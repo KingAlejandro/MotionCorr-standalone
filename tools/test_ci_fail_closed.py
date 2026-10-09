@@ -162,12 +162,14 @@ exec "{sys.executable}" "$@"
         self.assertEqual(res_empty.returncode, 1, "Zero collected tests must fail with exit code 1")
         self.assertIn("Empty test collection: 0 tests found", res_empty.stdout)
 
-        # The integrated suite registers 40 tests: the 13 pre-existing ones, the
+        # The integrated suite registers 42 tests: the 13 pre-existing ones, the
         # #72 CiFailClosedControls, the #99 WriteFaults / ImageWriteFaults, the
         # #98 DefectParser, #26 GlobalIfftElision, #69 PatchRetryState,
         # #85 OutputTreeComparator, #97 recenter/interpolation contracts, and
         # the #95 NativeMovieStaging, and the #126 DeflateLayout / ScratchArena /
-        # DefectNeighbours device-free ingest contracts.
+        # DefectNeighbours device-free ingest contracts, #147 MultiGpuScheduling
+        # and JointStarPublication, the --profile StageProfile, and #155
+        # HostBufferReuse.
         #
         # This list restates DEFAULT_REQUIRED_TESTS, so it has to be updated in
         # the same commit that adds a required test. It is deliberately a
@@ -219,6 +221,9 @@ exec "{sys.executable}" "$@"
             "NativeMovieStaging",
             "GainCacheOwnership",
             "JointStarPublication",
+            # --profile contract (docs/stage_profile.md).
+            "StageProfile",
+            "HostBufferReuse",
         ]
 
         def runnable(name: str) -> dict:
@@ -246,7 +251,8 @@ exec "{sys.executable}" "$@"
                         "OutputTreeComparator", "MultiGpuScheduling", "NativeMovieStaging",
                         "GainCacheOwnership", "JointStarPublication",
                         "MicrographModelBounds", "CompressedMovieSequence",
-                        "RunnerInterpolateRecenter", "RunnerInterpolateShifts"):
+                        "RunnerInterpolateRecenter", "RunnerInterpolateShifts",
+                        "StageProfile", "HostBufferReuse"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)
                 self.assertEqual(len(names), len(INTEGRATED_SUITE),

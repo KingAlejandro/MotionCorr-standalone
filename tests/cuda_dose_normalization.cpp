@@ -2,6 +2,7 @@
 // Original formulas below are deliberately independent of the new plane helper.
 // Returned-code faults are test-only, not physically poisoned GPU contexts.
 #include "src/acc/cuda/cuda_realspace_dw.h"
+#include "src/acc/cuda/cuda_movie_session.h"
 #include "src/acc/cuda/cuda_failure_state.h"
 #include "src/error.h"
 #include <cuda_runtime.h>
@@ -138,6 +139,10 @@ enum Fault { NONE, ALLOCATION, LAUNCH, COMPLETION, CLEANUP, LAUNCH_LATE_FATAL };
 bool active = false, fired = false;
 Fault fault = NONE;
 int allocations = 0, frees = 0, launch_checks = 0, syncs = 0, execs = 0, frame_copies = 0;
+int plan_creates = 0, plan_destroys = 0;
+cufftHandle executed_plan = 0;
+bool observe_session_plans = false;
+std::vector<cufftHandle> session_created, session_destroyed;
 void *plane = nullptr;
 size_t plane_bytes = 0;
 bool plane_freed = false;
@@ -153,6 +158,7 @@ void fft(cufftResult code, const char *message) { require(code == CUFFT_SUCCESS,
 void arm(Fault selected = NONE) {
     fault = selected; fired = plane_freed = false; plane = nullptr; plane_bytes = 0;
     allocations = frees = launch_checks = syncs = execs = frame_copies = 0;
+    plan_creates = plan_destroys = 0; executed_plan = 0;
     violation.clear(); active = true;
 }
 void empty() {
@@ -227,16 +233,18 @@ cudaError_t __wrap_cudaMemcpy(void *dst, const void *src, size_t bytes, cudaMemc
 }
 cufftResult __wrap_cufftCreate(cufftHandle *plan) {
     const auto status = __real_cufftCreate(plan);
-    if (active && status == CUFFT_SUCCESS) plans.insert(*plan);
+    if (active && status == CUFFT_SUCCESS) { plans.insert(*plan); ++plan_creates; }
+    if (observe_session_plans && status == CUFFT_SUCCESS) session_created.push_back(*plan);
     return status;
 }
 cufftResult __wrap_cufftDestroy(cufftHandle plan) {
     const auto status = __real_cufftDestroy(plan);
-    if (active && status == CUFFT_SUCCESS && !plans.erase(plan)) violation = "double plan release";
+    if (active && status == CUFFT_SUCCESS) { ++plan_destroys; if (!plans.erase(plan)) violation = "double plan release"; }
+    if (observe_session_plans && status == CUFFT_SUCCESS) session_destroyed.push_back(plan);
     return status;
 }
 cufftResult __wrap_cufftExecC2R(cufftHandle plan, cufftComplex *in, cufftReal *out) {
-    if (active) ++execs;
+    if (active) { ++execs; executed_plan = plan; }
     return __real_cufftExecC2R(plan, in, out);
 }
 }
@@ -408,6 +416,81 @@ void exactCases() {
     std::cout << "PASS: " << cases << " exact null/polynomial reconstructions; " << weighted_frames
               << " exact weighted Fourier frames; consecutive changed dose/apix/geometry calls\n";
 }
+void borrowedCase(int nx, int ny, bool poly, Fault selected = NONE) {
+    const Input in = inputFor(nx,ny,8,1,1.12);
+    const auto model = polynomial();
+    active = false;
+    const auto expected = oracle(in,poly ? &model : nullptr);
+    session_created.clear(); session_destroyed.clear(); observe_session_plans = true;
+    std::ostringstream log;
+    CudaMovieSession session(in.nx,in.ny,in.count,0,log);
+    require(session.initialize(), "borrowed test session initialization failed");
+    require(session_created.size() == 2, "session did not create exactly global R2C/C2R pair");
+    const cufftHandle c2r = session_created.back();
+    gpu(cudaMemcpy(session.getDeviceFourierFrames(),in.values.data(),in.values.size()*sizeof(cufftComplex),
+                   cudaMemcpyHostToDevice), "borrowed resident upload");
+    Image<float> output; output().resize(in.ny,in.nx); output().initConstant(-12345.0f);
+    arm(selected);
+    const bool ok = session.reconstructDoseWeighted(output,in.doses,in.apix,poly ? &model : nullptr);
+    require(plan_creates == 0 && plan_destroys == 0,
+            "resident reconstruction created/destroyed a plan instead of borrowing session owner");
+    require(violation.empty(), violation.c_str()); empty();
+    if (selected == NONE) {
+        require(ok && !session.getFailureState().hasFailed() && execs == in.count && executed_plan == c2r,
+                "resident reconstruction did not execute the actual session C2R plan");
+        require(std::memcmp(output().data,expected.data(),expected.size()*sizeof(float)) == 0,
+                "borrowed C2R changed dose reconstruction pixels");
+    } else {
+        require(!ok && fired && session.getFailureState().hasFailed(), "borrowed reconstruction fault did not refuse success");
+        require(session.getFailureState().firstError() == cudaErrorMemoryAllocation,
+                "borrowed failure lost first recoverable cause");
+        require(session.getFailureState().isPoisoned() == (selected == LAUNCH_LATE_FATAL),
+                "borrowed cleanup lost fatal retirement state");
+    }
+    active = false;
+    std::vector<cufftComplex> after(in.values.size());
+    gpu(cudaMemcpy(after.data(),session.getDeviceFourierFrames(),after.size()*sizeof(cufftComplex),
+                   cudaMemcpyDeviceToHost), "borrowed resident preservation read");
+    require(std::memcmp(after.data(),in.values.data(),after.size()*sizeof(cufftComplex)) == 0,
+            "dose C2R aliased/destroyed resident Fourier input");
+    const size_t before_retirement = session_destroyed.size();
+    require(before_retirement == 0, "borrower destroyed the session plan owner");
+    if (selected == LAUNCH_LATE_FATAL) {
+        arm();
+        require(!session.reconstructDoseWeighted(output,in.doses,in.apix,nullptr) && execs == 0 && allocations == 0,
+                "fatal borrowed cleanup permitted another CUDA reconstruction");
+        empty(); active = false;
+    } else {
+        // A real transform after borrow/refusal powers ownership: accidentally
+        // destroying the loan in helper cleanup makes this owner reuse fail.
+        // A separately allocated output stays aligned for odd widths. The
+        // existing multi-frame inverse method has a distinct odd output-stride
+        // restriction; it is not the ownership contract this test exercises.
+        float *owner_output = nullptr;
+        gpu(cudaMalloc(&owner_output, (size_t)in.nx*in.ny*sizeof(float)), "owner output allocation");
+        fft(cufftExecC2R(c2r,session.getDeviceFourierFrames(),owner_output),
+            "session C2R owner unusable after borrowed call");
+        gpu(cudaDeviceSynchronize(), "owner C2R completion");
+        gpu(cudaFree(owner_output), "owner output release");
+        require(session_destroyed.empty(), "borrower retired session plan during reuse");
+    }
+    session.release();
+    require(session_destroyed.size() == 2 &&
+            std::set<cufftHandle>(session_destroyed.begin(),session_destroyed.end()) ==
+            std::set<cufftHandle>(session_created.begin(),session_created.end()),
+            "session owner did not destroy each global plan exactly once");
+    observe_session_plans = false;
+    std::cout << "PASS borrowed session C2R " << nx << 'x' << ny << " polynomial=" << poly
+              << " fault=" << selected << "; no extra plans, resident input preserved, owner checked\n";
+}
+void borrowedCases() {
+    const std::pair<int,int> geometries[] = {{32,24},{35,29}};
+    for (bool poly : {false,true}) for (const auto &geometry : geometries)
+        borrowedCase(geometry.first,geometry.second,poly);
+    borrowedCase(32,24,false,LAUNCH);
+    // Keep the sticky returned-code fatal case last in this separate process.
+    borrowedCase(32,24,false,LAUNCH_LATE_FATAL);
+}
 void faultCase(Fault selected) {
     const Input in = inputFor(32,24,8,1,1.12);
     CudaFailureState failure; Image<float> output; std::string log; arm(selected);
@@ -444,12 +527,13 @@ void faultCase(Fault selected) {
 int main(int argc, char **argv) {
     std::string selected = "all";
     if (argc == 3 && std::string(argv[1]) == "--case") selected = argv[2];
-    else if (argc != 1) { std::cerr << "Usage: --case exact|allocation|launch|completion|cleanup|late-fatal\n"; return 1; }
+    else if (argc != 1) { std::cerr << "Usage: --case exact|borrowed|allocation|launch|completion|cleanup|late-fatal\n"; return 1; }
     if (cudaSetDevice(0) != cudaSuccess || cudaFree(nullptr) != cudaSuccess) {
         std::cerr << "Native CUDA device 0 required\n"; return 1;
     }
     try {
         bool known = selected == "all";
+        if (selected == "borrowed") { known = true; borrowedCases(); }
         if (selected == "all" || selected == "exact") { known = true; exactCases(); }
         const std::pair<const char*,Fault> cases[] = {{"allocation",ALLOCATION},{"launch",LAUNCH},
             {"completion",COMPLETION},{"cleanup",CLEANUP},{"late-fatal",LAUNCH_LATE_FATAL}};

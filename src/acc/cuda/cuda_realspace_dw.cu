@@ -208,7 +208,8 @@ bool cudaDoseWeightAndInterpolateDevice(
     const ThirdOrderPolynomialModel *model,
     const int device_id,
     std::ostream &logfile,
-    CudaFailureState *failure)
+    CudaFailureState *failure,
+    cufftHandle borrowed_c2r)
 {
     if (n_frames == 0) return true;
 
@@ -290,15 +291,21 @@ bool cudaDoseWeightAndInterpolateDevice(
     for (int i = 0; i < n_frames; i++) h_doses[i] = (float)doses[i];
     HANDLE_ERROR(cudaMemcpy(d_doses, h_doses.data(), n_frames * sizeof(float), cudaMemcpyHostToDevice));
 
-    cufftHandle plan_c2r;
-    int n[2] = {ny, nx};
-    CUFFT_CHECK(cufftCreate(&plan_c2r));
-    plan_cleanup.take(plan_c2r);
-    size_t plan_work_bytes = 0;
-    CUFFT_CHECK(cufftMakePlanMany(plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1, &plan_work_bytes));
-    size_t cufft_work_size = 0;
-    CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
-    total_vram_allocated += cufft_work_size;
+    // The resident session already owns the same geometry/type/batch plan.
+    // All executions and their completion events use stream0, so borrowing its
+    // live shared work area cannot overlap another session transform. Only the
+    // zero-handle fallback creates an owner; borrowed handles never enter RAII.
+    cufftHandle plan_c2r = borrowed_c2r;
+    if (plan_c2r == 0) {
+        int n[2] = {ny, nx};
+        CUFFT_CHECK(cufftCreate(&plan_c2r));
+        plan_cleanup.take(plan_c2r);
+        size_t plan_work_bytes = 0;
+        CUFFT_CHECK(cufftMakePlanMany(plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1, &plan_work_bytes));
+        size_t cufft_work_size = 0;
+        CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
+        total_vram_allocated += cufft_work_size;
+    }
 
     dim3 blockDW(16, 16);
     dim3 gridDW((nfx + 15) / 16, (nfy + 15) / 16);

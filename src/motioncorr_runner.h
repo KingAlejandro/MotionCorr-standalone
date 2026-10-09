@@ -82,6 +82,10 @@ public:
 	// otherwise identical binary, and as an escape hatch on a host where the
 	// extra thread costs more CPU than the overlap buys.
 	bool sync_output = false;
+	// --profile: JSON-lines stage profile path; empty disables it.
+	FileName fn_profile;
+	// How main() configured the host allocator; printed once and in --profile.
+	std::string host_allocator_mode;
 
 	// Rebuild only complete dataset STAR/report products; never process a movie.
 	bool aggregate_only = false;

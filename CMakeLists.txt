@@ -259,6 +259,12 @@ if(BUILD_TESTING)
         add_test(NAME GlobalIfftElision
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_global_ifft_elision.py
                 --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME HostBufferReuse
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_host_buffer_reuse.py
+                --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME StageProfile
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_stage_profile.py
+                --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)
@@ -403,6 +409,8 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftDestroy")
         add_test(NAME CudaDoseNormalization COMMAND cuda_dose_normalization)
         set_tests_properties(CudaDoseNormalization PROPERTIES LABELS "cuda;hardware" TIMEOUT 900)
+        add_test(NAME CudaDoseSessionPlan COMMAND cuda_dose_normalization --case borrowed)
+        set_tests_properties(CudaDoseSessionPlan PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
         add_executable(motioncorr_retry_caller
             src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp)
         target_link_libraries(motioncorr_retry_caller PRIVATE motioncorr_core)

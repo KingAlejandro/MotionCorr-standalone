@@ -55,12 +55,15 @@ def run_cmd(cmd: List[str], check: bool = True, timeout: Optional[int] = 600, cw
 def parse_telemetry(log_text: str) -> Dict[str, Any]:
     """Parse CUDA alignment profile blocks from a movie log.
 
-    Two formats exist. With --profile (or before #159) each block lists
+    Three formats exist. With --profile (or before #159) each block lists
     per-kernel H2D/kernel/cuFFT/D2H times. Without --profile those timings are
     not measured, so the block prints "Per-kernel timing: not measured" in
-    their place. The GPU-execution gate only needs the block itself, the total
-    GPU time and the VRAM lines, so both formats are accepted. Per-kernel
-    fields are None when not measured, never a fabricated zero.
+    their place. A patch aligned on the batched path (#160) prints
+    "Batched alignment: N patches together" instead, and its total time and
+    VRAM cover the whole batch. The GPU-execution gate only needs the block
+    itself, the total GPU time and the VRAM lines, so all formats are
+    accepted. Per-kernel fields are None when not measured, never a
+    fabricated zero.
 
     The H2D line carries a "(Resident VRAM)" suffix, which the previous
     pattern did not allow, so it matched no block at all even on timed logs.
@@ -73,6 +76,7 @@ def parse_telemetry(log_text: str) -> Dict[str, Any]:
         r"cuFFT execution time:\s+(?P<cufft>[\d\.]+)\s+ms\s+"
         r"Device-to-Host transfer time:\s+(?P<d2h>[\d\.]+)\s+ms\s+"
         r"|Per-kernel timing:\s+not measured[^\n]*\s+"
+        r"|Batched alignment:\s+(?P<batch>\d+)\s+patches together[^\n]*\s+"
         r")"
         r"Total GPU alignment time:\s+(?P<total_gpu>[\d\.]+)\s+ms\s+"
         r"Buffer VRAM:\s+(?P<buf_vram>[\d\.]+)\s+MiB\s+"
@@ -89,6 +93,7 @@ def parse_telemetry(log_text: str) -> Dict[str, Any]:
             else:
                 entry[k] = float(v) if v is not None else None
         entry["per_kernel_measured"] = entry["kernel"] is not None
+        entry["batch"] = int(entry["batch"]) if entry["batch"] is not None else None
         if entry["stage"] == "Global Alignment":
             global_prof = entry
         else:
@@ -98,7 +103,8 @@ def parse_telemetry(log_text: str) -> Dict[str, Any]:
         "global_profile": global_prof,
         "patch_profiles": patches,
         "num_patch_profiles": len(patches),
-        "total_patch_gpu_ms": sum(p["total_gpu"] for p in patches) if patches else 0.0
+        # Each patch of a batch repeats the batch total, so count 1/N of it.
+        "total_patch_gpu_ms": sum(p["total_gpu"] / (p["batch"] or 1) for p in patches) if patches else 0.0
     }
 
 

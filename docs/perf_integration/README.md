@@ -115,6 +115,8 @@ Extended matrix, `main` vs `rc`, movies 00021-00024, `--use_own --dose_weighting
 - CUDA build, `ctest` on GPU0 under `/tmp/motioncorr-gpu0-correctness.lock`: 62/62 passed, none skipped. Includes the fault, fallback and fail-closed suites (`WriteFaults*`, `OutputStageFaults`, `ImageWriteFaults`, `CudaFaultMatrix`, `CudaPreprocessingFailurePaths`, `CudaNvcompAcceptance*`, `CiFailClosedControls`) and A's in-tree mutants `CudaPatchBatchMutant_*`.
 - CPU-only build (`-DCUDA=OFF`), `ctest` on CPUs 64-71: 44/44 passed.
 
+- Codex P1 on #167, ctest `CudaValidationParser`: `tools/run_cuda_patch_validation.py` did not parse the `Batched alignment:` patch block that A writes, so the CUDA patch validation gate saw 0 patch profiles on the default batched path. Fixed in the parser; `tools/test_cuda_patch_validation_parser.py` now builds a batched block from the source literals. Control: with only the parser reverted, the test fails (`batched: parsed patches=0`). On four real RC movie logs (`59249c2` binary, 5x5 patches, batches of 4,4,4,4,4,4,1) the old parser found 0/25 patch blocks per movie and the fixed one 25/25. `total_patch_gpu_ms` counts each batch total once.
+
 ## Compiled negative controls
 
 `scripts/mutants.sh` on `c0f82c2`; each mutant is one `sed` edit, rebuilt and run against one test on GPU1. Log: `scripts/mutants.log`.

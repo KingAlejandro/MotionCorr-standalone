@@ -470,6 +470,8 @@ void sessionWindowed(Movie &m, const std::vector<CudaMovieSession::PatchBox> &bx
             active = false;
             require(malloc_calls == (own_spectrum ? 4 : 3),
                     label + ": windowed preparation made " + std::to_string(malloc_calls) + " allocations");
+            // Session-owned; freed untracked at teardown, so not a leak for the fault checks.
+            buffers.clear();
         }
         std::ostringstream one;
         one.copyfmt(all);

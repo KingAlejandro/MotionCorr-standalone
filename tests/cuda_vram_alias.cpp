@@ -82,7 +82,10 @@ template <class T> bool sameBytes(const std::vector<T> &a, const std::vector<T> 
 }
 
 // Periodic drift of one random image: the global aligner has real work to do.
-std::vector<Image<float>> movieFrames(int nx, int ny, int frames, unsigned seed) {
+// With noise > 0 each frame also gets its own noise, so once the frames are
+// aligned the CCF is not symmetric and the weights still move the peak (an
+// exactly aligned noiseless pair gives a symmetric CCF under any weighting).
+std::vector<Image<float>> movieFrames(int nx, int ny, int frames, unsigned seed, float noise = 0) {
     std::vector<float> base((size_t)nx * ny);
     unsigned s = seed;
     for (auto &v : base) { s = 1664525u * s + 1013904223u; v = (float)((s >> 8) & 1023) / 64.0f; }
@@ -92,7 +95,9 @@ std::vector<Image<float>> movieFrames(int nx, int ny, int frames, unsigned seed)
         for (int y = 0; y < ny; y++)
             for (int x = 0; x < nx; x++) {
                 const int sx = ((x - k) % nx + nx) % nx, sy = ((y + k / 2) % ny + ny) % ny;
-                DIRECT_A2D_ELEM(out[k](), y, x) = base[(size_t)sy * nx + sx];
+                float v = base[(size_t)sy * nx + sx];
+                if (noise > 0) { s = 1664525u * s + 1013904223u; v += noise * (float)((s >> 8) & 1023) / 1024.0f; }
+                DIRECT_A2D_ELEM(out[k](), y, x) = v;
             }
     }
     return out;
@@ -160,7 +165,7 @@ void compareGlobal(const GlobalResult &ref, const GlobalResult &got, const std::
 void globalArena() {
     std::vector<cufftComplex> input;
     {
-        Movie m(movieFrames(GNX, GNY, GFRAMES, 7u));
+        Movie m(movieFrames(GNX, GNY, GFRAMES, 7u, 12.0f));
         input = download(m.session.getDeviceFourierFrames(), (size_t)GFRAMES * GNY * (GNX / 2 + 1));
     }
     int cnx = 0, cny = 0;
@@ -186,7 +191,8 @@ void globalArena() {
     require(work > 512, "geometry needs a cuFFT work area larger than the arena slack, got " + std::to_string(work));
 
     const GlobalResult ref = runGlobal(input, nullptr, 0, 8, "", "global reference");
-    require(!ref.log.empty() && contains(ref.log, " Iteration 1:"), "global reference wrote no iterations");
+    // Iteration 2 reads the weight after a C2R has used the work area.
+    require(contains(ref.log, " Iteration 2:"), "global reference converged before a second iteration\n" + ref.log);
     // Raw cudaMalloc gives at least 256-byte alignment; align the arena start
     // so its usable size is exactly what is passed.
     const size_t big = need + work + 4096;

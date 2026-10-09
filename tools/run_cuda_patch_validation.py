@@ -53,13 +53,27 @@ def run_cmd(cmd: List[str], check: bool = True, timeout: Optional[int] = 600, cw
 
 
 def parse_telemetry(log_text: str) -> Dict[str, Any]:
-    """Parse CUDA timing and memory lines from logfile."""
+    """Parse CUDA alignment profile blocks from a movie log.
+
+    Two formats exist. With --profile (or before #159) each block lists
+    per-kernel H2D/kernel/cuFFT/D2H times. Without --profile those timings are
+    not measured, so the block prints "Per-kernel timing: not measured" in
+    their place. The GPU-execution gate only needs the block itself, the total
+    GPU time and the VRAM lines, so both formats are accepted. Per-kernel
+    fields are None when not measured, never a fabricated zero.
+
+    The H2D line carries a "(Resident VRAM)" suffix, which the previous
+    pattern did not allow, so it matched no block at all even on timed logs.
+    """
     profile_re = re.compile(
         r"\[CUDA (?P<stage>Global Alignment|Patch Alignment) Profile\]\s+"
-        r"Host-to-Device transfer time:\s+(?P<h2d>[\d\.]+)\s+ms\s+"
+        r"(?:"
+        r"Host-to-Device transfer time:\s+(?P<h2d>[\d\.]+)\s+ms[^\n]*\s+"
         r"Custom kernel execution time:\s+(?P<kernel>[\d\.]+)\s+ms\s+"
         r"cuFFT execution time:\s+(?P<cufft>[\d\.]+)\s+ms\s+"
         r"Device-to-Host transfer time:\s+(?P<d2h>[\d\.]+)\s+ms\s+"
+        r"|Per-kernel timing:\s+not measured[^\n]*\s+"
+        r")"
         r"Total GPU alignment time:\s+(?P<total_gpu>[\d\.]+)\s+ms\s+"
         r"Buffer VRAM:\s+(?P<buf_vram>[\d\.]+)\s+MiB\s+"
         r"cuFFT workspace VRAM:\s+(?P<cufft_vram>[\d\.]+)\s+MiB\s+"
@@ -68,7 +82,13 @@ def parse_telemetry(log_text: str) -> Dict[str, Any]:
     patches = []
     global_prof = None
     for m in profile_re.finditer(log_text):
-        entry = {k: float(v) if k != "stage" else v for k, v in m.groupdict().items()}
+        entry = {}
+        for k, v in m.groupdict().items():
+            if k == "stage":
+                entry[k] = v
+            else:
+                entry[k] = float(v) if v is not None else None
+        entry["per_kernel_measured"] = entry["kernel"] is not None
         if entry["stage"] == "Global Alignment":
             global_prof = entry
         else:

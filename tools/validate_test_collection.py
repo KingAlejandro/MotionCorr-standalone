@@ -49,6 +49,8 @@ DEFAULT_REQUIRED_TESTS = [
     "GlobalIfftElision",
     # --profile: products unchanged, stages exhaustive (docs/stage_profile.md).
     "StageProfile",
+    # The native validation runner must parse both timed and untimed profile blocks.
+    "CudaValidationParser",
     # Host buffer reuse: products identical with/without reuse and MALLOC_PERTURB_.
     "HostBufferReuse",
     # Added by the #69 CUDA reliability port. Device-free, so it is always

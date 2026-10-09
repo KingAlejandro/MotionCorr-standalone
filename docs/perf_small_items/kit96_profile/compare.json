@@ -1,0 +1,2015 @@
+{
+ "runs": {
+  "arms": [
+   "main",
+   "cand"
+  ],
+  "summary": {
+   "main": {
+    "n": 2,
+    "wall_median_s": 24.826830927748233,
+    "wall_iqr_s": 0.6568643287755549,
+    "wall_min_s": 24.169966598972678,
+    "wall_max_s": 25.483695256523788,
+    "cpu_median_s": 69.155508,
+    "rss_median_bytes": 386766848.0,
+    "minflt_median": 183972.5,
+    "majflt_max": 0,
+    "wall_outlier_rounds": [],
+    "vram_peak_process_bytes": 3525312512.0,
+    "vram_peak_process_bytes_max": 3525312512,
+    "vram_peak_device_delta_bytes": 3534553088.0,
+    "vram_peak_device_delta_bytes_max": 3534553088,
+    "lane_foreign_cores_max": 0.019722989605631472,
+    "load1_range": [
+     14.65087890625,
+     15.92041015625
+    ]
+   },
+   "cand": {
+    "n": 2,
+    "wall_median_s": 20.598809280898422,
+    "wall_iqr_s": 0.7599353087134659,
+    "wall_min_s": 19.838873972184956,
+    "wall_max_s": 21.358744589611888,
+    "cpu_median_s": 36.1212105,
+    "rss_median_bytes": 413917184.0,
+    "minflt_median": 202369.5,
+    "majflt_max": 17,
+    "wall_outlier_rounds": [],
+    "vram_peak_process_bytes": 3525312512.0,
+    "vram_peak_process_bytes_max": 3525312512,
+    "vram_peak_device_delta_bytes": 3534553088.0,
+    "vram_peak_device_delta_bytes_max": 3534553088,
+    "lane_foreign_cores_max": 0.1876643537349795,
+    "load1_range": [
+     17.73828125,
+     20.19140625
+    ]
+   }
+  },
+  "discarded_rounds": [
+   {
+    "round": 3,
+    "reasons": [
+     "cand: foreign CPU on lane 0.53 cores"
+    ],
+    "triggered_by": [
+     "cand"
+    ],
+    "order": "AB"
+   },
+   {
+    "round": 4,
+    "reasons": [
+     "cand: foreign CPU on lane 0.83 cores",
+     "main: foreign CPU on lane 1.01 cores"
+    ],
+    "triggered_by": [
+     "cand",
+     "main"
+    ],
+    "order": "BA"
+   },
+   {
+    "round": 5,
+    "reasons": [
+     "main: foreign CPU on lane 1.32 cores",
+     "cand: foreign CPU on lane 1.45 cores"
+    ],
+    "triggered_by": [
+     "cand",
+     "main"
+    ],
+    "order": "AB"
+   },
+   {
+    "round": 6,
+    "reasons": [
+     "cand: foreign CPU on lane 1.30 cores",
+     "main: foreign CPU on lane 0.36 cores"
+    ],
+    "triggered_by": [
+     "cand",
+     "main"
+    ],
+    "order": "BA"
+   }
+  ],
+  "discard_audit": {
+   "planned": 6,
+   "retained": 2,
+   "discarded": 4,
+   "triggered_alone": {
+    "main": 0,
+    "cand": 1
+   },
+   "triggered_any": {
+    "main": 3,
+    "cand": 4
+   },
+   "kept_orders": {
+    "AB": 1,
+    "BA": 1
+   },
+   "warnings": []
+  },
+  "comparisons": {
+   "cand": {
+    "n_pairs": 2,
+    "diffs_s": [
+     -2.8112220093607903,
+     -5.644821284338832
+    ],
+    "floor_s": 0.0,
+    "min_pairs": 6,
+    "median_diff_s": -4.228021646849811,
+    "q1_diff_s": -4.9364214655943215,
+    "q3_diff_s": -3.5196218281053007,
+    "min_diff_s": -5.644821284338832,
+    "max_diff_s": -2.8112220093607903,
+    "median_a_s": 24.826830927748233,
+    "median_b_s": 20.598809280898422,
+    "relative_median_diff": -0.17030049703702912,
+    "noise_s": 2.100547142541222,
+    "robust_sd_diff_s": 2.100547142541222,
+    "ci": null,
+    "sign_test": {
+     "positive": 0,
+     "negative": 2,
+     "ties": 0,
+     "p_two_sided": 0.5
+    },
+    "resolution_s": Infinity,
+    "resolved": false,
+    "verdict": "not resolved (2 retained pairs, 6 needed)",
+    "reason": "fewer than 6 retained pairs (2): no verdict and no resolution",
+    "positional": {
+     "n_ab": 1,
+     "n_ba": 1,
+     "median_diff_ab_s": -2.8112220093607903,
+     "median_diff_ba_s": -5.644821284338832,
+     "second_position_cost_s": 1.4167996374890208,
+     "order_corrected_effect_s": -4.228021646849811
+    }
+   }
+  },
+  "lane_waits": [
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 1
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.01,
+    "round": 2
+   },
+   {
+    "waited_s": 12.2,
+    "busy_cores": 0.04,
+    "round": 3
+   },
+   {
+    "waited_s": 2.0,
+    "busy_cores": 0.2,
+    "round": 4
+   },
+   {
+    "waited_s": 120.3,
+    "busy_cores": 2.03,
+    "timed_out": true,
+    "round": 5
+   },
+   {
+    "waited_s": 121.3,
+    "busy_cores": 1.15,
+    "timed_out": true,
+    "round": 6
+   }
+  ]
+ },
+ "identity": {
+  "cand": {
+   "root_a": "/home/alex/mc-small/runs/kit96/runs/main-r01/out",
+   "root_b": "/home/alex/mc-small/runs/kit96/runs/cand-r01/out",
+   "only_a": [],
+   "only_b": [],
+   "compared": 297,
+   "mrc_compared": 96,
+   "excluded": [
+    {
+     "file": "Movies/r1_20170629_00021_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00022_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00023_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00024_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00025_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00026_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00027_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00028_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00029_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00030_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00031_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00035_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00036_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00037_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00039_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00040_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00042_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00043_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00044_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00045_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00046_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00047_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00048_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r1_20170629_00049_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00021_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00022_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00023_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00024_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00025_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00026_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00027_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00028_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00029_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00030_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00031_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00035_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00036_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00037_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00039_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00040_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00042_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00043_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00044_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00045_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00046_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00047_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00048_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r2_20170629_00049_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00021_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00022_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00023_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00024_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00025_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00026_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00027_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00028_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00029_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00030_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00031_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00035_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00036_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00037_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00039_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00040_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00042_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00043_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00044_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00045_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00046_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00047_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00048_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r3_20170629_00049_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00021_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00022_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00023_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00024_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00025_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00026_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00027_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00028_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00029_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00030_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00031_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00035_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00036_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00037_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00039_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00040_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00042_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00043_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00044_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00045_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00046_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00047_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00048_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/r4_20170629_00049_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "all_batches.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "batch.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "header.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "logfile.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    }
+   ],
+   "differences": [],
+   "problems": [],
+   "identical": true
+  }
+ },
+ "stage_deltas": {
+  "arms": {
+   "cand": {
+    "stages": {
+     "setup": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        1.474188,
+        1.518889,
+        1.527551
+       ],
+       "pass_values_b": [
+        1.513858,
+        1.713881,
+        1.432568
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 1.506876,
+       "median_b": 1.5534356666666664,
+       "delta": 0.04655966666666633,
+       "df": 4,
+       "se": 0.08520403225069677,
+       "threshold": 0.7336067176784992
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        1.477509,
+        1.515038,
+        1.517321
+       ],
+       "pass_values_b": [
+        1.511892,
+        1.713605,
+        1.433912
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 1.5032893333333333,
+       "median_b": 1.5531363333333335,
+       "delta": 0.0498470000000002,
+       "df": 4,
+       "se": 0.08432602810652369,
+       "threshold": 0.7260471019971689
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        50,
+        50,
+        50
+       ],
+       "pass_values_b": [
+        50,
+        50,
+        50
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 50.0,
+       "median_b": 50.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "read gain": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.039388,
+        0.038831,
+        0.038831
+       ],
+       "pass_values_b": [
+        0.038552,
+        0.042464,
+        0.03939
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.039016666666666665,
+       "median_b": 0.040135333333333335,
+       "delta": 0.0011186666666666706,
+       "df": 4,
+       "se": 0.0012036048170207508,
+       "threshold": 0.5
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.0376,
+        0.03712,
+        0.03717
+       ],
+       "pass_values_b": [
+        0.03699,
+        0.04098,
+        0.03799
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.037296666666666665,
+       "median_b": 0.03865333333333334,
+       "delta": 0.0013566666666666727,
+       "df": 4,
+       "se": 0.001208258618379728,
+       "threshold": 0.5
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "session and device ingest": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        66.728966,
+        69.579466,
+        68.654824
+       ],
+       "pass_values_b": [
+        40.275481,
+        42.569332,
+        39.915787
+       ],
+       "flag": true,
+       "replicated": true,
+       "median_a": 68.32108533333333,
+       "median_b": 40.9202,
+       "delta": -27.400885333333328,
+       "df": 4,
+       "se": 1.1813757367575504,
+       "threshold": 10.171645093482509
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        61.186911,
+        65.890668,
+        63.370337
+       ],
+       "pass_values_b": [
+        37.773377,
+        39.146967,
+        38.39978
+       ],
+       "flag": true,
+       "replicated": true,
+       "median_a": 63.48263866666667,
+       "median_b": 38.44004133333333,
+       "delta": -25.04259733333334,
+       "df": 4,
+       "se": 1.4158265348387693,
+       "threshold": 12.190266464961804
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        49,
+        49,
+        47
+       ],
+       "pass_values_b": [
+        73,
+        73,
+        73
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 48.333333333333336,
+       "median_b": 73.0,
+       "delta": 24.666666666666664,
+       "df": 4,
+       "se": 0.6666666666666666,
+       "threshold": 50
+      }
+     },
+     "host read movie": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.03939,
+        0.039111,
+        0.038831
+       ],
+       "pass_values_b": [
+        0.037435,
+        0.043022,
+        0.038831
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.03911066666666666,
+       "median_b": 0.03976266666666667,
+       "delta": 0.0006520000000000067,
+       "df": 4,
+       "se": 0.0016864918881776118,
+       "threshold": 0.5
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.039269,
+        0.039191,
+        0.03894
+       ],
+       "pass_values_b": [
+        0.03721,
+        0.04272,
+        0.03817
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.03913333333333333,
+       "median_b": 0.03936666666666667,
+       "delta": 0.0002333333333333354,
+       "df": 4,
+       "se": 0.001702310945613508,
+       "threshold": 0.5
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "allocate host sum": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.012571,
+        0.012849,
+        0.012572
+       ],
+       "pass_values_b": [
+        0.011735,
+        0.013968,
+        0.012013
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.012664,
+       "median_b": 0.012572,
+       "delta": -9.200000000000007e-05,
+       "df": 4,
+       "se": 0.0007086611790317474,
+       "threshold": 0.5
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.01251,
+        0.01269,
+        0.01262
+       ],
+       "pass_values_b": [
+        0.0118,
+        0.01382,
+        0.01192
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.012606666666666667,
+       "median_b": 0.012513333333333335,
+       "delta": -9.333333333333242e-05,
+       "df": 4,
+       "se": 0.000656345098929587,
+       "threshold": 0.5
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "gain and sum": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.038274,
+        0.038831,
+        0.037993
+       ],
+       "pass_values_b": [
+        0.036596,
+        0.043301,
+        0.037435
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.038366000000000004,
+       "median_b": 0.03911066666666666,
+       "delta": 0.0007446666666666574,
+       "df": 4,
+       "se": 0.0021234452613095017,
+       "threshold": 0.5
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.03837,
+        0.03851,
+        0.03797
+       ],
+       "pass_values_b": [
+        0.03658,
+        0.04347,
+        0.037309
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.038283333333333336,
+       "median_b": 0.03911966666666667,
+       "delta": 0.0008363333333333348,
+       "df": 4,
+       "se": 0.0021913043046449658,
+       "threshold": 0.5
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "hot pixels": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        19.476206,
+        19.123131,
+        19.003588
+       ],
+       "pass_values_b": [
+        4.218072,
+        4.601079,
+        4.141821
+       ],
+       "flag": true,
+       "replicated": true,
+       "median_a": 19.200975,
+       "median_b": 4.320324,
+       "delta": -14.880651,
+       "df": 4,
+       "se": 0.20079657284757976,
+       "threshold": 1.7288584922176617
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        19.256925,
+        19.104103,
+        18.902887
+       ],
+       "pass_values_b": [
+        4.20438,
+        4.585841,
+        4.127908
+       ],
+       "flag": true,
+       "replicated": true,
+       "median_a": 19.087971666666665,
+       "median_b": 4.306043,
+       "delta": -14.781928666666666,
+       "df": 4,
+       "se": 0.17484095019601228,
+       "threshold": 1.5053805811876657
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "fix defects": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        1.842385,
+        1.439271,
+        1.679803
+       ],
+       "pass_values_b": [
+        1.017712,
+        1.261596,
+        1.038387
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 1.6538196666666665,
+       "median_b": 1.1058983333333332,
+       "delta": -0.5479213333333333,
+       "df": 4,
+       "se": 0.14073587663618525,
+       "threshold": 1.211735897837555
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        1.836991,
+        1.44811,
+        1.68374
+       ],
+       "pass_values_b": [
+        1.026114,
+        1.259269,
+        1.0436
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 1.6562803333333334,
+       "median_b": 1.109661,
+       "delta": -0.5466193333333333,
+       "df": 4,
+       "se": 0.13569081067796906,
+       "threshold": 1.1682978799373136
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        1,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.3333333333333333,
+       "median_b": 0.0,
+       "delta": -0.3333333333333333,
+       "df": 4,
+       "se": 0.3333333333333333,
+       "threshold": 50
+      }
+     },
+     "release preprocessing": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.248073,
+        0.252264,
+        0.250029
+       ],
+       "pass_values_b": [
+        0.249749,
+        0.274613,
+        0.244163
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.250122,
+       "median_b": 0.256175,
+       "delta": 0.006052999999999975,
+       "df": 4,
+       "se": 0.009436954646494812,
+       "threshold": 0.5
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.24324,
+        0.25394,
+        0.25201
+       ],
+       "pass_values_b": [
+        0.24886,
+        0.27237,
+        0.243581
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.24973,
+       "median_b": 0.254937,
+       "delta": 0.005207000000000017,
+       "df": 4,
+       "se": 0.009441404856623122,
+       "threshold": 0.5
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "global fft": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        21.935972,
+        21.871491,
+        21.909224
+       ],
+       "pass_values_b": [
+        21.900792,
+        21.910858,
+        21.874319
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 21.905562333333332,
+       "median_b": 21.895323,
+       "delta": -0.010239333333331047,
+       "df": 4,
+       "se": 0.021646499280741038,
+       "threshold": 0.5
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        21.940333,
+        21.867427,
+        21.905031
+       ],
+       "pass_values_b": [
+        21.90005,
+        21.911594,
+        21.869441
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 21.904263666666665,
+       "median_b": 21.893694999999997,
+       "delta": -0.010568666666667781,
+       "df": 4,
+       "se": 0.024520543634086234,
+       "threshold": 0.5
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "power spectrum": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.048328,
+        0.047212,
+        0.046653
+       ],
+       "pass_values_b": [
+        0.047491,
+        0.080456,
+        0.048888
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.04739766666666667,
+       "median_b": 0.058945,
+       "delta": 0.011547333333333326,
+       "df": 4,
+       "se": 0.010774313641455055,
+       "threshold": 0.5
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.0486,
+        0.04782,
+        0.04655
+       ],
+       "pass_values_b": [
+        0.04809,
+        0.08058,
+        0.05001
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.04765666666666666,
+       "median_b": 0.05956,
+       "delta": 0.011903333333333342,
+       "df": 4,
+       "se": 0.010541545322094755,
+       "threshold": 0.5
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "global alignment": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        9.004636,
+        8.958844,
+        8.961089
+       ],
+       "pass_values_b": [
+        8.944862,
+        9.70473,
+        8.987353
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 8.974856333333333,
+       "median_b": 9.212315,
+       "delta": 0.23745866666666693,
+       "df": 4,
+       "se": 0.2469629876825897,
+       "threshold": 2.1263513239470972
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        9.012008,
+        8.959025,
+        8.962139
+       ],
+       "pass_values_b": [
+        8.944958,
+        9.70376,
+        8.983468
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 8.977724,
+       "median_b": 9.210728666666666,
+       "delta": 0.23300466666666608,
+       "df": 4,
+       "se": 0.24736251770922082,
+       "threshold": 2.129791277476391
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "allocate reconstruction": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.01341,
+        0.012851,
+        0.01313
+       ],
+       "pass_values_b": [
+        0.012851,
+        0.015365,
+        0.013409
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.013130333333333332,
+       "median_b": 0.013875,
+       "delta": 0.0007446666666666678,
+       "df": 4,
+       "se": 0.0007791098196731391,
+       "threshold": 0.5
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.01295,
+        0.01276,
+        0.01257
+       ],
+       "pass_values_b": [
+        0.012649,
+        0.01515,
+        0.013
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.01276,
+       "median_b": 0.013599666666666668,
+       "delta": 0.0008396666666666674,
+       "df": 4,
+       "se": 0.0007894196884068984,
+       "threshold": 0.5
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "global ifft": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        22.004697,
+        22.030449,
+        22.006443
+       ],
+       "pass_values_b": [
+        22.26312,
+        22.25699,
+        22.26738
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 22.013863,
+       "median_b": 22.262496666666664,
+       "delta": 0.2486336666666631,
+       "df": 4,
+       "se": 0.008838610549427356,
+       "threshold": 0.5
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        22.007321,
+        22.032656,
+        22.010189
+       ],
+       "pass_values_b": [
+        22.266898,
+        22.260537,
+        22.270476
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 22.016722,
+       "median_b": 22.265970333333332,
+       "delta": 0.2492483333333304,
+       "df": 4,
+       "se": 0.00852089544068597,
+       "threshold": 0.5
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "patch alignment": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        27.023418,
+        27.121255,
+        26.983551
+       ],
+       "pass_values_b": [
+        27.471803,
+        29.872649,
+        27.392555
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 27.042741333333336,
+       "median_b": 28.245669000000003,
+       "delta": 1.2029276666666675,
+       "df": 4,
+       "se": 0.8148391749272429,
+       "threshold": 7.015765296123561
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        26.997566,
+        27.085813,
+        26.951553
+       ],
+       "pass_values_b": [
+        27.462165,
+        29.812272,
+        27.357249
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 27.011644,
+       "median_b": 28.210562,
+       "delta": 1.198917999999999,
+       "df": 4,
+       "se": 0.8023949805222699,
+       "threshold": 6.908620782296743
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "fit polynomial": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        1.683708,
+        1.651026,
+        1.659969
+       ],
+       "pass_values_b": [
+        1.699353,
+        2.269251,
+        1.658572
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 1.6649010000000002,
+       "median_b": 1.8757253333333335,
+       "delta": 0.21082433333333328,
+       "df": 4,
+       "se": 0.1973557549058159,
+       "threshold": 1.6992330497390746
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        1.68256,
+        1.640016,
+        1.652927
+       ],
+       "pass_values_b": [
+        1.69899,
+        2.268837,
+        1.655477
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 1.658501,
+       "median_b": 1.8744346666666667,
+       "delta": 0.2159336666666667,
+       "df": 4,
+       "se": 0.19800172203572144,
+       "threshold": 1.7047948267275614
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "release alignment": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        1.705777,
+        1.691254,
+        1.67198
+       ],
+       "pass_values_b": [
+        1.744051,
+        2.599177,
+        1.743498
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 1.6896703333333332,
+       "median_b": 2.0289086666666667,
+       "delta": 0.33923833333333353,
+       "df": 4,
+       "se": 0.2853021765056988,
+       "threshold": 2.4564517397140664
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        1.697557,
+        1.690729,
+        1.668266
+       ],
+       "pass_values_b": [
+        1.748853,
+        2.561336,
+        1.726452
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 1.6855173333333333,
+       "median_b": 2.0122136666666663,
+       "delta": 0.32669633333333303,
+       "df": 4,
+       "se": 0.27477980014105025,
+       "threshold": 2.3658540792144422
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "dose weighting": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        45.253105,
+        45.151809,
+        44.321316
+       ],
+       "pass_values_b": [
+        44.930749,
+        45.443972,
+        45.035942
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 44.90874333333333,
+       "median_b": 45.13688766666667,
+       "delta": 0.22814433333333994,
+       "df": 4,
+       "se": 0.33409597249426465,
+       "threshold": 2.8765663231756182
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        45.251155,
+        45.128123,
+        44.317312
+       ],
+       "pass_values_b": [
+        44.928699,
+        45.439344,
+        45.029521
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 44.89886333333334,
+       "median_b": 45.13252133333333,
+       "delta": 0.23365799999999126,
+       "df": 4,
+       "se": 0.3319548482041217,
+       "threshold": 2.8581312430374877
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "movie teardown": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        3.883394,
+        3.901004,
+        3.85631
+       ],
+       "pass_values_b": [
+        0.148899,
+        0.176556,
+        0.154487
+       ],
+       "flag": true,
+       "replicated": true,
+       "median_a": 3.880236,
+       "median_b": 0.15998066666666666,
+       "delta": -3.7202553333333332,
+       "df": 4,
+       "se": 0.01549979380866434,
+       "threshold": 0.5
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        3.839817,
+        3.869775,
+        3.816354
+       ],
+       "pass_values_b": [
+        0.14823,
+        0.17637,
+        0.1542
+       ],
+       "flag": true,
+       "replicated": true,
+       "median_a": 3.8419820000000002,
+       "median_b": 0.1596,
+       "delta": -3.682382,
+       "df": 4,
+       "se": 0.017671079282262345,
+       "threshold": 0.5
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     },
+     "submit model and plot": {
+      "wall_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.078221,
+        0.078781,
+        0.077104
+       ],
+       "pass_values_b": [
+        0.078499,
+        0.091071,
+        0.080735
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.07803533333333333,
+       "median_b": 0.083435,
+       "delta": 0.005399666666666664,
+       "df": 4,
+       "se": 0.0039034272263116557,
+       "threshold": 0.5
+      },
+      "cpu_ms": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0.076371,
+        0.07761,
+        0.07531
+       ],
+       "pass_values_b": [
+        0.07694,
+        0.08996,
+        0.07989
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.07643033333333334,
+       "median_b": 0.08226333333333334,
+       "delta": 0.005833000000000005,
+       "df": 4,
+       "se": 0.003997072831738524,
+       "threshold": 0.5
+      },
+      "minflt": {
+       "passes_a": 3,
+       "passes_b": 3,
+       "pass_values_a": [
+        0,
+        0,
+        0
+       ],
+       "pass_values_b": [
+        0,
+        0,
+        0
+       ],
+       "flag": false,
+       "replicated": true,
+       "median_a": 0.0,
+       "median_b": 0.0,
+       "delta": 0.0,
+       "df": 4,
+       "se": 0.0,
+       "threshold": 50
+      }
+     }
+    },
+    "movie_wall": {
+     "passes_a": 3,
+     "passes_b": 3,
+     "pass_values_a": [
+      224.110041,
+      225.1503,
+      223.598429
+     ],
+     "pass_values_b": [
+      176.850937,
+      185.508946,
+      176.284396
+     ],
+     "flag": true,
+     "replicated": true,
+     "median_a": 224.28625666666667,
+     "median_b": 179.548093,
+     "delta": -44.73816366666668,
+     "df": 4,
+     "se": 3.019626544951182,
+     "threshold": 25.998984552029675
+    }
+   }
+  },
+  "base": "main",
+  "passes": {
+   "main": 3,
+   "cand": 3
+  },
+  "checks": {
+   "main": [],
+   "cand": []
+  },
+  "flagged_passes": [
+   {
+    "arm": "cand",
+    "pass": 3,
+    "flags": [
+     "foreign CPU on lane 1.13 cores"
+    ]
+   }
+  ]
+ }
+}

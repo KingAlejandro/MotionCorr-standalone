@@ -206,6 +206,13 @@ if(BUILD_TESTING)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
     add_test(NAME NvcompAcceptanceDiagnostics
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_nvcomp_acceptance_diagnostics.py)
+    # Profiling kit (docs/profiling.md): Nsight SQLite queries and derived
+    # metrics against known-answer fixtures on the captured nsys schema, paired
+    # statistics, product identity and an end-to-end compare with a stand-in
+    # binary. Standard library only and device-free, so it runs everywhere.
+    add_test(NAME ProfilingKit
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/profiling/mcprof.py selftest)
+    set_tests_properties(ProfilingKit PROPERTIES TIMEOUT 300)
     add_test(NAME GainCacheOwnership
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_gain_cache_host.py
             --cxx ${CMAKE_CXX_COMPILER})

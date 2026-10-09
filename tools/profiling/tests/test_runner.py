@@ -1,0 +1,230 @@
+"""lib/runner.py and lib/provenance.py without a GPU: staging, scheduling,
+resource capture from wait4, failure handling and the shared-host lock."""
+import os
+import shutil
+import stat
+import sys
+import tempfile
+import time
+import unittest
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(HERE))
+
+from lib import provenance as prov, runner  # noqa: E402
+
+FAKE = os.path.join(HERE, "fake_motioncorr.py")
+STAR = """# version 30001
+
+data_optics
+
+loop_
+_rlnOpticsGroupName #1
+_rlnOpticsGroup #2
+opticsGroup1 1
+
+data_movies
+
+loop_
+_rlnMicrographMovieName #1
+_rlnOpticsGroup #2
+Movies/a.tiff 1
+Movies/b.tiff 1
+Movies/c.tiff 1
+"""
+
+
+def make_data(root):
+    os.makedirs(os.path.join(root, "Movies"))
+    for n in "abc":
+        open(os.path.join(root, "Movies", n + ".tiff"), "w").close()
+    with open(os.path.join(root, "movies.star"), "w") as f:
+        f.write(STAR)
+    return root
+
+
+def make_binary(path, env=None, device_timing_option=True):
+    """Executable wrapper around fake_motioncorr.py with fixed behaviour.
+    The comment line is what option detection reads for a script payload."""
+    lines = ["#!/bin/sh", "# stand-in motioncorr; accepts --profile"
+             + (" and --profile_device_timing" if device_timing_option else "")]
+    env = dict(env or {})
+    if not device_timing_option:
+        env["FAKE_DEVICE_TIMING_OPTION"] = "0"
+    lines += ["export %s=%s" % kv for kv in env.items()]
+    lines.append('exec "%s" "%s" "$@"' % (sys.executable, FAKE))
+    with open(path, "w") as f:
+        f.write("\n".join(lines) + "\n")
+    os.chmod(path, os.stat(path).st_mode | stat.S_IXUSR)
+    return path
+
+
+class Staging(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.data = make_data(os.path.join(self.tmp, "data"))
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def test_star_movies_reads_movie_block_only(self):
+        movies, rows = runner.star_movies(os.path.join(self.data, "movies.star"))
+        self.assertEqual(movies, ["Movies/a.tiff", "Movies/b.tiff", "Movies/c.tiff"])
+
+    def test_subset_keeps_header_and_links(self):
+        s = runner.stage_input(self.data, "movies.star", 2, os.path.join(self.tmp, "w"))
+        self.assertTrue(s["staged"])
+        self.assertEqual(s["movies"], ["Movies/a.tiff", "Movies/b.tiff"])
+        text = open(os.path.join(s["cwd"], "movies.star")).read()
+        self.assertIn("opticsGroup1 1", text)
+        self.assertNotIn("c.tiff", text)
+        self.assertTrue(os.path.exists(os.path.join(s["cwd"], "Movies", "c.tiff")))
+
+    def test_nested_star_subset_never_writes_into_data(self):
+        os.makedirs(os.path.join(self.data, "cfg"))
+        src = os.path.join(self.data, "cfg", "movies.star")
+        # Movie paths in a nested STAR are still relative to the cwd (--data).
+        shutil.copy(os.path.join(self.data, "movies.star"), src)
+        open(os.path.join(self.data, "cfg", "other.txt"), "w").write("keep")
+        before = open(src).read()
+        s = runner.stage_input(self.data, "cfg/movies.star", 2, os.path.join(self.tmp, "w"))
+        self.assertEqual(open(src).read(), before, "source STAR was modified")
+        staged = os.path.join(s["cwd"], "cfg", "movies.star")
+        self.assertFalse(os.path.islink(os.path.join(s["cwd"], "cfg")))
+        self.assertFalse(os.path.islink(staged))
+        self.assertNotIn("c.tiff", open(staged).read())
+        self.assertTrue(os.path.exists(os.path.join(s["cwd"], "cfg", "other.txt")))
+        self.assertTrue(os.path.exists(os.path.join(s["cwd"], "Movies", "c.tiff")))
+        self.assertNotEqual(s["star_sha256"], runner.prov.sha256_file(src))
+
+    def test_absolute_or_escaping_star_is_refused(self):
+        for bad in (os.path.join(self.data, "movies.star"), "../data/movies.star"):
+            with self.subTest(star=bad), self.assertRaises(SystemExit):
+                runner.stage_input(self.data, bad, 2, os.path.join(self.tmp, "w"))
+
+    def test_full_set_uses_data_dir(self):
+        s = runner.stage_input(self.data, "movies.star", None, os.path.join(self.tmp, "w"))
+        self.assertEqual(s["cwd"], os.path.abspath(self.data))
+        self.assertFalse(s["staged"])
+
+
+class Scheduling(unittest.TestCase):
+    def test_two_arms_alternate(self):
+        self.assertEqual(runner.schedule(["A", "B"], 4), [["A", "B"], ["B", "A"], ["A", "B"], ["B", "A"]])
+        self.assertEqual(runner.order_label(["A", "B"], ["B", "A"]), "BA")
+
+    def test_three_arms_rotate_through_every_position(self):
+        sched = runner.schedule(["A", "B", "C"], 3)
+        for arm in "ABC":
+            self.assertEqual(sorted(r.index(arm) for r in sched), [0, 1, 2])
+
+    def test_kit_owns_io_flags(self):
+        with self.assertRaises(ValueError):
+            runner.payload_argv("/bin/x", ["--o", "y"], "s.star", "/out", [])
+
+    def test_kit_owns_device_timing_flag(self):
+        with self.assertRaises(ValueError):
+            runner.payload_argv("/bin/x", ["--profile_device_timing", "0"], "s.star", "/out", [])
+
+    def test_device_timing_args(self):
+        self.assertEqual(runner.device_timing_args("off", True), (["--profile_device_timing", "0"], "off"))
+        self.assertEqual(runner.device_timing_args("on", True), (["--profile_device_timing", "1"], "on"))
+        # An older binary cannot turn timing off; the record must not claim it did.
+        extra, mode = runner.device_timing_args("off", False)
+        self.assertEqual(extra, [])
+        self.assertTrue(mode.startswith("on "), mode)
+        self.assertEqual(runner.device_timing_args("on", False), ([], "on"))
+        with self.assertRaises(ValueError):
+            runner.device_timing_args("0", True)
+
+    def test_cpu_list(self):
+        self.assertEqual(prov.cpu_list("96-99,101"), [96, 97, 98, 99, 101])
+
+
+class RunOnce(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.data = make_data(os.path.join(self.tmp, "data"))
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def run_fake(self, env):
+        b = make_binary(os.path.join(self.tmp, "mc"), env)
+        out = os.path.join(self.tmp, "run", "out")
+        argv = runner.payload_argv(b, ["--gpu", "0"], "movies.star", out, [])
+        return runner.run_once(argv, self.data, dict(os.environ), os.path.join(self.tmp, "run.log"),
+                               runner.GpuSampler(None), [], b, out, 3)
+
+    def test_wall_cpu_rss_products(self):
+        rec = self.run_fake({"FAKE_SLEEP": "0.2"})
+        self.assertGreaterEqual(rec["wall_s"], 0.2)
+        self.assertLess(rec["wall_s"], 5)
+        self.assertGreater(rec["peak_rss_bytes"], 1 << 20)   # a Python interpreter, from wait4
+        self.assertGreater(rec["cpu_s"], 0)
+        self.assertEqual(rec["mrc_products"], 3)
+        self.assertEqual(rec["flags"]["discard"], [])
+
+    def test_failure_raises(self):
+        with self.assertRaisesRegex(RuntimeError, "exited 3"):
+            self.run_fake({"FAKE_FAIL": "1"})
+
+    def test_lane_foreign_cpu_discards(self):
+        rec = {"lane": {"foreign_cores": 1.5}, "payload_affinity": None}
+        self.assertTrue(any("foreign CPU" in f for f in runner.run_flags(rec, [1, 2])["discard"]))
+        rec = {"vram": {"foreign_pids": {123: 0}, "own_pids_seen": []}}
+        self.assertTrue(any("foreign process" in f for f in runner.run_flags(rec, [])["discard"]))
+
+
+class QuietLane(unittest.TestCase):
+    def test_waits_then_times_out(self):
+        real = runner.lane_busy_cores
+        try:
+            seq = iter([1.0, 0.9, 0.1])
+            runner.lane_busy_cores = lambda lane, window_s=1.0: next(seq)
+            q = runner.wait_quiet_lane([1], timeout_s=60)
+            self.assertEqual(q["busy_cores"], 0.1)
+            self.assertNotIn("timed_out", q)
+            runner.lane_busy_cores = lambda lane, window_s=1.0: 1.0
+            self.assertTrue(runner.wait_quiet_lane([1], timeout_s=-1)["timed_out"])
+        finally:
+            runner.lane_busy_cores = real
+
+
+class Locks(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.path = os.path.join(self.tmp, "bench.lock")
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def test_exclusive_and_released(self):
+        with prov.HostLock(self.path) as a:
+            self.assertIsNotNone(a.fd)
+            t0 = time.monotonic()
+            with self.assertRaises(prov.LockError):
+                with prov.HostLock(self.path, timeout_s=0.2, poll_s=0.05):
+                    pass
+            self.assertGreaterEqual(time.monotonic() - t0, 0.2)
+        with prov.HostLock(self.path, timeout_s=0.2):
+            pass
+        self.assertTrue(os.path.exists(self.path))   # never deleted
+
+    def test_not_inherited(self):
+        with prov.HostLock(self.path) as a:
+            self.assertFalse(os.get_inheritable(a.fd))
+
+    def test_unlinked_lock_detected(self):
+        real_stat = os.stat
+        try:
+            os.stat = lambda p, *a, **k: (_ for _ in ()).throw(FileNotFoundError(p)) if p == self.path else real_stat(p, *a, **k)
+            with self.assertRaisesRegex(prov.LockError, "unlinked or replaced"):
+                with prov.HostLock(self.path):
+                    pass
+        finally:
+            os.stat = real_stat
+
+
+if __name__ == "__main__":
+    unittest.main()

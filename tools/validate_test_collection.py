@@ -51,6 +51,9 @@ DEFAULT_REQUIRED_TESTS = [
     "StageProfile",
     # Host buffer reuse: products identical with/without reuse and MALLOC_PERTURB_.
     "HostBufferReuse",
+    # Profiling kit: Nsight query/metric known answers, paired statistics and
+    # product identity (docs/profiling.md). Device-free.
+    "ProfilingKit",
     # Added by the #69 CUDA reliability port. Device-free, so it is always
     # collected; the CUDA-only CudaErrorClass is not listed here, matching
     # the existing exclusion of CudaWrapperUploadFailure.

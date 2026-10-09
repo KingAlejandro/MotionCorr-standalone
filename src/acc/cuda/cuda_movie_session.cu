@@ -11,6 +11,8 @@
 #include <cmath>
 #include <algorithm>
 #include <climits>
+#include <cstdlib>
+#include <cstring>
 #include "src/acc/cuda/cuda_scoped_resources.h"
 #include "src/acc/cuda/cuda_plan_pool.h"
 #if defined(_NVCOMP_ENABLED)
@@ -371,13 +373,31 @@ __global__ void cropAndGroupPatchResidentKernel(
     d_Ipatches[dst_idx] = sum;
 }
 
+// Low-VRAM layout: pinned host copy of the aligned spectrum, held from the
+// inverse FFT until dose weighting copies it back. Worker lifetime for the same
+// reason as the nvCOMP staging pool: sessions are per movie, and a pinned
+// allocation of this size costs far more than the copy it serves.
+struct FourierSpillPool {
+    void *ptr = nullptr;
+    size_t bytes = 0;
+    ~FourierSpillPool() { if (ptr) cudaFreeHost(ptr); }
+};
+thread_local FourierSpillPool t_fourier_spill;
+
 } // anonymous namespace
 
 CudaMovieSession::CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log)
     : patch_alignment_workspace(&failure_state),
       batched_patch_alignment_workspace(&failure_state),
       nx(nx), ny(ny), n_frames(n_frames), device_id(device_id),
-      nfx(nx / 2 + 1), logfile(log) {}
+      nfx(nx / 2 + 1), logfile(log) {
+    if (const char *env = std::getenv("MOTIONCORR_CUDA_LOW_VRAM")) {
+        if (std::strcmp(env, "1") == 0) low_vram = true;
+        else if (env[0] != '\0' && std::strcmp(env, "0") != 0)
+            logfile << "WARNING: MOTIONCORR_CUDA_LOW_VRAM must be 0 or 1; ignoring '"
+                    << env << "'." << std::endl;
+    }
+}
 
 CudaMovieSession::~CudaMovieSession() {
     release();
@@ -481,10 +501,21 @@ bool CudaMovieSession::initialize() {
     cudaError_t cuda_result = cudaSuccess;
     {
         StageScope alloc_scope("alloc movie buffers");
-        cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
-        if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
+        if (low_vram) {
+            // 2*ny*nfx >= nx*ny, so the real movie fits inside the Fourier one.
+            cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
+            if (cuda_result == cudaSuccess) d_Iframes = (float*)d_Fframes;
+        } else {
+            cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
+            if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
+        }
         if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Isum, sz_real);
     }
+    low_vram_content = LowVramContent::RealFrames;
+    host_spectrum = nullptr;
+    if (low_vram && cuda_result == cudaSuccess)
+        logfile << "CUDA low-VRAM movie layout: real frames share the Fourier buffer ("
+                << total_real_bytes << " bytes not allocated)" << std::endl;
     if (cuda_result != cudaSuccess) {
         recordFailure(cuda_result, "initialize buffers", __LINE__);
         logfile << "ERROR: Movie buffer allocation failed: " << cudaGetErrorString(cuda_result) << std::endl;
@@ -598,8 +629,11 @@ void CudaMovieSession::release() {
     releasePlan(plan_c2r, has_plan_c2r);
     releaseBuffer(d_fft_work);
     releaseBuffer(d_inverse_tile);
-    releaseBuffer(d_Iframes);
+    // In the low-VRAM layout d_Iframes aliases d_Fframes and owns nothing.
+    if (low_vram) d_Iframes = nullptr;
+    else releaseBuffer(d_Iframes);
     releaseBuffer(d_Fframes);
+    releaseBuffer(d_ingest_scratch);
     releaseBuffer(d_Isum);
     // Only free a gain this session owns; a pooled one outlives it.
     if (!d_gain_borrowed) releaseBuffer(d_gain);
@@ -1070,6 +1104,8 @@ void CudaMovieSession::endIngestScratch() {
             ingest_events[e] = 0;
         }
     }
+    // Low-VRAM layout only; null otherwise. Both streams have drained.
+    if (d_ingest_scratch) releaseBuffer(d_ingest_scratch);
     fourier_guard.finishIngestScratch();
 }
 
@@ -1176,8 +1212,15 @@ bool CudaMovieSession::gatherFrameSamples(
         ~ScratchScope() { session->endIngestScratch(); }
     } scratch_scope = { this };
 
-    mc_cuda::DeviceScratchArena arena(
-        d_Fframes, (size_t)n_frames * (size_t)ny * (size_t)nfx * sizeof(cufftComplex));
+    void *arena_base = d_Fframes;
+    size_t arena_bytes = (size_t)n_frames * (size_t)ny * (size_t)nfx * sizeof(cufftComplex);
+    if (low_vram) {
+        // d_Fframes holds the real frames being sampled; use a small allocation.
+        arena_bytes = 4 * n * sizeof(int);
+        HANDLE_ERROR(cudaMalloc(&d_ingest_scratch, arena_bytes));
+        arena_base = d_ingest_scratch;
+    }
+    mc_cuda::DeviceScratchArena arena(arena_base, arena_bytes);
     int *d_f = (int *)arena.alloc(n * sizeof(int), sizeof(int));
     int *d_y = (int *)arena.alloc(n * sizeof(int), sizeof(int));
     int *d_x = (int *)arena.alloc(n * sizeof(int), sizeof(int));
@@ -1421,8 +1464,10 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         ~ScratchScope() { session->endIngestScratch(); }
     } scratch_scope = { this };
 
-    mc_cuda::DeviceScratchArena arena(
-        d_Fframes, (size_t)n_frames * (size_t)ny * (size_t)nfx * sizeof(cufftComplex));
+    // In the low-VRAM layout the decoded frames land in d_Fframes, so the
+    // working set gets its own allocation, sized below.
+    const size_t arena_bytes = (size_t)n_frames * (size_t)ny * (size_t)nfx * sizeof(cufftComplex);
+    mc_cuda::DeviceScratchArena arena(low_vram ? nullptr : (void *)d_Fframes, arena_bytes);
 
     // Pinned host memory is a per-worker resource, not a per-session one, and under
     // a process-per-GPU layout the pools add up across workers. Cap it and let the
@@ -1507,64 +1552,82 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     int chunk_frames = 0;
     mc_tiff_deflate::PinnedChunkLayout layout;
 
-    for (int candidate = chunk_req; candidate >= 1; candidate = (candidate > 1 ? candidate / 2 : 0)) {
-        const int slots = mc_tiff_deflate::pipelineSlots(n_frames, candidate);
-        const size_t chunks = (size_t)candidate * (size_t)ny;
-        size_t cand_temp = 0;
-        if (nvcompBatchedDeflateDecompressGetTempSizeAsync(
-                chunks, row_bytes, nvcompBatchedDeflateDecompressDefaultOpts,
-                &cand_temp, chunks * row_bytes) != nvcompSuccess) {
-            break;
+    // Takes the largest candidate whose working set fits `a`.
+    auto select_chunk = [&](mc_cuda::DeviceScratchArena &a) -> bool {
+        for (int candidate = chunk_req; candidate >= 1; candidate = (candidate > 1 ? candidate / 2 : 0)) {
+            const int slots = mc_tiff_deflate::pipelineSlots(n_frames, candidate);
+            const size_t chunks = (size_t)candidate * (size_t)ny;
+            size_t cand_temp = 0;
+            if (nvcompBatchedDeflateDecompressGetTempSizeAsync(
+                    chunks, row_bytes, nvcompBatchedDeflateDecompressDefaultOpts,
+                    &cand_temp, chunks * row_bytes) != nvcompSuccess) {
+                return false;
+            }
+            const size_t cap = (size_t)candidate * alignUp(max_frame_stage, in_align);
+            const mc_tiff_deflate::PinnedChunkLayout cand_layout =
+                mc_tiff_deflate::pinnedChunkLayout(slots, cap, chunks, sizeof(nvcompStatus_t));
+            // Against the bytes that will actually be pinned, not the payload: the
+            // pool adds 12.5% headroom and rounds up to a 32 MiB granule, so a cap
+            // enforced on the payload is overshot by construction. Every pinned byte
+            // of the pipeline (both payload slots, tables, readback) is in total.
+            if (cand_layout.total == 0 ||
+                mc_tiff_deflate::pinnedReserveBytes(cand_layout.total) > pinned_cap) {
+                if (candidate == 1) return false;
+                continue;
+            }
+            a.reset();
+            SlotViews c[2];
+            std::memset(c, 0, sizeof(c));
+            bool fits = true;
+            for (int j = 0; j < slots && fits; j++) {
+                c[j].comp   = (uint8_t *)a.alloc(cap, in_align);
+                c[j].u16    = (uint16_t *)a.alloc(chunks * row_pitch_bytes, out_align);
+                c[j].cptr   = (void **)a.alloc(chunks * sizeof(void *), sizeof(void *));
+                c[j].csize  = (size_t *)a.alloc(chunks * sizeof(size_t), sizeof(size_t));
+                c[j].dptr   = (void **)a.alloc(chunks * sizeof(void *), sizeof(void *));
+                c[j].dsize  = (size_t *)a.alloc(chunks * sizeof(size_t), sizeof(size_t));
+                c[j].asize  = (size_t *)a.alloc(chunks * sizeof(size_t), sizeof(size_t));
+                c[j].status = (nvcompStatus_t *)a.alloc(chunks * sizeof(nvcompStatus_t), sizeof(nvcompStatus_t));
+                c[j].adler  = (uint32_t *)a.alloc(chunks * sizeof(uint32_t), sizeof(uint32_t));
+                fits = c[j].comp && c[j].u16 && c[j].cptr && c[j].csize && c[j].dptr &&
+                       c[j].dsize && c[j].asize && c[j].status && c[j].adler;
+            }
+            // One nvCOMP temp area: every decode runs on the compute stream, in order.
+            void *cand_temp_ptr = nullptr;
+            if (fits && cand_temp) {
+                cand_temp_ptr = a.alloc(cand_temp, tmp_align);
+                fits = (cand_temp_ptr != 0);
+            }
+            if (fits) {
+                dv[0] = c[0]; dv[1] = c[1];
+                d_temp = cand_temp_ptr;
+                temp_bytes = cand_temp;
+                slot_capacity = cap;
+                chunk_frames = candidate;
+                layout = cand_layout;
+                return true;
+            }
+            if (candidate == 1) return false;
         }
-        const size_t cap = (size_t)candidate * alignUp(max_frame_stage, in_align);
-        const mc_tiff_deflate::PinnedChunkLayout cand_layout =
-            mc_tiff_deflate::pinnedChunkLayout(slots, cap, chunks, sizeof(nvcompStatus_t));
-        // Against the bytes that will actually be pinned, not the payload: the
-        // pool adds 12.5% headroom and rounds up to a 32 MiB granule, so a cap
-        // enforced on the payload is overshot by construction. Every pinned byte
-        // of the pipeline (both payload slots, tables, readback) is in total.
-        if (cand_layout.total == 0 ||
-            mc_tiff_deflate::pinnedReserveBytes(cand_layout.total) > pinned_cap) {
-            if (candidate == 1) break;
-            continue;
+        return false;
+    };
+    bool chunk_fits = false;
+    if (low_vram) {
+        // Size against the capacity the default layout offers, so the chunk and
+        // the decode are the same, then allocate only what that chunk uses.
+        mc_cuda::DeviceScratchArena sizing(
+            (void *)mc_cuda::DeviceScratchArena::kMaxAlignment, arena_bytes);
+        if (select_chunk(sizing)) {
+            HANDLE_ERROR(cudaMalloc(&d_ingest_scratch, sizing.used()));
+            arena = mc_cuda::DeviceScratchArena(d_ingest_scratch, sizing.used());
+            chunk_fits = select_chunk(arena);
         }
-        arena.reset();
-        SlotViews c[2];
-        std::memset(c, 0, sizeof(c));
-        bool fits = true;
-        for (int j = 0; j < slots && fits; j++) {
-            c[j].comp   = (uint8_t *)arena.alloc(cap, in_align);
-            c[j].u16    = (uint16_t *)arena.alloc(chunks * row_pitch_bytes, out_align);
-            c[j].cptr   = (void **)arena.alloc(chunks * sizeof(void *), sizeof(void *));
-            c[j].csize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
-            c[j].dptr   = (void **)arena.alloc(chunks * sizeof(void *), sizeof(void *));
-            c[j].dsize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
-            c[j].asize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
-            c[j].status = (nvcompStatus_t *)arena.alloc(chunks * sizeof(nvcompStatus_t), sizeof(nvcompStatus_t));
-            c[j].adler  = (uint32_t *)arena.alloc(chunks * sizeof(uint32_t), sizeof(uint32_t));
-            fits = c[j].comp && c[j].u16 && c[j].cptr && c[j].csize && c[j].dptr &&
-                   c[j].dsize && c[j].asize && c[j].status && c[j].adler;
-        }
-        // One nvCOMP temp area: every decode runs on the compute stream, in order.
-        void *cand_temp_ptr = nullptr;
-        if (fits && cand_temp) {
-            cand_temp_ptr = arena.alloc(cand_temp, tmp_align);
-            fits = (cand_temp_ptr != 0);
-        }
-        if (fits) {
-            dv[0] = c[0]; dv[1] = c[1];
-            d_temp = cand_temp_ptr;
-            temp_bytes = cand_temp;
-            slot_capacity = cap;
-            chunk_frames = candidate;
-            layout = cand_layout;
-            break;
-        }
-        if (candidate == 1) break;
+    } else {
+        chunk_fits = select_chunk(arena);
     }
-    if (chunk_frames <= 0) {
+    if (!chunk_fits) {
         logfile << "nvCOMP ingestion declined: a one-frame chunk fits neither the "
-                << arena.capacity() << "-byte pre-FFT scratch arena nor the "
+                << arena_bytes << "-byte pre-FFT scratch arena nor the "
                 << pinned_cap << "-byte pinned staging cap"
                 << " (MOTIONCORR_NVCOMP_PINNED_MAX_MB); using the host reader." << std::endl;
         return false;
@@ -1582,8 +1645,9 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     for (int f = 0; f < n_frames; f++) contiguous_frames += frame_contiguous[f] ? 1 : 0;
     logfile << "nvCOMP ingestion: chunk=" << chunk_frames << "/" << n_frames
             << " frames x " << n_chunks << " chunks, slots=" << n_slots
-            << ", scratch=" << arena.used() << "/" << arena.capacity()
-            << " bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0)"
+            << ", scratch=" << arena.used() << "/" << arena_bytes
+            << (low_vram ? " bytes allocated (low-VRAM layout)"
+                         : " bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0)")
             << ", pinned staging=" << mc_tiff_deflate::pinnedReserveBytes(layout.total)
             << "/" << pinned_cap << " reserved, " << layout.total << " used ("
             << n_slots << " x " << slot_capacity << " payload)"
@@ -1868,8 +1932,35 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
     // work already queued finishes and any asynchronous error is attributed
     // here rather than to a later, unrelated call.
     auto drain_after_failure = [&]() { recordFailure(cudaDeviceSynchronize(), "forward FFT drain", __LINE__); };
-    for (int iframe = 0; iframe < n_frames; iframe++) {
-        const cufftResult res = cufftExecR2C(plan_r2c, (cufftReal*)(d_Iframes + (size_t)iframe * real_stride),
+    if (low_vram) {
+        if (low_vram_content != LowVramContent::RealFrames) {
+            logfile << "ERROR: forward FFT refused: the low-VRAM buffer does not hold real frames."
+                    << std::endl;
+            return false;
+        }
+        if (!d_inverse_tile) return false;
+        host_spectrum = nullptr;
+    }
+    for (int k = 0; k < n_frames; k++) {
+        // Low-VRAM layout: descending, through the tile. Fourier slot i covers
+        // real slots >= i only, all of which are already consumed by then
+        // (bit-identity: tests/cuda_fft_placement_probe.cpp).
+        const int iframe = low_vram ? n_frames - 1 - k : k;
+        const cufftReal *src = (const cufftReal*)(d_Iframes + (size_t)iframe * real_stride);
+        if (low_vram) {
+            const cudaError_t copy = cudaMemcpy(d_inverse_tile, src, real_stride * sizeof(float),
+                                                cudaMemcpyDeviceToDevice);
+            if (copy != cudaSuccess) {
+                logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " << cudaGetErrorString(copy) << std::endl;
+                recordFailure(copy, __func__, __LINE__);
+                drain_after_failure();
+                return false;
+            }
+            src = (const cufftReal*)d_inverse_tile;
+            // From the first transform on, neither movie is whole until the scale.
+            low_vram_content = LowVramContent::Lost;
+        }
+        const cufftResult res = cufftExecR2C(plan_r2c, (cufftReal*)src,
                                              d_Fframes + (size_t)iframe * complex_stride);
         if (res != CUFFT_SUCCESS) {
             logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " << res << std::endl;
@@ -1894,7 +1985,7 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
         }
     }
     HANDLE_ERROR(cudaDeviceSynchronize());
-
+    if (low_vram) low_vram_content = LowVramContent::FourierFrames;
     return true;
 }
 
@@ -1912,6 +2003,7 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
     const size_t real_stride = (size_t)nx * ny;
     const size_t complex_stride = (size_t)ny * nfx;
     auto drain_after_failure = [&]() { recordFailure(cudaDeviceSynchronize(), "inverse FFT drain", __LINE__); };
+    if (low_vram) return lowVramInverseFFT();
     for (int iframe = 0; iframe < n_frames; iframe++) {
         const cudaError_t copy = cudaMemcpy(d_inverse_tile, d_Fframes + (size_t)iframe * complex_stride,
                                             complex_stride * sizeof(cufftComplex),
@@ -1935,6 +2027,145 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
     return true;
 }
 
+// Low-VRAM inverse. Real slot i, written by C2R(i), overlaps Fourier slots <= i
+// only, so ascending order with each Fourier frame copied out to the pinned spill
+// before its transform loses nothing. The spill runs on its own non-blocking
+// stream (the session works on the legacy default stream, which would otherwise
+// serialise against it); its only ordering against the transforms is "frame i is
+// on the host before C2R(i)", so the copies run ahead of the transforms.
+bool CudaMovieSession::lowVramInverseFFT() {
+    if (low_vram_content != LowVramContent::FourierFrames) {
+        logfile << "ERROR: inverse FFT refused: the low-VRAM buffer does not hold the spectrum."
+                << std::endl;
+        return false;
+    }
+    const size_t real_stride = (size_t)nx * ny;
+    const size_t complex_stride = (size_t)ny * nfx;
+    const size_t frame_bytes = complex_stride * sizeof(cufftComplex);
+    const size_t movie_bytes = frame_bytes * (size_t)n_frames;
+    if (!t_fourier_spill.ptr || t_fourier_spill.bytes < movie_bytes) {
+        if (t_fourier_spill.ptr) {
+            void *old = t_fourier_spill.ptr;
+            t_fourier_spill.ptr = nullptr;
+            t_fourier_spill.bytes = 0;
+            HANDLE_ERROR(cudaFreeHost(old));
+        }
+        HANDLE_ERROR(cudaHostAlloc(&t_fourier_spill.ptr, movie_bytes, cudaHostAllocDefault));
+        t_fourier_spill.bytes = movie_bytes;
+        logfile << "CUDA low-VRAM layout: pinned spectrum spill grown to " << movie_bytes
+                << " bytes (worker lifetime)" << std::endl;
+    }
+    unsigned char *host = (unsigned char *)t_fourier_spill.ptr;
+
+    cudaStream_t copy_stream = 0;
+    cudaEvent_t spectrum_ready = 0, frame_on_host = 0;
+    int spilled = 0;   // frames whose D2H copy was enqueued
+    auto teardown = [&]() -> bool {
+        cudaError_t a = cudaSuccess, b = cudaSuccess, c = cudaSuccess;
+        if (frame_on_host) recordFailure(a = cudaEventDestroy(frame_on_host), "spill event", __LINE__);
+        if (spectrum_ready) recordFailure(b = cudaEventDestroy(spectrum_ready), "spill event", __LINE__);
+        if (copy_stream) recordFailure(c = cudaStreamDestroy(copy_stream), "spill stream", __LINE__);
+        frame_on_host = spectrum_ready = 0;
+        copy_stream = 0;
+        return a == cudaSuccess && b == cudaSuccess && c == cudaSuccess;
+    };
+    // Drain, then put the spilled frames back so d_Fframes is the whole spectrum
+    // again and the runner's downloadFourierFrames fallback sees what the
+    // default layout would have left there.
+    auto fail = [&](const char *what, int line) -> bool {
+        logfile << "CUDA Error in " << __FILE__ << ":" << line << " : " << what << std::endl;
+        recordFailure(cudaDeviceSynchronize(), "inverse FFT drain", __LINE__);
+        teardown();
+        low_vram_content = LowVramContent::Lost;
+        if (failure_state.isPoisoned()) return false;
+        const cudaError_t restore = cudaMemcpy(d_Fframes, host, frame_bytes * (size_t)spilled,
+                                               cudaMemcpyHostToDevice);
+        recordFailure(restore, "inverse FFT spill restore", __LINE__);
+        if (restore == cudaSuccess) low_vram_content = LowVramContent::FourierFrames;
+        else logfile << "ERROR: low-VRAM spectrum could not be restored after an inverse FFT failure."
+                     << std::endl;
+        return false;
+    };
+    cudaError_t err = cudaStreamCreateWithFlags(&copy_stream, cudaStreamNonBlocking);
+    // Plain cudaEventCreate: tests/cuda_fault_matrix.cpp wraps it (not the WithFlags
+    // form), so these creations are fault-enumerated and balance their destroys.
+    if (err == cudaSuccess) err = cudaEventCreate(&spectrum_ready);
+    if (err == cudaSuccess) err = cudaEventCreate(&frame_on_host);
+    // The spectrum is final once everything already queued on stream 0 is done.
+    if (err == cudaSuccess) err = cudaEventRecord(spectrum_ready, 0);
+    if (err == cudaSuccess) err = cudaStreamWaitEvent(copy_stream, spectrum_ready, 0);
+    if (err != cudaSuccess) {
+        recordFailure(err, __func__, __LINE__);
+        return fail(cudaGetErrorString(err), __LINE__);
+    }
+    for (int iframe = 0; iframe < n_frames; iframe++) {
+        const cufftComplex *slot = d_Fframes + (size_t)iframe * complex_stride;
+        err = cudaMemcpyAsync(host + frame_bytes * (size_t)iframe, slot, frame_bytes,
+                              cudaMemcpyDeviceToHost, copy_stream);
+        if (err == cudaSuccess) spilled = iframe + 1;
+        // Re-recording one event is safe: each wait captures the record before it.
+        if (err == cudaSuccess) err = cudaEventRecord(frame_on_host, copy_stream);
+        if (err == cudaSuccess) err = cudaStreamWaitEvent(0, frame_on_host, 0);
+        if (err == cudaSuccess)
+            err = cudaMemcpy(d_inverse_tile, slot, frame_bytes, cudaMemcpyDeviceToDevice);
+        if (err != cudaSuccess) {
+            recordFailure(err, __func__, __LINE__);
+            return fail(cudaGetErrorString(err), __LINE__);
+        }
+        const cufftResult res = cufftExecC2R(plan_c2r, d_inverse_tile,
+                                             (cufftReal*)(d_Iframes + (size_t)iframe * real_stride));
+        if (res != CUFFT_SUCCESS) {
+            recordCufftFailure(res, __func__, __LINE__);
+            return fail("cuFFT C2R failed", __LINE__);
+        }
+    }
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        recordFailure(err, __func__, __LINE__);
+        return fail(cudaGetErrorString(err), __LINE__);
+    }
+    const bool torn_down = teardown();
+    if (failure_state.isPoisoned()) {
+        low_vram_content = LowVramContent::Lost;
+        return false;
+    }
+    low_vram_content = LowVramContent::RealFramesHostFourier;
+    host_spectrum = t_fourier_spill.ptr;
+    // A failed destroy fails the step, as everywhere else. The spectrum is whole
+    // on the host, so the runner's downloadFourierFrames fallback still has it.
+    if (!torn_down) {
+        logfile << "ERROR: low-VRAM inverse FFT: releasing the spill stream or events failed."
+                << std::endl;
+        return false;
+    }
+    return true;
+}
+
+bool CudaMovieSession::realFramesResident(const char *caller) {
+    if (!low_vram || low_vram_content == LowVramContent::RealFrames ||
+        low_vram_content == LowVramContent::RealFramesHostFourier) return true;
+    logfile << "ERROR: " << caller << " refused: the low-VRAM buffer does not hold real frames."
+            << std::endl;
+    return false;
+}
+
+bool CudaMovieSession::ensureDeviceFourier() {
+    if (!low_vram || low_vram_content == LowVramContent::FourierFrames) return true;
+    if (low_vram_content != LowVramContent::RealFramesHostFourier) {
+        logfile << "ERROR: the low-VRAM spectrum is not available." << std::endl;
+        return false;
+    }
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    // The real frames die as this lands; mark that before it can half-happen.
+    // host_spectrum stays valid, so a failed copy still leaves the CPU
+    // dose-weighting fallback its input (downloadFourierFrames).
+    low_vram_content = LowVramContent::Lost;
+    const size_t movie_bytes = (size_t)n_frames * ny * nfx * sizeof(cufftComplex);
+    HANDLE_ERROR(cudaMemcpy(d_Fframes, host_spectrum, movie_bytes, cudaMemcpyHostToDevice));
+    low_vram_content = LowVramContent::FourierFrames;
+    return true;
+}
+
 bool CudaMovieSession::preparePatchInVram(
     int x_start, int y_start,
     int patch_w, int patch_h,
@@ -1942,6 +2173,7 @@ bool CudaMovieSession::preparePatchInVram(
     cufftComplex *d_out_fpatches
 ) {
     if (failure_state.isPoisoned() || !is_initialized || n_groups == 0 || !d_out_fpatches) return false;
+    if (!realFramesResident(__func__)) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const int patch_nfx = patch_w / 2 + 1;
@@ -2155,6 +2387,7 @@ bool CudaMovieSession::reconstructDoseWeighted(
 ) {
     if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_fft_work ||
         !d_inverse_tile) return false;
+    if (!ensureDeviceFourier()) return false;
     // d_inverse_tile (one complex frame) is dead once the global inverse
     // transform has finished, and holds nothing the reconstruction needs. It
     // becomes the C2R input the out-of-place weight kernel writes.
@@ -2171,13 +2404,29 @@ bool CudaMovieSession::reconstructUnweighted(
     const ThirdOrderPolynomialModel *model
 ) {
     if (failure_state.isPoisoned() || !is_initialized) return false;
+    if (!realFramesResident(__func__)) return false;
     return cudaRealSpaceInterpolationDevice(d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, logfile, &failure_state);
 }
 
 bool CudaMovieSession::downloadFourierFrames(std::vector<MultidimArray<fComplex> > &Fframes) {
     if (failure_state.isPoisoned() || !is_initialized || !d_Fframes) return false;
-    HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t sz_comp_frame = (size_t)ny * nfx * sizeof(cufftComplex);
+    if (low_vram && low_vram_content != LowVramContent::FourierFrames && host_spectrum) {
+        Fframes.resize(n_frames);
+        for (int iframe = 0; iframe < n_frames; iframe++) {
+            Fframes[iframe].reshape(ny, nfx);
+            std::memcpy(Fframes[iframe].data,
+                        (const unsigned char *)host_spectrum + sz_comp_frame * iframe,
+                        sz_comp_frame);
+        }
+        return true;
+    }
+    if (low_vram && low_vram_content != LowVramContent::FourierFrames) {
+        logfile << "ERROR: downloadFourierFrames refused: the low-VRAM spectrum is not available."
+                << std::endl;
+        return false;
+    }
+    HANDLE_ERROR(cudaSetDevice(device_id));
     Fframes.resize(n_frames);
     for (int iframe = 0; iframe < n_frames; iframe++) {
         Fframes[iframe].reshape(ny, nfx);
@@ -2189,6 +2438,7 @@ bool CudaMovieSession::downloadFourierFrames(std::vector<MultidimArray<fComplex>
 
 bool CudaMovieSession::downloadRealFrames(std::vector<Image<float> > &Iframes) {
     if (failure_state.isPoisoned() || !is_initialized || !d_Iframes) return false;
+    if (!realFramesResident(__func__)) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t sz_real_frame = (size_t)ny * nx * sizeof(float);
     Iframes.resize(n_frames);

@@ -602,6 +602,7 @@ void fftSyncCases() {
     // Healthy session run, both directions.
     {
         std::ostringstream log; CudaMovieSession session(nx,ny,frames,0,log);
+        session.setLowVram(false); // asserts the default layout's sync count
         require(session.initialize(),"fft sync test session init failed");
         gpu(cudaMemcpy(session.getDeviceRealFrames(),real.data(),rpix*frames*sizeof(float),cudaMemcpyHostToDevice),"fft real upload");
         arm();
@@ -639,6 +640,7 @@ void fftSyncCases() {
     // Exec failure mid-loop: refused, cuFFT status recorded, queue drained (one wait), nothing leaked.
     for (int direction = 0; direction < 2; ++direction) {
         std::ostringstream log; CudaMovieSession session(nx,ny,frames,0,log);
+        session.setLowVram(false);
         require(session.initialize(),"fft fault session init failed");
         gpu(cudaMemcpy(session.getDeviceRealFrames(),real.data(),rpix*frames*sizeof(float),cudaMemcpyHostToDevice),"fft fault upload");
         if (direction == 1) require(session.computeGlobalForwardFFT(),"fft fault prepare forward failed");
@@ -662,6 +664,9 @@ void borrowedCase(int nx, int ny, bool poly, Fault selected = NONE) {
     session_created.clear(); session_destroyed.clear(); observe_session_plans = true;
     std::ostringstream log;
     CudaMovieSession session(in.nx,in.ny,in.count,0,log);
+    // These checks read the default layout's device buffers directly; the low-VRAM
+    // layout's equivalence is tests/cuda_low_vram_layout.cpp.
+    session.setLowVram(false);
     require(session.initialize(), "borrowed test session initialization failed");
     require(session_created.size() == 2, "session did not create exactly global R2C/C2R pair");
     const cufftHandle c2r = session_created.back();

@@ -66,6 +66,16 @@ public:
     // Allocate persistent buffers and single-frame cuFFT plans
     bool initialize();
 
+    // Low-VRAM movie layout (docs/low_vram_movie_layout.md): real frames live
+    // inside the Fourier allocation instead of a second movie-sized buffer, and
+    // the aligned spectrum is held in pinned host memory while patch alignment
+    // needs the real frames. Products are byte-identical; the cost is one movie
+    // of pinned host RAM per worker and two PCIe copies of the spectrum.
+    // Off by default; MOTIONCORR_CUDA_LOW_VRAM=1 turns it on. The setter is for
+    // tests and is ignored once initialize() has run.
+    void setLowVram(bool on) { if (!is_initialized) low_vram = on; }
+    bool isLowVram() const { return low_vram; }
+
     // Release all persistent GPU allocations and plans
     void release();
 
@@ -391,6 +401,29 @@ private:
     // view dead. Idempotent; called from a scope guard so it also runs on the
     // HANDLE_ERROR early-return paths.
     void endIngestScratch();
+
+    // Low-VRAM layout state. Real frame i occupies floats [i*nx*ny, (i+1)*nx*ny)
+    // of d_Fframes and d_Iframes aliases it, so at most one of the two movies is
+    // whole on the device at a time. Ignored when low_vram is false.
+    bool low_vram = false;
+    enum class LowVramContent {
+        RealFrames,       // before/without the forward FFT
+        FourierFrames,    // after the forward FFT
+        RealFramesHostFourier,  // after the inverse: spectrum in the pinned host spill
+        Lost              // a partial transform destroyed both; nothing is recoverable
+    };
+    LowVramContent low_vram_content = LowVramContent::RealFrames;
+    // The pinned copy of the aligned spectrum written by the inverse FFT, or
+    // null. Outlives a failed copy back to the device, which only loses the
+    // device side.
+    const void *host_spectrum = nullptr;
+    // Separate scratch for the ingest/gather arenas, which otherwise borrow
+    // d_Fframes -- in this layout that is where the real frames are written.
+    void *d_ingest_scratch = nullptr;
+    bool realFramesResident(const char *caller);
+    bool lowVramInverseFFT();
+    // Copies the host spill back into d_Fframes (invalidating the real frames).
+    bool ensureDeviceFourier();
 
     // Cached patch resources to avoid allocations and plan recreation in patch loop
     cufftHandle plan_patch_r2c = 0;

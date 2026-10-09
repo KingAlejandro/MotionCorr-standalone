@@ -349,6 +349,12 @@ if(BUILD_TESTING AND CUDA)
         target_link_libraries(cuda_u16_staging_equivalence PRIVATE motioncorr_core)
         add_test(NAME CudaU16StagingEquivalence COMMAND cuda_u16_staging_equivalence)
         set_tests_properties(CudaU16StagingEquivalence PROPERTIES LABELS "cuda;hardware")
+        # Low-VRAM layout: movie FFTs through the tile with real frames inside the
+        # Fourier buffer must match the split layout bit for bit.
+        add_executable(cuda_fft_placement_probe tests/cuda_fft_placement_probe.cpp)
+        target_link_libraries(cuda_fft_placement_probe PRIVATE CUDA::cudart CUDA::cufft)
+        add_test(NAME CudaFftPlacementProbe COMMAND cuda_fft_placement_probe)
+        set_tests_properties(CudaFftPlacementProbe PROPERTIES LABELS "cuda;hardware" TIMEOUT 300 SKIP_RETURN_CODE 77)
 
         add_executable(cuda_wrapper_upload_failure tests/cuda_wrapper_upload_failure.cpp)
         target_link_libraries(cuda_wrapper_upload_failure PRIVATE motioncorr_core)
@@ -370,6 +376,14 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaGetDeviceCount")
         add_test(NAME CudaFaultMatrix COMMAND cuda_fault_matrix)
         set_tests_properties(CudaFaultMatrix PROPERTIES LABELS "cuda;hardware")
+        add_test(NAME CudaFaultMatrixLowVram COMMAND cuda_fault_matrix)
+        set_tests_properties(CudaFaultMatrixLowVram PROPERTIES LABELS "cuda;hardware"
+            ENVIRONMENT "MOTIONCORR_CUDA_LOW_VRAM=1")
+        add_executable(cuda_low_vram_layout tests/cuda_low_vram_layout.cpp)
+        target_link_libraries(cuda_low_vram_layout PRIVATE motioncorr_core)
+        add_test(NAME CudaLowVramLayout COMMAND cuda_low_vram_layout)
+        set_tests_properties(CudaLowVramLayout PROPERTIES LABELS "cuda;hardware"
+            SKIP_RETURN_CODE 77 TIMEOUT 300)
         add_executable(cuda_patch_workspace tests/cuda_patch_workspace.cpp)
         target_link_libraries(cuda_patch_workspace PRIVATE motioncorr_core)
         target_link_options(cuda_patch_workspace PRIVATE

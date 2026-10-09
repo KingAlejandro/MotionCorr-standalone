@@ -1994,6 +1994,11 @@ def case_ownership_cost_is_independent_of_host_processes(tmp: Path) -> None:
     fake-worker launch took ~10 s on a ~1800-process shared host and the
     observer occupied a payload CPU. Count whole-table enumerations in an
     actual subreaper launch; the refresh count shows the observer ran.
+
+    The bound holds only with /proc/<pid>/task/*/children. Kernels without
+    CONFIG_CHECKPOINT_RESTORE use the verified-proc-ppid inventory, which must
+    enumerate; the forced-fallback launch checks that this arm still succeeds
+    and is not held to the bound.
     """
     if sys.platform != "linux":
         print("NOT CLAIMED: child-subreaper ownership, and so the bounded "
@@ -2001,14 +2006,14 @@ def case_ownership_cost_is_independent_of_host_processes(tmp: Path) -> None:
         return
     star = tmp / "movies.star"
     build_star(star, DEFAULT_ROWS[:2])
-    counts = tmp / "counts.json"
     wrapper = tmp / "count_scans.py"
     wrapper.write_text(
-        "import json, sys\n"
+        "import json, os, sys\n"
         f"sys.path.insert(0, {str(TOOLS)!r})\n"
         "import process_ownership as po\n"
         "import run_multi_gpu as launcher\n"
-        "n = {'pids': 0, 'refresh': 0}\n"
+        "counts = sys.argv.pop()\n"
+        "n = {'pids': 0, 'refresh': 0, 'modes': []}\n"
         "def counted(cls, name):\n"
         "    f = getattr(cls, name)\n"
         "    def g(*a, **k):\n"
@@ -2017,22 +2022,40 @@ def case_ownership_cost_is_independent_of_host_processes(tmp: Path) -> None:
         "    setattr(cls, name, g)\n"
         "counted(po.ProcessTable, 'pids')\n"
         "counted(po.ProcessOwnership, 'refresh')\n"
+        "init = po.ProcessOwnership.__init__\n"
+        "def recorded(self, *a, **k):\n"
+        "    init(self, *a, **k)\n"
+        "    if os.environ.get('FORCE_PPID_INVENTORY'):\n"
+        "        self.child_inventory_mode = 'verified-proc-ppid'\n"
+        "    n['modes'].append(self)\n"
+        "po.ProcessOwnership.__init__ = recorded\n"
         "try:\n"
         "    rc = launcher.main()\n"
         "finally:\n"
-        f"    open({str(counts)!r}, 'w').write(json.dumps(n))\n"
+        "    n['modes'] = sorted({o.child_inventory_mode for o in n['modes']})\n"
+        "    open(counts, 'w').write(json.dumps(n))\n"
         "raise SystemExit(rc)\n")
-    out = tmp / "run"
-    cp = subprocess.run([PY, wrapper, "--star", star, "--out", out, "--binary", FAKE,
-                         "--workers", "2", "--no-witness"],
-                        capture_output=True, text=True, timeout=60)
-    assert cp.returncode == 0, cp.stdout + cp.stderr
-    n = json.loads(counts.read_text())
-    status = json.loads((out / "status.json").read_text())
-    assert status["process_cleanup"]["ownership_mode"] == "linux-child-subreaper", \
-        status["process_cleanup"]
-    assert n["refresh"] > 0, n
-    assert n["pids"] == 0, f"healthy launch enumerated the whole process table: {n}"
+    for arm in ("native", "forced-fallback"):
+        out, counts = tmp / f"run-{arm}", tmp / f"counts-{arm}.json"
+        env = dict(os.environ)
+        if arm == "forced-fallback":
+            env["FORCE_PPID_INVENTORY"] = "1"
+        cp = subprocess.run([PY, wrapper, "--star", star, "--out", out, "--binary", FAKE,
+                             "--workers", "2", "--no-witness", counts],
+                            capture_output=True, text=True, timeout=60, env=env)
+        assert cp.returncode == 0, arm + ": " + cp.stdout + cp.stderr
+        n = json.loads(counts.read_text())
+        status = json.loads((out / "status.json").read_text())
+        assert status["process_cleanup"]["ownership_mode"] == "linux-child-subreaper", \
+            status["process_cleanup"]
+        assert n["refresh"] > 0, n
+        if n["modes"] == ["task-children"]:
+            assert arm == "native", n
+            assert n["pids"] == 0, f"healthy launch enumerated the whole process table: {n}"
+        else:
+            assert "verified-proc-ppid" in n["modes"], n
+            print(f"NOT CLAIMED ({arm}): bounded scan; this launch used the "
+                  f"verified-proc-ppid inventory {n}")
 
 
 def case_launcher_signal_reaps_owned_process_group(tmp: Path) -> None:

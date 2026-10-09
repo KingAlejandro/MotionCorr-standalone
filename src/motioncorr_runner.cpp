@@ -820,8 +820,9 @@ void MotioncorrRunner::run()
 			std::set<std::filesystem::path> protected_paths;
 			for (const auto &movie : fn_ori_micrographs) {
 				const FileName root = getOutputFileNames(movie).withoutExtension();
+				// .out/.err/.com are executeMotioncor2()'s per-movie diagnostics.
 				for (const char *suffix : {".mrc", ".star", ".log", "_noDW.mrc", "_DWS.mrc", "_DW.mrc",
-					"_PS.mrc", "_EVN.mrc", "_ODD.mrc", "_frames.mrcs"})
+					"_PS.mrc", "_EVN.mrc", "_ODD.mrc", "_frames.mrcs", ".out", ".err", ".com"})
 					protected_paths.insert(std::filesystem::path((root + suffix).c_str()).lexically_normal());
 				protected_paths.insert(std::filesystem::path((fn_out + movie.withoutExtension() + "_shifts.eps").c_str()).lexically_normal());
 			}

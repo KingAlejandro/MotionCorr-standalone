@@ -35,24 +35,35 @@ static double cpuSeconds() {
            1e-6 * (ru.ru_utime.tv_usec + ru.ru_stime.tv_usec);
 }
 
+// Job state lives in statics: with the no-wait mutant a helper is still running when
+// runTeam returns, and it must not write to a dead stack frame, or the mutant would
+// end in a SIGSEGV instead of a clean, attributable check failure.
+static std::atomic<int> g_hits[8];
+static std::atomic<int> g_work;
+static std::function<void(int)> g_job = [](int tid) {
+    g_hits[tid]++;
+    // A little uneven work so that threads finish at different times.
+    std::this_thread::sleep_for(std::chrono::microseconds(50 * (tid + 1)));
+    g_work++;
+};
+
 static void testEveryThreadRunsOnceAndJoins() {
     mc_cuda::ChunkReaderPool pool(8);
     check(pool.threads() == 8, "team size includes the caller");
     for (int round = 0; round < 200; round++) {
-        std::vector<std::atomic<int>> hits(8);
-        for (auto &h : hits) h = 0;
-        std::atomic<int> work(0);
-        const bool ok = pool.runTeam([&](int tid) {
-            hits[tid]++;
-            // A little uneven work so that threads finish at different times.
-            std::this_thread::sleep_for(std::chrono::microseconds(50 * (tid + 1)));
-            work++;
-        });
+        for (auto &h : g_hits) h = 0;
+        g_work = 0;
+        const bool ok = pool.runTeam(g_job);
         check(ok, "healthy job reports success");
         // Read straight after return: any thread still running here is a bug.
-        check(work.load() == 8, "runTeam returned before every thread finished");
+        const int done = g_work.load();
+        check(done == 8, "runTeam returned before every thread finished");
         for (int t = 0; t < 8; t++)
-            check(hits[t].load() == 1, "each tid runs exactly once per job");
+            if (done == 8) check(g_hits[t].load() == 1, "each tid runs exactly once per job");
+        if (done != 8) {   // let the stragglers finish before the next round
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            if (failures > 3) return;
+        }
     }
 }
 
@@ -90,7 +101,11 @@ static void testIdleHelpersDoNotSpin() {
 }
 
 int main() {
+    std::setvbuf(stdout, nullptr, _IONBF, 0);
     testEveryThreadRunsOnceAndJoins();
+    // A pool that does not join leaves helpers running jobs whose captures are gone;
+    // stop here with a clean failure rather than let later tests crash on them.
+    if (failures) { std::printf("%d failure(s)\n", failures); return 1; }
     testFailureIsReportedAndPoolSurvives();
     testSingleThread();
     testIdleHelpersDoNotSpin();

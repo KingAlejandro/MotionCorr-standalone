@@ -1,0 +1,29 @@
+main 7d64043 cand b4359dd cmp /home/alex/mc-small/src-main/docs/perf_integration/identity/cmp_trees.py
+eo main rc=0
+eo_nodw main rc=0
+bin_late main rc=0
+cpu main rc=0
+mixed main rc=0
+mixed_cpu main rc=0
+eo cand rc=0
+eo_nodw cand rc=0
+bin_late cand rc=0
+cpu cand rc=0
+mixed cand rc=0
+mixed_cpu cand rc=0
+eo_nodw cand_poison rc=0
+eo_nodw cand_noretain rc=0
+bin_late cand_poison rc=0
+mixed cand_poison rc=0
+== eo cand: IDENTICAL mrc=12 other=17 pdf_inventoried=4 files=37/37 
+== eo_nodw cand: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== bin_late cand: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== cpu cand: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== mixed cand: IDENTICAL mrc=20 other=19 pdf_inventoried=4 files=48/48 
+== mixed_cpu cand: IDENTICAL mrc=20 other=19 pdf_inventoried=4 files=48/48 
+== eo_nodw cand_poison: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== eo_nodw cand_noretain: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== bin_late cand_poison: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== mixed cand_poison: IDENTICAL mrc=20 other=19 pdf_inventoried=4 files=48/48 
+== control (main eo vs main eo_nodw, must differ): DIFFERENT mrc=12 other=17 pdf_inventoried=4 files=37/41
+IDM-DONE

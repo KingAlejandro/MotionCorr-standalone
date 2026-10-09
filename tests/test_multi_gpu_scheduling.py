@@ -2463,6 +2463,61 @@ def case_tomography_partition(tmp: Path) -> None:
     assert cp.returncode == 2 and "do not cover the canonical movies" in cp.stderr, cp.stderr
 
 
+def case_bench_warmups_hold_arm_locks(tmp: Path) -> None:
+    """bench_scaling.py holds an arm's locks around its warm-up as well as measured runs.
+
+    A warm-up launches the same GPU workload, so without the locks it can overlap
+    another holder of those GPUs. The fake launch probes each lock non-blockingly
+    from its own open file description; flock(2) conflicts across descriptions
+    even within one process, so the probe fails exactly when the lock is held.
+    """
+    import fcntl
+    import importlib
+    bench = importlib.import_module("bench_scaling")
+    data = tmp / "data"; data.mkdir()
+    (data / "w.star").write_text("x\n")
+    (tmp / "binary").write_text("x\n")
+    stats = tmp / "stats.py"
+    stats.write_text("def quartiles(v): return (v[0], v[0], v[0])\n"
+                     "def median(v): return v[0]\n"
+                     "def paired(p): return {}\n")
+    locks = [tmp / "bench.lock", tmp / "gpu.lock"]
+    seen: dict[str, list[bool]] = {}
+
+    def fake_launch(_a, _arm, _star, run):
+        held = []
+        for path in locks:
+            with open(path, "a") as fh:
+                try:
+                    fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    fcntl.flock(fh, fcntl.LOCK_UN)
+                    held.append(False)
+                except BlockingIOError:
+                    held.append(True)
+        seen[run.name] = held
+        run.mkdir()
+        run.with_suffix(".console.log").write_text("")
+        return 0.0, 1.0, 0
+
+    saved = bench.host_snapshot, bench.launch, bench.summarise_run
+    bench.host_snapshot = lambda _cpus: {}
+    bench.launch = fake_launch
+    bench.summarise_run = lambda *_: {"rc": 0, "publication_s": 1.0, "workers": []}
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = bench.main(["--binary", str(tmp / "binary"), "--data", str(data),
+                             "--workload", "w=w.star", "--arm", "a=GPU-x@0",
+                             "--arm-locks", "a=" + ",".join(map(str, locks)),
+                             "--reps", "1", "--stats-lib", str(stats),
+                             "--work", str(tmp / "work"), "--out", str(tmp / "out.json")])
+    finally:
+        bench.host_snapshot, bench.launch, bench.summarise_run = saved
+    assert rc == 0, rc
+    assert set(seen) == {"warmup-a", "r0-w-a"}, seen
+    assert seen["r0-w-a"] == [True, True], seen
+    assert seen["warmup-a"] == [True, True], f"warm-up ran without the arm locks: {seen}"
+
+
 def case_dataset_endpoint(_tmp: Path) -> None:
     result = subprocess.run([PY, str(ROOT / "tests/test_dataset_endpoint.py")],
                             text=True, capture_output=True)
@@ -2536,6 +2591,7 @@ CASES = [
     case_per_worker_timing_and_rss_recorded,
     case_aggregate_staging_namespace_reserved,
     case_tomography_partition,
+    case_bench_warmups_hold_arm_locks,
     case_dataset_endpoint,
     case_owned_tree_rss,
     case_pid_birth_cleanup,

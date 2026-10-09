@@ -58,6 +58,20 @@ def run_dataset(binary: Path, cwd: Path, star: str, name: str):
     return cp, status, manifest, out, diag
 
 
+def remerge(binary: Path, cwd: Path, out: Path, star: str, dest: str):
+    """Rerun run_dataset.py's aggregate command on a finished run's workers."""
+    status = json.loads((out / 'workers/status.json').read_text())
+    return subprocess.run(
+        [sys.executable, str(ROOT / 'tools/multi_gpu/merge_workers.py'),
+         '--manifest', str(out / 'workers/shards/shard_manifest.json'),
+         '--workers', *[str(out / 'workers' / f'w{k}') for k in range(status['n_workers'])],
+         '--out', str(cwd / dest), '--status', str(out / 'workers/status.json'),
+         '--products', '.mrc,.star,_shifts.eps', '--aggregate-with', str(binary),
+         '--input-star', str(cwd / star), '--aggregate-args=' + ' '.join(ARGS),
+         '--report', str(cwd / f'{dest}.json')],
+        cwd=cwd, capture_output=True, text=True)
+
+
 def mutate(path: Path, edit) -> bytes:
     original = path.read_bytes()
     path.write_text(edit(original.decode()))
@@ -138,6 +152,30 @@ def tomography(binary: Path, tmp: Path) -> None:
     require(problems and 'corrected_tilt_series.star' in problems[0], str(problems))
     print('PASS validator rejects swapped tilts, swapped series, a misdirected reference, '
           'a different canonical order and a missing joint STAR')
+
+    # A per-series table edited after the workers ran, with its image order kept,
+    # passes every order check; only its digest shows the aggregate would publish
+    # dose metadata the products were not computed with.
+    require(all(len(t.get('ref_sha256') or '') == 64 for t in manifest['tomography']['series']),
+            'manifest does not record the per-series table digests')
+    cp = remerge(binary, tmp, out, 'tomo.star', 'remerge-same')
+    require(cp.returncode == 0 and (tmp / 'remerge-same/corrected_tilt_series.star').is_file(),
+            'unchanged inputs do not re-aggregate: ' + cp.stdout + cp.stderr)
+    table = tmp / 'tilt_series/one.star'
+    original = mutate(table, lambda t: t.replace('tiff 5\n', 'tiff 6\n').replace('tiff 0\n', 'tiff 1\n'))
+    try:
+        require(table.read_bytes() != original and len(table.read_bytes()) == len(original),
+                'fixture edit did not change the table')
+        cp = remerge(binary, tmp, out, 'tomo.star', 'remerge-edited')
+    finally:
+        table.write_bytes(original)
+    require(cp.returncode == 2 and 'one.star' in cp.stderr
+            and 'does not match the partition manifest' in cp.stderr, cp.stdout + cp.stderr)
+    require(not (tmp / 'remerge-edited/corrected_tilt_series.star').exists(),
+            'aggregate published from an edited per-series table')
+    print('PASS a per-series table edited after the workers, same order and size, '
+          'is refused before aggregation; the unchanged re-merge passes')
+    shutil.rmtree(tmp / 'remerge-same')
     shutil.rmtree(out)
 
 

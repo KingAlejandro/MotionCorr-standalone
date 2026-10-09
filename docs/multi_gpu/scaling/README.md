@@ -119,8 +119,9 @@ A flip at offset 300, inside the label block, was correctly ignored.
   | 4×8 | GPU0, GPU1, GPU2, GPU3 | 72-79, 80-87, 88-95, 96-103 |
 
 - **Locks:** each arm took `/tmp/motioncorr-bench.lock`, then its GPUs'
-  `/tmp/motioncorr-gpuN-correctness.lock` in index order. The locks were held
-  only around measured runs.
+  `/tmp/motioncorr-gpuN-correctness.lock` in index order. In this campaign the
+  locks were held only around measured runs; the four discarded warm-ups ran
+  unlocked. The committed driver now locks warm-ups too.
 - **Driver command:**
 
   ```

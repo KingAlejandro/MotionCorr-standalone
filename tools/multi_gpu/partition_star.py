@@ -183,9 +183,15 @@ def tomography_series(global_block: star_io.Block) -> tuple[list[dict], list[str
             problems.append(f"tilt series {name!r}: {sidecar} is a reserved output path")
             continue
         try:
+            # Workers and the aggregate step each reopen this table, and its
+            # dose/tilt metadata reaches the published STAR without any
+            # cross-check, so the merge revalidates this digest.
+            ref_sha256 = hashlib.sha256(Path(ref).read_bytes()).hexdigest()
             table = star_io.parse(ref).block(name)
             movie_col = table.column(star_io.MOVIE_LABEL)
             pre_col = table.column(star_io.PRE_EXPOSURE_LABEL)
+            if hashlib.sha256(Path(ref).read_bytes()).hexdigest() != ref_sha256:
+                raise OSError("changed while it was being read")
         except (OSError, star_io.StarFormatError) as exc:
             problems.append(f"tilt series {name!r}: cannot read data_{name} from "
                             f"{ref!r} relative to {Path.cwd()}: {exc}")
@@ -203,7 +209,8 @@ def tomography_series(global_block: star_io.Block) -> tuple[list[dict], list[str
             continue
         # std::stable_sort with MdDoubleComparator: ties keep file order.
         movies = [m for _, m in sorted(keyed, key=lambda kv: kv[0])]
-        series.append({"name": name, "ref": ref, "sidecar": sidecar, "movies": movies})
+        series.append({"name": name, "ref": ref, "ref_path": str(Path(ref).resolve()),
+                       "ref_sha256": ref_sha256, "sidecar": sidecar, "movies": movies})
     return series, problems
 
 

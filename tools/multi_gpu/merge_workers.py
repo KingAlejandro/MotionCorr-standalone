@@ -67,6 +67,20 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def changed_inputs(expected: dict[Path, str]) -> list[str]:
+    """Input STARs whose current bytes differ from the partition-time digest."""
+    changed = []
+    for path, want in expected.items():
+        try:
+            got = sha256_file(path)
+        except OSError as exc:
+            changed.append(f"{path} ({exc})")
+            continue
+        if got.lower() != want.lower():
+            changed.append(str(path))
+    return changed
+
+
 def gpu_witness_problems(status: dict[str, object]) -> list[str]:
     """Validate the evidence needed to certify a GPU-backed PASS."""
     devices = status.get("devices")
@@ -309,15 +323,22 @@ def main(argv: list[str] | None = None) -> int:
                   file=sys.stderr)
             return 2
         input_star_path = Path(a.input_star).resolve()
-        try:
-            actual_sha256 = sha256_file(input_star_path)
-        except OSError as exc:
-            print(f"FAIL: cannot hash aggregate input STAR {input_star_path}: {exc}",
-                  file=sys.stderr)
-            return 2
-        if actual_sha256.lower() != manifest_input_sha256.lower():
+        # The aggregate binary rereads every per-series table of a tomography
+        # input, so those are aggregate inputs too.
+        input_digests = {input_star_path: manifest_input_sha256}
+        if manifest.get("input_type") == "tomography":
+            for t in manifest.get("tomography", {}).get("series", []):
+                ref_sha256 = t.get("ref_sha256")
+                if (not t.get("ref_path") or not isinstance(ref_sha256, str)
+                        or re.fullmatch(r"[0-9a-fA-F]{64}", ref_sha256) is None):
+                    print(f"FAIL: partition manifest has no valid ref_sha256 for tilt "
+                          f"series {t.get('name')!r}", file=sys.stderr)
+                    return 2
+                input_digests[Path(t["ref_path"])] = ref_sha256
+        changed = changed_inputs(input_digests)
+        if changed:
             print("FAIL: aggregate input STAR content does not match the partition "
-                  "manifest input_sha256", file=sys.stderr)
+                  f"manifest digest: {changed}", file=sys.stderr)
             return 2
 
     problems: list[str] = []
@@ -613,14 +634,10 @@ def main(argv: list[str] | None = None) -> int:
     }
 
     if a.aggregate_with and not problems:
-        try:
-            current_input_sha256 = sha256_file(input_star_path)
-        except OSError as exc:
-            current_input_sha256 = None
-            problems.append(f"cannot recheck aggregate input STAR before launch: {exc}")
-        if current_input_sha256 != manifest_input_sha256:
+        changed = changed_inputs(input_digests)
+        if changed:
             problems.append("aggregate input STAR changed after preflight; aggregate "
-                            "binary was not run")
+                            f"binary was not run: {changed}")
 
     if problems:
         report["aggregate_star"] = "not attempted: staging failed"
@@ -644,13 +661,10 @@ def main(argv: list[str] | None = None) -> int:
                               (out / rel).stat().st_mtime_ns)
                          for rel in sorted(produced)}
         proc = subprocess.run(cmd, capture_output=True, text=True)
-        try:
-            final_input_sha256 = sha256_file(input_star_path)
-        except OSError as exc:
-            final_input_sha256 = None
-            problems.append(f"cannot verify aggregate input STAR after launch: {exc}")
-        if final_input_sha256 != manifest_input_sha256:
-            problems.append("aggregate input STAR changed while the aggregate binary ran")
+        changed = changed_inputs(input_digests)
+        if changed:
+            problems.append(f"aggregate input STAR changed while the aggregate binary ran: "
+                            f"{changed}")
         rewritten = sorted(
             rel for rel, digest in staged_before.items()
             if not (out / rel).exists()

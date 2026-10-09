@@ -223,7 +223,7 @@ def main(argv=None) -> int:
     ap.add_argument("--arm", action="append", required=True,
                     help="NAME=UUID[,UUID..]@MASK[;MASK..]; the first arm is the paired baseline")
     ap.add_argument("--arm-locks", action="append", default=[],
-                    help="NAME=PATH[,PATH..] taken in order around each measured run of that arm")
+                    help="NAME=PATH[,PATH..] taken in order around each run (warm-up included) of that arm")
     ap.add_argument("--reps", type=int, default=6)
     ap.add_argument("--stats-lib", required=True)
     ap.add_argument("--stats-commit", default=None)
@@ -270,7 +270,8 @@ def main(argv=None) -> int:
 
     def run_one(arm, wname, star, tag, measured):
         run = work / tag
-        with Locks(locks.get(arm["name"], []) if measured else []) as held:
+        # Warm-ups launch the same GPU workload, so they take the same locks.
+        with Locks(locks.get(arm["name"], [])) as held:
             before = host_snapshot(parse_cpus(arm["union"]))
             t0, t_exit, rc = launch(a, arm, star, run)
             after = host_snapshot(parse_cpus(arm["union"]))

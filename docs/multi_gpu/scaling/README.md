@@ -48,7 +48,8 @@ I kept one 96-movie 2×16 run (not part of the campaign) and broke down its
 aggregate phase:
 
 - **Staging:** `merge_workers.py` copies 384 staged products (5.2 GB) into
-  `merged/`, because `run_dataset.py` does not pass `--link`.
+  `merged/`, because `run_dataset.py` does not pass `--link`. (This describes
+  `d7339fd`; staging now hardlinks by default, see `../AGGREGATE_STAGING.md`.)
 - **Hashing:** it hashes every staged product before the `--aggregate_only`
   binary runs, and again after it, to prove nothing was rewritten. One
   `sha256sum` pass over the tree takes 5.3 s.
@@ -59,8 +60,9 @@ aggregate phase:
   `aggregate.json`.
 
 Most of the serial phase is therefore integrity bookkeeping in Python, not
-MotionCorr work. Hardlink staging and a single hash pass are the obvious levers.
-They are follow-up work, not part of #147.
+MotionCorr work. Hardlink staging, a single hash pass taken at worker exit, and
+a stat-key after-check now replace it; see `../AGGREGATE_STAGING.md` and the
+re-measurement below.
 
 ## Identity
 

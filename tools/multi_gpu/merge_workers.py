@@ -24,6 +24,7 @@ not dataset readiness.
 from __future__ import annotations
 
 import argparse
+import errno
 import hashlib
 import json
 import os
@@ -32,10 +33,14 @@ import shlex
 import shutil
 import subprocess
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import output_digests  # noqa: E402
 import star_io  # noqa: E402
+from output_digests import FileChanged, stat_key  # noqa: E402
 
 # Fixed-name per-process artifacts. Every worker writes its own; none of them is
 # the dataset product, so they are staged under a per-worker subdirectory
@@ -254,6 +259,89 @@ def worker_files(root: Path) -> dict[Path, Path]:
     return out
 
 
+# Filesystems that cannot hardlink this pair: a different filesystem, a
+# filesystem without hardlinks, a link-count limit, or protected_hardlinks.
+LINK_FALLBACK_ERRNOS = {errno.EXDEV, errno.EPERM, errno.EMLINK, errno.ENOTSUP,
+                        errno.EOPNOTSUPP}
+
+
+def exit_records(worker: dict, k: int, problems: list[str]) -> dict[str, dict] | None:
+    """The launcher's digests of worker k's outputs at exit, if it recorded any.
+
+    None means no reference: a status without exit digests (an older launcher,
+    or a hand-written status) leaves the merge to hash the products itself.
+    """
+    rec = worker.get("exit_digest")
+    if rec is None:
+        return None
+    if not isinstance(rec, dict) or rec.get("status") != "complete":
+        if worker.get("returncode") == 0:
+            problems.append(f"worker {k}: outputs were not digested at exit "
+                            f"({rec.get('status') if isinstance(rec, dict) else rec}: "
+                            f"{rec.get('error') if isinstance(rec, dict) else ''})")
+        return None
+    outputs = rec.get("outputs")
+    hexdigest = re.compile(r"[0-9a-f]{64}")
+    if not isinstance(outputs, dict) or not all(
+            isinstance(rel, str) and isinstance(v, dict)
+            and (isinstance(v.get("error"), str)
+                 or (isinstance(v.get("sha256"), str) and hexdigest.fullmatch(v["sha256"])
+                     and isinstance(v.get("key"), list) and len(v["key"]) == 5
+                     and all(type(x) is int for x in v["key"])))
+            for rel, v in outputs.items()):
+        problems.append(f"worker {k}: exit digest record is malformed")
+        return None
+    return outputs
+
+
+def stage_one(src: Path, dst: Path, mode: str, record: dict | None) -> dict:
+    """Put one product at dst and return its digest and staged stat key.
+
+    A link shares the source inode, so the bytes need not be read when the
+    source still has the stat key recorded at worker exit. Otherwise the bytes
+    are hashed -- during the copy when copying -- and compared with the record.
+    """
+    res: dict = {}
+    try:
+        key = stat_key(os.stat(src))
+        sha = record["sha256"] if record is not None and record["key"] == key else None
+        linked = False
+        if mode != "copy":
+            try:
+                os.link(src, dst)
+                linked = True
+            except OSError as exc:
+                if mode == "link":
+                    res["fatal"] = (f"cannot hardlink {src} -> {dst}: {exc}. --stage link "
+                                    "does not fall back; use --stage auto or copy.")
+                    return res
+                if exc.errno not in LINK_FALLBACK_ERRNOS:
+                    raise
+                res["fallback"] = errno.errorcode.get(exc.errno, str(exc.errno))
+        if linked:
+            dst_st = os.stat(dst)
+            # ctime moves with the link count; anything else moving means the
+            # source was written between the stat above and the link.
+            if stat_key(dst_st)[:4] != key[:4]:
+                raise FileChanged(f"{src} changed while it was linked")
+            if sha is not None:
+                res["digest"] = "worker exit"
+            else:
+                sha = output_digests.hash_file(dst, stat_key(dst_st))
+                res["digest"] = "merge" if record is None else "verified"
+        else:
+            sha = output_digests.copy_with_digest(src, dst, key)
+            res["digest"] = "merge" if record is None else "verified"
+        if record is not None and sha != record["sha256"]:
+            res["problem"] = (f"changed after the worker exited (sha256 "
+                              f"{record['sha256'][:16]} at exit, {sha[:16]} now)")
+        res.update(stage="link" if linked else "copy", sha256=sha,
+                   dst_key=stat_key(os.stat(dst)))
+    except (OSError, FileChanged) as exc:
+        res["problem"] = f"could not be staged: {type(exc).__name__}: {exc}"
+    return res
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -265,8 +353,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", required=True, help="merged tree to create")
     ap.add_argument("--products", default=".mrc,.star",
                     help="per-movie suffixes every movie must have produced")
-    ap.add_argument("--link", action="store_true",
-                    help="hardlink instead of copying; the comparison still reads real bytes")
+    ap.add_argument("--stage", choices=("auto", "link", "copy"), default="auto",
+                    help="how per-movie products enter the merged tree. auto (default) "
+                         "hardlinks and copies only where the filesystem refuses a link "
+                         "(e.g. a different filesystem); link refuses to fall back; copy "
+                         "always copies. See docs/multi_gpu/AGGREGATE_STAGING.md")
+    ap.add_argument("--link", dest="stage", action="store_const", const="link",
+                    help="same as --stage link")
     ap.add_argument("--report", default=None, help="write the verdict JSON here")
     ap.add_argument("--aggregate-with", default=None, metavar="BINARY",
                     help="regenerate corrected_micrographs.star by running BINARY over the "
@@ -297,13 +390,6 @@ def main(argv: list[str] | None = None) -> int:
         print(f"FAIL: {', '.join(clashes)} is owned by the aggregate step and must "
               "not appear in --aggregate-args; the input STAR and output tree "
               "must remain the ones verified by this merge", file=sys.stderr)
-        return 2
-
-    if a.link and a.aggregate_with:
-        print("FAIL: --link with --aggregate-with would let the aggregate step "
-              "rewrite a worker's own outputs through the shared inode, destroying "
-              "the evidence needed to diagnose the failure. Copy instead.",
-              file=sys.stderr)
         return 2
 
     manifest_path = Path(a.manifest).resolve()
@@ -410,6 +496,7 @@ def main(argv: list[str] | None = None) -> int:
 
     exits: dict[str, int] = {}
     launcher_verdict = None
+    records: dict[int, dict[str, dict]] = {}
     if a.status:
         status = json.loads(Path(a.status).read_text())
 
@@ -456,6 +543,9 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"FAIL: status file's worker {k} log {log} is not under the "
                       f"worker directory being merged ({wdir})", file=sys.stderr)
                 return 2
+            rec = exit_records(w, k, problems)
+            if rec is not None:
+                records[k] = rec
 
         for w in status.get("workers", []):
             exits[str(w["index"])] = w.get("returncode")
@@ -548,13 +638,29 @@ def main(argv: list[str] | None = None) -> int:
 
     produced: dict[Path, int] = {}     # staged relative path -> worker index
     per_worker_aggregates: list[str] = []
+    plan: list[tuple[int, Path, Path, Path]] = []
 
     for k, wdir in enumerate(a.workers):
         wpath = Path(wdir)
         if not wpath.is_dir():
             problems.append(f"worker {k}: {wpath} is not a directory")
             continue
-        for rel, src in worker_files(wpath).items():
+        files = worker_files(wpath)
+        if k in records:
+            # The record lists everything the worker left at exit, so a file
+            # present now but not then, or the reverse, was made or removed
+            # after the worker exited.
+            now = {str(rel) for rel in files} - output_digests.LAUNCHER_FILES
+            for rel in sorted(now - set(records[k])):
+                problems.append(f"worker {k}: {rel} appeared after the worker exited")
+            for rel in sorted(set(records[k]) - now):
+                problems.append(f"worker {k}: {rel} existed at worker exit and is now "
+                                "missing")
+            for rel in sorted(now & set(records[k])):
+                if "error" in records[k][rel]:
+                    problems.append(f"worker {k}: {rel} could not be digested at exit: "
+                                    f"{records[k][rel]['error']}")
+        for rel, src in files.items():
             # Attribute FIRST. Matching aggregate names by basename alone would
             # divert a real per-movie product: a movie named Movies/run.tiff
             # writes Movies/run.log, and a movie named Movies/gain.tiff writes
@@ -597,16 +703,35 @@ def main(argv: list[str] | None = None) -> int:
             produced[rel] = k
             dst = out / rel
             dst.parent.mkdir(parents=True, exist_ok=True)
-            if a.link:
-                try:
-                    os.link(src, dst)
-                except OSError as exc:
-                    print(f"FAIL: cannot hardlink {src} -> {dst}: {exc}. A merged tree "
-                          "on a different filesystem must be copied, not linked.",
-                          file=sys.stderr)
-                    return 2
-            else:
-                shutil.copy2(src, dst)
+            plan.append((k, rel, src, dst))
+
+    def stage(item: tuple[int, Path, Path, Path]) -> tuple[Path, int, dict]:
+        k, rel, src, dst = item
+        rec = records.get(k, {}).get(str(rel))
+        return rel, k, stage_one(src, dst, a.stage,
+                                 rec if rec is not None and "error" not in rec else None)
+
+    t_stage = time.monotonic()
+    with ThreadPoolExecutor(max_workers=output_digests.pool_size()) as pool:
+        staged_results = list(pool.map(stage, plan))
+    staging: dict[str, object] = {"mode_requested": a.stage,
+                                  "threads": output_digests.pool_size()}
+    staged: dict[Path, dict] = {}
+    for rel, k, res in staged_results:
+        if "fatal" in res:
+            print(f"FAIL: {res['fatal']}", file=sys.stderr)
+            return 2
+        if "problem" in res:
+            problems.append(f"worker {k}: {rel} {res['problem']}")
+        staged[rel] = res
+    for field in ("stage", "digest", "fallback"):
+        counts: dict[str, int] = {}
+        for res in staged.values():
+            if field in res:
+                counts[res[field]] = counts.get(res[field], 0) + 1
+        staging[{"stage": "staged_by", "digest": "digest_source",
+                 "fallback": "link_fallback_errno"}[field]] = counts
+    staging["seconds"] = round(time.monotonic() - t_stage, 3)
 
     canonical = manifest["canonical_movies"]
     for movie in canonical:
@@ -627,6 +752,8 @@ def main(argv: list[str] | None = None) -> int:
         "worker_exit_codes": exits,
         "launcher_verdict": launcher_verdict,
         "per_worker_aggregates_preserved": sorted(per_worker_aggregates),
+        "staging": staging,
+        "staged_sha256": {str(rel): res.get("sha256") for rel, res in sorted(staged.items())},
         "problems": problems,
         "verdict": "PASS" if not problems else "FAIL",
         "logfile_pdf": "not produced and not claimed equivalent; the PDF batch loop is "
@@ -639,6 +766,33 @@ def main(argv: list[str] | None = None) -> int:
             problems.append("aggregate input STAR changed after preflight; aggregate "
                             f"binary was not run: {changed}")
 
+    timing = report["timing_seconds"] = {"staging": staging["seconds"]}
+    if a.aggregate_with and not problems:
+        # The stock binary verifies every movie before generating the complete
+        # dataset STAR/report. --aggregate_only cannot process an incomplete movie,
+        # and isMovieComplete() is option-dependent -- do_dose_weighting/save_noDW,
+        # even_odd_split, grouping_for_ps, and since PR110 the per-movie expected
+        # frame count (src/motioncorr_runner.cpp:596-620). If --aggregate-args does
+        # not match what the workers ran, the binary refuses. Independently,
+        # require every staged product to keep the stat key it had when staged:
+        # any write changes mtime and ctime, a replacement changes the inode, and
+        # ctime cannot be restored from userspace, so a same-byte rewrite is
+        # caught too. The barrier first moves the filesystem clock past every
+        # staged ctime, so a write in the same tick as staging cannot hide.
+        #
+        # A linked product shares its inode with the worker's file, so a rewrite
+        # here also changes the worker's copy; the sha256 recorded at staging is
+        # then the only reference to what the worker wrote.
+        keys = [staged[rel]["dst_key"] for rel in produced]
+        t0 = time.monotonic()
+        (out / "_workers").mkdir(parents=True, exist_ok=True)
+        try:
+            output_digests.ctime_barrier(out / "_workers", max((k[4] for k in keys), default=0),
+                                         {k[0] for k in keys})
+        except RuntimeError as exc:
+            problems.append(f"cannot order staged timestamps, aggregate binary was not "
+                            f"run: {exc}")
+        timing["ctime_barrier"] = round(time.monotonic() - t0, 3)
     if problems:
         report["aggregate_star"] = "not attempted: staging failed"
     elif a.aggregate_with:
@@ -647,35 +801,44 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         cmd = [a.aggregate_with, "--i", str(Path(a.input_star).resolve()),
                "--o", str(out) + os.sep, "--aggregate_only"] + aggregate_extra
-        # The stock binary verifies every movie before generating the complete
-        # dataset STAR/report. --aggregate_only cannot process an incomplete movie,
-        # and isMovieComplete() is option-dependent -- do_dose_weighting/save_noDW,
-        # even_odd_split, grouping_for_ps, and since PR110 the per-movie expected
-        # frame count (src/motioncorr_runner.cpp:596-620). If --aggregate-args does
-        # not match what the workers ran, the binary refuses. Independently check
-        # contents AND mtimes so even a same-byte accidental rewrite is detected.
-        # Digest the
-        # staged per-movie products first and require every one of them to survive
-        # untouched.
-        staged_before = {rel: (hashlib.sha256((out / rel).read_bytes()).hexdigest(),
-                              (out / rel).stat().st_mtime_ns)
-                         for rel in sorted(produced)}
+        t0 = time.monotonic()
         proc = subprocess.run(cmd, capture_output=True, text=True)
+        timing["aggregate_binary"] = round(time.monotonic() - t0, 3)
+        t0 = time.monotonic()
         changed = changed_inputs(input_digests)
         if changed:
             problems.append(f"aggregate input STAR changed while the aggregate binary ran: "
                             f"{changed}")
-        rewritten = sorted(
-            rel for rel, digest in staged_before.items()
-            if not (out / rel).exists()
-            or (hashlib.sha256((out / rel).read_bytes()).hexdigest(),
-                (out / rel).stat().st_mtime_ns) != digest)
+
+        def moved(rel: Path) -> tuple[Path, bool, bool]:
+            """(rel, stat key changed, bytes changed)."""
+            try:
+                now = stat_key(os.stat(out / rel))
+            except OSError:
+                return rel, True, True
+            if now == staged[rel]["dst_key"]:
+                return rel, False, False
+            try:
+                return rel, True, output_digests.hash_file(out / rel, now) != staged[rel]["sha256"]
+            except (OSError, FileChanged):
+                return rel, True, True
+
+        with ThreadPoolExecutor(max_workers=output_digests.pool_size()) as pool:
+            after = [m for m in pool.map(moved, sorted(produced)) if m[1]]
+        rewritten = [str(rel) for rel, _, _ in after]
         if rewritten:
+            n_bytes = sum(1 for _, _, b in after if b)
+            linked = sum(1 for rel, _, _ in after if staged[rel]["stage"] == "link")
             problems.append(
                 f"aggregate step rewrote {len(rewritten)} staged worker product(s) "
                 f"instead of only regenerating the dataset STAR: {rewritten[:5]}"
                 + (" ..." if len(rewritten) > 5 else "")
-                + ". --aggregate_only must not process or rewrite per-movie products.")
+                + f" ({n_bytes} with different bytes, the rest metadata only)."
+                + (f" {linked} were hardlinks, so the workers' own copies changed with "
+                   "them; staged_sha256 in this report records what was staged."
+                   if linked else "")
+                + " --aggregate_only must not process or rewrite per-movie products.")
+        timing["after_check"] = round(time.monotonic() - t0, 3)
         (out / "_workers" / "merge.log").parent.mkdir(parents=True, exist_ok=True)
         (out / "_workers" / "merge.log").write_text(proc.stdout + proc.stderr)
         agg = {"command": cmd, "returncode": proc.returncode}
@@ -705,6 +868,10 @@ def main(argv: list[str] | None = None) -> int:
         report["aggregate_star"] = ("not requested; staged outputs only. No dataset STAR "
                                     "is claimed.")
 
+    # Problems can be added after the report was first built (an input STAR
+    # changed after preflight, the timestamp barrier failed), so the verdict is
+    # taken from the final list.
+    report["verdict"] = "PASS" if not problems else "FAIL"
     if a.report:
         Path(a.report).write_text(json.dumps(report, indent=2) + "\n")
 

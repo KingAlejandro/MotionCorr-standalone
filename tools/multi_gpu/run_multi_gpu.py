@@ -50,6 +50,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gpu_witness  # noqa: E402
+import output_digests  # noqa: E402
 import partition_star  # noqa: E402
 import star_io  # noqa: E402
 from process_ownership import ProcessOwnership, ProcessTable  # noqa: E402
@@ -683,6 +684,8 @@ def main(argv: list[str] | None = None) -> int:
     stamps: dict[int, dict[str, float]] = {}
     codes: dict[int, int] = {}
     waiters: list[threading.Thread] = []
+    exit_digests: dict[int, dict] = {}
+    stop_digests = threading.Event()
     previous_handlers: dict[int, object] = {}
     sampler_started = False
     resources_started = False
@@ -772,13 +775,32 @@ def main(argv: list[str] | None = None) -> int:
         # as the moment worker 0 was reaped, so the final-worker tail -- the whole
         # point of recording ends -- would read as zero whenever the workers are
         # reaped in finishing order.
-        def reap(index: int, proc: subprocess.Popen) -> None:
+        #
+        # A worker that exits 0 has its outputs digested straight away, on its
+        # own now-idle CPU mask, while the others are still running. The merge
+        # reuses these digests instead of hashing the products itself, and uses
+        # them to detect any change between worker exit and publication.
+        def reap(index: int, proc: subprocess.Popen, wdir: Path) -> None:
             rc = proc.wait()
             stamps[index]["ended"] = time.time()
             codes[index] = rc
+            if rc != 0:
+                return
+            t0 = time.monotonic()
+            try:
+                exit_digests[index] = {"status": "complete", "outputs":
+                    output_digests.digest_tree(
+                        wdir, wdir.parent, skip=output_digests.LAUNCHER_FILES,
+                        cpus=mask_sets[index] if mask_sets else None,
+                        stop=stop_digests)}
+            except Exception as exc:
+                exit_digests[index] = {"status": "error",
+                                       "error": f"{type(exc).__name__}: {exc}"}
+            exit_digests[index]["seconds"] = round(time.monotonic() - t0, 3)
 
-        for k, p, _ in procs:
-            waiter = threading.Thread(target=reap, args=(k, p), daemon=True)
+        for k, p, wdir in procs:
+            waiter = threading.Thread(target=reap, args=(k, p, wdir), daemon=True)
+
             with _defer_launcher_signals():
                 waiter.start()
                 waiters.append(waiter)
@@ -796,6 +818,9 @@ def main(argv: list[str] | None = None) -> int:
         # births while checking/draining every exit path, including exit0 with
         # an unexpected live descendant. Worker return codes stay the original
         # result; cleanup can only add a failure, never replace or erase it.
+        # Abandon any exit digest still running so the bounded waiter join below
+        # is not spent hashing.
+        stop_digests.set()
         try:
             ownership.refresh()
             cleanup_observed = ownership.known_live()
@@ -944,7 +969,8 @@ def main(argv: list[str] | None = None) -> int:
                         "cpu_mask": requested,
                         "cpu_mask_width": len(mask_sets[k]) if mask_sets else None,
                         "cpu_affinity": affinity,
-                        "phases": phases})
+                        "phases": phases,
+                        "exit_digest": exit_digests.get(k, {"status": "not taken"})})
 
     wall = time.time() - started
     # Resolved paths and the manifest digest, so merge_workers.py can prove this

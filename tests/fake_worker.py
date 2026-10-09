@@ -105,6 +105,11 @@ def main(argv: list[str] | None = None) -> int:
                          "given does not match the one the workers ran under "
                          "(isMovieComplete is option-dependent, and since PR110 also "
                          "frame-count dependent).")
+    ap.add_argument("--fake_rewrite_same", action="store_true",
+                    help="under --only_do_unfinished/--aggregate_only, rewrite each "
+                         "complete movie's existing products with their own bytes. "
+                         "A reprocessing that happens to be deterministic: the bytes "
+                         "match, only the file's stat key moves.")
     ap.add_argument("--fake_sleep_per_movie", type=float, default=0.0,
                     help="sleep this long after each movie. With uneven shards the "
                          "workers then finish at genuinely different times, which is "
@@ -142,6 +147,10 @@ def main(argv: list[str] | None = None) -> int:
         root = star_io.worker_relative_root(star_io.output_root(movie))
         if ((a.only_do_unfinished or a.aggregate_only) and not a.fake_reprocess
                 and all((outdir / (root + s)).exists() for s in PRODUCTS)):
+            if a.fake_rewrite_same:
+                for s in PRODUCTS:
+                    f = outdir / (root + s)
+                    f.write_bytes(f.read_bytes())
             continue
         write_products(outdir, movie,
                        row.values[optics_col] if optics_col is not None else "",

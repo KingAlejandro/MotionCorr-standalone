@@ -44,6 +44,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -892,23 +893,336 @@ def case_failed_device_witness_blocks_merge(tmp: Path) -> None:
     assert cp.returncode == 0, cp.stderr
 
 
-def case_link_with_aggregate_refused(tmp: Path) -> None:
-    """Hardlinking into the merged tree cannot be combined with the aggregate step."""
+def sha256_of(path: Path) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def patched_merge(tmp: Path, patch: str, manifest: Path, workers: list[Path], out: Path,
+                  status: Path, report: Path | None = None,
+                  extra: list[str] | None = None):
+    """merge_workers.main() run after `patch` has replaced something it calls."""
+    wrapper = tmp / f"patched_{out.name}.py"
+    wrapper.write_text(f"import sys\nsys.path.insert(0, {str(TOOLS)!r})\n" + patch
+                       + "\nimport merge_workers\nraise SystemExit(merge_workers.main())\n")
+    cmd = [PY, wrapper, "--manifest", manifest, "--out", out, "--workers"] + list(workers)
+    cmd += ["--status", status] + (["--report", report] if report else [])
+    return run(cmd + (extra or []))
+
+
+NO_LINK = ("import os, errno\n"
+           "def no_link(*a, **k):\n"
+           "    raise OSError(errno.EXDEV, 'Invalid cross-device link')\n"
+           "os.link = no_link\n")
+
+
+def staged_pairs(rep: dict, workers: list[Path], out: Path) -> list[tuple[Path, Path]]:
+    pairs = []
+    for rel in rep["staged_sha256"]:
+        src = [w / rel for w in workers if (w / rel).exists()]
+        assert len(src) == 1, (rel, src)
+        pairs.append((src[0], out / rel))
+    return pairs
+
+
+def case_link_staging_with_aggregate(tmp: Path) -> None:
+    """Products are hardlinked by default, also when the aggregate step runs.
+
+    Linking was refused next to --aggregate-with because a rewrite would reach
+    the worker's file through the shared inode. The after-check now compares
+    each staged product's stat key and the report keeps each staged sha256, so
+    a rewrite is still detected and still has a reference.
+    """
     star = tmp / "movies.star"
     build_star(star, DEFAULT_ROWS)
     shards = tmp / "shards"
     assert partition(star, 2, shards).returncode == 0
     dirs, codes = run_workers(tmp, shards, 2)
     status = fake_status(tmp, codes)
-    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status,
-               extra=["--link", "--aggregate-with", str(FAKE),
+    for mode, extra in (("auto", []), ("link", ["--link"]), ("link2", ["--stage", "link"])):
+        report = tmp / f"report_{mode}.json"
+        out = tmp / f"merged_{mode}"
+        cp = merge(shards / "shard_manifest.json", dirs, out, status, report,
+                   extra=extra + ["--aggregate-with", str(FAKE), "--input-star", str(star)])
+        assert cp.returncode == 0, f"{mode}: rc={cp.returncode} {cp.stderr}"
+        rep = json.loads(report.read_text())
+        n = rep["n_files_staged"]
+        assert n > 0 and rep["staging"]["staged_by"] == {"link": n}, rep["staging"]
+        # a hand-written status has no exit digests, so the merge hashes once
+        assert rep["staging"]["digest_source"] == {"merge": n}, rep["staging"]
+        for src, dst in staged_pairs(rep, dirs, out):
+            assert os.stat(src).st_ino == os.stat(dst).st_ino, f"{dst} is not a link"
+            assert rep["staged_sha256"][str(dst.relative_to(out))] == sha256_of(src)
+
+    report = tmp / "report_copy.json"
+    out = tmp / "merged_copy"
+    cp = merge(shards / "shard_manifest.json", dirs, out, status, report,
+               extra=["--stage", "copy", "--aggregate-with", str(FAKE),
                       "--input-star", str(star)])
-    assert cp.returncode == 2, f"--link + --aggregate-with accepted (rc={cp.returncode})"
-    assert "shared inode" in cp.stderr, cp.stderr
-    # --link alone is fine
-    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged_link", status,
-               extra=["--link"])
     assert cp.returncode == 0, cp.stderr
+    rep = json.loads(report.read_text())
+    assert rep["staging"]["staged_by"] == {"copy": rep["n_files_staged"]}, rep["staging"]
+    for src, dst in staged_pairs(rep, dirs, out):
+        assert os.stat(src).st_ino != os.stat(dst).st_ino, f"{dst} was linked under copy"
+        assert src.read_bytes() == dst.read_bytes()
+        assert os.stat(src).st_mtime_ns == os.stat(dst).st_mtime_ns, "copy lost mtime"
+
+
+def case_link_refusal_falls_back_to_copy(tmp: Path) -> None:
+    """Where the filesystem refuses a link, auto copies and link fails.
+
+    os.link is made to raise EXDEV, as it does across filesystems. auto must
+    produce the same tree by copying; --stage link must stop rather than fall
+    back; an errno that does not mean "cannot link here" (EIO) is a staging
+    failure under auto too, not a reason to copy.
+    """
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 2)
+    status = fake_status(tmp, codes)
+    man = shards / "shard_manifest.json"
+    agg = ["--aggregate-with", str(FAKE), "--input-star", str(star)]
+
+    report = tmp / "report_auto.json"
+    cp = patched_merge(tmp, NO_LINK, man, dirs, tmp / "merged_auto", status, report, agg)
+    assert cp.returncode == 0, f"auto did not fall back to copying: {cp.stderr}"
+    rep = json.loads(report.read_text())
+    n = rep["n_files_staged"]
+    assert rep["staging"]["staged_by"] == {"copy": n}, rep["staging"]
+    assert rep["staging"]["link_fallback_errno"] == {"EXDEV": n}, rep["staging"]
+    for src, dst in staged_pairs(rep, dirs, tmp / "merged_auto"):
+        assert os.stat(src).st_ino != os.stat(dst).st_ino
+        assert src.read_bytes() == dst.read_bytes()
+
+    cp = patched_merge(tmp, NO_LINK, man, dirs, tmp / "merged_strict", status,
+                       extra=["--stage", "link"] + agg)
+    assert cp.returncode == 2, f"--stage link fell back (rc={cp.returncode})"
+    assert "does not fall back" in cp.stderr, cp.stderr
+
+    eio = NO_LINK.replace("errno.EXDEV", "errno.EIO")
+    report = tmp / "report_eio.json"
+    cp = patched_merge(tmp, eio, man, dirs, tmp / "merged_eio", status, report, agg)
+    assert cp.returncode == 3, f"EIO from link was treated as a fallback (rc={cp.returncode})"
+    rep = json.loads(report.read_text())
+    assert any("could not be staged" in p for p in rep["problems"]), rep["problems"]
+    assert not (tmp / "merged_eio" / "_workers" / "merge.log").exists(), \
+        "aggregate binary ran after a staging failure"
+
+
+def launch(tmp: Path, name: str, rows=DEFAULT_ROWS, extra: list[str] | None = None) -> Path:
+    star = tmp / "movies.star"
+    if not star.exists():
+        build_star(star, rows)
+    out = tmp / name
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", out,
+              "--binary", FAKE, "--workers", "2", "--no-witness"] + (extra or []))
+    assert cp.returncode == 0, cp.stdout + cp.stderr
+    return out
+
+
+def merge_launch(tmp: Path, out: Path, name: str, extra: list[str] | None = None):
+    report = tmp / f"report_{name}.json"
+    cp = merge(out / "shards" / "shard_manifest.json", [out / "w0", out / "w1"],
+               tmp / f"merged_{name}", out / "status.json", report,
+               extra=(extra or []) + ["--aggregate-with", str(FAKE),
+                                      "--input-star", str(tmp / "movies.star")])
+    rep = json.loads(report.read_text()) if report.exists() else None
+    return cp, rep
+
+
+def case_launcher_exit_digests_are_reused(tmp: Path) -> None:
+    """The launcher digests each worker's outputs at exit, and the merge reuses them.
+
+    Linked products whose stat key still equals the recorded one are not read
+    again, so the whole run hashes each byte once.
+    """
+    out = launch(tmp, "run")
+    st = json.loads((out / "status.json").read_text())
+    for k, w in enumerate(st["workers"]):
+        rec = w["exit_digest"]
+        assert rec["status"] == "complete", rec
+        wdir = out / f"w{k}"
+        files = {str(f.relative_to(wdir)) for f in wdir.rglob("*") if f.is_file()}
+        assert set(rec["outputs"]) == files - {"launcher.console.log", "command.json"}, \
+            (sorted(rec["outputs"]), sorted(files))
+        for rel, v in rec["outputs"].items():
+            assert v["sha256"] == sha256_of(wdir / rel), rel
+            s = os.stat(wdir / rel)
+            assert v["key"] == [s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns,
+                                s.st_ctime_ns], rel
+    cp, rep = merge_launch(tmp, out, "reuse")
+    assert cp.returncode == 0, cp.stderr
+    n = rep["n_files_staged"]
+    assert rep["staging"]["digest_source"] == {"worker exit": n}, rep["staging"]
+    for rel, sha in rep["staged_sha256"].items():
+        assert sha == sha256_of(tmp / "merged_reuse" / rel), rel
+
+    # copying reads the bytes anyway, and checks them against the record
+    out = launch(tmp, "run_copy")
+    cp, rep = merge_launch(tmp, out, "copy", ["--stage", "copy"])
+    assert cp.returncode == 0, cp.stderr
+    assert rep["staging"]["digest_source"] == {"verified": rep["n_files_staged"]}, \
+        rep["staging"]
+
+
+def case_change_after_worker_exit_detected(tmp: Path) -> None:
+    """Outputs changed, added or removed between worker exit and the merge fail it.
+
+    The rewrite keeps the size and restores mtime with utime, so only the
+    ctime and the bytes say anything changed.
+    """
+    out = launch(tmp, "rewrite")
+    victim = next(f for f in sorted((out / "w0").rglob("*.mrc")))
+    data = bytearray(victim.read_bytes())
+    data[-1] ^= 0xFF
+    s = os.stat(victim)
+    victim.write_bytes(bytes(data))
+    os.utime(victim, ns=(s.st_atime_ns, s.st_mtime_ns))
+    for mode in ("auto", "copy"):
+        cp, rep = merge_launch(tmp, out, f"rewrite_{mode}", ["--stage", mode])
+        assert cp.returncode == 3, f"{mode}: post-exit rewrite merged (rc={cp.returncode})"
+        assert any("changed after the worker exited" in p for p in rep["problems"]), \
+            rep["problems"]
+
+    # same bytes, new stat key: re-hashed, matches, merges
+    out = launch(tmp, "same")
+    victim = next(f for f in sorted((out / "w0").rglob("*.mrc")))
+    victim.write_bytes(victim.read_bytes())
+    cp, rep = merge_launch(tmp, out, "same")
+    assert cp.returncode == 0, cp.stderr
+    assert rep["staging"]["digest_source"].get("verified") == 1, rep["staging"]
+
+    out = launch(tmp, "appeared")
+    (out / "w1" / "late.txt").write_text("written after exit\n")
+    cp, rep = merge_launch(tmp, out, "appeared")
+    assert cp.returncode == 3
+    assert "worker 1: late.txt appeared after the worker exited" in rep["problems"], \
+        rep["problems"]
+
+    out = launch(tmp, "missing")
+    gone = next(f for f in sorted((out / "w1").rglob("*.star")))
+    rel = str(gone.relative_to(out / "w1"))
+    gone.unlink()
+    cp, rep = merge_launch(tmp, out, "missing")
+    assert cp.returncode == 3
+    assert f"worker 1: {rel} existed at worker exit and is now missing" in rep["problems"], \
+        rep["problems"]
+
+
+def case_exit_digest_records_validated(tmp: Path) -> None:
+    """A malformed, failed or partial exit record fails the merge, never passes silently."""
+    out = launch(tmp, "run")
+    status = out / "status.json"
+    original = json.loads(status.read_text())
+
+    def with_record(name: str, edit) -> dict:
+        st = json.loads(json.dumps(original))
+        edit(st["workers"][0])
+        status.write_text(json.dumps(st))
+        cp, rep = merge_launch(tmp, out, name)
+        assert cp.returncode == 3, f"{name}: merged (rc={cp.returncode}) {cp.stderr}"
+        return rep
+
+    first = sorted(original["workers"][0]["exit_digest"]["outputs"])[0]
+
+    def bad_hex(w):
+        w["exit_digest"]["outputs"][first]["sha256"] = "zz" * 32
+    rep = with_record("malformed", bad_hex)
+    assert "worker 0: exit digest record is malformed" in rep["problems"], rep["problems"]
+
+    def failed(w):
+        w["exit_digest"] = {"status": "error", "error": "RuntimeError: clock"}
+    rep = with_record("failed", failed)
+    assert any("worker 0: outputs were not digested at exit" in p
+               for p in rep["problems"]), rep["problems"]
+
+    def per_file(w):
+        w["exit_digest"]["outputs"][first] = {"error": "FileChanged: moved"}
+    rep = with_record("per_file", per_file)
+    assert any(f"worker 0: {first} could not be digested at exit" in p
+               for p in rep["problems"]), rep["problems"]
+
+    status.write_text(json.dumps(original))
+    cp, rep = merge_launch(tmp, out, "restored")
+    assert cp.returncode == 0, cp.stderr
+
+
+def case_timestamp_barrier_failure_fails_closed(tmp: Path) -> None:
+    """If staged timestamps cannot be ordered, the aggregate does not run and the verdict is FAIL.
+
+    The problem is added after the report was first built, which is also the
+    path an input STAR changed after preflight takes; the verdict must follow
+    the final problem list.
+    """
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 2)
+    status = fake_status(tmp, codes)
+    patch = ("import output_digests\n"
+             "def fail(*a, **k):\n"
+             "    raise RuntimeError('probe clock did not advance')\n"
+             "output_digests.ctime_barrier = fail\n")
+    report = tmp / "report.json"
+    cp = patched_merge(tmp, patch, shards / "shard_manifest.json", dirs, tmp / "merged",
+                       status, report, ["--aggregate-with", str(FAKE),
+                                        "--input-star", str(star)])
+    rep = json.loads(report.read_text())
+    assert rep["verdict"] == "FAIL" and cp.returncode == 3, (rep["verdict"], cp.returncode)
+    assert any("cannot order staged timestamps" in p for p in rep["problems"]), rep["problems"]
+    assert not (tmp / "merged" / "_workers" / "merge.log").exists(), \
+        "aggregate binary ran without the timestamp barrier"
+
+
+def case_output_digest_primitives(tmp: Path) -> None:
+    """hash_file, ctime_barrier and digest_tree refuse what they cannot vouch for."""
+    sys.path.insert(0, str(TOOLS))
+    import output_digests as od
+    f = tmp / "a.bin"
+    f.write_bytes(b"abc" * 1000)
+    key = od.stat_key(os.stat(f))
+    assert od.hash_file(f, key) == sha256_of(f)
+    try:
+        od.hash_file(f, key[:4] + [key[4] - 1])
+        raise AssertionError("hash_file accepted a stale stat key")
+    except od.FileChanged:
+        pass
+    assert od.ctime_barrier(tmp, key[4], {key[0]}) >= 0
+    for after, devs in ((key[4] + 60 * 10**9, {key[0]}), (key[4], {key[0], key[0] + 1})):
+        try:
+            od.ctime_barrier(tmp, after, devs, timeout=0.2)
+            raise AssertionError(f"barrier passed for after={after} devices={devs}")
+        except RuntimeError:
+            pass
+    assert not list(tmp.glob(".ctime-probe-*")), "barrier left its probe behind"
+    (tmp / "skip.txt").write_text("launcher file\n")
+    calls: list = []
+    barrier, hash_file = od.ctime_barrier, od.hash_file
+
+    def spy_barrier(probe, after, devs, *a, **k):
+        calls.append(("barrier", after, devs))
+        return barrier(probe, after, devs, *a, **k)
+
+    def spy_hash(path, k):
+        calls.append(("hash", str(path)))
+        return hash_file(path, k)
+    od.ctime_barrier, od.hash_file = spy_barrier, spy_hash
+    try:
+        rec = od.digest_tree(tmp, tmp, skip=frozenset({"skip.txt"}))
+    finally:
+        od.ctime_barrier, od.hash_file = barrier, hash_file
+    assert set(rec) == {"a.bin"} and rec["a.bin"]["sha256"] == sha256_of(f), rec
+    # the clock must pass every listed ctime before any byte is read
+    assert calls and calls[0] == ("barrier", key[4], {key[0]}), calls
+    stop = threading.Event()
+    stop.set()
+    try:
+        od.digest_tree(tmp, tmp, stop=stop)
+        raise AssertionError("digest_tree returned a partial record after stop")
+    except RuntimeError:
+        pass
 
 
 def case_missing_worker_directory(tmp: Path) -> None:
@@ -1838,6 +2152,8 @@ def case_aggregate_may_not_rewrite_staged_products(tmp: Path) -> None:
     assert partition(star, 2, shards).returncode == 0
     dirs, codes = run_workers(tmp, shards, 2)
     status = fake_status(tmp, codes)
+    before = {str(f.relative_to(d)): sha256_of(f) for d in dirs for f in d.rglob("*")
+              if f.is_file()}
     report = tmp / "report.json"
     cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status, report,
                extra=["--aggregate-with", str(FAKE), "--input-star", str(star),
@@ -1851,6 +2167,34 @@ def case_aggregate_may_not_rewrite_staged_products(tmp: Path) -> None:
     # every movie was rewritten (.mrc, .star and .log each), so the count must
     # say so rather than reporting a single incidental file
     assert any(f"rewrote {3 * len(DEFAULT_ROWS)} staged" in p
+               for p in rep["problems"]), rep["problems"]
+    # the products were hardlinks, so the workers' files changed too; the
+    # report's staged digests must still describe what the workers wrote
+    assert any("were hardlinks" in p for p in rep["problems"]), rep["problems"]
+    for rel, sha in rep["staged_sha256"].items():
+        assert sha == before[rel], f"{rel}: staged digest follows the rewrite"
+
+
+def case_aggregate_same_byte_rewrite_detected(tmp: Path) -> None:
+    """A rewrite with identical bytes is still a rewrite of a staged product.
+
+    It means the aggregate judged the movie incomplete and reprocessed it. A
+    content hash cannot see it; the stat key, through ctime, does.
+    """
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 2)
+    status = fake_status(tmp, codes)
+    report = tmp / "report.json"
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status, report,
+               extra=["--aggregate-with", str(FAKE), "--input-star", str(star),
+                      "--aggregate-args=--fake_rewrite_same"])
+    assert cp.returncode == 3, f"same-byte rewrite passed (rc={cp.returncode})"
+    rep = json.loads(report.read_text())
+    n = 2 * len(DEFAULT_ROWS)
+    assert any(f"rewrote {n} staged" in p and "(0 with different bytes" in p
                for p in rep["problems"]), rep["problems"]
 
 
@@ -2599,7 +2943,14 @@ CASES = [
     case_missing_status_blocks_merge,
     case_failed_device_witness_blocks_merge,
     case_missing_worker_directory,
-    case_link_with_aggregate_refused,
+    case_link_staging_with_aggregate,
+    case_link_refusal_falls_back_to_copy,
+    case_launcher_exit_digests_are_reused,
+    case_change_after_worker_exit_detected,
+    case_exit_digest_records_validated,
+    case_timestamp_barrier_failure_fails_closed,
+    case_output_digest_primitives,
+    case_aggregate_same_byte_rewrite_detected,
     case_output_root_matches_withoutextension,
     case_reserved_name_collision,
     case_short_row_refused,

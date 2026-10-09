@@ -80,6 +80,28 @@ class Staging(unittest.TestCase):
         self.assertNotIn("c.tiff", text)
         self.assertTrue(os.path.exists(os.path.join(s["cwd"], "Movies", "c.tiff")))
 
+    def test_nested_star_subset_never_writes_into_data(self):
+        os.makedirs(os.path.join(self.data, "cfg"))
+        src = os.path.join(self.data, "cfg", "movies.star")
+        # Movie paths in a nested STAR are still relative to the cwd (--data).
+        shutil.copy(os.path.join(self.data, "movies.star"), src)
+        open(os.path.join(self.data, "cfg", "other.txt"), "w").write("keep")
+        before = open(src).read()
+        s = runner.stage_input(self.data, "cfg/movies.star", 2, os.path.join(self.tmp, "w"))
+        self.assertEqual(open(src).read(), before, "source STAR was modified")
+        staged = os.path.join(s["cwd"], "cfg", "movies.star")
+        self.assertFalse(os.path.islink(os.path.join(s["cwd"], "cfg")))
+        self.assertFalse(os.path.islink(staged))
+        self.assertNotIn("c.tiff", open(staged).read())
+        self.assertTrue(os.path.exists(os.path.join(s["cwd"], "cfg", "other.txt")))
+        self.assertTrue(os.path.exists(os.path.join(s["cwd"], "Movies", "c.tiff")))
+        self.assertNotEqual(s["star_sha256"], runner.prov.sha256_file(src))
+
+    def test_absolute_or_escaping_star_is_refused(self):
+        for bad in (os.path.join(self.data, "movies.star"), "../data/movies.star"):
+            with self.subTest(star=bad), self.assertRaises(SystemExit):
+                runner.stage_input(self.data, bad, 2, os.path.join(self.tmp, "w"))
+
     def test_full_set_uses_data_dir(self):
         s = runner.stage_input(self.data, "movies.star", None, os.path.join(self.tmp, "w"))
         self.assertEqual(s["cwd"], os.path.abspath(self.data))

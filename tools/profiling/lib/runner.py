@@ -51,30 +51,62 @@ def star_movies(path: str) -> Tuple[List[str], List[Tuple[int, str]]]:
     return movies, rows
 
 
+def _relative_star(star: str) -> str:
+    """The STAR path relative to --data, normalised; absolute or escaping paths
+    are refused so staging can never write outside its own directory."""
+    if os.path.isabs(star):
+        raise SystemExit("--star must be relative to --data, got %r" % star)
+    norm = os.path.normpath(star)
+    if norm == os.curdir or norm == os.pardir or norm.startswith(os.pardir + os.sep):
+        raise SystemExit("--star must stay inside --data, got %r" % star)
+    return norm
+
+
 def stage_input(data: str, star: str, n_movies: Optional[int], work: str) -> Dict:
     """Payload working directory and STAR. With n_movies, a staging directory
     holds a STAR with the first n movie rows and symlinks to everything else
-    in the data directory, so relative movie paths resolve unchanged."""
+    in the data directory, so relative movie paths resolve unchanged.
+
+    The subset STAR is always written into real staging directories: every
+    directory on the STAR's path is created (never symlinked) and its other
+    entries are linked one level down, so the write can never follow a link
+    back into --data and alter the source."""
     data = os.path.abspath(data)
+    star = _relative_star(star)
     src = os.path.join(data, star)
     movies, rows = star_movies(src)
     if n_movies is None or n_movies >= len(movies):
         return {"cwd": data, "star": star, "movies": movies, "staged": False, "star_sha256": prov.sha256_file(src)}
     stage = os.path.join(work, "input")
     os.makedirs(stage, exist_ok=True)
-    for name in os.listdir(data):
-        if name == star:
-            continue
-        link = os.path.join(stage, name)
-        if not os.path.lexists(link):
-            os.symlink(os.path.join(data, name), link)
+    parts = star.split(os.sep)
+    # Mirror each directory on the STAR's path as a real directory.
+    src_dir, dst_dir = data, stage
+    for depth, part in enumerate(parts):
+        last = depth == len(parts) - 1
+        for name in os.listdir(src_dir):
+            if name == part:
+                continue
+            link = os.path.join(dst_dir, name)
+            if not os.path.lexists(link):
+                os.symlink(os.path.join(src_dir, name), link)
+        if last:
+            break
+        src_dir, dst_dir = os.path.join(src_dir, part), os.path.join(dst_dir, part)
+        if os.path.islink(dst_dir):
+            raise SystemExit("staging path %s is a symlink; refusing to write through it" % dst_dir)
+        os.makedirs(dst_dir, exist_ok=True)
+    out = os.path.join(stage, star)
+    expected_dir = os.path.join(os.path.realpath(stage), os.path.dirname(star))
+    if os.path.lexists(out) or os.path.realpath(os.path.dirname(out)) != os.path.normpath(expected_dir):
+        raise SystemExit("staged STAR %s exists or resolves outside the staging directory" % out)
     with open(src) as f:
         lines = f.read().splitlines()
     drop = {i for i, _ in rows[n_movies:]}
-    with open(os.path.join(stage, star), "w") as f:
+    with open(out, "x") as f:
         f.write("\n".join(l for i, l in enumerate(lines) if i not in drop) + "\n")
     return {"cwd": stage, "star": star, "movies": movies[:n_movies], "staged": True,
-            "star_sha256": prov.sha256_file(os.path.join(stage, star)), "source_star": src}
+            "star_sha256": prov.sha256_file(out), "source_star": src}
 
 
 # ----------------------------------------------------------------- GPU samplers

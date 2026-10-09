@@ -24,6 +24,9 @@
 #include "nvcomp/deflate.h"
 #include "src/acc/cuda/cuda_deflate_layout.h"
 #include "src/acc/cuda/cuda_adler32_kernel.cuh"
+#include "src/acc/cuda/cuda_reader_pool.h"
+#include <atomic>
+#include <mutex>
 #endif
 
 
@@ -1626,6 +1629,30 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         if (!ensureDeviceGain(gain_ref, sz_real)) return false;
     }
 
+    // One LibTIFF handle per reader thread, opened once for the movie rather than
+    // once per chunk, and a reader team that sleeps between chunks. The team was an
+    // OpenMP parallel region per chunk: libgomp's idle threads spin after each
+    // region and competed with the thread submitting GPU work
+    // (docs/omp_waiting.md). Handles are opened here, on the calling thread, so a
+    // refused open declines the whole ingest before any chunk is staged.
+    const int io_threads = n_threads > 0 ? n_threads : 4;
+    struct TiffHandles {
+        std::vector<TIFF *> h;
+        ~TiffHandles() { for (TIFF *t : h) if (t) TIFFClose(t); }
+    } tiffs;
+    tiffs.h.assign((size_t)io_threads, nullptr);
+    bool all_open = true;
+    for (int t = 0; t < io_threads; t++) {
+        tiffs.h[t] = TIFFOpen(fn_mic.c_str(), "r");
+        if (!tiffs.h[t]) all_open = false;
+    }
+    if (!all_open) {
+        logfile << "WARNING: nvCOMP ingestion could not open a TIFF handle for every reader"
+                   " thread; using the host reader." << std::endl;
+        return false;
+    }
+    mc_cuda::ChunkReaderPool readers(io_threads);
+
     HANDLE_ERROR(cudaStreamCreate(&ingest_stream));
     HANDLE_ERROR(cudaStreamCreate(&ingest_copy_stream));
     for (int e = 0; e < kIngestEvents; e++)
@@ -1635,7 +1662,6 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     cudaEvent_t *const ev_h2d_done     = ingest_events;       // [2]
     cudaEvent_t *const ev_comp_free    = ingest_events + 2;   // [2]
     cudaEvent_t *const ev_status_ready = ingest_events + 4;   // [2]
-    const int io_threads = n_threads > 0 ? n_threads : 4;
 
     std::vector<size_t> chunk_stage_used(n_chunks, 0);
     bool slot_tables_uploaded[2] = {false, false};
@@ -1659,26 +1685,16 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         uint8_t *const d_comp = dv[j].comp;
 
         std::vector<char> frame_ok(bf, 1);   // not vector<bool>: concurrent bit writes race
-        #pragma omp parallel num_threads(io_threads)
-        {
-            TIFF *t = TIFFOpen(fn_mic.c_str(), "r");
-            if (!t) {
-                #pragma omp critical
-                { for (int i = 0; i < bf; i++) frame_ok[i] = 0; }
-            }
-            // The worksharing construct is encountered by every thread of the
-            // team, not just the ones that got a handle. OpenMP requires that,
-            // and libgomp implements the loop's implicit barrier and the
-            // parallel region's final barrier as the same team barrier: with
-            // the `omp for` inside the else arm, a thread whose TIFFOpen failed
-            // skipped one arrival, the barrier released a generation early, and
-            // the threads that did stage frames then blocked forever on
-            // arrivals that had already left. A failing thread has already
-            // zeroed every frame_ok[i], so the chunk is refused below whatever
-            // its iterations would have done.
-            #pragma omp for schedule(dynamic, 1)
-            for (int i = 0; i < bf; i++) {
-                    if (!t) continue;
+        std::atomic<int> next_frame(0);
+        std::mutex log_mutex;
+        // Every thread of the team runs this once per chunk and takes frames from a
+        // shared counter (the dynamic,1 schedule of the OpenMP loop it replaces). A
+        // thread with no usable handle takes nothing; all handles were checked when
+        // they were opened, so that cannot happen here.
+        auto read_frames = [&](int tid) {
+            TIFF *const t = tiffs.h[(size_t)tid];
+            for (int i = next_frame.fetch_add(1); i < bf; i = next_frame.fetch_add(1)) {
+                    if (!t) { frame_ok[i] = 0; continue; }
                     const int f = f0 + i;
                     uint8_t *fb = h_stage + frame_base[i];
                     const uint32_t *sizes = raw_sizes[f].data();
@@ -1711,10 +1727,12 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                             // difference between this refusal and a read failure is
                             // that the movie fails -- which makes the guard
                             // impossible to tell apart from the one after it.
-                            #pragma omp critical
-                            logfile << "WARNING: strip " << s << " of frame " << f
-                                    << " has an unusable zlib wrapper; falling back to"
-                                       " the host reader." << std::endl;
+                            {
+                                std::lock_guard<std::mutex> lock(log_mutex);
+                                logfile << "WARNING: strip " << s << " of frame " << f
+                                        << " has an unusable zlib wrapper; falling back to"
+                                           " the host reader." << std::endl;
+                            }
                             ok = false;
                             break;
                         }
@@ -1731,8 +1749,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                     }
                     if (!ok) frame_ok[i] = 0;
             }
-            if (t) TIFFClose(t);
-        }
+        };
+        if (!readers.runTeam(read_frames)) return false;
         for (int i = 0; i < bf; i++) if (!frame_ok[i]) return false;
         return true;
     };

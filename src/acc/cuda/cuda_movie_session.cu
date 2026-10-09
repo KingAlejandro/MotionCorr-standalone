@@ -24,6 +24,9 @@
 #include "nvcomp/deflate.h"
 #include "src/acc/cuda/cuda_deflate_layout.h"
 #include "src/acc/cuda/cuda_adler32_kernel.cuh"
+#include "src/acc/cuda/cuda_reader_pool.h"
+#include <atomic>
+#include <mutex>
 #endif
 
 
@@ -477,12 +480,44 @@ bool CudaMovieSession::initialize() {
         }
     }
 
+    // Take the worker's retained geometry on an exact key hit. A mismatching or
+    // invalidated entry is discarded before allocating, for the same admission
+    // reason as the gain above.
+    mc_cuda::CudaWorkerPlanPool::GeometryEntry &geometry = gain_pool.geometry;
+    const bool took_geometry =
+        mc_cuda::CudaWorkerPlanPool::geometryRetentionEnabled() &&
+        geometry.matches(device_id, nx, ny, n_frames);
+    if (took_geometry) {
+        d_Iframes = geometry.iframes;
+        d_Fframes = geometry.fframes;
+        d_fft_work = geometry.fft_work;
+        d_inverse_tile = geometry.inverse_tile;
+        plan_r2c = geometry.plan_r2c;
+        plan_c2r = geometry.plan_c2r;
+        has_plan_r2c = geometry.has_plan_r2c;
+        has_plan_c2r = geometry.has_plan_c2r;
+        fft_r2c_work_bytes = geometry.r2c_work_bytes;
+        fft_c2r_work_bytes = geometry.c2r_work_bytes;
+        geometry.iframes = nullptr;
+        geometry.fframes = nullptr;
+        geometry.fft_work = nullptr;
+        geometry.inverse_tile = nullptr;
+        geometry.plan_r2c = geometry.plan_c2r = 0;
+        geometry.has_plan_r2c = geometry.has_plan_c2r = false;
+        geometry.clearKey();
+    } else if (geometry.held() && !geometry.drop(&failure_state)) {
+        release();
+        return false;
+    }
+
     // Allocate persistent movie buffers
     cudaError_t cuda_result = cudaSuccess;
     {
         StageScope alloc_scope("alloc movie buffers");
-        cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
-        if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
+        if (!took_geometry) {
+            cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
+            if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
+        }
         if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Isum, sz_real);
     }
     if (cuda_result != cudaSuccess) {
@@ -519,7 +554,7 @@ bool CudaMovieSession::initialize() {
         }
         return true;
     };
-    {
+    if (!took_geometry) {
         StageScope plan_scope("fft plans");
         if (!make_plan(plan_r2c, has_plan_r2c, fft_r2c_work_bytes, CUFFT_R2C) ||
             !make_plan(plan_c2r, has_plan_c2r, fft_c2r_work_bytes, CUFFT_C2R)) {
@@ -529,7 +564,7 @@ bool CudaMovieSession::initialize() {
     }
 
     fft_work_bytes = std::max(fft_r2c_work_bytes, fft_c2r_work_bytes);
-    {
+    if (!took_geometry) {
         StageScope scratch_alloc_scope("fft scratch");
         // cudaMalloc(0) is invalid on some CUDA runtimes even if cuFFT needs no work.
         cuda_result = cudaMalloc(&d_fft_work, std::max((size_t)1, fft_work_bytes));
@@ -553,9 +588,26 @@ bool CudaMovieSession::initialize() {
         logfile << "ERROR: cuFFT shared work area association failed with code " << result << std::endl;
         return false;
     };
-    if (!attach_work(plan_r2c, has_plan_r2c) || !attach_work(plan_c2r, has_plan_c2r)) {
+    // Retained plans keep the work area attached when they were made.
+    if (!took_geometry &&
+        (!attach_work(plan_r2c, has_plan_r2c) || !attach_work(plan_c2r, has_plan_c2r))) {
         release();
         return false;
+    }
+    // Test hook shared with FrameBufferPool: a read of a reused buffer before
+    // this movie writes it then sees NaN, not the previous movie's pixels.
+    if (took_geometry && mc_cuda::CudaWorkerPlanPool::geometryPoisonRequested()) {
+        cuda_result = cudaMemset(d_Iframes, 0xFF, total_real_bytes);
+        if (cuda_result == cudaSuccess) cuda_result = cudaMemset(d_Fframes, 0xFF, total_comp_bytes);
+        if (cuda_result == cudaSuccess)
+            cuda_result = cudaMemset(d_fft_work, 0xFF, std::max((size_t)1, fft_work_bytes));
+        if (cuda_result == cudaSuccess) cuda_result = cudaMemset(d_inverse_tile, 0xFF, sz_comp);
+        if (cuda_result == cudaSuccess) cuda_result = cudaDeviceSynchronize();
+        if (cuda_result != cudaSuccess) {
+            recordFailure(cuda_result, "initialize poison retained geometry", __LINE__);
+            release();
+            return false;
+        }
     }
     logfile << "Movie FFT: batch=1"
             << " R2C work=" << fft_r2c_work_bytes << " C2R work=" << fft_c2r_work_bytes
@@ -592,6 +644,44 @@ void CudaMovieSession::release() {
     (void)releasePatchAlignmentWorkspace();
     if (has_plan_r2c || has_plan_c2r || has_plan_patch_r2c)
         recordFailure(cudaDeviceSynchronize(), "release synchronize", __LINE__);
+    // Hand the geometry resources to the next movie only from a session with no
+    // recorded failure, after the synchronize above: they are idle, and nothing
+    // this session did can have left them in an unknown state.
+    {
+        mc_cuda::CudaWorkerPlanPool &pool = mc_cuda::getWorkerPlanPool();
+        mc_cuda::CudaWorkerPlanPool::GeometryEntry &geometry = pool.geometry;
+        if (is_initialized && !failure_state.hasFailed() &&
+            mc_cuda::CudaWorkerPlanPool::geometryRetentionEnabled() &&
+            !pool.retiredFor(device_id) && !geometry.held() &&
+            has_plan_r2c && has_plan_c2r && d_fft_work && d_inverse_tile &&
+            d_Iframes && d_Fframes) {
+            const size_t sz_comp = (size_t)ny * nfx * sizeof(cufftComplex);
+            geometry.device_id = device_id;
+            geometry.nx = nx;
+            geometry.ny = ny;
+            geometry.n_frames = n_frames;
+            geometry.plan_r2c = plan_r2c;
+            geometry.plan_c2r = plan_c2r;
+            geometry.has_plan_r2c = geometry.has_plan_c2r = true;
+            geometry.r2c_work_bytes = fft_r2c_work_bytes;
+            geometry.c2r_work_bytes = fft_c2r_work_bytes;
+            geometry.work_bytes = fft_work_bytes;
+            geometry.fft_work = d_fft_work;
+            geometry.inverse_tile = d_inverse_tile;
+            geometry.iframes = d_Iframes;
+            geometry.fframes = d_Fframes;
+            geometry.bytes = (size_t)n_frames * ny * nx * sizeof(float) +
+                             (size_t)n_frames * sz_comp +
+                             std::max((size_t)1, fft_work_bytes) + sz_comp;
+            geometry.valid = true;
+            plan_r2c = plan_c2r = 0;
+            has_plan_r2c = has_plan_c2r = false;
+            d_fft_work = nullptr;
+            d_inverse_tile = nullptr;
+            d_Iframes = nullptr;
+            d_Fframes = nullptr;
+        }
+    }
     // Destroy plans before their work areas; attempt all releases, even after error.
     releasePlan(plan_patch_r2c, has_plan_patch_r2c);
     releasePlan(plan_r2c, has_plan_r2c);
@@ -1629,6 +1719,30 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         if (!ensureDeviceGain(gain_ref, sz_real)) return false;
     }
 
+    // One LibTIFF handle per reader thread, opened once for the movie rather than
+    // once per chunk, and a reader team that sleeps between chunks. The team was an
+    // OpenMP parallel region per chunk: libgomp's idle threads spin after each
+    // region and competed with the thread submitting GPU work
+    // (docs/nvcomp_ingest_pipeline.md). Handles are opened here, on the calling
+    // thread, so a refused open declines the whole ingest before any chunk is staged.
+    const int io_threads = n_threads > 0 ? n_threads : 4;
+    struct TiffHandles {
+        std::vector<TIFF *> h;
+        ~TiffHandles() { for (TIFF *t : h) if (t) TIFFClose(t); }
+    } tiffs;
+    tiffs.h.assign((size_t)io_threads, nullptr);
+    bool all_open = true;
+    for (int t = 0; t < io_threads; t++) {
+        tiffs.h[t] = TIFFOpen(fn_mic.c_str(), "r");
+        if (!tiffs.h[t]) all_open = false;
+    }
+    if (!all_open) {
+        logfile << "WARNING: nvCOMP ingestion could not open a TIFF handle for every reader"
+                   " thread; using the host reader." << std::endl;
+        return false;
+    }
+    mc_cuda::ChunkReaderPool readers(io_threads);
+
     HANDLE_ERROR(cudaStreamCreate(&ingest_stream));
     HANDLE_ERROR(cudaStreamCreate(&ingest_copy_stream));
     for (int e = 0; e < kIngestEvents; e++)
@@ -1638,7 +1752,6 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     cudaEvent_t *const ev_h2d_done     = ingest_events;       // [2]
     cudaEvent_t *const ev_comp_free    = ingest_events + 2;   // [2]
     cudaEvent_t *const ev_status_ready = ingest_events + 4;   // [2]
-    const int io_threads = n_threads > 0 ? n_threads : 4;
 
     std::vector<size_t> chunk_stage_used(n_chunks, 0);
     bool slot_tables_uploaded[2] = {false, false};
@@ -1662,26 +1775,16 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         uint8_t *const d_comp = dv[j].comp;
 
         std::vector<char> frame_ok(bf, 1);   // not vector<bool>: concurrent bit writes race
-        #pragma omp parallel num_threads(io_threads)
-        {
-            TIFF *t = TIFFOpen(fn_mic.c_str(), "r");
-            if (!t) {
-                #pragma omp critical
-                { for (int i = 0; i < bf; i++) frame_ok[i] = 0; }
-            }
-            // The worksharing construct is encountered by every thread of the
-            // team, not just the ones that got a handle. OpenMP requires that,
-            // and libgomp implements the loop's implicit barrier and the
-            // parallel region's final barrier as the same team barrier: with
-            // the `omp for` inside the else arm, a thread whose TIFFOpen failed
-            // skipped one arrival, the barrier released a generation early, and
-            // the threads that did stage frames then blocked forever on
-            // arrivals that had already left. A failing thread has already
-            // zeroed every frame_ok[i], so the chunk is refused below whatever
-            // its iterations would have done.
-            #pragma omp for schedule(dynamic, 1)
-            for (int i = 0; i < bf; i++) {
-                    if (!t) continue;
+        std::atomic<int> next_frame(0);
+        std::mutex log_mutex;
+        // Every thread of the team runs this once per chunk and takes frames from a
+        // shared counter (the dynamic,1 schedule of the OpenMP loop it replaces). A
+        // thread with no usable handle takes nothing; all handles were checked when
+        // they were opened, so that cannot happen here.
+        auto read_frames = [&](int tid) {
+            TIFF *const t = tiffs.h[(size_t)tid];
+            for (int i = next_frame.fetch_add(1); i < bf; i = next_frame.fetch_add(1)) {
+                    if (!t) { frame_ok[i] = 0; continue; }
                     const int f = f0 + i;
                     uint8_t *fb = h_stage + frame_base[i];
                     const uint32_t *sizes = raw_sizes[f].data();
@@ -1714,10 +1817,12 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                             // difference between this refusal and a read failure is
                             // that the movie fails -- which makes the guard
                             // impossible to tell apart from the one after it.
-                            #pragma omp critical
-                            logfile << "WARNING: strip " << s << " of frame " << f
-                                    << " has an unusable zlib wrapper; falling back to"
-                                       " the host reader." << std::endl;
+                            {
+                                std::lock_guard<std::mutex> lock(log_mutex);
+                                logfile << "WARNING: strip " << s << " of frame " << f
+                                        << " has an unusable zlib wrapper; falling back to"
+                                           " the host reader." << std::endl;
+                            }
                             ok = false;
                             break;
                         }
@@ -1734,8 +1839,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                     }
                     if (!ok) frame_ok[i] = 0;
             }
-            if (t) TIFFClose(t);
-        }
+        };
+        if (!readers.runTeam(read_frames)) return false;
         for (int i = 0; i < bf; i++) if (!frame_ok[i]) return false;
         return true;
     };

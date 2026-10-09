@@ -69,6 +69,7 @@ cudaError_t cudaGetDevice(int *d){*d=current;return cudaSuccess;}
 cudaError_t cudaSetDevice(int d){if(fail_selection)return cudaErrorInvalidDevice;current=d;return cudaSuccess;}
 cudaError_t cudaPeekAtLastError(){return cudaSuccess;}
 cudaError_t cudaMalloc(void **p,std::size_t n){*p=std::malloc(n?n:1);if(!*p)return cudaErrorMemoryAllocation;owners[*p]=current;return cudaSuccess;}
+cufftResult cufftDestroy(cufftHandle){return CUFFT_SUCCESS;}
 cudaError_t cudaFree(void *p){++free_calls;auto it=owners.find(p);if(it==owners.end()||it->second!=current){++wrong_context;return cudaErrorInvalidDevice;}owners.erase(it);std::free(p);return cudaSuccess;}
 int main(int argc,char **argv){
  try{

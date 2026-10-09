@@ -1889,6 +1889,7 @@ const MultidimArray<bool>& MotioncorrRunner::getDefectPremask(
 		defect_premask_nx = 0;
 		defect_premask_ny = 0;
 		defect_premask.clear();
+		std::vector<int>().swap(defect_premask_indices);
 	};
 	std::string defect_bytes;
 	try {
@@ -1933,8 +1934,12 @@ const MultidimArray<bool>& MotioncorrRunner::getDefectPremask(
 				}
 			}
 		}
+		std::vector<int> new_indices;
+		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(new_premask)
+			if (DIRECT_MULTIDIM_ELEM(new_premask, n)) new_indices.push_back((int)n);
 		// Published only once the mask is complete.
 		defect_premask = new_premask;
+		defect_premask_indices.swap(new_indices);
 		defect_premask_fn = fn_defect;
 		defect_premask_defect_bytes = std::move(defect_bytes);
 		defect_premask_gain_fn = fn_gain_reference;
@@ -2595,7 +2600,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		MC_STAGE("hot pixels");
 		RCTIC(TIMING_DETECT_HOT);
 		RFLOAT mean = 0, std = 0, threshold = 0;
-		MultidimArray<bool> bBad(ny, nx);
+		// Every element is overwritten by the pre-mask copy below before any read,
+		// so the zero fill of the sizing constructor is skipped.
+		MultidimArray<bool> bBad;
+		bBad.resizeNoCp(1, ny, nx);
 		int n_bad = 0;
 		const int NUM_MIN_OK = 6;
 		const int D_MAX = isEER ? 4 : 2;
@@ -2691,6 +2699,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			n_bad = 0;
 			mic.hotpixelX.clear();
 			mic.hotpixelY.clear();
+			std::vector<int> new_hits;
 			// Deep copy: detected hot pixels are added to this movie's mask below
 			// and must not reach the cached static premask.
 			bBad = getDefectPremask(nx, ny, fn_defect, fn_gain_reference, Igain, n_threads);
@@ -2716,6 +2725,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 						n_bad++;
 						mic.hotpixelX.push_back(n % nx);
 						mic.hotpixelY.push_back(n / nx);
+						new_hits.push_back((int)n);
 					}
 				}
 			}
@@ -2727,20 +2737,27 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 						n_bad++;
 						mic.hotpixelX.push_back(n % nx);
 						mic.hotpixelY.push_back(n / nx);
+						new_hits.push_back((int)n);
 					}
 				}
 			}
 
 			// Ascending row-major, which is the order both consumers below need.
-			bad_xs.clear();
-			bad_ys.clear();
-			bad_xs.reserve(1024);
-			bad_ys.reserve(1024);
-			FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
-				if (DIRECT_A2D_ELEM(bBad, i, j)) {
-					bad_xs.push_back(j);
-					bad_ys.push_back(i);
-				}
+			// bBad is exactly the pre-mask plus new_hits, so merging the two sorted
+			// index lists gives the list a full-frame scan would. The scan stays as
+			// the path for any input the merge cannot certify.
+			if (!mc_defect::mergeBadIndices(defect_premask_indices, new_hits, nx, bad_xs, bad_ys))
+			{
+				bad_xs.clear();
+				bad_ys.clear();
+				bad_xs.reserve(1024);
+				bad_ys.reserve(1024);
+				FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+					if (DIRECT_A2D_ELEM(bBad, i, j)) {
+						bad_xs.push_back(j);
+						bad_ys.push_back(i);
+					}
+			}
 
 			// Gaussian replacement consumes mean/std as well as the hot-pixel mask.
 			// If it is reachable, use the original host statistics rather than

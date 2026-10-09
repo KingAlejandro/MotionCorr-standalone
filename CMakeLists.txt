@@ -205,9 +205,63 @@ if(BUILD_TESTING)
     add_executable(scratch_arena tests/test_scratch_arena.cpp)
     target_include_directories(scratch_arena PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME ScratchArena COMMAND scratch_arena)
+    # Reader team of the nvCOMP ingest: join semantics and no CPU use between jobs.
+    # Device-free, so outside if(CUDA). Two compiled mutants of the header (a helper
+    # that spins instead of sleeping, a runTeam that does not wait) must both fail.
+    find_package(Threads REQUIRED)
+    add_executable(reader_pool tests/test_reader_pool.cpp)
+    target_include_directories(reader_pool PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    target_link_libraries(reader_pool PRIVATE Threads::Threads)
+    add_test(NAME ReaderPool COMMAND reader_pool)
+    set_tests_properties(ReaderPool PROPERTIES TIMEOUT 120)
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_reader_pool.h" _pool_source)
+    # Re-run configure when the header changes, or the mutants test a stale copy.
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+                 "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_reader_pool.h")
+    set(_pool_mutant_spin_from "cv_work_.wait(lock, [&] { return stop_ || generation_ != seen; });")
+    set(_pool_mutant_spin_to "while (!(stop_ || generation_ != seen)) { lock.unlock(); lock.lock(); }")
+    set(_pool_mutant_nowait_from "cv_done_.wait(lock, [this] { return pending_ == 0; });")
+    set(_pool_mutant_nowait_to "")
+    foreach(_mutant IN ITEMS spin nowait)
+        string(FIND "${_pool_source}" "${_pool_mutant_${_mutant}_from}" _pos)
+        string(REPLACE "${_pool_mutant_${_mutant}_from}" "${_pool_mutant_${_mutant}_to}" _mutant_header "${_pool_source}")
+        if(_pos EQUAL -1 OR _mutant_header STREQUAL _pool_source)
+            message(FATAL_ERROR "reader pool mutant ${_mutant}: target line missing")
+        endif()
+        file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/mutants/reader_pool_${_mutant}/src/acc/cuda/cuda_reader_pool.h" "${_mutant_header}")
+        add_executable(reader_pool_${_mutant} tests/test_reader_pool.cpp)
+        # The mutant tree is searched first, so its header shadows the real one.
+        target_include_directories(reader_pool_${_mutant} PRIVATE
+            "${CMAKE_CURRENT_BINARY_DIR}/mutants/reader_pool_${_mutant}")
+        target_link_libraries(reader_pool_${_mutant} PRIVATE Threads::Threads)
+        add_test(NAME ReaderPoolMutant_${_mutant} COMMAND reader_pool_${_mutant})
+        set_tests_properties(ReaderPoolMutant_${_mutant} PROPERTIES WILL_FAIL TRUE TIMEOUT 120)
+    endforeach()
     add_executable(defect_neighbours tests/test_defect_neighbours.cpp)
     target_include_directories(defect_neighbours PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME DefectNeighbours COMMAND defect_neighbours)
+    # Compiled negative controls for the merged hot-pixel bad list: each mutant
+    # header must make DefectNeighbours fail. A missing or repeated target line
+    # stops the configure step rather than building an unmutated control.
+    function(add_defect_merge_mutant _mutant _from _to)
+        file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/defect_neighbours.h" _header)
+        string(FIND "${_header}" "${_from}" _first)
+        string(FIND "${_header}" "${_from}" _last REVERSE)
+        if(_first EQUAL -1 OR NOT _first EQUAL _last)
+            message(FATAL_ERROR "defect merge mutant ${_mutant}: target missing or not unique")
+        endif()
+        string(REPLACE "${_from}" "${_to}" _header "${_header}")
+        set(_dir "${CMAKE_CURRENT_BINARY_DIR}/mutants/defect_merge_${_mutant}")
+        file(WRITE "${_dir}/src/defect_neighbours.h" "${_header}")
+        add_executable(defect_neighbours_${_mutant} tests/test_defect_neighbours.cpp)
+        target_include_directories(defect_neighbours_${_mutant} PRIVATE "${_dir}")
+        add_test(NAME DefectMergeMutant_${_mutant} COMMAND defect_neighbours_${_mutant} --expect-fail)
+    endfunction()
+    add_defect_merge_mutant(append_only
+        "(j == b.size() || (i < a.size() && a[i] < b[j]))" "(i < a.size())")
+    add_defect_merge_mutant(no_order_check
+        "if ((long)v <= prev) return false;" "if (false) return false;")
+    add_defect_merge_mutant(swap_xy "xs.push_back(v % nx);" "xs.push_back(v / nx);")
     # The malformed-input cases hang the pre-#98 parser; bound them so a
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
@@ -497,6 +551,28 @@ if(BUILD_TESTING AND CUDA)
         # from the other selector's earlier fatal retirement in its own process.
         add_test(NAME CudaDeviceGainCleanupFatal COMMAND cuda_device_gain_pool --case cleanup-fatal)
         set_tests_properties(CudaDeviceGainCleanupFatal PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        # Worker-retained movie geometry: products identical fresh/retained/poisoned,
+        # and the ledger shows the entry was taken, never aliased, never handed on
+        # by a failed session.
+        set(GEOMETRY_RETENTION_WRAPS "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cufftCreate")
+        add_executable(cuda_geometry_retention tests/cuda_geometry_retention.cpp)
+        target_link_libraries(cuda_geometry_retention PRIVATE motioncorr_core)
+        target_link_options(cuda_geometry_retention PRIVATE ${GEOMETRY_RETENTION_WRAPS})
+        add_test(NAME CudaGeometryRetention COMMAND cuda_geometry_retention)
+        set_tests_properties(CudaGeometryRetention PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # no_take: every movie allocates its own geometry (the predecessor behaviour).
+        mc_cuda_mutant(CudaGeometryRetentionMutant tests/cuda_geometry_retention.cpp cuda_movie_session no_take
+            "geometry.matches(device_id, nx, ny, n_frames);"
+            "false && geometry.matches(device_id, nx, ny, n_frames);" ${GEOMETRY_RETENTION_WRAPS})
+        # return_failed: a session with a recorded failure still returns its geometry.
+        mc_cuda_mutant(CudaGeometryRetentionMutant tests/cuda_geometry_retention.cpp cuda_movie_session return_failed
+            "if (is_initialized && !failure_state.hasFailed() &&"
+            "if (is_initialized &&" ${GEOMETRY_RETENTION_WRAPS})
+        # keep_taken_alias: a taken entry keeps its frame buffer in the pool slot.
+        mc_cuda_mutant(CudaGeometryRetentionMutant tests/cuda_geometry_retention.cpp cuda_movie_session keep_taken_alias
+            "        geometry.iframes = nullptr;"
+            "        (void)0;" ${GEOMETRY_RETENTION_WRAPS})
         # Independent predecessor arithmetic and actual reconstruction ownership
         # for the experimental dose-denominator plane. Needs a real device.
         set_source_files_properties(tests/cuda_dose_normalization.cpp PROPERTIES LANGUAGE CUDA)

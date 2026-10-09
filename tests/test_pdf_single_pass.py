@@ -98,6 +98,7 @@ def raster(real_gs: str, pdf: Path, dest: Path) -> list[bytes]:
 
 def reference_concat(real_gs: str, out: Path, dest: Path) -> Path:
     """The original logfile pass: concatenate header.pdf and all_batches.pdf."""
+    dest.mkdir(parents=True)
     ref = dest / "reference_logfile.pdf"
     run_gs(real_gs, ["-dNOPAUSE", "-sDEVICE=pdfwrite", f"-sOUTPUTFILE={ref}", "-dBATCH",
                      str(out / "header.pdf"), str(out / "all_batches.pdf")])

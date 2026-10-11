@@ -49,8 +49,13 @@ DEFAULT_REQUIRED_TESTS = [
     "GlobalIfftElision",
     # --profile: products unchanged, stages exhaustive (docs/stage_profile.md).
     "StageProfile",
+    # The native validation runner must parse both timed and untimed profile blocks.
+    "CudaValidationParser",
     # Host buffer reuse: products identical with/without reuse and MALLOC_PERTURB_.
     "HostBufferReuse",
+    # #154/#155 review fixes: profiler thread safety; bounded frame buffer pool.
+    "StageProfileThreads",
+    "FrameBufferPool",
     # Profiling kit: Nsight query/metric known answers, paired statistics and
     # product identity (docs/profiling.md). Device-free.
     "ProfilingKit",
@@ -110,6 +115,7 @@ DEFAULT_REQUIRED_TESTS = [
     # Issue #95: the only test that can observe the native sample staging
     # ownership contract, for both widths the compact route admits. Registered
     # under if(UNIX) beside ImageWriteFaults.
+    "MultiGpuScheduling",
     "NativeMovieStaging",
     "GainCacheOwnership",
     "JointStarPublication",

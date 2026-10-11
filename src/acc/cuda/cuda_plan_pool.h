@@ -8,6 +8,7 @@
 #include "src/acc/cuda/cuda_failure_state.h"
 #include <algorithm>
 #include <cstddef>
+#include <cstdlib>
 
 namespace mc_cuda {
 
@@ -23,8 +24,8 @@ namespace mc_cuda {
  * dispatched one at a time, but a worker-per-thread arrangement must not share
  * one buffer. One device per process is assumed, which is how --gpu behaves.
  *
- * Only one gain entry is retained; this port contains no retained FFT plans or
- * work areas. Retirement invalidates its key, selects the owning device before
+ * One gain entry and one movie-geometry entry are retained. Retirement
+ * invalidates their keys, selects the owning device before
  * releasing, and restores the caller's device. Failed selection retains owned
  * bytes for checked retry. A live session lease excludes replacement by another
  * session, and a fatal worker remains retired even after cleanup succeeds.
@@ -141,6 +142,104 @@ public:
         }
     } gain;
 
+    /**
+     * The movie-geometry resources a session allocates in initialize() and
+     * holds until release(): the frame buffers, both whole-frame cuFFT plans,
+     * their shared work area and the inverse tile.
+     *
+     * The key is (device, nx, ny, n_frames); every size and both plans are a
+     * function of it. Unlike the gain, the entry is taken, not borrowed: a
+     * session moves the resources out on a key hit and the slot stays empty
+     * until a healthy session returns them, so no two sessions can alias one
+     * buffer and no lease is needed. The contents are not part of the key and
+     * carry nothing across movies: initialize() hands out the same undefined
+     * contents a fresh cudaMalloc would.
+     */
+    struct GeometryEntry {
+        GeometryEntry() = default;
+        GeometryEntry(const GeometryEntry &) = delete;
+        GeometryEntry &operator=(const GeometryEntry &) = delete;
+        int device_id = -1, nx = 0, ny = 0, n_frames = 0;
+        // Cleared before a checked drop; an owned but invalid entry is never taken.
+        bool valid = false;
+        cufftHandle plan_r2c = 0, plan_c2r = 0;
+        bool has_plan_r2c = false, has_plan_c2r = false;
+        size_t r2c_work_bytes = 0, c2r_work_bytes = 0, work_bytes = 0;
+        void *fft_work = nullptr;
+        cufftComplex *inverse_tile = nullptr;
+        float *iframes = nullptr;
+        cufftComplex *fframes = nullptr;
+        size_t bytes = 0;
+
+        ~GeometryEntry() { (void)drop(nullptr); }
+
+        bool held() const {
+            return has_plan_r2c || has_plan_c2r || fft_work != nullptr ||
+                   inverse_tile != nullptr || iframes != nullptr || fframes != nullptr;
+        }
+        bool matches(int device, int x, int y, int frames) const {
+            return valid && held() && device_id == device && nx == x && ny == y &&
+                   n_frames == frames;
+        }
+        size_t retainedBytes() const { return held() ? bytes : (size_t)0; }
+
+        void clearKey() {
+            valid = false; device_id = -1; nx = ny = n_frames = 0;
+            r2c_work_bytes = c2r_work_bytes = work_bytes = 0; bytes = 0;
+        }
+
+        // Plans before their work area, as in CudaMovieSession::release(). The
+        // resources are idle here: release() synchronized before returning them.
+        bool drop(CudaFailureState *failure = nullptr) {
+            if (!held()) { clearKey(); return true; }
+            valid = false;
+            RetirementContext context(device_id, failure, "dropGeometry");
+            // A failed selection keeps ownership for a checked retry, as for the gain.
+            if (!context.selected())
+                return false;
+            bool ok = true;
+            auto destroy = [&](cufftHandle &plan, bool &has_plan) {
+                if (!has_plan) return;
+                const cufftResult res = cufftDestroy(plan);
+                plan = 0; has_plan = false;
+                if (res != CUFFT_SUCCESS) {
+                    ok = false;
+                    if (failure) {
+                        failure->recordCufft(res, "dropGeometry cufftDestroy", __LINE__);
+                        failure->record(cudaPeekAtLastError(), "dropGeometry cufftDestroy", __LINE__);
+                    }
+                }
+            };
+            auto free_one = [&](void *owned) {
+                if (owned == nullptr) return;
+                const cudaError_t err = cudaFree(owned);
+                if (err != cudaSuccess) {
+                    ok = false;
+                    if (failure) failure->record(err, "dropGeometry cudaFree", __LINE__);
+                }
+            };
+            destroy(plan_r2c, has_plan_r2c);
+            destroy(plan_c2r, has_plan_c2r);
+            void *owned[4] = {fft_work, inverse_tile, iframes, fframes};
+            fft_work = nullptr; inverse_tile = nullptr; iframes = nullptr; fframes = nullptr;
+            for (void *p : owned) free_one(p);
+            clearKey();
+            return context.finish(ok);
+        }
+    } geometry;
+
+    // MOTIONCORR_RETAIN_GEOMETRY=0 restores per-movie allocation of the geometry entry.
+    static bool geometryRetentionEnabled() {
+        const char *env = std::getenv("MOTIONCORR_RETAIN_GEOMETRY");
+        return !(env != nullptr && env[0] == '0' && env[1] == '\0');
+    }
+
+    // The FrameBufferPool test hook also poisons a taken geometry entry.
+    static bool geometryPoisonRequested() {
+        const char *env = std::getenv("MOTIONCORR_FRAME_POOL_POISON");
+        return env != nullptr && env[0] == '1' && env[1] == '\0';
+    }
+
     // One live session may borrow this worker's single gain entry. Thread-local
     // storage alone does not prevent two sessions interleaving on one thread.
     bool acquireLease(const void *holder, int device) {
@@ -183,11 +282,12 @@ public:
         }
         bool ok = true;
         if (!gain.drop(failure)) ok = false;
+        if (!geometry.drop(failure)) ok = false;
         return ok;
     }
 
     // Device bytes this worker keeps resident between movies.
-    size_t retainedBytes() const { return gain.retainedBytes(); }
+    size_t retainedBytes() const { return gain.retainedBytes() + geometry.retainedBytes(); }
 
 private:
     const void *lease_holder_ = nullptr;

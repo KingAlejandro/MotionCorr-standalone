@@ -28,6 +28,7 @@
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_fft_prep.h"
+#include "src/acc/cuda/cuda_plan_pool.h"
 #include "src/error.h"
 
 #include <cuda_runtime.h>
@@ -122,6 +123,11 @@ std::set<int>         g_outstanding_plans;   // cufftCreate / cufftPlanMany
 size_t totalOutstanding() {
     return g_outstanding.size() + g_outstanding_events.size() + g_outstanding_plans.size();
 }
+
+// A clean release hands the movie geometry to the worker pool. Drain it through
+// production cleanup so the ledger can still require zero outstanding resources,
+// and so a later trial never takes buffers this harness freed behind the pool.
+bool drainWorkerPool() { return mc_cuda::getWorkerPlanPool().dropAll(); }
 
 void resetCounters() {
     for (int i = 0; i < FAULT_KIND_COUNT; i++) g_counts[i] = 0;
@@ -512,6 +518,7 @@ TrialResult runTrial(FaultKind kind, long ordinal, int n_movies) {
     g_active = false;
     out.fault_fired = g_fault_fired;
     out.fault_in_teardown = g_fault_in_teardown;
+    (void)drainWorkerPool();
     out.leaked = totalOutstanding() + g_stale_releases;
     // Do not let one trial's leak contaminate the next one's verdict.
     for (std::set<void *>::iterator it = g_outstanding.begin(); it != g_outstanding.end(); ++it)
@@ -578,6 +585,7 @@ int runOwnershipControls(int selected_mode) {
             if (!ok) { ++failures; std::fprintf(stderr,"FAIL ownership re-entry mode=%d\n",mode); }
         }
         g_active = false;
+        if (!drainWorkerPool()) { ++failures; std::fprintf(stderr,"FAIL re-entry pool drain\n"); }
         if (totalOutstanding() || g_stale_releases) {
             ++failures; std::fprintf(stderr,"FAIL re-entry resources=%zu stale=%zu\n",totalOutstanding(),g_stale_releases);
         }
@@ -632,7 +640,8 @@ int runEnumerationControls(int selected_boundary, int selected_mode) {
                 }
             }
             g_count_armed = false; g_active = false;
-            ok = ok && totalOutstanding() == 0 && g_stale_releases == 0 && hostInputsIntact(in);
+            ok = ok && drainWorkerPool() &&
+                 totalOutstanding() == 0 && g_stale_releases == 0 && hostInputsIntact(in);
             if (!ok) {
                 ++failures;
                 std::fprintf(stderr, "FAIL enumeration boundary=%s mode=%s\n",
@@ -716,6 +725,19 @@ int main(int argc, char **argv) {
     }
     long budget[FAULT_KIND_COUNT];
     for (int i = 0; i < FAULT_KIND_COUNT; i++) budget[i] = g_counts[i];
+    // Later movies take the geometry the previous movie retained, so they issue
+    // fewer calls than the first. Multi-movie ordinals come from clean multi-movie
+    // runs rather than multiples of the single-movie budget.
+    long budget2[FAULT_KIND_COUNT], budget3[FAULT_KIND_COUNT];
+    for (int movies = 2; movies <= 3; movies++) {
+        const TrialResult warm = runTrial(FAULT_NONE, 0, movies);
+        if (warm.exit_mechanism != "completed" || warm.leaked != 0) {
+            std::fprintf(stderr, "%d-movie baseline is not clean: exit=%s leaked=%zu stage=%s.\n",
+                         movies, warm.exit_mechanism.c_str(), warm.leaked, warm.last_stage.c_str());
+            return 1;
+        }
+        for (int i = 0; i < FAULT_KIND_COUNT; i++) (movies == 2 ? budget2 : budget3)[i] = g_counts[i];
+    }
 
     std::printf("Issue #69 CUDA fault matrix. Clean run uses:");
     for (int k = FAULT_MALLOC; k < FAULT_KIND_COUNT; k++)
@@ -766,10 +788,29 @@ int main(int argc, char **argv) {
         }
     }
 
+    // Every call of a second movie, which starts from the geometry the first one
+    // retained: a failure there must release the taken buffers and plans too.
+    std::printf("\nWarm second-movie trials (fault on each call of movie 2):\n");
+    for (int k = FAULT_MALLOC; k < FAULT_KIND_COUNT; k++) {
+        for (long n = budget[k] + 1; n <= budget2[k]; n++) {
+            const TrialResult r = runTrial((FaultKind)k, n, 2);
+            trials++;
+            std::string why;
+            const bool ok = Oracle::ok(r, why);
+            std::printf("%-24s %-4ld %-34s %-22s %-7zu %-8s %s%s\n",
+                        faultName((FaultKind)k), n,
+                        r.last_stage.empty() ? "(not entered)" : r.last_stage.c_str(),
+                        r.exit_mechanism.empty() ? "(none)" : r.exit_mechanism.c_str(),
+                        r.leaked, r.products_ok ? "intact" : "DAMAGED",
+                        ok ? "" : "  <-- FAIL: ", why.c_str());
+            if (!ok) failures++;
+        }
+    }
+
     // Successive movies with the fault on the last one: exposes cross-movie leaks and
     // stale cache state that a single-movie trial cannot see.
     // Counters are cumulative across the three movies in a trial, so ordinal
-    // budget[k]*3 is the LAST call of that kind in the third movie -- late enough that
+    // budget3[k] is the LAST call of that kind in the third movie -- late enough that
     // two whole movies have already completed, which is what exposes cross-movie leaks
     // and stale cache state. If a movie ever issues a different number of calls than
     // the baseline the site is simply not reached, and the oracle says so rather than
@@ -777,7 +818,7 @@ int main(int argc, char **argv) {
     std::printf("\nSuccessive-movie trials (3 movies, fault on the last call of that\n"
                 "kind in the third movie):\n");
     for (int k = FAULT_MALLOC; k <= FAULT_D2H; k++) {
-        const long n = budget[k] * 3;
+        const long n = budget3[k];
         if (n == 0) continue;
         const TrialResult r = runTrial((FaultKind)k, n, 3);
         trials++;

@@ -271,8 +271,12 @@ void testGainSequenceABA() {
     const float *pooled_a = mc_cuda::getWorkerPlanPool().gain.ptr;
     require(pooled_a != nullptr, "gain was not retained after movie A1");
     require(mc_cuda::getWorkerPlanPool().gain.generation == 11, "retained generation wrong after A1");
-    require(mc_cuda::getWorkerPlanPool().retainedBytes() == (size_t)nx * ny * sizeof(float),
+    require(mc_cuda::getWorkerPlanPool().gain.retainedBytes() == (size_t)nx * ny * sizeof(float),
             "retained byte count does not match the gain size");
+    require(mc_cuda::getWorkerPlanPool().retainedBytes() ==
+                mc_cuda::getWorkerPlanPool().gain.retainedBytes() +
+                mc_cuda::getWorkerPlanPool().geometry.retainedBytes(),
+            "pool retained bytes are not the sum of its entries");
 
     require(gain_uploads == 1, "the first movie did not upload the gain exactly once");
 
@@ -298,7 +302,7 @@ void testGainSequenceABA() {
     requireSameBytes(runMovie(nx2, ny2, frames2, &gain_small, 13, "movie geometry"),
                      hostSum(frames2, &gain_small, nx2, ny2),
                      "changed geometry under the same generation reused the retained gain");
-    require(mc_cuda::getWorkerPlanPool().retainedBytes() == (size_t)nx2 * ny2 * sizeof(float),
+    require(mc_cuda::getWorkerPlanPool().gain.retainedBytes() == (size_t)nx2 * ny2 * sizeof(float),
             "retained byte count did not follow the new geometry");
     require(stale_frees == 0, "double free observed on the geometry change");
 
@@ -360,7 +364,7 @@ void testInvalidationAfterFailure() {
     requireSameBytes(runMovie(nx, ny, frames, &gain, 31, "healthy movie"),
                      hostSum(frames, &gain, nx, ny), "healthy movie produced wrong sum");
     require(mc_cuda::getWorkerPlanPool().gain.ptr != nullptr, "gain was not retained");
-    const size_t retained = mc_cuda::getWorkerPlanPool().retainedBytes();
+    const size_t retained = mc_cuda::getWorkerPlanPool().gain.retainedBytes();
     require(retained == (size_t)nx * ny * sizeof(float), "retained byte count wrong");
 
     {

@@ -190,6 +190,100 @@ static void testPinnedCapParsing() {
     check(!parsePinnedCapBytes("99999999999999999999999", out), "a value that overflows decimal parsing is rejected");
 }
 
+// The span reader places one pread of a frame's packed strips at the end of the
+// slotted frame and spreads it in place. The result must equal placing every
+// strip directly at its slot, which is what the per-strip reader does. Checked
+// on adversarial sizes too: every padding amount, tiny and large strips.
+static void testSpreadEqualsDirectPlacement(size_t in_align, unsigned seed, int n_strips) {
+    std::vector<uint32_t> sizes(n_strips);
+    unsigned st = seed;
+    for (int i = 0; i < n_strips; i++) {
+        st = st * 1103515245u + 12345u;
+        sizes[i] = 7u + (st >> 16) % (i % 5 == 0 ? 2000u : 13u);
+    }
+    const size_t frame = frameStageBytes(sizes.data(), n_strips, in_align);
+    const size_t packed = framePackedBytes(sizes.data(), n_strips);
+    check(frame >= packed, "slotted frame is never smaller than its packed span");
+    std::vector<uint8_t> packed_bytes(packed);
+    for (size_t i = 0; i < packed; i++) packed_bytes[i] = (uint8_t)((i * 131u + seed) & 0xFFu);
+
+    std::vector<uint8_t> direct(frame, 0xEE), spread(frame, 0xEE);
+    size_t cursor = 0, p = 0;
+    for (int s = 0; s < n_strips; s++) {
+        const size_t slot = stripSlotOffset(cursor, in_align);
+        std::memcpy(direct.data() + slot, packed_bytes.data() + p, sizes[s]);
+        cursor = slot + sizes[s];
+        p += sizes[s];
+    }
+    std::memcpy(spread.data() + (frame - packed), packed_bytes.data(), packed);
+    spreadPackedStrips(spread.data(), sizes.data(), n_strips, in_align);
+    // Padding bytes are never read (nvCOMP gets pointer + size per strip), so only
+    // the strip bytes are compared.
+    bool same = true;
+    cursor = 0;
+    for (int s = 0; s < n_strips && same; s++) {
+        const size_t slot = stripSlotOffset(cursor, in_align);
+        same = std::memcmp(direct.data() + slot, spread.data() + slot, sizes[s]) == 0;
+        cursor = slot + sizes[s];
+    }
+    check(same, "in-place spread of a packed span equals per-strip placement");
+}
+
+// Every pinned byte the pipeline uses is inside one layout whose total is what
+// the cap is checked against; slots must not overlap or one chunk's readback
+// would alias the other's while both are in flight.
+static void testPinnedChunkLayout() {
+    const size_t strips = 6 * 3838, payload = 33u << 20;
+    for (int slots = 1; slots <= 2; slots++) {
+        const PinnedChunkLayout L = pinnedChunkLayout(slots, payload, strips, 4);
+        check(L.slots == slots, "layout keeps the slot count");
+        struct R { size_t o, n; };
+        std::vector<R> r;
+        for (int j = 0; j < slots; j++) {
+            r.push_back({L.payload[j], payload});
+            r.push_back({L.cptr[j], strips * sizeof(void *)});
+            r.push_back({L.csize[j], strips * sizeof(size_t)});
+            r.push_back({L.dptr[j], strips * sizeof(void *)});
+            r.push_back({L.dsize[j], strips * sizeof(size_t)});
+            r.push_back({L.status[j], strips * 4});
+            r.push_back({L.asize[j], strips * sizeof(size_t)});
+            r.push_back({L.adler[j], strips * sizeof(uint32_t)});
+        }
+        bool disjoint = true, inside = true, aligned = true;
+        for (size_t a = 0; a < r.size(); a++) {
+            if (r[a].o + r[a].n > L.total) inside = false;
+            if (r[a].o % 8) aligned = false;
+            for (size_t b = a + 1; b < r.size(); b++)
+                if (r[a].o < r[b].o + r[b].n && r[b].o < r[a].o + r[a].n) disjoint = false;
+        }
+        check(disjoint, "pinned chunk regions are disjoint");
+        check(inside, "every pinned chunk region lies inside the checked total");
+        check(aligned, "pinned descriptor tables are naturally aligned");
+    }
+    check(pinnedChunkLayout(0, payload, strips, 4).total == 0, "zero slots is refused");
+    check(pinnedChunkLayout(3, payload, strips, 4).total == 0, "three slots is refused");
+    // Tutorial movie at the default chunking stays inside the default 256 MiB cap:
+    // two 6-frame slots of ~33 MiB payload plus tables, reserved with headroom.
+    const PinnedChunkLayout T = pinnedChunkLayout(2, (size_t)6 * 5480000u, strips, 4);
+    check(pinnedReserveBytes(T.total) <= ((size_t)256 << 20),
+          "default chunking of the tutorial movie fits the default pinned cap");
+}
+
+static void testChunkParameters() {
+    check(defaultChunkFrames(24) == 6, "24 frames -> 6-frame chunks");
+    check(defaultChunkFrames(1) == 1, "1 frame -> 1-frame chunk");
+    check(defaultChunkFrames(6) == 2, "6 frames -> 2-frame chunks");
+    check(pipelineSlots(24, 6) == 2, "several chunks use two slots");
+    check(pipelineSlots(24, 24) == 1, "one chunk uses one slot");
+    check(pipelineSlots(5, 0) == 0, "zero chunk size is refused");
+    int v = 0;
+    check(parsePositiveInt("6", v) && v == 6, "chunk env parses 6");
+    check(!parsePositiveInt("0", v), "chunk env refuses 0");
+    check(!parsePositiveInt("6x", v), "chunk env refuses junk");
+    check(!parsePositiveInt("", v), "chunk env refuses empty");
+    check(!parsePositiveInt("99999999999", v), "chunk env refuses overflow");
+}
+
 int main() {
     testSlotAlignment(4);
     testSlotAlignment(8);
@@ -200,6 +294,12 @@ int main() {
     testArenaFitsTutorialMovie();
     testPinnedBudgetBoundsWhatIsPinned();
     testPinnedCapParsing();
+    for (size_t a : {(size_t)1, (size_t)4, (size_t)8, (size_t)16})
+        for (unsigned seed : {1u, 7u, 99u})
+            testSpreadEqualsDirectPlacement(a, seed, 600);
+    testSpreadEqualsDirectPlacement(4, 3u, 3838);
+    testPinnedChunkLayout();
+    testChunkParameters();
 
     if (failures) { std::printf("%d check(s) failed\n", failures); return 1; }
     std::printf("deflate layout: all checks passed\n");

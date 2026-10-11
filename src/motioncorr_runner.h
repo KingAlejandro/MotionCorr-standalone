@@ -87,6 +87,9 @@ public:
 	// How main() configured the host allocator; printed once and in --profile.
 	std::string host_allocator_mode;
 
+	// Rebuild only complete dataset STAR/report products; never process a movie.
+	bool aggregate_only = false;
+
 	// Pinned ingest path; see MovieIngestMode. Default INGEST_AUTO is production.
 	MovieIngestMode ingest_mode = INGEST_AUTO;
 
@@ -218,6 +221,8 @@ public:
 	unsigned long long defect_premask_gain_gen = 0;
 	int defect_premask_nx = 0, defect_premask_ny = 0;
 	bool defect_premask_valid = false;
+	// Linear indices of the set pre-mask pixels, ascending; built with the mask.
+	std::vector<int> defect_premask_indices;
 
 	// Returns the static pre-mask, rebuilding it on a key miss. The returned
 	// reference is owned by this runner; callers that add detected hot pixels
@@ -295,6 +300,7 @@ public:
 	// Given an input fn_mic filename, this function will determine the names of the output corrected image (fn_avg) and the corrected movie (fn_mov).
 	FileName getOutputFileNames(FileName fn_mic, bool continue_even_odd = false);
 	bool isMovieComplete(const FileName &movie, int effective_expected_frames = -1);
+	void requireAggregateGeometry(const FileName &movie, int optics_group);
 
 	// Execute MOTIONCOR2 for a single micrograph
 	bool executeMotioncor2(Micrograph &mic, int rank = 0);
@@ -321,7 +327,7 @@ public:
 	void writeModel(Micrograph &mic);
 
 	// Make a PDF file with all the shifts and write output STAR files
-	void generateLogFilePDFAndWriteStarFiles();
+	void generateLogFilePDFAndWriteStarFiles(FileName report_out = "");
 
 	// Write out final STAR file
 	void writeSTAR();
@@ -376,7 +382,7 @@ private:
 
 	bool alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false);
 #ifdef _CUDA_ENABLED
-	bool alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false);
+	bool alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false, void *arena = nullptr, size_t arena_bytes = 0);
 #endif
 
 	void binNonSquareImage(Image<float> &Iwork, RFLOAT bin_factor);

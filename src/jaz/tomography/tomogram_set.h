@@ -23,6 +23,9 @@ class TomogramSet
         // return false if this is not a TomogramSet
         bool read(FileName filename, bool verbose = true);
         void write(FileName filename);
+        // Private aggregate files are written here, but references name the final directory.
+        // The nonempty final directory also enables checked serialization.
+        void write(FileName filename, FileName finalReferenceDirectory);
 
         void removeTomogram(std::string tomogramName);
 

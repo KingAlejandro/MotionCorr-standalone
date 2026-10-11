@@ -162,7 +162,13 @@ def main() -> int:
           f"({(ROOT/'input'/'Movies'/'control.tiff').stat().st_size} bytes)")
 
     fails = []
-    dw = ("--dose_weighting", "--dose_per_frame", "1")
+    # --save_noDW keeps the dose-weighting scratch a separate allocation: without
+    # it the scratch is carved from the consumed real-space movie
+    # (docs/vram_live_ranges.md) and there is no reconstruction cudaFree to fault.
+    # The runner writes _noDW.mrc before dose weighting starts (as on main), so
+    # that file is the one product the failed movie may leave.
+    dw = ("--dose_weighting", "--dose_per_frame", "1", "--save_noDW")
+    pre_dw = {"dw-release-fatal": {Path("Movies/control_noDW.mrc")}}
 
     # 0. Positive control: the fixture must actually reach the nvCOMP path.
     rc, text, out, path = run(FIXED, "healthy-nvcomp", "none")
@@ -179,7 +185,8 @@ def main() -> int:
     # 1-2. The two controls on the nvCOMP arm.
     for fault, extra in (("unweighted-release-fatal", ()), ("dw-release-fatal", dw)):
         rc, text, out, path = run(FIXED, f"fixed-{fault}", fault, extra)
-        prods = len(list(out.rglob("*.mrc"))) + len(list(out.rglob("*.star")))
+        published = {p.relative_to(out) for p in out.rglob("*") if p.suffix in (".mrc", ".star")}
+        prods = len(published - pre_dw.get(fault, set()))
         checks = {
             "fault actually injected": "[preprocessfault] injected" in text,
             "engaged nvCOMP": path == "nvcomp",

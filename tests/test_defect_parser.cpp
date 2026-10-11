@@ -258,6 +258,14 @@ int main()
         MultidimArray<float> no_gain;
         const std::string fn_a = tmpfile_with("0 0 2 2\n", "pma");
         const std::string fn_bad = tmpfile_with("0 0 1 1\nBAD\n", "pmb");
+        // The hot-pixel bad list is merged from defect_premask_indices instead of
+        // scanning the mask, so the indices must be exactly the mask's set pixels.
+        auto indices_match = [&runner]() {
+            std::vector<int> want;
+            FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(runner.defect_premask)
+                if (DIRECT_MULTIDIM_ELEM(runner.defect_premask, n)) want.push_back((int)n);
+            return want == runner.defect_premask_indices;
+        };
 
         // 1. No external defect file and no gain: an all-false mask, still cached.
         const MultidimArray<bool> &none = runner.getDefectPremask(nx, ny, "", "", no_gain, 1);
@@ -269,6 +277,8 @@ int main()
         const MultidimArray<bool> &mask_a = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
         check(runner.isDefectPremaskValid(), "premask A cached validly");
         check(count_set(const_cast<MultidimArray<bool>&>(mask_a)) == 4, "premask A has 4 defect pixels");
+        check(indices_match() && runner.defect_premask_indices.size() == 4,
+              "premask A index list matches its mask");
 
         // 3. A malformed file must throw and leave the cache invalid, not stale.
         bool threw = false;
@@ -278,6 +288,7 @@ int main()
         check(!runner.isDefectPremaskValid(), "premask cache invalidated after failure on B");
         check(runner.defect_premask_nx == 0 && runner.defect_premask_fn == "",
               "premask cache keys cleared after failure on B");
+        check(runner.defect_premask_indices.empty(), "premask index list cleared after failure on B");
 
         // 4. Recovery: A must be reparsed, not read back from corrupt state.
         const MultidimArray<bool> &mask_a2 = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
@@ -291,6 +302,7 @@ int main()
               "premask follows a changed geometry instead of reusing the old mask");
         check(runner.defect_premask_nx == 32 && runner.defect_premask_ny == 32,
               "premask geometry key follows the new geometry");
+        check(indices_match(), "premask index list follows the new geometry");
         (void)runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
 
         // 6. Metadata is NOT content identity. Both valid rectangles have
@@ -323,6 +335,9 @@ int main()
             check(count_set(const_cast<MultidimArray<bool>&>(rewrote)) == 4 &&
                   !DIRECT_A2D_ELEM(rewrote, 0, 0) && DIRECT_A2D_ELEM(rewrote, 4, 4),
                   "same-size same-mtime valid rewrite invalidates old mask coordinates");
+            check(indices_match() && !runner.defect_premask_indices.empty() &&
+                  runner.defect_premask_indices[0] == 4 * nx + 4,
+                  "rewritten premask index list follows the new coordinates");
             rewrite("4 4 X 2\n");
             check(::stat(fn_a.c_str(), &changed) == 0 && changed.st_size == original.st_size &&
                   changed.st_mtime == original.st_mtime,

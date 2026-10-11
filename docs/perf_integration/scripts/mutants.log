@@ -1,0 +1,27 @@
+BUILD /home/alex/mc-rc/build-mut rc=0
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+fbp_retain_unrequested: test FrameBufferPool rc=8 (DETECTED)
+    FAIL buffers of a never-requested (binned) size are not retained
+    FAIL after binned releases a full-frame buffer is still retained for reuse
+    The following tests FAILED:
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+fbp_no_inplace_keep: test FrameBufferPool rc=8 (DETECTED)
+    FAIL same-size reacquire keeps the owned buffer (pooled)
+    FAIL same-size reacquire does not consume or add a retained buffer
+    The following tests FAILED:
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+spt_no_owner_check: test StageProfileThreads rc=8 (DETECTED)
+    The following tests FAILED:
+ 1 file changed, 1 insertion(+)
+c_per_frame_fft_wait: test CudaDoseNormalization rc=8 (DETECTED)
+    FAIL: forward FFT must wait for the device exactly once (per-frame waits are back)
+    The following tests FAILED:
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+b_skip_adler: test CudaNvcompAcceptanceFailures rc=8 (DETECTED)
+    The following tests FAILED:
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+b_spread_wrong_src: test DeflateLayout rc=8 (DETECTED)
+    FAIL: in-place spread of a packed span equals per-strip placement
+    FAIL: in-place spread of a packed span equals per-strip placement
+    FAIL: in-place spread of a packed span equals per-strip placement
+MUTANTS_DONE

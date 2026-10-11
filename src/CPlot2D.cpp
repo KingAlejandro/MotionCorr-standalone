@@ -26,19 +26,26 @@
 
 #include "CPlot2D.h"
 
-void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps)
+void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps, bool strict)
 {
 
     FileName fn_list = fn_pdf + ".lst";
     std::string command = "gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -dDEVICEWIDTHPOINTS=800 -dDEVICEHEIGHTPOINTS=800 -sOutputFile=";
     command += fn_pdf + " @" + fn_list;
     std::ofstream filelist(fn_pdf + ".lst");
+    if (strict && !filelist) REPORT_ERROR("Cannot write aggregate PDF input list: " + fn_list);
     bool have_at_least_one = false;
     for (int i = 0; i < fn_eps.size(); i++)
     {
-        // fn_eps[i] could be a Linux wildcard...
+        // Strict aggregation supplies literal movie paths in input order.
+        // Legacy callers retain wildcard expansion for their batch expressions.
     	std::vector<FileName> all_eps_files;
-        fn_eps[i].globFiles(all_eps_files);
+        if (strict) {
+            if (!exists(fn_eps[i])) REPORT_ERROR("Missing aggregate EPS: " + fn_eps[i]);
+            all_eps_files.push_back(fn_eps[i]);
+        } else {
+            fn_eps[i].globFiles(all_eps_files);
+        }
         for (long int j= 0; j < all_eps_files.size(); j++)
         {
         	if (exists(all_eps_files[j]))
@@ -48,7 +55,10 @@ void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps)
         	}
         }
     }
+    filelist.flush();
+    if (strict && !filelist.good()) REPORT_ERROR("Cannot flush aggregate PDF input list: " + fn_list);
     filelist.close();
+    if (strict && !filelist.good()) REPORT_ERROR("Cannot close aggregate PDF input list: " + fn_list);
 
     bool have_error_in_gs = false;
     if (have_at_least_one)
@@ -70,6 +80,7 @@ void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps)
     // system() should wait the termination of the program, so this is very strange...
     if (!have_at_least_one || have_error_in_gs)
     {
+        if (strict) REPORT_ERROR("Aggregate PDF generation failed: " + fn_pdf);
     	std::cerr << " + Will make an empty PDF-file in " << fn_pdf << "\n";
     	touch(fn_pdf);
     }

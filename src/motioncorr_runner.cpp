@@ -25,6 +25,8 @@
 #include <cctype>
 #include <stdexcept>
 #include <thread>
+#include <filesystem>
+#include <set>
 #include <atomic>
 #include <sstream>
 #include <cstdio>
@@ -64,6 +66,7 @@ static std::atomic<unsigned long long> s_global_gain_generation{1};
 #include "src/funcs.h"
 #include "src/renderEER.h"
 #include "src/stage_profile.h"
+#include "src/frame_buffer_pool.h"
 
 //#define TIMING
 #ifdef TIMING
@@ -137,6 +140,18 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	fn_profile = parser.getOption("--profile", "Write a per-movie, per-stage wall/CPU/page-fault profile to this JSON-lines file (docs/stage_profile.md). Diagnostic; products are unchanged.", "");
 	// Opened here so an unwritable path fails before any processing.
 	StageProfile::instance().enable(fn_profile);
+	{
+		// Without device timing the profile keeps its stage records and NVTX
+		// ranges but the CUDA code takes its production shape: no per-step
+		// event waits, so a trace's synchronisation counts match an unprofiled run.
+		const std::string device_timing_arg = parser.getOption("--profile_device_timing", "With --profile: 1 (default) also times CUDA steps with events, which adds host waits; 0 records the stage profile and NVTX ranges with production device synchronisation.", "1");
+		if (device_timing_arg != "0" && device_timing_arg != "1")
+			REPORT_ERROR("--profile_device_timing must be 0 or 1. Got: " + device_timing_arg);
+		if (StageProfile::instance().enabled()) {
+			StageProfile::instance().setDeviceTiming(device_timing_arg == "1");
+			StageProfile::instance().setNote("device_timing", device_timing_arg == "1" ? "on" : "off");
+		}
+	}
 	sync_output = parser.checkOption("--sync_output", "Write output products on the main thread instead of a background writer thread (same products, same order).");
 	const std::string ingest_arg = parser.getOption("--ingest", "Movie ingest path: auto (default), nvcomp, compact or float. Anything but auto fails a movie that cannot use that path, instead of silently using another.", "auto");
 	fn_ingest_witness = parser.getOption("--ingest_witness", "Append one \"movie path\" line per movie to this file. Diagnostic; writes nothing when unset.", "");
@@ -145,6 +160,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	else if (ingest_arg == "compact") ingest_mode = INGEST_COMPACT;
 	else if (ingest_arg == "float")   ingest_mode = INGEST_FLOAT;
 	else REPORT_ERROR("--ingest must be one of: auto, nvcomp, compact, float. Got: " + ingest_arg);
+	aggregate_only = parser.checkOption("--aggregate_only", "Regenerate the full dataset STAR/report from complete per-movie outputs; never process or rewrite a movie.");
 	continue_old = parser.checkOption("--only_do_unfinished", "Only run motion correction for those micrographs for which there is not yet an output micrograph.");
 	do_at_most = textToInteger(parser.getOption("--do_at_most", "Only process at most this number of (unprocessed) micrographs.", "-1"));
 	grouping_for_ps = textToInteger(parser.getOption("--grouping_for_ps", "Group this number of frames and write summed power spectrum. -1 == do not write", "-1"));
@@ -174,7 +190,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	fn_archive = parser.getOption("--archive","Location of the directory for archiving movies in 4-byte MRC format","");
  	even_odd_split = parser.checkOption("--even_odd_split", "Generate two images summed from odd and even movie frames. Later used for denoising in tomography.");
 	fn_other_motioncor2_args = parser.getOption("--other_motioncor2_args", "Additional arguments to MOTIONCOR2", "");
-	gpu_ids = parser.getOption("--gpu", "Device ids for each MPI-thread, e.g 0:1:2:3", "");
+	gpu_ids = parser.getOption("--gpu", "Device ids. --use_motioncor2 passes the MotionCor2 list syntax through (e.g 0:1:2:3); --use_own supports exactly one device id (e.g 0) and rejects a list", "");
 
 	int doseweight_section = parser.addSection("Dose-weighting options");
 	do_dose_weighting = parser.checkOption("--dose_weighting", "Use dose-weighting scheme");
@@ -322,14 +338,58 @@ void MotioncorrRunner::initialise()
 		HANDLE_ERROR(accGPUGetDeviceCount(&devCount));
 	}
 #endif
-#if defined _CUDA_ENABLED
 	if (do_own && gpu_ids.length() > 0)
 	{
-		untangleDeviceIDs(gpu_ids, allThreadIDs);
-		if (allThreadIDs.size() > 0 && allThreadIDs[0].size() > 0)
-			gpu_id = textToInteger(allThreadIDs[0][0]);
-		else
-			gpu_id = 0;
+		// The device-list syntax is validated the same way in every build, so a CPU-only
+		// build rejects an unsupported list for the reason it is unsupported instead of
+		// reporting only the missing CUDA support.
+		//
+		// untangleDeviceIDs() consumes the string it is handed up to the last ':'
+		// (src/args.cpp:437-443), so "0:1:2:3" comes back as "3". Parse a copy: gpu_ids
+		// must still hold what the user typed when the error below quotes it.
+		std::string gpu_ids_to_parse = gpu_ids;
+		untangleDeviceIDs(gpu_ids_to_parse, allThreadIDs);
+
+		// --use_own processes one movie at a time in one process with one CUDA context, and
+		// the device-scoped state it relies on (src/acc/cuda/cuda_fft_prep.cu) is process
+		// global, so a device list is not merely unimplemented here. Silently honouring the
+		// first entry would report a multi-device run that never happened.
+		size_t n_requested = 0;
+		for (size_t irank = 0; irank < allThreadIDs.size(); irank++)
+			n_requested += allThreadIDs[irank].size();
+		if (allThreadIDs.size() != 1 || n_requested != 1)
+		{
+			REPORT_ERROR("ERROR: --gpu " + gpu_ids + " requests " + integerToString((int)n_requested) +
+			             " device entries, but --use_own supports exactly one device id (e.g. --gpu 0). "
+			             "This repository has no MPI runner, so the ':'-separated per-rank syntax has no "
+			             "meaning here. To use several GPUs, run one process per device over disjoint "
+			             "subsets of the input STAR; see tools/multi_gpu/.");
+		}
+
+		const std::string &requested_id = allThreadIDs[0][0];
+		if (requested_id.empty() || requested_id.find_first_not_of("0123456789") != std::string::npos)
+		{
+			REPORT_ERROR("ERROR: --gpu " + gpu_ids + " is not a non-negative device id. --use_own expects a "
+			             "single integer, e.g. --gpu 0.");
+		}
+
+		// sscanf("%d") in textToInteger can wrap oversized digit strings to a
+		// different valid device. Bound each step before multiplying or adding,
+		// and reject before querying CUDA (also in a CPU-only build).
+		int parsed_gpu_id = 0;
+		for (char ch : requested_id)
+		{
+			const int digit = ch - '0';
+			if (parsed_gpu_id > (INT_MAX - digit) / 10)
+			{
+				REPORT_ERROR("ERROR: --gpu " + gpu_ids + " is outside the supported device id range [0, " +
+				             integerToString(INT_MAX) + "].");
+			}
+			parsed_gpu_id = parsed_gpu_id * 10 + digit;
+		}
+
+#if defined _CUDA_ENABLED
+		gpu_id = parsed_gpu_id;
 		HANDLE_ERROR(accGPUGetDeviceCount(&devCount));
 		if (gpu_id >= devCount || gpu_id < 0) {
 			REPORT_ERROR("Invalid GPU device ID " + integerToString(gpu_id) + ". Found " + integerToString(devCount) + " CUDA device(s).");
@@ -337,13 +397,10 @@ void MotioncorrRunner::initialise()
 		use_gpu = true;
 		if (verb > 0)
 			std::cout << "Using CUDA acceleration on GPU device " << gpu_id << " for global alignment." << std::endl;
-	}
 #else
-	if (do_own && gpu_ids.length() > 0)
-	{
 		REPORT_ERROR("ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).");
-	}
 #endif
+	}
 
 	// Set up which micrograph movies to process
     is_tomo = false;
@@ -472,6 +529,27 @@ void MotioncorrRunner::initialise()
 	fn_micrographs.clear();
 	optics_group_micrographs.clear();
 	pre_exposure_micrographs.clear();
+
+	if (aggregate_only)
+	{
+		if (do_at_most >= 0) REPORT_ERROR("--aggregate_only cannot be combined with --do_at_most.");
+		if (fn_mic_given_all.empty()) REPORT_ERROR("--aggregate_only requires at least one movie.");
+		// Complete the entire preflight before publishing anything. A missing movie
+		// is an error, not permission to compute it as ordinary resume would do.
+		for (size_t i = 0; i < fn_mic_given_all.size(); ++i)
+		{
+			if (!isMovieComplete(fn_mic_given_all[i], expected_frames_given_all[i]))
+				REPORT_ERROR("Aggregate-only incomplete movie: " + fn_mic_given_all[i]);
+			requireAggregateGeometry(fn_mic_given_all[i], optics_group_given_all[i]);
+			if (!do_skip_logfile)
+			{
+				const FileName plot = fn_out + fn_mic_given_all[i].withoutExtension() + "_shifts.eps";
+				std::ifstream in(plot.c_str(), std::ios::binary | std::ios::ate);
+				if (!in || in.tellg() <= 0) REPORT_ERROR("Aggregate-only missing movie report: " + plot);
+			}
+		}
+		continue_old = true;
+	}
 
 	bool warned = false;
 
@@ -633,6 +711,71 @@ bool completeMrc(const FileName &filename)
 }
 }
 
+void MotioncorrRunner::requireAggregateGeometry(const FileName &movie, int optics_group)
+{
+	const FileName average = getOutputFileNames(movie);
+	const FileName root = average.withoutExtension();
+	Micrograph saved(root + ".star");
+	// STAR decimal serialization and MRC float32 sampling round independently.
+	// This is a representation check, not a tolerance for scientific pixels.
+	auto same = [](RFLOAT a, RFLOAT b) {
+		return std::isfinite(a) && std::isfinite(b) && a > 0 && b > 0 &&
+		       std::abs(a - b) <= 1e-6 * std::max(RFLOAT(1), std::max(std::abs(a), std::abs(b)));
+	};
+	if (!same(bin_factor, saved.getBinningFactor()))
+		REPORT_ERROR("Aggregate-only incompatible binning for movie: " + movie);
+	RFLOAT input_angpix = -1;
+	if (is_tomo) {
+		if (optics_group < 1 || optics_group > tomogramSet.globalTable.numberOfObjects() ||
+		    !tomogramSet.globalTable.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, input_angpix, optics_group - 1))
+			REPORT_ERROR("Aggregate-only missing declared sampling for movie: " + movie);
+	} else {
+		bool found = false;
+		if (!obsModel.opticsMdt.containsLabel(EMDL_IMAGE_OPTICS_GROUP) &&
+		    optics_group == 1 && obsModel.opticsMdt.numberOfObjects() == 1)
+			found = obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, input_angpix, 0);
+		FOR_ALL_OBJECTS_IN_METADATA_TABLE(obsModel.opticsMdt) {
+			int group;
+			if (obsModel.opticsMdt.getValue(EMDL_IMAGE_OPTICS_GROUP, group) && group == optics_group) {
+				if (found || !obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, input_angpix))
+					REPORT_ERROR("Aggregate-only ambiguous declared sampling for movie: " + movie);
+				found = true;
+			}
+		}
+		if (!found) REPORT_ERROR("Aggregate-only missing declared optics for movie: " + movie);
+	}
+	// initialise fills absent optics from CLI; processing then uses each
+	// movie's effective optics. A contradictory raw CLI value is not authority.
+	if (!same(input_angpix, saved.angpix))
+		REPORT_ERROR("Aggregate-only incompatible sampling for movie: " + movie);
+	const RFLOAT width = saved.getWidth() / bin_factor, height = saved.getHeight() / bin_factor;
+	if (!std::isfinite(width) || !std::isfinite(height) || width < 1 || height < 1 ||
+	    width > std::numeric_limits<int>::max() || height > std::numeric_limits<int>::max())
+		REPORT_ERROR("Aggregate-only invalid declared geometry for movie: " + movie);
+	const RFLOAT output_angpix = input_angpix * bin_factor;
+	auto check = [&](const FileName &file, int nx, int ny, bool check_sampling) {
+		std::ifstream in(file.c_str(), std::ios::binary);
+		Image<float>::MRChead h;
+		if (!in.read(reinterpret_cast<char*>(&h), sizeof(h)))
+			REPORT_ERROR("Aggregate-only unreadable geometry for movie " + movie + ": " + file);
+		Image<float> image;
+		image.parseMRCHeader(&h, -1, false, file); // also normalizes byte order
+		if (h.nx != nx || h.ny != ny || h.nz != 1 ||
+		    (check_sampling && (h.mx <= 0 || h.my <= 0 ||
+		     !same(h.a / h.mx, output_angpix) || !same(h.b / h.my, output_angpix))))
+			REPORT_ERROR("Aggregate-only incompatible output geometry/sampling for movie " + movie + ": " + file);
+	};
+	check(average, int(width), int(height), true);
+	if (do_dose_weighting && save_noDW) check(root + "_noDW.mrc", int(width), int(height), true);
+	if (even_odd_split) {
+		check(root + "_EVN.mrc", int(width), int(height), true);
+		check(root + "_ODD.mrc", int(width), int(height), true);
+	}
+	if (grouping_for_ps > 0) check(root + "_PS.mrc", ps_size, ps_size, false);
+	// Full option/input/gain identity is deliberately still Issue142. This
+	// gate prevents inconsistent declared binning/sampling at this new endpoint.
+}
+
 bool MotioncorrRunner::isMovieComplete(const FileName &movie, int effective_expected_frames)
 {
 	const FileName average = getOutputFileNames(movie);
@@ -679,6 +822,139 @@ bool MotioncorrRunner::isMovieComplete(const FileName &movie, int effective_expe
 
 void MotioncorrRunner::run()
 {
+	if (aggregate_only)
+	{
+		// Scientific products are read from fn_out; aggregate products are first
+		// written in a private sibling directory. Publish the joint STAR last, only
+		// after the full report closes successfully. Ordinary resume is unchanged.
+		if (is_tomo) {
+			// Per-series tables may be nested, but must not replace worker products
+			// or the report files generated into the same aggregate staging directory.
+			std::set<std::filesystem::path> protected_paths;
+			for (const auto &movie : fn_ori_micrographs) {
+				const FileName root = getOutputFileNames(movie).withoutExtension();
+				// .out/.err/.com and 0-Patch-Patch.log are executeMotioncor2()'s per-movie diagnostics.
+				for (const char *suffix : {".mrc", ".star", ".log", "_noDW.mrc", "_DWS.mrc", "_DW.mrc",
+					"_PS.mrc", "_EVN.mrc", "_ODD.mrc", "_frames.mrcs", ".out", ".err", ".com",
+					"0-Patch-Patch.log"})
+					protected_paths.insert(std::filesystem::path((root + suffix).c_str()).lexically_normal());
+				protected_paths.insert(std::filesystem::path((fn_out + movie.withoutExtension() + "_shifts.eps").c_str()).lexically_normal());
+			}
+			for (const char *report : {"gain.mrc", "corrected_tilt_series.star", "logfile.pdf", "header.pdf", "batch.pdf", "all_batches.pdf", "batch.pdf.lst", "header.pdf.lst", "logfile.pdf.lst"})
+				protected_paths.insert(std::filesystem::path((fn_out + report).c_str()).lexically_normal());
+			FOR_ALL_OBJECTS_IN_METADATA_TABLE(tomogramSet.globalTable) {
+				FileName reference;
+				if (!tomogramSet.globalTable.getValue(EMDL_TOMO_TILT_SERIES_STARFILE, reference))
+					REPORT_ERROR("Aggregate-only missing tomogram STAR reference.");
+				const auto final = std::filesystem::path(getOutputFileWithNewUniqueDate(reference, fn_out).c_str()).lexically_normal();
+				const auto relative = final.lexically_relative(std::filesystem::path(fn_out.c_str()).lexically_normal());
+				if (protected_paths.count(final) || (!relative.has_parent_path() &&
+					relative.filename().string().find("corrected_micrographs_") == 0))
+					REPORT_ERROR("Aggregate-only tomogram STAR reference collides with a movie/report product: " + reference);
+			}
+		}
+		std::string pattern = fn_out + ".aggregate-XXXXXX";
+		std::vector<char> name(pattern.begin(), pattern.end()); name.push_back('\0');
+		char *created = mkdtemp(name.data());
+		if (!created) REPORT_ERROR("Cannot create aggregate report staging directory in " + fn_out);
+		const std::filesystem::path stage(created);
+		struct StageCleanup {
+			std::filesystem::path path;
+			bool keep = false;
+			~StageCleanup() { if (!keep) { std::error_code error; std::filesystem::remove_all(path, error); } }
+		} cleanup{stage};
+		generateLogFilePDFAndWriteStarFiles(FileName(stage.string() + "/"));
+		const std::string joint = is_tomo ? "corrected_tilt_series.star" : "corrected_micrographs.star";
+		struct Publication {
+			std::filesystem::path file, target, backup;
+			bool old_moved = false, installed = false;
+		};
+		std::vector<Publication> publication;
+		try {
+			std::vector<std::filesystem::path> files;
+			for (const auto &file : std::filesystem::recursive_directory_iterator(stage))
+				if (file.is_regular_file()) files.push_back(file.path());
+			// Create backups only after inventory; mkdtemp cannot alias a generated series directory.
+			std::string backup_pattern = stage.string() + "/.rollback-XXXXXX";
+			std::vector<char> backup_name(backup_pattern.begin(), backup_pattern.end()); backup_name.push_back('\0');
+			char *backup_created = mkdtemp(backup_name.data());
+			if (!backup_created) REPORT_ERROR("Cannot create aggregate rollback directory in " + stage.string());
+			const std::filesystem::path backups(backup_created);
+			publication.reserve(files.size());
+			for (const auto &file : files) {
+				const auto relative = file.lexically_relative(stage);
+				publication.push_back({file, std::filesystem::path(fn_out.c_str()) / relative, backups / relative});
+			}
+			auto publish = [&](const std::filesystem::path &file) {
+				auto item = std::find_if(publication.begin(), publication.end(),
+					[&](const Publication &entry) { return entry.file == file; });
+				if (item == publication.end()) REPORT_ERROR("Aggregate-only unregistered publication: " + file.string());
+				std::filesystem::create_directories(item->target.parent_path());
+				const auto status = std::filesystem::symlink_status(item->target);
+				if (status.type() != std::filesystem::file_type::not_found) {
+					if (!std::filesystem::is_regular_file(status))
+						throw std::filesystem::filesystem_error("refusing non-regular aggregate target", item->target,
+							std::make_error_code(std::errc::invalid_argument));
+					std::filesystem::create_directories(item->backup.parent_path());
+					std::filesystem::rename(item->target, item->backup);
+					item->old_moved = true;
+				}
+				std::filesystem::rename(item->file, item->target);
+				item->installed = true;
+			};
+			std::set<std::filesystem::path> series_files;
+			if (is_tomo) {
+				MetaDataTable global;
+				global.read(FileName((stage / joint).string()), "global");
+				FOR_ALL_OBJECTS_IN_METADATA_TABLE(global) {
+					FileName reference;
+					if (!global.getValue(EMDL_TOMO_TILT_SERIES_STARFILE, reference))
+						REPORT_ERROR("Aggregate-only missing final tomogram STAR reference.");
+					const auto relative = std::filesystem::path(reference.c_str()).lexically_normal().lexically_relative(
+						std::filesystem::path(fn_out.c_str()).lexically_normal());
+					if (relative.empty() || relative.is_absolute() || *relative.begin() == "..")
+						REPORT_ERROR("Aggregate-only invalid final tomogram STAR reference: " + reference);
+					const auto file = stage / relative;
+					if (file == stage / joint || !std::filesystem::is_regular_file(file) || !series_files.insert(file).second)
+						REPORT_ERROR("Aggregate-only missing or duplicate staged tomogram STAR: " + reference);
+				}
+				// Resolve nested references before exposing any canonical report/joint STAR.
+				for (const auto &file : series_files) publish(file);
+				TomogramSet published(FileName((stage / joint).string()), false);
+				if (published.size() != tomogramSet.size())
+					REPORT_ERROR("Aggregate-only incomplete published tomogram references.");
+			}
+			for (const auto &file : files)
+				if (file != stage / joint && !series_files.count(file)) publish(file);
+			publish(stage / joint);
+		} catch (...) {
+			cleanup.keep = true; // Any secondary rollback/diagnostic exception must retain recovery backups.
+			const auto first_error = std::current_exception();
+			std::string rollback_error;
+			for (auto item = publication.rbegin(); item != publication.rend(); ++item) {
+				if (item->installed) {
+					std::error_code error; std::filesystem::remove(item->target, error);
+					if (error && rollback_error.empty()) rollback_error = item->target.string() + ": " + error.message();
+				}
+				if (item->old_moved) {
+					std::error_code error; std::filesystem::rename(item->backup, item->target, error);
+					if (error && rollback_error.empty()) rollback_error = item->target.string() + ": " + error.message();
+				}
+			}
+			if (rollback_error.empty()) cleanup.keep = false;
+			else {
+				std::cerr << "Aggregate-only rollback failed: " << rollback_error
+					<< "; retained recovery staging " << stage << std::endl;
+			}
+			try { std::rethrow_exception(first_error); }
+			catch (const std::filesystem::filesystem_error &error) {
+				REPORT_ERROR("Aggregate-only publication failed: " + std::string(error.what()) +
+					(rollback_error.empty() ? "" : "; rollback failed, retained staging " + stage.string()));
+			}
+		}
+		if (verb > 0) std::cout << "Aggregate-only dataset ready in " << fn_out << std::endl;
+		return;
+	}
 	prepareGainReference(true);
 
 	int barstep;
@@ -1256,6 +1532,9 @@ void MotioncorrRunner::submitImageWrite(Image<float> &image, const FileName &pat
 	owned->MDMainHeader = image.MDMainHeader;
 	submitOutput([owned, path, datatype]() {
 		owned->write(path, -1, false, WRITE_OVERWRITE, datatype);
+		// Full-frame buffers return to the bounded pool for the next movie;
+		// anything else, or a full pool, frees as before.
+		FrameBufferPool::instance().release(owned->data);
 	});
 }
 
@@ -1283,8 +1562,23 @@ void MotioncorrRunner::collectWriteFailures(std::vector<char> &movie_failed)
 	}
 }
 
-void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
+namespace {
+void requireAggregatePdf(const FileName &filename) {
+	std::ifstream input(filename.c_str(), std::ios::binary | std::ios::ate);
+	const std::streamoff length = input ? static_cast<std::streamoff>(input.tellg()) : 0;
+	if (length < 10) REPORT_ERROR("Aggregate-only incomplete PDF: " + filename);
+	input.seekg(0); char magic[5] = {};
+	input.read(magic, 5);
+	if (std::string(magic, 5) != "%PDF-") REPORT_ERROR("Aggregate-only invalid PDF: " + filename);
+	input.seekg(std::max<std::streamoff>(0, length - 1024));
+	std::string tail((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+	if (tail.find("%%EOF") == std::string::npos) REPORT_ERROR("Aggregate-only truncated PDF: " + filename);
+}
+}
+
+void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 {
+	if (report_out.empty()) report_out = fn_out;
 
 	long int barstep = XMIPP_MAX(1, fn_ori_micrographs.size() / 60);
 	if (verb > 0)
@@ -1388,8 +1682,11 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
         if (tomogramSet.globalTable.containsLabel(EMDL_MICROGRAPH_PIXEL_SIZE))
             tomogramSet.globalTable.deactivateLabel(EMDL_MICROGRAPH_PIXEL_SIZE);
         tomogramSet.convertBackFromSingleMetaDataTable(MDavg);
-        tomogramSet.write(fn_out+"corrected_tilt_series.star");
-        if (verb > 0) std::cout << " Written: " << fn_out << "corrected_tilt_series.star" << std::endl;
+        if (aggregate_only)
+            tomogramSet.write(report_out+"corrected_tilt_series.star", fn_out);
+        else
+            tomogramSet.write(report_out+"corrected_tilt_series.star");
+        if (verb > 0 && !aggregate_only) std::cout << " Written: " << fn_out << "corrected_tilt_series.star" << std::endl;
     }
     else
     {
@@ -1400,8 +1697,8 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
             my_angpix *= bin_factor;
             obsModel.opticsMdt.setValue(EMDL_MICROGRAPH_PIXEL_SIZE, my_angpix);
     	}
-        obsModel.save(MDavg, fn_out + "corrected_micrographs.star", "micrographs");
-        if (verb > 0) std::cout << " Written: " << fn_out << "corrected_micrographs.star" << std::endl;
+        obsModel.save(MDavg, report_out + "corrected_micrographs.star", "micrographs");
+        if (verb > 0 && !aggregate_only) std::cout << " Written: " << fn_out << "corrected_micrographs.star" << std::endl;
     }
 
 	if (verb > 0) std::cout << " Now generating logfile.pdf ... " << std::endl;
@@ -1411,7 +1708,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	plot_labels.push_back(EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL);
 	plot_labels.push_back(EMDL_MICROGRAPH_ACCUM_MOTION_EARLY);
 	plot_labels.push_back(EMDL_MICROGRAPH_ACCUM_MOTION_LATE);
-	FileName fn_eps, fn_eps_root = fn_out + "corrected_micrographs";
+	FileName fn_eps, fn_eps_root = report_out + "corrected_micrographs";
 	std::vector<FileName> all_fn_eps;
 	RCTIC(TIMING_W_HISTEPS);
 	for (int i = 0; i < plot_labels.size(); i++)
@@ -1446,7 +1743,8 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 
 		// Just have the overall headers only in the output PDF file
 		RCTIC(TIMING_W_GS_LOGFILE);
-		joinMultipleEPSIntoSinglePDF(fn_out + "logfile.pdf", all_fn_eps);
+		joinMultipleEPSIntoSinglePDF(report_out + "logfile.pdf", all_fn_eps, aggregate_only);
+		if (aggregate_only) requireAggregatePdf(report_out + "logfile.pdf");
 		RCTOC(TIMING_W_GS_LOGFILE);
 
 	}
@@ -1463,7 +1761,13 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 		// Only loop over fn_micrographs, not fn_ori_micrographs, so only the new ones for do_at_most or only_do_unfinished
 		all_fn_eps.clear();
 		FileName fn_prev="";
-		for (long int i = 0; i < fn_micrographs.size(); i++)
+		if (aggregate_only) {
+			// Exact original order, with no directory glob admitting stale/unassigned
+			// plots. Complete preflight already verified every requested movie.
+			for (const FileName &movie : fn_ori_micrographs)
+				all_fn_eps.push_back(fn_out + movie.withoutExtension() + "_shifts.eps");
+		}
+		for (long int i = 0; !aggregate_only && i < fn_micrographs.size(); i++)
 		{
 			if (fn_prev != fn_micrographs[i].beforeLastOf("/"))
 			{
@@ -1479,7 +1783,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 		// boundary, where it would be std::terminate.
 		std::exception_ptr header_failure;
 		std::thread header_thread([&]() {
-			try { joinMultipleEPSIntoSinglePDF(fn_out + "header.pdf", header_fn_eps); }
+			try { joinMultipleEPSIntoSinglePDF(report_out + "header.pdf", header_fn_eps, aggregate_only); }
 			catch (...) { header_failure = std::current_exception(); }
 		});
 		// The batch pass below is not noexcept: joinMultipleEPSIntoSinglePDF
@@ -1496,7 +1800,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 		} header_joiner{header_thread};
 
 		RCTIC(TIMING_W_GS_BATCH);
-		joinMultipleEPSIntoSinglePDF(fn_out + "batch.pdf", all_fn_eps);
+		joinMultipleEPSIntoSinglePDF(report_out + "batch.pdf", all_fn_eps, aggregate_only);
 		RCTOC(TIMING_W_GS_BATCH);
 
 		header_thread.join();
@@ -1505,21 +1809,28 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 
 		// Concatenate all PDFs of the batches
 		std::vector<FileName> fn_pdfs;
-		if (exists(fn_out + "all_batches.pdf")) fn_pdfs.push_back(fn_out + "all_batches.pdf");
-		fn_pdfs.push_back(fn_out + "batch.pdf");
+		if (!aggregate_only && exists(report_out + "all_batches.pdf")) fn_pdfs.push_back(report_out + "all_batches.pdf");
+		fn_pdfs.push_back(report_out + "batch.pdf");
 		RCTIC(TIMING_W_GS_ALLB);
-		concatenatePDFfiles(fn_out + "all_batches.pdf", fn_pdfs);
+		if (!concatenatePDFfiles(report_out + "all_batches.pdf", fn_pdfs) && aggregate_only)
+			REPORT_ERROR("Aggregate-only batch PDF concatenation failed.");
 		RCTOC(TIMING_W_GS_ALLB);
 
 		// Put header in front of comabined batches
 		RCTIC(TIMING_W_GS_LOGFILE);
-		concatenatePDFfiles(fn_out + "logfile.pdf", fn_out + "header.pdf", fn_out + "all_batches.pdf");
+		if (!concatenatePDFfiles(report_out + "logfile.pdf", report_out + "header.pdf", report_out + "all_batches.pdf") && aggregate_only)
+			REPORT_ERROR("Aggregate-only full PDF concatenation failed.");
+		if (aggregate_only) {
+			requireAggregatePdf(report_out + "header.pdf");
+			requireAggregatePdf(report_out + "batch.pdf");
+			requireAggregatePdf(report_out + "logfile.pdf");
+		}
 		RCTOC(TIMING_W_GS_LOGFILE);
 
 	}
 
 
-	if (verb > 0 )
+	if (verb > 0 && !aggregate_only)
 	{
 		std::cout << " Done! Written: " << fn_out << "logfile.pdf" << std::endl;
 	}
@@ -1578,6 +1889,7 @@ const MultidimArray<bool>& MotioncorrRunner::getDefectPremask(
 		defect_premask_nx = 0;
 		defect_premask_ny = 0;
 		defect_premask.clear();
+		std::vector<int>().swap(defect_premask_indices);
 	};
 	std::string defect_bytes;
 	try {
@@ -1622,8 +1934,12 @@ const MultidimArray<bool>& MotioncorrRunner::getDefectPremask(
 				}
 			}
 		}
+		std::vector<int> new_indices;
+		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(new_premask)
+			if (DIRECT_MULTIDIM_ELEM(new_premask, n)) new_indices.push_back((int)n);
 		// Published only once the mask is complete.
 		defect_premask = new_premask;
+		defect_premask_indices.swap(new_indices);
 		defect_premask_fn = fn_defect;
 		defect_premask_defect_bytes = std::move(defect_bytes);
 		defect_premask_gain_fn = fn_gain_reference;
@@ -1674,6 +1990,23 @@ bool MotioncorrRunner::gainIdentityResolvedFor(int nx, int ny) const
 	       gain_cache_name == fn_gain_reference &&
 	       gain_cache_nx == nx && gain_cache_ny == ny;
 }
+
+#ifdef _CUDA_ENABLED
+// MOTIONCORR_PATCH_BATCH: unset = batched patch alignment with up to 4 patches
+// per chunk (fewer if device memory is short); 0 = per-patch alignment only;
+// N > 0 = at most N patches per chunk. Larger chunks made the stage only ~1 ms
+// faster on the tutorial data and cost more in release and dose weighting
+// (docs/batched_patch_alignment.md).
+static int patchBatchCap() {
+	const char *env = getenv("MOTIONCORR_PATCH_BATCH");
+	if (!env) return 4;
+	char *end = nullptr;
+	const long value = strtol(env, &end, 10);
+	if (end == env || *end != '\0' || value < 0 || value > 4096)
+		REPORT_ERROR(std::string("Invalid MOTIONCORR_PATCH_BATCH: ") + env);
+	return (int)value;
+}
+#endif
 
 bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective_expected_frames) {
 	timeval movie_start_time;
@@ -1872,6 +2205,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		movie_session.reset();
 	};
 	if (use_gpu && !early_binning) {
+		StageScope session_scope("session setup");
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
 		// The device gain copy may outlive this session; the generation is what
 		// makes reusing it safe across movies. It is only an identity because
@@ -1892,6 +2226,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	if (ingest_mode != INGEST_COMPACT && ingest_mode != INGEST_FLOAT &&
 	    movie_session && !isEER && !isCompressedMRC) {
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
+		StageScope ingest_scope("device ingest");
 		ingest_status = movie_session->ingestMovie(fn_mic, frames, gain_ptr, n_io_threads);
 	}
 	// Each outcome gets its own response. Collapsing them into one bool is what
@@ -2091,8 +2426,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		        << " host staging after device forward FFT." << std::endl;
 	};
 
-	MultidimArray<float> Isum(ny, nx);
-	Isum.initZeros();
+	// The host unaligned sum is only read by CPU paths: the CPU gain-and-sum pass,
+	// host hot-pixel statistics, or the GPU statistics fallback (which downloads
+	// into it). On the resident path with GPU statistics none of those run, so
+	// the 57 MB buffer is materialised lazily by ensure_host_sum(). Every reader
+	// below calls it first; downloadUnalignedSum() reshapes it itself.
+	MultidimArray<float> Isum;
+	const long int isum_pixels = (long int)nx * ny;
+	auto ensure_host_sum = [&]() {
+		if (Isum.data == NULL) { Isum.resize(ny, nx); Isum.initZeros(); }
+	};
 	// The resident CUDA preprocessing path keeps decoded frames raw on the host.
 	// Its device copy is gain-corrected; host frames are materialized only if a
 	// later CPU/streaming path actually needs them.
@@ -2207,6 +2550,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			logfile << "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing." << std::endl;
 			// The failed CUDA call may have partially written the sum. Start the
 			// original CPU pass from raw frames and a known-zero accumulator.
+			ensure_host_sum();
 			Isum.initZeros();
 			// The CPU pass below reads float frames in place.
 			expand_compact_to_float();
@@ -2216,6 +2560,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 	{
 		const bool apply_gain = (fn_gain_reference != "");
+		ensure_host_sum();
 		const long int n_pixels = YXSIZE(Isum);
 		// Walk a tile of pixels through every frame before moving to the next
 		// tile. Frame-minor traversal of the whole image touches n_frames
@@ -2255,7 +2600,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		MC_STAGE("hot pixels");
 		RCTIC(TIMING_DETECT_HOT);
 		RFLOAT mean = 0, std = 0, threshold = 0;
-		MultidimArray<bool> bBad(ny, nx);
+		// Every element is overwritten by the pre-mask copy below before any read,
+		// so the zero fill of the sizing constructor is skipped.
+		MultidimArray<bool> bBad;
+		bBad.resizeNoCp(1, ny, nx);
 		int n_bad = 0;
 		const int NUM_MIN_OK = 6;
 		const int D_MAX = isEER ? 4 : 2;
@@ -2281,17 +2629,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				if (movie_session->reduceUnalignedSum(sum1, sum_abs))
 				{
 					// Same source expressions as the host path, so host rounding is unchanged.
-					const RFLOAT gpu_mean = sum1 / YXSIZE(Isum);
+					const RFLOAT gpu_mean = sum1 / isum_pixels;
 					if (std::isfinite(gpu_mean) && movie_session->reduceUnalignedSumSqDev(gpu_mean, sum2))
 					{
-						const RFLOAT gpu_std = std::sqrt(sum2 / YXSIZE(Isum));
+						const RFLOAT gpu_std = std::sqrt(sum2 / isum_pixels);
 						const RFLOAT gpu_threshold = gpu_mean + hotpixel_sigma * gpu_std;
 						// Bound the difference between reduction orders, including signed
 						// cancellation in the mean and its second-order contribution to std.
 						// For nearly constant data the latter scales as mean_abs^2/std;
 						// a zero/non-finite std makes the guard fail and uses the host scan.
 						// Widening the band only increases conservative host fallback.
-						const double n_pix = (double)YXSIZE(Isum);
+						const double n_pix = (double)isum_pixels;
 						const double u = (double)std::numeric_limits<RFLOAT>::epsilon() / 2.0;
 						const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
 						const double mean_abs = sum_abs / n_pix;
@@ -2332,6 +2680,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 			if (!used_gpu_stats)
 			{
+				ensure_host_sum();
 				mean = 0; std = 0;
 				#pragma omp parallel for reduction(+:mean) num_threads(n_threads)
 				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
@@ -2350,6 +2699,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			n_bad = 0;
 			mic.hotpixelX.clear();
 			mic.hotpixelY.clear();
+			std::vector<int> new_hits;
 			// Deep copy: detected hot pixels are added to this movie's mask below
 			// and must not reach the cached static premask.
 			bBad = getDefectPremask(nx, ny, fn_defect, fn_gain_reference, Igain, n_threads);
@@ -2375,6 +2725,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 						n_bad++;
 						mic.hotpixelX.push_back(n % nx);
 						mic.hotpixelY.push_back(n / nx);
+						new_hits.push_back((int)n);
 					}
 				}
 			}
@@ -2386,20 +2737,27 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 						n_bad++;
 						mic.hotpixelX.push_back(n % nx);
 						mic.hotpixelY.push_back(n / nx);
+						new_hits.push_back((int)n);
 					}
 				}
 			}
 
 			// Ascending row-major, which is the order both consumers below need.
-			bad_xs.clear();
-			bad_ys.clear();
-			bad_xs.reserve(1024);
-			bad_ys.reserve(1024);
-			FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
-				if (DIRECT_A2D_ELEM(bBad, i, j)) {
-					bad_xs.push_back(j);
-					bad_ys.push_back(i);
-				}
+			// bBad is exactly the pre-mask plus new_hits, so merging the two sorted
+			// index lists gives the list a full-frame scan would. The scan stays as
+			// the path for any input the merge cannot certify.
+			if (!mc_defect::mergeBadIndices(defect_premask_indices, new_hits, nx, bad_xs, bad_ys))
+			{
+				bad_xs.clear();
+				bad_ys.clear();
+				bad_xs.reserve(1024);
+				bad_ys.reserve(1024);
+				FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+					if (DIRECT_A2D_ELEM(bBad, i, j)) {
+						bad_xs.push_back(j);
+						bad_ys.push_back(i);
+					}
+			}
 
 			// Gaussian replacement consumes mean/std as well as the hot-pixel mask.
 			// If it is reachable, use the original host statistics rather than
@@ -2828,7 +3186,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	RCTIC(TIMING_GLOBAL_ALIGNMENT);
 #ifdef _CUDA_ENABLED
 	if (movie_session) {
-		alignPatchDevice(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+		// The real-space movie is dead until the inverse FFT below rewrites it,
+		// so the alignment's scratch lives there (docs/vram_live_ranges.md).
+		size_t arena_bytes = 0;
+		void *arena = movie_session->borrowRealFramesForGlobalAlignment(arena_bytes);
+		alignPatchDevice(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true, arena, arena_bytes);
 	} else
 #endif
 	{
@@ -2841,10 +3203,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		mic.setGlobalShift(frames[i] + 1, xshifts[i] * prescaling, yshifts[i] * prescaling); // 1-indexed
         }
 
-	Iref().reshape(ny, nx);
-	Iref_even().reshape(ny, nx);
-	Iref_odd().reshape(ny, nx);
-	Iref().initZeros();
+	// Iref, Iref_even and Iref_odd are acquired (pooled, then zeroed) at the
+	// reconstruction sites below; nothing reads them before that. The old
+	// reshape+initZeros here was a dead full-frame allocation and memset per
+	// movie (#162 review).
 
 	// The real-space frames reconstructed below have exactly two readers:
 	// patch clipping (do_local) and the "before dose weighting" sum further
@@ -2934,22 +3296,51 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		} patch_fcomplex_guard{&d_patch_fcomplex_buffer};
 #endif
 
+		// One definition of the patch bounds, for the batched pass and the loop.
+		auto patch_bounds = [&](int iy, int ix, int &x_start, int &x_end, int &y_start, int &y_end) {
+			x_start = ix * patch_nx; y_start = iy * patch_ny; // Inclusive
+			x_end = x_start + patch_nx; y_end = y_start + patch_ny; // Exclusive
+			if (x_end > nx) x_end = nx;
+			if (y_end > ny) y_end = ny;
+			// make patch size even
+			if ((x_end - x_start) % 2 == 1) {
+				if (x_end == nx) x_start++;
+				else x_end--;
+			}
+			if ((y_end - y_start) % 2 == 1) {
+				if (y_end == ny) y_start++;
+				else y_end--;
+			}
+		};
+
+#ifdef _CUDA_ENABLED
+		// Batched resident alignment (docs/batched_patch_alignment.md). It only
+		// computes; each done patch's log lines and results are consumed in patch
+		// order by the loop below, which keeps the non-convergence retry and every
+		// other per-patch decision unchanged. Patches it did not align take the
+		// per-patch device path.
+		std::vector<CudaMovieSession::PatchBatchOutcome> batched;
+		if (movie_session) {
+			std::vector<CudaMovieSession::PatchBox> boxes;
+			for (int iy = 0; iy < patch_y; iy++) {
+				for (int ix = 0; ix < patch_x; ix++) {
+					int x_start, x_end, y_start, y_end;
+					patch_bounds(iy, ix, x_start, x_end, y_start, y_end);
+					boxes.push_back({x_start, y_start, x_end - x_start, y_end - y_start});
+				}
+			}
+			RCTIC(TIMING_PATCH_ALIGN);
+			movie_session->alignPatchesBatched(boxes, n_groups, group_start.data(), group_size.data(),
+				bfactor / (prescaling * prescaling), max_iter, ccf_downsample, patchBatchCap(), batched);
+			RCTOC(TIMING_PATCH_ALIGN);
+		}
+#endif
+
 		int ipatch = 1;
 		for (int iy = 0; iy < patch_y; iy++) {
 			for (int ix = 0; ix < patch_x; ix++) {
-				int x_start = ix * patch_nx, y_start = iy * patch_ny; // Inclusive
-				int x_end = x_start + patch_nx, y_end = y_start + patch_ny; // Exclusive
-				if (x_end > nx) x_end = nx;
-				if (y_end > ny) y_end = ny;
-				// make patch size even
-				if ((x_end - x_start) % 2 == 1) {
-					if (x_end == nx) x_start++;
-					else x_end--;
-				}
-				if ((y_end - y_start) % 2 == 1) {
-					if (y_end == ny) y_start++;
-					else y_end--;
-				}
+				int x_start, x_end, y_start, y_end;
+				patch_bounds(iy, ix, x_start, x_end, y_start, y_end);
 
 				int x_center = (x_start + x_end - 1) / 2, y_center = (y_start + y_end - 1) / 2;
 				logfile << "Patch (" << iy + 1 << ", " << ix + 1 << "): " << ipatch << " / " << patch_x * patch_y;
@@ -2970,9 +3361,22 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				// converged == false is a completed alignment reporting its
 				// convergence verdict. Only the first is a fallback candidate.
 				bool device_prep_ok = false;
-				if (movie_session) {
+				const CudaMovieSession::PatchBatchOutcome *batch_outcome =
+					batched.empty() ? nullptr : &batched[iy * patch_x + ix];
+				if (batch_outcome && batch_outcome->done) {
+					// Completed on the device: the same verdict and shifts the
+					// per-patch call below would have produced.
+					device_prep_ok = true;
+					writePatchBatchLog(logfile, batch_outcome->log);
+					converged = batch_outcome->log.converged;
+					local_xshifts = batch_outcome->xshifts;
+					local_yshifts = batch_outcome->yshifts;
+				} else if (movie_session) {
 					RCTIC(TIMING_PREP_PATCH);
-					size_t sz_fpatches = (size_t)n_groups * patch_h * patch_nfx * sizeof(cufftComplex);
+					// Only each group's CCF window is kept (cudaExtractPatchWindow).
+					int window_nx = 0, window_ny = 0;
+					patchSpectrumWindow(patch_w, patch_h, bfactor / (prescaling * prescaling), ccf_downsample, window_nx, window_ny);
+					size_t sz_fpatches = (size_t)n_groups * window_ny * (window_nx / 2 + 1) * sizeof(cufftComplex);
 					if (!d_patch_fcomplex_buffer || sz_cached_patch_fcomplex < sz_fpatches) {
 						cufftComplex *stale = d_patch_fcomplex_buffer;
                         d_patch_fcomplex_buffer = nullptr;
@@ -2990,12 +3394,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 						}
 					}
 					if (d_patch_fcomplex_buffer) {
-						device_prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_patch_fcomplex_buffer);
+						device_prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_patch_fcomplex_buffer, window_nx, window_ny);
 					}
 					RCTOC(TIMING_PREP_PATCH);
 
 					if (device_prep_ok) {
 						RCTIC(TIMING_PATCH_ALIGN);
+						movie_session->getPatchAlignmentWorkspace().setSpectrumWindowed(true);
 						converged = cudaAlignPatchDeviceWithWorkspace(movie_session->getPatchAlignmentWorkspace(), d_patch_fcomplex_buffer, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, max_iter, ccf_downsample, gpu_id, logfile, false);
 						RCTOC(TIMING_PATCH_ALIGN);
 					}
@@ -3383,11 +3788,13 @@ skip_fitting:
 #endif
 	if (pre_dw_sum_needed) {
 		MC_STAGE("unweighted sums");
-		Iref().reshape(ny, nx);
+		// Pooled full-frame buffers (src/frame_buffer_pool.h): same contents as
+		// reshape()+initZeros(), without a fresh mapping per movie.
+		FrameBufferPool::instance().acquire(Iref(), ny, nx);
 		Iref().initZeros();
-		Iref_odd().reshape(ny, nx);
+		FrameBufferPool::instance().acquire(Iref_odd(), ny, nx);
 		Iref_odd().initZeros();
-		Iref_even().reshape(ny, nx);
+		FrameBufferPool::instance().acquire(Iref_even(), ny, nx);
 		Iref_even().initZeros();
 
 #ifdef _CUDA_ENABLED
@@ -3541,7 +3948,7 @@ skip_fitting:
 			}
 		}
 
-		Iref().reshape(ny, nx);
+		FrameBufferPool::instance().acquire(Iref(), ny, nx);
 		Iref().initZeros();
 
 #ifdef _CUDA_ENABLED
@@ -3552,7 +3959,9 @@ skip_fitting:
 				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
 			}
 			logfile << "Dose weighting and summing frames (CUDA in-VRAM)..." << std::endl;
-			cuda_dw_done = movie_session->reconstructDoseWeighted(Iref, doses, angpix * prescaling, poly_model);
+			// Nothing reads the real-space frames after dose weighting unless the
+			// pre-dose-weighting sum is needed, so DW may use them as scratch.
+			cuda_dw_done = movie_session->reconstructDoseWeighted(Iref, doses, angpix * prescaling, poly_model, !pre_dw_sum_needed);
 			if (!cuda_dw_done)
 				refuse_fallback_if_fatal(movie_session->getFailureState(), "resident dose-weighted reconstruction");
 		} else if (use_gpu) {
@@ -3616,6 +4025,15 @@ skip_fitting:
 	}
 
 	MC_STAGE("movie teardown");
+#ifdef _CUDA_ENABLED
+	// The session would otherwise be destroyed implicitly on return, still inside
+	// this stage but unattributed. Same order relative to the frame-cache guard
+	// (declared earlier, destroyed later); release() records its own errors.
+	if (movie_session) {
+		StageScope release_scope("session release");
+		movie_session.reset();
+	}
+#endif
 	// Set the start frame for the local motion model.
 	mic.first_frame = frames[0] + 1; // NOTE that this is 1-indexed.
 
@@ -4024,7 +4442,9 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 }
 
 #ifdef _CUDA_ENABLED
-bool MotioncorrRunner::alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global) {
+bool MotioncorrRunner::alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global, void *arena, size_t arena_bytes) {
+	if (arena)
+		return cudaAlignPatchDeviceInArena(d_Fframes, n_frames, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, arena, arena_bytes, is_global);
 	return cudaAlignPatchDevice(d_Fframes, n_frames, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, is_global);
 }
 #endif

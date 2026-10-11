@@ -45,7 +45,10 @@ def star_movies(path: str) -> Tuple[List[str], List[Tuple[int, str]]]:
             if s.split()[0] == "_rlnMicrographMovieName":
                 col = len(labels) - 1
         elif s and not s.startswith("#") and in_loop and col is not None:
-            movies.append(s.split()[col])
+            fields = s.split()
+            if len(fields) < len(labels):
+                raise ValueError("%s:%d: incomplete movie row" % (path, i + 1))
+            movies.append(fields[col])
             rows.append((i, block or ""))
     if not movies:
         raise ValueError("%s: no _rlnMicrographMovieName rows" % path)
@@ -63,6 +66,20 @@ def _relative_star(star: str) -> str:
     return norm
 
 
+def validate_input(data: str, star: str, n_movies: Optional[int]):
+    """Read-only input checks, safe to perform before replacing old evidence."""
+    if n_movies is not None and n_movies < 1:
+        raise ValueError("--movies must be positive")
+    data = os.path.abspath(data)
+    star = _relative_star(star)
+    src = os.path.join(data, star)
+    try:
+        movies, rows = star_movies(src)
+    except OSError as e:
+        raise ValueError("cannot read input STAR %s: %s" % (src, e)) from e
+    return data, star, src, movies, rows
+
+
 def stage_input(data: str, star: str, n_movies: Optional[int], work: str) -> Dict:
     """Payload working directory and STAR. With n_movies, a staging directory
     holds a STAR with the first n movie rows and symlinks to everything else
@@ -72,10 +89,7 @@ def stage_input(data: str, star: str, n_movies: Optional[int], work: str) -> Dic
     directory on the STAR's path is created (never symlinked) and its other
     entries are linked one level down, so the write can never follow a link
     back into --data and alter the source."""
-    data = os.path.abspath(data)
-    star = _relative_star(star)
-    src = os.path.join(data, star)
-    movies, rows = star_movies(src)
+    data, star, src, movies, rows = validate_input(data, star, n_movies)
     if n_movies is None or n_movies >= len(movies):
         return {"cwd": data, "star": star, "movies": movies, "staged": False, "star_sha256": prov.sha256_file(src)}
     stage = os.path.join(work, "input")
@@ -147,6 +161,7 @@ class GpuSampler:
         self.own_pids: set = set()
         self.unknown_pids: set = set()
         self.errors = 0
+        self.error_messages: set = set()
 
     # subclasses implement read() -> (device_used_bytes or None, [(pid, bytes or None)])
     def read(self):
@@ -176,8 +191,9 @@ class GpuSampler:
             t = time.monotonic()
             try:
                 used, procs = self.read()
-            except Exception:
+            except Exception as e:
                 self.errors += 1
+                self.error_messages.add(str(e))
                 used, procs = None, []
             self.samples += 1
             self.t_first = self.t_first or t
@@ -218,7 +234,8 @@ class GpuSampler:
                 "peak_device_delta_bytes": (self.device_peak - baseline)
                 if self.device_peak is not None and baseline is not None else None,
                 "own_pids_seen": sorted(self.own_pids), "foreign_pids": dict(sorted(self.foreign.items())),
-                "unclassified_pids": sorted(self.unknown_pids), "read_errors": self.errors}
+                "unclassified_pids": sorted(self.unknown_pids), "read_errors": self.errors,
+                "read_error_messages": sorted(self.error_messages)}
 
 
 def _ppid(pid: int) -> Optional[int]:
@@ -270,10 +287,13 @@ class NvmlSampler(GpuSampler):
         count = ctypes.c_uint(64)
         arr = (_NvmlProc * 64)()
         procs = []
-        if self._get_procs(self.handle, ctypes.byref(count), arr) == 0:
-            for i in range(count.value):
-                m = arr[i].usedGpuMemory
-                procs.append((int(arr[i].pid), None if m == NVML_NA else int(m)))
+        rc = self._get_procs(self.handle, ctypes.byref(count), arr)
+        if rc != 0 or count.value > len(arr):
+            raise RuntimeError("NVML process enumeration failed (status %d, count %d, capacity %d)"
+                               % (rc, count.value, len(arr)))
+        for i in range(count.value):
+            m = arr[i].usedGpuMemory
+            procs.append((int(arr[i].pid), None if m == NVML_NA else int(m)))
         return used, procs
 
 
@@ -293,12 +313,15 @@ class SmiSampler(GpuSampler):
         used = int(out.split()[0]) << 20 if rc == 0 and out.split() and out.split()[0].isdigit() else None
         rc, out = prov.run_text([self.smi, "--query-compute-apps=pid,gpu_uuid,used_memory",
                                  "--format=csv,noheader,nounits"], timeout=5)
+        if rc != 0:
+            raise RuntimeError("nvidia-smi process enumeration failed (status %d): %s" % (rc, out.strip()))
         procs = []
-        if rc == 0:
-            for line in out.splitlines():
-                f = [x.strip() for x in line.split(",")]
-                if len(f) >= 3 and f[1] == self.uuid and f[0].isdigit():
-                    procs.append((int(f[0]), int(f[2]) << 20 if f[2].isdigit() else None))
+        for line in out.splitlines():
+            f = [x.strip() for x in line.split(",")]
+            if len(f) < 3 or not f[0].isdigit() or not f[1]:
+                raise RuntimeError("nvidia-smi process enumeration failed: invalid row %r" % line)
+            if f[1] == self.uuid:
+                procs.append((int(f[0]), int(f[2]) << 20 if f[2].isdigit() else None))
         return used, procs
 
     def _wait(self, t0: float) -> None:
@@ -472,6 +495,9 @@ def run_flags(rec: Dict, lane: Sequence[int]) -> Dict[str, List[str]]:
         note.append("compilers running on the host")
     if v.get("unclassified_pids"):
         discard.append("unclassified GPU pids %s" % v["unclassified_pids"])
+    if v.get("read_errors"):
+        discard.append("GPU occupancy read failed %d time(s): %s"
+                       % (v["read_errors"], "; ".join(v.get("read_error_messages", []))))
     return {"discard": discard, "note": note}
 
 

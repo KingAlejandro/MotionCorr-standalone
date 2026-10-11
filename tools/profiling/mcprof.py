@@ -155,6 +155,7 @@ def start(a, rest, instrument, need_arms=True):
     cpus = prov.cpu_list(a.cpus)
     prov.cpu_list(a.runner_cpus)
     _, env_changes = runner.payload_env(a.gpu_uuid, a.env)
+    runner.validate_input(a.data, a.star, a.movies)
     work = prepare_work(a)
     pin_runner(a)
     staged = runner.stage_input(a.data, a.star, a.movies, work)
@@ -246,14 +247,15 @@ def cmd_run(a, rest, compare=False):
                                                    p["binaries"][arm].get("has_device_timing_option", False),
                                                    sampler=sampler)
                         contaminated = bool(gpu_settle and not gpu_settle["settled"]) or \
-                            bool(occupancy and (occupancy.get("foreign_pids") or occupancy.get("unknown_pids")))
+                            bool(occupancy and (occupancy.get("foreign_pids") or occupancy.get("unknown_pids")
+                                                or occupancy.get("errors")))
                         p.setdefault("trace_occupancy", []).append(
                             {"arm": arm, "pass": k + 1, "settle": gpu_settle, "during": occupancy,
                              "contaminated": contaminated})
                         if contaminated:
                             with open(os.path.join(trace_dir, "CONTAMINATED"), "w") as f:
                                 f.write(json.dumps({"settle": gpu_settle, "during": occupancy}) + "\n")
-                            print("mcprof: %-8s trace p%02d saw other GPU processes; excluded from deltas"
+                            print("mcprof: %-8s trace p%02d GPU occupancy contaminated or unreadable; excluded from deltas"
                                   % (arm, k + 1), flush=True)
                         p.setdefault("trace_device_timing", {})[arm] = mode
                         print("mcprof: %-8s trace p%02d done" % (arm, k + 1), flush=True)
@@ -358,7 +360,8 @@ def do_trace(a, binary, args, staged, work, cpus, has_profile, has_device_timing
             if sampler is not None and sampler.uuid:
                 sampler.stop()
                 occupancy = {"samples": sampler.samples, "foreign_pids": sorted(sampler.foreign),
-                             "unknown_pids": sorted(sampler.unknown_pids), "errors": sampler.errors}
+                             "unknown_pids": sorted(sampler.unknown_pids), "errors": sampler.errors,
+                             "error_messages": sorted(sampler.error_messages)}
     wall = time.monotonic() - t0
     if a.sample:
         subprocess.call(["sudo", "-n", "chown", "-R", "%d:%d" % (os.getuid(), os.getgid()), work])
@@ -428,10 +431,10 @@ def cmd_trace(a, rest):
                                    p["binaries"][name].get("has_device_timing_option", False), sampler=sampler)
         p["trace_device_timing"] = {name: mode}
         p["trace_occupancy"] = occupancy
-        if occupancy and (occupancy.get("foreign_pids") or occupancy.get("unknown_pids")):
+        if occupancy and (occupancy.get("foreign_pids") or occupancy.get("unknown_pids") or occupancy.get("errors")):
             with open(os.path.join(work, "CONTAMINATED"), "w") as f:
                 f.write(json.dumps({"during": occupancy}) + "\n")
-            print("mcprof: another GPU process was present during the trace; device timings are "
+            print("mcprof: GPU occupancy was contaminated or unreadable during the trace; device timings are "
                   "contaminated", flush=True)
         prov.write_json(os.path.join(work, "provenance.json"), p)
     write_report(work, 0.0, a.html)
@@ -596,7 +599,7 @@ def write_report(work, floor_s, want_html):
             if excluded:
                 out["device_deltas"]["excluded_traces"] = excluded
             parts.append(report.render_device_deltas(out["device_deltas"]) + (
-                "\n\nExcluded traces (another GPU process was present): %s\n" % ", ".join(excluded)
+                "\n\nExcluded traces (GPU occupancy contaminated or unreadable): %s\n" % ", ".join(excluded)
                 if excluded else ""))
             for arm, ts in traces.items():
                 parts.append(report.render_trace(ts[0]).replace(
@@ -606,8 +609,8 @@ def write_report(work, floor_s, want_html):
         t = report.load_json(os.path.join(work, "trace.json"))
         title = "MotionCorr trace"
         if os.path.isfile(os.path.join(work, "CONTAMINATED")):
-            parts.append("## WARNING: contaminated trace\n\nAnother GPU process was present during this "
-                         "trace (%s); its device timings include that contention.\n"
+            parts.append("## WARNING: contaminated trace\n\nAnother GPU process was present, or occupancy could not be read, "
+                         "during this trace (%s); its device timings cannot be treated as clean.\n"
                          % json.dumps(p.get("trace_occupancy")))
         if t.get("warning"):
             parts.append("WARNING: %s\n" % t["warning"])

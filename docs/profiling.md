@@ -48,6 +48,9 @@ or ascending ranges; an empty or descending lane is an error. When
 `--gpu-uuid` selects a device, `--env` cannot override `CUDA_VISIBLE_DEVICES`
 or `CUDA_DEVICE_ORDER`. These options are validated before `--force` clears
 the previous kit invocation.
+The input STAR path, readable movie rows and positive `--movies` count are
+also validated before a forced replacement, so an invalid input preserves
+the previous invocation's raw results and provenance.
 
 ## Trust rules and how they are enforced
 
@@ -77,6 +80,9 @@ the previous kit invocation.
    used more than 0.25 cores of the lane on average, the payload's affinity
    differed from the lane, the process image was not the arm's binary, or
    a sampled GPU process could not be classified as owned or foreign. A
+   failed GPU process query also discards the run; before launch it aborts
+   the invocation. NVML errors (including insufficient process-buffer capacity)
+   and failed or malformed `nvidia-smi` fallback queries never mean an idle GPU. A
    flag on any run discards the **whole round**: every arm loses it, so both
    arms always keep the same rounds and each retained difference is a complete
    pair (tested). The report lists rounds planned, retained and discarded,
@@ -179,6 +185,8 @@ but device deltas are not reported (`trace_instrumentation` in provenance).
 Before each trace pass the GPU is re-checked for other processes, and NVML
 samples it during the trace. A pass that saw another process is marked
 `CONTAMINATED`, recorded in `trace_occupancy`, and excluded from the deltas. A standalone `mcprof trace` gets the same marker and a warning at the top of its report. A process the payload starts in a new session (`nsys-launcher` does this for the traced application) still counts as the payload's own: ownership follows descent from the payload, not just the session.
+Failed process queries during a trace receive the same marker and exclusion;
+the error counts and diagnostic messages are retained with the occupancy record.
 
 `mcprof run` with several arms reports each arm but no comparison verdict, because it does not check product identity. Use `mcprof compare` for verdicts.
 

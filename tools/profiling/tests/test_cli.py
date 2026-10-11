@@ -154,6 +154,11 @@ class Compare(unittest.TestCase):
         self.assertEqual(len(ident["diff"]["differences"]), 3)   # three movies' payloads
         md = open(os.path.join(work, "report.md")).read()
         self.assertIn("| diff | FAIL |", md)
+        self.assertNotIn("speed only, products differ", md)
+        self.assertNotIn("## PRODUCTS DIFFER", md)
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(mcprof.main(["report", work]), 0)
+        self.assertNotIn("speed only, products differ", open(os.path.join(work, "report.md")).read())
 
     def test_allowed_product_difference_is_speed_only(self):
         rc, work = self.compare("diffok", ["main=" + self.base, "diff=" + self.diff], "--noise-floor", "0.1",
@@ -170,6 +175,9 @@ class Compare(unittest.TestCase):
         self.assertIn("| diff | FAIL |", sec["Product identity"])
         self.assertIn("**speed only, products differ: ", sec["Unprofiled wall and resources"])
         self.assertTrue(json.load(open(os.path.join(work, "provenance.json")))["allow_product_difference"])
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(mcprof.main(["report", work]), 0)
+        self.assertIn("speed only, products differ", open(os.path.join(work, "report.md")).read())
 
     def test_allow_flag_keeps_identical_arms_unlabelled(self):
         rc, work = self.compare("sameok", ["main=" + self.base, "same=" + self.same], "--noise-floor", "0.1",

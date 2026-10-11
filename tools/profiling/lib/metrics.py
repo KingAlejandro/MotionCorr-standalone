@@ -535,8 +535,9 @@ def analyze(db, top_kernels: int = 15) -> Dict:
                    "kernel_sum_ns": sum(k["end"] - k["start"] for k in kernels),
                    "kernel_union_ns": total(kern_u), "copy_sum_ns": sum(c["end"] - c["start"] for c in copies),
                    "copy_union_ns": total(copy_u),
-                   "overlap_ns": total(kern_u) + total(copy_u) + total(union([(m["start"], m["end"]) for m in memsets]))
-                   - total(busy),
+                   # Intersection of the two unions: memsets contribute to
+                   # busy time, but are neither kernels nor memory copies.
+                   "overlap_ns": total(kern_u) + total(copy_u) - total(union(kern_u + copy_u)),
                    "kernels": len(kernels), "copies": len(copies), "memsets": len(memsets),
                    "copy_bytes": sum(c["bytes"] for c in copies), "movies": len(movies),
                    "streams_with_kernels": len({k["stream"] for k in kernels})},

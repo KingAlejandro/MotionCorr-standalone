@@ -41,6 +41,14 @@ raw results (`runs.jsonl`, `identity.json`, `profile/*.jsonl`,
 `--keep-outputs`; `trace` keeps the `.nsys-rep` by default (`--keep sqlite`
 also keeps the export).
 
+Arm names are single identifiers: letters, digits, `_`, `.` and `-`, starting
+with a letter or digit. Path names and symlinked run directories are refused
+before output writing or cleanup. Explicit CPU lanes must contain numbers
+or ascending ranges; an empty or descending lane is an error. When
+`--gpu-uuid` selects a device, `--env` cannot override `CUDA_VISIBLE_DEVICES`
+or `CUDA_DEVICE_ORDER`. These options are validated before `--force` clears
+the previous kit invocation.
+
 ## Trust rules and how they are enforced
 
 1. **Provenance.** `provenance.json` holds the command, the kit commit (and
@@ -67,7 +75,8 @@ also keeps the export).
    a timeout is recorded, not hidden. A run is flagged when a foreign process
    appears on the target GPU, the GPU was occupied at start, other processes
    used more than 0.25 cores of the lane on average, the payload's affinity
-   differed from the lane, or the process image was not the arm's binary. A
+   differed from the lane, the process image was not the arm's binary, or
+   a sampled GPU process could not be classified as owned or foreign. A
    flag on any run discards the **whole round**: every arm loses it, so both
    arms always keep the same rounds and each retained difference is a complete
    pair (tested). The report lists rounds planned, retained and discarded,
@@ -146,9 +155,11 @@ For paired differences d = B − A (positive: B slower):
 
 ### Identity
 
-- MRC: bytes 0–223 of the header, the extended header and the full payload
-  must be identical. Bytes 224–1023 are the label block, where MotionCorr writes
-  a timestamp.
+- MRC: the complete 1024-byte header (including all ten labels), extended
+  header and full payload must be identical. Only the `DD-Mon-YY  HH:MM:SS`
+  suffix of the known first-label `Relion <version>   ...` writer label is
+  masked. The version, other label text and padding remain exact. Unknown
+  label formats fail closed when they differ.
 - Every other file must be byte-identical after the tree's own absolute root is
   replaced by a placeholder (STAR and EPS embed the output path).
 - Per-movie `.log` files (timing values) are excluded and PDFs (Ghostscript

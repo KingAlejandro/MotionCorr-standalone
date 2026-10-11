@@ -57,6 +57,7 @@ def main():
         struct.pack_into("<3i", hdr, 0, 4, 4, 1)
         struct.pack_into("<i", hdr, 12, 2)
         hdr[208:212] = b"MAP "
+        struct.pack_into("<i", hdr, 220, 1)
         label = ("Relion    %s" % time.strftime("%d-%b-%y  %H:%M:%S")).encode()
         hdr[224:224 + len(label)] = label
         payload = hashlib.sha256((m + variant).encode()).digest() * 2

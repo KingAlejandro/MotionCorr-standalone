@@ -66,6 +66,7 @@ def parse_arms(specs):
         name, sep, path = s.partition("=")
         if not sep:
             name, path = ("A", "B", "C", "D", "E")[i] if i < 5 else "arm%d" % i, s
+        runner.validate_arm_name(name)
         if name in arms:
             raise SystemExit("duplicate arm name %s" % name)
         path = os.path.abspath(path)
@@ -151,12 +152,13 @@ def start(a, rest, instrument, need_arms=True):
         raise SystemExit("no arm given")
     if not a.data:
         raise SystemExit("--data is required")
-    work = prepare_work(a)
     cpus = prov.cpu_list(a.cpus)
+    prov.cpu_list(a.runner_cpus)
+    _, env_changes = runner.payload_env(a.gpu_uuid, a.env)
+    work = prepare_work(a)
     pin_runner(a)
     staged = runner.stage_input(a.data, a.star, a.movies, work)
     args = payload_args(rest)
-    _, env_changes = runner.payload_env(a.gpu_uuid, a.env)
     p = prov.provenance(instrument, sys.argv, binaries_record(a, arms), cpus, a.gpu_uuid,
                         {"arms": list(arms), "input": staged, "payload_args": args, "payload_env": env_changes,
                          "locks": [], "noise_floor_s": getattr(a, "noise_floor", 0.0)})
@@ -538,12 +540,13 @@ def write_report(work, floor_s, want_html):
         ip = os.path.join(work, "identity.json")
         ident = report.load_json(ip) if os.path.isfile(ip) else None
         differ = sorted(k for k, v in (ident or {}).items() if not v["identical"])
-        for arm in differ:
+        speed_only = is_compare and p.get("allow_product_difference", False)
+        for arm in differ if speed_only else []:
             c = d.get("comparisons", {}).get(arm)
             if c:
                 c["verdict"] = "%s: %s" % (report.SPEED_ONLY, c["verdict"])
                 c["products_differ"] = True
-        if differ:
+        if differ and speed_only:
             parts.append(report.render_products_differ(differ, ident))
         parts.append(report.render_run_section(d))
         if d.get("comparisons_withheld"):

@@ -181,11 +181,15 @@ def gpu_record(uuid: Optional[str]) -> Optional[Dict]:
 
 
 def cpu_list(spec: Optional[str]) -> List[int]:
-    if not spec:
+    if spec is None:
         return []
     out: List[int] = []
     for part in spec.split(","):
+        if not re.fullmatch(r"[0-9]+(?:-[0-9]+)?", part):
+            raise ValueError("invalid CPU lane %r; use CPU numbers or ascending ranges" % spec)
         a, _, b = part.partition("-")
+        if b and int(b) < int(a):
+            raise ValueError("descending CPU range %r in lane %r" % (part, spec))
         out.extend(range(int(a), int(b or a) + 1))
     return sorted(set(out))
 

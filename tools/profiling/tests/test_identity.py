@@ -16,7 +16,9 @@ def write_tree(root, stamp="01-Jan-26  00:00:00", payload=b"\x01\x02" * 32, star
     hdr = bytearray(1024)
     struct.pack_into("<3i", hdr, 0, 4, 4, 1)
     struct.pack_into("<i", hdr, 92, nsymbt)
-    hdr[224:224 + len(stamp)] = stamp.encode()
+    struct.pack_into("<i", hdr, 220, 1)
+    label = ("Relion 5.0.1   " + stamp).encode()
+    hdr[224:224 + len(label)] = label
     with open(os.path.join(root, "Movies", "m1.mrc"), "wb") as f:
         f.write(bytes(hdr) + b"E" * nsymbt + payload)
     with open(os.path.join(root, "Movies", "m1.star"), "w") as f:
@@ -37,7 +39,7 @@ class Identity(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmp)
 
-    def test_identical_apart_from_labels_logs_pdf_and_root(self):
+    def test_identical_apart_from_writer_time_logs_pdf_and_root(self):
         write_tree(self.a, stamp="01-Jan-26  00:00:00")
         write_tree(self.b, stamp="02-Feb-26  11:11:11")
         r = identity.compare_trees(self.a, self.b, expect_mrc=1)

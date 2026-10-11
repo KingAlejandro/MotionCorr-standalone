@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import ctypes
 import os
+import re
 import shutil
 import statistics
 import subprocess
@@ -322,7 +323,11 @@ def payload_env(gpu_uuid: Optional[str], extra: Sequence[str]) -> Tuple[Dict[str
         changes["CUDA_VISIBLE_DEVICES"] = gpu_uuid
         changes["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     for kv in extra:
-        k, _, v = kv.partition("=")
+        k, sep, v = kv.partition("=")
+        if not sep or not k:
+            raise ValueError("expected KEY=VALUE for --env, got %r" % kv)
+        if gpu_uuid and k in ("CUDA_VISIBLE_DEVICES", "CUDA_DEVICE_ORDER"):
+            raise ValueError("--gpu-uuid owns %s; do not override it with --env" % k)
         changes[k] = v
     env.update(changes)
     return env, changes
@@ -466,7 +471,7 @@ def run_flags(rec: Dict, lane: Sequence[int]) -> Dict[str, List[str]]:
     if rec.get("compilers_before") or rec.get("compilers_after"):
         note.append("compilers running on the host")
     if v.get("unclassified_pids"):
-        note.append("unclassified GPU pids %s" % v["unclassified_pids"])
+        discard.append("unclassified GPU pids %s" % v["unclassified_pids"])
     return {"discard": discard, "note": note}
 
 
@@ -511,6 +516,26 @@ def wait_quiet_lane(lane: Sequence[int], timeout_s: float, threshold: float = FO
 
 # ----------------------------------------------------------------- series
 
+def validate_arm_name(name: str) -> None:
+    """Arm names become directory components, never paths."""
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", name):
+        raise ValueError("invalid arm name %r; use letters, digits, _, . or -, starting with a letter or digit" % name)
+
+
+def checked_run_dir(work: str, path: str) -> str:
+    """Reject an escaping/symlinked run directory before writing or deleting."""
+    root, resolved = os.path.realpath(work), os.path.realpath(path)
+    if resolved == root or os.path.commonpath((root, resolved)) != root:
+        raise ValueError("run directory escapes work root: %s" % path)
+    relative = os.path.relpath(os.path.abspath(path), os.path.abspath(work))
+    current = os.path.abspath(work)
+    for component in relative.split(os.sep):
+        current = os.path.join(current, component)
+        if os.path.islink(current):
+            raise ValueError("run directory contains a symlink: %s" % current)
+    return path
+
+
 def schedule(arms: Sequence[str], rounds: int) -> List[List[str]]:
     """Round r runs the arms rotated by r, so each arm takes each position
     equally often; with two arms the order alternates AB, BA, AB, ..."""
@@ -535,10 +560,12 @@ def series(arms: Dict[str, str], args: Sequence[str], staged: Dict, work: str, c
     depends only on the discard flags, never on the timings."""
     env, _ = payload_env(gpu_uuid, env_extra)
     names = list(arms)
+    for name in names:
+        validate_arm_name(name)
     max_rounds = max(rounds, max_rounds or rounds)
     plan = [("warmup", w, [n]) for w in range(warmup) for n in names] + \
            [("round", r + 1, order) for r, order in enumerate(schedule(names, max_rounds))]
-    runs_dir = os.path.join(work, "runs")
+    runs_dir = checked_run_dir(work, os.path.join(work, "runs"))
     os.makedirs(runs_dir, exist_ok=True)
     clean = ran = 0
     for kind, r, order in plan:
@@ -548,7 +575,7 @@ def series(arms: Dict[str, str], args: Sequence[str], staged: Dict, work: str, c
         quiet = wait_quiet_lane(cpus, lane_wait_s) if lane_wait_s > 0 else None
         for pos, arm in enumerate(order):
             tag = "%s-%s%02d" % (arm, "w" if kind == "warmup" else "r", r)
-            out = os.path.join(runs_dir, tag, "out")
+            out = checked_run_dir(work, os.path.join(runs_dir, tag, "out"))
             argv = payload_argv(arms[arm], args, staged["star"], out, cpus)
             rec = run_once(argv, staged["cwd"], env, os.path.join(runs_dir, tag + ".log"), sampler, cpus,
                            arms[arm], out, len(staged["movies"]))
@@ -563,6 +590,6 @@ def series(arms: Dict[str, str], args: Sequence[str], staged: Dict, work: str, c
             after_round(r if kind == "round" else 0, done)
         if not keep_outputs:
             for rec in done.values():
-                shutil.rmtree(os.path.dirname(rec["out_dir"]), ignore_errors=True)
+                shutil.rmtree(checked_run_dir(work, os.path.dirname(rec["out_dir"])), ignore_errors=True)
     return {"target_clean_rounds": rounds, "max_rounds": max_rounds, "rounds_run": ran, "clean_rounds": clean,
             "reached_target": clean >= rounds}

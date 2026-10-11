@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Sequence
 from . import stats
 
 INSTR_RUN = "mcprof run: unprofiled process, wall from CLOCK_MONOTONIC, CPU/RSS/faults from wait4, VRAM from NVML sampling"
-INSTR_IDENTITY = "lib/identity.py: MRC core header + payload, path-normalised STAR/EPS, round 1"
+INSTR_IDENTITY = "lib/identity.py: complete MRC header + extended header + payload, writer clock masked, path-normalised STAR/EPS, round 1"
 INSTR_PROFILE = "--profile (docs/stage_profile.md): profiled process, per-stage main-thread wall/CPU/faults"
 INSTR_NSYS = "Nsight Systems trace (--trace=cuda,nvtx --cuda-memory-usage=true): traced process, host times inflated"
 INSTR_NCU = "Nsight Compute: replayed kernels, counters only; durations are not timings"
@@ -451,7 +451,8 @@ def render_identity(ident: Dict) -> str:
         for side, key in (("only in base", "only_a"), ("only in arm", "only_b")):
             if r[key]:
                 body += "\n- `%s` %s: %s" % (arm, side, ", ".join(r[key][:10]))
-    body += "\n\nExcluded: per-movie `.log` (timing values) and `.pdf` (Ghostscript dates); MRC label bytes 224-1023."
+    body += "\n\nExcluded: per-movie `.log` (timing values) and `.pdf` (Ghostscript dates). " \
+            "All MRC header/label and extended-header bytes are compared; only the known first-label Relion writer timestamp is masked."
     return section("Product identity", INSTR_IDENTITY, body)
 
 

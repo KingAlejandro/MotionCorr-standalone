@@ -1,9 +1,9 @@
 """Product identity between two MotionCorr output trees (docs/profiling.md).
 
-* MRC (.mrc, .mrcs): core header bytes 0-223, the extended header and the
-  full payload must be byte-identical. Bytes 224-1023 are the ten 80-byte
-  labels; MotionCorr writes a strftime timestamp there, so they differ between
-  identical runs and are excluded.
+* MRC (.mrc, .mrcs): the complete 1024-byte header (including all ten labels),
+  extended header and payload must be byte-identical. Only the known Relion
+  writer timestamp at the end of the first label is normalised. The version,
+  remaining label text, padding and other labels are compared.
 * Every other file except those below: byte-identical after the tree's own
   absolute root is replaced by a placeholder. STAR and EPS files embed the
   output path; nothing else is normalised.
@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 import struct
 from typing import Dict, List, Optional
 
@@ -24,6 +25,23 @@ LABEL_START, HEADER_LEN = 224, 1024
 EXCLUDED = {".log": "timing values in per-movie logs",
             ".pdf": "Ghostscript creation date and /ID"}
 CHUNK = 8 << 20
+WRITER_LABEL = re.compile(
+    rb"(Relion [\x20-\x7e]*   )"
+    rb"((?:0[1-9]|[12][0-9]|3[01])-(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2}  "
+    rb"(?:[01][0-9]|2[0-3]):[0-5][0-9]:(?:[0-5][0-9]|60))(\x00*)")
+
+
+def normalise_mrc_header(header: bytes) -> bytes:
+    """Mask the known first-label writer clock, leaving every other byte."""
+    # nlabl is itself compared in the core header. Do not reinterpret unused
+    # label bytes as a writer clock on files without a declared first label.
+    if struct.unpack("<i", header[220:224])[0] < 1:
+        return header
+    match = WRITER_LABEL.fullmatch(header[LABEL_START:LABEL_START + 80])
+    if not match:
+        return header
+    begin, end = match.span(2)
+    return header[:LABEL_START + begin] + b"0" * (end - begin) + header[LABEL_START + end:]
 
 
 def inventory(root: str) -> List[str]:
@@ -39,7 +57,7 @@ def _ext(path: str) -> str:
 
 
 def compare_mrc(a: str, b: str) -> Optional[str]:
-    """None when identical outside the label block, else the first difference."""
+    """None when complete headers/extended headers/payloads match after the clock mask."""
     sa, sb = os.path.getsize(a), os.path.getsize(b)
     with open(a, "rb") as fa, open(b, "rb") as fb:
         ha, hb = fa.read(HEADER_LEN), fb.read(HEADER_LEN)
@@ -48,6 +66,10 @@ def compare_mrc(a: str, b: str) -> Optional[str]:
         if ha[:LABEL_START] != hb[:LABEL_START]:
             off = next(i for i in range(LABEL_START) if ha[i] != hb[i])
             return "core header differs at byte %d" % off
+        na, nb = normalise_mrc_header(ha), normalise_mrc_header(hb)
+        if na[LABEL_START:] != nb[LABEL_START:]:
+            off = next(i for i in range(LABEL_START, HEADER_LEN) if na[i] != nb[i])
+            return "label header differs at byte %d" % off
         if sa != sb:
             return "size differs (%d vs %d bytes)" % (sa, sb)
         nsymbt = struct.unpack("<i", ha[92:96])[0]

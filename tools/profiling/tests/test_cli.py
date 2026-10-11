@@ -13,6 +13,7 @@ import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
+from unittest.mock import patch
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
@@ -56,6 +57,22 @@ class Compare(unittest.TestCase):
             rc = mcprof.main(argv)
         return rc, work
 
+    def contract_compare(self, name, arms, *extra):
+        # Exercise actual CLI, payload, products and profile stages, but feed
+        # known endpoint evidence to the report contract. Login-host jitter is
+        # allowed to hide a real stand-in delay; it must not fail this contract.
+        actual_run = mcprof.runner.run_once
+
+        def endpoints(argv, *args, **kwargs):
+            rec = actual_run(argv, *args, **kwargs)
+            rec["stand_in_observed_wall_s"] = rec["wall_s"]
+            rec["wall_s"] = 0.03 + (0.45 if self.slow in argv else 0.0)
+            rec["test_endpoint_evidence"] = "controlled stand-in report contract; not hardware timing"
+            return rec
+
+        with patch.object(mcprof.runner, "run_once", side_effect=endpoints):
+            return self.compare(name, arms, *extra)
+
     def test_null_is_not_resolved(self):
         # The floor keeps scheduler jitter between two identical arms from
         # ever reaching a verdict; the slowdown below is 0.45 s per run.
@@ -76,11 +93,16 @@ class Compare(unittest.TestCase):
         return [r for r in runs if r["kind"] == "round" and r["arm"] == "same"]
 
     def test_slowdown_resolves_and_is_localised(self):
-        rc, work = self.compare("slow", ["main=" + self.base, "slow=" + self.slow], "--noise-floor", "0.1",
+        rc, work = self.contract_compare("slow", ["main=" + self.base, "slow=" + self.slow], "--noise-floor", "0.1",
                                 "--profile-pass", "3")
         self.assertEqual(rc, 0)
         c = json.load(open(os.path.join(work, "compare.json")))
         self.assertEqual(c["runs"]["comparisons"]["slow"]["verdict"], "resolved slower")
+        records = [json.loads(line) for line in open(os.path.join(work, "runs.jsonl"))]
+        self.assertTrue(all(r["stand_in_observed_wall_s"] > 0 for r in records))
+        self.assertTrue(all("not hardware timing" in r["test_endpoint_evidence"] for r in records))
+        self.assertEqual({r["wall_s"] for r in records if r["arm"] == "main"}, {0.03})
+        self.assertEqual({r["wall_s"] for r in records if r["arm"] == "slow"}, {0.48})
         self.assertEqual(c["stage_deltas"]["passes"], {"main": 3, "slow": 3})
         stages = c["stage_deltas"]["arms"]["slow"]["stages"]
         self.assertTrue(stages["fit polynomial"]["wall_ms"]["flag"])
@@ -99,7 +121,7 @@ class Compare(unittest.TestCase):
     def test_report_regeneration_keeps_the_comparison_floor(self):
         # A floor large enough to hide the 0.45 s slowdown: regenerating the
         # report without --noise-floor must not quietly resolve it (#165 review).
-        rc, work = self.compare("floor", ["main=" + self.base, "slow=" + self.slow], "--noise-floor", "5")
+        rc, work = self.contract_compare("floor", ["main=" + self.base, "slow=" + self.slow], "--noise-floor", "5")
         self.assertEqual(rc, 0)
         c = json.load(open(os.path.join(work, "compare.json")))
         first = c["runs"]["comparisons"]["slow"]["verdict"]

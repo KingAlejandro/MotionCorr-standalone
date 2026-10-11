@@ -387,33 +387,52 @@ def do_trace(a, binary, args, staged, work, cpus, has_profile, has_device_timing
     return mode, occupancy
 
 
-def analyze_sqlite(sqlite, work, meta, sample=False):
+def read_sqlite_analysis(sqlite, meta, sample=False):
+    """Validate and analyze the export read-only before replacing old evidence."""
     db = nsys_db.NsysDB(sqlite)
-    t = metrics.analyze(db)
-    t["capture"] = meta
-    if not meta.get("nvtx_stages", True):
-        t["warning"] = "binary has no --profile option: no stage ranges, whole-trace figures only"
+    try:
+        t = metrics.analyze(db)
+        t["capture"] = meta
+        if not meta.get("nvtx_stages", True):
+            t["warning"] = "binary has no --profile option: no stage ranges, whole-trace figures only"
+        timeline = metrics.timeline(db, t)
+        folded = None
+        if sample and db.has_sampling():
+            samples, frames, names = db.sampling()
+            folded, dropped = metrics.folded_stacks(samples, frames, names)
+            t["sampling"] = {"samples": sum(folded.values()), "stacks": len(folded), "without_callchain": dropped,
+                             "note": "CPU sampling inflates some host calls (cuModuleLoadData >10x measured); "
+                                     "cross-check host figures against an unsampled run"}
+    finally:
+        db.close()
+    return t, timeline, folded
+
+
+def write_sqlite_analysis(analysis, work):
+    t, timeline, folded = analysis
     prov.write_json(os.path.join(work, "trace.json"), t)
-    prov.write_json(os.path.join(work, "timeline.json"), metrics.timeline(db, t))
-    if sample and db.has_sampling():
-        samples, frames, names = db.sampling()
-        folded, dropped = metrics.folded_stacks(samples, frames, names)
+    prov.write_json(os.path.join(work, "timeline.json"), timeline)
+    if folded is not None:
         with open(os.path.join(work, "folded.txt"), "w") as f:
             for k, v in sorted(folded.items(), key=lambda kv: -kv[1]):
                 f.write("%s %d\n" % (k, v))
-        t["sampling"] = {"samples": sum(folded.values()), "stacks": len(folded), "without_callchain": dropped,
-                         "note": "CPU sampling inflates some host calls (cuModuleLoadData >10x measured); "
-                                 "cross-check host figures against an unsampled run"}
-        prov.write_json(os.path.join(work, "trace.json"), t)
-    db.close()
     return t
+
+
+def analyze_sqlite(sqlite, work, meta, sample=False):
+    return write_sqlite_analysis(read_sqlite_analysis(sqlite, meta, sample), work)
 
 
 def cmd_trace(a, rest):
     if a.from_sqlite:
+        sqlite = os.path.abspath(a.from_sqlite)
+        source_work = [(sqlite, os.path.abspath(a.work)),
+                       (os.path.realpath(sqlite), os.path.realpath(a.work))]
+        if any(os.path.commonpath([source, work]) == work for source, work in source_work):
+            raise SystemExit("--from-sqlite must be outside --work; refusing to replace its source export")
+        analysis = read_sqlite_analysis(sqlite, {"from_sqlite": sqlite}, sample=a.sample)
         work = prepare_work(a)
-        analyze_sqlite(os.path.abspath(a.from_sqlite), work, {"from_sqlite": os.path.abspath(a.from_sqlite)},
-                       sample=a.sample)
+        write_sqlite_analysis(analysis, work)
         prov.write_json(os.path.join(work, "provenance.json"),
                         prov.provenance("Nsight Systems (existing export)", sys.argv, {}, [], None))
         write_report(work, 0.0, a.html)

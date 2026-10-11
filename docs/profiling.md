@@ -51,6 +51,10 @@ the previous kit invocation.
 The input STAR path, readable movie rows and positive `--movies` count are
 also validated before a forced replacement, so an invalid input preserves
 the previous invocation's raw results and provenance.
+Imported `trace --from-sqlite` exports are fully analyzed read-only before
+replacement, and exports resolving inside `--work` are refused (including
+symlink aliases). Movie columns reset at each STAR loop; a movie subset
+preserves rows in all other loops.
 
 ## Trust rules and how they are enforced
 
@@ -117,7 +121,9 @@ the previous invocation's raw results and provenance.
    sync census, allocations, copies, kernel counts and memory high-water. The
    statistics, identity rules, runner, locks and an end-to-end compare (null,
    slowed and product-difference arms against a stand-in binary) are tested
-   too.
+   too. The resolved-slowdown and noise-floor report contracts use controlled
+   stand-in endpoint evidence after actual payload execution; the observed
+   wall is retained separately. These controls are not hardware timings.
 
 ## What the numbers mean
 

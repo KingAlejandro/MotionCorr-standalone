@@ -39,7 +39,7 @@ def star_movies(path: str) -> Tuple[List[str], List[Tuple[int, str]]]:
         if s.startswith("data_"):
             block, in_loop, labels, col = s, False, [], None
         elif s == "loop_":
-            in_loop, labels = True, []
+            in_loop, labels, col = True, [], None
         elif s.startswith("_") and in_loop:
             labels.append(s.split()[0])
             if s.split()[0] == "_rlnMicrographMovieName":

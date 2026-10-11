@@ -56,6 +56,9 @@ DEFAULT_REQUIRED_TESTS = [
     # #154/#155 review fixes: profiler thread safety; bounded frame buffer pool.
     "StageProfileThreads",
     "FrameBufferPool",
+    # Profiling kit: Nsight query/metric known answers, paired statistics and
+    # product identity (docs/profiling.md). Device-free.
+    "ProfilingKit",
     # Added by the #69 CUDA reliability port. Device-free, so it is always
     # collected; the CUDA-only CudaErrorClass is not listed here, matching
     # the existing exclusion of CudaWrapperUploadFailure.

@@ -227,6 +227,8 @@ exec "{sys.executable}" "$@"
             "HostBufferReuse",
             "StageProfileThreads",
             "FrameBufferPool",
+            # Profiling kit (docs/profiling.md).
+            "ProfilingKit",
         ]
 
         def runnable(name: str) -> dict:
@@ -256,7 +258,7 @@ exec "{sys.executable}" "$@"
                         "MicrographModelBounds", "CompressedMovieSequence",
                         "RunnerInterpolateRecenter", "RunnerInterpolateShifts",
                         "StageProfile", "CudaValidationParser", "HostBufferReuse",
-                        "StageProfileThreads", "FrameBufferPool"):
+                        "StageProfileThreads", "FrameBufferPool", "ProfilingKit"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)
                 self.assertEqual(len(names), len(INTEGRATED_SUITE),

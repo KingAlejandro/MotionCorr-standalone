@@ -485,6 +485,7 @@ void MotioncorrRunner::initialise()
 		expected_frames_micrographs.resize(fn_micrographs.size(), expected_frames);
 		obsModel.opticsMdt.clear();
 		obsModel.opticsMdt.addObject();
+		obsModel.opticsMdt.setValue(EMDL_IMAGE_OPTICS_GROUP, 1);
 	}
 
 	// Make sure obsModel.opticsMdt has all the necessary information

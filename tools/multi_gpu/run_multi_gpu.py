@@ -511,6 +511,14 @@ def main(argv: list[str] | None = None) -> int:
                          "'-'-prefixed value as a separate token when it contains a "
                          "space, so '--worker-extra --j 2' happens to work while "
                          "'--worker-extra --sync_output' exits on a usage error.")
+    ap.add_argument("--worker-joint-report", action="store_true",
+                    help="let each worker build its own joint report (logfile.pdf and "
+                         "the header/batch PDFs it is assembled from). Those are "
+                         "per-process artifacts: merge_workers.py stages them under "
+                         "_workers/wK/ and the dataset's report is written by the "
+                         "aggregate step, so by default this launcher passes "
+                         "--skip_logfile to every worker. Each worker still writes its "
+                         "per-movie <movie>_shifts.eps, which the aggregate requires.")
     ap.add_argument("--omp-num-threads", default=None,
                     help="OMP_NUM_THREADS for every worker. Default when --cpus is "
                          "given: that worker's mask width.")
@@ -669,6 +677,23 @@ def main(argv: list[str] | None = None) -> int:
               "directory and device while the run still reported PASS.",
               file=sys.stderr)
         return 2
+
+    # The workers' joint reports are thrown away: merge_workers.py classes
+    # logfile.pdf and its header/batch inputs as per-process artifacts and stages
+    # them under _workers/wK/, while the dataset's report comes from the aggregate
+    # step. Building them costs the slowest worker its whole tail, which is serial
+    # against every other worker's exit. Suppress by default, and never twice --
+    # IOParser consumes one --skip_logfile and would report the second as an
+    # unrecognised argument. --skip_logfile must stay worker-only: the
+    # aggregate-only preflight uses the same flag to decide whether to require the
+    # per-movie EPS, so an aggregate given it would skip that check and then fail
+    # inside the report.
+    # Naming the flag anywhere means the caller is managing it, including when
+    # they set it on one worker and not another; adding to that would hand some
+    # worker the flag twice.
+    if not a.worker_joint_report and "--skip_logfile" not in extra \
+            and not any("--skip_logfile" in e for e in per_worker_extra):
+        extra.append("--skip_logfile")
 
     sampler = None
     # Per-worker timing and resident set. These are the quantities a scaling

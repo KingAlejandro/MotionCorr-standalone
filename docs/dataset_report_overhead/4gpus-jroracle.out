@@ -1,0 +1,26 @@
+base   rc=0 wall=8.010 PASS w0_skip_logfile=False
+base   rc=0 wall=8.656 PASS w0_skip_logfile=False
+cand   rc=0 wall=7.750 PASS w0_skip_logfile=True
+manifest: 24 movies shape=3710x3838x1
+--- product oracle: MRC header+extended+payload, per-movie STAR, joint STAR ---
+  null-base-vs-base          rc=0 status=PASS     differing=[]
+  treat-base-vs-cand         rc=0 status=PASS     differing=[]
+--- EPS, worker path normalised ---
+  null-base-vs-base          eps_differ=0/24 []
+  treat-base-vs-cand         eps_differ=0/24 []
+whole-tree: null_diffs=31 treat_diffs=37 attributable=6
+    + Movies/20170629_00022_frameImage.log
+    + _workers/w0/batch.pdf.lst
+    + _workers/w0/command.json
+    + _workers/w0/header.pdf
+    + _workers/w0/header.pdf.lst
+    + _workers/w0/logfile.pdf.lst
+--- positive controls ---
+  c0-unperturbed             rc=0 status=PASS     differing=[]
+  c1-mrc-payload             rc=1 status=FAIL     differing=['Movies/20170629_00021_frameImage.mrc']
+  c2-per-movie-star          rc=1 status=FAIL     differing=['Movies/20170629_00021_frameImage.star']
+  c3-joint-star              rc=1 status=REJECTED differing=["FAIL: /home/alex/mc-scale-20261012/jrnull/pc1/merged/corrected_micrographs.star: unexpected movie identity in image path '/home/alex/mc-scale-20261012/jrnull/pc1/merged/Movies/20170629_00021_frameImage_x.mrc'"]
+  c4-eps                     eps_differ=1 ['20170629_00021_frameImage_shifts.eps']
+POSITIVE_CONTROLS=ALL_FIRED
+VERDICT null=PASS treat=PASS attributable=6
+ALLDONE

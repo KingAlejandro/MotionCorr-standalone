@@ -1,0 +1,84 @@
+### probe1 command
+ssh 4GPUs 'cd ~/mc-startup-20261013 && flock -w 600 /tmp/motioncorr-bench.lock taskset -c 96-103 bash -c "
+echo COLD; for i in 1 2 3 4 5; do ./probe time 0 128; sleep 1; done
+echo COLD-huge; for i in 1 2 3; do ./probe time 0 128 huge; sleep 1; done
+./probe hold 120 & H=\$!; sleep 3
+echo WARM-holder; for i in 1 2 3 4 5; do ./probe time 0 128; sleep 1; done
+echo WARM-huge; for i in 1 2 3; do ./probe time 0 128 huge; done
+echo WARM-4concurrent; for d in 0 1 2 3; do ./probe time \$d 128 & done; wait %2 %3 %4 %5 2>/dev/null; sleep 1
+kill \$H; wait
+echo COLD-4concurrent; for d in 0 1 2 3; do ./probe time \$d 128 & done; wait
+" 2>&1'
+### probe1 output
+COLD
+dev=0 cuInit=305.5 ctx=169.3 hostAlloc=120.2 freeHost=47.0 touch=87.1 hostRegister=17.9 unregister=7.2 reset=88.6 ms
+dev=0 cuInit=289.1 ctx=152.9 hostAlloc=119.5 freeHost=45.6 touch=85.6 hostRegister=17.7 unregister=7.1 reset=99.0 ms
+dev=0 cuInit=292.0 ctx=155.5 hostAlloc=119.2 freeHost=45.2 touch=85.4 hostRegister=17.9 unregister=7.0 reset=93.8 ms
+dev=0 cuInit=430.0 ctx=520.6 hostAlloc=119.2 freeHost=45.6 touch=86.2 hostRegister=17.8 unregister=7.0 reset=91.2 ms
+dev=0 cuInit=308.0 ctx=158.8 hostAlloc=118.7 freeHost=46.3 touch=94.8 hostRegister=21.5 unregister=7.5 reset=100.7 ms
+COLD-huge
+dev=0 cuInit=306.6 ctx=165.0 hostAlloc=120.6 freeHost=46.6 touch=16.8 hostRegister=9.0 unregister=6.9 reset=88.6 ms
+dev=0 cuInit=306.2 ctx=165.2 hostAlloc=119.2 freeHost=46.1 touch=16.8 hostRegister=9.1 unregister=7.0 reset=88.9 ms
+dev=0 cuInit=289.4 ctx=172.2 hostAlloc=120.0 freeHost=45.5 touch=16.5 hostRegister=9.4 unregister=7.1 reset=89.1 ms
+holding
+WARM-holder
+dev=0 cuInit=69.0 ctx=171.3 hostAlloc=128.9 freeHost=47.5 touch=88.6 hostRegister=17.6 unregister=7.3 reset=99.6 ms
+dev=0 cuInit=63.2 ctx=158.3 hostAlloc=117.9 freeHost=46.1 touch=88.5 hostRegister=17.6 unregister=7.4 reset=93.6 ms
+dev=0 cuInit=71.3 ctx=181.6 hostAlloc=140.3 freeHost=46.3 touch=86.3 hostRegister=18.1 unregister=7.3 reset=93.9 ms
+dev=0 cuInit=62.9 ctx=165.1 hostAlloc=122.7 freeHost=47.4 touch=87.5 hostRegister=18.4 unregister=7.2 reset=95.0 ms
+dev=0 cuInit=63.6 ctx=157.4 hostAlloc=122.0 freeHost=46.9 touch=85.2 hostRegister=17.9 unregister=7.8 reset=100.5 ms
+WARM-huge
+dev=0 cuInit=68.6 ctx=168.1 hostAlloc=123.5 freeHost=47.8 touch=17.4 hostRegister=9.3 unregister=7.5 reset=94.5 ms
+dev=0 cuInit=62.6 ctx=158.7 hostAlloc=127.5 freeHost=48.6 touch=17.0 hostRegister=9.4 unregister=7.1 reset=91.3 ms
+dev=0 cuInit=63.1 ctx=163.8 hostAlloc=125.0 freeHost=46.4 touch=17.2 hostRegister=8.8 unregister=7.4 reset=91.1 ms
+WARM-4concurrent
+dev=0 cuInit=197.1 ctx=550.9 hostAlloc=128.7 freeHost=49.7 touch=91.3 hostRegister=18.7 unregister=7.3 reset=263.9 ms
+dev=1 cuInit=270.1 ctx=483.6 hostAlloc=132.2 freeHost=50.8 touch=104.2 hostRegister=28.7 unregister=12.4 reset=312.1 ms
+dev=3 cuInit=316.6 ctx=469.9 hostAlloc=154.2 freeHost=59.5 touch=120.3 hostRegister=41.5 unregister=8.6 reset=286.7 ms
+dev=2 cuInit=244.6 ctx=527.7 hostAlloc=153.6 freeHost=59.8 touch=121.3 hostRegister=44.1 unregister=9.3 reset=297.8 ms
+COLD-4concurrent
+dev=0 cuInit=494.9 ctx=551.7 hostAlloc=155.6 freeHost=56.9 touch=106.4 hostRegister=24.6 unregister=11.1 reset=388.3 ms
+dev=2 cuInit=571.7 ctx=502.3 hostAlloc=167.7 freeHost=62.0 touch=123.3 hostRegister=36.9 unregister=10.1 reset=324.1 ms
+dev=3 cuInit=536.4 ctx=536.0 hostAlloc=159.4 freeHost=61.5 touch=120.2 hostRegister=38.4 unregister=10.2 reset=353.6 ms
+dev=1 cuInit=520.3 ctx=555.9 hostAlloc=166.8 freeHost=71.5 touch=124.9 hostRegister=38.0 unregister=11.8 reset=342.0 ms
+### probe2 command
+ssh 4GPUs 'cd ~/mc-startup-20261013 && cat > exitprobe.cu <<EOF
+// Process with a context and a 128 MiB pinned buffer; PROBE_RESET=1 tears down explicitly.
+#include <cuda_runtime.h>
+#include <cstdlib>
+int main() { cudaSetDevice(0); void *p; cudaHostAlloc(&p, 128u << 20, 0); void *d; cudaMalloc(&d, 1u << 30);
+  if (getenv("PROBE_RESET")) { cudaFree(d); cudaFreeHost(p); cudaDeviceReset(); } return 0; }
+EOF
+/usr/local/cuda/bin/nvcc -O2 -o exitprobe exitprobe.cu 2>/dev/null && U0=$(nvidia-smi -i 0 --query-gpu=uuid --format=csv,noheader) && flock -w 600 /tmp/motioncorr-bench.lock taskset -c 96-103 bash -c "
+echo COLD-all4visible; for i in 1 2 3; do ./probe time 0 128; sleep 1; done
+echo COLD-CVD1; for i in 1 2 3; do CUDA_VISIBLE_DEVICES=$U0 ./probe time 0 128; sleep 1; done
+echo COLD-CVD1-lazy-eager; CUDA_MODULE_LOADING=EAGER CUDA_VISIBLE_DEVICES=$U0 ./probe time 0 128; sleep 1
+./probe hold 100 & H=\$!; sleep 3
+echo WARM-CVD1; for i in 1 2 3; do CUDA_VISIBLE_DEVICES=$U0 ./probe time 0 128; done
+echo EXIT-wall-implicit; for i in 1 2 3; do /usr/bin/time -f %e env CUDA_VISIBLE_DEVICES=$U0 ./exitprobe; done
+echo EXIT-wall-explicit-reset; for i in 1 2 3; do /usr/bin/time -f %e env PROBE_RESET=1 CUDA_VISIBLE_DEVICES=$U0 ./exitprobe; done
+kill \$H; wait" 2>&1'
+### probe2 output
+COLD-all4visible
+dev=0 cuInit=307.4 ctx=418.6 hostAlloc=175.2 freeHost=45.5 touch=87.6 hostRegister=40.0 unregister=7.0 reset=107.5 ms
+dev=0 cuInit=284.5 ctx=169.8 hostAlloc=118.5 freeHost=47.3 touch=83.4 hostRegister=17.3 unregister=7.1 reset=95.2 ms
+dev=0 cuInit=287.3 ctx=154.4 hostAlloc=119.2 freeHost=46.2 touch=82.6 hostRegister=17.0 unregister=7.0 reset=89.3 ms
+COLD-CVD1
+dev=0 cuInit=110.4 ctx=155.5 hostAlloc=120.4 freeHost=45.9 touch=82.9 hostRegister=17.3 unregister=7.1 reset=90.0 ms
+dev=0 cuInit=109.2 ctx=150.5 hostAlloc=120.8 freeHost=46.9 touch=85.7 hostRegister=18.5 unregister=8.0 reset=100.6 ms
+dev=0 cuInit=124.6 ctx=151.6 hostAlloc=122.1 freeHost=46.5 touch=84.9 hostRegister=17.7 unregister=7.3 reset=92.5 ms
+COLD-CVD1-lazy-eager
+dev=0 cuInit=110.5 ctx=185.4 hostAlloc=121.9 freeHost=46.5 touch=86.4 hostRegister=18.9 unregister=7.8 reset=92.0 ms
+holding
+WARM-CVD1
+dev=0 cuInit=61.5 ctx=156.0 hostAlloc=121.0 freeHost=46.7 touch=84.6 hostRegister=17.8 unregister=7.1 reset=90.4 ms
+dev=0 cuInit=60.3 ctx=169.8 hostAlloc=116.5 freeHost=44.8 touch=82.3 hostRegister=18.0 unregister=7.9 reset=94.0 ms
+dev=0 cuInit=57.6 ctx=151.9 hostAlloc=119.1 freeHost=46.1 touch=83.1 hostRegister=17.4 unregister=6.9 reset=90.3 ms
+EXIT-wall-implicit
+0.47
+0.48
+0.46
+EXIT-wall-explicit-reset
+0.47
+0.46
+0.47

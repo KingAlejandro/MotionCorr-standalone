@@ -125,6 +125,9 @@ public:
 
     // Skip generation of logfile
 	bool do_skip_logfile;
+	// Write the dataset STAR but no logfile.pdf; for workers whose report is
+	// rebuilt by --aggregate_only.
+	bool do_skip_report_pdf = false;
 
 	// Use our own implementation
 	bool do_own;

@@ -123,6 +123,7 @@ def main(argv: list[str] | None = None) -> int:
                     help="write this text to <out>/note.txt; used to prove that extra "
                          "arguments actually reached the process rather than being "
                          "silently dropped by the caller's argument handling")
+    ap.add_argument("--skip_report_pdf", action="store_true")
     a, _unknown = ap.parse_known_args(argv)
 
     outdir = Path(a.out)
@@ -191,10 +192,12 @@ def main(argv: list[str] | None = None) -> int:
                      f"{star_quote(prefix + root + '.star')}\n")
     lines.append("\n")
     (outdir / "corrected_micrographs.star").write_text("".join(lines))
-    if not a.fake_missing_report:
-        (outdir / "logfile.pdf").write_text("%PDF-1.4 fake\n%%EOF\n")
-    (outdir / "logfile.pdf.lst").write_text("fake\n")
-    (outdir / "corrected_micrographs_all_accum.eps").write_text("%!PS fake\n")
+    # --skip_report_pdf: the real runner returns after the joint STAR.
+    if not a.skip_report_pdf:
+        if not a.fake_missing_report:
+            (outdir / "logfile.pdf").write_text("%PDF-1.4 fake\n%%EOF\n")
+        (outdir / "logfile.pdf.lst").write_text("fake\n")
+        (outdir / "corrected_micrographs_all_accum.eps").write_text("%!PS fake\n")
 
     if a.fake_note is not None:
         (outdir / "note.txt").write_text(a.fake_note + "\n")

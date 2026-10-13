@@ -1573,13 +1573,13 @@ def case_cpu_budget_gate(tmp: Path) -> None:
         scheduling_require(cmd["cpu_mask_width"] == len(group), cmd)
 
 def case_worker_joint_report_suppressed(tmp: Path) -> None:
-    """Workers get --skip_logfile by default, once, and only when wanted.
+    """Workers get --skip_report_pdf by default, once, and only when wanted.
 
     Their joint reports are staged under _workers/wK/ and never published, so
-    building them only lengthens the slowest worker's tail. The flag must reach
-    each worker exactly once -- IOParser consumes one and reports a second as an
-    unrecognised argument -- and must stay off the aggregate, whose preflight
-    reads the same flag to decide whether to require the per-movie EPS.
+    building them only lengthens the slowest worker's tail; --skip_logfile alone
+    still runs Ghostscript for the header pages. The flag must reach each worker
+    exactly once -- IOParser consumes one and reports a second as an
+    unrecognised argument -- and must stay off the aggregate, which refuses it.
     """
     star = tmp / "movies.star"
     build_star(star, DEFAULT_ROWS)
@@ -1591,31 +1591,35 @@ def case_worker_joint_report_suppressed(tmp: Path) -> None:
               "--binary", FAKE, "--workers", "2", "--no-witness"])
     assert cp.returncode == 0, cp.stdout + cp.stderr
     for k in range(2):
-        assert worker_cmd(tmp / "jr_default", k).count("--skip_logfile") == 1, k
+        cmd = worker_cmd(tmp / "jr_default", k)
+        assert cmd.count("--skip_report_pdf") == 1, k
+        assert "--skip_logfile" not in cmd, k
+        assert not (tmp / "jr_default" / f"w{k}" / "logfile.pdf").exists(), k
 
     cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "jr_keep",
               "--binary", FAKE, "--workers", "2", "--no-witness",
               "--worker-joint-report"])
     assert cp.returncode == 0, cp.stdout + cp.stderr
     for k in range(2):
-        assert "--skip_logfile" not in worker_cmd(tmp / "jr_keep", k), k
+        assert "--skip_report_pdf" not in worker_cmd(tmp / "jr_keep", k), k
+        assert (tmp / "jr_keep" / f"w{k}" / "logfile.pdf").exists(), k
 
     # A user who passes it explicitly must not get it twice, in either position.
     cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "jr_shared",
               "--binary", FAKE, "--workers", "2", "--no-witness",
-              "--", "--skip_logfile"])
+              "--", "--skip_report_pdf"])
     assert cp.returncode == 0, cp.stdout + cp.stderr
     for k in range(2):
-        assert worker_cmd(tmp / "jr_shared", k).count("--skip_logfile") == 1, k
+        assert worker_cmd(tmp / "jr_shared", k).count("--skip_report_pdf") == 1, k
 
     # Naming it for one worker hands the launcher's management of it to the
     # caller for all of them, rather than giving that worker the flag twice.
     cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "jr_per",
               "--binary", FAKE, "--workers", "2", "--no-witness",
-              "--worker-extra=--skip_logfile", "--worker-extra=--j 2"])
+              "--worker-extra=--skip_report_pdf", "--worker-extra=--j 2"])
     assert cp.returncode == 0, cp.stdout + cp.stderr
-    assert worker_cmd(tmp / "jr_per", 0).count("--skip_logfile") == 1
-    assert "--skip_logfile" not in worker_cmd(tmp / "jr_per", 1)
+    assert worker_cmd(tmp / "jr_per", 0).count("--skip_report_pdf") == 1
+    assert "--skip_report_pdf" not in worker_cmd(tmp / "jr_per", 1)
 
 
 def case_per_worker_args_and_cpu_accounting(tmp: Path) -> None:

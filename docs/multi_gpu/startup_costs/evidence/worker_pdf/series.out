@@ -1,0 +1,64 @@
+=== VENUE ===
+2026-10-13T13:24:18+00:00
+4-gpu-vm
+Cpus_allowed_list:	96-103
+Build cuda_12.8.r12.8/compiler.35404655_0
+10.02.1
+base built: c1a3bb8dba07ebb9 flag_strings=0 home=CMAKE_HOME_DIRECTORY:INTERNAL=/home/alex/mc-wpdf-20261013/src-base
+cand built: 042142ecd87070a4 flag_strings=2 home=CMAKE_HOME_DIRECTORY:INTERNAL=/home/alex/mc-wpdf-20261013/src-cand
+base rc=0 wall_under_strace=35.424162737 gs_execs=5 motioncorr_execs=3
+  base gs: "-sOutputFile=/home/alex/mc-wpdf-"
+  base gs: "-sOutputFile=/home/alex/mc-wpdf-"
+  base gs: "-sOutputFile=/home/alex/mc-wpdf-"
+  base gs: "-sOutputFile=/home/alex/mc-wpdf-"
+  base gs: "-sOutputFile=/home/alex/mc-wpdf-"
+cand rc=0 wall_under_strace=36.010450309 gs_execs=3 motioncorr_execs=3
+  cand gs: "-sOutputFile=/home/alex/mc-wpdf-"
+  cand gs: "-sOutputFile=/home/alex/mc-wpdf-"
+  cand gs: "-sOutputFile=/home/alex/mc-wpdf-"
+=== files present in only one arm (whole --out tree) ===
+116,121d115
+< ./merged/_workers/w0/corrected_micrographs_all_rlnAccumMotionEarly.eps
+< ./merged/_workers/w0/corrected_micrographs_all_rlnAccumMotionLate.eps
+< ./merged/_workers/w0/corrected_micrographs_all_rlnAccumMotionTotal.eps
+< ./merged/_workers/w0/corrected_micrographs_hist_rlnAccumMotionEarly.eps
+< ./merged/_workers/w0/corrected_micrographs_hist_rlnAccumMotionLate.eps
+< ./merged/_workers/w0/corrected_micrographs_hist_rlnAccumMotionTotal.eps
+124,125d117
+< ./merged/_workers/w0/logfile.pdf
+< ./merged/_workers/w0/logfile.pdf.lst
+127,132d118
+< ./merged/_workers/w1/corrected_micrographs_all_rlnAccumMotionEarly.eps
+< ./merged/_workers/w1/corrected_micrographs_all_rlnAccumMotionLate.eps
+< ./merged/_workers/w1/corrected_micrographs_all_rlnAccumMotionTotal.eps
+< ./merged/_workers/w1/corrected_micrographs_hist_rlnAccumMotionEarly.eps
+< ./merged/_workers/w1/corrected_micrographs_hist_rlnAccumMotionLate.eps
+< ./merged/_workers/w1/corrected_micrographs_hist_rlnAccumMotionTotal.eps
+135,136d120
+< ./merged/_workers/w1/logfile.pdf
+< ./merged/_workers/w1/logfile.pdf.lst
+143,148d126
+< ./workers/w0/corrected_micrographs_all_rlnAccumMotionEarly.eps
+< ./workers/w0/corrected_micrographs_all_rlnAccumMotionLate.eps
+< ./workers/w0/corrected_micrographs_all_rlnAccumMotionTotal.eps
+< ./workers/w0/corrected_micrographs_hist_rlnAccumMotionEarly.eps
+< ./workers/w0/corrected_micrographs_hist_rlnAccumMotionLate.eps
+< ./workers/w0/corrected_micrographs_hist_rlnAccumMotionTotal.eps
+151,152d128
+< ./workers/w0/logfile.pdf
+< ./workers/w0/logfile.pdf.lst
+202,207d177
+< ./workers/w1/corrected_micrographs_all_rlnAccumMotionEarly.eps
+< ./workers/w1/corrected_micrographs_all_rlnAccumMotionLate.eps
+< ./workers/w1/corrected_micrographs_all_rlnAccumMotionTotal.eps
+< ./workers/w1/corrected_micrographs_hist_rlnAccumMotionEarly.eps
+< ./workers/w1/corrected_micrographs_hist_rlnAccumMotionLate.eps
+< ./workers/w1/corrected_micrographs_hist_rlnAccumMotionTotal.eps
+210,211d179
+< ./workers/w1/logfile.pdf
+< ./workers/w1/logfile.pdf.lst
+=== merged products (compare_output_trees) ===
+FAIL: /home/alex/mc-wpdf-20261013/runs/base/merged: STAR inventory differs; missing=[], extra=['_workers/w0/corrected_micrographs.star', '_workers/w1/corrected_micrographs.star']
+CMP_RC=1
+=== worker report lines ===
+SERIES_DONE

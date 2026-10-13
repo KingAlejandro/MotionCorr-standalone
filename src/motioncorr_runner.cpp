@@ -135,6 +135,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	fn_in = parser.getOption("--i", "STAR file with all input micrographs, the tomography tilt series, or a Linux wildcard with all micrographs to operate on");
 	fn_out = parser.getOption("--o", "Name for the output directory", "MotionCorr");
 	do_skip_logfile = parser.checkOption("--skip_logfile", "Skip generation of tracks-part of the logfile.pdf");
+	do_skip_report_pdf = parser.checkOption("--skip_report_pdf", "Write the dataset STAR file but no logfile.pdf (for parallel workers whose report is built by a later --aggregate_only run)");
 	n_threads = textToInteger(parser.getOption("--j", "Number of threads per movie (= process)", "1"));
 	max_io_threads = textToInteger(parser.getOption("--max_io_threads", "Limit the number of IO threads.", "-1"));
 	fn_profile = parser.getOption("--profile", "Write a per-movie, per-stage wall/CPU/page-fault profile to this JSON-lines file (docs/stage_profile.md). Diagnostic; products are unchanged.", "");
@@ -534,6 +535,7 @@ void MotioncorrRunner::initialise()
 	if (aggregate_only)
 	{
 		if (do_at_most >= 0) REPORT_ERROR("--aggregate_only cannot be combined with --do_at_most.");
+		if (do_skip_report_pdf) REPORT_ERROR("--aggregate_only cannot be combined with --skip_report_pdf.");
 		if (fn_mic_given_all.empty()) REPORT_ERROR("--aggregate_only requires at least one movie.");
 		// Complete the entire preflight before publishing anything. A missing movie
 		// is an error, not permission to compute it as ordinary resume would do.
@@ -1701,6 +1703,8 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
         obsModel.save(MDavg, report_out + "corrected_micrographs.star", "micrographs");
         if (verb > 0 && !aggregate_only) std::cout << " Written: " << fn_out << "corrected_micrographs.star" << std::endl;
     }
+
+	if (do_skip_report_pdf) return;
 
 	if (verb > 0) std::cout << " Now generating logfile.pdf ... " << std::endl;
 

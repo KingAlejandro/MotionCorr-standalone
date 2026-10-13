@@ -517,7 +517,8 @@ def main(argv: list[str] | None = None) -> int:
                          "per-process artifacts: merge_workers.py stages them under "
                          "_workers/wK/ and the dataset's report is written by the "
                          "aggregate step, so by default this launcher passes "
-                         "--skip_logfile to every worker. Each worker still writes its "
+                         "--skip_report_pdf to every worker, which writes the joint STAR "
+                         "and runs no Ghostscript. Each worker still writes its "
                          "per-movie <movie>_shifts.eps, which the aggregate requires.")
     ap.add_argument("--omp-num-threads", default=None,
                     help="OMP_NUM_THREADS for every worker. Default when --cpus is "
@@ -682,18 +683,17 @@ def main(argv: list[str] | None = None) -> int:
     # logfile.pdf and its header/batch inputs as per-process artifacts and stages
     # them under _workers/wK/, while the dataset's report comes from the aggregate
     # step. Building them costs the slowest worker its whole tail, which is serial
-    # against every other worker's exit. Suppress by default, and never twice --
-    # IOParser consumes one --skip_logfile and would report the second as an
-    # unrecognised argument. --skip_logfile must stay worker-only: the
-    # aggregate-only preflight uses the same flag to decide whether to require the
-    # per-movie EPS, so an aggregate given it would skip that check and then fail
-    # inside the report.
+    # against every other worker's exit. --skip_logfile alone still runs
+    # Ghostscript for the header pages; --skip_report_pdf writes the joint STAR and
+    # stops. Suppress by default, and never twice -- IOParser consumes one flag and
+    # would report the second as an unrecognised argument. The runner refuses
+    # --skip_report_pdf with --aggregate_only, so it must stay worker-only.
     # Naming the flag anywhere means the caller is managing it, including when
     # they set it on one worker and not another; adding to that would hand some
     # worker the flag twice.
-    if not a.worker_joint_report and "--skip_logfile" not in extra \
-            and not any("--skip_logfile" in e for e in per_worker_extra):
-        extra.append("--skip_logfile")
+    if not a.worker_joint_report and "--skip_report_pdf" not in extra \
+            and not any("--skip_report_pdf" in e for e in per_worker_extra):
+        extra.append("--skip_report_pdf")
 
     sampler = None
     # Per-worker timing and resident set. These are the quantities a scaling

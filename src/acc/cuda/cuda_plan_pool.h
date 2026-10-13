@@ -22,7 +22,7 @@ namespace mc_cuda {
  *
  * thread_local, for the same reason as the session's PinnedStagePool: movies are
  * dispatched one at a time, but a worker-per-thread arrangement must not share
- * one buffer. One device per process is assumed, which is how --gpu behaves.
+ * one buffer. Each thread uses one device (one --use_own worker per device).
  *
  * One gain entry and one movie-geometry entry are retained. Retirement
  * invalidates their keys, selects the owning device before

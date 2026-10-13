@@ -1,0 +1,21 @@
+Using CUDA acceleration on GPU devices 0,1,2,3: one worker per device, 8 thread(s) each.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/r0_20170629_00021_frameImage.tiff
+  * Movies/r0_20170629_00022_frameImage.tiff
+  * Movies/r0_20170629_00023_frameImage.tiff
+  * Movies/r0_20170629_00024_frameImage.tiff
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled.
+000/??? sec ~~(,_,">                                                          [oo]   2/   8 sec ...............~~(,_,">                                          [oo]   2/   4 sec ..............................~~(,_,">                           [oo]   2/   2 sec .............................................~~(,_,">            [oo]   2/   2 sec ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /tmp/mdev-prof/outT/corrected_micrographs.star
+ Now generating logfile.pdf ... 
+ Done! Written: /tmp/mdev-prof/outT/logfile.pdf
+Collecting data...
+Generating '/tmp/nsys-report-173e.qdstrm'
+[1/1] [0%                          ] T2.nsys-rep[1/1] [0%                          ] T2.nsys-rep[1/1] [6%                          ] T2.nsys-rep[1/1] [11%                         ] T2.nsys-rep[1/1] [==========48%               ] T2.nsys-rep[1/1] [================70%         ] T2.nsys-rep[1/1] [========================100%] T2.nsys-rep[1/1] [========================100%] T2.nsys-rep
+Generated:
+    /tmp/mdev-prof/T2.nsys-rep
+T wall 8.51

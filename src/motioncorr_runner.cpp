@@ -31,11 +31,20 @@
 #include <sstream>
 #include <cstdio>
 #include <memory>
+#include <algorithm>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
 
 // Process-wide, so a generation minted by one runner can never collide with a
 // generation minted by another runner on the same worker thread. Starts at 1;
 // 0 is reserved for "no identity resolved".
 static std::atomic<unsigned long long> s_global_gain_generation{1};
+
+// The defect fix draws from libc rand(), reseeded per movie. Device workers hold
+// this from the reseed to the last draw, so every movie gets the same stream it
+// gets in a serial run.
+static std::mutex s_defect_rng_mutex;
 
 #include "src/motioncorr_runner.h"
 #include "src/native_movie_staging.h"
@@ -135,7 +144,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	fn_in = parser.getOption("--i", "STAR file with all input micrographs, the tomography tilt series, or a Linux wildcard with all micrographs to operate on");
 	fn_out = parser.getOption("--o", "Name for the output directory", "MotionCorr");
 	do_skip_logfile = parser.checkOption("--skip_logfile", "Skip generation of tracks-part of the logfile.pdf");
-	n_threads = textToInteger(parser.getOption("--j", "Number of threads per movie (= process)", "1"));
+	n_threads = textToInteger(parser.getOption("--j", "Number of threads per movie (= process); with several --use_own --gpu devices, the process total", "1"));
 	max_io_threads = textToInteger(parser.getOption("--max_io_threads", "Limit the number of IO threads.", "-1"));
 	fn_profile = parser.getOption("--profile", "Write a per-movie, per-stage wall/CPU/page-fault profile to this JSON-lines file (docs/stage_profile.md). Diagnostic; products are unchanged.", "");
 	// Opened here so an unwritable path fails before any processing.
@@ -190,7 +199,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	fn_archive = parser.getOption("--archive","Location of the directory for archiving movies in 4-byte MRC format","");
  	even_odd_split = parser.checkOption("--even_odd_split", "Generate two images summed from odd and even movie frames. Later used for denoising in tomography.");
 	fn_other_motioncor2_args = parser.getOption("--other_motioncor2_args", "Additional arguments to MOTIONCOR2", "");
-	gpu_ids = parser.getOption("--gpu", "Device ids. --use_motioncor2 passes the MotionCor2 list syntax through (e.g 0:1:2:3); --use_own supports exactly one device id (e.g 0) and rejects a list", "");
+	gpu_ids = parser.getOption("--gpu", "Device ids. --use_motioncor2 passes the MotionCor2 list syntax through (e.g 0:1:2:3); --use_own takes distinct ids separated by ',' (e.g 0 or 0,1,2,3), runs one worker thread per device in this process and splits --j evenly across them", "");
 
 	int doseweight_section = parser.addSection("Dose-weighting options");
 	do_dose_weighting = parser.checkOption("--dose_weighting", "Use dose-weighting scheme");
@@ -350,53 +359,79 @@ void MotioncorrRunner::initialise()
 		std::string gpu_ids_to_parse = gpu_ids;
 		untangleDeviceIDs(gpu_ids_to_parse, allThreadIDs);
 
-		// --use_own processes one movie at a time in one process with one CUDA context, and
-		// the device-scoped state it relies on (src/acc/cuda/cuda_fft_prep.cu) is process
-		// global, so a device list is not merely unimplemented here. Silently honouring the
-		// first entry would report a multi-device run that never happened.
-		size_t n_requested = 0;
-		for (size_t irank = 0; irank < allThreadIDs.size(); irank++)
-			n_requested += allThreadIDs[irank].size();
-		if (allThreadIDs.size() != 1 || n_requested != 1)
+		// ':' separates MPI ranks in the RELION device syntax, and this repository has no
+		// MPI runner. ',' lists the devices of this one process: one worker thread per
+		// device, each running whole movies (runDeviceWorkers).
+		if (allThreadIDs.size() != 1)
 		{
-			REPORT_ERROR("ERROR: --gpu " + gpu_ids + " requests " + integerToString((int)n_requested) +
-			             " device entries, but --use_own supports exactly one device id (e.g. --gpu 0). "
-			             "This repository has no MPI runner, so the ':'-separated per-rank syntax has no "
-			             "meaning here. To use several GPUs, run one process per device over disjoint "
-			             "subsets of the input STAR; see tools/multi_gpu/.");
+			REPORT_ERROR("ERROR: --gpu " + gpu_ids + " has " + integerToString((int)allThreadIDs.size()) +
+			             " ':'-separated rank entries, but --use_own runs a single process and this "
+			             "repository has no MPI runner. List the devices of this process with ',' "
+			             "instead (e.g. --gpu 0,1,2,3).");
 		}
 
-		const std::string &requested_id = allThreadIDs[0][0];
-		if (requested_id.empty() || requested_id.find_first_not_of("0123456789") != std::string::npos)
+		device_ids.clear();
+		for (const std::string &requested_id : allThreadIDs[0])
 		{
-			REPORT_ERROR("ERROR: --gpu " + gpu_ids + " is not a non-negative device id. --use_own expects a "
-			             "single integer, e.g. --gpu 0.");
-		}
-
-		// sscanf("%d") in textToInteger can wrap oversized digit strings to a
-		// different valid device. Bound each step before multiplying or adding,
-		// and reject before querying CUDA (also in a CPU-only build).
-		int parsed_gpu_id = 0;
-		for (char ch : requested_id)
-		{
-			const int digit = ch - '0';
-			if (parsed_gpu_id > (INT_MAX - digit) / 10)
+			if (requested_id.empty() || requested_id.find_first_not_of("0123456789") != std::string::npos)
 			{
-				REPORT_ERROR("ERROR: --gpu " + gpu_ids + " is outside the supported device id range [0, " +
-				             integerToString(INT_MAX) + "].");
+				REPORT_ERROR("ERROR: --gpu " + gpu_ids + " is not a list of non-negative device ids. --use_own "
+				             "expects integers separated by ',', e.g. --gpu 0 or --gpu 0,1.");
 			}
-			parsed_gpu_id = parsed_gpu_id * 10 + digit;
+
+			// sscanf("%d") in textToInteger can wrap oversized digit strings to a
+			// different valid device. Bound each step before multiplying or adding,
+			// and reject before querying CUDA (also in a CPU-only build).
+			int parsed_gpu_id = 0;
+			for (char ch : requested_id)
+			{
+				const int digit = ch - '0';
+				if (parsed_gpu_id > (INT_MAX - digit) / 10)
+				{
+					REPORT_ERROR("ERROR: --gpu " + gpu_ids + " is outside the supported device id range [0, " +
+					             integerToString(INT_MAX) + "].");
+				}
+				parsed_gpu_id = parsed_gpu_id * 10 + digit;
+			}
+			// Each worker sizes its batches from the free memory of its device, so two
+			// workers on one device would each plan for memory the other is using.
+			if (std::find(device_ids.begin(), device_ids.end(), parsed_gpu_id) != device_ids.end())
+			{
+				REPORT_ERROR("ERROR: --gpu " + gpu_ids + " lists device " + integerToString(parsed_gpu_id) +
+				             " more than once. --use_own runs one worker per device.");
+			}
+			device_ids.push_back(parsed_gpu_id);
+		}
+
+		if (device_ids.size() > 1)
+		{
+			if (n_threads < (int)device_ids.size())
+				REPORT_ERROR("ERROR: --j " + integerToString(n_threads) + " is split across the " +
+				             integerToString((int)device_ids.size()) + " devices of --gpu " + gpu_ids +
+				             ", so it must be at least the number of devices.");
+			// The stage profile and the TIMING build record one movie at a time.
+			if (fn_profile != "")
+				REPORT_ERROR("ERROR: --profile is not supported with several --gpu devices.");
+#ifdef TIMING
+			REPORT_ERROR("ERROR: a TIMING build does not support several --gpu devices.");
+#endif
 		}
 
 #if defined _CUDA_ENABLED
-		gpu_id = parsed_gpu_id;
 		HANDLE_ERROR(accGPUGetDeviceCount(&devCount));
-		if (gpu_id >= devCount || gpu_id < 0) {
-			REPORT_ERROR("Invalid GPU device ID " + integerToString(gpu_id) + ". Found " + integerToString(devCount) + " CUDA device(s).");
-		}
+		for (int id : device_ids)
+			if (id >= devCount || id < 0)
+				REPORT_ERROR("Invalid GPU device ID " + integerToString(id) + ". Found " + integerToString(devCount) + " CUDA device(s).");
+		gpu_id = device_ids[0];
 		use_gpu = true;
 		if (verb > 0)
-			std::cout << "Using CUDA acceleration on GPU device " << gpu_id << " for global alignment." << std::endl;
+		{
+			if (device_ids.size() == 1)
+				std::cout << "Using CUDA acceleration on GPU device " << gpu_id << " for global alignment." << std::endl;
+			else
+				std::cout << "Using CUDA acceleration on GPU devices " << gpu_ids << ": one worker per device, "
+				          << n_threads / (int)device_ids.size() << " thread(s) each." << std::endl;
+		}
 #else
 		REPORT_ERROR("ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).");
 #endif
@@ -984,9 +1019,15 @@ void MotioncorrRunner::run()
 	// Indexed by movie, so the report below stays in input order however the
 	// deferred write failures arrive.
 	std::vector<char> movie_failed(fn_micrographs.size(), 0);
-	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
+	if (!do_own && !do_motioncor2)
+		REPORT_ERROR("Bug: by now it should be clear whether to use MotionCor2 or own implementation ...");
+	if (device_ids.size() > 1)
 	{
-		output_movie_index = imic;
+		// The main runner's writer stays idle; each device worker has its own.
+		runDeviceWorkers(movie_failed, barstep);
+	}
+	else for (long int imic = 0; imic < fn_micrographs.size(); imic++)
+	{
 		if (verb > 0 && imic % barstep == 0)
 			progress_bar(imic);
 
@@ -1000,58 +1041,7 @@ void MotioncorrRunner::run()
 			if (output_writer) output_writer->drain();
 			exit(RELION_EXIT_ABORTED);
 		}
-
-		if (!do_own && !do_motioncor2)
-			REPORT_ERROR("Bug: by now it should be clear whether to use MotionCor2 or own implementation ...");
-		bool result = false;
-		// Before header parsing, so a movie that fails to open is still recorded.
-		StageProfile::instance().beginMovie(imic, fn_micrographs[imic]);
-		try
-		{
-			// Header parsing is also a per-movie failure, not a batch abort.
-			Micrograph mic(fn_micrographs[imic], fn_gain_reference, bin_factor, eer_upsampling, eer_grouping);
-			int exp_frames = (imic < (long int)expected_frames_micrographs.size()) ? expected_frames_micrographs[imic] : expected_frames;
-			if (exp_frames > 0 && mic.getNframes() != exp_frames)
-			{
-				REPORT_ERROR("Movie " + fn_micrographs[imic] + " frame count mismatch: expected " +
-				             integerToString(exp_frames) + " frames, but decoded " +
-				             integerToString(mic.getNframes()) + " frames.");
-			}
-			mic.pre_exposure = pre_exposure + pre_exposure_micrographs[imic];
-			obsModel.opticsMdt.getValue(EMDL_CTF_VOLTAGE, voltage, optics_group_micrographs[imic]-1);
-			obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, angpix, optics_group_micrographs[imic]-1);
-			result = do_own ? executeOwnMotionCorrection(mic, exp_frames) : executeMotioncor2(mic);
-			MC_STAGE("submit model and plot");
-			if (result) {
-				RCTIC(TIMING_SAVE_MODEL_PLOT);
-				// Stamped here: run() reassigns angpix and voltage for every
-				// movie, so the writer thread must not read them. The copy
-				// then owns everything the two writes need -- Micrograph's
-				// copy constructor clones the motion model.
-				stampModel(mic);
-				std::shared_ptr<Micrograph> saved = std::make_shared<Micrograph>(mic);
-				const FileName fn_movie = fn_micrographs[imic];
-				// Submitted after the image writes, and cancelled with them if
-				// one failed: the STAR is the resume completion marker.
-				submitOutput([this, saved, fn_movie]() {
-					writeModel(*saved);
-					plotShifts(fn_movie, *saved);
-				});
-				RCTOC(TIMING_SAVE_MODEL_PLOT);
-			}
-		}
-		catch (RelionError &XE)
-		{
-			// Retain successful per-movie outputs, but fail the job and withhold
-			// joint STAR/PDF outputs if any movie failed.
-			std::cerr << XE;
-			std::cerr << "Continuing with the remaining movies." << std::endl;
-			result = false;
-		}
-		StageProfile::instance().endMovie(result);
-		if (!result)
-			movie_failed[imic] = 1;
-		collectWriteFailures(movie_failed);
+		processMovie(imic, movie_failed);
 	}
 
 	// Every product is on disk and closed after this, which the joint STAR
@@ -1488,6 +1478,160 @@ void MotioncorrRunner::writeModel(Micrograph &mic) {
 	}
 	else
 		mic.write(fn_avg.withoutExtension() + ".star");
+}
+
+void MotioncorrRunner::processMovie(long int imic, std::vector<char> &movie_failed)
+{
+	output_movie_index = imic;
+	bool result = false;
+	// Before header parsing, so a movie that fails to open is still recorded.
+	StageProfile::instance().beginMovie(imic, fn_micrographs[imic]);
+	try
+	{
+		// Header parsing is also a per-movie failure, not a batch abort.
+		Micrograph mic(fn_micrographs[imic], fn_gain_reference, bin_factor, eer_upsampling, eer_grouping);
+		int exp_frames = (imic < (long int)expected_frames_micrographs.size()) ? expected_frames_micrographs[imic] : expected_frames;
+		if (exp_frames > 0 && mic.getNframes() != exp_frames)
+		{
+			REPORT_ERROR("Movie " + fn_micrographs[imic] + " frame count mismatch: expected " +
+			             integerToString(exp_frames) + " frames, but decoded " +
+			             integerToString(mic.getNframes()) + " frames.");
+		}
+		mic.pre_exposure = pre_exposure + pre_exposure_micrographs[imic];
+		obsModel.opticsMdt.getValue(EMDL_CTF_VOLTAGE, voltage, optics_group_micrographs[imic]-1);
+		obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, angpix, optics_group_micrographs[imic]-1);
+		result = do_own ? executeOwnMotionCorrection(mic, exp_frames) : executeMotioncor2(mic);
+		MC_STAGE("submit model and plot");
+		if (result) {
+			RCTIC(TIMING_SAVE_MODEL_PLOT);
+			// Stamped here: run() reassigns angpix and voltage for every
+			// movie, so the writer thread must not read them. The copy
+			// then owns everything the two writes need -- Micrograph's
+			// copy constructor clones the motion model.
+			stampModel(mic);
+			std::shared_ptr<Micrograph> saved = std::make_shared<Micrograph>(mic);
+			const FileName fn_movie = fn_micrographs[imic];
+			// Submitted after the image writes, and cancelled with them if
+			// one failed: the STAR is the resume completion marker.
+			submitOutput([this, saved, fn_movie]() {
+				writeModel(*saved);
+				plotShifts(fn_movie, *saved);
+			});
+			RCTOC(TIMING_SAVE_MODEL_PLOT);
+		}
+	}
+	catch (RelionError &XE)
+	{
+		// Retain successful per-movie outputs, but fail the job and withhold
+		// joint STAR/PDF outputs if any movie failed.
+		std::cerr << XE;
+		std::cerr << "Continuing with the remaining movies." << std::endl;
+		result = false;
+	}
+	StageProfile::instance().endMovie(result);
+	if (!result)
+		movie_failed[imic] = 1;
+	collectWriteFailures(movie_failed);
+}
+
+void MotioncorrRunner::runDeviceWorkers(std::vector<char> &movie_failed, int barstep)
+{
+	const int n_workers = (int)device_ids.size();
+	const long int n_movies = fn_micrographs.size();
+
+	// Each worker is a full copy of this runner, so everything run() and
+	// executeOwnMotionCorrection() write per movie (angpix, voltage, the gain and
+	// defect caches, the output writer) is private to its thread. What remains
+	// shared is process state: the movie index, the failure flags (one slot per
+	// movie, each written by the worker that owns that movie), and the libc RNG,
+	// which the defect fix serialises.
+	std::vector<std::unique_ptr<MotioncorrRunner> > workers;
+	for (int w = 0; w < n_workers; w++)
+	{
+		workers.emplace_back(new MotioncorrRunner(*this));
+		MotioncorrRunner &worker = *workers.back();
+		worker.gpu_id = device_ids[w];
+		worker.device_ids.assign(1, device_ids[w]);
+		worker.n_threads = n_threads / n_workers;
+		if (max_io_threads > 0)
+			worker.max_io_threads = std::max(1, max_io_threads / n_workers);
+		worker.output_writer = std::unique_ptr<OutputWriter>(new OutputWriter(!sync_output));
+	}
+	// Keep the per-worker reuse the single-device run gets.
+	FrameBufferPool::instance().scaleCapacity(n_workers);
+
+	std::atomic<long int> next_movie{0};
+	std::atomic<bool> stop{false};
+	std::mutex done_mutex;
+	std::condition_variable done_cv;
+	long int movies_done = 0;
+	int workers_running = n_workers;
+	std::vector<std::exception_ptr> errors(n_workers);
+	std::vector<std::thread> threads;
+	for (int w = 0; w < n_workers; w++)
+	{
+		threads.emplace_back([&, w]() {
+			MotioncorrRunner &worker = *workers[w];
+			try
+			{
+				while (!stop.load())
+				{
+					const long int imic = next_movie.fetch_add(1);
+					if (imic >= n_movies) break;
+					worker.processMovie(imic, movie_failed);
+					std::lock_guard<std::mutex> lock(done_mutex);
+					movies_done++;
+					done_cv.notify_one();
+				}
+				worker.output_writer->drain();
+				worker.collectWriteFailures(movie_failed);
+				worker.output_writer.reset();
+			}
+			catch (...)
+			{
+				// Anything that is not a per-movie RelionError ends the run, as it
+				// does in the serial loop; the other workers stop after their movie.
+				errors[w] = std::current_exception();
+				stop.store(true);
+			}
+			std::lock_guard<std::mutex> lock(done_mutex);
+			workers_running--;
+			done_cv.notify_one();
+		});
+	}
+
+	// The progress bar and the abort check stay on this thread: progress_bar()
+	// keeps function-static state.
+	bool aborted = false;
+	long int shown = 0;
+	{
+		std::unique_lock<std::mutex> lock(done_mutex);
+		while (workers_running > 0)
+		{
+			done_cv.wait_for(lock, std::chrono::milliseconds(500));
+			const long int done = movies_done;
+			lock.unlock();
+			if (verb > 0 && done / barstep > shown / barstep)
+			{
+				progress_bar(done);
+				shown = done;
+			}
+			if (!aborted && pipeline_control_check_abort_job())
+			{
+				// Workers finish and write their current movie, then stop.
+				aborted = true;
+				stop.store(true);
+			}
+			lock.lock();
+		}
+	}
+	for (std::thread &t : threads)
+		t.join();
+
+	for (const std::exception_ptr &error : errors)
+		if (error) std::rethrow_exception(error);
+	if (aborted)
+		exit(RELION_EXIT_ABORTED);
 }
 
 void MotioncorrRunner::submitOutput(std::function<void()> task)
@@ -2349,6 +2493,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		if (nvcomp_ingested)   taken = "nvcomp";
 		else if (compact_stage != COMPACT_NONE) taken = "compact";
 #endif
+		static std::mutex witness_mutex;
+		std::lock_guard<std::mutex> witness_lock(witness_mutex);
 		std::ofstream witness(fn_ingest_witness.c_str(), std::ios::app);
 		if (!witness) REPORT_ERROR("Cannot open --ingest_witness file " + fn_ingest_witness);
 		witness << fn_mic << " " << taken << std::endl;
@@ -2840,6 +2986,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		const RFLOAT frame_mean = mean / n_frames;
 		const RFLOAT frame_std = std / n_frames;
 
+		std::unique_lock<std::mutex> rng_lock(s_defect_rng_mutex);
 		init_random_generator(random_seed);
 
 		const int PBUF_SIZE = 100;
@@ -2952,6 +3099,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 //				std::cout << " set = " << DIRECT_A2D_ELEM(Iframes[iframe](), i, j) << std::endl;
 			}
 		}
+		rng_lock.unlock();
 #ifdef _CUDA_ENABLED
 		if (sparse_neighbours && !bad_xs.empty()) {
 			std::vector<float> gathered;

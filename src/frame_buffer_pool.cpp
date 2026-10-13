@@ -47,6 +47,12 @@ void FrameBufferPool::setEnabled(bool value)
 	on = value;
 }
 
+void FrameBufferPool::scaleCapacity(size_t workers)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	capacity = kDefaultCapacity * std::max<size_t>(1, workers);
+}
+
 bool FrameBufferPool::enabled() const
 {
 	std::lock_guard<std::mutex> lock(mutex);

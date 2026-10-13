@@ -60,6 +60,10 @@ public:
 	/** Free everything retained. */
 	void clear();
 
+	/** Retain the default number of buffers for each of @p workers movies in
+	 * flight at once (one per --use_own device worker). */
+	void scaleCapacity(size_t workers);
+
 	~FrameBufferPool();
 
 private:

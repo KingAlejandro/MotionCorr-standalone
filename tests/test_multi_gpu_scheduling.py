@@ -559,23 +559,40 @@ def case_gpu_witness_logic(tmp: Path) -> None:
 
 
 def case_device_list_rejected(tmp: Path, binary: str) -> None:
-    """--use_own rejects a device list instead of silently using the first entry."""
+    """--use_own rejects malformed and duplicate device lists, and rank syntax."""
     missing = tmp / "no_such_input.star"
-    for spec, needle in (("0:1:2:3", "4 device entries"),
-                         ("0,1", "2 device entries"),
-                         ("0:1", "2 device entries"),
-                         ("0abc", "not a non-negative device id"),
-                         ("-1", "not a non-negative device id"),
+    for spec, needle in (("0:1:2:3", "4 ':'-separated rank entries"),
+                         ("0:1", "2 ':'-separated rank entries"),
+                         ("0,0", "lists device 0 more than once"),
+                         ("1,2,1", "lists device 1 more than once"),
+                         ("0abc", "not a list of non-negative device ids"),
+                         ("0,abc", "not a list of non-negative device ids"),
+                         ("0,", "not a list of non-negative device ids"),
+                         ("-1", "not a list of non-negative device ids"),
                          ("2147483648", "outside the supported device id range"),
+                         ("0,2147483648", "outside the supported device id range"),
                          ("4294967296", "outside the supported device id range"),
                          ("18446744073709551616", "outside the supported device id range"),
                          ("9" * 128, "outside the supported device id range")):
         cp = run([binary, "--i", missing, "--o", tmp / "out", "--use_own",
-                  "--gpu", spec])
+                  "--gpu", spec, "--j", "4"])
         assert cp.returncode != 0, f"--gpu {spec} was accepted"
         combined = cp.stdout + cp.stderr
         assert needle in combined, f"--gpu {spec}: {combined[:400]}"
         assert spec in combined, f"--gpu {spec} not quoted back: {combined[:400]}"
+
+    # --j is the process total, split across the devices.
+    cp = run([binary, "--i", missing, "--o", tmp / "out", "--use_own", "--gpu", "0,1", "--j", "1"])
+    combined = cp.stdout + cp.stderr
+    assert cp.returncode != 0 and "must be at least the number of devices" in combined, combined[:400]
+
+    # A distinct list reaches the build/device check, like a single id.
+    cp = run([binary, "--i", missing, "--o", tmp / "out", "--use_own", "--gpu", "0,1", "--j", "2"])
+    combined = cp.stdout + cp.stderr
+    assert cp.returncode != 0, "--gpu 0,1 with a missing input must still fail"
+    assert ("built without CUDA support" in combined
+            or "Using CUDA acceleration on GPU devices 0,1" in combined
+            or "Invalid GPU device ID" in combined), combined[:400]
 
     # Both ends of the representable range (and leading zeroes) must reach the
     # next check. A rejection of every argument is not a valid range parser.
@@ -583,8 +600,8 @@ def case_device_list_rejected(tmp: Path, binary: str) -> None:
                  "000000000000000000002147483647"):
         cp = run([binary, "--i", missing, "--o", tmp / "out", "--use_own", "--gpu", spec])
         combined = cp.stdout + cp.stderr
-        assert "device entries" not in combined, combined[:400]
-        assert "not a non-negative" not in combined, combined[:400]
+        assert "rank entries" not in combined, combined[:400]
+        assert "not a list of non-negative" not in combined, combined[:400]
         assert "outside the supported device id range" not in combined, combined[:400]
         assert cp.returncode != 0, f"--gpu {spec} with a missing input must still fail"
         cpu_only = "built without CUDA support" in combined
@@ -603,7 +620,7 @@ def case_device_list_rejected(tmp: Path, binary: str) -> None:
                   "--motioncor2_exe", "/bin/false", "--gpu", spec])
         combined = cp.stdout + cp.stderr
         assert cp.returncode != 0 and "no_such_input.star" in combined, combined[:400]
-        assert "device entries" not in combined, combined[:400]
+        assert "rank entries" not in combined, combined[:400]
         assert "outside the supported device id range" not in combined, combined[:400]
 
 

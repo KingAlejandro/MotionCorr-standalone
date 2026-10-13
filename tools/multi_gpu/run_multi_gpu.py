@@ -18,6 +18,9 @@ called per movie, and the file-scope device cache in
 src/acc/cuda/cuda_fft_prep.cu -- makes process isolation the correct unit. Whole
 movies also keep reduction and peak-fit ordering inside one device, so no
 numerical contract changes. This is the first experiment, not a claimed optimum.
+The binary can now also drive several devices from one process
+(--use_own --gpu 0,1,2,3); that mode makes the state above per-thread or
+serialises it, and this launcher remains the process-isolated alternative.
 
 Device identity. Each worker is pinned with CUDA_VISIBLE_DEVICES=GPU-<uuid> and
 passes --gpu 0, so its ordinal cannot be mistaken for a claim about which GPU

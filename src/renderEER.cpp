@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <mutex>
 #include <algorithm>
 #include <omp.h>
 
@@ -53,6 +54,9 @@ void EERRenderer::TIFFWarningHandler(const char* module, const char* fmt, va_lis
 
 void EERRenderer::silenceTIFFWarnings()
 {
+	// Called per movie, concurrently by --use_own device workers.
+	static std::mutex handler_mutex;
+	std::lock_guard<std::mutex> lock(handler_mutex);
 	if (prevTIFFWarningHandler == NULL)
 	{
 		// Thread safety issue:

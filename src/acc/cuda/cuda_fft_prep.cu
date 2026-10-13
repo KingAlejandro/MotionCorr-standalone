@@ -31,12 +31,14 @@
     } \
 } while(0)
 
-static float *s_d_cached_Iframes = nullptr;
-static size_t s_cached_bytes = 0;
-static int s_cached_nx = 0;
-static int s_cached_ny = 0;
-static int s_cached_n_frames = 0;
-static int s_cached_device_id = -1;
+// Per thread: each --use_own device worker caches its own movie on its own
+// device, and its end-of-movie release must not free another worker's frames.
+static thread_local float *s_d_cached_Iframes = nullptr;
+static thread_local size_t s_cached_bytes = 0;
+static thread_local int s_cached_nx = 0;
+static thread_local int s_cached_ny = 0;
+static thread_local int s_cached_n_frames = 0;
+static thread_local int s_cached_device_id = -1;
 
 class CachedFramesCleanup {
 public:

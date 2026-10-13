@@ -1,0 +1,185 @@
+{
+ "runs": [
+  {
+   "tag": "single",
+   "cmd": [
+    "/home/alex/mc-mdev-20261013/build-cand/motioncorr",
+    "--i",
+    "movies.star",
+    "--o",
+    "/home/alex/mc-mdev-20261013/runs/single/",
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--gpu",
+    "0",
+    "--j",
+    "2",
+    "--seed",
+    "1"
+   ],
+   "rc": 0,
+   "wall": 26.89,
+   "pid": 3074715,
+   "own_gpu_uuids": [
+    "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+   ],
+   "foreign_gpu_apps": [],
+   "log_device_counts": {
+    "0": 24
+   },
+   "accel_line": [
+    "Using CUDA acceleration on GPU device 0 for global alignment."
+   ]
+  },
+  {
+   "tag": "multi",
+   "cmd": [
+    "/home/alex/mc-mdev-20261013/build-cand/motioncorr",
+    "--i",
+    "movies.star",
+    "--o",
+    "/home/alex/mc-mdev-20261013/runs/multi/",
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--gpu",
+    "0,1,2,3",
+    "--j",
+    "8",
+    "--seed",
+    "1"
+   ],
+   "rc": 0,
+   "wall": 12.67,
+   "pid": 3075888,
+   "own_gpu_uuids": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+    "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+    "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+    "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+   ],
+   "foreign_gpu_apps": [],
+   "log_device_counts": {
+    "0": 6,
+    "1": 6,
+    "3": 6,
+    "2": 6
+   },
+   "accel_line": [
+    "Using CUDA acceleration on GPU devices 0,1,2,3: one worker per device, 2 thread(s) each."
+   ]
+  },
+  {
+   "tag": "nomutex",
+   "cmd": [
+    "/home/alex/mc-mdev-20261013/build-nomutex/motioncorr",
+    "--i",
+    "movies.star",
+    "--o",
+    "/home/alex/mc-mdev-20261013/runs/nomutex/",
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--gpu",
+    "0,1,2,3",
+    "--j",
+    "8",
+    "--seed",
+    "1"
+   ],
+   "rc": 0,
+   "wall": 12.58,
+   "pid": 3076430,
+   "own_gpu_uuids": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+    "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+    "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+    "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+   ],
+   "foreign_gpu_apps": [],
+   "log_device_counts": {
+    "0": 6,
+    "3": 6,
+    "2": 6,
+    "1": 6
+   },
+   "accel_line": [
+    "Using CUDA acceleration on GPU devices 0,1,2,3: one worker per device, 2 thread(s) each."
+   ]
+  },
+  {
+   "tag": "seed2",
+   "cmd": [
+    "/home/alex/mc-mdev-20261013/build-cand/motioncorr",
+    "--i",
+    "movies.star",
+    "--o",
+    "/home/alex/mc-mdev-20261013/runs/seed2/",
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--gpu",
+    "0",
+    "--j",
+    "2",
+    "--seed",
+    "2"
+   ],
+   "rc": 0,
+   "wall": 27.31,
+   "pid": 3077450,
+   "own_gpu_uuids": [
+    "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+   ],
+   "foreign_gpu_apps": [],
+   "log_device_counts": {
+    "0": 24
+   },
+   "accel_line": [
+    "Using CUDA acceleration on GPU device 0 for global alignment."
+   ]
+  }
+ ],
+ "compare_rc": {
+  "multi": 1,
+  "nomutex": 1,
+  "seed2": 1
+ }
+}

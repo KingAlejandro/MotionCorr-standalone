@@ -188,8 +188,8 @@ public:
 	// the first movie and reused afterwards. Keyed on the geometry as well as the
 	// path: a movie of different dimensions, or a different EER upsampling, must
 	// miss and reload rather than silently reuse a wrongly sized array.
-	// A member rather than a file-static: the movie loop is serial, so this needs
-	// no synchronisation, and that reasoning stays checkable.
+	// A member rather than a file-static: each runner (one per device worker)
+	// processes its movies serially, so this needs no synchronisation.
 	Image<float> gain_cache;
 	FileName gain_cache_name;
 	int gain_cache_nx = 0, gain_cache_ny = 0;
@@ -282,6 +282,9 @@ public:
 	std::vector < std::vector < std::string > > allThreadIDs;
 	bool use_gpu;
 	int gpu_id;
+	// --use_own devices, in --gpu order and without duplicates. More than one
+	// entry runs one worker thread per device in this process (runDeviceWorkers).
+	std::vector<int> device_ids;
 
 	// Read command line arguments
 	void read(int argc, char **argv, int rank = 0);
@@ -361,8 +364,28 @@ private:
 	// loop. Null elsewhere -- including in a default-constructed runner -- and
 	// submitOutput() then runs the task inline, so every entry point that is
 	// not run() keeps the plain serial behaviour.
-	std::unique_ptr<OutputWriter> output_writer;
+	//
+	// A copied runner starts without a writer: each device worker owns its own.
+	struct OutputWriterSlot {
+		std::unique_ptr<OutputWriter> ptr;
+		OutputWriterSlot() = default;
+		OutputWriterSlot(const OutputWriterSlot &) {}
+		OutputWriterSlot &operator=(const OutputWriterSlot &) { ptr.reset(); return *this; }
+		OutputWriterSlot &operator=(std::unique_ptr<OutputWriter> p) { ptr = std::move(p); return *this; }
+		OutputWriter *operator->() const { return ptr.get(); }
+		explicit operator bool() const { return ptr != nullptr; }
+		void reset() { ptr.reset(); }
+	};
+	OutputWriterSlot output_writer;
 	long int output_movie_index = -1;
+
+	// One movie of run(): header parse, correction, product submission, and
+	// failure bookkeeping into @p movie_failed[imic].
+	void processMovie(long int imic, std::vector<char> &movie_failed);
+
+	// run()'s movie loop when device_ids lists more than one device: one runner
+	// copy per device on its own thread, each pulling whole movies in turn.
+	void runDeviceWorkers(std::vector<char> &movie_failed, int barstep);
 
 	// Hand one output product to the writer, or write it here when there is
 	// none. Products of one movie are written in submission order.

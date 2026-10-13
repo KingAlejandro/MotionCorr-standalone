@@ -44,7 +44,65 @@ each; they are not a speed comparison.
 `48292ddf07900234`): 28/28 passed. These tests are single-device; they cover regressions in the
 shared CUDA paths, not the multi-device mode.
 
-## Timing
+## Timing (SCARF, 2026-10-13)
 
-Pending: SCARF exclusive 4-GPU node, 96 movies, one process x 4 devices vs 4 processes x 1
-device, paired and interleaved.
+**Result: one process x 4 devices is slower than 4 processes x 1 device on this node.**
+Median +0.48 s on a 6.67 s wall; the one-process arm was faster in 0 of 12 pairs.
+
+Venue: SCARF `gn0006`, exclusive allocation (job 3599986), 4x A100-SXM4-40GB, all 64 CPUs,
+THP `always`. Binary sha256 prefix `5cf08e1592a3d17a` (same `src/` tree).
+Input: the 96-movie list (24 tutorial movies x 4). Arms:
+
+- T: one process, `taskset -c 0-31 ... --gpu 0,1,2,3 --j 32` over all 96 movies.
+- P: four processes, one per 24-movie shard. Each process has `CUDA_VISIBLE_DEVICES=<UUID k>`
+  and runs `--gpu 0 --j 8`, pinned to the 8-CPU NUMA-local lane k (0-7, 8-15, 16-23, 24-31).
+
+Both arms use the same 32 CPUs and `--ingest nvcomp --skip_logfile`.
+
+Pairs were interleaved, with alternating order, after a discarded warm-up pair.
+Driver: [`evidence/scarf/timing.py`](evidence/scarf/timing.py); results in
+[`timing.json`](evidence/scarf/timing.json) and [`timing.out`](evidence/scarf/timing.out).
+
+| | T (1 process) | P (4 processes) |
+|---|---|---|
+| Wall, median (range), 12 pairs | 7.144 s (7.028-7.372) | 6.667 s (6.515-6.781) |
+| T - P, median (range) | +0.482 s (+0.362 to +0.769) | |
+| Max RSS | 1.48 GB | 4 x 0.39 GB |
+| Peak VRAM per device | 3364 MiB | 3208-3364 MiB |
+
+Order does not explain the gap: the median T - P is +0.494 s when T ran first and +0.482 s when
+P ran first. The witness showed one PID on all four GPU UUIDs in T and four distinct PIDs in P.
+
+Diagnosis ([`evidence/scarf/diag.py`](evidence/scarf/diag.py), 6 pairs per condition):
+
+- With 4 movies (one per GPU), T - P is +0.342 s (range +0.282 to +0.376), so most of the loss
+  is fixed per run.
+- With 96 movies and `OMP_WAIT_POLICY=passive`, T - P is +0.549 s, so OpenMP spin-waiting is
+  not the cause.
+
+nsys trace of the 4-movie run (`--trace=cuda,osrt`; [`evidence/scarf/prof.sh`](evidence/scarf/prof.sh),
+API summaries in [`evidence/scarf/nsys/`](evidence/scarf/nsys/)). nsys inflates the absolute
+walls, so only the comparison between arms is meaningful. Within one process the CUDA driver
+serialises work that runs in parallel across processes:
+
+- Context creation: each T worker spends 490-585 ms in about 440 driver ioctls, and the large
+  ioctls finish in lockstep across the four threads (35-40 ms each). Each P process spends
+  about 390 ms on the same work, and the four processes run concurrently. The workers start at
+  265 ms; their first CUDA call is at about 1010 ms. A P process reaches its first CUDA call
+  about 520 ms after launch.
+- Pinned host memory: the four 70 ms `cudaHostAlloc` calls run one after another in T (total
+  448 ms vs 273 ms). They also hold the address-space lock, and one worker's `mmap` waited
+  60 ms behind another thread's pinning. `cudaFreeHost` at exit is serialised the same way
+  (201 vs 113 ms).
+- `cudaMalloc`/`cudaFree` total 148/145 ms in T against 19/24 ms in P (longest single
+  `cudaMalloc` in T: 75 ms). The longest `cuMemGetInfo` in T took 59.6 ms; in P it is
+  close to 0.
+
+The motive for this change was that context creation is serialised across processes
+(measured earlier on `gn0005`). That did not reproduce on `gn0006`, where the four processes
+create their contexts concurrently. The cost of in-process serialisation is therefore not
+offset by any saving.
+
+Conclusion: for throughput, keep the 4-process launcher (`tools/multi_gpu/run_multi_gpu.py`).
+The one-process mode is correct (see Identity), and its only advantage is that it has the
+same process shape as RELION's accelerated branch.

@@ -1,0 +1,67 @@
+cpu-bind=MASK - gn0005, task  0  0 [4056896]: mask 0xffffffffffffffff set
+=== VENUE ===
+2026-10-13T01:54:42+01:00
+gn0005.scarf.rl.ac.uk
+Cpus_allowed_list:	0-63
+[always] madvise never
+0, GPU-47d61ef5-38d4-8bab-6e1b-6673e3e1f011
+1, GPU-2119ad35-2627-3550-88b2-13639f951704
+2, GPU-1997915e-0e47-700c-c556-b192aef2da1c
+3, GPU-9349c6e7-7c6a-4f26-1ac1-e30f606986a0
+### warmup (discarded)
+  base 1x8-24 rc=0 wall=  7.449 worker=  6.457 agg= 0.977 PASS lst=False
+  cand 1x8-24 rc=0 wall=  5.970 worker=  5.407 agg= 0.550 PASS lst=True
+### rep 0
+  base 1x8-24 rc=0 wall=  6.324 worker=  5.337 agg= 0.970 PASS lst=False
+  cand 1x8-24 rc=0 wall=  5.957 worker=  5.382 agg= 0.558 PASS lst=True
+  base 1x8-96 rc=0 wall= 20.930 worker= 18.171 agg= 2.738 PASS lst=False
+  cand 1x8-96 rc=0 wall= 19.606 worker= 18.201 agg= 1.389 PASS lst=True
+  base 4x8-24 rc=0 wall=  5.099 worker=  4.101 agg= 0.982 PASS lst=False
+  cand 4x8-24 rc=0 wall=  4.622 worker=  4.031 agg= 0.575 PASS lst=True
+  base 4x8-96 rc=0 wall=  9.950 worker=  7.158 agg= 2.775 PASS lst=False
+  cand 4x8-96 rc=0 wall=  8.682 worker=  7.238 agg= 1.428 PASS lst=True
+### rep 1
+  cand 1x8-24 rc=0 wall=  5.995 worker=  5.425 agg= 0.556 PASS lst=True
+  base 1x8-24 rc=0 wall=  6.368 worker=  5.379 agg= 0.975 PASS lst=False
+  cand 1x8-96 rc=0 wall= 19.637 worker= 18.216 agg= 1.402 PASS lst=True
+  base 1x8-96 rc=0 wall= 20.944 worker= 18.186 agg= 2.740 PASS lst=False
+  cand 4x8-24 rc=0 wall=  4.612 worker=  4.018 agg= 0.579 PASS lst=True
+  base 4x8-24 rc=0 wall=  4.952 worker=  3.949 agg= 0.987 PASS lst=False
+  cand 4x8-96 rc=0 wall=  8.673 worker=  7.238 agg= 1.419 PASS lst=True
+  base 4x8-96 rc=0 wall= 10.055 worker=  7.262 agg= 2.774 PASS lst=False
+### rep 2
+  base 1x8-24 rc=0 wall=  6.429 worker=  5.443 agg= 0.970 PASS lst=False
+  cand 1x8-24 rc=0 wall=  6.003 worker=  5.436 agg= 0.553 PASS lst=True
+  base 1x8-96 rc=0 wall= 20.889 worker= 18.134 agg= 2.735 PASS lst=False
+  cand 1x8-96 rc=0 wall= 19.668 worker= 18.265 agg= 1.388 PASS lst=True
+  base 4x8-24 rc=0 wall=  5.028 worker=  4.012 agg= 1.000 PASS lst=False
+  cand 4x8-24 rc=0 wall=  4.618 worker=  3.997 agg= 0.606 PASS lst=True
+  base 4x8-96 rc=0 wall=  9.870 worker=  7.090 agg= 2.763 PASS lst=False
+  cand 4x8-96 rc=0 wall=  8.653 worker=  7.214 agg= 1.423 PASS lst=True
+### rep 3
+  cand 1x8-24 rc=0 wall=  6.017 worker=  5.450 agg= 0.551 PASS lst=True
+  base 1x8-24 rc=0 wall=  6.349 worker=  5.358 agg= 0.977 PASS lst=False
+  cand 1x8-96 rc=0 wall= 19.547 worker= 18.150 agg= 1.381 PASS lst=True
+  base 1x8-96 rc=0 wall= 20.968 worker= 18.213 agg= 2.739 PASS lst=False
+  cand 4x8-24 rc=0 wall=  4.555 worker=  3.970 agg= 0.570 PASS lst=True
+  base 4x8-24 rc=0 wall=  4.941 worker=  3.930 agg= 0.995 PASS lst=False
+  cand 4x8-96 rc=0 wall=  8.704 worker=  7.253 agg= 1.436 PASS lst=True
+  base 4x8-96 rc=0 wall= 10.051 worker=  7.231 agg= 2.804 PASS lst=False
+### rep 4
+  base 1x8-24 rc=0 wall=  6.437 worker=  5.454 agg= 0.969 PASS lst=False
+  cand 1x8-24 rc=0 wall=  5.955 worker=  5.385 agg= 0.555 PASS lst=True
+  base 1x8-96 rc=0 wall= 20.949 worker= 18.192 agg= 2.741 PASS lst=False
+  cand 1x8-96 rc=0 wall= 19.842 worker= 18.444 agg= 1.383 PASS lst=True
+  base 4x8-24 rc=0 wall=  5.026 worker=  4.019 agg= 0.991 PASS lst=False
+  cand 4x8-24 rc=0 wall=  4.574 worker=  3.982 agg= 0.576 PASS lst=True
+  base 4x8-96 rc=0 wall=  9.890 worker=  7.091 agg= 2.781 PASS lst=False
+  cand 4x8-96 rc=0 wall=  8.685 worker=  7.250 agg= 1.419 PASS lst=True
+
+cfg         base_med  cand_med    saving       pct    agg_b   agg_c
+1x8-24         6.368     5.995    +0.374      5.9%    0.970   0.555
+1x8-96        20.944    19.637    +1.307      6.2%    2.739   1.388
+4x8-24         5.026     4.612    +0.414      8.2%    0.991   0.576
+4x8-96         9.950     8.682    +1.268     12.7%    2.775   1.423
+
+runs=40 all_pass=True arm_witness_consistent=True intermediate_pdfs_present=True
+ALLDONE

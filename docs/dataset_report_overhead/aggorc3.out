@@ -1,0 +1,38 @@
+cpu-bind=MASK - gn0005, task  0  0 [4087564]: mask 0xffffffffffffffff set
+=== VENUE ===
+2026-10-13T02:09:25+01:00
+gn0005.scarf.rl.ac.uk
+Cpus_allowed_list:	0-63
+[always] madvise never
+0, GPU-47d61ef5-38d4-8bab-6e1b-6673e3e1f011
+1, GPU-2119ad35-2627-3550-88b2-13639f951704
+2, GPU-1997915e-0e47-700c-c556-b192aef2da1c
+3, GPU-9349c6e7-7c6a-4f26-1ac1-e30f606986a0
+base  rc=0 wall=6.426 PASS logfile.pdf.lst=False
+base  rc=0 wall=6.344 PASS logfile.pdf.lst=False
+cand  rc=0 wall=5.942 PASS logfile.pdf.lst=True
+--- product oracle ---
+  null-base-vs-base            rc=0 status=PASS     differing=[]
+  treat-base-vs-cand           rc=0 status=PASS     differing=[]
+  ctl-mrc-payload-flip         rc=1 status=FAIL     differing=['Movies/20170629_00021_frameImage.mrc']
+--- report raster, 30 pages expected ---
+  logfile null-base-vs-base    pages=30 differing=0
+  logfile treat-base-vs-cand   pages=30 differing=0
+  header  treat-base-vs-cand   pages=6 differing=0
+  batch   treat-base-vs-cand   pages=24 differing=0
+--- raster comparator controls, built from base0 EPS ---
+  c0-unperturbed               pages=30 differing=0
+  c1-page-content-swapped      pages=30 differing=1
+  c2-page-dropped              PAGECOUNT 30 vs 29 -> DIFFER
+  c3-pages-reordered           pages=30 differing=2
+  c4-header-omitted            PAGECOUNT 30 vs 24 -> DIFFER
+RASTER_CONTROLS=ALL_FIRED
+--- tree attribution (base0^base1 as null) ---
+null_diffs=9 treat_diffs=9 attributable=5
+    + Movies/20170629_00023_frameImage.log
+    + Movies/20170629_00040_frameImage.log
+    + Movies/20170629_00047_frameImage.log
+    + logfile.pdf
+    + logfile.pdf.lst
+VERDICT product null=PASS treat=PASS control=FAIL | raster logfile null=0 treat=0
+ALLDONE

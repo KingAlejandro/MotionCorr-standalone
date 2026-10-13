@@ -1795,10 +1795,32 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 		// already correctly written. joinable() means "not yet joined", not
 		// "still running", so this is needed even when the header pass finished
 		// long ago.
-		struct HeaderThreadJoiner {
+		struct ReportThreadJoiner {
 			std::thread &t;
-			~HeaderThreadJoiner() { if (t.joinable()) t.join(); }
+			~ReportThreadJoiner() { if (t.joinable()) t.join(); }
 		} header_joiner{header_thread};
+
+		// In aggregate mode logfile.pdf is exactly header_fn_eps followed by
+		// all_fn_eps: fn_pdfs below never admits a pre-existing all_batches.pdf,
+		// so concatenating header.pdf onto it makes Ghostscript re-render, as
+		// PDF, content this process is already holding as EPS. Rendering it
+		// once from the EPS instead, alongside the batch pass, is page-for-page
+		// identical and takes the concatenation off the critical path. The
+		// incremental path keeps the concatenation: there all_batches.pdf can
+		// carry earlier batches whose EPS this run does not have.
+		std::vector<FileName> logfile_fn_eps;
+		std::exception_ptr logfile_failure;
+		std::thread logfile_thread;
+		if (aggregate_only)
+		{
+			logfile_fn_eps = header_fn_eps;
+			logfile_fn_eps.insert(logfile_fn_eps.end(), all_fn_eps.begin(), all_fn_eps.end());
+			logfile_thread = std::thread([&]() {
+				try { joinMultipleEPSIntoSinglePDF(report_out + "logfile.pdf", logfile_fn_eps, true); }
+				catch (...) { logfile_failure = std::current_exception(); }
+			});
+		}
+		ReportThreadJoiner logfile_joiner{logfile_thread};
 
 		RCTIC(TIMING_W_GS_BATCH);
 		joinMultipleEPSIntoSinglePDF(report_out + "batch.pdf", all_fn_eps, aggregate_only);
@@ -1806,7 +1828,9 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 
 		header_thread.join();
 		RCTOC(TIMING_W_GS_HEADER);
+		if (logfile_thread.joinable()) logfile_thread.join();
 		if (header_failure) std::rethrow_exception(header_failure);
+		if (logfile_failure) std::rethrow_exception(logfile_failure);
 
 		// Concatenate all PDFs of the batches
 		std::vector<FileName> fn_pdfs;
@@ -1817,10 +1841,12 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 			REPORT_ERROR("Aggregate-only batch PDF concatenation failed.");
 		RCTOC(TIMING_W_GS_ALLB);
 
-		// Put header in front of comabined batches
+		// Put header in front of comabined batches. The aggregate built
+		// logfile.pdf from the EPS above, so re-deriving it here would only
+		// overwrite it with the same pages at the price of a second render.
 		RCTIC(TIMING_W_GS_LOGFILE);
-		if (!concatenatePDFfiles(report_out + "logfile.pdf", report_out + "header.pdf", report_out + "all_batches.pdf") && aggregate_only)
-			REPORT_ERROR("Aggregate-only full PDF concatenation failed.");
+		if (!aggregate_only)
+			concatenatePDFfiles(report_out + "logfile.pdf", report_out + "header.pdf", report_out + "all_batches.pdf");
 		if (aggregate_only) {
 			requireAggregatePdf(report_out + "header.pdf");
 			requireAggregatePdf(report_out + "batch.pdf");

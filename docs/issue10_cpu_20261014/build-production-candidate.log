@@ -1,0 +1,9 @@
+[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+/workspace/MotionCorr-standalone/src/motioncorr_runner.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/workspace/MotionCorr-standalone/src/motioncorr_runner.cpp:1879:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1879 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+[  2%] Linking CXX static library libmotioncorr_core.a
+[ 97%] Built target motioncorr_core
+[ 98%] Linking CXX executable motioncorr
+[100%] Built target motioncorr

@@ -1,0 +1,127 @@
+--- a/src/motioncorr_runner.cpp
++++ b/src/motioncorr_runner.cpp
+@@ -1,3 +1,4 @@
++#include <array>
+ /***************************************************************************
+  *
+  * Author: "Sjors H.W. Scheres"
+@@ -4486,6 +4487,7 @@
+ 		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, is_global);
+ 	}
+ #endif
++	std::vector<std::array<double, 6>> probe(n_threads);
+ 	std::vector<Image<float> > Iccs(n_threads);
+ 	MultidimArray<fComplex> Fref;
+ 	std::vector<MultidimArray<fComplex> > Fccs(n_threads);
+@@ -4588,7 +4590,25 @@
+ 			RCTOC(TIMING_CCF_CALC);
+ 
+ 			RCTIC(TIMING_CCF_IFFT);
+-			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
++            const double t0 = omp_get_wtime();
++            const double w0 = ccf_probe_wait;
++            {
++                MultidimArray<fComplex> disposable = Fccs[tid];
++                const double t1 = omp_get_wtime();
++                {
++                    NewFFT::FloatPlan plan(Iccs[tid](), disposable);
++                    const double t2 = omp_get_wtime();
++                    NewFFT::inverseFourierTransform(disposable, Iccs[tid](), plan, NewFFT::FwdOnly, false);
++                    const double t3 = omp_get_wtime();
++                    probe[tid][0] += t1-t0;
++                    probe[tid][1] += t2-t1;
++                    probe[tid][2] += t3-t2;
++                    probe[tid][3] -= t3;
++                }
++                probe[tid][3] += omp_get_wtime();
++                probe[tid][4] += 1;
++                probe[tid][5] += ccf_probe_wait-w0;
++            }
+ 			RCTOC(TIMING_CCF_IFFT);
+ 
+ 			RCTIC(TIMING_CCF_FIND_MAX);
+@@ -4682,6 +4702,8 @@
+ 	}
+ #endif
+ 
++    for (int t=0;t<n_threads;++t) fprintf(stderr,"CCF_PROBE %d %d %d copy=%.9f plan_with_wait=%.9f exec=%.9f destroy_with_wait=%.9f calls=%.0f lock_wait=%.9f\n", ccf_nx,ccf_ny,t,probe[t][0],probe[t][1],probe[t][2],probe[t][3],probe[t][4],probe[t][5]);
++
+ 	return converged;
+ }
+ 
+--- a/src/jaz/single_particle/new_ft.h
++++ b/src/jaz/single_particle/new_ft.h
+@@ -22,6 +22,8 @@
+ #define NEW_FFTW_H
+ 
+ #include <fftw3.h>
++#include <omp.h>
++extern thread_local double ccf_probe_wait;
+ #include <memory>
+ #include <src/multidim_array.h>
+ #include "t_complex.h"
+@@ -338,8 +340,10 @@
+ 
+                         ~Plan()
+                         {
++                            double wait_start = omp_get_wtime();
+                             #pragma omp critical(FourierTransformer_fftw_plan)
+                             {
++                                ccf_probe_wait += omp_get_wtime() - wait_start;
+                                 fftwf_destroy_plan(forward);
+                                 fftwf_destroy_plan(backward);
+                             }
+--- a/src/jaz/single_particle/new_ft.cpp
++++ b/src/jaz/single_particle/new_ft.cpp
+@@ -19,6 +19,7 @@
+  ***************************************************************************/
+ 
+ #include "new_ft.h"
++thread_local double ccf_probe_wait = 0;
+ 
+ #include "src/macros.h"
+ #include "src/fftw.h"
+@@ -361,8 +362,10 @@
+ 	const int ndim = N.size();
+ 
+ 	fftw_plan planForward, planBackward;	
++	double wait_start = omp_get_wtime();
+ 	#pragma omp critical(FourierTransformer_fftw_plan)
+ 	{
++		ccf_probe_wait += omp_get_wtime() - wait_start;
+ 		planForward = fftw_plan_dft_r2c(
+ 				ndim, &N[0],
+ 				MULTIDIM_ARRAY(realDummy),
+@@ -402,8 +405,10 @@
+ 	const int ndim = N.size();
+ 	
+ 	fftw_plan planForward, planBackward;	
++	double wait_start = omp_get_wtime();
+ 	#pragma omp critical(FourierTransformer_fftw_plan)
+ 	{
++		ccf_probe_wait += omp_get_wtime() - wait_start;
+ 		planForward = fftw_plan_dft_r2c(
+ 				ndim, &N[0],
+ 				MULTIDIM_ARRAY(real),
+@@ -443,8 +448,10 @@
+ 	
+ 	
+ 	fftwf_plan planForward, planBackward;	
++	double wait_start = omp_get_wtime();
+ 	#pragma omp critical(FourierTransformer_fftw_plan)
+ 	{
++		ccf_probe_wait += omp_get_wtime() - wait_start;
+ 		planForward = fftwf_plan_dft_r2c(
+ 				ndim, &N[0],
+ 				MULTIDIM_ARRAY(realDummy),
+@@ -485,8 +492,10 @@
+ 	
+ 	
+ 	fftwf_plan planForward, planBackward;	
++	double wait_start = omp_get_wtime();
+ 	#pragma omp critical(FourierTransformer_fftw_plan)
+ 	{
++		ccf_probe_wait += omp_get_wtime() - wait_start;
+ 		planForward = fftwf_plan_dft_r2c(
+ 				ndim, &N[0],
+ 				MULTIDIM_ARRAY(real),

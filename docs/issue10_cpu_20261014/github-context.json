@@ -1,0 +1,237 @@
+{
+  "issue10_comments": [
+    {
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/10#issuecomment-5860365121",
+      "body": "<!-- mc-audit-verified-20260927-issue10 -->\n## Scope reconciliation: preprocessing optimization is integrated\n\nThe output-preserving tiled gain/sum and gain-cache/I/O changes from #90 are on main `4c952b3f54479653512c4d208e09c9a8c02f3726`. The frozen #90/#91 report supplies complete same-backend image/header/STAR regression evidence. Its final validation explicitly ran no new controlled benchmark, so do not transfer older combined-branch speed numbers onto the final merged head.\n\n### Next agent's bounded task\n1. Map this issue's original acceptance items to the merged source, tests and their exact evidence revisions. Identify measured timing/memory evidence separately from implementation and numerical identity.\n2. Confirm per-pixel ascending-frame accumulation remains the same. Do not replace it with a parallel floating-point reduction merely because the loop is now tiled.\n3. Where the original >=3 paired repeats or memory limit is not established for the chosen release head, either run the small missing comparison through #26's shared recipe or record the limitation. Do not mark unmeasured criteria passed.\n4. Publish a scope-completion recommendation with links. Closure is a maintainer decision, not performed by this comment.\n\nDo not expand this into 'optimize all CPU code'. Remaining tasks already have owners: PR57 for the guarded unused inverse FFT (including even/odd consumers), #9/#26 for instrumentation and tuning, #85 for decoding, #94 for prefetch and #95 for staging. Preserve the CPU-only path as a tested product, not an assumed recovery mechanism for arbitrary CUDA errors. No new production code is required unless the checklist identifies a concrete gap. Integration: #66."
+    },
+    {
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/10#issuecomment-6175353878",
+      "body": "## CPU optimisation: next bounded work (14 October 2026)\n\nExisting tracker is appropriate: #9 owns the CPU stage/memory baseline; #26 owns scaling/placement; **this issue should own small source changes with matched before/after evidence**, not another general-purpose framework. Rechecked `main` at `116eb04`. The older #9/#26 timing numbers and #22's measurements are historical, not a current-main speedup baseline. The tiled gain/sum, cached gain and guarded CPU inverse-FFT elision are already integrated; do not count them again.\n\n**Ranked candidates**\n\n1. **Persistent per-worker CCF inverse FFTW plans and buffers (first experiment).** CPU `alignPatch()` still calls `NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]())` inside the frame/iteration loop. Check how often the convenience API copies the disposable spectrum, creates both plans and serialises plan creation/destruction. Build one stable, correctly aligned per-worker inverse plan; execute on owned disposable CCF storage. Preserve actual FFT flags, packed layout, precision, scaling, peak-search order and output bits. Do not blindly use `FFTW_UNALIGNED` or share a mutable plan across workers. First establish the plan/lock/copy share in a *current CPU-only stage profile*, then run the isolated change through the full job.\n2. **Stream the CPU unweighted/even–odd reconstruction.** `Irefframes` is still a full float movie; interpolate one frame into a bounded scratch and accumulate in the original ascending frame order, instead of allocating and revisiting a second movie stack. The tutorial's 24 × 3710 × 3838 stack is ~1.27 GiB of array storage (calculated, not an RSS result). Preserve the float-store rounding boundary, frame-dependent polynomial coefficients, exact resampling edges and even/odd selection. Measure complete RSS and whole-run wall; don't introduce a parallel reduction over frames.\n3. **Restrict CPU *local* patch phase updates to the correlation-frequency support.** The CUDA compact-patch work provides an algorithmic reference; begin with unchanged arrays and masked updates, prove the same patch shifts/fit and products, then consider compact allocation. Keep original frequency coordinates and do not apply this shortcut to the global Fourier movie needed for reconstruction.\n4. **Only after profiling:** experiment with 1/2/4/8/16 effective threads, physical cores/SMT/NUMA placement, FFTW outer-frame versus transform threading, and frequency-tiled dose weighting. Preserve accumulation order; no `-ffast-math` or approximate `exp/pow` in an exactness-labelled optimisation.\n\n**Acceptance and scheduling:** Use #9's current `--profile` instrumentation and #26's fixed-resource methodology. At minimum: global-only and 5×5; dose/no-dose, save-noDW and even/odd; tutorial plus a second geometry; 1 and 4 threads initially; at least 3 matched repetitions, with more for noise-sensitive results. Report source/binary/input hashes, CPU mask/NUMA, stage times, process wall+CPU, peak RSS, full corrected MRC/STAR inventory and unchanged numerical verdict. Mac CPU tests need their inherited `SyntheticRegression` failure kept visible, not silently waived. Implement the *first* measured win as a separate reviewable PR, then decide whether the others are worth their complexity. None needs to block the initial scoped CPU+CUDA release (#18)."
+    },
+    {
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/10#issuecomment-6176234026",
+      "body": "@codex Please start a **Codex Cloud coding task** for the CPU-only optimisation in this issue, on repository `KingAlejandro/MotionCorr-standalone`. Work from current `main` (at request time `116eb04ad359cd5bf789b28809fc2047ea155b9b`; refresh the branch before coding), respect `AGENTS.md`, and keep all changes on a separate branch/draft PR, **not main**.\n\n**Bounded implementation task — first CPU optimisation candidate:** eliminate redundant FFTW inverse-plan creation and unnecessary preservation/copying of disposable cross-correlation spectra in the CPU `alignPatch()` CCF inverse path (`src/motioncorr_runner.cpp`, `src/jaz/single_particle/new_ft.cpp` as relevant). First inspect the exact caller, concurrency/ownership and current FFTW convenience-plan behaviour; profile or instrument how much is actually spent in plans, copies, execution and OpenMP critical-section waits. Implement a small per-worker geometry/precision-aligned reusable inverse plan and scratch ownership *only if justified*. Do not reuse a plan across concurrent workers, assume alignment, silently select `FFTW_UNALIGNED`, or modify an input subsequently consumed. Preserve FFT ordering, normalisation, floating-point semantics, deterministic trajectories, images, STAR metadata, and all existing scientific/CI gates.\n\n**Acceptance/evidence:** current-main CPU-only build and CTests, source-bound focused positive/negative plan-lifetime tests, global-only and 5×5 alignment with 1/4 threads, dose/no-dose and even/odd/save-noDW cases as relevant; complete corrected MRC/STAR equality to the unchanged reference (or explicit gate failures); pinned source/binary/input hashes, process wall, stage wall/CPU, peak RSS and >=3 matched repetitions where the fixture/environment permits. Distinguish a standalone FFT mechanism benchmark from a full MotionCorr benchmark, and explicitly label any data/GPU-dependent tests UNRUN if not available. Do not claim a speedup from old CPU baseline (#9/#26).\n\n**Deliverable:** a narrow draft PR linked to #10 (and #9/#26 for measurements), with code, tests and measured findings; if the optimisation is no-go, post evidence here instead of merging extra complexity. Do not widen into the separate `Irefframes` streaming or compact-patch projects, do not change CUDA/Metal/JAX, do not touch release gates, and do not deploy or merge.\n\nIf this GitHub issue mention cannot launch a Codex Cloud task or this repository has no configured cloud environment, reply explicitly with that blocker rather than implying the task started."
+    },
+    {
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/10#issuecomment-6176235716",
+      "body": "To use Codex here, [create an environment for this repo](https://chatgpt.com/codex/cloud/settings/environments)."
+    }
+  ],
+  "open_prs": [
+    {
+      "number": 175,
+      "title": "[parked] motioncorr: drive several GPUs from one process (--use_own --gpu 0,1,2,3)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/175"
+    },
+    {
+      "number": 171,
+      "title": "perf(cuda): experimental --fft_size_policy fast (fails backend gate; speed only)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/171"
+    },
+    {
+      "number": 169,
+      "title": "docs: in-process movie overlap (next-movie strip prefetch) is a no-go",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/169"
+    },
+    {
+      "number": 161,
+      "title": "docs: GPU sharing evidence (processes per GPU, MPS)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/161"
+    },
+    {
+      "number": 156,
+      "title": "docs: host/device placement and transfer audit (single-GPU CUDA path)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/156"
+    },
+    {
+      "number": 152,
+      "title": "experiment: default-off standalone nvTIFF LZW sample probe",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/152"
+    },
+    {
+      "number": 150,
+      "title": "experiment(cuda): isolate global-frequency phase replay dependency",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/150"
+    },
+    {
+      "number": 149,
+      "title": "Bind ordinary resume to per-movie processing identity",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/149"
+    },
+    {
+      "number": 144,
+      "title": "experiment: evaluate CUDA policy and heterogeneous movie workers",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/144"
+    },
+    {
+      "number": 138,
+      "title": "feat(cuda): nvCOMP Deflate for 8-bit samples and any RowsPerStrip (moves the trust boundary — see the policy note)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/138"
+    },
+    {
+      "number": 127,
+      "title": "perf(output): cut the output stage from 15% to ~3% of a 24-movie CUDA run",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/127"
+    },
+    {
+      "number": 123,
+      "title": "Issue #83: compact-ingest support matrix (test-only, 16/16 native)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/123"
+    },
+    {
+      "number": 120,
+      "title": "Add isolated JAX global-alignment prototype",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/120"
+    },
+    {
+      "number": 119,
+      "title": "feat(metal): current-main alignment prototype (#32)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/119"
+    },
+    {
+      "number": 109,
+      "title": "Issue #26: current-main CPU/CUDA operating-envelope study (measurement only, no src changes)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/109"
+    },
+    {
+      "number": 108,
+      "title": "Issue #94: opt-in bounded next-movie prefetch (prototype, no speedup claimed)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/108"
+    },
+    {
+      "number": 89,
+      "title": "Issue 83 — Validate native CUDA option, repeat and resume support matrix",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/89"
+    },
+    {
+      "number": 87,
+      "title": "Issue 73 — Independent dataset scientific validation: frozen prospective protocol",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/87"
+    },
+    {
+      "number": 65,
+      "title": "Preregistered scientific non-inferiority study of CPU, native CUDA and all-FFTW hybrid motion correction (#61)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/65"
+    },
+    {
+      "number": 64,
+      "title": "research(#60): calibrate the numerical gates by controlled perturbation — result is inconclusive",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/64"
+    },
+    {
+      "number": 57,
+      "title": "perf: skip the global inverse FFT when nothing reads its output (#26)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/57"
+    },
+    {
+      "number": 55,
+      "title": "tools(multi-gpu): process-level movie scheduling wrapper and exact-output gates (#53)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/55"
+    },
+    {
+      "number": 52,
+      "title": "test(metal): record real tutorial movie validation",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/52"
+    },
+    {
+      "number": 46,
+      "title": "docs(metal): local patch alignment and dose-weighting feasibility ADR (#35)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/46"
+    },
+    {
+      "number": 43,
+      "title": "feat(metal): implement opt-in Metal global alignment with MPSGraph C2R IFFT (#32)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/43"
+    },
+    {
+      "number": 42,
+      "title": "docs(metal): FFT, precision, and buffer contract for global alignment (#31)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/42"
+    },
+    {
+      "number": 40,
+      "title": "feat(metal): opt-in macOS Metal build, device selection, and CPU-safe dispatch (#30)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/40"
+    },
+    {
+      "number": 39,
+      "title": "feat(metal): fast synthetic CPU-versus-Metal regression harness (#33)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/39"
+    },
+    {
+      "number": 38,
+      "title": "diagnostics(cuda): trace first peak divergence for issue 36",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/38"
+    },
+    {
+      "number": 22,
+      "title": "feat: CPU time and peak memory profiling baseline (Issue #9)",
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/22"
+    }
+  ],
+  "issue9": {
+    "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/9",
+    "title": "Profile CPU time and peak memory on representative movie sizes",
+    "issue_number": 9,
+    "body": "## Why this task exists\n\nUse the existing stage timers in src/motioncorr_runner.cpp to establish a baseline before optimization. Cover global-only and 5 x 5 local alignment, 1 and 4 threads, and one full-size tutorial movie.\n\n**Priority:** P0  \n**Owner fit:** performance engineer  \n**Dependency:** #4 (reference)\n\n## Pass criteria\n\n- [ ] A repeatable benchmark recipe records hardware, build flags, input hashes, thread count, wall time, stage times, peak RSS, and output checksums.\n- [ ] Results identify the top three time and memory costs, including movie I/O, FFT/CCF, patch alignment, and dose weighting where applicable.\n- [ ] At least three repetitions per case are summarized with variability; no optimization claim is based on a single run.\n- [ ] A short ranked list recommends isolated optimization issues with expected benefit and risk.\n\n## Delivery\n\nOne person or agent owns this issue and links a PR or evidence report here. State the exact dataset, command, hardware, and result where applicable. Review numerical and scientific changes against the reference gate before merging.\n",
+    "state": "open",
+    "user": {
+      "login": "KingAlejandro",
+      "name": "KingAlejandro",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/72450765?v=4",
+      "id": 72450765
+    },
+    "assignees": null,
+    "labels": [
+      {
+        "name": "track:cpu",
+        "color": "0E8A16",
+        "description": "CPU algorithm and performance"
+      }
+    ],
+    "milestone": null,
+    "state_reason": null,
+    "comments": 3,
+    "created_at": "2026-09-23T12:48:56Z",
+    "updated_at": "2026-10-09T11:15:57Z",
+    "closed_at": null,
+    "display_url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/9",
+    "display_title": "Profile CPU time and peak memory on representative movie sizes"
+  },
+  "issue26": {
+    "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/26",
+    "title": "Diagnose CPU parallel scaling bottlenecks and sub-linear multi-threading efficiency",
+    "issue_number": 26,
+    "body": "## Overview & Problem Statement\n\nBaseline CPU benchmarking on the reference server (`4-gpu-vm`, dual AMD EPYC 7452, 124 vCPUs, 432 GiB RAM) establishes that MotionCorr achieves only **$55.8\\%\\text{--}56.0\\%$ parallel efficiency** on 4 threads ($j=4$):\n\n| Configuration | Single-Thread ($j=1$) | 4 Threads ($j=4$) | Measured Speedup | Parallel Efficiency |\n| :--- | :---: | :---: | :---: | :---: |\n| **Global Alignment Only** | $54.28 \\pm 0.81\\text{ s}$ | $24.23 \\pm 0.23\\text{ s}$ | **2.24x** | **56.0%** |\n| **$5 \\times 5$ Patch Alignment** | $66.36 \\pm 0.19\\text{ s}$ | $29.71 \\pm 0.24\\text{ s}$ | **2.23x** | **55.8%** |\n\nMoving from 1 to 4 threads leaves **$44\\%$ of theoretical computing power on the table**. On a high-core server with 124 vCPUs, scaling to 8, 16, or 32 threads encounters severe diminishing returns without architectural intervention.\n\nThis issue details **why parallelization is imperfect**, analyzes the underlying software and hardware bottlenecks, and proposes a **concrete diagnostic and profiling methodology** to empirically quantify each factor.\n\n---\n\n## Why Parallelization Is Not Perfect (Root Causes)\n\nDetailed inspection of the algorithm, data flow, and OpenMP execution model reveals six primary bottlenecks that degrade parallel efficiency:\n\n### 1. Serialized Lock Contention on FFTW Plan Creation (`#pragma omp critical`)\n* **Mechanism**: Every call to `NewFFT::FourierTransform` or `NewFFT::inverseFourierTransform` without an explicit reusable plan instantiates a temporary `FloatPlan` or `DoublePlan` on the stack (`src/jaz/single_particle/new_ft.cpp:206-240`).\n* **The Lock**: Inside `FloatPlan` constructor and destructor:\n  ```cpp\n  #pragma omp critical(FourierTransformer_fftw_plan)\n  {\n      planForward = fftwf_plan_dft_r2c(...);\n      planBackward = fftwf_plan_dft_c2r(...);\n  }\n  ```\n* **Contention Scope**:\n  - `global FFT` (line 1395): 24 frames $\\times$ 2 lock acquisitions (create + destroy).\n  - `global iFFT` (line 1528) & `dw - iFFT` (line 1865): $2 \\times 24$ frames $\\times$ 2 lock acquisitions.\n  - `prepare patch` (line 1588): 600 patch transforms $\\times$ 2 lock acquisitions.\n  - `alignPatch` (line 2377): 25 patches $\\times$ 5 iterations $\\times$ 24 frames = 3,000 transforms $\\times$ 2 lock acquisitions.\n* **Impact**: Worker threads in OpenMP parallel loops repeatedly stall waiting on a single global critical section **over 7,300 times**. As thread count increases ($j=8, 16$), thread lock contention escalates dramatically.\n\n---\n\n### 2. Cache Thrashing & Strided Memory Traversal in Dose Weighting\n* **Mechanism**: Dose weighting (`src/motioncorr_runner.cpp:2504-2534`) takes $19.27\\text{ s}$ on 1 thread ($29\\%$ of total time) and only speeds up to $8.04\\text{ s}$ on 4 threads ($2.4\\text{x}$).\n* **Memory Stride**: The outer loops iterate over image coordinates $(y, x)$, and the innermost loop traverses all $N=24$ frames:\n  ```cpp\n  for (int y = 0; y < nfy; y++) {\n      for (int x = 0; x < nfx; x++) {\n          for (int iframe = 0; iframe < n_frames; iframe++) {\n              DIRECT_A2D_ELEM(Fframes[iframe], y, x) *= weight;\n          }\n      }\n  }\n  ```\n* **Impact**: Each frame buffer is $57\\text{ MB}$ ($1.37\\text{ GiB}$ total). At every single voxel, the CPU must touch 24 completely disjoint 57 MB memory spaces. When 4 threads concurrently process disjoint chunks of rows, each thread constantly sweeps through all 24 buffers, invalidating L1/L2 caches and saturating the L3 cache and memory bus.\n\n---\n\n### 3. Transcendental Function Arithmetic Stalls\n* **Mechanism**: In `doseWeighting`:\n  - `std::pow(dinv, -1.665)` is evaluated $7.12\\text{ million}$ times (once per voxel).\n  - `std::exp(-doses[iframe] / Ne)` is evaluated $171\\text{ million}$ times ($24 \\times 7.12\\text{ M}$).\n* **Impact**: Standard library `std::exp` and `std::pow` are multi-cycle transcendental operations ($15\\text{--}30\\text{ ns}$ each). Evaluating 171 million exponentials accounts for $\\sim 2.5\\text{--}4.0\\text{ s}$ of pure arithmetic stall that does not auto-vectorize with AVX2/AVX-512.\n\n---\n\n### 4. Amdahl's Law & Sequential Overhead\n* **Mechanism**: Significant portions of the execution pipeline remain strictly single-threaded:\n  - Reading multi-frame TIFF file from disk and decompression: $\\approx 1.94\\text{ s}$.\n  - Gain reference loading, dark frame application, header parsing: $\\approx 0.70\\text{ s}$.\n  - Defect detection and hot pixel mask creation: $\\approx 0.20\\text{ s}$.\n  - Polynomial motion model SVD solving (`solve(matA, vecX, ...)`): $\\approx 0.15\\text{ s}$.\n  - STAR file generation and MRC disk serialization: $\\approx 0.65\\text{ s}$.\n* **Impact**: According to Amdahl's Law ($S(N) = \\frac{1}{(1-p) + \\frac{p}{N}}$), if $\\approx 3.6\\text{ s}$ out of $66.4\\text{ s}$ ($5.4\\%$) is strictly sequential, the theoretical maximum speedup on 4 threads is $3.5\\text{x}$ (not $4.0\\text{x}$), and the asymptotic ceiling across infinite threads is $\\le 18.5\\text{x}$.\n\n---\n\n### 5. Parallelism Granularity & Frequent Barrier Synchronizations\n* **Mechanism**:\n  - The 25 patches (`--patch_x 5 --patch_y 5`) are iterated sequentially in an outer loop (`for (int ipatch = 0; ipatch < n_patches; ipatch++)`).\n  - Inside each patch, `alignPatch` dispatches fine-grained `#pragma omp parallel for` loops over 24 frames across 5 iterations.\n* **Impact**: The OpenMP runtime creates and synchronizes thread barriers $25 \\times 5 = 125$ times just for patch alignment, introducing thread dispatch latency and idle wait states at barrier points.\n\n---\n\n### 6. NUMA Domain Topology & Cross-Socket Memory Latency\n* **Mechanism**: The reference server features an AMD EPYC 7452 with 64 physical cores divided into 8 NUMA nodes (4 per socket) connected via AMD Infinity Fabric.\n* **Impact**: Without explicit thread and memory affinity (`OMP_PROC_BIND`, `OMP_PLACES`, `numactl`), OpenMP threads can be scheduled across different NUMA nodes while accessing memory allocated on a remote node, incurring an extra $30\\text{--}60\\text{ ns}$ latency penalty per memory access and saturating interconnect bandwidth.\n\n---\n\n## Diagnostic & Analysis Methodology\n\nTo scientifically validate and isolate the contribution of each bottleneck, the following experiments and profiling tools should be deployed:\n\n### Phase 1: Hardware Performance Counters via Linux `perf`\nRun MotionCorr under `perf stat` on the 4GPU VM across $j \\in \\{1, 2, 4, 8, 16\\}$:\n```bash\nperf stat -e \\\n  cycles,instructions,task-clock,\\\n  cache-misses,cache-references,\\\n  LLC-loads,LLC-load-misses,\\\n  dTLB-loads,dTLB-load-misses \\\n  -- ./build/motioncorr -j 4 ...\n```\n* **Metrics to Evaluate**:\n  - **IPC (Instructions Per Cycle)**: If IPC drops from $j=1$ to $j=4$, threads are stalling on memory or locks.\n  - **LLC Miss Rate (`LLC-load-misses / LLC-loads`)**: Tests whether dose weighting and FFTs saturate the L3 cache.\n  - **Memory Bandwidth**: Correlate peak memory throughput against theoretical DDR4 channel limits.\n\n### Phase 2: Lock Contention and Off-CPU Profiling\nProfile the exact time spent blocking on mutexes and OpenMP barriers:\n```bash\n# 1. Capture OpenMP critical section and futex contention\nperf lock record -- ./build/motioncorr -j 4 ...\nperf lock report\n\n# 2. FlameGraph with off-CPU analysis (visualizes lock sleep time vs execution time)\nperf record -F 99 -g -- ./build/motioncorr -j 4 ...\nperf script | stackcollapse-perf.pl | flamegraph.pl > cpu_flamegraph_j4.svg\n```\n* **Goal**: Quantify the exact percentage of wall-clock time spent waiting on `#pragma omp critical(FourierTransformer_fftw_plan)`.\n\n### Phase 3: Strong Scaling Sweep & Amdahl Parameterization\nExecute the benchmark harness with thread counts $j \\in \\{1, 2, 4, 8, 12, 16, 24, 32, 64\\}$ (3 repetitions each):\n* Fit the empirical curve to Amdahl's Law:\n  $$\\text{Speedup}(P) = \\frac{1}{(1 - p) + \\frac{p}{P} + \\kappa P}$$\n  where $\\kappa P$ accounts for communication/lock contention overhead.\n* Determine the inflection point where additional threads degrade performance.\n\n### Phase 4: NUMA & Core Affinity Isolation\nCompare execution times and memory throughput under three configurations:\n1. **Unconstrained** (Default OS scheduler).\n2. **NUMA-Local**: `numactl --cpunodebind=0 --membind=0 ./build/motioncorr -j 4 ...` (forces execution and memory within a single 8-core NUMA quadrant).\n3. **OpenMP Affinity**: `OMP_PROC_BIND=close OMP_PLACES=cores ./build/motioncorr -j 4 ...` (pins threads to adjacent physical cores sharing L3 cache).\n\n---\n\n## Actionable Improvement Roadmap\n\n1. **Eliminate Critical Sections in FFTW (P1)**:\n   - Pre-allocate reusable plans (`global_plan`, `patch_plan`, `ccf_plan`) via `NewFFT::FloatPlan` at startup.\n   - Execute lock-free with `fftwf_execute_dft_r2c` / `c2r` across worker threads.\n2. **Optimize Dose Weighting Cache Locality & Transcendental Operations (P1)**:\n   - Replace 171M `exp()` evaluations with geometric progression multiplications ($\\text{weight}_i = \\text{weight}_{i-1} \\cdot e^{-\\Delta d / N_e}$).\n   - Reorder loop traversal or process scanlines contiguously with `#pragma omp simd`.\n3. **Outer-Loop Patch Parallelization (P2)**:\n   - For $j \\ge 8$, parallelize across the 25 patches (`#pragma omp parallel for schedule(dynamic)`) rather than parallelizing 24 frames inside each patch sequentially.\n4. **Deterministic Defect Correction (P2)**:\n   - Eliminate shared `rand()` and `rnd_gaus()` data races to restore multi-threaded numerical determinism.\n",
+    "state": "open",
+    "user": {
+      "login": "KingAlejandro",
+      "name": "KingAlejandro",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/72450765?v=4",
+      "id": 72450765
+    },
+    "assignees": null,
+    "labels": [
+      {
+        "name": "enhancement",
+        "color": "a2eeef",
+        "description": "New feature or request"
+      },
+      {
+        "name": "track:cpu",
+        "color": "0E8A16",
+        "description": "CPU algorithm and performance"
+      }
+    ],
+    "milestone": null,
+    "state_reason": null,
+    "comments": 20,
+    "created_at": "2026-09-23T16:32:01Z",
+    "updated_at": "2026-10-09T11:15:34Z",
+    "closed_at": null,
+    "display_url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/26",
+    "display_title": "Diagnose CPU parallel scaling bottlenecks and sub-linear multi-threading efficiency"
+  }
+}

@@ -1,0 +1,4 @@
+#!/bin/bash
+set -eu
+cd /workspace/MotionCorr-standalone
+python3 tools/profiling/mcprof.py compare base=/workspace/cpu10/bin/base candidate=/workspace/cpu10/bin/candidate --data /workspace/cpu10/data --work /workspace/cpu10/kit-j4 --cpus 0-3 --runner-cpus 4 --pairs 3 --warmup 1 --lane-wait 30 --settle-timeout 30 --env OMP_NUM_THREADS=4 --env OMP_DYNAMIC=false --env OMP_PROC_BIND=close --env OMP_PLACES=cores --env OPENBLAS_NUM_THREADS=1 --source base=/workspace/cpu10/reference-src --source candidate=/workspace/MotionCorr-standalone --commit base=116eb04ad359cd5bf789b28809fc2047ea155b9b --keep-outputs -- --use_own --j 4 --angpix 0.885 --voltage 300 --patch_x 5 --patch_y 5 --bfactor 150 --seed 1 --gainref gain.mrc --dose_weighting --dose_per_frame 1.277 --save_noDW --even_odd_split > /workspace/cpu10/kit.log 2>&1

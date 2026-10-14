@@ -23,6 +23,14 @@
 //   MC_COUNT_FAULT_ORDINAL  1-based cudaGetDeviceCount call to replace
 //   MC_COUNT_FAULT_CODE     "poison", "recoverable", or "zero-devices"
 //
+// Context warm-up controls (src/acc/cuda/cuda_context_warmup.h). The helper thread's
+// cudaFree(nullptr) is recognised by its thread: it is the only cudaFree(nullptr)
+// issued off the main thread.
+//   MC_WARMUP_FAULT     error | throw  -> the warm-up operation fails without creating the
+//                       context (a returned cudaErrorMemoryAllocation, or a C++ exception)
+//   MC_WARMUP_DELAY_MS  the helper sleeps this long before its cudaFree, so a REPORT_ERROR
+//                       unwinding the owner meets a still-running helper
+//
 // Issue #85 lane C controls, confined to this test-only binary:
 //   MC_U16_FAULT        alloc | h2d | kernel-recoverable | kernel-fatal
 //   MC_U16_STAGE_BYTES  exact uint16 frame allocation size to distinguish it from
@@ -36,6 +44,9 @@
 #include <cstring>
 #include <tiffio.h>
 #include <set>
+#include <chrono>
+#include <stdexcept>
+#include <thread>
 #include <dlfcn.h>
 #include <execinfo.h>
 
@@ -61,6 +72,7 @@ cudaError_t g_count_error = cudaSuccess;
 bool  g_poison = false;
 bool  g_trace = false;
 bool  g_init = false;
+std::thread::id g_main_thread;
 const char *g_u16_fault = nullptr;
 size_t g_u16_stage_bytes = 0;
 void *g_u16_stage_ptr = nullptr;
@@ -103,6 +115,9 @@ cudaError_t inject_preprocess(bool fatal, const char *boundary) {
 void init_once() {
     if (g_init) return;
     g_init = true;
+    // The first wrapped call is cudaGetDeviceCount in initialise(), on the main
+    // thread and before the warm-up helper exists.
+    g_main_thread = std::this_thread::get_id();
     std::atexit(report_owned);
     const char *o = std::getenv("MC_FAULT_ORDINAL");
     g_at = o ? std::atol(o) : 0;
@@ -258,6 +273,28 @@ extern "C" cudaError_t __wrap_cudaMemcpy(void *dst, const void *src, size_t coun
 
 extern "C" cudaError_t __wrap_cudaFree(void *ptr) {
     init_once();
+    if (!ptr && std::this_thread::get_id() != g_main_thread) {
+        // The warm-up helper. It touches none of the ownership state below, which is
+        // not thread-safe: the main thread joins the helper before its first wrapped
+        // allocation, so the two never overlap.
+        const char *delay = std::getenv("MC_WARMUP_DELAY_MS");
+        const char *fault = std::getenv("MC_WARMUP_FAULT");
+        if (delay) {
+            std::fprintf(stderr, "[warmupfault] helper delayed %s ms\n", delay);
+            std::this_thread::sleep_for(std::chrono::milliseconds(std::atol(delay)));
+        }
+        if (fault && std::strcmp(fault, "error") == 0) {
+            std::fprintf(stderr, "[warmupfault] injected cudaErrorMemoryAllocation on the helper; no context created\n");
+            return cudaErrorMemoryAllocation;
+        }
+        if (fault && std::strcmp(fault, "throw") == 0) {
+            std::fprintf(stderr, "[warmupfault] throwing on the helper; no context created\n");
+            throw std::runtime_error("injected warm-up exception");
+        }
+        const cudaError_t made = __real_cudaFree(nullptr);
+        if (delay) std::fprintf(stderr, "[warmupfault] helper done\n");
+        return made;
+    }
     if (ptr && !g_owned.count(ptr)) ++g_stale;
     const bool stage_free = ptr && ptr == g_u16_stage_ptr;
     if (stage_free) std::fprintf(stderr, "[u16fault] stage-free-request ptr=%p\n", ptr);

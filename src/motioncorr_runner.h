@@ -44,6 +44,7 @@ class EERRenderer;
 #include "src/acc/cuda/cuda_movie_session.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
+#include "src/acc/cuda/cuda_context_warmup.h"
 #endif
 
 // Which movie ingest path executeOwnMotionCorrection() may use.
@@ -360,6 +361,19 @@ public:
 	static void recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts);
 
 private:
+#ifdef _CUDA_ENABLED
+	// Creates the CUDA primary context on a helper thread while the host-side
+	// setup (STAR loading, first movie header, gain) runs; see
+	// cuda_context_warmup.h for the contract. Null when no warm-up was started.
+	// Joined by joinContextWarmup() before the first CUDA call, and by its own
+	// destructor on every other path, including REPORT_ERROR unwinding.
+	std::unique_ptr<mc_cuda::ContextWarmup> context_warmup;
+	void startContextWarmup();
+	// Waits for the warm-up, once. The outcome is reported but never acted on:
+	// the caller proceeds exactly as it would with no warm-up.
+	void joinContextWarmup(std::ostream &logfile);
+#endif
+
 	// Background output writer, created by run() for the duration of the movie
 	// loop. Null elsewhere -- including in a default-constructed runner -- and
 	// submitOutput() then runs the task inline, so every entry point that is

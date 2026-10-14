@@ -134,6 +134,7 @@ if(CUDA)
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_alignpatch.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_realspace_dw.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_fft_prep.cu"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_context_warmup.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_movie_session.cu")
     target_link_libraries(motioncorr_core PUBLIC CUDA::toolkit CUDA::cudart CUDA::cufft)
 
@@ -612,7 +613,7 @@ if(BUILD_TESTING AND CUDA)
             src/apps/run_motioncorr.cpp tests/cuda_fault_inject_shim.cpp)
         target_link_libraries(motioncorr_faultinject PRIVATE motioncorr_core)
         target_link_libraries(motioncorr_faultinject PRIVATE ${CMAKE_DL_LIBS})
-        target_link_options(motioncorr_faultinject PRIVATE
+        set(FAULTINJECT_LINK_OPTIONS
             "-rdynamic"
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaMemcpy"
             "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetLastError"
@@ -622,12 +623,71 @@ if(BUILD_TESTING AND CUDA)
             # the multi-threaded strip reader, where some threads holding a handle
             # and some not is the state that used to deadlock the OpenMP team.
             "LINKER:--wrap=cudaStreamSynchronize" "LINKER:--wrap=TIFFOpen")
+        target_link_options(motioncorr_faultinject PRIVATE ${FAULTINJECT_LINK_OPTIONS})
         add_test(NAME CudaPreprocessingFailurePaths
             COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py
                 --binary $<TARGET_FILE:motioncorr_faultinject>)
         set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 900)
+        # CUDA context warm-up thread (src/acc/cuda/cuda_context_warmup.h). The thread
+        # contract is device-free (injected operation); the runner under a failed,
+        # throwing or slow warm-up needs the real binary and a device. Compiled
+        # mutants: a destructor that does not join (std::terminate on unwind), a
+        # swallowed warm-up error, and -- in the real runner -- a failed warm-up that
+        # makes the main thread skip its own CUDA path.
+        add_executable(cuda_context_warmup tests/cuda_context_warmup.cpp)
+        target_link_libraries(cuda_context_warmup PRIVATE motioncorr_core)
+        add_test(NAME CudaContextWarmup COMMAND cuda_context_warmup)
+        set_tests_properties(CudaContextWarmup PROPERTIES LABELS "cuda" TIMEOUT 60)
+        mc_cuda_mutant(CudaContextWarmupMutant tests/cuda_context_warmup.cpp cuda_context_warmup no_join
+            "ContextWarmup::~ContextWarmup() { join(); }"
+            "ContextWarmup::~ContextWarmup() {}")
+        mc_cuda_mutant(CudaContextWarmupMutant tests/cuda_context_warmup.cpp cuda_context_warmup swallow_error
+            "outcome_.error = op(device_id);"
+            "(void)op(device_id);")
+        add_test(NAME CudaWarmupFailurePaths
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_warmup_failure_controls.py
+                --binary $<TARGET_FILE:motioncorr_faultinject>)
+        set_tests_properties(CudaWarmupFailurePaths PROPERTIES LABELS "cuda;hardware" TIMEOUT 600)
+        # A copy of one source with one line rewritten, linked into the fault
+        # executable ahead of motioncorr_core. WILL_FAIL: the driver must reject it.
+        function(mc_faultinject_mutant mutant rel_source from to)
+            set(_src "${CMAKE_CURRENT_SOURCE_DIR}/${rel_source}")
+            set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_src}")
+            file(READ "${_src}" _source)
+            string(FIND "${_source}" "${from}" _first)
+            string(FIND "${_source}" "${from}" _last REVERSE)
+            if(_first EQUAL -1 OR NOT _first EQUAL _last)
+                message(FATAL_ERROR "mutant ${mutant}: target line missing or not unique in ${rel_source}")
+            endif()
+            string(REPLACE "${from}" "${to}" _mutant_source "${_source}")
+            get_filename_component(_ext "${_src}" EXT)
+            get_filename_component(_base "${_src}" NAME_WE)
+            set(_mutant_src "${CMAKE_CURRENT_BINARY_DIR}/mutants/${_base}_fi_${mutant}${_ext}")
+            file(WRITE "${_mutant_src}" "${_mutant_source}")
+            set(_exe motioncorr_faultinject_${mutant})
+            add_executable(${_exe} src/apps/run_motioncorr.cpp tests/cuda_fault_inject_shim.cpp "${_mutant_src}")
+            target_link_libraries(${_exe} PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+            target_compile_definitions(${_exe} PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG)
+            target_link_options(${_exe} PRIVATE ${FAULTINJECT_LINK_OPTIONS})
+            add_test(NAME CudaWarmupFailurePaths_${mutant}
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_warmup_failure_controls.py
+                    --binary $<TARGET_FILE:${_exe}>)
+            set_tests_properties(CudaWarmupFailurePaths_${mutant} PROPERTIES
+                LABELS "cuda;hardware" TIMEOUT 600 WILL_FAIL TRUE)
+        endfunction()
+        mc_faultinject_mutant(skip_cuda_on_warmup_failure src/motioncorr_runner.cpp
+            "	if (!warm->ok())
+		logfile << "
+            "	if (!warm->ok()) use_gpu = false;
+	if (!warm->ok())
+		logfile << ")
+        mc_faultinject_mutant(no_join src/acc/cuda/cuda_context_warmup.cu
+            "ContextWarmup::~ContextWarmup() { join(); }"
+            "ContextWarmup::~ContextWarmup() {}")
         # The same two reconstruction-cleanup controls on the nvCOMP ingest arm.
         # run_preprocessing_failure_controls.py builds its fixture with
         # TIFFTAG_COMPRESSION = 1, so the fast path declines it and

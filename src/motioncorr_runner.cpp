@@ -396,6 +396,7 @@ void MotioncorrRunner::initialise()
 			REPORT_ERROR("Invalid GPU device ID " + integerToString(gpu_id) + ". Found " + integerToString(devCount) + " CUDA device(s).");
 		}
 		use_gpu = true;
+		startContextWarmup();
 		if (verb > 0)
 			std::cout << "Using CUDA acceleration on GPU device " << gpu_id << " for global alignment." << std::endl;
 #else
@@ -624,6 +625,42 @@ void MotioncorrRunner::initialise()
 	}
 
 }
+
+#ifdef _CUDA_ENABLED
+void MotioncorrRunner::startContextWarmup()
+{
+	// Only the --use_own CUDA path with a validated device, and never for
+	// --aggregate_only, which runs no movie. MOTIONCORR_CUDA_WARMUP=0 turns it
+	// off so the same binary can be timed with and without it.
+	if (!use_gpu || !do_own || aggregate_only) return;
+	const char *env = getenv("MOTIONCORR_CUDA_WARMUP");
+	if (env != NULL && env[0] == '0' && env[1] == '\0') return;
+	context_warmup.reset(new mc_cuda::ContextWarmup());
+	context_warmup->start(gpu_id);
+}
+
+void MotioncorrRunner::joinContextWarmup(std::ostream &logfile)
+{
+	if (!context_warmup || context_warmup->joined()) return;
+	const mc_cuda::ContextWarmup::Outcome *warm;
+	{
+		StageScope wait_scope("context warmup wait");
+		warm = &context_warmup->join();
+	}
+	if (StageProfile::instance().enabled() && warm->started)
+		StageProfile::instance().addThreadTask("warmup", "create context", warm->wall_ms,
+		                                       warm->cpu_ms, warm->minflt);
+	// Information only. A failed warm-up changes nothing here: the main thread
+	// goes on to do its own cudaSetDevice and allocations, meets the same
+	// condition if it persists, and takes the existing failure route.
+	if (!warm->ok())
+		logfile << "NOTE: CUDA context warm-up on a helper thread did not complete ("
+		        << (warm->threw ? "exception: " + warm->what
+		                        : std::string(warm->started ? cudaGetErrorString(warm->error)
+		                                                    : "thread not started"))
+		        << "); this thread creates the context itself." << std::endl;
+}
+#endif
 
 void MotioncorrRunner::prepareGainReference(bool write_gain)
 {
@@ -1000,6 +1037,11 @@ void MotioncorrRunner::run()
 			// is no reason to leave one: the previous movie's writes are
 			// milliseconds from done.
 			if (output_writer) output_writer->drain();
+#ifdef _CUDA_ENABLED
+			// exit() runs no destructors of this object either, and a helper
+			// still creating the context would race the CUDA runtime's teardown.
+			context_warmup.reset();
+#endif
 			exit(RELION_EXIT_ABORTED);
 		}
 
@@ -2206,6 +2248,9 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	CompactStage compact_stage = COMPACT_NONE;
 
 #ifdef _CUDA_ENABLED
+	// Every CUDA call of this movie, in the session and in the early-binning
+	// path alike, is below this line; the helper's context must exist first.
+	joinContextWarmup(logfile);
     // Legacy early-binning/nonresident FFT preparation may retain a real-frame
     // cache. Its normal release at skip_fitting is insufficient if a patch throws.
     // Keep ownership bounded to this movie even on the final failed movie.

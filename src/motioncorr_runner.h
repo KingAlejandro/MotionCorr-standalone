@@ -381,7 +381,7 @@ private:
 	void submitImageWrite(Image<float> &image, const FileName &path, DataType datatype);
 
 	// shiftx, shifty is relative to the (real space) image size
-	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty);
+	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty, int window_nfx = 0, int window_nfy = 0);
 
 	bool alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false);
 #ifdef _CUDA_ENABLED

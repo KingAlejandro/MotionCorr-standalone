@@ -1,0 +1,53 @@
+Internal ctest changing into directory: /workspace/scratch/28038873ca11/build-patch-window
+UpdateCTestConfiguration  from :/workspace/scratch/28038873ca11/build-patch-window/DartConfiguration.tcl
+Parse Config file:/workspace/scratch/28038873ca11/build-patch-window/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/workspace/scratch/28038873ca11/build-patch-window/DartConfiguration.tcl
+Parse Config file:/workspace/scratch/28038873ca11/build-patch-window/DartConfiguration.tcl
+Test project /workspace/scratch/28038873ca11/build-patch-window
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start 1: PatchRetryState
+
+1: Test command: /workspace/scratch/28038873ca11/build-patch-window/patch_retry_state
+1: Working Directory: /workspace/scratch/28038873ca11/build-patch-window
+1: Test timeout computed to be: 1500
+1: Issue #69 patch retry shift-state contract (CPU, no device)
+1:   patch 256x256, 4 groups, scaled_B=20.0, truth (frame-0 relative): (+0.00,+0.00) (+2.70,-1.80) (-3.40,+2.20) (+1.90,-3.10)
+1: 
+1:   converged reference          ( +0.000, +0.000) ( -2.637, +1.755) ( +3.394, -2.198) ( -1.846, +3.041)   |v| = 6.2485
+1:   max |recovered + truth| = 0.0630 px  (converged=yes)
+1: 
+1:   attempt 1 (S1)               ( +0.000, +0.000) ( -4.367, +3.041) ( +3.594, -2.307) ( -3.378, +4.726)   |v| = 8.9615
+1:   arm A: reset (S2)            ( +0.000, +0.000) ( -4.367, +3.041) ( +3.594, -2.307) ( -3.378, +4.726)   |v| = 8.9615
+1:   arm B: no reset (S1+S2)      ( +0.000, +0.000) ( -8.734, +6.081) ( +7.189, -4.615) ( -6.756, +9.452)   |v| = 17.9231
+1:   |arm A| = 8.9615   |arm B| = 17.9231   ratio B/A = 2.0000
+1:   max |armA - S1|              = 0.000e+00 px
+1:   max |armB - (S1 + armA)|     = 0.000e+00 px
+1: 
+1: PASS alignPatch accumulates into the caller's vectors and does not
+1:      re-derive them, so re-entering without a reset publishes S1+S2.
+1:      Restoring the vectors publishes the single estimate S2.
+1/2 Test #1: PatchRetryState ..................   Passed    0.07 sec
+test 2
+    Start 2: CpuPatchPhaseWindow
+
+2: Test command: /workspace/scratch/28038873ca11/build-patch-window/cpu_patch_phase_window
+2: Working Directory: /workspace/scratch/28038873ca11/build-patch-window
+2: Test timeout computed to be: 120
+2: PASS 300 window geometries, five successive phase updates; global defaults exact
+2: PASS GNU/ELF production sincos count witness: window wx+wy, global nfx+nfy
+2: PASS 108 production local/full alignments, unequal group amplitudes, j1/j4, iteration limits 1/5
+2/2 Test #2: CpuPatchPhaseWindow ..............   Passed    4.41 sec
+
+The following tests passed:
+	PatchRetryState
+	CpuPatchPhaseWindow
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   4.48 sec

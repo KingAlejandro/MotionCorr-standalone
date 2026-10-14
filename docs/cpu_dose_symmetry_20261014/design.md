@@ -34,6 +34,8 @@ in the original and (floor(ny/2)+1)*nfx*N in production. The benchmark is a
 separate unwrapped target; no exp-count instrumentation enters its timings.
 
 Run bounded alternating mechanism measurements and end-to-end product checks.
-Use whole-job elapsed time and peak RSS for product claims. Even perfect halving
-of a 3.3-second weight stage saves at most 1.65 seconds in a 47.7-second job;
-complex pixel traffic is unchanged, so the real gain must be smaller.
+Use whole-job elapsed time and peak RSS for product claims. Halving a 3.3-second
+weight stage saves 1.65 seconds in a 47.7-second job. Symmetry alone saves only
+duplicated scalar work; tiling can also reduce the cost of applying unchanged
+pixel operations. The combined optimization still draws on that one 3.3-second
+budget, not on the entire dose reconstruction stage.

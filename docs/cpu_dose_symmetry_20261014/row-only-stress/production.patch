@@ -1,0 +1,41 @@
+diff --git a/src/motioncorr_runner.cpp b/src/motioncorr_runner.cpp
+index 9e260e5..ab8ff24 100644
+--- a/src/motioncorr_runner.cpp
++++ b/src/motioncorr_runner.cpp
+@@ -4714,11 +4714,17 @@ void MotioncorrRunner::doseWeighting(std::vector<MultidimArray<fComplex> > &Ffra
+ 	const RFLOAT nfx2 = (RFLOAT)(nfx - 1) * (nfx - 1) * 4; // assuming nx is even
+ 	const int n_frames= Fframes.size();
+ 	const RFLOAT A = 0.245, B = -1.665, C = 2.81;
++	// The dose model depends on ky squared. Rows y and nfy-y therefore
++	// have bit-identical weights, but independent complex pixels. Calculate
++	// each weight once; retain both original complex operations and their
++	// float stores. DC and the even-height Nyquist row are processed once.
++	const int independent_rows = nfy == 0 ? 0 : nfy_half + 1;
+ 
+ 	#pragma omp parallel for num_threads(n_threads)
+-	for (int y = 0; y < nfy; y++) {
+-		int ly = y;
+-		if (y > nfy_half) ly = y - nfy;
++	for (int y = 0; y < independent_rows; y++) {
++		const int ly = y;
++		const int mirror_y = y == 0 ? 0 : nfy - y;
++		const bool paired = mirror_y != y;
+ 
+ 		const RFLOAT ly2 = (RFLOAT)ly * ly / nfy2;
+ 		for (int x = 0; x < nfx; x++) {
+@@ -4734,6 +4740,7 @@ void MotioncorrRunner::doseWeighting(std::vector<MultidimArray<fComplex> > &Ffra
+ 				}
+ 				sum_weight_sq += weight * weight;
+ 				DIRECT_A2D_ELEM(Fframes[iframe], y, x) *= weight;
++				if (paired) DIRECT_A2D_ELEM(Fframes[iframe], mirror_y, x) *= weight;
+ 			}
+ 
+ 			sum_weight_sq = std::sqrt(sum_weight_sq);
+@@ -4743,6 +4750,7 @@ void MotioncorrRunner::doseWeighting(std::vector<MultidimArray<fComplex> > &Ffra
+ 			}
+ 			for (int iframe = 0; iframe < n_frames; iframe++) {
+ 				DIRECT_A2D_ELEM(Fframes[iframe], y, x) /= sum_weight_sq; // Eq. 9
++				if (paired) DIRECT_A2D_ELEM(Fframes[iframe], mirror_y, x) /= sum_weight_sq;
+ 			}
+ 		}
+ 	}

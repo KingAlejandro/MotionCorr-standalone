@@ -1,0 +1,24 @@
+Baseline 116eb04, prior Release binary b9f8912d65c79b572f2764628a914edaea3fe46380af0f98574ec0b087231674
+GCC 13.3, -O3 without fast-math. Static inspection, not a speed measurement.
+00000000000019d0 <MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image<float>&, std::vector<Image<float>, std::allocator<Image<float> > >&, ThirdOrderPolynomialModel&, std::ostream&) [clone ._omp_fn.0]>:
+    1b3f:	49 0f af c9          	imul   %r9,%rcx
+    1b43:	48 83 7c 24 30 01    	cmpq   $0x1,0x30(%rsp)
+    1b49:	66 41 0f 28 e9       	movapd %xmm9,%xmm5
+    1b4e:	f2 0f 5e 6c 24 70    	divsd  0x70(%rsp),%xmm5
+    1b54:	f2 41 0f 5c ea       	subsd  %xmm10,%xmm5
+    1b59:	f2 0f 59 fd          	mulsd  %xmm5,%xmm7
+    1b5d:	f2 44 0f 59 c5       	mulsd  %xmm5,%xmm8
+    1c6c:	66 41 0f 28 c3       	movapd %xmm11,%xmm0
+    1c71:	f2 0f 2a cf          	cvtsi2sd %edi,%xmm1
+    1c75:	66 0f 28 d9          	movapd %xmm1,%xmm3
+    1c79:	f2 0f 5e 5c 24 20    	divsd  0x20(%rsp),%xmm3
+    1c7f:	f2 41 0f 5c da       	subsd  %xmm10,%xmm3
+    1c84:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+    1c88:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+    1ede:	66 41 0f 28 c3       	movapd %xmm11,%xmm0
+    1ee3:	f2 0f 2a cf          	cvtsi2sd %edi,%xmm1
+    1ee7:	66 0f 28 d9          	movapd %xmm1,%xmm3
+    1eeb:	f2 0f 5e 5c 24 20    	divsd  0x20(%rsp),%xmm3
+    1ef1:	f2 41 0f 5c da       	subsd  %xmm10,%xmm3
+    1ef6:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+    1efa:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0

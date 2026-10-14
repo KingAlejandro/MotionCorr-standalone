@@ -59,8 +59,44 @@
 
 // Intel MKL provides an FFTW-like interface, so this is enough.
 #include <fftw3.h>
-#define RELION_ALIGNED_MALLOC fftw_malloc
+#include <cstdlib>
+#include <stdint.h>
+#define RELION_ALIGNED_MALLOC relionAlignedMalloc
 #define RELION_ALIGNED_FREE fftw_free
+
+/* Large arrays (full frames and their spectra) ask for transparent huge pages.
+ * With 4 KiB pages the column passes of a full-frame FFT miss the TLB on
+ * nearly every element, and every page faults separately on first touch.
+ * Only the page size backing the memory changes, not its contents or its
+ * alignment, so results are unaffected. No effect where THP is "never";
+ * redundant where it is "always". MOTIONCORR_HUGEPAGES=0 disables it. */
+inline bool relionHugePagesEnabled()
+{
+	static const bool enabled = []()
+	{
+		const char *env = getenv("MOTIONCORR_HUGEPAGES");
+		return !(env != NULL && env[0] == '0' && env[1] == '\0');
+	}();
+	return enabled;
+}
+
+inline void *relionAlignedMalloc(size_t bytes)
+{
+	void *ptr = fftw_malloc(bytes);
+#ifdef MADV_HUGEPAGE
+	const size_t min_bytes = 4 << 20;
+	if (ptr != NULL && bytes >= min_bytes && relionHugePagesEnabled())
+	{
+		const uintptr_t page = sysconf(_SC_PAGESIZE);
+		const uintptr_t start = ((uintptr_t)ptr + page - 1) & ~(page - 1);
+		const uintptr_t end = ((uintptr_t)ptr + bytes) & ~(page - 1);
+		// Advisory: failure (e.g. a kernel without THP) leaves normal pages.
+		if (end > start)
+			madvise((void *)start, end - start, MADV_HUGEPAGE);
+	}
+#endif
+	return ptr;
+}
 
 extern int bestPrecision(float F, int _width);
 extern std::string floatToString(float F, int _width, int _prec);

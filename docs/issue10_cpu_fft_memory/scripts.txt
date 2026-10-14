@@ -1,0 +1,101 @@
+=== ab.sh
+#!/bin/bash
+# A/B for issue 10: arms x rounds, interleaved, j4 on CPUs 8-11.
+cd /home/ubuntu/mc-cpu10-plancache
+MAIN=/home/ubuntu/mc-cpuprof-116eb04/build/motioncorr
+NEW=/home/ubuntu/mc-cpu10-plancache/build/motioncorr
+ARGS="--i Movies/20170629_00026_frameImage.tiff --use_own --j 4 --angpix 0.885 --voltage 300 --bfactor 150 --patch_x 5 --patch_y 5 --gainref Movies/gain.mrc --dose_weighting --dose_per_frame 1.277 --save_noDW --even_odd_split"
+run() { # name bin env...
+  local name=$1 bin=$2; shift 2
+  rm -rf ab/out-$name-$R; mkdir -p ab
+  env "$@" taskset -c 8-11 /usr/bin/time -v $bin $ARGS --o ab/out-$name-$R/ --profile ab/prof-$name-$R.jsonl > ab/run-$name-$R.log 2> ab/time-$name-$R.log
+  echo "$name r$R rc=$? $(grep -E 'Elapsed|User time|System time|Minor' ab/time-$name-$R.log | awk -F': ' '{printf "%s ", $2}')"
+}
+R=warm; run main $MAIN X=1; run new $NEW X=1
+for R in 1 2 3; do
+  run main  $MAIN X=1
+  run new   $NEW  X=1
+  run reuse $MAIN MOTIONCORR_MALLOC_REUSE=1
+  run huge  $MAIN GLIBC_TUNABLES=glibc.malloc.hugetlb=1
+  run newreuse $NEW MOTIONCORR_MALLOC_REUSE=1
+done
+=== ab2.sh
+#!/bin/bash
+# A/B for issue 10: arms x rounds, interleaved, j4 on CPUs 8-11.
+cd /home/ubuntu/mc-cpu10-plancache
+MAIN=/home/ubuntu/mc-cpuprof-116eb04/build/motioncorr
+NEW=/home/ubuntu/mc-cpu10-plancache/build/motioncorr
+ARGS="--i Movies/20170629_00026_frameImage.tiff --use_own --j 4 --angpix 0.885 --voltage 300 --bfactor 150 --patch_x 5 --patch_y 5 --gainref Movies/gain.mrc --dose_weighting --dose_per_frame 1.277 --save_noDW --even_odd_split"
+run() { # name bin env...
+  local name=$1 bin=$2; shift 2
+  rm -rf ab/out-$name-$R; mkdir -p ab
+  env "$@" taskset -c 8-11 /usr/bin/time -v $bin $ARGS --o ab/out-$name-$R/ --profile ab/prof-$name-$R.jsonl > ab/run-$name-$R.log 2> ab/time-$name-$R.log
+  echo "$name r$R rc=$? $(grep -E 'Elapsed|User time|System time|Minor' ab/time-$name-$R.log | awk -F': ' '{printf "%s ", $2}')"
+}
+
+for R in 4 5 6; do
+  run main    $MAIN X=1
+  run huge    $MAIN GLIBC_TUNABLES=glibc.malloc.hugetlb=1
+  run newhuge $NEW  GLIBC_TUNABLES=glibc.malloc.hugetlb=1
+done
+=== ab3.sh
+#!/bin/bash
+# A/B for issue 10: arms x rounds, interleaved, j4 on CPUs 8-11.
+cd /home/ubuntu/mc-cpu10-plancache
+MAIN=/home/ubuntu/mc-cpuprof-116eb04/build/motioncorr
+NEW=/home/ubuntu/mc-cpu10-plancache/build/motioncorr
+ARGS="--i Movies/20170629_00026_frameImage.tiff --use_own --j 1 --angpix 0.885 --voltage 300 --bfactor 150 --patch_x 5 --patch_y 5 --gainref Movies/gain.mrc --dose_weighting --dose_per_frame 1.277 --save_noDW --even_odd_split"
+run() { # name bin env...
+  local name=$1 bin=$2; shift 2
+  rm -rf ab/out-$name-$R; mkdir -p ab
+  env "$@" taskset -c 8 /usr/bin/time -v $bin $ARGS --o ab/out-$name-$R/ --profile ab/prof-$name-$R.jsonl > ab/run-$name-$R.log 2> ab/time-$name-$R.log
+  echo "$name r$R rc=$? $(grep -E 'Elapsed|User time|System time|Minor' ab/time-$name-$R.log | awk -F': ' '{printf "%s ", $2}')"
+}
+
+for R in j1; do
+  run main    $MAIN X=1
+  run newhuge $NEW  GLIBC_TUNABLES=glibc.malloc.hugetlb=1
+done
+=== ab4.sh
+#!/bin/bash
+# A/B for issue 10: arms x rounds, interleaved, j4 on CPUs 8-11.
+cd /home/ubuntu/mc-cpu10-plancache
+MAIN=/home/ubuntu/mc-cpuprof-116eb04/build/motioncorr
+NEW=/home/ubuntu/mc-cpu10-plancache/build/motioncorr
+ARGS="--i Movies/20170629_00026_frameImage.tiff --use_own --j 4 --angpix 0.885 --voltage 300 --bfactor 150 --patch_x 5 --patch_y 5 --gainref Movies/gain.mrc --dose_weighting --dose_per_frame 1.277 --save_noDW --even_odd_split"
+run() { # name bin env...
+  local name=$1 bin=$2; shift 2
+  rm -rf ab/out-$name-$R; mkdir -p ab
+  env "$@" taskset -c 8-11 /usr/bin/time -v $bin $ARGS --o ab/out-$name-$R/ --profile ab/prof-$name-$R.jsonl > ab/run-$name-$R.log 2> ab/time-$name-$R.log
+  echo "$name r$R rc=$? $(grep -E 'Elapsed|User time|System time|Minor' ab/time-$name-$R.log | awk -F': ' '{printf "%s ", $2}')"
+}
+
+OLD=/home/ubuntu/mc-cpu10-plancache/motioncorr.plancache
+R=warm4; run thp $NEW X=1
+for R in 7 8 9; do
+  run main    $MAIN X=1
+  run thp     $NEW  X=1
+  run thpoff  $NEW  MOTIONCORR_HUGEPAGES=0
+  run newhuge $OLD  GLIBC_TUNABLES=glibc.malloc.hugetlb=1
+done
+=== stages.py
+import json,statistics as st,collections,sys
+arms=sys.argv[1].split(","); reps=sys.argv[2].split(",")
+data={}
+for a in arms:
+    rows=collections.defaultdict(list)
+    for r in reps:
+        for line in open(f"prof-{a}-{r}.jsonl"):
+            d=json.loads(line)
+            if d["type"]=="movie":
+                for s in d["stages"]: rows[s["name"]].append(s["wall_ms"])
+                sub=d.get("sub") or {}
+                items=sub.items() if isinstance(sub,dict) else [(x.get("name"),x) for x in sub]
+                for k,v in items: rows["  "+str(k)].append(v["wall_ms"] if isinstance(v,dict) else v)
+            else:
+                rows["peak_rss_MiB"].append(d["peak_rss_kb"]/1024); rows["run_wall_ms"].append(d["run_wall_ms"])
+    data[a]=rows
+names=[n for n in data[arms[0]] if st.median(data[arms[0]][n])>300 or n=="peak_rss_MiB"]
+print("%-34s"%"stage (median ms)"+"".join("%10s"%a for a in arms))
+for n in names:
+    print("%-34s"%n[:34]+"".join(("%10.0f"%st.median(data[a][n])) if data[a].get(n) else "%10s"%"-" for a in arms))

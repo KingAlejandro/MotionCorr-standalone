@@ -52,8 +52,14 @@ because it changes every malloc-family allocation:
 - User settings (`MALLOC_MMAP_THRESHOLD_`, `MALLOC_TRIM_THRESHOLD_`,
   `GLIBC_TUNABLES`) are never overridden.
 
-The mode in effect is printed at start (`Host allocator: ...`) and recorded in
-the `--profile` process record.
+**Default: huge pages for large arrays** (`src/multidim_array.h`). Every
+`MultidimArray` allocation of 4 MiB or more is marked `MADV_HUGEPAGE`, so
+hosts with THP in `madvise` mode back full frames with 2 MiB pages like
+`always` hosts do. It does not change contents or alignment.
+`MOTIONCORR_HUGEPAGES=0` disables it. Evidence: `docs/issue10_cpu_fft_memory/`.
+
+The mode in effect, including the host's THP setting, is printed at start
+(`Host allocator: ...`) and recorded in the `--profile` process record.
 
 ## Correctness
 

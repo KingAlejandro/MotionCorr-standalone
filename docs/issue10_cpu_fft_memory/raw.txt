@@ -1,0 +1,116 @@
+# Arms x rounds. Columns: name round rc user_s sys_s wall minflt. Rounds 7-9 rc from ab4 console output (all 0).
+main rwarm rc=0 66.99 8.36 0:20.39 3500158 
+new rwarm rc=0 65.92 7.04 0:19.91 2830366 
+main r1 rc=0 68.66 9.09 0:21.29 3518422 
+new r1 rc=0 66.45 7.58 0:20.20 3124815 
+reuse r1 rc=0 67.86 5.57 0:19.90 2267662 
+huge r1 rc=0 59.23 12.59 0:20.81 724178 
+newreuse r1 rc=0 69.95 4.90 0:19.92 2295531 
+main r2 rc=0 69.74 7.26 0:20.81 3001985 
+new r2 rc=0 70.71 6.46 0:20.62 2771849 
+reuse r2 rc=0 68.10 5.38 0:19.64 2671218 
+huge r2 rc=0 59.86 4.22 0:17.71 316199 
+newreuse r2 rc=0 66.59 4.87 0:19.10 2290209 
+main r3 rc=0 68.05 7.30 0:20.12 3147309 
+new r3 rc=0 68.96 6.37 0:20.10 2759317 
+reuse r3 rc=0 66.45 5.16 0:19.29 2428608 
+huge r3 rc=0 60.36 4.66 0:17.34 261006 
+newreuse r3 rc=0 66.86 4.69 0:19.06 2235012 
+main r4 rc=0 67.04 7.31 0:19.83 3321326 
+huge r4 rc=0 59.33 2.50 0:16.08 161632 
+newhuge r4 rc=0 58.18 1.21 0:15.27 112373 
+main r5 rc=0 66.77 7.41 0:19.81 3298699 
+huge r5 rc=0 58.67 2.55 0:15.92 168259 
+newhuge r5 rc=0 57.52 1.21 0:15.12 105547 
+main r6 rc=0 68.46 7.38 0:20.24 3123122 
+huge r6 rc=0 58.94 1.43 0:15.60 152279 
+newhuge r6 rc=0 57.64 1.21 0:15.15 121497 
+main r7 rc=0 65.52 7.03 0:19.35 3233543 
+main r8 rc=0 65.26 7.29 0:19.40 3368566 
+main r9 rc=0 65.28 7.34 0:19.48 3369980 
+thp r7 rc=0 58.51 1.35 0:15.56 194517 
+thp r8 rc=0 58.11 1.38 0:15.34 194252 
+thp r9 rc=0 57.85 1.78 0:15.76 219965 
+thpoff r7 rc=0 65.07 6.18 0:19.06 2760303 
+thpoff r8 rc=0 64.81 6.42 0:19.11 2965652 
+thpoff r9 rc=0 65.79 6.30 0:19.24 2894061 
+newhuge r7 rc=0 57.68 1.23 0:15.15 111286 
+newhuge r8 rc=0 57.55 1.36 0:15.24 121655 
+newhuge r9 rc=0 57.70 2.16 0:15.96 218571 
+
+stage (median ms)                       main       new     reuse      huge  newreuse
+host read movie                          460       457       462       286       463
+global fft                              3580      3562      3547      2402      3375
+global alignment                         553       564       521       487       536
+global ifft                             3882      3893      3465      2640      3274
+patch alignment                         2346      2211      2393      2319      2222
+unweighted sums                         2514      2571      2474      3382      2441
+dose weighting                          6296      6092      5827      5757      6042
+movie teardown                           342       364        16        78        18
+  dose weighting/DOSE_WEIGHTING         6296      6092      5827      5756      6042
+  dose weighting/DOSE_WEIGHTING/DW      3622      3396      3080      3042      3349
+  dose weighting/DOSE_WEIGHTING/DW      1125      1122      1143      1050      1061
+  dose weighting/DOSE_WEIGHTING/RE      1544      1539      1556      1527      1558
+  global alignment/GLOBAL_ALIGNMEN       553       564       521       487       536
+  global alignment/GLOBAL_ALIGNMEN       353       354       336       300       338
+  global fft/GLOBAL_FFT                 3580      3562      3547      2402      3375
+  global ifft/GLOBAL_IFFT               3882      3893      3465      2640      3274
+  host read movie/READ_MOVIE             460       457       462       286       463
+  patch alignment/PATCH_ALIGN            383       295       388       384       291
+  patch alignment/PREP_PATCH            1962      1919      2004      1939      1931
+  patch alignment/PREP_PATCH/PATCH      1840      1787      1834      1820      1776
+  unweighted sums/REAL_SPACE_INTER      1560      1576      1559      1533      1578
+peak_rss_MiB                            4495      4276      4777      4496      4315
+run_wall_ms                            20776     20171     19248     17691     18752
+stage (median ms)                       main       thp    thpoff   newhuge
+host read movie                          450       289       457       284
+global fft                              3264      2380      3287      2361
+global alignment                         554       477       535       470
+global ifft                             3476      2641      3521      2569
+patch alignment                         2355      2153      2179      2134
+unweighted sums                         2561      1888      2528      1959
+dose weighting                          6001      5153      5817      5078
+  dose weighting/DOSE_WEIGHTING         6001      5153      5817      5078
+  dose weighting/DOSE_WEIGHTING/DW      3231      2548      3151      2446
+  dose weighting/DOSE_WEIGHTING/DW      1163      1064      1110      1021
+  dose weighting/DOSE_WEIGHTING/RE      1560      1527      1531      1531
+  global alignment/GLOBAL_ALIGNMEN       554       477       535       470
+  global alignment/GLOBAL_ALIGNMEN       367       299       349       299
+  global fft/GLOBAL_FFT                 3264      2380      3287      2361
+  global ifft/GLOBAL_IFFT               3476      2641      3521      2569
+  host read movie/READ_MOVIE             450       289       457       284
+  patch alignment/PATCH_ALIGN            387       291       296       289
+  patch alignment/PREP_PATCH            1964      1862      1886      1843
+  patch alignment/PREP_PATCH/PATCH      1827      1792      1774      1749
+  unweighted sums/REAL_SPACE_INTER      1588      1530      1586      1536
+peak_rss_MiB                            4495      4278      4276      4304
+run_wall_ms                            19372     15547     19077     15230
+stage (median ms)                       main   newhuge
+host read movie                         1331       814
+global fft                              8166      6060
+global alignment                        1353       975
+global ifft                             8907      6500
+patch alignment                         5051      4743
+unweighted sums                         4522      3794
+dose weighting                         14247     12473
+movie teardown                           343        56
+  dose weighting/DOSE_WEIGHTING        14247     12470
+  dose weighting/DOSE_WEIGHTING/DW      7577      6154
+  dose weighting/DOSE_WEIGHTING/DW      3139      2851
+  dose weighting/DOSE_WEIGHTING/RE      3472      3454
+  global alignment/GLOBAL_ALIGNMEN      1353       975
+  global alignment/GLOBAL_ALIGNMEN       945       630
+  global fft/GLOBAL_FFT                 8166      6060
+  global ifft/GLOBAL_IFFT               8907      6500
+  host read movie/READ_MOVIE            1331       814
+  patch alignment/PATCH_ALIGN            677       586
+  patch alignment/PATCH_ALIGN/FOUR       436       424
+  patch alignment/PREP_PATCH            4369      4156
+  patch alignment/PREP_PATCH/PATCH      4131      3968
+  unweighted sums/REAL_SPACE_INTER      3504      3461
+peak_rss_MiB                            4262      4224
+run_wall_ms                            44584     35909
+
+# j1 single pair (taskset -c 8), columns: user sys wall minflt
+main rj1 rc=0 38.75 5.84 0:44.61 3434902
+newhuge rj1 rc=0 34.86 1.04 0:35.91 123058

@@ -5,6 +5,8 @@ import json
 import os
 from pathlib import Path
 import signal
+import shutil
+import struct
 import sys
 import tempfile
 import unittest
@@ -119,6 +121,45 @@ class Controls(unittest.TestCase):
         target.write_bytes(b'changed')
         with self.assertRaisesRegex(RuntimeError, 'input bytes changed'):
             experiment.check_inputs(plan)
+
+    def test_comparison_view_paths_and_numeric_negative(self):
+        for name, token in [('a', 'Ab12Cd'), ('b', 'Xy98Za')]:
+            raw = self.root / name / 'merged'; raw.mkdir(parents=True)
+            worker = self.root / name / 'w0'
+            header = bytearray(1024); struct.pack_into('<4i', header, 0, 1, 1, 1, 2)
+            (raw / 'movie.mrc').write_bytes(header + struct.pack('<f', 1.0))
+            (raw / 'other.mrc').write_bytes(header + struct.pack('<f', 2.0))
+            (raw / 'movie.star').write_text('_rlnMicrographMovieName movie.tiff\n')
+            (raw / 'other.star').write_text('_rlnMicrographMovieName other.tiff\n')
+            (raw / 'movie_shifts.eps').write_text(f'({worker}/movie_shifts.eps) show\n1.25 2.0 lineto\n')
+            (raw / 'header.pdf.lst').write_text(''.join(
+                f'{raw}/.aggregate-{token}/corrected_micrographs_{kind}_rlnAccumMotion{period}.eps\n'
+                for period in ('Total', 'Early', 'Late') for kind in ('all', 'hist')))
+            experiment.canonical_comparison_view(raw, [worker], self.root / name / 'view')
+        a = self.root / 'a/view'; b = self.root / 'b/view'
+        self.assertTrue(experiment.identity.compare_trees(str(a), str(b))['identical'])
+        for mutation in ('none', 'pixel', 'association', 'plot', 'list'):
+            copy = self.root / ('copy-' + mutation); shutil.copytree(b, copy)
+            # Relocate known text roots before the positive-copy check. MRCs
+            # are copied, not linked, so mutations cannot touch originals.
+            for path in copy.iterdir():
+                if path.suffix != '.mrc':
+                    path.write_bytes(path.read_bytes().replace(str(b).encode(), str(copy).encode()))
+            if mutation == 'pixel':
+                image = copy / 'movie.mrc'; data = bytearray(image.read_bytes())
+                struct.pack_into('<f', data, 1024, 1.0000001192092896); image.write_bytes(data)
+            elif mutation == 'association':
+                shutil.copyfile(copy / 'other.mrc', copy / 'movie.mrc')
+            elif mutation == 'plot':
+                path = copy / 'movie_shifts.eps'; path.write_text(path.read_text().replace('1.25 2.0', '1.26 2.0'))
+            elif mutation == 'list':
+                path = copy / 'header.pdf.lst'; path.write_text(path.read_text().replace('MotionTotal.eps', 'MotionOther.eps'))
+            with self.subTest(mutation=mutation):
+                self.assertEqual(experiment.identity.compare_trees(str(a), str(copy))['identical'], mutation == 'none')
+        raw = self.root / 'b/merged'
+        (raw / 'movie_shifts.eps').write_text('(/unknown/output/movie_shifts.eps) show\n1.25 2.0 lineto\n')
+        experiment.canonical_comparison_view(raw, [self.root / 'b/w0'], self.root / 'unknown-view')
+        self.assertFalse(experiment.identity.compare_trees(str(a), str(self.root / 'unknown-view'))['identical'])
 
     def test_direct_child_self_affinity_and_nonzero_exit(self):
         self.require_child_support()

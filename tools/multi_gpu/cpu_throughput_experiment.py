@@ -17,6 +17,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import signal
 import sys
 import time
@@ -241,6 +242,52 @@ def stage_products(out, manifest, workers, suffixes):
     return staged
 
 
+def observed_aggregate_scratch(raw_root):
+    names = [f'corrected_micrographs_{kind}_rlnAccumMotion{period}.eps'
+             for period in ('Total', 'Early', 'Late') for kind in ('all', 'hist')]
+    lines = (raw_root / 'header.pdf.lst').read_text().splitlines()
+    if len(lines) != len(names) or not lines[0].endswith('/' + names[0]):
+        raise RuntimeError('unexpected aggregate header list membership')
+    prefix = lines[0][:-len(names[0]) - 1]
+    pattern = re.escape(str(raw_root)) + r'/\.aggregate-[A-Za-z0-9]{6}'
+    if not re.fullmatch(pattern, prefix) or lines != [prefix + '/' + name for name in names]:
+        raise RuntimeError('unexpected aggregate scratch paths or list order')
+    return prefix
+
+
+def canonical_comparison_view(raw_root, workers, view, scratch_prefix=None):
+    """Keep every file; canonicalize only declared output/scratch path prefixes.
+
+    Per-movie EPS titles name their original worker output, whereas aggregate
+    list files name a mkdtemp report directory. Neither is a numeric datum.
+    MRC/PDF/log bytes are linked untouched; all other bytes remain exact except
+    these bounded path substitutions. Raw products are retained independently.
+    """
+    view.mkdir()
+    changes = {}
+    scratch_prefix = scratch_prefix or observed_aggregate_scratch(raw_root)
+    scratch_in_view = str(view) + scratch_prefix[len(str(raw_root)):]
+    roots = [str(raw_root), *(str(worker) for worker in workers)]
+    for rel, source in merge_workers.worker_files(raw_root).items():
+        target = view / rel; target.parent.mkdir(parents=True, exist_ok=True)
+        if source.suffix.lower() in ('.mrc', '.mrcs', '.pdf', '.log'):
+            os.link(source, target)
+            continue
+        original = source.read_bytes(); data = original
+        for root in sorted(roots, key=len, reverse=True):
+            data = re.sub(re.escape(root.encode()) + rb'(?=/|$)', str(view).encode(), data)
+        if source.name in ('header.pdf.lst', 'logfile.pdf.lst'):
+            pattern = (rb'^' + re.escape(scratch_in_view.encode()) + rb'/' +
+                       rb'(corrected_micrographs_(?:all|hist)_rlnAccumMotion(?:Total|Early|Late)\.eps)(?=\r?$)')
+            data = re.sub(pattern, lambda m: str(view).encode() + b'/.aggregate-<SCRATCH>/' + m[1],
+                          data, flags=re.MULTILINE)
+        target.write_bytes(data)
+        if original != data:
+            changes[str(rel)] = {'raw_sha256': hashlib.sha256(original).hexdigest(),
+                                 'view_sha256': hashlib.sha256(data).hexdigest()}
+    return changes
+
+
 def one_run(plan, config, out):
     out.mkdir()
     status = {'certified': False, 'diagnostic_complete': False, 'name': config['name'],
@@ -311,6 +358,9 @@ def one_run(plan, config, out):
         status['n_movies'] = len(manifest['canonical_movies'])
         status['movies_per_s'] = status['n_movies'] / status['dataset_wall_s']
         status['staged_sha256'] = {rel: item['sha256'] for rel, item in staged.items()}
+        status['observed_aggregate_scratch_prefix'] = observed_aggregate_scratch(out / 'merged')
+        status['comparison_view_path_changes'] = canonical_comparison_view(
+            out / 'merged', workers, out / 'comparison', status['observed_aggregate_scratch_prefix'])
         status['diagnostic_complete'] = True
     except Exception as exc:
         status['error'] = f'{type(exc).__name__}: {exc}'
@@ -368,8 +418,8 @@ def main():
                 status['replicate'] = rep; status['warmup'] = rep < 0
                 if status['diagnostic_complete']:
                     if reference is None:
-                        reference = path / 'merged'
-                    comparison = identity.compare_trees(str(reference), str(path / 'merged'))
+                        reference = path / 'comparison'
+                    comparison = identity.compare_trees(str(reference), str(path / 'comparison'))
                     write(path / 'identity.json', comparison)
                     status['products_identical'] = comparison['identical']
                     if not comparison['identical']:

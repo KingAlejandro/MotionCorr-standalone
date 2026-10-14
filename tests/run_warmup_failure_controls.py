@@ -112,9 +112,12 @@ def main():
     for name, extra, star in (("unwind-initialise", (), "missing.star"),
                               ("unwind-run", ("--gainref", "missing-gain.mrc"), "movies.star")):
         out, rc, text = run(name, {"MC_WARMUP_DELAY_MS": "400"}, star=star, extra=extra)
+        # A negative status is a signal: unwinding past a joinable std::thread is
+        # std::terminate, which is what an unjoined helper does.
+        require(rc == 1, f"{name}: expected a clean failure exit (1), got {rc}"
+                         + (" (killed by a signal: the helper was destroyed while joinable)" if rc < 0 else ""))
         require("[warmupfault] helper delayed 400 ms" in text,
                 f"{name}: the helper was not running when the error was raised")
-        require(rc == 1, f"{name}: expected a clean failure exit (1), got {rc}")
         require("ERROR" in text, f"{name}: the original error was not reported")
         require("[warmupfault] helper done" in text,
                 f"{name}: the process ended before the helper finished, so it was not joined")

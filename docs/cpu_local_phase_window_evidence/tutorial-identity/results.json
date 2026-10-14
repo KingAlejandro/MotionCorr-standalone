@@ -1,0 +1,191 @@
+{
+  "mode": "tutorial-identity",
+  "claim_limit": "helper six paired samples only; whole movies are one-pair identity controls, not speed evidence",
+  "host_limitation": "hostname and child affinity checked; per-PID namespace ownership and physical-host isolation not certified by this driver",
+  "expected_host": "442a2f5ea6ec",
+  "actual_host": "442a2f5ea6ec",
+  "cpu_masks": {
+    "1": "0",
+    "4": "0-3"
+  },
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "source": {
+    "source_dir": "/workspace/scratch/28038873ca11/MotionCorr-patch-window",
+    "commit": "47d16108deeadb04c90e28a0e084830ec390b710",
+    "dirty": false,
+    "origin": "git in /workspace/scratch/28038873ca11/MotionCorr-patch-window"
+  },
+  "binaries": {
+    "base": {
+      "path": "/workspace/scratch/28038873ca11/build-layout-reference/motioncorr",
+      "sha256": "373f61b5f45dcb14a79129517ff72c90f253dec4fbd5cbd4acb4e90a53bead25"
+    },
+    "candidate": {
+      "path": "/workspace/scratch/28038873ca11/build-patch-window/motioncorr",
+      "sha256": "e4f8ea2d8a624d53e85c99b577f25439bca545f6b9f800d0b9d8adcbf6b0ae8a"
+    },
+    "bench": {
+      "path": "/workspace/scratch/28038873ca11/build-patch-window/cpu_patch_phase_bench",
+      "sha256": "a07e0b807cbad4b864ff582c08464a735de6df059b59a4cfd68296345c3ca898"
+    }
+  },
+  "inputs": {
+    "/workspace/scratch/28038873ca11/data/tutorial.tiff": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "/workspace/scratch/28038873ca11/data/gain.mrc": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1"
+  },
+  "cpu_max": "800000 100000",
+  "memory_max": "8589934592",
+  "runs": [
+    {
+      "tag": "patch5-j4-base",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-layout-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/phase-window-tutorial-identity/patch5-j4-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--group_frames",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc"
+      ],
+      "cpu_mask": "0-3",
+      "affinity_probe": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "environment": {
+        "OMP_NUM_THREADS": "4",
+        "OMP_DYNAMIC": "FALSE",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores",
+        "OMP_WAIT_POLICY": "PASSIVE",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "rc": 0,
+      "diagnostic_wall_s": 56.606572691998736,
+      "peak_rss_kib": 4556152,
+      "user_s": 148.837734,
+      "sys_s": 24.542874
+    },
+    {
+      "tag": "patch5-j4-candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-patch-window/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/phase-window-tutorial-identity/patch5-j4-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--group_frames",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc"
+      ],
+      "cpu_mask": "0-3",
+      "affinity_probe": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "environment": {
+        "OMP_NUM_THREADS": "4",
+        "OMP_DYNAMIC": "FALSE",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores",
+        "OMP_WAIT_POLICY": "PASSIVE",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "rc": 0,
+      "diagnostic_wall_s": 40.60862803599957,
+      "peak_rss_kib": 4554328,
+      "user_s": 115.457832,
+      "sys_s": 10.936512
+    }
+  ],
+  "comparisons": [
+    {
+      "patch": 5,
+      "threads": 4,
+      "root_a": "/workspace/scratch/28038873ca11/phase-window-tutorial-identity/patch5-j4-base",
+      "root_b": "/workspace/scratch/28038873ca11/phase-window-tutorial-identity/patch5-j4-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/tutorial.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    }
+  ]
+}

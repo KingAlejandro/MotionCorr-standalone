@@ -1,0 +1,114 @@
+{
+  "measurement_host": "442a2f5ea6ec",
+  "scope": "container-only; do not compare absolute times to cpu64",
+  "cpu_mask_j1": "0",
+  "cpu_mask_j4": "0-3",
+  "kernel": [
+    {
+      "tag": "kernel-j1",
+      "measured_pairs": 6,
+      "updates_per_arm": 460,
+      "full_median_s": 0.4784133735,
+      "window_median_s": 0.035757949,
+      "median_ratio": 13.379217401423109,
+      "paired_delta_median_s": -0.44326821,
+      "paired_delta_range_s": [
+        -0.617997716,
+        -0.399550557
+      ],
+      "paired_delta_MAD_s": 0.022089304000000004,
+      "all_six_faster": true,
+      "retained_complex_exact_per_pair": 446976,
+      "claim_limit": "within-process helper samples; not patch stage or movie speedup"
+    },
+    {
+      "tag": "kernel-j4",
+      "measured_pairs": 6,
+      "updates_per_arm": 460,
+      "full_median_s": 0.204967796,
+      "window_median_s": 0.0230168465,
+      "median_ratio": 8.905120690621107,
+      "paired_delta_median_s": -0.181639144,
+      "paired_delta_range_s": [
+        -0.185280701,
+        -0.17278660499999998
+      ],
+      "paired_delta_MAD_s": 0.0036200839999999956,
+      "all_six_faster": true,
+      "retained_complex_exact_per_pair": 446976,
+      "claim_limit": "within-process helper samples; not patch stage or movie speedup"
+    }
+  ],
+  "product_controls": [
+    {
+      "mode": "small-identity",
+      "patch": 1,
+      "threads": 1,
+      "strict_identical": true,
+      "files_compared": 12,
+      "mrc_compared": 4,
+      "only_a": [],
+      "only_b": [],
+      "problems": []
+    },
+    {
+      "mode": "small-identity",
+      "patch": 1,
+      "threads": 4,
+      "strict_identical": true,
+      "files_compared": 12,
+      "mrc_compared": 4,
+      "only_a": [],
+      "only_b": [],
+      "problems": []
+    },
+    {
+      "mode": "small-identity",
+      "patch": 3,
+      "threads": 1,
+      "strict_identical": true,
+      "files_compared": 12,
+      "mrc_compared": 4,
+      "only_a": [],
+      "only_b": [],
+      "problems": []
+    },
+    {
+      "mode": "small-identity",
+      "patch": 3,
+      "threads": 4,
+      "strict_identical": true,
+      "files_compared": 12,
+      "mrc_compared": 4,
+      "only_a": [],
+      "only_b": [],
+      "problems": []
+    },
+    {
+      "mode": "tutorial-identity",
+      "patch": 5,
+      "threads": 4,
+      "strict_identical": true,
+      "files_compared": 12,
+      "mrc_compared": 4,
+      "only_a": [],
+      "only_b": [],
+      "problems": []
+    }
+  ],
+  "whole_movie_performance_verdict": "not assessed: one tutorial identity pair only",
+  "tutorial_diagnostic_runs": [
+    {
+      "tag": "patch5-j4-base",
+      "wall_s": 56.606572691998736,
+      "peak_rss_kib": 4556152
+    },
+    {
+      "tag": "patch5-j4-candidate",
+      "wall_s": 40.60862803599957,
+      "peak_rss_kib": 4554328
+    }
+  ],
+  "canonical_file_pairs": 30,
+  "canonical_all_identical": true
+}

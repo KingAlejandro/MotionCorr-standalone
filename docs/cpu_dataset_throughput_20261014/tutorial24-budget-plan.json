@@ -1,0 +1,70 @@
+{
+  "star": "/workspace/scratch/28038873ca11/throughput-inputs/tutorial2.star",
+  "cpu_budget": 4,
+  "memory_budget_bytes": 8589934592,
+  "headroom_bytes": 1073741824,
+  "seed": 1,
+  "warmups": 0,
+  "replicates": 1,
+  "worker_args": [
+    "--use_own",
+    "--angpix",
+    ".885",
+    "--voltage",
+    "300",
+    "--bfactor",
+    "150",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--save_noDW",
+    "--even_odd_split",
+    "--gainref",
+    "/workspace/scratch/28038873ca11/data/gain.mrc"
+  ],
+  "required_products": [
+    ".mrc",
+    ".star",
+    "_noDW.mrc",
+    "_EVN.mrc",
+    "_ODD.mrc",
+    "_shifts.eps"
+  ],
+  "input_sha256": {
+    "/workspace/scratch/28038873ca11/throughput-inputs/tutorial0.tiff": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "/workspace/scratch/28038873ca11/throughput-inputs/tutorial1.tiff": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "/workspace/scratch/28038873ca11/data/gain.mrc": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1"
+  },
+  "configurations": [
+    {
+      "name": "main-2x2",
+      "binary": "/workspace/scratch/28038873ca11/build-layout-reference/motioncorr",
+      "worker_rss_kib": 4601124,
+      "source": {
+        "published": "116eb04ad359cd5bf789b28809fc2047ea155b9b"
+      },
+      "masks": [
+        "0-1",
+        "2-3"
+      ]
+    },
+    {
+      "name": "stream-2x2",
+      "binary": "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+      "worker_rss_kib": 3286696,
+      "source": {
+        "published": "5a6812baf69979a8446baae2835188a85336acf3",
+        "local": "c9dbe5957898f5206cb05ea5daaa62ae3358218a",
+        "sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de"
+      },
+      "masks": [
+        "0-1",
+        "2-3"
+      ]
+    }
+  ]
+}

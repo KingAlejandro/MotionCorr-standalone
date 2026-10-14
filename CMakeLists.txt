@@ -266,6 +266,11 @@ if(BUILD_TESTING)
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND EXISTS "/sys/fs/cgroup/memory.current")
+        add_test(NAME CpuDatasetThroughputExperiment
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/multi_gpu/test_cpu_throughput_experiment.py)
+        set_tests_properties(CpuDatasetThroughputExperiment PROPERTIES TIMEOUT 30 SKIP_RETURN_CODE 77)
+    endif()
     add_test(NAME NvcompAcceptanceDiagnostics
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_nvcomp_acceptance_diagnostics.py)
     # Profiling kit (docs/profiling.md): Nsight SQLite queries and derived

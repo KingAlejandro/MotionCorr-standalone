@@ -160,6 +160,10 @@ install(TARGETS motioncorr RUNTIME DESTINATION bin)
 
 include(CTest)
 if(BUILD_TESTING)
+    add_executable(cpu_interpolation_xcoords tests/test_cpu_interpolation_xcoords.cpp)
+    target_link_libraries(cpu_interpolation_xcoords PRIVATE motioncorr_core)
+    add_test(NAME CpuInterpolationXcoords COMMAND cpu_interpolation_xcoords)
+    set_tests_properties(CpuInterpolationXcoords PROPERTIES TIMEOUT 120)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
     # Device-free control for the issue #69 patch-retry shift-state contract.

@@ -1,0 +1,34 @@
+Internal ctest changing into directory: /workspace/scratch/28038873ca11/build-xcoords
+Test project /workspace/scratch/28038873ca11/build-xcoords
+    Start  1: CpuInterpolationXcoords
+1/4 Test  #1: CpuInterpolationXcoords ..........   Passed    1.04 sec
+    Start 24: SyntheticRegression
+2/4 Test #24: SyntheticRegression ..............   Passed    3.04 sec
+    Start 40: RunnerModelParser
+3/4 Test #40: RunnerModelParser ................***Failed    1.03 sec
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-xcoords/tests/test_runner_contract.py", line 379, in <module>
+    main()
+  File "/workspace/scratch/28038873ca11/MotionCorr-xcoords/tests/test_runner_contract.py", line 372, in main
+    CASES[args.case](args.binary.resolve(), Path(directory))
+  File "/workspace/scratch/28038873ca11/MotionCorr-xcoords/tests/test_runner_contract.py", line 208, in model_parser
+    subprocess.run([str(HELPER), 'write_model', 'a.mrc', 'export/'], cwd=work, check=True)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/scratch/28038873ca11/build-xcoords/runner_numerics'
+
+    Start 42: RunnerInterpolateShifts
+4/4 Test #42: RunnerInterpolateShifts ..........   Passed    2.13 sec
+
+75% tests passed, 1 tests failed out of 4
+
+Total Test time (real) =   7.24 sec
+
+The following tests FAILED:
+	 40 - RunnerModelParser (Failed)
+Errors while running CTest

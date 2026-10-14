@@ -1,0 +1,52 @@
+main116eb04: /workspace/scratch/28038873ca11/build-layout-reference/CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+00000000000011f0 <MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float>, std::allocator<Image<float> > >&, std::vector<Image<float>, std::allocator<Image<float> > >&, ThirdOrderPolynomialModel&, std::ostream&) [clone ._omp_fn.0]>:
+static scalar/vector division instruction sites in outlined pixel loop: 3
+    1363:	48 83 7c 24 30 01    	cmpq   $0x1,0x30(%rsp)
+    1369:	66 41 0f 28 e9       	movapd %xmm9,%xmm5
+    136e:	f2 0f 5e 6c 24 70    	divsd  0x70(%rsp),%xmm5
+    1374:	f2 41 0f 5c ea       	subsd  %xmm10,%xmm5
+    1379:	f2 0f 59 fd          	mulsd  %xmm5,%xmm7
+    1491:	f2 0f 2a cf          	cvtsi2sd %edi,%xmm1
+    1495:	66 0f 28 d9          	movapd %xmm1,%xmm3
+    1499:	f2 0f 5e 5c 24 20    	divsd  0x20(%rsp),%xmm3
+    149f:	f2 41 0f 5c da       	subsd  %xmm10,%xmm3
+    14a4:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+    1703:	f2 0f 2a cf          	cvtsi2sd %edi,%xmm1
+    1707:	66 0f 28 d9          	movapd %xmm1,%xmm3
+    170b:	f2 0f 5e 5c 24 20    	divsd  0x20(%rsp),%xmm3
+    1711:	f2 41 0f 5c da       	subsd  %xmm10,%xmm3
+    1716:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+00000000000019d0 <MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image<float>&, std::vector<Image<float>, std::allocator<Image<float> > >&, ThirdOrderPolynomialModel&, std::ostream&) [clone ._omp_fn.0]>:
+static scalar/vector division instruction sites in outlined pixel loop: 3
+    1b43:	48 83 7c 24 30 01    	cmpq   $0x1,0x30(%rsp)
+    1b49:	66 41 0f 28 e9       	movapd %xmm9,%xmm5
+    1b4e:	f2 0f 5e 6c 24 70    	divsd  0x70(%rsp),%xmm5
+    1b54:	f2 41 0f 5c ea       	subsd  %xmm10,%xmm5
+    1b59:	f2 0f 59 fd          	mulsd  %xmm5,%xmm7
+    1c71:	f2 0f 2a cf          	cvtsi2sd %edi,%xmm1
+    1c75:	66 0f 28 d9          	movapd %xmm1,%xmm3
+    1c79:	f2 0f 5e 5c 24 20    	divsd  0x20(%rsp),%xmm3
+    1c7f:	f2 41 0f 5c da       	subsd  %xmm10,%xmm3
+    1c84:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+    1ee3:	f2 0f 2a cf          	cvtsi2sd %edi,%xmm1
+    1ee7:	66 0f 28 d9          	movapd %xmm1,%xmm3
+    1eeb:	f2 0f 5e 5c 24 20    	divsd  0x20(%rsp),%xmm3
+    1ef1:	f2 41 0f 5c da       	subsd  %xmm10,%xmm3
+    1ef6:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+
+candidate: /workspace/scratch/28038873ca11/build-xcoords/CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+00000000000011f0 <MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float>, std::allocator<Image<float> > >&, std::vector<Image<float>, std::allocator<Image<float> > >&, ThirdOrderPolynomialModel&, std::ostream&) [clone ._omp_fn.0]>:
+static scalar/vector division instruction sites in outlined pixel loop: 1
+    1353:	48 83 7c 24 30 01    	cmpq   $0x1,0x30(%rsp)
+    1359:	66 41 0f 28 e9       	movapd %xmm9,%xmm5
+    135e:	f2 0f 5e 6c 24 70    	divsd  0x70(%rsp),%xmm5
+    1364:	f2 0f 5c 2d 00 00 00 	subsd  0x0(%rip),%xmm5        # 136c <MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float>, std::allocator<Image<float> > >&, std::vector<Image<float>, std::allocator<Image<float> > >&, ThirdOrderPolynomialModel&, std::ostream&) [clone ._omp_fn.0]+0x17c>
+    136b:	00 
+00000000000019e0 <MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image<float>&, std::vector<Image<float>, std::allocator<Image<float> > >&, ThirdOrderPolynomialModel&, std::ostream&) [clone ._omp_fn.0]>:
+static scalar/vector division instruction sites in outlined pixel loop: 1
+    1b3b:	48 83 7c 24 30 01    	cmpq   $0x1,0x30(%rsp)
+    1b41:	66 41 0f 28 e9       	movapd %xmm9,%xmm5
+    1b46:	f2 0f 5e 6c 24 70    	divsd  0x70(%rsp),%xmm5
+    1b4c:	f2 0f 5c 2d 00 00 00 	subsd  0x0(%rip),%xmm5        # 1b54 <MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image<float>&, std::vector<Image<float>, std::allocator<Image<float> > >&, ThirdOrderPolynomialModel&, std::ostream&) [clone ._omp_fn.0]+0x174>
+    1b53:	00 
+

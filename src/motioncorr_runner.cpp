@@ -4220,6 +4220,12 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(st
 	const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
 	const Matrix1D<RFLOAT> coeffX = model.coeffX, coeffY = model.coeffY;
 
+	// Preserve the original division and subtraction, once per column rather
+	// than once per pixel/frame. All OpenMP workers read the same exact values.
+	std::vector<RFLOAT> x_coordinates(nx);
+	for (int ix = 0; ix < nx; ix++)
+		x_coordinates[ix] = (RFLOAT)ix / nx - 0.5;
+
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		logfile << "." << std::flush;
 
@@ -4243,7 +4249,7 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(st
 		for (int iy = 0; iy < ny; iy++) {
 			const RFLOAT y = (RFLOAT)iy / ny - 0.5;
 			for (int ix = 0; ix < nx; ix++) {
-				const RFLOAT x = (RFLOAT)ix / nx - 0.5;
+				const RFLOAT x = x_coordinates[ix];
 				bool valid = true;
 
 				RFLOAT x_fitted = x_C0 + (x_C1 + x_C2 * x) * x + (x_C3 + x_C4 * y + x_C5 * x) * y;
@@ -4391,6 +4397,12 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 	const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
 	const Matrix1D<RFLOAT> coeffX = model.coeffX, coeffY = model.coeffY;
 
+	// Preserve the original division and subtraction, once per column rather
+	// than once per pixel/frame. All OpenMP workers read the same exact values.
+	std::vector<RFLOAT> x_coordinates(nx);
+	for (int ix = 0; ix < nx; ix++)
+		x_coordinates[ix] = (RFLOAT)ix / nx - 0.5;
+
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		logfile << "." << std::flush;
 
@@ -4414,7 +4426,7 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 		for (int iy = 0; iy < ny; iy++) {
 			const RFLOAT y = (RFLOAT)iy / ny - 0.5;
 			for (int ix = 0; ix < nx; ix++) {
-				const RFLOAT x = (RFLOAT)ix / nx - 0.5;
+				const RFLOAT x = x_coordinates[ix];
 				bool valid = true;
 
 				RFLOAT x_fitted = x_C0 + (x_C1 + x_C2 * x) * x + (x_C3 + x_C4 * y + x_C5 * x) * y;

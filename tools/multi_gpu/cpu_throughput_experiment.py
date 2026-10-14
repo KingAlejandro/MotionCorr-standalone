@@ -242,9 +242,11 @@ def stage_products(out, manifest, workers, suffixes):
     return staged
 
 
-def observed_aggregate_scratch(raw_root):
+def observed_aggregate_scratch(raw_root, n_movies):
+    # motioncorr_runner.cpp emits histograms only for more than three rows.
+    kinds = ('all', 'hist') if n_movies > 3 else ('all',)
     names = [f'corrected_micrographs_{kind}_rlnAccumMotion{period}.eps'
-             for period in ('Total', 'Early', 'Late') for kind in ('all', 'hist')]
+             for period in ('Total', 'Early', 'Late') for kind in kinds]
     lines = (raw_root / 'header.pdf.lst').read_text().splitlines()
     if len(lines) != len(names) or not lines[0].endswith('/' + names[0]):
         raise RuntimeError('unexpected aggregate header list membership')
@@ -255,7 +257,7 @@ def observed_aggregate_scratch(raw_root):
     return prefix
 
 
-def canonical_comparison_view(raw_root, workers, view, scratch_prefix=None):
+def canonical_comparison_view(raw_root, workers, view, scratch_prefix=None, n_movies=4):
     """Keep every file; canonicalize only declared output/scratch path prefixes.
 
     Per-movie EPS titles name their original worker output, whereas aggregate
@@ -265,7 +267,7 @@ def canonical_comparison_view(raw_root, workers, view, scratch_prefix=None):
     """
     view.mkdir()
     changes = {}
-    scratch_prefix = scratch_prefix or observed_aggregate_scratch(raw_root)
+    scratch_prefix = scratch_prefix or observed_aggregate_scratch(raw_root, n_movies)
     scratch_in_view = str(view) + scratch_prefix[len(str(raw_root)):]
     roots = [str(raw_root), *(str(worker) for worker in workers)]
     for rel, source in merge_workers.worker_files(raw_root).items():
@@ -358,7 +360,7 @@ def one_run(plan, config, out):
         status['n_movies'] = len(manifest['canonical_movies'])
         status['movies_per_s'] = status['n_movies'] / status['dataset_wall_s']
         status['staged_sha256'] = {rel: item['sha256'] for rel, item in staged.items()}
-        status['observed_aggregate_scratch_prefix'] = observed_aggregate_scratch(out / 'merged')
+        status['observed_aggregate_scratch_prefix'] = observed_aggregate_scratch(out / 'merged', len(manifest['canonical_movies']))
         status['comparison_view_path_changes'] = canonical_comparison_view(
             out / 'merged', workers, out / 'comparison', status['observed_aggregate_scratch_prefix'])
         status['diagnostic_complete'] = True

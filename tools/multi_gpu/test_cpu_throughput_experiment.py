@@ -160,6 +160,15 @@ class Controls(unittest.TestCase):
         (raw / 'movie_shifts.eps').write_text('(/unknown/output/movie_shifts.eps) show\n1.25 2.0 lineto\n')
         experiment.canonical_comparison_view(raw, [self.root / 'b/w0'], self.root / 'unknown-view')
         self.assertFalse(experiment.identity.compare_trees(str(a), str(self.root / 'unknown-view'))['identical'])
+        header = raw / 'header.pdf.lst'
+        # The runner emits only all-movie plots at <=3 movies; histogram
+        # membership remains mandatory above that source-defined threshold.
+        with self.assertRaisesRegex(RuntimeError, 'header list membership'):
+            experiment.observed_aggregate_scratch(raw, 2)
+        header.write_text(''.join(line for line in header.read_text().splitlines(keepends=True) if '_hist_' not in line))
+        self.assertTrue(experiment.observed_aggregate_scratch(raw, 2).endswith('.aggregate-Xy98Za'))
+        with self.assertRaisesRegex(RuntimeError, 'header list membership'):
+            experiment.observed_aggregate_scratch(raw, 4)
 
     def test_direct_child_self_affinity_and_nonzero_exit(self):
         self.require_child_support()

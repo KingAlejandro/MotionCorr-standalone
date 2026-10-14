@@ -134,6 +134,7 @@ if(CUDA)
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_alignpatch.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_realspace_dw.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_fft_prep.cu"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_pinned_stage.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_movie_session.cu")
     target_link_libraries(motioncorr_core PUBLIC CUDA::toolkit CUDA::cudart CUDA::cufft)
 
@@ -628,6 +629,29 @@ if(BUILD_TESTING AND CUDA)
                 --binary $<TARGET_FILE:motioncorr_faultinject>)
         set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 900)
+        # Worker-lifetime pinned staging buffer (src/acc/cuda/cuda_pinned_stage.h):
+        # one owner, one free path, freed exactly once. Device-free (counting fake
+        # backend). Mutants: a freed buffer that stays owned (double free), a
+        # leaked mapping after unpin, and a leaked mapping when registration is
+        # refused.
+        add_executable(test_pinned_stage tests/test_pinned_stage.cpp)
+        target_link_libraries(test_pinned_stage PRIVATE motioncorr_core)
+        add_test(NAME CudaPinnedStage COMMAND test_pinned_stage)
+        set_tests_properties(CudaPinnedStage PROPERTIES LABELS "cuda" TIMEOUT 60)
+        mc_cuda_mutant(CudaPinnedStageMutant tests/test_pinned_stage.cpp cuda_pinned_stage double_free
+            "    ptr_ = nullptr;
+    bytes_ = 0;
+    kind_ = Kind::None;
+    return status;"
+            "    bytes_ = 0;
+    kind_ = Kind::None;
+    return status;")
+        mc_cuda_mutant(CudaPinnedStageMutant tests/test_pinned_stage.cpp cuda_pinned_stage leak_after_unpin
+            "        backend_->unmap(ptr_, bytes_);"
+            "        (void)0;")
+        mc_cuda_mutant(CudaPinnedStageMutant tests/test_pinned_stage.cpp cuda_pinned_stage leak_on_refusal
+            "            backend_->unmap(mapped, bytes);"
+            "            (void)0;")
         # The same two reconstruction-cleanup controls on the nvCOMP ingest arm.
         # run_preprocessing_failure_controls.py builds its fixture with
         # TIFFTAG_COMPRESSION = 1, so the fast path declines it and

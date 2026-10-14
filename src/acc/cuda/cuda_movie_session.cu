@@ -25,6 +25,7 @@
 #include "src/acc/cuda/cuda_deflate_layout.h"
 #include "src/acc/cuda/cuda_adler32_kernel.cuh"
 #include "src/acc/cuda/cuda_reader_pool.h"
+#include "src/acc/cuda/cuda_pinned_stage.h"
 #include <atomic>
 #include <mutex>
 #endif
@@ -1314,14 +1315,11 @@ namespace {
 // thread_local, not a shared static: movies are dispatched one at a time here, but
 // a worker-per-thread arrangement must not share one pinned buffer. One device per
 // process is assumed, which is already how --gpu behaves.
-struct PinnedStagePool {
-    void *ptr = nullptr;
-    size_t bytes = 0;
-    // Destroyed at thread exit, possibly after the CUDA context has gone; the
-    // status is deliberately ignored because there is nowhere left to report it.
-    ~PinnedStagePool() { if (ptr) cudaFreeHost(ptr); }
-};
-thread_local PinnedStagePool t_pinned_stage;
+// The buffer is a mc_cuda::PinnedStage: one owner, one free path (hugepage
+// mapping pinned with cudaHostRegister, or cudaHostAlloc if that is unavailable),
+// released on thread exit with the status dropped because the CUDA context may
+// already be gone.
+thread_local mc_cuda::PinnedStage t_pinned_stage;
 
 // pread until n bytes have arrived. A short file, an error or EOF is a refusal,
 // as a short TIFFReadRawStrip was. pread leaves the descriptor's offset alone,
@@ -1341,22 +1339,23 @@ bool preadFully(int fd, uint8_t *dst, size_t n, uint64_t offset) {
 } // namespace
 
 bool CudaMovieSession::ensurePinnedStage(size_t bytes) {
-    if (t_pinned_stage.ptr && t_pinned_stage.bytes >= bytes) return true;
-    if (t_pinned_stage.ptr) {
-        HANDLE_ERROR(cudaFreeHost(t_pinned_stage.ptr));
-        t_pinned_stage.ptr = nullptr;
-        t_pinned_stage.bytes = 0;
+    if (t_pinned_stage.data() && t_pinned_stage.bytes() >= bytes) return true;
+    if (t_pinned_stage.data()) {
+        HANDLE_ERROR(t_pinned_stage.release());
     }
     // Headroom, rounded to 32 MiB. Compressed size drifts by a few MiB between
     // movies of the same geometry, so an exact fit reallocated on 7 of 24 tutorial
     // movies; with slack the pool is allocated once for the run.
     const size_t reserve = mc_tiff_deflate::pinnedReserveBytes(bytes);
-    HANDLE_ERROR(cudaHostAlloc(&t_pinned_stage.ptr, reserve, cudaHostAllocDefault));
-    t_pinned_stage.bytes = reserve;
+    bool fell_back = false;
+    HANDLE_ERROR(t_pinned_stage.acquire(reserve, &fell_back));
     // Logged only when the pool actually grows, so "allocated once across the run"
     // is something the log can show rather than something the design merely claims.
     logfile << "nvCOMP ingestion: pinned staging pool grown to " << reserve
             << " bytes for a " << bytes << "-byte request (worker lifetime)" << std::endl;
+    if (fell_back)
+        logfile << "nvCOMP ingestion: hugepage registration unavailable; the pinned "
+                << "staging pool was allocated with cudaHostAlloc." << std::endl;
     return true;
 }
 
@@ -1538,9 +1537,9 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // The pool is never shrunk, so a cap lowered mid-run cannot be honoured by
     // declining a batch: those bytes are already pinned. Refuse rather than
     // report a budget the worker is not inside.
-    if (t_pinned_stage.ptr && t_pinned_stage.bytes > pinned_cap) {
+    if (t_pinned_stage.data() && t_pinned_stage.bytes() > pinned_cap) {
         logfile << "nvCOMP ingestion declined: this worker already holds "
-                << t_pinned_stage.bytes << " pinned bytes, above the "
+                << t_pinned_stage.bytes() << " pinned bytes, above the "
                 << pinned_cap << "-byte cap; using the host reader." << std::endl;
         return false;
     }
@@ -1688,7 +1687,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // Host side: the worker-lifetime pinned pool, laid out as two slots.
     // ------------------------------------------------------------------
     if (!ensurePinnedStage(layout.total)) return false;
-    uint8_t *const h_base = (uint8_t *)t_pinned_stage.ptr;
+    uint8_t *const h_base = (uint8_t *)t_pinned_stage.data();
     struct HostSlot {
         uint8_t *payload; void **cptr; size_t *csize; void **dptr; size_t *dsize;
         nvcompStatus_t *status; size_t *asize; uint32_t *adler;

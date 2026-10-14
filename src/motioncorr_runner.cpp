@@ -1781,6 +1781,13 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 			}
 		}
 
+		// Whether an all_batches.pdf from an earlier run is going to be prepended
+		// to this run's batches (--only_do_unfinished, incremental runs). Asked
+		// once, before any report thread starts: the batch pass below writes
+		// all_batches.pdf, so asking again afterwards always answers yes. Both
+		// the logfile.pdf render choice and fn_pdfs follow from this one answer.
+		const bool prior_all_batches = !aggregate_only && exists(report_out + "all_batches.pdf");
+
 		RCTIC(TIMING_W_GS_HEADER);
 		// joinMultipleEPSIntoSinglePDF reports its own failures and falls back
 		// to an empty PDF, so it has no result to return; anything that does
@@ -1804,23 +1811,30 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 			~ReportThreadJoiner() { if (t.joinable()) t.join(); }
 		} header_joiner{header_thread};
 
-		// In aggregate mode logfile.pdf is exactly header_fn_eps followed by
-		// all_fn_eps: fn_pdfs below never admits a pre-existing all_batches.pdf,
-		// so concatenating header.pdf onto it makes Ghostscript re-render, as
-		// PDF, content this process is already holding as EPS. Rendering it
-		// once from the EPS instead, alongside the batch pass, is page-for-page
-		// identical and takes the concatenation off the critical path. The
-		// incremental path keeps the concatenation: there all_batches.pdf can
-		// carry earlier batches whose EPS this run does not have.
+		// logfile.pdf is exactly header_fn_eps followed by all_fn_eps whenever
+		// no all_batches.pdf from an earlier run is going to be prepended: in
+		// aggregate mode fn_pdfs below never admits one, and in the normal path
+		// there is none on disk. Concatenating header.pdf onto this run's
+		// all_batches.pdf then makes Ghostscript re-render, as PDF, content
+		// this process is already holding as EPS. Rendering it once from the
+		// EPS instead, alongside the batch pass, is page-for-page identical and
+		// takes the concatenation off the critical path. When an earlier
+		// all_batches.pdf exists it can carry batches whose EPS this run does
+		// not have, so the concatenation stays.
+		const bool logfile_from_eps = !prior_all_batches;
 		std::vector<FileName> logfile_fn_eps;
 		std::exception_ptr logfile_failure;
 		std::thread logfile_thread;
-		if (aggregate_only)
+		if (logfile_from_eps)
 		{
 			logfile_fn_eps = header_fn_eps;
 			logfile_fn_eps.insert(logfile_fn_eps.end(), all_fn_eps.begin(), all_fn_eps.end());
 			logfile_thread = std::thread([&]() {
-				try { joinMultipleEPSIntoSinglePDF(report_out + "logfile.pdf", logfile_fn_eps, true); }
+				try { joinMultipleEPSIntoSinglePDF(report_out + "logfile.pdf", logfile_fn_eps, aggregate_only); }
+				// The concatenation this replaces ignores its result outside
+				// aggregate mode, so a failed logfile.pdf must not fail the job
+				// there. REPORT_ERROR has already printed the message.
+				catch (const RelionError &) { if (aggregate_only) logfile_failure = std::current_exception(); }
 				catch (...) { logfile_failure = std::current_exception(); }
 			});
 		}
@@ -1833,23 +1847,27 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 		header_thread.join();
 		RCTOC(TIMING_W_GS_HEADER);
 		if (logfile_thread.joinable()) logfile_thread.join();
+		// The concatenation this replaces left no argument list behind, so the
+		// normal path's output inventory must not gain one. Aggregate mode has
+		// always kept it; publication there expects it.
+		if (logfile_from_eps && !aggregate_only) std::remove((report_out + "logfile.pdf.lst").c_str());
 		if (header_failure) std::rethrow_exception(header_failure);
 		if (logfile_failure) std::rethrow_exception(logfile_failure);
 
 		// Concatenate all PDFs of the batches
 		std::vector<FileName> fn_pdfs;
-		if (!aggregate_only && exists(report_out + "all_batches.pdf")) fn_pdfs.push_back(report_out + "all_batches.pdf");
+		if (prior_all_batches) fn_pdfs.push_back(report_out + "all_batches.pdf");
 		fn_pdfs.push_back(report_out + "batch.pdf");
 		RCTIC(TIMING_W_GS_ALLB);
 		if (!concatenatePDFfiles(report_out + "all_batches.pdf", fn_pdfs) && aggregate_only)
 			REPORT_ERROR("Aggregate-only batch PDF concatenation failed.");
 		RCTOC(TIMING_W_GS_ALLB);
 
-		// Put header in front of comabined batches. The aggregate built
-		// logfile.pdf from the EPS above, so re-deriving it here would only
-		// overwrite it with the same pages at the price of a second render.
+		// Put header in front of comabined batches. When logfile.pdf was built
+		// from the EPS above, re-deriving it here would only overwrite it with
+		// the same pages at the price of a second render.
 		RCTIC(TIMING_W_GS_LOGFILE);
-		if (!aggregate_only)
+		if (!logfile_from_eps)
 			concatenatePDFfiles(report_out + "logfile.pdf", report_out + "header.pdf", report_out + "all_batches.pdf");
 		if (aggregate_only) {
 			requireAggregatePdf(report_out + "header.pdf");

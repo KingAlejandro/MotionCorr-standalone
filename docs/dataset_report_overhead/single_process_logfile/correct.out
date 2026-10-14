@@ -1,0 +1,143 @@
+start 2026-10-14T22:41:49+00:00 gs=10.02.1 base=7b0d4b4cd5ff9042 cand=d82a42247655da0e
+default base rc=0 movies_mrc=12
+default cand rc=0 movies_mrc=12
+== default: products (cmp_trees.py)
+IDENTICAL mrc=12 other=33 pdf_inventoried=4 files=61/61
+== default: logfile.pdf pages
+pages 18 vs 18: differing=0 IDENTICAL
+== default: gs calls that write logfile.pdf
+-- base
+3
+-sOUTPUTFILE=<out>/logfile.pdf
+-- cand
+3
+-sOutputFile=<out>/logfile.pdf
+== default: inventory (names only)
+inventory identical
+eo base rc=0 movies_mrc=36
+eo cand rc=0 movies_mrc=36
+== eo: products (cmp_trees.py)
+IDENTICAL mrc=36 other=33 pdf_inventoried=4 files=85/85
+== eo: logfile.pdf pages
+pages 18 vs 18: differing=0 IDENTICAL
+== eo: gs calls that write logfile.pdf
+-- base
+3
+-sOUTPUTFILE=<out>/logfile.pdf
+-- cand
+3
+-sOutputFile=<out>/logfile.pdf
+== eo: inventory (names only)
+inventory identical
+== comparator controls
+-- cmp_trees payload-flip control (expect DIFFERENT)
+DIFFERENT mrc=12 other=33 pdf_inventoried=4 files=61/61
+   ('mrc', 'Movies/r1_20170629_00021_frameImage.mrc')
+   ('file', 'batch.pdf.lst')
+   ('file', 'corrected_micrographs.star')
+   ('file', 'header.pdf.lst')
+-- cmp_trees eo vs default (expect DIFFERENT)
+DIFFERENT mrc=12 other=33 pdf_inventoried=4 files=61/85
+   ('inventory', ['Movies/r1_20170629_00021_frameImage_EVN.mrc', 'Movies/r1_20170629_00021_frameImage_ODD.mrc', 'Movies/r1_20170629_00022_frameImage_EVN.mrc', 'Movies/r1_20170629_00022_frameImage_ODD.mrc', 'Movies/r1_20170629_00023_frameImage_EVN.mrc', 'Movies/r1_20170629_00023_frameImage_ODD.mrc', 'Movies/r1_20170629_00024_frameImage_EVN.mrc', 'Movies/r1_20170629_00024_frameImage_ODD.mrc', 'Movies/r1_20170629_00025_frameImage_EVN.mrc', 'Movies/r1_20170629_00025_frameImage_ODD.mrc', 'Movies/r1_20170629_00026_frameImage_EVN.mrc', 'Movies/r1_20170629_00026_frameImage_ODD.mrc', 'Movies/r1_20170629_00027_frameImage_EVN.mrc', 'Movies/r1_20170629_00027_frameImage_ODD.mrc', 'Movies/r1_20170629_00028_frameImage_EVN.mrc', 'Movies/r1_20170629_00028_frameImage_ODD.mrc', 'Movies/r1_20170629_00029_frameImage_EVN.mrc', 'Movies/r1_20170629_00029_frameImage_ODD.mrc', 'Movies/r1_20170629_00030_frameImage_EVN.mrc', 'Movies/r1_20170629_00030_frameImage_ODD.mrc', 'Movies/r1_20170629_00031_frameImage_EVN.mrc', 'Movies/r1_20170629_00031_frameImage_ODD.mrc', 'Movies/r1_20170629_00035_frameImage_EVN.mrc', 'Movies/r1_20170629_00035_frameImage_ODD.mrc'])
+   ('file', 'Movies/r1_20170629_00021_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00022_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00023_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00024_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00025_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00026_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00027_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00028_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00029_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00030_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00031_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00035_frameImage_shifts.eps')
+-- pagecmp controls on default/base EPS lists
+c0 unperturbed EPS list (expect IDENTICAL): pages 18 vs 18: differing=0 IDENTICAL
+c1 one batch EPS dropped (expect DIFFERENT): pages 18 vs 17: DIFFERENT (page count)
+c2 two batch EPS swapped (expect DIFFERENT): pages 18 vs 18: differing=2 DIFFERENT
+c3 header EPS dropped (expect DIFFERENT): pages 18 vs 17: DIFFERENT (page count)
+c4 batch before header (expect DIFFERENT): pages 18 vs 18: differing=18 DIFFERENT
+-- pagecmp eo-vs-default logfile (different content, expect DIFFERENT)
+pages 18 vs 18: differing=12 DIFFERENT
+== incremental: 6 movies, then --only_do_unfinished over 12
+incr base step1 rc=0
+incr base step2 rc=0
+incr cand step1 rc=0
+incr cand step2 rc=0
+-- step1 logfile.pdf pages base vs cand
+pages 12 vs 12: differing=0 IDENTICAL
+-- base step1 gs calls writing logfile.pdf (-sOutputFile = EPS list, -sOUTPUTFILE = concatenation)
+-sOUTPUTFILE=<out>/logfile.pdf
+-- cand step1 gs calls writing logfile.pdf (-sOutputFile = EPS list, -sOUTPUTFILE = concatenation)
+-sOutputFile=<out>/logfile.pdf
+-- step2 logfile.pdf pages base vs cand
+pages 24 vs 24: differing=0 IDENTICAL
+-- base step2 gs calls writing logfile.pdf (-sOutputFile = EPS list, -sOUTPUTFILE = concatenation)
+-sOUTPUTFILE=<out>/logfile.pdf
+-- cand step2 gs calls writing logfile.pdf (-sOutputFile = EPS list, -sOUTPUTFILE = concatenation)
+-sOUTPUTFILE=<out>/logfile.pdf
+-- incr products
+IDENTICAL mrc=12 other=33 pdf_inventoried=4 files=61/61
+-- incr: step1 vs step2 logfile (control: must differ)
+pages 12 vs 24: DIFFERENT (page count)
+== failure cases, 2 movies
+fail-case=fail arm=base rc=0 wall=1.287s mrc=2
+fail-case=fail arm=cand rc=0 wall=1.281s mrc=2
+-- fail: console output diff (base < > cand), after normalising the output root
+14a15,16
+>  ERROR in executing: gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -dDEVICEWIDTHPOINTS=800 -dDEVICEHEIGHTPOINTS=800 -sOutputFile=<out>/logfile.pdf @<out>/logfile.pdf.lst > /dev/null
+>  + Will make an empty PDF-file in <out>/logfile.pdf
+18d19
+<  ERROR in executing: gs -dNOPAUSE -sDEVICE=pdfwrite -sOUTPUTFILE=<out>/logfile.pdf -dBATCH <out>/header.pdf <out>/all_batches.pdf  > /dev/null
+-- fail: output files (ls)
+3d2
+< ls: No such file
+5a5
+> -rw-rw-r-- 0 logfile.pdf 
+fail-case=hang arm=base rc=0 wall=4.353s mrc=2
+fail-case=hang arm=cand rc=0 wall=3.321s mrc=2
+-- hang: console output diff (base < > cand), after normalising the output root
+8c8
+< 000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ..............................~~(,_,">                           [oo]   1/   1 sec ............................................................~~(,_,"> yum!
+---
+> 000/??? sec ~~(,_,">                                                          [oo]   1/   2 sec ..............................~~(,_,">                           [oo]   1/   1 sec ............................................................~~(,_,"> yum!
+16a17,18
+>  ERROR in executing: gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -dDEVICEWIDTHPOINTS=800 -dDEVICEHEIGHTPOINTS=800 -sOutputFile=<out>/logfile.pdf @<out>/logfile.pdf.lst > /dev/null
+>  + Will make an empty PDF-file in <out>/logfile.pdf
+18d19
+<  ERROR in executing: gs -dNOPAUSE -sDEVICE=pdfwrite -sOUTPUTFILE=<out>/logfile.pdf -dBATCH <out>/header.pdf <out>/all_batches.pdf  > /dev/null
+-- hang: output files (ls)
+3d2
+< ls: No such file
+5a5
+> -rw-rw-r-- 0 logfile.pdf 
+fail-case=dir arm=base rc=0 wall=1.533s mrc=2
+fail-case=dir arm=cand rc=0 wall=1.388s mrc=2
+-- dir: console output diff (base < > cand), after normalising the output root
+15c15,19
+<  ERROR in executing: gs -dNOPAUSE -sDEVICE=pdfwrite -sOUTPUTFILE=<out>/logfile.pdf -dBATCH <out>/header.pdf <out>/all_batches.pdf  > /dev/null
+---
+>  ERROR in executing: gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -dDEVICEWIDTHPOINTS=800 -dDEVICEHEIGHTPOINTS=800 -sOutputFile=<out>/logfile.pdf @<out>/logfile.pdf.lst > /dev/null
+>  + Will make an empty PDF-file in <out>/logfile.pdf
+> in: /home/alex/mc-small/lfe/src-cand/src/filename.cpp, line 525
+> ERROR: 
+> Filename::touch ERROR: Cannot open file: <out>/logfile.pdf
+-- dir: output files (ls)
+listing identical
+== dataset endpoint, 4 movies, one worker (output only, no timing claim)
+dataset base rc=0 
+dataset cand rc=0 
+DIFFERENT mrc=4 other=20 pdf_inventoried=4 files=34/34
+   ('file', 'Movies/r1_20170629_00021_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00022_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00023_frameImage_shifts.eps')
+   ('file', 'Movies/r1_20170629_00024_frameImage_shifts.eps')
+   ('file', '_workers/w0/command.json')
+   ('file', '_workers/w0/corrected_micrographs.star')
+   ('file', 'header.pdf.lst')
+   ('file', 'logfile.pdf.lst')
+-- merged inventory
+inventory identical
+-- merged logfile.pdf pages
+pages 10 vs 10: differing=4 DIFFERENT
+end 2026-10-14T22:43:10+00:00

@@ -1,0 +1,49 @@
+{
+  "input_star": "/workspace/scratch/28038873ca11/throughput-inputs/tutorial2.star",
+  "input_sha256": "3e9afd1f2170d23b375fc7a4c25874561f4d10cf596ae1fb3425ba93c5c72d6d",
+  "movie_block": "movies",
+  "labels": [
+    "rlnMicrographMovieName",
+    "rlnOpticsGroup"
+  ],
+  "n_movies": 2,
+  "n_shards": 2,
+  "partition": "contiguous",
+  "canonical_movies": [
+    "/workspace/scratch/28038873ca11/throughput-inputs/tutorial0.tiff",
+    "/workspace/scratch/28038873ca11/throughput-inputs/tutorial1.tiff"
+  ],
+  "canonical_output_roots": [
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial0",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial1"
+  ],
+  "shards": [
+    {
+      "index": 0,
+      "path": "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/r0-stream-2x2/shards/shard_2way_0.star",
+      "sha256": "d629aec93d8ecbe1cac23799cb8a6de6110a500de4f6de505a1df04afb674f1c",
+      "n_movies": 1,
+      "first_input_row": 0,
+      "movies": [
+        "/workspace/scratch/28038873ca11/throughput-inputs/tutorial0.tiff"
+      ],
+      "output_roots": [
+        "workspace/scratch/28038873ca11/throughput-inputs/tutorial0"
+      ]
+    },
+    {
+      "index": 1,
+      "path": "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/r0-stream-2x2/shards/shard_2way_1.star",
+      "sha256": "c598c24595fd6d5548ea27626815fa01c8a43bbe292d9076af9f919477b6e62c",
+      "n_movies": 1,
+      "first_input_row": 1,
+      "movies": [
+        "/workspace/scratch/28038873ca11/throughput-inputs/tutorial1.tiff"
+      ],
+      "output_roots": [
+        "workspace/scratch/28038873ca11/throughput-inputs/tutorial1"
+      ]
+    }
+  ],
+  "input_type": "spa"
+}

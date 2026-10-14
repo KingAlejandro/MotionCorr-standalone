@@ -1,0 +1,72 @@
+{
+  "control": "replace generated0 corrected image with generated1 while keeping STAR associations",
+  "expected_identical": false,
+  "comparison": {
+    "root_a": "/workspace/scratch/28038873ca11/throughput-synthetic-smoke/r0-stream-2x2/merged",
+    "root_b": "/workspace/scratch/28038873ca11/throughput-association-negative",
+    "only_a": [],
+    "only_b": [],
+    "compared": 34,
+    "mrc_compared": 16,
+    "excluded": [
+      {
+        "file": "all_batches.pdf",
+        "reason": "Ghostscript creation date and /ID"
+      },
+      {
+        "file": "batch.pdf",
+        "reason": "Ghostscript creation date and /ID"
+      },
+      {
+        "file": "header.pdf",
+        "reason": "Ghostscript creation date and /ID"
+      },
+      {
+        "file": "logfile.pdf",
+        "reason": "Ghostscript creation date and /ID"
+      },
+      {
+        "file": "workspace/scratch/28038873ca11/throughput-generated/generated0.log",
+        "reason": "timing values in per-movie logs"
+      },
+      {
+        "file": "workspace/scratch/28038873ca11/throughput-generated/generated1.log",
+        "reason": "timing values in per-movie logs"
+      },
+      {
+        "file": "workspace/scratch/28038873ca11/throughput-generated/generated2.log",
+        "reason": "timing values in per-movie logs"
+      },
+      {
+        "file": "workspace/scratch/28038873ca11/throughput-generated/generated3.log",
+        "reason": "timing values in per-movie logs"
+      }
+    ],
+    "differences": [
+      {
+        "file": "batch.pdf.lst",
+        "difference": "differs after root normalisation (sha256 4e87530630af vs b82327b03007)"
+      },
+      {
+        "file": "corrected_micrographs.star",
+        "difference": "differs after root normalisation (sha256 9b6a97dce0a5 vs 43419fabd21f)"
+      },
+      {
+        "file": "header.pdf.lst",
+        "difference": "differs after root normalisation (sha256 989e7be17b36 vs 6a6e6c729380)"
+      },
+      {
+        "file": "logfile.pdf.lst",
+        "difference": "differs after root normalisation (sha256 b39f8d607a0f vs 38c060287bbe)"
+      },
+      {
+        "file": "workspace/scratch/28038873ca11/throughput-generated/generated0.mrc",
+        "difference": "core header differs at byte 76"
+      }
+    ],
+    "problems": [
+      "5 file(s) differ"
+    ],
+    "identical": false
+  }
+}

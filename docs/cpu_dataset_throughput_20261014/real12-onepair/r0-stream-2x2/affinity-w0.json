@@ -1,0 +1,57 @@
+{
+  "pid": 66,
+  "requested": [
+    0,
+    1
+  ],
+  "actual_before_exec": [
+    0,
+    1
+  ],
+  "environment": {
+    "OMP_DYNAMIC": "FALSE",
+    "OMP_PROC_BIND": "close",
+    "OMP_PLACES": "cores",
+    "OMP_WAIT_POLICY": "PASSIVE",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "BLIS_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "OMP_NUM_THREADS": "2"
+  },
+  "LD_LIBRARY_PATH": "/workspace/scratch/28038873ca11/layout-deps/usr/lib/x86_64-linux-gnu",
+  "command": [
+    "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+    "--i",
+    "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/r0-stream-2x2/shards/shard_2way_0.star",
+    "--o",
+    "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/r0-stream-2x2/w0/",
+    "--use_own",
+    "--angpix",
+    ".885",
+    "--voltage",
+    "300",
+    "--bfactor",
+    "150",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--save_noDW",
+    "--even_odd_split",
+    "--gainref",
+    "/workspace/scratch/28038873ca11/data/gain.mrc",
+    "--last_frame_sum",
+    "12",
+    "--seed",
+    "1",
+    "--j",
+    "2",
+    "--skip_report_pdf"
+  ],
+  "monotonic_before_exec": 18168.624508882
+}

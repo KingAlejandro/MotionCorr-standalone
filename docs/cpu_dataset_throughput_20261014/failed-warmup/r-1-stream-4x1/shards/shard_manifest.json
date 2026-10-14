@@ -1,0 +1,79 @@
+{
+  "input_star": "/workspace/scratch/28038873ca11/throughput-generated/generated4.star",
+  "input_sha256": "d151522de8a0adbdc50cd2d0ae5a85dc067c264a5b18aca5ff29d965abb7945b",
+  "movie_block": "movies",
+  "labels": [
+    "rlnMicrographMovieName",
+    "rlnOpticsGroup"
+  ],
+  "n_movies": 4,
+  "n_shards": 4,
+  "partition": "contiguous",
+  "canonical_movies": [
+    "/workspace/scratch/28038873ca11/throughput-generated/generated0.mrcs",
+    "/workspace/scratch/28038873ca11/throughput-generated/generated1.mrcs",
+    "/workspace/scratch/28038873ca11/throughput-generated/generated2.mrcs",
+    "/workspace/scratch/28038873ca11/throughput-generated/generated3.mrcs"
+  ],
+  "canonical_output_roots": [
+    "workspace/scratch/28038873ca11/throughput-generated/generated0",
+    "workspace/scratch/28038873ca11/throughput-generated/generated1",
+    "workspace/scratch/28038873ca11/throughput-generated/generated2",
+    "workspace/scratch/28038873ca11/throughput-generated/generated3"
+  ],
+  "shards": [
+    {
+      "index": 0,
+      "path": "/workspace/scratch/28038873ca11/throughput-synthetic-six/r-1-stream-4x1/shards/shard_4way_0.star",
+      "sha256": "0a39b0d90dba6e02e7d27ba53de13b0d36e22fa5b80b1b043daf9d7588278d0d",
+      "n_movies": 1,
+      "first_input_row": 0,
+      "movies": [
+        "/workspace/scratch/28038873ca11/throughput-generated/generated0.mrcs"
+      ],
+      "output_roots": [
+        "workspace/scratch/28038873ca11/throughput-generated/generated0"
+      ]
+    },
+    {
+      "index": 1,
+      "path": "/workspace/scratch/28038873ca11/throughput-synthetic-six/r-1-stream-4x1/shards/shard_4way_1.star",
+      "sha256": "17607c063a57399273a53568f214369c5bfafb7dbf4bc734a773d99cf6edf66f",
+      "n_movies": 1,
+      "first_input_row": 1,
+      "movies": [
+        "/workspace/scratch/28038873ca11/throughput-generated/generated1.mrcs"
+      ],
+      "output_roots": [
+        "workspace/scratch/28038873ca11/throughput-generated/generated1"
+      ]
+    },
+    {
+      "index": 2,
+      "path": "/workspace/scratch/28038873ca11/throughput-synthetic-six/r-1-stream-4x1/shards/shard_4way_2.star",
+      "sha256": "11a01658ebc6e99a9644a04f7e110462249be9e9ba3f2f32286bdceb57383df5",
+      "n_movies": 1,
+      "first_input_row": 2,
+      "movies": [
+        "/workspace/scratch/28038873ca11/throughput-generated/generated2.mrcs"
+      ],
+      "output_roots": [
+        "workspace/scratch/28038873ca11/throughput-generated/generated2"
+      ]
+    },
+    {
+      "index": 3,
+      "path": "/workspace/scratch/28038873ca11/throughput-synthetic-six/r-1-stream-4x1/shards/shard_4way_3.star",
+      "sha256": "487106ec46da7df9c495163c47e09ae2a4b36268e54c3693ce58fda67456135b",
+      "n_movies": 1,
+      "first_input_row": 3,
+      "movies": [
+        "/workspace/scratch/28038873ca11/throughput-generated/generated3.mrcs"
+      ],
+      "output_roots": [
+        "workspace/scratch/28038873ca11/throughput-generated/generated3"
+      ]
+    }
+  ],
+  "input_type": "spa"
+}

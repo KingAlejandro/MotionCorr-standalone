@@ -1,0 +1,178 @@
+{
+  "certified": false,
+  "diagnostic_complete": true,
+  "name": "stream-1x4",
+  "limitation": "self-affinity only before exec; no descendant tree, physical-host isolation or NUMA-placement certification",
+  "binary": "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+  "binary_sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de",
+  "input_star_sha256": "3e9afd1f2170d23b375fc7a4c25874561f4d10cf596ae1fb3425ba93c5c72d6d",
+  "input_sha256": {
+    "/workspace/scratch/28038873ca11/throughput-inputs/tutorial0.tiff": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "/workspace/scratch/28038873ca11/throughput-inputs/tutorial1.tiff": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "/workspace/scratch/28038873ca11/data/gain.mrc": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1"
+  },
+  "source": {
+    "published": "5a6812baf69979a8446baae2835188a85336acf3",
+    "local": "c9dbe5957898f5206cb05ea5daaa62ae3358218a",
+    "sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de"
+  },
+  "memory_preflight": {
+    "cgroup_current_bytes": 1777061888,
+    "cgroup_limit_bytes": 8589934592,
+    "budget_bytes": 8589934592,
+    "estimated_worker_peak_bytes": 2178742272,
+    "headroom_bytes": 1073741824,
+    "required_bytes": 5029545984,
+    "allowed": true,
+    "method": "current cgroup charge + sum of calibrated worker RSS + headroom; estimate, not simultaneous tree RSS"
+  },
+  "workers": [
+    {
+      "pid": 38,
+      "started": 18023.041264552,
+      "command": [
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/r-1-stream-1x4/shards/shard_1way_0.star",
+        "--o",
+        "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/r-1-stream-1x4/w0/",
+        "--use_own",
+        "--angpix",
+        ".885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--last_frame_sum",
+        "12",
+        "--seed",
+        "1",
+        "--j",
+        "4",
+        "--skip_report_pdf"
+      ],
+      "witness": "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/r-1-stream-1x4/affinity-w0.json",
+      "log": "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/r-1-stream-1x4/w0/launcher.console.log",
+      "returncode": 0,
+      "ended": 18102.323378049,
+      "rss_hwm_kib": 1903756,
+      "user_s": 192.033423,
+      "sys_s": 28.811069,
+      "minor_faults": 1853907,
+      "major_faults": 0,
+      "wall_s": 79.28211349699995
+    }
+  ],
+  "worker_phase_wall_s": 79.30358755099951,
+  "all_worker_lifetimes_overlap_s": 79.28211349699995,
+  "achieved_worker_processes": 1,
+  "concurrency_note": "direct-child lifetimes overlap; this does not observe simultaneous CPU residency or runtime OpenMP team size",
+  "sum_worker_peak_rss_kib": 1903756,
+  "memory_note": "sum of individual child ru_maxrss values is not simultaneous dataset-tree RSS; helper peaks are not measured as a tree",
+  "staging_wall_s": 1.2432600680003816,
+  "aggregate": {
+    "pid": 43,
+    "started": 18103.578535986,
+    "command": [
+      "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+      "--i",
+      "/workspace/scratch/28038873ca11/throughput-inputs/tutorial2.star",
+      "--o",
+      "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/r-1-stream-1x4/merged/",
+      "--use_own",
+      "--angpix",
+      ".885",
+      "--voltage",
+      "300",
+      "--bfactor",
+      "150",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--save_noDW",
+      "--even_odd_split",
+      "--gainref",
+      "/workspace/scratch/28038873ca11/data/gain.mrc",
+      "--last_frame_sum",
+      "12",
+      "--seed",
+      "1",
+      "--j",
+      "4",
+      "--aggregate_only"
+    ],
+    "witness": "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/r-1-stream-1x4/affinity-aggregate.json",
+    "log": "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/r-1-stream-1x4/aggregate.log",
+    "returncode": 0,
+    "ended": 18105.665860368,
+    "rss_hwm_kib": 19584,
+    "user_s": 1.476449,
+    "sys_s": 0.510355,
+    "minor_faults": 19049,
+    "major_faults": 0,
+    "wall_s": 2.087324382002407
+  },
+  "dataset_wall_s": 82.64083219399981,
+  "endpoint": "partition + concurrent workers + checked staging + full aggregate STAR/report publication; postpublication verification excluded",
+  "n_movies": 2,
+  "movies_per_s": 0.024201111568007798,
+  "staged_sha256": {
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial0.log": "4b6ed3e4ee5a0e677065b6189d3194d3bd76757ce0e419ad871fef3388923111",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial0.mrc": "7948b8a8a25b546104566ea9bec63b001a56760a43a391e4feb045be81340610",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial0.star": "78d7e313151ad24534c26acbfb74ba85721d44b38fd4b625739083fc7518e597",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial0_EVN.mrc": "af3c96537c0bb485d300b23c8cfbd2d06ef5f71cf8c57993249b9deb33af94c9",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial0_ODD.mrc": "956296c94792109ad638d28f12e7a4405056f27623bb869972e4ecd8ab61b9fe",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial0_noDW.mrc": "2d3048b6006efdff4d24bf382c4526a72af58d21ca621bf8af5639e0775ddd5c",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial0_shifts.eps": "0dadd7185abb4bbe8ae7ef2f145351329bff50f872bacde620103729e7964f38",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial1.log": "5f92fdd61865bd088a2bc8b4fcad4a48605eb9ae65b47724b112ca7170ddf3fc",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial1.mrc": "a735627d84fec665458935b8a1204bdbde6213cfb3c45a6e8421902dc44ccce4",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial1.star": "678193f0e02c10e02ad8bcc01ffb34025da873760031b4c1fcfe834bc47805a0",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial1_EVN.mrc": "8f2ceabc9e7d9df3db65f5f8578b6ad24ffea0457d7c43c63e8d84f40f810266",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial1_ODD.mrc": "a6089462178a16d6023979a49ff3006bb22e52d5d4ca8766428b92994bf92058",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial1_noDW.mrc": "1aba4a29527eac811fc1d83f8fc394adf0647e4ab65d78c687c91beff90c3959",
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial1_shifts.eps": "2aa56349c3ef56929b2d91870cbe85904b400169a47e57ac9cdd5c03d843fa17"
+  },
+  "observed_aggregate_scratch_prefix": "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/r-1-stream-1x4/merged/.aggregate-pSRwPH",
+  "comparison_view_path_changes": {
+    "batch.pdf.lst": {
+      "raw_sha256": "551efd560460781713ab86313a6179361b17272a98dca199bfa869ee83d54a4c",
+      "view_sha256": "86c38f892a0d9c42965c329668a80b8e0b2abd1675a77b4baef23df0b40357dd"
+    },
+    "corrected_micrographs.star": {
+      "raw_sha256": "f984410cd3ebcb664be4ef662ac14017fcdf70f660500e50c4c42dfa195090ca",
+      "view_sha256": "1c95746fed57e924b818f6ef485cb06751d9ccf73cb3f2435c3ba8e6517484de"
+    },
+    "header.pdf.lst": {
+      "raw_sha256": "a87814d68ba5251d72d2a06f070cce2618740981930ad40f4085a0ebc79e013f",
+      "view_sha256": "881812b8a4fd165a25c43cbda0d6dbf88867941dec774d03521a0c019f158d8f"
+    },
+    "logfile.pdf.lst": {
+      "raw_sha256": "be5685590861130e4c28736f1487230ea17b58296961b2c051f1e6b7d2740e6e",
+      "view_sha256": "6d1b7e2e7ef62afeb763216c086a0474c5b870ef2a412cf99e5834a12a4fdb54"
+    },
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial0_shifts.eps": {
+      "raw_sha256": "0dadd7185abb4bbe8ae7ef2f145351329bff50f872bacde620103729e7964f38",
+      "view_sha256": "37b163677ea435262c407cb7af169903562b7b79e68cf693152088f5d013613d"
+    },
+    "workspace/scratch/28038873ca11/throughput-inputs/tutorial1_shifts.eps": {
+      "raw_sha256": "2aa56349c3ef56929b2d91870cbe85904b400169a47e57ac9cdd5c03d843fa17",
+      "view_sha256": "7bc5c150399f6451605c4b9eb4f1fb013082ef56f292775431dd0818cca2ff35"
+    }
+  },
+  "observed_until_s": 83.68506156199874
+}

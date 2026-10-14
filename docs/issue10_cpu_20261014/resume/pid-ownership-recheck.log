@@ -1,0 +1,17 @@
+test_descendant_in_new_session_is_own (tests.test_runner.PidOwnership.test_descendant_in_new_session_is_own) ... FAIL
+
+======================================================================
+FAIL: test_descendant_in_new_session_is_own (tests.test_runner.PidOwnership.test_descendant_in_new_session_is_own)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-standalone/tools/profiling/tests/test_runner.py", line 196, in test_descendant_in_new_session_is_own
+    self.assertEqual(runner.classify_pid(child, leader.pid), "own")
+AssertionError: 'unknown' != 'own'
+- unknown
++ own
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.167s
+
+FAILED (failures=1)

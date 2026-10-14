@@ -1,0 +1,169 @@
+{
+ "instrument": "mcprof compare",
+ "command": [
+  "tools/profiling/mcprof.py",
+  "compare",
+  "base=/workspace/scratch/28038873ca11/build-reference/motioncorr",
+  "candidate=/workspace/scratch/28038873ca11/build-candidate/motioncorr",
+  "--data",
+  "/workspace/scratch/28038873ca11/data",
+  "--star",
+  "synthetic_512x512_16frames.star",
+  "--work",
+  "/workspace/scratch/28038873ca11/kit-namespace-check",
+  "--cpus",
+  "0-3",
+  "--runner-cpus",
+  "8",
+  "--pairs",
+  "1",
+  "--warmup",
+  "0",
+  "--lane-wait",
+  "5",
+  "--settle-timeout",
+  "5",
+  "--source",
+  "base=/workspace/scratch/28038873ca11/reference",
+  "--source",
+  "candidate=/workspace/scratch/28038873ca11/MotionCorr-standalone",
+  "--keep-outputs",
+  "--",
+  "--use_own",
+  "--j",
+  "4",
+  "--angpix",
+  "1",
+  "--voltage",
+  "300",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1"
+ ],
+ "kit": {
+  "path": "/workspace/scratch/28038873ca11/MotionCorr-standalone/tools/profiling",
+  "commit": "5ac83a4ab4384f514a1ec2062f98c449576f01be",
+  "dirty": false
+ },
+ "binaries": {
+  "base": {
+   "path": "/workspace/scratch/28038873ca11/build-reference/motioncorr",
+   "realpath": "/workspace/scratch/28038873ca11/build-reference/motioncorr",
+   "sha256": "b9f8912d65c79b572f2764628a914edaea3fe46380af0f98574ec0b087231674",
+   "size": 4813728,
+   "source": {
+    "source_dir": "/workspace/scratch/28038873ca11/reference",
+    "commit": "116eb04ad359cd5bf789b28809fc2047ea155b9b",
+    "dirty": false,
+    "origin": "git in /workspace/scratch/28038873ca11/reference"
+   },
+   "has_profile_option": true,
+   "has_device_timing_option": true,
+   "device_timing_detection": "--use_own --help",
+   "linked": {
+    "libfftw3f.so.3": "/workspace/scratch/4d99fce6c5db/build-deps/usr/lib/x86_64-linux-gnu/libfftw3f.so.3",
+    "libtiff.so.6": "/lib/x86_64-linux-gnu/libtiff.so.6"
+   }
+  },
+  "candidate": {
+   "path": "/workspace/scratch/28038873ca11/build-candidate/motioncorr",
+   "realpath": "/workspace/scratch/28038873ca11/build-candidate/motioncorr",
+   "sha256": "abd3db17aaf6a94a455f1caacac922ec40f160c352a9c30f65df6688466f334a",
+   "size": 4818240,
+   "source": {
+    "source_dir": "/workspace/scratch/28038873ca11/MotionCorr-standalone",
+    "commit": "5ac83a4ab4384f514a1ec2062f98c449576f01be",
+    "dirty": false,
+    "origin": "git in /workspace/scratch/28038873ca11/MotionCorr-standalone"
+   },
+   "has_profile_option": true,
+   "has_device_timing_option": true,
+   "device_timing_detection": "--use_own --help",
+   "linked": {
+    "libfftw3f.so.3": "/workspace/scratch/4d99fce6c5db/build-deps/usr/lib/x86_64-linux-gnu/libfftw3f.so.3",
+    "libtiff.so.6": "/lib/x86_64-linux-gnu/libtiff.so.6"
+   }
+  }
+ },
+ "host": {
+  "hostname": "442a2f5ea6ec",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "python": "3.12.14",
+  "cpu_count": 9,
+  "load1_5_15": [
+   1.86962890625,
+   3.05517578125,
+   2.13134765625
+  ],
+  "lane_cpus": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "time_utc": "2026-10-14T20:23:44Z",
+  "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "clocksource": "tsc",
+  "thp_enabled": "always [madvise] never",
+  "thp_defrag": "always defer defer+madvise [madvise] never",
+  "perf_event_paranoid": "2",
+  "env": {}
+ },
+ "gpu": null,
+ "arms": [
+  "base",
+  "candidate"
+ ],
+ "input": {
+  "cwd": "/workspace/scratch/28038873ca11/data",
+  "star": "synthetic_512x512_16frames.star",
+  "movies": [
+   "synthetic_512x512_16frames.mrcs"
+  ],
+  "staged": false,
+  "star_sha256": "35c92d95f191f095885e51665ee9c0b99008c4c74735ebf9f20d17a95a11c666"
+ },
+ "payload_args": [
+  "--use_own",
+  "--j",
+  "4",
+  "--angpix",
+  "1",
+  "--voltage",
+  "300",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1"
+ ],
+ "payload_env": {},
+ "locks": [
+  {
+   "path": "/tmp/motioncorr-bench.lock",
+   "waited_s": 0.0
+  }
+ ],
+ "noise_floor_s": 0.0,
+ "vram_instrument": "none",
+ "allow_product_difference": false,
+ "settle": {
+  "settled": true,
+  "waited_s": 0.0
+ },
+ "series": {
+  "target_clean_rounds": 1,
+  "max_rounds": 1,
+  "rounds_run": 1,
+  "clean_rounds": 0,
+  "reached_target": false
+ }
+}

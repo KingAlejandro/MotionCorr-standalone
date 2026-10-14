@@ -1,0 +1,99 @@
+{
+ "runs": {
+  "arms": [
+   "base",
+   "candidate"
+  ],
+  "summary": {
+   "base": {
+    "n": 0
+   },
+   "candidate": {
+    "n": 0
+   }
+  },
+  "discarded_rounds": [
+   {
+    "round": 1,
+    "reasons": [
+     "base: payload affinity [8] != lane",
+     "candidate: payload affinity [8] != lane"
+    ],
+    "triggered_by": [
+     "base",
+     "candidate"
+    ],
+    "order": "AB"
+   }
+  ],
+  "discard_audit": {
+   "planned": 1,
+   "retained": 0,
+   "discarded": 1,
+   "triggered_alone": {
+    "base": 0,
+    "candidate": 0
+   },
+   "triggered_any": {
+    "base": 1,
+    "candidate": 1
+   },
+   "kept_orders": {},
+   "warnings": []
+  },
+  "comparisons": {
+   "candidate": {
+    "n_pairs": 0,
+    "diffs_s": [],
+    "floor_s": 0.0,
+    "min_pairs": 6,
+    "verdict": "not resolved (0 retained pairs, 6 needed)",
+    "resolved": false,
+    "resolution_s": Infinity,
+    "reason": "no retained pairs"
+   }
+  },
+  "lane_waits": [
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 1
+   }
+  ]
+ },
+ "identity": {
+  "candidate": {
+   "root_a": "/workspace/scratch/28038873ca11/kit-namespace-check/runs/base-r01/out",
+   "root_b": "/workspace/scratch/28038873ca11/kit-namespace-check/runs/candidate-r01/out",
+   "only_a": [],
+   "only_b": [],
+   "compared": 9,
+   "mrc_compared": 1,
+   "excluded": [
+    {
+     "file": "all_batches.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "batch.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "header.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "logfile.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "synthetic_512x512_16frames.log",
+     "reason": "timing values in per-movie logs"
+    }
+   ],
+   "differences": [],
+   "problems": [],
+   "identical": true
+  }
+ }
+}

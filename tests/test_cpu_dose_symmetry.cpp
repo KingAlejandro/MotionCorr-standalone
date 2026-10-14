@@ -56,7 +56,7 @@ static std::vector<MultidimArray<fComplex>> allocate(int nfx, int ny, int count)
     for (auto &frame : frames) frame.reshape(ny, nfx);
     return frames;
 }
-static void fill(std::vector<MultidimArray<fComplex>> &frames, bool exceptional) {
+static void fill(std::vector<MultidimArray<fComplex>> &frames, bool exceptional, bool stress = true) {
     for (size_t f = 0; f < frames.size(); ++f) {
         auto &frame = frames[f];
         for (size_t n = 0; n < frame.nzyxdim; ++n) {
@@ -65,7 +65,7 @@ static void fill(std::vector<MultidimArray<fComplex>> &frames, bool exceptional)
             float im = static_cast<int>((n * 31 + f * 7) % 997) * -0.17f + 19.25f;
             if (n % 23 == 0) re = -0.0f;
             if (n % 29 == 0) im = 0.0f;
-            if (n % 37 == 0) re = std::ldexp(1.0f, -140);
+            if (stress && n % 37 == 0) re = std::ldexp(1.0f, -140);
             if (exceptional && n % 41 == 0) im = std::numeric_limits<float>::infinity();
             if (exceptional && n % 43 == 0) re = std::numeric_limits<float>::quiet_NaN();
             frame.data[n] = fComplex(re, im);
@@ -88,7 +88,7 @@ static void copy(const std::vector<MultidimArray<fComplex>> &src,
 
 static int controls() {
     size_t cases = 0;
-    for (int nfx : {2, 10, 33}) for (int ny : {1, 2, 3, 8, 9, 48, 49})
+    for (int nfx : {2, 33, 64, 65, 130}) for (int ny : {1, 2, 3, 8, 9, 48, 49})
     for (int count : {1, 7, 24, 64}) for (int threads : {1, 4})
     for (int pattern : {0, 1, 2}) for (bool exceptional : {false, true}) {
         auto expected = allocate(nfx, ny, count), actual = allocate(nfx, ny, count);
@@ -117,7 +117,8 @@ static int controls() {
 }
 
 static int benchmark(int argc, char **argv) {
-    require(argc == 7, "cpu_dose_bench --bench nx ny frames threads repetitions");
+    require(argc == 7 || (argc == 8 && std::string(argv[7]) == "--stress"),
+            "cpu_dose_bench --bench nx ny frames threads repetitions [--stress]");
 #ifdef MOTIONCORR_EXP_WITNESS
     throw std::runtime_error("use the unwrapped cpu_dose_bench target for timing");
 #endif
@@ -125,8 +126,9 @@ static int benchmark(int argc, char **argv) {
     const int threads = std::stoi(argv[5]), repeats = std::stoi(argv[6]);
     require(nx >= 2 && nx % 2 == 0 && ny > 0 && count > 0 && threads > 0 && repeats >= 6,
             "invalid benchmark dimensions or fewer than six repetitions");
+    const bool stress = argc == 8;
     auto frames = allocate(nx / 2 + 1, ny, count), saved = allocate(nx / 2 + 1, ny, count);
-    fill(saved, false); // Commit both allocations before warmup.
+    fill(saved, false, stress); // Work-array first touch is excluded with warmup.
     std::vector<RFLOAT> doses(count);
     for (int f = 0; f < count; ++f) doses[f] = 1.277 * (f + 1);
     MotioncorrRunner runner; runner.n_threads = threads;
@@ -135,7 +137,7 @@ static int benchmark(int argc, char **argv) {
         const bool candidate_first = rep >= 0 && rep % 2 == 1;
         for (int slot = 0; slot < 2; ++slot) {
             const bool candidate = candidate_first != (slot == 1);
-            fill(frames, false);
+            fill(frames, false, stress);
             const auto cpu_start = std::clock();
             const auto start = std::chrono::steady_clock::now();
             if (candidate) MotioncorrRunnerTestAccess::weight(runner, frames, doses, 0.885);

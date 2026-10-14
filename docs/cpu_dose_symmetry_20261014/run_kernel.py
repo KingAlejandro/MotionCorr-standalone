@@ -15,11 +15,13 @@ from lib import provenance, stats
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--binary', type=Path, required=True)
 parser.add_argument('--out', type=Path, required=True)
+parser.add_argument('--stress', action='store_true')
 args = parser.parse_args()
 args.out.mkdir(exist_ok=False, parents=True)
 env = dict(os.environ, OMP_DYNAMIC='false', OMP_PROC_BIND='close', OMP_PLACES='cores',
            OMP_WAIT_POLICY='PASSIVE', OPENBLAS_NUM_THREADS='1')
-manifest = {'scope': 'unwrapped source-bound dose kernel, one process per configuration; '
+manifest = {'spectrum_fixture': 'deliberate subnormal stress' if args.stress else 'finite normal values and signed zero; no deliberate subnormals',
+            'scope': 'unwrapped source-bound dose kernel, one process per configuration; '
                      'within-process paired statistics are descriptive, not certified job speed',
             'limitation': '/proc PID namespace differs from child PIDs; no certified ownership, '
                           'foreign activity or physical host isolation',
@@ -47,6 +49,8 @@ with open('/tmp/motioncorr-bench.lock', 'a') as lock:
             name = f'{nx}x{ny}x{count}-j{threads}'
             command = ['taskset', '-c', mask, str(args.binary.resolve()), '--bench',
                        str(nx), str(ny), str(count), str(threads), '6']
+            if args.stress:
+                command.append('--stress')
             with (args.out / (name + '.jsonl')).open('w') as output, \
                  (args.out / (name + '.stderr')).open('w') as error:
                 rc = subprocess.run(command, env=env, stdout=output, stderr=error).returncode

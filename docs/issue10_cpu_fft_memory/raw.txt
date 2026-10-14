@@ -114,3 +114,17 @@ run_wall_ms                            44584     35909
 # j1 single pair (taskset -c 8), columns: user sys wall minflt
 main rj1 rc=0 38.75 5.84 0:44.61 3434902
 newhuge rj1 rc=0 34.86 1.04 0:35.91 123058
+
+## 24-movie batch (ab24.sh, one process per arm per round)
+# columns: user s, sys s, wall, max RSS KiB, minor faults; mrc = MRC products found
+THP: always [madvise] never defrag: always defer defer+madvise [madvise] never
+main rwarm rc=0 mrc=4 65.52 7.00 0:19.47 4602728 3028587 
+thp rwarm rc=0 mrc=4 57.08 1.94 0:15.57 4380424 230838 
+main r1 rc=0 mrc=96 1589.43 143.46 7:41.30 4604680 51670986 
+thp r1 rc=0 mrc=96 1380.40 40.93 6:07.08 4383844 2990865 
+thp r2 rc=0 mrc=96 1379.79 27.60 5:58.65 4383700 2201110 
+main r2 rc=0 mrc=96 1627.99 142.01 7:50.12 4604796 50799792 
+identity ab24/digest-thp-1.txt vs main-1: IDENTICAL
+identity ab24/digest-thp-2.txt vs main-1: IDENTICAL
+identity ab24/digest-main-2.txt vs main-1: IDENTICAL
+DONE

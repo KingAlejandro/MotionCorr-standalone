@@ -99,3 +99,55 @@ names=[n for n in data[arms[0]] if st.median(data[arms[0]][n])>300 or n=="peak_r
 print("%-34s"%"stage (median ms)"+"".join("%10s"%a for a in arms))
 for n in names:
     print("%-34s"%n[:34]+"".join(("%10.0f"%st.median(data[a][n])) if data[a].get(n) else "%10s"%"-" for a in arms))
+
+===== ab24.sh =====
+#!/bin/bash
+# Issue 10: 24-movie batch A/B, main vs branch, j4 on CPUs 8-11, interleaved.
+cd /home/ubuntu/mc-cpu10-plancache
+MAIN=/home/ubuntu/mc-cpuprof-116eb04/build/motioncorr
+NEW=/home/ubuntu/mc-cpu10-plancache/build/motioncorr
+mkdir -p Movies24 ab24
+for f in /home/ubuntu/mc-issue26/data/*; do ln -sf $f Movies24/; done
+ARGS="--use_own --j 4 --angpix 0.885 --voltage 300 --bfactor 150 --patch_x 5 --patch_y 5 --gainref Movies24/gain.mrc --dose_weighting --dose_per_frame 1.277 --save_noDW --even_odd_split"
+run() { # name input bin env...
+  local name=$1 in=$2 bin=$3; shift 3
+  rm -rf ab24/out-$name-$R
+  env "$@" taskset -c 8-11 /usr/bin/time -v $bin --i "$in" $ARGS --o ab24/out-$name-$R/ --profile ab24/prof-$name-$R.jsonl > ab24/run-$name-$R.log 2> ab24/time-$name-$R.log
+  local rc=$?
+  python3 digest24.py ab24/out-$name-$R > ab24/digest-$name-$R.txt
+  echo "$name r$R rc=$rc mrc=$(grep -c ' mrc ' ab24/digest-$name-$R.txt) $(grep -E 'Elapsed|User time|System time|Maximum resident|Minor' ab24/time-$name-$R.log | awk -F': ' '{printf "%s ", $2}')"
+}
+echo "THP: $(cat /sys/kernel/mm/transparent_hugepage/enabled) defrag: $(cat /sys/kernel/mm/transparent_hugepage/defrag)"
+R=warm; run main Movies24/20170629_00021_frameImage.tiff $MAIN X=1; run thp Movies24/20170629_00021_frameImage.tiff $NEW X=1
+R=1; run main "Movies24/*.tiff" $MAIN X=1; run thp "Movies24/*.tiff" $NEW X=1
+R=2; run thp  "Movies24/*.tiff" $NEW X=1;  run main "Movies24/*.tiff" $MAIN X=1
+for d in ab24/digest-thp-1.txt ab24/digest-thp-2.txt ab24/digest-main-2.txt; do
+  cmp -s ab24/digest-main-1.txt $d && echo "identity $d vs main-1: IDENTICAL" || echo "identity $d vs main-1: DIFFERS"
+done
+echo DONE
+
+===== digest24.py =====
+#!/usr/bin/env python3
+"""Print a manifest of product digests for one MotionCorr output tree.
+
+MRCs: SHA-256 of data after the 1024-byte header and extended header.
+STARs: SHA-256 of the file, with the output-dir prefix removed.
+"""
+import hashlib, os, struct, sys
+root = sys.argv[1].rstrip('/')
+rows = []
+for dirpath, _, files in os.walk(root):
+    for f in sorted(files):
+        p = os.path.join(dirpath, f)
+        rel = os.path.relpath(p, root)
+        if f.endswith('.mrc'):
+            with open(p, 'rb') as fh:
+                hdr = fh.read(1024)
+                nsymbt = struct.unpack('<i', hdr[92:96])[0]
+                fh.seek(1024 + nsymbt)
+                rows.append((rel, 'mrc', hashlib.sha256(fh.read()).hexdigest()))
+        elif f.endswith('.star'):
+            data = open(p, 'rb').read().replace(root.encode() + b'/', b'')
+            rows.append((rel, 'star', hashlib.sha256(data).hexdigest()))
+for r in sorted(rows):
+    print(*r)

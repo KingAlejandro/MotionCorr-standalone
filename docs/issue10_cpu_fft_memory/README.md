@@ -3,9 +3,20 @@
 ## Result
 
 On a host with THP in `madvise` mode, asking for transparent huge pages on
-large arrays cuts the CPU run from 19.4 s to 15.5 s (j4). All products are
-byte-identical to main. A FFTW plan cache plus skipping the dose-weighting
-inverse-FFT input copy saves a further 0.3–0.8 s and 220 MiB of peak RSS.
+large arrays cuts the 24-movie CPU batch from 7:41–7:50 to 5:59–6:07 (j4, two
+rounds per arm, −22%). All products of all 24 movies are byte-identical to
+main. A FFTW plan cache plus skipping the dose-weighting
+inverse-FFT input copy saves a further 0.3–0.8 s per movie and 220 MiB of peak RSS.
+
+| 24-movie batch, j4 | round 1 wall | round 2 wall | user | sys | minor faults | max RSS |
+|---|---|---|---|---|---|---|
+| main `116eb04` | 461.3 s | 470.1 s | 1589–1628 s | 142–143 s | 51M | 4497 MiB |
+| this branch | 367.1 s | 358.7 s | 1380 s | 28–41 s | 2.2–3.0M | 4281 MiB |
+
+Round 1 ran main first, round 2 the branch first. Identity: 96 MRC payloads
+and 25 STARs per run match `main` round 1 exactly (`digest24.txt`).
+
+Single movie 00026, used to separate the two changes:
 
 | arm (j4, rounds 7–9, median) | wall | user | sys | minor faults |
 |---|---|---|---|---|
@@ -32,16 +43,18 @@ the next eleven huge-page runs.
   weighting, `--save_noDW --even_odd_split --profile`, `taskset -c 8-11 --j 4`.
 - Arms interleaved per round after one warm run per binary, under
   `/tmp/motioncorr-cpu64-bench.lock`. Scripts: `scripts.txt`.
+- 24-movie batch: all tutorial movies in one process per run (`ab24.sh`,
+  `digest24.py`), one single-movie warm run per binary first.
 - Identity: SHA-256 of the data after header and extended header of all four
   MRCs (DW, noDW, EVN, ODD), plus the STAR files, against `main` round 1, for
   every run.
 
 Files: `raw.txt` (per-run `/usr/bin/time` and per-stage medians),
-`profiles.tar.gz` (`--profile` JSONL for every run).
+`profiles.tar.gz` and `profiles24.tar.gz` (`--profile` JSONL for every run).
 
 ## Limitations
 
-- One movie, one host. A THP `always` host (e.g. SCARF) already gets huge
+- One host. A THP `always` host (e.g. SCARF) already gets huge
   pages, so the expected gain there is about zero; a THP `never` host is
   unchanged.
 - With `defrag=madvise` the kernel may compact memory synchronously on fault,

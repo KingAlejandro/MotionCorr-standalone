@@ -1,0 +1,146 @@
+
+/workspace/scratch/28038873ca11/build-fused-sums/CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000f20 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]>:
+     f20:	f3 0f 1e fa          	endbr64
+     f24:	41 57                	push   %r15
+     f26:	41 56                	push   %r14
+     f28:	41 55                	push   %r13
+     f2a:	41 54                	push   %r12
+     f2c:	55                   	push   %rbp
+     f2d:	48 89 fd             	mov    %rdi,%rbp
+     f30:	53                   	push   %rbx
+     f31:	48 83 ec 08          	sub    $0x8,%rsp
+     f35:	4c 8b 27             	mov    (%rdi),%r12
+     f38:	e8 00 00 00 00       	call   f3d <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x1d>
+     f3d:	89 c3                	mov    %eax,%ebx
+     f3f:	e8 00 00 00 00       	call   f44 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x24>
+     f44:	48 63 f3             	movslq %ebx,%rsi
+     f47:	48 63 c8             	movslq %eax,%rcx
+     f4a:	49 8b 44 24 40       	mov    0x40(%r12),%rax
+     f4f:	48 99                	cqto
+     f51:	48 f7 fe             	idiv   %rsi
+     f54:	48 39 d1             	cmp    %rdx,%rcx
+     f57:	0f 8c 9b 01 00 00    	jl     10f8 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x1d8>
+     f5d:	48 0f af c8          	imul   %rax,%rcx
+     f61:	48 01 ca             	add    %rcx,%rdx
+     f64:	48 8d 3c 10          	lea    (%rax,%rdx,1),%rdi
+     f68:	48 39 fa             	cmp    %rdi,%rdx
+     f6b:	0f 8d 43 01 00 00    	jge    10b4 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x194>
+     f71:	48 8b 4d 08          	mov    0x8(%rbp),%rcx
+     f75:	49 8b 34 24          	mov    (%r12),%rsi
+     f79:	49 89 c4             	mov    %rax,%r12
+     f7c:	48 8b 09             	mov    (%rcx),%rcx
+     f7f:	4c 8b 01             	mov    (%rcx),%r8
+     f82:	48 8b 4d 10          	mov    0x10(%rbp),%rcx
+     f86:	48 89 d5             	mov    %rdx,%rbp
+     f89:	48 8b 09             	mov    (%rcx),%rcx
+     f8c:	48 83 f8 01          	cmp    $0x1,%rax
+     f90:	0f 84 32 01 00 00    	je     10c8 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x1a8>
+     f96:	4c 8d 0c 95 00 00 00 	lea    0x0(,%rdx,4),%r9
+     f9d:	00 
+     f9e:	4e 8d 1c 0e          	lea    (%rsi,%r9,1),%r11
+     fa2:	4f 8d 6c 08 04       	lea    0x4(%r8,%r9,1),%r13
+     fa7:	4d 89 de             	mov    %r11,%r14
+     faa:	4e 8d 14 09          	lea    (%rcx,%r9,1),%r10
+     fae:	49 8d 59 10          	lea    0x10(%r9),%rbx
+     fb2:	4d 29 ee             	sub    %r13,%r14
+     fb5:	4d 89 d7             	mov    %r10,%r15
+     fb8:	49 83 fe 08          	cmp    $0x8,%r14
+     fbc:	41 0f 97 c6          	seta   %r14b
+     fc0:	4d 29 ef             	sub    %r13,%r15
+     fc3:	49 83 ff 08          	cmp    $0x8,%r15
+     fc7:	41 0f 97 c5          	seta   %r13b
+     fcb:	45 84 ee             	test   %r13b,%r14b
+     fce:	0f 84 f4 00 00 00    	je     10c8 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x1a8>
+     fd4:	4c 8d 2c 1e          	lea    (%rsi,%rbx,1),%r13
+     fd8:	4d 39 ea             	cmp    %r13,%r10
+     fdb:	41 0f 93 c5          	setae  %r13b
+     fdf:	48 01 cb             	add    %rcx,%rbx
+     fe2:	49 39 db             	cmp    %rbx,%r11
+     fe5:	0f 93 c3             	setae  %bl
+     fe8:	41 08 dd             	or     %bl,%r13b
+     feb:	0f 84 d7 00 00 00    	je     10c8 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x1a8>
+     ff1:	48 8d 78 ff          	lea    -0x1(%rax),%rdi
+     ff5:	48 83 ff 02          	cmp    $0x2,%rdi
+     ff9:	0f 86 04 01 00 00    	jbe    1103 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x1e3>
+     fff:	48 89 c3             	mov    %rax,%rbx
+    1002:	4d 01 c1             	add    %r8,%r9
+    1005:	31 ff                	xor    %edi,%edi
+    1007:	48 c1 eb 02          	shr    $0x2,%rbx
+    100b:	48 c1 e3 04          	shl    $0x4,%rbx
+    100f:	90                   	nop
+    1010:	41 0f 10 0c 39       	movups (%r9,%rdi,1),%xmm1
+    1015:	41 0f 10 04 3b       	movups (%r11,%rdi,1),%xmm0
+    101a:	0f 58 c1             	addps  %xmm1,%xmm0
+    101d:	41 0f 11 04 3b       	movups %xmm0,(%r11,%rdi,1)
+    1022:	41 0f 10 04 3a       	movups (%r10,%rdi,1),%xmm0
+    1027:	0f 58 c1             	addps  %xmm1,%xmm0
+    102a:	41 0f 11 04 3a       	movups %xmm0,(%r10,%rdi,1)
+    102f:	48 83 c7 10          	add    $0x10,%rdi
+    1033:	48 39 fb             	cmp    %rdi,%rbx
+    1036:	75 d8                	jne    1010 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0xf0>
+    1038:	48 89 c7             	mov    %rax,%rdi
+    103b:	48 83 e7 fc          	and    $0xfffffffffffffffc,%rdi
+    103f:	48 01 fa             	add    %rdi,%rdx
+    1042:	48 39 f8             	cmp    %rdi,%rax
+    1045:	74 6d                	je     10b4 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x194>
+    1047:	48 29 f8             	sub    %rdi,%rax
+    104a:	49 89 c4             	mov    %rax,%r12
+    104d:	48 83 f8 01          	cmp    $0x1,%rax
+    1051:	74 39                	je     108c <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x16c>
+    1053:	48 01 fd             	add    %rdi,%rbp
+    1056:	48 8d 04 ad 00 00 00 	lea    0x0(,%rbp,4),%rax
+    105d:	00 
+    105e:	f3 41 0f 7e 0c a8    	movq   (%r8,%rbp,4),%xmm1
+    1064:	48 8d 3c 06          	lea    (%rsi,%rax,1),%rdi
+    1068:	48 01 c8             	add    %rcx,%rax
+    106b:	f3 0f 7e 07          	movq   (%rdi),%xmm0
+    106f:	0f 58 c1             	addps  %xmm1,%xmm0
+    1072:	0f 13 07             	movlps %xmm0,(%rdi)
+    1075:	f3 0f 7e 00          	movq   (%rax),%xmm0
+    1079:	0f 58 c1             	addps  %xmm1,%xmm0
+    107c:	0f 13 00             	movlps %xmm0,(%rax)
+    107f:	41 f6 c4 01          	test   $0x1,%r12b
+    1083:	74 2f                	je     10b4 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x194>
+    1085:	49 83 e4 fe          	and    $0xfffffffffffffffe,%r12
+    1089:	4c 01 e2             	add    %r12,%rdx
+    108c:	48 8d 04 95 00 00 00 	lea    0x0(,%rdx,4),%rax
+    1093:	00 
+    1094:	f3 41 0f 10 04 90    	movss  (%r8,%rdx,4),%xmm0
+    109a:	48 01 c6             	add    %rax,%rsi
+    109d:	48 01 c1             	add    %rax,%rcx
+    10a0:	f3 0f 10 0e          	movss  (%rsi),%xmm1
+    10a4:	f3 0f 58 c8          	addss  %xmm0,%xmm1
+    10a8:	f3 0f 11 0e          	movss  %xmm1,(%rsi)
+    10ac:	f3 0f 58 01          	addss  (%rcx),%xmm0
+    10b0:	f3 0f 11 01          	movss  %xmm0,(%rcx)
+    10b4:	48 83 c4 08          	add    $0x8,%rsp
+    10b8:	5b                   	pop    %rbx
+    10b9:	5d                   	pop    %rbp
+    10ba:	41 5c                	pop    %r12
+    10bc:	41 5d                	pop    %r13
+    10be:	41 5e                	pop    %r14
+    10c0:	41 5f                	pop    %r15
+    10c2:	c3                   	ret
+    10c3:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+    10c8:	f3 41 0f 10 04 90    	movss  (%r8,%rdx,4),%xmm0
+    10ce:	f3 0f 10 0c 96       	movss  (%rsi,%rdx,4),%xmm1
+    10d3:	f3 0f 58 c8          	addss  %xmm0,%xmm1
+    10d7:	f3 0f 11 0c 96       	movss  %xmm1,(%rsi,%rdx,4)
+    10dc:	f3 0f 58 04 91       	addss  (%rcx,%rdx,4),%xmm0
+    10e1:	f3 0f 11 04 91       	movss  %xmm0,(%rcx,%rdx,4)
+    10e6:	48 83 c2 01          	add    $0x1,%rdx
+    10ea:	48 39 d7             	cmp    %rdx,%rdi
+    10ed:	75 d9                	jne    10c8 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x1a8>
+    10ef:	eb c3                	jmp    10b4 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x194>
+    10f1:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+    10f8:	48 83 c0 01          	add    $0x1,%rax
+    10fc:	31 d2                	xor    %edx,%edx
+    10fe:	e9 5a fe ff ff       	jmp    f5d <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x3d>
+    1103:	31 ff                	xor    %edi,%edi
+    1105:	e9 49 ff ff ff       	jmp    1053 <MotioncorrRunner::sumUnweightedFrames(Image<float>&, Image<float>*, Image<float>*, std::vector<Image<float>, std::allocator<Image<float> > >&, MotionModel*, std::ostream&) [clone ._omp_fn.0]+0x133>
+    110a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)

@@ -1,0 +1,872 @@
+{
+  "scope": "One diagnostic pair per configuration for exact even/odd output products; no complete-movie performance verdict",
+  "hostname": "442a2f5ea6ec",
+  "source": "8336fc983ab1f71eb908e98a0402c0ef0d6926be",
+  "production_commit": "b780577fd0d62af41793555e0f06b94b49f2e6e9",
+  "baseline_commit": "e8f3eb8ea6165edae73613751df5a2e92ff4f955",
+  "limitation": "Authorized container fallback. Mounted /proc and PID namespaces disagree; ownership and physical-host isolation are NOT certified. Single pairs do not establish wall-time or RSS improvements. Do not pool with cpu64.",
+  "baseline_build_history": "Existing #178 binary from earlier same-GCC13 Release build; dependency include prefixes differ from fresh candidate build. Both use identical -O3 -DNDEBUG -std=gnu++17 -fopenmp and resolve current layout-deps/system runtime libraries. Whole wall values are diagnostic only.",
+  "binaries": {
+    "base": {
+      "path": "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+      "sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de",
+      "linked_libraries": "\tlinux-vdso.so.1 (0x00007fcda683f000)\n\tlibfftw3f.so.3 => /workspace/scratch/28038873ca11/layout-deps/usr/lib/x86_64-linux-gnu/libfftw3f.so.3 (0x00007fcda61bb000)\n\tlibgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1 (0x00007fcda615c000)\n\tlibtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6 (0x00007fcda60cf000)\n\tlibpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16 (0x00007fcda6097000)\n\tlibstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007fcda5e19000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fcda5d2e000)\n\tlibgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007fcda5d00000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcda5aee000)\n\tlibwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7 (0x00007fcda5a73000)\n\tlibzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1 (0x00007fcda59b9000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fcda5987000)\n\tlibLerc.so.4 => /lib/x86_64-linux-gnu/libLerc.so.4 (0x00007fcda58fe000)\n\tlibjbig.so.0 => /lib/x86_64-linux-gnu/libjbig.so.0 (0x00007fcda58ee000)\n\tlibjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8 (0x00007fcda586b000)\n\tlibdeflate.so.0 => /lib/x86_64-linux-gnu/libdeflate.so.0 (0x00007fcda5858000)\n\tlibz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007fcda583c000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fcda6841000)\n\tlibsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0 (0x00007fcda5832000)\n"
+    },
+    "candidate": {
+      "path": "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr",
+      "sha256": "d1a62d624de143ef55a2b57700288a61101ce192a830c17f9568c8a8efffc423",
+      "linked_libraries": "\tlinux-vdso.so.1 (0x00007f6910e6d000)\n\tlibfftw3f.so.3 => /workspace/scratch/28038873ca11/layout-deps/usr/lib/x86_64-linux-gnu/libfftw3f.so.3 (0x00007f69107e9000)\n\tlibgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1 (0x00007f691078a000)\n\tlibtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6 (0x00007f69106fd000)\n\tlibpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16 (0x00007f69106c5000)\n\tlibstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f6910447000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f691035c000)\n\tlibgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f691032e000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f691011c000)\n\tlibwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7 (0x00007f69100a1000)\n\tlibzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1 (0x00007f690ffe7000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f690ffb5000)\n\tlibLerc.so.4 => /lib/x86_64-linux-gnu/libLerc.so.4 (0x00007f690ff2c000)\n\tlibjbig.so.0 => /lib/x86_64-linux-gnu/libjbig.so.0 (0x00007f690ff1c000)\n\tlibjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8 (0x00007f690fe99000)\n\tlibdeflate.so.0 => /lib/x86_64-linux-gnu/libdeflate.so.0 (0x00007f690fe86000)\n\tlibz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f690fe6a000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f6910e6f000)\n\tlibsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0 (0x00007f690fe60000)\n"
+    }
+  },
+  "inputs": {
+    "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs": "36e1a91b25a54d958e0ff78be87e55fa9777aebbd36d145d415bbc7837b8c8a1",
+    "/workspace/scratch/28038873ca11/data/tutorial.tiff": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "/workspace/scratch/28038873ca11/data/gain.mrc": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1"
+  },
+  "cpu_max": "800000 100000",
+  "memory_max": "8589934592",
+  "runs": [
+    {
+      "configuration": "synthetic-p1-j1",
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p1-j1-base",
+        "--use_own",
+        "--j",
+        "1",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--first_frame_sum",
+        "2",
+        "--last_frame_sum",
+        "8"
+      ],
+      "self_affinity": [
+        0
+      ],
+      "environment": {
+        "OMP_NUM_THREADS": "1",
+        "OMP_DYNAMIC": "false",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores",
+        "OMP_WAIT_POLICY": "PASSIVE",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "rc": 0,
+      "diagnostic_wall_s": 0.9786688749991299,
+      "peak_rss_kib": 29356,
+      "user_s": 0.669678,
+      "sys_s": 0.307496,
+      "load_before": [
+        1.32666015625,
+        1.49169921875,
+        1.40576171875
+      ],
+      "load_after": [
+        1.32666015625,
+        1.49169921875,
+        1.40576171875
+      ]
+    },
+    {
+      "configuration": "synthetic-p1-j1",
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p1-j1-candidate",
+        "--use_own",
+        "--j",
+        "1",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--first_frame_sum",
+        "2",
+        "--last_frame_sum",
+        "8"
+      ],
+      "self_affinity": [
+        0
+      ],
+      "environment": {
+        "OMP_NUM_THREADS": "1",
+        "OMP_DYNAMIC": "false",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores",
+        "OMP_WAIT_POLICY": "PASSIVE",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "rc": 0,
+      "diagnostic_wall_s": 0.9436968170011824,
+      "peak_rss_kib": 29332,
+      "user_s": 0.570062,
+      "sys_s": 0.337833,
+      "load_before": [
+        0.63623046875,
+        1.26904296875,
+        1.33251953125
+      ],
+      "load_after": [
+        0.63623046875,
+        1.26904296875,
+        1.33251953125
+      ]
+    },
+    {
+      "configuration": "synthetic-p1-j4",
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p1-j4-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--first_frame_sum",
+        "2",
+        "--last_frame_sum",
+        "8"
+      ],
+      "self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "environment": {
+        "OMP_NUM_THREADS": "4",
+        "OMP_DYNAMIC": "false",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores",
+        "OMP_WAIT_POLICY": "PASSIVE",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "rc": 0,
+      "diagnostic_wall_s": 0.8747657859967148,
+      "peak_rss_kib": 30720,
+      "user_s": 0.758601,
+      "sys_s": 0.31879199999999996,
+      "load_before": [
+        0.63623046875,
+        1.26904296875,
+        1.33251953125
+      ],
+      "load_after": [
+        0.63623046875,
+        1.26904296875,
+        1.33251953125
+      ]
+    },
+    {
+      "configuration": "synthetic-p1-j4",
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p1-j4-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--first_frame_sum",
+        "2",
+        "--last_frame_sum",
+        "8"
+      ],
+      "self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "environment": {
+        "OMP_NUM_THREADS": "4",
+        "OMP_DYNAMIC": "false",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores",
+        "OMP_WAIT_POLICY": "PASSIVE",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "rc": 0,
+      "diagnostic_wall_s": 0.8331504070010851,
+      "peak_rss_kib": 32760,
+      "user_s": 0.647888,
+      "sys_s": 0.37096799999999996,
+      "load_before": [
+        0.63623046875,
+        1.26904296875,
+        1.33251953125
+      ],
+      "load_after": [
+        0.63623046875,
+        1.26904296875,
+        1.33251953125
+      ]
+    },
+    {
+      "configuration": "synthetic-p5-j1",
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p5-j1-base",
+        "--use_own",
+        "--j",
+        "1",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--first_frame_sum",
+        "2",
+        "--last_frame_sum",
+        "8"
+      ],
+      "self_affinity": [
+        0
+      ],
+      "environment": {
+        "OMP_NUM_THREADS": "1",
+        "OMP_DYNAMIC": "false",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores",
+        "OMP_WAIT_POLICY": "PASSIVE",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "rc": 0,
+      "diagnostic_wall_s": 0.9081179479981074,
+      "peak_rss_kib": 29420,
+      "user_s": 0.744946,
+      "sys_s": 0.149719,
+      "load_before": [
+        0.63623046875,
+        1.26904296875,
+        1.33251953125
+      ],
+      "load_after": [
+        0.63623046875,
+        1.26904296875,
+        1.33251953125
+      ]
+    },
+    {
+      "configuration": "synthetic-p5-j1",
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p5-j1-candidate",
+        "--use_own",
+        "--j",
+        "1",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--first_frame_sum",
+        "2",
+        "--last_frame_sum",
+        "8"
+      ],
+      "self_affinity": [
+        0
+      ],
+      "environment": {
+        "OMP_NUM_THREADS": "1",
+        "OMP_DYNAMIC": "false",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores",
+        "OMP_WAIT_POLICY": "PASSIVE",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "rc": 0,
+      "diagnostic_wall_s": 0.8464117369985615,
+      "peak_rss_kib": 29404,
+      "user_s": 0.687927,
+      "sys_s": 0.15673299999999998,
+      "load_before": [
+        0.63623046875,
+        1.26904296875,
+        1.33251953125
+      ],
+      "load_after": [
+        0.66552734375,
+        1.26416015625,
+        1.33056640625
+      ]
+    },
+    {
+      "configuration": "synthetic-p5-j4",
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p5-j4-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--first_frame_sum",
+        "2",
+        "--last_frame_sum",
+        "8"
+      ],
+      "self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "environment": {
+        "OMP_NUM_THREADS": "4",
+        "OMP_DYNAMIC": "false",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores",
+        "OMP_WAIT_POLICY": "PASSIVE",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "rc": 0,
+      "diagnostic_wall_s": 1.0016431440017186,
+      "peak_rss_kib": 32940,
+      "user_s": 1.035283,
+      "sys_s": 0.27596899999999996,
+      "load_before": [
+        0.66552734375,
+        1.26416015625,
+        1.33056640625
+      ],
+      "load_after": [
+        0.66552734375,
+        1.26416015625,
+        1.33056640625
+      ]
+    },
+    {
+      "configuration": "synthetic-p5-j4",
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p5-j4-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--first_frame_sum",
+        "2",
+        "--last_frame_sum",
+        "8"
+      ],
+      "self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "environment": {
+        "OMP_NUM_THREADS": "4",
+        "OMP_DYNAMIC": "false",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores",
+        "OMP_WAIT_POLICY": "PASSIVE",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "rc": 0,
+      "diagnostic_wall_s": 0.9856618960002379,
+      "peak_rss_kib": 32840,
+      "user_s": 1.034714,
+      "sys_s": 0.23998699999999998,
+      "load_before": [
+        0.66552734375,
+        1.26416015625,
+        1.33056640625
+      ],
+      "load_after": [
+        0.66552734375,
+        1.26416015625,
+        1.33056640625
+      ]
+    },
+    {
+      "configuration": "tutorial-p5-j4",
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/fused-sums-products/tutorial-p5-j4-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc"
+      ],
+      "self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "environment": {
+        "OMP_NUM_THREADS": "4",
+        "OMP_DYNAMIC": "false",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores",
+        "OMP_WAIT_POLICY": "PASSIVE",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "rc": 0,
+      "diagnostic_wall_s": 48.127225979002105,
+      "peak_rss_kib": 3265712,
+      "user_s": 133.850782,
+      "sys_s": 17.897399,
+      "load_before": [
+        0.66552734375,
+        1.26416015625,
+        1.33056640625
+      ],
+      "load_after": [
+        2.37939453125,
+        1.6533203125,
+        1.4619140625
+      ]
+    },
+    {
+      "configuration": "tutorial-p5-j4",
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/fused-sums-products/tutorial-p5-j4-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc"
+      ],
+      "self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "environment": {
+        "OMP_NUM_THREADS": "4",
+        "OMP_DYNAMIC": "false",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores",
+        "OMP_WAIT_POLICY": "PASSIVE",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "rc": 0,
+      "diagnostic_wall_s": 41.96213836000243,
+      "peak_rss_kib": 3265640,
+      "user_s": 128.204884,
+      "sys_s": 9.614422,
+      "load_before": [
+        2.37939453125,
+        1.6533203125,
+        1.4619140625
+      ],
+      "load_after": [
+        2.81884765625,
+        1.85546875,
+        1.53857421875
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "configuration": "synthetic-p1-j1",
+      "root_a": "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p1-j1-base",
+      "root_b": "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p1-j1-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true,
+      "canonical_mrc_star_pairs": 6
+    },
+    {
+      "configuration": "synthetic-p1-j4",
+      "root_a": "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p1-j4-base",
+      "root_b": "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p1-j4-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true,
+      "canonical_mrc_star_pairs": 6
+    },
+    {
+      "configuration": "synthetic-p5-j1",
+      "root_a": "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p5-j1-base",
+      "root_b": "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p5-j1-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true,
+      "canonical_mrc_star_pairs": 6
+    },
+    {
+      "configuration": "synthetic-p5-j4",
+      "root_a": "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p5-j4-base",
+      "root_b": "/workspace/scratch/28038873ca11/fused-sums-products/synthetic-p5-j4-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true,
+      "canonical_mrc_star_pairs": 6
+    },
+    {
+      "configuration": "tutorial-p5-j4",
+      "root_a": "/workspace/scratch/28038873ca11/fused-sums-products/tutorial-p5-j4-base",
+      "root_b": "/workspace/scratch/28038873ca11/fused-sums-products/tutorial-p5-j4-candidate",
+      "only_a": [
+        "workspace/scratch/28038873ca11/data/.tutorial_noDW.mrc.128xfS"
+      ],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/tutorial.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [
+        "file inventories differ"
+      ],
+      "identical": false,
+      "canonical_mrc_star_pairs": 6
+    }
+  ],
+  "harness_incidents": [
+    {
+      "after_run": "synthetic-p1-j1 base",
+      "problem": "The driver used shallow glob for split-file presence but absolute input names produce nested output paths. Baseline process rc=0 and both split files existed.",
+      "correction": "Use recursive split-file checks; retain the completed baseline run and resume remaining population without rerun."
+    }
+  ]
+}

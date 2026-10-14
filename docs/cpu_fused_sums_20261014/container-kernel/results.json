@@ -1,0 +1,347 @@
+{
+  "scope": "actual production streaming reconstruction vs frozen #178 separate-scan caller",
+  "limitation": "Stage-only paired experiment, not a complete movie or clean mcprof verdict. Caller must provide an exclusive measurement lane. Container and VM results must remain separate.",
+  "hostname": "442a2f5ea6ec",
+  "expected_hostname": "442a2f5ea6ec",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "parent_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "pid_matches_proc_self": false,
+  "source": "8336fc983ab1f71eb908e98a0402c0ef0d6926be",
+  "binary": "/workspace/scratch/28038873ca11/build-fused-sums/cpu_fused_sums_bench",
+  "binary_sha256": "095c6d45ba84e5bf492054d6a2b08f38fb82536cd218590dd2d0d82932a0a2f9",
+  "cpu_max": "800000 100000",
+  "memory_max": "8589934592",
+  "lscpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           46 bits physical, 57 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  9\nOn-line CPU(s) list:                     0-8\nVendor ID:                               GenuineIntel\nModel name:                              INTEL(R) XEON(R) PLATINUM 8573C\nBIOS Model name:                           CPU @ 0.0GHz\nBIOS CPU family:                         0\nCPU family:                              6\nModel:                                   207\nThread(s) per core:                      1\nCore(s) per socket:                      9\nSocket(s):                               1\nStepping:                                2\nBogoMIPS:                                4600.00\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 arat avx512vbmi umip waitpkg avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid cldemote movdiri movdir64b fsrm serialize tsxldtrk avx512_fp16 arch_capabilities\nHypervisor vendor:                       KVM\nVirtualization type:                     full\nL1d cache:                               240 KiB (5 instances)\nL1i cache:                               160 KiB (5 instances)\nL2 cache:                                10 MiB (5 instances)\nL3 cache:                                260 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-8\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Vulnerable\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Vulnerable\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Vulnerable: __user pointer sanitization and usercopy barriers only; no swapgs barriers\nVulnerability Spectre v2:                Vulnerable; STIBP: disabled; PBRSB-eIBRS: Not affected; BHI: Vulnerable\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+  "environment": {
+    "OMP_DYNAMIC": "false",
+    "OMP_PROC_BIND": "close",
+    "OMP_PLACES": "cores",
+    "OMP_WAIT_POLICY": "PASSIVE",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "configurations": [
+    {
+      "name": "3710x3838x24-j1-polynomial",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-fused-sums/cpu_fused_sums_bench",
+        "3710",
+        "3838",
+        "24",
+        "1",
+        "6",
+        "polynomial"
+      ],
+      "self_affinity": [
+        0
+      ],
+      "load_before": [
+        1.935546875,
+        1.375,
+        1.35302734375
+      ],
+      "load_after": [
+        1.12158203125,
+        1.25830078125,
+        1.3115234375
+      ],
+      "baseline_median_s": 8.805333415,
+      "candidate_median_s": 12.08931312,
+      "paired_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          8.146288887,
+          3.6284308979999995,
+          -0.1728292929999995,
+          -0.8090585560000001,
+          5.204730412,
+          3.246259009000001
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": 3.4373449535000002,
+        "q1_diff_s": 0.6819427825000006,
+        "q3_diff_s": 4.8106555335,
+        "min_diff_s": -0.8090585560000001,
+        "max_diff_s": 8.146288887,
+        "median_a_s": 8.805333415,
+        "median_b_s": 12.08931312,
+        "relative_median_diff": 0.39037078909975614,
+        "noise_s": 3.9863850093164994,
+        "robust_sd_diff_s": 3.9863850093164994,
+        "ci": {
+          "low_s": -0.8090585560000001,
+          "high_s": 8.146288887,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 4,
+          "negative": 2,
+          "ties": 0,
+          "p_two_sided": 0.6875
+        },
+        "resolution_s": 4.4776737215,
+        "resolved": false,
+        "verdict": "not resolved (below noise 4.478 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": 5.204730412,
+          "median_diff_ba_s": 3.246259009000001,
+          "second_position_cost_s": 0.9792357014999995,
+          "order_corrected_effect_s": 4.2254947105000005
+        }
+      }
+    },
+    {
+      "name": "3710x3838x24-j4-polynomial",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-fused-sums/cpu_fused_sums_bench",
+        "3710",
+        "3838",
+        "24",
+        "4",
+        "6",
+        "polynomial"
+      ],
+      "self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "load_before": [
+        1.12158203125,
+        1.25830078125,
+        1.3115234375
+      ],
+      "load_after": [
+        2.3984375,
+        1.580078125,
+        1.41796875
+      ],
+      "baseline_median_s": 4.6832619555,
+      "candidate_median_s": 4.3167713435,
+      "paired_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -6.564016985,
+          -1.035721723,
+          -0.5110177629999999,
+          -0.1960030279999998,
+          -0.26433529,
+          0.05087487099999999
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.38767652649999995,
+        "q1_diff_s": -0.904545733,
+        "q3_diff_s": -0.21308609349999985,
+        "min_diff_s": -6.564016985,
+        "max_diff_s": 0.05087487099999999,
+        "median_a_s": 4.6832619555,
+        "median_b_s": 4.3167713435,
+        "relative_median_diff": -0.08277916763650484,
+        "noise_s": 0.46718571540480003,
+        "robust_sd_diff_s": 0.46718571540480003,
+        "ci": {
+          "low_s": -6.564016985,
+          "high_s": 0.05087487099999999,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 1,
+          "negative": 5,
+          "ties": 0,
+          "p_two_sided": 0.21875
+        },
+        "resolution_s": 3.307445928,
+        "resolved": false,
+        "verdict": "not resolved (below noise 3.307 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -0.5110177629999999,
+          "median_diff_ba_s": -0.1960030279999998,
+          "second_position_cost_s": -0.15750736750000005,
+          "order_corrected_effect_s": -0.35351039549999985
+        }
+      }
+    },
+    {
+      "name": "3710x3838x24-j4-null",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-fused-sums/cpu_fused_sums_bench",
+        "3710",
+        "3838",
+        "24",
+        "4",
+        "6",
+        "null"
+      ],
+      "self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "load_before": [
+        2.3984375,
+        1.580078125,
+        1.41796875
+      ],
+      "load_after": [
+        2.32861328125,
+        1.60107421875,
+        1.42724609375
+      ],
+      "baseline_median_s": 0.8703438145,
+      "candidate_median_s": 0.827973707,
+      "paired_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -0.11469408799999992,
+          -0.319275203,
+          -0.288168631,
+          0.31951148400000007,
+          -0.09287968300000005,
+          0.252313648
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.10378688549999998,
+        "q1_diff_s": -0.24479999524999999,
+        "q3_diff_s": 0.16601531525,
+        "min_diff_s": -0.319275203,
+        "max_diff_s": 0.31951148400000007,
+        "median_a_s": 0.8703438145,
+        "median_b_s": 0.827973707,
+        "relative_median_diff": -0.11924814512483674,
+        "noise_s": 0.29642367770190003,
+        "robust_sd_diff_s": 0.29642367770190003,
+        "ci": {
+          "low_s": -0.319275203,
+          "high_s": 0.31951148400000007,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 2,
+          "negative": 4,
+          "ties": 0,
+          "p_two_sided": 0.6875
+        },
+        "resolution_s": 0.31939334350000004,
+        "resolved": false,
+        "verdict": "not resolved (below noise 0.319 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -0.11469408799999992,
+          "median_diff_ba_s": 0.252313648,
+          "second_position_cost_s": -0.18350386799999996,
+          "order_corrected_effect_s": 0.06880978000000004
+        }
+      }
+    },
+    {
+      "name": "3710x3838x7-j4-polynomial",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-fused-sums/cpu_fused_sums_bench",
+        "3710",
+        "3838",
+        "7",
+        "4",
+        "6",
+        "polynomial"
+      ],
+      "self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "load_before": [
+        2.32861328125,
+        1.60107421875,
+        1.42724609375
+      ],
+      "load_after": [
+        2.27734375,
+        1.66259765625,
+        1.45458984375
+      ],
+      "baseline_median_s": 2.0940031725,
+      "candidate_median_s": 1.6797515875000002,
+      "paired_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -0.10947805399999999,
+          -0.7823865899999998,
+          -0.19880386999999988,
+          -0.399822189,
+          -0.42868098100000007,
+          0.17953832599999986
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.29931302949999994,
+        "q1_diff_s": -0.42146628300000005,
+        "q3_diff_s": -0.13180950799999996,
+        "min_diff_s": -0.7823865899999998,
+        "max_diff_s": 0.17953832599999986,
+        "median_a_s": 2.0940031725,
+        "median_b_s": 1.6797515875000002,
+        "relative_median_diff": -0.14293819294583707,
+        "noise_s": 0.23662512978510006,
+        "robust_sd_diff_s": 0.23662512978510006,
+        "ci": {
+          "low_s": -0.7823865899999998,
+          "high_s": 0.17953832599999986,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 1,
+          "negative": 5,
+          "ties": 0,
+          "p_two_sided": 0.21875
+        },
+        "resolution_s": 0.4809624579999998,
+        "resolved": false,
+        "verdict": "not resolved (below noise 0.481 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -0.19880386999999988,
+          "median_diff_ba_s": -0.399822189,
+          "second_position_cost_s": 0.10050915950000006,
+          "order_corrected_effect_s": -0.29931302949999994
+        }
+      }
+    }
+  ]
+}

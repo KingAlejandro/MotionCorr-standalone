@@ -1,0 +1,234 @@
+{
+  "production_commit": "b780577fd0d62af41793555e0f06b94b49f2e6e9",
+  "baseline_commit": "e8f3eb8ea6165edae73613751df5a2e92ff4f955",
+  "promotion": "NO-GO: unresolved performance, unfavorable j1 median, and strict tutorial full-tree inventory FAIL",
+  "timing_host": "442a2f5ea6ec authorized container fallback; no cpu64 timings",
+  "kernel_configurations": [
+    {
+      "name": "3710x3838x24-j1-polynomial",
+      "baseline_median_s": 8.805333415,
+      "candidate_median_s": 12.08931312,
+      "paired_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          8.146288887,
+          3.6284308979999995,
+          -0.1728292929999995,
+          -0.8090585560000001,
+          5.204730412,
+          3.246259009000001
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": 3.4373449535000002,
+        "q1_diff_s": 0.6819427825000006,
+        "q3_diff_s": 4.8106555335,
+        "min_diff_s": -0.8090585560000001,
+        "max_diff_s": 8.146288887,
+        "median_a_s": 8.805333415,
+        "median_b_s": 12.08931312,
+        "relative_median_diff": 0.39037078909975614,
+        "noise_s": 3.9863850093164994,
+        "robust_sd_diff_s": 3.9863850093164994,
+        "ci": {
+          "low_s": -0.8090585560000001,
+          "high_s": 8.146288887,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 4,
+          "negative": 2,
+          "ties": 0,
+          "p_two_sided": 0.6875
+        },
+        "resolution_s": 4.4776737215,
+        "resolved": false,
+        "verdict": "not resolved (below noise 4.478 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": 5.204730412,
+          "median_diff_ba_s": 3.246259009000001,
+          "second_position_cost_s": 0.9792357014999995,
+          "order_corrected_effect_s": 4.2254947105000005
+        }
+      }
+    },
+    {
+      "name": "3710x3838x24-j4-polynomial",
+      "baseline_median_s": 4.6832619555,
+      "candidate_median_s": 4.3167713435,
+      "paired_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -6.564016985,
+          -1.035721723,
+          -0.5110177629999999,
+          -0.1960030279999998,
+          -0.26433529,
+          0.05087487099999999
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.38767652649999995,
+        "q1_diff_s": -0.904545733,
+        "q3_diff_s": -0.21308609349999985,
+        "min_diff_s": -6.564016985,
+        "max_diff_s": 0.05087487099999999,
+        "median_a_s": 4.6832619555,
+        "median_b_s": 4.3167713435,
+        "relative_median_diff": -0.08277916763650484,
+        "noise_s": 0.46718571540480003,
+        "robust_sd_diff_s": 0.46718571540480003,
+        "ci": {
+          "low_s": -6.564016985,
+          "high_s": 0.05087487099999999,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 1,
+          "negative": 5,
+          "ties": 0,
+          "p_two_sided": 0.21875
+        },
+        "resolution_s": 3.307445928,
+        "resolved": false,
+        "verdict": "not resolved (below noise 3.307 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -0.5110177629999999,
+          "median_diff_ba_s": -0.1960030279999998,
+          "second_position_cost_s": -0.15750736750000005,
+          "order_corrected_effect_s": -0.35351039549999985
+        }
+      }
+    },
+    {
+      "name": "3710x3838x24-j4-null",
+      "baseline_median_s": 0.8703438145,
+      "candidate_median_s": 0.827973707,
+      "paired_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -0.11469408799999992,
+          -0.319275203,
+          -0.288168631,
+          0.31951148400000007,
+          -0.09287968300000005,
+          0.252313648
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.10378688549999998,
+        "q1_diff_s": -0.24479999524999999,
+        "q3_diff_s": 0.16601531525,
+        "min_diff_s": -0.319275203,
+        "max_diff_s": 0.31951148400000007,
+        "median_a_s": 0.8703438145,
+        "median_b_s": 0.827973707,
+        "relative_median_diff": -0.11924814512483674,
+        "noise_s": 0.29642367770190003,
+        "robust_sd_diff_s": 0.29642367770190003,
+        "ci": {
+          "low_s": -0.319275203,
+          "high_s": 0.31951148400000007,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 2,
+          "negative": 4,
+          "ties": 0,
+          "p_two_sided": 0.6875
+        },
+        "resolution_s": 0.31939334350000004,
+        "resolved": false,
+        "verdict": "not resolved (below noise 0.319 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -0.11469408799999992,
+          "median_diff_ba_s": 0.252313648,
+          "second_position_cost_s": -0.18350386799999996,
+          "order_corrected_effect_s": 0.06880978000000004
+        }
+      }
+    },
+    {
+      "name": "3710x3838x7-j4-polynomial",
+      "baseline_median_s": 2.0940031725,
+      "candidate_median_s": 1.6797515875000002,
+      "paired_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -0.10947805399999999,
+          -0.7823865899999998,
+          -0.19880386999999988,
+          -0.399822189,
+          -0.42868098100000007,
+          0.17953832599999986
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.29931302949999994,
+        "q1_diff_s": -0.42146628300000005,
+        "q3_diff_s": -0.13180950799999996,
+        "min_diff_s": -0.7823865899999998,
+        "max_diff_s": 0.17953832599999986,
+        "median_a_s": 2.0940031725,
+        "median_b_s": 1.6797515875000002,
+        "relative_median_diff": -0.14293819294583707,
+        "noise_s": 0.23662512978510006,
+        "robust_sd_diff_s": 0.23662512978510006,
+        "ci": {
+          "low_s": -0.7823865899999998,
+          "high_s": 0.17953832599999986,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 1,
+          "negative": 5,
+          "ties": 0,
+          "p_two_sided": 0.21875
+        },
+        "resolution_s": 0.4809624579999998,
+        "resolved": false,
+        "verdict": "not resolved (below noise 0.481 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -0.19880386999999988,
+          "median_diff_ba_s": -0.399822189,
+          "second_position_cost_s": 0.10050915950000006,
+          "order_corrected_effect_s": -0.29931302949999994
+        }
+      }
+    }
+  ],
+  "kernel_pairs_bitwise_equal": 28,
+  "kernel_measured_pairs": 24,
+  "synthetic_evenodd_full_tree_passes": 4,
+  "tutorial_full_tree": "FAIL: control output directory contains unexpected truncated temporary file; origin unproven, file retained",
+  "canonical_mrc_star_pairs_equal": 70,
+  "local_focused_cases": 288,
+  "local_relevant_ctests": "10/10 PASS",
+  "ci": "Run 514 GREEN on production b780577: Linux 53/53, known/canonical/smoke/failure checks and CUDA compilation; no GPU execution",
+  "known_motion": "aggregate PASS; inherited noisy characterization accuracy FAIL retained",
+  "tutorial_diagnostics": {
+    "base": {
+      "diagnostic_wall_s": 48.127225979002105,
+      "peak_rss_kib": 3265712,
+      "rc": 0
+    },
+    "candidate": {
+      "diagnostic_wall_s": 41.96213836000243,
+      "peak_rss_kib": 3265640,
+      "rc": 0
+    }
+  },
+  "performance_limitations": "Each stage configuration uses six alternating measured pairs after one warmup. No records removed or retries added. All intervals include zero. Complete jobs each have one unwarmed diagnostic pair, no wall/RSS verdict. Container physical-host isolation and per-PID ownership are not certified. Do not pool with VM data."
+}

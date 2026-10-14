@@ -1,0 +1,253 @@
+Start testing: Oct 14 23:43 WEST
+----------------------------------------------------------
+1/53 Testing: CpuUnweightedStream
+1/53 Test: CpuUnweightedStream
+Command: "/workspace/scratch/28038873ca11/build-fused-sums/cpu_unweighted_stream"
+Directory: /workspace/scratch/28038873ca11/build-fused-sums
+"CpuUnweightedStream" start time: Oct 14 23:43 WEST
+Output:
+----------------------------------------------------------
+288 fused/separate/full-stack cases, parity, model time, float rounding and scratch bound PASS
+<end of output>
+Test time =   2.82 sec
+----------------------------------------------------------
+Test Passed.
+"CpuUnweightedStream" end time: Oct 14 23:43 WEST
+"CpuUnweightedStream" time elapsed: 00:00:02
+----------------------------------------------------------
+
+2/53 Testing: PatchRetryState
+2/53 Test: PatchRetryState
+Command: "/workspace/scratch/28038873ca11/build-fused-sums/patch_retry_state"
+Directory: /workspace/scratch/28038873ca11/build-fused-sums
+"PatchRetryState" start time: Oct 14 23:43 WEST
+Output:
+----------------------------------------------------------
+Issue #69 patch retry shift-state contract (CPU, no device)
+  patch 256x256, 4 groups, scaled_B=20.0, truth (frame-0 relative): (+0.00,+0.00) (+2.70,-1.80) (-3.40,+2.20) (+1.90,-3.10)
+
+  converged reference          ( +0.000, +0.000) ( -2.637, +1.755) ( +3.394, -2.198) ( -1.846, +3.041)   |v| = 6.2485
+  max |recovered + truth| = 0.0630 px  (converged=yes)
+
+  attempt 1 (S1)               ( +0.000, +0.000) ( -4.367, +3.041) ( +3.594, -2.307) ( -3.378, +4.726)   |v| = 8.9615
+  arm A: reset (S2)            ( +0.000, +0.000) ( -4.367, +3.041) ( +3.594, -2.307) ( -3.378, +4.726)   |v| = 8.9615
+  arm B: no reset (S1+S2)      ( +0.000, +0.000) ( -8.734, +6.081) ( +7.189, -4.615) ( -6.756, +9.452)   |v| = 17.9231
+  |arm A| = 8.9615   |arm B| = 17.9231   ratio B/A = 2.0000
+  max |armA - S1|              = 0.000e+00 px
+  max |armB - (S1 + armA)|     = 0.000e+00 px
+
+PASS alignPatch accumulates into the caller's vectors and does not
+     re-derive them, so re-entering without a reset publishes S1+S2.
+     Restoring the vectors publishes the single estimate S2.
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"PatchRetryState" end time: Oct 14 23:43 WEST
+"PatchRetryState" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/53 Testing: RunnerInterpolateRecenter
+3/53 Test: RunnerInterpolateRecenter
+Command: "/workspace/scratch/28038873ca11/build-fused-sums/runner_numerics" "interpolate_recenter"
+Directory: /workspace/scratch/28038873ca11/build-fused-sums
+"RunnerInterpolateRecenter" start time: Oct 14 23:43 WEST
+Output:
+----------------------------------------------------------
+PASS archived witness, slope 1 (X only) (bug reproduced and fixed)
+PASS slope +2 X / -1.5 Y, nonzero origin both axes (bug reproduced and fixed)
+PASS unequal last group, negative X slope, piecewise (bug reproduced and fixed)
+PASS zero-origin control (no-op) (no-op control)
+PASS empty-input guard
+PASS issue97 interpolate_recenter
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"RunnerInterpolateRecenter" end time: Oct 14 23:43 WEST
+"RunnerInterpolateRecenter" time elapsed: 00:00:00
+----------------------------------------------------------
+
+24/53 Testing: SyntheticRegression
+24/53 Test: SyntheticRegression
+Command: "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3" "/workspace/scratch/28038873ca11/MotionCorr-fused-sums/tests/test_synthetic_regression.py" "--binary" "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr"
+Directory: /workspace/scratch/28038873ca11/build-fused-sums
+"SyntheticRegression" start time: Oct 14 23:43 WEST
+Output:
+----------------------------------------------------------
+Results for --j 1 vs Expected Old Baseline:
+  Image Max Pixel Difference: 0.000000e+00
+  Image RMSE:                 0.000000e+00
+  Shift Max Difference (px):  0.000000e+00
+  Shift RMSD (px):            0.000000e+00
+Results for --j 4 vs Expected Old Baseline:
+  Image Max Pixel Difference: 0.000000e+00
+  Image RMSE:                 0.000000e+00
+  Shift Max Difference (px):  0.000000e+00
+  Shift RMSD (px):            0.000000e+00
+
+SUCCESS: All synthetic regression tests passed with bit-for-bit identity!
+<end of output>
+Test time =   2.89 sec
+----------------------------------------------------------
+Test Passed.
+"SyntheticRegression" end time: Oct 14 23:43 WEST
+"SyntheticRegression" time elapsed: 00:00:02
+----------------------------------------------------------
+
+31/53 Testing: RunnerLateBin
+31/53 Test: RunnerLateBin
+Command: "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3" "/workspace/scratch/28038873ca11/MotionCorr-fused-sums/tests/test_runner_contract.py" "--binary" "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr" "--helper" "/workspace/scratch/28038873ca11/build-fused-sums/runner_numerics" "--case" "late_bin"
+Directory: /workspace/scratch/28038873ca11/build-fused-sums
+"RunnerLateBin" start time: Oct 14 23:43 WEST
+Output:
+----------------------------------------------------------
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS runner late_bin
+<end of output>
+Test time =   4.03 sec
+----------------------------------------------------------
+Test Passed.
+"RunnerLateBin" end time: Oct 14 23:43 WEST
+"RunnerLateBin" time elapsed: 00:00:04
+----------------------------------------------------------
+
+32/53 Testing: RunnerExportedUnits
+32/53 Test: RunnerExportedUnits
+Command: "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3" "/workspace/scratch/28038873ca11/MotionCorr-fused-sums/tests/test_runner_contract.py" "--binary" "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr" "--helper" "/workspace/scratch/28038873ca11/build-fused-sums/runner_numerics" "--case" "exported_units"
+Directory: /workspace/scratch/28038873ca11/build-fused-sums
+"RunnerExportedUnits" start time: Oct 14 23:43 WEST
+Output:
+----------------------------------------------------------
+PASS serialized units and unchanged runtime model
+PASS runner exported_units
+<end of output>
+Test time =   0.23 sec
+----------------------------------------------------------
+Test Passed.
+"RunnerExportedUnits" end time: Oct 14 23:43 WEST
+"RunnerExportedUnits" time elapsed: 00:00:00
+----------------------------------------------------------
+
+39/53 Testing: StageProfile
+39/53 Test: StageProfile
+Command: "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3" "/workspace/scratch/28038873ca11/MotionCorr-fused-sums/tests/test_stage_profile.py" "--binary" "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr"
+Directory: /workspace/scratch/28038873ca11/build-fused-sums
+"StageProfile" start time: Oct 14 23:43 WEST
+Output:
+----------------------------------------------------------
+ok   both runs exit 0
+ok   same product inventory (4 files)
+ok   identical corrected_micrographs.star
+ok   identical workspace/scratch/28038873ca11/MotionCorr-fused-sums/test-data/synthetic/synthetic_movie.mrc
+ok   identical workspace/scratch/28038873ca11/MotionCorr-fused-sums/test-data/synthetic/synthetic_movie.star
+ok   identical workspace/scratch/28038873ca11/MotionCorr-fused-sums/test-data/synthetic/synthetic_movie_noDW.mrc
+ok   one movie and one process record
+ok   stages tile the movie (266.054 vs 266.054 ms)
+ok   all expected stages in order: ['setup', 'read gain', 'session and device ingest', 'host read movie', 'allocate host sum', 'gain and sum', 'hot pixels', 'fix defects', 'release preprocessing', 'global fft', 'power spectrum', 'global alignment', 'allocate reconstruction', 'global ifft', 'patch alignment', 'fit polynomial', 'release alignment', 'unweighted sums', 'dose weighting', 'movie teardown', 'submit model and plot']
+ok   host read movie contains its own work (host read movie/READ_MOVIE: 5.218 of 5.224 ms)
+ok   global fft contains its own work (global fft/GLOBAL_FFT: 15.365 of 15.373 ms)
+ok   global alignment contains its own work (global alignment/GLOBAL_ALIGNMENT: 15.984 of 15.986 ms)
+ok   patch alignment contains its own work (patch alignment/PATCH_ALIGN: 69.644 of 106.033 ms)
+ok   dose weighting contains its own work (dose weighting/DOSE_WEIGHTING: 60.812 of 60.853 ms)
+ok   catch-all stages stay small (3.627 of 266.054 ms)
+ok   stage page faults sum to the movie total
+ok   every sub-stage is keyed under a top-level stage
+ok   non-negative stage walls
+ok   sub-stages recorded
+ok   process record consistent
+ok   writer thread tasks recorded
+ok   mid-stage failure recorded with its open stage closed (['release alignment', 'unweighted sums', 'dose weighting'])
+ok   process record written after a mid-stage failure
+ok   job with an unreadable movie fails
+ok   both movies recorded, failed one ok=false ([(0, True), (1, False)])
+ok   process record written on a failed job
+ok   failed-job movie 0 stages still tile its wall
+ok   failed-job movie 1 stages still tile its wall
+ok   unwritable --profile path fails with a named error
+ok   --profile refuses an existing input file
+ok   --profile refuses an symlink to an input
+ok   input reached through --profile is unchanged
+ok   an existing profile is not truncated
+ok   a profile write failure after open is reported by name
+ok   device-timing arm plain exits 0
+ok   device-timing arm timed exits 0
+ok   timed profile still records the movie's stages
+ok   device-timing arm untimed exits 0
+ok   untimed profile still records the movie's stages
+ok   process record names the device timing mode ({'timed': 'on', 'untimed': 'off'})
+ok   an invalid --profile_device_timing value fails with a named error
+PASS
+<end of output>
+Test time =   3.30 sec
+----------------------------------------------------------
+Test Passed.
+"StageProfile" end time: Oct 14 23:43 WEST
+"StageProfile" time elapsed: 00:00:03
+----------------------------------------------------------
+
+40/53 Testing: RunnerModelParser
+40/53 Test: RunnerModelParser
+Command: "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3" "/workspace/scratch/28038873ca11/MotionCorr-fused-sums/tests/test_runner_contract.py" "--binary" "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr" "--helper" "/workspace/scratch/28038873ca11/build-fused-sums/runner_numerics" "--case" "model_parser"
+Directory: /workspace/scratch/28038873ca11/build-fused-sums
+"RunnerModelParser" start time: Oct 14 23:43 WEST
+Output:
+----------------------------------------------------------
+duplicate rejected
+nonfinite rejected
+truncated rejected
+negative_index rejected
+trailing rejected
+invalid_index rejected
+missing_coefficient rejected
+legacy empty trailing string preserved
+PASS runner model_parser
+<end of output>
+Test time =   0.26 sec
+----------------------------------------------------------
+Test Passed.
+"RunnerModelParser" end time: Oct 14 23:43 WEST
+"RunnerModelParser" time elapsed: 00:00:00
+----------------------------------------------------------
+
+41/53 Testing: MicrographModelBounds
+41/53 Test: MicrographModelBounds
+Command: "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3" "/workspace/scratch/28038873ca11/MotionCorr-fused-sums/tests/test_micrograph_model_bounds.py" "--binary" "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr" "--helper" "/workspace/scratch/28038873ca11/build-fused-sums/runner_numerics"
+Directory: /workspace/scratch/28038873ca11/build-fused-sums
+"MicrographModelBounds" start time: Oct 14 23:43 WEST
+Output:
+----------------------------------------------------------
+PASS 7 valid and 11 malformed saved-EER parser/completion controls; decoding unrun
+PASS 38 malformed saved models; sparse, fractional, mask and round-trip controls
+PASS actual resume repairs invalid hot-pixel records; valid resume is unchanged
+<end of output>
+Test time =   3.17 sec
+----------------------------------------------------------
+Test Passed.
+"MicrographModelBounds" end time: Oct 14 23:43 WEST
+"MicrographModelBounds" time elapsed: 00:00:03
+----------------------------------------------------------
+
+42/53 Testing: RunnerInterpolateShifts
+42/53 Test: RunnerInterpolateShifts
+Command: "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3" "/workspace/scratch/28038873ca11/MotionCorr-fused-sums/tests/test_runner_contract.py" "--binary" "/workspace/scratch/28038873ca11/build-fused-sums/motioncorr" "--case" "interpolate_shifts"
+Directory: /workspace/scratch/28038873ca11/build-fused-sums
+"RunnerInterpolateShifts" start time: Oct 14 23:43 WEST
+Output:
+----------------------------------------------------------
+PASS runner interpolate_shifts
+<end of output>
+Test time =   1.58 sec
+----------------------------------------------------------
+Test Passed.
+"RunnerInterpolateShifts" end time: Oct 14 23:44 WEST
+"RunnerInterpolateShifts" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Oct 14 23:44 WEST

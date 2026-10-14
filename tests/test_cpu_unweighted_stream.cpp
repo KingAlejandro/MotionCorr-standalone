@@ -5,25 +5,7 @@
 #include <sstream>
 #include <stdexcept>
 
-// Exercise both production entry points: the former full-stack interpolation
-// remains the independent reference for the bounded streaming caller.
-struct MotioncorrRunnerTestAccess {
-    static void stream(MotioncorrRunner &r, Image<float> &sum, Image<float> *even,
-                       Image<float> *odd, std::vector<Image<float>> &frames,
-                       MotionModel *model, std::ostream &log) {
-        r.sumUnweightedFrames(sum, even, odd, frames, model, log);
-    }
-    static void materialize(MotioncorrRunner &r, std::vector<Image<float>> &out,
-                            std::vector<Image<float>> &frames, MotionModel *model,
-                            std::ostream &log, int offset = 0) {
-        r.realSpaceInterpolation_withoutsum(out, frames, model, log, offset);
-    }
-    static void direct(MotioncorrRunner &r, Image<float> &sum,
-                       std::vector<Image<float>> &frames, MotionModel *model,
-                       std::ostream &log) {
-        r.realSpaceInterpolation(sum, frames, model, log);
-    }
-};
+#include "cpu_separate_sum_reference.h"
 
 #ifdef MOTIONCORR_ALLOCATION_WITNESS
 namespace {
@@ -94,8 +76,9 @@ int main() {
         polynomial.coeffY(15) = 0.017;
         GeneralModel general;
         bool rounding_witness = false, time_witness = false;
-        for (int count : {7, 32}) for (int threads : {1, 4})
-        for (int nx : {20, 64}) for (bool split : {false, true})
+        int cases = 0;
+        for (int count : {1, 2, 7, 32}) for (int threads : {1, 4})
+        for (int nx : {20, 64, 65}) for (int split : {0, 1, 2, 3})
         for (MotionModel *model : {static_cast<MotionModel *>(nullptr),
                                   static_cast<MotionModel *>(&polynomial),
                                   static_cast<MotionModel *>(&general)}) {
@@ -125,13 +108,14 @@ int main() {
                 // Former caller's ascending frame additions, including float stores.
                 for (int f = 0; f < count; ++f) for (int n = 0; n < nx * ny; ++n) {
                     expected().data[n] += aligned[f]().data[n];
-                    if (split) (f % 2 ? expected_odd : expected_even)().data[n] += aligned[f]().data[n];
+                    if ((f % 2 ? split & 2 : split & 1))
+                        (f % 2 ? expected_odd : expected_even)().data[n] += aligned[f]().data[n];
                 }
             }
             const size_t old_peak = stop_allocations();
             start_allocations(frame_bytes);
-            MotioncorrRunnerTestAccess::stream(runner, actual, split ? &even : nullptr,
-                                               split ? &odd : nullptr, frames, model, stream_log);
+            MotioncorrRunnerTestAccess::stream(runner, actual, split & 1 ? &even : nullptr,
+                                               split & 2 ? &odd : nullptr, frames, model, stream_log);
             const size_t new_peak = stop_allocations();
             require(identical(expected, actual), "stream changed corrected pixels");
             require(identical(expected_even, even) && identical(expected_odd, odd),
@@ -144,6 +128,17 @@ int main() {
             require(old_peak == count * frame_bytes, "full-stack allocation control not witnessed");
             require(new_peak == frame_bytes, "stream scratch exceeds one frame");
 #endif
+            Image<float> separate, separate_even, separate_odd;
+            for (auto *image : {&separate, &separate_even, &separate_odd})
+                (*image)().initZeros(ny, nx);
+            std::ostringstream separate_log;
+            MotioncorrRunnerTestAccess::separate(runner, separate,
+                split & 1 ? &separate_even : nullptr, split & 2 ? &separate_odd : nullptr,
+                frames, model, separate_log);
+            require(identical(separate, actual) && identical(separate_even, even) &&
+                    identical(separate_odd, odd), "fused scan differs from frozen #178");
+            require(separate_log.str() == stream_log.str(), "fused scan changed progress output");
+            ++cases;
             if (model) {
                 MotioncorrRunnerTestAccess::direct(runner, direct, frames, model, extra_log);
                 rounding_witness |= !identical(expected, direct);
@@ -157,7 +152,7 @@ int main() {
         }
         require(rounding_witness, "fixture cannot reject fused interpolation/add rounding changes");
         require(time_witness, "fixture cannot reject resetting streamed model time to zero");
-        std::cout << "stream/reference pixels, splits, model time, float rounding and scratch bound PASS\n";
+        std::cout << cases << " fused/separate/full-stack cases, parity, model time, float rounding and scratch bound PASS\n";
         return 0;
     } catch (const std::exception &error) {
         std::cerr << error.what() << '\n'; return 1;

@@ -4108,14 +4108,20 @@ void MotioncorrRunner::sumUnweightedFrames(Image<float> &sum, Image<float> *even
         // Model time is the selected movie's original relative frame index,
         // not the one-element view's index zero.
         realSpaceInterpolation_withoutsum(aligned, view, model, logfile, iframe);
-        #pragma omp parallel for num_threads(n_threads)
-        FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(sum()) {
-            DIRECT_MULTIDIM_ELEM(sum(), n) += DIRECT_MULTIDIM_ELEM(aligned[0](), n);
-        }
         Image<float> *split = (iframe % 2 == 0) ? even : odd;
         if (split) {
-            FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY((*split)()) {
-                DIRECT_MULTIDIM_ELEM((*split)(), n) += DIRECT_MULTIDIM_ELEM(aligned[0](), n);
+            // Each pixel belongs to one worker. Reuse its stored float in
+            // both products while retaining ascending additions per frame.
+            #pragma omp parallel for num_threads(n_threads)
+            FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(sum()) {
+                const float pixel = DIRECT_MULTIDIM_ELEM(aligned[0](), n);
+                DIRECT_MULTIDIM_ELEM(sum(), n) += pixel;
+                DIRECT_MULTIDIM_ELEM((*split)(), n) += pixel;
+            }
+        } else {
+            #pragma omp parallel for num_threads(n_threads)
+            FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(sum()) {
+                DIRECT_MULTIDIM_ELEM(sum(), n) += DIRECT_MULTIDIM_ELEM(aligned[0](), n);
             }
         }
     }

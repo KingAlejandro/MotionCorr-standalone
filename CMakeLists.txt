@@ -170,6 +170,9 @@ if(BUILD_TESTING)
             "LINKER:--wrap=fftw_malloc" "LINKER:--wrap=fftw_free")
     endif()
     add_test(NAME CpuUnweightedStream COMMAND cpu_unweighted_stream)
+    # Timed harness has no allocation wrapper interposition.
+    add_executable(cpu_fused_sums_bench tests/bench_cpu_fused_sums.cpp)
+    target_link_libraries(cpu_fused_sums_bench PRIVATE motioncorr_core)
     # Device-free control for the issue #69 patch-retry shift-state contract.
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)

@@ -4529,9 +4529,15 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	const int nfy_half = nfy / 2;
 
 	Fref.reshape(ccf_nfy, ccf_nfx);
+	// Bind each plan to its worker's stable, FFTW-aligned arrays. Fccs is
+	// disposable: every element is overwritten before the next inverse.
+	// Keep plans inside this call so geometry changes cannot reuse stale storage.
+	std::vector<NewFFT::FloatPlan> ccf_plans;
+	ccf_plans.reserve(n_threads);
 	for (int i = 0; i < n_threads; i++) {
 		Iccs[i]().reshape(ccf_ny, ccf_nx);
 		Fccs[i].reshape(Fref);
+		ccf_plans.emplace_back(Iccs[i](), Fccs[i]);
 	}
 
 #ifdef DEBUG
@@ -4588,7 +4594,8 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			RCTOC(TIMING_CCF_CALC);
 
 			RCTIC(TIMING_CCF_IFFT);
-			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
+			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid](),
+				ccf_plans[tid], NewFFT::FwdOnly, false);
 			RCTOC(TIMING_CCF_IFFT);
 
 			RCTIC(TIMING_CCF_FIND_MAX);

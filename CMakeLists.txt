@@ -266,6 +266,38 @@ if(BUILD_TESTING)
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    # GNU/ELF linker wrappers witness actual runner plan ownership and lifetime.
+    # The mutant restores the old per-frame convenience inverse; it must fail
+    # the reuse witness. Ordinary numerical tests remain portable to macOS.
+    if(UNIX AND NOT APPLE)
+        set(_ccf_wraps "LINKER:--wrap=fftwf_plan_dft_c2r"
+            "LINKER:--wrap=fftwf_execute_dft_c2r" "LINKER:--wrap=fftwf_destroy_plan")
+        add_executable(ccf_plan_witness src/apps/run_motioncorr.cpp tests/ccf_plan_witness.cpp)
+        target_link_libraries(ccf_plan_witness PRIVATE motioncorr_core)
+        target_link_options(ccf_plan_witness PRIVATE ${_ccf_wraps})
+        set(_ccf_runner "${CMAKE_CURRENT_SOURCE_DIR}/src/motioncorr_runner.cpp")
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_ccf_runner}")
+        file(READ "${_ccf_runner}" _ccf_source)
+        set(_ccf_from "ccf_plans[tid], NewFFT::FwdOnly, false);")
+        string(FIND "${_ccf_source}" "${_ccf_from}" _ccf_first)
+        string(FIND "${_ccf_source}" "${_ccf_from}" _ccf_last REVERSE)
+        if(_ccf_first EQUAL -1 OR NOT _ccf_first EQUAL _ccf_last)
+            message(FATAL_ERROR "CCF no-reuse mutant target missing or not unique")
+        endif()
+        string(REPLACE "${_ccf_from}" "NewFFT::FwdOnly, true);" _ccf_source "${_ccf_source}")
+        file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/mutants/ccf_no_reuse.cpp" "${_ccf_source}")
+        add_executable(ccf_plan_no_reuse src/apps/run_motioncorr.cpp
+            tests/ccf_plan_witness.cpp "${CMAKE_CURRENT_BINARY_DIR}/mutants/ccf_no_reuse.cpp")
+        target_compile_definitions(ccf_plan_no_reuse PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG)
+        target_link_libraries(ccf_plan_no_reuse PRIVATE motioncorr_core)
+        target_link_options(ccf_plan_no_reuse PRIVATE ${_ccf_wraps})
+        add_test(NAME CcfPlanLifetime COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_ccf_plan_lifetime.py --binary $<TARGET_FILE:ccf_plan_witness>)
+        add_test(NAME CcfPlanNoReuseControl COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_ccf_plan_lifetime.py --binary $<TARGET_FILE:ccf_plan_no_reuse> --negative)
+        set_tests_properties(CcfPlanLifetime CcfPlanNoReuseControl PROPERTIES TIMEOUT 120)
+    endif()
+
     add_test(NAME NvcompAcceptanceDiagnostics
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_nvcomp_acceptance_diagnostics.py)
     # Profiling kit (docs/profiling.md): Nsight SQLite queries and derived

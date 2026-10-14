@@ -1,0 +1,37 @@
+Source-bound benchmark executable: /workspace/scratch/28038873ca11/build-xcoords/cpu_interpolation_xcoords
+0000000000066b50 <reference_realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float>, std::allocator<Image<float> > >&, std::vector<Image<float>, std::allocator<Image<float> > >&, ThirdOrderPolynomialModel&, std::ostream&, int) [clone ._omp_fn.0]>:
+static scalar/vector division instruction sites: 3
+   66cc3:	48 83 7c 24 30 01    	cmpq   $0x1,0x30(%rsp)
+   66cc9:	66 41 0f 28 e9       	movapd %xmm9,%xmm5
+   66cce:	f2 0f 5e 6c 24 70    	divsd  0x70(%rsp),%xmm5
+   66cd4:	f2 41 0f 5c ea       	subsd  %xmm10,%xmm5
+   66cd9:	f2 0f 59 fd          	mulsd  %xmm5,%xmm7
+   66df1:	f2 0f 2a cf          	cvtsi2sd %edi,%xmm1
+   66df5:	66 0f 28 d9          	movapd %xmm1,%xmm3
+   66df9:	f2 0f 5e 5c 24 20    	divsd  0x20(%rsp),%xmm3
+   66dff:	f2 41 0f 5c da       	subsd  %xmm10,%xmm3
+   66e04:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+   67063:	f2 0f 2a cf          	cvtsi2sd %edi,%xmm1
+   67067:	66 0f 28 d9          	movapd %xmm1,%xmm3
+   6706b:	f2 0f 5e 5c 24 20    	divsd  0x20(%rsp),%xmm3
+   67071:	f2 41 0f 5c da       	subsd  %xmm10,%xmm3
+   67076:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+
+00000000000671e0 <reference_realSpaceInterpolation_ThirdOrderPolynomial(Image<float>&, std::vector<Image<float>, std::allocator<Image<float> > >&, ThirdOrderPolynomialModel&, std::ostream&, int) [clone ._omp_fn.0]>:
+static scalar/vector division instruction sites: 3
+   67353:	48 83 7c 24 30 01    	cmpq   $0x1,0x30(%rsp)
+   67359:	66 41 0f 28 e9       	movapd %xmm9,%xmm5
+   6735e:	f2 0f 5e 6c 24 70    	divsd  0x70(%rsp),%xmm5
+   67364:	f2 41 0f 5c ea       	subsd  %xmm10,%xmm5
+   67369:	f2 0f 59 fd          	mulsd  %xmm5,%xmm7
+   67481:	f2 0f 2a cf          	cvtsi2sd %edi,%xmm1
+   67485:	66 0f 28 d9          	movapd %xmm1,%xmm3
+   67489:	f2 0f 5e 5c 24 20    	divsd  0x20(%rsp),%xmm3
+   6748f:	f2 41 0f 5c da       	subsd  %xmm10,%xmm3
+   67494:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+   676f3:	f2 0f 2a cf          	cvtsi2sd %edi,%xmm1
+   676f7:	66 0f 28 d9          	movapd %xmm1,%xmm3
+   676fb:	f2 0f 5e 5c 24 20    	divsd  0x20(%rsp),%xmm3
+   67701:	f2 41 0f 5c da       	subsd  %xmm10,%xmm3
+   67706:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+

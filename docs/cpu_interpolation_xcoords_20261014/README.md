@@ -63,11 +63,29 @@ reset are outside timing, as are full bitwise comparisons after every pair.
 It times either the summed reconstruction or the materialized-frame path:
 
 ```sh
-OMP_DYNAMIC=FALSE OMP_PROC_BIND=close OMP_PLACES=cores OMP_WAIT_POLICY=PASSIVE \
-  taskset -c 0 build/cpu_interpolation_xcoords --bench 3710 3838 24 1 6 sum affinity-confirmed
-OMP_DYNAMIC=FALSE OMP_PROC_BIND=close OMP_PLACES=cores OMP_WAIT_POLICY=PASSIVE \
-  taskset -c 0-3 build/cpu_interpolation_xcoords --bench 3710 3838 24 4 6 sum affinity-confirmed
+OMP_WAIT_POLICY=PASSIVE python3 docs/cpu_interpolation_xcoords_20261014/run_kernel.py \
+  --expected-host small-refmac-machine --cpus-j1 "$J1_CPUS" --cpus-j4 "$J4_CPUS" \
+  --binary /absolute/build/cpu_interpolation_xcoords --out /absolute/evidence/cpu64-kernel
 ```
+
+Select both CPU lists from the host's actual topology and allowed affinity before
+running. `--cpus-j1` requires exactly one CPU; `--cpus-j4` requires four distinct
+CPUs. Ranges and comma-separated CPU indices are supported. The driver rejects a
+hostname mismatch, malformed/duplicate CPU lists, or CPUs outside its allowed
+affinity **before creating output or starting a workload**. The expected hostname
+defaults to `small-refmac-machine`; a different venue requires an explicit
+`--expected-host` naming that observed host. Each workload's taskset affinity is
+queried and checked before measurement. No fixed CPU 0–3 assumption remains.
+
+The portable `run_products.py` adapter accepts the same venue arguments plus
+`--base`, `--candidate`, `--data`, and a new `--out` directory. It directly runs the
+agreed matrix using the existing strict product comparator. It does not call
+#179's older harness, whose fixed CPU mask would be unsafe to reuse unchecked on
+a different host. The matrix is three alternating synthetic local j4 pairs plus
+one warmup pair, and one identity pair each for synthetic global j1/global j4/local
+j1 and tutorial local j4 (DW, save-noDW, even/odd). Single-pair wall and RSS values
+are diagnostics. Three synthetic pairs are also insufficient for a movie-speed
+verdict.
 
 Use a global benchmark lock and no overlapping build/test/movie timing. Record
 CPU mask, host/compiler/flags/input/source/binary hashes and raw pairs. The marker
@@ -92,6 +110,77 @@ loop has one y division and two static sites for x division (compiler-unrolled
 copies). The candidate retains the y division and removes both x division sites.
 This confirms generated-code mechanism, not runtime benefit.
 
-The full CTest suite, complete movie identity/timing, other CPU architectures and
-CUDA compilation/execution are UNRUN for this independent branch. No performance
-result is claimed yet.
+Draft PR #181 publishes the same tested tree as
+`cffe054a8d178c2788995fa7c9a3763e514f949e`. CI run 513
+(`38649220847`) passed native Linux's 53/53 CTests, the known-motion aggregate,
+canonical fixture checks, smoke checks and failure controls. CUDA compilation
+also passed; native GPU execution was not run. The complete local CTest suite
+and other CPU architectures remain UNRUN here. The container-only kernel and
+whole-product results below supplement that unchanged production code.
+
+## Measurement venue
+
+All timing in this report is from container `442a2f5ea6ec`, using an exposed Intel
+Xeon Platinum 8573C, nine visible CPU IDs (0–8), an 8-CPU quota, and an 8 GiB
+memory limit. Both arms used CPU mask `0` at j1 and `0-3` at j4. OpenMP waiting was
+PASSIVE, dynamic teams were disabled, and binding used `close` / `cores`.
+
+CPU64 timing is **UNRUN**. Container and VM results are separate; no cpu64
+performance claim is made. Hostname and CPU-mask checks in the portable drivers
+prevent silently substituting another venue. Physical-host exclusivity and
+per-PID `/proc` ownership are not certified in this container.
+
+## Container measurements
+
+The production code remains `cffe054`; the product receipt pins its portable
+measurement driver by SHA-256 and records the local evidence commit. Both arms use GCC 13.3.0, Release `-O3 -DNDEBUG`, identical
+FFTW/system libraries and input hashes, with no fast-math. The matching host has
+an 8-CPU quota and 8 GiB memory limit; affinity, OpenMP waiting/binding and binary
+hashes are recorded in the receipts. Physical-host exclusivity and per-PID
+`/proc` ownership are not certified. This is bounded container evidence, not a
+clean cpu64 profiling verdict.
+
+All 24 measured kernel-pair comparisons, and their excluded warmup comparisons,
+had identical output bits. Medians are reference/candidate; the intervals below
+are descriptive 96.875% sign-median intervals from six paired differences within
+one process, not whole-job confidence intervals:
+
+- 3710 x 3838 x 24, summed, j1: **5.924 / 4.501 s**; paired median -1.212 s,
+  interval [-1.813, +0.824] s. Five of six pairs improved; the large-geometry
+  speed verdict remains unresolved.
+- Same geometry, summed, j4: **4.194 / 3.339 s**; paired median -0.548 s,
+  interval [-1.453, +6.372] s. The large positive difference is retained.
+  Speed verdict remains unresolved.
+- 512 x 512 x 16, materialized frames, j1: **0.09359 / 0.06978 s**;
+  all six pairs improved, interval [-0.03839, -0.00665] s. This supports an
+  improvement for this small, within-process kernel case only.
+- Same small geometry, materialized frames, j4: **0.05681 / 0.04601 s**;
+  interval [-0.02013, +0.06080] s. Speed verdict remains unresolved.
+
+`kernel/` keeps every raw measured pair and stderr record. No outlier was removed
+and no record was pooled with the dose-weighting experiment or any VM result.
+
+The complete product matrix passed **8 strict tree comparisons**, with
+**42 canonical MRC/STAR file pairs** (26 MRC pairs). The existing comparator
+normalizes only its documented writer timestamp/root fields; PDF files are
+inventoried, and timing-bearing logs are excluded. Full raw run logs, commands,
+input/binary hashes, wall/user/sys measurements, RSS and canonical hashes
+are under `products-container/`.
+
+Three measured synthetic local j4 pairs have reference/candidate wall medians
+1.0505 / 0.9364 s and paired differences [-0.3905, -0.1036, +0.0601] s. Three
+pairs with mixed signs cannot establish a job-speed improvement. The global
+j1/global j4/local j1 checks have one pair each and establish identity only:
+reference/candidate diagnostic wall values were 0.6318 / 0.5458 s, 0.5096 /
+0.5391 s, and 1.0868 / 0.9581 s respectively. Every individual run, including the
+excluded synthetic warmup pair, is retained in the raw receipt.
+
+The tutorial 5 x 5 j4 DW/save-noDW/even-odd identity pair was **46.214 / 41.591 s**.
+This is a single diagnostic observation, **not a measured movie-speed verdict**.
+Peak RSS was 4,601,288 / 4,600,804 KiB, both about 4.388 GiB. The extra cache has
+not established a whole-movie peak-RSS reduction.
+
+The numerical contract and removal of repeated x division are established.
+The large-geometry kernel and whole-movie speed gains remain unresolved. Keep
+this as a draft experiment pending a repeatable, matching-host performance win.
+Combined runs with #178, #179 or #180, and all cpu64 timing, remain UNRUN.

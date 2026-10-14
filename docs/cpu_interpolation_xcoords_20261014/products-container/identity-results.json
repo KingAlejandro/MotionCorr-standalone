@@ -1,0 +1,1093 @@
+{
+  "source": "f80fde0df3456a6872fb4e4aa89f8759144cd33a",
+  "driver_sha256": "b22031a34176add35ed5b6a3d8af8f10c2c1d5149d9b990d2c35508a7e1259da",
+  "venue": {
+    "expected_host": "442a2f5ea6ec",
+    "actual_host": "442a2f5ea6ec",
+    "allowed_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "requested_affinity": {
+      "1": [
+        0
+      ],
+      "4": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "masks": {
+      "1": "0",
+      "4": "0,1,2,3"
+    },
+    "scope": "Hostname and allowed CPU lists verified; this does not certify host-wide workload isolation"
+  },
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "binaries": {
+    "base": {
+      "path": "/workspace/scratch/28038873ca11/build-layout-reference/motioncorr",
+      "sha256": "373f61b5f45dcb14a79129517ff72c90f253dec4fbd5cbd4acb4e90a53bead25"
+    },
+    "candidate": {
+      "path": "/workspace/scratch/28038873ca11/build-xcoords/motioncorr",
+      "sha256": "3180165cd5d43016bbf29ad5b44796c57f53ea9817cc9893ee7c7bd9835e60ce"
+    }
+  },
+  "inputs": {
+    "synthetic_512x512_16frames.mrcs": "36e1a91b25a54d958e0ff78be87e55fa9777aebbd36d145d415bbc7837b8c8a1",
+    "tutorial.tiff": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "gain.mrc": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1"
+  },
+  "environment": {
+    "OMP_DYNAMIC": "false",
+    "OMP_PROC_BIND": "close",
+    "OMP_PLACES": "cores",
+    "OMP_WAIT_POLICY": "PASSIVE",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "scope": "identity controls with diagnostic spawn-to-reap wall and wait4 rusage",
+  "performance_verdict": "unresolved: three synthetic pairs or one identity pair, not a movie-speed claim",
+  "limitation": "Cooperating benchmark lock and validated CPU masks do not certify host-wide workload isolation; local-container /proc ownership is not certified",
+  "runs": [
+    {
+      "case": "synthetic-patch5-j4",
+      "rep": -1,
+      "warmup": true,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0,1,2,3",
+        "/workspace/scratch/28038873ca11/build-layout-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r-1-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "cpu_mask": "0,1,2,3",
+      "verified_self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "wall_diagnostic_seconds": 1.1149590509994596,
+      "user_seconds": 1.276921,
+      "sys_seconds": 0.46712499999999996,
+      "peak_rss_kib": 67576
+    },
+    {
+      "case": "synthetic-patch5-j4",
+      "rep": -1,
+      "warmup": true,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0,1,2,3",
+        "/workspace/scratch/28038873ca11/build-xcoords/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r-1-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "cpu_mask": "0,1,2,3",
+      "verified_self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "wall_diagnostic_seconds": 1.0139840900010313,
+      "user_seconds": 1.241391,
+      "sys_seconds": 0.296657,
+      "peak_rss_kib": 67464
+    },
+    {
+      "case": "synthetic-patch5-j4",
+      "rep": 0,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0,1,2,3",
+        "/workspace/scratch/28038873ca11/build-layout-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r0-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "cpu_mask": "0,1,2,3",
+      "verified_self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "wall_diagnostic_seconds": 1.32685171599951,
+      "user_seconds": 1.5661939999999999,
+      "sys_seconds": 0.365209,
+      "peak_rss_kib": 68708
+    },
+    {
+      "case": "synthetic-patch5-j4",
+      "rep": 0,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0,1,2,3",
+        "/workspace/scratch/28038873ca11/build-xcoords/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r0-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "cpu_mask": "0,1,2,3",
+      "verified_self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "wall_diagnostic_seconds": 0.9363849300025322,
+      "user_seconds": 1.185786,
+      "sys_seconds": 0.248157,
+      "peak_rss_kib": 67624
+    },
+    {
+      "case": "synthetic-patch5-j4",
+      "rep": 1,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0,1,2,3",
+        "/workspace/scratch/28038873ca11/build-xcoords/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r1-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "cpu_mask": "0,1,2,3",
+      "verified_self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "wall_diagnostic_seconds": 0.812405585002125,
+      "user_seconds": 1.111609,
+      "sys_seconds": 0.173676,
+      "peak_rss_kib": 68728
+    },
+    {
+      "case": "synthetic-patch5-j4",
+      "rep": 1,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0,1,2,3",
+        "/workspace/scratch/28038873ca11/build-layout-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r1-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "cpu_mask": "0,1,2,3",
+      "verified_self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "wall_diagnostic_seconds": 0.9160337290013558,
+      "user_seconds": 1.21018,
+      "sys_seconds": 0.188404,
+      "peak_rss_kib": 67668
+    },
+    {
+      "case": "synthetic-patch5-j4",
+      "rep": 2,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0,1,2,3",
+        "/workspace/scratch/28038873ca11/build-layout-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r2-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "cpu_mask": "0,1,2,3",
+      "verified_self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "wall_diagnostic_seconds": 1.0504928619993734,
+      "user_seconds": 1.334696,
+      "sys_seconds": 0.243726,
+      "peak_rss_kib": 67616
+    },
+    {
+      "case": "synthetic-patch5-j4",
+      "rep": 2,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0,1,2,3",
+        "/workspace/scratch/28038873ca11/build-xcoords/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r2-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "cpu_mask": "0,1,2,3",
+      "verified_self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "wall_diagnostic_seconds": 1.110587705999933,
+      "user_seconds": 1.3352140000000001,
+      "sys_seconds": 0.25015899999999996,
+      "peak_rss_kib": 66420
+    },
+    {
+      "case": "synthetic-patch1-j1",
+      "rep": 0,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-layout-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch1-j1/r0-base",
+        "--use_own",
+        "--j",
+        "1",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1"
+      ],
+      "rc": 0,
+      "cpu_mask": "0",
+      "verified_self_affinity": [
+        0
+      ],
+      "wall_diagnostic_seconds": 0.6318302740000945,
+      "user_seconds": 0.40745499999999996,
+      "sys_seconds": 0.219736,
+      "peak_rss_kib": 70592
+    },
+    {
+      "case": "synthetic-patch1-j1",
+      "rep": 0,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-xcoords/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch1-j1/r0-candidate",
+        "--use_own",
+        "--j",
+        "1",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1"
+      ],
+      "rc": 0,
+      "cpu_mask": "0",
+      "verified_self_affinity": [
+        0
+      ],
+      "wall_diagnostic_seconds": 0.5457636770006502,
+      "user_seconds": 0.41679499999999997,
+      "sys_seconds": 0.128096,
+      "peak_rss_kib": 71568
+    },
+    {
+      "case": "synthetic-patch1-j4",
+      "rep": 0,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0,1,2,3",
+        "/workspace/scratch/28038873ca11/build-layout-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch1-j4/r0-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1"
+      ],
+      "rc": 0,
+      "cpu_mask": "0,1,2,3",
+      "verified_self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "wall_diagnostic_seconds": 0.5095594129998062,
+      "user_seconds": 0.44615499999999997,
+      "sys_seconds": 0.181509,
+      "peak_rss_kib": 67540
+    },
+    {
+      "case": "synthetic-patch1-j4",
+      "rep": 0,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0,1,2,3",
+        "/workspace/scratch/28038873ca11/build-xcoords/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch1-j4/r0-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1"
+      ],
+      "rc": 0,
+      "cpu_mask": "0,1,2,3",
+      "verified_self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "wall_diagnostic_seconds": 0.5390706620019046,
+      "user_seconds": 0.457781,
+      "sys_seconds": 0.191511,
+      "peak_rss_kib": 66500
+    },
+    {
+      "case": "synthetic-patch5-j1",
+      "rep": 0,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-layout-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j1/r0-base",
+        "--use_own",
+        "--j",
+        "1",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "cpu_mask": "0",
+      "verified_self_affinity": [
+        0
+      ],
+      "wall_diagnostic_seconds": 1.086764334999316,
+      "user_seconds": 0.887767,
+      "sys_seconds": 0.18506799999999998,
+      "peak_rss_kib": 71636
+    },
+    {
+      "case": "synthetic-patch5-j1",
+      "rep": 0,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-xcoords/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j1/r0-candidate",
+        "--use_own",
+        "--j",
+        "1",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "cpu_mask": "0",
+      "verified_self_affinity": [
+        0
+      ],
+      "wall_diagnostic_seconds": 0.9581352309978683,
+      "user_seconds": 0.7648579999999999,
+      "sys_seconds": 0.192159,
+      "peak_rss_kib": 72620
+    },
+    {
+      "case": "tutorial-patch5-j4",
+      "rep": 0,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0,1,2,3",
+        "/workspace/scratch/28038873ca11/build-layout-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/tutorial-patch5-j4/r0-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "cpu_mask": "0,1,2,3",
+      "verified_self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "wall_diagnostic_seconds": 46.21396350500072,
+      "user_seconds": 123.018138,
+      "sys_seconds": 16.696241,
+      "peak_rss_kib": 4601288
+    },
+    {
+      "case": "tutorial-patch5-j4",
+      "rep": 0,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0,1,2,3",
+        "/workspace/scratch/28038873ca11/build-xcoords/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/xcoords-products-container/tutorial-patch5-j4/r0-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "cpu_mask": "0,1,2,3",
+      "verified_self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "wall_diagnostic_seconds": 41.590546658000676,
+      "user_seconds": 118.276427,
+      "sys_seconds": 9.393744,
+      "peak_rss_kib": 4600804
+    }
+  ],
+  "comparisons": [
+    {
+      "case": "synthetic-patch5-j4",
+      "rep": -1,
+      "warmup": true,
+      "root_a": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r-1-base",
+      "root_b": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r-1-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "case": "synthetic-patch5-j4",
+      "rep": 0,
+      "warmup": false,
+      "root_a": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r0-base",
+      "root_b": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r0-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "case": "synthetic-patch5-j4",
+      "rep": 1,
+      "warmup": false,
+      "root_a": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r1-base",
+      "root_b": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r1-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "case": "synthetic-patch5-j4",
+      "rep": 2,
+      "warmup": false,
+      "root_a": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r2-base",
+      "root_b": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j4/r2-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "case": "synthetic-patch1-j1",
+      "rep": 0,
+      "warmup": false,
+      "root_a": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch1-j1/r0-base",
+      "root_b": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch1-j1/r0-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 9,
+      "mrc_compared": 1,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "case": "synthetic-patch1-j4",
+      "rep": 0,
+      "warmup": false,
+      "root_a": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch1-j4/r0-base",
+      "root_b": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch1-j4/r0-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 9,
+      "mrc_compared": 1,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "case": "synthetic-patch5-j1",
+      "rep": 0,
+      "warmup": false,
+      "root_a": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j1/r0-base",
+      "root_b": "/workspace/scratch/28038873ca11/xcoords-products-container/synthetic-patch5-j1/r0-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "case": "tutorial-patch5-j4",
+      "rep": 0,
+      "warmup": false,
+      "root_a": "/workspace/scratch/28038873ca11/xcoords-products-container/tutorial-patch5-j4/r0-base",
+      "root_b": "/workspace/scratch/28038873ca11/xcoords-products-container/tutorial-patch5-j4/r0-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/tutorial.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    }
+  ]
+}

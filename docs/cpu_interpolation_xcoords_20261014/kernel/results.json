@@ -1,0 +1,202 @@
+{
+  "receipt": {
+    "source": "cffe054a8d178c2788995fa7c9a3763e514f949e",
+    "binary": "/workspace/scratch/28038873ca11/build-xcoords/cpu_interpolation_xcoords",
+    "binary_sha256": "25aff9a48a177c8d73d070a4c11af4657fcd1f400447c1cdf11ceca10d513796",
+    "wall_start_unix": 1792018173.9075363,
+    "parent_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "environment": {
+      "OMP_DYNAMIC": "FALSE",
+      "OMP_PROC_BIND": "close",
+      "OMP_PLACES": "cores",
+      "OMP_WAIT_POLICY": "PASSIVE",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    },
+    "warmups_per_arm": 1,
+    "pairs": 6,
+    "order": "AB,BA,AB,BA,AB,BA",
+    "reference": "frozen main116eb04 functions in the same executable",
+    "scope": "kernel only; includes candidate cache allocation/setup, excludes reset/bit comparison",
+    "isolation_limit": "cooperating lock only; no verified host-wide process inventory",
+    "measurement_host_class": "local container, not cpu64",
+    "exclude_from_cpu64_results": true,
+    "user_steering": "After this driver completed, user required all further timing on cpu64. All four configurations are retained as container-only diagnostics; no product driver or whole movie was started.",
+    "latest_user_venue_authorization": "Then just run in the container that\u2019s fine. Existing container-only records are authorized again; no rerun. CPU64 remains unmeasured and separate.",
+    "container_timing_authorized": true
+  },
+  "results": [
+    {
+      "name": "3710x3838x24-j1-sum",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-xcoords/cpu_interpolation_xcoords",
+        "--bench",
+        "3710",
+        "3838",
+        "24",
+        "1",
+        "6",
+        "sum",
+        "affinity-confirmed"
+      ],
+      "affinity": [
+        0
+      ],
+      "reference_median_seconds": 5.9240918995000005,
+      "candidate_median_seconds": 4.501035397,
+      "paired_deltas_seconds": [
+        -1.2879934290000001,
+        -0.9707392710000002,
+        -1.136808293,
+        -1.813270696,
+        0.8235733319999996,
+        -1.4499667760000001
+      ],
+      "paired_median_seconds": -1.212400861,
+      "paired_median_ci_96_875_percent_seconds": [
+        -1.813270696,
+        0.8235733319999996
+      ],
+      "paired_mad_scaled_seconds": 0.3552513494564999,
+      "all_pairs_faster": false,
+      "bitwise_equal": true,
+      "raw_sha256": "0ed6713f8818ebd3e3abc1a886797ad06494111c9faecef0e6814fe7d561f6ef"
+    },
+    {
+      "name": "3710x3838x24-j4-sum",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-xcoords/cpu_interpolation_xcoords",
+        "--bench",
+        "3710",
+        "3838",
+        "24",
+        "4",
+        "6",
+        "sum",
+        "affinity-confirmed"
+      ],
+      "affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_median_seconds": 4.194257501,
+      "candidate_median_seconds": 3.338930562,
+      "paired_deltas_seconds": [
+        -0.10143262499999972,
+        -1.45341684,
+        6.372057732,
+        2.243162013,
+        -0.9952900110000003,
+        -1.2745455759999995
+      ],
+      "paired_median_seconds": -0.548361318,
+      "paired_median_ci_96_875_percent_seconds": [
+        -1.45341684,
+        6.372057732
+      ],
+      "paired_mad_scaled_seconds": 1.2092380489139996,
+      "all_pairs_faster": false,
+      "bitwise_equal": true,
+      "raw_sha256": "47421b64ba22ba837d226c8a5cb7bbb3d38820c183dba68a859af966068927c2"
+    },
+    {
+      "name": "512x512x16-j1-frames",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-xcoords/cpu_interpolation_xcoords",
+        "--bench",
+        "512",
+        "512",
+        "16",
+        "1",
+        "6",
+        "frames",
+        "affinity-confirmed"
+      ],
+      "affinity": [
+        0
+      ],
+      "reference_median_seconds": 0.0935944165,
+      "candidate_median_seconds": 0.0697811685,
+      "paired_deltas_seconds": [
+        -0.014029838999999988,
+        -0.038393511000000005,
+        -0.03592746100000001,
+        -0.0066500670000000095,
+        -0.018095128000000002,
+        -0.021053433999999996
+      ],
+      "paired_median_seconds": -0.019574281,
+      "paired_median_ci_96_875_percent_seconds": [
+        -0.038393511000000005,
+        -0.0066500670000000095
+      ],
+      "paired_mad_scaled_seconds": 0.013690814692799999,
+      "all_pairs_faster": true,
+      "bitwise_equal": true,
+      "raw_sha256": "f337ac74d3598cd0c89f916b739c7b09d97675f4675db8c191f90f6e2fa025ce"
+    },
+    {
+      "name": "512x512x16-j4-frames",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-xcoords/cpu_interpolation_xcoords",
+        "--bench",
+        "512",
+        "512",
+        "16",
+        "4",
+        "6",
+        "frames",
+        "affinity-confirmed"
+      ],
+      "affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_median_seconds": 0.0568067875,
+      "candidate_median_seconds": 0.046009951,
+      "paired_deltas_seconds": [
+        -0.003002576000000007,
+        -0.005366871000000002,
+        -0.0029709849999999954,
+        -0.020132159000000004,
+        0.00016445899999999875,
+        0.06080423800000001
+      ],
+      "paired_median_seconds": -0.002986780500000001,
+      "paired_median_ci_96_875_percent_seconds": [
+        -0.020132159000000004,
+        0.06080423800000001
+      ],
+      "paired_mad_scaled_seconds": 0.004100374929000001,
+      "all_pairs_faster": false,
+      "bitwise_equal": true,
+      "raw_sha256": "9228ef10cd053f28cfd5117c6a2b8096b0f3b6e5024ebbd203e0b84a0cac065f"
+    }
+  ]
+}

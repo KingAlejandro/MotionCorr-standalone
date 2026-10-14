@@ -4026,9 +4026,11 @@ skip_fitting:
 
 			// Update real space images
 			RCTIC(TIMING_DW_IFFT);
+			// Fframes are not read again for this movie, so FFTW may destroy them
+			// instead of transforming a full-frame copy.
 			#pragma omp parallel for num_threads(n_threads)
 			for (int iframe = 0; iframe < n_frames; iframe++) {
-				NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
+				NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe](), NewFFT::FwdOnly, false);
 			}
 			RCTOC(TIMING_DW_IFFT);
 

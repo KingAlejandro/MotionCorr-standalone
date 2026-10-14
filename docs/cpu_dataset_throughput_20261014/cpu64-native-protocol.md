@@ -1,8 +1,7 @@
 # Native cpu64 throughput protocol
 
-This is the separate 64-core VM protocol. Container diagnostic timing has also
-been authorized, with explicit host labels; its results must not be pooled with
-this venue. Remote access is currently unavailable from this session, so this
+This is the separate 64-core VM protocol. Container diagnostic results must not
+be pooled with this venue. Remote access is currently unavailable from this session, so this
 native protocol is **unrun**. Require observed
 `hostname -s` to equal `small-refmac-machine` before building or running payloads.
 The archived container's 8 GiB preflight says nothing about this VM's capacity.
@@ -39,8 +38,13 @@ is a single-layout template; all `CPU64_*` values must be populated from the
 confirmed allocation and frozen manifest. `CPU64_LAUNCHER_ARGS` contains CPU
 worker count, disjoint masks, fixed union budget and matching OpenMP settings,
 for example `--workers 2 --no-witness --cpus '32-39;40-47' --cpu-budget 16
---omp-proc-bind close --omp-places cores` **only if that exact allocation was
+--worker-extra='--j 8' --worker-extra='--j 8' --omp-proc-bind close --omp-places
+cores` **only if that exact allocation was
 observed and approved by the coordinator**. Use a fresh output for every arm.
+Keep common `--j` equal to the fixed aggregate budget so report publication has
+the same setting across layouts; repeat `--worker-extra` once per worker to
+override its movie thread count to its mask width. The launcher also sets each
+worker's `OMP_NUM_THREADS` from that width.
 
 ```sh
 test "$(hostname -s)" = small-refmac-machine
@@ -54,11 +58,13 @@ numactl --physcpubind="$CPU64_CPU_UNION" --membind="$CPU64_MEM_NODES" \
     --binary "$CPU64_BINARY" --star "$CPU64_STAR" --out "$CPU64_FRESH_OUT" \
     --launcher-args "$CPU64_LAUNCHER_ARGS" \
     --required-products '.mrc,.star,_noDW.mrc,_EVN.mrc,_ODD.mrc,_shifts.eps' \
-    -- --use_own --j "$CPU64_THREADS_PER_WORKER" --seed 1 \
+    -- --use_own --j "$CPU64_CPU_BUDGET" --seed 1 \
        --angpix 0.885 --voltage 300 --bfactor 150 --patch_x 5 --patch_y 5 \
        --gainref "$CPU64_GAIN" --dose_weighting --dose_per_frame 1.277 \
        --save_noDW --even_odd_split
+CPU64_RUN_STATUS=$?
 flock -u 9
+# Retain CPU64_RUN_STATUS and require zero before using this run.
 ```
 
 This template assumes the tutorial acquisition settings. A representative
@@ -71,10 +77,16 @@ combine #178 with the new fused-sum change and call that an isolated #178 result
 The production coordinator suppresses worker joint PDFs, stages checked movie
 products, and publishes one complete canonical dataset STAR/report. Require its
 ownership/exit, coverage, immutability and final `dataset_ready` checks to pass.
-Compare every timed final tree with the existing strict profiling identity
-helper: complete MRC headers/payloads apart from the established writer-clock
-mask, STAR/EPS content after output-root normalization, full inventory, and only
-the existing log/PDF-byte exclusions. Retain failures and their original exits.
+Production merging retains `_workers/wK/` provenance; its worker count, commands
+and per-shard joint STAR inventory necessarily differ between layouts. Keep and
+validate that provenance separately. For cross-layout identity, construct a
+canonical published-product view containing every final file except this
+`_workers/` namespace, then use the existing strict profiling identity helper:
+complete MRC headers/payloads apart from the established writer-clock mask,
+STAR/EPS content after output-root normalization, full canonical inventory, and
+only the existing log/PDF-byte exclusions. Do not filter individual unexpected
+movie products or metadata differences. Native ownership/coverage/publication
+checks remain required. Retain failures and their original exits.
 
 ## Measurements and claims
 

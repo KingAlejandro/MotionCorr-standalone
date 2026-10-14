@@ -27,7 +27,21 @@ class Controls(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
+    def require_two_cpus(self):
+        if len(self.cpus) < 2:
+            self.skipTest('two allocated CPU IDs are required for this control')
+
+    def require_child_support(self):
+        self.require_two_cpus()
+        if not hasattr(os, 'pidfd_open') or not hasattr(signal, 'pidfd_send_signal'):
+            self.skipTest('Linux pidfd APIs unavailable for child control')
+        try:
+            fd = os.pidfd_open(os.getpid()); os.close(fd)
+        except OSError as exc:
+            self.skipTest(f'kernel pidfd unavailable for child control: {exc}')
+
     def test_disjoint_fixed_budget_and_owned_options(self):
+        self.require_two_cpus()
         self.assertEqual(experiment.validate(self.plan), set(self.cpus))
         for mutation in ('overlap', 'budget', 'owned', 'headroom'):
             plan = copy.deepcopy(self.plan)
@@ -43,9 +57,17 @@ class Controls(unittest.TestCase):
                 experiment.validate(plan)
 
     def test_memory_budget_refuses_without_launching(self):
-        self.plan['memory_budget_bytes'] = 1
-        report = experiment.memory_preflight(self.plan, self.plan['configurations'][0])
-        self.assertFalse(report['allowed'])
+        for current, limit, budget, allowed in [
+                ('1024', '8589934592', 8 << 30, True),
+                ('8589934592', '8589934592', 8 << 30, False),
+                ('1024', '8589934592', 1, False),
+                ('1024', 'max', 8 << 30, True)]:
+            self.plan['memory_budget_bytes'] = budget
+            with self.subTest(current=current, limit=limit, budget=budget), \
+                 mock.patch.object(experiment.Path, 'read_text', side_effect=[current, limit]):
+                report = experiment.memory_preflight(self.plan, self.plan['configurations'][0])
+                self.assertEqual(report['allowed'], allowed)
+                self.assertEqual(report['cgroup_current_bytes'], int(current))
 
     def fixture(self):
         workers = [self.root / 'w0', self.root / 'w1']
@@ -99,6 +121,7 @@ class Controls(unittest.TestCase):
             experiment.check_inputs(plan)
 
     def test_direct_child_self_affinity_and_nonzero_exit(self):
+        self.require_child_support()
         for returncode in (0, 7):
             child = experiment.launch([sys.executable, '-c', f'raise SystemExit({returncode})'],
                                       {self.cpus[0]}, self.root / f'{returncode}.log',
@@ -114,6 +137,7 @@ class Controls(unittest.TestCase):
                              [self.cpus[0]])
 
     def test_partial_launch_failure_reaps_only_owned_child(self):
+        self.require_child_support()
         binary = self.root / 'sleep-worker'
         binary.write_text('#!/usr/bin/python3\nimport time\ntime.sleep(30)\n')
         binary.chmod(0o755)
@@ -141,19 +165,7 @@ class Controls(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    reason = None
-    if sys.platform != 'linux' or not hasattr(os, 'pidfd_open') or not hasattr(signal, 'pidfd_send_signal'):
-        reason = 'Linux pidfd APIs unavailable'
-    elif not all(Path('/sys/fs/cgroup', filename).is_file() for filename in ('memory.current', 'memory.max')):
-        reason = 'cgroup-v2 memory accounting unavailable'
-    elif len(os.sched_getaffinity(0)) < 2:
-        reason = 'two allocated CPU IDs are required'
-    else:
-        try:
-            fd = os.pidfd_open(os.getpid()); os.close(fd)
-        except OSError as exc:
-            reason = f'kernel pidfd unavailable: {exc}'
-    if reason:
-        print('SKIP CpuDatasetThroughputExperiment: ' + reason)
+    if sys.platform != 'linux':
+        print('SKIP CpuDatasetThroughputExperiment: Linux-only controls')
         raise SystemExit(77)
     unittest.main()

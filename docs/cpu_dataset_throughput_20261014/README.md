@@ -1,21 +1,19 @@
 # CPU dataset throughput experiment, 14 October 2026
 
-Refs #10 and #26. No production source or defaults change. A guarded Linux CTest registers the nine light diagnostic-tool controls (30-second timeout); missing cgroup-v2 accounting, pidfd support or two allocated CPU IDs is an explicit skip. Base main
+Refs #10 and #26. No production source or defaults change. A Linux CTest registers the nine light diagnostic-tool controls (30-second timeout). Memory-budget controls use deterministic cgroup snapshots; unavailable pidfd support or CPU capacity skips only the affected controls. Base main
 `116eb04ad359cd5bf789b28809fc2047ea155b9b`; #178 is a separately identified
 memory treatment, not assumed to improve individual-movie speed.
 
-**Measurement venue update:** Alex has reauthorized explicitly labelled container
-diagnostic timing. Those runs remain queued behind the other three experiments;
-no local movie or dataset payload has been launched for this experiment yet.
-The primary bounded series uses #178 only at 1x4, 2x2 and 4x1; main versus #178
-full-24-frame budget refusals remain separate. The 12-selected-frame tutorial
-series is separate again and runs only if its calibrated live memory preflight
-permits it. No local result will be pooled with cpu64.
+**Venue and scope:** the local container provides explicitly labelled diagnostic
+timing, with #178 at 1x4, 2x2 and 4x1 for six measured repetitions. Main versus
+#178 full-24-frame budget refusals are separate; a 12-selected-frame tutorial
+series runs only if calibrated live memory preflight permits it. These
+populations are not pooled.
 
-The unrun [cpu64-native protocol](cpu64-native-protocol.md) requires the observed
-hostname, coordinated occupancy/NUMA/RAM allocation and confirmed shared lock,
-then uses the existing production dataset coordinator. Native access is
-currently unavailable. The 8 GiB refusals below are container-only and establish
+The [cpu64-native protocol](cpu64-native-protocol.md) is unrun because native
+access is unavailable. It requires an observed hostname, coordinated
+occupancy/NUMA/RAM allocation and the confirmed shared lock, then uses the
+existing production dataset coordinator. Container 8 GiB refusals establish
 no VM capacity limit.
 
 ## Earlier work
@@ -130,6 +128,15 @@ rewrites/additions, incomplete PDFs, noncanonical STAR rows or unequal complete
 output trees stop the experiment. No new numerical tolerances are introduced.
 
 ## Results
+
+Initial [CI run 517](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/38651003895)
+passed the **52 inherited Linux CTests**, known/canonical/smoke/failure checks
+and CUDA compilation on `e4e86ed`. It did **not** execute the new harness
+controls: the configure-time cgroup-v2-file guard excluded their CTest on that
+host. Raw logs/status are retained. Registration now applies to every Linux
+test build, memory-budget controls mock cgroup snapshots, and only affected
+child controls can skip unavailable pidfd/CPU capabilities. CI on this
+correction is pending. No native GPU execution is claimed.
 
 Pending execution. Small JSON plans and the exact planned STAR rows are retained
 under `planned/`; their absolute paths describe this scratch venue. Recreate the

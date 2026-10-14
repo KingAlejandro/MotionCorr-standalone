@@ -4,8 +4,8 @@
 
 The checkpoint below is retained as historical evidence. Clean reference and
 candidate CPU builds, both lifetime controls and known-motion checks have now
-run on a second host. The full suites share two PID-identity failures in this
-environment; they are not waived. See [the continuation report](resume/README.md)
+run on a second host. The local suites share two PID-identity failures in this
+environment; GitHub Ubuntu CI passes all 54 tests. See [the continuation report](resume/README.md)
 for exact results, source pins, the standard-kit limitation and fresh unprofiled
 measurements. No further production optimization has been added.
 

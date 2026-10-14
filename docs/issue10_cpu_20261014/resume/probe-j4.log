@@ -1,0 +1,115 @@
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * /workspace/scratch/28038873ca11/data/tutorial.tiff
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled.
+000/??? sec ~~(,_,">                                                          [oo]CCF_PROBE 972 972 0 copy=0.020803658 plan_with_wait=0.007383123 exec=0.138868928 destroy_with_wait=0.001609538 calls=12 lock_wait=0.001372344
+CCF_PROBE 972 972 1 copy=0.023451314 plan_with_wait=0.011967888 exec=0.159964869 destroy_with_wait=0.000325187 calls=12 lock_wait=0.004938467
+CCF_PROBE 972 972 2 copy=0.015390199 plan_with_wait=0.010327938 exec=0.154060913 destroy_with_wait=0.000404146 calls=12 lock_wait=0.000765114
+CCF_PROBE 972 972 3 copy=0.024562632 plan_with_wait=0.007296143 exec=0.126924256 destroy_with_wait=0.000203964 calls=12 lock_wait=0.002177470
+CCF_PROBE 192 192 0 copy=0.000430198 plan_with_wait=0.015942023 exec=0.005898400 destroy_with_wait=0.000337903 calls=12 lock_wait=0.012543752
+CCF_PROBE 192 192 1 copy=0.000701001 plan_with_wait=0.012272730 exec=0.002488201 destroy_with_wait=0.005067451 calls=12 lock_wait=0.015715975
+CCF_PROBE 192 192 2 copy=0.000353833 plan_with_wait=0.013192199 exec=0.002911177 destroy_with_wait=0.004163083 calls=12 lock_wait=0.013784999
+CCF_PROBE 192 192 3 copy=0.000176251 plan_with_wait=0.011187338 exec=0.004673859 destroy_with_wait=0.004684673 calls=12 lock_wait=0.005337240
+CCF_PROBE 192 192 0 copy=0.000153814 plan_with_wait=0.005026525 exec=0.007365482 destroy_with_wait=0.005698868 calls=12 lock_wait=0.006330762
+CCF_PROBE 192 192 1 copy=0.000190799 plan_with_wait=0.009161165 exec=0.003536681 destroy_with_wait=0.005056426 calls=12 lock_wait=0.008000562
+CCF_PROBE 192 192 2 copy=0.000190900 plan_with_wait=0.006919732 exec=0.003044052 destroy_with_wait=0.007817602 calls=12 lock_wait=0.011244790
+CCF_PROBE 192 192 3 copy=0.000393166 plan_with_wait=0.009700977 exec=0.001875474 destroy_with_wait=0.004000572 calls=12 lock_wait=0.011068947
+CCF_PROBE 192 192 0 copy=0.001118886 plan_with_wait=0.004760944 exec=0.002365461 destroy_with_wait=0.006198072 calls=12 lock_wait=0.008725622
+CCF_PROBE 192 192 1 copy=0.000689268 plan_with_wait=0.004843559 exec=0.002672541 destroy_with_wait=0.004419071 calls=12 lock_wait=0.006354544
+CCF_PROBE 192 192 2 copy=0.000177233 plan_with_wait=0.007321907 exec=0.005189938 destroy_with_wait=0.001722257 calls=12 lock_wait=0.004296926
+CCF_PROBE 192 192 3 copy=0.000308369 plan_with_wait=0.006354892 exec=0.003416590 destroy_with_wait=0.005533593 calls=12 lock_wait=0.008280382
+CCF_PROBE 192 192 0 copy=0.000178539 plan_with_wait=0.006470466 exec=0.003940288 destroy_with_wait=0.004535638 calls=12 lock_wait=0.006307819
+CCF_PROBE 192 192 1 copy=0.000264428 plan_with_wait=0.006858094 exec=0.003168588 destroy_with_wait=0.001657832 calls=12 lock_wait=0.005930167
+CCF_PROBE 192 192 2 copy=0.000187027 plan_with_wait=0.005562170 exec=0.002230607 destroy_with_wait=0.002441345 calls=12 lock_wait=0.005185818
+CCF_PROBE 192 192 3 copy=0.000175575 plan_with_wait=0.003137018 exec=0.003152182 destroy_with_wait=0.004157615 calls=12 lock_wait=0.005442423
+CCF_PROBE 192 192 0 copy=0.000397945 plan_with_wait=0.009996263 exec=0.003998164 destroy_with_wait=0.001874228 calls=12 lock_wait=0.007265518
+CCF_PROBE 192 192 1 copy=0.000182632 plan_with_wait=0.005009130 exec=0.005170200 destroy_with_wait=0.003283888 calls=12 lock_wait=0.005290844
+CCF_PROBE 192 192 2 copy=0.000235416 plan_with_wait=0.004683726 exec=0.004572855 destroy_with_wait=0.003040389 calls=12 lock_wait=0.004530308
+CCF_PROBE 192 192 3 copy=0.003548610 plan_with_wait=0.004173658 exec=0.002814948 destroy_with_wait=0.003409309 calls=12 lock_wait=0.004611802
+CCF_PROBE 192 192 0 copy=0.000459683 plan_with_wait=0.012211842 exec=0.001824338 destroy_with_wait=0.006527273 calls=12 lock_wait=0.008398867
+CCF_PROBE 192 192 1 copy=0.000397241 plan_with_wait=0.004522727 exec=0.005910961 destroy_with_wait=0.006654009 calls=12 lock_wait=0.008927789
+CCF_PROBE 192 192 2 copy=0.000266603 plan_with_wait=0.006550952 exec=0.003016498 destroy_with_wait=0.008421810 calls=12 lock_wait=0.012973520
+CCF_PROBE 192 192 3 copy=0.000369184 plan_with_wait=0.010917681 exec=0.002376318 destroy_with_wait=0.007868047 calls=12 lock_wait=0.014162087
+CCF_PROBE 192 192 0 copy=0.000501699 plan_with_wait=0.007787200 exec=0.003914607 destroy_with_wait=0.002403071 calls=12 lock_wait=0.005648919
+CCF_PROBE 192 192 1 copy=0.000520532 plan_with_wait=0.006628264 exec=0.003283882 destroy_with_wait=0.004665285 calls=12 lock_wait=0.008154155
+CCF_PROBE 192 192 2 copy=0.000178197 plan_with_wait=0.006671723 exec=0.002851985 destroy_with_wait=0.004219814 calls=12 lock_wait=0.007618762
+CCF_PROBE 192 192 3 copy=0.000167367 plan_with_wait=0.005116800 exec=0.002325686 destroy_with_wait=0.003094343 calls=12 lock_wait=0.005006618
+CCF_PROBE 192 192 0 copy=0.000415723 plan_with_wait=0.006474898 exec=0.007025435 destroy_with_wait=0.008887412 calls=12 lock_wait=0.011294800
+CCF_PROBE 192 192 1 copy=0.000406190 plan_with_wait=0.011371975 exec=0.002468685 destroy_with_wait=0.001661470 calls=12 lock_wait=0.006286003
+CCF_PROBE 192 192 2 copy=0.000226777 plan_with_wait=0.004549118 exec=0.004522813 destroy_with_wait=0.006106286 calls=12 lock_wait=0.008582579
+CCF_PROBE 192 192 3 copy=0.000210360 plan_with_wait=0.004378337 exec=0.005659087 destroy_with_wait=0.005083102 calls=12 lock_wait=0.006870237
+CCF_PROBE 192 192 0 copy=0.001517771 plan_with_wait=0.005514047 exec=0.008520381 destroy_with_wait=0.002815866 calls=12 lock_wait=0.003390501
+CCF_PROBE 192 192 1 copy=0.000214041 plan_with_wait=0.005443649 exec=0.005120494 destroy_with_wait=0.002176332 calls=12 lock_wait=0.004906506
+CCF_PROBE 192 192 2 copy=0.000193568 plan_with_wait=0.007651948 exec=0.006618580 destroy_with_wait=0.001754928 calls=12 lock_wait=0.006287255
+CCF_PROBE 192 192 3 copy=0.002532353 plan_with_wait=0.007871282 exec=0.003617061 destroy_with_wait=0.001294846 calls=12 lock_wait=0.006385227
+CCF_PROBE 192 192 0 copy=0.000394955 plan_with_wait=0.003698634 exec=0.005277049 destroy_with_wait=0.009499174 calls=12 lock_wait=0.009259180
+CCF_PROBE 192 192 1 copy=0.001298649 plan_with_wait=0.004680468 exec=0.002040976 destroy_with_wait=0.005672383 calls=12 lock_wait=0.008811196
+CCF_PROBE 192 192 2 copy=0.000195862 plan_with_wait=0.010865274 exec=0.002039964 destroy_with_wait=0.000497737 calls=12 lock_wait=0.005648196
+CCF_PROBE 192 192 3 copy=0.000163984 plan_with_wait=0.010766979 exec=0.002180971 destroy_with_wait=0.002359105 calls=12 lock_wait=0.008557781
+CCF_PROBE 192 192 0 copy=0.000162536 plan_with_wait=0.009774449 exec=0.008280441 destroy_with_wait=0.003162650 calls=12 lock_wait=0.004769491
+CCF_PROBE 192 192 1 copy=0.000208827 plan_with_wait=0.007988735 exec=0.002503606 destroy_with_wait=0.004541155 calls=12 lock_wait=0.008827184
+CCF_PROBE 192 192 2 copy=0.000512017 plan_with_wait=0.006434479 exec=0.002366016 destroy_with_wait=0.003773237 calls=12 lock_wait=0.007079350
+CCF_PROBE 192 192 3 copy=0.000663668 plan_with_wait=0.004498264 exec=0.004595745 destroy_with_wait=0.006219863 calls=12 lock_wait=0.008230491
+CCF_PROBE 192 192 0 copy=0.000293691 plan_with_wait=0.006066963 exec=0.006845909 destroy_with_wait=0.007022811 calls=12 lock_wait=0.009091174
+CCF_PROBE 192 192 1 copy=0.002136959 plan_with_wait=0.008234167 exec=0.003416428 destroy_with_wait=0.001184199 calls=12 lock_wait=0.007587517
+CCF_PROBE 192 192 2 copy=0.000234237 plan_with_wait=0.004093507 exec=0.005054021 destroy_with_wait=0.005930411 calls=12 lock_wait=0.007114720
+CCF_PROBE 192 192 3 copy=0.000288551 plan_with_wait=0.009691612 exec=0.006261294 destroy_with_wait=0.000575725 calls=12 lock_wait=0.004110509
+CCF_PROBE 192 192 0 copy=0.000169869 plan_with_wait=0.007430213 exec=0.004335130 destroy_with_wait=0.001452358 calls=12 lock_wait=0.004505281
+CCF_PROBE 192 192 1 copy=0.000338952 plan_with_wait=0.008229216 exec=0.005268781 destroy_with_wait=0.005984734 calls=12 lock_wait=0.011530673
+CCF_PROBE 192 192 2 copy=0.000496084 plan_with_wait=0.009441127 exec=0.005536328 destroy_with_wait=0.001647950 calls=12 lock_wait=0.007431757
+CCF_PROBE 192 192 3 copy=0.000305135 plan_with_wait=0.007931382 exec=0.003310620 destroy_with_wait=0.002807824 calls=12 lock_wait=0.007923019
+CCF_PROBE 192 192 0 copy=0.002717955 plan_with_wait=0.003461845 exec=0.006438627 destroy_with_wait=0.005622769 calls=12 lock_wait=0.006900824
+CCF_PROBE 192 192 1 copy=0.000421466 plan_with_wait=0.004046548 exec=0.002185726 destroy_with_wait=0.003604836 calls=12 lock_wait=0.005716750
+CCF_PROBE 192 192 2 copy=0.000217044 plan_with_wait=0.006449696 exec=0.003076114 destroy_with_wait=0.000916179 calls=12 lock_wait=0.004696501
+CCF_PROBE 192 192 3 copy=0.000170772 plan_with_wait=0.004558413 exec=0.003871222 destroy_with_wait=0.000642346 calls=12 lock_wait=0.002290958
+CCF_PROBE 192 192 0 copy=0.000509229 plan_with_wait=0.011147360 exec=0.005687553 destroy_with_wait=0.001852224 calls=12 lock_wait=0.009423168
+CCF_PROBE 192 192 1 copy=0.002435940 plan_with_wait=0.008088566 exec=0.004167632 destroy_with_wait=0.003393016 calls=12 lock_wait=0.005716724
+CCF_PROBE 192 192 2 copy=0.002357480 plan_with_wait=0.007188322 exec=0.009601689 destroy_with_wait=0.001980352 calls=12 lock_wait=0.006502753
+CCF_PROBE 192 192 3 copy=0.001298934 plan_with_wait=0.003045528 exec=0.002407469 destroy_with_wait=0.004703161 calls=12 lock_wait=0.004943941
+CCF_PROBE 192 192 0 copy=0.009439581 plan_with_wait=0.008902830 exec=0.037925163 destroy_with_wait=0.140787875 calls=12 lock_wait=0.140986298
+CCF_PROBE 192 192 1 copy=0.003672892 plan_with_wait=0.009661335 exec=0.008106233 destroy_with_wait=0.003012328 calls=12 lock_wait=0.006866787
+CCF_PROBE 192 192 2 copy=0.002582802 plan_with_wait=0.009550192 exec=0.128258139 destroy_with_wait=0.004505039 calls=12 lock_wait=0.004719998
+CCF_PROBE 192 192 3 copy=0.018752339 plan_with_wait=0.009751659 exec=0.069689220 destroy_with_wait=0.058633464 calls=12 lock_wait=0.011816992
+CCF_PROBE 192 192 0 copy=0.000875490 plan_with_wait=0.004653101 exec=0.006336142 destroy_with_wait=0.004873435 calls=12 lock_wait=0.006048139
+CCF_PROBE 192 192 1 copy=0.000182240 plan_with_wait=0.006108804 exec=0.004249569 destroy_with_wait=0.002098400 calls=12 lock_wait=0.006063586
+CCF_PROBE 192 192 2 copy=0.001150344 plan_with_wait=0.008198151 exec=0.002375303 destroy_with_wait=0.001291618 calls=12 lock_wait=0.006925442
+CCF_PROBE 192 192 3 copy=0.000237031 plan_with_wait=0.005714604 exec=0.005520356 destroy_with_wait=0.001259618 calls=12 lock_wait=0.002263468
+CCF_PROBE 192 192 0 copy=0.000761665 plan_with_wait=0.004913467 exec=0.004712790 destroy_with_wait=0.003161584 calls=12 lock_wait=0.004611303
+CCF_PROBE 192 192 1 copy=0.000621128 plan_with_wait=0.005242888 exec=0.002350916 destroy_with_wait=0.004503173 calls=12 lock_wait=0.007296059
+CCF_PROBE 192 192 2 copy=0.002008379 plan_with_wait=0.007251190 exec=0.002551103 destroy_with_wait=0.002085506 calls=12 lock_wait=0.005475599
+CCF_PROBE 192 192 3 copy=0.000187277 plan_with_wait=0.005990714 exec=0.003329349 destroy_with_wait=0.003206629 calls=12 lock_wait=0.005496070
+CCF_PROBE 192 192 0 copy=0.000172720 plan_with_wait=0.016209085 exec=0.007746677 destroy_with_wait=0.002397662 calls=12 lock_wait=0.010125392
+CCF_PROBE 192 192 1 copy=0.000189914 plan_with_wait=0.006278070 exec=0.006207120 destroy_with_wait=0.002334187 calls=12 lock_wait=0.003365381
+CCF_PROBE 192 192 2 copy=0.000487734 plan_with_wait=0.005650047 exec=0.007329955 destroy_with_wait=0.003496201 calls=12 lock_wait=0.005306433
+CCF_PROBE 192 192 3 copy=0.000355789 plan_with_wait=0.004042420 exec=0.007111487 destroy_with_wait=0.015174712 calls=12 lock_wait=0.017282279
+CCF_PROBE 192 192 0 copy=0.000827214 plan_with_wait=0.005908421 exec=0.004234780 destroy_with_wait=0.002723013 calls=12 lock_wait=0.006128722
+CCF_PROBE 192 192 1 copy=0.000186623 plan_with_wait=0.005270830 exec=0.005474276 destroy_with_wait=0.001369945 calls=12 lock_wait=0.003110155
+CCF_PROBE 192 192 2 copy=0.000264566 plan_with_wait=0.005013067 exec=0.004868146 destroy_with_wait=0.001046266 calls=12 lock_wait=0.002154281
+CCF_PROBE 192 192 3 copy=0.000658729 plan_with_wait=0.001550703 exec=0.003608782 destroy_with_wait=0.001474839 calls=12 lock_wait=0.001734394
+CCF_PROBE 192 192 0 copy=0.001339448 plan_with_wait=0.010644184 exec=0.006076002 destroy_with_wait=0.010307775 calls=12 lock_wait=0.012538407
+CCF_PROBE 192 192 1 copy=0.000916973 plan_with_wait=0.006466541 exec=0.007037437 destroy_with_wait=0.002904120 calls=12 lock_wait=0.006474427
+CCF_PROBE 192 192 2 copy=0.000260966 plan_with_wait=0.005097966 exec=0.005942841 destroy_with_wait=0.005550416 calls=12 lock_wait=0.006244092
+CCF_PROBE 192 192 3 copy=0.000342164 plan_with_wait=0.007114917 exec=0.001874142 destroy_with_wait=0.006465688 calls=12 lock_wait=0.010943176
+CCF_PROBE 192 192 0 copy=0.000175999 plan_with_wait=0.006698296 exec=0.003998338 destroy_with_wait=0.002608637 calls=12 lock_wait=0.004750710
+CCF_PROBE 192 192 1 copy=0.000395365 plan_with_wait=0.002668646 exec=0.004613503 destroy_with_wait=0.007108743 calls=12 lock_wait=0.007727481
+CCF_PROBE 192 192 2 copy=0.002397814 plan_with_wait=0.007772249 exec=0.003784347 destroy_with_wait=0.003339388 calls=12 lock_wait=0.007155906
+CCF_PROBE 192 192 3 copy=0.000344647 plan_with_wait=0.006387533 exec=0.002975788 destroy_with_wait=0.000628808 calls=12 lock_wait=0.003591827
+CCF_PROBE 192 192 0 copy=0.000298801 plan_with_wait=0.014385522 exec=0.003902845 destroy_with_wait=0.001275048 calls=12 lock_wait=0.011656522
+CCF_PROBE 192 192 1 copy=0.002085488 plan_with_wait=0.009105110 exec=0.006925408 destroy_with_wait=0.002346338 calls=12 lock_wait=0.003562412
+CCF_PROBE 192 192 2 copy=0.002023302 plan_with_wait=0.006482514 exec=0.003733948 destroy_with_wait=0.006550070 calls=12 lock_wait=0.008494757
+CCF_PROBE 192 192 3 copy=0.000844155 plan_with_wait=0.005737477 exec=0.004471242 destroy_with_wait=0.008678798 calls=12 lock_wait=0.012793254
+CCF_PROBE 192 192 0 copy=0.005872283 plan_with_wait=0.042737842 exec=0.012081166 destroy_with_wait=0.016766486 calls=12 lock_wait=0.022001416
+CCF_PROBE 192 192 1 copy=0.000405435 plan_with_wait=0.014605888 exec=0.010184770 destroy_with_wait=0.059712858 calls=12 lock_wait=0.047262595
+CCF_PROBE 192 192 2 copy=0.000235180 plan_with_wait=0.015541907 exec=0.061457917 destroy_with_wait=0.004671326 calls=12 lock_wait=0.013239305
+CCF_PROBE 192 192 3 copy=0.005099229 plan_with_wait=0.033363194 exec=0.040278983 destroy_with_wait=0.026943538 calls=12 lock_wait=0.040274276
+CCF_PROBE 192 192 0 copy=0.008799711 plan_with_wait=0.068202224 exec=0.039756782 destroy_with_wait=0.037927576 calls=12 lock_wait=0.042245018
+CCF_PROBE 192 192 1 copy=0.043704486 plan_with_wait=0.037197722 exec=0.022127088 destroy_with_wait=0.022427875 calls=12 lock_wait=0.039225113
+CCF_PROBE 192 192 2 copy=0.044469550 plan_with_wait=0.051821886 exec=0.023831455 destroy_with_wait=0.011656549 calls=12 lock_wait=0.039564511
+CCF_PROBE 192 192 3 copy=0.005812512 plan_with_wait=0.039638165 exec=0.002218967 destroy_with_wait=0.007118464 calls=12 lock_wait=0.031742323
+1.27/1.27 min ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /workspace/scratch/28038873ca11/probe-j4/corrected_micrographs.star
+ Now generating logfile.pdf ... 
+ Done! Written: /workspace/scratch/28038873ca11/probe-j4/logfile.pdf

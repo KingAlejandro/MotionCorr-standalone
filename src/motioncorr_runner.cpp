@@ -1830,10 +1830,11 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 			logfile_fn_eps = header_fn_eps;
 			logfile_fn_eps.insert(logfile_fn_eps.end(), all_fn_eps.begin(), all_fn_eps.end());
 			logfile_thread = std::thread([&]() {
-				try { joinMultipleEPSIntoSinglePDF(report_out + "logfile.pdf", logfile_fn_eps, aggregate_only); }
 				// The concatenation this replaces ignores its result outside
-				// aggregate mode, so a failed logfile.pdf must not fail the job
-				// there. REPORT_ERROR has already printed the message.
+				// aggregate mode and leaves no logfile.pdf when it fails, so a
+				// failed render must neither fail the job there nor leave an
+				// empty placeholder. Aggregate mode is strict and still throws.
+				try { joinMultipleEPSIntoSinglePDF(report_out + "logfile.pdf", logfile_fn_eps, aggregate_only, false); }
 				catch (const RelionError &) { if (aggregate_only) logfile_failure = std::current_exception(); }
 				catch (...) { logfile_failure = std::current_exception(); }
 			});

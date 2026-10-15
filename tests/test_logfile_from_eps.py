@@ -205,20 +205,31 @@ def check(binary: Path, fixture: Path, tmp: Path) -> None:
                     for line in r.stderr.splitlines()),
                 f"gs {mode}: the logfile.pdf failure was not reported: " + r.stderr[-1500:])
         require((out / "Movies" / "a.mrc").stat().st_size > 0, f"gs {mode}: product lost")
-    print("PASS Ghostscript failure (immediate and delayed) reports and exits 0, as before")
+        # The failed concatenation this replaced left no logfile.pdf; an empty
+        # placeholder would read as a written report.
+        require(not (out / "logfile.pdf").exists(),
+                f"gs {mode}: a failed logfile.pdf render left a file behind; the "
+                "concatenation it replaced left none")
+    print("PASS Ghostscript failure (immediate and delayed) reports, exits 0 and leaves "
+          "no logfile.pdf, as before")
 
-    # A directory in the way of logfile.pdf: gs cannot write it, touch() cannot
-    # open it. The old concatenation ignored this, so the job still succeeds,
-    # and the exception is contained in the thread rather than std::terminate.
+    # A directory in the way of logfile.pdf: gs cannot write it. The old
+    # concatenation ignored this, so the job still succeeds, nothing is touched
+    # in its place, and nothing escapes the thread as std::terminate.
     out = tmp / "logfile-dir"
     out.mkdir()
     (out / "logfile.pdf").mkdir()
     r = run(binary, tmp, "ab.star", out, env())
     require(r.returncode == 0, f"logfile.pdf directory: exit {r.returncode}: " + r.stderr[-1500:])
     require("terminate called" not in r.stderr, "logfile.pdf directory: std::terminate")
-    require("Filename::touch ERROR" in r.stderr and str(out / "logfile.pdf") in r.stderr,
+    require(any("ERROR in executing: gs -sDEVICE=pdfwrite" in line and
+                "-sOutputFile=" + str(out / "logfile.pdf") + " " in line
+                for line in r.stderr.splitlines()),
             "logfile.pdf directory: the failure was not reported: " + r.stderr[-1500:])
-    require((out / "batch.pdf").is_file() and (out / "Movies" / "a.mrc").stat().st_size > 0,
+    require("Filename::touch ERROR" not in r.stderr,
+            "logfile.pdf directory: a placeholder was attempted after the failed render")
+    require((out / "logfile.pdf").is_dir() and (out / "batch.pdf").is_file()
+            and (out / "Movies" / "a.mrc").stat().st_size > 0,
             "logfile.pdf directory: other products missing")
     print("PASS an unwritable logfile.pdf is reported without failing the job or terminating")
 

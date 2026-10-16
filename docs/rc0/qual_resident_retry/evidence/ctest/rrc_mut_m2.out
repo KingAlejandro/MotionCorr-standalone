@@ -1,0 +1,14 @@
+PASS healthy: resident retry preparation ran, retry converged, products complete
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/src-branch/tests/run_resident_retry_controls.py", line 173, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/src-branch/tests/run_resident_retry_controls.py", line 146, in main
+    out, rc, text, built = run("recoverable", "resident-retry-recoverable")
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/src-branch/tests/run_resident_retry_controls.py", line 130, in run
+    require("remaining-owned=0 stale-releases=0" in r.stderr,
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/src-branch/tests/run_resident_retry_controls.py", line 28, in require
+    raise RuntimeError(message)
+RuntimeError: recoverable: owned CUDA allocation cleanup was not complete
+driver-rc=1

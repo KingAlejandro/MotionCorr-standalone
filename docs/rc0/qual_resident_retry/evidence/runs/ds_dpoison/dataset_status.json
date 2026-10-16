@@ -1,0 +1,540 @@
+{
+  "workers_complete": false,
+  "dataset_ready": false,
+  "verdict": "FAIL",
+  "input_star_sha256": "d478c5863aed986f7e98117574a1a8819c4f7de8f7863d5eae5d6bf1643fc36c",
+  "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+  "binary_sha256": "63b173cb0957c5ad93bb72956b174bbafff8ee8247a63149c6142da5f5216f31",
+  "endpoint": "successful staged products, canonical joint STAR and full report publication",
+  "dataset_wall_s": 6.395595020614564,
+  "ownership_mode": "linux-child-subreaper",
+  "worker_phase_wall_s": 6.368717331439257,
+  "failure": "Worker phase exited 3",
+  "cleanup": "Owned PID/birth groups reaped; observed descendants absent or zombies",
+  "process_ownership_errors": [],
+  "tree_rss": {
+    "status": "SAMPLED",
+    "unavailable": null,
+    "errors": [],
+    "interval_s": 0.1,
+    "units": "KiB",
+    "peak_simultaneous_sum_rss_kib": 3841336,
+    "note": "Current RSS summed at each observation, not summed VmHWM. Shared pages are counted more than once. Sampled peak may miss brief peaks/children born and exited between polls; PSS is optional. Only exact PID/start roots and their observed descendants are owned.",
+    "samples": [
+      {
+        "monotonic_s": 7638987.463736038,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22148,
+            "pss_kib": 12168
+          },
+          {
+            "pid": 4063238,
+            "ppid": 4063235,
+            "pgid": 4063238,
+            "start_ticks": 763898717,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23152,
+            "pss_kib": 13136
+          }
+        ],
+        "rss_sum_kib": 45300,
+        "pss_sum_kib": 25304,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7638987.882893622,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22208,
+            "pss_kib": 12244
+          },
+          {
+            "pid": 4063238,
+            "ppid": 4063235,
+            "pgid": 4063238,
+            "start_ticks": 763898717,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23180,
+            "pss_kib": 13175
+          },
+          {
+            "pid": 4063260,
+            "ppid": 4063238,
+            "pgid": 4063260,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 25064,
+            "pss_kib": 12705
+          },
+          {
+            "pid": 4063262,
+            "ppid": 4063238,
+            "pgid": 4063262,
+            "start_ticks": 763898741,
+            "state": "D",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 82488,
+            "pss_kib": 70121
+          }
+        ],
+        "rss_sum_kib": 152940,
+        "pss_sum_kib": 108245,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7638988.32939739,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22212,
+            "pss_kib": 12245
+          },
+          {
+            "pid": 4063238,
+            "ppid": 4063235,
+            "pgid": 4063238,
+            "start_ticks": 763898717,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23212,
+            "pss_kib": 13209
+          },
+          {
+            "pid": 4063260,
+            "ppid": 4063238,
+            "pgid": 4063260,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 147040,
+            "pss_kib": 131302
+          },
+          {
+            "pid": 4063262,
+            "ppid": 4063238,
+            "pgid": 4063262,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 152320,
+            "pss_kib": 136765
+          }
+        ],
+        "rss_sum_kib": 344784,
+        "pss_sum_kib": 293521,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7638988.842847307,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22212,
+            "pss_kib": 12245
+          },
+          {
+            "pid": 4063238,
+            "ppid": 4063235,
+            "pgid": 4063238,
+            "start_ticks": 763898717,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23216,
+            "pss_kib": 13217
+          },
+          {
+            "pid": 4063260,
+            "ppid": 4063238,
+            "pgid": 4063260,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 466380,
+            "pss_kib": 428917
+          },
+          {
+            "pid": 4063262,
+            "ppid": 4063238,
+            "pgid": 4063262,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 540704,
+            "pss_kib": 506976
+          }
+        ],
+        "rss_sum_kib": 1052512,
+        "pss_sum_kib": 961355,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7638989.727855792,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22232,
+            "pss_kib": 12430
+          },
+          {
+            "pid": 4063238,
+            "ppid": 4063235,
+            "pgid": 4063238,
+            "start_ticks": 763898717,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23240,
+            "pss_kib": 13413
+          },
+          {
+            "pid": 4063260,
+            "ppid": 4063238,
+            "pgid": 4063260,
+            "start_ticks": 763898741,
+            "state": "S",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 1876400,
+            "pss_kib": 1866088
+          },
+          {
+            "pid": 4063262,
+            "ppid": 4063238,
+            "pgid": 4063262,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 1919464,
+            "pss_kib": 1898110
+          }
+        ],
+        "rss_sum_kib": 3841336,
+        "pss_sum_kib": 3790041,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7638990.264919301,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22236,
+            "pss_kib": 12434
+          },
+          {
+            "pid": 4063238,
+            "ppid": 4063235,
+            "pgid": 4063238,
+            "start_ticks": 763898717,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23240,
+            "pss_kib": 13412
+          },
+          {
+            "pid": 4063260,
+            "ppid": 4063238,
+            "pgid": 4063260,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 997292,
+            "pss_kib": 295134
+          },
+          {
+            "pid": 4063262,
+            "ppid": 4063238,
+            "pgid": 4063262,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 454480,
+            "pss_kib": 295312
+          }
+        ],
+        "rss_sum_kib": 1497248,
+        "pss_sum_kib": 616292,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7638990.784706052,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22244,
+            "pss_kib": 12444
+          },
+          {
+            "pid": 4063238,
+            "ppid": 4063235,
+            "pgid": 4063238,
+            "start_ticks": 763898717,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23380,
+            "pss_kib": 13429
+          },
+          {
+            "pid": 4063260,
+            "ppid": 4063238,
+            "pgid": 4063260,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 564472,
+            "pss_kib": 554787
+          }
+        ],
+        "rss_sum_kib": 610096,
+        "pss_sum_kib": 580660,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7638991.249863291,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22252,
+            "pss_kib": 12459
+          },
+          {
+            "pid": 4063238,
+            "ppid": 4063235,
+            "pgid": 4063238,
+            "start_ticks": 763898717,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23384,
+            "pss_kib": 13441
+          },
+          {
+            "pid": 4063260,
+            "ppid": 4063238,
+            "pgid": 4063260,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 575948,
+            "pss_kib": 565651
+          }
+        ],
+        "rss_sum_kib": 621584,
+        "pss_sum_kib": 591551,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7638991.716728567,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22252,
+            "pss_kib": 12459
+          },
+          {
+            "pid": 4063238,
+            "ppid": 4063235,
+            "pgid": 4063238,
+            "start_ticks": 763898717,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23384,
+            "pss_kib": 13430
+          },
+          {
+            "pid": 4063260,
+            "ppid": 4063238,
+            "pgid": 4063260,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 575948,
+            "pss_kib": 565864
+          }
+        ],
+        "rss_sum_kib": 621584,
+        "pss_sum_kib": 591753,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7638992.208173757,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22260,
+            "pss_kib": 12468
+          },
+          {
+            "pid": 4063238,
+            "ppid": 4063235,
+            "pgid": 4063238,
+            "start_ticks": 763898717,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23384,
+            "pss_kib": 13441
+          },
+          {
+            "pid": 4063260,
+            "ppid": 4063238,
+            "pgid": 4063260,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 575948,
+            "pss_kib": 565857
+          }
+        ],
+        "rss_sum_kib": 621592,
+        "pss_sum_kib": 591766,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7638992.67980416,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22260,
+            "pss_kib": 12468
+          },
+          {
+            "pid": 4063238,
+            "ppid": 4063235,
+            "pgid": 4063238,
+            "start_ticks": 763898717,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23388,
+            "pss_kib": 13445
+          },
+          {
+            "pid": 4063260,
+            "ppid": 4063238,
+            "pgid": 4063260,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 575948,
+            "pss_kib": 565857
+          }
+        ],
+        "rss_sum_kib": 621596,
+        "pss_sum_kib": 591770,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7638993.128496756,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22264,
+            "pss_kib": 12472
+          },
+          {
+            "pid": 4063238,
+            "ppid": 4063235,
+            "pgid": 4063238,
+            "start_ticks": 763898717,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23388,
+            "pss_kib": 13446
+          },
+          {
+            "pid": 4063260,
+            "ppid": 4063238,
+            "pgid": 4063260,
+            "start_ticks": 763898741,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault",
+            "rss_kib": 413916,
+            "pss_kib": 407796
+          }
+        ],
+        "rss_sum_kib": 459568,
+        "pss_sum_kib": 433714,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7638993.573692821,
+        "processes": [
+          {
+            "pid": 4063235,
+            "ppid": 4063225,
+            "pgid": 4055690,
+            "start_ticks": 763898706,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22400,
+            "pss_kib": 12776
+          }
+        ],
+        "rss_sum_kib": 22400,
+        "pss_sum_kib": 12776,
+        "errors": []
+      }
+    ]
+  }
+}

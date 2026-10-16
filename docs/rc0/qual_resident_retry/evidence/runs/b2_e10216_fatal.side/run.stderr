@@ -1,0 +1,73 @@
+Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs: Not a TIFF or MDI file, bad magic number 4096 (0x1000).
+[preprocessfault] injected cudaErrorIllegalAddress at downloadPatchSpectra; pending slot cleared
+in: /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/src-branch/src/motioncorr_runner.cpp, line 3658
+ERROR: 
+CUDA device context is unusable for Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs (patch 1, 4): an illegal memory access was encountered. Refusing to retry alignment on a poisoned context.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x6411cb2b4787]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(+0x5f8d2) [0x6411cb2828d2]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(_ZN16MotioncorrRunner3runEv+0x22b1) [0x6411cb388ff1]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(main+0x296) [0x6411cb2a80b6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x70eb14c2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x70eb14c2a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(_start+0x25) [0x6411cb2a8c75]
+==================
+ERROR: 
+CUDA device context is unusable for Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs (patch 1, 4): an illegal memory access was encountered. Refusing to retry alignment on a poisoned context.
+Continuing with the remaining movies.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/src-branch/src/motioncorr_runner.cpp, line 2251
+ERROR: 
+CUDA device became unusable during session initialization for Movies/FoilHole_14961496_Data_14966722_14966723_20180615_1742_Fractions.mrcs: an illegal memory access was encountered (recorded at initialize retired gain cache:461). First failure at initialize retired gain cache:461. Refusing CPU fallback after a fatal device error.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x6411cb2b4787]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(+0x492ef) [0x6411cb26c2ef]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(+0x1223fe) [0x6411cb3453fe]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(_ZN16MotioncorrRunner26executeOwnMotionCorrectionER10Micrographi+0x9a99) [0x6411cb383759]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(_ZN16MotioncorrRunner3runEv+0x22b1) [0x6411cb388ff1]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(main+0x296) [0x6411cb2a80b6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x70eb14c2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x70eb14c2a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(_start+0x25) [0x6411cb2a8c75]
+==================
+ERROR: 
+CUDA device became unusable during session initialization for Movies/FoilHole_14961496_Data_14966722_14966723_20180615_1742_Fractions.mrcs: an illegal memory access was encountered (recorded at initialize retired gain cache:461). First failure at initialize retired gain cache:461. Refusing CPU fallback after a fatal device error.
+Continuing with the remaining movies.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/src-branch/src/motioncorr_runner.cpp, line 1089
+ERROR: 
+Motion correction failed for 2 movie(s): Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs Movies/FoilHole_14961496_Data_14966722_14966723_20180615_1742_Fractions.mrcs. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x6411cb2b4787]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(+0x62e1b) [0x6411cb285e1b]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(main+0x296) [0x6411cb2a80b6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x70eb14c2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x70eb14c2a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault(_start+0x25) [0x6411cb2a8c75]
+==================
+ERROR: 
+Motion correction failed for 2 movie(s): Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs Movies/FoilHole_14961496_Data_14966722_14966723_20180615_1742_Fractions.mrcs. Successful per-movie outputs were retained; joint output was not generated.
+[faultinject] remaining-owned=0 stale-releases=0
+[faultinject] resident-retry-preparations=0
+Command exited with non-zero status 1
+	Command being timed: "flock /tmp/motioncorr-gpu2-correctness.lock taskset -c 80-87 env CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598 CUDA_DEVICE_ORDER=PCI_BUS_ID OMP_NUM_THREADS=8 MC_RESIDENT_RETRY_COUNT=1 MC_PREPROCESS_FAULT=resident-retry-fatal /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-branch/motioncorr_resident_retry_fault --use_own --dose_weighting --bfactor 150 --seed 1 --dose_per_frame 1.0 --expected_frames 59 --patch_x 5 --patch_y 5 --i movies.star --o /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/runs/b2_e10216_fatal/ --j 8 --gpu 0 --ingest_witness /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/runs/b2_e10216_fatal.side/witness.txt"
+	User time (seconds): 0.73
+	System time (seconds): 5.24
+	Percent of CPU this job got: 55%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:10.70
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2211756
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 1006709
+	Voluntary context switches: 599
+	Involuntary context switches: 24
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 48
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1

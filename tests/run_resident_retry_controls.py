@@ -116,7 +116,7 @@ def main():
         out = work / name
         out.mkdir()
         cmd = [str(binary), "--i", "movies.star", "--o", str(out) + "/", "--use_own", "--gpu", "0",
-               "--j", "4", "--max_io_threads", "2", "--patch_x", "2", "--patch_y", "2",
+               "--j", "4", "--max_io_threads", "2", "--patch_x", "3", "--patch_y", "3",
                "--max_iter", "5", "--bfactor", "150", "--seed", "1", "--angpix", "1.0",
                "--voltage", "300"]
         env = dict(os.environ, OMP_NUM_THREADS="4", MC_RETRY_CALLER="1", MC_PREPROCESS_FAULT=fault,

@@ -1,0 +1,24 @@
+Movies/HM70-1_10-A-002_0002_Oct28_23.00.41.tif: too few valid local trajectories to fit local motion model.
+	Command being timed: "flock /tmp/motioncorr-gpu2-correctness.lock taskset -c 80-87 env CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598 CUDA_DEVICE_ORDER=PCI_BUS_ID OMP_NUM_THREADS=8 /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/build/cuda-1db/motioncorr --use_own --dose_weighting --bfactor 150 --seed 1 --dose_per_frame 1.0 --gainref gain.mrc --expected_frames 70 --patch_x 5 --patch_y 5 --i movies.star --o /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/runs/b1_e10641_db_a/ --j 8 --gpu 0 --ingest_witness /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/runs/b1_e10641_db_a.side/witness.txt"
+	User time (seconds): 13.67
+	System time (seconds): 7.83
+	Percent of CPU this job got: 176%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:12.15
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2178112
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 1230837
+	Voluntary context switches: 736
+	Involuntary context switches: 4149
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 369672
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

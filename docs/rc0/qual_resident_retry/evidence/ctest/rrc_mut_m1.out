@@ -1,0 +1,12 @@
+PASS healthy: resident retry preparation ran, retry converged, products complete
+PASS recoverable: WARNING, download path taken, pixels identical
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/src-branch/tests/run_resident_retry_controls.py", line 173, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/src-branch/tests/run_resident_retry_controls.py", line 163, in main
+    require("Refusing to retry alignment on a poisoned context" in text, "fatal: refusal missing")
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/src-branch/tests/run_resident_retry_controls.py", line 28, in require
+    raise RuntimeError(message)
+RuntimeError: fatal: refusal missing
+driver-rc=1

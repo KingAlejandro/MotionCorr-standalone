@@ -1,0 +1,171 @@
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/control.tiff
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.
+000/??? sec ~~(,_,">                                                          [oo]
+   0/   0 sec ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]
+   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/ctest/rrc1/recoverable/corrected_micrographs.star
+ Now generating logfile.pdf ... 
+ Done! Written: /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/ctest/rrc1/recoverable/logfile.pdf
+Movies/control.tiff: Cannot get "Predictor" tag as plugin is not configured.
+[retry-caller] injected nonconvergence with nonzero shifts (batched)
+[preprocessfault] injected cudaErrorMemoryAllocation at downloadPatchSpectra; pending slot cleared
+[preprocessfault] later cudaMalloc size=1387200
+[preprocessfault] later cudaMalloc size=1403520
+[preprocessfault] later cudaMalloc size=48
+[preprocessfault] later cudaMalloc size=48
+[retry-caller] actual runner reset both vectors
+[preprocessfault] later cudaMalloc size=1403520
+[preprocessfault] later cudaMalloc size=116960
+[preprocessfault] later cudaMalloc size=58480
+[preprocessfault] later cudaMalloc size=1403520
+[preprocessfault] later cudaMalloc size=1387200
+[preprocessfault] later cudaMalloc size=48
+[preprocessfault] later cudaMalloc size=48
+[preprocessfault] later cudaMalloc size=48
+[preprocessfault] later cudaMalloc size=48
+[retry-caller] second native alignment succeeded
+[preprocessfault] later cudaMalloc size=1048576
+[faultinject] remaining-owned=0 stale-releases=0
+[faultinject] resident-retry-preparations=0
+Working on Movies/control.tiff with 4 thread(s).
+
+Limitted the number of IO threads per movie to 2 thread(s).
+Movie size: X = 512 Y = 512 N = 12
+Frames to be used: 1 2 3 4 5 6 7 8 9 10 11 12
+Frame grouping: n_frames = 12, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 
+interpolate_shifts = 0
+
+Movie FFT: batch=1 R2C work=1052672 C2R work=1052672 shared work=1052672 inverse tile=1052672 bytes
+nvCOMP ingestion declined (TIFFTAG_PREDICTOR != 1); using the host reader.
+Staging this movie as native unsigned 16-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 6291456 bytes for 12 x 512 x 512 samples, released before any float movie is materialized.
+In unaligned sum, Mean = 25317.4 Std = 2276.68 Hotpixel threshold = 38977.4
+Detected 0 hot pixels to be corrected.
+Fixed hot pixels.
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+Released native uint16 host staging after device forward FFT.
+
+Global alignment:
+ Iteration 1: RMSD = 7.82361 px
+ Iteration 2: RMSD = 0.722048 px
+ Iteration 3: RMSD = 0.048227 px
+ [CUDA Global Alignment Profile]
+   Per-kernel timing:            not measured (enable with --profile)
+   Total GPU alignment time:     1.15 ms
+   Buffer VRAM:                  15.65 MiB
+   cuFFT workspace VRAM:         1.71 MiB
+   Peak GPU memory allocated:    17.36 MiB
+   Buffer placement:             borrowed dead device memory, nothing allocated
+ [CUDA Global Alignment] completed; converged=yes
+Reconstructing globally aligned frames (CUDA in-VRAM)...
+
+Local alignments:
+Patches: X = 3 Y = 3
+Batched patch alignment: 9 patches, chunk size 4 (cap 4, 3 chunk(s)); free device memory 80690 of 81153 MiB; workspace 16 MiB + cuFFT work 1 MiB, retained until alignment release.
+Batched patch alignment: device memory in use rose by at most 26 MiB (sampled after each chunk).
+Patch (1, 1): 1 / 9, X range = [0, 170), Y range = [0, 170), Center = (84, 84)
+ Iteration 1: RMSD = 0.10 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     0.24 ms
+   Buffer VRAM:                  16.51 MiB
+   cuFFT workspace VRAM:         1.34 MiB
+   Peak GPU memory allocated:    17.85 MiB
+ [CUDA Patch Alignment] completed; converged=no
+CUDA Error in /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/src-branch/src/acc/cuda/cuda_movie_session.cu:2267 : out of memory
+WARNING: resident retry preparation did not complete for patch (1, 1); classified recoverable, retrying from the downloaded frames.
+ Iteration 1: RMSD = 0.10 px
+ [CUDA Patch Alignment Profile]
+   Per-kernel timing:            not measured (enable with --profile)
+   Total GPU alignment time:     2.71 ms
+   Buffer VRAM:                  4.17 MiB
+   cuFFT workspace VRAM:         1.34 MiB
+   Peak GPU memory allocated:    5.51 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (1, 2): 2 / 9, X range = [170, 340), Y range = [0, 170), Center = (254, 84)
+ Iteration 1: RMSD = 0.07 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     0.24 ms
+   Buffer VRAM:                  16.51 MiB
+   cuFFT workspace VRAM:         1.34 MiB
+   Peak GPU memory allocated:    17.85 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (1, 3): 3 / 9, X range = [340, 510), Y range = [0, 170), Center = (424, 84)
+ Iteration 1: RMSD = 0.08 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     0.24 ms
+   Buffer VRAM:                  16.51 MiB
+   cuFFT workspace VRAM:         1.34 MiB
+   Peak GPU memory allocated:    17.85 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (2, 1): 4 / 9, X range = [0, 170), Y range = [170, 340), Center = (84, 254)
+ Iteration 1: RMSD = 0.05 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     0.24 ms
+   Buffer VRAM:                  16.51 MiB
+   cuFFT workspace VRAM:         1.34 MiB
+   Peak GPU memory allocated:    17.85 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (2, 2): 5 / 9, X range = [170, 340), Y range = [170, 340), Center = (254, 254)
+ Iteration 1: RMSD = 0.05 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     0.23 ms
+   Buffer VRAM:                  16.51 MiB
+   cuFFT workspace VRAM:         1.34 MiB
+   Peak GPU memory allocated:    17.85 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (2, 3): 6 / 9, X range = [340, 510), Y range = [170, 340), Center = (424, 254)
+ Iteration 1: RMSD = 0.04 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     0.23 ms
+   Buffer VRAM:                  16.51 MiB
+   cuFFT workspace VRAM:         1.34 MiB
+   Peak GPU memory allocated:    17.85 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (3, 1): 7 / 9, X range = [0, 170), Y range = [340, 510), Center = (84, 424)
+ Iteration 1: RMSD = 0.06 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     0.23 ms
+   Buffer VRAM:                  16.51 MiB
+   cuFFT workspace VRAM:         1.34 MiB
+   Peak GPU memory allocated:    17.85 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (3, 2): 8 / 9, X range = [170, 340), Y range = [340, 510), Center = (254, 424)
+ Iteration 1: RMSD = 0.07 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     0.23 ms
+   Buffer VRAM:                  16.51 MiB
+   cuFFT workspace VRAM:         1.34 MiB
+   Peak GPU memory allocated:    17.85 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (3, 3): 9 / 9, X range = [340, 510), Y range = [340, 510), Center = (424, 424)
+ Iteration 1: RMSD = 0.10 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            1 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     0.08 ms
+   Buffer VRAM:                  16.51 MiB
+   cuFFT workspace VRAM:         1.34 MiB
+   Peak GPU memory allocated:    17.85 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+
+Polynomial fit RMSD: X = 0.06 px Y = 0.04 px
+Summing frames before dose weighting (CUDA in-VRAM)...
+ [CUDA Unweighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 12, Size: 512x512
+  Peak VRAM: 1.00 MiB
+  Total Unweighted Reconstruction Time: 0.70 ms
+Written aligned but non-dose weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/ctest/rrc1/recoverable/Movies/control.mrc
+Full movie wall time: 0.223 s

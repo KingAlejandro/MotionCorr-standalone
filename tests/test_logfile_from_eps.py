@@ -108,6 +108,15 @@ def concats(cs: list[dict], out: Path, name: str) -> list[dict]:
     return [c for c in cs if c["list"] is None and c["out"] == str(out / name)]
 
 
+def reported(stderr: str, out: Path) -> bool:
+    # The header, batch and logfile renders run on three threads and write
+    # their messages to stderr in fragments, so a line can interleave with
+    # another thread's. Only the command, which is one fragment, is matched.
+    return ("ERROR in executing" in stderr and
+            "gs -sDEVICE=pdfwrite" in stderr and
+            "-sOutputFile=" + str(out / "logfile.pdf") + " @" in stderr)
+
+
 def inputs(c: dict) -> list[str]:
     return [a for a in c["args"] if not a.startswith("-")]
 
@@ -208,9 +217,7 @@ def check(binary: Path, fixture: Path, tmp: Path) -> None:
                 f"gs {mode}: exit {r.returncode}; the concatenation this replaced ignored "
                 "Ghostscript failure and so must the EPS-direct render")
         require("terminate called" not in r.stderr, f"gs {mode}: std::terminate")
-        require(any("ERROR in executing: gs -sDEVICE=pdfwrite" in line and
-                    "-sOutputFile=" + str(out / "logfile.pdf") + " " in line
-                    for line in r.stderr.splitlines()),
+        require(reported(r.stderr, out),
                 f"gs {mode}: the logfile.pdf failure was not reported: " + r.stderr[-1500:])
         require((out / "Movies" / "a.mrc").stat().st_size > 0, f"gs {mode}: product lost")
         # The failed concatenation this replaced left no logfile.pdf; an empty
@@ -250,9 +257,7 @@ def check(binary: Path, fixture: Path, tmp: Path) -> None:
     r = run(binary, tmp, "ab.star", out, env())
     require(r.returncode == 0, f"logfile.pdf directory: exit {r.returncode}: " + r.stderr[-1500:])
     require("terminate called" not in r.stderr, "logfile.pdf directory: std::terminate")
-    require(any("ERROR in executing: gs -sDEVICE=pdfwrite" in line and
-                "-sOutputFile=" + str(out / "logfile.pdf") + " " in line
-                for line in r.stderr.splitlines()),
+    require(reported(r.stderr, out),
             "logfile.pdf directory: the failure was not reported: " + r.stderr[-1500:])
     require("Filename::touch ERROR" not in r.stderr,
             "logfile.pdf directory: a placeholder was attempted after the failed render")

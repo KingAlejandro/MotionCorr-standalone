@@ -631,9 +631,10 @@ if(BUILD_TESTING AND CUDA)
             LABELS "cuda;hardware" TIMEOUT 900)
         # Worker-lifetime pinned staging buffer (src/acc/cuda/cuda_pinned_stage.h):
         # one owner, one free path, freed exactly once. Device-free (counting fake
-        # backend). Mutants: a freed buffer that stays owned (double free), a
-        # leaked mapping after unpin, and a leaked mapping when registration is
-        # refused.
+        # backend), plus one check on the real mapping: a fork child must not
+        # inherit it. Mutants: a freed buffer that stays owned (double free), a
+        # leaked mapping after unpin, a leaked mapping when registration is
+        # refused, and a mapping that fork children inherit.
         add_executable(test_pinned_stage tests/test_pinned_stage.cpp)
         target_link_libraries(test_pinned_stage PRIVATE motioncorr_core)
         add_test(NAME CudaPinnedStage COMMAND test_pinned_stage)
@@ -652,6 +653,9 @@ if(BUILD_TESTING AND CUDA)
         mc_cuda_mutant(CudaPinnedStageMutant tests/test_pinned_stage.cpp cuda_pinned_stage leak_on_refusal
             "            backend_->unmap(mapped, bytes);"
             "            (void)0;")
+        mc_cuda_mutant(CudaPinnedStageMutant tests/test_pinned_stage.cpp cuda_pinned_stage inherited_by_fork
+            "madvise((void *)aligned, len, MADV_DONTFORK) != 0"
+            "false")
         # The same two reconstruction-cleanup controls on the nvCOMP ingest arm.
         # run_preprocessing_failure_controls.py builds its fixture with
         # TIFFTAG_COMPRESSION = 1, so the fast path declines it and

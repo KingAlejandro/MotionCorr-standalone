@@ -24,6 +24,14 @@ void *mapHuge(size_t bytes) {
     if (aligned > base) munmap(raw, aligned - base);
     const uintptr_t end = base + span;
     if (end > aligned + len) munmap((void *)(aligned + len), end - (aligned + len));
+    // Not inherited by fork children (popen for compressed MRC, system() for gs).
+    // Otherwise every fork would copy or COW-share pinned pages, and a parent write
+    // after a COW break could leave the device reading the child's page. Required,
+    // not advisory: without it the caller falls back to cudaHostAlloc.
+    if (madvise((void *)aligned, len, MADV_DONTFORK) != 0) {
+        munmap((void *)aligned, len);
+        return nullptr;
+    }
 #ifdef MADV_HUGEPAGE
     // Advisory: refused or ignored (THP=never) just means 4 KiB pages.
     madvise((void *)aligned, len, MADV_HUGEPAGE);

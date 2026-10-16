@@ -8,10 +8,14 @@
 //   test_pinned_stage --expect-mismatch  exit 0 only if a check fails (compiled mutants)
 #include "src/acc/cuda/cuda_pinned_stage.h"
 
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <map>
+#include <sys/mman.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 using mc_cuda::PinnedBackend;
 using mc_cuda::PinnedStage;
@@ -214,6 +218,29 @@ void destructorUnmapsEvenIfUnpinFails() {
     // On thread exit the context may be gone; the mapping must still be returned.
     check(L.unmaps == 1 && L.unregisters == 1, "destructor: mapping returned although the unpin failed");
 }
+
+// The real mapping (no CUDA call involved) must not exist in a fork child: popen
+// and system() fork while the pinned pool is held. mincore() reports ENOMEM for
+// an address that is not mapped in the calling process.
+void systemMappingNotInheritedByFork() {
+    const size_t bytes = (size_t)4 << 20;
+    void *p = PinnedBackend::system().map(bytes);
+    check(p != nullptr, "fork: system mapping created");
+    if (!p) return;
+    std::memset(p, 0x5a, bytes);
+    unsigned char vec[1];
+    check(mincore(p, 4096, vec) == 0, "fork: mapping present in the parent");
+    std::fflush(nullptr);
+    const pid_t pid = fork();
+    if (pid == 0) {
+        const int rc = mincore(p, 4096, vec);
+        _exit(rc == -1 && errno == ENOMEM ? 0 : 3);
+    }
+    int status = 0;
+    check(pid > 0 && waitpid(pid, &status, 0) == pid, "fork: child ran");
+    check(WIFEXITED(status) && WEXITSTATUS(status) == 0, "fork: the child does not inherit the pinned mapping");
+    check(PinnedBackend::system().unmap(p, bytes) == 0, "fork: system mapping returned");
+}
 }  // namespace
 
 int main(int argc, char **argv) {
@@ -228,6 +255,7 @@ int main(int argc, char **argv) {
     allocationFailureHoldsNothing();
     failedUnpinKeepsOwnershipUntilRetried();
     destructorUnmapsEvenIfUnpinFails();
+    systemMappingNotInheritedByFork();
     if (expect_mismatch) {
         std::printf("%s: %d check(s) failed as the mutant should\n", g_failures ? "OK" : "MUTANT SURVIVED",
                     g_failures);

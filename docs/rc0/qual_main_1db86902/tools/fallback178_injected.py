@@ -83,7 +83,7 @@ def main():
         rec['cur'], rec['pre178'] = cur, pre
         if pre.get('rc') == 0:
             rep = identity.compare_trees(cur['out'], pre['out'])
-            rec['identity_cur_vs_pre178'] = {'status': rep.get('status'), 'detail': {kk: v for kk, v in rep.items() if kk != 'files'}}
+            rec['identity_cur_vs_pre178'] = {'status': ('PASS' if rep.get('identical') else 'FAIL'), 'detail': {kk: v for kk, v in rep.items() if kk != 'files'}}
         rec['mrc_whole_file_sha256'] = {str(p.relative_to(ROOT)): sha256_file(p) for p in sorted(ROOT.rglob('*.mrc'))}
     for p in list(ROOT.rglob('*.mrc')) + list(ROOT.rglob('*.pdf')):
         p.unlink()

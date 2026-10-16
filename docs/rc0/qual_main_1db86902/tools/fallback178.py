@@ -95,7 +95,7 @@ def main():
         ok = all(rec['runs'][k].get('rc') == 0 for k in ('cur', 'pre178'))
         if ok:
             rep = identity.compare_trees(str(root / 'out-cur'), str(root / 'out-pre178'))
-            rec['identity_cur_vs_pre178'] = {'status': rep.get('status'), 'detail': {k: v for k, v in rep.items() if k != 'files'}}
+            rec['identity_cur_vs_pre178'] = {'status': ('PASS' if rep.get('identical') else 'FAIL'), 'detail': {k: v for k, v in rep.items() if k != 'files'}}
             rec['n_products'] = {'mrc': sorted(p.name for p in (root / 'out-cur').rglob('*.mrc'))}
         # delete bulk MRC after grading, retain whole-file hashes of the current arm
         rec['mrc_whole_file_sha256'] = {str(p.relative_to(root)): sha256_file(p) for p in sorted(root.rglob('*.mrc'))}

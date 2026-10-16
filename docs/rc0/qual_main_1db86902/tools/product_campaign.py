@@ -73,6 +73,10 @@ def setup_family(fam, droot, hashes):
     name = src.name
     if fam.get('link_rename') and name.endswith('.mrc'):
         name = name[:-4] + fam['link_rename']
+    # MotionCorr writes products under the stem with '.' -> '_'; link under that spelling so the
+    # input stem equals the product stem (same file bytes, only the symlink name differs).
+    stem, dot, suffix = name.rpartition('.')
+    name = stem.replace('.', '_') + dot + suffix
     link = d / 'Movies' / name
     if link.is_symlink() or link.exists():
         link.unlink()

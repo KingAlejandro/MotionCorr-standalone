@@ -1,0 +1,37 @@
+[faultinject] cudaGetDeviceCount #1
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/20170629_00026_frameImage.tiff
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.
+000/??? sec ~~(,_,">                                                          [oo][faultinject] cudaGetDeviceCount #2
+[faultinject] cudaMalloc #1 size=1366942080
+[faultinject] cudaMalloc #2 size=1367678976
+[faultinject] cudaMalloc #3 size=56955920
+[faultinject] cudaMalloc #4 size=56986624
+[faultinject] cudaMalloc #5 size=56986624
+[faultinject] cudaMalloc #6 size=56955920
+[faultinject] cudaMalloc #7 size=16384
+[faultinject] cudaMalloc #8 size=16
+[faultinject] cudaMalloc #9 size=8192
+[faultinject] cudaMalloc #10 size=8
+[faultinject] cudaMalloc #11 size=1582112
+[faultinject] cudaMalloc #12 size=12
+[faultinject] cudaMalloc #13 size=244
+[faultinject] cudaMalloc #14 size=244
+[faultinject] cudaMalloc #15 size=5856
+[faultinject] cudaGetDeviceCount #3
+[faultinject] cudaGetDeviceCount #4
+[faultinject] cudaMalloc #16 size=56955920
+[faultinject] cudaMalloc #17 size=56955920
+[faultinject] cudaMalloc #18 size=56955920
+[faultinject] cudaGetDeviceCount #5
+[faultinject] cudaMalloc #19 size=142406656
+   1/   1 sec ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/fallback178-injected/out-trace/corrected_micrographs.star
+ Now generating logfile.pdf ... 
+ Done! Written: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/fallback178-injected/out-trace/logfile.pdf
+[faultinject] remaining-owned=0 stale-releases=0

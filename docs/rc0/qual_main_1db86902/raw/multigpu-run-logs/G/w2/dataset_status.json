@@ -1,0 +1,479 @@
+{
+  "workers_complete": true,
+  "dataset_ready": true,
+  "verdict": "PASS",
+  "input_star_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041",
+  "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+  "binary_sha256": "77db3f9268589158347f3710f904c0238e53de4e1a12703f2ca1d7cb84412a99",
+  "endpoint": "successful staged products, canonical joint STAR and full report publication",
+  "dataset_wall_s": 4.303937980905175,
+  "ownership_mode": "linux-child-subreaper",
+  "worker_phase_wall_s": 3.488198553211987,
+  "aggregate_cpu_mask": "64-71,104-111",
+  "aggregate_phase_wall_s": 0.789731103926897,
+  "cleanup": "No observed live PID/birth descendants",
+  "process_ownership_errors": [],
+  "tree_rss": {
+    "status": "INCOMPLETE",
+    "unavailable": null,
+    "errors": [
+      "Owned PID 4080520 RSS unavailable: [Errno 2] No such file or directory: '/proc/4080520/exe'"
+    ],
+    "interval_s": 0.1,
+    "units": "KiB",
+    "peak_simultaneous_sum_rss_kib": 844024,
+    "note": "Current RSS summed at each observation, not summed VmHWM. Shared pages are counted more than once. Sampled peak may miss brief peaks/children born and exited between polls; PSS is optional. Only exact PID/start roots and their observed descendants are owned.",
+    "samples": [
+      {
+        "monotonic_s": 7639681.827147396,
+        "processes": [
+          {
+            "pid": 4080508,
+            "ppid": 4079756,
+            "pgid": 4079574,
+            "start_ticks": 763968144,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22128,
+            "pss_kib": 12362
+          },
+          {
+            "pid": 4080511,
+            "ppid": 4080508,
+            "pgid": 4080511,
+            "start_ticks": 763968153,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23192,
+            "pss_kib": 13403
+          }
+        ],
+        "rss_sum_kib": 45320,
+        "pss_sum_kib": 25765,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7639682.239805846,
+        "processes": [
+          {
+            "pid": 4080508,
+            "ppid": 4079756,
+            "pgid": 4079574,
+            "start_ticks": 763968144,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22176,
+            "pss_kib": 12410
+          },
+          {
+            "pid": 4080511,
+            "ppid": 4080508,
+            "pgid": 4080511,
+            "start_ticks": 763968153,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23216,
+            "pss_kib": 13427
+          },
+          {
+            "pid": 4080519,
+            "ppid": 4080511,
+            "pgid": 4080519,
+            "start_ticks": 763968169,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+            "rss_kib": 164040,
+            "pss_kib": 154595
+          },
+          {
+            "pid": 4080520,
+            "ppid": 4080511,
+            "pgid": 4080520,
+            "start_ticks": 763968170,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+            "rss_kib": 141264,
+            "pss_kib": 130332
+          }
+        ],
+        "rss_sum_kib": 350696,
+        "pss_sum_kib": 310764,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7639682.691226191,
+        "processes": [
+          {
+            "pid": 4080508,
+            "ppid": 4079756,
+            "pgid": 4079574,
+            "start_ticks": 763968144,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22192,
+            "pss_kib": 12421
+          },
+          {
+            "pid": 4080511,
+            "ppid": 4080508,
+            "pgid": 4080511,
+            "start_ticks": 763968153,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23220,
+            "pss_kib": 13426
+          },
+          {
+            "pid": 4080519,
+            "ppid": 4080511,
+            "pgid": 4080519,
+            "start_ticks": 763968169,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+            "rss_kib": 370596,
+            "pss_kib": 352845
+          },
+          {
+            "pid": 4080520,
+            "ppid": 4080511,
+            "pgid": 4080520,
+            "start_ticks": 763968170,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+            "rss_kib": 370624,
+            "pss_kib": 352839
+          }
+        ],
+        "rss_sum_kib": 786632,
+        "pss_sum_kib": 731531,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7639683.136438208,
+        "processes": [
+          {
+            "pid": 4080508,
+            "ppid": 4079756,
+            "pgid": 4079574,
+            "start_ticks": 763968144,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22192,
+            "pss_kib": 12414
+          },
+          {
+            "pid": 4080511,
+            "ppid": 4080508,
+            "pgid": 4080511,
+            "start_ticks": 763968153,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23232,
+            "pss_kib": 13432
+          },
+          {
+            "pid": 4080519,
+            "ppid": 4080511,
+            "pgid": 4080519,
+            "start_ticks": 763968169,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+            "rss_kib": 427644,
+            "pss_kib": 408790
+          },
+          {
+            "pid": 4080520,
+            "ppid": 4080511,
+            "pgid": 4080520,
+            "start_ticks": 763968170,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+            "rss_kib": 370956,
+            "pss_kib": 352958
+          }
+        ],
+        "rss_sum_kib": 844024,
+        "pss_sum_kib": 787594,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7639683.581662238,
+        "processes": [
+          {
+            "pid": 4080508,
+            "ppid": 4079756,
+            "pgid": 4079574,
+            "start_ticks": 763968144,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22220,
+            "pss_kib": 12442
+          },
+          {
+            "pid": 4080511,
+            "ppid": 4080508,
+            "pgid": 4080511,
+            "start_ticks": 763968153,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23232,
+            "pss_kib": 13432
+          },
+          {
+            "pid": 4080519,
+            "ppid": 4080511,
+            "pgid": 4080519,
+            "start_ticks": 763968169,
+            "state": "S",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+            "rss_kib": 427152,
+            "pss_kib": 408746
+          },
+          {
+            "pid": 4080520,
+            "ppid": 4080511,
+            "pgid": 4080520,
+            "start_ticks": 763968170,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+            "rss_kib": 370976,
+            "pss_kib": 352978
+          }
+        ],
+        "rss_sum_kib": 843580,
+        "pss_sum_kib": 787598,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7639684.037984043,
+        "processes": [
+          {
+            "pid": 4080508,
+            "ppid": 4079756,
+            "pgid": 4079574,
+            "start_ticks": 763968144,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22224,
+            "pss_kib": 12446
+          },
+          {
+            "pid": 4080511,
+            "ppid": 4080508,
+            "pgid": 4080511,
+            "start_ticks": 763968153,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23244,
+            "pss_kib": 13443
+          },
+          {
+            "pid": 4080519,
+            "ppid": 4080511,
+            "pgid": 4080519,
+            "start_ticks": 763968169,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+            "rss_kib": 426556,
+            "pss_kib": 408598
+          },
+          {
+            "pid": 4080520,
+            "ppid": 4080511,
+            "pgid": 4080520,
+            "start_ticks": 763968170,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+            "rss_kib": 370984,
+            "pss_kib": 352986
+          }
+        ],
+        "rss_sum_kib": 843008,
+        "pss_sum_kib": 787473,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7639684.420468557,
+        "processes": [
+          {
+            "pid": 4080508,
+            "ppid": 4079756,
+            "pgid": 4079574,
+            "start_ticks": 763968144,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22224,
+            "pss_kib": 12448
+          },
+          {
+            "pid": 4080511,
+            "ppid": 4080508,
+            "pgid": 4080511,
+            "start_ticks": 763968153,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23248,
+            "pss_kib": 13450
+          },
+          {
+            "pid": 4080519,
+            "ppid": 4080511,
+            "pgid": 4080519,
+            "start_ticks": 763968169,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+            "rss_kib": 147448,
+            "pss_kib": 142379
+          }
+        ],
+        "rss_sum_kib": null,
+        "pss_sum_kib": 168277,
+        "errors": [
+          "Owned PID 4080520 RSS unavailable: [Errno 2] No such file or directory: '/proc/4080520/exe'"
+        ]
+      },
+      {
+        "monotonic_s": 7639684.874726413,
+        "processes": [
+          {
+            "pid": 4080508,
+            "ppid": 4079756,
+            "pgid": 4079574,
+            "start_ticks": 763968144,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22236,
+            "pss_kib": 12464
+          },
+          {
+            "pid": 4080511,
+            "ppid": 4080508,
+            "pgid": 4080511,
+            "start_ticks": 763968153,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 59044,
+            "pss_kib": 49249
+          }
+        ],
+        "rss_sum_kib": 81280,
+        "pss_sum_kib": 61713,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7639685.288509028,
+        "processes": [
+          {
+            "pid": 4080508,
+            "ppid": 4079756,
+            "pgid": 4079574,
+            "start_ticks": 763968144,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 25668,
+            "pss_kib": 15964
+          }
+        ],
+        "rss_sum_kib": 25668,
+        "pss_sum_kib": 15964,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7639685.684205272,
+        "processes": [
+          {
+            "pid": 4080508,
+            "ppid": 4079756,
+            "pgid": 4079574,
+            "start_ticks": 763968144,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 25700,
+            "pss_kib": 15981
+          },
+          {
+            "pid": 4080791,
+            "ppid": 4080508,
+            "pgid": 4080791,
+            "start_ticks": 763968503,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23056,
+            "pss_kib": 13224
+          },
+          {
+            "pid": 4080808,
+            "ppid": 4080791,
+            "pgid": 4080791,
+            "start_ticks": 763968526,
+            "state": "S",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+            "rss_kib": 17292,
+            "pss_kib": 13023
+          },
+          {
+            "pid": 4080811,
+            "ppid": 4080808,
+            "pgid": 4080791,
+            "start_ticks": 763968531,
+            "state": "S",
+            "executable": "/usr/bin/dash",
+            "rss_kib": 1908,
+            "pss_kib": 152
+          },
+          {
+            "pid": 4080813,
+            "ppid": 4080808,
+            "pgid": 4080791,
+            "start_ticks": 763968531,
+            "state": "S",
+            "executable": "/usr/bin/dash",
+            "rss_kib": 1908,
+            "pss_kib": 156
+          },
+          {
+            "pid": 4080815,
+            "ppid": 4080811,
+            "pgid": 4080791,
+            "start_ticks": 763968532,
+            "state": "R",
+            "executable": "/usr/bin/gs",
+            "rss_kib": 25992,
+            "pss_kib": 16960
+          },
+          {
+            "pid": 4080816,
+            "ppid": 4080813,
+            "pgid": 4080791,
+            "start_ticks": 763968532,
+            "state": "R",
+            "executable": "/usr/bin/gs",
+            "rss_kib": 26112,
+            "pss_kib": 17124
+          }
+        ],
+        "rss_sum_kib": 121968,
+        "pss_sum_kib": 76620,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7639686.025451319,
+        "processes": [
+          {
+            "pid": 4080508,
+            "ppid": 4079756,
+            "pgid": 4079574,
+            "start_ticks": 763968144,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 25844,
+            "pss_kib": 16284
+          }
+        ],
+        "rss_sum_kib": 25844,
+        "pss_sum_kib": 16284,
+        "errors": []
+      }
+    ]
+  }
+}

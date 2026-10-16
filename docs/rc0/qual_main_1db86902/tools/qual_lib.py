@@ -69,19 +69,41 @@ def smi_rows(query='gpu_uuid,pid,used_memory'):
 
 class GpuSampler(threading.Thread):
     """Poll nvidia-smi; keep the (uuid, MiB) rows whose pid is the child's."""
-    def __init__(self, pid, interval=0.2):
+    def __init__(self, pid, interval=0.1):
         super().__init__(daemon=True)
-        self.pid, self.interval = str(pid), interval
+        self.root, self.interval = int(pid), interval
+        self.pid = str(pid)
         self.stop_evt = threading.Event()
         self.uuids, self.peak_mib, self.samples, self.hits = set(), 0, 0, 0
+
+    def descendants(self):
+        """root pid plus all its live descendants (/usr/bin/time forks the payload, so the CUDA pid is a child)."""
+        parent = {}
+        for d in os.listdir('/proc'):
+            if d.isdigit():
+                try:
+                    stat = open(f'/proc/{d}/stat').read()
+                    parent[int(d)] = int(stat.rsplit(')', 1)[1].split()[1])
+                except (OSError, ValueError, IndexError):
+                    pass
+        fam = {self.root}
+        grew = True
+        while grew:
+            grew = False
+            for p, pp in parent.items():
+                if pp in fam and p not in fam:
+                    fam.add(p)
+                    grew = True
+        return fam
 
     def run(self):
         while not self.stop_evt.is_set():
             try:
                 rows = smi_rows()
                 self.samples += 1
+                family = self.descendants()
                 for uuid, pid, mem in rows:
-                    if pid == self.pid:
+                    if int(pid) in family:
                         self.hits += 1
                         self.uuids.add(uuid)
                         self.peak_mib = max(self.peak_mib, int(mem))
@@ -92,6 +114,31 @@ class GpuSampler(threading.Thread):
     def stop(self):
         self.stop_evt.set()
         self.join(timeout=10)
+
+
+BENCH_LOCK = '/tmp/motioncorr-bench.lock'
+
+
+def wait_bench_free(poll=60, max_wait=6 * 3600):
+    """Coordinator rule: before a heavy GPU run or build, `flock -n bench true`; if held, poll.
+
+    Only probes (non-blocking, released at once); never holds the lock and never touches its owner.
+    """
+    start = time.time()
+    polls = 0
+    while True:
+        fd = os.open(BENCH_LOCK, os.O_RDWR)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            return {'bench_polls_held': polls, 'bench_waited_s': round(time.time() - start, 1)}
+        except OSError:
+            polls += 1
+        finally:
+            os.close(fd)
+        if time.time() - start > max_wait:
+            return {'bench_polls_held': polls, 'bench_waited_s': round(time.time() - start, 1), 'timed_out': True}
+        time.sleep(poll)
 
 
 def wait_gpu1_free(max_wait=1800):
@@ -148,6 +195,11 @@ def run_case(label, binary, args, cwd, logdir, gpu, extra_env=None, witness=None
             t0 = time.time()
             fcntl.flock(lock_fd, fcntl.LOCK_EX)
             rec['lock_wait_s'] = round(time.time() - t0, 1)
+            rec['bench_gate'] = wait_bench_free()
+            if rec['bench_gate'].get('timed_out'):
+                rec['rc'] = None
+                rec['error'] = 'bench lock never free; run not started'
+                return rec
             rec['gpu1_precheck'] = wait_gpu1_free()
             if rec['gpu1_precheck'].get('timed_out'):
                 rec['rc'] = None

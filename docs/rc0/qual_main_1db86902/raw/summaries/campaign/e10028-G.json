@@ -1,0 +1,395 @@
+{
+ "family": "e10028",
+ "config": "G",
+ "movie": "Movies/031_movie.mrcs",
+ "runs": {
+  "auto": {
+   "label": "e10028-G-auto",
+   "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+   "binary_sha256": "77db3f9268589158347f3710f904c0238e53de4e1a12703f2ca1d7cb84412a99",
+   "args": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--expected_frames",
+    "16",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/out-auto/",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--ingest",
+    "auto",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/witness-auto.txt"
+   ],
+   "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/inputs/e10028",
+   "cpu_mask": "104-111",
+   "env": {
+    "CUDA_VISIBLE_DEVICES": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+    "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "1",
+    "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+   },
+   "extra_env": {},
+   "gpu_run": true,
+   "start_utc": "2026-10-16T20:19:33Z",
+   "lock_wait_s": 0.0,
+   "bench_gate": {
+    "bench_polls_held": 0,
+    "bench_waited_s": 0.0
+   },
+   "gpu1_precheck": {
+    "waited_s": 0.1,
+    "foreign": []
+   },
+   "rc": 0,
+   "wall_s": 1.717,
+   "gpu_witness": {
+    "uuids_seen_for_pid": [],
+    "peak_mib": 0,
+    "smi_samples": 7,
+    "pid_hits": 0,
+    "on_gpu1_only": null
+   },
+   "max_rss_kib": 1663436,
+   "time_exit_status": 0,
+   "elapsed": "0:01.67",
+   "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/logs/e10028-G-auto.stdout",
+   "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/logs/e10028-G-auto.time",
+   "ingest_witness": [
+    "Movies/031_movie.mrcs float"
+   ]
+  },
+  "float": {
+   "label": "e10028-G-float",
+   "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+   "binary_sha256": "77db3f9268589158347f3710f904c0238e53de4e1a12703f2ca1d7cb84412a99",
+   "args": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--expected_frames",
+    "16",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/out-float/",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--ingest",
+    "float",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/witness-float.txt"
+   ],
+   "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/inputs/e10028",
+   "cpu_mask": "104-111",
+   "env": {
+    "CUDA_VISIBLE_DEVICES": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+    "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "1",
+    "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+   },
+   "extra_env": {},
+   "gpu_run": true,
+   "start_utc": "2026-10-16T20:19:34Z",
+   "lock_wait_s": 0.0,
+   "bench_gate": {
+    "bench_polls_held": 0,
+    "bench_waited_s": 0.0
+   },
+   "gpu1_precheck": {
+    "waited_s": 0.1,
+    "foreign": []
+   },
+   "rc": 0,
+   "wall_s": 1.63,
+   "gpu_witness": {
+    "uuids_seen_for_pid": [],
+    "peak_mib": 0,
+    "smi_samples": 6,
+    "pid_hits": 0,
+    "on_gpu1_only": null
+   },
+   "max_rss_kib": 1623788,
+   "time_exit_status": 0,
+   "elapsed": "0:01.61",
+   "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/logs/e10028-G-float.stdout",
+   "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/logs/e10028-G-float.time",
+   "ingest_witness": [
+    "Movies/031_movie.mrcs float"
+   ]
+  },
+  "cpu": {
+   "label": "e10028-G-cpu",
+   "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-cpu/motioncorr",
+   "binary_sha256": "dd86cd419c43dc83d732c7b70cff2bb40c5459674ba65f9b9ba5ee85a6b26439",
+   "args": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--expected_frames",
+    "16",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/out-cpu/",
+    "--j",
+    "8",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/witness-cpu.txt"
+   ],
+   "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/inputs/e10028",
+   "cpu_mask": "104-111",
+   "env": {
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "1",
+    "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+   },
+   "extra_env": {},
+   "gpu_run": false,
+   "start_utc": "2026-10-16T20:19:36Z",
+   "rc": 0,
+   "wall_s": 6.125,
+   "max_rss_kib": 2217308,
+   "time_exit_status": 0,
+   "elapsed": "0:06.07",
+   "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/logs/e10028-G-cpu.stdout",
+   "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/logs/e10028-G-cpu.time",
+   "ingest_witness": [
+    "Movies/031_movie.mrcs float"
+   ]
+  }
+ },
+ "checks": {
+  "auto_vs_float": {
+   "strict_all_files_rc": 0,
+   "declared_route_log_allowance_rc": 0,
+   "products_only_rc": 0,
+   "log_line_diff": {
+    "only_in_A": [
+     "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/out-auto/Movies/031_movie.mrc"
+    ],
+    "only_in_B": [
+     "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10028-G/out-float/Movies/031_movie.mrc"
+    ]
+   },
+   "allowance_prefixes": [
+    "nvCOMP ingestion",
+    "Staging this movie as native",
+    "Released native uint",
+    "Materialized native uint"
+   ],
+   "detail_tail": {
+    "strict": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=PASS; different files=0\n",
+    "declared": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nAllowed added .log line prefixes (dropped from BOTH arms): 'nvCOMP ingestion', 'Staging this movie as native', 'Released native uint', 'Materialized native uint'\nComparison: complete non-PDF tree; status=PASS; different files=0\n"
+   },
+   "identity-strict": {
+    "status": "PASS",
+    "different_files": [],
+    "different_products": [],
+    "mrc_payload_sha256": {
+     "Movies/031_movie.mrc": "2134bf53f2d79c378cb4936970e24bc46d2726ec59e48fe8a80cc17507259d51"
+    }
+   },
+   "identity-declared": {
+    "status": "PASS",
+    "different_files": [],
+    "different_products": [],
+    "mrc_payload_sha256": {
+     "Movies/031_movie.mrc": "2134bf53f2d79c378cb4936970e24bc46d2726ec59e48fe8a80cc17507259d51"
+    }
+   },
+   "identity-products": {
+    "status": "PASS",
+    "different_files": [],
+    "different_products": [],
+    "mrc_payload_sha256": {
+     "Movies/031_movie.mrc": "2134bf53f2d79c378cb4936970e24bc46d2726ec59e48fe8a80cc17507259d51"
+    }
+   }
+  },
+  "cpu_vs_cuda_auto_backend_gate_DIAGNOSTIC_ONLY": {
+   "rc": 1,
+   "tail": "=========================================\n MOTIONCORR ACCEPTANCE GATE REPORT\n========================================================================\nGate Profile:      BACKEND\nOverall Status:    FAIL\n------------------------------------------------------------------------\n1. MOTION TRAJECTORY:\n   Frames evaluated:     16\n   Coordinate RMS error: 0.003201 px (threshold: 0.020000)\n   Max absolute shift:   0.007420 px (threshold: 0.050000)\n   Status:               PASS\n\n2. CORRECTED IMAGE PARITY:\n   Pixel-identical:      False\n   Image RMSE:           5.983387e+00 (threshold: 2.000000e-02)\n   Max absolute diff:    2.827344e+01 (threshold: 5.000000e+00)\n   Relative RMSE:        1.391695e-02 (threshold: 1.000000e-03 in relaxed/custom gate)\n     diagnostic status: FAIL (nonblocking; backend profile only)\n     denominator:        reference pixel population std = 4.299353e+02\n     equivalent to:      absolute RMSE <= 4.299353e-01 for this reference\n   Normalized headers:   Core metadata: 8 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               FAIL\n     ! Image RMSE 5.983387e+00 > 2.000000e-02\n     ! Image max pixel error 2.827344e+01 > 5.000000e+00\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n\n5. PROCESS METRICS:\n   Wall clock time:      0:01.67\n   User CPU time:        1.01 s\n   Peak RSS memory:      1624.45 MB (1663436 KB)\n   Process exit status:  0\n========================================================================\n",
+   "json_checks": {
+    "motion_trajectory": {
+     "num_frames": 16,
+     "max_abs_diff_x": 0.007419999999999982,
+     "max_abs_diff_y": 0.0026010000000000755,
+     "max_shift_error": 0.007419999999999982,
+     "coord_rms_error": 0.0032010553630795057,
+     "per_frame_diffs": [
+      {
+       "frame": 1,
+       "dx": 0.0,
+       "dy": 0.0
+      },
+      {
+       "frame": 2,
+       "dx": -0.00270999999999999,
+       "dy": -0.0021619999999999973
+      },
+      {
+       "frame": 3,
+       "dx": -0.00041999999999997595,
+       "dy": 0.001048000000000049
+      },
+      {
+       "frame": 4,
+       "dx": 0.00268999999999997,
+       "dy": 0.0014060000000000183
+      },
+      {
+       "frame": 5,
+       "dx": -0.0027200000000000557,
+       "dy": 0.0014849999999999586
+      },
+      {
+       "frame": 6,
+       "dx": -0.00021000000000004349,
+       "dy": 0.0026010000000000755
+      },
+      {
+       "frame": 7,
+       "dx": -0.0021400000000000308,
+       "dy": -0.0009949999999999681
+      },
+      {
+       "frame": 8,
+       "dx": -0.0007999999999999119,
+       "dy": -0.0011100000000000554
+      },
+      {
+       "frame": 9,
+       "dx": -0.0026999999999999247,
+       "dy": 0.001442999999999972
+      },
+      {
+       "frame": 10,
+       "dx": -0.007419999999999982,
+       "dy": -0.0011060000000000514
+      },
+      {
+       "frame": 11,
+       "dx": -0.000320000000000098,
+       "dy": 9.40000000000385e-05
+      },
+      {
+       "frame": 12,
+       "dx": 0.00045000000000006146,
+       "dy": 0.002599000000000018
+      },
+      {
+       "frame": 13,
+       "dx": 0.003710000000000102,
+       "dy": 3.900000000012227e-05
+      },
+      {
+       "frame": 14,
+       "dx": -0.0026999999999999247,
+       "dy": 0.0024129999999999985
+      },
+      {
+       "frame": 15,
+       "dx": -0.0027000000000001467,
+       "dy": 0.0015460000000000473
+      },
+      {
+       "frame": 16,
+       "dx": -0.002869999999999928,
+       "dy": 0.000268000000000046
+      }
+     ],
+     "passed": true,
+     "fail_reasons": []
+    },
+    "star_fields": {
+     "num_differences": 0,
+     "differences": [],
+     "passed": true
+    },
+    "corrected_image": {
+     "num_pixels": 16777216,
+     "pixel_identical": false,
+     "max_abs_pixel_error": 28.2734375,
+     "rmse": 5.983386631203309,
+     "relative_rmse": 0.013916945029583325,
+     "relative_rmse_denominator": "reference_pixel_population_std",
+     "relative_rmse_denominator_value": 429.9353499266104,
+     "ref_pixel_min": 3601.4365234375,
+     "ref_pixel_max": 13003.447265625,
+     "ref_pixel_mean": 8423.013671875,
+     "ref_pixel_std": 429.9353499266104,
+     "test_pixel_min": 3600.934814453125,
+     "test_pixel_max": 12994.05078125,
+     "test_pixel_mean": 8424.650390625,
+     "test_pixel_std": 429.97607421875,
+     "core_header_diff_bytes": 8,
+     "label_header_diff_bytes": 2,
+     "normalized_label_diff_bytes": 0,
+     "geometry_matches": true,
+     "relative_rmse_diagnostic": {
+      "value": 0.013916945029583325,
+      "threshold": 0.001,
+      "status": "FAIL",
+      "blocking": false
+     },
+     "passed": false,
+     "fail_reasons": [
+      "Image RMSE 5.983387e+00 > 2.000000e-02",
+      "Image max pixel error 2.827344e+01 > 5.000000e+00"
+     ]
+    }
+   }
+  }
+ },
+ "runs_ok": [
+  "auto",
+  "cpu",
+  "float"
+ ],
+ "output_dims_xyz": [
+  4096,
+  4096,
+  1
+ ],
+ "output_mode": 2,
+ "dims_match_family_geometry": true,
+ "mrc_whole_file_sha256": {
+  "cpu": {
+   "size": 67109888,
+   "sha256_whole_file": "1dc8d820389f36a7a453fb2f045b3e9d11bfc6a82843d4f6d62a62cb493f9bd1"
+  },
+  "float": {
+   "size": 67109888,
+   "sha256_whole_file": "0acb3aa6dcab32c24a79ca5fb530a7b3673fe754cc1c084cd0ac60b1434ea4d0"
+  },
+  "auto": {
+   "size": 67109888,
+   "sha256_whole_file": "c212d577ba3188b28db1a19efa50c97c6bb6e6bf9d2bc0d5f74380dde2f1a3e9"
+  }
+ }
+}

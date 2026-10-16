@@ -1,0 +1,28 @@
+locks held 2026-10-16T20:35:43Z
+G w1 rc 0 problems [] 6s
+G w2 rc 0 problems [] 5s
+G w4 rc 0 problems [] 4s
+G s0_vs_w1 identity FAIL products_only_rc 0 full_rc 1
+G s0_vs_w2 identity FAIL products_only_rc 0 full_rc 1
+G s0_vs_w4 identity FAIL products_only_rc 0 full_rc 1
+G w1_vs_w2 identity FAIL products_only_rc 0 full_rc 1
+G w1_vs_w4 identity FAIL products_only_rc 0 full_rc 1
+G w2_vs_w4 identity FAIL products_only_rc 0 full_rc 1
+G negative control FAIL 1
+L w1 rc 0 problems [] 7s
+L w2 rc 0 problems [] 5s
+L w4 rc 0 problems [] 5s
+L s0_vs_w1 identity FAIL products_only_rc 0 full_rc 1
+L s0_vs_w2 identity FAIL products_only_rc 0 full_rc 1
+L s0_vs_w4 identity FAIL products_only_rc 0 full_rc 1
+L w1_vs_w2 identity FAIL products_only_rc 0 full_rc 1
+L w1_vs_w4 identity FAIL products_only_rc 0 full_rc 1
+L w2_vs_w4 identity FAIL products_only_rc 0 full_rc 1
+L negative control FAIL 1
+driver rc=0 locks released 2026-10-16T20:38:27Z
+locks held 2026-10-16T20:38:38Z
+mixed w1 rc 0 problems ['worker_products_partition_input', 'worker_products_match_a_shard', 'merged_inventory_24', 'joint_star_row_order_equals_input'] 11s
+mixed w2 rc 0 problems ['worker_products_partition_input', 'worker_products_match_a_shard', 'merged_inventory_24', 'joint_star_row_order_equals_input'] 8s
+mixed identity w1 vs w2 FAIL
+driver rc=0 locks released 2026-10-16T20:39:06Z
+MG_DONE

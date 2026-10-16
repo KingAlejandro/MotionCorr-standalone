@@ -550,15 +550,15 @@ def _ref_to_comp(rel):
     return rel
 
 
-def _norm(data, root):
+def _norm(data, root, collapse_ws=True):
     for r in sorted({root.rstrip("/"), os.path.realpath(root).rstrip("/")}, key=len, reverse=True):
         data = data.replace(r.encode(), b"<ROOT>")
     for pat in (b"movie.mrc.zst", b"movie.mrc.bz2", b"movie.mrc.xz", b"movie_mrc", b"movie.mrcs", b"movie.mrc"):
         data = data.replace(pat, b"movie")
-    return re.sub(rb"[ \t]+", b" ", data)  # STAR columns are padded to the longest name
+    return re.sub(rb"[ \t]+", b" ", data) if collapse_ws else data  # STAR columns are padded to the longest name
 
 
-def compare_named(ref, a):
+def compare_named(ref, a, collapse_ws=True):
     """Plain vs compressed movie: MRC products strict (header, payload); STAR/EPS after root and movie-name
     normalisation; .log and .pdf are inventoried only, as in tools/profiling/lib/identity.py."""
     ra, rb = Path(ref["out"]), Path(a["out"])
@@ -577,7 +577,8 @@ def compare_named(ref, a):
             n_mrc += 1
             d = identity.compare_mrc(str(pa), str(pb))
         else:
-            d = None if _norm(pa.read_bytes(), str(ra)) == _norm(pb.read_bytes(), str(rb)) else "differs after normalisation"
+            d = None if _norm(pa.read_bytes(), str(ra), collapse_ws) == _norm(pb.read_bytes(), str(rb), collapse_ws) \
+                else "differs after normalisation"
         if d:
             diffs.append({"file": "%s vs %s" % (rel, other), "difference": d})
     if diffs:

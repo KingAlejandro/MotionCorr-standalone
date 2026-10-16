@@ -26,7 +26,7 @@ Input identity (all re-downloaded from `ftp.ebi.ac.uk/empiar/world_availability`
 | EMPIAR-10216 `…1739_Fractions.mrc` (mode 1, 4096²×59) | `f399bd30bfe1a9807bd494c348bfcf7d4aee312ccc18140b05abb1453ac23a56` |
 | EMPIAR-10028 `031_movie.mrcs` (mode 2, 4096²×16) | `8ce479649ec00abf46b290aee2b43343d0ba0dc67f239f0e3fd0c6875b3c7213` |
 
-Code in this directory: `real_data_identity.py` (items 1 and 7), `synth_mrc_matrix.py` (generator and runner, items 2–4 and 7), `mrc_header_stats.py` (item 5), `compare_tree_dirs.py` (item 6). Raw results are in `evidence/` (JSON per section, logs, per-movie logs and witnesses under `evidence/runlogs/`).
+Code in this directory: `real_data_identity.py` (items 1 and 7), `synth_mrc_matrix.py` (generator and runner, items 2–4 and 7), `mrc_header_stats.py` (item 5), `compare_tree_dirs.py` (item 6). Code also includes `fixture_manifest.py` (provenance). Raw results are in `evidence/` (JSON per section, logs, per-movie logs and witnesses under `evidence/runlogs/`, provenance under `evidence/provenance/`).
 
 ## 1. Real data, `--ingest auto` vs `--ingest float`
 
@@ -69,13 +69,17 @@ Expected failures (identical message on every route, no products):
 
 | check | result |
 |---|---|
-| modes 1, 0, 6, 2 × xz, zstd × `auto`/`float`: float route, products identical to the uncompressed movie (MRC strict; STAR/EPS after root and movie-name normalisation) | 16/16 |
+| modes 1, 0, 6, 2 × xz, zstd × `auto`/`float`: float route, products identical to the uncompressed movie (MRC strict; text products after normalisation, see below) | 16/16 |
 | mode 1 `.bz2`, real PATH (no `pbzip2`): explicit failure, no products | 2/2 |
 | mode 1 `.bz2` with a `pbzip2` shim that runs `bzip2 -cd`: float route, products identical | 2/2 (shim, not real pbzip2) |
 | pinned `--ingest compact` on compressed (m1, m2 × xz, zstd) and on raw float32 MRC: refuses, no products | 5/5 |
 | truncated stream (60 %), header-only stream, mid-stream corruption, zstd tail/trailer damage: explicit failure, no completion STAR | 16/16 (xz and zstd × auto/float) |
 | **xz stream missing its last byte; xz with a corrupt index CRC (all payload delivered, decoder exit 1)** | **0/4: motioncorr exits 0, publishes products and STAR** |
 | **shim decoder that emits the complete correct stream and exits 3 (xz and zstd)** | **0/2: motioncorr exits 0, publishes products and STAR** |
+
+**What "identical" means in this section.** Plain and compressed movies are named differently (`movie.mrcs` vs `movie.mrc.xz`), so the trees cannot go through `identity.py` directly. `compare_named` in `synth_mrc_matrix.py` maps the product names and then compares: the MRC product with `identity.compare_mrc` (strict, as elsewhere); every other file except `.log` and `.pdf` (inventoried only, as in `identity.py`) as text after replacing the output root and the movie name, **and collapsing runs of horizontal whitespace (`[ \t]+` to one space)**. The text files are the per-movie `.star`, `corrected_micrographs.star`, `*_shifts.eps` and the three `corrected_micrographs_all_*.eps`, and the two `.pdf.lst` lists (9 files per pair including the MRC). The collapse was added because STAR columns are padded to the longest movie name; I assumed that padding would differ. It was not tested at the time. Only these compressed comparisons collapse whitespace; the auto-vs-float comparisons in sections 1, 2, 7 and the CPU control use `identity.py` unchanged.
+
+Follow-up check (`fixture_manifest.py wscheck`, `evidence/provenance/compressed_ws_check.json`) on the retained products of all 16 xz/zstd pairs plus the 2 `.bz2`-shim pairs: **18/18 are also identical with no whitespace collapse** (root and movie-name replacement only), so the collapse hid nothing here. Controls on the per-movie STAR confirm the check can fail: one extra space is hidden by the collapse and detected without it; a changed digit is detected both ways.
 
 A control shim that exits 0 gives a normal run (2/2), so the exit-3 arms differ only in the decoder's exit status. A first version of the shims had a quoting bug and failed for the wrong reason (header read); that was caught because the control did not discriminate, and the results above are from the corrected shims. See D2.
 
@@ -142,6 +146,24 @@ Peak host RSS, 10216 (`/usr/bin/time -f %M`, one sample per cell, MiB; single ru
 | (d) `--grouping_for_ps 4`, G / L | 7821 / 7862 | 4045 / 4086 |
 
 (d) adds about 3.8 GiB on the float arm and 1.9 GiB on the compact arm. A full host Fourier movie for 59 frames of 4096×2049 complex floats is 59 × 67.1 MB = 3 777 MiB, which matches the float-arm delta; on the compact arm the host staging is released first, so the peak is that movie plus ~0.27 GiB (inference from the sizes, not separately instrumented). This is the `downloadFourierFrames` copy at `src/motioncorr_runner.cpp:3205-3212`; documented as pre-existing, not changed. Early binning removes the compact arm's RSS saving (4360 vs 2131 MiB) because it falls back to the float route.
+
+## Provenance, and what cannot be re-verified
+
+Files are under `evidence/provenance/`; they were produced on 4GPUs on 2026-10-16 after the runs, by `fixture_manifest.py`.
+
+**Synthetic fixtures.** None were deleted. `fixtures_sha256.txt` lists sha256 and size of every input file the final runs read (536 files in the `matrix`, `compressed`, `errors`, `options` and `refuse` arm directories: movies, gain references, compressed sources, damaged variants, `movies.star`; 90 distinct digests). The generator is deterministic: `fixtures_regen.json` regenerates the 36 matrix cases, the 10 option cases, the 4 raw compressed-section sources and the 6 gain references with `synth_mrc_matrix.py` in a fresh directory (same Python and numpy 2.5.3), and **50/50 match the on-disk bytes** (gains 6/6). Not regenerated: the `.xz`/`.zst`/`.bz2` files and the damaged streams, whose bytes depend on the xz/zstd/bzip2 versions on 4GPUs; they are hashed from disk only. Fixtures of superseded runs (the first matrix attempt, the first options attempt `cuda-options.v1.json`, the crashed chain) were deleted with their work directory and are not hashed.
+
+**How each binary was bound.** The wrappers (`gpu3run.sh`, `cpurun.sh`) execute `$MC_BIN`, which I exported in the invoking shell before each batch: `…/W-MRC-Q/build/cuda-nvcomp-1db86902/motioncorr` for every CUDA run, `…/build/cpu-1db86902/motioncorr` and `…/build/cpu-4b849165/motioncorr` for the CPU runs. The harness JSONs record the wrapper path as `binary`, not `MC_BIN`, and **no per-run sha256 of the executed binary was recorded.** What supports the binding instead:
+
+| binary | sha256 | file mtime (UTC) |
+|---|---|---|
+| `build/cuda-nvcomp-1db86902/motioncorr` | `45043787cf166eec28dfa0f1473c59b349f235a710a61c9a57178ca10bc0a75a` | 19:35:44 |
+| `build/cpu-1db86902/motioncorr` | `e846895b83f747468f4a5d62bca8822ae414b729707a89dd57153459d2f705a6` | 19:36:34 |
+| `build/cpu-4b849165/motioncorr` | `1bbbd73826faa90045299ec87997a6964c9df5452e29b91e38df7c2b909aa6c2` | 19:37:26 |
+
+These hashes were taken at 19:37 UTC after the builds and before the first run (`evidence/binaries.sha256`), checked by prefix after the CPU runs, and recomputed at 20:59 UTC (`binaries_rehash_20261016T2059Z.sha256`, identical). The mtimes precede every run. The stderr backtraces kept from failing runs name only these three paths (CUDA 916 lines, each CPU build 135), which covers failing arms only. Wrapper scripts: `gpu3run.sh` kept here is the final version (rewritten at 19:54 UTC to wait for the bench lock and to write `MC_RSS_FILE`); the first version (lane lock, `nvidia-smi` check, `taskset`, no bench-lock wait, no RSS) ran sections 1 to 4 and is not kept as a file. `cpurun.sh`, `run_options.sh` and `run_cpu.sh` are kept. The earlier batches (real data, matrix, refuse, compressed, errors) were started by inline shell loops that were not saved; their per-arm command lines are in the JSONs (`cmd`).
+
+**MRC outputs were deleted after comparison and cannot be rehashed.** The real-data GPU runs (sections 1 and 7) deleted each `*.mrc` immediately after the float/auto comparison; the synthetic matrix and option CUDA arms deleted the whole output directory. `identity.py` compares streams and stores no digests, so no digest of those products exists, and the "identical" verdicts for them rest on the in-run comparisons recorded in the JSONs. Independent verification would need a re-run, which was not done. Retained on scratch: the 185 MRC products of the compressed, error and CPU runs (sections 3, 4, 6), hashed in `retained_mrc_outputs_sha256.txt`; scratch may be cleaned later.
 
 ## Defects and escalations
 

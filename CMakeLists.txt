@@ -331,6 +331,11 @@ if(BUILD_TESTING)
         add_test(NAME DamagedMovie
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_damaged_movie.py
                 --binary $<TARGET_FILE:motioncorr>)
+        # RC0 F3: a truncated raw MRC movie fails its movie and publishes nothing.
+        add_test(NAME TruncatedMrcMovie
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_truncated_mrc_movie.py
+                --binary $<TARGET_FILE:motioncorr>)
+        set_tests_properties(TruncatedMrcMovie PROPERTIES TIMEOUT 600)
         add_test(NAME CompressedMovieSequence
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compressed_movie_sequence.py
                 --binary $<TARGET_FILE:motioncorr>)
@@ -480,6 +485,11 @@ if(BUILD_TESTING AND CUDA)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_signed_mrc_staging.py
                 --binary $<TARGET_FILE:motioncorr> --gpu 0)
         set_tests_properties(SignedMrcStaging PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # RC0 F3: the same truncated raw MRC movies on every --ingest route.
+        add_test(NAME TruncatedMrcMovieCuda
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_truncated_mrc_movie.py
+                --binary $<TARGET_FILE:motioncorr> --gpu 0 --ingest auto,compact,float)
+        set_tests_properties(TruncatedMrcMovieCuda PROPERTIES LABELS "cuda;hardware" TIMEOUT 900)
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         # Issue #85 lane C: uint16 staging must reproduce the float path's device

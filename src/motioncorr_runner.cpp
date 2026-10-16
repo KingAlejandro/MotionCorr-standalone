@@ -2446,6 +2446,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		// rethrow on the serial path, where run()'s caller records the failure and
 		// continues with the remaining movies.
 		std::vector<std::exception_ptr> read_errors(n_frames);
+		// Image<T>::read reports a short or unseekable raw MRC only through a negative
+		// return (-1 seek, -2 short fread); 0 is success and TIFF always returns 0.
+		// Dropping it published products built from unread frame memory. One message
+		// for every destination type, so the failure does not depend on the ingest route.
+		auto read_movie_frame = [&](auto &frame_image, int iframe) {
+			const int err = frame_image.read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
+			if (err < 0)
+				REPORT_ERROR("Failed to read frame " + integerToString(frames[iframe]) + " (0-based) of " +
+				             fn_mic + ": the movie is truncated or unreadable.");
+		};
 		#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			try {
@@ -2462,19 +2472,19 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				else if (compact_stage == COMPACT_U16)
 					// Same reader, same guards, same per-row Y-flip; only the destination
 					// sample type differs, and castPage2T's UShort branch is then a memcpy.
-					Iframes_u16[iframe].read(fn_mic, true, frames[iframe], false, true);
+					read_movie_frame(Iframes_u16[iframe], iframe);
 				else if (compact_stage == COMPACT_U8)
 					// As above; castPage2T's UChar branch is the memcpy here.
-					Iframes_u8[iframe].read(fn_mic, true, frames[iframe], false, true);
+					read_movie_frame(Iframes_u8[iframe], iframe);
 				else if (compact_stage == COMPACT_S16)
 					// MRC mode 1: castPage2T's SShort branch is the memcpy here.
-					Iframes_s16[iframe].read(fn_mic, true, frames[iframe], false, true);
+					read_movie_frame(Iframes_s16[iframe], iframe);
 				else if (compact_stage == COMPACT_S8)
 					// MRC mode 0: castPage2T's SChar branch is the memcpy here.
-					Iframes_s8[iframe].read(fn_mic, true, frames[iframe], false, true);
+					read_movie_frame(Iframes_s8[iframe], iframe);
 #endif
 				else
-					Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
+					read_movie_frame(Iframes[iframe], iframe);
 			} catch (...) {
 				read_errors[iframe] = std::current_exception();
 			}

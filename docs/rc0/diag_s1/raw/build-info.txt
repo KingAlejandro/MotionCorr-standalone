@@ -22,3 +22,11 @@ dd86cd419c43dc83d732c7b70cff2bb40c5459674ba65f9b9ba5ee85a6b26439  /mnt/clathrin/
 77db3f9268589158347f3710f904c0238e53de4e1a12703f2ca1d7cb84412a99  /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr
 src-diag: 1db869025507ac801845b4001b84e6bc0e77a645  M src/motioncorr_runner.cpp 
 src-116eb04a: 116eb04ad359cd5bf789b28809fc2047ea155b9b 
+
+== round 1 (R-S1)
+src-diag2 HEAD 1db869025507ac801845b4001b84e6bc0e77a645 modified:  M src/acc/cuda/cuda_alignpatch.cu  M src/acc/cuda/cuda_movie_session.cu  M src/motioncorr_runner.cpp ?? src/diag_ccf.h 
+build diag2-cpu rc=0 2026-10-16T22:07:34Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+7bad3c9c5336f3482b5bc90fdf918c71b27338589493846b929dee90aa750585  /mnt/clathrin/alex-motioncorr-rc0/W-DIAG-S1/build-diag2-cpu/motioncorr
+build diag2-nvcomp rc=0 2026-10-16T22:08:26Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+48085ddaf12daa9289c7a9f71d477d1018a06399fe137fdfafa28ffbe85aa06a  /mnt/clathrin/alex-motioncorr-rc0/W-DIAG-S1/build-diag2-nvcomp/motioncorr
+BUILDS-R1-DONE

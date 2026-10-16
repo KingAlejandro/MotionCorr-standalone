@@ -2308,6 +2308,27 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// into one of these two sample types is eligible here regardless of codec,
 	// strip geometry or predictor -- the decode is LibTIFF's, so this route
 	// inherits its codec semantics instead of reimplementing them.
+	// EER (#193) is rendered on the host straight into uint16 and takes the same
+	// route. A pixel gets at most one count per fraction (decoded positions are
+	// strictly increasing), except 4K -> 2K, where four source pixels merge into
+	// one. So a group holds at most eer_grouping counts, or 4 * eer_grouping at
+	// upsampling -1. Anything that could exceed uint16 stays on the float path,
+	// because the renderer's ++ would wrap silently.
+	const long long eer_max_count = (long long)eer_grouping * (eer_upsampling == -1 ? 4 : 1);
+	const bool eer_fits_u16 = isEER && eer_max_count <= 65535;
+	if (isEER && !eer_fits_u16 && ingest_mode != INGEST_FLOAT && movie_session)
+		logfile << "EER grouping " << eer_grouping << " at upsampling " << eer_upsampling
+		        << " can exceed 65535 counts per pixel; using the float movie." << std::endl;
+	if (ingest_mode != INGEST_FLOAT &&
+	    !nvcomp_ingested && movie_session && eer_fits_u16) {
+		compact_stage = COMPACT_U16;
+		u16_staging.bind(Iframes_u16, n_frames, ny, nx);
+		logfile << "Staging this movie as native unsigned 16-bit; the integer to float "
+		        << "expansion and the gain are applied on the device; host staging is one "
+		        << "mapping of " << u16_staging.bytes() << " bytes for " << n_frames
+		        << " x " << nx << " x " << ny << " samples, released before any float "
+		        << "movie is materialized." << std::endl;
+	}
 	if (ingest_mode != INGEST_FLOAT &&
 	    !nvcomp_ingested && movie_session && !isEER && !isCompressedMRC &&
 	    ((FileName)fn_mic.getFileFormat()).contains("tif") &&
@@ -2339,7 +2360,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	if (ingest_mode == INGEST_COMPACT && compact_stage == COMPACT_NONE)
 		REPORT_ERROR("--ingest compact was requested but the compact native staging did not "
 		             "apply to " + fn_mic + ". Either there is no resident CUDA session, or "
-		             "this movie is not an unsigned 8- or 16-bit TIFF. Refusing to continue "
+		             "this movie is not an unsigned 8- or 16-bit TIFF or an EER whose grouped "
+		             "counts fit uint16. Refusing to continue "
 		             "on a different path under a pinned --ingest.");
 #endif
 
@@ -2376,6 +2398,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			try {
+#ifdef _CUDA_ENABLED
+				if (isEER && compact_stage == COMPACT_U16)
+					renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes_u16[iframe]());
+				else
+#endif
 				if (isEER)
 					renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
 				else if (isCompressedMRC)

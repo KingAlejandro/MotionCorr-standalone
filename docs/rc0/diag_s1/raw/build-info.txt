@@ -1,0 +1,24 @@
+src-diag HEAD 1db869025507ac801845b4001b84e6bc0e77a645 modified:  M src/motioncorr_runner.cpp 
+src-116eb04a HEAD 116eb04ad359cd5bf789b28809fc2047ea155b9b modified: 
+build diag-cpu rc=0 2026-10-16T21:39:31Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+11ce169a5e60cf0517dd644b62f3141ad6ef7c3cc1f418c29df3a9cb3b824a74  /mnt/clathrin/alex-motioncorr-rc0/W-DIAG-S1/build-diag-cpu/motioncorr
+build diag-nvcomp rc=0 2026-10-16T21:41:01Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+037bbd15f16020215b4e1ce26c9b92e4159b9e3551c5a0bfee42dfe4d78ec6eb  /mnt/clathrin/alex-motioncorr-rc0/W-DIAG-S1/build-diag-nvcomp/motioncorr
+build 116-cpu rc=0 2026-10-16T21:42:11Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+7ad59e89e2e3cceb2cf117c53425787bfc14d74f930ec50c9303213f89f006a5  /mnt/clathrin/alex-motioncorr-rc0/W-DIAG-S1/build-116-cpu/motioncorr
+build 116-nvcomp rc=0 2026-10-16T21:43:35Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+6d27823a80cb6031c3a1514b26c56ee37c61c251c7028c1bb6940a479bf8dd18  /mnt/clathrin/alex-motioncorr-rc0/W-DIAG-S1/build-116-nvcomp/motioncorr
+BUILDS-DONE
+host 4-gpu-vm kernel 6.8.0-136-generic
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, NVIDIA A100 80GB PCIe, 570.86.10
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, NVIDIA A100 80GB PCIe, 570.86.10
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, NVIDIA A100 80GB PCIe, 570.86.10
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, NVIDIA A100 80GB PCIe, 570.86.10
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Cuda compilation tools, release 12.8, V12.8.61
+nvCOMP 5.3.0.16 (~/nvcomp53)
+reused W-QUAL binaries (sha256 verified against PR #209 build-info.txt):
+dd86cd419c43dc83d732c7b70cff2bb40c5459674ba65f9b9ba5ee85a6b26439  /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-cpu/motioncorr
+77db3f9268589158347f3710f904c0238e53de4e1a12703f2ca1d7cb84412a99  /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr
+src-diag: 1db869025507ac801845b4001b84e6bc0e77a645  M src/motioncorr_runner.cpp 
+src-116eb04a: 116eb04ad359cd5bf789b28809fc2047ea155b9b 

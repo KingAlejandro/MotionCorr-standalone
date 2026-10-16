@@ -1,0 +1,47 @@
+{
+ "name": "c03_g_g49_up1_gain",
+ "desc": "12963 corpus default g49 up1 with gain (39 groups)",
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.282051",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "8",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "49",
+  "--eer_upsampling",
+  "1",
+  "--expected_frames",
+  "39",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--gainref",
+  "gain.gain"
+ ],
+ "arms": [
+  {
+   "name": "auto",
+   "ingest": "auto"
+  },
+  {
+   "name": "float",
+   "ingest": "float"
+  }
+ ],
+ "compare": [
+  "auto",
+  "float"
+ ],
+ "keep_mrc": false,
+ "witness": true
+}

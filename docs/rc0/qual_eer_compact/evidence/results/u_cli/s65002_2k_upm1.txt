@@ -1,0 +1,36 @@
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/movie.eer
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.
+000/??? sec ~~(,_,">                                                          [oo]in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/renderEER.cpp, line 229
+ERROR: 
+For subpixel_bits = 2, eer_upsamling must be 1 or 2.
+=== Backtrace  ===
+../../build/cpu-1db86902/motioncorr(+0x55737) [0x56899fb55737]
+../../build/cpu-1db86902/motioncorr(+0x2f5b4) [0x56899fb2f5b4]
+../../build/cpu-1db86902/motioncorr(+0x1bc6d5) [0x56899fcbc6d5]
+../../build/cpu-1db86902/motioncorr(+0x1bdd24) [0x56899fcbdd24]
+../../build/cpu-1db86902/motioncorr(+0x10ade0) [0x56899fc0ade0]
+../../build/cpu-1db86902/motioncorr(+0x4ba26) [0x56899fb4ba26]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x78988cc2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x78988cc2a28b]
+../../build/cpu-1db86902/motioncorr(+0x4bfd5) [0x56899fb4bfd5]
+==================
+ERROR: 
+For subpixel_bits = 2, eer_upsamling must be 1 or 2.
+Continuing with the remaining movies.
+   0/   0 sec ............................................................~~(,_,"> yum!
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/motioncorr_runner.cpp, line 1089
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/movie.eer. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+../../build/cpu-1db86902/motioncorr(+0x55737) [0x56899fb55737]
+../../build/cpu-1db86902/motioncorr(+0x2d093) [0x56899fb2d093]
+../../build/cpu-1db86902/motioncorr(+0x4ba26) [0x56899fb4ba26]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x78988cc2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x78988cc2a28b]
+../../build/cpu-1db86902/motioncorr(+0x4bfd5) [0x56899fb4bfd5]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/movie.eer. Successful per-movie outputs were retained; joint output was not generated.

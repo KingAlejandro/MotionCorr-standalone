@@ -1,0 +1,44 @@
+{
+ "name": "o3_boundary_up1_g65535",
+ "desc": "boundary: 2K det, up1, g65535 -> exactly 65535 counts at one pixel (fits uint16)",
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.0",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "8",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "65535",
+  "--eer_upsampling",
+  "1",
+  "--skip_defect"
+ ],
+ "arms": [
+  {
+   "name": "auto",
+   "ingest": "auto"
+  },
+  {
+   "name": "float",
+   "ingest": "float"
+  },
+  {
+   "name": "compact",
+   "ingest": "compact"
+  }
+ ],
+ "compare": [
+  "auto",
+  "float"
+ ],
+ "keep_mrc": false,
+ "witness": true
+}

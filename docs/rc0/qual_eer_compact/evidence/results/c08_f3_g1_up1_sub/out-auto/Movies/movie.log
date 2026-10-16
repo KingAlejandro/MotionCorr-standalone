@@ -1,0 +1,43 @@
+Working on Movies/movie.eer with 8 thread(s).
+
+Movie size: X = 4096 Y = 4096 N = 2331
+Frames to be used: 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140
+Frame grouping: n_frames = 40, requested group size = 1
+ | 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109 | 110 | 111 | 112 | 113 | 114 | 115 | 116 | 117 | 118 | 119 | 120 | 121 | 122 | 123 | 124 | 125 | 126 | 127 | 128 | 129 | 130 | 131 | 132 | 133 | 134 | 135 | 136 | 137 | 138 | 139 | 140 | 
+interpolate_shifts = 0
+
+Movie FFT: batch=1 R2C work=67141632 C2R work=67141632 shared work=67141632 inverse tile=67141632 bytes
+Staging this movie as native unsigned 16-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 1342177280 bytes for 40 x 4096 x 4096 samples, released before any float movie is materialized.
+In unaligned sum, Mean = 0.875329 Std = 0.926517 Hotpixel threshold = 6.43443
+Detected 451 hot pixels to be corrected.
+Fixed hot pixels.
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+Released native uint16 host staging after device forward FFT.
+
+Global alignment:
+ Iteration 1: RMSD = 2.52604 px
+ Iteration 2: RMSD = 1.45914 px
+ Iteration 3: RMSD = 0.320789 px
+ [CUDA Global Alignment Profile]
+   Per-kernel timing:            not measured (enable with --profile)
+   Total GPU alignment time:     17.60 ms
+   Buffer VRAM:                  2887.57 MiB
+   cuFFT workspace VRAM:         160.31 MiB
+   Peak GPU memory allocated:    3047.89 MiB
+   Buffer placement:             borrowed dead device memory, nothing allocated
+ [CUDA Global Alignment] completed; converged=yes
+Reconstructing globally aligned frames (CUDA in-VRAM)...
+
+Local alignments:
+Patches: X = 1 Y = 1
+Too few patches to do local alignments. Local alignment is skipped.
+Pre-exposure: = 0.00
+Dose weighting and summing frames (CUDA in-VRAM)...
+Dose-weighting scratch borrowed from the consumed real-space movie
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 40, Size: 4096x4096
+  Peak VRAM: 0.00 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 30.70 ms
+Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/runs/c08_f3_g1_up1_sub/out-auto/Movies/movie.mrc
+Full movie wall time: 1.942 s

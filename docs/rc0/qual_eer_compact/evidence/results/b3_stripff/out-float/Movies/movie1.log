@@ -1,0 +1,43 @@
+Working on Movies/movie1.eer with 8 thread(s).
+
+Movie size: X = 4096 Y = 4096 N = 58
+Frames to be used: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58
+Frame grouping: n_frames = 58, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 | 48 | 49 | 50 | 51 | 52 | 53 | 54 | 55 | 56 | 57 | 58 | 
+interpolate_shifts = 0
+
+Movie FFT: batch=1 R2C work=67141632 C2R work=67141632 shared work=67141632 inverse tile=67141632 bytes
+In unaligned sum, Mean = 50.6765 Std = 7.76138 Hotpixel threshold = 97.2448
+Detected 9861 hot pixels to be corrected.
+Fixed hot pixels.
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+
+Global alignment:
+ Iteration 1: RMSD = 15.9838 px
+ Iteration 2: RMSD = 2.61491 px
+ Iteration 3: RMSD = 1.60538 px
+ Iteration 4: RMSD = 0.628812 px
+ Iteration 5: RMSD = 0.22596 px
+ [CUDA Global Alignment Profile]
+   Per-kernel timing:            not measured (enable with --profile)
+   Total GPU alignment time:     39.74 ms
+   Buffer VRAM:                  4184.28 MiB
+   cuFFT workspace VRAM:         232.45 MiB
+   Peak GPU memory allocated:    4416.73 MiB
+   Buffer placement:             borrowed dead device memory, nothing allocated
+ [CUDA Global Alignment] completed; converged=yes
+Reconstructing globally aligned frames (CUDA in-VRAM)...
+
+Local alignments:
+Patches: X = 1 Y = 1
+Too few patches to do local alignments. Local alignment is skipped.
+Pre-exposure: = 0.00
+Dose weighting and summing frames (CUDA in-VRAM)...
+Dose-weighting scratch borrowed from the consumed real-space movie
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 58, Size: 4096x4096
+  Peak VRAM: 0.00 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 39.31 ms
+Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/runs/b3_stripff/out-float/Movies/movie1.mrc
+Full movie wall time: 5.971 s

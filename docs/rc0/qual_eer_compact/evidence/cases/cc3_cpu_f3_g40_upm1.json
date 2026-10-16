@@ -1,0 +1,38 @@
+{
+ "name": "cc3_cpu_f3_g40_upm1",
+ "desc": "CPU-only: Falcon3 g40 up -1 config G",
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cpu-1db86902/motioncorr",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.0",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "8",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "40",
+  "--eer_upsampling",
+  "-1",
+  "--expected_frames",
+  "58"
+ ],
+ "arms": [
+  {
+   "name": "default",
+   "ingest": null
+  },
+  {
+   "name": "default",
+   "ingest": null
+  }
+ ],
+ "compare": null,
+ "keep_mrc": false,
+ "witness": false
+}

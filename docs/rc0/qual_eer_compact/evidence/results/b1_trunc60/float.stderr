@@ -1,0 +1,28 @@
+TIFFAdvanceDirectory: Error fetching directory count.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/motioncorr_runner.cpp, line 1018
+ERROR: 
+Movie Movies/movie2.eer frame count mismatch: expected 58 frames, but decoded 34 frames.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x68207) [0x60d7e0557207]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x3ab22) [0x60d7e0529b22]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x5df06) [0x60d7e054cf06]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x70b281a2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x70b281a2a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x5ea75) [0x60d7e054da75]
+==================
+ERROR: 
+Movie Movies/movie2.eer frame count mismatch: expected 58 frames, but decoded 34 frames.
+Continuing with the remaining movies.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/motioncorr_runner.cpp, line 1089
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/movie2.eer. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x68207) [0x60d7e0557207]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x3bc79) [0x60d7e052ac79]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x5df06) [0x60d7e054cf06]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x70b281a2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x70b281a2a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x5ea75) [0x60d7e054da75]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/movie2.eer. Successful per-movie outputs were retained; joint output was not generated.

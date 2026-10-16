@@ -1,0 +1,36 @@
+Working on Movies/movie.eer with 8 thread(s).
+
+Movie size: X = 8192 Y = 8192 N = 3
+Frames to be used: 1 2 3
+Frame grouping: n_frames = 3, requested group size = 1
+ | 1 | 2 | 3 | 
+interpolate_shifts = 0
+
+Movie FFT: batch=1 R2C work=268500992 C2R work=268500992 shared work=268500992 inverse tile=268500992 bytes
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+
+Global alignment:
+ Iteration 1: RMSD = 5.70715e-07 px
+ [CUDA Global Alignment Profile]
+   Per-kernel timing:            not measured (enable with --profile)
+   Total GPU alignment time:     2.34 ms
+   Buffer VRAM:                  888.26 MiB
+   cuFFT workspace VRAM:         48.05 MiB
+   Peak GPU memory allocated:    936.30 MiB
+   Buffer placement:             borrowed dead device memory, nothing allocated
+ [CUDA Global Alignment] completed; converged=yes
+Reconstructing globally aligned frames (CUDA in-VRAM)...
+
+Local alignments:
+Patches: X = 1 Y = 1
+Too few patches to do local alignments. Local alignment is skipped.
+Pre-exposure: = 0.00
+Dose weighting and summing frames (CUDA in-VRAM)...
+Dose-weighting scratch borrowed from the consumed real-space movie
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 3, Size: 8192x8192
+  Peak VRAM: 0.00 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 35.68 ms
+Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/runs/o5_ovf_up2_g65536_8K/out-float/Movies/movie.mrc
+Full movie wall time: 35.402 s

@@ -1,0 +1,45 @@
+{
+ "name": "c16_g_g150_up3",
+ "desc": "12963 g150 up3 (16384x16384), 12 groups, rem 111",
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.282051",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "8",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "150",
+  "--eer_upsampling",
+  "3",
+  "--expected_frames",
+  "12",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5"
+ ],
+ "arms": [
+  {
+   "name": "auto",
+   "ingest": "auto"
+  },
+  {
+   "name": "float",
+   "ingest": "float"
+  }
+ ],
+ "compare": [
+  "auto",
+  "float"
+ ],
+ "keep_mrc": false,
+ "witness": true
+}

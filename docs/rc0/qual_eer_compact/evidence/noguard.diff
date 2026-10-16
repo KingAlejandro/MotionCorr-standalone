@@ -1,0 +1,4 @@
+2345c2345
+< 	const bool eer_fits_u16 = isEER && eer_max_count <= 65535;
+---
+> 	const bool eer_fits_u16 = isEER; /* NEGATIVE CONTROL: guard removed */ (void)eer_max_count;

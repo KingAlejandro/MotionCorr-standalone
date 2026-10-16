@@ -418,6 +418,11 @@ if(BUILD_TESTING AND CUDA)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_stage_profile.py
                 --binary $<TARGET_FILE:motioncorr> --gpu 0)
         set_tests_properties(StageProfileDeviceTiming PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Issue #194: raw integer MRC (modes 0, 1, 6) through the compact staging.
+        add_test(NAME SignedMrcStaging
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_signed_mrc_staging.py
+                --binary $<TARGET_FILE:motioncorr> --gpu 0)
+        set_tests_properties(SignedMrcStaging PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         # Issue #85 lane C: uint16 staging must reproduce the float path's device

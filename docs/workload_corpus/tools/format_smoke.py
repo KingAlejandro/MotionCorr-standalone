@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Decode-coverage smoke runs of the format families on real EMPIAR data (#186 follow-up).
 
 One process per family, global alignment (config G), CPU or --gpu with an ingest

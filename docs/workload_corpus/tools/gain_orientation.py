@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Which --gain_rot/--gain_flip matches a movie? Correlate pixel-level structure.
 
 For each candidate run directory, MotionCorr writes the gain it applied (rotated

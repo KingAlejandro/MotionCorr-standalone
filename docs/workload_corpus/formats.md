@@ -8,17 +8,19 @@ not been run (Limitations).
 
 ## Result in brief
 
-- **Census.** 2,940 EMPIAR entries were catalogued through the EMPIAR API and the headers of 2,651
-  files from 1,960 imagesets were read with HTTP range requests. 1,464 movie imagesets
-  ("micrographs - multiframe") were classified by their actual encoding, which often disagrees
-  with the deposited metadata (e.g. EMPIAR-10216 says unsigned 16-bit; its header is mode 1).
-- **Common encodings the corpus lacked:** signed 16-bit TIFF with Deflate code 32946 (EPU Falcon,
-  86 imagesets), 16-bit LZW TIFF (143), bzip2-compressed MRC (48), uint16 MRC (23), float32 TIFF
-  (12). Rarer: SerialEM 4-bit MRC (1), zstd MRC (1), 8192^2 frames (DE Apollo).
+- **Census.** 2,940 EMPIAR entries were catalogued through the EMPIAR API. Of 2,273 imagesets
+  probed, 2,057 yielded at least one header read by HTTP range request (2,651 probe records: 2,420
+  headers read, 221 imagesets where the crawler found no movie file, 10 fetch failures). 1,461
+  distinct movie imagesets ("micrographs - multiframe") were classified by their actual encoding
+  (1,464 entries: three imagesets hold two encodings), which often disagrees with the deposited
+  metadata (e.g. EMPIAR-10216 says unsigned 16-bit; its header is mode 1).
+- **Common encodings the corpus lacked:** signed 16-bit Deflate TIFF (EPU Falcon; 70 imagesets with
+  code 32946, 16 with code 8), 16-bit LZW TIFF (143), bzip2-compressed MRC (48), uint16 MRC (23),
+  float32 TIFF (12). Rarer: SerialEM 4-bit MRC (1), zstd MRC (1), 8192^2 frames (DE Apollo).
 - **Added:** eight real families (two movies each, 10.8 GB): `e10500f3`, `e10342`, `e10740`,
   `e10374`, `e11217`, `e10202`, `e10666`, `e11404` (`families-formats.json`).
-- **Not found in EMPIAR:** EER 65000, 65002, 2K EER or the legacy EER container (every one of 264
-  EER imagesets probed is 65001 at 4096^2); IMOD packed 4-bit TIFF; float16, signed 8-bit or PackBits
+- **Not found in the files read:** EER 65000, 65002, 2K EER or the legacy EER container (EER headers
+  were read from 361 files in 211 imagesets, 196 of them movie imagesets: all are 65001 at 4096^2); IMOD packed 4-bit TIFF; float16, signed 8-bit or PackBits
   movies; xz-compressed MRC. These are covered by the synthetic fixtures (`InputFormats`, test-data
   README section 1c), which also cover every rejected encoding.
 - **Decode smoke runs** (SCARF CPU, main's source): all eight new families decode and correct with
@@ -51,8 +53,11 @@ byte-identical to `--ingest float` for every fixture (254 checks pass; test-data
 Method: `tools/empiar_catalogue.py` read the API record of entries 10001-13399 (2,940 entries,
 3,098 movie imagesets by metadata). `tools/probe_formats.py` listed each selected imageset
 directory and parsed only headers: the MRC header, the TIFF/BigTIFF header and first (and second)
-directory, or the compression suffix. All EER, MRC, non-8-bit TIFF and other imagesets were probed;
-8-bit TIFF was sampled (every sixth entry), so its counts below are about a sixth of the total.
+directory, or the compression suffix. All EER, MRC, non-8-bit TIFF and other imagesets were
+selected; 8-bit TIFF was sampled (every sixth entry), so its counts below are about a sixth of the
+total. One or two files per imageset were read; 221 imagesets had no movie file the crawler could
+find within three directory levels and 10 fetches failed, so absence claims cover only the files
+read.
 `tools/summarize_census.py` counts imagesets in the "micrographs - multiframe" category and
 excludes gain, reference and single-frame files. Raw output: `evidence/formats/census/`.
 
@@ -64,7 +69,8 @@ excludes gain, reference and single-frame files. Raw output: `evidence/formats/c
 | MRC mode 2 (incl. extended headers) | 105 | 12494, 10384 | e10028 | `mrc_mode2_f32`, `_bigendian` |
 | MRC mode 1 (incl. FEI1/FEI2/SERI headers) | 133 | 10050, 10844, 11554 | e10216 | `mrc_mode1_s16`, `_bigendian`, `_seri` |
 | BigTIFF / TIFF u16 LZW | 143 | 10334, 10342, 10200 | **e10342**, **e11404** (8192^2) | `tiff_u16_lzw`, `_pred2` |
-| TIFF s16 Deflate (32946 or 8) | 86 | 10500, 10518, 10243 | **e10500f3** | `tiff_s16_deflate_old_epu` |
+| TIFF s16 Deflate, code 32946 | 70 | 10500, 10518, 10608 | **e10500f3** | `tiff_s16_deflate_old_epu`, `tiff_s16_wide_deflate_old_epu` |
+| TIFF s16 Deflate, code 8 | 16 | 10243, 10264, 10308 | | (same decode path) |
 | MRC mode 0 | 72 | 10025, 10164 | e10164 | `mrc_mode0_s8` |
 | MRC compressed `.bz2` | 48 | 10130, 11217 | **e11217** | `mrc_compressed_bz2` |
 | MRC mode 6 (incl. extended headers) | 23 | 10096, 10740, 10292 | **e10740** | `mrc_mode6_u16`, `_fei2` |
@@ -78,7 +84,7 @@ excludes gain, reference and single-frame files. Raw output: `evidence/formats/c
 | MRC mode 101 | 1 | 10374 | **e10374** | `mrc_mode101_4bit` |
 | MRC compressed `.zst` | 1 | 10202 | **e10202** | `mrc_compressed_zst` |
 | TIFF u8 uncompressed (incl. big-endian) | 98 | 10463, 12239 | | `tiff_u8_none` |
-| EER 65000 / 65002 / 2K / legacy | 0 of 264 probed | | | `eer_2k_65000`, `eer_*_65002`, `eer_legacy_container` |
+| EER 65000 / 65002 / 2K / legacy | 0 (of 211 imagesets with an EER header read) | | | `eer_2k_65000`, `eer_*_65002`, `eer_legacy_container` |
 | IMOD packed 4-bit TIFF | 0 | (10251, 12550 are labelled 4-bit; both are 8-bit) | | `tiff_4bit_packed_k2` (heavy) |
 | float16, s8, PackBits movies; `.mrc.xz` | 0 | (mode 12 files found are particle stacks) | | `mrc_mode12_f16`, `tiff_s8`, `*_packbits`, `mrc_compressed_xz` |
 
@@ -198,10 +204,11 @@ A product-based stripe metric pointed the same way but by only 9%, which is why 
 | EPU EER and `.gain` files carry TIFF orientation tags 2, 4, 5, 6, 7; the readers ignore them, consistently for movie and gain. | census | upstream behaviour |
 | The tutorial movies are 16-bit, not 8-bit as `corpus.md`/`families.json` label them. | nvCOMP route in the #186 GPU runs; header | corrected in `corpus.md` |
 
-Synthetic-only findings (no real file of that kind exists in EMPIAR) are in the test-data README,
-section 1c: 4K EER 65002 at `--eer_upsampling 2` loses the y subpixel; 2K EER with 4-bit symbols at
-upsampling 2 would write past the frame; the legacy EER path reads uninitialised members; odd-width
-4-bit MRC is read without IMOD's row padding.
+Synthetic-only findings (no real file of that kind was found in EMPIAR) are in the test-data
+README, section 1c: 4K EER 65002 at `--eer_upsampling 2` loses the y subpixel; 2K EER with 4-bit
+symbols at upsampling 2 places electrons on the wrong subpixels (the OR in `render2K_to_4K` keeps
+them inside the frame); the legacy EER path reads uninitialised members; odd-width 4-bit MRC is
+read without IMOD's row padding.
 
 ## Limitations
 

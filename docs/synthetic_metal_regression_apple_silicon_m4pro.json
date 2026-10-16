@@ -1,0 +1,233 @@
+{
+  "system": {
+    "os": "macOS 26.6.2 (Darwin 26.2.0, arm64)",
+    "hardware": "Apple M4 Pro (14 CPU cores, 20 GPU cores, 24 GB Unified Memory)",
+    "compiler": "Apple Clang 17.0.0 (Metal 3 / MPSGraph)"
+  },
+  "cases": [
+    {
+      "case_name": "integer_shift_128x128",
+      "fixture_star": "synthetic_128x128_8frames.star",
+      "cpu_exit": 0,
+      "metal_exit": 0,
+      "metal_profile": {
+        "h2d_ms": 0.08,
+        "kernel_ms": 17.28,
+        "fft_ms": 118.51,
+        "d2h_ms": 0.02,
+        "total_metal_alignment_ms": 200.05,
+        "peak_gpu_memory_mib": 1.61,
+        "movie_wall_time_s": 0.206
+      },
+      "metal_vs_cpu": {
+        "gate_profile": "relaxed",
+        "tolerances": {
+          "max_shift_error": 0.05,
+          "shift_rmse": 0.02,
+          "image_rmse": 0.02,
+          "image_max_err": 5.0,
+          "image_relative_rmse": 0.001
+        },
+        "checks": {
+          "motion_trajectory": {
+            "num_frames": 8,
+            "max_abs_diff_x": 0.00439,
+            "max_abs_diff_y": 0.004583000000000004,
+            "max_shift_error": 0.004583000000000004,
+            "coord_rms_error": 0.004060683886366954,
+            "per_frame_diffs": [
+              {
+                "frame": 1,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 2,
+                "dx": -0.00439,
+                "dy": -0.0016500000000000004
+              },
+              {
+                "frame": 3,
+                "dx": -0.0018000000000000238,
+                "dy": -0.0028970000000000384
+              },
+              {
+                "frame": 4,
+                "dx": -0.0005899999999999794,
+                "dy": -0.003550999999999971
+              },
+              {
+                "frame": 5,
+                "dx": -0.0016500000000001513,
+                "dy": -0.004583000000000004
+              },
+              {
+                "frame": 6,
+                "dx": -0.003670000000000062,
+                "dy": -0.0017480000000000828
+              },
+              {
+                "frame": 7,
+                "dx": -0.003469999999999862,
+                "dy": -0.0007949999999998791
+              },
+              {
+                "frame": 8,
+                "dx": -0.004100000000000215,
+                "dy": -0.00394899999999998
+              }
+            ],
+            "passed": true,
+            "fail_reasons": []
+          },
+          "star_fields": {
+            "num_differences": 0,
+            "differences": [],
+            "passed": true
+          },
+          "corrected_image": {
+            "num_pixels": 16384,
+            "pixel_identical": false,
+            "max_abs_pixel_error": 0.24554443359375,
+            "rmse": 0.03865797377134807,
+            "relative_rmse": 0.000601386386025504,
+            "ref_pixel_min": 787.4429931640625,
+            "ref_pixel_max": 1218.8272705078125,
+            "ref_pixel_mean": 834.9652099609375,
+            "ref_pixel_std": 64.28142483709074,
+            "test_pixel_min": 787.4282836914062,
+            "test_pixel_max": 1218.8214111328125,
+            "test_pixel_mean": 834.9652099609375,
+            "test_pixel_std": 64.28145599365234,
+            "core_header_diff_bytes": 4,
+            "label_header_diff_bytes": 1,
+            "normalized_label_diff_bytes": 0,
+            "passed": false,
+            "fail_reasons": [
+              "Image RMSE 3.865797e-02 > 2.000000e-02"
+            ]
+          }
+        },
+        "overall_status": "FAIL",
+        "coverage": {
+          "motion_and_star": true,
+          "corrected_image": true,
+          "complete": true
+        }
+      },
+      "metal_vs_ground_truth": {}
+    },
+    {
+      "case_name": "subpixel_shift_128x128",
+      "fixture_star": "synthetic_128x128_8frames_subpixel.star",
+      "cpu_exit": 0,
+      "metal_exit": 0,
+      "metal_profile": {
+        "h2d_ms": 0.04,
+        "kernel_ms": 7.85,
+        "fft_ms": 56.38,
+        "d2h_ms": 0.01,
+        "total_metal_alignment_ms": 70.38,
+        "peak_gpu_memory_mib": 1.61,
+        "movie_wall_time_s": 0.076
+      },
+      "metal_vs_cpu": {
+        "gate_profile": "relaxed",
+        "tolerances": {
+          "max_shift_error": 0.05,
+          "shift_rmse": 0.02,
+          "image_rmse": 0.02,
+          "image_max_err": 5.0,
+          "image_relative_rmse": 0.001
+        },
+        "checks": {
+          "motion_trajectory": {
+            "num_frames": 8,
+            "max_abs_diff_x": 0.0041599999999999415,
+            "max_abs_diff_y": 0.0027780000000001692,
+            "max_shift_error": 0.0041599999999999415,
+            "coord_rms_error": 0.002570524216964364,
+            "per_frame_diffs": [
+              {
+                "frame": 1,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 2,
+                "dx": -0.00029999999999996696,
+                "dy": 0.0006240000000000134
+              },
+              {
+                "frame": 3,
+                "dx": -0.0041599999999999415,
+                "dy": 0.00019199999999996997
+              },
+              {
+                "frame": 4,
+                "dx": -0.0014600000000000168,
+                "dy": 0.0014520000000000088
+              },
+              {
+                "frame": 5,
+                "dx": 4.0000000000040004e-05,
+                "dy": -0.001535000000000064
+              },
+              {
+                "frame": 6,
+                "dx": -0.003149999999999986,
+                "dy": 0.0003789999999999072
+              },
+              {
+                "frame": 7,
+                "dx": -0.0031600000000002737,
+                "dy": 0.0027780000000001692
+              },
+              {
+                "frame": 8,
+                "dx": -0.0005499999999996064,
+                "dy": -0.000608000000000164
+              }
+            ],
+            "passed": true,
+            "fail_reasons": []
+          },
+          "star_fields": {
+            "num_differences": 0,
+            "differences": [],
+            "passed": true
+          },
+          "corrected_image": {
+            "num_pixels": 16384,
+            "pixel_identical": false,
+            "max_abs_pixel_error": 0.12646484375,
+            "rmse": 0.022068353709627307,
+            "relative_rmse": 0.00034330595015097945,
+            "ref_pixel_min": 789.9563598632812,
+            "ref_pixel_max": 1220.6685791015625,
+            "ref_pixel_mean": 834.9652709960938,
+            "ref_pixel_std": 64.28188529771204,
+            "test_pixel_min": 789.9603271484375,
+            "test_pixel_max": 1220.653564453125,
+            "test_pixel_mean": 834.9652709960938,
+            "test_pixel_std": 64.28190612792969,
+            "core_header_diff_bytes": 4,
+            "label_header_diff_bytes": 0,
+            "normalized_label_diff_bytes": 0,
+            "passed": false,
+            "fail_reasons": [
+              "Image RMSE 2.206835e-02 > 2.000000e-02"
+            ]
+          }
+        },
+        "overall_status": "FAIL",
+        "coverage": {
+          "motion_and_star": true,
+          "corrected_image": true,
+          "complete": true
+        }
+      },
+      "metal_vs_ground_truth": {}
+    }
+  ]
+}

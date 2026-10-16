@@ -3,6 +3,8 @@
 
 #include <cstddef>
 
+#include "src/acc/cuda/cuda_checked_arith.h"
+
 /**
  * Device scratch borrowed from a buffer that a later phase owns.
  *
@@ -42,7 +44,8 @@ public:
     void *alloc(size_t bytes, size_t alignment) {
         if (!base_ || alignment == 0 || alignment > kMaxAlignment) return 0;
         if ((alignment & (alignment - 1)) != 0) return 0;      // power of two only
-        const size_t start = alignUp(used_, alignment);
+        size_t start = 0;
+        if (!mc_checked::alignUpChecked(used_, alignment, start)) return 0;
         if (start > capacity_ || bytes > capacity_ - start) return 0;
         used_ = start + bytes;
         return base_ + start;

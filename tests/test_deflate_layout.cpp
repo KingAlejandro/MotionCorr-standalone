@@ -7,11 +7,15 @@
 // the benchmark. Both are pure integer/byte logic, so they are checked here rather
 // than behind a GPU and an nvCOMP install.
 
+#include "src/acc/cuda/cuda_checked_arith.h"
 #include "src/acc/cuda/cuda_deflate_layout.h"
 
+#include <climits>
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <limits>
 #include <vector>
 
 using namespace mc_tiff_deflate;
@@ -284,6 +288,330 @@ static void testChunkParameters() {
     check(!parsePositiveInt("99999999999", v), "chunk env refuses overflow");
 }
 
+
+// ---------------------------------------------------------------------------
+// Checked arithmetic (#134 item 2 / RC0 T3).
+//
+// Sizes and offsets on the nvCOMP admission path come from the TIFF tags, and the
+// scratch arena's capacity test cannot see a size that already wrapped. Each
+// hardened computation is checked at the largest value that fits (accepted, and
+// equal to the exact result) and one past it (declined, destination untouched).
+// The compiled mutants in CMakeLists.txt remove each check in turn and must turn
+// this red, so a check that the boundaries below do not reach is not left behind.
+// ---------------------------------------------------------------------------
+#ifndef __SIZEOF_INT128__
+#error "the boundary oracle needs a 128-bit integer type"
+#endif
+typedef unsigned __int128 u128;
+// Upper midpoint offset of a span, without the span + 1 that wraps when the span is 2^64 - 1.
+static size_t upperMid(size_t span) { return span / 2 + span % 2; }
+static const size_t SZ_MAX = std::numeric_limits<size_t>::max();
+static const uint64_t U64_MAX = std::numeric_limits<uint64_t>::max();
+
+static void testCheckedAddMulAlign() {
+    using namespace mc_checked;
+    size_t r = 7;
+    check(addSize(SZ_MAX - 5, 5, r) && r == SZ_MAX, "addSize accepts a sum equal to SIZE_MAX");
+    r = 7;
+    check(!addSize(SZ_MAX - 5, 6, r) && r == 7, "addSize declines SIZE_MAX + 1 and leaves out untouched");
+    check(!addSize(SZ_MAX, 1, r) && addSize(SZ_MAX, 0, r) && r == SZ_MAX, "addSize at SIZE_MAX");
+    check(!addSize(SZ_MAX / 2 + 1, SZ_MAX / 2 + 1, r), "addSize declines a sum that wraps to a small value");
+
+    uint64_t u = 7;
+    check(addU64(U64_MAX - 5, 5, u) && u == U64_MAX, "addU64 accepts a sum equal to UINT64_MAX");
+    u = 7;
+    check(!addU64(U64_MAX - 5, 6, u) && u == 7, "addU64 declines UINT64_MAX + 1");
+    check(!addU64(U64_MAX, U64_MAX, u), "addU64 declines a doubling");
+
+    r = 7;
+    check(mulSize((size_t)1 << 32, ((size_t)1 << 32) - 1, r) && r == SZ_MAX - ((size_t)1 << 32) + 1,
+          "mulSize accepts 2^32 * (2^32 - 1)");
+    r = 7;
+    check(!mulSize((size_t)1 << 32, (size_t)1 << 32, r) && r == 7, "mulSize declines 2^64, which wraps to 0");
+    check(mulSize(SZ_MAX, 1, r) && r == SZ_MAX && mulSize(0, SZ_MAX, r) && r == 0 && mulSize(SZ_MAX, 0, r) && r == 0,
+          "mulSize with 0 and 1 never declines");
+    check(!mulSize(SZ_MAX, 2, r), "mulSize declines SIZE_MAX * 2");
+    for (size_t b : {(size_t)3, (size_t)8, (size_t)48, (size_t)4096, (size_t)5480000u, (size_t)1 << 31}) {
+        const size_t a = SZ_MAX / b;      // largest factor that still fits
+        r = 0;
+        check(mulSize(a, b, r) && (u128)r == (u128)a * b, "mulSize accepts the largest fitting factor");
+        check(!mulSize(a + 1, b, r), "mulSize declines one past the largest fitting factor");
+    }
+
+    // alignment: the largest multiple of 64 below 2^64 is SIZE_MAX - 63.
+    r = 7;
+    check(alignUpChecked(SZ_MAX - 63, 64, r) && r == SZ_MAX - 63, "alignUpChecked keeps the largest aligned value");
+    check(!alignUpChecked(SZ_MAX - 62, 64, r) && r == SZ_MAX - 63, "alignUpChecked declines a round-up past 2^64 and leaves out untouched");
+    check(!alignUpChecked(SZ_MAX, 256, r), "alignUpChecked declines SIZE_MAX at 256");
+    check(alignUpChecked(SZ_MAX, 1, r) && r == SZ_MAX && alignUpChecked(SZ_MAX, 0, r) && r == SZ_MAX,
+          "alignment 0 and 1 are the identity, even at SIZE_MAX");
+    check(alignUpChecked(0, 64, r) && r == 0 && alignUpChecked(1, 64, r) && r == 64 && alignUpChecked(64, 64, r) && r == 64 &&
+          alignUpChecked(65, 64, r) && r == 128, "alignUpChecked agrees with the exact round-up on ordinary values");
+    // Control: the unchecked helper really does wrap here, so the case above is a
+    // property of the check and not of the value chosen.
+    check(mc_cuda::alignUp(SZ_MAX - 62, 64) == 0, "control: the unchecked alignUp wraps to 0");
+}
+
+static void testConvertExact() {
+    using namespace mc_checked;
+    int i = 7; unsigned u32 = 7; int64_t i64 = 7; uint64_t u64 = 7; int16_t i16 = 7; uint16_t u16 = 7;
+    check(convertExact((size_t)INT_MAX, i) && i == INT_MAX, "size_t INT_MAX -> int accepted");
+    i = 7;
+    check(!convertExact((size_t)INT_MAX + 1, i) && i == 7, "size_t INT_MAX+1 -> int declined, out untouched");
+    // 2^32 + 5 truncates to 5: a plain (int) cast would turn this into a valid-looking 5.
+    check(!convertExact(((size_t)1 << 32) + 5, i), "size_t 2^32+5 -> int declined (a cast would give 5)");
+    check(!convertExact((size_t)UINT32_MAX, i), "size_t UINT32_MAX -> int declined");
+    check(convertExact((size_t)UINT32_MAX, u32) && u32 == UINT32_MAX, "size_t UINT32_MAX -> uint32 accepted");
+    check(!convertExact((size_t)UINT32_MAX + 1, u32), "size_t UINT32_MAX+1 -> uint32 declined");
+    // Sign changes whose bit pattern survives the round trip.
+    check(!convertExact(-1, u32), "int -1 -> unsigned declined");
+    check(!convertExact((int64_t)-1, u64), "int64 -1 -> uint64 declined");
+    check(!convertExact(INT_MIN, u64), "int INT_MIN -> uint64 declined");
+    check(convertExact((int64_t)0, u64) && u64 == 0, "int64 0 -> uint64 accepted");
+    check(!convertExact((uint64_t)1 << 63, i64), "uint64 2^63 -> int64 declined");
+    check(convertExact(((uint64_t)1 << 63) - 1, i64) && i64 == INT64_MAX, "uint64 2^63-1 -> int64 accepted");
+    check(!convertExact(U64_MAX, i64), "uint64 UINT64_MAX -> int64 declined");
+    check(convertExact((int64_t)INT_MIN, i) && i == INT_MIN, "int64 INT_MIN -> int accepted");
+    check(!convertExact((int64_t)INT_MIN - 1, i), "int64 INT_MIN-1 -> int declined");
+    check(convertExact((uint32_t)65535, u16) && u16 == 65535, "uint32 65535 -> uint16 accepted");
+    check(!convertExact((uint32_t)65536, u16), "uint32 65536 -> uint16 declined");
+    check(convertExact(32767, i16) && !convertExact(32768, i16), "int -> int16 boundary");
+    off_t o = 7;
+    check(convertExact((uint64_t)std::numeric_limits<off_t>::max(), o) && o == std::numeric_limits<off_t>::max(),
+          "uint64 off_t max -> off_t accepted");
+    o = 7;
+    check(!convertExact((uint64_t)std::numeric_limits<off_t>::max() + 1, o) && o == 7,
+          "uint64 off_t max + 1 -> off_t declined: the (off_t) cast would give a negative position");
+}
+
+static void testFileSpanFitsOffT() {
+    using namespace mc_checked;
+    const uint64_t omax = (uint64_t)std::numeric_limits<off_t>::max();
+    check(fileSpanFitsOffT(0, 0) && fileSpanFitsOffT(1000, 1300), "an ordinary strip span fits");
+    check(fileSpanFitsOffT(omax - 100, 100), "a span ending exactly at the off_t maximum fits");
+    check(!fileSpanFitsOffT(omax - 100, 101), "a span ending one past the off_t maximum is declined");
+    check(fileSpanFitsOffT(omax, 0) && !fileSpanFitsOffT(omax, 1), "start at the off_t maximum");
+    check(!fileSpanFitsOffT(omax + 1, 0), "a start above the off_t maximum is declined even with no bytes");
+    // Wrapping end: offset + n wraps to a small, perfectly valid-looking number.
+    check(!fileSpanFitsOffT(U64_MAX - 9, 20), "offset 2^64-10 + 20 wraps to 9 and is declined");
+    check(!fileSpanFitsOffT(5, U64_MAX - 3), "a length that wraps the end past 2^64 is declined");
+    // Start representable, sum does not wrap, but the end is not an off_t.
+    check(!fileSpanFitsOffT(1, omax + 1), "start fine, end past the off_t maximum, no 64-bit wrap");
+}
+
+static void testCeilDivInt() {
+    using namespace mc_checked;
+    // volatile: the original (a + b - 1) / b is signed overflow at these values, and
+    // a constant-folded call would let the compiler choose what it means.
+    volatile int vmax = INT_MAX, v1 = 1, v2 = 2, v4 = 4, vhalf = 1 << 30;
+    check(ceilDivInt(vmax, v4) == 536870912, "ceilDivInt(INT_MAX, 4)");
+    check(ceilDivInt(vmax, v2) == 1073741824, "ceilDivInt(INT_MAX, 2)");
+    check(ceilDivInt(vmax, v1) == INT_MAX, "ceilDivInt(INT_MAX, 1)");
+    check(ceilDivInt(vmax, vmax) == 1, "ceilDivInt(INT_MAX, INT_MAX)");
+    check(ceilDivInt(24, 6) == 4 && ceilDivInt(25, 6) == 5 && ceilDivInt(0, 3) == 0 && ceilDivInt(1, 3) == 1,
+          "ceilDivInt ordinary values");
+    check(ceilDivInt(5, 0) == 0 && ceilDivInt(-1, 2) == 0, "ceilDivInt refuses a non-positive divisor or negative dividend");
+    check(defaultChunkFrames(vmax) == 536870912, "defaultChunkFrames at INT_MAX frames (was signed overflow)");
+    // n + 3 first exceeds INT_MAX at n = INT_MAX - 2.
+    check(defaultChunkFrames(vmax - 2) == 536870912 && defaultChunkFrames(vmax - 3) == 536870911,
+          "defaultChunkFrames agrees with exact ceil(n/4) around the old overflow point");
+    check(pipelineSlots(vmax, vmax) == 1, "one chunk of INT_MAX frames uses one slot");
+    check(pipelineSlots(vmax, vhalf) == 2, "two chunks at INT_MAX frames use two slots (was signed overflow)");
+    check(pipelineSlots(vmax, vmax - 1) == 2, "chunk of INT_MAX-1 frames out of INT_MAX uses two slots");
+}
+
+static void testCheckedStripSlotAndFrameStage() {
+    size_t r = 7;
+    // Largest cursor that fits at alignment 8: cursor+2 must round up to <= SIZE_MAX - 7.
+    check(checkedStripSlotOffset(SZ_MAX - 9, 8, r) && r == SZ_MAX - 9, "slot offset at the largest fitting cursor");
+    r = 7;
+    check(!checkedStripSlotOffset(SZ_MAX - 8, 8, r) && r == 7, "slot offset one past it is declined (round-up wraps)");
+    check(!checkedStripSlotOffset(SZ_MAX - 1, 1, r), "cursor + 2 wrapping is declined even with no alignment");
+    check(checkedStripSlotOffset(SZ_MAX - 2, 1, r) && r == SZ_MAX - 2, "cursor + 2 == SIZE_MAX is accepted at alignment 1");
+    check(!checkedStripSlotOffset(SZ_MAX, 4, r), "cursor SIZE_MAX is declined");
+
+    // Agrees with the unchecked replay everywhere the latter is valid.
+    bool agree = true;
+    for (size_t align : {(size_t)1, (size_t)2, (size_t)4, (size_t)8, (size_t)16, (size_t)256})
+        for (size_t c = 0; c < 600 && agree; c++) {
+            size_t got = 0;
+            agree = checkedStripSlotOffset(c, align, got) && got == stripSlotOffset(c, align);
+        }
+    check(agree, "checkedStripSlotOffset equals stripSlotOffset on ordinary cursors");
+
+    // Frame sum, driven past 2^64 with synthetic 64-bit sizes (a real frame cannot
+    // hold 2^32 strips of 2^32 bytes).
+    auto fixed = [](const std::vector<size_t> &v) { return [&v](size_t s) { return v[s]; }; };
+    {
+        std::vector<size_t> ok2 = { (size_t)1 << 63, ((size_t)1 << 63) - 1 };
+        r = 7;
+        check(checkedFrameStageBytesFrom(fixed(ok2), 2, 1, r) && r == SZ_MAX, "stage sum reaching SIZE_MAX exactly is accepted");
+        std::vector<size_t> over2 = { (size_t)1 << 63, (size_t)1 << 63 };
+        r = 7;
+        check(!checkedFrameStageBytesFrom(fixed(over2), 2, 1, r) && r == 7, "stage sum of 2^64 is declined and out untouched");
+        // Overflow caused only by the alignment padding of the second slot.
+        std::vector<size_t> pad = { SZ_MAX - 100 };
+        check(checkedFrameStageBytesFrom(fixed(pad), 1, 8, r) && r == SZ_MAX - 94, "one huge strip plus 6 bytes of slot padding fits");
+        std::vector<size_t> pad_over = { SZ_MAX - 4 };
+        check(!checkedFrameStageBytesFrom(fixed(pad_over), 1, 8, r), "one huge strip whose slot padding wraps the sum is declined");
+        // The running cursor, not just the final add, must be checked at every strip.
+        // Strip 0 ends at SIZE_MAX - 3 without wrapping; strip 1's slot offset does.
+        std::vector<size_t> mid = { SZ_MAX - 9, 0 };
+        check(!checkedFrameStageBytesFrom(fixed(mid), 2, 8, r), "a later slot offset that wraps is declined");
+    }
+    // Production wrapper, uint32 sizes.
+    const std::vector<uint32_t> sizes = tutorialStripSizes(3838, 7u);
+    for (size_t align : {(size_t)1, (size_t)4, (size_t)8, (size_t)16}) {
+        size_t got = 0;
+        check(checkedFrameStageBytes(sizes.data(), 3838, align, got) &&
+              got == frameStageBytes(sizes.data(), 3838, align),
+              "checkedFrameStageBytes equals frameStageBytes on a tutorial-sized frame");
+        check(got >= framePackedBytes(sizes.data(), 3838),
+              "the staged size bounds the packed size, so framePackedBytes cannot wrap after it is accepted");
+    }
+    size_t got = 7;
+    check(checkedFrameStageBytes(sizes.data(), 0, 8, got) && got == 0, "an empty frame stages zero bytes");
+    check(!checkedFrameStageBytes(sizes.data(), -1, 8, got), "a negative strip count is declined");
+    const uint32_t maxes[3] = { UINT32_MAX, UINT32_MAX, UINT32_MAX };
+    check(checkedFrameStageBytes(maxes, 3, 8, got) && got == frameStageBytes(maxes, 3, 8),
+          "three 4 GiB strips are accepted and equal the unchecked sum");
+}
+
+static void testCheckedPinnedReserve() {
+    size_t r = 7;
+    const size_t gran = (size_t)32 << 20;
+    // Largest request whose 12.5% headroom and 32 MiB round-up are both representable.
+    size_t lo = 0, hi = SZ_MAX;
+    while (lo < hi) {
+        const size_t mid = lo + upperMid(hi - lo);
+        const u128 padded = (u128)mid + mid / 8;
+        const u128 rounded = (padded + gran - 1) / gran * gran;
+        if (rounded <= (u128)SZ_MAX) lo = mid; else hi = mid - 1;
+    }
+    r = 7;
+    check(checkedPinnedReserveBytes(lo, r) && r % gran == 0 && (u128)r >= (u128)lo + lo / 8,
+          "reservation at the largest fitting request is accepted");
+    r = 7;
+    check(!checkedPinnedReserveBytes(lo + 1, r) && r == 7, "one byte more is declined and out untouched");
+    check(pinnedReserveBytes(lo + 1) == SZ_MAX, "the saturating form returns SIZE_MAX, which no pinned cap admits");
+    check(!checkedPinnedReserveBytes(SZ_MAX - 10, r), "bytes + bytes/8 wrapping is declined");
+    check(!checkedPinnedReserveBytes(SZ_MAX, r), "SIZE_MAX is declined");
+    // Ordinary values: identical to the formula the pool has always used.
+    bool same = true;
+    for (size_t b : {(size_t)0, (size_t)1, (size_t)1000, (size_t)33u << 20, (size_t)256 << 20, (size_t)5 << 30}) {
+        size_t got = 0;
+        const size_t want = ((b + b / 8) + gran - 1) / gran * gran;
+        same = same && checkedPinnedReserveBytes(b, got) && got == want && pinnedReserveBytes(b) == want;
+    }
+    check(same, "reservation equals ceil((b + b/8) / 32 MiB) * 32 MiB on ordinary requests");
+}
+
+// Independent oracle for the pinned layout: the same sequence of slots, computed
+// in 128 bits, so "fits in size_t" is decided by arithmetic and not by the code
+// under test. Returns false if any offset or the total exceeds SIZE_MAX.
+static bool oracleLayout(int slots, size_t payload, size_t strips, size_t status_bytes,
+                         std::vector<u128> &offs, u128 &total) {
+    u128 cur = 0;
+    offs.clear();
+    auto take = [&](u128 bytes) { const u128 o = (cur + 63) / 64 * 64; cur = o + bytes; offs.push_back(o); };
+    for (int j = 0; j < slots; j++) take(payload);
+    for (int j = 0; j < slots; j++) {
+        take((u128)strips * sizeof(void *));   take((u128)strips * sizeof(size_t));
+        take((u128)strips * sizeof(void *));   take((u128)strips * sizeof(size_t));
+        take((u128)strips * status_bytes);     take((u128)strips * sizeof(size_t));
+        take((u128)strips * sizeof(uint32_t));
+    }
+    total = (cur + 63) / 64 * 64;
+    for (u128 o : offs) if (o > (u128)SZ_MAX) return false;
+    return total <= (u128)SZ_MAX;
+}
+
+static void checkLayoutAgainstOracle(int slots, size_t payload, size_t strips, size_t status_bytes,
+                                     const char *what) {
+    std::vector<u128> offs; u128 total = 0;
+    const bool fits = oracleLayout(slots, payload, strips, status_bytes, offs, total);
+    PinnedChunkLayout L;
+    const bool ok = checkedPinnedChunkLayout(slots, payload, strips, status_bytes, L);
+    char msg[160];
+    std::snprintf(msg, sizeof(msg), "layout fits == oracle (%s)", what);
+    check(ok == fits, msg);
+    if (!ok) {
+        std::snprintf(msg, sizeof(msg), "a declined layout is empty (%s)", what);
+        check(L.total == 0 && L.slots == 0, msg);
+        const PinnedChunkLayout W = pinnedChunkLayout(slots, payload, strips, status_bytes);
+        check(W.total == 0, "pinnedChunkLayout reports a declined layout as total == 0");
+        return;
+    }
+    size_t k = 0;
+    bool same = (u128)L.total == total;
+    for (int j = 0; j < slots; j++) same = same && (u128)L.payload[j] == offs[k++];
+    for (int j = 0; j < slots; j++) {
+        same = same && (u128)L.cptr[j] == offs[k++] && (u128)L.csize[j] == offs[k++] &&
+               (u128)L.dptr[j] == offs[k++] && (u128)L.dsize[j] == offs[k++] &&
+               (u128)L.status[j] == offs[k++] && (u128)L.asize[j] == offs[k++] &&
+               (u128)L.adler[j] == offs[k++];
+    }
+    std::snprintf(msg, sizeof(msg), "an accepted layout holds the exact offsets (%s)", what);
+    check(same, msg);
+}
+
+static void testCheckedPinnedChunkLayout() {
+    // Ordinary and tutorial layouts are unchanged: exact offsets from the oracle.
+    for (int slots = 1; slots <= 2; slots++) {
+        checkLayoutAgainstOracle(slots, 0, 0, 4, "empty");
+        checkLayoutAgainstOracle(slots, (size_t)33 << 20, (size_t)6 * 3838, 4, "tutorial");
+        checkLayoutAgainstOracle(slots, 12345, 7, 4, "odd sizes");
+    }
+    // Table product wraps on its own: strips * 8 == 2^64.
+    checkLayoutAgainstOracle(1, 0, (size_t)1 << 61, 4, "strips*8 == 2^64");
+    checkLayoutAgainstOracle(2, 0, SZ_MAX / 8 + 1, 4, "strips just past SIZE_MAX/8");
+    // The status table is the one whose element size is a parameter.
+    checkLayoutAgainstOracle(1, 0, SZ_MAX / 4 + 1, 4, "status table wraps");
+    checkLayoutAgainstOracle(1, 0, 1000, SZ_MAX, "status element size wraps");
+    // Payload so large that its slot, or the alignment after it, passes 2^64.
+    checkLayoutAgainstOracle(1, SZ_MAX - 10, 1, 4, "payload round-up wraps");
+    checkLayoutAgainstOracle(2, SZ_MAX / 2 + 100, 1, 4, "two payload slots wrap the cursor");
+    checkLayoutAgainstOracle(2, SZ_MAX / 2 - 100, 1, 4, "two payload slots near the limit");
+    // Largest payload that fits, found by bisection against the oracle itself, and one more.
+    for (int slots = 1; slots <= 2; slots++) {
+        std::vector<u128> offs; u128 total;
+        size_t lo = 0, hi = SZ_MAX;
+        while (lo < hi) {
+            const size_t mid = lo + upperMid(hi - lo);
+            if (oracleLayout(slots, mid, 5, 4, offs, total)) lo = mid; else hi = mid - 1;
+        }
+        PinnedChunkLayout L;
+        check(checkedPinnedChunkLayout(slots, lo, 5, 4, L) && L.total != 0, "largest fitting payload is accepted");
+        check(!checkedPinnedChunkLayout(slots, lo + 1, 5, 4, L), "payload one byte larger is declined");
+        checkLayoutAgainstOracle(slots, lo, 5, 4, "largest fitting payload");
+        checkLayoutAgainstOracle(slots, lo + 1, 5, 4, "largest fitting payload + 1");
+        // Same for the strip count, which scales seven tables per slot.
+        lo = 0; hi = SZ_MAX;
+        while (lo < hi) {
+            const size_t mid = lo + upperMid(hi - lo);
+            if (oracleLayout(slots, 4096, mid, 4, offs, total)) lo = mid; else hi = mid - 1;
+        }
+        check(checkedPinnedChunkLayout(slots, 4096, lo, 4, L), "largest fitting strip count is accepted");
+        check(!checkedPinnedChunkLayout(slots, 4096, lo + 1, 4, L), "strip count one larger is declined");
+        checkLayoutAgainstOracle(slots, 4096, lo, 4, "largest fitting strip count");
+        checkLayoutAgainstOracle(slots, 4096, lo + 1, 4, "largest fitting strip count + 1");
+    }
+    // An unsupported slot count is a refusal, not an overflow: ok with total == 0.
+    PinnedChunkLayout L;
+    check(checkedPinnedChunkLayout(3, 100, 100, 4, L) && L.total == 0, "three slots: not an overflow, total == 0");
+    check(checkedPinnedChunkLayout(0, 100, 100, 4, L) && L.total == 0, "zero slots: not an overflow, total == 0");
+}
+
+// Arena: an aligned start that wraps past 2^64 must not come back as offset 0.
+static void testArenaAlignedStartCannotWrap() {
+    // A fake base, never dereferenced: only offsets are compared.
+    mc_cuda::DeviceScratchArena arena((void *)(uintptr_t)256, SZ_MAX);
+    check(arena.alloc(SZ_MAX - 100, 1) != 0 && arena.used() == SZ_MAX - 100,
+          "a near-SIZE_MAX first allocation is handed out");
+    check(arena.alloc(1, 256) == 0 && arena.used() == SZ_MAX - 100,
+          "the next aligned start would wrap to 0: refused, not returned as the arena base");
+}
+
 int main() {
     testSlotAlignment(4);
     testSlotAlignment(8);
@@ -300,6 +628,14 @@ int main() {
     testSpreadEqualsDirectPlacement(4, 3u, 3838);
     testPinnedChunkLayout();
     testChunkParameters();
+    testCheckedAddMulAlign();
+    testConvertExact();
+    testFileSpanFitsOffT();
+    testCeilDivInt();
+    testCheckedStripSlotAndFrameStage();
+    testCheckedPinnedReserve();
+    testCheckedPinnedChunkLayout();
+    testArenaAlignedStartCannotWrap();
 
     if (failures) { std::printf("%d check(s) failed\n", failures); return 1; }
     std::printf("deflate layout: all checks passed\n");

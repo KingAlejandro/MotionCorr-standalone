@@ -125,6 +125,36 @@ DEFAULT_REQUIRED_TESTS = [
     "LogfileFromEpsMutant_eps_order",
     "LogfileFromEpsMutant_placeholder",
     "LogfileFromEpsMutant_concat_cleanup",
+    # Checked arithmetic on the nvCOMP admission path (#134 item 2, RC0 T3). Each
+    # DeflateLayoutMutant_* is a compiled copy of DeflateLayout with one overflow
+    # check removed from a header, which the test must reject (WILL_FAIL); the names
+    # come from a CMake function, so a mutant dropped from it would leave that check
+    # unproven with the suite still green.
+    "DeflateLayoutMutant_add_size",
+    "DeflateLayoutMutant_mul_size",
+    "DeflateLayoutMutant_add_u64",
+    "DeflateLayoutMutant_align_up",
+    "DeflateLayoutMutant_convert_roundtrip",
+    "DeflateLayoutMutant_convert_sign",
+    "DeflateLayoutMutant_span_wrap",
+    "DeflateLayoutMutant_span_end",
+    "DeflateLayoutMutant_ceil_div",
+    "DeflateLayoutMutant_slot_cursor",
+    "DeflateLayoutMutant_slot_align",
+    "DeflateLayoutMutant_stage_slot",
+    "DeflateLayoutMutant_stage_sum",
+    "DeflateLayoutMutant_stage_negative",
+    "DeflateLayoutMutant_reserve_headroom",
+    "DeflateLayoutMutant_reserve_round",
+    "DeflateLayoutMutant_reserve_saturate",
+    "DeflateLayoutMutant_layout_take_align",
+    "DeflateLayoutMutant_layout_take_add",
+    "DeflateLayoutMutant_layout_table",
+    "DeflateLayoutMutant_layout_total",
+    "DeflateLayoutMutant_layout_ok_flag",
+    "DeflateLayoutMutant_chunk_frames",
+    "DeflateLayoutMutant_slots",
+    "DeflateLayoutMutant_arena_start",
     # Issue #95: the only test that can observe the native sample staging
     # ownership contract, for both widths the compact route admits. Registered
     # under if(UNIX) beside ImageWriteFaults.

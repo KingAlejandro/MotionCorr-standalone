@@ -196,6 +196,100 @@ if(BUILD_TESTING)
     add_executable(deflate_layout tests/test_deflate_layout.cpp)
     target_include_directories(deflate_layout PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME DeflateLayout COMMAND deflate_layout)
+    # Compiled negative controls for the checked arithmetic on the nvCOMP admission
+    # path (#134 item 2). Each mutant removes one overflow check from a header and
+    # must turn DeflateLayout red. The target text must exist exactly once, so an
+    # edited header stops the configure step instead of building an unmutated control.
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+                 "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_checked_arith.h"
+                 "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_deflate_layout.h"
+                 "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_scratch_arena.h")
+    function(add_deflate_layout_mutant _mutant _header _from _to)
+        file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/${_header}" _text)
+        string(FIND "${_text}" "${_from}" _first)
+        string(FIND "${_text}" "${_from}" _last REVERSE)
+        if(_first EQUAL -1 OR NOT _first EQUAL _last)
+            message(FATAL_ERROR "deflate layout mutant ${_mutant}: target missing or not unique in ${_header}")
+        endif()
+        string(REPLACE "${_from}" "${_to}" _text "${_text}")
+        set(_dir "${CMAKE_CURRENT_BINARY_DIR}/mutants/deflate_layout_${_mutant}")
+        file(WRITE "${_dir}/src/acc/cuda/${_header}" "${_text}")
+        add_executable(deflate_layout_${_mutant} tests/test_deflate_layout.cpp)
+        # The mutant tree is searched first, so its header shadows the real one.
+        target_include_directories(deflate_layout_${_mutant} PRIVATE
+            "${_dir}" "${CMAKE_CURRENT_SOURCE_DIR}")
+        add_test(NAME DeflateLayoutMutant_${_mutant} COMMAND deflate_layout_${_mutant})
+        set_tests_properties(DeflateLayoutMutant_${_mutant} PROPERTIES WILL_FAIL TRUE TIMEOUT 120)
+    endfunction()
+    # cuda_checked_arith.h
+    add_deflate_layout_mutant(add_size cuda_checked_arith.h
+        "if (a > std::numeric_limits<size_t>::max() - b) return false;" "")
+    add_deflate_layout_mutant(mul_size cuda_checked_arith.h
+        "if (b != 0 && a > std::numeric_limits<size_t>::max() / b) return false;" "")
+    add_deflate_layout_mutant(add_u64 cuda_checked_arith.h
+        "if (a > std::numeric_limits<uint64_t>::max() - b) return false;" "")
+    add_deflate_layout_mutant(align_up cuda_checked_arith.h
+        "return addSize(value, alignment - rem, out);" "out = value + (alignment - rem); return true;")
+    add_deflate_layout_mutant(convert_roundtrip cuda_checked_arith.h
+        "if (static_cast<From>(t) != v) return false;" "")
+    add_deflate_layout_mutant(convert_sign cuda_checked_arith.h
+        "if (isNegative(v, std::is_signed<From>()) != isNegative(t, std::is_signed<To>())) return false;" "")
+    add_deflate_layout_mutant(span_wrap cuda_checked_arith.h
+        "return addU64(offset, n, end_u) && convertExact(end_u, end);"
+        "end_u = offset + n; return convertExact(end_u, end);")
+    add_deflate_layout_mutant(span_end cuda_checked_arith.h
+        "return addU64(offset, n, end_u) && convertExact(end_u, end);"
+        "end = (off_t)end_u; return addU64(offset, n, end_u);")
+    add_deflate_layout_mutant(ceil_div cuda_checked_arith.h
+        "return (int)(((long long)a + (long long)b - 1) / (long long)b);"
+        "return (int)((unsigned)a + (unsigned)b - 1u) / b;")   # 32-bit wrap, as the int expression did
+    # cuda_deflate_layout.h
+    add_deflate_layout_mutant(slot_cursor cuda_deflate_layout.h
+        "if (!mc_checked::addSize(cursor, 2, shifted)) return false;" "shifted = cursor + 2;")
+    add_deflate_layout_mutant(slot_align cuda_deflate_layout.h
+        "if (!mc_checked::alignUpChecked(shifted, in_align, aligned)) return false;"
+        "aligned = alignUp(shifted, in_align);")
+    add_deflate_layout_mutant(stage_slot cuda_deflate_layout.h
+        "if (!checkedStripSlotOffset(cursor, in_align, slot)) return false;"
+        "slot = stripSlotOffset(cursor, in_align);")
+    add_deflate_layout_mutant(stage_sum cuda_deflate_layout.h
+        "if (!mc_checked::addSize(slot, (size_t)size_at(s), cursor)) return false;"
+        "cursor = slot + (size_t)size_at(s);")
+    add_deflate_layout_mutant(stage_negative cuda_deflate_layout.h
+        "if (n_strips < 0) return false;" "if (n_strips < 0) n_strips = 0;")
+    add_deflate_layout_mutant(reserve_headroom cuda_deflate_layout.h
+        "if (!mc_checked::addSize(bytes, bytes / 8, padded)) return false;"
+        "padded = bytes + bytes / 8;")
+    add_deflate_layout_mutant(reserve_round cuda_deflate_layout.h
+        "return mc_checked::alignUpChecked(padded, (size_t)32 << 20, out);"
+        "out = alignUp(padded, (size_t)32 << 20); return true;")
+    add_deflate_layout_mutant(reserve_saturate cuda_deflate_layout.h
+        "return checkedPinnedReserveBytes(bytes, reserve) ? reserve : (size_t)-1;"
+        "checkedPinnedReserveBytes(bytes, reserve); return reserve;")
+    add_deflate_layout_mutant(layout_take_align cuda_deflate_layout.h
+        "if (!mc_checked::alignUpChecked(cur, a, o) || !mc_checked::addSize(o, bytes, next)) {"
+        "o = alignUp(cur, a); if (!mc_checked::addSize(o, bytes, next)) {")
+    add_deflate_layout_mutant(layout_take_add cuda_deflate_layout.h
+        "if (!mc_checked::alignUpChecked(cur, a, o) || !mc_checked::addSize(o, bytes, next)) {"
+        "next = 0; if (!mc_checked::alignUpChecked(cur, a, o) || ((next = o + bytes), false)) {")
+    add_deflate_layout_mutant(layout_table cuda_deflate_layout.h
+        "if (!mc_checked::mulSize(chunk_strips, elem, bytes)) { ok = false; return (size_t)0; }"
+        "bytes = chunk_strips * elem;")
+    add_deflate_layout_mutant(layout_total cuda_deflate_layout.h
+        "!mc_checked::alignUpChecked(cur, a, L.total)) return false;"
+        "((L.total = alignUp(cur, a)), false)) return false;")
+    add_deflate_layout_mutant(layout_ok_flag cuda_deflate_layout.h
+        "if (!ok || !mc_checked::alignUpChecked(cur, a, L.total)) return false;"
+        "if (!mc_checked::alignUpChecked(cur, a, L.total)) return false;")
+    add_deflate_layout_mutant(chunk_frames cuda_deflate_layout.h
+        "return mc_checked::ceilDivInt(n_frames, 4);" "return (int)((unsigned)n_frames + 3u) / 4;")
+    add_deflate_layout_mutant(slots cuda_deflate_layout.h
+        "return mc_checked::ceilDivInt(n_frames, chunk_frames) > 1 ? 2 : 1;"
+        "return (int)((unsigned)n_frames + (unsigned)chunk_frames - 1u) / chunk_frames > 1 ? 2 : 1;")
+    # cuda_scratch_arena.h
+    add_deflate_layout_mutant(arena_start cuda_scratch_arena.h
+        "if (!mc_checked::alignUpChecked(used_, alignment, start)) return 0;"
+        "start = alignUp(used_, alignment);")
     add_executable(adler32_arithmetic tests/test_adler32.cpp)
     target_include_directories(adler32_arithmetic PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME Adler32Arithmetic COMMAND adler32_arithmetic)

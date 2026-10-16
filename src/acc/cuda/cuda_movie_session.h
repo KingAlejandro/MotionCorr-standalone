@@ -106,9 +106,26 @@ public:
     // products are bit-identical to the float path for the same file, and the
     // host payload and the PCIe bytes are a quarter of the float movie's rather
     // than a half. Signed 8-bit samples are a different conversion and must not
-    // reach this overload; the runner admits UChar by name.
+    // reach this overload; use applyGainDefectsAndSumS8 for them.
     bool applyGainDefectsAndSumU8(
         const std::vector<Image<unsigned char> > &raw_frames,
+        const MultidimArray<float> *gain_ref,
+        MultidimArray<float> &unaligned_sum,
+        bool download_sum = true
+    );
+
+    // Signed counterparts, for raw MRC mode 0 (SChar) and mode 1 (SShort). The
+    // frames hold the file's own sample type, so (float)(signed char) and
+    // (float)(short) on the device sign-extend exactly as the host reader's
+    // castPage2T does when it widens the same samples to float.
+    bool applyGainDefectsAndSumS8(
+        const std::vector<Image<signed char> > &raw_frames,
+        const MultidimArray<float> *gain_ref,
+        MultidimArray<float> &unaligned_sum,
+        bool download_sum = true
+    );
+    bool applyGainDefectsAndSumS16(
+        const std::vector<Image<short> > &raw_frames,
         const MultidimArray<float> *gain_ref,
         MultidimArray<float> &unaligned_sum,
         bool download_sum = true
@@ -321,9 +338,9 @@ public:
     bool isInitialized() const { return is_initialized; }
 
 private:
-    // The shared body of the two native-sample overloads above. Private: callers
-    // name the sample type through the overloads, which is what keeps SChar and
-    // SShort from instantiating it by accident.
+    // The shared body of the four native-sample overloads above. Private: callers
+    // name the sample type through the overloads, so a width cannot be mapped to
+    // the wrong signedness by accident.
     template <typename T>
     bool applyGainDefectsAndSumNative(
         const std::vector<Image<T> > &raw_frames,

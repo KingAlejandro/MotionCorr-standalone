@@ -2068,19 +2068,24 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	Image<float> Ihead, Iref, Iref_odd, Iref_even;
 	std::vector<MultidimArray<fComplex> > Fframes;
 	std::vector<Image<float> > Iframes;
-	// Issue #85 lane C: native sample staging for unsigned TIFF input on the
-	// resident CUDA path. Holds the decoded movie in its file sample type (half the
-	// bytes of Iframes for a 16-bit file, a quarter for an 8-bit one) until the
+	// Issue #85 lane C: native sample staging for TIFF and raw MRC integer input on
+	// the resident CUDA path. Holds the decoded movie in its file sample type (half
+	// the bytes of Iframes for a 16-bit file, a quarter for an 8-bit one) until the
 	// device has expanded it. Exactly one of these is non-empty, and only on the
-	// compact route; both are empty on every other path.
+	// compact route; all are empty on every other path. The signed pair is raw MRC
+	// mode 1 and mode 0.
 	std::vector<Image<unsigned short> > Iframes_u16;
 	std::vector<Image<unsigned char> > Iframes_u8;
+	std::vector<Image<short> > Iframes_s16;
+	std::vector<Image<signed char> > Iframes_s8;
 	// Own those frames' pixels as one mapping each; see NativeMovieStaging. Movie
 	// scoped, so a throw anywhere below still returns the pages. Declared AFTER
 	// the frame vectors on purpose: release() writes through the frames it bound,
 	// so it has to run before those vectors are destroyed.
 	NativeU16MovieStaging u16_staging;
 	NativeU8MovieStaging u8_staging;
+	NativeS16MovieStaging s16_staging;
+	NativeS8MovieStaging s8_staging;
 	std::vector<Image<float> > Irefframes;
 	std::vector<int> frames; // 0-indexed
 
@@ -2202,8 +2207,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// One variable rather than one bool per width: the sites below all ask "is a
 	// compact movie live, and in which sample type", and two independent bools
 	// would make "both set" representable and silently wrong.
-	enum CompactStage { COMPACT_NONE, COMPACT_U8, COMPACT_U16 };
+	enum CompactStage { COMPACT_NONE, COMPACT_U8, COMPACT_U16, COMPACT_S8, COMPACT_S16 };
 	CompactStage compact_stage = COMPACT_NONE;
+	auto compactStageName = [](CompactStage stage) {
+		return stage == COMPACT_U8 ? "uint8" : stage == COMPACT_U16 ? "uint16"
+		     : stage == COMPACT_S8 ? "int8" : "int16";
+	};
 
 #ifdef _CUDA_ENABLED
     // Legacy early-binning/nonresident FFT preparation may retain a real-frame
@@ -2293,7 +2302,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// Composed ingest routing (#126 fast path over the #118/#125 fallback). Exactly
 	// one of three paths runs for a healthy movie:
 	//   eligible Deflate TIFF and nvCOMP available -> device ingest, above;
-	//   otherwise eligible unsigned 8/16-bit TIFF  -> compact host native staging;
+	//   otherwise eligible 8/16-bit TIFF or raw MRC -> compact host native staging;
 	//   otherwise                                  -> main's float host reader.
 	// Deciding the compact arm here, after the session exists, is what lets it
 	// require a live session. PR125 had to approximate that with
@@ -2308,28 +2317,52 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// into one of these two sample types is eligible here regardless of codec,
 	// strip geometry or predictor -- the decode is LibTIFF's, so this route
 	// inherits its codec semantics instead of reimplementing them.
+	//
+	// Raw (uncompressed) MRC joins it for the types its reader yields without a
+	// float conversion: mode 6 UShort, and mode 0 / mode 1, which are SChar / SShort.
+	// Those two are staged in their own signed type, so the device sign-extends
+	// exactly as castPage2T does on the host. Float MRC gains nothing from staging.
+	const bool compact_tif = ((FileName)fn_mic.getFileFormat()).contains("tif") &&
+	                         (Ihead.dataType() == UShort || Ihead.dataType() == UChar);
+	const bool compact_mrc = ((FileName)fn_mic.getFileFormat()).contains("mrc") &&
+	                         (Ihead.dataType() == UShort || Ihead.dataType() == SChar ||
+	                          Ihead.dataType() == SShort);
 	if (ingest_mode != INGEST_FLOAT &&
 	    !nvcomp_ingested && movie_session && !isEER && !isCompressedMRC &&
-	    ((FileName)fn_mic.getFileFormat()).contains("tif") &&
-	    (Ihead.dataType() == UShort || Ihead.dataType() == UChar)) {
+	    (compact_tif || compact_mrc)) {
 		size_t staged_bytes = 0;
 		const char *width_name = "";
-		if (Ihead.dataType() == UShort) {
+		switch (Ihead.dataType()) {
+		case UShort:
 			compact_stage = COMPACT_U16;
 			u16_staging.bind(Iframes_u16, n_frames, ny, nx);
 			staged_bytes = u16_staging.bytes();
-			width_name = "16-bit";
-		} else {
+			width_name = "unsigned 16-bit";
+			break;
+		case SShort:
+			compact_stage = COMPACT_S16;
+			s16_staging.bind(Iframes_s16, n_frames, ny, nx);
+			staged_bytes = s16_staging.bytes();
+			width_name = "signed 16-bit";
+			break;
+		case SChar:
+			compact_stage = COMPACT_S8;
+			s8_staging.bind(Iframes_s8, n_frames, ny, nx);
+			staged_bytes = s8_staging.bytes();
+			width_name = "signed 8-bit";
+			break;
+		default:
 			compact_stage = COMPACT_U8;
 			u8_staging.bind(Iframes_u8, n_frames, ny, nx);
 			staged_bytes = u8_staging.bytes();
-			width_name = "8-bit";
+			width_name = "unsigned 8-bit";
+			break;
 		}
 		// One line, and the 16-bit wording keeps the exact prefix
 		// tools/support_matrix.py filters on. A second line would make every
 		// compact-staged log differ under that retained comparator for a reason
 		// that is not a product difference.
-		logfile << "Staging this movie as native unsigned " << width_name
+		logfile << "Staging this movie as native " << width_name
 		        << "; the integer to float "
 		        << "expansion and the gain are applied on the device; host staging is one "
 		        << "mapping of " << staged_bytes << " bytes for " << n_frames
@@ -2339,7 +2372,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	if (ingest_mode == INGEST_COMPACT && compact_stage == COMPACT_NONE)
 		REPORT_ERROR("--ingest compact was requested but the compact native staging did not "
 		             "apply to " + fn_mic + ". Either there is no resident CUDA session, or "
-		             "this movie is not an unsigned 8- or 16-bit TIFF. Refusing to continue "
+		             "this movie is not an unsigned 8- or 16-bit TIFF or a raw integer MRC "
+		             "(mode 0, 1 or 6). Refusing to continue "
 		             "on a different path under a pinned --ingest.");
 #endif
 
@@ -2388,6 +2422,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				else if (compact_stage == COMPACT_U8)
 					// As above; castPage2T's UChar branch is the memcpy here.
 					Iframes_u8[iframe].read(fn_mic, true, frames[iframe], false, true);
+				else if (compact_stage == COMPACT_S16)
+					// MRC mode 1: castPage2T's SShort branch is the memcpy here.
+					Iframes_s16[iframe].read(fn_mic, true, frames[iframe], false, true);
+				else if (compact_stage == COMPACT_S8)
+					// MRC mode 0: castPage2T's SChar branch is the memcpy here.
+					Iframes_s8[iframe].read(fn_mic, true, frames[iframe], false, true);
 #endif
 				else
 					Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
@@ -2415,28 +2455,28 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	auto expand_compact_to_float = [&]() {
 		if (compact_stage == COMPACT_NONE) return;
 		const size_t num_pixels = (size_t)nx * ny;
-		const bool is_u8 = (compact_stage == COMPACT_U8);
-		for (int iframe = 0; iframe < n_frames; iframe++) {
-			Iframes[iframe]().reshape(ny, nx);
-			float *dst = &DIRECT_MULTIDIM_ELEM(Iframes[iframe](), 0);
-			if (is_u8) {
-				const unsigned char *src = &DIRECT_MULTIDIM_ELEM(Iframes_u8[iframe](), 0);
+		// The cast is through the file's own sample type, so a signed sample
+		// sign-extends here exactly as castPage2T does when it widens to float.
+		auto widen = [&](auto &native, auto &staging) {
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				Iframes[iframe]().reshape(ny, nx);
+				float *dst = &DIRECT_MULTIDIM_ELEM(Iframes[iframe](), 0);
+				const auto *src = &DIRECT_MULTIDIM_ELEM(native[iframe](), 0);
 				#pragma omp parallel for num_threads(n_threads) schedule(static)
 				for (long int pixel = 0; pixel < (long int)num_pixels; pixel++)
 					dst[pixel] = (float)src[pixel];
-				Iframes_u8[iframe].clear();
-				u8_staging.discardThrough(iframe + 1);
-			} else {
-				const unsigned short *src = &DIRECT_MULTIDIM_ELEM(Iframes_u16[iframe](), 0);
-				#pragma omp parallel for num_threads(n_threads) schedule(static)
-				for (long int pixel = 0; pixel < (long int)num_pixels; pixel++)
-					dst[pixel] = (float)src[pixel];
-				Iframes_u16[iframe].clear();
-				u16_staging.discardThrough(iframe + 1);
+				native[iframe].clear();
+				staging.discardThrough(iframe + 1);
 			}
+			staging.release();
+		};
+		switch (compact_stage) {
+		case COMPACT_U8:  widen(Iframes_u8, u8_staging);     break;
+		case COMPACT_U16: widen(Iframes_u16, u16_staging);   break;
+		case COMPACT_S8:  widen(Iframes_s8, s8_staging);     break;
+		default:          widen(Iframes_s16, s16_staging);   break;
 		}
-		if (is_u8) u8_staging.release(); else u16_staging.release();
-		logfile << "Materialized native " << (is_u8 ? "uint8" : "uint16")
+		logfile << "Materialized native " << compactStageName(compact_stage)
 		        << " frames as float for CPU fallback." << std::endl;
 		compact_stage = COMPACT_NONE;
 	};
@@ -2450,10 +2490,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		// patch downloads the full float movie afterwards, and anything the staging
 		// still holds is added to that. munmap makes the release unconditional, so
 		// this no longer depends on an allocator returning arena pages.
-		const bool was_u8 = (compact_stage == COMPACT_U8);
-		if (was_u8) u8_staging.release(); else u16_staging.release();
+		const CompactStage was = compact_stage;
+		switch (was) {
+		case COMPACT_U8:  u8_staging.release();  break;
+		case COMPACT_U16: u16_staging.release(); break;
+		case COMPACT_S8:  s8_staging.release();  break;
+		default:          s16_staging.release(); break;
+		}
 		compact_stage = COMPACT_NONE;
-		logfile << "Released native " << (was_u8 ? "uint8" : "uint16")
+		logfile << "Released native " << compactStageName(was)
 		        << " host staging after device forward FFT." << std::endl;
 	};
 
@@ -2572,6 +2617,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		    ? movie_session->applyGainDefectsAndSumU16(Iframes_u16, gain_ptr, Isum, false)
 		    : compact_stage == COMPACT_U8
 		    ? movie_session->applyGainDefectsAndSumU8(Iframes_u8, gain_ptr, Isum, false)
+		    : compact_stage == COMPACT_S16
+		    ? movie_session->applyGainDefectsAndSumS16(Iframes_s16, gain_ptr, Isum, false)
+		    : compact_stage == COMPACT_S8
+		    ? movie_session->applyGainDefectsAndSumS8(Iframes_s8, gain_ptr, Isum, false)
 		    : movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum, false);
 		if (gain_sum_ok) {
 			cuda_gain_sum_done = true;
@@ -2919,8 +2968,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 						if (DIRECT_A2D_ELEM(bBad, y, x)) continue;
 //						std::cout << "o";
 						// Issue #85 lane C: on a compact-staged path the raw host
-						// movie lives in Iframes_u16 or Iframes_u8. (float)u16 and
-						// (float)u8 are the same values the float reader stored, so
+						// movie lives in Iframes_{u16,u8,s16,s8}. (float) of the file's
+						// own sample type is the value the float reader stored, so
 						// the gain multiply below and every RNG draw that follows
 						// are unchanged.
 						float neighbor;
@@ -2929,6 +2978,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 							neighbor = (float)DIRECT_A2D_ELEM(Iframes_u16[iframe](), y, x);
 						else if (compact_stage == COMPACT_U8)
 							neighbor = (float)DIRECT_A2D_ELEM(Iframes_u8[iframe](), y, x);
+						else if (compact_stage == COMPACT_S16)
+							neighbor = (float)DIRECT_A2D_ELEM(Iframes_s16[iframe](), y, x);
+						else if (compact_stage == COMPACT_S8)
+							neighbor = (float)DIRECT_A2D_ELEM(Iframes_s8[iframe](), y, x);
 						else
 #endif
 							neighbor = DIRECT_A2D_ELEM(Iframes[iframe](), y, x);

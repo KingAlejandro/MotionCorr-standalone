@@ -111,8 +111,8 @@ __global__ void fusedGainAndSumKernel(
 
 // Issue #85 lane C: native sample staging. One frame per launch, so only a single
 // frame-sized native staging buffer is ever resident instead of a second whole movie.
-// T is the file's own unsigned sample type: unsigned short for a 16-bit TIFF,
-// unsigned char for an 8-bit one.
+// T is the file's own sample type: unsigned short or unsigned char for a TIFF or
+// mode 6 MRC, signed char or short for MRC modes 0 and 1.
 //
 // Arithmetic is pinned to the fused float kernel above, term for term:
 //   (float)T is exact for every value an 8- or 16-bit unsigned sample can hold
@@ -128,10 +128,10 @@ __global__ void fusedGainAndSumKernel(
 //   float accumulator. Spilling that accumulator to a float array between frames
 //   is exact because it is a float there too.
 //
-// Signed sample types must never reach this kernel: (float)(signed char)0xFF is
-// -1.0f where the reader's own cast produces the same -1.0f only because
-// castPage2T went through the same signed type. The runner admits UChar and
-// UShort by name, not by width, which is what keeps SChar/SShort out.
+// T must be the file's own type, never a same-width one of the other signedness:
+// (float)(signed char)0xFF is -1.0f and (float)(unsigned char)0xFF is 255.0f. The
+// runner picks T by name from the header's sample type, not from a width, so each
+// width reproduces the cast the host float reader applies to that type.
 template <typename T>
 __global__ void convertGainAndAccumulateNativeKernel(
     const T *d_src,
@@ -948,6 +948,26 @@ bool CudaMovieSession::applyGainDefectsAndSumU8(
 ) {
     return applyGainDefectsAndSumNative<unsigned char>(raw_frames, gain_ref,
                                                        unaligned_sum, download_sum);
+}
+
+bool CudaMovieSession::applyGainDefectsAndSumS8(
+    const std::vector<Image<signed char> > &raw_frames,
+    const MultidimArray<float> *gain_ref,
+    MultidimArray<float> &unaligned_sum,
+    bool download_sum
+) {
+    return applyGainDefectsAndSumNative<signed char>(raw_frames, gain_ref,
+                                                     unaligned_sum, download_sum);
+}
+
+bool CudaMovieSession::applyGainDefectsAndSumS16(
+    const std::vector<Image<short> > &raw_frames,
+    const MultidimArray<float> *gain_ref,
+    MultidimArray<float> &unaligned_sum,
+    bool download_sum
+) {
+    return applyGainDefectsAndSumNative<short>(raw_frames, gain_ref,
+                                               unaligned_sum, download_sum);
 }
 
 bool CudaMovieSession::downloadUnalignedSum(MultidimArray<float> &unaligned_sum) {

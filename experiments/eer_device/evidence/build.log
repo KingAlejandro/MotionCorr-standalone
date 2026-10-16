@@ -1,0 +1,187 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- The CUDA compiler identification is NVIDIA 12.8.61
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /usr/local/cuda/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1") 
+-- Checking for module 'fftw3'
+--   Found fftw3, version 3.3.10
+-- Checking for module 'fftw3f'
+--   Found fftw3f, version 3.3.10
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5") found components: CXX 
+-- Found TIFF: /usr/lib/x86_64-linux-gnu/libtiff.so (found version "4.5.1")  
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.3")  
+-- Found PNG: /usr/lib/x86_64-linux-gnu/libpng.so (found version "1.6.43") 
+-- Found JPEG: /usr/lib/x86_64-linux-gnu/libjpeg.so (found version "80") 
+-- Found CUDAToolkit: /usr/local/cuda/targets/x86_64-linux/include (found version "12.8.61") 
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Configuring done (6.7s)
+-- Generating done (0.0s)
+-- Build files have been written to: /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/build
+[  1%] Building CUDA object CMakeFiles/eerdev.dir/eer_device.cu.o
+[  2%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/CPlot2D.cpp.o
+[  4%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/args.cpp.o
+[  4%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/backprojector.cpp.o
+[  5%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/ctf.cpp.o
+[  7%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/error.cpp.o
+[  7%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/euler.cpp.o
+[  8%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/complex.cpp.o
+[  9%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/fftw.cpp.o
+[ 10%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/filename.cpp.o
+[ 12%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/frame_buffer_pool.cpp.o
+[ 13%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/funcs.cpp.o
+[ 14%] Linking CUDA static library libeerdev.a
+[ 15%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/image.cpp.o
+[ 15%] Built target eerdev
+[ 16%] Building C object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/d3x3/dsyev2.c.o
+[ 17%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/image/radial_avg.cpp.o
+[ 18%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/image/resampling.cpp.o
+[ 19%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/image/stack_helper.cpp.o
+[ 20%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/math/Zernike.cpp.o
+[ 21%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/math/fft.cpp.o
+[ 23%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/math/t_complex.cpp.o
+[ 24%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/optics/damage.cpp.o
+[ 25%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/optics/optics_data.cpp.o
+[ 26%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/optimization/nelder_mead.cpp.o
+[ 27%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/optimization/optimization.cpp.o
+[ 28%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/Fourier_helper.cpp.o
+[ 29%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/complex_io.cpp.o
+[ 30%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/ctf/tilt_helper.cpp.o
+[ 31%] Building C object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/d3x3/dsyev2.c.o
+[ 32%] Building C object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/d3x3/dsyevc3.c.o
+[ 34%] Building C object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/d3x3/dsyevh3.c.o
+[ 35%] Building C object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/d3x3/dsyevq3.c.o
+[ 36%] Building C object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/d3x3/dsytrd3.c.o
+[ 37%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/image_log.cpp.o
+[ 38%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/img_proc/filter_helper.cpp.o
+[ 39%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/img_proc/image_op.cpp.o
+[ 40%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/interpolation.cpp.o
+[ 41%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/io/star_converter.cpp.o
+[ 42%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/jaz_config.cpp.o
+[ 43%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/new_ft.cpp.o
+[ 45%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/obs_model.cpp.o
+[ 46%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/parallel_ft.cpp.o
+[ 47%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/resampling_helper.cpp.o
+[ 48%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/slice_helper.cpp.o
+[ 49%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/stack_helper.cpp.o
+[ 50%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/t_complex.cpp.o
+[ 51%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/single_particle/vtk_helper.cpp.o
+[ 52%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/motion/Fourier_2D_deformation.cpp.o
+[ 53%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/motion/linear_2D_deformation.cpp.o
+[ 54%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/motion/modular_alignment/Fourier_2D_deformation_model.cpp.o
+[ 56%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/motion/modular_alignment/linear_2D_deformation_model.cpp.o
+[ 57%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/motion/modular_alignment/spline_2D_deformation_model.cpp.o
+[ 58%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/motion/spline_2D_deformation.cpp.o
+[ 59%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/motion/trajectory.cpp.o
+[ 60%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/motion/trajectory_set.cpp.o
+[ 61%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/particle_set.cpp.o
+[ 62%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/projection_IO.cpp.o
+[ 63%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/tomo_ctf_helper.cpp.o
+[ 64%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/tomogram.cpp.o
+[ 65%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/tomography/tomogram_set.cpp.o
+[ 67%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/util/ansi_codes.cpp.o
+[ 68%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/util/image_file_helper.cpp.o
+[ 69%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/util/log.cpp.o
+[ 70%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/jaz/util/zio.cpp.o
+[ 71%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/mask.cpp.o
+[ 72%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/matrix1d.cpp.o
+[ 73%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/matrix2d.cpp.o
+[ 74%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/memory.cpp.o
+[ 75%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/metadata_container.cpp.o
+[ 76%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/metadata_label.cpp.o
+[ 78%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/metadata_table.cpp.o
+[ 79%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/micrograph_model.cpp.o
+[ 80%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/motioncorr_runner.cpp.o
+[ 81%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/multidim_array.cpp.o
+[ 82%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp.o
+[ 83%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/output_writer.cpp.o
+[ 84%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/parallel.cpp.o
+In file included from /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.h:48,
+                 from /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp:49:
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘double brent(double, double, double, double (*)(double*, void*), void*, double, double*, int, double*, double*)’ at /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp:594:25:
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xt’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp: In function ‘double brent(double, double, double, double (*)(double*, void*), void*, double, double*, int, double*, double*)’:
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp:579:13: note: declared here
+  579 |     RFLOAT *xt=NULL;
+      |             ^~
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp:767:25:
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xit’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp: In function ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’:
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp:703:24: note: declared here
+  703 |     RFLOAT *pt, *ptt, *xit;
+      |                        ^~~
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp:768:25:
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘ptt’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp: In function ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’:
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp:703:18: note: declared here
+  703 |     RFLOAT *pt, *ptt, *xit;
+      |                  ^~~
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp:769:25:
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘pt’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp: In function ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’:
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/numerical_recipes.cpp:703:13: note: declared here
+  703 |     RFLOAT *pt, *ptt, *xit;
+      |             ^~
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/motioncorr_runner.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/motioncorr_runner.cpp:1898:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1898 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+[ 85%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/pipeline_control.cpp.o
+[ 86%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/projector.cpp.o
+[ 87%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/renderEER.cpp.o
+[ 89%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/stage_profile.cpp.o
+[ 90%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/strings.cpp.o
+[ 91%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/symmetries.cpp.o
+[ 92%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/tabfuncs.cpp.o
+[ 93%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/time.cpp.o
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/time.cpp: In function ‘void progress_bar(long int)’:
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/time.cpp:191:20: warning: format not a string literal and no format arguments [-Wformat-security]
+  191 |             fprintf(stdout, cheese);
+      |             ~~~~~~~^~~~~~~~~~~~~~~~
+[ 94%] Building CXX object CMakeFiles/eer_host_core.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/transformations.cpp.o
+[ 95%] Building CXX object CMakeFiles/eer_host_core.dir/macros.cpp.o
+[ 96%] Linking CXX static library libeer_host_core.a
+[ 96%] Built target eer_host_core
+[ 97%] Building CXX object CMakeFiles/eer_device_exp.dir/eer_exp.cpp.o
+[ 98%] Building CXX object CMakeFiles/eer_device_exp.dir/eer_fixture.cpp.o
+[100%] Linking CXX executable eer_device_exp
+[100%] Built target eer_device_exp
+[  2%] Built target eerdev
+[ 95%] Built target eer_host_core
+[ 96%] Building CXX object CMakeFiles/eer_device_exp_asan.dir/eer_exp.cpp.o
+[ 97%] Building CXX object CMakeFiles/eer_device_exp_asan.dir/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/renderEER.cpp.o
+[ 98%] Building CXX object CMakeFiles/eer_device_exp_asan.dir/eer_fixture.cpp.o
+[100%] Linking CXX executable eer_device_exp_asan
+[100%] Built target eer_device_exp_asan
+
+real	1m6.459s
+user	4m30.889s
+sys	0m31.648s

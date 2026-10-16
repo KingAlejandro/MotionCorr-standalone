@@ -35,17 +35,22 @@ MAX_SAMPLES = 50_000_000   # every fixture here is far smaller
 
 
 def declared_samples(path):
-    """Samples an MRC header claims in its more modest byte order (TIFF: None)."""
+    """Samples the MRC reader will believe the header declares (TIFF: None).
+
+    Mirrors parseMRCHeader in src/rwMRC.h: the header is read little-endian and
+    byte-swapped when |mode| or |nx| exceeds SWAPTRIG (65535, src/image.h). Any
+    other rule can approve a header the reader then interprets as 2^48 samples.
+    """
     with open(path, "rb") as f:
         h = f.read(1024)
     if len(h) < 1024 or h[:4] in (b"II*\0", b"MM\0*", b"II+\0", b"MM\0+"):
         return None
-    counts = []
-    for e in ("<", ">"):                      # the reader picks the order; take the smaller claim
-        nx, ny, nz = struct.unpack(e + "3i", h[:12])
-        if nx > 0 and ny > 0 and nz > 0:
-            counts.append(nx * ny * nz)
-    return min(counts) if counts else 0
+    nx, ny, nz, mode = struct.unpack("<4i", h[:16])
+    if abs(mode) > 65535 or abs(nx) > 65535:
+        nx, ny, nz, mode = struct.unpack(">4i", h[:16])
+    if nx <= 0 or ny <= 0 or nz <= 0:
+        return 0
+    return nx * ny * nz
 
 
 def decode(helper, path, tmp):
@@ -58,7 +63,7 @@ def decode(helper, path, tmp):
     if not Path(path).exists():
         return np.zeros((0, 0, 0), np.float32)
     n = declared_samples(path)
-    if n is not None and n > MAX_SAMPLES:
+    if n is not None and (n == 0 or n > MAX_SAMPLES):
         return np.zeros((0, 0, 0), np.float32)
     if subprocess.run([str(helper), "read_tiff_raw", str(path), str(dump)],
                                                  capture_output=True).returncode != 0:
@@ -187,6 +192,18 @@ def main():
                 (t / "c_cut2.mrcs").write_bytes(plain)
                 ok = np.array_equal(decode(a.helper, t / "c_cut2.mrcs", tmp), m[:3])
             check("mrc zst frames 0-2", ok, r.stderr.strip()[-120:])
+        # The guard must use the reader's byte-order rule: this little-endian header
+        # (65536, 256, 1, mode 0) is modest read as written, but rwMRC.h swaps it
+        # (nx > 65535) and sees 256 x 65536 x 16777216 = 2^48 samples. The helper path
+        # does not exist, so the check fails loudly if the guard lets the file through.
+        g = bytearray(1024 + 4096)
+        struct.pack_into("<4i", g, 0, 65536, 256, 1, 0)
+        (t / "guard.mrcs").write_bytes(bytes(g))
+        try:
+            refused = decode(Path("/nonexistent/runner_numerics"), t / "guard.mrcs", tmp).size == 0
+        except OSError:
+            refused = False
+        check("oversized header not decoded", refused and declared_samples(t / "guard.mrcs") == 1 << 48)
         # An inconsistent header (more frames than the file holds) is refused, not cut.
         bad = bytearray(E.mrc_bytes(m, 2))
         struct.pack_into("<i", bad, 8, 60)

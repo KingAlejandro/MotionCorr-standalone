@@ -202,12 +202,14 @@ rewritten (`correct.sh`).
   all three, products written. Differences, all in the report:
   main prints `ERROR in executing: gs -dNOPAUSE … header.pdf all_batches.pdf`
   from the concatenation; the candidate prints `ERROR in executing: gs
-  -sDEVICE=pdfwrite … logfile.pdf @…logfile.pdf.lst` plus `Will make an empty
-  PDF-file in …logfile.pdf`. Main leaves no `logfile.pdf` when `gs` fails; the
-  candidate leaves a zero-byte one (the `touch()` fallback every other report PDF
-  already has). With a directory in the way the candidate also prints the
-  `Filename::touch ERROR` that `touch()` reports; the exception is contained in the
-  thread and the job still exits 0, as main does.
+  -sDEVICE=pdfwrite … logfile.pdf @…logfile.pdf.lst`. At `d1bb1406` the candidate
+  also left a zero-byte `logfile.pdf` (the `touch()` fallback every other report
+  PDF has) and, with a directory in the way, printed `Filename::touch ERROR`.
+  From `aed8004a` the normal-path render passes `placeholder_on_failure = false`,
+  so like main it leaves no `logfile.pdf` (or the directory untouched) and makes
+  no `touch()` attempt. Checked on macOS CPU-only builds of `116eb04a` and
+  `aed8004a` with the same three fake-`gs` cases: exit 0 and products written in
+  both arms; only the failing command named on stderr differs.
 - `run_dataset.py`, 4 movies, one worker: both arms PASS, merged inventory and
   `logfile.pdf` pages (10 vs 10) identical. `cmp_trees` still lists four
   `merged/` files; after normalising arm name, the random `.aggregate-XXXX` suffix
@@ -223,7 +225,9 @@ concatenation `header.pdf all_batches.pdf` and no EPS-list call; failure cases
 above. Three compiled mutants of the runner each fail it (`--expect-fail`):
 `always_eps` (EPS-direct although a prior `all_batches.pdf` exists), `late_guard`
 (the skip decision asks `exists(all_batches.pdf)` after the batch pass wrote it),
-`eps_order` (batch list before header).
+`eps_order` (batch list before header), and from `aed8004a` `placeholder` (an
+empty `logfile.pdf` left after a failed render). At `aed8004a` on macOS CPU-only,
+`LogfileFromEps` and its four mutants pass.
 
 - 4GPUs, candidate `d1bb1406`, full CUDA suite: 87/88. Failing:
   `CiFailClosedControls`.
@@ -239,7 +243,10 @@ on base here; it is the same test and cause recorded for the SCARF run above.
   runs. The 96-movie logfile and 24-movie report were not rastered.
 - The CPU-path identity run used the CUDA binary without `--gpu` on 4GPUs
   (the tutorial movies are not on cpu64), once per arm: 273 s base, 260 s cand.
-- A failed EPS-direct `logfile.pdf` leaves an empty file where main leaves none;
-  the console messages differ as described above.
+- On a failed render the console messages differ as described above; the file
+  outcome matches main from `aed8004a`.
+- The 4GPUs and cpu64 suite results and all timing, identity and raster evidence
+  are from `d1bb1406`. `aed8004a` changes only the failure path and was checked
+  on macOS CPU-only builds.
 - Multi-GPU launcher workers already skip the report and the aggregate already
   renders from EPS, so the endpoint is unchanged by design.

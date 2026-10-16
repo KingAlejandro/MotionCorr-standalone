@@ -1,44 +1,56 @@
-# Issue 10: allocator setting vs source-level huge pages (24 movies)
+# Issue 10: huge pages by allocator setting (24 movies)
 
 Question from the #180 review: does `GLIBC_TUNABLES=glibc.malloc.hugetlb=1` give the
-huge-page gain without `madvise` code in `multidim_array.h`?
+huge-page gain without `madvise` code in `multidim_array.h`, and what is left for the
+FFTW plan cache (#187)?
 
 ## Setup
 
-cpu64, glibc 2.39, THP `enabled=madvise`, `defrag=madvise`. Release builds. All 24 tutorial
-movies in one process, 5x5 patches, `--dose_weighting --save_noDW --even_odd_split`,
-`--j 4` under `taskset -c 8-11`, under `/tmp/motioncorr-cpu64-bench.lock`. Two rounds,
-order reversed in round 2. Script: `ab24c.sh`. Raw output: `raw.txt`.
+cpu64: AMD EPYC 7763, Linux 6.8.0-86, glibc 2.39, gcc 13.3.0, THP `enabled=madvise`,
+`defrag=madvise`. Release builds (`-O3 -DNDEBUG`), built from `git archive` trees of
+main `116eb04a` and #187 head `3fb58c2a` (`ab24d.sh`; binary hashes in `provenance.txt`).
+All 24 tutorial movies in one process (hashes in `inputs.sha256`), 5x5 patches,
+`--dose_weighting --save_noDW --even_odd_split`, `--j 4` under `taskset -c 8-11`, under
+`/tmp/motioncorr-cpu64-bench.lock`. Rounds alternate arm order. Output check: SHA-256 of
+the data of every MRC and of every STAR (`digest24.py`) against main; all runs below match.
 
-Arms:
+## 1. Allocator setting on unmodified main (`ab24e.sh`, `raw-main-tunable.txt`)
 
-| arm | binary | environment |
-|---|---|---|
-| main | `116eb04` | none |
-| main+tunable | `116eb04` | `GLIBC_TUNABLES=glibc.malloc.hugetlb=1` |
-| #180 | `03976d94`-based branch (madvise + plan cache) | none |
-| plan cache+tunable | plan cache and DW copy elision only, no madvise code | `GLIBC_TUNABLES=glibc.malloc.hugetlb=1` |
+| arm | wall, rounds 1-4 | mean | sys | minor faults | max RSS |
+|---|---|---|---|---|---|
+| main | 499.6, 503.4, 514.9, 514.1 s | 508.0 s | 146-167 s | 51M | 4.39 GiB |
+| main + `hugetlb=1` | 386.2, 392.0, 393.3, 397.1 s | 392.2 s | 43-53 s | 2.1-2.8M | 4.39 GiB |
 
-## Result
+The tunable cuts wall time by 23% (116 s) with identical output.
 
-| arm | wall r1, r2 | sys | minor faults | max RSS |
-|---|---|---|---|---|
-| main | 506.2 s, 452.3 s | 148, 134 s | 51.6M | 4.60 GB |
-| main+tunable | 371.3 s, 370.5 s | 30, 40 s | 1.9–2.0M | 4.61 GB |
-| #180 | 362.5 s, 359.6 s | 26, 26 s | 2.0–2.2M | 4.39–4.41 GB |
-| plan cache+tunable | 357.7 s, 356.7 s | 24, 24 s | 1.6–1.7M | 4.41 GB |
+## 2. #187 on top of the tunable (`ab24d.sh`, `raw-exact-revisions.txt`)
 
-- The tunable on unmodified main recovers about 89% of the main-to-#180 gain (82 s of
-  91 s, against the faster main round).
-- The remaining gap is the plan cache and copy elision (about 13 s, 3.6%, and 0.2 GB RSS),
-  not the `madvise` code. Plan cache+tunable is 4–5 s faster than #180 with its own `madvise`.
-- Identity: SHA-256 of all 96 MRC payloads and the STAR files of every run match main
-  round 1 (`digests.tar.gz`).
-- Main round 1 started at load1 9.1 and is 54 s slower than main round 2. Use round 2
-  (452 s) for the baseline. Jiffies on CPUs 8–11 equal the process's own user+sys time in
-  every run, so nothing foreign ran on the pinned CPUs.
+| arm | wall, rounds 1-4 | mean | max RSS |
+|---|---|---|---|
+| main + `hugetlb=1` | 374.3, 382.9, 383.4, 373.2 s | 378.4 s | 4.39 GiB |
+| #187 + `hugetlb=1` | 366.4, 372.5, 364.8, 366.6 s | 367.6 s | 4.21 GiB |
+
+#187 is faster in all four pairs: 10.9 s (2.9%) on average, 0.19 GiB less RSS. The
+`FloatPlanCache` test passes on the head and fails on a mutant whose cache key drops the
+FFTW alignment classes (both run in `ab24d.sh`).
+
+## 3. First run (`raw-retained-first-run.txt`, `ab24c-first-run.sh`)
+
+Two rounds, same setup, run before the revisions above were recorded. Its binaries are
+`motioncorr` built in `mc-cpuprof-116eb04` (main), the #180 head, and a plan-cache build
+without `madvise`; their exact source revisions were not recorded, so use it as supporting
+evidence only. Main took 506 s and 452 s, main + tunable 371 s and 371 s, #180 363 s and
+360 s, plan cache + tunable 358 s and 357 s. The 3-5 s between #180 and plan cache +
+tunable is not resolved from run-to-run variation, so this run shows no benefit from the
+source `madvise` beyond the tunable.
 
 ## Limitations
 
-One host, two rounds per arm. The tunable needs glibc 2.35 or later and applies to every
-malloc in the process. On THP `always` hosts neither setting is expected to change anything.
+- One host, four rounds per arm in sections 1-2, two in section 3. Main varies from 452 s to
+  515 s across these runs, so compare within a section, not across them.
+- Host load1 was 7-18 during sections 1-2 (other users). The pinned CPUs 8-11 show no
+  foreign work: their jiffies exceed the process's own user+sys time by at most 1.2%
+  (section 1, plain round 3; below 0.3% in every other run). Memory bandwidth and cache contention from other
+  users are not measured.
+- The tunable needs glibc 2.35 or later and applies to every malloc in the process. THP
+  `always` (SCARF) and `never` hosts were not measured; no gain is expected on `always`.

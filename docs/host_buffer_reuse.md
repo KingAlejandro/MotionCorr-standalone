@@ -57,14 +57,14 @@ because it changes every malloc-family allocation:
 pages, so the full-frame FFT passes miss the TLB and every page faults on first
 touch. On a glibc 2.35 or later host, start the process with
 `GLIBC_TUNABLES=glibc.malloc.hugetlb=1` to have malloc request huge pages.
-Output is unchanged. On cpu64 (THP `madvise`) a 24-movie CPU batch went from
-452 s to 371 s, system time from 134 s to 30-40 s
+Output is unchanged. On cpu64 (THP `madvise`) a 24-movie CPU batch went from 508 s to
+392 s (mean of four alternating rounds), system time from ~150 s to ~50 s
 (`docs/issue10_allocator_control/`). Hosts with THP `always` (SCARF) already get
-huge pages and need nothing; `never` is unaffected. The tunable applies to every
-malloc in the process. The host THP mode and any `GLIBC_TUNABLES` value are in the
-`Host allocator:` line and the `--profile` record.
+huge pages, so no gain is expected there, and `never` should be unaffected; neither
+was measured. The tunable applies to every malloc in the process.
 
-The mode in effect is printed at start (`Host allocator: ...`) and recorded in
+The mode in effect is printed at start (`Host allocator: ...`, which also names the
+host THP mode and any `GLIBC_TUNABLES`) and recorded in
 the `--profile` process record.
 
 ## Correctness

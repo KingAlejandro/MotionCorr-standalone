@@ -25,26 +25,8 @@
 #include <malloc.h>
 #endif
 
-/* Host allocator policy (docs/host_buffer_reuse.md).
- *
- * Default: unchanged glibc behaviour. Full-frame per-movie buffers are reused
- * through a bounded, scoped pool instead (src/frame_buffer_pool.h), so no
- * process-wide allocator setting is needed and other allocations, including
- * per-frame movie storage, keep their normal release behaviour.
- *
- * MOTIONCORR_MALLOC_REUSE=1 opts in to raising glibc's mmap and trim
- * thresholds to 512 MiB. That keeps every large freed allocation in the heap
- * (including float movie frames), which can retain hundreds of MB that
- * M_TRIM_THRESHOLD does not cap: it only triggers trimming of the top-most
- * free chunk. It is kept for measurement and for hosts that want it.
- *  - glibc < 2.35 refuses a mmap threshold above 32 MiB, and any successful
- *    setter disables the dynamic threshold. So the mmap threshold is set first,
- *    and if it is refused nothing else is touched.
- *  - Never applied over user settings (MALLOC_MMAP_THRESHOLD_,
- *    MALLOC_TRIM_THRESHOLD_, GLIBC_TUNABLES).
- */
 // Host THP mode and any user GLIBC_TUNABLES, for the benchmark record. The THP
-// mode changes CPU-path timings by ~20-25% (docs/host_buffer_reuse.md).
+// mode changes CPU-path timings substantially (docs/issue10_allocator_control/).
 static std::string hostMemoryNote()
 {
 	std::string thp = "unknown";
@@ -63,6 +45,24 @@ static std::string hostMemoryNote()
 	return note;
 }
 
+/* Host allocator policy (docs/host_buffer_reuse.md).
+ *
+ * Default: unchanged glibc behaviour. Full-frame per-movie buffers are reused
+ * through a bounded, scoped pool instead (src/frame_buffer_pool.h), so no
+ * process-wide allocator setting is needed and other allocations, including
+ * per-frame movie storage, keep their normal release behaviour.
+ *
+ * MOTIONCORR_MALLOC_REUSE=1 opts in to raising glibc's mmap and trim
+ * thresholds to 512 MiB. That keeps every large freed allocation in the heap
+ * (including float movie frames), which can retain hundreds of MB that
+ * M_TRIM_THRESHOLD does not cap: it only triggers trimming of the top-most
+ * free chunk. It is kept for measurement and for hosts that want it.
+ *  - glibc < 2.35 refuses a mmap threshold above 32 MiB, and any successful
+ *    setter disables the dynamic threshold. So the mmap threshold is set first,
+ *    and if it is refused nothing else is touched.
+ *  - Never applied over user settings (MALLOC_MMAP_THRESHOLD_,
+ *    MALLOC_TRIM_THRESHOLD_, GLIBC_TUNABLES).
+ */
 static std::string configureHostAllocator()
 {
 	// The pool reads MOTIONCORR_FRAME_POOL itself; report its real state so a

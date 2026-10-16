@@ -194,13 +194,8 @@ static void testPinnedCapParsing() {
 // slotted frame and spreads it in place. The result must equal placing every
 // strip directly at its slot, which is what the per-strip reader does. Checked
 // on adversarial sizes too: every padding amount, tiny and large strips.
-static void testSpreadEqualsDirectPlacement(size_t in_align, unsigned seed, int n_strips) {
-    std::vector<uint32_t> sizes(n_strips);
-    unsigned st = seed;
-    for (int i = 0; i < n_strips; i++) {
-        st = st * 1103515245u + 12345u;
-        sizes[i] = 7u + (st >> 16) % (i % 5 == 0 ? 2000u : 13u);
-    }
+static void testSpreadSizes(const std::vector<uint32_t> &sizes, size_t in_align, unsigned seed) {
+    const int n_strips = (int)sizes.size();
     const size_t frame = frameStageBytes(sizes.data(), n_strips, in_align);
     const size_t packed = framePackedBytes(sizes.data(), n_strips);
     check(frame >= packed, "slotted frame is never smaller than its packed span");
@@ -227,6 +222,40 @@ static void testSpreadEqualsDirectPlacement(size_t in_align, unsigned seed, int 
         cursor = slot + sizes[s];
     }
     check(same, "in-place spread of a packed span equals per-strip placement");
+}
+
+static void testSpreadEqualsDirectPlacement(size_t in_align, unsigned seed, int n_strips) {
+    std::vector<uint32_t> sizes(n_strips);
+    unsigned st = seed;
+    for (int i = 0; i < n_strips; i++) {
+        st = st * 1103515245u + 12345u;
+        sizes[i] = 7u + (st >> 16) % (i % 5 == 0 ? 2000u : 13u);
+    }
+    testSpreadSizes(sizes, in_align, seed);
+}
+
+// The same span read for a multi-row-strip frame. The per-frame vector then holds
+// strips_per_frame entries, not ny, so everything that walks it must be bounded by
+// the geometry's strip count (frameStageBytes and the span reader once walked ny
+// entries, which reads past the vector for any RowsPerStrip > 1). Strip sizes track
+// the decompressed length of each strip, so the short final strip is short here too,
+// and the vector is sized exactly so a walk past it is a sanitizer finding.
+static void testSpreadMultiRowStrips(size_t in_align, int nx, int ny, int rps, int bps, unsigned seed) {
+    char msg[200];
+    const StripGeometry g = planStrips(nx, ny, rps, bps);
+    std::vector<uint32_t> sizes((size_t)g.strips_per_frame);
+    unsigned st = seed;
+    for (int s = 0; s < g.strips_per_frame; s++) {
+        st = st * 1103515245u + 12345u;
+        sizes[(size_t)s] = 7u + (uint32_t)(g.chunkBytes((size_t)s) / 3) + (st >> 16) % 211u;
+    }
+    std::snprintf(msg, sizeof(msg), "rps=%d: one compressed size per strip, fewer than ny rows", rps);
+    check((int)sizes.size() == g.strips_per_frame && (rps == 1 || g.strips_per_frame < ny), msg);
+    const size_t stage = frameStageBytes(sizes.data(), g.strips_per_frame, in_align);
+    const size_t packed = framePackedBytes(sizes.data(), g.strips_per_frame);
+    check(stage >= packed && stage - packed <= (size_t)g.strips_per_frame * in_align,
+          "slot padding is bounded by one alignment unit per strip");
+    testSpreadSizes(sizes, in_align, seed);
 }
 
 // Every pinned byte the pipeline uses is inside one layout whose total is what
@@ -412,6 +441,10 @@ int main() {
         for (unsigned seed : {1u, 7u, 99u})
             testSpreadEqualsDirectPlacement(a, seed, 600);
     testSpreadEqualsDirectPlacement(4, 3u, 3838);
+    for (size_t a : {(size_t)1, (size_t)4, (size_t)8, (size_t)16})
+        for (int bps = 1; bps <= 2; bps++)
+            for (int rps : {1, 2, 8, 16, 512, 3838})
+                testSpreadMultiRowStrips(a, 3710, 3838, rps, bps, 5u + (unsigned)rps);
     testPinnedChunkLayout();
     testChunkParameters();
 

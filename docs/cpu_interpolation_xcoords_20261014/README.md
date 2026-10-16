@@ -2,18 +2,23 @@
 
 ## Current state — 16 October 2026
 
-Merged main `d7171b810dc97003784339d7bad1c279903f3bba` with merge commit
-`4fe5b00d`; tested code is `78df217a0792571e1f3f3e3ecb9583db6b028848`.
+Merged main `1db869025507ac801845b4001b84e6bc0e77a645` (#178 included);
+merged/tested code is `d22c4569160a6d88eb73b754c2cbaa5edd9f452b`.
+The earlier d7171b81 merge and controls remain retained as history.
 Both production methods now use one private cache builder, tested directly against
 inline division for 57,922 coordinates across 13 widths (including detector and
 odd widths). The reciprocal-multiply mutant fails on macOS and GCC/Linux.
-Linux Release passes 59/59 CTests; macOS has only the two independently reproduced
-main failures. Tutorial and synthetic 5x5-patch product trees match current main
+Linux Release passes 60/60 CTests on full rerun (an initial ProfilingKit timeout
+is retained); macOS has only the two independently reproduced main failures. Tutorial and synthetic 5x5-patch product trees match current main
 exactly (8 MRC payloads, 4 canonical STARs); a payload-bit mutant is rejected.
+Streamed one-frame offsets are tested against the frozen full-stack reference.
+The cache remains per interpolation call, so #178's unweighted path rebuilds it
+once per frame, outside all row/pixel loops; no cross-call cache is introduced.
 Both measurement drivers require a full source SHA **per measured binary** and
 record it separately from driver HEAD, with caller-attestation explicitly labelled.
 
-[Commands, statuses, hashes, limitations and retained logs](review_20261016/README.md).
+[Current commands, statuses, hashes, limitations and logs](review_20261016/streamed-main/README.md).
+[Earlier review-fix evidence](review_20261016/README.md).
 No new timing was collected; application benefit remains unresolved. Keep draft.
 Everything below is historical evidence against the original baseline, not a
 current-main performance claim. Its old receipt `source` identifies driver HEAD,

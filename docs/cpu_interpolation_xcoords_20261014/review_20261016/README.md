@@ -1,5 +1,8 @@
 # PR #181 review fixes and correctness verification
 
+Superseded for current-head claims by [the #178/main 1db86902 merge verification](streamed-main/README.md).
+This section preserves the earlier d7171b81 checks.
+
 Base: `d7171b810dc97003784339d7bad1c279903f3bba` (main).
 Original PR: `a532b8a4371e0e6c732fb8149284a4887298c00d`.
 Merge: `4fe5b00d9991c459f32862a74f0eb463b9a2368d` (no rebase/force push).

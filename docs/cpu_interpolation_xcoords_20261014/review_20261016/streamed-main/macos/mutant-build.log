@@ -1,0 +1,77 @@
+-- LibTIFF Deflate subcodec: zlib only
+--   Deflate movie reads use zlib here. A LibTIFF built with libdeflate decodes the same bytes faster; see README, "LibTIFF Deflate backend". Results are unaffected.
+-- Configuring done (0.9s)
+-- Generating done (0.6s)
+-- Build files have been written to: /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/build
+[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/motioncorr_runner.cpp:40:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/motioncorr_runner.h:35:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/image.h:689:
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/rwSPIDER.h:333:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  333 |     sprintf(header->ctim, "%02d:%02d:%02d", t->tm_hour, t->tm_min, t->tm_sec);
+      |     ^
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/image.h:1787:10: note: in instantiation of member function 'Image<double>::writeSPIDER' requested here
+ 1787 |                         err = writeSPIDER(select_img, isStack, mode, datatype);
+      |                               ^
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/image.h:767:3: note: in instantiation of member function 'Image<double>::_write' requested here
+  767 |                 _write(fname, hFile, select_img, isStack, mode, datatype);
+      |                 ^
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/motioncorr_runner.cpp:666:8: note: in instantiation of member function 'Image<double>::write' requested here
+  666 |                 Iout.write(fn_new_gain);
+      |                      ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/motioncorr_runner.cpp:40:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/motioncorr_runner.h:35:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/image.h:689:
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/rwSPIDER.h:334:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  334 |     sprintf(header->cdat, "%02d-%02d-%02d", t->tm_mday, t->tm_mon, t->tm_year);
+      |     ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/motioncorr_runner.cpp:40:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/motioncorr_runner.h:35:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/image.h:689:
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/rwSPIDER.h:333:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  333 |     sprintf(header->ctim, "%02d:%02d:%02d", t->tm_hour, t->tm_min, t->tm_sec);
+      |     ^
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/image.h:1787:10: note: in instantiation of member function 'Image<float>::writeSPIDER' requested here
+ 1787 |                         err = writeSPIDER(select_img, isStack, mode, datatype);
+      |                               ^
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/image.h:767:3: note: in instantiation of member function 'Image<float>::_write' requested here
+  767 |                 _write(fname, hFile, select_img, isStack, mode, datatype);
+      |                 ^
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/motioncorr_runner.cpp:1537:10: note: in instantiation of member function 'Image<float>::write' requested here
+ 1537 |                 owned->write(path, -1, false, WRITE_OVERWRITE, datatype);
+      |                        ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/motioncorr_runner.cpp:40:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/motioncorr_runner.h:35:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/image.h:689:
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/src/rwSPIDER.h:334:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  334 |     sprintf(header->cdat, "%02d-%02d-%02d", t->tm_mday, t->tm_mon, t->tm_year);
+      |     ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+4 warnings generated.
+[  1%] Linking CXX static library libmotioncorr_core.a
+[ 96%] Built target motioncorr_core
+[ 98%] Linking CXX executable cpu_interpolation_xcoords
+[100%] Built target cpu_interpolation_xcoords

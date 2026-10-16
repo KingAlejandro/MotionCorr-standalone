@@ -1,0 +1,13 @@
+diff --git a/src/motioncorr_runner.cpp b/src/motioncorr_runner.cpp
+index 2ce479e..dec047c 100644
+--- a/src/motioncorr_runner.cpp
++++ b/src/motioncorr_runner.cpp
+@@ -4353,7 +4353,7 @@ std::vector<RFLOAT> MotioncorrRunner::interpolationColumnCoordinates(int nx) {
+ 	// Keep the inline expression's rounding; reciprocal multiplication differs.
+ 	std::vector<RFLOAT> coordinates(nx);
+ 	for (int ix = 0; ix < nx; ix++)
+-		coordinates[ix] = (RFLOAT)ix / nx - 0.5;
++		coordinates[ix] = (RFLOAT)ix * (1.0 / nx) - 0.5;
+ 	return coordinates;
+ }
+ 

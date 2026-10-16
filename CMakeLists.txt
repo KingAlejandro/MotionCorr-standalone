@@ -385,7 +385,8 @@ if(BUILD_TESTING)
         # mutant runner below must fail the same script: one takes the EPS-direct
         # route although a prior all_batches.pdf exists, one asks for that prior
         # file again after the batch pass has written it, one lists the EPS in
-        # the wrong order, one leaves an empty logfile.pdf after a failed render.
+        # the wrong order, one leaves an empty logfile.pdf after a failed render, one keeps a
+        # partial or stale logfile.pdf after a failed concatenation.
         add_test(NAME LogfileFromEps
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_logfile_from_eps.py
                 --binary $<TARGET_FILE:motioncorr>)
@@ -401,7 +402,9 @@ if(BUILD_TESTING)
         set(_mutant_eps_order_4 "logfile_fn_eps.insert(logfile_fn_eps.end(), header_fn_eps.begin(), header_fn_eps.end());")
         set(_mutant_placeholder_1 "logfile_fn_eps, aggregate_only, false)")
         set(_mutant_placeholder_2 "logfile_fn_eps, aggregate_only, true)")
-        foreach(_mutant always_eps late_guard eps_order placeholder)
+        set(_mutant_concat_cleanup_1 "removeRegularFileIfPresent(report_out + \"logfile.pdf\");")
+        set(_mutant_concat_cleanup_2 "(void)0;")
+        foreach(_mutant always_eps late_guard eps_order placeholder concat_cleanup)
             file(READ "${_runner}" _mutant_source)
             set(_pair 1)
             while(DEFINED _mutant_${_mutant}_${_pair})

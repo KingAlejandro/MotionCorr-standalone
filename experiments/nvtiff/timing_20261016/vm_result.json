@@ -1,0 +1,410 @@
+{
+  "run_root": "/home/alex/motioncorr-validation-20261011-vm/timing-20261016/run-4",
+  "state": "ABORTED_INCOMPLETE",
+  "error": "RuntimeError('resource/owned observer gate failed; raw receipt retained')",
+  "recorded_process_rows": 143,
+  "complete_files": 2,
+  "metrics": {},
+  "files": [
+    {
+      "id": "empiar-10361-1",
+      "recipe": {
+        "id": "empiar-10361-1",
+        "family": "EMPIAR-10361",
+        "relative_path": "EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-12_0007_Jan20_08.57.33.tif",
+        "sha256": "79efffaa086d56c799a234e3768843cb429c02c05d024f6a553a462acf8a6736",
+        "bytes": 710039128,
+        "width": 5760,
+        "height": 4092,
+        "frames": 62,
+        "bytes_per_sample": 1,
+        "codec": "LZW",
+        "io_threads": 8,
+        "movie": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-12_0007_Jan20_08.57.33.tif"
+      },
+      "driver_verdict": "GO_TO_APPLICATION_PILOT_ONLY",
+      "metrics": {
+        "ingest_ready_device_wall_s": {
+          "compact_median_s": 1.644182505,
+          "nvtiff_median_s": 0.852425128,
+          "paired_savings_s": [
+            0.8648164819999999,
+            0.7940488710000001,
+            0.776423453,
+            0.840329318,
+            0.7700148250000001,
+            0.779609065,
+            0.838457298,
+            0.762344314,
+            0.803648426,
+            0.78110731,
+            0.82296261,
+            0.7752308720000001
+          ],
+          "paired_median_saving_s": 0.7875780905,
+          "descriptive_saving_interval_s": [
+            0.7758271625000001,
+            0.830709954
+          ],
+          "null_right_minus_left_by_arm_s": {
+            "compact": [
+              0.04497022099999981,
+              -0.01961560699999998,
+              0.09512377799999983,
+              0.1360367790000001,
+              -0.09308440700000009,
+              0.04270708600000006
+            ],
+            "nvtiff": [
+              -0.012843245000000003,
+              0.019347981000000014,
+              0.007676112000000068,
+              -0.027501245999999924,
+              0.0033635560000000453,
+              -0.0018438079999999468
+            ]
+          },
+          "null_band_s": [
+            -0.1360367790000001,
+            0.1360367790000001
+          ],
+          "required_saving_s": 0.15,
+          "resolved_at_declared_minimum": true
+        },
+        "checked_exit_monotonic_s": {
+          "compact_median_s": 2.243264662101865,
+          "nvtiff_median_s": 1.3544367523863912,
+          "paired_savings_s": [
+            0.9708368899300694,
+            0.8906597085297108,
+            0.8596901409327984,
+            0.9136911230161786,
+            0.8520503528416157,
+            0.8710429901257157,
+            0.8893383210524917,
+            0.8508080327883363,
+            0.9091170895844698,
+            0.8928063726052642,
+            0.9320934684947133,
+            0.8730829320847988
+          ],
+          "paired_median_saving_s": 0.8899990147911012,
+          "descriptive_saving_interval_s": [
+            0.8653665655292571,
+            0.9114041063003242
+          ],
+          "null_right_minus_left_by_arm_s": {
+            "compact": [
+              0.042165118269622326,
+              0.004357818514108658,
+              0.08669980708509684,
+              0.14004706405103207,
+              -0.1019981037825346,
+              0.03879290446639061
+            ],
+            "nvtiff": [
+              -0.020609031431376934,
+              0.020207587629556656,
+              0.001598808914422989,
+              -0.03951952699571848,
+              -0.0014923661947250366,
+              -0.0011456720530986786
+            ]
+          },
+          "null_band_s": [
+            -0.14004706405103207,
+            0.14004706405103207
+          ],
+          "required_saving_s": 0.15,
+          "resolved_at_declared_minimum": true
+        },
+        "process_internal_total_wall_s": {
+          "compact_median_s": 2.1019905025,
+          "nvtiff_median_s": 1.2129887845,
+          "paired_savings_s": [
+            0.9619718000000002,
+            0.8905230980000001,
+            0.8691712300000001,
+            0.9299803350000002,
+            0.8538980730000001,
+            0.874911078,
+            0.9110103399999998,
+            0.8678811450000001,
+            0.9003330170000001,
+            0.9007062560000001,
+            0.93382246,
+            0.880894815
+          ],
+          "paired_median_saving_s": 0.8954280575000001,
+          "descriptive_saving_interval_s": [
+            0.872041154,
+            0.9204953375
+          ],
+          "null_right_minus_left_by_arm_s": {
+            "compact": [
+              0.05563497999999978,
+              0.004886657999999766,
+              0.08844025100000019,
+              0.14950720100000003,
+              -0.09408481199999974,
+              0.03538437299999986
+            ],
+            "nvtiff": [
+              -0.011991180999999962,
+              0.008064150999999908,
+              -0.005112377000000112,
+              -0.04101161399999986,
+              0.009228822999999942,
+              -0.0066449730000002205
+            ]
+          },
+          "null_band_s": [
+            -0.14950720100000003,
+            0.14950720100000003
+          ],
+          "required_saving_s": 0.15,
+          "resolved_at_declared_minimum": true
+        }
+      }
+    },
+    {
+      "id": "empiar-10361-2",
+      "recipe": {
+        "id": "empiar-10361-2",
+        "family": "EMPIAR-10361",
+        "relative_path": "EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-18_0004_Jan20_09.12.45.tif",
+        "sha256": "3948c91b8f223f5ef860c05d974bfea42dc08f19bbcfe14332cc473a8737661b",
+        "bytes": 708051618,
+        "width": 5760,
+        "height": 4092,
+        "frames": 62,
+        "bytes_per_sample": 1,
+        "codec": "LZW",
+        "io_threads": 8,
+        "movie": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-18_0004_Jan20_09.12.45.tif"
+      },
+      "driver_verdict": "GO_TO_APPLICATION_PILOT_ONLY",
+      "metrics": {
+        "ingest_ready_device_wall_s": {
+          "compact_median_s": 1.672913229,
+          "nvtiff_median_s": 0.8262535735,
+          "paired_savings_s": [
+            0.8641860259999999,
+            0.8179622980000001,
+            0.838014838,
+            0.862617402,
+            0.851693391,
+            0.904394487,
+            0.7986403040000001,
+            0.867566083,
+            0.874804429,
+            0.7858512630000001,
+            0.8166766759999999,
+            0.867845176
+          ],
+          "paired_median_saving_s": 0.8571553965,
+          "descriptive_saving_interval_s": [
+            0.817319487,
+            0.8677056295000001
+          ],
+          "null_right_minus_left_by_arm_s": {
+            "compact": [
+              -0.02939785500000003,
+              -0.02261068299999991,
+              0.021739348000000103,
+              0.0024472400000001837,
+              -0.012072756000000018,
+              -0.02257268899999998
+            ],
+            "nvtiff": [
+              -0.005510752999999924,
+              0.004250539999999914,
+              -0.006603349000000036,
+              0.014587883000000024,
+              0.030423128999999993,
+              -0.006422321999999925
+            ]
+          },
+          "null_band_s": [
+            -0.030423128999999993,
+            0.030423128999999993
+          ],
+          "required_saving_s": 0.15,
+          "resolved_at_declared_minimum": true
+        },
+        "checked_exit_monotonic_s": {
+          "compact_median_s": 2.2834326215088367,
+          "nvtiff_median_s": 1.3349996097385883,
+          "paired_savings_s": [
+            0.9623283473774791,
+            0.9267073627561331,
+            0.9389988612383604,
+            0.9555892394855618,
+            0.9595578955486417,
+            0.9808469135314226,
+            0.8965909834951162,
+            0.9679852314293385,
+            0.9578772466629744,
+            0.872378708794713,
+            0.8993106102570891,
+            0.9572500828653574
+          ],
+          "paired_median_saving_s": 0.9564196611754596,
+          "descriptive_saving_interval_s": [
+            0.9130089865066111,
+            0.9609431214630604
+          ],
+          "null_right_minus_left_by_arm_s": {
+            "compact": [
+              -0.031188862398266792,
+              0.0027366643771529198,
+              -0.01171013806015253,
+              0.0019499706104397774,
+              0.025999944657087326,
+              0.0033437227830290794
+            ],
+            "nvtiff": [
+              -0.03935442492365837,
+              -0.0007808245718479156,
+              0.002363150008022785,
+              0.0200852295383811,
+              0.04033807199448347,
+              -0.02452656999230385
+            ]
+          },
+          "null_band_s": [
+            -0.04033807199448347,
+            0.04033807199448347
+          ],
+          "required_saving_s": 0.15,
+          "resolved_at_declared_minimum": true
+        },
+        "process_internal_total_wall_s": {
+          "compact_median_s": 2.142438221,
+          "nvtiff_median_s": 1.191183493,
+          "paired_savings_s": [
+            0.967161363,
+            0.9226222069999999,
+            0.949210211,
+            0.9528883380000002,
+            0.9493060389999999,
+            0.9895714819999999,
+            0.9027132680000001,
+            0.9646085470000001,
+            0.9609089150000001,
+            0.8859703750000003,
+            0.9166128030000003,
+            0.9589497389999999
+          ],
+          "paired_median_saving_s": 0.9510971885,
+          "descriptive_saving_interval_s": [
+            0.9196175050000001,
+            0.9627587310000001
+          ],
+          "null_right_minus_left_by_arm_s": {
+            "compact": [
+              -0.015499444999999668,
+              -0.002750623999999924,
+              -0.006682964999999985,
+              -0.003228616999999989,
+              0.014738742000000027,
+              -0.00429523300000012
+            ],
+            "nvtiff": [
+              -0.019855586000000036,
+              -0.014816122000000043,
+              0.0056702730000000034,
+              0.023865035999999895,
+              0.044101120000000105,
+              -0.010639893999999872
+            ]
+          },
+          "null_band_s": [
+            -0.044101120000000105,
+            0.044101120000000105
+          ],
+          "required_saving_s": 0.15,
+          "resolved_at_declared_minimum": true
+        }
+      }
+    }
+  ],
+  "timing_claim": "UNQUALIFIED",
+  "scope": "Standalone warm-cache real U8 LZW native-device ingest; no application, real U16, safety or licensing result",
+  "sign": "Positive compact minus nvTIFF is saving, seconds/movie",
+  "overall_definition": "Equal-file mean of five paired medians; envelope = means of file bounds, not pooled confidence; null = maximum per-file magnitude",
+  "source_receipts": {
+    "/home/alex/motioncorr-validation-20261011-vm/timing-20261016/run-4/pairs/progress.json": "4667e70096de5cdf1a85a47c92731f6b44310921da5ea9214d838e6f33e03276",
+    "/home/alex/motioncorr-validation-20261011-vm/timing-20261016/run-4/pairs/identities.json": "068f0630798bcadb4cee4bc33f98b35c2c87047e72b623ae5168a212e75c510d",
+    "/home/alex/motioncorr-validation-20261011-vm/timing-20261016/run-4/exit.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "/home/alex/motioncorr-validation-20261011-vm/timing-20261016/run-4/compute-before.csv": "a8e32f59cad656f66ec8f16e9ab5c7622ef85eb929386b6d767e32de4284d835",
+    "/home/alex/motioncorr-validation-20261011-vm/timing-20261016/run-4/compute-after.csv": "a8e32f59cad656f66ec8f16e9ab5c7622ef85eb929386b6d767e32de4284d835",
+    "/home/alex/motioncorr-validation-20261011-vm/timing-20261016/run-4/thp.txt": "4ca7db7e514787a42c69893c196cd4f7ed14154bda6d690fc2f7771b7ae497d1",
+    "/home/alex/motioncorr-validation-20261011-vm/timing-20261016/run-4/start.utc": "b0b05b27aed8b7cb9bb1a7f2f52d76418629989b1c78553a2de6178d0e06bb21",
+    "/home/alex/motioncorr-validation-20261011-vm/timing-20261016/run-4/end.utc": "41ffbc6cca3413b50259fc860c6cedbbf3664ed83c316aa1445baef00d6ee2af",
+    "/home/alex/motioncorr-validation-20261011-vm/timing-20261016/run-4/hostname.txt": "77c945fd118300b77beb1a4c4f11e6706ef4ceb02be3889df5b4607bd4263a18"
+  },
+  "verdict": "UNRESOLVED",
+  "run_metadata": {
+    "exit.txt": "1",
+    "compute-before.csv": "pid, gpu_uuid, used_gpu_memory [MiB]",
+    "compute-after.csv": "pid, gpu_uuid, used_gpu_memory [MiB]",
+    "thp.txt": "always [madvise] never",
+    "start.utc": "2026-10-16T18:37:18Z",
+    "end.utc": "2026-10-16T18:46:31Z",
+    "hostname.txt": "4-gpu-vm"
+  },
+  "campaign_usable_as_complete_result": false,
+  "complete_file_fragments_only": true,
+  "limitations": [
+    "Entire five-file campaign aborted under original one-bad-row rule; two completed file summaries are descriptive retained fragments, not an accepted overall campaign.",
+    "Physical underlying VM host exclusivity is unverified; observed guest box-wide GPUs empty before/after; exact lane residual gate applied continuously per run.",
+    "Both failed rows had valid observed payload/observer provenance, no thread inventory errors; unowned CPU source is not established. Kernel/IRQ is not excused or subtracted.",
+    "No retry/filtering of individual pairs. One complete-campaign retry only. Other three file effects and overall null/saving are unavailable."
+  ],
+  "attempts": [
+    {
+      "run": "run-1",
+      "exit_status": 1,
+      "native_rows": 0,
+      "failure": "KeyError('head'): wrong kit manifest schema"
+    },
+    {
+      "run": "run-2",
+      "exit_status": 1,
+      "native_rows": 0,
+      "failure": "Wrong corpus-root path, FileNotFoundError before any launch"
+    },
+    {
+      "run": "run-3",
+      "exit_status": 1,
+      "native_rows": 41,
+      "complete_files": 0,
+      "failure": "empiar-10361-1-pair-08-B resource gate",
+      "unowned_cores": 0.9935115166765478,
+      "raw_unowned_cores": 1.1034314290689966,
+      "limit": 0.25,
+      "unowned_cpu_s": 1.9204469999999922,
+      "payload_wall_s": 1.9329891679808497
+    },
+    {
+      "run": "run-4",
+      "exit_status": 1,
+      "native_rows": 143,
+      "complete_files": 2,
+      "failure": "empiar-10441-1-pair-09-A resource gate",
+      "unowned_cores": 0.5188887091137898,
+      "raw_unowned_cores": 0.6245042966929867,
+      "limit": 0.25,
+      "unowned_cpu_s": 2.7554229999999684,
+      "payload_wall_s": 5.3102388847619295
+    }
+  ],
+  "archive": {
+    "host": "4GPUs",
+    "path": "/home/alex/motioncorr-validation-20261011-vm/timing-20261016/evidence-20261016-vm.tar.gz",
+    "sha256": "db55e9ce65c11890db292b8cc21e0ae9d6ff290e265dd7f2f6004e2e2dc3b74e",
+    "manifest_path": "/home/alex/motioncorr-validation-20261011-vm/timing-20261016/evidence-20261016-vm-manifest.json",
+    "manifest_sha256": "52d0df1b7e120f4cd225a9096c146c78696b3cc793b5a071ed09db66562092fe"
+  }
+}

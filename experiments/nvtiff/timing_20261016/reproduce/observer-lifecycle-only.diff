@@ -1,0 +1,64 @@
+--- /tmp/nvtiff-original-accounting/owned_cpu.py	2026-10-16 19:38:59
++++ /tmp/nvtiff-timing-run/owned_cpu.py	2026-10-16 19:29:42
+@@ -5,7 +5,7 @@
+ the controller (including its NVML threads) is accounted as owned. Remaining
+ unattributed busy time is still subject to the original 0.25-core gate.
+ """
+-import copy,math,os,resource,signal,threading,time
++import copy,errno,math,os,resource,signal,threading,time
+ 
+ def self_usage():
+     r=resource.getrusage(resource.RUSAGE_SELF)
+@@ -17,18 +17,47 @@
+     fields=raw[raw.rindex(')')+2:].split()
+     return {'tid':tid,'start_ticks':int(fields[19]),'affinity':sorted(os.sched_getaffinity(tid))}
+ 
++def process_identity():
++    with open('/proc/self/stat') as stream:raw=stream.read()
++    fields=raw[raw.rindex(')')+2:].split()
++    return {'pid':os.getpid(),'start_ticks':int(fields[19])}
++
++def departed_task(tid,before,error,identity,phase):
++    """Classify only a proven departed thread of this still-identical process."""
++    if error.errno not in (errno.ENOENT,errno.ESRCH):raise error
++    current=process_identity()
++    if current!=identity:raise RuntimeError('owned observer process identity changed')
++    names={int(name) for name in os.listdir('/proc/self/task')}
++    if identity['pid'] not in names or tid in names:
++        raise RuntimeError('failed owned task read but task departure is unproven') from error
++    for path in ('/proc/self/task/%d'%tid,'/proc/%d'%tid):
++        try:os.stat(path)
++        except FileNotFoundError:pass
++        else:raise RuntimeError('failed owned task read but live or reused TID remains') from error
++    if process_identity()!=identity:raise RuntimeError('owned observer process identity changed during departure proof')
++    return {'tid':tid,'before_identity':before,'failed_phase':phase,'errno':error.errno,
++            'classification':'DEPARTED_OWN_THREAD','process_identity':identity,
++            'proof':'absent fresh self-task inventory and both self-task/global TID directories; owning PID/birth unchanged',
++            'scope':'lifecycle observation only; no additional CPU subtraction or relaxed resource gate'}
++
+ def own_tasks(lane,bind=False):
+     if not lane:raise RuntimeError('owned observer lane is empty')
+-    rows=[]
++    rows=[];departed=[];identity=process_identity()
+     for name in os.listdir('/proc/self/task'):
+-        tid=int(name);before=task(tid)
+-        if bind:os.sched_setaffinity(tid,lane)
+-        after=task(tid)
++        tid=int(name);before=None;phase='before task identity'
++        try:
++            before=task(tid)
++            if bind:
++                phase='bind affinity';os.sched_setaffinity(tid,lane)
++            phase='after task identity';after=task(tid)
++        except OSError as error:
++            departed.append(departed_task(tid,before,error,identity,phase));continue
+         if before['start_ticks']!=after['start_ticks']:raise RuntimeError('owned observer thread identity changed')
+         if not set(after['affinity'])<=set(lane):raise RuntimeError('owned observer thread escaped admitted lane')
+         rows.append(after)
+     if not rows:raise RuntimeError('owned observer thread inventory unavailable')
+-    return {'monotonic_s':time.monotonic(),'threads':rows}
++    if process_identity()!=identity:raise RuntimeError('owned observer process identity changed during inventory')
++    return {'monotonic_s':time.monotonic(),'threads':rows,'departed_threads':departed,'process_identity':identity}
+ 
+ def valid_number(n):return isinstance(n,(int,float)) and not isinstance(n,bool) and math.isfinite(n) and n>=0
+ 

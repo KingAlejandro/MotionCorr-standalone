@@ -639,7 +639,10 @@ void MotioncorrRunner::prepareGainReference(bool write_gain)
 	if (write_gain)
 	{
 		Image<RFLOAT> Iin, Iout;
-		Iin.read(fn_gain_reference);
+		// Image::read reports a short raw MRC only through a negative return (0 is success).
+		if (Iin.read(fn_gain_reference) < 0)
+			REPORT_ERROR("Failed to read the gain reference " + fn_gain_reference +
+			             ": the file is truncated or unreadable.");
 
 		if (gain_rotation == 0)
 			Iout() = Iin();
@@ -2020,7 +2023,13 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 		if (is_eer)
 			renderer.loadEERGain(fn_gain_reference, gain_cache());
 		else
-			gain_cache.read(fn_gain_reference);
+		{
+			// A short raw MRC leaves the rest of the array unread, and the size check below
+			// sees only the header, so the stale data would be multiplied into every movie.
+			if (gain_cache.read(fn_gain_reference) < 0)
+				REPORT_ERROR("Failed to read the gain reference " + fn_gain_reference +
+				             ": the file is truncated or unreadable.");
+		}
 		if (XSIZE(gain_cache()) != nx || YSIZE(gain_cache()) != ny)
 			REPORT_ERROR("The size of the image and the size of the gain reference do not match. Make sure the gain reference has been rotated if necessary.");
 		gain_cache_name = fn_gain_reference;
@@ -5139,7 +5148,9 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 	{
 		// Defect map
 		Image<float> Idefect;
-		Idefect.read(fn_defect);
+		if (Idefect.read(fn_defect) < 0)
+			REPORT_ERROR("Failed to read the defect map " + fn_defect +
+			             ": the file is truncated or unreadable.");
 		if (ny != YSIZE(Idefect()) || nx != XSIZE(Idefect()))
 			REPORT_ERROR("The size of the defect map is not the same as that of the movie.");
 

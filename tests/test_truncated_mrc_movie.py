@@ -131,19 +131,23 @@ def variants(mode, frames):
     }
 
 
-def run(binary, work, label, movies, gpu, ingest):
-    """movies: ordered {name: bytes}. Returns (rc, text, out dir, witness lines)."""
+def run(binary, work, label, movies, gpu, ingest, extra_files=None, extra_args=()):
+    """movies: ordered {name: bytes}. Returns (rc, text, out dir, witness lines).
+
+    extra_files {name: bytes} are written beside the movies and extra_args appended to the command.
+    """
     data = work / label / "data"
     out = work / label / "out"
     data.mkdir(parents=True)
     out.mkdir()
-    for name, payload in movies.items():
+    for name, payload in {**movies, **(extra_files or {})}.items():
         (data / name).write_bytes(payload)
     (data / "movies.star").write_text(STAR_HEAD + "".join("%s 1\n" % n for n in movies))
     witness = work / label / "witness.txt"
     cmd = [str(Path(binary).resolve()), "--i", "movies.star", "--o", str(out) + "/", "--use_own",
            "--j", "2", "--dose_weighting", "--dose_per_frame", "1.0", "--voltage", "300",
-           "--angpix", "1.0", "--patch_x", "3", "--patch_y", "3", "--bfactor", "150", "--seed", "1"]
+           "--angpix", "1.0", "--patch_x", "3", "--patch_y", "3", "--bfactor", "150", "--seed", "1",
+           *extra_args]
     if gpu is not None:
         cmd += ["--gpu", str(gpu), "--ingest", ingest, "--ingest_witness", str(witness)]
     res = subprocess.run(cmd, cwd=data, capture_output=True, text=True, timeout=600)

@@ -189,7 +189,7 @@ exec "{sys.executable}" "$@"
             "RunnerExportedUnits",
             "GainCache",
             "TiffRead",
-            "DamagedMovie", "TruncatedMrcMovie",
+            "DamagedMovie", "TruncatedMrcMovie", "TruncatedGainDefect",
             "CompressedMovieSequence",
             "RunnerModelParser",
             "MicrographModelBounds",

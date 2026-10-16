@@ -336,6 +336,11 @@ if(BUILD_TESTING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_truncated_mrc_movie.py
                 --binary $<TARGET_FILE:motioncorr>)
         set_tests_properties(TruncatedMrcMovie PROPERTIES TIMEOUT 600)
+        # RC0 F3b: a truncated raw MRC gain reference or defect map fails instead of being applied.
+        add_test(NAME TruncatedGainDefect
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_truncated_gain_defect.py
+                --binary $<TARGET_FILE:motioncorr>)
+        set_tests_properties(TruncatedGainDefect PROPERTIES TIMEOUT 600)
         add_test(NAME CompressedMovieSequence
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compressed_movie_sequence.py
                 --binary $<TARGET_FILE:motioncorr>)
@@ -490,6 +495,10 @@ if(BUILD_TESTING AND CUDA)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_truncated_mrc_movie.py
                 --binary $<TARGET_FILE:motioncorr> --gpu 0 --ingest auto,compact,float)
         set_tests_properties(TruncatedMrcMovieCuda PROPERTIES LABELS "cuda;hardware" TIMEOUT 900)
+        add_test(NAME TruncatedGainDefectCuda
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_truncated_gain_defect.py
+                --binary $<TARGET_FILE:motioncorr> --gpu 0 --ingest auto,compact,float)
+        set_tests_properties(TruncatedGainDefectCuda PROPERTIES LABELS "cuda;hardware" TIMEOUT 900)
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         # Issue #85 lane C: uint16 staging must reproduce the float path's device

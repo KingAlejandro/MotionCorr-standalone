@@ -92,6 +92,15 @@ bool called_from(const char *name) {
     return false;
 }
 
+// MC_FAULT_ONLY_CVD: with several workers sharing one environment, inject only in the
+// worker whose CUDA_VISIBLE_DEVICES contains this text.
+bool fault_device_selected() {
+    const char *only = std::getenv("MC_FAULT_ONLY_CVD");
+    if (!only) return true;
+    const char *visible = std::getenv("CUDA_VISIBLE_DEVICES");
+    return visible && std::strstr(visible, only);
+}
+
 bool preprocess_mode(const char *name) {
     return g_preprocess_fault && std::strcmp(g_preprocess_fault, name) == 0;
 }
@@ -209,7 +218,7 @@ extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
         if (!g_preprocess_injected &&
             (preprocess_mode("resident-retry-recoverable") ||
              preprocess_mode("resident-retry-fatal")) &&
-            called_from("downloadPatchSpectra")) {
+            fault_device_selected() && called_from("downloadPatchSpectra")) {
             if (ptr) *ptr = nullptr;
             return inject_preprocess(preprocess_mode("resident-retry-fatal"),
                                      "downloadPatchSpectra");

@@ -23,8 +23,8 @@ not been run (Limitations).
   were read from 361 files in 211 imagesets, 196 of them movie imagesets: all are 65001 at 4096^2); IMOD packed 4-bit TIFF; float16, signed 8-bit or PackBits
   movies; xz-compressed MRC. These are covered by the synthetic fixtures (`InputFormats`, test-data
   README section 1c), which also cover every rejected encoding.
-- **Decode smoke runs** (SCARF CPU, main's source): all eight new families decode and correct with
-  exit 0 and the expected frame counts.
+- **Decode smoke runs** (SCARF CPU and A100 GPU, main's source): all eight new families decode and
+  correct with exit 0 and the expected frame counts; each GPU route matches the reader table.
 - **Findings from real data:**
   - a linked `.mrc.zst` movie fails to open (`zstd -cdk` ignores symbolic links); copied, it works;
   - EMPIAR-10342's defect list is in SerialEM format and is refused;
@@ -178,9 +178,31 @@ single runs on a shared cluster and are not timing baselines.
 | `e10740_gain_unrotated` | 1 | 0 | 3838x3710x43 | 0.1 | gain not rotated: refused |
 | `e10342_serialem_defect` | 1 | 0 | - | 0.1 | `--defect_file 190830_defects.txt` (SerialEM format): refused |
 
-GPU runs of the same families (`format_smoke.py --gpu`, with `--ingest_witness`) are queued on SCARF
-(job 3633156) and are not reported here yet. The CUDA routes in the reader table were measured on
-the synthetic fixtures, which include each of these encodings.
+GPU runs of the same families: SCARF `gn0002`, NVIDIA A100-SXM4-40GB (driver 580.178.04), CUDA 12.8
+with nvCOMP, Slurm allocation of 16 cores; binary built from `03fc40f7` of the fixtures branch (main
+`d7171b81` source, test code only), `format_smoke.py --gpu` (`--gpu 0`, `--ingest auto`,
+`--ingest_witness`); results in `evidence/formats/smoke-gpu-3633156.json`. Single runs; not timing
+baselines.
+
+| run | exit | products | frames per movie | `--ingest auto` route (witness) | wall s |
+|---|---:|---:|---|---|---:|
+| `e10500f3` | 0 | 2 | 4096x4096x60 | float | 16.3 |
+| `e10342` | 0 | 2 | 3838x3710x50 | compact | 5.0 |
+| `e10740` | 0 | 2 | 3838x3710x43 | compact | 16.3 |
+| `e10374` | 0 | 2 | 7676x7420x50 | float | 22.1 |
+| `e11217` | 0 | 2 | 11520x8184x32 | float | 15.5 |
+| `e11217_copied` | 0 | 2 | 11520x8184x32 | float | 14.8 |
+| `e10202` | 1 | 0 | - | - | 0.3 |
+| `e10202_copied` | 0 | 2 | 7420x7676x70 | float | 20.3 |
+| `e10666` | 0 | 2 | 3838x3710x40 | float | 4.2 |
+| `e11404` | 0 | 2 | 8192x8192x45 | compact | 10.2 |
+| `e10740_gain_unrotated` | 1 | 0 | 3838x3710x43 | - | 0.2 |
+| `e10342_serialem_defect` | 1 | 0 | - | - | 0.1 |
+
+Every route is the one the reader table predicts: signed 16-bit TIFF, 4-bit MRC, compressed MRC and
+float32 TIFF take float; 16-bit LZW TIFF (both geometries) and uint16 MRC take compact. The GPU gain
+search chose the same e10740 orientation (`--gain_rot 3 --gain_flip 0`), and the linked `.zst`
+movies fail exactly as on the CPU.
 
 **e10740 gain orientation.** The gain (3710 x 3838) does not match the movies (3838 x 3710)
 without rotation, and MotionCorr refuses the unrotated gain. Six `--gain_rot/--gain_flip`
@@ -220,7 +242,7 @@ read without IMOD's row padding.
 ## Limitations
 
 - No CPU or GPU timing baselines for the new families; the smoke runs are single, unpinned runs on
-  shared SCARF nodes and only show that each encoding decodes and corrects.
+  shared SCARF nodes and only show that each encoding decodes, corrects and takes its route.
 - Dose and voltage are placeholders for most new families; gain orientation was established only
   for e10740. Products were not compared with another program.
 - Two movies per family; the census reads one or two files per imageset, so encodings that vary

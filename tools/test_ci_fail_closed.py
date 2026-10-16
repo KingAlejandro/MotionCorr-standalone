@@ -219,6 +219,13 @@ exec "{sys.executable}" "$@"
             "NvcompGuards",
             "NvcompAcceptanceDiagnostics",
             "OutputStageFaults",
+            # #185/#200 logfile.pdf rendering and its compiled mutants.
+            "LogfileFromEps",
+            "LogfileFromEpsMutant_always_eps",
+            "LogfileFromEpsMutant_late_guard",
+            "LogfileFromEpsMutant_eps_order",
+            "LogfileFromEpsMutant_placeholder",
+            "LogfileFromEpsMutant_concat_cleanup",
             "MultiGpuScheduling",
             "NativeMovieStaging",
             "GainCacheOwnership",
@@ -260,7 +267,11 @@ exec "{sys.executable}" "$@"
                         "MicrographModelBounds", "CompressedMovieSequence",
                         "RunnerInterpolateRecenter", "RunnerInterpolateShifts",
                         "StageProfile", "CudaValidationParser", "HostBufferReuse",
-                        "StageProfileThreads", "FrameBufferPool", "ProfilingKit"):
+                        "StageProfileThreads", "FrameBufferPool", "ProfilingKit",
+                        "LogfileFromEps", "LogfileFromEpsMutant_always_eps",
+                        "LogfileFromEpsMutant_late_guard", "LogfileFromEpsMutant_eps_order",
+                        "LogfileFromEpsMutant_placeholder",
+                        "LogfileFromEpsMutant_concat_cleanup"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)
                 self.assertEqual(len(names), len(INTEGRATED_SUITE),

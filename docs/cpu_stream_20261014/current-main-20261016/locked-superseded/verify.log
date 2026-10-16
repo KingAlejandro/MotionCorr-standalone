@@ -1,0 +1,29 @@
+synthetic-p1-j1-default-r0 PASS
+synthetic-p1-j1-noDW-r0 PASS
+synthetic-p1-j1-split-r0 PASS
+synthetic-p1-j1-odd-bin2-r0 PASS
+synthetic-p1-j4-default-r0 PASS
+synthetic-p1-j4-noDW-r0 PASS
+synthetic-p1-j4-split-r0 PASS
+synthetic-p1-j4-odd-bin2-r0 PASS
+synthetic-p5-j1-default-r0 PASS
+synthetic-p5-j1-noDW-r0 PASS
+synthetic-p5-j1-split-r0 PASS
+synthetic-p5-j1-odd-bin2-r0 PASS
+synthetic-p5-j4-default-r0 PASS
+synthetic-p5-j4-noDW-r0 PASS
+synthetic-p5-j4-split-r0 PASS
+synthetic-p5-j4-odd-bin2-r0 PASS
+synthetic-p5-j4-no-dose-r0 PASS
+tutorial-p5-j4-default-r0 PASS
+tutorial-p5-j4-noDW-r0 PASS
+tutorial-p5-j4-split-r0 PASS
+Traceback (most recent call last):
+  File "/home/ubuntu/fix178-20261016/verify.py", line 160, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/ubuntu/fix178-20261016/verify.py", line 122, in main
+    run('tutorial', 5, 4, config)
+  File "/home/ubuntu/fix178-20261016/verify.py", line 105, in run
+    raise RuntimeError(f'{name}/{arm} exit {rc}')
+RuntimeError: tutorial-p5-j4-odd-bin2-r0/base exit 1

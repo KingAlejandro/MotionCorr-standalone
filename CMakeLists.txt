@@ -162,6 +162,14 @@ include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
+    add_executable(cpu_unweighted_stream tests/test_cpu_unweighted_stream.cpp)
+    target_link_libraries(cpu_unweighted_stream PRIVATE motioncorr_core)
+    if(UNIX AND NOT APPLE)
+        target_compile_definitions(cpu_unweighted_stream PRIVATE MOTIONCORR_ALLOCATION_WITNESS)
+        target_link_options(cpu_unweighted_stream PRIVATE
+            "LINKER:--wrap=fftw_malloc" "LINKER:--wrap=fftw_free")
+    endif()
+    add_test(NAME CpuUnweightedStream COMMAND cpu_unweighted_stream)
     # Device-free control for the issue #69 patch-retry shift-state contract.
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
@@ -415,7 +423,8 @@ if(BUILD_TESTING)
         # mutant runner below must fail the same script: one takes the EPS-direct
         # route although a prior all_batches.pdf exists, one asks for that prior
         # file again after the batch pass has written it, one lists the EPS in
-        # the wrong order, one leaves an empty logfile.pdf after a failed render.
+        # the wrong order, one leaves an empty logfile.pdf after a failed render, one keeps a
+        # partial or stale logfile.pdf after a failed concatenation.
         add_test(NAME LogfileFromEps
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_logfile_from_eps.py
                 --binary $<TARGET_FILE:motioncorr>)
@@ -431,7 +440,9 @@ if(BUILD_TESTING)
         set(_mutant_eps_order_4 "logfile_fn_eps.insert(logfile_fn_eps.end(), header_fn_eps.begin(), header_fn_eps.end());")
         set(_mutant_placeholder_1 "logfile_fn_eps, aggregate_only, false)")
         set(_mutant_placeholder_2 "logfile_fn_eps, aggregate_only, true)")
-        foreach(_mutant always_eps late_guard eps_order placeholder)
+        set(_mutant_concat_cleanup_1 "removeRegularFileIfPresent(report_out + \"logfile.pdf\");")
+        set(_mutant_concat_cleanup_2 "(void)0;")
+        foreach(_mutant always_eps late_guard eps_order placeholder concat_cleanup)
             file(READ "${_runner}" _mutant_source)
             set(_pair 1)
             while(DEFINED _mutant_${_mutant}_${_pair})
@@ -714,6 +725,28 @@ if(BUILD_TESTING AND CUDA)
             # the multi-threaded strip reader, where some threads holding a handle
             # and some not is the state that used to deadlock the OpenMP team.
             "LINKER:--wrap=cudaStreamSynchronize" "LINKER:--wrap=TIFFOpen")
+        # Resident retry preparation (#197): the retry-caller shim forces a completed
+        # non-converged attempt, and the fault shim fails downloadPatchSpectra, the step
+        # that builds the retry input. Both shims are test-only; src/ has no switch.
+        add_executable(motioncorr_resident_retry_fault
+            src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp tests/cuda_fault_inject_shim.cpp)
+        target_link_libraries(motioncorr_resident_retry_fault PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+        target_link_options(motioncorr_resident_retry_fault PRIVATE
+            "-rdynamic"
+            "LINKER:--wrap=_Z20cudaAlignPatchDeviceP6float2iiidRSt6vectorIdSaIdEES4_idiRSob"
+            "LINKER:--wrap=_Z33cudaAlignPatchDeviceWithWorkspaceR23PatchAlignmentWorkspaceP6float2iiidRSt6vectorIdSaIdEES6_idiRSob"
+            "LINKER:--wrap=_Z25cudaAlignPatchBatchDeviceR30BatchedPatchAlignmentWorkspaceiiiidPSt6vectorIdSaIdEES4_idiP13PatchBatchLog"
+            "LINKER:--wrap=_Z14cudaAlignPatchRSt6vectorI13MultidimArrayI8tComplexIfEESaIS3_EEiidRS_IdSaIdEES9_idiRSob"
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaMemcpy"
+            "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetLastError"
+            "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cudaGetDeviceCount"
+            "LINKER:--wrap=cudaStreamSynchronize" "LINKER:--wrap=TIFFOpen")
+        add_test(NAME CudaResidentRetryFailures
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_resident_retry_controls.py
+                --binary $<TARGET_FILE:motioncorr_resident_retry_fault>)
+        set_tests_properties(CudaResidentRetryFailures PROPERTIES
+            LABELS "cuda;hardware" TIMEOUT 600)
         add_test(NAME CudaPreprocessingFailurePaths
             COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py

@@ -59,7 +59,15 @@ cmake --build build-cuda --parallel
 
 # One GPU
 ./build-cuda/motioncorr --i movies.star --o MotionCorr --use_own --gpu 0 --j 4
+
+# Several GPUs: one worker process per device (Linux). Needs Ghostscript (`gs`); --out must NOT already exist
+python3 tools/multi_gpu/run_dataset.py \
+  --binary "$PWD/build-cuda/motioncorr" --star movies.star --out MotionCorr_4gpu \
+  --launcher-args="--devices 0,1,2,3" -- \
+  --use_own --j 8
 ```
+
+`--devices` takes `nvidia-smi` indices or GPU UUID prefixes, and everything after `--` goes to every worker. The multi-GPU run is verified for 1, 2 and 4 workers at `1db86902` (PR #209, which selected devices by UUID with explicit CPU masks); this exact command line has not been run by the author of this README text, and on macOS it stops with "Native multi-GPU worker cleanup requires Linux child-subreaper support" (checked). `--bin_factor` other than 1 turns on early binning by default, which bypasses the GPU-resident path: add `--no_early_binning` to keep the GPU-resident path with late binning (see [`docs/release/SUPPORT.md`](docs/release/SUPPORT.md) §3).
 
 `./build/motioncorr --version` prints the version; `./build/motioncorr --use_own --help` lists the options.
 
@@ -69,7 +77,7 @@ cmake --build build-cuda --parallel
 
 **Optional nvCOMP GPU decoder: input-trust precondition.** On builds configured with `-DUSE_NVCOMP=ON` (default OFF), `--ingest auto` sends eligible TIFFs (16-bit, Deflate/Adobe-Deflate, one row per strip, no predictor, native byte order) to NVIDIA nvCOMP's GPU Deflate decoder. nvCOMP 5.3 documents undefined behaviour for corrupt compressed input. MotionCorr checks the TIFF structure, zlib wrapper, sizes/offsets, decoder status, decoded length and an Adler-32 checksum before using any decoded data, but it cannot guarantee safe behaviour on a corrupt Deflate body. This route therefore assumes complete, unmodified acquisition files; use `--ingest compact` for files of unknown integrity or still being written. A file that changes between the tag scan and the read is not detected (follow-up [#215](https://github.com/KingAlejandro/MotionCorr-standalone/issues/215)); checked-arithmetic hardening (T3) is pending until it merges.
 
-**Compressed MRC inputs must be validated first.** `.bz2`/`.xz`/`.zst` MRC movies are read without checking the decompressor's exit status after a complete read, so some end-of-stream corruption is accepted. Run `xz -t`, `zstd -t` or `bzip2 -t`/`pbzip2 -t` on every file before processing (fix scheduled: [#214](https://github.com/KingAlejandro/MotionCorr-standalone/issues/214)). For EER, supply `--expected_frames` (or per-movie STAR frame counts): a truncated EER file is otherwise processed as a shorter movie, and a fraction with a wrong pixel count is skipped with a warning. See [`docs/release/SUPPORT.md`](docs/release/SUPPORT.md) §6.
+**Compressed MRC inputs must be validated first.** `.bz2`/`.xz`/`.zst` MRC movies are read without checking the decompressor's exit status after a complete read, so some end-of-stream corruption is accepted. Run `xz -t`, `zstd -t` or `bzip2 -t`/`pbzip2 -t` on every file before processing (fix scheduled: [#214](https://github.com/KingAlejandro/MotionCorr-standalone/issues/214)). For EER, supply `--expected_frames <grouped_frames>` (or per-movie STAR frame counts), where grouped frames = raw fractions ÷ `--eer_grouping` with integer division (for example 2331 or 2330 fractions at `--eer_grouping 40` both give 58): a truncated EER file is otherwise processed as a shorter movie, and a fraction with a wrong pixel count is skipped with a warning. The check detects a mismatch in the grouped count only, not every shortened or damaged file. EER inputs, like nvCOMP inputs, are assumed complete and unmodified: memory safety of the inherited EER decoder on malformed input is not established (EER-MS). See [`docs/release/SUPPORT.md`](docs/release/SUPPORT.md) §6.
 
 ## Optional proprietary dependencies
 

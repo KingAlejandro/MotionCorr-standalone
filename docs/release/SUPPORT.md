@@ -5,8 +5,8 @@
 > No unrestricted or stable support is claimed for CUDA local alignment (see **S1** below), and no scientific equivalence or
 > preference for either backend is established.
 
-Status: **draft for RC0, pre-freeze, revision 2** (after the R-REL accuracy review of PR #201 and the maintainer decisions D1, D2,
-T3, D5, D6 and D7). Written against main `2b3c74b3` (the merge of #200 F1 and #210 TST1 on top of `1db86902`); the qualification
+Status: **draft for RC0, pre-freeze, revision 3** (it stays DRAFT until the freeze) (after the R-REL and R-REL-B reviews and the R-QA2 audits of PR #201, and the maintainer
+decisions D1, D2, T3, D5, D6 and D7). Written against main `2b3c74b3` (the merge of #200 F1 and #210 TST1 on top of `1db86902`); the qualification
 evidence cited below was gathered at `1db86902`. Source line numbers are at `2b3c74b3` and will move; re-check them against the
 frozen SHA. Every **Qualification** cell says **pending RC0 QF** (the full CPU + native CUDA qualification of the frozen SHA, register
 item QF in #198), unless a row cites evidence. Linux/CUDA command validation by this document's author is **UNRUN**; the qualification
@@ -56,7 +56,7 @@ Where this program behaves differently from RELION 5.1's built-in CPU motion cor
 | Worker reports; failed movie | per-movie files may remain | `--skip_report_pdf` for multi-GPU workers; no rollback: partial or earlier per-movie files and an early `_PS.mrc` can remain, joint outputs withheld, §6 | Verified |
 | Corrupt EER fractions | skipped with a warning (inherited) | preserved: wrong-pixel-count fractions are skipped and the movie publishes; supply `--expected_frames`, §2 | Decided (D6) |
 | Compressed MRC integrity | decompressor exit status not checked (inherited) | unchanged; validate inputs with `xz -t`/`zstd -t`/`bzip2 -t`, §6 item 6 | Decided (D5/F4, fix #214) |
-| MRC mode 0, early binning, dose-weighting voltages | mode 0 read as signed int8; early binning on by default when `--bin_factor` is not 1; dose weighting only at 100/200/300 kV | unchanged; early binning also bypasses the GPU-resident path (§2, §3) | Verified |
+| MRC mode 0, early binning, dose-weighting voltages | mode 0 read as signed int8; early binning on by default when `--bin_factor` is not 1; dose weighting only at 100/200/300 kV | unchanged. **GPU users:** with `--bin_factor` other than 1, default early binning bypasses the resident CUDA session and compact host staging (the movie takes the `float` route and the global FFT runs on the CPU); late binning needs `--no_early_binning` (`src/motioncorr_runner.cpp:2269, 2374`; §2, §3). RELION users who pass `--bin_factor 2` expecting lower GPU memory use will not get the resident path by default | Verified |
 | Options | all RELION 5.1 `relion_run_motioncorr` options | all still parsed; new, additive: `--seed`, `--expected_frames`, `--ingest`, `--ingest_witness`, `--profile`, `--profile_device_timing`, `--sync_output`, `--skip_report_pdf`, `--aggregate_only`. The only change in meaning is `--gpu` under `--use_own` | Verified |
 
 ### Not yet verified (#216 "To verify"; nothing here is asserted)
@@ -75,7 +75,7 @@ Open policy questions (drop-in replacement, CPU parity target, upstream sequenci
 | Class | Configuration | Basis | Qualification |
 |---|---|---|---|
 | Supported (intended) | `--use_own` on CPU, Release build, Linux x86_64 and macOS arm64 | CPU CTest suite; `README.md` build section | pending RC0 QF |
-| Supported for evaluation | `--use_own --gpu <one id>` on a CUDA build (`-DCUDA=ON`), one process per device. **Local alignment: no unrestricted or stable claim, see S1** | `src/motioncorr_runner.cpp:342-405`; qualification PRs #204, #207, #208, #209 | same-backend contracts qualified at `1db86902` (#209); frozen SHA pending RC0 QF |
+| Supported for evaluation | `--use_own --gpu <one id>` on a CUDA build (`-DCUDA=ON`), one process per device. **Local alignment: no unrestricted or stable claim, see S1** | `src/motioncorr_runner.cpp:342-405`; qualification PRs #204, #207, #208, #209 | at `1db86902` (#209): CTest 89/89 on the no-nvCOMP build; the real-data route-invariance campaign ran on the CUDA+nvCOMP binary, not on a no-nvCOMP binary; frozen SHA pending RC0 QF |
 | Supported for evaluation | Several GPUs through `tools/multi_gpu/run_dataset.py` (one process per device) | §4; `docs/multi_gpu/CURRENT_MAIN_ACCEPTANCE.md`; PR #209 | 1/2/4 workers x 24 tutorial movies passed at `1db86902` including a real-Ghostscript `logfile.pdf` (#209); frozen SHA pending RC0 QF |
 | Experimental | nvCOMP device Deflate ingest (`-DUSE_NVCOMP=ON`, default OFF); assumes complete, unmodified input files, §7 | `CMakeLists.txt:140`; D1 (option 1), D2 (interim policy A) | qualified for route invariance at `1db86902` (#209); frozen SHA pending RC0 QF |
 | Experimental | `--interpolate_shifts` | help text: "(EXPERIMENTAL)", `src/motioncorr_runner.cpp:212` | pending RC0 QF |
@@ -144,22 +144,33 @@ Shape and format restrictions the cells above do not repeat:
   with a WARNING and **the movie still publishes** (`src/renderEER.cpp:564-567`, "This frame is skipped"). Two limits follow:
   - **undetected corruption:** corruption that leaves the pixel count right is not detected at all;
   - **missing frames:** a truncated EER file is processed as a shorter movie unless `--expected_frames` or a per-movie STAR frame count
-    is supplied. **Supply one** for every EER dataset (`--expected_frames` is the grouped frame count). With either, a short movie fails.
+    is supplied. **Supply one** for every EER dataset. `--expected_frames` and the STAR counts are the **grouped** frame count, not the number of fractions:
+    `grouped count = raw fractions / --eer_grouping`, **integer division** (`src/motioncorr_runner.cpp:2125-2127`). Example: 2331 fractions at
+    `--eer_grouping 40` give 58 groups, and so do 2330; give 58, not 2331 (a raw count would make every valid movie fail). The check detects a
+    **mismatch in the expected grouped frame count** (`:2141-2146`); it does **not** detect every shortened or damaged file, because losing
+    trailing fractions without changing the quotient is invisible.
   Preserved unchanged for RC0 by maintainer decision D6; identical before and after #196 and on both routes (#198 register E-1).
+- **EER-MS: malformed-EER memory safety is not established (new known limitation).** The inherited host decoder's 7-bit loops read without a
+  strip-length termination check, and its decode vectors are sized from `frame_sizes * 2` with no per-emission capacity check
+  (`src/renderEER.cpp:416-555`), so malformed EER input can reach undefined behaviour before the uint16 count-bound argument applies (R-QA2 on #208; no sanitizer was
+  run; host ASan results are pending). **Like nvCOMP under D1, EER inputs are assumed complete and unmodified.** Hardening after RC0 is the maintainer's decision.
+  The count bound itself holds only for decoder executions within valid buffer bounds, where emitted positions are strictly increasing
+  (`src/renderEER.cpp:438-463, 484-510, 537-555`) and the render mapping is injective except for the four-to-one 4K to 2K case.
 - **EER defect replacement** on the compact EER route uses the host path (`Iframes_u16` x gain); the sparse device gather is reachable only with
   nvCOMP input (PR #208).
 - **EER memory (single runs per arm, PR #208, A100 80 GB, main `1db86902`).** `--eer_upsampling 2` doubles both dimensions
   (`src/renderEER.cpp:356-375`), so every movie buffer is four times larger (upsampling 3: sixteen times). Host RSS with the compact route
   was 34-39 % lower than the float route at upsampling 1 and 43-47 % lower at 2 and 3; there was no saving at -1 (not investigated). Device
   memory is unchanged, because the resident device buffers are float whatever the host staging type. A 144-group Falcon 4 movie at
-  upsampling 2 **fit at 79,522 MiB** on the 80 GB card (calculated 80,520 MiB), with host RSS 21,547 MiB (compact) versus 40,171 MiB (float).
-  There is essentially **no headroom**: upsampling 2 on large EER movies is unqualified on any card below 80 GB and marginal on 80 GB. The
+  upsampling 2 **completed with 79,522 MiB of sampled NVML process VRAM** (one run per arm, 81,920 MiB card, about 2.3 GiB remained; calculated 80,520 MiB),
+  with host RSS 21,547 MiB (compact) versus 40,171 MiB (float). That figure is a **sample, not an upper bound or a guaranteed fit**, and the out-of-memory
+  path was not exercised. There is **little observed headroom**: upsampling 2 on large EER movies is unqualified on any card below 80 GB and marginal on 80 GB. The
   earlier #186 estimate was about 75 GiB, not run (`docs/workload_corpus/gpu/README.md`); the measurement above supersedes it.
 
 Corpus labels (corrected in this PR, `docs/workload_corpus/corpus.md` and `families.json`):
 
 - **The RELION tutorial movies are 16-bit Adobe-Deflate TIFF, RowsPerStrip 1, no predictor, unsigned integer samples, little-endian,
-  width 3710 x height 3838** (W-TIFF, `tiffinfo`, [PR #206](https://github.com/KingAlejandro/MotionCorr-standalone/pull/206)); sample values are at
+  width 3710 x height 3838** (W-TIFF, TIFF inventory by `tifffile`, [PR #206](https://github.com/KingAlejandro/MotionCorr-standalone/pull/206)); sample values are at
   most 68. This agrees with the nvCOMP admission rule (16 bits, one row per strip) and with the #186 witness `nvcomp`. The earlier label
   "u8 Deflate TIFF" and the 3838 x 3710 order were wrong.
 - **EMPIAR-10164 is MRC mode 0, which this program reads as signed int8** (`src/rwMRC.h:200-202`); the maximum byte value in the corpus
@@ -213,7 +224,7 @@ qualification. The CUDA column says only what source shows; "not claimed" means 
 | Global alignment only (`--patch_x 1 --patch_y 1`, default) | yes | yes, device alignment (resident Fourier frames) | parse `:187-188`; execution `:3324-3330` | pending RC0 QF |
 | Local patches (`--patch_x N --patch_y M`) | yes; a value of exactly 2 prints "too small ... Patch based alignment will be skipped" (`:308-314`) | yes, device patch alignment (`:3529-3538`) with resident retry for non-converged patches (#197) | as cited | pending RC0 QF |
 | Dose weighting (`--dose_weighting`, `--angpix`, `--voltage`, `--dose_per_frame`, `--preexposure`) | yes; **voltage must be within 2 kV of 100, 200 or 300** or the movie fails | yes, in VRAM when a session is resident; CPU fallback exists | `:4075-4088, 4102` | pending RC0 QF |
-| `--save_noDW` | yes (streamed unweighted sum, #178); **needs `--dose_weighting`**: without dose weighting the unweighted sum is the main `.mrc` and no `_noDW.mrc` is written | yes; the CUDA-to-CPU unweighted fallback has **not** been executed natively | `:3360` (`pre_dw_sum_needed`), `:4048-4054`, resume `:789`; #198 item C1 | pending RC0 QF |
+| `--save_noDW` | yes (streamed unweighted sum, #178); **needs `--dose_weighting`**: without dose weighting the unweighted sum is the main `.mrc` and no `_noDW.mrc` is written | yes. At `1db86902` six CPU-backend checks (CUDA-linked binaries run **without** `--gpu`) and **one** injected recoverable CUDA-to-CPU fallback under `--gpu` (injected `cudaMalloc` failure #16) all matched the pre-#178 build `d7171b81` (PR #209); not real out-of-memory or device poisoning; frozen-SHA rerun pending | `:3360` (`pre_dw_sum_needed`), `:4048-4054`, resume `:789`; #198 item C1 | pending RC0 QF |
 | `--even_odd_split` (`_EVN.mrc`, `_ODD.mrc`) | yes | yes | `:3360, 3962-3970` | pending RC0 QF |
 | `--bin_factor` (non-integer allowed) | yes; early binning is on by default when binning; **the binned dimensions must both be even** or the movie fails | early binning (the default when binning) skips the resident session and compact staging, so the movie takes the float route and the global FFT stays on the CPU; late binning needs `--no_early_binning`. Route-invariance of late/early binning was checked on valid input (PR #204) | `:182, 217-219, 2269, 2374, 3116-3120, 3146-3152`; late binning `:4954-4956` | pending RC0 QF |
 | `--group_frames N` | yes; fewer than 3 groups after grouping skips the movie; a non-dividing remainder goes to the **last** groups (`:2176-2186`) | identical across routes for `--group_frames 4` (PR #207) | `:2165-2186` | pending RC0 QF |
@@ -241,9 +252,10 @@ qualification. The CUDA column says only what source shows; "not claimed" means 
   `gs` installed, two CPU workers completed and the aggregate failed with "Aggregate PDF generation failed"
   (`src/CPlot2D.cpp:93`), so `run_dataset.py` exited 3.
 - **Verified at `1db86902`** (W-QUAL, [PR #209](https://github.com/KingAlejandro/MotionCorr-standalone/pull/209), 4GPUs): 1, 2 and 4 workers on the
-  24 tutorial movies, configs G and L, 6/6 dataset-endpoint PASS; workers on distinct, witnessed GPU UUIDs; products identical across worker counts
-  and to a single process; joint STAR and a 30-page `logfile.pdf` rendered with real Ghostscript 10.02.1. A mixed tutorial + 10641 + EER 2-worker run was identical to
-  a 1-worker run. Not run: 10441 and 10641 config G/L alone, launcher failure/resume injection, PDF page content comparison, real
+  24 tutorial movies, configs G and L, 6/6 dataset-endpoint PASS; every launcher worker was physically witnessed on its intended, distinct GPU UUID; normalised products (labels and extended headers
+  included, only the writer timestamp masked) identical across worker counts and to a single process; joint STAR and a 30-page `logfile.pdf` rendered with real Ghostscript 10.02.1. A mixed tutorial + 10641 + EER 2-worker run was identical to
+  a 1-worker run. **Witnessing limit:** the 28 original single-process CUDA campaign runs (route invariance, #178 checks) and the injected-fallback pair were
+  UUID-pinned with `CUDA_VISIBLE_DEVICES` but **not physically witnessed**; three later runs and all launcher workers were. Not run: 10441 and 10641 config G/L alone, launcher failure/resume injection, PDF page content comparison, real
   out-of-memory, a second venue, timing. Re-verification on the frozen SHA is pending RC0 QF.
 - Earlier scaling evidence (not RC0): 4x8 CPUs was 1.34x (24 movies) and 1.68x (96 movies) faster than 1x32 to publication
   (`docs/multi_gpu/scaling/README.md`; source `d7339fd`, 4GPUs). Tomography on real data is unmeasured.
@@ -327,8 +339,10 @@ healthy movies for a published dataset.
    here"), so some corruption that is reported only at the end of the stream (for example a missing final byte or a bad index CRC) is
    **accepted**. Short reads are still caught. **You must validate compressed inputs independently before processing**: `xz -t FILE`,
    `zstd -t FILE`, `bzip2 -t FILE` (or `pbzip2 -t FILE`). Scheduled fix: [#214](https://github.com/KingAlejandro/MotionCorr-standalone/issues/214).
-7. **Big-endian mode-0 MRC with nx = 128 is not byte-swap detected** (F5; the header swap test is `abs(header->nx) > SWAPTRIG`,
-   `src/rwMRC.h:149`); it fails identically on every route. Document-only for RC0 (W-MRC-Q, PR #204).
+7. **Big-endian mode-0 MRC with nx = 128 is not byte-swap detected** (F5). Observed on the tested GCC build: the movie failed identically on every
+   tested route. The swap heuristic is `abs(header->mode) > SWAPTRIG || abs(header->nx) > SWAPTRIG` (`src/rwMRC.h:149`), and a byte-swapped
+   nx of 128 is `INT_MIN`, for which `abs` is undefined behaviour, so **no portable clean failure is promised** on other compilers or platforms.
+   Document-only for RC0 (W-MRC-Q, PR #204; R-QA1).
 
 Auxiliary versus numerical products: the corrected MRC(s) and the per-movie and joint STAR files carry the
 results. `logfile.pdf`, `header.pdf`, `batch.pdf`, the shift EPS plots, `.log` and `_PS.mrc` are auxiliary reports.
@@ -384,6 +398,7 @@ paragraph when it does.
   failed in 9 and 5 of 14 CPU-versus-CUDA cases at `1db86902`, tracking image intensity (for example EMPIAR-10028, sigma about 430); the gate contract
   notes absolute limits are not portable (`docs/gate_contract.md` §4.2). Config-G relative RMSE CPU versus CUDA was 0.0015-0.023 on the seven corpus
   families tested (PR #209). Limits are unchanged.
+- **EER-MS (new):** malformed-EER memory safety is not established; EER inputs are assumed complete and unmodified (§2).
 - **There is no Tier D scientific gate.** No CTF/FSC/B-factor non-inferiority result exists for CPU, CUDA or hybrid output
   (`docs/gate_contract.md` §1; #61, #73 open). RC0 is an evaluation release.
 - Tier A (byte-exact CPU regression) and Tier C (known-motion truth) exist and are enforced

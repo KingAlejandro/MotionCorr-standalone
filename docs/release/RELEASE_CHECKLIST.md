@@ -1,6 +1,6 @@
-# RC0 release checklist (DRAFT)
+# RC0 release checklist (DRAFT, stays DRAFT until the freeze)
 
-Status: **draft, pre-freeze, revision 2** (after the R-REL review of PR #201 and the maintainer decisions D1, D2, T3, D5, D6, D7). This checklist is for an **evaluation RC0**, not a stable release (D7). Commands below were written against main `1db86902` and re-checked on the merge with `2b3c74b3` (#200 F1, #210 TST1). Each command is tagged:
+Status: **draft, pre-freeze, revision 3** (after the R-REL review of PR #201 and the maintainer decisions D1, D2, T3, D5, D6, D7). This checklist is for an **evaluation RC0**, not a stable release (D7). Commands below were written against main `1db86902` and re-checked on the merge with `2b3c74b3` (#200 F1, #210 TST1). Each command is tagged:
 
 - **LOCAL-OK**: run on macOS arm64 (AppleClang, Homebrew) in this worktree for this draft; result stated.
 - **UNRUN**: not executed. Linux/CUDA commands are UNRUN until the final qualification (**QF**, #198) runs them.
@@ -102,8 +102,9 @@ cmake --build build-nvcomp --parallel 8
 ```
 
 `USE_NVCOMP=ON` without the headers and library is a configure error (`CMakeLists.txt:152`). Record the nvCOMP version
-(the #186 and #194 evidence used 5.3 with CUDA 12.8). The decoder trust boundary (D1) and licence (D2) are open on #198; the
-release notes must carry whatever the maintainer decides.
+(the #186 and #194 evidence used 5.3 with CUDA 12.8). The release notes must carry the decided input-trust precondition
+(D1 option 1: complete, unmodified files; `--ingest compact` for files of unknown integrity) and the optional-SDK policy (D2 interim policy A: optional,
+default OFF, not vendored, no project-distributed linked binaries) from `SUPPORT.md` §7; T3 hardening is pending until it merges.
 
 ## 3. CTest
 

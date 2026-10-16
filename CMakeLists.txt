@@ -343,6 +343,16 @@ if(BUILD_TESTING)
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>
                 ${_input_format_unrun})
         set_tests_properties(InputFormats PROPERTIES TIMEOUT 600)
+        # Opt-in: cut-down real movies, one per corpus family (test-data/real_cutdown_manifest.json).
+        # Point MC_REAL_CUTDOWN_DIR at a copy of the assets to register it.
+        set(MC_REAL_CUTDOWN_DIR "" CACHE PATH "Directory holding the cut-down real movies (opt-in RealCutdown test)")
+        if(MC_REAL_CUTDOWN_DIR)
+            add_test(NAME RealCutdown
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_real_cutdown.py
+                    --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>
+                    --assets ${MC_REAL_CUTDOWN_DIR} ${_input_format_unrun})
+            set_tests_properties(RealCutdown PROPERTIES TIMEOUT 1800)
+        endif()
         add_test(NAME GlobalIfftElision
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_global_ifft_elision.py
                 --binary $<TARGET_FILE:motioncorr>)

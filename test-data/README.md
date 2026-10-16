@@ -111,6 +111,25 @@ Cases that document current behaviour rather than a pass:
 
 All of these are inherited from upstream RELION 5.1 unless stated otherwise.
 
+### Cut-down real movies
+
+`real_cutdown_manifest.json` lists one cut-down movie per corpus family
+(`docs/workload_corpus/corpus.md` and `formats.md`): a few frames, or 30 EER fractions, of a real
+EMPIAR movie in its producer's exact encoding. `tools/cut_down_movie.py` copies raw TIFF/EER strips
+without re-encoding; raw MRC is cropped to 2048^2 where the frame is large. About 400 MB in all;
+the files are not versioned (EMPIAR data, see each accession's licence).
+
+```sh
+python3 tests/test_real_cutdown.py --binary build/motioncorr --helper build/runner_numerics \
+  --assets DIR [--download RELEASE_URL]
+# or configure with -DMC_REAL_CUTDOWN_DIR=DIR to register the RealCutdown CTest entry
+```
+
+Each item checks file SHA-256, the SHA-256 of MotionCorr's decoded samples (decoding is exact, so
+this is portable), a correction run with the expected frame count, and, for EMPIAR-10342, that its
+SerialEM defect list is refused. `tools/make_real_cutdown.py` rebuilds the files and manifest from
+`real_cutdown_plan.json` on a host with the corpus data.
+
 ---
 
 ## 2. Experimental RELION SPA Tutorial Dataset

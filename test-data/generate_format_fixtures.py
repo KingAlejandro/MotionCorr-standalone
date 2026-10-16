@@ -263,6 +263,9 @@ def build_small(b):
     tif("tiff_s8", "tiff_s8.tif", np.int8, "signed 8-bit TIFF")
     tif("tiff_s16", "tiff_s16.tif", np.int16, "signed 16-bit TIFF")
     tif("tiff_s16_lzw", "tiff_s16_lzw.tif", np.int16, "signed 16-bit LZW TIFF", compression=5, rows_per_strip=4)
+    tif("tiff_s16_deflate_old_epu", "tiff_s16_deflate_32946.tif", np.int16,
+        "signed 16-bit TIFF, Deflate code 32946, one strip per frame: the EPU Falcon TIFF layout (EMPIAR-10500/10518)",
+        compression=32946, rows_per_strip=NY)
     tif("tiff_f32", "tiff_f32.tif", np.float32, "float32 TIFF")
     tif("tiff_f32_lzw_pred3", "tiff_f32_lzw_p3.tif", np.float32, "float32 LZW TIFF, floating-point predictor", compression=5, predictor=3, rows_per_strip=4)
     tif("tiff_f32_deflate", "tiff_f32_deflate.tif", np.float32, "float32 Deflate TIFF", compression=8, rows_per_strip=8)

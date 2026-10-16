@@ -1,5 +1,26 @@
 # Exact interpolation x-coordinate experiment
 
+## Current state — 16 October 2026
+
+Merged main `d7171b810dc97003784339d7bad1c279903f3bba` with merge commit
+`4fe5b00d`; tested code is `78df217a0792571e1f3f3e3ecb9583db6b028848`.
+Both production methods now use one private cache builder, tested directly against
+inline division for 57,922 coordinates across 13 widths (including detector and
+odd widths). The reciprocal-multiply mutant fails on macOS and GCC/Linux.
+Linux Release passes 59/59 CTests; macOS has only the two independently reproduced
+main failures. Tutorial and synthetic 5x5-patch product trees match current main
+exactly (8 MRC payloads, 4 canonical STARs); a payload-bit mutant is rejected.
+Both measurement drivers require a full source SHA **per measured binary** and
+record it separately from driver HEAD, with caller-attestation explicitly labelled.
+
+[Commands, statuses, hashes, limitations and retained logs](review_20261016/README.md).
+No new timing was collected; application benefit remains unresolved. Keep draft.
+Everything below is historical evidence against the original baseline, not a
+current-main performance claim. Its old receipt `source` identifies driver HEAD,
+not verified build provenance for either binary.
+
+## Original experiment
+
 This independent issue #10 experiment starts from main
 `116eb04ad359cd5bf789b28809fc2047ea155b9b`. It does not include #177's CCF plans,
 #178's streamed unweighted sums, #179's dose weights, or #180's FFT/memory changes.
@@ -65,7 +86,8 @@ It times either the summed reconstruction or the materialized-frame path:
 ```sh
 OMP_WAIT_POLICY=PASSIVE python3 docs/cpu_interpolation_xcoords_20261014/run_kernel.py \
   --expected-host small-refmac-machine --cpus-j1 "$J1_CPUS" --cpus-j4 "$J4_CPUS" \
-  --binary /absolute/build/cpu_interpolation_xcoords --out /absolute/evidence/cpu64-kernel
+  --binary /absolute/build/cpu_interpolation_xcoords --source-sha "$BINARY_BUILD_SHA" \
+  --out /absolute/evidence/cpu64-kernel
 ```
 
 Select both CPU lists from the host's actual topology and allowed affinity before
@@ -78,7 +100,12 @@ defaults to `small-refmac-machine`; a different venue requires an explicit
 queried and checked before measurement. No fixed CPU 0–3 assumption remains.
 
 The portable `run_products.py` adapter accepts the same venue arguments plus
-`--base`, `--candidate`, `--data`, and a new `--out` directory. It directly runs the
+`--base`, `--candidate`, `--base-source-sha`, `--candidate-source-sha`, `--data`,
+and a new `--out` directory. The required full 40-character SHAs attest each
+binary's actual build source, not the driver's checkout. The kernel driver also
+requires `--source-sha`. Both receipts label these as caller attestations, not
+automatic verification of the build or a clean tree; retain archive/build commands
+and binary hashes. Historical receipts are preserved unchanged. It directly runs the
 agreed matrix using the existing strict product comparator. It does not call
 #179's older harness, whose fixed CPU mask would be unsafe to reuse unchecked on
 a different host. The matrix is three alternating synthetic local j4 pairs plus

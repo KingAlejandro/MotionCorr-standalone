@@ -1,0 +1,52 @@
+.E
+======================================================================
+ERROR: test_receipts (__main__.Sources.test_receipts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/docs/cpu_interpolation_xcoords_20261014/review_20261016/test_driver_sources.py", line 55, in test_receipts
+    products.main()
+    ~~~~~~~~~~~~~^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/docs/cpu_interpolation_xcoords_20261014/run_products.py", line 52, in main
+    "platform": platform.platform(),
+                ~~~~~~~~~~~~~~~~~^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/platform.py", line 1337, in platform
+    system, node, release, version, machine, processor = uname()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/platform.py", line 942, in __iter__
+    (self.processor,)
+     ^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/functools.py", line 1026, in __get__
+    val = self.func(instance)
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/platform.py", line 937, in processor
+    return _unknown_as_blank(_Processor.get())
+                             ~~~~~~~~~~~~~~^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/platform.py", line 869, in get
+    return func() or ''
+           ~~~~^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/platform.py", line 905, in from_subprocess
+    return subprocess.check_output(
+           ~~~~~~~~~~~~~~~~~~~~~~~^
+        ['uname', '-p'],
+        ^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        encoding="utf8",
+        ^^^^^^^^^^^^^^^^
+    ).strip()
+    ^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/unittest/mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/unittest/mock.py", line 1234, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ecd478ba/docs/cpu_interpolation_xcoords_20261014/review_20261016/test_driver_sources.py", line 39, in output
+    return json.dumps([44] if command[2] == '44' else [44, 45, 46, 47]).encode()
+                              ~~~~~~~^^^
+IndexError: list index out of range
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.064s
+
+FAILED (errors=1)

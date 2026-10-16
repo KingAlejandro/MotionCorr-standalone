@@ -1,0 +1,401 @@
+{
+  "binaries": {
+    "base": {
+      "path": "/home/ubuntu/fix181-20261016/base/build/motioncorr",
+      "sha256": "231fdec604fb42b1bc2a869044454d5095f7b98d61608c0a54c80775b4bd4995",
+      "source_sha": "d7171b810dc97003784339d7bad1c279903f3bba"
+    },
+    "candidate": {
+      "path": "/home/ubuntu/fix181-20261016/candidate/build/motioncorr",
+      "sha256": "2f21e3fc6d8a68758b7bf60a47bb9adc6d4450c4a65f67306a9c6f403cd5ea24",
+      "source_sha": "78df217a0792571e1f3f3e3ecb9583db6b028848"
+    }
+  },
+  "inputs": {
+    "tutorial.tiff": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "gain.mrc": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1",
+    "synthetic_512x512_16frames.mrcs": "36e1a91b25a54d958e0ff78be87e55fa9777aebbd36d145d415bbc7837b8c8a1"
+  },
+  "runs": [
+    {
+      "fixture": "synthetic",
+      "arm": "base",
+      "command": [
+        "/home/ubuntu/fix181-20261016/base/build/motioncorr",
+        "--i",
+        "/home/ubuntu/fix181-20261016/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/home/ubuntu/fix181-20261016/products-pinned/synthetic-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0
+    },
+    {
+      "fixture": "synthetic",
+      "arm": "candidate",
+      "command": [
+        "/home/ubuntu/fix181-20261016/candidate/build/motioncorr",
+        "--i",
+        "/home/ubuntu/fix181-20261016/data/synthetic_512x512_16frames.mrcs",
+        "--o",
+        "/home/ubuntu/fix181-20261016/products-pinned/synthetic-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "1",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0
+    },
+    {
+      "fixture": "tutorial",
+      "arm": "base",
+      "command": [
+        "/home/ubuntu/fix181-20261016/base/build/motioncorr",
+        "--i",
+        "/home/ubuntu/fix181-20261016/data/tutorial.tiff",
+        "--o",
+        "/home/ubuntu/fix181-20261016/products-pinned/tutorial-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--gainref",
+        "/home/ubuntu/fix181-20261016/data/gain.mrc"
+      ],
+      "rc": 0
+    },
+    {
+      "fixture": "tutorial",
+      "arm": "candidate",
+      "command": [
+        "/home/ubuntu/fix181-20261016/candidate/build/motioncorr",
+        "--i",
+        "/home/ubuntu/fix181-20261016/data/tutorial.tiff",
+        "--o",
+        "/home/ubuntu/fix181-20261016/products-pinned/tutorial-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--gainref",
+        "/home/ubuntu/fix181-20261016/data/gain.mrc"
+      ],
+      "rc": 0
+    }
+  ],
+  "comparisons": [
+    {
+      "root_a": "/home/ubuntu/fix181-20261016/products-pinned/synthetic-base",
+      "root_b": "/home/ubuntu/fix181-20261016/products-pinned/synthetic-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "home/ubuntu/fix181-20261016/data/synthetic_512x512_16frames.log",
+          "reason": "timing values in per-movie logs"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "root_a": "/home/ubuntu/fix181-20261016/products-pinned/tutorial-base",
+      "root_b": "/home/ubuntu/fix181-20261016/products-pinned/tutorial-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "home/ubuntu/fix181-20261016/data/tutorial.log",
+          "reason": "timing values in per-movie logs"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    }
+  ],
+  "hashes": [
+    {
+      "fixture": "synthetic",
+      "file": "corrected_micrographs.star",
+      "base": {
+        "canonical_star_sha256": "e8524fb59cb29ce7a3d5bf973d7d17382f6f08d1b459acc626123175759a014f"
+      },
+      "candidate": {
+        "canonical_star_sha256": "e8524fb59cb29ce7a3d5bf973d7d17382f6f08d1b459acc626123175759a014f"
+      }
+    },
+    {
+      "fixture": "synthetic",
+      "file": "home/ubuntu/fix181-20261016/data/synthetic_512x512_16frames.mrc",
+      "base": {
+        "payload_sha256": "ad2315c0c5d6aee6a4ee6f35a4f75944393c90a648f2b175f2d9d78a399021c0",
+        "canonical_file_sha256": "7093bdb2b24d694cded1833498c23edfe072d0243205f5c1933d1c8430d0d504"
+      },
+      "candidate": {
+        "payload_sha256": "ad2315c0c5d6aee6a4ee6f35a4f75944393c90a648f2b175f2d9d78a399021c0",
+        "canonical_file_sha256": "7093bdb2b24d694cded1833498c23edfe072d0243205f5c1933d1c8430d0d504"
+      }
+    },
+    {
+      "fixture": "synthetic",
+      "file": "home/ubuntu/fix181-20261016/data/synthetic_512x512_16frames.star",
+      "base": {
+        "canonical_star_sha256": "5e562c2ef325de3603487672ba05cbb845529eae54592e1b1f407ad302704c76"
+      },
+      "candidate": {
+        "canonical_star_sha256": "5e562c2ef325de3603487672ba05cbb845529eae54592e1b1f407ad302704c76"
+      }
+    },
+    {
+      "fixture": "synthetic",
+      "file": "home/ubuntu/fix181-20261016/data/synthetic_512x512_16frames_EVN.mrc",
+      "base": {
+        "payload_sha256": "f656a7d479524f3a1528db783f9efcc8e86275be0c77819c9ae21c71c98424a6",
+        "canonical_file_sha256": "c0f6e43234a98bc4220b3889d8c453f9f9a200828b3672bb72a883b51017e44a"
+      },
+      "candidate": {
+        "payload_sha256": "f656a7d479524f3a1528db783f9efcc8e86275be0c77819c9ae21c71c98424a6",
+        "canonical_file_sha256": "c0f6e43234a98bc4220b3889d8c453f9f9a200828b3672bb72a883b51017e44a"
+      }
+    },
+    {
+      "fixture": "synthetic",
+      "file": "home/ubuntu/fix181-20261016/data/synthetic_512x512_16frames_ODD.mrc",
+      "base": {
+        "payload_sha256": "cb52285471851666c1ff0da945e4f772ee2aa352279080905e0b372f2cb7184c",
+        "canonical_file_sha256": "06a93a0ac725e8470dcfc362b9bdf05200bfc7c4635345ec09e10737ec2993be"
+      },
+      "candidate": {
+        "payload_sha256": "cb52285471851666c1ff0da945e4f772ee2aa352279080905e0b372f2cb7184c",
+        "canonical_file_sha256": "06a93a0ac725e8470dcfc362b9bdf05200bfc7c4635345ec09e10737ec2993be"
+      }
+    },
+    {
+      "fixture": "synthetic",
+      "file": "home/ubuntu/fix181-20261016/data/synthetic_512x512_16frames_noDW.mrc",
+      "base": {
+        "payload_sha256": "dcc2aa9f8ab819946bd30acdea29aac1a2958c1f84c1ca57eb970cd43fb1e6b8",
+        "canonical_file_sha256": "1450f554e6d8987e08eca3f61e08092bb85bcca728fd573c2839bd41c44725d8"
+      },
+      "candidate": {
+        "payload_sha256": "dcc2aa9f8ab819946bd30acdea29aac1a2958c1f84c1ca57eb970cd43fb1e6b8",
+        "canonical_file_sha256": "1450f554e6d8987e08eca3f61e08092bb85bcca728fd573c2839bd41c44725d8"
+      }
+    },
+    {
+      "fixture": "tutorial",
+      "file": "corrected_micrographs.star",
+      "base": {
+        "canonical_star_sha256": "4c4896007157761bbf6cb5a7d2a5e61033aa2b7a8f8a8fad36724862f6e5dc39"
+      },
+      "candidate": {
+        "canonical_star_sha256": "4c4896007157761bbf6cb5a7d2a5e61033aa2b7a8f8a8fad36724862f6e5dc39"
+      }
+    },
+    {
+      "fixture": "tutorial",
+      "file": "home/ubuntu/fix181-20261016/data/tutorial.mrc",
+      "base": {
+        "payload_sha256": "7900325a266e310b156fef62ed57ff7d177967e4a232bc10cf4df0c68ee5d74d",
+        "canonical_file_sha256": "22ea2329f277e63e120f059c95aab6fdd3f0c51ab891d12dab0209a4bae5300b"
+      },
+      "candidate": {
+        "payload_sha256": "7900325a266e310b156fef62ed57ff7d177967e4a232bc10cf4df0c68ee5d74d",
+        "canonical_file_sha256": "22ea2329f277e63e120f059c95aab6fdd3f0c51ab891d12dab0209a4bae5300b"
+      }
+    },
+    {
+      "fixture": "tutorial",
+      "file": "home/ubuntu/fix181-20261016/data/tutorial.star",
+      "base": {
+        "canonical_star_sha256": "920b2d63449a4238eb12ed6c2f6885ddce5e67592eab9cc7b4b45dba26b17503"
+      },
+      "candidate": {
+        "canonical_star_sha256": "920b2d63449a4238eb12ed6c2f6885ddce5e67592eab9cc7b4b45dba26b17503"
+      }
+    },
+    {
+      "fixture": "tutorial",
+      "file": "home/ubuntu/fix181-20261016/data/tutorial_EVN.mrc",
+      "base": {
+        "payload_sha256": "49c143b759d603a43694f25bb323541ade40a46cca877383e7e0f26cc75ef797",
+        "canonical_file_sha256": "9d34eabf4f26d587087e9024a1c718024a7f8fff9a3ffb31197ebd34d5b43705"
+      },
+      "candidate": {
+        "payload_sha256": "49c143b759d603a43694f25bb323541ade40a46cca877383e7e0f26cc75ef797",
+        "canonical_file_sha256": "9d34eabf4f26d587087e9024a1c718024a7f8fff9a3ffb31197ebd34d5b43705"
+      }
+    },
+    {
+      "fixture": "tutorial",
+      "file": "home/ubuntu/fix181-20261016/data/tutorial_ODD.mrc",
+      "base": {
+        "payload_sha256": "5bbec135e401c14aba9381280a662eab80be9df9bdb1fd5ce7dc32b82f623a52",
+        "canonical_file_sha256": "6e04a50341efc5f8b6790f248e601ce4d9dde9c807af8a6db16abf60e0b120e1"
+      },
+      "candidate": {
+        "payload_sha256": "5bbec135e401c14aba9381280a662eab80be9df9bdb1fd5ce7dc32b82f623a52",
+        "canonical_file_sha256": "6e04a50341efc5f8b6790f248e601ce4d9dde9c807af8a6db16abf60e0b120e1"
+      }
+    },
+    {
+      "fixture": "tutorial",
+      "file": "home/ubuntu/fix181-20261016/data/tutorial_noDW.mrc",
+      "base": {
+        "payload_sha256": "97600dbab8f2391e52690431d8cfecc914a754120fbd4a624f2d4130cb0bf900",
+        "canonical_file_sha256": "73f060f8ff5a935b0a300311612aa3e5e8b9e3fd445da3a4b7f233c2ef6088ae"
+      },
+      "candidate": {
+        "payload_sha256": "97600dbab8f2391e52690431d8cfecc914a754120fbd4a624f2d4130cb0bf900",
+        "canonical_file_sha256": "73f060f8ff5a935b0a300311612aa3e5e8b9e3fd445da3a4b7f233c2ef6088ae"
+      }
+    }
+  ],
+  "scope": "same-backend exact output, no timing or scientific-equivalence claim",
+  "negative_control": {
+    "mutation": "home/ubuntu/fix181-20261016/data/synthetic_512x512_16frames.mrc: XOR 1 at byte 1024",
+    "root_a": "/home/ubuntu/fix181-20261016/products-pinned/synthetic-base",
+    "root_b": "/home/ubuntu/fix181-20261016/products-pinned/synthetic-candidate",
+    "only_a": [],
+    "only_b": [],
+    "compared": 12,
+    "mrc_compared": 4,
+    "excluded": [
+      {
+        "file": "all_batches.pdf",
+        "reason": "Ghostscript creation date and /ID"
+      },
+      {
+        "file": "batch.pdf",
+        "reason": "Ghostscript creation date and /ID"
+      },
+      {
+        "file": "header.pdf",
+        "reason": "Ghostscript creation date and /ID"
+      },
+      {
+        "file": "home/ubuntu/fix181-20261016/data/synthetic_512x512_16frames.log",
+        "reason": "timing values in per-movie logs"
+      },
+      {
+        "file": "logfile.pdf",
+        "reason": "Ghostscript creation date and /ID"
+      }
+    ],
+    "differences": [
+      {
+        "file": "home/ubuntu/fix181-20261016/data/synthetic_512x512_16frames.mrc",
+        "difference": "payload differs at byte 1024"
+      }
+    ],
+    "problems": [
+      "1 file(s) differ"
+    ],
+    "identical": false
+  }
+}

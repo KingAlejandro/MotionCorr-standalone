@@ -1,0 +1,334 @@
+[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/CPlot2D.cpp.o
+[  3%] Building CXX object CMakeFiles/motioncorr_core.dir/src/args.cpp.o
+[  3%] Building CXX object CMakeFiles/motioncorr_core.dir/src/backprojector.cpp.o
+[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/complex.cpp.o
+[  6%] Building CXX object CMakeFiles/motioncorr_core.dir/src/ctf.cpp.o
+In file included from /tmp/fix181-local-20261016/main/src/backprojector.cpp:27:
+In file included from /tmp/fix181-local-20261016/main/src/backprojector.h:34:
+In file included from /tmp/fix181-local-20261016/main/src/projector.h:25:
+In file included from /tmp/fix181-local-20261016/main/src/image.h:689:
+/tmp/fix181-local-20261016/main/src/rwSPIDER.h:333:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  333 |     sprintf(header->ctim, "%02d:%02d:%02d", t->tm_hour, t->tm_min, t->tm_sec);
+      |     ^
+/tmp/fix181-local-20261016/main/src/image.h:1787:10: note: in instantiation of member function 'Image<double>::writeSPIDER' requested here
+ 1787 |                         err = writeSPIDER(select_img, isStack, mode, datatype);
+      |                               ^
+/tmp/fix181-local-20261016/main/src/image.h:767:3: note: in instantiation of member function 'Image<double>::_write' requested here
+  767 |                 _write(fname, hFile, select_img, isStack, mode, datatype);
+      |                 ^
+/tmp/fix181-local-20261016/main/src/backprojector.cpp:1245:10: note: in instantiation of member function 'Image<double>::write' requested here
+ 1245 |         Iweight.write(fn_out+"_external_reconstruct_weight.mrc");
+      |                 ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+In file included from /tmp/fix181-local-20261016/main/src/backprojector.cpp:27:
+In file included from /tmp/fix181-local-20261016/main/src/backprojector.h:34:
+In file included from /tmp/fix181-local-20261016/main/src/projector.h:25:
+In file included from /tmp/fix181-local-20261016/main/src/image.h:689:
+/tmp/fix181-local-20261016/main/src/rwSPIDER.h:334:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  334 |     sprintf(header->cdat, "%02d-%02d-%02d", t->tm_mday, t->tm_mon, t->tm_year);
+      |     ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+[  7%] Building CXX object CMakeFiles/motioncorr_core.dir/src/error.cpp.o
+[  7%] Building CXX object CMakeFiles/motioncorr_core.dir/src/euler.cpp.o
+[  9%] Building CXX object CMakeFiles/motioncorr_core.dir/src/fftw.cpp.o
+[ 11%] Building CXX object CMakeFiles/motioncorr_core.dir/src/filename.cpp.o
+[ 11%] Building CXX object CMakeFiles/motioncorr_core.dir/src/frame_buffer_pool.cpp.o
+2 warnings generated.
+[ 12%] Building CXX object CMakeFiles/motioncorr_core.dir/src/funcs.cpp.o
+/tmp/fix181-local-20261016/main/src/filename.cpp:61:3: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+   61 |                 sprintf(aux_str, tmp_fileformat.c_str(), no);
+      |                 ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+/tmp/fix181-local-20261016/main/src/filename.cpp:81:3: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+   81 |                 sprintf(aux_str, tmp_fileformat.c_str(), no);
+      |                 ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+/tmp/fix181-local-20261016/main/src/filename.cpp:581:7: warning: comparison of array 'retval' equal to a null pointer is always false [-Wtautological-pointer-compare]
+  581 |                 if (retval == NULL)
+      |                     ^~~~~~    ~~~~
+[ 14%] Building CXX object CMakeFiles/motioncorr_core.dir/src/image.cpp.o
+3 warnings generated.
+/tmp/fix181-local-20261016/main/src/funcs.cpp:599:73: warning: implicit conversion from 'int' to 'float' changes value from 2147483647 to 2147483648 [-Wimplicit-const-int-float-conversion]
+  599 |         return a + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(b-a)));
+      |                                                                         ^~~~~~~~~
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdlib.h:124:18: note: expanded from macro 'RAND_MAX'
+  124 | #define RAND_MAX        0x7fffffff
+      |                         ^~~~~~~~~~
+/tmp/fix181-local-20261016/main/src/funcs.cpp:619:36: warning: implicit conversion from 'int' to 'float' changes value from 2147483647 to 2147483648 [-Wimplicit-const-int-float-conversion]
+  619 |       U1 = -1 + ((float) rand () / RAND_MAX) * 2;
+      |                                  ~ ^~~~~~~~
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdlib.h:124:18: note: expanded from macro 'RAND_MAX'
+  124 | #define RAND_MAX        0x7fffffff
+      |                         ^~~~~~~~~~
+/tmp/fix181-local-20261016/main/src/funcs.cpp:620:36: warning: implicit conversion from 'int' to 'float' changes value from 2147483647 to 2147483648 [-Wimplicit-const-int-float-conversion]
+  620 |       U2 = -1 + ((float) rand () / RAND_MAX) * 2;
+      |                                  ~ ^~~~~~~~
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdlib.h:124:18: note: expanded from macro 'RAND_MAX'
+  124 | #define RAND_MAX        0x7fffffff
+      |                         ^~~~~~~~~~
+[ 15%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/d3x3/dsyev2.c.o
+3 warnings generated.
+[ 15%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/radial_avg.cpp.o
+[ 17%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/resampling.cpp.o
+[ 19%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/stack_helper.cpp.o
+[ 19%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/Zernike.cpp.o
+[ 20%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/fft.cpp.o
+[ 22%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/t_complex.cpp.o
+[ 23%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optics/damage.cpp.o
+[ 23%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optics/optics_data.cpp.o
+[ 25%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optimization/nelder_mead.cpp.o
+[ 26%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optimization/optimization.cpp.o
+[ 26%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/Fourier_helper.cpp.o
+[ 28%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/complex_io.cpp.o
+[ 30%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/ctf/tilt_helper.cpp.o
+[ 31%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyev2.c.o
+[ 31%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevc3.c.o
+[ 33%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevh3.c.o
+[ 34%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevq3.c.o
+[ 34%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsytrd3.c.o
+/tmp/fix181-local-20261016/main/src/jaz/single_particle/d3x3/dsytrd3.c:40:12: warning: variable length array folded to constant array as an extension [-Wgnu-folding-constant]
+   40 |   double u[n], q[n];
+      |            ^
+/tmp/fix181-local-20261016/main/src/jaz/single_particle/d3x3/dsytrd3.c:40:18: warning: variable length array folded to constant array as an extension [-Wgnu-folding-constant]
+   40 |   double u[n], q[n];
+      |                  ^
+2 warnings generated.
+[ 36%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/image_log.cpp.o
+[ 38%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/img_proc/filter_helper.cpp.o
+[ 39%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/img_proc/image_op.cpp.o
+[ 39%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/interpolation.cpp.o
+[ 41%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/io/star_converter.cpp.o
+In file included from /tmp/fix181-local-20261016/main/src/jaz/single_particle/image_log.cpp:21:
+In file included from /tmp/fix181-local-20261016/main/src/jaz/single_particle/image_log.h:24:
+In file included from /tmp/fix181-local-20261016/main/src/image.h:689:
+/tmp/fix181-local-20261016/main/src/rwSPIDER.h:333:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  333 |     sprintf(header->ctim, "%02d:%02d:%02d", t->tm_hour, t->tm_min, t->tm_sec);
+      |     ^
+/tmp/fix181-local-20261016/main/src/image.h:1787:10: note: in instantiation of member function 'Image<double>::writeSPIDER' requested here
+ 1787 |                         err = writeSPIDER(select_img, isStack, mode, datatype);
+      |                               ^
+/tmp/fix181-local-20261016/main/src/image.h:767:3: note: in instantiation of member function 'Image<double>::_write' requested here
+  767 |                 _write(fname, hFile, select_img, isStack, mode, datatype);
+      |                 ^
+/tmp/fix181-local-20261016/main/src/jaz/single_particle/image_log.h:115:13: note: in instantiation of member function 'Image<double>::write' requested here
+  115 |         img.write(fn+".mrc");
+      |             ^
+/tmp/fix181-local-20261016/main/src/jaz/single_particle/image_log.cpp:38:9: note: in instantiation of function template specialization 'ImageLog::write<double>' requested here
+   38 |         write(argImg, fn+"_arg", center, originX, originY, originZ, spacingX, spacingY, spacingZ);
+      |         ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+In file included from /tmp/fix181-local-20261016/main/src/jaz/single_particle/image_log.cpp:21:
+In file included from /tmp/fix181-local-20261016/main/src/jaz/single_particle/image_log.h:24:
+In file included from /tmp/fix181-local-20261016/main/src/image.h:689:
+/tmp/fix181-local-20261016/main/src/rwSPIDER.h:334:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  334 |     sprintf(header->cdat, "%02d-%02d-%02d", t->tm_mday, t->tm_mon, t->tm_year);
+      |     ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+[ 42%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/jaz_config.cpp.o
+[ 42%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/new_ft.cpp.o
+2 warnings generated.
+[ 44%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/obs_model.cpp.o
+[ 46%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/parallel_ft.cpp.o
+[ 47%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/resampling_helper.cpp.o
+[ 47%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/slice_helper.cpp.o
+[ 49%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/stack_helper.cpp.o
+[ 50%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/t_complex.cpp.o
+[ 50%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/vtk_helper.cpp.o
+[ 52%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/Fourier_2D_deformation.cpp.o
+[ 53%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/linear_2D_deformation.cpp.o
+In file included from /tmp/fix181-local-20261016/main/src/jaz/single_particle/stack_helper.cpp:21:
+In file included from /tmp/fix181-local-20261016/main/src/jaz/single_particle/stack_helper.h:24:
+In file included from /tmp/fix181-local-20261016/main/src/ctf.h:50:
+In file included from /tmp/fix181-local-20261016/main/src/jaz/single_particle/obs_model.h:24:
+In file included from /tmp/fix181-local-20261016/main/src/image.h:689:
+/tmp/fix181-local-20261016/main/src/rwSPIDER.h:333:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  333 |     sprintf(header->ctim, "%02d:%02d:%02d", t->tm_hour, t->tm_min, t->tm_sec);
+      |     ^
+/tmp/fix181-local-20261016/main/src/image.h:1787:10: note: in instantiation of member function 'Image<double>::writeSPIDER' requested here
+ 1787 |                         err = writeSPIDER(select_img, isStack, mode, datatype);
+      |                               ^
+/tmp/fix181-local-20261016/main/src/image.h:767:3: note: in instantiation of member function 'Image<double>::_write' requested here
+  767 |                 _write(fname, hFile, select_img, isStack, mode, datatype);
+      |                 ^
+/tmp/fix181-local-20261016/main/src/jaz/single_particle/stack_helper.cpp:239:6: note: in instantiation of member function 'Image<double>::write' requested here
+  239 |         img.write(fn);
+      |             ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+In file included from /tmp/fix181-local-20261016/main/src/jaz/single_particle/stack_helper.cpp:21:
+In file included from /tmp/fix181-local-20261016/main/src/jaz/single_particle/stack_helper.h:24:
+In file included from /tmp/fix181-local-20261016/main/src/ctf.h:50:
+In file included from /tmp/fix181-local-20261016/main/src/jaz/single_particle/obs_model.h:24:
+In file included from /tmp/fix181-local-20261016/main/src/image.h:689:
+/tmp/fix181-local-20261016/main/src/rwSPIDER.h:334:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  334 |     sprintf(header->cdat, "%02d-%02d-%02d", t->tm_mday, t->tm_mon, t->tm_year);
+      |     ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+[ 55%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/modular_alignment/Fourier_2D_deformation_model.cpp.o
+[ 55%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/modular_alignment/linear_2D_deformation_model.cpp.o
+[ 57%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/modular_alignment/spline_2D_deformation_model.cpp.o
+2 warnings generated.
+[ 58%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/spline_2D_deformation.cpp.o
+[ 58%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/trajectory.cpp.o
+[ 60%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/trajectory_set.cpp.o
+[ 61%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/particle_set.cpp.o
+[ 63%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/projection_IO.cpp.o
+[ 63%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/tomo_ctf_helper.cpp.o
+[ 65%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/tomogram.cpp.o
+[ 66%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/tomogram_set.cpp.o
+[ 66%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/ansi_codes.cpp.o
+[ 68%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/image_file_helper.cpp.o
+[ 69%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/log.cpp.o
+[ 71%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/zio.cpp.o
+/tmp/fix181-local-20261016/main/src/jaz/util/log.cpp:151:4: warning: delete called on 'Logger' that is abstract but has non-virtual destructor [-Wdelete-abstract-non-virtual-dtor]
+  151 |                         delete logger;
+      |                         ^
+/tmp/fix181-local-20261016/main/src/jaz/util/log.cpp:164:5: warning: delete called on 'Logger' that is abstract but has non-virtual destructor [-Wdelete-abstract-non-virtual-dtor]
+  164 |                                 delete logger;
+      |                                 ^
+/tmp/fix181-local-20261016/main/src/jaz/util/log.cpp:176:4: warning: delete called on 'Logger' that is abstract but has non-virtual destructor [-Wdelete-abstract-non-virtual-dtor]
+  176 |                         delete logger;
+      |                         ^
+3 warnings generated.
+[ 71%] Building CXX object CMakeFiles/motioncorr_core.dir/src/mask.cpp.o
+[ 73%] Building CXX object CMakeFiles/motioncorr_core.dir/src/matrix1d.cpp.o
+[ 74%] Building CXX object CMakeFiles/motioncorr_core.dir/src/matrix2d.cpp.o
+[ 74%] Building CXX object CMakeFiles/motioncorr_core.dir/src/memory.cpp.o
+[ 76%] Building CXX object CMakeFiles/motioncorr_core.dir/src/metadata_container.cpp.o
+[ 77%] Building CXX object CMakeFiles/motioncorr_core.dir/src/metadata_label.cpp.o
+[ 79%] Building CXX object CMakeFiles/motioncorr_core.dir/src/metadata_table.cpp.o
+[ 79%] Building CXX object CMakeFiles/motioncorr_core.dir/src/micrograph_model.cpp.o
+[ 80%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+[ 82%] Building CXX object CMakeFiles/motioncorr_core.dir/src/multidim_array.cpp.o
+[ 82%] Building CXX object CMakeFiles/motioncorr_core.dir/src/numerical_recipes.cpp.o
+In file included from /tmp/fix181-local-20261016/main/src/motioncorr_runner.cpp:40:
+In file included from /tmp/fix181-local-20261016/main/src/motioncorr_runner.h:35:
+In file included from /tmp/fix181-local-20261016/main/src/image.h:689:
+/tmp/fix181-local-20261016/main/src/rwSPIDER.h:333:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  333 |     sprintf(header->ctim, "%02d:%02d:%02d", t->tm_hour, t->tm_min, t->tm_sec);
+      |     ^
+/tmp/fix181-local-20261016/main/src/image.h:1787:10: note: in instantiation of member function 'Image<double>::writeSPIDER' requested here
+ 1787 |                         err = writeSPIDER(select_img, isStack, mode, datatype);
+      |                               ^
+/tmp/fix181-local-20261016/main/src/image.h:767:3: note: in instantiation of member function 'Image<double>::_write' requested here
+  767 |                 _write(fname, hFile, select_img, isStack, mode, datatype);
+      |                 ^
+/tmp/fix181-local-20261016/main/src/motioncorr_runner.cpp:666:8: note: in instantiation of member function 'Image<double>::write' requested here
+  666 |                 Iout.write(fn_new_gain);
+      |                      ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+In file included from /tmp/fix181-local-20261016/main/src/motioncorr_runner.cpp:40:
+In file included from /tmp/fix181-local-20261016/main/src/motioncorr_runner.h:35:
+In file included from /tmp/fix181-local-20261016/main/src/image.h:689:
+/tmp/fix181-local-20261016/main/src/rwSPIDER.h:334:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  334 |     sprintf(header->cdat, "%02d-%02d-%02d", t->tm_mday, t->tm_mon, t->tm_year);
+      |     ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+In file included from /tmp/fix181-local-20261016/main/src/motioncorr_runner.cpp:40:
+In file included from /tmp/fix181-local-20261016/main/src/motioncorr_runner.h:35:
+In file included from /tmp/fix181-local-20261016/main/src/image.h:689:
+/tmp/fix181-local-20261016/main/src/rwSPIDER.h:333:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  333 |     sprintf(header->ctim, "%02d:%02d:%02d", t->tm_hour, t->tm_min, t->tm_sec);
+      |     ^
+/tmp/fix181-local-20261016/main/src/image.h:1787:10: note: in instantiation of member function 'Image<float>::writeSPIDER' requested here
+ 1787 |                         err = writeSPIDER(select_img, isStack, mode, datatype);
+      |                               ^
+/tmp/fix181-local-20261016/main/src/image.h:767:3: note: in instantiation of member function 'Image<float>::_write' requested here
+  767 |                 _write(fname, hFile, select_img, isStack, mode, datatype);
+      |                 ^
+/tmp/fix181-local-20261016/main/src/motioncorr_runner.cpp:1537:10: note: in instantiation of member function 'Image<float>::write' requested here
+ 1537 |                 owned->write(path, -1, false, WRITE_OVERWRITE, datatype);
+      |                        ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+In file included from /tmp/fix181-local-20261016/main/src/motioncorr_runner.cpp:40:
+In file included from /tmp/fix181-local-20261016/main/src/motioncorr_runner.h:35:
+In file included from /tmp/fix181-local-20261016/main/src/image.h:689:
+/tmp/fix181-local-20261016/main/src/rwSPIDER.h:334:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  334 |     sprintf(header->cdat, "%02d-%02d-%02d", t->tm_mday, t->tm_mon, t->tm_year);
+      |     ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+[ 84%] Building CXX object CMakeFiles/motioncorr_core.dir/src/output_writer.cpp.o
+[ 85%] Building CXX object CMakeFiles/motioncorr_core.dir/src/parallel.cpp.o
+[ 87%] Building CXX object CMakeFiles/motioncorr_core.dir/src/pipeline_control.cpp.o
+[ 87%] Building CXX object CMakeFiles/motioncorr_core.dir/src/projector.cpp.o
+[ 88%] Building CXX object CMakeFiles/motioncorr_core.dir/src/renderEER.cpp.o
+[ 90%] Building CXX object CMakeFiles/motioncorr_core.dir/src/stage_profile.cpp.o
+[ 90%] Building CXX object CMakeFiles/motioncorr_core.dir/src/strings.cpp.o
+[ 92%] Building CXX object CMakeFiles/motioncorr_core.dir/src/symmetries.cpp.o
+[ 93%] Building CXX object CMakeFiles/motioncorr_core.dir/src/tabfuncs.cpp.o
+[ 95%] Building CXX object CMakeFiles/motioncorr_core.dir/src/time.cpp.o
+[ 95%] Building CXX object CMakeFiles/motioncorr_core.dir/src/transformations.cpp.o
+[ 96%] Building CXX object CMakeFiles/motioncorr_core.dir/macros.cpp.o
+/tmp/fix181-local-20261016/main/src/time.cpp:191:29: warning: format string is not a string literal (potentially insecure) [-Wformat-security]
+  191 |             fprintf(stdout, cheese);
+      |                             ^~~~~~
+/tmp/fix181-local-20261016/main/src/time.cpp:191:29: note: treat the string as an argument to avoid this
+  191 |             fprintf(stdout, cheese);
+      |                             ^
+      |                             "%s", 
+1 warning generated.
+4 warnings generated.
+[ 98%] Linking CXX static library libmotioncorr_core.a
+[ 98%] Built target motioncorr_core
+[100%] Building CXX object CMakeFiles/motioncorr.dir/src/apps/run_motioncorr.cpp.o
+[100%] Linking CXX executable motioncorr
+[100%] Built target motioncorr

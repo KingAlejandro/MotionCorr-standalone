@@ -2105,7 +2105,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	NativeU8MovieStaging u8_staging;
 	NativeS16MovieStaging s16_staging;
 	NativeS8MovieStaging s8_staging;
-	std::vector<Image<float> > Irefframes;
 	std::vector<int> frames; // 0-indexed
 
 	RFLOAT output_angpix = angpix * bin_factor;
@@ -2157,7 +2156,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 
 	const int n_frames = frames.size();
 	Iframes.resize(n_frames);
-	Irefframes.resize(n_frames);
 	Fframes.resize(n_frames);
 
 	std::vector<RFLOAT> xshifts(n_frames), yshifts(n_frames);
@@ -4015,42 +4013,12 @@ skip_fitting:
 					REPORT_ERROR("Failed to download resident real frames for unweighted fallback");
 			}
 #endif
-			for (int iframe = 0; iframe < n_frames; iframe++){
-				Irefframes[iframe]().initZeros(Iframes[iframe]());	
-			}
-
 			RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
 			logfile << "Summing frames before dose weighting: ";
-			realSpaceInterpolation_withoutsum(Irefframes, Iframes, mic.model, logfile);
+			sumUnweightedFrames(Iref, even_odd_split ? &Iref_even : nullptr,
+				even_odd_split ? &Iref_odd : nullptr, Iframes, mic.model, logfile);
 			logfile << " done" << std::endl;
 			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
-			
-			// Sum frames and save aligned stack
-			for (int iframe = 0; iframe < n_frames; iframe++)
-			{
-			#pragma omp parallel for num_threads(n_threads)
-			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref()) {
-				DIRECT_MULTIDIM_ELEM(Iref(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);
-				}
-
-			// save odd even aligned stack
-			if (even_odd_split)
-			{
-			if ( iframe % 2 == 0)
-			{
-			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref_even()) {
-				DIRECT_MULTIDIM_ELEM(Iref_even(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);			
-			}
-			}
-			else
-			{
-			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref_odd()) {
-				DIRECT_MULTIDIM_ELEM(Iref_odd(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);			
-
-			}
-			}
-			}
-			}
 		}
 
 		// Apply binning
@@ -4267,7 +4235,34 @@ void MotioncorrRunner::interpolateShifts(std::vector<int> &group_start, std::vec
 	}
 }
 
-void MotioncorrRunner::realSpaceInterpolation_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, MotionModel *model, std::ostream &logfile) {
+void MotioncorrRunner::sumUnweightedFrames(Image<float> &sum, Image<float> *even,
+        Image<float> *odd, std::vector<Image<float> > &frames,
+        MotionModel *model, std::ostream &logfile) {
+    // Input pixels remain owned by frames. The view is rebound only between
+    // completed interpolation calls; no worker can outlive that call.
+    std::vector<Image<float> > view(1), aligned(1);
+    for (int iframe = 0; iframe < static_cast<int>(frames.size()); ++iframe) {
+        view[0]().alias(frames[iframe]());
+        aligned[0]().initZeros(frames[iframe]());
+        // Model time is the selected movie's original relative frame index,
+        // not the one-element view's index zero.
+        realSpaceInterpolation_withoutsum(aligned, view, model, logfile, iframe);
+        #pragma omp parallel for num_threads(n_threads)
+        FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(sum()) {
+            DIRECT_MULTIDIM_ELEM(sum(), n) += DIRECT_MULTIDIM_ELEM(aligned[0](), n);
+        }
+        Image<float> *split = (iframe % 2 == 0) ? even : odd;
+        if (split) {
+            FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY((*split)()) {
+                DIRECT_MULTIDIM_ELEM((*split)(), n) += DIRECT_MULTIDIM_ELEM(aligned[0](), n);
+            }
+        }
+    }
+    // aligned is released here, before dose weighting; no corrected movie
+    // stack survives into the following reconstruction.
+}
+
+void MotioncorrRunner::realSpaceInterpolation_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, MotionModel *model, std::ostream &logfile, int frame_offset) {
 	int model_version = MOTION_MODEL_NULL;
 	if (model != NULL) {
 		model_version = model->getModelVersion();
@@ -4289,12 +4284,12 @@ void MotioncorrRunner::realSpaceInterpolation_withoutsum(std::vector<Image<float
 		}
 	} else if (model_version == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) { // Optimised code
 		ThirdOrderPolynomialModel *polynomial_model = (ThirdOrderPolynomialModel*)model;
-		realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(Ialignedframes, Iframes, *polynomial_model, logfile);
+		realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(Ialignedframes, Iframes, *polynomial_model, logfile, frame_offset);
 	} else { // general code
 		const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			logfile << "." << std::flush;
-			const RFLOAT z = iframe;
+			const RFLOAT z = iframe + frame_offset;
 
 			#pragma omp parallel for num_threads(n_threads)
 			for (int iy = 0; iy < ny; iy++) {
@@ -4354,7 +4349,7 @@ void MotioncorrRunner::realSpaceInterpolation_withoutsum(std::vector<Image<float
 	} // general model
 }
 
-void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile) {
+void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile, int frame_offset) {
 	const int n_frames = Iframes.size();
 	const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
 	const Matrix1D<RFLOAT> coeffX = model.coeffX, coeffY = model.coeffY;
@@ -4362,7 +4357,8 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(st
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		logfile << "." << std::flush;
 
-		const RFLOAT z = iframe, z2 = iframe * iframe;
+		const int model_frame = iframe + frame_offset;
+		const RFLOAT z = model_frame, z2 = model_frame * model_frame;
 		const RFLOAT z3 = z * z2;
 		// Common terms
 		const RFLOAT x_C0 = coeffX(0)  * z + coeffX(1)  * z2 + coeffX(2)  * z3;

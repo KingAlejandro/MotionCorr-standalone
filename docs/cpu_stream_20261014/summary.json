@@ -1,0 +1,805 @@
+{
+  "scope": "fallback observations, not a clean mcprof verdict",
+  "configurations": [
+    {
+      "results": "docs/cpu_stream_20261014/tutorial-p5-j4/results.json",
+      "limitation": "PID namespace disagrees with mounted /proc: per-PID image/ownership and physical-host isolation are NOT certified; this is not a clean mcprof verdict",
+      "strict_identity_all_pairs_including_warmup": true,
+      "comparisons_including_warmup": 7,
+      "mrc_comparisons_including_warmup": 28,
+      "pairs": [
+        {
+          "rep": 0,
+          "a": 46.31372709899915,
+          "b": 47.18307516300047,
+          "order": "AB"
+        },
+        {
+          "rep": 1,
+          "a": 50.745127144000435,
+          "b": 47.934345869000026,
+          "order": "BA"
+        },
+        {
+          "rep": 2,
+          "a": 57.647174744999575,
+          "b": 50.67093240000031,
+          "order": "AB"
+        },
+        {
+          "rep": 3,
+          "a": 69.90064934899965,
+          "b": 56.367736255000636,
+          "order": "BA"
+        },
+        {
+          "rep": 4,
+          "a": 59.98463737600105,
+          "b": 52.289915553001265,
+          "order": "AB"
+        },
+        {
+          "rep": 5,
+          "a": 47.0501251279984,
+          "b": 55.86876609299907,
+          "order": "BA"
+        }
+      ],
+      "wall_descriptive_statistics_only": {
+        "n_pairs": 6,
+        "diffs_s": [
+          0.8693480640013149,
+          -2.8107812750004086,
+          -6.976242344999264,
+          -13.532913093999014,
+          -7.694721822999782,
+          8.818640965000668
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -4.893511809999836,
+        "q1_diff_s": -7.515101953499652,
+        "q3_diff_s": -0.05068427074911597,
+        "min_diff_s": -13.532913093999014,
+        "max_diff_s": 8.818640965000668,
+        "median_a_s": 54.196150944500005,
+        "median_b_s": 51.48042397650079,
+        "relative_median_diff": -0.09029260795680999,
+        "noise_s": 6.348545007233913,
+        "robust_sd_diff_s": 6.348545007233913,
+        "ci": {
+          "low_s": -13.532913093999014,
+          "high_s": 8.818640965000668,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 2,
+          "negative": 4,
+          "ties": 0,
+          "p_two_sided": 0.6875
+        },
+        "resolution_s": 11.17577702949984,
+        "resolved": false,
+        "verdict": "not resolved (below noise 11.176 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -6.976242344999264,
+          "median_diff_ba_s": -2.8107812750004086,
+          "second_position_cost_s": -2.0827305349994276,
+          "order_corrected_effect_s": -4.893511809999836
+        }
+      },
+      "rss_pairs": [
+        {
+          "rep": 0,
+          "base_kib": 4600576,
+          "candidate_kib": 3265604,
+          "delta_kib": -1334972,
+          "relative_delta": -0.29017496939513665
+        },
+        {
+          "rep": 1,
+          "base_kib": 4600896,
+          "candidate_kib": 3265624,
+          "delta_kib": -1335272,
+          "relative_delta": -0.2902199919320063
+        },
+        {
+          "rep": 2,
+          "base_kib": 4600792,
+          "candidate_kib": 3265752,
+          "delta_kib": -1335040,
+          "relative_delta": -0.2901761261974025
+        },
+        {
+          "rep": 3,
+          "base_kib": 4600764,
+          "candidate_kib": 3266016,
+          "delta_kib": -1334748,
+          "relative_delta": -0.2901144244738483
+        },
+        {
+          "rep": 4,
+          "base_kib": 4600692,
+          "candidate_kib": 3265748,
+          "delta_kib": -1334944,
+          "relative_delta": -0.2901615669990515
+        },
+        {
+          "rep": 5,
+          "base_kib": 4600912,
+          "candidate_kib": 3286696,
+          "delta_kib": -1314216,
+          "relative_delta": -0.2856424987046047
+        }
+      ],
+      "rss_base_kib": {
+        "median": 4600778.0,
+        "min": 4600576,
+        "max": 4600912
+      },
+      "rss_candidate_kib": {
+        "median": 3265750.0,
+        "min": 3265604,
+        "max": 3286696
+      },
+      "rss_relative_delta": {
+        "median": -0.29016826819709407,
+        "min": -0.2902199919320063,
+        "max": -0.2856424987046047
+      },
+      "cpu_base_s": {
+        "median": 166.644104,
+        "min": 142.961983,
+        "max": 212.59488199999998
+      },
+      "cpu_candidate_s": {
+        "median": 161.6361195,
+        "min": 150.46919799999998,
+        "max": 190.473839
+      }
+    },
+    {
+      "results": "docs/cpu_stream_20261014/synthetic-p1-j1/results.json",
+      "limitation": "PID namespace disagrees with mounted /proc: per-PID image/ownership and physical-host isolation are NOT certified; this is not a clean mcprof verdict",
+      "strict_identity_all_pairs_including_warmup": true,
+      "comparisons_including_warmup": 7,
+      "mrc_comparisons_including_warmup": 7,
+      "pairs": [
+        {
+          "rep": 0,
+          "a": 0.6423871970000619,
+          "b": 0.8831946459995379,
+          "order": "AB"
+        },
+        {
+          "rep": 1,
+          "a": 0.6272683179995511,
+          "b": 0.7485788119993231,
+          "order": "BA"
+        },
+        {
+          "rep": 2,
+          "a": 1.8286284220012021,
+          "b": 0.7559038190011051,
+          "order": "AB"
+        },
+        {
+          "rep": 3,
+          "a": 0.6329262769995694,
+          "b": 1.6716660759993829,
+          "order": "BA"
+        },
+        {
+          "rep": 4,
+          "a": 0.5761225000005652,
+          "b": 1.5117742319998797,
+          "order": "AB"
+        },
+        {
+          "rep": 5,
+          "a": 1.0915859079996153,
+          "b": 1.7282507269992493,
+          "order": "BA"
+        }
+      ],
+      "wall_descriptive_statistics_only": {
+        "n_pairs": 6,
+        "diffs_s": [
+          0.24080744899947604,
+          0.121310493999772,
+          -1.072724603000097,
+          1.0387397989998135,
+          0.9356517319993145,
+          0.636664818999634
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": 0.438736133999555,
+        "q1_diff_s": 0.15118473274969801,
+        "q3_diff_s": 0.8609050037493944,
+        "min_diff_s": -1.072724603000097,
+        "max_diff_s": 1.0387397989998135,
+        "median_a_s": 0.6376567369998156,
+        "median_b_s": 1.1974844389997088,
+        "relative_median_diff": 0.6880443795886405,
+        "noise_s": 0.6036711597290608,
+        "robust_sd_diff_s": 0.6036711597290608,
+        "ci": {
+          "low_s": -1.072724603000097,
+          "high_s": 1.0387397989998135,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 5,
+          "negative": 1,
+          "ties": 0,
+          "p_two_sided": 0.21875
+        },
+        "resolution_s": 1.0557322009999552,
+        "resolved": false,
+        "verdict": "not resolved (below noise 1.056 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": 0.24080744899947604,
+          "median_diff_ba_s": 0.636664818999634,
+          "second_position_cost_s": -0.19792868500007899,
+          "order_corrected_effect_s": 0.438736133999555
+        }
+      },
+      "rss_pairs": [
+        {
+          "rep": 0,
+          "base_kib": 70652,
+          "candidate_kib": 55140,
+          "delta_kib": -15512,
+          "relative_delta": -0.21955500198154332
+        },
+        {
+          "rep": 1,
+          "base_kib": 70620,
+          "candidate_kib": 55260,
+          "delta_kib": -15360,
+          "relative_delta": -0.21750212404418012
+        },
+        {
+          "rep": 2,
+          "base_kib": 70540,
+          "candidate_kib": 55228,
+          "delta_kib": -15312,
+          "relative_delta": -0.2170683300255174
+        },
+        {
+          "rep": 3,
+          "base_kib": 70688,
+          "candidate_kib": 55132,
+          "delta_kib": -15556,
+          "relative_delta": -0.22006564056133993
+        },
+        {
+          "rep": 4,
+          "base_kib": 70652,
+          "candidate_kib": 55056,
+          "delta_kib": -15596,
+          "relative_delta": -0.2207439279850535
+        },
+        {
+          "rep": 5,
+          "base_kib": 70668,
+          "candidate_kib": 55128,
+          "delta_kib": -15540,
+          "relative_delta": -0.21990151129223978
+        }
+      ],
+      "rss_base_kib": {
+        "median": 70652.0,
+        "min": 70540,
+        "max": 70688
+      },
+      "rss_candidate_kib": {
+        "median": 55136.0,
+        "min": 55056,
+        "max": 55260
+      },
+      "rss_relative_delta": {
+        "median": -0.21972825663689155,
+        "min": -0.2207439279850535,
+        "max": -0.2170683300255174
+      },
+      "cpu_base_s": {
+        "median": 0.636743,
+        "min": 0.575186,
+        "max": 1.705216
+      },
+      "cpu_candidate_s": {
+        "median": 1.158601,
+        "min": 0.7464439999999999,
+        "max": 1.655867
+      }
+    },
+    {
+      "results": "docs/cpu_stream_20261014/synthetic-p1-j4/results.json",
+      "limitation": "PID namespace disagrees with mounted /proc: per-PID image/ownership and physical-host isolation are NOT certified; this is not a clean mcprof verdict",
+      "strict_identity_all_pairs_including_warmup": true,
+      "comparisons_including_warmup": 7,
+      "mrc_comparisons_including_warmup": 7,
+      "pairs": [
+        {
+          "rep": 0,
+          "a": 0.6456038219985203,
+          "b": 0.6234195390006789,
+          "order": "AB"
+        },
+        {
+          "rep": 1,
+          "a": 0.6317017700002907,
+          "b": 0.8405292209990876,
+          "order": "BA"
+        },
+        {
+          "rep": 2,
+          "a": 1.4860808070006897,
+          "b": 0.6061514190005255,
+          "order": "AB"
+        },
+        {
+          "rep": 3,
+          "a": 0.6054631930001051,
+          "b": 0.5920405149990984,
+          "order": "BA"
+        },
+        {
+          "rep": 4,
+          "a": 0.8802388150015759,
+          "b": 0.6446254330003285,
+          "order": "AB"
+        },
+        {
+          "rep": 5,
+          "a": 0.8657699340001273,
+          "b": 0.8051176810004108,
+          "order": "BA"
+        }
+      ],
+      "wall_descriptive_statistics_only": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -0.022184282997841365,
+          0.20882745099879685,
+          -0.8799293880001642,
+          -0.013422678001006716,
+          -0.23561338200124737,
+          -0.06065225299971644
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.0414182679987789,
+        "q1_diff_s": -0.19187309975086464,
+        "q3_diff_s": -0.015613079250215378,
+        "min_diff_s": -0.8799293880001642,
+        "max_diff_s": 0.20882745099879685,
+        "median_a_s": 0.7556868779993238,
+        "median_b_s": 0.6340224860005037,
+        "relative_median_diff": -0.0548087696168994,
+        "noise_s": 0.1647099688753784,
+        "robust_sd_diff_s": 0.1647099688753784,
+        "ci": {
+          "low_s": -0.8799293880001642,
+          "high_s": 0.20882745099879685,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 1,
+          "negative": 5,
+          "ties": 0,
+          "p_two_sided": 0.21875
+        },
+        "resolution_s": 0.5443784194994805,
+        "resolved": false,
+        "verdict": "not resolved (below noise 0.544 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -0.23561338200124737,
+          "median_diff_ba_s": -0.013422678001006716,
+          "second_position_cost_s": -0.11109535200012033,
+          "order_corrected_effect_s": -0.12451803000112704
+        }
+      },
+      "rss_pairs": [
+        {
+          "rep": 0,
+          "base_kib": 67472,
+          "candidate_kib": 51068,
+          "delta_kib": -16404,
+          "relative_delta": -0.24312307327483995
+        },
+        {
+          "rep": 1,
+          "base_kib": 67536,
+          "candidate_kib": 51128,
+          "delta_kib": -16408,
+          "relative_delta": -0.24295190713101156
+        },
+        {
+          "rep": 2,
+          "base_kib": 67708,
+          "candidate_kib": 51160,
+          "delta_kib": -16548,
+          "relative_delta": -0.24440243398121342
+        },
+        {
+          "rep": 3,
+          "base_kib": 67728,
+          "candidate_kib": 51056,
+          "delta_kib": -16672,
+          "relative_delta": -0.24616111504842897
+        },
+        {
+          "rep": 4,
+          "base_kib": 67676,
+          "candidate_kib": 51180,
+          "delta_kib": -16496,
+          "relative_delta": -0.24374963059282462
+        },
+        {
+          "rep": 5,
+          "base_kib": 67704,
+          "candidate_kib": 51144,
+          "delta_kib": -16560,
+          "relative_delta": -0.2445941155618575
+        }
+      ],
+      "rss_base_kib": {
+        "median": 67690.0,
+        "min": 67472,
+        "max": 67728
+      },
+      "rss_candidate_kib": {
+        "median": 51136.0,
+        "min": 51056,
+        "max": 51180
+      },
+      "rss_relative_delta": {
+        "median": -0.24407603228701902,
+        "min": -0.24616111504842897,
+        "max": -0.24295190713101156
+      },
+      "cpu_base_s": {
+        "median": 1.2512955,
+        "min": 0.931132,
+        "max": 1.835847
+      },
+      "cpu_candidate_s": {
+        "median": 0.9509519999999999,
+        "min": 0.885389,
+        "max": 1.203028
+      }
+    },
+    {
+      "results": "docs/cpu_stream_20261014/synthetic-p5-j1/results.json",
+      "limitation": "PID namespace disagrees with mounted /proc: per-PID image/ownership and physical-host isolation are NOT certified; this is not a clean mcprof verdict",
+      "strict_identity_all_pairs_including_warmup": true,
+      "comparisons_including_warmup": 7,
+      "mrc_comparisons_including_warmup": 28,
+      "pairs": [
+        {
+          "rep": 0,
+          "a": 1.3704037870011234,
+          "b": 1.2524564000013925,
+          "order": "AB"
+        },
+        {
+          "rep": 1,
+          "a": 1.49827754099897,
+          "b": 1.294858954001029,
+          "order": "BA"
+        },
+        {
+          "rep": 2,
+          "a": 1.3462073459995736,
+          "b": 1.5090032770003745,
+          "order": "AB"
+        },
+        {
+          "rep": 3,
+          "a": 2.3237317799994344,
+          "b": 2.039235546000782,
+          "order": "BA"
+        },
+        {
+          "rep": 4,
+          "a": 1.8636053250011173,
+          "b": 3.535707230999833,
+          "order": "AB"
+        },
+        {
+          "rep": 5,
+          "a": 3.435681693999868,
+          "b": 2.83764425300069,
+          "order": "BA"
+        }
+      ],
+      "wall_descriptive_statistics_only": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -0.11794738699973095,
+          -0.20341858699794102,
+          0.16279593100080092,
+          -0.2844962339986523,
+          1.6721019059987157,
+          -0.5980374409991782
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.16068298699883599,
+        "q1_diff_s": -0.2642268222484745,
+        "q3_diff_s": 0.09261010150066795,
+        "min_diff_s": -0.5980374409991782,
+        "max_diff_s": 1.6721019059987157,
+        "median_a_s": 1.6809414330000436,
+        "median_b_s": 1.7741194115005783,
+        "relative_median_diff": -0.09559106810286579,
+        "noise_s": 0.33157768191409465,
+        "robust_sd_diff_s": 0.33157768191409465,
+        "ci": {
+          "low_s": -0.5980374409991782,
+          "high_s": 1.6721019059987157,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 2,
+          "negative": 4,
+          "ties": 0,
+          "p_two_sided": 0.6875
+        },
+        "resolution_s": 1.135069673498947,
+        "resolved": false,
+        "verdict": "not resolved (below noise 1.135 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": 0.16279593100080092,
+          "median_diff_ba_s": -0.2844962339986523,
+          "second_position_cost_s": 0.22364608249972662,
+          "order_corrected_effect_s": -0.0608501514989257
+        }
+      },
+      "rss_pairs": [
+        {
+          "rep": 0,
+          "base_kib": 71752,
+          "candidate_kib": 55084,
+          "delta_kib": -16668,
+          "relative_delta": -0.232300144943695
+        },
+        {
+          "rep": 1,
+          "base_kib": 70640,
+          "candidate_kib": 55324,
+          "delta_kib": -15316,
+          "relative_delta": -0.2168176670441676
+        },
+        {
+          "rep": 2,
+          "base_kib": 71760,
+          "candidate_kib": 55152,
+          "delta_kib": -16608,
+          "relative_delta": -0.23143812709030098
+        },
+        {
+          "rep": 3,
+          "base_kib": 71744,
+          "candidate_kib": 55224,
+          "delta_kib": -16520,
+          "relative_delta": -0.23026315789473684
+        },
+        {
+          "rep": 4,
+          "base_kib": 71620,
+          "candidate_kib": 55176,
+          "delta_kib": -16444,
+          "relative_delta": -0.22960067020385366
+        },
+        {
+          "rep": 5,
+          "base_kib": 71588,
+          "candidate_kib": 55088,
+          "delta_kib": -16500,
+          "relative_delta": -0.23048555623847578
+        }
+      ],
+      "rss_base_kib": {
+        "median": 71682.0,
+        "min": 70640,
+        "max": 71760
+      },
+      "rss_candidate_kib": {
+        "median": 55164.0,
+        "min": 55084,
+        "max": 55324
+      },
+      "rss_relative_delta": {
+        "median": -0.2303743570666063,
+        "min": -0.232300144943695,
+        "max": -0.2168176670441676
+      },
+      "cpu_base_s": {
+        "median": 1.6488990000000001,
+        "min": 1.340293,
+        "max": 3.403646
+      },
+      "cpu_candidate_s": {
+        "median": 1.727179,
+        "min": 1.249817,
+        "max": 3.447821
+      }
+    },
+    {
+      "results": "docs/cpu_stream_20261014/synthetic-p5-j4/results.json",
+      "limitation": "PID namespace disagrees with mounted /proc: per-PID image/ownership and physical-host isolation are NOT certified; this is not a clean mcprof verdict",
+      "strict_identity_all_pairs_including_warmup": true,
+      "comparisons_including_warmup": 7,
+      "mrc_comparisons_including_warmup": 28,
+      "pairs": [
+        {
+          "rep": 0,
+          "a": 1.4023159429998486,
+          "b": 1.403186478999487,
+          "order": "AB"
+        },
+        {
+          "rep": 1,
+          "a": 1.1605803730017215,
+          "b": 1.078750629998467,
+          "order": "BA"
+        },
+        {
+          "rep": 2,
+          "a": 1.1188219060004485,
+          "b": 1.1148187420003524,
+          "order": "AB"
+        },
+        {
+          "rep": 3,
+          "a": 1.0787054800002807,
+          "b": 1.089936979000413,
+          "order": "BA"
+        },
+        {
+          "rep": 4,
+          "a": 1.07526836299985,
+          "b": 1.0948331890012923,
+          "order": "AB"
+        },
+        {
+          "rep": 5,
+          "a": 1.2048409409999294,
+          "b": 1.071961741999985,
+          "order": "BA"
+        }
+      ],
+      "wall_descriptive_statistics_only": {
+        "n_pairs": 6,
+        "diffs_s": [
+          0.0008705359996383777,
+          -0.08182974300325441,
+          -0.004003164000096149,
+          0.011231499000132317,
+          0.01956482600144227,
+          -0.1328791989999445
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.0015663140002288856,
+        "q1_diff_s": -0.06237309825246484,
+        "q3_diff_s": 0.008641258250008832,
+        "min_diff_s": -0.1328791989999445,
+        "max_diff_s": 0.01956482600144227,
+        "median_a_s": 1.139701139501085,
+        "median_b_s": 1.0923850840008527,
+        "relative_median_diff": -0.0013743199387468844,
+        "noise_s": 0.025151532860406587,
+        "robust_sd_diff_s": 0.025151532860406587,
+        "ci": {
+          "low_s": -0.1328791989999445,
+          "high_s": 0.01956482600144227,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 3,
+          "negative": 3,
+          "ties": 0,
+          "p_two_sided": 1.0
+        },
+        "resolution_s": 0.07622201250069338,
+        "resolved": false,
+        "verdict": "not resolved (below noise 0.076 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": 0.0008705359996383777,
+          "median_diff_ba_s": -0.08182974300325441,
+          "second_position_cost_s": 0.04135013950144639,
+          "order_corrected_effect_s": -0.040479603501808015
+        }
+      },
+      "rss_pairs": [
+        {
+          "rep": 0,
+          "base_kib": 68620,
+          "candidate_kib": 52300,
+          "delta_kib": -16320,
+          "relative_delta": -0.23783153599533668
+        },
+        {
+          "rep": 1,
+          "base_kib": 69796,
+          "candidate_kib": 51044,
+          "delta_kib": -18752,
+          "relative_delta": -0.2686686916155654
+        },
+        {
+          "rep": 2,
+          "base_kib": 68592,
+          "candidate_kib": 51216,
+          "delta_kib": -17376,
+          "relative_delta": -0.25332400279916023
+        },
+        {
+          "rep": 3,
+          "base_kib": 68728,
+          "candidate_kib": 52132,
+          "delta_kib": -16596,
+          "relative_delta": -0.2414736351996275
+        },
+        {
+          "rep": 4,
+          "base_kib": 68752,
+          "candidate_kib": 51328,
+          "delta_kib": -17424,
+          "relative_delta": -0.25343262741447525
+        },
+        {
+          "rep": 5,
+          "base_kib": 68792,
+          "candidate_kib": 51168,
+          "delta_kib": -17624,
+          "relative_delta": -0.25619258053262006
+        }
+      ],
+      "rss_base_kib": {
+        "median": 68740.0,
+        "min": 68592,
+        "max": 69796
+      },
+      "rss_candidate_kib": {
+        "median": 51272.0,
+        "min": 51044,
+        "max": 52300
+      },
+      "rss_relative_delta": {
+        "median": -0.25337831510681774,
+        "min": -0.2686686916155654,
+        "max": -0.23783153599533668
+      },
+      "cpu_base_s": {
+        "median": 2.896032,
+        "min": 2.688255,
+        "max": 3.4170000000000003
+      },
+      "cpu_candidate_s": {
+        "median": 2.8314375,
+        "min": 2.611484,
+        "max": 3.605658
+      }
+    }
+  ]
+}

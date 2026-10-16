@@ -401,9 +401,14 @@ private:
 
 	void realSpaceInterpolation_ThirdOrderPolynomial(Image <float> &Isum, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile);
 	
-	void realSpaceInterpolation_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, MotionModel *model, std::ostream &logfile);
+	// One float scratch frame; keep the original interpolation-store rounding
+	// before the ordered total/even/odd additions.
+	void sumUnweightedFrames(Image<float> &sum, Image<float> *even, Image<float> *odd,
+		std::vector<Image<float> > &frames, MotionModel *model, std::ostream &logfile);
 
-	void realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile);
+	void realSpaceInterpolation_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, MotionModel *model, std::ostream &logfile, int frame_offset = 0);
+
+	void realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile, int frame_offset = 0);
 
 };
 

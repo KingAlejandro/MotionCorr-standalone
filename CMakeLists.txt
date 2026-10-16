@@ -330,11 +330,18 @@ if(BUILD_TESTING)
         # Every container, sample type and codec the readers accept (issue #186 follow-up).
         # The compressed-MRC cases need the decoders the reader pipes through; a missing
         # one is reported UNRUN and only tolerated when it is absent at configure time.
+        # CI sets MC_REQUIRE_ALL_DECODERS=ON, so a missing decoder fails configuration there
+        # instead of being waived; elsewhere the waiver is explicit in the configure output.
+        option(MC_REQUIRE_ALL_DECODERS "Fail configuration if pbzip2 or zstd is missing (no UNRUN waiver)" OFF)
         set(_input_format_unrun "")
         foreach(_decoder pbzip2 zstd)
             find_program(_decoder_path_${_decoder} ${_decoder})
             if(NOT _decoder_path_${_decoder})
-                message(WARNING "${_decoder} not found: InputFormats reports its compressed-MRC case as UNRUN")
+                if(MC_REQUIRE_ALL_DECODERS)
+                    message(FATAL_ERROR "${_decoder} not found and MC_REQUIRE_ALL_DECODERS=ON")
+                endif()
+                message(WARNING "${_decoder} not found: InputFormats and RealCutdown waive its compressed-MRC "
+                                "cases (UNRUN). Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the waiver.")
                 list(APPEND _input_format_unrun --allow-unrun ${_decoder})
             endif()
         endforeach()

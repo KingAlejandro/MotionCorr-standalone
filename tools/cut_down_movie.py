@@ -81,6 +81,7 @@ def cut_tiff(src, dst, first, frames):
         bom = b"II" if e == "<" else b"MM"
         out.write(bom + (struct.pack(e + "HHHQ", 43, 8, 0, 0) if big else struct.pack(e + "HI", 42, 0)))
         next_ptr = 8 if big else 4
+        align = 8 if big else 2          # BigTIFF: 8-byte boundaries; classic TIFF: word boundaries
         dropped = set()
         for entries in ifds[first:first + frames]:
             tags = {t: (typ, cnt, data) for t, typ, cnt, data in entries}
@@ -94,8 +95,7 @@ def cut_tiff(src, dst, first, frames):
                     offs = values(e, typ, cnt, data)
                     new_offs = []
                     for o, c in zip(offs, counts):
-                        if out.tell() % 2:
-                            out.write(b"\0")
+                        out.write(b"\0" * ((-out.tell()) % align))
                         new_offs.append(out.tell())
                         fh.seek(o)
                         out.write(fh.read(c))
@@ -109,13 +109,11 @@ def cut_tiff(src, dst, first, frames):
                 if len(data) <= inline:
                     fields.append((tag, typ, cnt, data.ljust(inline, b"\0")))
                 else:
-                    if out.tell() % 2:
-                        out.write(b"\0")
+                    out.write(b"\0" * ((-out.tell()) % align))
                     ptr = out.tell()
                     out.write(data)
                     fields.append((tag, typ, cnt, struct.pack(e + ("Q" if big else "I"), ptr)))
-            if out.tell() % 2:
-                out.write(b"\0")
+            out.write(b"\0" * ((-out.tell()) % align))
             ifd = out.tell()
             out.write(struct.pack(e + ("Q" if big else "H"), len(fields)))
             for tag, typ, cnt, field in fields:

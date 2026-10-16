@@ -113,46 +113,62 @@ def render_eer(helper, path, tmp, upsampling, grouping):
     return nx, ny, out
 
 
+def compare_image(helper, path, tmp, exp, max_rows):
+    n, ny, nx = exp.shape
+    gx, gy, gn, arr = read_raw(helper, path, tmp, max_rows)
+    rows = min(max_rows, ny * n) if max_rows else ny * n
+    flat = exp.reshape(-1, nx)[:rows].ravel().astype(np.float32)
+    if (gx, gy, gn) != (nx, ny, n) or arr.size != flat.size:
+        return False, "dims %s vs %s" % ((gx, gy, gn), (nx, ny, n))
+    if np.array_equal(arr, flat):
+        return True, ""
+    bad = np.flatnonzero(arr != flat)
+    return False, "%d of %d samples differ, first at %d (%g vs %g)" % (bad.size, arr.size, bad[0], arr[bad[0]], flat[bad[0]])
+
+
+def compare_eer(rendered, z, groups):
+    gx, gy, got = rendered
+    if (gx, gy) != (int(z["nx"]), int(z["ny"])):
+        return False, "rendered %dx%d, expected %dx%d" % (gx, gy, int(z["nx"]), int(z["ny"]))
+    if len(got) != groups:
+        return False, "%d groups rendered, expected %d" % (len(got), groups)
+    for g, (idx, val) in enumerate(got):
+        ei, ev = z["idx%d" % g], z["val%d" % g]
+        if not (np.array_equal(idx, ei) and np.array_equal(val, ev.astype(np.float32))):
+            return False, "group %d: %d electrons at %d pixels, expected %d at %d" % (
+                g, int(val.sum()), idx.size, int(ev.sum()), ei.size)
+    return True, ""
+
+
 def check_decode(case, fixtures, manifest, helper, tmp, rep):
+    """accept: equal to the format oracle. characterise: equal to the pinned
+    current output AND different from the format oracle."""
     d = case["decode"]
     want_equal = d.get("expect_equal", True)
     path = fixtures / case["file"]
     try:
         if d["reader"] == "image":
-            exp = np.load(fixtures / manifest["expected"][d["expected"]])
-            n, ny, nx = exp.shape
-            mr = d.get("max_rows")
-            gx, gy, gn, arr = read_raw(helper, path, tmp, mr)
-            rows = min(mr, ny * n) if mr else ny * n
-            exp_flat = exp.reshape(-1, nx)[:rows].ravel()
-            same_shape = (gx, gy, gn) == (nx, ny, n) and arr.size == exp_flat.size
-            equal = same_shape and np.array_equal(arr, exp_flat.astype(np.float32))
-            detail = "" if same_shape else "dims %s vs %s" % ((gx, gy, gn), (nx, ny, n))
-            if same_shape and not equal:
-                bad = np.flatnonzero(arr != exp_flat)
-                detail = "%d of %d samples differ, first at %d (%g vs %g)" % (
-                    bad.size, arr.size, bad[0], arr[bad[0]], exp_flat[bad[0]])
+            load = lambda key: np.load(fixtures / manifest["expected"][key])
+            fmt_ok, fmt_detail = compare_image(helper, path, tmp, load(d["expected"]), d.get("max_rows"))
+            if not want_equal:
+                pin_ok, pin_detail = compare_image(helper, path, tmp, load(d["characterised"]), d.get("max_rows"))
         else:
-            z = np.load(fixtures / manifest["expected"][d["expected"]])
-            gx, gy, got = render_eer(helper, path, tmp, d["upsampling"], d["grouping"])
-            equal = len(got) == d["groups"]
-            detail = "" if equal else "%d groups rendered, expected %d" % (len(got), d["groups"])
-            for g, (idx, val) in enumerate(got[:d["groups"]]):
-                ei, ev = z["idx%d" % g], z["val%d" % g]
-                if not (np.array_equal(idx, ei) and np.array_equal(val, ev.astype(np.float32))):
-                    equal = False
-                    detail = "group %d: %d electrons rendered at %d pixels, expected %d at %d" % (
-                        g, int(val.sum()), idx.size, int(ev.sum()), ei.size)
-                    break
+            rendered = render_eer(helper, path, tmp, d["upsampling"], d["grouping"])
+            load = lambda key: np.load(fixtures / manifest["expected"][key])
+            fmt_ok, fmt_detail = compare_eer(rendered, load(d["expected"]), d["groups"])
+            if not want_equal:
+                pin_ok, pin_detail = compare_eer(rendered, load(d["characterised"]), d["groups"])
     except Exception as ex:          # noqa: BLE001 - reported as a failure
-        equal, detail = None, str(ex)[-300:]
-    if equal is None:
-        rep.add(case["name"], "decode", "FAIL", detail)
-    elif equal == want_equal:
-        rep.add(case["name"], "decode", "PASS" if want_equal else "KNOWN", "" if want_equal else "differs, as pinned")
+        rep.add(case["name"], "decode", "FAIL", str(ex)[-300:])
+        return
+    if want_equal:
+        rep.add(case["name"], "decode", "PASS" if fmt_ok else "FAIL", fmt_detail)
+    elif pin_ok and not fmt_ok:
+        rep.add(case["name"], "decode", "KNOWN", "matches the pinned current output")
+    elif fmt_ok:
+        rep.add(case["name"], "decode", "FAIL", "now decodes as the format defines; update the case")
     else:
-        rep.add(case["name"], "decode", "FAIL",
-                detail if want_equal else "expected the pinned divergence, but it decoded equal")
+        rep.add(case["name"], "decode", "FAIL", "differs from the pinned current output: " + pin_detail)
 
 
 # ------------------------------------------------------------------- e2e level
@@ -234,14 +250,17 @@ def check_e2e(cases, fixtures, binary, work, threads, rep, available, label="e2e
                     movie, route = line.rsplit(" ", 1)
                     ROUTES.setdefault(label, {})[Path(movie).name] = route
         for c in members:
+            if r.returncode != 0:
+                # Products alone are not enough: a run that exits non-zero fails every case in it.
+                tail = (r.stderr + r.stdout).strip().splitlines()[-1:] if (r.stderr + r.stdout).strip() else ""
+                rep.add(c["name"], label, "FAIL", "run exited %d: %s" % (r.returncode, tail))
+                continue
             prod = product(run_dir, c["file"])
             if prod is None:
                 rep.add(c["name"], label, "FAIL", "no product (rc %d): %s" % (
                     r.returncode, (r.stderr + r.stdout).strip().splitlines()[-1:] if (r.stderr + r.stdout).strip() else ""))
                 continue
             outputs[c["name"]] = prod
-        if r.returncode:
-            print("  run %s exited %d" % (run_dir.name, r.returncode))
     for c in cases:
         if c["name"] not in outputs:
             continue

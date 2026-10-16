@@ -161,6 +161,52 @@ def render_expected(fractions, size, group, n_groups, upsampling, sym_bits):
     return out
 
 
+def render_relion(fractions, size, group, n_groups, upsampling, sym_bits):
+    """Grouped counts as renderEER.cpp computes them, formula for formula.
+
+    Equal to render_expected wherever renderEER.cpp follows the format; used to
+    pin the cases where it does not (characterise), so that a change in either
+    direction is caught.
+    """
+    out = []
+    for g in range(n_groups):
+        acc = {}
+        for pos, s in fractions[g * group:(g + 1) * group]:
+            if size == 4096:
+                if upsampling == 2:        # render4K_to_8K
+                    X = ((pos & 4095) << 1) | ((s & 2) >> 1)
+                    Y = ((pos >> 12) << 1) | ((s & 8) >> 3)
+                    w = 8192
+                elif upsampling == 1:
+                    X, Y, w = pos & 4095, pos >> 12, 4096
+                elif upsampling == -1:
+                    X, Y, w = (pos & 4095) >> 1, (pos >> 12) >> 1, 2048
+                else:
+                    raise ValueError(upsampling)
+            else:
+                if upsampling == 2:        # render2K_to_4K
+                    X = ((pos & 2047) << 1) | (s & 1)
+                    Y = ((pos >> 11) << 1) | (s >> 1)
+                    w = 4096
+                else:
+                    X, Y, w = pos & 2047, pos >> 11, 2048
+            lin = Y * w + X
+            u, c = np.unique(lin, return_counts=True)
+            for a, b in zip(u.tolist(), c.tolist()):
+                acc[a] = acc.get(a, 0) + b
+        keys = np.array(sorted(acc), dtype=np.int64)
+        out.append((keys, np.array([acc[k] for k in keys.tolist()], dtype=np.int64)))
+    return out
+
+
+def save_sparse(b, key, groups, nx, ny):
+    p = b.path("expected/%s.npz" % key)
+    np.savez_compressed(p, nx=np.int64(nx), ny=np.int64(ny),
+                        **{"idx%d" % i: e[0] for i, e in enumerate(groups)},
+                        **{"val%d" % i: e[1] for i, e in enumerate(groups)})
+    b.expected[key] = str(p.relative_to(b.out))
+
+
 # --------------------------------------------------------------------- the cases
 
 class Builder:
@@ -273,6 +319,47 @@ def build_small(b):
         "orientation tag 2 (EPU EER and .gain files carry 2, 4, 5, 6): the reader ignores it, as upstream",
         extra_tags=[(274, E.SHORT, [2])])
 
+    # ---- full sample ranges: negative signed values, unsigned above the signed maximum.
+    # The 0..15 movie cannot tell signed from unsigned decoding; these can.
+    base = blob_movie(96, 80, 4, seed=77)                 # 0..15
+    ranges = {
+        "u16": (base * 4000 + 3000, [(0, 0, 0, 0), (0, 0, 1, 65535), (0, 1, 0, 32768)], np.uint16),
+        "s16": (base * 4000 - 30000, [(0, 0, 0, -32768), (0, 0, 1, 32767), (0, 1, 0, -1)], np.int16),
+        "u8": (base * 15 + 10, [(0, 0, 0, 0), (0, 0, 1, 255), (0, 1, 0, 128)], np.uint8),
+        "s8": (base * 15 - 120, [(0, 0, 0, -128), (0, 0, 1, 127), (0, 1, 0, -1)], np.int8),
+    }
+    for kind, (mov, pins, dt) in ranges.items():
+        mov = mov.copy()
+        for pin in pins:
+            if len(pin) == 4:
+                mov[pin[0], pin[1], pin[2]] = pin[3]
+        key = "wide_" + kind
+        b.expect(key, mov)
+        refname = "wide_%s_ref" % kind
+        b.path("small/%s.mrcs" % refname).write_bytes(E.mrc_bytes(mov, 2))
+        b.add(name=refname, group="small", file="small/%s.mrcs" % refname,
+              note="float32 reference for the full-range %s cases" % kind,
+              decode={"reader": "image", "expected": key}, e2e={"batch": key, "reference": refname})
+        variants = [("tiff_%s_wide" % kind, "tif", dict()), ("tiff_%s_wide_lzw" % kind, "tif", dict(compression=5, rows_per_strip=4))]
+        if kind == "u16":
+            variants += [("tiff_u16_wide_deflate_rps1", "tif", dict(compression=8, rows_per_strip=1)),
+                         ("tiff_u16_wide_deflate_pred2", "tif", dict(compression=8, predictor=2, rows_per_strip=1)),
+                         ("mrc_mode6_wide", "mrc", dict(mode=6))]
+        if kind == "s16":
+            variants += [("tiff_s16_wide_deflate_old_epu", "tif", dict(compression=32946, rows_per_strip=80)),
+                         ("mrc_mode1_wide", "mrc", dict(mode=1)), ("mrc_mode1_wide_bigendian", "mrc", dict(mode=1, endian=">"))]
+        if kind == "s8":
+            variants += [("mrc_mode0_wide", "mrc", dict(mode=0))]
+        for name, cont, kw in variants:
+            fname = "small/%s.%s" % (name, "mrcs" if cont == "mrc" else "tif")
+            if cont == "mrc":
+                b.path(fname).write_bytes(E.mrc_bytes(mov, kw.pop("mode"), **kw))
+            else:
+                E.write_tiff_movie(b.path(fname), mov, dt, **kw)
+            b.add(name=name, group="small", file=fname,
+                  note="%s over its full range (pinned extremes), %s" % (kind, ", ".join("%s=%s" % i for i in kw.items()) or "plain"),
+                  decode={"reader": "image", "expected": key}, e2e={"batch": key, "reference": refname})
+
     # ---- characterisation: behaviour that differs from a producer's convention
     u = np.where(m > 0, m + 120, 0)                       # 0 or 121..135: crosses 127
     b.path("small/mrc_mode0_unsigned.mrcs").write_bytes(E.mrc_bytes(u, 0, imod_flags=0))
@@ -299,8 +386,15 @@ def build_small(b):
     b.path("small/mrc_mode101_oddwidth.mrcs").write_bytes(
         E.mrc_bytes(odd, 101, payload=b"".join(row_bytes)))
     b.expect("small_oddwidth", odd)
+    # What rwMRC.h reads: nx*ny/2 bytes per frame from frame*nx*ny/2, nibbles in order.
+    payload = b"".join(row_bytes)
+    nib = np.frombuffer(payload, dtype=np.uint8)
+    nib = np.stack([nib & 0x0F, nib >> 4], axis=1).ravel().astype(np.float64)
+    per = (NX - 1) * NY
+    b.expect("small_oddwidth_relion", np.stack([nib[f * per:(f + 1) * per].reshape(NY, NX - 1) for f in range(2)]))
     b.add(name="mrc_mode101_odd_width", group="small", file="small/mrc_mode101_oddwidth.mrcs", kind="characterise",
-          decode={"reader": "image", "expected": "small_oddwidth", "expect_equal": False},
+          decode={"reader": "image", "expected": "small_oddwidth", "expect_equal": False,
+                  "characterised": "small_oddwidth_relion"},
           note="IMOD pads each 4-bit row to (nx+1)/2 bytes when nx is odd (mrc_format.txt). rwMRC.h reads the "
                "nibbles contiguously and rejects only odd nx AND odd ny, so an odd-width, even-height file "
                "decodes shifted. Pinned as a known divergence; no real file of this shape was found.")
@@ -425,31 +519,33 @@ def build_eer(b):
             tag = "eer_%dk_%d" % (size // 1024, comp)
             fname = "eer/%s.eer" % tag
             E.write_eer(b.path(fname), fr, size, comp)
-            # 2K files with 4-bit symbols are rendered at upsampling 1 only: render2K_to_4K
-            # assumes 2-bit symbols and would index rows past the frame (see the note case).
-            if size == 2048:
-                ups = [1, 2] if sym_bits == 2 else [1]
-            else:
-                ups = [1, 2, -1] if sym_bits == 4 else [1, 2]
+            ups = [1, 2] + ([-1] if size == 4096 and sym_bits == 4 else [])
             for up in ups:
-                exp = render_expected(fr, size, group, ngroups, up, sym_bits)
+                dim = (size >> 1) if up == -1 else size << (up - 1)
+                fmt = render_expected(fr, size, group, ngroups, up, sym_bits)
+                rel = render_relion(fr, size, group, ngroups, up, sym_bits)
                 key = "%s_up%d" % (tag, up)
-                p = b.path("expected/%s.npz" % key)
-                np.savez_compressed(p, **{"idx%d" % i: e[0] for i, e in enumerate(exp)},
-                                    **{"val%d" % i: e[1] for i, e in enumerate(exp)})
-                b.expected[key] = str(p.relative_to(b.out))
-                known = None
-                if size == 4096 and comp == 65002 and up == 2:
-                    known = ("renderEER.cpp renders 4K 65002 (1+1 subpixel bits) at --eer_upsampling 2 with the "
-                             "4-bit symbol masks of render4K_to_8K, so the y subpixel is always 0 and x takes "
-                             "the y bit. Upstream ver5.1 and master are identical. No real 4K 65002 file was found "
-                             "in the EMPIAR census, so this is a latent divergence.")
+                save_sparse(b, key, fmt, dim, dim)
+                same = all(np.array_equal(a[0], c[0]) and np.array_equal(a[1], c[1]) for a, c in zip(fmt, rel))
+                decode = {"reader": "eer", "upsampling": up, "grouping": group, "groups": ngroups, "expected": key}
+                note = ("EER %d at %d^2, rendered at --eer_upsampling %d; %d trailing fractions must be dropped"
+                        % (comp, size, up, tail))
+                if not same:
+                    save_sparse(b, key + "_relion", rel, dim, dim)
+                    decode.update(expect_equal=False, characterised=key + "_relion")
+                    if size == 4096:
+                        note = ("renderEER.cpp renders 4K 65002 (1+1 subpixel bits) at --eer_upsampling 2 with "
+                                "render4K_to_8K's 4-bit symbol masks: the y subpixel is always 0 and x takes the y "
+                                "bit. Pinned to that exact output. Upstream ver5.1 and master are identical; no real "
+                                "4K 65002 file was found in the EMPIAR census.")
+                    else:
+                        note = ("render2K_to_4K takes x from symbol bit 0 and y from symbol >> 1, which matches 2-bit "
+                                "symbols only. A 2K file with 4-bit symbols (65000/65001) at --eer_upsampling 2 gets "
+                                "the low x bit and a y offset OR-ed from three bits, so electrons land on the wrong "
+                                "subpixels (always inside the frame: the OR keeps y <= 4095). Pinned to that exact "
+                                "output. Upstream is the same; no real 2K EER file was found in the EMPIAR census.")
                 b.add(name="%s_render_up%d" % (tag, up), group="eer", file=fname,
-                      kind="characterise" if known else "accept",
-                      decode={"reader": "eer", "upsampling": up, "grouping": group, "groups": ngroups,
-                              "expected": key, "expect_equal": known is None},
-                      note=known or ("EER %d at %d^2, rendered at --eer_upsampling %d; %d trailing fractions "
-                                     "must be dropped" % (comp, size, up, tail)))
+                      kind="accept" if same else "characterise", decode=decode, note=note)
             if size == 2048:
                 ref = "eer/%s_ref.mrcs" % tag
                 # int8 keeps this 13 MB instead of 50; counts are <= grouping (10), and the
@@ -521,13 +617,6 @@ def build_eer(b):
     b.add(name="eer_4k_65002_upsampling_minus1", group="eer", file="eer/eer_4k_65002.eer", kind="reject",
           reject={"substring": "must be 1 or 2", "options": ["--eer_grouping", str(EER_GROUP), "--eer_upsampling", "-1"]},
           note="65002 (1+1 subpixel bits) refuses --eer_upsampling -1 and 3")
-    b.add(name="eer_2k_4bit_symbols_upsampling2", group="eer", file="eer/eer_2k_65001.eer", kind="not_run",
-          note="render2K_to_4K takes x from symbol bit 0 and y from symbol >> 1, which is right for 2-bit "
-               "symbols only. A 2K file with 4-bit symbols (65000/65001) at --eer_upsampling 2 would place "
-               "y subpixels 0..7 and write past the last row of the 4096^2 frame. read() guards 2-bit symbols "
-               "against -1 and 3 but nothing guards this case. Not run because it writes out of bounds; "
-               "upstream ver5.1/master are the same. No real 2K EER file was found in the EMPIAR census.")
-
     # Legacy (pre-TIFF) EER: written, not run. renderEER.cpp leaves width, height, rle_bits,
     # subpixel_bits and total_pixels uninitialised on this path (RELION 3.1 fixed them at 4K 8-bit).
     lfr, _ = eer_fractions(4096, 1, 2, 0, seed=8, blobs_per_mpx=2, sym_bits=4)

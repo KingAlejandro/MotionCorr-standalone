@@ -83,6 +83,7 @@ the fixtures regenerate in about 15 s (about 100 MB) and `manifest.json` records
 |---|---|
 | MRC | modes 0, 1, 2, 6, 12, 101; big-endian; FEI2 and SERI extended headers; `.mrcs.xz/.bz2/.zst` |
 | TIFF | u8, u16, s8, s16, f32; none, LZW, Deflate (8 and 32946), PackBits; predictors 2 and 3; big-endian; BigTIFF; one and many rows per strip; orientation tag |
+| full sample ranges | u16 up to 65535, s16 down to -32768, u8 above 127, s8 negative, in TIFF (several codecs) and MRC, so signed/unsigned confusion cannot pass |
 | EER | 65000, 65001, 65002 at 2048^2 and 4096^2; upsampling 1, 2, -1; trailing fractions; EPU `.gain` and count-reference gains |
 | gain, defect | gain as MRC f32/f16/s16/u16/s8 and TIFF f32/u16/u8; defects as text and as MRC/TIFF maps |
 | rejected | MRC modes 3, 4, 5, odd-by-odd mode 101; TIFF u32, f64, f16, tiled, RGB, mixed frame sizes; EER 3072^2, unknown code, 65002 with 8-bit runs, upsampling -1 on 65002; SerialEM defect lists |
@@ -98,16 +99,19 @@ The CTest entry is `InputFormats`. Compressed-MRC cases need `pbzip2` and `zstd`
 both); a missing decoder is reported UNRUN and fails the suite unless it was absent at configure
 time.
 
-Cases that document current behaviour rather than a pass:
+Cases that document current behaviour rather than a pass. A characterised case must match the
+current output exactly (computed from the reader's own formulas) and differ from the format's
+definition; a known failure records the current outcome and fails when it changes:
 
 | case | behaviour |
 |---|---|
 | `mrc_truncated_payload`, `mrc_mode0_imod_4bit_flag` | **known failure.** A short MRC payload is accepted: `Image::readData` returns -2, the runner ignores `Image::read`'s return value, and the missing frames hold stale pooled-buffer contents. Every MRC mode behaves the same. |
 | `mrc_compressed_zst_symlink` | **known failure.** `zstd -cdk` ignores a symbolic-link input, so a linked `.mrc.zst` movie fails to open. |
 | `eer_4k_65002_render_up2` | **characterised.** 4K EER with 1+1 subpixel bits at `--eer_upsampling 2` uses the 4-bit masks; y subpixel is always 0. |
+| `eer_2k_65000_render_up2`, `eer_2k_65001_render_up2` | **characterised.** 2K EER with 4-bit symbols at upsampling 2 takes x from symbol bit 0 and ORs three bits into y: wrong subpixels, always inside the frame. |
 | `mrc_mode101_odd_width` | **characterised.** IMOD pads odd-width 4-bit rows; the reader does not. |
 | `mrc_mode0_unsigned_bytes` | **characterised.** Mode 0 is read signed, as upstream (IMOD writes it unsigned). |
-| `eer_legacy_container`, `eer_2k_4bit_symbols_upsampling2` | **not run.** The legacy EER path reads uninitialised members; 2K files with 4-bit symbols at upsampling 2 would write past the frame. |
+| `eer_legacy_container` | **not run.** The legacy EER path reads uninitialised members. |
 
 All of these are inherited from upstream RELION 5.1 unless stated otherwise.
 

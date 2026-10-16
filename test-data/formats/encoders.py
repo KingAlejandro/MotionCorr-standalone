@@ -219,8 +219,10 @@ class TiffWriter:
             self.next_ptr = 4
 
     def _align(self):
-        if self.fh.tell() % 2:
-            self.fh.write(b"\0")
+        # Classic TIFF: word (2-byte) boundaries. BigTIFF: 8-byte boundaries for
+        # directories and out-of-line values (BigTIFF specification).
+        pad = (-self.fh.tell()) % (8 if self.big else 2)
+        self.fh.write(b"\0" * pad)
 
     def _values(self, typ, values):
         fmt = {SHORT: "H", LONG: "I", LONG8: "Q"}[typ]

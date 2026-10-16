@@ -157,7 +157,12 @@ int main() {
         }
         require(rounding_witness, "fixture cannot reject fused interpolation/add rounding changes");
         require(time_witness, "fixture cannot reject resetting streamed model time to zero");
-        std::cout << "stream/reference pixels, splits, model time, float rounding and scratch bound PASS\n";
+        std::cout << "stream/reference pixels, splits, model time and float rounding PASS; "
+#ifdef MOTIONCORR_ALLOCATION_WITNESS
+                  << "scratch bound PASS\n";
+#else
+                  << "scratch bound not witnessed (allocation witness skipped)\n";
+#endif
         return 0;
     } catch (const std::exception &error) {
         std::cerr << error.what() << '\n'; return 1;

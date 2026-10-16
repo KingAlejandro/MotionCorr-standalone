@@ -24,10 +24,15 @@ A case that needs an external decoder that is absent (pbzip2, zstd, xz) is
 UNRUN and fails the suite unless --allow-unrun names that tool: a skipped codec
 must be visible, not silently green.
 
-On a CUDA build, --ingest-matrix runs every end-to-end batch twice on the GPU,
-with --ingest float and --ingest auto, applies the checks above within each mode,
-requires each case's products to be byte-identical across the two modes, and
-reports the route each movie took (--ingest_witness: nvcomp, compact or float).
+On a CUDA build, --ingest-matrix (with --nvcomp yes|no) runs every end-to-end
+batch twice on the GPU, with --ingest float and --ingest auto, and applies the
+checks above within each mode. Every movie must have exactly one --ingest_witness
+line, naming float under --ingest float and, under auto, the route the generator
+derived from the file's encoding (manifest e2e.route, mirroring main's admission
+rules). Products must be byte-identical across the two modes. A few pinned
+--ingest compact/nvcomp runs must take the pinned route or refuse, never fall back.
+The exhaustive pinned-route and boundary qualification stays with #204 (MRC) and
+#208 (EER).
 """
 import argparse
 import json
@@ -231,7 +236,25 @@ def side_inputs(options):
     return out
 
 
-def check_e2e(cases, fixtures, binary, work, threads, rep, available, label="e2e", witness=False):
+VALID_ROUTES = ("nvcomp", "compact", "float")
+
+
+def read_witness(path):
+    """--ingest_witness lines 'MOVIE ROUTE' -> {movie file name: [routes]}."""
+    out = {}
+    if Path(path).exists():
+        for line in Path(path).read_text().split("\n"):
+            if line.strip():
+                movie, _, route = line.strip().rpartition(" ")
+                out.setdefault(Path(movie).name, []).append(route)
+    return out
+
+
+def check_e2e(cases, fixtures, binary, work, threads, rep, available, label="e2e", expect_route=None):
+    """expect_route(case) -> route: when given, every movie must have exactly one valid
+    --ingest_witness line naming that route, or the case fails even if products match."""
+    witness = expect_route is not None
+    route_fail = {}
     runs = {}
     for c in cases:
         e = c["e2e"]
@@ -244,12 +267,17 @@ def check_e2e(cases, fixtures, binary, work, threads, rep, available, label="e2e
         run_dir = work / ("%s_%02d_%s" % (label, i, re.sub(r"[^A-Za-z0-9]+", "_", batch)))
         opts = list(options) + (["--ingest_witness", str(run_dir) + ".witness"] if witness else [])
         r = run_mc(binary, run_dir, files, opts, side, fixtures, threads, nsd, copy)
-        if witness and Path(str(run_dir) + ".witness").exists():
-            for line in Path(str(run_dir) + ".witness").read_text().split("\n"):
-                if line.strip():
-                    movie, route = line.rsplit(" ", 1)
-                    ROUTES.setdefault(label, {})[Path(movie).name] = route
+        seen = read_witness(str(run_dir) + ".witness") if witness else {}
         for c in members:
+            if witness:
+                got = seen.get(Path(c["file"]).name, [])
+                want = expect_route(c)
+                if len(got) != 1 or got[0] not in VALID_ROUTES:
+                    route_fail[c["name"]] = "witness %s for this movie (need exactly one valid route)" % (got or "missing")
+                elif got[0] != want:
+                    route_fail[c["name"]] = "route %s, expected %s" % (got[0], want)
+                else:
+                    ROUTES.setdefault(label, {})[c["name"]] = got[0]
             if r.returncode != 0:
                 # Products alone are not enough: a run that exits non-zero fails every case in it.
                 tail = (r.stderr + r.stdout).strip().splitlines()[-1:] if (r.stderr + r.stdout).strip() else ""
@@ -266,7 +294,10 @@ def check_e2e(cases, fixtures, binary, work, threads, rep, available, label="e2e
             continue
         ref = c["e2e"]["reference"]
         if ref == c["name"]:
-            rep.add(c["name"], label, "PASS", "reference")
+            if c["name"] in route_fail:
+                rep.add(c["name"], label, "FAIL", route_fail[c["name"]])
+            else:
+                rep.add(c["name"], label, "PASS", "reference")
             continue
         if ref not in outputs:
             rep.add(c["name"], label, "FAIL", "reference %s produced nothing" % ref)
@@ -285,6 +316,9 @@ def check_e2e(cases, fixtures, binary, work, threads, rep, available, label="e2e
         if not t1.get("global_shift"):
             problems.append("no global shift table")
         want_equal = c["kind"] != "characterise" or c.get("decode", {}).get("expect_equal", True)
+        if c["name"] in route_fail:
+            rep.add(c["name"], label, "FAIL", route_fail[c["name"]])
+            continue
         if not problems:
             rep.add(c["name"], label, "PASS" if want_equal else "FAIL", "" if want_equal else "expected a difference")
         else:
@@ -302,9 +336,46 @@ def compare_modes(cases, out_a, out_b, rep, label):
             continue                   # already reported as a failure in its mode
         (h1, p1), (h2, p2) = pixels(a), pixels(b)
         same = h1 == h2 and p1 == p2 and shift_tables(a) == shift_tables(b)
-        route = ROUTES.get("auto", {}).get(Path(c["file"]).name, "?")
-        rep.add(c["name"], label, "PASS" if same else "FAIL",
-                ("route " + route) if same else "auto (route %s) differs from float" % route)
+        route = ROUTES.get("auto", {}).get(c["name"])
+        if route is None or ROUTES.get("float", {}).get(c["name"]) != "float":
+            rep.add(c["name"], label, "FAIL", "route evidence missing for this case")
+        else:
+            rep.add(c["name"], label, "PASS" if same else "FAIL",
+                    ("route " + route) if same else "auto (route %s) differs from float" % route)
+
+
+PINNED = [  # (case, --ingest, expected outcome); the exhaustive gates are #204 (MRC) and #208 (EER)
+    ("tiff_u16_lzw", "compact", "accept:compact"),
+    ("mrc_mode6_u16", "compact", "accept:compact"),
+    ("tiff_f32", "compact", "refuse:--ingest compact was requested"),
+    ("mrc_mode2_f32", "compact", "refuse:--ingest compact was requested"),
+    ("tiff_u16_deflate_rps1", "nvcomp", "NVCOMP"),
+    ("tiff_u16_deflate_pred2", "nvcomp", "refuse:--ingest nvcomp was requested"),
+    ("tiff_u16_lzw", "nvcomp", "refuse:--ingest nvcomp was requested"),
+    ("tiff_u16_bigendian_deflate", "nvcomp", "refuse:--ingest nvcomp was requested"),
+]
+
+
+def check_pinned(manifest, fixtures, binary, work, threads, rep, nvcomp):
+    """A pinned --ingest must take that route or refuse; it must never fall back."""
+    by_name = {c["name"]: c for c in manifest["cases"]}
+    for i, (name, mode, outcome) in enumerate(PINNED):
+        if outcome == "NVCOMP":
+            outcome = "accept:nvcomp" if nvcomp else "refuse:--ingest nvcomp was requested"
+        c = by_name[name]
+        run_dir = work / ("pinned_%02d_%s_%s" % (i, mode, name))
+        r = run_mc(binary, run_dir, [c["file"]], ["--ingest", mode, "--ingest_witness", str(run_dir) + ".witness"],
+                   [], fixtures, threads, False)
+        got = read_witness(str(run_dir) + ".witness").get(Path(c["file"]).name, [])
+        prod = product(run_dir, c["file"])
+        kind, _, arg = outcome.partition(":")
+        if kind == "accept":
+            ok = r.returncode == 0 and prod is not None and got == [arg]
+            detail = "" if ok else "rc %d, product %s, witness %s" % (r.returncode, prod is not None, got)
+        else:
+            ok = r.returncode > 0 and arg in (r.stdout + r.stderr) and prod is None
+            detail = "" if ok else "rc %d, product %s, message %s" % (r.returncode, prod is not None, arg in (r.stdout + r.stderr))
+        rep.add(name, "--ingest %s" % mode, "PASS" if ok else "FAIL", detail or outcome)
 
 
 def check_reject(c, fixtures, binary, work, threads, rep):
@@ -325,6 +396,8 @@ def check_reject(c, fixtures, binary, work, threads, rep):
         problems.append("movie not named")
     if product(run_dir, c["file"]) is not None:
         problems.append("a product was written")
+    if (run_dir / "out" / "corrected_micrographs.star").exists():
+        problems.append("the completion STAR was written")
     rep.add(c["name"], "reject", "FAIL" if problems else "PASS", "; ".join(problems))
 
 
@@ -357,10 +430,14 @@ def main():
                     help="extra motioncorr option for every run (repeat per token), e.g. --mc-option=--gpu --mc-option=0")
     ap.add_argument("--ingest-matrix", action="store_true",
                     help="CUDA build: run end-to-end batches with --ingest float and auto and compare (implies --gpu 0 unless given)")
+    ap.add_argument("--nvcomp", choices=("yes", "no"),
+                    help="with --ingest-matrix: whether the build has nvCOMP, which decides the expected routes")
     a = ap.parse_args()
     EXTRA_OPTS.extend(a.mc_option)
     if a.ingest_matrix and "--gpu" not in EXTRA_OPTS:
         EXTRA_OPTS.extend(["--gpu", "0"])
+    if a.ingest_matrix and a.nvcomp is None:
+        ap.error("--ingest-matrix needs --nvcomp yes|no to know the expected routes")
 
     tmp = Path(tempfile.mkdtemp(prefix="mc-formats-"))
     try:
@@ -407,12 +484,17 @@ def main():
         if a.ingest_matrix:
             base = list(EXTRA_OPTS)
             outs = {}
+            nv = a.nvcomp == "yes"
+            expect = {"float": lambda c: "float",
+                      "auto": lambda c: "compact" if c["e2e"]["route"] == "nvcomp" and not nv else c["e2e"]["route"]}
             for mode in ("float", "auto"):
                 EXTRA_OPTS[:] = base + ["--ingest", mode]
                 outs[mode] = check_e2e(e2e, fixtures, a.binary, work, a.threads, rep, available,
-                                       label=mode, witness=True)
+                                       label=mode, expect_route=expect[mode])
             EXTRA_OPTS[:] = base
             compare_modes(e2e, outs["float"], outs["auto"], rep, "auto=float")
+            print("pinned routes", flush=True)
+            check_pinned(manifest, fixtures, a.binary, work, a.threads, rep, nv)
         else:
             check_e2e(e2e, fixtures, a.binary, work, a.threads, rep, available)
         print("rejections and known failures", flush=True)

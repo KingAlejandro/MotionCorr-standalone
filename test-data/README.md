@@ -92,8 +92,15 @@ the fixtures regenerate in about 15 s (about 100 MB) and `manifest.json` records
 ```sh
 python3 tests/test_input_formats.py --binary build/motioncorr --helper build/runner_numerics
 # add --include-heavy for the packed 4-bit TIFF (about 20 s more)
-# on a CUDA build, --ingest-matrix also compares --ingest auto with --ingest float on the GPU
+# on a CUDA build: --ingest-matrix --nvcomp yes|no also runs --ingest float and auto on the GPU
 ```
+
+`--ingest-matrix` requires exactly one `--ingest_witness` line per movie: `float` under
+`--ingest float`, and under `auto` the route the generator derives from the file's encoding
+(manifest `e2e.route`, mirroring main's admission rules; nvCOMP-eligible movies take compact on a
+build without nvCOMP). Products must be byte-identical across the two modes, and a few pinned
+`--ingest compact/nvcomp` runs must take the pinned route or refuse. Exhaustive pinned-route and
+boundary qualification stays with the MRC staging matrix (#204) and the EER qualification (#208).
 
 The CTest entry is `InputFormats`. Compressed-MRC cases need `pbzip2` and `zstd` (CI installs
 both); a missing decoder is reported UNRUN and fails the suite unless it was absent at configure
@@ -105,7 +112,7 @@ definition; a known failure records the current outcome and fails when it change
 
 | case | behaviour |
 |---|---|
-| `mrc_truncated_payload`, `mrc_mode0_imod_4bit_flag` | **known failure.** A short MRC payload is accepted: `Image::readData` returns -2, the runner ignores `Image::read`'s return value, and the missing frames hold stale pooled-buffer contents. Every MRC mode behaves the same. |
+| `mrc_truncated_payload`, `mrc_mode0_imod_4bit_flag` | **refused** (reject cases): non-signal failure naming the movie ("is truncated or unreadable"), no product, no completion STAR. This needs the fail-closed short-read fix (F3/F3b, #205, decision D5); main before it accepted these movies and corrected stale frame-buffer contents. Truncated compressed MRC streams are a separate RC0 limitation (F4, #214). |
 | `mrc_compressed_zst_symlink` | **known failure.** `zstd -cdk` ignores a symbolic-link input, so a linked `.mrc.zst` movie fails to open. |
 | `eer_4k_65002_render_up2` | **characterised.** 4K EER with 1+1 subpixel bits at `--eer_upsampling 2` uses the 4-bit masks; y subpixel is always 0. |
 | `eer_2k_65000_render_up2`, `eer_2k_65001_render_up2` | **characterised.** 2K EER with 4-bit symbols at upsampling 2 takes x from symbol bit 0 and ORs three bits into y: wrong subpixels, always inside the frame. |
@@ -120,8 +127,17 @@ All of these are inherited from upstream RELION 5.1 unless stated otherwise.
 `real_cutdown_manifest.json` lists one cut-down movie per corpus family
 (`docs/workload_corpus/corpus.md` and `formats.md`): a few frames, or 30 EER fractions, of a real
 EMPIAR movie in its producer's exact encoding. `tools/cut_down_movie.py` copies raw TIFF/EER strips
-without re-encoding; raw MRC is cropped to 2048^2 where the frame is large. About 400 MB in all;
-the files are not versioned (EMPIAR data, see each accession's licence).
+without re-encoding; raw MRC is cropped to 2048^2 where the frame is large. About 436 MB in all,
+not versioned in Git: the files are assets of the GitHub release
+[`real-cutdown-v1`](https://github.com/KingAlejandro/MotionCorr-standalone/releases/tag/real-cutdown-v1)
+(a draft until the maintainer publishes it; until then anonymous `--download` does not work and
+`gh release download real-cutdown-v1` needs repository access). Asset names fold the item directory
+into the name (`<item>__<file>`).
+
+Licence: the source movies are EMPIAR data, which EMPIAR releases under CC0
+([EMPIAR policies](https://www.ebi.ac.uk/empiar/policies/)); the tutorial movie is from
+EMPIAR-10204. The manifest records each source accession and path, the source SHA-256, the frame
+and crop selection, and the cut file's SHA-256.
 
 ```sh
 python3 tests/test_real_cutdown.py --binary build/motioncorr --helper build/runner_numerics \

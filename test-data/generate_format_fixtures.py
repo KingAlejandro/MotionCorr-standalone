@@ -35,6 +35,7 @@ import json
 import lzma
 import os
 import shutil
+import struct
 import subprocess
 import sys
 from pathlib import Path
@@ -460,20 +461,20 @@ def build_small(b):
     b.path("small/mrc_mode0_imodflag16.mrcs").write_bytes(
         E.mrc_bytes(m, 0, imod_flags=16, payload=E.pack_nibbles(m)))
     b.add(name="mrc_mode0_imod_4bit_flag", group="small", file="small/mrc_mode0_imodflag16.mrcs",
-          kind="known_failure", known={"current": "accepted", "correct": "refused"},
+          kind="reject", reject={"substring": "is truncated or unreadable"},
           note="IMOD flag 16 marks 4-bit data stored as mode 0. rwMRC.h ignores the flag and reads nx*ny "
-               "bytes per frame, so the second half of the movie is past end of file. The short read "
-               "returns -2 from Image::readData, the runner ignores it, and the movie is corrected from "
-               "reinterpreted nibbles plus whatever the frame buffers held. Should be refused.")
+               "bytes per frame, so the second half of the movie is past end of file. Refused since the "
+               "fail-closed short-read fix (F3/F3b, #205, decision D5); main before it accepted the movie "
+               "and corrected reinterpreted nibbles plus stale frame-buffer contents.")
     full = E.mrc_bytes(m, 2)
     b.path("small/mrc_truncated.mrcs").write_bytes(full[:1024 + (len(full) - 1024) * 6 // 10])
     b.add(name="mrc_truncated_payload", group="small", file="small/mrc_truncated.mrcs",
-          kind="known_failure", known={"current": "accepted", "correct": "refused"},
-          note="float32 MRC cut to 60% of its payload (an interrupted copy). Every MRC mode behaves the "
-               "same: Image::readData returns -2 on the short fread, MotioncorrRunner ignores the return "
-               "value of Image::read, the job exits 0, and the missing frames hold stale pooled-buffer "
-               "contents, so the product depends on the movie processed before it. Upstream ignores the "
-               "return value too. TIFF truncation is refused (#92).")
+          kind="reject", reject={"substring": "is truncated or unreadable"},
+          note="float32 MRC cut to 60% of its payload (an interrupted copy). Refused since F3/F3b (#205, "
+               "decision D5): a short read now fails the movie with no product and no completion STAR. "
+               "Main before it ignored Image::read's -2, exited 0 and corrected stale pooled-buffer "
+               "frames. Truncated compressed MRC streams are a separate, documented RC0 limitation "
+               "(F4, #214).")
     rej("tiff_u32", "tiff_u32.tif", lambda p: E.write_tiff_movie(p, m, np.uint32),
         "Unsupported TIFF format", "32-bit unsigned integer TIFF")
     rej("tiff_f64", "tiff_f64.tif", lambda p: E.write_tiff_movie(p, m, np.float64),
@@ -655,6 +656,65 @@ def build_heavy(b):
           e2e={"batch": "heavy", "reference": "heavy_k2_ref"})
 
 
+PACKED_4BIT = {(5760, 8184), (8184, 5760), (4092, 11520), (11520, 4092),
+               (3710, 7676), (7676, 3710), (3838, 7420), (7420, 3838)}
+
+
+def tiff_first_page(path):
+    """Tags of the first directory of a TIFF/BigTIFF we wrote (classification only)."""
+    with open(path, "rb") as fh:
+        h = fh.read(16)
+        e = "<" if h[:2] == b"II" else ">"
+        big = struct.unpack(e + "H", h[2:4])[0] == 43
+        off = struct.unpack(e + "Q", h[8:16])[0] if big else struct.unpack(e + "I", h[4:8])[0]
+        fh.seek(off)
+        n = struct.unpack(e + ("Q" if big else "H"), fh.read(8 if big else 2))[0]
+        tags = {}
+        for _ in range(n):
+            ent = fh.read(20 if big else 12)
+            tag, typ = struct.unpack(e + "HH", ent[:4])
+            cnt = struct.unpack(e + ("Q" if big else "I"), ent[4:12] if big else ent[4:8])[0]
+            val = ent[12:20] if big else ent[8:12]
+            if typ == 3:
+                tags[tag] = (struct.unpack(e + "H", val[:2])[0], cnt)
+            elif typ in (4, 16):
+                tags[tag] = (struct.unpack(e + ("I" if typ == 4 else "Q"), val[:4 if typ == 4 else 8])[0], cnt)
+    return e, tags
+
+
+def expected_route(path):
+    """CUDA --ingest auto route main's routing gives this movie on a build with a
+    resident session: 'nvcomp' (nvCOMP-eligible; compact without nvCOMP), 'compact'
+    or 'float'. Mirrors motioncorr_runner.cpp and cuda_movie_session.cu: nvCOMP takes
+    native-order u16 Deflate (8 or 32946), predictor 1, MSB2LSB fill order, one sample,
+    contiguous planes, one full row per strip; compact takes other u8/u16 TIFF, raw
+    MRC modes 0/1/6 and EER whose grouped counts fit uint16; everything else is float."""
+    name = path.name
+    if name.endswith((".bz2", ".xz", ".zst")):
+        return "float"
+    if name.endswith(".eer"):
+        return "compact"
+    with open(path, "rb") as fh:
+        h = fh.read(1024)
+    if h[:4] in (b"II*\0", b"MM\0*", b"II+\0", b"MM\0+"):
+        e, t = tiff_first_page(path)
+        get = lambda tag, d: t[tag][0] if tag in t else d
+        width, length = get(256, 0), get(257, 0)
+        bits, sf = get(258, 1), get(339, 1)
+        if bits == 8 and (width, length) in PACKED_4BIT:
+            return "float"                         # read as packed 4-bit (UHalf)
+        if bits not in (8, 16) or sf != 1:
+            return "float"                         # s8, s16, f32: float route
+        native = e == ("<" if sys.byteorder == "little" else ">")
+        strips = t[273][1] if 273 in t else 0
+        if (bits == 16 and get(259, 1) in (8, 32946) and get(317, 1) == 1 and get(266, 1) == 1
+                and get(277, 1) == 1 and get(284, 1) == 1 and native and strips == length):
+            return "nvcomp"
+        return "compact"
+    mode = struct.unpack(">i" if h[212] == 0x11 else "<i", h[12:16])[0]
+    return "compact" if mode in (0, 1, 6) else "float"
+
+
 def sha256(p):
     h = hashlib.sha256()
     with open(p, "rb") as fh:
@@ -681,6 +741,9 @@ def main():
         build_eer(b)
     if a.include_heavy:
         build_heavy(b)
+    for c in b.cases:
+        if c.get("e2e"):
+            c["e2e"]["route"] = expected_route(a.outdir / c["file"])
     files = sorted(p for p in a.outdir.rglob("*") if p.is_file())
     manifest = {
         "generator": "generate_format_fixtures.py", "generator_version": GENERATOR_VERSION,

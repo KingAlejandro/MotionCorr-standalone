@@ -160,16 +160,26 @@ def products(out):
                   if p.is_file() and p.suffix.lower() in (".mrc", ".mrcs", ".star", ".eps"))
 
 
+def movie_inventory(tree, stem):
+    """Relative paths of one movie's products (everything the comparator compares)."""
+    return sorted(r for r in identity.inventory(str(tree)) if Path(r).name.startswith(stem)
+                  and Path(r).suffix.lower() not in identity.EXCLUDED)
+
+
 def per_movie_identical(single, batch, stem):
-    """Files of one movie in a batch tree against its single-movie tree; None when identical."""
-    rels = [r for r in identity.inventory(str(batch)) if Path(r).name.startswith(stem)
-            and Path(r).suffix.lower() not in identity.EXCLUDED]
-    if not any(Path(r).suffix.lower() in identity.MRC_EXT for r in rels):
+    """One movie's files in a batch tree against its single-movie tree; None when identical.
+
+    The per-movie inventories of BOTH trees must match before any bytes are compared, so a
+    healthy movie's STAR or EPS missing from either tree is a difference even when its MRC survives.
+    """
+    inv_single, inv_batch = movie_inventory(single, stem), movie_inventory(batch, stem)
+    if inv_single != inv_batch:
+        return "per-movie inventories differ: only single %s, only batch %s" % (
+            sorted(set(inv_single) - set(inv_batch)), sorted(set(inv_batch) - set(inv_single)))
+    if not any(Path(r).suffix.lower() in identity.MRC_EXT for r in inv_batch):
         return "no %s MRC product in the batch" % stem
-    for rel in rels:
+    for rel in inv_batch:
         a, b = Path(single) / rel, Path(batch) / rel
-        if not a.is_file():
-            return "%s is absent from the single-movie tree" % rel
         if Path(rel).suffix.lower() in identity.MRC_EXT:
             diff = identity.compare_mrc(str(a), str(b))
         else:
@@ -178,6 +188,31 @@ def per_movie_identical(single, batch, stem):
         if diff:
             return "%s: %s" % (rel, diff)
     return None
+
+
+def selfcheck_per_movie_identical(work, failures):
+    """The helper must see a missing STAR, a missing EPS and a changed STAR, not only a bad MRC."""
+    def tree(name, files):
+        root = work / name
+        root.mkdir(parents=True)
+        for rel, payload in files.items():
+            (root / rel).write_bytes(payload)
+        return root
+
+    mrc = mrc_header(2) + bytes(range(16))
+    full = {"good.mrc": mrc, "good.star": b"data_\n1\n", "good_shifts.eps": b"%!PS\n"}
+    single = tree("self-single", full)
+    check(per_movie_identical(single, tree("self-same", dict(full)), "good") is None,
+          "self-check: identical per-movie trees compare identical", failures)
+    for label, files in (("STAR missing from the batch", {k: v for k, v in full.items() if k != "good.star"}),
+                         ("EPS missing from the batch", {k: v for k, v in full.items() if k != "good_shifts.eps"}),
+                         ("STAR changed", {**full, "good.star": b"data_\n2\n"}),
+                         ("extra product in the batch", {**full, "good_extra.star": b"x"})):
+        diff = per_movie_identical(single, tree("self-" + label.replace(" ", "-"), files), "good")
+        check(diff is not None, "self-check: %s is caught (%s)" % (label, diff), failures)
+    diff = per_movie_identical(tree("self-missing-ref", {k: v for k, v in full.items() if k != "good.star"}),
+                               tree("self-full-batch", dict(full)), "good")
+    check(diff is not None, "self-check: STAR missing from the single-movie tree is caught (%s)" % diff, failures)
 
 
 def check(cond, msg, failures):
@@ -202,6 +237,7 @@ def main():
 
     with tempfile.TemporaryDirectory(prefix="mc-trunc-mrc-") as tmp:
         work = Path(tmp)
+        selfcheck_per_movie_identical(work, failures)
         for mode in [int(m) for m in args.modes.split(",")]:
             vs = variants(mode, frames)
             for route in routes:

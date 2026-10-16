@@ -1,5 +1,12 @@
 # Exact-output CPU dose-weight experiment, 14 October 2026
 
+**Current verification (16 October):** merged main `1db86902`, Linux 60/60
+CTests, exact four-product global/5x5 synthetic/tutorial checks against that
+main in both Release and FMA-enabled builds. Benchmark is now opt-in and NaN
+messages identify mirrored rows. No new timing result or whole-job speed claim.
+[Current report, commands and raw evidence](fix179/README.md).
+The report below is retained historical evidence on `116eb04a`.
+
 Refs #10. Independent of the other agent's full-frame reusable FFT plans,
 final inverse preservation copy, frame-buffer reuse and huge-page experiments.
 The implementation changes only CPU dose weighting and its tests. Main reference:

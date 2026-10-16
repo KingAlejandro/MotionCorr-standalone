@@ -3,9 +3,22 @@
 Coordination: #198 (D1, D2, T1, T2, L1). Inputs: #134, #141, #193, PR #138, PR #151, PR #152,
 `experiment/nvtiff-timing-20261016`. Source revision read: `main` =
 `1db869025507ac801845b4001b84e6bc0e77a645`. This is a documentation brief. It changes no
-source and decides nothing; each option below is for the maintainer to choose.
+source. The maintainer's decisions are recorded in the next section; the analysis that
+informed them follows unchanged.
 
 **Section 3 is not legal advice. Licence compatibility is a maintainer decision.**
+
+## Decisions recorded (2026-10-16)
+
+Decided by the maintainer on 2026-10-16; the record is on
+[#198](https://github.com/KingAlejandro/MotionCorr-standalone/issues/198).
+
+| Item | Decision |
+|---|---|
+| D1 ([#134](https://github.com/KingAlejandro/MotionCorr-standalone/issues/134) trust boundary) | **Uniform option 1:** a documented trusted-input precondition for `--ingest auto`. No routing change and no log notice. The file-identity check is deferred to [#215](https://github.com/KingAlejandro/MotionCorr-standalone/issues/215). |
+| T3 (bounds audit, section 4.2.1) | Narrowly scoped checked-arithmetic hardening of the pre-decode path **before RC0**, with boundary tests and independent review. In progress. |
+| D2 (proprietary optional dependencies) | **Option A as the interim policy:** optional, default-off SDK; a clear notice; no vendored SDK; no project-distributed nvCOMP- or nvTIFF-linked binaries. Redistribution remains subject to licensing review. |
+| nvTIFF (L1) | **NO-GO for RC0** (unchanged). |
 
 ## 1. Summary
 
@@ -462,17 +475,19 @@ standalone and SCARF timing evidence above remains valid input for that decision
 
 ## 6. Open questions for the maintainer
 
-1. D1: uniform option 1, uniform option 2a, or option 3? (For RC0, option 2 means reusing
-   `--ingest nvcomp` with strict refusal; a fallback-keeping opt-in is post-RC0.)
-2. D1: open a bug-fix lane for the file-identity check before freeze, or defer it past RC0 as
-   this brief recommends (4.3.1)?
-3. D1: the checked-arithmetic bounds audit (4.2.1): RC0 hardening (source change, QF rerun) or
-   post-RC0?
-4. D1 under option 1: add the optional per-run trust notice (source change, QF rerun), or
-   documentation only?
-5. D2: accept A for nvCOMP and add the README notice now?
-6. D2: will the project ever distribute binaries (containers, conda, modules)? If yes, counsel
-   is needed before any is built with nvCOMP or nvTIFF.
+1. ~~D1: uniform option 1, uniform option 2a, or option 3?~~ **Answered:** uniform option 1.
+2. ~~D1: open a bug-fix lane for the file-identity check before freeze, or defer it past RC0?~~
+   **Answered:** deferred to #215.
+3. ~~D1: the checked-arithmetic bounds audit (4.2.1): RC0 hardening or post-RC0?~~
+   **Answered:** RC0 hardening (T3), narrowly scoped, with boundary tests and independent
+   review.
+4. ~~D1 under option 1: add the optional per-run trust notice, or documentation only?~~
+   **Answered:** no log notice; documentation only.
+5. ~~D2: accept A for nvCOMP and add the README notice now?~~ **Answered:** A as the interim
+   policy, with a clear notice.
+6. D2: will the project ever distribute binaries (containers, conda, modules)? **Answered for
+   the interim:** no project-distributed nvCOMP/nvTIFF-linked binaries; any redistribution
+   remains subject to licensing review.
 7. nvTIFF after RC0: ask NVIDIA about S3/S4 and whether 0.8.0.82 (`Development Status :: 4 -
    Beta`) is "pre-release" under the agreement, before spending on the integration gate?
 8. If nvTIFF is excluded, is a project-owned device LZW decoder in scope after RC0, using the

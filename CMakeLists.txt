@@ -687,6 +687,28 @@ if(BUILD_TESTING AND CUDA)
             # the multi-threaded strip reader, where some threads holding a handle
             # and some not is the state that used to deadlock the OpenMP team.
             "LINKER:--wrap=cudaStreamSynchronize" "LINKER:--wrap=TIFFOpen")
+        # Resident retry preparation (#197): the retry-caller shim forces a completed
+        # non-converged attempt, and the fault shim fails downloadPatchSpectra, the step
+        # that builds the retry input. Both shims are test-only; src/ has no switch.
+        add_executable(motioncorr_resident_retry_fault
+            src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp tests/cuda_fault_inject_shim.cpp)
+        target_link_libraries(motioncorr_resident_retry_fault PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+        target_link_options(motioncorr_resident_retry_fault PRIVATE
+            "-rdynamic"
+            "LINKER:--wrap=_Z20cudaAlignPatchDeviceP6float2iiidRSt6vectorIdSaIdEES4_idiRSob"
+            "LINKER:--wrap=_Z33cudaAlignPatchDeviceWithWorkspaceR23PatchAlignmentWorkspaceP6float2iiidRSt6vectorIdSaIdEES6_idiRSob"
+            "LINKER:--wrap=_Z25cudaAlignPatchBatchDeviceR30BatchedPatchAlignmentWorkspaceiiiidPSt6vectorIdSaIdEES4_idiP13PatchBatchLog"
+            "LINKER:--wrap=_Z14cudaAlignPatchRSt6vectorI13MultidimArrayI8tComplexIfEESaIS3_EEiidRS_IdSaIdEES9_idiRSob"
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaMemcpy"
+            "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetLastError"
+            "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cudaGetDeviceCount"
+            "LINKER:--wrap=cudaStreamSynchronize" "LINKER:--wrap=TIFFOpen")
+        add_test(NAME CudaResidentRetryFailures
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_resident_retry_controls.py
+                --binary $<TARGET_FILE:motioncorr_resident_retry_fault>)
+        set_tests_properties(CudaResidentRetryFailures PROPERTIES
+            LABELS "cuda;hardware" TIMEOUT 600)
         add_test(NAME CudaPreprocessingFailurePaths
             COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py

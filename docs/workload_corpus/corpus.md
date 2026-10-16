@@ -14,7 +14,7 @@ Run directories (`corpus/<id>/`, symlinks plus `movies.star`) are rebuilt by
 
 | id | family | container | geometry (nx × ny × frames) | Mpx-frame / movie | angpix | kV | gain | movies |
 |---|---|---|---|---:|---:|---:|---|---:|
-| `tutorial` | RELION tutorial | u8 Deflate TIFF | 3838 × 3710 × 24 | 342 | 0.885 | 200 | yes | 2 of 24 |
+| `tutorial` | RELION tutorial | u16 Deflate TIFF (label corrected; see below) | 3838 × 3710 × 24 | 342 | 0.885 | 200 | yes | 2 of 24 |
 | `e10028` | EMPIAR-10028 | float32 MRC | 4096 × 4096 × 16 | 268 | 1.34 | 300* | no | 2 |
 | `e10361` | EMPIAR-10361 | u8 LZW BigTIFF | 5760 × 4092 × 62 | 1461 | 0.826 | 300 | no (pre-normalised) | 2 |
 | `e10641` | EMPIAR-10641 | u8 LZW BigTIFF | 5760 × 4092 × 70 | 1650 | 0.4 | 300* | yes | 2 |
@@ -24,6 +24,15 @@ Run directories (`corpus/<id>/`, symlinks plus `movies.star`) are rebuilt by
 | `e12963` | EMPIAR-12963 | EER | 4096 × 4096 × 39 (grouping 49) | 654 | 0.97 | 300* | yes | 1 |
 | `e10164` | EMPIAR-10164 tilt series (added) | u8 MRC | 7420 × 7676 × 8 | 456 | 0.675 | 300* | no (pre-corrected) | 2 |
 | `e10216` | EMPIAR-10216 apoferritin (added) | int16 MRC | 4096 × 4096 × 59 | 990 | 0.517 | 300* | no | 2 |
+
+The tutorial movies are 16-bit Deflate TIFF with one row per strip. Earlier versions of this table
+said 8-bit; `families.json` keeps that label so its SHA-256, cited by the CPU and GPU reports, stays
+valid. The sample type did not change any run: main's nvCOMP route admits only 16-bit samples and the
+tutorial took it.
+
+**Format coverage.** `formats.md` lists every encoding the readers accept, an EMPIAR census of the
+encodings actually deposited, and eight further real families (`families-formats.json`) for the
+encodings these ten lack.
 
 `*` voltage is a characterisation placeholder (the accession does not state it); dose
 weighting cost does not depend on it. Mpx-frame is nx·ny·frames/1e6 and is the unit used
@@ -55,6 +64,7 @@ files are served as `.mrc`.
 
 - `.mrc.bz2` / `.xz` / `.zst` MRC. Main decodes these through an external `pbzip2`, `xz` or
   `zstd` process; `pbzip2` is not installed on cpu64, and the cost would measure that tool, not MotionCorr.
+  They are now covered for decoding by `e11217` and `e10202` in `families-formats.json` (`formats.md`).
 - EMPIAR-10304 (int16 MRC, 4092 × 5760). Fast-incremental tilt series: one frame per tilt, not movies.
 - Falcon 4 TIFF or other detectors. The frame sizes already span 3838×3710, 4096², 5760×4092,
   7420×7676 and 11520×8184, and the container paths are Deflate, LZW, MRC (u8/i16/f32) and EER.

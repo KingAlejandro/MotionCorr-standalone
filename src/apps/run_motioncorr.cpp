@@ -19,10 +19,31 @@
  ***************************************************************************/
 #include <exception>
 #include <string>
+#include <fstream>
 #include <src/motioncorr_runner.h>
 #if defined(__GLIBC__)
 #include <malloc.h>
 #endif
+
+// Host THP mode and any user GLIBC_TUNABLES, for the benchmark record. The THP
+// mode changes CPU-path timings substantially (docs/issue10_allocator_control/).
+static std::string hostMemoryNote()
+{
+	std::string thp = "unknown";
+	std::ifstream in("/sys/kernel/mm/transparent_hugepage/enabled");
+	std::string line;
+	if (std::getline(in, line))
+	{
+		const size_t open = line.find('['), close = line.find(']');
+		if (open != std::string::npos && close != std::string::npos && close > open)
+			thp = line.substr(open + 1, close - open - 1);
+	}
+	std::string note = "; THP " + thp;
+	const char *tunables = getenv("GLIBC_TUNABLES");
+	if (tunables != NULL && tunables[0] != '\0')
+		note += "; GLIBC_TUNABLES=" + std::string(tunables);
+	return note;
+}
 
 /* Host allocator policy (docs/host_buffer_reuse.md).
  *
@@ -68,7 +89,7 @@ static std::string configureHostAllocator()
 
 int main(int argc, char *argv[])
 {
-	const std::string allocator_mode = configureHostAllocator();
+	const std::string allocator_mode = configureHostAllocator() + hostMemoryNote();
 	MotioncorrRunner prm;
 	prm.host_allocator_mode = allocator_mode;
 

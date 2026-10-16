@@ -8,7 +8,7 @@ Extracted from [`3dem/relion` `ver5.1`](https://github.com/3dem/relion/tree/ver5
 
 ## Build
 
-Requires a C++17 compiler, CMake 3.21+, FFTW (double and float), OpenMP, libtiff, libpng, libjpeg, and zlib. Ghostscript (`gs`) is needed for the optional summary PDF; without it, image and STAR outputs are written but `logfile.pdf` is empty.
+Requires a C++17 compiler, CMake 3.21+, FFTW (double and float), OpenMP, libtiff, libpng, libjpeg, and zlib. With `-DBUILD_TESTING=ON` (used below) CMake also needs a Python 3 that can import NumPy at configure time; pass `-DPython3_EXECUTABLE=<python>` (for example a virtual environment with `pip install numpy`) if the default Python lacks it. Ghostscript (`gs`) renders `logfile.pdf` and the other PDF reports. Without it a single-process run still writes the image, STAR and EPS products, but the PDF reports are absent or empty; `tools/multi_gpu/run_dataset.py` requires it. See [`docs/release/SUPPORT.md`](docs/release/SUPPORT.md) for failure behaviour.
 
 ### Prerequisites
 
@@ -57,7 +57,7 @@ cmake --build build-cuda --parallel
 ./build-cuda/motioncorr --i movies.star --o MotionCorr --use_own --gpu 0 --j 4
 ```
 
-`BUILD_TESTING=ON` needs a Python 3 with NumPy at configure time; pass `-DPython3_EXECUTABLE=<python>` if the default one lacks it. `./build/motioncorr --version` prints the version; `./build/motioncorr --use_own --help` lists the options.
+`./build/motioncorr --version` prints the version; `./build/motioncorr --use_own --help` lists the options.
 
 **Validation status.** The gates and what each one measures are defined in [`docs/gate_contract.md`](docs/gate_contract.md). The CPU build is checked byte for byte against recorded CPU output (Tier A) and against known injected motion (Tier C). CUDA output is not byte-identical to CPU output. The strict CUDA-versus-CPU relative-RMSE diagnostic (limit 0.001) still fails: 0/24 tutorial movies in the historical [CUDA validation report](docs/cuda_global_alignment_validation.md), with relative RMSE 0.002899-0.010082. The explicit backend profile records that failure as non-blocking; it is a CPU-agreement diagnostic, not a measure of signal loss. No downstream scientific gate (CTF/FSC/B-factor) exists yet, so no scientific equivalence is claimed. Supported and experimental configurations are listed in the [RC0 support draft](docs/release/SUPPORT.md); the release checklist is [`docs/release/RELEASE_CHECKLIST.md`](docs/release/RELEASE_CHECKLIST.md).
 

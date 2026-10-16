@@ -1,6 +1,6 @@
 # Post-freeze validation plan (DRAFT)
 
-Status: **draft.** This is the heavy validation campaign that runs **after** the RC0 freeze, on the frozen SHA. It is a plan:
+Status: **draft, revision 1** (after the R-REL accuracy review of PR #201). This is the heavy validation campaign that runs **after** the RC0 freeze, on the frozen SHA. It is a plan:
 every row is **UNRUN** and every result cell is **pending**. Resource lanes, locks and venues are those recorded on
 [#198](https://github.com/KingAlejandro/MotionCorr-standalone/issues/198) (checked 2026-10-16 19:21Z) and must be re-checked
 at run time (`AGENTS.md`: check occupancy before running work; leave unrelated processes alone; record actual resources).
@@ -21,27 +21,38 @@ Never combine venues or multiply single-GPU gains.
 
 ## 2. Corpus families
 
-The ten families of `docs/workload_corpus/families.json` (hashes in `corpus.md`; 21 GB on disk): tutorial (Deflate TIFF),
+The ten families of `docs/workload_corpus/families.json` (hashes in `corpus.md`; 21 GB on disk): tutorial (16-bit Deflate TIFF, one row per strip),
 EMPIAR-10028 (float32 MRC), 10361/10641/10441 (LZW BigTIFF), 10474 Falcon 3 and Falcon 4 (EER), 12963 (EER with gain), 10164
-(mode 0 MRC tilt series), 10216 (mode 1 MRC). Run each with the family's gain and EER options, configs G (global only) and L
-(`--patch_x 5 --patch_y 5`). Distinct versus replayed inputs are labelled separately (as in #186). Two of the families
-have label questions to settle first (tutorial bit depth and EMPIAR-10164 signedness; `SUPPORT.md` §2).
+(MRC mode 0, read as signed int8; tilt series), 10216 (mode 1 MRC). Run each with the family's gain and EER options, configs G (global only) and L
+(`--patch_x 5 --patch_y 5`). Distinct versus replayed inputs are labelled separately (as in #186). The corpus document still carries
+two stale labels (tutorial "u8", EMPIAR-10164 "u8"); `SUPPORT.md` §2 gives the corrected description and the coordinator is
+fixing the corpus text separately.
 
 Add what the corpus lacks, as separate small rows: compressed MRC (needs `pbzip2`/`xz`/`zstd`), signed TIFF, float TIFF, 4-bit
 inputs, a multi-optics STAR, a tomography STAR, and a movie that triggers patch non-convergence (EMPIAR-10641 and 10216 do).
 
 ## 3. Option matrix
 
-Per family where the option applies, each arm compared with the same-backend arm without the option, and CUDA arms compared with
-the CPU arm under the backend profile (`docs/gate_contract.md`):
+Per family where the option applies. Two kinds of comparison, never interchanged:
 
-- patches: none, 3 x 3, 5 x 5 (a value of 2 is skipped by the program, `src/motioncorr_runner.cpp:308-311`);
-- dose weighting off/on, `--save_noDW`, `--even_odd_split`, `--grouping_for_ps` with `--ps_size`, `--float16`;
-- `--bin_factor` 1, 2 and a non-integer value; early binning on and `--no_early_binning` (on CUDA, early binning prevents the
+- **Cross-backend:** each CUDA arm against the CPU arm **with the same options**, per movie, with
+  `tools/compare_motioncorr.py --gate backend` and its required GNU `time -v` log. The 0.001 relative-RMSE figure is a
+  non-blocking diagnostic there (`docs/gate_contract.md`). Strict tree identity is not used across backends.
+- **Same-backend invariance** (routes, repeats, worker counts, resume): `docs/issue85_laneC/compare_output_trees.py`, exact.
+- **Option on versus off is not an equality test.** Binning, frame selection, grouping, dose weighting and defect handling change
+  products by design. Each option arm needs a **named invariant** (for example `--save_noDW` leaves the dose-weighted `.mrc`
+  unchanged, `--even_odd_split` leaves the main `.mrc` unchanged) plus complete products, expected geometry and sampling.
+
+Options:
+
+- patches: none, 3 x 3, 5 x 5 (a value of 2 is skipped by the program, `src/motioncorr_runner.cpp:308-314`);
+- dose weighting off/on (voltage must be within 2 kV of 100, 200 or 300), `--save_noDW` (only produces a separate file with dose weighting), `--even_odd_split`, `--grouping_for_ps` with `--ps_size`, `--float16`;
+- `--bin_factor` 1, 2 and a non-integer value (binned dimensions must be even); early binning on and `--no_early_binning` (on CUDA, early binning prevents the
   resident session, `:2264`);
 - `--group_frames`, `--first_frame_sum`/`--last_frame_sum`, `--max_iter`;
 - gain with `--gain_rot` 0-3 and `--gain_flip` 0-2; defect text file and defect map; `--skip_defect`; `--seed`;
-- EER grouping and upsampling 1, 2 and -1, including a value that crosses the uint16 limit;
+- EER grouping and upsampling -1, 1, 2 (and 3 on 4096 x 4096 only; 2048 x 2048 and 2-bit sub-pixel EER take only 1 and 2), including a
+  value that crosses the uint16 limit and, on an 80 GB card, upsampling 2 on a large EER movie (about 75 GiB estimated, never run);
 - `--ingest auto|nvcomp|compact|float` with `--ingest_witness` on every run; pinned-route refusals on ineligible movies;
 - `--j` 1, 4, 8; `--max_io_threads`; `--sync_output`.
 
@@ -54,15 +65,19 @@ Reuse existing controls and add native runs on the frozen SHA:
 - write faults and late-writer faults (`WriteFaults*`, `OutputStageFaults`, `ImageWriteFaults`; `docs/issue99_write_faults/`);
 - damaged and truncated movies (`DamagedMovie`), wrong frame count (`--expected_frames`), gain size mismatch, SerialEM defect file;
 - CUDA: injected allocation, upload and nvCOMP failures (`CudaFaultMatrix`, `CudaPreprocessingFailurePaths`,
-  `CudaNvcompAcceptanceFailures`, `CudaU16FailurePaths`) plus the **native** CUDA-to-CPU unweighted fallback, which is UNRUN
+  `CudaNvcompAcceptanceFailures`; `CudaU16FailurePaths` exists only when configured with `-DMOTIONCORR_U16_TEST_MOVIE=<uint16 TIFF>`,
+  `CMakeLists.txt:760-779`, and a test that was not registered is not an executed pass) plus the **native** CUDA-to-CPU unweighted fallback, which is UNRUN
   (#198 item C1), and the resident patch retry under injected failure (#197);
 - multi-GPU: owned-worker failure with a TERM-ignoring descendant, late writer fault, report failure, and a non-prefix resume
   (`docs/multi_gpu/CURRENT_MAIN_ACCEPTANCE.md`);
 - `logfile.pdf` render failure in normal and `--aggregate_only` modes (`SUPPORT.md` §6, depends on fix F1);
 - `_PS.mrc` left behind by a movie that fails after the power spectrum is written (`SUPPORT.md` §6).
 
-Each negative needs a healthy positive control and a witnessed intended route. Required outcome: named failure, no completion
-STAR for the failed movie, healthy movies retained, no owned process left. The distinction between component injected faults
+Each negative needs a healthy positive control that proves the intended route with `--ingest_witness`; a pinned-route refusal writes no
+witness line of its own, and a witness line is a route-selection record, not a completion record (`SUPPORT.md` §2). Required
+outcome: named failure, no completion STAR for the failed movie, healthy movies' per-movie products retained, **no joint output for the
+batch**, no owned process left. The program does not roll back: a failed movie may leave a truncated or earlier per-movie file
+and `_PS.mrc` (`SUPPORT.md` §6, `tests/test_write_faults.py:21-30`); record what is on disk and do not assert its absence. The distinction between component injected faults
 and a genuinely poisoned device must stay explicit in the report. Malformed-input behaviour of the nvCOMP decoder is bounded
 by D1/#134 and is not a safety claim.
 
@@ -111,6 +126,12 @@ From the #186 evidence at main `116eb04a` (not the frozen SHA; re-measure at fre
   (`docs/workload_corpus/gpu/README.md`).
 - Estimated frames that fit a 24, 40 or 48 GiB card are in that README's VRAM table; those are arithmetic from the 80 GB measurement, not
   runs on small cards.
+- Per-geometry VRAM floor: two float-size resident stacks (about `2 x frames x nx x ny x 4` bytes) plus 0.7-4.2 GiB; EMPIAR-10441 peaked at
+  39.3 GiB. Behaviour when the session cannot be allocated (streaming fallback or a clean failure) is **not qualified**; register item
+  QM on #198 is pending and the forced-OOM control belongs to this campaign if QM is not closed before freeze.
+- Host RAM: `--grouping_for_ps` on the resident CUDA path downloads the full Fourier movie to the host (`src/motioncorr_runner.cpp:3205-3212`),
+  about one extra float-movie-sized allocation; include it in any RAM budget for that option.
+- EER upsampling 2 quadruples movie storage (about 75 GiB estimated for 144 groups, not run).
 - Disk: 21 GB corpus, plus scratch for products (a 300 GB cap was set for the RC0 pre-freeze programme on #198).
 - Wall: the #186 GPU pass held locks for 63.2 min over 90 blocks; the CPU pass needed about 8.6 h of run time plus settle waits and
   extrapolated to roughly 12.5 h of lock time for `--j 4`, so `--j 4` was dropped for the two largest families.

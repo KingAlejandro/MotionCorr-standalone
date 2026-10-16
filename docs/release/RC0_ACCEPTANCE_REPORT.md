@@ -1,6 +1,6 @@
 # RC0 acceptance report (SKELETON)
 
-Status: **skeleton, not a result.** Fill from the qualification of the frozen SHA (QF, #198). Every cell that needs a QF result says
+Status: **skeleton, not a result, revision 1** (after the R-REL accuracy review of PR #201). Fill from the qualification of the frozen SHA (QF, #198). Every cell that needs a QF result says
 **pending RC0 QF**. A planned or unrun check is **UNRUN**, never PASS. Rows labelled "reference" come from earlier evidence at an
 older SHA and are not RC0 results.
 
@@ -10,10 +10,12 @@ older SHA and are not RC0 results.
 |---|---|
 | Frozen source SHA | pending RC0 QF (decision D4 on #198) |
 | Base for this draft | main `1db86902` |
-| Register items included (GO) | C1 #178, C2 #187, C3 #188, C4 #185, E1 #196, M1 #195, R1 #197 (merged), plus any of C5-C7 that reach GO; list the merge SHAs at freeze |
-| Register items excluded | C8 #184, C9 #177/#182, L1 #141/#152, T1 #138 (merge hold), E2 #193 option 2 unless a pre-freeze gate passes; #149 deferred |
+| Register items included (GO, merged) | C1 #178, C2 #187, C3 #188, C4 #185, E1 #196, M1 #195, R1 #197; list the merge SHAs at freeze |
+| Prospective, not yet merged | **F1** (no `logfile.pdf` after a failed render, `fix/rc0-logfile-failed-render`): GO as a routine fix, pending merge, independent review and tests. Pending merge/review/tests state: pending RC0 QF. C5 #179, C6 #181, C7 #183: **bounded experiments** under the amended rule ([#10](https://github.com/KingAlejandro/MotionCorr-standalone/issues/10#issuecomment-6223528151)); only items the coordinator records GO enter |
+| Held / excluded | T1 #138: bounded experiment, **merge HOLD pending D1** and its gates (not simply out of scope); L1 #141/#152 nvTIFF: **NO-GO for RC0** unless D2 is GO before freeze and a separate complete-product gate passes; E2 #193 option 2: bounded experiment, NO-GO for RC0 unless all gates pass before freeze; C8 #184 and C9 #177/#182: NO-GO; #149 deferred |
+| Open items that affect the claim | QM memory admission on smaller GPUs: pending; T3 nvCOMP pre-decode arithmetic audit: decision pending |
 | CI run on the frozen head | pending RC0 QF |
-| Decisions recorded | D1 decoder trust boundary: pending; D2 optional proprietary dependencies: pending; D3 each merge: per PR; D4 scope and SHA: pending |
+| Decisions recorded | D1 decoder trust boundary: pending; D2 optional proprietary dependencies: pending; T3 arithmetic audit: pending (brief [PR #199](https://github.com/KingAlejandro/MotionCorr-standalone/pull/199), being revised); D3 each merge: per PR; D4 scope and SHA: pending |
 
 ## 2. Supported and unsupported configurations
 
@@ -36,8 +38,11 @@ Carry over from `SUPPORT.md` §5, §6 and §8, updated at freeze:
 - the `0.001` relative-RMSE diagnostic fails for CUDA versus CPU (reference: 24/24 tutorial movies, 0.002899-0.010082; not re-measured on RC0);
 - no Tier D scientific gate (#61, #73);
 - resume does not detect changed settings (#149 deferred);
-- `_PS.mrc` can remain after a later failure of the same movie; a failed `logfile.pdf` render is non-fatal outside `--aggregate_only`
-  (pending fix F1, `fix/rc0-logfile-failed-render`);
+- no rollback: a failed movie can leave a truncated or earlier per-movie file and an auxiliary `_PS.mrc`; a failed batch withholds the joint
+  output and keeps healthy per-movie products (`SUPPORT.md` §6);
+- a failed `logfile.pdf` render is non-fatal outside `--aggregate_only` (pending fix F1, `fix/rc0-logfile-failed-render`);
+- host RAM with `--grouping_for_ps` on CUDA (one extra Fourier movie), per-geometry VRAM floor and unqualified out-of-memory behaviour
+  (register item QM pending), EER upsampling 2 storage (about 75 GiB estimated for 144 groups, not run);
 - decoder trust boundary: pending D1/D2;
 - inherited macOS test results (`SyntheticRegression`, `MultiGpuScheduling` fail; `NativeMovieStaging` skips);
 - data-dependent patch non-convergence retry (EMPIAR-10641, 10216);
@@ -50,6 +55,9 @@ List every check that failed or was not run, with the reason. Do not drop an ori
 | Check | Status | Reason / evidence |
 |---|---|---|
 | Native CUDA execution of the CUDA-to-CPU unweighted fallback (#198 C1) | UNRUN | pending RC0 QF |
+| Forced out-of-memory on session initialisation (QM) | UNRUN | register item pending |
+| Cross-backend CPU versus CUDA `compare_motioncorr.py --gate backend` per movie | UNRUN | needs a CUDA arm and GNU `time -v` logs |
+| F1 merged, reviewed and tested | pending | #198 register F1 |
 | Linux CPU build and full CTest on the frozen SHA | UNRUN | pending RC0 QF |
 | CUDA build (no nvCOMP) full CTest, native | UNRUN | pending RC0 QF |
 | CUDA + nvCOMP full CTest, native | UNRUN | pending RC0 QF |
@@ -91,7 +99,10 @@ Source tables: `docs/workload_corpus/cpu/README.md` ("Peak RSS" table) and `docs
 table). Rule of thumb from the GPU report: VRAM peak is two resident float32 movies (`2 x frames x nx x ny x 4 B`) plus 0.7-4.2 GiB;
 estimates for 24, 40 and 48 GiB cards are arithmetic, not runs. Also record: scratch space per run, pinned host memory
 (`MOTIONCORR_NVCOMP_PINNED_MAX_MB`, default 256 MiB per worker, `cuda_movie_session.cu:1544-1545`), per-worker RSS and VRAM at 1/2/4 devices,
-and the 8-CPU or other CPU cap actually used.
+and the 8-CPU or other CPU cap actually used. Add the two inherited host/VRAM behaviours: `--grouping_for_ps` on the resident CUDA
+path downloads one extra Fourier movie to the host (`src/motioncorr_runner.cpp:3205-3212`), and the resident path needs two float-size
+stacks on the device (EMPIAR-10441 peaked at 39.3 GiB). EER upsampling 2 quadruples movie storage (about 75 GiB estimated for 144 groups,
+not run).
 
 ## 6. Measured performance
 

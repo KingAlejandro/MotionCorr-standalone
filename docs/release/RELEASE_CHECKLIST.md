@@ -1,6 +1,6 @@
 # RC0 release checklist (DRAFT)
 
-Status: **draft, pre-freeze.** Commands below were written against main `1db86902`. Each command is tagged:
+Status: **draft, pre-freeze, revision 1** (after the R-REL accuracy review of PR #201). Commands below were written against main `1db86902`. Each command is tagged:
 
 - **LOCAL-OK**: run on macOS arm64 (AppleClang, Homebrew) in this worktree for this draft; result stated.
 - **UNRUN**: not executed. Linux/CUDA commands are UNRUN until the final qualification (**QF**, #198) runs them.
@@ -19,6 +19,23 @@ THP mode, driver, CUDA and nvCOMP versions), actually allocated CPUs/GPUs, input
 A planned or unrun check is UNRUN, never PASS. Compilation and green CI do not establish native GPU execution, performance
 or scientific correctness.
 
+## 0b. Composition pre-conditions (track before the freeze)
+
+The frozen SHA must contain exactly the register items the maintainer accepts (#198). State of each at this revision;
+update at freeze. Nothing here is verified by this document.
+
+| Item | State at this revision | Needed before QF |
+|---|---|---|
+| F1: no `logfile.pdf` after a failed render (`fix/rc0-logfile-failed-render`) | **pending**: routine fix GO on #198, in progress | merged, independently reviewed, write-then-fail and stale-destination tests pass; strict `--aggregate_only` unchanged. `SUPPORT.md` §6 states F1's behaviour conditionally and must be updated when it merges |
+| QM: memory admission on smaller GPUs (resident-session OOM on large compact-staged movies) | **pending**, no worker assigned | forced-OOM control and a per-geometry VRAM floor; until then `SUPPORT.md` §8 says the fallback is unqualified |
+| D1 decoder trust boundary, D2 optional proprietary dependencies, T3 nvCOMP pre-decode arithmetic audit | **decisions pending** (brief [PR #199](https://github.com/KingAlejandro/MotionCorr-standalone/pull/199), being revised) | maintainer decisions recorded; `SUPPORT.md` §7 placeholder replaced |
+| C5 #179, C6 #181, C7 #183 | **bounded experiments** under the amended rule ([#10](https://github.com/KingAlejandro/MotionCorr-standalone/issues/10#issuecomment-6223528151)); default outcome is park | coordinator records GO or park; only GO items enter the composition |
+| T1 #138 nvCOMP widening | bounded experiment, **merge HOLD** pending D1 and its gates | not part of RC0 unless D1 and the gates clear |
+| L1 #141/#152 nvTIFF | **NO-GO for RC0** unless D2 is GO before freeze and a separate complete-product gate passes | none expected |
+| E2 #193 option 2 (device EER renderer) | bounded experiment; integration NO-GO for RC0 unless all gates pass before freeze | none expected |
+| F2 known-motion launcher rewrites tracked fixtures | **documented workaround**, no code change before freeze: pass `--fixtures <scratch>` (§4) | none |
+| DOC1 host/VRAM memory behaviours in `SUPPORT.md` | documented in revision 1 | re-check line numbers at the frozen SHA |
+
 ## 1. Clean checkout
 
 ```sh
@@ -29,8 +46,8 @@ PY="$SCRATCH/mc-venv/bin/python"
 ```
 
 Why a venv: with `BUILD_TESTING=ON` the CMake configure fails unless the chosen Python imports NumPy
-(`CMakeLists.txt:298-304`: "BUILD_TESTING=ON requires Python 3 with 'numpy' installed."). The README's build command does not
-mention this. **LOCAL-OK**: reproduced here (system Python 3.14 has no NumPy); configure succeeds with
+(`CMakeLists.txt:298-304`: "BUILD_TESTING=ON requires Python 3 with 'numpy' installed."). `README.md` now states this next to
+the build prerequisites. **LOCAL-OK**: reproduced here (system Python 3.14 has no NumPy); configure succeeds with
 `-DPython3_EXECUTABLE=<venv python>`.
 
 Dependencies: README "Prerequisites" (CMake >= 3.21, FFTW double and float, OpenMP, libtiff, libpng, libjpeg, zlib,
@@ -89,9 +106,14 @@ ctest --test-dir build-cpu --output-on-failure
 ```
 
 Use the same two commands for `build-cuda` and `build-nvcomp` (UNRUN). Record the **collected count and the executed
-inventory** from that configuration; do not predict a count. The `Cuda*` tests are registered only in CUDA builds
-(`CMakeLists.txt:468` onward) and some need a GPU and an nvCOMP build (`CudaPreprocessingFailurePaths`,
-`CMakeLists.txt:705-709`).
+inventory** from that configuration; do not predict a count, and do not count a test that was not registered as an executed
+pass. Most `Cuda*` tests are registered only in CUDA builds (`CMakeLists.txt:468` onward); `CudaValidationParser` is
+device-free and is registered in CPU builds too (`CMakeLists.txt:432-435`; it ran in the local CPU suite). Several need a GPU
+(label `hardware`, for example `CudaPreprocessingFailurePaths`, `CMakeLists.txt:687-692`). `CudaAdler32`,
+`CudaNvcompAcceptanceFailures` and `CudaNvcompReconstructionFailures` exist only with `-DUSE_NVCOMP=ON`
+(`CMakeLists.txt:708` onward). **`CudaU16FailurePaths` is registered only if you configure with
+`-DMOTIONCORR_U16_TEST_MOVIE=<uint16 TIFF>`** (and `-DMOTIONCORR_U16_TEST_STAGE_BYTES=<bytes in one uint16 frame>`, default
+28477960); without it the test is absent, not passed (`CMakeLists.txt:760-779`).
 
 **LOCAL-OK, with failures (CPU build, main `1db86902`):** 59 collected, 56 passed, **2 failed, 1 skipped**.
 `validate_test_collection.py` reports PASS with 59 collected tests.
@@ -108,9 +130,10 @@ QF must show it. A failure there is a release blocker, not an inherited macOS no
 ## 4. Known-motion launcher (Tier C)
 
 ```sh
-"$PY" tools/run_known_motion_gates.py --binary build-cpu/motioncorr --outdir "$SCRATCH/km" --json "$SCRATCH/km.json"
-# CUDA row (UNRUN): add  --gpu 0  and use build-cuda/motioncorr
-git checkout -- test-data/known_motion          # see note
+"$PY" tools/run_known_motion_gates.py --binary build-cpu/motioncorr --outdir "$SCRATCH/km" \
+    --fixtures "$SCRATCH/km-fixtures" --json "$SCRATCH/km.json"
+git status --porcelain                           # must still print nothing
+# CUDA row (UNRUN): same command with  --gpu 0  and build-cuda/motioncorr
 ```
 
 **LOCAL-OK** (CPU, macOS): exit 0, OVERALL PASS in 5.3 s wall. Gate cases `km_global_hisnr`, `km_local_hisnr` and
@@ -118,9 +141,13 @@ git checkout -- test-data/known_motion          # see note
 **FAIL**s visibly without blocking (`docs/gate_contract.md` §1, Tier C; the launcher says characterization failures stay
 visible). Field difference `--j 1` versus `--j 4` is 0 px (identical).
 
-Note: the launcher regenerates the fixtures in place. It rewrote `source_commit` in the four tracked
-`test-data/known_motion/*_ground_truth.json` files and created four ignored `.mrcs` files. Movie hashes were unchanged. Run it from
-a scratch clone, or restore the tracked files afterwards, so `git status --porcelain` stays clean for the next step.
+**Always pass `--fixtures <scratch dir>`.** The launcher's `--fixtures` default is the tracked `test-data/known_motion` and
+`--regenerate` is on by default (`tools/run_known_motion_gates.py:244-266`); the generator stamps the current HEAD into
+`source_commit` and replaces the ground-truth JSON files (`test-data/generate_known_motion_fixture.py`, also `MANIFEST.json`
+provenance). Without the flag the first local run rewrote `source_commit` in the four tracked
+`test-data/known_motion/*_ground_truth.json` files (movie hashes unchanged) and left four ignored `.mrcs` files. The tool is
+not changed for RC0 (register F2). **LOCAL-OK, re-run with the flag** (CPU, macOS, main `1db86902`): exit 0, OVERALL PASS, same four
+case verdicts, `git status --short` empty, fixtures generated under the scratch directory.
 
 ## 5. Tier A regression on the committed fixture
 
@@ -136,17 +163,19 @@ difference bytes, complete coverage; ground-truth recovery reported at 0.071437 
 ## 6. Example run and expected inventory
 
 ```sh
-cd test-data/fixtures
-../../build-cpu/motioncorr --i synthetic_128x128_8frames.star --o "$SCRATCH/ex1" --use_own --j 2 \
-    --ingest_witness "$SCRATCH/ex1.witness"
+( cd test-data/fixtures && ../../build-cpu/motioncorr --i synthetic_128x128_8frames.star \
+      --o "$SCRATCH/ex1" --use_own --j 2 --ingest_witness "$SCRATCH/ex1.witness" )
 ```
+
+The subshell keeps the working directory at the checkout root for the commands that follow.
 
 **LOCAL-OK**: exit 0. Witness file: `synthetic_128x128_8frames.mrcs float`. Output inventory (no `gs` installed on the validation
 machine): `batch.pdf`, `batch.pdf.lst`, `corrected_micrographs.star`, `corrected_micrographs_all_rlnAccumMotion{Early,Late,Total}.eps`,
 `header.pdf`, `header.pdf.lst`, `synthetic_128x128_8frames.{log,mrc,star}`, `synthetic_128x128_8frames_shifts.eps`. **`logfile.pdf` was
-not written** because `gs` was missing; the program printed the gs error and exited 0 (`src/CPlot2D.cpp:66-87`). With `gs`
-the inventory is **UNRUN**; record the real list at QF. The same inventory command for a `--save_noDW` / `--even_odd_split`
-run adds `_noDW.mrc` and `_EVN.mrc`/`_ODD.mrc` (`src/motioncorr_runner.cpp:3355, 771-777`).
+not written** and `batch.pdf` and `header.pdf` are zero-byte placeholders, because `gs` was missing; the program printed the gs error and exited 0 (`src/CPlot2D.cpp:66-87`). With `gs`
+the inventory is **UNRUN**; record the real list at QF. A run with `--dose_weighting --save_noDW` adds `_noDW.mrc`
+(`--save_noDW` without dose weighting writes no separate file: the unweighted sum is the main `.mrc`,
+`src/motioncorr_runner.cpp:4043-4049`), and `--even_odd_split` adds `_EVN.mrc` and `_ODD.mrc`.
 
 Refusal checks on the CPU build (**LOCAL-OK**, each exits 1): `--gpu 0` (line 402, "built without CUDA support"),
 `--gpu 0:1` (line 367, device list rejected), `--ingest compact` and `--ingest nvcomp` (line 245), `--ingest bogus` (line 163).
@@ -157,22 +186,48 @@ There is no single script for this. Reuse the existing pieces and declare unrun 
 
 - Corpus and hashes: `docs/workload_corpus/corpus.md`, `families.json`, `docs/workload_corpus/tools/fetch_corpus.py`, `docs/workload_corpus/tools/setup_corpus.py`
   (SHA-256 verified; 22 of 22 held-family files in the #186 pass).
-- Tree comparison: `docs/issue85_laneC/compare_output_trees.py` with a manifest (`tutorial_24_movie_manifest.json` is the
-  24-movie example). It validates each arm against the manifest, then compares MRC pixels, the extended header, STAR content
-  and logs, normalising only the output root, duration lines and the MRC label date. **LOCAL-OK** on two CPU runs of the
-  128 x 128 fixture (a manifest with `movies: ["Movies/..."]` and `expected_shape_xyz: [128,128,1]`): "Validated 1 movies, 1 MRC
-  images, 2 STAR files, 16384 pixels per arm; Comparison: products; status=PASS; different files=0". Needs NumPy; movie names must
-  carry the `Movies/` prefix the manifest expects.
-- Per-row route proof: `--ingest_witness` plus a pinned `--ingest` where the row is meant to take one route.
+- **Two comparison tools for two questions. Do not mix them.**
+  1. **Cross-backend (CPU versus CUDA): `tools/compare_motioncorr.py --gate backend`, one movie at a time**, plus structural
+     validation of each tree. The backend profile keeps the relaxed absolute image RMSE (0.020), maximum pixel error (5), global
+     shift limits (0.02 / 0.05 px) and static STAR checks, requires complete image and movie-STAR coverage, and requires a
+     `--test-log` with a parseable elapsed time, peak RSS and successful exit status; the 0.001 relative-RMSE figure is reported
+     as a **non-blocking diagnostic** (`docs/gate_contract.md` "Explicit backend profile"; `tools/compare_motioncorr.py:481-496,
+     749-772`). It does not accept threshold overrides and must not be described as passing the relaxed gate. The log is a GNU
+     `/usr/bin/time -v` log, so this row runs on Linux. **UNRUN** (needs a CUDA arm). Do not use strict tree identity here:
+     CUDA output is not byte-identical to CPU output.
+  2. **Same-backend invariance: `docs/issue85_laneC/compare_output_trees.py` with a manifest** for implementation, ingest-route,
+     repeat and worker-count comparisons (for example `--ingest compact` versus `float` on one backend, one GPU versus four
+     workers, a repeat run). It validates each arm against the manifest and then compares MRC header, extended header and pixel
+     payload hashes **exactly**, STAR content and logs, normalising only the output root, duration lines and the MRC label date
+     (`docs/issue85_laneC/compare_output_trees.py:467-478`; `--products-only` still compares pixels exactly). **LOCAL-OK** on two CPU runs of the
+     128 x 128 fixture (a manifest with `movies: ["Movies/..."]` and `expected_shape_xyz: [128,128,1]`): "Validated 1 movies, 1 MRC
+     images, 2 STAR files, 16384 pixels per arm; Comparison: products; status=PASS; different files=0". Needs NumPy; movie names
+     must carry the `Movies/` prefix the manifest expects.
+- Per-row route proof: `--ingest_witness` plus a pinned `--ingest` where the row is meant to take one route. The witness is a
+  route-selection record, not a completion record (`SUPPORT.md` §2); pair it with the product check.
 
-Row template (run each row once per backend that can take it; arms must differ only in the backend):
+Cross-backend per-movie command (UNRUN; GNU time is required for `--test-log`):
+
+```sh
+/usr/bin/time -v ./build-cuda/motioncorr --i movies.star --o "$OUT/cuda" --use_own --gpu 0 --j 8 <row options> 2> "$OUT/cuda.time"
+"$PY" tools/compare_motioncorr.py --gate backend --require-complete-coverage \
+    --ref-mrc "$OUT/cpu/Movies/<movie>.mrc"  --test-mrc "$OUT/cuda/Movies/<movie>.mrc" \
+    --ref-star "$OUT/cpu/Movies/<movie>.star" --test-star "$OUT/cuda/Movies/<movie>.star" \
+    --test-log "$OUT/cuda.time" --json-out "$OUT/<movie>.backend.json"
+```
+
+The `--help` of this tool accepts these flags (**LOCAL-OK**). Dataset verdicts are conjunctive over movies. Run every movie.
+
+Same-backend row template (run each row once per ingest route or worker layout of the same backend):
 
 ```sh
 ./build-cuda/motioncorr --i movies.star --o "$OUT/<row>" --use_own --gpu 0 --j 8 \
     --ingest <auto|nvcomp|compact|float> --ingest_witness "$OUT/<row>.witness" <row options>
 "$PY" docs/issue85_laneC/compare_output_trees.py --manifest <row manifest> --input-star movies.star \
-    "$OUT/<baseline>" "$OUT/<row>"
+    "$OUT/<same-backend baseline>" "$OUT/<row>"
 ```
+
+The CPU arm of a row is the reference for the cross-backend check only; it is not a strict-identity baseline for the CUDA arm.
 
 | Row | Input | Route to prove (witness) | Options | Corpus family |
 |---|---|---|---|---|
@@ -183,11 +238,11 @@ Row template (run each row once per backend that can take it; arms must differ o
 | R5 | EER, grouping and upsampling 1 | `compact` | `--eer_grouping`, gain | e10474f3/f4, e12963 |
 | R6 | EER with `eer_grouping` x (4 at upsampling -1, else 1) above 65535 | `float`, log line present | needs a movie with at least 3 x grouping fractions, so likely unreachable with real EER; if not run, declare UNRUN and cite the #196 overflow-guard control | synthetic |
 | R7 | compressed MRC (`.mrc.zst` or similar) | `float` | needs the external decompressor | one small file |
-| R8 | pinned-route refusals | movie fails, no completion STAR | `--ingest nvcomp` / `compact` on an ineligible movie | any ineligible movie |
-| R9 | options | same-backend equality of each option arm with and without the option where defined | `--save_noDW`, `--even_odd_split`, `--bin_factor`, `--group_frames`, first/last frame, defect file, gain rot/flip | tutorial |
+| R8 | pinned-route refusals | movie fails, no completion STAR; a refusal writes no witness line, so prove the intended route with a positive control on an eligible movie | `--ingest nvcomp` / `compact` on an ineligible movie | any ineligible movie |
+| R9 | options | each option arm completes with complete products and passes its **named invariant**; option-on versus option-off products are **not** expected to be equal where the option changes them. Invariants: `--save_noDW` adds `_noDW.mrc` and leaves the dose-weighted `.mrc` equal to the run without it (same backend); `--even_odd_split` adds `_EVN`/`_ODD` and leaves the main `.mrc` equal; binning, `--group_frames`, first/last frame, defect file and gain rot/flip change the products by design, so check complete products, geometry and sampling, and the cross-backend backend gate against the CPU arm of the **same** options | `--save_noDW` (with `--dose_weighting`), `--even_odd_split`, `--bin_factor` (even binned dimensions), `--group_frames`, first/last frame, defect file, gain rot/flip | tutorial |
 | R10 | direct input and glob | complete products | `--i 'Movies/*.tiff' --angpix --voltage` | tutorial subset |
 | R11 | unchanged-setting resume | no reprocessing, identical tree | `--only_do_unfinished` | tutorial subset |
-| R12 | one checked failure | named failure, no completion, healthy movies kept | truncated movie | one damaged copy |
+| R12 | one checked failure | named failure, no completion STAR for that movie, healthy movies' per-movie products retained, **no joint output for the batch**; partial or earlier per-movie files for the failed movie may exist (`SUPPORT.md` §6): record what is on disk, do not assert absence | truncated movie | one damaged copy |
 
 The #186 families and options are the starting point; their dose-per-frame and voltage values are placeholders for several
 families, and corpus gain orientation is the default (`docs/workload_corpus/corpus.md`). Those runs timed the work; QF must
@@ -212,7 +267,8 @@ pass of "resume under changed settings".
 Adapted from `docs/multi_gpu/CURRENT_MAIN_ACCEPTANCE.md`. Select devices by UUID from `nvidia-smi -L`, with disjoint CPU masks
 taken from the actual allocation. The output directory must not exist. Required: `dataset_status.json` with `dataset_ready: true`
 and `verdict: PASS`; every worker's device witness on its intended, distinct GPU; the complete product tree compared with a
-single-process single-GPU run of the same input (`compare_output_trees.py`); **Ghostscript installed** (the aggregate renders
+single-process single-GPU run of the same input on the **same backend** (`compare_output_trees.py`, strict; this is a
+worker-count invariance check, not a CPU comparison); **Ghostscript installed** (the aggregate renders
 `logfile.pdf` strictly). Repeat at 1, 2 and 4 devices.
 
 **LOCAL-OK, partial:** `run_dataset.py` with `--launcher-args="--workers 2 --no-witness"` on two CPU workers (the two 128 x 128

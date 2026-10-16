@@ -1,0 +1,21 @@
+{
+ "host": "small-refmac-machine",
+ "kernel": "6.8.0-86-generic",
+ "os": "PRETTY_NAME=\"Ubuntu 24.04.3 LTS\"",
+ "cpu": "CPU(s):                               64\nModel name:                           AMD EPYC 7763 64-Core Processor\nThread(s) per core:                   1\nL3 cache:                             32 MiB (2 instances)\nNUMA node(s):                         2\nNUMA node0 CPU(s):                    0-31\nNUMA node1 CPU(s):                    32-63",
+ "mem_gib": "Mem:             226          14          23           0         190         211",
+ "thp_enabled": "always [madvise] never",
+ "thp_defrag": "always defer defer+madvise [madvise] never",
+ "cpufreq_driver": "ls: cannot access '/sys/devices/system/cpu/cpu0/cpufreq': No such file or directory",
+ "source_commit": "116eb04ad359cd5bf789b28809fc2047ea155b9b",
+ "source_dirty": "0",
+ "binary_sha256": "86a43e9f0fa0787ba7eef5270c65eee466857e493d7f6df6daa98de0b28bed53",
+ "cmake_build_type": "CMAKE_BUILD_TYPE:STRING=Release",
+ "cxx_flags": "CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp",
+ "cmake_opts": "CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++\nCUDA:BOOL=OFF\nPython3_EXECUTABLE:UNINITIALIZED=/home/ubuntu/.mc-venv/bin/python3\n_Python3_EXECUTABLE:INTERNAL=/home/ubuntu/.mc-venv/bin/python3",
+ "gcc": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+ "fftw": "libfftw3-double3:amd64 3.3.10-1ubuntu3\nlibfftw3-single3:amd64 3.3.10-1ubuntu3",
+ "libtiff": "libtiff6:amd64 4.5.1+git230720-4ubuntu2.5",
+ "omp_env_in_driver": {},
+ "background": "two ctffind processes (cpus 26 and 32) permanently; other users run jobs (refmac5, other MotionCorr agents under the lock)"
+}

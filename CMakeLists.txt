@@ -183,6 +183,8 @@ if(BUILD_TESTING)
     # find_package(Python3 ... REQUIRED) line because it needs no interpreter.
     add_test(NAME RunnerInterpolateRecenter
         COMMAND $<TARGET_FILE:runner_numerics> interpolate_recenter)
+    add_test(NAME FloatPlanCache
+        COMMAND $<TARGET_FILE:runner_numerics> float_plan_cache)
     add_test(NAME MrcHeaderStats
         COMMAND $<TARGET_FILE:runner_numerics> mrc_stats)
     add_executable(pdf_concat tests/test_pdf_concat.cpp)
@@ -381,6 +383,53 @@ if(BUILD_TESTING)
         add_test(NAME OutputStageFaults
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_output_stage_faults.py
                 --binary $<TARGET_FILE:motioncorr>)
+        # The normal report path renders logfile.pdf from EPS only when no earlier
+        # all_batches.pdf exists. A fake Ghostscript records every call. Each
+        # mutant runner below must fail the same script: one takes the EPS-direct
+        # route although a prior all_batches.pdf exists, one asks for that prior
+        # file again after the batch pass has written it, one lists the EPS in
+        # the wrong order, one leaves an empty logfile.pdf after a failed render.
+        add_test(NAME LogfileFromEps
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_logfile_from_eps.py
+                --binary $<TARGET_FILE:motioncorr>)
+        set(_runner "${CMAKE_CURRENT_SOURCE_DIR}/src/motioncorr_runner.cpp")
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_runner}")
+        set(_mutant_always_eps_1 "const bool logfile_from_eps = !prior_all_batches;")
+        set(_mutant_always_eps_2 "const bool logfile_from_eps = true;")
+        set(_mutant_late_guard_1 "if (!logfile_from_eps)")
+        set(_mutant_late_guard_2 "if (!aggregate_only && exists(report_out + \"all_batches.pdf\"))")
+        set(_mutant_eps_order_1 "logfile_fn_eps = header_fn_eps;")
+        set(_mutant_eps_order_2 "logfile_fn_eps = all_fn_eps;")
+        set(_mutant_eps_order_3 "logfile_fn_eps.insert(logfile_fn_eps.end(), all_fn_eps.begin(), all_fn_eps.end());")
+        set(_mutant_eps_order_4 "logfile_fn_eps.insert(logfile_fn_eps.end(), header_fn_eps.begin(), header_fn_eps.end());")
+        set(_mutant_placeholder_1 "logfile_fn_eps, aggregate_only, false)")
+        set(_mutant_placeholder_2 "logfile_fn_eps, aggregate_only, true)")
+        foreach(_mutant always_eps late_guard eps_order placeholder)
+            file(READ "${_runner}" _mutant_source)
+            set(_pair 1)
+            while(DEFINED _mutant_${_mutant}_${_pair})
+                math(EXPR _to "${_pair} + 1")
+                string(FIND "${_mutant_source}" "${_mutant_${_mutant}_${_pair}}" _first)
+                string(FIND "${_mutant_source}" "${_mutant_${_mutant}_${_pair}}" _last REVERSE)
+                if(_first EQUAL -1 OR NOT _first EQUAL _last)
+                    message(FATAL_ERROR "logfile mutant ${_mutant}: target line missing or not unique in motioncorr_runner.cpp")
+                endif()
+                string(REPLACE "${_mutant_${_mutant}_${_pair}}" "${_mutant_${_mutant}_${_to}}"
+                    _mutant_source "${_mutant_source}")
+                math(EXPR _pair "${_pair} + 2")
+            endwhile()
+            file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/mutants/motioncorr_runner_logfile_${_mutant}.cpp"
+                "${_mutant_source}")
+            # Defines every symbol of the archive's runner object, so the linker
+            # never pulls the original from motioncorr_core.
+            add_executable(motioncorr_logfile_${_mutant} src/apps/run_motioncorr.cpp
+                "${CMAKE_CURRENT_BINARY_DIR}/mutants/motioncorr_runner_logfile_${_mutant}.cpp")
+            target_compile_definitions(motioncorr_logfile_${_mutant} PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG)
+            target_link_libraries(motioncorr_logfile_${_mutant} PRIVATE motioncorr_core)
+            add_test(NAME LogfileFromEpsMutant_${_mutant}
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_logfile_from_eps.py
+                    --binary $<TARGET_FILE:motioncorr_logfile_${_mutant}> --expect-fail)
+        endforeach()
         add_test(NAME CiFailClosedControls
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
         add_test(NAME CudaValidationParser
@@ -429,6 +478,11 @@ if(BUILD_TESTING AND CUDA)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_stage_profile.py
                 --binary $<TARGET_FILE:motioncorr> --gpu 0)
         set_tests_properties(StageProfileDeviceTiming PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Issue #194: raw integer MRC (modes 0, 1, 6) through the compact staging.
+        add_test(NAME SignedMrcStaging
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_signed_mrc_staging.py
+                --binary $<TARGET_FILE:motioncorr> --gpu 0)
+        set_tests_properties(SignedMrcStaging PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         # Issue #85 lane C: uint16 staging must reproduce the float path's device

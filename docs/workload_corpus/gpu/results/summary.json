@@ -1,0 +1,7856 @@
+{
+ "tutorial": {
+  "mpx_frame_per_movie": 341.73552,
+  "movies": 2,
+  "cells": {
+   "auto-G": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 1.4098407970741391,
+     "min": 1.3458261033520103,
+     "max": 1.4225264312699437,
+     "values": [
+      1.3522152481600642,
+      1.4225264312699437,
+      1.3458261033520103,
+      1.4213758977130055,
+      1.4098407970741391
+     ]
+    },
+    "wall_per_movie_s": 0.7049203985370696,
+    "user_s": 0.530837,
+    "sys_s": 1.206384,
+    "cpu_s": 1.737801,
+    "cpu_over_wall": 1.2326221539385729,
+    "rss_gib": 0.3526039123535156,
+    "rss_gib_max": 0.3535614013671875,
+    "minflt": 100326,
+    "majflt": 12,
+    "vram_proc_mib": 3260.0,
+    "vram_proc_mib_max": 3260.0,
+    "vram_dev_delta_mib": 3268.8125,
+    "vram_dev_delta_mib_max": 3268.8125,
+    "ingest_witness": {
+     "nvcomp": 34
+    },
+    "foreign_cores_max": 0.011731860013844667,
+    "prof_wall_s": 1.3765404596924782,
+    "prof_overhead_s": -0.03330033738166094,
+    "prof_overhead_pct": -2.361992747746381,
+    "prof": {
+     "outside_movies_s": 0.6089777956924782,
+     "run_wall_s": 1.3765404596924782,
+     "movie_wall_ms": {
+      "0": 616.641362,
+      "1": 150.921302
+     },
+     "ingest_ms": {
+      "0": 311.28685,
+      "1": 39.376539
+     },
+     "stages": {},
+     "steady_movie_ms": 150.921302,
+     "steady_ingest_ms": 39.376539,
+     "steady_stages": [
+      [
+       "dose weighting",
+       42.934354
+      ],
+      [
+       "session and device ingest",
+       39.282952
+      ],
+      [
+       "global ifft",
+       22.074892
+      ],
+      [
+       "global fft",
+       21.783514
+      ],
+      [
+       "hot pixels",
+       12.923748
+      ],
+      [
+       "global alignment",
+       8.594695
+      ],
+      [
+       "setup",
+       1.220268
+      ],
+      [
+       "fix defects",
+       0.903467
+      ],
+      [
+       "release preprocessing",
+       0.224889
+      ],
+      [
+       "movie teardown",
+       0.141359
+      ],
+      [
+       "submit model and plot",
+       0.068724
+      ],
+      [
+       "host read movie",
+       0.043581
+      ],
+      [
+       "power spectrum",
+       0.043022
+      ],
+      [
+       "read gain",
+       0.03967
+      ],
+      [
+       "gain and sum",
+       0.036597
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "release alignment",
+       0.013689
+      ],
+      [
+       "allocate reconstruction",
+       0.01313
+      ],
+      [
+       "allocate host sum",
+       0.01285
+      ]
+     ],
+     "first_movie_ms": 616.641362,
+     "first_stages": [
+      [
+       "session and device ingest",
+       311.192983
+      ],
+      [
+       "read gain",
+       104.806706
+      ],
+      [
+       "dose weighting",
+       74.390958
+      ],
+      [
+       "hot pixels",
+       70.282456
+      ],
+      [
+       "global ifft",
+       21.972919
+      ],
+      [
+       "global fft",
+       21.74277
+      ],
+      [
+       "global alignment",
+       8.946415
+      ],
+      [
+       "fix defects",
+       2.775774
+      ],
+      [
+       "setup",
+       1.418619
+      ],
+      [
+       "release preprocessing",
+       0.247519
+      ],
+      [
+       "movie teardown",
+       0.129066
+      ],
+      [
+       "submit model and plot",
+       0.07068
+      ],
+      [
+       "power spectrum",
+       0.042465
+      ],
+      [
+       "host read movie",
+       0.042183
+      ],
+      [
+       "gain and sum",
+       0.038273
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "release alignment",
+       0.01369
+      ],
+      [
+       "allocate reconstruction",
+       0.013689
+      ],
+      [
+       "allocate host sum",
+       0.012013
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.745259115457898,
+     "run_wall_s": 2.074035184457898,
+     "movie_wall_ms": {
+      "0": 627.296952,
+      "1": 151.31237,
+      "2": 158.655056,
+      "3": 151.223678,
+      "4": 141.103695,
+      "5": 141.33765
+     },
+     "ingest_ms": {
+      "0": 312.32848,
+      "1": 39.91142,
+      "2": 39.269611,
+      "3": 39.454102000000006,
+      "4": 39.502988,
+      "5": 39.336768
+     },
+     "stages": {},
+     "steady_movie_ms": 151.223678,
+     "steady_ingest_ms": 39.454102000000006,
+     "steady_stages": [
+      [
+       "dose weighting",
+       42.291327
+      ],
+      [
+       "session and device ingest",
+       39.351854
+      ],
+      [
+       "global ifft",
+       21.996348
+      ],
+      [
+       "global fft",
+       21.808336
+      ],
+      [
+       "global alignment",
+       8.709758
+      ],
+      [
+       "hot pixels",
+       3.837634
+      ],
+      [
+       "setup",
+       1.233953
+      ],
+      [
+       "fix defects",
+       0.922742
+      ],
+      [
+       "release preprocessing",
+       0.22824
+      ],
+      [
+       "movie teardown",
+       0.146107
+      ],
+      [
+       "submit model and plot",
+       0.068722
+      ],
+      [
+       "power spectrum",
+       0.043581
+      ],
+      [
+       "host read movie",
+       0.040228
+      ],
+      [
+       "read gain",
+       0.039949
+      ],
+      [
+       "gain and sum",
+       0.035757
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "release alignment",
+       0.013968
+      ],
+      [
+       "allocate reconstruction",
+       0.012851
+      ],
+      [
+       "allocate host sum",
+       0.011734
+      ]
+     ],
+     "first_movie_ms": 627.296952,
+     "first_stages": [
+      [
+       "session and device ingest",
+       312.239084
+      ],
+      [
+       "read gain",
+       106.265243
+      ],
+      [
+       "dose weighting",
+       74.293097
+      ],
+      [
+       "hot pixels",
+       70.475387
+      ],
+      [
+       "global ifft",
+       21.952209
+      ],
+      [
+       "global fft",
+       21.72752
+      ],
+      [
+       "global alignment",
+       8.878214
+      ],
+      [
+       "fix defects",
+       2.738055
+      ],
+      [
+       "setup",
+       1.658867
+      ],
+      [
+       "release preprocessing",
+       0.243048
+      ],
+      [
+       "movie teardown",
+       0.126831
+      ],
+      [
+       "submit model and plot",
+       0.069282
+      ],
+      [
+       "power spectrum",
+       0.041904
+      ],
+      [
+       "host read movie",
+       0.040787
+      ],
+      [
+       "gain and sum",
+       0.036596
+      ],
+      [
+       "patch alignment",
+       0.019834
+      ],
+      [
+       "release alignment",
+       0.01341
+      ],
+      [
+       "allocate reconstruction",
+       0.01285
+      ],
+      [
+       "allocate host sum",
+       0.012013
+      ]
+     ]
+    }
+   },
+   "auto-L": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 1.433315140195191,
+     "min": 1.4104748722165823,
+     "max": 1.5107984906062484,
+     "values": [
+      1.433315140195191,
+      1.4859619243070483,
+      1.4104748722165823,
+      1.5107984906062484,
+      1.4207962062209845
+     ]
+    },
+    "wall_per_movie_s": 0.7166575700975955,
+    "user_s": 0.502093,
+    "sys_s": 1.227097,
+    "cpu_s": 1.7158120000000001,
+    "cpu_over_wall": 1.197093334105393,
+    "rss_gib": 0.35724639892578125,
+    "rss_gib_max": 0.3572807312011719,
+    "minflt": 100423,
+    "majflt": 0,
+    "vram_proc_mib": 3362.0,
+    "vram_proc_mib_max": 3362.0,
+    "vram_dev_delta_mib": 3370.8125,
+    "vram_dev_delta_mib_max": 3370.8125,
+    "ingest_witness": {
+     "nvcomp": 34
+    },
+    "foreign_cores_max": 0.00838051731579854,
+    "prof_wall_s": 1.491941980086267,
+    "prof_overhead_s": 0.05862683989107609,
+    "prof_overhead_pct": 4.0902965612358075,
+    "prof0_wall_s": 1.5137622794136405,
+    "prof0_overhead_s": 0.08044713921844959,
+    "prof": {
+     "outside_movies_s": 0.663523866086267,
+     "run_wall_s": 1.491941980086267,
+     "movie_wall_ms": {
+      "0": 639.309098,
+      "1": 180.641268
+     },
+     "ingest_ms": {
+      "0": 301.432208,
+      "1": 40.025036
+     },
+     "stages": {},
+     "steady_movie_ms": 180.641268,
+     "steady_ingest_ms": 40.025036,
+     "steady_stages": [
+      [
+       "dose weighting",
+       43.669825
+      ],
+      [
+       "session and device ingest",
+       39.938712
+      ],
+      [
+       "patch alignment",
+       26.319569
+      ],
+      [
+       "global ifft",
+       21.980746
+      ],
+      [
+       "global fft",
+       21.792448
+      ],
+      [
+       "hot pixels",
+       12.65134
+      ],
+      [
+       "global alignment",
+       8.659766
+      ],
+      [
+       "release alignment",
+       1.597131
+      ],
+      [
+       "fit polynomial",
+       1.450186
+      ],
+      [
+       "setup",
+       1.222785
+      ],
+      [
+       "fix defects",
+       0.879163
+      ],
+      [
+       "release preprocessing",
+       0.226845
+      ],
+      [
+       "movie teardown",
+       0.143595
+      ],
+      [
+       "submit model and plot",
+       0.079619
+      ],
+      [
+       "power spectrum",
+       0.041905
+      ],
+      [
+       "host read movie",
+       0.039948
+      ],
+      [
+       "read gain",
+       0.039112
+      ],
+      [
+       "gain and sum",
+       0.036038
+      ],
+      [
+       "allocate reconstruction",
+       0.013409
+      ],
+      [
+       "allocate host sum",
+       0.012013
+      ]
+     ],
+     "first_movie_ms": 639.309098,
+     "first_stages": [
+      [
+       "session and device ingest",
+       301.315991
+      ],
+      [
+       "read gain",
+       104.463302
+      ],
+      [
+       "dose weighting",
+       75.530211
+      ],
+      [
+       "hot pixels",
+       69.870378
+      ],
+      [
+       "patch alignment",
+       27.185098
+      ],
+      [
+       "global ifft",
+       21.945261
+      ],
+      [
+       "global fft",
+       21.795526
+      ],
+      [
+       "global alignment",
+       9.00117
+      ],
+      [
+       "fix defects",
+       2.634421
+      ],
+      [
+       "release alignment",
+       1.597689
+      ],
+      [
+       "fit polynomial",
+       1.475332
+      ],
+      [
+       "setup",
+       1.453537
+      ],
+      [
+       "release preprocessing",
+       0.314286
+      ],
+      [
+       "movie teardown",
+       0.142756
+      ],
+      [
+       "submit model and plot",
+       0.077385
+      ],
+      [
+       "host read movie",
+       0.04358
+      ],
+      [
+       "power spectrum",
+       0.042743
+      ],
+      [
+       "gain and sum",
+       0.036597
+      ],
+      [
+       "allocate reconstruction",
+       0.013689
+      ],
+      [
+       "allocate host sum",
+       0.012013
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.7741509406436213,
+     "run_wall_s": 2.3172053983435035,
+     "movie_wall_ms": {
+      "0": 643.960224,
+      "1": 181.388625,
+      "2": 189.75308,
+      "3": 181.450365,
+      "4": 171.708236,
+      "5": 172.414877
+     },
+     "ingest_ms": {
+      "0": 301.132931,
+      "1": 39.678151,
+      "2": 39.04612,
+      "3": 39.631386,
+      "4": 39.334423,
+      "5": 39.655243
+     },
+     "stages": {},
+     "steady_movie_ms": 181.388625,
+     "steady_ingest_ms": 39.631386,
+     "steady_stages": [
+      [
+       "dose weighting",
+       44.010694
+      ],
+      [
+       "session and device ingest",
+       39.444493
+      ],
+      [
+       "patch alignment",
+       26.406122
+      ],
+      [
+       "global ifft",
+       22.105859
+      ],
+      [
+       "global fft",
+       21.784031
+      ],
+      [
+       "global alignment",
+       8.750233
+      ],
+      [
+       "hot pixels",
+       3.87926
+      ],
+      [
+       "release alignment",
+       1.518067
+      ],
+      [
+       "fit polynomial",
+       1.489571
+      ],
+      [
+       "setup",
+       1.253785
+      ],
+      [
+       "fix defects",
+       0.931121
+      ],
+      [
+       "release preprocessing",
+       0.236343
+      ],
+      [
+       "movie teardown",
+       0.138285
+      ],
+      [
+       "submit model and plot",
+       0.078502
+      ],
+      [
+       "power spectrum",
+       0.042464
+      ],
+      [
+       "host read movie",
+       0.03995
+      ],
+      [
+       "read gain",
+       0.03967
+      ],
+      [
+       "gain and sum",
+       0.036038
+      ],
+      [
+       "allocate reconstruction",
+       0.012851
+      ],
+      [
+       "allocate host sum",
+       0.011733
+      ]
+     ],
+     "first_movie_ms": 643.960224,
+     "first_stages": [
+      [
+       "session and device ingest",
+       301.038506
+      ],
+      [
+       "read gain",
+       106.070633
+      ],
+      [
+       "dose weighting",
+       77.232636
+      ],
+      [
+       "hot pixels",
+       71.12377
+      ],
+      [
+       "patch alignment",
+       27.115126
+      ],
+      [
+       "global ifft",
+       21.930696
+      ],
+      [
+       "global fft",
+       21.742405
+      ],
+      [
+       "global alignment",
+       8.897178
+      ],
+      [
+       "fix defects",
+       2.729112
+      ],
+      [
+       "release alignment",
+       1.737369
+      ],
+      [
+       "fit polynomial",
+       1.528399
+      ],
+      [
+       "setup",
+       1.328097
+      ],
+      [
+       "release preprocessing",
+       0.237181
+      ],
+      [
+       "movie teardown",
+       0.125993
+      ],
+      [
+       "submit model and plot",
+       0.082133
+      ],
+      [
+       "host read movie",
+       0.045537
+      ],
+      [
+       "power spectrum",
+       0.042743
+      ],
+      [
+       "gain and sum",
+       0.034921
+      ],
+      [
+       "allocate reconstruction",
+       0.012851
+      ],
+      [
+       "allocate host sum",
+       0.012571
+      ]
+     ]
+    }
+   },
+   "nvcomp-G": {
+    "n_unprof": 5,
+    "n_prof": 0,
+    "n_replay": 0,
+    "wall_s": {
+     "median": 1.3639351660385728,
+     "min": 1.343790091574192,
+     "max": 1.4355367198586464,
+     "values": [
+      1.4355367198586464,
+      1.3500313917174935,
+      1.343790091574192,
+      1.4164397940039635,
+      1.3639351660385728
+     ]
+    },
+    "wall_per_movie_s": 0.6819675830192864,
+    "user_s": 0.455841,
+    "sys_s": 1.1832,
+    "cpu_s": 1.634603,
+    "cpu_over_wall": 1.1984462610107471,
+    "rss_gib": 0.3525352478027344,
+    "rss_gib_max": 0.3525810241699219,
+    "minflt": 100139,
+    "majflt": 0,
+    "vram_proc_mib": 3258.0,
+    "vram_proc_mib_max": 3260.0,
+    "vram_dev_delta_mib": 3266.8125,
+    "vram_dev_delta_mib_max": 3268.8125,
+    "ingest_witness": {
+     "nvcomp": 10
+    },
+    "foreign_cores_max": 0.004656188025378298,
+    "prof_wall_s": null
+   },
+   "nvcomp-L": {
+    "n_unprof": 5,
+    "n_prof": 0,
+    "n_replay": 0,
+    "wall_s": {
+     "median": 1.4857582254335284,
+     "min": 1.4339216034859419,
+     "max": 1.508257457986474,
+     "values": [
+      1.4339216034859419,
+      1.436832164414227,
+      1.4857582254335284,
+      1.4919455256313086,
+      1.508257457986474
+     ]
+    },
+    "wall_per_movie_s": 0.7428791127167642,
+    "user_s": 0.589164,
+    "sys_s": 1.226433,
+    "cpu_s": 1.8227659999999999,
+    "cpu_over_wall": 1.2268254476384515,
+    "rss_gib": 0.357269287109375,
+    "rss_gib_max": 0.35727691650390625,
+    "minflt": 100795,
+    "majflt": 14,
+    "vram_proc_mib": 3362.0,
+    "vram_proc_mib_max": 3362.0,
+    "vram_dev_delta_mib": 3370.8125,
+    "vram_dev_delta_mib_max": 3370.8125,
+    "ingest_witness": {
+     "nvcomp": 10
+    },
+    "foreign_cores_max": 0.009598153739047773,
+    "prof_wall_s": null
+   }
+  },
+  "host_read_steady_ms": 0.03995,
+  "host_read_share": 0.0002202453433890907,
+  "host_read_share_ex_retry": 0.0002577710336759757,
+  "ms_per_mpx_L_steady": 0.5307865714398081,
+  "patches": 50,
+  "patches_retried": 0,
+  "patch_retry_converged": 0,
+  "traced_peak_mib": 1569.59,
+  "vram_peak_gib": 3.283203125,
+  "movie_f32_gib": 1.2730640172958374
+ },
+ "e10028": {
+  "mpx_frame_per_movie": 268.435456,
+  "movies": 2,
+  "cells": {
+   "auto-G": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 2.2026786794885993,
+     "min": 2.19990112259984,
+     "max": 2.378819008357823,
+     "values": [
+      2.2421475406736135,
+      2.2026786794885993,
+      2.19990112259984,
+      2.200156059116125,
+      2.378819008357823
+     ]
+    },
+    "wall_per_movie_s": 1.1013393397442997,
+    "user_s": 1.420062,
+    "sys_s": 5.549491,
+    "cpu_s": 6.96246,
+    "cpu_over_wall": 3.160905884655173,
+    "rss_gib": 1.6072845458984375,
+    "rss_gib_max": 1.6304740905761719,
+    "minflt": 1151452,
+    "majflt": 0,
+    "vram_proc_mib": 2672.0,
+    "vram_proc_mib_max": 2672.0,
+    "vram_dev_delta_mib": 2680.8125,
+    "vram_dev_delta_mib_max": 2680.8125,
+    "ingest_witness": {
+     "float": 34
+    },
+    "foreign_cores_max": 0.003729031624511273,
+    "prof_wall_s": 2.218536832369864,
+    "prof_overhead_s": 0.015858152881264687,
+    "prof_overhead_pct": 0.7199485348878262,
+    "prof": {
+     "outside_movies_s": 0.5169244095356555,
+     "run_wall_s": 2.218536832369864,
+     "movie_wall_ms": {
+      "0": 932.886869,
+      "1": 761.934475
+     },
+     "ingest_ms": {
+      "0": 661.6887780000001,
+      "1": 493.03900999999996
+     },
+     "stages": {},
+     "steady_movie_ms": 761.934475,
+     "steady_ingest_ms": 493.03900999999996,
+     "steady_stages": [
+      [
+       "host read movie",
+       396.417942
+      ],
+      [
+       "movie teardown",
+       127.876672
+      ],
+      [
+       "gain and sum",
+       95.751828
+      ],
+      [
+       "hot pixels",
+       93.532058
+      ],
+      [
+       "dose weighting",
+       26.433603
+      ],
+      [
+       "global fft",
+       5.907459
+      ],
+      [
+       "global ifft",
+       5.834265
+      ],
+      [
+       "global alignment",
+       5.642345
+      ],
+      [
+       "fix defects",
+       3.089781
+      ],
+      [
+       "session and device ingest",
+       0.811836
+      ],
+      [
+       "setup",
+       0.399493
+      ],
+      [
+       "release preprocessing",
+       0.290262
+      ],
+      [
+       "submit model and plot",
+       0.115098
+      ],
+      [
+       "read gain",
+       0.046375
+      ],
+      [
+       "power spectrum",
+       0.044698
+      ],
+      [
+       "patch alignment",
+       0.019555
+      ],
+      [
+       "allocate host sum",
+       0.013968
+      ],
+      [
+       "release alignment",
+       0.01341
+      ],
+      [
+       "allocate reconstruction",
+       0.01313
+      ]
+     ],
+     "first_movie_ms": 932.886869,
+     "first_stages": [
+      [
+       "host read movie",
+       406.554999
+      ],
+      [
+       "session and device ingest",
+       158.837607
+      ],
+      [
+       "movie teardown",
+       120.425983
+      ],
+      [
+       "gain and sum",
+       95.569681
+      ],
+      [
+       "hot pixels",
+       65.744577
+      ],
+      [
+       "dose weighting",
+       61.640691
+      ],
+      [
+       "global alignment",
+       5.937072
+      ],
+      [
+       "global fft",
+       5.914722
+      ],
+      [
+       "global ifft",
+       5.85523
+      ],
+      [
+       "fix defects",
+       4.697528
+      ],
+      [
+       "setup",
+       0.432178
+      ],
+      [
+       "release preprocessing",
+       0.265118
+      ],
+      [
+       "submit model and plot",
+       0.109791
+      ],
+      [
+       "power spectrum",
+       0.040228
+      ],
+      [
+       "read gain",
+       0.03967
+      ],
+      [
+       "patch alignment",
+       0.019835
+      ],
+      [
+       "allocate host sum",
+       0.014247
+      ],
+      [
+       "allocate reconstruction",
+       0.012851
+      ],
+      [
+       "release alignment",
+       0.012851
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.5799689842715559,
+     "run_wall_s": 5.004064528271556,
+     "movie_wall_ms": {
+      "0": 935.541992,
+      "1": 695.525149,
+      "2": 707.144732,
+      "3": 674.032858,
+      "4": 705.022632,
+      "5": 677.792688
+     },
+     "ingest_ms": {
+      "0": 666.4095669999999,
+      "1": 507.272476,
+      "2": 529.855973,
+      "3": 496.661626,
+      "4": 526.648901,
+      "5": 500.405393
+     },
+     "stages": {},
+     "steady_movie_ms": 695.525149,
+     "steady_ingest_ms": 507.272476,
+     "steady_stages": [
+      [
+       "host read movie",
+       411.842072
+      ],
+      [
+       "movie teardown",
+       126.65664
+      ],
+      [
+       "gain and sum",
+       94.814106
+      ],
+      [
+       "dose weighting",
+       26.268675
+      ],
+      [
+       "global fft",
+       5.906052
+      ],
+      [
+       "global ifft",
+       5.893481
+      ],
+      [
+       "global alignment",
+       5.572485
+      ],
+      [
+       "hot pixels",
+       4.203322
+      ],
+      [
+       "fix defects",
+       2.869915
+      ],
+      [
+       "session and device ingest",
+       0.856252
+      ],
+      [
+       "setup",
+       0.322386
+      ],
+      [
+       "release preprocessing",
+       0.28551
+      ],
+      [
+       "submit model and plot",
+       0.115657
+      ],
+      [
+       "power spectrum",
+       0.043301
+      ],
+      [
+       "read gain",
+       0.039111
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "allocate host sum",
+       0.015924
+      ],
+      [
+       "release alignment",
+       0.013968
+      ],
+      [
+       "allocate reconstruction",
+       0.013689
+      ]
+     ],
+     "first_movie_ms": 935.541992,
+     "first_stages": [
+      [
+       "host read movie",
+       409.234197
+      ],
+      [
+       "session and device ingest",
+       158.100092
+      ],
+      [
+       "movie teardown",
+       122.68446
+      ],
+      [
+       "gain and sum",
+       95.298885
+      ],
+      [
+       "hot pixels",
+       65.994855
+      ],
+      [
+       "dose weighting",
+       62.279026
+      ],
+      [
+       "global alignment",
+       5.971123
+      ],
+      [
+       "global fft",
+       5.915545
+      ],
+      [
+       "global ifft",
+       5.841777
+      ],
+      [
+       "fix defects",
+       4.643039
+      ],
+      [
+       "setup",
+       0.380774
+      ],
+      [
+       "release preprocessing",
+       0.275734
+      ],
+      [
+       "submit model and plot",
+       0.111466
+      ],
+      [
+       "power spectrum",
+       0.050006
+      ],
+      [
+       "read gain",
+       0.041067
+      ],
+      [
+       "patch alignment",
+       0.019834
+      ],
+      [
+       "allocate host sum",
+       0.013689
+      ],
+      [
+       "release alignment",
+       0.01341
+      ],
+      [
+       "allocate reconstruction",
+       0.012851
+      ]
+     ]
+    }
+   },
+   "auto-L": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 2.3177125342190266,
+     "min": 2.2251597931608558,
+     "max": 2.4038283741101623,
+     "values": [
+      2.4038283741101623,
+      2.2251597931608558,
+      2.3177125342190266,
+      2.2700828621163964,
+      2.3538872813805938
+     ]
+    },
+    "wall_per_movie_s": 1.1588562671095133,
+    "user_s": 1.464478,
+    "sys_s": 5.561707,
+    "cpu_s": 7.0470950000000006,
+    "cpu_over_wall": 3.0405388485222913,
+    "rss_gib": 1.6093673706054688,
+    "rss_gib_max": 1.6433792114257812,
+    "minflt": 1163653,
+    "majflt": 3,
+    "vram_proc_mib": 2736.0,
+    "vram_proc_mib_max": 2736.0,
+    "vram_dev_delta_mib": 2744.8125,
+    "vram_dev_delta_mib_max": 2744.8125,
+    "ingest_witness": {
+     "float": 34
+    },
+    "foreign_cores_max": 0.013678225059747109,
+    "prof_wall_s": 2.323421106673777,
+    "prof_overhead_s": 0.005708572454750538,
+    "prof_overhead_pct": 0.2463020055536823,
+    "prof0_wall_s": 2.3654039781540632,
+    "prof0_overhead_s": 0.04769144393503666,
+    "prof": {
+     "outside_movies_s": 0.53100561835721,
+     "run_wall_s": 2.323421106673777,
+     "movie_wall_ms": {
+      "0": 976.018137,
+      "1": 814.854459
+     },
+     "ingest_ms": {
+      "0": 665.9124879999999,
+      "1": 496.52353700000003
+     },
+     "stages": {},
+     "steady_movie_ms": 814.854459,
+     "steady_ingest_ms": 496.52353700000003,
+     "steady_stages": [
+      [
+       "host read movie",
+       401.528656
+      ],
+      [
+       "movie teardown",
+       127.209073
+      ],
+      [
+       "hot pixels",
+       99.114962
+      ],
+      [
+       "gain and sum",
+       93.794028
+      ],
+      [
+       "dose weighting",
+       47.721003
+      ],
+      [
+       "patch alignment",
+       25.071935
+      ],
+      [
+       "global fft",
+       5.984563
+      ],
+      [
+       "global ifft",
+       5.854663
+      ],
+      [
+       "global alignment",
+       5.78985
+      ],
+      [
+       "fix defects",
+       3.14175
+      ],
+      [
+       "release alignment",
+       1.529249
+      ],
+      [
+       "session and device ingest",
+       0.993146
+      ],
+      [
+       "fit polynomial",
+       0.961576
+      ],
+      [
+       "setup",
+       0.358985
+      ],
+      [
+       "release preprocessing",
+       0.25115
+      ],
+      [
+       "submit model and plot",
+       0.125434
+      ],
+      [
+       "power spectrum",
+       0.042184
+      ],
+      [
+       "read gain",
+       0.037994
+      ],
+      [
+       "allocate host sum",
+       0.013968
+      ],
+      [
+       "allocate reconstruction",
+       0.013689
+      ]
+     ],
+     "first_movie_ms": 976.018137,
+     "first_stages": [
+      [
+       "host read movie",
+       408.717573
+      ],
+      [
+       "session and device ingest",
+       163.49362
+      ],
+      [
+       "movie teardown",
+       127.402026
+      ],
+      [
+       "gain and sum",
+       93.808556
+      ],
+      [
+       "dose weighting",
+       63.291367
+      ],
+      [
+       "hot pixels",
+       62.178613
+      ],
+      [
+       "patch alignment",
+       25.899956
+      ],
+      [
+       "global fft",
+       5.918633
+      ],
+      [
+       "global ifft",
+       5.868068
+      ],
+      [
+       "global alignment",
+       5.867233
+      ],
+      [
+       "fix defects",
+       4.623217
+      ],
+      [
+       "release alignment",
+       1.449909
+      ],
+      [
+       "fit polynomial",
+       0.95962
+      ],
+      [
+       "setup",
+       0.382172
+      ],
+      [
+       "release preprocessing",
+       0.272381
+      ],
+      [
+       "submit model and plot",
+       0.185499
+      ],
+      [
+       "power spectrum",
+       0.040228
+      ],
+      [
+       "read gain",
+       0.039671
+      ],
+      [
+       "allocate host sum",
+       0.013689
+      ],
+      [
+       "allocate reconstruction",
+       0.012851
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.670358528998098,
+     "run_wall_s": 5.165317906998098,
+     "movie_wall_ms": {
+      "0": 958.769467,
+      "1": 725.012244,
+      "2": 702.266406,
+      "3": 699.651606,
+      "4": 698.277975,
+      "5": 696.503461
+     },
+     "ingest_ms": {
+      "0": 658.16956,
+      "1": 491.983096,
+      "2": 492.392647,
+      "3": 491.10436799999997,
+      "4": 492.426452,
+      "5": 490.98192
+     },
+     "stages": {},
+     "steady_movie_ms": 699.651606,
+     "steady_ingest_ms": 491.983096,
+     "steady_stages": [
+      [
+       "host read movie",
+       396.242384
+      ],
+      [
+       "movie teardown",
+       129.512302
+      ],
+      [
+       "gain and sum",
+       93.909324
+      ],
+      [
+       "dose weighting",
+       27.627225
+      ],
+      [
+       "patch alignment",
+       24.28684
+      ],
+      [
+       "global ifft",
+       5.968608
+      ],
+      [
+       "global fft",
+       5.90298
+      ],
+      [
+       "global alignment",
+       5.514083
+      ],
+      [
+       "hot pixels",
+       4.252756
+      ],
+      [
+       "fix defects",
+       2.889181
+      ],
+      [
+       "release alignment",
+       1.515555
+      ],
+      [
+       "fit polynomial",
+       0.974983
+      ],
+      [
+       "session and device ingest",
+       0.887819
+      ],
+      [
+       "setup",
+       0.369599
+      ],
+      [
+       "release preprocessing",
+       0.269309
+      ],
+      [
+       "submit model and plot",
+       0.129905
+      ],
+      [
+       "power spectrum",
+       0.040508
+      ],
+      [
+       "read gain",
+       0.037156
+      ],
+      [
+       "allocate host sum",
+       0.014248
+      ],
+      [
+       "allocate reconstruction",
+       0.01313
+      ]
+     ],
+     "first_movie_ms": 958.769467,
+     "first_stages": [
+      [
+       "host read movie",
+       407.982079
+      ],
+      [
+       "session and device ingest",
+       153.467395
+      ],
+      [
+       "movie teardown",
+       123.586361
+      ],
+      [
+       "gain and sum",
+       96.085228
+      ],
+      [
+       "hot pixels",
+       64.895935
+      ],
+      [
+       "dose weighting",
+       63.371726
+      ],
+      [
+       "patch alignment",
+       25.805744
+      ],
+      [
+       "global fft",
+       5.916109
+      ],
+      [
+       "global alignment",
+       5.897946
+      ],
+      [
+       "global ifft",
+       5.839841
+      ],
+      [
+       "fix defects",
+       4.782988
+      ],
+      [
+       "release alignment",
+       1.46862
+      ],
+      [
+       "fit polynomial",
+       0.973864
+      ],
+      [
+       "setup",
+       0.436926
+      ],
+      [
+       "release preprocessing",
+       0.273498
+      ],
+      [
+       "submit model and plot",
+       0.188292
+      ],
+      [
+       "read gain",
+       0.040787
+      ],
+      [
+       "power spectrum",
+       0.040229
+      ],
+      [
+       "allocate host sum",
+       0.01369
+      ],
+      [
+       "allocate reconstruction",
+       0.012851
+      ]
+     ]
+    }
+   }
+  },
+  "host_read_steady_ms": 396.242384,
+  "host_read_share": 0.5663424204303191,
+  "host_read_share_ex_retry": 0.5867087001692949,
+  "ms_per_mpx_L_steady": 2.6064053401350975,
+  "patches": 50,
+  "patches_retried": 0,
+  "patch_retry_converged": 0,
+  "traced_peak_mib": 1222.76,
+  "vram_peak_gib": 2.671875,
+  "movie_f32_gib": 1.0
+ },
+ "e10361": {
+  "mpx_frame_per_movie": 1461.33504,
+  "movies": 2,
+  "cells": {
+   "auto-G": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 4.904431600123644,
+     "min": 4.8621511701494455,
+     "max": 4.972753834910691,
+     "values": [
+      4.972753834910691,
+      4.88847176078707,
+      4.904431600123644,
+      4.90782774053514,
+      4.8621511701494455
+     ]
+    },
+    "wall_per_movie_s": 2.452215800061822,
+    "user_s": 19.731488,
+    "sys_s": 4.094376,
+    "cpu_s": 23.825864,
+    "cpu_over_wall": 4.858027584562365,
+    "rss_gib": 1.6601028442382812,
+    "rss_gib_max": 1.662994384765625,
+    "minflt": 870359,
+    "majflt": 0,
+    "vram_proc_mib": 11872.0,
+    "vram_proc_mib_max": 11872.0,
+    "vram_dev_delta_mib": 11880.8125,
+    "vram_dev_delta_mib_max": 11880.8125,
+    "ingest_witness": {
+     "compact": 34
+    },
+    "foreign_cores_max": 0.0021419403626168616,
+    "prof_wall_s": 4.869038589298725,
+    "prof_overhead_s": -0.03539301082491875,
+    "prof_overhead_pct": -0.7216536738737771,
+    "prof": {
+     "outside_movies_s": 0.6313696047010602,
+     "run_wall_s": 4.869038589298725,
+     "movie_wall_ms": {
+      "0": 2271.337453,
+      "1": 1972.357437
+     },
+     "ingest_ms": {
+      "0": 1726.563918,
+      "1": 1538.075139
+     },
+     "stages": {},
+     "steady_movie_ms": 1972.357437,
+     "steady_ingest_ms": 1538.075139,
+     "steady_stages": [
+      [
+       "host read movie",
+       1385.434591
+      ],
+      [
+       "global fft",
+       224.941348
+      ],
+      [
+       "gain and sum",
+       152.711717
+      ],
+      [
+       "dose weighting",
+       89.733827
+      ],
+      [
+       "global ifft",
+       47.49241
+      ],
+      [
+       "global alignment",
+       38.486488
+      ],
+      [
+       "hot pixels",
+       28.327939
+      ],
+      [
+       "fix defects",
+       2.997875
+      ],
+      [
+       "setup",
+       2.226544
+      ],
+      [
+       "session and device ingest",
+       0.98588
+      ],
+      [
+       "release preprocessing",
+       0.246959
+      ],
+      [
+       "movie teardown",
+       0.199187
+      ],
+      [
+       "submit model and plot",
+       0.070401
+      ],
+      [
+       "power spectrum",
+       0.043861
+      ],
+      [
+       "read gain",
+       0.037156
+      ],
+      [
+       "patch alignment",
+       0.020116
+      ],
+      [
+       "release alignment",
+       0.014246
+      ],
+      [
+       "allocate reconstruction",
+       0.013689
+      ],
+      [
+       "allocate host sum",
+       0.01341
+      ]
+     ],
+     "first_movie_ms": 2271.337453,
+     "first_stages": [
+      [
+       "host read movie",
+       1399.853123
+      ],
+      [
+       "global fft",
+       223.702187
+      ],
+      [
+       "session and device ingest",
+       166.93424
+      ],
+      [
+       "gain and sum",
+       157.278503
+      ],
+      [
+       "dose weighting",
+       138.605141
+      ],
+      [
+       "hot pixels",
+       84.362905
+      ],
+      [
+       "global ifft",
+       47.540999
+      ],
+      [
+       "global alignment",
+       39.566533
+      ],
+      [
+       "fix defects",
+       5.599052
+      ],
+      [
+       "setup",
+       2.707893
+      ],
+      [
+       "movie teardown",
+       0.391671
+      ],
+      [
+       "release preprocessing",
+       0.259531
+      ],
+      [
+       "submit model and plot",
+       0.069003
+      ],
+      [
+       "power spectrum",
+       0.051404
+      ],
+      [
+       "read gain",
+       0.041345
+      ],
+      [
+       "patch alignment",
+       0.020394
+      ],
+      [
+       "allocate reconstruction",
+       0.015643
+      ],
+      [
+       "allocate host sum",
+       0.013968
+      ],
+      [
+       "release alignment",
+       0.013408
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.7063311050565098,
+     "run_wall_s": 13.04594415705651,
+     "movie_wall_ms": {
+      "0": 2308.987779,
+      "1": 2002.263935,
+      "2": 1990.504294,
+      "3": 1968.375631,
+      "4": 2040.076917,
+      "5": 2033.589685
+     },
+     "ingest_ms": {
+      "0": 1764.3646390000001,
+      "1": 1542.007958,
+      "2": 1538.131091,
+      "3": 1555.3096389999998,
+      "4": 1622.481527,
+      "5": 1619.281998
+     },
+     "stages": {},
+     "steady_movie_ms": 2002.263935,
+     "steady_ingest_ms": 1555.3096389999998,
+     "steady_stages": [
+      [
+       "host read movie",
+       1403.077439
+      ],
+      [
+       "global fft",
+       225.277381
+      ],
+      [
+       "gain and sum",
+       152.507778
+      ],
+      [
+       "dose weighting",
+       91.887535
+      ],
+      [
+       "global ifft",
+       47.462091
+      ],
+      [
+       "global alignment",
+       38.698325
+      ],
+      [
+       "hot pixels",
+       12.591242
+      ],
+      [
+       "fix defects",
+       3.083906
+      ],
+      [
+       "setup",
+       2.312854
+      ],
+      [
+       "session and device ingest",
+       0.995376
+      ],
+      [
+       "release preprocessing",
+       0.255339
+      ],
+      [
+       "movie teardown",
+       0.20645
+      ],
+      [
+       "submit model and plot",
+       0.071517
+      ],
+      [
+       "power spectrum",
+       0.045536
+      ],
+      [
+       "read gain",
+       0.038552
+      ],
+      [
+       "patch alignment",
+       0.020392
+      ],
+      [
+       "release alignment",
+       0.014528
+      ],
+      [
+       "allocate host sum",
+       0.014247
+      ],
+      [
+       "allocate reconstruction",
+       0.013968
+      ]
+     ],
+     "first_movie_ms": 2308.987779,
+     "first_stages": [
+      [
+       "host read movie",
+       1400.279348
+      ],
+      [
+       "global fft",
+       224.316065
+      ],
+      [
+       "gain and sum",
+       212.695086
+      ],
+      [
+       "session and device ingest",
+       160.911216
+      ],
+      [
+       "dose weighting",
+       138.79496
+      ],
+      [
+       "hot pixels",
+       84.510656
+      ],
+      [
+       "global ifft",
+       47.477612
+      ],
+      [
+       "global alignment",
+       39.150467
+      ],
+      [
+       "fix defects",
+       5.63924
+      ],
+      [
+       "setup",
+       2.786661
+      ],
+      [
+       "movie teardown",
+       0.433293
+      ],
+      [
+       "release preprocessing",
+       0.322667
+      ],
+      [
+       "submit model and plot",
+       0.073752
+      ],
+      [
+       "power spectrum",
+       0.044977
+      ],
+      [
+       "read gain",
+       0.042463
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "release alignment",
+       0.018717
+      ],
+      [
+       "allocate reconstruction",
+       0.0176
+      ],
+      [
+       "allocate host sum",
+       0.013968
+      ]
+     ]
+    }
+   },
+   "auto-L": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 5.177076649852097,
+     "min": 5.139620350673795,
+     "max": 5.280081752687693,
+     "values": [
+      5.139620350673795,
+      5.1408501993864775,
+      5.1861151698976755,
+      5.177076649852097,
+      5.280081752687693
+     ]
+    },
+    "wall_per_movie_s": 2.5885383249260485,
+    "user_s": 19.931894,
+    "sys_s": 4.290115,
+    "cpu_s": 24.167293,
+    "cpu_over_wall": 4.668135056623207,
+    "rss_gib": 1.655914306640625,
+    "rss_gib_max": 1.6795578002929688,
+    "minflt": 872182,
+    "majflt": 15,
+    "vram_proc_mib": 12632.0,
+    "vram_proc_mib_max": 12632.0,
+    "vram_dev_delta_mib": 12640.8125,
+    "vram_dev_delta_mib_max": 12640.8125,
+    "ingest_witness": {
+     "compact": 34
+    },
+    "foreign_cores_max": 0.0009341751291611238,
+    "prof_wall_s": 5.14404771476984,
+    "prof_overhead_s": -0.033028935082256794,
+    "prof_overhead_pct": -0.6379842779264315,
+    "prof0_wall_s": 5.104637275449932,
+    "prof0_overhead_s": -0.07243937440216541,
+    "prof": {
+     "outside_movies_s": 0.67555725176984,
+     "run_wall_s": 5.14404771476984,
+     "movie_wall_ms": {
+      "0": 2375.077793,
+      "1": 2100.136609
+     },
+     "ingest_ms": {
+      "0": 1751.465339,
+      "1": 1559.31584
+     },
+     "stages": {},
+     "steady_movie_ms": 2100.136609,
+     "steady_ingest_ms": 1559.31584,
+     "steady_stages": [
+      [
+       "host read movie",
+       1404.758346
+      ],
+      [
+       "global fft",
+       226.450068
+      ],
+      [
+       "gain and sum",
+       152.220098
+      ],
+      [
+       "dose weighting",
+       125.047519
+      ],
+      [
+       "patch alignment",
+       69.867907
+      ],
+      [
+       "global ifft",
+       47.472854
+      ],
+      [
+       "global alignment",
+       38.756633
+      ],
+      [
+       "hot pixels",
+       19.767063
+      ],
+      [
+       "fit polynomial",
+       3.699084
+      ],
+      [
+       "fix defects",
+       3.012123
+      ],
+      [
+       "release alignment",
+       2.329628
+      ],
+      [
+       "setup",
+       2.268727
+      ],
+      [
+       "session and device ingest",
+       1.255468
+      ],
+      [
+       "release preprocessing",
+       0.25534
+      ],
+      [
+       "movie teardown",
+       0.194439
+      ],
+      [
+       "submit model and plot",
+       0.09694
+      ],
+      [
+       "power spectrum",
+       0.044978
+      ],
+      [
+       "read gain",
+       0.038553
+      ],
+      [
+       "allocate host sum",
+       0.013968
+      ],
+      [
+       "allocate reconstruction",
+       0.013688
+      ]
+     ],
+     "first_movie_ms": 2375.077793,
+     "first_stages": [
+      [
+       "host read movie",
+       1385.715316
+      ],
+      [
+       "global fft",
+       221.781446
+      ],
+      [
+       "gain and sum",
+       195.748506
+      ],
+      [
+       "session and device ingest",
+       157.783942
+      ],
+      [
+       "dose weighting",
+       146.335202
+      ],
+      [
+       "hot pixels",
+       84.122933
+      ],
+      [
+       "patch alignment",
+       70.508741
+      ],
+      [
+       "global ifft",
+       47.503931
+      ],
+      [
+       "global alignment",
+       39.268153
+      ],
+      [
+       "fix defects",
+       5.655475
+      ],
+      [
+       "fit polynomial",
+       3.880113
+      ],
+      [
+       "setup",
+       2.776613
+      ],
+      [
+       "release alignment",
+       2.329906
+      ],
+      [
+       "movie teardown",
+       0.397258
+      ],
+      [
+       "release preprocessing",
+       0.265956
+      ],
+      [
+       "submit model and plot",
+       0.093588
+      ],
+      [
+       "power spectrum",
+       0.046654
+      ],
+      [
+       "read gain",
+       0.040508
+      ],
+      [
+       "allocate host sum",
+       0.013968
+      ],
+      [
+       "allocate reconstruction",
+       0.01341
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.8240052362015078,
+     "run_wall_s": 13.644193691201508,
+     "movie_wall_ms": {
+      "0": 2404.72432,
+      "1": 2083.096705,
+      "2": 2084.695793,
+      "3": 2025.400332,
+      "4": 2062.955908,
+      "5": 2057.152002
+     },
+     "ingest_ms": {
+      "0": 1774.385613,
+      "1": 1542.324981,
+      "2": 1546.345884,
+      "3": 1530.0417869999999,
+      "4": 1553.037147,
+      "5": 1563.954085
+     },
+     "stages": {},
+     "steady_movie_ms": 2062.955908,
+     "steady_ingest_ms": 1546.345884,
+     "steady_stages": [
+      [
+       "host read movie",
+       1391.733504
+      ],
+      [
+       "global fft",
+       223.526597
+      ],
+      [
+       "gain and sum",
+       151.264322
+      ],
+      [
+       "dose weighting",
+       125.075111
+      ],
+      [
+       "patch alignment",
+       70.150126
+      ],
+      [
+       "global ifft",
+       47.474142
+      ],
+      [
+       "global alignment",
+       38.811461
+      ],
+      [
+       "hot pixels",
+       12.439837
+      ],
+      [
+       "fit polynomial",
+       3.626712
+      ],
+      [
+       "fix defects",
+       3.120782
+      ],
+      [
+       "setup",
+       2.321242
+      ],
+      [
+       "release alignment",
+       2.317331
+      ],
+      [
+       "session and device ingest",
+       1.261891
+      ],
+      [
+       "release preprocessing",
+       0.261485
+      ],
+      [
+       "movie teardown",
+       0.190807
+      ],
+      [
+       "submit model and plot",
+       0.09219
+      ],
+      [
+       "power spectrum",
+       0.043301
+      ],
+      [
+       "read gain",
+       0.037156
+      ],
+      [
+       "allocate host sum",
+       0.016202
+      ],
+      [
+       "allocate reconstruction",
+       0.013409
+      ]
+     ],
+     "first_movie_ms": 2404.72432,
+     "first_stages": [
+      [
+       "host read movie",
+       1400.12197
+      ],
+      [
+       "global fft",
+       223.76145
+      ],
+      [
+       "gain and sum",
+       214.782748
+      ],
+      [
+       "session and device ingest",
+       165.047203
+      ],
+      [
+       "dose weighting",
+       147.080989
+      ],
+      [
+       "hot pixels",
+       84.596419
+      ],
+      [
+       "patch alignment",
+       70.445693
+      ],
+      [
+       "global ifft",
+       47.4484
+      ],
+      [
+       "global alignment",
+       39.103221
+      ],
+      [
+       "fix defects",
+       5.72893
+      ],
+      [
+       "fit polynomial",
+       3.935957
+      ],
+      [
+       "setup",
+       2.752581
+      ],
+      [
+       "release alignment",
+       2.648378
+      ],
+      [
+       "movie teardown",
+       0.400608
+      ],
+      [
+       "release preprocessing",
+       0.260647
+      ],
+      [
+       "power spectrum",
+       0.13158
+      ],
+      [
+       "submit model and plot",
+       0.087441
+      ],
+      [
+       "read gain",
+       0.044418
+      ],
+      [
+       "allocate reconstruction",
+       0.018158
+      ],
+      [
+       "allocate host sum",
+       0.013969
+      ]
+     ]
+    }
+   }
+  },
+  "host_read_steady_ms": 1391.733504,
+  "host_read_share": 0.6746307560927279,
+  "host_read_share_ex_retry": 0.6983788970158659,
+  "ms_per_mpx_L_steady": 1.4116926314173648,
+  "patches": 50,
+  "patches_retried": 0,
+  "patch_retry_converged": 0,
+  "traced_peak_mib": 6702.47,
+  "vram_peak_gib": 12.3359375,
+  "movie_f32_gib": 5.443897247314453
+ },
+ "e10641": {
+  "mpx_frame_per_movie": 1649.8944,
+  "movies": 2,
+  "cells": {
+   "auto-G": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 3.9028390469029546,
+     "min": 3.804933306761086,
+     "max": 3.9427397372201085,
+     "values": [
+      3.9389161923900247,
+      3.9028390469029546,
+      3.804933306761086,
+      3.899842550046742,
+      3.9427397372201085
+     ]
+    },
+    "wall_per_movie_s": 1.9514195234514773,
+    "user_s": 9.179091,
+    "sys_s": 4.508741,
+    "cpu_s": 13.69305,
+    "cpu_over_wall": 3.50848442260665,
+    "rss_gib": 1.8782882690429688,
+    "rss_gib_max": 1.8915252685546875,
+    "minflt": 940125,
+    "majflt": 1,
+    "vram_proc_mib": 13400.0,
+    "vram_proc_mib_max": 13400.0,
+    "vram_dev_delta_mib": 13408.8125,
+    "vram_dev_delta_mib_max": 13408.8125,
+    "ingest_witness": {
+     "compact": 34
+    },
+    "foreign_cores_max": 0.0011089773852990096,
+    "prof_wall_s": 3.9606319777667522,
+    "prof_overhead_s": 0.057792930863797665,
+    "prof_overhead_pct": 1.4807920636557756,
+    "prof": {
+     "outside_movies_s": 0.6942787436972275,
+     "run_wall_s": 3.9606319777667522,
+     "movie_wall_ms": {
+      "0": 1839.642552,
+      "1": 1425.477288
+     },
+     "ingest_ms": {
+      "0": 1060.106816,
+      "1": 952.301128
+     },
+     "stages": {},
+     "steady_movie_ms": 1425.477288,
+     "steady_ingest_ms": 952.301128,
+     "steady_stages": [
+      [
+       "host read movie",
+       766.065577
+      ],
+      [
+       "global fft",
+       252.864184
+      ],
+      [
+       "gain and sum",
+       182.932881
+      ],
+      [
+       "dose weighting",
+       98.422923
+      ],
+      [
+       "global ifft",
+       53.644369
+      ],
+      [
+       "global alignment",
+       43.437975
+      ],
+      [
+       "hot pixels",
+       18.913321
+      ],
+      [
+       "fix defects",
+       2.948981
+      ],
+      [
+       "setup",
+       2.366505
+      ],
+      [
+       "session and device ingest",
+       0.987558
+      ],
+      [
+       "movie teardown",
+       0.441956
+      ],
+      [
+       "release preprocessing",
+       0.329093
+      ],
+      [
+       "submit model and plot",
+       0.072635
+      ],
+      [
+       "read gain",
+       0.045816
+      ],
+      [
+       "power spectrum",
+       0.042465
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "allocate reconstruction",
+       0.016203
+      ],
+      [
+       "allocate host sum",
+       0.013968
+      ],
+      [
+       "release alignment",
+       0.013131
+      ]
+     ],
+     "first_movie_ms": 1839.642552,
+     "first_stages": [
+      [
+       "host read movie",
+       704.264008
+      ],
+      [
+       "global fft",
+       249.230581
+      ],
+      [
+       "gain and sum",
+       186.717736
+      ],
+      [
+       "read gain",
+       171.786008
+      ],
+      [
+       "session and device ingest",
+       169.929835
+      ],
+      [
+       "dose weighting",
+       147.424098
+      ],
+      [
+       "hot pixels",
+       106.516739
+      ],
+      [
+       "global ifft",
+       53.60023
+      ],
+      [
+       "global alignment",
+       43.628206
+      ],
+      [
+       "fix defects",
+       4.687752
+      ],
+      [
+       "setup",
+       2.846733
+      ],
+      [
+       "movie teardown",
+       0.265398
+      ],
+      [
+       "release preprocessing",
+       0.264839
+      ],
+      [
+       "submit model and plot",
+       0.068164
+      ],
+      [
+       "power spectrum",
+       0.046095
+      ],
+      [
+       "patch alignment",
+       0.019834
+      ],
+      [
+       "allocate reconstruction",
+       0.013968
+      ],
+      [
+       "release alignment",
+       0.013968
+      ],
+      [
+       "allocate host sum",
+       0.013409
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.7006066495253016,
+     "run_wall_s": 9.792500553652644,
+     "movie_wall_ms": {
+      "0": 1845.866641,
+      "1": 1437.612916,
+      "2": 1496.242683,
+      "3": 1410.733294,
+      "4": 1397.186811,
+      "5": 1425.066389
+     },
+     "ingest_ms": {
+      "0": 1057.201669,
+      "1": 963.868967,
+      "2": 1033.901392,
+      "3": 943.119775,
+      "4": 935.1978790000001,
+      "5": 969.0015840000001
+     },
+     "stages": {},
+     "steady_movie_ms": 1425.066389,
+     "steady_ingest_ms": 963.868967,
+     "steady_stages": [
+      [
+       "host read movie",
+       766.08591
+      ],
+      [
+       "global fft",
+       254.774471
+      ],
+      [
+       "gain and sum",
+       185.45999
+      ],
+      [
+       "dose weighting",
+       98.721686
+      ],
+      [
+       "global ifft",
+       53.620865
+      ],
+      [
+       "global alignment",
+       43.230477
+      ],
+      [
+       "hot pixels",
+       4.433229
+      ],
+      [
+       "setup",
+       2.400575
+      ],
+      [
+       "fix defects",
+       2.158931
+      ],
+      [
+       "session and device ingest",
+       0.869662
+      ],
+      [
+       "release preprocessing",
+       0.255339
+      ],
+      [
+       "movie teardown",
+       0.201981
+      ],
+      [
+       "submit model and plot",
+       0.067606
+      ],
+      [
+       "power spectrum",
+       0.044699
+      ],
+      [
+       "read gain",
+       0.03967
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "allocate reconstruction",
+       0.014247
+      ],
+      [
+       "release alignment",
+       0.013968
+      ],
+      [
+       "allocate host sum",
+       0.013968
+      ]
+     ],
+     "first_movie_ms": 1845.866641,
+     "first_stages": [
+      [
+       "host read movie",
+       701.956528
+      ],
+      [
+       "global fft",
+       251.602804
+      ],
+      [
+       "gain and sum",
+       187.653438
+      ],
+      [
+       "read gain",
+       170.074697
+      ],
+      [
+       "session and device ingest",
+       163.325075
+      ],
+      [
+       "dose weighting",
+       147.863068
+      ],
+      [
+       "hot pixels",
+       107.421654
+      ],
+      [
+       "global ifft",
+       53.562477
+      ],
+      [
+       "global alignment",
+       43.7256
+      ],
+      [
+       "fix defects",
+       4.719866
+      ],
+      [
+       "setup",
+       2.843088
+      ],
+      [
+       "release preprocessing",
+       0.265397
+      ],
+      [
+       "movie teardown",
+       0.178793
+      ],
+      [
+       "submit model and plot",
+       0.067886
+      ],
+      [
+       "power spectrum",
+       0.045257
+      ],
+      [
+       "patch alignment",
+       0.020393
+      ],
+      [
+       "release alignment",
+       0.014246
+      ],
+      [
+       "allocate reconstruction",
+       0.013689
+      ],
+      [
+       "allocate host sum",
+       0.013131
+      ]
+     ]
+    }
+   },
+   "auto-L": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 29.820011178031564,
+     "min": 29.800641749985516,
+     "max": 30.016912180930376,
+     "values": [
+      30.016912180930376,
+      29.800641749985516,
+      29.868793851695955,
+      29.81042938027531,
+      29.820011178031564
+     ]
+    },
+    "wall_per_movie_s": 14.910005589015782,
+    "user_s": 17.510084,
+    "sys_s": 22.395579,
+    "cpu_s": 39.862977,
+    "cpu_over_wall": 1.3367861186238288,
+    "rss_gib": 7.011772155761719,
+    "rss_gib_max": 7.021568298339844,
+    "minflt": 7042722,
+    "majflt": 0,
+    "vram_proc_mib": 15034.0,
+    "vram_proc_mib_max": 15034.0,
+    "vram_dev_delta_mib": 15042.8125,
+    "vram_dev_delta_mib_max": 15042.8125,
+    "ingest_witness": {
+     "compact": 34
+    },
+    "foreign_cores_max": 0.0035662799466737124,
+    "prof_wall_s": 29.934849900193512,
+    "prof_overhead_s": 0.11483872216194868,
+    "prof_overhead_pct": 0.38510623445557424,
+    "prof0_wall_s": 29.77957506850362,
+    "prof0_overhead_s": -0.04043610952794552,
+    "prof": {
+     "outside_movies_s": 0.6031436291902423,
+     "run_wall_s": 29.934849900193512,
+     "movie_wall_ms": {
+      "0": 16580.001771,
+      "1": 12735.993999
+     },
+     "ingest_ms": {
+      "0": 1069.809754,
+      "1": 874.3603129999999
+     },
+     "stages": {},
+     "steady_movie_ms": 12735.993999,
+     "steady_ingest_ms": 874.3603129999999,
+     "steady_stages": [
+      [
+       "patch alignment",
+       10643.633044
+      ],
+      [
+       "movie teardown",
+       729.776862
+      ],
+      [
+       "host read movie",
+       702.101382
+      ],
+      [
+       "global fft",
+       249.648854
+      ],
+      [
+       "gain and sum",
+       169.411615
+      ],
+      [
+       "dose weighting",
+       106.395496
+      ],
+      [
+       "global ifft",
+       53.662195
+      ],
+      [
+       "global alignment",
+       43.271177
+      ],
+      [
+       "hot pixels",
+       20.177172
+      ],
+      [
+       "fix defects",
+       2.989489
+      ],
+      [
+       "release alignment",
+       2.581895
+      ],
+      [
+       "setup",
+       2.500881
+      ],
+      [
+       "fit polynomial",
+       1.591268
+      ],
+      [
+       "session and device ingest",
+       1.482036
+      ],
+      [
+       "release preprocessing",
+       0.253663
+      ],
+      [
+       "submit model and plot",
+       0.137447
+      ],
+      [
+       "power spectrum",
+       0.044419
+      ],
+      [
+       "read gain",
+       0.03967
+      ],
+      [
+       "allocate reconstruction",
+       0.014527
+      ],
+      [
+       "allocate host sum",
+       0.014247
+      ]
+     ],
+     "first_movie_ms": 16580.001771,
+     "first_stages": [
+      [
+       "patch alignment",
+       14013.232213
+      ],
+      [
+       "movie teardown",
+       750.719701
+      ],
+      [
+       "host read movie",
+       713.03106
+      ],
+      [
+       "global fft",
+       250.362092
+      ],
+      [
+       "gain and sum",
+       184.669236
+      ],
+      [
+       "session and device ingest",
+       172.093278
+      ],
+      [
+       "read gain",
+       167.19823
+      ],
+      [
+       "dose weighting",
+       120.558438
+      ],
+      [
+       "hot pixels",
+       107.595654
+      ],
+      [
+       "global ifft",
+       53.590654
+      ],
+      [
+       "global alignment",
+       43.62214
+      ],
+      [
+       "fix defects",
+       4.633553
+      ],
+      [
+       "setup",
+       2.840309
+      ],
+      [
+       "release alignment",
+       2.646429
+      ],
+      [
+       "release preprocessing",
+       0.32546
+      ],
+      [
+       "fit polynomial",
+       0.152813
+      ],
+      [
+       "submit model and plot",
+       0.125155
+      ],
+      [
+       "power spectrum",
+       0.045815
+      ],
+      [
+       "allocate host sum",
+       0.013968
+      ],
+      [
+       "allocate reconstruction",
+       0.013689
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.7301063992150318,
+     "run_wall_s": 96.18650390021503,
+     "movie_wall_ms": {
+      "0": 16604.5267,
+      "1": 15954.826105,
+      "2": 15738.332194,
+      "3": 15730.155081,
+      "4": 15669.08795,
+      "5": 15596.997268
+     },
+     "ingest_ms": {
+      "0": 1053.7067439999998,
+      "1": 879.022455,
+      "2": 877.984648,
+      "3": 877.7530300000001,
+      "4": 860.627264,
+      "5": 871.969175
+     },
+     "stages": {},
+     "steady_movie_ms": 15730.155081,
+     "steady_ingest_ms": 877.7530300000001,
+     "steady_stages": [
+      [
+       "patch alignment",
+       13634.011239
+      ],
+      [
+       "movie teardown",
+       710.744176
+      ],
+      [
+       "host read movie",
+       700.802404
+      ],
+      [
+       "global fft",
+       248.335051
+      ],
+      [
+       "gain and sum",
+       165.145011
+      ],
+      [
+       "dose weighting",
+       98.649248
+      ],
+      [
+       "global ifft",
+       53.635813
+      ],
+      [
+       "global alignment",
+       43.307291
+      ],
+      [
+       "hot pixels",
+       16.857713
+      ],
+      [
+       "release alignment",
+       2.526295
+      ],
+      [
+       "setup",
+       2.407846
+      ],
+      [
+       "fix defects",
+       2.224302
+      ],
+      [
+       "session and device ingest",
+       1.734854
+      ],
+      [
+       "release preprocessing",
+       0.322106
+      ],
+      [
+       "submit model and plot",
+       0.119568
+      ],
+      [
+       "fit polynomial",
+       0.093029
+      ],
+      [
+       "power spectrum",
+       0.045815
+      ],
+      [
+       "read gain",
+       0.041905
+      ],
+      [
+       "allocate host sum",
+       0.014527
+      ],
+      [
+       "allocate reconstruction",
+       0.014527
+      ]
+     ],
+     "first_movie_ms": 16604.5267,
+     "first_stages": [
+      [
+       "patch alignment",
+       14040.566278
+      ],
+      [
+       "movie teardown",
+       750.419215
+      ],
+      [
+       "host read movie",
+       703.51794
+      ],
+      [
+       "global fft",
+       251.494566
+      ],
+      [
+       "gain and sum",
+       187.857616
+      ],
+      [
+       "read gain",
+       169.597637
+      ],
+      [
+       "session and device ingest",
+       163.824862
+      ],
+      [
+       "dose weighting",
+       121.804913
+      ],
+      [
+       "hot pixels",
+       107.819095
+      ],
+      [
+       "global ifft",
+       53.597541
+      ],
+      [
+       "global alignment",
+       43.727266
+      ],
+      [
+       "fix defects",
+       4.689414
+      ],
+      [
+       "setup",
+       2.807328
+      ],
+      [
+       "release alignment",
+       2.438854
+      ],
+      [
+       "release preprocessing",
+       0.263721
+      ],
+      [
+       "fit polynomial",
+       0.153092
+      ],
+      [
+       "submit model and plot",
+       0.11873
+      ],
+      [
+       "power spectrum",
+       0.045537
+      ],
+      [
+       "allocate reconstruction",
+       0.013968
+      ],
+      [
+       "allocate host sum",
+       0.013131
+      ]
+     ]
+    }
+   }
+  },
+  "host_read_steady_ms": 700.802404,
+  "host_read_share": 0.044551525423069664,
+  "host_read_share_ex_retry": 0.33432934799519337,
+  "ms_per_mpx_L_steady": 9.534037500218197,
+  "patches": 50,
+  "patches_retried": 41,
+  "patch_retry_converged": 1,
+  "traced_peak_mib": 7566.14,
+  "vram_peak_gib": 14.681640625,
+  "movie_f32_gib": 6.146335601806641
+ },
+ "e10441": {
+  "mpx_frame_per_movie": 4713.984,
+  "movies": 1,
+  "cells": {
+   "auto-G": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 6.8490043533965945,
+     "min": 6.769395328126848,
+     "max": 6.869729234836996,
+     "values": [
+      6.769395328126848,
+      6.846255408599973,
+      6.869729234836996,
+      6.8490043533965945,
+      6.8513767048716545
+     ]
+    },
+    "wall_per_movie_s": 6.8490043533965945,
+    "user_s": 15.545414,
+    "sys_s": 6.857219,
+    "cpu_s": 22.340087,
+    "cpu_over_wall": 3.261800671643753,
+    "rss_gib": 5.042797088623047,
+    "rss_gib_max": 5.043430328369141,
+    "minflt": 1582159,
+    "majflt": 2,
+    "vram_proc_mib": 37924.0,
+    "vram_proc_mib_max": 37924.0,
+    "vram_dev_delta_mib": 37932.8125,
+    "vram_dev_delta_mib_max": 37932.8125,
+    "ingest_witness": {
+     "compact": 26
+    },
+    "foreign_cores_max": 0,
+    "prof_wall_s": 6.797920857556164,
+    "prof_overhead_s": -0.05108349584043026,
+    "prof_overhead_pct": -0.745852874441475,
+    "prof": {
+     "outside_movies_s": 1.0059678168408208,
+     "run_wall_s": 6.797920857556164,
+     "movie_wall_ms": {
+      "0": 5794.192242
+     },
+     "ingest_ms": {
+      "0": 3134.511395
+     },
+     "stages": {},
+     "first_movie_ms": 5794.192242,
+     "first_stages": [
+      [
+       "host read movie",
+       2413.391539
+      ],
+      [
+       "global fft",
+       747.171785
+      ],
+      [
+       "read gain",
+       629.805465
+      ],
+      [
+       "gain and sum",
+       556.98902
+      ],
+      [
+       "dose weighting",
+       502.824067
+      ],
+      [
+       "hot pixels",
+       407.097051
+      ],
+      [
+       "global ifft",
+       179.645874
+      ],
+      [
+       "session and device ingest",
+       164.359563
+      ],
+      [
+       "global alignment",
+       121.997208
+      ],
+      [
+       "fix defects",
+       65.397003
+      ],
+      [
+       "setup",
+       2.332143
+      ],
+      [
+       "release preprocessing",
+       0.443073
+      ],
+      [
+       "movie teardown",
+       0.393346
+      ],
+      [
+       "submit model and plot",
+       0.068724
+      ],
+      [
+       "power spectrum",
+       0.04358
+      ],
+      [
+       "patch alignment",
+       0.020673
+      ],
+      [
+       "allocate host sum",
+       0.013968
+      ],
+      [
+       "release alignment",
+       0.01369
+      ],
+      [
+       "allocate reconstruction",
+       0.012851
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 1.0954948777613964,
+     "run_wall_s": 29.46683369204402,
+     "movie_wall_ms": {
+      "0": 5859.862487,
+      "1": 4556.401397,
+      "2": 4455.261812,
+      "3": 4385.101357,
+      "4": 4532.853611,
+      "5": 4647.852214
+     },
+     "ingest_ms": {
+      "0": 3182.865169,
+      "1": 3064.088553,
+      "2": 2956.793993,
+      "3": 2888.036776,
+      "4": 2917.986405,
+      "5": 3162.197121
+     },
+     "stages": {},
+     "steady_movie_ms": 4532.853611,
+     "steady_ingest_ms": 2956.793993,
+     "steady_stages": [
+      [
+       "host read movie",
+       2495.478326
+      ],
+      [
+       "global fft",
+       742.473305
+      ],
+      [
+       "gain and sum",
+       456.147231
+      ],
+      [
+       "dose weighting",
+       310.496252
+      ],
+      [
+       "global ifft",
+       179.718325
+      ],
+      [
+       "global alignment",
+       121.775353
+      ],
+      [
+       "hot pixels",
+       69.114588
+      ],
+      [
+       "fix defects",
+       66.795541
+      ],
+      [
+       "setup",
+       1.970915
+      ],
+      [
+       "session and device ingest",
+       1.027504
+      ],
+      [
+       "release preprocessing",
+       0.460112
+      ],
+      [
+       "movie teardown",
+       0.189968
+      ],
+      [
+       "submit model and plot",
+       0.069004
+      ],
+      [
+       "power spectrum",
+       0.046373
+      ],
+      [
+       "read gain",
+       0.039949
+      ],
+      [
+       "patch alignment",
+       0.020394
+      ],
+      [
+       "allocate host sum",
+       0.015644
+      ],
+      [
+       "allocate reconstruction",
+       0.014527
+      ],
+      [
+       "release alignment",
+       0.014246
+      ]
+     ],
+     "first_movie_ms": 5859.862487,
+     "first_stages": [
+      [
+       "host read movie",
+       2426.687004
+      ],
+      [
+       "global fft",
+       752.752532
+      ],
+      [
+       "read gain",
+       638.217577
+      ],
+      [
+       "gain and sum",
+       580.196886
+      ],
+      [
+       "dose weighting",
+       504.353311
+      ],
+      [
+       "hot pixels",
+       408.90784
+      ],
+      [
+       "global ifft",
+       179.879514
+      ],
+      [
+       "session and device ingest",
+       174.105663
+      ],
+      [
+       "global alignment",
+       122.011692
+      ],
+      [
+       "fix defects",
+       65.240596
+      ],
+      [
+       "setup",
+       2.465392
+      ],
+      [
+       "release preprocessing",
+       0.45732
+      ],
+      [
+       "movie teardown",
+       0.387478
+      ],
+      [
+       "submit model and plot",
+       0.078223
+      ],
+      [
+       "power spectrum",
+       0.044698
+      ],
+      [
+       "patch alignment",
+       0.020394
+      ],
+      [
+       "release alignment",
+       0.020115
+      ],
+      [
+       "allocate host sum",
+       0.015085
+      ],
+      [
+       "allocate reconstruction",
+       0.013689
+      ]
+     ]
+    }
+   },
+   "auto-L": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 7.137150370515883,
+     "min": 7.063404253683984,
+     "max": 7.1661490658298135,
+     "values": [
+      7.120212431065738,
+      7.063404253683984,
+      7.137150370515883,
+      7.1661490658298135,
+      7.160285988822579
+     ]
+    },
+    "wall_per_movie_s": 7.137150370515883,
+    "user_s": 15.65213,
+    "sys_s": 7.112124,
+    "cpu_s": 22.773411,
+    "cpu_over_wall": 3.1908268451339783,
+    "rss_gib": 5.042240142822266,
+    "rss_gib_max": 5.042819976806641,
+    "minflt": 1586871,
+    "majflt": 15,
+    "vram_proc_mib": 40266.0,
+    "vram_proc_mib_max": 40266.0,
+    "vram_dev_delta_mib": 40274.8125,
+    "vram_dev_delta_mib_max": 40274.8125,
+    "ingest_witness": {
+     "compact": 26
+    },
+    "foreign_cores_max": 0,
+    "prof_wall_s": 7.100186024792492,
+    "prof_overhead_s": -0.03696434572339058,
+    "prof_overhead_pct": -0.517914627049097,
+    "prof0_wall_s": 7.126515838317573,
+    "prof0_overhead_s": -0.010634532198309898,
+    "prof": {
+     "outside_movies_s": 1.0180054050417704,
+     "run_wall_s": 7.100186024792492,
+     "movie_wall_ms": {
+      "0": 6078.760134
+     },
+     "ingest_ms": {
+      "0": 3158.1133019999997
+     },
+     "stages": {},
+     "first_movie_ms": 6078.760134,
+     "first_stages": [
+      [
+       "host read movie",
+       2407.250032
+      ],
+      [
+       "global fft",
+       750.656041
+      ],
+      [
+       "read gain",
+       634.41851
+      ],
+      [
+       "gain and sum",
+       569.700463
+      ],
+      [
+       "dose weighting",
+       533.975179
+      ],
+      [
+       "hot pixels",
+       407.358247
+      ],
+      [
+       "patch alignment",
+       223.402589
+      ],
+      [
+       "global ifft",
+       179.45954
+      ],
+      [
+       "session and device ingest",
+       167.97539
+      ],
+      [
+       "global alignment",
+       121.905577
+      ],
+      [
+       "fix defects",
+       65.64082
+      ],
+      [
+       "release alignment",
+       4.132099
+      ],
+      [
+       "fit polynomial",
+       3.109896
+      ],
+      [
+       "setup",
+       2.320411
+      ],
+      [
+       "release preprocessing",
+       0.493079
+      ],
+      [
+       "movie teardown",
+       0.390273
+      ],
+      [
+       "submit model and plot",
+       0.091073
+      ],
+      [
+       "power spectrum",
+       0.044419
+      ],
+      [
+       "allocate host sum",
+       0.014806
+      ],
+      [
+       "allocate reconstruction",
+       0.013409
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 1.249892140401986,
+     "run_wall_s": 31.171060314401984,
+     "movie_wall_ms": {
+      "0": 6069.995163,
+      "1": 4844.850723,
+      "2": 4843.040966,
+      "3": 4664.232293,
+      "4": 4926.407843,
+      "5": 4589.785825
+     },
+     "ingest_ms": {
+      "0": 3163.048244,
+      "1": 3092.652974,
+      "2": 3076.045665,
+      "3": 2917.272525,
+      "4": 3073.815697,
+      "5": 2836.398335
+     },
+     "stages": {},
+     "steady_movie_ms": 4843.040966,
+     "steady_ingest_ms": 3073.815697,
+     "steady_stages": [
+      [
+       "host read movie",
+       2614.068924
+      ],
+      [
+       "global fft",
+       741.445008
+      ],
+      [
+       "gain and sum",
+       457.345639
+      ],
+      [
+       "dose weighting",
+       341.057237
+      ],
+      [
+       "patch alignment",
+       222.992657
+      ],
+      [
+       "global ifft",
+       179.685624
+      ],
+      [
+       "global alignment",
+       121.729326
+      ],
+      [
+       "hot pixels",
+       69.45453
+      ],
+      [
+       "fix defects",
+       66.935645
+      ],
+      [
+       "release alignment",
+       3.964736
+      ],
+      [
+       "fit polynomial",
+       2.989476
+      ],
+      [
+       "session and device ingest",
+       2.420975
+      ],
+      [
+       "setup",
+       2.020641
+      ],
+      [
+       "release preprocessing",
+       0.535822
+      ],
+      [
+       "movie teardown",
+       0.230476
+      ],
+      [
+       "submit model and plot",
+       0.089117
+      ],
+      [
+       "power spectrum",
+       0.047212
+      ],
+      [
+       "read gain",
+       0.037994
+      ],
+      [
+       "allocate host sum",
+       0.014527
+      ],
+      [
+       "allocate reconstruction",
+       0.013969
+      ]
+     ],
+     "first_movie_ms": 6069.995163,
+     "first_stages": [
+      [
+       "host read movie",
+       2429.374392
+      ],
+      [
+       "global fft",
+       748.493601
+      ],
+      [
+       "read gain",
+       633.497672
+      ],
+      [
+       "gain and sum",
+       567.687181
+      ],
+      [
+       "dose weighting",
+       530.844339
+      ],
+      [
+       "hot pixels",
+       401.039195
+      ],
+      [
+       "patch alignment",
+       223.639805
+      ],
+      [
+       "global ifft",
+       179.410906
+      ],
+      [
+       "session and device ingest",
+       167.938507
+      ],
+      [
+       "global alignment",
+       121.964751
+      ],
+      [
+       "fix defects",
+       65.515913
+      ],
+      [
+       "release alignment",
+       4.053023
+      ],
+      [
+       "fit polynomial",
+       3.157373
+      ],
+      [
+       "setup",
+       2.240784
+      ],
+      [
+       "release preprocessing",
+       0.452013
+      ],
+      [
+       "movie teardown",
+       0.307023
+      ],
+      [
+       "submit model and plot",
+       0.084648
+      ],
+      [
+       "power spectrum",
+       0.042184
+      ],
+      [
+       "allocate host sum",
+       0.015644
+      ],
+      [
+       "allocate reconstruction",
+       0.013409
+      ]
+     ]
+    }
+   }
+  },
+  "host_read_steady_ms": 2614.068924,
+  "host_read_share": 0.5397577559949965,
+  "host_read_share_ex_retry": 0.5658098680283735,
+  "ms_per_mpx_L_steady": 1.0273774722188278,
+  "patches": 25,
+  "patches_retried": 0,
+  "patch_retry_converged": 0,
+  "traced_peak_mib": 21623.13,
+  "vram_peak_gib": 39.322265625,
+  "movie_f32_gib": 17.560958862304688
+ },
+ "e10474f3": {
+  "mpx_frame_per_movie": 973.078528,
+  "movies": 2,
+  "cells": {
+   "auto-G": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 12.431912852451205,
+     "min": 12.34798953216523,
+     "max": 12.506122919730842,
+     "values": [
+      12.34798953216523,
+      12.37251412589103,
+      12.458895687013865,
+      12.506122919730842,
+      12.431912852451205
+     ]
+    },
+    "wall_per_movie_s": 6.215956426225603,
+    "user_s": 46.164906,
+    "sys_s": 9.961927,
+    "cpu_s": 56.162183999999996,
+    "cpu_over_wall": 4.517581861018796,
+    "rss_gib": 5.037891387939453,
+    "rss_gib_max": 5.038974761962891,
+    "minflt": 2842550,
+    "majflt": 0,
+    "vram_proc_mib": 8048.0,
+    "vram_proc_mib_max": 8052.0,
+    "vram_dev_delta_mib": 8056.8125,
+    "vram_dev_delta_mib_max": 8060.8125,
+    "ingest_witness": {
+     "float": 34
+    },
+    "foreign_cores_max": 0.001442825972081897,
+    "prof_wall_s": 12.536357286386192,
+    "prof_overhead_s": 0.10444443393498659,
+    "prof_overhead_pct": 0.8401316448610179,
+    "prof": {
+     "outside_movies_s": 0.6222663547281044,
+     "run_wall_s": 12.536357286386192,
+     "movie_wall_ms": {
+      "0": 6115.333591,
+      "1": 5840.306192
+     },
+     "ingest_ms": {
+      "0": 4945.551528,
+      "1": 4785.782264
+     },
+     "stages": {},
+     "steady_movie_ms": 5840.306192,
+     "steady_ingest_ms": 4785.782264,
+     "steady_stages": [
+      [
+       "host read movie",
+       4383.082443
+      ],
+      [
+       "movie teardown",
+       592.997603
+      ],
+      [
+       "gain and sum",
+       332.46077
+      ],
+      [
+       "fix defects",
+       286.832203
+      ],
+      [
+       "dose weighting",
+       51.54185
+      ],
+      [
+       "setup",
+       45.195221
+      ],
+      [
+       "global alignment",
+       24.626084
+      ],
+      [
+       "global ifft",
+       21.362814
+      ],
+      [
+       "global fft",
+       21.257214
+      ],
+      [
+       "hot pixels",
+       15.983348
+      ],
+      [
+       "session and device ingest",
+       0.736687
+      ],
+      [
+       "release preprocessing",
+       0.336636
+      ],
+      [
+       "submit model and plot",
+       0.133258
+      ],
+      [
+       "power spectrum",
+       0.042743
+      ],
+      [
+       "read gain",
+       0.041625
+      ],
+      [
+       "patch alignment",
+       0.019834
+      ],
+      [
+       "allocate host sum",
+       0.014247
+      ],
+      [
+       "allocate reconstruction",
+       0.013969
+      ],
+      [
+       "release alignment",
+       0.01369
+      ]
+     ],
+     "first_movie_ms": 6115.333591,
+     "first_stages": [
+      [
+       "host read movie",
+       4389.755667
+      ],
+      [
+       "movie teardown",
+       597.263513
+      ],
+      [
+       "gain and sum",
+       425.194014
+      ],
+      [
+       "fix defects",
+       294.564295
+      ],
+      [
+       "session and device ingest",
+       160.417925
+      ],
+      [
+       "dose weighting",
+       85.845082
+      ],
+      [
+       "hot pixels",
+       60.489039
+      ],
+      [
+       "setup",
+       45.36368
+      ],
+      [
+       "global alignment",
+       40.330576
+      ],
+      [
+       "global ifft",
+       21.372565
+      ],
+      [
+       "global fft",
+       21.274515
+      ],
+      [
+       "release preprocessing",
+       0.284393
+      ],
+      [
+       "submit model and plot",
+       0.134653
+      ],
+      [
+       "read gain",
+       0.045257
+      ],
+      [
+       "power spectrum",
+       0.039949
+      ],
+      [
+       "patch alignment",
+       0.019556
+      ],
+      [
+       "allocate reconstruction",
+       0.01369
+      ],
+      [
+       "allocate host sum",
+       0.013131
+      ],
+      [
+       "release alignment",
+       0.012851
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.7095076532662645,
+     "run_wall_s": 35.938472824171185,
+     "movie_wall_ms": {
+      "0": 6172.991637,
+      "1": 5928.015633,
+      "2": 5792.618783,
+      "3": 5784.458996,
+      "4": 5786.965095,
+      "5": 5861.431212
+     },
+     "ingest_ms": {
+      "0": 4998.7205539999995,
+      "1": 4829.138928,
+      "2": 4717.202464,
+      "3": 4709.247284,
+      "4": 4700.715099,
+      "5": 4744.351629000001
+     },
+     "stages": {},
+     "steady_movie_ms": 5792.618783,
+     "steady_ingest_ms": 4717.202464,
+     "steady_stages": [
+      [
+       "host read movie",
+       4386.31237
+      ],
+      [
+       "movie teardown",
+       596.703246
+      ],
+      [
+       "gain and sum",
+       330.102285
+      ],
+      [
+       "fix defects",
+       295.111801
+      ],
+      [
+       "dose weighting",
+       52.43648
+      ],
+      [
+       "setup",
+       45.078852
+      ],
+      [
+       "global alignment",
+       40.203379
+      ],
+      [
+       "global ifft",
+       21.375
+      ],
+      [
+       "global fft",
+       21.225818
+      ],
+      [
+       "hot pixels",
+       10.930407
+      ],
+      [
+       "session and device ingest",
+       0.78753
+      ],
+      [
+       "release preprocessing",
+       0.287186
+      ],
+      [
+       "submit model and plot",
+       0.155606
+      ],
+      [
+       "read gain",
+       0.042463
+      ],
+      [
+       "power spectrum",
+       0.041905
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "allocate host sum",
+       0.016204
+      ],
+      [
+       "allocate reconstruction",
+       0.016203
+      ],
+      [
+       "release alignment",
+       0.013688
+      ]
+     ],
+     "first_movie_ms": 6172.991637,
+     "first_stages": [
+      [
+       "host read movie",
+       4406.836931
+      ],
+      [
+       "movie teardown",
+       597.413369
+      ],
+      [
+       "gain and sum",
+       429.719608
+      ],
+      [
+       "fix defects",
+       294.437655
+      ],
+      [
+       "session and device ingest",
+       169.988776
+      ],
+      [
+       "dose weighting",
+       86.394101
+      ],
+      [
+       "hot pixels",
+       60.873016
+      ],
+      [
+       "setup",
+       45.160449
+      ],
+      [
+       "global alignment",
+       40.300811
+      ],
+      [
+       "global ifft",
+       21.375882
+      ],
+      [
+       "global fft",
+       21.279222
+      ],
+      [
+       "release preprocessing",
+       0.258412
+      ],
+      [
+       "submit model and plot",
+       0.132978
+      ],
+      [
+       "read gain",
+       0.047772
+      ],
+      [
+       "power spectrum",
+       0.041625
+      ],
+      [
+       "patch alignment",
+       0.021511
+      ],
+      [
+       "allocate host sum",
+       0.015644
+      ],
+      [
+       "release alignment",
+       0.014527
+      ],
+      [
+       "allocate reconstruction",
+       0.013689
+      ]
+     ]
+    }
+   },
+   "auto-L": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 14.213572887703776,
+     "min": 14.048993625678122,
+     "max": 14.335691160522401,
+     "values": [
+      14.048993625678122,
+      14.32809759490192,
+      14.213572887703776,
+      14.335691160522401,
+      14.124451348558068
+     ]
+    },
+    "wall_per_movie_s": 7.106786443851888,
+    "user_s": 47.62182,
+    "sys_s": 10.705576,
+    "cpu_s": 58.428506999999996,
+    "cpu_over_wall": 4.1107543797483,
+    "rss_gib": 5.2525787353515625,
+    "rss_gib_max": 5.252655029296875,
+    "minflt": 3041037,
+    "majflt": 0,
+    "vram_proc_mib": 9026.0,
+    "vram_proc_mib_max": 9026.0,
+    "vram_dev_delta_mib": 9034.8125,
+    "vram_dev_delta_mib_max": 9034.8125,
+    "ingest_witness": {
+     "float": 34
+    },
+    "foreign_cores_max": 0.0006417460475192436,
+    "prof_wall_s": 14.236950542777777,
+    "prof_overhead_s": 0.02337765507400036,
+    "prof_overhead_pct": 0.16447416324311018,
+    "prof0_wall_s": 14.015249126590788,
+    "prof0_overhead_s": -0.198323761112988,
+    "prof": {
+     "outside_movies_s": 0.6081779469265669,
+     "run_wall_s": 14.236950542777777,
+     "movie_wall_ms": {
+      "0": 7724.955483,
+      "1": 5915.291706
+     },
+     "ingest_ms": {
+      "0": 5084.658978,
+      "1": 4791.22845
+     },
+     "stages": {},
+     "steady_movie_ms": 5915.291706,
+     "steady_ingest_ms": 4791.22845,
+     "steady_stages": [
+      [
+       "host read movie",
+       4454.365584
+      ],
+      [
+       "movie teardown",
+       589.924021
+      ],
+      [
+       "gain and sum",
+       330.819109
+      ],
+      [
+       "fix defects",
+       282.426329
+      ],
+      [
+       "patch alignment",
+       60.600225
+      ],
+      [
+       "dose weighting",
+       57.01511
+      ],
+      [
+       "setup",
+       45.163609
+      ],
+      [
+       "global alignment",
+       24.608461
+      ],
+      [
+       "global ifft",
+       21.371196
+      ],
+      [
+       "global fft",
+       21.290151
+      ],
+      [
+       "hot pixels",
+       15.903435
+      ],
+      [
+       "fit polynomial",
+       3.328642
+      ],
+      [
+       "release alignment",
+       2.034062
+      ],
+      [
+       "session and device ingest",
+       0.961856
+      ],
+      [
+       "submit model and plot",
+       0.336075
+      ],
+      [
+       "release preprocessing",
+       0.233829
+      ],
+      [
+       "read gain",
+       0.043023
+      ],
+      [
+       "power spectrum",
+       0.043022
+      ],
+      [
+       "allocate host sum",
+       0.014527
+      ],
+      [
+       "allocate reconstruction",
+       0.013689
+      ]
+     ],
+     "first_movie_ms": 7724.955483,
+     "first_stages": [
+      [
+       "host read movie",
+       4482.801112
+      ],
+      [
+       "patch alignment",
+       1481.048564
+      ],
+      [
+       "movie teardown",
+       592.289319
+      ],
+      [
+       "gain and sum",
+       429.423614
+      ],
+      [
+       "fix defects",
+       290.613226
+      ],
+      [
+       "session and device ingest",
+       171.213564
+      ],
+      [
+       "dose weighting",
+       73.44852
+      ],
+      [
+       "hot pixels",
+       60.544053
+      ],
+      [
+       "setup",
+       45.693893
+      ],
+      [
+       "global alignment",
+       40.265776
+      ],
+      [
+       "global ifft",
+       21.401067
+      ],
+      [
+       "global fft",
+       21.29379
+      ],
+      [
+       "fit polynomial",
+       2.945073
+      ],
+      [
+       "release alignment",
+       2.236878
+      ],
+      [
+       "release preprocessing",
+       0.286629
+      ],
+      [
+       "submit model and plot",
+       0.15896
+      ],
+      [
+       "read gain",
+       0.046654
+      ],
+      [
+       "power spectrum",
+       0.040508
+      ],
+      [
+       "allocate host sum",
+       0.015365
+      ],
+      [
+       "allocate reconstruction",
+       0.01313
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.8926680633519979,
+     "run_wall_s": 44.681605325080454,
+     "movie_wall_ms": {
+      "0": 7664.332254,
+      "1": 7392.126754,
+      "2": 7256.224986,
+      "3": 7196.107423,
+      "4": 7208.263686,
+      "5": 7145.618555
+     },
+     "ingest_ms": {
+      "0": 5021.8546479999995,
+      "1": 4843.782287999999,
+      "2": 4750.853843999999,
+      "3": 4687.945838000001,
+      "4": 4716.582614000001,
+      "5": 4629.788633
+     },
+     "stages": {},
+     "steady_movie_ms": 7208.263686,
+     "steady_ingest_ms": 4716.582614000001,
+     "steady_stages": [
+      [
+       "host read movie",
+       4382.221317
+      ],
+      [
+       "patch alignment",
+       1418.000275
+      ],
+      [
+       "movie teardown",
+       591.470144
+      ],
+      [
+       "gain and sum",
+       354.096157
+      ],
+      [
+       "fix defects",
+       289.300609
+      ],
+      [
+       "dose weighting",
+       56.946163
+      ],
+      [
+       "setup",
+       45.294165
+      ],
+      [
+       "global alignment",
+       40.090513
+      ],
+      [
+       "global ifft",
+       21.36387
+      ],
+      [
+       "global fft",
+       21.277254
+      ],
+      [
+       "hot pixels",
+       10.857789
+      ],
+      [
+       "fit polynomial",
+       2.967971
+      ],
+      [
+       "release alignment",
+       2.194406
+      ],
+      [
+       "session and device ingest",
+       0.976378
+      ],
+      [
+       "release preprocessing",
+       0.239416
+      ],
+      [
+       "submit model and plot",
+       0.170692
+      ],
+      [
+       "read gain",
+       0.043302
+      ],
+      [
+       "power spectrum",
+       0.041625
+      ],
+      [
+       "allocate host sum",
+       0.014806
+      ],
+      [
+       "allocate reconstruction",
+       0.013968
+      ]
+     ],
+     "first_movie_ms": 7664.332254,
+     "first_stages": [
+      [
+       "host read movie",
+       4429.33573
+      ],
+      [
+       "patch alignment",
+       1482.252716
+      ],
+      [
+       "movie teardown",
+       596.964174
+      ],
+      [
+       "gain and sum",
+       428.396282
+      ],
+      [
+       "fix defects",
+       290.825925
+      ],
+      [
+       "session and device ingest",
+       159.752006
+      ],
+      [
+       "dose weighting",
+       73.078177
+      ],
+      [
+       "hot pixels",
+       60.245558
+      ],
+      [
+       "setup",
+       45.25309
+      ],
+      [
+       "global alignment",
+       40.296427
+      ],
+      [
+       "global ifft",
+       21.360467
+      ],
+      [
+       "global fft",
+       21.275578
+      ],
+      [
+       "fit polynomial",
+       2.91182
+      ],
+      [
+       "release alignment",
+       2.396949
+      ],
+      [
+       "release preprocessing",
+       0.25534
+      ],
+      [
+       "submit model and plot",
+       0.163428
+      ],
+      [
+       "read gain",
+       0.045258
+      ],
+      [
+       "power spectrum",
+       0.043022
+      ],
+      [
+       "allocate host sum",
+       0.015644
+      ],
+      [
+       "allocate reconstruction",
+       0.01341
+      ]
+     ]
+    }
+   }
+  },
+  "host_read_steady_ms": 4382.221317,
+  "host_read_share": 0.6079440913782355,
+  "host_read_share_ex_retry": 0.7568258999538632,
+  "ms_per_mpx_L_steady": 7.407689593989274,
+  "patches": 50,
+  "patches_retried": 4,
+  "patch_retry_converged": 0,
+  "traced_peak_mib": 4416.73,
+  "vram_peak_gib": 8.814453125,
+  "movie_f32_gib": 3.625
+ },
+ "e10474f4": {
+  "mpx_frame_per_movie": 2415.919104,
+  "movies": 2,
+  "cells": {
+   "auto-G": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 25.989165489561856,
+     "min": 25.68409512937069,
+     "max": 26.12897466868162,
+     "values": [
+      25.68409512937069,
+      26.12897466868162,
+      25.989165489561856,
+      25.84110591094941,
+      26.022065824829042
+     ]
+    },
+    "wall_per_movie_s": 12.994582744780928,
+    "user_s": 107.505504,
+    "sys_s": 22.212728,
+    "cpu_s": 129.718232,
+    "cpu_over_wall": 4.991242679650461,
+    "rss_gib": 11.999980926513672,
+    "rss_gib_max": 12.000740051269531,
+    "minflt": 6809798,
+    "majflt": 0,
+    "vram_proc_mib": 19058.0,
+    "vram_proc_mib_max": 19060.0,
+    "vram_dev_delta_mib": 19066.8125,
+    "vram_dev_delta_mib_max": 19068.8125,
+    "ingest_witness": {
+     "float": 34
+    },
+    "foreign_cores_max": 0.0038097733995113036,
+    "prof_wall_s": 26.02591226901859,
+    "prof_overhead_s": 0.03674677945673466,
+    "prof_overhead_pct": 0.14139268716224623,
+    "prof": {
+     "outside_movies_s": 0.5830172470017345,
+     "run_wall_s": 26.02591226901859,
+     "movie_wall_ms": {
+      "0": 12709.749942,
+      "1": 12738.164311
+     },
+     "ingest_ms": {
+      "0": 10965.400518999999,
+      "1": 11074.395343
+     },
+     "stages": {},
+     "steady_movie_ms": 12738.164311,
+     "steady_ingest_ms": 11074.395343,
+     "steady_stages": [
+      [
+       "host read movie",
+       9995.094807
+      ],
+      [
+       "movie teardown",
+       1386.023059
+      ],
+      [
+       "gain and sum",
+       1094.77092
+      ],
+      [
+       "dose weighting",
+       107.37697
+      ],
+      [
+       "global fft",
+       53.554066
+      ],
+      [
+       "global ifft",
+       52.910393
+      ],
+      [
+       "global alignment",
+       39.853987
+      ],
+      [
+       "hot pixels",
+       14.221934
+      ],
+      [
+       "fix defects",
+       5.860527
+      ],
+      [
+       "setup",
+       3.720588
+      ],
+      [
+       "session and device ingest",
+       0.639188
+      ],
+      [
+       "release preprocessing",
+       0.29529
+      ],
+      [
+       "submit model and plot",
+       0.122362
+      ],
+      [
+       "power spectrum",
+       0.047492
+      ],
+      [
+       "read gain",
+       0.039391
+      ],
+      [
+       "patch alignment",
+       0.020115
+      ],
+      [
+       "allocate host sum",
+       0.01704
+      ],
+      [
+       "allocate reconstruction",
+       0.015366
+      ],
+      [
+       "release alignment",
+       0.014247
+      ]
+     ],
+     "first_movie_ms": 12709.749942,
+     "first_stages": [
+      [
+       "host read movie",
+       10022.933091
+      ],
+      [
+       "movie teardown",
+       1381.751021
+      ],
+      [
+       "gain and sum",
+       767.729407
+      ],
+      [
+       "session and device ingest",
+       165.585882
+      ],
+      [
+       "dose weighting",
+       140.806823
+      ],
+      [
+       "hot pixels",
+       58.785446
+      ],
+      [
+       "global fft",
+       53.582887
+      ],
+      [
+       "global ifft",
+       52.872678
+      ],
+      [
+       "global alignment",
+       39.76543
+      ],
+      [
+       "fix defects",
+       6.403619
+      ],
+      [
+       "setup",
+       5.321356
+      ],
+      [
+       "release preprocessing",
+       0.279645
+      ],
+      [
+       "submit model and plot",
+       0.192762
+      ],
+      [
+       "power spectrum",
+       0.043022
+      ],
+      [
+       "read gain",
+       0.042184
+      ],
+      [
+       "patch alignment",
+       0.019835
+      ],
+      [
+       "allocate reconstruction",
+       0.018995
+      ],
+      [
+       "release alignment",
+       0.017041
+      ],
+      [
+       "allocate host sum",
+       0.013968
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.6052694625099377,
+     "run_wall_s": 75.96928720641881,
+     "movie_wall_ms": {
+      "0": 12734.223789,
+      "1": 12560.920319,
+      "2": 12663.286459,
+      "3": 12529.689929,
+      "4": 12536.120184,
+      "5": 12412.795163
+     },
+     "ingest_ms": {
+      "0": 10961.164850000001,
+      "1": 10901.059962,
+      "2": 10987.800648999999,
+      "3": 10854.552183,
+      "4": 10867.622019,
+      "5": 10762.506275000002
+     },
+     "stages": {},
+     "steady_movie_ms": 12536.120184,
+     "steady_ingest_ms": 10867.622019,
+     "steady_stages": [
+      [
+       "host read movie",
+       10043.617528
+      ],
+      [
+       "movie teardown",
+       1388.667005
+      ],
+      [
+       "gain and sum",
+       781.403989
+      ],
+      [
+       "dose weighting",
+       106.925633
+      ],
+      [
+       "global fft",
+       53.553602
+      ],
+      [
+       "global ifft",
+       52.88152
+      ],
+      [
+       "global alignment",
+       39.75747
+      ],
+      [
+       "hot pixels",
+       5.687862
+      ],
+      [
+       "fix defects",
+       4.761772
+      ],
+      [
+       "setup",
+       3.761928
+      ],
+      [
+       "session and device ingest",
+       0.706794
+      ],
+      [
+       "release preprocessing",
+       0.287746
+      ],
+      [
+       "submit model and plot",
+       0.123758
+      ],
+      [
+       "power spectrum",
+       0.043301
+      ],
+      [
+       "read gain",
+       0.038831
+      ],
+      [
+       "patch alignment",
+       0.019835
+      ],
+      [
+       "allocate host sum",
+       0.016204
+      ],
+      [
+       "allocate reconstruction",
+       0.014807
+      ],
+      [
+       "release alignment",
+       0.013968
+      ]
+     ],
+     "first_movie_ms": 12734.223789,
+     "first_stages": [
+      [
+       "host read movie",
+       10034.740647
+      ],
+      [
+       "movie teardown",
+       1383.106787
+      ],
+      [
+       "gain and sum",
+       783.65902
+      ],
+      [
+       "session and device ingest",
+       164.376061
+      ],
+      [
+       "dose weighting",
+       139.636394
+      ],
+      [
+       "hot pixels",
+       59.139567
+      ],
+      [
+       "global fft",
+       53.520446
+      ],
+      [
+       "global ifft",
+       52.899418
+      ],
+      [
+       "global alignment",
+       39.684834
+      ],
+      [
+       "fix defects",
+       6.558917
+      ],
+      [
+       "setup",
+       5.140873
+      ],
+      [
+       "release preprocessing",
+       0.257296
+      ],
+      [
+       "submit model and plot",
+       0.124317
+      ],
+      [
+       "read gain",
+       0.046655
+      ],
+      [
+       "power spectrum",
+       0.041904
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "allocate reconstruction",
+       0.018717
+      ],
+      [
+       "release alignment",
+       0.01369
+      ],
+      [
+       "allocate host sum",
+       0.013409
+      ]
+     ]
+    }
+   },
+   "auto-L": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 26.395824052393436,
+     "min": 26.03053688071668,
+     "max": 26.407721240073442,
+     "values": [
+      26.407721240073442,
+      26.40159724280238,
+      26.03053688071668,
+      26.395824052393436,
+      26.231232898309827
+     ]
+    },
+    "wall_per_movie_s": 13.197912026196718,
+    "user_s": 107.444009,
+    "sys_s": 22.421611,
+    "cpu_s": 129.768601,
+    "cpu_over_wall": 4.916254962997954,
+    "rss_gib": 12.007129669189453,
+    "rss_gib_max": 12.007503509521484,
+    "minflt": 6780141,
+    "majflt": 0,
+    "vram_proc_mib": 20446.0,
+    "vram_proc_mib_max": 20446.0,
+    "vram_dev_delta_mib": 20454.8125,
+    "vram_dev_delta_mib_max": 20454.8125,
+    "ingest_witness": {
+     "float": 34
+    },
+    "foreign_cores_max": 0.00575047313196256,
+    "prof_wall_s": 26.08900502230972,
+    "prof_overhead_s": -0.3068190300837159,
+    "prof_overhead_pct": -1.1623771603974424,
+    "prof0_wall_s": 26.136955906637013,
+    "prof0_overhead_s": -0.2588681457564235,
+    "prof": {
+     "outside_movies_s": 0.681365470527016,
+     "run_wall_s": 26.08900502230972,
+     "movie_wall_ms": {
+      "0": 12801.198194,
+      "1": 12600.559426
+     },
+     "ingest_ms": {
+      "0": 10882.441395,
+      "1": 10769.309476
+     },
+     "stages": {},
+     "steady_movie_ms": 12600.559426,
+     "steady_ingest_ms": 10769.309476,
+     "steady_stages": [
+      [
+       "host read movie",
+       9990.469843
+      ],
+      [
+       "movie teardown",
+       1392.034478
+      ],
+      [
+       "gain and sum",
+       769.895798
+      ],
+      [
+       "patch alignment",
+       137.379414
+      ],
+      [
+       "dose weighting",
+       119.645289
+      ],
+      [
+       "global fft",
+       53.363803
+      ],
+      [
+       "global ifft",
+       52.906777
+      ],
+      [
+       "global alignment",
+       39.864071
+      ],
+      [
+       "hot pixels",
+       14.391508
+      ],
+      [
+       "fit polynomial",
+       8.86482
+      ],
+      [
+       "fix defects",
+       5.091434
+      ],
+      [
+       "setup",
+       3.725895
+      ],
+      [
+       "release alignment",
+       2.713755
+      ],
+      [
+       "session and device ingest",
+       1.406325
+      ],
+      [
+       "release preprocessing",
+       0.313168
+      ],
+      [
+       "submit model and plot",
+       0.186616
+      ],
+      [
+       "power spectrum",
+       0.044419
+      ],
+      [
+       "read gain",
+       0.039949
+      ],
+      [
+       "allocate host sum",
+       0.016483
+      ],
+      [
+       "allocate reconstruction",
+       0.013969
+      ]
+     ],
+     "first_movie_ms": 12801.198194,
+     "first_stages": [
+      [
+       "host read movie",
+       9964.038237
+      ],
+      [
+       "movie teardown",
+       1388.204483
+      ],
+      [
+       "gain and sum",
+       763.253396
+      ],
+      [
+       "session and device ingest",
+       161.030075
+      ],
+      [
+       "dose weighting",
+       153.211904
+      ],
+      [
+       "patch alignment",
+       138.437841
+      ],
+      [
+       "hot pixels",
+       58.47479
+      ],
+      [
+       "global fft",
+       53.504095
+      ],
+      [
+       "global ifft",
+       52.881668
+      ],
+      [
+       "global alignment",
+       39.738636
+      ],
+      [
+       "fit polynomial",
+       8.38152
+      ],
+      [
+       "fix defects",
+       7.075766
+      ],
+      [
+       "setup",
+       5.150105
+      ],
+      [
+       "release alignment",
+       2.746161
+      ],
+      [
+       "release preprocessing",
+       0.312609
+      ],
+      [
+       "submit model and plot",
+       0.178235
+      ],
+      [
+       "read gain",
+       0.041067
+      ],
+      [
+       "power spectrum",
+       0.040508
+      ],
+      [
+       "allocate reconstruction",
+       0.017321
+      ],
+      [
+       "allocate host sum",
+       0.012851
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.8533784270192228,
+     "run_wall_s": 77.62970791570842,
+     "movie_wall_ms": {
+      "0": 12951.43288,
+      "1": 12954.829798,
+      "2": 12798.005197,
+      "3": 12776.49508,
+      "4": 12656.318299,
+      "5": 12748.403394
+     },
+     "ingest_ms": {
+      "0": 11044.330803,
+      "1": 11083.28236,
+      "2": 10950.696598,
+      "3": 10945.970647,
+      "4": 10817.737891,
+      "5": 10896.470093999998
+     },
+     "stages": {},
+     "steady_movie_ms": 12776.49508,
+     "steady_ingest_ms": 10945.970647,
+     "steady_stages": [
+      [
+       "host read movie",
+       10022.192966
+      ],
+      [
+       "movie teardown",
+       1398.345325
+      ],
+      [
+       "gain and sum",
+       890.725606
+      ],
+      [
+       "dose weighting",
+       138.438087
+      ],
+      [
+       "patch alignment",
+       137.063115
+      ],
+      [
+       "global fft",
+       53.39296
+      ],
+      [
+       "global ifft",
+       52.90079
+      ],
+      [
+       "global alignment",
+       39.857473
+      ],
+      [
+       "hot pixels",
+       11.138557
+      ],
+      [
+       "fit polynomial",
+       8.77204
+      ],
+      [
+       "fix defects",
+       4.853965
+      ],
+      [
+       "setup",
+       3.723374
+      ],
+      [
+       "release alignment",
+       2.747552
+      ],
+      [
+       "session and device ingest",
+       1.496276
+      ],
+      [
+       "release preprocessing",
+       0.253384
+      ],
+      [
+       "submit model and plot",
+       0.18857
+      ],
+      [
+       "power spectrum",
+       0.041905
+      ],
+      [
+       "read gain",
+       0.03939
+      ],
+      [
+       "allocate host sum",
+       0.01704
+      ],
+      [
+       "allocate reconstruction",
+       0.016203
+      ]
+     ],
+     "first_movie_ms": 12951.43288,
+     "first_stages": [
+      [
+       "host read movie",
+       10092.662457
+      ],
+      [
+       "movie teardown",
+       1390.575458
+      ],
+      [
+       "gain and sum",
+       783.75761
+      ],
+      [
+       "session and device ingest",
+       168.206932
+      ],
+      [
+       "dose weighting",
+       152.621151
+      ],
+      [
+       "patch alignment",
+       138.567148
+      ],
+      [
+       "hot pixels",
+       58.740377
+      ],
+      [
+       "global fft",
+       53.49799
+      ],
+      [
+       "global ifft",
+       52.913918
+      ],
+      [
+       "global alignment",
+       39.6846
+      ],
+      [
+       "fit polynomial",
+       8.892743
+      ],
+      [
+       "fix defects",
+       6.450532
+      ],
+      [
+       "setup",
+       5.191158
+      ],
+      [
+       "release alignment",
+       2.681623
+      ],
+      [
+       "release preprocessing",
+       0.330209
+      ],
+      [
+       "submit model and plot",
+       0.191645
+      ],
+      [
+       "read gain",
+       0.045816
+      ],
+      [
+       "power spectrum",
+       0.040509
+      ],
+      [
+       "allocate reconstruction",
+       0.017321
+      ],
+      [
+       "allocate host sum",
+       0.01341
+      ]
+     ]
+    }
+   }
+  },
+  "host_read_steady_ms": 10022.192966,
+  "host_read_share": 0.7844242809351123,
+  "host_read_share_ex_retry": 0.7929306470221584,
+  "ms_per_mpx_L_steady": 5.288461463318931,
+  "patches": 50,
+  "patches_retried": 0,
+  "patch_retry_converged": 0,
+  "traced_peak_mib": 10956.76,
+  "vram_peak_gib": 19.966796875,
+  "movie_f32_gib": 9.0
+ },
+ "e12963": {
+  "mpx_frame_per_movie": 654.311424,
+  "movies": 1,
+  "cells": {
+   "auto-G": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 5.071536471135914,
+     "min": 5.0475953770801425,
+     "max": 5.098368545994163,
+     "values": [
+      5.098368545994163,
+      5.090862593613565,
+      5.057132489979267,
+      5.0475953770801425,
+      5.071536471135914
+     ]
+    },
+    "wall_per_movie_s": 5.071536471135914,
+    "user_s": 17.068621,
+    "sys_s": 4.014349,
+    "cpu_s": 21.054751,
+    "cpu_over_wall": 4.151552713823666,
+    "rss_gib": 3.5692138671875,
+    "rss_gib_max": 3.569469451904297,
+    "minflt": 1049915,
+    "majflt": 2,
+    "vram_proc_mib": 5678.0,
+    "vram_proc_mib_max": 5680.0,
+    "vram_dev_delta_mib": 5686.8125,
+    "vram_dev_delta_mib_max": 5688.8125,
+    "ingest_witness": {
+     "float": 26
+    },
+    "foreign_cores_max": 0.004952368541469433,
+    "prof_wall_s": 5.063747643493116,
+    "prof_overhead_s": -0.007788827642798424,
+    "prof_overhead_pct": -0.15357924934835174,
+    "prof": {
+     "outside_movies_s": 0.5242826312427606,
+     "run_wall_s": 5.063747643493116,
+     "movie_wall_ms": {
+      "0": 4541.204775
+     },
+     "ingest_ms": {
+      "0": 3503.896852
+     },
+     "stages": {},
+     "first_movie_ms": 4541.204775,
+     "first_stages": [
+      [
+       "host read movie",
+       3100.943315
+      ],
+      [
+       "movie teardown",
+       409.7396
+      ],
+      [
+       "read gain",
+       401.48096
+      ],
+      [
+       "gain and sum",
+       243.797552
+      ],
+      [
+       "session and device ingest",
+       160.240865
+      ],
+      [
+       "hot pixels",
+       75.988542
+      ],
+      [
+       "dose weighting",
+       74.492819
+      ],
+      [
+       "fix defects",
+       24.24388
+      ],
+      [
+       "global fft",
+       14.312443
+      ],
+      [
+       "global ifft",
+       14.198745
+      ],
+      [
+       "global alignment",
+       11.835031
+      ],
+      [
+       "setup",
+       1.879291
+      ],
+      [
+       "release preprocessing",
+       0.252267
+      ],
+      [
+       "submit model and plot",
+       0.116775
+      ],
+      [
+       "power spectrum",
+       0.041625
+      ],
+      [
+       "release alignment",
+       0.029054
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "allocate host sum",
+       0.013969
+      ],
+      [
+       "allocate reconstruction",
+       0.01341
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.6098016930921162,
+     "run_wall_s": 24.6199918538332,
+     "movie_wall_ms": {
+      "0": 4585.374744,
+      "1": 3943.254161,
+      "2": 3869.910635,
+      "3": 3854.880377,
+      "4": 3882.440997,
+      "5": 3871.890648
+     },
+     "ingest_ms": {
+      "0": 3537.681509,
+      "1": 3417.244857,
+      "2": 3340.101529,
+      "3": 3324.528617,
+      "4": 3346.706828,
+      "5": 3350.693972
+     },
+     "stages": {},
+     "steady_movie_ms": 3871.890648,
+     "steady_ingest_ms": 3346.706828,
+     "steady_stages": [
+      [
+       "host read movie",
+       3109.788111
+      ],
+      [
+       "movie teardown",
+       411.499188
+      ],
+      [
+       "gain and sum",
+       229.860247
+      ],
+      [
+       "dose weighting",
+       39.426437
+      ],
+      [
+       "fix defects",
+       25.78174
+      ],
+      [
+       "global fft",
+       14.318289
+      ],
+      [
+       "global ifft",
+       14.197864
+      ],
+      [
+       "global alignment",
+       11.697009
+      ],
+      [
+       "hot pixels",
+       9.228807
+      ],
+      [
+       "setup",
+       1.565002
+      ],
+      [
+       "session and device ingest",
+       0.685282
+      ],
+      [
+       "release preprocessing",
+       0.280202
+      ],
+      [
+       "submit model and plot",
+       0.120407
+      ],
+      [
+       "power spectrum",
+       0.041905
+      ],
+      [
+       "read gain",
+       0.040786
+      ],
+      [
+       "patch alignment",
+       0.020393
+      ],
+      [
+       "allocate host sum",
+       0.014527
+      ],
+      [
+       "release alignment",
+       0.01369
+      ],
+      [
+       "allocate reconstruction",
+       0.01285
+      ]
+     ],
+     "first_movie_ms": 4585.374744,
+     "first_stages": [
+      [
+       "host read movie",
+       3123.46047
+      ],
+      [
+       "movie teardown",
+       415.511704
+      ],
+      [
+       "read gain",
+       405.606539
+      ],
+      [
+       "gain and sum",
+       243.497461
+      ],
+      [
+       "session and device ingest",
+       156.930499
+      ],
+      [
+       "hot pixels",
+       77.077587
+      ],
+      [
+       "dose weighting",
+       74.706619
+      ],
+      [
+       "fix defects",
+       25.114066
+      ],
+      [
+       "global fft",
+       14.321082
+      ],
+      [
+       "global ifft",
+       14.210169
+      ],
+      [
+       "global alignment",
+       11.761816
+      ],
+      [
+       "setup",
+       1.885431
+      ],
+      [
+       "release preprocessing",
+       0.274616
+      ],
+      [
+       "submit model and plot",
+       0.121803
+      ],
+      [
+       "power spectrum",
+       0.042184
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "allocate host sum",
+       0.013969
+      ],
+      [
+       "release alignment",
+       0.013689
+      ],
+      [
+       "allocate reconstruction",
+       0.013132
+      ]
+     ]
+    }
+   },
+   "auto-L": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 5.800195561721921,
+     "min": 5.793576194904745,
+     "max": 5.940945215523243,
+     "values": [
+      5.793576194904745,
+      5.827523451298475,
+      5.800195561721921,
+      5.940945215523243,
+      5.794640274718404
+     ]
+    },
+    "wall_per_movie_s": 5.800195561721921,
+    "user_s": 17.573261,
+    "sys_s": 4.295725,
+    "cpu_s": 21.860309,
+    "cpu_over_wall": 3.76889171535283,
+    "rss_gib": 3.701080322265625,
+    "rss_gib_max": 3.702556610107422,
+    "minflt": 1160314,
+    "majflt": 2,
+    "vram_proc_mib": 6316.0,
+    "vram_proc_mib_max": 6316.0,
+    "vram_dev_delta_mib": 6324.8125,
+    "vram_dev_delta_mib_max": 6324.8125,
+    "ingest_witness": {
+     "float": 26
+    },
+    "foreign_cores_max": 0.0023899030674444585,
+    "prof_wall_s": 5.791029849089682,
+    "prof_overhead_s": -0.009165712632238865,
+    "prof_overhead_pct": -0.15802419995504105,
+    "prof0_wall_s": 5.82592536509037,
+    "prof0_overhead_s": 0.02572980336844921,
+    "prof": {
+     "outside_movies_s": 0.5427787029731679,
+     "run_wall_s": 5.791029849089682,
+     "movie_wall_ms": {
+      "0": 5252.770574
+     },
+     "ingest_ms": {
+      "0": 3501.743825
+     },
+     "stages": {},
+     "first_movie_ms": 5252.770574,
+     "first_stages": [
+      [
+       "host read movie",
+       3083.310928
+      ],
+      [
+       "patch alignment",
+       722.187034
+      ],
+      [
+       "movie teardown",
+       407.78793
+      ],
+      [
+       "read gain",
+       401.947268
+      ],
+      [
+       "gain and sum",
+       245.861083
+      ],
+      [
+       "session and device ingest",
+       167.704388
+      ],
+      [
+       "hot pixels",
+       76.981903
+      ],
+      [
+       "dose weighting",
+       57.946839
+      ],
+      [
+       "fix defects",
+       23.95139
+      ],
+      [
+       "global fft",
+       14.311058
+      ],
+      [
+       "global ifft",
+       14.202936
+      ],
+      [
+       "global alignment",
+       11.727478
+      ],
+      [
+       "fit polynomial",
+       2.17877
+      ],
+      [
+       "release alignment",
+       1.975393
+      ],
+      [
+       "setup",
+       1.875102
+      ],
+      [
+       "release preprocessing",
+       0.265119
+      ],
+      [
+       "submit model and plot",
+       0.155886
+      ],
+      [
+       "power spectrum",
+       0.043302
+      ],
+      [
+       "allocate host sum",
+       0.013408
+      ],
+      [
+       "allocate reconstruction",
+       0.013408
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.7159519968026871,
+     "run_wall_s": 29.00909063965082,
+     "movie_wall_ms": {
+      "0": 5325.753154,
+      "1": 4595.073698,
+      "2": 4613.263153,
+      "3": 4537.916311,
+      "4": 4548.050739,
+      "5": 4512.206105
+     },
+     "ingest_ms": {
+      "0": 3547.421531,
+      "1": 3354.582655,
+      "2": 3386.003666,
+      "3": 3329.3632350000003,
+      "4": 3314.235113,
+      "5": 3325.6349729999997
+     },
+     "stages": {},
+     "steady_movie_ms": 4548.050739,
+     "steady_ingest_ms": 3329.3632350000003,
+     "steady_stages": [
+      [
+       "host read movie",
+       3099.016063
+      ],
+      [
+       "patch alignment",
+       696.507531
+      ],
+      [
+       "movie teardown",
+       405.0534
+      ],
+      [
+       "gain and sum",
+       233.048107
+      ],
+      [
+       "dose weighting",
+       41.861372
+      ],
+      [
+       "fix defects",
+       23.186449
+      ],
+      [
+       "global fft",
+       14.301787
+      ],
+      [
+       "global ifft",
+       14.198995
+      ],
+      [
+       "global alignment",
+       11.669895
+      ],
+      [
+       "hot pixels",
+       9.121263
+      ],
+      [
+       "fit polynomial",
+       2.196363
+      ],
+      [
+       "release alignment",
+       2.038524
+      ],
+      [
+       "setup",
+       1.641827
+      ],
+      [
+       "session and device ingest",
+       0.819935
+      ],
+      [
+       "release preprocessing",
+       0.236901
+      ],
+      [
+       "submit model and plot",
+       0.14946
+      ],
+      [
+       "power spectrum",
+       0.040787
+      ],
+      [
+       "read gain",
+       0.03967
+      ],
+      [
+       "allocate host sum",
+       0.023746
+      ],
+      [
+       "allocate reconstruction",
+       0.01313
+      ]
+     ],
+     "first_movie_ms": 5325.753154,
+     "first_stages": [
+      [
+       "host read movie",
+       3142.234461
+      ],
+      [
+       "patch alignment",
+       767.46565
+      ],
+      [
+       "movie teardown",
+       416.496183
+      ],
+      [
+       "read gain",
+       403.124626
+      ],
+      [
+       "gain and sum",
+       237.53189
+      ],
+      [
+       "session and device ingest",
+       161.975528
+      ],
+      [
+       "hot pixels",
+       76.190797
+      ],
+      [
+       "dose weighting",
+       58.425535
+      ],
+      [
+       "fix defects",
+       24.757028
+      ],
+      [
+       "global fft",
+       14.3043
+      ],
+      [
+       "global ifft",
+       14.200118
+      ],
+      [
+       "global alignment",
+       11.861271
+      ],
+      [
+       "fit polynomial",
+       2.300567
+      ],
+      [
+       "release alignment",
+       2.271795
+      ],
+      [
+       "setup",
+       1.855819
+      ],
+      [
+       "release preprocessing",
+       0.265956
+      ],
+      [
+       "submit model and plot",
+       0.150298
+      ],
+      [
+       "power spectrum",
+       0.042463
+      ],
+      [
+       "allocate host sum",
+       0.027937
+      ],
+      [
+       "allocate reconstruction",
+       0.013409
+      ]
+     ]
+    }
+   }
+  },
+  "host_read_steady_ms": 3099.016063,
+  "host_read_share": 0.6813943469068232,
+  "host_read_share_ex_retry": 0.8046167200105834,
+  "ms_per_mpx_L_steady": 6.950896120988406,
+  "patches": 25,
+  "patches_retried": 2,
+  "patch_retry_converged": 0,
+  "traced_peak_mib": 2971.84,
+  "vram_peak_gib": 6.16796875,
+  "movie_f32_gib": 2.4375
+ },
+ "e10164": {
+  "mpx_frame_per_movie": 455.64736,
+  "movies": 2,
+  "cells": {
+   "auto-G": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 3.006195948459208,
+     "min": 2.9928266312927008,
+     "max": 3.1700552655383945,
+     "values": [
+      3.006195948459208,
+      2.9928266312927008,
+      3.085560690611601,
+      2.9973430652171373,
+      3.1700552655383945
+     ]
+    },
+    "wall_per_movie_s": 1.503097974229604,
+    "user_s": 1.913249,
+    "sys_s": 5.82163,
+    "cpu_s": 7.714543000000001,
+    "cpu_over_wall": 2.5662142895089732,
+    "rss_gib": 2.326923370361328,
+    "rss_gib_max": 2.3319854736328125,
+    "minflt": 1253126,
+    "majflt": 0,
+    "vram_proc_mib": 4560.0,
+    "vram_proc_mib_max": 4568.0,
+    "vram_dev_delta_mib": 4568.8125,
+    "vram_dev_delta_mib_max": 4576.8125,
+    "ingest_witness": {
+     "float": 34
+    },
+    "foreign_cores_max": 0.009973889745063335,
+    "prof_wall_s": 3.1139201037585735,
+    "prof_overhead_s": 0.10772415529936552,
+    "prof_overhead_pct": 3.5834043138331793,
+    "prof": {
+     "outside_movies_s": 0.6298633657585735,
+     "run_wall_s": 3.1139201037585735,
+     "movie_wall_ms": {
+      "0": 1419.228583,
+      "1": 1066.278402
+     },
+     "ingest_ms": {
+      "0": 642.351844,
+      "1": 568.7740650000001
+     },
+     "stages": {},
+     "steady_movie_ms": 1066.278402,
+     "steady_ingest_ms": 568.7740650000001,
+     "steady_stages": [
+      [
+       "host read movie",
+       410.88825
+      ],
+      [
+       "movie teardown",
+       215.356894
+      ],
+      [
+       "gain and sum",
+       157.02062
+      ],
+      [
+       "dose weighting",
+       79.665225
+      ],
+      [
+       "fix defects",
+       64.318288
+      ],
+      [
+       "hot pixels",
+       45.752504
+      ],
+      [
+       "global fft",
+       25.274458
+      ],
+      [
+       "global ifft",
+       25.214394
+      ],
+      [
+       "global alignment",
+       9.856015
+      ],
+      [
+       "session and device ingest",
+       0.934755
+      ],
+      [
+       "release preprocessing",
+       0.350324
+      ],
+      [
+       "setup",
+       0.295289
+      ],
+      [
+       "submit model and plot",
+       0.100851
+      ],
+      [
+       "power spectrum",
+       0.042743
+      ],
+      [
+       "read gain",
+       0.041346
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "release alignment",
+       0.015086
+      ],
+      [
+       "allocate reconstruction",
+       0.014807
+      ],
+      [
+       "allocate host sum",
+       0.01341
+      ]
+     ],
+     "first_movie_ms": 1419.228583,
+     "first_stages": [
+      [
+       "host read movie",
+       324.111215
+      ],
+      [
+       "hot pixels",
+       215.72873
+      ],
+      [
+       "movie teardown",
+       212.073234
+      ],
+      [
+       "dose weighting",
+       198.810038
+      ],
+      [
+       "session and device ingest",
+       161.837753
+      ],
+      [
+       "gain and sum",
+       159.728508
+      ],
+      [
+       "fix defects",
+       93.758369
+      ],
+      [
+       "global fft",
+       25.299881
+      ],
+      [
+       "global ifft",
+       25.212158
+      ],
+      [
+       "global alignment",
+       10.315293
+      ],
+      [
+       "release preprocessing",
+       0.44922
+      ],
+      [
+       "setup",
+       0.297524
+      ],
+      [
+       "submit model and plot",
+       0.129906
+      ],
+      [
+       "power spectrum",
+       0.042743
+      ],
+      [
+       "read gain",
+       0.040786
+      ],
+      [
+       "patch alignment",
+       0.020116
+      ],
+      [
+       "allocate reconstruction",
+       0.016203
+      ],
+      [
+       "allocate host sum",
+       0.013969
+      ],
+      [
+       "release alignment",
+       0.01341
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.7373519820061931,
+     "run_wall_s": 7.1685376996174455,
+     "movie_wall_ms": {
+      "0": 1442.433337,
+      "1": 1047.553513,
+      "2": 964.123751,
+      "3": 957.721267,
+      "4": 953.472302,
+      "5": 1036.02697
+     },
+     "ingest_ms": {
+      "0": 648.329107,
+      "1": 570.2375,
+      "2": 479.300994,
+      "3": 480.787403,
+      "4": 482.473462,
+      "5": 559.222322
+     },
+     "stages": {},
+     "steady_movie_ms": 964.123751,
+     "steady_ingest_ms": 482.473462,
+     "steady_stages": [
+      [
+       "host read movie",
+       325.894942
+      ],
+      [
+       "movie teardown",
+       215.27629
+      ],
+      [
+       "gain and sum",
+       156.812346
+      ],
+      [
+       "dose weighting",
+       79.178717
+      ],
+      [
+       "fix defects",
+       74.062126
+      ],
+      [
+       "hot pixels",
+       45.902167
+      ],
+      [
+       "global fft",
+       25.27079
+      ],
+      [
+       "global ifft",
+       25.202905
+      ],
+      [
+       "global alignment",
+       9.763804
+      ],
+      [
+       "session and device ingest",
+       0.859885
+      ],
+      [
+       "release preprocessing",
+       0.410386
+      ],
+      [
+       "setup",
+       0.312051
+      ],
+      [
+       "submit model and plot",
+       0.106158
+      ],
+      [
+       "power spectrum",
+       0.04386
+      ],
+      [
+       "read gain",
+       0.03995
+      ],
+      [
+       "patch alignment",
+       0.020394
+      ],
+      [
+       "allocate host sum",
+       0.013968
+      ],
+      [
+       "release alignment",
+       0.01369
+      ],
+      [
+       "allocate reconstruction",
+       0.013131
+      ]
+     ],
+     "first_movie_ms": 1442.433337,
+     "first_stages": [
+      [
+       "host read movie",
+       327.030275
+      ],
+      [
+       "hot pixels",
+       217.80929
+      ],
+      [
+       "movie teardown",
+       212.287158
+      ],
+      [
+       "dose weighting",
+       201.395273
+      ],
+      [
+       "session and device ingest",
+       161.649821
+      ],
+      [
+       "gain and sum",
+       159.845333
+      ],
+      [
+       "fix defects",
+       101.21111
+      ],
+      [
+       "global fft",
+       25.290624
+      ],
+      [
+       "global ifft",
+       25.217153
+      ],
+      [
+       "global alignment",
+       10.337046
+      ],
+      [
+       "release preprocessing",
+       0.372114
+      ],
+      [
+       "setup",
+       0.267912
+      ],
+      [
+       "submit model and plot",
+       0.129066
+      ],
+      [
+       "power spectrum",
+       0.042465
+      ],
+      [
+       "read gain",
+       0.042463
+      ],
+      [
+       "patch alignment",
+       0.020673
+      ],
+      [
+       "release alignment",
+       0.01704
+      ],
+      [
+       "allocate reconstruction",
+       0.016483
+      ],
+      [
+       "allocate host sum",
+       0.014247
+      ]
+     ]
+    }
+   },
+   "auto-L": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 3.158678609877825,
+     "min": 3.129539556801319,
+     "max": 3.209534076973796,
+     "values": [
+      3.130761345848441,
+      3.158678609877825,
+      3.209534076973796,
+      3.129539556801319,
+      3.1702713603153825
+     ]
+    },
+    "wall_per_movie_s": 1.5793393049389124,
+    "user_s": 1.924682,
+    "sys_s": 5.993371,
+    "cpu_s": 7.989794,
+    "cpu_over_wall": 2.5294735510647723,
+    "rss_gib": 2.19482421875,
+    "rss_gib_max": 2.337932586669922,
+    "minflt": 1252938,
+    "majflt": 1,
+    "vram_proc_mib": 4560.0,
+    "vram_proc_mib_max": 4568.0,
+    "vram_dev_delta_mib": 4568.8125,
+    "vram_dev_delta_mib_max": 4576.8125,
+    "ingest_witness": {
+     "float": 34
+    },
+    "foreign_cores_max": 0.016889475818560234,
+    "prof_wall_s": 3.1328526912257075,
+    "prof_overhead_s": -0.025825918652117252,
+    "prof_overhead_pct": -0.8176178029431167,
+    "prof0_wall_s": 3.170229382812977,
+    "prof0_overhead_s": 0.011550772935152054,
+    "prof": {
+     "outside_movies_s": 0.5906756595903135,
+     "run_wall_s": 3.1328526912257075,
+     "movie_wall_ms": {
+      "0": 1463.593142,
+      "1": 1079.351009
+     },
+     "ingest_ms": {
+      "0": 646.62647,
+      "1": 574.96829
+     },
+     "stages": {},
+     "steady_movie_ms": 1079.351009,
+     "steady_ingest_ms": 574.96829,
+     "steady_stages": [
+      [
+       "host read movie",
+       418.273652
+      ],
+      [
+       "movie teardown",
+       214.774647
+      ],
+      [
+       "gain and sum",
+       156.347475
+      ],
+      [
+       "dose weighting",
+       80.591043
+      ],
+      [
+       "fix defects",
+       64.600484
+      ],
+      [
+       "hot pixels",
+       45.415056
+      ],
+      [
+       "patch alignment",
+       36.200436
+      ],
+      [
+       "global fft",
+       25.256041
+      ],
+      [
+       "global ifft",
+       25.205474
+      ],
+      [
+       "global alignment",
+       9.710182
+      ],
+      [
+       "release alignment",
+       1.689043
+      ],
+      [
+       "session and device ingest",
+       0.827201
+      ],
+      [
+       "fit polynomial",
+       0.538617
+      ],
+      [
+       "release preprocessing",
+       0.422121
+      ],
+      [
+       "setup",
+       0.291658
+      ],
+      [
+       "submit model and plot",
+       0.110349
+      ],
+      [
+       "power spectrum",
+       0.040787
+      ],
+      [
+       "read gain",
+       0.037435
+      ],
+      [
+       "allocate host sum",
+       0.01369
+      ],
+      [
+       "allocate reconstruction",
+       0.012851
+      ]
+     ],
+     "first_movie_ms": 1463.593142,
+     "first_stages": [
+      [
+       "host read movie",
+       325.819261
+      ],
+      [
+       "movie teardown",
+       212.098049
+      ],
+      [
+       "hot pixels",
+       210.063202
+      ],
+      [
+       "dose weighting",
+       199.775572
+      ],
+      [
+       "session and device ingest",
+       161.31683
+      ],
+      [
+       "gain and sum",
+       157.947834
+      ],
+      [
+       "fix defects",
+       91.054393
+      ],
+      [
+       "patch alignment",
+       36.186496
+      ],
+      [
+       "global fft",
+       25.279766
+      ],
+      [
+       "global ifft",
+       25.21609
+      ],
+      [
+       "global alignment",
+       10.259414
+      ],
+      [
+       "release alignment",
+       1.685692
+      ],
+      [
+       "fit polynomial",
+       0.549511
+      ],
+      [
+       "release preprocessing",
+       0.356751
+      ],
+      [
+       "setup",
+       0.28579
+      ],
+      [
+       "submit model and plot",
+       0.135213
+      ],
+      [
+       "read gain",
+       0.040508
+      ],
+      [
+       "power spectrum",
+       0.040508
+      ],
+      [
+       "allocate reconstruction",
+       0.015086
+      ],
+      [
+       "allocate host sum",
+       0.014807
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.7508356730601262,
+     "run_wall_s": 7.311112409457564,
+     "movie_wall_ms": {
+      "0": 1467.984414,
+      "1": 1049.380628,
+      "2": 1009.979057,
+      "3": 1004.905158,
+      "4": 990.512104,
+      "5": 1005.237971
+     },
+     "ingest_ms": {
+      "0": 650.29863,
+      "1": 540.532098,
+      "2": 494.08998,
+      "3": 493.864063,
+      "4": 474.29979999999995,
+      "5": 487.67278
+     },
+     "stages": {},
+     "steady_movie_ms": 1005.237971,
+     "steady_ingest_ms": 493.864063,
+     "steady_stages": [
+      [
+       "host read movie",
+       335.671573
+      ],
+      [
+       "movie teardown",
+       216.53601
+      ],
+      [
+       "gain and sum",
+       155.565413
+      ],
+      [
+       "dose weighting",
+       80.259859
+      ],
+      [
+       "fix defects",
+       74.373825
+      ],
+      [
+       "hot pixels",
+       45.786216
+      ],
+      [
+       "patch alignment",
+       36.20206
+      ],
+      [
+       "global fft",
+       25.27774
+      ],
+      [
+       "global ifft",
+       25.200669
+      ],
+      [
+       "global alignment",
+       9.705683
+      ],
+      [
+       "release alignment",
+       1.747707
+      ],
+      [
+       "session and device ingest",
+       0.829433
+      ],
+      [
+       "fit polynomial",
+       0.504532
+      ],
+      [
+       "setup",
+       0.373231
+      ],
+      [
+       "release preprocessing",
+       0.371276
+      ],
+      [
+       "submit model and plot",
+       0.10979
+      ],
+      [
+       "power spectrum",
+       0.042184
+      ],
+      [
+       "read gain",
+       0.037993
+      ],
+      [
+       "allocate host sum",
+       0.014248
+      ],
+      [
+       "allocate reconstruction",
+       0.01285
+      ]
+     ],
+     "first_movie_ms": 1467.984414,
+     "first_stages": [
+      [
+       "host read movie",
+       324.288906
+      ],
+      [
+       "movie teardown",
+       212.021756
+      ],
+      [
+       "hot pixels",
+       211.713896
+      ],
+      [
+       "dose weighting",
+       198.448531
+      ],
+      [
+       "session and device ingest",
+       165.96125
+      ],
+      [
+       "gain and sum",
+       160.395402
+      ],
+      [
+       "fix defects",
+       98.012071
+      ],
+      [
+       "patch alignment",
+       36.186416
+      ],
+      [
+       "global fft",
+       25.292302
+      ],
+      [
+       "global ifft",
+       25.221063
+      ],
+      [
+       "global alignment",
+       10.246267
+      ],
+      [
+       "release alignment",
+       1.699375
+      ],
+      [
+       "fit polynomial",
+       0.555657
+      ],
+      [
+       "release preprocessing",
+       0.357864
+      ],
+      [
+       "setup",
+       0.317357
+      ],
+      [
+       "submit model and plot",
+       0.129906
+      ],
+      [
+       "read gain",
+       0.042463
+      ],
+      [
+       "power spectrum",
+       0.041346
+      ],
+      [
+       "allocate reconstruction",
+       0.015644
+      ],
+      [
+       "allocate host sum",
+       0.01341
+      ]
+     ]
+    }
+   }
+  },
+  "host_read_steady_ms": 335.671573,
+  "host_read_share": 0.333922496646319,
+  "host_read_share_ex_retry": 0.3463974546140427,
+  "ms_per_mpx_L_steady": 2.2061753435814926,
+  "patches": 50,
+  "patches_retried": 0,
+  "patch_retry_converged": 0,
+  "traced_peak_mib": 2106.5,
+  "vram_peak_gib": 4.4609375,
+  "movie_f32_gib": 1.6974186897277832
+ },
+ "e10216": {
+  "mpx_frame_per_movie": 989.855744,
+  "movies": 2,
+  "cells": {
+   "auto-G": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 4.752415489405394,
+     "min": 4.729896044358611,
+     "max": 4.8804683573544025,
+     "values": [
+      4.729896044358611,
+      4.8804683573544025,
+      4.752415489405394,
+      4.770000695250928,
+      4.745778757147491
+     ]
+    },
+    "wall_per_movie_s": 2.376207744702697,
+    "user_s": 2.415909,
+    "sys_s": 12.885849,
+    "cpu_s": 15.238119000000001,
+    "cpu_over_wall": 3.2063945237891107,
+    "rss_gib": 3.9746856689453125,
+    "rss_gib_max": 4.005764007568359,
+    "minflt": 3027230,
+    "majflt": 16,
+    "vram_proc_mib": 8174.0,
+    "vram_proc_mib_max": 8176.0,
+    "vram_dev_delta_mib": 8182.8125,
+    "vram_dev_delta_mib_max": 8184.8125,
+    "ingest_witness": {
+     "float": 34
+    },
+    "foreign_cores_max": 0,
+    "prof_wall_s": 4.689544715918601,
+    "prof_overhead_s": -0.06287077348679304,
+    "prof_overhead_pct": -1.3229224933499917,
+    "prof": {
+     "outside_movies_s": 0.5101149979877739,
+     "run_wall_s": 4.689544715918601,
+     "movie_wall_ms": {
+      "0": 2209.798177,
+      "1": 1971.848322
+     },
+     "ingest_ms": {
+      "0": 1526.5302179999999,
+      "1": 1348.636127
+     },
+     "stages": {},
+     "steady_movie_ms": 1971.848322,
+     "steady_ingest_ms": 1348.636127,
+     "steady_stages": [
+      [
+       "host read movie",
+       970.137058
+      ],
+      [
+       "movie teardown",
+       465.920973
+      ],
+      [
+       "gain and sum",
+       379.827851
+      ],
+      [
+       "dose weighting",
+       54.153327
+      ],
+      [
+       "global alignment",
+       40.826732
+      ],
+      [
+       "global ifft",
+       21.777926
+      ],
+      [
+       "global fft",
+       21.590205
+      ],
+      [
+       "hot pixels",
+       14.801615
+      ],
+      [
+       "session and device ingest",
+       0.865195
+      ],
+      [
+       "setup",
+       0.612369
+      ],
+      [
+       "release preprocessing",
+       0.47967
+      ],
+      [
+       "submit model and plot",
+       0.11454
+      ],
+      [
+       "fix defects",
+       0.045258
+      ],
+      [
+       "power spectrum",
+       0.042183
+      ],
+      [
+       "read gain",
+       0.037435
+      ],
+      [
+       "patch alignment",
+       0.020115
+      ],
+      [
+       "allocate host sum",
+       0.015366
+      ],
+      [
+       "release alignment",
+       0.014528
+      ],
+      [
+       "allocate reconstruction",
+       0.013689
+      ]
+     ],
+     "first_movie_ms": 2209.798177,
+     "first_stages": [
+      [
+       "host read movie",
+       984.158963
+      ],
+      [
+       "movie teardown",
+       464.448781
+      ],
+      [
+       "gain and sum",
+       382.156644
+      ],
+      [
+       "session and device ingest",
+       160.875699
+      ],
+      [
+       "dose weighting",
+       87.78384
+      ],
+      [
+       "hot pixels",
+       65.328456
+      ],
+      [
+       "global ifft",
+       21.769266
+      ],
+      [
+       "global fft",
+       21.689379
+      ],
+      [
+       "global alignment",
+       17.392457
+      ],
+      [
+       "fix defects",
+       1.79213
+      ],
+      [
+       "setup",
+       0.858488
+      ],
+      [
+       "release preprocessing",
+       0.539734
+      ],
+      [
+       "submit model and plot",
+       0.119568
+      ],
+      [
+       "power spectrum",
+       0.042185
+      ],
+      [
+       "read gain",
+       0.040509
+      ],
+      [
+       "patch alignment",
+       0.020393
+      ],
+      [
+       "allocate host sum",
+       0.015923
+      ],
+      [
+       "allocate reconstruction",
+       0.014527
+      ],
+      [
+       "release alignment",
+       0.014527
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.5786776915248275,
+     "run_wall_s": 12.668196849524975,
+     "movie_wall_ms": {
+      "0": 2218.671083,
+      "1": 2058.385227,
+      "2": 1946.299513,
+      "3": 1940.466656,
+      "4": 1958.279436,
+      "5": 2002.825942
+     },
+     "ingest_ms": {
+      "0": 1537.269912,
+      "1": 1432.651899,
+      "2": 1355.4797919999999,
+      "3": 1350.20734,
+      "4": 1374.118897,
+      "5": 1420.9180649999998
+     },
+     "stages": {},
+     "steady_movie_ms": 1958.279436,
+     "steady_ingest_ms": 1374.118897,
+     "steady_stages": [
+      [
+       "host read movie",
+       1010.414789
+      ],
+      [
+       "movie teardown",
+       465.241185
+      ],
+      [
+       "gain and sum",
+       389.062099
+      ],
+      [
+       "dose weighting",
+       53.320145
+      ],
+      [
+       "global ifft",
+       21.764203
+      ],
+      [
+       "global fft",
+       21.62424
+      ],
+      [
+       "global alignment",
+       16.961919
+      ],
+      [
+       "hot pixels",
+       4.54806
+      ],
+      [
+       "session and device ingest",
+       0.877485
+      ],
+      [
+       "release preprocessing",
+       0.452291
+      ],
+      [
+       "setup",
+       0.385523
+      ],
+      [
+       "submit model and plot",
+       0.117333
+      ],
+      [
+       "fix defects",
+       0.045815
+      ],
+      [
+       "power spectrum",
+       0.042183
+      ],
+      [
+       "read gain",
+       0.03967
+      ],
+      [
+       "patch alignment",
+       0.020115
+      ],
+      [
+       "allocate host sum",
+       0.014247
+      ],
+      [
+       "release alignment",
+       0.013689
+      ],
+      [
+       "allocate reconstruction",
+       0.013408
+      ]
+     ],
+     "first_movie_ms": 2218.671083,
+     "first_stages": [
+      [
+       "host read movie",
+       1009.423791
+      ],
+      [
+       "movie teardown",
+       466.513123
+      ],
+      [
+       "gain and sum",
+       364.999637
+      ],
+      [
+       "session and device ingest",
+       155.572401
+      ],
+      [
+       "dose weighting",
+       88.382009
+      ],
+      [
+       "hot pixels",
+       64.655375
+      ],
+      [
+       "global ifft",
+       21.759167
+      ],
+      [
+       "global fft",
+       21.672565
+      ],
+      [
+       "global alignment",
+       17.306356
+      ],
+      [
+       "fix defects",
+       1.839057
+      ],
+      [
+       "setup",
+       0.783898
+      ],
+      [
+       "release preprocessing",
+       0.547555
+      ],
+      [
+       "submit model and plot",
+       0.115657
+      ],
+      [
+       "power spectrum",
+       0.04833
+      ],
+      [
+       "read gain",
+       0.040229
+      ],
+      [
+       "patch alignment",
+       0.020114
+      ],
+      [
+       "allocate host sum",
+       0.014248
+      ],
+      [
+       "allocate reconstruction",
+       0.014247
+      ],
+      [
+       "release alignment",
+       0.013409
+      ]
+     ]
+    }
+   },
+   "auto-L": {
+    "n_unprof": 5,
+    "n_prof": 3,
+    "n_replay": 3,
+    "wall_s": {
+     "median": 12.797791356220841,
+     "min": 12.729419668205082,
+     "max": 12.87911008298397,
+     "values": [
+      12.729419668205082,
+      12.824316161684692,
+      12.797791356220841,
+      12.76990176923573,
+      12.87911008298397
+     ]
+    },
+    "wall_per_movie_s": 6.398895678110421,
+    "user_s": 6.052046,
+    "sys_s": 17.260904,
+    "cpu_s": 23.245487,
+    "cpu_over_wall": 1.8163670865520611,
+    "rss_gib": 4.222667694091797,
+    "rss_gib_max": 4.2403106689453125,
+    "minflt": 4263618,
+    "majflt": 1,
+    "vram_proc_mib": 9172.0,
+    "vram_proc_mib_max": 9172.0,
+    "vram_dev_delta_mib": 9180.8125,
+    "vram_dev_delta_mib_max": 9180.8125,
+    "ingest_witness": {
+     "float": 34
+    },
+    "foreign_cores_max": 0.0026967934575073483,
+    "prof_wall_s": 12.823240458965302,
+    "prof_overhead_s": 0.025449102744460106,
+    "prof_overhead_pct": 0.19885542775386492,
+    "prof0_wall_s": 12.845374192111194,
+    "prof0_overhead_s": 0.047582835890352726,
+    "prof": {
+     "outside_movies_s": 0.5722859613665481,
+     "run_wall_s": 12.823240458965302,
+     "movie_wall_ms": {
+      "0": 3923.21688,
+      "1": 8288.275741
+     },
+     "ingest_ms": {
+      "0": 1503.935205,
+      "1": 1280.315801
+     },
+     "stages": {},
+     "steady_movie_ms": 8288.275741,
+     "steady_ingest_ms": 1280.315801,
+     "steady_stages": [
+      [
+       "patch alignment",
+       6399.734918
+      ],
+      [
+       "host read movie",
+       935.94743
+      ],
+      [
+       "movie teardown",
+       451.15466
+      ],
+      [
+       "gain and sum",
+       341.539165
+      ],
+      [
+       "dose weighting",
+       52.812625
+      ],
+      [
+       "global alignment",
+       40.794326
+      ],
+      [
+       "global ifft",
+       21.747755
+      ],
+      [
+       "global fft",
+       21.63126
+      ],
+      [
+       "hot pixels",
+       9.336396
+      ],
+      [
+       "release alignment",
+       2.337173
+      ],
+      [
+       "session and device ingest",
+       1.053208
+      ],
+      [
+       "setup",
+       0.480508
+      ],
+      [
+       "release preprocessing",
+       0.437486
+      ],
+      [
+       "submit model and plot",
+       0.114819
+      ],
+      [
+       "fit polynomial",
+       0.103366
+      ],
+      [
+       "fix defects",
+       0.054477
+      ],
+      [
+       "power spectrum",
+       0.040508
+      ],
+      [
+       "read gain",
+       0.039111
+      ],
+      [
+       "allocate host sum",
+       0.015365
+      ],
+      [
+       "allocate reconstruction",
+       0.01313
+      ]
+     ],
+     "first_movie_ms": 3923.21688,
+     "first_stages": [
+      [
+       "patch alignment",
+       1748.615239
+      ],
+      [
+       "host read movie",
+       988.676233
+      ],
+      [
+       "movie teardown",
+       468.509958
+      ],
+      [
+       "gain and sum",
+       362.208085
+      ],
+      [
+       "session and device ingest",
+       157.062644
+      ],
+      [
+       "dose weighting",
+       74.346386
+      ],
+      [
+       "hot pixels",
+       66.089221
+      ],
+      [
+       "global ifft",
+       21.770676
+      ],
+      [
+       "global fft",
+       21.702218
+      ],
+      [
+       "global alignment",
+       17.397487
+      ],
+      [
+       "fit polynomial",
+       2.862379
+      ],
+      [
+       "release alignment",
+       2.220118
+      ],
+      [
+       "fix defects",
+       1.816713
+      ],
+      [
+       "setup",
+       0.75289
+      ],
+      [
+       "release preprocessing",
+       0.634159
+      ],
+      [
+       "submit model and plot",
+       0.135212
+      ],
+      [
+       "read gain",
+       0.041625
+      ],
+      [
+       "power spectrum",
+       0.041067
+      ],
+      [
+       "allocate reconstruction",
+       0.01369
+      ],
+      [
+       "allocate host sum",
+       0.012571
+      ]
+     ]
+    },
+    "replay": {
+     "outside_movies_s": 0.7628218409635927,
+     "run_wall_s": 22.900496184825897,
+     "movie_wall_ms": {
+      "0": 3973.100525,
+      "1": 3646.033513,
+      "2": 3657.799713,
+      "3": 3626.988075,
+      "4": 3639.189669,
+      "5": 3575.544838
+     },
+     "ingest_ms": {
+      "0": 1527.7418989999999,
+      "1": 1298.068894,
+      "2": 1383.456007,
+      "3": 1318.470237,
+      "4": 1393.909199,
+      "5": 1281.9834700000001
+     },
+     "stages": {},
+     "steady_movie_ms": 3639.189669,
+     "steady_ingest_ms": 1318.470237,
+     "steady_stages": [
+      [
+       "patch alignment",
+       1711.868896
+      ],
+      [
+       "host read movie",
+       958.292835
+      ],
+      [
+       "movie teardown",
+       458.248946
+      ],
+      [
+       "gain and sum",
+       341.258053
+      ],
+      [
+       "dose weighting",
+       57.733552
+      ],
+      [
+       "global ifft",
+       21.775649
+      ],
+      [
+       "global fft",
+       21.717269
+      ],
+      [
+       "global alignment",
+       16.973089
+      ],
+      [
+       "hot pixels",
+       4.118676
+      ],
+      [
+       "fit polynomial",
+       2.871868
+      ],
+      [
+       "release alignment",
+       2.227098
+      ],
+      [
+       "session and device ingest",
+       1.127237
+      ],
+      [
+       "setup",
+       0.468774
+      ],
+      [
+       "release preprocessing",
+       0.402844
+      ],
+      [
+       "submit model and plot",
+       0.138843
+      ],
+      [
+       "fix defects",
+       0.046934
+      ],
+      [
+       "power spectrum",
+       0.040228
+      ],
+      [
+       "read gain",
+       0.039111
+      ],
+      [
+       "allocate host sum",
+       0.01369
+      ],
+      [
+       "allocate reconstruction",
+       0.01369
+      ]
+     ],
+     "first_movie_ms": 3973.100525,
+     "first_stages": [
+      [
+       "patch alignment",
+       1744.079269
+      ],
+      [
+       "host read movie",
+       989.499026
+      ],
+      [
+       "movie teardown",
+       471.7501
+      ],
+      [
+       "gain and sum",
+       363.950544
+      ],
+      [
+       "session and device ingest",
+       156.484933
+      ],
+      [
+       "dose weighting",
+       73.995381
+      ],
+      [
+       "hot pixels",
+       65.934782
+      ],
+      [
+       "global ifft",
+       21.763357
+      ],
+      [
+       "global fft",
+       21.683739
+      ],
+      [
+       "global alignment",
+       17.338503
+      ],
+      [
+       "fit polynomial",
+       2.879134
+      ],
+      [
+       "release alignment",
+       2.20251
+      ],
+      [
+       "fix defects",
+       1.78514
+      ],
+      [
+       "setup",
+       0.784177
+      ],
+      [
+       "release preprocessing",
+       0.528279
+      ],
+      [
+       "submit model and plot",
+       0.162871
+      ],
+      [
+       "read gain",
+       0.041346
+      ],
+      [
+       "power spectrum",
+       0.040787
+      ],
+      [
+       "allocate host sum",
+       0.016203
+      ],
+      [
+       "allocate reconstruction",
+       0.01369
+      ]
+     ]
+    }
+   }
+  },
+  "host_read_steady_ms": 958.292835,
+  "host_read_share": 0.26332588355124836,
+  "host_read_share_ex_retry": 0.49721501912126176,
+  "ms_per_mpx_L_steady": 3.6764848727290915,
+  "patches": 50,
+  "patches_retried": 30,
+  "patch_retry_converged": 0,
+  "traced_peak_mib": 4492.78,
+  "vram_peak_gib": 8.95703125,
+  "movie_f32_gib": 3.6875
+ }
+}

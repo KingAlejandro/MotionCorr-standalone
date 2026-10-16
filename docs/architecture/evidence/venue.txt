@@ -1,0 +1,54 @@
+2026-10-02T12:45:00+01:00
+gn3000.scarf.rl.ac.uk
+57e98666a6225a8fdb6dafbdbc356478c21cea3a
+2defb3a9016e8b865586897352ea8607732c2901372a50398c09b89e5ed1ecb0  -
+index, uuid, name, memory.total [MiB], memory.used [MiB], utilization.gpu [%]
+0, GPU-c6c43d6a-aa2e-af46-022c-aa4a4735638d, NVIDIA A100-SXM4-40GB, 40960 MiB, 0 MiB, 0 %
+1, GPU-2e1b6776-2dce-cad6-5e4c-9d0d58849616, NVIDIA A100-SXM4-40GB, 40960 MiB, 0 MiB, 0 %
+2, GPU-69bdbeb9-d502-8487-0f78-98e7d4b6c73a, NVIDIA A100-SXM4-40GB, 40960 MiB, 0 MiB, 0 %
+3, GPU-0ade54fe-adbf-ca88-2135-90cbf33b2cbb, NVIDIA A100-SXM4-40GB, 40960 MiB, 0 MiB, 0 %
+pid, gpu_uuid, used_gpu_memory [MiB]
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2025 NVIDIA Corporation
+Built on Wed_Jan_15_19:20:09_PST_2025
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+cmake version 3.31.8
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+c++ (GCC) 11.5.0 20240719 (Red Hat 11.5.0-14)
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+JobId=3521980 JobName=mc142-mini
+   UserId=scarf1415(101415) GroupId=cseg(101004) MCS_label=N/A
+   Priority=6 Nice=0 Account=scd QOS=normal
+   JobState=RUNNING Reason=None Dependency=(null)
+   Requeue=0 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0
+   RunTime=00:00:01 TimeLimit=00:30:00 TimeMin=N/A
+   SubmitTime=2026-10-02T12:44:59 EligibleTime=2026-10-02T12:44:59
+   AccrueTime=Unknown
+   StartTime=2026-10-02T12:45:00 EndTime=2026-10-02T13:15:00 Deadline=N/A
+   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2026-10-02T12:45:00 Scheduler=Main
+   Partition=gpu-devel AllocNode:Sid=cn1052:3224867
+   ReqNodeList=(null) ExcNodeList=(null)
+   NodeList=gn3000
+   BatchHost=gn3000
+   NumNodes=1 NumCPUs=64 NumTasks=1 CPUs/Task=4 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=4,mem=16000M,node=1,billing=1000,gres/gpu=1
+   AllocTRES=cpu=64,mem=250G,node=1,billing=4000,gres/gpu=4,gres/gpu:a100=4
+   Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=*
+   MinCPUsNode=4 MinMemoryCPU=4000M MinTmpDiskNode=0
+   Features=amd DelayBoot=00:00:00
+   OverSubscribe=NO Contiguous=0 Licenses=(null) Network=(null)
+   Command=/work4/scd/scarf1415/motioncorr/issue142-architecture-20261002/src/tools/architecture/run_scarf.sh
+   WorkDir=/work4/scd/scarf1415/motioncorr/issue142-architecture-20261002
+   StdErr=/work4/scd/scarf1415/motioncorr/issue142-architecture-20261002/slurm-3521980.out
+   StdIn=/dev/null
+   StdOut=/work4/scd/scarf1415/motioncorr/issue142-architecture-20261002/slurm-3521980.out
+   Power=
+   TresPerNode=gres:gpu:1
+   
+
+Cpus_allowed_list:	0-63

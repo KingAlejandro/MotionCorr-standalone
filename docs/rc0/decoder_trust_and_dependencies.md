@@ -276,10 +276,14 @@ Admitted encoding (`:1414–1458`): native byte order, `PREDICTOR_NONE`, `SAMPLE
 Deflate/Adobe-Deflate, exactly `ny` strips of `nx*2` bytes. Every other encoding is declined
 by name.
 
-**Population on main.** In the ten-family #186 corpus (`docs/workload_corpus/gpu/README.md`,
-main `116eb04a`, `--ingest_witness` on every run), only the tutorial takes `nvcomp`. The three
-real TIFF depositions (EMPIAR-10361, 10641, 10441) are u8 LZW BigTIFF on `compact`; the other
-six families are EER or MRC on `float`. (The corpus labels the tutorial "u8"; W-TIFF is
+**Population on main.** In the ten-family #186 corpus, only the tutorial takes `nvcomp`; the
+other nine are not nvCOMP-eligible on current main. Historical witness (`docs/workload_corpus/gpu/README.md:14–16`,
+main `116eb04a`, `--ingest_witness` on every run): tutorial `nvcomp`; the three real TIFF
+depositions (EMPIAR-10361, 10641, 10441, u8 LZW BigTIFF) `compact`; the six EER and MRC
+families `float`. Current `1db86902` routes differently for some of those six: eligible EER
+renders into u16 compact staging (#196, `runner:2344–2357`) and raw integer MRC modes 0/1/6 use
+compact staging (#195, `runner:2363–2389`); float32 MRC (mode 2) and compressed MRC stay on
+`float`. None of them reaches nvCOMP. (The corpus labels the tutorial "u8"; W-TIFF is
 checking that label, #198.) #138 would extend nvCOMP only to Deflate TIFF writers; it does not
 touch LZW, EER or MRC.
 
@@ -354,8 +358,13 @@ whether or not #138 merges.
 - **Process isolation** (decode in a separate worker). The decoded movie must reach the main
   context through CUDA IPC or a host round trip, with new worker lifecycle and failure
   handling: an architectural change, outside RC0's "no new architectures" rule.
-- **Per-run log notice under option 1.** The movie log already records the route on success
-  (`nvCOMP ingestion: chunk=…`, `:1696`) and `--ingest_witness` records it when asked; neither
+- **Per-run log notice under option 1.** The movie log line `nvCOMP ingestion: chunk=…`
+  (`:1696`) records a configured ingest *attempt*: it is written before pinned allocation,
+  strip reads, decode and verification, and survives a later decline or fallback, so it is not a
+  success witness. The only per-movie record of the route taken is the `--ingest_witness` line
+  (`runner:2423–2431`), which writes `nvcomp` only after `MovieIngestStatus::Success`
+  (`runner:2292–2293`), is written only when the option is given, and does not prove later
+  whole-movie success. No log line records a successful nvCOMP ingest, and neither record
   states the precondition. A one-line notice when auto first takes nvCOMP is a small source
   change; it changes log bytes (output-tree comparisons may need an allowance) and requires a
   QF rerun. Optional.

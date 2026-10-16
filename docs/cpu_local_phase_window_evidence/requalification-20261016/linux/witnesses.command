@@ -1,0 +1,1 @@
+cd /home/ubuntu/fix183-20261016 && candidate/build-release/cpu_patch_phase_window && candidate/build-debug/cpu_patch_phase_window && sha256sum candidate/build-{release,debug}/{motioncorr,cpu_patch_phase_window} base/build/motioncorr && uname -a && lscpu && free -h && ps -eo user,pid,pcpu,comm --sort=-pcpu | head -15

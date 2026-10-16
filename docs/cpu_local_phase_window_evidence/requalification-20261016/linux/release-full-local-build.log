@@ -1,0 +1,14 @@
+-- LibTIFF Deflate subcodec: libdeflate
+-- Configuring done (0.3s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/ubuntu/fix183-20261016/candidate/build-release
+[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+/home/ubuntu/fix183-20261016/candidate/src/motioncorr_runner.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/home/ubuntu/fix183-20261016/candidate/src/motioncorr_runner.cpp:1898:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1898 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+[  1%] Linking CXX static library libmotioncorr_core.a
+[ 98%] Built target motioncorr_core
+[ 98%] Building CXX object CMakeFiles/cpu_patch_phase_window.dir/tests/test_cpu_patch_phase_window.cpp.o
+[100%] Linking CXX executable cpu_patch_phase_window
+[100%] Built target cpu_patch_phase_window

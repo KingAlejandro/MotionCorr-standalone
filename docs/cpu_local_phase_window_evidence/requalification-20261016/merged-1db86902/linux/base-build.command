@@ -1,0 +1,1 @@
+cd /home/ubuntu/fix183-20261016/base-178 && ~/.mc-venv/bin/cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCUDA=OFF -DPython3_EXECUTABLE=/home/ubuntu/.mc-venv/bin/python3 && ~/.mc-venv/bin/cmake --build build -j4

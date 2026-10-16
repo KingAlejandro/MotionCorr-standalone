@@ -1,0 +1,40 @@
+{
+  "source_commit": "146dc07baab2c1a3dfa77fe61422827f5ee6d5cb",
+  "source_tree": "50f15baa989211d06b22328a33eeb25a7990fe35",
+  "baseline_commit": "116eb04ad359cd5bf789b28809fc2047ea155b9b",
+  "uname": {
+    "system": "Linux",
+    "node": "442a2f5ea6ec",
+    "release": "6.18.44",
+    "version": "#1 SMP Sat Sep 26 20:02:31 UTC 2026",
+    "machine": "x86_64",
+    "processor": "x86_64"
+  },
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "build_jobs": 3,
+  "cmake_build_type": "Release",
+  "cxx_flags": "-O3 -DNDEBUG -std=gnu++17 -fopenmp",
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+  "THP": "always [madvise] never",
+  "memory_max": "8589934592",
+  "cpu_max": "800000 100000",
+  "test_command": "run-layout-checks.sh ctest --test-dir /workspace/scratch/28038873ca11/build-patch-window -R ^(CpuPatchPhaseWindow|PatchRetryState)$ --output-on-failure -V",
+  "performance_status": "not run",
+  "correctness_result": "PASS 2/2 focused CTests; 300 geometries x5 updates and108 production local/full alignment cases",
+  "binary_sha256": {
+    "motioncorr": "e4f8ea2d8a624d53e85c99b577f25439bca545f6b9f800d0b9d8adcbf6b0ae8a",
+    "cpu_patch_phase_window": "1b88bba132e840c4f05e6d23ee95b4c2bbe4dfaf5d86ef23bc92888fe0343002",
+    "cpu_patch_phase_bench": "a07e0b807cbad4b864ff582c08464a735de6df059b59a4cfd68296345c3ca898",
+    "patch_retry_state": "f8571dbe0992efc6230b6f19381ca7f034337cda29b9cc1cbe3212f8d5a36a15"
+  }
+}

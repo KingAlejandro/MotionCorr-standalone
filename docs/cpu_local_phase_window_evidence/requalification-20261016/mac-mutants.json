@@ -1,0 +1,18 @@
+[
+  {
+    "name": "skip-needed",
+    "file": "src/motioncorr_runner.cpp",
+    "old": "if (is_global || (!(rmsd < tolerance) && iter < max_iter)) {",
+    "new": "if (is_global) {",
+    "build_status": 0,
+    "test_status": 1
+  },
+  {
+    "name": "single-iteration",
+    "file": "tests/test_cpu_patch_phase_window.cpp",
+    "old": "for (int iterations : {1,5})",
+    "new": "for (int iterations : {1})",
+    "build_status": 0,
+    "test_status": 1
+  }
+]

@@ -1,0 +1,143 @@
+author:	KingAlejandro
+association:	owner
+edited:	false
+status:	none
+--
+**Review of #178 at `5a6812b`: the change is correct as far as I can verify. Its payoff is untested, and the PR makes no performance claim yet.**
+
+**Code read.**
+- The float store of each interpolated frame is kept before the ordered total and even/odd additions, so rounding is unchanged.
+- The frame offset reaches both the polynomial and general models. The null-model path correctly ignores it.
+- Even/odd still selects by selected-frame index parity, and the `alias` view never owns pixels.
+- The interpolation substage now includes the accumulation (the design note says so), so compare the surrounding unweighted-sums stage.
+
+**Independent local check** (not timed; the host was loaded):
+- Apple clang 21, arm64, Release CPU build with FFTW 3.3.11, fresh build dirs.
+- `CpuUnweightedStream` passes.
+- **Negative control:** I changed the call to pass offset `0`. The test fails with `stream changed corrected pixels`.
+- Pixels and STAR are bit-identical to main `116eb04` in six configurations: global and 5x5 at j1/j4, plus dose + noDW + even/odd at j1 and j4. The input is the 128x128x8 fixture, so the MRC header and ground-truth movies were not compared. That fixture has 8 frames, so odd frame counts and the tutorial geometry are **not covered by this check**.
+- Full CTest: 51/53 on #178 versus 50/52 on main, with the same two failures (`SyntheticRegression`, `MultiGpuScheduling`). That differs from the PR text, which names ProfilingKit and MultiGpuScheduling on the Linux host.
+- The 1.27 GiB figure is correct as a calculation: 3710x3838x4x24 = 1.273 GiB.
+
+**What the evidence does not settle yet.** #177's raw data shows the tutorial 5x5 j4 job peaks at ~4.39 GiB RSS on main (4,600,836 KiB). The stack removal can lower that peak only if it is live at the peak, and it could instead lower RSS elsewhere. The planned unprofiled peak-RSS comparison is the real test. There is no speed claim to check, and I expect wall time to be neutral, since the same additions run in the same order.
+
+**Concern.** `docs/cpu_stream_20261014/run_unprofiled.py` is byte-identical to the copy in #177 (121 lines). Keep one copy, for example under `tools/`, rather than two.
+
+**Next action.** Finish the alternating RSS and wall run on the tutorial geometry with an odd frame count included, then mark ready only if the peak RSS drops. If the peak does not move, treat this as a no-go.
+
+--
+author:	KingAlejandro
+association:	owner
+edited:	false
+status:	none
+--
+**Follow-up in progress:** Alex requested an experiment fusing the streamed float scratch frame's total and selected even/odd accumulation into one parallel scan. Work is isolated on `perf/cpu-fused-unweighted-sums`, based on current #178 head `e8f3eb8`; this PR's branch and existing evidence will be preserved. Ascending frame order, the interpolation float store, selected-frame parity and model time offsets remain required exactness controls. Separate bitwise and whole-product results, plus kernel/job timing and RSS, will be linked when ready. The fixed-budget CPU worker experiment on #26 will also test whether #178's measured RAM reduction permits useful extra movie concurrency. Coordination: #10.
+--
+author:	KingAlejandro
+association:	owner
+edited:	false
+status:	none
+--
+Fusion follow-up #182 is complete and is **not recommended for promotion**. All four six-pair reconstruction comparisons remain unresolved; large polynomial j1 medians are worse. Four actual odd-selection global/local j1/j4 complete trees, including even/odd, pass; 70 canonical MRC/STAR pairs match across the validation matrix. The tutorial strict tree fails because the #178 control directory alone contains an unexpected truncated temporary; origin remains unproven, and it is preserved rather than excluded. Full evidence is on #182. This does not invalidate or add to #178's separately measured RAM reduction. The final #184 worker-throughput experiment is now running with a fixed four-CPU budget.
+--
+author:	KingAlejandro
+association:	owner
+edited:	false
+status:	none
+--
+@codex review
+--
+author:	KingAlejandro
+association:	owner
+edited:	false
+status:	commented
+--
+**Merge decision: YES IN PRINCIPLE, but NOT READY TO MERGE THIS HEAD — strongest CPU memory improvement (reviewed 16 October 2026).**
+
+Read the source diff and evidence at `e8f3eb8` (production code `5a6812b`). Replacing the whole corrected `Irefframes` stack with one temporary frame has a direct, physical benefit: 24-frame 3710×3838 tutorial, j4, 5×5, dose + noDW + even/odd, **peak RSS 4.388 → 3.134 GiB** (28.56–29.02% across the six measured pairs). The code preserves the float intermediate store, ascending total/even/odd accumulation, selected-frame parity and model-time offset in both polynomial and general paths; retained exact-product tests and native Linux CI are positive. The full-job wall interval crosses zero, so **do not claim a speedup**. The benefit applies to unweighted/noDW/even-odd reconstruction, not dose-only runs.
+
+Compared with the other proposals this is relatively contained buffer-lifetime logic and does not rewrite RELION FFTs or change interpolation formulas. I favour merging this **after** the following final qualifications, not as a blanket approval of the October 14 base:
+1. Rebase/compose against current `main` `d7171b8`, now including #187 FFTW plan cache/DW copy elision, #188 host THP notes and #185 report changes. Run fresh CPU-only CTests and strict full-tree exact products across global/5×5, j1/j4, dose/noDW/even-odd, binning and relevant fallback paths; retain complete inventory including temporary artifacts. #182's baseline-side truncated temporary is *not* proof of a #178 defect but remains unresolved for its own strict tutorial case.
+2. Run matched cpu64 full-geometry wall/RSS with the **same** declared THP policy on both arms (including the release-recommended glibc setting where applicable); validate combined memory peak rather than adding old #178/#187 RSS deltas.
+3. Confirm native CUDA build and the actual CPU fallback in a supported configuration, especially the borrowed input/one-frame scratch lifetime, without claiming native GPU testing from CUDA compilation.
+
+**Disposition:** priority integration candidate, request the minimal current-main qualification PR/delta, then merge if exactness and material RSS gain remain. Do **not** pull in stacked #182: its fusion trial does not justify added code.
+--
+author:	chatgpt-codex-connector
+association:	none
+edited:	true
+status:	none
+--
+<!-- codex-pull-request-review-summary -->
+<!-- codex-review-state:v1 {"code_review":{"commit_sha":"e8f3eb8ea6165edae73613751df5a2e92ff4f955","has_any_findings":false,"has_unresolved_findings":false,"status":"completed"},"security_review":{"commit_sha":null,"has_any_findings":null,"has_unresolved_findings":null,"status":null}} -->
+
+## Codex Review Summary
+
+This comment shows the latest Codex review activity on this pull request.
+
+| Review | Status | Commit | Review trigger |
+| --- | --- | --- | --- |
+| 📝 **Code Review** | ✅ **Completed** <relative-time datetime="2026-10-16T18:08:10.934873Z">2026-10-16T18:08:10.934873Z</relative-time> | `e8f3eb8` | Manual request |
+
+
+
+<details> <summary>ℹ️ About Codex in GitHub</summary>
+<br/>
+
+[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you
+- Open a pull request for review
+- Mark a draft as ready
+- Comment "@codex review" or "@codex security review".
+
+Codex reacts with 👀 while any review is running, comments if it has suggestions, and reacts with 👍 once all reviews finish with no findings.
+
+</details>
+--
+author:	chatgpt-codex-connector
+association:	none
+edited:	false
+status:	none
+--
+<!-- codex-review-receipt:v1 -->
+
+Codex Review: Didn't find any major issues. Bravo.
+
+**Reviewed commit:** `e8f3eb8ea6`
+
+<details> <summary>ℹ️ About Codex in GitHub</summary>
+<br/>
+
+[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you
+- Open a pull request for review
+- Mark a draft as ready
+- Comment "@codex review".
+
+If Codex has suggestions, it will comment; otherwise it will react with 👍.
+
+
+
+
+Codex can also answer questions or update the PR. Try commenting "@codex address that feedback".
+            
+</details>
+--
+author:	KingAlejandro
+association:	owner
+edited:	false
+status:	commented
+--
+Reviewer: Sonnet 5.5
+
+Needs a rebase, then merge-ready on correctness: the change is exact as far as I can establish and the RSS claim follows from the code. It conflicts with main d7171b81 mechanically, and the 28.6-29.0% saving should be re-measured on current main before merge.
+
+1. P1 `src/motioncorr_runner.cpp:2083` (merge conflict, mechanical). #195 added `NativeS16MovieStaging s16_staging; NativeS8MovieStaging s8_staging;` on the lines next to the `Irefframes` declaration this PR deletes. Resolution: keep the two staging lines, drop `Irefframes`. Nothing else on main references `Irefframes`, and #187/#195/#196/#197 do not touch the unweighted fallback block. I resolved it in a throwaway worktree on d7171b81: it builds and `CpuUnweightedStream` passes (macOS CPU-only, so the allocation witness is not compiled; see item 4).
+2. P2 Re-measure on d7171b81. The saving follows from the code: median peak difference 1,335,028 KiB vs 3710x3838x4x24 = 1,334,904 KiB (0.01%), so the stack is live at the baseline peak and the one-frame scratch is already freed by then. #187 removes a DW iFFT copy, and the candidate's 3.13 GiB peak may now be set by another stage, so the gain on main may be smaller. Run the tutorial dose+noDW+even/odd j4 pair on the same THP policy for both arms.
+3. P2 `docs/cpu_stream_20261014/*/results.json`: every end-to-end run has an even frame count (tutorial 24, synthetic 16). Odd-frame parity (`iframe % 2` in `sumUnweightedFrames`) is covered only by the kernel test (7 frames, `tests/test_cpu_unweighted_stream.cpp`). The code is right (parity uses the selected-frame index in both old and new), but add one odd-frame end-to-end tree (even/odd + `--bin_factor 2`) to the post-rebase matrix.
+4. P3 `tests/test_cpu_unweighted_stream.cpp:143-145,160`: without `MOTIONCORR_ALLOCATION_WITNESS` (all non-Linux builds) the one-frame bound is never checked, yet the test still prints "...scratch bound PASS". Print "bound not witnessed" in that case. Linux CI log line 976 shows it was witnessed there, including the N-frame control.
+5. Strict-tree failure (`.tutorial_noDW.mrc.128xfS`, 46,661,632 B): not in this PR's evidence and not a product bug that I can find. All 35 comparisons in `{tutorial,synthetic}-*/results.json` have empty `only_a`/`only_b`/`problems`. The file is reported in #182/#177 on the baseline (main binary) side only. Neither binary can create that name: MRC products are written in place at the final name (`Image::write`, `src/image.h:332`; `submitImageWrite`, `src/motioncorr_runner.cpp:1527`); the only temp-then-rename writers are STAR (`metadata_table.cpp:1529,2229`, suffix `.tmp`). A dot-prefixed name with a 6-character random suffix is rsync's partial-file name, and the size is ~82% of the 56,956,944 B complete noDW file with a valid header. I infer a harness copy/sync artefact. This is unproven; to settle it, check how the output tree reached the comparison host, and re-run the tutorial pair.
+
+Verified: the production diff is `5a6812b` only (nothing outside `docs/cpu_stream_20261014/` changes between `5a6812b` and `e8f3eb8`, and the tree `64057a8` matches `ci-status.json`). Float store per frame, ascending total/even/odd order, `iframe + frame_offset` model time (int square preserved), alias non-ownership, and no OpenMP sharing of the scratch hold on read. Recomputed from the retained JSON: 35/35 clean comparisons, all RSS ranges and wall medians match the PR body. Not checked: native CUDA execution, the unpublished measurement commit `c9dbe595` (only its tree id), any end-to-end run of my own, cpu64/4GPUs.
+
+Next action: rebase onto d7171b81 per item 1, re-run the tutorial RSS/wall pair and a strict-tree check (include one odd-frame case) on the merged head, then mark ready.
+
+--

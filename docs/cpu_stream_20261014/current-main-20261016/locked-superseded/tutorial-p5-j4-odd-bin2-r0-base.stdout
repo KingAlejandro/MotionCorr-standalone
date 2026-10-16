@@ -1,0 +1,34 @@
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * /home/ubuntu/fix178-20261016/data/tutorial.tiff
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise; GLIBC_TUNABLES=glibc.malloc.hugetlb=1.
+000/??? sec ~~(,_,">                                                          [oo]in: /home/ubuntu/fix178-20261016/base/src/motioncorr_runner.cpp, line 3117
+ERROR: 
+The dimensions of the image after binning must be even
+=== Backtrace  ===
+/home/ubuntu/fix178-20261016/base/build/motioncorr(+0x55a27) [0x5e7c92f64a27]
+/home/ubuntu/fix178-20261016/base/build/motioncorr(+0x2a091) [0x5e7c92f39091]
+/home/ubuntu/fix178-20261016/base/build/motioncorr(+0x10b17a) [0x5e7c9301a17a]
+/home/ubuntu/fix178-20261016/base/build/motioncorr(+0x4bd16) [0x5e7c92f5ad16]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x77183122a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x77183122a28b]
+/home/ubuntu/fix178-20261016/base/build/motioncorr(+0x4c2c5) [0x5e7c92f5b2c5]
+==================
+ERROR: 
+The dimensions of the image after binning must be even
+Continuing with the remaining movies.
+   1/   1 sec ............................................................~~(,_,"> yum!
+in: /home/ubuntu/fix178-20261016/base/src/motioncorr_runner.cpp, line 1089
+ERROR: 
+Motion correction failed for 1 movie(s): /home/ubuntu/fix178-20261016/data/tutorial.tiff. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/home/ubuntu/fix178-20261016/base/build/motioncorr(+0x55a27) [0x5e7c92f64a27]
+/home/ubuntu/fix178-20261016/base/build/motioncorr(+0x2d383) [0x5e7c92f3c383]
+/home/ubuntu/fix178-20261016/base/build/motioncorr(+0x4bd16) [0x5e7c92f5ad16]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x77183122a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x77183122a28b]
+/home/ubuntu/fix178-20261016/base/build/motioncorr(+0x4c2c5) [0x5e7c92f5b2c5]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): /home/ubuntu/fix178-20261016/data/tutorial.tiff. Successful per-movie outputs were retained; joint output was not generated.

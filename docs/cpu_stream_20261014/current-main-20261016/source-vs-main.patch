@@ -1,0 +1,351 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1f024b4e..6646f692 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -162,6 +162,14 @@ include(CTest)
+ if(BUILD_TESTING)
+     add_executable(runner_numerics tests/test_runner_numerics.cpp)
+     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
++    add_executable(cpu_unweighted_stream tests/test_cpu_unweighted_stream.cpp)
++    target_link_libraries(cpu_unweighted_stream PRIVATE motioncorr_core)
++    if(UNIX AND NOT APPLE)
++        target_compile_definitions(cpu_unweighted_stream PRIVATE MOTIONCORR_ALLOCATION_WITNESS)
++        target_link_options(cpu_unweighted_stream PRIVATE
++            "LINKER:--wrap=fftw_malloc" "LINKER:--wrap=fftw_free")
++    endif()
++    add_test(NAME CpuUnweightedStream COMMAND cpu_unweighted_stream)
+     # Device-free control for the issue #69 patch-retry shift-state contract.
+     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
+     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
+diff --git a/src/motioncorr_runner.cpp b/src/motioncorr_runner.cpp
+index 532d556b..bc32b739 100644
+--- a/src/motioncorr_runner.cpp
++++ b/src/motioncorr_runner.cpp
+@@ -2105,7 +2105,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
+ 	NativeU8MovieStaging u8_staging;
+ 	NativeS16MovieStaging s16_staging;
+ 	NativeS8MovieStaging s8_staging;
+-	std::vector<Image<float> > Irefframes;
+ 	std::vector<int> frames; // 0-indexed
+ 
+ 	RFLOAT output_angpix = angpix * bin_factor;
+@@ -2157,7 +2156,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
+ 
+ 	const int n_frames = frames.size();
+ 	Iframes.resize(n_frames);
+-	Irefframes.resize(n_frames);
+ 	Fframes.resize(n_frames);
+ 
+ 	std::vector<RFLOAT> xshifts(n_frames), yshifts(n_frames);
+@@ -4015,42 +4013,12 @@ skip_fitting:
+ 					REPORT_ERROR("Failed to download resident real frames for unweighted fallback");
+ 			}
+ #endif
+-			for (int iframe = 0; iframe < n_frames; iframe++){
+-				Irefframes[iframe]().initZeros(Iframes[iframe]());	
+-			}
+-
+ 			RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
+ 			logfile << "Summing frames before dose weighting: ";
+-			realSpaceInterpolation_withoutsum(Irefframes, Iframes, mic.model, logfile);
++			sumUnweightedFrames(Iref, even_odd_split ? &Iref_even : nullptr,
++				even_odd_split ? &Iref_odd : nullptr, Iframes, mic.model, logfile);
+ 			logfile << " done" << std::endl;
+ 			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+-			
+-			// Sum frames and save aligned stack
+-			for (int iframe = 0; iframe < n_frames; iframe++)
+-			{
+-			#pragma omp parallel for num_threads(n_threads)
+-			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref()) {
+-				DIRECT_MULTIDIM_ELEM(Iref(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);
+-				}
+-
+-			// save odd even aligned stack
+-			if (even_odd_split)
+-			{
+-			if ( iframe % 2 == 0)
+-			{
+-			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref_even()) {
+-				DIRECT_MULTIDIM_ELEM(Iref_even(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);			
+-			}
+-			}
+-			else
+-			{
+-			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref_odd()) {
+-				DIRECT_MULTIDIM_ELEM(Iref_odd(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);			
+-
+-			}
+-			}
+-			}
+-			}
+ 		}
+ 
+ 		// Apply binning
+@@ -4267,7 +4235,34 @@ void MotioncorrRunner::interpolateShifts(std::vector<int> &group_start, std::vec
+ 	}
+ }
+ 
+-void MotioncorrRunner::realSpaceInterpolation_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, MotionModel *model, std::ostream &logfile) {
++void MotioncorrRunner::sumUnweightedFrames(Image<float> &sum, Image<float> *even,
++        Image<float> *odd, std::vector<Image<float> > &frames,
++        MotionModel *model, std::ostream &logfile) {
++    // Input pixels remain owned by frames. The view is rebound only between
++    // completed interpolation calls; no worker can outlive that call.
++    std::vector<Image<float> > view(1), aligned(1);
++    for (int iframe = 0; iframe < static_cast<int>(frames.size()); ++iframe) {
++        view[0]().alias(frames[iframe]());
++        aligned[0]().initZeros(frames[iframe]());
++        // Model time is the selected movie's original relative frame index,
++        // not the one-element view's index zero.
++        realSpaceInterpolation_withoutsum(aligned, view, model, logfile, iframe);
++        #pragma omp parallel for num_threads(n_threads)
++        FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(sum()) {
++            DIRECT_MULTIDIM_ELEM(sum(), n) += DIRECT_MULTIDIM_ELEM(aligned[0](), n);
++        }
++        Image<float> *split = (iframe % 2 == 0) ? even : odd;
++        if (split) {
++            FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY((*split)()) {
++                DIRECT_MULTIDIM_ELEM((*split)(), n) += DIRECT_MULTIDIM_ELEM(aligned[0](), n);
++            }
++        }
++    }
++    // aligned is released here, before dose weighting; no corrected movie
++    // stack survives into the following reconstruction.
++}
++
++void MotioncorrRunner::realSpaceInterpolation_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, MotionModel *model, std::ostream &logfile, int frame_offset) {
+ 	int model_version = MOTION_MODEL_NULL;
+ 	if (model != NULL) {
+ 		model_version = model->getModelVersion();
+@@ -4289,12 +4284,12 @@ void MotioncorrRunner::realSpaceInterpolation_withoutsum(std::vector<Image<float
+ 		}
+ 	} else if (model_version == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) { // Optimised code
+ 		ThirdOrderPolynomialModel *polynomial_model = (ThirdOrderPolynomialModel*)model;
+-		realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(Ialignedframes, Iframes, *polynomial_model, logfile);
++		realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(Ialignedframes, Iframes, *polynomial_model, logfile, frame_offset);
+ 	} else { // general code
+ 		const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
+ 		for (int iframe = 0; iframe < n_frames; iframe++) {
+ 			logfile << "." << std::flush;
+-			const RFLOAT z = iframe;
++			const RFLOAT z = iframe + frame_offset;
+ 
+ 			#pragma omp parallel for num_threads(n_threads)
+ 			for (int iy = 0; iy < ny; iy++) {
+@@ -4354,7 +4349,7 @@ void MotioncorrRunner::realSpaceInterpolation_withoutsum(std::vector<Image<float
+ 	} // general model
+ }
+ 
+-void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile) {
++void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile, int frame_offset) {
+ 	const int n_frames = Iframes.size();
+ 	const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
+ 	const Matrix1D<RFLOAT> coeffX = model.coeffX, coeffY = model.coeffY;
+@@ -4362,7 +4357,8 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(st
+ 	for (int iframe = 0; iframe < n_frames; iframe++) {
+ 		logfile << "." << std::flush;
+ 
+-		const RFLOAT z = iframe, z2 = iframe * iframe;
++		const int model_frame = iframe + frame_offset;
++		const RFLOAT z = model_frame, z2 = model_frame * model_frame;
+ 		const RFLOAT z3 = z * z2;
+ 		// Common terms
+ 		const RFLOAT x_C0 = coeffX(0)  * z + coeffX(1)  * z2 + coeffX(2)  * z3;
+diff --git a/src/motioncorr_runner.h b/src/motioncorr_runner.h
+index ddfab661..db054ea1 100644
+--- a/src/motioncorr_runner.h
++++ b/src/motioncorr_runner.h
+@@ -398,9 +398,14 @@ private:
+ 
+ 	void realSpaceInterpolation_ThirdOrderPolynomial(Image <float> &Isum, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile);
+ 	
+-	void realSpaceInterpolation_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, MotionModel *model, std::ostream &logfile);
++	// One float scratch frame; keep the original interpolation-store rounding
++	// before the ordered total/even/odd additions.
++	void sumUnweightedFrames(Image<float> &sum, Image<float> *even, Image<float> *odd,
++		std::vector<Image<float> > &frames, MotionModel *model, std::ostream &logfile);
+ 
+-	void realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile);
++	void realSpaceInterpolation_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, MotionModel *model, std::ostream &logfile, int frame_offset = 0);
++
++	void realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile, int frame_offset = 0);
+ 
+ };
+ 
+diff --git a/tests/test_cpu_unweighted_stream.cpp b/tests/test_cpu_unweighted_stream.cpp
+new file mode 100644
+index 00000000..41845a8d
+--- /dev/null
++++ b/tests/test_cpu_unweighted_stream.cpp
+@@ -0,0 +1,170 @@
++#include "src/motioncorr_runner.h"
++#include <cstring>
++#include <iostream>
++#include <map>
++#include <sstream>
++#include <stdexcept>
++
++// Exercise both production entry points: the former full-stack interpolation
++// remains the independent reference for the bounded streaming caller.
++struct MotioncorrRunnerTestAccess {
++    static void stream(MotioncorrRunner &r, Image<float> &sum, Image<float> *even,
++                       Image<float> *odd, std::vector<Image<float>> &frames,
++                       MotionModel *model, std::ostream &log) {
++        r.sumUnweightedFrames(sum, even, odd, frames, model, log);
++    }
++    static void materialize(MotioncorrRunner &r, std::vector<Image<float>> &out,
++                            std::vector<Image<float>> &frames, MotionModel *model,
++                            std::ostream &log, int offset = 0) {
++        r.realSpaceInterpolation_withoutsum(out, frames, model, log, offset);
++    }
++    static void direct(MotioncorrRunner &r, Image<float> &sum,
++                       std::vector<Image<float>> &frames, MotionModel *model,
++                       std::ostream &log) {
++        r.realSpaceInterpolation(sum, frames, model, log);
++    }
++};
++
++#ifdef MOTIONCORR_ALLOCATION_WITNESS
++namespace {
++bool recording = false;
++size_t threshold = 0, live = 0, peak = 0;
++std::map<void *, size_t> tracked;
++}
++extern "C" void *__real_fftw_malloc(size_t);
++extern "C" void __real_fftw_free(void *);
++extern "C" void *__wrap_fftw_malloc(size_t n) {
++    void *p = __real_fftw_malloc(n);
++    if (recording && p && n >= threshold) {
++        tracked[p] = n; live += n; peak = std::max(peak, live);
++    }
++    return p;
++}
++extern "C" void __wrap_fftw_free(void *p) {
++    auto it = tracked.find(p);
++    if (it != tracked.end()) { live -= it->second; tracked.erase(it); }
++    __real_fftw_free(p);
++}
++#endif
++
++static void require(bool value, const char *message) {
++    if (!value) throw std::runtime_error(message);
++}
++static void start_allocations(size_t frame_bytes) {
++#ifdef MOTIONCORR_ALLOCATION_WITNESS
++    require(tracked.empty(), "previous scratch allocation leaked");
++    threshold = frame_bytes; live = peak = 0; recording = true;
++#endif
++}
++static size_t stop_allocations() {
++#ifdef MOTIONCORR_ALLOCATION_WITNESS
++    recording = false;
++    require(live == 0 && tracked.empty(), "scratch survived reconstruction");
++    return peak;
++#else
++    return 0;
++#endif
++}
++static bool identical(const Image<float> &a, const Image<float> &b) {
++    return a().nzyxdim == b().nzyxdim &&
++        std::memcmp(a().data, b().data, a().nzyxdim * sizeof(float)) == 0;
++}
++
++class GeneralModel : public MotionModel {
++public:
++    void fit() override {}
++    void read(std::ifstream &, std::string) override {}
++    void write(std::ostream &, std::string) override {}
++    int getModelVersion() const override { return 2; }
++    int getShiftAt(RFLOAT z, RFLOAT x, RFLOAT y, RFLOAT &sx, RFLOAT &sy) const override {
++        sx = 0.37 * z + 0.13 * x - 0.21 * y;
++        sy = -0.23 * z + 0.17 * x + 0.11 * y;
++        return 0;
++    }
++    MotionModel *clone() const override { return new GeneralModel(*this); }
++};
++
++int main() {
++    try {
++        ThirdOrderPolynomialModel polynomial;
++        polynomial.coeffX.initZeros(18); polynomial.coeffY.initZeros(18);
++        polynomial.coeffX(0) = 0.37; polynomial.coeffX(4) = 0.013;
++        polynomial.coeffX(11) = -0.0003;
++        polynomial.coeffY(0) = -0.23; polynomial.coeffY(7) = 0.021;
++        polynomial.coeffY(15) = 0.017;
++        GeneralModel general;
++        bool rounding_witness = false, time_witness = false;
++        for (int count : {7, 32}) for (int threads : {1, 4})
++        for (int nx : {20, 64}) for (bool split : {false, true})
++        for (MotionModel *model : {static_cast<MotionModel *>(nullptr),
++                                  static_cast<MotionModel *>(&polynomial),
++                                  static_cast<MotionModel *>(&general)}) {
++            const int ny = nx == 20 ? 18 : 48;
++            const size_t frame_bytes = nx * ny * sizeof(float);
++            MotioncorrRunner runner; runner.n_threads = threads;
++            std::vector<Image<float>> frames(count);
++            std::vector<std::vector<float>> original(count);
++            for (int f = 0; f < count; ++f) {
++                frames[f]().reshape(ny, nx);
++                for (int n = 0; n < nx * ny; ++n) {
++                    const float scale = n % 5 == 0 ? 16777216.0f : 1.0f;
++                    frames[f]().data[n] = scale * ((n * 17 + f * 23) % 101 - 50) +
++                        0.13f * ((n + f) % 7);
++                }
++                original[f].assign(frames[f]().data, frames[f]().data + nx * ny);
++            }
++            Image<float> expected, expected_even, expected_odd, actual, even, odd, direct;
++            for (auto *image : {&expected, &expected_even, &expected_odd, &actual, &even, &odd, &direct})
++                (*image)().initZeros(ny, nx);
++            std::ostringstream ref_log, stream_log, extra_log;
++            start_allocations(frame_bytes);
++            {
++                std::vector<Image<float>> aligned(count);
++                for (int f = 0; f < count; ++f) aligned[f]().initZeros(frames[f]());
++                MotioncorrRunnerTestAccess::materialize(runner, aligned, frames, model, ref_log);
++                // Former caller's ascending frame additions, including float stores.
++                for (int f = 0; f < count; ++f) for (int n = 0; n < nx * ny; ++n) {
++                    expected().data[n] += aligned[f]().data[n];
++                    if (split) (f % 2 ? expected_odd : expected_even)().data[n] += aligned[f]().data[n];
++                }
++            }
++            const size_t old_peak = stop_allocations();
++            start_allocations(frame_bytes);
++            MotioncorrRunnerTestAccess::stream(runner, actual, split ? &even : nullptr,
++                                               split ? &odd : nullptr, frames, model, stream_log);
++            const size_t new_peak = stop_allocations();
++            require(identical(expected, actual), "stream changed corrected pixels");
++            require(identical(expected_even, even) && identical(expected_odd, odd),
++                    "stream changed even/odd products");
++            require(ref_log.str() == stream_log.str(), "stream changed progress output");
++            for (int f = 0; f < count; ++f)
++                require(std::memcmp(original[f].data(), frames[f]().data, frame_bytes) == 0,
++                        "stream modified or freed its input alias");
++#ifdef MOTIONCORR_ALLOCATION_WITNESS
++            require(old_peak == count * frame_bytes, "full-stack allocation control not witnessed");
++            require(new_peak == frame_bytes, "stream scratch exceeds one frame");
++#endif
++            if (model) {
++                MotioncorrRunnerTestAccess::direct(runner, direct, frames, model, extra_log);
++                rounding_witness |= !identical(expected, direct);
++                std::vector<Image<float>> view(1), wrong(1), correct(1);
++                view[0]().alias(frames.back()());
++                wrong[0]().initZeros(view[0]()); correct[0]().initZeros(view[0]());
++                MotioncorrRunnerTestAccess::materialize(runner, wrong, view, model, extra_log);
++                MotioncorrRunnerTestAccess::materialize(runner, correct, view, model, extra_log, count - 1);
++                time_witness |= !identical(wrong[0], correct[0]);
++            }
++        }
++        require(rounding_witness, "fixture cannot reject fused interpolation/add rounding changes");
++        require(time_witness, "fixture cannot reject resetting streamed model time to zero");
++        std::cout << "stream/reference pixels, splits, model time and float rounding PASS; "
++#ifdef MOTIONCORR_ALLOCATION_WITNESS
++                  << "scratch bound PASS\n";
++#else
++                  << "scratch bound not witnessed (allocation witness skipped)\n";
++#endif
++        return 0;
++    } catch (const std::exception &error) {
++        std::cerr << error.what() << '\n'; return 1;
++    }
++}

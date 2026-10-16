@@ -24,8 +24,8 @@ struct MotioncorrRunnerTestAccess {
     }
     static void frames(MotioncorrRunner &runner, std::vector<Image<float>> &out,
                        std::vector<Image<float>> &frames, ThirdOrderPolynomialModel &model,
-                       std::ostream &log) {
-        runner.realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(out, frames, model, log);
+                       std::ostream &log, int frame_offset = 0) {
+        runner.realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(out, frames, model, log, frame_offset);
     }
 };
 
@@ -140,6 +140,17 @@ void check(int nx, int ny, int nf, int which, int threads, bool exceptional) {
         equal(original[f], frames[f], tag + " input unchanged");
     }
     require(log_ref.str() == log_actual.str(), tag + " frame progress log");
+    // #178 calls this entry point one frame at a time. Compare nonzero model
+    // offsets against the frozen full-stack path, not another streamed call.
+    for (int f = 0; f < nf; ++f) {
+        std::vector<Image<float>> view(1), out(1);
+        view[0]().alias(frames[f]());
+        out[0]().reshape(ny, nx); fill(out[0], float(f + 1) / 4.0f);
+        std::ostringstream streamed_log;
+        MotioncorrRunnerTestAccess::frames(runner, out, view, m, streamed_log, f);
+        equal(ref_frames[f], out[0], tag + " streamed offset=" + std::to_string(f));
+        require(streamed_log.str() == ".", tag + " streamed progress log");
+    }
 }
 
 void benchmark(int nx, int ny, int nf, int threads, int repetitions, bool withoutsum) {

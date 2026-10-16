@@ -194,13 +194,14 @@ def main():
         return out, r.returncode, text, tuple(int(v) for v in witness[0])
 
     healthy, rc, text, (prepared, failed, copied) = run("healthy", "none")
-    require(rc == 0, f"healthy run failed:\n{text[-2000:]}")
-    require("second native alignment succeeded" in text, "healthy run did not converge on the retry")
-    # Positive witness: a downloadPatchSpectra invocation finished with every one of its
-    # NFRAMES spectrum copies (one group per frame) returning success.
+    # Positive witness, checked first so that a silent failure of the preparation is named
+    # as such: a downloadPatchSpectra invocation finished with every one of its NFRAMES
+    # spectrum copies (one group per frame) returning success.
     require((prepared, failed, copied) == (1, 0, NFRAMES),
             f"healthy: resident retry preparation did not succeed once (prepared={prepared} "
-            f"failed={failed} spectra copied={copied}, expected 1, 0, {NFRAMES})")
+            f"failed={failed} spectra copied={copied}, expected 1, 0, {NFRAMES}; exit {rc})")
+    require(rc == 0, f"healthy run failed:\n{text[-2000:]}")
+    require("second native alignment succeeded" in text, "healthy run did not converge on the retry")
     require("WARNING:" not in text and "[preprocessfault]" not in text and "CUDA Error in" not in text,
             "healthy run took the download path or logged a CUDA error")
     require(set(p for p in products(healthy) if p.endswith(".mrc")) == {"Movies/control.mrc"},

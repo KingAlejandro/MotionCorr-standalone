@@ -140,7 +140,7 @@ lower bound) and includes the CUDA context (`docs/workload_corpus/gpu/README.md`
 family, `--j 8`, `docs/workload_corpus/families.json` options. Source `1db869025507ac801845b4001b84e6bc0e77a645` (clean clone), host 4GPUs
 (4-gpu-vm, 4 x A100 80 GB PCIe, driver 570.86.10, g++ 13.3.0, CUDA 12.8.61, nvCOMP 5.3.0.16, THP `madvise`), lane GPU1 and CPUs 104-111, Release builds
 (CPU binary `dd86cd41...6b26439`, CUDA+nvCOMP `77db3f92...12a99`; full hashes in `docs/rc0/qual_main_1db86902/raw/summaries/build-info.txt` on PR #209's branch).
-One sample per cell; no variability is available. Routes are the `--ingest_witness` values. Not a performance claim.
+One sample per cell for the seven family rows; no variability is available. Routes are the `--ingest_witness` values. Not a performance claim. **Exception:** the EMPIAR-10641 row below is from PR #207 and is a **two-movie** process peak with **two passes per arm** (CPU-only: one pass per arm); the Falcon 4 row is one run per arm from PR #208. They are not single-movie samples.
 
 | Family | cfg | auto route | RSS auto | RSS `--ingest float` | RSS CPU build |
 |---|---|---|---:|---:|---:|
@@ -151,14 +151,14 @@ One sample per cell; no variability is available. Routes are the `--ingest_witne
 | EMPIAR-10216 | G / L | compact | 2.10 / 2.10 | 3.89 / 4.01 | 7.50 / 7.66 |
 | EMPIAR-10028 | G / L | float | 1.59 / 1.54 | 1.55 / 1.58 | 2.11 / 2.43 |
 | EMPIAR-10164 | G / L | compact | 0.80 / 0.85 | 2.14 / 2.08 | 3.78 / 4.60 |
-| EMPIAR-10641 | L | compact, resident retry | 2.07 (PR #207, lane GPU2, CPUs 80-87) | 6.6 injected fallback, 7.0 pre-#197 (PR #207); `--ingest float` not run | **UNRUN** at `1db86902` (reference CPU `--j 8`: 13.50, #186 at `116eb04a`) |
+| EMPIAR-10641 (two movies) | L, `--j 8` | compact, resident retry (db) | **2.07, 2.07** (two passes; two-movie process peak; PR #207, lane GPU2, CPUs 80-87) | injected fallback 6.63, 6.67; pre-#197 6.99, 7.03 (two passes each); `--ingest float` not run | CPU-only build, two movies, CPUs 80-87, one pair, no null control: **12.92 GiB** (13,550,512 KiB, raw GNU `time -v`, exit 0) for `1db86902`, 13.50 GiB (14,158,836 KiB) for the pre-#197 CPU build (PR #207 `evidence/runs/b5_cpu_db.side` and `b5_cpu_pre.side`); not run in #209's single-movie campaign. Reference CPU `--j 8`: 13.50 (#186 at `116eb04a`, different host) |
 | EMPIAR-10474 Falcon 4, 144 groups, upsampling 2 | as #208 `m1` | compact | 21.04 (21,547 MiB, PR #208, lane GPU2, CPUs 112-119) | 39.23 (40,171 MiB, same run set) | **UNRUN** at upsampling 2 (reference upsampling 1, `--j 8`: 21.35, #186) |
 | EMPIAR-10441 | G / L | compact | **UNRUN** at `1db86902` | **UNRUN** | **UNRUN** (references: GPU host RSS 5.0, CPU `--j 8` 39.09, VRAM peak 39.3 GiB, #186 at `116eb04a`) |
 
 Other qualification figures (single runs, same host): EER upsampling at the compact route lowered host RSS 34-39 % at upsampling 1 and 43-47 % at 2 and 3
 (no saving at -1); a 144-group Falcon 4 movie at upsampling 2 completed with 79,522 MiB sampled NVML process VRAM on the 81,920 MiB card (calculated 80,520 MiB; one run per arm; about 2.3 GiB remained; not an upper bound) with host RSS 21,547 MiB compact versus 40,171
-MiB float (PR #208, lane GPU2, CPUs 112-119). EMPIAR-10641 resident retry: peak host RSS 2.07 GiB versus 6.6 GiB (injected fallback) and 7.0 GiB (pre-#197); NVML VRAM
-14.24 / 14.68 / 14.68 GiB; one resident retry allocates 504 MiB (10641) / 301 MiB (10216) (PR #207, lane GPU2, CPUs 80-87; VRAM corrected after R-QA1).
+MiB float (PR #208, lane GPU2, CPUs 112-119). EMPIAR-10641 resident retry (two movies, two passes per GPU arm): peak host RSS 2.07, 2.07 GiB versus 6.63, 6.67 GiB (injected fallback) and 6.99, 7.03 GiB (pre-#197); NVML VRAM 14,582 / 15,034 / 15,034 MiB
+= 14.24 / 14.68 / 14.68 GiB (sampled); CPU-only two-movie run 12.92 GiB (raw 13,550,512 KiB; the "13.6 GiB" in #207's README does not match its raw GNU-time record: 13,550,512 KiB is 13.55 decimal GB, and the pre-#197 CPU value is 13.50 GiB, README "14.2"); one resident retry allocates 504 MiB (10641) / 301 MiB (10216) (PR #207, lane GPU2, CPUs 80-87; VRAM corrected after R-QA1).
 `--grouping_for_ps 4` on EMPIAR-10216: about +3.8 GiB host RAM (float) and +1.9 GiB (compact), single samples (PR #204, lane GPU3, CPUs 88-95).
 
 Source tables: `docs/workload_corpus/cpu/README.md` ("Peak RSS" table) and `docs/workload_corpus/gpu/README.md` ("Per-family result"

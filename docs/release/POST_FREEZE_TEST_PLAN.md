@@ -1,6 +1,6 @@
 # Post-freeze validation plan (DRAFT)
 
-Status: **draft, revision 3, stays DRAFT until the freeze** (after R-REL round 2, R-REL-B and the R-QA2 audits of PR #201, and the maintainer decisions D1, D2, T3, D5, D6, D7). RC0 is an **evaluation** release, not a stable one (D7). This is the heavy validation campaign that runs **after** the RC0 freeze, on the frozen SHA. It is a plan:
+Status: **draft, revision 4, stays DRAFT until the freeze** (after R-REL rounds 2 and 3, R-REL-B and the R-QA2 audits of PR #201, and the maintainer decisions D1, D2, T3, D5, D6, D7). RC0 is an **evaluation** release, not a stable one (D7). This is the heavy validation campaign that runs **after** the RC0 freeze, on the frozen SHA. It is a plan:
 every row is **UNRUN** and every result cell is **pending**. Resource lanes, locks and venues are those recorded on
 [#198](https://github.com/KingAlejandro/MotionCorr-standalone/issues/198) (checked 2026-10-16 19:21Z) and must be re-checked
 at run time (`AGENTS.md`: check occupancy before running work; leave unrelated processes alone; record actual resources).
@@ -104,19 +104,30 @@ and options as in `RC0_ACCEPTANCE_REPORT.md` §6.
 
 ## 4. Failure injection
 
-Four kinds of case, with different pass criteria. Do not apply one rule to all of them: the program preserves some inherited acceptance of damaged
-input by decision (D5 for compressed MRC, D6 for EER), and a case that is expected to publish is characterised, not rejected.
+There is **no universal pass rule** in this section. Each failure class has its own exit and publication criterion, and a case that is expected to
+publish is characterised, not rejected: the program keeps some inherited acceptance of damaged input by decision (D5 for compressed MRC, D6 for EER).
+Cases whose outcome is not specified are listed separately in 4.5 and carry no expected outcome.
+
+| Class | Section | Exit status | Publication outcome |
+|---|---|---|---|
+| A. Movie-level rejection | 4.1 | run exit 1 | named failure; no completion STAR for the failed movie; no joint output for the batch; movies already completed retained |
+| B. Report failure | 4.2 | normal mode 0; `--aggregate_only` 1 | normal: products and joint STAR published, no `logfile.pdf`; strict mode: joint output withheld |
+| C. Launcher worker failure | 4.3 | the launcher's actual code (3 for a failed worker) | no merged tree, no joint STAR, worker attribution recorded |
+| D. Accepted corruption (characterisation) | 4.4 | 0 | the movie publishes; the report states the input was accepted |
+| E. Outcome not specified | 4.5 | none asserted | none asserted; do not rely on it |
+| R. Recovery controls | 4.6 | 0 | products identical to the unfaulted run |
 
 Common to every case: a healthy positive control that proves the intended route with `--ingest_witness` (a witness line is a route-selection
 record, not a completion record, and a pinned-route refusal writes none, `SUPPORT.md` §2); the full on-disk inventory is recorded, because the
 program does not roll back (`SUPPORT.md` §6, `tests/test_write_faults.py:21-30`): a failed movie may leave a truncated or earlier per-movie
 file and `_PS.mrc`, so absence is never asserted.
 
-### 4.1 Rejection controls: must fail
+### 4.1 Class A: movie-level rejection (must fail)
 
-Expected for every row: run exit status 1 (a nonzero exit, not a crash or signal); a named failure on stderr; **no completion STAR** for the failed movie;
-**no joint output** (`corrected_micrographs.star`, `logfile.pdf`) for the batch; healthy movies' per-movie products retained and byte-identical to their
-standalone runs (`src/motioncorr_runner.cpp:1083-1089`).
+Criterion for every row of this table only: run exit status 1 (a nonzero exit, not a crash or signal); a named failure on stderr; **no completion STAR**
+for the failed movie; **no joint output** (`corrected_micrographs.star`, `logfile.pdf`) for the batch (`src/motioncorr_runner.cpp:1083-1089`); movies
+that completed before the failure retained and byte-identical to their standalone runs. The two start-up refusals (SerialEM defect text, `--ingest` refusals on
+a build without the backend) fail before any movie is processed.
 
 | Control | Input | Evidence or baseline |
 |---|---|---|
@@ -124,43 +135,70 @@ standalone runs (`src/motioncorr_runner.cpp:1083-1089`).
 | Wrong gain | gain reference of the wrong size (including a 4K gain with `--eer_upsampling -1`) | #208 b6, c17: exit 1, both movies fail, "Unsupported gain size", no MRC/STAR; `src/motioncorr_runner.cpp:2210-2218` |
 | Pinned route cannot be honoured | `--ingest nvcomp` or `--ingest compact` on an ineligible movie; EER overflow with pinned compact | #208 overflow controls and #204: exit 1, no MRC/STAR for the movie, no witness line |
 | Unsupported MRC mode, SerialEM defect text, malformed TIFF | MRC modes 3/4; a SerialEM-format `.txt`; `DamagedMovie` fixtures | refused at read or initialise (`src/rwMRC.h:209-228`, `src/motioncorr_runner.cpp:267-272`; `DamagedMovie` test) |
-| Truncated raw MRC movie, gain reference, defect map | truncated copies, every mode | **after [PR #205](https://github.com/KingAlejandro/MotionCorr-standalone/pull/205) merges only** (F3/F3b): must fail as above. **Before #205 this is not a rejection control**: today it publishes (listed in 4.2 as a baseline) |
-| Injected fatal CUDA error | `CudaResidentRetryFailures`, `CudaFaultMatrix`, `CudaPreprocessingFailurePaths` (error codes injected, not a poisoned device) | #207: exit 1, refusal, no publication, the later movie refused at session initialisation |
-| Write faults, late writer fault, report failure; multi-GPU owned-worker failure | `WriteFaults*`, `OutputStageFaults`, `ImageWriteFaults`; `docs/multi_gpu/CURRENT_MAIN_ACCEPTANCE.md` | named failure, no dataset-ready success, retained healthy movies, no owned process left |
-| `logfile.pdf` render failure | forced failed render | normal mode: exit 0, **no `logfile.pdf`** left (F1, #200); `--aggregate_only`: strict failure, no joint STAR (`SUPPORT.md` §6) |
+| Truncated raw MRC movie, gain reference, defect map | truncated copies, every mode | **after [PR #205](https://github.com/KingAlejandro/MotionCorr-standalone/pull/205) merges only** (F3/F3b). **Before #205 this is not a Class A control**: it is the publishing baseline in 4.4 |
+| Write faults and late-writer faults | `WriteFaults*`, `OutputStageFaults`, `ImageWriteFaults` | the existing tests: exit non-zero without a signal, the product path and movie named, earlier movies' bytes unchanged, no completion record for the failed movie, not added to the joint STAR (`tests/test_write_faults.py:15-30`) |
+| Injected fatal CUDA error | `CudaResidentRetryFailures`, `CudaFaultMatrix`, `CudaPreprocessingFailurePaths` (error codes injected, not a poisoned device) | #207: exit 1, refusal, no publication; **later movies in the same process are refused** at session initialisation, so "healthy movies retained" applies to movies completed before the fault |
 
-### 4.2 Characterisation: expected to publish (inherited behaviour kept by decision)
+After a Class A failure record what is left on disk: a truncated destination MRC, earlier complete products of the same movie, and an auxiliary
+`<movie>_PS.mrc` written before global alignment when `--grouping_for_ps` is used (`src/motioncorr_runner.cpp:3309`; `SUPPORT.md` §6). The completion marker is the
+per-movie STAR, not file presence.
+
+### 4.2 Class B: report failure
+
+| Mode | Criterion | Evidence |
+|---|---|---|
+| Normal mode, failed `logfile.pdf` render (forced failure or no Ghostscript) | **exit 0**; the corrected MRC and per-movie STAR files **and the joint STAR are published**; **no `logfile.pdf`** is left (F1, #200 merged: a partial or earlier regular file is removed); `header.pdf` and `batch.pdf` receive the empty placeholder PDF in normal mode | `src/motioncorr_runner.cpp:1832-1838, 1874-1879`; `src/CPlot2D.cpp:30-36, 91-98`; local run without `gs`: exit 0, `corrected_micrographs.star` written, no `logfile.pdf`, zero-byte `header.pdf`/`batch.pdf` |
+| `--aggregate_only` (and therefore the `run_dataset.py` aggregate step), failed render | **strict: exit 1, the joint output withheld** (publication is staged and a failed render stops it); healthy per-movie products untouched | `src/CPlot2D.cpp:93`; `src/motioncorr_runner.cpp:828-869`; local `run_dataset.py` run without `gs`: workers exit 0, aggregate fails, `run_dataset.py` exit 3, `dataset_ready: false` |
+
+### 4.3 Class C: multi-GPU launcher worker failure
+
+Criterion: record the **actual launcher exit code** and do not assume 1. `tools/multi_gpu/run_dataset.py` returns the worker phase's exit code when it is
+nonzero, and 3 when the worker status does not pass or the aggregate does not pass (`run_dataset.py:88-136`); `run_multi_gpu.py` itself returns 3 for a failed worker, 2 for a
+usage error or refusal, and 128 plus the signal number when interrupted (`run_multi_gpu.py:601-680, 1143-1147`). Expected for an owned-worker failure (for example the #207 poisoned
+2-worker run): a nonzero launcher code (3 expected), `dataset_status.json` with `verdict: FAIL` and a named `failure`, per-worker return codes attributing the failing
+worker (#207: worker return codes `[0, 1]`), **no merged tree and no joint STAR**, the healthy worker's outputs retained, and no owned process left
+(`docs/multi_gpu/CURRENT_MAIN_ACCEPTANCE.md`). Include a TERM-ignoring descendant, a late writer fault, a report failure and a non-prefix resume.
+
+### 4.4 Class D: characterisation of accepted corruption (expected to publish)
 
 The expected outcome is the **published** outcome. Record it exactly; the pass criterion is that it matches the decided behaviour, and the report states
-that the input was accepted. These are not rejection tests, and applying 4.1 to them would contradict D5 and D6.
+that the input was accepted. Applying the Class A rule to these rows would contradict D5 and D6.
 
 | Case | Input | Expected exit and publication | Decision and evidence |
 |---|---|---|---|
 | EER fraction with a wrong decoded pixel count | one fraction's strip set to 0xFF or 0x00 | exit 0; WARNING on stderr "The number of pixels is not right ... This frame is skipped."; the movie **publishes** with a different product; joint STAR lists it | D6; #208 b3, b4; `src/renderEER.cpp:564-567` |
 | EER corruption that keeps the pixel count | 4096 random bytes inside one fraction's strip | exit 0, **no warning**, movie publishes with a different product | D6; #208 b2 |
 | Truncated EER without an expected count | file cut at 60 %, no `--expected_frames`, no STAR count | exit 0, a shorter movie (34 groups instead of 58) **publishes silently** | D6; #208 b5 |
-| Shortened EER with an unchanged grouped count | trailing fractions removed so `floor(fractions / eer_grouping)` is unchanged (for example 2331 to 2330 fractions at grouping 40) with the correct `--expected_frames` | exit 0, publishes; **the count check cannot see it** | `src/motioncorr_runner.cpp:2125-2127, 2141-2146` |
-| Compressed-MRC end-of-stream corruption | `.xz` with the last byte removed, a corrupt index CRC, a non-zero decoder exit after a full stream | exit 0, movie **publishes** (the decoder exit status is not checked); a short read in mid-stream is still caught and fails. **The independent validator must reject the file first**: `xz -t`, `zstd -t`, `bzip2 -t`/`pbzip2 -t` exit non-zero, and the run is then not started | D5/F4 (fix #214); #204 damage records; `src/image.h:1939-1953` |
-| `_PS.mrc` left behind | `--grouping_for_ps` with a patch-alignment failure of the same movie | the movie fails (exit 1, no completion STAR, joint outputs withheld) but `<movie>_PS.mrc` **remains** on disk; record it, do not assert absence | `src/motioncorr_runner.cpp:3309` (inherited; `SUPPORT.md` §6 item 1) |
-| Truncated raw MRC before #205 | truncated movie, gain or defect map, current `2b3c74b3` | exit 0, products and completion STAR **publish** from partly unread memory (float and compact routes publish different unread bytes) | #198 register F3/F3b; baseline only |
-| Big-endian mode-0 MRC with nx = 128 (F5) | such a file | observed on the tested GCC build: fails identically on every tested route; record the exit status and message. **No portable clean failure is promised** (`abs(INT_MIN)`, `src/rwMRC.h:149`) | D5; #204 |
-| Malformed EER decoder input (EER-MS) | malformed streams | **do not run on production lanes.** Only under an address sanitizer in an authorised scratch lane; record the outcome, assert nothing. Memory safety is not established (`src/renderEER.cpp:416-555`) | #198 register EER-MS; R-QA2 on #208 |
-| nvCOMP corrupt Deflate body | corrupt or growing TIFF on a `USE_NVCOMP=ON` build | not a safety claim (D1): the route assumes complete, unmodified files; characterise only, in an authorised lane, and use `--ingest compact` for unverified files | D1; #134; #215 |
+| Shortened EER with an unchanged grouped count | trailing fractions removed so `floor(fractions / eer_grouping)` is unchanged (for example 2331 to 2330 fractions at grouping 40), with the correct `--expected_frames` | exit 0, publishes; **the count check cannot see it** | `src/motioncorr_runner.cpp:2125-2127, 2141-2146` |
+| Compressed-MRC end-of-stream corruption, **controlled characterisation run** | a `.xz` with the last byte removed, a corrupt index CRC, or a non-zero decoder exit after a full stream; **run MotionCorr on the file directly, without the validator**, in an authorised scratch lane | exit 0 and the movie **publishes** (the decoder exit status is not checked); a short read in mid-stream is still caught and fails (Class A). This run is what demonstrates MotionCorr's accepted-corruption outcome | D5/F4 (fix #214); #204 damage records; `src/image.h:1939-1953` |
+| Compressed-MRC **operational validator workflow** (separate from the row above) | the same damaged file, checked **before** processing with `xz -t`, `zstd -t` or `bzip2 -t`/`pbzip2 -t` | the validator exits non-zero and the operator does not start MotionCorr. This documents the user workflow; it does **not** demonstrate MotionCorr's own outcome, because the run never starts | `SUPPORT.md` §6 item 6; README |
+| Truncated raw MRC movie, gain reference or defect map, **before #205** | current `2b3c74b3` | exit 0, products and completion STAR **publish** from partly unread memory (float and compact routes publish different unread bytes). After #205 merges these rows move to 4.1 | #198 register F3/F3b; baseline only |
 
-### 4.3 Recovery controls: must complete
+### 4.5 Class E: outcome not specified (do not rely on)
+
+No expected exit status or publication is asserted for these, and nothing may be inferred from a run. Do not place them in a pass/fail or expected-publish
+table. Run only in an authorised scratch lane, under a sanitizer where stated, and record what happens.
+
+| Case | Why unspecified | Reference |
+|---|---|---|
+| Malformed EER decoder input (EER-MS) | the inherited host decoder's 7-bit loops lack strip-length termination checks and its decode vectors have no per-emission capacity check, so behaviour can be undefined before the count-bound argument applies; run only under an address sanitizer | `src/renderEER.cpp:416-555`; #198 register EER-MS; R-QA2 on #208 |
+| Big-endian mode-0 MRC with nx = 128 (F5) | observed to fail identically on every tested route of the GCC build, but the swap heuristic calls `abs(INT_MIN)` (undefined behaviour), so no outcome is promised on other compilers or platforms | `src/rwMRC.h:149`; #204; R-QA1 |
+| nvCOMP: corrupt Deflate body | nvCOMP documents undefined behaviour for corrupt compressed input (D1); the route assumes complete, unmodified files; use `--ingest compact` for files of unknown integrity | D1; #134 |
+| nvCOMP: file changing between tag scan and read | not detected (follow-up #215) | #215 |
+| Genuine device poisoning; real out-of-memory on session initialisation (QM) | no genuine-poisoning test exists (all fatal-path tests inject error codes, TST2, #213); QM forced-OOM control is UNRUN | #213; #198 register QM |
+
+### 4.6 Class R: recovery controls (must complete)
 
 Injected recoverable CUDA failure: exit 0, one WARNING, products identical to the unfaulted run (#207: identical; #209: one injected recoverable
 CUDA-to-CPU fallback under `--gpu`, identical to `d7171b81`). The six CPU-backend checks of CUDA-linked binaries without `--gpu` are a separate control.
 Re-verify both on the frozen SHA. Neither is real out-of-memory or device-poisoning evidence.
 
-### 4.4 Controls that already exist, and what they do not cover
+### 4.7 Controls that already exist, and what they do not cover
 
 - CUDA tests: `CudaFaultMatrix`, `CudaPreprocessingFailurePaths`, `CudaNvcompAcceptanceFailures`, `CudaNvcompReconstructionFailures`, `CudaResidentRetryFailures`;
   `CudaU16FailurePaths` exists only when configured with `-DMOTIONCORR_U16_TEST_MOVIE=<uint16 TIFF>` (`CMakeLists.txt:788-807`), and a test that was not
   registered is not an executed pass.
-- All fatal-path CUDA tests inject error codes; a **genuine device-poisoning** control is post-RC0 (TST2,
-  [#213](https://github.com/KingAlejandro/MotionCorr-standalone/issues/213)). Real out-of-memory and the QM forced-OOM control are UNRUN.
-- Malformed-input behaviour of the nvCOMP decoder is bounded by D1/#134 and of the EER decoder by EER-MS; neither is a safety claim.
+- All fatal-path CUDA tests inject error codes; a genuine device-poisoning control is post-RC0 (TST2, [#213](https://github.com/KingAlejandro/MotionCorr-standalone/issues/213)).
 
 ## 5. Soak and long queues
 

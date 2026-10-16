@@ -31,8 +31,11 @@ not been run (Limitations).
   - EMPIAR-10740's gain is transposed against its movies and needs `--gain_rot 3`, identified by a pixel-correlation test;
   - nine imagesets deposit compressed TIFF (`.tif.bz2`), which MotionCorr cannot read;
   - EPU EER and `.gain` files carry TIFF orientation tags 2, 4, 5, 6 or 7, which the readers ignore.
-- **Label correction:** the RELION tutorial movies are 16-bit Deflate TIFF, not 8-bit as
-  `corpus.md` and `families.json` say. Main's nvCOMP route admits only 16-bit samples, and the
+- **Label corrections, made in #201:** the RELION tutorial movies are unsigned 16-bit Adobe-Deflate
+  TIFF (compression 8, RowsPerStrip 1, no predictor, little-endian), width 3710 x height 3838, and
+  EMPIAR-10164 is MRC mode 0, read as signed int8 (its largest byte is 90, so no value changes).
+  The release-docs PR #201 corrects `corpus.md` and `families.json`; this PR leaves both files
+  unchanged so the two do not conflict. Main's nvCOMP route admits only 16-bit samples, and the
   tutorial took that route in the #186 GPU runs.
 
 ## What the readers accept
@@ -41,8 +44,12 @@ not been run (Limitations).
 |---|---|---|---|
 | MRC | modes 0 (read as signed int8), 1, 2, 6, 12, 101 (4-bit; not odd x odd); either byte order; extended headers skipped | modes 3, 4 and unknown modes | modes 0, 1, 6: compact staging; 2, 12, 101: float |
 | compressed MRC | `.mrc(s).bz2/.xz/.zst` through `pbzip2`, `xz` or `zstd` pipes | | float |
-| TIFF / BigTIFF | u8, s8, u16, s16, f32; any LibTIFF codec and predictor; either byte order; strips; IMOD packed 4-bit at eight K2/K3 geometries | u32, f64, f16, tiled, more than one sample per pixel, mixed frame sizes | u16 Deflate with one row per strip and native byte order: nvCOMP; other u8/u16: compact; s8, s16, f32, 4-bit: float |
-| EER | 65000, 65001, 65002 (7-bit runs, 1+1 subpixel bits) at 4096^2 or 2048^2; upsampling -1/1/2/3 (4K), 1/2 (2K) | other sizes, codes and 65002 depths | compact (uint16 render) when grouped counts fit |
+| TIFF / BigTIFF | u8, s8, u16, s16, f32; any LibTIFF codec and predictor; either byte order; strips; IMOD packed 4-bit at eight K2/K3 geometries | u32, f64, f16, tiled, more than one sample per pixel, mixed frame sizes | **nvCOMP** only when every condition holds: unsigned 16-bit samples, Deflate (code 8 or 32946), predictor 1, MSB-to-LSB fill order, one sample per pixel, contiguous planes, one full row per strip, native byte order, the same geometry in every frame, a `USE_NVCOMP` build and a resident CUDA session (`cuda_movie_session.cu` tag scan). **compact**: any other u8/u16 TIFF, including predictor-2 u16 Deflate, multi-row strips and byte-swapped files. **float**: s8, s16, f32, packed 4-bit |
+| EER | 65000 and 65001 at 4096^2 (upsampling -1/1/2/3) or 2048^2 (1/2); 65002 (7-bit runs, 1+1 subpixel bits) at upsampling **1 or 2 only** | other sizes and codes, other 65002 depths, 65002 at upsampling -1 or 3 (`renderEER.cpp`) | compact (uint16 render) when grouping x (4 at upsampling -1, else 1) <= 65535; otherwise float |
+
+Every compact or nvCOMP route needs a CUDA build with a resident session and is not taken under
+`--ingest float`; `--ingest compact` or `--ingest nvcomp` refuses a movie its route does not admit.
+A CPU build reads every movie through the float reader.
 
 The routes were measured, not inferred: the synthetic suite's `--ingest-matrix` run on a SCARF A100
 recorded each fixture's route with `--ingest_witness` and found `--ingest auto` products
@@ -197,12 +204,12 @@ A product-based stripe metric pointed the same way but by only 9%, which is why 
 | finding | evidence | status |
 |---|---|---|
 | A linked `.mrc.zst` movie fails with "error in reading header": the reader runs `zstd -cdk FILE`, and zstd ignores a symbolic-link input without `-f`. `setup_corpus.py` and RELION projects link movies. `.bz2` (pbzip2) and `.xz` accept links. | e10202 linked vs copied (smoke table); synthetic `mrc_compressed_zst_symlink` | inherited from upstream; `copy_movies` works around it here |
-| Truncated MRC payloads are accepted with exit 0; the missing frames hold stale pooled-buffer contents. | synthetic `mrc_truncated_payload` (all modes, macOS and Linux) | inherited (`Image::read`'s return value is ignored) |
+| On main at the time of these runs (`d7171b81`), truncated raw MRC payloads were accepted with exit 0; the missing frames held stale pooled-buffer contents. | synthetic `mrc_truncated_payload` (all modes, macOS and Linux) | RC0 register F3/F3b: the approved fail-closed fix #205 (decision D5) refuses them, so this describes main only until #205 is integrated. Separate from F4 (#214): compressed-MRC damage that the decompressor reports only through its exit status after complete-looking data is a documented RC0 limitation (validate with `xz -t`, `zstd -t` or `pbzip2 -t`). |
 | EMPIAR-10342 ships a SerialEM defect list; MotionCorr refuses it with its SerialEM message. | smoke `e10342_serialem_defect` | expected behaviour; such lists need IMOD `clip defect` first |
 | EMPIAR-10740's gain is transposed against the movies; `--gain_rot 3` is right. | gain orientation table | data property |
 | Nine imagesets deposit compressed TIFF (`.tif.bz2`); MotionCorr reads compressed MRC only. | census | user must decompress |
 | EPU EER and `.gain` files carry TIFF orientation tags 2, 4, 5, 6, 7; the readers ignore them, consistently for movie and gain. | census | upstream behaviour |
-| The tutorial movies are 16-bit, not 8-bit as `corpus.md`/`families.json` label them. | nvCOMP route in the #186 GPU runs; header | corrected in `corpus.md` |
+| The tutorial movies are 16-bit (width 3710, height 3838), and EMPIAR-10164 is mode 0 read as signed int8, not as `corpus.md`/`families.json` label them on main. | nvCOMP route in the #186 GPU runs; headers | corrected in `corpus.md` and `families.json` by #201 |
 
 Synthetic-only findings (no real file of that kind was found in EMPIAR) are in the test-data
 README, section 1c: 4K EER 65002 at `--eer_upsampling 2` loses the y subpixel; 2K EER with 4-bit

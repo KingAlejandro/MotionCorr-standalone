@@ -237,6 +237,7 @@ int main(int argc, char **argv)
             // plan rebound to new arrays must name those arrays, not the ones it was
             // planned on.
             const int nx = 96, ny = 64;
+            const size_t plans_before = NewFFT::cachedFloatPlanCount();
             for (int round = 0; round < 3; round++) {
                 MultidimArray<float> real(ny, nx), reference_real(ny, nx);
                 MultidimArray<fComplex> cached(ny, nx / 2 + 1), reference(ny, nx / 2 + 1);
@@ -254,6 +255,37 @@ int main(int argc, char **argv)
                 NewFFT::inverseFourierTransform(reference, real, own, NewFFT::FwdOnly, false);
                 require(std::memcmp(real.data, reference_real.data, sizeof(float) * NZYXSIZE(real)) == 0,
                         "Cached inverse FFT differs from a plan made for the same arrays");
+            }
+            require(NewFFT::cachedFloatPlanCount() == plans_before + 1,
+                    "Three rounds on one geometry must share one cached plan");
+            // Arrays that start one float past an aligned address are another FFTW alignment
+            // class: they need their own plan, and a repeat of the class reuses it.
+            for (int repeat = 0; repeat < 2; repeat++) {
+                MultidimArray<float> real_backing(ny * nx + 4), real_view;
+                MultidimArray<fComplex> out_backing(ny * (nx / 2 + 1) + 2), ref_backing(ny * (nx / 2 + 1) + 2);
+                MultidimArray<fComplex> out_view, ref_view;
+                real_view.alias(real_backing);
+                real_view.data = real_backing.data + 1;
+                real_view.setDimensions(nx, ny, 1, 1);
+                out_view.alias(out_backing);
+                out_view.data = (fComplex*) ((float*) out_backing.data + 1);
+                out_view.setDimensions(nx / 2 + 1, ny, 1, 1);
+                ref_view.alias(ref_backing);
+                ref_view.data = (fComplex*) ((float*) ref_backing.data + 1);
+                ref_view.setDimensions(nx / 2 + 1, ny, 1, 1);
+                FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(real_view) {
+                    DIRECT_MULTIDIM_ELEM(real_view, n) = std::cos(0.21f * n) + repeat;
+                }
+                NewFFT::FloatPlan own(real_view, ref_view);
+                NewFFT::FourierTransform(real_view, ref_view, own, NewFFT::FwdOnly);
+                NewFFT::FourierTransform(real_view, out_view);
+                require(std::memcmp(out_view.data, ref_view.data, sizeof(fComplex) * NZYXSIZE(out_view)) == 0,
+                        "Cached forward FFT on offset arrays differs from a plan made for them");
+                // An FFTW build without SIMD has a single alignment class (always 0); then
+                // the offset arrays legitimately share the aligned plan.
+                const bool has_classes = fftwf_alignment_of(real_view.data) != fftwf_alignment_of(real_backing.data);
+                require(NewFFT::cachedFloatPlanCount() == plans_before + (has_classes ? 2 : 1),
+                        "An offset alignment class must add exactly one cached plan, then reuse it");
             }
             MultidimArray<float> a(ny, nx), b(ny, nx), other(ny, nx + 2);
             MultidimArray<fComplex> fa(ny, nx / 2 + 1), fb(ny, nx / 2 + 1);

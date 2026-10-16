@@ -34,16 +34,22 @@ namespace
 	   both arrays. FFTW_ESTIMATE planning for the same problem and alignment is
 	   deterministic, so a cached plan executes the same algorithm on new arrays
 	   as one planned on them would, and the output bits are unchanged.
-	   Plans are kept for the lifetime of the process. */
+	   Plans are kept for the lifetime of the process, so fftwf_cleanup() must not
+	   be called once any of them exists (nothing the runner reaches calls it). */
 	typedef std::tuple<int, int, int, int, int, bool> FloatPlanKey;
+	typedef std::map<FloatPlanKey, NewFFT::FloatPlan> FloatPlanCache;
+
+	// Intentionally leaked: no static-destruction order problem at exit.
+	FloatPlanCache& floatPlanCache()
+	{
+		static FloatPlanCache* cache = new FloatPlanCache();
+		return *cache;
+	}
 
 	NewFFT::FloatPlan cachedFloatPlan(
 			MultidimArray<float>& real,
 			MultidimArray<fComplex>& complex)
 	{
-		static std::map<FloatPlanKey, NewFFT::FloatPlan>* cache =
-				new std::map<FloatPlanKey, NewFFT::FloatPlan>();
-
 		float* realPtr = MULTIDIM_ARRAY(real);
 		float* complexPtr = (float*) MULTIDIM_ARRAY(complex);
 
@@ -53,22 +59,36 @@ namespace
 				fftwf_alignment_of(complexPtr),
 				realPtr == complexPtr);
 
-		std::shared_ptr<NewFFT::FloatPlan> plan;
+		const NewFFT::FloatPlan* cached;
 
 		#pragma omp critical(NewFFT_float_plan_cache)
 		{
-			std::map<FloatPlanKey, NewFFT::FloatPlan>::iterator it = cache->find(key);
+			FloatPlanCache& cache = floatPlanCache();
+			FloatPlanCache::iterator it = cache.find(key);
 
-			if (it == cache->end())
+			if (it == cache.end())
 			{
-				it = cache->insert(std::make_pair(key, NewFFT::FloatPlan(real, complex))).first;
+				it = cache.insert(std::make_pair(key, NewFFT::FloatPlan(real, complex))).first;
 			}
 
-			plan = std::make_shared<NewFFT::FloatPlan>(it->second, real, complex);
+			cached = &it->second;
 		}
 
-		return *plan;
+		// Entries are never erased or modified, so *cached stays valid outside the lock.
+		return NewFFT::FloatPlan(*cached, real, complex);
 	}
+}
+
+size_t NewFFT::cachedFloatPlanCount()
+{
+	size_t count;
+
+	#pragma omp critical(NewFFT_float_plan_cache)
+	{
+		count = floatPlanCache().size();
+	}
+
+	return count;
 }
 
 

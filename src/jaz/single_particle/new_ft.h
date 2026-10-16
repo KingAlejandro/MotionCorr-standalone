@@ -65,6 +65,9 @@ class NewFFT
 {
     public:
 
+        // Number of distinct float plans cached by the ad-hoc transforms (for tests).
+        static size_t cachedFloatPlanCount();
+
         class DoublePlan;
         class FloatPlan;
 

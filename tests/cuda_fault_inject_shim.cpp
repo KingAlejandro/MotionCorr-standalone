@@ -50,8 +50,21 @@ namespace {
 // so any drift fails loudly rather than silently selecting the wrong call.
 std::set<void*> g_owned;
 size_t g_stale = 0;
+// MC_RESIDENT_RETRY_COUNT: witnesses for the resident retry preparation (#197).
+// One downloadPatchSpectra invocation is recognised at its own cudaFree of the spectra
+// buffer, which the nested preparePatchInVram frees do not match. It counts as
+// successful only if every device-to-host spectrum copy it issued returned success;
+// g_resident_spectra_copied is the number of such copies.
+bool g_count_resident_retry = false;
+long g_resident_retry_preps = 0;
+long g_resident_retry_failed = 0;
+long g_resident_spectra_copied = 0;
+bool g_resident_copy_failed = false;
 void report_owned() {
     std::fprintf(stderr, "[faultinject] remaining-owned=%zu stale-releases=%zu\n", g_owned.size(), g_stale);
+    if (g_count_resident_retry)
+        std::fprintf(stderr, "[faultinject] resident-retry-preparations=%ld failed=%ld spectra-copied=%ld\n",
+                     g_resident_retry_preps, g_resident_retry_failed, g_resident_spectra_copied);
 }
 long  g_seen = 0;
 long  g_at = -1;
@@ -104,6 +117,7 @@ void init_once() {
     if (g_init) return;
     g_init = true;
     std::atexit(report_owned);
+    g_count_resident_retry = std::getenv("MC_RESIDENT_RETRY_COUNT") != nullptr;
     const char *o = std::getenv("MC_FAULT_ORDINAL");
     g_at = o ? std::atol(o) : 0;
     const char *c = std::getenv("MC_FAULT_CODE");
@@ -195,6 +209,17 @@ extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
         if (!g_preprocess_injected && preprocess_mode("patch-prep-recoverable") &&
             called_from("preparePatchInVram"))
             return inject_preprocess(false, "preparePatchInVram");
+        // The resident retry (#197) builds its input in downloadPatchSpectra, which
+        // is reached only after a completed, non-converged resident attempt. Failing
+        // its first allocation exercises the runner's classification of that step.
+        if (!g_preprocess_injected &&
+            (preprocess_mode("resident-retry-recoverable") ||
+             preprocess_mode("resident-retry-fatal")) &&
+            called_from("downloadPatchSpectra")) {
+            if (ptr) *ptr = nullptr;
+            return inject_preprocess(preprocess_mode("resident-retry-fatal"),
+                                     "downloadPatchSpectra");
+        }
         if (sparse || initialize) {
             if (ptr) *ptr = nullptr;
             return inject_preprocess(preprocess_mode("sparse-fatal") || initialize,
@@ -249,6 +274,11 @@ extern "C" cudaError_t __wrap_cudaMemcpy(void *dst, const void *src, size_t coun
         return cudaErrorMemoryAllocation;
     }
     const cudaError_t result = __real_cudaMemcpy(dst, src, count, kind);
+    if (g_count_resident_retry && kind == cudaMemcpyDeviceToHost &&
+        called_from("downloadPatchSpectra") && !called_from("preparePatchInVram")) {
+        if (result == cudaSuccess) ++g_resident_spectra_copied;
+        else g_resident_copy_failed = true;
+    }
     if (stage_upload && result == cudaSuccess) {
         g_u16_stage_upload_seen = true;
         std::fprintf(stderr, "[u16fault] stage-h2d-ok size=%zu\n", count);
@@ -258,6 +288,11 @@ extern "C" cudaError_t __wrap_cudaMemcpy(void *dst, const void *src, size_t coun
 
 extern "C" cudaError_t __wrap_cudaFree(void *ptr) {
     init_once();
+    if (ptr && g_count_resident_retry && called_from("downloadPatchSpectra") &&
+        !called_from("preparePatchInVram")) {
+        ++(g_resident_copy_failed ? g_resident_retry_failed : g_resident_retry_preps);
+        g_resident_copy_failed = false;
+    }
     if (ptr && !g_owned.count(ptr)) ++g_stale;
     const bool stage_free = ptr && ptr == g_u16_stage_ptr;
     if (stage_free) std::fprintf(stderr, "[u16fault] stage-free-request ptr=%p\n", ptr);

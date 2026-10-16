@@ -327,6 +327,22 @@ if(BUILD_TESTING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compressed_movie_sequence.py
                 --binary $<TARGET_FILE:motioncorr>)
         set_tests_properties(CompressedMovieSequence PROPERTIES TIMEOUT 120)
+        # Every container, sample type and codec the readers accept (issue #186 follow-up).
+        # The compressed-MRC cases need the decoders the reader pipes through; a missing
+        # one is reported UNRUN and only tolerated when it is absent at configure time.
+        set(_input_format_unrun "")
+        foreach(_decoder pbzip2 zstd)
+            find_program(_decoder_path_${_decoder} ${_decoder})
+            if(NOT _decoder_path_${_decoder})
+                message(WARNING "${_decoder} not found: InputFormats reports its compressed-MRC case as UNRUN")
+                list(APPEND _input_format_unrun --allow-unrun ${_decoder})
+            endif()
+        endforeach()
+        add_test(NAME InputFormats
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_input_formats.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>
+                ${_input_format_unrun})
+        set_tests_properties(InputFormats PROPERTIES TIMEOUT 600)
         add_test(NAME GlobalIfftElision
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_global_ifft_elision.py
                 --binary $<TARGET_FILE:motioncorr>)

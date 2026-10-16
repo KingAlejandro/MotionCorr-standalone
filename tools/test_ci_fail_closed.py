@@ -191,6 +191,7 @@ exec "{sys.executable}" "$@"
             "TiffRead",
             "DamagedMovie",
             "CompressedMovieSequence",
+            "InputFormats",
             "RunnerModelParser",
             "MicrographModelBounds",
             "CiFailClosedControls",

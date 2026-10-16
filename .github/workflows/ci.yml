@@ -38,7 +38,9 @@ jobs:
             libjpeg-dev \
             zlib1g-dev \
             ghostscript \
-            xz-utils
+            xz-utils \
+            pbzip2 \
+            zstd
 
       - name: Install required numerical validation dependencies
         run: python3 -m pip install 'numpy>=2.4.0,<3'

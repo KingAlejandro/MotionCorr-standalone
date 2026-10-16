@@ -1,4 +1,5 @@
 #include "src/motioncorr_runner.h"
+#include "src/renderEER.h"
 #include "src/jaz/single_particle/new_ft.h"
 #include "src/fftw.h"
 #include <algorithm>
@@ -299,6 +300,42 @@ int main(int argc, char **argv)
             try { NewFFT::FloatPlan wrong(planned, other, fother); } catch (const RelionError&) { rejected = true; }
             require(rejected, "Rebinding a plan to arrays of another size was accepted");
             std::cout << "PASS float plan cache\n";
+            return 0;
+        }
+        if (std::string(argv[1]) == "render_eer") {
+            // Render EER groups exactly as MotioncorrRunner does (frames g*G+1 .. (g+1)*G,
+            // trailing fractions dropped) and dump the non-zero counts sparsely: one
+            // super-resolution frame is up to 8192^2, and synthetic fixtures are sparse.
+            // Layout: int64 nx, ny, groups; then per group int64 n, n x int64 index,
+            // n x float32 count.
+            require(argc == 6, "Usage: runner_numerics render_eer input output upsampling grouping");
+            EERRenderer renderer;
+            renderer.read(argv[2], textToInteger(argv[4]));
+            const int grouping = textToInteger(argv[5]);
+            require(grouping > 0, "grouping must be positive");
+            const long nx = renderer.getWidth(), ny = renderer.getHeight();
+            const long groups = renderer.getNFrames() / grouping;
+            std::ofstream out(argv[3], std::ios::binary);
+            require(out.good(), "Cannot open EER dump");
+            const long long dims[3] = {nx, ny, groups};
+            out.write(reinterpret_cast<const char*>(dims), sizeof(dims));
+            MultidimArray<float> frame;
+            for (long g = 0; g < groups; g++) {
+                renderer.renderFrames(g * grouping + 1, (g + 1) * grouping, frame);
+                std::vector<long long> idx;
+                std::vector<float> val;
+                FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(frame)
+                    if (DIRECT_MULTIDIM_ELEM(frame, n) != 0) {
+                        idx.push_back(n);
+                        val.push_back(DIRECT_MULTIDIM_ELEM(frame, n));
+                    }
+                const long long count = idx.size();
+                out.write(reinterpret_cast<const char*>(&count), sizeof(count));
+                out.write(reinterpret_cast<const char*>(idx.data()), sizeof(long long) * count);
+                out.write(reinterpret_cast<const char*>(val.data()), sizeof(float) * count);
+            }
+            out.close();
+            require(out.good(), "Failed writing EER dump");
             return 0;
         }
         if (std::string(argv[1]) == "read_tiff_raw") {

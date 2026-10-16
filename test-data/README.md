@@ -70,6 +70,49 @@ Tolerances, their physical derivation, results, and the negative controls are in
 
 ---
 
+## 1c. Input-Format Fixtures (every container, sample type and codec)
+
+`generate_format_fixtures.py` writes one integer-valued movie (counts 0..15) in every encoding
+the readers accept, plus encodings they must refuse. Every value is exact in every sample type,
+so each accepted encoding must decode to the same array and give byte-identical products to the
+float32 MRC reference. The encoders (`formats/encoders.py`) are pure Python and NumPy and were
+cross-checked against LibTIFF and tifffile/imagecodecs during development. Nothing is versioned:
+the fixtures regenerate in about 15 s (about 100 MB) and `manifest.json` records every SHA-256.
+
+| group | what it covers |
+|---|---|
+| MRC | modes 0, 1, 2, 6, 12, 101; big-endian; FEI2 and SERI extended headers; `.mrcs.xz/.bz2/.zst` |
+| TIFF | u8, u16, s8, s16, f32; none, LZW, Deflate (8 and 32946), PackBits; predictors 2 and 3; big-endian; BigTIFF; one and many rows per strip; orientation tag |
+| EER | 65000, 65001, 65002 at 2048^2 and 4096^2; upsampling 1, 2, -1; trailing fractions; EPU `.gain` and count-reference gains |
+| gain, defect | gain as MRC f32/f16/s16/u16/s8 and TIFF f32/u16/u8; defects as text and as MRC/TIFF maps |
+| rejected | MRC modes 3, 4, 5, odd-by-odd mode 101; TIFF u32, f64, f16, tiled, RGB, mixed frame sizes; EER 3072^2, unknown code, 65002 with 8-bit runs, upsampling -1 on 65002; SerialEM defect lists |
+| heavy (opt-in) | IMOD packed 4-bit TIFF at the K2 super-resolution geometry it is recognised by |
+
+```sh
+python3 tests/test_input_formats.py --binary build/motioncorr --helper build/runner_numerics
+# add --include-heavy for the packed 4-bit TIFF (about 20 s more)
+# on a CUDA build, --ingest-matrix also compares --ingest auto with --ingest float on the GPU
+```
+
+The CTest entry is `InputFormats`. Compressed-MRC cases need `pbzip2` and `zstd` (CI installs
+both); a missing decoder is reported UNRUN and fails the suite unless it was absent at configure
+time.
+
+Cases that document current behaviour rather than a pass:
+
+| case | behaviour |
+|---|---|
+| `mrc_truncated_payload`, `mrc_mode0_imod_4bit_flag` | **known failure.** A short MRC payload is accepted: `Image::readData` returns -2, the runner ignores `Image::read`'s return value, and the missing frames hold stale pooled-buffer contents. Every MRC mode behaves the same. |
+| `mrc_compressed_zst_symlink` | **known failure.** `zstd -cdk` ignores a symbolic-link input, so a linked `.mrc.zst` movie fails to open. |
+| `eer_4k_65002_render_up2` | **characterised.** 4K EER with 1+1 subpixel bits at `--eer_upsampling 2` uses the 4-bit masks; y subpixel is always 0. |
+| `mrc_mode101_odd_width` | **characterised.** IMOD pads odd-width 4-bit rows; the reader does not. |
+| `mrc_mode0_unsigned_bytes` | **characterised.** Mode 0 is read signed, as upstream (IMOD writes it unsigned). |
+| `eer_legacy_container`, `eer_2k_4bit_symbols_upsampling2` | **not run.** The legacy EER path reads uninitialised members; 2K files with 4-bit symbols at upsampling 2 would write past the frame. |
+
+All of these are inherited from upstream RELION 5.1 unless stated otherwise.
+
+---
+
 ## 2. Experimental RELION SPA Tutorial Dataset
 
 The experimental benchmark dataset is the **beta-galactosidase movie subset used by the [RELION SPA tutorial](https://relion.readthedocs.io/en/latest/SPA_tutorial/Introduction.html)**.

@@ -1467,7 +1467,6 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             // the logical width for it, so the session's nx is twice the stored
             // TIFFTAG_IMAGEWIDTH and this comparison fails.
             else if ((int)width != nx || (int)height != ny) reject = "frame geometry differs";
-            else if (bits != 16 && bits != 8)            reject = "bits per sample is not 8 or 16";
             else if (samples != 1)                       reject = "samples per pixel != 1";
             else if (planar != PLANARCONFIG_CONTIG)      reject = "planar configuration not contiguous";
             else if (compression != COMPRESSION_DEFLATE &&
@@ -1482,6 +1481,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             TIFFGetFieldDefaulted(tif, TIFFTAG_ROWSPERSTRIP, &rps_tag);
             // LibTIFF reports (uint32)-1 for "the whole image in one strip".
             const int rps = (rps_tag == 0 || rps_tag > (uint32_t)ny) ? ny : (int)rps_tag;
+            // The one policy decision, in cuda_deflate_layout.h (#134, D1).
+            if ((reject = mc_tiff_deflate::admissionRefusal(bits, rps))) break;
             const int n_strips = (ny + rps - 1) / rps;
             const int last_rows = ny - (n_strips - 1) * rps;
             if (f == 0) {
@@ -1877,11 +1878,11 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                         // One read of the frame's whole span, placed so that it ends
                         // where the slotted layout ends, then spread into the
                         // aligned slots in place. Same bytes as one
-                        // TIFFReadRawStrip per strip, without ny library calls.
-                        const size_t packed = mc_tiff_deflate::framePackedBytes(sizes, ny);
+                        // TIFFReadRawStrip per strip, without one library call per strip.
+                        const size_t packed = mc_tiff_deflate::framePackedBytes(sizes, strips_per_frame);
                         const size_t lead = frame_stage_bytes[f] - packed;
                         ok = preadFully(TIFFFileno(t), fb + lead, packed, raw_offsets[f][0]);
-                        if (ok) mc_tiff_deflate::spreadPackedStrips(fb, sizes, ny, in_align);
+                        if (ok) mc_tiff_deflate::spreadPackedStrips(fb, sizes, strips_per_frame, in_align);
                     } else {
                         if (!TIFFSetDirectory(t, frames[f])) { frame_ok[i] = 0; continue; }
                         size_t cursor = 0;

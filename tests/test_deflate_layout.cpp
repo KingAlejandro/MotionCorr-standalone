@@ -384,6 +384,20 @@ static void testStripGeometryControlsFire() {
     check(!contiguous, "padding inserted between rows inside a strip is detected");
 }
 
+// The admission policy is a decision (#134, D1), so this pins the table rather
+// than the mechanism: flipping either constant must be a deliberate edit that
+// turns this red, not a silent change to which files reach the GPU decoder.
+static void testAdmissionPolicy() {
+    check(admissionRefusal(16, 1) == nullptr, "16-bit, one row per strip is admitted");
+    check(admissionRefusal(8, 1) == nullptr, "8-bit, one row per strip is admitted");
+    check(admissionRefusal(16, 16) == nullptr, "16-bit, multi-row strips are admitted");
+    check(admissionRefusal(8, 3838) == nullptr, "8-bit, whole-frame strip is admitted");
+    for (int bits : {1, 4, 12, 24, 32, 64})
+        check(admissionRefusal(bits, 1) != nullptr, "unsupported sample widths are refused");
+    check(kAdmit8BitSamples && kAdmitMultiRowStrips,
+          "the widened policy of #138 is the one compiled in");
+}
+
 int main() {
     testSlotAlignment(4);
     testSlotAlignment(8);
@@ -412,6 +426,7 @@ int main() {
     for (int rps : {3, 5, 16})
         testStripGeometry(1023, 101, rps, 1, 8);
     testStripGeometryControlsFire();
+    testAdmissionPolicy();
 
     if (failures) { std::printf("%d check(s) failed\n", failures); return 1; }
     std::printf("deflate layout: all checks passed\n");

@@ -65,6 +65,34 @@ inline bool zlibWrapperIsUsable(const uint8_t *p, size_t n) {
 }
 
 /**
+ * ADMISSION POLICY: which TIFF encodings the automatic route hands to nvCOMP.
+ *
+ * This is the one place that decides it (#138, #134, decision D1 on #198).
+ * Everything admitted here is decoded by nvCOMP Deflate, which NVIDIA documents
+ * as undefined behaviour on corrupt input; inputs refused here fall back to the
+ * compact or float host readers. The remaining checks in the ingest tag scan
+ * (predictor, byte order, sample format, planar layout, geometry, strip-size
+ * consistency) are format correctness, not policy.
+ *
+ * Both flags true is #138. Both false reproduces main at 1db86902: 16-bit
+ * samples, one full row per strip. A decision for "GPU decoder only by explicit
+ * opt-in" would not be made here but at the caller, by refusing every input
+ * unless --ingest nvcomp was pinned.
+ *
+ * Returns nullptr when admitted, else the reason logged for the refusal.
+ */
+constexpr bool kAdmit8BitSamples = true;
+constexpr bool kAdmitMultiRowStrips = true;
+
+inline const char *admissionRefusal(int bits_per_sample, int rows_per_strip) {
+    if (bits_per_sample != 16 && !(kAdmit8BitSamples && bits_per_sample == 8))
+        return "bits per sample is not 8 or 16";
+    if (rows_per_strip != 1 && !kAdmitMultiRowStrips)
+        return "strip layout is not one full row per strip";
+    return nullptr;
+}
+
+/**
  * Decompressed-output geometry of one TIFF frame's strips.
  *
  * A strip is one independent Deflate stream and therefore one nvCOMP chunk, so

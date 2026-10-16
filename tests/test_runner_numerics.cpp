@@ -231,6 +231,44 @@ int main(int argc, char **argv)
             std::cout << "PASS fused MRC header statistics (" << cases.size() << " cases)\n";
             return 0;
         }
+        if (std::string(argv[1]) == "float_plan_cache") {
+            // The ad-hoc float transforms share cached FFTW plans between arrays. Each
+            // transform must give the bits a plan made for its own arrays gives, and a
+            // plan rebound to new arrays must name those arrays, not the ones it was
+            // planned on.
+            const int nx = 96, ny = 64;
+            for (int round = 0; round < 3; round++) {
+                MultidimArray<float> real(ny, nx), reference_real(ny, nx);
+                MultidimArray<fComplex> cached(ny, nx / 2 + 1), reference(ny, nx / 2 + 1);
+                FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(real) {
+                    DIRECT_MULTIDIM_ELEM(real, n) = std::sin(0.37f * n) + 0.001f * (n % 17) + round;
+                }
+                NewFFT::FloatPlan own(real, reference);
+                NewFFT::FourierTransform(real, reference, own, NewFFT::FwdOnly);
+                NewFFT::FourierTransform(real, cached);
+                require(std::memcmp(cached.data, reference.data, sizeof(fComplex) * NZYXSIZE(cached)) == 0,
+                        "Cached forward FFT differs from a plan made for the same arrays");
+                // The plan made for (real, reference) only accepts those arrays.
+                MultidimArray<fComplex> spectrum = cached;
+                NewFFT::inverseFourierTransform(spectrum, reference_real, NewFFT::FwdOnly, false);
+                NewFFT::inverseFourierTransform(reference, real, own, NewFFT::FwdOnly, false);
+                require(std::memcmp(real.data, reference_real.data, sizeof(float) * NZYXSIZE(real)) == 0,
+                        "Cached inverse FFT differs from a plan made for the same arrays");
+            }
+            MultidimArray<float> a(ny, nx), b(ny, nx), other(ny, nx + 2);
+            MultidimArray<fComplex> fa(ny, nx / 2 + 1), fb(ny, nx / 2 + 1);
+            NewFFT::FloatPlan planned(a, fa);
+            NewFFT::FloatPlan rebound(planned, b, fb);
+            require(planned.isCompatible(a) && planned.isCompatible(fa), "Plan does not accept its own arrays");
+            require(rebound.isCompatible(b) && rebound.isCompatible(fb), "Rebound plan does not accept the new arrays");
+            require(!rebound.isCompatible(a) && !rebound.isCompatible(fa), "Rebound plan still names the original arrays");
+            bool rejected = false;
+            MultidimArray<fComplex> fother(ny, (nx + 2) / 2 + 1);
+            try { NewFFT::FloatPlan wrong(planned, other, fother); } catch (const RelionError&) { rejected = true; }
+            require(rejected, "Rebinding a plan to arrays of another size was accepted");
+            std::cout << "PASS float plan cache\n";
+            return 0;
+        }
         if (std::string(argv[1]) == "read_tiff_raw") {
             // Dump decoded samples in index order. The row sums the read_tiff
             // mode writes cannot see sample order within a row: swapping the two

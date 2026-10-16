@@ -299,6 +299,15 @@ class NewFFT
                           MultidimArray<fComplex>& complex,
                           unsigned int flags = FFTW_ESTIMATE);
 
+                // Reuse the FFTW plans of 'cached' for another pair of arrays.
+                // 'cached' must have been planned on arrays of the same size,
+                // FFTW alignment and in-place-ness as 'real' and 'complex'.
+                // The copy is bound to the new arrays, so isCompatible() never
+                // refers to the pointers of the arrays 'cached' was planned on.
+                FloatPlan(const FloatPlan& cached,
+                          MultidimArray<float>& real,
+                          MultidimArray<fComplex>& complex);
+
                 fftwf_plan getForward() const
                 {
                     return plan.get()->forward;

@@ -172,6 +172,8 @@ if(BUILD_TESTING)
     # find_package(Python3 ... REQUIRED) line because it needs no interpreter.
     add_test(NAME RunnerInterpolateRecenter
         COMMAND $<TARGET_FILE:runner_numerics> interpolate_recenter)
+    add_test(NAME FloatPlanCache
+        COMMAND $<TARGET_FILE:runner_numerics> float_plan_cache)
     add_test(NAME MrcHeaderStats
         COMMAND $<TARGET_FILE:runner_numerics> mrc_stats)
     add_executable(pdf_concat tests/test_pdf_concat.cpp)

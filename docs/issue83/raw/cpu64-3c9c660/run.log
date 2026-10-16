@@ -1,0 +1,250 @@
+=== queued for project lock at 2026-09-28T11:07:08Z
+ 11:07:08 up 300 days,  1:04, 21 users,  load average: 2.15, 2.16, 2.12
+=== acquired project lock at 2026-09-28T11:07:08Z
+3c9c660 fix(issue83): stop the gates that read a summary instead of the measurement
+?? build-cpu/
+?? evidence-cpu-025908a/
+?? evidence-cpu-2a8d13a/
+?? evidence-cpu-3c9c660/
+?? evidence-cpu-4c2305b/
+?? evidence-cpu-705d2c7/
+?? evidence-cpu-7ba584e/
+?? evidence-cpu-8298158/
+?? evidence-cpu-89e7a93/
+?? evidence-cpu-93d427e/
+?? evidence-cpu-cb587bd/
+?? evidence/
+?? evidence2/
+?? evidence3-run.log
+?? evidence3/
+?? evidence4/
+?? fixtures/
+?? runroot24-synthetic/
+90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4  /home/ubuntu/mc-i83-cpu/build-cpu/motioncorr
+2ff2095d0d7a6be4807c0d627b9ffd7c8fcbce85f68f561af383846211ed8f58 matrix.py
+e303c89d3229cc539c61f20ed73537df8b32d367b34a07fac6c2091934302ae9 measure_capacity.py
+67588ce6a8c870c18b3f1cea226046ccfa45959f237d6fcee939ae6006c9c989 meta_controls.py
+e9b529843a896f0cd7ce7cf710eee5f0a694404af9b63277ebfeb8eeff1d0af1 negative_controls.py
+3592c92f7419ed5bbf793a1dee3a300288f6529574edd3077df5714e0d1d3223 products.py
+8a08406ef9ac1e297a1736f1167941242da0531ac16b370fdc54182cbe60e19c record_payload_env.py
+83b3e342abfdc09e3fdba3e9799a0af78c59fb53c301ab5a978c14cd550ad10a regenerate_report.sh
+52cfa63decfc935ebaa86a910c2a5721bed438415f1641126f82f0660fe0a7be report.py
+0ac3d39558259921fd6a97a77f018ee0a04c4e1e78623ce672832ad9aff622ac run_all24_schedules.py
+1e8fbe049f2b78bcd7387a2ad873aedf913e191a036e341fe253ef3a4e02f0ee run_matrix.py
+fdc93fe3294ecce30f2af41af7c6e22b3eeac18d4287e5bbc6b78cd7a2c88ed8 stage_synthetic_runroot.py
+704de7498d953f016fe35986d9e8d72658c339cae8a3b8f3d54e0b7bbffa619c verify_fixtures.py
+# affinity of a child launched exactly as the gates below were
+# (the launcher shell above is unpinned; the gates are not)
+Cpus_allowed_list:	32-63
+Mems_allowed_list:	0-1
+
+=== (a) verify_fixtures against the committed manifest  2026-09-28T11:07:08Z
+content_equal  km_global_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+content_equal  km_local_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /noise/absolute_sigma, /noise/noise_free_image_std, /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+                    2 float leaf/leaves agree to within 4 ULP (max 1.84e-16 relative): /noise/absolute_sigma, /noise/noise_free_image_std
+content_equal  km_local_noisy
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4144 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+content_equal  km_local_nonsquare
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+ missing  km_local_realscale
+           missing  movie
+           missing  ground_truth
+verifier numpy 1.26.4; manifest from HEAD (e07fdec235d38f152356b136fb7038394eb8c919)
+VERIFIED (content) -- 4 truth file(s) differ from the committed bytes only in the commit stamp and/or in the last bit of a derived float; every motion value is the same number: km_global_hisnr (ground_truth), km_local_hisnr (ground_truth), km_local_noisy (ground_truth), km_local_nonsquare (ground_truth)
+--- verify_fixtures exit=0
+
+=== (a2) the same verification over an EMPTY directory  2026-09-28T11:07:08Z
+# The published defect: nothing to mismatch, so 'verified' with nothing
+# compared. The vacuity refusal now lives in verdict(), which the report
+# generator and the controls both call. A nonzero exit is expected.
+NOT VERIFIED: no digests were compared (0 movie, 0 ground truth, over 5 declared case(s))
+ missing  km_global_hisnr
+           missing  movie
+           missing  ground_truth
+ missing  km_local_hisnr
+           missing  movie
+           missing  ground_truth
+ missing  km_local_noisy
+           missing  movie
+           missing  ground_truth
+ missing  km_local_nonsquare
+           missing  movie
+           missing  ground_truth
+ missing  km_local_realscale
+           missing  movie
+           missing  ground_truth
+verifier numpy 1.26.4; manifest from HEAD (e07fdec235d38f152356b136fb7038394eb8c919)
+NOT VERIFIED
+--- verify_fixtures(empty) exit=1  (expected nonzero)
+
+=== (b) negative controls WITH real fixtures  2026-09-28T11:07:09Z
+    pass  fixture_verdict_vacuous
+    pass  ground_truth_mutation
+    pass  ps_wrong_dimension
+    pass  resume_native_witness
+    pass  witness_is_consumed
+    pass  report_renders_witness
+    pass  report_states_input_coverage
+    pass  report_attributes_each_section
+    pass  partial_schedules
+    pass  matrix_schedule_witness
+    pass  rejection_names_option
+    pass  aggregate_needs_every_leg
+    pass  comparator_coverage
+    pass  all24_asserts_metadata
+    pass  input_hashes
+    pass  cross_row_consumed
+    pass  provenance_allowance
+    pass  truth_provenance
+    pass  payload_recorder
+    pass  suite_selects_something
+{
+  "pass": 20,
+  "skipped": 0,
+  "failed": 0
+}
+--- negative_controls exit=0
+
+=== (b2) meta-checks: every gate reverted must make its control FAIL
+# 2026-09-28T11:07:10Z
+# A control that passes both with and without its gate is testing
+# nothing. Two of this round's gates recompute what a summary field
+# already asserted, so their reverts restore the trusting read.
+  ok   vacuous_fixture_verification: control failed as it must -- VACUOUS PASS: a fixture record that compared nothing was verified
+  ok   aggregate_trusts_fixture_summary: control failed as it must -- VACUOUS VERIFICATION: a fixture record that compared no digest was accepted as verifying t
+  ok   w3_caveat_keyed_on_schema: control failed as it must -- a movie-only record was rendered without saying so; this is the published W3 overclaim rea
+  ok   substring_rejection: control failed as it must -- SUBSTRING DEFECT REPRODUCED: a crash with no diagnostic satisfied the '--j must be rejecte
+  ok   matrix_witness_unrendered: control failed as it must -- UNCONSUMED WITNESS: a matrix schedule 'cpu_executed' rendered as 'exact 3/3', which does n
+  ok   matrix_witness_last_invocation_only: control failed as it must -- the per-invocation markers were not recorded one per invocation
+  ok   matrix_witness_gap_unreported: control failed as it must -- a row whose schedule witnesses cover one invocation each was not reported as a gap
+  ok   aggregate_trusts_record_summary: control failed as it must -- a record with no missing-schedule field was read as complete: []
+  ok   coverage_guard_shadowed: control failed as it must -- SHADOWED GUARD REPRODUCED: a comparator PASS whose coverage was incomplete was accepted as
+  ok   all24_asserts_nothing: control failed as it must -- EMPTY EXPECTATION REPRODUCED: the integrated screen asserted no STAR metadata at all
+  ok   sections_share_one_attribution: control failed as it must -- the integrated screen did not name the run it came from: 
+### Integrated candidate: all 24
+  ok   cpu_section_reads_as_unknown_device: control failed as it must -- a screen from a different device was folded into the header's run
+  ok   identityless_section_inherits_header: control failed as it must -- the integrated screen did not name the run it came from: 
+### Integrated candidate: all 24
+  ok   matrix_completeness_taken_on_trust: control failed as it must -- a record holding 1 of 25 declared rows certified the matrix complete on the strength of it
+  ok   all24_equality_taken_on_trust: control failed as it must -- VACUOUS EQUALITY: a schedule that compared no movie certified cross-schedule equality
+  ok   coverage_keyed_on_field_name: control failed as it must -- the rendered table does not carry resume's own witness cell, saying what the record actual
+  ok   banner_gap_silently_dropped: control failed as it must -- batch's banner coverage reads (1, 1), not 1 of 24
+  ok   payload_match_is_substring: control failed as it must -- a different executable under the same tree was recorded as the payload: /home/ubuntu/mc-i8
+  ok   recorder_exits_zero_unobserved: control failed as it must -- a recorder that never saw the payload exited 0, so a job's exit-code table recorded succes
+  ok   suite_exit ['--only', 'ground_truth_mutation']: exit=1 -- every selected control skipped
+  ok   suite_exit ['--only', 'comparator_coverage']: exit=0 -- the selected control passed
+  ok   suite_exit (full): exit=1 -- one control of the suite skipped
+
+wrote /home/ubuntu/mc-i83-cpu/evidence-cpu-3c9c660/meta_controls.json
+
+all 22 meta-checks passed (19 reverted gates + 3 suite exit-status cases): every gate, reverted, makes its control fail
+--- meta_controls exit=0
+
+=== (c) CPU support matrix (real pixels)  2026-09-28T11:07:11Z
+# Exits 1 by design: realscale_local has no staged fixture here, so its
+# row is UNRUN and the matrix refuses to report a complete pass.
+[issue83] global_square ...
+[issue83] global_square: pass
+[issue83] local_square ...
+[issue83] local_square: pass
+[issue83] global_nonsquare ...
+[issue83] global_nonsquare: pass
+[issue83] local_nonsquare ...
+[issue83] local_nonsquare: pass
+[issue83] gain_none ...
+[issue83] gain_none: pass
+[issue83] gain_unity ...
+[issue83] gain_unity: pass
+[issue83] gain_nonunity ...
+[issue83] gain_nonunity: pass
+[issue83] defect_skip ...
+[issue83] defect_skip: pass
+[issue83] defect_detect ...
+[issue83] defect_detect: pass
+[issue83] defect_file ...
+[issue83] defect_file: pass
+[issue83] dose_off ...
+[issue83] dose_off: pass
+[issue83] dose_on ...
+[issue83] dose_on: pass
+[issue83] dose_on_savenoDW ...
+[issue83] dose_on_savenoDW: pass
+[issue83] dose_on_preexposure ...
+[issue83] dose_on_preexposure: pass
+[issue83] evenodd ...
+[issue83] evenodd: pass
+[issue83] evenodd_dose_noDW ...
+[issue83] evenodd_dose_noDW: pass
+[issue83] frames_subset ...
+[issue83] frames_subset: pass
+[issue83] group_frames_2 ...
+[issue83] group_frames_2: pass
+[issue83] group_frames_invalid ...
+[issue83] group_frames_invalid: pass
+[issue83] threads_invalid ...
+[issue83] threads_invalid: pass
+[issue83] bin1 ...
+[issue83] bin1: pass
+[issue83] early_bin2 ...
+[issue83] early_bin2: pass
+[issue83] late_bin2 ...
+[issue83] late_bin2: pass
+[issue83] power_spectrum ...
+[issue83] power_spectrum: pass
+{
+  "declared": 25,
+  "attempted": 24,
+  "pass": 24,
+  "fail": 0,
+  "error": 0
+}
+UNRUN rows: realscale_local
+--- run_matrix exit=1
+
+=== (d) stage a synthetic 24-movie runroot  2026-09-28T11:08:22Z
+# 24 names over one generated fixture. This exercises the integrated
+# screen's STAR metadata assertion; it says nothing about the RELION
+# tutorial dataset.
+runroot /home/ubuntu/mc-i83-cpu/runroot24-synthetic
+movies  24 (one fixture under 24 names)
+star    /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star
+--- stage exit=0
+
+=== (e) integrated schedules on the synthetic runroot  2026-09-28T11:08:22Z
+{
+  "all24_equal": true,
+  "partial_screen": false,
+  "schedules_passed": [
+    "batch",
+    "repeat",
+    "resume"
+  ],
+  "missing_required_schedules": [],
+  "errors": []
+}
+--- run_all24_schedules exit=0
+--- recorder exit=0  (2 would mean it never saw the payload)
+
+=== done 2026-09-28T11:08:46Z
+verify_fixtures 0
+verify_fixtures_empty 1
+negative_controls 0
+meta_controls 0
+run_matrix 1
+stage_synthetic_runroot 0
+run_all24_schedules 0
+record_payload_env 0

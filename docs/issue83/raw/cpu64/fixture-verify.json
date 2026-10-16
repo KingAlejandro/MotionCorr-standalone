@@ -1,0 +1,47 @@
+{
+  "cases": {
+    "km_global_hisnr": {
+      "expected": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990",
+      "expected_bytes": 12583936,
+      "observed": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990",
+      "observed_bytes": 12583936,
+      "status": "match"
+    },
+    "km_local_hisnr": {
+      "expected": "2ae3c87938545aafae71e3e51d7f9040e8f3de6e1cd8a1f14e1c27980272d092",
+      "expected_bytes": 12583936,
+      "observed": "2ae3c87938545aafae71e3e51d7f9040e8f3de6e1cd8a1f14e1c27980272d092",
+      "observed_bytes": 12583936,
+      "status": "match"
+    },
+    "km_local_noisy": {
+      "expected": "98930a070a9da7b172c940a2e6bcf95044dcd2070f4637dba2e8b3635ac6a668",
+      "expected_bytes": 12583936,
+      "observed": "98930a070a9da7b172c940a2e6bcf95044dcd2070f4637dba2e8b3635ac6a668",
+      "observed_bytes": 12583936,
+      "status": "match"
+    },
+    "km_local_nonsquare": {
+      "expected": "9ef410b8cf70bfafddd1659bfc3fae5c17ef802ea57d301f93434f1f89a598d8",
+      "expected_bytes": 18875392,
+      "observed": "9ef410b8cf70bfafddd1659bfc3fae5c17ef802ea57d301f93434f1f89a598d8",
+      "observed_bytes": 18875392,
+      "status": "match"
+    },
+    "km_local_realscale": {
+      "expected": "886b277be567e8ae310f3ec3b7bca95cb4e1776a71217e862e9abe0ef162abf7",
+      "status": "missing"
+    }
+  },
+  "fixtures_dir": "fixtures",
+  "manifest_ref": "HEAD",
+  "manifest_source_commit": "e07fdec235d38f152356b136fb7038394eb8c919",
+  "mismatched": [],
+  "missing": [
+    "km_local_realscale"
+  ],
+  "schema": "issue83-fixture-verify/1",
+  "undeclared": [],
+  "verified": true,
+  "verifier_numpy_version": "1.26.4"
+}

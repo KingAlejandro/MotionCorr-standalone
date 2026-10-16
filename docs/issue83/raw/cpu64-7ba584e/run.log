@@ -1,0 +1,116 @@
+=== queued for project lock at 2026-09-28T07:49:44Z
+ 07:49:44 up 299 days, 21:47, 25 users,  load average: 6.10, 5.17, 7.23
+=== acquired project lock at 2026-09-28T07:51:59Z
+90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4  /home/ubuntu/mc-i83-cpu/build-cpu/motioncorr
+
+=== (a) verify_fixtures against the committed manifest  2026-09-28T07:51:59Z
+content_equal  km_global_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+content_equal  km_local_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /noise/absolute_sigma, /noise/noise_free_image_std, /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+                    2 float leaf/leaves agree to within 4 ULP (max 1.84e-16 relative): /noise/absolute_sigma, /noise/noise_free_image_std
+content_equal  km_local_noisy
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4144 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+content_equal  km_local_nonsquare
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+ missing  km_local_realscale
+           missing  movie
+           missing  ground_truth
+verifier numpy 1.26.4; manifest from HEAD (e07fdec235d38f152356b136fb7038394eb8c919)
+VERIFIED (content) -- 4 truth file(s) differ from the committed bytes only in the commit stamp and/or in the last bit of a derived float; every motion value is the same number: km_global_hisnr (ground_truth), km_local_hisnr (ground_truth), km_local_noisy (ground_truth), km_local_nonsquare (ground_truth)
+--- verify_fixtures exit=0
+
+=== (b) negative controls WITH real fixtures  2026-09-28T07:52:00Z
+    pass  ground_truth_mutation
+    pass  ps_wrong_dimension
+    pass  resume_native_witness
+    pass  witness_is_consumed
+    pass  report_renders_witness
+    pass  partial_schedules
+    pass  input_hashes
+    pass  cross_row_consumed
+    pass  provenance_allowance
+    pass  truth_provenance
+{
+  "pass": 10,
+  "skipped": 0,
+  "failed": 0
+}
+--- negative_controls exit=0
+
+=== (c) CPU support matrix (real pixels)  2026-09-28T07:52:00Z
+[issue83] global_square ...
+[issue83] global_square: pass
+[issue83] local_square ...
+[issue83] local_square: pass
+[issue83] global_nonsquare ...
+[issue83] global_nonsquare: pass
+[issue83] local_nonsquare ...
+[issue83] local_nonsquare: pass
+[issue83] gain_none ...
+[issue83] gain_none: pass
+[issue83] gain_unity ...
+[issue83] gain_unity: pass
+[issue83] gain_nonunity ...
+[issue83] gain_nonunity: pass
+[issue83] defect_skip ...
+[issue83] defect_skip: pass
+[issue83] defect_detect ...
+[issue83] defect_detect: pass
+[issue83] defect_file ...
+[issue83] defect_file: pass
+[issue83] dose_off ...
+[issue83] dose_off: pass
+[issue83] dose_on ...
+[issue83] dose_on: pass
+[issue83] dose_on_savenoDW ...
+[issue83] dose_on_savenoDW: pass
+[issue83] dose_on_preexposure ...
+[issue83] dose_on_preexposure: pass
+[issue83] evenodd ...
+[issue83] evenodd: pass
+[issue83] evenodd_dose_noDW ...
+[issue83] evenodd_dose_noDW: pass
+[issue83] frames_subset ...
+[issue83] frames_subset: pass
+[issue83] group_frames_2 ...
+[issue83] group_frames_2: pass
+[issue83] group_frames_invalid ...
+[issue83] group_frames_invalid: pass
+[issue83] threads_invalid ...
+[issue83] threads_invalid: pass
+[issue83] bin1 ...
+[issue83] bin1: pass
+[issue83] early_bin2 ...
+[issue83] early_bin2: pass
+[issue83] late_bin2 ...
+[issue83] late_bin2: pass
+[issue83] power_spectrum ...
+[issue83] power_spectrum: pass
+{
+  "declared": 25,
+  "attempted": 24,
+  "pass": 24,
+  "fail": 0,
+  "error": 0
+}
+UNRUN rows: realscale_local
+--- run_matrix exit=1
+--- recorder exit=0
+
+=== done 2026-09-28T07:53:12Z
+verify_fixtures 0
+negative_controls 0
+run_matrix 1

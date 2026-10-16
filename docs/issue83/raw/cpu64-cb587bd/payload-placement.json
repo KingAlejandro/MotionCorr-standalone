@@ -1,0 +1,2094 @@
+{
+  "cpus_allowed_observed": [
+    "32-63"
+  ],
+  "distinct_payload_pids": 76,
+  "executables": [
+    "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr"
+  ],
+  "host_at_end": {
+    "cpu_count": 64,
+    "hostname": "small-refmac-machine",
+    "loadavg": {
+      "15m": 2.615234375,
+      "1m": 6.66064453125,
+      "5m": 3.53955078125
+    },
+    "recorded_utc": "2026-09-28T10:23:29Z"
+  },
+  "host_at_start": {
+    "cpu_count": 64,
+    "hostname": "small-refmac-machine",
+    "loadavg": {
+      "15m": 2.13134765625,
+      "1m": 2.2431640625,
+      "5m": 2.17529296875
+    },
+    "recorded_utc": "2026-09-28T10:21:51Z"
+  },
+  "match": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+  "match_mode": "exact",
+  "memory_policies_observed": [
+    "bind:1"
+  ],
+  "memory_policy_observed": true,
+  "mems_allowed_observed": [
+    "0-1"
+  ],
+  "note": "Sampled processes whose own /proc/<pid>/exe matches --match. Launchers (taskset, numactl, flock, /usr/bin/time) are not matched and are not recorded as the payload.",
+  "observed": true,
+  "payloads": {
+    "3439370": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/global_square/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/global_square/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 1 --patch_y 1 --skip_defect --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 16.7
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4275
+        },
+        "pages_total": 4934,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439370,
+      "sampled_utc": "2026-09-28T10:21:55Z",
+      "started_utc": "2026-09-28T10:21:54Z",
+      "threads": "8",
+      "vm_rss_kb": "19416 kB"
+    },
+    "3439386": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/global_square/movies_nonprefix.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/global_square/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 1 --patch_y 1 --skip_defect",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 17.8
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4551
+        },
+        "pages_total": 5210,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439386,
+      "sampled_utc": "2026-09-28T10:21:56Z",
+      "started_utc": "2026-09-28T10:21:55Z",
+      "threads": "8",
+      "vm_rss_kb": "20544 kB"
+    },
+    "3439420": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/local_square/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/local_square/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 144,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 28.8
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 7371
+        },
+        "pages_total": 8030,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439420,
+      "sampled_utc": "2026-09-28T10:21:57Z",
+      "started_utc": "2026-09-28T10:21:56Z",
+      "threads": "8",
+      "vm_rss_kb": "30960 kB"
+    },
+    "3439497": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/global_nonsquare/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/global_nonsquare/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 1 --patch_y 1 --skip_defect",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 143,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 73.6
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 18840
+        },
+        "pages_total": 19499,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439497,
+      "sampled_utc": "2026-09-28T10:21:59Z",
+      "started_utc": "2026-09-28T10:21:59Z",
+      "threads": "8",
+      "vm_rss_kb": "71640 kB"
+    },
+    "3439577": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/global_nonsquare/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/global_nonsquare/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 1 --patch_y 1 --skip_defect --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 23.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 5900
+        },
+        "pages_total": 6559,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439577,
+      "sampled_utc": "2026-09-28T10:22:00Z",
+      "started_utc": "2026-09-28T10:22:00Z",
+      "threads": "8",
+      "vm_rss_kb": "26144 kB"
+    },
+    "3439621": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/global_nonsquare/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/global_nonsquare/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 1 --patch_y 1 --skip_defect --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 22.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 5632
+        },
+        "pages_total": 6291,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439621,
+      "sampled_utc": "2026-09-28T10:22:01Z",
+      "started_utc": "2026-09-28T10:22:01Z",
+      "threads": "8",
+      "vm_rss_kb": "25892 kB"
+    },
+    "3439637": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/local_nonsquare/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/local_nonsquare/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 30.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 7682
+        },
+        "pages_total": 8341,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439637,
+      "sampled_utc": "2026-09-28T10:22:02Z",
+      "started_utc": "2026-09-28T10:22:01Z",
+      "threads": "8",
+      "vm_rss_kb": "31256 kB"
+    },
+    "3439663": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/local_nonsquare/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/local_nonsquare/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 24.2
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 6203
+        },
+        "pages_total": 6862,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439663,
+      "sampled_utc": "2026-09-28T10:22:03Z",
+      "started_utc": "2026-09-28T10:22:03Z",
+      "threads": "8",
+      "vm_rss_kb": "25232 kB"
+    },
+    "3439699": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/local_nonsquare/movies_nonprefix.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/local_nonsquare/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 22.8
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 5837
+        },
+        "pages_total": 6496,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439699,
+      "sampled_utc": "2026-09-28T10:22:04Z",
+      "started_utc": "2026-09-28T10:22:04Z",
+      "threads": "8",
+      "vm_rss_kb": "24508 kB"
+    },
+    "3439723": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_none/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_none/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 52.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 13303
+        },
+        "pages_total": 13962,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439723,
+      "sampled_utc": "2026-09-28T10:22:05Z",
+      "started_utc": "2026-09-28T10:22:05Z",
+      "threads": "8",
+      "vm_rss_kb": "52804 kB"
+    },
+    "3439736": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_none/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_none/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 14.8
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 3784
+        },
+        "pages_total": 4443,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439736,
+      "sampled_utc": "2026-09-28T10:22:06Z",
+      "started_utc": "2026-09-28T10:22:05Z",
+      "threads": "8",
+      "vm_rss_kb": "16336 kB"
+    },
+    "3439749": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_none/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_none/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 16.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4339
+        },
+        "pages_total": 4998,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439749,
+      "sampled_utc": "2026-09-28T10:22:06Z",
+      "started_utc": "2026-09-28T10:22:06Z",
+      "threads": "8",
+      "vm_rss_kb": "19136 kB"
+    },
+    "3439793": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_none/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_none/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 142,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 43.6
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 11159
+        },
+        "pages_total": 11818,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439793,
+      "sampled_utc": "2026-09-28T10:22:07Z",
+      "started_utc": "2026-09-28T10:22:07Z",
+      "threads": "8",
+      "vm_rss_kb": "46000 kB"
+    },
+    "3439821": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_unity/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_unity/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --gainref /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_unity/aux/gain_unity.mrc",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 143,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 47.4
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 12140
+        },
+        "pages_total": 12799,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439821,
+      "sampled_utc": "2026-09-28T10:22:09Z",
+      "started_utc": "2026-09-28T10:22:08Z",
+      "threads": "8",
+      "vm_rss_kb": "51088 kB"
+    },
+    "3439895": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_nonunity/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_nonunity/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --gainref /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_nonunity/aux/gain_nonunity.mrc",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 36.7
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 9400
+        },
+        "pages_total": 10059,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439895,
+      "sampled_utc": "2026-09-28T10:22:11Z",
+      "started_utc": "2026-09-28T10:22:11Z",
+      "threads": "8",
+      "vm_rss_kb": "33852 kB"
+    },
+    "3439905": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_nonunity/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_nonunity/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --gainref /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_nonunity/aux/gain_nonunity.mrc",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 21.6
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 5541
+        },
+        "pages_total": 6200,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439905,
+      "sampled_utc": "2026-09-28T10:22:12Z",
+      "started_utc": "2026-09-28T10:22:11Z",
+      "threads": "8",
+      "vm_rss_kb": "21580 kB"
+    },
+    "3439921": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_nonunity/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_nonunity/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --gainref /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/gain_nonunity/aux/gain_nonunity.mrc --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 30.7
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 7866
+        },
+        "pages_total": 8525,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3439921,
+      "sampled_utc": "2026-09-28T10:22:12Z",
+      "started_utc": "2026-09-28T10:22:12Z",
+      "threads": "8",
+      "vm_rss_kb": "33848 kB"
+    },
+    "3440066": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_detect/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_detect/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 139,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 17.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4574
+        },
+        "pages_total": 5233,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440066,
+      "sampled_utc": "2026-09-28T10:22:17Z",
+      "started_utc": "2026-09-28T10:22:16Z",
+      "threads": "8",
+      "vm_rss_kb": "30672 kB"
+    },
+    "3440076": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_detect/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_detect/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 16.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4090
+        },
+        "pages_total": 4749,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440076,
+      "sampled_utc": "2026-09-28T10:22:17Z",
+      "started_utc": "2026-09-28T10:22:17Z",
+      "threads": "8",
+      "vm_rss_kb": "17404 kB"
+    },
+    "3440090": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_detect/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_detect/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 139,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 19.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4866
+        },
+        "pages_total": 5525,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440090,
+      "sampled_utc": "2026-09-28T10:22:18Z",
+      "started_utc": "2026-09-28T10:22:17Z",
+      "threads": "8",
+      "vm_rss_kb": "21580 kB"
+    },
+    "3440128": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_detect/movies_nonprefix.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_detect/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 19.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4854
+        },
+        "pages_total": 5513,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440128,
+      "sampled_utc": "2026-09-28T10:22:19Z",
+      "started_utc": "2026-09-28T10:22:18Z",
+      "threads": "8",
+      "vm_rss_kb": "21032 kB"
+    },
+    "3440152": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_file/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_file/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --defect_file /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_file/aux/defects.txt",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 14.8
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 3789
+        },
+        "pages_total": 4448,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440152,
+      "sampled_utc": "2026-09-28T10:22:20Z",
+      "started_utc": "2026-09-28T10:22:19Z",
+      "threads": "8",
+      "vm_rss_kb": "16468 kB"
+    },
+    "3440188": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_file/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_file/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --defect_file /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_file/aux/defects.txt --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 19.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4874
+        },
+        "pages_total": 5533,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440188,
+      "sampled_utc": "2026-09-28T10:22:21Z",
+      "started_utc": "2026-09-28T10:22:20Z",
+      "threads": "8",
+      "vm_rss_kb": "21576 kB"
+    },
+    "3440222": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_file/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_file/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --defect_file /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/defect_file/aux/defects.txt --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 12.8
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 3280
+        },
+        "pages_total": 3939,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440222,
+      "sampled_utc": "2026-09-28T10:22:22Z",
+      "started_utc": "2026-09-28T10:22:21Z",
+      "threads": "8",
+      "vm_rss_kb": "13124 kB"
+    },
+    "3440238": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_off/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_off/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 145,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 30.6
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 7823
+        },
+        "pages_total": 8482,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440238,
+      "sampled_utc": "2026-09-28T10:22:22Z",
+      "started_utc": "2026-09-28T10:22:22Z",
+      "threads": "8",
+      "vm_rss_kb": "30748 kB"
+    },
+    "3440248": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_off/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_off/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 19.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 5084
+        },
+        "pages_total": 5743,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440248,
+      "sampled_utc": "2026-09-28T10:22:23Z",
+      "started_utc": "2026-09-28T10:22:22Z",
+      "threads": "8",
+      "vm_rss_kb": "21836 kB"
+    },
+    "3440264": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_off/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_off/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 144,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 42.7
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 10923
+        },
+        "pages_total": 11582,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440264,
+      "sampled_utc": "2026-09-28T10:22:24Z",
+      "started_utc": "2026-09-28T10:22:23Z",
+      "threads": "8",
+      "vm_rss_kb": "44896 kB"
+    },
+    "3440299": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_off/movies_nonprefix.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_off/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 19.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4869
+        },
+        "pages_total": 5528,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440299,
+      "sampled_utc": "2026-09-28T10:22:25Z",
+      "started_utc": "2026-09-28T10:22:24Z",
+      "threads": "8",
+      "vm_rss_kb": "21572 kB"
+    },
+    "3440323": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --dose_weighting --dose_per_frame 1.277 --voltage 300",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 14.6
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 3746
+        },
+        "pages_total": 4405,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440323,
+      "sampled_utc": "2026-09-28T10:22:26Z",
+      "started_utc": "2026-09-28T10:22:25Z",
+      "threads": "8",
+      "vm_rss_kb": "16192 kB"
+    },
+    "3440359": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --dose_weighting --dose_per_frame 1.277 --voltage 300 --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 139,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 22.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 5858
+        },
+        "pages_total": 6517,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440359,
+      "sampled_utc": "2026-09-28T10:22:27Z",
+      "started_utc": "2026-09-28T10:22:26Z",
+      "threads": "8",
+      "vm_rss_kb": "25816 kB"
+    },
+    "3440393": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --dose_weighting --dose_per_frame 1.277 --voltage 300 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 139,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 14.6
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 3738
+        },
+        "pages_total": 4397,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440393,
+      "sampled_utc": "2026-09-28T10:22:28Z",
+      "started_utc": "2026-09-28T10:22:27Z",
+      "threads": "8",
+      "vm_rss_kb": "15392 kB"
+    },
+    "3440409": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_savenoDW/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_savenoDW/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --save_noDW --dose_weighting --dose_per_frame 1.277 --voltage 300",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 145,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 30.5
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 7800
+        },
+        "pages_total": 8459,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440409,
+      "sampled_utc": "2026-09-28T10:22:28Z",
+      "started_utc": "2026-09-28T10:22:28Z",
+      "threads": "8",
+      "vm_rss_kb": "30548 kB"
+    },
+    "3440421": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_savenoDW/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_savenoDW/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --save_noDW --dose_weighting --dose_per_frame 1.277 --voltage 300",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 32.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 8421
+        },
+        "pages_total": 9080,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440421,
+      "sampled_utc": "2026-09-28T10:22:29Z",
+      "started_utc": "2026-09-28T10:22:28Z",
+      "threads": "8",
+      "vm_rss_kb": "15160 kB"
+    },
+    "3440439": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_savenoDW/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_savenoDW/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --save_noDW --dose_weighting --dose_per_frame 1.277 --voltage 300 --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 144,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 48.3
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 12375
+        },
+        "pages_total": 13034,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440439,
+      "sampled_utc": "2026-09-28T10:22:30Z",
+      "started_utc": "2026-09-28T10:22:29Z",
+      "threads": "8",
+      "vm_rss_kb": "46116 kB"
+    },
+    "3440477": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_savenoDW/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_savenoDW/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --save_noDW --dose_weighting --dose_per_frame 1.277 --voltage 300 --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 23.1
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 5907
+        },
+        "pages_total": 6566,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440477,
+      "sampled_utc": "2026-09-28T10:22:30Z",
+      "started_utc": "2026-09-28T10:22:30Z",
+      "threads": "8",
+      "vm_rss_kb": "25680 kB"
+    },
+    "3440542": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_savenoDW/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_savenoDW/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --save_noDW --dose_weighting --dose_per_frame 1.277 --voltage 300 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 144,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 43.8
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 11200
+        },
+        "pages_total": 11859,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440542,
+      "sampled_utc": "2026-09-28T10:22:31Z",
+      "started_utc": "2026-09-28T10:22:31Z",
+      "threads": "8",
+      "vm_rss_kb": "46520 kB"
+    },
+    "3440571": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_preexposure/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_preexposure/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --preexposure 3.0 --dose_weighting --dose_per_frame 1.277 --voltage 300",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 52.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 13309
+        },
+        "pages_total": 13968,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440571,
+      "sampled_utc": "2026-09-28T10:22:33Z",
+      "started_utc": "2026-09-28T10:22:32Z",
+      "threads": "8",
+      "vm_rss_kb": "53820 kB"
+    },
+    "3440607": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_preexposure/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_preexposure/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --preexposure 3.0 --dose_weighting --dose_per_frame 1.277 --voltage 300 --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 21.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 5380
+        },
+        "pages_total": 6039,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440607,
+      "sampled_utc": "2026-09-28T10:22:34Z",
+      "started_utc": "2026-09-28T10:22:33Z",
+      "threads": "8",
+      "vm_rss_kb": "23344 kB"
+    },
+    "3440621": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_preexposure/movies_nonprefix.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/dose_on_preexposure/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --preexposure 3.0 --dose_weighting --dose_per_frame 1.277 --voltage 300",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 139,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 27.1
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 6937
+        },
+        "pages_total": 7596,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440621,
+      "sampled_utc": "2026-09-28T10:22:34Z",
+      "started_utc": "2026-09-28T10:22:34Z",
+      "threads": "8",
+      "vm_rss_kb": "29584 kB"
+    },
+    "3440647": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --even_odd_split",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 13.6
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 3491
+        },
+        "pages_total": 4150,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440647,
+      "sampled_utc": "2026-09-28T10:22:35Z",
+      "started_utc": "2026-09-28T10:22:35Z",
+      "threads": "8",
+      "vm_rss_kb": "14272 kB"
+    },
+    "3440724": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --even_odd_split --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 139,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 18.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4846
+        },
+        "pages_total": 5505,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440724,
+      "sampled_utc": "2026-09-28T10:22:38Z",
+      "started_utc": "2026-09-28T10:22:37Z",
+      "threads": "8",
+      "vm_rss_kb": "21580 kB"
+    },
+    "3440758": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --even_odd_split --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 14.5
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 3707
+        },
+        "pages_total": 4366,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440758,
+      "sampled_utc": "2026-09-28T10:22:39Z",
+      "started_utc": "2026-09-28T10:22:38Z",
+      "threads": "8",
+      "vm_rss_kb": "15356 kB"
+    },
+    "3440779": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd_dose_noDW/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd_dose_noDW/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --even_odd_split --save_noDW --dose_weighting --dose_per_frame 1.277 --voltage 300",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 37.7
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 9642
+        },
+        "pages_total": 10301,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440779,
+      "sampled_utc": "2026-09-28T10:22:41Z",
+      "started_utc": "2026-09-28T10:22:40Z",
+      "threads": "8",
+      "vm_rss_kb": "38732 kB"
+    },
+    "3440791": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd_dose_noDW/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd_dose_noDW/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --even_odd_split --save_noDW --dose_weighting --dose_per_frame 1.277 --voltage 300",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 14.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 3807
+        },
+        "pages_total": 4466,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440791,
+      "sampled_utc": "2026-09-28T10:22:41Z",
+      "started_utc": "2026-09-28T10:22:40Z",
+      "threads": "8",
+      "vm_rss_kb": "16332 kB"
+    },
+    "3440839": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd_dose_noDW/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd_dose_noDW/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --even_odd_split --save_noDW --dose_weighting --dose_per_frame 1.277 --voltage 300 --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 144,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 60.6
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 15516
+        },
+        "pages_total": 16175,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440839,
+      "sampled_utc": "2026-09-28T10:22:43Z",
+      "started_utc": "2026-09-28T10:22:43Z",
+      "threads": "8",
+      "vm_rss_kb": "64044 kB"
+    },
+    "3440875": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd_dose_noDW/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/evenodd_dose_noDW/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --even_odd_split --save_noDW --dose_weighting --dose_per_frame 1.277 --voltage 300 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 15.8
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4052
+        },
+        "pages_total": 4711,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440875,
+      "sampled_utc": "2026-09-28T10:22:45Z",
+      "started_utc": "2026-09-28T10:22:45Z",
+      "threads": "8",
+      "vm_rss_kb": "16200 kB"
+    },
+    "3440911": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/frames_subset/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/frames_subset/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --first_frame_sum 3 --last_frame_sum 10",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 42.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 10987
+        },
+        "pages_total": 11646,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440911,
+      "sampled_utc": "2026-09-28T10:22:47Z",
+      "started_utc": "2026-09-28T10:22:47Z",
+      "threads": "8",
+      "vm_rss_kb": "29508 kB"
+    },
+    "3440997": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/group_frames_2/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/group_frames_2/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --group_frames 2",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 51.7
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 13228
+        },
+        "pages_total": 13887,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3440997,
+      "sampled_utc": "2026-09-28T10:22:50Z",
+      "started_utc": "2026-09-28T10:22:49Z",
+      "threads": "8",
+      "vm_rss_kb": "52800 kB"
+    },
+    "3441031": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/group_frames_2/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/group_frames_2/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --group_frames 2 --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 16.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4323
+        },
+        "pages_total": 4982,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441031,
+      "sampled_utc": "2026-09-28T10:22:51Z",
+      "started_utc": "2026-09-28T10:22:50Z",
+      "threads": "8",
+      "vm_rss_kb": "19296 kB"
+    },
+    "3441046": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/group_frames_2/movies_nonprefix.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/group_frames_2/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --group_frames 2",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 22.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 5858
+        },
+        "pages_total": 6517,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441046,
+      "sampled_utc": "2026-09-28T10:22:52Z",
+      "started_utc": "2026-09-28T10:22:51Z",
+      "threads": "8",
+      "vm_rss_kb": "25672 kB"
+    },
+    "3441072": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/bin1/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/bin1/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --bin_factor 1",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 143,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 42.4
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 10860
+        },
+        "pages_total": 11519,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441072,
+      "sampled_utc": "2026-09-28T10:22:53Z",
+      "started_utc": "2026-09-28T10:22:52Z",
+      "threads": "8",
+      "vm_rss_kb": "34952 kB"
+    },
+    "3441085": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/bin1/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/bin1/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --bin_factor 1",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 139,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 14.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 3807
+        },
+        "pages_total": 4466,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441085,
+      "sampled_utc": "2026-09-28T10:22:53Z",
+      "started_utc": "2026-09-28T10:22:52Z",
+      "threads": "8",
+      "vm_rss_kb": "16316 kB"
+    },
+    "3441100": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/bin1/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/bin1/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --bin_factor 1 --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 144,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 42.3
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 10825
+        },
+        "pages_total": 11484,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441100,
+      "sampled_utc": "2026-09-28T10:22:54Z",
+      "started_utc": "2026-09-28T10:22:53Z",
+      "threads": "8",
+      "vm_rss_kb": "44900 kB"
+    },
+    "3441134": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/bin1/movies_nonprefix.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/bin1/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --bin_factor 1",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 17.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 4349
+        },
+        "pages_total": 5008,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441134,
+      "sampled_utc": "2026-09-28T10:22:55Z",
+      "started_utc": "2026-09-28T10:22:54Z",
+      "threads": "8",
+      "vm_rss_kb": "19164 kB"
+    },
+    "3441170": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/early_bin2/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/early_bin2/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --bin_factor 2",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 26.4
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 6746
+        },
+        "pages_total": 7405,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441170,
+      "sampled_utc": "2026-09-28T10:22:56Z",
+      "started_utc": "2026-09-28T10:22:55Z",
+      "threads": "8",
+      "vm_rss_kb": "35288 kB"
+    },
+    "3441184": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/early_bin2/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/early_bin2/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --bin_factor 2 --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 22.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 5857
+        },
+        "pages_total": 6516,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441184,
+      "sampled_utc": "2026-09-28T10:22:56Z",
+      "started_utc": "2026-09-28T10:22:56Z",
+      "threads": "8",
+      "vm_rss_kb": "24828 kB"
+    },
+    "3441229": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/early_bin2/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/early_bin2/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --bin_factor 2 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 25.5
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 6526
+        },
+        "pages_total": 7185,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441229,
+      "sampled_utc": "2026-09-28T10:22:57Z",
+      "started_utc": "2026-09-28T10:22:57Z",
+      "threads": "8",
+      "vm_rss_kb": "26936 kB"
+    },
+    "3441243": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/late_bin2/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/late_bin2/base/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --bin_factor 2 --no_early_binning",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 143,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 40.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 10242
+        },
+        "pages_total": 10901,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441243,
+      "sampled_utc": "2026-09-28T10:22:58Z",
+      "started_utc": "2026-09-28T10:22:57Z",
+      "threads": "8",
+      "vm_rss_kb": "32804 kB"
+    },
+    "3441256": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/late_bin2/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/late_bin2/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --bin_factor 2 --no_early_binning",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 14.7
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 3766
+        },
+        "pages_total": 4425,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441256,
+      "sampled_utc": "2026-09-28T10:22:58Z",
+      "started_utc": "2026-09-28T10:22:58Z",
+      "threads": "8",
+      "vm_rss_kb": "16404 kB"
+    },
+    "3441269": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/late_bin2/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/late_bin2/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --bin_factor 2 --no_early_binning --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 140,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 22.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 5638
+        },
+        "pages_total": 6297,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441269,
+      "sampled_utc": "2026-09-28T10:22:59Z",
+      "started_utc": "2026-09-28T10:22:58Z",
+      "threads": "8",
+      "vm_rss_kb": "24304 kB"
+    },
+    "3441315": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/late_bin2/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/late_bin2/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --bin_factor 2 --no_early_binning --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 144,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 43.3
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 11080
+        },
+        "pages_total": 11739,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441315,
+      "sampled_utc": "2026-09-28T10:23:00Z",
+      "started_utc": "2026-09-28T10:22:59Z",
+      "threads": "8",
+      "vm_rss_kb": "46628 kB"
+    },
+    "3441359": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/power_spectrum/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/power_spectrum/repeat/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --grouping_for_ps 3 --ps_size 128",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 147,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 35.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 9182
+        },
+        "pages_total": 9841,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441359,
+      "sampled_utc": "2026-09-28T10:23:01Z",
+      "started_utc": "2026-09-28T10:23:00Z",
+      "threads": "8",
+      "vm_rss_kb": "61524 kB"
+    },
+    "3441421": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/power_spectrum/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/power_spectrum/batch/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --grouping_for_ps 3 --ps_size 128 --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 146,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 50.4
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 12903
+        },
+        "pages_total": 13562,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441421,
+      "sampled_utc": "2026-09-28T10:23:02Z",
+      "started_utc": "2026-09-28T10:23:02Z",
+      "threads": "8",
+      "vm_rss_kb": "49236 kB"
+    },
+    "3441473": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/power_spectrum/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/matrix/work/power_spectrum/resume/ --use_own --j 8 --seed 1 --skip_logfile --patch_x 4 --patch_y 4 --skip_defect --grouping_for_ps 3 --ps_size 128 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 141,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 14.7
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 3756
+        },
+        "pages_total": 4415,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441473,
+      "sampled_utc": "2026-09-28T10:23:04Z",
+      "started_utc": "2026-09-28T10:23:03Z",
+      "threads": "8",
+      "vm_rss_kb": "15096 kB"
+    },
+    "3441506": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/all24-synthetic/base/ --use_own --j 16 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --skip_logfile",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 165,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 70.2
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 17971
+        },
+        "pages_total": 18630,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441506,
+      "sampled_utc": "2026-09-28T10:23:07Z",
+      "started_utc": "2026-09-28T10:23:06Z",
+      "threads": "16",
+      "vm_rss_kb": "71484 kB"
+    },
+    "3441531": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/all24-synthetic/repeat/ --use_own --j 16 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --skip_logfile",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 165,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 68.2
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 17459
+        },
+        "pages_total": 18118,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441531,
+      "sampled_utc": "2026-09-28T10:23:09Z",
+      "started_utc": "2026-09-28T10:23:08Z",
+      "threads": "16",
+      "vm_rss_kb": "69400 kB"
+    },
+    "3441587": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/all24-synthetic/batch/ --use_own --j 16 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --skip_logfile --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 165,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 42.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 10985
+        },
+        "pages_total": 11644,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441587,
+      "sampled_utc": "2026-09-28T10:23:15Z",
+      "started_utc": "2026-09-28T10:23:14Z",
+      "threads": "16",
+      "vm_rss_kb": "45788 kB"
+    },
+    "3441680": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/all24-synthetic/batch/ --use_own --j 16 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --skip_logfile --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 164,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 45.9
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 11763
+        },
+        "pages_total": 12422,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441680,
+      "sampled_utc": "2026-09-28T10:23:16Z",
+      "started_utc": "2026-09-28T10:23:16Z",
+      "threads": "16",
+      "vm_rss_kb": "48916 kB"
+    },
+    "3441716": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/all24-synthetic/batch/ --use_own --j 16 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --skip_logfile --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 166,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 46.2
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 11827
+        },
+        "pages_total": 12486,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441716,
+      "sampled_utc": "2026-09-28T10:23:17Z",
+      "started_utc": "2026-09-28T10:23:16Z",
+      "threads": "16",
+      "vm_rss_kb": "49432 kB"
+    },
+    "3441753": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/all24-synthetic/batch/ --use_own --j 16 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --skip_logfile --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 163,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 42.2
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 10792
+        },
+        "pages_total": 11451,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441753,
+      "sampled_utc": "2026-09-28T10:23:17Z",
+      "started_utc": "2026-09-28T10:23:17Z",
+      "threads": "16",
+      "vm_rss_kb": "45204 kB"
+    },
+    "3441789": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/all24-synthetic/batch/ --use_own --j 16 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --skip_logfile --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 163,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 42.1
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 10775
+        },
+        "pages_total": 11434,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441789,
+      "sampled_utc": "2026-09-28T10:23:18Z",
+      "started_utc": "2026-09-28T10:23:17Z",
+      "threads": "16",
+      "vm_rss_kb": "45200 kB"
+    },
+    "3441830": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/all24-synthetic/batch/ --use_own --j 16 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --skip_logfile --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 165,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 42.8
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 10953
+        },
+        "pages_total": 11612,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441830,
+      "sampled_utc": "2026-09-28T10:23:18Z",
+      "started_utc": "2026-09-28T10:23:18Z",
+      "threads": "16",
+      "vm_rss_kb": "45796 kB"
+    },
+    "3441866": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/all24-synthetic/batch/ --use_own --j 16 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --skip_logfile --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 0,
+        "mib_per_node": {},
+        "pages_per_node": {},
+        "pages_total": 0,
+        "policies_seen": []
+      },
+      "pid": 3441866,
+      "sampled_utc": "2026-09-28T10:23:19Z",
+      "started_utc": "2026-09-28T10:23:18Z",
+      "threads": "16",
+      "vm_rss_kb": "47012 kB"
+    },
+    "3441957": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/all24-synthetic/batch/ --use_own --j 16 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --skip_logfile --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 166,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 32.6
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 8345
+        },
+        "pages_total": 9004,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441957,
+      "sampled_utc": "2026-09-28T10:23:20Z",
+      "started_utc": "2026-09-28T10:23:19Z",
+      "threads": "16",
+      "vm_rss_kb": "32764 kB"
+    },
+    "3441996": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/all24-synthetic/batch/ --use_own --j 16 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --skip_logfile --do_at_most 1 --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 166,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 46.0
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 11780
+        },
+        "pages_total": 12439,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3441996,
+      "sampled_utc": "2026-09-28T10:23:20Z",
+      "started_utc": "2026-09-28T10:23:20Z",
+      "threads": "16",
+      "vm_rss_kb": "49364 kB"
+    },
+    "3442063": {
+      "cmdline": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr --i /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star --o /home/ubuntu/mc-i83-cpu/evidence-cpu-cb587bd/all24-synthetic/resume/ --use_own --j 16 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --skip_logfile --only_do_unfinished",
+      "cpus_allowed_list": "32-63",
+      "executable": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+      "executable_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+      "mems_allowed_list": "0-1",
+      "numa": {
+        "mappings_counted": 164,
+        "mib_per_node": {
+          "node0": 2.6,
+          "node1": 70.1
+        },
+        "pages_per_node": {
+          "node0": 659,
+          "node1": 17949
+        },
+        "pages_total": 18608,
+        "policies_seen": [
+          "bind:1"
+        ]
+      },
+      "pid": 3442063,
+      "sampled_utc": "2026-09-28T10:23:25Z",
+      "started_utc": "2026-09-28T10:23:23Z",
+      "threads": "16",
+      "vm_rss_kb": "71484 kB"
+    }
+  },
+  "payloads_without_numa_sample": [
+    "3441866"
+  ],
+  "procfs_available": true,
+  "schema": "issue83-payload-placement/1",
+  "warnings": [
+    "1 of 76 payload processes exited between polls before any mapping was sampled; their memory policy is not recorded here and must not be read off the others"
+  ]
+}

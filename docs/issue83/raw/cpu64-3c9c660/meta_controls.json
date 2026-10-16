@@ -1,0 +1,135 @@
+{
+  "checks": {
+    "aggregate_trusts_fixture_summary": {
+      "control_failed": true,
+      "diagnostic": "VACUOUS VERIFICATION: a fixture record that compared no digest was accepted as verifying the inputs",
+      "kind": "reverted_gate"
+    },
+    "aggregate_trusts_record_summary": {
+      "control_failed": true,
+      "diagnostic": "a record with no missing-schedule field was read as complete: []",
+      "kind": "reverted_gate"
+    },
+    "all24_asserts_nothing": {
+      "control_failed": true,
+      "diagnostic": "EMPTY EXPECTATION REPRODUCED: the integrated screen asserted no STAR metadata at all",
+      "kind": "reverted_gate"
+    },
+    "all24_equality_taken_on_trust": {
+      "control_failed": true,
+      "diagnostic": "VACUOUS EQUALITY: a schedule that compared no movie certified cross-schedule equality",
+      "kind": "reverted_gate"
+    },
+    "banner_gap_silently_dropped": {
+      "control_failed": true,
+      "diagnostic": "batch's banner coverage reads (1, 1), not 1 of 24",
+      "kind": "reverted_gate"
+    },
+    "coverage_guard_shadowed": {
+      "control_failed": true,
+      "diagnostic": "SHADOWED GUARD REPRODUCED: a comparator PASS whose coverage was incomplete was accepted as numerically equal",
+      "kind": "reverted_gate"
+    },
+    "coverage_keyed_on_field_name": {
+      "control_failed": true,
+      "diagnostic": "the rendered table does not carry resume's own witness cell, saying what the record actually holds: \n### Integrated candidate: all 24 tutorial movies\n\n- Source record: `gn0005.scarf.rl.ac.uk`, device ",
+      "kind": "reverted_gate"
+    },
+    "cpu_section_reads_as_unknown_device": {
+      "control_failed": true,
+      "diagnostic": "a screen from a different device was folded into the header's run",
+      "kind": "reverted_gate"
+    },
+    "identityless_section_inherits_header": {
+      "control_failed": true,
+      "diagnostic": "the integrated screen did not name the run it came from: \n### Integrated candidate: all 24 tutorial movies\n\n- Source record: (inherited)\n- Movies in STAR: 24 (expected 24)\n- Aggregate pixel equality a",
+      "kind": "reverted_gate"
+    },
+    "matrix_completeness_taken_on_trust": {
+      "control_failed": true,
+      "diagnostic": "a record holding 1 of 25 declared rows certified the matrix complete on the strength of its own summary",
+      "kind": "reverted_gate"
+    },
+    "matrix_witness_gap_unreported": {
+      "control_failed": true,
+      "diagnostic": "a row whose schedule witnesses cover one invocation each was not reported as a gap",
+      "kind": "reverted_gate"
+    },
+    "matrix_witness_last_invocation_only": {
+      "control_failed": true,
+      "diagnostic": "the per-invocation markers were not recorded one per invocation",
+      "kind": "reverted_gate"
+    },
+    "matrix_witness_unrendered": {
+      "control_failed": true,
+      "diagnostic": "UNCONSUMED WITNESS: a matrix schedule 'cpu_executed' rendered as 'exact 3/3', which does not say 'NOT established'",
+      "kind": "reverted_gate"
+    },
+    "payload_match_is_substring": {
+      "control_failed": true,
+      "diagnostic": "a different executable under the same tree was recorded as the payload: /home/ubuntu/mc-i83-cpu/build-cpu/motioncorr-old",
+      "kind": "reverted_gate"
+    },
+    "recorder_exits_zero_unobserved": {
+      "control_failed": true,
+      "diagnostic": "a recorder that never saw the payload exited 0, so a job's exit-code table recorded success for a run whose placement is unknown",
+      "kind": "reverted_gate"
+    },
+    "sections_share_one_attribution": {
+      "control_failed": true,
+      "diagnostic": "the integrated screen did not name the run it came from: \n### Integrated candidate: all 24 tutorial movies\n\n- Movies in STAR: 24 (expected 24)\n- Aggregate pixel equality across schedules: **PARTIAL** ",
+      "kind": "reverted_gate"
+    },
+    "substring_rejection": {
+      "control_failed": true,
+      "diagnostic": "SUBSTRING DEFECT REPRODUCED: a crash with no diagnostic satisfied the '--j must be rejected by name' contract",
+      "kind": "reverted_gate"
+    },
+    "suite_exit['(full)']": {
+      "args": [],
+      "got": 1,
+      "held": true,
+      "kind": "suite_exit_status",
+      "wanted": 1,
+      "why": "one control of the suite skipped"
+    },
+    "suite_exit['--only', 'comparator_coverage']": {
+      "args": [
+        "--only",
+        "comparator_coverage"
+      ],
+      "got": 0,
+      "held": true,
+      "kind": "suite_exit_status",
+      "wanted": 0,
+      "why": "the selected control passed"
+    },
+    "suite_exit['--only', 'ground_truth_mutation']": {
+      "args": [
+        "--only",
+        "ground_truth_mutation"
+      ],
+      "got": 1,
+      "held": true,
+      "kind": "suite_exit_status",
+      "wanted": 1,
+      "why": "every selected control skipped"
+    },
+    "vacuous_fixture_verification": {
+      "control_failed": true,
+      "diagnostic": "VACUOUS PASS: a fixture record that compared nothing was verified",
+      "kind": "reverted_gate"
+    },
+    "w3_caveat_keyed_on_schema": {
+      "control_failed": true,
+      "diagnostic": "a movie-only record was rendered without saying so; this is the published W3 overclaim reappearing",
+      "kind": "reverted_gate"
+    }
+  },
+  "failed": 0,
+  "failures": [],
+  "reverted_gates": 19,
+  "schema": "issue83-meta-controls/1",
+  "suite_exit_cases": 3,
+  "total": 22
+}

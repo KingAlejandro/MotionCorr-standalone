@@ -1,0 +1,2924 @@
+{
+  "all24_equal": true,
+  "errors": [],
+  "expected_movies": 24,
+  "finished_utc": "2026-09-28T08:14:38Z",
+  "missing_required_schedules": [],
+  "movies_in_star": 24,
+  "partial_screen": false,
+  "provenance": {
+    "binary": "/work4/scd/scarf1415/motioncorr/mc-i83b/build-cuda/motioncorr",
+    "binary_sha256": "0c5246675175ba4dc52e1c95a99046711a5d67e8e1eb1d829c33fb09e4335b0e",
+    "common_args": [
+      "--use_own",
+      "--j",
+      "8",
+      "--seed",
+      "1",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5",
+      "--bfactor",
+      "150",
+      "--gainref",
+      "Movies/gain.mrc",
+      "--skip_logfile"
+    ],
+    "comparator_sha256": "cb37991af515c5529f31ac48adb157771b1ac21b8308ba28735362f36085e46b",
+    "gpu": 0,
+    "hostname": "gn3000.scarf.rl.ac.uk",
+    "inputs": {
+      "gainref": {
+        "path": "Movies/gain.mrc",
+        "sha256": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1"
+      },
+      "harness": {
+        "products.py": "3592c92f7419ed5bbf793a1dee3a300288f6529574edd3077df5714e0d1d3223",
+        "run_all24_schedules.py": "768f1f71aebf059ea4936d2235f2032bf4d808bdaa082ad72b38ac836aa7c0be",
+        "run_matrix.py": "b3a86b9e19363943591c4d890e985eb899350cc0d065e235697dbb846e3d9643"
+      },
+      "movies": {
+        "Movies/20170629_00021_frameImage.tiff": {
+          "bytes": 126550106,
+          "sha256": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0"
+        },
+        "Movies/20170629_00022_frameImage.tiff": {
+          "bytes": 129567782,
+          "sha256": "cc55f13d606463acbad23a4d42f2e48e60ee9cd783eeca0f1957a103b748ac47"
+        },
+        "Movies/20170629_00023_frameImage.tiff": {
+          "bytes": 131245904,
+          "sha256": "87c2640f5c2200c2f8e62e7dd50f4aa2d694fac2238743560b7c705fb0e61f3f"
+        },
+        "Movies/20170629_00024_frameImage.tiff": {
+          "bytes": 131735614,
+          "sha256": "70e075416ee6b682600277b21bf626c51f2c0b98f0f23dafe6a3478ea1766595"
+        },
+        "Movies/20170629_00025_frameImage.tiff": {
+          "bytes": 130134480,
+          "sha256": "798cf7b0cd24aef070d69525543214bdd60a3900667d7d3a32dfe3bffe9fce1a"
+        },
+        "Movies/20170629_00026_frameImage.tiff": {
+          "bytes": 132754590,
+          "sha256": "f989391b9d0e3e3b927a8de59d60179ade0b7ae5075ce7c3a9a5002ae2254ae3"
+        },
+        "Movies/20170629_00027_frameImage.tiff": {
+          "bytes": 133754728,
+          "sha256": "adb4fbf597ca78387b22c4a2452c7351499f7b78fb2da67bc5fdd52e4bc58a39"
+        },
+        "Movies/20170629_00028_frameImage.tiff": {
+          "bytes": 133960502,
+          "sha256": "b990365a74752daecbf437aab4b6b235197bf9932f18541246ed1e72ea629e2c"
+        },
+        "Movies/20170629_00029_frameImage.tiff": {
+          "bytes": 131961632,
+          "sha256": "91a985fddf18a7388740d601d6909c6de3a28c7df98d2d263126c8dd90e9f234"
+        },
+        "Movies/20170629_00030_frameImage.tiff": {
+          "bytes": 131259748,
+          "sha256": "878ad41ae6ff95d902fe1c996ad2703285d538b610d3f108433a272d627c8e59"
+        },
+        "Movies/20170629_00031_frameImage.tiff": {
+          "bytes": 132157138,
+          "sha256": "fa2699a1203a2ee278a5973e10105ea3e56b18a1c1d5ee153482767cb7e71d8d"
+        },
+        "Movies/20170629_00035_frameImage.tiff": {
+          "bytes": 134600552,
+          "sha256": "407f435a5dec04e5425feb7ef34d014b047765a9fa07d25093035245fa56253c"
+        },
+        "Movies/20170629_00036_frameImage.tiff": {
+          "bytes": 134642532,
+          "sha256": "ed1dbbbf81cb83d232f442e6f00c0391780022d2231800f595248fa97bf677b0"
+        },
+        "Movies/20170629_00037_frameImage.tiff": {
+          "bytes": 134726088,
+          "sha256": "b90176a79afed2857c180bf272637b7b6e187e52202d8e132beff68a683a01b6"
+        },
+        "Movies/20170629_00039_frameImage.tiff": {
+          "bytes": 134190674,
+          "sha256": "c3e474564505dfe3095b08f0e1ae70b331387cdb66c3251637d879a461cc317c"
+        },
+        "Movies/20170629_00040_frameImage.tiff": {
+          "bytes": 134017162,
+          "sha256": "08d2b7f3d4375f73deb67e2131d92cb2d707fee7866f9dffba133f570fd4771a"
+        },
+        "Movies/20170629_00042_frameImage.tiff": {
+          "bytes": 132281636,
+          "sha256": "5acc8ae812df2cd5925f15db8dd6dd2db65b88df96402eb1eb04182970135083"
+        },
+        "Movies/20170629_00043_frameImage.tiff": {
+          "bytes": 131963598,
+          "sha256": "5e89d7afe604533ac1b264de77b1a7cefcc91ecaf1ba8175a08ffd7651abdc61"
+        },
+        "Movies/20170629_00044_frameImage.tiff": {
+          "bytes": 134677684,
+          "sha256": "e5476b46c5de02caddd446f20e6ddd81311dff3264ad173439da0200eb6271dc"
+        },
+        "Movies/20170629_00045_frameImage.tiff": {
+          "bytes": 134666858,
+          "sha256": "c0cab09118639dd3d38e39442df465fa7a352029a217184738747afb2cd4bc7a"
+        },
+        "Movies/20170629_00046_frameImage.tiff": {
+          "bytes": 134394390,
+          "sha256": "61094383ce6750976275b13227033dcdb154c8214ef3db402aa6440a505ad377"
+        },
+        "Movies/20170629_00047_frameImage.tiff": {
+          "bytes": 134471280,
+          "sha256": "4ebadc647bf112242e17d975e65a67aaaeaf8296f71cb99d10ca790a92a06192"
+        },
+        "Movies/20170629_00048_frameImage.tiff": {
+          "bytes": 134412868,
+          "sha256": "05348afd74991a20e09d10667268ab496b3a614a891a8f9954fce212f418d955"
+        },
+        "Movies/20170629_00049_frameImage.tiff": {
+          "bytes": 134103752,
+          "sha256": "78d0d2c96c03d13a97d12da7e7ae5e8878abea057a728b4fea239d0642090faf"
+        }
+      },
+      "movies_hashed": 24,
+      "movies_missing": [],
+      "star": {
+        "path": "/work4/scd/scarf1415/motioncorr/i53-scarf/runroot/movies.star",
+        "sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041"
+      }
+    },
+    "runroot": "/work4/scd/scarf1415/motioncorr/i53-scarf/runroot",
+    "source": {
+      "commit": "7ba584eaf5eae28661d80880fdf220c130c235dc",
+      "dirty": true,
+      "dirty_paths": [
+        "M test-data/known_motion/MANIFEST.json",
+        " M test-data/known_motion/km_global_hisnr_ground_truth.json",
+        " M test-data/known_motion/km_local_hisnr_ground_truth.json",
+        " M test-data/known_motion/km_local_noisy_ground_truth.json",
+        " M test-data/known_motion/km_local_nonsquare_ground_truth.json",
+        " M test-data/known_motion/km_local_realscale_ground_truth.json",
+        "?? build-cuda/",
+        "?? evidence-native/",
+        "?? fixtures/",
+        "?? i83-native.sbatch",
+        "?? slurm-3511139.out"
+      ]
+    },
+    "star": "/work4/scd/scarf1415/motioncorr/i53-scarf/runroot/movies.star",
+    "started_utc": "2026-09-28T08:10:50Z"
+  },
+  "required_schedules": [
+    "repeat",
+    "batch",
+    "resume"
+  ],
+  "schedules": {
+    "base": {
+      "backend_evidence": {
+        "executed_movies": [
+          "Movies/20170629_00021_frameImage",
+          "Movies/20170629_00022_frameImage",
+          "Movies/20170629_00023_frameImage",
+          "Movies/20170629_00024_frameImage",
+          "Movies/20170629_00025_frameImage",
+          "Movies/20170629_00026_frameImage",
+          "Movies/20170629_00027_frameImage",
+          "Movies/20170629_00028_frameImage",
+          "Movies/20170629_00029_frameImage",
+          "Movies/20170629_00030_frameImage",
+          "Movies/20170629_00031_frameImage",
+          "Movies/20170629_00035_frameImage",
+          "Movies/20170629_00036_frameImage",
+          "Movies/20170629_00037_frameImage",
+          "Movies/20170629_00039_frameImage",
+          "Movies/20170629_00040_frameImage",
+          "Movies/20170629_00042_frameImage",
+          "Movies/20170629_00043_frameImage",
+          "Movies/20170629_00044_frameImage",
+          "Movies/20170629_00045_frameImage",
+          "Movies/20170629_00046_frameImage",
+          "Movies/20170629_00047_frameImage",
+          "Movies/20170629_00048_frameImage",
+          "Movies/20170629_00049_frameImage"
+        ],
+        "gpu": 0,
+        "invocations": 1,
+        "movies_with_stage_marker": 24,
+        "native_cuda_proven": true,
+        "per_movie": {
+          "Movies/20170629_00021_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00022_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00023_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00024_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00025_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00026_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00027_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00028_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00029_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00030_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00031_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00035_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00036_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00037_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00039_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00040_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00042_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00043_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00044_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00045_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00046_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00047_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00048_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00049_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          }
+        },
+        "requested": "cuda",
+        "startup_marker_all_invocations": true,
+        "startup_marker_found": true,
+        "startup_marker_per_invocation": [
+          true
+        ],
+        "vacuous": false
+      },
+      "command": [
+        "/work4/scd/scarf1415/motioncorr/mc-i83b/build-cuda/motioncorr",
+        "--i",
+        "/work4/scd/scarf1415/motioncorr/i53-scarf/runroot/movies.star",
+        "--o",
+        "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/",
+        "--use_own",
+        "--j",
+        "8",
+        "--seed",
+        "1",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--skip_logfile",
+        "--gpu",
+        "0"
+      ],
+      "elapsed_sec": 33.841,
+      "inventory_errors": [],
+      "movies_present": 24,
+      "returncode": 0
+    },
+    "batch": {
+      "backend_evidence": {
+        "executed_movies": [
+          "Movies/20170629_00021_frameImage",
+          "Movies/20170629_00022_frameImage",
+          "Movies/20170629_00023_frameImage",
+          "Movies/20170629_00024_frameImage",
+          "Movies/20170629_00025_frameImage",
+          "Movies/20170629_00026_frameImage",
+          "Movies/20170629_00027_frameImage",
+          "Movies/20170629_00028_frameImage",
+          "Movies/20170629_00029_frameImage",
+          "Movies/20170629_00030_frameImage",
+          "Movies/20170629_00031_frameImage",
+          "Movies/20170629_00035_frameImage",
+          "Movies/20170629_00036_frameImage",
+          "Movies/20170629_00037_frameImage",
+          "Movies/20170629_00039_frameImage",
+          "Movies/20170629_00040_frameImage",
+          "Movies/20170629_00042_frameImage",
+          "Movies/20170629_00043_frameImage",
+          "Movies/20170629_00044_frameImage",
+          "Movies/20170629_00045_frameImage",
+          "Movies/20170629_00046_frameImage",
+          "Movies/20170629_00047_frameImage",
+          "Movies/20170629_00048_frameImage",
+          "Movies/20170629_00049_frameImage"
+        ],
+        "gpu": 0,
+        "invocations": 24,
+        "movies_with_stage_marker": 24,
+        "native_cuda_proven": true,
+        "per_movie": {
+          "Movies/20170629_00021_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00022_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00023_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00024_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00025_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00026_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00027_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00028_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00029_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00030_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00031_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00035_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00036_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00037_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00039_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00040_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00042_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00043_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00044_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00045_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00046_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00047_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00048_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00049_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          }
+        },
+        "requested": "cuda",
+        "startup_marker_all_invocations": true,
+        "startup_marker_found": true,
+        "startup_marker_per_invocation": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "vacuous": false
+      },
+      "byte_identical_products": 24,
+      "failed_movies": [],
+      "missing_pairs": [],
+      "movies_compared": 24,
+      "movies_passed": 24,
+      "native_cuda_required": true,
+      "passed": true,
+      "per_movie": {
+        "Movies/20170629_00021_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00021_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00021_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00021_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00021_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00021_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00022_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00022_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00022_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00022_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00022_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00022_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00023_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00023_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00023_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00023_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00023_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00023_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00024_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00024_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00024_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00024_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00024_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00024_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00025_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00025_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00025_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00025_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00025_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00025_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00026_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00026_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00026_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00026_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00026_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00026_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00027_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00027_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00027_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00027_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00027_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00027_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00028_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00028_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00028_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00028_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00028_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00028_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00029_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00029_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00029_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00029_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00029_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00029_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00030_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00030_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00030_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00030_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00030_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00030_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00031_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00031_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00031_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00031_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00031_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00031_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00035_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00035_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00035_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00035_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00035_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00035_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00036_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00036_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00036_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00036_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00036_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00036_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00037_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00037_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00037_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00037_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00037_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00037_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00039_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00039_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00039_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00039_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00039_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00039_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00040_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00040_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00040_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00040_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00040_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00040_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00042_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00042_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00042_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00042_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00042_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00042_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00043_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00043_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00043_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00043_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00043_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00043_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00044_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00044_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00044_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00044_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00044_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00044_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00045_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00045_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00045_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00045_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00045_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00045_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00046_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00046_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00046_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00046_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00046_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00046_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00047_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00047_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00047_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00047_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00047_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00047_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00048_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00048_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00048_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00048_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00048_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00048_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00049_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00049_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00049_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00049_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/Movies/20170629_00049_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/batch/compare/Movies__20170629_00049_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        }
+      },
+      "products_compared_by_digest": 48,
+      "runs": [
+        {
+          "elapsed_sec": 3.418,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.362,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.124,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.255,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.282,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.108,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.15,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.136,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.238,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.264,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.176,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.169,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.191,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.307,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.19,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.165,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.218,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.265,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.271,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.228,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.268,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.312,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.243,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 3.214,
+          "returncode": 0
+        }
+      ]
+    },
+    "repeat": {
+      "backend_evidence": {
+        "executed_movies": [
+          "Movies/20170629_00021_frameImage",
+          "Movies/20170629_00022_frameImage",
+          "Movies/20170629_00023_frameImage",
+          "Movies/20170629_00024_frameImage",
+          "Movies/20170629_00025_frameImage",
+          "Movies/20170629_00026_frameImage",
+          "Movies/20170629_00027_frameImage",
+          "Movies/20170629_00028_frameImage",
+          "Movies/20170629_00029_frameImage",
+          "Movies/20170629_00030_frameImage",
+          "Movies/20170629_00031_frameImage",
+          "Movies/20170629_00035_frameImage",
+          "Movies/20170629_00036_frameImage",
+          "Movies/20170629_00037_frameImage",
+          "Movies/20170629_00039_frameImage",
+          "Movies/20170629_00040_frameImage",
+          "Movies/20170629_00042_frameImage",
+          "Movies/20170629_00043_frameImage",
+          "Movies/20170629_00044_frameImage",
+          "Movies/20170629_00045_frameImage",
+          "Movies/20170629_00046_frameImage",
+          "Movies/20170629_00047_frameImage",
+          "Movies/20170629_00048_frameImage",
+          "Movies/20170629_00049_frameImage"
+        ],
+        "gpu": 0,
+        "invocations": 1,
+        "movies_with_stage_marker": 24,
+        "native_cuda_proven": true,
+        "per_movie": {
+          "Movies/20170629_00021_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00022_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00023_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00024_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00025_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00026_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00027_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00028_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00029_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00030_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00031_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00035_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00036_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00037_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00039_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00040_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00042_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00043_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00044_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00045_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00046_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00047_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00048_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00049_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          }
+        },
+        "requested": "cuda",
+        "startup_marker_all_invocations": true,
+        "startup_marker_found": true,
+        "startup_marker_per_invocation": [
+          true
+        ],
+        "vacuous": false
+      },
+      "byte_identical_products": 24,
+      "failed_movies": [],
+      "missing_pairs": [],
+      "movies_compared": 24,
+      "movies_passed": 24,
+      "native_cuda_required": true,
+      "passed": true,
+      "per_movie": {
+        "Movies/20170629_00021_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00021_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00021_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00021_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00021_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00021_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00022_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00022_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00022_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00022_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00022_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00022_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00023_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00023_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00023_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00023_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00023_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00023_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00024_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00024_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00024_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00024_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00024_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00024_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00025_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00025_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00025_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00025_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00025_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00025_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00026_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00026_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00026_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00026_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00026_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00026_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00027_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00027_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00027_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00027_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00027_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00027_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00028_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00028_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00028_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00028_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00028_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00028_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00029_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00029_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00029_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00029_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00029_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00029_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00030_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00030_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00030_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00030_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00030_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00030_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00031_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00031_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00031_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00031_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00031_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00031_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00035_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00035_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00035_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00035_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00035_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00035_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00036_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00036_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00036_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00036_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00036_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00036_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00037_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00037_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00037_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00037_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00037_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00037_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00039_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00039_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00039_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00039_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00039_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00039_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00040_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00040_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00040_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00040_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00040_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00040_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00042_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00042_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00042_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00042_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00042_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00042_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00043_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00043_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00043_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00043_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00043_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00043_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00044_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00044_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00044_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00044_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00044_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00044_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00045_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00045_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00045_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00045_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00045_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00045_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00046_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00046_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00046_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00046_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00046_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00046_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00047_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00047_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00047_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00047_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00047_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00047_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00048_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00048_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00048_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00048_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00048_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00048_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00049_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00049_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00049_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00049_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/Movies/20170629_00049_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/repeat/compare/Movies__20170629_00049_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        }
+      },
+      "products_compared_by_digest": 48,
+      "runs": [
+        {
+          "elapsed_sec": 33.488,
+          "returncode": 0
+        }
+      ]
+    },
+    "resume": {
+      "backend_evidence": {
+        "executed_movies": [
+          "Movies/20170629_00021_frameImage",
+          "Movies/20170629_00023_frameImage",
+          "Movies/20170629_00024_frameImage",
+          "Movies/20170629_00026_frameImage",
+          "Movies/20170629_00027_frameImage",
+          "Movies/20170629_00029_frameImage",
+          "Movies/20170629_00030_frameImage",
+          "Movies/20170629_00035_frameImage",
+          "Movies/20170629_00036_frameImage",
+          "Movies/20170629_00039_frameImage",
+          "Movies/20170629_00040_frameImage",
+          "Movies/20170629_00043_frameImage",
+          "Movies/20170629_00044_frameImage",
+          "Movies/20170629_00046_frameImage",
+          "Movies/20170629_00047_frameImage",
+          "Movies/20170629_00049_frameImage"
+        ],
+        "gpu": 0,
+        "invocations": 1,
+        "movies_with_stage_marker": 16,
+        "native_cuda_proven": true,
+        "per_movie": {
+          "Movies/20170629_00021_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00023_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00024_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00026_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00027_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00029_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00030_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00035_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00036_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00039_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00040_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00043_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00044_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00046_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00047_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          },
+          "Movies/20170629_00049_frameImage": {
+            "cuda_stage_marker": true,
+            "log_present": true
+          }
+        },
+        "requested": "cuda",
+        "startup_marker_all_invocations": true,
+        "startup_marker_found": true,
+        "startup_marker_per_invocation": [
+          true
+        ],
+        "vacuous": false
+      },
+      "byte_identical_products": 32,
+      "failed_movies": [],
+      "missing_pairs": [],
+      "movies_compared": 24,
+      "movies_passed": 24,
+      "native_cuda_required": true,
+      "passed": true,
+      "per_movie": {
+        "Movies/20170629_00021_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00021_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00021_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00021_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00021_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00021_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00022_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00022_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00022_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00022_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00022_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00022_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00023_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00023_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00023_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00023_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00023_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00023_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00024_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00024_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00024_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00024_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00024_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00024_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00025_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00025_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00025_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00025_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00025_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00025_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00026_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00026_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00026_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00026_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00026_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00026_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00027_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00027_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00027_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00027_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00027_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00027_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00028_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00028_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00028_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00028_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00028_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00028_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00029_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00029_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00029_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00029_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00029_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00029_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00030_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00030_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00030_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00030_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00030_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00030_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00031_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00031_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00031_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00031_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00031_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00031_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00035_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00035_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00035_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00035_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00035_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00035_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00036_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00036_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00036_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00036_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00036_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00036_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00037_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00037_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00037_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00037_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00037_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00037_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00039_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00039_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00039_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00039_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00039_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00039_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00040_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00040_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00040_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00040_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00040_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00040_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00042_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00042_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00042_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00042_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00042_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00042_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00043_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00043_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00043_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00043_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00043_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00043_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00044_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00044_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00044_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00044_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00044_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00044_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00045_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00045_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00045_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00045_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00045_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00045_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00046_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00046_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00046_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00046_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00046_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00046_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00047_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00047_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00047_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00047_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00047_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00047_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00048_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00048_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00048_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00048_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00048_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00048_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/20170629_00049_frameImage": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00049_frameImage.mrc",
+            "--test-mrc",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00049_frameImage.mrc",
+            "--ref-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/base/Movies/20170629_00049_frameImage.star",
+            "--test-star",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/Movies/20170629_00049_frameImage.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/work4/scd/scarf1415/motioncorr/mc-i83b/evidence-native/all24/resume/compare/Movies__20170629_00049_frameImage_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        }
+      },
+      "preserved_seeded_outputs": true,
+      "products_compared_by_digest": 48,
+      "runs": [
+        {
+          "elapsed_sec": 21.189,
+          "returncode": 0
+        }
+      ],
+      "seeded_movies": [
+        "Movies/20170629_00022_frameImage",
+        "Movies/20170629_00025_frameImage",
+        "Movies/20170629_00028_frameImage",
+        "Movies/20170629_00031_frameImage",
+        "Movies/20170629_00037_frameImage",
+        "Movies/20170629_00042_frameImage",
+        "Movies/20170629_00045_frameImage",
+        "Movies/20170629_00048_frameImage"
+      ]
+    }
+  },
+  "schedules_passed": [
+    "batch",
+    "repeat",
+    "resume"
+  ],
+  "schedules_requested": [
+    "repeat",
+    "batch",
+    "resume"
+  ],
+  "schema": "issue83-all24-schedules/1"
+}

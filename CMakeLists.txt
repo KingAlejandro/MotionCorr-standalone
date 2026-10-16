@@ -350,6 +350,11 @@ if(BUILD_TESTING)
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>
                 ${_input_format_unrun})
         set_tests_properties(InputFormats PROPERTIES TIMEOUT 600)
+        # tools/cut_down_movie.py keeps exactly the requested frames in every container.
+        add_test(NAME CutDownMovie
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_cut_down_movie.py
+                --helper $<TARGET_FILE:runner_numerics>)
+        set_tests_properties(CutDownMovie PROPERTIES TIMEOUT 300)
         # Opt-in: cut-down real movies, one per corpus family (test-data/real_cutdown_manifest.json).
         # Point MC_REAL_CUTDOWN_DIR at a copy of the assets to register it.
         set(MC_REAL_CUTDOWN_DIR "" CACHE PATH "Directory holding the cut-down real movies (opt-in RealCutdown test)")

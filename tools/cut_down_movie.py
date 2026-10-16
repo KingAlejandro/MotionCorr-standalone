@@ -131,19 +131,37 @@ def cut_tiff(src, dst, first, frames):
     return len(ifds)
 
 
-def cut_mrc_bytes(raw, first, frames, crop=None):
-    e = "<"
-    nx, ny, nz, mode = struct.unpack("<4i", raw[:16])
-    if not (0 < nx < 1 << 20 and 0 < ny < 1 << 20):
-        e = ">"
-        nx, ny, nz, mode = struct.unpack(">4i", raw[:16])
-    nsymbt = struct.unpack(e + "i", raw[92:96])[0]
+def mrc_frame_bytes(nx, ny, mode):
     if mode == 101:
-        frame_bytes = nx * ny // 2
-    elif mode in MRC_BPP:
-        frame_bytes = nx * ny * MRC_BPP[mode]
-    else:
-        raise SystemExit("MRC mode %d is not a movie mode" % mode)
+        return nx * ny // 2
+    return nx * ny * MRC_BPP[mode] if mode in MRC_BPP else None
+
+
+def mrc_header(raw):
+    """Byte order, dimensions, mode and extended-header size of an MRC file.
+
+    The machine stamp (bytes 212-213: 0x44 little-endian, 0x11 big-endian) decides
+    when present. Otherwise each byte order is accepted only if its header is a
+    movie header that fits the file; dimension plausibility alone is not enough
+    (a big-endian 256 x 256 frame reads as 65536 x 65536 little-endian).
+    """
+    stamp = raw[212]
+    orders = ["<"] if stamp == 0x44 else [">"] if stamp == 0x11 else ["<", ">"]
+    fits = []
+    for e in orders:
+        nx, ny, nz, mode = struct.unpack(e + "4i", raw[:16])
+        nsymbt = struct.unpack(e + "i", raw[92:96])[0]
+        fb = mrc_frame_bytes(nx, ny, mode)
+        if (fb and 0 < nx < 1 << 17 and 0 < ny < 1 << 17 and nz > 0 and nsymbt >= 0
+                and 1024 + nsymbt + nz * fb <= len(raw)):
+            fits.append((e, nx, ny, nz, mode, nsymbt, fb))
+    if len(fits) != 1:
+        raise SystemExit("cannot determine a consistent MRC header (%d byte orders fit)" % len(fits))
+    return fits[0]
+
+
+def cut_mrc_bytes(raw, first, frames, crop=None):
+    e, nx, ny, nz, mode, nsymbt, frame_bytes = mrc_header(raw)
     if first + frames > nz:
         raise SystemExit("movie has %d frames; asked for %d from %d" % (nz, frames, first))
     base = 1024 + nsymbt

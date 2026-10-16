@@ -192,6 +192,7 @@ exec "{sys.executable}" "$@"
             "DamagedMovie",
             "CompressedMovieSequence",
             "InputFormats",
+            "CutDownMovie",
             "RunnerModelParser",
             "MicrographModelBounds",
             "CiFailClosedControls",

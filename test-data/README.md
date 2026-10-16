@@ -129,6 +129,9 @@ python3 tests/test_real_cutdown.py --binary build/motioncorr --helper build/runn
 # or configure with -DMC_REAL_CUTDOWN_DIR=DIR to register the RealCutdown CTest entry
 ```
 
+`CutDownMovie` (default suite) checks the cut tool itself on generated inputs in every container,
+including MRC whose byte order only the machine stamp or payload size can decide.
+
 Each item checks file SHA-256, the SHA-256 of MotionCorr's decoded samples (decoding is exact, so
 this is portable), a correction run with the expected frame count, and, for EMPIAR-10342, that its
 SerialEM defect list is refused. `tools/make_real_cutdown.py` rebuilds the files and manifest from

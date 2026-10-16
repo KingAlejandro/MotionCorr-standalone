@@ -130,8 +130,10 @@ def main():
             if it.get("refuse"):
                 rf = it["refuse"]
                 r = subprocess.run(base + ["--o", "refused/"] + rf["options"], cwd=run, capture_output=True, text=True)
-                good = r.returncode > 0 and rf["substring"] in (r.stdout + r.stderr)
-                report(it["id"], "refuse", "PASS" if good else "FAIL", "" if good else "rc %d" % r.returncode)
+                published = list((run / "refused").rglob("*.mrc")) if (run / "refused").exists() else []
+                good = r.returncode > 0 and rf["substring"] in (r.stdout + r.stderr) and not published
+                report(it["id"], "refuse", "PASS" if good else "FAIL", "" if good else "rc %d, %d products written" % (
+                    r.returncode, len(published)))
             shutil.rmtree(run, ignore_errors=True)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

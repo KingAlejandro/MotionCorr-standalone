@@ -59,7 +59,7 @@ Option 1 (documented trusted-input precondition) needs no code. Option 3 (CPU in
 ## Evidence
 
 Source: branch `perf/138-nvcomp-widen-port`, binaries built from `977a9cef` (the later commits change only
-`tests/test_deflate_layout.cpp` and docs; the final-head CTest below is re-run on the later head).
+`tests/test_deflate_layout.cpp` and docs; the binaries were rebuilt at `86d16667` with unchanged sha256).
 Hardware: 4GPUs, GPU3 (`GPU-b2cb2c39…`, A100 80 GB) via `CUDA_VISIBLE_DEVICES`, `taskset -c 72-79`, gpu3 correctness
 lock per run, bench lock checked free (waited when held) before every run after the coordinator's steer.
 Builds: Release, `-O3`, CUDA 12.8, nvCOMP 5.3.0.16, CMake 3.28.3, gcc 13.3, `CMAKE_CUDA_ARCHITECTURES=80`.
@@ -108,13 +108,19 @@ CMP real24 main-vs-port PASS Validated 24 movies, 24 MRC images, 25 STAR files, 
 
 ### CTest (item 6)
 
+Final run on head `86d16667` (docs-only difference from the commit that follows it), same lane and binaries
+(`logs/final-binary-sha256.txt`, identical to the first batch), bench lock free at start:
+
 | suite | build | result |
 |---|---|---|
-| full CTest, CPU | `build-port-cpu` | 59/59 pass (`logs/ctest-port-cpu-all.log`) |
-| CUDA+nvCOMP, non-hardware | `build-port-nvcomp` | 59/60; `ProfilingKit` failed a 30 s subprocess timeout while two generator processes shared the 8 CPUs (re-run below) |
-| CUDA+nvCOMP, hardware label (GPU3) | `build-port-nvcomp` | 32/32 pass, including `CudaNvcompAcceptanceFailures`, `CudaNvcompReconstructionFailures`, `CudaPreprocessingFailurePaths`, `CudaAdler32` |
+| full CTest, CPU | `build-port-cpu` | **59/59** (`logs/final-ctest-cpu-all.log`) |
+| CUDA+nvCOMP, non-hardware | `build-port-nvcomp` | **60/60** (`logs/final-ctest-nvcomp-nonhw.log`) |
+| CUDA+nvCOMP, `hardware` label, GPU3 under the gpu3 lock | `build-port-nvcomp` | **32/32**, incl. `CudaNvcompAcceptanceFailures`, `CudaNvcompReconstructionFailures`, `CudaPreprocessingFailurePaths`, `CudaAdler32` (`logs/final-ctest-nvcomp-hw.log`) |
 
-This first CTest batch ran before the steer to check the bench lock; its bench-lock state was not recorded.
+The first batch (on `977a9cef`, `logs/first-batch-*`) had `ProfilingKit` fail a 30 s subprocess timeout while two
+generator processes shared the 8 CPUs; everything else passed (59/59 CPU, 59/60 + 32/32). That first batch ran before the steer to check the bench
+lock, and its bench-lock state was not recorded. The failure did not recur on the quiet re-run and does not touch this change.
+
 `DeflateLayout` mutants against the production header (device-free build): full-length final strip 27 failing checks,
 unaligned strip slots 18, padded rows 56, admission flag off 3, frame-stage size off by one 3; span-spread skipping one
 strip 40; and a call-site walk over `ny` is an AddressSanitizer heap-buffer-overflow in `frameStageBytes`. The unmutated test passes under ASan/UBSan.

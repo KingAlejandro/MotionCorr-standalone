@@ -11,9 +11,25 @@ source and decides nothing; each option below is for the maintainer to choose.
 
 | | Current state | Options | Brief's recommendation |
 |---|---|---|---|
-| D1 | `--ingest auto` on a `USE_NVCOMP=ON` build sends eligible u16 one-row-per-strip Deflate TIFF strips to nvCOMP. NVIDIA documents undefined behaviour for corrupt input. Main's checks are output-integrity checks; nothing validates the Deflate body before the decoder runs. | (1) documented trusted/immutable-input precondition for auto; (2) GPU decoder only on explicit opt-in; (3) full CPU inflate before GPU decode | Option 1 for the existing u16 route, option 2 for any newly admitted population (#138 widening, nvTIFF). Section 4.5. |
-| D2 | nvCOMP is `option(USE_NVCOMP OFF)`, found with `find_library`, never vendored; CI builds without it; the project distributes no binaries. nvTIFF exists only on unmerged branch #152. | A: keep optional/off/not vendored, add a notice, distribute no linked binaries; B: also distribute linked binaries; C: exclude proprietary optional dependencies; D: ask NVIDIA / counsel first | A for nvCOMP. nvTIFF stays out of RC0 whatever is chosen. Section 3.5. |
-| nvTIFF | Standalone decode exact; SCARF timing GO (0.89 s/movie); VM unresolved; malformed-LZW safety unproven; no application route | — | Not in RC0 unless D1 and D2 permit it **and** a complete-product integration gate passes before freeze. Section 5. |
+| D1 | `--ingest auto` on a `USE_NVCOMP=ON` build sends eligible u16 one-row-per-strip Deflate TIFF strips to nvCOMP. NVIDIA documents undefined behaviour for corrupt input. Main's checks are output-integrity checks; nothing validates the Deflate body before the decoder runs. In the #186 corpus only the tutorial takes this route. | Uniform (1): documented trusted/immutable-input precondition for auto, all nvCOMP-eligible encodings. Uniform (2): GPU decoder only on explicit opt-in (for RC0, only by reusing the `--ingest nvcomp` pin). (3) full CPU inflate before GPU decode: current cost unmeasured | Uniform option 1 for RC0, because it needs no source change; the evidence supports uniform option 2a equally. Section 4.5. |
+| D2 | nvCOMP is `option(USE_NVCOMP OFF)`, found with `find_library`, never vendored; CI builds without it; the project distributes no binaries. nvTIFF exists only on unmerged branch #152. | A: keep optional/off/not vendored, add a notice, distribute no linked binaries; B: also distribute linked binaries; C: exclude proprietary optional dependencies; D: ask NVIDIA / counsel first | A for nvCOMP. Section 3.5. |
+| nvTIFF | Standalone decode exact; SCARF timing GO (0.89 s/movie); VM unresolved; malformed-LZW safety unproven; no application route | — | **NO-GO for RC0.** The complete-product gate has not started and cannot realistically pass before freeze; S3/S4 licensing is unresolved. Reconsider after RC0 if D1/D2 permit. Section 5. |
+
+### 1.1 RC0 freeze matrix
+
+Minimal change set before freeze for each likely outcome. "QF rerun" means the frozen-SHA
+qualification in #198 must be repeated because source changed.
+
+| Outcome | Source changes | Doc changes | QF rerun? | T1 (#138) / L1 (nvTIFF) |
+|---|---|---|---|---|
+| Uniform 1 + D2 A | **None** | README "Input trust" and "Optional proprietary dependencies" paragraphs; `docs/input_backends/FAILURE_POLICY.md` for main | No | T1 HOLD (or merge under the same rule only if qualified before QF); L1 NO-GO |
+| Uniform 2a + D2 A | `runner:2283`: call `ingestMovie` only under `INGEST_NVCOMP`; `--ingest` help text (`runner:157`) | As above, plus "auto does not use nvCOMP"; tutorial benchmark recipes pass `--ingest nvcomp` | **Yes** (route selection changed; tests expecting the `nvcomp` witness under auto must be updated) | T1 HOLD; L1 NO-GO |
+| No decision before freeze | **None** | Factual vendor-limitation and dependency notices only (same text as uniform 1 minus the precondition wording) | No | T1 HOLD; L1 NO-GO |
+
+The doc changes are still changes: they need review like any other RC0 documentation, but
+they do not alter numerical results, routing or defaults. Optional source additions (per-run
+nvCOMP log notice, file-identity check, bounds-audit fixes) are not in any minimal set; each
+would require a QF rerun (sections 4.2.1 and 4.3.1; questions 2–4 in section 6).
 
 ## 2. Vendor contracts as installed
 
@@ -195,10 +211,13 @@ Further limits:
 - **"Optional and default-off" does not settle S3/S4.** It keeps the project in S1/S2 by
   default; it does not change what a third party who builds and distributes a linked binary
   must consider. #141 and PR #152 already say this.
-- **nvTIFF adds a pre-release question.** The wheel declares `Development Status :: 4 - Beta`
+- **nvTIFF: secondary pre-release question.** The wheel declares `Development Status :: 4 - Beta`
   and version 0.8. The agreement says pre-release SDKs "are not intended for use in
-  production or business-critical systems" (nvTIFF l.60). Whether the classifier "identifies"
-  the release as pre-release is for NVIDIA or counsel. This bears on promotion even under S1/S2.
+  production or business-critical systems" (nvTIFF l.60). That sentence sits in a
+  risk/warranty clause addressed to the SDK user; it is not the primary blocker. nvTIFF's
+  exclusion from RC0 rests on the unstarted complete-product gate (section 5) and on the same
+  S3/S4 question as nvCOMP. Whether the classifier "identifies" the release as pre-release is
+  for NVIDIA or counsel, and is a further reason not to integrate before a 1.0 release.
 - **Headers.** nvCOMP headers are `LicenseRef-NvidiaProprietary`; nvTIFF headers are MIT.
   Neither is vendored, so this matters only if headers were ever copied into the tree. Do not.
 
@@ -217,15 +236,19 @@ Further limits:
 |---|---|---|
 | **A. Keep optional, off, not vendored; add notice; distribute no linked binaries** (current nvCOMP practice, made explicit) | README paragraph (3.4). Release artefacts, if any, built with `USE_NVCOMP=OFF`. nvTIFF, if ever integrated, follows exactly the same pattern. | S3/S4 risk is left to third parties and named in the notice. A second optional SDK doubles the notice and test matrix. nvTIFF's Beta/pre-release status remains open. |
 | **B. A, and allow project-distributed linked binaries** | e.g. a container with nvCOMP | S3/S4 conflict on both licences. Not supportable without counsel. |
-| **C. Exclude proprietary optional dependencies beyond the CUDA toolkit** | Remove `USE_NVCOMP`; close the nvTIFF route | Loses the nvCOMP route: about 0.34 s/movie on Deflate input (section 4.4). LZW stays on LibTIFF. GPL-compatible replacement is a project-owned device decoder (as #193 option 2 for EER, or the device LZW decoder mentioned in #141). |
+| **C. Exclude proprietary optional dependencies beyond the CUDA toolkit** | Remove `USE_NVCOMP`; close the nvTIFF route | Loses the nvCOMP route. On current main that affects only u16 one-row-per-strip Deflate TIFF (in the #186 corpus, the tutorial); the historical tutorial difference is ≈ 0.35 s/movie of process wall (section 4.4). LZW stays on LibTIFF. GPL-compatible replacement is a project-owned device decoder (as #193 option 2 for EER, or the device LZW decoder mentioned in #141). |
 | **D. Ask before deciding** | Write to `nvidia-compute-license-questions@nvidia.com` (both agreements name it) and/or institutional counsel about S1–S4 and nvTIFF's pre-release status | Delay. Answers may not arrive before freeze; A remains the holding position. |
 
 **Safe without a decision:** keep `USE_NVCOMP` OFF and unvendored; keep CI and any RC0
 artefacts nvCOMP-free; keep nvTIFF off main (#152 stays a draft experiment); add the
-factual README paragraph in 3.4, which describes current practice and commits to nothing new.
+factual README paragraph in 3.4. None of these changes defaults, routing or numerical
+results, but they are not literally change-free: the README paragraph is a documentation
+change needing review, and "nvCOMP-free RC0 artefacts" is a release constraint W-REL must
+apply.
 
-**Recommendation (maintainer decision):** A for nvCOMP. For nvTIFF, A at most, and only after
-the pre-release question is answered (option D); until then it stays out of main.
+**Recommendation (maintainer decision):** A for nvCOMP. nvTIFF is NO-GO for RC0 (section 5);
+if it is reconsidered after RC0, it could follow A at most, ideally after option D answers the
+S3/S4 and pre-release questions.
 
 ## 4. D1 — the #134 trust boundary
 
@@ -241,131 +264,173 @@ the pre-release question is answered (option D); until then it stays out of main
   pinned `nvcomp` fails the movie (`runner:2313`).
 - `RecoverableFailure` (CUDA error, context not poisoned): auto re-reads with the host reader,
   which overwrites `d_Iframes`/`d_Isum` in full (`runner:2302–2309`); pinned fails.
-- `FatalDeviceFailure` (poisoning code latched in `CudaFailureState`): run fails, no fallback,
-  no re-dispatch (`runner:2295–2300`).
+- `FatalDeviceFailure` (poisoning code latched in `CudaFailureState`): that movie fails with no
+  fallback or retry (`runner:2295–2300`). `run()` catches the error, records the failure and
+  continues with the remaining movies in the same process (`runner:1045–1055`); at the end it
+  fails the job and withholds joint STAR/PDF output (`runner:1083–1089`). This is not an
+  immediate worker or process termination, and these citations do not establish a
+  process-wide latch against later CUDA dispatch.
 
 Admitted encoding (`:1414–1458`): native byte order, `PREDICTOR_NONE`, `SAMPLEFORMAT_UINT`,
 `FILLORDER_MSB2LSB`, geometry equal to the session's, 16 bits, 1 sample, contiguous planar,
 Deflate/Adobe-Deflate, exactly `ny` strips of `nx*2` bytes. Every other encoding is declined
-by name. #186 witnessed `nvcomp` for the tutorial, so the tutorial is on the auto nvCOMP route
-on such builds (the corpus "u8" label is being checked by W-TIFF, #198).
+by name.
+
+**Population on main.** In the ten-family #186 corpus (`docs/workload_corpus/gpu/README.md`,
+main `116eb04a`, `--ingest_witness` on every run), only the tutorial takes `nvcomp`. The three
+real TIFF depositions (EMPIAR-10361, 10641, 10441) are u8 LZW BigTIFF on `compact`; the other
+six families are EER or MRC on `float`. (The corpus labels the tutorial "u8"; W-TIFF is
+checking that label, #198.) #138 would extend nvCOMP only to Deflate TIFF writers; it does not
+touch LZW, EER or MRC.
 
 ### 4.2 Category table (main `1db86902`)
 
 | #134 category | Main's behaviour | Code | Existing native evidence |
 |---|---|---|---|
-| Unsupported valid encoding (u8, multi-row strips, predictor, byte-swapped, LZW, …) | **Rejected before the library.** Tag-only scan, named decline, `NotApplicable`; auto → compact/float; pinned → movie fails | `cuda_movie_session.cu:1414–1481`; `runner:2313` | No dedicated decline fixture on main is cited here. Pinned-route refusal is exercised by `CudaNvcompReconstructionFailures` (`CMakeLists.txt:696–702`); compact vs nvcomp product identity in `docs/nvcomp_ingest_pipeline.md` |
+| Unsupported valid encoding (u8, multi-row strips, predictor, byte-swapped, LZW, …) | **Rejected before the library.** Tag-only scan, named decline, `NotApplicable`; auto → compact/float; pinned → movie fails | `cuda_movie_session.cu:1414–1481`; `runner:2313` | **No dedicated test** submits an unsupported encoding under `--ingest nvcomp` and asserts refusal. (`CudaNvcompReconstructionFailures` pins a *supported* fixture and is not refusal coverage.) Compact vs nvcomp product identity: `docs/nvcomp_ingest_pipeline.md` |
 | Truncated / incomplete TIFF: IFD chain | **Host reader fails the movie** before any route (`Corrupted TIFF directory structure`) | `rwTIFF.h:69–81` | Route-independent host checks |
 | Truncated / incomplete TIFF: strip data beyond EOF | **Rejected before the library.** `pread`/`TIFFReadRawStrip` short read refuses the chunk (no log line); `NotApplicable`; auto host reader then reads the same file | `:1819`, `:1826`, `preadFully` `:1349` | No dedicated native fixture recorded |
 | Truncated / incomplete TIFF: file still growing or replaced | **Not detected.** Tags are read in pass A; bytes are read later through fresh handles. No size/inode/mtime pin. The runner's recovery comment assumes "the immutable file" | `:1414` vs `:1749–1762`; `runner:2302–2307` | None |
-| Invalid wrapper / offset / size | **Rejected before the library.** Raw size `< 7` or `> 4 GiB` refused (`:1463`); strip count/size must match one full row (`:1452`); zlib CMF/FLG/FCHECK/FDICT checked on the staged bytes with a named warning (`cuda_deflate_layout.h:47`, call `:1835`); compressed pointers alignment-checked (`:1692`); output capacity per strip is fixed at `row_bytes`, and nvCOMP documents an overflow status for undersized output | as listed | Host `DeflateLayout` tests; native 55/55 at `c4dad3b` (`docs/nvcomp_ingest_pipeline.md`) |
+| Invalid wrapper / offset / size | **Ordinary cases rejected before the library.** Raw size `< 7` or `> 4 GiB` refused (`:1463`); strip count/size must match one full row (`:1452`); zlib CMF/FLG/FCHECK/FDICT checked on the staged bytes with a named warning (`cuda_deflate_layout.h:47`, call `:1835`); compressed pointers alignment-checked (`:1692`); output capacity per strip is fixed at `row_bytes`, and nvCOMP documents an overflow status for undersized output. **Arithmetic is not checked throughout; see 4.2.1.** | as listed | Host `DeflateLayout` tests; native 55/55 at candidate `c4dad3b` (`docs/nvcomp_ingest_pipeline.md`) |
 | Structurally corrupt Deflate body | **Submitted to nvCOMP.** Nothing validates the body before decode (the wrapper check reads two bytes). If nvCOMP reports a bad status or wrong length, the chunk is rejected before any output is consumed → `NotApplicable` → auto host reader / pinned fail. If nvCOMP misbehaves, the outcome is undefined: a sticky CUDA error becomes `FatalDeviceFailure`; a silent out-of-bounds write is not detectable | decode `:1934`; gate `:1871–1883` | **None.** #151 and the 5 October acceptance used healthy compressed input with injected readback; no corrupt-stream test exists |
-| Valid Deflate, wrong Adler-32 trailer | **Detected after decode.** Device Adler-32 over each strip, read only for strips whose status and length passed; host checks all status/length first, then Adler; the gain kernel for that chunk is not launched → auto host reader / pinned fail | Adler kernel `:1944`; check `:1885–1893`; gain `:1963` | 5 Oct native acceptance, composition `50a59b5`, VM GPU0: CPU 34/34, CUDA-noNV 42/42, CUDA-NV 45/45, mutants fail as intended (#134); PR #151: 52/52, 13 CUDA, three compiled mutants discriminate. Both inject readback values; a real trailer-mutated file is not recorded |
-| Resource failure | Arena or pinned-cap shortfall, or busy Fourier buffer: **named decline before allocation** (`:1527`, `:1562`, `:1679`) → host route. A CUDA allocation/copy error: `HANDLE_ERROR` records it → `RecoverableFailure` → auto host re-read / pinned fail | as listed; `ingestMovie` `:1220–1248` | Native 55/55 at `c4dad3b` incl. `CudaPreprocessingFailurePaths`, `CudaNvcompReconstructionFailures` |
-| Fatal device / context failure | **Worker failure.** Poisoning code → `FatalDeviceFailure` → `REPORT_ERROR`, no CPU fallback, no re-dispatch | `ingestMovie` `:1200`, `:1222–1226`; `runner:2295–2300`; `cuda_failure_state.h` | `CudaPreprocessingFailurePaths`; `CudaErrorClass` (`tests/cuda_error_class.cpp`) |
+| Valid Deflate, wrong Adler-32 trailer | **Detected after decode.** Device Adler-32 over each strip, read only for strips whose status and length passed; host checks all status/length first, then Adler; the gain kernel for that chunk is not launched → auto host reader / pinned fail | Adler kernel `:1944`; check `:1885–1893`; gain `:1963` | 5 Oct native acceptance, composition `50a59b5`, VM GPU0: CPU 34/34, CUDA-noNV 42/42, CUDA-NV 45/45, mutants fail as intended (#134); PR #151 at `c596164`: 52/52, 13 CUDA, three compiled mutants discriminate. Both inject readback values; a real trailer-mutated file is not recorded |
+| Resource failure | Arena or pinned-cap shortfall, or busy Fourier buffer: **named decline before allocation** (`:1527`, `:1562`, `:1679`) → host route. A CUDA allocation/copy error: `HANDLE_ERROR` records it → `RecoverableFailure` → auto host re-read / pinned fail | as listed; `ingestMovie` `:1220–1248` | Native 55/55 at candidate `c4dad3b` incl. `CudaPreprocessingFailurePaths`, `CudaNvcompReconstructionFailures` |
+| Fatal device / context failure | **That movie fails; no fallback or retry for it.** Poisoning code → `FatalDeviceFailure` → `REPORT_ERROR`; `run()` continues the remaining movies, then fails the job and withholds joint output (4.1) | `ingestMovie` `:1200`, `:1222–1226`; `runner:2295–2300`, `1045–1055`, `1083–1089`; `cuda_failure_state.h` | `CudaPreprocessingFailurePaths`; `CudaErrorClass` (`tests/cuda_error_class.cpp`) |
 
-Summary: every category except "structurally corrupt Deflate" and "growing file" is either
-declined before nvCOMP or caught before any decoded byte is consumed. Those two are what D1
-is about.
+Summary: apart from a corrupt Deflate body and a changing file, the categories are declined
+before nvCOMP or caught before any decoded byte is consumed, **subject to the open bounds
+audit in 4.2.1**. All native evidence above is integrity evidence on healthy input or injected
+readbacks, not corrupt-Deflate safety and not current-head native qualification.
+
+#### 4.2.1 Outstanding: checked-arithmetic bounds audit (#134 item 2)
+
+The ordinary layout and capacity checks are real, but size and offset arithmetic is not
+checked throughout. Sites identified by review (R-TRUST-A) and confirmed in source:
+
+| Site | Unchecked operation |
+|---|---|
+| `cuda_movie_session.cu:1352`, `:1357` (`preadFully`) | `(off_t)offset` cast and `offset += got` with no representability or overflow guard |
+| `cuda_movie_session.cu:1469` | contiguity test `raw_offsets[s-1] + raw_sizes[s-1]` can wrap |
+| `cuda_movie_session.cu:1625–1657` | candidate sizing products (`candidate * alignUp(max_frame_stage, …)`, `chunks * row_bytes`, `chunks * row_pitch_bytes`, table sizes) |
+| `cuda_deflate_layout.h:28–37` | `stripSlotOffset`/`frameStageBytes` alignment and running sums |
+| `cuda_deflate_layout.h:72–73` | `pinnedReserveBytes`: `bytes + bytes/8` and round-up |
+| `cuda_deflate_layout.h:156–176` | `pinnedChunkLayout` offset sums and table products |
+
+The arena's subtraction-based capacity check cannot detect a size that wrapped before the
+call. Mitigations exist: `initialize()` bounds frame pixel counts (`:451–455`), session
+allocation must succeed, and the default 256 MiB pinned cap restricts reachable sizes. **No
+end-to-end overflow reaching nvCOMP has been demonstrated**, and none is claimed here. Until the
+audit is done, the brief does not claim universal rejection of invalid sizes or offsets.
+Whether to do it before freeze is question 3 in section 6.
 
 ### 4.3 Options
 
-| | (1) Trusted/immutable-input precondition for auto | (2) GPU decoder only on explicit opt-in | (3) Full CPU inflate before GPU decode |
-|---|---|---|---|
-| Behaviour | Unchanged. Documented: auto on a `USE_NVCOMP=ON` build is for complete, unmodified acquisition files; use `--ingest compact` for files of unknown integrity or still being written | Auto never calls nvCOMP; compact (u8/u16) and float remain automatic. nvCOMP runs only when the user asks | Every staged strip is inflated on the CPU (zlib, into scratch) and must end exactly at `Z_STREAM_END` with `row_bytes` out and a matching Adler before the batch is submitted |
-| What it guarantees | Honest description; no new safety. The `USE_NVCOMP=OFF` default already makes nvCOMP a build-time choice | Malformed-input exposure only for users who opted in at run time | nvCOMP only sees syntactically valid streams whose output fits the buffer, i.e. inside its documented contract |
-| What it does not | Corrupt or adversarial files still reach nvCOMP on such builds | Opt-in users keep the residual risk | Not a proof that nvCOMP is bug-free on valid input |
-| Runtime cost (existing evidence) | 0 | On `USE_NVCOMP=ON` builds, Deflate movies return to compact: about **+0.34 s/movie** (u16 Deflate 8 rows/strip, compact 0.810 vs nvcomp 0.471 s/movie, #141). Tutorial, 24 movies: `--ingest compact` 20.9/21.0 s vs `--ingest nvcomp` 12.8/12.6 s, **≈ +0.35 s/movie** (`docs/single_gpu_execution_profile.md` §8, earlier candidate binary) | Adds roughly a host Deflate decode: **≈ 0.27 s/movie** (u16 Deflate 8 rows/strip, 1.61 s per 6 movies, instrumented, #141), removing most of the 0.34 s saving. The 8-CPU lane is already saturated while decoding (CPU/wall 3.2–4.7, #141). After a full CPU inflate the samples are already on the host, so this is close to the compact route plus a redundant GPU decode. Unmeasured |
-| Effect on #138 (u8 and multi-row strips newly reach nvCOMP) | Population grows under the same precondition | Widening applies only to opt-in runs; no default change | Validation cost scales with the widened population |
-| Effect on a future nvTIFF LZW route | Would need its own precondition, and trusts nvTIFF's TIFF parsing as well as its decode | Opt-in only; the PR #152 probe already requires `--trusted-input` | A CPU LZW validation is the LibTIFF decode nvTIFF exists to remove (0.3–2.6 s/movie): no gain left |
+The primary choices are **uniform**: one rule for every nvCOMP-eligible Deflate encoding,
+whether or not #138 merges.
 
-**Project-owned device decoders (#193 option 2, a possible device LZW decoder).** These differ
-in kind. With our own GPL kernel we control every read and write: each fraction or code
-stream has a known length, every run or code advance can be checked against the frame or strip
-size before the write, and violations set a per-unit error flag that the host checks before
-consumption. Behaviour on malformed input is then ours to specify, test with mutated and
-truncated fixtures, and audit in source; no vendor undefined-behaviour clause applies. The
-#134 categories still have to be answered and tested for it, but D1's options 1–3 exist only
-because nvCOMP's (and nvTIFF's) internals are closed. D1 need not block the EER prototype.
+| | Uniform (1): trusted/immutable-input precondition for auto | Uniform (2): GPU decoder only on explicit opt-in | (3) Full CPU inflate before GPU decode |
+|---|---|---|---|
+| Behaviour | Unchanged. Documented: auto on a `USE_NVCOMP=ON` build is for complete, unmodified acquisition files; use `--ingest compact` for files of unknown integrity or still being written | Auto never calls nvCOMP; compact (u8/u16) and float remain automatic. For RC0, the only opt-in is the existing pin **`--ingest nvcomp` (2a)**: a movie that cannot take nvCOMP fails, per `runner:157` and `:2313`. A fallback-keeping opt-in (2b, e.g. `--ingest nvcomp_or_host`) is new CLI surface and belongs after RC0 | Every staged strip is inflated on the CPU (zlib, into scratch) and must end exactly at `Z_STREAM_END` with `row_bytes` out and a matching Adler before the batch is submitted |
+| What it guarantees | Honest description; no new safety. `USE_NVCOMP=OFF` by default already makes nvCOMP a build-time choice | Malformed-input exposure only for runs that pinned nvCOMP | nvCOMP only sees syntactically valid streams whose output fits the buffer, i.e. inside its documented contract |
+| What it does not | Corrupt or adversarial files still reach nvCOMP on such builds | Opt-in runs keep the residual risk. Under 2a a mixed dataset (some movies ineligible) fails under the pin | Not a proof that nvCOMP is bug-free on valid input |
+| Runtime cost | 0 | On current main only u16 one-row-per-strip Deflate is affected (the #138 8-row population is already rejected by main, so its cost is zero). The only evidence for the affected population is historical: tutorial 24-movie **process wall**, `--ingest compact` 20.9/21.0 s vs `--ingest nvcomp` 12.8/12.6 s, from an earlier candidate binary (≈ 0.34–0.35 s/movie). **Current-main penalty unmeasured** | **Unmeasured.** The nearest figure, ≈ 0.27 s/movie, is an instrumented LibTIFF compact-reader stage on #138's 8-row variant, not a zlib validator on staged bytes. Expectation only: since a full CPU inflate leaves the samples on the host, the route would cost roughly what compact costs plus a redundant GPU decode |
+| Freeze impact | None | Source change at `runner:2283`; QF rerun | Source change in `read_chunk`; A/B required; QF rerun |
+| Effect on #138 (u8 and multi-row strips newly reach nvCOMP) | Same precondition covers the widened population if #138 merges | Widening applies only to pinned runs | Validation cost scales with the widened population |
+| Effect on a future nvTIFF LZW route | Would need the same precondition, and trusts nvTIFF's TIFF parsing as well as its decode | Opt-in only; the PR #152 probe already requires `--trusted-input` | A CPU LZW validation is the LibTIFF decode nvTIFF exists to remove (0.70–2.61 s/movie on the real corpus, #141): expected to leave little or no gain (unmeasured) |
+
+#### 4.3.1 Considered and not proposed for RC0
+
+- **Hybrid** (uniform 1 for the existing u16 one-row route, 2 for #138's widening and nvTIFF;
+  recommended in revision `c34a6024`). Objection (R-TRUST-B): the same vendor undefined
+  behaviour applies to every Deflate encoding; routing two files from one microscope
+  differently because `RowsPerStrip` is 1 or 8 is opaque, hard to document, and adds a
+  qualification axis. Counter-argument: only the narrow population is released behaviour, so
+  the hybrid keeps "nothing weakened relative to the released fast path" true for the default.
+  For a release that must be documented and qualified, the objection is stronger.
+- **Bit-level structural pre-checks** (find the final block's `BFINAL`/`BTYPE`, bound output
+  from headers). Deflate blocks are bit-packed; their boundaries and lengths are known only
+  after decoding every Huffman symbol in order, so a check strong enough to validate the body
+  is a full decode (option 3). The two-byte zlib wrapper check is the cheap limit.
+- **Process isolation** (decode in a separate worker). The decoded movie must reach the main
+  context through CUDA IPC or a host round trip, with new worker lifecycle and failure
+  handling: an architectural change, outside RC0's "no new architectures" rule.
+- **Per-run log notice under option 1.** The movie log already records the route on success
+  (`nvCOMP ingestion: chunk=…`, `:1696`) and `--ingest_witness` records it when asked; neither
+  states the precondition. A one-line notice when auto first takes nvCOMP is a small source
+  change; it changes log bytes (output-tree comparisons may need an allowance) and requires a
+  QF rerun. Optional.
+- **Build-time default policy** (a CMake switch for whether auto may use nvCOMP): new
+  configure surface; after RC0 if wanted.
+- **File-identity check** (`fstat` `st_dev`/`st_ino`/`st_size`/`st_mtim` pinned at pass A,
+  rechecked on every reader handle and after the last read). Orthogonal to options 1–3: it
+  closes the growing/replaced-file gap, not decoder safety. Recommendation: defer past RC0 and
+  rely on the documented precondition, unless the maintainer opens a bug-fix lane (source
+  change, CTest, QF rerun).
+
+**Project-owned device decoders (#193 option 2; a possible device LZW decoder)** differ in
+kind: we own every read and write, can check each run or code advance against the frame or
+strip size before writing, and can flag violations per unit for the host to check before
+consumption. Malformed-input behaviour is then ours to specify, test with mutated and
+truncated fixtures, and audit; no vendor undefined-behaviour clause applies. The #134
+categories still need answers and tests, but D1 need not block the EER prototype.
 
 ### 4.4 Cost reference
 
-| Quantity | Value | Source |
+All figures are historical; none is a measurement on `1db86902`.
+
+| Quantity | Value | Endpoint, population, source |
 |---|---|---|
-| Compact-route host LibTIFF decode, LZW | 0.305 s/movie (u8), 0.428 s/movie (u16) | #141, 2 Oct, instrumented |
-| Compact → nvcomp, u16 Deflate 8 rows/strip | 0.810 → 0.471 s/movie (−0.339) | #141 / #138 campaign |
-| Tutorial 24 movies, compact vs nvcomp | 20.9/21.0 s vs 12.8/12.6 s | `docs/single_gpu_execution_profile.md` §8 |
-| Host Deflate decode, u16 8 rows/strip | 1.61 s per 6 movies (≈ 0.27 s/movie) | #141, 2 Oct, instrumented |
-| Real LZW compact host read | 1.39 / 2.61 / 0.70 s/movie (10361 / 10441 / 10641) | #141, 16 Oct, #186 GPU pass |
+| Tutorial 24 movies, compact vs nvcomp | 20.9/21.0 s vs 12.8/12.6 s (≈ 0.34–0.35 s/movie) | 24-movie process wall, earlier candidate binary, same binary with the route forced; u16 one-row Deflate (the population main admits). `docs/single_gpu_execution_profile.md` §8 |
+| Compact → nvcomp, u16 Deflate 8 rows/strip | 0.810 → 0.471 s/movie (−0.339) | Median movie-log wall after movie 1, `main` then `c499b1d`; **#138's widened route, rejected by main**. #141 / PR #138 `RESULTS.md` |
+| Host LibTIFF Deflate stage, u16 8 rows/strip | 1.61 s per 6 movies (≈ 0.27 s/movie) | Instrumented compact-reader stage, not comparable with production walls; not a zlib validator. #141, 2 Oct |
+| Compact-route host LibTIFF decode, LZW | 0.305 s/movie (u8), 0.428 s/movie (u16) | Instrumented stage, controlled fixtures. #141, 2 Oct |
+| Real LZW compact host read | 1.39 / 2.61 / 0.70 s/movie (10361 / 10441 / 10641) | `host read movie` stage, main `116eb04a`, #186 GPU pass. #141, 16 Oct. CPU/wall 3.2–4.7 there; that ratio alone does not establish saturation of the eight CPUs |
+
+Population impact: on main, and across the #186 corpus, only the tutorial uses nvCOMP, so the
+cost of uniform option 2 falls on Deflate TIFF workflows and tutorial benchmarks, not on the
+LZW, EER or MRC families.
 
 ### 4.5 Recommendation (maintainer decision)
 
-**Option 1 for the existing u16 one-row-per-strip auto route; option 2 for any population
-not admitted on main today** (#138's u8 and multi-row encodings, nvTIFF).
+**The evidence supports either uniform rule.** If one is wanted for RC0, **uniform option 1**,
+because it is the outcome that needs no source change and no QF rerun (section 1.1).
 
-Rationale:
+- For uniform 1: main's behaviour is unchanged; the route is reached only on builds where
+  someone chose `USE_NVCOMP=ON`, which is already a site-level opt-in; in the corpus only the
+  tutorial is affected. The realistic threat for acquisition data is transfer damage, which the
+  status, length and Adler gates catch whenever nvCOMP reports honestly; the residual risk is
+  decoder misbehaviour on a damaged body, which the precondition states plainly. #138 could
+  later enter under the same rule once its own qualification passes.
+- For uniform 2a: it is the stronger safety claim (the #134 owner recommended option 2 on
+  2 Oct), it reuses the existing pin contract with no new CLI surface, and its cost falls only
+  on u16 one-row Deflate users. Against it: a source change and QF rerun before freeze, an
+  unmeasured current penalty, and hard failure of mixed datasets under the pin.
+- Option 3 is not recommended for RC0: its cost is unmeasured, and the expectation above
+  suggests little advantage over compact.
 
-- The existing route is in released behaviour, is reached only on builds where someone chose
-  `USE_NVCOMP=ON`, and is worth about 0.35 s/movie on the tutorial. Every category other than a
-  corrupt Deflate body or a changing file is already handled before consumption (4.2). The
-  realistic threat for acquisition data is transfer damage, which the status, length and
-  Adler gates catch whenever nvCOMP reports honestly; the residual risk is decoder misbehaviour
-  on a damaged body. Stating that plainly is cheaper than removing the route.
-- Widening is new exposure. Gating it behind opt-in keeps "nothing weakened relative to the
-  released fast path" (PR #138's own claim) true for the default, and lets #138's measured
-  gains be used by sites that accept the boundary.
-- Option 3 is dominated on the evidence: it costs about what it saves.
-- The #134 owner earlier recommended option 2 throughout (#134, 2 Oct). That is the stronger
-  claim, at about +0.35 s/movie on Deflate input for `USE_NVCOMP=ON` builds. If the
-  maintainer prefers a single rule, option 2 everywhere is the consistent alternative.
-
-If no decision is made before freeze: the existing route stays as it is (it is current main),
-the factual limitation text below should still ship, T1 (#138) stays HOLD, L1 stays NO-GO.
+If no decision is made before freeze: main stays as it is, the factual limitation text ships,
+T1 (#138) stays HOLD, L1 stays NO-GO (section 1.1).
 
 ### 4.6 Exact changes each option implies
 
-Common to all options (documentation only):
+Section 1.1 gives the minimal set per outcome. Detail:
 
-- `README.md`: an "Input trust" paragraph quoting the vendor limitation (2.1) and naming
-  `--ingest compact` as the route that keeps every TIFF on LibTIFF.
-- `docs/input_backends/FAILURE_POLICY.md` on main: the category table of 4.2, adapted from
-  PR #138's file to main's narrower admission.
-
-Option 1:
-
-- `motioncorr_runner.cpp:157` `--ingest` help: add "auto may decode Deflate TIFF on the GPU
-  (nvCOMP); use only on complete, unmodified files."
-- Replace the "immutable file" assumption in the comment at `runner:2302–2307` with a reference
-  to the documented precondition.
-- Optional hardening, small code change: record `fstat` (`st_dev`, `st_ino`, `st_size`,
-  `st_mtim`) on the pass-A handle, compare on each reader handle (`:1749–1762`) and after the
-  last chunk read; decline with a named message on mismatch. Add a CTest that rewrites the file
-  between passes via the existing shim. This addresses #134 item 2 (growing file), not decoder
-  safety.
-- Add log lines for the silent refusals (`:1463`, short read at `:1819`/`:1826`) so a truncated
-  strip is distinguishable from an unsupported encoding.
-
-Option 2:
-
-- `motioncorr_runner.cpp:2283`: call `ingestMovie` only when nvCOMP was requested.
-  - 2a: reuse `--ingest nvcomp`. An ineligible movie in a mixed dataset then fails, by the
-    existing pin semantics.
-  - 2b: add an explicit opt-in that keeps auto's fallback (for example `--ingest nvcomp_or_host`
-    or a separate `--trust_gpu_decoder`), so mixed datasets still complete.
-- Update `--ingest` help, README, and any test, harness or benchmark recipe that expects the
-  `nvcomp` witness under the default (`--ingest_witness`). The tutorial benchmark recipes in
-  `docs/` that rely on auto selecting nvCOMP would need `--ingest nvcomp`.
-- Hybrid (recommended): keep auto's current admission at `cuda_movie_session.cu:1414–1458`
-  unchanged, and admit #138's widened encodings only on the opt-in path.
-
-Option 3:
-
-- In `read_chunk` (`:1780–1866`), after the wrapper check, inflate each staged strip on the
-  reader thread into per-thread scratch with zlib; require `Z_STREAM_END`, exactly `raw_sz`
-  consumed, `row_bytes` produced; decline the batch otherwise. Validate the same pinned bytes
-  that are uploaded, so the check and the decode see one snapshot.
-- A matched current-main A/B (tutorial and #138 variants, ≥3 pairs, null control) before
-  adoption, per #134 item 5.
+- **All outcomes (documentation):** `README.md` "Input trust" paragraph quoting the vendor
+  limitation (2.1) and naming `--ingest compact` as the route that keeps every TIFF on
+  LibTIFF; `docs/input_backends/FAILURE_POLICY.md` on main with the 4.2 table and 4.2.1 status.
+- **Uniform 1:** the README states the precondition (complete, unmodified acquisition files).
+  No source change is required. Optional, each a source change with a QF rerun: `--ingest`
+  help wording (`runner:157`); the per-run notice (4.3.1); log lines for the silent refusals
+  (`:1463`, short reads `:1819`/`:1826`); the "immutable file" comment at `runner:2302–2307`
+  pointing to the precondition.
+- **Uniform 2a:** `runner:2283` calls `ingestMovie` only when `ingest_mode == INGEST_NVCOMP`;
+  help text and README say auto does not use nvCOMP and `--ingest nvcomp` opts in with strict
+  refusal; tests, harnesses and `docs/` tutorial recipes that expect the `nvcomp` witness under
+  the default pass `--ingest nvcomp`; QF rerun. 2b is out of RC0 scope.
+- **Option 3:** in `read_chunk` (`:1780–1866`), after the wrapper check, inflate each staged
+  strip with zlib into per-thread scratch; require `Z_STREAM_END`, exactly `raw_sz` consumed and
+  `row_bytes` produced; decline otherwise. Validate the same pinned bytes that are uploaded.
+  Requires a matched current-main A/B (≥3 pairs, null control) per #134 item 5, then QF.
 
 ## 5. nvTIFF promotion checklist (#141 gates)
 
@@ -376,31 +441,38 @@ Option 3:
 | Scratch / VRAM | Callback runs: 3.21–14.11 MiB device, 64.19–192 KiB pinned high-water; sampled extra owned GPU memory +8 to +18 MiB. Not a hard bound and not whole-application VRAM | #141, 13 Oct |
 | Malformed-LZW safety | **Unproven.** Vendor header documents TIFF-structure errors only (2.2). Fault injections used healthy streams | PR #152 `NATIVE_RESULTS.md` |
 | Real U16 LZW | Not covered | #141 |
-| Licence (D2) | **Open**, plus pre-release/Beta question (3.3) | this brief |
-| Trust policy (D1) | **Open**; under the recommendation, nvTIFF would be opt-in only | this brief |
+| Licence (D2) | **Open**: S3/S4 question as for nvCOMP; secondary pre-release/Beta question (3.3) | this brief |
+| Trust policy (D1) | **Open**; under uniform 1 it needs the same precondition plus trust in nvTIFF's TIFF parser; under uniform 2 it is pinned opt-in only | this brief |
 | Complete-product integration gate | **Not started.** Needs: TIFF→MRC row flip and gain orientation re-established against nvTIFF output (#60 precedent: unflipped re-encode relRMSE 1.435, flip-only 0.700); frame selection (`--first_frame_sum`/`--last_frame_sum`, IFD-offset regions); full MRC header/payload and STAR identity against the compact route on the release baseline; failure and no-publication on decoder refusal, execution failure and late failure; memory admission with nvTIFF scratch included; `--ingest_witness` value and a pinnable `--ingest` mode with refusal semantics | #141, PR #152 README "Contract" |
 
-**nvTIFF integration is not in RC0** unless, before freeze, D1 and D2 both permit it **and** the
-complete-product integration gate above passes on the RC0 baseline. Neither decision is made
-and the gate has not started, so the #198 register entry L1 (NO-GO for RC0 integration)
-stands.
+**Recommendation: nvTIFF is NO-GO for RC0.** Primary reasons: the complete-product
+integration gate has not started and cannot realistically pass before freeze, and the S3/S4
+licensing question (3.3) is unresolved. The Beta/pre-release clause is a secondary reason.
+This matches #198 register entry L1. Reconsider after RC0 if D1 and D2 permit it; the
+standalone and SCARF timing evidence above remains valid input for that decision.
 
 ## 6. Open questions for the maintainer
 
-1. D1: option 1, 2, 3, or the hybrid (1 for the existing route, 2 for widening)? Under option 2,
-   reuse the pin (2a) or add a fallback-preserving opt-in (2b)?
-2. D1: should the file-identity pin (4.6, option 1) be in RC0 scope, given it is a small source
-   change after the "no new features" rule in #198?
-3. D2: accept A for nvCOMP and add the README notice now?
-4. D2: will the project ever distribute binaries (containers, conda, modules)? If yes, counsel
+1. D1: uniform option 1, uniform option 2a, or option 3? (For RC0, option 2 means reusing
+   `--ingest nvcomp` with strict refusal; a fallback-keeping opt-in is post-RC0.)
+2. D1: open a bug-fix lane for the file-identity check before freeze, or defer it past RC0 as
+   this brief recommends (4.3.1)?
+3. D1: the checked-arithmetic bounds audit (4.2.1): RC0 hardening (source change, QF rerun) or
+   post-RC0?
+4. D1 under option 1: add the optional per-run trust notice (source change, QF rerun), or
+   documentation only?
+5. D2: accept A for nvCOMP and add the README notice now?
+6. D2: will the project ever distribute binaries (containers, conda, modules)? If yes, counsel
    is needed before any is built with nvCOMP or nvTIFF.
-5. nvTIFF: ask NVIDIA whether 0.8.0.82 (`Development Status :: 4 - Beta`) is "pre-release"
-   under the agreement, before spending on the integration gate?
-6. If nvTIFF is excluded, is a project-owned device LZW decoder in scope after RC0, using the
+7. nvTIFF after RC0: ask NVIDIA about S3/S4 and whether 0.8.0.82 (`Development Status :: 4 -
+   Beta`) is "pre-release" under the agreement, before spending on the integration gate?
+8. If nvTIFF is excluded, is a project-owned device LZW decoder in scope after RC0, using the
    same bounds-checked design as #193 option 2?
 
 ## Provenance of this brief
 
+- Revision 2 addresses review R-TRUST-A (PR #199 review 5552919790) and R-TRUST-B (PR #199
+  comment 6223436930). Revision 1 was `c34a6024`.
 - Repository reads at `1db86902`; branch inputs read from `origin/experiment/nvtiff-lzw-20261002`
   (`d61308a2`), `origin/experiment/nvtiff-timing-20261016`, `origin/experiment/input-nvcomp-widen`.
 - Vendor files read on 4GPUs (commands pinned with `taskset -c 64-67`) and on the SCARF login

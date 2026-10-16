@@ -1,0 +1,84 @@
+{
+  "issue": 73,
+  "purpose": "Explicit record of every byte acquired from a public archive for Issue #73, against the <=2 GiB feasibility cap.",
+  "cap_MiB": 2048,
+  "source": {
+    "archive": "EMPIAR",
+    "accession": "EMPIAR-12963",
+    "cross_reference": "EMD-45966",
+    "title": "Melbournevirus Mini variant Nucleosome",
+    "licence": "CC0 (EMPIAR: re-usable freely without conditions or restrictions)",
+    "access": "anonymous HTTPS, no credential or account",
+    "base_url": "https://ftp.ebi.ac.uk/empiar/world_availability/12963/data/EMPIAR-Deposition/",
+    "acquired_by": "headless Opus session, issue-73 checkout, 2026-09-27",
+    "staged_on": "cpu64:/home/ubuntu/mc-issue73/stage",
+    "affinity": "taskset -c 48-55"
+  },
+  "stage_1_metadata": {
+    "status": "ACQUIRED 2026-09-27",
+    "rationale": "Preconditions for feasibility: verify particle orientations, half-sets, CTF, micrograph linkage and gain format exist before committing to any movie download.",
+    "total_bytes": 64015673,
+    "total_MiB": 61.05,
+    "files": [
+      {
+        "path": "GainReference/20230326_221855_EER_GainReference.gain",
+        "bytes": 33874221,
+        "sha256": "6d4f3e5f9a6b837c637dc7098420e1c0cdfbbd61c9305a7780568f67c7134050",
+        "verified": "file(1) reports TIFF image data, little-endian; readable by src/rwTIFF.h"
+      },
+      {
+        "path": "Refinement/J189_003_particles.cs",
+        "bytes": 14854548,
+        "sha256": "65cc2c7d49e911df08cdb0c390dc0fa624a012e78bc97764fcff9111505093b7",
+        "verified": "36051 particles; alignments3D/pose, /shift, /split (18026/18025); ctf accel_kv=300, cs_mm=2.7, amp=0.1; blob/psize_A=0.485; box 448x448"
+      },
+      {
+        "path": "Refinement/J189_passthrough_particles.cs",
+        "bytes": 15286904,
+        "sha256": "171fe2ac208d9b841c8eded8d9fd0dac82599e9ddd266cb81b57729444efc122",
+        "verified": "uid matches particles file elementwise; location/micrograph_path, center_x_frac, center_y_frac present; micrograph_shape 8192x8192"
+      }
+    ]
+  },
+  "stage_2_feasibility_movies": {
+    "status": "ACQUIRED 2026-09-27",
+    "selection_rule": "the two micrographs carrying the most deposited particles, maximising pilot particle count within the cap; frozen before acquisition, see PROTOCOL.md section 4",
+    "total_bytes": 1588045828,
+    "total_MiB": 1514.48,
+    "files": [
+      {
+        "path": "RawMicrographs/Images-Disc1/GridSquare_4650360/Data/FoilHole_4677724_Data_4659374_4659376_20230406_041554_EER.eer",
+        "staged_as": "stage/movies/FoilHole_4677724_041554_EER.eer",
+        "bytes": 792936370,
+        "MiB": 756.2,
+        "sha256": "b25af46fbaace4cfb2ad67a91ad627b5a4c04a988271854c09753eaea4974221",
+        "deposited_particles": 54,
+        "verified": "1911 IFDs (raw detector frames), 4096x4096, TIFF compression tag 65001 (EER); tools/science_issue73/i73_eer_probe.py"
+      },
+      {
+        "path": "RawMicrographs/Images-Disc1/GridSquare_4650302/Data/FoilHole_4681533_Data_4659374_4659376_20230406_062633_EER.eer",
+        "staged_as": "stage/movies/FoilHole_4681533_062633_EER.eer",
+        "bytes": 795109458,
+        "MiB": 758.28,
+        "sha256": "3c8d113fd59ac1c2f873b54c9aa6775477cf5e2314a8e0bbd8957f03b5c92e98",
+        "deposited_particles": 50,
+        "verified": "1911 IFDs (raw detector frames), 4096x4096, TIFF compression tag 65001 (EER); tools/science_issue73/i73_eer_probe.py"
+      }
+    ]
+  },
+  "budget": {
+    "stage_1_metadata_MiB": 61.05,
+    "stage_2_movies_MiB": 1514.48,
+    "acquired_total_bytes": 1652061501,
+    "acquired_total_MiB": 1575.53,
+    "cap_MiB": 2048,
+    "headroom_MiB": 472.47,
+    "within_cap": true,
+    "note": "Acquisition is complete. No further bytes will be taken from the archive under this issue's cap."
+  },
+  "not_acquired": {
+    "confirmatory_set_GiB": 270,
+    "whole_collection_GiB": 2167,
+    "reason": "Exceeds this issue's <=2 GiB cap by two orders of magnitude. Requires explicit authorization and a host with ~445 GiB working space. Not taken."
+  }
+}

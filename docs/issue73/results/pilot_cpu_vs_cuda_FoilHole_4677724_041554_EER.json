@@ -1,0 +1,163 @@
+{
+  "arms": {
+    "cpu": "pair_cpu/FoilHole_4677724_041554_EER/stage/movies/FoilHole_4677724_041554_EER.mrc",
+    "cuda": "pair_cuda/FoilHole_4677724_041554_EER/stage/movies/FoilHole_4677724_041554_EER.mrc"
+  },
+  "headers": {
+    "cpu": {
+      "nx": 8192,
+      "ny": 8192,
+      "mode": 2,
+      "pixel_size_A": 0.48500001430511475,
+      "pixel_size_A_y": 0.48500001430511475
+    },
+    "cuda": {
+      "nx": 8192,
+      "ny": 8192,
+      "mode": 2,
+      "pixel_size_A": 0.48500001430511475,
+      "pixel_size_A_y": 0.48500001430511475
+    }
+  },
+  "adr66_reference_thresholds": {
+    "absolute_image_rmse": {
+      "threshold": 0.02,
+      "blocking": true
+    },
+    "max_abs_pixel_error": {
+      "threshold": 5.0,
+      "blocking": true
+    },
+    "global_trajectory_vector_rms_px": {
+      "threshold": 0.02,
+      "blocking": true
+    },
+    "max_per_axis_global_shift_diff_px": {
+      "threshold": 0.05,
+      "blocking": true
+    },
+    "static_star_discrepancies": {
+      "threshold": 0,
+      "blocking": true
+    },
+    "relative_image_rmse": {
+      "threshold": 0.001,
+      "blocking": false
+    }
+  },
+  "image": {
+    "absolute_image_rmse": 0.014232228642258466,
+    "relative_image_rmse": 0.011060682663278438,
+    "max_abs_pixel_error": 0.7755505442619324,
+    "identical_bitwise": false,
+    "n_differing_pixels": 67108493,
+    "n_pixels": 67108864,
+    "rms_cpu": 1.2867405272831476,
+    "mean_cpu": 1.236964369445453,
+    "mean_cuda": 1.2360245558311314,
+    "std_cpu": 0.3544295886002239,
+    "std_cuda": 0.354506756104326
+  },
+  "trajectory": {
+    "n_frames": 40,
+    "global_trajectory_vector_rms_px": 0.005790338811330493,
+    "max_per_axis_global_shift_diff_px": 0.00878000000000001,
+    "max_vector_shift_diff_px": 0.009320428155401595
+  },
+  "static_star": {
+    "compared_keys": [
+      "_rlnImageSizeX",
+      "_rlnImageSizeY",
+      "_rlnImageSizeZ",
+      "_rlnMicrographBinning",
+      "_rlnMicrographOriginalPixelSize",
+      "_rlnMicrographDoseRate",
+      "_rlnMicrographPreExposure",
+      "_rlnVoltage",
+      "_rlnMicrographStartFrame",
+      "_rlnEERUpsampling",
+      "_rlnEERGrouping",
+      "_rlnMotionModelVersion"
+    ],
+    "static_star_discrepancies": 0,
+    "mismatches": {},
+    "cpu_general": {
+      "_rlnImageSizeX": "8192",
+      "_rlnImageSizeY": "8192",
+      "_rlnImageSizeZ": "40",
+      "_rlnMicrographMovieName": "stage/movies/FoilHole_4677724_041554_EER.eer",
+      "_rlnMicrographGainName": "/home/vol05/scarf1415/mc-issue73/stage/meta/gain.tif",
+      "_rlnMicrographBinning": "1.000000",
+      "_rlnMicrographOriginalPixelSize": "0.485000",
+      "_rlnMicrographDoseRate": "1.229700",
+      "_rlnMicrographPreExposure": "0.000000",
+      "_rlnVoltage": "300.000000",
+      "_rlnMicrographStartFrame": "1",
+      "_rlnEERUpsampling": "2",
+      "_rlnEERGrouping": "47",
+      "_rlnMotionModelVersion": "1"
+    },
+    "cuda_general": {
+      "_rlnImageSizeX": "8192",
+      "_rlnImageSizeY": "8192",
+      "_rlnImageSizeZ": "40",
+      "_rlnMicrographMovieName": "stage/movies/FoilHole_4677724_041554_EER.eer",
+      "_rlnMicrographGainName": "/home/vol05/scarf1415/mc-issue73/stage/meta/gain.tif",
+      "_rlnMicrographBinning": "1.000000",
+      "_rlnMicrographOriginalPixelSize": "0.485000",
+      "_rlnMicrographDoseRate": "1.229700",
+      "_rlnMicrographPreExposure": "0.000000",
+      "_rlnVoltage": "300.000000",
+      "_rlnMicrographStartFrame": "1",
+      "_rlnEERUpsampling": "2",
+      "_rlnEERGrouping": "47",
+      "_rlnMotionModelVersion": "1"
+    }
+  },
+  "checks": {
+    "absolute_image_rmse": {
+      "value": 0.014232228642258466,
+      "threshold": 0.02,
+      "within": true,
+      "blocking": true,
+      "state": "WITHIN"
+    },
+    "max_abs_pixel_error": {
+      "value": 0.7755505442619324,
+      "threshold": 5.0,
+      "within": true,
+      "blocking": true,
+      "state": "WITHIN"
+    },
+    "global_trajectory_vector_rms_px": {
+      "value": 0.005790338811330493,
+      "threshold": 0.02,
+      "within": true,
+      "blocking": true,
+      "state": "WITHIN"
+    },
+    "max_per_axis_global_shift_diff_px": {
+      "value": 0.00878000000000001,
+      "threshold": 0.05,
+      "within": true,
+      "blocking": true,
+      "state": "WITHIN"
+    },
+    "static_star_discrepancies": {
+      "value": 0,
+      "threshold": 0,
+      "within": true,
+      "blocking": true,
+      "state": "WITHIN"
+    },
+    "relative_image_rmse": {
+      "value": 0.011060682663278438,
+      "threshold": 0.001,
+      "within": false,
+      "blocking": false,
+      "state": "EXCEEDS_NONBLOCKING"
+    }
+  },
+  "blocking_failures": [],
+  "scope": "Image-level agreement on the corrected micrograph for the movies compared here, and nothing more. This is not a resolution, FSC or signal-equivalence claim, and on the feasibility subset it is explicitly underpowered for any such claim (PROTOCOL.md section 10). Relative image RMSE is a non-blocking diagnostic per ADR #66 section 4."
+}

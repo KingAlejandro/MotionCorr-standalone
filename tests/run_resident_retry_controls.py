@@ -23,6 +23,7 @@ import re
 import shutil
 import struct
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -168,6 +169,19 @@ def main():
     work = args.workdir.resolve() if args.workdir else Path(tempfile.mkdtemp(prefix="mc-resident-retry-"))
     if args.workdir:
         work.mkdir(parents=True, exist_ok=False)
+    # A temporary directory is removed on success and kept, with its path printed, on failure.
+    # A directory named with --workdir belongs to the caller and is always kept.
+    try:
+        status = run_controls(binary, work)
+    except BaseException:
+        print(f"FAILED: work directory kept at {work}", file=sys.stderr)
+        raise
+    if not args.workdir:
+        shutil.rmtree(work)
+    return status
+
+
+def run_controls(binary, work):
     data = work / "input"
     write_tiff(data / "Movies/control.tiff", synthetic_frames())
     write_star(data / "movies.star")

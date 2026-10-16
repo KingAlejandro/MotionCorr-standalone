@@ -11,7 +11,7 @@ import numpy as np, tifffile
 SRC_DIR = "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies"
 OUT = sys.argv[1]
 MOVIES = sys.argv[2].split(",")
-VARIANTS = sys.argv[3].split(",")   # name:dtype:comp:rps[:pred][:repeat]
+VARIANTS = sys.argv[3].split(",")   # name:dtype:comp:rps[:pred][:repeat][:byteorder < or >]
 
 COMP = {"deflate": "zlib", "lzw": "lzw", "raw": None, "packbits": "packbits"}
 
@@ -19,7 +19,8 @@ def parse(v):
     p = v.split(":")
     return dict(name=p[0], dtype=p[1], comp=p[2], rps=int(p[3]),
                 pred=bool(int(p[4])) if len(p) > 4 else False,
-                repeat=int(p[5]) if len(p) > 5 else 1)
+                repeat=int(p[5]) if len(p) > 5 else 1,
+                byteorder=p[6] if len(p) > 6 else "<")
 
 specs = [parse(v) for v in VARIANTS]
 for s in specs:
@@ -48,7 +49,7 @@ for m in MOVIES:
         else:
             data = data.astype(s["dtype"])
         t1 = time.time()
-        with tifffile.TiffWriter(dst) as tw:
+        with tifffile.TiffWriter(dst, byteorder=s["byteorder"]) as tw:
             for f in range(data.shape[0]):
                 tw.write(data[f], photometric="minisblack", compression=COMP[s["comp"]],
                          predictor=s["pred"], rowsperstrip=s["rps"], contiguous=False)

@@ -1,0 +1,123 @@
+Test project /mnt/clathrin/alex-motioncorr-rc0/W-TIFF/build-port-cpu
+      Start  1: CpuUnweightedStream
+      Start  2: PatchRetryState
+      Start  3: RunnerInterpolateRecenter
+      Start  4: FloatPlanCache
+ 1/59 Test  #3: RunnerInterpolateRecenter ..........   Passed    0.01 sec
+      Start  5: MrcHeaderStats
+ 2/59 Test  #4: FloatPlanCache .....................   Passed    0.02 sec
+      Start  6: PdfConcat
+ 3/59 Test  #5: MrcHeaderStats .....................   Passed    0.02 sec
+      Start  7: DefectParser
+ 4/59 Test  #7: DefectParser .......................   Passed    0.02 sec
+      Start  8: DeflateLayout
+ 5/59 Test  #2: PatchRetryState ....................   Passed    0.05 sec
+      Start  9: Adler32Arithmetic
+ 6/59 Test  #8: DeflateLayout ......................   Passed    0.01 sec
+      Start 10: Adler32KernelHost
+ 7/59 Test #10: Adler32KernelHost ..................   Passed    0.00 sec
+      Start 11: StageProfileThreads
+ 8/59 Test  #1: CpuUnweightedStream ................   Passed    0.13 sec
+      Start 12: FrameBufferPool
+ 9/59 Test  #6: PdfConcat ..........................   Passed    0.11 sec
+      Start 13: ScratchArena
+10/59 Test #13: ScratchArena .......................   Passed    0.01 sec
+      Start 14: ReaderPool
+11/59 Test #12: FrameBufferPool ....................   Passed    0.05 sec
+      Start 15: ReaderPoolMutant_spin
+12/59 Test #14: ReaderPool .........................   Passed    0.60 sec
+      Start 16: ReaderPoolMutant_nowait
+13/59 Test #16: ReaderPoolMutant_nowait ............   Passed    0.04 sec
+      Start 17: DefectNeighbours
+14/59 Test #17: DefectNeighbours ...................   Passed    0.01 sec
+      Start 18: DefectMergeMutant_append_only
+15/59 Test #11: StageProfileThreads ................   Passed    0.74 sec
+      Start 19: DefectMergeMutant_no_order_check
+16/59 Test #18: DefectMergeMutant_append_only ......   Passed    0.01 sec
+      Start 20: DefectMergeMutant_swap_xy
+17/59 Test #19: DefectMergeMutant_no_order_check ...   Passed    0.01 sec
+      Start 21: NvcompAcceptanceDiagnostics
+18/59 Test #20: DefectMergeMutant_swap_xy ..........   Passed    0.01 sec
+      Start 22: ProfilingKit
+19/59 Test #15: ReaderPoolMutant_spin ..............   Passed    0.70 sec
+      Start 23: GainCacheOwnership
+20/59 Test #21: NvcompAcceptanceDiagnostics ........   Passed    0.24 sec
+      Start 24: NvcompGuards
+21/59 Test  #9: Adler32Arithmetic ..................   Passed    1.02 sec
+      Start 25: SyntheticRegression
+22/59 Test #24: NvcompGuards .......................   Passed    0.07 sec
+      Start 26: HotPixelRngDeterminism
+23/59 Test #26: HotPixelRngDeterminism .............   Passed    0.76 sec
+      Start 27: RunnerExposure
+24/59 Test #25: SyntheticRegression ................   Passed    1.13 sec
+      Start 28: Runner_failure
+25/59 Test #28: Runner_failure .....................   Passed    0.20 sec
+      Start 29: Runner_invalid
+26/59 Test #29: Runner_invalid .....................   Passed    0.24 sec
+      Start 30: Runner_resume
+27/59 Test #27: RunnerExposure .....................   Passed    0.76 sec
+      Start 31: Runner_tomography
+28/59 Test #31: Runner_tomography ..................   Passed    0.58 sec
+      Start 32: RunnerLateBin
+29/59 Test #32: RunnerLateBin ......................   Passed    1.16 sec
+      Start 33: RunnerExportedUnits
+30/59 Test #33: RunnerExportedUnits ................   Passed    0.21 sec
+      Start 34: GainCache
+31/59 Test #30: Runner_resume ......................   Passed    3.29 sec
+      Start 35: TiffRead
+32/59 Test #34: GainCache ..........................   Passed    1.48 sec
+      Start 36: DamagedMovie
+33/59 Test #23: GainCacheOwnership .................   Passed    5.52 sec
+      Start 37: CompressedMovieSequence
+34/59 Test #35: TiffRead ...........................   Passed    1.19 sec
+      Start 38: GlobalIfftElision
+35/59 Test #37: CompressedMovieSequence ............   Passed    1.15 sec
+      Start 39: HostBufferReuse
+36/59 Test #38: GlobalIfftElision ..................   Passed    3.26 sec
+      Start 40: StageProfile
+37/59 Test #36: DamagedMovie .......................   Passed    5.27 sec
+      Start 41: RunnerModelParser
+38/59 Test #41: RunnerModelParser ..................   Passed    0.25 sec
+      Start 42: MicrographModelBounds
+39/59 Test #40: StageProfile .......................   Passed    2.93 sec
+      Start 43: RunnerInterpolateShifts
+40/59 Test #39: HostBufferReuse ....................   Passed    5.94 sec
+      Start 44: WriteFaults
+41/59 Test #42: MicrographModelBounds ..............   Passed    2.08 sec
+      Start 45: WriteFaultsSync
+42/59 Test #43: RunnerInterpolateShifts ............   Passed    0.79 sec
+      Start 46: WriteFaultsMultiProduct
+43/59 Test #44: WriteFaults ........................   Passed    0.94 sec
+      Start 47: OutputStageFaults
+44/59 Test #45: WriteFaultsSync ....................   Passed    0.82 sec
+      Start 48: LogfileFromEps
+45/59 Test #46: WriteFaultsMultiProduct ............   Passed    0.96 sec
+      Start 49: LogfileFromEpsMutant_always_eps
+46/59 Test #47: OutputStageFaults ..................   Passed    0.77 sec
+      Start 50: LogfileFromEpsMutant_late_guard
+47/59 Test #49: LogfileFromEpsMutant_always_eps ....   Passed    0.58 sec
+      Start 51: LogfileFromEpsMutant_eps_order
+48/59 Test #50: LogfileFromEpsMutant_late_guard ....   Passed    0.51 sec
+      Start 52: LogfileFromEpsMutant_placeholder
+49/59 Test #51: LogfileFromEpsMutant_eps_order .....   Passed    0.35 sec
+      Start 53: CiFailClosedControls
+50/59 Test #52: LogfileFromEpsMutant_placeholder ...   Passed    1.06 sec
+      Start 54: CudaValidationParser
+51/59 Test #54: CudaValidationParser ...............   Passed    0.12 sec
+      Start 55: MultiGpuScheduling
+52/59 Test #48: LogfileFromEps .....................   Passed    3.81 sec
+      Start 56: OutputTreeComparator
+53/59 Test #56: OutputTreeComparator ...............   Passed    1.37 sec
+      Start 57: JointStarPublication
+54/59 Test #57: JointStarPublication ...............   Passed    1.23 sec
+      Start 58: ImageWriteFaults
+55/59 Test #58: ImageWriteFaults ...................   Passed    0.05 sec
+      Start 59: NativeMovieStaging
+56/59 Test #59: NativeMovieStaging .................   Passed    0.48 sec
+57/59 Test #53: CiFailClosedControls ...............   Passed   28.22 sec
+58/59 Test #55: MultiGpuScheduling .................   Passed  101.83 sec
+59/59 Test #22: ProfilingKit .......................   Passed  134.65 sec
+
+100% tests passed, 0 tests failed out of 59
+
+Total Test time (real) = 135.48 sec

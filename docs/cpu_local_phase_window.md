@@ -1,6 +1,26 @@
 # CPU local patch phase window experiment
 
-Base: main `116eb04ad359cd5bf789b28809fc2047ea155b9b`. Issue #10.
+Current base: main `d7171b81`, merged with a merge commit (not rebased). Issue #10.
+
+## Current requalification (16 October 2026)
+
+Code `7c453e5e` fixes the separate/fused trig-count witness, omits unread final
+local updates, documents local spectra as consumed scratch at the declaration,
+and requires cropped multi-iteration production coverage. No numerical gate is
+changed. Current commands, provenance, exact-output and mutation results are in
+[`cpu_local_phase_window_evidence/requalification-20261016/`](cpu_local_phase_window_evidence/requalification-20261016/).
+
+Expected benefit is **calculated, not measured**: for the representative geometry
+below, retained complex updates are 6.52% of full support. For I local iterations,
+only I-1 updates are consumed; I=1 needs none and I=2 removes half the cropped
+updates. Whole-job benefit and RSS improvement remain unestablished. Timing is
+owned by the separate cpu64 corpus screen; this requalification runs no timing
+experiments. Keep draft pending the benefit/complexity decision.
+
+Everything below is retained historical context from base `116eb04a`, **not
+current-head acceptance evidence**. The old off-branch binary/driver revisions
+are not reconciled by an unsupported identical-source assertion; the fresh
+published-source checks above replace them for current exactness claims.
 
 ## Scope and earlier work
 
@@ -42,7 +62,7 @@ helper. It checks 300 window geometries across odd and even full spectra, both
 halves, crop edges, zero/partial/full extents and five successive phase updates.
 Every retained complex float must match bit for bit, every discarded bin must
 remain untouched. Default full geometry must match every original pixel.
-GNU/ELF builds additionally wrap `sincos`/`sincosf` and check actual production
+GNU/ELF builds now wrap `sin`/`sinf` and `sincos`/`sincosf` and check actual production
 table call counts against window extents and full default geometry.
 
 The same test compares actual production local and global `alignPatch` arms on

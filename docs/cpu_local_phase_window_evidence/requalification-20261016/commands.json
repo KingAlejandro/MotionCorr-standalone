@@ -1,0 +1,30 @@
+{
+  "revision": "7c453e5ef54816f0eacdbdf532f133e284e49ac1",
+  "local_configure": {
+    "command": "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCUDA=OFF -DPython3_EXECUTABLE=$HOME/.venvs/global/bin/python3",
+    "exit_status": 0
+  },
+  "local_build": {
+    "command": "cmake --build build -j4",
+    "exit_status": 0
+  },
+  "local_ctest": {
+    "command": "ctest --test-dir build --output-on-failure",
+    "exit_status": 8,
+    "passed": 56,
+    "failed": [
+      "SyntheticRegression",
+      "MultiGpuScheduling"
+    ],
+    "skipped": [
+      "NativeMovieStaging"
+    ]
+  },
+  "plain_main_control": {
+    "revision": "d7171b81",
+    "configure_build_status": 0,
+    "command": "ctest --test-dir /tmp/fix183/mac-main/build -R \"^(SyntheticRegression|MultiGpuScheduling)$\" --output-on-failure",
+    "exit_status": 8,
+    "same_failures": true
+  }
+}

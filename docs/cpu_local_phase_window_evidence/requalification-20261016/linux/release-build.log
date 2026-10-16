@@ -1,0 +1,66 @@
+-- LibTIFF Deflate subcodec: libdeflate
+-- Configuring done (0.3s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/ubuntu/fix183-20261016/candidate/build-release
+[  1%] Built target deflate_layout
+[  2%] Built target adler32_kernel_host
+[  3%] Built target adler32_arithmetic
+[  4%] Built target scratch_arena
+[  5%] Building CXX object CMakeFiles/reader_pool_spin.dir/tests/test_reader_pool.cpp.o
+[  7%] Built target reader_pool
+[  7%] Building CXX object CMakeFiles/reader_pool_nowait.dir/tests/test_reader_pool.cpp.o
+[  8%] Built target defect_neighbours
+[  9%] Building CXX object CMakeFiles/defect_neighbours_append_only.dir/tests/test_defect_neighbours.cpp.o
+[ 68%] Built target motioncorr_core
+[ 69%] Building CXX object CMakeFiles/defect_neighbours_no_order_check.dir/tests/test_defect_neighbours.cpp.o
+[ 70%] Linking CXX executable defect_neighbours_append_only
+[ 71%] Linking CXX executable reader_pool_nowait
+[ 71%] Built target defect_neighbours_append_only
+[ 72%] Building CXX object CMakeFiles/defect_neighbours_swap_xy.dir/tests/test_defect_neighbours.cpp.o
+[ 72%] Built target reader_pool_nowait
+[ 73%] Building CXX object CMakeFiles/motioncorr_logfile_always_eps.dir/mutants/motioncorr_runner_logfile_always_eps.cpp.o
+[ 73%] Linking CXX executable reader_pool_spin
+[ 73%] Built target reader_pool_spin
+[ 74%] Building CXX object CMakeFiles/motioncorr_logfile_late_guard.dir/mutants/motioncorr_runner_logfile_late_guard.cpp.o
+[ 74%] Linking CXX executable defect_neighbours_no_order_check
+[ 74%] Built target defect_neighbours_no_order_check
+[ 75%] Building CXX object CMakeFiles/motioncorr_logfile_eps_order.dir/mutants/motioncorr_runner_logfile_eps_order.cpp.o
+[ 76%] Linking CXX executable defect_neighbours_swap_xy
+[ 76%] Built target defect_neighbours_swap_xy
+[ 77%] Building CXX object CMakeFiles/motioncorr_logfile_placeholder.dir/mutants/motioncorr_runner_logfile_placeholder.cpp.o
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_late_guard.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_late_guard.cpp:1898:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1898 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_always_eps.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_always_eps.cpp:1898:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1898 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_eps_order.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_eps_order.cpp:1898:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1898 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_placeholder.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_placeholder.cpp:1898:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1898 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+[ 77%] Linking CXX executable motioncorr_logfile_always_eps
+[ 78%] Linking CXX executable motioncorr_logfile_late_guard
+[ 79%] Built target motioncorr_logfile_always_eps
+[ 80%] Built target motioncorr_logfile_late_guard
+[ 81%] Built target observation_model_save
+[ 82%] Built target image_write_faults
+[ 83%] Built target native_movie_staging
+[ 85%] Built target motioncorr
+[ 87%] Built target runner_numerics
+[ 89%] Built target patch_retry_state
+[ 90%] Built target cpu_patch_phase_window
+[ 92%] Built target cpu_patch_phase_bench
+[ 93%] Built target defect_parser
+[ 94%] Built target pdf_concat
+[ 96%] Built target stage_profile_threads
+[ 98%] Built target frame_buffer_pool
+[ 98%] Linking CXX executable motioncorr_logfile_eps_order
+[ 99%] Built target motioncorr_logfile_eps_order
+[100%] Linking CXX executable motioncorr_logfile_placeholder
+[100%] Built target motioncorr_logfile_placeholder

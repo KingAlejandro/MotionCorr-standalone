@@ -1,0 +1,29 @@
+[
+  {
+    "name": "debug-old-witness",
+    "build": "build-debug",
+    "file": "tests/test_cpu_patch_phase_window.cpp",
+    "old": "phase_calls.fetch_add(1,std::memory_order_relaxed); return __real_sin",
+    "new": "return __real_sin",
+    "build_status": 0,
+    "test_status": 1
+  },
+  {
+    "name": "release-full-local",
+    "build": "build-release",
+    "file": "src/motioncorr_runner.cpp",
+    "old": "is_global ? 0 : ccf_nfx, is_global ? 0 : ccf_nfy",
+    "new": "0, 0",
+    "build_status": 0,
+    "test_status": 1
+  },
+  {
+    "name": "release-dead-final",
+    "build": "build-release",
+    "file": "src/motioncorr_runner.cpp",
+    "old": "if (is_global || (!(rmsd < tolerance) && iter < max_iter)) {",
+    "new": "if (true) {",
+    "build_status": 0,
+    "test_status": 1
+  }
+]

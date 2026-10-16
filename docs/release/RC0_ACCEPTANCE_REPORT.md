@@ -1,79 +1,100 @@
-# RC0 acceptance report (SKELETON)
+# RC0 acceptance report (SKELETON, partly filled)
 
-Status: **skeleton, not a result, revision 1** (after the R-REL accuracy review of PR #201). Fill from the qualification of the frozen SHA (QF, #198). Every cell that needs a QF result says
-**pending RC0 QF**. A planned or unrun check is **UNRUN**, never PASS. Rows labelled "reference" come from earlier evidence at an
-older SHA and are not RC0 results.
+> **EVALUATION RC0, not a stable release** (maintainer decision D7, [#198](https://github.com/KingAlejandro/MotionCorr-standalone/issues/198)). No
+> unrestricted or stable support is claimed for CUDA local alignment (known limitation **S1**, PROVISIONAL), and no scientific equivalence or
+> preference for either backend is established.
+
+Status: **skeleton, revision 2.** Filled from the qualification PRs #209 (Q1), #204 (raw MRC), #208 (EER), #207 (resident retry) and #212 (S1), all at
+main `1db86902` and reported on #198. The frozen SHA and the QF rows stay **pending freeze**. A planned or unrun check is **UNRUN**, never PASS.
+Evidence cited here comes from those PRs and #198 and was not re-run by the author of this report; the PRs are open, so their claims are as reported
+there. Rows labelled "reference" come from earlier evidence at an older SHA and are not RC0 results.
 
 ## 1. Frozen SHA
 
 | Field | Value |
 |---|---|
-| Frozen source SHA | pending RC0 QF (decision D4 on #198) |
-| Base for this draft | main `1db86902` |
-| Register items included (GO, merged) | C1 #178, C2 #187, C3 #188, C4 #185, E1 #196, M1 #195, R1 #197; list the merge SHAs at freeze |
-| Prospective, not yet merged | **F1** (no `logfile.pdf` after a failed render, `fix/rc0-logfile-failed-render`): GO as a routine fix, pending merge, independent review and tests. Pending merge/review/tests state: pending RC0 QF. C5 #179, C6 #181, C7 #183: **bounded experiments** under the amended rule ([#10](https://github.com/KingAlejandro/MotionCorr-standalone/issues/10#issuecomment-6223528151)); only items the coordinator records GO enter |
-| Held / excluded | T1 #138: bounded experiment, **merge HOLD pending D1** and its gates (not simply out of scope); L1 #141/#152 nvTIFF: **NO-GO for RC0** unless D2 is GO before freeze and a separate complete-product gate passes; E2 #193 option 2: bounded experiment, NO-GO for RC0 unless all gates pass before freeze; C8 #184 and C9 #177/#182: NO-GO; #149 deferred |
-| Open items that affect the claim | QM memory admission on smaller GPUs: pending; T3 nvCOMP pre-decode arithmetic audit: decision pending |
-| CI run on the frozen head | pending RC0 QF |
-| Decisions recorded | D1 decoder trust boundary: pending; D2 optional proprietary dependencies: pending; T3 arithmetic audit: pending (brief [PR #199](https://github.com/KingAlejandro/MotionCorr-standalone/pull/199), being revised); D3 each merge: per PR; D4 scope and SHA: pending |
+| Frozen source SHA | **pending freeze** (decision D4 on #198) |
+| Base for this draft | main `2b3c74b3` (= `1db86902` + #200 F1 + #210 TST1); qualification evidence is at `1db86902` |
+| Register items merged | C1 #178, C2 #187, C3 #188, C4 #185 (`d7171b81`), E1 #196 (`4b849165`), M1 #195 (`faf5fbdf`), R1 #197 (`0ac2726a`), F1 #200 (`ea86fc90`), TST1 #210 (`2b3c74b3`); merge SHAs of C1-C3 are in the #198 register |
+| Pending, not merged | **F3/F3b** [PR #205](https://github.com/KingAlejandro/MotionCorr-standalone/pull/205) (truncated raw MRC, gain, defect map fail explicitly; D5 approved, in qualification); **T3** checked-arithmetic hardening of the nvCOMP pre-decode arithmetic (approved for RC0, `fix/rc0-nvcomp-checked-arithmetic`); **QM** memory admission on smaller GPUs (no worker assigned) |
+| Bounded experiments, not in RC0 unless they pass the amended rule | C5 #179, C6 #181, C7 #183 ([#10](https://github.com/KingAlejandro/MotionCorr-standalone/issues/10#issuecomment-6223528151)); E2 #193 option 2 |
+| Excluded | T1 #138 (NO-GO for RC0, parked [PR #206](https://github.com/KingAlejandro/MotionCorr-standalone/pull/206)); L1 #141/#152 nvTIFF (NO-GO, not used); C8 #184 and C9 #177/#182 (NO-GO); #149 deferred; TST2 genuine device poisoning (post-RC0, #213); #214 (compressed-MRC exit status), #215 (nvCOMP file identity) post-RC0 |
+| CI run on the frozen head | pending freeze |
+| Decisions recorded | D1: option 1, documented trusted-input precondition (no code change); D2: interim policy A (optional, default-off, not vendored, no project-distributed linked binaries); T3: checked-arithmetic hardening for RC0; D5: F3/F3b fail-closed approved, F4 a documented limitation; D6: preserve the EER skip-and-warn recovery; D7: evaluation RC0 with S1 provisional. D3 (each merge) is per PR; D4 (scope and SHA) is open |
 
 ## 2. Supported and unsupported configurations
 
-Copy the final classes from `SUPPORT.md` §1 and the matrices in §2 and §3 of that page. Each row below is filled at freeze.
+Classes follow `SUPPORT.md` §1; evidence is at `1db86902` unless stated. "QF" = re-verification on the frozen SHA, **pending freeze** for every row.
 
-| Configuration | Class at freeze | Evidence | Verdict |
+| Configuration | Class | Evidence at `1db86902` | QF |
 |---|---|---|---|
-| CPU `--use_own`, Release, Linux x86_64 | pending RC0 QF | pending RC0 QF | pending RC0 QF |
-| CPU `--use_own`, Release, macOS arm64 | pending RC0 QF | CPU suite with 2 inherited failures and 1 skip (`RELEASE_CHECKLIST.md` §3) | pending RC0 QF |
-| CUDA one device, no nvCOMP | pending RC0 QF | pending RC0 QF | pending RC0 QF |
-| CUDA one device, nvCOMP | pending RC0 QF | pending RC0 QF | pending RC0 QF |
-| Multi-GPU via `run_dataset.py` | pending RC0 QF | pending RC0 QF | pending RC0 QF |
-| Input rows R1-R12 | per `RELEASE_CHECKLIST.md` §7 | pending RC0 QF | pending RC0 QF |
+| CPU `--use_own`, Release, Linux x86_64 | supported (intended) | CPU CTest 58/59 (`ProfilingKit` 30 s load timeout, passed on rerun); CPU build route-invariance runs 14/14 exit 0 (#209) | pending freeze |
+| CPU `--use_own`, Release, macOS arm64 | supported (intended) | local author run at the merge head `67b5315b`: 60 collected, 57 passed, 2 failed (`SyntheticRegression`, `MultiGpuScheduling`, both inherited), 1 skipped (`RELEASE_CHECKLIST.md` §3) | pending freeze |
+| CUDA, one device, no nvCOMP | supported for evaluation; **local alignment: S1, no unrestricted claim** | CTest 89/89, 0 skipped (#209); route invariance auto vs float 14/14 identical on 7 families x G/L; #178 CPU unweighted path executed natively 6/6 identical to pre-#178 | pending freeze |
+| CUDA, one device, nvCOMP (`USE_NVCOMP=ON`) | experimental; trusted-input precondition (D1) | CTest 92/92, 0 skipped (#209); tutorial route `nvcomp`, identical to float | pending freeze |
+| Multi-GPU via `run_dataset.py` | supported for evaluation | 1/2/4 workers x 24 tutorial movies, G and L, 6/6 endpoint PASS, distinct witnessed UUIDs, identical to a single process, real-Ghostscript 30-page `logfile.pdf`; mixed tutorial + 10641 + EER 2-worker run identical to 1-worker (#209) | pending freeze |
+| Raw integer MRC modes 0/1/6 (compact route, #195) | supported on valid input | real 10164/10216/10028 G and L, auto vs float 6/6 identical; synthetic modes 0/1/6/2/12/101 28/28; compressed xz/zstd 16/16 on the float route; pinned-compact refusals 15/15; modes 3/4 refuse (#204, evidence audit corrected @ `5944617b`) | pending freeze |
+| Truncated raw MRC, gain, defect map | **today: products published from partly unread memory** (F3); fails explicitly only with PR #205 | #204, #198 register F3/F3b | pending #205 |
+| Compressed MRC (`.bz2`/`.xz`/`.zst`) | supported on valid, **independently validated** input (F4: decoder exit status unchecked) | #204 (native `pbzip2` UNRUN; `.bz2` tested through a `bzip2 -cd` shim) | pending freeze |
+| EER compact route (#196) | supported on valid input; `--expected_frames` recommended (D6) | 34/34 strict tree identities (31 CUDA auto vs float incl. upsampling -1/1/2/3, gain, defect file, synthetic 65000/65002; 3 CPU old vs new); all seven corpus EER files are encoding 65001 at 4096 x 4096; 65000/65002/2K synthetic only (#208) | pending freeze |
+| Resident patch retry (#197) | supported | success path 10641 41/50 and 10216 30/50 patches retried, identical to pre-#197 and to `1db86902` with #197 reverted (28 comparisons); injected recoverable failure identical, injected fatal failure refuses with no publication; 1- vs 2-worker identical (#207) | pending freeze |
+| **CUDA local alignment vs CPU** | **S1, PROVISIONAL**: relative RMSE 0.43-0.60 on 10216, 10474 Falcon 3, 12963 (5 x 5 patches) | #209 backend diagnostic, #212 diagnosis | heavy testing is the priority after freeze |
+| Input rows R1-R12 | per `RELEASE_CHECKLIST.md` §7 | partly covered by #204, #208, #209 | pending freeze |
 | Unsupported (named in `SUPPORT.md` §1) | unsupported | n/a | n/a |
 
 ## 3. Known limitations
 
-Carry over from `SUPPORT.md` §5, §6 and §8, updated at freeze:
+Carry over from `SUPPORT.md` §0, §5, §6 and §8, updated at freeze:
 
-- the `0.001` relative-RMSE diagnostic fails for CUDA versus CPU (reference: 24/24 tutorial movies, 0.002899-0.010082; not re-measured on RC0);
+- **S1 (PROVISIONAL, first post-freeze priority):** the statement in `SUPPORT.md` §0, verbatim; evidence PRs #212 and #209;
+- the `0.001` relative-RMSE diagnostic fails for CUDA versus CPU in all 14 tested family and config cases at `1db86902` (config G 0.0015-0.023); the absolute RMSE
+  limit failed in 9 and the max-pixel limit in 5 of 14, tracking intensity scale (#209); the historical 24 tutorial movies gave 0.002899-0.010082;
 - no Tier D scientific gate (#61, #73);
 - resume does not detect changed settings (#149 deferred);
 - no rollback: a failed movie can leave a truncated or earlier per-movie file and an auxiliary `_PS.mrc`; a failed batch withholds the joint
   output and keeps healthy per-movie products (`SUPPORT.md` §6);
-- a failed `logfile.pdf` render is non-fatal outside `--aggregate_only` (pending fix F1, `fix/rc0-logfile-failed-render`);
-- host RAM with `--grouping_for_ps` on CUDA (one extra Fourier movie), per-geometry VRAM floor and unqualified out-of-memory behaviour
-  (register item QM pending), EER upsampling 2 storage (about 75 GiB estimated for 144 groups, not run);
-- decoder trust boundary: pending D1/D2;
+- a failed `logfile.pdf` render leaves no `logfile.pdf` (F1, merged); strict in `--aggregate_only`;
+- F3/F3b pending (#205); F4 compressed MRC must be validated independently (#214); F5 big-endian mode-0 MRC with nx = 128 not swap-detected;
+- EER (D6): damaged fractions are skipped with a warning and the movie publishes; undetected corruption that preserves the pixel count; a truncated EER is a
+  shorter movie unless `--expected_frames` or a STAR count is supplied;
+- nvCOMP (D1): assumes complete, unmodified input files; a file changing between scan and read is not detected (#215); T3 hardening pending; use `--ingest compact` otherwise;
+- optional proprietary dependencies (D2): no project-distributed nvCOMP/nvTIFF-linked binaries; nvTIFF not used;
+- host RAM with `--grouping_for_ps` (about +3.8 GiB float, +1.9 GiB compact on 10216), per-geometry VRAM floor, unqualified out-of-memory behaviour (QM),
+  EER upsampling 2 memory (Falcon 4, 144 groups, fits at 79,522 MiB on 80 GB);
 - inherited macOS test results (`SyntheticRegression`, `MultiGpuScheduling` fail; `NativeMovieStaging` skips);
-- data-dependent patch non-convergence retry (EMPIAR-10641, 10216);
+- `ProfilingKit` has a load-sensitive 30 s subprocess timeout (#209);
+- data-dependent patch non-convergence retry (EMPIAR-10641, 10216): host RSS 2.07 GiB with the resident retry versus 7.0 GiB before #197, one retry +504 MiB VRAM on 10641 (#207);
+- differences from RELION 5.1: `SUPPORT.md` §0a (#216);
 - anything newly found during QF.
 
 ## 4. Failed and UNRUN checks
 
-List every check that failed or was not run, with the reason. Do not drop an original failure.
+Every check that failed or was not run, with the reason. Original failures are not dropped.
 
 | Check | Status | Reason / evidence |
 |---|---|---|
-| Native CUDA execution of the CUDA-to-CPU unweighted fallback (#198 C1) | UNRUN | pending RC0 QF |
-| Forced out-of-memory on session initialisation (QM) | UNRUN | register item pending |
-| Cross-backend CPU versus CUDA `compare_motioncorr.py --gate backend` per movie | UNRUN | needs a CUDA arm and GNU `time -v` logs |
-| F1 merged, reviewed and tested | pending | #198 register F1 |
-| Linux CPU build and full CTest on the frozen SHA | UNRUN | pending RC0 QF |
-| CUDA build (no nvCOMP) full CTest, native | UNRUN | pending RC0 QF |
-| CUDA + nvCOMP full CTest, native | UNRUN | pending RC0 QF |
-| Real-format rows R1-R12 | UNRUN | pending RC0 QF |
-| Example run inventory with Ghostscript installed | UNRUN | not run locally (no `gs`); pending RC0 QF |
-| `run_dataset.py` success path on macOS | UNRUN | local attempt failed only because `gs` is missing (`RELEASE_CHECKLIST.md` §8) |
-| Multi-GPU 1/2/4 on the frozen SHA, failure injection | UNRUN | pending RC0 QF |
-| `SyntheticRegression` on macOS | FAILED (inherited) | max pixel diff 23.649856567382812; unchanged from main |
-| `MultiGpuScheduling` on macOS | FAILED (inherited) | tomography endpoint validator; 73 of 74 checks |
+| Frozen-SHA qualification (QF): CPU, CUDA, CUDA+nvCOMP CTest and product campaign | UNRUN | pending freeze |
+| CUDA-to-CPU unweighted fallback (#198 C1) | executed natively at `1db86902` | #209: 6/6 identical to pre-#178; injected non-fatal `cudaMalloc` failure falls back identically. Re-run on the frozen SHA pending freeze |
+| `ProfilingKit` (CPU, Linux) | FAILED once, then passed | 30 s subprocess timeout at load about 27; passed on rerun (#209) |
+| `SyntheticRegression` on macOS | FAILED (inherited) | max pixel diff 23.649856567382812; unchanged from main; reproduced at `67b5315b` |
+| `MultiGpuScheduling` on macOS | FAILED (inherited) | tomography endpoint validator; 73 of 74 checks; passed on Linux (#209) |
 | `NativeMovieStaging` on macOS | SKIPPED | Linux-only |
+| Forced out-of-memory on session initialisation (QM); EER OOM path (the movie fit) | UNRUN | register item pending; #208 |
+| Genuine device poisoning | UNRUN | all fatal cases inject error codes; post-RC0 (#213) |
+| Native `pbzip2` | UNRUN | absent; `.bz2` tested via a `bzip2 -cd` shim (#204) |
+| 10441 and 10641 config G/L product campaign; launcher failure/resume injection; PDF content; second venue; timing | UNRUN | #209 |
+| Real 65000, 65002 and 2K EER files; 8K gain at upsampling 1; measured 144-group retry VRAM; converging real-data retry | UNRUN | #208, #207 |
+| Truncated raw MRC fails explicitly (F3/F3b) | pending | PR #205 in qualification |
+| T3 hardening merged and qualified | pending | #198 register T3 |
+| Cross-backend `compare_motioncorr.py --gate backend`, all families | executed as a diagnostic at `1db86902` | relative RMSE fails 14/14 as expected; see §3 and S1 (#209). Not a gate result |
+| EER frame-count metadata; RELION pipeliner/GUI without `logfile.pdf`; RELION 5.1 vs standalone on the #186 families | UNRUN | `POST_FREEZE_TEST_PLAN.md` §3a (#216) |
+| Example run inventory with Ghostscript on macOS; `run_dataset.py` success path on macOS | UNRUN | local attempt failed only because `gs` is not installed there (`RELEASE_CHECKLIST.md` §8); Linux real-Ghostscript run passed (#209) |
 | nvTIFF/LZW, device EER renderer, nvCOMP widening | not in RC0 | #198 register |
 
 ## 5. Resource requirements
 
 Peak host RSS and device memory per corpus family. The reference columns are the #186 measurements at main `116eb04a`
-(before #178, #187, #195, #196, #197 and #185 merged); the RC0 columns are filled at QF.
+(before #178, #187, #195, #196, #197 and #185 merged); the RC0 columns are filled at QF (**pending freeze**). The table after the reference tables gives the qualification measurements at `1db86902`.
 
 Reference provenance. CPU: cpu64, AMD EPYC 7763, 64 cores, SMT off, 226 GB RAM, THP `madvise`, GCC 13.3.0, FFTW 3.3.10, libtiff 4.5.1,
 binary SHA-256 `86a43e9f0fa0787ba7eef5270c65eee466857e493d7f6df6daa98de0b28bed53`; config L (`--patch_x 5 --patch_y 5`), dose weighting,
@@ -84,7 +105,7 @@ lower bound) and includes the CUDA context (`docs/workload_corpus/gpu/README.md`
 
 | Family | Reference CPU RSS GiB, L, `--j 1` / `--j 8` | Reference GPU host RSS GiB, L | Reference VRAM GiB, G / L | RC0 RSS | RC0 VRAM |
 |---|---|---|---|---|---|
-| tutorial (3838 x 3710 x 24) | 2.75 / 3.19 | 0.4 | 3.2 / 3.3 | pending RC0 QF | pending RC0 QF |
+| tutorial (3710 x 3838 x 24) | 2.75 / 3.19 | 0.4 | 3.2 / 3.3 | pending RC0 QF | pending RC0 QF |
 | EMPIAR-10028 (4096 x 4096 x 16) | 2.17 / 2.67 | 1.6 | 2.6 / 2.7 | pending RC0 QF | pending RC0 QF |
 | EMPIAR-10361 (5760 x 4092 x 62) | 11.24 / 11.99 | 1.7 | 11.6 / 12.3 | pending RC0 QF | pending RC0 QF |
 | EMPIAR-10641 (5760 x 4092 x 70) | 12.75 / 13.50 | 7.0 (includes the retry path) | 13.1 / 14.7 | pending RC0 QF | pending RC0 QF |
@@ -95,14 +116,35 @@ lower bound) and includes the CUDA context (`docs/workload_corpus/gpu/README.md`
 | EMPIAR-10164 (7420 x 7676 x 8) | 3.89 / 5.57 | 2.2 | 4.5 / 4.5 | pending RC0 QF | pending RC0 QF |
 | EMPIAR-10216 (4096 x 4096 x 59) | 7.62 / 8.15 | 4.2 | 8.0 / 9.0 | pending RC0 QF | pending RC0 QF |
 
+**Qualification measurements at `1db86902` (PR #209).** Peak host RSS (GiB) of the single-movie worker process from `/usr/bin/time -v`, one movie per
+family, `--j 8`, `docs/workload_corpus/families.json` options. Source `1db869025507ac801845b4001b84e6bc0e77a645` (clean clone), host 4GPUs
+(4-gpu-vm, 4 x A100 80 GB PCIe, driver 570.86.10, g++ 13.3.0, CUDA 12.8.61, nvCOMP 5.3.0.16, THP `madvise`), lane GPU1 and CPUs 104-111, Release builds
+(CPU binary `dd86cd41...6b26439`, CUDA+nvCOMP `77db3f92...12a99`; full hashes in `docs/rc0/qual_main_1db86902/raw/summaries/build-info.txt` on PR #209's branch).
+One sample per cell; no variability is available. Routes are the `--ingest_witness` values. Not a performance claim.
+
+| Family | cfg | auto route | RSS auto | RSS `--ingest float` | RSS CPU build |
+|---|---|---|---:|---:|---:|
+| tutorial | G / L | nvcomp | 0.34 / 0.34 | 1.52 / 1.52 | 2.71 / 2.84 |
+| EMPIAR-10361 | G / L | compact | 1.54 / 1.53 | 5.67 / 5.68 | 11.06 / 11.28 |
+| EMPIAR-10474 Falcon 3 | G / L | compact | 3.16 / 3.16 | 5.02 / 5.14 | 8.53 / 8.65 |
+| EMPIAR-12963 | G / L | compact | 2.30 / 2.30 | 3.57 / 3.63 | 5.89 / 5.97 |
+| EMPIAR-10216 | G / L | compact | 2.10 / 2.10 | 3.89 / 4.01 | 7.50 / 7.66 |
+| EMPIAR-10028 | G / L | float | 1.59 / 1.54 | 1.55 / 1.58 | 2.11 / 2.43 |
+| EMPIAR-10164 | G / L | compact | 0.80 / 0.85 | 2.14 / 2.08 | 3.78 / 4.60 |
+
+Other qualification figures (single runs, same host): EER upsampling at the compact route lowered host RSS 34-39 % at upsampling 1 and 43-47 % at 2 and 3
+(no saving at -1); a 144-group Falcon 4 movie at upsampling 2 fit on the 80 GB card at 79,522 MiB (calculated 80,520 MiB) with host RSS 21,547 MiB compact versus 40,171
+MiB float (PR #208, lane GPU2, CPUs 112-119). EMPIAR-10641 resident retry: peak host RSS 2.07 GiB versus 6.6 GiB (injected fallback) and 7.0 GiB (pre-#197); NVML VRAM
+14.24 / 14.68 / 14.68 GiB; one resident retry allocates 504 MiB (10641) / 301 MiB (10216) (PR #207, lane GPU2, CPUs 80-87; VRAM corrected after R-QA1).
+`--grouping_for_ps 4` on EMPIAR-10216: about +3.8 GiB host RAM (float) and +1.9 GiB (compact), single samples (PR #204, lane GPU3, CPUs 88-95).
+
 Source tables: `docs/workload_corpus/cpu/README.md` ("Peak RSS" table) and `docs/workload_corpus/gpu/README.md` ("Per-family result"
 table). Rule of thumb from the GPU report: VRAM peak is two resident float32 movies (`2 x frames x nx x ny x 4 B`) plus 0.7-4.2 GiB;
 estimates for 24, 40 and 48 GiB cards are arithmetic, not runs. Also record: scratch space per run, pinned host memory
 (`MOTIONCORR_NVCOMP_PINNED_MAX_MB`, default 256 MiB per worker, `cuda_movie_session.cu:1544-1545`), per-worker RSS and VRAM at 1/2/4 devices,
 and the 8-CPU or other CPU cap actually used. Add the two inherited host/VRAM behaviours: `--grouping_for_ps` on the resident CUDA
-path downloads one extra Fourier movie to the host (`src/motioncorr_runner.cpp:3205-3212`), and the resident path needs two float-size
-stacks on the device (EMPIAR-10441 peaked at 39.3 GiB). EER upsampling 2 quadruples movie storage (about 75 GiB estimated for 144 groups,
-not run).
+path downloads one extra Fourier movie to the host (`src/motioncorr_runner.cpp:3210-3217`), and the resident path needs two float-size
+stacks on the device (EMPIAR-10441 peaked at 39.3 GiB). EER upsampling 2 quadruples movie storage (measured 79,522 MiB for 144 groups, above).
 
 ## 6. Measured performance
 

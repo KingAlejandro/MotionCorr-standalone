@@ -2,6 +2,10 @@
 
 An experimental standalone build of RELION 5.1's CPU implementation of the MotionCor2-style motion correction algorithm. This repository contains the command-line motion correction entry point and its required RELION source files, without the full RELION application.
 
+> **Release status: EVALUATION RC0, not a stable release.** It is offered for evaluation and heavy testing. CUDA local alignment (`--patch_x`/`--patch_y` of 3 or more with `--gpu`) has **no unrestricted or stable support claim**: see known limitation **S1 (PROVISIONAL)** below and in [`docs/release/SUPPORT.md`](docs/release/SUPPORT.md).
+>
+> Coming from RELION? See [SUPPORT.md → Coming from RELION (#216)](docs/release/SUPPORT.md#0a-coming-from-relion-51-relion_run_motioncorr---use_own).
+
 ## Source and license
 
 Extracted from [`3dem/relion` `ver5.1`](https://github.com/3dem/relion/tree/ver5.1) at commit `ad0b230ca22095700f6392479326836efb1c911d`. Original notices are retained in the source files; see `SOURCE_MANIFEST.txt` for the imported files. RELION's GPL-2.0-or-later terms apply; see `LICENSE` and `COPYING`. The included `d3x3` sources retain their copyright notices in their directories.
@@ -60,6 +64,21 @@ cmake --build build-cuda --parallel
 `./build/motioncorr --version` prints the version; `./build/motioncorr --use_own --help` lists the options.
 
 **Validation status.** The gates and what each one measures are defined in [`docs/gate_contract.md`](docs/gate_contract.md). The CPU build is checked byte for byte against recorded CPU output (Tier A) and against known injected motion (Tier C). CUDA output is not byte-identical to CPU output. The strict CUDA-versus-CPU relative-RMSE diagnostic (limit 0.001) still fails: 0/24 tutorial movies in the historical [CUDA validation report](docs/cuda_global_alignment_validation.md), with relative RMSE 0.002899-0.010082. The explicit backend profile records that failure as non-blocking; it is a CPU-agreement diagnostic, not a measure of signal loss. No downstream scientific gate (CTF/FSC/B-factor) exists yet, so no scientific equivalence is claimed. Supported and experimental configurations are listed in the [RC0 support draft](docs/release/SUPPORT.md); the release checklist is [`docs/release/RELEASE_CHECKLIST.md`](docs/release/RELEASE_CHECKLIST.md).
+
+**Known limitation S1 (PROVISIONAL, priority for heavy testing).** In the tested movies (EMPIAR-10216, 10474 Falcon 3 and 12963, 5×5 patches), CPU and CUDA local-alignment products differ substantially (relative RMSE 0.43–0.60). This was already present before RC0 (`116eb04a`). The difference is amplified by patch acceptance and the inherited unweighted polynomial fit. It also occurs among trajectories accepted on both backends; matching convergence status does not guarantee agreement. In the inspected cases the initiating events are frames where two cross-correlation peaks are within a few float ulps and the two backends order them differently. Making CUDA use the CPU tie rule (#70) changed two outputs slightly but did not explain the discrepancy. Whether the small map differences are pure rounding is not established. Other CUDA defects are not excluded, and no scientific equivalence or preference for either backend is established. Evidence: [PR #212](https://github.com/KingAlejandro/MotionCorr-standalone/pull/212) and [PR #209](https://github.com/KingAlejandro/MotionCorr-standalone/pull/209).
+
+**Optional nvCOMP GPU decoder: input-trust precondition.** On builds configured with `-DUSE_NVCOMP=ON` (default OFF), `--ingest auto` sends eligible TIFFs (16-bit, Deflate/Adobe-Deflate, one row per strip, no predictor, native byte order) to NVIDIA nvCOMP's GPU Deflate decoder. nvCOMP 5.3 documents undefined behaviour for corrupt compressed input. MotionCorr checks the TIFF structure, zlib wrapper, sizes/offsets, decoder status, decoded length and an Adler-32 checksum before using any decoded data, but it cannot guarantee safe behaviour on a corrupt Deflate body. This route therefore assumes complete, unmodified acquisition files; use `--ingest compact` for files of unknown integrity or still being written. A file that changes between the tag scan and the read is not detected (follow-up [#215](https://github.com/KingAlejandro/MotionCorr-standalone/issues/215)); checked-arithmetic hardening (T3) is pending until it merges.
+
+**Compressed MRC inputs must be validated first.** `.bz2`/`.xz`/`.zst` MRC movies are read without checking the decompressor's exit status after a complete read, so some end-of-stream corruption is accepted. Run `xz -t`, `zstd -t` or `bzip2 -t`/`pbzip2 -t` on every file before processing (fix scheduled: [#214](https://github.com/KingAlejandro/MotionCorr-standalone/issues/214)). For EER, supply `--expected_frames` (or per-movie STAR frame counts): a truncated EER file is otherwise processed as a shorter movie, and a fraction with a wrong pixel count is skipped with a warning. See [`docs/release/SUPPORT.md`](docs/release/SUPPORT.md) §6.
+
+## Optional proprietary dependencies
+
+- nvCOMP (tested 5.3.0.16) is optional and off by default (`-DUSE_NVCOMP`). It is not included or vendored in this repository, and it is licensed under NVIDIA's SDK agreement, which you obtain and accept from NVIDIA.
+- This project distributes no binaries linked against nvCOMP or nvTIFF.
+- Redistribution of such binaries remains subject to licensing review. Anyone who builds and distributes one must review both licences first.
+- nvTIFF is not used by RC0.
+
+Basis: the decision brief in [PR #199](https://github.com/KingAlejandro/MotionCorr-standalone/pull/199), section 3.
 
 You can also supply a movie file or quoted file wildcard directly when `--angpix` and `--voltage` are specified. This standalone build repairs a RELION 5.1 direct-input crash caused by missing per-movie metadata.
 

@@ -1,12 +1,33 @@
 # Post-freeze validation plan (DRAFT)
 
-Status: **draft, revision 1** (after the R-REL accuracy review of PR #201). This is the heavy validation campaign that runs **after** the RC0 freeze, on the frozen SHA. It is a plan:
+Status: **draft, revision 2** (after the R-REL review of PR #201 and the maintainer decisions D1, D2, T3, D5, D6, D7). RC0 is an **evaluation** release, not a stable one (D7). This is the heavy validation campaign that runs **after** the RC0 freeze, on the frozen SHA. It is a plan:
 every row is **UNRUN** and every result cell is **pending**. Resource lanes, locks and venues are those recorded on
 [#198](https://github.com/KingAlejandro/MotionCorr-standalone/issues/198) (checked 2026-10-16 19:21Z) and must be re-checked
 at run time (`AGENTS.md`: check occupancy before running work; leave unrelated processes alone; record actual resources).
 
 The freeze-time gate is `RELEASE_CHECKLIST.md` (QF). This plan adds breadth, soak and scientific evidence that QF does not
 cover. Nothing here changes a gate or tolerance (`docs/gate_contract.md`).
+
+## 0. Priority 1: S1, CPU versus CUDA local alignment (PROVISIONAL)
+
+S1 is the first item of this campaign and has priority over every other row. The statement that RC0 ships is in `SUPPORT.md` §0 and `README.md`
+(maintainer decision D7); evidence: [PR #212](https://github.com/KingAlejandro/MotionCorr-standalone/pull/212) (diagnosis) and
+[PR #209](https://github.com/KingAlejandro/MotionCorr-standalone/pull/209) (backend diagnostic table, main `1db86902`: relative RMSE CPU versus CUDA 0.43-0.60
+on EMPIAR-10216, 10474 Falcon 3 and 12963 with 5 x 5 patches). The campaign, in this order:
+
+1. **More movies per family.** Run CPU and CUDA local alignment (configs L and 3 x 3) on many more distinct movies of every #186 family, not one
+   or two, and record per movie: the backend gate result, the number of patches that converge on each backend, the patch sets that differ, and the
+   relative RMSE. Establish how often S1 occurs and on which families (it was seen on families with non-converging patches; the tutorial, 10361,
+   10164 and 10028 were 0.0013-0.014).
+2. **Older builds.** Re-run on older builds to establish longevity. S1 is already present at `116eb04a`; test earlier builds too, and a
+   CPU build against CPU builds (CPU-versus-CPU is the control).
+3. **CCF near-tie logging.** Log the cross-correlation peaks (top two values and positions, and their ordering on each backend) at every frame of
+   the patches whose trajectories diverge, to test the diagnosed mechanism: two peaks within a few float ulps ordered differently by the two backends.
+   PR #212's finding that using the CPU tie rule (#70) changed two outputs slightly but did not explain S1 stays the reference result; whether the
+   small map differences are pure rounding is open, and other CUDA defects are not excluded.
+4. **Downstream scientific comparison.** CTF, FSC and relative B-factor on CPU-aligned versus CUDA-aligned micrographs of the same movies (#61, #73),
+   including at least one S1 family. Only this can say whether the difference matters.
+5. Keep thresholds unchanged. Any change to a gate or default is a separate maintainer decision (D7 options 2 and 3 are post-RC0).
 
 ## 1. Venues
 
@@ -28,7 +49,7 @@ EMPIAR-10028 (float32 MRC), 10361/10641/10441 (LZW BigTIFF), 10474 Falcon 3 and 
 two stale labels (tutorial "u8", EMPIAR-10164 "u8"); `SUPPORT.md` §2 gives the corrected description and the coordinator is
 fixing the corpus text separately.
 
-Add what the corpus lacks, as separate small rows: compressed MRC (needs `pbzip2`/`xz`/`zstd`), signed TIFF, float TIFF, 4-bit
+Add what the corpus lacks, as separate small rows: compressed MRC (needs `pbzip2`/`xz`/`zstd`; **run `xz -t`, `zstd -t` or `bzip2 -t`/`pbzip2 -t` on every input first**, F4), signed TIFF, float TIFF, 4-bit
 inputs, a multi-optics STAR, a tomography STAR, and a movie that triggers patch non-convergence (EMPIAR-10641 and 10216 do).
 
 ## 3. Option matrix
@@ -48,15 +69,28 @@ Options:
 - patches: none, 3 x 3, 5 x 5 (a value of 2 is skipped by the program, `src/motioncorr_runner.cpp:308-314`);
 - dose weighting off/on (voltage must be within 2 kV of 100, 200 or 300), `--save_noDW` (only produces a separate file with dose weighting), `--even_odd_split`, `--grouping_for_ps` with `--ps_size`, `--float16`;
 - `--bin_factor` 1, 2 and a non-integer value (binned dimensions must be even); early binning on and `--no_early_binning` (on CUDA, early binning prevents the
-  resident session, `:2264`);
+  resident session, `:2269`);
 - `--group_frames`, `--first_frame_sum`/`--last_frame_sum`, `--max_iter`;
 - gain with `--gain_rot` 0-3 and `--gain_flip` 0-2; defect text file and defect map; `--skip_defect`; `--seed`;
 - EER grouping and upsampling -1, 1, 2 (and 3 on 4096 x 4096 only; 2048 x 2048 and 2-bit sub-pixel EER take only 1 and 2), including a
-  value that crosses the uint16 limit and, on an 80 GB card, upsampling 2 on a large EER movie (about 75 GiB estimated, never run);
+  value that crosses the uint16 limit and, on an 80 GB card, upsampling 2 on a large EER movie (one run fit at 79,522 MiB, PR #208, no headroom; repeat for variability);
 - `--ingest auto|nvcomp|compact|float` with `--ingest_witness` on every run; pinned-route refusals on ineligible movies;
 - `--j` 1, 4, 8; `--max_io_threads`; `--sync_output`.
 
 Record the route witness for every CUDA run. A row without a witness is not a route claim.
+
+## 3a. RELION 5.1 compatibility rows (#216)
+
+From [#216](https://github.com/KingAlejandro/MotionCorr-standalone/issues/216); summary in `SUPPORT.md` §0a. All **UNRUN**.
+
+| Row | What to test | Expected / question | Inputs |
+|---|---|---|---|
+| (a) EER frame-count metadata | The per-movie STAR counts `rlnNrOfFrames` / `rlnTomoTiltMovieFrameCount` (and `--expected_frames`) are compared with the **decoded grouped** frame count, which for EER is `fractions / --eer_grouping` with the trailing remainder dropped (`src/motioncorr_runner.cpp:454-478, 2141-2146, 2125-2127`). Run EER movies whose STAR records the **raw fraction count** and ones that record the grouped count; include a **RELION 5 tomography STAR** | Does the standalone fail movies that RELION 5.1 processes? Not yet shown (#216 "to verify"); record each case, the exact error text and exit status, and RELION's behaviour on the same STAR | e10474f3/f4, e12963; a RELION 5 tomography import of EER tilts |
+| (b) pipeliner and GUI with no `logfile.pdf` | Run RELION 5.1's pipeliner/GUI job type for motion correction with the standalone as the executable, once with Ghostscript (full `logfile.pdf`) and once without or with a forced failed render (no `logfile.pdf` after F1). Compare with RELION's own end state without Ghostscript | Does the pipeliner/GUI, which lists `logfile.pdf` as a job output node, tolerate its absence? What is RELION's own end state? Not yet checked (#216 "to verify") | tutorial subset |
+| (c) RELION 5.1 versus standalone CPU on the #186 families | Extend `docs/spa_24_movies_validation.md` (24 tutorial movies, exact profile, `--j 1` and `--j 4`; 1/24 exact at `--j 1`, #20) to the ten #186 families: same options per family (the defect-replacement random sequence is the open parity question, #20, so record whether movies share a process), pixel and STAR comparison with the exact and relaxed profiles reported **separately** (upstream parity is a separate axis, `docs/gate_contract.md` §1) | Quantify the difference introduced by the documented fixes (RNG re-seed, deterministic defect seeding, direct-input repair) per family; no tolerance is relaxed | all ten families in `docs/workload_corpus/families.json` |
+
+Row (c) needs a CPU-only build of full RELION 5.1 at `ad0b230c` on the same inputs and a venue booked for it; record both binaries' hashes, resources, inputs
+and options as in `RC0_ACCEPTANCE_REPORT.md` §6.
 
 ## 4. Failure injection
 
@@ -66,11 +100,15 @@ Reuse existing controls and add native runs on the frozen SHA:
 - damaged and truncated movies (`DamagedMovie`), wrong frame count (`--expected_frames`), gain size mismatch, SerialEM defect file;
 - CUDA: injected allocation, upload and nvCOMP failures (`CudaFaultMatrix`, `CudaPreprocessingFailurePaths`,
   `CudaNvcompAcceptanceFailures`; `CudaU16FailurePaths` exists only when configured with `-DMOTIONCORR_U16_TEST_MOVIE=<uint16 TIFF>`,
-  `CMakeLists.txt:760-779`, and a test that was not registered is not an executed pass) plus the **native** CUDA-to-CPU unweighted fallback, which is UNRUN
+  `CMakeLists.txt:788-807`, and a test that was not registered is not an executed pass) plus the **native** CUDA-to-CPU unweighted fallback, which is UNRUN
   (#198 item C1), and the resident patch retry under injected failure (#197);
 - multi-GPU: owned-worker failure with a TERM-ignoring descendant, late writer fault, report failure, and a non-prefix resume
   (`docs/multi_gpu/CURRENT_MAIN_ACCEPTANCE.md`);
-- `logfile.pdf` render failure in normal and `--aggregate_only` modes (`SUPPORT.md` §6, depends on fix F1);
+- `logfile.pdf` render failure in normal and `--aggregate_only` modes: a failed render leaves no `logfile.pdf` (F1, #200 merged), strict in `--aggregate_only` (`SUPPORT.md` §6);
+- truncated or short raw MRC movie, gain reference and defect map (F3/F3b): fail explicitly **if PR #205 has merged**; otherwise record today's behaviour (products published from partly unread memory) as the baseline;
+- compressed MRC: damaged `.xz`/`.zst`/`.bz2` files, with and without the independent integrity check; the decoder exit status is not checked (F4, fix #214), so the expected outcome without the check is acceptance of some end-of-stream corruption;
+- EER: damaged fractions (skipped with a warning, movie publishes, D6) and a truncated EER with and without `--expected_frames`;
+- big-endian mode-0 MRC with nx = 128 (F5; not swap-detected, fails identically on every route);
 - `_PS.mrc` left behind by a movie that fails after the power spectrum is written (`SUPPORT.md` §6).
 
 Each negative needs a healthy positive control that proves the intended route with `--ingest_witness`; a pinned-route refusal writes no
@@ -78,7 +116,7 @@ witness line of its own, and a witness line is a route-selection record, not a c
 outcome: named failure, no completion STAR for the failed movie, healthy movies' per-movie products retained, **no joint output for the
 batch**, no owned process left. The program does not roll back: a failed movie may leave a truncated or earlier per-movie file
 and `_PS.mrc` (`SUPPORT.md` §6, `tests/test_write_faults.py:21-30`); record what is on disk and do not assert its absence. The distinction between component injected faults
-and a genuinely poisoned device must stay explicit in the report. Malformed-input behaviour of the nvCOMP decoder is bounded
+and a genuinely poisoned device must stay explicit in the report: all fatal-path CUDA tests inject error codes, and a genuine device-poisoning control is post-RC0 (TST2, [#213](https://github.com/KingAlejandro/MotionCorr-standalone/issues/213)). Malformed-input behaviour of the nvCOMP decoder is bounded
 by D1/#134 and is not a safety claim.
 
 ## 5. Soak and long queues
@@ -129,9 +167,9 @@ From the #186 evidence at main `116eb04a` (not the frozen SHA; re-measure at fre
 - Per-geometry VRAM floor: two float-size resident stacks (about `2 x frames x nx x ny x 4` bytes) plus 0.7-4.2 GiB; EMPIAR-10441 peaked at
   39.3 GiB. Behaviour when the session cannot be allocated (streaming fallback or a clean failure) is **not qualified**; register item
   QM on #198 is pending and the forced-OOM control belongs to this campaign if QM is not closed before freeze.
-- Host RAM: `--grouping_for_ps` on the resident CUDA path downloads the full Fourier movie to the host (`src/motioncorr_runner.cpp:3205-3212`),
+- Host RAM: `--grouping_for_ps` on the resident CUDA path downloads the full Fourier movie to the host (`src/motioncorr_runner.cpp:3210-3217`),
   about one extra float-movie-sized allocation; include it in any RAM budget for that option.
-- EER upsampling 2 quadruples movie storage (about 75 GiB estimated for 144 groups, not run).
+- EER upsampling 2 quadruples movie storage: a 144-group Falcon 4 movie fit at 79,522 MiB on an 80 GB card (calculated 80,520 MiB), host RSS 21,547 MiB compact versus 40,171 MiB float (single runs, PR #208). No headroom on 80 GB.
 - Disk: 21 GB corpus, plus scratch for products (a 300 GB cap was set for the RC0 pre-freeze programme on #198).
 - Wall: the #186 GPU pass held locks for 63.2 min over 90 blocks; the CPU pass needed about 8.6 h of run time plus settle waits and
   extrapolated to roughly 12.5 h of lock time for `--j 4`, so `--j 4` was dropped for the two largest families.

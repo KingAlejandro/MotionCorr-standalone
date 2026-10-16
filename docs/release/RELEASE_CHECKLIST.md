@@ -1,6 +1,6 @@
 # RC0 release checklist (DRAFT)
 
-Status: **draft, pre-freeze, revision 1** (after the R-REL accuracy review of PR #201). Commands below were written against main `1db86902`. Each command is tagged:
+Status: **draft, pre-freeze, revision 2** (after the R-REL review of PR #201 and the maintainer decisions D1, D2, T3, D5, D6, D7). This checklist is for an **evaluation RC0**, not a stable release (D7). Commands below were written against main `1db86902` and re-checked on the merge with `2b3c74b3` (#200 F1, #210 TST1). Each command is tagged:
 
 - **LOCAL-OK**: run on macOS arm64 (AppleClang, Homebrew) in this worktree for this draft; result stated.
 - **UNRUN**: not executed. Linux/CUDA commands are UNRUN until the final qualification (**QF**, #198) runs them.
@@ -26,15 +26,22 @@ update at freeze. Nothing here is verified by this document.
 
 | Item | State at this revision | Needed before QF |
 |---|---|---|
-| F1: no `logfile.pdf` after a failed render (`fix/rc0-logfile-failed-render`) | **pending**: routine fix GO on #198, in progress | merged, independently reviewed, write-then-fail and stale-destination tests pass; strict `--aggregate_only` unchanged. `SUPPORT.md` §6 states F1's behaviour conditionally and must be updated when it merges |
+| F1: no `logfile.pdf` after a failed render | **MERGED** (#200, `ea86fc90`; included in main `2b3c74b3`) | re-verify on the frozen SHA (`LogfileFromEps*` tests) |
+| TST1: `CudaResidentRetryFailures` test | **MERGED** (#210, `2b3c74b3`); CUDA-only, injected failures | runs in the CUDA configurations at QF |
+| F3/F3b: truncated raw MRC movie, gain reference, defect map fail explicitly | **pending**: [PR #205](https://github.com/KingAlejandro/MotionCorr-standalone/pull/205), still in qualification (D5 approved the change) | merged and qualified, or `SUPPORT.md` §6 item 5 stays in its "today" state |
+| T3: checked-arithmetic hardening of the nvCOMP pre-decode arithmetic | **pending**: approved for RC0 (D1/T3), branch `fix/rc0-nvcomp-checked-arithmetic` | merged, boundary tests and mutants pass, native nvCOMP controls, independent review; update `SUPPORT.md` §7 |
 | QM: memory admission on smaller GPUs (resident-session OOM on large compact-staged movies) | **pending**, no worker assigned | forced-OOM control and a per-geometry VRAM floor; until then `SUPPORT.md` §8 says the fallback is unqualified |
-| D1 decoder trust boundary, D2 optional proprietary dependencies, T3 nvCOMP pre-decode arithmetic audit | **decisions pending** (brief [PR #199](https://github.com/KingAlejandro/MotionCorr-standalone/pull/199), being revised) | maintainer decisions recorded; `SUPPORT.md` §7 placeholder replaced |
-| C5 #179, C6 #181, C7 #183 | **bounded experiments** under the amended rule ([#10](https://github.com/KingAlejandro/MotionCorr-standalone/issues/10#issuecomment-6223528151)); default outcome is park | coordinator records GO or park; only GO items enter the composition |
-| T1 #138 nvCOMP widening | bounded experiment, **merge HOLD** pending D1 and its gates | not part of RC0 unless D1 and the gates clear |
-| L1 #141/#152 nvTIFF | **NO-GO for RC0** unless D2 is GO before freeze and a separate complete-product gate passes | none expected |
+| D1 (option 1: trusted-input precondition), D2 (interim policy A), D5, D6, D7 | **decided**; the docs carry the wording | none (re-read #198 for any change) |
+| S1: CPU versus CUDA local alignment | **PROVISIONAL known limitation** (D7), prominent in README and `SUPPORT.md` §0; post-freeze priority 1 | none for RC0; no unrestricted CUDA local-alignment claim |
+| C5 #179, C6 #181, C7 #183 | **bounded experiments** under the amended rule ([#10](https://github.com/KingAlejandro/MotionCorr-standalone/issues/10#issuecomment-6223528151)); not in RC0 unless they pass it | coordinator records GO or park; only GO items enter the composition |
+| T1 #138 nvCOMP widening | **NO-GO for RC0**, parked as [PR #206](https://github.com/KingAlejandro/MotionCorr-standalone/pull/206) | none |
+| L1 #141/#152 nvTIFF | **NO-GO for RC0**; not used | none |
 | E2 #193 option 2 (device EER renderer) | bounded experiment; integration NO-GO for RC0 unless all gates pass before freeze | none expected |
+| TST2: genuine device-poisoning test | **post-RC0** ([#213](https://github.com/KingAlejandro/MotionCorr-standalone/issues/213)); current fatal-path tests inject error codes | none |
+| F4 compressed-MRC decoder exit status | **documented RC0 limitation**; fix scheduled [#214](https://github.com/KingAlejandro/MotionCorr-standalone/issues/214); inputs must be validated independently (§7) | none |
+| #215 nvCOMP file-identity check (file changing between scan and read) | post-RC0 | none |
 | F2 known-motion launcher rewrites tracked fixtures | **documented workaround**, no code change before freeze: pass `--fixtures <scratch>` (§4) | none |
-| DOC1 host/VRAM memory behaviours in `SUPPORT.md` | documented in revision 1 | re-check line numbers at the frozen SHA |
+| DOC1 host/VRAM memory behaviours in `SUPPORT.md` | documented | re-check line numbers at the frozen SHA |
 
 ## 1. Clean checkout
 
@@ -65,13 +72,13 @@ cmake --build build-cpu --parallel 8
 shasum -a 256 build-cpu/motioncorr          # sha256sum on Linux
 ```
 
-**LOCAL-OK** (macOS arm64, AppleClang 21, FFTW 3.3.11, libtiff 4.7.2, Python 3.14.8; main `1db86902`): configure and build exit 0
-(about 22 s wall with `--parallel 6`, 57 compiler warnings, none treated as errors). `--version` prints
+**LOCAL-OK** (macOS arm64, AppleClang 21, FFTW 3.3.11, libtiff 4.7.2; first run at main `1db86902`, repeated at the merge head `67b5315b`
+= `2b3c74b3` + this branch's docs): configure and build exit 0 (about 22 s wall with `--parallel 6`). `--version` prints
 `RELION version: 5.1.0-motioncorr-standalone` and `Precision: BASE=double`, exit 0. `--use_own --help` prints 58 lines of
 options, exit 0. **Plain `--help` exits 1** with "You have to choose either UCSF MotionCor2 or RELION's own implementation"
 because the program parses `--use_own` before it prints usage; the support page and the README must give the
-`--use_own --help` form. Binary SHA-256 on this machine: `6d9ee043e004734fdec39590f2e6c3edc5fe51b1d7139ecfd3716c44ddde4bc2`
-(a local build; not a release artefact).
+`--use_own --help` form. Binary SHA-256 on this machine: `6d9ee043e004734fdec39590f2e6c3edc5fe51b1d7139ecfd3716c44ddde4bc2` at `1db86902`,
+`c8755d48e58fd783d4730efb66dd30541f39f25714eb87afbe5ef96331d31847` at `67b5315b` (local builds; not release artefacts).
 
 ### 2b. CUDA without nvCOMP — UNRUN
 
@@ -107,16 +114,22 @@ ctest --test-dir build-cpu --output-on-failure
 
 Use the same two commands for `build-cuda` and `build-nvcomp` (UNRUN). Record the **collected count and the executed
 inventory** from that configuration; do not predict a count, and do not count a test that was not registered as an executed
-pass. Most `Cuda*` tests are registered only in CUDA builds (`CMakeLists.txt:468` onward); `CudaValidationParser` is
-device-free and is registered in CPU builds too (`CMakeLists.txt:432-435`; it ran in the local CPU suite). Several need a GPU
-(label `hardware`, for example `CudaPreprocessingFailurePaths`, `CMakeLists.txt:687-692`). `CudaAdler32`,
+pass. Most `Cuda*` tests are registered only in CUDA builds (`CMakeLists.txt:471` onward); `CudaValidationParser` is
+device-free and is registered in CPU builds too (`CMakeLists.txt:435-438`; it ran in the local CPU suite). Several need a GPU
+(label `hardware`, for example `CudaPreprocessingFailurePaths`, `CMakeLists.txt:712-717`). `CudaAdler32`,
 `CudaNvcompAcceptanceFailures` and `CudaNvcompReconstructionFailures` exist only with `-DUSE_NVCOMP=ON`
-(`CMakeLists.txt:708` onward). **`CudaU16FailurePaths` is registered only if you configure with
+(`CMakeLists.txt:733` onward). **`CudaU16FailurePaths` is registered only if you configure with
 `-DMOTIONCORR_U16_TEST_MOVIE=<uint16 TIFF>`** (and `-DMOTIONCORR_U16_TEST_STAGE_BYTES=<bytes in one uint16 frame>`, default
-28477960); without it the test is absent, not passed (`CMakeLists.txt:760-779`).
+28477960); without it the test is absent, not passed (`CMakeLists.txt:788-807`).
 
-**LOCAL-OK, with failures (CPU build, main `1db86902`):** 59 collected, 56 passed, **2 failed, 1 skipped**.
-`validate_test_collection.py` reports PASS with 59 collected tests.
+**LOCAL-OK, with failures (CPU build, macOS):** at the merge head `67b5315b`: **60 collected, 57 passed, 2 failed, 1 skipped**
+(`validate_test_collection.py` PASS with 60 collected; the one added test is `LogfileFromEpsMutant_concat_cleanup` from F1). At `1db86902`
+the same two failed (59 collected, 56 passed, 1 skipped). The Linux CPU qualification at `1db86902` (W-QUAL, [PR #209](https://github.com/KingAlejandro/MotionCorr-standalone/pull/209))
+collected 59/89/92 tests (CPU, CUDA, CUDA+nvCOMP) and passed 58/89/92 with 0 skipped; its one CPU failure, `ProfilingKit`, was a 30 s
+subprocess timeout under host load about 27 and passed on rerun.
+
+**`ProfilingKit` is load sensitive.** `tools/profiling/tests/test_import_subset_boundaries.py` has a hard 30 s subprocess timeout. Run
+CTest on a quiet host, or record a timeout and its rerun explicitly. (Locally it passed in 64.7 s of CTest wall time.)
 
 | Test | Result on macOS | Status |
 |---|---|---|
@@ -172,10 +185,10 @@ The subshell keeps the working directory at the checkout root for the commands t
 **LOCAL-OK**: exit 0. Witness file: `synthetic_128x128_8frames.mrcs float`. Output inventory (no `gs` installed on the validation
 machine): `batch.pdf`, `batch.pdf.lst`, `corrected_micrographs.star`, `corrected_micrographs_all_rlnAccumMotion{Early,Late,Total}.eps`,
 `header.pdf`, `header.pdf.lst`, `synthetic_128x128_8frames.{log,mrc,star}`, `synthetic_128x128_8frames_shifts.eps`. **`logfile.pdf` was
-not written** and `batch.pdf` and `header.pdf` are zero-byte placeholders, because `gs` was missing; the program printed the gs error and exited 0 (`src/CPlot2D.cpp:66-87`). With `gs`
+not written** and `batch.pdf` and `header.pdf` are zero-byte placeholders, because `gs` was missing; the program printed the gs error and exited 0 (`src/CPlot2D.cpp:66-98`). With `gs`
 the inventory is **UNRUN**; record the real list at QF. A run with `--dose_weighting --save_noDW` adds `_noDW.mrc`
 (`--save_noDW` without dose weighting writes no separate file: the unweighted sum is the main `.mrc`,
-`src/motioncorr_runner.cpp:4043-4049`), and `--even_odd_split` adds `_EVN.mrc` and `_ODD.mrc`.
+`src/motioncorr_runner.cpp:4048-4054`), and `--even_odd_split` adds `_EVN.mrc` and `_ODD.mrc`.
 
 Refusal checks on the CPU build (**LOCAL-OK**, each exits 1): `--gpu 0` (line 402, "built without CUDA support"),
 `--gpu 0:1` (line 367, device list rejected), `--ingest compact` and `--ingest nvcomp` (line 245), `--ingest bogus` (line 163).
@@ -203,6 +216,16 @@ There is no single script for this. Reuse the existing pieces and declare unrun 
      128 x 128 fixture (a manifest with `movies: ["Movies/..."]` and `expected_shape_xyz: [128,128,1]`): "Validated 1 movies, 1 MRC
      images, 2 STAR files, 16384 pixels per arm; Comparison: products; status=PASS; different files=0". Needs NumPy; movie names
      must carry the `Movies/` prefix the manifest expects.
+- **Input integrity before every row (D1, D5, D6).** Compressed MRC: run `xz -t`, `zstd -t` or `bzip2 -t`/`pbzip2 -t` on every input first
+  (F4, fix scheduled #214). nvCOMP rows: use complete, unmodified acquisition files (D1 option 1); use `--ingest compact` for files of unknown integrity
+  or still being written. EER rows: pass `--expected_frames` or per-movie STAR frame counts. Raw MRC rows: validate file sizes yourself unless
+  [PR #205](https://github.com/KingAlejandro/MotionCorr-standalone/pull/205) has merged.
+- **Route-log allowance for signed MRC.** Declared route-record log prefixes for `compare_output_trees.py --allow-added-log-line` must include
+  `Released native int` for signed raw MRC (#195 added `Released native int16/int8 host staging after device forward FFT.`); the #209 campaign
+  declared four prefixes in advance (`nvCOMP ingestion`, `Staging this movie as native`, `Released native uint` and one more), and its signed-MRC cases
+  (10164, 10216) still showed that extra line, so the allowance needs `Released native int` (#209 README, "PASS*").
+  The comparator cannot compare `_noDW`/`_EVN`/`_ODD` products or mixed-shape trees (#209 tooling note); compare those with
+  `tools/profiling/lib/identity.py` (`mcprof`) or per product.
 - Per-row route proof: `--ingest_witness` plus a pinned `--ingest` where the row is meant to take one route. The witness is a
   route-selection record, not a completion record (`SUPPORT.md` §2); pair it with the product check.
 
@@ -235,9 +258,9 @@ The CPU arm of a row is the reference for the cross-backend check only; it is no
 | R2 | TIFF 8-bit LZW BigTIFF | `compact` | gain or none, dose weighting | e10361, e10641, e10441 |
 | R3 | MRC float32 | `float` | dose weighting | e10028 |
 | R4 | MRC mode 0 (int8) and mode 1 (int16) | `compact` | dose weighting | e10164, e10216 |
-| R5 | EER, grouping and upsampling 1 | `compact` | `--eer_grouping`, gain | e10474f3/f4, e12963 |
+| R5 | EER, grouping and upsampling 1 (4096 x 4096, encoding 65001 in the corpus) | `compact` | `--eer_grouping`, gain, **`--expected_frames`** (D6: otherwise a truncated EER processes as a shorter movie) | e10474f3/f4, e12963 |
 | R6 | EER with `eer_grouping` x (4 at upsampling -1, else 1) above 65535 | `float`, log line present | needs a movie with at least 3 x grouping fractions, so likely unreachable with real EER; if not run, declare UNRUN and cite the #196 overflow-guard control | synthetic |
-| R7 | compressed MRC (`.mrc.zst` or similar) | `float` | needs the external decompressor | one small file |
+| R7 | compressed MRC (`.mrc.zst`, `.mrc.xz`, `.mrc.bz2`) | `float` | needs the external decompressor; **validate the file first** with `xz -t`, `zstd -t` or `bzip2 -t`/`pbzip2 -t` (F4: the decoder exit status is not checked, `SUPPORT.md` §6); PR #204 tested `.bz2` through a `bzip2 -cd` shim because `pbzip2` was absent | one small file |
 | R8 | pinned-route refusals | movie fails, no completion STAR; a refusal writes no witness line, so prove the intended route with a positive control on an eligible movie | `--ingest nvcomp` / `compact` on an ineligible movie | any ineligible movie |
 | R9 | options | each option arm completes with complete products and passes its **named invariant**; option-on versus option-off products are **not** expected to be equal where the option changes them. Invariants: `--save_noDW` adds `_noDW.mrc` and leaves the dose-weighted `.mrc` equal to the run without it (same backend); `--even_odd_split` adds `_EVN`/`_ODD` and leaves the main `.mrc` equal; binning, `--group_frames`, first/last frame, defect file and gain rot/flip change the products by design, so check complete products, geometry and sampling, and the cross-backend backend gate against the CPU arm of the **same** options | `--save_noDW` (with `--dose_weighting`), `--even_odd_split`, `--bin_factor` (even binned dimensions), `--group_frames`, first/last frame, defect file, gain rot/flip | tutorial |
 | R10 | direct input and glob | complete products | `--i 'Movies/*.tiff' --angpix --voltage` | tutorial subset |
@@ -270,6 +293,10 @@ and `verdict: PASS`; every worker's device witness on its intended, distinct GPU
 single-process single-GPU run of the same input on the **same backend** (`compare_output_trees.py`, strict; this is a
 worker-count invariance check, not a CPU comparison); **Ghostscript installed** (the aggregate renders
 `logfile.pdf` strictly). Repeat at 1, 2 and 4 devices.
+
+**Verified on Linux at `1db86902`** (W-QUAL, PR #209): 1, 2 and 4 workers on the 24 tutorial movies, configs G and L, dataset-endpoint PASS
+6/6, distinct witnessed UUIDs, identical products across worker counts and to a single process, real-Ghostscript `logfile.pdf` (30 pages).
+Re-verification on the frozen SHA is the QF row.
 
 **LOCAL-OK, partial:** `run_dataset.py` with `--launcher-args="--workers 2 --no-witness"` on two CPU workers (the two 128 x 128
 fixtures): both workers exited 0 and 8 files were staged, then the aggregate step failed with "Aggregate PDF generation failed"

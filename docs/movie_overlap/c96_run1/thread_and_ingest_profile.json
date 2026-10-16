@@ -1,0 +1,187 @@
+{
+ "source": "c96 run 1 --profile passes (2 per arm), 96 movies; steady medians exclude movie 0",
+ "passes": {
+  "base-p01": {
+   "run_wall_ms": 24703.1,
+   "main_cpu_ms": 21670.8,
+   "process_cpu_ms": 61071.1,
+   "peak_rss_kb": 377052,
+   "threads": [
+    {
+     "name": "main/final writer drain",
+     "n": 1,
+     "wall_ms": 88.4,
+     "cpu_ms": 0.1,
+     "minflt": 0
+    },
+    {
+     "name": "main/joint star and logfile pdf",
+     "n": 1,
+     "wall_ms": 2326.0,
+     "cpu_ms": 54.3,
+     "minflt": 25
+    },
+    {
+     "name": "writer/product task",
+     "n": 192,
+     "wall_ms": 9490.6,
+     "cpu_ms": 9411.5,
+     "minflt": 6318
+    }
+   ],
+   "device_ingest_steady_median_ms": {
+    "device ingest": 44.69,
+    "ingest decompress submit": 0.43,
+    "ingest drain": 0.93,
+    "ingest gain sum cast": 0.1,
+    "ingest h2d submit": 0.42,
+    "ingest setup": 0.95,
+    "ingest slot wait": 0.03,
+    "ingest status d2h and sync": 12.6,
+    "ingest strip read": 24.68,
+    "ingest tag scan": 2.9,
+    "ingest verify": 0.3
+   }
+  },
+  "base-p02": {
+   "run_wall_ms": 30076.6,
+   "main_cpu_ms": 23292.4,
+   "process_cpu_ms": 62975.9,
+   "peak_rss_kb": 377004,
+   "threads": [
+    {
+     "name": "main/final writer drain",
+     "n": 1,
+     "wall_ms": 81.0,
+     "cpu_ms": 0.1,
+     "minflt": 0
+    },
+    {
+     "name": "main/joint star and logfile pdf",
+     "n": 1,
+     "wall_ms": 2327.5,
+     "cpu_ms": 51.0,
+     "minflt": 25
+    },
+    {
+     "name": "writer/product task",
+     "n": 192,
+     "wall_ms": 10059.5,
+     "cpu_ms": 9950.3,
+     "minflt": 14195
+    }
+   ],
+   "device_ingest_steady_median_ms": {
+    "device ingest": 45.41,
+    "ingest decompress submit": 0.43,
+    "ingest drain": 0.93,
+    "ingest gain sum cast": 0.1,
+    "ingest h2d submit": 0.32,
+    "ingest setup": 1.04,
+    "ingest slot wait": 0.03,
+    "ingest status d2h and sync": 12.18,
+    "ingest strip read": 25.75,
+    "ingest tag scan": 3.08,
+    "ingest verify": 0.27
+   }
+  },
+  "cand-p01": {
+   "run_wall_ms": 22694.3,
+   "main_cpu_ms": 20153.3,
+   "process_cpu_ms": 36094.7,
+   "peak_rss_kb": 543336,
+   "threads": [
+    {
+     "name": "main/final writer drain",
+     "n": 1,
+     "wall_ms": 78.7,
+     "cpu_ms": 0.1,
+     "minflt": 0
+    },
+    {
+     "name": "main/joint star and logfile pdf",
+     "n": 1,
+     "wall_ms": 2278.0,
+     "cpu_ms": 50.8,
+     "minflt": 23
+    },
+    {
+     "name": "prefetch/movie strip read",
+     "n": 95,
+     "wall_ms": 5455.5,
+     "cpu_ms": 5453.7,
+     "minflt": 4431
+    },
+    {
+     "name": "writer/product task",
+     "n": 192,
+     "wall_ms": 9856.4,
+     "cpu_ms": 9846.1,
+     "minflt": 2983
+    }
+   ],
+   "device_ingest_steady_median_ms": {
+    "device ingest": 33.32,
+    "ingest decompress submit": 0.25,
+    "ingest drain": 0.97,
+    "ingest gain sum cast": 0.1,
+    "ingest h2d submit": 0.17,
+    "ingest prefetch tables": 5.34,
+    "ingest prefetch wait": 0.01,
+    "ingest setup": 0.98,
+    "ingest slot wait": 0.03,
+    "ingest status d2h and sync": 24.48,
+    "ingest verify": 0.2
+   }
+  },
+  "cand-p02": {
+   "run_wall_ms": 29240.6,
+   "main_cpu_ms": 21506.0,
+   "process_cpu_ms": 35254.0,
+   "peak_rss_kb": 543740,
+   "threads": [
+    {
+     "name": "main/final writer drain",
+     "n": 1,
+     "wall_ms": 82.1,
+     "cpu_ms": 0.4,
+     "minflt": 0
+    },
+    {
+     "name": "main/joint star and logfile pdf",
+     "n": 1,
+     "wall_ms": 2593.2,
+     "cpu_ms": 60.0,
+     "minflt": 23
+    },
+    {
+     "name": "prefetch/movie strip read",
+     "n": 95,
+     "wall_ms": 4547.2,
+     "cpu_ms": 4504.6,
+     "minflt": 4381
+    },
+    {
+     "name": "writer/product task",
+     "n": 192,
+     "wall_ms": 8656.7,
+     "cpu_ms": 8655.4,
+     "minflt": 333
+    }
+   ],
+   "device_ingest_steady_median_ms": {
+    "device ingest": 33.32,
+    "ingest decompress submit": 0.23,
+    "ingest drain": 0.96,
+    "ingest gain sum cast": 0.1,
+    "ingest h2d submit": 0.14,
+    "ingest prefetch tables": 5.17,
+    "ingest prefetch wait": 0.01,
+    "ingest setup": 0.95,
+    "ingest slot wait": 0.03,
+    "ingest status d2h and sync": 24.87,
+    "ingest verify": 0.19
+   }
+  }
+ }
+}

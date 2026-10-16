@@ -1,0 +1,105 @@
+id_e10216_L cand {'patches': 50, 'retried': 30, 'retry_conv': 0} normalised-log diff lines: 0 []
+id_e10216_L2 cand {'patches': 50, 'retried': 30, 'retry_conv': 0} normalised-log diff lines: 0 []
+id_e10474f3_L cand {'patches': 50, 'retried': 4, 'retry_conv': 0} normalised-log diff lines: 0 []
+id_e10474f3_L2 cand {'patches': 50, 'retried': 4, 'retry_conv': 0} normalised-log diff lines: 0 []
+id_e10641_L cand {'patches': 50, 'retried': 41, 'retry_conv': 0} normalised-log diff lines: 0 []
+id_e10641_L2 cand {'patches': 50, 'retried': 41, 'retry_conv': 0} normalised-log diff lines: 0 []
+id_e12963_L cand {'patches': 25, 'retried': 2, 'retry_conv': 0} normalised-log diff lines: 0 []
+id_e12963_L2 cand {'patches': 25, 'retried': 2, 'retry_conv': 0} normalised-log diff lines: 0 []
+neg10641 mut {'patches': 50, 'retried': 41, 'retry_conv': 0} normalised-log diff lines: 498 ['- Iteration 1: RMSD = 10.08 px\n', '- Iteration 2: RMSD = 6.41 px\n', '- Iteration 3: RMSD = 5.07 px\n', '- Iteration 4: RMSD = 4.43 px\n']
+ 1/84 Test  #1: PatchRetryState     Passed    0.05 sec
+ 2/84 Test  #2: RunnerInterpolateRecenter     Passed    0.01 sec
+ 3/84 Test  #3: MrcHeaderStats     Passed    0.02 sec
+ 4/84 Test  #4: PdfConcat     Passed    0.08 sec
+ 5/84 Test  #5: DefectParser     Passed    0.02 sec
+ 6/84 Test  #6: DeflateLayout     Passed    0.01 sec
+ 7/84 Test  #7: Adler32Arithmetic     Passed    0.75 sec
+ 8/84 Test  #8: Adler32KernelHost     Passed    0.00 sec
+ 9/84 Test  #9: StageProfileThreads     Passed    0.52 sec
+10/84 Test #10: FrameBufferPool     Passed    0.04 sec
+11/84 Test #11: ScratchArena     Passed    0.00 sec
+12/84 Test #12: ReaderPool     Passed    0.57 sec
+13/84 Test #13: ReaderPoolMutant_spin     Passed    0.55 sec
+14/84 Test #14: ReaderPoolMutant_nowait     Passed    0.03 sec
+15/84 Test #15: DefectNeighbours     Passed    0.01 sec
+16/84 Test #16: DefectMergeMutant_append_only     Passed    0.00 sec
+17/84 Test #17: DefectMergeMutant_no_order_check     Passed    0.01 sec
+18/84 Test #18: DefectMergeMutant_swap_xy     Passed    0.00 sec
+19/84 Test #19: NvcompAcceptanceDiagnostics     Passed    0.13 sec
+20/84 Test #20: ProfilingKit     Passed  107.89 sec
+21/84 Test #21: GainCacheOwnership     Passed    4.36 sec
+22/84 Test #22: NvcompGuards     Passed    0.04 sec
+23/84 Test #23: SyntheticRegression     Passed    0.95 sec
+24/84 Test #24: HotPixelRngDeterminism     Passed    0.76 sec
+25/84 Test #25: RunnerExposure     Passed    0.66 sec
+26/84 Test #26: Runner_failure     Passed    0.18 sec
+27/84 Test #27: Runner_invalid     Passed    0.18 sec
+28/84 Test #28: Runner_resume     Passed    2.69 sec
+29/84 Test #29: Runner_tomography     Passed    0.54 sec
+30/84 Test #30: RunnerLateBin     Passed    0.90 sec
+31/84 Test #31: RunnerExportedUnits     Passed    0.15 sec
+32/84 Test #32: GainCache     Passed    1.63 sec
+33/84 Test #33: TiffRead     Passed    0.96 sec
+34/84 Test #34: DamagedMovie     Passed    4.60 sec
+35/84 Test #35: CompressedMovieSequence     Passed    0.81 sec
+36/84 Test #36: GlobalIfftElision     Passed    1.79 sec
+37/84 Test #37: HostBufferReuse     Passed    3.95 sec
+38/84 Test #38: StageProfile     Passed    2.07 sec
+39/84 Test #39: RunnerModelParser     Passed    0.25 sec
+40/84 Test #40: MicrographModelBounds     Passed    2.13 sec
+41/84 Test #41: RunnerInterpolateShifts     Passed    0.72 sec
+42/84 Test #42: WriteFaults     Passed    1.38 sec
+43/84 Test #43: WriteFaultsSync     Passed    0.66 sec
+44/84 Test #44: WriteFaultsMultiProduct     Passed    0.67 sec
+45/84 Test #45: OutputStageFaults     Passed    0.61 sec
+46/84 Test #46: CiFailClosedControls  ***Failed   17.71 sec
+FAILED (failures=1)
+47/84 Test #47: CudaValidationParser     Passed    0.07 sec
+48/84 Test #48: MultiGpuScheduling     Passed   88.05 sec
+49/84 Test #49: OutputTreeComparator     Passed    0.91 sec
+50/84 Test #50: JointStarPublication     Passed    0.98 sec
+51/84 Test #51: ImageWriteFaults     Passed    0.03 sec
+52/84 Test #52: NativeMovieStaging     Passed    0.33 sec
+53/84 Test #53: RunnerInterpolateShiftsCuda     Passed    1.47 sec
+54/84 Test #54: StageProfileDeviceTiming     Passed    2.86 sec
+55/84 Test #55: CudaU16StagingEquivalence     Passed    0.39 sec
+56/84 Test #56: CudaWrapperUploadFailure     Passed    0.37 sec
+57/84 Test #57: CudaFaultMatrix     Passed    7.77 sec
+58/84 Test #58: CudaPatchWorkspace     Passed    0.55 sec
+59/84 Test #59: CudaPatchBatch     Passed    1.94 sec
+60/84 Test #60: CudaVramAlias     Passed    0.81 sec
+61/84 Test #61: CudaPatchBatchMutant_shift_retired     Passed    1.90 sec
+62/84 Test #62: CudaPatchBatchMutant_never_retire     Passed    1.90 sec
+63/84 Test #63: CudaPatchBatchMutant_extract_no_remap     Passed    1.88 sec
+64/84 Test #64: CudaPatchBatchMutant_scale_divide     Passed    1.88 sec
+65/84 Test #65: CudaPatchBatchMutant_shift_wrong_half     Passed    1.90 sec
+66/84 Test #66: CudaPatchBatchMutant_perpatch_wrong_half     Passed    1.90 sec
+67/84 Test #67: CudaVramAliasMutant_arena_overlap     Passed    0.80 sec
+68/84 Test #68: CudaVramAliasMutant_arena_work_over_buffers     Passed    0.80 sec
+69/84 Test #69: CudaVramAliasMutant_refusal_off     Passed    0.81 sec
+70/84 Test #70: CudaVramAliasMutant_dw_scratch_over_fourier     Passed    0.82 sec
+71/84 Test #71: CudaDeviceGainPool     Passed    0.41 sec
+72/84 Test #72: CudaDeviceGainCleanupFatal     Passed    0.40 sec
+73/84 Test #73: CudaGeometryRetention     Passed    0.41 sec
+74/84 Test #74: CudaGeometryRetentionMutant_no_take     Passed    0.44 sec
+75/84 Test #75: CudaGeometryRetentionMutant_return_failed     Passed    0.41 sec
+76/84 Test #76: CudaGeometryRetentionMutant_keep_taken_alias     Passed    0.39 sec
+77/84 Test #77: CudaDoseNormalization     Passed    1.91 sec
+78/84 Test #78: CudaDoseSessionPlan     Passed    0.41 sec
+79/84 Test #79: CudaPreprocessingFailurePaths     Passed    5.06 sec
+80/84 Test #80: CudaAdler32     Passed    1.32 sec
+81/84 Test #81: CudaNvcompAcceptanceFailures     Passed    5.38 sec
+82/84 Test #82: CudaNvcompReconstructionFailures     Passed    3.79 sec
+83/84 Test #83: CudaDoseWeightAlias     Passed    2.85 sec
+84/84 Test #84: CudaErrorClass     Passed    0.00 sec
+99% tests passed, 1 tests failed out of 84
+The following tests FAILED:
+neg10641 mut identical=False files 12 mrc 2 ['5 file(s) differ']
+id_e10216_L cand identical=True files 12 mrc 2 []
+id_e10216_L2 cand identical=True files 18 mrc 8 []
+id_e10474f3_L cand identical=True files 12 mrc 2 []
+id_e10474f3_L2 cand identical=True files 18 mrc 8 []
+id_e10641_L cand identical=True files 12 mrc 2 []
+id_e10641_L2 cand identical=True files 18 mrc 8 []
+id_e12963_L cand identical=True files 9 mrc 1 []
+id_e12963_L2 cand identical=True files 12 mrc 4 []

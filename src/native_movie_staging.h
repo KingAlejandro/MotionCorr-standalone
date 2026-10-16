@@ -132,10 +132,12 @@ private:
 	std::vector<Image<T> > *bound_ = NULL;
 };
 
-// The two sample types the compact ingest route accepts. Named rather than
-// spelled out at each use so a third type is one line here and not a sweep
-// through the runner.
+// The sample types the compact ingest route accepts. Named rather than
+// spelled out at each use so another type is one line here and not a sweep
+// through the runner. The signed pair is raw MRC mode 0 and mode 1 only.
 typedef NativeMovieStaging<unsigned short> NativeU16MovieStaging;
 typedef NativeMovieStaging<unsigned char>  NativeU8MovieStaging;
+typedef NativeMovieStaging<short>          NativeS16MovieStaging;
+typedef NativeMovieStaging<signed char>    NativeS8MovieStaging;
 
 #endif // NATIVE_MOVIE_STAGING_H_

@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "$@" >> "$GSLOG"
+exec /usr/bin/gs "$@"

@@ -1781,6 +1781,13 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 			}
 		}
 
+		// Whether an all_batches.pdf from an earlier run is going to be prepended
+		// to this run's batches (--only_do_unfinished, incremental runs). Asked
+		// once, before any report thread starts: the batch pass below writes
+		// all_batches.pdf, so asking again afterwards always answers yes. Both
+		// the logfile.pdf render choice and fn_pdfs follow from this one answer.
+		const bool prior_all_batches = !aggregate_only && exists(report_out + "all_batches.pdf");
+
 		RCTIC(TIMING_W_GS_HEADER);
 		// joinMultipleEPSIntoSinglePDF reports its own failures and falls back
 		// to an empty PDF, so it has no result to return; anything that does
@@ -1804,23 +1811,31 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 			~ReportThreadJoiner() { if (t.joinable()) t.join(); }
 		} header_joiner{header_thread};
 
-		// In aggregate mode logfile.pdf is exactly header_fn_eps followed by
-		// all_fn_eps: fn_pdfs below never admits a pre-existing all_batches.pdf,
-		// so concatenating header.pdf onto it makes Ghostscript re-render, as
-		// PDF, content this process is already holding as EPS. Rendering it
-		// once from the EPS instead, alongside the batch pass, is page-for-page
-		// identical and takes the concatenation off the critical path. The
-		// incremental path keeps the concatenation: there all_batches.pdf can
-		// carry earlier batches whose EPS this run does not have.
+		// logfile.pdf is exactly header_fn_eps followed by all_fn_eps whenever
+		// no all_batches.pdf from an earlier run is going to be prepended: in
+		// aggregate mode fn_pdfs below never admits one, and in the normal path
+		// there is none on disk. Concatenating header.pdf onto this run's
+		// all_batches.pdf then makes Ghostscript re-render, as PDF, content
+		// this process is already holding as EPS. Rendering it once from the
+		// EPS instead, alongside the batch pass, is page-for-page identical and
+		// takes the concatenation off the critical path. When an earlier
+		// all_batches.pdf exists it can carry batches whose EPS this run does
+		// not have, so the concatenation stays.
+		const bool logfile_from_eps = !prior_all_batches;
 		std::vector<FileName> logfile_fn_eps;
 		std::exception_ptr logfile_failure;
 		std::thread logfile_thread;
-		if (aggregate_only)
+		if (logfile_from_eps)
 		{
 			logfile_fn_eps = header_fn_eps;
 			logfile_fn_eps.insert(logfile_fn_eps.end(), all_fn_eps.begin(), all_fn_eps.end());
 			logfile_thread = std::thread([&]() {
-				try { joinMultipleEPSIntoSinglePDF(report_out + "logfile.pdf", logfile_fn_eps, true); }
+				// The concatenation this replaces ignores its result outside
+				// aggregate mode and leaves no logfile.pdf when it fails, so a
+				// failed render must neither fail the job there nor leave an
+				// empty placeholder. Aggregate mode is strict and still throws.
+				try { joinMultipleEPSIntoSinglePDF(report_out + "logfile.pdf", logfile_fn_eps, aggregate_only, false); }
+				catch (const RelionError &) { if (aggregate_only) logfile_failure = std::current_exception(); }
 				catch (...) { logfile_failure = std::current_exception(); }
 			});
 		}
@@ -1833,23 +1848,27 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 		header_thread.join();
 		RCTOC(TIMING_W_GS_HEADER);
 		if (logfile_thread.joinable()) logfile_thread.join();
+		// The concatenation this replaces left no argument list behind, so the
+		// normal path's output inventory must not gain one. Aggregate mode has
+		// always kept it; publication there expects it.
+		if (logfile_from_eps && !aggregate_only) std::remove((report_out + "logfile.pdf.lst").c_str());
 		if (header_failure) std::rethrow_exception(header_failure);
 		if (logfile_failure) std::rethrow_exception(logfile_failure);
 
 		// Concatenate all PDFs of the batches
 		std::vector<FileName> fn_pdfs;
-		if (!aggregate_only && exists(report_out + "all_batches.pdf")) fn_pdfs.push_back(report_out + "all_batches.pdf");
+		if (prior_all_batches) fn_pdfs.push_back(report_out + "all_batches.pdf");
 		fn_pdfs.push_back(report_out + "batch.pdf");
 		RCTIC(TIMING_W_GS_ALLB);
 		if (!concatenatePDFfiles(report_out + "all_batches.pdf", fn_pdfs) && aggregate_only)
 			REPORT_ERROR("Aggregate-only batch PDF concatenation failed.");
 		RCTOC(TIMING_W_GS_ALLB);
 
-		// Put header in front of comabined batches. The aggregate built
-		// logfile.pdf from the EPS above, so re-deriving it here would only
-		// overwrite it with the same pages at the price of a second render.
+		// Put header in front of comabined batches. When logfile.pdf was built
+		// from the EPS above, re-deriving it here would only overwrite it with
+		// the same pages at the price of a second render.
 		RCTIC(TIMING_W_GS_LOGFILE);
-		if (!aggregate_only)
+		if (!logfile_from_eps)
 			concatenatePDFfiles(report_out + "logfile.pdf", report_out + "header.pdf", report_out + "all_batches.pdf");
 		if (aggregate_only) {
 			requireAggregatePdf(report_out + "header.pdf");
@@ -2068,19 +2087,24 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	Image<float> Ihead, Iref, Iref_odd, Iref_even;
 	std::vector<MultidimArray<fComplex> > Fframes;
 	std::vector<Image<float> > Iframes;
-	// Issue #85 lane C: native sample staging for unsigned TIFF input on the
-	// resident CUDA path. Holds the decoded movie in its file sample type (half the
-	// bytes of Iframes for a 16-bit file, a quarter for an 8-bit one) until the
+	// Issue #85 lane C: native sample staging for TIFF and raw MRC integer input on
+	// the resident CUDA path. Holds the decoded movie in its file sample type (half
+	// the bytes of Iframes for a 16-bit file, a quarter for an 8-bit one) until the
 	// device has expanded it. Exactly one of these is non-empty, and only on the
-	// compact route; both are empty on every other path.
+	// compact route; all are empty on every other path. The signed pair is raw MRC
+	// mode 1 and mode 0.
 	std::vector<Image<unsigned short> > Iframes_u16;
 	std::vector<Image<unsigned char> > Iframes_u8;
+	std::vector<Image<short> > Iframes_s16;
+	std::vector<Image<signed char> > Iframes_s8;
 	// Own those frames' pixels as one mapping each; see NativeMovieStaging. Movie
 	// scoped, so a throw anywhere below still returns the pages. Declared AFTER
 	// the frame vectors on purpose: release() writes through the frames it bound,
 	// so it has to run before those vectors are destroyed.
 	NativeU16MovieStaging u16_staging;
 	NativeU8MovieStaging u8_staging;
+	NativeS16MovieStaging s16_staging;
+	NativeS8MovieStaging s8_staging;
 	std::vector<int> frames; // 0-indexed
 
 	RFLOAT output_angpix = angpix * bin_factor;
@@ -2200,8 +2224,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// One variable rather than one bool per width: the sites below all ask "is a
 	// compact movie live, and in which sample type", and two independent bools
 	// would make "both set" representable and silently wrong.
-	enum CompactStage { COMPACT_NONE, COMPACT_U8, COMPACT_U16 };
+	enum CompactStage { COMPACT_NONE, COMPACT_U8, COMPACT_U16, COMPACT_S8, COMPACT_S16 };
 	CompactStage compact_stage = COMPACT_NONE;
+	auto compactStageName = [](CompactStage stage) {
+		return stage == COMPACT_U8 ? "uint8" : stage == COMPACT_U16 ? "uint16"
+		     : stage == COMPACT_S8 ? "int8" : "int16";
+	};
 
 #ifdef _CUDA_ENABLED
     // Legacy early-binning/nonresident FFT preparation may retain a real-frame
@@ -2291,7 +2319,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// Composed ingest routing (#126 fast path over the #118/#125 fallback). Exactly
 	// one of three paths runs for a healthy movie:
 	//   eligible Deflate TIFF and nvCOMP available -> device ingest, above;
-	//   otherwise eligible unsigned 8/16-bit TIFF  -> compact host native staging;
+	//   otherwise eligible 8/16-bit TIFF or raw MRC -> compact host native staging;
 	//   otherwise                                  -> main's float host reader.
 	// Deciding the compact arm here, after the session exists, is what lets it
 	// require a live session. PR125 had to approximate that with
@@ -2306,28 +2334,73 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// into one of these two sample types is eligible here regardless of codec,
 	// strip geometry or predictor -- the decode is LibTIFF's, so this route
 	// inherits its codec semantics instead of reimplementing them.
+	//
+	// EER (#193) is rendered on the host straight into uint16 and takes the same
+	// route. A pixel gets at most one count per fraction (decoded positions are
+	// strictly increasing), except 4K -> 2K, where four source pixels merge into
+	// one. So a group holds at most eer_grouping counts, or 4 * eer_grouping at
+	// upsampling -1. Anything that could exceed uint16 stays on the float path,
+	// because the renderer's ++ would wrap silently.
+	const long long eer_max_count = (long long)eer_grouping * (eer_upsampling == -1 ? 4 : 1);
+	const bool eer_fits_u16 = isEER && eer_max_count <= 65535;
+	if (isEER && !eer_fits_u16 && ingest_mode != INGEST_FLOAT && movie_session)
+		logfile << "EER grouping " << eer_grouping << " at upsampling " << eer_upsampling
+		        << " can exceed 65535 counts per pixel; using the float movie." << std::endl;
+	if (ingest_mode != INGEST_FLOAT &&
+	    !nvcomp_ingested && movie_session && eer_fits_u16) {
+		compact_stage = COMPACT_U16;
+		u16_staging.bind(Iframes_u16, n_frames, ny, nx);
+		logfile << "Staging this movie as native unsigned 16-bit; the integer to float "
+		        << "expansion and the gain are applied on the device; host staging is one "
+		        << "mapping of " << u16_staging.bytes() << " bytes for " << n_frames
+		        << " x " << nx << " x " << ny << " samples, released before any float "
+		        << "movie is materialized." << std::endl;
+	}
+	// Raw (uncompressed) MRC joins the TIFF route for the types its reader yields without a
+	// float conversion: mode 6 UShort, and mode 0 / mode 1, which are SChar / SShort.
+	// Those two are staged in their own signed type, so the device sign-extends
+	// exactly as castPage2T does on the host. Float MRC gains nothing from staging.
+	const bool compact_tif = ((FileName)fn_mic.getFileFormat()).contains("tif") &&
+	                         (Ihead.dataType() == UShort || Ihead.dataType() == UChar);
+	const bool compact_mrc = ((FileName)fn_mic.getFileFormat()).contains("mrc") &&
+	                         (Ihead.dataType() == UShort || Ihead.dataType() == SChar ||
+	                          Ihead.dataType() == SShort);
 	if (ingest_mode != INGEST_FLOAT &&
 	    !nvcomp_ingested && movie_session && !isEER && !isCompressedMRC &&
-	    ((FileName)fn_mic.getFileFormat()).contains("tif") &&
-	    (Ihead.dataType() == UShort || Ihead.dataType() == UChar)) {
+	    (compact_tif || compact_mrc)) {
 		size_t staged_bytes = 0;
 		const char *width_name = "";
-		if (Ihead.dataType() == UShort) {
+		switch (Ihead.dataType()) {
+		case UShort:
 			compact_stage = COMPACT_U16;
 			u16_staging.bind(Iframes_u16, n_frames, ny, nx);
 			staged_bytes = u16_staging.bytes();
-			width_name = "16-bit";
-		} else {
+			width_name = "unsigned 16-bit";
+			break;
+		case SShort:
+			compact_stage = COMPACT_S16;
+			s16_staging.bind(Iframes_s16, n_frames, ny, nx);
+			staged_bytes = s16_staging.bytes();
+			width_name = "signed 16-bit";
+			break;
+		case SChar:
+			compact_stage = COMPACT_S8;
+			s8_staging.bind(Iframes_s8, n_frames, ny, nx);
+			staged_bytes = s8_staging.bytes();
+			width_name = "signed 8-bit";
+			break;
+		default:
 			compact_stage = COMPACT_U8;
 			u8_staging.bind(Iframes_u8, n_frames, ny, nx);
 			staged_bytes = u8_staging.bytes();
-			width_name = "8-bit";
+			width_name = "unsigned 8-bit";
+			break;
 		}
 		// One line, and the 16-bit wording keeps the exact prefix
 		// tools/support_matrix.py filters on. A second line would make every
 		// compact-staged log differ under that retained comparator for a reason
 		// that is not a product difference.
-		logfile << "Staging this movie as native unsigned " << width_name
+		logfile << "Staging this movie as native " << width_name
 		        << "; the integer to float "
 		        << "expansion and the gain are applied on the device; host staging is one "
 		        << "mapping of " << staged_bytes << " bytes for " << n_frames
@@ -2337,7 +2410,9 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	if (ingest_mode == INGEST_COMPACT && compact_stage == COMPACT_NONE)
 		REPORT_ERROR("--ingest compact was requested but the compact native staging did not "
 		             "apply to " + fn_mic + ". Either there is no resident CUDA session, or "
-		             "this movie is not an unsigned 8- or 16-bit TIFF. Refusing to continue "
+		             "this movie is not an unsigned 8- or 16-bit TIFF, a raw integer MRC "
+		             "(mode 0, 1 or 6), or an EER whose grouped counts fit uint16. Refusing "
+		             "to continue "
 		             "on a different path under a pinned --ingest.");
 #endif
 
@@ -2374,6 +2449,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			try {
+#ifdef _CUDA_ENABLED
+				if (isEER && compact_stage == COMPACT_U16)
+					renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes_u16[iframe]());
+				else
+#endif
 				if (isEER)
 					renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
 				else if (isCompressedMRC)
@@ -2386,6 +2466,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				else if (compact_stage == COMPACT_U8)
 					// As above; castPage2T's UChar branch is the memcpy here.
 					Iframes_u8[iframe].read(fn_mic, true, frames[iframe], false, true);
+				else if (compact_stage == COMPACT_S16)
+					// MRC mode 1: castPage2T's SShort branch is the memcpy here.
+					Iframes_s16[iframe].read(fn_mic, true, frames[iframe], false, true);
+				else if (compact_stage == COMPACT_S8)
+					// MRC mode 0: castPage2T's SChar branch is the memcpy here.
+					Iframes_s8[iframe].read(fn_mic, true, frames[iframe], false, true);
 #endif
 				else
 					Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
@@ -2413,28 +2499,28 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	auto expand_compact_to_float = [&]() {
 		if (compact_stage == COMPACT_NONE) return;
 		const size_t num_pixels = (size_t)nx * ny;
-		const bool is_u8 = (compact_stage == COMPACT_U8);
-		for (int iframe = 0; iframe < n_frames; iframe++) {
-			Iframes[iframe]().reshape(ny, nx);
-			float *dst = &DIRECT_MULTIDIM_ELEM(Iframes[iframe](), 0);
-			if (is_u8) {
-				const unsigned char *src = &DIRECT_MULTIDIM_ELEM(Iframes_u8[iframe](), 0);
+		// The cast is through the file's own sample type, so a signed sample
+		// sign-extends here exactly as castPage2T does when it widens to float.
+		auto widen = [&](auto &native, auto &staging) {
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				Iframes[iframe]().reshape(ny, nx);
+				float *dst = &DIRECT_MULTIDIM_ELEM(Iframes[iframe](), 0);
+				const auto *src = &DIRECT_MULTIDIM_ELEM(native[iframe](), 0);
 				#pragma omp parallel for num_threads(n_threads) schedule(static)
 				for (long int pixel = 0; pixel < (long int)num_pixels; pixel++)
 					dst[pixel] = (float)src[pixel];
-				Iframes_u8[iframe].clear();
-				u8_staging.discardThrough(iframe + 1);
-			} else {
-				const unsigned short *src = &DIRECT_MULTIDIM_ELEM(Iframes_u16[iframe](), 0);
-				#pragma omp parallel for num_threads(n_threads) schedule(static)
-				for (long int pixel = 0; pixel < (long int)num_pixels; pixel++)
-					dst[pixel] = (float)src[pixel];
-				Iframes_u16[iframe].clear();
-				u16_staging.discardThrough(iframe + 1);
+				native[iframe].clear();
+				staging.discardThrough(iframe + 1);
 			}
+			staging.release();
+		};
+		switch (compact_stage) {
+		case COMPACT_U8:  widen(Iframes_u8, u8_staging);     break;
+		case COMPACT_U16: widen(Iframes_u16, u16_staging);   break;
+		case COMPACT_S8:  widen(Iframes_s8, s8_staging);     break;
+		default:          widen(Iframes_s16, s16_staging);   break;
 		}
-		if (is_u8) u8_staging.release(); else u16_staging.release();
-		logfile << "Materialized native " << (is_u8 ? "uint8" : "uint16")
+		logfile << "Materialized native " << compactStageName(compact_stage)
 		        << " frames as float for CPU fallback." << std::endl;
 		compact_stage = COMPACT_NONE;
 	};
@@ -2448,10 +2534,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		// patch downloads the full float movie afterwards, and anything the staging
 		// still holds is added to that. munmap makes the release unconditional, so
 		// this no longer depends on an allocator returning arena pages.
-		const bool was_u8 = (compact_stage == COMPACT_U8);
-		if (was_u8) u8_staging.release(); else u16_staging.release();
+		const CompactStage was = compact_stage;
+		switch (was) {
+		case COMPACT_U8:  u8_staging.release();  break;
+		case COMPACT_U16: u16_staging.release(); break;
+		case COMPACT_S8:  s8_staging.release();  break;
+		default:          s16_staging.release(); break;
+		}
 		compact_stage = COMPACT_NONE;
-		logfile << "Released native " << (was_u8 ? "uint8" : "uint16")
+		logfile << "Released native " << compactStageName(was)
 		        << " host staging after device forward FFT." << std::endl;
 	};
 
@@ -2570,6 +2661,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		    ? movie_session->applyGainDefectsAndSumU16(Iframes_u16, gain_ptr, Isum, false)
 		    : compact_stage == COMPACT_U8
 		    ? movie_session->applyGainDefectsAndSumU8(Iframes_u8, gain_ptr, Isum, false)
+		    : compact_stage == COMPACT_S16
+		    ? movie_session->applyGainDefectsAndSumS16(Iframes_s16, gain_ptr, Isum, false)
+		    : compact_stage == COMPACT_S8
+		    ? movie_session->applyGainDefectsAndSumS8(Iframes_s8, gain_ptr, Isum, false)
 		    : movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum, false);
 		if (gain_sum_ok) {
 			cuda_gain_sum_done = true;
@@ -2917,8 +3012,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 						if (DIRECT_A2D_ELEM(bBad, y, x)) continue;
 //						std::cout << "o";
 						// Issue #85 lane C: on a compact-staged path the raw host
-						// movie lives in Iframes_u16 or Iframes_u8. (float)u16 and
-						// (float)u8 are the same values the float reader stored, so
+						// movie lives in Iframes_{u16,u8,s16,s8}. (float) of the file's
+						// own sample type is the value the float reader stored, so
 						// the gain multiply below and every RNG draw that follows
 						// are unchanged.
 						float neighbor;
@@ -2927,6 +3022,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 							neighbor = (float)DIRECT_A2D_ELEM(Iframes_u16[iframe](), y, x);
 						else if (compact_stage == COMPACT_U8)
 							neighbor = (float)DIRECT_A2D_ELEM(Iframes_u8[iframe](), y, x);
+						else if (compact_stage == COMPACT_S16)
+							neighbor = (float)DIRECT_A2D_ELEM(Iframes_s16[iframe](), y, x);
+						else if (compact_stage == COMPACT_S8)
+							neighbor = (float)DIRECT_A2D_ELEM(Iframes_s8[iframe](), y, x);
 						else
 #endif
 							neighbor = DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
@@ -3535,11 +3634,45 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					local_xshifts.assign(local_xshifts.size(), (RFLOAT)0);
 					local_yshifts.assign(local_yshifts.size(), (RFLOAT)0);
 #endif
+#ifdef _CUDA_ENABLED
+					// Issue #192: a completed resident attempt that did not converge
+					// leaves d_Iframes valid, so the retry input is built from it
+					// instead of downloading the movie. This is the spectrum
+					// cudaPreparePatch makes from the downloaded frames: same group
+					// sums in the same order, same R2C plan, same scaling. Only a
+					// failure here (or a failed first preparation) takes the
+					// download path below.
+					bool resident_retry_prep_done = false;
+					if (movie_session && device_prep_ok) {
+						RCTIC(TIMING_PREP_PATCH);
+						resident_retry_prep_done = movie_session->downloadPatchSpectra(
+							x_start, y_start, patch_w, patch_h, n_groups,
+							group_start.data(), group_size.data(), Fpatches);
+						RCTOC(TIMING_PREP_PATCH);
+						if (!resident_retry_prep_done) {
+							// Same rule as above: the preserved status and the pending
+							// slot both decide, never the slot alone.
+							const CudaRetryDecision decision = cudaRetryDecisionFor(
+								movie_session->getFailureState(), cudaGetLastError());
+							if (decision.verdict == CUDA_RETRY_FATAL) {
+								REPORT_ERROR_STR("CUDA device context is unusable for " << fn_mic
+								                 << " (patch " << iy + 1 << ", " << ix + 1 << "): "
+								                 << cudaGetErrorString(decision.decisive)
+								                 << ". Refusing to retry alignment on a poisoned context.");
+							}
+							logfile << "WARNING: resident retry preparation did not complete for patch ("
+							        << iy + 1 << ", " << ix + 1 << "); classified recoverable, "
+							        << "retrying from the downloaded frames." << std::endl;
+						}
+					}
+#endif
 					// Host frames are deliberately raw on the resident path. If a
 					// device patch attempt falls back, download the aligned real frames
 					// before either CUDA staging or CPU patch preparation reads them.
 #ifdef _CUDA_ENABLED
-					if (movie_session && host_frames_are_raw) {
+					if (resident_retry_prep_done) {
+						// Nothing reads the host frames on this retry.
+					} else if (movie_session && host_frames_are_raw) {
 						if (!movie_session->downloadRealFrames(Iframes))
 							REPORT_ERROR("Failed to download resident real frames for patch fallback");
 						host_frames_are_raw = false;
@@ -3556,7 +3689,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					}
 #endif
 					RCTIC(TIMING_PREP_PATCH);
+#ifdef _CUDA_ENABLED
+					bool cuda_patch_prep_done = resident_retry_prep_done;
+#else
 					bool cuda_patch_prep_done = false;
+#endif
 #ifdef _CUDA_ENABLED
 					// Issue #69, second boundary. The health check above runs BEFORE
 					// this preparation, so it cannot see a fatal error raised HERE --
@@ -3567,7 +3704,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					// Peeking at the cleared slot afterwards is not sufficient; the
 					// status has to be carried out of the helper.
 					CudaFailureState fallback_prep_failure;
-					if (use_gpu) {
+					if (use_gpu && !cuda_patch_prep_done) {
 						cuda_patch_prep_done = cudaPreparePatch(
 							Iframes, x_start, x_end, y_start, y_end,
 							n_groups, group_start, group_size, Fpatches,
@@ -3994,9 +4131,11 @@ skip_fitting:
 
 			// Update real space images
 			RCTIC(TIMING_DW_IFFT);
+			// Fframes are not read again for this movie, so FFTW may destroy them
+			// instead of transforming a full-frame copy.
 			#pragma omp parallel for num_threads(n_threads)
 			for (int iframe = 0; iframe < n_frames; iframe++) {
-				NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
+				NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe](), NewFFT::FwdOnly, false);
 			}
 			RCTOC(TIMING_DW_IFFT);
 

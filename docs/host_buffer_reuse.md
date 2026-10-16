@@ -52,6 +52,18 @@ because it changes every malloc-family allocation:
 - User settings (`MALLOC_MMAP_THRESHOLD_`, `MALLOC_TRIM_THRESHOLD_`,
   `GLIBC_TUNABLES`) are never overridden.
 
+**Huge pages on THP `madvise` hosts** (deployment setting, no code). Where
+`/sys/kernel/mm/transparent_hugepage/enabled` is `madvise`, large arrays get 4 KiB
+pages, so the full-frame FFT passes miss the TLB and every page faults on first
+touch. On a glibc 2.35 or later host, start the process with
+`GLIBC_TUNABLES=glibc.malloc.hugetlb=1` to have malloc request huge pages.
+Output is unchanged. On cpu64 (THP `madvise`) a 24-movie CPU batch went from
+452 s to 371 s, system time from 134 s to 30-40 s
+(`docs/issue10_allocator_control/`). Hosts with THP `always` (SCARF) already get
+huge pages and need nothing; `never` is unaffected. The tunable applies to every
+malloc in the process. The host THP mode and any `GLIBC_TUNABLES` value are in the
+`Host allocator:` line and the `--profile` record.
+
 The mode in effect is printed at start (`Host allocator: ...`) and recorded in
 the `--profile` process record.
 

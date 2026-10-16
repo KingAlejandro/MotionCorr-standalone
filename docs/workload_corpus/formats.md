@@ -2,8 +2,8 @@
 
 The ten #186 families cover four decode paths. This note lists every on-disk encoding MotionCorr
 reads, measures which ones EMPIAR actually holds, adds eight real families for the encodings the
-corpus lacked, and records which encodings exist only as synthetic fixtures because no deposited
-movie uses them. It makes decode-coverage claims only. Timing baselines for the new families have
+corpus lacked, and records which encodings exist only as synthetic fixtures because none was
+found among the EMPIAR files read. It makes decode-coverage claims only. Timing baselines for the new families have
 not been run (Limitations).
 
 ## Result in brief

@@ -94,7 +94,7 @@ Tutorial `--ingest nvcomp` equals `auto` (G 1.36 s, L 1.49 s, witness `nvcomp`).
 | EER f3 | 7208 | host read 4382 (61%) | patch alignment 1418 | movie teardown 591 |
 | EER f4 | 12776 | host read 10022 (78%) | movie teardown 1398 | gain and sum 891 |
 | EER 12963 | 4548 | host read 3099 (68%) | patch alignment 697 | movie teardown 405 |
-| 10164 (u8 MRC, 8 fr) | 1005 | host read 336 (33%) | movie teardown 217 | gain and sum 156 |
+| 10164 (8-bit MRC, mode 0, 8 fr) | 1005 | host read 336 (33%) | movie teardown 217 | gain and sum 156 |
 | 10216 (i16 MRC) | 3639 | patch alignment 1712 (47%) | host read 958 (26%) | movie teardown 458 |
 
 `movie teardown` tracks the host float movie that the float path (and the retry download) frees: 0.12-0.17 s per GiB of host float movie across
@@ -169,10 +169,10 @@ estimate, labelled.
 
 | # | bottleneck | families | measured share of steady movie | ceiling per movie | existing issue |
 |---|---|---|---|---|---|
-| 1 | EER host render (`host read movie`), plus the host float movie's upload (`gain and sum` 0.23-0.89 s) and teardown (0.4-1.4 s) | f3, f4, 12963 | 61% (76% without retry) / 78% / 68% (80%) | 4.4 / 10.0 / 3.1 s read, 4.2-4.7 ms per Mpx-frame | none for performance. #8 is validation of the EER and compressed-MRC paths; a device EER route would need a **new issue** |
+| 1 | EER host render (`host read movie`), plus the host float movie's upload (`gain and sum` 0.23-0.89 s) and teardown (0.4-1.4 s) | f3, f4, 12963 | 61% (76% without retry) / 78% / 68% (80%) | 4.4 / 10.0 / 3.1 s read, 4.2-4.7 ms per Mpx-frame | **#193** (host render into `uint16` + compact staging, or device render). #8 holds EER validation |
 | 2 | LZW host decode on the compact path | 10361, 10441, 10641 | 67% / 54% / 33% (4% as measured, hidden by the retry) | 1.4 / 2.6 / 0.7 s; 0.42-0.95 ms per Mpx-frame | **#141** (nvTIFF). The host decode alone is 5-17x the 0.15 s/movie gate. Analogy-based estimate, not a measurement: the tutorial's Deflate device ingest costs 0.12 ms per Mpx-frame, which would leave about 0.2 s of 1.4 s on 10361 |
-| 3 | Non-convergence retry (host download and repeat) | 10641, 10216, f3, 12963 | 87% / 47% / 20% / 15% | 13.6 / 1.7 / 1.4 / 0.7 s (the whole `patch alignment` stage; the retry's own share is not separated) | none; relates to #69 (retry state). **New issue**, parity sign-off needed (section above) |
-| 4 | Raw MRC read and convert (u8, i16, f32) to a host float movie | 10028, 10164, 10216 | 57% / 33% / 26% (50% without retry) | 0.40 / 0.34 / 0.96 s; 0.74-1.48 ms per Mpx-frame | none. The compact route (native samples staged, expansion on the device) is gated on a `tif` file name in the runner; u8 MRC is not offered it, and i16 MRC is signed in its header, which the route excludes by design. Small **new issue**; #8 for the MRC input paths |
+| 3 | Non-convergence retry (host download and repeat) | 10641, 10216, f3, 12963 | 87% / 47% / 20% / 15% | 13.6 / 1.7 / 1.4 / 0.7 s (the whole `patch alignment` stage; the retry's own share is not separated) | **#192** (keep the retry on the device, products unchanged); dropping the retry is a separate parity decision. Related #69, #157 |
+| 4 | Raw MRC read and convert (u8, i16, f32) to a host float movie | 10028, 10164, 10216 | 57% / 33% / 26% (50% without retry) | 0.40 / 0.34 / 0.96 s; 0.74-1.48 ms per Mpx-frame | **#194**. The compact route is gated on a `tif` file name and on unsigned types; MRC mode 0 is read as signed char (`src/rwMRC.h:201`) and mode 1 as signed short, so signed staging is needed. Float32 MRC is out of scope. #8 for the MRC input paths |
 | 5 | Per-process fixed cost and first-movie extra (context, nvCOMP/pinned setup, gain read on the first movie) | all; dominant for short runs | 0.53-1.25 s + 0.18-1.2 s per process | tutorial: ~1.2 s of a 1.43 s two-movie run | **#53**. First-movie `read gain` is 0.1-0.63 s in the four gain families |
 | 6 | Device stages after decode (global FFT, gain and sum, dose weighting, patch alignment without retries) | K3, 10361 | each 3-15% (global fft 741 ms on 10441, 224 ms on 10361) | no single stage above 15% | none needed yet |
 | 7 | VRAM capacity | 10441; EER with upsampling 2 | n/a | 39.3 GiB peak; 24 GiB card holds ~26 of 50 frames (estimate) | **Tier 2** (follow-up to #168) |

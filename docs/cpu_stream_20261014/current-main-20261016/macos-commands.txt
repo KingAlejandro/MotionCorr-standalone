@@ -1,0 +1,12 @@
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCUDA=OFF -DPython3_EXECUTABLE=$HOME/.venvs/global/bin/python3 : exit 0
+cmake --build build --parallel 4 : exit 0
+ctest --test-dir build --output-on-failure : exit 8
+ctest --test-dir build -R ^CpuUnweightedStream$ -V : exit 0
+
+Baseline d7171b810dc97003784339d7bad1c279903f3bba:
+cmake -S /tmp/fix178-main -B /tmp/fix178-main/build -DCMAKE_BUILD_TYPE=Release -DCUDA=OFF -DPython3_EXECUTABLE=$HOME/.venvs/global/bin/python3 : exit 0
+cmake --build /tmp/fix178-main/build --parallel 4 : exit 0
+ctest --test-dir /tmp/fix178-main/build --output-on-failure : exit 8 (macos-main-archive-ctest.log, archived tree without git metadata; extra CiFailClosedControls failure)
+Restored baseline git metadata (local object alternate, reset --mixed d7171b81); no source changes.
+ctest --test-dir /tmp/fix178-main/build -R ^CiFailClosedControls$ --output-on-failure : exit 0
+ctest --test-dir /tmp/fix178-main/build --output-on-failure : exit 8 (macos-main-ctest.log; only the two known macOS failures)

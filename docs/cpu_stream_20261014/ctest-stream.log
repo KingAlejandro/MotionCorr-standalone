@@ -1,0 +1,430 @@
+Internal ctest changing into directory: /workspace/scratch/28038873ca11/build-stream
+Test project /workspace/scratch/28038873ca11/build-stream
+      Start  1: CpuUnweightedStream
+      Start  2: PatchRetryState
+      Start  3: RunnerInterpolateRecenter
+      Start  4: MrcHeaderStats
+ 1/53 Test  #3: RunnerInterpolateRecenter ..........   Passed    0.01 sec
+      Start  5: PdfConcat
+ 2/53 Test  #4: MrcHeaderStats .....................   Passed    0.03 sec
+      Start  6: DefectParser
+ 3/53 Test  #6: DefectParser .......................   Passed    0.03 sec
+      Start  7: DeflateLayout
+ 4/53 Test  #2: PatchRetryState ....................   Passed    0.09 sec
+      Start  8: Adler32Arithmetic
+ 5/53 Test  #7: DeflateLayout ......................   Passed    0.04 sec
+      Start  9: Adler32KernelHost
+ 6/53 Test  #9: Adler32KernelHost ..................   Passed    0.01 sec
+      Start 10: StageProfileThreads
+ 7/53 Test #10: StageProfileThreads ................   Passed    0.07 sec
+      Start 11: FrameBufferPool
+ 8/53 Test #11: FrameBufferPool ....................   Passed    0.09 sec
+      Start 12: ScratchArena
+ 9/53 Test  #5: PdfConcat ..........................   Passed    0.25 sec
+      Start 13: ReaderPool
+10/53 Test #12: ScratchArena .......................   Passed    0.01 sec
+      Start 14: ReaderPoolMutant_spin
+11/53 Test  #1: CpuUnweightedStream ................   Passed    0.32 sec
+      Start 15: ReaderPoolMutant_nowait
+12/53 Test #15: ReaderPoolMutant_nowait ............   Passed    0.04 sec
+      Start 16: DefectNeighbours
+13/53 Test #16: DefectNeighbours ...................   Passed    0.01 sec
+      Start 17: DefectMergeMutant_append_only
+14/53 Test #17: DefectMergeMutant_append_only ......   Passed    0.01 sec
+      Start 18: DefectMergeMutant_no_order_check
+15/53 Test #18: DefectMergeMutant_no_order_check ...   Passed    0.01 sec
+      Start 19: DefectMergeMutant_swap_xy
+16/53 Test #19: DefectMergeMutant_swap_xy ..........   Passed    0.01 sec
+      Start 20: NvcompAcceptanceDiagnostics
+17/53 Test #13: ReaderPool .........................   Passed    1.08 sec
+      Start 21: ProfilingKit
+18/53 Test #14: ReaderPoolMutant_spin ..............   Passed    1.16 sec
+      Start 22: GainCacheOwnership
+19/53 Test #20: NvcompAcceptanceDiagnostics ........   Passed    2.54 sec
+      Start 23: NvcompGuards
+20/53 Test #23: NvcompGuards .......................   Passed    0.07 sec
+      Start 24: SyntheticRegression
+21/53 Test  #8: Adler32Arithmetic ..................   Passed    3.44 sec
+      Start 25: HotPixelRngDeterminism
+22/53 Test #25: HotPixelRngDeterminism .............   Passed    2.44 sec
+      Start 26: RunnerExposure
+23/53 Test #24: SyntheticRegression ................   Passed    3.69 sec
+      Start 27: Runner_failure
+24/53 Test #27: Runner_failure .....................   Passed    0.82 sec
+      Start 28: Runner_invalid
+25/53 Test #28: Runner_invalid .....................   Passed    0.84 sec
+      Start 29: Runner_resume
+26/53 Test #26: RunnerExposure .....................   Passed    2.87 sec
+      Start 30: Runner_tomography
+27/53 Test #30: Runner_tomography ..................   Passed    6.33 sec
+      Start 31: RunnerLateBin
+28/53 Test #29: Runner_resume ......................   Passed    8.89 sec
+      Start 32: RunnerExportedUnits
+29/53 Test #32: RunnerExportedUnits ................   Passed    0.33 sec
+      Start 33: GainCache
+30/53 Test #31: RunnerLateBin ......................   Passed    2.90 sec
+      Start 34: TiffRead
+31/53 Test #22: GainCacheOwnership .................   Passed   17.80 sec
+      Start 35: DamagedMovie
+32/53 Test #33: GainCache ..........................   Passed    4.78 sec
+      Start 36: CompressedMovieSequence
+33/53 Test #34: TiffRead ...........................   Passed    5.05 sec
+      Start 37: GlobalIfftElision
+34/53 Test #36: CompressedMovieSequence ............   Passed    2.11 sec
+      Start 38: HostBufferReuse
+35/53 Test #37: GlobalIfftElision ..................   Passed    3.60 sec
+      Start 39: StageProfile
+36/53 Test #35: DamagedMovie .......................   Passed    8.68 sec
+      Start 40: RunnerModelParser
+37/53 Test #40: RunnerModelParser ..................   Passed    0.24 sec
+      Start 41: MicrographModelBounds
+38/53 Test #41: MicrographModelBounds ..............   Passed    2.83 sec
+      Start 42: RunnerInterpolateShifts
+39/53 Test #39: StageProfile .......................   Passed    4.60 sec
+      Start 43: WriteFaults
+40/53 Test #42: RunnerInterpolateShifts ............   Passed    1.31 sec
+      Start 44: WriteFaultsSync
+41/53 Test #43: WriteFaults ........................   Passed    1.38 sec
+      Start 45: WriteFaultsMultiProduct
+42/53 Test #44: WriteFaultsSync ....................   Passed    1.28 sec
+      Start 46: OutputStageFaults
+43/53 Test #38: HostBufferReuse ....................   Passed    9.16 sec
+      Start 47: CiFailClosedControls
+44/53 Test #45: WriteFaultsMultiProduct ............   Passed    1.14 sec
+      Start 48: CudaValidationParser
+45/53 Test #48: CudaValidationParser ...............   Passed    0.08 sec
+      Start 49: MultiGpuScheduling
+46/53 Test #46: OutputStageFaults ..................   Passed    0.96 sec
+      Start 50: OutputTreeComparator
+47/53 Test #50: OutputTreeComparator ...............   Passed    1.74 sec
+      Start 51: JointStarPublication
+48/53 Test #51: JointStarPublication ...............   Passed    1.59 sec
+      Start 52: ImageWriteFaults
+49/53 Test #52: ImageWriteFaults ...................   Passed    0.04 sec
+      Start 53: NativeMovieStaging
+50/53 Test #53: NativeMovieStaging .................   Passed    0.67 sec
+51/53 Test #47: CiFailClosedControls ...............   Passed   44.15 sec
+52/53 Test #21: ProfilingKit .......................***Failed   76.92 sec
+........................................................................................................F.............................
+======================================================================
+FAIL: test_descendant_in_new_session_is_own (tests.test_runner.PidOwnership.test_descendant_in_new_session_is_own)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/profiling/tests/test_runner.py", line 196, in test_descendant_in_new_session_is_own
+    self.assertEqual(runner.classify_pid(child, leader.pid), "own")
+AssertionError: 'unknown' != 'own'
+- unknown
++ own
+
+
+----------------------------------------------------------------------
+Ran 134 tests in 70.061s
+
+FAILED (failures=1)
+
+53/53 Test #49: MultiGpuScheduling .................***Failed   57.55 sec
+ok   case_roundtrip_and_metadata
+ok   case_empty_required_products_refused
+ok   case_empty_shard_rejected
+ok   case_output_name_collision
+ok   case_duplicate_movie_in_input
+ok   case_collapsed_spaces_are_a_collision
+ok   case_decorated_output_collision
+ok   case_manifest_digest_binds_parsed_snapshot
+ok   case_real_output_suffixes_attributed
+ok   case_dotted_shift_plot_root
+ok   case_aggregate_name_shadowing
+ok   case_star_parser_refusals
+ok   case_clean_merge
+ok   case_lost_output
+ok   case_duplicate_and_misrouted_output
+ok   case_unassigned_movie_output
+ok   case_failed_worker_blocks_merge
+ok   case_missing_status_blocks_merge
+ok   case_failed_device_witness_blocks_merge
+ok   case_missing_worker_directory
+ok   case_link_staging_with_aggregate
+ok   case_link_refusal_falls_back_to_copy
+FAIL case_launcher_exit_digests_are_reused: /tmp/mgpu_uyzfrvxm/run/shards/shard_2way_0.star	3
+/tmp/mgpu_uyzfrvxm/run/shards/shard_2way_1.star	3
+manifest	/tmp/mgpu_uyzfrvxm/run/shards/shard_manifest.json
+TOTAL	6
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 1151, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 730, in main
+    ownership.activate(native_required=bool(devices))
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 231, in activate
+    raise RuntimeError('Launcher PID/birth identity unavailable')
+RuntimeError: Launcher PID/birth identity unavailable
+
+FAIL case_change_after_worker_exit_detected: /tmp/mgpu_eu10ptqy/rewrite/shards/shard_2way_0.star	3
+/tmp/mgpu_eu10ptqy/rewrite/shards/shard_2way_1.star	3
+manifest	/tmp/mgpu_eu10ptqy/rewrite/shards/shard_manifest.json
+TOTAL	6
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 1151, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 730, in main
+    ownership.activate(native_required=bool(devices))
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 231, in activate
+    raise RuntimeError('Launcher PID/birth identity unavailable')
+RuntimeError: Launcher PID/birth identity unavailable
+
+FAIL case_preserved_aggregate_change_after_exit_detected: /tmp/mgpu_jkayyta0/agg_rewrite/shards/shard_2way_0.star	3
+/tmp/mgpu_jkayyta0/agg_rewrite/shards/shard_2way_1.star	3
+manifest	/tmp/mgpu_jkayyta0/agg_rewrite/shards/shard_manifest.json
+TOTAL	6
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 1151, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 730, in main
+    ownership.activate(native_required=bool(devices))
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 231, in activate
+    raise RuntimeError('Launcher PID/birth identity unavailable')
+RuntimeError: Launcher PID/birth identity unavailable
+
+FAIL case_exit_digest_records_validated: /tmp/mgpu_q1cdua43/run/shards/shard_2way_0.star	3
+/tmp/mgpu_q1cdua43/run/shards/shard_2way_1.star	3
+manifest	/tmp/mgpu_q1cdua43/run/shards/shard_manifest.json
+TOTAL	6
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 1151, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 730, in main
+    ownership.activate(native_required=bool(devices))
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 231, in activate
+    raise RuntimeError('Launcher PID/birth identity unavailable')
+RuntimeError: Launcher PID/birth identity unavailable
+
+ok   case_timestamp_barrier_failure_fails_closed
+ok   case_output_digest_primitives
+ok   case_aggregate_same_byte_rewrite_detected
+ok   case_aggregate_may_not_add_per_movie_products
+ok   case_output_root_matches_withoutextension
+ok   case_reserved_name_collision
+ok   case_short_row_refused
+ok   case_killed_worker_then_nonprefix_resume
+ok   case_aggregate_star_canonical_order
+ok   case_aggregate_star_must_match_partition_content
+ok   case_aggregate_args_may_not_override_owned_paths
+ok   case_aggregate_wrong_order_rejected
+ok   case_failed_staging_never_reprocesses
+ok   case_merge_out_is_resolved
+ERROR case_launcher_refuses_cpu_gpu_confusion: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/mgpu_f4wej8rw/run2/status.json'
+FAIL case_per_worker_cpu_masks: /tmp/mgpu__wa5sd3g/r_per/shards/shard_2way_0.star	3
+/tmp/mgpu__wa5sd3g/r_per/shards/shard_2way_1.star	3
+manifest	/tmp/mgpu__wa5sd3g/r_per/shards/shard_manifest.json
+TOTAL	6
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 1151, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 730, in main
+    ownership.activate(native_required=bool(devices))
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 231, in activate
+    raise RuntimeError('Launcher PID/birth identity unavailable')
+RuntimeError: Launcher PID/birth identity unavailable
+
+FAIL case_cpu_budget_gate: /tmp/mgpu_xyrjb1h5/b_ok/shards/shard_2way_0.star	3
+/tmp/mgpu_xyrjb1h5/b_ok/shards/shard_2way_1.star	3
+manifest	/tmp/mgpu_xyrjb1h5/b_ok/shards/shard_manifest.json
+TOTAL	6
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 1151, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 730, in main
+    ownership.activate(native_required=bool(devices))
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 231, in activate
+    raise RuntimeError('Launcher PID/birth identity unavailable')
+RuntimeError: Launcher PID/birth identity unavailable
+
+FAIL case_phase_timeline_recorded: /tmp/mgpu__ofgbud3/ph/shards/shard_2way_0.star	3
+/tmp/mgpu__ofgbud3/ph/shards/shard_2way_1.star	3
+manifest	/tmp/mgpu__ofgbud3/ph/shards/shard_manifest.json
+TOTAL	6
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 1151, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 730, in main
+    ownership.activate(native_required=bool(devices))
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 231, in activate
+    raise RuntimeError('Launcher PID/birth identity unavailable')
+RuntimeError: Launcher PID/birth identity unavailable
+
+FAIL case_completed_image_marker_not_mrc_creation: actual writer identity unavailable
+FAIL case_per_worker_args_and_cpu_accounting: /tmp/mgpu_r4_1idrr/x_ok/shards/shard_2way_0.star	3
+/tmp/mgpu_r4_1idrr/x_ok/shards/shard_2way_1.star	3
+manifest	/tmp/mgpu_r4_1idrr/x_ok/shards/shard_manifest.json
+TOTAL	6
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 1151, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 730, in main
+    ownership.activate(native_required=bool(devices))
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 231, in activate
+    raise RuntimeError('Launcher PID/birth identity unavailable')
+RuntimeError: Launcher PID/birth identity unavailable
+
+FAIL case_worker_joint_report_suppressed: /tmp/mgpu_mw1061z4/jr_default/shards/shard_2way_0.star	3
+/tmp/mgpu_mw1061z4/jr_default/shards/shard_2way_1.star	3
+manifest	/tmp/mgpu_mw1061z4/jr_default/shards/shard_manifest.json
+TOTAL	6
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 1151, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 730, in main
+    ownership.activate(native_required=bool(devices))
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 231, in activate
+    raise RuntimeError('Launcher PID/birth identity unavailable')
+RuntimeError: Launcher PID/birth identity unavailable
+
+ok   case_devices_with_no_witness_refused
+ok   case_normalized_root_collision_refused
+ok   case_interior_double_slash_is_the_same_product
+ok   case_duplicate_coverage_and_zero_pairs_rejected
+ok   case_absolute_movie_roots_attributed
+ok   case_gpu_witness_logic
+ok   case_sampler_lifecycle
+ok   case_stale_status_is_refused
+ok   case_duplicate_movie_name_refused
+FAIL case_worker_args_may_not_override_launcher_options: TOTAL	6
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 1151, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 730, in main
+    ownership.activate(native_required=bool(devices))
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 231, in activate
+    raise RuntimeError('Launcher PID/birth identity unavailable')
+RuntimeError: Launcher PID/birth identity unavailable
+
+ok   case_aggregate_may_not_rewrite_staged_products
+ERROR case_launcher_verdict_follows_the_device_witness: RuntimeError: Launcher PID/birth identity unavailable
+FAIL case_ownership_cost_is_independent_of_host_processes: native: /tmp/mgpu_v8wk1dvc/run-native/shards/shard_2way_0.star	1
+/tmp/mgpu_v8wk1dvc/run-native/shards/shard_2way_1.star	1
+manifest	/tmp/mgpu_v8wk1dvc/run-native/shards/shard_manifest.json
+TOTAL	2
+Traceback (most recent call last):
+  File "/tmp/mgpu_v8wk1dvc/count_scans.py", line 23, in <module>
+    rc = launcher.main()
+         ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 730, in main
+    ownership.activate(native_required=bool(devices))
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 231, in activate
+    raise RuntimeError('Launcher PID/birth identity unavailable')
+RuntimeError: Launcher PID/birth identity unavailable
+
+FAIL case_launcher_signal_reaps_owned_process_group: worker did not reach signal-ready state for 15
+FAIL case_launcher_signal_reaches_cooperative_worker: cooperative worker did not become ready
+FAIL case_launcher_signal_during_spawn_keeps_child_owned: spawn boundary was not reached
+FAIL case_per_worker_timing_and_rss_recorded: TOTAL	5
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 1151, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/run_multi_gpu.py", line 730, in main
+    ownership.activate(native_required=bool(devices))
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 231, in activate
+    raise RuntimeError('Launcher PID/birth identity unavailable')
+RuntimeError: Launcher PID/birth identity unavailable
+
+ok   case_aggregate_staging_namespace_reserved
+ok   case_tomography_partition
+ok   case_bench_warmups_hold_arm_locks
+ok   case_bench_arm_tools_and_phase_pairs
+FAIL case_dataset_endpoint: Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tests/test_dataset_endpoint.py", line 97, in <module>
+    if __name__=='__main__':raise SystemExit(main())
+                                             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tests/test_dataset_endpoint.py", line 29, in main
+    require(cp.returncode==0,cp.stdout+cp.stderr+'\n'+(out/'aggregate.log').read_text())
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/dataset-endpoint-dqjbq0yf/healthy/aggregate.log'
+
+ok   case_owned_tree_rss
+FAIL case_pid_birth_cleanup: PASS actual procfs read handles exit/ESRCH and preserves permission refusal
+PASS recycled original PID/birth refused without any signal
+PASS observed reparented child escalates; unrelated group untouched
+PASS every escalation rechecks original PID/birth
+PASS observer error fails closed before any signal
+Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tests/test_process_ownership.py", line 532, in <module>
+    if __name__=='__main__':raise SystemExit(main())
+                                             ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tests/test_process_ownership.py", line 523, in main
+    procfs_exit_race();mod=load(a.helper.resolve());mocked(mod);live(mod)
+                                                                ^^^^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tests/test_process_ownership.py", line 142, in live
+    owner=ProcessOwnership();owner.watch(proc.pid)
+                             ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tools/multi_gpu/process_ownership.py", line 288, in watch
+    raise RuntimeError(f'Original launched PID {pid} birth identity unavailable')
+RuntimeError: Original launched PID 2633 birth identity unavailable
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1047, in write_text
+    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/owned-cleanup-dj_tfvk6/pid'
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1047, in write_text
+    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/owned-cleanup-dj_tfvk6/ready'
+
+ok   case_device_list_rejected
+ok   aggregate_control
+FAIL tomography_endpoint: Traceback (most recent call last):
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tests/test_tomography_endpoint.py", line 239, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tests/test_tomography_endpoint.py", line 233, in main
+    tomography(binary, tmp)
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tests/test_tomography_endpoint.py", line 102, in tomography
+    cp, status, manifest, out, diag = run_dataset(binary, tmp, 'tomo.star', 'tomo')
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream/tests/test_tomography_endpoint.py", line 57, in run_dataset
+    manifest = json.loads((out / 'workers/shards/shard_manifest.json').read_text())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tomo-endpoint-r33b5hkm/tomo/workers/shards/shard_manifest.json'
+
+
+53/74 passed
+
+
+96% tests passed, 2 tests failed out of 53
+
+Total Test time (real) =  91.48 sec
+
+The following tests FAILED:
+	 21 - ProfilingKit (Failed)
+	 49 - MultiGpuScheduling (Failed)
+Errors while running CTest

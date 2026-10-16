@@ -1,5 +1,8 @@
 # PR #183 requalification, 16 October 2026
 
+**Superseded by the [current main 1db86902 acceptance](merged-1db86902/README.md).**
+The earlier d7171b81 results below are preserved, not current-head claims.
+
 Base: `d7171b81` (merged, not rebased, merge commit `bd408a48`). Code: `7c453e5ef54816f0eacdbdf532f133e284e49ac1`.
 
 All review findings accepted. No numerical gates changed.

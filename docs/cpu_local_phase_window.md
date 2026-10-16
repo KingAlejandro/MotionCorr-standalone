@@ -1,6 +1,6 @@
 # CPU local patch phase window experiment
 
-Current base: main `d7171b81`, merged with a merge commit (not rebased). Issue #10.
+Current base: main `1db86902` (includes #178), merged with merge commit `e48b59ca` (not rebased). Issue #10.
 
 ## Current requalification (16 October 2026)
 
@@ -8,7 +8,10 @@ Code `7c453e5e` fixes the separate/fused trig-count witness, omits unread final
 local updates, documents local spectra as consumed scratch at the declaration,
 and requires cropped multi-iteration production coverage. No numerical gate is
 changed. Current commands, provenance, exact-output and mutation results are in
-[`cpu_local_phase_window_evidence/requalification-20261016/`](cpu_local_phase_window_evidence/requalification-20261016/).
+[`cpu_local_phase_window_evidence/requalification-20261016/merged-1db86902/`](cpu_local_phase_window_evidence/requalification-20261016/merged-1db86902/).
+Linux Release and Debug (-O0) each pass 60/60 CTests; four strict 5x5 output pairs
+are exact against `1db86902`, with the payload negative control rejected.
+The earlier d7171b81 checks are retained but superseded.
 
 Expected benefit is **calculated, not measured**: for the representative geometry
 below, retained complex updates are 6.52% of full support. For I local iterations,

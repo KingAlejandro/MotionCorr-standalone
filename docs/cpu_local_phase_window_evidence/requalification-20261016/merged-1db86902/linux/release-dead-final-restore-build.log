@@ -1,0 +1,86 @@
+-- LibTIFF Deflate subcodec: libdeflate
+-- Configuring done (0.4s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/ubuntu/fix183-20261016/candidate/build-release
+[  2%] Built target deflate_layout
+[  3%] Built target adler32_arithmetic
+[  4%] Built target adler32_kernel_host
+[  5%] Built target scratch_arena
+[  7%] Built target reader_pool
+[  8%] Building CXX object CMakeFiles/reader_pool_spin.dir/tests/test_reader_pool.cpp.o
+[ 10%] Built target defect_neighbours
+[ 10%] Building CXX object CMakeFiles/reader_pool_nowait.dir/tests/test_reader_pool.cpp.o
+[ 10%] Building CXX object CMakeFiles/defect_neighbours_append_only.dir/tests/test_defect_neighbours.cpp.o
+[ 10%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+[ 11%] Linking CXX executable defect_neighbours_append_only
+[ 11%] Built target defect_neighbours_append_only
+[ 12%] Building CXX object CMakeFiles/defect_neighbours_no_order_check.dir/tests/test_defect_neighbours.cpp.o
+[ 12%] Linking CXX executable reader_pool_spin
+[ 13%] Linking CXX executable reader_pool_nowait
+[ 13%] Built target reader_pool_spin
+[ 13%] Built target reader_pool_nowait
+[ 14%] Building CXX object CMakeFiles/defect_neighbours_swap_xy.dir/tests/test_defect_neighbours.cpp.o
+/home/ubuntu/fix183-20261016/candidate/src/motioncorr_runner.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/home/ubuntu/fix183-20261016/candidate/src/motioncorr_runner.cpp:1898:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1898 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+[ 14%] Linking CXX executable defect_neighbours_no_order_check
+[ 14%] Built target defect_neighbours_no_order_check
+[ 15%] Linking CXX executable defect_neighbours_swap_xy
+[ 15%] Built target defect_neighbours_swap_xy
+[ 16%] Linking CXX static library libmotioncorr_core.a
+[ 74%] Built target motioncorr_core
+[ 75%] Linking CXX executable motioncorr
+[ 76%] Linking CXX executable patch_retry_state
+[ 77%] Linking CXX executable runner_numerics
+[ 77%] Linking CXX executable cpu_unweighted_stream
+[ 78%] Built target runner_numerics
+[ 79%] Built target cpu_unweighted_stream
+[ 80%] Linking CXX executable cpu_patch_phase_window
+[ 81%] Linking CXX executable cpu_patch_phase_bench
+[ 82%] Built target motioncorr
+[ 82%] Built target patch_retry_state
+[ 82%] Linking CXX executable pdf_concat
+[ 82%] Linking CXX executable defect_parser
+[ 83%] Built target pdf_concat
+[ 84%] Linking CXX executable stage_profile_threads
+[ 84%] Built target cpu_patch_phase_window
+[ 85%] Built target cpu_patch_phase_bench
+[ 86%] Built target defect_parser
+[ 87%] Linking CXX executable frame_buffer_pool
+[ 88%] Building CXX object CMakeFiles/motioncorr_logfile_always_eps.dir/mutants/motioncorr_runner_logfile_always_eps.cpp.o
+[ 89%] Building CXX object CMakeFiles/motioncorr_logfile_late_guard.dir/mutants/motioncorr_runner_logfile_late_guard.cpp.o
+[ 90%] Built target stage_profile_threads
+[ 91%] Building CXX object CMakeFiles/motioncorr_logfile_eps_order.dir/mutants/motioncorr_runner_logfile_eps_order.cpp.o
+[ 91%] Built target frame_buffer_pool
+[ 92%] Building CXX object CMakeFiles/motioncorr_logfile_placeholder.dir/mutants/motioncorr_runner_logfile_placeholder.cpp.o
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_late_guard.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_late_guard.cpp:1898:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1898 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_placeholder.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_placeholder.cpp:1898:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1898 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_always_eps.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_always_eps.cpp:1898:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1898 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_eps_order.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/home/ubuntu/fix183-20261016/candidate/build-release/mutants/motioncorr_runner_logfile_eps_order.cpp:1898:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1898 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+[ 93%] Linking CXX executable motioncorr_logfile_placeholder
+[ 93%] Built target motioncorr_logfile_placeholder
+[ 94%] Linking CXX executable observation_model_save
+[ 95%] Built target observation_model_save
+[ 95%] Linking CXX executable image_write_faults
+[ 96%] Linking CXX executable motioncorr_logfile_late_guard
+[ 97%] Built target image_write_faults
+[ 98%] Linking CXX executable native_movie_staging
+[ 98%] Built target motioncorr_logfile_late_guard
+[ 98%] Built target native_movie_staging
+[ 99%] Linking CXX executable motioncorr_logfile_always_eps
+[100%] Linking CXX executable motioncorr_logfile_eps_order
+[100%] Built target motioncorr_logfile_always_eps
+[100%] Built target motioncorr_logfile_eps_order

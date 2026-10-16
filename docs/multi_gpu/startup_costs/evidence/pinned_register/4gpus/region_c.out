@@ -1,0 +1,48 @@
+region C start 2026-10-16T04:39:41+00:00 load=4.16 4.14 2.67
+s2 cuda cmake rc=0
+s2 cuda build rc=0 2026-10-16T04:41:29+00:00 Total Tests: 89
+s2 cpu cmake rc=0
+s2 cpu build rc=0 2026-10-16T04:42:15+00:00 Total Tests: 52
+main cuda cmake rc=0
+main cuda build rc=0 2026-10-16T04:44:00+00:00 Total Tests: 84
+fork_probe rc=0
+6.8.0-136-generic
+hostalloc       vmflags=[rd wr sh mr mw me ms sd ] child_mapped=1 fork_ms=8.1 stale_pages=0/32768
+register        vmflags=[rd wr mr mw me ac sd hg ] child_mapped=1 fork_ms=85.0 stale_pages=0/32768
+register_dfork  vmflags=[rd wr mr mw me dc ac sd hg ] child_mapped=0 fork_ms=7.4 stale_pages=0/32768
+hostalloc       vmflags=[rd wr sh mr mw me ms sd ] child_mapped=1 fork_ms=8.8 stale_pages=0/32768
+register        vmflags=[rd wr mr mw me ac sd hg ] child_mapped=1 fork_ms=85.3 stale_pages=0/32768
+register_dfork  vmflags=[rd wr mr mw me dc ac sd hg ] child_mapped=0 fork_ms=7.5 stale_pages=0/32768
+hostalloc       vmflags=[rd wr sh mr mw me ms sd ] child_mapped=1 fork_ms=8.8 stale_pages=0/32768
+register        vmflags=[rd wr mr mw me ac sd hg ] child_mapped=1 fork_ms=85.4 stale_pages=0/32768
+register_dfork  vmflags=[rd wr mr mw me dc ac sd hg ] child_mapped=0 fork_ms=7.5 stale_pages=0/32768
+s2 cuda ctest rc=8
+
+99% tests passed, 1 tests failed out of 89
+
+Label Time Summary:
+cuda        =  55.37 sec*proc (37 tests)
+hardware    =  55.22 sec*proc (35 tests)
+
+Total Test time (real) = 306.54 sec
+
+The following tests FAILED:
+	 46 - CiFailClosedControls (Failed)
+Errors while running CTest
+rerun failed: CiFailClosedControls
+s2 rerun rc=8
+main same tests rc=8
+/dev/shm/mcs2/ctest-s2-cuda-rerun.log:1/1 Test #46: CiFailClosedControls .............***Failed   19.99 sec
+/dev/shm/mcs2/ctest-s2-cuda-rerun.log:0% tests passed, 1 tests failed out of 1
+/dev/shm/mcs2/ctest-main-cuda-failed.log:1/1 Test #46: CiFailClosedControls .............***Failed   19.18 sec
+/dev/shm/mcs2/ctest-main-cuda-failed.log:0% tests passed, 1 tests failed out of 1
+s2 cpu ctest rc=8
+
+98% tests passed, 1 tests failed out of 52
+
+Total Test time (real) = 117.07 sec
+
+The following tests FAILED:
+	 46 - CiFailClosedControls (Failed)
+Errors while running CTest
+region C end 2026-10-16T04:51:47+00:00

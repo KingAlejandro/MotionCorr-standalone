@@ -1,0 +1,89 @@
+cpu-bind=MASK - gn0005, task  0  0 [317565]: mask 0xffffffffffffffff set
+=== VENUE ===
+2026-10-15T14:05:28+01:00
+gn0005.scarf.rl.ac.uk
+Cpus_allowed_list:	0-63
+[always] madvise never
+0, GPU-47d61ef5-38d4-8bab-6e1b-6673e3e1f011, NVIDIA A100-SXM4-40GB, Enabled
+1, GPU-2119ad35-2627-3550-88b2-13639f951704, NVIDIA A100-SXM4-40GB, Enabled
+2, GPU-1997915e-0e47-700c-c556-b192aef2da1c, NVIDIA A100-SXM4-40GB, Enabled
+3, GPU-9349c6e7-7c6a-4f26-1ac1-e30f606986a0, NVIDIA A100-SXM4-40GB, Enabled
+gs 9.54.0
+7fa355f268921d37f83d3d81497f382ab7945989c148186a1e2ffc122263b352  build-base/motioncorr
+317cccb8594e3c2fd92d2d919f4f9faef77b1ee92f7c48f869c01e13a7c3799a  build-cand/motioncorr
+files=409
+3.1G	/tmp/bench-data
+movies.star=24 movies96.star=96
+409
+-rw-r--r-- 1 scarf1415 cseg 56956944 Oct 13 01:54 Movies/gain.mrc
+### warmup (discarded; merged tree kept for the product comparison)
+  base 1x8-24 rc=0 wall=  6.618 worker=  5.977 agg= 0.626 PASS
+  cand 1x8-24 rc=0 wall=  5.672 worker=  5.110 agg= 0.548 PASS
+### rep 0
+  base 1x8-24 rc=0 wall=  5.784 worker=  5.217 agg= 0.551 PASS
+  cand 1x8-24 rc=0 wall=  5.553 worker=  4.987 agg= 0.550 PASS
+  base 4x8-24 rc=0 wall=  4.406 worker=  3.820 agg= 0.570 PASS
+  cand 4x8-24 rc=0 wall=  4.378 worker=  3.801 agg= 0.562 PASS
+### rep 1
+  cand 1x8-24 rc=0 wall=  5.633 worker=  5.067 agg= 0.552 PASS
+  base 1x8-24 rc=0 wall=  5.683 worker=  5.119 agg= 0.549 PASS
+  cand 4x8-24 rc=0 wall=  4.326 worker=  3.725 agg= 0.585 PASS
+  base 4x8-24 rc=0 wall=  4.297 worker=  3.715 agg= 0.563 PASS
+### rep 2
+  base 1x8-24 rc=0 wall=  5.767 worker=  5.202 agg= 0.547 PASS
+  cand 1x8-24 rc=0 wall=  5.569 worker=  5.006 agg= 0.547 PASS
+  base 4x8-24 rc=0 wall=  4.338 worker=  3.755 agg= 0.567 PASS
+  cand 4x8-24 rc=0 wall=  4.410 worker=  3.824 agg= 0.565 PASS
+### rep 3
+  cand 1x8-24 rc=0 wall=  5.659 worker=  5.094 agg= 0.551 PASS
+  base 1x8-24 rc=0 wall=  5.698 worker=  5.126 agg= 0.556 PASS
+  cand 4x8-24 rc=0 wall=  4.321 worker=  3.746 agg= 0.560 PASS
+  base 4x8-24 rc=0 wall=  4.291 worker=  3.704 agg= 0.567 PASS
+### rep 4
+  base 1x8-24 rc=0 wall=  5.740 worker=  5.171 agg= 0.552 PASS
+  cand 1x8-24 rc=0 wall=  5.584 worker=  5.007 agg= 0.563 PASS
+  base 4x8-24 rc=0 wall=  4.354 worker=  3.756 agg= 0.582 PASS
+  cand 4x8-24 rc=0 wall=  4.344 worker=  3.763 agg= 0.566 PASS
+### rep 5
+  cand 1x8-24 rc=0 wall=  5.644 worker=  5.079 agg= 0.550 PASS
+  base 1x8-24 rc=0 wall=  5.671 worker=  5.085 agg= 0.568 PASS
+  cand 4x8-24 rc=0 wall=  4.328 worker=  3.749 agg= 0.563 PASS
+  base 4x8-24 rc=0 wall=  4.302 worker=  3.719 agg= 0.564 PASS
+### rep 6
+  base 1x8-24 rc=0 wall=  5.756 worker=  5.192 agg= 0.548 PASS
+  cand 1x8-24 rc=0 wall=  5.586 worker=  5.021 agg= 0.549 PASS
+  base 4x8-24 rc=0 wall=  4.313 worker=  3.737 agg= 0.559 PASS
+  cand 4x8-24 rc=0 wall=  4.334 worker=  3.757 agg= 0.562 PASS
+### rep 7
+  cand 1x8-24 rc=0 wall=  5.576 worker=  5.010 agg= 0.551 PASS
+  base 1x8-24 rc=0 wall=  5.681 worker=  5.107 agg= 0.558 PASS
+  cand 4x8-24 rc=0 wall=  4.341 worker=  3.748 agg= 0.577 PASS
+  base 4x8-24 rc=0 wall=  4.413 worker=  3.842 agg= 0.557 PASS
+### rep 8
+  base 1x8-24 rc=0 wall=  5.765 worker=  5.200 agg= 0.550 PASS
+  cand 1x8-24 rc=0 wall=  5.595 worker=  5.030 agg= 0.551 PASS
+  base 4x8-24 rc=0 wall=  4.350 worker=  3.770 agg= 0.565 PASS
+  cand 4x8-24 rc=0 wall=  4.339 worker=  3.762 agg= 0.562 PASS
+### rep 9
+  cand 1x8-24 rc=0 wall=  5.613 worker=  5.047 agg= 0.549 PASS
+  base 1x8-24 rc=0 wall=  5.680 worker=  5.114 agg= 0.547 PASS
+  cand 4x8-24 rc=0 wall=  4.272 worker=  3.694 agg= 0.558 PASS
+  base 4x8-24 rc=0 wall=  4.374 worker=  3.803 agg= 0.556 PASS
+### rep 10
+  base 1x8-24 rc=0 wall=  5.786 worker=  5.221 agg= 0.549 PASS
+  cand 1x8-24 rc=0 wall=  5.606 worker=  5.031 agg= 0.562 PASS
+  base 4x8-24 rc=0 wall=  4.372 worker=  3.782 agg= 0.575 PASS
+  cand 4x8-24 rc=0 wall=  4.388 worker=  3.812 agg= 0.561 PASS
+### rep 11
+  cand 1x8-24 rc=0 wall=  5.631 worker=  5.062 agg= 0.550 PASS
+  base 1x8-24 rc=0 wall=  5.673 worker=  5.104 agg= 0.552 PASS
+  cand 4x8-24 rc=0 wall=  4.291 worker=  3.715 agg= 0.560 PASS
+  base 4x8-24 rc=0 wall=  4.328 worker=  3.756 agg= 0.557 PASS
+
+cfg       base_med  cand_med    saving      pct  pairs cand<base
+1x8-24       5.719     5.601    +0.118     2.1%  12/12  p=0.0005  median paired diff +0.130
+4x8-24       4.344     4.336    +0.007     0.2%  6/12  p=1.0000  median paired diff -0.003
+
+runs=48 all_pass=True
+ALLDONE
+BENCH_DONE

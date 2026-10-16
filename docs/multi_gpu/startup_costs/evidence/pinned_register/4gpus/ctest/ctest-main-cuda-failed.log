@@ -1,0 +1,26 @@
+Test project /dev/shm/mcs2/b-full-main-cuda
+    Start 46: CiFailClosedControls
+1/1 Test #46: CiFailClosedControls .............***Failed   19.18 sec
+.....F..
+======================================================================
+FAIL: test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/dev/shm/mcs2/src-main/tools/test_ci_fail_closed.py", line 460, in test_6_trusted_git_lookup_and_tampered_disk_manifest
+    self.assertIn("Failed to load trusted manifest from git ref", res_invalid_ref.stderr)
+AssertionError: 'Failed to load trusted manifest from git ref' not found in "ERROR: Cannot load trusted manifest: Cannot resolve git ref 'nonexistent_ref_12345' in source archive without git metadata\n"
+
+----------------------------------------------------------------------
+Ran 8 tests in 19.086s
+
+FAILED (failures=1)
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =  19.18 sec
+
+The following tests FAILED:
+	 46 - CiFailClosedControls (Failed)
+Errors while running CTest

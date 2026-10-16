@@ -1,0 +1,28 @@
+main sha=b956fead76fc2585 cand sha=5b390ddc8498fc45 cmp sha=28748f3315b4df0d 2026-10-16T04:34:24+00:00
+eo main rc=0
+eo_nodw main rc=0
+bin_late main rc=0
+cpu main rc=0
+mixed main rc=0
+mixed_cpu main rc=0
+eo cand rc=0
+eo_nodw cand rc=0
+bin_late cand rc=0
+cpu cand rc=0
+mixed cand rc=0
+mixed_cpu cand rc=0
+eo_nodw_poison main rc=0
+eo_nodw_poison cand rc=0
+eo_nodw cand_nopinreg rc=0
+== log lines: cand eo_nodw:       1 nvCOMP ingestion: pinned staging pool grown to 100663296 bytes for a 65245824-byte request (worker lifetime) 
+== eo main-vs-cand: IDENTICAL mrc=12 other=17 pdf_inventoried=4 files=37/37 
+== eo_nodw main-vs-cand: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== bin_late main-vs-cand: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== cpu main-vs-cand: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== mixed main-vs-cand: IDENTICAL mrc=20 other=19 pdf_inventoried=4 files=48/48 
+== mixed_cpu main-vs-cand: IDENTICAL mrc=20 other=19 pdf_inventoried=4 files=48/48 
+== eo_nodw_poison main-vs-cand: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== eo_nodw main-vs-cand_nopinreg: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== control A (main eo vs main eo_nodw, must differ): DIFFERENT mrc=12 other=17 pdf_inventoried=4 files=37/41
+== control B (cand eo_nodw with one payload byte flipped vs main, must differ): DIFFERENT mrc=16 other=17 pdf_inventoried=4 files=41/41    ('mrc', 'Movies/20170629_00021_frameImage_EVN.mrc') 
+IDM-DONE

@@ -1,0 +1,36 @@
+== test_pinned_stage
+PASS pinned stage ownership
+rc=0
+== test_pinned_stage_double_free
+FAIL: registered: release clears ownership
+FAIL: registered: a second release frees nothing
+FAIL: registered: destructor after release frees nothing more
+FAIL: grow: release then acquire a larger buffer
+FAIL: grow: the old buffer is gone before the new one counts
+FAIL: grow: every buffer freed exactly once
+FAIL: unpin failure: retry frees once
+OK: 7 check(s) failed as the mutant should
+rc=0
+== test_pinned_stage_leak_after_unpin
+FAIL: registered: freed by unregister + unmap, not freeHost
+FAIL: registered: a second release frees nothing
+FAIL: registered: destructor after release frees nothing more
+FAIL: destructor: a held registered buffer is freed once
+FAIL: single owner: ledger clean
+FAIL: grow: the old buffer is gone before the new one counts
+FAIL: grow: every buffer freed exactly once
+FAIL: unpin failure: retry frees once
+FAIL: unpin failure: ledger clean
+FAIL: destructor: mapping returned although the unpin failed
+OK: 10 check(s) failed as the mutant should
+rc=0
+== test_pinned_stage_leak_on_refusal
+OK: 3 check(s) failed as the mutant should
+FAIL: fallback: the refused mapping was returned, then one hostAlloc
+FAIL: fallback: freed via freeHost only, mapping not unmapped twice
+FAIL: fallback: ledger clean
+rc=0
+== test_pinned_stage_inherited_by_fork
+OK: 1 check(s) failed as the mutant should
+rc=0
+FAIL: fork: the child does not inherit the pinned mapping

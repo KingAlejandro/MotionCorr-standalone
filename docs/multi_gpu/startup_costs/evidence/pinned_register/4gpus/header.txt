@@ -1,0 +1,18 @@
+start 2026-10-16T04:11:42+00:00 load=0.82 1.72 1.53 uptime=7580348.68
+thp/enabled: always [madvise] never
+thp/defrag: always defer defer+madvise [madvise] never
+thp/khugepaged/defrag: 1
+compaction_proactiveness=20 extfrag_threshold=500
+kernel=6.8.0-136-generic
+               total        used        free      shared  buff/cache   available
+Mem:             432          27          64          18         363         405
+Node 0, zone      DMA      0      0      0      0      0      0      0      0      1      1      2 
+Node 0, zone    DMA32   1076    743    664    552    355    185    132     74     67     57    399 
+Node 0, zone   Normal   1586    885    421    343    108    590    536   8126   5669   2705   3272 
+Node 1, zone   Normal   1215   1186   9761 111898  51017  21533   9980   5712   3665   2726   2789 
+main sha256=b956fead76fc2585 bin=/dev/shm/mcs2/b-t-main/motioncorr
+s2 sha256=5b390ddc8498fc45 bin=/dev/shm/mcs2/b-t-s2/motioncorr
+c1 sha256=21fb2b6af100c642 bin=/dev/shm/mcs2/b-t-c1/motioncorr
+name, driver_version, persistence_mode, clocks.current.sm [MHz]
+NVIDIA A100 80GB PCIe, 570.86.10, Disabled, 1410 MHz
+end 2026-10-16T04:34:24+00:00

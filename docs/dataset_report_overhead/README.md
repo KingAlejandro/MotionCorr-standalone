@@ -142,3 +142,111 @@ Both fail closed, and `requireAggregatePdf(logfile.pdf)` still runs afterwards.
   the movie count rises and rises as the worker count rises.
 - `aggorc3` covers aggregate SPA only. The incremental and tomography report
   paths are unchanged by `a3f9049f` and are covered by `ctest` alone.
+
+## Single-process logfile.pdf from EPS
+
+`generateLogFilePDFAndWriteStarFiles()` in the normal (non-aggregate) path made
+Ghostscript re-render `header.pdf` + `all_batches.pdf` into `logfile.pdf`, pages
+the process already holds as EPS. When no `all_batches.pdf` exists before this
+run's report, `logfile.pdf` is exactly header EPS then this run's batch EPS, so it
+is now rendered from that EPS list on a thread alongside the batch pass and the
+concatenation is skipped. The existence of an earlier `all_batches.pdf` is asked
+once, before any report thread starts. If one exists (`--only_do_unfinished`,
+incremental runs) the concatenation is unchanged. `header.pdf`, `batch.pdf`,
+`all_batches.pdf` and the `.lst` files are produced as before; `logfile.pdf.lst`
+is removed after use so the output inventory does not change. Evidence and
+scripts: `single_process_logfile/`.
+
+Venue: 4GPUs, A100 GPU0 (`GPU-eddb42fe`), `taskset -c 96-103`, bench flock, THP
+`madvise`, Ghostscript 10.02.1, Release CUDA+nvCOMP build of both arms from
+scratch in one locked region. Base `116eb04a` (`sha256 7b0d4b4c…`), candidate
+`d1bb1406` (`sha256 d82a4224…`). Box shared; settle gate waited ~11 s per run.
+
+### Timing (measured)
+
+Default options, `--profile`, `--j 8 --ingest nvcomp`, 5 paired reps per count,
+arm order alternating by rep, discarded warm-up per arm. Medians, ms:
+
+| movies | report task base | cand | saving | process wall base | cand | saving |
+|---|---|---|---|---|---|---|
+| 12 | 510 | 326 | 179 (5/5 pairs) | 3597 | 3414 | 210 (4/5 pairs) |
+| 96 | 2312 | 1202 | 1117 (5/5 pairs) | 20810 | 19835 | 978 (5/5 pairs) |
+
+Task = `--profile` thread `main/joint star and logfile pdf`. The 12-movie wall
+has one outlier pair (cand 4834 ms, -1214 ms); the median ignores it. Both
+savings are below the 0.5 s / 1.3 s estimate. `timing_analysis.txt`,
+`timing_runs.jsonl`.
+
+### Correctness (measured)
+
+Both arms of a configuration wrote to the same as-run path, because each shifts
+EPS draws its own path onto the page; trees were then moved and `.star`/`.lst`
+rewritten (`correct.sh`).
+
+- Products, `docs/perf_integration/identity/cmp_trees.py`, 12 movies:
+  default IDENTICAL (12 mrc, 61/61 files), `--even_odd_split` IDENTICAL (36 mrc,
+  85/85), CPU path with `--even_odd_split --save_noDW` IDENTICAL (48 mrc, 97/97).
+  The output inventory, including `logfile.pdf.lst` being absent, is identical.
+  Comparator control: a flipped MRC payload byte gives DIFFERENT (and
+  eo-vs-default gives DIFFERENT on inventory).
+- `logfile.pdf`: 18 pages vs 18, 0 pages differ at `gs -sDEVICE=pnggray -r50`, in
+  all three configurations. Raster comparator controls built from the base run's own
+  EPS lists: unperturbed IDENTICAL; one EPS dropped 18 vs 17; two swapped 2 pages
+  differ; header EPS dropped 17; batch before header 18 differ.
+- Incremental, 6 movies then `--only_do_unfinished` over 12: step 2 of the
+  candidate made a `-sOUTPUTFILE=…/logfile.pdf` concatenation call and no EPS-list
+  call, as base; step 1 used the EPS list. Pages 12 vs 12 and 24 vs 24, 0 differ;
+  products IDENTICAL.
+- Ghostscript failure, 2 movies: a fake `gs` that exits 1, one that sleeps 1 s then
+  exits 1, and a directory named `logfile.pdf`. Exit status 0 for both arms in
+  all three, products written. Differences, all in the report:
+  main prints `ERROR in executing: gs -dNOPAUSE … header.pdf all_batches.pdf`
+  from the concatenation; the candidate prints `ERROR in executing: gs
+  -sDEVICE=pdfwrite … logfile.pdf @…logfile.pdf.lst`. At `d1bb1406` the candidate
+  also left a zero-byte `logfile.pdf` (the `touch()` fallback every other report
+  PDF has) and, with a directory in the way, printed `Filename::touch ERROR`.
+  From `aed8004a` the normal-path render passes `placeholder_on_failure = false`,
+  so like main it leaves no `logfile.pdf` (or the directory untouched) and makes
+  no `touch()` attempt. Checked on macOS CPU-only builds of `116eb04a` and
+  `aed8004a` with the same three fake-`gs` cases: exit 0 and products written in
+  both arms; only the failing command named on stderr differs.
+- `run_dataset.py`, 4 movies, one worker: both arms PASS, merged inventory and
+  `logfile.pdf` pages (10 vs 10) identical. `cmp_trees` still lists four
+  `merged/` files; after normalising arm name, the random `.aggregate-XXXX` suffix
+  and a PID the residual difference is zero. Workers write no `logfile.pdf`. No
+  timing claim.
+
+### Tests
+
+New `LogfileFromEps` (CPU, fake Ghostscript that logs each call and its `@list`
+content): fresh run makes three calls, `logfile.pdf` from header list then batch
+list, no concatenation; incremental run with a prior `all_batches.pdf` makes the
+concatenation `header.pdf all_batches.pdf` and no EPS-list call; failure cases
+above. Three compiled mutants of the runner each fail it (`--expect-fail`):
+`always_eps` (EPS-direct although a prior `all_batches.pdf` exists), `late_guard`
+(the skip decision asks `exists(all_batches.pdf)` after the batch pass wrote it),
+`eps_order` (batch list before header), and from `aed8004a` `placeholder` (an
+empty `logfile.pdf` left after a failed render). At `aed8004a` on macOS CPU-only,
+`LogfileFromEps` and its four mutants pass.
+
+- 4GPUs, candidate `d1bb1406`, full CUDA suite: 87/88. Failing:
+  `CiFailClosedControls`.
+- cpu64, `-DCUDA=OFF`: 55/56, same failure.
+
+`CiFailClosedControls` fails with `Cannot resolve git ref … in source archive
+without git metadata`: the staged trees come from `git archive`. It was not run
+on base here; it is the same test and cause recorded for the SCARF run above.
+
+### Limitations
+
+- Pixel equality is shown on Ghostscript 10.02.1 at r50 for 12-movie tutorial
+  runs. The 96-movie logfile and 24-movie report were not rastered.
+- The CPU-path identity run used the CUDA binary without `--gpu` on 4GPUs
+  (the tutorial movies are not on cpu64), once per arm: 273 s base, 260 s cand.
+- On a failed render the console messages differ as described above; the file
+  outcome matches main from `aed8004a`.
+- The 4GPUs and cpu64 suite results and all timing, identity and raster evidence
+  are from `d1bb1406`. `aed8004a` changes only the failure path and was checked
+  on macOS CPU-only builds.
+- Multi-GPU launcher workers already skip the report and the aggregate already
+  renders from EPS, so the endpoint is unchanged by design.

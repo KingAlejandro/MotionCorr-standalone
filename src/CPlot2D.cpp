@@ -26,7 +26,8 @@
 
 #include "CPlot2D.h"
 
-void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps, bool strict)
+void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps, bool strict,
+                                  bool placeholder_on_failure)
 {
 
     FileName fn_list = fn_pdf + ".lst";
@@ -81,6 +82,7 @@ void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps,
     if (!have_at_least_one || have_error_in_gs)
     {
         if (strict) REPORT_ERROR("Aggregate PDF generation failed: " + fn_pdf);
+        if (!placeholder_on_failure) return;
     	std::cerr << " + Will make an empty PDF-file in " << fn_pdf << "\n";
     	touch(fn_pdf);
     }

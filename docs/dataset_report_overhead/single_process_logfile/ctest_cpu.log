@@ -1,0 +1,136 @@
+Test project /home/ubuntu/lfe/build-cpu
+      Start  1: PatchRetryState
+      Start  2: RunnerInterpolateRecenter
+ 1/56 Test  #2: RunnerInterpolateRecenter ..........   Passed    0.01 sec
+      Start  3: MrcHeaderStats
+ 2/56 Test  #3: MrcHeaderStats .....................   Passed    0.01 sec
+      Start  4: PdfConcat
+ 3/56 Test  #1: PatchRetryState ....................   Passed    0.03 sec
+      Start  5: DefectParser
+ 4/56 Test  #5: DefectParser .......................   Passed    0.02 sec
+      Start  6: DeflateLayout
+ 5/56 Test  #6: DeflateLayout ......................   Passed    0.01 sec
+      Start  7: Adler32Arithmetic
+ 6/56 Test  #4: PdfConcat ..........................   Passed    0.06 sec
+      Start  8: Adler32KernelHost
+ 7/56 Test  #8: Adler32KernelHost ..................   Passed    0.00 sec
+      Start  9: StageProfileThreads
+ 8/56 Test  #9: StageProfileThreads ................   Passed    0.05 sec
+      Start 10: FrameBufferPool
+ 9/56 Test #10: FrameBufferPool ....................   Passed    0.03 sec
+      Start 11: ScratchArena
+10/56 Test #11: ScratchArena .......................   Passed    0.00 sec
+      Start 12: ReaderPool
+11/56 Test  #7: Adler32Arithmetic ..................   Passed    0.52 sec
+      Start 13: ReaderPoolMutant_spin
+12/56 Test #12: ReaderPool .........................   Passed    0.51 sec
+      Start 14: ReaderPoolMutant_nowait
+13/56 Test #14: ReaderPoolMutant_nowait ............   Passed    0.02 sec
+      Start 15: DefectNeighbours
+14/56 Test #15: DefectNeighbours ...................   Passed    0.00 sec
+      Start 16: DefectMergeMutant_append_only
+15/56 Test #16: DefectMergeMutant_append_only ......   Passed    0.00 sec
+      Start 17: DefectMergeMutant_no_order_check
+16/56 Test #17: DefectMergeMutant_no_order_check ...   Passed    0.00 sec
+      Start 18: DefectMergeMutant_swap_xy
+17/56 Test #18: DefectMergeMutant_swap_xy ..........   Passed    0.00 sec
+      Start 19: NvcompAcceptanceDiagnostics
+18/56 Test #19: NvcompAcceptanceDiagnostics ........   Passed    0.12 sec
+      Start 20: ProfilingKit
+19/56 Test #13: ReaderPoolMutant_spin ..............   Passed    0.51 sec
+      Start 21: GainCacheOwnership
+20/56 Test #21: GainCacheOwnership .................   Passed    4.07 sec
+      Start 22: NvcompGuards
+21/56 Test #22: NvcompGuards .......................   Passed    0.03 sec
+      Start 23: SyntheticRegression
+22/56 Test #23: SyntheticRegression ................   Passed    0.58 sec
+      Start 24: HotPixelRngDeterminism
+23/56 Test #24: HotPixelRngDeterminism .............   Passed    0.43 sec
+      Start 25: RunnerExposure
+24/56 Test #25: RunnerExposure .....................   Passed    0.46 sec
+      Start 26: Runner_failure
+25/56 Test #26: Runner_failure .....................   Passed    0.12 sec
+      Start 27: Runner_invalid
+26/56 Test #27: Runner_invalid .....................   Passed    0.12 sec
+      Start 28: Runner_resume
+27/56 Test #28: Runner_resume ......................   Passed    2.00 sec
+      Start 29: Runner_tomography
+28/56 Test #29: Runner_tomography ..................   Passed    0.37 sec
+      Start 30: RunnerLateBin
+29/56 Test #30: RunnerLateBin ......................   Passed    0.60 sec
+      Start 31: RunnerExportedUnits
+30/56 Test #31: RunnerExportedUnits ................   Passed    0.09 sec
+      Start 32: GainCache
+31/56 Test #32: GainCache ..........................   Passed    0.85 sec
+      Start 33: TiffRead
+32/56 Test #33: TiffRead ...........................   Passed    0.69 sec
+      Start 34: DamagedMovie
+33/56 Test #34: DamagedMovie .......................   Passed    2.39 sec
+      Start 35: CompressedMovieSequence
+34/56 Test #35: CompressedMovieSequence ............   Passed    0.60 sec
+      Start 36: GlobalIfftElision
+35/56 Test #36: GlobalIfftElision ..................   Passed    1.28 sec
+      Start 37: HostBufferReuse
+36/56 Test #37: HostBufferReuse ....................   Passed    2.89 sec
+      Start 38: StageProfile
+37/56 Test #38: StageProfile .......................   Passed    1.50 sec
+      Start 39: RunnerModelParser
+38/56 Test #39: RunnerModelParser ..................   Passed    0.14 sec
+      Start 40: MicrographModelBounds
+39/56 Test #40: MicrographModelBounds ..............   Passed    1.01 sec
+      Start 41: RunnerInterpolateShifts
+40/56 Test #41: RunnerInterpolateShifts ............   Passed    0.39 sec
+      Start 42: WriteFaults
+41/56 Test #42: WriteFaults ........................   Passed    0.46 sec
+      Start 43: WriteFaultsSync
+42/56 Test #43: WriteFaultsSync ....................   Passed    0.48 sec
+      Start 44: WriteFaultsMultiProduct
+43/56 Test #44: WriteFaultsMultiProduct ............   Passed    0.46 sec
+      Start 45: OutputStageFaults
+44/56 Test #45: OutputStageFaults ..................   Passed    0.38 sec
+      Start 46: LogfileFromEps
+45/56 Test #46: LogfileFromEps .....................   Passed    2.91 sec
+      Start 47: LogfileFromEpsMutant_always_eps
+46/56 Test #47: LogfileFromEpsMutant_always_eps ....   Passed    0.31 sec
+      Start 48: LogfileFromEpsMutant_late_guard
+47/56 Test #48: LogfileFromEpsMutant_late_guard ....   Passed    0.21 sec
+      Start 49: LogfileFromEpsMutant_eps_order
+48/56 Test #49: LogfileFromEpsMutant_eps_order .....   Passed    0.18 sec
+      Start 50: CiFailClosedControls
+49/56 Test #50: CiFailClosedControls ...............***Failed   13.74 sec
+.....F..
+======================================================================
+FAIL: test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ubuntu/lfe/src-cand/tools/test_ci_fail_closed.py", line 460, in test_6_trusted_git_lookup_and_tampered_disk_manifest
+    self.assertIn("Failed to load trusted manifest from git ref", res_invalid_ref.stderr)
+AssertionError: 'Failed to load trusted manifest from git ref' not found in "ERROR: Cannot load trusted manifest: Cannot resolve git ref 'nonexistent_ref_12345' in source archive without git metadata\n"
+
+----------------------------------------------------------------------
+Ran 8 tests in 13.683s
+
+FAILED (failures=1)
+
+      Start 51: CudaValidationParser
+50/56 Test #51: CudaValidationParser ...............   Passed    0.05 sec
+      Start 52: MultiGpuScheduling
+51/56 Test #20: ProfilingKit .......................   Passed   52.31 sec
+      Start 53: OutputTreeComparator
+52/56 Test #53: OutputTreeComparator ...............   Passed    0.74 sec
+      Start 54: JointStarPublication
+53/56 Test #54: JointStarPublication ...............   Passed    0.76 sec
+      Start 55: ImageWriteFaults
+54/56 Test #55: ImageWriteFaults ...................   Passed    0.02 sec
+      Start 56: NativeMovieStaging
+55/56 Test #56: NativeMovieStaging .................   Passed    0.27 sec
+56/56 Test #52: MultiGpuScheduling .................   Passed   44.16 sec
+
+98% tests passed, 1 tests failed out of 56
+
+Total Test time (real) =  85.05 sec
+
+The following tests FAILED:
+	 50 - CiFailClosedControls (Failed)
+Errors while running CTest

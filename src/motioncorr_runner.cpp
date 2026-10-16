@@ -1869,7 +1869,12 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 		// the same pages at the price of a second render.
 		RCTIC(TIMING_W_GS_LOGFILE);
 		if (!logfile_from_eps)
-			concatenatePDFfiles(report_out + "logfile.pdf", report_out + "header.pdf", report_out + "all_batches.pdf");
+		{
+			// Same contract as the EPS-direct render: a failed logfile.pdf leaves
+			// no partial or earlier file behind. Not reachable in aggregate mode.
+			if (!concatenatePDFfiles(report_out + "logfile.pdf", report_out + "header.pdf", report_out + "all_batches.pdf"))
+				removeRegularFileIfPresent(report_out + "logfile.pdf");
+		}
 		if (aggregate_only) {
 			requireAggregatePdf(report_out + "header.pdf");
 			requireAggregatePdf(report_out + "batch.pdf");

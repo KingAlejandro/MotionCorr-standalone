@@ -69,7 +69,10 @@ os.close(fd)
 mode = os.environ.get("FAKE_GS_MODE", "ok")
 if mode == "hang":
     time.sleep(1)
-if mode in ("fail", "hang"):
+if mode == "partial" and out:
+    # Writes to the destination and then fails, as Ghostscript can part-way.
+    pathlib.Path(out).write_bytes(b"%%PDF-1.4 partial")
+if mode in ("fail", "hang", "partial"):
     sys.exit(1)
 if out:
     pathlib.Path(out).write_bytes(b"%%PDF-1.4 fake\n%%%%EOF\n")
@@ -193,9 +196,14 @@ def check(binary: Path, fixture: Path, tmp: Path) -> None:
     print("PASS incremental run with a prior all_batches.pdf keeps the concatenation")
 
     # --- Failure semantics: Ghostscript failure is not a job failure. --------
-    for mode in ("fail", "hang"):
+    for mode in ("fail", "hang", "partial", "stale"):
         out = tmp / ("gsfail-" + mode)
-        r = run(binary, tmp, "ab.star", out, env(mode))
+        if mode == "stale":
+            # A logfile.pdf from an earlier run, and Ghostscript fails without
+            # writing: the old report must not survive as this run's.
+            out.mkdir()
+            (out / "logfile.pdf").write_bytes(b"%PDF-1.4 stale")
+        r = run(binary, tmp, "ab.star", out, env("fail" if mode == "stale" else mode))
         require(r.returncode == 0,
                 f"gs {mode}: exit {r.returncode}; the concatenation this replaced ignored "
                 "Ghostscript failure and so must the EPS-direct render")
@@ -210,8 +218,28 @@ def check(binary: Path, fixture: Path, tmp: Path) -> None:
         require(not (out / "logfile.pdf").exists(),
                 f"gs {mode}: a failed logfile.pdf render left a file behind; the "
                 "concatenation it replaced left none")
-    print("PASS Ghostscript failure (immediate and delayed) reports, exits 0 and leaves "
-          "no logfile.pdf, as before")
+    print("PASS Ghostscript failure (immediate, delayed, after a partial write, over a "
+          "stale logfile.pdf) reports, exits 0 and leaves no logfile.pdf")
+
+    # The same contract on the concatenation path taken when an earlier
+    # all_batches.pdf exists. Ghostscript here fails after writing the
+    # destination (partial) or without writing over a stale one (stale).
+    for mode in ("partial", "stale"):
+        out = tmp / ("cat-" + mode)
+        r = run(binary, tmp, "ab.star", out, env())
+        require(r.returncode == 0, f"concat {mode}: fixture run failed: " + r.stderr[-1500:])
+        if mode == "stale":
+            require((out / "logfile.pdf").is_file(), "fixture: stale logfile.pdf")
+        r = run(binary, tmp, "abc.star", out, env("partial" if mode == "partial" else "fail"),
+                ["--only_do_unfinished"])
+        require(r.returncode == 0, f"concat {mode}: exit {r.returncode}: " + r.stderr[-1500:])
+        require("terminate called" not in r.stderr, f"concat {mode}: std::terminate")
+        require(concats(calls(log), out, "logfile.pdf"),
+                f"concat {mode}: the concatenation path was not exercised")
+        require(not (out / "logfile.pdf").exists(),
+                f"concat {mode}: a failed concatenation left a logfile.pdf behind")
+        require((out / "Movies" / "c.mrc").stat().st_size > 0, f"concat {mode}: product lost")
+    print("PASS a failed concatenation leaves no logfile.pdf (partial write, stale file)")
 
     # A directory in the way of logfile.pdf: gs cannot write it. The old
     # concatenation ignored this, so the job still succeeds, nothing is touched

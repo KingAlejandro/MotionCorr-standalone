@@ -23,8 +23,17 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <filesystem>
 
 #include "CPlot2D.h"
+
+void removeRegularFileIfPresent(const FileName &fn)
+{
+	// symlink_status: a symlink or directory at fn is left alone.
+	std::error_code ec;
+	if (std::filesystem::is_regular_file(std::filesystem::symlink_status(fn.c_str(), ec)))
+		std::filesystem::remove(fn.c_str(), ec);
+}
 
 void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps, bool strict,
                                   bool placeholder_on_failure)
@@ -82,7 +91,9 @@ void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps,
     if (!have_at_least_one || have_error_in_gs)
     {
         if (strict) REPORT_ERROR("Aggregate PDF generation failed: " + fn_pdf);
-        if (!placeholder_on_failure) return;
+        // Ghostscript may have written part of the output, and an earlier run
+        // may have left a file of the same name: neither is a report.
+        if (!placeholder_on_failure) { removeRegularFileIfPresent(fn_pdf); return; }
     	std::cerr << " + Will make an empty PDF-file in " << fn_pdf << "\n";
     	touch(fn_pdf);
     }

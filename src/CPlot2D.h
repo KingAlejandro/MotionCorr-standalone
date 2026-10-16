@@ -35,8 +35,12 @@
 /* SHWS: join multiple eps files into a single pdf
  *
  */
-// placeholder_on_failure=false leaves no empty fn_pdf behind when a non-strict
-// render fails, as a failed concatenatePDFfiles() does.
+// Removes fn if it is a regular file; a missing file, directory or symlink is
+// left alone. Callers use it to leave no PDF behind after a failed render.
+void removeRegularFileIfPresent(const FileName &fn);
+
+// placeholder_on_failure=false leaves no fn_pdf behind when a non-strict render
+// fails: no placeholder, and any partial or earlier regular file is removed.
 void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps, bool strict = false,
                                   bool placeholder_on_failure = true);
 

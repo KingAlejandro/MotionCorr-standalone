@@ -4354,16 +4354,20 @@ void MotioncorrRunner::realSpaceInterpolation_withoutsum(std::vector<Image<float
 	} // general model
 }
 
+std::vector<RFLOAT> MotioncorrRunner::interpolationColumnCoordinates(int nx) {
+	// Keep the inline expression's rounding; reciprocal multiplication differs.
+	std::vector<RFLOAT> coordinates(nx);
+	for (int ix = 0; ix < nx; ix++)
+		coordinates[ix] = (RFLOAT)ix / nx - 0.5;
+	return coordinates;
+}
+
 void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile) {
 	const int n_frames = Iframes.size();
 	const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
 	const Matrix1D<RFLOAT> coeffX = model.coeffX, coeffY = model.coeffY;
 
-	// Preserve the original division and subtraction, once per column rather
-	// than once per pixel/frame. All OpenMP workers read the same exact values.
-	std::vector<RFLOAT> x_coordinates(nx);
-	for (int ix = 0; ix < nx; ix++)
-		x_coordinates[ix] = (RFLOAT)ix / nx - 0.5;
+	const auto x_coordinates = interpolationColumnCoordinates(nx);
 
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		logfile << "." << std::flush;
@@ -4536,11 +4540,7 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 	const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
 	const Matrix1D<RFLOAT> coeffX = model.coeffX, coeffY = model.coeffY;
 
-	// Preserve the original division and subtraction, once per column rather
-	// than once per pixel/frame. All OpenMP workers read the same exact values.
-	std::vector<RFLOAT> x_coordinates(nx);
-	for (int ix = 0; ix < nx; ix++)
-		x_coordinates[ix] = (RFLOAT)ix / nx - 0.5;
+	const auto x_coordinates = interpolationColumnCoordinates(nx);
 
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		logfile << "." << std::flush;

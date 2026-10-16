@@ -14,6 +14,9 @@
 #include <stdexcept>
 
 struct MotioncorrRunnerTestAccess {
+    static std::vector<RFLOAT> coordinates(int nx) {
+        return MotioncorrRunner::interpolationColumnCoordinates(nx);
+    }
     static void sum(MotioncorrRunner &runner, Image<float> &out,
                     std::vector<Image<float>> &frames, ThirdOrderPolynomialModel &model,
                     std::ostream &log) {
@@ -29,6 +32,23 @@ struct MotioncorrRunnerTestAccess {
 namespace {
 void require(bool ok, const std::string &message) {
     if (!ok) throw std::runtime_error(message);
+}
+
+void check_coordinates() {
+    std::size_t checked = 0;
+    // Test the actual cache builder used by both production paths, before float
+    // stores can hide a one-ulp coordinate error. Include detector and odd widths.
+    for (int nx : {1, 3, 65, 3710, 3711, 3838, 3839, 4096, 4097, 5760, 5761, 11520, 11521}) {
+        const auto cached = MotioncorrRunnerTestAccess::coordinates(nx);
+        require(cached.size() == std::size_t(nx), "coordinate cache size");
+        for (int ix = 0; ix < nx; ++ix) {
+            const RFLOAT expected = (RFLOAT)ix / nx - 0.5;
+            require(std::memcmp(&cached[ix], &expected, sizeof(RFLOAT)) == 0,
+                    "coordinate bits differ: nx=" + std::to_string(nx) + " ix=" + std::to_string(ix));
+            ++checked;
+        }
+    }
+    std::cout << "PASS " << checked << " cached coordinate bits vs inline division\n";
 }
 
 float value(std::size_t p, int frame, bool exceptional) {
@@ -182,6 +202,7 @@ int main(int argc, char **argv) {
             benchmark(std::stoi(argv[2]), std::stoi(argv[3]), std::stoi(argv[4]), std::stoi(argv[5]),
                       std::stoi(argv[6]), std::string(argv[7]) == "frames");
         } else {
+            check_coordinates();
             int cases = 0;
             for (const auto &shape : {std::pair<int,int>{1,1}, {2,3}, {3,2}, {7,9}, {16,16}, {33,17}, {64,49}, {65,8}})
                 for (int nf : {1,3,7}) for (int which = 0; which < 5; ++which)

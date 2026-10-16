@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import subprocess
 import sys
 import time
@@ -31,7 +32,13 @@ def main():
     add_arguments(parser)
     for name in ("base", "candidate", "data", "out"):
         parser.add_argument("--" + name, type=Path, required=True)
+    for name in ("base", "candidate"):
+        parser.add_argument("--" + name + "-source-sha", required=True,
+                            help="Full source commit used to build this binary (caller attestation, not driver HEAD)")
     args = parser.parse_args()
+    for name in ("base", "candidate"):
+        if not re.fullmatch(r"[0-9a-f]{40}", getattr(args, name + "_source_sha")):
+            parser.error("--" + name + "-source-sha must be a full 40-character lowercase SHA")
     venue = validate(args)  # Fail before outputs, hashing, or child launch.
     args.out.mkdir(parents=True, exist_ok=False)
     repo = Path(__file__).resolve().parents[2]
@@ -41,9 +48,12 @@ def main():
     binaries = {"base": args.base.resolve(strict=True), "candidate": args.candidate.resolve(strict=True)}
     data = args.data.resolve(strict=True)
     env = dict(os.environ, OMP_DYNAMIC="false", OMP_PROC_BIND="close", OMP_PLACES="cores", OPENBLAS_NUM_THREADS="1")
-    receipt = {"source": source, "driver_sha256": digest(Path(__file__).resolve()), "venue": venue,
+    receipt = {"driver_source": source, "driver_sha256": digest(Path(__file__).resolve()), "venue": venue,
                "platform": platform.platform(),
-               "binaries": {k: {"path": str(v), "sha256": digest(v)} for k, v in binaries.items()},
+               "binaries": {k: {"path": str(v), "sha256": digest(v),
+                                "source": {"commit": getattr(args, k + "_source_sha"),
+                                           "origin": "caller-attested build source SHA", "dirty": None}}
+                            for k, v in binaries.items()},
                "inputs": {p.name: digest(p) for p in (data / "synthetic_512x512_16frames.mrcs", data / "tutorial.tiff", data / "gain.mrc")},
                "environment": {k: env.get(k, "runtime default") for k in
                                ("OMP_DYNAMIC", "OMP_PROC_BIND", "OMP_PLACES", "OMP_WAIT_POLICY", "OPENBLAS_NUM_THREADS")},

@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import statistics
+import re
 import subprocess
 import time
 from cpu_venue import add_arguments, validate
@@ -25,8 +26,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     add_arguments(parser)
     parser.add_argument("--binary", type=Path, required=True)
+    parser.add_argument("--source-sha", required=True,
+                        help="Full source commit used to build the binary (caller attestation, not driver HEAD)")
     parser.add_argument("--out", type=Path, default=Path(__file__).resolve().parent / "kernel")
     args = parser.parse_args()
+    if not re.fullmatch(r"[0-9a-f]{40}", args.source_sha):
+        parser.error("--source-sha must be a full 40-character lowercase SHA")
     venue = validate(args)
     binary = args.binary.resolve(strict=True)
     args.out.mkdir(parents=True, exist_ok=True)
@@ -36,7 +41,8 @@ def main():
                OMP_WAIT_POLICY="PASSIVE", OPENBLAS_NUM_THREADS="1", MKL_NUM_THREADS="1")
     repo = Path(__file__).resolve().parents[2]
     source = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
-    receipt = {"source": source, "binary": str(binary), "binary_sha256": digest(binary),
+    receipt = {"driver_source": source, "binary": str(binary), "binary_sha256": digest(binary),
+               "source": {"commit": args.source_sha, "origin": "caller-attested build source SHA", "dirty": None},
                "wall_start_unix": time.time(), "venue": venue,
                "environment": {k: env[k] for k in ("OMP_DYNAMIC", "OMP_PROC_BIND", "OMP_PLACES",
                                "OMP_WAIT_POLICY", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS")},

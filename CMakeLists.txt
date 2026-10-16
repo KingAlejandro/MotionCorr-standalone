@@ -172,7 +172,8 @@ if(BUILD_TESTING)
     set_tests_properties(CpuPatchPhaseWindow PROPERTIES TIMEOUT 120)
     if(UNIX AND NOT APPLE)
         target_compile_definitions(cpu_patch_phase_window PRIVATE MC_PHASE_COUNT_TRIG)
-        target_link_options(cpu_patch_phase_window PRIVATE "-Wl,--wrap=sincos" "-Wl,--wrap=sincosf")
+        target_link_options(cpu_patch_phase_window PRIVATE
+            "-Wl,--wrap=sin" "-Wl,--wrap=sinf" "-Wl,--wrap=sincos" "-Wl,--wrap=sincosf")
     endif()
     # Keep timing separate from the linker-wrapped trig mechanism witness.
     add_executable(cpu_patch_phase_bench tests/test_cpu_patch_phase_window.cpp)

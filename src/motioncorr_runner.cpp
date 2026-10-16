@@ -4796,21 +4796,25 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 //			std::cout << "Shift for Frame " << iframe << ": delta_x = " << cur_xshifts[iframe] << " delta_y = " << cur_yshifts[iframe] << std::endl;
 		}
 
-		// Apply shifts
-		// Since the image is not necessarily square, we cannot use the method in fftw.cpp
-		RCTIC(TIMING_FOURIER_SHIFT);
-		#pragma omp parallel for num_threads(n_threads)
-		for (int iframe = 1; iframe < n_frames; iframe++) {
-			// Only the CCF window is read again for local patches. Their spectra
-			// are discarded by the caller after alignment; global spectra remain
-			// full because reconstruction consumes every frequency afterwards.
-			shiftNonSquareImageInFourierTransform(Fframes[iframe], -cur_xshifts[iframe] / pnx, -cur_yshifts[iframe] / pny,
-			                                     is_global ? 0 : ccf_nfx, is_global ? 0 : ccf_nfy);
+		const RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
+		// Local spectra are scratch: no subsequent read needs the last update.
+		// Global reconstruction still needs every update, including the last.
+		if (is_global || (!(rmsd < tolerance) && iter < max_iter)) {
+			// Apply shifts
+			// Since the image is not necessarily square, we cannot use the method in fftw.cpp
+			RCTIC(TIMING_FOURIER_SHIFT);
+			#pragma omp parallel for num_threads(n_threads)
+			for (int iframe = 1; iframe < n_frames; iframe++) {
+				// Only the CCF window is read again for local patches. Their spectra
+				// are discarded by the caller after alignment; global spectra remain
+				// full because reconstruction consumes every frequency afterwards.
+				shiftNonSquareImageInFourierTransform(Fframes[iframe], -cur_xshifts[iframe] / pnx, -cur_yshifts[iframe] / pny,
+				                                     is_global ? 0 : ccf_nfx, is_global ? 0 : ccf_nfy);
+			}
+			RCTOC(TIMING_FOURIER_SHIFT);
 		}
-		RCTOC(TIMING_FOURIER_SHIFT);
 
 		// Test convergence
-		RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
 		logfile << " Iteration " << iter << ": RMSD = " << rmsd << " px" << std::endl;
 
 		if (rmsd < tolerance) {

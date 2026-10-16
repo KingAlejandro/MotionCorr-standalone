@@ -15,6 +15,16 @@
 
 #ifdef MC_PHASE_COUNT_TRIG
 static std::atomic<unsigned long long> phase_calls{0};
+// Count one sine evaluation per phase, whether the compiler fuses sin+cos
+// or leaves the macros.h fallback as separate calls (e.g. Debug/-O0).
+extern "C" double __real_sin(double);
+extern "C" float __real_sinf(float);
+extern "C" double __wrap_sin(double a) {
+    phase_calls.fetch_add(1,std::memory_order_relaxed); return __real_sin(a);
+}
+extern "C" float __wrap_sinf(float a) {
+    phase_calls.fetch_add(1,std::memory_order_relaxed); return __real_sinf(a);
+}
 extern "C" void __real_sincos(double,double*,double*);
 extern "C" void __real_sincosf(float,float*,float*);
 extern "C" void __wrap_sincos(double a,double *s,double *c) {
@@ -115,11 +125,11 @@ void phaseControls() {
     }
     std::printf("PASS %d window geometries, five successive phase updates; global defaults exact\n",cases);
 #ifdef MC_PHASE_COUNT_TRIG
-    std::puts("PASS GNU/ELF production sincos count witness: window wx+wy, global nfx+nfy");
+    std::puts("PASS GNU/ELF production sine count witness (separate or fused): window wx+wy, global nfx+nfy");
 #endif
 }
 void alignControls() {
-    int cases=0;
+    int cases=0, cropped_multi_iteration_cases=0;
     for (const auto shape : {std::pair<int,int>{256,256},{648,600},{194,198}})
     for (double downsample : {0.7,1.0,0.0})
     for (int groups : {2,4,7}) for (int threads : {1,4}) for (int iterations : {1,5}) {
@@ -159,22 +169,28 @@ void alignControls() {
         const bool b=MotioncorrRunnerTestAccess::align(r,full,nx,ny,fx,fy,fl,true,scaled_B);
         require(a == b && same(lx,fx) && same(ly,fy) && ll.str() == fl.str(),
                 "local versus full production alignment shifts/logs differ");
-#ifdef MC_PHASE_COUNT_TRIG
         unsigned iterations_run=0;
         for(std::size_t pos=0;(pos=ll.str().find(" Iteration ",pos)) != std::string::npos;pos+=11)
             ++iterations_run;
-        const unsigned long long shifted_groups=(groups-1)*iterations_run;
         const float scale=downsample<=0 ? std::sqrt(-std::log(1E-8)/(2*scaled_B)) : downsample;
         const int ccf_nx=MotioncorrRunnerTestAccess::ccfSize(r,nx,scale);
         const int ccf_ny=MotioncorrRunnerTestAccess::ccfSize(r,ny,scale);
-        require(local_calls == shifted_groups*(ccf_nx/2+1+ccf_ny),
-                "actual local alignPatch did not limit phase tables to CCF support");
-        require(phase_calls == shifted_groups*(nx/2+1+ny),
+        require(iterations_run > 0, "alignment iteration log was not exercised");
+        if (ccf_nx < nx && ccf_ny < ny && iterations_run >= 2)
+            ++cropped_multi_iteration_cases;
+#ifdef MC_PHASE_COUNT_TRIG
+        const unsigned long long local_groups=(groups-1)*(iterations_run-1);
+        const unsigned long long global_groups=(groups-1)*iterations_run;
+        require(local_calls == local_groups*(ccf_nx/2+1+ccf_ny),
+                "local alignPatch must update CCF support only before a subsequent read");
+        require(phase_calls == global_groups*(nx/2+1+ny),
                 "actual global alignPatch did not retain full phase tables");
 #endif
         ++cases;
     }
-    std::printf("PASS %d production local/full alignments, unequal group amplitudes, j1/j4, iteration limits 1/5\n",cases);
+    require(cropped_multi_iteration_cases > 0,
+            "no cropped alignment exercised a needed phase update (>=2 iterations)");
+    std::printf("PASS %d production local/full alignments, %d cropped multi-iteration cases, unequal group amplitudes, j1/j4, iteration limits 1/5\n",cases,cropped_multi_iteration_cases);
 }
 double elapsed(std::chrono::steady_clock::time_point start) {
     return std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();

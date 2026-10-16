@@ -1,0 +1,1018 @@
+{
+  "instrument": "unprofiled spawn-to-reap monotonic wall and wait4 rusage",
+  "limitation": "PID namespace disagrees with mounted /proc: per-PID image/ownership and physical-host isolation are NOT certified; this is not a clean mcprof verdict",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "cpu_mask": "0-3",
+  "cgroup_cpu_max": "800000 100000",
+  "cgroup_memory_max": "8589934592",
+  "environment": {
+    "OMP_NUM_THREADS": "4",
+    "OMP_DYNAMIC": "false",
+    "OMP_PROC_BIND": "close",
+    "OMP_PLACES": "cores",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "binaries": {
+    "base": {
+      "path": "/workspace/scratch/28038873ca11/build-reference/motioncorr",
+      "sha256": "b9f8912d65c79b572f2764628a914edaea3fe46380af0f98574ec0b087231674",
+      "source": {
+        "source_dir": "/workspace/scratch/28038873ca11/reference",
+        "commit": "116eb04ad359cd5bf789b28809fc2047ea155b9b",
+        "dirty": false,
+        "origin": "git in /workspace/scratch/28038873ca11/reference"
+      }
+    },
+    "candidate": {
+      "path": "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+      "sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de",
+      "source": {
+        "source_dir": "/workspace/scratch/28038873ca11/MotionCorr-cpu-stream",
+        "commit": "c9dbe5957898f5206cb05ea5daaa62ae3358218a",
+        "dirty": false,
+        "origin": "git in /workspace/scratch/28038873ca11/MotionCorr-cpu-stream"
+      }
+    }
+  },
+  "inputs": {
+    "/workspace/scratch/28038873ca11/data/tutorial.tiff": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "/workspace/scratch/28038873ca11/data/gain.mrc": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1"
+  },
+  "runs": [
+    {
+      "rep": -1,
+      "warmup": true,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r-1-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 44.32231879400024,
+      "user_s": 129.914354,
+      "sys_s": 14.140984,
+      "peak_rss_kib": 4600924,
+      "load_before": [
+        2.775390625,
+        1.96875,
+        1.58935546875
+      ],
+      "load_after": [
+        3.25537109375,
+        2.2080078125,
+        1.68994140625
+      ]
+    },
+    {
+      "rep": -1,
+      "warmup": true,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r-1-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 54.78738979699847,
+      "user_s": 167.820618,
+      "sys_s": 9.850131,
+      "peak_rss_kib": 3265608,
+      "load_before": [
+        3.25537109375,
+        2.2080078125,
+        1.68994140625
+      ],
+      "load_after": [
+        3.55126953125,
+        2.4775390625,
+        1.814453125
+      ]
+    },
+    {
+      "rep": 0,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r0-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 46.31372709899915,
+      "user_s": 135.948915,
+      "sys_s": 12.399144,
+      "peak_rss_kib": 4600576,
+      "load_before": [
+        3.55126953125,
+        2.4775390625,
+        1.814453125
+      ],
+      "load_after": [
+        3.64404296875,
+        2.6591796875,
+        1.9091796875
+      ]
+    },
+    {
+      "rep": 0,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r0-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 47.18307516300047,
+      "user_s": 140.023554,
+      "sys_s": 10.445644,
+      "peak_rss_kib": 3265604,
+      "load_before": [
+        3.64404296875,
+        2.6591796875,
+        1.9091796875
+      ],
+      "load_after": [
+        3.51953125,
+        2.77490234375,
+        1.9892578125
+      ]
+    },
+    {
+      "rep": 1,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r1-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 47.934345869000026,
+      "user_s": 141.609424,
+      "sys_s": 9.014601,
+      "peak_rss_kib": 3265624,
+      "load_before": [
+        3.51953125,
+        2.77490234375,
+        1.9892578125
+      ],
+      "load_after": [
+        3.3564453125,
+        2.83740234375,
+        2.046875
+      ]
+    },
+    {
+      "rep": 1,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r1-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 50.745127144000435,
+      "user_s": 147.057694,
+      "sys_s": 11.50671,
+      "peak_rss_kib": 4600896,
+      "load_before": [
+        3.3564453125,
+        2.83740234375,
+        2.046875
+      ],
+      "load_after": [
+        3.4482421875,
+        2.93212890625,
+        2.125
+      ]
+    },
+    {
+      "rep": 2,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r2-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 57.647174744999575,
+      "user_s": 158.164374,
+      "sys_s": 16.55943,
+      "peak_rss_kib": 4600792,
+      "load_before": [
+        3.4482421875,
+        2.93212890625,
+        2.125
+      ],
+      "load_after": [
+        3.3662109375,
+        2.99267578125,
+        2.1923828125
+      ]
+    },
+    {
+      "rep": 2,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r2-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 50.67093240000031,
+      "user_s": 148.800865,
+      "sys_s": 10.403337,
+      "peak_rss_kib": 3265752,
+      "load_before": [
+        3.3662109375,
+        2.99267578125,
+        2.1923828125
+      ],
+      "load_after": [
+        3.36083984375,
+        3.0556640625,
+        2.25634765625
+      ]
+    },
+    {
+      "rep": 3,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r3-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 56.367736255000636,
+      "user_s": 177.722685,
+      "sys_s": 12.751154,
+      "peak_rss_kib": 3266016,
+      "load_before": [
+        3.17138671875,
+        3.021484375,
+        2.24951171875
+      ],
+      "load_after": [
+        3.18310546875,
+        3.07421875,
+        2.314453125
+      ]
+    },
+    {
+      "rep": 3,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r3-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 69.90064934899965,
+      "user_s": 191.976869,
+      "sys_s": 20.618013,
+      "peak_rss_kib": 4600764,
+      "load_before": [
+        3.18310546875,
+        3.07421875,
+        2.314453125
+      ],
+      "load_after": [
+        3.4521484375,
+        3.17919921875,
+        2.40869140625
+      ]
+    },
+    {
+      "rep": 4,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r4-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 59.98463737600105,
+      "user_s": 161.797233,
+      "sys_s": 15.523125,
+      "peak_rss_kib": 4600692,
+      "load_before": [
+        3.4521484375,
+        3.17919921875,
+        2.40869140625
+      ],
+      "load_after": [
+        3.0166015625,
+        3.11181640625,
+        2.4365234375
+      ]
+    },
+    {
+      "rep": 4,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r4-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 52.289915553001265,
+      "user_s": 152.793748,
+      "sys_s": 11.274289,
+      "peak_rss_kib": 3265748,
+      "load_before": [
+        3.0166015625,
+        3.11181640625,
+        2.4365234375
+      ],
+      "load_after": [
+        2.96630859375,
+        3.10546875,
+        2.470703125
+      ]
+    },
+    {
+      "rep": 5,
+      "warmup": false,
+      "arm": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r5-candidate",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 55.86876609299907,
+      "user_s": 158.537436,
+      "sys_s": 14.80563,
+      "peak_rss_kib": 3286696,
+      "load_before": [
+        2.96630859375,
+        3.10546875,
+        2.470703125
+      ],
+      "load_after": [
+        2.97412109375,
+        3.06103515625,
+        2.4921875
+      ]
+    },
+    {
+      "rep": 5,
+      "warmup": false,
+      "arm": "base",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-reference/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/data/tutorial.tiff",
+        "--o",
+        "/workspace/scratch/28038873ca11/bench-stream-tutorial/r5-base",
+        "--use_own",
+        "--j",
+        "4",
+        "--angpix",
+        "0.885",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--gainref",
+        "/workspace/scratch/28038873ca11/data/gain.mrc",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split"
+      ],
+      "rc": 0,
+      "wall_s": 47.0501251279984,
+      "user_s": 130.493918,
+      "sys_s": 12.468065,
+      "peak_rss_kib": 4600912,
+      "load_before": [
+        2.97412109375,
+        3.06103515625,
+        2.4921875
+      ],
+      "load_after": [
+        2.95849609375,
+        3.0498046875,
+        2.5166015625
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "rep": -1,
+      "root_a": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r-1-base",
+      "root_b": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r-1-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/tutorial.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "rep": 0,
+      "root_a": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r0-base",
+      "root_b": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r0-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/tutorial.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "rep": 1,
+      "root_a": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r1-base",
+      "root_b": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r1-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/tutorial.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "rep": 2,
+      "root_a": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r2-base",
+      "root_b": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r2-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/tutorial.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "rep": 3,
+      "root_a": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r3-base",
+      "root_b": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r3-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/tutorial.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "rep": 4,
+      "root_a": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r4-base",
+      "root_b": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r4-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/tutorial.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    },
+    {
+      "rep": 5,
+      "root_a": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r5-base",
+      "root_b": "/workspace/scratch/28038873ca11/bench-stream-tutorial/r5-candidate",
+      "only_a": [],
+      "only_b": [],
+      "compared": 12,
+      "mrc_compared": 4,
+      "excluded": [
+        {
+          "file": "all_batches.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "batch.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "header.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "workspace/scratch/28038873ca11/data/tutorial.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    }
+  ],
+  "taskset_self_affinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "lock": "/tmp/motioncorr-bench.lock"
+}

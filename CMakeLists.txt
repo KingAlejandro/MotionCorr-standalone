@@ -169,9 +169,12 @@ if(BUILD_TESTING)
         target_link_options(cpu_dose_symmetry PRIVATE "LINKER:--wrap=exp" "LINKER:--wrap=expf")
     endif()
     add_test(NAME CpuDoseSymmetry COMMAND cpu_dose_symmetry)
-    # The benchmark has no call-count wrappers or instrumentation in exp().
-    add_executable(cpu_dose_bench tests/test_cpu_dose_symmetry.cpp)
-    target_link_libraries(cpu_dose_bench PRIVATE motioncorr_core)
+    option(BUILD_CPU_DOSE_BENCH "Build the uninstrumented CPU dose benchmark" OFF)
+    if(BUILD_CPU_DOSE_BENCH)
+        # The benchmark has no call-count wrappers or instrumentation in exp().
+        add_executable(cpu_dose_bench tests/test_cpu_dose_symmetry.cpp)
+        target_link_libraries(cpu_dose_bench PRIVATE motioncorr_core)
+    endif()
     # Device-free control for the issue #69 patch-retry shift-state contract.
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)

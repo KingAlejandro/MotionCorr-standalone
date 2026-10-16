@@ -4882,14 +4882,14 @@ void MotioncorrRunner::doseWeighting(std::vector<MultidimArray<fComplex> > &Ffra
 					for (int iframe = 0; iframe < n_frames; iframe++) {
 						const RFLOAT weight = std::exp(- doses[iframe] / Ne);
 						if (std::isnan(weight)) {
-							std::cerr << "dose = " << doses[iframe] << " Ne = " << Ne << " frm = " << iframe << " lx = " << x << " ly = " << ly << " reso = " << 1 / dinv << " weight = " << weight << std::endl;
+							std::cerr << "dose = " << doses[iframe] << " Ne = " << Ne << " frm = " << iframe << " lx = " << x << " ly = " << ly << " reso = " << 1 / dinv << " weight = " << weight << (mirror_y != y ? " (also applies to mirrored row ly = -ly)" : "") << std::endl;
 						}
 						sum_weight_sq += weight * weight;
 						weights[static_cast<size_t>(iframe) * tile_width + local] = weight;
 					}
 					norms[local] = std::sqrt(sum_weight_sq);
 					if (std::isnan(norms[local])) {
-						std::cerr << " Ne = " << Ne << " lx = " << x << " ly = " << ly << " reso = " << 1 / dinv << " sum_weight_sq NaN" << std::endl;
+						std::cerr << " Ne = " << Ne << " lx = " << x << " ly = " << ly << " reso = " << 1 / dinv << " sum_weight_sq NaN" << (mirror_y != y ? " (also applies to mirrored row ly = -ly)" : "") << std::endl;
 						REPORT_ERROR("Shouldn't happen.");
 					}
 				}

@@ -3537,11 +3537,45 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					local_xshifts.assign(local_xshifts.size(), (RFLOAT)0);
 					local_yshifts.assign(local_yshifts.size(), (RFLOAT)0);
 #endif
+#ifdef _CUDA_ENABLED
+					// Issue #192: a completed resident attempt that did not converge
+					// leaves d_Iframes valid, so the retry input is built from it
+					// instead of downloading the movie. This is the spectrum
+					// cudaPreparePatch makes from the downloaded frames: same group
+					// sums in the same order, same R2C plan, same scaling. Only a
+					// failure here (or a failed first preparation) takes the
+					// download path below.
+					bool resident_retry_prep_done = false;
+					if (movie_session && device_prep_ok) {
+						RCTIC(TIMING_PREP_PATCH);
+						resident_retry_prep_done = movie_session->downloadPatchSpectra(
+							x_start, y_start, patch_w, patch_h, n_groups,
+							group_start.data(), group_size.data(), Fpatches);
+						RCTOC(TIMING_PREP_PATCH);
+						if (!resident_retry_prep_done) {
+							// Same rule as above: the preserved status and the pending
+							// slot both decide, never the slot alone.
+							const CudaRetryDecision decision = cudaRetryDecisionFor(
+								movie_session->getFailureState(), cudaGetLastError());
+							if (decision.verdict == CUDA_RETRY_FATAL) {
+								REPORT_ERROR_STR("CUDA device context is unusable for " << fn_mic
+								                 << " (patch " << iy + 1 << ", " << ix + 1 << "): "
+								                 << cudaGetErrorString(decision.decisive)
+								                 << ". Refusing to retry alignment on a poisoned context.");
+							}
+							logfile << "WARNING: resident retry preparation did not complete for patch ("
+							        << iy + 1 << ", " << ix + 1 << "); classified recoverable, "
+							        << "retrying from the downloaded frames." << std::endl;
+						}
+					}
+#endif
 					// Host frames are deliberately raw on the resident path. If a
 					// device patch attempt falls back, download the aligned real frames
 					// before either CUDA staging or CPU patch preparation reads them.
 #ifdef _CUDA_ENABLED
-					if (movie_session && host_frames_are_raw) {
+					if (resident_retry_prep_done) {
+						// Nothing reads the host frames on this retry.
+					} else if (movie_session && host_frames_are_raw) {
 						if (!movie_session->downloadRealFrames(Iframes))
 							REPORT_ERROR("Failed to download resident real frames for patch fallback");
 						host_frames_are_raw = false;
@@ -3558,7 +3592,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					}
 #endif
 					RCTIC(TIMING_PREP_PATCH);
+#ifdef _CUDA_ENABLED
+					bool cuda_patch_prep_done = resident_retry_prep_done;
+#else
 					bool cuda_patch_prep_done = false;
+#endif
 #ifdef _CUDA_ENABLED
 					// Issue #69, second boundary. The health check above runs BEFORE
 					// this preparation, so it cannot see a fatal error raised HERE --
@@ -3569,7 +3607,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					// Peeking at the cleared slot afterwards is not sufficient; the
 					// status has to be carried out of the helper.
 					CudaFailureState fallback_prep_failure;
-					if (use_gpu) {
+					if (use_gpu && !cuda_patch_prep_done) {
 						cuda_patch_prep_done = cudaPreparePatch(
 							Iframes, x_start, x_end, y_start, y_end,
 							n_groups, group_start, group_size, Fpatches,

@@ -116,6 +116,19 @@ DEFAULT_REQUIRED_TESTS = [
     # difference the scope guard makes; a check for "non-zero exit" would pass
     # on the defect.
     "OutputStageFaults",
+    # logfile.pdf rendering (#185, #200). LogfileFromEps is the only test that
+    # sees which Ghostscript calls the report makes (EPS-direct vs concatenation
+    # when an earlier all_batches.pdf exists) and that a failed render leaves no
+    # logfile.pdf. Each LogfileFromEpsMutant_* is a compiled runner with one
+    # defect that the script must reject (--expect-fail); the names come from a
+    # CMake loop, so a mutant dropped from that loop would otherwise leave the
+    # script's own checks unproven for that defect with the suite still green.
+    "LogfileFromEps",
+    "LogfileFromEpsMutant_always_eps",
+    "LogfileFromEpsMutant_late_guard",
+    "LogfileFromEpsMutant_eps_order",
+    "LogfileFromEpsMutant_placeholder",
+    "LogfileFromEpsMutant_concat_cleanup",
     # Issue #95: the only test that can observe the native sample staging
     # ownership contract, for both widths the compact route admits. Registered
     # under if(UNIX) beside ImageWriteFaults.

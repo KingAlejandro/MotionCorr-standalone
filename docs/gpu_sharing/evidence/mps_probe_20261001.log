@@ -1,0 +1,63 @@
+=== compute mode (MPS needs Default or Exclusive-Process) ===
+0, Default
+1, Default
+2, Default
+3, Default
+=== starting user-scoped MPS daemon ===
+daemon started
+
+=== probe under MPS ===
+PROBE tag=n1_distinct_w0_r1 ctx_ms=884.7 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=4.8 fft_second_ms=1.9 pinalloc_ms=174.4 pinfree_ms=70.2 freeplans_ms=1.9 ctxdestroy_ms=75.9 total_ms=1214.2
+PROBE tag=n2_distinct_w0_r1 ctx_ms=323.1 malloc_ms=0.4 kernel_ms=0.1 fft_first_ms=4.9 fft_second_ms=1.9 pinalloc_ms=143.3 pinfree_ms=54.5 freeplans_ms=1.4 ctxdestroy_ms=120.8 total_ms=650.4
+PROBE tag=n2_distinct_w1_r1 ctx_ms=322.9 malloc_ms=0.4 kernel_ms=0.2 fft_first_ms=5.1 fft_second_ms=2.0 pinalloc_ms=143.3 pinfree_ms=62.4 freeplans_ms=2.1 ctxdestroy_ms=113.1 total_ms=651.5
+PROBE tag=n3_distinct_w1_r1 ctx_ms=428.8 malloc_ms=1.2 kernel_ms=0.2 fft_first_ms=5.0 fft_second_ms=3.6 pinalloc_ms=155.6 pinfree_ms=56.0 freeplans_ms=1.5 ctxdestroy_ms=184.0 total_ms=835.8
+PROBE tag=n3_distinct_w0_r1 ctx_ms=439.0 malloc_ms=0.2 kernel_ms=0.1 fft_first_ms=4.4 fft_second_ms=1.8 pinalloc_ms=150.1 pinfree_ms=64.3 freeplans_ms=1.5 ctxdestroy_ms=179.5 total_ms=841.0
+PROBE tag=n3_distinct_w2_r1 ctx_ms=442.9 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=4.5 fft_second_ms=1.9 pinalloc_ms=163.5 pinfree_ms=55.3 freeplans_ms=7.1 ctxdestroy_ms=163.9 total_ms=839.6
+PROBE tag=n4_distinct_w3_r1 ctx_ms=537.6 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=5.0 fft_second_ms=1.9 pinalloc_ms=146.3 pinfree_ms=55.1 freeplans_ms=4.5 ctxdestroy_ms=115.3 total_ms=866.1
+PROBE tag=n4_distinct_w1_r1 ctx_ms=563.9 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=5.6 fft_second_ms=2.1 pinalloc_ms=150.0 pinfree_ms=56.6 freeplans_ms=4.2 ctxdestroy_ms=202.5 total_ms=985.3
+PROBE tag=n4_distinct_w0_r1 ctx_ms=564.1 malloc_ms=0.4 kernel_ms=0.1 fft_first_ms=5.4 fft_second_ms=2.4 pinalloc_ms=150.4 pinfree_ms=65.6 freeplans_ms=7.4 ctxdestroy_ms=207.0 total_ms=1002.8
+PROBE tag=n4_distinct_w2_r1 ctx_ms=564.1 malloc_ms=0.4 kernel_ms=0.2 fft_first_ms=5.2 fft_second_ms=2.1 pinalloc_ms=150.4 pinfree_ms=75.3 freeplans_ms=11.2 ctxdestroy_ms=201.2 total_ms=1010.1
+PROBE tag=n1_distinct_w0_r2 ctx_ms=169.4 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=4.6 fft_second_ms=1.8 pinalloc_ms=141.1 pinfree_ms=53.8 freeplans_ms=1.3 ctxdestroy_ms=72.1 total_ms=444.5
+PROBE tag=n2_distinct_w0_r2 ctx_ms=283.1 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=5.3 fft_second_ms=2.0 pinalloc_ms=143.2 pinfree_ms=54.8 freeplans_ms=1.3 ctxdestroy_ms=125.1 total_ms=615.1
+PROBE tag=n2_distinct_w1_r2 ctx_ms=282.0 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=5.1 fft_second_ms=2.0 pinalloc_ms=143.3 pinfree_ms=62.9 freeplans_ms=2.2 ctxdestroy_ms=123.8 total_ms=621.6
+PROBE tag=n3_distinct_w1_r2 ctx_ms=429.1 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=4.8 fft_second_ms=3.7 pinalloc_ms=145.0 pinfree_ms=55.2 freeplans_ms=1.4 ctxdestroy_ms=153.9 total_ms=793.6
+PROBE tag=n3_distinct_w2_r2 ctx_ms=447.8 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=5.3 fft_second_ms=1.9 pinalloc_ms=146.1 pinfree_ms=64.4 freeplans_ms=5.5 ctxdestroy_ms=165.7 total_ms=837.3
+PROBE tag=n3_distinct_w0_r2 ctx_ms=447.1 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=4.7 fft_second_ms=2.0 pinalloc_ms=147.7 pinfree_ms=56.5 freeplans_ms=10.4 ctxdestroy_ms=169.7 total_ms=838.5
+PROBE tag=n4_distinct_w1_r2 ctx_ms=568.7 malloc_ms=3.2 kernel_ms=0.2 fft_first_ms=9.3 fft_second_ms=1.9 pinalloc_ms=157.2 pinfree_ms=57.3 freeplans_ms=1.5 ctxdestroy_ms=203.5 total_ms=1002.8
+PROBE tag=n4_distinct_w0_r2 ctx_ms=581.7 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=4.7 fft_second_ms=1.9 pinalloc_ms=163.9 pinfree_ms=57.5 freeplans_ms=6.9 ctxdestroy_ms=244.5 total_ms=1061.6
+PROBE tag=n4_distinct_w2_r2 ctx_ms=583.3 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=4.6 fft_second_ms=1.9 pinalloc_ms=163.1 pinfree_ms=65.7 freeplans_ms=12.2 ctxdestroy_ms=233.8 total_ms=1065.0
+PROBE tag=n4_distinct_w3_r2 ctx_ms=581.7 malloc_ms=0.4 kernel_ms=0.2 fft_first_ms=4.8 fft_second_ms=1.9 pinalloc_ms=173.4 pinfree_ms=64.7 freeplans_ms=6.4 ctxdestroy_ms=232.2 total_ms=1065.8
+PROBE tag=n1_distinct_w0_r3 ctx_ms=169.4 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=4.6 fft_second_ms=1.8 pinalloc_ms=141.2 pinfree_ms=53.9 freeplans_ms=1.4 ctxdestroy_ms=68.3 total_ms=441.0
+PROBE tag=n2_distinct_w1_r3 ctx_ms=294.1 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=5.0 fft_second_ms=1.8 pinalloc_ms=142.7 pinfree_ms=55.4 freeplans_ms=1.4 ctxdestroy_ms=126.5 total_ms=627.4
+PROBE tag=n2_distinct_w0_r3 ctx_ms=294.3 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=5.0 fft_second_ms=1.9 pinalloc_ms=143.7 pinfree_ms=63.0 freeplans_ms=2.4 ctxdestroy_ms=121.5 total_ms=632.3
+PROBE tag=n3_distinct_w1_r3 ctx_ms=468.9 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=5.3 fft_second_ms=1.7 pinalloc_ms=151.6 pinfree_ms=55.9 freeplans_ms=1.3 ctxdestroy_ms=159.8 total_ms=844.9
+PROBE tag=n3_distinct_w2_r3 ctx_ms=472.1 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=4.7 fft_second_ms=1.9 pinalloc_ms=148.2 pinfree_ms=66.7 freeplans_ms=4.9 ctxdestroy_ms=174.5 total_ms=873.3
+PROBE tag=n3_distinct_w0_r3 ctx_ms=471.1 malloc_ms=0.5 kernel_ms=0.2 fft_first_ms=4.6 fft_second_ms=1.8 pinalloc_ms=151.6 pinfree_ms=73.9 freeplans_ms=8.8 ctxdestroy_ms=163.7 total_ms=876.2
+PROBE tag=n4_distinct_w1_r3 ctx_ms=540.2 malloc_ms=0.4 kernel_ms=0.2 fft_first_ms=8.4 fft_second_ms=4.5 pinalloc_ms=146.3 pinfree_ms=56.1 freeplans_ms=9.1 ctxdestroy_ms=177.6 total_ms=942.8
+PROBE tag=n4_distinct_w3_r3 ctx_ms=577.2 malloc_ms=1.0 kernel_ms=0.1 fft_first_ms=5.0 fft_second_ms=1.8 pinalloc_ms=148.8 pinfree_ms=55.6 freeplans_ms=9.0 ctxdestroy_ms=216.0 total_ms=1014.7
+PROBE tag=n4_distinct_w2_r3 ctx_ms=595.6 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=4.6 fft_second_ms=1.8 pinalloc_ms=159.8 pinfree_ms=56.4 freeplans_ms=5.3 ctxdestroy_ms=196.3 total_ms=1020.3
+PROBE tag=n4_distinct_w0_r3 ctx_ms=586.7 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=4.7 fft_second_ms=1.8 pinalloc_ms=159.7 pinfree_ms=56.1 freeplans_ms=13.4 ctxdestroy_ms=203.0 total_ms=1025.8
+PROBE tag=n1_distinct_w0_r4 ctx_ms=391.8 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=4.8 fft_second_ms=1.8 pinalloc_ms=140.7 pinfree_ms=53.5 freeplans_ms=1.4 ctxdestroy_ms=66.2 total_ms=660.5
+PROBE tag=n2_distinct_w1_r4 ctx_ms=283.2 malloc_ms=0.3 kernel_ms=0.1 fft_first_ms=5.1 fft_second_ms=1.8 pinalloc_ms=142.6 pinfree_ms=53.7 freeplans_ms=1.4 ctxdestroy_ms=109.0 total_ms=597.3
+PROBE tag=n2_distinct_w0_r4 ctx_ms=283.1 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=5.1 fft_second_ms=1.9 pinalloc_ms=142.8 pinfree_ms=62.8 freeplans_ms=1.3 ctxdestroy_ms=118.4 total_ms=615.8
+PROBE tag=n3_distinct_w1_r4 ctx_ms=411.2 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=4.7 fft_second_ms=1.8 pinalloc_ms=143.1 pinfree_ms=55.6 freeplans_ms=1.5 ctxdestroy_ms=139.0 total_ms=757.4
+PROBE tag=n3_distinct_w2_r4 ctx_ms=430.0 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=4.9 fft_second_ms=1.9 pinalloc_ms=144.7 pinfree_ms=56.9 freeplans_ms=5.6 ctxdestroy_ms=156.1 total_ms=800.5
+PROBE tag=n3_distinct_w0_r4 ctx_ms=430.2 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=5.1 fft_second_ms=2.0 pinalloc_ms=145.4 pinfree_ms=64.6 freeplans_ms=5.2 ctxdestroy_ms=153.2 total_ms=806.3
+PROBE tag=n4_distinct_w0_r4 ctx_ms=519.2 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=5.6 fft_second_ms=2.4 pinalloc_ms=144.5 pinfree_ms=55.3 freeplans_ms=8.7 ctxdestroy_ms=154.8 total_ms=890.9
+PROBE tag=n4_distinct_w2_r4 ctx_ms=549.9 malloc_ms=0.7 kernel_ms=0.2 fft_first_ms=4.4 fft_second_ms=1.8 pinalloc_ms=150.7 pinfree_ms=57.6 freeplans_ms=4.2 ctxdestroy_ms=207.2 total_ms=976.8
+PROBE tag=n4_distinct_w1_r4 ctx_ms=553.5 malloc_ms=0.4 kernel_ms=0.2 fft_first_ms=5.0 fft_second_ms=2.0 pinalloc_ms=147.9 pinfree_ms=65.1 freeplans_ms=5.7 ctxdestroy_ms=206.3 total_ms=986.1
+PROBE tag=n4_distinct_w3_r4 ctx_ms=552.1 malloc_ms=0.5 kernel_ms=0.1 fft_first_ms=4.9 fft_second_ms=2.0 pinalloc_ms=148.1 pinfree_ms=73.1 freeplans_ms=5.5 ctxdestroy_ms=198.3 total_ms=984.6
+PROBE tag=n1_distinct_w0_r5 ctx_ms=170.1 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=4.6 fft_second_ms=1.8 pinalloc_ms=141.0 pinfree_ms=54.0 freeplans_ms=1.3 ctxdestroy_ms=66.8 total_ms=440.0
+PROBE tag=n2_distinct_w1_r5 ctx_ms=289.5 malloc_ms=0.3 kernel_ms=0.1 fft_first_ms=5.0 fft_second_ms=1.9 pinalloc_ms=144.0 pinfree_ms=53.9 freeplans_ms=1.5 ctxdestroy_ms=118.3 total_ms=614.5
+PROBE tag=n2_distinct_w0_r5 ctx_ms=289.4 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=5.1 fft_second_ms=2.0 pinalloc_ms=144.1 pinfree_ms=62.7 freeplans_ms=1.6 ctxdestroy_ms=125.8 total_ms=631.0
+PROBE tag=n3_distinct_w1_r5 ctx_ms=455.2 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=5.1 fft_second_ms=1.9 pinalloc_ms=144.6 pinfree_ms=54.6 freeplans_ms=1.4 ctxdestroy_ms=161.1 total_ms=824.4
+PROBE tag=n3_distinct_w0_r5 ctx_ms=455.2 malloc_ms=0.3 kernel_ms=0.1 fft_first_ms=5.0 fft_second_ms=1.9 pinalloc_ms=144.8 pinfree_ms=64.0 freeplans_ms=1.5 ctxdestroy_ms=190.3 total_ms=863.2
+PROBE tag=n3_distinct_w2_r5 ctx_ms=471.2 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=4.5 fft_second_ms=1.8 pinalloc_ms=150.0 pinfree_ms=55.8 freeplans_ms=15.0 ctxdestroy_ms=166.3 total_ms=865.1
+PROBE tag=n4_distinct_w3_r5 ctx_ms=557.1 malloc_ms=0.3 kernel_ms=0.2 fft_first_ms=4.7 fft_second_ms=1.8 pinalloc_ms=144.9 pinfree_ms=56.1 freeplans_ms=1.2 ctxdestroy_ms=202.8 total_ms=969.1
+PROBE tag=n4_distinct_w1_r5 ctx_ms=551.0 malloc_ms=1.4 kernel_ms=0.2 fft_first_ms=4.8 fft_second_ms=1.9 pinalloc_ms=151.6 pinfree_ms=57.7 freeplans_ms=2.1 ctxdestroy_ms=213.1 total_ms=983.7
+PROBE tag=n4_distinct_w2_r5 ctx_ms=569.1 malloc_ms=0.9 kernel_ms=0.2 fft_first_ms=4.9 fft_second_ms=1.9 pinalloc_ms=151.1 pinfree_ms=57.9 freeplans_ms=14.0 ctxdestroy_ms=213.2 total_ms=1013.2
+PROBE tag=n4_distinct_w0_r5 ctx_ms=578.2 malloc_ms=0.2 kernel_ms=0.2 fft_first_ms=4.8 fft_second_ms=1.9 pinalloc_ms=156.5 pinfree_ms=57.1 freeplans_ms=5.4 ctxdestroy_ms=212.1 total_ms=1016.3
+
+=== shutting the daemon down ===
+no mps processes remain
+MPS_PROBE_DONE

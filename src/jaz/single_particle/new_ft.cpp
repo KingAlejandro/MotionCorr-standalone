@@ -25,6 +25,71 @@
 #include "src/args.h"
 #include <string.h>
 #include <math.h>
+#include <map>
+#include <tuple>
+
+namespace
+{
+	/* Ad-hoc float plans are cached per geometry and per FFTW alignment class of
+	   both arrays. FFTW_ESTIMATE planning for the same problem and alignment is
+	   deterministic, so a cached plan executes the same algorithm on new arrays
+	   as one planned on them would, and the output bits are unchanged.
+	   Plans are kept for the lifetime of the process, so fftwf_cleanup() must not
+	   be called once any of them exists (nothing the runner reaches calls it). */
+	typedef std::tuple<int, int, int, int, int, bool> FloatPlanKey;
+	typedef std::map<FloatPlanKey, NewFFT::FloatPlan> FloatPlanCache;
+
+	// Intentionally leaked: no static-destruction order problem at exit.
+	FloatPlanCache& floatPlanCache()
+	{
+		static FloatPlanCache* cache = new FloatPlanCache();
+		return *cache;
+	}
+
+	NewFFT::FloatPlan cachedFloatPlan(
+			MultidimArray<float>& real,
+			MultidimArray<fComplex>& complex)
+	{
+		float* realPtr = MULTIDIM_ARRAY(real);
+		float* complexPtr = (float*) MULTIDIM_ARRAY(complex);
+
+		const FloatPlanKey key(
+				real.xdim, real.ydim, real.zdim,
+				fftwf_alignment_of(realPtr),
+				fftwf_alignment_of(complexPtr),
+				realPtr == complexPtr);
+
+		const NewFFT::FloatPlan* cached;
+
+		#pragma omp critical(NewFFT_float_plan_cache)
+		{
+			FloatPlanCache& cache = floatPlanCache();
+			FloatPlanCache::iterator it = cache.find(key);
+
+			if (it == cache.end())
+			{
+				it = cache.insert(std::make_pair(key, NewFFT::FloatPlan(real, complex))).first;
+			}
+
+			cached = &it->second;
+		}
+
+		// Entries are never erased or modified, so *cached stays valid outside the lock.
+		return NewFFT::FloatPlan(*cached, real, complex);
+	}
+}
+
+size_t NewFFT::cachedFloatPlanCount()
+{
+	size_t count;
+
+	#pragma omp critical(NewFFT_float_plan_cache)
+	{
+		count = floatPlanCache().size();
+	}
+
+	return count;
+}
 
 
 void NewFFT::FourierTransform(
@@ -213,7 +278,7 @@ void NewFFT::FourierTransform(
 		resizeComplexToMatch(src, dest);
 	}
 			
-	FloatPlan p(src, dest);
+	FloatPlan p = cachedFloatPlan(src, dest);
 	_FourierTransform(src, dest, p, normalization);
 }
 
@@ -231,12 +296,12 @@ void NewFFT::inverseFourierTransform(
 	if (preserveInput)
 	{
 		MultidimArray<fComplex> src2 = src;
-		FloatPlan p(dest, src2);
+		FloatPlan p = cachedFloatPlan(dest, src2);
 		_inverseFourierTransform(src2, dest, p, normalization);
 	}
 	else
 	{
-		FloatPlan p(dest, src);
+		FloatPlan p = cachedFloatPlan(dest, src);
 		_inverseFourierTransform(src, dest, p, normalization);
 	}
 }
@@ -506,4 +571,21 @@ NewFFT::FloatPlan::FloatPlan(
 	}
 	
 	plan = std::shared_ptr<Plan>(new Plan(planForward, planBackward));
+}
+
+NewFFT::FloatPlan::FloatPlan(
+		const FloatPlan& cached,
+		MultidimArray<float>& real,
+		MultidimArray<fComplex>& complex)
+:
+	reusable(cached.reusable),
+	w(real.xdim), h(real.ydim), d(real.zdim),
+	realPtr(MULTIDIM_ARRAY(real)),
+	complexPtr((float*)MULTIDIM_ARRAY(complex)),
+	plan(cached.plan)
+{
+	if (w != cached.w || h != cached.h || d != cached.d)
+	{
+		REPORT_ERROR("NewFFT::FloatPlan: cached plan has a different size");
+	}
 }

@@ -35,7 +35,10 @@
 /* SHWS: join multiple eps files into a single pdf
  *
  */
-void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps, bool strict = false);
+// placeholder_on_failure=false leaves no empty fn_pdf behind when a non-strict
+// render fails, as a failed concatenatePDFfiles() does.
+void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps, bool strict = false,
+                                  bool placeholder_on_failure = true);
 
 /* SHWS: concatenate multiple PDF files into a single one
  *

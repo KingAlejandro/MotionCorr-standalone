@@ -1,0 +1,293 @@
+{
+ "collected_utc": "2026-10-16T04:09:00Z",
+ "host": "4-gpu-vm",
+ "kernel": "6.8.0-136-generic",
+ "os": "Ubuntu 24.04.4 LTS",
+ "cpu_model": "AMD EPYC 7452 32-Core Processor",
+ "logical_cpus": 124,
+ "lane": "96-103",
+ "mem_gib": "432",
+ "thp_enabled": "always [madvise] never",
+ "thp_defrag": "always defer defer+madvise [madvise] never",
+ "gpu": "0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, NVIDIA A100 80GB PCIe, 570.86.10, Disabled, 81920 MiB, 00000000:06:00.0, 1410 MHz",
+ "nvidia_smi_header": "Fri Oct 16 04:09:00 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 570.86.10              Driver Version: 570.86.10      CUDA Version: 12.8     |\n|-----------------------------------------+------------------------+----------------------+",
+ "nvcc": "Cuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+ "tmpfs_inputs": "inputs, run directories and products live in /dev/shm (tmpfs): already in RAM, like a warm page cache",
+ "binary": {
+  "path": "/home/alex/mc-small/build-116eb04/motioncorr",
+  "sha256": "79c88e4ce1f1cb5a445f4da34f195b31edd257d58f4706624678f61fe6d6166c",
+  "bytes": 3281496,
+  "ldd": [
+   "libfftw3.so.3 => /lib/x86_64-linux-gnu/libfftw3.so.3 (0x00007d7796000000)",
+   "libfftw3f.so.3 => /lib/x86_64-linux-gnu/libfftw3f.so.3 (0x00007d7795c00000)",
+   "libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1 (0x00007d779676c000)",
+   "libtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6 (0x00007d7796373000)",
+   "libcudart.so.12 => /usr/local/cuda-12.8/lib64/libcudart.so.12 (0x00007d7795800000)",
+   "libcufft.so.11 => /usr/local/cuda-12.8/lib64/libcufft.so.11 (0x00007d7784600000)",
+   "libnvcomp.so.5 => /home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib/libnvcomp.so.5 (0x00007d7781800000)"
+  ]
+ },
+ "source": {
+  "path": "/home/alex/mc-small/src-116eb04",
+  "head": "116eb04ad359cd5bf789b28809fc2047ea155b9b",
+  "status_short": "",
+  "cmake_build_type": "CMAKE_BUILD_TYPE:STRING=Release",
+  "cxx_flags_release": "CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG",
+  "use_nvcomp": "USE_NVCOMP:BOOL=ON",
+  "cuda_arch_note": "built 2026-10-14 from this tree; see build-116eb04.cmake.log"
+ },
+ "kit": {
+  "path": "kit-116eb04/profiling",
+  "files": {
+   "lib/__init__.py": "b08cfa49772f77d7b386cecd24511a3e15eb2815f88bd67d4ea864226e19d57f",
+   "lib/identity.py": "e44cfd0f21de16140fc7a60624000103faa61ba9778e50eb9749a193a0be4645",
+   "lib/metrics.py": "62358f882339fbde5575282a6bc41b13a895bca4d7b1991fbcad41a1fd981ebf",
+   "lib/nsys_db.py": "4bf763cca63edc51c6cb7c30b51137d064eb8b4947cd04439c1706cac945abe5",
+   "lib/provenance.py": "b171d0f9f7e984e5652393adebad06484d5ad68b0e65d44e571d1bf92b22d965",
+   "lib/report.py": "4f569664d5d38988cf8be8f433cf5af5f28c6cc80c67d64e9219b7bc7da88e68",
+   "lib/runner.py": "d356c0eae6bbd610c99b1dbc31ee208d10d038f974c8fda23632f48529f2349f",
+   "lib/stats.py": "8d61e0544b462ba91a0258f445c37c252b37cf0ddc293eaf31543cbcf0173c7c",
+   "mcprof.py": "c970e1bba46154b5c3dd581b67ffa76cc9e85b27763aa3b6492fd0f79cef29d1"
+  }
+ },
+ "shared_definitions": {
+  "corpus.md": "9dad79fc6d57c80d14bab6c62d8475a580109939c98975eb6d6d22adb441d53a",
+  "evidence/gap-download-manifest.json": "36dcb7b8469cf8961059fc269e86accb2023935526e64954e6fb404ab3b40d74",
+  "evidence/gap-fetch.json": "022226baea84ad19b7868efcfa02c9aeaeb54a9afa13c8e6ccba2c371e326018",
+  "evidence/recipes-from-96-corpus.json": "5a7085d1a8610f2af5a6bc302bce7a7e8140cf680873262be58b74e1e7e8c36f",
+  "evidence/selected-download-manifest.json": "e1ac2f0a04064207169a3d9d202d4be582c31573704e28658ebe791f59f52dcf",
+  "evidence/selected-fetch.json": "442691f63b147485b11dbd17c26a84af13187c1f672f8e9912d4367a7fa6592a",
+  "evidence/tutorial.sha256": "9ce94ab1648a085ae5a48fd3b969193c4edf5e6751f25ec9d2468752b61c9191",
+  "families.json": "86e4d69797e1e036508d7087f720e3093dd5ba391e29a4a403933b1e00be053d",
+  "tools/fetch_corpus.py": "cc22ab9be37594d9230b106884bb543fcc037b227193b5a740304af54c2a8e60",
+  "tools/setup_corpus.py": "1fd5313576bd62de6c9ea133849d37e7d6e985afd392802d560c8b9aebd454e9"
+ },
+ "inputs": {
+  "all_pass": true,
+  "files": [
+   {
+    "path": "tutorial/Movies/20170629_00026_frameImage.tiff",
+    "bytes": 132754590,
+    "expected_bytes": 132754590,
+    "sha256": "f989391b9d0e3e3b927a8de59d60179ade0b7ae5075ce7c3a9a5002ae2254ae3",
+    "expected_sha256": "f989391b9d0e3e3b927a8de59d60179ade0b7ae5075ce7c3a9a5002ae2254ae3",
+    "pass": true
+   },
+   {
+    "path": "tutorial/Movies/20170629_00031_frameImage.tiff",
+    "bytes": 132157138,
+    "expected_bytes": 132157138,
+    "sha256": "fa2699a1203a2ee278a5973e10105ea3e56b18a1c1d5ee153482767cb7e71d8d",
+    "expected_sha256": "fa2699a1203a2ee278a5973e10105ea3e56b18a1c1d5ee153482767cb7e71d8d",
+    "pass": true
+   },
+   {
+    "path": "tutorial/Movies/gain.mrc",
+    "bytes": 56956944,
+    "expected_bytes": 56956944,
+    "sha256": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1",
+    "expected_sha256": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10028/data/Micrographs/Micrographs_part1/031_movie.mrcs",
+    "bytes": 1073742848,
+    "expected_bytes": 1073742848,
+    "sha256": "8ce479649ec00abf46b290aee2b43343d0ba0dc67f239f0e3fd0c6875b3c7213",
+    "expected_sha256": "8ce479649ec00abf46b290aee2b43343d0ba0dc67f239f0e3fd0c6875b3c7213",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10028/data/Micrographs/Micrographs_part1/091_movie.mrcs",
+    "bytes": 1073742848,
+    "expected_bytes": 1073742848,
+    "sha256": "75fb041c286c211dae1562f1746b948db45eefe2bb0603173fd7d8a5d7103bf2",
+    "expected_sha256": "75fb041c286c211dae1562f1746b948db45eefe2bb0603173fd7d8a5d7103bf2",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-12_0007_Jan20_08.57.33.tif",
+    "bytes": 710039128,
+    "expected_bytes": 710039128,
+    "sha256": "79efffaa086d56c799a234e3768843cb429c02c05d024f6a553a462acf8a6736",
+    "expected_sha256": "79efffaa086d56c799a234e3768843cb429c02c05d024f6a553a462acf8a6736",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-18_0004_Jan20_09.12.45.tif",
+    "bytes": 708051618,
+    "expected_bytes": 708051618,
+    "sha256": "3948c91b8f223f5ef860c05d974bfea42dc08f19bbcfe14332cc473a8737661b",
+    "expected_sha256": "3948c91b8f223f5ef860c05d974bfea42dc08f19bbcfe14332cc473a8737661b",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10641/data/Movies/Dataset/HM70-1_10-A-002_0002_Oct28_23.00.41.tif",
+    "bytes": 170391276,
+    "expected_bytes": 170391276,
+    "sha256": "5f50686d7d32b9635fd64e550a91fc7d192849deeda30b7349a2827d17478c6d",
+    "expected_sha256": "5f50686d7d32b9635fd64e550a91fc7d192849deeda30b7349a2827d17478c6d",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10641/data/Movies/Dataset/HM70-1_10-A-004_0008_Oct28_23.06.04.tif",
+    "bytes": 170864882,
+    "expected_bytes": 170864882,
+    "sha256": "d0a4df43c93f694d792a9822a0f5d970ec866a0a9345d6bc44eb84e50020a617",
+    "expected_sha256": "d0a4df43c93f694d792a9822a0f5d970ec866a0a9345d6bc44eb84e50020a617",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10641/data/Movies/CountCDSRef_HM70-1_65-9_0000_Oct28_19.44.32.mrc",
+    "bytes": 94280704,
+    "expected_bytes": 94280704,
+    "sha256": "bdb0bb58f33d1b0dbf011222da0700f513ecb674e4085ed4708cce701dff7d95",
+    "expected_sha256": "bdb0bb58f33d1b0dbf011222da0700f513ecb674e4085ed4708cce701dff7d95",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+    "bytes": 732798334,
+    "expected_bytes": 732798334,
+    "sha256": "70f850d3deff2274fac8515d7d38c6654aab1791f7aa2cca5a8b61b43b26eb7c",
+    "expected_sha256": "70f850d3deff2274fac8515d7d38c6654aab1791f7aa2cca5a8b61b43b26eb7c",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10441/data/frames/200509_gain.mrc",
+    "bytes": 377119744,
+    "expected_bytes": 377119744,
+    "sha256": "b6036c9bab66fecb5c13fd5fed360c20405169b4d438d57b6a8d99801ff81b1e",
+    "expected_sha256": "b6036c9bab66fecb5c13fd5fed360c20405169b4d438d57b6a8d99801ff81b1e",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_20-39-45.801_eer_data_4096x4096.eer",
+    "bytes": 1215708772,
+    "expected_bytes": 1215708772,
+    "sha256": "fad4d37cc4b7b73076e3dd94c44be8a343f37f60b218e8057424b2154c9878ba",
+    "expected_sha256": "fad4d37cc4b7b73076e3dd94c44be8a343f37f60b218e8057424b2154c9878ba",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_20-57-59.233_eer_data_4096x4096.eer",
+    "bytes": 1213974236,
+    "expected_bytes": 1213974236,
+    "sha256": "454cd504b40f00619e71312528af9ee9f2a4c19151611c2c7255ff19956d0214",
+    "expected_sha256": "454cd504b40f00619e71312528af9ee9f2a4c19151611c2c7255ff19956d0214",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+    "bytes": 2931223304,
+    "expected_bytes": 2931223304,
+    "sha256": "2a46fd6123a7240e95acb324681c281964ec21da9037e05d66d9ab37319e9fed",
+    "expected_sha256": "2a46fd6123a7240e95acb324681c281964ec21da9037e05d66d9ab37319e9fed",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919967_Data_10919593_10919595_20200711_002422_Fractions.mrc.eer",
+    "bytes": 2927735032,
+    "expected_bytes": 2927735032,
+    "sha256": "b440371d6a4b9648421633e2bfe36d8303ef88c21c27b4c3aa9031dcf99a04d5",
+    "expected_sha256": "b440371d6a4b9648421633e2bfe36d8303ef88c21c27b4c3aa9031dcf99a04d5",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674725_Data_4659374_4659376_20230406_014501_EER.eer",
+    "bytes": 873093330,
+    "expected_bytes": 873093330,
+    "sha256": "3fc5feb61f487f0f4f6ec1317ae033138fe50e7da80e3b5b16bab3aaff2403f5",
+    "expected_sha256": "3fc5feb61f487f0f4f6ec1317ae033138fe50e7da80e3b5b16bab3aaff2403f5",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-12963/data/EMPIAR-Deposition/GainReference/20230326_221855_EER_GainReference.gain",
+    "bytes": 33874221,
+    "expected_bytes": 33874221,
+    "sha256": "6d4f3e5f9a6b837c637dc7098420e1c0cdfbbd61c9305a7780568f67c7134050",
+    "expected_sha256": "6d4f3e5f9a6b837c637dc7098420e1c0cdfbbd61c9305a7780568f67c7134050",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10164/data/frames/TS_01_000_0.0.mrc",
+    "bytes": 455648384,
+    "expected_bytes": 455648384,
+    "sha256": "117c303163480aa6bd3a1c1298c5635486dd077babce770dfcaf4ca944245039",
+    "expected_sha256": "117c303163480aa6bd3a1c1298c5635486dd077babce770dfcaf4ca944245039",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10164/data/frames/TS_01_020_30.0.mrc",
+    "bytes": 455648384,
+    "expected_bytes": 455648384,
+    "sha256": "e6780acb0df21aae077fb9a5fdaf80a1553cd0fb4a339482aa59799b2642029d",
+    "expected_sha256": "e6780acb0df21aae077fb9a5fdaf80a1553cd0fb4a339482aa59799b2642029d",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+    "bytes": 1979712512,
+    "expected_bytes": 1979712512,
+    "sha256": "f399bd30bfe1a9807bd494c348bfcf7d4aee312ccc18140b05abb1453ac23a56",
+    "expected_sha256": "f399bd30bfe1a9807bd494c348bfcf7d4aee312ccc18140b05abb1453ac23a56",
+    "pass": true
+   },
+   {
+    "path": "EMPIAR-10216/data/FoilHole_14961496_Data_14966722_14966723_20180615_1742_Fractions.mrc",
+    "bytes": 1979712512,
+    "expected_bytes": 1979712512,
+    "sha256": "c3b841e9ebcfb1e734a93c7bd7511033ded98c82b5c1cdb123f17e669e165ca1",
+    "expected_sha256": "c3b841e9ebcfb1e734a93c7bd7511033ded98c82b5c1cdb123f17e669e165ca1",
+    "pass": true
+   }
+  ]
+ },
+ "runtime_env": {},
+ "logins": "3",
+ "run": {
+  "issue": "#186",
+  "pass": "GPU characterisation on 4GPUs, GPU0, main 116eb04a",
+  "window_utc": [
+   "2026-10-16T04:05:19Z",
+   "2026-10-16T05:59:54Z"
+  ],
+  "driver_cpu": "driver and NVML sampler pinned to CPU 104, outside the measured lane 96-103",
+  "payload_pinning": "taskset -c 96-103; CUDA_VISIBLE_DEVICES=<GPU0 UUID>, CUDA_DEVICE_ORDER=PCI_BUS_ID; OMP_PROC_BIND/OMP_PLACES unset, OMP_NUM_THREADS=8; --j 8 --gpu 0",
+  "options_common": "--use_own --dose_weighting --dose_per_frame <family> --bfactor 150 --seed 1 --expected_frames <n> [--patch_x 5 --patch_y 5 for L] [--gainref] [--eer_grouping N --eer_upsampling 1] --ingest_witness <file> (default --ingest auto)",
+  "runs_total": 260,
+  "runs_by_kind": {
+   "warmup": 20,
+   "prof0": 10,
+   "unprof": 110,
+   "prof": 60,
+   "replay": 60
+  },
+  "runs_flagged": 0,
+  "runs_failed": 0,
+  "lock_blocks": 90,
+  "lock_held_total_s": 3790.6,
+  "lock_wait_max_s": 2594.4,
+  "locks": [
+   "/tmp/motioncorr-bench.lock",
+   "/tmp/motioncorr-gpu0-correctness.lock"
+  ],
+  "lock_note": "taken per family block (one round of one family, a warm-up pair, or one replay rep), released between blocks; the 43 min wait was the first block behind another thread's timing job",
+  "max_foreign_lane_cores": 0.02640573129849896,
+  "settle_all_ok": true,
+  "payload_image_verified_all": true,
+  "vram_instrument": "NVML via libnvidia-ml (ctypes), ~10 ms sampling, session-id ownership; peaks are lower bounds",
+  "cleanup": "/dev/shm/mc-corpus-186 removed after the last run (19 GB inputs, run and replay directories, products)",
+  "cpu_thread_files_used": {
+   "families.json_sha256": "86e4d69797e1e036508d7087f720e3093dd5ba391e29a4a403933b1e00be053d",
+   "corpus.md_sha256": "dd7c8bea684c08aae136bea1fd741ce5c3caf6526320ee09e53e142d9b8cb6a7",
+   "note": "copied read-only from the CPU thread's uncommitted worktree. families.json was identical at start and end. corpus.md changed during the pass by documentation only (a note on the fetcher version and a Files table; no input, hash or option row changed), so the run used the earlier copy. cpu/summary.json was read at the end for the context table only.",
+   "corpus.md_sha256_at_start": "9dad79fc6d57c80d14bab6c62d8475a580109939c98975eb6d6d22adb441d53a",
+   "cpu_summary.json_sha256": "929735a5ef2de2f15638bd2d28046246611ade818854d4151d49b7e2604fc028"
+  },
+  "kit": {
+   "used": "tools/profiling/lib of main 116eb04a (runner.run_once, NVML sampler, HostLock, settle), imported by tools/gpu_matrix.py",
+   "note": "the older kit checkout at ~/mc-small/kit (1d3c399) has different runner.py/provenance.py hashes and was not used"
+  }
+ }
+}

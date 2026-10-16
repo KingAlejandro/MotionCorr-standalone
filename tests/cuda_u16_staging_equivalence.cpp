@@ -1,6 +1,6 @@
-// CUDA hardware control for Issue #85 lane C.
+// CUDA hardware control for Issue #85 lane C (and #194 for the signed widths).
 //
-// applyGainDefectsAndSumU8/U16 stage a movie in its native unsigned sample type and
+// applyGainDefectsAndSumU8/U16/S8/S16 stage a movie in its native sample type and
 // expand it on the device; applyGainDefectsAndSum takes the same movie already
 // widened to float on the host. The claim is that the two produce bit-identical
 // device state, so this compares BOTH outputs of the preprocessing stage -- the
@@ -29,6 +29,7 @@
 #include <iostream>
 #include <limits>
 #include <sstream>
+#include <type_traits>
 #include <vector>
 
 namespace {
@@ -45,11 +46,15 @@ const long int PIX_GAIN_SUBNORMAL = 107;
 template <typename T>
 T sample(int iframe, long int pixel) {
     // Pin 0/max/midpoint for both unsigned widths: the uint8 case observes
-    // 255 (and values above 127), so signed reinterpretation cannot pass.
-    const unsigned long range = (unsigned long)std::numeric_limits<T>::max() + 1;
+    // 255 (and values above 127), so signed reinterpretation cannot pass. For the
+    // signed widths the third pin is the most negative value and the pseudo-random
+    // body wraps into negatives, so unsigned expansion cannot pass either.
+    using U = typename std::make_unsigned<T>::type;
+    const unsigned long range = (unsigned long)std::numeric_limits<U>::max() + 1;
     if (pixel == 0) return 0;
     if (pixel == 1) return std::numeric_limits<T>::max();
-    if (pixel == 2) return (T)(range / 2);
+    if (pixel == 2) return std::is_signed<T>::value ? std::numeric_limits<T>::min()
+                                                    : (T)(range / 2);
     // A zero sample on the negative-gain pixel, so the -0.0f product exists.
     if (pixel == PIX_GAIN_NEGATIVE) return 0;
     return (T)((pixel * 7919 + iframe * 104729) % range);
@@ -92,6 +97,14 @@ bool applyNative(CudaMovieSession &s, const std::vector<Image<unsigned short> > 
 bool applyNative(CudaMovieSession &s, const std::vector<Image<unsigned char> > &in,
                  const MultidimArray<float> *gain, MultidimArray<float> &sum) {
     return s.applyGainDefectsAndSumU8(in, gain, sum, true);
+}
+bool applyNative(CudaMovieSession &s, const std::vector<Image<short> > &in,
+                 const MultidimArray<float> *gain, MultidimArray<float> &sum) {
+    return s.applyGainDefectsAndSumS16(in, gain, sum, true);
+}
+bool applyNative(CudaMovieSession &s, const std::vector<Image<signed char> > &in,
+                 const MultidimArray<float> *gain, MultidimArray<float> &sum) {
+    return s.applyGainDefectsAndSumS8(in, gain, sum, true);
 }
 
 template <typename T>
@@ -140,7 +153,7 @@ int runContract(const char *width) {
         for (long int p = 0; p < n; p++) {
             const T v = sample<T>(i, p);
             DIRECT_MULTIDIM_ELEM(native[i](), p) = v;
-            // Exactly the unsigned reader's conversion to float.
+            // Exactly the host reader's conversion to float for T.
             DIRECT_MULTIDIM_ELEM(f32[i](), p) = (float)v;
         }
     }
@@ -175,6 +188,20 @@ int runContract(const char *width) {
         if (neg_zero_products == 0 || zero_gain == 0 || subnormal_products == 0) {
             std::cerr << "FAIL fixture does not contain the cases the hostile-gain arm "
                          "exists to exercise; that arm would prove nothing\n";
+            return 1;
+        }
+    }
+
+    // The signed fixtures must really contain negative samples, or the sign
+    // extension this control exists for is never exercised.
+    if (std::is_signed<T>::value) {
+        long int negatives = 0;
+        for (int i = 0; i < NFRAMES; i++)
+            for (long int p = 0; p < n; p++)
+                if (DIRECT_MULTIDIM_ELEM(native[i](), p) < 0) negatives++;
+        std::cout << width << " fixture: " << negatives << " negative samples\n";
+        if (negatives == 0) {
+            std::cerr << "FAIL signed fixture contains no negative samples\n";
             return 1;
         }
     }
@@ -229,6 +256,36 @@ int runContract(const char *width) {
         }
     }
 
+    // Signedness control: expand the same bits as the unsigned type of that width.
+    // (float)(unsigned char)0xFF is 255.0f where the host reader gives -1.0f, so the
+    // identity comparison has to fail; if it passed, the signed comparisons above
+    // could not tell a sign-extending expansion from a zero-extending one.
+    if (std::is_signed<T>::value) {
+        using U = typename std::make_unsigned<T>::type;
+        std::vector<Image<U> > as_unsigned(NFRAMES);
+        for (int i = 0; i < NFRAMES; i++) {
+            as_unsigned[i]().reshape(NY, NX);
+            for (long int p = 0; p < n; p++)
+                DIRECT_MULTIDIM_ELEM(as_unsigned[i](), p) =
+                    (U)DIRECT_MULTIDIM_ELEM(native[i](), p);
+        }
+        Arm a, b;
+        if (!runFloatArm(f32, &gain_plain, a, log) ||
+            !runNativeArm(as_unsigned, &gain_plain, b, log)) {
+            std::cerr << "FAIL signedness control: an arm did not complete\n" << log.str();
+            return 1;
+        }
+        std::string why;
+        if (identical(a, b, why)) {
+            std::cerr << "FAIL signedness control: unsigned expansion of a signed fixture "
+                         "was not detected, so the signed comparisons above are vacuous\n";
+            failures++;
+        } else {
+            std::cout << "PASS signedness control: unsigned expansion of a signed fixture "
+                         "detected (" << why << ")\n";
+        }
+    }
+
     // Second negative control, for the other oracle. The check above short-circuits
     // on the sum, so it never demonstrated that the per-frame comparison can fail.
     // Perturb one downloaded frame value directly and require that branch to report it.
@@ -273,5 +330,7 @@ int main() {
     }
     const int u16 = runContract<unsigned short>("uint16");
     const int u8 = runContract<unsigned char>("uint8");
-    return u16 || u8 ? 1 : 0;
+    const int s16 = runContract<short>("int16");
+    const int s8 = runContract<signed char>("int8");
+    return u16 || u8 || s16 || s8 ? 1 : 0;
 }

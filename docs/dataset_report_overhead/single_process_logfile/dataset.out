@@ -1,0 +1,16 @@
+dataset base rc=0 
+dataset cand rc=0 
+-- merged products (cmp_trees.py)
+DIFFERENT mrc=4 other=20 pdf_inventoried=4 files=34/34
+   ('file', '_workers/w0/command.json')
+   ('file', '_workers/w0/corrected_micrographs.star')
+   ('file', 'header.pdf.lst')
+   ('file', 'logfile.pdf.lst')
+-- merged inventory
+inventory identical
+-- merged logfile.pdf pages
+pages 10 vs 10: differing=0 IDENTICAL
+-- worker trees: any logfile.pdf rendered by workers?
+base: 0 worker logfile.pdf, 0 all_batches.pdf
+cand: 0 worker logfile.pdf, 0 all_batches.pdf
+end 2026-10-14T23:07:35+00:00

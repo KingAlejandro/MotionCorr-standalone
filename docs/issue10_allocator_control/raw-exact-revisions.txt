@@ -1,0 +1,35 @@
+start 2026-10-16T03:05:32Z
+build /home/ubuntu/mc-prov/build-main rc=0
+build /home/ubuntu/mc-prov/build-187 rc=0
+FloatPlanCache on #187 head:
+PASS float plan cache
+rc=0
+0
+build /home/ubuntu/mc-prov/build-mut rc=0
+FloatPlanCache on alignment-key mutant (must fail):
+Cached forward FFT on offset arrays differs from a plan made for them
+rc=1
+THP: always [madvise] never defrag: always defer defer+madvise [madvise] never
+warmmain rwarm rc=0 load1_start=14.04 cpu8-11_jiffies=150119 own_jiffies=150058 mrc=96 1466.95 33.63 6:24.49 4607228 1879387 
+warm187 rwarm rc=0 load1_start=13.28 cpu8-11_jiffies=145048 own_jiffies=144999 mrc=96 1420.77 29.22 6:11.91 4410052 1696302 
+main r1 rc=0 load1_start=13.22 cpu8-11_jiffies=146299 own_jiffies=146120 mrc=96 1431.45 29.75 6:14.34 4607420 1882286 
+p187 r1 rc=0 load1_start=12.28 cpu8-11_jiffies=143078 own_jiffies=143041 mrc=96 1402.62 27.80 6:06.35 4409000 1737764 
+p187 r2 rc=0 load1_start=12.54 cpu8-11_jiffies=144870 own_jiffies=144724 mrc=96 1416.33 30.91 6:12.49 4409336 1710221 
+main r2 rc=0 load1_start=12.25 cpu8-11_jiffies=149032 own_jiffies=148922 mrc=96 1449.12 40.11 6:22.88 4606340 1966403 
+main r3 rc=0 load1_start=12.13 cpu8-11_jiffies=149312 own_jiffies=149182 mrc=96 1453.88 37.94 6:23.37 4605796 1963693 
+p187 r3 rc=0 load1_start=12.04 cpu8-11_jiffies=142956 own_jiffies=142894 mrc=96 1403.30 25.64 6:04.76 4409512 1662749 
+p187 r4 rc=0 load1_start=8.03 cpu8-11_jiffies=142983 own_jiffies=142943 mrc=96 1399.94 29.49 6:06.61 4408264 1889015 
+main r4 rc=0 load1_start=7.21 cpu8-11_jiffies=145567 own_jiffies=145543 mrc=96 1416.62 38.82 6:13.20 4606948 2181154 
+identity ab24d/digest-main-1.txt: IDENTICAL
+identity ab24d/digest-main-2.txt: IDENTICAL
+identity ab24d/digest-main-3.txt: IDENTICAL
+identity ab24d/digest-main-4.txt: IDENTICAL
+identity ab24d/digest-p187-1.txt: IDENTICAL
+identity ab24d/digest-p187-2.txt: IDENTICAL
+identity ab24d/digest-p187-3.txt: IDENTICAL
+identity ab24d/digest-p187-4.txt: IDENTICAL
+identity ab24d/digest-warm187-warm.txt: IDENTICAL
+identity ab24d/digest-warmmain-warm.txt: IDENTICAL
+sha256sum: invalid option -- 'L'
+Try 'sha256sum --help' for more information.
+DONE 2026-10-16T04:11:33Z

@@ -2318,7 +2318,28 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// strip geometry or predictor -- the decode is LibTIFF's, so this route
 	// inherits its codec semantics instead of reimplementing them.
 	//
-	// Raw (uncompressed) MRC joins it for the types its reader yields without a
+	// EER (#193) is rendered on the host straight into uint16 and takes the same
+	// route. A pixel gets at most one count per fraction (decoded positions are
+	// strictly increasing), except 4K -> 2K, where four source pixels merge into
+	// one. So a group holds at most eer_grouping counts, or 4 * eer_grouping at
+	// upsampling -1. Anything that could exceed uint16 stays on the float path,
+	// because the renderer's ++ would wrap silently.
+	const long long eer_max_count = (long long)eer_grouping * (eer_upsampling == -1 ? 4 : 1);
+	const bool eer_fits_u16 = isEER && eer_max_count <= 65535;
+	if (isEER && !eer_fits_u16 && ingest_mode != INGEST_FLOAT && movie_session)
+		logfile << "EER grouping " << eer_grouping << " at upsampling " << eer_upsampling
+		        << " can exceed 65535 counts per pixel; using the float movie." << std::endl;
+	if (ingest_mode != INGEST_FLOAT &&
+	    !nvcomp_ingested && movie_session && eer_fits_u16) {
+		compact_stage = COMPACT_U16;
+		u16_staging.bind(Iframes_u16, n_frames, ny, nx);
+		logfile << "Staging this movie as native unsigned 16-bit; the integer to float "
+		        << "expansion and the gain are applied on the device; host staging is one "
+		        << "mapping of " << u16_staging.bytes() << " bytes for " << n_frames
+		        << " x " << nx << " x " << ny << " samples, released before any float "
+		        << "movie is materialized." << std::endl;
+	}
+	// Raw (uncompressed) MRC joins the TIFF route for the types its reader yields without a
 	// float conversion: mode 6 UShort, and mode 0 / mode 1, which are SChar / SShort.
 	// Those two are staged in their own signed type, so the device sign-extends
 	// exactly as castPage2T does on the host. Float MRC gains nothing from staging.
@@ -2372,8 +2393,9 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	if (ingest_mode == INGEST_COMPACT && compact_stage == COMPACT_NONE)
 		REPORT_ERROR("--ingest compact was requested but the compact native staging did not "
 		             "apply to " + fn_mic + ". Either there is no resident CUDA session, or "
-		             "this movie is not an unsigned 8- or 16-bit TIFF or a raw integer MRC "
-		             "(mode 0, 1 or 6). Refusing to continue "
+		             "this movie is not an unsigned 8- or 16-bit TIFF, a raw integer MRC "
+		             "(mode 0, 1 or 6), or an EER whose grouped counts fit uint16. Refusing "
+		             "to continue "
 		             "on a different path under a pinned --ingest.");
 #endif
 
@@ -2410,6 +2432,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			try {
+#ifdef _CUDA_ENABLED
+				if (isEER && compact_stage == COMPACT_U16)
+					renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes_u16[iframe]());
+				else
+#endif
 				if (isEER)
 					renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
 				else if (isCompressedMRC)
@@ -3590,11 +3617,45 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					local_xshifts.assign(local_xshifts.size(), (RFLOAT)0);
 					local_yshifts.assign(local_yshifts.size(), (RFLOAT)0);
 #endif
+#ifdef _CUDA_ENABLED
+					// Issue #192: a completed resident attempt that did not converge
+					// leaves d_Iframes valid, so the retry input is built from it
+					// instead of downloading the movie. This is the spectrum
+					// cudaPreparePatch makes from the downloaded frames: same group
+					// sums in the same order, same R2C plan, same scaling. Only a
+					// failure here (or a failed first preparation) takes the
+					// download path below.
+					bool resident_retry_prep_done = false;
+					if (movie_session && device_prep_ok) {
+						RCTIC(TIMING_PREP_PATCH);
+						resident_retry_prep_done = movie_session->downloadPatchSpectra(
+							x_start, y_start, patch_w, patch_h, n_groups,
+							group_start.data(), group_size.data(), Fpatches);
+						RCTOC(TIMING_PREP_PATCH);
+						if (!resident_retry_prep_done) {
+							// Same rule as above: the preserved status and the pending
+							// slot both decide, never the slot alone.
+							const CudaRetryDecision decision = cudaRetryDecisionFor(
+								movie_session->getFailureState(), cudaGetLastError());
+							if (decision.verdict == CUDA_RETRY_FATAL) {
+								REPORT_ERROR_STR("CUDA device context is unusable for " << fn_mic
+								                 << " (patch " << iy + 1 << ", " << ix + 1 << "): "
+								                 << cudaGetErrorString(decision.decisive)
+								                 << ". Refusing to retry alignment on a poisoned context.");
+							}
+							logfile << "WARNING: resident retry preparation did not complete for patch ("
+							        << iy + 1 << ", " << ix + 1 << "); classified recoverable, "
+							        << "retrying from the downloaded frames." << std::endl;
+						}
+					}
+#endif
 					// Host frames are deliberately raw on the resident path. If a
 					// device patch attempt falls back, download the aligned real frames
 					// before either CUDA staging or CPU patch preparation reads them.
 #ifdef _CUDA_ENABLED
-					if (movie_session && host_frames_are_raw) {
+					if (resident_retry_prep_done) {
+						// Nothing reads the host frames on this retry.
+					} else if (movie_session && host_frames_are_raw) {
 						if (!movie_session->downloadRealFrames(Iframes))
 							REPORT_ERROR("Failed to download resident real frames for patch fallback");
 						host_frames_are_raw = false;
@@ -3611,7 +3672,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					}
 #endif
 					RCTIC(TIMING_PREP_PATCH);
+#ifdef _CUDA_ENABLED
+					bool cuda_patch_prep_done = resident_retry_prep_done;
+#else
 					bool cuda_patch_prep_done = false;
+#endif
 #ifdef _CUDA_ENABLED
 					// Issue #69, second boundary. The health check above runs BEFORE
 					// this preparation, so it cannot see a fatal error raised HERE --
@@ -3622,7 +3687,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					// Peeking at the cleared slot afterwards is not sufficient; the
 					// status has to be carried out of the helper.
 					CudaFailureState fallback_prep_failure;
-					if (use_gpu) {
+					if (use_gpu && !cuda_patch_prep_done) {
 						cuda_patch_prep_done = cudaPreparePatch(
 							Iframes, x_start, x_end, y_start, y_end,
 							n_groups, group_start, group_size, Fpatches,

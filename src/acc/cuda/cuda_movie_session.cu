@@ -2252,6 +2252,42 @@ bool CudaMovieSession::preparePatchInVram(
     return true;
 }
 
+bool CudaMovieSession::downloadPatchSpectra(
+    int x_start, int y_start,
+    int patch_w, int patch_h,
+    int n_groups, const int *group_start, const int *group_size,
+    std::vector<MultidimArray<fComplex> > &Fpatches
+) {
+    if (failure_state.isPoisoned() || !is_initialized || n_groups == 0) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+
+    const int patch_nfx = patch_w / 2 + 1;
+    const size_t sz_patch_comp = (size_t)patch_h * patch_nfx * sizeof(cufftComplex);
+    cufftComplex *d_fpatches = nullptr;
+    HANDLE_ERROR(cudaMalloc((void**)&d_fpatches, sz_patch_comp * n_groups));
+
+    bool ok = preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups,
+                                 group_start, group_size, d_fpatches);
+    if (ok) {
+        Fpatches.resize(n_groups);
+        for (int igroup = 0; igroup < n_groups && ok; igroup++) {
+            Fpatches[igroup].resizeNoCp(2, 1, patch_h, patch_nfx);
+            const cudaError_t err = cudaMemcpy(MULTIDIM_ARRAY(Fpatches[igroup]),
+                d_fpatches + (size_t)igroup * patch_h * patch_nfx, sz_patch_comp,
+                cudaMemcpyDeviceToHost);
+            if (err != cudaSuccess) {
+                logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : "
+                        << cudaGetErrorString(err) << std::endl;
+                recordFailure(err, __func__, __LINE__);
+                ok = false;
+            }
+        }
+    }
+    const cudaError_t release = releaseBuffer(d_fpatches);
+    HANDLE_ERROR(release);
+    return ok;
+}
+
 void CudaMovieSession::alignPatchesBatched(
     const std::vector<PatchBox> &boxes,
     int n_groups, const int *group_start, const int *group_size,

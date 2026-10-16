@@ -1,0 +1,15 @@
+mcprof: IDENTITY FAILURE: products differ: mut: 10 file(s) differ
+neg mcprof rc=2
+cand --ingest float rc=0
+2019-06-21_20-39-45.801_eer_data_4096x4096.eer float
+2019-06-21_20-57-59.233_eer_data_4096x4096.eer float
+identity vs base(auto, witness float): True [] mrc 2
+cand --ingest compact rc=0
+2019-06-21_20-39-45.801_eer_data_4096x4096.eer compact
+2019-06-21_20-57-59.233_eer_data_4096x4096.eer compact
+identity vs base(auto, witness float): True [] mrc 2
+pins done
+FAILED (failures=1)
+99% tests passed, 1 tests failed out of 84
+The following tests FAILED:
+	 46 - CiFailClosedControls (Failed)

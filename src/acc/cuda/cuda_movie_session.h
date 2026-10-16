@@ -253,6 +253,16 @@ public:
         int window_nx = 0, int window_ny = 0
     );
 
+    // Issue #192: the full (unwindowed) patch spectra of preparePatchInVram, copied
+    // to Fpatches in the layout cudaPreparePatch produces. Lets the non-converged
+    // retry take its input from d_Iframes instead of a host copy of the movie.
+    bool downloadPatchSpectra(
+        int x_start, int y_start,
+        int patch_w, int patch_h,
+        int n_groups, const int *group_start, const int *group_size,
+        std::vector<MultidimArray<fComplex> > &Fpatches
+    );
+
     PatchAlignmentWorkspace& getPatchAlignmentWorkspace() { return patch_alignment_workspace; }
     BatchedPatchAlignmentWorkspace& getBatchedPatchAlignmentWorkspace() { return batched_patch_alignment_workspace; }
     // Must succeed before any reconstruction or output publication. Releases both

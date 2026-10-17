@@ -49,7 +49,50 @@
      ]
     }
    },
-   "recorded_compare_rc": null
+   "recorded_compare_rc": null,
+   "batch": {
+    "auto": {
+     "rc": 1,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": false,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [
+      "Motion correction failed for 1 movie(s): Movies/movie2.eer. Successful per-movie outputs were retained; joint output was not generated.",
+      "Movie Movies/movie2.eer frame count mismatch: expected 58 frames, but decoded 34 frames."
+     ],
+     "frames": {
+      "movie1.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "float": {
+     "rc": 1,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": false,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [
+      "Motion correction failed for 1 movie(s): Movies/movie2.eer. Successful per-movie outputs were retained; joint output was not generated.",
+      "Movie Movies/movie2.eer frame count mismatch: expected 58 frames, but decoded 34 frames."
+     ],
+     "frames": {
+      "movie1.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "auto_eq_float_products_208": true
+   }
   },
   "b2_randbytes": {
    "desc": "batch: healthy, 4096 random bytes in frame 500 strip, healthy",
@@ -101,7 +144,50 @@
      ]
     }
    },
-   "recorded_compare_rc": null
+   "recorded_compare_rc": null,
+   "batch": {
+    "auto": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "a5150f7edfe39764",
+      "Movies/movie2.star": "star:269355 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "float": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "a5150f7edfe39764",
+      "Movies/movie2.star": "star:269355 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "auto_eq_float_products_208": false
+   }
   },
   "b3_stripff": {
    "desc": "batch: healthy, frame 700 strip all 0xFF, healthy",
@@ -153,7 +239,54 @@
      ]
     }
    },
-   "recorded_compare_rc": null
+   "recorded_compare_rc": null,
+   "batch": {
+    "auto": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "4a6e9d15cbf51feb",
+      "Movies/movie2.star": "star:268950 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [
+      701
+     ],
+     "n_warn_lines": 1,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "float": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "4a6e9d15cbf51feb",
+      "Movies/movie2.star": "star:268950 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [
+      701
+     ],
+     "n_warn_lines": 1,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "auto_eq_float_products_208": false
+   }
   },
   "b4_stripzero": {
    "desc": "batch: healthy, frame 900 strip all zero, healthy",
@@ -205,7 +338,54 @@
      ]
     }
    },
-   "recorded_compare_rc": null
+   "recorded_compare_rc": null,
+   "batch": {
+    "auto": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "b32417d9d4b8b984",
+      "Movies/movie2.star": "star:269220 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [
+      901
+     ],
+     "n_warn_lines": 1,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "float": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "b32417d9d4b8b984",
+      "Movies/movie2.star": "star:269220 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [
+      901
+     ],
+     "n_warn_lines": 1,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "auto_eq_float_products_208": false
+   }
   },
   "b5_trunc60_noexp": {
    "desc": "as b1 without --expected_frames",
@@ -255,7 +435,50 @@
      ]
     }
    },
-   "recorded_compare_rc": null
+   "recorded_compare_rc": null,
+   "batch": {
+    "auto": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "f71de09c42d7a044",
+      "Movies/movie2.star": "star:136122 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 34,
+      "movie3.log": 58
+     }
+    },
+    "float": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "f71de09c42d7a044",
+      "Movies/movie2.star": "star:136122 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 34,
+      "movie3.log": 58
+     }
+    },
+    "auto_eq_float_products_208": false
+   }
   },
   "b6_wronggain": {
    "desc": "12963 twice, 2048x2048 gain (wrong dimensions)",
@@ -301,7 +524,40 @@
      "routes": []
     }
    },
-   "recorded_compare_rc": null
+   "recorded_compare_rc": null,
+   "batch": {
+    "auto": {
+     "rc": 1,
+     "products": {},
+     "joint_star": false,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [
+      "Motion correction failed for 2 movie(s): Movies/movie1.eer Movies/movie2.eer. Successful per-movie outputs were retained; joint output was not generated.",
+      "Unsupported gain size in EERRenderer::loadEERGain()"
+     ],
+     "frames": {
+      "movie1.log": 39,
+      "movie2.log": 39
+     }
+    },
+    "float": {
+     "rc": 1,
+     "products": {},
+     "joint_star": false,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [
+      "Motion correction failed for 2 movie(s): Movies/movie1.eer Movies/movie2.eer. Successful per-movie outputs were retained; joint output was not generated.",
+      "Unsupported gain size in EERRenderer::loadEERGain()"
+     ],
+     "frames": {
+      "movie1.log": 39,
+      "movie2.log": 39
+     }
+    },
+    "auto_eq_float_products_208": true
+   }
   },
   "c01_f3_g40_up1": {
    "desc": "Falcon3 corpus default g40 up1 (58 groups)",
@@ -2253,5 +2509,6 @@
    },
    "recorded_compare_rc": 0
   }
- }
+ },
+ "batch_source": "PR #208 @ a5fa5429 evidence/batch_analysis.json (analyse_batch.py: MRC payload sha256[:16] after header+extended header; STAR as size)"
 }

@@ -21,9 +21,16 @@ Pass criteria (#207 sections 1, 2, 3, 5):
 Dataset part (`--dataset`, needs the multi-GPU window: start it through multigpu_step.sh --driver):
 mixed [tutorial 00026, 10641 A-002, tutorial 00031, 10641 A-004], run_dataset.py, d1 (1 worker),
 d2 (2 workers), dshim (2 workers, counter), dpoison (2 workers, fatal only in the worker on the
-second GPU in #207; both workers on the frozen SHA, see dataset()). Pass: d1/d2/dshim dataset PASS and d2, dshim identical to d1 (inventory, MRC bytes
-[0:224]+[1024:], STAR/EPS/log text, as #207's cmp_tree.py); dpoison dataset FAIL with
-dataset_ready false, no merged/ tree and no dataset joint STAR.
+second GPU, restored by the UUID-selective wrapper qf_fault_by_uuid.sh) and dpoison_both (both
+workers fault). grade_dataset() requires, from the run's own files (a missing file fails):
+  d1/d2/dshim  rc 0, dataset and worker verdict PASS, dataset_ready, worker rcs 0, workers on their
+               intended distinct witnessed UUIDs, cleanup complete, 4 MRC + 4 STAR + joint STAR merged,
+               d2 and dshim identical to d1 (#207 cmp_tree.py rules); dshim's counter = retried patches;
+  dpoison      nonzero rc, verdict FAIL, dataset_ready false, 'Worker phase exited', worker rcs [0, 1]:
+               w1 log carries the injected fault, the refusal and fault=on, its 10641 movie has no
+               MRC/STAR, its tutorial movie keeps both; w0 complete with its per-worker joint STAR and
+               fault=off; no merged tree; cleanup complete, no leftover process;
+  dpoison_both as dpoison, with both workers faulting and refusing.
 """
 import argparse
 import hashlib
@@ -257,62 +264,189 @@ def digest_tree(root):
     return out
 
 
-def dataset():
-    gpus = [LANE_GPU_UUID, os.environ['QF_DATASET_GPU2_UUID']]
-    masks = [CPUS, os.environ['QF_DATASET_CPUS2']]
+MIXED = [('tut_00026', '20170629_00026_frameImage.tiff', 1), ('10641_A002', 'HM70-1_10-A-002_0002_Oct28_23_00_41.tif', 2),
+         ('tut_00031', '20170629_00031_frameImage.tiff', 1), ('10641_A004', 'HM70-1_10-A-004_0008_Oct28_23_06_04.tif', 2)]
+# contiguous sharding of the 4-movie STAR over 2 workers (#207 section 4): w0 = t26 + 10641-A, w1 = t31 + 10641-B
+SHARDS = {1: [[0, 1, 2, 3]], 2: [[0, 1], [2, 3]]}
+WRAPPER = HERE / 'qf_fault_by_uuid.sh'
+
+
+def _stem(i):
+    return MIXED[i][1].rsplit('.', 1)[0]
+
+
+def _load(path):
+    try:
+        return json.loads(Path(path).read_text())
+    except (OSError, ValueError):
+        return None
+
+
+def grade_dataset(tag, out, rc, n, expect, gpus, fault_worker=None, retried=None):
+    """Grade one run_dataset.py arm from its own files. expect: 'pass', 'poison_both' or 'poison_one'.
+
+    Missing files are failures, never defaults: a run that did not execute cannot pass."""
+    problems = []
+    ds = _load(out / 'dataset_status.json')
+    ws = _load(out / 'workers' / 'status.json')
+    if ds is None:
+        problems.append('no dataset_status.json')
+    if ws is None:
+        problems.append('no workers/status.json')
+    if ds is None or ws is None:
+        return problems
+    workers = ws.get('workers') if isinstance(ws.get('workers'), list) else []
+    if ws.get('n_workers') != n or len(workers) != n:
+        problems.append(f'n_workers {ws.get("n_workers")}/{len(workers)} != {n}')
+    gw = ws.get('gpu_witness') or {}
+    if not gw.get('all_pids_witnessed_on_intended_distinct_devices') or gw.get('distinct_devices_witnessed') != n:
+        problems.append(f'device witness: {gw.get("distinct_devices_witnessed")} distinct, all-on-intended '
+                        f'{gw.get("all_pids_witnessed_on_intended_distinct_devices")}')
+    devs = [d.get('uuid') for d in ws.get('devices') or []]
+    if devs != gpus[:n]:
+        problems.append(f'worker devices {devs} != {gpus[:n]}')
+    pc = ws.get('process_cleanup') or {}
+    if not pc.get('complete') or pc.get('observed_live_before_cleanup') or pc.get('unexpected_descendants'):
+        problems.append(f'process cleanup incomplete: {pc}')
+    if ds.get('process_ownership_errors'):
+        problems.append(f'process ownership errors {ds.get("process_ownership_errors")}')
+    consoles = []
+    for w in workers:
+        log = Path(w.get('log') or '')
+        consoles.append(log.read_text(errors='replace') if log.is_file() else None)
+    rcs = [w.get('returncode') for w in workers]
+    merged = out / 'merged'
+
+    def worker_products(k):
+        wd = out / 'workers' / f'w{k}'
+        return {p.name for p in (wd / 'Movies').glob('*') if p.suffix in ('.mrc', '.star')} if (wd / 'Movies').exists() else set()
+
+    if expect == 'pass':
+        if rc != 0 or ds.get('verdict') != 'PASS' or not ds.get('dataset_ready') or ws.get('verdict') != 'PASS':
+            problems.append(f'rc {rc}, dataset {ds.get("verdict")}/{ds.get("dataset_ready")}, workers {ws.get("verdict")}')
+        if rcs != [0] * n:
+            problems.append(f'worker rcs {rcs}')
+        names = {f'{_stem(i)}.{x}' for i in range(4) for x in ('mrc', 'star')}
+        have = {p.name for p in (merged / 'Movies').glob('*') if p.suffix in ('.mrc', '.star')} if merged.exists() else set()
+        if have != names or not (merged / 'corrected_micrographs.star').exists():
+            problems.append(f'merged products {sorted(have)}, joint STAR {(merged / "corrected_micrographs.star").exists()}')
+        if retried is not None:  # dshim: the counter must have run, once per retried 10641 patch
+            preps = sum(int(m) for c in consoles if c for m in re.findall(r'resident-retry-preparations=(\d+)', c))
+            if preps != retried:
+                problems.append(f'shim resident-retry-preparations {preps} != retried {retried}')
+        return problems
+    # poison cases
+    if rc in (0, None) or ds.get('verdict') != 'FAIL' or ds.get('dataset_ready') is not False:
+        problems.append(f'rc {rc}, dataset verdict {ds.get("verdict")}, ready {ds.get("dataset_ready")}')
+    if 'Worker phase exited' not in (ds.get('failure') or ''):
+        problems.append(f'failure reason {ds.get("failure")!r}')
+    if merged.exists() or (merged / 'corrected_micrographs.star').exists():
+        problems.append('a merged tree was published')
+    faulting = list(range(n)) if expect == 'poison_both' else [fault_worker]
+    for k in range(n):
+        c = consoles[k] if k < len(consoles) else None
+        prods = worker_products(k)
+        shard = SHARDS[n][k]
+        first_ret = next(j for j, i in enumerate(shard) if MIXED[i][0].startswith('10641'))
+        # movies before the first faulting (10641) movie must survive; the faulting movie must not publish.
+        # Later movies in the same process are refused at session initialisation (#69), so not required.
+        tut, ret = [_stem(i) for i in shard[:first_ret]], [_stem(shard[first_ret])]
+        if c is None:
+            problems.append(f'w{k}: no console log')
+            continue
+        if k in faulting:
+            if rcs[k] in (0, None):
+                problems.append(f'w{k}: faulting worker rc {rcs[k]}')
+            if '[preprocessfault] injected' not in c or REFUSAL not in c:
+                problems.append(f'w{k}: fault not attributed (injected/refusal lines missing)')
+            if expect == 'poison_one' and 'fault=on' not in c:
+                problems.append(f'w{k}: wrapper did not enable the fault')
+            for st in ret:
+                if any(p.startswith(st) for p in prods):
+                    problems.append(f'w{k}: refused movie {st} published {sorted(prods)}')
+            for st in tut:  # the healthy movie before it in the same worker keeps its products
+                if not {f'{st}.mrc', f'{st}.star'} <= prods:
+                    problems.append(f'w{k}: healthy movie {st} lost products ({sorted(prods)})')
+        else:
+            if rcs[k] != 0:
+                problems.append(f'w{k}: healthy worker rc {rcs[k]}')
+            if '[preprocessfault] injected' in c or 'fault=off' not in c:
+                problems.append(f'w{k}: healthy worker shows a fault or no wrapper attribution')
+            want = {f'{_stem(i)}.{x}' for i in SHARDS[n][k] for x in ('mrc', 'star')}
+            if not want <= prods or not (out / 'workers' / f'w{k}' / 'corrected_micrographs.star').exists():
+                problems.append(f'w{k}: healthy worker incomplete ({sorted(prods)})')
+    return problems
+
+
+def run_dataset_arm(tag, binary, n, env, gpus, masks, star, cwd):
+    out = ROOT / 'dataset' / tag
+    if out.exists():
+        shutil.rmtree(out)
+    la = f"--devices {','.join(gpus[:n])} --cpus '{';'.join(masks[:n])}'"
+    cmd = ['taskset', '-c', ','.join(masks[:n]), PY, str(SRC / 'tools/multi_gpu/run_dataset.py'), '--binary', str(binary),
+           '--star', str(star), '--out', str(out), f'--launcher-args={la}', '--',
+           '--use_own', '--dose_weighting', '--dose_per_frame', '1.0', '--bfactor', '150', '--seed', '1',
+           '--patch_x', '5', '--patch_y', '5', '--j', '8']
+    e = base_env(False)
+    e.update(env)
+    p = subprocess.run(cmd, cwd=cwd, env=e, capture_output=True, text=True)
+    (ROOT / 'dataset').mkdir(exist_ok=True)
+    (ROOT / 'dataset' / f'{tag}.driver.log').write_text(p.stdout + '\n--stderr--\n' + p.stderr)
+    leftovers = subprocess.run(['pgrep', '-u', str(os.getuid()), '-f', str(binary)], capture_output=True, text=True).stdout.split()
+    return out, p.returncode, leftovers
+
+
+def dataset(single_gpu=False):
+    if single_gpu:  # GPU0 only: the 1-worker arms (healthy and poisoned); the 2-worker arms need the window
+        gpus, masks = [LANE_GPU_UUID, None], [CPUS, None]
+    else:
+        gpus = [LANE_GPU_UUID, os.environ['QF_DATASET_GPU2_UUID']]
+        masks = [CPUS, os.environ['QF_DATASET_CPUS2']]
     d = ROOT / 'inputs' / 'mixed'
     (d / 'Movies').mkdir(parents=True, exist_ok=True)
-    movies = [('tut_00026', '20170629_00026_frameImage.tiff', 1), ('10641_A002', 'HM70-1_10-A-002_0002_Oct28_23_00_41.tif', 2),
-              ('tut_00031', '20170629_00031_frameImage.tiff', 1), ('10641_A004', 'HM70-1_10-A-004_0008_Oct28_23_06_04.tif', 2)]
-    for key, name, _ in movies:
+    for key, name, _ in MIXED:
         if (d / 'Movies' / name).is_symlink():
             (d / 'Movies' / name).unlink()
         os.symlink(INPUTS[key][0], d / 'Movies' / name)
-    (d / 'movies.star').write_text(star_text(['opticsGroupTut 1 0.885 200 1.4 0.1', 'opticsGroup10641 2 0.4 300 2.7 0.1'],
-                                             [(f'Movies/{n}', g) for _, n, g in movies]))
-    runs = {'d1': (BIN['nvcomp'], 1, {}), 'd2': (BIN['nvcomp'], 2, {}),
-            'dshim': (SHIM, 2, {'MC_PREPROCESS_FAULT': 'none', 'MC_RESIDENT_RETRY_COUNT': '1'}),
-            # #207 confined the fault to one worker with MC_FAULT_ONLY_CVD; #210 removed that variable from the
-            # shim, so on the frozen SHA both workers refuse their 10641 movie. Graded: no dataset publication.
-            'dpoison': (SHIM, 2, {'MC_PREPROCESS_FAULT': 'resident-retry-fatal'})}
-    res = {'gpus': gpus, 'cpu_masks': masks, 'runs': {}, 'problems': []}
-    for tag, (binary, n, env) in runs.items():
-        out = ROOT / 'dataset' / tag
-        if out.exists():
-            shutil.rmtree(out)
-        la = f"--devices {','.join(gpus[:n])} --cpus '{';'.join(masks[:n])}'"
-        cmd = ['taskset', '-c', ','.join(masks[:n]), PY, str(SRC / 'tools/multi_gpu/run_dataset.py'), '--binary', str(binary),
-               '--star', str(d / 'movies.star'), '--out', str(out), f'--launcher-args={la}', '--',
-               '--use_own', '--dose_weighting', '--dose_per_frame', '1.0', '--bfactor', '150', '--seed', '1',
-               '--patch_x', '5', '--patch_y', '5', '--j', '8']
-        e = base_env(False)
-        e.update(env)
-        p = subprocess.run(cmd, cwd=d, env=e, capture_output=True, text=True)
-        (ROOT / 'dataset').mkdir(exist_ok=True)
-        (ROOT / 'dataset' / f'{tag}.driver.log').write_text(p.stdout + '\n--stderr--\n' + p.stderr)
-        st = json.loads((out / 'dataset_status.json').read_text()) if (out / 'dataset_status.json').exists() else {}
-        res['runs'][tag] = {'rc': p.returncode, 'binary_sha256': sha256_file(binary), 'verdict': st.get('verdict'),
-                            'dataset_ready': st.get('dataset_ready'), 'merged': (out / 'merged').exists(),
-                            'joint_star': (out / 'merged' / 'corrected_micrographs.star').exists(), 'status': st}
-        print(tag, 'rc', p.returncode, 'verdict', st.get('verdict'), flush=True)
-    R = res['runs']
-    for tag in ('d1', 'd2', 'dshim'):
-        if R[tag]['verdict'] != 'PASS' or not R[tag]['dataset_ready']:
-            res['problems'].append(f'{tag}: verdict {R[tag]["verdict"]}, ready {R[tag]["dataset_ready"]}')
-    base = digest_tree(ROOT / 'dataset' / 'd1' / 'merged') if R['d1']['merged'] else {}
-    for tag in ('d2', 'dshim'):
-        other = digest_tree(ROOT / 'dataset' / tag / 'merged') if R[tag]['merged'] else {}
+    star = d / 'movies.star'
+    star.write_text(star_text(['opticsGroupTut 1 0.885 200 1.4 0.1', 'opticsGroup10641 2 0.4 300 2.7 0.1'],
+                              [(f'Movies/{n}', g) for _, n, g in MIXED]))
+    fault_env = {'QF_FAULT_SHIM': str(SHIM), 'QF_FAULT_UUID': gpus[1], 'MC_RESIDENT_RETRY_COUNT': '1'}
+    arms = [('d1', BIN['nvcomp'], 1, {}, 'pass'), ('d2', BIN['nvcomp'], 2, {}, 'pass'),
+            ('dshim', SHIM, 2, {'MC_PREPROCESS_FAULT': 'none', 'MC_RESIDENT_RETRY_COUNT': '1'}, 'pass'),
+            # #207's case: only the worker on the second GPU faults (UUID-selective wrapper, see qf_fault_by_uuid.sh)
+            ('dpoison', WRAPPER, 2, fault_env, 'poison_one'),
+            # additional: both workers fault (the shim's own env, no wrapper)
+            ('dpoison_both', SHIM, 2, {'MC_PREPROCESS_FAULT': 'resident-retry-fatal'}, 'poison_both')]
+    if single_gpu:
+        arms = [arms[0], ('dpoison_1w', SHIM, 1, {'MC_PREPROCESS_FAULT': 'resident-retry-fatal'}, 'poison_both')]
+    res = {'gpus': gpus, 'cpu_masks': masks, 'wrapper_sha256': sha256_file(WRAPPER), 'shim_sha256': sha256_file(SHIM),
+           'runs': {}, 'problems': []}
+    retried = None
+    for tag, binary, n, env, expect in arms:
+        out, rc, leftovers = run_dataset_arm(tag, binary, n, env, gpus, masks, star, d)
+        if tag == 'd1' and (out / 'merged').exists():
+            retried = retry_accounting(out / 'merged')['retried']
+        probs = grade_dataset(tag, out, rc, n, expect, gpus, fault_worker=1, retried=retried if tag == 'dshim' else None)
+        if leftovers:
+            probs.append(f'leftover processes {leftovers}')
+        st = _load(out / 'dataset_status.json') or {}
+        res['runs'][tag] = {'rc': rc, 'binary_sha256': sha256_file(binary), 'expect': expect, 'verdict': st.get('verdict'),
+                            'dataset_ready': st.get('dataset_ready'), 'failure': st.get('failure'), 'problems': probs}
+        res['problems'] += [f'{tag}: {x}' for x in probs]
+        print(tag, 'rc', rc, 'verdict', st.get('verdict'), probs, flush=True)
+    base = digest_tree(ROOT / 'dataset' / 'd1' / 'merged') if (ROOT / 'dataset' / 'd1' / 'merged').exists() else {}
+    for tag in (() if single_gpu else ('d2', 'dshim')):
+        m = ROOT / 'dataset' / tag / 'merged'
+        other = digest_tree(m) if m.exists() else {}
         diff = sorted(k for k in set(base) | set(other) if base.get(k) != other.get(k))
         res[f'd1_vs_{tag}'] = {'files': len(base), 'differing': diff[:20]}
         if not base or diff:
             res['problems'].append(f'd1 vs {tag}: {len(diff)} differing files')
-    dp = R['dpoison']
-    if dp['verdict'] == 'PASS' or dp['dataset_ready'] or dp['merged'] or dp['joint_star']:
-        res['problems'].append(f'dpoison: verdict {dp["verdict"]}, ready {dp["dataset_ready"]}, merged {dp["merged"]}')
     for p in list((ROOT / 'dataset').rglob('*.mrc')) + list((ROOT / 'dataset').rglob('*.pdf')):
         p.unlink()
     res['verdict'] = 'PASS' if not res['problems'] else 'FAIL'
-    dump(res, ROOT / 'results' / 'dataset.json')
+    dump(res, ROOT / 'results' / ('dataset-single-gpu.json' if single_gpu else 'dataset.json'))
     print('dataset:', res['verdict'], res['problems'])
     return res
 
@@ -322,12 +456,14 @@ def main():
     ap.add_argument('--families', default='e10641,e10216')
     ap.add_argument('--groupings', default='1,4')
     ap.add_argument('--dataset', action='store_true', help='dataset part only (multi-GPU window)')
+    ap.add_argument('--dataset-single-gpu', action='store_true',
+                    help='dataset grading on the lane GPU only: 1-worker healthy and poisoned arms (not a QF PASS)')
     a = ap.parse_args()
     ROOT.mkdir(parents=True, exist_ok=True)
     dump({'inputs': check_inputs(), 'binaries': {'frozen': sha256_file(BIN['nvcomp']), 'ref_1db': sha256_file(REF_1DB),
                                                  'shim': sha256_file(SHIM)}}, ROOT / 'provenance.json')
-    if a.dataset:
-        return 0 if dataset()['verdict'] == 'PASS' else 1
+    if a.dataset or a.dataset_single_gpu:
+        return 0 if dataset(single_gpu=a.dataset_single_gpu)['verdict'] == 'PASS' else 1
     res = single_gpu(a.families.split(','), [int(x) for x in a.groupings.split(',')])
     return 0 if all(r['verdict'] == 'PASS' for r in res) else 1
 

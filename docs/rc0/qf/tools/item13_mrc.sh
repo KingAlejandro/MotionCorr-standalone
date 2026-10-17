@@ -1,7 +1,8 @@
 #!/bin/bash
 # QF item 13: raw integer MRC staging (#195) with #204's harness (PR #204 @ 5944617b, vendored in
 # harness_mrc/ with only its source-root line changed) on the frozen binaries, then graded against
-# #204's recorded verdicts by grade_item13.py. Requires QF_W QF_CPUS QF_GPU_UUID QF_GPU_LOCK.
+# #204's recorded verdicts by grade_item13.py; exits with the grader's status.
+# Requires QF_W QF_CPUS QF_GPU_UUID QF_GPU_LOCK. QF_ITEM13_GRADE_ONLY=1 skips the runs and regrades $QF_W/item13-mrc.
 # Mirrors #204's runs: CUDA synthetic sections all; CPU matrix + errors; real data G/L (pinned compact
 # refusal on 10028 via the options runs); the six option sets of run_options.sh.
 set -u
@@ -22,6 +23,7 @@ f399bd30bfe1a9807bd494c348bfcf7d4aee312ccc18140b05abb1453ac23a56  10216_1739_Fra
 8ce479649ec00abf46b290aee2b43343d0ba0dc67f239f0e3fd0c6875b3c7213  10028_031_movie.mrcs
 SUMS
 GPU="$T/qf_lane_exec.sh"
+if [ "${QF_ITEM13_GRADE_ONLY:-0}" = 1 ]; then $PY $T/grade_item13.py $O; exit $?; fi
 echo "start $(date -u +%FT%TZ)"
 for s in matrix refuse compressed errors options; do
   MC_BIN=$QF_W/build-nvcomp/motioncorr $PY -I $T/harness_mrc/synth_mrc_matrix.py --binary $GPU --gpu 0 \
@@ -42,4 +44,7 @@ opt early_bin2_explicit --configs G --extra '--early_binning --bin_factor 2' --e
 opt noDW_evenodd --configs G,L --extra '--save_noDW --even_odd_split'
 opt ps_group4 --configs G,L --extra '--grouping_for_ps 4'
 find $O/synth $O/runs -name '*.mrc' -delete 2>/dev/null
-$PY $T/grade_item13.py $O; echo "grade rc=$? end $(date -u +%FT%TZ)"
+$PY $T/grade_item13.py $O
+rc=$?
+echo "grade rc=$rc end $(date -u +%FT%TZ)"
+exit $rc   # the driver's status is the grader's

@@ -24,8 +24,8 @@ records its own harness, comparator and fixture hashes).
 | 8. Multi-GPU | **dry run only**: GPU1 was in use by W-QM, so the "all four lanes free" condition for a 2-worker smoke never held. Commands and device/CPU assignment printed correctly for G/L × w1/w2/w4 | `raw/multigpu/multigpu-dryrun.txt` |
 | 9. Adapted #123 matrix | **16/16 rows PASS on both CUDA executables**; 28/28 arms UUID-witnessed on GPU0 each; gain-effect control `differs: true`; routes 23 compact / 16 float as declared; inputs byte-identical to #123's runs of record | `raw/matrix/` |
 | 10. `CpuDoseSymmetry` (#220) | N/A: #220 not merged at `483e881d` | — |
-| 11. EER #208 replay | smoke only (revision 1): 3/3 cases PASS (`c04`, `b6`, `cc1`); 38 cases UNRUN | `raw/revision1/` |
-| 12. Resident retry | revision 1: **4/4 single-GPU cases PASS** (retried 41/30/9/25 as #207); dataset part UNRUN (multi-GPU window) | `raw/revision1/` |
+| 11. EER #208 replay | **revision 2: 41/41 recorded cases PASS** (`o1n` replaced by the guard-removed control); 4/4 negative controls rejected; guard-removed control o1n/o5n PASS | `raw/revision2/` |
+| 12. Resident retry | **4/4 single-GPU cases PASS** (revision 1; retried 41/30/9/25 as #207); **dataset part PASS** (revision 2, GPU0 + GPU2: d1/d2/dshim, #207's asymmetric dpoison, dpoison_both) | `raw/revision1/`, `raw/revision2/` |
 | 13. MRC #204 harness | **revision 1: PASS**, all 14 runs graded against #204 (errors 26/26 + 26/26 now pass; 6 KNOWN-F4) | `raw/revision1/` |
 | 14. macOS | UNRUN here (other worker) | — |
 
@@ -106,12 +106,12 @@ campaign cases 21–48 s each (5 arms, small families).
 | #123 matrix ×2 executables | 1 min (measured) |
 | #178 fallback + injected sweep | ≤ 30 min (not rehearsed; ≈ 20 tutorial runs plus a sweep of up to 16) |
 | Multi-GPU G/L 1/2/4 + mixed | 30–45 min once all four GPU locks and the bench lock are free (Q1: ≈3 min per invocation) |
-| Item 11 (#208 replay, 41 cases incl. up3 and F4-up2) | 1–2 h (smoke: 3 cases 85 s; not run in full) |
-| Item 12 single-GPU + dataset | ≈ 6 min (measured) + ≈ 10 min in the multi-GPU window |
+| Item 11 (#208 replay, 41 cases incl. up3 and F4-up2, negative controls) + guard-removed control | ≈ 25 min + ≈ 6 min (measured, revision 2) |
+| Item 12 single-GPU + dataset | ≈ 6 min + ≈ 1 min with two GPUs (measured) |
 | Item 13 (#204 harness, all runs) | 5.4 min (measured) |
-| **Total compute** | **≈ 3–4.5 h** on one single-GPU lane plus one multi-GPU window, excluding lock waits and macOS |
+| **Total compute** | **≈ 2.5–3 h** on one single-GPU lane plus one multi-GPU window, excluding lock waits and macOS |
 
-Items 0–10 alone are about 2–2.5 h; item 11 dominates the rest.
+Items 0–10 are about 2–2.5 h; items 11–13 add about 45 min.
 
 ## Revision 1 (R-QF findings)
 
@@ -144,3 +144,42 @@ Driver runs on `483e881d`:
 - **Item 11, smoke:** `c04` (12963 g49 up1, auto vs float identical), `b6` (wrong-size gain, both arms fail
   as recorded) and `cc1` (frozen CPU vs Q1 CPU identical) PASS. The four damaged movies regenerated with
   #208's `eer_corrupt.py` equal #208's hashes. The other 38 cases are UNRUN here.
+
+## Revision 2 (R-QF round 2)
+
+[R-QF round 2](https://github.com/KingAlejandro/MotionCorr-standalone/pull/224#issuecomment-6234322411)
+left finding 6 partly open. Tools and docs only. Same source `483e881d` and binaries. Lanes: GPU0 + CPUs
+96–103 under the GPU0 lock; the item 12 dataset part also used GPU2 `GPU-063e5232…` + CPUs 112–119, holding
+the GPU2 lock (all four GPU locks and the bench lock were free, with no compute process, when it started).
+Evidence: `raw/revision2/`.
+
+**Item 11.** #208's per-movie predicates are restored (script header). The synthetic fixtures are bound to a
+frozen recipe (`item_records/eer_synth_recipe.json`): every run regenerates them and compares hashes. An
+independent strip decode records encodings 65000/65001/65002, detectors 4K/2K, 240/49 152/196 608 fractions
+and group maxima of 65 532 (o2), 65 535 (o3) and 65 536 (o1, o4, o5); decoded electron counts equal the recipe.
+Results:
+
+| Run | Result |
+|---|---|
+| first pass (superseded), all non-heavy cases | 32 PASS. b1–b5 FAILED on a **harness error**: movie 3 must be #208's "healthy B" (the second Falcon3 movie), not a second copy of A. The payload check against #208's hashes caught it (`raw/revision2/superseded/`) |
+| b1–b5 re-run after the fix (then repeated in the final pass) | **5/5 PASS**: published sets, joint STAR, frame counts (b5: 34), D6 warnings (b3 frame 701, b4 frame 901), error messages, auto = float, and every MRC payload hash (healthy and damaged) equal to #208's `1db86902` record |
+| heavy cases (m1, m2, c15, c16) | **4/4 PASS** (F4 up2 full 144 groups and 100 groups; Falcon3 and 12963 up3) |
+| **final pass**, all non-heavy cases with the committed harness, `--negative-controls` | **37/37 PASS**, 4/4 negative controls rejected (`raw/revision2/item11.log`, `item11-summary-final.json`). With the heavy run: **41/41** |
+| negative controls (real outputs, mutated copies) | 4/4 rejected: b6 planted per-movie + joint STAR (`exited 1 but wrote a completion STAR`), b2 one float payload byte (`payload … != #208`, `auto vs float MRC payloads differ`), o1 MRC planted in the refused compact arm (`refused but published`), b3 warning removed (`D6 skip warnings at [] != #208 [701]`) |
+| guard-removed control (`item11_noguard_control.sh`, mutant `8ba5bc0f…`) | o1n and o5n PASS: without the guard, auto takes compact and its products **differ** from float (compare rc 1), so the replacement fixtures reach the wrap |
+
+**Item 12 dataset part** (GPU0 + GPU2, `raw/revision2/item12-dataset.log`, `item12-dataset.json`):
+
+| Arm | rc | Dataset | Checks |
+|---|---:|---|---|
+| d1 (1 worker) | 0 | PASS | 4 MRC + 4 STAR + joint STAR merged |
+| d2 (2 workers) | 0 | PASS | identical to d1 (30 files) |
+| dshim (counter) | 0 | PASS | identical to d1; shim counted 25 + 16 resident preparations = retried (as #207) |
+| dpoison (wrapper, fault on GPU2's worker only) | 3 | FAIL, not ready | worker rcs [0, 1]; w1 log has `fault=on`, the injected fault and the refusal, keeps its tutorial movie, no 10641-B product; w0 `fault=off`, complete; no merged tree; cleanup complete |
+| dpoison_both | 3 | FAIL, not ready | worker rcs [1, 1]; both logs carry the injected fault and refusal; each keeps its tutorial movie; nothing merged |
+
+`probe_item12_dataset_grader.py`: rc 127 with no files (three expectations), a FAIL status without worker
+status, and a complete-looking FAIL status where no fault ran are all rejected.
+
+**Item 13.** The driver now exits with the grader's status. `probe_item13_exit.sh`: unmodified results →
+driver rc 0; one verdict flipped → driver rc 1.

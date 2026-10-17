@@ -88,9 +88,9 @@ UNRUN.
 | 8 | Multi-GPU publication 1/2/4 workers | QF runner | dataset endpoint contract + same-backend identity across worker counts | reserve the window: `multigpu_step.sh` takes all four `gpuN-correctness` locks (ascending) **and** the bench lock and waits until no compute process is on any GPU; then `bash tools/multigpu_step.sh --configs G,L` (s0, w1, w2, w4 per config) and `bash tools/multigpu_step.sh --mixed` (w1, w2) | per arm `dataset_status` PASS, aggregate PASS, workers on distinct witnessed UUIDs, shards partition the input, joint STAR order, `logfile.pdf` rendered by real Ghostscript, no leftover process; all arm pairs identical (products-only and identity lib); positive control PASS, flipped-byte control FAIL; all 8 arms (G/L × w1/w2/w4, mixed w1/w2) present | `python3 tools/multigpu_publication.py [--mixed] --dry-run` needs no locks and is side-effect free (`tools/probe_multigpu_dryrun.py`) |
 | 9 | Adapted #123 compact-ingest matrix | QF runner | same-backend identity (u16 vs float32 TIFF twin, repeat, resume) | `QF_W=$QF_W flock $QF_GPU_LOCK taskset -c $QF_CPUS ~/.mc-venv/bin/python3 tools/run_compact_ingest_support_matrix.py --binary build-<cfg>/motioncorr --device $QF_GPU_UUID --workdir matrix-<cfg> --json matrix-<cfg>.json` for `<cfg>` in `nvcomp`, `cuda` | 16/16 rows PASS, 28/28 arms UUID-witnessed, gain-effect control `differs: true`, rc 0; on **both** CUDA executables | adaptation record below; maintainer decision: run on the frozen executable, not merged into `tests/` |
 | 10 | `CpuDoseSymmetry` + `CpuDoseSymmetryBase`, recorded toolchain (#220) | QF runner, after #220 merges | exact-bit CPU dose weights (test-internal oracle) | inside items 1–3; record the `MOTIONCORR_CPU_DOSE_SYMMETRY` selection each build reports, `g++ --version`, and the compile flags from `flags.make` (no `-march=native`/`-mfma` or other FMA flag) | both tests collected (required list) and pass in **every shipped configuration** (CPU, CUDA, CUDA+nvCOMP, and any other build offered for release); the reported AUTO path matches #220's qualified-toolchain contract (AUTO = x86-64 GCC without FMA; original loop elsewhere unless `ON`) | **N/A while #220 is unmerged; UNRUN if #220 is in the frozen SHA and this is not done.** Native-FMA flags are unqualified: QF must not recommend them |
-| 11 | EER compact (#196): #208 matrix replay | QF runner | same-backend identity + refusal/overflow guards, against #208's record | `taskset -c $QF_CPUS ~/.mc-venv/bin/python3 tools/item11_eer.py` (all 41 recorded cases; writes `$QF_W/item11-eer/`) | `summary.json` totals: every replayed case PASS, 0 UNRUN (`--skip-heavy` makes the up2-F4/up3 cases UNRUN). A case passes when each arm's rc and `--ingest_witness` routes equal #208's, the recorded auto-vs-float (or CPU-vs-Q1-CPU) complete-tree comparison passes iff it passed in #208, and every rc-0 GPU arm is witnessed on the lane UUID only | details below. D6/E-1 skip-and-warn is preserved behaviour; EER-MS (#221) is separate, see item 15 |
-| 12 | Resident retry (#197): #207 success, recoverable, fatal, grouping, dataset | QF runner | same-backend identity + failure/publication, against #207's record | single GPU: `taskset -c $QF_CPUS ~/.mc-venv/bin/python3 tools/item12_retry.py`; dataset (multi-GPU window): `bash tools/multigpu_step.sh --driver item12_retry.py --dataset` | CTests `PatchRetryState`, `CudaResidentRetryFailures` pass (items 2–3) **and** every `item12-retry/results/*.json` verdict PASS: 4 single-GPU cases (10641/10216 × `--group_frames` 1/4) and the dataset case, per the criteria in the script header (retried counts 41/30/9/25, counter = retried, rec = one warning and identical products, fatal = refusal and no publication, remaining-owned=0, d2/dshim identical to d1, dpoison not published) | details below |
-| 13 | Raw integer MRC staging (#195): #204 harness | QF runner | same-backend identity; F3 fail-closed; refusal routes | `bash tools/item13_mrc.sh` (writes `$QF_W/item13-mrc/`, ends with `grade_item13.py`) | `grade.json` verdict PASS: every record's verdict equals #204's, except both `errors` runs, where all 26+26 must now PASS (#205); the 6 F4 `damaged` records stay FAIL and are listed as KNOWN-F4 | details below. F4 is a documented RC0 limitation (D5, #214) |
+| 11 | EER compact (#196): #208 matrix replay | QF runner | same-backend identity, refusal/overflow guards, D6 batch behaviour, against #208's record | `taskset -c $QF_CPUS ~/.mc-venv/bin/python3 tools/item11_eer.py --negative-controls`; then `bash tools/item11_noguard_control.sh` (powered control) | `summary.json`: every replayed case PASS, 0 UNRUN (`--skip-heavy` makes the up2-F4/up3 cases UNRUN), `negative_controls_all_rejected: true`; `summary-noguard.json`: o1n and o5n PASS (compact ≠ float without the guard). Per-case predicates are in the script header: rc, routes, recorded comparisons, UUID witness, no joint STAR after a nonzero exit, refusal with no publication, guard log line, and for b1–b6 the published set, every MRC payload hash, frame counts, D6 skip warnings, error messages and auto-vs-float identity as #208 | details below. D6/E-1 skip-and-warn is preserved behaviour; EER-MS (#221) is separate, see item 15 |
+| 12 | Resident retry (#197): #207 success, recoverable, fatal, grouping, dataset | QF runner | same-backend identity + failure/publication, against #207's record | single GPU: `taskset -c $QF_CPUS ~/.mc-venv/bin/python3 tools/item12_retry.py`; dataset (multi-GPU window, two GPUs): `bash tools/multigpu_step.sh --driver item12_retry.py --dataset` | CTests `PatchRetryState`, `CudaResidentRetryFailures` pass (items 2–3) **and** every `item12-retry/results/*.json` verdict PASS: 4 single-GPU cases (retried 41/30/9/25, counter = retried, recoverable = one warning and identical products, fatal = refusal and no publication, remaining-owned 0) and `dataset.json` (d1/d2/dshim healthy and identical, dshim counter = retried; dpoison: #207's asymmetric case, worker rcs [0, 1] with the fault attributed to the second GPU's worker only, its earlier movie kept, the healthy worker complete, nothing merged; dpoison_both; every arm with status files, device witness and cleanup) | `probe_item12_dataset_grader.py` (a run that never exercised the fault, including rc 127 with no files, must FAIL) |
+| 13 | Raw integer MRC staging (#195): #204 harness | QF runner | same-backend identity; F3 fail-closed; refusal routes | `bash tools/item13_mrc.sh` (writes `$QF_W/item13-mrc/`, ends with `grade_item13.py`; **its exit status is the grader's**) | driver exit 0 and `grade.json` verdict PASS: every record's verdict equals #204's, except both `errors` runs, where all 26+26 must now PASS (#205); the 6 F4 `damaged` records stay FAIL and are listed as KNOWN-F4 | `probe_item13_exit.sh` (one flipped verdict must make the driver fail). F4 is a documented RC0 limitation (D5, #214) |
 | 14 | macOS | **macOS worker (not W-QF-PREP; assigned by the coordinator)** | none: not a qualification | `cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON`; `ctest` | not graded. Reported as **"builds and runs; not qualified; known CPU CTest differences"**, with the actual failing tests listed | known differences: `SyntheticRegression` (libc `rand()` in hot-pixel replacement, #222) and `MultiGpuScheduling` (test-harness temp-path issue, fixed by PR #223). Record whether #223 is in the frozen SHA (it is **not** in `483e881d`; #223 is open). Reported separately from QF |
 | 15 | EER robustness regression tests (if the D10 fix lands) | QF runner | as defined by the D10 fix's own gates (ASan/identity/review) | the fix PR's tests, on the frozen binaries | as the fix PR specifies; plus items 1–3 and 11 unchanged | **EER-MS (#221): disposition PENDING (maintainer D10).** Kept separate from D6 skip-and-warn. QF must not describe the EER input paths as stable unless D10 is resolved; the QF report states the D10 outcome |
 
@@ -128,18 +128,29 @@ does not invoke them in place:
   from #204's JSONs). Self-test on #204's own JSONs: 40 mismatches (exactly the pre-#205 error records), and
   PASS once those records pass.
 - **Item 12 (#207):** #207's shell scripts are not reused. `item12_retry.py` re-implements their runs (the same
-  inputs, hash-checked against #207's list; the same options; #207's retry accounting and log allowances)
-  against the frozen `motioncorr` and `motioncorr_resident_retry_fault`, with Q1's CUDA `1db86902` as the
-  reference arm (#207's "db"). Not ported: #207's pre-#197 and reverse-applied builds and its mutants (they
-  established the comparison's power at `1db86902`). #210 removed the shim's `MC_FAULT_ONLY_CVD`, so the
-  dataset poison case now faults both workers. It is graded on non-publication only.
+  inputs, hash-checked against #207's list; the same options; #207's retry accounting, log allowances and
+  dataset comparison rules) against the frozen `motioncorr` and `motioncorr_resident_retry_fault`, with Q1's
+  CUDA `1db86902` as the reference arm (#207's "db"). Not ported: #207's pre-#197 and reverse-applied builds
+  and its mutants (they established the comparison's power at `1db86902`). #210 removed the shim's
+  `MC_FAULT_ONLY_CVD`. #207's asymmetric poison case is restored by `qf_fault_by_uuid.sh`, a hashed wrapper
+  passed as the launcher's `--binary`: it enables the fatal fault only when the worker's
+  `CUDA_VISIBLE_DEVICES` is the chosen UUID, logs `fault=on`/`fault=off`, and execs the unchanged frozen shim.
+  The both-workers case is kept as an additional check. `grade_dataset()` reads every verdict from the run's
+  own files; a missing file is a failure.
 - **Item 11 (#208):** `item11_eer.py` replays every case in `item_records/eer_208.json` (extracted from #208's
-  case and result files) with the recorded options and arms on the frozen binaries. Not replayed:
-  `o1n_NOGUARD` (a mutant build) and the `s00` smoke runs (no result recorded). The damaged movies are
+  case and result files and `batch_analysis.json`) with the recorded options and arms on the frozen binaries,
+  and grades #208's per-movie predicates before deleting products (script header). The batches are healthy A
+  (Falcon3 movie 1), a damaged copy of A, and healthy B (Falcon3 movie 2), as #208. The damaged movies are
   regenerated with #208's `eer_corrupt.py` and must equal #208's hashes. #208 did not record its
-  `eer_synth.py` parameters, so the synthetic movies use declared parameters with recorded hashes. Their
-  verdict is comparable with #208's (rc, route, auto-vs-float identity, overflow-guard refusal), but they are
-  not the same bytes. The 2048² wrong-size gain for `b6` is written by the script.
+  `eer_synth.py` parameters, so the synthetic movies follow a **frozen replacement recipe**: generator
+  (`harness_eer/eer_synth.py`, #208's), seed and parameters in `SYNTH`, with expected hashes in
+  `item_records/eer_synth_recipe.json`. Every run regenerates them and stops on any mismatch. The recipe file
+  also records, from an independent decode of each fixture's strips, its encoding (65000/65001/65002),
+  detector (4K/2K), fraction count (240/49 152/196 608) and the largest per-pixel count of one group at each
+  overflow case's grouping and upsampling: o2 65 532, o3 65 535, o1/o4/o5 65 536, the same boundaries as
+  #208 section 4. #208's historical fixture hashes are not these bytes. `item11_noguard_control.sh` repeats
+  #208's guard-removed control (o1n) and adds o5n on the replacement fixtures, so the overflow cases are
+  shown to reach the wrap.
 
 ## Adapted #123 matrix: what changed
 
@@ -177,7 +188,7 @@ session, so the `ineligible_early_binning` row tests the same predicate.
 
 ## Estimated QF wall-clock (frozen SHA)
 
-From the rehearsal ([details](rehearsal_483e881d/README.md#estimated-qf-wall-clock-on-the-frozen-sha)): builds + three
-CTest configurations 26 min, #123 matrix 1 min, item 13 5.4 min and item 12 single-GPU ≈ 6 min (measured);
-campaign 15–25 min, #178 ≤ 30 min, multi-GPU 30–45 min plus item 12 dataset ≈ 10 min once all locks are free,
-item 11 1–2 h (estimated). Total ≈ 3–4.5 h, excluding lock waits and macOS.
+From the rehearsal ([details](rehearsal_483e881d/README.md#estimated-qf-wall-clock-on-the-frozen-sha)), measured:
+builds + three CTest configurations 26 min, #123 matrix 1 min, item 11 ≈ 31 min (with negative and guard-removed
+controls), item 12 ≈ 7 min, item 13 5.4 min. Estimated: campaign 15–25 min, #178 ≤ 30 min, multi-GPU 30–45 min
+once all locks are free. Total ≈ 2.5–3 h, excluding lock waits and macOS.

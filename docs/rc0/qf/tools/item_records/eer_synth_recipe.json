@@ -1,0 +1,240 @@
+{
+ "fixtures": {
+  "n65000_4k_n240": {
+   "generator": "harness_eer/eer_synth.py",
+   "generator_sha256": "0a0d35c5556806533249e3ccdab627c1a7f0a18ecbaa4a3279445dcb80e22e1d",
+   "args": [
+    "--det",
+    "4096",
+    "--nfrac",
+    "240",
+    "--codec",
+    "65000",
+    "--bg",
+    "20000",
+    "--variants",
+    "2",
+    "--seed",
+    "1"
+   ],
+   "sha256": "15feaf9812a1468843bb37c7b6e4dcc58238c4451f3cd082c300d9bfbd07897c",
+   "witness": {
+    "detector": 4096,
+    "codec": 65000,
+    "fractions": 240,
+    "distinct_strips": 2,
+    "electrons_per_strip": [
+     20000,
+     20000
+    ],
+    "group_max": {}
+   }
+  },
+  "n65001_2k_n240": {
+   "generator": "harness_eer/eer_synth.py",
+   "generator_sha256": "0a0d35c5556806533249e3ccdab627c1a7f0a18ecbaa4a3279445dcb80e22e1d",
+   "args": [
+    "--det",
+    "2048",
+    "--nfrac",
+    "240",
+    "--codec",
+    "65001",
+    "--bg",
+    "20000",
+    "--variants",
+    "2",
+    "--seed",
+    "1"
+   ],
+   "sha256": "9b2160f8f938c3afd54908fb3017429b92591769b9df0ed7ef07629776b5893d",
+   "witness": {
+    "detector": 2048,
+    "codec": 65001,
+    "fractions": 240,
+    "distinct_strips": 2,
+    "electrons_per_strip": [
+     20000,
+     20000
+    ],
+    "group_max": {}
+   }
+  },
+  "n65002_2k_n240": {
+   "generator": "harness_eer/eer_synth.py",
+   "generator_sha256": "0a0d35c5556806533249e3ccdab627c1a7f0a18ecbaa4a3279445dcb80e22e1d",
+   "args": [
+    "--det",
+    "2048",
+    "--nfrac",
+    "240",
+    "--codec",
+    "65002",
+    "--bg",
+    "20000",
+    "--variants",
+    "2",
+    "--seed",
+    "1"
+   ],
+   "sha256": "d8b77c59d00d684b6c9ee791689541b6cac07fbaf76be01152f169780f0b1e9f",
+   "witness": {
+    "detector": 2048,
+    "codec": 65002,
+    "fractions": 240,
+    "distinct_strips": 2,
+    "electrons_per_strip": [
+     20000,
+     20000
+    ],
+    "group_max": {}
+   }
+  },
+  "ovf4k_n49152": {
+   "generator": "harness_eer/eer_synth.py",
+   "generator_sha256": "0a0d35c5556806533249e3ccdab627c1a7f0a18ecbaa4a3279445dcb80e22e1d",
+   "args": [
+    "--det",
+    "4096",
+    "--nfrac",
+    "49152",
+    "--codec",
+    "65001",
+    "--hot",
+    "4",
+    "--bg",
+    "2000",
+    "--variants",
+    "2",
+    "--seed",
+    "1"
+   ],
+   "sha256": "79b230b3cfa70ac68dc5eb7f8e48ba96892ae2ee085b65b5f66c4cd1e1201a68",
+   "witness": {
+    "detector": 4096,
+    "codec": 65001,
+    "fractions": 49152,
+    "distinct_strips": 2,
+    "electrons_per_strip": [
+     2004,
+     2004
+    ],
+    "group_max": {
+     "g16384_up-1": 65536,
+     "g16383_up-1": 65532
+    }
+   }
+  },
+  "ovf2k_n196608": {
+   "generator": "harness_eer/eer_synth.py",
+   "generator_sha256": "0a0d35c5556806533249e3ccdab627c1a7f0a18ecbaa4a3279445dcb80e22e1d",
+   "args": [
+    "--det",
+    "2048",
+    "--nfrac",
+    "196608",
+    "--codec",
+    "65001",
+    "--hot",
+    "1",
+    "--bg",
+    "2000",
+    "--variants",
+    "2",
+    "--seed",
+    "1"
+   ],
+   "sha256": "5d159a1b86ec05cc4e09f920931e6ca75ca6094c9f3c5818503d8a7bf4643677",
+   "witness": {
+    "detector": 2048,
+    "codec": 65001,
+    "fractions": 196608,
+    "distinct_strips": 2,
+    "electrons_per_strip": [
+     2001,
+     2001
+    ],
+    "group_max": {
+     "g65535_up1": 65535,
+     "g65536_up1": 65536
+    }
+   }
+  },
+  "ovf4k_n196608": {
+   "generator": "harness_eer/eer_synth.py",
+   "generator_sha256": "0a0d35c5556806533249e3ccdab627c1a7f0a18ecbaa4a3279445dcb80e22e1d",
+   "args": [
+    "--det",
+    "4096",
+    "--nfrac",
+    "196608",
+    "--codec",
+    "65001",
+    "--hot",
+    "1",
+    "--bg",
+    "2000",
+    "--variants",
+    "1",
+    "--seed",
+    "1"
+   ],
+   "sha256": "d202037ec07b4e22baf3b27895b582d54b029af3c9e0768614731f533f373a16",
+   "witness": {
+    "detector": 4096,
+    "codec": 65001,
+    "fractions": 196608,
+    "distinct_strips": 1,
+    "electrons_per_strip": [
+     2001
+    ],
+    "group_max": {
+     "g65536_up2": 65536
+    }
+   }
+  }
+ },
+ "note": "QF replacement fixtures for #208 x1-x5/o1-o5 (#208 did not record eer_synth.py parameters; its historical hashes are in evidence/fixture-sha256.txt of PR #208 and are not these).",
+ "overflow_cases": {
+  "o1": {
+   "fixture": "ovf4k_n49152",
+   "grouping": 16384,
+   "upsampling": -1,
+   "group_max": 65536,
+   "required": 65536,
+   "ok": true
+  },
+  "o2": {
+   "fixture": "ovf4k_n49152",
+   "grouping": 16383,
+   "upsampling": -1,
+   "group_max": 65532,
+   "required": 65532,
+   "ok": true
+  },
+  "o3": {
+   "fixture": "ovf2k_n196608",
+   "grouping": 65535,
+   "upsampling": 1,
+   "group_max": 65535,
+   "required": 65535,
+   "ok": true
+  },
+  "o4": {
+   "fixture": "ovf2k_n196608",
+   "grouping": 65536,
+   "upsampling": 1,
+   "group_max": 65536,
+   "required": 65536,
+   "ok": true
+  },
+  "o5": {
+   "fixture": "ovf4k_n196608",
+   "grouping": 65536,
+   "upsampling": 2,
+   "group_max": 65536,
+   "required": 65536,
+   "ok": true
+  }
+ }
+}

@@ -1,0 +1,126 @@
+cpu-bind=MASK - gn0002, task  0  0 [67353]: mask 0xffffffffffffffff set
+=== VENUE ===
+2026-10-16T05:08:33+01:00
+gn0002.scarf.rl.ac.uk
+5.14.0-687.53.1.el9_8.x86_64
+Cpus_allowed_list:	0-63
+Model name:                              AMD EPYC 7302 16-Core Processor
+NUMA node(s):                            2
+NUMA node0 CPU(s):                       0-15,32-47
+NUMA node1 CPU(s):                       16-31,48-63
+	[4mGPU0	GPU1	GPU2	GPU3	NIC0	NIC1	CPU Affinity	NUMA Affinity	GPU NUMA ID[0m
+GPU0	 X 	NV4	NV4	NV4	SYS	SYS	0-15,32-47	0		N/A
+GPU1	NV4	 X 	NV4	NV4	SYS	SYS	0-15,32-47	0		N/A
+GPU2	NV4	NV4	 X 	NV4	NODE	NODE	16-31,48-63	1		N/A
+GPU3	NV4	NV4	NV4	 X 	NODE	NODE	16-31,48-63	1		N/A
+NIC0	SYS	SYS	NODE	NODE	 X 	NODE				
+NIC1	SYS	SYS	NODE	NODE	NODE	 X 				
+
+Legend:
+
+  X    = Self
+  SYS  = Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)
+  NODE = Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node
+  PHB  = Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU)
+  PXB  = Connection traversing multiple PCIe bridges (without traversing the PCIe Host Bridge)
+  PIX  = Connection traversing at most a single PCIe bridge
+  NV#  = Connection traversing a bonded set of # NVLinks
+
+NIC Legend:
+
+  NIC0: mlx5_0
+  NIC1: mlx5_1
+
+thp/enabled: [always] madvise never
+thp/defrag: always defer defer+madvise [madvise] never
+thp/khugepaged/defrag: 1
+0, GPU-ba532823-8144-c15e-618d-060ebb72bf53, NVIDIA A100-SXM4-40GB, Enabled, 580.178.04
+1, GPU-7d938a5c-782a-e64e-ba51-b645ce7f111d, NVIDIA A100-SXM4-40GB, Enabled, 580.178.04
+2, GPU-16e88172-6038-25be-1929-326c14c19f86, NVIDIA A100-SXM4-40GB, Enabled, 580.178.04
+3, GPU-f417f33a-8c2b-1a7c-170e-0fa3bdb01914, NVIDIA A100-SXM4-40GB, Enabled, 580.178.04
+2cea885e4158240460ec309a446b1f95c92097a5a38bd7b6bb4507e9b4a4f29e  build-base/motioncorr
+f03090e29dd071dd4db18219ad4f3719748ab59709c50d7c4bfed08b6e2b0e34  build-cand/motioncorr
+=== PROBES (GPU0, lane 0-7) ===
+Terminated
+=== A/B ===
+files=121
+3.1G	/tmp/bench-data
+movies.star=24 movies96.star=96
+121
+-rw-r--r-- 1 scarf1415 cseg 56956944 Oct 16 04:27 Movies/gain.mrc
+### warmup (discarded; merged tree kept for the product comparison)
+  base 1x8-24 rc=0 wall=  5.758 worker=  5.176 agg= 0.566 PASS
+  cand 1x8-24 rc=0 wall=  5.677 worker=  5.120 agg= 0.541 PASS
+### rep 0
+  base 1x8-24 rc=0 wall=  5.747 worker=  5.190 agg= 0.541 PASS
+  cand 1x8-24 rc=0 wall=  5.604 worker=  5.046 agg= 0.540 PASS
+  base 4x8-24 rc=0 wall=  4.345 worker=  3.781 agg= 0.548 PASS
+  cand 4x8-24 rc=0 wall=  4.206 worker=  3.641 agg= 0.549 PASS
+### rep 1
+  cand 1x8-24 rc=0 wall=  5.655 worker=  5.093 agg= 0.545 PASS
+  base 1x8-24 rc=0 wall=  5.636 worker=  5.074 agg= 0.544 PASS
+  cand 4x8-24 rc=0 wall=  4.272 worker=  3.697 agg= 0.554 PASS
+  base 4x8-24 rc=0 wall=  4.422 worker=  3.839 agg= 0.567 PASS
+### rep 2
+  base 1x8-24 rc=0 wall=  5.736 worker=  5.161 agg= 0.560 PASS
+  cand 1x8-24 rc=0 wall=  5.582 worker=  5.024 agg= 0.541 PASS
+  base 4x8-24 rc=0 wall=  4.348 worker=  3.780 agg= 0.553 PASS
+  cand 4x8-24 rc=0 wall=  4.294 worker=  3.713 agg= 0.563 PASS
+### rep 3
+  cand 1x8-24 rc=0 wall=  5.664 worker=  5.108 agg= 0.540 PASS
+  base 1x8-24 rc=0 wall=  5.659 worker=  5.097 agg= 0.547 PASS
+  cand 4x8-24 rc=0 wall=  4.322 worker=  3.744 agg= 0.561 PASS
+  base 4x8-24 rc=0 wall=  4.289 worker=  3.714 agg= 0.556 PASS
+### rep 4
+  base 1x8-24 rc=0 wall=  5.664 worker=  5.104 agg= 0.545 PASS
+  cand 1x8-24 rc=0 wall=  5.554 worker=  4.994 agg= 0.544 PASS
+  base 4x8-24 rc=0 wall=  4.314 worker=  3.742 agg= 0.556 PASS
+  cand 4x8-24 rc=0 wall=  4.347 worker=  3.772 agg= 0.559 PASS
+### rep 5
+  cand 1x8-24 rc=0 wall=  5.590 worker=  5.015 agg= 0.559 PASS
+  base 1x8-24 rc=0 wall=  5.646 worker=  5.085 agg= 0.544 PASS
+  cand 4x8-24 rc=0 wall=  4.249 worker=  3.670 agg= 0.562 PASS
+  base 4x8-24 rc=0 wall=  4.314 worker=  3.741 agg= 0.558 PASS
+### rep 6
+  base 1x8-24 rc=0 wall=  5.768 worker=  5.202 agg= 0.547 PASS
+  cand 1x8-24 rc=0 wall=  5.572 worker=  5.015 agg= 0.540 PASS
+  base 4x8-24 rc=0 wall=  4.317 worker=  3.745 agg= 0.557 PASS
+  cand 4x8-24 rc=0 wall=  4.238 worker=  3.653 agg= 0.567 PASS
+### rep 7
+  cand 1x8-24 rc=0 wall=  5.618 worker=  5.054 agg= 0.547 PASS
+  base 1x8-24 rc=0 wall=  5.650 worker=  5.089 agg= 0.546 PASS
+  cand 4x8-24 rc=0 wall=  4.258 worker=  3.679 agg= 0.562 PASS
+  base 4x8-24 rc=0 wall=  4.390 worker=  3.811 agg= 0.563 PASS
+### rep 8
+  base 1x8-24 rc=0 wall=  5.742 worker=  5.160 agg= 0.568 PASS
+  cand 1x8-24 rc=0 wall=  5.577 worker=  5.018 agg= 0.545 PASS
+  base 4x8-24 rc=0 wall=  4.392 worker=  3.816 agg= 0.560 PASS
+  cand 4x8-24 rc=0 wall=  4.126 worker=  3.538 agg= 0.569 PASS
+### rep 9
+  cand 1x8-24 rc=0 wall=  5.711 worker=  5.150 agg= 0.544 PASS
+  base 1x8-24 rc=0 wall=  5.673 worker=  5.116 agg= 0.543 PASS
+  cand 4x8-24 rc=0 wall=  4.245 worker=  3.669 agg= 0.559 PASS
+  base 4x8-24 rc=0 wall=  4.329 worker=  3.759 agg= 0.554 PASS
+### rep 10
+  base 1x8-24 rc=0 wall=  5.755 worker=  5.193 agg= 0.548 PASS
+  cand 1x8-24 rc=0 wall=  5.590 worker=  5.029 agg= 0.545 PASS
+  base 4x8-24 rc=0 wall=  4.367 worker=  3.787 agg= 0.564 PASS
+  cand 4x8-24 rc=0 wall=  4.376 worker=  3.799 agg= 0.559 PASS
+### rep 11
+  cand 1x8-24 rc=0 wall=  5.662 worker=  5.083 agg= 0.562 PASS
+  base 1x8-24 rc=0 wall=  5.649 worker=  5.085 agg= 0.550 PASS
+  cand 4x8-24 rc=0 wall=  4.255 worker=  3.681 agg= 0.555 PASS
+  base 4x8-24 rc=0 wall=  4.265 worker=  3.691 agg= 0.559 PASS
+
+cfg       base_med  cand_med    saving      pct  pairs cand<base
+1x8-24       5.669     5.597    +0.072     1.3%  8/12  p=0.3877  median paired diff +0.083
+4x8-24       4.337     4.256    +0.081     1.9%  9/12  p=0.1460  median paired diff +0.072
+
+runs=48 all_pass=True
+ALLDONE
+=== PRODUCTS (kept 1x8 warm-up trees) ===
+  File "/home/vol05/scarf1415/mc-pinreg-20261016/src-cand/docs/perf_integration/identity/cmp_trees.py", line 26
+    print(f"{("IDENTICAL" if n_mrc else "NO-MRC") if not bad else "DIFFERENT"} mrc={n_mrc} other={n_other} pdf_inventoried={n_pdf} files={len(A)}/{len(B)}")
+               ^
+SyntaxError: f-string: unmatched '('
+BENCH_DONE

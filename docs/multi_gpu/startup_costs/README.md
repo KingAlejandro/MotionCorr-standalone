@@ -60,8 +60,8 @@ input STAR, so host-side setup does not overlap driver and context setup.
 | Lever | Estimate | Status |
 |---|---|---|
 | Skip the workers' discarded `logfile.pdf` | 0.14 s (4GPUs) / ~0.19 s (SCARF) on the slowest worker's tail | done: `--skip_report_pdf`, below |
-| Create the context on a background thread while host setup runs | ~150-250 ms | not started |
-| Hugepage `mmap` + `cudaHostRegister` for the nvCOMP pinned stage | ~130 ms on 4GPUs; less on SCARF (THP `always`) | not started |
+| Create the context on a background thread while host setup runs | ~150-250 ms | measured, not merged (#53): about 2% with one worker, nothing with four; branch `perf/cuda-warmup-thread`, [`evidence/warmup/`](evidence/warmup/README.md) |
+| Hugepage `mmap` + `cudaHostRegister` for the nvCOMP pinned stage | ~130 ms on 4GPUs; less on SCARF (THP `always`) | parked: pinning 86 → 15 ms on SCARF, but the SCARF dataset A/B did not resolve; [`pinned_stage_register.md`](pinned_stage_register.md) |
 | Driver persistence mode | ~50 ms on `cuInit` | needs an administrator |
 | Lazy module loading, skipping exit teardown, MPS, one process for all GPUs | none | rejected; one-process numbers in #175 |
 

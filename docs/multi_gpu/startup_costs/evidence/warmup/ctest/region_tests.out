@@ -1,0 +1,36 @@
+region start 2026-10-15T00:03:17+00:00 load=14.43 15.56 14.23
+main cuda: Total Tests: 84
+main cpu: Total Tests: 52
+c3 cuda cmake rc=0
+c3 cuda build rc=0 2026-10-15T00:05:43+00:00
+c3 cuda: Total Tests: 94
+c3 cuda ctest rc=8
+98% tests passed, 2 tests failed out of 94
+
+Label Time Summary:
+cuda        =  76.02 sec*proc (42 tests)
+hardware    =  75.51 sec*proc (39 tests)
+
+Total Test time (real) = 368.00 sec
+
+The following tests FAILED:
+	 46 - CiFailClosedControls (Failed)
+	 48 - MultiGpuScheduling (Failed)
+Errors while running CTest
+c3 cpu cmake rc=0
+c3 cpu build rc=0 2026-10-15T00:12:47+00:00
+c3 cpu: Total Tests: 52
+c3 cpu ctest rc=8
+FAILED (failures=1)
+
+51/52 Test #48: MultiGpuScheduling .................   Passed  111.25 sec
+52/52 Test #20: ProfilingKit .......................   Passed  142.00 sec
+
+98% tests passed, 1 tests failed out of 52
+
+Total Test time (real) = 142.87 sec
+
+The following tests FAILED:
+	 46 - CiFailClosedControls (Failed)
+Errors while running CTest
+region end 2026-10-15T00:15:10+00:00

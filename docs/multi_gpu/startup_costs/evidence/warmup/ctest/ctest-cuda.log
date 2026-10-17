@@ -1,0 +1,296 @@
+Test project /home/alex/mc-small/wu/b-full-cuda
+      Start  1: PatchRetryState
+ 1/94 Test  #1: PatchRetryState ......................................   Passed    0.05 sec
+      Start  2: RunnerInterpolateRecenter
+ 2/94 Test  #2: RunnerInterpolateRecenter ............................   Passed    0.02 sec
+      Start  3: MrcHeaderStats
+ 3/94 Test  #3: MrcHeaderStats .......................................   Passed    0.02 sec
+      Start  4: PdfConcat
+ 4/94 Test  #4: PdfConcat ............................................   Passed    0.08 sec
+      Start  5: DefectParser
+ 5/94 Test  #5: DefectParser .........................................   Passed    0.03 sec
+      Start  6: DeflateLayout
+ 6/94 Test  #6: DeflateLayout ........................................   Passed    0.01 sec
+      Start  7: Adler32Arithmetic
+ 7/94 Test  #7: Adler32Arithmetic ....................................   Passed    0.84 sec
+      Start  8: Adler32KernelHost
+ 8/94 Test  #8: Adler32KernelHost ....................................   Passed    0.01 sec
+      Start  9: StageProfileThreads
+ 9/94 Test  #9: StageProfileThreads ..................................   Passed    0.67 sec
+      Start 10: FrameBufferPool
+10/94 Test #10: FrameBufferPool ......................................   Passed    0.05 sec
+      Start 11: ScratchArena
+11/94 Test #11: ScratchArena .........................................   Passed    0.00 sec
+      Start 12: ReaderPool
+12/94 Test #12: ReaderPool ...........................................   Passed    0.58 sec
+      Start 13: ReaderPoolMutant_spin
+13/94 Test #13: ReaderPoolMutant_spin ................................   Passed    0.57 sec
+      Start 14: ReaderPoolMutant_nowait
+14/94 Test #14: ReaderPoolMutant_nowait ..............................   Passed    0.03 sec
+      Start 15: DefectNeighbours
+15/94 Test #15: DefectNeighbours .....................................   Passed    0.01 sec
+      Start 16: DefectMergeMutant_append_only
+16/94 Test #16: DefectMergeMutant_append_only ........................   Passed    0.01 sec
+      Start 17: DefectMergeMutant_no_order_check
+17/94 Test #17: DefectMergeMutant_no_order_check .....................   Passed    0.01 sec
+      Start 18: DefectMergeMutant_swap_xy
+18/94 Test #18: DefectMergeMutant_swap_xy ............................   Passed    0.01 sec
+      Start 19: NvcompAcceptanceDiagnostics
+19/94 Test #19: NvcompAcceptanceDiagnostics ..........................   Passed    0.16 sec
+      Start 20: ProfilingKit
+20/94 Test #20: ProfilingKit .........................................   Passed  123.54 sec
+      Start 21: GainCacheOwnership
+21/94 Test #21: GainCacheOwnership ...................................   Passed    5.25 sec
+      Start 22: NvcompGuards
+22/94 Test #22: NvcompGuards .........................................   Passed    0.06 sec
+      Start 23: SyntheticRegression
+23/94 Test #23: SyntheticRegression ..................................   Passed    1.17 sec
+      Start 24: HotPixelRngDeterminism
+24/94 Test #24: HotPixelRngDeterminism ...............................   Passed    0.88 sec
+      Start 25: RunnerExposure
+25/94 Test #25: RunnerExposure .......................................   Passed    0.76 sec
+      Start 26: Runner_failure
+26/94 Test #26: Runner_failure .......................................   Passed    0.21 sec
+      Start 27: Runner_invalid
+27/94 Test #27: Runner_invalid .......................................   Passed    0.21 sec
+      Start 28: Runner_resume
+28/94 Test #28: Runner_resume ........................................   Passed    3.09 sec
+      Start 29: Runner_tomography
+29/94 Test #29: Runner_tomography ....................................   Passed    0.60 sec
+      Start 30: RunnerLateBin
+30/94 Test #30: RunnerLateBin ........................................   Passed    1.02 sec
+      Start 31: RunnerExportedUnits
+31/94 Test #31: RunnerExportedUnits ..................................   Passed    0.17 sec
+      Start 32: GainCache
+32/94 Test #32: GainCache ............................................   Passed    1.85 sec
+      Start 33: TiffRead
+33/94 Test #33: TiffRead .............................................   Passed    1.10 sec
+      Start 34: DamagedMovie
+34/94 Test #34: DamagedMovie .........................................   Passed    6.13 sec
+      Start 35: CompressedMovieSequence
+35/94 Test #35: CompressedMovieSequence ..............................   Passed    0.99 sec
+      Start 36: GlobalIfftElision
+36/94 Test #36: GlobalIfftElision ....................................   Passed    1.99 sec
+      Start 37: HostBufferReuse
+37/94 Test #37: HostBufferReuse ......................................   Passed    4.55 sec
+      Start 38: StageProfile
+38/94 Test #38: StageProfile .........................................   Passed    2.71 sec
+      Start 39: RunnerModelParser
+39/94 Test #39: RunnerModelParser ....................................   Passed    0.29 sec
+      Start 40: MicrographModelBounds
+40/94 Test #40: MicrographModelBounds ................................   Passed    2.54 sec
+      Start 41: RunnerInterpolateShifts
+41/94 Test #41: RunnerInterpolateShifts ..............................   Passed    0.80 sec
+      Start 42: WriteFaults
+42/94 Test #42: WriteFaults ..........................................   Passed    0.76 sec
+      Start 43: WriteFaultsSync
+43/94 Test #43: WriteFaultsSync ......................................   Passed    1.12 sec
+      Start 44: WriteFaultsMultiProduct
+44/94 Test #44: WriteFaultsMultiProduct ..............................   Passed    0.86 sec
+      Start 45: OutputStageFaults
+45/94 Test #45: OutputStageFaults ....................................   Passed    0.69 sec
+      Start 46: CiFailClosedControls
+46/94 Test #46: CiFailClosedControls .................................***Failed   21.29 sec
+.....F..
+======================================================================
+FAIL: test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alex/mc-small/wu/src-c4/tools/test_ci_fail_closed.py", line 460, in test_6_trusted_git_lookup_and_tampered_disk_manifest
+    self.assertIn("Failed to load trusted manifest from git ref", res_invalid_ref.stderr)
+AssertionError: 'Failed to load trusted manifest from git ref' not found in "ERROR: Cannot load trusted manifest: Cannot resolve git ref 'nonexistent_ref_12345' in source archive without git metadata\n"
+
+----------------------------------------------------------------------
+Ran 8 tests in 21.185s
+
+FAILED (failures=1)
+
+      Start 47: CudaValidationParser
+47/94 Test #47: CudaValidationParser .................................   Passed    0.08 sec
+      Start 48: MultiGpuScheduling
+48/94 Test #48: MultiGpuScheduling ...................................***Failed  101.50 sec
+ok   case_roundtrip_and_metadata
+ok   case_empty_required_products_refused
+ok   case_empty_shard_rejected
+ok   case_output_name_collision
+ok   case_duplicate_movie_in_input
+ok   case_collapsed_spaces_are_a_collision
+ok   case_decorated_output_collision
+ok   case_manifest_digest_binds_parsed_snapshot
+ok   case_real_output_suffixes_attributed
+ok   case_dotted_shift_plot_root
+ok   case_aggregate_name_shadowing
+ok   case_star_parser_refusals
+ok   case_clean_merge
+ok   case_lost_output
+ok   case_duplicate_and_misrouted_output
+ok   case_unassigned_movie_output
+ok   case_failed_worker_blocks_merge
+ok   case_missing_status_blocks_merge
+ok   case_failed_device_witness_blocks_merge
+ok   case_missing_worker_directory
+ok   case_link_staging_with_aggregate
+ok   case_link_refusal_falls_back_to_copy
+ok   case_launcher_exit_digests_are_reused
+ok   case_change_after_worker_exit_detected
+ok   case_preserved_aggregate_change_after_exit_detected
+ok   case_exit_digest_records_validated
+ok   case_timestamp_barrier_failure_fails_closed
+ok   case_output_digest_primitives
+ok   case_aggregate_same_byte_rewrite_detected
+ok   case_aggregate_may_not_add_per_movie_products
+ok   case_output_root_matches_withoutextension
+ok   case_reserved_name_collision
+ok   case_short_row_refused
+ok   case_killed_worker_then_nonprefix_resume
+ok   case_aggregate_star_canonical_order
+ok   case_aggregate_star_must_match_partition_content
+ok   case_aggregate_args_may_not_override_owned_paths
+ok   case_aggregate_wrong_order_rejected
+ok   case_failed_staging_never_reprocesses
+ok   case_merge_out_is_resolved
+ok   case_launcher_refuses_cpu_gpu_confusion
+ok   case_per_worker_cpu_masks
+ok   case_cpu_budget_gate
+ok   case_phase_timeline_recorded
+      powered marker receipt {"pid": 2867054, "birth": 747940205, "MRC_creation_observed_s": 1792022955.583568, "image_closed_s": 1792022955.586914, "STAR_marker_observed_s": 1792022955.587943, "scope": "actual delayed open-image child; no native GPU/timing claim"}
+ok   case_completed_image_marker_not_mrc_creation
+ok   case_per_worker_args_and_cpu_accounting
+ok   case_worker_joint_report_suppressed
+ok   case_devices_with_no_witness_refused
+ok   case_normalized_root_collision_refused
+ok   case_interior_double_slash_is_the_same_product
+ok   case_duplicate_coverage_and_zero_pairs_rejected
+ok   case_absolute_movie_roots_attributed
+ok   case_gpu_witness_logic
+ok   case_sampler_lifecycle
+ok   case_stale_status_is_refused
+ok   case_duplicate_movie_name_refused
+ok   case_worker_args_may_not_override_launcher_options
+ok   case_aggregate_may_not_rewrite_staged_products
+ok   case_launcher_verdict_follows_the_device_witness
+NOT CLAIMED (forced-fallback): bounded scan; this launch used the verified-proc-ppid inventory {'pids': 21, 'refresh': 10, 'modes': ['verified-proc-ppid']}
+ok   case_ownership_cost_is_independent_of_host_processes
+ok   case_launcher_signal_reaps_owned_process_group
+ok   case_launcher_signal_reaches_cooperative_worker
+ok   case_launcher_signal_during_spawn_keeps_child_owned
+FAIL case_per_worker_timing_and_rss_recorded: final-worker tail 0.23s is ~0 although the shards differ by one movie at 0.4s each; the launcher is not stamping each child's own exit
+ok   case_aggregate_staging_namespace_reserved
+ok   case_tomography_partition
+ok   case_bench_warmups_hold_arm_locks
+ok   case_bench_arm_tools_and_phase_pairs
+ok   case_dataset_endpoint
+ok   case_owned_tree_rss
+ok   case_pid_birth_cleanup
+ok   case_device_list_rejected
+ok   aggregate_control
+ok   tomography_endpoint
+
+73/74 passed
+
+      Start 49: OutputTreeComparator
+49/94 Test #49: OutputTreeComparator .................................   Passed    1.03 sec
+      Start 50: JointStarPublication
+50/94 Test #50: JointStarPublication .................................   Passed    1.11 sec
+      Start 51: ImageWriteFaults
+51/94 Test #51: ImageWriteFaults .....................................   Passed    0.04 sec
+      Start 52: NativeMovieStaging
+52/94 Test #52: NativeMovieStaging ...................................   Passed    0.37 sec
+      Start 53: RunnerInterpolateShiftsCuda
+53/94 Test #53: RunnerInterpolateShiftsCuda ..........................   Passed    1.64 sec
+      Start 54: StageProfileDeviceTiming
+54/94 Test #54: StageProfileDeviceTiming .............................   Passed    3.11 sec
+      Start 55: CudaU16StagingEquivalence
+55/94 Test #55: CudaU16StagingEquivalence ............................   Passed    0.41 sec
+      Start 56: CudaWrapperUploadFailure
+56/94 Test #56: CudaWrapperUploadFailure .............................   Passed    0.40 sec
+      Start 57: CudaFaultMatrix
+57/94 Test #57: CudaFaultMatrix ......................................   Passed    8.24 sec
+      Start 58: CudaPatchWorkspace
+58/94 Test #58: CudaPatchWorkspace ...................................   Passed    0.58 sec
+      Start 59: CudaPatchBatch
+59/94 Test #59: CudaPatchBatch .......................................   Passed    2.13 sec
+      Start 60: CudaVramAlias
+60/94 Test #60: CudaVramAlias ........................................   Passed    0.91 sec
+      Start 61: CudaPatchBatchMutant_shift_retired
+61/94 Test #61: CudaPatchBatchMutant_shift_retired ...................   Passed    2.28 sec
+      Start 62: CudaPatchBatchMutant_never_retire
+62/94 Test #62: CudaPatchBatchMutant_never_retire ....................   Passed    2.27 sec
+      Start 63: CudaPatchBatchMutant_extract_no_remap
+63/94 Test #63: CudaPatchBatchMutant_extract_no_remap ................   Passed    2.25 sec
+      Start 64: CudaPatchBatchMutant_scale_divide
+64/94 Test #64: CudaPatchBatchMutant_scale_divide ....................   Passed    2.28 sec
+      Start 65: CudaPatchBatchMutant_shift_wrong_half
+65/94 Test #65: CudaPatchBatchMutant_shift_wrong_half ................   Passed    2.27 sec
+      Start 66: CudaPatchBatchMutant_perpatch_wrong_half
+66/94 Test #66: CudaPatchBatchMutant_perpatch_wrong_half .............   Passed    2.12 sec
+      Start 67: CudaVramAliasMutant_arena_overlap
+67/94 Test #67: CudaVramAliasMutant_arena_overlap ....................   Passed    0.87 sec
+      Start 68: CudaVramAliasMutant_arena_work_over_buffers
+68/94 Test #68: CudaVramAliasMutant_arena_work_over_buffers ..........   Passed    0.88 sec
+      Start 69: CudaVramAliasMutant_refusal_off
+69/94 Test #69: CudaVramAliasMutant_refusal_off ......................   Passed    0.88 sec
+      Start 70: CudaVramAliasMutant_dw_scratch_over_fourier
+70/94 Test #70: CudaVramAliasMutant_dw_scratch_over_fourier ..........   Passed    0.87 sec
+      Start 71: CudaDeviceGainPool
+71/94 Test #71: CudaDeviceGainPool ...................................   Passed    0.45 sec
+      Start 72: CudaDeviceGainCleanupFatal
+72/94 Test #72: CudaDeviceGainCleanupFatal ...........................   Passed    0.42 sec
+      Start 73: CudaGeometryRetention
+73/94 Test #73: CudaGeometryRetention ................................   Passed    0.42 sec
+      Start 74: CudaGeometryRetentionMutant_no_take
+74/94 Test #74: CudaGeometryRetentionMutant_no_take ..................   Passed    0.44 sec
+      Start 75: CudaGeometryRetentionMutant_return_failed
+75/94 Test #75: CudaGeometryRetentionMutant_return_failed ............   Passed    0.43 sec
+      Start 76: CudaGeometryRetentionMutant_keep_taken_alias
+76/94 Test #76: CudaGeometryRetentionMutant_keep_taken_alias .........   Passed    0.41 sec
+      Start 77: CudaDoseNormalization
+77/94 Test #77: CudaDoseNormalization ................................   Passed    2.04 sec
+      Start 78: CudaDoseSessionPlan
+78/94 Test #78: CudaDoseSessionPlan ..................................   Passed    0.43 sec
+      Start 79: CudaPreprocessingFailurePaths
+79/94 Test #79: CudaPreprocessingFailurePaths ........................   Passed    5.51 sec
+      Start 80: CudaContextWarmup
+80/94 Test #80: CudaContextWarmup ....................................   Passed    0.34 sec
+      Start 81: CudaContextWarmupMutant_no_join
+81/94 Test #81: CudaContextWarmupMutant_no_join ......................   Passed    1.33 sec
+      Start 82: CudaContextWarmupMutant_swallow_error
+82/94 Test #82: CudaContextWarmupMutant_swallow_error ................   Passed    0.33 sec
+      Start 83: CudaPinnedStage
+83/94 Test #83: CudaPinnedStage ......................................   Passed    0.17 sec
+      Start 84: CudaPinnedStageMutant_double_free
+84/94 Test #84: CudaPinnedStageMutant_double_free ....................   Passed    0.17 sec
+      Start 85: CudaPinnedStageMutant_leak_after_unpin
+85/94 Test #85: CudaPinnedStageMutant_leak_after_unpin ...............   Passed    0.17 sec
+      Start 86: CudaPinnedStageMutant_leak_on_refusal
+86/94 Test #86: CudaPinnedStageMutant_leak_on_refusal ................   Passed    0.17 sec
+      Start 87: CudaWarmupFailurePaths
+87/94 Test #87: CudaWarmupFailurePaths ...............................   Passed    5.69 sec
+      Start 88: CudaWarmupFailurePaths_skip_cuda_on_warmup_failure
+88/94 Test #88: CudaWarmupFailurePaths_skip_cuda_on_warmup_failure ...   Passed    2.55 sec
+      Start 89: CudaWarmupFailurePaths_no_join
+89/94 Test #89: CudaWarmupFailurePaths_no_join .......................   Passed    5.52 sec
+      Start 90: CudaAdler32
+90/94 Test #90: CudaAdler32 ..........................................   Passed    1.40 sec
+      Start 91: CudaNvcompAcceptanceFailures
+91/94 Test #91: CudaNvcompAcceptanceFailures .........................   Passed    5.95 sec
+      Start 92: CudaNvcompReconstructionFailures
+92/94 Test #92: CudaNvcompReconstructionFailures .....................   Passed    4.00 sec
+      Start 93: CudaDoseWeightAlias
+93/94 Test #93: CudaDoseWeightAlias ..................................   Passed    3.31 sec
+      Start 94: CudaErrorClass
+94/94 Test #94: CudaErrorClass .......................................   Passed    0.00 sec
+
+98% tests passed, 2 tests failed out of 94
+
+Label Time Summary:
+cuda        =  76.02 sec*proc (42 tests)
+hardware    =  75.51 sec*proc (39 tests)
+
+Total Test time (real) = 368.00 sec
+
+The following tests FAILED:
+	 46 - CiFailClosedControls (Failed)
+	 48 - MultiGpuScheduling (Failed)
+Errors while running CTest

@@ -128,6 +128,12 @@ Device modes: **fail** (default; any failed fraction rejects the movie) and **sk
 6. **Coverage still UNRUN:** a native run of 65000/65002 on real data (only synthetic files), 2048² detectors (synthetic only), upsampling 3, legacy non-TIFF EER, multi-strip fractions on real data, and the whole-application effect of the saved upload and expansion.
 7. **Headroom, not required:** the decode kernel is latency-bound at 0.17–0.32 s per movie; splitting a fraction across a warp, or overlapping chunk decode with later reads, would cut it, but the saving already clears the bar by a wide margin.
 
+## Addendum: host findings against `renderEER.cpp:416–555` (coordinator request)
+
+The three host weaknesses with ASan or release evidence all sit in the decode loops of that range: the unbounded read (`:436`, 7+4 loop starting `:427`) and the electron-vector write (`:447`, vectors sized at `:415–419`). The 7+2 loop (`:471`, same `while (true)` with no strip limit, writes at `:494`/`:507`) and the 8+4 loop (`:520–555`, limited by `pos_limit`, writes at `:542`/`:552`) have the same structure by inspection, but I exercised malformed input on the host only with 65001 data (the corpus encoding); 65000 and 65002 were run on the host only with valid synthetic files. The device decoder covers all three layouts with the same bounds check, memcheck-clean on valid synthetic files of each; malformed 65000/65002 input on the device is UNRUN.
+
+State at 2026-10-17: all campaigns on the final binary finished (`evidence/final/final.done`; exactness 18/18, malformed and skip semantics as above, default timing series). No jobs are running and the lane locks are free.
+
 ## Limitations
 
 - One movie per family, one GPU (A100-80GB), one node and CPU mask; page cache warm; no cold-disk numbers (both arms read the same bytes).

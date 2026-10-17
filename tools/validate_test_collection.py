@@ -63,6 +63,12 @@ DEFAULT_REQUIRED_TESTS = [
     # collected; the CUDA-only CudaErrorClass is not listed here, matching
     # the existing exclusion of CudaWrapperUploadFailure.
     "PatchRetryState",
+    # Local patch phase updates are cropped to the CCF support and the final
+    # update is skipped (#183). CpuPatchPhaseWindow compares the retained window
+    # bit-for-bit with the frozen full-spectrum shift and local alignPatch with
+    # global alignPatch; no product comparator sees a wrongly cropped window
+    # unless the dataset happens to expose it.
+    "CpuPatchPhaseWindow",
     # Issue #85 lane C: each arm's MRC/STAR inventory and structure is checked
     # independently before pairwise image equality is considered.
     "OutputTreeComparator",

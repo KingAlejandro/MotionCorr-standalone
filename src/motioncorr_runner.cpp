@@ -4797,17 +4797,25 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 //			std::cout << "Shift for Frame " << iframe << ": delta_x = " << cur_xshifts[iframe] << " delta_y = " << cur_yshifts[iframe] << std::endl;
 		}
 
-		// Apply shifts
-		// Since the image is not necessarily square, we cannot use the method in fftw.cpp
-		RCTIC(TIMING_FOURIER_SHIFT);
-		#pragma omp parallel for num_threads(n_threads)
-		for (int iframe = 1; iframe < n_frames; iframe++) {
-			shiftNonSquareImageInFourierTransform(Fframes[iframe], -cur_xshifts[iframe] / pnx, -cur_yshifts[iframe] / pny);
+		const RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
+		// Local spectra are scratch: no subsequent read needs the last update.
+		// Global reconstruction still needs every update, including the last.
+		if (is_global || (!(rmsd < tolerance) && iter < max_iter)) {
+			// Apply shifts
+			// Since the image is not necessarily square, we cannot use the method in fftw.cpp
+			RCTIC(TIMING_FOURIER_SHIFT);
+			#pragma omp parallel for num_threads(n_threads)
+			for (int iframe = 1; iframe < n_frames; iframe++) {
+				// Only the CCF window is read again for local patches. Their spectra
+				// are discarded by the caller after alignment; global spectra remain
+				// full because reconstruction consumes every frequency afterwards.
+				shiftNonSquareImageInFourierTransform(Fframes[iframe], -cur_xshifts[iframe] / pnx, -cur_yshifts[iframe] / pny,
+				                                     is_global ? 0 : ccf_nfx, is_global ? 0 : ccf_nfy);
+			}
+			RCTOC(TIMING_FOURIER_SHIFT);
 		}
-		RCTOC(TIMING_FOURIER_SHIFT);
 
 		// Test convergence
-		RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
 		logfile << " Iteration " << iter << ": RMSD = " << rmsd << " px" << std::endl;
 
 		if (rmsd < tolerance) {
@@ -4889,27 +4897,31 @@ void MotioncorrRunner::doseWeighting(std::vector<MultidimArray<fComplex> > &Ffra
 }
 
 // shiftx, shifty is relative to the (real space) image size
-void MotioncorrRunner::shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty) {
+void MotioncorrRunner::shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty, int window_nfx, int window_nfy) {
 	const int nfx = XSIZE(frame), nfy = YSIZE(frame);
 	const int nfy_half = nfy / 2;
 	const RFLOAT twoPI = 2 * PI;
+	if (window_nfx == 0) window_nfx = nfx;
+	if (window_nfy == 0) window_nfy = nfy;
+	const int window_nfy_half = window_nfy / 2;
 
 // Reduce calls to SINCOS from nfx * nfy to nfx + nfy
 #define USE_TABLE
 #ifdef USE_TABLE
-	std::vector<RFLOAT> sinx(nfx), cosx(nfx), siny(nfy), cosy(nfy);
-	for (int y = 0; y < nfy; y++) {
+	std::vector<RFLOAT> sinx(window_nfx), cosx(window_nfx), siny(window_nfy), cosy(window_nfy);
+	for (int wy = 0; wy < window_nfy; wy++) {
+		const int y = wy > window_nfy_half ? wy - window_nfy + nfy : wy;
 		int ly = y;
 		if (y > nfy_half) ly = y - nfy;
 
 		const RFLOAT phase_y = twoPI * ly * shifty;
 		#ifdef RELION_SINGLE_PRECISION
-		SINCOSF(phase_y, &siny[y], &cosy[y]);
+		SINCOSF(phase_y, &siny[wy], &cosy[wy]);
 		#else
-		SINCOS(phase_y, &siny[y], &cosy[y]);
+		SINCOS(phase_y, &siny[wy], &cosy[wy]);
 		#endif
 	}
-	for (int x = 0; x < nfx; x++) {
+	for (int x = 0; x < window_nfx; x++) {
 		const RFLOAT phase_x = twoPI * x * shiftx;
 		#ifdef RELION_SINGLE_PRECISION
 		SINCOSF(phase_x, &sinx[x], &cosx[x]);
@@ -4919,16 +4931,17 @@ void MotioncorrRunner::shiftNonSquareImageInFourierTransform(MultidimArray<fComp
 	}
 #endif
 
-	for (int y = 0; y < nfy; y++) {
+	for (int wy = 0; wy < window_nfy; wy++) {
+		const int y = wy > window_nfy_half ? wy - window_nfy + nfy : wy;
 #ifndef USE_TABLE
 		int ly = y;
 		if (y > nfy_half) ly = y - nfy;
 #endif
-		for (int x = 0; x < nfx; x++) {
+		for (int x = 0; x < window_nfx; x++) {
 			RFLOAT a, b, c, d, ac, bd, ab_cd;
 #ifdef USE_TABLE
-			b = sinx[x] * cosy[y] + cosx[x] * siny[y];
-			a = cosx[x] * cosy[y] - sinx[x] * siny[y];
+			b = sinx[x] * cosy[wy] + cosx[x] * siny[wy];
+			a = cosx[x] * cosy[wy] - sinx[x] * siny[wy];
 #else
 			RFLOAT phase_shift = twoPI * (x * shiftx + ly * shifty);
 			#ifdef RELION_SINGLE_PRECISION

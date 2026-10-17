@@ -1,0 +1,57 @@
+{
+  "input_star": "/workspace/scratch/28038873ca11/throughput-generated/generated4.star",
+  "input_sha256": "d151522de8a0adbdc50cd2d0ae5a85dc067c264a5b18aca5ff29d965abb7945b",
+  "movie_block": "movies",
+  "labels": [
+    "rlnMicrographMovieName",
+    "rlnOpticsGroup"
+  ],
+  "n_movies": 4,
+  "n_shards": 2,
+  "partition": "contiguous",
+  "canonical_movies": [
+    "/workspace/scratch/28038873ca11/throughput-generated/generated0.mrcs",
+    "/workspace/scratch/28038873ca11/throughput-generated/generated1.mrcs",
+    "/workspace/scratch/28038873ca11/throughput-generated/generated2.mrcs",
+    "/workspace/scratch/28038873ca11/throughput-generated/generated3.mrcs"
+  ],
+  "canonical_output_roots": [
+    "workspace/scratch/28038873ca11/throughput-generated/generated0",
+    "workspace/scratch/28038873ca11/throughput-generated/generated1",
+    "workspace/scratch/28038873ca11/throughput-generated/generated2",
+    "workspace/scratch/28038873ca11/throughput-generated/generated3"
+  ],
+  "shards": [
+    {
+      "index": 0,
+      "path": "/workspace/scratch/28038873ca11/throughput-synthetic-six/r-1-stream-2x2/shards/shard_2way_0.star",
+      "sha256": "ba40fdb92fc6e1537d777ea4543a015e15835cbf0a885dbee10cf34016a28390",
+      "n_movies": 2,
+      "first_input_row": 0,
+      "movies": [
+        "/workspace/scratch/28038873ca11/throughput-generated/generated0.mrcs",
+        "/workspace/scratch/28038873ca11/throughput-generated/generated1.mrcs"
+      ],
+      "output_roots": [
+        "workspace/scratch/28038873ca11/throughput-generated/generated0",
+        "workspace/scratch/28038873ca11/throughput-generated/generated1"
+      ]
+    },
+    {
+      "index": 1,
+      "path": "/workspace/scratch/28038873ca11/throughput-synthetic-six/r-1-stream-2x2/shards/shard_2way_1.star",
+      "sha256": "ffd8f61259c573356e8a7c43db568b0ffb9fa5896ffa6a098d9f74e5a6605505",
+      "n_movies": 2,
+      "first_input_row": 2,
+      "movies": [
+        "/workspace/scratch/28038873ca11/throughput-generated/generated2.mrcs",
+        "/workspace/scratch/28038873ca11/throughput-generated/generated3.mrcs"
+      ],
+      "output_roots": [
+        "workspace/scratch/28038873ca11/throughput-generated/generated2",
+        "workspace/scratch/28038873ca11/throughput-generated/generated3"
+      ]
+    }
+  ],
+  "input_type": "spa"
+}

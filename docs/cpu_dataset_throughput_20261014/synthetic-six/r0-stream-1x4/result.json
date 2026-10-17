@@ -1,0 +1,193 @@
+{
+  "certified": false,
+  "diagnostic_complete": true,
+  "name": "stream-1x4",
+  "limitation": "self-affinity only before exec; no descendant tree, physical-host isolation or NUMA-placement certification",
+  "binary": "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+  "binary_sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de",
+  "input_star_sha256": "d151522de8a0adbdc50cd2d0ae5a85dc067c264a5b18aca5ff29d965abb7945b",
+  "input_sha256": {
+    "/workspace/scratch/28038873ca11/throughput-generated/generated0.mrcs": "6204e3fd53601a7eb30827969463413758a20e906e6903741686764b424f02bb",
+    "/workspace/scratch/28038873ca11/throughput-generated/generated1.mrcs": "84f42a62d781335893e59c695eb55c05f460b6b5e689ad923bbef9f3e8003fea",
+    "/workspace/scratch/28038873ca11/throughput-generated/generated2.mrcs": "6662338238ee76ee2df94e4933c73b30d583dc1baa4a965c36ae21f056fbfff7",
+    "/workspace/scratch/28038873ca11/throughput-generated/generated3.mrcs": "a7eac62f91cf4dfb7726d98b2ab59825fcf3321ebae405e9dc4ffc0f1c268ce2"
+  },
+  "source": {
+    "published": "5a6812baf69979a8446baae2835188a85336acf3",
+    "local": "c9dbe5957898f5206cb05ea5daaa62ae3358218a",
+    "sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de"
+  },
+  "memory_preflight": {
+    "cgroup_current_bytes": 1222574080,
+    "cgroup_limit_bytes": 8589934592,
+    "budget_bytes": 8589934592,
+    "estimated_worker_peak_bytes": 102400000,
+    "headroom_bytes": 1073741824,
+    "required_bytes": 2398715904,
+    "allowed": true,
+    "method": "current cgroup charge + sum of calibrated worker RSS + headroom; estimate, not simultaneous tree RSS"
+  },
+  "workers": [
+    {
+      "pid": 53,
+      "started": 17654.286014382,
+      "command": [
+        "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+        "--i",
+        "/workspace/scratch/28038873ca11/throughput-synthetic-six-canonical/r0-stream-1x4/shards/shard_1way_0.star",
+        "--o",
+        "/workspace/scratch/28038873ca11/throughput-synthetic-six-canonical/r0-stream-1x4/w0/",
+        "--use_own",
+        "--angpix",
+        "1.0",
+        "--voltage",
+        "300",
+        "--bfactor",
+        "150",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--seed",
+        "1",
+        "--j",
+        "4",
+        "--skip_report_pdf"
+      ],
+      "witness": "/workspace/scratch/28038873ca11/throughput-synthetic-six-canonical/r0-stream-1x4/affinity-w0.json",
+      "log": "/workspace/scratch/28038873ca11/throughput-synthetic-six-canonical/r0-stream-1x4/w0/launcher.console.log",
+      "returncode": 0,
+      "ended": 17656.703528266,
+      "rss_hwm_kib": 54376,
+      "user_s": 4.177274,
+      "sys_s": 0.592368,
+      "minor_faults": 38973,
+      "major_faults": 0,
+      "wall_s": 2.4175138840000727
+    }
+  ],
+  "worker_phase_wall_s": 2.4223349310013873,
+  "all_worker_lifetimes_overlap_s": 2.4175138840000727,
+  "achieved_worker_processes": 1,
+  "concurrency_note": "direct-child lifetimes overlap; this does not observe simultaneous CPU residency or runtime OpenMP team size",
+  "sum_worker_peak_rss_kib": 54376,
+  "memory_note": "sum of individual child ru_maxrss values is not simultaneous dataset-tree RSS; helper peaks are not measured as a tree",
+  "staging_wall_s": 0.06159199299872853,
+  "aggregate": {
+    "pid": 58,
+    "started": 17656.767908912,
+    "command": [
+      "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+      "--i",
+      "/workspace/scratch/28038873ca11/throughput-generated/generated4.star",
+      "--o",
+      "/workspace/scratch/28038873ca11/throughput-synthetic-six-canonical/r0-stream-1x4/merged/",
+      "--use_own",
+      "--angpix",
+      "1.0",
+      "--voltage",
+      "300",
+      "--bfactor",
+      "150",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--save_noDW",
+      "--even_odd_split",
+      "--seed",
+      "1",
+      "--j",
+      "4",
+      "--aggregate_only"
+    ],
+    "witness": "/workspace/scratch/28038873ca11/throughput-synthetic-six-canonical/r0-stream-1x4/affinity-aggregate.json",
+    "log": "/workspace/scratch/28038873ca11/throughput-synthetic-six-canonical/r0-stream-1x4/aggregate.log",
+    "returncode": 0,
+    "ended": 17657.535881636,
+    "rss_hwm_kib": 19584,
+    "user_s": 0.595078,
+    "sys_s": 0.15881399999999998,
+    "minor_faults": 19060,
+    "major_faults": 0,
+    "wall_s": 0.7679727239992644
+  },
+  "dataset_wall_s": 3.25464414200178,
+  "endpoint": "partition + concurrent workers + checked staging + full aggregate STAR/report publication; postpublication verification excluded",
+  "n_movies": 4,
+  "movies_per_s": 1.2290130120154354,
+  "staged_sha256": {
+    "workspace/scratch/28038873ca11/throughput-generated/generated0.log": "33df83027b04c1d838b2484abcaa7941850617e6f3e09d0a65805b09b3dd1ddc",
+    "workspace/scratch/28038873ca11/throughput-generated/generated0.mrc": "47321acb69f9a12cdb81f1b54e5863e57ef27952f63b24a63bb9cebe9b258eb1",
+    "workspace/scratch/28038873ca11/throughput-generated/generated0.star": "aed6214ce4aae020ed773add0e250eb679c10694d3f1061083b050318356050b",
+    "workspace/scratch/28038873ca11/throughput-generated/generated0_EVN.mrc": "b2731e8b80f8bf8745fa78d8911f9b0b439d806656f0b2c34fd6f13fdc9772f4",
+    "workspace/scratch/28038873ca11/throughput-generated/generated0_ODD.mrc": "3fc043179f54f626bab12df5eab13a9f366f3f7ff182b3272473cc0df5c2bffa",
+    "workspace/scratch/28038873ca11/throughput-generated/generated0_noDW.mrc": "a6402a41b5dced2cb9d9e145c402f04c70c893ebe73a6a465c0271d75fd37875",
+    "workspace/scratch/28038873ca11/throughput-generated/generated0_shifts.eps": "abe3b7a66136cd00f8f6dd3b76af5c60f1ca08bb5de8d9ec7e80bfe6f8a4a342",
+    "workspace/scratch/28038873ca11/throughput-generated/generated1.log": "5d9440c4e28572caa7fb1919af43c898dfe49f21e3f81e9f0199c972fb6cf535",
+    "workspace/scratch/28038873ca11/throughput-generated/generated1.mrc": "1ca9c32d9a78dc763a31d0377b96b521acdbd629aa53e246a869c7efcd9c5b8f",
+    "workspace/scratch/28038873ca11/throughput-generated/generated1.star": "a7dfe2aa7d0af6ed356b80e7171fc040c1bb5d478a111ff83cc15a3cde64ccca",
+    "workspace/scratch/28038873ca11/throughput-generated/generated1_EVN.mrc": "9afbdc372ccc17c4e87fe508abf3fda859e1e43c1e58c44f7c4f08d8ce6cccbf",
+    "workspace/scratch/28038873ca11/throughput-generated/generated1_ODD.mrc": "5763073d285d5682f8a94fcf716bcada9ff0dd9a0488355019186b10dde033f4",
+    "workspace/scratch/28038873ca11/throughput-generated/generated1_noDW.mrc": "686e5e15af6fb0804f557865c39259713fb8780728e487feed257043afcd3624",
+    "workspace/scratch/28038873ca11/throughput-generated/generated1_shifts.eps": "452f8e1a6efbc40a9ab3d768f514c2f38d4b9b2f32e0f4b92e67f077fcb1982f",
+    "workspace/scratch/28038873ca11/throughput-generated/generated2.log": "2534bd1b8486033da772ee59823beb61f07c2a7d7706562121ddcaaa0aef99f6",
+    "workspace/scratch/28038873ca11/throughput-generated/generated2.mrc": "3d05d9dbd5681aaba87e667112654d73404bcd91be66bcf44dc79b73ec4eca4f",
+    "workspace/scratch/28038873ca11/throughput-generated/generated2.star": "67b0cce25f3875c9f8056350a082a914d8f163a301bea7f8784ede31800449e3",
+    "workspace/scratch/28038873ca11/throughput-generated/generated2_EVN.mrc": "e99c8ad0218fa5d8704c78ed0bd45faba0834831be0ef19b00d019556dd315e9",
+    "workspace/scratch/28038873ca11/throughput-generated/generated2_ODD.mrc": "3ebe709c376a8b2bb337b8ba2932b0136c11fc59ba259f4c5f48e08b85c2dd21",
+    "workspace/scratch/28038873ca11/throughput-generated/generated2_noDW.mrc": "e194f7299db5dbeae47c2b32837925b024f3e2d11fae8fa15304612d9418328f",
+    "workspace/scratch/28038873ca11/throughput-generated/generated2_shifts.eps": "bc5446a375e16d81ca2506159b1b28ae9d504876b2445f471bcc768a849057e4",
+    "workspace/scratch/28038873ca11/throughput-generated/generated3.log": "334a5b1782d9ed81f78bda65b3a2aad512a9444ca05ab8b0cfd0f01cd5de0cc6",
+    "workspace/scratch/28038873ca11/throughput-generated/generated3.mrc": "20c36428e6ef171c3f55afa02d278ee8814824fd04a60b70d567761bead4a105",
+    "workspace/scratch/28038873ca11/throughput-generated/generated3.star": "baa8e675cc9ed2ef69acb4ecde84b6dc0b495eea123bfcd232c890fe2db47631",
+    "workspace/scratch/28038873ca11/throughput-generated/generated3_EVN.mrc": "e2d7f7dc3e018b0e846d0bfe679b62da1c6650d3e7482ee872ce613698ad46a6",
+    "workspace/scratch/28038873ca11/throughput-generated/generated3_ODD.mrc": "2d84a7515a7ef750b5b6841ae3f01374a1b0daf94d4084c057f9a5b3726ff767",
+    "workspace/scratch/28038873ca11/throughput-generated/generated3_noDW.mrc": "7f9d531d720a9ebd9c69a39f92909a5e68898aafc981872dd586d202e25d4d07",
+    "workspace/scratch/28038873ca11/throughput-generated/generated3_shifts.eps": "8a5fab2ccc7ec2276ff851b4c804c28362d9c8132c13a85cbf5cdba144043ecc"
+  },
+  "observed_aggregate_scratch_prefix": "/workspace/scratch/28038873ca11/throughput-synthetic-six-canonical/r0-stream-1x4/merged/.aggregate-t650P7",
+  "comparison_view_path_changes": {
+    "batch.pdf.lst": {
+      "raw_sha256": "f9e7651194c4c024a5cfcc1d44dd5221efd3399378cbbede130ba95adf3ee4be",
+      "view_sha256": "4490ccd6a3d53d9b5f1174101b5e063310900a1979e8b2429e89e33d3a39969a"
+    },
+    "corrected_micrographs.star": {
+      "raw_sha256": "41f7e427effdc42928e6cd07f1f80113bfe183e93a1fd3b73064575a1914756b",
+      "view_sha256": "aa55bf79d6d436f962024c72bf9608dbf1a635f434c18f3dac9d3820bdf38151"
+    },
+    "header.pdf.lst": {
+      "raw_sha256": "0ffed878ff69af17f41821ba599b3142595143d8970ab81a61f7b07bbfa75dc9",
+      "view_sha256": "36264b2dc83b4206c1c89534ec936c2a01456d91d391cc558a158fd1e89bef5b"
+    },
+    "logfile.pdf.lst": {
+      "raw_sha256": "809a7cd6af3fe713308f84b705d67aca47fdf66365e8659b7660e699762791fc",
+      "view_sha256": "557178668cee0ea1fbcf0a3f1a0367840048b0887c1fe5da6a0b18f55a654d54"
+    },
+    "workspace/scratch/28038873ca11/throughput-generated/generated0_shifts.eps": {
+      "raw_sha256": "abe3b7a66136cd00f8f6dd3b76af5c60f1ca08bb5de8d9ec7e80bfe6f8a4a342",
+      "view_sha256": "f486724c427de1c917b5a40ed67cbff7a99dacb0a42f3eb12cb3f673b52f6a1d"
+    },
+    "workspace/scratch/28038873ca11/throughput-generated/generated1_shifts.eps": {
+      "raw_sha256": "452f8e1a6efbc40a9ab3d768f514c2f38d4b9b2f32e0f4b92e67f077fcb1982f",
+      "view_sha256": "f8747af3e8719a3127e3092b406d8b381916dd51039b51fb588576b7c22500a8"
+    },
+    "workspace/scratch/28038873ca11/throughput-generated/generated2_shifts.eps": {
+      "raw_sha256": "bc5446a375e16d81ca2506159b1b28ae9d504876b2445f471bcc768a849057e4",
+      "view_sha256": "e7ce232f35dfbfc0bb9b2fef4cfcfb7779af94435471380eac12762f3ae2ee73"
+    },
+    "workspace/scratch/28038873ca11/throughput-generated/generated3_shifts.eps": {
+      "raw_sha256": "8a5fab2ccc7ec2276ff851b4c804c28362d9c8132c13a85cbf5cdba144043ecc",
+      "view_sha256": "38b1ea9a42b6503bfcc95be9dc27c54e0e4d33cd12367f3b641d776f1650401a"
+    }
+  },
+  "observed_until_s": 3.3886537329999555
+}

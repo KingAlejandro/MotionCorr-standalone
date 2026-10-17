@@ -1,0 +1,32 @@
+{
+  "stream-1x4": {
+    "cgroup_current_bytes": 1088077824,
+    "cgroup_limit_bytes": 8589934592,
+    "budget_bytes": 8589934592,
+    "estimated_worker_peak_bytes": 102400000,
+    "headroom_bytes": 1073741824,
+    "required_bytes": 2264219648,
+    "allowed": true,
+    "method": "current cgroup charge + sum of calibrated worker RSS + headroom; estimate, not simultaneous tree RSS"
+  },
+  "stream-2x2": {
+    "cgroup_current_bytes": 1088077824,
+    "cgroup_limit_bytes": 8589934592,
+    "budget_bytes": 8589934592,
+    "estimated_worker_peak_bytes": 204800000,
+    "headroom_bytes": 1073741824,
+    "required_bytes": 2366619648,
+    "allowed": true,
+    "method": "current cgroup charge + sum of calibrated worker RSS + headroom; estimate, not simultaneous tree RSS"
+  },
+  "stream-4x1": {
+    "cgroup_current_bytes": 1088077824,
+    "cgroup_limit_bytes": 8589934592,
+    "budget_bytes": 8589934592,
+    "estimated_worker_peak_bytes": 409600000,
+    "headroom_bytes": 1073741824,
+    "required_bytes": 2571419648,
+    "allowed": true,
+    "method": "current cgroup charge + sum of calibrated worker RSS + headroom; estimate, not simultaneous tree RSS"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "star": "/workspace/scratch/28038873ca11/throughput-inputs/synthetic4.star",
+  "cpu_budget": 4,
+  "memory_budget_bytes": 8589934592,
+  "headroom_bytes": 1073741824,
+  "seed": 1,
+  "warmups": 0,
+  "replicates": 1,
+  "worker_args": [
+    "--use_own",
+    "--angpix",
+    "1.0",
+    "--voltage",
+    "300",
+    "--bfactor",
+    "150",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--save_noDW",
+    "--even_odd_split"
+  ],
+  "required_products": [
+    ".mrc",
+    ".star",
+    "_noDW.mrc",
+    "_EVN.mrc",
+    "_ODD.mrc",
+    "_shifts.eps"
+  ],
+  "input_sha256": {
+    "/workspace/scratch/28038873ca11/throughput-inputs/synthetic0.mrcs": "36e1a91b25a54d958e0ff78be87e55fa9777aebbd36d145d415bbc7837b8c8a1",
+    "/workspace/scratch/28038873ca11/throughput-inputs/synthetic1.mrcs": "36e1a91b25a54d958e0ff78be87e55fa9777aebbd36d145d415bbc7837b8c8a1",
+    "/workspace/scratch/28038873ca11/throughput-inputs/synthetic2.mrcs": "36e1a91b25a54d958e0ff78be87e55fa9777aebbd36d145d415bbc7837b8c8a1",
+    "/workspace/scratch/28038873ca11/throughput-inputs/synthetic3.mrcs": "36e1a91b25a54d958e0ff78be87e55fa9777aebbd36d145d415bbc7837b8c8a1"
+  },
+  "configurations": [
+    {
+      "name": "stream-2x2",
+      "binary": "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+      "worker_rss_kib": 100000,
+      "source": {
+        "published": "5a6812baf69979a8446baae2835188a85336acf3",
+        "local": "c9dbe5957898f5206cb05ea5daaa62ae3358218a",
+        "sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de"
+      },
+      "masks": [
+        "0-1",
+        "2-3"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,229 @@
+{
+  "certified": false,
+  "input": "/workspace/scratch/28038873ca11/throughput-synthetic-six-canonical/results.json",
+  "layouts": {
+    "stream-1x4": {
+      "n_retained": 6,
+      "median_dataset_wall_s": 3.3526681390012527,
+      "dataset_walls_s": [
+        3.25464414200178,
+        2.979638242002693,
+        3.318764560001,
+        3.3865717180015054,
+        3.6098551450013474,
+        3.6682642710002256
+      ],
+      "median_worker_phase_s": 2.4393430615018588,
+      "median_movies_per_s": 1.1932016292411287,
+      "max_sum_individual_worker_rss_kib": 55440
+    },
+    "stream-2x2": {
+      "n_retained": 6,
+      "median_dataset_wall_s": 2.6388596815013443,
+      "dataset_walls_s": [
+        3.1007220259998576,
+        2.224747144999128,
+        2.578910143001849,
+        2.4941615460011235,
+        2.799812009998277,
+        2.6988092200008396
+      ],
+      "median_worker_phase_s": 1.7353016734996345,
+      "median_movies_per_s": 1.5165889717239778,
+      "max_sum_individual_worker_rss_kib": 105156
+    },
+    "stream-4x1": {
+      "n_retained": 6,
+      "median_dataset_wall_s": 2.5263328839992027,
+      "dataset_walls_s": [
+        2.4475805219990434,
+        2.028367253002216,
+        2.605085245999362,
+        2.1865643269993598,
+        2.784508968998125,
+        2.6053647750013624
+      ],
+      "median_worker_phase_s": 1.4988300169989088,
+      "median_movies_per_s": 1.584862679735183,
+      "max_sum_individual_worker_rss_kib": 225096
+    }
+  },
+  "comparisons": {
+    "stream-2x2": {
+      "reference": "stream-1x4",
+      "pairs": [
+        {
+          "a": 3.25464414200178,
+          "b": 3.1007220259998576,
+          "replicate": 0,
+          "order": "AB"
+        },
+        {
+          "a": 2.979638242002693,
+          "b": 2.224747144999128,
+          "replicate": 1,
+          "order": "BA"
+        },
+        {
+          "a": 3.318764560001,
+          "b": 2.578910143001849,
+          "replicate": 2,
+          "order": "AB"
+        },
+        {
+          "a": 3.3865717180015054,
+          "b": 2.4941615460011235,
+          "replicate": 3,
+          "order": "BA"
+        },
+        {
+          "a": 3.6098551450013474,
+          "b": 2.799812009998277,
+          "replicate": 4,
+          "order": "AB"
+        },
+        {
+          "a": 3.6682642710002256,
+          "b": 2.6988092200008396,
+          "replicate": 5,
+          "order": "BA"
+        }
+      ],
+      "descriptive_paired_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -0.1539221160019224,
+          -0.7548910970035649,
+          -0.739854416999151,
+          -0.8924101720003819,
+          -0.8100431350030703,
+          -0.969455050999386
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.7824671160033176,
+        "q1_diff_s": -0.871818412751054,
+        "q3_diff_s": -0.7436135870002545,
+        "min_diff_s": -0.969455050999386,
+        "max_diff_s": -0.1539221160019224,
+        "median_a_s": 3.3526681390012527,
+        "median_b_s": 2.6388596815013443,
+        "relative_median_diff": -0.23338639064837824,
+        "noise_s": 0.11308958118241243,
+        "robust_sd_diff_s": 0.11308958118241243,
+        "ci": {
+          "low_s": -0.969455050999386,
+          "high_s": -0.1539221160019224,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 0,
+          "negative": 6,
+          "ties": 0,
+          "p_two_sided": 0.03125
+        },
+        "resolution_s": 0.4077664674987318,
+        "resolved": true,
+        "verdict": "resolved faster",
+        "reason": "CI of median excludes 0 and |median| exceeds noise",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -0.739854416999151,
+          "median_diff_ba_s": -0.8924101720003819,
+          "second_position_cost_s": 0.07627787750061543,
+          "order_corrected_effect_s": -0.8161322944997664
+        }
+      }
+    },
+    "stream-4x1": {
+      "reference": "stream-1x4",
+      "pairs": [
+        {
+          "a": 3.25464414200178,
+          "b": 2.4475805219990434,
+          "replicate": 0,
+          "order": "AB"
+        },
+        {
+          "a": 2.979638242002693,
+          "b": 2.028367253002216,
+          "replicate": 1,
+          "order": "BA"
+        },
+        {
+          "a": 3.318764560001,
+          "b": 2.605085245999362,
+          "replicate": 2,
+          "order": "AB"
+        },
+        {
+          "a": 3.3865717180015054,
+          "b": 2.1865643269993598,
+          "replicate": 3,
+          "order": "BA"
+        },
+        {
+          "a": 3.6098551450013474,
+          "b": 2.784508968998125,
+          "replicate": 4,
+          "order": "AB"
+        },
+        {
+          "a": 3.6682642710002256,
+          "b": 2.6053647750013624,
+          "replicate": 5,
+          "order": "BA"
+        }
+      ],
+      "descriptive_paired_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -0.8070636200027366,
+          -0.9512709890004771,
+          -0.713679314001638,
+          -1.2000073910021456,
+          -0.8253461760032224,
+          -1.0628994959988631
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.8883085825018497,
+        "q1_diff_s": -1.0349923692492666,
+        "q3_diff_s": -0.811634259002858,
+        "min_diff_s": -1.2000073910021456,
+        "max_diff_s": -0.713679314001638,
+        "median_a_s": 3.3526681390012527,
+        "median_b_s": 2.5263328839992027,
+        "relative_median_diff": -0.26495571457498135,
+        "noise_s": 0.1896511348759286,
+        "robust_sd_diff_s": 0.1896511348759286,
+        "ci": {
+          "low_s": -1.2000073910021456,
+          "high_s": -0.713679314001638,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 0,
+          "negative": 6,
+          "ties": 0,
+          "p_two_sided": 0.03125
+        },
+        "resolution_s": 0.2431640385002538,
+        "resolved": true,
+        "verdict": "resolved faster",
+        "reason": "CI of median excludes 0 and |median| exceeds noise",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -0.8070636200027366,
+          "median_diff_ba_s": -1.0628994959988631,
+          "second_position_cost_s": 0.12791793799806328,
+          "order_corrected_effect_s": -0.9349815580007999
+        }
+      }
+    }
+  },
+  "scope": "within this explicitly diagnostic fallback series; no native ownership, isolation or NUMA verdict",
+  "skips_and_errors": []
+}

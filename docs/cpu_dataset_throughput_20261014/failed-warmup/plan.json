@@ -1,0 +1,132 @@
+{
+  "star": "/workspace/scratch/28038873ca11/throughput-generated/generated4.star",
+  "cpu_budget": 4,
+  "memory_budget_bytes": 8589934592,
+  "headroom_bytes": 1073741824,
+  "seed": 1,
+  "warmups": 1,
+  "replicates": 6,
+  "worker_args": [
+    "--use_own",
+    "--angpix",
+    "1.0",
+    "--voltage",
+    "300",
+    "--bfactor",
+    "150",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--save_noDW",
+    "--even_odd_split"
+  ],
+  "required_products": [
+    ".mrc",
+    ".star",
+    "_noDW.mrc",
+    "_EVN.mrc",
+    "_ODD.mrc",
+    "_shifts.eps"
+  ],
+  "input_sha256": {
+    "/workspace/scratch/28038873ca11/throughput-generated/generated0.mrcs": "6204e3fd53601a7eb30827969463413758a20e906e6903741686764b424f02bb",
+    "/workspace/scratch/28038873ca11/throughput-generated/generated1.mrcs": "84f42a62d781335893e59c695eb55c05f460b6b5e689ad923bbef9f3e8003fea",
+    "/workspace/scratch/28038873ca11/throughput-generated/generated2.mrcs": "6662338238ee76ee2df94e4933c73b30d583dc1baa4a965c36ae21f056fbfff7",
+    "/workspace/scratch/28038873ca11/throughput-generated/generated3.mrcs": "a7eac62f91cf4dfb7726d98b2ab59825fcf3321ebae405e9dc4ffc0f1c268ce2"
+  },
+  "configurations": [
+    {
+      "name": "stream-1x4",
+      "binary": "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+      "worker_rss_kib": 100000,
+      "source": {
+        "published": "5a6812baf69979a8446baae2835188a85336acf3",
+        "local": "c9dbe5957898f5206cb05ea5daaa62ae3358218a",
+        "sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de"
+      },
+      "masks": [
+        "0-3"
+      ],
+      "binary_sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de"
+    },
+    {
+      "name": "stream-2x2",
+      "binary": "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+      "worker_rss_kib": 100000,
+      "source": {
+        "published": "5a6812baf69979a8446baae2835188a85336acf3",
+        "local": "c9dbe5957898f5206cb05ea5daaa62ae3358218a",
+        "sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de"
+      },
+      "masks": [
+        "0-1",
+        "2-3"
+      ],
+      "binary_sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de"
+    },
+    {
+      "name": "stream-4x1",
+      "binary": "/workspace/scratch/28038873ca11/build-stream/motioncorr",
+      "worker_rss_kib": 100000,
+      "source": {
+        "published": "5a6812baf69979a8446baae2835188a85336acf3",
+        "local": "c9dbe5957898f5206cb05ea5daaa62ae3358218a",
+        "sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de"
+      },
+      "masks": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "binary_sha256": "0160ab12cb348d8dbab5763f12449e8920986bb70d34b94d42e9e4675ba230de"
+    }
+  ],
+  "fixture_provenance": {
+    "source": "/workspace/scratch/28038873ca11/data/synthetic_512x512_16frames.mrcs",
+    "source_sha256": "36e1a91b25a54d958e0ff78be87e55fa9777aebbd36d145d415bbc7837b8c8a1",
+    "recipe_sha256": "9005de27e38b15d33869640ac99fcf1f279ddd6399d707e9bd5d13a72f8ba9b4",
+    "numpy_version": "2.3.5",
+    "shape_xyz": [
+      512,
+      512,
+      16
+    ],
+    "files": [
+      {
+        "path": "/workspace/scratch/28038873ca11/throughput-generated/generated0.mrcs",
+        "sha256": "6204e3fd53601a7eb30827969463413758a20e906e6903741686764b424f02bb",
+        "payload_sha256": "fd854b1dbe4968a5ec8ffdd7cf19b678d3a984339e449aa6cdcf641fd4fa3370",
+        "index": 0
+      },
+      {
+        "path": "/workspace/scratch/28038873ca11/throughput-generated/generated1.mrcs",
+        "sha256": "84f42a62d781335893e59c695eb55c05f460b6b5e689ad923bbef9f3e8003fea",
+        "payload_sha256": "ac0f69ca5759a8dd74a7db4ef314af5abda703014e856e47da38c9029624acf7",
+        "index": 1
+      },
+      {
+        "path": "/workspace/scratch/28038873ca11/throughput-generated/generated2.mrcs",
+        "sha256": "6662338238ee76ee2df94e4933c73b30d583dc1baa4a965c36ae21f056fbfff7",
+        "payload_sha256": "09d185923f4e174de970816b73d4a544af1ce6bd8ac6d5f0a0d671758bb60497",
+        "index": 2
+      },
+      {
+        "path": "/workspace/scratch/28038873ca11/throughput-generated/generated3.mrcs",
+        "sha256": "a7eac62f91cf4dfb7726d98b2ab59825fcf3321ebae405e9dc4ffc0f1c268ce2",
+        "payload_sha256": "b49cf9f067bea06ee24e6678b84efe0b820e17d4857a76190a5119ba7b4d8c2a",
+        "index": 3
+      }
+    ],
+    "recipe": "movie k=0..3: scale base by float32(1+k/32); per frame z add float32((((x+3*y+5*z+11*k)%29)-14)*(k+1)/128), then float32(k/4); store float32 at each step",
+    "star": {
+      "path": "/workspace/scratch/28038873ca11/throughput-generated/generated4.star",
+      "sha256": "d151522de8a0adbdc50cd2d0ae5a85dc067c264a5b18aca5ff29d965abb7945b"
+    }
+  },
+  "star_sha256": "d151522de8a0adbdc50cd2d0ae5a85dc067c264a5b18aca5ff29d965abb7945b"
+}

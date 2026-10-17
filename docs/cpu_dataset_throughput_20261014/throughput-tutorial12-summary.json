@@ -1,0 +1,71 @@
+{
+  "certified": false,
+  "input": "/workspace/scratch/28038873ca11/throughput-tutorial12-onepair/results.json",
+  "layouts": {
+    "stream-1x4": {
+      "n_retained": 1,
+      "median_dataset_wall_s": 57.46198147500036,
+      "dataset_walls_s": [
+        57.46198147500036
+      ],
+      "median_worker_phase_s": 55.88323728500109,
+      "median_movies_per_s": 0.03480562188531783,
+      "max_sum_individual_worker_rss_kib": 1903672
+    },
+    "stream-2x2": {
+      "n_retained": 1,
+      "median_dataset_wall_s": 50.15737020600136,
+      "dataset_walls_s": [
+        50.15737020600136
+      ],
+      "median_worker_phase_s": 48.4297157760011,
+      "median_movies_per_s": 0.03987449883807303,
+      "max_sum_individual_worker_rss_kib": 3578228
+    }
+  },
+  "comparisons": {
+    "stream-2x2": {
+      "reference": "stream-1x4",
+      "pairs": [
+        {
+          "a": 57.46198147500036,
+          "b": 50.15737020600136,
+          "replicate": 0,
+          "order": "AB"
+        }
+      ],
+      "descriptive_paired_statistics": {
+        "n_pairs": 1,
+        "diffs_s": [
+          -7.304611268998997
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -7.304611268998997,
+        "q1_diff_s": -7.304611268998997,
+        "q3_diff_s": -7.304611268998997,
+        "min_diff_s": -7.304611268998997,
+        "max_diff_s": -7.304611268998997,
+        "median_a_s": 57.46198147500036,
+        "median_b_s": 50.15737020600136,
+        "relative_median_diff": -0.12712076892400537,
+        "noise_s": 0.0,
+        "robust_sd_diff_s": 0.0,
+        "ci": null,
+        "sign_test": {
+          "positive": 0,
+          "negative": 1,
+          "ties": 0,
+          "p_two_sided": 1.0
+        },
+        "resolution_s": null,
+        "resolved": false,
+        "verdict": "not resolved (1 retained pairs, 6 needed)",
+        "reason": "fewer than 6 retained pairs (1): no verdict and no resolution",
+        "positional": null
+      }
+    }
+  },
+  "scope": "within this explicitly diagnostic fallback series; no native ownership, isolation or NUMA verdict",
+  "skips_and_errors": []
+}

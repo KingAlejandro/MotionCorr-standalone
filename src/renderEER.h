@@ -31,8 +31,7 @@ class EERRenderer {
 
 	std::vector<long long> frame_starts, frame_sizes;
 	unsigned char* buf;
-	// Set inside lazyReadFrames' critical section when the container is damaged;
-	// raised by every renderFrames call after it leaves that section.
+	// Captured inside lazyReadFrames' critical section, rethrown outside it.
 	std::exception_ptr read_error;
 
 	int eer_upsampling;

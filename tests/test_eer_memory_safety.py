@@ -88,6 +88,8 @@ def expected_image(width, up, groups, electrons):
 
 
 def main():
+    if not __debug__:
+        raise RuntimeError("EerMemorySafety requires Python assertions enabled")
     ap = argparse.ArgumentParser()
     ap.add_argument('--binary', type=Path, required=True)
     ap.add_argument('--helper', type=Path, required=True)

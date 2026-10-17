@@ -184,7 +184,8 @@ void EERRenderer::read(FileName _fn_movie, int eer_upsampling)
 	fseek(fh.get(), 0, SEEK_END);
 	file_size = ftell(fh.get());
 	fseek(fh.get(), 0, SEEK_SET);
-	if (file_size < 0 || (unsigned long long)file_size >
+	if (file_size < 0 || file_size > std::numeric_limits<long long>::max() - EER_READ_PADDING ||
+	    (unsigned long long)file_size >
 	    std::numeric_limits<size_t>::max() - EER_READ_PADDING)
 		REPORT_ERROR("Failed to determine the size of " + fn_movie);
 
@@ -310,7 +311,7 @@ void EERRenderer::readLegacy(FILE *fh)
 			pos -= 8;
 			long long frame_words;
 			memcpy(&frame_words, buf + pos, sizeof(frame_words));
-			if (frame_words < 0 || frame_words > pos / (long long)sizeof(long long))
+			if (frame_words <= 0 || frame_words > pos / (long long)sizeof(long long))
 				REPORT_ERROR("Broken frame in file " + fn_movie);
 			long long frame_size = frame_words * sizeof(long long);
 			pos -= frame_size;

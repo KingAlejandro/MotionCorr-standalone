@@ -1258,7 +1258,11 @@ public:
 			{
 				error_fseek = fseek(fimg, myoffset, SEEK_SET);
 				if (error_fseek != 0)
+				{
+					// A failed read is routine for a truncated movie; do not keep the page (up to 1 GiB).
+					freeMemory(page, pagesize*sizeof(char));
 					return -1;
+				}
 			}
 
 			for (size_t myn=0; myn<NSIZE(data); myn++)
@@ -1283,7 +1287,10 @@ public:
 					//Read page from disc
 					size_t result = fread( page, readsize, 1, fimg );
 					if (result != 1)
+					{
+						freeMemory(page, pagesize*sizeof(char));
 						return -2;
+					}
 
 					//swap per page
 					if (swap)
@@ -1297,7 +1304,10 @@ public:
 					//fread( padpage, pad, 1, fimg);
 					error_fseek = fseek( fimg, pad, SEEK_CUR );
 					if (error_fseek != 0)
+					{
+						freeMemory(page, pagesize*sizeof(char));
 						return -1;
+					}
 				}
 			}
 			//if ( pad > 0 )

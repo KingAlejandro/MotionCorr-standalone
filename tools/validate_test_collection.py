@@ -29,6 +29,10 @@ DEFAULT_REQUIRED_TESTS = [
     "GainCache",
     "TiffRead",
     "DamagedMovie",
+    # RC0 F3: the only test that sees a short raw MRC read being dropped.
+    "TruncatedMrcMovie",
+    # RC0 F3b: the only test that sees a short gain or defect-map read being dropped.
+    "TruncatedGainDefect",
     # Sequential compressed readers must close/reap their decoder before reuse.
     "CompressedMovieSequence",
     "RunnerModelParser",

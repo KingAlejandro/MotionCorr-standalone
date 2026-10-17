@@ -129,6 +129,17 @@ DEFAULT_REQUIRED_TESTS = [
     "LogfileFromEpsMutant_eps_order",
     "LogfileFromEpsMutant_placeholder",
     "LogfileFromEpsMutant_concat_cleanup",
+    # Checked arithmetic on the nvCOMP admission path (#134 item 2, RC0 T3). Each
+    # DeflateLayoutMutant_* is a compiled copy of DeflateLayout with one overflow
+    # check removed from a header, which the test must reject (WILL_FAIL); the names
+    # come from a CMake function, so a mutant dropped from it would leave that check
+    # unproven with the suite still green.
+    "DeflateLayoutMutant_span_wrap",
+    "DeflateLayoutMutant_stage_sum",
+    "DeflateLayoutMutant_reserve_round",
+    "DeflateLayoutMutant_layout_table",
+    "DeflateLayoutMutant_arena_start",
+    "DeflateLayoutMutant_drain_step",
     # Issue #95: the only test that can observe the native sample staging
     # ownership contract, for both widths the compact route admits. Registered
     # under if(UNIX) beside ImageWriteFaults.

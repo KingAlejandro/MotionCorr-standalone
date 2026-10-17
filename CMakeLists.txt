@@ -196,6 +196,51 @@ if(BUILD_TESTING)
     add_executable(deflate_layout tests/test_deflate_layout.cpp)
     target_include_directories(deflate_layout PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME DeflateLayout COMMAND deflate_layout)
+    # Compiled negative controls for the checked arithmetic on the nvCOMP admission
+    # path (#134 item 2). Each mutant removes one overflow check from a header and
+    # must turn DeflateLayout red. The target text must exist exactly once, so an
+    # edited header stops the configure step instead of building an unmutated control.
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+                 "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_checked_arith.h"
+                 "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_deflate_layout.h"
+                 "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_scratch_arena.h")
+    function(add_deflate_layout_mutant _mutant _header _from _to)
+        file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/${_header}" _text)
+        string(FIND "${_text}" "${_from}" _first)
+        string(FIND "${_text}" "${_from}" _last REVERSE)
+        if(_first EQUAL -1 OR NOT _first EQUAL _last)
+            message(FATAL_ERROR "deflate layout mutant ${_mutant}: target missing or not unique in ${_header}")
+        endif()
+        string(REPLACE "${_from}" "${_to}" _text "${_text}")
+        set(_dir "${CMAKE_CURRENT_BINARY_DIR}/mutants/deflate_layout_${_mutant}")
+        file(WRITE "${_dir}/src/acc/cuda/${_header}" "${_text}")
+        add_executable(deflate_layout_${_mutant} tests/test_deflate_layout.cpp)
+        # The mutant tree is searched first, so its header shadows the real one.
+        target_include_directories(deflate_layout_${_mutant} PRIVATE
+            "${_dir}" "${CMAKE_CURRENT_SOURCE_DIR}")
+        add_test(NAME DeflateLayoutMutant_${_mutant} COMMAND deflate_layout_${_mutant})
+        set_tests_properties(DeflateLayoutMutant_${_mutant} PROPERTIES WILL_FAIL TRUE TIMEOUT 120)
+    endfunction()
+    # One mutant per hardened entry point; the direct boundary tests in
+    # test_deflate_layout.cpp are the primary coverage of every other check.
+    add_deflate_layout_mutant(span_wrap cuda_checked_arith.h
+        "return addU64(offset, n, end_u) && convertExact(end_u, end);"
+        "end_u = offset + n; return convertExact(end_u, end);")
+    add_deflate_layout_mutant(stage_sum cuda_deflate_layout.h
+        "if (!mc_checked::addSize(slot, (size_t)size_at(s), cursor)) return false;"
+        "cursor = slot + (size_t)size_at(s);")
+    add_deflate_layout_mutant(reserve_round cuda_deflate_layout.h
+        "return mc_checked::alignUpChecked(padded, (size_t)32 << 20, out);"
+        "out = alignUp(padded, (size_t)32 << 20); return true;")
+    add_deflate_layout_mutant(layout_table cuda_deflate_layout.h
+        "if (!mc_checked::mulSize(chunk_strips, elem, bytes)) { ok = false; return (size_t)0; }"
+        "bytes = chunk_strips * elem;")
+    add_deflate_layout_mutant(arena_start cuda_scratch_arena.h
+        "if (!mc_checked::alignUpChecked(used_, alignment, start)) return 0;"
+        "start = alignUp(used_, alignment);")
+    add_deflate_layout_mutant(drain_step cuda_checked_arith.h
+        "if (k >= n_chunks) return false;"
+        "if (k < 0) return false; k = (int)((unsigned)k + 1u); return k >= 0;")   # wraps past INT_MAX
     add_executable(adler32_arithmetic tests/test_adler32.cpp)
     target_include_directories(adler32_arithmetic PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME Adler32Arithmetic COMMAND adler32_arithmetic)

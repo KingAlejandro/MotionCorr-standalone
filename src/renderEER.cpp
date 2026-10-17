@@ -393,7 +393,7 @@ std::string EERRenderer::readFramesLocked()
 		for (uint32_t strip = 0; strip < nstrips; strip++)
 		{
 			const tmsize_t strip_size = TIFFRawStripSize(ftiff.get(), strip);
-			if (strip_size <= 0 || strip_size > file_size - pos ||
+			if (strip_size <= 0 || strip_size >= file_size - pos ||
 			    offsets[strip] > (uint64_t)file_size ||
 			    (uint64_t)strip_size > (uint64_t)file_size - offsets[strip])
 				return "EER: invalid strip size in frame " + integerToString(frame + 1) + " of " + fn_movie;
@@ -639,11 +639,7 @@ long long EERRenderer::renderFrames(int frame_start, int frame_end, MultidimArra
 
 				if (pos + 2 >= pos_limit) { overrun = true; break; }
 				n_pix += p2;
-				if (n_pix >= total_pixels)
-				{
-					overrun = pos + 2 >= pos_limit;
-					break;
-				}
+				if (n_pix >= total_pixels) break;
 				if (p2 < 255)
 				{
 					positions[n_electron] = n_pix;

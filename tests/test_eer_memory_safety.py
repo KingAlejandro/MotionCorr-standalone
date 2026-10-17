@@ -8,6 +8,29 @@ import subprocess
 import tempfile
 
 
+STAR_HEADER = """# version 30001
+
+data_optics
+
+loop_
+_rlnOpticsGroupName #1
+_rlnOpticsGroup #2
+_rlnMicrographOriginalPixelSize #3
+_rlnVoltage #4
+_rlnSphericalAberration #5
+_rlnAmplitudeContrast #6
+opticsGroup1 1 1.0 300.0 2.7 0.1
+
+# version 30001
+
+data_movies
+
+loop_
+_rlnMicrographMovieName #1
+_rlnOpticsGroup #2
+"""
+
+
 def encode(compression, width, electrons):
     """Independent scalar LSB-first encoder; skip codes omit symbols only in 7-bit."""
     rle, sym = (8, 4) if compression == 65000 else (7, 2 if compression == 65002 else 4)
@@ -128,6 +151,15 @@ def main():
             log = run([helper, 'render_eer', 'zero.eer', 'render.bin', 1, 3, 2], root)
             assert 'This frame is skipped' in log
             assert (root/'render.bin').read_bytes() == expected_image(width, 1, [[0, 1, 2]], [[], [], []])
+            # Truncated last strip and (for 65000) non-multiple-of-3 / shared-strip over-read.
+            for trim in (1, 2, 10):
+                if len(strips[-1]) > trim:
+                    trunc_strips = [strips[0], strips[1], strips[2][:-trim]]
+                    write_eer(root/'trunc-strip.eer', comp, trunc_strips, width)
+                    log = run([helper, 'render_eer', 'trunc-strip.eer', 'render.bin', 1, 3, 2], root)
+                    assert 'This frame is skipped' in log, log
+                    assert (root/'render.bin').read_bytes() == expected_image(
+                        width, 1, [[0, 1, 2]], [electrons[0], electrons[1], []])
 
         # The actual runner must continue after container/header failure, publish
         # the healthy second movie, and withhold joint completion STAR (#205).
@@ -135,7 +167,7 @@ def main():
         strip = encode(65002, width, [(100, 0), (10000, 3), (100000, 1)])
         write_eer(root/'healthy.eer', 65002, [strip]*12, width)
         damaged = []
-        for tag in (256, 257, 259, 65007, 65008):
+        for tag in (256, 257, 259, 273, 65007, 65008):
             path = root/f'missing-{tag}.eer'
             write_eer(path, 65002, [strip]*12, width, omit=(tag,))
             damaged.append(path)
@@ -153,9 +185,10 @@ def main():
             path = root/f'legacy-{n}.eer'
             path.write_bytes(bytes(n))
             damaged.append(path)
-        for words in (-1, 0, 1 << 62):
+        for words in (-1, 0, 1, 1 << 62):
             path = root/f'legacy-words-{words}.eer'
-            path.write_bytes(struct.pack('<q', words) + b'ThermoFisherECComprOK000\0')
+            payload = (bytes(8) if words == 1 else b'') + struct.pack('<q', words) + b'ThermoFisherECComprOK000'
+            path.write_bytes(payload)
             damaged.append(path)
         for field in (0, 3):
             head = bytearray(1024)
@@ -166,14 +199,15 @@ def main():
             damaged.append(path)
         for i, path in enumerate(damaged):
             out = root/f'out-{i}'
-            (root/'movies.star').write_text('data_movies\n\nloop_\n_rlnMicrographMovieName #1\n' + path.name + '\nhealthy.eer\n')
+            (root/'movies.star').write_text(STAR_HEADER + f'{path.name} 1\nhealthy.eer 1\n')
             log = run([binary, '--i', 'movies.star', '--o', str(out)+'/', '--use_own',
                        '--eer_grouping', 4, '--j', 2, '--bin_factor', 8, '--angpix', 1,
                        '--skip_report_pdf'], root, expected=1)
-            assert path.name in log and 'Failed' in log, log
+            assert f'Motion correction failed for 1 movie(s): {path.name}.' in log, log
             assert (out/'healthy.star').is_file() and (out/'healthy.mrc').is_file(), log
             assert not (out/'corrected_micrographs.star').exists(), log
-            assert not list(out.glob(path.stem + '.*')), list(out.iterdir())
+            bad_products = [p.name for p in out.glob(path.stem + '.*') if p.suffix != '.log']
+            assert not bad_products, bad_products
     print('PASS EerMemorySafety: scalar valid identity, isolated corrupt fractions, clean per-movie failures')
 
 

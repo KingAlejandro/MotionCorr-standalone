@@ -1,0 +1,58 @@
+=================================================================
+==4136186==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5020000030b8 at pc 0x5bb5fb284ad1 bp 0x7fff8ea3a500 sp 0x7fff8ea3a4f0
+WRITE of size 4 at 0x5020000030b8 thread T0
+    #0 0x5bb5fb284ad0 in long long EERRenderer::renderFrames<unsigned short>(int, int, MultidimArray<unsigned short>&) /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/renderEER.cpp:447
+    #1 0x5bb5fb231e88 in cmd_host_frames /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/experiments/eer_device/eer_exp.cpp:558
+    #2 0x5bb5fb224605 in main /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/experiments/eer_device/eer_exp.cpp:634
+    #3 0x723b0422a1c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #4 0x723b0422a28a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #5 0x5bb5fb225304 in _start (/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/build/eer_device_exp_asan+0x14304) (BuildId: fd51cb817a7639041b76bf0eaeff491e202b92e9)
+
+0x5020000030b8 is located 0 bytes after 8-byte region [0x5020000030b0,0x5020000030b8)
+allocated by thread T0 here:
+    #0 0x723b056fe548 in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:95
+    #1 0x5bb5fb25f2ec in std::__new_allocator<unsigned int>::allocate(unsigned long, void const*) /usr/include/c++/13/bits/new_allocator.h:151
+    #2 0x5bb5fb25f2ec in std::allocator_traits<std::allocator<unsigned int> >::allocate(std::allocator<unsigned int>&, unsigned long) /usr/include/c++/13/bits/alloc_traits.h:482
+    #3 0x5bb5fb25f2ec in std::_Vector_base<unsigned int, std::allocator<unsigned int> >::_M_allocate(unsigned long) /usr/include/c++/13/bits/stl_vector.h:381
+    #4 0x5bb5fb25f2ec in std::vector<unsigned int, std::allocator<unsigned int> >::_M_default_append(unsigned long) /usr/include/c++/13/bits/vector.tcc:663
+    #5 0x5bb5fb283af9 in std::vector<unsigned int, std::allocator<unsigned int> >::resize(unsigned long) /usr/include/c++/13/bits/stl_vector.h:1016
+    #6 0x5bb5fb283af9 in long long EERRenderer::renderFrames<unsigned short>(int, int, MultidimArray<unsigned short>&) /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/renderEER.cpp:418
+    #7 0x5bb5fb231e88 in cmd_host_frames /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/experiments/eer_device/eer_exp.cpp:558
+    #8 0x5bb5fb224605 in main /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/experiments/eer_device/eer_exp.cpp:634
+    #9 0x723b0422a1c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #10 0x723b0422a28a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #11 0x5bb5fb225304 in _start (/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/build/eer_device_exp_asan+0x14304) (BuildId: fd51cb817a7639041b76bf0eaeff491e202b92e9)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/renderEER.cpp:447 in long long EERRenderer::renderFrames<unsigned short>(int, int, MultidimArray<unsigned short>&)
+Shadow bytes around the buggy address:
+  0x502000002e00: fa fa fd fa fa fa fd fd fa fa fd fd fa fa fd fd
+  0x502000002e80: fa fa fd fa fa fa fd fa fa fa fd fd fa fa fd fd
+  0x502000002f00: fa fa fd fd fa fa fd fa fa fa fd fa fa fa fd fd
+  0x502000002f80: fa fa fd fd fa fa fd fd fa fa fd fa fa fa fd fa
+  0x502000003000: fa fa fd fd fa fa fd fd fa fa fd fd fa fa fd fa
+=>0x502000003080: fa fa fd fa fa fa 00[fa]fa fa 02 fa fa fa fa fa
+  0x502000003100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000003180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000003200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000003280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000003300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4136186==ABORTING

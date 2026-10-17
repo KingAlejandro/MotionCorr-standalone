@@ -1,0 +1,31 @@
+f3-g40-u1-float verify rc=0 EXACT ADMITTED
+f3-g40-u2-float verify rc=0 EXACT ADMITTED
+f3-g40-u-1-float verify rc=0 EXACT ADMITTED
+f3-g48-u1-float verify rc=0 EXACT ADMITTED
+f3-g48-u2-float verify rc=0 EXACT ADMITTED
+f4-g40-u1-float verify rc=0 EXACT ADMITTED
+f4-g40-u2-float verify rc=0 EXACT ADMITTED
+f4-g40-u-1-float verify rc=0 EXACT ADMITTED
+f4-g50-u1-float verify rc=0 EXACT ADMITTED
+f4-g50-u2-float verify rc=0 EXACT ADMITTED
+g-g49-u1-float verify rc=0 EXACT ADMITTED
+g-g49-u2-float verify rc=0 EXACT ADMITTED
+g-g49-u-1-float verify rc=0 EXACT ADMITTED
+g-g40-u1-float verify rc=0 EXACT ADMITTED
+g-g40-u2-float verify rc=0 EXACT ADMITTED
+f3-g40-u1-u16 verify rc=0 EXACT ADMITTED
+f4-g40-u1-u16 verify rc=0 EXACT ADMITTED
+g-g49-u1-u16 verify rc=0 EXACT ADMITTED
+f4-g40-u2-admit-40GiB verify rc=5 None REFUSED
+f4-g40-u2-admit-reserve-8GiB verify rc=5 None REFUSED
+f4-g40-u2-admit-reserve-12GiB verify rc=5 None REFUSED
+f3-g40-u1 timing attempt 1 rc=0 ok [other_gpu_busy_samples=17/138]
+f4-g40-u1 timing attempt 1 rc=0 ok
+g-g49-u1 timing attempt 1 rc=0 ok
+f3-g40-u2 timing attempt 1 rc=0 ok [other_gpu_busy_samples=39/252]
+g-g49-u2 timing attempt 1 rc=0 ok [other_gpu_busy_samples=7/174]
+f3-g40-u-1 timing attempt 1 rc=0 ok
+f4-g40-u-1 timing attempt 1 rc=0 ok [other_gpu_busy_samples=4/186]
+g-g49-u-1 timing attempt 1 rc=0 ok [other_gpu_busy_samples=2/69]
+f4-g40-u2-devonly timing attempt 1 rc=0 ok
+matrix done

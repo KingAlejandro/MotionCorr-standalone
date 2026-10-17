@@ -1,0 +1,54 @@
+=================================================================
+==4140733==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x70270a7fe87a at pc 0x6042c75b5a93 bp 0x7ffc14be0380 sp 0x7ffc14be0370
+READ of size 4 at 0x70270a7fe87a thread T0
+    #0 0x6042c75b5a92 in long long EERRenderer::renderFrames<unsigned short>(int, int, MultidimArray<unsigned short>&) /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/renderEER.cpp:436
+    #1 0x6042c7562e88 in cmd_host_frames /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/experiments/eer_device/eer_exp.cpp:558
+    #2 0x6042c7555605 in main /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/experiments/eer_device/eer_exp.cpp:634
+    #3 0x70270ea2a1c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #4 0x70270ea2a28a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #5 0x6042c7556304 in _start (/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/build/eer_device_exp_asan+0x14304) (BuildId: fd51cb817a7639041b76bf0eaeff491e202b92e9)
+
+0x70270a7fe87a is located 2 bytes after 24916088-byte region [0x70270903b800,0x70270a7fe878)
+allocated by thread T0 here:
+    #0 0x70270fefd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x6042c75a5b01 in EERRenderer::lazyReadFrames() /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/renderEER.cpp:304
+    #2 0x6042c75b2833 in long long EERRenderer::renderFrames<unsigned short>(int, int, MultidimArray<unsigned short>&) /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/renderEER.cpp:384
+    #3 0x6042c7562e88 in cmd_host_frames /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/experiments/eer_device/eer_exp.cpp:558
+    #4 0x6042c7555605 in main /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/experiments/eer_device/eer_exp.cpp:634
+    #5 0x70270ea2a1c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #6 0x70270ea2a28a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #7 0x6042c7556304 in _start (/mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/build/eer_device_exp_asan+0x14304) (BuildId: fd51cb817a7639041b76bf0eaeff491e202b92e9)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /mnt/clathrin/alex-motioncorr-rc0/W-EER-DEV/src/src/renderEER.cpp:436 in long long EERRenderer::renderFrames<unsigned short>(int, int, MultidimArray<unsigned short>&)
+Shadow bytes around the buggy address:
+  0x70270a7fe580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x70270a7fe600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x70270a7fe680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x70270a7fe700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x70270a7fe780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x70270a7fe800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00[fa]
+  0x70270a7fe880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x70270a7fe900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x70270a7fe980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x70270a7fea00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x70270a7fea80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4140733==ABORTING

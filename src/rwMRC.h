@@ -193,8 +193,6 @@ DataType parseMRCHeader(MRChead *header, long int img_select,  bool isStack=fals
 	else
 		_nDim = 1;
 
-	data.setDimensions(_xDim, _yDim, _zDim, _nDim);
-
 	DataType datatype;
 
 	switch (header->mode)
@@ -229,6 +227,15 @@ DataType parseMRCHeader(MRChead *header, long int img_select,  bool isStack=fals
 	default:
 		REPORT_ERROR((std::string)"readMRC: unsupported MRC mode " + integerToString(header->mode));
 	}
+
+	const long int max_dim = std::numeric_limits<long int>::max();
+	if (_xDim <= 0 || _yDim <= 0 || _zDim <= 0 || _nDim <= 0 ||
+	    _yDim > max_dim / _xDim ||
+	    _zDim > max_dim / (_xDim * _yDim) ||
+	    _nDim > max_dim / (_xDim * _yDim * _zDim))
+		REPORT_ERROR("readMRC: invalid dimensions in header of image " + name);
+
+	data.setDimensions(_xDim, _yDim, _zDim, _nDim);
 	offset = MRCSIZE + header->nsymbt;
 
 	MDMainHeader.setValue(EMDL_IMAGE_STATS_MIN,(RFLOAT)header->amin);

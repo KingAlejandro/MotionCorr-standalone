@@ -116,12 +116,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--binary', type=Path, required=True)
     ap.add_argument('--helper', type=Path, required=True)
+    ap.add_argument('--skip-helper', action='store_true')
     args = ap.parse_args()
     binary, helper = args.binary.resolve(), args.helper.resolve()
     with tempfile.TemporaryDirectory(prefix='eer-safety-') as td:
         root = Path(td)
-        run([helper, 'integer_to_string'], root)
-        for comp in (65000, 65001, 65002):
+        if not args.skip_helper:
+            run([helper, 'integer_to_string'], root)
+        for comp in (() if args.skip_helper else (65000, 65001, 65002)):
             width = 2048 if comp == 65002 else 4096
             electrons = [[(0, 0), (131 + i, i % (4 if comp == 65002 else 16)),
                           (width*width - 1, 3 if comp == 65002 else 15)] for i in range(3)]
@@ -161,11 +163,23 @@ def main():
                     assert (root/'render.bin').read_bytes() == expected_image(
                         width, 1, [[0, 1, 2]], [electrons[0], electrons[1], []])
 
-        # The actual runner must continue after container/header failure, publish
-        # the healthy second movie, and withhold joint completion STAR (#205).
+        # D6 corrupt fraction (short 3-byte first strip) in a full motioncorr batch
+        # must skip-and-warn without heap OOB write, and complete both movies.
         width = 2048
         strip = encode(65002, width, [(100, 0), (10000, 3), (100000, 1)])
         write_eer(root/'healthy.eer', 65002, [strip]*12, width)
+        write_eer(root/'short-batch.eer', 65002, [bytes(3)] + [strip]*11, width)
+        out_d6 = root/'out-d6'
+        (root/'movies.star').write_text(STAR_HEADER + 'short-batch.eer 1\nhealthy.eer 1\n')
+        log = run([binary, '--i', 'movies.star', '--o', str(out_d6)+'/', '--use_own',
+                   '--eer_grouping', 4, '--j', 2, '--bin_factor', 8, '--angpix', 1,
+                   '--skip_report_pdf'], root, expected=0)
+        assert 'This frame is skipped' in log, log
+        assert (out_d6/'short-batch.mrc').is_file() and (out_d6/'healthy.mrc').is_file(), log
+        assert (out_d6/'corrected_micrographs.star').is_file(), log
+
+        # The actual runner must continue after container/header failure, publish
+        # the healthy second movie, and withhold joint completion STAR (#205).
         damaged = []
         for tag in (256, 257, 259, 273, 65007, 65008):
             path = root/f'missing-{tag}.eer'
@@ -197,6 +211,12 @@ def main():
             path = root/f'int-min-{field}.mrcs'
             path.write_bytes(head)
             damaged.append(path)
+            head_be = bytearray(1024)
+            struct.pack_into('>4i', head_be, 0, 64, 64, 3, 2)
+            struct.pack_into('>i', head_be, field*4, -(1 << 31))
+            path_be = root/f'int-min-be-{field}.mrcs'
+            path_be.write_bytes(head_be)
+            damaged.append(path_be)
         for i, path in enumerate(damaged):
             out = root/f'out-{i}'
             (root/'movies.star').write_text(STAR_HEADER + f'{path.name} 1\nhealthy.eer 1\n')

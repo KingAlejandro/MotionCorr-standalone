@@ -35,9 +35,8 @@ outside CTest. Every original assertion is kept. Adaptations, each marked
 "QF adaptation" below and listed in docs/rc0/qf/README.md:
   A1  comparator: the cfa331eb comparator is vendored unchanged beside this
       file (main's copy lacks the schema-2 per-movie product contract);
-  A2  the "No resident CUDA session; widening ..." literal no longer exists on
-      main; the host-fallback check matches every "Materialized native " line
-      instead (a superset of the original uint16 literal);
+  A2  added: besides the original two fallback literals (kept), any
+      "Materialized native " line is rejected (main prints it for every type);
   A3  added: --ingest_witness per arm, asserting compact for eligible movies
       and float for ineligible ones (and never nvcomp);
   A4  added: every generated input must match #123's recorded fixture SHA-256;
@@ -64,8 +63,10 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import compact_ingest_fixtures as fixtures  # noqa: E402
 
-# QF adaptation A5: the source tree is $QF_W/src when the tools run from $QF_W/tools.
-SOURCE_ROOT = (Path(os.environ["QF_W"]) / "src") if os.environ.get("QF_W") else Path(__file__).resolve().parents[3]
+# QF adaptation A5: the source tree is $QF_W/src (required).
+if not os.environ.get("QF_W"):
+    raise SystemExit("run_compact_ingest_support_matrix: QF_W is not set (docs/rc0/qf/README.md)")
+SOURCE_ROOT = Path(os.environ["QF_W"]) / "src"
 # QF adaptation A1: #123's comparator (cfa331eb, sha256 b5d5d998...) vendored unchanged.
 COMPARATOR_PATH = Path(__file__).resolve().parent / "compact_compare_output_trees.py"
 PORTED_FROM = {"pr": 123, "commit": "cfa331eb",
@@ -88,10 +89,11 @@ RECORDED_FIXTURE_SHA256 = {
 STAGED = "Staging this movie as native unsigned 16-bit"
 RELEASED = "Released native uint16 host staging after device forward FFT."
 MATERIALIZED = "Materialized native uint16 frames as float for CPU fallback."
-# QF adaptation A2: main removed the NO_SESSION widening line (the compact route is
-# now chosen only with a live session, motioncorr_runner.cpp:2363/2383) and prints
-# "Materialized native <type> frames as float for CPU fallback." for every staged
-# type. Any such line counts as a host fallback.
+NO_SESSION = "No resident CUDA session; widening the native uint16 movie to float."
+# QF adaptation A2: main no longer emits NO_SESSION (the compact route is chosen only
+# with a live session, motioncorr_runner.cpp:2363/2383) and prints "Materialized native
+# <type> frames as float for CPU fallback." for every staged type. The original
+# rejections are kept unchanged; any "Materialized native " line is rejected as well.
 MATERIALIZED_PREFIX = "Materialized native "
 SESSION_READY = "Movie FFT: batch=1"
 RESIDENT_RECON = "Reconstruction Profile (Resident VRAM)]"
@@ -405,7 +407,7 @@ def assert_witnesses(arm: ArmResult, *, expect_u16: bool, movies: Sequence[str])
         text = arm.logs[rel]
         staged = STAGED in text
         released = RELEASED in text
-        fell_back = MATERIALIZED_PREFIX in text  # includes MATERIALIZED
+        fell_back = MATERIALIZED in text or NO_SESSION in text or MATERIALIZED_PREFIX in text
         verdicts[movie] = {
             "selected_compact_ingest": staged,
             "released_after_device_forward_fft": released,

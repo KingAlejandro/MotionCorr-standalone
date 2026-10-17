@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, str(Path(os.environ.get('QF_W', '/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP')) / 'src/tools/profiling'))
+sys.path.insert(0, str(Path(os.environ['QF_W']) / 'src/tools/profiling'))
 from qual_lib import *  # noqa: F401,F403
 from lib import identity  # noqa: E402
 
@@ -32,15 +32,15 @@ OUT = W / 'multigpu'
 TEXT = ('.star', '.eps', '.lst', '.log', '.txt')
 # (name, devices, per-worker cpu masks, j)
 # QF change: the fixed 16-CPU budget comes from QF_MG_CPU_A / QF_MG_CPU_B (two 8-CPU ranges
-# 'lo-hi', default 96-103 and 104-111); the 1-worker arm and the s0 reference use QF_MG_W1_GPU
+# 'lo-hi', required); the 1-worker arm and the s0 reference use QF_MG_W1_GPU
 # (default 0). Q1 used 104-111 + 64-71 and GPU1.
 def _split(r):
     lo, hi = map(int, r.split('-'))
     return f'{lo}-{lo + 3}', f'{lo + 4}-{hi}'
 
 
-MG_A = os.environ.get('QF_MG_CPU_A', '96-103')
-MG_B = os.environ.get('QF_MG_CPU_B', '104-111')
+MG_A = os.environ['QF_MG_CPU_A']
+MG_B = os.environ['QF_MG_CPU_B']
 MG_ALL = f'{MG_A},{MG_B}'
 W1_GPU = int(os.environ.get('QF_MG_W1_GPU', '0'))
 W2_GPUS = [W1_GPU, (W1_GPU + 1) % 4]
@@ -189,11 +189,12 @@ def main():
     global ARMS
     ARMS = [arm for arm in ARMS if arm[0] in a.arms.split(',')]
     if a.mixed:
-        return main_mixed()
+        return main_mixed(dry_run=a.dry_run)
     movies = movie_list()
     assert len(movies) == 24, len(movies)
     summ = W / 'summaries' / 'multigpu'
-    summ.mkdir(parents=True, exist_ok=True)
+    if not a.dry_run:  # dry run: read-only on every path (no mkdir, rmtree, symlink or launch)
+        summ.mkdir(parents=True, exist_ok=True)
     star = DATA / 'movies.star'
     manifest = {'schema_version': 1, 'input_star_sha256': sha256_file(star), 'expected_shape_xyz': None,
                 'joint_star': 'corrected_micrographs.star', 'movies': movies}
@@ -202,9 +203,10 @@ def main():
     for cfg in a.configs.split(','):
         res = {'arms': {}}
         base = OUT / cfg
-        if base.exists() and not a.dry_run:
-            shutil.rmtree(base)
-        base.mkdir(parents=True, exist_ok=True)
+        if not a.dry_run:
+            if base.exists():
+                shutil.rmtree(base)
+            base.mkdir(parents=True)
         pa = ['--use_own', '--dose_weighting', '--dose_per_frame', '1.277', '--bfactor', '150', '--seed', '1',
               '--expected_frames', '24', '--gainref', 'Movies/gain.mrc', '--ingest', 'auto']
         if cfg == 'L':
@@ -367,7 +369,28 @@ def per_movie_markers(run, movies):
     return out
 
 
-def main_mixed():
+def mixed_arm_cmd(name, devs, masks, j, star, run, wit):
+    la = f"--devices {','.join(UUID[x] for x in devs)} --cpus '{';'.join(masks)}' --cpu-budget 16"
+    return ['taskset', '-c', MG_ALL, PY, str(TOOLS / 'run_dataset.py'), '--binary', str(BIN['nvcomp']),
+            '--star', str(star), '--out', str(run), f'--launcher-args={la}',
+            '--required-products=.mrc,.star,_shifts.eps', '--',
+            '--use_own', '--j', str(j), '--max_io_threads', str(j), '--dose_weighting', '--dose_per_frame', '1.0',
+            '--bfactor', '150', '--seed', '1', '--ingest', 'auto', '--ingest_witness', str(wit),
+            '--patch_x', '5', '--patch_y', '5', '--eer_grouping', '40', '--eer_upsampling', '1']
+
+
+def main_mixed(dry_run=False):
+    arms = [arm for arm in ARMS if arm[0] in ('w1', 'w2')]
+    if dry_run:
+        # Nothing is created, removed or launched: print the planned inputs and commands only.
+        d = W / 'inputs' / 'mixed'
+        base = OUT / 'mixed'
+        for fam, rel, grp in MIXED:
+            print(f'mixed input: {fam} optics {grp} <- {rel}', flush=True)
+        for name, devs, masks, j in arms:
+            cmd = mixed_arm_cmd(name, devs, masks, j, d / 'movies.star', base / name, base / f'ingest-witness-{name}.txt')
+            print(f'mixed {name} (cwd {d}):', ' '.join(map(str, cmd)), flush=True)
+        return 0
     d, ident = build_mixed_inputs()
     star = d / 'movies.star'
     movies = movie_list(star)
@@ -380,18 +403,11 @@ def main_mixed():
     (base / 'logs').mkdir(parents=True)
     res = {'inputs': ident, 'input_star_sha256': sha256_file(star), 'binary': str(BIN['nvcomp']),
            'binary_sha256': sha256_file(BIN['nvcomp']), 'arms': {}}
-    arms = [arm for arm in ARMS if arm[0] in ('w1', 'w2')]
     trees = {}
     for name, devs, masks, j in arms:
         run = base / name
         wit = base / f'ingest-witness-{name}.txt'
-        la = f"--devices {','.join(UUID[x] for x in devs)} --cpus '{';'.join(masks)}' --cpu-budget 16"
-        cmd = ['taskset', '-c', MG_ALL, PY, str(TOOLS / 'run_dataset.py'), '--binary', str(BIN['nvcomp']),
-               '--star', str(star), '--out', str(run), f'--launcher-args={la}',
-               '--required-products=.mrc,.star,_shifts.eps', '--',
-               '--use_own', '--j', str(j), '--max_io_threads', str(j), '--dose_weighting', '--dose_per_frame', '1.0',
-               '--bfactor', '150', '--seed', '1', '--ingest', 'auto', '--ingest_witness', str(wit),
-               '--patch_x', '5', '--patch_y', '5', '--eer_grouping', '40', '--eer_upsampling', '1']
+        cmd = mixed_arm_cmd(name, devs, masks, j, star, run, wit)
         env = base_env(False)
         t0 = time.monotonic()
         p = subprocess.run(cmd, cwd=d, env=env, capture_output=True, text=True)

@@ -148,6 +148,19 @@ def log_line_diff(a_root, b_root, movie_stem):
     return {'only_in_A': [l for l in la if l not in lb], 'only_in_B': [l for l in lb if l not in la]}
 
 
+def refusal_publications(out, stem):
+    """Products a refused movie must not have: its corrected MRC (any suffix), its per-movie STAR,
+    and a completion (joint) STAR row naming it."""
+    found = []
+    if out.exists():
+        found += sorted(str(p.relative_to(out)) for p in out.rglob(f'{stem}*.mrc'))
+        found += sorted(str(p.relative_to(out)) for p in out.rglob(f'{stem}*.star'))
+        joint = out / 'corrected_micrographs.star'
+        if joint.exists() and stem in joint.read_text(errors='replace'):
+            found.append('corrected_micrographs.star (names the movie)')
+    return found
+
+
 def products_identity(root, a, b, star, prefixes=None, products_only=False, tag=''):
     tag = tag or f'{a}-vs-{b}'
     allow = []
@@ -193,11 +206,15 @@ def one_case(fam, cfg, inputs_dir, ident, summary_dir, ingest_arms):
     refused_arms = set()
     if 'compact' in ingest_arms:
         text = Path(arms['compact']['stdout']).read_text(errors='replace')
+        published = refusal_publications(root / 'out-compact', stem)
         refused = arms['compact'].get('rc') not in (0, None) and COMPACT_REFUSAL in text
         expect_refusal = route.get('auto') == 'float'
-        case['checks']['compact_refusal'] = {'refused': refused, 'expected': expect_refusal}
+        case['checks']['compact_refusal'] = {'refused': refused, 'expected': expect_refusal,
+                                             'published_after_refusal': published}
         if refused != expect_refusal:
             case['problems'].append(f'compact arm refused={refused}, expected refusal={expect_refusal}')
+        if refused and published:
+            case['problems'].append(f'compact arm refused but published {published}')
         if refused:
             ok_runs.discard('compact')
             refused_arms.add('compact')

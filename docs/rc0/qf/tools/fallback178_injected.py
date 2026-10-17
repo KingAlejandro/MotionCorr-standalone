@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, str(Path(os.environ.get('QF_W', '/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP')) / 'src/tools/profiling'))
+sys.path.insert(0, str(Path(os.environ['QF_W']) / 'src/tools/profiling'))
 from qual_lib import *  # noqa: F401,F403
 from lib import identity  # noqa: E402
 import product_campaign as pc  # noqa: E402

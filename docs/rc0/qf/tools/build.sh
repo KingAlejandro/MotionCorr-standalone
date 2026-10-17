@@ -1,18 +1,20 @@
 #!/bin/bash
-# QF-prep builds of the exact SHA: CPU, CUDA sm80, CUDA sm80 + nvCOMP. CPUs 96-103, -j8.
+# QF builds of the exact SHA: CPU, CUDA sm80, CUDA sm80 + nvCOMP, -j8 on $QF_CPUS, into $QF_W/build-*.
+# Required: QF_W (holds src/, a git checkout of the frozen SHA), QF_SHA (the frozen SHA), QF_CPUS.
 # Gated on the bench lock (probe only, poll 60 s). Abort on any non-zero rc.
 set -u
-W=/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP
+: "${QF_W:?set QF_W to the QF workspace}" "${QF_SHA:?set QF_SHA to the frozen SHA}" "${QF_CPUS:?set QF_CPUS}"
+W=$QF_W
 SRC=$W/src
-SHA=${QF_SHA:-483e881d9a6a352dba3268dac0f8c729364860b5}
-CPUS=${QF_CPUS:-96-103}
+SHA=$QF_SHA
+CPUS=$QF_CPUS
 export PATH=/home/alex/.mc-venv/bin:/usr/local/cuda-12.8/bin:$PATH
 PY=/home/alex/.mc-venv/bin/python3
 NVC=/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive
+cd $SRC || { echo "no source checkout at $SRC"; exit 90; }
+[ "$(git rev-parse HEAD)" = "$SHA" ] || { echo "HEAD $(git rev-parse HEAD) != QF_SHA $SHA"; exit 91; }
+[ "$(git status --porcelain | wc -l)" = 0 ] || { echo "source tree not clean"; git status --porcelain; exit 92; }
 mkdir -p $W/logs
-cd $SRC || exit 90
-[ "$(git rev-parse HEAD)" = "$SHA" ] || exit 91
-[ "$(git status --porcelain | wc -l)" = 0 ] || exit 92
 until flock -n /tmp/motioncorr-bench.lock true; do echo "bench lock held, waiting $(date -u +%T)"; sleep 60; done
 build() { # name extra...
   name=$1; shift

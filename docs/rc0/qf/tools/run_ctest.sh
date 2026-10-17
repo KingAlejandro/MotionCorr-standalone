@@ -1,16 +1,13 @@
 #!/bin/bash
 # QF item 1: full CTest, no exclusions, one configuration. Ported from Q1 (PR #209).
 # Usage: run_ctest.sh cpu|cuda|nvcomp [tag] [ctest -R regex]
-# Lane from the environment (defaults = W-QF-PREP rehearsal lane): QF_W, QF_CPUS,
-# QF_GPU_UUID, QF_GPU_LOCK. CUDA configurations hold the lane GPU flock for the whole batch
+# Lane from the environment (all required): QF_W, QF_CPUS, QF_GPU_UUID, QF_GPU_LOCK. CUDA configurations hold the lane GPU flock for the whole batch
 # and see only that GPU (CUDA_VISIBLE_DEVICES=<UUID>). Every configuration waits while the
 # bench lock is held (probe only). Writes $QF_W/ctest-<cfg>[-tag].{log,junit.xml,exit}.
 set -u
 cfg=$1; tag=${2:-}; rx=${3:-}
-W=${QF_W:-/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP}
-CPUS=${QF_CPUS:-96-103}
-GPU=${QF_GPU_UUID:-GPU-eddb42fe-4f9a-adde-76d3-b924e14add54}
-LOCK=${QF_GPU_LOCK:-/tmp/motioncorr-gpu0-correctness.lock}
+: "${QF_W:?}" "${QF_CPUS:?}" "${QF_GPU_UUID:?}" "${QF_GPU_LOCK:?}"
+W=$QF_W CPUS=$QF_CPUS GPU=$QF_GPU_UUID LOCK=$QF_GPU_LOCK
 B=$W/build-$cfg
 O=$W/ctest-$cfg${tag:+-$tag}
 export PATH=/home/alex/.mc-venv/bin:/usr/local/cuda-12.8/bin:$PATH

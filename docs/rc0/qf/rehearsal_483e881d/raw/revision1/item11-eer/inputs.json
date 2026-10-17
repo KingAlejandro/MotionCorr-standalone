@@ -1,0 +1,151 @@
+{
+ "f3": {
+  "path": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_20-39-45.801_eer_data_4096x4096.eer",
+  "sha256": "fad4d37cc4b7b73076e3dd94c44be8a343f37f60b218e8057424b2154c9878ba",
+  "corpus_md": "fad4d37cc4b7b73076e3dd94c44be8a343f37f60b218e8057424b2154c9878ba",
+  "match": true
+ },
+ "f4": {
+  "path": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+  "sha256": "2a46fd6123a7240e95acb324681c281964ec21da9037e05d66d9ab37319e9fed",
+  "corpus_md": "2a46fd6123a7240e95acb324681c281964ec21da9037e05d66d9ab37319e9fed",
+  "match": true
+ },
+ "g": {
+  "path": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674725_Data_4659374_4659376_20230406_014501_EER.eer",
+  "sha256": "3fc5feb61f487f0f4f6ec1317ae033138fe50e7da80e3b5b16bab3aaff2403f5",
+  "corpus_md": "3fc5feb61f487f0f4f6ec1317ae033138fe50e7da80e3b5b16bab3aaff2403f5",
+  "match": true
+ },
+ "g_gain": {
+  "path": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-12963/data/EMPIAR-Deposition/GainReference/20230326_221855_EER_GainReference.gain",
+  "sha256": "6d4f3e5f9a6b837c637dc7098420e1c0cdfbbd61c9305a7780568f67c7134050",
+  "corpus_md": "6d4f3e5f9a6b837c637dc7098420e1c0cdfbbd61c9305a7780568f67c7134050",
+  "match": true
+ },
+ "f3_trunc60": {
+  "args": [
+   "truncate",
+   "0.6"
+  ],
+  "sha256": "e23cd25ef3bb3600a057e36ddd3a091ceb20693fedaaf4fd910f4e2ed12ed8f7",
+  "pr208_sha256": "e23cd25ef3bb3600a057e36ddd3a091ceb20693fedaaf4fd910f4e2ed12ed8f7",
+  "match": true
+ },
+ "f3_rand": {
+  "args": [
+   "random",
+   "500",
+   "4096"
+  ],
+  "sha256": "e0cfbe1c7542de3a161ebe2ff139443c446fb33a4f166bd75f48470d602047da",
+  "pr208_sha256": "e0cfbe1c7542de3a161ebe2ff139443c446fb33a4f166bd75f48470d602047da",
+  "match": true
+ },
+ "f3_ff": {
+  "args": [
+   "ff",
+   "700"
+  ],
+  "sha256": "ebdb0e12dea7be0f059b230c7b6434ad62e9137f0cec6e9f0246f0e5aaf4099a",
+  "pr208_sha256": "ebdb0e12dea7be0f059b230c7b6434ad62e9137f0cec6e9f0246f0e5aaf4099a",
+  "match": true
+ },
+ "f3_zero": {
+  "args": [
+   "zero",
+   "900"
+  ],
+  "sha256": "c7cf6747e2b3d17c018ece718aff242ce8e765720da93a85bc816d052910ee54",
+  "pr208_sha256": "c7cf6747e2b3d17c018ece718aff242ce8e765720da93a85bc816d052910ee54",
+  "match": true
+ },
+ "n65000_4k_n240": {
+  "args": [
+   "--det",
+   "4096",
+   "--nfrac",
+   "240",
+   "--codec",
+   "65000",
+   "--bg",
+   "20000"
+  ],
+  "sha256": "15feaf9812a1468843bb37c7b6e4dcc58238c4451f3cd082c300d9bfbd07897c",
+  "pr208_sha256": null
+ },
+ "n65001_2k_n240": {
+  "args": [
+   "--det",
+   "2048",
+   "--nfrac",
+   "240",
+   "--codec",
+   "65001",
+   "--bg",
+   "20000"
+  ],
+  "sha256": "9b2160f8f938c3afd54908fb3017429b92591769b9df0ed7ef07629776b5893d",
+  "pr208_sha256": null
+ },
+ "n65002_2k_n240": {
+  "args": [
+   "--det",
+   "2048",
+   "--nfrac",
+   "240",
+   "--codec",
+   "65002",
+   "--bg",
+   "20000"
+  ],
+  "sha256": "d8b77c59d00d684b6c9ee791689541b6cac07fbaf76be01152f169780f0b1e9f",
+  "pr208_sha256": null
+ },
+ "ovf4k_n49152": {
+  "args": [
+   "--det",
+   "4096",
+   "--nfrac",
+   "49152",
+   "--hot",
+   "4",
+   "--bg",
+   "2000"
+  ],
+  "sha256": "79b230b3cfa70ac68dc5eb7f8e48ba96892ae2ee085b65b5f66c4cd1e1201a68",
+  "pr208_sha256": null
+ },
+ "ovf2k_n196608": {
+  "args": [
+   "--det",
+   "2048",
+   "--nfrac",
+   "196608",
+   "--hot",
+   "1",
+   "--bg",
+   "2000"
+  ],
+  "sha256": "5d159a1b86ec05cc4e09f920931e6ca75ca6094c9f3c5818503d8a7bf4643677",
+  "pr208_sha256": null
+ },
+ "ovf4k_n196608": {
+  "args": [
+   "--det",
+   "4096",
+   "--nfrac",
+   "196608",
+   "--hot",
+   "1",
+   "--bg",
+   "2000"
+  ],
+  "sha256": "8b42db6c38184b0896794b848a3a930772d2745b8302fe6c7c1ffefb45693c29",
+  "pr208_sha256": null
+ },
+ "gain_wrong_2048": {
+  "sha256": "49b7f376c85f9e5b82ac99bf93261f7d2b1cd87eb0993dc9457d815885c5fa96",
+  "note": "QF-written 2048x2048 float32 ones"
+ }
+}

@@ -2,7 +2,7 @@
 """Shared helpers for the RC0 QF (issue #198). Ported from Q1 (PR #209, bf69efc2, W-QUAL).
 
 QF change: the lane is no longer hard-coded to GPU1 + CPUs 104-111. It comes from the
-environment (defaults = the W-QF-PREP rehearsal lane):
+environment, and a missing variable is an error:
   QF_W         work directory holding src/ and build-{cpu,cuda,nvcomp}/
   QF_CPUS      CPU mask for every child (taskset)
   QF_GPU_UUID  the lane's GPU, pinned through CUDA_VISIBLE_DEVICES=<UUID>
@@ -25,11 +25,18 @@ import threading
 import time
 from pathlib import Path
 
-W = Path(os.environ.get('QF_W', '/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP'))
+def _required(name):
+    value = os.environ.get(name)
+    if not value:
+        raise SystemExit(f'qual_lib: {name} is not set; export the QF lane (docs/rc0/qf/README.md)')
+    return value
+
+
+W = Path(_required('QF_W'))
 SRC = W / 'src'
-CPUS = os.environ.get('QF_CPUS', '96-103')
-LANE_GPU_UUID = os.environ.get('QF_GPU_UUID', 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54')  # 4GPUs GPU0
-LANE_GPU_LOCK = os.environ.get('QF_GPU_LOCK', '/tmp/motioncorr-gpu0-correctness.lock')
+CPUS = _required('QF_CPUS')
+LANE_GPU_UUID = _required('QF_GPU_UUID')
+LANE_GPU_LOCK = _required('QF_GPU_LOCK')
 NVCOMP_LIB = '/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib'
 # Q1's retained pre-#178 (d7171b81) builds are the #178 reference; not rebuilt for QF.
 Q1 = Path('/mnt/clathrin/alex-motioncorr-rc0/W-QUAL')

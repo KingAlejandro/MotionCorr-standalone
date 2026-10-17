@@ -393,6 +393,8 @@ private:
 	int findGoodSize(int request);
 
 	void doseWeighting(std::vector<MultidimArray<fComplex> > &Fframes, std::vector<RFLOAT> doses, RFLOAT apix);
+	// "symmetric" or "original": the doseWeighting path this object was compiled with.
+	static const char *doseWeightingPath();
 
 	void realSpaceInterpolation(Image <float> &Isum, std::vector<Image<float> > &Iframes, MotionModel *model, std::ostream &logfile);
 

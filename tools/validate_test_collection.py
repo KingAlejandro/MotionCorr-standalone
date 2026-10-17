@@ -67,6 +67,11 @@ DEFAULT_REQUIRED_TESTS = [
     # collected; the CUDA-only CudaErrorClass is not listed here, matching
     # the existing exclusion of CudaWrapperUploadFailure.
     "PatchRetryState",
+    # CPU dose weighting (#179, #220): exact bits against the frozen base
+    # doseWeighting, including the FMA-contraction signed-zero case, for the
+    # selected path and for the forced original path.
+    "CpuDoseSymmetry",
+    "CpuDoseSymmetryBase",
     # Issue #85 lane C: each arm's MRC/STAR inventory and structure is checked
     # independently before pairwise image equality is considered.
     "OutputTreeComparator",

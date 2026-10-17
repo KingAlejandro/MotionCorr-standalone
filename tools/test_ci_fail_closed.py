@@ -199,6 +199,8 @@ exec "{sys.executable}" "$@"
             "DefectParser",
             "GlobalIfftElision",
             "PatchRetryState",
+            "CpuDoseSymmetry",
+            "CpuDoseSymmetryBase",
             "OutputTreeComparator",
             "RunnerInterpolateRecenter",
             "RunnerInterpolateShifts",
@@ -267,6 +269,7 @@ exec "{sys.executable}" "$@"
         # only thing that can reject the collection is the missing-name check.
         for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults",
                         "DefectParser", "GlobalIfftElision", "PatchRetryState",
+                        "CpuDoseSymmetry", "CpuDoseSymmetryBase",
                         "OutputTreeComparator", "MultiGpuScheduling", "NativeMovieStaging",
                         "GainCacheOwnership", "JointStarPublication",
                         "MicrographModelBounds", "CompressedMovieSequence",

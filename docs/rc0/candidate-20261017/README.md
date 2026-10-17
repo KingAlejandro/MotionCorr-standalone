@@ -27,7 +27,7 @@ fixes are out of scope here, and so are their specialist test campaigns.
 | macOS | builds and runs; not qualified; 70/72 (`SyntheticRegression` #222 fails, `NativeMovieStaging` skipped) |
 | Hosted CI (added after push) | draft PR #227, run 39073675385 on the PR merge of `54d6b1ee`: Linux CTest 72/72 (pbzip2 case PASS), CUDA compile-only pass. This is not native CUDA evidence |
 | Not run | pbzip2 case natively (hosted Linux CPU CTest only); item 15 (no D10 fix yet); QM, SCARF, timing |
-| Release state | **not frozen, not fully qualified**: D10 (#221) and D11 (#226) fixes in progress (decided 2026-10-17: fix before freeze); D3, D4 and QF pending (§8) |
+| Release state | **not frozen, not fully qualified**: D10 (#221) and D11 (#226) fixes in progress (decided 2026-10-17: fix before freeze); D4 location decided as (a), the frozen SHA is a `main` commit; D3 merges, the freeze and QF pending (§8) |
 
 ## 1. Composition
 
@@ -41,7 +41,7 @@ Every merge resolved automatically, with no conflict and no manual edit:
 | Order | PR | Head merged | Content | Review state at that head | Hosted CI at that head |
 |---|---|---|---|---|---|
 | 1 | #223 macOS temp-dir test | `cd1f313b8eb765d6cd6c9bcb36e0b907b3caea0b` | one test line (`tests/test_tomography_endpoint.py`) | coordinator review: no findings | [39030283091](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39030283091) success |
-| 2 | #202 input-format fixtures | `45516ff092f51b2e230a203d8e36e7b48e9a22eb` | test generators, tests, CMake test registration, required-test lists; no `src/` | R-NEW round 2 resolved all round-1 findings on `2e88cf5b`. `45516ff0` merges main `483e881d` into the branch; the coordinator verified the net content was unchanged | [39029051194](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39029051194) success |
+| 2 | #202 input-format fixtures | `45516ff092f51b2e230a203d8e36e7b48e9a22eb` | test generators, tests, CMake test registration, required-test lists. Also `.github/workflows/ci.yml`: installs pbzip2/zstd and configures with `-DMC_REQUIRE_ALL_DECODERS=ON`. No `src/` | R-NEW round 2 resolved all round-1 findings on `2e88cf5b`. `45516ff0` merges main `483e881d` into the branch; the coordinator verified the net content was unchanged | [39029051194](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39029051194) success |
 | 3 | #203 format-coverage docs | `0539bf523f125b70a9d4349e77d910e3c3b382db` | `docs/workload_corpus/**` only | R-NEW round 2 left one P2. It was fixed in `0539bf52`, and the coordinator accepted the fix. **No independent round-3 re-review is recorded** | [39029073734](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39029073734) success |
 | 4 | #224 QF runbook and tooling | `ef3e8f72a98c56404a02a5f5708ef09ec5734391` | `docs/rc0/qf/**` (runbook, tools, rehearsal evidence) | R-QF round 3: **fit for QF**, no blocking findings | [39040505351](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39040505351) success |
 
@@ -108,7 +108,7 @@ NUMA node 1 = CPUs 62–123. Full record: `raw/build/build-info.txt`.
 | Lane B | GPU1 `GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d` pinned by UUID, CPUs 104–111, `/tmp/motioncorr-gpu1-correctness.lock` |
 | CPU CTest | lane B CPUs 104–111, no GPU |
 | Multi-GPU window | all four `gpuN-correctness` locks (ascending) and then the bench lock, held by `multigpu_step.sh` from 19:20:45Z to 19:25:00Z in three invocations, after confirming no compute process on any GPU. Workers on GPU0–3 by UUID; 16-CPU budget 96–103 + 104–111 |
-| Bench lock | probed (`flock -n`) before every build, CTest batch and GPU run. It was never found held: 114/114 run records carrying the field show `bench_polls_held 0`, the build log has no wait line, and no CTest `.waits` file was written |
+| Bench lock | probed (`flock -n`) before every build, CTest batch and GPU run. It was never found held: all 114 occurrences of `bench_polls_held` in `raw/` are 0. They are 58 unique run records, plus 56 copies inside the three aggregate `summaries/all.json` files. The build log has no wait line, and no CTest `.waits` file was written |
 | Occupancy at start (18:21Z) | all four GPUs idle with no compute process; every `/tmp/motioncorr-*.lock` free. No other MotionCorr job was running; another user's interactive editor session was left alone |
 | Scratch | `/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND` (5.0 GB at the end, bulk MRC outputs deleted by the tools after grading). Programme directory 49 GB at start, 54 GB at end, against the 300 GB limit. `/mnt/clathrin` had 1.2 TB free |
 | macOS | local Apple M4 Pro, macOS 26.7.1, AppleClang 21.0.0, CMake 4.4.4, `-j6`, scratch `/tmp/rc0cand` |
@@ -232,13 +232,14 @@ earlier version listed D10/D11 as "pending maintainer" and mixed decided documen
 
 | ID | What | State |
 |---|---|---|
-| **D10 / EER-MS** ([#221](https://github.com/KingAlejandro/MotionCorr-standalone/issues/221)) | host EER decoder memory safety (all 65000/65001/65002 loops, container errors outside `omp critical`, TIFF tag checks, `readLegacy`), plus the MRC-header `abs(INT_MIN)` and `ltostr` arithmetic | **decided 2026-10-17: fix before freeze.** In progress in a separate PR with performance preservation and independent review (two reviewers, per #198 D10 option (a)). Runbook item 15 applies once it is composed. Composition must avoid the `render_eer` helper collision with #202 (§11, F-1) |
-| **D11 / QM-D1** ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)) | stale `cudaErrorMemoryAllocation` after a handled OOM degrades the next movie's route (`auto`) or refuses it (pinned `--ingest nvcomp`) | **decided 2026-10-17: fix before freeze**, with no performance regression and no admission redesign. In progress as draft PR #228 |
-| D3 | main merges of the constituent PRs: #223, #202, #203, #224, the D10 PR, #228 and #201 | maintainer approval per PR; not yet given |
-| D4 | freeze scope and frozen SHA, including where the frozen SHA lives (§10) | not taken |
-| QF | full audited QF on the final candidate. It needs the D4 record, GitHub Actions on the exact frozen SHA (`workflow_dispatch` is available, §2), item 15, and item 10 in every shipped build | pending the fixes |
-| REL ([#201](https://github.com/KingAlejandro/MotionCorr-standalone/pull/201)) | release docs | needs the freeze-time update and an independent R-REL re-review. At `34107d38` it still says #220 is pending merge, omits `CpuDoseSymmetryBase`, and describes D10 and D11 as open limitations. Two revisions (`cab5f620`, `34107d38`) have had no independent review since R-REL round 3 (`a31b4e03`) |
-| #203 final fix | `0539bf52` (docs only) | coordinator-accepted; no independent round-3 review. Needs an independent confirmation or an explicit maintainer waiver before the D3 merge |
+| **D10 / EER-MS** ([#221](https://github.com/KingAlejandro/MotionCorr-standalone/issues/221)) | host EER decoder memory safety (all 65000/65001/65002 loops, container errors outside `omp critical`, TIFF tag checks, `readLegacy`), plus the MRC-header `abs(INT_MIN)` and `ltostr` arithmetic | **decided 2026-10-17: fix before freeze.** In progress (W-D10c, Gemini 4; as of the round-2 audit, not yet on origin and with no PR). Requires performance preservation (≥6 balanced pairs with AA null controls) and **two independent reviewers who did not author any D10 commit**: Claude Sonnet 5.5 and MiMo v2.6 Pro. Opus 5.5, Sol 6.1 and Gemini 4 all wrote D10 code. Compose only from the pushed origin head, by explicit SHA; the local ref `fix/rc0-d10-eer-memory-safety` at `486a51df` still has the collision. Runbook item 15 applies once it is composed. Composition must avoid the `render_eer` helper collision with #202 (§11, F-1) |
+| **D11 / QM-D1** ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)) | stale `cudaErrorMemoryAllocation` after a handled OOM degrades the next movie's route (`auto`) or refuses it (pinned `--ingest nvcomp`) | **decided 2026-10-17: fix before freeze**, with no performance regression and no admission redesign. In progress as draft PR #228. Requires performance preservation (≥6 balanced pairs with AA null controls) and independent review by Sol 6.1, which wrote no D11 code. The body must not auto-close #226 ("Fixes #226" → "Refs #226"; requested from W-D11). `CudaStaleErrorAfterOom` must be in the required list or explicitly checked in QF |
+| D3 | main merges of the constituent PRs: #223, #202, #203, #224, the D10 PR, #228 and #201, in this order, as merge commits pinned with `--match-head-commit`, with a tree-equality check after each | per-PR maintainer approval, not yet given. #223 and #224 are still marked draft on GitHub |
+| D4 | freeze scope and frozen SHA | **Location decided 2026-10-17: option (a).** The frozen SHA is a `main` commit taken after the D3 merges. Its push CI is the D4 record's CI run. The SHA itself is not yet taken |
+| QF | full audited QF on the frozen `main` SHA. It needs the D4 record, push CI on that exact SHA, item 15, item 10 in every shipped build, and an explicit check that `CudaStaleErrorAfterOom` was collected and passed | pending the fixes. **The runbook needs a small, independently reviewed update first:** item 15 still says "disposition PENDING", and there is no D11 check. That changes `docs/rc0/qf/`, so the tool hashes are re-recorded |
+| REL ([#201](https://github.com/KingAlejandro/MotionCorr-standalone/pull/201)) | release docs | needs the freeze-time update and an independent R-REL re-review. At `34107d38` it still says #220 is pending merge, omits `CpuDoseSymmetryBase`, and describes D10 and D11 as open limitations. Under (a) it merges **before** the freeze, so `RELEASE_CHECKLIST.md` §10 ("no commits after the evidence") must allow later docs-only QF evidence commits and must say which commit is tagged. Its `src/` line citations must be re-checked against the composed tree. Two revisions (`cab5f620`, `34107d38`) have had no independent review since R-REL round 3 (`a31b4e03`) |
+| #203 final fix | `0539bf52` (docs only) | **closed**: R-NEW round 3 (Claude Sonnet 5.5) CONFIRMED, no blocking findings ([comment](https://github.com/KingAlejandro/MotionCorr-standalone/pull/203#issuecomment-6242750071)). Three P3 wording notes remain open |
+| Licence and notices (#18) | `RELEASE_CHECKLIST.md` row in #201: six ambiguous notices in `CPlot2D.cpp/.h` and four in `src/acc/hip` headers, marked `open` | **needs a maintainer disposition** before the freeze (found by R-INT-C/D) |
 
 **8.2 Decided items handed off to the release docs.** Their dispositions are already decided, so none of these
 blocks the freeze as a code change. Each must be stated correctly in #201.
@@ -251,6 +252,8 @@ blocks the freeze as a code change. Each must be stated correctly in #201.
 | [#215](https://github.com/KingAlejandro/MotionCorr-standalone/issues/215) | nvCOMP file-identity check deferred under D1 option 1 (trusted-input precondition) |
 | C3, F2, DOC1, CMP1 (#216), #222, D2 | THP/allocator note, Tier C `--fixtures <scratch>` workaround, inherited host-memory behaviours, RELION 5.1 differences, macOS `rand()`, optional-SDK notice |
 | S1 / D7 | evaluation RC0; no unrestricted CUDA local-alignment claim |
+| F5, TST2 (#213) | big-endian mode-0 MRC with `nx=128` not swap-detected (document only); genuine device-poisoning control (post-RC0) |
+| `metadata_table.cpp:1721` | `addToCPlot2D` reads `label2offset[EMDL_UNDEFINED]`, i.e. index −1, before checking for `EMDL_UNDEFINED`. This is a small out-of-bounds read on the report-plot path, flagged by V-EER and R-INT-D. It is outside #221/D10. **Disposition to be confirmed by the maintainer** (recommended: document now, narrow fix after RC0). ASan runs that render the report hit it, which is why D10's sanitizer controls use `--skip_report_pdf` |
 
 **8.3 Not a blocker; recorded.** #202's opt-in `RealCutdown` assets live in an external GitHub release
 (`real-cutdown-v1`) that is still a draft. The test registers only when `MC_REAL_CUTDOWN_DIR` is set, and it is not in
@@ -287,27 +290,30 @@ bash tools/multigpu_step.sh --driver item12_retry.py --dataset
 ## 10. Next steps
 
 1. **D10 and D11 fixes:** finish them in their PRs, then independent review (D10: two reviewers; D11: Sol 6.1).
-2. **Composition and affected reruns.** Each reviewed fix is merged into this branch as a new commit labelled
-   *tested source*. `rc0-candidate-20261017-t3-tested` is moved to that commit for direct `workflow_dispatch` CI.
-   On every composition, the reruns are:
-   - always: builds (item 0) and CTest ×3 (items 1–4, 10);
-   - D10 (EER decoder, MRC header and string helpers): item 11 (#208 replay plus guard-removed control), item 13
-     (MRC #204 harness), items 5/6 (all 7 families × G/L, because the MRC header parsing used by every MRC family
-     changes), item 15, and macOS (item 14);
-   - D11 (CUDA per-movie failure path): item 12 (single-GPU and dataset), item 7 (#178, including the injected
-     recoverable fallback), items 5/6, item 9 (#123 matrix), and item 8 (multi-GPU publication).
-
-   The whole set takes about 75 min of compute, so each composition may run all of it.
-3. **D4 and QF.** A green composition and QF are separate steps; QF itself must still run on the frozen SHA. Where
-   the frozen SHA lives is a maintainer decision. The options are:
-   - (a) merge the reviewed PRs into `main` (D3) and freeze a `main` commit, which gets push CI directly;
-   - (b) freeze a candidate-branch commit, run `workflow_dispatch` CI on it, then fast-forward `main` to exactly
-     that commit.
-
-   Either way, QF runs on the frozen SHA with the D4 record, and evidence is committed afterwards as evidence-only
-   commits.
-4. **#201** final revision and R-REL re-review after QF (§8.1).
-5. **#203** `0539bf52`: an independent confirmation, or a maintainer waiver.
+2. **Composition and reruns.** Tested compositions are built on the **`rc0-candidate-20261017-t3-tested`** line,
+   starting from `adb32785`. Each reviewed fix is merged there by explicit origin SHA. That line has no candidate
+   evidence docs, so its tree can be compared with the future `main` merges: equal, apart from #201. This branch
+   (#227) then merges each tested composition and adds evidence-only commits. Every composition runs the **full**
+   set (about 75 min); the round-2 audit showed a per-fix subset can miss inputs, e.g. item 8's mixed dataset
+   contains an EER movie and item 12 reads MRC inputs. Before reruns, check the composed tree for duplicate test
+   names, helper subcommands and required-list entries.
+3. **D4 under decision (a)**, in this order:
+   1. Reviewed fixes are composed and their reruns pass.
+   2. #201 is updated (D10/D11 outcomes, #220, `CpuDoseSymmetryBase`, line citations, the tag/evidence rule) and
+      re-reviewed by R-REL.
+   3. The QF runbook update is reviewed.
+   4. D3 merges go into `main` in candidate order, pinned with `--match-head-commit`, checking the tree after each.
+   5. The frozen SHA F is the `main` commit after the last merge.
+   6. Push CI runs on F.
+   7. The full QF runs on F with the D4 record.
+   8. QF results go into docs-only commits after F: `git diff F HEAD -- . ':!docs/rc0' ':!docs/release'` must be
+      empty.
+   9. The tag goes on the commit the maintainer and #201 name (F, or the evidence commit that cites F).
+4. **#201:** the update above, before the freeze. The QF results are filled in afterwards, as evidence.
+5. **Maintainer:**
+   - D3 approvals;
+   - the licence/notices disposition (#18);
+   - the `metadata_table.cpp:1721` disposition.
 
 ## 11. Integration audit (2026-10-17)
 
@@ -326,3 +332,24 @@ would fail. The coordinator confirmed this with `git merge-tree` and asked the D
 test on the composed tree. R-INT-A alone noted that #198 asked for two D10 reviewers; that is adopted.
 
 This revision fixes the README contradictions, the `raw/` paths, the macOS summary note, and §8/§10.
+
+**Round 2.** Two more Gemini 4 auditors (R-INT-C/D) and two Claude Sonnet 5.5 auditors (R-INT-E/F) used one
+identical brief. All four returned ON TRACK WITH ISSUES, with no open P1. All four confirmed:
+- the round-1 fixes;
+- run `39075928389` on exactly `adb32785`;
+- that merging the four PRs into `71ab841e` reproduces tree `bd4742f7` in any order;
+- that #228 composes cleanly;
+- that the helper collision is fixed only in the local `w-d10c` (`9cc45d1a`).
+
+The remaining findings are adopted in §8.1, §8.2 and §10:
+- conflicts with decision (a) (#201 ordering and the checklist tag rule);
+- D10 reviewer independence (Sol authored D10 code);
+- the licence/notices row;
+- the #228 auto-close keyword;
+- the required-list status of `CudaStaleErrorAfterOom`;
+- the runbook item 15/D11 update;
+- the full rerun set;
+- building tested compositions on the `-tested` line;
+- the `bench_polls_held` count wording;
+- the #202 `ci.yml` delta;
+- `metadata_table.cpp:1721`.

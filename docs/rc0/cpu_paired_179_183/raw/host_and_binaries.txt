@@ -1,0 +1,12 @@
+A 0746b03b2e77bf6fa5a431c54d42176899a07b94bf1b031824f797ded3215236 CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+179 e0ac28a3fc74ef4a0a43400c772ae2441a6931a01799adaa764c8fdf812a83c0 CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+183 8d372f0380bcb6985d2ef242d0cb56f7300a03da7ffe12f1946adc12be045e70 CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+always [madvise] never
+GLIBC_TUNABLES=[]
+6.8.0-86-generic
+Model name:                           AMD EPYC 7763 64-Core Processor
+USER         PID     ELAPSED COMMAND
+ubuntu   2284816       00:00 ps -eo user,pid,etime,args --sort=-pcpu
+ubuntu   1156942 68-02:20:35 ./ctffind --old-school-input -j:1
+ubuntu   1635429 66-23:56:53 /home/ubuntu/work/ctffind-4.1.14-portable/ctffind --old-school-input-ctffind4 -j:1
+cat: /sys/devices/system/cpu/cpu8/cpufreq/scaling_governor: No such file or directory

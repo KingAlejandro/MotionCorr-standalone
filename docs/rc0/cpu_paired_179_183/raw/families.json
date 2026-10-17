@@ -1,0 +1,200 @@
+{
+ "_comment": "Family definitions for the CPU/GPU workload corpus. movies/gain are relative to the corpus data root (EMPIAR-* trees as fetched by tools/fetch_corpus.py, plus tutorial/Movies). 'link' is the file name MotionCorr sees inside corpus/<id>/Movies (.mrc movies are linked as .mrcs, which main requires for MRC stacks). expected_frames is the decoded (grouped, for EER) frame count and is passed as --expected_frames.",
+ "families": [
+  {
+   "id": "tutorial",
+   "label": "RELION tutorial",
+   "container": "u8 Deflate TIFF",
+   "nx": 3838,
+   "ny": 3710,
+   "frames": 24,
+   "angpix": 0.885,
+   "voltage": 200,
+   "cs": 1.4,
+   "dose": 1.277,
+   "dose_source": "RELION tutorial value (existing profiling)",
+   "gain": "tutorial/Movies/gain.mrc",
+   "gain_link": "gain.mrc",
+   "movies": [
+    "tutorial/Movies/20170629_00026_frameImage.tiff",
+    "tutorial/Movies/20170629_00031_frameImage.tiff"
+   ]
+  },
+  {
+   "id": "e10028",
+   "label": "EMPIAR-10028",
+   "container": "float32 MRC (.mrcs)",
+   "nx": 4096,
+   "ny": 4096,
+   "frames": 16,
+   "angpix": 1.34,
+   "voltage": 300,
+   "cs": 2.7,
+   "dose": 1.0,
+   "dose_source": "placeholder (recipe has none)",
+   "gain": null,
+   "movies": [
+    "EMPIAR-10028/data/Micrographs/Micrographs_part1/031_movie.mrcs",
+    "EMPIAR-10028/data/Micrographs/Micrographs_part1/091_movie.mrcs"
+   ]
+  },
+  {
+   "id": "e10361",
+   "label": "EMPIAR-10361",
+   "container": "u8 LZW BigTIFF",
+   "nx": 5760,
+   "ny": 4092,
+   "frames": 62,
+   "angpix": 0.826,
+   "voltage": 300,
+   "cs": 2.7,
+   "dose": 1.032258064516129,
+   "dose_source": "recipe: 64 e/A2 / 62 frames",
+   "gain": null,
+   "movies": [
+    "EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-12_0007_Jan20_08.57.33.tif",
+    "EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-18_0004_Jan20_09.12.45.tif"
+   ]
+  },
+  {
+   "id": "e10641",
+   "label": "EMPIAR-10641",
+   "container": "u8 LZW BigTIFF",
+   "nx": 5760,
+   "ny": 4092,
+   "frames": 70,
+   "angpix": 0.4,
+   "voltage": 300,
+   "cs": 2.7,
+   "dose": 1.0,
+   "dose_source": "placeholder (recipe has none)",
+   "gain": "EMPIAR-10641/data/Movies/CountCDSRef_HM70-1_65-9_0000_Oct28_19.44.32.mrc",
+   "gain_link": "gain.mrc",
+   "movies": [
+    "EMPIAR-10641/data/Movies/Dataset/HM70-1_10-A-002_0002_Oct28_23.00.41.tif",
+    "EMPIAR-10641/data/Movies/Dataset/HM70-1_10-A-004_0008_Oct28_23.06.04.tif"
+   ]
+  },
+  {
+   "id": "e10441",
+   "label": "EMPIAR-10441",
+   "container": "u8 LZW BigTIFF",
+   "nx": 11520,
+   "ny": 8184,
+   "frames": 50,
+   "angpix": 0.5685,
+   "voltage": 200,
+   "cs": 2.7,
+   "dose": 0.999033,
+   "dose_source": "recipe: accession XML dose per frame",
+   "gain": "EMPIAR-10441/data/frames/200509_gain.mrc",
+   "gain_link": "gain.mrc",
+   "movies": [
+    "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif"
+   ],
+   "skip_j": [
+    4
+   ],
+   "skip_j_reason": "lock-time budget: estimate exceeded ~10 h, so --j 4 is dropped for the two largest families"
+  },
+  {
+   "id": "e10474f3",
+   "label": "EMPIAR-10474 Falcon3 (58 fr)",
+   "container": "EER (65001)",
+   "nx": 4096,
+   "ny": 4096,
+   "frames": 58,
+   "eer_grouping": 40,
+   "angpix": 1.06,
+   "voltage": 300,
+   "cs": 2.7,
+   "dose": 1.0,
+   "dose_source": "placeholder (recipe has none)",
+   "gain": null,
+   "movies": [
+    "EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_20-39-45.801_eer_data_4096x4096.eer",
+    "EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_20-57-59.233_eer_data_4096x4096.eer"
+   ]
+  },
+  {
+   "id": "e10474f4",
+   "label": "EMPIAR-10474 Falcon4 (144 fr)",
+   "container": "EER (65001)",
+   "nx": 4096,
+   "ny": 4096,
+   "frames": 144,
+   "eer_grouping": 40,
+   "angpix": 1.64,
+   "voltage": 300,
+   "cs": 2.7,
+   "dose": 1.0,
+   "dose_source": "placeholder (recipe has none)",
+   "gain": null,
+   "movies": [
+    "EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+    "EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919967_Data_10919593_10919595_20200711_002422_Fractions.mrc.eer"
+   ],
+   "skip_j": [
+    4
+   ],
+   "skip_j_reason": "lock-time budget: estimate exceeded ~10 h, so --j 4 is dropped for the two largest families"
+  },
+  {
+   "id": "e12963",
+   "label": "EMPIAR-12963",
+   "container": "EER (65001)",
+   "nx": 4096,
+   "ny": 4096,
+   "frames": 39,
+   "eer_grouping": 49,
+   "angpix": 0.97,
+   "voltage": 300,
+   "cs": 2.7,
+   "dose": 1.282051282051282,
+   "dose_source": "XML nominal total 50 e/A2 / 39 frames (grouping allocation not established)",
+   "gain": "EMPIAR-12963/data/EMPIAR-Deposition/GainReference/20230326_221855_EER_GainReference.gain",
+   "gain_link": "gain.gain",
+   "movies": [
+    "EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674725_Data_4659374_4659376_20230406_014501_EER.eer"
+   ]
+  },
+  {
+   "id": "e10164",
+   "label": "EMPIAR-10164 tilt series (8 fr)",
+   "container": "u8 MRC (.mrcs)",
+   "nx": 7420,
+   "ny": 7676,
+   "frames": 8,
+   "angpix": 0.675,
+   "voltage": 300,
+   "cs": 2.7,
+   "dose": 1.0,
+   "dose_source": "placeholder (not stated per frame)",
+   "gain": null,
+   "movies": [
+    "EMPIAR-10164/data/frames/TS_01_000_0.0.mrc",
+    "EMPIAR-10164/data/frames/TS_01_020_30.0.mrc"
+   ],
+   "link_rename": ".mrcs"
+  },
+  {
+   "id": "e10216",
+   "label": "EMPIAR-10216 apoferritin (59 fr)",
+   "container": "int16 MRC (.mrcs)",
+   "nx": 4096,
+   "ny": 4096,
+   "frames": 59,
+   "angpix": 0.517,
+   "voltage": 300,
+   "cs": 2.7,
+   "dose": 1.0,
+   "dose_source": "placeholder (not stated per frame)",
+   "gain": null,
+   "movies": [
+    "EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+    "EMPIAR-10216/data/FoilHole_14961496_Data_14966722_14966723_20180615_1742_Fractions.mrc"
+   ],
+   "link_rename": ".mrcs"
+  }
+ ]
+}

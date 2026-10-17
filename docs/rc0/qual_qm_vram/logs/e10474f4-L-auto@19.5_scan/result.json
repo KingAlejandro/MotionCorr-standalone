@@ -1,0 +1,84 @@
+{
+ "spec": "e10474f4-L-auto@19.5:scan",
+ "family": "e10474f4",
+ "config": "L",
+ "ingest": "auto",
+ "target_free_gib": 19.5,
+ "movies": [
+  "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer"
+ ],
+ "identity": {
+  "e10474f4": {
+   "movie": "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer",
+   "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+   "bytes": 2931223304
+  }
+ },
+ "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 144 --i movies.star --j 8 --eer_grouping 40 --eer_upsampling 1 --o /mnt/clathrin/alex-motioncorr-rc0/W-QM/runs/e10474f4-L-auto@19.5_scan/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-rc0/W-QM/runs/e10474f4-L-auto@19.5_scan/witness.txt --patch_x 5 --patch_y 5",
+ "binary_sha256_head": null,
+ "bench_lock_wait_s": 0,
+ "gpu_free_before_balloon_mib": 81154,
+ "free_vram_after_balloon_mib": 19965,
+ "balloon_held_mib": 60766,
+ "gpu_used_before_run_mib": 61189,
+ "timed_out": false,
+ "wall_s": 19.72,
+ "exit": 1,
+ "sampled": {
+  "n": 76,
+  "peak_gpu_used_mib": 80959,
+  "peak_motioncorr_above_baseline_mib": 19770,
+  "peak_compute_app_mib": 19764,
+  "min_free_mib": 196
+ },
+ "balloon_gone": true,
+ "gpu_used_after_mib": 1,
+ "gpu_apps_after": {},
+ "products": {
+  "FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc": {
+   ".mrc": false,
+   ".star": false,
+   ".log": true
+  }
+ },
+ "joint_star": false,
+ "witness": [
+  "Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer compact"
+ ],
+ "log_lines": {
+  "FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.log": [
+   "Staging this movie as native unsigned 16-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 4831838208 bytes for 144 x 4096 x 4096 samples, released before any float movie is materialized.",
+   "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+   "Released native uint16 host staging after device forward FFT.",
+   "Buffer VRAM:                  10379.64 MiB",
+   "cuFFT workspace VRAM:         577.12 MiB",
+   "Peak GPU memory allocated:    10956.76 MiB",
+   "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+   "CUDA Error in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_movie_session.cu:2300 : out of memory",
+   "WARNING: resident patch preparation did not complete for patch (1, 1); recorded CUDA error out of memory at preparePatchInVram:2300. Classified recoverable, so this patch is re-attempted through alignPatch(), which re-dispatches CUDA on the same device -- this is not a CPU fallback.",
+   "CUDA Error in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_fft_prep.cu:324 : out of memory",
+   "WARNING: CUDA patch preparation declined for patch (1, 1); classified recoverable, continuing with host patch preparation."
+  ]
+ },
+ "stdout_tail": [
+  "Continuing with the remaining movies.",
+  "in: /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/motioncorr_runner.cpp, line 1092",
+  "ERROR: ",
+  "Motion correction failed for 1 movie(s): Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer. Successful per-movie outputs were retained; joint output was not generated.",
+  "=== Backtrace  ===",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr(+0x5afd7) [0x60023fe3efd7]",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr(+0x2e281) [0x60023fe12281]",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr(+0x50cd6) [0x60023fe34cd6]",
+  "/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x72a182a2a1ca]",
+  "/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x72a182a2a28b]",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr(+0x51845) [0x60023fe35845]",
+  "==================",
+  "ERROR: ",
+  "Motion correction failed for 1 movie(s): Movies/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions_mrc.eer. Successful per-movie outputs were retained; joint output was not generated."
+ ],
+ "max_rss_mib": 12546,
+ "all_products": false,
+ "compare": {
+  "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+ }
+}

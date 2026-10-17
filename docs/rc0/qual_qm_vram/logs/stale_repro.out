@@ -1,0 +1,5 @@
+1. cudaMalloc(free+4GiB)            -> out of memory (handled by caller; error return consumed)
+2. cudaMalloc(1 MiB), unrelated      -> no error
+3. cudaGetLastError() after good launch -> out of memory   <-- stale error from step 1
+4. cudaGetLastError() again          -> no error
+5. control (clear before launch)     -> no error

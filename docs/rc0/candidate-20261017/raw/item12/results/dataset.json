@@ -1,0 +1,69 @@
+{
+ "gpus": [
+  "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+  "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d"
+ ],
+ "cpu_masks": [
+  "96-103",
+  "104-111"
+ ],
+ "wrapper_sha256": "260a79b89dbd97c543179cb46e452493d5fa34fa473c7935e1320d7566eba97b",
+ "shim_sha256": "b7efe25d6d26d14532d5dbd8be3dc2b0ed7587fd4f5a9137da9ada66bed8d002",
+ "runs": {
+  "d1": {
+   "rc": 0,
+   "binary_sha256": "43c4ca0dcfff13b8fb3d4653844415e333e5eb4ea7a8d0e01b76b1f0cb6160ae",
+   "expect": "pass",
+   "verdict": "PASS",
+   "dataset_ready": true,
+   "failure": null,
+   "problems": []
+  },
+  "d2": {
+   "rc": 0,
+   "binary_sha256": "43c4ca0dcfff13b8fb3d4653844415e333e5eb4ea7a8d0e01b76b1f0cb6160ae",
+   "expect": "pass",
+   "verdict": "PASS",
+   "dataset_ready": true,
+   "failure": null,
+   "problems": []
+  },
+  "dshim": {
+   "rc": 0,
+   "binary_sha256": "b7efe25d6d26d14532d5dbd8be3dc2b0ed7587fd4f5a9137da9ada66bed8d002",
+   "expect": "pass",
+   "verdict": "PASS",
+   "dataset_ready": true,
+   "failure": null,
+   "problems": []
+  },
+  "dpoison": {
+   "rc": 3,
+   "binary_sha256": "260a79b89dbd97c543179cb46e452493d5fa34fa473c7935e1320d7566eba97b",
+   "expect": "poison_one",
+   "verdict": "FAIL",
+   "dataset_ready": false,
+   "failure": "Worker phase exited 3",
+   "problems": []
+  },
+  "dpoison_both": {
+   "rc": 3,
+   "binary_sha256": "b7efe25d6d26d14532d5dbd8be3dc2b0ed7587fd4f5a9137da9ada66bed8d002",
+   "expect": "poison_both",
+   "verdict": "FAIL",
+   "dataset_ready": false,
+   "failure": "Worker phase exited 3",
+   "problems": []
+  }
+ },
+ "problems": [],
+ "d1_vs_d2": {
+  "files": 30,
+  "differing": []
+ },
+ "d1_vs_dshim": {
+  "files": 30,
+  "differing": []
+ },
+ "verdict": "PASS"
+}

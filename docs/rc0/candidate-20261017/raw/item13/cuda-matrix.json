@@ -1,0 +1,2390 @@
+{
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/tools/qf_lane_exec.sh",
+ "cpu": false,
+ "matrix": [
+  {
+   "case": {
+    "name": "m0_even",
+    "mode": 0,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "compact"
+   },
+   "arms": {
+    "float": {
+     "label": "m0_even-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m0_even-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m0_even-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m1_even",
+    "mode": 1,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "compact"
+   },
+   "arms": {
+    "float": {
+     "label": "m1_even-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m1_even-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m1_even-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m6_even",
+    "mode": 6,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "compact"
+   },
+   "arms": {
+    "float": {
+     "label": "m6_even-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m6_even-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m6_even-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m2_even",
+    "mode": 2,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "float"
+   },
+   "arms": {
+    "float": {
+     "label": "m2_even-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m2_even-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "float",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true,
+   "pinned_compact": {
+    "label": "m2_even-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   }
+  },
+  {
+   "case": {
+    "name": "m12_even",
+    "mode": 12,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "float"
+   },
+   "arms": {
+    "float": {
+     "label": "m12_even-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m12_even-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "float",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true,
+   "pinned_compact": {
+    "label": "m12_even-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   }
+  },
+  {
+   "case": {
+    "name": "m101_even",
+    "mode": 101,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "float"
+   },
+   "arms": {
+    "float": {
+     "label": "m101_even-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m101_even-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "float",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true,
+   "pinned_compact": {
+    "label": "m101_even-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   }
+  },
+  {
+   "case": {
+    "name": "m0_odd_gain",
+    "mode": 0,
+    "nx": 134,
+    "ny": 98,
+    "nz": 9,
+    "gain": true,
+    "route": "compact"
+   },
+   "arms": {
+    "float": {
+     "label": "m0_odd_gain-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m0_odd_gain-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m0_odd_gain-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m0_20fr",
+    "mode": 0,
+    "nx": 96,
+    "ny": 112,
+    "nz": 20,
+    "route": "compact"
+   },
+   "arms": {
+    "float": {
+     "label": "m0_20fr-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m0_20fr-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m0_20fr-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m0_framesel",
+    "mode": 0,
+    "nx": 128,
+    "ny": 128,
+    "nz": 12,
+    "route": "compact",
+    "extra": [
+     "--first_frame_sum",
+     "3",
+     "--last_frame_sum",
+     "10"
+    ],
+    "frames_expected": null
+   },
+   "arms": {
+    "float": {
+     "label": "m0_framesel-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m0_framesel-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m0_framesel-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m0_swapped",
+    "mode": 0,
+    "nx": 120,
+    "ny": 128,
+    "nz": 8,
+    "route": "compact",
+    "big": true
+   },
+   "arms": {
+    "float": {
+     "label": "m0_swapped-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m0_swapped-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m0_swapped-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m0_nsymbt",
+    "mode": 0,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "compact",
+    "nsymbt": 1024
+   },
+   "arms": {
+    "float": {
+     "label": "m0_nsymbt-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m0_nsymbt-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m0_nsymbt-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m1_odd_gain",
+    "mode": 1,
+    "nx": 134,
+    "ny": 98,
+    "nz": 9,
+    "gain": true,
+    "route": "compact"
+   },
+   "arms": {
+    "float": {
+     "label": "m1_odd_gain-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m1_odd_gain-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m1_odd_gain-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m1_20fr",
+    "mode": 1,
+    "nx": 96,
+    "ny": 112,
+    "nz": 20,
+    "route": "compact"
+   },
+   "arms": {
+    "float": {
+     "label": "m1_20fr-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m1_20fr-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m1_20fr-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m1_framesel",
+    "mode": 1,
+    "nx": 128,
+    "ny": 128,
+    "nz": 12,
+    "route": "compact",
+    "extra": [
+     "--first_frame_sum",
+     "3",
+     "--last_frame_sum",
+     "10"
+    ],
+    "frames_expected": null
+   },
+   "arms": {
+    "float": {
+     "label": "m1_framesel-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m1_framesel-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m1_framesel-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m1_swapped",
+    "mode": 1,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "compact",
+    "big": true
+   },
+   "arms": {
+    "float": {
+     "label": "m1_swapped-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m1_swapped-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m1_swapped-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m1_nsymbt",
+    "mode": 1,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "compact",
+    "nsymbt": 1024
+   },
+   "arms": {
+    "float": {
+     "label": "m1_nsymbt-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m1_nsymbt-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m1_nsymbt-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m6_odd_gain",
+    "mode": 6,
+    "nx": 134,
+    "ny": 98,
+    "nz": 9,
+    "gain": true,
+    "route": "compact"
+   },
+   "arms": {
+    "float": {
+     "label": "m6_odd_gain-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m6_odd_gain-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m6_odd_gain-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m6_20fr",
+    "mode": 6,
+    "nx": 96,
+    "ny": 112,
+    "nz": 20,
+    "route": "compact"
+   },
+   "arms": {
+    "float": {
+     "label": "m6_20fr-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m6_20fr-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m6_20fr-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m6_framesel",
+    "mode": 6,
+    "nx": 128,
+    "ny": 128,
+    "nz": 12,
+    "route": "compact",
+    "extra": [
+     "--first_frame_sum",
+     "3",
+     "--last_frame_sum",
+     "10"
+    ],
+    "frames_expected": null
+   },
+   "arms": {
+    "float": {
+     "label": "m6_framesel-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m6_framesel-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m6_framesel-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m6_swapped",
+    "mode": 6,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "compact",
+    "big": true
+   },
+   "arms": {
+    "float": {
+     "label": "m6_swapped-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m6_swapped-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m6_swapped-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m6_nsymbt",
+    "mode": 6,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "compact",
+    "nsymbt": 1024
+   },
+   "arms": {
+    "float": {
+     "label": "m6_nsymbt-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m6_nsymbt-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "compact": {
+     "label": "m6_nsymbt-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "compact",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "compact_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true
+  },
+  {
+   "case": {
+    "name": "m2_odd_gain",
+    "mode": 2,
+    "nx": 134,
+    "ny": 98,
+    "nz": 9,
+    "gain": true,
+    "route": "float"
+   },
+   "arms": {
+    "float": {
+     "label": "m2_odd_gain-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m2_odd_gain-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "float",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true,
+   "pinned_compact": {
+    "label": "m2_odd_gain-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   }
+  },
+  {
+   "case": {
+    "name": "m2_20fr",
+    "mode": 2,
+    "nx": 96,
+    "ny": 112,
+    "nz": 20,
+    "route": "float"
+   },
+   "arms": {
+    "float": {
+     "label": "m2_20fr-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m2_20fr-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "float",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true,
+   "pinned_compact": {
+    "label": "m2_20fr-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   }
+  },
+  {
+   "case": {
+    "name": "m2_framesel",
+    "mode": 2,
+    "nx": 128,
+    "ny": 128,
+    "nz": 12,
+    "route": "float",
+    "extra": [
+     "--first_frame_sum",
+     "3",
+     "--last_frame_sum",
+     "10"
+    ],
+    "frames_expected": null
+   },
+   "arms": {
+    "float": {
+     "label": "m2_framesel-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m2_framesel-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "float",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true,
+   "pinned_compact": {
+    "label": "m2_framesel-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   }
+  },
+  {
+   "case": {
+    "name": "m2_swapped",
+    "mode": 2,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "float",
+    "big": true
+   },
+   "arms": {
+    "float": {
+     "label": "m2_swapped-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m2_swapped-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "float",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true,
+   "pinned_compact": {
+    "label": "m2_swapped-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   }
+  },
+  {
+   "case": {
+    "name": "m2_nsymbt",
+    "mode": 2,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "float",
+    "nsymbt": 1024
+   },
+   "arms": {
+    "float": {
+     "label": "m2_nsymbt-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m2_nsymbt-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "float",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true,
+   "pinned_compact": {
+    "label": "m2_nsymbt-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   }
+  },
+  {
+   "case": {
+    "name": "m1_odd_nx133_expected_fail",
+    "mode": 1,
+    "nx": 133,
+    "ny": 96,
+    "nz": 8,
+    "route": "compact",
+    "expect_fail": true
+   },
+   "arms": {
+    "float": {
+     "label": "m1_odd_nx133_expected_fail-float",
+     "rc": 1,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "auto": {
+     "label": "m1_odd_nx133_expected_fail-auto",
+     "rc": 1,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "compact": {
+     "label": "m1_odd_nx133_expected_fail-compact",
+     "rc": 1,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    }
+   },
+   "pass": true,
+   "expected_failure": true,
+   "same_error_on_every_route": true,
+   "error": "in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/acc/cuda/cuda_alignpatch.cu, line 457 :: Patch size must be even || in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/motioncorr_runner.cpp, line 1093 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs ",
+   "fail_tail": {
+    "float": [],
+    "auto": [],
+    "compact": []
+   }
+  },
+  {
+   "case": {
+    "name": "m0_odd_nx133_expected_fail",
+    "mode": 0,
+    "nx": 133,
+    "ny": 96,
+    "nz": 8,
+    "route": "compact",
+    "expect_fail": true
+   },
+   "arms": {
+    "float": {
+     "label": "m0_odd_nx133_expected_fail-float",
+     "rc": 1,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "auto": {
+     "label": "m0_odd_nx133_expected_fail-auto",
+     "rc": 1,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "compact": {
+     "label": "m0_odd_nx133_expected_fail-compact",
+     "rc": 1,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    }
+   },
+   "pass": true,
+   "expected_failure": true,
+   "same_error_on_every_route": true,
+   "error": "in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/acc/cuda/cuda_alignpatch.cu, line 457 :: Patch size must be even || in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/motioncorr_runner.cpp, line 1093 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs ",
+   "fail_tail": {
+    "float": [],
+    "auto": [],
+    "compact": []
+   }
+  },
+  {
+   "case": {
+    "name": "m6_odd_nx133_expected_fail",
+    "mode": 6,
+    "nx": 133,
+    "ny": 96,
+    "nz": 8,
+    "route": "compact",
+    "expect_fail": true
+   },
+   "arms": {
+    "float": {
+     "label": "m6_odd_nx133_expected_fail-float",
+     "rc": 1,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "auto": {
+     "label": "m6_odd_nx133_expected_fail-auto",
+     "rc": 1,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "compact": {
+     "label": "m6_odd_nx133_expected_fail-compact",
+     "rc": 1,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    }
+   },
+   "pass": true,
+   "expected_failure": true,
+   "same_error_on_every_route": true,
+   "error": "in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/acc/cuda/cuda_alignpatch.cu, line 457 :: Patch size must be even || in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/motioncorr_runner.cpp, line 1093 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs ",
+   "fail_tail": {
+    "float": [],
+    "auto": [],
+    "compact": []
+   }
+  },
+  {
+   "case": {
+    "name": "m2_odd_nx133_expected_fail",
+    "mode": 2,
+    "nx": 133,
+    "ny": 96,
+    "nz": 8,
+    "route": "float",
+    "expect_fail": true
+   },
+   "arms": {
+    "float": {
+     "label": "m2_odd_nx133_expected_fail-float",
+     "rc": 1,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "auto": {
+     "label": "m2_odd_nx133_expected_fail-auto",
+     "rc": 1,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    }
+   },
+   "pass": true,
+   "expected_failure": true,
+   "same_error_on_every_route": true,
+   "error": "in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/acc/cuda/cuda_alignpatch.cu, line 457 :: Patch size must be even || in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/motioncorr_runner.cpp, line 1093 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs ",
+   "fail_tail": {
+    "float": [],
+    "auto": []
+   }
+  },
+  {
+   "case": {
+    "name": "m101_odd_nx133_expected_fail",
+    "mode": 101,
+    "nx": 133,
+    "ny": 96,
+    "nz": 8,
+    "route": "float",
+    "expect_fail": true
+   },
+   "arms": {
+    "float": {
+     "label": "m101_odd_nx133_expected_fail-float",
+     "rc": 1,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "auto": {
+     "label": "m101_odd_nx133_expected_fail-auto",
+     "rc": 1,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    }
+   },
+   "pass": true,
+   "expected_failure": true,
+   "same_error_on_every_route": true,
+   "error": "in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/acc/cuda/cuda_alignpatch.cu, line 457 :: Patch size must be even || in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/motioncorr_runner.cpp, line 1093 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs ",
+   "fail_tail": {
+    "float": [],
+    "auto": []
+   }
+  },
+  {
+   "case": {
+    "name": "m1_odd_ny97_expected_fail",
+    "mode": 1,
+    "nx": 132,
+    "ny": 97,
+    "nz": 8,
+    "route": "compact",
+    "expect_fail": true
+   },
+   "arms": {
+    "float": {
+     "label": "m1_odd_ny97_expected_fail-float",
+     "rc": 1,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "auto": {
+     "label": "m1_odd_ny97_expected_fail-auto",
+     "rc": 1,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "compact": {
+     "label": "m1_odd_ny97_expected_fail-compact",
+     "rc": 1,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [],
+     "mrc_products": []
+    }
+   },
+   "pass": true,
+   "expected_failure": true,
+   "same_error_on_every_route": true,
+   "error": "in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/acc/cuda/cuda_alignpatch.cu, line 457 :: Patch size must be even || in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/motioncorr_runner.cpp, line 1093 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs ",
+   "fail_tail": {
+    "float": [],
+    "auto": [],
+    "compact": []
+   }
+  },
+  {
+   "case": {
+    "name": "m101_both_odd_expected_fail",
+    "mode": 101,
+    "nx": 133,
+    "ny": 97,
+    "nz": 8,
+    "route": "float",
+    "expect_fail": true
+   },
+   "arms": {
+    "float": {
+     "label": "m101_both_odd_expected_fail-float",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "auto": {
+     "label": "m101_both_odd_expected_fail-auto",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": []
+    }
+   },
+   "pass": true,
+   "expected_failure": true,
+   "same_error_on_every_route": true,
+   "error": "in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/rwMRC.h, line 224 :: Currently we support 4-bit MRC (mode 101) only when nx * ny is an even number. || in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/motioncorr_runner.cpp, line 1093 :: Motion correction failed for 1 movie(s): movie.",
+   "fail_tail": {
+    "float": [],
+    "auto": []
+   }
+  },
+  {
+   "case": {
+    "name": "m0_swapped_nx128_inherited",
+    "mode": 0,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "route": "compact",
+    "big": true,
+    "expect_fail": true
+   },
+   "arms": {
+    "float": {
+     "label": "m0_swapped_nx128_inherited-float",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "auto": {
+     "label": "m0_swapped_nx128_inherited-auto",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": []
+    },
+    "compact": {
+     "label": "m0_swapped_nx128_inherited-compact",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": []
+    }
+   },
+   "pass": true,
+   "expected_failure": true,
+   "same_error_on_every_route": true,
+   "error": "in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/motioncorr_runner.cpp, line 1022 :: Movie movie.mrcs frame count mismatch: expected 8 frames, but decoded 134217728 frames. || in: /mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/src/src/motioncorr_runner.cpp, line 1093 :: Motion correction faile",
+   "fail_tail": {
+    "float": [
+     "Movie movie.mrcs frame count mismatch: expected 8 frames, but decoded 134217728 frames."
+    ],
+    "auto": [
+     "Movie movie.mrcs frame count mismatch: expected 8 frames, but decoded 134217728 frames."
+    ],
+    "compact": [
+     "Movie movie.mrcs frame count mismatch: expected 8 frames, but decoded 134217728 frames."
+    ]
+   }
+  },
+  {
+   "case": {
+    "name": "m12_odd_gain",
+    "mode": 12,
+    "nx": 134,
+    "ny": 98,
+    "nz": 9,
+    "gain": true,
+    "route": "float"
+   },
+   "arms": {
+    "float": {
+     "label": "m12_odd_gain-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m12_odd_gain-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "float",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true,
+   "pinned_compact": {
+    "label": "m12_odd_gain-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   }
+  },
+  {
+   "case": {
+    "name": "m101_gain",
+    "mode": 101,
+    "nx": 128,
+    "ny": 128,
+    "nz": 8,
+    "gain": true,
+    "route": "float"
+   },
+   "arms": {
+    "float": {
+     "label": "m101_gain-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "m101_gain-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "expected_route": "float",
+   "routes_ok": true,
+   "all_rc0": true,
+   "auto_vs_float": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "pass": true,
+   "pinned_compact": {
+    "label": "m101_gain-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   }
+  }
+ ],
+ "refuse": [],
+ "compressed": [],
+ "damaged": [],
+ "errors": [],
+ "options": []
+}

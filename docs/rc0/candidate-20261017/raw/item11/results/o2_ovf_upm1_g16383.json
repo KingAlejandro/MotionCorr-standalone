@@ -1,0 +1,134 @@
+{
+ "case": "o2_ovf_upm1_g16383",
+ "desc": "overflow boundary: up -1, g16383 -> 65532 <= 65535 (largest fitting group at -1)",
+ "recorded": {
+  "auto": {
+   "rc": 0,
+   "routes": [
+    "compact"
+   ]
+  },
+  "float": {
+   "rc": 0,
+   "routes": [
+    "float"
+   ]
+  },
+  "compact": {
+   "rc": 0,
+   "routes": [
+    "compact"
+   ]
+  }
+ },
+ "recorded_compare_rc": 0,
+ "arms": {
+  "auto": {
+   "rc": 0,
+   "routes": [
+    "compact"
+   ],
+   "binary_sha256": "43c4ca0dcfff13b8fb3d4653844415e333e5eb4ea7a8d0e01b76b1f0cb6160ae",
+   "gpu_witness": {
+    "uuids_seen_for_pid": [
+     "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    ],
+    "peak_mib": 574,
+    "smi_samples": 37,
+    "pid_hits": 35,
+    "on_lane_gpu_only": true
+   },
+   "max_rss_kib": 5800764,
+   "wall_s": 13.439
+  },
+  "float": {
+   "rc": 0,
+   "routes": [
+    "float"
+   ],
+   "binary_sha256": "43c4ca0dcfff13b8fb3d4653844415e333e5eb4ea7a8d0e01b76b1f0cb6160ae",
+   "gpu_witness": {
+    "uuids_seen_for_pid": [
+     "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    ],
+    "peak_mib": 574,
+    "smi_samples": 40,
+    "pid_hits": 38,
+    "on_lane_gpu_only": true
+   },
+   "max_rss_kib": 5840116,
+   "wall_s": 13.479
+  },
+  "compact": {
+   "rc": 0,
+   "routes": [
+    "compact"
+   ],
+   "binary_sha256": "43c4ca0dcfff13b8fb3d4653844415e333e5eb4ea7a8d0e01b76b1f0cb6160ae",
+   "gpu_witness": {
+    "uuids_seen_for_pid": [
+     "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    ],
+    "peak_mib": 574,
+    "smi_samples": 27,
+    "pid_hits": 25,
+    "on_lane_gpu_only": true
+   },
+   "max_rss_kib": 5800632,
+   "wall_s": 9.994
+  }
+ },
+ "problems": [],
+ "compare": {
+  "rc": 0,
+  "tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 4194304 pixels per arm\nAllowed added .log line prefixes (dropped from BOTH arms): 'Staging this movie as native', 'Released native uint', 'Materialized native uint', 'EER grouping'\nComparison: complete non-PDF tree; status=PASS; different files=0\n"
+ },
+ "inventory": {
+  "auto": {
+   "products": {
+    "Movies/movie.mrc": "9b5b15f32e6354e1",
+    "Movies/movie.star": "star"
+   },
+   "stars": {
+    "Movies/movie.star": "6dce0193014f1f04153cd176f2d32aedba568fbb2b3d4bb0d3219a332374d582",
+    "corrected_micrographs.star": "91e32c64ecadf5c158d1d3e6082eb7b05acdf93b7213875332ca386a3677362b"
+   },
+   "frames": {
+    "movie.log": 3
+   },
+   "joint_star": true,
+   "skip_warning_frames": []
+  },
+  "float": {
+   "products": {
+    "Movies/movie.mrc": "9b5b15f32e6354e1",
+    "Movies/movie.star": "star"
+   },
+   "stars": {
+    "Movies/movie.star": "6dce0193014f1f04153cd176f2d32aedba568fbb2b3d4bb0d3219a332374d582",
+    "corrected_micrographs.star": "91e32c64ecadf5c158d1d3e6082eb7b05acdf93b7213875332ca386a3677362b"
+   },
+   "frames": {
+    "movie.log": 3
+   },
+   "joint_star": true,
+   "skip_warning_frames": []
+  },
+  "compact": {
+   "products": {
+    "Movies/movie.mrc": "9b5b15f32e6354e1",
+    "Movies/movie.star": "star"
+   },
+   "stars": {
+    "Movies/movie.star": "6dce0193014f1f04153cd176f2d32aedba568fbb2b3d4bb0d3219a332374d582",
+    "corrected_micrographs.star": "91e32c64ecadf5c158d1d3e6082eb7b05acdf93b7213875332ca386a3677362b"
+   },
+   "frames": {
+    "movie.log": 3
+   },
+   "joint_star": true,
+   "skip_warning_frames": []
+  }
+ },
+ "verdict": "PASS"
+}

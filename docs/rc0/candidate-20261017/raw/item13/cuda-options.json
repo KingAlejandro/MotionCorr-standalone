@@ -1,0 +1,661 @@
+{
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/tools/qf_lane_exec.sh",
+ "cpu": false,
+ "matrix": [],
+ "refuse": [],
+ "compressed": [],
+ "damaged": [],
+ "errors": [],
+ "options": [
+  {
+   "mode": 0,
+   "option_set": "late_bin2",
+   "options": [
+    "--no_early_binning",
+    "--bin_factor",
+    "2"
+   ],
+   "expected_route": "compact",
+   "side_px": 192,
+   "arms": {
+    "float": {
+     "label": "o-m0-late_bin2-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "o-m0-late_bin2-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "routes_ok": true,
+   "resident_session_used": {
+    "float": true,
+    "auto": true
+   },
+   "session_ok": true,
+   "identity": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "products": [
+    "movie.mrc"
+   ],
+   "pass": true
+  },
+  {
+   "mode": 0,
+   "option_set": "early_bin2_default",
+   "options": [
+    "--bin_factor",
+    "2"
+   ],
+   "expected_route": "float",
+   "side_px": 192,
+   "arms": {
+    "float": {
+     "label": "o-m0-early_bin2_default-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "o-m0-early_bin2_default-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "routes_ok": true,
+   "resident_session_used": {
+    "float": false,
+    "auto": false
+   },
+   "session_ok": true,
+   "identity": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "products": [
+    "movie.mrc"
+   ],
+   "pinned_compact": {
+    "label": "o-m0-early_bin2_default-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   },
+   "pass": true
+  },
+  {
+   "mode": 0,
+   "option_set": "early_bin2_explicit",
+   "options": [
+    "--early_binning",
+    "--bin_factor",
+    "2"
+   ],
+   "expected_route": "float",
+   "side_px": 192,
+   "arms": {
+    "float": {
+     "label": "o-m0-early_bin2_explicit-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "o-m0-early_bin2_explicit-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "routes_ok": true,
+   "resident_session_used": {
+    "float": false,
+    "auto": false
+   },
+   "session_ok": true,
+   "identity": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "products": [
+    "movie.mrc"
+   ],
+   "pinned_compact": {
+    "label": "o-m0-early_bin2_explicit-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   },
+   "pass": true
+  },
+  {
+   "mode": 0,
+   "option_set": "noDW_evenodd",
+   "options": [
+    "--save_noDW",
+    "--even_odd_split"
+   ],
+   "expected_route": "compact",
+   "side_px": 192,
+   "arms": {
+    "float": {
+     "label": "o-m0-noDW_evenodd-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc",
+      "movie_EVN.mrc",
+      "movie_ODD.mrc",
+      "movie_noDW.mrc"
+     ]
+    },
+    "auto": {
+     "label": "o-m0-noDW_evenodd-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc",
+      "movie_EVN.mrc",
+      "movie_ODD.mrc",
+      "movie_noDW.mrc"
+     ]
+    }
+   },
+   "routes_ok": true,
+   "resident_session_used": {
+    "float": true,
+    "auto": true
+   },
+   "session_ok": true,
+   "identity": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 4,
+    "compared": 12,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "products": [
+    "movie.mrc",
+    "movie_EVN.mrc",
+    "movie_ODD.mrc",
+    "movie_noDW.mrc"
+   ],
+   "pass": true
+  },
+  {
+   "mode": 0,
+   "option_set": "ps_group4",
+   "options": [
+    "--grouping_for_ps",
+    "4"
+   ],
+   "expected_route": "compact",
+   "side_px": 768,
+   "arms": {
+    "float": {
+     "label": "o-m0-ps_group4-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc",
+      "movie_PS.mrc"
+     ]
+    },
+    "auto": {
+     "label": "o-m0-ps_group4-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc",
+      "movie_PS.mrc"
+     ]
+    }
+   },
+   "routes_ok": true,
+   "resident_session_used": {
+    "float": true,
+    "auto": true
+   },
+   "session_ok": true,
+   "identity": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 2,
+    "compared": 10,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "products": [
+    "movie.mrc",
+    "movie_PS.mrc"
+   ],
+   "pass": true
+  },
+  {
+   "mode": 1,
+   "option_set": "late_bin2",
+   "options": [
+    "--no_early_binning",
+    "--bin_factor",
+    "2"
+   ],
+   "expected_route": "compact",
+   "side_px": 192,
+   "arms": {
+    "float": {
+     "label": "o-m1-late_bin2-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "o-m1-late_bin2-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "routes_ok": true,
+   "resident_session_used": {
+    "float": true,
+    "auto": true
+   },
+   "session_ok": true,
+   "identity": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "products": [
+    "movie.mrc"
+   ],
+   "pass": true
+  },
+  {
+   "mode": 1,
+   "option_set": "early_bin2_default",
+   "options": [
+    "--bin_factor",
+    "2"
+   ],
+   "expected_route": "float",
+   "side_px": 192,
+   "arms": {
+    "float": {
+     "label": "o-m1-early_bin2_default-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "o-m1-early_bin2_default-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "routes_ok": true,
+   "resident_session_used": {
+    "float": false,
+    "auto": false
+   },
+   "session_ok": true,
+   "identity": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "products": [
+    "movie.mrc"
+   ],
+   "pinned_compact": {
+    "label": "o-m1-early_bin2_default-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   },
+   "pass": true
+  },
+  {
+   "mode": 1,
+   "option_set": "early_bin2_explicit",
+   "options": [
+    "--early_binning",
+    "--bin_factor",
+    "2"
+   ],
+   "expected_route": "float",
+   "side_px": 192,
+   "arms": {
+    "float": {
+     "label": "o-m1-early_bin2_explicit-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    },
+    "auto": {
+     "label": "o-m1-early_bin2_explicit-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ]
+    }
+   },
+   "routes_ok": true,
+   "resident_session_used": {
+    "float": false,
+    "auto": false
+   },
+   "session_ok": true,
+   "identity": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 1,
+    "compared": 9,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "products": [
+    "movie.mrc"
+   ],
+   "pinned_compact": {
+    "label": "o-m1-early_bin2_explicit-pinned",
+    "rc": 1,
+    "witness": [],
+    "completion_star": [],
+    "mrc_products": [],
+    "refused": true
+   },
+   "pass": true
+  },
+  {
+   "mode": 1,
+   "option_set": "noDW_evenodd",
+   "options": [
+    "--save_noDW",
+    "--even_odd_split"
+   ],
+   "expected_route": "compact",
+   "side_px": 192,
+   "arms": {
+    "float": {
+     "label": "o-m1-noDW_evenodd-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc",
+      "movie_EVN.mrc",
+      "movie_ODD.mrc",
+      "movie_noDW.mrc"
+     ]
+    },
+    "auto": {
+     "label": "o-m1-noDW_evenodd-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc",
+      "movie_EVN.mrc",
+      "movie_ODD.mrc",
+      "movie_noDW.mrc"
+     ]
+    }
+   },
+   "routes_ok": true,
+   "resident_session_used": {
+    "float": true,
+    "auto": true
+   },
+   "session_ok": true,
+   "identity": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 4,
+    "compared": 12,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "products": [
+    "movie.mrc",
+    "movie_EVN.mrc",
+    "movie_ODD.mrc",
+    "movie_noDW.mrc"
+   ],
+   "pass": true
+  },
+  {
+   "mode": 1,
+   "option_set": "ps_group4",
+   "options": [
+    "--grouping_for_ps",
+    "4"
+   ],
+   "expected_route": "compact",
+   "side_px": 768,
+   "arms": {
+    "float": {
+     "label": "o-m1-ps_group4-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc",
+      "movie_PS.mrc"
+     ]
+    },
+    "auto": {
+     "label": "o-m1-ps_group4-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc",
+      "movie_PS.mrc"
+     ]
+    }
+   },
+   "routes_ok": true,
+   "resident_session_used": {
+    "float": true,
+    "auto": true
+   },
+   "session_ok": true,
+   "identity": {
+    "identical": true,
+    "problems": [],
+    "mrc_compared": 2,
+    "compared": 10,
+    "differences": [],
+    "only_a": [],
+    "only_b": []
+   },
+   "products": [
+    "movie.mrc",
+    "movie_PS.mrc"
+   ],
+   "pass": true
+  }
+ ]
+}

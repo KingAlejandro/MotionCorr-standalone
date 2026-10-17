@@ -1,0 +1,115 @@
+{
+ "case": "b5_trunc60_noexp",
+ "desc": "as b1 without --expected_frames",
+ "recorded": {
+  "auto": {
+   "rc": 0,
+   "routes": [
+    "compact",
+    "compact",
+    "compact"
+   ]
+  },
+  "float": {
+   "rc": 0,
+   "routes": [
+    "float",
+    "float",
+    "float"
+   ]
+  }
+ },
+ "recorded_compare_rc": null,
+ "arms": {
+  "auto": {
+   "rc": 0,
+   "routes": [
+    "compact",
+    "compact",
+    "compact"
+   ],
+   "binary_sha256": "43c4ca0dcfff13b8fb3d4653844415e333e5eb4ea7a8d0e01b76b1f0cb6160ae",
+   "gpu_witness": {
+    "uuids_seen_for_pid": [
+     "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    ],
+    "peak_mib": 8078,
+    "smi_samples": 36,
+    "pid_hits": 34,
+    "on_lane_gpu_only": true
+   },
+   "max_rss_kib": 3381636,
+   "wall_s": 15.972
+  },
+  "float": {
+   "rc": 0,
+   "routes": [
+    "float",
+    "float",
+    "float"
+   ],
+   "binary_sha256": "43c4ca0dcfff13b8fb3d4653844415e333e5eb4ea7a8d0e01b76b1f0cb6160ae",
+   "gpu_witness": {
+    "uuids_seen_for_pid": [
+     "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    ],
+    "peak_mib": 8046,
+    "smi_samples": 43,
+    "pid_hits": 41,
+    "on_lane_gpu_only": true
+   },
+   "max_rss_kib": 5280708,
+   "wall_s": 18.26
+  }
+ },
+ "problems": [],
+ "inventory": {
+  "auto": {
+   "products": {
+    "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+    "Movies/movie1.star": "star",
+    "Movies/movie2.mrc": "f71de09c42d7a044",
+    "Movies/movie2.star": "star",
+    "Movies/movie3.mrc": "5e67ac8b928c1258",
+    "Movies/movie3.star": "star"
+   },
+   "stars": {
+    "Movies/movie1.star": "571ddf35bdd2b6a9eac23173b131008295f293f6dbff9755c27beba610d0a585",
+    "Movies/movie2.star": "e80ce4eecf77cce0cd60b6933d6f4e9b06ba34ec3922da39a9c0963969c379ab",
+    "Movies/movie3.star": "a0058ba9e8fb5ac3a099b90e79b667c54d39a107fea9326dc33a06331712b5ba",
+    "corrected_micrographs.star": "f536a360153fb0d2c46e38969fb2667a3051c054d761cd5bc8faf61536511232"
+   },
+   "frames": {
+    "movie1.log": 58,
+    "movie2.log": 34,
+    "movie3.log": 58
+   },
+   "joint_star": true,
+   "skip_warning_frames": []
+  },
+  "float": {
+   "products": {
+    "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+    "Movies/movie1.star": "star",
+    "Movies/movie2.mrc": "f71de09c42d7a044",
+    "Movies/movie2.star": "star",
+    "Movies/movie3.mrc": "5e67ac8b928c1258",
+    "Movies/movie3.star": "star"
+   },
+   "stars": {
+    "Movies/movie1.star": "571ddf35bdd2b6a9eac23173b131008295f293f6dbff9755c27beba610d0a585",
+    "Movies/movie2.star": "e80ce4eecf77cce0cd60b6933d6f4e9b06ba34ec3922da39a9c0963969c379ab",
+    "Movies/movie3.star": "a0058ba9e8fb5ac3a099b90e79b667c54d39a107fea9326dc33a06331712b5ba",
+    "corrected_micrographs.star": "f536a360153fb0d2c46e38969fb2667a3051c054d761cd5bc8faf61536511232"
+   },
+   "frames": {
+    "movie1.log": 58,
+    "movie2.log": 34,
+    "movie3.log": 58
+   },
+   "joint_star": true,
+   "skip_warning_frames": []
+  }
+ },
+ "verdict": "PASS"
+}

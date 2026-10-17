@@ -1,0 +1,229 @@
+{
+  "input_star": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/item12-retry/inputs/mixed/movies.star",
+  "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/build-nvcomp/motioncorr_resident_retry_fault",
+  "n_workers": 2,
+  "worker_args": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--j",
+    "8",
+    "--skip_report_pdf"
+  ],
+  "cpus": "96-103;104-111",
+  "cpu_masks": [
+    "96-103",
+    "104-111"
+  ],
+  "cpu_mask_widths": [
+    8,
+    8
+  ],
+  "cpu_budget_requested": null,
+  "cpu_budget_covered": 16,
+  "cpu_masks_disjoint": true,
+  "cpu_masks_disjoint_note": "false means workers shared cores. Allowed, but such a run is an oversubscription measurement, not a fixed-budget scaling point; --cpu-budget refuses it for that reason.",
+  "launcher_allocation": "96-111",
+  "omp_requested": {
+    "OMP_NUM_THREADS": null,
+    "OMP_PROC_BIND": null,
+    "OMP_PLACES": null
+  },
+  "omp_note": "as requested on the command line. The value each worker was actually given, including the mask-width default for OMP_NUM_THREADS and anything inherited from the environment, is in that worker's command.json.",
+  "cpu_seconds_total": 16.192,
+  "minor_faults_total": 1048433,
+  "major_faults_total": 0,
+  "faults_note": "exact, from getrusage(RUSAGE_CHILDREN). Per-run total should be near constant for a fixed dataset; if the rate per second falls as workers are added, fault handling is a shared bottleneck rather than per-process work.",
+  "cpu_seconds_total_note": "getrusage(RUSAGE_CHILDREN) delta across the run: exact, unsampled, and includes the ghostscript grandchildren each worker reaps.",
+  "mean_cores_busy": 5.25,
+  "mean_cores_busy_note": "cpu_seconds_total / launcher wall. Achieved parallelism averaged over the whole run, including the serial tails. Compare against cpu_budget_covered: a scaling number is only meaningful when the budget was actually used.",
+  "affinity_problems": null,
+  "phase_rollup": {
+    "max_setup_seconds": 1.162,
+    "max_tail_seconds": 1.968,
+    "first_product_spread": 0.159,
+    "n_workers_missing_setup": 0,
+    "n_workers_missing_tail": 0,
+    "note": "first_product_spread is the stagger between workers reaching their first product. If per-process CUDA setup serialises across concurrent workers this grows with worker count; if setup is genuinely parallel it stays near zero."
+  },
+  "started_at": "2026-10-17T19:24:50.102+00:00",
+  "ended_at": "2026-10-17T19:24:53.189+00:00",
+  "wall_seconds": 3.087,
+  "wall_seconds_note": "bookkeeping only; this tool makes no throughput claim and is not a benchmark. #26 owns the measurement matrix.",
+  "final_worker_tail_seconds": 0.088,
+  "final_worker_tail_note": "spread between the first and last worker to exit. Load imbalance is one of the candidate limits on static workers; this makes it observable, it does not attribute it.",
+  "manifest": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/item12-retry/dataset/dpoison_both/workers/shards/shard_manifest.json",
+  "manifest_sha256": "6031a671593b4f6e2a339dc23a27be93c2b28ce2ad0242fb7bb6f08252bb0890",
+  "workers": [
+    {
+      "index": 0,
+      "pid": 489806,
+      "returncode": 1,
+      "log": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/item12-retry/dataset/dpoison_both/workers/w0/launcher.console.log",
+      "started_at": "2026-10-17T19:24:50.110+00:00",
+      "ended_at": "2026-10-17T19:24:53.177+00:00",
+      "exit_observed": true,
+      "observed_until_at": "2026-10-17T19:24:53.177+00:00",
+      "wall_seconds": 3.066,
+      "rss_hwm_kib": 1954648,
+      "rss_status": "MEASURED",
+      "rss_note": "worker process only; ghostscript children excluded; sampled every 0.5s",
+      "cpu_seconds_sampled": 7.89,
+      "minor_faults": 507962,
+      "major_faults": 0,
+      "mean_threads_running": 2.57,
+      "cpu_mask": "96-103",
+      "cpu_mask_width": 8,
+      "cpu_affinity": {
+        "requested": "96-103",
+        "witnessed_at_launch": "96-103",
+        "later_observations": [
+          "96-103"
+        ],
+        "verdict": "MATCH",
+        "note": "read back from /proc/<pid>/status Cpus_allowed_list rather than assumed from the taskset argument, so a cpuset that narrows the mask is visible. later_observations is the 0.5 s sampler trace and records any change after launch."
+      },
+      "phases": {
+        "n_products": 1,
+        "setup_seconds": 1.162,
+        "produce_seconds": 0.0,
+        "tail_seconds": 1.904,
+        "first_product_offset": 1.162,
+        "product_offsets": [
+          1.162
+        ],
+        "inter_product_seconds": [],
+        "poll_interval": 0.05,
+        "completion_marker": "per-movie STAR appearance after image writes close",
+        "note": "marker observations can lag appearance by one poll interval; not STAR-close or full-movie timestamps. Tail includes remaining model STAR/plots/aggregate/report/drain work; setup+produce+tail partition the worker wall",
+        "binary_movie_wall_sum": null,
+        "binary_movie_walls": [
+          0.657
+        ],
+        "binary_movie_walls_missing": [
+          "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.tif"
+        ]
+      },
+      "exit_digest": {
+        "status": "not taken"
+      }
+    },
+    {
+      "index": 1,
+      "pid": 489807,
+      "returncode": 1,
+      "log": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/item12-retry/dataset/dpoison_both/workers/w1/launcher.console.log",
+      "started_at": "2026-10-17T19:24:50.118+00:00",
+      "ended_at": "2026-10-17T19:24:53.089+00:00",
+      "exit_observed": true,
+      "observed_until_at": "2026-10-17T19:24:53.089+00:00",
+      "wall_seconds": 2.971,
+      "rss_hwm_kib": 1952744,
+      "rss_status": "MEASURED",
+      "rss_note": "worker process only; ghostscript children excluded; sampled every 0.5s",
+      "cpu_seconds_sampled": 7.52,
+      "minor_faults": 515386,
+      "major_faults": 0,
+      "mean_threads_running": 2.53,
+      "cpu_mask": "104-111",
+      "cpu_mask_width": 8,
+      "cpu_affinity": {
+        "requested": "104-111",
+        "witnessed_at_launch": "104-111",
+        "later_observations": [
+          "104-111"
+        ],
+        "verdict": "MATCH",
+        "note": "read back from /proc/<pid>/status Cpus_allowed_list rather than assumed from the taskset argument, so a cpuset that narrows the mask is visible. later_observations is the 0.5 s sampler trace and records any change after launch."
+      },
+      "phases": {
+        "n_products": 1,
+        "setup_seconds": 1.003,
+        "produce_seconds": 0.0,
+        "tail_seconds": 1.968,
+        "first_product_offset": 1.003,
+        "product_offsets": [
+          1.003
+        ],
+        "inter_product_seconds": [],
+        "poll_interval": 0.05,
+        "completion_marker": "per-movie STAR appearance after image writes close",
+        "note": "marker observations can lag appearance by one poll interval; not STAR-close or full-movie timestamps. Tail includes remaining model STAR/plots/aggregate/report/drain work; setup+produce+tail partition the worker wall",
+        "binary_movie_wall_sum": null,
+        "binary_movie_walls": [
+          0.691
+        ],
+        "binary_movie_walls_missing": [
+          "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.tif"
+        ]
+      },
+      "exit_digest": {
+        "status": "not taken"
+      }
+    }
+  ],
+  "devices": [
+    {
+      "smi_index": "0",
+      "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_total": "81920 MiB",
+      "selector": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    },
+    {
+      "smi_index": "1",
+      "uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_total": "81920 MiB",
+      "selector": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d"
+    }
+  ],
+  "termination_signal": null,
+  "sampled_peak_gpu_memory_mib": {
+    "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54": 13290.0,
+    "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d": 13290.0
+  },
+  "sampled_peak_gpu_memory_note": "max nvidia-smi used_gpu_memory of each worker pid, sampled every 0.5s: a lower bound on the true peak; null means the worker was never observed with a reading",
+  "gpu_witness": {
+    "expected": {
+      "489806": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+      "489807": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d"
+    },
+    "witnessed": {
+      "489806": [
+        "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+      ],
+      "489807": [
+        "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d"
+      ]
+    },
+    "unwitnessed_pids": [],
+    "wrong_device": [],
+    "shared_devices": [],
+    "distinct_devices_witnessed": 2,
+    "all_pids_witnessed_on_intended_distinct_devices": true,
+    "sampler_errors": [],
+    "n_samples": 6
+  },
+  "process_cleanup": {
+    "ownership_mode": "linux-child-subreaper",
+    "complete": true,
+    "observed_live_before_cleanup": [],
+    "unexpected_descendants": false,
+    "error": null,
+    "scope": "Linux child-subreaper adopts unsampled surviving worker orphans; other platforms offer observed-only simulated CPU controls, not arbitrary native descendant containment. Checked PID/birth before every TERM/KILL; original worker return codes preserved."
+  },
+  "process_ownership_errors": [],
+  "workers_complete": false,
+  "dataset_ready": false,
+  "verdict": "FAIL"
+}

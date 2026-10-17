@@ -1,0 +1,214 @@
+{
+ "case": "evenodd-23fr-L",
+ "extra_options": [
+  "--save_noDW",
+  "--even_odd_split",
+  "--last_frame_sum",
+  "23"
+ ],
+ "dose_weighting": true,
+ "runs": {
+  "cur": {
+   "label": "evenodd-23fr-L-cur",
+   "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/build-nvcomp/motioncorr",
+   "binary_sha256": "43c4ca0dcfff13b8fb3d4653844415e333e5eb4ea7a8d0e01b76b1f0cb6160ae",
+   "args": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--expected_frames",
+    "24",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/fallback178/evenodd-23fr-L/out-cur/",
+    "--j",
+    "8",
+    "--gainref",
+    "gain.mrc",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--save_noDW",
+    "--even_odd_split",
+    "--last_frame_sum",
+    "23"
+   ],
+   "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/inputs/tutorial",
+   "cpu_mask": "104-111",
+   "env": {
+    "CUDA_VISIBLE_DEVICES": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+    "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "1",
+    "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+   },
+   "extra_env": {},
+   "gpu_run": true,
+   "start_utc": "2026-10-17T18:57:01Z",
+   "lock_wait_s": 0.0,
+   "bench_gate": {
+    "bench_polls_held": 0,
+    "bench_waited_s": 0.0
+   },
+   "gpu_precheck": {
+    "waited_s": 0.1,
+    "foreign": []
+   },
+   "rc": 0,
+   "wall_s": 19.128,
+   "gpu_witness": {
+    "uuids_seen_for_pid": [],
+    "peak_mib": 0,
+    "smi_samples": 34,
+    "pid_hits": 0,
+    "on_lane_gpu_only": null
+   },
+   "max_rss_kib": 2961000,
+   "time_exit_status": 0,
+   "elapsed": "0:18.93",
+   "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/fallback178/evenodd-23fr-L/logs/evenodd-23fr-L-cur.stdout",
+   "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/fallback178/evenodd-23fr-L/logs/evenodd-23fr-L-cur.time",
+   "witness": {
+    "cpu_line_count": 1,
+    "cuda_line_count": 0,
+    "cpu_line_example": "Summing frames before dose weighting: ....................... done",
+    "cuda_line_example": null
+   }
+  },
+  "pre178": {
+   "label": "evenodd-23fr-L-pre178",
+   "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-pre178-nvcomp/motioncorr",
+   "binary_sha256": "1d5d0d1e90860e1b5936eeb0e6e8d1f97a19a76471bad288faad672b7021ebf1",
+   "args": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--expected_frames",
+    "24",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/fallback178/evenodd-23fr-L/out-pre178/",
+    "--j",
+    "8",
+    "--gainref",
+    "gain.mrc",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--save_noDW",
+    "--even_odd_split",
+    "--last_frame_sum",
+    "23"
+   ],
+   "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/inputs/tutorial",
+   "cpu_mask": "104-111",
+   "env": {
+    "CUDA_VISIBLE_DEVICES": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+    "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "1",
+    "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+   },
+   "extra_env": {},
+   "gpu_run": true,
+   "start_utc": "2026-10-17T18:57:20Z",
+   "lock_wait_s": 0.0,
+   "bench_gate": {
+    "bench_polls_held": 0,
+    "bench_waited_s": 0.0
+   },
+   "gpu_precheck": {
+    "waited_s": 0.1,
+    "foreign": []
+   },
+   "rc": 0,
+   "wall_s": 20.21,
+   "gpu_witness": {
+    "uuids_seen_for_pid": [],
+    "peak_mib": 0,
+    "smi_samples": 37,
+    "pid_hits": 0,
+    "on_lane_gpu_only": null
+   },
+   "max_rss_kib": 4238564,
+   "time_exit_status": 0,
+   "elapsed": "0:20.20",
+   "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/fallback178/evenodd-23fr-L/logs/evenodd-23fr-L-pre178.stdout",
+   "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/fallback178/evenodd-23fr-L/logs/evenodd-23fr-L-pre178.time",
+   "witness": {
+    "cpu_line_count": 1,
+    "cuda_line_count": 0,
+    "cpu_line_example": "Summing frames before dose weighting: ....................... done",
+    "cuda_line_example": null
+   }
+  }
+ },
+ "identity_cur_vs_pre178": {
+  "status": "PASS",
+  "detail": {
+   "root_a": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/fallback178/evenodd-23fr-L/out-cur",
+   "root_b": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/fallback178/evenodd-23fr-L/out-pre178",
+   "only_a": [],
+   "only_b": [],
+   "compared": 12,
+   "mrc_compared": 4,
+   "excluded": [
+    {
+     "file": "Movies/20170629_00026_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "all_batches.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "batch.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "header.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "logfile.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    }
+   ],
+   "differences": [],
+   "problems": [],
+   "identical": true
+  }
+ },
+ "n_products": {
+  "mrc": [
+   "20170629_00026_frameImage.mrc",
+   "20170629_00026_frameImage_EVN.mrc",
+   "20170629_00026_frameImage_ODD.mrc",
+   "20170629_00026_frameImage_noDW.mrc"
+  ]
+ },
+ "mrc_whole_file_sha256": {
+  "out-cur/Movies/20170629_00026_frameImage.mrc": "2a1fa885617ada9b24e0659dd6bc8da6efffc0591afbb7fcc087435b12596484",
+  "out-cur/Movies/20170629_00026_frameImage_EVN.mrc": "d1830537c71f57cd4509c91a6b3f83a6c75eaeb0aab1d07c0d9eee98b43afabb",
+  "out-cur/Movies/20170629_00026_frameImage_ODD.mrc": "3119a8a42d1dc20cf542ad9c6dfc5667ab34b25950ce6288c61cd22c9b6dff61",
+  "out-cur/Movies/20170629_00026_frameImage_noDW.mrc": "fcb3832bfb4aca314f76e8c3d2def92fa2183efeff76dd5e5afb408854eff344",
+  "out-pre178/Movies/20170629_00026_frameImage.mrc": "7932e84547652bd7fc41c363cde0a7482ee2c69d2f6a1392212e9060f82b8b19",
+  "out-pre178/Movies/20170629_00026_frameImage_EVN.mrc": "ba071cf5c70edf7820956907f383700bbbe4fc23c864695141616b4726232c61",
+  "out-pre178/Movies/20170629_00026_frameImage_ODD.mrc": "e043db14208adb8f19ace77bea5f25851d012dd9fedd29bff286ffca66cba597",
+  "out-pre178/Movies/20170629_00026_frameImage_noDW.mrc": "c8448fdb48c3e1b3797096bd842f7365bf1955d99906bc859b93eddb47d4162e"
+ }
+}

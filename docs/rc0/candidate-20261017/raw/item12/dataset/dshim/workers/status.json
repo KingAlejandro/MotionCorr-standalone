@@ -1,0 +1,419 @@
+{
+  "input_star": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/item12-retry/inputs/mixed/movies.star",
+  "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/build-nvcomp/motioncorr_resident_retry_fault",
+  "n_workers": 2,
+  "worker_args": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--j",
+    "8",
+    "--skip_report_pdf"
+  ],
+  "cpus": "96-103;104-111",
+  "cpu_masks": [
+    "96-103",
+    "104-111"
+  ],
+  "cpu_mask_widths": [
+    8,
+    8
+  ],
+  "cpu_budget_requested": null,
+  "cpu_budget_covered": 16,
+  "cpu_masks_disjoint": true,
+  "cpu_masks_disjoint_note": "false means workers shared cores. Allowed, but such a run is an oversubscription measurement, not a fixed-budget scaling point; --cpu-budget refuses it for that reason.",
+  "launcher_allocation": "96-111",
+  "omp_requested": {
+    "OMP_NUM_THREADS": null,
+    "OMP_PROC_BIND": null,
+    "OMP_PLACES": null
+  },
+  "omp_note": "as requested on the command line. The value each worker was actually given, including the mask-width default for OMP_NUM_THREADS and anything inherited from the environment, is in that worker's command.json.",
+  "cpu_seconds_total": 20.666,
+  "minor_faults_total": 1249851,
+  "major_faults_total": 0,
+  "faults_note": "exact, from getrusage(RUSAGE_CHILDREN). Per-run total should be near constant for a fixed dataset; if the rate per second falls as workers are added, fault handling is a shared bottleneck rather than per-process work.",
+  "cpu_seconds_total_note": "getrusage(RUSAGE_CHILDREN) delta across the run: exact, unsampled, and includes the ghostscript grandchildren each worker reaps.",
+  "mean_cores_busy": 3.58,
+  "mean_cores_busy_note": "cpu_seconds_total / launcher wall. Achieved parallelism averaged over the whole run, including the serial tails. Compare against cpu_budget_covered: a scaling number is only meaningful when the budget was actually used.",
+  "affinity_problems": null,
+  "phase_rollup": {
+    "max_setup_seconds": 1.063,
+    "max_tail_seconds": 0.221,
+    "first_product_spread": 0.058,
+    "n_workers_missing_setup": 0,
+    "n_workers_missing_tail": 0,
+    "note": "first_product_spread is the stagger between workers reaching their first product. If per-process CUDA setup serialises across concurrent workers this grows with worker count; if setup is genuinely parallel it stays near zero."
+  },
+  "started_at": "2026-10-17T19:24:32.468+00:00",
+  "ended_at": "2026-10-17T19:24:38.246+00:00",
+  "wall_seconds": 5.778,
+  "wall_seconds_note": "bookkeeping only; this tool makes no throughput claim and is not a benchmark. #26 owns the measurement matrix.",
+  "final_worker_tail_seconds": 1.114,
+  "final_worker_tail_note": "spread between the first and last worker to exit. Load imbalance is one of the candidate limits on static workers; this makes it observable, it does not attribute it.",
+  "manifest": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/item12-retry/dataset/dshim/workers/shards/shard_manifest.json",
+  "manifest_sha256": "b1ab8b654e5fa91d1c1451226e22ade4ac14154f54eb748233b3ed9430d8b56f",
+  "workers": [
+    {
+      "index": 0,
+      "pid": 489587,
+      "returncode": 0,
+      "log": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/item12-retry/dataset/dshim/workers/w0/launcher.console.log",
+      "started_at": "2026-10-17T19:24:32.475+00:00",
+      "ended_at": "2026-10-17T19:24:38.121+00:00",
+      "exit_observed": true,
+      "observed_until_at": "2026-10-17T19:24:38.121+00:00",
+      "wall_seconds": 5.646,
+      "rss_hwm_kib": 1952824,
+      "rss_status": "MEASURED",
+      "rss_note": "worker process only; ghostscript children excluded; sampled every 0.5s",
+      "cpu_seconds_sampled": 10.41,
+      "minor_faults": 619235,
+      "major_faults": 0,
+      "mean_threads_running": 1.84,
+      "cpu_mask": "96-103",
+      "cpu_mask_width": 8,
+      "cpu_affinity": {
+        "requested": "96-103",
+        "witnessed_at_launch": "96-103",
+        "later_observations": [
+          "96-103"
+        ],
+        "verdict": "MATCH",
+        "note": "read back from /proc/<pid>/status Cpus_allowed_list rather than assumed from the taskset argument, so a cpuset that narrows the mask is visible. later_observations is the 0.5 s sampler trace and records any change after launch."
+      },
+      "phases": {
+        "n_products": 2,
+        "setup_seconds": 1.063,
+        "produce_seconds": 4.362,
+        "tail_seconds": 0.221,
+        "first_product_offset": 1.063,
+        "product_offsets": [
+          1.063,
+          5.424
+        ],
+        "inter_product_seconds": [
+          4.362
+        ],
+        "poll_interval": 0.05,
+        "completion_marker": "per-movie STAR appearance after image writes close",
+        "note": "marker observations can lag appearance by one poll interval; not STAR-close or full-movie timestamps. Tail includes remaining model STAR/plots/aggregate/report/drain work; setup+produce+tail partition the worker wall",
+        "binary_movie_wall_sum": 5.06,
+        "binary_movie_walls": [
+          0.69,
+          4.37
+        ],
+        "binary_movie_walls_missing": []
+      },
+      "exit_digest": {
+        "status": "complete",
+        "outputs": {
+          "Movies/20170629_00026_frameImage.log": {
+            "sha256": "1be50791321f90e064c0c937b5c8bd43b40ef46b8ee8b2a20bf305e645ff1285",
+            "key": [
+              2064,
+              16406135,
+              14868,
+              1792265073385180734,
+              1792265073385180734
+            ]
+          },
+          "Movies/20170629_00026_frameImage.mrc": {
+            "sha256": "b75e541be6e481a940dd4a3a8720051354575f557c531c74a072fed48b33db23",
+            "key": [
+              2064,
+              16406140,
+              56956944,
+              1792265073479192688,
+              1792265073479192688
+            ]
+          },
+          "Movies/20170629_00026_frameImage.star": {
+            "sha256": "a423515914e7e67a0b5b2220a3851fbbfbdd246d58406296531e0d5aade58c08",
+            "key": [
+              2064,
+              16406143,
+              49222,
+              1792265073487193705,
+              1792265073487193705
+            ]
+          },
+          "Movies/20170629_00026_frameImage_shifts.eps": {
+            "sha256": "8887ec5c7bbaaec5e2e4b14e090df2d87a351aa68640351c9bb6f69de1c69e8f",
+            "key": [
+              2064,
+              16406144,
+              92330,
+              1792265073492194341,
+              1792265073492194341
+            ]
+          },
+          "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.log": {
+            "sha256": "76ab097eca02da4ddaf44c22ee1d13c29799dabf25ec186aa4928407774105f0",
+            "key": [
+              2064,
+              16406141,
+              29289,
+              1792265077756736599,
+              1792265077756736599
+            ]
+          },
+          "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.mrc": {
+            "sha256": "2acbe6d206c56ddf9411e651358c4c6d942fdcc331e75f820d8567182160e11f",
+            "key": [
+              2064,
+              16406150,
+              94280704,
+              1792265077891753767,
+              1792265077891753767
+            ]
+          },
+          "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.star": {
+            "sha256": "efde90613ff25ef2cf1e2aff1ec5f712b3b69e551f8341bd00c46289628d31a6",
+            "key": [
+              2064,
+              16406151,
+              6772,
+              1792265077891753767,
+              1792265077891753767
+            ]
+          },
+          "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41_shifts.eps": {
+            "sha256": "91bbc1cb32506b2fd92267671cb5f224b05d11f68c7ed44428bbbaaadb067a6a",
+            "key": [
+              2064,
+              16406152,
+              57394,
+              1792265077893754022,
+              1792265077893754022
+            ]
+          },
+          "corrected_micrographs.star": {
+            "sha256": "b594384de1edb3f168c7387be2daa6a78f1e7b0517a90e8e844a7a660ac143d1",
+            "key": [
+              2064,
+              16406153,
+              1205,
+              1792265077895754276,
+              1792265077895754276
+            ]
+          }
+        },
+        "seconds": 0.113
+      }
+    },
+    {
+      "index": 1,
+      "pid": 489588,
+      "returncode": 0,
+      "log": "/mnt/clathrin/alex-motioncorr-rc0/W-RC0-CAND/item12-retry/dataset/dshim/workers/w1/launcher.console.log",
+      "started_at": "2026-10-17T19:24:32.479+00:00",
+      "ended_at": "2026-10-17T19:24:37.007+00:00",
+      "exit_observed": true,
+      "observed_until_at": "2026-10-17T19:24:37.007+00:00",
+      "wall_seconds": 4.528,
+      "rss_hwm_kib": 1954328,
+      "rss_status": "MEASURED",
+      "rss_note": "worker process only; ghostscript children excluded; sampled every 0.5s",
+      "cpu_seconds_sampled": 9.72,
+      "minor_faults": 586272,
+      "major_faults": 0,
+      "mean_threads_running": 2.15,
+      "cpu_mask": "104-111",
+      "cpu_mask_width": 8,
+      "cpu_affinity": {
+        "requested": "104-111",
+        "witnessed_at_launch": "104-111",
+        "later_observations": [
+          "104-111"
+        ],
+        "verdict": "MATCH",
+        "note": "read back from /proc/<pid>/status Cpus_allowed_list rather than assumed from the taskset argument, so a cpuset that narrows the mask is visible. later_observations is the 0.5 s sampler trace and records any change after launch."
+      },
+      "phases": {
+        "n_products": 2,
+        "setup_seconds": 1.005,
+        "produce_seconds": 3.304,
+        "tail_seconds": 0.219,
+        "first_product_offset": 1.005,
+        "product_offsets": [
+          1.005,
+          4.309
+        ],
+        "inter_product_seconds": [
+          3.304
+        ],
+        "poll_interval": 0.05,
+        "completion_marker": "per-movie STAR appearance after image writes close",
+        "note": "marker observations can lag appearance by one poll interval; not STAR-close or full-movie timestamps. Tail includes remaining model STAR/plots/aggregate/report/drain work; setup+produce+tail partition the worker wall",
+        "binary_movie_wall_sum": 3.89,
+        "binary_movie_walls": [
+          0.612,
+          3.278
+        ],
+        "binary_movie_walls_missing": []
+      },
+      "exit_digest": {
+        "status": "complete",
+        "outputs": {
+          "Movies/20170629_00031_frameImage.log": {
+            "sha256": "fa920863480bc6bddbd47b7532499e65d87a8543f5d5a23a06798317fbff15d2",
+            "key": [
+              2064,
+              16406137,
+              14867,
+              1792265073381180225,
+              1792265073381180225
+            ]
+          },
+          "Movies/20170629_00031_frameImage.mrc": {
+            "sha256": "57995333ea012decf064fa970afee32903431b0292cd41030b35b5098086c2ec",
+            "key": [
+              2064,
+              16406138,
+              56956944,
+              1792265073472191798,
+              1792265073472191798
+            ]
+          },
+          "Movies/20170629_00031_frameImage.star": {
+            "sha256": "e8310ae06ac63025caabd001c6dfeae855f5b10b203c48a81750382c35ae1360",
+            "key": [
+              2064,
+              16406142,
+              49330,
+              1792265073487193705,
+              1792265073487193705
+            ]
+          },
+          "Movies/20170629_00031_frameImage_shifts.eps": {
+            "sha256": "d51f93f1f4ba1a903b6193dad301f2486f0a902f75eeef38fa6b59b13f7def1f",
+            "key": [
+              2064,
+              16406145,
+              92298,
+              1792265073492194341,
+              1792265073492194341
+            ]
+          },
+          "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.log": {
+            "sha256": "15cbf853150c088ce7dda1276de82b71a2ca64582e6d6e971f3102200565b8f8",
+            "key": [
+              2064,
+              16406139,
+              24902,
+              1792265076660597220,
+              1792265076660597220
+            ]
+          },
+          "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.mrc": {
+            "sha256": "3cffa7884bba0e34293789a3b10ee212f7b8c3bec99a6aeb0ef51a269cf3fcb2",
+            "key": [
+              2064,
+              16406146,
+              94280704,
+              1792265076783612862,
+              1792265076783612862
+            ]
+          },
+          "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.star": {
+            "sha256": "648fbdafa2161477002c61c8a53a6559cd847dbde381ccd1a276216c47154c0c",
+            "key": [
+              2064,
+              16406147,
+              49973,
+              1792265076786613244,
+              1792265076786613244
+            ]
+          },
+          "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04_shifts.eps": {
+            "sha256": "ae8c0938c917e788607059cb0cbabec716436ee67f804044969df862bf18bf8c",
+            "key": [
+              2064,
+              16406148,
+              88470,
+              1792265076789613625,
+              1792265076789613625
+            ]
+          },
+          "corrected_micrographs.star": {
+            "sha256": "a8a8e0207367e5ce04e33fbec1271372ee266845d4f7c36ba153f9384e0b2414",
+            "key": [
+              2064,
+              16406149,
+              1205,
+              1792265076791613880,
+              1792265076791613880
+            ]
+          }
+        },
+        "seconds": 0.104
+      }
+    }
+  ],
+  "devices": [
+    {
+      "smi_index": "0",
+      "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_total": "81920 MiB",
+      "selector": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    },
+    {
+      "smi_index": "1",
+      "uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_total": "81920 MiB",
+      "selector": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d"
+    }
+  ],
+  "termination_signal": null,
+  "sampled_peak_gpu_memory_mib": {
+    "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54": 14474.0,
+    "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d": 14438.0
+  },
+  "sampled_peak_gpu_memory_note": "max nvidia-smi used_gpu_memory of each worker pid, sampled every 0.5s: a lower bound on the true peak; null means the worker was never observed with a reading",
+  "gpu_witness": {
+    "expected": {
+      "489587": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+      "489588": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d"
+    },
+    "witnessed": {
+      "489587": [
+        "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+      ],
+      "489588": [
+        "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d"
+      ]
+    },
+    "unwitnessed_pids": [],
+    "wrong_device": [],
+    "shared_devices": [],
+    "distinct_devices_witnessed": 2,
+    "all_pids_witnessed_on_intended_distinct_devices": true,
+    "sampler_errors": [],
+    "n_samples": 11
+  },
+  "process_cleanup": {
+    "ownership_mode": "linux-child-subreaper",
+    "complete": true,
+    "observed_live_before_cleanup": [],
+    "unexpected_descendants": false,
+    "error": null,
+    "scope": "Linux child-subreaper adopts unsampled surviving worker orphans; other platforms offer observed-only simulated CPU controls, not arbitrary native descendant containment. Checked PID/birth before every TERM/KILL; original worker return codes preserved."
+  },
+  "process_ownership_errors": [],
+  "workers_complete": true,
+  "dataset_ready": false,
+  "verdict": "PASS"
+}

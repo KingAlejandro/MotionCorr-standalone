@@ -1,0 +1,2514 @@
+{
+ "source": "PR #208 qual/rc0-eer-compact @ a5fa5429, docs/rc0/qual_eer_compact/evidence/{cases,results}",
+ "cases": {
+  "b1_trunc60": {
+   "desc": "batch: healthy, truncated at 60%, healthy; --expected_frames 58",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "58"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": null,
+   "recorded": {
+    "auto": {
+     "rc": 1,
+     "routes": [
+      "compact",
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 1,
+     "routes": [
+      "float",
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": null,
+   "batch": {
+    "auto": {
+     "rc": 1,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": false,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [
+      "Motion correction failed for 1 movie(s): Movies/movie2.eer. Successful per-movie outputs were retained; joint output was not generated.",
+      "Movie Movies/movie2.eer frame count mismatch: expected 58 frames, but decoded 34 frames."
+     ],
+     "frames": {
+      "movie1.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "float": {
+     "rc": 1,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": false,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [
+      "Motion correction failed for 1 movie(s): Movies/movie2.eer. Successful per-movie outputs were retained; joint output was not generated.",
+      "Movie Movies/movie2.eer frame count mismatch: expected 58 frames, but decoded 34 frames."
+     ],
+     "frames": {
+      "movie1.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "auto_eq_float_products_208": true
+   }
+  },
+  "b2_randbytes": {
+   "desc": "batch: healthy, 4096 random bytes in frame 500 strip, healthy",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "58"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": null,
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact",
+      "compact",
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float",
+      "float",
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": null,
+   "batch": {
+    "auto": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "a5150f7edfe39764",
+      "Movies/movie2.star": "star:269355 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "float": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "a5150f7edfe39764",
+      "Movies/movie2.star": "star:269355 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "auto_eq_float_products_208": false
+   }
+  },
+  "b3_stripff": {
+   "desc": "batch: healthy, frame 700 strip all 0xFF, healthy",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "58"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": null,
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact",
+      "compact",
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float",
+      "float",
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": null,
+   "batch": {
+    "auto": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "4a6e9d15cbf51feb",
+      "Movies/movie2.star": "star:268950 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [
+      701
+     ],
+     "n_warn_lines": 1,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "float": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "4a6e9d15cbf51feb",
+      "Movies/movie2.star": "star:268950 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [
+      701
+     ],
+     "n_warn_lines": 1,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "auto_eq_float_products_208": false
+   }
+  },
+  "b4_stripzero": {
+   "desc": "batch: healthy, frame 900 strip all zero, healthy",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "58"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": null,
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact",
+      "compact",
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float",
+      "float",
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": null,
+   "batch": {
+    "auto": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "b32417d9d4b8b984",
+      "Movies/movie2.star": "star:269220 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [
+      901
+     ],
+     "n_warn_lines": 1,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "float": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "b32417d9d4b8b984",
+      "Movies/movie2.star": "star:269220 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [
+      901
+     ],
+     "n_warn_lines": 1,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 58,
+      "movie3.log": 58
+     }
+    },
+    "auto_eq_float_products_208": false
+   }
+  },
+  "b5_trunc60_noexp": {
+   "desc": "as b1 without --expected_frames",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": null,
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact",
+      "compact",
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float",
+      "float",
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": null,
+   "batch": {
+    "auto": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "f71de09c42d7a044",
+      "Movies/movie2.star": "star:136122 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 34,
+      "movie3.log": 58
+     }
+    },
+    "float": {
+     "rc": 0,
+     "products": {
+      "Movies/movie1.mrc": "f8cf9fbdc6229b99",
+      "Movies/movie1.star": "star:269544 B",
+      "Movies/movie2.mrc": "f71de09c42d7a044",
+      "Movies/movie2.star": "star:136122 B",
+      "Movies/movie3.mrc": "5e67ac8b928c1258",
+      "Movies/movie3.star": "star:266196 B"
+     },
+     "joint_star": true,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [],
+     "frames": {
+      "movie1.log": 58,
+      "movie2.log": 34,
+      "movie3.log": 58
+     }
+    },
+    "auto_eq_float_products_208": false
+   }
+  },
+  "b6_wronggain": {
+   "desc": "12963 twice, 2048x2048 gain (wrong dimensions)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "49",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "39",
+    "--gainref",
+    "gain.mrc"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": null,
+   "recorded": {
+    "auto": {
+     "rc": 1,
+     "routes": []
+    },
+    "float": {
+     "rc": 1,
+     "routes": []
+    }
+   },
+   "recorded_compare_rc": null,
+   "batch": {
+    "auto": {
+     "rc": 1,
+     "products": {},
+     "joint_star": false,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [
+      "Motion correction failed for 2 movie(s): Movies/movie1.eer Movies/movie2.eer. Successful per-movie outputs were retained; joint output was not generated.",
+      "Unsupported gain size in EERRenderer::loadEERGain()"
+     ],
+     "frames": {
+      "movie1.log": 39,
+      "movie2.log": 39
+     }
+    },
+    "float": {
+     "rc": 1,
+     "products": {},
+     "joint_star": false,
+     "skip_warning_frames": [],
+     "n_warn_lines": 0,
+     "errors": [
+      "Motion correction failed for 2 movie(s): Movies/movie1.eer Movies/movie2.eer. Successful per-movie outputs were retained; joint output was not generated.",
+      "Unsupported gain size in EERRenderer::loadEERGain()"
+     ],
+     "frames": {
+      "movie1.log": 39,
+      "movie2.log": 39
+     }
+    },
+    "auto_eq_float_products_208": true
+   }
+  },
+  "c01_f3_g40_up1": {
+   "desc": "Falcon3 corpus default g40 up1 (58 groups)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "58",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c02_f4_g40_up1": {
+   "desc": "Falcon4 corpus default g40 up1 (144 groups)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "144",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c03_g_g49_up1_gain": {
+   "desc": "12963 corpus default g49 up1 with gain (39 groups)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "49",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "39",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--gainref",
+    "gain.gain"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c04_g_g49_up1_nogain": {
+   "desc": "12963 g49 up1 without gain",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "49",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "39",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c05_f3_g45_up1_rem": {
+   "desc": "Falcon3 g45: 51 groups, 36 fractions dropped",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "45",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "51",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c06_f4_g37_up1_rem": {
+   "desc": "Falcon4 g37: 156 groups, 10 fractions dropped",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "37",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "156",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c07_g_g47_up1_gain_rem": {
+   "desc": "12963 g47: 40 groups, 31 fractions dropped, gain",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "47",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "40",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--gainref",
+    "gain.gain"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c08_f3_g1_up1_sub": {
+   "desc": "Falcon3 g1, groups 101-140 only",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "1",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "2331",
+    "--first_frame_sum",
+    "101",
+    "--last_frame_sum",
+    "140"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c09_g_g1_up1_gain_sub": {
+   "desc": "12963 g1 with gain, groups 101-140 only",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "1",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "1911",
+    "--gainref",
+    "gain.gain",
+    "--first_frame_sum",
+    "101",
+    "--last_frame_sum",
+    "140"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c10_f3_g40_up2": {
+   "desc": "Falcon3 g40 up2 (8192x8192)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "2",
+    "--expected_frames",
+    "58",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c11_g_g49_up2_gain": {
+   "desc": "12963 g49 up2 with 4K gain (gain upsampled 2x)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "49",
+    "--eer_upsampling",
+    "2",
+    "--expected_frames",
+    "39",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--gainref",
+    "gain.gain"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c12_g_g49_up2_nogain": {
+   "desc": "12963 g49 up2 no gain",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "49",
+    "--eer_upsampling",
+    "2",
+    "--expected_frames",
+    "39",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c13_f3_g40_up-1": {
+   "desc": "Falcon3 g40 up -1 (4K->2K, up to 4 counts/pixel/fraction)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "-1",
+    "--expected_frames",
+    "58",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c14_g_g49_up-1_nogain": {
+   "desc": "12963 g49 up -1 no gain",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "49",
+    "--eer_upsampling",
+    "-1",
+    "--expected_frames",
+    "39",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c15_f3_g200_up3": {
+   "desc": "Falcon3 g200 up3 (16384x16384), 11 groups, rem 131",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "200",
+    "--eer_upsampling",
+    "3",
+    "--expected_frames",
+    "11",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c16_g_g150_up3": {
+   "desc": "12963 g150 up3 (16384x16384), 12 groups, rem 111",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "150",
+    "--eer_upsampling",
+    "3",
+    "--expected_frames",
+    "12",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "c17_g_g49_up-1_gain_expectfail": {
+   "desc": "12963 up -1 with 4K gain: unsupported gain size (explicit failure expected)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "49",
+    "--eer_upsampling",
+    "-1",
+    "--expected_frames",
+    "39",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--gainref",
+    "gain.gain"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 1,
+     "routes": []
+    },
+    "float": {
+     "rc": 1,
+     "routes": []
+    }
+   },
+   "recorded_compare_rc": null
+  },
+  "cc1_cpu_f3_g40_up1": {
+   "desc": "CPU-only: Falcon3 g40 up1 config L",
+   "binary_kind": "cpu",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "58",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "default",
+    "default"
+   ],
+   "arm_ingest": {
+    "default": null
+   },
+   "compare": null,
+   "recorded": {
+    "base0ac2726a": {
+     "rc": 0,
+     "routes": []
+    },
+    "cand1db86902": {
+     "rc": 0,
+     "routes": []
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "cc2_cpu_g_g49_up1_gain": {
+   "desc": "CPU-only: 12963 g49 up1 gain config L",
+   "binary_kind": "cpu",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "49",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "39",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--gainref",
+    "gain.gain"
+   ],
+   "arms": [
+    "default",
+    "default"
+   ],
+   "arm_ingest": {
+    "default": null
+   },
+   "compare": null,
+   "recorded": {
+    "base0ac2726a": {
+     "rc": 0,
+     "routes": []
+    },
+    "cand1db86902": {
+     "rc": 0,
+     "routes": []
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "cc3_cpu_f3_g40_upm1": {
+   "desc": "CPU-only: Falcon3 g40 up -1 config G",
+   "binary_kind": "cpu",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "-1",
+    "--expected_frames",
+    "58"
+   ],
+   "arms": [
+    "default",
+    "default"
+   ],
+   "arm_ingest": {
+    "default": null
+   },
+   "compare": null,
+   "recorded": {
+    "base0ac2726a": {
+     "rc": 0,
+     "routes": []
+    },
+    "cand1db86902": {
+     "rc": 0,
+     "routes": []
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "d1_g_up1_gain_defect": {
+   "desc": "12963 gain up1, defect file: pixels + row segment (+ natural hot pixels)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "49",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "39",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--gainref",
+    "gain.gain",
+    "--defect_file",
+    "defect.txt"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "d2_g_up1_gain_defectblock": {
+   "desc": "12963 gain up1, defect file incl. 11x11 block (Gaussian-replacement branch reachable)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "49",
+    "--eer_upsampling",
+    "1",
+    "--expected_frames",
+    "39",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--gainref",
+    "gain.gain",
+    "--defect_file",
+    "defect.txt"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "d3_g_up2_gain_defectblock": {
+   "desc": "12963 gain up2, defect file incl. 22x22 block",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "49",
+    "--eer_upsampling",
+    "2",
+    "--expected_frames",
+    "39",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--gainref",
+    "gain.gain",
+    "--defect_file",
+    "defect.txt"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "m1_f4_g40_up2_full": {
+   "desc": "memory edge: Falcon4 up2, 144 groups of 8192x8192 (predicted ~80.5 GiB device: marginal/OOM)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "2",
+    "--expected_frames",
+    "144",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "m2_f4_g40_up2_100groups": {
+   "desc": "Falcon4 up2, groups 1-100 only (predicted ~56.6 GiB device, fits)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "2",
+    "--expected_frames",
+    "144",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--first_frame_sum",
+    "1",
+    "--last_frame_sum",
+    "100"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "o1_ovf_upm1_g16384": {
+   "desc": "overflow guard: up -1, g16384 -> 4*16384=65536 > 65535",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "16384",
+    "--eer_upsampling",
+    "-1",
+    "--skip_defect"
+   ],
+   "arms": [
+    "auto",
+    "float",
+    "compact"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float",
+    "compact": "compact"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    },
+    "compact": {
+     "rc": 1,
+     "routes": []
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "o1n_NOGUARD_upm1_g16384": {
+   "desc": "NEGATIVE CONTROL: same as o1 on a build with the uint16 guard removed (src-noguard)",
+   "binary_kind": "noguard",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "16384",
+    "--eer_upsampling",
+    "-1",
+    "--skip_defect"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 1
+  },
+  "o2_ovf_upm1_g16383": {
+   "desc": "overflow boundary: up -1, g16383 -> 65532 <= 65535 (largest fitting group at -1)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "16383",
+    "--eer_upsampling",
+    "-1",
+    "--skip_defect"
+   ],
+   "arms": [
+    "auto",
+    "float",
+    "compact"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float",
+    "compact": "compact"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    },
+    "compact": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "o3_boundary_up1_g65535": {
+   "desc": "boundary: 2K det, up1, g65535 -> exactly 65535 counts at one pixel (fits uint16)",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "65535",
+    "--eer_upsampling",
+    "1",
+    "--skip_defect"
+   ],
+   "arms": [
+    "auto",
+    "float",
+    "compact"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float",
+    "compact": "compact"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    },
+    "compact": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "o4_ovf_up1_g65536": {
+   "desc": "overflow guard: up1, g65536 -> 65536 > 65535",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "65536",
+    "--eer_upsampling",
+    "1",
+    "--skip_defect"
+   ],
+   "arms": [
+    "auto",
+    "float",
+    "compact"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float",
+    "compact": "compact"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    },
+    "compact": {
+     "rc": 1,
+     "routes": []
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "o5_ovf_up2_g65536_8K": {
+   "desc": "overflow guard at up2 (4K det -> 8192x8192), g65536 -> 65536 > 65535",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "65536",
+    "--eer_upsampling",
+    "2",
+    "--skip_defect"
+   ],
+   "arms": [
+    "auto",
+    "float",
+    "compact"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float",
+    "compact": "compact"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    },
+    "compact": {
+     "rc": 1,
+     "routes": []
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "x1_syn65000_4k_up1": {
+   "desc": "synthetic tag 65000 (8-bit RLE), 4K, up1",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "x2_syn65000_4k_upm1": {
+   "desc": "synthetic tag 65000, 4K, up -1",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "-1"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "x3_syn65002_2k_up1": {
+   "desc": "synthetic tag 65002 (detailed, 2-bit subpixel), 2K, up1",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "x4_syn65002_2k_up2": {
+   "desc": "synthetic tag 65002, 2K, up2",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "2"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  },
+  "x5_syn65001_2k_up2": {
+   "desc": "synthetic tag 65001, 2K detector, up2",
+   "binary_kind": "cuda",
+   "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "2"
+   ],
+   "arms": [
+    "auto",
+    "float"
+   ],
+   "arm_ingest": {
+    "auto": "auto",
+    "float": "float"
+   },
+   "compare": [
+    "auto",
+    "float"
+   ],
+   "recorded": {
+    "auto": {
+     "rc": 0,
+     "routes": [
+      "compact"
+     ]
+    },
+    "float": {
+     "rc": 0,
+     "routes": [
+      "float"
+     ]
+    }
+   },
+   "recorded_compare_rc": 0
+  }
+ },
+ "batch_source": "PR #208 @ a5fa5429 evidence/batch_analysis.json (analyse_batch.py: MRC payload sha256[:16] after header+extended header; STAR as size)"
+}

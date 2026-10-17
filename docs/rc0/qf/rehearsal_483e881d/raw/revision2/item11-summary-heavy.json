@@ -1,0 +1,39 @@
+{
+ "record": "PR #208 qual/rc0-eer-compact @ a5fa5429, docs/rc0/qual_eer_compact/evidence/{cases,results}",
+ "recipe_sha256": "0c5fd2d04380efaded2e60a3df37e05ec2619ebdba69e636428ba37dffdc4c05",
+ "binaries": {
+  "nvcomp": "f8bd37409897b3dbf3c398e3bc8b4aaefbf00ca38204e806d27832a4ca3e899b",
+  "cpu": "57256b875ab1bbcb45a398210d138c1f92a6e55b9edb71c8b2c5fcf57ca2b0ea",
+  "ref_cpu_1db86902": "dd86cd419c43dc83d732c7b70cff2bb40c5459674ba65f9b9ba5ee85a6b26439"
+ },
+ "cases": {
+  "c15_f3_g200_up3": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c16_g_g150_up3": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "m1_f4_g40_up2_full": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "m2_f4_g40_up2_100groups": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "o1n_NOGUARD_upm1_g16384": {
+   "verdict": "N/A",
+   "reason": "guard-removed mutant; run with --noguard-binary (item11_noguard_control.sh)"
+  }
+ },
+ "negative_controls": {},
+ "totals": {
+  "PASS": 4,
+  "FAIL": 0,
+  "UNRUN": 0,
+  "N/A": 1
+ },
+ "negative_controls_all_rejected": true
+}

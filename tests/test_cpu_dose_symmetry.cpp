@@ -19,6 +19,7 @@ struct MotioncorrRunnerTestAccess {
                        const std::vector<RFLOAT> &doses, RFLOAT apix) {
         runner.doseWeighting(frames, doses, apix);
     }
+    static const char *path() { return MotioncorrRunner::doseWeightingPath(); }
 };
 
 #ifdef MOTIONCORR_EXP_WITNESS
@@ -86,7 +87,11 @@ static void copy(const std::vector<MultidimArray<fComplex>> &src,
         std::memcpy(dest[f].data, src[f].data, src[f].nzyxdim * sizeof(fComplex));
 }
 
-static int controls() {
+static int controls(const std::string &expected_path) {
+    const std::string path = MotioncorrRunnerTestAccess::path();
+    std::cout << "production doseWeighting path: " << path << '\n';
+    require(path == expected_path, "production path is " + path + ", configure reported " + expected_path);
+    const bool symmetric = path == "symmetric";
     size_t cases = 0;
     // R-NUM-179A: underflowing weights distinguish +0 from -0 under FMA contraction.
     {
@@ -118,8 +123,8 @@ static int controls() {
 #ifdef MOTIONCORR_EXP_WITNESS
         require(original_calls == static_cast<size_t>(ny) * nfx * count,
                 "original exp-call count not witnessed");
-        require(candidate_calls == static_cast<size_t>(ny / 2 + 1) * nfx * count,
-                "production did not eliminate duplicate weight calculations");
+        require(candidate_calls == static_cast<size_t>(symmetric ? ny / 2 + 1 : ny) * nfx * count,
+                "production exp-call count does not match its path");
 #endif
         ++cases;
     }
@@ -173,7 +178,9 @@ static int benchmark(int argc, char **argv) {
 int main(int argc, char **argv) {
     try {
         if (argc > 1 && std::string(argv[1]) == "--bench") return benchmark(argc, argv);
-        return controls();
+        require(argc == 3 && std::string(argv[1]) == "--expect-path",
+                "cpu_dose_symmetry --expect-path symmetric|original");
+        return controls(argv[2]);
     } catch (const std::exception &error) {
         std::cerr << error.what() << '\n'; return 1;
     }

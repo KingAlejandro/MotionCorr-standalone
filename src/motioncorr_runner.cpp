@@ -38,6 +38,7 @@
 static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
+#include "src/cpu_dose_symmetry_mode.h"
 #include "src/native_movie_staging.h"
 #include "src/defect_neighbours.h"
 #ifdef _CUDA_ENABLED
@@ -4863,6 +4864,11 @@ int MotioncorrRunner::findGoodSize(int request) {
 	return request; // return as it is
 }
 
+const char *MotioncorrRunner::doseWeightingPath() {
+	return MOTIONCORR_CPU_DOSE_SYMMETRY ? "symmetric" : "original";
+}
+
+#if MOTIONCORR_CPU_DOSE_SYMMETRY
 // On FMA targets the compiler may contract the complex multiply/divide, and
 // vectorised and scalar copies of a loop contract differently. An empty asm
 // statement stops GCC and Clang from vectorising the pixel loops, which keeps
@@ -4944,6 +4950,51 @@ void MotioncorrRunner::doseWeighting(std::vector<MultidimArray<fComplex> > &Ffra
 		}
 	}
 }
+#else
+// dose is equivalent dose at 300 kV at the END of the frame.
+// This implements the model by Timothy Grant & Nikolaus Grigorieff on eLife, 2015
+// doi: 10.7554/eLife.06980
+void MotioncorrRunner::doseWeighting(std::vector<MultidimArray<fComplex> > &Fframes, std::vector<RFLOAT> doses, RFLOAT apix) {
+	const int nfx = XSIZE(Fframes[0]), nfy = YSIZE(Fframes[0]);
+	const int nfy_half = nfy / 2;
+	const RFLOAT nfy2 = (RFLOAT)nfy * nfy;
+	const RFLOAT nfx2 = (RFLOAT)(nfx - 1) * (nfx - 1) * 4; // assuming nx is even
+	const int n_frames= Fframes.size();
+	const RFLOAT A = 0.245, B = -1.665, C = 2.81;
+
+	#pragma omp parallel for num_threads(n_threads)
+	for (int y = 0; y < nfy; y++) {
+		int ly = y;
+		if (y > nfy_half) ly = y - nfy;
+
+		const RFLOAT ly2 = (RFLOAT)ly * ly / nfy2;
+		for (int x = 0; x < nfx; x++) {
+			const RFLOAT dinv2 = ly2 + (RFLOAT)x * x / nfx2;
+			const RFLOAT dinv = std::sqrt(dinv2) / apix; // d = N * apix / dist, thus dinv = dist / N / angpix
+			const RFLOAT Ne = (A * std::pow(dinv, B) + C) * 2; // Eq. 3. 2 comes from Eq. 5
+			RFLOAT sum_weight_sq = 0;
+
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				const RFLOAT weight = std::exp(- doses[iframe] / Ne); // Eq. 5. 0.5 is factored out to Ne.
+				if (std::isnan(weight)) {
+					std::cerr << "dose = " <<  doses[iframe] << " Ne = " << Ne << " frm = " << iframe << " lx = " << x << " ly = " << ly << " reso = " << 1 / dinv << " weight = " << weight << std::endl;
+				}
+				sum_weight_sq += weight * weight;
+				DIRECT_A2D_ELEM(Fframes[iframe], y, x) *= weight;
+			}
+
+			sum_weight_sq = std::sqrt(sum_weight_sq);
+			if (std::isnan(sum_weight_sq)) {
+				std::cerr << " Ne = " << Ne << " lx = " << x << " ly = " << ly << " reso = " << 1 / dinv << " sum_weight_sq NaN" << std::endl;
+				REPORT_ERROR("Shouldn't happen.");
+			}
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				DIRECT_A2D_ELEM(Fframes[iframe], y, x) /= sum_weight_sq; // Eq. 9
+			}
+		}
+	}
+}
+#endif
 
 // shiftx, shifty is relative to the (real space) image size
 void MotioncorrRunner::shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty) {

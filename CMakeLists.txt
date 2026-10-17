@@ -98,6 +98,56 @@ add_library(motioncorr_core STATIC ${MOTIONCORR_SOURCES}
     "${CMAKE_CURRENT_BINARY_DIR}/macros.cpp")
 target_include_directories(motioncorr_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_definitions(motioncorr_core PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG)
+
+# CPU dose weighting: the symmetric-row path (#179, #220) is bit-exact and
+# measured only on x86-64 GCC without FMA code generation. AUTO enables it there
+# and keeps the original loop everywhere else; ON is for sites whose toolchain
+# passes CpuDoseSymmetry. src/cpu_dose_symmetry_mode.h makes the decision from the
+# real compile flags; the check below only reports it, and CpuDoseSymmetry fails
+# if the compiled path disagrees with this report.
+set(MOTIONCORR_CPU_DOSE_SYMMETRY AUTO CACHE STRING
+    "CPU dose-weighting symmetric rows: AUTO (qualified toolchains only), ON or OFF")
+set_property(CACHE MOTIONCORR_CPU_DOSE_SYMMETRY PROPERTY STRINGS AUTO ON OFF)
+string(TOUPPER "${MOTIONCORR_CPU_DOSE_SYMMETRY}" _dose_symmetry)
+if(_dose_symmetry STREQUAL "OFF")
+    set(_dose_symmetry_mode 0)
+elseif(_dose_symmetry STREQUAL "ON")
+    set(_dose_symmetry_mode 1)
+elseif(_dose_symmetry STREQUAL "AUTO")
+    set(_dose_symmetry_mode 2)
+else()
+    message(FATAL_ERROR "MOTIONCORR_CPU_DOSE_SYMMETRY must be AUTO, ON or OFF, not '${MOTIONCORR_CPU_DOSE_SYMMETRY}'")
+endif()
+target_compile_definitions(motioncorr_core PRIVATE MOTIONCORR_CPU_DOSE_SYMMETRY_MODE=${_dose_symmetry_mode})
+include(CheckCXXSourceCompiles)
+set(CMAKE_REQUIRED_DEFINITIONS -DMOTIONCORR_CPU_DOSE_SYMMETRY_MODE=${_dose_symmetry_mode})
+set(CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}")
+set(CMAKE_TRY_COMPILE_CONFIGURATION "${CMAKE_BUILD_TYPE}")
+unset(MOTIONCORR_DOSE_SYMMETRY_SELECTED CACHE)
+check_cxx_source_compiles("#include \"src/cpu_dose_symmetry_mode.h\"
+#if !MOTIONCORR_CPU_DOSE_SYMMETRY
+#error original path
+#endif
+int main() { return 0; }" MOTIONCORR_DOSE_SYMMETRY_SELECTED)
+unset(CMAKE_REQUIRED_DEFINITIONS)
+unset(CMAKE_REQUIRED_INCLUDES)
+unset(CMAKE_TRY_COMPILE_CONFIGURATION)
+if(MOTIONCORR_DOSE_SYMMETRY_SELECTED)
+    set(MOTIONCORR_DOSE_WEIGHTING_PATH symmetric)
+else()
+    set(MOTIONCORR_DOSE_WEIGHTING_PATH original)
+endif()
+if(_dose_symmetry STREQUAL "AUTO" AND MOTIONCORR_DOSE_SYMMETRY_SELECTED)
+    message(STATUS "CPU dose weighting: symmetric rows (AUTO: qualified x86-64 GCC without FMA)")
+elseif(_dose_symmetry STREQUAL "AUTO")
+    message(STATUS "CPU dose weighting: original loop (AUTO: ${CMAKE_CXX_COMPILER_ID} on ${CMAKE_SYSTEM_PROCESSOR} "
+        "with these flags is not the qualified x86-64 GCC without FMA). To opt in after CpuDoseSymmetry "
+        "passes on this toolchain: -DMOTIONCORR_CPU_DOSE_SYMMETRY=ON")
+elseif(_dose_symmetry STREQUAL "ON")
+    message(STATUS "CPU dose weighting: symmetric rows (forced ON; requires CpuDoseSymmetry to pass on this toolchain)")
+else()
+    message(STATUS "CPU dose weighting: original loop (forced OFF)")
+endif()
 target_link_libraries(motioncorr_core PUBLIC
     PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
     motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)
@@ -168,7 +218,18 @@ if(BUILD_TESTING)
         target_compile_definitions(cpu_dose_symmetry PRIVATE MOTIONCORR_EXP_WITNESS)
         target_link_options(cpu_dose_symmetry PRIVATE "LINKER:--wrap=exp" "LINKER:--wrap=expf")
     endif()
-    add_test(NAME CpuDoseSymmetry COMMAND cpu_dose_symmetry)
+    add_test(NAME CpuDoseSymmetry COMMAND cpu_dose_symmetry --expect-path ${MOTIONCORR_DOSE_WEIGHTING_PATH})
+    # The original loop, compiled into its own runner object, so CI exercises the
+    # fallback path whichever path the library selected.
+    add_executable(cpu_dose_symmetry_base tests/test_cpu_dose_symmetry.cpp src/motioncorr_runner.cpp)
+    target_compile_definitions(cpu_dose_symmetry_base PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG
+        MOTIONCORR_CPU_DOSE_SYMMETRY_MODE=0)
+    target_link_libraries(cpu_dose_symmetry_base PRIVATE motioncorr_core)
+    if(UNIX AND NOT APPLE)
+        target_compile_definitions(cpu_dose_symmetry_base PRIVATE MOTIONCORR_EXP_WITNESS)
+        target_link_options(cpu_dose_symmetry_base PRIVATE "LINKER:--wrap=exp" "LINKER:--wrap=expf")
+    endif()
+    add_test(NAME CpuDoseSymmetryBase COMMAND cpu_dose_symmetry_base --expect-path original)
     option(BUILD_CPU_DOSE_BENCH "Build the uninstrumented CPU dose benchmark" OFF)
     if(BUILD_CPU_DOSE_BENCH)
         # The benchmark has no call-count wrappers or instrumentation in exp().

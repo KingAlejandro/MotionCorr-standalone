@@ -136,7 +136,10 @@ void alignControls() {
         MotioncorrRunner r;
         r.use_gpu=false; r.gpu_id=0; r.n_threads=threads;
         r.ccf_downsample=downsample; r.max_iter=iterations;
-        const RFLOAT scaled_B=downsample==0 ? 150.0 : 20.0;
+        // A large B-factor weights the outer CCF columns below float rounding
+        // in Iccs, so a window short of ccf_nfx would pass. Keep the explicit
+        // downsample cases nearly flat so those columns reach the shifts.
+        const RFLOAT scaled_B=downsample==0 ? 150.0 : 0.01;
         const int nx=shape.first, ny=shape.second;
         MultidimArray<float> image(ny,nx);
         unsigned state=812;

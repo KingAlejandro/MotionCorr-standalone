@@ -1348,6 +1348,10 @@ thread_local PinnedStagePool t_pinned_stage;
 // so it does not disturb the LibTIFF handle that owns fd.
 bool preadFully(int fd, uint8_t *dst, size_t n, uint64_t offset) {
     if (fd < 0) return false;
+    // The whole span must be addressable up front: a start above the off_t
+    // maximum would reach pread as a negative position, and a wrapped end would
+    // let the loop below advance offset past 2^64. Valid spans end inside the file.
+    if (!mc_checked::fileSpanFitsOffT(offset, n)) return false;
     while (n > 0) {
         const ssize_t got = pread(fd, dst, n, (off_t)offset);
         if (got < 0 && errno == EINTR) continue;
@@ -1392,8 +1396,9 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     if (!d_Iframes || !d_Isum || !d_Fframes) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    const int num_req_frames = (int)frames.size();
-    if (num_req_frames != n_frames || n_frames <= 0 || nx <= 0 || ny <= 0) return false;
+    // Compared as size_t: the former (int)frames.size() could wrap into n_frames.
+    if (n_frames <= 0 || nx <= 0 || ny <= 0 || frames.size() != (size_t)n_frames) return false;
+    const int num_req_frames = n_frames;
 
     // ------------------------------------------------------------------
     // Pass A: geometry and per-strip compressed sizes. Tag reads only; no
@@ -1465,10 +1470,25 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                 // Same offset and byte count TIFFReadRawStrip uses for this strip.
                 int err = 0;
                 raw_offsets[f][s] = TIFFGetStrileOffsetWithErr(tif, (uint32_t)s, &err);
-                if (err || raw_offsets[f][s] == 0) contiguous = false;
+                // LibTIFF could not supply this strip's offset (unreadable or
+                // unpopulated StripOffsets). Say so rather than fall through to the
+                // span check, which would name the wrong cause.
+                if (err) {
+                    reject = "strip offset not readable from the TIFF directory";
+                    break;
+                }
+                if (raw_offsets[f][s] == 0) contiguous = false;
+                // Offsets come from the file's StripOffsets. A strip whose end is
+                // not addressable cannot be a real strip, and offset + size would
+                // wrap in the adjacency test below.
+                if (!mc_checked::fileSpanFitsOffT(raw_offsets[f][s], raw_sizes[f][s])) {
+                    reject = "size arithmetic overflow: strip offset + byte count";
+                    break;
+                }
                 if (s > 0 && raw_offsets[f][s] != raw_offsets[f][s - 1] + raw_sizes[f][s - 1])
                     contiguous = false;
             }
+            if (reject) break;
             if (!ok || (int)raw_sizes[f].size() != ny) { ok = false; break; }
             frame_contiguous[f] = contiguous ? 1 : 0;
         }
@@ -1501,8 +1521,18 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     const size_t out_align = std::max<size_t>((size_t)align_req.output, sizeof(uint16_t));
     const size_t tmp_align = std::max<size_t>((size_t)align_req.temp, 256);
 
+    // An overflow in any size below is a named decline like the others: no CUDA
+    // error is recorded, so the caller maps it to NotApplicable.
+    auto decline_overflow = [&](const char *what) {
+        logfile << "nvCOMP ingestion declined (size arithmetic overflow: " << what
+                << "); using the host reader." << std::endl;
+        return false;
+    };
+
     const size_t row_bytes = (size_t)nx * sizeof(uint16_t);
-    const size_t row_pitch_bytes = alignUp(row_bytes, out_align);
+    size_t row_pitch_bytes = 0;
+    if (!mc_checked::alignUpChecked(row_bytes, out_align, row_pitch_bytes))
+        return decline_overflow("row pitch");
     if (row_pitch_bytes % sizeof(uint16_t) != 0) return false;
     const size_t row_pitch_u16 = row_pitch_bytes / sizeof(uint16_t);
 
@@ -1511,7 +1541,9 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     std::vector<size_t> frame_stage_bytes(num_req_frames, 0);
     size_t max_frame_stage = 0;
     for (int f = 0; f < num_req_frames; f++) {
-        const size_t cursor = frameStageBytes(raw_sizes[f].data(), ny, in_align);
+        size_t cursor = 0;
+        if (!mc_tiff_deflate::checkedFrameStageBytes(raw_sizes[f].data(), ny, in_align, cursor))
+            return decline_overflow("frame staging size");
         frame_stage_bytes[f] = cursor;
         max_frame_stage = std::max(max_frame_stage, cursor);
     }
@@ -1534,8 +1566,12 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         ~ScratchScope() { session->endIngestScratch(); }
     } scratch_scope = { this };
 
-    mc_cuda::DeviceScratchArena arena(
-        d_Fframes, (size_t)n_frames * (size_t)ny * (size_t)nfx * sizeof(cufftComplex));
+    size_t arena_bytes = 0;
+    if (!mc_checked::mulSize((size_t)n_frames, (size_t)ny, arena_bytes) ||
+        !mc_checked::mulSize(arena_bytes, (size_t)nfx, arena_bytes) ||
+        !mc_checked::mulSize(arena_bytes, sizeof(cufftComplex), arena_bytes))
+        return decline_overflow("pre-FFT scratch arena size");
+    mc_cuda::DeviceScratchArena arena(d_Fframes, arena_bytes);
 
     // Pinned host memory is a per-worker resource, not a per-session one, and under
     // a process-per-GPU layout the pools add up across workers. Cap it and let the
@@ -1622,22 +1658,47 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
 
     for (int candidate = chunk_req; candidate >= 1; candidate = (candidate > 1 ? candidate / 2 : 0)) {
         const int slots = mc_tiff_deflate::pipelineSlots(n_frames, candidate);
-        const size_t chunks = (size_t)candidate * (size_t)ny;
+        size_t chunks = 0;
+        if (!mc_checked::mulSize((size_t)candidate, (size_t)ny, chunks))
+            return decline_overflow("strips per chunk");
+        // One Adler-32 block per strip is launched with an unsigned grid, and
+        // gridDim.x tops out at INT_MAX. A larger chunk is not launchable, so
+        // halve it like any other candidate that does not fit.
+        if (chunks > (size_t)INT_MAX) {
+            if (candidate == 1) break;
+            continue;
+        }
+        size_t chunk_out_bytes = 0, aligned_stage = 0, cap = 0;
+        size_t u16_bytes = 0, ptr_bytes = 0, size_bytes = 0, status_bytes = 0, adler_bytes = 0;
+        if (!mc_checked::mulSize(chunks, row_bytes, chunk_out_bytes))
+            return decline_overflow("chunk output bytes");
+        if (!mc_checked::alignUpChecked(max_frame_stage, in_align, aligned_stage) ||
+            !mc_checked::mulSize((size_t)candidate, aligned_stage, cap))
+            return decline_overflow("chunk payload capacity");
+        if (!mc_checked::mulSize(chunks, row_pitch_bytes, u16_bytes) ||
+            !mc_checked::mulSize(chunks, sizeof(void *), ptr_bytes) ||
+            !mc_checked::mulSize(chunks, sizeof(size_t), size_bytes) ||
+            !mc_checked::mulSize(chunks, sizeof(nvcompStatus_t), status_bytes) ||
+            !mc_checked::mulSize(chunks, sizeof(uint32_t), adler_bytes))
+            return decline_overflow("chunk table bytes");
         size_t cand_temp = 0;
         if (nvcompBatchedDeflateDecompressGetTempSizeAsync(
                 chunks, row_bytes, nvcompBatchedDeflateDecompressDefaultOpts,
-                &cand_temp, chunks * row_bytes) != nvcompSuccess) {
+                &cand_temp, chunk_out_bytes) != nvcompSuccess) {
             break;
         }
-        const size_t cap = (size_t)candidate * alignUp(max_frame_stage, in_align);
-        const mc_tiff_deflate::PinnedChunkLayout cand_layout =
-            mc_tiff_deflate::pinnedChunkLayout(slots, cap, chunks, sizeof(nvcompStatus_t));
+        mc_tiff_deflate::PinnedChunkLayout cand_layout;
+        if (!mc_tiff_deflate::checkedPinnedChunkLayout(slots, cap, chunks, sizeof(nvcompStatus_t),
+                                                       cand_layout))
+            return decline_overflow("pinned staging layout");
+        size_t cand_reserve = 0;
+        if (!mc_tiff_deflate::checkedPinnedReserveBytes(cand_layout.total, cand_reserve))
+            return decline_overflow("pinned staging reservation");
         // Against the bytes that will actually be pinned, not the payload: the
         // pool adds 12.5% headroom and rounds up to a 32 MiB granule, so a cap
         // enforced on the payload is overshot by construction. Every pinned byte
         // of the pipeline (both payload slots, tables, readback) is in total.
-        if (cand_layout.total == 0 ||
-            mc_tiff_deflate::pinnedReserveBytes(cand_layout.total) > pinned_cap) {
+        if (cand_layout.total == 0 || cand_reserve > pinned_cap) {
             if (candidate == 1) break;
             continue;
         }
@@ -1647,14 +1708,14 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         bool fits = true;
         for (int j = 0; j < slots && fits; j++) {
             c[j].comp   = (uint8_t *)arena.alloc(cap, in_align);
-            c[j].u16    = (uint16_t *)arena.alloc(chunks * row_pitch_bytes, out_align);
-            c[j].cptr   = (void **)arena.alloc(chunks * sizeof(void *), sizeof(void *));
-            c[j].csize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
-            c[j].dptr   = (void **)arena.alloc(chunks * sizeof(void *), sizeof(void *));
-            c[j].dsize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
-            c[j].asize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
-            c[j].status = (nvcompStatus_t *)arena.alloc(chunks * sizeof(nvcompStatus_t), sizeof(nvcompStatus_t));
-            c[j].adler  = (uint32_t *)arena.alloc(chunks * sizeof(uint32_t), sizeof(uint32_t));
+            c[j].u16    = (uint16_t *)arena.alloc(u16_bytes, out_align);
+            c[j].cptr   = (void **)arena.alloc(ptr_bytes, sizeof(void *));
+            c[j].csize  = (size_t *)arena.alloc(size_bytes, sizeof(size_t));
+            c[j].dptr   = (void **)arena.alloc(ptr_bytes, sizeof(void *));
+            c[j].dsize  = (size_t *)arena.alloc(size_bytes, sizeof(size_t));
+            c[j].asize  = (size_t *)arena.alloc(size_bytes, sizeof(size_t));
+            c[j].status = (nvcompStatus_t *)arena.alloc(status_bytes, sizeof(nvcompStatus_t));
+            c[j].adler  = (uint32_t *)arena.alloc(adler_bytes, sizeof(uint32_t));
             fits = c[j].comp && c[j].u16 && c[j].cptr && c[j].csize && c[j].dptr &&
                    c[j].dsize && c[j].asize && c[j].status && c[j].adler;
         }
@@ -1683,7 +1744,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         return false;
     }
     const int n_slots = layout.slots;
-    const int n_chunks = (n_frames + chunk_frames - 1) / chunk_frames;
+    const int n_chunks = mc_checked::ceilDivInt(n_frames, chunk_frames);
 
     // The arena can only honour this because its base came from cudaMalloc. Checked
     // rather than assumed: a misaligned input is undefined behaviour in nvCOMP that
@@ -1783,8 +1844,9 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         std::vector<size_t> frame_base(bf);
         size_t stage_used = 0;
         for (int i = 0; i < bf; i++) {
-            frame_base[i] = alignUp(stage_used, in_align);
-            stage_used = frame_base[i] + frame_stage_bytes[f0 + i];
+            if (!mc_checked::alignUpChecked(stage_used, in_align, frame_base[i]) ||
+                !mc_checked::addSize(frame_base[i], frame_stage_bytes[f0 + i], stage_used))
+                return decline_overflow("chunk staging size");
         }
         if (stage_used > slot_capacity) return false;
         chunk_stage_used[k] = stage_used;
@@ -1901,7 +1963,10 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // Pass B: read chunk k while chunk k-1 is on the device; verify chunk k-1
     // and only then convert it.
     // ------------------------------------------------------------------
-    for (int k = 0; k <= n_chunks; k++) {
+    // k runs 0..n_chunks inclusive (the last pass only drains chunk n_chunks-1).
+    // advancePipelineStep stops at n_chunks instead of incrementing past it, which
+    // would overflow int when n_chunks == INT_MAX.
+    for (int k = 0;; ) {
         if (k < n_chunks) {
             const int j = k % n_slots;
             const int f0 = k * chunk_frames;
@@ -1965,6 +2030,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                 f0, bf, f0 == 0, apply_gain);
             HANDLE_ERROR(cudaGetLastError());
         }
+        if (!mc_checked::advancePipelineStep(k, n_chunks)) break;
     }
     phase.next("ingest drain");
     HANDLE_ERROR(cudaStreamSynchronize(stream));

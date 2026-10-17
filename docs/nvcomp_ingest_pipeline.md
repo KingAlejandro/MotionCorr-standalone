@@ -51,6 +51,18 @@ summed, but nothing is published:
     a later batch failed.
 - **CUDA error.** The ingest reports RecoverableFailure, as before.
 
+### Checked size arithmetic (#134 item 2)
+
+Strip offsets, byte counts and geometry come from the file, so the sizes derived
+from them are checked where they are computed: a scratch-arena or pinned-cap test
+cannot tell that a size already wrapped. The helpers are in
+`src/acc/cuda/cuda_checked_arith.h` and `cuda_deflate_layout.h`. An overflow in the
+tag scan, the per-frame staging size, the chunk sizing, the pinned layout or the
+pinned reservation is a named decline
+(`nvCOMP ingestion declined (size arithmetic overflow: ...); using the host reader.`)
+with no CUDA error, so it is NotApplicable like any other decline. Valid inputs
+produce the same values and take the same route.
+
 ### Slot reuse
 
 | resource of slot j | rewritten only after |

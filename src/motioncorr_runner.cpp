@@ -639,7 +639,10 @@ void MotioncorrRunner::prepareGainReference(bool write_gain)
 	if (write_gain)
 	{
 		Image<RFLOAT> Iin, Iout;
-		Iin.read(fn_gain_reference);
+		// Image::read reports a short raw MRC only through a negative return (0 is success).
+		if (Iin.read(fn_gain_reference) < 0)
+			REPORT_ERROR("Failed to read the gain reference " + fn_gain_reference +
+			             ": the file is truncated or unreadable.");
 
 		if (gain_rotation == 0)
 			Iout() = Iin();
@@ -2025,7 +2028,13 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 		if (is_eer)
 			renderer.loadEERGain(fn_gain_reference, gain_cache());
 		else
-			gain_cache.read(fn_gain_reference);
+		{
+			// A short raw MRC leaves the rest of the array unread, and the size check below
+			// sees only the header, so the stale data would be multiplied into every movie.
+			if (gain_cache.read(fn_gain_reference) < 0)
+				REPORT_ERROR("Failed to read the gain reference " + fn_gain_reference +
+				             ": the file is truncated or unreadable.");
+		}
 		if (XSIZE(gain_cache()) != nx || YSIZE(gain_cache()) != ny)
 			REPORT_ERROR("The size of the image and the size of the gain reference do not match. Make sure the gain reference has been rotated if necessary.");
 		gain_cache_name = fn_gain_reference;
@@ -2451,6 +2460,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		// rethrow on the serial path, where run()'s caller records the failure and
 		// continues with the remaining movies.
 		std::vector<std::exception_ptr> read_errors(n_frames);
+		// Image<T>::read reports a short or unseekable raw MRC only through a negative
+		// return (-1 seek, -2 short fread); 0 is success and TIFF always returns 0.
+		// Dropping it published products built from unread frame memory. One message
+		// for every destination type, so the failure does not depend on the ingest route.
+		auto read_movie_frame = [&](auto &frame_image, int iframe) {
+			const int err = frame_image.read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
+			if (err < 0)
+				REPORT_ERROR("Failed to read frame " + integerToString(frames[iframe]) + " (0-based) of " +
+				             fn_mic + ": the movie is truncated or unreadable.");
+		};
 		#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			try {
@@ -2467,19 +2486,19 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				else if (compact_stage == COMPACT_U16)
 					// Same reader, same guards, same per-row Y-flip; only the destination
 					// sample type differs, and castPage2T's UShort branch is then a memcpy.
-					Iframes_u16[iframe].read(fn_mic, true, frames[iframe], false, true);
+					read_movie_frame(Iframes_u16[iframe], iframe);
 				else if (compact_stage == COMPACT_U8)
 					// As above; castPage2T's UChar branch is the memcpy here.
-					Iframes_u8[iframe].read(fn_mic, true, frames[iframe], false, true);
+					read_movie_frame(Iframes_u8[iframe], iframe);
 				else if (compact_stage == COMPACT_S16)
 					// MRC mode 1: castPage2T's SShort branch is the memcpy here.
-					Iframes_s16[iframe].read(fn_mic, true, frames[iframe], false, true);
+					read_movie_frame(Iframes_s16[iframe], iframe);
 				else if (compact_stage == COMPACT_S8)
 					// MRC mode 0: castPage2T's SChar branch is the memcpy here.
-					Iframes_s8[iframe].read(fn_mic, true, frames[iframe], false, true);
+					read_movie_frame(Iframes_s8[iframe], iframe);
 #endif
 				else
-					Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
+					read_movie_frame(Iframes[iframe], iframe);
 			} catch (...) {
 				read_errors[iframe] = std::current_exception();
 			}
@@ -5134,7 +5153,9 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 	{
 		// Defect map
 		Image<float> Idefect;
-		Idefect.read(fn_defect);
+		if (Idefect.read(fn_defect) < 0)
+			REPORT_ERROR("Failed to read the defect map " + fn_defect +
+			             ": the file is truncated or unreadable.");
 		if (ny != YSIZE(Idefect()) || nx != XSIZE(Idefect()))
 			REPORT_ERROR("The size of the defect map is not the same as that of the movie.");
 

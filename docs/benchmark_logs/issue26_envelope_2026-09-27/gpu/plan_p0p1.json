@@ -1,0 +1,558 @@
+{
+  "name": "issue26-phase0-phase1",
+  "source_commit": "4c952b3f54479653512c4d208e09c9a8c02f3726",
+  "config": {
+    "own_user": "alex",
+    "settle_load_max": 2.0,
+    "settle_timeout_s": 300,
+    "settle_full_gate": true,
+    "inter_run_quiet_s": 8.0,
+    "device_sample_period_s": 0.2,
+    "foreign_sample_period_s": 1.0,
+    "rss_period_s": 0.25,
+    "run_timeout_s": 5400
+  },
+  "input_hashes": {
+    "movies_star_24": "/home/alex/MotionCorr-issue26-envelope/runroot/movies.star",
+    "subset4_star": "/home/alex/MotionCorr-issue26-envelope/runroot/subset4.star",
+    "gain": "/home/alex/MotionCorr-issue26-envelope/runroot/Movies/gain.mrc"
+  },
+  "binaries": {
+    "cuda_release": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+    "cuda_release_timing": "/home/alex/MotionCorr-issue26-envelope/build-cuda-timing/motioncorr"
+  },
+  "arms": [
+    {
+      "id": "warmup_24_j8",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "movies.star",
+      "j": 8,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "cache_regime": "cold-or-mixed (first touch)"
+    },
+    {
+      "id": "p0_base_24_j8",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "movies.star",
+      "j": 8,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ]
+    },
+    {
+      "id": "p0_profiled_24_j8",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda-timing/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "movies.star",
+      "j": 8,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ]
+    },
+    {
+      "id": "p1_j1_io1",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 1,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ]
+    },
+    {
+      "id": "p1_j2_io1",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 2,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "max_io_threads": 1
+    },
+    {
+      "id": "p1_j2_io2",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 2,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ]
+    },
+    {
+      "id": "p1_j4_io1",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 4,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "max_io_threads": 1
+    },
+    {
+      "id": "p1_j4_io2",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 4,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "max_io_threads": 2
+    },
+    {
+      "id": "p1_j4_io4",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 4,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ]
+    },
+    {
+      "id": "p1_j8_io1",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 8,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "max_io_threads": 1
+    },
+    {
+      "id": "p1_j8_io2",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 8,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "max_io_threads": 2
+    },
+    {
+      "id": "p1_j8_io4",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 8,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "max_io_threads": 4
+    },
+    {
+      "id": "p1_j8_io8",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 8,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ]
+    }
+  ],
+  "schedule": [
+    {
+      "arm": "warmup_24_j8",
+      "pair": -1,
+      "order": 0,
+      "rep": 0
+    },
+    {
+      "arm": "p0_base_24_j8",
+      "pair": 0,
+      "order": 0,
+      "rep": 1
+    },
+    {
+      "arm": "p0_profiled_24_j8",
+      "pair": 0,
+      "order": 1,
+      "rep": 1
+    },
+    {
+      "arm": "p1_j1_io1",
+      "pair": 101,
+      "order": 0,
+      "rep": 1
+    },
+    {
+      "arm": "p1_j2_io1",
+      "pair": 101,
+      "order": 1,
+      "rep": 1
+    },
+    {
+      "arm": "p1_j2_io2",
+      "pair": 101,
+      "order": 2,
+      "rep": 1
+    },
+    {
+      "arm": "p1_j4_io1",
+      "pair": 101,
+      "order": 3,
+      "rep": 1
+    },
+    {
+      "arm": "p1_j4_io2",
+      "pair": 101,
+      "order": 4,
+      "rep": 1
+    },
+    {
+      "arm": "p1_j4_io4",
+      "pair": 101,
+      "order": 5,
+      "rep": 1
+    },
+    {
+      "arm": "p1_j8_io1",
+      "pair": 101,
+      "order": 6,
+      "rep": 1
+    },
+    {
+      "arm": "p1_j8_io2",
+      "pair": 101,
+      "order": 7,
+      "rep": 1
+    },
+    {
+      "arm": "p1_j8_io4",
+      "pair": 101,
+      "order": 8,
+      "rep": 1
+    },
+    {
+      "arm": "p1_j8_io8",
+      "pair": 101,
+      "order": 9,
+      "rep": 1
+    },
+    {
+      "arm": "p1_j8_io8",
+      "pair": 102,
+      "order": 0,
+      "rep": 2
+    },
+    {
+      "arm": "p1_j8_io4",
+      "pair": 102,
+      "order": 1,
+      "rep": 2
+    },
+    {
+      "arm": "p1_j8_io2",
+      "pair": 102,
+      "order": 2,
+      "rep": 2
+    },
+    {
+      "arm": "p1_j8_io1",
+      "pair": 102,
+      "order": 3,
+      "rep": 2
+    },
+    {
+      "arm": "p1_j4_io4",
+      "pair": 102,
+      "order": 4,
+      "rep": 2
+    },
+    {
+      "arm": "p1_j4_io2",
+      "pair": 102,
+      "order": 5,
+      "rep": 2
+    },
+    {
+      "arm": "p1_j4_io1",
+      "pair": 102,
+      "order": 6,
+      "rep": 2
+    },
+    {
+      "arm": "p1_j2_io2",
+      "pair": 102,
+      "order": 7,
+      "rep": 2
+    },
+    {
+      "arm": "p1_j2_io1",
+      "pair": 102,
+      "order": 8,
+      "rep": 2
+    },
+    {
+      "arm": "p1_j1_io1",
+      "pair": 102,
+      "order": 9,
+      "rep": 2
+    },
+    {
+      "arm": "p1_j1_io1",
+      "pair": 103,
+      "order": 0,
+      "rep": 3
+    },
+    {
+      "arm": "p1_j2_io1",
+      "pair": 103,
+      "order": 1,
+      "rep": 3
+    },
+    {
+      "arm": "p1_j2_io2",
+      "pair": 103,
+      "order": 2,
+      "rep": 3
+    },
+    {
+      "arm": "p1_j4_io1",
+      "pair": 103,
+      "order": 3,
+      "rep": 3
+    },
+    {
+      "arm": "p1_j4_io2",
+      "pair": 103,
+      "order": 4,
+      "rep": 3
+    },
+    {
+      "arm": "p1_j4_io4",
+      "pair": 103,
+      "order": 5,
+      "rep": 3
+    },
+    {
+      "arm": "p1_j8_io1",
+      "pair": 103,
+      "order": 6,
+      "rep": 3
+    },
+    {
+      "arm": "p1_j8_io2",
+      "pair": 103,
+      "order": 7,
+      "rep": 3
+    },
+    {
+      "arm": "p1_j8_io4",
+      "pair": 103,
+      "order": 8,
+      "rep": 3
+    },
+    {
+      "arm": "p1_j8_io8",
+      "pair": 103,
+      "order": 9,
+      "rep": 3
+    }
+  ]
+}

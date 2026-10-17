@@ -1,0 +1,199 @@
+{
+  "name": "issue26-phase1-confirmation-24movies",
+  "source_commit": "4c952b3f54479653512c4d208e09c9a8c02f3726",
+  "config": {
+    "own_user": "alex",
+    "settle_load_max": 2.0,
+    "settle_timeout_s": 300,
+    "settle_full_gate": true,
+    "settle_mode": "global_load",
+    "inter_run_quiet_s": 8.0,
+    "device_sample_period_s": 0.2,
+    "foreign_sample_period_s": 1.0,
+    "rss_period_s": 0.25,
+    "run_timeout_s": 5400
+  },
+  "input_hashes": {
+    "movies_star_24": "/home/alex/MotionCorr-issue26-envelope/runroot/movies.star",
+    "gain": "/home/alex/MotionCorr-issue26-envelope/runroot/Movies/gain.mrc"
+  },
+  "binaries": {
+    "cuda_release": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr"
+  },
+  "arms": [
+    {
+      "id": "c_j8_io8",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "movies.star",
+      "j": 8,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ]
+    },
+    {
+      "id": "c_j16_io16",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "movies.star",
+      "j": 16,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ]
+    },
+    {
+      "id": "c_j16_io8",
+      "binary": "/home/alex/MotionCorr-issue26-envelope/build-cuda/motioncorr",
+      "cwd": "/home/alex/MotionCorr-issue26-envelope/runroot",
+      "input_star": "movies.star",
+      "j": 16,
+      "gpu": 0,
+      "cpu_mask": "96-111",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "max_io_threads": 8
+    }
+  ],
+  "schedule": [
+    {
+      "arm": "c_j8_io8",
+      "pair": 300,
+      "order": 0,
+      "rep": 1
+    },
+    {
+      "arm": "c_j16_io16",
+      "pair": 300,
+      "order": 1,
+      "rep": 1
+    },
+    {
+      "arm": "c_j16_io16",
+      "pair": 301,
+      "order": 0,
+      "rep": 2
+    },
+    {
+      "arm": "c_j8_io8",
+      "pair": 301,
+      "order": 1,
+      "rep": 2
+    },
+    {
+      "arm": "c_j8_io8",
+      "pair": 302,
+      "order": 0,
+      "rep": 3
+    },
+    {
+      "arm": "c_j16_io16",
+      "pair": 302,
+      "order": 1,
+      "rep": 3
+    },
+    {
+      "arm": "c_j16_io16",
+      "pair": 303,
+      "order": 0,
+      "rep": 4
+    },
+    {
+      "arm": "c_j8_io8",
+      "pair": 303,
+      "order": 1,
+      "rep": 4
+    },
+    {
+      "arm": "c_j8_io8",
+      "pair": 304,
+      "order": 0,
+      "rep": 5
+    },
+    {
+      "arm": "c_j16_io16",
+      "pair": 304,
+      "order": 1,
+      "rep": 5
+    },
+    {
+      "arm": "c_j16_io16",
+      "pair": 400,
+      "order": 0,
+      "rep": 1
+    },
+    {
+      "arm": "c_j16_io8",
+      "pair": 400,
+      "order": 1,
+      "rep": 1
+    },
+    {
+      "arm": "c_j16_io8",
+      "pair": 401,
+      "order": 0,
+      "rep": 2
+    },
+    {
+      "arm": "c_j16_io16",
+      "pair": 401,
+      "order": 1,
+      "rep": 2
+    },
+    {
+      "arm": "c_j16_io16",
+      "pair": 402,
+      "order": 0,
+      "rep": 3
+    },
+    {
+      "arm": "c_j16_io8",
+      "pair": 402,
+      "order": 1,
+      "rep": 3
+    }
+  ]
+}

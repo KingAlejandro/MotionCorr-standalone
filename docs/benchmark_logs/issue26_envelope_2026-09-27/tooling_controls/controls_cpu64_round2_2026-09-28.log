@@ -1,0 +1,44 @@
+=== issue26 tooling controls, round 2 (CPU-only; not a benchmark) ===
+utc             : 2026-09-28T06:21:09Z
+host            : small-refmac-machine
+lock held       : /tmp/motioncorr-issue96-cpu-validation.lock
+requested lane  : 32-63   (build/runtime parallelism <= 16; controls are serial)
+inherited cpuset: 32-63
+inherited mems  : 0-1
+lane NUMA node  : 1 
+memory policy   : policy: default;preferred node: current;physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 ;cpubind: 1 ;nodebind: 1 ;membind: 0 1 ;preferred: ;
+nproc visible   : 32
+loadavg         : 2.02 2.05 2.07 3/7966 3241723
+runner  sha256  : e7276f5eaf689b97bc06a81a479dbdd893e60383aee3089c67ce1e98c3e7c4cf
+controls sha256 : f6e585ca2c82c043b51640a034dfdf66b7a3774e7f5b92ede7286fd2c8d9a917
+prior runner    : b05260dbf9b4ddbd76c8e248dc1bb503b911ec5d1aef11d16ef699005443bdcd (defective, superseded)
+ctffind (recorded as interference, NOT altered):
+                  pid=1156942 pcpu=99.9 psr=1
+                  pid=1635429 pcpu=99.9 psr=25
+
+platform=linux /proc=True
+  PASS  two sequential 100 MiB stages are not a 200 MiB peak  n=2 max=100.0 sum=None
+  PASS  time-like tags still expose a meaningful sum  sum=7.0
+  PASS  payload resolved via /proc/<pid>/exe  {'pid': 3241734, 'exe': '/usr/bin/python3.12', 'starttime_ticks': 2590673198, 'session': 3241733, 'launcher_pid': 3241733, 'resolved_after_s': 0.036}
+  PASS  resolved payload PID differs from the launcher PID  payload=3241734 launcher=3241733 launcher_exe=/usr/bin/time
+  PASS  sampling the CHILD passes: residency reflects 256 MiB  child=266.07 MiB
+  PASS  MUTATION - sampling the PARENT fails the same assertion  parent=1.45 MiB vs threshold 128.0 MiB
+  PASS  parent residency is strictly smaller than the payload's  parent=1.45 MiB < child=266.07 MiB
+  PASS  units are bytes from numa_maps, not numastat MB  bytes, from numa_maps page counts x that mappi
+        identity: payload pid=3241734 exe=/usr/bin/python3.12 session=3241733 starttime=2590673198
+        per-node child bytes: {'N0': 4222976, 'N1': 274767872}
+  PASS  launcher-exit escalation demonstrably leaves the child running  child=3241737 alive=True ppid_now=1 descendants_of_launcher=[]
+  PASS  pgid enumeration sees the reparented child (descent does not)  group_members=[3241737]
+  PASS  shipped cleanup reaps the SIGTERM-ignoring child  child=3241743 still_running=False
+  PASS  cleanup reports confirmed  confirmed=True survivors=[]
+  PASS  cleanup escalated to SIGKILL rather than trusting SIGTERM  escalated=True
+  PASS  adopted payload does not appear in its own foreign list  python3 hits=0  (other in-mask commands seen: {})
+  PASS  without adoption the same payload IS seen (control is not vacuous)  python3 hits=10
+
+all runner controls passed
+rc=0
+
+=== post-control process hygiene (nothing of ours must survive) ===
+stray control children: 0
+ctffind after          : 2
+loadavg after          : 2.01 2.05 2.07 3/7966 3241781

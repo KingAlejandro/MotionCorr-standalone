@@ -125,7 +125,10 @@ class EERRenderer {
 		const int detector_height = height;
 
 		Image<T> original;
-		original.read(fn_gain, true, 0, false, true); // explicitly use the first page
+		// explicitly use the first page; a negative return is a short raw MRC (0 is success)
+		if (original.read(fn_gain, true, 0, false, true) < 0)
+			REPORT_ERROR("Failed to read the gain reference " + fn_gain +
+			             ": the file is truncated or unreadable.");
 		const int nx_in = XSIZE(original());
 		const int ny_in = YSIZE(original());
 		long long size_out = getWidth();

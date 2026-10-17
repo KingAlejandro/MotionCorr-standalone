@@ -189,7 +189,7 @@ exec "{sys.executable}" "$@"
             "RunnerExportedUnits",
             "GainCache",
             "TiffRead",
-            "DamagedMovie",
+            "DamagedMovie", "TruncatedMrcMovie", "TruncatedGainDefect",
             "CompressedMovieSequence",
             "InputFormats",
             "CutDownMovie",
@@ -226,6 +226,13 @@ exec "{sys.executable}" "$@"
             "LogfileFromEpsMutant_eps_order",
             "LogfileFromEpsMutant_placeholder",
             "LogfileFromEpsMutant_concat_cleanup",
+            # #134 item 2 checked arithmetic: compiled mutants of DeflateLayout.
+            "DeflateLayoutMutant_span_wrap",
+            "DeflateLayoutMutant_stage_sum",
+            "DeflateLayoutMutant_reserve_round",
+            "DeflateLayoutMutant_layout_table",
+            "DeflateLayoutMutant_arena_start",
+            "DeflateLayoutMutant_drain_step",
             "MultiGpuScheduling",
             "NativeMovieStaging",
             "GainCacheOwnership",
@@ -271,7 +278,11 @@ exec "{sys.executable}" "$@"
                         "LogfileFromEps", "LogfileFromEpsMutant_always_eps",
                         "LogfileFromEpsMutant_late_guard", "LogfileFromEpsMutant_eps_order",
                         "LogfileFromEpsMutant_placeholder",
-                        "LogfileFromEpsMutant_concat_cleanup"):
+                        "LogfileFromEpsMutant_concat_cleanup",
+                        "DeflateLayout", "DeflateLayoutMutant_span_wrap",
+                        "DeflateLayoutMutant_stage_sum", "DeflateLayoutMutant_reserve_round",
+                        "DeflateLayoutMutant_layout_table", "DeflateLayoutMutant_arena_start",
+                        "DeflateLayoutMutant_drain_step"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)
                 self.assertEqual(len(names), len(INTEGRATED_SUITE),

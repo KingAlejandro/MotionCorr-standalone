@@ -1,0 +1,8 @@
+b1_trunc60: PASS [] (24s)
+  negative control b2_randbytes: rejected=True ['float: Movies/movie2.mrc payload fd04fcbdea9c283c != #208 a5150f7edfe39764', "auto vs float MRC payloads differ: ['Movies/movie2.mrc']"]
+b2_randbytes: PASS [] (37s)
+  negative control b3_stripff: rejected=True ['auto: D6 skip warnings at [] != #208 [701]']
+b3_stripff: PASS [] (37s)
+b4_stripzero: PASS [] (36s)
+b5_trunc60_noexp: PASS [] (32s)
+item 11: {'PASS': 5, 'FAIL': 0, 'UNRUN': 0, 'N/A': 1} negative controls rejected: True

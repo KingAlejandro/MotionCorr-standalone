@@ -1,0 +1,311 @@
+diff --git a/src/acc/cuda/cuda_alignpatch.cu b/src/acc/cuda/cuda_alignpatch.cu
+index 3a8718d..7de542d 100644
+--- a/src/acc/cuda/cuda_alignpatch.cu
++++ b/src/acc/cuda/cuda_alignpatch.cu
+@@ -1,6 +1,7 @@
+ #ifdef _CUDA_ENABLED
+ 
+ #include "src/acc/cuda/cuda_alignpatch.h"
++#include "src/diag_ccf.h" // W-DIAG-S1 DIAGNOSTIC ONLY
+ #include "src/acc/cuda/cuda_settings.h"
+ #include "src/error.h"
+ #include "src/acc/cuda/cuda_scoped_resources.h"
+@@ -187,7 +188,7 @@ __global__ void findPeakAndInterpolateKernel(
+     int ccf_nx, int ccf_ny,
+     int search_range,
+     float ccf_scale_x, float ccf_scale_y,
+-    int n_frames)
++    int n_frames, int cpu_ties) // W-DIAG-S1 DIAGNOSTIC ONLY: cpu_ties
+ {
+     int iframe = blockIdx.x;
+     if (iframe >= n_frames) return;
+@@ -199,6 +200,7 @@ __global__ void findPeakAndInterpolateKernel(
+     float local_max = -1e30f;
+     int local_posx = 0;
+     int local_posy = 0;
++    int local_idx = total_pts; // W-DIAG-S1: search ordinal of the lane's maximum
+ 
+     for (int idx = threadIdx.x; idx < total_pts; idx += blockDim.x) {
+         int sy = idx / range_len - search_range;
+@@ -210,24 +212,32 @@ __global__ void findPeakAndInterpolateKernel(
+             local_max = val;
+             local_posx = sx;
+             local_posy = sy;
++            local_idx = idx;
+         }
+     }
+ 
+     __shared__ float s_max[256];
+     __shared__ int s_posx[256];
+     __shared__ int s_posy[256];
++    __shared__ int s_idx[256];
+ 
+     s_max[threadIdx.x] = local_max;
+     s_posx[threadIdx.x] = local_posx;
+     s_posy[threadIdx.x] = local_posy;
++    s_idx[threadIdx.x] = local_idx;
+     __syncthreads();
+ 
+     for (int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
+         if (threadIdx.x < stride) {
+-            if (s_max[threadIdx.x + stride] > s_max[threadIdx.x]) {
++            // W-DIAG-S1 DIAGNOSTIC ONLY: with cpu_ties, an equal value at an
++            // earlier CPU search ordinal wins, i.e. CPU's first maximum.
++            if (s_max[threadIdx.x + stride] > s_max[threadIdx.x] ||
++                (cpu_ties && s_max[threadIdx.x + stride] == s_max[threadIdx.x] &&
++                 s_idx[threadIdx.x + stride] < s_idx[threadIdx.x])) {
+                 s_max[threadIdx.x] = s_max[threadIdx.x + stride];
+                 s_posx[threadIdx.x] = s_posx[threadIdx.x + stride];
+                 s_posy[threadIdx.x] = s_posy[threadIdx.x + stride];
++                s_idx[threadIdx.x] = s_idx[threadIdx.x + stride];
+             }
+         }
+         __syncthreads();
+@@ -261,6 +271,33 @@ __global__ void findPeakAndInterpolateKernel(
+     }
+ }
+ 
++// W-DIAG-S1 DIAGNOSTIC ONLY: copy the CCF maps and the kernel's shifts back,
++// log statistics, and check the host emulation of the kernel's selection
++// against what the kernel actually produced ("emul-ok" / "emul-MISMATCH").
++static void diagCcfDevice(const char *tag, int patch, int iter, const float *d_Iccs,
++                          const float *d_cx, const float *d_cy, int n_frames, int ccf_nx, int ccf_ny,
++                          int search_range, float scale_x, float scale_y) {
++    std::vector<float> h((size_t)n_frames * ccf_ny * ccf_nx), cx(n_frames), cy(n_frames);
++    if (cudaMemcpy(h.data(), d_Iccs, h.size() * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess ||
++        cudaMemcpy(cx.data(), d_cx, n_frames * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess ||
++        cudaMemcpy(cy.data(), d_cy, n_frames * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess)
++        REPORT_ERROR("W-DIAG-S1 diagnostic read-back failed");
++    for (int f = 0; f < n_frames; f++) {
++        const float *I = h.data() + (size_t)f * ccf_ny * ccf_nx;
++        DiagCcfStat st = diagCcfStat(I, ccf_nx, ccf_ny, search_range);
++        const int px = diagCpuTies() ? st.cpu_x : st.lane_x, py = diagCpuTies() ? st.cpu_y : st.lane_y;
++        // Recompute the kernel's subpixel step on the host at the emulated peak.
++        const float m = diagCcfAt(I, ccf_nx, ccf_ny, px, py);
++        const float vpx = diagCcfAt(I, ccf_nx, ccf_ny, px + 1, py), vnx = diagCcfAt(I, ccf_nx, ccf_ny, px - 1, py);
++        const float vpy = diagCcfAt(I, ccf_nx, ccf_ny, px, py + 1), vny = diagCcfAt(I, ccf_nx, ccf_ny, px, py - 1);
++        const float dxn = vpx + vnx - 2.0f * m, dyn = vpy + vny - 2.0f * m;
++        const float hx = ((std::fabs(dxn) > 1e-15f) ? (px - 0.5f * (vpx - vnx) / dxn) : px) * scale_x;
++        const float hy = ((std::fabs(dyn) > 1e-15f) ? (py - 0.5f * (vpy - vny) / dyn) : py) * scale_y;
++        const bool ok = std::fabs(cx[f] - hx) <= 1e-3f && std::fabs(cy[f] - hy) <= 1e-3f;
++        diagCcfWrite(tag, patch, iter, f, st, px, py, ok ? "emul-ok" : "emul-MISMATCH");
++    }
++}
++
+ __global__ void fourierShiftKernel(
+     float2 *d_Fframes,
+     const float *d_shiftx,
+@@ -636,9 +673,13 @@ bool cudaAlignPatchDeviceWithWorkspace(
+         findPeakAndInterpolateKernel<<<n_frames, 256>>>(
+             d_Iccs, d_cur_xshifts, d_cur_yshifts,
+             ccf_nx, ccf_ny, search_range,
+-            (float)ccf_scale_x, (float)ccf_scale_y, n_frames
++            (float)ccf_scale_x, (float)ccf_scale_y, n_frames, diagCpuTies() ? 1 : 0
+         );
+         ALIGN_LAUNCH(cudaGetLastError());
++        if (diagCcfPath()) // W-DIAG-S1 DIAGNOSTIC ONLY: read-back, no arithmetic change
++            diagCcfDevice(is_global ? "cuda-global" : "cuda-single", is_global ? -1 : g_diag_patch, iter,
++                          d_Iccs, d_cur_xshifts, d_cur_yshifts, n_frames, ccf_nx, ccf_ny, search_range,
++                          (float)ccf_scale_x, (float)ccf_scale_y);
+         if (timed) {
+             ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
+             ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
+@@ -989,9 +1030,13 @@ void cudaAlignPatchBatchDevice(
+             findPeakAndInterpolateKernel<<<n_frames, 256>>>(
+                 d_Iccs, d_cur_x + p * n, d_cur_y + p * n,
+                 ccf_nx, ccf_ny, search_range,
+-                (float)w.geo.ccf_scale_x, (float)w.geo.ccf_scale_y, n_frames
++                (float)w.geo.ccf_scale_x, (float)w.geo.ccf_scale_y, n_frames, diagCpuTies() ? 1 : 0
+             );
+             ALIGN_LAUNCH(cudaGetLastError());
++            if (diagCcfPath()) // W-DIAG-S1 DIAGNOSTIC ONLY: read-back, no arithmetic change
++                diagCcfDevice("cuda-batched", g_diag_batch_base + p, iter, d_Iccs, d_cur_x + p * n, d_cur_y + p * n,
++                              n_frames, ccf_nx, ccf_ny, search_range,
++                              (float)w.geo.ccf_scale_x, (float)w.geo.ccf_scale_y);
+         }
+         // The iteration's one wait, for every active patch at once.
+         ALIGN_CUDA(cudaMemcpy(w.h_cur.data(), w.d_cur, sz_all_shifts, cudaMemcpyDeviceToHost));
+diff --git a/src/acc/cuda/cuda_movie_session.cu b/src/acc/cuda/cuda_movie_session.cu
+index ab24788..9f1c960 100644
+--- a/src/acc/cuda/cuda_movie_session.cu
++++ b/src/acc/cuda/cuda_movie_session.cu
+@@ -1,4 +1,5 @@
+ #include "src/acc/cuda/cuda_movie_session.h"
++#include "src/diag_ccf.h" // W-DIAG-S1 DIAGNOSTIC ONLY
+ #include "src/acc/cuda/cuda_settings.h"
+ #include "src/acc/cuda/cuda_realspace_dw.h"
+ #include "src/stage_profile.h"
+@@ -2373,6 +2374,7 @@ void CudaMovieSession::alignPatchesBatched(
+             return;
+         }
+         for (int j = 0; j < count; j++) xs[j].assign(n_groups, (RFLOAT)0), ys[j].assign(n_groups, (RFLOAT)0);
++        g_diag_batch_base = first; // W-DIAG-S1 DIAGNOSTIC ONLY
+         cudaAlignPatchBatchDevice(workspace, count, n_groups, patch_w, patch_h, scaled_B,
+                                   xs.data(), ys.data(), max_iter, ccf_downsample, device_id,
+                                   logs.data());
+diff --git a/src/diag_ccf.h b/src/diag_ccf.h
+new file mode 100644
+index 0000000..cd5cef0
+--- /dev/null
++++ b/src/diag_ccf.h
+@@ -0,0 +1,87 @@
++// W-DIAG-S1 DIAGNOSTIC ONLY (scratch build, never merged).
++// Host-side statistics of a CCF search window, written to the file named by
++// MC_DIAG_CCF. Reads CCF values only; changes no alignment arithmetic.
++#ifndef MC_DIAG_CCF_H
++#define MC_DIAG_CCF_H
++
++#include <cstdio>
++#include <cstdlib>
++#include <mutex>
++#include <string>
++#include <vector>
++
++// Patch label for the next alignment call: 0-based iy*patch_x+ix, -1 = global.
++inline int g_diag_patch = -1;
++inline int g_diag_patch_x = 1;
++// First patch index of the current batched chunk.
++inline int g_diag_batch_base = 0;
++
++inline const char *diagCcfPath() { static const char *p = std::getenv("MC_DIAG_CCF"); return p; }
++inline bool diagCpuTies() { static const bool on = std::getenv("MC_DIAG_CPU_TIES") != nullptr; return on; }
++
++struct DiagCcfStat {
++	float maxval = -1e30f;
++	int cpu_x = 0, cpu_y = 0;    // first maximum in CPU search order (signed y, then x)
++	int lane_x = 0, lane_y = 0;  // 256-lane strided strict '>' scan + tree reduction (production CUDA)
++	int ties = 0;                // ordinals whose value == maxval exactly
++	float second = -1e30f;       // best 8-neighbour local maximum outside the 3x3 around the CPU maximum
++	int second_x = 0, second_y = 0;
++	int n_local_max = 0;
++};
++
++inline float diagCcfAt(const float *I, int ccf_nx, int ccf_ny, int sx, int sy) {
++	int iy = ((sy % ccf_ny) + ccf_ny) % ccf_ny, ix = ((sx % ccf_nx) + ccf_nx) % ccf_nx;
++	return I[(size_t)iy * ccf_nx + ix];
++}
++
++// Same ordinal enumeration as findPeakAndInterpolateKernel and alignPatch.
++inline DiagCcfStat diagCcfStat(const float *I, int ccf_nx, int ccf_ny, int search_range, int lanes = 256) {
++	DiagCcfStat s;
++	const int range_len = 2 * search_range + 1, total = range_len * range_len;
++	auto val = [&](int idx, int &sx, int &sy) {
++		sy = idx / range_len - search_range; sx = idx % range_len - search_range;
++		return diagCcfAt(I, ccf_nx, ccf_ny, sx, sy);
++	};
++	for (int idx = 0; idx < total; idx++) {
++		int sx, sy; float v = val(idx, sx, sy);
++		if (v > s.maxval) { s.maxval = v; s.cpu_x = sx; s.cpu_y = sy; }
++	}
++	std::vector<float> lm(lanes, -1e30f); std::vector<int> lx(lanes, 0), ly(lanes, 0);
++	for (int t = 0; t < lanes; t++)
++		for (int idx = t; idx < total; idx += lanes) {
++			int sx, sy; float v = val(idx, sx, sy);
++			if (v > lm[t]) { lm[t] = v; lx[t] = sx; ly[t] = sy; }
++		}
++	for (int stride = lanes / 2; stride > 0; stride >>= 1)
++		for (int t = 0; t < stride; t++)
++			if (lm[t + stride] > lm[t]) { lm[t] = lm[t + stride]; lx[t] = lx[t + stride]; ly[t] = ly[t + stride]; }
++	s.lane_x = lx[0]; s.lane_y = ly[0];
++	for (int idx = 0; idx < total; idx++) {
++		int sx, sy; float v = val(idx, sx, sy);
++		if (v == s.maxval) s.ties++;
++		if (std::abs(sx - s.cpu_x) <= 1 && std::abs(sy - s.cpu_y) <= 1) continue;
++		bool is_max = true;
++		for (int dy = -1; dy <= 1 && is_max; dy++)
++			for (int dx = -1; dx <= 1; dx++)
++				if ((dx || dy) && diagCcfAt(I, ccf_nx, ccf_ny, sx + dx, sy + dy) > v) { is_max = false; break; }
++		if (!is_max) continue;
++		s.n_local_max++;
++		if (v > s.second) { s.second = v; s.second_x = sx; s.second_y = sy; }
++	}
++	return s;
++}
++
++inline void diagCcfWrite(const char *path_tag, int patch, int iter, int frame, const DiagCcfStat &s,
++                         int actual_x, int actual_y, const char *actual_note) {
++	static std::mutex mu;
++	std::lock_guard<std::mutex> lock(mu);
++	FILE *f = std::fopen(diagCcfPath(), "a");
++	if (!f) return;
++	int iy = patch < 0 ? 0 : patch / g_diag_patch_x + 1, ix = patch < 0 ? 0 : patch % g_diag_patch_x + 1;
++	std::fprintf(f, "%s %d %d it %d fr %d max %.9g cpu %d %d lane %d %d ties %d second %.9g at %d %d nlm %d actual %d %d %s cputies %d\n",
++	             path_tag, iy, ix, iter, frame + 1, s.maxval, s.cpu_x, s.cpu_y, s.lane_x, s.lane_y, s.ties,
++	             s.second, s.second_x, s.second_y, s.n_local_max, actual_x, actual_y, actual_note, diagCpuTies() ? 1 : 0);
++	std::fclose(f);
++}
++
++#endif
+diff --git a/src/motioncorr_runner.cpp b/src/motioncorr_runner.cpp
+index 4405b54..b2c2875 100644
+--- a/src/motioncorr_runner.cpp
++++ b/src/motioncorr_runner.cpp
+@@ -38,6 +38,7 @@
+ static std::atomic<unsigned long long> s_global_gain_generation{1};
+ 
+ #include "src/motioncorr_runner.h"
++#include "src/diag_ccf.h" // W-DIAG-S1 DIAGNOSTIC ONLY
+ #include "src/native_movie_staging.h"
+ #include "src/defect_neighbours.h"
+ #ifdef _CUDA_ENABLED
+@@ -3457,6 +3458,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
+ 					boxes.push_back({x_start, y_start, x_end - x_start, y_end - y_start});
+ 				}
+ 			}
++			g_diag_patch_x = patch_x; // W-DIAG-S1 DIAGNOSTIC ONLY
+ 			RCTIC(TIMING_PATCH_ALIGN);
+ 			movie_session->alignPatchesBatched(boxes, n_groups, group_start.data(), group_size.data(),
+ 				bfactor / (prescaling * prescaling), max_iter, ccf_downsample, patchBatchCap(), batched);
+@@ -3465,10 +3467,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
+ #endif
+ 
+ 		int ipatch = 1;
++		g_diag_patch_x = patch_x; // W-DIAG-S1 DIAGNOSTIC ONLY
+ 		for (int iy = 0; iy < patch_y; iy++) {
+ 			for (int ix = 0; ix < patch_x; ix++) {
+ 				int x_start, x_end, y_start, y_end;
+ 				patch_bounds(iy, ix, x_start, x_end, y_start, y_end);
++				g_diag_patch = iy * patch_x + ix; // W-DIAG-S1 DIAGNOSTIC ONLY
+ 
+ 				int x_center = (x_start + x_end - 1) / 2, y_center = (y_start + y_end - 1) / 2;
+ 				logfile << "Patch (" << iy + 1 << ", " << ix + 1 << "): " << ipatch << " / " << patch_x * patch_y;
+@@ -3809,6 +3813,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
+ 			}
+ 		}
+ 		Fpatches.clear();
++		g_diag_patch = -1; // W-DIAG-S1 DIAGNOSTIC ONLY
+ #ifdef _CUDA_ENABLED
+ 		if (d_patch_fcomplex_buffer) {
+             cufftComplex *owned = d_patch_fcomplex_buffer;
+@@ -4711,6 +4716,9 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
+ 	}
+ 	RCTOC(TIMING_PREP_WEIGHT);
+ 
++	// W-DIAG-S1 DIAGNOSTIC ONLY: per-frame CCF statistics (read-only).
++	std::vector<DiagCcfStat> diag_stats(diagCcfPath() ? n_frames : 0);
++	std::vector<int> diag_pos(diagCcfPath() ? 2 * n_frames : 0);
+ 	for (int iter = 1; iter	<= max_iter; iter++) {
+ 		RCTIC(TIMING_MAKE_REF);
+ 		Fref.initZeros();
+@@ -4761,6 +4769,10 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
+ 				}
+ 			}
+ 
++			if (diagCcfPath()) {
++				diag_stats[iframe] = diagCcfStat(Iccs[tid]().data, ccf_nx, ccf_ny, search_range);
++				diag_pos[2 * iframe] = posx; diag_pos[2 * iframe + 1] = posy;
++			}
+ 			int ipx_n = posx - 1, ipx = posx, ipx_p = posx + 1, ipy_n = posy - 1, ipy = posy, ipy_p = posy + 1;
+ 			if (ipx_n < 0) ipx_n = ccf_nx + ipx_n;
+ 			if (ipx < 0) ipx = ccf_nx + ipx;
+@@ -4794,6 +4806,10 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
+ 			RCTOC(TIMING_CCF_FIND_MAX);
+ 		}
+ 
++		if (diagCcfPath())
++			for (int f = 0; f < n_frames; f++)
++				diagCcfWrite(is_global ? "cpu-global" : "cpu", is_global ? -1 : g_diag_patch, iter, f, diag_stats[f],
++				             diag_pos[2 * f], diag_pos[2 * f + 1], "cpu-actual");
+ 		// Set origin
+ 		RFLOAT x_sumsq = 0, y_sumsq = 0;
+ 		for (int iframe = n_frames - 1; iframe >= 0; iframe--) { // do frame 0 last!

@@ -4,12 +4,15 @@
 Movies and gains are symlinks into the data root, so the STAR holds short relative
 paths ("Movies/<name>") and MotionCorr products land at <out>/Movies/<name>.mrc
 (memory note: output paths mirror the input path). MRC movies named .mrc are linked
-as .mrcs, which main requires for MRC stacks.
+as .mrcs, which main requires for MRC stacks. A family with "copy_movies": true is
+copied instead: the compressed-MRC reader pipes `zstd -cdk FILE`, and zstd ignores a
+symbolic-link input (families-formats.json, formats.md).
 
 Usage: setup_corpus.py FAMILIES_JSON DATA_ROOT CORPUS_ROOT
 """
 import json
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -30,7 +33,10 @@ def main():
             link = d / 'Movies' / name
             if link.is_symlink() or link.exists():
                 link.unlink()
-            os.symlink(src, link)
+            if fam.get('copy_movies'):
+                shutil.copyfile(src, link)
+            else:
+                os.symlink(src, link)
             names.append('Movies/' + name)
         if fam.get('gain'):
             src = data / fam['gain']

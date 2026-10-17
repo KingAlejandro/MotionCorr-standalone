@@ -132,6 +132,12 @@ DEFAULT_REQUIRED_TESTS = [
     "NativeMovieStaging",
     "GainCacheOwnership",
     "JointStarPublication",
+    # Local patch phase updates are cropped to the CCF support and the final
+    # update is skipped (#183). CpuPatchPhaseWindow compares the retained window
+    # bit-for-bit with the frozen full-spectrum shift and local alignPatch with
+    # global alignPatch; no product comparator sees a wrongly cropped window
+    # unless the dataset happens to expose it.
+    "CpuPatchPhaseWindow",
 ]
 
 

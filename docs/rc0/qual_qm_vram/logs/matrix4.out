@@ -1,0 +1,25 @@
+  probe 8.5 GiB -> FAIL exit=1 route=compact fallback_warn=False wall=5.61s free_meas=8701MiB products_rc=None strict_rc=None
+  probe 1 GiB -> FAIL exit=1 route=float fallback_warn=True wall=6.67s free_meas=1021MiB products_rc=None strict_rc=None
+hi is not passing; abort
+  probe 3 GiB -> PASS exit=0 route=float fallback_warn=True wall=5.71s free_meas=3069MiB products_rc=0 strict_rc=1
+  probe 1 GiB -> FAIL exit=1 route=float fallback_warn=True wall=2.74s free_meas=1021MiB products_rc=None strict_rc=None
+  probe 2 GiB -> PASS exit=0 route=float fallback_warn=True wall=5.86s free_meas=2045MiB products_rc=0 strict_rc=1
+FLOOR tutorial-L-auto completes: fails at 1 GiB free, passes at 2 GiB free (tol 1)
+  probe 8.5 GiB -> PASS exit=0 route=compact fallback_warn=False wall=2.14s free_meas=8701MiB products_rc=0 strict_rc=0
+  probe 1 GiB -> FAIL exit=1 route=float fallback_warn=True wall=6.57s free_meas=1021MiB products_rc=None strict_rc=None
+  probe 5 GiB -> PASS exit=0 route=float fallback_warn=True wall=11.98s free_meas=5117MiB products_rc=0 strict_rc=1
+  probe 3 GiB -> FAIL exit=1 route=float fallback_warn=True wall=6.52s free_meas=3069MiB products_rc=None strict_rc=None
+  probe 4 GiB -> FAIL exit=1 route=float fallback_warn=True wall=6.62s free_meas=4093MiB products_rc=None strict_rc=None
+FLOOR e10216-G-auto completes: fails at 4 GiB free, passes at 5 GiB free (tol 1)
+  probe 16 GiB -> PASS exit=0 route=nvcomp fallback_warn=False wall=1.18s free_meas=16381MiB products_rc=0 strict_rc=0
+  probe 1 GiB -> FAIL exit=1 route=float fallback_warn=True wall=2.7s free_meas=1021MiB products_rc=None strict_rc=None
+  probe 8.5 GiB -> PASS exit=0 route=nvcomp fallback_warn=False wall=1.13s free_meas=8701MiB products_rc=0 strict_rc=0
+  probe 5 GiB -> PASS exit=0 route=nvcomp fallback_warn=False wall=1.18s free_meas=5117MiB products_rc=0 strict_rc=0
+  probe 3 GiB -> FAIL exit=0 route=float fallback_warn=True wall=4.96s free_meas=3069MiB products_rc=0 strict_rc=1
+  probe 4 GiB -> PASS exit=0 route=nvcomp fallback_warn=False wall=1.13s free_meas=4093MiB products_rc=0 strict_rc=0
+FLOOR tutorial-G-auto resident: fails at 3 GiB free, passes at 4 GiB free (tol 1)
+  probe 3 GiB -> PASS exit=0 route=float fallback_warn=True wall=5.01s free_meas=3069MiB products_rc=0 strict_rc=1
+  probe 1 GiB -> FAIL exit=1 route=float fallback_warn=True wall=2.74s free_meas=1021MiB products_rc=None strict_rc=None
+  probe 2 GiB -> PASS exit=0 route=float fallback_warn=True wall=5.06s free_meas=2045MiB products_rc=0 strict_rc=1
+FLOOR tutorial-G-auto completes: fails at 1 GiB free, passes at 2 GiB free (tol 1)
+M4_DONE

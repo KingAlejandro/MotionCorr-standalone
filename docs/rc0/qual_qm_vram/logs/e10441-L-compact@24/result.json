@@ -1,0 +1,74 @@
+{
+ "spec": "e10441-L-compact@24",
+ "family": "e10441",
+ "config": "L",
+ "ingest": "compact",
+ "target_free_gib": 24.0,
+ "movies": [
+  "Movies/20May09_3A-3_109-21_0003.tif"
+ ],
+ "identity": {
+  "e10441": {
+   "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+   "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+   "bytes": 732798334,
+   "gain": "gain.mrc"
+  }
+ },
+ "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-rc0/W-QM/runs/e10441-L-compact@24/out/ --gpu 0 --ingest compact --ingest_witness /mnt/clathrin/alex-motioncorr-rc0/W-QM/runs/e10441-L-compact@24/witness.txt --patch_x 5 --patch_y 5",
+ "binary_sha256_head": null,
+ "bench_lock_wait_s": 0,
+ "gpu_free_before_balloon_mib": 81154,
+ "free_vram_after_balloon_mib": 24573,
+ "balloon_held_mib": 56158,
+ "gpu_used_before_run_mib": 56581,
+ "timed_out": false,
+ "wall_s": 1.13,
+ "exit": 1,
+ "sampled": {
+  "n": 5,
+  "peak_gpu_used_mib": 56599,
+  "peak_motioncorr_above_baseline_mib": 18,
+  "peak_compute_app_mib": 22,
+  "min_free_mib": 24556
+ },
+ "balloon_gone": true,
+ "gpu_used_after_mib": 1,
+ "gpu_apps_after": {},
+ "products": {
+  "20May09_3A-3_109-21_0003": {
+   ".mrc": false,
+   ".star": false,
+   ".log": true
+  }
+ },
+ "joint_star": false,
+ "witness": [],
+ "log_lines": {
+  "20May09_3A-3_109-21_0003.log": [
+   "ERROR: Movie buffer allocation failed: out of memory",
+   "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline."
+  ]
+ },
+ "stdout_tail": [
+  "Continuing with the remaining movies.",
+  "in: /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/motioncorr_runner.cpp, line 1092",
+  "ERROR: ",
+  "Motion correction failed for 1 movie(s): Movies/20May09_3A-3_109-21_0003.tif. Successful per-movie outputs were retained; joint output was not generated.",
+  "=== Backtrace  ===",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr(+0x5afd7) [0x5d60c8176fd7]",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr(+0x2e281) [0x5d60c814a281]",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr(+0x50cd6) [0x5d60c816ccd6]",
+  "/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7c58cb62a1ca]",
+  "/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7c58cb62a28b]",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr(+0x51845) [0x5d60c816d845]",
+  "==================",
+  "ERROR: ",
+  "Motion correction failed for 1 movie(s): Movies/20May09_3A-3_109-21_0003.tif. Successful per-movie outputs were retained; joint output was not generated."
+ ],
+ "max_rss_mib": 743,
+ "all_products": false,
+ "compare": {
+  "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+ }
+}

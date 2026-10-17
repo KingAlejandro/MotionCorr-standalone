@@ -1,0 +1,5500 @@
+[
+ {
+  "case": "e10216-G-auto@10_bisres",
+  "spec": "e10216-G-auto@10:bisres",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 10237,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.18,
+  "peak_over_baseline_mib": 8212,
+  "peak_compute_app_mib": 8206,
+  "max_rss_mib": 2146,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@16",
+  "spec": "e10216-G-auto@16",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.33,
+  "peak_over_baseline_mib": 8212,
+  "peak_compute_app_mib": 8206,
+  "max_rss_mib": 2150,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@16_bisres",
+  "spec": "e10216-G-auto@16:bisres",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.29,
+  "peak_over_baseline_mib": 8212,
+  "peak_compute_app_mib": 8206,
+  "max_rss_mib": 2161,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@1_biscom",
+  "spec": "e10216-G-auto@1:biscom",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 1021,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 6.57,
+  "peak_over_baseline_mib": 626,
+  "peak_compute_app_mib": 620,
+  "max_rss_mib": 7692,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@24",
+  "spec": "e10216-G-auto@24",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.33,
+  "peak_over_baseline_mib": 8212,
+  "peak_compute_app_mib": 8206,
+  "max_rss_mib": 2155,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@3_biscom",
+  "spec": "e10216-G-auto@3:biscom",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 3069,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 6.52,
+  "peak_over_baseline_mib": 626,
+  "peak_compute_app_mib": 620,
+  "max_rss_mib": 7693,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@40",
+  "spec": "e10216-G-auto@40",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.34,
+  "peak_over_baseline_mib": 8212,
+  "peak_compute_app_mib": 8206,
+  "max_rss_mib": 2157,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@4_biscom",
+  "spec": "e10216-G-auto@4:biscom",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 4093,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 6.62,
+  "peak_over_baseline_mib": 626,
+  "peak_compute_app_mib": 620,
+  "max_rss_mib": 7693,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@4_bisres",
+  "spec": "e10216-G-auto@4:bisres",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 4093,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 6.52,
+  "peak_over_baseline_mib": 626,
+  "peak_compute_app_mib": 620,
+  "max_rss_mib": 7693,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@5_biscom",
+  "spec": "e10216-G-auto@5:biscom",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 5117,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 11.98,
+  "peak_over_baseline_mib": 4338,
+  "peak_compute_app_mib": 4332,
+  "max_rss_mib": 7757,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@7.5_scan",
+  "spec": "e10216-G-auto@7.5:scan",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 7677,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 12.01,
+  "peak_over_baseline_mib": 4338,
+  "peak_compute_app_mib": 4332,
+  "max_rss_mib": 7757,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@7_bisres",
+  "spec": "e10216-G-auto@7:bisres",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 7165,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 12.0,
+  "peak_over_baseline_mib": 4338,
+  "peak_compute_app_mib": 4332,
+  "max_rss_mib": 7757,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@8.25_scan",
+  "spec": "e10216-G-auto@8.25:scan",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 8445,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.14,
+  "peak_over_baseline_mib": 8212,
+  "peak_compute_app_mib": 8206,
+  "max_rss_mib": 2128,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@8.5_biscom",
+  "spec": "e10216-G-auto@8.5:biscom",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 8701,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.14,
+  "peak_over_baseline_mib": 8212,
+  "peak_compute_app_mib": 8206,
+  "max_rss_mib": 2128,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@8.5_bisres",
+  "spec": "e10216-G-auto@8.5:bisres",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 8701,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.13,
+  "peak_over_baseline_mib": 8212,
+  "peak_compute_app_mib": 8206,
+  "max_rss_mib": 2155,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@8_bisres",
+  "spec": "e10216-G-auto@8:bisres",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 8189,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [
+   "gain/sum-OOM->CPU-preprocess"
+  ],
+  "wall_s": 13.76,
+  "peak_over_baseline_mib": 8180,
+  "peak_compute_app_mib": 8174,
+  "max_rss_mib": 7756,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-G-auto@none",
+  "spec": "e10216-G-auto@none",
+  "family": "e10216",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 3.96,
+  "peak_over_baseline_mib": 8214,
+  "peak_compute_app_mib": 8206,
+  "max_rss_mib": 2070,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@10_bisres",
+  "spec": "e10216-L-auto@10:bisres",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 10237,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.69,
+  "peak_over_baseline_mib": 8626,
+  "peak_compute_app_mib": 8772,
+  "max_rss_mib": 2143,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@16",
+  "spec": "e10216-L-auto@16",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.83,
+  "peak_over_baseline_mib": 8874,
+  "peak_compute_app_mib": 8868,
+  "max_rss_mib": 2150,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@16_bisres",
+  "spec": "e10216-L-auto@16:bisres",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.69,
+  "peak_over_baseline_mib": 8874,
+  "peak_compute_app_mib": 8868,
+  "max_rss_mib": 2162,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@1_biscom",
+  "spec": "e10216-L-auto@1:biscom",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 1021,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 6.67,
+  "peak_over_baseline_mib": 626,
+  "peak_compute_app_mib": 620,
+  "max_rss_mib": 7692,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@24",
+  "spec": "e10216-L-auto@24",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.83,
+  "peak_over_baseline_mib": 8874,
+  "peak_compute_app_mib": 8868,
+  "max_rss_mib": 2153,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@40",
+  "spec": "e10216-L-auto@40",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.78,
+  "peak_over_baseline_mib": 8874,
+  "peak_compute_app_mib": 8868,
+  "max_rss_mib": 2152,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@4_biscom",
+  "spec": "e10216-L-auto@4:biscom",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 4093,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 6.57,
+  "peak_over_baseline_mib": 626,
+  "peak_compute_app_mib": 620,
+  "max_rss_mib": 7692,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@4_bisres",
+  "spec": "e10216-L-auto@4:bisres",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 4093,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 6.66,
+  "peak_over_baseline_mib": 626,
+  "peak_compute_app_mib": 620,
+  "max_rss_mib": 7693,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@5.5_biscom",
+  "spec": "e10216-L-auto@5.5:biscom",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 5629,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 13.77,
+  "peak_over_baseline_mib": 4400,
+  "peak_compute_app_mib": 4354,
+  "max_rss_mib": 7880,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@5_biscom",
+  "spec": "e10216-L-auto@5:biscom",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 5117,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 13.81,
+  "peak_over_baseline_mib": 4668,
+  "peak_compute_app_mib": 4662,
+  "max_rss_mib": 7857,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@7.5_scan",
+  "spec": "e10216-L-auto@7.5:scan",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 7677,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 13.87,
+  "peak_over_baseline_mib": 4668,
+  "peak_compute_app_mib": 4662,
+  "max_rss_mib": 7880,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@7_biscom",
+  "spec": "e10216-L-auto@7:biscom",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 7165,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 13.81,
+  "peak_over_baseline_mib": 4932,
+  "peak_compute_app_mib": 4662,
+  "max_rss_mib": 7875,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@7_bisres",
+  "spec": "e10216-L-auto@7:bisres",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 7165,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 14.02,
+  "peak_over_baseline_mib": 4668,
+  "peak_compute_app_mib": 4662,
+  "max_rss_mib": 7863,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@8.5_biscom",
+  "spec": "e10216-L-auto@8.5:biscom",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 8701,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [
+   "patch-prep-declined"
+  ],
+  "wall_s": 5.61,
+  "peak_over_baseline_mib": 8626,
+  "peak_compute_app_mib": 8620,
+  "max_rss_mib": 4096,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@8.5_bisres",
+  "spec": "e10216-L-auto@8.5:bisres",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 8701,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [
+   "patch-prep-declined"
+  ],
+  "wall_s": 5.66,
+  "peak_over_baseline_mib": 8626,
+  "peak_compute_app_mib": 8620,
+  "max_rss_mib": 4096,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@8.75_scan",
+  "spec": "e10216-L-auto@8.75:scan",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 8957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.59,
+  "peak_over_baseline_mib": 8814,
+  "peak_compute_app_mib": 8772,
+  "max_rss_mib": 2122,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@8_scan",
+  "spec": "e10216-L-auto@8:scan",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 8189,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [
+   "gain/sum-OOM->CPU-preprocess"
+  ],
+  "wall_s": 15.69,
+  "peak_over_baseline_mib": 8180,
+  "peak_compute_app_mib": 8174,
+  "max_rss_mib": 7848,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@9_bisres",
+  "spec": "e10216-L-auto@9:bisres",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 9213,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.69,
+  "peak_over_baseline_mib": 8778,
+  "peak_compute_app_mib": 8772,
+  "max_rss_mib": 2155,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10216-L-auto@none",
+  "spec": "e10216-L-auto@none",
+  "family": "e10216",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 2.93,
+  "peak_over_baseline_mib": 8876,
+  "peak_compute_app_mib": 8868,
+  "max_rss_mib": 2160,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10361-G-auto@16",
+  "spec": "e10361-G-auto@16",
+  "family": "e10361",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 3.29,
+  "peak_over_baseline_mib": 11878,
+  "peak_compute_app_mib": 11872,
+  "max_rss_mib": 1573,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10361-G-auto@none",
+  "spec": "e10361-G-auto@none",
+  "family": "e10361",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 3.29,
+  "peak_over_baseline_mib": 11880,
+  "peak_compute_app_mib": 11872,
+  "max_rss_mib": 1575,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10361-L-auto@16",
+  "spec": "e10361-L-auto@16",
+  "family": "e10361",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 3.55,
+  "peak_over_baseline_mib": 12506,
+  "peak_compute_app_mib": 11872,
+  "max_rss_mib": 1579,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10361-L-auto@none",
+  "spec": "e10361-L-auto@none",
+  "family": "e10361",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 3.55,
+  "peak_over_baseline_mib": 11880,
+  "peak_compute_app_mib": 11848,
+  "max_rss_mib": 1570,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@16",
+  "spec": "e10441-G-auto@16",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 29.33,
+  "peak_over_baseline_mib": 1510,
+  "peak_compute_app_mib": 1504,
+  "max_rss_mib": 36541,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@16_biscom",
+  "spec": "e10441-G-auto@16:biscom",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 28.01,
+  "peak_over_baseline_mib": 1510,
+  "peak_compute_app_mib": 1504,
+  "max_rss_mib": 36541,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@20_biscom",
+  "spec": "e10441-G-auto@20:biscom",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 20477,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 30.22,
+  "peak_over_baseline_mib": 18414,
+  "peak_compute_app_mib": 18408,
+  "max_rss_mib": 36542,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 539 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@21_biscom",
+  "spec": "e10441-G-auto@21:biscom",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 21501,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 29.87,
+  "peak_over_baseline_mib": 18414,
+  "peak_compute_app_mib": 20852,
+  "max_rss_mib": 36541,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": null,
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@22_biscom",
+  "spec": "e10441-G-auto@22:biscom",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 22525,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 52.91,
+  "peak_over_baseline_mib": 20038,
+  "peak_compute_app_mib": 20032,
+  "max_rss_mib": 36902,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@24",
+  "spec": "e10441-G-auto@24",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 59.57,
+  "peak_over_baseline_mib": 22062,
+  "peak_compute_app_mib": 22056,
+  "max_rss_mib": 36902,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@24_biscom",
+  "spec": "e10441-G-auto@24:biscom",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 56.59,
+  "peak_over_baseline_mib": 20038,
+  "peak_compute_app_mib": 20032,
+  "max_rss_mib": 36902,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@24_bisres",
+  "spec": "e10441-G-auto@24:bisres",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 56.31,
+  "peak_over_baseline_mib": 22062,
+  "peak_compute_app_mib": 22056,
+  "max_rss_mib": 36901,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@32_bisres",
+  "spec": "e10441-G-auto@32:bisres",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 32765,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 56.81,
+  "peak_over_baseline_mib": 20038,
+  "peak_compute_app_mib": 22056,
+  "max_rss_mib": 36902,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@36.5_scan",
+  "spec": "e10441-G-auto@36.5:scan",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 37373,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 58.3,
+  "peak_over_baseline_mib": 22062,
+  "peak_compute_app_mib": 36744,
+  "max_rss_mib": 36903,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@36_bisres",
+  "spec": "e10441-G-auto@36:bisres",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 36861,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 60.24,
+  "peak_over_baseline_mib": 22062,
+  "peak_compute_app_mib": 36744,
+  "max_rss_mib": 36903,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@37.5_scan",
+  "spec": "e10441-G-auto@37.5:scan",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 38397,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 7.37,
+  "peak_over_baseline_mib": 37930,
+  "peak_compute_app_mib": 37924,
+  "max_rss_mib": 5164,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@37_bisres",
+  "spec": "e10441-G-auto@37:bisres",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 37885,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [
+   "gain/sum-OOM->CPU-preprocess"
+  ],
+  "wall_s": 59.97,
+  "peak_over_baseline_mib": 37480,
+  "peak_compute_app_mib": 37474,
+  "max_rss_mib": 36905,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@38_bisres",
+  "spec": "e10441-G-auto@38:bisres",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 38909,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 7.22,
+  "peak_over_baseline_mib": 37930,
+  "peak_compute_app_mib": 37924,
+  "max_rss_mib": 5164,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@40",
+  "spec": "e10441-G-auto@40",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 8.7,
+  "peak_over_baseline_mib": 37930,
+  "peak_compute_app_mib": 37924,
+  "max_rss_mib": 5163,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@40_bisres",
+  "spec": "e10441-G-auto@40:bisres",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 7.32,
+  "peak_over_baseline_mib": 37930,
+  "peak_compute_app_mib": 37924,
+  "max_rss_mib": 5164,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-auto@none",
+  "spec": "e10441-G-auto@none",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 7.88,
+  "peak_over_baseline_mib": 37932,
+  "peak_compute_app_mib": 37924,
+  "max_rss_mib": 5164,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-compact@16",
+  "spec": "e10441-G-compact@16",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "compact",
+  "free_mib": 16381,
+  "exit": 1,
+  "timed_out": false,
+  "route": [],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 1.13,
+  "peak_over_baseline_mib": 18,
+  "peak_compute_app_mib": 24,
+  "max_rss_mib": 743,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": null,
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-compact@24",
+  "spec": "e10441-G-compact@24",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "compact",
+  "free_mib": 24573,
+  "exit": 1,
+  "timed_out": false,
+  "route": [],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 1.13,
+  "peak_over_baseline_mib": 17,
+  "peak_compute_app_mib": 22,
+  "max_rss_mib": 743,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": null,
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-compact@40",
+  "spec": "e10441-G-compact@40",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "compact",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 7.42,
+  "peak_over_baseline_mib": 37930,
+  "peak_compute_app_mib": 37924,
+  "max_rss_mib": 5165,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-compact@none",
+  "spec": "e10441-G-compact@none",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "compact",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 7.72,
+  "peak_over_baseline_mib": 37932,
+  "peak_compute_app_mib": 37924,
+  "max_rss_mib": 5164,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-float@16",
+  "spec": "e10441-G-float@16",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "float",
+  "free_mib": 16381,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 28.67,
+  "peak_over_baseline_mib": 1510,
+  "peak_compute_app_mib": 1504,
+  "max_rss_mib": 36541,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-float@24",
+  "spec": "e10441-G-float@24",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "float",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 53.51,
+  "peak_over_baseline_mib": 20038,
+  "peak_compute_app_mib": 22056,
+  "max_rss_mib": 36902,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-float@40",
+  "spec": "e10441-G-float@40",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "float",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [],
+  "wall_s": 12.05,
+  "peak_over_baseline_mib": 37840,
+  "peak_compute_app_mib": 37834,
+  "max_rss_mib": 18918,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-G-float@none",
+  "spec": "e10441-G-float@none",
+  "family": "e10441",
+  "config": "G",
+  "ingest": "float",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [],
+  "wall_s": 11.79,
+  "peak_over_baseline_mib": 37842,
+  "peak_compute_app_mib": 37834,
+  "max_rss_mib": 18918,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@16",
+  "spec": "e10441-L-auto@16",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 30.87,
+  "peak_over_baseline_mib": 1510,
+  "peak_compute_app_mib": 1504,
+  "max_rss_mib": 36541,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@16_biscom",
+  "spec": "e10441-L-auto@16:biscom",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 28.36,
+  "peak_over_baseline_mib": 1510,
+  "peak_compute_app_mib": 1504,
+  "max_rss_mib": 36539,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@20_biscom",
+  "spec": "e10441-L-auto@20:biscom",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 20477,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 30.88,
+  "peak_over_baseline_mib": 18414,
+  "peak_compute_app_mib": 18408,
+  "max_rss_mib": 36541,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 539 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@21_biscom",
+  "spec": "e10441-L-auto@21:biscom",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 21501,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 31.72,
+  "peak_over_baseline_mib": 18414,
+  "peak_compute_app_mib": 18408,
+  "max_rss_mib": 36541,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": null,
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@22_biscom",
+  "spec": "e10441-L-auto@22:biscom",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 22525,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 65.71,
+  "peak_over_baseline_mib": 22062,
+  "peak_compute_app_mib": 22056,
+  "max_rss_mib": 37266,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@24",
+  "spec": "e10441-L-auto@24",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 69.08,
+  "peak_over_baseline_mib": 22062,
+  "peak_compute_app_mib": 22056,
+  "max_rss_mib": 37267,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@24_biscom",
+  "spec": "e10441-L-auto@24:biscom",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 61.69,
+  "peak_over_baseline_mib": 20580,
+  "peak_compute_app_mib": 20574,
+  "max_rss_mib": 37267,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@24_bisres",
+  "spec": "e10441-L-auto@24:bisres",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 65.14,
+  "peak_over_baseline_mib": 22062,
+  "peak_compute_app_mib": 22056,
+  "max_rss_mib": 37266,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@32_bisres",
+  "spec": "e10441-L-auto@32:bisres",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 32765,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 66.47,
+  "peak_over_baseline_mib": 22062,
+  "peak_compute_app_mib": 20574,
+  "max_rss_mib": 37267,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@36.5_scan",
+  "spec": "e10441-L-auto@36.5:scan",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 37373,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 66.39,
+  "peak_over_baseline_mib": 20580,
+  "peak_compute_app_mib": 36746,
+  "max_rss_mib": 37266,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@36_bisres",
+  "spec": "e10441-L-auto@36:bisres",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 36861,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 65.9,
+  "peak_over_baseline_mib": 22062,
+  "peak_compute_app_mib": 36384,
+  "max_rss_mib": 37267,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@37.5_scan",
+  "spec": "e10441-L-auto@37.5:scan",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 38397,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [
+   "patch-prep-declined"
+  ],
+  "wall_s": 22.82,
+  "peak_over_baseline_mib": 38254,
+  "peak_compute_app_mib": 38248,
+  "max_rss_mib": 19402,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@37_scan",
+  "spec": "e10441-L-auto@37:scan",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 37885,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [
+   "gain/sum-OOM->CPU-preprocess"
+  ],
+  "wall_s": 68.21,
+  "peak_over_baseline_mib": 37480,
+  "peak_compute_app_mib": 37474,
+  "max_rss_mib": 37268,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@38.5_scan",
+  "spec": "e10441-L-auto@38.5:scan",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 39421,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [
+   "patch-prep-declined"
+  ],
+  "wall_s": 22.81,
+  "peak_over_baseline_mib": 38974,
+  "peak_compute_app_mib": 38968,
+  "max_rss_mib": 19401,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@38_bisres",
+  "spec": "e10441-L-auto@38:bisres",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 38909,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [
+   "patch-prep-declined"
+  ],
+  "wall_s": 22.89,
+  "peak_over_baseline_mib": 38254,
+  "peak_compute_app_mib": 38248,
+  "max_rss_mib": 19403,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@39_bisres",
+  "spec": "e10441-L-auto@39:bisres",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 39933,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 7.57,
+  "peak_over_baseline_mib": 39838,
+  "peak_compute_app_mib": 37924,
+  "max_rss_mib": 5164,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@40",
+  "spec": "e10441-L-auto@40",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 8.57,
+  "peak_over_baseline_mib": 39838,
+  "peak_compute_app_mib": 39784,
+  "max_rss_mib": 5164,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@40_bisres",
+  "spec": "e10441-L-auto@40:bisres",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 7.47,
+  "peak_over_baseline_mib": 39838,
+  "peak_compute_app_mib": 39832,
+  "max_rss_mib": 5164,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-auto@none",
+  "spec": "e10441-L-auto@none",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 7.78,
+  "peak_over_baseline_mib": 40274,
+  "peak_compute_app_mib": 37924,
+  "max_rss_mib": 5164,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-compact@16",
+  "spec": "e10441-L-compact@16",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "compact",
+  "free_mib": 16381,
+  "exit": 1,
+  "timed_out": false,
+  "route": [],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 1.08,
+  "peak_over_baseline_mib": 18,
+  "peak_compute_app_mib": 414,
+  "max_rss_mib": 743,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": null,
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-compact@24",
+  "spec": "e10441-L-compact@24",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "compact",
+  "free_mib": 24573,
+  "exit": 1,
+  "timed_out": false,
+  "route": [],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 1.13,
+  "peak_over_baseline_mib": 18,
+  "peak_compute_app_mib": 22,
+  "max_rss_mib": 743,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": null,
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-compact@40",
+  "spec": "e10441-L-compact@40",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "compact",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 7.92,
+  "peak_over_baseline_mib": 39838,
+  "peak_compute_app_mib": 37924,
+  "max_rss_mib": 5164,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-compact@none",
+  "spec": "e10441-L-compact@none",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "compact",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 8.46,
+  "peak_over_baseline_mib": 40274,
+  "peak_compute_app_mib": 40266,
+  "max_rss_mib": 5164,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-float@16",
+  "spec": "e10441-L-float@16",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "float",
+  "free_mib": 16381,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 27.76,
+  "peak_over_baseline_mib": 1510,
+  "peak_compute_app_mib": 1504,
+  "max_rss_mib": 36541,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-float@24",
+  "spec": "e10441-L-float@24",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "float",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 64.1,
+  "peak_over_baseline_mib": 20580,
+  "peak_compute_app_mib": 20574,
+  "max_rss_mib": 37266,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-float@40",
+  "spec": "e10441-L-float@40",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "float",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [],
+  "wall_s": 12.41,
+  "peak_over_baseline_mib": 39790,
+  "peak_compute_app_mib": 39832,
+  "max_rss_mib": 18922,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10441-L-float@none",
+  "spec": "e10441-L-float@none",
+  "family": "e10441",
+  "config": "L",
+  "ingest": "float",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [],
+  "wall_s": 12.21,
+  "peak_over_baseline_mib": 40274,
+  "peak_compute_app_mib": 40266,
+  "max_rss_mib": 18922,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@11_biscom",
+  "spec": "e10474f4-G-auto@11:biscom",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 11261,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 24.18,
+  "peak_over_baseline_mib": 9650,
+  "peak_compute_app_mib": 9644,
+  "max_rss_mib": 21438,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": null,
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@12.5_biscom",
+  "spec": "e10474f4-G-auto@12.5:biscom",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 12797,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 37.12,
+  "peak_over_baseline_mib": 11396,
+  "peak_compute_app_mib": 9772,
+  "max_rss_mib": 21503,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@12_biscom",
+  "spec": "e10474f4-G-auto@12:biscom",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 12285,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 37.42,
+  "peak_over_baseline_mib": 9948,
+  "peak_compute_app_mib": 9942,
+  "max_rss_mib": 21503,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@16",
+  "spec": "e10474f4-G-auto@16",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 38.16,
+  "peak_over_baseline_mib": 9948,
+  "peak_compute_app_mib": 9772,
+  "max_rss_mib": 21503,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@16_biscom",
+  "spec": "e10474f4-G-auto@16:biscom",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 37.4,
+  "peak_over_baseline_mib": 9778,
+  "peak_compute_app_mib": 9772,
+  "max_rss_mib": 21504,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@16_bisres",
+  "spec": "e10474f4-G-auto@16:bisres",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 36.73,
+  "peak_over_baseline_mib": 9778,
+  "peak_compute_app_mib": 9942,
+  "max_rss_mib": 21504,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@18.5_scan",
+  "spec": "e10474f4-G-auto@18.5:scan",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 18941,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 35.02,
+  "peak_over_baseline_mib": 9948,
+  "peak_compute_app_mib": 10812,
+  "max_rss_mib": 21503,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@18_bisres",
+  "spec": "e10474f4-G-auto@18:bisres",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 18429,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 37.18,
+  "peak_over_baseline_mib": 9948,
+  "peak_compute_app_mib": 9772,
+  "max_rss_mib": 21503,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@19_bisres",
+  "spec": "e10474f4-G-auto@19:bisres",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 19453,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 11.4,
+  "peak_over_baseline_mib": 19096,
+  "peak_compute_app_mib": 19090,
+  "max_rss_mib": 7627,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@20_bisres",
+  "spec": "e10474f4-G-auto@20:bisres",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 20477,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 11.34,
+  "peak_over_baseline_mib": 19096,
+  "peak_compute_app_mib": 19090,
+  "max_rss_mib": 7625,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@24",
+  "spec": "e10474f4-G-auto@24",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 11.81,
+  "peak_over_baseline_mib": 19096,
+  "peak_compute_app_mib": 19090,
+  "max_rss_mib": 7625,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@24_bisres",
+  "spec": "e10474f4-G-auto@24:bisres",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 11.35,
+  "peak_over_baseline_mib": 19096,
+  "peak_compute_app_mib": 19090,
+  "max_rss_mib": 7625,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@2_biscom",
+  "spec": "e10474f4-G-auto@2:biscom",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 2045,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 22.17,
+  "peak_over_baseline_mib": 626,
+  "peak_compute_app_mib": 620,
+  "max_rss_mib": 21438,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@40",
+  "spec": "e10474f4-G-auto@40",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 11.97,
+  "peak_over_baseline_mib": 19096,
+  "peak_compute_app_mib": 19090,
+  "max_rss_mib": 7626,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@9_biscom",
+  "spec": "e10474f4-G-auto@9:biscom",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 9213,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 23.17,
+  "peak_over_baseline_mib": 626,
+  "peak_compute_app_mib": 620,
+  "max_rss_mib": 21438,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-G-auto@none",
+  "spec": "e10474f4-G-auto@none",
+  "family": "e10474f4",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 12.03,
+  "peak_over_baseline_mib": 19098,
+  "peak_compute_app_mib": 19090,
+  "max_rss_mib": 7626,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@11_biscom",
+  "spec": "e10474f4-L-auto@11:biscom",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 11261,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 23.82,
+  "peak_over_baseline_mib": 9650,
+  "peak_compute_app_mib": 9644,
+  "max_rss_mib": 21439,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": null,
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@12.5_biscom",
+  "spec": "e10474f4-L-auto@12.5:biscom",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 12797,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 41.09,
+  "peak_over_baseline_mib": 10760,
+  "peak_compute_app_mib": 10754,
+  "max_rss_mib": 21837,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@12_biscom",
+  "spec": "e10474f4-L-auto@12:biscom",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 12285,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 42.53,
+  "peak_over_baseline_mib": 10760,
+  "peak_compute_app_mib": 10754,
+  "max_rss_mib": 21808,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@16",
+  "spec": "e10474f4-L-auto@16",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 42.28,
+  "peak_over_baseline_mib": 10760,
+  "peak_compute_app_mib": 11390,
+  "max_rss_mib": 21807,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@16_biscom",
+  "spec": "e10474f4-L-auto@16:biscom",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 40.96,
+  "peak_over_baseline_mib": 10760,
+  "peak_compute_app_mib": 10754,
+  "max_rss_mib": 21835,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@16_bisres",
+  "spec": "e10474f4-L-auto@16:bisres",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 43.46,
+  "peak_over_baseline_mib": 11396,
+  "peak_compute_app_mib": 10754,
+  "max_rss_mib": 21808,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@18.5_scan",
+  "spec": "e10474f4-L-auto@18.5:scan",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 18941,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 39.04,
+  "peak_over_baseline_mib": 11396,
+  "peak_compute_app_mib": 10754,
+  "max_rss_mib": 21839,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@18_bisres",
+  "spec": "e10474f4-L-auto@18:bisres",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 18429,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 41.55,
+  "peak_over_baseline_mib": 10760,
+  "peak_compute_app_mib": 10754,
+  "max_rss_mib": 21808,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@19.5_scan",
+  "spec": "e10474f4-L-auto@19.5:scan",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 19965,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [
+   "patch-prep-declined"
+  ],
+  "wall_s": 19.72,
+  "peak_over_baseline_mib": 19770,
+  "peak_compute_app_mib": 19764,
+  "max_rss_mib": 12546,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@19_bisres",
+  "spec": "e10474f4-L-auto@19:bisres",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 19453,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [
+   "patch-prep-declined"
+  ],
+  "wall_s": 19.9,
+  "peak_over_baseline_mib": 19400,
+  "peak_compute_app_mib": 19394,
+  "max_rss_mib": 12548,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@20_bisres",
+  "spec": "e10474f4-L-auto@20:bisres",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 20477,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 11.8,
+  "peak_over_baseline_mib": 19096,
+  "peak_compute_app_mib": 20212,
+  "max_rss_mib": 7626,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@24",
+  "spec": "e10474f4-L-auto@24",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 12.24,
+  "peak_over_baseline_mib": 20218,
+  "peak_compute_app_mib": 20212,
+  "max_rss_mib": 7626,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@24_bisres",
+  "spec": "e10474f4-L-auto@24:bisres",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 12.01,
+  "peak_over_baseline_mib": 19096,
+  "peak_compute_app_mib": 19090,
+  "max_rss_mib": 7625,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@2_biscom",
+  "spec": "e10474f4-L-auto@2:biscom",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 2045,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 22.46,
+  "peak_over_baseline_mib": 626,
+  "peak_compute_app_mib": 620,
+  "max_rss_mib": 21439,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@40",
+  "spec": "e10474f4-L-auto@40",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 12.29,
+  "peak_over_baseline_mib": 20452,
+  "peak_compute_app_mib": 20446,
+  "max_rss_mib": 7626,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@9_biscom",
+  "spec": "e10474f4-L-auto@9:biscom",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 9213,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 22.25,
+  "peak_over_baseline_mib": 626,
+  "peak_compute_app_mib": 620,
+  "max_rss_mib": 21439,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "e10474f4-L-auto@none",
+  "spec": "e10474f4-L-auto@none",
+  "family": "e10474f4",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 12.41,
+  "peak_over_baseline_mib": 19098,
+  "peak_compute_app_mib": 20446,
+  "max_rss_mib": 7626,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "mmA-G-auto@16",
+  "spec": "mmA-G-auto@16",
+  "family": "mmA",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float",
+   "compact"
+  ],
+  "flags": [
+   "session-init-OOM->streaming",
+   "device-ingest-declined->host-reader"
+  ],
+  "wall_s": 30.02,
+  "peak_over_baseline_mib": 3208,
+  "peak_compute_app_mib": 3230,
+  "max_rss_mib": 36180,
+  "all_products": false,
+  "movies_with_products": 1,
+  "n_movies": 2,
+  "products_identical": true,
+  "identity_rc(products,strict)": {
+   "20May09_3A-3_109-21_0003": [
+    null,
+    null
+   ],
+   "20170629_00026_frameImage": [
+    0,
+    1
+   ]
+  },
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [
+    "Movies/20170629_00026_frameImage_shifts.eps",
+    "Movies/20170629_00026_frameImage.star"
+   ],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "mmA-G-auto@none",
+  "spec": "mmA-G-auto@none",
+  "family": "mmA",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact",
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 6.81,
+  "peak_over_baseline_mib": 37572,
+  "peak_compute_app_mib": 37564,
+  "max_rss_mib": 4805,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 2,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "mmA-L-auto@16",
+  "spec": "mmA-L-auto@16",
+  "family": "mmA",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float",
+   "compact"
+  ],
+  "flags": [
+   "session-init-OOM->streaming",
+   "device-ingest-declined->host-reader"
+  ],
+  "wall_s": 29.47,
+  "peak_over_baseline_mib": 3208,
+  "peak_compute_app_mib": 3202,
+  "max_rss_mib": 36182,
+  "all_products": false,
+  "movies_with_products": 1,
+  "n_movies": 2,
+  "products_identical": true,
+  "identity_rc(products,strict)": {
+   "20May09_3A-3_109-21_0003": [
+    null,
+    null
+   ],
+   "20170629_00026_frameImage": [
+    0,
+    1
+   ]
+  },
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [
+    "Movies/20170629_00026_frameImage_shifts.eps",
+    "Movies/20170629_00026_frameImage.star"
+   ],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "mmA-L-auto@24",
+  "spec": "mmA-L-auto@24",
+  "family": "mmA",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float",
+   "nvcomp"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 74.74,
+  "peak_over_baseline_mib": 20580,
+  "peak_compute_app_mib": 20574,
+  "max_rss_mib": 36906,
+  "all_products": true,
+  "movies_with_products": 2,
+  "n_movies": 2,
+  "products_identical": true,
+  "identity_rc(products,strict)": {
+   "20May09_3A-3_109-21_0003": [
+    0,
+    1
+   ],
+   "20170629_00026_frameImage": [
+    0,
+    1
+   ]
+  },
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "mmA-L-auto@none",
+  "spec": "mmA-L-auto@none",
+  "family": "mmA",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact",
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 7.04,
+  "peak_over_baseline_mib": 39914,
+  "peak_compute_app_mib": 39906,
+  "max_rss_mib": 4805,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 2,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "mmB-L-auto@16",
+  "spec": "mmB-L-auto@16",
+  "family": "mmB",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float",
+   "compact"
+  ],
+  "flags": [
+   "session-init-OOM->streaming",
+   "gain/sum-OOM->CPU-preprocess"
+  ],
+  "wall_s": 48.84,
+  "peak_over_baseline_mib": 11854,
+  "peak_compute_app_mib": 11848,
+  "max_rss_mib": 36180,
+  "all_products": false,
+  "movies_with_products": 1,
+  "n_movies": 2,
+  "products_identical": true,
+  "identity_rc(products,strict)": {
+   "20May09_3A-3_109-21_0003": [
+    null,
+    null
+   ],
+   "PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33": [
+    0,
+    1
+   ]
+  },
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [
+    "Movies/PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33.star",
+    "Movies/PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33_shifts.eps"
+   ],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "mmB-L-auto@24",
+  "spec": "mmB-L-auto@24",
+  "family": "mmB",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float",
+   "compact"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 64.78,
+  "peak_over_baseline_mib": 20580,
+  "peak_compute_app_mib": 20574,
+  "max_rss_mib": 36906,
+  "all_products": true,
+  "movies_with_products": 2,
+  "n_movies": 2,
+  "products_identical": true,
+  "identity_rc(products,strict)": {
+   "20May09_3A-3_109-21_0003": [
+    0,
+    1
+   ],
+   "PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33": [
+    0,
+    1
+   ]
+  },
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "mmB-L-auto@none",
+  "spec": "mmB-L-auto@none",
+  "family": "mmB",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact",
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 9.03,
+  "peak_over_baseline_mib": 37572,
+  "peak_compute_app_mib": 39906,
+  "max_rss_mib": 4805,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 2,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "mmC-L-auto@16",
+  "spec": "mmC-L-auto@16",
+  "family": "mmC",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float",
+   "compact",
+   "compact"
+  ],
+  "flags": [
+   "session-init-OOM->streaming",
+   "device-ingest-declined->host-reader"
+  ],
+  "wall_s": 31.75,
+  "peak_over_baseline_mib": 11882,
+  "peak_compute_app_mib": 12500,
+  "max_rss_mib": 36180,
+  "all_products": false,
+  "movies_with_products": 2,
+  "n_movies": 3,
+  "products_identical": true,
+  "identity_rc(products,strict)": {
+   "20May09_3A-3_109-21_0003": [
+    null,
+    null
+   ],
+   "20170629_00026_frameImage": [
+    0,
+    1
+   ],
+   "PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33": [
+    0,
+    1
+   ]
+  },
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [
+    "Movies/PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33.star",
+    "Movies/PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33_shifts.eps",
+    "Movies/20170629_00026_frameImage_shifts.eps",
+    "Movies/20170629_00026_frameImage.star"
+   ],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "mmC-L-auto@24",
+  "spec": "mmC-L-auto@24",
+  "family": "mmC",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float",
+   "nvcomp",
+   "compact"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 67.46,
+  "peak_over_baseline_mib": 20860,
+  "peak_compute_app_mib": 22056,
+  "max_rss_mib": 36906,
+  "all_products": true,
+  "movies_with_products": 3,
+  "n_movies": 3,
+  "products_identical": true,
+  "identity_rc(products,strict)": {
+   "20May09_3A-3_109-21_0003": [
+    0,
+    1
+   ],
+   "20170629_00026_frameImage": [
+    0,
+    1
+   ],
+   "PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33": [
+    0,
+    1
+   ]
+  },
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "mmC-L-auto@none",
+  "spec": "mmC-L-auto@none",
+  "family": "mmC",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "compact",
+   "nvcomp",
+   "compact"
+  ],
+  "flags": [],
+  "wall_s": 9.29,
+  "peak_over_baseline_mib": 39914,
+  "peak_compute_app_mib": 39906,
+  "max_rss_mib": 4805,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 3,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@16",
+  "spec": "tutorial-G-auto@16",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.13,
+  "peak_over_baseline_mib": 3208,
+  "peak_compute_app_mib": 3202,
+  "max_rss_mib": 348,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@16_bisres",
+  "spec": "tutorial-G-auto@16:bisres",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.18,
+  "peak_over_baseline_mib": 3208,
+  "peak_compute_app_mib": 3202,
+  "max_rss_mib": 348,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@1_biscom",
+  "spec": "tutorial-G-auto@1:biscom",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 1021,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 2.74,
+  "peak_over_baseline_mib": 598,
+  "peak_compute_app_mib": 592,
+  "max_rss_mib": 2799,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@1_bisres",
+  "spec": "tutorial-G-auto@1:bisres",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 1021,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 2.7,
+  "peak_over_baseline_mib": 598,
+  "peak_compute_app_mib": 592,
+  "max_rss_mib": 2799,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@24",
+  "spec": "tutorial-G-auto@24",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.13,
+  "peak_over_baseline_mib": 3266,
+  "peak_compute_app_mib": 3202,
+  "max_rss_mib": 348,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@2_biscom",
+  "spec": "tutorial-G-auto@2:biscom",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 2045,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 5.06,
+  "peak_over_baseline_mib": 1846,
+  "peak_compute_app_mib": 1840,
+  "max_rss_mib": 2855,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@3_biscom",
+  "spec": "tutorial-G-auto@3:biscom",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 3069,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 5.01,
+  "peak_over_baseline_mib": 1846,
+  "peak_compute_app_mib": 1984,
+  "max_rss_mib": 2856,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@3_bisres",
+  "spec": "tutorial-G-auto@3:bisres",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 3069,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 4.96,
+  "peak_over_baseline_mib": 1846,
+  "peak_compute_app_mib": 1984,
+  "max_rss_mib": 2856,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@40",
+  "spec": "tutorial-G-auto@40",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.18,
+  "peak_over_baseline_mib": 3264,
+  "peak_compute_app_mib": 3202,
+  "max_rss_mib": 348,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@4_bisres",
+  "spec": "tutorial-G-auto@4:bisres",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 4093,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.13,
+  "peak_over_baseline_mib": 3208,
+  "peak_compute_app_mib": 3202,
+  "max_rss_mib": 348,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@5_bisres",
+  "spec": "tutorial-G-auto@5:bisres",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 5117,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.18,
+  "peak_over_baseline_mib": 3208,
+  "peak_compute_app_mib": 3202,
+  "max_rss_mib": 348,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@8.5_bisres",
+  "spec": "tutorial-G-auto@8.5:bisres",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 8701,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.13,
+  "peak_over_baseline_mib": 3208,
+  "peak_compute_app_mib": 3202,
+  "max_rss_mib": 348,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   0
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-G-auto@none",
+  "spec": "tutorial-G-auto@none",
+  "family": "tutorial",
+  "config": "G",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.28,
+  "peak_over_baseline_mib": 3266,
+  "peak_compute_app_mib": 3202,
+  "max_rss_mib": 347,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 60,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@16",
+  "spec": "tutorial-L-auto@16",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.17,
+  "peak_over_baseline_mib": 3264,
+  "peak_compute_app_mib": 3206,
+  "max_rss_mib": 351,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@16_bisres",
+  "spec": "tutorial-L-auto@16:bisres",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 16381,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.18,
+  "peak_over_baseline_mib": 3212,
+  "peak_compute_app_mib": 3308,
+  "max_rss_mib": 351,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@1_biscom",
+  "spec": "tutorial-L-auto@1:biscom",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 1021,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 2.74,
+  "peak_over_baseline_mib": 598,
+  "peak_compute_app_mib": 592,
+  "max_rss_mib": 2799,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@1_bisres",
+  "spec": "tutorial-L-auto@1:bisres",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 1021,
+  "exit": 1,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 2.74,
+  "peak_over_baseline_mib": 598,
+  "peak_compute_app_mib": 592,
+  "max_rss_mib": 2799,
+  "all_products": false,
+  "movies_with_products": 0,
+  "n_movies": 1,
+  "products_identical": false,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": {
+   "exit": 1,
+   "named_movie_failure_line": true,
+   "oom_line": "000/??? sec ~~(,_,\">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)",
+   "stray_files_besides_log": [],
+   "gpu_used_after_mib": 1,
+   "gpu_apps_after": {},
+   "signal_exit": false,
+   "timed_out": false
+  },
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@24",
+  "spec": "tutorial-L-auto@24",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 24573,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.28,
+  "peak_over_baseline_mib": 3264,
+  "peak_compute_app_mib": 3206,
+  "max_rss_mib": 351,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@2_biscom",
+  "spec": "tutorial-L-auto@2:biscom",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 2045,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 5.86,
+  "peak_over_baseline_mib": 2006,
+  "peak_compute_app_mib": 1842,
+  "max_rss_mib": 2912,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@3_biscom",
+  "spec": "tutorial-L-auto@3:biscom",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 3069,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 5.71,
+  "peak_over_baseline_mib": 1902,
+  "peak_compute_app_mib": 1932,
+  "max_rss_mib": 2890,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@3_bisres",
+  "spec": "tutorial-L-auto@3:bisres",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 3069,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "float"
+  ],
+  "flags": [
+   "session-init-OOM->streaming"
+  ],
+  "wall_s": 5.91,
+  "peak_over_baseline_mib": 2004,
+  "peak_compute_app_mib": 1842,
+  "max_rss_mib": 2911,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@40",
+  "spec": "tutorial-L-auto@40",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 40957,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.28,
+  "peak_over_baseline_mib": 3264,
+  "peak_compute_app_mib": 3304,
+  "max_rss_mib": 351,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@4_bisres",
+  "spec": "tutorial-L-auto@4:bisres",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 4093,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.18,
+  "peak_over_baseline_mib": 3264,
+  "peak_compute_app_mib": 3206,
+  "max_rss_mib": 351,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@5_bisres",
+  "spec": "tutorial-L-auto@5:bisres",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 5117,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.18,
+  "peak_over_baseline_mib": 3212,
+  "peak_compute_app_mib": 3324,
+  "max_rss_mib": 351,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@8.5_bisres",
+  "spec": "tutorial-L-auto@8.5:bisres",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 8701,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.18,
+  "peak_over_baseline_mib": 3212,
+  "peak_compute_app_mib": 3332,
+  "max_rss_mib": 351,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": true,
+  "identity_rc(products,strict)": [
+   0,
+   1
+  ],
+  "strict_log_residual_after_whitelist": 0,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ },
+ {
+  "case": "tutorial-L-auto@none",
+  "spec": "tutorial-L-auto@none",
+  "family": "tutorial",
+  "config": "L",
+  "ingest": "auto",
+  "free_mib": 81154,
+  "exit": 0,
+  "timed_out": false,
+  "route": [
+   "nvcomp"
+  ],
+  "flags": [],
+  "wall_s": 1.38,
+  "peak_over_baseline_mib": 3266,
+  "peak_compute_app_mib": 3206,
+  "max_rss_mib": 351,
+  "all_products": true,
+  "movies_with_products": 1,
+  "n_movies": 1,
+  "products_identical": null,
+  "identity_rc(products,strict)": [
+   null,
+   null
+  ],
+  "strict_log_residual_after_whitelist": null,
+  "failure": null,
+  "bench_lock_wait_s": 0,
+  "balloon_gone": true
+ }
+]

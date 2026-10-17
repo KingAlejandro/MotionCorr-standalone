@@ -1,6 +1,6 @@
 # RC0 release checklist (DRAFT, stays DRAFT until the freeze)
 
-Status: **draft, pre-freeze, revision 3** (after the R-REL review of PR #201 and the maintainer decisions D1, D2, T3, D5, D6, D7). This checklist is for an **evaluation RC0**, not a stable release (D7). Commands below were written against main `1db86902` and re-checked on the merge with `2b3c74b3` (#200 F1, #210 TST1). Each command is tagged:
+Status: **draft, pre-freeze, revision 5** (after the R-REL review of PR #201 and the maintainer decisions D1, D2, T3, D5, D6, D7). This checklist is for an **evaluation RC0**, not a stable release (D7). Commands below were written against main `1db86902` and re-checked on the merge with `2b3c74b3` (#200 F1, #210 TST1). Each command is tagged:
 
 - **LOCAL-OK**: run on macOS arm64 (AppleClang, Homebrew) in this worktree for this draft; result stated.
 - **UNRUN**: not executed. Linux/CUDA commands are UNRUN until the final qualification (**QF**, #198) runs them.
@@ -24,19 +24,30 @@ or scientific correctness.
 The frozen SHA must contain exactly the register items the maintainer accepts (#198). State of each at this revision;
 update at freeze. Nothing here is verified by this document.
 
+**Completed versus pending (this revision, main `483e881d`).**
+
+| Completed pre-freeze (per item, on the stated SHAs; not re-run on the frozen SHA) | Pending QF on the frozen SHA (placeholders) |
+|---|---|
+| Q1 baseline qualification (`1db86902`, PR #209); raw-MRC staging M1 (#204); EER compact route E1 (#208); resident retry R1 (#207); S1 diagnosis (#212); F3/F3b fail-closed reads (#205, `f67a5866`); T3 checked arithmetic (#217, `483e881d`); C5 timing measurement (#218) | CTest on CPU, CUDA and CUDA+nvCOMP; route/product campaign (§7); multi-GPU 1/2/4 (§8); the adapted compact-ingest matrix of #123; `CpuDoseSymmetry` (if #220 merges); smaller-GPU memory admission (QM, in progress); the macOS platform statement (W-MAC investigating the macOS `SyntheticRegression` and `MultiGpuScheduling` failures) |
+
 | Item | State at this revision | Needed before QF |
 |---|---|---|
-| F1: no `logfile.pdf` after a failed render | **MERGED** (#200, `ea86fc90`; included in main `2b3c74b3`) | re-verify on the frozen SHA (`LogfileFromEps*` tests) |
+| F1: no `logfile.pdf` after a failed render | **MERGED** (#200, `ea86fc90`) | re-verify on the frozen SHA (`LogfileFromEps*` tests) |
 | TST1: `CudaResidentRetryFailures` test | **MERGED** (#210, `2b3c74b3`); CUDA-only, injected failures | runs in the CUDA configurations at QF |
-| F3/F3b: truncated raw MRC movie, gain reference, defect map fail explicitly | **pending**: [PR #205](https://github.com/KingAlejandro/MotionCorr-standalone/pull/205), still in qualification (D5 approved the change) | merged and qualified, or `SUPPORT.md` §6 item 5 stays in its "today" state |
-| T3: checked-arithmetic hardening of the nvCOMP pre-decode arithmetic | **pending**: approved for RC0 (D1/T3), branch `fix/rc0-nvcomp-checked-arithmetic` | merged, boundary tests and mutants pass, native nvCOMP controls, independent review; update `SUPPORT.md` §7 |
-| QM: memory admission on smaller GPUs (resident-session OOM on large compact-staged movies) | **pending**, no worker assigned | forced-OOM control and a per-geometry VRAM floor; until then `SUPPORT.md` §8 says the fallback is unqualified |
-| D1 (option 1: trusted-input precondition), D2 (interim policy A), D5, D6, D7 | **decided**; the docs carry the wording | none (re-read #198 for any change) |
-| S1: CPU versus CUDA local alignment | **PROVISIONAL known limitation** (D7), prominent in README and `SUPPORT.md` §0; post-freeze priority 1 | none for RC0; no unrestricted CUDA local-alignment claim |
-| C5 #179, C6 #181, C7 #183 | **bounded experiments** under the amended rule ([#10](https://github.com/KingAlejandro/MotionCorr-standalone/issues/10#issuecomment-6223528151)); not in RC0 unless they pass it | coordinator records GO or park; only GO items enter the composition |
+| F3/F3b: truncated raw MRC movie, gain reference, defect map fail closed | **MERGED** (#205, `f67a5866`): movie-level rejection, message "is truncated or unreadable"; tests `TruncatedMrcMovie`, `TruncatedGainDefect` (+ `Cuda` variants) | the two required tests pass on the frozen SHA |
+| T3: checked arithmetic on the nvCOMP pre-decode path | **MERGED** (#217, `483e881d`): overflow or unreadable strip offset gives a named decline (`NotApplicable`); D1's trusted-input precondition unchanged | `DeflateLayout*` tests and the native nvCOMP controls on the frozen SHA |
+| D1 (option 1), D2 (interim policy A), D5, D6, D7 | **decided**; record [`docs/rc0/decoder_trust_and_dependencies.md`](../rc0/decoder_trust_and_dependencies.md) (#199 `a1ab83f2`) | none (re-read #198 for any change) |
+| QM: memory admission on smaller GPUs | **IN PROGRESS** (W-QM) | forced-OOM control and per-geometry VRAM floor; until then `SUPPORT.md` §8 says the fallback is unqualified |
+| S1: CPU versus CUDA local alignment | **PROVISIONAL known limitation** (D7), prominent in README and `SUPPORT.md` §0; post-freeze priority 1 | none for RC0 |
+| C5 #179 (lean port [PR #220](https://github.com/KingAlejandro/MotionCorr-standalone/pull/220)) | **PENDING MERGE**; decided acceptable for RC0 under a qualified-toolchain contract (`SUPPORT.md` §9) | merged; `CpuDoseSymmetry` run on the frozen SHA on every release toolchain; contract text re-checked against merged source |
+| C6 #181, #182 | **closed, no-go** | none |
+| C7 #183 / #219 | **parked**, not in RC0 | none |
 | T1 #138 nvCOMP widening | **NO-GO for RC0**, parked as [PR #206](https://github.com/KingAlejandro/MotionCorr-standalone/pull/206) | none |
 | L1 #141/#152 nvTIFF | **NO-GO for RC0**; not used | none |
-| E2 #193 option 2 (device EER renderer) | bounded experiment; integration NO-GO for RC0 unless all gates pass before freeze | none expected |
+| E2 #193 / #211 device EER renderer | **parked post-RC0** (D9) | none |
+| EER damaged-input robustness (EER-MS, [#221](https://github.com/KingAlejandro/MotionCorr-standalone/issues/221)) | host-renderer out-of-bounds access and process abort on malformed or truncated EER **reported**; independent verification in progress; **release disposition (fix or documented limitation) PENDING** | decision, then the matching `SUPPORT.md` text; no claim that the EER input path is stable on damaged input |
+| #123 adapted compact-ingest matrix | **runs on the frozen executable at QF** (§7); result placeholder | result recorded in the evidence table (§9) |
+| macOS platform statement | **PENDING** (W-MAC); `SyntheticRegression` and `MultiGpuScheduling` fail on macOS, `NativeMovieStaging` skips | W-MAC's finding; then a macOS support statement or a limitation |
 | TST2: genuine device-poisoning test | **post-RC0** ([#213](https://github.com/KingAlejandro/MotionCorr-standalone/issues/213)); current fatal-path tests inject error codes | none |
 | F4 compressed-MRC decoder exit status | **documented RC0 limitation**; fix scheduled [#214](https://github.com/KingAlejandro/MotionCorr-standalone/issues/214); inputs must be validated independently (§7) | none |
 | #215 nvCOMP file-identity check (file changing between scan and read) | post-RC0 | none |
@@ -53,7 +64,7 @@ PY="$SCRATCH/mc-venv/bin/python"
 ```
 
 Why a venv: with `BUILD_TESTING=ON` the CMake configure fails unless the chosen Python imports NumPy
-(`CMakeLists.txt:298-304`: "BUILD_TESTING=ON requires Python 3 with 'numpy' installed."). `README.md` now states this next to
+(`CMakeLists.txt:343-349`: "BUILD_TESTING=ON requires Python 3 with 'numpy' installed."). `README.md` now states this next to
 the build prerequisites. **LOCAL-OK**: reproduced here (system Python 3.14 has no NumPy); configure succeeds with
 `-DPython3_EXECUTABLE=<venv python>`.
 
@@ -104,7 +115,7 @@ cmake --build build-nvcomp --parallel 8
 `USE_NVCOMP=ON` without the headers and library is a configure error (`CMakeLists.txt:152`). Record the nvCOMP version
 (the #186 and #194 evidence used 5.3 with CUDA 12.8). The release notes must carry the decided input-trust precondition
 (D1 option 1: complete, unmodified files; `--ingest compact` for files of unknown integrity) and the optional-SDK policy (D2 interim policy A: optional,
-default OFF, not vendored, no project-distributed linked binaries) from `SUPPORT.md` §7; T3 hardening is pending until it merges.
+default OFF, not vendored, no project-distributed linked binaries) from `SUPPORT.md` §7 and the record [`docs/rc0/decoder_trust_and_dependencies.md`](../rc0/decoder_trust_and_dependencies.md); T3 checked arithmetic is merged (#217) and does not change the D1 precondition.
 
 ## 3. CTest
 
@@ -115,19 +126,24 @@ ctest --test-dir build-cpu --output-on-failure
 
 Use the same two commands for `build-cuda` and `build-nvcomp` (UNRUN). Record the **collected count and the executed
 inventory** from that configuration; do not predict a count, and do not count a test that was not registered as an executed
-pass. Most `Cuda*` tests are registered only in CUDA builds (`CMakeLists.txt:471` onward); `CudaValidationParser` is
-device-free and is registered in CPU builds too (`CMakeLists.txt:435-438`; it ran in the local CPU suite). Several need a GPU
-(label `hardware`, for example `CudaPreprocessingFailurePaths`, `CMakeLists.txt:712-717`). `CudaAdler32`,
+pass. Most `Cuda*` tests are registered only in CUDA builds (`CMakeLists.txt:526` onward); `CudaValidationParser` is
+device-free and is registered in CPU builds too (`CMakeLists.txt:490-493`; it ran in the local CPU suite). Several need a GPU
+(label `hardware`, for example `CudaPreprocessingFailurePaths`, `CMakeLists.txt:776-781`). `CudaAdler32`,
 `CudaNvcompAcceptanceFailures` and `CudaNvcompReconstructionFailures` exist only with `-DUSE_NVCOMP=ON`
-(`CMakeLists.txt:733` onward). **`CudaU16FailurePaths` is registered only if you configure with
+(`CMakeLists.txt:797` onward). **`CudaU16FailurePaths` is registered only if you configure with
 `-DMOTIONCORR_U16_TEST_MOVIE=<uint16 TIFF>`** (and `-DMOTIONCORR_U16_TEST_STAGE_BYTES=<bytes in one uint16 frame>`, default
-28477960); without it the test is absent, not passed (`CMakeLists.txt:788-807`).
+28477960); without it the test is absent, not passed (`CMakeLists.txt:852-871`).
 
-**LOCAL-OK, with failures (CPU build, macOS):** at the merge head `67b5315b`: **60 collected, 57 passed, 2 failed, 1 skipped**
+**LOCAL-OK, with failures (CPU build, macOS), latest run at the merge head `861afa5d` (main `483e881d` + this branch's docs): 68 collected, 65 passed, 2 failed (`SyntheticRegression`, `MultiGpuScheduling`), 1 skipped (`NativeMovieStaging`); `validate_test_collection.py` PASS with 68; the new `TruncatedMrcMovie`, `TruncatedGainDefect` and `DeflateLayout*` tests pass on macOS; the CPU binary is `8a8886e8...`.** Earlier run, at the merge head `67b5315b`: **60 collected, 57 passed, 2 failed, 1 skipped**
 (`validate_test_collection.py` PASS with 60 collected; the one added test is `LogfileFromEpsMutant_concat_cleanup` from F1). At `1db86902`
 the same two failed (59 collected, 56 passed, 1 skipped). The Linux CPU qualification at `1db86902` (W-QUAL, [PR #209](https://github.com/KingAlejandro/MotionCorr-standalone/pull/209))
 collected 59/89/92 tests (CPU, CUDA, CUDA+nvCOMP) and passed 58/89/92 with 0 skipped; its one CPU failure, `ProfilingKit`, was a 30 s
 subprocess timeout under host load about 27 and passed on rerun.
+
+**Tests required at QF that were added after `1db86902`:** `TruncatedMrcMovie` and `TruncatedGainDefect` (F3/F3b, #205; CUDA builds also register `TruncatedMrcMovieCuda` and `TruncatedGainDefectCuda`), the six
+`DeflateLayoutMutant_*` controls (T3, #217; they must **fail** by design, `WILL_FAIL`) and `LogfileFromEpsMutant_concat_cleanup` (F1). **`CpuDoseSymmetry`** (C5) is required in release qualification **if #220 merges**
+(it adds it to `tools/validate_test_collection.py`): it must pass on every toolchain that is released with the symmetric path enabled (`SUPPORT.md` §9). Collected counts will differ from the figures
+below; record the actual count.
 
 **`ProfilingKit` is load sensitive.** `tools/profiling/tests/test_import_subset_boundaries.py` has a hard 30 s subprocess timeout. Run
 CTest on a quiet host, or record a timeout and its rerun explicitly. (Locally it passed in 64.7 s of CTest wall time.)
@@ -138,6 +154,7 @@ CTest on a quiet host, or record a timeout and its rerun explicitly. (Locally it
 | `MultiGpuScheduling` | FAIL at `tests/test_tomography_endpoint.py:122`: "validator rejects the healthy published tree"; 73 of 74 checks pass; reproduces when run alone | inherited: same evidence file ("the device-free scheduling validator rejects its healthy tree in both"). Cause not diagnosed here |
 | `NativeMovieStaging` | SKIPPED (Linux-only) | skip is not a pass |
 
+**macOS platform statement: PENDING.** The two macOS failures are under investigation (W-MAC). Until that reports, no macOS support statement is made and the failures are not waived.
 None of these may be relaxed or waived to pass RC0. On Linux, `SyntheticRegression` and `MultiGpuScheduling` are expected to pass and `NativeMovieStaging` to run (main CI is green per #198);
 QF must show it. A failure there is a release blocker, not an inherited macOS note.
 
@@ -189,7 +206,7 @@ machine): `batch.pdf`, `batch.pdf.lst`, `corrected_micrographs.star`, `corrected
 not written** and `batch.pdf` and `header.pdf` are zero-byte placeholders, because `gs` was missing; the program printed the gs error and exited 0 (`src/CPlot2D.cpp:66-98`). With `gs`
 the inventory is **UNRUN**; record the real list at QF. A run with `--dose_weighting --save_noDW` adds `_noDW.mrc`
 (`--save_noDW` without dose weighting writes no separate file: the unweighted sum is the main `.mrc`,
-`src/motioncorr_runner.cpp:4048-4054`), and `--even_odd_split` adds `_EVN.mrc` and `_ODD.mrc`.
+`src/motioncorr_runner.cpp:4067-4073`), and `--even_odd_split` adds `_EVN.mrc` and `_ODD.mrc`.
 
 Refusal checks on the CPU build (**LOCAL-OK**, each exits 1): `--gpu 0` (line 402, "built without CUDA support"),
 `--gpu 0:1` (line 367, device list rejected), `--ingest compact` and `--ingest nvcomp` (line 245), `--ingest bogus` (line 163).
@@ -219,8 +236,7 @@ There is no single script for this. Reuse the existing pieces and declare unrun 
      must carry the `Movies/` prefix the manifest expects.
 - **Input integrity before every row (D1, D5, D6).** Compressed MRC: run `xz -t`, `zstd -t` or `bzip2 -t`/`pbzip2 -t` on every input first
   (F4, fix scheduled #214). nvCOMP rows: use complete, unmodified acquisition files (D1 option 1); use `--ingest compact` for files of unknown integrity
-  or still being written. EER rows: pass `--expected_frames` or per-movie STAR frame counts. Raw MRC rows: validate file sizes yourself unless
-  [PR #205](https://github.com/KingAlejandro/MotionCorr-standalone/pull/205) has merged.
+  or still being written. EER rows: pass `--expected_frames` or per-movie STAR frame counts. Raw MRC truncation is rejected (F3/F3b, #205 merged); compressed MRC is not (F4).
 - **Route-log allowance for signed MRC.** Declared route-record log prefixes for `compare_output_trees.py --allow-added-log-line` must include
   `Released native int` for signed raw MRC (#195 added `Released native int16/int8 host staging after device forward FFT.`); the #209 campaign
   declared four prefixes in advance (`nvCOMP ingestion`, `Staging this movie as native`, `Released native uint` and one more), and its signed-MRC cases
@@ -266,6 +282,8 @@ The CPU arm of a row is the reference for the cross-backend check only; it is no
 | R9 | options | each option arm completes with complete products and passes its **named invariant**; option-on versus option-off products are **not** expected to be equal where the option changes them. Invariants: `--save_noDW` adds `_noDW.mrc` and leaves the dose-weighted `.mrc` equal to the run without it (same backend); `--even_odd_split` adds `_EVN`/`_ODD` and leaves the main `.mrc` equal; binning, `--group_frames`, first/last frame, defect file and gain rot/flip change the products by design, so check complete products, geometry and sampling, and the cross-backend backend gate against the CPU arm of the **same** options | `--save_noDW` (with `--dose_weighting`), `--even_odd_split`, `--bin_factor` (even binned dimensions), `--group_frames`, first/last frame, defect file, gain rot/flip | tutorial |
 | R10 | direct input and glob | complete products | `--i 'Movies/*.tiff' --angpix --voltage` | tutorial subset |
 | R11 | unchanged-setting resume | no reprocessing, identical tree | `--only_do_unfinished` | tutorial subset |
+| R13 | truncated raw MRC movie, gain reference, defect map (F3/F3b, merged) | movie-level rejection: exit 1, "is truncated or unreadable", no completion STAR, no joint output; a truncated gain or defect map fails every movie and the job; valid input byte-identical to the unfaulted run | truncated copies of one movie, one gain, one defect map | any small raw MRC family |
+| R14 | **#123 adapted compact-ingest support matrix (placeholder)** | to be run on the frozen executable at QF; result **pending RC0 QF** | per #123 | per #123 |
 | R12 | one checked failure | named failure, no completion STAR for that movie, healthy movies' per-movie products retained, **no joint output for the batch**; partial or earlier per-movie files for the failed movie may exist (`SUPPORT.md` §6): record what is on disk, do not assert absence | truncated movie | one damaged copy |
 
 The #186 families and options are the starting point; their dose-per-frame and voltage values are placeholders for several
@@ -320,6 +338,12 @@ leave no owned process.
 | Example run and inventory, with `gs` | 6 | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF |
 | Real-format rows R1-R12 | 7 | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF |
 | Multi-GPU 1/2/4 dataset run, failure injection | 8 | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF |
+| #123 adapted compact-ingest matrix (R14) | 7 | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF |
+| `CpuDoseSymmetry` on each released toolchain (if #220 merges) | 3 | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF |
+| F3/F3b required tests (`TruncatedMrcMovie`, `TruncatedGainDefect`) and T3 `DeflateLayout*` | 3, 7 | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF |
+| Smaller-GPU memory admission (QM) | n/a | pending (in progress) | pending | pending | pending | pending |
+| macOS platform statement (W-MAC) | 3 | pending | pending | pending | pending | pending |
+| EER damaged-input disposition (EER-MS, #221) | n/a | pending decision | n/a | n/a | pending | pending |
 | Licence and notices review (#18: six ambiguous notices in `CPlot2D.cpp/.h` and four `src/acc/hip` headers) | maintainer | n/a | n/a | n/a | open | pending RC0 QF |
 
 ## 10. Tag procedure (do not execute from this draft)

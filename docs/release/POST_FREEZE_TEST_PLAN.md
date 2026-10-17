@@ -1,6 +1,6 @@
 # Post-freeze validation plan (DRAFT)
 
-Status: **draft, revision 5, stays DRAFT until the freeze** (after R-REL rounds 2 and 3, R-REL-B and the R-QA2 audits of PR #201, and the maintainer decisions D1, D2, T3, D5, D6, D7). RC0 is an **evaluation** release, not a stable one (D7). This is the heavy validation campaign that runs **after** the RC0 freeze, on the frozen SHA. It is a plan:
+Status: **draft, revision 6, stays DRAFT until the freeze** (after R-REL rounds 2 and 3, R-REL-B and the R-QA2 audits of PR #201, and the maintainer decisions D1, D2, T3, D5, D6, D7). RC0 is an **evaluation** release, not a stable one (D7). This is the heavy validation campaign that runs **after** the RC0 freeze, on the frozen SHA. It is a plan:
 every row is **UNRUN** and every result cell is **pending**. Resource lanes, locks and venues are those recorded on
 [#198](https://github.com/KingAlejandro/MotionCorr-standalone/issues/198) (checked 2026-10-16 19:21Z) and must be re-checked
 at run time (`AGENTS.md`: check occupancy before running work; leave unrelated processes alone; record actual resources).
@@ -108,7 +108,7 @@ and options as in `RC0_ACCEPTANCE_REPORT.md` §6.
 |---|---|---|---|
 | #123 adapted compact-ingest matrix | run the adapted matrix of #123 on the frozen executable (part of QF, not post-freeze) | 4GPUs (correctness lock); qualification worker | result recorded in `RELEASE_CHECKLIST.md` §9; placeholder, pending RC0 QF |
 | CPU dose symmetry on other toolchains (C5, #220, PENDING MERGE) | `CpuDoseSymmetry` and strict output-tree identity with `MOTIONCORR_CPU_DOSE_SYMMETRY=ON` on toolchains PR #220 lists as UNRUN (Linux aarch64 GCC, PowerPC, NVHPC and Intel compilers) and on x86-64 with native FMA | per toolchain; qualification worker | the test passes (exact bits) before any site enables the path; no performance claim outside x86-64 cpu64 (#218); native-FMA flags stay unqualified and not recommended |
-| macOS statement (W-MAC) | rerun the macOS CPU suite after W-MAC's finding | local macOS; release-docs owner | a macOS support statement or a recorded limitation replaces the PENDING text in `SUPPORT.md` §1 |
+| macOS platform rows | the macOS statement is made (`SUPPORT.md` §1: builds and runs; not qualified; known CPU CTest differences). After [PR #223](https://github.com/KingAlejandro/MotionCorr-standalone/pull/223) merges, rerun the macOS CPU suite: `MultiGpuScheduling` is expected to pass, `SyntheticRegression` still fails by design of the platform difference (libc `rand()`, [#222](https://github.com/KingAlejandro/MotionCorr-standalone/issues/222)) | local macOS; release-docs owner | the failure list matches the documented one; a portable-RNG decision on #222 is post-RC0 and changes this row |
 
 ## 4. Failure injection
 
@@ -192,13 +192,14 @@ table. Run only in an authorised scratch lane, under a sanitizer where stated, a
 | Big-endian mode-0 MRC with nx = 128 (F5) | observed to fail identically on every tested route of the GCC build, but the swap heuristic calls `abs(INT_MIN)` (undefined behaviour), so no outcome is promised on other compilers or platforms | `src/rwMRC.h:149`; #204; R-QA1 |
 | nvCOMP: corrupt Deflate body | nvCOMP documents undefined behaviour for corrupt compressed input (D1); the route assumes complete, unmodified files; use `--ingest compact` for files of unknown integrity | D1; #134 |
 | nvCOMP: file changing between tag scan and read | not detected (follow-up #215) | #215 |
-| Genuine device poisoning; real out-of-memory on session initialisation (QM) | no genuine-poisoning test exists (all fatal-path tests inject error codes, TST2, #213); QM forced-OOM control is UNRUN | #213; #198 register QM |
+| Genuine device poisoning | no genuine-poisoning test exists (all fatal-path tests inject error codes, TST2, #213) | #213 |
+| QM follow-ups D1-D3 (stale CUDA error after OOM, config-L admission gap, late OOM failure) | **post-RC0** ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)). The balloon qualification (PR #225) produced genuine device out-of-memory failures that were clean, but did not cover hosts below about 36 GiB of RAM, `--eer_upsampling 2`, `--grouping_for_ps`, `--bin_factor`, float32 MRC or multi-GPU; a stale CUDA error makes the next movie fall back one route step, and under a pinned `--ingest nvcomp` that next movie is refused | #226; `SUPPORT.md` §8 "GPU memory (QM)" |
 
 ### 4.6 Class R: recovery controls (must complete)
 
 Injected recoverable CUDA failure: exit 0, one WARNING, products identical to the unfaulted run (#207: identical; #209: one injected recoverable
 CUDA-to-CPU fallback under `--gpu`, identical to `d7171b81`). The six CPU-backend checks of CUDA-linked binaries without `--gpu` are a separate control.
-Re-verify both on the frozen SHA. Neither is real out-of-memory or device-poisoning evidence.
+Re-verify both on the frozen SHA. Neither is device-poisoning evidence. Real device out-of-memory behaviour (VRAM balloon, genuine `cudaMalloc` failures) is covered separately by PR #225 within the limits in `SUPPORT.md` §8.
 
 ### 4.7 Controls that already exist, and what they do not cover
 
@@ -253,8 +254,9 @@ From the #186 evidence at main `116eb04a` (not the frozen SHA; re-measure at fre
 - Estimated frames that fit a 24, 40 or 48 GiB card are in that README's VRAM table; those are arithmetic from the 80 GB measurement, not
   runs on small cards.
 - Per-geometry VRAM floor: two float-size resident stacks (about `2 x frames x nx x ny x 4` bytes) plus 0.7-4.2 GiB; EMPIAR-10441 peaked at
-  39.3 GiB. Behaviour when the session cannot be allocated (streaming fallback or a clean failure) is **not qualified**; register item
-  QM on #198 is pending and the forced-OOM control belongs to this campaign if QM is not closed before freeze.
+  39.3 GiB. Behaviour when the session cannot be allocated was qualified with a VRAM balloon on one A100 80 GB (PR #225, `483e881d`): streaming fallback or a
+  clean failure, with floors per geometry, a non-monotone band below the full-speed floor and a stale-error route degradation (#226); the table and limits are in `SUPPORT.md` §8 "GPU memory (QM)". Host RAM for the streaming
+  route is about 36 GiB for 11520 x 8184 x 50 (hosts below that are untested).
 - Host RAM: `--grouping_for_ps` on the resident CUDA path downloads the full Fourier movie to the host (`src/motioncorr_runner.cpp:3229-3236`),
   about one extra float-movie-sized allocation; include it in any RAM budget for that option.
 - EER upsampling 2 quadruples movie storage: a 144-group Falcon 4 movie completed at 79,522 MiB sampled NVML process VRAM on an 81,920 MiB card (calculated 80,520 MiB; about 2.3 GiB remained), host RSS 21,547 MiB compact versus 40,171 MiB float (single runs, PR #208). A sample, not an upper bound or guaranteed fit; little observed headroom on 80 GB.

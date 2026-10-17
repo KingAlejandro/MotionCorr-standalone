@@ -5,17 +5,16 @@
 > No unrestricted or stable support is claimed for CUDA local alignment (see **S1** below), and no scientific equivalence or
 > preference for either backend is established.
 
-Status: **draft for RC0, pre-freeze, revision 5** (it stays DRAFT until the freeze; the freeze-time edit is meant to be small: fill the PENDING items below) (after the R-REL and R-REL-B reviews and the R-QA2 audits of PR #201, and the maintainer
+Status: **draft for RC0, pre-freeze, revision 6** (it stays DRAFT until the freeze; the freeze-time edit is meant to be small: fill the PENDING items below) (after the R-REL and R-REL-B reviews and the R-QA2 audits of PR #201, and the maintainer
 decisions D1, D2, T3, D5, D6 and D7). Written against main `483e881d` (after #205 F3/F3b `f67a5866`, the D1/D2 record #199 `a1ab83f2` and #217 T3 `483e881d`, on top of #200 F1 and #210 TST1); the
 qualification evidence cited below was gathered at the SHAs stated for each item (mostly `1db86902`). Source line numbers are at `483e881d` and will move; re-check
 them against the frozen SHA. Every **Qualification** cell says **pending RC0 QF** (the full CPU + native CUDA qualification of the frozen SHA, register item QF in #198),
 unless a row cites evidence. Linux/CUDA command validation by this document's author is **UNRUN**; the qualification lanes on #198 are cited as evidence, not re-run here.
 
 **Qualification state, completed versus pending.** *Completed* (per-item, pre-freeze, on the stated SHAs): Q1 (`1db86902`, PR #209), raw-MRC staging M1 (#204),
-EER compact route E1 (#208), resident retry R1 (#207), S1 diagnosis (#212), F3/F3b fail-closed reads (#205), T3 checked arithmetic (#217), and the C5 timing
-measurement (#218). *Pending QF on the frozen SHA* (placeholders, nothing here has been run on it): CTest on CPU, CUDA and CUDA+nvCOMP; the route/product campaign;
-multi-GPU 1/2/4; the adapted compact-ingest matrix (#123); `CpuDoseSymmetry` (if #220 merges); smaller-GPU memory admission (QM, in progress); the macOS platform statement
-(the macOS `SyntheticRegression` and `MultiGpuScheduling` failures are under investigation, W-MAC). `RC0_ACCEPTANCE_REPORT.md` carries the per-item detail.
+EER compact route E1 (#208), resident retry R1 (#207), S1 diagnosis (#212), F3/F3b fail-closed reads (#205), T3 checked arithmetic (#217), the C5 timing
+measurement (#218), and smaller-GPU memory admission QM (PR #225, on `483e881d`, audited by R-QM; documented limits in §8 "GPU memory"). *Pending QF on the frozen SHA* (placeholders, nothing here has been run on it): CTest on CPU, CUDA and CUDA+nvCOMP; the route/product campaign;
+multi-GPU 1/2/4; the adapted compact-ingest matrix (#123); `CpuDoseSymmetry` (if #220 merges); whether PR #223 (the `MultiGpuScheduling` test-harness fix) is in the frozen SHA. The macOS statement is made (§1: builds and runs; not qualified; known CPU CTest differences). `RC0_ACCEPTANCE_REPORT.md` carries the per-item detail.
 
 MotionCorr is an experimental standalone build of RELION 5.1's motion correction (`ad0b230c`, see
 `SOURCE_MANIFEST.txt`). It is not an official RELION or MotionCor2 release. An RC0 evaluation release is not a
@@ -80,7 +79,7 @@ Open policy questions (drop-in replacement, CPU parity target, upstream sequenci
 | Class | Configuration | Basis | Qualification |
 |---|---|---|---|
 | Supported (intended) | `--use_own` on CPU, Release build, **Linux x86_64** | CPU CTest suite; `README.md` build section | pending RC0 QF |
-| **Platform statement PENDING** | `--use_own` on CPU, Release build, **macOS arm64** | builds and runs; the macOS `SyntheticRegression` and `MultiGpuScheduling` CTest failures are under investigation (W-MAC), so no macOS support statement is made yet (`RELEASE_CHECKLIST.md` §3) | PENDING |
+| Not qualified | `--use_own` on CPU, Release build, **macOS arm64: builds and runs; not qualified; known CPU CTest differences.** `SyntheticRegression` fails because libc `rand()` differs from glibc, so the same `--seed` gives different hot-pixel replacement and therefore different output bytes on macOS and on glibc Linux ([#222](https://github.com/KingAlejandro/MotionCorr-standalone/issues/222)); `MultiGpuScheduling` fails from a test-harness `/var` symlink issue, fixed by [PR #223](https://github.com/KingAlejandro/MotionCorr-standalone/pull/223) (**PENDING MERGE**; whether it is in the frozen SHA is a freeze-time placeholder) | W-MAC, #198; `RELEASE_CHECKLIST.md` §3 | n/a |
 | Supported for evaluation | `--use_own --gpu <one id>` on a CUDA build (`-DCUDA=ON`), one process per device. **Local alignment: no unrestricted or stable claim, see S1** | `src/motioncorr_runner.cpp:342-405`; qualification PRs #204, #207, #208, #209 | at `1db86902` (#209): CTest 89/89 on the no-nvCOMP build; the real-data route-invariance campaign ran on the CUDA+nvCOMP binary, not on a no-nvCOMP binary; frozen SHA pending RC0 QF |
 | Supported for evaluation | Several GPUs through `tools/multi_gpu/run_dataset.py` (one process per device) | §4; `docs/multi_gpu/CURRENT_MAIN_ACCEPTANCE.md`; PR #209 | 1/2/4 workers x 24 tutorial movies passed at `1db86902` including a real-Ghostscript `logfile.pdf` (#209); frozen SHA pending RC0 QF |
 | Experimental | nvCOMP device Deflate ingest (`-DUSE_NVCOMP=ON`, default OFF); assumes complete, unmodified input files, §7 | `CMakeLists.txt:140`; D1 (option 1), D2 (interim policy A), T3 merged | qualified for route invariance at `1db86902` (#209); frozen SHA pending RC0 QF |
@@ -430,28 +429,47 @@ Two further statements: a file that changes **between the tag scan and the strip
 - `--max_iter 5` non-convergence: 41 of 50 patches in EMPIAR-10641 and 30 of 50 in EMPIAR-10216 did not converge in the
   #186 pass; those movies spend most of their time in the retry (`docs/workload_corpus/gpu/README.md`). Data dependent.
 - Resume (§5). Multi-GPU is process-per-device only (§4).
-- **CUDA VRAM floor per geometry.** The resident CUDA path keeps two float-size stacks on the device: the real frames
-  and the Fourier half-spectra, each about `frames x nx x ny x 4` bytes. Peak is those two plus 0.7-4.2 GiB of scratch
-  (`docs/workload_corpus/gpu/README.md`, VRAM section). EMPIAR-10441 (11520 x 8184 x 50) needs about 35 GiB for the two
-  stacks (arithmetic) and peaked at **39.3 GiB** in the #186 GPU pass (NVML, sampled lower bound, 80 GB A100, main
-  `116eb04a`), so it does not fit a 24 GiB card and is borderline on 40 GiB (estimate, no small card was run).
-  Source shows that if the resident session cannot be initialised the movie takes the **streaming fallback**
-  (`src/motioncorr_runner.cpp:2289-2292`, "falling back to streaming pipeline"). What actually happens on an out-of-memory
-  allocation inside session initialisation (completion on the streaming path, or a clean failure) is **not qualified**:
-  register item QM on #198 is in progress (W-QM). Until QM reports, size the card from the table above rather than relying on the fallback.
-  Binning is not recommended as a memory workaround on the strength of this page: source shows that early binning skips
-  the resident session (`:2278`) and performs the global FFT on the CPU, but it changes the output sampling and the
-  memory behaviour of the later CUDA stages is unqualified.
+- **GPU memory: free-VRAM floors per geometry, the streaming fallback and a non-monotone gap: see "GPU memory (QM)" at the end of this section.** Binning is not a memory workaround on the strength of this page: early binning skips the resident session (`:2278`) and does the global FFT on the CPU, changes the output sampling, and the later CUDA stages' memory behaviour is unqualified.
 - **Host RAM with `--grouping_for_ps` on CUDA:** one extra Fourier movie on the host (§3).
 - The `ProfilingKit` test has a 30 s subprocess timeout (`tools/profiling/tests/test_import_subset_boundaries.py`) that is load sensitive; it
   failed once under host load about 27 in the Linux CPU qualification and passed on rerun (PR #209). Run CTest on a quiet host, or record it.
 - Resident retry (#197), 10641: host RSS 2.07 GiB with the resident retry versus 7.0 GiB before #197; one resident retry allocates 504 MiB of
   VRAM (301 MiB on 10216) (PR #207, single runs).
-- **macOS: platform statement PENDING.** On macOS, `SyntheticRegression` (historical Linux reference) and `MultiGpuScheduling` (tomography endpoint validator) fail,
-  and `NativeMovieStaging` (Linux-only) is skipped. The same two failed on `1db86902`, on the merge with `2b3c74b3` (60 collected, 57 passed) and on the merge with `483e881d` (68 collected, 65 passed). They are **under
-  investigation** (W-MAC); until that reports, the cause and whether macOS is supported for RC0 are open. Section 3 of `docs/release/RELEASE_CHECKLIST.md`.
+- **macOS arm64: builds and runs; not qualified; known CPU CTest differences.** The macOS CPU suite has two failures and one skip (68 collected, 65 passed at the merge with
+  `483e881d`; the same two failed on `1db86902`):
+  - `SyntheticRegression` fails because **libc `rand()` differs from glibc**: hot-pixel and defect replacement draw positions and values from `rand()` seeded by `--seed`, so the same `--seed` gives
+    different replacements, and therefore different output bytes, on macOS and on glibc Linux (about 391 replaced pixels in that fixture; maximum pixel difference 23.65). Outputs are **not bit-identical across C
+    libraries for the same `--seed`**; behaviour on Linux is unchanged. Documented only for RC0; post-RC0 options (a portable project-owned RNG, per-platform references, restricting the bit-exact assertion to glibc)
+    are the maintainer's decision ([#222](https://github.com/KingAlejandro/MotionCorr-standalone/issues/222); W-MAC on #198). No numerical gate is relaxed.
+  - `MultiGpuScheduling` fails from a **test-harness issue**: the tomography endpoint test compares paths through the macOS `/var` symlink. [PR #223](https://github.com/KingAlejandro/MotionCorr-standalone/pull/223)
+    fixes the test (**PENDING MERGE**); **whether #223 is in the frozen SHA is a freeze-time placeholder**.
+  - `NativeMovieStaging` is Linux-only and is skipped.
+  No unqualified "macOS supported" statement is made anywhere in these documents. Section 3 of `docs/release/RELEASE_CHECKLIST.md`.
 - `python3 tools/multi_gpu/run_dataset.py` emits a `SyntaxWarning: 'return' in a 'finally' block` on Python 3.14
   (`run_dataset.py:172`). Cosmetic as of this draft.
+
+### GPU memory (QM)
+
+Evidence: [PR #225](https://github.com/KingAlejandro/MotionCorr-standalone/pull/225) (`docs/rc0/qual_qm_vram/` on that branch, main `483e881d`): 162 runs on one A100 80 GB with a VRAM balloon, 0 crashes, 0 hangs, 0 wrong outputs;
+every completed constrained run was identical to its unconstrained run and every failure was clean (no products written). Audited by R-QM
+([audit](https://github.com/KingAlejandro/MotionCorr-standalone/pull/225#issuecomment-6234250216)). The three defects it found (D1 stale CUDA error, D2 config-L admission gap, D3 late OOM failure) are post-RC0
+([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)); none changes output. The wording below is R-QM's, not the worker's first draft.
+
+> **GPU memory.** The resident CUDA route keeps the movie on the device twice (real space and Fourier space, about 8 bytes × pixels × frames) plus 0.7–4.2 GiB of workspace. The table gives the minimum **free GPU memory at launch** (`nvidia-smi` free memory before `motioncorr` creates its ~0.4 GiB CUDA context, not nominal card size) for the full-speed route, measured with `--use_own --gpu 0 --j 8` on one A100 80 GB card using a VRAM balloon (one movie per family; leave 1–2 GiB of margin):
+>
+> | Movie | Full speed (global / patch) | Slower streaming route completes | Fails |
+> |---|---|---|---|
+> | 3838×3710×24 (Deflate TIFF, nvCOMP) | 4 / 4 GiB | 2–3 GiB | ≤ 1 GiB |
+> | 4096²×59 (int16 MRC, compact) | 8.25 / 8.75 GiB | 5–7.5 GiB | ≤ 4 GiB |
+> | 4096²×144 (Falcon 4 EER, compact) | 19 / 20 GiB | 12–18.5 GiB | ≤ 11 GiB |
+> | 11520×8184×50 (K3-class u8 TIFF, compact) | 37.5 / 39 GiB | 22–36.5 GiB | ≤ 21 GiB |
+>
+> Below the resident session threshold, the movie falls back to the streaming route (identical output, 3–9× slower, and several times the host RAM: about 36 GiB RSS for 11520×8184×50, 21 GiB for 4096²×144, and 7.7 GiB for 4096²×59; hosts with insufficient RAM are untested). Below the streaming floor, the movie fails cleanly after host preprocessing with an out-of-memory error and writes no products. **Completion is not monotone in free VRAM:** in the ~0.5–1.5 GiB band **between the streaming range and the full-speed floor** (8.0–8.5, 19–19.5, and 37.0–38.5 GiB above), the resident session is admitted before gain/sum or patch-stage buffers are allocated, so global alignment falls back to CPU preprocessing (8.0 and 37.0 GiB) and local (patch) alignment **fails** with a patch-stage out-of-memory error (8.5, 19–19.5, and 37.5–38.5 GiB) even though lower free VRAM completes via streaming (#226 D2). Do not size runs in that gap or right at the floor. After a movie fails with a device out-of-memory error in a multi-movie run, a stale CUDA error makes the next movie in the same process fall back one route step under `--ingest auto` (identical output, slower route; under a pinned `--ingest nvcomp`, that next movie will be refused; #226 D1). `--ingest compact` refuses immediately (~1 s, no products) when the resident session cannot be created. Not covered here: `--eer_upsampling 2` (see §2), `--grouping_for_ps` (+1 Fourier movie in host RAM, §3), `--bin_factor`, float32 MRC, and real smaller GPUs (whose driver reservation may differ from the 80 GB A100).
+
+Caveats that stay with the table: the floors are **free GiB at launch measured with a VRAM balloon on one A100 80 GB, not nominal card sizes**; card-size conclusions are estimates and were not
+measured (the 80 GB card's driver reserve was 766 MiB; a small card's may differ); one movie per family, bracketed at 1 GiB / 0.5 GiB steps (NVML sampling is a lower bound), and the e10361 floor was
+not bisected; host-RAM exhaustion (hosts below about 36 GiB for 11520×8184×50) is untested; multi-GPU, `e10028`, `e10164` and `e10641` were not run (PR #225 README limitations, R-QM section 4). The QM
+status in the qualification lists is **completed (pre-freeze, on `483e881d`), with these documented limits**.
 
 ## 9. CPU dose-weighting symmetry (#220): qualified-toolchain contract (PENDING MERGE)
 

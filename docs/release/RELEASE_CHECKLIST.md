@@ -1,6 +1,6 @@
 # RC0 release checklist (DRAFT, stays DRAFT until the freeze)
 
-Status: **draft, pre-freeze, revision 5** (after the R-REL review of PR #201 and the maintainer decisions D1, D2, T3, D5, D6, D7). This checklist is for an **evaluation RC0**, not a stable release (D7). Commands below were written against main `1db86902` and re-checked on the merge with `2b3c74b3` (#200 F1, #210 TST1). Each command is tagged:
+Status: **draft, pre-freeze, revision 6** (after the R-REL review of PR #201 and the maintainer decisions D1, D2, T3, D5, D6, D7). This checklist is for an **evaluation RC0**, not a stable release (D7). Commands below were written against main `1db86902` and re-checked on the merge with `2b3c74b3` (#200 F1, #210 TST1). Each command is tagged:
 
 - **LOCAL-OK**: run on macOS arm64 (AppleClang, Homebrew) in this worktree for this draft; result stated.
 - **UNRUN**: not executed. Linux/CUDA commands are UNRUN until the final qualification (**QF**, #198) runs them.
@@ -28,7 +28,7 @@ update at freeze. Nothing here is verified by this document.
 
 | Completed pre-freeze (per item, on the stated SHAs; not re-run on the frozen SHA) | Pending QF on the frozen SHA (placeholders) |
 |---|---|
-| Q1 baseline qualification (`1db86902`, PR #209); raw-MRC staging M1 (#204); EER compact route E1 (#208); resident retry R1 (#207); S1 diagnosis (#212); F3/F3b fail-closed reads (#205, `f67a5866`); T3 checked arithmetic (#217, `483e881d`); C5 timing measurement (#218) | CTest on CPU, CUDA and CUDA+nvCOMP; route/product campaign (§7); multi-GPU 1/2/4 (§8); the adapted compact-ingest matrix of #123; `CpuDoseSymmetry` (if #220 merges); smaller-GPU memory admission (QM, in progress); the macOS platform statement (W-MAC investigating the macOS `SyntheticRegression` and `MultiGpuScheduling` failures) |
+| Q1 baseline qualification (`1db86902`, PR #209); raw-MRC staging M1 (#204); EER compact route E1 (#208); resident retry R1 (#207); S1 diagnosis (#212); F3/F3b fail-closed reads (#205, `f67a5866`); T3 checked arithmetic (#217, `483e881d`); C5 timing measurement (#218); smaller-GPU memory admission QM (PR #225 on `483e881d`, audited by R-QM, with documented limits in `SUPPORT.md` §8) | CTest on CPU, CUDA and CUDA+nvCOMP; route/product campaign (§7); multi-GPU 1/2/4 (§8); the adapted compact-ingest matrix of #123; `CpuDoseSymmetry` (if #220 merges); whether PR #223 (the `MultiGpuScheduling` test-harness fix) is in the frozen SHA (placeholder). The macOS statement is made: builds and runs; not qualified; known CPU CTest differences |
 
 | Item | State at this revision | Needed before QF |
 |---|---|---|
@@ -37,7 +37,7 @@ update at freeze. Nothing here is verified by this document.
 | F3/F3b: truncated raw MRC movie, gain reference, defect map fail closed | **MERGED** (#205, `f67a5866`): movie-level rejection, message "is truncated or unreadable"; tests `TruncatedMrcMovie`, `TruncatedGainDefect` (+ `Cuda` variants) | the two required tests pass on the frozen SHA |
 | T3: checked arithmetic on the nvCOMP pre-decode path | **MERGED** (#217, `483e881d`): overflow or unreadable strip offset gives a named decline (`NotApplicable`); D1's trusted-input precondition unchanged | `DeflateLayout*` tests and the native nvCOMP controls on the frozen SHA |
 | D1 (option 1), D2 (interim policy A), D5, D6, D7 | **decided**; record [`docs/rc0/decoder_trust_and_dependencies.md`](../rc0/decoder_trust_and_dependencies.md) (#199 `a1ab83f2`) | none (re-read #198 for any change) |
-| QM: memory admission on smaller GPUs | **IN PROGRESS** (W-QM) | forced-OOM control and per-geometry VRAM floor; until then `SUPPORT.md` §8 says the fallback is unqualified |
+| QM: memory admission on smaller GPUs | **COMPLETED pre-freeze on `483e881d`** ([PR #225](https://github.com/KingAlejandro/MotionCorr-standalone/pull/225), audited by R-QM) with documented limits (balloon on one A100 80 GB, one movie per family, free GiB at launch); defects D1-D3 are post-RC0 ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)) | none; `SUPPORT.md` §8 "GPU memory (QM)" carries R-QM's wording |
 | S1: CPU versus CUDA local alignment | **PROVISIONAL known limitation** (D7), prominent in README and `SUPPORT.md` §0; post-freeze priority 1 | none for RC0 |
 | C5 #179 (lean port [PR #220](https://github.com/KingAlejandro/MotionCorr-standalone/pull/220)) | **PENDING MERGE**; decided acceptable for RC0 under a qualified-toolchain contract (`SUPPORT.md` §9) | merged; `CpuDoseSymmetry` run on the frozen SHA on every release toolchain; contract text re-checked against merged source |
 | C6 #181, #182 | **closed, no-go** | none |
@@ -47,7 +47,7 @@ update at freeze. Nothing here is verified by this document.
 | E2 #193 / #211 device EER renderer | **parked post-RC0** (D9) | none |
 | EER damaged-input robustness (EER-MS, [#221](https://github.com/KingAlejandro/MotionCorr-standalone/issues/221)) | host-renderer out-of-bounds access and process abort on malformed or truncated EER **reported**; independent verification in progress; **release disposition (fix or documented limitation) PENDING** | decision, then the matching `SUPPORT.md` text; no claim that the EER input path is stable on damaged input |
 | #123 adapted compact-ingest matrix | **runs on the frozen executable at QF** (§7); result placeholder | result recorded in the evidence table (§9) |
-| macOS platform statement | **PENDING** (W-MAC); `SyntheticRegression` and `MultiGpuScheduling` fail on macOS, `NativeMovieStaging` skips | W-MAC's finding; then a macOS support statement or a limitation |
+| macOS platform statement | **MADE**: "macOS arm64: builds and runs; not qualified; known CPU CTest differences." `SyntheticRegression`: libc `rand()` differs from glibc, so the same `--seed` gives different output bytes ([#222](https://github.com/KingAlejandro/MotionCorr-standalone/issues/222)); `MultiGpuScheduling`: test-harness `/var` symlink issue, fix [PR #223](https://github.com/KingAlejandro/MotionCorr-standalone/pull/223) **PENDING MERGE** | **placeholder: whether #223 is in the frozen SHA**; no unqualified "macOS supported" statement |
 | TST2: genuine device-poisoning test | **post-RC0** ([#213](https://github.com/KingAlejandro/MotionCorr-standalone/issues/213)); current fatal-path tests inject error codes | none |
 | F4 compressed-MRC decoder exit status | **documented RC0 limitation**; fix scheduled [#214](https://github.com/KingAlejandro/MotionCorr-standalone/issues/214); inputs must be validated independently (§7) | none |
 | #215 nvCOMP file-identity check (file changing between scan and read) | post-RC0 | none |
@@ -150,11 +150,11 @@ CTest on a quiet host, or record a timeout and its rerun explicitly. (Locally it
 
 | Test | Result on macOS | Status |
 |---|---|---|
-| `SyntheticRegression` | FAIL: image pixel diff 23.649856567382812 (max), RMSE 0.311928825603332, shift RMSD 0.003305323357857738 px; asserts exact 0.0 | inherited: same numbers in the #178 current-main evidence (`docs/cpu_stream_20261014/current-main-20261016/README.md`); the committed reference is a Linux output. Tier A on the committed fixture passes, see §5 |
-| `MultiGpuScheduling` | FAIL at `tests/test_tomography_endpoint.py:122`: "validator rejects the healthy published tree"; 73 of 74 checks pass; reproduces when run alone | inherited: same evidence file ("the device-free scheduling validator rejects its healthy tree in both"). Cause not diagnosed here |
+| `SyntheticRegression` | FAIL: image pixel diff 23.649856567382812 (max), RMSE 0.311928825603332, shift RMSD 0.003305323357857738 px; asserts exact 0.0 | **cause: libc `rand()` differs from glibc**, so hot-pixel replacement (about 391 replaced pixels) and the output bytes differ for the same `--seed` ([#222](https://github.com/KingAlejandro/MotionCorr-standalone/issues/222), W-MAC); it has failed on macOS since the test was created. Documented only; a glibc-compatible `rand` scratch build reduced the difference to 1.07. Tier A on the committed fixture passes, see §5 |
+| `MultiGpuScheduling` | FAIL at `tests/test_tomography_endpoint.py:122`: "validator rejects the healthy published tree"; 73 of 74 checks pass; reproduces when run alone | **cause: test-harness `/var` symlink issue** (macOS temporary paths), fixed by [PR #223](https://github.com/KingAlejandro/MotionCorr-standalone/pull/223) (**PENDING MERGE**; **placeholder: is #223 in the frozen SHA?**); it passes on Linux (#209) |
 | `NativeMovieStaging` | SKIPPED (Linux-only) | skip is not a pass |
 
-**macOS platform statement: PENDING.** The two macOS failures are under investigation (W-MAC). Until that reports, no macOS support statement is made and the failures are not waived.
+**macOS platform statement: "macOS arm64: builds and runs; not qualified; known CPU CTest differences."** The two macOS failures are explained (above) and are not waived; no unqualified "macOS supported" statement is made.
 None of these may be relaxed or waived to pass RC0. On Linux, `SyntheticRegression` and `MultiGpuScheduling` are expected to pass and `NativeMovieStaging` to run (main CI is green per #198);
 QF must show it. A failure there is a release blocker, not an inherited macOS note.
 
@@ -341,8 +341,8 @@ leave no owned process.
 | #123 adapted compact-ingest matrix (R14) | 7 | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF |
 | `CpuDoseSymmetry` on each released toolchain (if #220 merges) | 3 | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF |
 | F3/F3b required tests (`TruncatedMrcMovie`, `TruncatedGainDefect`) and T3 `DeflateLayout*` | 3, 7 | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF | pending RC0 QF |
-| Smaller-GPU memory admission (QM) | n/a | pending (in progress) | pending | pending | pending | pending |
-| macOS platform statement (W-MAC) | 3 | pending | pending | pending | pending | pending |
+| Smaller-GPU memory admission (QM) | n/a | `483e881d` (PR #225) | `d8e7a003...f98173` (build-nvcomp `motioncorr`) | one A100 80 GB, VRAM balloon | 162 runs, no crash, hang or wrong output; limits in `SUPPORT.md` §8 | completed pre-freeze, documented limits |
+| macOS platform statement (W-MAC) | 3 | statement made | n/a | n/a | not qualified; known CPU CTest differences | **placeholder: #223 in the frozen SHA?** |
 | EER damaged-input disposition (EER-MS, #221) | n/a | pending decision | n/a | n/a | pending | pending |
 | Licence and notices review (#18: six ambiguous notices in `CPlot2D.cpp/.h` and four `src/acc/hip` headers) | maintainer | n/a | n/a | n/a | open | pending RC0 QF |
 

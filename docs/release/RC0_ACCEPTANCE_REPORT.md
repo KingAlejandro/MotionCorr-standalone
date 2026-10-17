@@ -4,7 +4,7 @@
 > unrestricted or stable support is claimed for CUDA local alignment (known limitation **S1**, PROVISIONAL), and no scientific equivalence or
 > preference for either backend is established.
 
-Status: **draft skeleton, revision 5** (after R-REL round 2, R-REL-B and the R-QA2 evidence audits of #209 and #208). Filled from the qualification PRs #209 (Q1), #204 (raw MRC), #208 (EER), #207 (resident retry) and #212 (S1), all at
+Status: **draft skeleton, revision 6** (after R-REL round 2, R-REL-B and the R-QA2 evidence audits of #209 and #208). Filled from the qualification PRs #209 (Q1), #204 (raw MRC), #208 (EER), #207 (resident retry) and #212 (S1), all at
 main `1db86902` and reported on #198. The frozen SHA and the QF rows stay **pending freeze**. A planned or unrun check is **UNRUN**, never PASS.
 Evidence cited here comes from those PRs and #198 and was not re-run by the author of this report; the PRs are open, so their claims are as reported
 there. Rows labelled "reference" come from earlier evidence at an older SHA and are not RC0 results.
@@ -16,7 +16,7 @@ there. Rows labelled "reference" come from earlier evidence at an older SHA and 
 | Frozen source SHA | **pending freeze** (decision D4 on #198) |
 | Base for this draft | main `483e881d` (= `1db86902` + #200 F1, #210 TST1, #205 F3/F3b `f67a5866`, #199 D1/D2 record `a1ab83f2`, #217 T3 `483e881d`); per-item qualification evidence is at the SHAs stated below (mostly `1db86902`) |
 | Register items merged | C1 #178, C2 #187, C3 #188, C4 #185 (`d7171b81`), E1 #196 (`4b849165`), M1 #195 (`faf5fbdf`), R1 #197 (`0ac2726a`), F1 #200 (`ea86fc90`), TST1 #210 (`2b3c74b3`); merge SHAs of C1-C3 are in the #198 register |
-| Pending, not merged | **C5 #179 lean port [PR #220](https://github.com/KingAlejandro/MotionCorr-standalone/pull/220):** PENDING MERGE, expected before freeze, acceptable for RC0 under a qualified-toolchain contract (`SUPPORT.md` §9). **QM** memory admission on smaller GPUs: in progress (W-QM). **EER damaged-input robustness (EER-MS, [#221](https://github.com/KingAlejandro/MotionCorr-standalone/issues/221)):** release disposition (fix or documented limitation) PENDING |
+| Pending, not merged | **C5 #179 lean port [PR #220](https://github.com/KingAlejandro/MotionCorr-standalone/pull/220):** PENDING MERGE, expected before freeze, acceptable for RC0 under a qualified-toolchain contract (`SUPPORT.md` §9). **EER damaged-input robustness (EER-MS, [#221](https://github.com/KingAlejandro/MotionCorr-standalone/issues/221)):** release disposition (fix or documented limitation) PENDING |
 | Parked or closed, not in RC0 | C7 #183 / #219 (parked); C6 #181 and #182 (closed, no-go); device EER renderer #193 / #211 E2 (parked post-RC0, D9) |
 | Excluded | T1 #138 (NO-GO for RC0, parked [PR #206](https://github.com/KingAlejandro/MotionCorr-standalone/pull/206)); L1 #141/#152 nvTIFF (NO-GO, not used); C8 #184 and C9 #177/#182 (NO-GO); #149 deferred; TST2 genuine device poisoning (post-RC0, #213); #214 (compressed-MRC exit status), #215 (nvCOMP file identity) post-RC0 |
 | CI run on the frozen head | pending freeze |
@@ -35,6 +35,7 @@ there. Rows labelled "reference" come from earlier evidence at an older SHA and 
 | S1 diagnosis | `1db86902`, PR #212 | CPU versus CUDA local-alignment divergence localised; bounded statement in `SUPPORT.md` §0 |
 | F3/F3b fail-closed reads | #205 merged `f67a5866` | truncated raw MRC movie, gain and defect map fail with "is truncated or unreadable"; valid input byte-identical; required tests `TruncatedMrcMovie`, `TruncatedGainDefect` |
 | T3 checked arithmetic | #217 merged `483e881d` | overflow or unreadable strip offset gives a named decline; reported native GPU run: tutorial x 24 `nvcomp` identical, crafted files decline; independent review confirmed (#198 register T3) |
+| QM smaller-GPU memory admission | `483e881d`, PR #225 (audited by R-QM) | 162 runs on one A100 80 GB with a VRAM balloon: 0 crashes, 0 hangs, 0 wrong outputs; every completed constrained run identical to its unconstrained run; every failure clean (no products); free-VRAM floors per geometry, a non-monotone band below the full-speed floor, and three post-RC0 defects (#226); documented limits (balloon on one card, one movie per family, hosts below about 36 GiB RAM untested) in `SUPPORT.md` §8 |
 | C5 measurement | PR #218 | whole-job reduction on x86-64 cpu64: tutorial -3.28 %, EMPIAR-10474 Falcon 4 -3.97 % resolved beyond the null; EMPIAR-10216 unresolved; products identical |
 
 **Pending QF on the frozen SHA** (placeholders; nothing here has been run on it):
@@ -46,8 +47,8 @@ there. Rows labelled "reference" come from earlier evidence at an older SHA and 
 | Multi-GPU 1/2/4 workers | pending RC0 QF |
 | #123 adapted compact-ingest matrix | pending RC0 QF |
 | `CpuDoseSymmetry` (if #220 merges) | pending RC0 QF |
-| Smaller-GPU memory admission (QM, in progress) | pending |
-| macOS platform statement (W-MAC investigating the macOS `SyntheticRegression` and `MultiGpuScheduling` failures) | pending |
+| PR #223 (`MultiGpuScheduling` test-harness fix) in the frozen SHA | placeholder, pending freeze |
+| macOS statement | made: "builds and runs; not qualified; known CPU CTest differences" (see section 2); #223 inclusion is the placeholder above |
 | EER damaged-input disposition (#221) | pending decision |
 
 ## 2. Supported and unsupported configurations
@@ -57,7 +58,7 @@ Classes follow `SUPPORT.md` §1; evidence is at `1db86902` unless stated. "QF" =
 | Configuration | Class | Evidence at `1db86902` | QF |
 |---|---|---|---|
 | CPU `--use_own`, Release, Linux x86_64 | supported (intended) | CPU CTest 58/59 (`ProfilingKit` 30 s load timeout, passed on rerun); CPU build route-invariance runs 14/14 exit 0 (#209) | pending freeze |
-| CPU `--use_own`, Release, macOS arm64 | **platform statement PENDING** (W-MAC) | local author runs at `1db86902`, the merge with `2b3c74b3` (60 collected, 57 passed) and the merge with `483e881d` (68 collected, 65 passed): 2 failed (`SyntheticRegression`, `MultiGpuScheduling`), 1 skipped; cause under investigation | PENDING |
+| CPU `--use_own`, Release, macOS arm64 | **builds and runs; not qualified; known CPU CTest differences** | local author runs at `1db86902`, the merge with `2b3c74b3` (60 collected, 57 passed) and the merge with `483e881d` (68 collected, 65 passed): 2 failed, 1 skipped (`NativeMovieStaging`). `SyntheticRegression` fails because libc `rand()` differs from glibc, so the same `--seed` gives different hot-pixel replacement and output bytes on macOS and glibc Linux (#222); `MultiGpuScheduling` fails from a test-harness `/var` symlink issue fixed by PR #223 (PENDING MERGE) | not qualified |
 | CUDA, one device, **no nvCOMP** | supported for evaluation; **local alignment: S1, no unrestricted claim** | **CTest 89/89 only** (0 skipped, #209). **No real-data campaign was run on a no-nvCOMP CUDA binary**: the route-invariance and #178 checks below used the CUDA+nvCOMP binary | pending freeze |
 | CUDA, one device, **with nvCOMP** (`USE_NVCOMP=ON`) | experimental; trusted-input precondition (D1) | CTest 92/92, 0 skipped (#209). **Same-backend route comparisons: 14/14** `--ingest auto` vs `--ingest float` on 7 families x G/L, run with this binary (tutorial auto route `nvcomp`; 10361, 10474 Falcon 3, 12963, 10216, 10164 `compact`; 10028 `float`): identical normalised MRC (label, extended header, payload) and STAR products. This is a products-only identity: complete-tree comparison needs the disclosed route-log allowances (without them only 10028 G/L pass; the four declared prefixes pass 10/14; the four signed-MRC cases, 10216 and 10164 G/L, are manually inspected exceptions needing `Released native int`). **#178 checks (this binary): six CPU-backend checks (CUDA-linked binaries run WITHOUT `--gpu`) and one injected recoverable CUDA-to-CPU fallback under `--gpu` (injected `cudaMalloc` failure #16), all matching the pre-#178 build `d7171b81`; this is not real out-of-memory or device-poisoning evidence; frozen-SHA rerun pending** | pending freeze |
 | Multi-GPU via `run_dataset.py` | supported for evaluation | 1/2/4 workers x 24 tutorial movies, G and L, 6/6 endpoint PASS; every launcher worker physically witnessed on its intended, distinct GPU UUID; normalised products identical across worker counts and to a single process (labels and extended headers included, only the writer timestamp masked); real-Ghostscript 30-page `logfile.pdf` (PDF content is inventoried, not compared); the mixed tutorial + 10641 + EER 1- vs 2-worker case also matched (#209). Not run: launcher failure/resume injection | pending freeze |
@@ -107,9 +108,9 @@ Carry over from `SUPPORT.md` §0, §5, §6 and §8, updated at freeze:
   shorter movie unless `--expected_frames` or a STAR count is supplied, and even then only a mismatch in the **grouped** frame count (`floor(fractions / eer_grouping)`) is detected;
 - nvCOMP (D1): assumes complete, unmodified input files; a file changing between scan and read is not detected (#215); T3 checked arithmetic merged (#217; the Deflate-body precondition is unchanged); use `--ingest compact` otherwise;
 - optional proprietary dependencies (D2): no project-distributed nvCOMP/nvTIFF-linked binaries; nvTIFF not used;
-- host RAM with `--grouping_for_ps` (about +3.8 GiB float, +1.9 GiB compact on 10216), per-geometry VRAM floor, unqualified out-of-memory behaviour (QM),
+- host RAM with `--grouping_for_ps` (about +3.8 GiB float, +1.9 GiB compact on 10216), per-geometry free-VRAM floors with a streaming fallback, a non-monotone band below the full-speed floor, and the stale-CUDA-error route degradation (QM, PR #225; defects post-RC0, #226; `SUPPORT.md` §8),
   EER upsampling 2 memory (Falcon 4, 144 groups: one run per arm sampled 79,522 MiB NVML process VRAM on an 81,920 MiB card, about 2.3 GiB remained; little observed headroom, not a guaranteed fit);
-- macOS: `SyntheticRegression` and `MultiGpuScheduling` fail and `NativeMovieStaging` skips; under investigation (W-MAC), platform statement PENDING;
+- macOS arm64: builds and runs; not qualified; known CPU CTest differences. `SyntheticRegression` fails because libc `rand()` differs from glibc (the same `--seed` gives different output bytes on macOS and glibc Linux, #222); `MultiGpuScheduling` fails from a test-harness `/var` symlink issue, fix PR #223 PENDING MERGE (inclusion in the frozen SHA is a freeze-time placeholder); `NativeMovieStaging` is skipped;
 - C5 CPU dose symmetry (if #220 merges): enabled by default only on x86-64 GCC without FMA code generation; other toolchains run the original code unless a site sets `MOTIONCORR_CPU_DOSE_SYMMETRY=ON` after `CpuDoseSymmetry` passes; native-FMA flags unqualified and not recommended; performance claim x86-64 cpu64 only (`SUPPORT.md` §9);
 - `ProfilingKit` has a load-sensitive 30 s subprocess timeout (#209);
 - data-dependent patch non-convergence retry (EMPIAR-10641, 10216): host RSS 2.07 GiB with the resident retry versus 7.0 GiB before #197, one retry +504 MiB VRAM on 10641 (#207);
@@ -125,10 +126,10 @@ Every check that failed or was not run, with the reason. Original failures are n
 | Frozen-SHA qualification (QF): CPU, CUDA, CUDA+nvCOMP CTest and product campaign | UNRUN | pending freeze |
 | CUDA-to-CPU unweighted fallback (#198 C1) | six CPU-backend checks and one injected recoverable fallback executed at `1db86902` | #209: six current-vs-`d7171b81` pairs ran CUDA-linked binaries **without `--gpu`** (CPU backend) and all matched; one pair (injected `cudaMalloc` failure #16) executed the actual fallback branch under `--gpu` (CUDA-then-CPU log witness, both exits 0, four MRCs plus STAR/EPS identical). Not real OOM, not device poisoning. Frozen-SHA rerun pending freeze |
 | `ProfilingKit` (CPU, Linux) | FAILED once, then passed | 30 s subprocess timeout at load about 27; passed on rerun (#209) |
-| `SyntheticRegression` on macOS | FAILED (inherited) | max pixel diff 23.649856567382812; unchanged from main; reproduced at `67b5315b` |
-| `MultiGpuScheduling` on macOS | FAILED (inherited) | tomography endpoint validator; 73 of 74 checks; passed on Linux (#209) |
+| `SyntheticRegression` on macOS | FAILED (documented, platform difference) | max pixel diff 23.649856567382812 from libc `rand()` differing from glibc (#222); unchanged from main; reproduced at `67b5315b` and the merge with `483e881d` |
+| `MultiGpuScheduling` on macOS | FAILED (test-harness `/var` symlink; fix PR #223 PENDING MERGE) | 73 of 74 checks; passed on Linux (#209) |
 | `NativeMovieStaging` on macOS | SKIPPED | Linux-only |
-| Forced out-of-memory on session initialisation (QM); EER OOM path (the movie fit) | UNRUN | register item pending; #208 |
+| Forced out-of-memory on session initialisation (QM) | executed with a VRAM balloon at `483e881d` (PR #225) | completed with documented limits; EER OOM path in #208 not exercised (the movie fit) |
 | Genuine device poisoning | UNRUN | all fatal cases inject error codes; post-RC0 (#213) |
 | Native `pbzip2` | UNRUN | absent; `.bz2` tested via a `bzip2 -cd` shim (#204) |
 | 10441 and 10641 config G/L product campaign; launcher failure/resume injection; PDF content; second venue; timing | UNRUN | #209 |
@@ -140,9 +141,9 @@ Every check that failed or was not run, with the reason. Original failures are n
 | Example run inventory with Ghostscript on macOS; `run_dataset.py` success path on macOS | UNRUN | local attempt failed only because `gs` is not installed there (`RELEASE_CHECKLIST.md` §8); Linux real-Ghostscript run passed (#209) |
 | #123 adapted compact-ingest matrix | UNRUN | runs on the frozen executable at QF |
 | `CpuDoseSymmetry` | UNRUN | required at QF if #220 merges |
-| Smaller-GPU memory admission (QM) | in progress | W-QM; forced-OOM control pending |
+| Smaller-GPU memory admission follow-ups D1-D3 (#226) | post-RC0 | stale CUDA error after OOM, config-L admission gap, late OOM failure; none changes output |
 | EER damaged-input robustness (#221) | PENDING decision | verification in progress |
-| macOS platform statement | PENDING | W-MAC |
+| macOS platform statement | made (not qualified; known CPU CTest differences) | W-MAC, #222; PR #223 inclusion is a freeze-time placeholder |
 | nvTIFF/LZW, device EER renderer (parked post-RC0), nvCOMP widening, #183 | not in RC0 | #198 register |
 
 ## 5. Resource requirements

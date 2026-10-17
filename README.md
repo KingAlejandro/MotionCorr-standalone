@@ -42,7 +42,7 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
 
-The output binary is `build/motioncorr`. It has been compiled on macOS with AppleClang and Homebrew libraries, and on Ubuntu with GCC. On macOS, two CTest tests currently fail (`SyntheticRegression`, `MultiGpuScheduling`); they are under investigation and no macOS platform statement is made yet (see [`docs/release/SUPPORT.md`](docs/release/SUPPORT.md)). Linux builds and synthetic regression parity tests are continuously validated via GitHub Actions CI.
+The output binary is `build/motioncorr`. It has been compiled on macOS with AppleClang and Homebrew libraries, and on Ubuntu with GCC. **macOS arm64: builds and runs; not qualified; known CPU CTest differences.** `SyntheticRegression` fails there because libc `rand()` differs from glibc, so the same `--seed` gives different hot-pixel replacement and different output bytes on macOS and Linux ([#222](https://github.com/KingAlejandro/MotionCorr-standalone/issues/222)); `MultiGpuScheduling` fails from a test-harness `/var` symlink issue (fix: [PR #223](https://github.com/KingAlejandro/MotionCorr-standalone/pull/223), pending merge). See [`docs/release/SUPPORT.md`](docs/release/SUPPORT.md). Linux builds and synthetic regression parity tests are continuously validated via GitHub Actions CI.
 
 For a RELION-compatible movie STAR file, the command line follows RELION's CPU motion correction program:
 

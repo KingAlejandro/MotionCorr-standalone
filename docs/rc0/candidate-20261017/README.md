@@ -6,8 +6,8 @@
 > ([`../qf/README.md`](../qf/README.md#verdicts)), a run on a SHA that is not the frozen SHA is **UNRUN for
 > QF**, so nothing here is a QF PASS. The results below are candidate results on the candidate source
 > SHA only. Support status stays **evaluation**. The input-reader and recovery dispositions in
-> [§8](#8-release-blockers-and-open-dispositions) remain open release blockers. Nothing here was pushed, merged,
-> tagged or published.
+> [§8](#8-release-blockers-and-open-dispositions) remain open release blockers. Nothing here is merged, tagged
+> or published. After Alex authorised it, the branch was pushed for testing as draft PR #227 (DO NOT MERGE).
 
 Requested by Alex (issue #198 programme, release engineering). Work package: candidate assembly, builds
 and routine CPU/CUDA/nvCOMP regression checks from the audited QF runbook. The input-reader and recovery
@@ -27,7 +27,7 @@ fixes are out of scope here, and so are their specialist test campaigns.
 | macOS | builds and runs; not qualified; 70/72 (`SyntheticRegression` #222 fails, `NativeMovieStaging` skipped) |
 | Hosted CI (added after push) | draft PR #227, run 39073675385 on the PR merge of `54d6b1ee`: Linux CTest 72/72 (pbzip2 case PASS), CUDA compile-only pass. This is not native CUDA evidence |
 | Not run | pbzip2 case natively (hosted Linux CPU CTest only); item 15 (no D10 fix yet); QM, SCARF, timing |
-| Release state | **not frozen, not fully qualified**: D10 (#221) and D11 (#226) open, D4 not taken |
+| Release state | **not frozen, not fully qualified**: D10 (#221) and D11 (#226) fixes in progress (decided 2026-10-17: fix before freeze); D3, D4 and QF pending (§8) |
 
 ## 1. Composition
 
@@ -61,7 +61,7 @@ Candidate merge commits: `02852b67` (#223), `3cf96e02` (#202), `be4af664` (#203)
 
 | What | Revision |
 |---|---|
-| Candidate source | **`adb3278542a33df1f3ae661d428c45d15a5a5b7f`**, branch `rc0-candidate-20261017-t3`. Local only: **not pushed, so no hosted CI exists for this SHA** |
+| Candidate source | **`adb3278542a33df1f3ae661d428c45d15a5a5b7f`**, branch `rc0-candidate-20261017-t3`. Pushed for testing (draft PR #227) after Alex authorised it. Hosted CI on this exact SHA: `workflow_dispatch` run [39075928389](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39075928389) on branch `rc0-candidate-20261017-t3-tested` (= `adb32785`), success (Linux CTest + CUDA compile-only; not native evidence) |
 | Host checkout | `git clone` of a bundle of the branch (`rc0-candidate-adb32785.bundle`, sha256 `edc750c62740efecd7b01e02f96ca040da06f5ac679a9dc2a33f486c52578ba8`) into `$QF_W/src`. `HEAD = adb32785`, `git status --porcelain` empty at build time, at the start of each CTest batch and after all runs (`raw/end-state.txt`) |
 | Harness | `docs/rc0/qf/tools/` at `adb32785` (= #224 `ef3e8f72`), copied to `$QF_W/tools/`. All 35 files hash-equal to the committed copies (`raw/tool-sha256.txt`). No tool, gate, threshold or required-test list was changed |
 | Run drivers (not graders) | `raw/drivers/chainA.sh`, `chainB.sh`, `chainC.sh`, `collect_build_info.sh`. These only sequence the runbook commands, set the lane variables and record provenance |
@@ -71,7 +71,7 @@ Candidate merge commits: `02852b67` (#223), `3cf96e02` (#202), `be4af664` (#203)
 ## 3. Build provenance (4GPUs, `tools/build.sh`)
 
 Host `4-gpu-vm`, Ubuntu 24.04.4 LTS, kernel 6.8.0-136. 4× A100 80GB PCIe, driver 570.86.10. AMD EPYC 7452,
-NUMA node 1 = CPUs 62–123. Full record: `raw/build-info.txt`.
+NUMA node 1 = CPUs 62–123. Full record: `raw/build/build-info.txt`.
 
 | Toolchain / dependency | Version |
 |---|---|
@@ -93,7 +93,7 @@ NUMA node 1 = CPUs 62–123. Full record: `raw/build-info.txt`.
 | CUDA sm80 | `… -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DUSE_NVCOMP=OFF` | `9f6839a2b85e421f42fa8ddb3c487030434e5fa317917a8da1e8bc29c3cba7bd` | `25fb87d1…993b1d` | `15fce418…356ec6` | 105 |
 | CUDA sm80 + nvCOMP | `… -DUSE_NVCOMP=ON -DNVCOMP_ROOT=…5.3.0.16_cuda12-archive` | `43c4ca0dcfff13b8fb3d4653844415e333e5eb4ea7a8d0e01b76b1f0cb6160ae` | `d1302dd2…48692a` | `b7efe25d…d8d002` | 108 |
 
-- All three builds exited with rc 0 (`raw/build.out`). Each `CMAKE_HOME_DIRECTORY` is `$QF_W/src`.
+- All three builds exited with rc 0 (`raw/build/build.out`). Each `CMAKE_HOME_DIRECTORY` is `$QF_W/src`.
 - **Flags:**
   - C++ in every build: `-O3 -DNDEBUG -std=gnu++17 -fopenmp`.
   - CUDA: `-O3 -DNDEBUG -std=c++17 --generate-code=arch=compute_80,code=[compute_80,sm_80] -Xcompiler -fopenmp`.
@@ -207,7 +207,7 @@ Clean clone of `adb32785` on Apple M4 Pro, macOS 26.7.1, AppleClang 21.0.0, `cma
   - **Linux CTest: 72/72 pass**, including `InputFormats` `mrc_compressed_bz2` e2e PASS (pbzip2 installed, `MC_REQUIRE_ALL_DECODERS=ON`).
   - **CUDA compile-only: pass.**
   - Hosted CI is not native CUDA, performance or scientific evidence.
-- **pbzip2-compressed MRC: UNRUN natively** on 4GPUs and macOS; hosted Linux CPU CTest covers it (above). pbzip2 is not installed, and `build.sh` does not set `MC_REQUIRE_ALL_DECODERS=ON`. Hosted CI installs pbzip2 and sets that flag, so it would cover these cases once the branch is pushed. No package was installed on the shared host.
+- **pbzip2-compressed MRC: UNRUN natively** on 4GPUs and macOS; hosted Linux CPU CTest covers it (above). pbzip2 is not installed, and `build.sh` does not set `MC_REQUIRE_ALL_DECODERS=ON`. No package was installed on the shared host.
 - **Not covered here:**
   - Tier C launcher runs: covered only by the CTests that wrap it, as the runbook says (F2 applies).
   - Second venue (SCARF).
@@ -215,30 +215,46 @@ Clean clone of `adb32785` on Apple M4 Pro, macOS 26.7.1, AppleClang 21.0.0, `cma
   - Timing.
   - Genuine device poisoning (#213).
   - QM memory admission (separate, #225).
-  - Item 15: N/A while D10 is undecided (no fix in the candidate).
+  - Item 15: N/A on this composition, which contains no D10 fix yet. On 2026-10-17 D10 was decided as fix before freeze; item 15 applies once the fix is composed.
 - **Comparator scope:**
   - Strict all-files comparisons differ only in per-movie route log lines where the arms' routes differ. The declared route-log allowance is recorded and is not a gate.
   - For e10361 (u8 LZW), `--ingest auto` also logs `nvCOMP ingestion declined (bits per sample != 16)` before taking the compact route, so auto and pinned compact differ in that one log line.
   - Multi-GPU complete-tree comparisons differ only in per-movie log lines (thread count, free device memory), as in Q1; they are not a gate.
+- `raw/macos/ctest-macos.summary.json` has `collected: null` because `summarize_ctest.py` parses the Linux CTest log format. The macOS collection validator reports 72 collected tests (`raw/macos/ctest-macos.log`), and the JUnit file has 72 test cases.
 - `InputFormats` writes its generated fixtures under the system temporary directory (`/tmp/mc-formats-*`) rather than the workspace. This is test behaviour, recorded here; nothing was changed.
 
 ## 8. Release blockers and open dispositions
 
-The candidate contains none of the following. Each one keeps RC0 from being declared frozen or fully qualified, or
-from describing the input paths as stable, until its disposition is resolved:
+*Revised after the maintainer decisions of 2026-10-17 and the integration audit (R-INT-A/R-INT-B, §11). The
+earlier version listed D10/D11 as "pending maintainer" and mixed decided documentation items in with blockers.*
 
-| ID | Issue | Area | State |
-|---|---|---|---|
-| **D10 / EER-MS** | [#221](https://github.com/KingAlejandro/MotionCorr-standalone/issues/221) | input reader (host EER decoder): heap OOB **write** and read on malformed or truncated EER, `REPORT_ERROR` inside `omp critical` aborts the process; MRC header `abs(INT_MIN)` UB | confirmed (W-EER-DEV ASan, V-EER independent verification). **Disposition pending maintainer.** The coordinator recommends (a), a narrow pre-freeze fix. Until resolved, the EER input path is not stable (runbook item 15) |
-| **D11 / QM-D1** | [#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226) | recovery: stale `cudaErrorMemoryAllocation` after an OOM in `cudaAlignPatch` is not cleared. The next movie falls back under `auto`, and is **refused** under pinned `--ingest nvcomp` | traced at source (R-QM). **Disposition pending maintainer**: (a) document and fix post-RC0, or (b) small pre-freeze fix with a two-movie native control |
-| F4 | [#214](https://github.com/KingAlejandro/MotionCorr-standalone/issues/214) | input reader (compressed MRC): decoder exit status ignored | D5: documented RC0 limitation (validate inputs with `xz -t`/`zstd -t`/`bzip2 -t`). The fix is scheduled post-RC0; item 13 shows the 6 KNOWN-F4 records unchanged |
-| QM-D2/D3 | #226 | admission gap (config L), late misleading OOM | post-RC0, documented (DOC1) |
-| E-1 / D6 | — | damaged EER fractions skipped with a warning | preserved by decision D6; documentation hand-off to #201 |
-| #215 | [#215](https://github.com/KingAlejandro/MotionCorr-standalone/issues/215) | nvCOMP file-identity check between tag scan and strip read | deferred post-RC0 under D1 option 1 (trusted-input precondition) |
-| D4 | #198 | freeze scope and SHA | not taken; this candidate is input to that decision |
-| REL | #201 | release docs | merge-ready draft. It still needs the freeze-time updates (QF results, #223 inclusion, D10/D11 outcomes, DRAFT labels) |
+**8.1 Open freeze blockers.** RC0 cannot be declared frozen or fully qualified until each is closed.
 
-S1/D7 is decided and is not a blocker for an *evaluation* RC0. It does block any unrestricted CUDA local-alignment claim.
+| ID | What | State |
+|---|---|---|
+| **D10 / EER-MS** ([#221](https://github.com/KingAlejandro/MotionCorr-standalone/issues/221)) | host EER decoder memory safety (all 65000/65001/65002 loops, container errors outside `omp critical`, TIFF tag checks, `readLegacy`), plus the MRC-header `abs(INT_MIN)` and `ltostr` arithmetic | **decided 2026-10-17: fix before freeze.** In progress in a separate PR with performance preservation and independent review (two reviewers, per #198 D10 option (a)). Runbook item 15 applies once it is composed. Composition must avoid the `render_eer` helper collision with #202 (§11, F-1) |
+| **D11 / QM-D1** ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)) | stale `cudaErrorMemoryAllocation` after a handled OOM degrades the next movie's route (`auto`) or refuses it (pinned `--ingest nvcomp`) | **decided 2026-10-17: fix before freeze**, with no performance regression and no admission redesign. In progress as draft PR #228 |
+| D3 | main merges of the constituent PRs: #223, #202, #203, #224, the D10 PR, #228 and #201 | maintainer approval per PR; not yet given |
+| D4 | freeze scope and frozen SHA, including where the frozen SHA lives (§10) | not taken |
+| QF | full audited QF on the final candidate. It needs the D4 record, GitHub Actions on the exact frozen SHA (`workflow_dispatch` is available, §2), item 15, and item 10 in every shipped build | pending the fixes |
+| REL ([#201](https://github.com/KingAlejandro/MotionCorr-standalone/pull/201)) | release docs | needs the freeze-time update and an independent R-REL re-review. At `34107d38` it still says #220 is pending merge, omits `CpuDoseSymmetryBase`, and describes D10 and D11 as open limitations. Two revisions (`cab5f620`, `34107d38`) have had no independent review since R-REL round 3 (`a31b4e03`) |
+| #203 final fix | `0539bf52` (docs only) | coordinator-accepted; no independent round-3 review. Needs an independent confirmation or an explicit maintainer waiver before the D3 merge |
+
+**8.2 Decided items handed off to the release docs.** Their dispositions are already decided, so none of these
+blocks the freeze as a code change. Each must be stated correctly in #201.
+
+| ID | Disposition |
+|---|---|
+| F4 / [#214](https://github.com/KingAlejandro/MotionCorr-standalone/issues/214) | D5: documented RC0 limitation (validate inputs with `xz -t`/`zstd -t`/`bzip2 -t`); fix after RC0. Item 13 shows the 6 KNOWN-F4 records unchanged |
+| QM-D2/D3 (#226) | after RC0 (excluded from D11 by the maintainer); documented (DOC1, per-geometry VRAM floors) |
+| E-1 / D6 | EER skip-and-warn and the truncated-EER shorter-movie behaviour are kept (D6); documented |
+| [#215](https://github.com/KingAlejandro/MotionCorr-standalone/issues/215) | nvCOMP file-identity check deferred under D1 option 1 (trusted-input precondition) |
+| C3, F2, DOC1, CMP1 (#216), #222, D2 | THP/allocator note, Tier C `--fixtures <scratch>` workaround, inherited host-memory behaviours, RELION 5.1 differences, macOS `rand()`, optional-SDK notice |
+| S1 / D7 | evaluation RC0; no unrestricted CUDA local-alignment claim |
+
+**8.3 Not a blocker; recorded.** #202's opt-in `RealCutdown` assets live in an external GitHub release
+(`real-cutdown-v1`) that is still a draft. The test registers only when `MC_REAL_CUTDOWN_DIR` is set, and it is not in
+the required list. Publishing the release would be a publication decision for Alex. Nothing here publishes it.
 
 ## 9. Reproduce
 
@@ -270,21 +286,43 @@ bash tools/multigpu_step.sh --driver item12_retry.py --dataset
 
 ## 10. Next steps
 
-1. **Hosted CI on the composed SHA (needs Alex).** Push `rc0-candidate-20261017-t3`, or open it as a draft PR
-   that is never merged, so Linux CI and CUDA compile-only run on `adb32785`. This also exercises the pbzip2
-   cases. Until then hosted CI is UNRUN for this SHA.
-2. **D10 (#221) and D11 (#226) dispositions (maintainer).** Approved fixes land as their own PRs, with their own
-   reviews and specialist campaigns (outside this package). A new candidate then composes them, and this package
-   is repeated on it, plus runbook item 15. Measured compute for this package: builds 6 min; three CTest suites
-   15 min across two lanes; items 5–13 about 45 min; the multi-GPU window 4.3 min.
-3. **Main merges (maintainer, D3).** #223, #202, #203 and #224 are each merge-ready on their own heads. If they
-   are merged into `71ab841e` in this order without further changes, the resulting tree should equal this
-   candidate's tree `bd4742f70d7118d6006ceb465e3bcd1947ed4167` (`git rev-parse <sha>^{tree}`). That would tie
-   the evidence here to a main commit. QF itself must still run on the frozen SHA.
-4. **D4 and QF proper.** After the blockers are resolved and the freeze SHA is chosen, run the full runbook on it
-   with the D4 record, the frozen-binary reruns and the GitHub Actions run on that SHA. This candidate run shows
-   the current composition is green on the runbook's correctness items; it does not replace QF.
-5. **#201 freeze-time updates (W-REL):** QF results, #223 inclusion (the macOS statement now has
-   `MultiGpuScheduling` passing), the D10/D11 outcomes and the DRAFT labels.
-6. Optional: an independent confirmation of #203's final P2 fix (`0539bf52`, docs only). The coordinator accepted
-   it, but no round-3 review is recorded.
+1. **D10 and D11 fixes:** finish them in their PRs, then independent review (D10: two reviewers; D11: Sol 6.1).
+2. **Composition and affected reruns.** Each reviewed fix is merged into this branch as a new commit labelled
+   *tested source*. `rc0-candidate-20261017-t3-tested` is moved to that commit for direct `workflow_dispatch` CI.
+   On every composition, the reruns are:
+   - always: builds (item 0) and CTest ×3 (items 1–4, 10);
+   - D10 (EER decoder, MRC header and string helpers): item 11 (#208 replay plus guard-removed control), item 13
+     (MRC #204 harness), items 5/6 (all 7 families × G/L, because the MRC header parsing used by every MRC family
+     changes), item 15, and macOS (item 14);
+   - D11 (CUDA per-movie failure path): item 12 (single-GPU and dataset), item 7 (#178, including the injected
+     recoverable fallback), items 5/6, item 9 (#123 matrix), and item 8 (multi-GPU publication).
+
+   The whole set takes about 75 min of compute, so each composition may run all of it.
+3. **D4 and QF.** A green composition and QF are separate steps; QF itself must still run on the frozen SHA. Where
+   the frozen SHA lives is a maintainer decision. The options are:
+   - (a) merge the reviewed PRs into `main` (D3) and freeze a `main` commit, which gets push CI directly;
+   - (b) freeze a candidate-branch commit, run `workflow_dispatch` CI on it, then fast-forward `main` to exactly
+     that commit.
+
+   Either way, QF runs on the frozen SHA with the D4 record, and evidence is committed afterwards as evidence-only
+   commits.
+4. **#201** final revision and R-REL re-review after QF (§8.1).
+5. **#203** `0539bf52`: an independent confirmation, or a maintainer waiver.
+
+## 11. Integration audit (2026-10-17)
+
+Two independent Gemini 4 auditors (R-INT-A `rc0-r-int-a-1`, R-INT-B `rc0-r-int-b-1`) were given an identical
+read-only brief. Both returned **ON TRACK WITH ISSUES**. Both found:
+- the composition, the merged heads' review state, every native result (including all 7 binary hashes) and the
+  hosted-CI description supported;
+- this README's push-status contradictions and stale §8;
+- the stale #198 register, including row T3, which names #205's merge `f67a5866` instead of #217's `483e881d`;
+- #201 drift;
+- the frozen-SHA/CI sequencing question.
+
+R-INT-B alone found **F-1 (P1)**: D10's `render_eer` test-helper subcommand collides silently with #202's helper
+of the same name (`argc` 7 vs 6). The merge is textually clean, but in the composed tree D10's `EerMemorySafety`
+would fail. The coordinator confirmed this with `git merge-tree` and asked the D10 worker to rename the helper and
+test on the composed tree. R-INT-A alone noted that #198 asked for two D10 reviewers; that is adopted.
+
+This revision fixes the README contradictions, the `raw/` paths, the macOS summary note, and §8/§10.

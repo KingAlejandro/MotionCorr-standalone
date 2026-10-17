@@ -854,8 +854,9 @@ if(BUILD_TESTING AND CUDA)
         set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 900)
         # Issue #226 D1: a genuine handled allocation failure in alignment must not
-        # leave a stale last error that degrades or refuses the next movie. Needs a
-        # GPU, so, like the test above, it is not in DEFAULT_REQUIRED_TESTS.
+        # leave a stale last error that degrades or refuses the next movie. Registered
+        # in every CUDA build, so it is in CUDA_REQUIRED_TESTS
+        # (tools/validate_test_collection.py), which applies when CUDA:BOOL=ON.
         if(USE_NVCOMP)
             set(_stale_cuda_args "")
         else()

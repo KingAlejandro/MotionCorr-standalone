@@ -86,17 +86,8 @@ def run(binary: Path, root: Path, label: str, star: str, ingest: str, fault: boo
     return r.returncode, text, out, routes
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--binary", type=Path, required=True,
-                    help="motioncorr_faultinject from the build under test")
-    ap.add_argument("--workdir", type=Path, default=None)
-    ap.add_argument("--cpus", default=None, help="optional taskset CPU list")
-    ap.add_argument("--no-nvcomp", action="store_true",
-                    help="build without nvCOMP: run only the compact row")
-    a = ap.parse_args()
+def controls(a: argparse.Namespace, root: Path) -> int:
     binary = a.binary.resolve()
-    root = a.workdir.resolve() if a.workdir else Path(tempfile.mkdtemp(prefix="mc-stale-cuda-"))
     if root.exists():
         shutil.rmtree(root)
     frames = [[int(v) for v in f] for f in synthetic_frames()]
@@ -169,6 +160,26 @@ def main() -> int:
     print("PASS: a genuine handled allocation failure leaves the next movies on their "
           "route with identical products")
     return 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--binary", type=Path, required=True,
+                    help="motioncorr_faultinject from the build under test")
+    ap.add_argument("--workdir", type=Path, default=None)
+    ap.add_argument("--cpus", default=None, help="optional taskset CPU list")
+    ap.add_argument("--no-nvcomp", action="store_true",
+                    help="build without nvCOMP: run only the compact row")
+    a = ap.parse_args()
+    if a.workdir:
+        return controls(a, a.workdir.resolve())
+    # No --workdir: the scratch tree (movies, products, logs) is removed whatever
+    # the outcome; controls() prints every failing check before returning.
+    root = Path(tempfile.mkdtemp(prefix="mc-stale-cuda-"))
+    try:
+        return controls(a, root)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
 
 
 if __name__ == "__main__":

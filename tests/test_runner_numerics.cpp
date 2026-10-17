@@ -330,6 +330,29 @@ int main(int argc, char **argv)
             return 0;
         }
 
+        if (std::string(argv[1]) == "count_eer") {
+            require(argc == 6, "Usage: runner_numerics count_eer movie upsampling grouping threads");
+            EERRenderer renderer;
+            renderer.read(argv[2], textToInteger(argv[3]));
+            const int grouping = textToInteger(argv[4]), threads = textToInteger(argv[5]);
+            require(grouping > 0 && threads > 0, "grouping and threads must be positive");
+            const int groups = renderer.getNFrames() / grouping;
+            std::vector<std::exception_ptr> errors(groups);
+            long long electrons = 0;
+            #pragma omp parallel for num_threads(threads) reduction(+:electrons)
+            for (int g = 0; g < groups; g++) {
+                try {
+                    MultidimArray<float> image;
+                    electrons += renderer.renderFrames(g * grouping + 1, (g + 1) * grouping, image);
+                } catch (...) {
+                    errors[g] = std::current_exception();
+                }
+            }
+            for (const auto &error : errors) if (error) std::rethrow_exception(error);
+            std::cout << "electrons " << electrons << '\n';
+            return 0;
+        }
+
         if (std::string(argv[1]) == "render_eer") {
             // Render every group of an EER movie the way the runner does: one
             // renderFrames call per group from an OpenMP team, errors captured per

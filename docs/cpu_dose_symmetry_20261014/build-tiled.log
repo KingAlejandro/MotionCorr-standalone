@@ -1,0 +1,17 @@
+[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+/workspace/scratch/28038873ca11/MotionCorr-cpu-layout/src/motioncorr_runner.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/workspace/scratch/28038873ca11/MotionCorr-cpu-layout/src/motioncorr_runner.cpp:1879:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1879 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+[  1%] Linking CXX static library libmotioncorr_core.a
+[ 98%] Built target motioncorr_core
+[100%] Linking CXX executable motioncorr
+[100%] Built target motioncorr
+[ 97%] Built target motioncorr_core
+[ 98%] Building CXX object CMakeFiles/cpu_dose_symmetry.dir/tests/test_cpu_dose_symmetry.cpp.o
+[100%] Linking CXX executable cpu_dose_symmetry
+[100%] Built target cpu_dose_symmetry
+[ 98%] Built target motioncorr_core
+[ 98%] Building CXX object CMakeFiles/cpu_dose_bench.dir/tests/test_cpu_dose_symmetry.cpp.o
+[100%] Linking CXX executable cpu_dose_bench
+[100%] Built target cpu_dose_bench

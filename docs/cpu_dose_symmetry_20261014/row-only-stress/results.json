@@ -1,0 +1,294 @@
+{
+  "scope": "unwrapped source-bound dose kernel, one process per configuration; within-process paired statistics are descriptive, not certified job speed",
+  "limitation": "/proc PID namespace differs from child PIDs; no certified ownership, foreign activity or physical host isolation",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "binary": "/workspace/scratch/28038873ca11/build-layout/cpu_dose_bench",
+  "binary_sha256": "95f080820dc1452b694164e8aabccde60d0d0f85df6d7abffe64ee75f1afaaee",
+  "source": {
+    "source_dir": "/workspace/scratch/28038873ca11/MotionCorr-cpu-layout",
+    "commit": "a020424e6c9292bd42ebcc7496e05ba874cfe23d",
+    "dirty": false,
+    "origin": "git in /workspace/scratch/28038873ca11/MotionCorr-cpu-layout"
+  },
+  "cpu_max": "800000 100000",
+  "memory_max": "8589934592",
+  "environment": {
+    "OMP_DYNAMIC": "false",
+    "OMP_PROC_BIND": "close",
+    "OMP_PLACES": "cores",
+    "OMP_WAIT_POLICY": "PASSIVE",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "configurations": [
+    {
+      "configuration": "512x512x64-j1",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-layout/cpu_dose_bench",
+        "--bench",
+        "512",
+        "512",
+        "64",
+        "1",
+        "6"
+      ],
+      "rc": 0,
+      "self_affinity": [
+        0
+      ],
+      "spectra_bitwise_equal_every_pair": true,
+      "within_process_wall_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -0.0010250829999999822,
+          -0.30022324899999997,
+          -0.23478423399999998,
+          -0.095189782,
+          -0.07354240699999998,
+          -0.03917939300000001
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.08436609449999999,
+        "q1_diff_s": -0.199885621,
+        "q3_diff_s": -0.0477701465,
+        "min_diff_s": -0.30022324899999997,
+        "max_diff_s": -0.0010250829999999822,
+        "median_a_s": 0.358279768,
+        "median_b_s": 0.283031921,
+        "relative_median_diff": -0.23547546368847708,
+        "noise_s": 0.09527759364689999,
+        "robust_sd_diff_s": 0.09527759364689999,
+        "ci": {
+          "low_s": -0.30022324899999997,
+          "high_s": -0.0010250829999999822,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 0,
+          "negative": 6,
+          "ties": 0,
+          "p_two_sided": 0.03125
+        },
+        "resolution_s": 0.149599083,
+        "resolved": false,
+        "verdict": "not resolved (below noise 0.150 s)",
+        "reason": "|median| does not exceed noise",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -0.07354240699999998,
+          "median_diff_ba_s": -0.095189782,
+          "second_position_cost_s": 0.010823687500000012,
+          "order_corrected_effect_s": -0.08436609449999999
+        }
+      }
+    },
+    {
+      "configuration": "512x512x64-j4",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-layout/cpu_dose_bench",
+        "--bench",
+        "512",
+        "512",
+        "64",
+        "4",
+        "6"
+      ],
+      "rc": 0,
+      "self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "spectra_bitwise_equal_every_pair": true,
+      "within_process_wall_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -0.029053923999999995,
+          -0.060838637,
+          0.18653930300000002,
+          0.013196065000000007,
+          -0.033792001000000016,
+          -0.028073554000000014
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.028563739000000005,
+        "q1_diff_s": -0.032607481750000014,
+        "q3_diff_s": 0.0028786602500000015,
+        "min_diff_s": -0.060838637,
+        "max_diff_s": 0.18653930300000002,
+        "median_a_s": 0.1283260075,
+        "median_b_s": 0.10341201950000001,
+        "relative_median_diff": -0.22258729587609125,
+        "noise_s": 0.027801092508000003,
+        "robust_sd_diff_s": 0.027801092508000003,
+        "ci": {
+          "low_s": -0.060838637,
+          "high_s": 0.18653930300000002,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 2,
+          "negative": 4,
+          "ties": 0,
+          "p_two_sided": 0.6875
+        },
+        "resolution_s": 0.12368897000000001,
+        "resolved": false,
+        "verdict": "not resolved (below noise 0.124 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -0.029053923999999995,
+          "median_diff_ba_s": -0.028073554000000014,
+          "second_position_cost_s": -0.0004901849999999902,
+          "order_corrected_effect_s": -0.028563739000000005
+        }
+      }
+    },
+    {
+      "configuration": "3710x3838x24-j1",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/workspace/scratch/28038873ca11/build-layout/cpu_dose_bench",
+        "--bench",
+        "3710",
+        "3838",
+        "24",
+        "1",
+        "6"
+      ],
+      "rc": 0,
+      "self_affinity": [
+        0
+      ],
+      "spectra_bitwise_equal_every_pair": true,
+      "within_process_wall_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -4.564979753000001,
+          3.436963778,
+          -3.89323041,
+          -1.354779385,
+          -6.062861314,
+          -2.120193988
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -3.006712199,
+        "q1_diff_s": -4.397042417250001,
+        "q3_diff_s": -1.54613303575,
+        "min_diff_s": -6.062861314,
+        "max_diff_s": 3.436963778,
+        "median_a_s": 7.133822495,
+        "median_b_s": 4.068015555,
+        "relative_median_diff": -0.4214728080362756,
+        "noise_s": 2.3797215327984005,
+        "robust_sd_diff_s": 2.3797215327984005,
+        "ci": {
+          "low_s": -6.062861314,
+          "high_s": 3.436963778,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 1,
+          "negative": 5,
+          "ties": 0,
+          "p_two_sided": 0.21875
+        },
+        "resolution_s": 4.749912546,
+        "resolved": false,
+        "verdict": "not resolved (below noise 4.750 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -4.564979753000001,
+          "median_diff_ba_s": -1.354779385,
+          "second_position_cost_s": -1.6051001840000005,
+          "order_corrected_effect_s": -2.959879569000001
+        }
+      }
+    },
+    {
+      "configuration": "3710x3838x24-j4",
+      "command": [
+        "taskset",
+        "-c",
+        "0-3",
+        "/workspace/scratch/28038873ca11/build-layout/cpu_dose_bench",
+        "--bench",
+        "3710",
+        "3838",
+        "24",
+        "4",
+        "6"
+      ],
+      "rc": 0,
+      "self_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "spectra_bitwise_equal_every_pair": true,
+      "within_process_wall_statistics": {
+        "n_pairs": 6,
+        "diffs_s": [
+          -1.2121229800000002,
+          1.547367066,
+          -0.836794875,
+          -1.0031867949999997,
+          -0.45523868899999975,
+          -0.7572642370000002
+        ],
+        "floor_s": 0.0,
+        "min_pairs": 6,
+        "median_diff_s": -0.7970295560000001,
+        "q1_diff_s": -0.9615888149999998,
+        "q3_diff_s": -0.5307450759999999,
+        "min_diff_s": -1.2121229800000002,
+        "max_diff_s": 1.547367066,
+        "median_a_s": 2.7737328055,
+        "median_b_s": 2.2361211685,
+        "relative_median_diff": -0.28734907501529355,
+        "noise_s": 0.4061939309778,
+        "robust_sd_diff_s": 0.4061939309778,
+        "ci": {
+          "low_s": -1.2121229800000002,
+          "high_s": 1.547367066,
+          "confidence": 0.96875
+        },
+        "sign_test": {
+          "positive": 1,
+          "negative": 5,
+          "ties": 0,
+          "p_two_sided": 0.21875
+        },
+        "resolution_s": 1.3797450230000001,
+        "resolved": false,
+        "verdict": "not resolved (below noise 1.380 s)",
+        "reason": "CI of median includes 0",
+        "positional": {
+          "n_ab": 3,
+          "n_ba": 3,
+          "median_diff_ab_s": -0.836794875,
+          "median_diff_ba_s": -0.7572642370000002,
+          "second_position_cost_s": -0.03976531899999991,
+          "order_corrected_effect_s": -0.7970295560000001
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,247 @@
+Test project /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-adea2235/build
+      Start  1: CpuDoseSymmetry
+ 1/60 Test  #1: CpuDoseSymmetry ....................   Passed    0.85 sec
+      Start  2: CpuUnweightedStream
+ 2/60 Test  #2: CpuUnweightedStream ................   Passed    0.37 sec
+      Start  3: PatchRetryState
+ 3/60 Test  #3: PatchRetryState ....................   Passed    0.34 sec
+      Start  4: RunnerInterpolateRecenter
+ 4/60 Test  #4: RunnerInterpolateRecenter ..........   Passed    0.31 sec
+      Start  5: FloatPlanCache
+ 5/60 Test  #5: FloatPlanCache .....................   Passed    0.02 sec
+      Start  6: MrcHeaderStats
+ 6/60 Test  #6: MrcHeaderStats .....................   Passed    0.02 sec
+      Start  7: PdfConcat
+ 7/60 Test  #7: PdfConcat ..........................   Passed    0.37 sec
+      Start  8: DefectParser
+ 8/60 Test  #8: DefectParser .......................   Passed    0.48 sec
+      Start  9: DeflateLayout
+ 9/60 Test  #9: DeflateLayout ......................   Passed    0.02 sec
+      Start 10: Adler32Arithmetic
+10/60 Test #10: Adler32Arithmetic ..................   Passed    0.65 sec
+      Start 11: Adler32KernelHost
+11/60 Test #11: Adler32KernelHost ..................   Passed    0.02 sec
+      Start 12: StageProfileThreads
+12/60 Test #12: StageProfileThreads ................   Passed    0.32 sec
+      Start 13: FrameBufferPool
+13/60 Test #13: FrameBufferPool ....................   Passed    0.31 sec
+      Start 14: ScratchArena
+14/60 Test #14: ScratchArena .......................   Passed    0.01 sec
+      Start 15: ReaderPool
+15/60 Test #15: ReaderPool .........................   Passed    0.52 sec
+      Start 16: ReaderPoolMutant_spin
+16/60 Test #16: ReaderPoolMutant_spin ..............   Passed    0.80 sec
+      Start 17: ReaderPoolMutant_nowait
+17/60 Test #17: ReaderPoolMutant_nowait ............   Passed    0.31 sec
+      Start 18: DefectNeighbours
+18/60 Test #18: DefectNeighbours ...................   Passed    0.02 sec
+      Start 19: DefectMergeMutant_append_only
+19/60 Test #19: DefectMergeMutant_append_only ......   Passed    0.31 sec
+      Start 20: DefectMergeMutant_no_order_check
+20/60 Test #20: DefectMergeMutant_no_order_check ...   Passed    0.27 sec
+      Start 21: DefectMergeMutant_swap_xy
+21/60 Test #21: DefectMergeMutant_swap_xy ..........   Passed    0.27 sec
+      Start 22: NvcompAcceptanceDiagnostics
+22/60 Test #22: NvcompAcceptanceDiagnostics ........   Passed    0.47 sec
+      Start 23: ProfilingKit
+23/60 Test #23: ProfilingKit .......................   Passed   62.44 sec
+      Start 24: GainCacheOwnership
+24/60 Test #24: GainCacheOwnership .................   Passed    7.84 sec
+      Start 25: NvcompGuards
+25/60 Test #25: NvcompGuards .......................   Passed    0.09 sec
+      Start 26: SyntheticRegression
+26/60 Test #26: SyntheticRegression ................***Failed    0.66 sec
+Results for --j 1 vs Expected Old Baseline:
+  Image Max Pixel Difference: 2.364986e+01
+  Image RMSE:                 3.119288e-01
+  Shift Max Difference (px):  4.670000e-03
+  Shift RMSD (px):            3.305323e-03
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-adea2235/tests/test_synthetic_regression.py", line 194, in <module>
+    main()
+    ~~~~^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-adea2235/tests/test_synthetic_regression.py", line 189, in main
+    success = test_synthetic_regression(binary=args.binary, threads_to_test=threads)
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-adea2235/tests/test_synthetic_regression.py", line 173, in test_synthetic_regression
+    assert m_diff == 0.0, f"Image pixel diff ({m_diff}) must be exactly 0.0"
+           ^^^^^^^^^^^^^
+AssertionError: Image pixel diff (23.649856567382812) must be exactly 0.0
+
+      Start 27: HotPixelRngDeterminism
+27/60 Test #27: HotPixelRngDeterminism .............   Passed    0.23 sec
+      Start 28: RunnerExposure
+28/60 Test #28: RunnerExposure .....................   Passed    0.25 sec
+      Start 29: Runner_failure
+29/60 Test #29: Runner_failure .....................   Passed    0.12 sec
+      Start 30: Runner_invalid
+30/60 Test #30: Runner_invalid .....................   Passed    0.13 sec
+      Start 31: Runner_resume
+31/60 Test #31: Runner_resume ......................   Passed    1.32 sec
+      Start 32: Runner_tomography
+32/60 Test #32: Runner_tomography ..................   Passed    0.23 sec
+      Start 33: RunnerLateBin
+33/60 Test #33: RunnerLateBin ......................   Passed    0.36 sec
+      Start 34: RunnerExportedUnits
+34/60 Test #34: RunnerExportedUnits ................   Passed    0.10 sec
+      Start 35: GainCache
+35/60 Test #35: GainCache ..........................   Passed    0.38 sec
+      Start 36: TiffRead
+36/60 Test #36: TiffRead ...........................   Passed    0.43 sec
+      Start 37: DamagedMovie
+37/60 Test #37: DamagedMovie .......................   Passed    1.59 sec
+      Start 38: CompressedMovieSequence
+38/60 Test #38: CompressedMovieSequence ............   Passed    1.02 sec
+      Start 39: GlobalIfftElision
+39/60 Test #39: GlobalIfftElision ..................   Passed    0.57 sec
+      Start 40: HostBufferReuse
+40/60 Test #40: HostBufferReuse ....................   Passed    1.35 sec
+      Start 41: StageProfile
+41/60 Test #41: StageProfile .......................   Passed    0.82 sec
+      Start 42: RunnerModelParser
+42/60 Test #42: RunnerModelParser ..................   Passed    0.19 sec
+      Start 43: MicrographModelBounds
+43/60 Test #43: MicrographModelBounds ..............   Passed    1.54 sec
+      Start 44: RunnerInterpolateShifts
+44/60 Test #44: RunnerInterpolateShifts ............   Passed    0.21 sec
+      Start 45: WriteFaults
+45/60 Test #45: WriteFaults ........................   Passed    0.30 sec
+      Start 46: WriteFaultsSync
+46/60 Test #46: WriteFaultsSync ....................   Passed    0.27 sec
+      Start 47: WriteFaultsMultiProduct
+47/60 Test #47: WriteFaultsMultiProduct ............   Passed    0.30 sec
+      Start 48: OutputStageFaults
+48/60 Test #48: OutputStageFaults ..................   Passed    0.23 sec
+      Start 49: LogfileFromEps
+49/60 Test #49: LogfileFromEps .....................   Passed    5.77 sec
+      Start 50: LogfileFromEpsMutant_always_eps
+50/60 Test #50: LogfileFromEpsMutant_always_eps ....   Passed    1.06 sec
+      Start 51: LogfileFromEpsMutant_late_guard
+51/60 Test #51: LogfileFromEpsMutant_late_guard ....   Passed    0.81 sec
+      Start 52: LogfileFromEpsMutant_eps_order
+52/60 Test #52: LogfileFromEpsMutant_eps_order .....   Passed    0.74 sec
+      Start 53: LogfileFromEpsMutant_placeholder
+53/60 Test #53: LogfileFromEpsMutant_placeholder ...   Passed    1.61 sec
+      Start 54: CiFailClosedControls
+54/60 Test #54: CiFailClosedControls ...............   Passed   19.40 sec
+      Start 55: CudaValidationParser
+55/60 Test #55: CudaValidationParser ...............   Passed    0.07 sec
+      Start 56: MultiGpuScheduling
+56/60 Test #56: MultiGpuScheduling .................***Failed   51.07 sec
+ok   case_roundtrip_and_metadata
+ok   case_empty_required_products_refused
+ok   case_empty_shard_rejected
+ok   case_output_name_collision
+ok   case_duplicate_movie_in_input
+ok   case_collapsed_spaces_are_a_collision
+ok   case_decorated_output_collision
+ok   case_manifest_digest_binds_parsed_snapshot
+ok   case_real_output_suffixes_attributed
+ok   case_dotted_shift_plot_root
+ok   case_aggregate_name_shadowing
+ok   case_star_parser_refusals
+ok   case_clean_merge
+ok   case_lost_output
+ok   case_duplicate_and_misrouted_output
+ok   case_unassigned_movie_output
+ok   case_failed_worker_blocks_merge
+ok   case_missing_status_blocks_merge
+ok   case_failed_device_witness_blocks_merge
+ok   case_missing_worker_directory
+ok   case_link_staging_with_aggregate
+ok   case_link_refusal_falls_back_to_copy
+ok   case_launcher_exit_digests_are_reused
+ok   case_change_after_worker_exit_detected
+ok   case_preserved_aggregate_change_after_exit_detected
+ok   case_exit_digest_records_validated
+ok   case_timestamp_barrier_failure_fails_closed
+ok   case_output_digest_primitives
+ok   case_aggregate_same_byte_rewrite_detected
+ok   case_aggregate_may_not_add_per_movie_products
+ok   case_output_root_matches_withoutextension
+ok   case_reserved_name_collision
+ok   case_short_row_refused
+ok   case_killed_worker_then_nonprefix_resume
+ok   case_aggregate_star_canonical_order
+ok   case_aggregate_star_must_match_partition_content
+ok   case_aggregate_args_may_not_override_owned_paths
+ok   case_aggregate_wrong_order_rejected
+ok   case_failed_staging_never_reprocesses
+ok   case_merge_out_is_resolved
+ok   case_launcher_refuses_cpu_gpu_confusion
+      UNAVAILABLE Linux pinning success: taskset absent; refusal verified
+ok   case_per_worker_cpu_masks
+      UNAVAILABLE Linux budget success: taskset absent; refusal verified
+ok   case_cpu_budget_gate
+ok   case_phase_timeline_recorded
+      powered marker receipt {"pid": 31633, "birth": [1792178741, 868303], "MRC_creation_observed_s": 1792178741.898617, "image_closed_s": 1792178741.90412, "STAR_marker_observed_s": 1792178741.910391, "scope": "actual delayed open-image child; no native GPU/timing claim"}
+ok   case_completed_image_marker_not_mrc_creation
+ok   case_per_worker_args_and_cpu_accounting
+ok   case_worker_joint_report_suppressed
+ok   case_devices_with_no_witness_refused
+ok   case_normalized_root_collision_refused
+ok   case_interior_double_slash_is_the_same_product
+ok   case_duplicate_coverage_and_zero_pairs_rejected
+ok   case_absolute_movie_roots_attributed
+ok   case_gpu_witness_logic
+ok   case_sampler_lifecycle
+ok   case_stale_status_is_refused
+ok   case_duplicate_movie_name_refused
+ok   case_worker_args_may_not_override_launcher_options
+ok   case_aggregate_may_not_rewrite_staged_products
+SIMULATION: portable fake-device verdict wiring; native containment unavailable
+ok   case_launcher_verdict_follows_the_device_witness
+NOT CLAIMED: child-subreaper ownership, and so the bounded descendant walk, exists only on Linux
+ok   case_ownership_cost_is_independent_of_host_processes
+ok   case_launcher_signal_reaps_owned_process_group
+ok   case_launcher_signal_reaches_cooperative_worker
+ok   case_launcher_signal_during_spawn_keeps_child_owned
+ok   case_per_worker_timing_and_rss_recorded
+ok   case_aggregate_staging_namespace_reserved
+ok   case_tomography_partition
+ok   case_bench_warmups_hold_arm_locks
+ok   case_bench_arm_tools_and_phase_pairs
+ok   case_dataset_endpoint
+ok   case_owned_tree_rss
+ok   case_pid_birth_cleanup
+ok   case_device_list_rejected
+ok   aggregate_control
+FAIL tomography_endpoint: PASS tomography dataset through run_dataset: corrected_tilt_series.star, two series, four tilts, canonical order
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-adea2235/tests/test_tomography_endpoint.py", line 239, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-adea2235/tests/test_tomography_endpoint.py", line 233, in main
+    tomography(binary, tmp)
+    ~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-adea2235/tests/test_tomography_endpoint.py", line 122, in tomography
+    require(merge_workers.joint_star_problems(merged, manifest, 'tomography', agg) == [],
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            'validator rejects the healthy published tree')
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-adea2235/tests/test_tomography_endpoint.py", line 42, in require
+    raise AssertionError(message)
+AssertionError: validator rejects the healthy published tree
+
+
+73/74 passed
+
+      Start 57: OutputTreeComparator
+57/60 Test #57: OutputTreeComparator ...............   Passed    0.92 sec
+      Start 58: JointStarPublication
+58/60 Test #58: JointStarPublication ...............   Passed    0.95 sec
+      Start 59: ImageWriteFaults
+59/60 Test #59: ImageWriteFaults ...................   Passed    0.34 sec
+      Start 60: NativeMovieStaging
+60/60 Test #60: NativeMovieStaging .................***Skipped   0.31 sec
+
+97% tests passed, 2 tests failed out of 60
+
+Total Test time (real) = 173.37 sec
+
+The following tests did not run:
+	 60 - NativeMovieStaging (Skipped)
+
+The following tests FAILED:
+	 26 - SyntheticRegression (Failed)
+	 56 - MultiGpuScheduling (Failed)
+Errors while running CTest

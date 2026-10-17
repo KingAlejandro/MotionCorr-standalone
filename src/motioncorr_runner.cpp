@@ -4873,35 +4873,58 @@ void MotioncorrRunner::doseWeighting(std::vector<MultidimArray<fComplex> > &Ffra
 	const RFLOAT nfx2 = (RFLOAT)(nfx - 1) * (nfx - 1) * 4; // assuming nx is even
 	const int n_frames= Fframes.size();
 	const RFLOAT A = 0.245, B = -1.665, C = 2.81;
+	// The dose model depends on ky squared. Rows y and nfy-y therefore
+	// have bit-identical weights, but independent complex pixels. Calculate
+	// each weight once; retain both original complex operations and their
+	// float stores. DC and the even-height Nyquist row are processed once.
+	const int independent_rows = nfy == 0 ? 0 : nfy_half + 1;
 
-	#pragma omp parallel for num_threads(n_threads)
-	for (int y = 0; y < nfy; y++) {
-		int ly = y;
-		if (y > nfy_half) ly = y - nfy;
-
-		const RFLOAT ly2 = (RFLOAT)ly * ly / nfy2;
-		for (int x = 0; x < nfx; x++) {
-			const RFLOAT dinv2 = ly2 + (RFLOAT)x * x / nfx2;
-			const RFLOAT dinv = std::sqrt(dinv2) / apix; // d = N * apix / dist, thus dinv = dist / N / angpix
-			const RFLOAT Ne = (A * std::pow(dinv, B) + C) * 2; // Eq. 3. 2 comes from Eq. 5
-			RFLOAT sum_weight_sq = 0;
-
-			for (int iframe = 0; iframe < n_frames; iframe++) {
-				const RFLOAT weight = std::exp(- doses[iframe] / Ne); // Eq. 5. 0.5 is factored out to Ne.
-				if (std::isnan(weight)) {
-					std::cerr << "dose = " <<  doses[iframe] << " Ne = " << Ne << " frm = " << iframe << " lx = " << x << " ly = " << ly << " reso = " << 1 / dinv << " weight = " << weight << std::endl;
+	const int tile_width = 64;
+	#pragma omp parallel num_threads(n_threads)
+	{
+		// Frame-major weights keep both exp evaluation and application bounded.
+		// Only scalars are shared between row partners; their pixels stay distinct.
+		std::vector<RFLOAT> weights(static_cast<size_t>(n_frames) * tile_width);
+		std::vector<RFLOAT> norms(tile_width);
+		#pragma omp for
+		for (int y = 0; y < independent_rows; y++) {
+			const int ly = y;
+			const int mirror_y = y == 0 ? 0 : nfy - y;
+			const RFLOAT ly2 = (RFLOAT)ly * ly / nfy2;
+			for (int begin = 0; begin < nfx; begin += tile_width) {
+				const int width = std::min(tile_width, nfx - begin);
+				for (int local = 0; local < width; local++) {
+					const int x = begin + local;
+					const RFLOAT dinv2 = ly2 + (RFLOAT)x * x / nfx2;
+					const RFLOAT dinv = std::sqrt(dinv2) / apix;
+					const RFLOAT Ne = (A * std::pow(dinv, B) + C) * 2;
+					RFLOAT sum_weight_sq = 0;
+					for (int iframe = 0; iframe < n_frames; iframe++) {
+						const RFLOAT weight = std::exp(- doses[iframe] / Ne);
+						if (std::isnan(weight)) {
+							std::cerr << "dose = " << doses[iframe] << " Ne = " << Ne << " frm = " << iframe << " lx = " << x << " ly = " << ly << " reso = " << 1 / dinv << " weight = " << weight << (mirror_y != y ? " (also applies to mirrored row ly = -ly)" : "") << std::endl;
+						}
+						sum_weight_sq += weight * weight;
+						weights[static_cast<size_t>(iframe) * tile_width + local] = weight;
+					}
+					norms[local] = std::sqrt(sum_weight_sq);
+					if (std::isnan(norms[local])) {
+						std::cerr << " Ne = " << Ne << " lx = " << x << " ly = " << ly << " reso = " << 1 / dinv << " sum_weight_sq NaN" << (mirror_y != y ? " (also applies to mirrored row ly = -ly)" : "") << std::endl;
+						REPORT_ERROR("Shouldn't happen.");
+					}
 				}
-				sum_weight_sq += weight * weight;
-				DIRECT_A2D_ELEM(Fframes[iframe], y, x) *= weight;
-			}
-
-			sum_weight_sq = std::sqrt(sum_weight_sq);
-			if (std::isnan(sum_weight_sq)) {
-				std::cerr << " Ne = " << Ne << " lx = " << x << " ly = " << ly << " reso = " << 1 / dinv << " sum_weight_sq NaN" << std::endl;
-				REPORT_ERROR("Shouldn't happen.");
-			}
-			for (int iframe = 0; iframe < n_frames; iframe++) {
-				DIRECT_A2D_ELEM(Fframes[iframe], y, x) /= sum_weight_sq; // Eq. 9
+				const int row_count = mirror_y == y ? 1 : 2;
+				for (int row = 0; row < row_count; row++) {
+					const int output_y = row == 0 ? y : mirror_y;
+					for (int iframe = 0; iframe < n_frames; iframe++) {
+						const size_t offset = static_cast<size_t>(iframe) * tile_width;
+						// Keep separate multiply/divide passes and float stores.
+						for (int local = 0; local < width; local++)
+							DIRECT_A2D_ELEM(Fframes[iframe], output_y, begin + local) *= weights[offset + local];
+						for (int local = 0; local < width; local++)
+							DIRECT_A2D_ELEM(Fframes[iframe], output_y, begin + local) /= norms[local];
+					}
+				}
 			}
 		}
 	}

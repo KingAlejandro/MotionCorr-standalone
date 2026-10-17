@@ -1,0 +1,33 @@
+RUN real24 main: RC=0 routes=[     24 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:05.26
+RUN real24 port: RC=0 routes=[     24 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:05.42
+CMP real24 main-vs-port FAIL rc=1
+FAIL: --input-star is required because the manifest pins an input STAR hash
+bench lock held by another session; waiting 60 s (2026-10-16T20:08:31Z)
+RUN real2 main: RC=0 routes=[      2 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.55
+RUN real2 port: RC=0 routes=[      2 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.36
+CMP real2 main-vs-port PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u16_deflate_rps1 main: RC=0 routes=[      2 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.34
+RUN u16_deflate_rps1 port: RC=0 routes=[      2 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.33
+CMP u16_deflate_rps1 main-vs-port PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u8_deflate_rps1 main: RC=0 routes=[      2 compact ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.01
+bench lock held by another session; waiting 60 s (2026-10-16T20:09:40Z)
+RUN u8_deflate_rps1 port: RC=0 routes=[      2 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.34
+CMP u8_deflate_rps1 main-vs-port PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u8_deflate_rps8 main: RC=0 routes=[      2 compact ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.66
+RUN u8_deflate_rps8 port: RC=0 routes=[      2 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.35
+CMP u8_deflate_rps8 main-vs-port PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u8_deflate_rps3838 main: RC=0 routes=[      2 compact ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.87
+RUN u8_deflate_rps3838 port: RC=0 routes=[      2 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:09.29
+CMP u8_deflate_rps3838 main-vs-port PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u16_deflate_rps8 main: RC=0 routes=[      2 compact ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.08
+RUN u16_deflate_rps8 port: RC=0 routes=[      2 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.36
+CMP u16_deflate_rps8 main-vs-port PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u16_deflate_rps16 main: RC=0 routes=[      2 compact ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.13
+RUN u16_deflate_rps16 port: RC=0 routes=[      2 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.50
+CMP u16_deflate_rps16 main-vs-port PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u16_deflate_rps512 main: RC=0 routes=[      2 compact ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.26
+RUN u16_deflate_rps512 port: RC=0 routes=[      2 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.59
+CMP u16_deflate_rps512 main-vs-port PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u16_deflate_rps3838 main: RC=0 routes=[      2 compact ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.27
+RUN u16_deflate_rps3838 port: RC=0 routes=[      2 nvcomp ] 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:10.20
+CMP u16_deflate_rps3838 main-vs-port PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm

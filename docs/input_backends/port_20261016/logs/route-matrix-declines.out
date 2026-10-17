@@ -1,0 +1,34 @@
+RUN u16_deflate_pred2 nvcomp: RC=1 routes=[] products=PRODUCTS=0
+RUN u16_deflate_pred2 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u16_deflate_pred2 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u16_deflate_pred2 auto: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+DECLINE u16_deflate_pred2: pinned nvcomp refusal text: 
+CMP u16_deflate_pred2:auto-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_pred2:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u8_deflate_pred2 nvcomp: RC=1 routes=[] products=PRODUCTS=0
+RUN u8_deflate_pred2 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u8_deflate_pred2 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u8_deflate_pred2 auto: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+DECLINE u8_deflate_pred2: pinned nvcomp refusal text: 
+CMP u8_deflate_pred2:auto-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_pred2:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u16_deflate_be nvcomp: RC=1 routes=[] products=PRODUCTS=0
+RUN u16_deflate_be compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u16_deflate_be float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u16_deflate_be auto: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+DECLINE u16_deflate_be: pinned nvcomp refusal text: 
+CMP u16_deflate_be:auto-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_be:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+bench lock held by another session; waiting 60 s (2026-10-16T20:01:35Z)
+bench lock held by another session; waiting 60 s (2026-10-16T20:02:35Z)
+bench lock held by another session; waiting 60 s (2026-10-16T20:03:35Z)
+bench lock held by another session; waiting 60 s (2026-10-16T20:04:35Z)
+bench lock held by another session; waiting 60 s (2026-10-16T20:05:35Z)
+bench lock held by another session; waiting 60 s (2026-10-16T20:06:41Z)
+RUN u8_deflate_be nvcomp: RC=1 routes=[] products=PRODUCTS=0
+RUN u8_deflate_be compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u8_deflate_be float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u8_deflate_be auto: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+DECLINE u8_deflate_be: pinned nvcomp refusal text: 
+CMP u8_deflate_be:auto-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_be:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm

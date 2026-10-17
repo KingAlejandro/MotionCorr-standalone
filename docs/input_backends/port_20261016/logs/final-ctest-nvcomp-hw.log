@@ -1,0 +1,73 @@
+Test project /mnt/clathrin/alex-motioncorr-rc0/W-TIFF/build-port-nvcomp
+      Start 60: RunnerInterpolateShiftsCuda
+ 1/32 Test #60: RunnerInterpolateShiftsCuda ....................   Passed    1.37 sec
+      Start 61: StageProfileDeviceTiming
+ 2/32 Test #61: StageProfileDeviceTiming .......................   Passed    2.94 sec
+      Start 62: SignedMrcStaging
+ 3/32 Test #62: SignedMrcStaging ...............................   Passed    6.55 sec
+      Start 63: CudaU16StagingEquivalence
+ 4/32 Test #63: CudaU16StagingEquivalence ......................   Passed    0.40 sec
+      Start 64: CudaWrapperUploadFailure
+ 5/32 Test #64: CudaWrapperUploadFailure .......................   Passed    0.38 sec
+      Start 65: CudaFaultMatrix
+ 6/32 Test #65: CudaFaultMatrix ................................   Passed    7.96 sec
+      Start 66: CudaPatchWorkspace
+ 7/32 Test #66: CudaPatchWorkspace .............................   Passed    0.52 sec
+      Start 67: CudaPatchBatch
+ 8/32 Test #67: CudaPatchBatch .................................   Passed    2.03 sec
+      Start 68: CudaVramAlias
+ 9/32 Test #68: CudaVramAlias ..................................   Passed    0.81 sec
+      Start 69: CudaPatchBatchMutant_shift_retired
+10/32 Test #69: CudaPatchBatchMutant_shift_retired .............   Passed    1.88 sec
+      Start 70: CudaPatchBatchMutant_never_retire
+11/32 Test #70: CudaPatchBatchMutant_never_retire ..............   Passed    1.89 sec
+      Start 71: CudaPatchBatchMutant_extract_no_remap
+12/32 Test #71: CudaPatchBatchMutant_extract_no_remap ..........   Passed    1.93 sec
+      Start 72: CudaPatchBatchMutant_scale_divide
+13/32 Test #72: CudaPatchBatchMutant_scale_divide ..............   Passed    1.95 sec
+      Start 73: CudaPatchBatchMutant_shift_wrong_half
+14/32 Test #73: CudaPatchBatchMutant_shift_wrong_half ..........   Passed    1.92 sec
+      Start 74: CudaPatchBatchMutant_perpatch_wrong_half
+15/32 Test #74: CudaPatchBatchMutant_perpatch_wrong_half .......   Passed    2.01 sec
+      Start 75: CudaVramAliasMutant_arena_overlap
+16/32 Test #75: CudaVramAliasMutant_arena_overlap ..............   Passed    0.84 sec
+      Start 76: CudaVramAliasMutant_arena_work_over_buffers
+17/32 Test #76: CudaVramAliasMutant_arena_work_over_buffers ....   Passed    0.97 sec
+      Start 77: CudaVramAliasMutant_refusal_off
+18/32 Test #77: CudaVramAliasMutant_refusal_off ................   Passed    0.81 sec
+      Start 78: CudaVramAliasMutant_dw_scratch_over_fourier
+19/32 Test #78: CudaVramAliasMutant_dw_scratch_over_fourier ....   Passed    0.85 sec
+      Start 79: CudaDeviceGainPool
+20/32 Test #79: CudaDeviceGainPool .............................   Passed    0.41 sec
+      Start 80: CudaDeviceGainCleanupFatal
+21/32 Test #80: CudaDeviceGainCleanupFatal .....................   Passed    0.38 sec
+      Start 81: CudaGeometryRetention
+22/32 Test #81: CudaGeometryRetention ..........................   Passed    0.39 sec
+      Start 82: CudaGeometryRetentionMutant_no_take
+23/32 Test #82: CudaGeometryRetentionMutant_no_take ............   Passed    0.40 sec
+      Start 83: CudaGeometryRetentionMutant_return_failed
+24/32 Test #83: CudaGeometryRetentionMutant_return_failed ......   Passed    0.40 sec
+      Start 84: CudaGeometryRetentionMutant_keep_taken_alias
+25/32 Test #84: CudaGeometryRetentionMutant_keep_taken_alias ...   Passed    0.40 sec
+      Start 85: CudaDoseNormalization
+26/32 Test #85: CudaDoseNormalization ..........................   Passed    1.90 sec
+      Start 86: CudaDoseSessionPlan
+27/32 Test #86: CudaDoseSessionPlan ............................   Passed    0.41 sec
+      Start 87: CudaPreprocessingFailurePaths
+28/32 Test #87: CudaPreprocessingFailurePaths ..................   Passed    4.85 sec
+      Start 88: CudaAdler32
+29/32 Test #88: CudaAdler32 ....................................   Passed    1.38 sec
+      Start 89: CudaNvcompAcceptanceFailures
+30/32 Test #89: CudaNvcompAcceptanceFailures ...................   Passed    5.13 sec
+      Start 90: CudaNvcompReconstructionFailures
+31/32 Test #90: CudaNvcompReconstructionFailures ...............   Passed    3.41 sec
+      Start 91: CudaDoseWeightAlias
+32/32 Test #91: CudaDoseWeightAlias ............................   Passed    2.52 sec
+
+100% tests passed, 0 tests failed out of 32
+
+Label Time Summary:
+cuda        =  60.00 sec*proc (32 tests)
+hardware    =  60.00 sec*proc (32 tests)
+
+Total Test time (real) =  60.02 sec

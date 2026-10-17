@@ -194,13 +194,8 @@ static void testPinnedCapParsing() {
 // slotted frame and spreads it in place. The result must equal placing every
 // strip directly at its slot, which is what the per-strip reader does. Checked
 // on adversarial sizes too: every padding amount, tiny and large strips.
-static void testSpreadEqualsDirectPlacement(size_t in_align, unsigned seed, int n_strips) {
-    std::vector<uint32_t> sizes(n_strips);
-    unsigned st = seed;
-    for (int i = 0; i < n_strips; i++) {
-        st = st * 1103515245u + 12345u;
-        sizes[i] = 7u + (st >> 16) % (i % 5 == 0 ? 2000u : 13u);
-    }
+static void testSpreadSizes(const std::vector<uint32_t> &sizes, size_t in_align, unsigned seed) {
+    const int n_strips = (int)sizes.size();
     const size_t frame = frameStageBytes(sizes.data(), n_strips, in_align);
     const size_t packed = framePackedBytes(sizes.data(), n_strips);
     check(frame >= packed, "slotted frame is never smaller than its packed span");
@@ -227,6 +222,40 @@ static void testSpreadEqualsDirectPlacement(size_t in_align, unsigned seed, int 
         cursor = slot + sizes[s];
     }
     check(same, "in-place spread of a packed span equals per-strip placement");
+}
+
+static void testSpreadEqualsDirectPlacement(size_t in_align, unsigned seed, int n_strips) {
+    std::vector<uint32_t> sizes(n_strips);
+    unsigned st = seed;
+    for (int i = 0; i < n_strips; i++) {
+        st = st * 1103515245u + 12345u;
+        sizes[i] = 7u + (st >> 16) % (i % 5 == 0 ? 2000u : 13u);
+    }
+    testSpreadSizes(sizes, in_align, seed);
+}
+
+// The same span read for a multi-row-strip frame. The per-frame vector then holds
+// strips_per_frame entries, not ny, so everything that walks it must be bounded by
+// the geometry's strip count (frameStageBytes and the span reader once walked ny
+// entries, which reads past the vector for any RowsPerStrip > 1). Strip sizes track
+// the decompressed length of each strip, so the short final strip is short here too,
+// and the vector is sized exactly so a walk past it is a sanitizer finding.
+static void testSpreadMultiRowStrips(size_t in_align, int nx, int ny, int rps, int bps, unsigned seed) {
+    char msg[200];
+    const StripGeometry g = planStrips(nx, ny, rps, bps);
+    std::vector<uint32_t> sizes((size_t)g.strips_per_frame);
+    unsigned st = seed;
+    for (int s = 0; s < g.strips_per_frame; s++) {
+        st = st * 1103515245u + 12345u;
+        sizes[(size_t)s] = 7u + (uint32_t)(g.chunkBytes((size_t)s) / 3) + (st >> 16) % 211u;
+    }
+    std::snprintf(msg, sizeof(msg), "rps=%d: one compressed size per strip, fewer than ny rows", rps);
+    check((int)sizes.size() == g.strips_per_frame && (rps == 1 || g.strips_per_frame < ny), msg);
+    const size_t stage = frameStageBytes(sizes.data(), g.strips_per_frame, in_align);
+    const size_t packed = framePackedBytes(sizes.data(), g.strips_per_frame);
+    check(stage >= packed && stage - packed <= (size_t)g.strips_per_frame * in_align,
+          "slot padding is bounded by one alignment unit per strip");
+    testSpreadSizes(sizes, in_align, seed);
 }
 
 // Every pinned byte the pipeline uses is inside one layout whose total is what
@@ -284,6 +313,120 @@ static void testChunkParameters() {
     check(!parsePositiveInt("99999999999", v), "chunk env refuses overflow");
 }
 
+// Strip geometry: the decompressed side of the layout.
+//
+// Everything here is a silent-defect site. A short final strip declared at the
+// full length, padding inserted between rows inside one strip, or a strip index
+// derived with the wrong divisor all produce a buffer that still decodes and
+// still reports success; the image is simply wrong in part of every frame. A
+// device run cannot separate those from a correct one without comparing pixels
+// against an independent decode, which is exactly what this avoids needing.
+static void testStripGeometry(int nx, int ny, int rps, int bps, size_t out_align) {
+    char msg[220];
+    const StripGeometry g = withOutputAlignment(planStrips(nx, ny, rps, bps), out_align);
+
+    std::snprintf(msg, sizeof(msg), "nx=%d ny=%d rps=%d bps=%d: strips cover every row exactly once",
+                  nx, ny, rps, bps);
+    check(g.strips_per_frame * rps - (rps - g.last_strip_rows) == ny &&
+          g.last_strip_rows >= 1 && g.last_strip_rows <= rps, msg);
+
+    // Declared decompressed bytes must sum to the frame, per frame. Declaring
+    // the full length for a short final strip inflates this.
+    size_t declared = 0;
+    for (int s = 0; s < g.strips_per_frame; s++) declared += g.chunkBytes((size_t)s);
+    std::snprintf(msg, sizeof(msg), "nx=%d ny=%d rps=%d bps=%d: declared chunk bytes sum to one frame",
+                  nx, ny, rps, bps);
+    check(declared == (size_t)nx * (size_t)ny * (size_t)bps, msg);
+
+    // Row offsets: distinct, ordered within a strip, and never past the slab.
+    const size_t slab = (size_t)g.strips_per_frame * g.strip_pitch;
+    bool distinct = true, in_bounds = true, contiguous_in_strip = true, aligned = true;
+    size_t prev = 0;
+    for (int y = 0; y < ny; y++) {
+        const size_t off = g.rowOffset(0, y);
+        if (y > 0 && off <= prev) distinct = false;
+        if (off + g.row_bytes > slab) in_bounds = false;
+        if (y % rps != 0 && off != prev + g.row_bytes) contiguous_in_strip = false;
+        if (y % rps == 0 && off % out_align != 0) aligned = false;
+        prev = off;
+    }
+    std::snprintf(msg, sizeof(msg), "nx=%d ny=%d rps=%d bps=%d: row offsets strictly increase",
+                  nx, ny, rps, bps);
+    check(distinct, msg);
+    std::snprintf(msg, sizeof(msg), "nx=%d ny=%d rps=%d bps=%d: every row lies inside the frame slab",
+                  nx, ny, rps, bps);
+    check(in_bounds, msg);
+    std::snprintf(msg, sizeof(msg), "nx=%d ny=%d rps=%d bps=%d: rows inside a strip are contiguous",
+                  nx, ny, rps, bps);
+    check(contiguous_in_strip, msg);
+    std::snprintf(msg, sizeof(msg), "nx=%d ny=%d rps=%d bps=%d: each strip slot meets the output alignment",
+                  nx, ny, rps, bps);
+    check(aligned, msg);
+
+    // The second frame of a batch must start exactly one slab on.
+    std::snprintf(msg, sizeof(msg), "nx=%d ny=%d rps=%d bps=%d: batch frames are one slab apart",
+                  nx, ny, rps, bps);
+    check(g.rowOffset(1, 0) == g.rowOffset(0, 0) + slab, msg);
+}
+
+// The one-row-per-strip case must reduce to the arithmetic the released path
+// used, or this generalisation silently changed the encoding that is already
+// validated against 24 movies.
+static void testOneRowPerStripIsUnchanged() {
+    const int nx = 3710, ny = 3838;
+    for (size_t out_align = 1; out_align <= 16; out_align *= 2) {
+        const StripGeometry g = withOutputAlignment(planStrips(nx, ny, 1, 2), out_align);
+        const size_t legacy_row_pitch = alignUp((size_t)nx * 2, out_align);
+        bool same = (g.strips_per_frame == ny) && (g.strip_pitch == legacy_row_pitch);
+        for (int y = 0; y < ny && same; y++)
+            if (g.rowOffset(0, y) != (size_t)y * legacy_row_pitch) same = false;
+        if (g.chunkBytes(0) != (size_t)nx * 2) same = false;
+        char msg[120];
+        std::snprintf(msg, sizeof(msg),
+                      "rps=1 reproduces the released row-pitch addressing at out_align=%zu",
+                      out_align);
+        check(same, msg);
+    }
+}
+
+// Negative control: the two defects the assertions above exist for must be
+// visible to them. Without this, every check could pass against a geometry
+// that cannot express the defect at all.
+static void testStripGeometryControlsFire() {
+    const int nx = 3710, ny = 3838, rps = 7;        // 3838 = 548*7 + 2
+    const StripGeometry good = withOutputAlignment(planStrips(nx, ny, rps, 2), 8);
+    check(good.last_strip_rows == 2 && good.strips_per_frame == 549,
+          "control geometry really has a short final strip");
+
+    StripGeometry bad = good;                        // defect 1: full-length final strip
+    bad.last_strip_bytes = bad.full_strip_bytes;
+    size_t declared = 0;
+    for (int s = 0; s < bad.strips_per_frame; s++) declared += bad.chunkBytes((size_t)s);
+    check(declared != (size_t)nx * (size_t)ny * 2,
+          "a full-length final strip is detected by the declared-bytes sum");
+
+    StripGeometry pad = good;                        // defect 2: padding between rows
+    pad.row_bytes = alignUp(pad.row_bytes, 8) + 8;
+    bool contiguous = true;
+    for (int y = 1; y < rps; y++)
+        if (pad.rowOffset(0, y) != pad.rowOffset(0, y - 1) + good.row_bytes) contiguous = false;
+    check(!contiguous, "padding inserted between rows inside a strip is detected");
+}
+
+// The admission policy is a decision (#134, D1), so this pins the table rather
+// than the mechanism: flipping either constant must be a deliberate edit that
+// turns this red, not a silent change to which files reach the GPU decoder.
+static void testAdmissionPolicy() {
+    check(admissionRefusal(16, 1) == nullptr, "16-bit, one row per strip is admitted");
+    check(admissionRefusal(8, 1) == nullptr, "8-bit, one row per strip is admitted");
+    check(admissionRefusal(16, 16) == nullptr, "16-bit, multi-row strips are admitted");
+    check(admissionRefusal(8, 3838) == nullptr, "8-bit, whole-frame strip is admitted");
+    for (int bits : {1, 4, 12, 24, 32, 64})
+        check(admissionRefusal(bits, 1) != nullptr, "unsupported sample widths are refused");
+    check(kAdmit8BitSamples && kAdmitMultiRowStrips,
+          "the widened policy of #138 is the one compiled in");
+}
+
 int main() {
     testSlotAlignment(4);
     testSlotAlignment(8);
@@ -298,8 +441,25 @@ int main() {
         for (unsigned seed : {1u, 7u, 99u})
             testSpreadEqualsDirectPlacement(a, seed, 600);
     testSpreadEqualsDirectPlacement(4, 3u, 3838);
+    for (size_t a : {(size_t)1, (size_t)4, (size_t)8, (size_t)16})
+        for (int bps = 1; bps <= 2; bps++)
+            for (int rps : {1, 2, 8, 16, 512, 3838})
+                testSpreadMultiRowStrips(a, 3710, 3838, rps, bps, 5u + (unsigned)rps);
     testPinnedChunkLayout();
     testChunkParameters();
+
+    // Sample widths x strip geometries, including a RowsPerStrip that does not
+    // divide the height and a whole-frame strip.
+    testOneRowPerStripIsUnchanged();
+    for (int bps = 1; bps <= 2; bps++)
+        for (int rps : {1, 2, 4, 7, 8, 3838})
+            for (size_t a : {(size_t)1, (size_t)4, (size_t)8, (size_t)16})
+                testStripGeometry(3710, 3838, rps, bps, a);
+    // A height that is not a multiple of any of these, with an odd width.
+    for (int rps : {3, 5, 16})
+        testStripGeometry(1023, 101, rps, 1, 8);
+    testStripGeometryControlsFire();
+    testAdmissionPolicy();
 
     if (failures) { std::printf("%d check(s) failed\n", failures); return 1; }
     std::printf("deflate layout: all checks passed\n");

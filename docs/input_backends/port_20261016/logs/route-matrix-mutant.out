@@ -1,0 +1,11 @@
+# Device-side mutant: cuda_deflate_layout.h rowOffsetInFrame() returns `strip * strip_pitch` (drops the row inside the strip).
+# Binary b592a233... (build-mut-rowoffset, source 977a9cef + that one-line mutation). Same harness, same inputs, GPU3, CPUs 72-79.
+# rps1 is unaffected by construction (row-in-strip is always 0); every multi-row variant must go red against compact and float.
+CMP u16_deflate_rps1:nvcomp-vs-compact PASS (28477960 pixels per arm)
+CMP u16_deflate_rps1:nvcomp-vs-float PASS
+CMP u16_deflate_rps8:nvcomp-vs-compact FAIL rc=1  (DIFF corrected_micrographs.star, ...)
+CMP u16_deflate_rps8:nvcomp-vs-float FAIL rc=1
+CMP u8_deflate_rps16:nvcomp-vs-compact FAIL rc=1
+CMP u8_deflate_rps16:nvcomp-vs-float FAIL rc=1
+# All 12 runs RC=0, pinned nvcomp arms witnessed `nvcomp`, compact/float arms witnessed `compact`/`float`.
+# auto-vs-nvcomp and compact-vs-float PASS (the mutant only damages the nvcomp decode path).

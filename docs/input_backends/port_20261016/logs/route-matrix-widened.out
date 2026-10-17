@@ -1,0 +1,107 @@
+RUN u16_deflate_rps1 nvcomp: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+RUN u16_deflate_rps1 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u16_deflate_rps1 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u16_deflate_rps1 auto: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+CMP u16_deflate_rps1:nvcomp-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps1:nvcomp-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps1:auto-vs-nvcomp PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps1:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u8_deflate_rps1 nvcomp: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+RUN u8_deflate_rps1 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u8_deflate_rps1 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u8_deflate_rps1 auto: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+CMP u8_deflate_rps1:nvcomp-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps1:nvcomp-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps1:auto-vs-nvcomp PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps1:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps1:nvcomp-vs-ref(u16_deflate_rps1) PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u8_deflate_rps2 nvcomp: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+RUN u8_deflate_rps2 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u8_deflate_rps2 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u8_deflate_rps2 auto: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+CMP u8_deflate_rps2:nvcomp-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps2:nvcomp-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps2:auto-vs-nvcomp PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps2:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps2:nvcomp-vs-ref(u16_deflate_rps1) PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u8_deflate_rps8 nvcomp: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+RUN u8_deflate_rps8 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u8_deflate_rps8 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u8_deflate_rps8 auto: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+CMP u8_deflate_rps8:nvcomp-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps8:nvcomp-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps8:auto-vs-nvcomp PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps8:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps8:nvcomp-vs-ref(u16_deflate_rps1) PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u8_deflate_rps16 nvcomp: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+RUN u8_deflate_rps16 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u8_deflate_rps16 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u8_deflate_rps16 auto: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+CMP u8_deflate_rps16:nvcomp-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps16:nvcomp-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps16:auto-vs-nvcomp PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps16:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps16:nvcomp-vs-ref(u16_deflate_rps1) PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u8_deflate_rps512 nvcomp: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+RUN u8_deflate_rps512 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u8_deflate_rps512 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u8_deflate_rps512 auto: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+CMP u8_deflate_rps512:nvcomp-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps512:nvcomp-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps512:auto-vs-nvcomp PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps512:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps512:nvcomp-vs-ref(u16_deflate_rps1) PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u8_deflate_rps3838 nvcomp: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+RUN u8_deflate_rps3838 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u8_deflate_rps3838 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u8_deflate_rps3838 auto: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+CMP u8_deflate_rps3838:nvcomp-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps3838:nvcomp-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps3838:auto-vs-nvcomp PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps3838:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u8_deflate_rps3838:nvcomp-vs-ref(u16_deflate_rps1) PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u16_deflate_rps2 nvcomp: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+RUN u16_deflate_rps2 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u16_deflate_rps2 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u16_deflate_rps2 auto: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+CMP u16_deflate_rps2:nvcomp-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps2:nvcomp-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps2:auto-vs-nvcomp PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps2:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps2:nvcomp-vs-ref(u16_deflate_rps1) PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u16_deflate_rps8 nvcomp: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+RUN u16_deflate_rps8 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u16_deflate_rps8 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u16_deflate_rps8 auto: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+CMP u16_deflate_rps8:nvcomp-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps8:nvcomp-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps8:auto-vs-nvcomp PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps8:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps8:nvcomp-vs-ref(u16_deflate_rps1) PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u16_deflate_rps16 nvcomp: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+RUN u16_deflate_rps16 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u16_deflate_rps16 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u16_deflate_rps16 auto: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+CMP u16_deflate_rps16:nvcomp-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps16:nvcomp-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps16:auto-vs-nvcomp PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps16:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps16:nvcomp-vs-ref(u16_deflate_rps1) PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u16_deflate_rps512 nvcomp: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+RUN u16_deflate_rps512 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u16_deflate_rps512 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u16_deflate_rps512 auto: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+CMP u16_deflate_rps512:nvcomp-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps512:nvcomp-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps512:auto-vs-nvcomp PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps512:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps512:nvcomp-vs-ref(u16_deflate_rps1) PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+RUN u16_deflate_rps3838 nvcomp: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+RUN u16_deflate_rps3838 compact: RC=0 routes=[      2 compact ] products=PRODUCTS=2
+RUN u16_deflate_rps3838 float: RC=0 routes=[      2 float ] products=PRODUCTS=2
+RUN u16_deflate_rps3838 auto: RC=0 routes=[      2 nvcomp ] products=PRODUCTS=2
+CMP u16_deflate_rps3838:nvcomp-vs-compact PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps3838:nvcomp-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps3838:auto-vs-nvcomp PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps3838:compact-vs-float PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm
+CMP u16_deflate_rps3838:nvcomp-vs-ref(u16_deflate_rps1) PASS Validated 2 movies, 2 MRC images, 3 STAR files, 28477960 pixels per arm

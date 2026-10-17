@@ -199,6 +199,8 @@ exec "{sys.executable}" "$@"
             "DefectParser",
             "GlobalIfftElision",
             "PatchRetryState",
+            # #183 local patch phase window.
+            "CpuPatchPhaseWindow",
             "OutputTreeComparator",
             "RunnerInterpolateRecenter",
             "RunnerInterpolateShifts",
@@ -236,8 +238,6 @@ exec "{sys.executable}" "$@"
             "FrameBufferPool",
             # Profiling kit (docs/profiling.md).
             "ProfilingKit",
-            # #183 local patch phase window.
-            "CpuPatchPhaseWindow",
         ]
 
         def runnable(name: str) -> dict:

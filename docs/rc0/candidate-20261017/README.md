@@ -234,12 +234,11 @@ earlier version listed D10/D11 as "pending maintainer" and mixed decided documen
 |---|---|---|
 | **D10 / EER-MS** ([#221](https://github.com/KingAlejandro/MotionCorr-standalone/issues/221)) | host EER decoder memory safety (all 65000/65001/65002 loops, container errors outside `omp critical`, TIFF tag checks, `readLegacy`), plus the MRC-header `abs(INT_MIN)` and `ltostr` arithmetic | **decided 2026-10-17: fix before freeze.** In progress (W-D10c, Gemini 4; as of the round-2 audit, not yet on origin and with no PR). Requires performance preservation (≥6 balanced pairs with AA null controls) and **two independent reviewers who did not author any D10 commit**: Claude Sonnet 5.5 and MiMo v2.6 Pro. Opus 5.5, Sol 6.1 and Gemini 4 all wrote D10 code. Compose only from the pushed origin head, by explicit SHA; the local ref `fix/rc0-d10-eer-memory-safety` at `486a51df` still has the collision. Runbook item 15 applies once it is composed. Composition must avoid the `render_eer` helper collision with #202 (§11, F-1) |
 | **D11 / QM-D1** ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)) | stale `cudaErrorMemoryAllocation` after a handled OOM degrades the next movie's route (`auto`) or refuses it (pinned `--ingest nvcomp`) | **decided 2026-10-17: fix before freeze**, with no performance regression and no admission redesign. In progress as draft PR #228. Requires performance preservation (≥6 balanced pairs with AA null controls) and independent review by Sol 6.1, which wrote no D11 code. The body must not auto-close #226 ("Fixes #226" → "Refs #226"; requested from W-D11). `CudaStaleErrorAfterOom` must be in the required list or explicitly checked in QF |
-| D3 | main merges of the constituent PRs: #223, #202, #203, #224, the D10 PR, #228 and #201, in this order, as merge commits pinned with `--match-head-commit`, with a tree-equality check after each | per-PR maintainer approval, not yet given. #223 and #224 are still marked draft on GitHub |
+| D3 | main merges, as merge commits pinned with `--match-head-commit`, with a tree-equality check after each | **#223, #202, #203, #224 merged 2026-10-17 (maintainer-approved): `ecb7d7f7`, `687ffc17`, `5e12fecf`, `1afa03b5`.** Main's tree after each merge equals the candidate's intermediate tree. Final main `1afa03b5` has tree `bd4742f7`, the same as `adb32785`, so the native evidence here applies to that tree. **Still to merge:** the D10 PR, #228 and #201, each after review and approval |
 | D4 | freeze scope and frozen SHA | **Location decided 2026-10-17: option (a).** The frozen SHA is a `main` commit taken after the D3 merges. Its push CI is the D4 record's CI run. The SHA itself is not yet taken |
 | QF | full audited QF on the frozen `main` SHA. It needs the D4 record, push CI on that exact SHA, item 15, item 10 in every shipped build, and an explicit check that `CudaStaleErrorAfterOom` was collected and passed | pending the fixes. **The runbook needs a small, independently reviewed update first:** item 15 still says "disposition PENDING", and there is no D11 check. That changes `docs/rc0/qf/`, so the tool hashes are re-recorded |
 | REL ([#201](https://github.com/KingAlejandro/MotionCorr-standalone/pull/201)) | release docs | needs the freeze-time update and an independent R-REL re-review. At `34107d38` it still says #220 is pending merge, omits `CpuDoseSymmetryBase`, and describes D10 and D11 as open limitations. Under (a) it merges **before** the freeze, so `RELEASE_CHECKLIST.md` §10 ("no commits after the evidence") must allow later docs-only QF evidence commits and must say which commit is tagged. Its `src/` line citations must be re-checked against the composed tree. Two revisions (`cab5f620`, `34107d38`) have had no independent review since R-REL round 3 (`a31b4e03`) |
 | #203 final fix | `0539bf52` (docs only) | **closed**: R-NEW round 3 (Claude Sonnet 5.5) CONFIRMED, no blocking findings ([comment](https://github.com/KingAlejandro/MotionCorr-standalone/pull/203#issuecomment-6242750071)). Three P3 wording notes remain open |
-| Licence and notices (#18) | `RELEASE_CHECKLIST.md` row in #201: six ambiguous notices in `CPlot2D.cpp/.h` and four in `src/acc/hip` headers, marked `open` | **needs a maintainer disposition** before the freeze (found by R-INT-C/D) |
 
 **8.2 Decided items handed off to the release docs.** Their dispositions are already decided, so none of these
 blocks the freeze as a code change. Each must be stated correctly in #201.
@@ -252,8 +251,9 @@ blocks the freeze as a code change. Each must be stated correctly in #201.
 | [#215](https://github.com/KingAlejandro/MotionCorr-standalone/issues/215) | nvCOMP file-identity check deferred under D1 option 1 (trusted-input precondition) |
 | C3, F2, DOC1, CMP1 (#216), #222, D2 | THP/allocator note, Tier C `--fixtures <scratch>` workaround, inherited host-memory behaviours, RELION 5.1 differences, macOS `rand()`, optional-SDK notice |
 | S1 / D7 | evaluation RC0; no unrestricted CUDA local-alignment claim |
+| Licence and notices (#18) | **D12, decided 2026-10-17: leave for later.** Not an RC0 freeze blocker; #201's checklist row must say it is deferred |
 | F5, TST2 (#213) | big-endian mode-0 MRC with `nx=128` not swap-detected (document only); genuine device-poisoning control (post-RC0) |
-| `metadata_table.cpp:1721` | `addToCPlot2D` reads `label2offset[EMDL_UNDEFINED]`, i.e. index −1, before checking for `EMDL_UNDEFINED`. This is a small out-of-bounds read on the report-plot path, flagged by V-EER and R-INT-D. It is outside #221/D10. **Disposition to be confirmed by the maintainer** (recommended: document now, narrow fix after RC0). ASan runs that render the report hit it, which is why D10's sanitizer controls use `--skip_report_pdf` |
+| `metadata_table.cpp:1721` | `addToCPlot2D` reads `label2offset[EMDL_UNDEFINED]` (index −1) on the report-plot path. **D13, decided 2026-10-17: document for RC0, fix later**, tracked as [#229](https://github.com/KingAlejandro/MotionCorr-standalone/issues/229). It does not affect corrected products. D10's sanitizer controls use `--skip_report_pdf` to keep it out of the D10 evidence |
 
 **8.3 Not a blocker; recorded.** #202's opt-in `RealCutdown` assets live in an external GitHub release
 (`real-cutdown-v1`) that is still a draft. The test registers only when `MC_REAL_CUTDOWN_DIR` is set, and it is not in
@@ -310,10 +310,7 @@ bash tools/multigpu_step.sh --driver item12_retry.py --dataset
       empty.
    9. The tag goes on the commit the maintainer and #201 name (F, or the evidence commit that cites F).
 4. **#201:** the update above, before the freeze. The QF results are filled in afterwards, as evidence.
-5. **Maintainer:**
-   - D3 approvals;
-   - the licence/notices disposition (#18);
-   - the `metadata_table.cpp:1721` disposition.
+5. **Maintainer:** D3 approvals for the D10 PR, #228 and #201. Decided 2026-10-17: the first four D3 merges, D12 (licence/notices deferred) and D13 (#229 documented, fixed after RC0).
 
 ## 11. Integration audit (2026-10-17)
 

@@ -1,0 +1,18 @@
++ R=/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q
++ NV=/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive
++ PY=/home/alex/mc-env/bin/python3
++ cd /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/build
++ taskset -c 88-95 cmake -S /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src -B cuda-nvcomp-1db86902 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DPython3_EXECUTABLE=/home/alex/mc-env/bin/python3 -DCUDA=ON -DCMAKE_CUDA_COMPILER=/usr/local/cuda-12.8/bin/nvcc -DCUDAToolkit_ROOT=/usr/local/cuda-12.8 -DUSE_NVCOMP=ON -DNVCOMP_ROOT=/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive
++ taskset -c 88-95 cmake --build cuda-nvcomp-1db86902 -j8
++ echo cuda rc=0
+cuda rc=0
++ taskset -c 88-95 cmake -S /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src -B cpu-1db86902 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DPython3_EXECUTABLE=/home/alex/mc-env/bin/python3
++ taskset -c 88-95 cmake --build cpu-1db86902 -j8
++ echo cpu rc=0
+cpu rc=0
++ taskset -c 88-95 cmake -S /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src-4b849165 -B cpu-4b849165 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DPython3_EXECUTABLE=/home/alex/mc-env/bin/python3
++ taskset -c 88-95 cmake --build cpu-4b849165 -j8
++ echo cpuparent rc=0
+cpuparent rc=0
++ echo done
+done

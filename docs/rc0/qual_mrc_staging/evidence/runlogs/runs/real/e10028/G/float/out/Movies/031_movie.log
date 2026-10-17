@@ -1,0 +1,40 @@
+Working on Movies/031_movie.mrcs with 8 thread(s).
+
+Movie size: X = 4096 Y = 4096 N = 16
+Frames to be used: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+Frame grouping: n_frames = 16, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 
+interpolate_shifts = 0
+
+Movie FFT: batch=1 R2C work=67141632 C2R work=67141632 shared work=67141632 inverse tile=67141632 bytes
+In unaligned sum, Mean = 33692.3 Std = 1719.93 Hotpixel threshold = 44011.9
+Detected 375 hot pixels to be corrected.
+Fixed hot pixels.
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+
+Global alignment:
+ Iteration 1: RMSD = 1.38904 px
+ Iteration 2: RMSD = 0.0374263 px
+ [CUDA Global Alignment Profile]
+   Per-kernel timing:            not measured (enable with --profile)
+   Total GPU alignment time:     5.59 ms
+   Buffer VRAM:                  1158.64 MiB
+   cuFFT workspace VRAM:         64.12 MiB
+   Peak GPU memory allocated:    1222.76 MiB
+   Buffer placement:             borrowed dead device memory, nothing allocated
+ [CUDA Global Alignment] completed; converged=yes
+Reconstructing globally aligned frames (CUDA in-VRAM)...
+
+Local alignments:
+Patches: X = 1 Y = 1
+Too few patches to do local alignments. Local alignment is skipped.
+Pre-exposure: = 0.00
+Dose weighting and summing frames (CUDA in-VRAM)...
+Dose-weighting scratch borrowed from the consumed real-space movie
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 16, Size: 4096x4096
+  Peak VRAM: 0.00 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 17.28 ms
+Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/runs/real/e10028/G/float/out/Movies/031_movie.mrc
+Full movie wall time: 0.872 s

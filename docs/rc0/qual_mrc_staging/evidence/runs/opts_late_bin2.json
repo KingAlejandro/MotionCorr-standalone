@@ -1,0 +1,160 @@
+[
+ {
+  "family": "e10216",
+  "mode": 1,
+  "config": "G",
+  "expect_auto_route": "compact",
+  "extra": [
+   "--no_early_binning",
+   "--bin_factor",
+   "2"
+  ],
+  "tag": "late_bin2",
+  "arms": {
+   "float": {
+    "rc": 0,
+    "wall_s_incl_lock_wait": 3.1,
+    "witness": [
+     "float"
+    ],
+    "cmd": "/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/gpu3run.sh --i movies.star --o /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/runs/opts/late_bin2/e10216/G/float/out/ --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --j 8 --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/runs/opts/late_bin2/e10216/G/float/witness.txt --no_early_binning --bin_factor 2",
+    "peak_rss_kib": 4158972
+   },
+   "auto": {
+    "rc": 0,
+    "wall_s_incl_lock_wait": 2.5,
+    "witness": [
+     "compact"
+    ],
+    "cmd": "/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/gpu3run.sh --i movies.star --o /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/runs/opts/late_bin2/e10216/G/auto/out/ --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --j 8 --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/runs/opts/late_bin2/e10216/G/auto/witness.txt --no_early_binning --bin_factor 2",
+    "peak_rss_kib": 2160188
+   }
+  },
+  "routes_ok": true,
+  "resident_session_used": {
+   "float": true,
+   "auto": true
+  },
+  "products": [
+   "Movies/1739_Fractions.log",
+   "Movies/1739_Fractions.mrc",
+   "Movies/1739_Fractions.star",
+   "Movies/1739_Fractions_shifts.eps",
+   "all_batches.pdf",
+   "batch.pdf",
+   "batch.pdf.lst",
+   "corrected_micrographs.star",
+   "corrected_micrographs_all_rlnAccumMotionEarly.eps",
+   "corrected_micrographs_all_rlnAccumMotionLate.eps",
+   "corrected_micrographs_all_rlnAccumMotionTotal.eps",
+   "header.pdf",
+   "header.pdf.lst",
+   "logfile.pdf"
+  ],
+  "identity": {
+   "identical": true,
+   "problems": [],
+   "compared": 9,
+   "mrc_compared": 1,
+   "differences": [],
+   "only_a": [],
+   "only_b": []
+  },
+  "inventory": [
+   "Movies/1739_Fractions.log",
+   "Movies/1739_Fractions.mrc",
+   "Movies/1739_Fractions.star",
+   "Movies/1739_Fractions_shifts.eps",
+   "all_batches.pdf",
+   "batch.pdf",
+   "batch.pdf.lst",
+   "corrected_micrographs.star",
+   "corrected_micrographs_all_rlnAccumMotionEarly.eps",
+   "corrected_micrographs_all_rlnAccumMotionLate.eps",
+   "corrected_micrographs_all_rlnAccumMotionTotal.eps",
+   "header.pdf",
+   "header.pdf.lst",
+   "logfile.pdf"
+  ],
+  "pass": true
+ },
+ {
+  "family": "e10216",
+  "mode": 1,
+  "config": "L",
+  "expect_auto_route": "compact",
+  "extra": [
+   "--no_early_binning",
+   "--bin_factor",
+   "2"
+  ],
+  "tag": "late_bin2",
+  "arms": {
+   "float": {
+    "rc": 0,
+    "wall_s_incl_lock_wait": 4.1,
+    "witness": [
+     "float"
+    ],
+    "cmd": "/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/gpu3run.sh --i movies.star --o /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/runs/opts/late_bin2/e10216/L/float/out/ --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --j 8 --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/runs/opts/late_bin2/e10216/L/float/witness.txt --patch_x 5 --patch_y 5 --no_early_binning --bin_factor 2",
+    "peak_rss_kib": 4259188
+   },
+   "auto": {
+    "rc": 0,
+    "wall_s_incl_lock_wait": 3.3,
+    "witness": [
+     "compact"
+    ],
+    "cmd": "/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/gpu3run.sh --i movies.star --o /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/runs/opts/late_bin2/e10216/L/auto/out/ --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --expected_frames 59 --j 8 --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/runs/opts/late_bin2/e10216/L/auto/witness.txt --patch_x 5 --patch_y 5 --no_early_binning --bin_factor 2",
+    "peak_rss_kib": 2157248
+   }
+  },
+  "routes_ok": true,
+  "resident_session_used": {
+   "float": true,
+   "auto": true
+  },
+  "products": [
+   "Movies/1739_Fractions.log",
+   "Movies/1739_Fractions.mrc",
+   "Movies/1739_Fractions.star",
+   "Movies/1739_Fractions_shifts.eps",
+   "all_batches.pdf",
+   "batch.pdf",
+   "batch.pdf.lst",
+   "corrected_micrographs.star",
+   "corrected_micrographs_all_rlnAccumMotionEarly.eps",
+   "corrected_micrographs_all_rlnAccumMotionLate.eps",
+   "corrected_micrographs_all_rlnAccumMotionTotal.eps",
+   "header.pdf",
+   "header.pdf.lst",
+   "logfile.pdf"
+  ],
+  "identity": {
+   "identical": true,
+   "problems": [],
+   "compared": 9,
+   "mrc_compared": 1,
+   "differences": [],
+   "only_a": [],
+   "only_b": []
+  },
+  "inventory": [
+   "Movies/1739_Fractions.log",
+   "Movies/1739_Fractions.mrc",
+   "Movies/1739_Fractions.star",
+   "Movies/1739_Fractions_shifts.eps",
+   "all_batches.pdf",
+   "batch.pdf",
+   "batch.pdf.lst",
+   "corrected_micrographs.star",
+   "corrected_micrographs_all_rlnAccumMotionEarly.eps",
+   "corrected_micrographs_all_rlnAccumMotionLate.eps",
+   "corrected_micrographs_all_rlnAccumMotionTotal.eps",
+   "header.pdf",
+   "header.pdf.lst",
+   "logfile.pdf"
+  ],
+  "pass": true
+ }
+]

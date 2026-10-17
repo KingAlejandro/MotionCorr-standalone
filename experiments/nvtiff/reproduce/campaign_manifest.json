@@ -1,0 +1,1111 @@
+{
+  "scope": "Recorded controlled standalone native sample campaign; no product/performance/trust/scratch/licensing acceptance",
+  "source": "997b955c883300fc76ec43423ec0c533f7b685cf",
+  "predecessor": "a2888d2df1bb93a8c7f30b96219d12c32069f5cf",
+  "package_versions": {
+    "numpy": "2.5.3",
+    "tifffile": "2026.9.20",
+    "imagecodecs": "2026.8.16"
+  },
+  "sdk_wheel": {
+    "name": "nvidia-nvtiff-cu12",
+    "version": "0.8.0.82",
+    "sha256": "2d4a2ea3b749d78fe446df496235469a4cb71eb64deff907e74f02eaa4a70cdf"
+  },
+  "cuda": "12.8",
+  "helpers": {
+    "generate_inputs.py": {
+      "sha256": "df5c4f3a6a6ca0d45d1b91519a7c94f22b74e397a20a2117746fd6ea07900785",
+      "role": "Retained acceptance source, unchanged; not production registration"
+    },
+    "faults.cpp": {
+      "sha256": "81734b7f2db7104fc4f80f1e705122d091059bbb4a89cc3f79b9cd29920c3851",
+      "role": "Retained acceptance source, unchanged; not production registration"
+    },
+    "run_acceptance.py": {
+      "sha256": "897636393d76cbccdb23858be9f20152f6da2549471ce925b75b6bed4c8d9164",
+      "role": "Retained acceptance source, unchanged; not production registration"
+    },
+    "owned_process.py": {
+      "sha256": "90ad5cc3b0bf000eeef0e6b1567571bd41a715c6e0640be687bcf3963f1bd39d",
+      "role": "Retained acceptance source, unchanged; not production registration"
+    },
+    "process_ownership.py": {
+      "sha256": "759c12fd92d01438eb0261c6321b96c6147ec17d8e42cb2072f76a703cd959ca",
+      "role": "Retained acceptance source, unchanged; not production registration"
+    }
+  },
+  "commands": {
+    "actual_native_launcher": "nohup numactl --membind=1 taskset -c 96-103 bash /home/alex/motioncorr-nvtiff-native-v2-20261006/run-native.sh /home/alex/motioncorr-nvtiff-native-v2-20261006",
+    "build_and_fault_compile": "flock -w 300 /tmp/motioncorr-build.lock bash -c 'cmake -S source/experiments/nvtiff -B build -DCMAKE_BUILD_TYPE=Release -DNVTIFF_ROOT=\"$1\" -DCUDAToolkit_ROOT=/usr/local/cuda-12.8 && cmake --build build --parallel 4 && c++ -std=c++17 -shared -fPIC -I\"$1/include\" -I/usr/local/cuda-12.8/include harness/faults.cpp -ldl -o build/faults.so' bash \"$ROOT\" >build.log 2>&1",
+    "fixture_generator": "python3 harness/generate_inputs.py inputs >input-generation.log 2>&1",
+    "native_campaign": "python3 harness/run_acceptance.py --binary build/motioncorr_nvtiff_probe --predecessor /home/alex/motioncorr-nvtiff-native-20261006/build/motioncorr_nvtiff_probe --fault-library build/faults.so --inputs inputs --work native >native.log 2>&1"
+  },
+  "cases": [
+    {
+      "name": "old-absent-depth",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/old-absent-depth.bin"
+      ],
+      "cwd": null,
+      "returncode": 3,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "u8-strip-p1",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/u8-strip-p1.bin"
+      ],
+      "cwd": null,
+      "returncode": 0,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint8",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true
+        },
+        "payload_sha256": "f5179ef99063dec2cbdde03fecd3bf9b3ddee1c24076059d421270a55ea34e45"
+      }
+    },
+    {
+      "name": "u8-strip-p2",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p2.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/u8-strip-p2.bin"
+      ],
+      "cwd": null,
+      "returncode": 0,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": {
+        "samples": 25165824,
+        "dtype": "uint8",
+        "shape": [
+          48,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true
+        },
+        "payload_sha256": "f031fa8aae62f408c5ecc5c7c71bf768f278f1b9c6f8a951fc2fa6176d5f42fc"
+      }
+    },
+    {
+      "name": "u16-strip-p1",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u16-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/u16-strip-p1.bin"
+      ],
+      "cwd": null,
+      "returncode": 0,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint16",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true,
+          "byte_order": true
+        },
+        "payload_sha256": "22ec2fd25f4eae070fd4f64ce21edceb6a1f63ed46b6a9d8885dbe42401abe71"
+      }
+    },
+    {
+      "name": "u16-strip-p2",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u16-strip-p2.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/u16-strip-p2.bin"
+      ],
+      "cwd": null,
+      "returncode": 0,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": {
+        "samples": 25165824,
+        "dtype": "uint16",
+        "shape": [
+          48,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true,
+          "byte_order": true
+        },
+        "payload_sha256": "6d3196607cc81f420c9a0872533264390f6dc6f65a0b85764b07c58ce5427a76"
+      }
+    },
+    {
+      "name": "u16-big-endian",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u16-big-endian.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/u16-big-endian.bin"
+      ],
+      "cwd": null,
+      "returncode": 0,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint16",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true,
+          "byte_order": true
+        },
+        "payload_sha256": "22ec2fd25f4eae070fd4f64ce21edceb6a1f63ed46b6a9d8885dbe42401abe71"
+      }
+    },
+    {
+      "name": "u8-tile",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-tile.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/u8-tile.bin"
+      ],
+      "cwd": null,
+      "returncode": 0,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint8",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true
+        },
+        "payload_sha256": "f5179ef99063dec2cbdde03fecd3bf9b3ddee1c24076059d421270a55ea34e45"
+      }
+    },
+    {
+      "name": "u16-tile-p2",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u16-tile-p2.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/u16-tile-p2.bin"
+      ],
+      "cwd": null,
+      "returncode": 0,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint16",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true,
+          "byte_order": true
+        },
+        "payload_sha256": "22ec2fd25f4eae070fd4f64ce21edceb6a1f63ed46b6a9d8885dbe42401abe71"
+      }
+    },
+    {
+      "name": "u8-explicit-depth1",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-explicit-depth1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/u8-explicit-depth1.bin"
+      ],
+      "cwd": null,
+      "returncode": 0,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint8",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true
+        },
+        "payload_sha256": "f5179ef99063dec2cbdde03fecd3bf9b3ddee1c24076059d421270a55ea34e45"
+      }
+    },
+    {
+      "name": "orientation-2",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/orientation-2.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--first",
+        "0",
+        "--count",
+        "1",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/orientation-2.bin"
+      ],
+      "cwd": null,
+      "returncode": 3,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "miniswhite",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/miniswhite.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--first",
+        "0",
+        "--count",
+        "1",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/miniswhite.bin"
+      ],
+      "cwd": null,
+      "returncode": 3,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "signed",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/signed.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--first",
+        "0",
+        "--count",
+        "1",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/signed.bin"
+      ],
+      "cwd": null,
+      "returncode": 3,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "mixed-width",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/mixed-width.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--first",
+        "0",
+        "--count",
+        "1",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/mixed-width.bin"
+      ],
+      "cwd": null,
+      "returncode": 3,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "volume-depth2",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/volume-depth2.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--first",
+        "0",
+        "--count",
+        "1",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/volume-depth2.bin"
+      ],
+      "cwd": null,
+      "returncode": 3,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "u8-strip-p1-range",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--first",
+        "3",
+        "--count",
+        "5",
+        "--batch-frames",
+        "4",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/u8-strip-p1-range.bin"
+      ],
+      "cwd": null,
+      "returncode": 0,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": {
+        "samples": 2621440,
+        "dtype": "uint8",
+        "shape": [
+          5,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true
+        },
+        "payload_sha256": "7e08d4b875beef208d7cca25a06988c27d79b7933e52acbdb0c5ec32bf5f198b"
+      }
+    },
+    {
+      "name": "u16-strip-p2-range",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u16-strip-p2.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--first",
+        "3",
+        "--count",
+        "5",
+        "--batch-frames",
+        "4",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/u16-strip-p2-range.bin"
+      ],
+      "cwd": null,
+      "returncode": 0,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": {
+        "samples": 2621440,
+        "dtype": "uint16",
+        "shape": [
+          5,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true,
+          "byte_order": true
+        },
+        "payload_sha256": "a169be26a0a17b6b02abdb24b732154bc02ac25dad11b5feb1d020cb7f2e48c0"
+      }
+    },
+    {
+      "name": "no-trust",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/no-trust.bin"
+      ],
+      "cwd": null,
+      "returncode": 1,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "input-cap",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--max-input-bytes",
+        "1",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/input-cap.bin"
+      ],
+      "cwd": null,
+      "returncode": 1,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "output-cap",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--max-output-bytes",
+        "1",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/output-cap.bin"
+      ],
+      "cwd": null,
+      "returncode": 1,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "first-oob",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--first",
+        "24",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/first-oob.bin"
+      ],
+      "cwd": null,
+      "returncode": 1,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "count-oob",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--first",
+        "23",
+        "--count",
+        "2",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/count-oob.bin"
+      ],
+      "cwd": null,
+      "returncode": 1,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "existing",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/existing.bin"
+      ],
+      "cwd": null,
+      "returncode": 1,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "symlink",
+      "command": [
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/input-symlink.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/symlink.bin"
+      ],
+      "cwd": null,
+      "returncode": 1,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "interposer-healthy",
+      "command": [
+        "env",
+        "LD_PRELOAD=/home/alex/motioncorr-nvtiff-native-v2-20261006/build/faults.so",
+        "MC_NVTIFF_FAULT=healthy",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/interposer-healthy.bin"
+      ],
+      "cwd": null,
+      "returncode": 0,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint8",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true
+        },
+        "payload_sha256": "f5179ef99063dec2cbdde03fecd3bf9b3ddee1c24076059d421270a55ea34e45"
+      }
+    },
+    {
+      "name": "fault-decode-refusal",
+      "command": [
+        "env",
+        "LD_PRELOAD=/home/alex/motioncorr-nvtiff-native-v2-20261006/build/faults.so",
+        "MC_NVTIFF_FAULT=decode-refusal",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/fault-decode-refusal.bin"
+      ],
+      "cwd": null,
+      "returncode": 1,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "fault-decode-execution",
+      "command": [
+        "env",
+        "LD_PRELOAD=/home/alex/motioncorr-nvtiff-native-v2-20261006/build/faults.so",
+        "MC_NVTIFF_FAULT=decode-execution",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/fault-decode-execution.bin"
+      ],
+      "cwd": null,
+      "returncode": 1,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "fault-completion",
+      "command": [
+        "env",
+        "LD_PRELOAD=/home/alex/motioncorr-nvtiff-native-v2-20261006/build/faults.so",
+        "MC_NVTIFF_FAULT=completion",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/fault-completion.bin"
+      ],
+      "cwd": null,
+      "returncode": 1,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    },
+    {
+      "name": "fault-destroy",
+      "command": [
+        "env",
+        "LD_PRELOAD=/home/alex/motioncorr-nvtiff-native-v2-20261006/build/faults.so",
+        "MC_NVTIFF_FAULT=destroy",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "--movie",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/inputs/u8-strip-p1.tiff",
+        "--max-input-bytes",
+        "134217728",
+        "--max-output-bytes",
+        "67108864",
+        "--trusted-input",
+        "--dump",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/native/fault-destroy.bin"
+      ],
+      "cwd": null,
+      "returncode": 1,
+      "input_dump_cap_bytes": [
+        134217728,
+        67108864
+      ],
+      "owned_log_hash": null,
+      "oracle": null
+    }
+  ],
+  "inputs": {
+    "sha256": {
+      "u8-strip-p1.tiff": "979bf1477696d2bb4c294e3ebc000cf4e6eebd6d56d3c9678a57c6c95088ea7c",
+      "u8-strip-p2.tiff": "3273239d30632201e7d8f5dbffdbf24392274ac580b75e1c2697c902016886e8",
+      "u16-strip-p1.tiff": "e8ef1e5ef34f24a7329c3bf4dafc8b736ef40ea543fd854c32a4e565502a34bf",
+      "u16-strip-p2.tiff": "3fd0aebcca2d6d20ccc7b867ebba84b836e1ca00447443baf088ab8ffca88318",
+      "u16-big-endian.tiff": "40e0169bc84d2bd323dec46daf7c1a0f3af4ce9138d571d392fefc635fc1809b",
+      "u8-tile.tiff": "d75b1c25e4d91cb0a9887ed7442f7f0c44cbbdc3f5d747f8c77c9e48d9f4f74f",
+      "u16-tile-p2.tiff": "e2518f98b7d0283127480b9cfe3143a17fb118e4be97578b2c1d38f36d42d95d",
+      "u8-explicit-depth1.tiff": "979bf1477696d2bb4c294e3ebc000cf4e6eebd6d56d3c9678a57c6c95088ea7c",
+      "orientation-2.tiff": "a5414683abc4e4dd3cd174ca979df5e6aa241049ab42653348dfb9b782bfa5be",
+      "miniswhite.tiff": "7711662b84c51c41779b3c6f077c238530b6fb32ce95cdee3c917914dcc10247",
+      "signed.tiff": "863b7849603d298bd7718bf3ba7d58402becf69aefd530ff0a9659176dc614b2",
+      "mixed-width.tiff": "1682b83fcad22032b03d3caa77d348f2b2b55f2f37c48c7e555c07b60e0f81c8",
+      "volume-depth2.tiff": "376026b8dae3e6ec51e633972b3159041fc3193487005686f4e48177f6e8a415"
+    },
+    "generation": "reproduce/generate_inputs.py; every generated source read back independently"
+  },
+  "supplement": {
+    "source": "#!/usr/bin/env python3\n# SPDX-License-Identifier: GPL-2.0-or-later\n\"\"\"One genuine explicitunit ImageDepth gate; borrow only frozen validatedv2.\"\"\"\nimport hashlib,json,os,struct,sys,subprocess\nfrom pathlib import Path\nimport numpy as np,tifffile\nprior=Path(sys.argv[1]).resolve();out=Path(sys.argv[2]).resolve();out.mkdir(exist_ok=False)\npayload={'pid':os.getpid(),'stat':Path('/proc/self/stat').read_text(),'exe':os.readlink('/proc/self/exe'),'status':Path('/proc/self/status').read_text(),'memory_policy':subprocess.check_output(['numactl','--show'],text=True)}\n(out/'payload.json').write_text(json.dumps(payload,indent=2)+'\\n')\nsys.path.insert(0,str(prior/'harness'))\nfrom run_acceptance import grade\nfrom owned_process import run\ndef need(ok,msg):\n if not ok:raise RuntimeError(msg)\ndef sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()\nneed(set(os.sched_getaffinity(0))==set(range(96,104)),'actualCPU96-103')\nneed((prior/'exit-status.txt').read_text().strip()=='0' and (prior/'release-gate-status.txt').read_text().strip()=='0','priorrelease/completion')\nsubprocess.run([sys.executable,str(prior/'verify_freeze.py'),'--complete'],cwd=prior,check=True)\npins=json.loads((prior/'built-identities.json').read_text())\ndef stable():\n for n,v in pins.items():need(sha(n if Path(n).is_absolute() else prior/n)==v,'unchanged borrowedsource/binary/library '+n)\ndef idle(stage):\n r=subprocess.run(['nvidia-smi','--query-compute-apps=pid,gpu_uuid,process_name','--format=csv,noheader'],capture_output=True,text=True,timeout=15)\n (out/(stage+'-query.log')).write_text(r.stdout+r.stderr);need(r.returncode==0,'assignedoccupancyquery')\n for line in r.stdout.splitlines():\n  if not line.strip():continue\n  f=[s.strip() for s in line.split(',',2)];need(len(f)==3 and f[0].isdigit() and f[1].startswith('GPU-'),'malformedoccupancy')\n  need(f[1]!='GPU-eddb42fe-4f9a-adde-76d3-b924e14add54','assignedGPU0busy')\nstable();idle('initial')\narr=np.arange(3*32*64,dtype=np.uint16).reshape(3,32,64);movie=out/'explicit-unit.tiff'\nwith tifffile.TiffWriter(movie) as w:\n for plane in arr:w.write(plane[None,...],volumetric=True,compression='lzw',predictor=2,rowsperstrip=8,photometric='minisblack',metadata=None)\nwith tifffile.TiffFile(movie) as tf:\n tags=[dict(value=p.tags[32997].value,dtype=int(p.tags[32997].dtype),count=p.tags[32997].count) for p in tf.pages]\n need(all(t==dict(value=1,dtype=4,count=1) for t in tags),'genuine scalarLONGImageDepth1 everypage')\n oracle=np.stack([p.asarray() for p in tf.pages]);need(np.array_equal(arr,oracle),'independentgeneratedpixelsreadback')\nbinary=prior/'build/motioncorr_nvtiff_probe';dump=out/'samples.bin'\nrc,text,owned=run([str(binary),'--movie',str(movie),'--trusted-input','--dump',str(dump),'--batch-frames','2'],out/'native.log',timeout=120)\nneed(rc==0,'explicitunit native decode')\n(out/'native-result.json').write_text(json.dumps({'returncode':rc,'owned':owned,'input_sha256':sha(movie),'binary_sha256':sha(binary),'tags':tags,'pins':pins},indent=2)+'\\n')\nresult=json.loads(text);need(result['decode_executed'] and result['cleanup_complete'] and result['uuid_hex']=='eddb42fe4f9aadde76d3b924e14add54','nativebackend/cleanup')\nneed(all(f['tag_depth']==1 and f['depth']<=1 and f['experiment_admitted'] and f['nvtiff_status']==0 for f in result['frames']),'raw LONGunit branch and geometry witness')\ncomparison=grade(dump,oracle);stable();idle('release')\nreceipt=dict(status='PASS',source=json.loads((prior/'freeze.json').read_text())['source'],prior_receipt_sha256=sha(prior/'final-receipt.json'),pins=pins,input_sha256=sha(movie),binary_sha256=sha(binary),tags=tags,native=result,owned=owned,comparison=comparison,release='emptyassignedGPU0query0',scope='exactexplicitunit depth supplement; no timing/3D/productroute/trust proof')\n(out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\\n')\nprint(json.dumps({'status':'PASS','samples':comparison['samples'],'source':receipt['source'],'input_sha256':receipt['input_sha256']}))\n",
+    "receipt": {
+      "status": "PASS",
+      "source": "997b955c883300fc76ec43423ec0c533f7b685cf",
+      "prior_receipt_sha256": "c7e5ae87bb0ba34fb175a0e2505ad2b472f6ecc6085b3b83cc7688a8ad1e4449",
+      "pins": {
+        "build/motioncorr_nvtiff_probe": "0643930d608c1e0670edd6fef687affa2af5df555e147fb940f216c8fa004ed9",
+        "build/faults.so": "d9bc216c2d3be34425d323453512103be1729bdf459d0d63843eaea6a57f12b2",
+        "build/CMakeCache.txt": "c793946ea9d5ab7f367f7b0256956a7dc477d794e6315babdd0e568618648b16",
+        "/usr/local/cuda-12.8/lib64/libcudart.so.12": "218eec4c8385a32e258a0235be4d449986844f2d0de3430052f0924e6fe60f71",
+        "/home/alex/motioncorr-nvtiff-native-v2-20261006/private-sdk/unpacked/nvidia/nvtiff/lib/libnvtiff.so.0": "d46cfdef19db2530a5cfe06cc093edba7592d51656f1cbf833d51ce60b8a7830",
+        "/lib/x86_64-linux-gnu/libstdc++.so.6": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11",
+        "/lib/x86_64-linux-gnu/libgcc_s.so.1": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb",
+        "/lib/x86_64-linux-gnu/libc.so.6": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf",
+        "/lib/x86_64-linux-gnu/libdl.so.2": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96",
+        "/lib/x86_64-linux-gnu/libpthread.so.0": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd",
+        "/lib/x86_64-linux-gnu/librt.so.1": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82",
+        "/lib/x86_64-linux-gnu/libm.so.6": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+      },
+      "input_sha256": "0b677b12df006b3083c8e6325f2adf7541ff1a90ad3d7439ceaf7c1338e52ea3",
+      "binary_sha256": "0643930d608c1e0670edd6fef687affa2af5df555e147fb940f216c8fa004ed9",
+      "tags": [
+        {
+          "value": 1,
+          "dtype": 4,
+          "count": 1
+        },
+        {
+          "value": 1,
+          "dtype": 4,
+          "count": 1
+        },
+        {
+          "value": 1,
+          "dtype": 4,
+          "count": 1
+        }
+      ],
+      "native": {
+        "mode": "decode",
+        "movie": "/home/alex/motioncorr-nvtiff-native-v2-20261006/unit-depth-supplement-v3/explicit-unit.tiff",
+        "nvtiff_headers": "0.8.0.82",
+        "nvtiff_runtime": "0.8.0",
+        "device": 0,
+        "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+        "device_name": "NVIDIA A100 80GB PCIe",
+        "frames": [
+          {
+            "index": 0,
+            "ifd_offset": 8,
+            "width": 64,
+            "height": 32,
+            "bits": 16,
+            "compression": 5,
+            "geometry_type": 0,
+            "strile_height": 8,
+            "orientation": 1,
+            "predictor": 2,
+            "samples_per_pixel": 1,
+            "photometric": 1,
+            "planar_config": 1,
+            "depth": 0,
+            "tag_depth": 1,
+            "sample_format": 1,
+            "experiment_admitted": true,
+            "nvtiff_status": 0
+          },
+          {
+            "index": 1,
+            "ifd_offset": 636,
+            "width": 64,
+            "height": 32,
+            "bits": 16,
+            "compression": 5,
+            "geometry_type": 0,
+            "strile_height": 8,
+            "orientation": 1,
+            "predictor": 2,
+            "samples_per_pixel": 1,
+            "photometric": 1,
+            "planar_config": 1,
+            "depth": 0,
+            "tag_depth": 1,
+            "sample_format": 1,
+            "experiment_admitted": true,
+            "nvtiff_status": 0
+          },
+          {
+            "index": 2,
+            "ifd_offset": 1264,
+            "width": 64,
+            "height": 32,
+            "bits": 16,
+            "compression": 5,
+            "geometry_type": 0,
+            "strile_height": 8,
+            "orientation": 1,
+            "predictor": 2,
+            "samples_per_pixel": 1,
+            "photometric": 1,
+            "planar_config": 1,
+            "depth": 0,
+            "tag_depth": 1,
+            "sample_format": 1,
+            "experiment_admitted": true,
+            "nvtiff_status": 0
+          }
+        ],
+        "first": 0,
+        "count": 3,
+        "batch_frames": 2,
+        "row_order": "MRC-bottom-up",
+        "input_snapshot_bytes": 1888,
+        "output_device_bytes": 8192,
+        "decoder_internal_device_bytes": null,
+        "host_output_bytes": 8192,
+        "admission_wall_s": 0.384421661,
+        "decode_wall_s": 0.005341459,
+        "decode_stream_ms": 5.25721579,
+        "sample_copy_wall_s": 0.000166222,
+        "dump_write_wall_s": 0.000186895,
+        "total_wall_s": 0.392200022,
+        "dump": "/home/alex/motioncorr-nvtiff-native-v2-20261006/unit-depth-supplement-v3/samples.bin",
+        "decode_executed": true,
+        "cleanup_complete": true
+      },
+      "owned": {
+        "command": [
+          "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+          "--movie",
+          "/home/alex/motioncorr-nvtiff-native-v2-20261006/unit-depth-supplement-v3/explicit-unit.tiff",
+          "--trusted-input",
+          "--dump",
+          "/home/alex/motioncorr-nvtiff-native-v2-20261006/unit-depth-supplement-v3/samples.bin",
+          "--batch-frames",
+          "2"
+        ],
+        "cwd": null,
+        "pid": 3276152,
+        "pgid": 3276152,
+        "original_start": 673673410,
+        "proc_stat": "3276152 (motioncorr_nvti) R 3276133 3276152 3276152 0 -1 4194304 19 0 0 0 0 0 0 0 20 0 1 0 673673410 462848 0 18446744073709551615 102006211608576 102006211634573 140723963744528 0 0 0 0 7 0 0 0 0 17 99 0 0 0 0 0 102006211648120 102006211649568 102007207886848 140723963751214 140723963751517 140723963751517 140723963752362 0\n",
+        "status": "Name:\tmotioncorr_nvti\nUmask:\t0002\nState:\tR (running)\nTgid:\t3276152\nNgid:\t0\nPid:\t3276152\nPPid:\t3276133\nTracerPid:\t0\nUid:\t1004\t1004\t1004\t1004\nGid:\t1004\t1004\t1004\t1004\nFDSize:\t64\nGroups:\t100 1004 \nNStgid:\t3276152\nNSpid:\t3276152\nNSpgid:\t3276152\nNSsid:\t3276152\nKthread:\t0\nVmPeak:\t   14628 kB\nVmSize:\t   12580 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t     404 kB\nVmRSS:\t     404 kB\nRssAnon:\t      56 kB\nRssFile:\t     348 kB\nRssShmem:\t       0 kB\nVmData:\t     152 kB\nVmStk:\t     132 kB\nVmExe:\t      28 kB\nVmLib:\t    8092 kB\nVmPTE:\t      48 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/1773298\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000000007\nSigCgt:\t0000000000000000\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\t00000ff,00000000,00000000,00000000\nCpus_allowed_list:\t96-103\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000003\nMems_allowed_list:\t0-1\nvoluntary_ctxt_switches:\t0\nnonvoluntary_ctxt_switches:\t0\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+        "executable": "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+        "returncode": 0,
+        "timeout": false,
+        "unexpected_live_descendants": [],
+        "unverified_original_group_members": [],
+        "final_live_owned": [],
+        "ownership_errors": [],
+        "observed_pid_births": {
+          "3276152": 673673410
+        }
+      },
+      "comparison": {
+        "samples": 6144,
+        "dtype": "uint16",
+        "shape": [
+          3,
+          32,
+          64
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true,
+          "byte_order": true
+        },
+        "payload_sha256": "e4472d728175cfd68afd0501919fb7ce55bca3edf3b878b686656ca0041c3409"
+      },
+      "release": "emptyassignedGPU0query0",
+      "scope": "exactexplicitunit depth supplement; no timing/3D/productroute/trust proof"
+    },
+    "scope": "Genuine scalar LONG ImageDepth1; finalscript retained verbatim as manifestdata, not registered product code"
+  }
+}

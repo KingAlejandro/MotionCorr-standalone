@@ -158,6 +158,11 @@ add_executable(motioncorr src/apps/run_motioncorr.cpp)
 target_link_libraries(motioncorr PRIVATE motioncorr_core)
 install(TARGETS motioncorr RUNTIME DESTINATION bin)
 
+option(BUILD_NVTIFF_PROBE "Build the standalone experimental nvTIFF decoder (not a MotionCorr ingest route)" OFF)
+if(BUILD_NVTIFF_PROBE)
+    add_subdirectory(experiments/nvtiff)
+endif()
+
 include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)

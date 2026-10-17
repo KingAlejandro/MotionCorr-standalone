@@ -420,6 +420,25 @@ static void testCeilDivInt() {
     check(pipelineSlots(vmax, vmax - 1) == 2, "chunk of INT_MAX-1 frames out of INT_MAX uses two slots");
 }
 
+// The pipeline loop visits k = 0..n_chunks inclusive. At n_chunks == INT_MAX the old
+// `k <= n_chunks; k++` incremented past INT_MAX; the step helper must stop there.
+static void testAdvancePipelineStep() {
+    using namespace mc_checked;
+    volatile int vmax = INT_MAX;
+    int k = vmax - 1;
+    check(advancePipelineStep(k, vmax) && k == INT_MAX, "step reaches INT_MAX from INT_MAX-1");
+    check(!advancePipelineStep(k, vmax) && k == INT_MAX, "step stops at INT_MAX without incrementing past it");
+    k = 0;
+    check(advancePipelineStep(k, 1) && k == 1 && !advancePipelineStep(k, 1) && k == 1, "one chunk: steps 0 and 1");
+    k = 0;
+    check(!advancePipelineStep(k, 0) && k == 0, "zero chunks: only step 0");
+    for (int n : {1, 2, 4, 5}) {
+        int visits = 0;
+        for (int i = 0;; ) { visits++; if (!advancePipelineStep(i, n)) break; }
+        check(visits == n + 1, "the loop visits exactly n_chunks + 1 steps");
+    }
+}
+
 static void testCheckedStripSlotAndFrameStage() {
     size_t r = 7;
     // Largest cursor that fits at alignment 8: cursor+2 must round up to <= SIZE_MAX - 7.
@@ -632,6 +651,7 @@ int main() {
     testConvertExact();
     testFileSpanFitsOffT();
     testCeilDivInt();
+    testAdvancePipelineStep();
     testCheckedStripSlotAndFrameStage();
     testCheckedPinnedReserve();
     testCheckedPinnedChunkLayout();

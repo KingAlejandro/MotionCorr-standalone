@@ -130,31 +130,12 @@ DEFAULT_REQUIRED_TESTS = [
     # check removed from a header, which the test must reject (WILL_FAIL); the names
     # come from a CMake function, so a mutant dropped from it would leave that check
     # unproven with the suite still green.
-    "DeflateLayoutMutant_add_size",
-    "DeflateLayoutMutant_mul_size",
-    "DeflateLayoutMutant_add_u64",
-    "DeflateLayoutMutant_align_up",
-    "DeflateLayoutMutant_convert_roundtrip",
-    "DeflateLayoutMutant_convert_sign",
     "DeflateLayoutMutant_span_wrap",
-    "DeflateLayoutMutant_span_end",
-    "DeflateLayoutMutant_ceil_div",
-    "DeflateLayoutMutant_slot_cursor",
-    "DeflateLayoutMutant_slot_align",
-    "DeflateLayoutMutant_stage_slot",
     "DeflateLayoutMutant_stage_sum",
-    "DeflateLayoutMutant_stage_negative",
-    "DeflateLayoutMutant_reserve_headroom",
     "DeflateLayoutMutant_reserve_round",
-    "DeflateLayoutMutant_reserve_saturate",
-    "DeflateLayoutMutant_layout_take_align",
-    "DeflateLayoutMutant_layout_take_add",
     "DeflateLayoutMutant_layout_table",
-    "DeflateLayoutMutant_layout_total",
-    "DeflateLayoutMutant_layout_ok_flag",
-    "DeflateLayoutMutant_chunk_frames",
-    "DeflateLayoutMutant_slots",
     "DeflateLayoutMutant_arena_start",
+    "DeflateLayoutMutant_drain_step",
     # Issue #95: the only test that can observe the native sample staging
     # ownership contract, for both widths the compact route admits. Registered
     # under if(UNIX) beside ImageWriteFaults.

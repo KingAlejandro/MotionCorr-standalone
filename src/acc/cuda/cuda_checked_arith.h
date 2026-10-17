@@ -89,6 +89,17 @@ inline int ceilDivInt(int a, int b) {
     return (int)(((long long)a + (long long)b - 1) / (long long)b);
 }
 
+/**
+ * Advance the pipeline step counter, which runs 0..n_chunks inclusive: false (and k
+ * unchanged) once k has reached n_chunks. Written so that k never exceeds n_chunks;
+ * a plain `k <= n_chunks; k++` increments past INT_MAX when n_chunks == INT_MAX.
+ */
+inline bool advancePipelineStep(int &k, int n_chunks) {
+    if (k >= n_chunks) return false;
+    k = k + 1;
+    return true;
+}
+
 } // namespace mc_checked
 
 #endif // CUDA_CHECKED_ARITH_H_

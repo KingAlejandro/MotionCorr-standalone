@@ -1470,7 +1470,14 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                 // Same offset and byte count TIFFReadRawStrip uses for this strip.
                 int err = 0;
                 raw_offsets[f][s] = TIFFGetStrileOffsetWithErr(tif, (uint32_t)s, &err);
-                if (err || raw_offsets[f][s] == 0) contiguous = false;
+                // LibTIFF could not supply this strip's offset (unreadable or
+                // unpopulated StripOffsets). Say so rather than fall through to the
+                // span check, which would name the wrong cause.
+                if (err) {
+                    reject = "strip offset not readable from the TIFF directory";
+                    break;
+                }
+                if (raw_offsets[f][s] == 0) contiguous = false;
                 // Offsets come from the file's StripOffsets. A strip whose end is
                 // not addressable cannot be a real strip, and offset + size would
                 // wrap in the adjacency test below.
@@ -1956,7 +1963,10 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // Pass B: read chunk k while chunk k-1 is on the device; verify chunk k-1
     // and only then convert it.
     // ------------------------------------------------------------------
-    for (int k = 0; k <= n_chunks; k++) {
+    // k runs 0..n_chunks inclusive (the last pass only drains chunk n_chunks-1).
+    // advancePipelineStep stops at n_chunks instead of incrementing past it, which
+    // would overflow int when n_chunks == INT_MAX.
+    for (int k = 0;; ) {
         if (k < n_chunks) {
             const int j = k % n_slots;
             const int f0 = k * chunk_frames;
@@ -2020,6 +2030,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                 f0, bf, f0 == 0, apply_gain);
             HANDLE_ERROR(cudaGetLastError());
         }
+        if (!mc_checked::advancePipelineStep(k, n_chunks)) break;
     }
     phase.next("ingest drain");
     HANDLE_ERROR(cudaStreamSynchronize(stream));

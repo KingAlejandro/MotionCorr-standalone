@@ -353,7 +353,7 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        if (std::string(argv[1]) == "render_eer") {
+        if (std::string(argv[1]) == "render_eer_groups") {
             // Render every group of an EER movie the way the runner does: one
             // renderFrames call per group from an OpenMP team, errors captured per
             // group and rethrown on the serial path (#221). Writes, per group, the
@@ -361,7 +361,7 @@ int main(int argc, char **argv)
             // {width, height, groups} and an int64 pair count per group, so a test
             // can compare the decode exactly without writing whole frames.
             require(argc == 7,
-                    "Usage: runner_numerics render_eer movie output upsampling grouping threads");
+                    "Usage: runner_numerics render_eer_groups movie output upsampling grouping threads");
             const int upsampling = textToInteger(argv[4]);
             const int grouping = textToInteger(argv[5]);
             const int threads = textToInteger(argv[6]);

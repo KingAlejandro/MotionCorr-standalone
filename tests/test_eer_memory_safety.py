@@ -131,7 +131,7 @@ def main():
             for up in ((1, 2) if comp == 65002 else (-1, 1, 2)):
                 for grouping in (1, 3):
                     dest = root / 'render.bin'
-                    log = run([helper, 'render_eer', movie, dest, up, grouping, 2], root)
+                    log = run([helper, 'render_eer_groups', movie, dest, up, grouping, 2], root)
                     assert 'This frame is skipped' not in log, log
                     groups = [list(range(g, g + grouping)) for g in range(0, 3, grouping)]
                     assert dest.read_bytes() == expected_image(width, up, groups, electrons)
@@ -142,21 +142,21 @@ def main():
                 bad[where] = bytes(1 if comp == 65000 else 3)
                 write_eer(root / 'short.eer', comp, bad, width)
                 for grouping in (1, 3):
-                    log = run([helper, 'render_eer', 'short.eer', 'render.bin', 1, grouping, 2], root)
+                    log = run([helper, 'render_eer_groups', 'short.eer', 'render.bin', 1, grouping, 2], root)
                     assert 'This frame is skipped' in log, log
                     filtered = [e if i != where else [] for i, e in enumerate(electrons)]
                     groups = [list(range(g, g + grouping)) for g in range(0, 3, grouping)]
                     assert (root/'render.bin').read_bytes() == expected_image(width, 1, groups, filtered)
             write_eer(root/'zero.eer', comp, [bytes(len(s)) for s in strips], width)
-            log = run([helper, 'render_eer', 'zero.eer', 'render.bin', 1, 3, 2], root)
+            log = run([helper, 'render_eer_groups', 'zero.eer', 'render.bin', 1, 3, 2], root)
             assert 'This frame is skipped' in log
             assert (root/'render.bin').read_bytes() == expected_image(width, 1, [[0, 1, 2]], [[], [], []])
-            # Truncated last strip and (for 65000) non-multiple-of-3 / shared-strip over-read.
-            for trim in (1, 2, 10):
+            # Truncated last strip and (for 65000) all mod-3 remainders (0, 1, 2) before total_pixels.
+            for trim in (3, 4, 5, 10):
                 if len(strips[-1]) > trim:
                     trunc_strips = [strips[0], strips[1], strips[2][:-trim]]
                     write_eer(root/'trunc-strip.eer', comp, trunc_strips, width)
-                    log = run([helper, 'render_eer', 'trunc-strip.eer', 'render.bin', 1, 3, 2], root)
+                    log = run([helper, 'render_eer_groups', 'trunc-strip.eer', 'render.bin', 1, 3, 2], root)
                     assert 'This frame is skipped' in log, log
                     assert (root/'render.bin').read_bytes() == expected_image(
                         width, 1, [[0, 1, 2]], [electrons[0], electrons[1], []])

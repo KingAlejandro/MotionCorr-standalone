@@ -51,7 +51,9 @@ def products(out: Path, movie: str) -> dict[str, bytes]:
         if p.suffix == ".mrc":
             found[p.name[len(movie):]] = mrc_payload(p)
         elif p.suffix == ".star":
-            found[p.name[len(movie):]] = p.read_bytes()
+            # The STAR names its own movie; nothing else in it may differ.
+            found[p.name[len(movie):]] = p.read_bytes().replace(
+                f"Movies/{movie}.".encode(), b"Movies/MOVIE.")
     return found
 
 
@@ -132,7 +134,8 @@ def main() -> int:
         rc, text, out, routes = run(binary, root, label, f"{kind}.star", ingest, True, a.cpus)
         logs = {m: (out / "Movies" / f"{m}.log") for m in MOVIES}
         later_logs = "".join(logs[m].read_text() for m in MOVIES[1:] if logs[m].exists())
-        failed_line = [l for l in text.splitlines() if "Motion correction failed for" in l]
+        # REPORT_ERROR prints the job-level message twice; count distinct lines.
+        failed_line = sorted({l for l in text.splitlines() if "Motion correction failed for" in l})
         checks = {
             "genuine fault set the runtime slot":
                 "returned=cudaErrorMemoryAllocation pending-after=cudaErrorMemoryAllocation"
@@ -147,6 +150,8 @@ def main() -> int:
                 and "failed recoverably" not in later_logs,
             "b and c products identical to b alone":
                 products(out, "b") == refs[kind] and products(out, "c") == refs[kind],
+            "no device allocation left at exit":
+                "[faultinject] remaining-owned=0 stale-releases=0" in text,
         }
         bad = [k for k, v in checks.items() if not v]
         print(f"[{'PASS' if not bad else 'FAIL'}] {kind:<8} --ingest {ingest:<7} rc={rc} "

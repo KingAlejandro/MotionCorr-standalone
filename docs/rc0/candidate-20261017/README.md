@@ -25,7 +25,8 @@ fixes are out of scope here, and so are their specialist test campaigns.
 | CPU/CUDA diagnostic (Tier B) | recorded, not graded; S1 values unchanged from Q1 |
 | Scientific validation (Tier D) | not run; no claim |
 | macOS | builds and runs; not qualified; 70/72 (`SyntheticRegression` #222 fails, `NativeMovieStaging` skipped) |
-| Not run | hosted CI on this SHA (not pushed); pbzip2 cases; item 15 (D10 undecided); QM, SCARF, timing |
+| Hosted CI (added after push) | draft PR #227, run 39073675385 on the PR merge of `54d6b1ee`: Linux CTest 72/72 (pbzip2 case PASS), CUDA compile-only pass. This is not native CUDA evidence |
+| Not run | pbzip2 case natively (hosted Linux CPU CTest only); item 15 (no D10 fix yet); QM, SCARF, timing |
 | Release state | **not frozen, not fully qualified**: D10 (#221) and D11 (#226) open, D4 not taken |
 
 ## 1. Composition
@@ -201,8 +202,12 @@ Clean clone of `adb32785` on Apple M4 Pro, macOS 26.7.1, AppleClang 21.0.0, `cma
 
 ## 7. Not run, limitations and observations
 
-- **Hosted CI on `adb32785`: UNRUN.** The branch was not pushed. Every constituent head and the base has green CI, but the composed SHA has none. Pushing the branch, or opening a draft PR, needs Alex's go-ahead.
-- **pbzip2-compressed MRC: UNRUN** on 4GPUs and macOS. pbzip2 is not installed, and `build.sh` does not set `MC_REQUIRE_ALL_DECODERS=ON`. Hosted CI installs pbzip2 and sets that flag, so it would cover these cases once the branch is pushed. No package was installed on the shared host.
+- **Hosted CI (update after push, 2026-10-17 22:06Z).** Alex authorised the push. The branch was pushed without force at `54d6b1ee`, and draft PR [#227](https://github.com/KingAlejandro/MotionCorr-standalone/pull/227) (DO NOT MERGE) was opened.
+  - Run [39073675385](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39073675385) checked out `b231c2d0`, i.e. `Merge 54d6b1ee into 71ab841e`. Its tree equals `54d6b1ee`, whose files outside `docs/rc0/candidate-20261017/` equal `adb32785`.
+  - **Linux CTest: 72/72 pass**, including `InputFormats` `mrc_compressed_bz2` e2e PASS (pbzip2 installed, `MC_REQUIRE_ALL_DECODERS=ON`).
+  - **CUDA compile-only: pass.**
+  - Hosted CI is not native CUDA, performance or scientific evidence.
+- **pbzip2-compressed MRC: UNRUN natively** on 4GPUs and macOS; hosted Linux CPU CTest covers it (above). pbzip2 is not installed, and `build.sh` does not set `MC_REQUIRE_ALL_DECODERS=ON`. Hosted CI installs pbzip2 and sets that flag, so it would cover these cases once the branch is pushed. No package was installed on the shared host.
 - **Not covered here:**
   - Tier C launcher runs: covered only by the CTests that wrap it, as the runbook says (F2 applies).
   - Second venue (SCARF).

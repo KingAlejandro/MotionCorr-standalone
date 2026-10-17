@@ -146,7 +146,9 @@ DataType parseMRCHeader(MRChead *header, long int img_select,  bool isStack=fals
 	swap = 0;
 	char *b = (char*) header;
 	int i;
-	if ((abs(header->mode) > SWAPTRIG) || (abs(header->nx) > SWAPTRIG))
+	// abs() is undefined for INT_MIN, which a damaged header can hold.
+	if (header->mode < -SWAPTRIG || header->mode > SWAPTRIG ||
+	    header->nx < -SWAPTRIG || header->nx > SWAPTRIG)
 	{
 #ifdef DEBUG
 		fprintf(stderr, "Warning: Swapping header byte order for 4-byte types\n");
@@ -259,9 +261,21 @@ int readMRC(long int img_select, bool isStack=false, const FileName &name="")
 
 	MRChead *header = (MRChead*)askMemory(sizeof(MRChead));
 	if (fread(header, MRCSIZE, 1, fimg) < 1)
+	{
+		freeMemory(header, sizeof(MRChead));
 		REPORT_ERROR("rwMRC: error in reading header of image " + name);
+	}
 
-	DataType datatype = parseMRCHeader(header, img_select, isStack, name);
+	DataType datatype;
+	try
+	{
+		datatype = parseMRCHeader(header, img_select, isStack, name);
+	}
+	catch (...)
+	{
+		freeMemory(header, sizeof(MRChead));
+		throw;
+	}
 
 	if (isStack && dataflag<0) // Don't read the individual header and the data if not necessary
 	{

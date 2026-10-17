@@ -151,7 +151,7 @@ DEFAULT_REQUIRED_TESTS = [
     "MultiGpuScheduling",
     "NativeMovieStaging",
     "GainCacheOwnership",
-    "JointStarPublication",
+    "JointStarPublication", "EerMemorySafety",
 ]
 
 

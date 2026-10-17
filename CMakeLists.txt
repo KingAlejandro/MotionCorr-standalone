@@ -390,6 +390,44 @@ if(BUILD_TESTING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compressed_movie_sequence.py
                 --binary $<TARGET_FILE:motioncorr>)
         set_tests_properties(CompressedMovieSequence PROPERTIES TIMEOUT 120)
+        # Every container, sample type and codec the readers accept (issue #186 follow-up).
+        # The compressed-MRC cases need the decoders the reader pipes through; a missing
+        # one is reported UNRUN and only tolerated when it is absent at configure time.
+        # CI sets MC_REQUIRE_ALL_DECODERS=ON, so a missing decoder fails configuration there
+        # instead of being waived; elsewhere the waiver is explicit in the configure output.
+        option(MC_REQUIRE_ALL_DECODERS "Fail configuration if pbzip2 or zstd is missing (no UNRUN waiver)" OFF)
+        set(_input_format_unrun "")
+        foreach(_decoder pbzip2 zstd)
+            find_program(_decoder_path_${_decoder} ${_decoder})
+            if(NOT _decoder_path_${_decoder})
+                if(MC_REQUIRE_ALL_DECODERS)
+                    message(FATAL_ERROR "${_decoder} not found and MC_REQUIRE_ALL_DECODERS=ON")
+                endif()
+                message(WARNING "${_decoder} not found: InputFormats and RealCutdown waive its compressed-MRC "
+                                "cases (UNRUN). Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the waiver.")
+                list(APPEND _input_format_unrun --allow-unrun ${_decoder})
+            endif()
+        endforeach()
+        add_test(NAME InputFormats
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_input_formats.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>
+                ${_input_format_unrun})
+        set_tests_properties(InputFormats PROPERTIES TIMEOUT 600)
+        # tools/cut_down_movie.py keeps exactly the requested frames in every container.
+        add_test(NAME CutDownMovie
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_cut_down_movie.py
+                --helper $<TARGET_FILE:runner_numerics>)
+        set_tests_properties(CutDownMovie PROPERTIES TIMEOUT 300)
+        # Opt-in: cut-down real movies, one per corpus family (test-data/real_cutdown_manifest.json).
+        # Point MC_REAL_CUTDOWN_DIR at a copy of the assets to register it.
+        set(MC_REAL_CUTDOWN_DIR "" CACHE PATH "Directory holding the cut-down real movies (opt-in RealCutdown test)")
+        if(MC_REAL_CUTDOWN_DIR)
+            add_test(NAME RealCutdown
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_real_cutdown.py
+                    --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>
+                    --assets ${MC_REAL_CUTDOWN_DIR} ${_input_format_unrun})
+            set_tests_properties(RealCutdown PROPERTIES TIMEOUT 1800)
+        endif()
         add_test(NAME GlobalIfftElision
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_global_ifft_elision.py
                 --binary $<TARGET_FILE:motioncorr>)

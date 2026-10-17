@@ -1,0 +1,124 @@
+{
+ "case": "x5_syn65001_2k_up2",
+ "desc": "synthetic tag 65001, 2K detector, up2",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.0",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "8",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "40",
+  "--eer_upsampling",
+  "2"
+ ],
+ "arms": {
+  "auto": {
+   "arm": "auto",
+   "ingest": "auto",
+   "rc": 0,
+   "wall_s": 3.62,
+   "peak_rss_mib": 368.9,
+   "gpu2_mem_base_mib": 1,
+   "gpu2_peak_used_mib": 1399,
+   "gpu2_peak_over_base_mib": 1398,
+   "nvml_app_peak_mib": 1390,
+   "foreign_pids_seen": [],
+   "nvml_gpu_samples": 40,
+   "nvml_my_pids": [
+    4038610
+   ],
+   "witness": [
+    "Movies/movie.eer compact"
+   ],
+   "cmd": [
+    "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/runs/x5_syn65001_2k_up2/out-auto/",
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "2",
+    "--ingest",
+    "auto",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/results/x5_syn65001_2k_up2/auto.witness"
+   ],
+   "bench_lock_waits_60s": 0
+  },
+  "float": {
+   "arm": "float",
+   "ingest": "float",
+   "rc": 0,
+   "wall_s": 4.22,
+   "peak_rss_mib": 609.6,
+   "gpu2_mem_base_mib": 1,
+   "gpu2_peak_used_mib": 1399,
+   "gpu2_peak_over_base_mib": 1398,
+   "nvml_app_peak_mib": 1390,
+   "foreign_pids_seen": [],
+   "nvml_gpu_samples": 47,
+   "nvml_my_pids": [
+    4038833
+   ],
+   "witness": [
+    "Movies/movie.eer float"
+   ],
+   "cmd": [
+    "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/runs/x5_syn65001_2k_up2/out-float/",
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "2",
+    "--ingest",
+    "float",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/results/x5_syn65001_2k_up2/float.witness"
+   ],
+   "bench_lock_waits_60s": 0
+  }
+ },
+ "compare_complete_tree": {
+  "rc": 0,
+  "stdout": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nAllowed added .log line prefixes (dropped from BOTH arms): 'Staging this movie as native', 'Released native uint', 'Materialized native uint', 'EER grouping'\nComparison: complete non-PDF tree; status=PASS; different files=0",
+  "stderr": "",
+  "products_only": false
+ }
+}

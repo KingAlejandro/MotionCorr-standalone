@@ -1,0 +1,36 @@
+{
+ "name": "s00_smoke65000",
+ "desc": "",
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cpu-1db86902/motioncorr",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.0",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "2",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "5",
+  "--eer_upsampling",
+  "1"
+ ],
+ "arms": [
+  {
+   "name": "default",
+   "ingest": null
+  },
+  {
+   "name": "default",
+   "ingest": null
+  }
+ ],
+ "compare": null,
+ "keep_mrc": false,
+ "witness": false
+}

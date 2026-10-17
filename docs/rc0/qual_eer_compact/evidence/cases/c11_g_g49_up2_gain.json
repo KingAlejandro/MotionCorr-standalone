@@ -1,0 +1,47 @@
+{
+ "name": "c11_g_g49_up2_gain",
+ "desc": "12963 g49 up2 with 4K gain (gain upsampled 2x)",
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.282051",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "8",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "49",
+  "--eer_upsampling",
+  "2",
+  "--expected_frames",
+  "39",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--gainref",
+  "gain.gain"
+ ],
+ "arms": [
+  {
+   "name": "auto",
+   "ingest": "auto"
+  },
+  {
+   "name": "float",
+   "ingest": "float"
+  }
+ ],
+ "compare": [
+  "auto",
+  "float"
+ ],
+ "keep_mrc": false,
+ "witness": true
+}

@@ -1,0 +1,122 @@
+{
+ "case": "b5_trunc60_noexp",
+ "desc": "as b1 without --expected_frames",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.0",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "8",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "40",
+  "--eer_upsampling",
+  "1"
+ ],
+ "arms": {
+  "auto": {
+   "arm": "auto",
+   "ingest": "auto",
+   "rc": 0,
+   "wall_s": 15.9,
+   "peak_rss_mib": 3301.4,
+   "gpu2_mem_base_mib": 1,
+   "gpu2_peak_used_mib": 8087,
+   "gpu2_peak_over_base_mib": 8086,
+   "nvml_app_peak_mib": 8078,
+   "foreign_pids_seen": [],
+   "nvml_gpu_samples": 162,
+   "nvml_my_pids": [
+    4048281
+   ],
+   "witness": [
+    "Movies/movie1.eer compact",
+    "Movies/movie2.eer compact",
+    "Movies/movie3.eer compact"
+   ],
+   "cmd": [
+    "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/runs/b5_trunc60_noexp/out-auto/",
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1",
+    "--ingest",
+    "auto",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/results/b5_trunc60_noexp/auto.witness"
+   ],
+   "bench_lock_waits_60s": 0
+  },
+  "float": {
+   "arm": "float",
+   "ingest": "float",
+   "rc": 0,
+   "wall_s": 19.58,
+   "peak_rss_mib": 5158.1,
+   "gpu2_mem_base_mib": 1,
+   "gpu2_peak_used_mib": 8055,
+   "gpu2_peak_over_base_mib": 8054,
+   "nvml_app_peak_mib": 8046,
+   "foreign_pids_seen": [],
+   "nvml_gpu_samples": 198,
+   "nvml_my_pids": [
+    4049127
+   ],
+   "witness": [
+    "Movies/movie1.eer float",
+    "Movies/movie2.eer float",
+    "Movies/movie3.eer float"
+   ],
+   "cmd": [
+    "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/runs/b5_trunc60_noexp/out-float/",
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1",
+    "--ingest",
+    "float",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/results/b5_trunc60_noexp/float.witness"
+   ],
+   "bench_lock_waits_60s": 0
+  }
+ }
+}

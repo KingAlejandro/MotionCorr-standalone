@@ -1,0 +1,22 @@
+host 4-gpu-vm
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, NVIDIA A100 80GB PCIe, 570.86.10
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, NVIDIA A100 80GB PCIe, 570.86.10
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, NVIDIA A100 80GB PCIe, 570.86.10
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, NVIDIA A100 80GB PCIe, 570.86.10
+bash: line 1: nvcc: command not found
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake version 3.28.3
+python 3.12.3 numpy 2.5.3
+10.02.1
+always [madvise] never
+src HEAD 483e881d9a6a352dba3268dac0f8c729364860b5 modified=0
+57256b875ab1bbcb45a398210d138c1f92a6e55b9edb71c8b2c5fcf57ca2b0ea  build-cpu/motioncorr
+7d2a0b17542d9a6d47b1483a8340f57a2105b948a2d77a6ede61c91c09dd4ad4  build-cuda/motioncorr
+f8bd37409897b3dbf3c398e3bc8b4aaefbf00ca38204e806d27832a4ca3e899b  build-nvcomp/motioncorr
+17655b701f5b1e4ad9f95b5156dea317b8f8b80fd0eeea79bc44b1d92dee5970  build-cuda/motioncorr_faultinject
+4ff0757a324ac7ce98347989b25e82b17036d1f93da4f35b507bf807cb93ee82  build-nvcomp/motioncorr_faultinject
+dd86cd419c43dc83d732c7b70cff2bb40c5459674ba65f9b9ba5ee85a6b26439  /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-cpu/motioncorr
+cpu: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+cuda: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+nvcomp: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+Cuda compilation tools, release 12.8, V12.8.61

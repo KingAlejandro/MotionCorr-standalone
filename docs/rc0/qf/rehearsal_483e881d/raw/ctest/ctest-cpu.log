@@ -1,0 +1,242 @@
+start 2026-10-17T11:38:19Z cfg=cpu HEAD=483e881d9a6a352dba3268dac0f8c729364860b5 status=0
+mask: 96-103 gpu: none
+binary sha256: 57256b875ab1bbcb45a398210d138c1f92a6e55b9edb71c8b2c5fcf57ca2b0ea
+  Test #68: NativeMovieStaging
+
+Total Tests: 68
+=== CTest Collection Validation: PASS === 
+  Collected tests: 68
+    - CpuUnweightedStream            [ADDITIVE]
+    - PatchRetryState                [REQUIRED]
+    - RunnerInterpolateRecenter      [REQUIRED]
+    - FloatPlanCache                 [ADDITIVE]
+    - MrcHeaderStats                 [REQUIRED]
+    - PdfConcat                      [REQUIRED]
+    - DefectParser                   [REQUIRED]
+    - DeflateLayout                  [REQUIRED]
+    - DeflateLayoutMutant_span_wrap  [REQUIRED]
+    - DeflateLayoutMutant_stage_sum  [REQUIRED]
+    - DeflateLayoutMutant_reserve_round [REQUIRED]
+    - DeflateLayoutMutant_layout_table [REQUIRED]
+    - DeflateLayoutMutant_arena_start [REQUIRED]
+    - DeflateLayoutMutant_drain_step [REQUIRED]
+    - Adler32Arithmetic              [REQUIRED]
+    - Adler32KernelHost              [REQUIRED]
+    - StageProfileThreads            [REQUIRED]
+    - FrameBufferPool                [REQUIRED]
+    - ScratchArena                   [REQUIRED]
+    - ReaderPool                     [ADDITIVE]
+    - ReaderPoolMutant_spin          [ADDITIVE]
+    - ReaderPoolMutant_nowait        [ADDITIVE]
+    - DefectNeighbours               [REQUIRED]
+    - DefectMergeMutant_append_only  [ADDITIVE]
+    - DefectMergeMutant_no_order_check [ADDITIVE]
+    - DefectMergeMutant_swap_xy      [ADDITIVE]
+    - NvcompAcceptanceDiagnostics    [REQUIRED]
+    - ProfilingKit                   [REQUIRED]
+    - GainCacheOwnership             [REQUIRED]
+    - NvcompGuards                   [REQUIRED]
+    - SyntheticRegression            [REQUIRED]
+    - HotPixelRngDeterminism         [REQUIRED]
+    - RunnerExposure                 [REQUIRED]
+    - Runner_failure                 [REQUIRED]
+    - Runner_invalid                 [REQUIRED]
+    - Runner_resume                  [REQUIRED]
+    - Runner_tomography              [REQUIRED]
+    - RunnerLateBin                  [REQUIRED]
+    - RunnerExportedUnits            [REQUIRED]
+    - GainCache                      [REQUIRED]
+    - TiffRead                       [REQUIRED]
+    - DamagedMovie                   [REQUIRED]
+    - TruncatedMrcMovie              [REQUIRED]
+    - TruncatedGainDefect            [REQUIRED]
+    - CompressedMovieSequence        [REQUIRED]
+    - GlobalIfftElision              [REQUIRED]
+    - HostBufferReuse                [REQUIRED]
+    - StageProfile                   [REQUIRED]
+    - RunnerModelParser              [REQUIRED]
+    - MicrographModelBounds          [REQUIRED]
+    - RunnerInterpolateShifts        [REQUIRED]
+    - WriteFaults                    [REQUIRED]
+    - WriteFaultsSync                [REQUIRED]
+    - WriteFaultsMultiProduct        [REQUIRED]
+    - OutputStageFaults              [REQUIRED]
+    - LogfileFromEps                 [REQUIRED]
+    - LogfileFromEpsMutant_always_eps [REQUIRED]
+    - LogfileFromEpsMutant_late_guard [REQUIRED]
+    - LogfileFromEpsMutant_eps_order [REQUIRED]
+    - LogfileFromEpsMutant_placeholder [REQUIRED]
+    - LogfileFromEpsMutant_concat_cleanup [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - CudaValidationParser           [REQUIRED]
+    - MultiGpuScheduling             [REQUIRED]
+    - OutputTreeComparator           [REQUIRED]
+    - JointStarPublication           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+    - NativeMovieStaging             [REQUIRED]
+validate_test_collection rc=0
+test_1_absent_truth_script_and_missing_binary (__main__.TestCiFailClosedControls.test_1_absent_truth_script_and_missing_binary)
+Control 1: Missing truth script fails CI preflight; missing binary fails gate runner. ... ok
+test_2_absent_dependency_fails_cmake (__main__.TestCiFailClosedControls.test_2_absent_dependency_fails_cmake)
+Control 2: BUILD_TESTING=ON must fail if python or numpy is missing in MotionCorr CMakeLists.txt. ... ok
+test_3_zero_or_missing_collected_tests_fails (__main__.TestCiFailClosedControls.test_3_zero_or_missing_collected_tests_fails)
+Control 3: Empty test suite or missing required test fails collection validation. ... ok
+test_4_missing_fixture_or_truth_fails (__main__.TestCiFailClosedControls.test_4_missing_fixture_or_truth_fails)
+Control 4: Missing fixture movie, missing truth file, or malformed manifest fails verify_fixtures. ... ok
+test_5_byte_flipped_fixture_fails (__main__.TestCiFailClosedControls.test_5_byte_flipped_fixture_fails)
+Control 5: Baseline fixture must pass first, then fail after corrupting one byte. ... ok
+test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref. ... ok
+test_7_reused_stem_and_canonical_generator_protection (__main__.TestCiFailClosedControls.test_7_reused_stem_and_canonical_generator_protection)
+Control 7: Generator protects canonical truth and refuses conflicting stem overwrite. ... ok
+test_8_canonical_star_input_is_immutable (__main__.TestCiFailClosedControls.test_8_canonical_star_input_is_immutable)
+Control 8: STAR metadata drift that leaves the pixels untouched must fail closed. ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 22.994s
+
+OK
+test_ci_fail_closed rc=0
+Internal ctest changing into directory: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/build-cpu
+Test project /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/build-cpu
+      Start  1: CpuUnweightedStream
+ 1/68 Test  #1: CpuUnweightedStream ...................   Passed    0.08 sec
+      Start  2: PatchRetryState
+ 2/68 Test  #2: PatchRetryState .......................   Passed    0.04 sec
+      Start  3: RunnerInterpolateRecenter
+ 3/68 Test  #3: RunnerInterpolateRecenter .............   Passed    0.01 sec
+      Start  4: FloatPlanCache
+ 4/68 Test  #4: FloatPlanCache ........................   Passed    0.01 sec
+      Start  5: MrcHeaderStats
+ 5/68 Test  #5: MrcHeaderStats ........................   Passed    0.01 sec
+      Start  6: PdfConcat
+ 6/68 Test  #6: PdfConcat .............................   Passed    0.08 sec
+      Start  7: DefectParser
+ 7/68 Test  #7: DefectParser ..........................   Passed    0.02 sec
+      Start  8: DeflateLayout
+ 8/68 Test  #8: DeflateLayout .........................   Passed    0.01 sec
+      Start  9: DeflateLayoutMutant_span_wrap
+ 9/68 Test  #9: DeflateLayoutMutant_span_wrap .........   Passed    0.01 sec
+      Start 10: DeflateLayoutMutant_stage_sum
+10/68 Test #10: DeflateLayoutMutant_stage_sum .........   Passed    0.01 sec
+      Start 11: DeflateLayoutMutant_reserve_round
+11/68 Test #11: DeflateLayoutMutant_reserve_round .....   Passed    0.01 sec
+      Start 12: DeflateLayoutMutant_layout_table
+12/68 Test #12: DeflateLayoutMutant_layout_table ......   Passed    0.01 sec
+      Start 13: DeflateLayoutMutant_arena_start
+13/68 Test #13: DeflateLayoutMutant_arena_start .......   Passed    0.01 sec
+      Start 14: DeflateLayoutMutant_drain_step
+14/68 Test #14: DeflateLayoutMutant_drain_step ........   Passed    0.01 sec
+      Start 15: Adler32Arithmetic
+15/68 Test #15: Adler32Arithmetic .....................   Passed    0.76 sec
+      Start 16: Adler32KernelHost
+16/68 Test #16: Adler32KernelHost .....................   Passed    0.00 sec
+      Start 17: StageProfileThreads
+17/68 Test #17: StageProfileThreads ...................   Passed    0.58 sec
+      Start 18: FrameBufferPool
+18/68 Test #18: FrameBufferPool .......................   Passed    0.04 sec
+      Start 19: ScratchArena
+19/68 Test #19: ScratchArena ..........................   Passed    0.00 sec
+      Start 20: ReaderPool
+20/68 Test #20: ReaderPool ............................   Passed    0.57 sec
+      Start 21: ReaderPoolMutant_spin
+21/68 Test #21: ReaderPoolMutant_spin .................   Passed    0.54 sec
+      Start 22: ReaderPoolMutant_nowait
+22/68 Test #22: ReaderPoolMutant_nowait ...............   Passed    0.03 sec
+      Start 23: DefectNeighbours
+23/68 Test #23: DefectNeighbours ......................   Passed    0.01 sec
+      Start 24: DefectMergeMutant_append_only
+24/68 Test #24: DefectMergeMutant_append_only .........   Passed    0.00 sec
+      Start 25: DefectMergeMutant_no_order_check
+25/68 Test #25: DefectMergeMutant_no_order_check ......   Passed    0.01 sec
+      Start 26: DefectMergeMutant_swap_xy
+26/68 Test #26: DefectMergeMutant_swap_xy .............   Passed    0.00 sec
+      Start 27: NvcompAcceptanceDiagnostics
+27/68 Test #27: NvcompAcceptanceDiagnostics ...........   Passed    0.14 sec
+      Start 28: ProfilingKit
+28/68 Test #28: ProfilingKit ..........................   Passed  113.20 sec
+      Start 29: GainCacheOwnership
+29/68 Test #29: GainCacheOwnership ....................   Passed    4.51 sec
+      Start 30: NvcompGuards
+30/68 Test #30: NvcompGuards ..........................   Passed    0.04 sec
+      Start 31: SyntheticRegression
+31/68 Test #31: SyntheticRegression ...................   Passed    0.91 sec
+      Start 32: HotPixelRngDeterminism
+32/68 Test #32: HotPixelRngDeterminism ................   Passed    0.56 sec
+      Start 33: RunnerExposure
+33/68 Test #33: RunnerExposure ........................   Passed    0.61 sec
+      Start 34: Runner_failure
+34/68 Test #34: Runner_failure ........................   Passed    0.16 sec
+      Start 35: Runner_invalid
+35/68 Test #35: Runner_invalid ........................   Passed    0.16 sec
+      Start 36: Runner_resume
+36/68 Test #36: Runner_resume .........................   Passed    2.58 sec
+      Start 37: Runner_tomography
+37/68 Test #37: Runner_tomography .....................   Passed    0.48 sec
+      Start 38: RunnerLateBin
+38/68 Test #38: RunnerLateBin .........................   Passed    0.82 sec
+      Start 39: RunnerExportedUnits
+39/68 Test #39: RunnerExportedUnits ...................   Passed    0.15 sec
+      Start 40: GainCache
+40/68 Test #40: GainCache .............................   Passed    1.21 sec
+      Start 41: TiffRead
+41/68 Test #41: TiffRead ..............................   Passed    1.01 sec
+      Start 42: DamagedMovie
+42/68 Test #42: DamagedMovie ..........................   Passed    3.16 sec
+      Start 43: TruncatedMrcMovie
+43/68 Test #43: TruncatedMrcMovie .....................   Passed    3.74 sec
+      Start 44: TruncatedGainDefect
+44/68 Test #44: TruncatedGainDefect ...................   Passed    2.01 sec
+      Start 45: CompressedMovieSequence
+45/68 Test #45: CompressedMovieSequence ...............   Passed    0.82 sec
+      Start 46: GlobalIfftElision
+46/68 Test #46: GlobalIfftElision .....................   Passed    1.69 sec
+      Start 47: HostBufferReuse
+47/68 Test #47: HostBufferReuse .......................   Passed    3.54 sec
+      Start 48: StageProfile
+48/68 Test #48: StageProfile ..........................   Passed    1.87 sec
+      Start 49: RunnerModelParser
+49/68 Test #49: RunnerModelParser .....................   Passed    0.19 sec
+      Start 50: MicrographModelBounds
+50/68 Test #50: MicrographModelBounds .................   Passed    1.40 sec
+      Start 51: RunnerInterpolateShifts
+51/68 Test #51: RunnerInterpolateShifts ...............   Passed    0.52 sec
+      Start 52: WriteFaults
+52/68 Test #52: WriteFaults ...........................   Passed    0.63 sec
+      Start 53: WriteFaultsSync
+53/68 Test #53: WriteFaultsSync .......................   Passed    0.67 sec
+      Start 54: WriteFaultsMultiProduct
+54/68 Test #54: WriteFaultsMultiProduct ...............   Passed    0.63 sec
+      Start 55: OutputStageFaults
+55/68 Test #55: OutputStageFaults .....................   Passed    0.50 sec
+      Start 56: LogfileFromEps
+56/68 Test #56: LogfileFromEps ........................   Passed    4.66 sec
+      Start 57: LogfileFromEpsMutant_always_eps
+57/68 Test #57: LogfileFromEpsMutant_always_eps .......   Passed    0.45 sec
+      Start 58: LogfileFromEpsMutant_late_guard
+58/68 Test #58: LogfileFromEpsMutant_late_guard .......   Passed    0.38 sec
+      Start 59: LogfileFromEpsMutant_eps_order
+59/68 Test #59: LogfileFromEpsMutant_eps_order ........   Passed    0.27 sec
+      Start 60: LogfileFromEpsMutant_placeholder
+60/68 Test #60: LogfileFromEpsMutant_placeholder ......   Passed    0.73 sec
+      Start 61: LogfileFromEpsMutant_concat_cleanup
+61/68 Test #61: LogfileFromEpsMutant_concat_cleanup ...   Passed    3.87 sec
+      Start 62: CiFailClosedControls
+62/68 Test #62: CiFailClosedControls ..................   Passed   20.41 sec
+      Start 63: CudaValidationParser
+63/68 Test #63: CudaValidationParser ..................   Passed    0.07 sec
+      Start 64: MultiGpuScheduling
+64/68 Test #64: MultiGpuScheduling ....................   Passed  114.53 sec
+      Start 65: OutputTreeComparator
+65/68 Test #65: OutputTreeComparator ..................   Passed    1.15 sec
+      Start 66: JointStarPublication
+66/68 Test #66: JointStarPublication ..................   Passed    1.14 sec
+      Start 67: ImageWriteFaults
+67/68 Test #67: ImageWriteFaults ......................   Passed    0.05 sec
+      Start 68: NativeMovieStaging
+68/68 Test #68: NativeMovieStaging ....................   Passed    0.39 sec
+
+100% tests passed, 0 tests failed out of 68
+
+Total Test time (real) = 298.87 sec
+ctest rc=0 end 2026-10-17T11:43:42Z

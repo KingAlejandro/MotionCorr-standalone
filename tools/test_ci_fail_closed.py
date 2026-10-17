@@ -214,6 +214,7 @@ exec "{sys.executable}" "$@"
             "DefectNeighbours",
             # #127 output stage.
             "MrcHeaderStats",
+            "ReportPlotUndefinedAxis",
             "PdfConcat",
             # #127 writer fail-closed variants.
             "WriteFaultsSync",
@@ -276,6 +277,7 @@ exec "{sys.executable}" "$@"
                         "GainCacheOwnership", "JointStarPublication",
                         "MicrographModelBounds", "CompressedMovieSequence",
                         "RunnerInterpolateRecenter", "RunnerInterpolateShifts",
+                        "ReportPlotUndefinedAxis",
                         "StageProfile", "CudaValidationParser", "HostBufferReuse",
                         "StageProfileThreads", "FrameBufferPool", "ProfilingKit",
                         "LogfileFromEps", "LogfileFromEpsMutant_always_eps",

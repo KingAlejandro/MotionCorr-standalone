@@ -102,6 +102,9 @@ DEFAULT_REQUIRED_TESTS = [
     # any of amin/amax/amean/arms and every product comparator would still pass,
     # because both sides would be reading the same drifted header.
     "MrcHeaderStats",
+    # Issue #229: addToCPlot2D with EMDL_UNDEFINED (-1) on the x-axis must not
+    # index label2offset[-1], while still rejecting missing defined labels.
+    "ReportPlotUndefinedAxis",
     "PdfConcat",
     # Added with the #127 background output writer. WriteFaults exercises the
     # deferred path (failure raised on the worker thread, collected afterwards);

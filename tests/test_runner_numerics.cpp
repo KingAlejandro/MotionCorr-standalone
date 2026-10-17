@@ -232,6 +232,96 @@ int main(int argc, char **argv)
             std::cout << "PASS fused MRC header statistics (" << cases.size() << " cases)\n";
             return 0;
         }
+        if (std::string(argv[1]) == "plot2d_undefined_axis") {
+            // Regression for issue #229: MetaDataTable::addToCPlot2D indexed
+            // label2offset[xaxis] before checking xaxis == EMDL_UNDEFINED (-1),
+            // reading one element before label2offset's storage on every report
+            // plot call (MDavg.addToCPlot2D(plot2Db, EMDL_UNDEFINED, label, 1.)).
+            struct InspectablePlot2D : CPlot2D {
+                using CPlot2D::CPlot2D;
+                const std::vector<CDataSet> &dataSets() const { return m_dataSets; }
+            };
+
+            const std::vector<RFLOAT> want_y_double = {1.25, 3.5, 0.75, 6.125};
+            const std::vector<int> want_y_int = {2, 5, 3, 8};
+            MetaDataTable table;
+            for (size_t i = 0; i < want_y_double.size(); i++) {
+                table.addObject();
+                table.setValue(EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL, want_y_double[i]);
+                table.setValue(EMDL_IMAGE_OPTICS_GROUP, want_y_int[i]);
+                table.setValue(EMDL_MICROGRAPH_NAME, std::string("mic_") + std::to_string(i + 1) + ".mrc");
+            }
+
+            InspectablePlot2D plot("summary");
+            table.addToCPlot2D(&plot, EMDL_UNDEFINED, EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL, 1.0);
+            require(plot.dataSets().size() == 1, "expected 1 dataset after double y plot");
+            CDataSet ds_double = plot.dataSets()[0];
+            require(ds_double.GetNumberOfDataPointsInSet() == static_cast<int>(want_y_double.size()),
+                    "unexpected point count for double y plot");
+            for (size_t i = 0; i < want_y_double.size(); i++) {
+                CDataPoint pt = ds_double.GetDataPoint(static_cast<int>(i));
+                require(pt.GetX() == static_cast<double>(i + 1),
+                        "EMDL_UNDEFINED x-axis must produce 1..N at row " + std::to_string(i));
+                require(pt.GetY() == static_cast<double>(want_y_double[i]),
+                        "unexpected double y value at row " + std::to_string(i));
+            }
+            require(plot.GetXAxisTitle().empty(), "EMDL_UNDEFINED must leave x-axis title empty");
+            require(plot.GetYAxisTitle() == EMDL::label2Str(EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL),
+                    "unexpected y-axis title for double y plot");
+
+            table.addToCPlot2D(&plot, EMDL_UNDEFINED, EMDL_IMAGE_OPTICS_GROUP, 1.0);
+            require(plot.dataSets().size() == 2, "expected 2 datasets after int y plot");
+            CDataSet ds_int = plot.dataSets()[1];
+            require(ds_int.GetNumberOfDataPointsInSet() == static_cast<int>(want_y_int.size()),
+                    "unexpected point count for int y plot");
+            for (size_t i = 0; i < want_y_int.size(); i++) {
+                CDataPoint pt = ds_int.GetDataPoint(static_cast<int>(i));
+                require(pt.GetX() == static_cast<double>(i + 1),
+                        "EMDL_UNDEFINED x-axis must produce 1..N for int y plot at row " + std::to_string(i));
+                require(pt.GetY() == static_cast<double>(want_y_int[i]),
+                        "unexpected int y value at row " + std::to_string(i));
+            }
+
+            table.addToCPlot2D(&plot, EMDL_IMAGE_OPTICS_GROUP, EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL, 1.0);
+            require(plot.dataSets().size() == 3, "expected 3 datasets after defined x/y plot");
+            CDataSet ds_xy = plot.dataSets()[2];
+            for (size_t i = 0; i < want_y_double.size(); i++) {
+                CDataPoint pt = ds_xy.GetDataPoint(static_cast<int>(i));
+                require(pt.GetX() == static_cast<double>(want_y_int[i]),
+                        "defined x-axis value mismatch at row " + std::to_string(i));
+                require(pt.GetY() == static_cast<double>(want_y_double[i]),
+                        "defined y-axis value mismatch at row " + std::to_string(i));
+            }
+            require(plot.GetXAxisTitle() == EMDL::label2Str(EMDL_IMAGE_OPTICS_GROUP),
+                    "defined x-axis must set x-axis title");
+
+            auto expect_plot_error = [&](EMDLabel x_label, EMDLabel y_label, const char *substr, const char *tag) {
+                bool caught = false;
+                try {
+                    InspectablePlot2D bad_plot;
+                    table.addToCPlot2D(&bad_plot, x_label, y_label, 1.0);
+                } catch (const RelionError &err) {
+                    require(err.msg.find(substr) != std::string::npos,
+                            std::string(tag) + ": unexpected error message: " + err.msg);
+                    caught = true;
+                }
+                require(caught, std::string(tag) + ": expected RelionError containing '" + substr + "'");
+            };
+
+            expect_plot_error(EMDL_MICROGRAPH_ACCUM_MOTION_EARLY, EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL,
+                              "cannot find x-axis label", "missing defined x-label");
+            expect_plot_error(EMDL_UNDEFINED, EMDL_MICROGRAPH_ACCUM_MOTION_LATE,
+                              "cannot find y-axis label", "missing defined y-label with EMDL_UNDEFINED x-axis");
+            expect_plot_error(EMDL_IMAGE_OPTICS_GROUP, EMDL_MICROGRAPH_ACCUM_MOTION_LATE,
+                              "cannot find y-axis label", "missing defined y-label with defined x-axis");
+            expect_plot_error(EMDL_MICROGRAPH_NAME, EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL,
+                              "can only plot x-axis double, int or long int", "non-numeric x-label");
+            expect_plot_error(EMDL_UNDEFINED, EMDL_MICROGRAPH_NAME,
+                              "can only plot y-axis double, int or long int", "non-numeric y-label");
+
+            std::cout << "PASS addToCPlot2D EMDL_UNDEFINED x-axis and missing-label errors\n";
+            return 0;
+        }
         if (std::string(argv[1]) == "float_plan_cache") {
             // The ad-hoc float transforms share cached FFTW plans between arrays. Each
             // transform must give the bits a plan made for its own arrays gives, and a

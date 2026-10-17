@@ -51,6 +51,26 @@ Every compact or nvCOMP route needs a CUDA build with a resident session and is 
 `--ingest float`; `--ingest compact` or `--ingest nvcomp` refuses a movie its route does not admit.
 A CPU build reads every movie through the float reader.
 
+**Eligibility, admission and trust.** The table gives *encoding eligibility*. On current main two
+further conditions apply to the nvCOMP route:
+
+- **Checked admission (#217).** Before any decode, a strip offset that LibTIFF cannot supply, or an
+  overflow in the file span, row pitch, staging, layout or reservation arithmetic, is a named
+  decline (`nvCOMP ingestion declined (...)` in the movie log) with no CUDA error. Under
+  `--ingest auto` the movie then falls back to the host route (compact or float); a pinned
+  `--ingest nvcomp` refuses it. A decline says nothing about whether the host reader will accept
+  a malformed file.
+- **Trusted, immutable input (decision D1, adopted for RC0).** `--ingest auto` on a `USE_NVCOMP`
+  build assumes the movie is trusted and does not change while it is read. Matching tags and a
+  successful witness do not validate the compressed Deflate body before nvCOMP decodes it (NVIDIA
+  documents undefined behaviour for corrupt input), and a file replaced between the tag scan and
+  the strip reads is not detected; that check is deferred to #215. See the decision brief
+  [`docs/rc0/decoder_trust_and_dependencies.md`](../rc0/decoder_trust_and_dependencies.md).
+
+The routes recorded in this note were measured on main `d7171b81`, before #217 (the synthetic
+matrix and the GPU smoke runs below). The RC0 review's rerun of the synthetic ingest matrix on main
+`483e881d`, which includes #217, reported no route failures (#202 review, round 2).
+
 The routes were measured, not inferred: the synthetic suite's `--ingest-matrix` run on a SCARF A100
 recorded each fixture's route with `--ingest_witness` and found `--ingest auto` products
 byte-identical to `--ingest float` for every fixture (254 checks pass; test-data README 1c).

@@ -434,7 +434,8 @@ static void testAdvancePipelineStep() {
     check(!advancePipelineStep(k, 0) && k == 0, "zero chunks: only step 0");
     for (int n : {1, 2, 4, 5}) {
         int visits = 0;
-        for (int i = 0;; ) { visits++; if (!advancePipelineStep(i, n)) break; }
+        // Bounded: a helper that never stops must fail this check, not hang the test.
+        for (int i = 0; visits <= n + 2; ) { visits++; if (!advancePipelineStep(i, n)) break; }
         check(visits == n + 1, "the loop visits exactly n_chunks + 1 steps");
     }
 }

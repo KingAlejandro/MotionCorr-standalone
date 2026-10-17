@@ -1,0 +1,28 @@
+locks held 2026-10-16T20:40:21Z
+G w1 rc 0 problems [] 6s
+G w2 rc 0 problems [] 5s
+G w4 rc 0 problems [] 4s
+G s0_vs_w1 identity PASS products_only_rc 0 full_rc 1
+G s0_vs_w2 identity PASS products_only_rc 0 full_rc 1
+G s0_vs_w4 identity PASS products_only_rc 0 full_rc 1
+G w1_vs_w2 identity PASS products_only_rc 0 full_rc 1
+G w1_vs_w4 identity PASS products_only_rc 0 full_rc 1
+G w2_vs_w4 identity PASS products_only_rc 0 full_rc 1
+G controls {'positive_untouched_copy': {'identity_lib': 'PASS', 'compare_output_trees_full_rc': 0}, 'negative_flipped_payload_byte': {'identity_lib': 'FAIL', 'compare_output_trees_full_rc': 1}}
+L w1 rc 0 problems [] 7s
+L w2 rc 0 problems [] 5s
+L w4 rc 0 problems [] 4s
+L s0_vs_w1 identity PASS products_only_rc 0 full_rc 1
+L s0_vs_w2 identity PASS products_only_rc 0 full_rc 1
+L s0_vs_w4 identity PASS products_only_rc 0 full_rc 1
+L w1_vs_w2 identity PASS products_only_rc 0 full_rc 1
+L w1_vs_w4 identity PASS products_only_rc 0 full_rc 1
+L w2_vs_w4 identity PASS products_only_rc 0 full_rc 1
+L controls {'positive_untouched_copy': {'identity_lib': 'PASS', 'compare_output_trees_full_rc': 0}, 'negative_flipped_payload_byte': {'identity_lib': 'FAIL', 'compare_output_trees_full_rc': 1}}
+driver rc=0 locks released 2026-10-16T20:43:10Z
+locks held 2026-10-16T20:43:12Z
+mixed w1 rc 0 problems [] 11s
+mixed w2 rc 0 problems [] 8s
+mixed identity w1 vs w2 PASS
+driver rc=0 locks released 2026-10-16T20:43:41Z
+MG_DONE

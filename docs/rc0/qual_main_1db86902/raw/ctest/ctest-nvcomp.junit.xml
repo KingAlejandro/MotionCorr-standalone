@@ -1,0 +1,1125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Linux-c++"
+	tests="92"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname="4-gpu-vm"
+	time="342"
+	timestamp="2026-10-16T20:01:01"
+	>
+	<testcase name="CpuUnweightedStream" classname="CpuUnweightedStream" time="0.139138" status="run">
+		<properties/>
+		<system-out>stream/reference pixels, splits, model time and float rounding PASS; scratch bound PASS
+</system-out>
+	</testcase>
+	<testcase name="PatchRetryState" classname="PatchRetryState" time="0.0626058" status="run">
+		<properties/>
+		<system-out>Issue #69 patch retry shift-state contract (CPU, no device)
+  patch 256x256, 4 groups, scaled_B=20.0, truth (frame-0 relative): (+0.00,+0.00) (+2.70,-1.80) (-3.40,+2.20) (+1.90,-3.10)
+
+  converged reference          ( +0.000, +0.000) ( -2.637, +1.755) ( +3.394, -2.198) ( -1.846, +3.041)   |v| = 6.2485
+  max |recovered + truth| = 0.0630 px  (converged=yes)
+
+  attempt 1 (S1)               ( +0.000, +0.000) ( -4.367, +3.041) ( +3.594, -2.307) ( -3.378, +4.726)   |v| = 8.9615
+  arm A: reset (S2)            ( +0.000, +0.000) ( -4.367, +3.041) ( +3.594, -2.307) ( -3.378, +4.726)   |v| = 8.9615
+  arm B: no reset (S1+S2)      ( +0.000, +0.000) ( -8.734, +6.081) ( +7.189, -4.615) ( -6.756, +9.452)   |v| = 17.9231
+  |arm A| = 8.9615   |arm B| = 17.9231   ratio B/A = 2.0000
+  max |armA - S1|              = 0.000e+00 px
+  max |armB - (S1 + armA)|     = 0.000e+00 px
+
+PASS alignPatch accumulates into the caller's vectors and does not
+     re-derive them, so re-entering without a reset publishes S1+S2.
+     Restoring the ve...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="RunnerInterpolateRecenter" classname="RunnerInterpolateRecenter" time="0.0183557" status="run">
+		<properties/>
+		<system-out>PASS archived witness, slope 1 (X only) (bug reproduced and fixed)
+PASS slope +2 X / -1.5 Y, nonzero origin both axes (bug reproduced and fixed)
+PASS unequal last group, negative X slope, piecewise (bug reproduced and fixed)
+PASS zero-origin control (no-op) (no-op control)
+PASS empty-input guard
+PASS issue97 interpolate_recenter
+</system-out>
+	</testcase>
+	<testcase name="FloatPlanCache" classname="FloatPlanCache" time="0.0278485" status="run">
+		<properties/>
+		<system-out>in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/jaz/single_particle/new_ft.cpp, line 589
+ERROR: 
+NewFFT::FloatPlan: cached plan has a different size
+PASS float plan cache
+</system-out>
+	</testcase>
+	<testcase name="MrcHeaderStats" classname="MrcHeaderStats" time="0.0263218" status="run">
+		<properties/>
+		<system-out>PASS fused MRC header statistics (13 cases)
+</system-out>
+	</testcase>
+	<testcase name="PdfConcat" classname="PdfConcat" time="0.0998639" status="run">
+		<properties/>
+		<system-out>GPL Ghostscript 10.02.1: Unrecoverable error, exit code 1
+PASS one-input concatenation copied 193 B exactly
+ ERROR in executing: gs -dNOPAUSE -sDEVICE=pdfwrite -sOUTPUTFILE=test_pdf_concat_tmp/from_notapdf.pdf -dBATCH test_pdf_concat_tmp/notapdf.pdf  &gt; /dev/null
+PASS non-PDF input was not copied
+</system-out>
+	</testcase>
+	<testcase name="DefectParser" classname="DefectParser" time="0.0329746" status="run">
+		<properties/>
+		<system-out>== valid input ==
+  PASS  single rect 0 0 2 3 -&gt; 6 px
+  PASS  two rects -&gt; 22 px
+  PASS  no trailing newline -&gt; 6 px
+  PASS  blank lines and padding tolerated -&gt; 6 px
+== empty / whitespace ==
+  PASS  empty file -&gt; no error, 0 px
+  PASS  whitespace-only -&gt; no error, 0 px
+== malformed (must be rejected) ==
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/motioncorr_runner.cpp, line 5073
+ERROR: 
+Malformed defect record (record 2, line 2) of /tmp/motioncorr_defect_test_3979653/m1.txt: field 'x' is "BAD", which is not an integer. The MotionCor2 txt defect format does not support comments, headers or non-integer fields.
+  PASS  issue #98 reproducer 'BAD TOKEN' rejected
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/motioncorr_runner.cpp, line 5073
+ERROR: 
+Malformed defect record (record 1, line 1) of /tmp/motioncorr_defect_test_3979653/m2.txt: field 'x' is "BAD", which is not an integer. The MotionCor2 txt defect format does not support comments, headers or non-integer fields.
+  PASS  malformed FIRST reje...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="DeflateLayout" classname="DeflateLayout" time="0.0133598" status="run">
+		<properties/>
+		<system-out>deflate layout: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="Adler32Arithmetic" classname="Adler32Arithmetic" time="0.827576" status="run">
+		<properties/>
+		<system-out>PASS: 7 ordinary lengths, actual production arithmetic over 512MiB logical ff bytes; old uint64 model fails 645a3c03 vs 2a2a3c03
+</system-out>
+	</testcase>
+	<testcase name="Adler32KernelHost" classname="Adler32KernelHost" time="0.00537387" status="run">
+		<properties/>
+		<system-out>PASS: actual kernel body, one CPU lane: healthy/full/short, failed-status and short-size null-output guards
+</system-out>
+	</testcase>
+	<testcase name="StageProfileThreads" classname="StageProfileThreads" time="0.742373" status="run">
+		<properties/>
+		<system-out>ok   a path swapped to a symlink after enable() is not written through
+ok   the profile went to the inode enable() created
+ok   workers ran concurrently with the owner
+ok   owner sub-stage recorded exactly n times
+ok   worker markers ignored
+ok   profile written without error
+</system-out>
+	</testcase>
+	<testcase name="FrameBufferPool" classname="FrameBufferPool" time="0.043564" status="run">
+		<properties/>
+		<system-out>ok   acquire gives an ny x nx buffer
+ok   release retains one frame and empties the array
+ok   next acquire reuses the retained buffer
+ok   reused buffer is fully writable
+ok   retained count and bytes stay within the bound
+ok   a small buffer is freed, not pooled
+ok   a non-owning alias is never pooled
+ok   a different-size buffer is not handed out for this geometry
+ok   buffers of a never-requested (binned) size are not retained
+ok   after binned releases a full-frame buffer is still retained for reuse
+ok   and it is the one handed out next
+ok   same-size reacquire keeps the owned buffer (pooled)
+ok   same-size reacquire does not consume or add a retained buffer
+ok   same-size reacquire keeps the owned buffer (pool disabled)
+ok   same-size reacquire does not consume or add a retained buffer
+ok   geometry A fills the pool
+ok   releasing the current geometry into a full pool evicts an old one
+ok   the next acquisition of the new geometry reuses it
+ok   a sustained new geometry fully replaces the old one, with...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="ScratchArena" classname="ScratchArena" time="0.00601585" status="run">
+		<properties/>
+		<system-out>scratch arena: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="ReaderPool" classname="ReaderPool" time="0.607971" status="run">
+		<properties/>
+		<system-out>idle 8-thread team: 0.000 cpu-s over 0.400 s wall
+reader pool: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="ReaderPoolMutant_spin" classname="ReaderPoolMutant_spin" time="0.591161" status="run">
+		<properties/>
+		<system-out>idle 8-thread team: 1.429 cpu-s over 0.400 s wall
+FAIL: idle helpers consumed CPU between jobs
+1 failure(s)
+</system-out>
+	</testcase>
+	<testcase name="ReaderPoolMutant_nowait" classname="ReaderPoolMutant_nowait" time="0.039302" status="run">
+		<properties/>
+		<system-out>FAIL: runTeam returned before every thread finished
+FAIL: runTeam returned before every thread finished
+FAIL: runTeam returned before every thread finished
+FAIL: runTeam returned before every thread finished
+4 failure(s)
+</system-out>
+	</testcase>
+	<testcase name="DefectNeighbours" classname="DefectNeighbours" time="0.00989764" status="run">
+		<properties/>
+		<system-out>  isolated + edges + corners   defects=10 ranks=136
+  5x5 dense block              defects=25 ranks=264
+  full row and column          defects=87 ranks=1656
+  d_max=4 (EER radius)         defects=17 ranks=1103
+  merge == full-mask scan      trials=200 entries=9673
+defect neighbours: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="DefectMergeMutant_append_only" classname="DefectMergeMutant_append_only" time="0.00646899" status="run">
+		<properties/>
+		<system-out>  isolated + edges + corners   defects=10 ranks=136
+  5x5 dense block              defects=25 ranks=264
+  full row and column          defects=87 ranks=1656
+  d_max=4 (EER radius)         defects=17 ranks=1103
+FAIL: merge != full scan, trial 1 (pre 27, hits 27)
+negative control: defect detected (1 check(s) failed)
+</system-out>
+	</testcase>
+	<testcase name="DefectMergeMutant_no_order_check" classname="DefectMergeMutant_no_order_check" time="0.00817647" status="run">
+		<properties/>
+		<system-out>  isolated + edges + corners   defects=10 ranks=136
+  5x5 dense block              defects=25 ranks=264
+  full row and column          defects=87 ranks=1656
+  d_max=4 (EER radius)         defects=17 ranks=1103
+  merge == full-mask scan      trials=200 entries=9673
+FAIL: unsorted pre-mask list is refused
+FAIL: unsorted hit list is refused
+FAIL: an index in both lists is refused
+FAIL: a repeated index is refused
+FAIL: a negative index is refused
+negative control: defect detected (5 check(s) failed)
+</system-out>
+	</testcase>
+	<testcase name="DefectMergeMutant_swap_xy" classname="DefectMergeMutant_swap_xy" time="0.00599937" status="run">
+		<properties/>
+		<system-out>  isolated + edges + corners   defects=10 ranks=136
+  5x5 dense block              defects=25 ranks=264
+  full row and column          defects=87 ranks=1656
+  d_max=4 (EER radius)         defects=17 ranks=1103
+FAIL: merge != full scan, trial 1 (pre 27, hits 27)
+negative control: defect detected (1 check(s) failed)
+</system-out>
+	</testcase>
+	<testcase name="NvcompAcceptanceDiagnostics" classname="NvcompAcceptanceDiagnostics" time="0.255107" status="run">
+		<properties/>
+		<system-out>PASS: missing movie log rejects with child streams and exit verdict retained
+</system-out>
+	</testcase>
+	<testcase name="ProfilingKit" classname="ProfilingKit" time="121.748" status="run">
+		<properties/>
+		<system-out>......................................................................................................................................
+----------------------------------------------------------------------
+Ran 134 tests in 119.875s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="GainCacheOwnership" classname="GainCacheOwnership" time="4.71846" status="run">
+		<properties/>
+		<system-out>PASS: candidate
+PASS: old-production-selection
+PASS: omit-owner-selection
+PASS: omit-live-lease
+PASS: optimized interpreter reran all actual-header controls
+</system-out>
+	</testcase>
+	<testcase name="NvcompGuards" classname="NvcompGuards" time="0.0450158" status="run">
+		<properties/>
+		<system-out>nvcomp guards: 32 CudaMovieSession members, declaration and definition agree on all of them
+</system-out>
+	</testcase>
+	<testcase name="SyntheticRegression" classname="SyntheticRegression" time="0.756762" status="run">
+		<properties/>
+		<system-out>Results for --j 1 vs Expected Old Baseline:
+  Image Max Pixel Difference: 0.000000e+00
+  Image RMSE:                 0.000000e+00
+  Shift Max Difference (px):  0.000000e+00
+  Shift RMSD (px):            0.000000e+00
+Results for --j 4 vs Expected Old Baseline:
+  Image Max Pixel Difference: 0.000000e+00
+  Image RMSE:                 0.000000e+00
+  Shift Max Difference (px):  0.000000e+00
+  Shift RMSD (px):            0.000000e+00
+
+SUCCESS: All synthetic regression tests passed with bit-for-bit identity!
+</system-out>
+	</testcase>
+	<testcase name="HotPixelRngDeterminism" classname="HotPixelRngDeterminism" time="0.553906" status="run">
+		<properties/>
+		<system-out>Precondition: full 5x5 hot block detected (27 hot pixels total) -&gt; Gaussian branch reached.
+probe.mrc pixel bytes: 36864; differing: 0
+
+SUCCESS: hot-pixel replacement is independent of movie order and count.
+</system-out>
+	</testcase>
+	<testcase name="RunnerExposure" classname="RunnerExposure" time="0.671839" status="run">
+		<properties/>
+		<system-out>PASS runner exposure
+</system-out>
+	</testcase>
+	<testcase name="Runner_failure" classname="Runner_failure" time="0.190767" status="run">
+		<properties/>
+		<system-out>PASS runner failure
+</system-out>
+	</testcase>
+	<testcase name="Runner_invalid" classname="Runner_invalid" time="0.221897" status="run">
+		<properties/>
+		<system-out>PASS runner invalid
+</system-out>
+	</testcase>
+	<testcase name="Runner_resume" classname="Runner_resume" time="2.97545" status="run">
+		<properties/>
+		<system-out>PASS runner resume
+</system-out>
+	</testcase>
+	<testcase name="Runner_tomography" classname="Runner_tomography" time="0.570463" status="run">
+		<properties/>
+		<system-out>PASS runner tomography
+</system-out>
+	</testcase>
+	<testcase name="RunnerLateBin" classname="RunnerLateBin" time="1.01056" status="run">
+		<properties/>
+		<system-out>PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS runner late_bin
+</system-out>
+	</testcase>
+	<testcase name="RunnerExportedUnits" classname="RunnerExportedUnits" time="0.161562" status="run">
+		<properties/>
+		<system-out>PASS serialized units and unchanged runtime model
+PASS runner exported_units
+</system-out>
+	</testcase>
+	<testcase name="GainCache" classname="GainCache" time="1.20553" status="run">
+		<properties/>
+		<system-out>  identity: gain of 1.0 reproduces the no-gain output exactly
+  control:  gain of 2.0 does change the output (the checks above can fail)
+  reuse:    second movie in a run matches the first, and matches a solo run
+gain cache: all cases exact
+</system-out>
+	</testcase>
+	<testcase name="TiffRead" classname="TiffRead" time="1.01516" status="run">
+		<properties/>
+		<system-out>  u16_deflate_rps1: 3 frame(s) 29x37, 111 row sums and 3219 samples exact
+  u16_raw_rps7: 2 frame(s) 16x50, 100 row sums and 1600 samples exact
+  packed4bit_k2sr: 1 frame(s) 7420x7676, 7676 row sums and 474880 samples exact
+TIFF read: all cases exact
+</system-out>
+	</testcase>
+	<testcase name="DamagedMovie" classname="DamagedMovie" time="4.30121" status="run">
+		<properties/>
+		<system-out>Running TIFF integrity and expected-frame validation test suite...
+  [PASS] test_strip_truncation
+  [PASS] test_ifd_directory_truncation
+  [PASS] test_hard_truncation
+  [PASS] test_corrupt_header
+  [PASS] test_expected_frames_cli
+  [PASS] test_expected_frames_star
+  [PASS] test_positive_control_short_valid_movie
+  [PASS] test_batch_permutations
+  [PASS] test_resume_isolation
+  [PASS] test_expected_frame_contract
+  [PASS] test_tomogram_expected_frames
+All TIFF integrity and expected-frame validation tests PASSED.
+</system-out>
+	</testcase>
+	<testcase name="CompressedMovieSequence" classname="CompressedMovieSequence" time="1.09069" status="run">
+		<properties/>
+		<system-out>PASS: six compressed movies after a plain movie; exact core headers/pixels, STAR files present
+</system-out>
+	</testcase>
+	<testcase name="GlobalIfftElision" classname="GlobalIfftElision" time="1.97416" status="run">
+		<properties/>
+		<system-out>PASS: global inverse FFT elision preserves every product
+  A dose-weighting independence of EVN/ODD  ok
+  C patch alignment still contributes       ok
+  D elided branch matches non-elided branch ok (product set;
+                                                pixels cannot fail)
+  E _noDW.mrc independent of --dose_weighting ok
+  B determinism on the eliding arm          ok (defence in depth;
+                                                power undemonstrated)
+</system-out>
+	</testcase>
+	<testcase name="HostBufferReuse" classname="HostBufferReuse" time="3.76435" status="run">
+		<properties/>
+		<system-out>ok   nopool run exits 0
+ok   disabled pool reported accurately
+ok   pool run exits 0
+ok   default allocator mode reported (glibc defaults, pooled buffers)
+ok   perturbed run exits 0
+ok   thresholds run exits 0
+ok   no pool vs pool: same product inventory (10 files)
+ok   no pool vs pool: byte-identical products
+ok   no pool vs pool+MALLOC_PERTURB_: same product inventory (10 files)
+ok   no pool vs pool+MALLOC_PERTURB_: byte-identical products
+ok   no pool vs opt-in thresholds+MALLOC_PERTURB_: same product inventory (10 files)
+ok   no pool vs opt-in thresholds+MALLOC_PERTURB_: byte-identical products
+ok   mixed-geometry defaults run exits 0
+ok   mixed-geometry perturbed run exits 0
+ok   mixed geometry defaults vs reuse+perturbed: same product inventory (10 files)
+ok   mixed geometry defaults vs reuse+perturbed: byte-identical products
+ok   user-provided malloc settings are not overridden by the opt-in
+PASS
+</system-out>
+	</testcase>
+	<testcase name="StageProfile" classname="StageProfile" time="1.92144" status="run">
+		<properties/>
+		<system-out>ok   both runs exit 0
+ok   same product inventory (4 files)
+ok   identical corrected_micrographs.star
+ok   identical mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/test-data/synthetic/synthetic_movie.mrc
+ok   identical mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/test-data/synthetic/synthetic_movie.star
+ok   identical mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/test-data/synthetic/synthetic_movie_noDW.mrc
+ok   one movie and one process record
+ok   stages tile the movie (124.741 vs 124.741 ms)
+ok   all expected stages in order: ['setup', 'read gain', 'session and device ingest', 'host read movie', 'allocate host sum', 'gain and sum', 'hot pixels', 'fix defects', 'release preprocessing', 'global fft', 'power spectrum', 'global alignment', 'allocate reconstruction', 'global ifft', 'patch alignment', 'fit polynomial', 'release alignment', 'unweighted sums', 'dose weighting', 'movie teardown', 'submit model and plot']
+ok   host read movie contains its own work (host read movie/READ_MOVIE: 4.714 of 4.741 ms)
+ok   globa...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="RunnerModelParser" classname="RunnerModelParser" time="0.248176" status="run">
+		<properties/>
+		<system-out>duplicate rejected
+nonfinite rejected
+truncated rejected
+negative_index rejected
+trailing rejected
+invalid_index rejected
+missing_coefficient rejected
+legacy empty trailing string preserved
+PASS runner model_parser
+</system-out>
+	</testcase>
+	<testcase name="MicrographModelBounds" classname="MicrographModelBounds" time="2.51898" status="run">
+		<properties/>
+		<system-out>PASS 7 valid and 11 malformed saved-EER parser/completion controls; decoding unrun
+PASS 38 malformed saved models; sparse, fractional, mask and round-trip controls
+PASS actual resume repairs invalid hot-pixel records; valid resume is unchanged
+</system-out>
+	</testcase>
+	<testcase name="RunnerInterpolateShifts" classname="RunnerInterpolateShifts" time="0.601223" status="run">
+		<properties/>
+		<system-out>PASS runner interpolate_shifts
+</system-out>
+	</testcase>
+	<testcase name="WriteFaults" classname="WriteFaults" time="1.32097" status="run">
+		<properties/>
+		<system-out>  phase 1: a.mrc 1049600 B, sha256 cdf033ff763df2b3
+    log check: claim_present=True corrected=True
+  phase 2: exit 1, b.mrc truncated to 600000 B, no b.star, a.mrc unchanged
+  phase 3: exit 0, b.mrc 1049600 B, joint STAR lists both, a.mrc still sha256 cdf033ff763df2b3
+  phase 4: finite hard limit 8388608 B -&gt; exit 1, MotionCorr reported the short write on c.mrc, c.mrc truncated to 600000 B, no c.star
+fail-closed image writes: ok
+</system-out>
+	</testcase>
+	<testcase name="WriteFaultsSync" classname="WriteFaultsSync" time="0.740023" status="run">
+		<properties/>
+		<system-out>extra runner options: --sync_output
+  phase 1: a.mrc 1049600 B, sha256 0816febe3a2d980f
+    log check: claim_present=False corrected=False
+  phase 2: exit 1, b.mrc truncated to 600000 B, no b.star, a.mrc unchanged
+  phase 3: exit 0, b.mrc 1049600 B, joint STAR lists both, a.mrc still sha256 0816febe3a2d980f
+  phase 4: finite hard limit 8388608 B -&gt; exit 1, MotionCorr reported the short write on c.mrc, c.mrc truncated to 600000 B, no c.star
+fail-closed image writes: ok
+</system-out>
+	</testcase>
+	<testcase name="WriteFaultsMultiProduct" classname="WriteFaultsMultiProduct" time="0.714358" status="run">
+		<properties/>
+		<system-out>extra runner options: --save_noDW --even_odd_split
+  phase 1: a.mrc 1049600 B, sha256 1a3e46c046e2d594
+    log check: claim_present=True corrected=True
+  phase 2: exit 1, b.mrc truncated to 600000 B, no b.star, a.mrc unchanged
+  phase 3: exit 0, b.mrc 1049600 B, joint STAR lists both, a.mrc still sha256 1a3e46c046e2d594
+  phase 4: finite hard limit 8388608 B -&gt; exit 1, MotionCorr reported the short write on c.mrc, c.mrc truncated to 600000 B, no c.star
+fail-closed image writes: ok
+</system-out>
+	</testcase>
+	<testcase name="OutputStageFaults" classname="OutputStageFaults" time="0.575658" status="run">
+		<properties/>
+		<system-out>control arm: the same command without the fault exits 0
+PASS: the job reported failure (exit 1) rather than aborting
+PASS: the micrograph written before the PDF stage survived
+output stage faults: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEps" classname="LogfileFromEps" time="3.30465" status="run">
+		<properties/>
+		<system-out>PASS fresh run renders logfile.pdf from EPS (header list + batch list), one render
+PASS incremental run with a prior all_batches.pdf keeps the concatenation
+PASS Ghostscript failure (immediate and delayed) reports, exits 0 and leaves no logfile.pdf, as before
+PASS an unwritable logfile.pdf is reported without failing the job or terminating
+logfile from EPS: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_always_eps" classname="LogfileFromEpsMutant_always_eps" time="0.454855" status="run">
+		<properties/>
+		<system-out>PASS fresh run renders logfile.pdf from EPS (header list + batch list), one render
+FAIL: incremental run rendered logfile.pdf from this run's EPS although a prior all_batches.pdf exists: the earlier batches would be lost: [{'args': ['-sDEVICE=pdfwrite', '-dNOPAUSE', '-dBATCH', '-dSAFER', '-dDEVICEWIDTHPOINTS=800', '-dDEVICEHEIGHTPOINTS=800', '-sOutputFile=/tmp/logfile-from-eps-mctfy3dm/fresh/logfile.pdf', '@/tmp/logfile-from-eps-mctfy3dm/fresh/logfile.pdf.lst'], 'out': '/tmp/logfile-from-eps-mctfy3dm/fresh/logfile.pdf', 'list': ['/tmp/logfile-from-eps-mctfy3dm/fresh/corrected_micrographs_all_rlnAccumMotionTotal.eps', '/tmp/logfile-from-eps-mctfy3dm/fresh/corrected_micrographs_all_rlnAccumMotionEarly.eps', '/tmp/logfile-from-eps-mctfy3dm/fresh/corrected_micrographs_all_rlnAccumMotionLate.eps', '/tmp/logfile-from-eps-mctfy3dm/fresh/Movies/a_shifts.eps', '/tmp/logfile-from-eps-mctfy3dm/fresh/Movies/b_shifts.eps', '/tmp/logfile-from-eps-mctfy3dm/fresh/Movies/c_shifts.eps']}, {'args': ['-sDEVICE=pdfwrite', '-dNOPA...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_late_guard" classname="LogfileFromEpsMutant_late_guard" time="0.358459" status="run">
+		<properties/>
+		<system-out>FAIL: fresh run still concatenated header.pdf + all_batches.pdf into logfile.pdf
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_eps_order" classname="LogfileFromEpsMutant_eps_order" time="0.308271" status="run">
+		<properties/>
+		<system-out>FAIL: EPS-direct logfile.pdf must list header EPS followed by batch EPS, in order: ['/tmp/logfile-from-eps-zi_colvt/fresh/Movies/a_shifts.eps', '/tmp/logfile-from-eps-zi_colvt/fresh/Movies/b_shifts.eps', '/tmp/logfile-from-eps-zi_colvt/fresh/corrected_micrographs_all_rlnAccumMotionTotal.eps', '/tmp/logfile-from-eps-zi_colvt/fresh/corrected_micrographs_all_rlnAccumMotionEarly.eps', '/tmp/logfile-from-eps-zi_colvt/fresh/corrected_micrographs_all_rlnAccumMotionLate.eps']
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_placeholder" classname="LogfileFromEpsMutant_placeholder" time="0.858028" status="run">
+		<properties/>
+		<system-out>PASS fresh run renders logfile.pdf from EPS (header list + batch list), one render
+PASS incremental run with a prior all_batches.pdf keeps the concatenation
+FAIL: gs fail: a failed logfile.pdf render left a file behind; the concatenation it replaced left none
+</system-out>
+	</testcase>
+	<testcase name="CiFailClosedControls" classname="CiFailClosedControls" time="21.3652" status="run">
+		<properties/>
+		<system-out>........
+----------------------------------------------------------------------
+Ran 8 tests in 21.252s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="CudaValidationParser" classname="CudaValidationParser" time="0.0703956" status="run">
+		<properties/>
+		<system-out>PASS
+</system-out>
+	</testcase>
+	<testcase name="MultiGpuScheduling" classname="MultiGpuScheduling" time="92.8931" status="run">
+		<properties/>
+		<system-out>ok   case_roundtrip_and_metadata
+ok   case_empty_required_products_refused
+ok   case_empty_shard_rejected
+ok   case_output_name_collision
+ok   case_duplicate_movie_in_input
+ok   case_collapsed_spaces_are_a_collision
+ok   case_decorated_output_collision
+ok   case_manifest_digest_binds_parsed_snapshot
+ok   case_real_output_suffixes_attributed
+ok   case_dotted_shift_plot_root
+ok   case_aggregate_name_shadowing
+ok   case_star_parser_refusals
+ok   case_clean_merge
+ok   case_lost_output
+ok   case_duplicate_and_misrouted_output
+ok   case_unassigned_movie_output
+ok   case_failed_worker_blocks_merge
+ok   case_missing_status_blocks_merge
+ok   case_failed_device_witness_blocks_merge
+ok   case_missing_worker_directory
+ok   case_link_staging_with_aggregate
+ok   case_link_refusal_falls_back_to_copy
+ok   case_launcher_exit_digests_are_reused
+ok   case_change_after_worker_exit_detected
+ok   case_preserved_aggregate_change_after_exit_detected
+ok   case_exit_digest_records_validated
+ok   case_timestamp_barrier_failure_fails_cl...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="OutputTreeComparator" classname="OutputTreeComparator" time="0.863689" status="run">
+		<properties/>
+		<system-out>test_changed_header_field_is_detected (__main__.TestOutputTreeComparator.test_changed_header_field_is_detected) ... ok
+test_changed_pixel_is_detected (__main__.TestOutputTreeComparator.test_changed_pixel_is_detected) ... ok
+test_changed_star_is_detected (__main__.TestOutputTreeComparator.test_changed_star_is_detected) ... ok
+test_cli_exit_code_agrees_with_the_report_it_writes (__main__.TestOutputTreeComparator.test_cli_exit_code_agrees_with_the_report_it_writes)
+A comparator that prints FAIL and exits 0 certifies the opposite of ... ok
+test_equal_complete_trees_pass_with_only_timestamp_and_log_timing_differences (__main__.TestOutputTreeComparator.test_equal_complete_trees_pass_with_only_timestamp_and_log_timing_differences) ... ok
+test_extended_header_is_included_in_length_and_payload_offset (__main__.TestOutputTreeComparator.test_extended_header_is_included_in_length_and_payload_offset) ... ok
+test_extra_movie_product_is_rejected (__main__.TestOutputTreeComparator.test_extra_movie_product_is_rejected) ... ok...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="JointStarPublication" classname="JointStarPublication" time="0.992527" status="run">
+		<properties/>
+		<system-out>PASS joint STAR healthy
+PASS joint STAR open
+PASS joint STAR rename
+LIMIT soft=128 hard=8192
+PASS joint STAR limit
+LIMIT soft=128 hard=8192
+PASS joint STAR write-limit
+PASS direct/glob optics association and binned sampling; STAR-reference pixels unchanged
+PASS joint STAR actual runner failure and repair; completed products unchanged
+</system-out>
+	</testcase>
+	<testcase name="ImageWriteFaults" classname="ImageWriteFaults" time="0.0372609" status="run">
+		<properties/>
+		<system-out>  inherited RLIMIT_FSIZE: soft=infinity hard=infinity
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/rwMRC.h, line 621
+ERROR: 
+Failed to write image data (1048576 bytes) to /tmp/mc_write_faults_3991299/big.mrc: File too large
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/image.h, line 570
+ERROR: 
+Failed to flush and close image file /tmp/mc_write_faults_3991299/small.mrc: File too large
+  destructor dropped 1464 unflushable bytes without terminating
+  inherited RLIMIT_FSIZE: soft=8388608 hard=8388608  (finite-hard-limit control child)
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/rwMRC.h, line 621
+ERROR: 
+Failed to write image data (1048576 bytes) to /tmp/mc_write_faults_3991300/big.mrc: File too large
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/image.h, line 570
+ERROR: 
+Failed to flush and close image file /tmp/mc_write_faults_3991300/small.mrc: File too large
+  destructor dropped 1464 unflushable bytes without terminating
+image write faults: ok (finite hard limit)
+  finite-hard-...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="NativeMovieStaging" classname="NativeMovieStaging" time="0.325898" status="run">
+		<properties/>
+		<system-out>
+native uint16 staging contract: 16 frames of 1534x2046 (98080 kB payload)
+ok     bind() sizes the frame vector
+ok     mapping covers the whole movie
+ok     every frame carries the movie geometry
+ok     frames alias the mapping (destroyData=false, nzyxdimAlloc set)
+ok     frame slices are laid out in ascending order
+ok     Image::read's coreAllocateReuse() keeps the bound slice
+ok     writes through the alias read back per frame
+ok     discardThrough() returns the consumed pages (48972 kB of about 49040 kB)
+ok     discardThrough() leaves unconsumed frames byte-intact
+ok     release() clears the frame vector
+ok     release() is idempotent and leaves no capacity
+ok     instrument sees the mapping arrive (98088 kB of 98080 kB)
+ok     release() returns the payload (4 kB retained of 98080 kB)
+       [control] per-frame heap: grew 98068 kB, retained 116 kB after free
+       [control] NOTE: this host's allocator also returns per-frame heap
+       storage, so the assertion above is not discriminating here; the
+      ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="RunnerInterpolateShiftsCuda" classname="RunnerInterpolateShiftsCuda" time="1.40982" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS runner interpolate_shifts
+</system-out>
+	</testcase>
+	<testcase name="StageProfileDeviceTiming" classname="StageProfileDeviceTiming" time="2.94248" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>ok   both runs exit 0
+ok   same product inventory (4 files)
+ok   identical corrected_micrographs.star
+ok   identical mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/test-data/synthetic/synthetic_movie.mrc
+ok   identical mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/test-data/synthetic/synthetic_movie.star
+ok   identical mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/test-data/synthetic/synthetic_movie_noDW.mrc
+ok   one movie and one process record
+ok   stages tile the movie (127.979 vs 127.979 ms)
+ok   all expected stages in order: ['setup', 'read gain', 'session and device ingest', 'host read movie', 'allocate host sum', 'gain and sum', 'hot pixels', 'fix defects', 'release preprocessing', 'global fft', 'power spectrum', 'global alignment', 'allocate reconstruction', 'global ifft', 'patch alignment', 'fit polynomial', 'release alignment', 'unweighted sums', 'dose weighting', 'movie teardown', 'submit model and plot']
+ok   host read movie contains its own work (host read movie/READ_MOVIE: 5.22 of 5.258 ms)
+ok   global...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="SignedMrcStaging" classname="SignedMrcStaging" time="6.28208" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS int8 (28925) and int16 (34873) fixtures both contain negative samples
+PASS uint16 fixture contains 131072 samples above 32767
+PASS mode 0: both arms exit 0
+PASS mode 0: witness says compact / float
+PASS mode 0 (int8): compact products identical to float: no differences
+PASS control: one flipped payload byte is detected
+PASS control: unsigned expansion of the int8 fixture fails identity
+PASS mode 1: both arms exit 0
+PASS mode 1: witness says compact / float
+PASS mode 1 (int16): compact products identical to float: no differences
+PASS control: unsigned expansion of the int16 fixture fails identity
+PASS mode 6: both arms exit 0
+PASS mode 6: witness says compact / float
+PASS mode 6 (uint16): compact products identical to float: no differences
+PASS control: --ingest compact refuses a float32 MRC (rc=1)
+PASS float32 MRC under --ingest auto stays on the float path
+
+All signed MRC staging checks passed
+</system-out>
+	</testcase>
+	<testcase name="CudaU16StagingEquivalence" classname="CudaU16StagingEquivalence" time="0.426855" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>Native staging contract: uint16
+uint16 fixture: 5 negative-zero products, 5 zero-gain pixels, 5 subnormal products
+PASS uint16 no gain: sum and all 5 resident frames are byte-identical
+PASS uint16 plain gain: sum and all 5 resident frames are byte-identical
+PASS uint16 hostile gain: sum and all 5 resident frames are byte-identical
+PASS negative control: one-count change detected (unaligned sum differs)
+PASS frame-oracle control: changed resident frame detected (resident frame 4 differs)
+All uint16 staging equivalence checks passed
+Native staging contract: uint8
+uint8 fixture: 5 negative-zero products, 5 zero-gain pixels, 5 subnormal products
+PASS uint8 no gain: sum and all 5 resident frames are byte-identical
+PASS uint8 plain gain: sum and all 5 resident frames are byte-identical
+PASS uint8 hostile gain: sum and all 5 resident frames are byte-identical
+PASS negative control: one-count change detected (unaligned sum differs)
+PASS frame-oracle control: changed resident frame detected (resident frame 4 differs)
+...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaWrapperUploadFailure" classname="CudaWrapperUploadFailure" time="0.407695" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>All six failed uploads returned false and released their allocations
+</system-out>
+	</testcase>
+	<testcase name="CudaFaultMatrix" classname="CudaFaultMatrix" time="8.02073" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>Ownership control: one production session sequence, failures=0
+Ownership control: one production session sequence, failures=0
+Ownership control: one production session sequence, failures=0
+Ownership control: one production session sequence, failures=0
+Enumeration control: one production boundary case, failures=0
+Enumeration control: one production boundary case, failures=0
+Enumeration control: one production boundary case, failures=0
+Enumeration control: one production boundary case, failures=0
+Enumeration control: one production boundary case, failures=0
+Enumeration control: one production boundary case, failures=0
+ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/acc/cuda/cuda_alignpatch.cu at line 536 (error-code 2)
+Issue #69 CUDA fault matrix. Clean run uses: cudaMalloc=51 cudaFree (after release)=47 cudaEventCreate=34 cudaEventDestroy (after release)=34 cufftDestroy (after release)=5 cudaMemcpy H2D=25 cudaMemcpy D2H=24 cudaMemcpy D2D=4 cudaMemset=5 cudaDeviceSynchronize=6 cufftCrea...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchWorkspace" classname="CudaPatchWorkspace" time="0.573977" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/acc/cuda/cuda_alignpatch.cu at line 536 (error-code 2)
+PASS: 13 exact actual-path input/key/movie controls; 3 reuse calls had zero setup resources
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/acc/cuda/cuda_settings.h, line 65
+ERROR: 
+
+A GPU-function failed to execute.
+
+ If this occured at the start of a run, you might have GPUs which
+are incompatible with either the data or your installation of relion.
+If you 
+
+	-&gt; INSTALLED RELION YOURSELF: if you e.g. specified -DCUDA_ARCH=50
+	   and are trying ot run on a compute 3.5 GPU (-DCUDA_ARCH=3.5), or 
+	   a similar mismatch on AMD or Intel GPUs, this may happen.
+
+	-&gt; HAVE MULTIPLE GPUS OF DIFFERNT VERSIONS: relion needs at least NVIDIA 
+	   GPUs with compute 5.0 or AMD MI GPUs with archtiecture gfx906. 
+	   You may be trying to use a GPU architectures older than these. 
+	   If you have multiple generations, try specifying --gpu &lt;X&gt;
+	   with X=0. Then try X=1 in a new run, and so on. T...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatch" classname="CudaPatchBatch" time="2.01134" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS: window extraction matches the frequency definition
+PASS: 22 direct windowed/full-spectrum comparisons
+PASS: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: chunk-size arithmetic
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/acc/cuda/cuda_alignpatch.cu, line 843
+ERROR: 
+Fatal CUDA error allocating the batched patch workspace
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/acc/cuda/cuda_alignpatch.cu, line 885
+ERROR: 
+Fatal CUDA state refuses batched patch workspace
+PASS: 12 reservation fault controls (declines keep nothing and record nothing; fatal is not retried)
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/acc/cuda/cuda_alignpatch.cu, line 988
+ERROR: 
+cuFFT error: code 6
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/acc/cuda/cuda_movie_session.cu, line 2362
+ERROR: 
+CUDA device context is unusable during batched patch preparation (patch 1 of 9): an illegal memory access was encountered. Refusing to retry alignment on a poisoned context.
+PASS: 5 ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaVramAlias" classname="CudaVramAlias" time="0.832199" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS: 3 global arena comparisons (need 79697408 B, work 35444736 B)
+PASS: 4 real-space readers refused while borrowed
+PASS: dose-weighting scratch in the consumed movie
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatchMutant_shift_retired" classname="CudaPatchBatchMutant_shift_retired" time="1.91691" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: window extraction matches the frequency definition
+RAN: 22 direct windowed/full-spectrum comparisons
+RAN: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: mutant produced 62 detected mismatches
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatchMutant_never_retire" classname="CudaPatchBatchMutant_never_retire" time="1.98201" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: window extraction matches the frequency definition
+RAN: 22 direct windowed/full-spectrum comparisons
+RAN: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: mutant produced 430 detected mismatches
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatchMutant_extract_no_remap" classname="CudaPatchBatchMutant_extract_no_remap" time="1.99384" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: window extraction matches the frequency definition
+RAN: 22 direct windowed/full-spectrum comparisons
+RAN: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: mutant produced 117 detected mismatches
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatchMutant_scale_divide" classname="CudaPatchBatchMutant_scale_divide" time="1.95459" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: window extraction matches the frequency definition
+RAN: 22 direct windowed/full-spectrum comparisons
+RAN: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: mutant produced 109 detected mismatches
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatchMutant_shift_wrong_half" classname="CudaPatchBatchMutant_shift_wrong_half" time="1.87699" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: window extraction matches the frequency definition
+RAN: 22 direct windowed/full-spectrum comparisons
+RAN: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: mutant produced 56 detected mismatches
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatchMutant_perpatch_wrong_half" classname="CudaPatchBatchMutant_perpatch_wrong_half" time="1.96935" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: window extraction matches the frequency definition
+RAN: 22 direct windowed/full-spectrum comparisons
+RAN: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: mutant produced 27 detected mismatches
+</system-out>
+	</testcase>
+	<testcase name="CudaVramAliasMutant_arena_overlap" classname="CudaVramAliasMutant_arena_overlap" time="0.839744" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: 3 global arena comparisons (need 79697408 B, work 35444736 B)
+RAN: 4 real-space readers refused while borrowed
+RAN: dose-weighting scratch in the consumed movie
+PASS: mutant detected (8 mismatches)
+</system-out>
+	</testcase>
+	<testcase name="CudaVramAliasMutant_arena_work_over_buffers" classname="CudaVramAliasMutant_arena_work_over_buffers" time="0.840681" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: 3 global arena comparisons (need 79697408 B, work 35444736 B)
+RAN: 4 real-space readers refused while borrowed
+RAN: dose-weighting scratch in the consumed movie
+PASS: mutant detected (4 mismatches)
+</system-out>
+	</testcase>
+	<testcase name="CudaVramAliasMutant_refusal_off" classname="CudaVramAliasMutant_refusal_off" time="0.850172" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: 3 global arena comparisons (need 79697408 B, work 35444736 B)
+RAN: 0 real-space readers refused while borrowed
+RAN: dose-weighting scratch in the consumed movie
+PASS: mutant detected (7 mismatches)
+</system-out>
+	</testcase>
+	<testcase name="CudaVramAliasMutant_dw_scratch_over_fourier" classname="CudaVramAliasMutant_dw_scratch_over_fourier" time="0.82632" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: 3 global arena comparisons (need 79697408 B, work 35444736 B)
+RAN: 4 real-space readers refused while borrowed
+RAN: dose-weighting scratch in the consumed movie
+PASS: mutant detected (2 mismatches)
+</system-out>
+	</testcase>
+	<testcase name="CudaDeviceGainPool" classname="CudaDeviceGainPool" time="0.405812" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>CUDA_VISIBLE_DEVICES=GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d visible_count=1
+CUDA device index=0 UUID=GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d name=NVIDIA A100 80GB PCIe
+Testing retained gain A -&gt; B -&gt; A...
+  PASS: A -&gt; B -&gt; A, reuse, geometry change
+Testing gain -&gt; no gain -&gt; gain...
+  PASS: gain -&gt; no gain -&gt; gain, and generation 0
+Testing device selection restored after a retained-gain drop...
+  PASS: owning device selected, caller's device restored
+Testing one-GPU logic-only selection owner0/current1; actual device1 UNRUN...
+Testing interleaved session gain leases...
+Testing early stale-gain retirement before movie admission...
+Testing runner gain identity ordering and uniqueness...
+  PASS: identity is per-resolution, geometry-checked and per-runner
+Testing retained gain invalidation after a session failure...
+  PASS: failed session retires the retained gain
+Tracked allocation ledger selector=all allocated_bytes=777856 freed_bytes=777856 stale_frees=0 live_buffers=0
+PASS: worker-lifetime device gain pool...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaDeviceGainCleanupFatal" classname="CudaDeviceGainCleanupFatal" time="0.404273" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>CUDA_VISIBLE_DEVICES=GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d visible_count=1
+CUDA device index=0 UUID=GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d name=NVIDIA A100 80GB PCIe
+Testing recoverable session -&gt; fatal retained-gain cleanup...
+  PASS: cleanup-origin fatal retires before a fresh session; tracked fixture released
+Tracked allocation ledger selector=cleanup-fatal allocated_bytes=25344 freed_bytes=25344 stale_frees=0 live_buffers=0
+PASS: worker-lifetime device gain pool controls
+</system-out>
+	</testcase>
+	<testcase name="CudaGeometryRetention" classname="CudaGeometryRetention" time="0.43212" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>Testing retained geometry reuse...
+Testing a geometry change discards the entry before allocating...
+Testing a failed session frees instead of returning...
+Testing two live sessions never share the entry...
+PASS: retained geometry controls (0 failed checks)
+</system-out>
+	</testcase>
+	<testcase name="CudaGeometryRetentionMutant_no_take" classname="CudaGeometryRetentionMutant_no_take" time="0.435784" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>Testing retained geometry reuse...
+CHECK FAILED: a key hit still allocated the movie buffers
+CHECK FAILED: a key hit still created cuFFT plans
+CHECK FAILED: the poisoned movie did not take the entry
+Testing a geometry change discards the entry before allocating...
+Testing a failed session frees instead of returning...
+Testing two live sessions never share the entry...
+PASS: mutant detected (3 failed checks)
+</system-out>
+	</testcase>
+	<testcase name="CudaGeometryRetentionMutant_return_failed" classname="CudaGeometryRetentionMutant_return_failed" time="0.42818" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>Testing retained geometry reuse...
+Testing a geometry change discards the entry before allocating...
+Testing a failed session frees instead of returning...
+CHECK FAILED: a failed session returned its geometry while the guard's drop was refused
+Testing two live sessions never share the entry...
+PASS: mutant detected (1 failed checks)
+</system-out>
+	</testcase>
+	<testcase name="CudaGeometryRetentionMutant_keep_taken_alias" classname="CudaGeometryRetentionMutant_keep_taken_alias" time="0.411017" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>Testing retained geometry reuse...
+CHECK FAILED: poisoned retained movie failed
+CHECK FAILED: a poisoned retained geometry changed products
+Testing a geometry change discards the entry before allocating...
+CHECK FAILED: geometry fixture movie failed
+CHECK FAILED: changed-geometry movie failed
+CHECK FAILED: a changed key reused the old plans or buffers
+CHECK FAILED: the mismatching entry was not freed before the new movie allocated
+CHECK FAILED: the changed geometry was not retained
+Testing a failed session frees instead of returning...
+CHECK FAILED: failure fixture movie failed
+CHECK FAILED: failure fixture initialization
+CHECK FAILED: a taken entry stayed in the pool slot
+CHECK FAILED: failure fixture pipeline
+CHECK FAILED: a failed session returned its geometry to the pool
+CHECK FAILED: lease fixture movie failed
+CHECK FAILED: lease holder initialization
+CHECK FAILED: failing session admitted beside the lease holder
+CHECK FAILED: lease fixture pipeline
+CHECK FAILED: a failed session returned its geometry wh...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaDoseNormalization" classname="CudaDoseNormalization" time="1.93135" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS: 100 exact null/polynomial reconstructions; 1365 exact weighted Fourier frames; consecutive changed dose/apix/geometry calls
+PASS: global FFTs bit-identical to the per-frame-synchronised oracle with one device wait each; exec failure refused, drained, unleaked; negative control detected
+PASS: 36 session-mode reconstructions exact, 1 allocation, 0 frame copies, resident input intact; negative controls detected
+PASS: session-mode block allocation fault refused success and freed nothing it did not own
+PASS: selected actual-path dose fault refused success and released all owners
+PASS: selected actual-path dose fault refused success and released all owners
+PASS: selected actual-path dose fault refused success and released all owners
+PASS: selected actual-path dose fault refused success and released all owners
+PASS: selected actual-path dose fault refused success and released all owners
+PASS: exact reconstruction-scoped dose normalization controls (injected codes, not poisoned hardware)
+</system-out>
+	</testcase>
+	<testcase name="CudaDoseSessionPlan" classname="CudaDoseSessionPlan" time="0.407139" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS borrowed session C2R 32x24 polynomial=0 fault=0; no extra plans, resident input preserved, owner checked
+PASS borrowed session C2R 35x29 polynomial=0 fault=0; no extra plans, resident input preserved, owner checked
+PASS borrowed session C2R 32x24 polynomial=1 fault=0; no extra plans, resident input preserved, owner checked
+PASS borrowed session C2R 35x29 polynomial=1 fault=0; no extra plans, resident input preserved, owner checked
+PASS borrowed session C2R 32x24 polynomial=0 fault=2; no extra plans, resident input preserved, owner checked
+PASS borrowed session C2R 32x24 polynomial=0 fault=5; no extra plans, resident input preserved, owner checked
+PASS: exact reconstruction-scoped dose normalization controls (injected codes, not poisoned hardware)
+</system-out>
+	</testcase>
+	<testcase name="CudaPreprocessingFailurePaths" classname="CudaPreprocessingFailurePaths" time="5.06784" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS preprocessing failure controls; artifacts: /tmp/mc-preprocessing-xw3okg6l
+Injected status codes only; genuine device poisoning remains untested.
+</system-out>
+	</testcase>
+	<testcase name="CudaAdler32" classname="CudaAdler32" time="1.38471" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS: actual Adler kernel all
+</system-out>
+	</testcase>
+	<testcase name="CudaNvcompAcceptanceFailures" classname="CudaNvcompAcceptanceFailures" time="5.41617" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>[
+  {
+    "label": "healthy",
+    "returncode": 0,
+    "products": [
+      "Movies/control.mrc",
+      "Movies/control.star",
+      "corrected_micrographs.star"
+    ],
+    "chunk_frames": 2,
+    "chunks": 3,
+    "gain_launches": 3,
+    "path": "nvcomp",
+    "identical_to_c2": true,
+    "pass": true,
+    "command": [
+      "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr_nvcomp_acceptance",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/mc-adler-accept-o581lwjq/healthy/",
+      "--use_own",
+      "--gpu",
+      "0",
+      "--j",
+      "1",
+      "--max_io_threads",
+      "1",
+      "--patch_x",
+      "2",
+      "--patch_y",
+      "2",
+      "--max_iter",
+      "1",
+      "--bfactor",
+      "150",
+      "--seed",
+      "1",
+      "--angpix",
+      "1.0",
+      "--voltage",
+      "300",
+      "--ingest",
+      "nvcomp",
+      "--ingest_witness",
+      "/tmp/mc-adler-accept-o581lwjq/healthy.witness"
+    ]
+  },
+  {
+    "label": "healthy-c1",
+    "returncode": 0,
+    "products": [
+     ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaNvcompReconstructionFailures" classname="CudaNvcompReconstructionFailures" time="4.01683" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>fixture: 48x40x6 Adobe Deflate, RowsPerStrip=1, 16-bit (22268 bytes)
+[PASS] healthy nvCOMP      rc=0 path=nvcomp products=3
+[PASS] unweighted-release-fatal   rc=1 path=nvcomp products=0
+[PASS] dw-release-fatal           rc=1 path=nvcomp products=0
+[UNRUN] mutant rows: no --mutant-binary given, so nothing here shows the guard can stay silent
+[PASS] sparse-recoverable         rc=0 route=nvcomp products=3/3
+        recoverable defect-update failure: the movie must be recovered from the device, not lost with it
+        route witnesses seen: none (reported, not asserted)
+[PASS] ingest-teardown-fatal      rc=0 route=compact products=3/3
+        teardown fails after the worker returned success: the ingest must not be reported as successful
+        route witnesses seen: none (reported, not asserted)
+[PASS] tiff-open-partial          rc=0 route=compact products=3/3
+        some ingest threads get no TIFF handle: the team must not deadlock, and the movie must fall back
+
+PASS: reconstruction-cleanup controls hold on the...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaDoseWeightAlias" classname="CudaDoseWeightAlias" time="2.77872" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS dose-weighting alias: carved by default, not with --save_noDW/--even_odd_split, dose-weighted micrograph identical
+PASS mutant predicate carves with --save_noDW and is detected
+</system-out>
+	</testcase>
+	<testcase name="CudaErrorClass" classname="CudaErrorClass" time="0.00410639" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda"/>
+		</properties>
+		<system-out>21 classifier cases (13 poisoning, 8 recoverable), 0 failures  [CUDART_VERSION 12080]
+13 retry cases (8 fatal, 5 permitted), 0 failures
+8 session-state sequences, 0 failures
+PASS classifier separates poisoned-context codes from recoverable ones,
+     and a fatal error already consumed by a helper -- leaving the
+     last-error slot clear -- still refuses the retry, while a recorded
+     recoverable allocation failure still permits the supported path.
+     A later fatal error is latched monotonically by the production
+     session state even when an earlier recoverable one was recorded
+     and the last-error slot has since been cleared. A fatal error
+     consumed by the FALLBACK preparation, after a permitted
+     pre-fallback check and with the slot cleared, also refuses the
+     CUDA re-dispatch.
+     These cover the predicates only; no real poisoned context is
+     synthesised anywhere in this suite, and no device is used.
+</system-out>
+	</testcase>
+</testsuite>

@@ -1,0 +1,43 @@
+# build-info collected 2026-10-16T20:45:08Z on 4-gpu-vm kernel 6.8.0-136-generic
+source main  : 1db869025507ac801845b4001b84e6bc0e77a645  (clean: 0 modified)
+source pre178: d7171b810dc97003784339d7bad1c279903f3bba
+g++ : g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+nvcc: Cuda compilation tools, release 12.8, V12.8.61
+cmake: cmake version 3.28.3
+python (numpy): 3.12.3 2.5.3
+nvCOMP: 5.3.0.16.MAKE_SEMANTIC_VERSION(NVCOMP_VER_MAJOR,.  lib /home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib/libnvcomp.so.5.3.0.16
+driver: 570.86.10; Ghostscript 10.02.1; THP always [madvise] never
+GPUs:
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, NVIDIA A100 80GB PCIe
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, NVIDIA A100 80GB PCIe
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, NVIDIA A100 80GB PCIe
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, NVIDIA A100 80GB PCIe
+== build-cpu
+BUILD_TESTING:BOOL=ON CMAKE_BUILD_TYPE:STRING=Release CUDA:BOOL=OFF CMAKE_HOME_DIRECTORY:INTERNAL=/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src 
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+dd86cd419c43dc83d732c7b70cff2bb40c5459674ba65f9b9ba5ee85a6b26439  build-cpu/motioncorr
+ctest -N: Total Tests: 59
+== build-cuda
+BUILD_TESTING:BOOL=ON CMAKE_BUILD_TYPE:STRING=Release CMAKE_CUDA_ARCHITECTURES:UNINITIALIZED=80 CUDA:BOOL=ON USE_NVCOMP:BOOL=OFF CMAKE_HOME_DIRECTORY:INTERNAL=/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src 
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+8dd18695a4da451d2c206d7f8a557dafc42a84fd314bf83b982ae5eefb0859b3  build-cuda/motioncorr
+ctest -N: Total Tests: 89
+== build-nvcomp
+BUILD_TESTING:BOOL=ON CMAKE_BUILD_TYPE:STRING=Release CMAKE_CUDA_ARCHITECTURES:UNINITIALIZED=80 CUDA:BOOL=ON USE_NVCOMP:BOOL=ON CMAKE_HOME_DIRECTORY:INTERNAL=/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src 
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+77db3f9268589158347f3710f904c0238e53de4e1a12703f2ca1d7cb84412a99  build-nvcomp/motioncorr
+ctest -N: Total Tests: 92
+== build-pre178-nvcomp
+BUILD_TESTING:BOOL=OFF CMAKE_BUILD_TYPE:STRING=Release CMAKE_CUDA_ARCHITECTURES:UNINITIALIZED=80 CUDA:BOOL=ON USE_NVCOMP:BOOL=ON CMAKE_HOME_DIRECTORY:INTERNAL=/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src-pre178 
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+1d5d0d1e90860e1b5936eeb0e6e8d1f97a19a76471bad288faad672b7021ebf1  build-pre178-nvcomp/motioncorr
+== build-pre178-fi
+BUILD_TESTING:BOOL=ON CMAKE_BUILD_TYPE:STRING=Release CMAKE_CUDA_ARCHITECTURES:UNINITIALIZED=80 CUDA:BOOL=ON USE_NVCOMP:BOOL=ON CMAKE_HOME_DIRECTORY:INTERNAL=/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src-pre178 
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+ctest -N: Total Tests: 91
+== build-pre178-cpu
+BUILD_TESTING:BOOL=OFF CMAKE_BUILD_TYPE:STRING=Release CUDA:BOOL=OFF CMAKE_HOME_DIRECTORY:INTERNAL=/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src-pre178 
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+c30b11c263d8fb9496457c5c6710414541170aa2b99f87d3c890bc78f94bd73e  build-pre178-cpu/motioncorr
+c808db080c76e728baa5af97f8106a12c3a65a06cb7c3afdc8171cb1eb9a6852  build-nvcomp/motioncorr_faultinject
+a8671c76542e3abffc545341a5a94fb53cf25deb05021f67b869cdb4103d9d74  build-pre178-fi/motioncorr_faultinject

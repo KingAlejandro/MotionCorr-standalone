@@ -271,7 +271,8 @@ exec "{sys.executable}" "$@"
                         "LogfileFromEps", "LogfileFromEpsMutant_always_eps",
                         "LogfileFromEpsMutant_late_guard", "LogfileFromEpsMutant_eps_order",
                         "LogfileFromEpsMutant_placeholder",
-                        "LogfileFromEpsMutant_concat_cleanup"):
+                        "LogfileFromEpsMutant_concat_cleanup",
+                        "CpuPatchPhaseWindow"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)
                 self.assertEqual(len(names), len(INTEGRATED_SUITE),

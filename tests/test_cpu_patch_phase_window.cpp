@@ -126,6 +126,8 @@ void phaseControls() {
     std::printf("PASS %d window geometries, five successive phase updates; global defaults exact\n",cases);
 #ifdef MC_PHASE_COUNT_TRIG
     std::puts("PASS GNU/ELF production sine count witness (separate or fused): window wx+wy, global nfx+nfy");
+#else
+    std::puts("SKIP (UNRUN) sine count witness: MC_PHASE_COUNT_TRIG is not compiled on this platform (needs GNU ld --wrap)");
 #endif
 }
 void alignControls() {
@@ -194,6 +196,9 @@ void alignControls() {
     require(cropped_multi_iteration_cases > 0,
             "no cropped alignment exercised a needed phase update (>=2 iterations)");
     std::printf("PASS %d production local/full alignments, %d cropped multi-iteration cases, unequal group amplitudes, j1/j4, iteration limits 1/5\n",cases,cropped_multi_iteration_cases);
+#ifndef MC_PHASE_COUNT_TRIG
+    std::puts("SKIP (UNRUN) alignPatch sine count witness: MC_PHASE_COUNT_TRIG is not compiled on this platform");
+#endif
 }
 double elapsed(std::chrono::steady_clock::time_point start) {
     return std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();

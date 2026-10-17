@@ -853,6 +853,20 @@ if(BUILD_TESTING AND CUDA)
                 --binary $<TARGET_FILE:motioncorr_faultinject>)
         set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 900)
+        # Issue #226 D1: a genuine handled allocation failure in alignment must not
+        # leave a stale last error that degrades or refuses the next movie. Needs a
+        # GPU, so, like the test above, it is not in DEFAULT_REQUIRED_TESTS.
+        if(USE_NVCOMP)
+            set(_stale_cuda_args "")
+        else()
+            set(_stale_cuda_args "--no-nvcomp")
+        endif()
+        add_test(NAME CudaStaleErrorAfterOom
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_stale_cuda_error_controls.py
+                --binary $<TARGET_FILE:motioncorr_faultinject> ${_stale_cuda_args})
+        set_tests_properties(CudaStaleErrorAfterOom PROPERTIES
+            LABELS "cuda;hardware" TIMEOUT 600)
         # The same two reconstruction-cleanup controls on the nvCOMP ingest arm.
         # run_preprocessing_failure_controls.py builds its fixture with
         # TIFFTAG_COMPRESSION = 1, so the fast path declines it and

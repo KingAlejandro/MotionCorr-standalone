@@ -1,14 +1,19 @@
 {
  "status": "frozen",
  "venue": "4GPUs GPU3 GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, payload 88-95, runner 120-123",
- "driver_sha256": "ab4e68edd3388ed2baf2203d65be6342b454680a0c4338777289c08ec46aced2",
- "rule_sha256": "346399f8d324f4820490b0ed0ab871ae7e91b205bff7b087094118fe0bc215b8",
+ "gpu_uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+ "frozen_files": {
+  "confirm_pairs.py": "fbd6deb1a0df787765676eafa4504348e5c4f940f14d3f4db7c4d76c76087c15",
+  "rule.txt": "be187eb2a5624670b4f47f6f14d5e0087334568f051947cdfefbdfff8bb93dc7",
+  "vendor/stats.py": "8d61e0544b462ba91a0258f445c37c252b37cf0ddc293eaf31543cbcf0173c7c",
+  "vendor/identity.py": "e44cfd0f21de16140fc7a60624000103faa61ba9778e50eb9749a193a0be4645"
+ },
  "source_tree": "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-confirm",
- "source_head": "72152947c2fa8240541447fbefc360016958366e",
- "source_clean": true,
+ "source_head": "c6c83d4af999dddcb6b384bbab6fe4a7d61658bf",
  "main_sha": "71ab841e69869b615555bb02f8f393db59c22d73",
- "fix_sha": "72152947c2fa8240541447fbefc360016958366e",
+ "fix_sha": "c6c83d4af999dddcb6b384bbab6fe4a7d61658bf",
  "fix_build_sha": "78aae2d3e79298913c904f0616a27432119d3988",
+ "fix_build_equivalence": "binary built from 78aae2d3e79298913c904f0616a27432119d3988; src/ identical to c6c83d4af999dddcb6b384bbab6fe4a7d61658bf; CMakeLists.txt differs in 5 comment line(s) only",
  "binaries": {
   "main": {
    "path": "/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-main-nvcomp/motioncorr",
@@ -375,6 +380,5 @@
  },
  "budget_s": 2700,
  "payload_timeout_s": 120,
- "max_attempts": 3,
- "fix_build_equivalence": "binary built from 78aae2d3e79298913c904f0616a27432119d3988; src/ identical to 72152947c2fa8240541447fbefc360016958366e; CMakeLists.txt differs in 5 comment line(s) only"
+ "max_attempts": 3
 }

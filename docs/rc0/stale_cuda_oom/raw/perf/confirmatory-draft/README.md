@@ -12,7 +12,19 @@ The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No time
 
 ## Frozen state
 
-FROZEN_STATE_PLACEHOLDER
+| Item | Value |
+|---|---|
+| Frozen source | `c6c83d4af999dddcb6b384bbab6fe4a7d61658bf`, clean checkout `W-D11/src-confirm`; it stays clean, since no bytecode is written |
+| `confirm_pairs.py` | sha256 `fbd6deb1a0df787765676eafa4504348e5c4f940f14d3f4db7c4d76c76087c15` |
+| `rule.txt` | sha256 `be187eb2a5624670b4f47f6f14d5e0087334568f051947cdfefbdfff8bb93dc7` |
+| `vendor/stats.py`, `vendor/identity.py` | sha256 `8d61e054…173c7c`, `e44cfd0f…be4645` |
+| `manifest.json` | sha256 `af88a4e9c6209164c285760fd0151dbc23c6505f831f1bbc13ba14daef284bde` (copy here; the run uses `W-D11/confirm4/manifest.json`) |
+| Binaries | main `c2263c22…f8dd`; fix `29b894f0…c185`, built from `78aae2d3`, source-equivalent to `c6c83d4a` (`src/` identical, 5 comment lines in `CMakeLists.txt`) |
+| Plan | tutG: 136 positions per window; e10216L: 96 per window |
+| Inputs | tutG 26 files, e10216L 4; `verify` passed for both after freezing, with no lock taken |
+| Superseded | the design and manifest frozen at `38fbfa6f` (manifest `c6b92eee…`, kept in `superseded-38fbfa6f/`) |
+
+Later evidence commits on the branch do not change the frozen files. Every window re-verifies them before taking a lock.
 
 ## Changes for review R-D11 round 5 (supersedes the design frozen at `38fbfa6f`)
 

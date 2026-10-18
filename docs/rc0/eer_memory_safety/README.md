@@ -77,8 +77,19 @@ Records are in [`raw/native/`](raw/native/), with summaries in
 | Identity, main `71ab841e` vs fix | 24/24 byte-identical, on CPU and CUDA. Covers EMPIAR-12963 (with EER gain), 10474 Falcon 3 and 10474 Falcon 4, each at G and L and upsampling 1 and 2 (`identity-*.log`) |
 
 **Note on the control arms.** Independent reviewer R-D10a found that four of the six control arms
-predate the final build. The coordinator had missed this. R-D10a has rebuilt the head and is rerunning all six arms;
-its result will be recorded here when its review is complete.
+predate the final build; the coordinator had missed this. During its first review, R-D10a rebuilt the exact head
+`97fb9fda` and reran all 37 V-EER fixtures in all six arms (CPU and ASan+UBSan, upsampling −1, 1 and 2).
+
+**Result:** 37/37 controlled, 37/37 publication-correct and 0 sanitizer reports in every arm
+([review](https://github.com/KingAlejandro/MotionCorr-standalone/pull/231#issuecomment-6248101932)).
+
+R-D10a's records are on 4GPUs under `/mnt/clathrin/alex-motioncorr-rc0/R-D10a/`:
+- `controls.done`
+- `controls-head-{cpu,asan}-up{-1,1,2}.log`
+
+Copies are in [`raw/review-r-d10a/`](raw/review-r-d10a/).
+
+The later test-only commit `9d8533a4` does not change `src/`.
 
 ## Added test cases (W-D10d, review findings P2-1 and P3-1)
 

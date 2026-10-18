@@ -239,20 +239,19 @@ def main() -> int:
         with open(log_file, "w") as lf:
             p = subprocess.Popen(argv, cwd=o.data, stdout=lf, stderr=subprocess.STDOUT)
             exe = None
-            affinity = None
-            for _ in range(50):
-                if p.poll() is not None:
+            deadline = time.monotonic() + 2.0
+            while time.monotonic() < deadline:
+                try:
+                    exe = os.path.realpath(f"/proc/{p.pid}/exe") if os.path.exists(f"/proc/{p.pid}") else None
+                except OSError:
+                    exe = None
+                if exe is None or exe == os.path.realpath(binary):
                     break
-                if exe is None:
-                    try:
-                        exe = os.path.realpath(f"/proc/{p.pid}/exe")
-                    except OSError:
-                        pass
-                if affinity is None:
-                    affinity = runner._proc_affinity(p.pid)
-                if exe is not None and affinity is not None:
-                    break
-                time.sleep(0.01)
+                time.sleep(0.002)
+            try:
+                affinity = sorted(os.sched_getaffinity(p.pid))
+            except (AttributeError, OSError):
+                affinity = None
             _, status, ru = os.wait4(p.pid, 0)
 
         wall = time.monotonic() - t0

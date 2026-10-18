@@ -258,6 +258,11 @@ if(BUILD_TESTING)
         COMMAND $<TARGET_FILE:runner_numerics> float_plan_cache)
     add_test(NAME MrcHeaderStats
         COMMAND $<TARGET_FILE:runner_numerics> mrc_stats)
+    # Issue #229: report plot path calls addToCPlot2D with EMDL_UNDEFINED (-1) as
+    # the x-axis; it must produce 1..N without indexing label2offset[-1] while
+    # preserving missing-label and non-numeric-label errors for defined labels.
+    add_test(NAME ReportPlotUndefinedAxis
+        COMMAND $<TARGET_FILE:runner_numerics> plot2d_undefined_axis)
     add_executable(pdf_concat tests/test_pdf_concat.cpp)
     target_link_libraries(pdf_concat PRIVATE motioncorr_core)
     add_test(NAME PdfConcat COMMAND pdf_concat)

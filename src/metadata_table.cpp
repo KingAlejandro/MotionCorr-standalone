@@ -1718,26 +1718,29 @@ void MetaDataTable::addToCPlot2D(CPlot2D *plot2D, EMDLabel xaxis, EMDLabel yaxis
 	double xval, yval;
 	for (long int idx = 0; idx < objects.size(); idx++)
 	{
-		const long offx = label2offset[xaxis];
-		if (offx < 0)
-			REPORT_ERROR("MetaDataTable::addToCPlot2D ERROR: cannot find x-axis label");
-
 		if (xaxis == EMDL_UNDEFINED)
 		{
 			xval = idx+1;
 		}
-		else if (EMDL::isDouble(xaxis))
-		{
-			objects[idx]->getValue(offx, mydbl);
-			xval = mydbl;
-		}
-		else if (EMDL::isInt(xaxis))
-		{
-			objects[idx]->getValue(offx, myint);
-			xval = myint;
-		}
 		else
-			REPORT_ERROR("MetaDataTable::addToCPlot2D ERROR: can only plot x-axis double, int or long int");
+		{
+			const long offx = label2offset[xaxis];
+			if (offx < 0)
+				REPORT_ERROR("MetaDataTable::addToCPlot2D ERROR: cannot find x-axis label");
+
+			if (EMDL::isDouble(xaxis))
+			{
+				objects[idx]->getValue(offx, mydbl);
+				xval = mydbl;
+			}
+			else if (EMDL::isInt(xaxis))
+			{
+				objects[idx]->getValue(offx, myint);
+				xval = myint;
+			}
+			else
+				REPORT_ERROR("MetaDataTable::addToCPlot2D ERROR: can only plot x-axis double, int or long int");
+		}
 
 		const long offy = label2offset[yaxis];
 		if (offy < 0)

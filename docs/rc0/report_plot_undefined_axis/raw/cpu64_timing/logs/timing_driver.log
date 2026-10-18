@@ -1,0 +1,176 @@
+=== 0. Host & Toolchain Provenance ===
+2026-10-18T00:34:27Z
+small-refmac-machine
+Linux small-refmac-machine 6.8.0-86-generic #87-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 22 18:03:36 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+CPU(s):                               64
+Model name:                           AMD EPYC 7763 64-Core Processor
+Thread(s) per core:                   1
+Socket(s):                            2
+NUMA node(s):                         2
+NUMA node0 CPU(s):                    0-31
+NUMA node1 CPU(s):                    32-63
+always [madvise] never
+GLIBC_TUNABLES=<unset>
+cmake version 4.4.3
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+10.02.1
+Python 3.12.3
+=== 1. Build Release CPU binaries under /tmp/motioncorr-cpu64-bench.lock on CPUs 48-63 ===
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+307a030b03785201342a57c4d8adae14120d87676fa6bec7e62f8959d5b03a35  /home/ubuntu/mc-w-d13/build-main/motioncorr
+68dc7ac11049bb15be3caa90af10adb6c7bb7e44b752d797080b9ca1a79d96f9  /home/ubuntu/mc-w-d13/build-fix/motioncorr
+65b1c972db5b06f4bd556f3118948ee0da35589a1f06e8a120ce33ffc7724f05  movies.star
+8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1  gain.mrc
+f989391b9d0e3e3b927a8de59d60179ade0b7ae5075ce7c3a9a5002ae2254ae3  Movies/20170629_00026_frameImage.tiff
+fa2699a1203a2ee278a5973e10105ea3e56b18a1c1d5ee153482767cb7e71d8d  Movies/20170629_00031_frameImage.tiff
+=== 2. Paired AB/BA comparison (main vs fix, 8 pairs, warmup 1, CPUs 48-55) ===
+mcprof: waiting for /tmp/motioncorr-cpu64-bench.lock
+mcprof: main     warmup r00 wall 17.378 s
+mcprof: fix      warmup r00 wall 17.357 s
+mcprof: main     round  r01 wall 17.511 s
+mcprof: fix      round  r01 wall 17.507 s
+mcprof: fix      round  r02 wall 17.504 s
+mcprof: main     round  r02 wall 17.512 s
+mcprof: main     round  r03 wall 17.625 s
+mcprof: fix      round  r03 wall 17.494 s
+mcprof: fix      round  r04 wall 17.707 s
+mcprof: main     round  r04 wall 17.524 s
+mcprof: main     round  r05 wall 17.654 s
+mcprof: fix      round  r05 wall 17.760 s
+mcprof: fix      round  r06 wall 17.654 s
+mcprof: main     round  r06 wall 17.661 s
+mcprof: main     round  r07 wall 17.635 s
+mcprof: fix      round  r07 wall 17.872 s
+mcprof: fix      round  r08 wall 18.367 s
+mcprof: main     round  r08 wall 17.651 s
+mcprof: wrote /home/ubuntu/mc-w-d13/ab_compare/report.md
+=== 3. Paired AA null comparison (main vs main_null, 6 pairs, warmup 1, CPUs 48-55) ===
+mcprof: waiting for /tmp/motioncorr-cpu64-bench.lock
+mcprof: main     warmup r00 wall 17.691 s
+mcprof: main_null warmup r00 wall 17.664 s
+mcprof: main     round  r01 wall 17.699 s
+mcprof: main_null round  r01 wall 17.650 s
+mcprof: main_null round  r02 wall 17.669 s
+mcprof: main     round  r02 wall 17.668 s
+mcprof: main     round  r03 wall 17.707 s
+mcprof: main_null round  r03 wall 17.741 s
+mcprof: main_null round  r04 wall 17.700 s
+mcprof: main     round  r04 wall 17.650 s
+mcprof: main     round  r05 wall 17.832 s
+mcprof: main_null round  r05 wall 18.125 s
+mcprof: main_null round  r06 wall 17.682 s
+mcprof: main     round  r06 wall 17.722 s
+mcprof: wrote /home/ubuntu/mc-w-d13/aa_null/report.md
+=== 4. Reports ===
+# MotionCorr compare: main vs fix
+
+## Provenance
+
+- kit: `None`
+- arm `main`: `/home/ubuntu/mc-w-d13/build-main/motioncorr` sha256 `307a030b03785201`; source `1afa03b57afbae42138ee30c3545b57b5a74c321` (given on command line); --profile present
+  - linked: libfftw3.so.3=/lib/x86_64-linux-gnu/libfftw3.so.3, libfftw3f.so.3=/lib/x86_64-linux-gnu/libfftw3f.so.3, libtiff.so.6=/lib/x86_64-linux-gnu/libtiff.so.6
+- arm `fix`: `/home/ubuntu/mc-w-d13/build-fix/motioncorr` sha256 `68dc7ac11049bb15`; source `b82d25f4dda6bca746e4206fed1272851cc6a5ce` (given on command line); --profile present
+  - linked: libfftw3.so.3=/lib/x86_64-linux-gnu/libfftw3.so.3, libfftw3f.so.3=/lib/x86_64-linux-gnu/libfftw3f.so.3, libtiff.so.6=/lib/x86_64-linux-gnu/libtiff.so.6
+- host: small-refmac-machine, AMD EPYC 7763 64-Core Processor, 64 CPUs, lane 48-55, load1 6.0, clocksource kvm-clock, THP always [madvise] never
+- locks: /tmp/motioncorr-cpu64-bench.lock (waited 0 s)
+- settle: {"settled": true, "waited_s": 0.0}
+- rounds: 8 run, 8 clean, target 8 clean, at most 12
+- input: `movies.star` in `/home/ubuntu/mc-rc0-paired-20261017/work/tutorial`, 2 movies, STAR sha256 `65b1c972db5b06f4`
+- payload options: `--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref gain.mrc --seed 1 --expected_frames 24 --j 8`
+- command: `/home/ubuntu/mc-w-d13/src-fix/tools/profiling/mcprof.py compare main=/home/ubuntu/mc-w-d13/build-main/motioncorr fix=/home/ubuntu/mc-w-d13/build-fix/motioncorr --source main=/home/ubuntu/mc-w-d13/src-main --source fix=/home/ubuntu/mc-w-d13/src-fix --commit main=1afa03b57afbae42138ee30c3545b57b5a74c321 --commit fix=b82d25f4dda6bca746e4206fed1272851cc6a5ce --data /home/ubuntu/mc-rc0-paired-20261017/work/tutorial --star movies.star --work /home/ubuntu/mc-w-d13/ab_compare --cpus 48-55 --runner-cpus 56-59 --bench-lock /tmp/motioncorr-cpu64-bench.lock --warmup 1 --pairs 8 --max-rounds 12 -- --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref gain.mrc --seed 1 --expected_frames 24 --j 8`
+
+## Unprofiled wall and resources
+
+Instrument: mcprof run: unprofiled process, wall from CLOCK_MONOTONIC, CPU/RSS/faults from wait4, VRAM from NVML sampling.
+
+| arm | runs | wall med s | wall IQR s | wall range s | CPU med s | peak RSS MiB | minflt med | majflt max | VRAM proc MiB | VRAM dev delta MiB |
+|---|---|---|---|---|---|---|---|---|---|---|
+| main | 8 | 17.630 | 0.130 | 17.511-17.661 | 132.950 | 3201 | 3369510 | 34 | - | - |
+| fix | 8 | 17.681 | 0.282 | 17.494-18.367 | 133.530 | 3209 | 3355571 | 43 | - | - |
+
+VRAM columns are sampled peaks and therefore lower bounds. "proc" is NVML's per-process used memory (includes the CUDA context); "dev delta" is device used memory minus the idle baseline taken just before the run.
+
+- `main`: load1 7.3-9.7, max foreign CPU on lane 0.00 cores, wall outlier rounds none
+- `fix`: load1 8.0-9.8, max foreign CPU on lane 0.00 cores, wall outlier rounds none
+
+Rounds: 8 planned, 8 retained, 0 discarded (a discard removes the whole round, every arm). Discards triggered by: `main` 0 (alone 0), `fix` 0 (alone 0). Kept orders: AB 4, BA 4.
+
+Lane wait before round: r1 1 s, r2 1 s, r3 1 s, r4 1 s, r5 1 s, r6 1 s, r7 1 s, r8 1 s.
+
+### `fix` vs `main`: **not resolved (below noise 0.424 s)**
+
+| pairs | median B-A s | IQR s | range s | CI of median s | noise s | sign test | relative |
+|---|---|---|---|---|---|---|---|
+| 8 | +0.051 | -0.007..+0.196 | -0.131..+0.717 | -0.131..+0.717 (99.2%) | 0.141 | 4+/4- p=1 | +0.29% |
+
+Reason: CI of median includes 0. Positive differences mean `fix` is slower.
+Positional: median B-A when `fix` ran second +0.051 s (n=4), first +0.088 s (n=4); cost of running second -0.018 s.
+Paired differences (s): -0.003, -0.008, -0.131, +0.183, +0.106, -0.007, +0.237, +0.717
+
+## Product identity
+
+Instrument: lib/identity.py: complete MRC header + extended header + payload, writer clock masked, path-normalised STAR/EPS, round 1.
+
+| arm vs base | result | files compared | MRC compared | excluded | problems |
+|---|---|---|---|---|---|
+| fix | PASS | 12 | 2 | 6 | - |
+
+Excluded: per-movie `.log` (timing values) and `.pdf` (Ghostscript dates). All MRC header/label and extended-header bytes are compared; only the known first-label Relion writer timestamp is masked.
+---
+# MotionCorr compare: main vs main_null
+
+## Provenance
+
+- kit: `None`
+- arm `main`: `/home/ubuntu/mc-w-d13/build-main/motioncorr` sha256 `307a030b03785201`; source `1afa03b57afbae42138ee30c3545b57b5a74c321` (given on command line); --profile present
+  - linked: libfftw3.so.3=/lib/x86_64-linux-gnu/libfftw3.so.3, libfftw3f.so.3=/lib/x86_64-linux-gnu/libfftw3f.so.3, libtiff.so.6=/lib/x86_64-linux-gnu/libtiff.so.6
+- arm `main_null`: `/home/ubuntu/mc-w-d13/build-main/motioncorr` sha256 `307a030b03785201`; source `1afa03b57afbae42138ee30c3545b57b5a74c321` (given on command line); --profile present
+  - linked: libfftw3.so.3=/lib/x86_64-linux-gnu/libfftw3.so.3, libfftw3f.so.3=/lib/x86_64-linux-gnu/libfftw3f.so.3, libtiff.so.6=/lib/x86_64-linux-gnu/libtiff.so.6
+- host: small-refmac-machine, AMD EPYC 7763 64-Core Processor, 64 CPUs, lane 48-55, load1 9.5, clocksource kvm-clock, THP always [madvise] never
+- locks: /tmp/motioncorr-cpu64-bench.lock (waited 0 s)
+- settle: {"settled": true, "waited_s": 0.0}
+- rounds: 6 run, 6 clean, target 6 clean, at most 10
+- input: `movies.star` in `/home/ubuntu/mc-rc0-paired-20261017/work/tutorial`, 2 movies, STAR sha256 `65b1c972db5b06f4`
+- payload options: `--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref gain.mrc --seed 1 --expected_frames 24 --j 8`
+- command: `/home/ubuntu/mc-w-d13/src-fix/tools/profiling/mcprof.py compare main=/home/ubuntu/mc-w-d13/build-main/motioncorr main_null=/home/ubuntu/mc-w-d13/build-main/motioncorr --source main=/home/ubuntu/mc-w-d13/src-main --source main_null=/home/ubuntu/mc-w-d13/src-main --commit main=1afa03b57afbae42138ee30c3545b57b5a74c321 --commit main_null=1afa03b57afbae42138ee30c3545b57b5a74c321 --data /home/ubuntu/mc-rc0-paired-20261017/work/tutorial --star movies.star --work /home/ubuntu/mc-w-d13/aa_null --cpus 48-55 --runner-cpus 56-59 --bench-lock /tmp/motioncorr-cpu64-bench.lock --warmup 1 --pairs 6 --max-rounds 10 -- --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref gain.mrc --seed 1 --expected_frames 24 --j 8`
+
+## Unprofiled wall and resources
+
+Instrument: mcprof run: unprofiled process, wall from CLOCK_MONOTONIC, CPU/RSS/faults from wait4, VRAM from NVML sampling.
+
+| arm | runs | wall med s | wall IQR s | wall range s | CPU med s | peak RSS MiB | minflt med | majflt max | VRAM proc MiB | VRAM dev delta MiB |
+|---|---|---|---|---|---|---|---|---|---|---|
+| main | 6 | 17.703 | 0.042 | 17.650-17.832 | 133.653 | 3207 | 3331495 | 39 | - | - |
+| main_null | 6 | 17.691 | 0.059 | 17.650-18.125 | 133.790 | 3210 | 3355178 | 39 | - | - |
+
+VRAM columns are sampled peaks and therefore lower bounds. "proc" is NVML's per-process used memory (includes the CUDA context); "dev delta" is device used memory minus the idle baseline taken just before the run.
+
+- `main`: load1 9.2-9.9, max foreign CPU on lane 0.00 cores, wall outlier rounds [5]
+- `main_null`: load1 9.0-9.8, max foreign CPU on lane 0.00 cores, wall outlier rounds [5]
+
+Rounds: 6 planned, 6 retained, 0 discarded (a discard removes the whole round, every arm). Discards triggered by: `main` 0 (alone 0), `main_null` 0 (alone 0). Kept orders: AB 3, BA 3.
+
+Lane wait before round: r1 1 s, r2 1 s, r3 1 s, r4 1 s, r5 1 s, r6 1 s.
+
+### `main_null` vs `main`: **not resolved (below noise 0.171 s)**
+
+| pairs | median B-A s | IQR s | range s | CI of median s | noise s | sign test | relative |
+|---|---|---|---|---|---|---|---|
+| 6 | +0.018 | -0.030..+0.046 | -0.049..+0.293 | -0.049..+0.293 (96.9%) | 0.067 | 4+/2- p=0.688 | +0.10% |
+
+Reason: CI of median includes 0. Positive differences mean `main_null` is slower.
+Positional: median B-A when `main_null` ran second +0.034 s (n=3), first +0.001 s (n=3); cost of running second +0.017 s.
+Paired differences (s): -0.049, +0.001, +0.034, +0.050, +0.293, -0.040
+
+## Product identity
+
+Instrument: lib/identity.py: complete MRC header + extended header + payload, writer clock masked, path-normalised STAR/EPS, round 1.
+
+| arm vs base | result | files compared | MRC compared | excluded | problems |
+|---|---|---|---|---|---|
+| main_null | PASS | 12 | 2 | 6 | - |
+
+Excluded: per-movie `.log` (timing values) and `.pdf` (Ghostscript dates). All MRC header/label and extended-header bytes are compared; only the known first-label Relion writer timestamp is masked.
+51M	/home/ubuntu/mc-w-d13
+CPU64_TIMING_COMPLETE 2026-10-18T00:45:02Z

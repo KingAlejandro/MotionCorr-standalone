@@ -1,0 +1,158 @@
+=== 0. Interleaved Definitive Run Provenance (cpu64) ===
+2026-10-18T09:26:49Z
+small-refmac-machine
+Linux small-refmac-machine 6.8.0-86-generic #87-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 22 18:03:36 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+CPU(s):                               64
+Model name:                           AMD EPYC 7763 64-Core Processor
+Thread(s) per core:                   1
+Socket(s):                            2
+NUMA node(s):                         2
+NUMA node0 CPU(s):                    0-31
+NUMA node1 CPU(s):                    32-63
+always [madvise] never
+GLIBC_TUNABLES=<unset>
+cmake version 4.4.3
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+10.02.1
+Python 3.12.3
+307a030b03785201342a57c4d8adae14120d87676fa6bec7e62f8959d5b03a35  /home/ubuntu/mc-w-d13/build-main/motioncorr
+68dc7ac11049bb15be3caa90af10adb6c7bb7e44b752d797080b9ca1a79d96f9  /home/ubuntu/mc-w-d13/build-fix/motioncorr
+2026-10-18 09:26:48.473281420 +0000 (1792315608) /home/ubuntu/mc-w-d13/run_interleaved_cpu64.sh
+2026-10-18 09:26:48.340282070 +0000 (1792315608) /home/ubuntu/mc-w-d13/wd13_interleaved_pairs.py
+aa019332ca8825b26f89ffd94d382f46a1a64749b052ede953a48e40107fd69e  movies2.star
+8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1  gain.mrc
+df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0  Movies/20170629_00021_frameImage.tiff
+cc55f13d606463acbad23a4d42f2e48e60ee9cd783eeca0f1957a103b748ac47  Movies/20170629_00022_frameImage.tiff
+=== Waiting for /tmp/motioncorr-cpu64-bench.lock 2026-10-18T09:26:50Z ===
+=== Acquired /tmp/motioncorr-cpu64-bench.lock 2026-10-18T09:26:50Z ===
+DECLARED_TIMESTAMPS {"recorded_before_first_run_utc": "2026-10-18T09:26:50.429361Z", "script_path": "/home/ubuntu/mc-w-d13/wd13_interleaved_pairs.py", "script_mtime_utc": "2026-10-18T09:26:48.340282Z", "rule_txt_path": "/home/ubuntu/mc-w-d13/interleaved_definitive/rule.txt", "rule_txt_mtime_utc": "2026-10-18T09:26:50.419272Z", "design_json_path": "/home/ubuntu/mc-w-d13/interleaved_definitive/design.json", "design_json_mtime_utc": "2026-10-18T09:26:50.428272Z"}
+wd13: seq=001 warmup     pos=00 att=1 arm=A  wall=17.366s foreign=0.000c violations=[]
+wd13: seq=002 warmup     pos=00 att=1 arm=B  wall=17.285s foreign=0.000c violations=[]
+wd13: seq=003 definitive pos=01 att=1 arm=A  wall=17.389s foreign=0.000c violations=[]
+wd13: seq=004 definitive pos=01 att=1 arm=B  wall=17.246s foreign=0.003c violations=[]
+wd13: seq=005 definitive pos=02 att=1 arm=B  wall=17.313s foreign=0.000c violations=[]
+wd13: seq=006 definitive pos=02 att=1 arm=A  wall=17.510s foreign=0.002c violations=[]
+wd13: seq=007 definitive pos=03 att=1 arm=A  wall=17.313s foreign=0.000c violations=[]
+wd13: seq=008 definitive pos=03 att=1 arm=B  wall=17.401s foreign=0.001c violations=[]
+wd13: seq=009 definitive pos=04 att=1 arm=B  wall=17.421s foreign=0.000c violations=[]
+wd13: seq=010 definitive pos=04 att=1 arm=A  wall=17.446s foreign=0.004c violations=[]
+wd13: seq=011 definitive pos=05 att=1 arm=A  wall=17.430s foreign=0.000c violations=[]
+wd13: seq=012 definitive pos=05 att=1 arm=A' wall=17.498s foreign=0.000c violations=[]
+wd13: seq=013 definitive pos=06 att=1 arm=A' wall=17.456s foreign=0.000c violations=[]
+wd13: seq=014 definitive pos=06 att=1 arm=A  wall=17.472s foreign=0.001c violations=[]
+wd13: seq=015 definitive pos=07 att=1 arm=A  wall=17.357s foreign=0.000c violations=[]
+wd13: seq=016 definitive pos=07 att=1 arm=B  wall=17.471s foreign=0.001c violations=[]
+wd13: seq=017 definitive pos=08 att=1 arm=B  wall=17.423s foreign=0.000c violations=[]
+wd13: seq=018 definitive pos=08 att=1 arm=A  wall=17.535s foreign=0.002c violations=[]
+wd13: seq=019 definitive pos=09 att=1 arm=A  wall=17.499s foreign=0.000c violations=[]
+wd13: seq=020 definitive pos=09 att=1 arm=B  wall=17.432s foreign=0.000c violations=[]
+wd13: seq=021 definitive pos=10 att=1 arm=B  wall=17.361s foreign=0.001c violations=[]
+wd13: seq=022 definitive pos=10 att=1 arm=A  wall=17.399s foreign=0.001c violations=[]
+wd13: seq=023 definitive pos=11 att=1 arm=A  wall=17.393s foreign=0.000c violations=[]
+wd13: seq=024 definitive pos=11 att=1 arm=A' wall=17.453s foreign=0.000c violations=[]
+wd13: seq=025 definitive pos=12 att=1 arm=A' wall=17.429s foreign=0.000c violations=[]
+wd13: seq=026 definitive pos=12 att=1 arm=A  wall=17.558s foreign=0.000c violations=[]
+wd13: seq=027 definitive pos=13 att=1 arm=A  wall=17.449s foreign=0.000c violations=[]
+wd13: seq=028 definitive pos=13 att=1 arm=B  wall=17.395s foreign=0.001c violations=[]
+wd13: seq=029 definitive pos=14 att=1 arm=B  wall=17.524s foreign=0.001c violations=[]
+wd13: seq=030 definitive pos=14 att=1 arm=A  wall=17.462s foreign=0.000c violations=[]
+wd13: seq=031 definitive pos=15 att=1 arm=A  wall=17.419s foreign=0.000c violations=[]
+wd13: seq=032 definitive pos=15 att=1 arm=B  wall=17.378s foreign=0.002c violations=[]
+wd13: seq=033 definitive pos=16 att=1 arm=B  wall=17.475s foreign=0.001c violations=[]
+wd13: seq=034 definitive pos=16 att=1 arm=A  wall=17.412s foreign=0.000c violations=[]
+wd13: seq=035 definitive pos=17 att=1 arm=A  wall=17.346s foreign=0.000c violations=[]
+wd13: seq=036 definitive pos=17 att=1 arm=A' wall=17.454s foreign=0.000c violations=[]
+wd13: seq=037 definitive pos=18 att=1 arm=A' wall=17.493s foreign=0.002c violations=[]
+wd13: seq=038 definitive pos=18 att=1 arm=A  wall=17.425s foreign=0.000c violations=[]
+wd13: seq=039 definitive pos=19 att=1 arm=A  wall=17.436s foreign=0.000c violations=[]
+wd13: seq=040 definitive pos=19 att=1 arm=B  wall=17.472s foreign=0.001c violations=[]
+wd13: seq=041 definitive pos=20 att=1 arm=B  wall=17.974s foreign=0.000c violations=[]
+wd13: seq=042 definitive pos=20 att=1 arm=A  wall=17.421s foreign=0.001c violations=[]
+wd13: seq=043 definitive pos=21 att=1 arm=A  wall=17.477s foreign=0.003c violations=[]
+wd13: seq=044 definitive pos=21 att=1 arm=B  wall=17.450s foreign=0.000c violations=[]
+wd13: seq=045 definitive pos=22 att=1 arm=B  wall=17.386s foreign=0.002c violations=[]
+wd13: seq=046 definitive pos=22 att=1 arm=A  wall=17.509s foreign=0.002c violations=[]
+wd13: seq=047 definitive pos=23 att=1 arm=A  wall=17.446s foreign=0.000c violations=[]
+wd13: seq=048 definitive pos=23 att=1 arm=A' wall=17.397s foreign=0.000c violations=[]
+wd13: seq=049 definitive pos=24 att=1 arm=A' wall=17.568s foreign=0.000c violations=[]
+wd13: seq=050 definitive pos=24 att=1 arm=A  wall=17.399s foreign=0.001c violations=[]
+wd13: seq=051 definitive pos=25 att=1 arm=A  wall=17.424s foreign=0.000c violations=[]
+wd13: seq=052 definitive pos=25 att=1 arm=B  wall=17.460s foreign=0.000c violations=[]
+wd13: seq=053 definitive pos=26 att=1 arm=B  wall=17.521s foreign=0.000c violations=[]
+wd13: seq=054 definitive pos=26 att=1 arm=A  wall=17.228s foreign=0.001c violations=[]
+wd13: seq=055 definitive pos=27 att=1 arm=A  wall=17.459s foreign=0.005c violations=[]
+wd13: seq=056 definitive pos=27 att=1 arm=B  wall=17.377s foreign=0.000c violations=[]
+wd13: seq=057 definitive pos=28 att=1 arm=B  wall=17.270s foreign=0.000c violations=[]
+wd13: seq=058 definitive pos=28 att=1 arm=A  wall=17.341s foreign=0.002c violations=[]
+wd13: seq=059 definitive pos=29 att=1 arm=A  wall=17.408s foreign=0.001c violations=[]
+wd13: seq=060 definitive pos=29 att=1 arm=A' wall=17.342s foreign=0.000c violations=[]
+wd13: seq=061 definitive pos=30 att=1 arm=A' wall=17.326s foreign=0.001c violations=[]
+wd13: seq=062 definitive pos=30 att=1 arm=A  wall=17.395s foreign=0.001c violations=[]
+wd13: seq=063 definitive pos=31 att=1 arm=A  wall=17.367s foreign=0.002c violations=[]
+wd13: seq=064 definitive pos=31 att=1 arm=B  wall=17.363s foreign=0.000c violations=[]
+wd13: seq=065 definitive pos=32 att=1 arm=B  wall=17.417s foreign=0.003c violations=[]
+wd13: seq=066 definitive pos=32 att=1 arm=A  wall=17.479s foreign=0.000c violations=[]
+wd13: seq=067 definitive pos=33 att=1 arm=A  wall=17.337s foreign=0.002c violations=[]
+wd13: seq=068 definitive pos=33 att=1 arm=B  wall=17.369s foreign=0.000c violations=[]
+wd13: seq=069 definitive pos=34 att=1 arm=B  wall=17.617s foreign=0.000c violations=[]
+wd13: seq=070 definitive pos=34 att=1 arm=A  wall=17.472s foreign=0.000c violations=[]
+wd13: seq=071 definitive pos=35 att=1 arm=A  wall=17.491s foreign=0.002c violations=[]
+wd13: seq=072 definitive pos=35 att=1 arm=A' wall=17.508s foreign=0.001c violations=[]
+wd13: seq=073 definitive pos=36 att=1 arm=A' wall=17.460s foreign=0.001c violations=[]
+wd13: seq=074 definitive pos=36 att=1 arm=A  wall=17.414s foreign=0.001c violations=[]
+wd13: seq=075 definitive pos=37 att=1 arm=A  wall=17.357s foreign=0.000c violations=[]
+wd13: seq=076 definitive pos=37 att=1 arm=B  wall=17.454s foreign=0.000c violations=[]
+wd13: seq=077 definitive pos=38 att=1 arm=B  wall=17.404s foreign=0.000c violations=[]
+wd13: seq=078 definitive pos=38 att=1 arm=A  wall=17.463s foreign=0.000c violations=[]
+wd13: seq=079 definitive pos=39 att=1 arm=A  wall=17.427s foreign=0.000c violations=[]
+wd13: seq=080 definitive pos=39 att=1 arm=B  wall=17.412s foreign=0.000c violations=[]
+wd13: seq=081 definitive pos=40 att=1 arm=B  wall=17.397s foreign=0.001c violations=[]
+wd13: seq=082 definitive pos=40 att=1 arm=A  wall=17.482s foreign=0.001c violations=[]
+wd13: seq=083 definitive pos=41 att=1 arm=A  wall=17.410s foreign=0.000c violations=[]
+wd13: seq=084 definitive pos=41 att=1 arm=A' wall=17.417s foreign=0.000c violations=[]
+wd13: seq=085 definitive pos=42 att=1 arm=A' wall=17.451s foreign=0.000c violations=[]
+wd13: seq=086 definitive pos=42 att=1 arm=A  wall=17.437s foreign=0.000c violations=[]
+wd13: seq=087 definitive pos=43 att=1 arm=A  wall=17.415s foreign=0.000c violations=[]
+wd13: seq=088 definitive pos=43 att=1 arm=B  wall=17.460s foreign=0.000c violations=[]
+wd13: seq=089 definitive pos=44 att=1 arm=B  wall=17.470s foreign=0.002c violations=[]
+wd13: seq=090 definitive pos=44 att=1 arm=A  wall=17.485s foreign=0.000c violations=[]
+wd13: seq=091 definitive pos=45 att=1 arm=A  wall=17.425s foreign=0.000c violations=[]
+wd13: seq=092 definitive pos=45 att=1 arm=B  wall=17.550s foreign=0.000c violations=[]
+wd13: seq=093 definitive pos=46 att=1 arm=B  wall=17.341s foreign=0.002c violations=[]
+wd13: seq=094 definitive pos=46 att=1 arm=A  wall=17.451s foreign=0.001c violations=[]
+wd13: seq=095 definitive pos=47 att=1 arm=A  wall=17.427s foreign=0.000c violations=[]
+wd13: seq=096 definitive pos=47 att=1 arm=A' wall=17.782s foreign=0.000c violations=[]
+wd13: seq=097 definitive pos=48 att=1 arm=A' wall=17.562s foreign=0.001c violations=[]
+wd13: seq=098 definitive pos=48 att=1 arm=A  wall=17.353s foreign=0.000c violations=[]
+INTERLEAVED_RESULT {
+  "d14_label": "PASS",
+  "comp_pairs": 32,
+  "null_pairs": 16,
+  "main_median_s": 17.43186404183507,
+  "fix_median_s": 17.419142277911305,
+  "median_d_s": -0.01984388940036297,
+  "median_d_pct": -0.11383687569349572,
+  "ci_s": [
+    -0.061351895332336426,
+    0.04552232846617699
+  ],
+  "ci_pct": [
+    -0.3519525805450112,
+    0.2611443524165119
+  ],
+  "ci_confidence": 0.9799383929930627,
+  "null_median_s": 0.03135867044329643,
+  "null_ci_s": [
+    -0.0489271879196167,
+    0.10772332549095154
+  ],
+  "null_range_s": [
+    -0.12865563482046127,
+    0.3550710827112198
+  ],
+  "identity_identical": true
+}
+2026-10-18 09:26:50.419271911 +0000 (1792315610) /home/ubuntu/mc-w-d13/interleaved_definitive/rule.txt
+2026-10-18 09:26:50.428271868 +0000 (1792315610) /home/ubuntu/mc-w-d13/interleaved_definitive/design.json
+2026-10-18 09:26:50.428271868 +0000 (1792315610) /home/ubuntu/mc-w-d13/interleaved_definitive/declared_timestamps.json
+INTERLEAVED_CPU64_COMPLETE 2026-10-18T09:57:03Z

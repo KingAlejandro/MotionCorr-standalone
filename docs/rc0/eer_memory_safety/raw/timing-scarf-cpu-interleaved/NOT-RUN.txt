@@ -1,0 +1,18 @@
+W-D10e: declared, not run.
+
+Cancelled before any timed run following the maintainer decision of 2026-10-18 (#198): the
+earlier SCARF CPU whole-job runs 3634353 (12963 L) and 3634354 (10474 F3 L), with sequential
+nulls, are accepted as they stand.
+
+No SCARF job was ever submitted for this design (verified with squeue/sacct; the staging
+directory /work4/scd/scarf1415/W-D10e was never created). The new EMPIAR-10474 Falcon 4 L
+whole-job workload therefore has no timing record.
+
+Retained here: rule.txt (the declared design and its addendum) and wd10e_cpu_pairs.py (the
+driver). The driver was exercised only functionally on 4GPUs with fake payloads (no timing claim):
+the witness control attributed a 1.5 s burst on CPU 5 to the payload CPUs (1.54 s) and one on
+CPU 24 elsewhere (1.52 s, 0.0 s on the payload CPUs); a clean run gave PASS with 32 AB/BA pairs and
+16 interleaved nulls; a non-identical B product gave INCOMPLETE with an identity blocker; a B that
+intermittently produced no products had 6 pairs discarded and gave INCOMPLETE with a by-arm
+failure blocker; with the pre-review revision of the driver, a 15 % failing A exhausted 3 attempts and stopped as incomplete. The sbatch
+drafts were removed because they predated the final driver and were never submitted.

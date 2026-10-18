@@ -100,12 +100,13 @@ The CIs below are the tools' order-statistic intervals, with coverage of at leas
 
 | Workload | Median main | Median fix − main | CI of median | Upper bound | Null median, CI | D14 |
 |---|---|---|---|---|---|---|
-| CPU whole job, 12963 L (`--j 16`) | 9.509 s | −0.025 s (−0.26 %) | −0.040 … −0.007 s | −0.07 % | −0.010 s, −0.043 … +0.022 s | pass |
-| CPU whole job, 10474 F3 L (`--j 16`) | 15.151 s | +0.002 s (+0.01 %) | −0.018 … +0.029 s | +0.19 % | +0.005 s, −0.018 … +0.061 s | pass |
+| CPU whole job, 12963 L (`--j 16`) | 9.509 s | −0.025 s (−0.26 %) | −0.040 … −0.007 s | −0.07 % | −0.010 s, −0.043 … +0.022 s | D14 PASS (nulls sequential, not interleaved; deviation accepted by the maintainer 2026-10-18, #198) |
+| CPU whole job, 10474 F3 L (`--j 16`) | 15.151 s | +0.002 s (+0.01 %) | −0.018 … +0.029 s | +0.19 % | +0.005 s, −0.018 … +0.061 s | D14 PASS (nulls sequential, not interleaved; deviation accepted by the maintainer 2026-10-18, #198) |
 | Host decode, 12963 | 4.402 s | +0.0002 s (+0.00 %) | −0.0019 … +0.0029 s | +0.07 % | +0.0018 s, −0.0024 … +0.0058 s | pass |
 | Host decode, 10474 F3 | 7.360 s | +0.0017 s (+0.02 %) | −0.0014 … +0.0070 s | +0.09 % | −0.0002 s, −0.0030 … +0.0045 s | pass |
 | Host decode, 10474 F4 | — | — | — | — | — | **not yet measured.** Attempt 1 (job 3634352) hit the 1:30 limit at 24/32 pairs before any F4 statistic was written. Attempt 2 (job 3634495) uses the same declared design, F4 only, with a 4:00 limit |
 | CUDA compact whole job, 12963 L (nvCOMP build, `--j 8`) | 4.833 s | −0.024 s (−0.49 %) | −0.059 … +0.014 s | +0.30 % | −0.004 s, −0.099 … +0.037 s (16 pairs) | pass |
+| CPU whole job, 10474 F4 L (`--j 16`) | — | — | — | — | — | **declared, not run:** cancelled before any timed run following the maintainer decision (W-D10e; no SCARF job was submitted) |
 
 **Integrity of the runs:**
 - No pair was discarded in any workload.
@@ -121,5 +122,9 @@ The CIs below are the tools' order-statistic intervals, with coverage of at leas
 - CUDA: [`raw/timing-cuda-e12963L/`](raw/timing-cuda-e12963L/). Read `INCIDENT.txt`
   there: the coordinator killed an earlier, queued instance of the window by mistake.
   That instance had no timed runs, and the run reported here is the only result.
+- W-D10e: [`raw/timing-scarf-cpu-interleaved/`](raw/timing-scarf-cpu-interleaved/) holds a
+  declared design with interleaved nulls for the three CPU whole-job workloads, including the new
+  10474 F4 L, and its driver. It was not run: after the maintainer accepted jobs 3634353 and
+  3634354 as they stand, it was withdrawn before any job was submitted (`NOT-RUN.txt`).
 - SCARF GPU job 3634351, a backup for the same CUDA workload, was cancelled before it
   started, so the result is not duplicated.

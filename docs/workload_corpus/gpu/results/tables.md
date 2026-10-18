@@ -107,7 +107,7 @@ Mpx-frame = nx*ny*frames/1e6 (EER: grouped frames). Steady movie from the replay
 
 | family | container | Mpx-frame/movie | G steady ms/Mpx | L steady ms/Mpx | L ingest ms/Mpx | L tutorial ratio |
 |---|---|---:|---:|---:|---:|---:|
-| RELION tutorial | u8 Deflate TIFF | 342 | 0.4 | 0.5 | 0.1 | 1.00 |
+| RELION tutorial | 16-bit Adobe-Deflate TIFF | 342 | 0.4 | 0.5 | 0.1 | 1.00 |
 | EMPIAR-10028 | float32 MRC (.mrcs) | 268 | 2.6 | 2.6 | 1.8 | 4.91 |
 | EMPIAR-10361 | u8 LZW BigTIFF | 1461 | 1.4 | 1.4 | 1.1 | 2.66 |
 | EMPIAR-10641 | u8 LZW BigTIFF | 1650 | 0.9 | 9.5 | 0.5 | 17.96 |
@@ -115,7 +115,7 @@ Mpx-frame = nx*ny*frames/1e6 (EER: grouped frames). Steady movie from the replay
 | EMPIAR-10474 Falcon3 (58 fr) | EER (65001) | 973 | 6.0 | 7.4 | 4.8 | 13.96 |
 | EMPIAR-10474 Falcon4 (144 fr) | EER (65001) | 2416 | 5.2 | 5.3 | 4.5 | 9.96 |
 | EMPIAR-12963 | EER (65001) | 654 | 5.9 | 7.0 | 5.1 | 13.10 |
-| EMPIAR-10164 tilt series (8 fr) | u8 MRC (.mrcs) | 456 | 2.1 | 2.2 | 1.1 | 4.16 |
+| EMPIAR-10164 tilt series (8 fr) | MRC mode 0, signed int8 (.mrcs) | 456 | 2.1 | 2.2 | 1.1 | 4.16 |
 | EMPIAR-10216 apoferritin (59 fr) | int16 MRC (.mrcs) | 990 | 2.0 | 3.7 | 1.3 | 6.93 |
 
 ### 7. Profile overhead (profiled vs unprofiled process wall)
@@ -183,7 +183,7 @@ Measured = NVML per-process peak over every run of the family (all cells; sample
 
 | geometry | measured overhead GiB | max frames, 24 GiB | 40 GiB | 48 GiB | frames in the corpus movie |
 |---|---:|---:|---:|---:|---:|
-| RELION tutorial (3838x3710) | 0.74 | 207 | 351 | 422 | 24 |
+| RELION tutorial (3710x3838) | 0.74 | 207 | 351 | 422 | 24 |
 | EMPIAR-10028 (4096x4096) | 0.67 | 177 | 298 | 359 | 16 |
 | EMPIAR-10361 (5760x4092) | 1.45 | 121 | 208 | 251 | 62 |
 | EMPIAR-10641 (5760x4092) | 2.39 | 116 | 202 | 246 | 70 |

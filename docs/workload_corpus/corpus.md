@@ -14,7 +14,7 @@ Run directories (`corpus/<id>/`, symlinks plus `movies.star`) are rebuilt by
 
 | id | family | container | geometry (nx × ny × frames) | Mpx-frame / movie | angpix | kV | gain | movies |
 |---|---|---|---|---:|---:|---:|---|---:|
-| `tutorial` | RELION tutorial | u8 Deflate TIFF | 3838 × 3710 × 24 | 342 | 0.885 | 200 | yes | 2 of 24 |
+| `tutorial` | RELION tutorial | 16-bit Adobe-Deflate TIFF (RowsPerStrip 1, no predictor, UINT, little-endian) | 3710 × 3838 × 24 | 342 | 0.885 | 200 | yes | 2 of 24 |
 | `e10028` | EMPIAR-10028 | float32 MRC | 4096 × 4096 × 16 | 268 | 1.34 | 300* | no | 2 |
 | `e10361` | EMPIAR-10361 | u8 LZW BigTIFF | 5760 × 4092 × 62 | 1461 | 0.826 | 300 | no (pre-normalised) | 2 |
 | `e10641` | EMPIAR-10641 | u8 LZW BigTIFF | 5760 × 4092 × 70 | 1650 | 0.4 | 300* | yes | 2 |
@@ -22,7 +22,7 @@ Run directories (`corpus/<id>/`, symlinks plus `movies.star`) are rebuilt by
 | `e10474f3` | EMPIAR-10474 Falcon 3 | EER | 4096 × 4096 × 58 (grouping 40) | 973 | 1.06 | 300* | no | 2 |
 | `e10474f4` | EMPIAR-10474 Falcon 4 | EER | 4096 × 4096 × 144 (grouping 40) | 2416 | 1.64 | 300* | no | 2 |
 | `e12963` | EMPIAR-12963 | EER | 4096 × 4096 × 39 (grouping 49) | 654 | 0.97 | 300* | yes | 1 |
-| `e10164` | EMPIAR-10164 tilt series (added) | u8 MRC | 7420 × 7676 × 8 | 456 | 0.675 | 300* | no (pre-corrected) | 2 |
+| `e10164` | EMPIAR-10164 tilt series (added) | MRC mode 0 (read as signed int8) | 7420 × 7676 × 8 | 456 | 0.675 | 300* | no (pre-corrected) | 2 |
 | `e10216` | EMPIAR-10216 apoferritin (added) | int16 MRC | 4096 × 4096 × 59 | 990 | 0.517 | 300* | no | 2 |
 
 `*` voltage is a characterisation placeholder (the accession does not state it); dose
@@ -38,7 +38,7 @@ Together they cover frame sizes from 3.5 to 94 Mpx, 8 to 144 frames, four decode
 
 **Added families** fill two shapes the held set lacks:
 
-- **EMPIAR-10164 (short tilt-series movies).** 8 frames of 7420 × 7676, u8 MRC, gain-corrected, 3° tilt
+- **EMPIAR-10164 (short tilt-series movies).** 8 frames of 7420 × 7676, MRC mode 0 (read as signed int8; maximum byte value 90, so no value changes), gain-corrected, 3° tilt
   steps. With 8 frames per movie the per-movie fixed costs (gain, hot-pixel detection, patch set-up,
   dataset report, process start) are a large share, and the frame is the largest non-EER frame
   after 10441. Two tilts: 0° and +30° (`TS_01_000_0.0`, `TS_01_020_30.0`). Pixel size 0.675 Å is the raw
@@ -56,7 +56,7 @@ files are served as `.mrc`.
 - `.mrc.bz2` / `.xz` / `.zst` MRC. Main decodes these through an external `pbzip2`, `xz` or
   `zstd` process; `pbzip2` is not installed on cpu64, and the cost would measure that tool, not MotionCorr.
 - EMPIAR-10304 (int16 MRC, 4092 × 5760). Fast-incremental tilt series: one frame per tilt, not movies.
-- Falcon 4 TIFF or other detectors. The frame sizes already span 3838×3710, 4096², 5760×4092,
+- Falcon 4 TIFF or other detectors. The frame sizes already span 3710×3838, 4096², 5760×4092,
   7420×7676 and 11520×8184, and the container paths are Deflate, LZW, MRC (u8/i16/f32) and EER.
   No remaining shape was missing enough to justify another download.
 

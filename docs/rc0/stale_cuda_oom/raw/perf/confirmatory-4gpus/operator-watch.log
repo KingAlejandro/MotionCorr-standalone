@@ -1,0 +1,18 @@
+2026-10-18T21:14:03Z watch start
+2026-10-18T21:14:03Z LAUNCHER === tutG window 1 2026-10-18T21:11:24Z
+2026-10-18T21:14:11Z LOCK holder=1410837 workers=[1411049 ]
+2026-10-18T21:35:48Z LAUNCHER === e10216L window 1 2026-10-18T21:35:36Z
+2026-10-18T21:35:55Z LOCK holder=1478838 workers=[1478850 ]
+2026-10-18T21:57:32Z RELEASE lock free (last holder 1478838)
+2026-10-18T21:57:47Z LAUNCHER === tutG window 2 2026-10-18T21:57:25Z
+2026-10-18T21:57:55Z LOCK holder=1497458 workers=[1497478 ]
+2026-10-18T22:21:24Z LAUNCHER === e10216L window 2 2026-10-18T22:21:23Z
+2026-10-18T22:21:31Z RELEASE lock free (last holder 1497458)
+2026-10-18T22:21:54Z LOCK holder=1564081 workers=[1564165 ]
+2026-10-18T22:43:30Z RELEASE lock free (last holder 1564081)
+2026-10-18T22:43:30Z CAMPAIGN ENDED
+2026-10-18T22:43:30Z TAIL {"manifest_sha256": "ea4c9dd61b8a95098f33c831de6404358f64f0d7a12aba4be569a10832c888dd", "workload": "tutG", "window": 2, "budget_s": 2700, "start_epoch": 1792360648.2398937, "deadline_epoch": 1792363348.2398937, "locks": ["/tmp/motioncorr-bench.lock", "/tmp/motioncorr-gpu3-correctness.lock"], "lock_wait_s": 8.436758071184158e-05, "locks_released_after_s": 1435.47, "worker_pid": 1497478, "worker_rc": 0, "worker_killed_at_deadline": false, "session_leftovers_killed": [], "reason": ""}
+2026-10-18T22:43:30Z TAIL === e10216L window 2 2026-10-18T22:21:23Z
+2026-10-18T22:43:30Z TAIL {"manifest_sha256": "ea4c9dd61b8a95098f33c831de6404358f64f0d7a12aba4be569a10832c888dd", "workload": "e10216L", "window": 2, "budget_s": 2700, "start_epoch": 1792362088.9332252, "deadline_epoch": 1792364788.9332252, "locks": ["/tmp/motioncorr-bench.lock", "/tmp/motioncorr-gpu3-correctness.lock"], "lock_wait_s": 8.325092494487762e-05, "locks_released_after_s": 1310.081, "worker_pid": 1564165, "worker_rc": 0, "worker_killed_at_deadline": false, "session_leftovers_killed": [], "reason": ""}
+2026-10-18T22:43:30Z TAIL PASS {"workload": "tutG", "pairs": 256, "median_d_s": -0.0052715000000000956, "ci95_s": [-0.014052999999999649, 0.0049440000000000595], "ci_pct_of_main_wall": [-0.31304070832337105, 0.11013116501464483], "incomplete_reasons": []}
+2026-10-18T22:43:30Z TAIL PASS {"workload": "e10216L", "pairs": 176, "median_d_s": -0.0168484999999996, "ci95_s": [-0.03547400000000067, 0.007362999999999786], "ci_pct_of_main_wall": [-0.5516129516307822, 0.11449304174486255], "incomplete_reasons": []}

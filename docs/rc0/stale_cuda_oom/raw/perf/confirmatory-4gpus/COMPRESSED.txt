@@ -1,0 +1,6 @@
+Lossless storage note: these four files from the 4GPUs evidence tree are stored gzip -9n compressed (file.gz).
+Each line: sha256 of the original (uncompressed) file as recorded on 4GPUs, then the stored path. Verify with: gunzip -c <path> | sha256sum
+ed493b1f4655aa9fbec0713f1a38e6a54e96b579f7abc55ea27f6f7e226da0c4  e10216L/window1/mpstat.txt.gz
+93a3ba37941fe6140129a37441fa79837ef18e3aa48c964adb1d2f6219fba41d  e10216L/window2/mpstat.txt.gz
+d53c7bdc1124bbd5abc967a72d3f90f06154c9ce574b859d2b7c7eb58d8125d1  tutG/window1/mpstat.txt.gz
+77e13c3a1262390df99abeefc18ba88e6ad5748b3cad4eff1edcb0ed3af98f41  tutG/window2/mpstat.txt.gz

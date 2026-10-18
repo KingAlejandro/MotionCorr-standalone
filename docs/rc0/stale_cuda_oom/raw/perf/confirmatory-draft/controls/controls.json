@@ -1,0 +1,500 @@
+[
+ {
+  "group": "A",
+  "case": "real CPU product, 4 movies: complete, 10 pages",
+  "ok": true,
+  "detail": "rc=0 pages=10 problems=[]"
+ },
+ {
+  "group": "A",
+  "case": "real CPU product, 3 movies: complete, 6 pages",
+  "ok": true,
+  "detail": "rc=0 pages=6 problems=[]"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: zero dimension (nx = 0)",
+  "ok": true,
+  "detail": "['Movies/20170629_00021_frameImage.mrc header invalid (dims 0x3838x1, mode 2, nsymbt 0)']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: negative nsymbt",
+  "ok": true,
+  "detail": "['Movies/20170629_00021_frameImage.mrc header invalid (dims 3710x3838x1, mode 2, nsymbt -4)']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: truncated MRC",
+  "ok": true,
+  "detail": "['Movies/20170629_00021_frameImage.mrc size 4096, expected 56956944']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: per-movie STAR empty",
+  "ok": true,
+  "detail": "['Movies/20170629_00021_frameImage.star missing or empty']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: joint STAR missing one movie",
+  "ok": true,
+  "detail": "['joint STAR lists 3 micrographs, not the expected 4']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: joint STAR with no rows",
+  "ok": true,
+  "detail": "['joint STAR lists 0 micrographs, not the expected 4']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: joint STAR deleted",
+  "ok": true,
+  "detail": "['joint STAR missing or malformed']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: logfile.pdf deleted",
+  "ok": true,
+  "detail": "['logfile.pdf pages None, expected 10']"
+ },
+ {
+  "group": "A",
+  "case": "synthetic 24-movie tree with a 30-page PDF accepted",
+  "ok": true,
+  "detail": "pages=30 problems=[]"
+ },
+ {
+  "group": "A",
+  "case": "synthetic 24-movie tree with a 27-page PDF rejected",
+  "ok": true,
+  "detail": "pages=27 problems=['logfile.pdf pages 27, expected 30']"
+ },
+ {
+  "group": "A",
+  "case": "synthetic 24-movie tree with a 24-page PDF rejected",
+  "ok": true,
+  "detail": "pages=24 problems=['logfile.pdf pages 24, expected 30']"
+ },
+ {
+  "group": "A",
+  "case": "synthetic e10216 (3 movies) tree with a 6-page PDF accepted",
+  "ok": true,
+  "detail": "pages=6 problems=[]"
+ },
+ {
+  "group": "A",
+  "case": "synthetic e10216 (3 movies) tree with a 9-page PDF rejected",
+  "ok": true,
+  "detail": "pages=9 problems=['logfile.pdf pages 9, expected 6']"
+ },
+ {
+  "group": "A",
+  "case": "expected pages: 24 movies -> 30, 3 movies -> 6",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "B",
+  "case": "complete, null effect: PASS",
+  "ok": true,
+  "detail": "label=PASS reasons=[]"
+ },
+ {
+  "group": "B",
+  "case": "complete, N=256 null effect: PASS",
+  "ok": true,
+  "detail": "label=PASS reasons=[]"
+ },
+ {
+  "group": "B",
+  "case": "complete, resolved slowdown: FAIL",
+  "ok": true,
+  "detail": "label=FAIL reasons=[]"
+ },
+ {
+  "group": "B",
+  "case": "complete, wide spread: UNRESOLVED",
+  "ok": true,
+  "detail": "label=UNRESOLVED reasons=[]"
+ },
+ {
+  "group": "B",
+  "case": "headers removed: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: missing or incomplete header', 'window 1: completion marker inconsistent with the header or budget, or late', 'window 2: missing or incomplete header', 'window 2: completion marker inconsistent with the header or budget, or late', 'comparison pairs 0 (0 AB / 0 BA"
+ },
+ {
+  "group": "B",
+  "case": "identity removed: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: first-pair identity record missing', 'window 2: first-pair identity record missing', 'comparison pairs 2 (2 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval (too few pairs)']"
+ },
+ {
+  "group": "B",
+  "case": "payload records removed: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=[\"window 1: expected warmup payload main seq 1, found {'pair': 'AB', 'position': 1, 'order': 'main,fix', 'attempt': 1, 'retained': Tru\", 'window 1: completion marker inconsistent with the header or budget, or late', \"window 2: expected warmup payload main seq 1, found {'pair"
+ },
+ {
+  "group": "B",
+  "case": "every payload a resource failure: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: warm-up main failed', 'window 1: warm-up fix failed', 'window 1: position 1: pair record contradicts its payloads', 'window 2: warm-up main failed', 'window 2: warm-up fix failed', 'window 2: position 1: pair record contradicts its payloads', 'comparison pairs 0 "
+ },
+ {
+  "group": "B",
+  "case": "record order reversed: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: missing or incomplete header', 'window 1: completion marker inconsistent with the header or budget, or late', 'window 2: missing or incomplete header', 'window 2: completion marker inconsistent with the header or budget, or late', 'comparison pairs 0 (0 AB / 0 BA"
+ },
+ {
+  "group": "B",
+  "case": "retained walls differ from payloads: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: position 1: retained walls differ from the payload records', 'window 2: position 1: retained walls differ from the payload records', 'comparison pairs 0 (0 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval (too few pairs)']"
+ },
+ {
+  "group": "B",
+  "case": "every payload reports CPU mask 0: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: position 1: retained payload lacks its CPU-mask or product evidence', 'window 2: position 1: retained payload lacks its CPU-mask or product evidence', 'comparison pairs 0 (0 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval "
+ },
+ {
+  "group": "B",
+  "case": "mask and PDF-page observations removed: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: position 1: retained payload lacks its CPU-mask or product evidence', 'window 2: position 1: retained payload lacks its CPU-mask or product evidence', 'comparison pairs 0 (0 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval "
+ },
+ {
+  "group": "B",
+  "case": "header with overlapping masks and no locks: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: header does not match the manifest (venue, GPU, masks, locks or budget)', 'window 2: header does not match the manifest (venue, GPU, masks, locks or budget)']"
+ },
+ {
+  "group": "B",
+  "case": "identity true but with problems, zero comparisons, position 99: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: product identity failed, missing or inconsistent', 'window 2: product identity failed, missing or inconsistent']"
+ },
+ {
+  "group": "B",
+  "case": "marker deadline beyond the header deadline: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: completion marker inconsistent with the header or budget, or late']"
+ },
+ {
+  "group": "B",
+  "case": "marker records an unreaped process: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: completion marker inconsistent with the header or budget, or late']"
+ },
+ {
+  "group": "B",
+  "case": "lock-holder record missing: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: lock-holder record missing or not a clean, in-time worker exit']"
+ },
+ {
+  "group": "B",
+  "case": "lock-holder killed the worker at its deadline: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: lock-holder record missing or not a clean, in-time worker exit']"
+ },
+ {
+  "group": "B",
+  "case": "lock-holder killed leftover processes: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: lock-holder record missing or not a clean, in-time worker exit']"
+ },
+ {
+  "group": "B",
+  "case": "window 2 missing: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 2: no completion marker', 'comparison pairs 8 (4 AB / 4 BA), declared 16 balanced', 'null pairs 8, declared 16']"
+ },
+ {
+  "group": "B",
+  "case": "window 1 truncated: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: expected timed payload mainb seq 17, found None', 'window 1: expected timed payload main seq 17, found None', 'window 1: position 8: records missing or out of order', 'comparison pairs 12 (6 AB / 6 BA), declared 16 balanced', 'null pairs 11, declared 16']"
+ },
+ {
+  "group": "B",
+  "case": "zero pairs: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: expected timed payload main seq 3, found None', 'window 1: expected timed payload fix seq 3, found None', 'window 1: position 1: records missing or out of order', 'window 2: expected timed payload main seq 3, found None', 'window 2: expected timed payload fix seq"
+ },
+ {
+  "group": "B",
+  "case": "malformed record: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: expected timed payload fix seq 4, found {not json', 'window 1: position 1: records missing or out of order', 'comparison pairs 8 (4 AB / 4 BA), declared 16 balanced', 'null pairs 8, declared 16']"
+ },
+ {
+  "group": "B",
+  "case": "one position in the wrong order: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: position 3: pair record contradicts its payloads', 'comparison pairs 10 (5 AB / 5 BA), declared 16 balanced', 'null pairs 8, declared 16']"
+ },
+ {
+  "group": "B",
+  "case": "identity failed: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: product identity failed, missing or inconsistent']"
+ },
+ {
+  "group": "B",
+  "case": "dry-run header: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: dry run (no GPU checks or no input/source checks), never a verdict']"
+ },
+ {
+  "group": "B",
+  "case": "header for another venue: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: header does not match the manifest (venue, GPU, masks, locks or budget)']"
+ },
+ {
+  "group": "B",
+  "case": "warm-up failure (fix): INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: warm-up fix failed']"
+ },
+ {
+  "group": "B",
+  "case": "fix-arm product failure (arm-dependent): INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['systematic payload failures: payload failures on the fix arm only (arm-dependent)']"
+ },
+ {
+  "group": "B",
+  "case": "two payload failures (recurrent): INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['systematic payload failures: 2 payload failures (exit/timeout/product)']"
+ },
+ {
+  "group": "B",
+  "case": "one isolated main failure: PASS",
+  "ok": true,
+  "detail": "label=PASS reasons=[]"
+ },
+ {
+  "group": "B",
+  "case": "marker with negative remaining budget: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: completion marker inconsistent with the header or budget, or late']"
+ },
+ {
+  "group": "B",
+  "case": "marker written after the deadline: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: completion marker inconsistent with the header or budget, or late']"
+ },
+ {
+  "group": "B",
+  "case": "manifest missing: INCOMPLETE (no exception)",
+  "ok": true,
+  "detail": "{'workload': 'w', 'stats_sha256': '8d61e0544b462ba91a0258f445c37c252b37cf0ddc293eaf31543cbcf0173c7c', 'label': 'INCOMPLETE', 'incomplete_reasons': [\"evidence unreadable: FileNotFoundError: [Errno 2] No such file or directory: '/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/b-manifest missing/absen"
+ },
+ {
+  "group": "B",
+  "case": "labels are exactly PASS / UNRESOLVED / FAIL / INCOMPLETE",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "C",
+  "case": "healthy dry-run windows complete; lock released; no orphans",
+  "ok": true,
+  "detail": "e_epoch\": 1792357412.593174, \"locks\": [\"/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-private.lock\"], \"lock_wait_s\": 9.526405483484268e-05, \"locks_released_after_s\": 13.673, \"worker_pid\": 1401111, \"worker_rc\": 0, \"worker_killed_at_deadline\": false, \"session_leftovers_killed\": [], \"reason\": \"\"}\n"
+ },
+ {
+  "group": "C",
+  "case": "every timed payload has an observed CPU mask equal to the payload mask",
+  "ok": true,
+  "detail": "[{'seq': 3, 'phase': 'timed', 'label': 'main', 'rc': 0, 'wall_s': 0.219298, 'pdf_pages': 10, 'observed_mask': '24,25,26,27,28,29,30,31'}]"
+ },
+ {
+  "group": "C",
+  "case": "real driver streams pass the sequence validation; only the dry-run flag makes them INCOMPLETE",
+  "ok": true,
+  "detail": "['window 1: dry run (no GPU checks or no input/source checks), never a verdict', 'window 2: dry run (no GPU checks or no input/source checks), never a verdict']"
+ },
+ {
+  "group": "C",
+  "case": "exit-0 product failure on fix: classified \"product\", pair rerun in the same position",
+  "ok": true,
+  "detail": "[{'seq': 13, 'phase': 'timed', 'label': 'fix', 'rc': 0, 'wall_s': 0.221036, 'pdf_pages': None, 'failure': 'product', 'detail': 'logfile.pdf pages None, expected 10', 'observed_mask': '24,25,26,27,28,29,30,31'}, {'pair': 'BA', 'position': 6, 'order': 'fix,main', 'attempt': 2, 'retained': True, 'seqs'"
+ },
+ {
+  "group": "C",
+  "case": "unsuccessful warm-up ends the window as incomplete",
+  "ok": true,
+  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"RuntimeError: warm-up fix failed: product (logfile.pdf pages None, expected 10)\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"49f0ef0ce260c3d07434d8e5848bf5db82a5475a66046cd13ba73ef157eb6971\",\n \"budget_s\": 600,\n \"start_epoch\": 1792356"
+ },
+ {
+  "group": "C",
+  "case": "identity failure recorded once, evidence kept, not retried",
+  "ok": true,
+  "detail": "[{'position': 1, 'identical': False, 'problems': ['1 file(s) differ'], 'compared': 9, 'mrc_compared': 4}]"
+ },
+ {
+  "group": "C",
+  "case": "watchdog kills and reaps a hung payload at the per-payload timeout; pair rerun",
+  "ok": true,
+  "detail": "[{'seq': 6, 'phase': 'timed', 'label': 'main', 'rc': -9, 'wall_s': 3.00271, 'failure': 'timeout', 'detail': 'killed after 3 s', 'observed_mask': '24,25,26,27,28,29,30,31'}]"
+ },
+ {
+  "group": "C",
+  "case": "window deadline: payload killed at the deadline, incomplete, lock released, no orphans",
+  "ok": true,
+  "detail": "elapsed 8.5 s; {\n \"status\": \"incomplete\",\n \"reason\": \"RuntimeError: warm-up fix failed: timeout (killed after 4 s)\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"0e68b1f01bff766d203c4417fa7ac780b7281a92bb0bdada3b11aabe82b49a8f\",\n \"budget_s\": 20,\n \"start_epoch\": 1792356892.4"
+ },
+ {
+  "group": "C",
+  "case": "deadline covers the lock wait: the holder gives up, no worker or payload started",
+  "ok": true,
+  "detail": "{\n \"manifest_sha256\": \"f2e15309f513add687949524c5cf08fce3b4d9cc2dadc4438c8baa517c9cf494\",\n \"workload\": \"w\",\n \"window\": 1,\n \"budget_s\": 12,\n \"start_epoch\": 1792356904.627957,\n \"deadline_epoch\": 1792356916.627957,\n \"locks\": [\n  \"/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-private.lock\"\n ],\n \"lo"
+ },
+ {
+  "group": "C",
+  "case": "delayed product check: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans",
+  "ok": true,
+  "detail": "elapsed 5.4 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '-B', '-c', 'import sys, json; sys.path[:0] = [sys.argv[1], sys.argv[2]]; import confirm_pairs as cp, identity; a = sys.argv[3:]; print(json.dumps(cp.product_problems(a[0], a[1:])))"
+ },
+ {
+  "group": "C",
+  "case": "delayed cleanup: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans",
+  "ok": true,
+  "detail": "elapsed 5.5 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['rm', '-rf', '/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-delayed-cleanup/scratch/wd11c-w-w1/0001-main']' timed out after 4.528156496584415 seconds\", 'workload': 'w', 'window': 1, 'positions': 16, 'manifest_sh"
+ },
+ {
+  "group": "C",
+  "case": "aggregate release: pending samplers and a stalled registered child: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans",
+  "ok": true,
+  "detail": "elapsed 5.5 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '-B', '-c', 'import sys, json; sys.path[:0] = [sys.argv[1], sys.argv[2]]; import confirm_pairs as cp, identity; a = sys.argv[3:]; print(json.dumps(cp.product_problems(a[0], a[1:])))"
+ },
+ {
+  "group": "C",
+  "case": "binary changed after freezing: fatal before any resource",
+  "ok": true,
+  "detail": "provenance check failed: main binary\n"
+ },
+ {
+  "group": "D",
+  "case": "blocking wait: completions 25 ms apart recorded 24.59 ms apart (|error| <= 1 ms)",
+  "ok": true,
+  "detail": "(0.024591673631221056, [0.004, 0.003, 0.0039, 0.0038, 0.0038, 0.0033, 0.0039, 0.003, 0.0031, 0.0034, 0.0038, 0.0031], [0.0031, 0.0032, 0.0031, 0.0029, 0.0033, 0.0031, 0.0037, 0.0031, 0.0039, 0.0037, 0.0032, 0.0034])"
+ },
+ {
+  "group": "D",
+  "case": "control discriminates: legacy polled wait records 50.40 ms (error > 1 ms)",
+  "ok": true,
+  "detail": "(0.050399144645780325, [0.0169, 0.0173, 0.0174, 0.0167, 0.0165, 0.0169, 0.0172, 0.0169, 0.0173, 0.0169, 0.0169, 0.017], [0.0427, 0.0423, 0.0422, 0.0429, 0.0425, 0.0422, 0.0423, 0.0423, 0.0424, 0.0426, 0.0423, 0.0419])"
+ },
+ {
+  "group": "E",
+  "case": "completion marker after the release deadline, or with an unreaped process, becomes incomplete",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "E",
+  "case": "release: one shared reap deadline for 3 unreapable processes (1.52 s for a 2 s deadline; 5 s each before), unreaped recorded, lock released",
+  "ok": true,
+  "detail": "1.52 s [4000000, 4000001, 4000002]"
+ },
+ {
+  "group": "E",
+  "case": "mask rule: no CPU-mask observation -> invalid (no CPU-mask observation)",
+  "ok": true,
+  "detail": "('resource', 'no CPU-mask observation')"
+ },
+ {
+  "group": "E",
+  "case": "mask rule: sampler did not finish -> invalid (sampler did not finish)",
+  "ok": true,
+  "detail": "('resource', 'sampler did not finish')"
+ },
+ {
+  "group": "E",
+  "case": "mask rule: different observed mask -> invalid (payload mask)",
+  "ok": true,
+  "detail": "('resource', 'payload mask 0')"
+ },
+ {
+  "group": "E",
+  "case": "mask rule: valid observation -> valid",
+  "ok": true,
+  "detail": "None"
+ },
+ {
+  "group": "E",
+  "case": "source re-verification: clean frozen head -> accepted",
+  "ok": true,
+  "detail": "\": [], \"lock_wait_s\": 2.3186206817626953e-05, \"locks_released_after_s\": 0.469, \"worker_pid\": 1404040, \"worker_rc\": 1, \"worker_killed_at_deadline\": false, \"session_leftovers_killed\": [], \"reason\": \"\"}\n"
+ },
+ {
+  "group": "E",
+  "case": "source re-verification: wrong source_head -> fatal before any resource",
+  "ok": true,
+  "detail": "-motioncorr-rc0/W-D11/ctl-work/e-repo', 'diff', '--name-only', '52963ac0e2ba6078f3ae17c9ebb46e9096281bfb', '0000000000000000000000000000000000000000', '--', 'src']' returned non-zero exit status 128.\n"
+ },
+ {
+  "group": "E",
+  "case": "source re-verification: invalid source path -> fatal before any resource",
+  "ok": true,
+  "detail": "provenance check failed: git/setup error: Command '['git', '-C', '/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/no-such-repo', 'rev-parse', 'HEAD']' returned non-zero exit status 128.\n"
+ },
+ {
+  "group": "E",
+  "case": "source re-verification: changed build equivalence -> fatal before any resource",
+  "ok": true,
+  "detail": "provenance check failed: build equivalence\n"
+ },
+ {
+  "group": "E",
+  "case": "source re-verification: vendored stats changed -> fatal before any resource",
+  "ok": true,
+  "detail": "provenance check failed: vendor/stats.py, source tree not clean\n"
+ },
+ {
+  "group": "E",
+  "case": "source re-verification: untracked file in the tree (not clean) -> fatal before any resource",
+  "ok": true,
+  "detail": "provenance check failed: source tree not clean\n"
+ },
+ {
+  "group": "F",
+  "case": "integrated, unreapable payload: lock released within the 20 s budget (17.959285671822727), window INCOMPLETE",
+  "ok": true,
+  "detail": "{'mode': 'unreapable', 'lock_acquired_s': 0.10634731967002153, 'lock_released_s': 17.959285671822727, 'budget_s': 20, 'driver_still_running_after': False, 'holder_record': {'manifest_sha256': '1bca80bc5009274a9fdc97593062ae2182b96c5966d73d477ff0a7757c7534f3', 'workload': 'w', 'window': 1, 'budget_s'"
+ },
+ {
+  "group": "F",
+  "case": "integrated, third fsync blocks (emit, review of 5b430d4b): lock released within the 20 s budget (18.473117496818304), window INCOMPLETE",
+  "ok": true,
+  "detail": "{'mode': 'fsync:3', 'lock_acquired_s': 0.10645403619855642, 'lock_released_s': 18.473117496818304, 'budget_s': 20, 'driver_still_running_after': False, 'holder_record': {'manifest_sha256': '4f9d80f5d435245f4db0211d37b1e91a2e456a847a52e3a44a9669b842f8ffc7', 'workload': 'w', 'window': 1, 'budget_s': 2"
+ },
+ {
+  "group": "F",
+  "case": "integrated, open() of a per-run log blocks: lock released within the 20 s budget (18.471907588653266), window INCOMPLETE",
+  "ok": true,
+  "detail": "{'mode': 'open-log', 'lock_acquired_s': 0.10627217032015324, 'lock_released_s': 18.471907588653266, 'budget_s': 20, 'driver_still_running_after': False, 'holder_record': {'manifest_sha256': '8b5ead6556275cbf9183dc756025399d54f818650e742a024e4a0931d6b3469e', 'workload': 'w', 'window': 1, 'budget_s': "
+ },
+ {
+  "group": "F",
+  "case": "worker does not inherit the lock: no lock fd in the worker; killing only the holder frees the lock in 0.029 s while the worker is alive",
+  "ok": true,
+  "detail": "{'mode': 'inherit', 'lock_acquired_s': 0.10682643111795187, 'lock_released_s': None, 'budget_s': 60, 'driver_still_running_after': False, 'holder_record': {}, 'worker_marker_status': None, 'unreaped_pids': None, 'inherit': {'workers': [1404730], 'worker_lock_fds': {1404730: []}, 'lock_free_after_hol"
+ },
+ {
+  "group": "G",
+  "case": "launcher: a failed window aborts the campaign (one run invoked, no later window, non-zero exit)",
+  "ok": true,
+  "detail": "{'launcher_rc': 1, 'run_invocations': 1, 'runs': ['/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-confirm/docs/rc0/stale_cuda_oom/raw/'], 'all_invocations': 3}"
+ }
+]

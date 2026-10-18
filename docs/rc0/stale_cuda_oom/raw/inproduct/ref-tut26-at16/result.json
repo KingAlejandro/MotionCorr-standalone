@@ -1,0 +1,27 @@
+{
+ "label": "ref-tut26-at16",
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr",
+ "binary_sha256": "29b894f0643f1b8f1cbcb33954165bd70f1613f9095be36e963660f7939ac185",
+ "input_dir": "/mnt/clathrin/alex-motioncorr-rc0/W-D11/inputs",
+ "star": "tut26.star",
+ "ingest": "auto",
+ "target_free_gib": "16",
+ "gpu_uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+ "cpus": "88-95",
+ "balloon_mib": 64347,
+ "free_mib_at_launch": 16383,
+ "used_mib_at_launch": 64771,
+ "cmd": "taskset -c 88-95 /mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --j 8 --gpu 0 --patch_x 5 --patch_y 5 --i tut26.star --o /mnt/clathrin/alex-motioncorr-rc0/W-D11/runs/ref-tut26-at16/out/ --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-rc0/W-D11/runs/ref-tut26-at16/witness.txt",
+ "wall_s": 1.3,
+ "exit": 0,
+ "peak_motioncorr_mib": 3202,
+ "after_free_used_mib": [
+  81154,
+  1
+ ],
+ "after_apps": {},
+ "witness": [
+  "Movies/tut26.tiff nvcomp",
+  ""
+ ]
+}

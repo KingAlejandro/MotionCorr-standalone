@@ -29,6 +29,14 @@
 //                       the session's float buffers (derived from the input TIFF)
 // These return controlled error codes at the actual U16 allocation, upload, or
 // post-launch status-check boundary. They do not simulate a genuinely poisoned GPU.
+//
+// Issue #226 D1, confined to this test-only binary:
+//   MC_ALIGN_ALLOC_FAULT=genuine  the first cudaMalloc issued from a cudaAlignPatch*
+//                       function is replaced by a REAL cudaMalloc of an impossible size.
+//                       The runtime itself fails it, so its own last-error slot holds
+//                       cudaErrorMemoryAllocation exactly as after a device OOM; a
+//                       returned code alone would leave that slot clean and could not
+//                       reproduce a stale error. Fires once per process.
 
 #include <cuda_runtime.h>
 #include <cstdio>
@@ -83,6 +91,8 @@ const char *g_preprocess_fault = nullptr;
 bool g_preprocess_injected = false;
 bool g_preprocess_release_injected = false;
 bool g_workspace_cleanup_injected = false;
+bool g_align_alloc_fault = false;
+bool g_align_alloc_injected = false;
 
 // Test binary only, exported with -rdynamic. Resolve the real production caller
 // rather than relying on a fixture-specific allocation ordinal or byte count.
@@ -127,6 +137,8 @@ void init_once() {
     const char *stage = std::getenv("MC_U16_STAGE_BYTES");
     if (stage) g_u16_stage_bytes = (size_t)std::strtoull(stage, nullptr, 10);
     g_preprocess_fault = std::getenv("MC_PREPROCESS_FAULT");
+    const char *align_fault = std::getenv("MC_ALIGN_ALLOC_FAULT");
+    g_align_alloc_fault = align_fault && std::strcmp(align_fault, "genuine") == 0;
     const char *count_ordinal = std::getenv("MC_COUNT_FAULT_ORDINAL");
     g_count_at = count_ordinal ? std::atol(count_ordinal) : 0;
     const char *count_code = std::getenv("MC_COUNT_FAULT_CODE");
@@ -195,6 +207,18 @@ extern "C" cudaError_t __wrap_cudaGetDeviceCount(int *count) {
 
 extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
     init_once();
+    if (g_align_alloc_fault && !g_align_alloc_injected && called_from("cudaAlignPatch")) {
+        g_align_alloc_injected = true;
+        const cudaError_t before = cudaPeekAtLastError();
+        const size_t impossible = (size_t)1 << 50;
+        const cudaError_t result = __real_cudaMalloc(ptr, impossible);
+        if (ptr) *ptr = nullptr;
+        std::fprintf(stderr, "[alignfault] genuine cudaMalloc(%zu) for a %zu-byte alignment "
+                     "allocation: pending-before=%s returned=%s pending-after=%s\n",
+                     impossible, size, cudaGetErrorName(before), cudaGetErrorName(result),
+                     cudaGetErrorName(cudaPeekAtLastError()));
+        return result;
+    }
     if (g_preprocess_injected)
         std::fprintf(stderr, "[preprocessfault] later cudaMalloc size=%zu\n", size);
     if (!g_preprocess_injected && g_preprocess_fault) {

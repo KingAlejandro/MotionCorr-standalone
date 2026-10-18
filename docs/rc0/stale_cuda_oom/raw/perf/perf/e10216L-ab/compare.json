@@ -1,0 +1,228 @@
+{
+ "runs": {
+  "arms": [
+   "main",
+   "fix"
+  ],
+  "summary": {
+   "main": {
+    "n": 8,
+    "wall_median_s": 6.569218889344484,
+    "wall_iqr_s": 0.069863170851022,
+    "wall_min_s": 6.337987896054983,
+    "wall_max_s": 6.722093686461449,
+    "cpu_median_s": 19.8468865,
+    "rss_median_bytes": 2458161152.0,
+    "minflt_median": 2880737.0,
+    "majflt_max": 18,
+    "wall_outlier_rounds": [
+     5
+    ],
+    "vram_peak_process_bytes": 9336520704.0,
+    "vram_peak_process_bytes_max": 9336520704,
+    "vram_peak_device_delta_bytes": 9345761280.0,
+    "vram_peak_device_delta_bytes_max": 9345761280,
+    "lane_foreign_cores_max": 0.021931478236338488,
+    "load1_range": [
+     5.64208984375,
+     9.68603515625
+    ]
+   },
+   "fix": {
+    "n": 8,
+    "wall_median_s": 6.664684962015599,
+    "wall_iqr_s": 0.1369592258706689,
+    "wall_min_s": 6.387443063780665,
+    "wall_max_s": 6.8586913999170065,
+    "cpu_median_s": 20.303560500000003,
+    "rss_median_bytes": 2471755776.0,
+    "minflt_median": 2902270.5,
+    "majflt_max": 21,
+    "wall_outlier_rounds": [],
+    "vram_peak_process_bytes": 9336520704.0,
+    "vram_peak_process_bytes_max": 9336520704,
+    "vram_peak_device_delta_bytes": 9345761280.0,
+    "vram_peak_device_delta_bytes_max": 9345761280,
+    "lane_foreign_cores_max": 0.12105140326971196,
+    "load1_range": [
+     5.78515625,
+     9.310546875
+    ]
+   }
+  },
+  "discarded_rounds": [
+   {
+    "round": 6,
+    "reasons": [
+     "fix: unclassified GPU pids [607727]",
+     "main: unclassified GPU pids [607774]"
+    ],
+    "triggered_by": [
+     "fix",
+     "main"
+    ],
+    "order": "BA"
+   }
+  ],
+  "discard_audit": {
+   "planned": 9,
+   "retained": 8,
+   "discarded": 1,
+   "triggered_alone": {
+    "main": 0,
+    "fix": 0
+   },
+   "triggered_any": {
+    "main": 1,
+    "fix": 1
+   },
+   "kept_orders": {
+    "AB": 5,
+    "BA": 3
+   },
+   "warnings": [
+    "kept pairs are unbalanced by order (AB 5, BA 3): the position cost no longer cancels; see the positional line"
+   ]
+  },
+  "comparisons": {
+   "fix": {
+    "n_pairs": 8,
+    "diffs_s": [
+     -0.062424744479358196,
+     -0.0502493754029274,
+     0.03242476191371679,
+     0.2933792741969228,
+     0.2250917423516512,
+     0.154683337546885,
+     0.20355162769556046,
+     -0.18568258918821812
+    ],
+    "floor_s": 0.0,
+    "min_pairs": 6,
+    "median_diff_s": 0.0935540497303009,
+    "q1_diff_s": -0.0532932176720351,
+    "q3_diff_s": 0.20893665635958314,
+    "min_diff_s": -0.18568258918821812,
+    "max_diff_s": 0.2933792741969228,
+    "median_a_s": 6.569218889344484,
+    "median_b_s": 6.664684962015599,
+    "relative_median_diff": 0.014241274542099523,
+    "noise_s": 0.2041103705914691,
+    "robust_sd_diff_s": 0.2041103705914691,
+    "ci": {
+     "low_s": -0.18568258918821812,
+     "high_s": 0.2933792741969228,
+     "confidence": 0.9921875
+    },
+    "sign_test": {
+     "positive": 5,
+     "negative": 3,
+     "ties": 0,
+     "p_two_sided": 0.7265625
+    },
+    "resolution_s": 0.23953093169257045,
+    "resolved": false,
+    "verdict": "not resolved (below noise 0.240 s)",
+    "reason": "CI of median includes 0",
+    "positional": {
+     "n_ab": 5,
+     "n_ba": 3,
+     "median_diff_ab_s": 0.03242476191371679,
+     "median_diff_ba_s": 0.20355162769556046,
+     "second_position_cost_s": -0.08556343289092183,
+     "order_corrected_effect_s": 0.11798819480463862
+    }
+   }
+  },
+  "lane_waits": [
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 1
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 2
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 3
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 4
+   },
+   {
+    "waited_s": 3.0,
+    "busy_cores": 0.0,
+    "round": 5
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 6
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 7
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 8
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 9
+   }
+  ]
+ },
+ "identity": {
+  "fix": {
+   "root_a": "/mnt/clathrin/alex-motioncorr-rc0/W-D11/perf/e10216L-ab/runs/main-r01/out",
+   "root_b": "/mnt/clathrin/alex-motioncorr-rc0/W-D11/perf/e10216L-ab/runs/fix-r01/out",
+   "only_a": [],
+   "only_b": [],
+   "compared": 15,
+   "mrc_compared": 3,
+   "excluded": [
+    {
+     "file": "Movies/e10216_1.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/e10216_2.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/e10216_3.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "all_batches.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "batch.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "header.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "logfile.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    }
+   ],
+   "differences": [],
+   "problems": [],
+   "identical": true
+  }
+ }
+}

@@ -35,6 +35,10 @@ DEFAULT_REQUIRED_TESTS = [
     "TruncatedGainDefect",
     # Sequential compressed readers must close/reap their decoder before reuse.
     "CompressedMovieSequence",
+    # Every movie container, sample type and codec the readers accept, with
+    # rejections and pinned known failures (test-data/generate_format_fixtures.py).
+    "InputFormats",
+    "CutDownMovie",
     "RunnerModelParser",
     "MicrographModelBounds",
     "CiFailClosedControls",
@@ -67,6 +71,11 @@ DEFAULT_REQUIRED_TESTS = [
     # collected; the CUDA-only CudaErrorClass is not listed here, matching
     # the existing exclusion of CudaWrapperUploadFailure.
     "PatchRetryState",
+    # CPU dose weighting (#179, #220): exact bits against the frozen base
+    # doseWeighting, including the FMA-contraction signed-zero case, for the
+    # selected path and for the forced original path.
+    "CpuDoseSymmetry",
+    "CpuDoseSymmetryBase",
     # Issue #85 lane C: each arm's MRC/STAR inventory and structure is checked
     # independently before pairwise image equality is considered.
     "OutputTreeComparator",
@@ -93,6 +102,9 @@ DEFAULT_REQUIRED_TESTS = [
     # any of amin/amax/amean/arms and every product comparator would still pass,
     # because both sides would be reading the same drifted header.
     "MrcHeaderStats",
+    # Issue #229: addToCPlot2D with EMDL_UNDEFINED (-1) on the x-axis must not
+    # index label2offset[-1], while still rejecting missing defined labels.
+    "ReportPlotUndefinedAxis",
     "PdfConcat",
     # Added with the #127 background output writer. WriteFaults exercises the
     # deferred path (failure raised on the worker thread, collected afterwards);
@@ -146,7 +158,7 @@ DEFAULT_REQUIRED_TESTS = [
     "MultiGpuScheduling",
     "NativeMovieStaging",
     "GainCacheOwnership",
-    "JointStarPublication",
+    "JointStarPublication", "EerMemorySafety",
 ]
 
 

@@ -1,0 +1,32 @@
+{
+ "record": "PR #208 qual/rc0-eer-compact @ a5fa5429, docs/rc0/qual_eer_compact/evidence/{cases,results}",
+ "binaries": {
+  "nvcomp": "f8bd37409897b3dbf3c398e3bc8b4aaefbf00ca38204e806d27832a4ca3e899b",
+  "cpu": "57256b875ab1bbcb45a398210d138c1f92a6e55b9edb71c8b2c5fcf57ca2b0ea",
+  "ref_cpu_1db86902": "dd86cd419c43dc83d732c7b70cff2bb40c5459674ba65f9b9ba5ee85a6b26439"
+ },
+ "cases": {
+  "b6_wronggain": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c04_g_g49_up1_nogain": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "cc1_cpu_f3_g40_up1": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "o1n_NOGUARD_upm1_g16384": {
+   "verdict": "N/A",
+   "reason": "negative control on a mutant (guard-removed) build; not a frozen-binary case"
+  }
+ },
+ "totals": {
+  "PASS": 3,
+  "FAIL": 0,
+  "UNRUN": 0,
+  "N/A": 1
+ }
+}

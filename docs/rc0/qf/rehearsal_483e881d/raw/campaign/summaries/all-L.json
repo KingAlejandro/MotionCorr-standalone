@@ -1,0 +1,667 @@
+[
+ {
+  "family": "tutorial",
+  "config": "L",
+  "movie": "Movies/20170629_00026_frameImage.tiff",
+  "runs": {
+   "auto": {
+    "label": "tutorial-L-auto",
+    "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/build-nvcomp/motioncorr",
+    "binary_sha256": "f8bd37409897b3dbf3c398e3bc8b4aaefbf00ca38204e806d27832a4ca3e899b",
+    "args": [
+     "--use_own",
+     "--dose_weighting",
+     "--dose_per_frame",
+     "1.277",
+     "--bfactor",
+     "150",
+     "--seed",
+     "1",
+     "--expected_frames",
+     "24",
+     "--i",
+     "movies.star",
+     "--o",
+     "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/out-auto/",
+     "--j",
+     "8",
+     "--gainref",
+     "gain.mrc",
+     "--patch_x",
+     "5",
+     "--patch_y",
+     "5",
+     "--gpu",
+     "0",
+     "--ingest",
+     "auto",
+     "--ingest_witness",
+     "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/witness-auto.txt"
+    ],
+    "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/inputs/tutorial",
+    "cpu_mask": "96-103",
+    "env": {
+     "CUDA_VISIBLE_DEVICES": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+     "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+     "OMP_NUM_THREADS": "8",
+     "OPENBLAS_NUM_THREADS": "1",
+     "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+    },
+    "extra_env": {},
+    "gpu_run": true,
+    "start_utc": "2026-10-17T12:08:07Z",
+    "lock_wait_s": 0.0,
+    "bench_gate": {
+     "bench_polls_held": 0,
+     "bench_waited_s": 0.0
+    },
+    "gpu_precheck": {
+     "waited_s": 0.1,
+     "foreign": []
+    },
+    "rc": 0,
+    "wall_s": 1.313,
+    "gpu_witness": {
+     "uuids_seen_for_pid": [
+      "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+     ],
+     "peak_mib": 3206,
+     "smi_samples": 4,
+     "pid_hits": 2,
+     "on_lane_gpu_only": true
+    },
+    "max_rss_kib": 359892,
+    "time_exit_status": 0,
+    "elapsed": "0:01.23",
+    "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/logs/tutorial-L-auto.stdout",
+    "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/logs/tutorial-L-auto.time",
+    "ingest_witness": [
+     "Movies/20170629_00026_frameImage.tiff nvcomp"
+    ]
+   },
+   "compact": {
+    "label": "tutorial-L-compact",
+    "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/build-nvcomp/motioncorr",
+    "binary_sha256": "f8bd37409897b3dbf3c398e3bc8b4aaefbf00ca38204e806d27832a4ca3e899b",
+    "args": [
+     "--use_own",
+     "--dose_weighting",
+     "--dose_per_frame",
+     "1.277",
+     "--bfactor",
+     "150",
+     "--seed",
+     "1",
+     "--expected_frames",
+     "24",
+     "--i",
+     "movies.star",
+     "--o",
+     "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/out-compact/",
+     "--j",
+     "8",
+     "--gainref",
+     "gain.mrc",
+     "--patch_x",
+     "5",
+     "--patch_y",
+     "5",
+     "--gpu",
+     "0",
+     "--ingest",
+     "compact",
+     "--ingest_witness",
+     "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/witness-compact.txt"
+    ],
+    "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/inputs/tutorial",
+    "cpu_mask": "96-103",
+    "env": {
+     "CUDA_VISIBLE_DEVICES": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+     "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+     "OMP_NUM_THREADS": "8",
+     "OPENBLAS_NUM_THREADS": "1",
+     "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+    },
+    "extra_env": {},
+    "gpu_run": true,
+    "start_utc": "2026-10-17T12:08:08Z",
+    "lock_wait_s": 0.0,
+    "bench_gate": {
+     "bench_polls_held": 0,
+     "bench_waited_s": 0.0
+    },
+    "gpu_precheck": {
+     "waited_s": 0.1,
+     "foreign": []
+    },
+    "rc": 0,
+    "wall_s": 1.645,
+    "gpu_witness": {
+     "uuids_seen_for_pid": [
+      "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+     ],
+     "peak_mib": 3206,
+     "smi_samples": 4,
+     "pid_hits": 3,
+     "on_lane_gpu_only": true
+    },
+    "max_rss_kib": 878620,
+    "time_exit_status": 0,
+    "elapsed": "0:01.63",
+    "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/logs/tutorial-L-compact.stdout",
+    "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/logs/tutorial-L-compact.time",
+    "ingest_witness": [
+     "Movies/20170629_00026_frameImage.tiff compact"
+    ]
+   },
+   "float": {
+    "label": "tutorial-L-float",
+    "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/build-nvcomp/motioncorr",
+    "binary_sha256": "f8bd37409897b3dbf3c398e3bc8b4aaefbf00ca38204e806d27832a4ca3e899b",
+    "args": [
+     "--use_own",
+     "--dose_weighting",
+     "--dose_per_frame",
+     "1.277",
+     "--bfactor",
+     "150",
+     "--seed",
+     "1",
+     "--expected_frames",
+     "24",
+     "--i",
+     "movies.star",
+     "--o",
+     "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/out-float/",
+     "--j",
+     "8",
+     "--gainref",
+     "gain.mrc",
+     "--patch_x",
+     "5",
+     "--patch_y",
+     "5",
+     "--gpu",
+     "0",
+     "--ingest",
+     "float",
+     "--ingest_witness",
+     "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/witness-float.txt"
+    ],
+    "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/inputs/tutorial",
+    "cpu_mask": "96-103",
+    "env": {
+     "CUDA_VISIBLE_DEVICES": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+     "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+     "OMP_NUM_THREADS": "8",
+     "OPENBLAS_NUM_THREADS": "1",
+     "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+    },
+    "extra_env": {},
+    "gpu_run": true,
+    "start_utc": "2026-10-17T12:08:10Z",
+    "lock_wait_s": 0.0,
+    "bench_gate": {
+     "bench_polls_held": 0,
+     "bench_waited_s": 0.0
+    },
+    "gpu_precheck": {
+     "waited_s": 0.1,
+     "foreign": []
+    },
+    "rc": 0,
+    "wall_s": 1.891,
+    "gpu_witness": {
+     "uuids_seen_for_pid": [
+      "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+     ],
+     "peak_mib": 3206,
+     "smi_samples": 5,
+     "pid_hits": 4,
+     "on_lane_gpu_only": true
+    },
+    "max_rss_kib": 1593852,
+    "time_exit_status": 0,
+    "elapsed": "0:01.85",
+    "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/logs/tutorial-L-float.stdout",
+    "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/logs/tutorial-L-float.time",
+    "ingest_witness": [
+     "Movies/20170629_00026_frameImage.tiff float"
+    ]
+   },
+   "cpu": {
+    "label": "tutorial-L-cpu",
+    "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/build-cpu/motioncorr",
+    "binary_sha256": "57256b875ab1bbcb45a398210d138c1f92a6e55b9edb71c8b2c5fcf57ca2b0ea",
+    "args": [
+     "--use_own",
+     "--dose_weighting",
+     "--dose_per_frame",
+     "1.277",
+     "--bfactor",
+     "150",
+     "--seed",
+     "1",
+     "--expected_frames",
+     "24",
+     "--i",
+     "movies.star",
+     "--o",
+     "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/out-cpu/",
+     "--j",
+     "8",
+     "--gainref",
+     "gain.mrc",
+     "--patch_x",
+     "5",
+     "--patch_y",
+     "5",
+     "--ingest_witness",
+     "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/witness-cpu.txt"
+    ],
+    "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/inputs/tutorial",
+    "cpu_mask": "96-103",
+    "env": {
+     "OMP_NUM_THREADS": "8",
+     "OPENBLAS_NUM_THREADS": "1",
+     "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+    },
+    "extra_env": {},
+    "gpu_run": false,
+    "start_utc": "2026-10-17T12:08:12Z",
+    "rc": 0,
+    "wall_s": 12.568,
+    "max_rss_kib": 3062780,
+    "time_exit_status": 0,
+    "elapsed": "0:12.52",
+    "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/logs/tutorial-L-cpu.stdout",
+    "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/logs/tutorial-L-cpu.time",
+    "ingest_witness": [
+     "Movies/20170629_00026_frameImage.tiff float"
+    ]
+   },
+   "ref_cpu": {
+    "label": "tutorial-L-ref_cpu",
+    "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-cpu/motioncorr",
+    "binary_sha256": "dd86cd419c43dc83d732c7b70cff2bb40c5459674ba65f9b9ba5ee85a6b26439",
+    "args": [
+     "--use_own",
+     "--dose_weighting",
+     "--dose_per_frame",
+     "1.277",
+     "--bfactor",
+     "150",
+     "--seed",
+     "1",
+     "--expected_frames",
+     "24",
+     "--i",
+     "movies.star",
+     "--o",
+     "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/out-ref_cpu/",
+     "--j",
+     "8",
+     "--gainref",
+     "gain.mrc",
+     "--patch_x",
+     "5",
+     "--patch_y",
+     "5",
+     "--ingest_witness",
+     "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/witness-ref_cpu.txt"
+    ],
+    "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/inputs/tutorial",
+    "cpu_mask": "96-103",
+    "env": {
+     "OMP_NUM_THREADS": "8",
+     "OPENBLAS_NUM_THREADS": "1",
+     "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+    },
+    "extra_env": {},
+    "gpu_run": false,
+    "start_utc": "2026-10-17T12:08:24Z",
+    "rc": 0,
+    "wall_s": 12.923,
+    "max_rss_kib": 3187916,
+    "time_exit_status": 0,
+    "elapsed": "0:12.91",
+    "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/logs/tutorial-L-ref_cpu.stdout",
+    "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/logs/tutorial-L-ref_cpu.time",
+    "ingest_witness": [
+     "Movies/20170629_00026_frameImage.tiff float"
+    ]
+   }
+  },
+  "checks": {
+   "compact_refusal": {
+    "refused": false,
+    "expected": false
+   },
+   "auto_vs_compact": {
+    "products_only": {
+     "rc": 0,
+     "tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 14238980 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+     "status": "PASS",
+     "different_files": [],
+     "different_products": []
+    },
+    "strict_all_files": {
+     "rc": 1,
+     "tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 14238980 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20170629_00026_frameImage.log\n",
+     "status": "FAIL",
+     "different_files": [
+      "Movies/20170629_00026_frameImage.log"
+     ],
+     "different_products": []
+    },
+    "declared_route_log_allowance": {
+     "rc": 0,
+     "tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 14238980 pixels per arm\nAllowed added .log line prefixes (dropped from BOTH arms): 'nvCOMP ingestion', 'Staging this movie as native', 'Released native ', 'Materialized native '\nComparison: complete non-PDF tree; status=PASS; different files=0\n",
+     "status": "PASS",
+     "different_files": [],
+     "different_products": []
+    },
+    "allowance_prefixes": [
+     "nvCOMP ingestion",
+     "Staging this movie as native",
+     "Released native ",
+     "Materialized native "
+    ],
+    "log_line_diff": {
+     "only_in_A": [
+      "nvCOMP ingestion: chunk=6/24 frames x 4 chunks, slots=2, scratch=410073744/1367678976 bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0), pinned staging=100663296/268435456 reserved, 68338816 used (2 x 33063768 payload), nvCOMP temp=0, input alignment=4, span-read frames=24/24",
+      "nvCOMP ingestion: pinned staging pool grown to 100663296 bytes for a 68338816-byte request (worker lifetime)",
+      "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/out-auto/Movies/20170629_00026_frameImage.mrc"
+     ],
+     "only_in_B": [
+      "Staging this movie as native unsigned 16-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 683472384 bytes for 24 x 3710 x 3838 samples, released before any float movie is materialized.",
+      "Released native uint16 host staging after device forward FFT.",
+      "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/out-compact/Movies/20170629_00026_frameImage.mrc"
+     ]
+    }
+   },
+   "auto_vs_float": {
+    "products_only": {
+     "rc": 0,
+     "tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 14238980 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+     "status": "PASS",
+     "different_files": [],
+     "different_products": []
+    },
+    "strict_all_files": {
+     "rc": 1,
+     "tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 14238980 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20170629_00026_frameImage.log\n",
+     "status": "FAIL",
+     "different_files": [
+      "Movies/20170629_00026_frameImage.log"
+     ],
+     "different_products": []
+    },
+    "declared_route_log_allowance": {
+     "rc": 0,
+     "tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 14238980 pixels per arm\nAllowed added .log line prefixes (dropped from BOTH arms): 'nvCOMP ingestion', 'Staging this movie as native', 'Released native ', 'Materialized native '\nComparison: complete non-PDF tree; status=PASS; different files=0\n",
+     "status": "PASS",
+     "different_files": [],
+     "different_products": []
+    },
+    "allowance_prefixes": [
+     "nvCOMP ingestion",
+     "Staging this movie as native",
+     "Released native ",
+     "Materialized native "
+    ],
+    "log_line_diff": {
+     "only_in_A": [
+      "nvCOMP ingestion: chunk=6/24 frames x 4 chunks, slots=2, scratch=410073744/1367678976 bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0), pinned staging=100663296/268435456 reserved, 68338816 used (2 x 33063768 payload), nvCOMP temp=0, input alignment=4, span-read frames=24/24",
+      "nvCOMP ingestion: pinned staging pool grown to 100663296 bytes for a 68338816-byte request (worker lifetime)",
+      "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/out-auto/Movies/20170629_00026_frameImage.mrc"
+     ],
+     "only_in_B": [
+      "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/out-float/Movies/20170629_00026_frameImage.mrc"
+     ]
+    }
+   },
+   "ref_cpu_vs_cpu": {
+    "products_only": {
+     "rc": 0,
+     "tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 14238980 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+     "status": "PASS",
+     "different_files": [],
+     "different_products": []
+    },
+    "strict_all_files": {
+     "rc": 0,
+     "tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 14238980 pixels per arm\nComparison: complete non-PDF tree; status=PASS; different files=0\n",
+     "status": "PASS",
+     "different_files": [],
+     "different_products": []
+    },
+    "ref_cpu_binary_sha256": "dd86cd419c43dc83d732c7b70cff2bb40c5459674ba65f9b9ba5ee85a6b26439",
+    "log_line_diff": {
+     "only_in_A": [
+      "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/out-ref_cpu/Movies/20170629_00026_frameImage.mrc"
+     ],
+     "only_in_B": [
+      "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/campaign/tutorial-L/out-cpu/Movies/20170629_00026_frameImage.mrc"
+     ]
+    }
+   },
+   "cpu_vs_cuda_auto_backend_gate_DIAGNOSTIC_ONLY": {
+    "rc": 0,
+    "tail": "========================================================================\n MOTIONCORR ACCEPTANCE GATE REPORT\n========================================================================\nGate Profile:      BACKEND\nOverall Status:    PASS\n------------------------------------------------------------------------\n1. MOTION TRAJECTORY:\n   Frames evaluated:     24\n   Coordinate RMS error: 0.004947 px (threshold: 0.020000)\n   Max absolute shift:   0.007496 px (threshold: 0.050000)\n   Status:               PASS\n\n2. CORRECTED IMAGE PARITY:\n   Pixel-identical:      False\n   Image RMSE:           7.233422e-03 (threshold: 2.000000e-02)\n   Max absolute diff:    3.007114e+00 (threshold: 5.000000e+00)\n   Relative RMSE:        8.358252e-03 (threshold: 1.000000e-03 in relaxed/custom gate)\n     diagnostic status: FAIL (nonblocking; backend profile only)\n     denominator:        reference pixel population std = 8.654228e-01\n     equivalent to:      absolute RMSE <= 8.654228e-04 for this reference\n   Normalized headers:   Core metadata: 6 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               PASS\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n\n5. PROCESS METRICS:\n   Wall clock time:      0:01.23\n   User CPU time:        0.52 s\n   Peak RSS memory:      351.46 MB (359892 KB)\n   Process exit status:  0\n========================================================================\n",
+    "json_checks": {
+     "motion_trajectory": {
+      "num_frames": 24,
+      "max_abs_diff_x": 0.007496000000000613,
+      "max_abs_diff_y": 0.005469999999999864,
+      "max_shift_error": 0.007496000000000613,
+      "coord_rms_error": 0.004947414644707651,
+      "per_frame_diffs": [
+       {
+        "frame": 1,
+        "dx": 0.0,
+        "dy": 0.0
+       },
+       {
+        "frame": 2,
+        "dx": -0.0032440000000000246,
+        "dy": -0.0037299999999999833
+       },
+       {
+        "frame": 3,
+        "dx": 0.00030599999999991745,
+        "dy": -0.0012199999999999989
+       },
+       {
+        "frame": 4,
+        "dx": -0.007065000000000099,
+        "dy": -0.0041599999999999415
+       },
+       {
+        "frame": 5,
+        "dx": -0.004061999999999788,
+        "dy": -0.0020799999999998597
+       },
+       {
+        "frame": 6,
+        "dx": -0.0025380000000003733,
+        "dy": -0.0015600000000000058
+       },
+       {
+        "frame": 7,
+        "dx": -0.0033759999999998236,
+        "dy": -0.0014300000000000423
+       },
+       {
+        "frame": 8,
+        "dx": -0.004426000000000041,
+        "dy": -0.004649999999999821
+       },
+       {
+        "frame": 9,
+        "dx": -0.00356600000000018,
+        "dy": -0.0025599999999998957
+       },
+       {
+        "frame": 10,
+        "dx": 0.0025560000000002248,
+        "dy": -0.0032600000000000406
+       },
+       {
+        "frame": 11,
+        "dx": 8.999999999925734e-05,
+        "dy": -0.003330000000000055
+       },
+       {
+        "frame": 12,
+        "dx": -0.007432999999999801,
+        "dy": -0.0020100000000002893
+       },
+       {
+        "frame": 13,
+        "dx": -0.0023770000000000735,
+        "dy": -0.0053800000000006065
+       },
+       {
+        "frame": 14,
+        "dx": -0.007496000000000613,
+        "dy": -0.0035199999999999676
+       },
+       {
+        "frame": 15,
+        "dx": -0.0028649999999998954,
+        "dy": -0.005469999999999864
+       },
+       {
+        "frame": 16,
+        "dx": -0.003655000000000186,
+        "dy": -0.0013199999999997658
+       },
+       {
+        "frame": 17,
+        "dx": -0.0031999999999996476,
+        "dy": -0.003829999999999778
+       },
+       {
+        "frame": 18,
+        "dx": -0.0025479999999999947,
+        "dy": -0.0015900000000002024
+       },
+       {
+        "frame": 19,
+        "dx": 0.0003380000000001715,
+        "dy": -0.0025800000000000267
+       },
+       {
+        "frame": 20,
+        "dx": 0.0010639999999995098,
+        "dy": -0.0016400000000000858
+       },
+       {
+        "frame": 21,
+        "dx": -0.0025769999999996074,
+        "dy": 0.0025800000000000267
+       },
+       {
+        "frame": 22,
+        "dx": -0.0024449999999998084,
+        "dy": 0.0013100000000001444
+       },
+       {
+        "frame": 23,
+        "dx": -0.005460000000001131,
+        "dy": -0.005119999999999791
+       },
+       {
+        "frame": 24,
+        "dx": 0.0013630000000013354,
+        "dy": -0.0048200000000004906
+       }
+      ],
+      "passed": true,
+      "fail_reasons": []
+     },
+     "star_fields": {
+      "num_differences": 0,
+      "differences": [],
+      "passed": true
+     },
+     "corrected_image": {
+      "num_pixels": 14238980,
+      "pixel_identical": false,
+      "max_abs_pixel_error": 3.0071139335632324,
+      "rmse": 0.007233422077366508,
+      "relative_rmse": 0.008358252470687779,
+      "relative_rmse_denominator": "reference_pixel_population_std",
+      "relative_rmse_denominator_value": 0.8654227785932492,
+      "ref_pixel_min": -0.31011706590652466,
+      "ref_pixel_max": 12.47128677368164,
+      "ref_pixel_mean": 5.388949394226074,
+      "ref_pixel_std": 0.8654227785932492,
+      "test_pixel_min": -0.3092960715293884,
+      "test_pixel_max": 12.47304630279541,
+      "test_pixel_mean": 5.388949394226074,
+      "test_pixel_std": 0.8651394844055176,
+      "core_header_diff_bytes": 6,
+      "label_header_diff_bytes": 2,
+      "normalized_label_diff_bytes": 0,
+      "geometry_matches": true,
+      "relative_rmse_diagnostic": {
+       "value": 0.008358252470687779,
+       "threshold": 0.001,
+       "status": "FAIL",
+       "blocking": false
+      },
+      "passed": true,
+      "fail_reasons": []
+     }
+    }
+   }
+  },
+  "problems": [],
+  "runs_ok": [
+   "auto",
+   "compact",
+   "cpu",
+   "float",
+   "ref_cpu"
+  ],
+  "routes": {
+   "auto": "nvcomp",
+   "compact": "compact",
+   "float": "float",
+   "cpu": "float",
+   "ref_cpu": "float"
+  },
+  "output_dims_xyz": [
+   3710,
+   3838,
+   1
+  ],
+  "output_mode": 2,
+  "dims_match_family_geometry": true,
+  "mrc_whole_file_sha256": {
+   "ref_cpu": {
+    "size": 56956944,
+    "sha256_whole_file": "a8f5bac50e359812cf88155f76d8d15e7ed2a1a7d5c1e2283d1515f66b5dc282"
+   },
+   "float": {
+    "size": 56956944,
+    "sha256_whole_file": "de9d56cc79ac728ad72ebebd46e71ac0df7374457f29f2482d6a882205c4b350"
+   },
+   "compact": {
+    "size": 56956944,
+    "sha256_whole_file": "811310752cc22af0b2b35c826ae1a9316e9ef6717f9b3261cdd920fb0d3001e1"
+   },
+   "auto": {
+    "size": 56956944,
+    "sha256_whole_file": "e4d0b479569551d5229bc6b0c9b5a16a498598a810e777bfc2a8e62fde8e8ad6"
+   },
+   "cpu": {
+    "size": 56956944,
+    "sha256_whole_file": "8123169c8647f0c02e77116bfe6d1c7067816e230176913d3d251b22ff3713a2"
+   }
+  },
+  "verdict": "PASS"
+ }
+]

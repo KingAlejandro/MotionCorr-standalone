@@ -1,0 +1,42 @@
+Internal ctest changing into directory: /mnt/clathrin/alex-motioncorr-rc0/W-D13/build-fix-asan
+UpdateCTestConfiguration  from :/mnt/clathrin/alex-motioncorr-rc0/W-D13/build-fix-asan/DartConfiguration.tcl
+Parse Config file:/mnt/clathrin/alex-motioncorr-rc0/W-D13/build-fix-asan/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/mnt/clathrin/alex-motioncorr-rc0/W-D13/build-fix-asan/DartConfiguration.tcl
+Parse Config file:/mnt/clathrin/alex-motioncorr-rc0/W-D13/build-fix-asan/DartConfiguration.tcl
+Test project /mnt/clathrin/alex-motioncorr-rc0/W-D13/build-fix-asan
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 8
+    Start 8: ReportPlotUndefinedAxis
+
+8: Test command: /mnt/clathrin/alex-motioncorr-rc0/W-D13/build-fix-asan/runner_numerics "plot2d_undefined_axis"
+8: Working Directory: /mnt/clathrin/alex-motioncorr-rc0/W-D13/build-fix-asan
+8: Test timeout computed to be: 1500
+8: in: /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-fix/src/metadata_table.cpp, line 1729
+8: ERROR: 
+8: MetaDataTable::addToCPlot2D ERROR: cannot find x-axis label
+8: in: /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-fix/src/metadata_table.cpp, line 1747
+8: ERROR: 
+8: MetaDataTable::addToCPlot2D ERROR: cannot find y-axis label
+8: in: /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-fix/src/metadata_table.cpp, line 1747
+8: ERROR: 
+8: MetaDataTable::addToCPlot2D ERROR: cannot find y-axis label
+8: in: /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-fix/src/metadata_table.cpp, line 1742
+8: ERROR: 
+8: MetaDataTable::addToCPlot2D ERROR: can only plot x-axis double, int or long int
+8: in: /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-fix/src/metadata_table.cpp, line 1760
+8: ERROR: 
+8: MetaDataTable::addToCPlot2D ERROR: can only plot y-axis double, int or long int
+8: PASS addToCPlot2D EMDL_UNDEFINED x-axis and missing-label errors
+1/1 Test #8: ReportPlotUndefinedAxis ..........   Passed    0.07 sec
+
+The following tests passed:
+	ReportPlotUndefinedAxis
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.08 sec

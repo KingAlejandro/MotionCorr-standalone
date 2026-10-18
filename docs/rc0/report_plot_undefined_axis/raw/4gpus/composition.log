@@ -1,0 +1,285 @@
+=== Composition Check 2026-10-18T00:38:46Z ===
+main:  1afa03b57afbae42138ee30c3545b57b5a74c321
+D13:   b82d25f4dda6bca746e4206fed1272851cc6a5ce
+#228:  da402cab31110cdd8a5837889ae3a205511450c3
+D10c:  97fb9fda5902f4bd5c2aab7c40ae4064637b5125
+merge-tree(D13, #228) rc=0 tree=cc7ec4ad59cab1c3fc64ef18bb20b2f55e6e8ad7
+commit-tree(D13 + #228) commit=4a680104c75f89b115e6b0191d702b2137cc9e5a
+merge-tree(D13 + #228, D10c) rc=0 tree=e33f89a33781af3f88d30ce2c02d7e178a5e5c64
+comp-all HEAD=064ca0fb046ac2fd81076f1426a54bf1a91d5f7d tree=e33f89a33781af3f88d30ce2c02d7e178a5e5c64
+--- Semantic collision check (helper subcommands, test names, required-list entries) ---
+runner_numerics subcommands: 19 ['interpolate_recenter', 'mrc_stats', 'plot2d_undefined_axis', 'float_plan_cache', 'render_eer', 'read_tiff_raw', 'count_eer', 'render_eer_groups', 'integer_to_string', 'read_tiff', 'read', 'model_eer', 'model_complete', 'model_query', 'model_roundtrip', 'model_mask', 'legacy_mtf', 'bin', 'write_model']
+DEFAULT_REQUIRED_TESTS count: 66 unique: 66
+CUDA_REQUIRED_TESTS count: 1 unique: 1
+Semantic collision check: PASS (0 duplicates)
+--- Configure and build composed tree (CPU and CUDA+nvCOMP) ---
+build-comp-cpu rc=0 sha256=4659fe56bca4a90045cd3dba3fd4c88c4bcba80112d47d431334d7d7a1be6a7a
+build-comp-nvcomp rc=0 sha256=514da152b9a0dd739f1fb31438664f9053abfe29e52871a87e7d709a3ecc6cea
+--- Validate test collection on composed CPU and CUDA+nvCOMP builds ---
+=== CTest Collection Validation: PASS === 
+  CUDA-only required tests: not required
+  Collected tests: 74
+    - CpuDoseSymmetry                [REQUIRED]
+    - CpuDoseSymmetryBase            [REQUIRED]
+    - CpuUnweightedStream            [ADDITIVE]
+    - PatchRetryState                [REQUIRED]
+    - RunnerInterpolateRecenter      [REQUIRED]
+    - FloatPlanCache                 [ADDITIVE]
+    - MrcHeaderStats                 [REQUIRED]
+    - ReportPlotUndefinedAxis        [REQUIRED]
+    - PdfConcat                      [REQUIRED]
+    - DefectParser                   [REQUIRED]
+    - DeflateLayout                  [REQUIRED]
+    - DeflateLayoutMutant_span_wrap  [REQUIRED]
+    - DeflateLayoutMutant_stage_sum  [REQUIRED]
+    - DeflateLayoutMutant_reserve_round [REQUIRED]
+    - DeflateLayoutMutant_layout_table [REQUIRED]
+    - DeflateLayoutMutant_arena_start [REQUIRED]
+    - DeflateLayoutMutant_drain_step [REQUIRED]
+    - Adler32Arithmetic              [REQUIRED]
+    - Adler32KernelHost              [REQUIRED]
+    - StageProfileThreads            [REQUIRED]
+    - FrameBufferPool                [REQUIRED]
+    - ScratchArena                   [REQUIRED]
+    - ReaderPool                     [ADDITIVE]
+    - ReaderPoolMutant_spin          [ADDITIVE]
+    - ReaderPoolMutant_nowait        [ADDITIVE]
+    - DefectNeighbours               [REQUIRED]
+    - DefectMergeMutant_append_only  [ADDITIVE]
+    - DefectMergeMutant_no_order_check [ADDITIVE]
+    - DefectMergeMutant_swap_xy      [ADDITIVE]
+    - NvcompAcceptanceDiagnostics    [REQUIRED]
+    - ProfilingKit                   [REQUIRED]
+    - GainCacheOwnership             [REQUIRED]
+    - NvcompGuards                   [REQUIRED]
+    - SyntheticRegression            [REQUIRED]
+    - HotPixelRngDeterminism         [REQUIRED]
+    - RunnerExposure                 [REQUIRED]
+    - Runner_failure                 [REQUIRED]
+    - Runner_invalid                 [REQUIRED]
+    - Runner_resume                  [REQUIRED]
+    - Runner_tomography              [REQUIRED]
+    - RunnerLateBin                  [REQUIRED]
+    - RunnerExportedUnits            [REQUIRED]
+    - GainCache                      [REQUIRED]
+    - TiffRead                       [REQUIRED]
+    - DamagedMovie                   [REQUIRED]
+    - TruncatedMrcMovie              [REQUIRED]
+    - TruncatedGainDefect            [REQUIRED]
+    - CompressedMovieSequence        [REQUIRED]
+    - InputFormats                   [REQUIRED]
+    - CutDownMovie                   [REQUIRED]
+    - GlobalIfftElision              [REQUIRED]
+    - HostBufferReuse                [REQUIRED]
+    - StageProfile                   [REQUIRED]
+    - RunnerModelParser              [REQUIRED]
+    - EerMemorySafety                [REQUIRED]
+    - MicrographModelBounds          [REQUIRED]
+    - RunnerInterpolateShifts        [REQUIRED]
+    - WriteFaults                    [REQUIRED]
+    - WriteFaultsSync                [REQUIRED]
+    - WriteFaultsMultiProduct        [REQUIRED]
+    - OutputStageFaults              [REQUIRED]
+    - LogfileFromEps                 [REQUIRED]
+    - LogfileFromEpsMutant_always_eps [REQUIRED]
+    - LogfileFromEpsMutant_late_guard [REQUIRED]
+    - LogfileFromEpsMutant_eps_order [REQUIRED]
+    - LogfileFromEpsMutant_placeholder [REQUIRED]
+    - LogfileFromEpsMutant_concat_cleanup [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - CudaValidationParser           [REQUIRED]
+    - MultiGpuScheduling             [REQUIRED]
+    - OutputTreeComparator           [REQUIRED]
+    - JointStarPublication           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+    - NativeMovieStaging             [REQUIRED]
+validate comp-cpu rc=0
+=== CTest Collection Validation: PASS === 
+  CUDA-only required tests: required
+  Collected tests: 111
+    - CpuDoseSymmetry                [REQUIRED]
+    - CpuDoseSymmetryBase            [REQUIRED]
+    - CpuUnweightedStream            [ADDITIVE]
+    - PatchRetryState                [REQUIRED]
+    - RunnerInterpolateRecenter      [REQUIRED]
+    - FloatPlanCache                 [ADDITIVE]
+    - MrcHeaderStats                 [REQUIRED]
+    - ReportPlotUndefinedAxis        [REQUIRED]
+    - PdfConcat                      [REQUIRED]
+    - DefectParser                   [REQUIRED]
+    - DeflateLayout                  [REQUIRED]
+    - DeflateLayoutMutant_span_wrap  [REQUIRED]
+    - DeflateLayoutMutant_stage_sum  [REQUIRED]
+    - DeflateLayoutMutant_reserve_round [REQUIRED]
+    - DeflateLayoutMutant_layout_table [REQUIRED]
+    - DeflateLayoutMutant_arena_start [REQUIRED]
+    - DeflateLayoutMutant_drain_step [REQUIRED]
+    - Adler32Arithmetic              [REQUIRED]
+    - Adler32KernelHost              [REQUIRED]
+    - StageProfileThreads            [REQUIRED]
+    - FrameBufferPool                [REQUIRED]
+    - ScratchArena                   [REQUIRED]
+    - ReaderPool                     [ADDITIVE]
+    - ReaderPoolMutant_spin          [ADDITIVE]
+    - ReaderPoolMutant_nowait        [ADDITIVE]
+    - DefectNeighbours               [REQUIRED]
+    - DefectMergeMutant_append_only  [ADDITIVE]
+    - DefectMergeMutant_no_order_check [ADDITIVE]
+    - DefectMergeMutant_swap_xy      [ADDITIVE]
+    - NvcompAcceptanceDiagnostics    [REQUIRED]
+    - ProfilingKit                   [REQUIRED]
+    - GainCacheOwnership             [REQUIRED]
+    - NvcompGuards                   [REQUIRED]
+    - SyntheticRegression            [REQUIRED]
+    - HotPixelRngDeterminism         [REQUIRED]
+    - RunnerExposure                 [REQUIRED]
+    - Runner_failure                 [REQUIRED]
+    - Runner_invalid                 [REQUIRED]
+    - Runner_resume                  [REQUIRED]
+    - Runner_tomography              [REQUIRED]
+    - RunnerLateBin                  [REQUIRED]
+    - RunnerExportedUnits            [REQUIRED]
+    - GainCache                      [REQUIRED]
+    - TiffRead                       [REQUIRED]
+    - DamagedMovie                   [REQUIRED]
+    - TruncatedMrcMovie              [REQUIRED]
+    - TruncatedGainDefect            [REQUIRED]
+    - CompressedMovieSequence        [REQUIRED]
+    - InputFormats                   [REQUIRED]
+    - CutDownMovie                   [REQUIRED]
+    - GlobalIfftElision              [REQUIRED]
+    - HostBufferReuse                [REQUIRED]
+    - StageProfile                   [REQUIRED]
+    - RunnerModelParser              [REQUIRED]
+    - EerMemorySafety                [REQUIRED]
+    - MicrographModelBounds          [REQUIRED]
+    - RunnerInterpolateShifts        [REQUIRED]
+    - WriteFaults                    [REQUIRED]
+    - WriteFaultsSync                [REQUIRED]
+    - WriteFaultsMultiProduct        [REQUIRED]
+    - OutputStageFaults              [REQUIRED]
+    - LogfileFromEps                 [REQUIRED]
+    - LogfileFromEpsMutant_always_eps [REQUIRED]
+    - LogfileFromEpsMutant_late_guard [REQUIRED]
+    - LogfileFromEpsMutant_eps_order [REQUIRED]
+    - LogfileFromEpsMutant_placeholder [REQUIRED]
+    - LogfileFromEpsMutant_concat_cleanup [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - CudaValidationParser           [REQUIRED]
+    - MultiGpuScheduling             [REQUIRED]
+    - OutputTreeComparator           [REQUIRED]
+    - JointStarPublication           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+    - NativeMovieStaging             [REQUIRED]
+    - RunnerInterpolateShiftsCuda    [ADDITIVE]
+    - StageProfileDeviceTiming       [ADDITIVE]
+    - SignedMrcStaging               [ADDITIVE]
+    - TruncatedMrcMovieCuda          [ADDITIVE]
+    - TruncatedGainDefectCuda        [ADDITIVE]
+    - CudaU16StagingEquivalence      [ADDITIVE]
+    - CudaWrapperUploadFailure       [ADDITIVE]
+    - CudaFaultMatrix                [ADDITIVE]
+    - CudaPatchWorkspace             [ADDITIVE]
+    - CudaPatchBatch                 [ADDITIVE]
+    - CudaVramAlias                  [ADDITIVE]
+    - CudaPatchBatchMutant_shift_retired [ADDITIVE]
+    - CudaPatchBatchMutant_never_retire [ADDITIVE]
+    - CudaPatchBatchMutant_extract_no_remap [ADDITIVE]
+    - CudaPatchBatchMutant_scale_divide [ADDITIVE]
+    - CudaPatchBatchMutant_shift_wrong_half [ADDITIVE]
+    - CudaPatchBatchMutant_perpatch_wrong_half [ADDITIVE]
+    - CudaVramAliasMutant_arena_overlap [ADDITIVE]
+    - CudaVramAliasMutant_arena_work_over_buffers [ADDITIVE]
+    - CudaVramAliasMutant_refusal_off [ADDITIVE]
+    - CudaVramAliasMutant_dw_scratch_over_fourier [ADDITIVE]
+    - CudaDeviceGainPool             [ADDITIVE]
+    - CudaDeviceGainCleanupFatal     [ADDITIVE]
+    - CudaGeometryRetention          [ADDITIVE]
+    - CudaGeometryRetentionMutant_no_take [ADDITIVE]
+    - CudaGeometryRetentionMutant_return_failed [ADDITIVE]
+    - CudaGeometryRetentionMutant_keep_taken_alias [ADDITIVE]
+    - CudaDoseNormalization          [ADDITIVE]
+    - CudaDoseSessionPlan            [ADDITIVE]
+    - CudaResidentRetryFailures      [ADDITIVE]
+    - CudaPreprocessingFailurePaths  [ADDITIVE]
+    - CudaStaleErrorAfterOom         [REQUIRED]
+    - CudaAdler32                    [ADDITIVE]
+    - CudaNvcompAcceptanceFailures   [ADDITIVE]
+    - CudaNvcompReconstructionFailures [ADDITIVE]
+    - CudaDoseWeightAlias            [ADDITIVE]
+    - CudaErrorClass                 [ADDITIVE]
+validate comp-nvcomp rc=0
+test_1_absent_truth_script_and_missing_binary (__main__.TestCiFailClosedControls.test_1_absent_truth_script_and_missing_binary)
+Control 1: Missing truth script fails CI preflight; missing binary fails gate runner. ... ok
+test_2_absent_dependency_fails_cmake (__main__.TestCiFailClosedControls.test_2_absent_dependency_fails_cmake)
+Control 2: BUILD_TESTING=ON must fail if python or numpy is missing in MotionCorr CMakeLists.txt. ... ok
+test_3_zero_or_missing_collected_tests_fails (__main__.TestCiFailClosedControls.test_3_zero_or_missing_collected_tests_fails)
+Control 3: Empty test suite or missing required test fails collection validation. ... ok
+test_4_missing_fixture_or_truth_fails (__main__.TestCiFailClosedControls.test_4_missing_fixture_or_truth_fails)
+Control 4: Missing fixture movie, missing truth file, or malformed manifest fails verify_fixtures. ... ok
+test_5_byte_flipped_fixture_fails (__main__.TestCiFailClosedControls.test_5_byte_flipped_fixture_fails)
+Control 5: Baseline fixture must pass first, then fail after corrupting one byte. ... ok
+test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref. ... ok
+test_7_reused_stem_and_canonical_generator_protection (__main__.TestCiFailClosedControls.test_7_reused_stem_and_canonical_generator_protection)
+Control 7: Generator protects canonical truth and refuses conflicting stem overwrite. ... ok
+test_8_canonical_star_input_is_immutable (__main__.TestCiFailClosedControls.test_8_canonical_star_input_is_immutable)
+Control 8: STAR metadata drift that leaves the pixels untouched must fail closed. ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 21.810s
+
+OK
+comp test_ci_fail_closed rc=0
+Internal ctest changing into directory: /mnt/clathrin/alex-motioncorr-rc0/W-D13/build-comp-cpu
+UpdateCTestConfiguration  from :/mnt/clathrin/alex-motioncorr-rc0/W-D13/build-comp-cpu/DartConfiguration.tcl
+Parse Config file:/mnt/clathrin/alex-motioncorr-rc0/W-D13/build-comp-cpu/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/mnt/clathrin/alex-motioncorr-rc0/W-D13/build-comp-cpu/DartConfiguration.tcl
+Parse Config file:/mnt/clathrin/alex-motioncorr-rc0/W-D13/build-comp-cpu/DartConfiguration.tcl
+Test project /mnt/clathrin/alex-motioncorr-rc0/W-D13/build-comp-cpu
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 8
+    Start  8: ReportPlotUndefinedAxis
+
+8: Test command: /mnt/clathrin/alex-motioncorr-rc0/W-D13/build-comp-cpu/runner_numerics "plot2d_undefined_axis"
+8: Working Directory: /mnt/clathrin/alex-motioncorr-rc0/W-D13/build-comp-cpu
+8: Test timeout computed to be: 1500
+8: in: /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-comp/src/metadata_table.cpp, line 1729
+8: ERROR: 
+8: MetaDataTable::addToCPlot2D ERROR: cannot find x-axis label
+8: in: /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-comp/src/metadata_table.cpp, line 1747
+8: ERROR: 
+8: MetaDataTable::addToCPlot2D ERROR: cannot find y-axis label
+8: in: /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-comp/src/metadata_table.cpp, line 1747
+8: ERROR: 
+8: MetaDataTable::addToCPlot2D ERROR: cannot find y-axis label
+8: in: /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-comp/src/metadata_table.cpp, line 1742
+8: ERROR: 
+8: MetaDataTable::addToCPlot2D ERROR: can only plot x-axis double, int or long int
+8: in: /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-comp/src/metadata_table.cpp, line 1760
+8: ERROR: 
+8: MetaDataTable::addToCPlot2D ERROR: can only plot y-axis double, int or long int
+8: PASS addToCPlot2D EMDL_UNDEFINED x-axis and missing-label errors
+1/2 Test  #8: ReportPlotUndefinedAxis ..........   Passed    0.01 sec
+test 55
+    Start 55: EerMemorySafety
+
+55: Test command: /home/alex/.mc-venv/bin/python3 "/mnt/clathrin/alex-motioncorr-rc0/W-D13/src-comp/tests/test_eer_memory_safety.py" "--binary" "/mnt/clathrin/alex-motioncorr-rc0/W-D13/build-comp-cpu/motioncorr" "--helper" "/mnt/clathrin/alex-motioncorr-rc0/W-D13/build-comp-cpu/runner_numerics"
+55: Working Directory: /mnt/clathrin/alex-motioncorr-rc0/W-D13/build-comp-cpu
+55: Test timeout computed to be: 600
+55: PASS EerMemorySafety: scalar valid identity, isolated corrupt fractions, clean per-movie failures
+2/2 Test #55: EerMemorySafety ..................   Passed   15.51 sec
+
+The following tests passed:
+	ReportPlotUndefinedAxis
+	EerMemorySafety
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  15.52 sec
+comp targeted tests rc=0

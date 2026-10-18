@@ -1,0 +1,143 @@
+{
+  "d14_margin_pct": 0.5,
+  "d14_threshold_s": 0.08699,
+  "d14_verdict": "Pass",
+  "ab_32": {
+    "n_pairs": 32,
+    "kept_orders": {
+      "AB": 16,
+      "BA": 16
+    },
+    "discarded": 0,
+    "main_wall_s": {
+      "n": 32,
+      "wall_median_s": 17.39805972762406,
+      "wall_iqr_s": 0.11336574889719486,
+      "wall_min_s": 17.228426046669483,
+      "wall_max_s": 17.56058344617486,
+      "cpu_median_s": 131.465869,
+      "rss_median_bytes": 3362224128.0,
+      "minflt_median": 3358941.5,
+      "majflt_max": 46,
+      "wall_outlier_rounds": [],
+      "vram_peak_process_bytes": null,
+      "vram_peak_process_bytes_max": null,
+      "vram_peak_device_delta_bytes": null,
+      "vram_peak_device_delta_bytes_max": null,
+      "lane_foreign_cores_max": 0.005790022862078389,
+      "load1_range": [
+        5.103515625,
+        10.173828125
+      ]
+    },
+    "fix_wall_s": {
+      "n": 32,
+      "wall_median_s": 17.399827664718032,
+      "wall_iqr_s": 0.0862045269459486,
+      "wall_min_s": 17.236983988434076,
+      "wall_max_s": 17.616137452423573,
+      "cpu_median_s": 131.51037150000002,
+      "rss_median_bytes": 3368816640.0,
+      "minflt_median": 3353833.0,
+      "majflt_max": 50,
+      "wall_outlier_rounds": [
+        2,
+        12
+      ],
+      "vram_peak_process_bytes": null,
+      "vram_peak_process_bytes_max": null,
+      "vram_peak_device_delta_bytes": null,
+      "vram_peak_device_delta_bytes_max": null,
+      "lane_foreign_cores_max": 0.006440427117786129,
+      "load1_range": [
+        6.18896484375,
+        10.18603515625
+      ]
+    },
+    "median_diff_s": -6.8e-05,
+    "median_diff_pct": -0.0004,
+    "ci_low_s": -0.084329,
+    "ci_high_s": 0.051712,
+    "ci_low_pct": -0.4847,
+    "ci_high_pct": 0.2972,
+    "ci_confidence": 0.979938,
+    "q1_diff_s": -0.090088,
+    "q3_diff_s": 0.057857,
+    "noise_s": 0.115883,
+    "noise_pct": 0.6661,
+    "sign_test": {
+      "positive": 16,
+      "negative": 16,
+      "ties": 0,
+      "p_two_sided": 1.0
+    },
+    "mcprof_verdict": "not resolved (below noise 0.116 s)"
+  },
+  "aa_12": {
+    "n_pairs": 12,
+    "kept_orders": {
+      "AB": 6,
+      "BA": 6
+    },
+    "discarded": 0,
+    "main_wall_s": {
+      "n": 12,
+      "wall_median_s": 17.476111866533756,
+      "wall_iqr_s": 0.07752296794205904,
+      "wall_min_s": 17.376526940613985,
+      "wall_max_s": 17.612392846494913,
+      "cpu_median_s": 132.091724,
+      "rss_median_bytes": 3375069184.0,
+      "minflt_median": 3369577.5,
+      "majflt_max": 43,
+      "wall_outlier_rounds": [],
+      "vram_peak_process_bytes": null,
+      "vram_peak_process_bytes_max": null,
+      "vram_peak_device_delta_bytes": null,
+      "vram_peak_device_delta_bytes_max": null,
+      "lane_foreign_cores_max": 0.0026916567338473377,
+      "load1_range": [
+        9.2158203125,
+        9.94580078125
+      ]
+    },
+    "main_null_wall_s": {
+      "n": 12,
+      "wall_median_s": 17.425374949350953,
+      "wall_iqr_s": 0.06099002994596958,
+      "wall_min_s": 17.349394500255585,
+      "wall_max_s": 17.51071911677718,
+      "cpu_median_s": 131.800805,
+      "rss_median_bytes": 3372826624.0,
+      "minflt_median": 3338597.5,
+      "majflt_max": 46,
+      "wall_outlier_rounds": [],
+      "vram_peak_process_bytes": null,
+      "vram_peak_process_bytes_max": null,
+      "vram_peak_device_delta_bytes": null,
+      "vram_peak_device_delta_bytes_max": null,
+      "lane_foreign_cores_max": 0.0024781590512336538,
+      "load1_range": [
+        9.03173828125,
+        9.9619140625
+      ]
+    },
+    "median_diff_s": -0.042996,
+    "median_diff_pct": -0.246,
+    "ci_low_s": -0.180871,
+    "ci_high_s": 0.038215,
+    "ci_low_pct": -1.035,
+    "ci_high_pct": 0.2187,
+    "ci_confidence": 0.961426,
+    "noise_s": 0.111503,
+    "null_max_abs_s": 0.258634,
+    "null_max_abs_pct": 1.4799,
+    "sign_test": {
+      "positive": 4,
+      "negative": 8,
+      "ties": 0,
+      "p_two_sided": 0.3876953125
+    },
+    "mcprof_verdict": "not resolved (below noise 0.112 s)"
+  }
+}

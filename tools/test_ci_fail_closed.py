@@ -191,6 +191,8 @@ exec "{sys.executable}" "$@"
             "TiffRead",
             "DamagedMovie", "TruncatedMrcMovie", "TruncatedGainDefect",
             "CompressedMovieSequence",
+            "InputFormats",
+            "CutDownMovie",
             "RunnerModelParser",
             "MicrographModelBounds",
             "CiFailClosedControls",
@@ -199,6 +201,8 @@ exec "{sys.executable}" "$@"
             "DefectParser",
             "GlobalIfftElision",
             "PatchRetryState",
+            "CpuDoseSymmetry",
+            "CpuDoseSymmetryBase",
             "OutputTreeComparator",
             "RunnerInterpolateRecenter",
             "RunnerInterpolateShifts",
@@ -210,6 +214,7 @@ exec "{sys.executable}" "$@"
             "DefectNeighbours",
             # #127 output stage.
             "MrcHeaderStats",
+            "ReportPlotUndefinedAxis",
             "PdfConcat",
             # #127 writer fail-closed variants.
             "WriteFaultsSync",
@@ -234,7 +239,7 @@ exec "{sys.executable}" "$@"
             "MultiGpuScheduling",
             "NativeMovieStaging",
             "GainCacheOwnership",
-            "JointStarPublication",
+            "JointStarPublication", "EerMemorySafety",
             # --profile contract (docs/stage_profile.md).
             "StageProfile",
             "CudaValidationParser",
@@ -267,10 +272,12 @@ exec "{sys.executable}" "$@"
         # only thing that can reject the collection is the missing-name check.
         for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults",
                         "DefectParser", "GlobalIfftElision", "PatchRetryState",
+                        "CpuDoseSymmetry", "CpuDoseSymmetryBase",
                         "OutputTreeComparator", "MultiGpuScheduling", "NativeMovieStaging",
-                        "GainCacheOwnership", "JointStarPublication",
+                        "GainCacheOwnership", "JointStarPublication", "EerMemorySafety",
                         "MicrographModelBounds", "CompressedMovieSequence",
                         "RunnerInterpolateRecenter", "RunnerInterpolateShifts",
+                        "ReportPlotUndefinedAxis",
                         "StageProfile", "CudaValidationParser", "HostBufferReuse",
                         "StageProfileThreads", "FrameBufferPool", "ProfilingKit",
                         "LogfileFromEps", "LogfileFromEpsMutant_always_eps",

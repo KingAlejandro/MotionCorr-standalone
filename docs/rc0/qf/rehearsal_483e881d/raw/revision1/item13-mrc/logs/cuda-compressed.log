@@ -1,0 +1,51 @@
+PASS compressed m1 xz [native] ingest=auto
+PASS compressed m1 xz [native] ingest=float
+PASS pinned compact refuses compressed m1 xz
+PASS compressed m1 zst [native] ingest=auto
+PASS compressed m1 zst [native] ingest=float
+PASS pinned compact refuses compressed m1 zst
+PASS compressed m1 bz2 [native] ingest=auto
+PASS compressed m1 bz2 [native] ingest=float
+PASS compressed m1 bz2 [pbzip2-shim] ingest=auto
+PASS compressed m1 bz2 [pbzip2-shim] ingest=float
+PASS compressed m0 xz [native] ingest=auto
+PASS compressed m0 xz [native] ingest=float
+PASS compressed m0 zst [native] ingest=auto
+PASS compressed m0 zst [native] ingest=float
+PASS compressed m6 xz [native] ingest=auto
+PASS compressed m6 xz [native] ingest=float
+PASS compressed m6 zst [native] ingest=auto
+PASS compressed m6 zst [native] ingest=float
+PASS compressed m2 xz [native] ingest=auto
+PASS compressed m2 xz [native] ingest=float
+PASS pinned compact refuses compressed m2 xz
+PASS compressed m2 zst [native] ingest=auto
+PASS compressed m2 zst [native] ingest=float
+PASS pinned compact refuses compressed m2 zst
+PASS pinned compact refuses raw float32 MRC
+PASS damaged xz truncated-60pct ingest=auto (decoder rc=1, 158464/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged xz truncated-60pct ingest=float (decoder rc=1, 158464/263168 bytes out, motioncorr rc=1, completion star=False)
+FAIL damaged xz truncated-tail1 ingest=auto (decoder rc=1, 263168/263168 bytes out, motioncorr rc=0, completion star=True)
+FAIL damaged xz truncated-tail1 ingest=float (decoder rc=1, 263168/263168 bytes out, motioncorr rc=0, completion star=True)
+PASS damaged xz truncated-header-only ingest=auto (decoder rc=1, 1245/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged xz truncated-header-only ingest=float (decoder rc=1, 1245/263168 bytes out, motioncorr rc=1, completion star=False)
+FAIL damaged xz trailer-corrupt ingest=auto (decoder rc=1, 263168/263168 bytes out, motioncorr rc=0, completion star=True)
+FAIL damaged xz trailer-corrupt ingest=float (decoder rc=1, 263168/263168 bytes out, motioncorr rc=0, completion star=True)
+PASS damaged xz midstream-corrupt ingest=auto (decoder rc=1, 132302/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged xz midstream-corrupt ingest=float (decoder rc=1, 132302/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged zst truncated-60pct ingest=auto (decoder rc=1, 131072/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged zst truncated-60pct ingest=float (decoder rc=1, 131072/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged zst truncated-tail1 ingest=auto (decoder rc=1, 262144/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged zst truncated-tail1 ingest=float (decoder rc=1, 262144/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged zst truncated-header-only ingest=auto (decoder rc=1, 0/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged zst truncated-header-only ingest=float (decoder rc=1, 0/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged zst trailer-corrupt ingest=auto (decoder rc=1, 262144/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged zst trailer-corrupt ingest=float (decoder rc=1, 262144/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged zst midstream-corrupt ingest=auto (decoder rc=1, 262144/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS damaged zst midstream-corrupt ingest=float (decoder rc=1, 262144/263168 bytes out, motioncorr rc=1, completion star=False)
+PASS shim control exits 0 (xz): rc=0
+FAIL decoder exits 3 after full stream (xz): rc=0 completion star=True
+PASS shim control exits 0 (zst): rc=0
+FAIL decoder exits 3 after full stream (zst): rc=0 completion star=True
+
+49 records, 6 not passing

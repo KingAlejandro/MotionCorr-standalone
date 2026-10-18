@@ -124,6 +124,7 @@ def build_cmd(fam, cfg, j, cpus, outdir, profile):
         opts += ['--gainref', fam['gain_link']]
     if fam['container'].startswith('EER'):
         opts += ['--eer_grouping', str(fam['eer_grouping']), '--eer_upsampling', '1']
+    opts += list(fam.get('extra_options', []))      # families-formats.json, e.g. gain orientation
     if profile:
         opts += ['--profile', profile]
     return opts

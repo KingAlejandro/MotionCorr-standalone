@@ -212,7 +212,7 @@ def main() -> int:
     binary = a.binary.resolve()
     fixture = ROOT / 'test-data/synthetic/synthetic_movie.tiff'
     with tempfile.TemporaryDirectory(prefix='tomo-endpoint-') as td:
-        tmp = Path(td)
+        tmp = Path(td).resolve()
         (tmp / 'Movies').mkdir()
         for m in 'abcd':
             shutil.copyfile(fixture, tmp / 'Movies' / f'{m}.tiff')

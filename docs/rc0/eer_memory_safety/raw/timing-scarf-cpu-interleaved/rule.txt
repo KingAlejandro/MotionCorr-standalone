@@ -1,0 +1,85 @@
+W-D10e: interleaved D14 whole-job CPU timing for PR #231 (RC0 D10, #221). Declared design.
+
+Written and committed to the job scripts before any timed run. Each job copies this file to its
+output directory, with a UTC timestamp, before building, and refuses to run if its SHA-256 differs
+from the value written in the sbatch script.
+
+Venue     SCARF exclusive CPU node (-p scarf --nodes=1 --cpus-per-task=64 --exclusive), one job per
+          workload. Payload pinned to CPUs 0-15 (--j 16, OMP_NUM_THREADS=16). Driver pinned to
+          CPUs 16-19, mpstat to CPU 20. Inputs and per-run products on node-local /tmp.
+Builds    Both arms built inside the allocation with identical flags
+          (-DCMAKE_BUILD_TYPE=Release -DCUDA=OFF -DBUILD_TESTING=OFF) from the verified tarballs
+          w-d10-main.tar.gz (71ab841e) and w-d10-fix.tar.gz (97fb9fda). Binary SHA-256s recorded.
+Arms      A = main 71ab841e, B = fix 97fb9fda. Null: A vs A2, where A2 is the same main binary
+          under a second label (written A' in reports; the label in paths and records is "A2").
+Measures  d  = wall(B) - wall(A) per comparison pair; d0 = wall(A2) - wall(A) per null pair.
+          Wall is CLOCK_MONOTONIC from spawn to reap of the payload.
+Workloads (CPU whole job, motioncorr, one movie)
+  e12963L   EMPIAR-12963 with EER gain: --use_own --dose_weighting --dose_per_frame 1.282051282051282
+            --patch_x 5 --patch_y 5 --bfactor 150 --gainref gain.gain --eer_grouping 49
+            --eer_upsampling 1 --expected_frames 39 --seed 1 --skip_report_pdf --j 16 (0.97 A/px)
+  e10474f3L EMPIAR-10474 Falcon 3: --use_own --dose_weighting --dose_per_frame 1.0 --patch_x 5
+            --patch_y 5 --bfactor 150 --eer_grouping 40 --eer_upsampling 1 --expected_frames 58
+            --seed 1 --skip_report_pdf --j 16 (1.06 A/px)
+  e10474f4L EMPIAR-10474 Falcon 4: --use_own --dose_weighting --dose_per_frame 1.0 --patch_x 5
+            --patch_y 5 --bfactor 150 --eer_grouping 40 --eer_upsampling 1 --expected_frames 144
+            --seed 1 --skip_report_pdf --j 16 (1.64 A/px; arguments of the F4 L identity case,
+            with --j 16 for the timing venue)
+
+Per workload, in this order:
+ 0. Witness control (not timed; before any motioncorr run). Payload `sleep 3` on CPUs 0-15 with
+    (i) no burst, (ii) a 1.5 s single-thread busy loop in another session pinned to CPU 5, and
+    (iii) the same burst pinned to CPU 24. The burst's CPU time is attributed by its session id.
+    Required: in (ii) the burst contributes >= 1.0 s on the payload CPUs and the run is a resource
+    violation; in (iii) the burst contributes <= 0.1 s on the payload CPUs and >= 1.0 s elsewhere.
+    (i) is recorded only (the node's quiet foreign load). If (ii) or (iii) fails, the job stops before any
+    timed run and the workload is reported incomplete.
+ 1. Warm-up: one run of A, one of B. Discarded.
+ 2. PILOT: 6 comparison pairs, orders AB BA AB BA AB BA. Recorded separately (pilot.json), never
+    part of the result.
+ 3. SIZING, from the pilot only, written to design.json before the definitive phase:
+      s = 1.4826 * MAD(pilot d), M = median(pilot wall A), T = 0.005 * M.
+      N = the smallest even N with 1.96 * 1.2533 * s / sqrt(N) <= T, floored at 32 and capped at
+      128. design.json records whether the cap binds; if it does, the cap is run anyway.
+ 4. DEFINITIVE, run exactly once, never extended: N comparison pairs in N/2 blocks [AB, BA]
+    (exactly N/2 AB and N/2 BA), and 16 null pairs in 8 null blocks [A A2, A2 A].
+    Null block j (j = 1..8) follows comparison block floor(j * (N/2) / 8). When 8 divides N/2 this
+    is "after every k-th block, k = (N/2)/8". The last null block follows the last comparison block.
+
+Exclusion: a pair is discarded only if a run in it exits non-zero, or a recorded resource
+    violation occurred. Resource signal: foreign CPU time on the payload CPUs, from per-thread
+    /proc/<pid>/task/<tid>/stat utime+stime deltas sampled every 0.5 s by the driver, summing
+    threads whose session id is not the payload's session (the payload runs under setsid), that
+    are not kernel threads (PF_KTHREAD), and whose last CPU is one of the payload CPUs. A run is a
+    resource violation if that foreign CPU time exceeds 0.0025 * wall * 16 CPU-seconds (an average
+    of 0.04 foreign cores on the 16 payload CPUs), or if a /proc sample fails. Kernel-thread CPU on
+    the payload CPUs and foreign CPU on their SMT siblings (32-47) are recorded, not used.
+    A discarded pair is rerun immediately in the same position and order, up to 3 attempts. If all
+    3 fail, the workload stops and is reported incomplete.
+
+Report, per workload: median(d), its distribution-free CI from tools/profiling/lib/stats.median_ci
+    with the achieved coverage, the upper bound as % of median wall A, the null median/CI/range,
+    each arm's median and IQR, and the D14 label:
+      fail       if the CI lower bound is > 0 (a slowdown is resolved);
+      pass       otherwise, if the CI upper bound is <= 0.5 % of median wall A;
+      unresolved otherwise.
+    The result stands whatever it shows. Nothing is rerun or extended.
+Identity: the products of the first definitive AB pair are compared with
+    tools/profiling/lib/identity.compare_trees. Those two product trees are kept on SCARF.
+
+Addendum (coordinator review points from #228 / R-D11 round 4, built into wd10e_cpu_pairs.py
+before any submission):
+  - Completeness: the verdict is computed only if every planned position and order was retained,
+    the comparison and null counts and AB/BA and A-A2/A2-A balance are exact, wall times are finite
+    and both CIs exist; otherwise INCOMPLETE. Any exception while computing the verdict is INCOMPLETE.
+  - Identity: non-identical products in the first definitive AB pair block PASS (PASS -> INCOMPLETE).
+  - Failure accounting: runs, non-zero exits, invalid products and resource violations are counted
+    by arm. Any non-zero exit or invalid product in a timed run blocks PASS (PASS -> INCOMPLETE).
+  - Provenance: the driver checks the binary SHA-256s frozen by the job before the first run and
+    again at the end, and refuses identical main/fix binaries.
+  - Resource signal: sampled throughout each run; threads that started before the run count.
+  - Labels: PASS / UNRESOLVED / FAIL / INCOMPLETE.
+  - Product validity: every run must produce corrected_micrographs.star (listing
+    Movies/movie1.mrc), Movies/movie1.mrc (4096x4096x1, mode 2, size consistent with its header),
+    Movies/movie1.star and Movies/movie1.log, with the same inventory as warm-up A; otherwise the
+    pair is discarded like a non-zero exit. stdout and stderr of every run are kept.

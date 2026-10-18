@@ -1,0 +1,208 @@
+{
+ "runs": {
+  "arms": [
+   "main",
+   "main_null"
+  ],
+  "summary": {
+   "main": {
+    "n": 12,
+    "wall_median_s": 9.50233515349828,
+    "wall_iqr_s": 0.032410790750873275,
+    "wall_min_s": 9.465909782993549,
+    "wall_max_s": 9.53053392899892,
+    "cpu_median_s": 85.739117,
+    "rss_median_bytes": 6895833088.0,
+    "minflt_median": 172307.5,
+    "majflt_max": 7,
+    "wall_outlier_rounds": [],
+    "vram_peak_process_bytes": null,
+    "vram_peak_process_bytes_max": null,
+    "vram_peak_device_delta_bytes": null,
+    "vram_peak_device_delta_bytes_max": null,
+    "lane_foreign_cores_max": 0.08974051703545849,
+    "load1_range": [
+     7.41,
+     10.24
+    ]
+   },
+   "main_null": {
+    "n": 12,
+    "wall_median_s": 9.493690272502135,
+    "wall_iqr_s": 0.016416815744378255,
+    "wall_min_s": 9.445893040996452,
+    "wall_max_s": 9.514670402000775,
+    "cpu_median_s": 85.716163,
+    "rss_median_bytes": 6879305728.0,
+    "minflt_median": 171262.0,
+    "majflt_max": 0,
+    "wall_outlier_rounds": [
+     3
+    ],
+    "vram_peak_process_bytes": null,
+    "vram_peak_process_bytes_max": null,
+    "vram_peak_device_delta_bytes": null,
+    "vram_peak_device_delta_bytes_max": null,
+    "lane_foreign_cores_max": 0.09437496917403301,
+    "load1_range": [
+     7.33,
+     9.3
+    ]
+   }
+  },
+  "discarded_rounds": [],
+  "discard_audit": {
+   "planned": 12,
+   "retained": 12,
+   "discarded": 0,
+   "triggered_alone": {
+    "main": 0,
+    "main_null": 0
+   },
+   "triggered_any": {
+    "main": 0,
+    "main_null": 0
+   },
+   "kept_orders": {
+    "AB": 6,
+    "BA": 6
+   },
+   "warnings": []
+  },
+  "comparisons": {
+   "main_null": {
+    "n_pairs": 12,
+    "diffs_s": [
+     0.0022858759984956123,
+     -0.054100171000754926,
+     -0.042623371999070514,
+     -0.02454982700146502,
+     -0.0063069570023799315,
+     -0.01366047599731246,
+     0.022159003994602244,
+     0.02829420800844673,
+     -0.0036942009974154644,
+     0.026050549990031868,
+     -0.02929839699936565,
+     -0.046724662999622524
+    ],
+    "floor_s": 0.0,
+    "min_pairs": 6,
+    "median_diff_s": -0.009983716499846196,
+    "q1_diff_s": -0.032629640749291866,
+    "q3_diff_s": 0.00725415799752227,
+    "min_diff_s": -0.054100171000754926,
+    "max_diff_s": 0.02829420800844673,
+    "median_a_s": 9.50233515349828,
+    "median_b_s": 9.493690272502135,
+    "relative_median_diff": -0.0010506592683347626,
+    "noise_s": 0.0381453713568284,
+    "robust_sd_diff_s": 0.0381453713568284,
+    "ci": {
+     "low_s": -0.042623371999070514,
+     "high_s": 0.022159003994602244,
+     "confidence": 0.96142578125
+    },
+    "sign_test": {
+     "positive": 4,
+     "negative": 8,
+     "ties": 0,
+     "p_two_sided": 0.3876953125
+    },
+    "resolution_s": 0.0381453713568284,
+    "resolved": false,
+    "verdict": "not resolved (below noise 0.038 s)",
+    "reason": "CI of median includes 0",
+    "positional": {
+     "n_ab": 6,
+     "n_ba": 6,
+     "median_diff_ab_s": -0.005000578999897698,
+     "median_diff_ba_s": -0.01910515149938874,
+     "second_position_cost_s": 0.007052286249745521,
+     "order_corrected_effect_s": -0.012052865249643219
+    }
+   }
+  },
+  "lane_waits": [
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.01,
+    "round": 1
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 2
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 3
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 4
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.01,
+    "round": 5
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 6
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.01,
+    "round": 7
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 8
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 9
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 10
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 11
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 12
+   }
+  ]
+ },
+ "identity": {
+  "main_null": {
+   "root_a": "/work4/scd/scarf1415/W-D10/def-e12963-3634353/e12963_aa12/runs/main-r01/out",
+   "root_b": "/work4/scd/scarf1415/W-D10/def-e12963-3634353/e12963_aa12/runs/main_null-r01/out",
+   "only_a": [],
+   "only_b": [],
+   "compared": 4,
+   "mrc_compared": 1,
+   "excluded": [
+    {
+     "file": "Movies/movie1.log",
+     "reason": "timing values in per-movie logs"
+    }
+   ],
+   "differences": [],
+   "problems": [],
+   "identical": true
+  }
+ }
+}

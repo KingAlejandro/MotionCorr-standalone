@@ -1,0 +1,594 @@
+{
+ "plan_sha256": "03671cc0734cefc6adfc8fc40618f1ac55087f075ed2d632eb1b41154493b7cb",
+ "cut_tool_sha256": "679be1c411e40fdb36c53005becc8f0c2113451493b030899fb95a1ff52bc21e",
+ "items": [
+  {
+   "id": "tutorial_u16_deflate",
+   "family": "tutorial",
+   "source": "tutorial/Movies/20170629_00026_frameImage.tiff",
+   "frames": 4,
+   "options": [
+    "--angpix",
+    "0.885",
+    "--voltage",
+    "200"
+   ],
+   "files": [
+    {
+     "path": "tutorial_u16_deflate/20170629_00026_frameImage.tiff",
+     "sha256": "b5fa1d7917d7b09e05e7ef7a9f75b162eb7d84ea7f6be52b8ed1027769958589",
+     "bytes": 22115020
+    }
+   ],
+   "movie": "tutorial_u16_deflate/20170629_00026_frameImage.tiff",
+   "source_sha256": "f989391b9d0e3e3b927a8de59d60179ade0b7ae5075ce7c3a9a5002ae2254ae3",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 3710,
+    "ny": 3838,
+    "n": 4,
+    "sha256": "bbaadcbf7a1666c4aa65d61df0a7717cc0e5bc1d8c0fd12b177d7b9309452b2c"
+   }
+  },
+  {
+   "id": "e10028_f32_mrc",
+   "family": "e10028",
+   "source": "EMPIAR-10028/data/Micrographs/Micrographs_part1/031_movie.mrcs",
+   "frames": 4,
+   "crop": [
+    1024,
+    1024,
+    2048,
+    2048
+   ],
+   "options": [
+    "--angpix",
+    "1.34",
+    "--voltage",
+    "300"
+   ],
+   "files": [
+    {
+     "path": "e10028_f32_mrc/031_movie.mrcs",
+     "sha256": "ccee6ca88b0a24bbdd734d7d35f939679e9f09cea45b4f7fe249e9e0764aff8d",
+     "bytes": 67109888
+    }
+   ],
+   "movie": "e10028_f32_mrc/031_movie.mrcs",
+   "source_sha256": "8ce479649ec00abf46b290aee2b43343d0ba0dc67f239f0e3fd0c6875b3c7213",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 2048,
+    "ny": 2048,
+    "n": 4,
+    "sha256": "b327c2777ba8ea89c129c7b96f0ab9bd8932ac5a267eb6f2e1364d0225b44402"
+   }
+  },
+  {
+   "id": "e10361_u8_lzw_bigtiff",
+   "family": "e10361",
+   "source": "EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-12_0007_Jan20_08.57.33.tif",
+   "frames": 3,
+   "options": [
+    "--angpix",
+    "0.826",
+    "--voltage",
+    "300"
+   ],
+   "files": [
+    {
+     "path": "e10361_u8_lzw_bigtiff/PS.18.2.4_CTEM_103-12_0007_Jan20_08.57.33.tif",
+     "sha256": "c1feec142cea26ddde8d2561a6a791f95b52e1a75be7a19d18009e19c0132007",
+     "bytes": 34347404
+    }
+   ],
+   "movie": "e10361_u8_lzw_bigtiff/PS.18.2.4_CTEM_103-12_0007_Jan20_08.57.33.tif",
+   "source_sha256": "79efffaa086d56c799a234e3768843cb429c02c05d024f6a553a462acf8a6736",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 5760,
+    "ny": 4092,
+    "n": 3,
+    "sha256": "2e9af45d598270524468902747738adc9f5711d4af3e2b9dabd29bfe3e11f1fd"
+   }
+  },
+  {
+   "id": "e10641_u8_lzw_bigtiff",
+   "family": "e10641",
+   "source": "EMPIAR-10641/data/Movies/Dataset/HM70-1_10-A-002_0002_Oct28_23.00.41.tif",
+   "frames": 3,
+   "options": [
+    "--angpix",
+    "0.4",
+    "--voltage",
+    "300"
+   ],
+   "files": [
+    {
+     "path": "e10641_u8_lzw_bigtiff/HM70-1_10-A-002_0002_Oct28_23.00.41.tif",
+     "sha256": "c0346d54787ec13ef2895e325eae233d8aa696e8994284383de31d1a15884397",
+     "bytes": 8174004
+    }
+   ],
+   "movie": "e10641_u8_lzw_bigtiff/HM70-1_10-A-002_0002_Oct28_23.00.41.tif",
+   "source_sha256": "5f50686d7d32b9635fd64e550a91fc7d192849deeda30b7349a2827d17478c6d",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 5760,
+    "ny": 4092,
+    "n": 3,
+    "sha256": "27a3dbacc7acb785652e79462f5ee4bca4cfdbf72455fc8a1bf2a672f0f3c3d4"
+   }
+  },
+  {
+   "id": "e10441_u8_lzw_k3sr",
+   "family": "e10441",
+   "source": "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+   "frames": 3,
+   "options": [
+    "--angpix",
+    "0.5685",
+    "--voltage",
+    "200"
+   ],
+   "files": [
+    {
+     "path": "e10441_u8_lzw_k3sr/20May09_3A-3_109-21_0003.tif",
+     "sha256": "810effadc1fb095c422a28deb33027af9ed4c484313ab6020496d0bcf33f3a91",
+     "bytes": 43652036
+    }
+   ],
+   "movie": "e10441_u8_lzw_k3sr/20May09_3A-3_109-21_0003.tif",
+   "source_sha256": "70f850d3deff2274fac8515d7d38c6654aab1791f7aa2cca5a8b61b43b26eb7c",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 11520,
+    "ny": 8184,
+    "n": 3,
+    "sha256": "99f1f34d63b8c45878ee1c92988fde136301dcd409132644ca1892516802943c"
+   }
+  },
+  {
+   "id": "e10474f3_eer_65001",
+   "family": "e10474f3",
+   "source": "EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_20-39-45.801_eer_data_4096x4096.eer",
+   "frames": 30,
+   "eer_grouping": 10,
+   "options": [
+    "--angpix",
+    "1.06",
+    "--voltage",
+    "300",
+    "--eer_grouping",
+    "10",
+    "--eer_upsampling",
+    "1"
+   ],
+   "files": [
+    {
+     "path": "e10474f3_eer_65001/2019-06-21_20-39-45.801_eer_data_4096x4096.eer",
+     "sha256": "ca9d4d77b67b12624e6e059e095bc98c169bb0a5c893fc0efdb64ff18e26af6d",
+     "bytes": 15728244
+    }
+   ],
+   "movie": "e10474f3_eer_65001/2019-06-21_20-39-45.801_eer_data_4096x4096.eer",
+   "source_sha256": "fad4d37cc4b7b73076e3dd94c44be8a343f37f60b218e8057424b2154c9878ba",
+   "decoded": {
+    "kind": "render_eer upsampling 1 grouping 10 (sparse dump)",
+    "nx": 4096,
+    "ny": 4096,
+    "n": 3,
+    "sha256": "34c86551c00e6ffa9413894e874ecc1f6648033168605c287a767ef388e8b692"
+   }
+  },
+  {
+   "id": "e10474f4_eer_65001",
+   "family": "e10474f4",
+   "source": "EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+   "frames": 30,
+   "eer_grouping": 10,
+   "options": [
+    "--angpix",
+    "1.64",
+    "--voltage",
+    "300",
+    "--eer_grouping",
+    "10",
+    "--eer_upsampling",
+    "1"
+   ],
+   "files": [
+    {
+     "path": "e10474f4_eer_65001/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+     "sha256": "dbdc11e84dc74de137ee56a0887bfe0493fdc931115778f75372a3ed2330af74",
+     "bytes": 15208012
+    }
+   ],
+   "movie": "e10474f4_eer_65001/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer",
+   "source_sha256": "2a46fd6123a7240e95acb324681c281964ec21da9037e05d66d9ab37319e9fed",
+   "decoded": {
+    "kind": "render_eer upsampling 1 grouping 10 (sparse dump)",
+    "nx": 4096,
+    "ny": 4096,
+    "n": 3,
+    "sha256": "5c34f60b16aa75b2eeecbd5848ba74766ecb0242e7ec8caaba060c9d28ac4b3d"
+   }
+  },
+  {
+   "id": "e12963_eer_65001_gain",
+   "family": "e12963",
+   "source": "EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674725_Data_4659374_4659376_20230406_014501_EER.eer",
+   "frames": 30,
+   "eer_grouping": 10,
+   "options": [
+    "--angpix",
+    "0.97",
+    "--voltage",
+    "300",
+    "--eer_grouping",
+    "10",
+    "--eer_upsampling",
+    "1",
+    "--gainref",
+    "20230326_221855_EER_GainReference.gain"
+   ],
+   "files": [
+    {
+     "path": "e12963_eer_65001_gain/FoilHole_4674725_Data_4659374_4659376_20230406_014501_EER.eer",
+     "sha256": "d94c7616dd26cd218b14f4e71498803fe00ef8fd311ed8c8b51fc7715b493cc9",
+     "bytes": 13692700
+    },
+    {
+     "path": "e12963_eer_65001_gain/20230326_221855_EER_GainReference.gain",
+     "sha256": "6d4f3e5f9a6b837c637dc7098420e1c0cdfbbd61c9305a7780568f67c7134050",
+     "bytes": 33874221
+    }
+   ],
+   "movie": "e12963_eer_65001_gain/FoilHole_4674725_Data_4659374_4659376_20230406_014501_EER.eer",
+   "source_sha256": "3fc5feb61f487f0f4f6ec1317ae033138fe50e7da80e3b5b16bab3aaff2403f5",
+   "decoded": {
+    "kind": "render_eer upsampling 1 grouping 10 (sparse dump)",
+    "nx": 4096,
+    "ny": 4096,
+    "n": 3,
+    "sha256": "1f1720c919ce8cfce5964195076a685511cb05ae5c5151cdf2678893f3005f2f"
+   }
+  },
+  {
+   "id": "e10164_u8_mrc",
+   "family": "e10164",
+   "source": "EMPIAR-10164/data/frames/TS_01_000_0.0.mrc",
+   "frames": 3,
+   "crop": [
+    2686,
+    2814,
+    2048,
+    2048
+   ],
+   "options": [
+    "--angpix",
+    "0.675",
+    "--voltage",
+    "300"
+   ],
+   "files": [
+    {
+     "path": "e10164_u8_mrc/TS_01_000_0.0.mrcs",
+     "sha256": "365c333f18aeb911e320a56a5e170c477b579f78667d35ab407bee5ed02395a2",
+     "bytes": 12583936
+    }
+   ],
+   "movie": "e10164_u8_mrc/TS_01_000_0.0.mrcs",
+   "source_sha256": "117c303163480aa6bd3a1c1298c5635486dd077babce770dfcaf4ca944245039",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 2048,
+    "ny": 2048,
+    "n": 3,
+    "sha256": "e5785119e5d491d0a51f750c994b5c69ea049c79c09865cd6aaa3d26ae06738e"
+   }
+  },
+  {
+   "id": "e10216_s16_mrc",
+   "family": "e10216",
+   "source": "EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+   "frames": 3,
+   "crop": [
+    1024,
+    1024,
+    2048,
+    2048
+   ],
+   "options": [
+    "--angpix",
+    "0.517",
+    "--voltage",
+    "300"
+   ],
+   "files": [
+    {
+     "path": "e10216_s16_mrc/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+     "sha256": "84d8457d4abaf7da74e882048b4e2baf26f1f716e32ce2a21ae82adb21a317e6",
+     "bytes": 25166848
+    }
+   ],
+   "movie": "e10216_s16_mrc/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+   "source_sha256": "f399bd30bfe1a9807bd494c348bfcf7d4aee312ccc18140b05abb1453ac23a56",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 2048,
+    "ny": 2048,
+    "n": 3,
+    "sha256": "a09947c6ee674ae2b6b9c17790653978f9a6f5070b0943b341933871f4f75874"
+   }
+  },
+  {
+   "id": "e10500_s16_deflate32946",
+   "family": "e10500f3",
+   "source": "EMPIAR-10500/data/XFEG-Falcon3/GridSquare_14725129/Data/FoilHole_14730491_Data_14726927_14726929_20200316_135927_Fractions.tif",
+   "frames": 3,
+   "options": [
+    "--angpix",
+    "0.827",
+    "--voltage",
+    "300"
+   ],
+   "files": [
+    {
+     "path": "e10500_s16_deflate32946/FoilHole_14730491_Data_14726927_14726929_20200316_135927_Fractions.tif",
+     "sha256": "c1cb10a0e88608ac2c95dedab10fcf6838cd82c8ed20879bbd4e9575676f3160",
+     "bytes": 54772928
+    }
+   ],
+   "movie": "e10500_s16_deflate32946/FoilHole_14730491_Data_14726927_14726929_20200316_135927_Fractions.tif",
+   "source_sha256": "17f6b2d39497feb6f93046c9370a595678121b66fdc10aa0a71230b52655d629",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 4096,
+    "ny": 4096,
+    "n": 3,
+    "sha256": "93312e6bdb4f96f00a96dea111d4ef106c424a7ba95262efac1050edfe3e54b9"
+   }
+  },
+  {
+   "id": "e10342_u16_lzw_bigtiff",
+   "family": "e10342",
+   "source": "EMPIAR-10342/data/Movies/190830/bna_h1_s1_i0001_movie_Aug30_21.13.54.tif",
+   "frames": 3,
+   "options": [
+    "--angpix",
+    "1.1",
+    "--voltage",
+    "300"
+   ],
+   "refuse": {
+    "options": [
+     "--defect_file",
+     "190830_defects.txt"
+    ],
+    "substring": "SerialEM"
+   },
+   "files": [
+    {
+     "path": "e10342_u16_lzw_bigtiff/bna_h1_s1_i0001_movie_Aug30_21.13.54.tif",
+     "sha256": "77bb1c2d5cc2d6dffcc39855adbb5b2aa9475d9efba324057cecd4081b0d7a14",
+     "bytes": 14149108
+    },
+    {
+     "path": "e10342_u16_lzw_bigtiff/190830_defects.txt",
+     "sha256": "e03fe718546e89c559c9b4ac83ca516b24e242661ba2bacb53e9c5fdd63776bd",
+     "bytes": 1934
+    }
+   ],
+   "movie": "e10342_u16_lzw_bigtiff/bna_h1_s1_i0001_movie_Aug30_21.13.54.tif",
+   "source_sha256": "baf58aebb09f236678fe51215b726e5e7885918d1dd21ea9c8f25e9d3bd428b1",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 3838,
+    "ny": 3710,
+    "n": 3,
+    "sha256": "180effce5c7ac3324eacce69292bcd2bd1021aa0e2a0cc7977590ebd65a1e1b0"
+   }
+  },
+  {
+   "id": "e10740_u16_mrc",
+   "family": "e10740",
+   "source": "EMPIAR-10740/data/EMPIAR_sjojoa/frames/19may24k/rawdata/19may24k_1_00001gr_00001sq_00002hl_00002ed.frames.mrc",
+   "frames": 3,
+   "crop": [
+    895,
+    831,
+    2048,
+    2048
+   ],
+   "options": [
+    "--angpix",
+    "1.03",
+    "--voltage",
+    "300"
+   ],
+   "files": [
+    {
+     "path": "e10740_u16_mrc/19may24k_1_00001gr_00001sq_00002hl_00002ed.frames.mrcs",
+     "sha256": "70a913cc1a26d4425ed7492d18905e19268bd69d5ac0076f7a47a975a075df36",
+     "bytes": 25166848
+    }
+   ],
+   "movie": "e10740_u16_mrc/19may24k_1_00001gr_00001sq_00002hl_00002ed.frames.mrcs",
+   "source_sha256": "3499f58ba49e7977de805ff5ce4f836d37a7719307c1ddff7b172a3b474b9697",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 2048,
+    "ny": 2048,
+    "n": 3,
+    "sha256": "4e11a57c582104529b82eb86a843cf41641da7ff44accf73e2546fc41ec6959c"
+   }
+  },
+  {
+   "id": "e10374_4bit_mrc",
+   "family": "e10374",
+   "source": "EMPIAR-10374/data/Movies/2017-05-04/May04_14.24.37.mrc",
+   "frames": 3,
+   "crop": [
+    2814,
+    2686,
+    2048,
+    2048
+   ],
+   "options": [
+    "--angpix",
+    "0.42",
+    "--voltage",
+    "300"
+   ],
+   "files": [
+    {
+     "path": "e10374_4bit_mrc/May04_14.24.37.mrcs",
+     "sha256": "d973257cea94b723273b98c79c6387c1b69895233aa4810c7c328a7f072f272e",
+     "bytes": 6292480
+    }
+   ],
+   "movie": "e10374_4bit_mrc/May04_14.24.37.mrcs",
+   "source_sha256": "225e837f40c723b3b5b0fa9dfa4782023c26c71750b0e4ae7df532bd3ef9099d",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 2048,
+    "ny": 2048,
+    "n": 3,
+    "sha256": "49c5974997a35c31a4301aa767615ee2acb1a950f405980142a8c6960581f0b7"
+   }
+  },
+  {
+   "id": "e11217_s8_mrc_bz2",
+   "family": "e11217",
+   "source": "EMPIAR-11217/data/Compressed-frames/stack_0015.mrcs.bz2",
+   "frames": 3,
+   "crop": [
+    4736,
+    3068,
+    2048,
+    2048
+   ],
+   "options": [
+    "--angpix",
+    "0.25955",
+    "--voltage",
+    "300"
+   ],
+   "requires": [
+    "pbzip2"
+   ],
+   "files": [
+    {
+     "path": "e11217_s8_mrc_bz2/stack_0015.mrcs.bz2",
+     "sha256": "0848c0fb9d49df1d83a802fb847e62362564d1b1dc4aa79e9e97fb6f043bd90f",
+     "bytes": 1120707
+    }
+   ],
+   "movie": "e11217_s8_mrc_bz2/stack_0015.mrcs.bz2",
+   "source_sha256": "b4b9d9fdd175a7a88ec1de01c715409ba6a1e2f2521f55c599e2f3f915dcb10d",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 2048,
+    "ny": 2048,
+    "n": 3,
+    "sha256": "f2aa8813d4a0a7d2c18e4b7a2b6b5a1996eb4f28868b15f7349ca3d6a4774b59"
+   }
+  },
+  {
+   "id": "e10202_s8_mrc_zst",
+   "family": "e10202",
+   "source": "EMPIAR-10202/data/01_Raw_Frames_Compressed/17aug31d_00001sq_v01_00002hl_00002ed3.frames.mrc.zst",
+   "frames": 3,
+   "crop": [
+    2686,
+    2814,
+    2048,
+    2048
+   ],
+   "options": [
+    "--angpix",
+    "0.394",
+    "--voltage",
+    "300"
+   ],
+   "requires": [
+    "zstd"
+   ],
+   "copy": true,
+   "files": [
+    {
+     "path": "e10202_s8_mrc_zst/17aug31d_00001sq_v01_00002hl_00002ed3.frames.mrc.zst",
+     "sha256": "5265a30cb72b901c78e2acb22fcd0207df17cf0f4c653433f3a58e54aa930f41",
+     "bytes": 649887
+    }
+   ],
+   "movie": "e10202_s8_mrc_zst/17aug31d_00001sq_v01_00002hl_00002ed3.frames.mrc.zst",
+   "source_sha256": "8c0113e8e66323df10ba78c7924aa4fd54545f8e6a7fab3020046430fb23486b",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 2048,
+    "ny": 2048,
+    "n": 3,
+    "sha256": "add39e1cd6feb36161029ed6d23b3ee346ebbfde6c125d930ac078cd6780c438"
+   }
+  },
+  {
+   "id": "e10666_f32_lzw",
+   "family": "e10666",
+   "source": "EMPIAR-10666/data/eTG-movies-EMPIAR/FoilHole_16376725_Data_16377678_16377679_20171016_1214-38093.tif",
+   "frames": 3,
+   "options": [
+    "--angpix",
+    "1.043",
+    "--voltage",
+    "300"
+   ],
+   "files": [
+    {
+     "path": "e10666_f32_lzw/FoilHole_16376725_Data_16377678_16377679_20171016_1214-38093.tif",
+     "sha256": "3c6ffb58a9817144adc7c2238b67a123bf8f895d89d5a0bf6a9d9c33905fa895",
+     "bytes": 17162180
+    }
+   ],
+   "movie": "e10666_f32_lzw/FoilHole_16376725_Data_16377678_16377679_20171016_1214-38093.tif",
+   "source_sha256": "02a282ea850e1956e0348647a391e05790f36087a5344e6d1b2c9313f4c8bec1",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 3838,
+    "ny": 3710,
+    "n": 3,
+    "sha256": "57d2f07e70cf7d3a9ad4b9a2a2d9732a8c2ab19a992b765b6c63229f75d2be3e"
+   }
+  },
+  {
+   "id": "e11404_u16_lzw_8k",
+   "family": "e11404",
+   "source": "EMPIAR-11404/data/20221014_76242_12_8_integrated_movie.tif",
+   "frames": 3,
+   "options": [
+    "--angpix",
+    "0.387",
+    "--voltage",
+    "300"
+   ],
+   "files": [
+    {
+     "path": "e11404_u16_lzw_8k/20221014_76242_12_8_integrated_movie.tif",
+     "sha256": "7fc75e123eff2b7366f0b4fb87514b174030277fbe98908032511b5944e7c949",
+     "bytes": 24986932
+    }
+   ],
+   "movie": "e11404_u16_lzw_8k/20221014_76242_12_8_integrated_movie.tif",
+   "source_sha256": "b0933727670930509c6fc179d0e3da4cdbd06b0341652d0361cac5ed6fbab831",
+   "decoded": {
+    "kind": "read_tiff_raw (float32 samples)",
+    "nx": 8192,
+    "ny": 8192,
+    "n": 3,
+    "sha256": "48de06ae827e78f819c5c58e3c7ef9c4f9b6abc156cf18e6fb956bffe8d086a5"
+   }
+  }
+ ],
+ "total_bytes": 435955317
+}

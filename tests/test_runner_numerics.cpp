@@ -1,4 +1,5 @@
 #include "src/motioncorr_runner.h"
+#include "src/renderEER.h"
 #include "src/jaz/single_particle/new_ft.h"
 #include "src/fftw.h"
 #include <algorithm>
@@ -8,6 +9,8 @@
 #include <stdexcept>
 #include <cstring>
 #include <cstdint>
+#include <climits>
+#include <exception>
 #include <limits>
 #include <iomanip>
 
@@ -231,6 +234,96 @@ int main(int argc, char **argv)
             std::cout << "PASS fused MRC header statistics (" << cases.size() << " cases)\n";
             return 0;
         }
+        if (std::string(argv[1]) == "plot2d_undefined_axis") {
+            // Regression for issue #229: MetaDataTable::addToCPlot2D indexed
+            // label2offset[xaxis] before checking xaxis == EMDL_UNDEFINED (-1),
+            // reading one element before label2offset's storage on every report
+            // plot call (MDavg.addToCPlot2D(plot2Db, EMDL_UNDEFINED, label, 1.)).
+            struct InspectablePlot2D : CPlot2D {
+                using CPlot2D::CPlot2D;
+                const std::vector<CDataSet> &dataSets() const { return m_dataSets; }
+            };
+
+            const std::vector<RFLOAT> want_y_double = {1.25, 3.5, 0.75, 6.125};
+            const std::vector<int> want_y_int = {2, 5, 3, 8};
+            MetaDataTable table;
+            for (size_t i = 0; i < want_y_double.size(); i++) {
+                table.addObject();
+                table.setValue(EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL, want_y_double[i]);
+                table.setValue(EMDL_IMAGE_OPTICS_GROUP, want_y_int[i]);
+                table.setValue(EMDL_MICROGRAPH_NAME, std::string("mic_") + std::to_string(i + 1) + ".mrc");
+            }
+
+            InspectablePlot2D plot("summary");
+            table.addToCPlot2D(&plot, EMDL_UNDEFINED, EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL, 1.0);
+            require(plot.dataSets().size() == 1, "expected 1 dataset after double y plot");
+            CDataSet ds_double = plot.dataSets()[0];
+            require(ds_double.GetNumberOfDataPointsInSet() == static_cast<int>(want_y_double.size()),
+                    "unexpected point count for double y plot");
+            for (size_t i = 0; i < want_y_double.size(); i++) {
+                CDataPoint pt = ds_double.GetDataPoint(static_cast<int>(i));
+                require(pt.GetX() == static_cast<double>(i + 1),
+                        "EMDL_UNDEFINED x-axis must produce 1..N at row " + std::to_string(i));
+                require(pt.GetY() == static_cast<double>(want_y_double[i]),
+                        "unexpected double y value at row " + std::to_string(i));
+            }
+            require(plot.GetXAxisTitle().empty(), "EMDL_UNDEFINED must leave x-axis title empty");
+            require(plot.GetYAxisTitle() == EMDL::label2Str(EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL),
+                    "unexpected y-axis title for double y plot");
+
+            table.addToCPlot2D(&plot, EMDL_UNDEFINED, EMDL_IMAGE_OPTICS_GROUP, 1.0);
+            require(plot.dataSets().size() == 2, "expected 2 datasets after int y plot");
+            CDataSet ds_int = plot.dataSets()[1];
+            require(ds_int.GetNumberOfDataPointsInSet() == static_cast<int>(want_y_int.size()),
+                    "unexpected point count for int y plot");
+            for (size_t i = 0; i < want_y_int.size(); i++) {
+                CDataPoint pt = ds_int.GetDataPoint(static_cast<int>(i));
+                require(pt.GetX() == static_cast<double>(i + 1),
+                        "EMDL_UNDEFINED x-axis must produce 1..N for int y plot at row " + std::to_string(i));
+                require(pt.GetY() == static_cast<double>(want_y_int[i]),
+                        "unexpected int y value at row " + std::to_string(i));
+            }
+
+            table.addToCPlot2D(&plot, EMDL_IMAGE_OPTICS_GROUP, EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL, 1.0);
+            require(plot.dataSets().size() == 3, "expected 3 datasets after defined x/y plot");
+            CDataSet ds_xy = plot.dataSets()[2];
+            for (size_t i = 0; i < want_y_double.size(); i++) {
+                CDataPoint pt = ds_xy.GetDataPoint(static_cast<int>(i));
+                require(pt.GetX() == static_cast<double>(want_y_int[i]),
+                        "defined x-axis value mismatch at row " + std::to_string(i));
+                require(pt.GetY() == static_cast<double>(want_y_double[i]),
+                        "defined y-axis value mismatch at row " + std::to_string(i));
+            }
+            require(plot.GetXAxisTitle() == EMDL::label2Str(EMDL_IMAGE_OPTICS_GROUP),
+                    "defined x-axis must set x-axis title");
+
+            auto expect_plot_error = [&](EMDLabel x_label, EMDLabel y_label, const char *substr, const char *tag) {
+                bool caught = false;
+                try {
+                    InspectablePlot2D bad_plot;
+                    table.addToCPlot2D(&bad_plot, x_label, y_label, 1.0);
+                } catch (const RelionError &err) {
+                    require(err.msg.find(substr) != std::string::npos,
+                            std::string(tag) + ": unexpected error message: " + err.msg);
+                    caught = true;
+                }
+                require(caught, std::string(tag) + ": expected RelionError containing '" + substr + "'");
+            };
+
+            expect_plot_error(EMDL_MICROGRAPH_ACCUM_MOTION_EARLY, EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL,
+                              "cannot find x-axis label", "missing defined x-label");
+            expect_plot_error(EMDL_UNDEFINED, EMDL_MICROGRAPH_ACCUM_MOTION_LATE,
+                              "cannot find y-axis label", "missing defined y-label with EMDL_UNDEFINED x-axis");
+            expect_plot_error(EMDL_IMAGE_OPTICS_GROUP, EMDL_MICROGRAPH_ACCUM_MOTION_LATE,
+                              "cannot find y-axis label", "missing defined y-label with defined x-axis");
+            expect_plot_error(EMDL_MICROGRAPH_NAME, EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL,
+                              "can only plot x-axis double, int or long int", "non-numeric x-label");
+            expect_plot_error(EMDL_UNDEFINED, EMDL_MICROGRAPH_NAME,
+                              "can only plot y-axis double, int or long int", "non-numeric y-label");
+
+            std::cout << "PASS addToCPlot2D EMDL_UNDEFINED x-axis and missing-label errors\n";
+            return 0;
+        }
         if (std::string(argv[1]) == "float_plan_cache") {
             // The ad-hoc float transforms share cached FFTW plans between arrays. Each
             // transform must give the bits a plan made for its own arrays gives, and a
@@ -301,6 +394,42 @@ int main(int argc, char **argv)
             std::cout << "PASS float plan cache\n";
             return 0;
         }
+        if (std::string(argv[1]) == "render_eer") {
+            // Render EER groups exactly as MotioncorrRunner does (frames g*G+1 .. (g+1)*G,
+            // trailing fractions dropped) and dump the non-zero counts sparsely: one
+            // super-resolution frame is up to 8192^2, and synthetic fixtures are sparse.
+            // Layout: int64 nx, ny, groups; then per group int64 n, n x int64 index,
+            // n x float32 count.
+            require(argc == 6, "Usage: runner_numerics render_eer input output upsampling grouping");
+            EERRenderer renderer;
+            renderer.read(argv[2], textToInteger(argv[4]));
+            const int grouping = textToInteger(argv[5]);
+            require(grouping > 0, "grouping must be positive");
+            const long nx = renderer.getWidth(), ny = renderer.getHeight();
+            const long groups = renderer.getNFrames() / grouping;
+            std::ofstream out(argv[3], std::ios::binary);
+            require(out.good(), "Cannot open EER dump");
+            const long long dims[3] = {nx, ny, groups};
+            out.write(reinterpret_cast<const char*>(dims), sizeof(dims));
+            MultidimArray<float> frame;
+            for (long g = 0; g < groups; g++) {
+                renderer.renderFrames(g * grouping + 1, (g + 1) * grouping, frame);
+                std::vector<long long> idx;
+                std::vector<float> val;
+                FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(frame)
+                    if (DIRECT_MULTIDIM_ELEM(frame, n) != 0) {
+                        idx.push_back(n);
+                        val.push_back(DIRECT_MULTIDIM_ELEM(frame, n));
+                    }
+                const long long count = idx.size();
+                out.write(reinterpret_cast<const char*>(&count), sizeof(count));
+                out.write(reinterpret_cast<const char*>(idx.data()), sizeof(long long) * count);
+                out.write(reinterpret_cast<const char*>(val.data()), sizeof(float) * count);
+            }
+            out.close();
+            require(out.good(), "Failed writing EER dump");
+            return 0;
+        }
         if (std::string(argv[1]) == "read_tiff_raw") {
             // Dump decoded samples in index order. The row sums the read_tiff
             // mode writes cannot see sample order within a row: swapping the two
@@ -324,6 +453,88 @@ int main(int argc, char **argv)
                       static_cast<std::streamsize>(sizeof(float)) * nx * rows);
             out.close(); // flush before judging success: ~ofstream would swallow it
             require(out.good(), "Failed writing raw samples");
+            return 0;
+        }
+
+        if (std::string(argv[1]) == "count_eer") {
+            require(argc == 6, "Usage: runner_numerics count_eer movie upsampling grouping threads");
+            EERRenderer renderer;
+            renderer.read(argv[2], textToInteger(argv[3]));
+            const int grouping = textToInteger(argv[4]), threads = textToInteger(argv[5]);
+            require(grouping > 0 && threads > 0, "grouping and threads must be positive");
+            const int groups = renderer.getNFrames() / grouping;
+            std::vector<std::exception_ptr> errors(groups);
+            long long electrons = 0;
+            #pragma omp parallel for num_threads(threads) reduction(+:electrons)
+            for (int g = 0; g < groups; g++) {
+                try {
+                    MultidimArray<float> image;
+                    electrons += renderer.renderFrames(g * grouping + 1, (g + 1) * grouping, image);
+                } catch (...) {
+                    errors[g] = std::current_exception();
+                }
+            }
+            for (const auto &error : errors) if (error) std::rethrow_exception(error);
+            std::cout << "electrons " << electrons << '\n';
+            return 0;
+        }
+
+        if (std::string(argv[1]) == "render_eer_groups") {
+            // Render every group of an EER movie the way the runner does: one
+            // renderFrames call per group from an OpenMP team, errors captured per
+            // group and rethrown on the serial path (#221). Writes, per group, the
+            // nonzero pixels as (int64 index, float count) after an int64 header
+            // {width, height, groups} and an int64 pair count per group, so a test
+            // can compare the decode exactly without writing whole frames.
+            require(argc == 7,
+                    "Usage: runner_numerics render_eer_groups movie output upsampling grouping threads");
+            const int upsampling = textToInteger(argv[4]);
+            const int grouping = textToInteger(argv[5]);
+            const int threads = textToInteger(argv[6]);
+            require(grouping > 0 && threads > 0, "grouping and threads must be positive");
+            EERRenderer renderer;
+            renderer.read(argv[2], upsampling);
+            const int groups = renderer.getNFrames() / grouping;
+            std::vector<MultidimArray<float> > images(groups);
+            std::vector<std::exception_ptr> errors(groups);
+            #pragma omp parallel for num_threads(threads)
+            for (int g = 0; g < groups; g++) {
+                try {
+                    renderer.renderFrames(g * grouping + 1, (g + 1) * grouping, images[g]);
+                } catch (...) {
+                    errors[g] = std::current_exception();
+                }
+            }
+            for (int g = 0; g < groups; g++)
+                if (errors[g]) std::rethrow_exception(errors[g]);
+            std::ofstream out(argv[3], std::ios::binary);
+            require(out.good(), "Cannot open render output");
+            const int64_t head[3] = {renderer.getWidth(), renderer.getHeight(), groups};
+            out.write(reinterpret_cast<const char*>(head), sizeof(head));
+            for (int g = 0; g < groups; g++) {
+                std::vector<std::pair<int64_t, float> > nonzero;
+                FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(images[g])
+                    if (DIRECT_MULTIDIM_ELEM(images[g], n) != 0)
+                        nonzero.emplace_back((int64_t)n, DIRECT_MULTIDIM_ELEM(images[g], n));
+                const int64_t count = nonzero.size();
+                out.write(reinterpret_cast<const char*>(&count), sizeof(count));
+                for (const auto &p : nonzero) {
+                    out.write(reinterpret_cast<const char*>(&p.first), sizeof(p.first));
+                    out.write(reinterpret_cast<const char*>(&p.second), sizeof(p.second));
+                }
+            }
+            out.close(); // flush before judging success: ~ofstream would swallow it
+            require(out.good(), "Failed writing render output");
+            return 0;
+        }
+        if (std::string(argv[1]) == "integer_to_string") {
+            // -INT_MIN overflows; the formatted value must still be exact (#221).
+            for (int value : {INT_MIN, INT_MIN + 1, -1, 0, 7, INT_MAX})
+                require(integerToString(value) == std::to_string(value),
+                        "integerToString(" + std::to_string(value) + ") gave " + integerToString(value));
+            require(integerToString(INT_MIN, 12) == "-02147483648",
+                    "integerToString(INT_MIN, 12) gave " + integerToString(INT_MIN, 12));
+            std::cout << "PASS integerToString\n";
             return 0;
         }
 

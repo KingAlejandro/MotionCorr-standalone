@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <string>
+#include <exception>
 #include <vector>
 #include <algorithm>
 #include <omp.h>
@@ -17,6 +19,7 @@ class EERRenderer {
 	static const char EER_FOOTER_ERR[];
 	static const int EER_4K, EER_2K;
 	static const unsigned int EER_LEN_FOOTER;
+	static const long long EER_READ_PADDING;
 	static const uint16_t TIFF_COMPRESSION_EER8bit, TIFF_COMPRESSION_EER7bit, TIFF_COMPRESSION_EERDetailed;
 	static const ttag_t TIFFTAG_EER_RLE_DEPTH, TIFFTAG_EER_SUBPIXEL_H_DEPTH, TIFFTAG_EER_SUBPIXEL_V_DEPTH;
 
@@ -28,6 +31,8 @@ class EERRenderer {
 
 	std::vector<long long> frame_starts, frame_sizes;
 	unsigned char* buf;
+	// Captured inside lazyReadFrames' critical section, rethrown outside it.
+	std::exception_ptr read_error;
 
 	int eer_upsampling;
 	int nframes, width, height;
@@ -36,6 +41,7 @@ class EERRenderer {
 	long long file_size, total_pixels;
 	void readLegacy(FILE *fh);
 	void lazyReadFrames();
+	std::string readFramesLocked();
 
 	template <typename T>
 	void render4K_to_16K(MultidimArray<T> &image, std::vector<unsigned int> &positions, std::vector<unsigned char> &symbols, int n_electrons);

@@ -98,6 +98,56 @@ add_library(motioncorr_core STATIC ${MOTIONCORR_SOURCES}
     "${CMAKE_CURRENT_BINARY_DIR}/macros.cpp")
 target_include_directories(motioncorr_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_definitions(motioncorr_core PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG)
+
+# CPU dose weighting: the symmetric-row path (#179, #220) is bit-exact and
+# measured only on x86-64 GCC without FMA code generation. AUTO enables it there
+# and keeps the original loop everywhere else; ON is for sites whose toolchain
+# passes CpuDoseSymmetry. src/cpu_dose_symmetry_mode.h makes the decision from the
+# real compile flags; the check below only reports it, and CpuDoseSymmetry fails
+# if the compiled path disagrees with this report.
+set(MOTIONCORR_CPU_DOSE_SYMMETRY AUTO CACHE STRING
+    "CPU dose-weighting symmetric rows: AUTO (qualified toolchains only), ON or OFF")
+set_property(CACHE MOTIONCORR_CPU_DOSE_SYMMETRY PROPERTY STRINGS AUTO ON OFF)
+string(TOUPPER "${MOTIONCORR_CPU_DOSE_SYMMETRY}" _dose_symmetry)
+if(_dose_symmetry STREQUAL "OFF")
+    set(_dose_symmetry_mode 0)
+elseif(_dose_symmetry STREQUAL "ON")
+    set(_dose_symmetry_mode 1)
+elseif(_dose_symmetry STREQUAL "AUTO")
+    set(_dose_symmetry_mode 2)
+else()
+    message(FATAL_ERROR "MOTIONCORR_CPU_DOSE_SYMMETRY must be AUTO, ON or OFF, not '${MOTIONCORR_CPU_DOSE_SYMMETRY}'")
+endif()
+target_compile_definitions(motioncorr_core PRIVATE MOTIONCORR_CPU_DOSE_SYMMETRY_MODE=${_dose_symmetry_mode})
+include(CheckCXXSourceCompiles)
+set(CMAKE_REQUIRED_DEFINITIONS -DMOTIONCORR_CPU_DOSE_SYMMETRY_MODE=${_dose_symmetry_mode})
+set(CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}")
+set(CMAKE_TRY_COMPILE_CONFIGURATION "${CMAKE_BUILD_TYPE}")
+unset(MOTIONCORR_DOSE_SYMMETRY_SELECTED CACHE)
+check_cxx_source_compiles("#include \"src/cpu_dose_symmetry_mode.h\"
+#if !MOTIONCORR_CPU_DOSE_SYMMETRY
+#error original path
+#endif
+int main() { return 0; }" MOTIONCORR_DOSE_SYMMETRY_SELECTED)
+unset(CMAKE_REQUIRED_DEFINITIONS)
+unset(CMAKE_REQUIRED_INCLUDES)
+unset(CMAKE_TRY_COMPILE_CONFIGURATION)
+if(MOTIONCORR_DOSE_SYMMETRY_SELECTED)
+    set(MOTIONCORR_DOSE_WEIGHTING_PATH symmetric)
+else()
+    set(MOTIONCORR_DOSE_WEIGHTING_PATH original)
+endif()
+if(_dose_symmetry STREQUAL "AUTO" AND MOTIONCORR_DOSE_SYMMETRY_SELECTED)
+    message(STATUS "CPU dose weighting: symmetric rows (AUTO: qualified x86-64 GCC without FMA)")
+elseif(_dose_symmetry STREQUAL "AUTO")
+    message(STATUS "CPU dose weighting: original loop (AUTO: ${CMAKE_CXX_COMPILER_ID} on ${CMAKE_SYSTEM_PROCESSOR} "
+        "with these flags is not the qualified x86-64 GCC without FMA). To opt in after CpuDoseSymmetry "
+        "passes on this toolchain: -DMOTIONCORR_CPU_DOSE_SYMMETRY=ON")
+elseif(_dose_symmetry STREQUAL "ON")
+    message(STATUS "CPU dose weighting: symmetric rows (forced ON; requires CpuDoseSymmetry to pass on this toolchain)")
+else()
+    message(STATUS "CPU dose weighting: original loop (forced OFF)")
+endif()
 target_link_libraries(motioncorr_core PUBLIC
     PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
     motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)
@@ -162,6 +212,30 @@ include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
+    add_executable(cpu_dose_symmetry tests/test_cpu_dose_symmetry.cpp)
+    target_link_libraries(cpu_dose_symmetry PRIVATE motioncorr_core)
+    if(UNIX AND NOT APPLE)
+        target_compile_definitions(cpu_dose_symmetry PRIVATE MOTIONCORR_EXP_WITNESS)
+        target_link_options(cpu_dose_symmetry PRIVATE "LINKER:--wrap=exp" "LINKER:--wrap=expf")
+    endif()
+    add_test(NAME CpuDoseSymmetry COMMAND cpu_dose_symmetry --expect-path ${MOTIONCORR_DOSE_WEIGHTING_PATH})
+    # The original loop, compiled into its own runner object, so CI exercises the
+    # fallback path whichever path the library selected.
+    add_executable(cpu_dose_symmetry_base tests/test_cpu_dose_symmetry.cpp src/motioncorr_runner.cpp)
+    target_compile_definitions(cpu_dose_symmetry_base PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG
+        MOTIONCORR_CPU_DOSE_SYMMETRY_MODE=0)
+    target_link_libraries(cpu_dose_symmetry_base PRIVATE motioncorr_core)
+    if(UNIX AND NOT APPLE)
+        target_compile_definitions(cpu_dose_symmetry_base PRIVATE MOTIONCORR_EXP_WITNESS)
+        target_link_options(cpu_dose_symmetry_base PRIVATE "LINKER:--wrap=exp" "LINKER:--wrap=expf")
+    endif()
+    add_test(NAME CpuDoseSymmetryBase COMMAND cpu_dose_symmetry_base --expect-path original)
+    option(BUILD_CPU_DOSE_BENCH "Build the uninstrumented CPU dose benchmark" OFF)
+    if(BUILD_CPU_DOSE_BENCH)
+        # The benchmark has no call-count wrappers or instrumentation in exp().
+        add_executable(cpu_dose_bench tests/test_cpu_dose_symmetry.cpp)
+        target_link_libraries(cpu_dose_bench PRIVATE motioncorr_core)
+    endif()
     add_executable(cpu_unweighted_stream tests/test_cpu_unweighted_stream.cpp)
     target_link_libraries(cpu_unweighted_stream PRIVATE motioncorr_core)
     if(UNIX AND NOT APPLE)
@@ -184,6 +258,11 @@ if(BUILD_TESTING)
         COMMAND $<TARGET_FILE:runner_numerics> float_plan_cache)
     add_test(NAME MrcHeaderStats
         COMMAND $<TARGET_FILE:runner_numerics> mrc_stats)
+    # Issue #229: report plot path calls addToCPlot2D with EMDL_UNDEFINED (-1) as
+    # the x-axis; it must produce 1..N without indexing label2offset[-1] while
+    # preserving missing-label and non-numeric-label errors for defined labels.
+    add_test(NAME ReportPlotUndefinedAxis
+        COMMAND $<TARGET_FILE:runner_numerics> plot2d_undefined_axis)
     add_executable(pdf_concat tests/test_pdf_concat.cpp)
     target_link_libraries(pdf_concat PRIVATE motioncorr_core)
     add_test(NAME PdfConcat COMMAND pdf_concat)
@@ -390,6 +469,44 @@ if(BUILD_TESTING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compressed_movie_sequence.py
                 --binary $<TARGET_FILE:motioncorr>)
         set_tests_properties(CompressedMovieSequence PROPERTIES TIMEOUT 120)
+        # Every container, sample type and codec the readers accept (issue #186 follow-up).
+        # The compressed-MRC cases need the decoders the reader pipes through; a missing
+        # one is reported UNRUN and only tolerated when it is absent at configure time.
+        # CI sets MC_REQUIRE_ALL_DECODERS=ON, so a missing decoder fails configuration there
+        # instead of being waived; elsewhere the waiver is explicit in the configure output.
+        option(MC_REQUIRE_ALL_DECODERS "Fail configuration if pbzip2 or zstd is missing (no UNRUN waiver)" OFF)
+        set(_input_format_unrun "")
+        foreach(_decoder pbzip2 zstd)
+            find_program(_decoder_path_${_decoder} ${_decoder})
+            if(NOT _decoder_path_${_decoder})
+                if(MC_REQUIRE_ALL_DECODERS)
+                    message(FATAL_ERROR "${_decoder} not found and MC_REQUIRE_ALL_DECODERS=ON")
+                endif()
+                message(WARNING "${_decoder} not found: InputFormats and RealCutdown waive its compressed-MRC "
+                                "cases (UNRUN). Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the waiver.")
+                list(APPEND _input_format_unrun --allow-unrun ${_decoder})
+            endif()
+        endforeach()
+        add_test(NAME InputFormats
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_input_formats.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>
+                ${_input_format_unrun})
+        set_tests_properties(InputFormats PROPERTIES TIMEOUT 600)
+        # tools/cut_down_movie.py keeps exactly the requested frames in every container.
+        add_test(NAME CutDownMovie
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_cut_down_movie.py
+                --helper $<TARGET_FILE:runner_numerics>)
+        set_tests_properties(CutDownMovie PROPERTIES TIMEOUT 300)
+        # Opt-in: cut-down real movies, one per corpus family (test-data/real_cutdown_manifest.json).
+        # Point MC_REAL_CUTDOWN_DIR at a copy of the assets to register it.
+        set(MC_REAL_CUTDOWN_DIR "" CACHE PATH "Directory holding the cut-down real movies (opt-in RealCutdown test)")
+        if(MC_REAL_CUTDOWN_DIR)
+            add_test(NAME RealCutdown
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_real_cutdown.py
+                    --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>
+                    --assets ${MC_REAL_CUTDOWN_DIR} ${_input_format_unrun})
+            set_tests_properties(RealCutdown PROPERTIES TIMEOUT 1800)
+        endif()
         add_test(NAME GlobalIfftElision
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_global_ifft_elision.py
                 --binary $<TARGET_FILE:motioncorr>)
@@ -402,6 +519,10 @@ if(BUILD_TESTING)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)
+        add_test(NAME EerMemorySafety
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_eer_memory_safety.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>)
+        set_tests_properties(EerMemorySafety PROPERTIES TIMEOUT 600)
         add_test(NAME MicrographModelBounds
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_micrograph_model_bounds.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>)

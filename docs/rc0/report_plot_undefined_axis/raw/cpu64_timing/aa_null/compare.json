@@ -1,0 +1,194 @@
+{
+ "runs": {
+  "arms": [
+   "main",
+   "main_null"
+  ],
+  "summary": {
+   "main": {
+    "n": 6,
+    "wall_median_s": 17.702883403748274,
+    "wall_iqr_s": 0.042010676115751266,
+    "wall_min_s": 17.65006722509861,
+    "wall_max_s": 17.831543140113354,
+    "cpu_median_s": 133.6528725,
+    "rss_median_bytes": 3362355200.0,
+    "minflt_median": 3331495.0,
+    "majflt_max": 39,
+    "wall_outlier_rounds": [
+     5
+    ],
+    "vram_peak_process_bytes": null,
+    "vram_peak_process_bytes_max": null,
+    "vram_peak_device_delta_bytes": null,
+    "vram_peak_device_delta_bytes_max": null,
+    "lane_foreign_cores_max": 0.00229509318697547,
+    "load1_range": [
+     9.20263671875,
+     9.904296875
+    ]
+   },
+   "main_null": {
+    "n": 6,
+    "wall_median_s": 17.691057408228517,
+    "wall_iqr_s": 0.058543646708130836,
+    "wall_min_s": 17.650105379521847,
+    "wall_max_s": 18.124611668288708,
+    "cpu_median_s": 133.789536,
+    "rss_median_bytes": 3366387712.0,
+    "minflt_median": 3355177.5,
+    "majflt_max": 39,
+    "wall_outlier_rounds": [
+     5
+    ],
+    "vram_peak_process_bytes": null,
+    "vram_peak_process_bytes_max": null,
+    "vram_peak_device_delta_bytes": null,
+    "vram_peak_device_delta_bytes_max": null,
+    "lane_foreign_cores_max": 0.001300143870715099,
+    "load1_range": [
+     8.974609375,
+     9.77294921875
+    ]
+   }
+  },
+  "discarded_rounds": [],
+  "discard_audit": {
+   "planned": 6,
+   "retained": 6,
+   "discarded": 0,
+   "triggered_alone": {
+    "main": 0,
+    "main_null": 0
+   },
+   "triggered_any": {
+    "main": 0,
+    "main_null": 0
+   },
+   "kept_orders": {
+    "AB": 3,
+    "BA": 3
+   },
+   "warnings": []
+  },
+  "comparisons": {
+   "main_null": {
+    "n_pairs": 6,
+    "diffs_s": [
+     -0.04895809665322304,
+     0.0007274821400642395,
+     0.03437241166830063,
+     0.050158288329839706,
+     0.293068528175354,
+     -0.039980448782444
+    ],
+    "floor_s": 0.0,
+    "min_pairs": 6,
+    "median_diff_s": 0.017549946904182434,
+    "q1_diff_s": -0.02980346605181694,
+    "q3_diff_s": 0.04621181916445494,
+    "min_diff_s": -0.04895809665322304,
+    "max_diff_s": 0.293068528175354,
+    "median_a_s": 17.702883403748274,
+    "median_b_s": 17.691057408228517,
+    "relative_median_diff": 0.0009913609271395044,
+    "noise_s": 0.0668198458213359,
+    "robust_sd_diff_s": 0.0668198458213359,
+    "ci": {
+     "low_s": -0.04895809665322304,
+     "high_s": 0.293068528175354,
+     "confidence": 0.96875
+    },
+    "sign_test": {
+     "positive": 4,
+     "negative": 2,
+     "ties": 0,
+     "p_two_sided": 0.6875
+    },
+    "resolution_s": 0.17101331241428852,
+    "resolved": false,
+    "verdict": "not resolved (below noise 0.171 s)",
+    "reason": "CI of median includes 0",
+    "positional": {
+     "n_ab": 3,
+     "n_ba": 3,
+     "median_diff_ab_s": 0.03437241166830063,
+     "median_diff_ba_s": 0.0007274821400642395,
+     "second_position_cost_s": 0.016822464764118195,
+     "order_corrected_effect_s": 0.017549946904182434
+    }
+   }
+  },
+  "lane_waits": [
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.04,
+    "round": 1
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 2
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 3
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 4
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 5
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 6
+   }
+  ]
+ },
+ "identity": {
+  "main_null": {
+   "root_a": "/home/ubuntu/mc-w-d13/aa_null/runs/main-r01/out",
+   "root_b": "/home/ubuntu/mc-w-d13/aa_null/runs/main_null-r01/out",
+   "only_a": [],
+   "only_b": [],
+   "compared": 12,
+   "mrc_compared": 2,
+   "excluded": [
+    {
+     "file": "Movies/20170629_00026_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00031_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "all_batches.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "batch.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "header.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "logfile.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    }
+   ],
+   "differences": [],
+   "problems": [],
+   "identical": true
+  }
+ }
+}

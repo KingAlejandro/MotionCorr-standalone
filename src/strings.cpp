@@ -381,7 +381,9 @@ std::string integerToString(int I, int _width, char fill_with)
 
 	// Check width
 	int width = _width;
-	int Iaux = ABS(I);
+	// Unsigned magnitude: -I overflows for INT_MIN.
+	const unsigned int magnitude = (I < 0) ? 0u - (unsigned int)I : (unsigned int)I;
+	unsigned int Iaux = magnitude;
 
 	if (width == 0)
 		do
@@ -399,7 +401,7 @@ std::string integerToString(int I, int _width, char fill_with)
 
 	// Start filling the array
 	aux[width--] = '\0';
-	Iaux = ABS(I);
+	Iaux = magnitude;
 	do
 	{
 		int digit = Iaux % 10;

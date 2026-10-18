@@ -14,7 +14,21 @@ The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No time
 
 ## Frozen state
 
-FROZEN_STATE_PLACEHOLDER
+| Item | Value |
+|---|---|
+| Frozen source | `0b11f6a8b27412d94af7438f81d0c312939360a0`, clean checkout `W-D11/src-confirm`; it stays clean |
+| `confirm_pairs.py` | sha256 `86f2db900527d07b044952646447e846e692b18e9955370126170d1f9004a06c` |
+| `rule.txt` | sha256 `077b26d146ff767e42270da823934f9152220692f9e663124d4e417baea77687` |
+| `confirm_4gpus.sh` (launcher) | sha256 `44d599b9427b0edfc075368e1e78451871255c5a3ed3c999699f40492b8853c1` |
+| `vendor/stats.py`, `vendor/identity.py` | sha256 `8d61e054…173c7c`, `e44cfd0f…be4645` (unchanged) |
+| `manifest.json` | sha256 `ea4c9dd61b8a95098f33c831de6404358f64f0d7a12aba4be569a10832c888dd` (copy here; the run uses `W-D11/confirm4/manifest.json`) |
+| Window | 2700 s total lock tenure, held by the lock-holder; worker work by 2690 s, worker cleanup by 2698 s, holder releases by 2698 s at the latest whatever the worker is doing |
+| Campaign | stops at the first window that does not complete cleanly |
+| Binaries | main `c2263c22…f8dd`; fix `29b894f0…c185`, built from `78aae2d3`, source-equivalent to `0b11f6a8` |
+| Inputs | tutG 26 files, e10216L 4; `verify` passed for both after freezing, with no lock taken |
+| Superseded | designs frozen at `38fbfa6f`, `8aed9b0b`, `6b797438`, `202fd5bf` and `21b19aac`/`5b430d4b`, kept in `superseded-*/` |
+
+Later evidence commits on the branch do not change the frozen files. Every window re-verifies them before taking a lock.
 
 ## Changes for review R-D11 round 8 (supersedes the design frozen at `21b19aac`/`5b430d4b`)
 
@@ -61,7 +75,7 @@ Only what the six findings require. Line numbers are in `confirm_pairs.py`.
 | 5 | Warm-up failures bypassed the failure rule | Any unsuccessful warm-up ends the window as INCOMPLETE; `combine` also rejects a failed warm-up | :475–478, :573 | Dry run: a fix warm-up product failure gives incomplete.json ("warm-up fix failed"). Synthetic: a warm-up failure gives INCOMPLETE |
 | 6 | Missing CPU-mask evidence accepted | The watcher observes the executable and its mask first, polling `/proc` every 2 ms before any GPU query (:425); `classify` (:244) makes a run invalid without an observation, if the sampler did not finish, or if the mask differs | :244–259, :425–434, :460 | `classify`: no observation, unfinished sampler and a different mask are invalid; a valid observation is valid. Dry run: every timed payload has an observed mask equal to the payload mask |
 
-Control suite (all groups A–E) on 4GPUs CPUs 24–39 with no GPU payload, using the frozen driver and rule: **65/65 as required**.
+Control suite (groups A–E at that revision) on 4GPUs CPUs 24–39 with no GPU payload, using the frozen driver and rule: **65/65 as required**.
 
 ## Changes for review R-D11 round 4
 

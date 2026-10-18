@@ -143,7 +143,7 @@ def timed_payload(cmd, cwd, stdout, timeout, on_start=None):
     waits on the waiter's event for at most timeout + REAP_GRACE_S, so it returns even if the
     payload can never be reaped. Returns (p, rc, wall, timed_out, unreaped); rc/wall are None if unreaped."""
     t0 = time.monotonic()
-    p = subprocess.Popen(cmd, cwd=cwd, stdout=stdout, stderr=subprocess.STDOUT, start_new_session=True)
+    p = subprocess.Popen(cmd, cwd=cwd, stdout=stdout, stderr=subprocess.STDOUT, process_group=0)
     reaped, fired, result = threading.Event(), [], {}
 
     def waiter():
@@ -178,7 +178,7 @@ UNLOCK_RESERVE_S = 0.5           # reaping stops this long before the release de
 def run_child(cmd, timeout):
     """Run a child process in its own process group, registered so that Window.release() kills it,
     and killed here when `timeout` (the remaining window time) expires. Returns (rc, stdout)."""
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, start_new_session=True)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, process_group=0)
     with CHILD_LOCK:
         CHILDREN.add(p)
     try:
@@ -410,16 +410,14 @@ def verify(m, workload, check_inputs=True, check_source=True):
 
 
 # ---------------------------------------------------------------- run
-def run_window(o):
+def worker_main(o):
+    """One window's work, in a session of its own started by the lock-holder (run_window). It holds no
+    lock: the holder owns the flocks and kills this whole session at its hard deadline, so nothing the
+    worker blocks on (fsync, write, open, a stuck payload) can keep the locks."""
     m = json.loads(Path(o.manifest).read_text())
     dry = o.gpu_uuid is None or o.dry_run_inputs
-    w = verify(m, o.workload, check_inputs=not o.dry_run_inputs, check_source=not o.dry_run_inputs)
-    if not dry and o.gpu_uuid != m.get('gpu_uuid'):
-        raise SystemExit('GPU differs from the manifest')
-    out = Path(o.out) / o.workload / f'window{o.window}'
-    if out.exists():
-        raise SystemExit(f'{out} exists: a window runs once')
-    (out / 'logs').mkdir(parents=True)
+    w = m['workloads'][o.workload]
+    out = Path(o.out_dir)
     gpu = Gpu(o.gpu_uuid)
     log = open(out / 'runs.jsonl', 'w')
 
@@ -427,11 +425,11 @@ def run_window(o):
         log.write(json.dumps(rec) + '\n'); log.flush(); os.fsync(log.fileno())
 
     budget_s, payload_timeout_s = m['budget_s'], m['payload_timeout_s']
-    t_start, wall_start = time.monotonic(), time.time()
+    t_start, wall_start = o.t_start, o.wall_start              # the holder's, so all deadlines share one origin
     deadline = t_start + budget_s - CLEANUP_MARGIN_S          # end of work
-    release_deadline = t_start + budget_s                      # locks released by here (budget includes cleanup)
+    release_deadline = t_start + budget_s - HOLDER_RESERVE_S   # worker cleanup done before the holder's deadline
     RELEASE_DEADLINE[0] = release_deadline
-    win = Window(deadline, release_deadline, m['locks'])
+    win = Window(deadline, release_deadline, [])
     status, reason = 'incomplete', 'not started'
 
     def on_signal(sig, frame):
@@ -461,9 +459,7 @@ def run_window(o):
                          'runner_cpus': fmt_cpus(runner), 'gpu_local_cpus': fmt_cpus(gpu_cpus),
                          'locks': m['locks'], 'dry_run': dry, 'start_epoch': wall_start,
                          'deadline_epoch': wall_start + budget_s}})
-        t_lock = time.monotonic()
-        win.acquire()
-        emit({'locks_acquired_after_s': round(time.monotonic() - t_lock, 1)})
+        emit({'locks_acquired_after_s': round(o.lock_wait, 1)})   # acquired and held by the holder
         while gpu.pids(timeout=min(30, left())) != set():
             time.sleep(min(10, left()))
         if o.samplers:
@@ -471,7 +467,7 @@ def run_window(o):
                               (['nvidia-smi', '--query-gpu=timestamp,uuid,utilization.gpu,memory.used',
                                 '--format=csv', '-l', '10'], 'nvidia-smi.csv')):
                 win.samplers.append(subprocess.Popen(cmd, stdout=open(out / name, 'w'), stderr=subprocess.STDOUT,
-                                                     start_new_session=True))
+                                                     process_group=0))
         seq = [0]
 
         def run(phase, label, keep=False):
@@ -597,6 +593,107 @@ def run_window(o):
     return 0 if final == 'complete' else 1
 
 
+HOLDER_RESERVE_S = 2             # the holder's hard deadline is start + budget - this
+
+
+def session_pids(sid):
+    """Every process whose session id is `sid` (the worker's session), from /proc. procfs reads do not
+    wait on storage, so this cannot block on the worker's I/O."""
+    pids = []
+    for d in os.listdir('/proc'):
+        if d.isdigit():
+            try:
+                stat = open(f'/proc/{d}/stat', 'rb').read()
+                if int(stat[stat.rindex(b')') + 2:].split()[3]) == sid:
+                    pids.append(int(d))
+            except (OSError, ValueError, IndexError):
+                pass
+    return pids
+
+
+def run_window(o):
+    """Lock-holder for one window. Verifies the manifest, prepares the window directory and opens its
+    files BEFORE taking any lock. While the locks are held it only flocks, starts the worker in a new
+    session (lock fds are O_CLOEXEC and close_fds=True, so the worker never shares them), waits on it
+    with a bound, scans /proc and closes fds. At its hard deadline, start + budget - HOLDER_RESERVE_S,
+    it SIGKILLs every process in the worker's session and closes the lock fds whatever the worker is
+    doing; only then does it try to write holder.json (a bounded, best-effort write)."""
+    m = json.loads(Path(o.manifest).read_text())
+    dry = o.gpu_uuid is None or o.dry_run_inputs
+    w = verify(m, o.workload, check_inputs=not o.dry_run_inputs, check_source=not o.dry_run_inputs)
+    if not dry and o.gpu_uuid != m.get('gpu_uuid'):
+        raise SystemExit('GPU differs from the manifest')
+    out = Path(o.out) / o.workload / f'window{o.window}'
+    if out.exists():
+        raise SystemExit(f'{out} exists: a window runs once')
+    (out / 'logs').mkdir(parents=True)
+    worker_log = open(out / 'worker.log', 'w')
+    mh = sha256(o.manifest)
+    budget_s = m['budget_s']
+    t_start, wall_start = time.monotonic(), time.time()
+    work_deadline, hard = t_start + budget_s - CLEANUP_MARGIN_S, t_start + budget_s - HOLDER_RESERVE_S
+    fds, worker, lock_wait, killed, leftovers, reason = [], None, None, False, [], ''
+    try:
+        for path in m['locks']:
+            fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_CLOEXEC, 0o664)
+            fds.append(fd)
+            while True:
+                try:
+                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except BlockingIOError:
+                    if time.monotonic() >= work_deadline:
+                        raise TimeoutError(f'deadline passed waiting for {path}')
+                    time.sleep(min(5, max(work_deadline - time.monotonic(), 0.1)))
+            if os.stat(path).st_ino != os.fstat(fd).st_ino:
+                raise RuntimeError(f'{path} was replaced while locked')
+        lock_wait = time.monotonic() - t_start
+        cmd = [sys.executable, '-B', str(HERE / 'confirm_pairs.py'), 'worker', '--manifest', str(o.manifest),
+               '--workload', o.workload, '--window', str(o.window), '--out-dir', str(out), '--scratch', o.scratch,
+               '--t-start', repr(t_start), '--wall-start', repr(wall_start), '--lock-wait', repr(lock_wait)]
+        cmd += (['--gpu-uuid', o.gpu_uuid] if o.gpu_uuid else []) + (['--samplers'] if o.samplers else [])
+        cmd += ['--dry-run-inputs'] if o.dry_run_inputs else []
+        worker = subprocess.Popen(cmd, stdout=worker_log, stderr=subprocess.STDOUT, start_new_session=True,
+                                  close_fds=True)
+        try:
+            worker.wait(timeout=max(hard - time.monotonic(), 0))
+        except subprocess.TimeoutExpired:
+            killed, reason = True, 'worker still running at the hard deadline: killed'
+    except (TimeoutError, RuntimeError, OSError, KeyboardInterrupt) as exc:
+        reason = f'{type(exc).__name__}: {exc}'
+    finally:
+        if worker is not None:
+            leftovers = [pid for pid in session_pids(worker.pid) if pid != worker.pid]
+            for pid in session_pids(worker.pid):
+                try:
+                    os.kill(pid, signal.SIGKILL)
+                except (ProcessLookupError, PermissionError):
+                    pass
+        for fd in fds:                                    # closing the only fds releases the flocks
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+        released_after_s = time.monotonic() - t_start
+        worker_rc = None
+        if worker is not None:
+            try:
+                worker_rc = worker.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                pass
+    record = {'manifest_sha256': mh, 'workload': o.workload, 'window': o.window, 'budget_s': budget_s,
+              'start_epoch': wall_start, 'deadline_epoch': wall_start + budget_s, 'locks': m['locks'],
+              'lock_wait_s': lock_wait, 'locks_released_after_s': round(released_after_s, 3),
+              'worker_pid': worker.pid if worker else None, 'worker_rc': worker_rc,
+              'worker_killed_at_deadline': killed, 'session_leftovers_killed': leftovers, 'reason': reason}
+    writer = threading.Thread(target=lambda: (out / 'holder.json').write_text(json.dumps(record, indent=1)),
+                              daemon=True)
+    writer.start(); writer.join(timeout=5)                # after release; best effort, bounded
+    ok = worker_rc == 0 and not killed and not leftovers and released_after_s <= budget_s
+    print(json.dumps(record))
+    return 0 if ok else 1
+
+
 # ---------------------------------------------------------------- combine
 def validate_window(lines, m, w, plan, i, manifest_hash, reasons):
     """Strict chronological validation of one window's record stream: header, lock record, two
@@ -711,6 +808,12 @@ def combine(o):
                 reasons.append(f'window {i}: no completion marker'
                                + (f' ({json.loads(inc.read_text()).get("reason")})' if inc.is_file() else ''))
                 continue
+            hr = json.loads((wd / 'holder.json').read_text()) if (wd / 'holder.json').is_file() else {}
+            if (hr.get('manifest_sha256') != mh or hr.get('workload') != o.workload or hr.get('window') != i
+                    or hr.get('worker_rc') != 0 or hr.get('worker_killed_at_deadline') is not False
+                    or hr.get('session_leftovers_killed') != [] or hr.get('locks') != m['locks']
+                    or not 0 <= hr.get('locks_released_after_s', math.inf) <= m['budget_s']):
+                reasons.append(f'window {i}: lock-holder record missing or not a clean, in-time worker exit')
             mk = json.loads((wd / 'complete.json').read_text())
             retained, c, hd = validate_window((wd / 'runs.jsonl').read_text().splitlines(), m, w, plan, i, mh, reasons)
             hd = hd or {}
@@ -788,6 +891,15 @@ def main():
     r.add_argument('--gpu-uuid', default=None, help='omit only for a dry run with a stub payload')
     r.add_argument('--samplers', action='store_true', help='mpstat and nvidia-smi every 10 s')
     r.add_argument('--dry-run-inputs', action='store_true', help='controls only: skip input and source checks')
+    k = sub.add_parser('worker')                          # started only by run (the lock-holder)
+    for a in ('manifest', 'workload', 'out-dir', 'scratch'):
+        k.add_argument('--' + a, required=True)
+    k.add_argument('--window', type=int, required=True)
+    for a in ('t-start', 'wall-start', 'lock-wait'):
+        k.add_argument('--' + a, type=float, required=True)
+    k.add_argument('--gpu-uuid', default=None)
+    k.add_argument('--samplers', action='store_true')
+    k.add_argument('--dry-run-inputs', action='store_true')
     c = sub.add_parser('combine')
     for k in ('manifest', 'workload', 'out', 'result'):
         c.add_argument('--' + k, required=True)
@@ -796,6 +908,8 @@ def main():
         return freeze(o)
     if o.cmd == 'run':
         return run_window(o)
+    if o.cmd == 'worker':
+        return worker_main(o)
     return combine(o)
 
 

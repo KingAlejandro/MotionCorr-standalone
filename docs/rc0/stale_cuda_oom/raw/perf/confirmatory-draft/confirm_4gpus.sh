@@ -15,6 +15,7 @@ TUT=/home/alex/motioncorr-validation-20261011-vm/tutorial-data; E10216=$W/perf-e
 G="--use_own --dose_weighting --dose_per_frame 1.277 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 8 --ingest nvcomp"
 EL="--use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --gpu 0 --j 8 --patch_x 5 --patch_y 5 --ingest compact"
 export PATH=/home/alex/.mc-venv/bin:/usr/local/cuda-12.8/bin:$PATH PYTHONDONTWRITEBYTECODE=1
+PY="${CONFIRM_PY:-python3}"                       # overridable only so the abort control can stub the driver
 export CUDA_VISIBLE_DEVICES=$UUID CUDA_DEVICE_ORDER=PCI_BUS_ID OMP_NUM_THREADS=8
 unset GLIBC_TUNABLES OMP_PROC_BIND OMP_PLACES
 
@@ -23,7 +24,7 @@ freeze)
   [ -z "$(git -C $SRC status --porcelain)" ] || { echo "source checkout not clean"; exit 1; }
   mkdir -p $E
   [ ! -e $E/manifest.json ] || { echo "manifest exists: frozen once"; exit 1; }
-  python3 $D/confirm_pairs.py freeze --manifest $E/manifest.json --venue "4GPUs GPU3 $UUID, payload 88-95, runner 120-123" \
+  $PY $D/confirm_pairs.py freeze --manifest $E/manifest.json --venue "4GPUs GPU3 $UUID, payload 88-95, runner 120-123" \
     --gpu-uuid $UUID --payload-cpus 88-95 --runner-cpus 120-123 \
     --lock /tmp/motioncorr-bench.lock --lock /tmp/motioncorr-gpu3-correctness.lock \
     --src $SRC --main-sha 71ab841e69869b615555bb02f8f393db59c22d73 \
@@ -34,14 +35,23 @@ freeze)
     --workload "tutG:256:$TUT:$G" --workload "e10216L:176:$E10216:$EL" --windows 2
   sha256sum $E/manifest.json ;;
 windows)
+  # Declared campaign policy (rule.txt "Campaign"): the first window that does not complete cleanly
+  # (non-zero exit: incomplete, unreaped payload, unknown GPU state, killed at the deadline) aborts the
+  # campaign. No further window runs and nothing is restarted; combine then labels what exists.
+  failed=""
   for spec in tutG:1 e10216L:1 tutG:2 e10216L:2; do
     w=${spec%:*}; i=${spec#*:}
     echo "=== $w window $i $(date -u +%FT%TZ)"
-    python3 $D/confirm_pairs.py run --manifest $E/manifest.json --workload $w --window $i --out $E \
-      --gpu-uuid $UUID --scratch /tmp --samplers || true
+    if ! $PY $D/confirm_pairs.py run --manifest $E/manifest.json --workload $w --window $i --out $E \
+         --gpu-uuid $UUID --scratch /tmp --samplers; then
+      failed="$w window $i"
+      echo "=== ABORT: $failed did not complete cleanly; no further windows $(date -u +%FT%TZ)"
+      break
+    fi
   done
   for w in tutG e10216L; do
-    python3 $D/confirm_pairs.py combine --manifest $E/manifest.json --workload $w --out $E --result $E/$w-result.json
-  done ;;
+    $PY $D/confirm_pairs.py combine --manifest $E/manifest.json --workload $w --out $E --result $E/$w-result.json
+  done
+  [ -z "$failed" ] ;;
 *) echo "usage: $0 freeze|windows"; exit 2 ;;
 esac

@@ -193,6 +193,24 @@
  },
  {
   "group": "B",
+  "case": "lock-holder record missing: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: lock-holder record missing or not a clean, in-time worker exit']"
+ },
+ {
+  "group": "B",
+  "case": "lock-holder killed the worker at its deadline: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: lock-holder record missing or not a clean, in-time worker exit']"
+ },
+ {
+  "group": "B",
+  "case": "lock-holder killed leftover processes: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: lock-holder record missing or not a clean, in-time worker exit']"
+ },
+ {
+  "group": "B",
   "case": "window 2 missing: INCOMPLETE",
   "ok": true,
   "detail": "label=INCOMPLETE reasons=['window 2: no completion marker', 'comparison pairs 8 (4 AB / 4 BA), declared 16 balanced', 'null pairs 8, declared 16']"
@@ -291,13 +309,13 @@
   "group": "C",
   "case": "healthy dry-run windows complete; lock released; no orphans",
   "ok": true,
-  "detail": "256\": \"9a47bc515007653ad44ae89a179eca45fd3568dee105cb894d40ba299c0cd3a1\", \"budget_s\": 600, \"start_epoch\": 1792355017.1571987, \"deadline_epoch\": 1792355617.1571987, \"end_epoch\": 1792355030.327778, \"remaining_budget_s\": 586.829, \"released_after_s\": 13.171, \"cleanup_margin_s\": 10, \"unreaped_pids\": []}\n"
+  "detail": "e_epoch\": 1792357412.593174, \"locks\": [\"/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-private.lock\"], \"lock_wait_s\": 9.526405483484268e-05, \"locks_released_after_s\": 13.673, \"worker_pid\": 1401111, \"worker_rc\": 0, \"worker_killed_at_deadline\": false, \"session_leftovers_killed\": [], \"reason\": \"\"}\n"
  },
  {
   "group": "C",
   "case": "every timed payload has an observed CPU mask equal to the payload mask",
   "ok": true,
-  "detail": "[{'seq': 3, 'phase': 'timed', 'label': 'main', 'rc': 0, 'wall_s': 0.218206, 'pdf_pages': 10, 'observed_mask': '24,25,26,27,28,29,30,31'}]"
+  "detail": "[{'seq': 3, 'phase': 'timed', 'label': 'main', 'rc': 0, 'wall_s': 0.219298, 'pdf_pages': 10, 'observed_mask': '24,25,26,27,28,29,30,31'}]"
  },
  {
   "group": "C",
@@ -309,13 +327,13 @@
   "group": "C",
   "case": "exit-0 product failure on fix: classified \"product\", pair rerun in the same position",
   "ok": true,
-  "detail": "[{'seq': 13, 'phase': 'timed', 'label': 'fix', 'rc': 0, 'wall_s': 0.219892, 'pdf_pages': None, 'failure': 'product', 'detail': 'logfile.pdf pages None, expected 10', 'observed_mask': '24,25,26,27,28,29,30,31'}, {'pair': 'BA', 'position': 6, 'order': 'fix,main', 'attempt': 2, 'retained': True, 'seqs'"
+  "detail": "[{'seq': 13, 'phase': 'timed', 'label': 'fix', 'rc': 0, 'wall_s': 0.221036, 'pdf_pages': None, 'failure': 'product', 'detail': 'logfile.pdf pages None, expected 10', 'observed_mask': '24,25,26,27,28,29,30,31'}, {'pair': 'BA', 'position': 6, 'order': 'fix,main', 'attempt': 2, 'retained': True, 'seqs'"
  },
  {
   "group": "C",
   "case": "unsuccessful warm-up ends the window as incomplete",
   "ok": true,
-  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"RuntimeError: warm-up fix failed: product (logfile.pdf pages None, expected 10)\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"71900affdefb1883dcc1eca90fd205f6e02942cdb1b4c64b2b1d10371c9cbc00\",\n \"budget_s\": 600,\n \"start_epoch\": 1792355"
+  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"RuntimeError: warm-up fix failed: product (logfile.pdf pages None, expected 10)\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"49f0ef0ce260c3d07434d8e5848bf5db82a5475a66046cd13ba73ef157eb6971\",\n \"budget_s\": 600,\n \"start_epoch\": 1792356"
  },
  {
   "group": "C",
@@ -327,37 +345,37 @@
   "group": "C",
   "case": "watchdog kills and reaps a hung payload at the per-payload timeout; pair rerun",
   "ok": true,
-  "detail": "[{'seq': 6, 'phase': 'timed', 'label': 'main', 'rc': -9, 'wall_s': 3.003718, 'failure': 'timeout', 'detail': 'killed after 3 s', 'observed_mask': '24,25,26,27,28,29,30,31'}]"
+  "detail": "[{'seq': 6, 'phase': 'timed', 'label': 'main', 'rc': -9, 'wall_s': 3.00271, 'failure': 'timeout', 'detail': 'killed after 3 s', 'observed_mask': '24,25,26,27,28,29,30,31'}]"
  },
  {
   "group": "C",
   "case": "window deadline: payload killed at the deadline, incomplete, lock released, no orphans",
   "ok": true,
-  "detail": "elapsed 8.1 s; {\n \"status\": \"incomplete\",\n \"reason\": \"RuntimeError: warm-up fix failed: timeout (killed after 4 s)\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"01abbad4c54208b8abab8b300dcb2a816461c080eaf8111e933c180b57248188\",\n \"budget_s\": 20,\n \"start_epoch\": 1792355096.1"
+  "detail": "elapsed 8.5 s; {\n \"status\": \"incomplete\",\n \"reason\": \"RuntimeError: warm-up fix failed: timeout (killed after 4 s)\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"0e68b1f01bff766d203c4417fa7ac780b7281a92bb0bdada3b11aabe82b49a8f\",\n \"budget_s\": 20,\n \"start_epoch\": 1792356892.4"
  },
  {
   "group": "C",
-  "case": "deadline covers the lock wait: incomplete, no payload started",
+  "case": "deadline covers the lock wait: the holder gives up, no worker or payload started",
   "ok": true,
-  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline passed waiting for /mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-private.lock\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"ea929f5f1389e81fd9ac0ac81ea99cb1b1a95a1ca7d6deaa530633052ec1e2d7\",\n \"budget_s\": 12"
+  "detail": "{\n \"manifest_sha256\": \"f2e15309f513add687949524c5cf08fce3b4d9cc2dadc4438c8baa517c9cf494\",\n \"workload\": \"w\",\n \"window\": 1,\n \"budget_s\": 12,\n \"start_epoch\": 1792356904.627957,\n \"deadline_epoch\": 1792356916.627957,\n \"locks\": [\n  \"/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-private.lock\"\n ],\n \"lo"
  },
  {
   "group": "C",
   "case": "delayed product check: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans",
   "ok": true,
-  "detail": "elapsed 5.1 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '-B', '-c', 'import sys, json; sys.path[:0] = [sys.argv[1], sys.argv[2]]; import confirm_pairs as cp, identity; a = sys.argv[3:]; print(json.dumps(cp.product_problems(a[0], a[1:])))"
+  "detail": "elapsed 5.4 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '-B', '-c', 'import sys, json; sys.path[:0] = [sys.argv[1], sys.argv[2]]; import confirm_pairs as cp, identity; a = sys.argv[3:]; print(json.dumps(cp.product_problems(a[0], a[1:])))"
  },
  {
   "group": "C",
   "case": "delayed cleanup: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans",
   "ok": true,
-  "detail": "elapsed 5.1 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['rm', '-rf', '/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-delayed-cleanup/scratch/wd11c-w-w1/0001-main']' timed out after 4.603314285166562 seconds\", 'workload': 'w', 'window': 1, 'positions': 16, 'manifest_sh"
+  "detail": "elapsed 5.5 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['rm', '-rf', '/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-delayed-cleanup/scratch/wd11c-w-w1/0001-main']' timed out after 4.528156496584415 seconds\", 'workload': 'w', 'window': 1, 'positions': 16, 'manifest_sh"
  },
  {
   "group": "C",
   "case": "aggregate release: pending samplers and a stalled registered child: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans",
   "ok": true,
-  "detail": "elapsed 5.1 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '-B', '-c', 'import sys, json; sys.path[:0] = [sys.argv[1], sys.argv[2]]; import confirm_pairs as cp, identity; a = sys.argv[3:]; print(json.dumps(cp.product_problems(a[0], a[1:])))"
+  "detail": "elapsed 5.5 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '-B', '-c', 'import sys, json; sys.path[:0] = [sys.argv[1], sys.argv[2]]; import confirm_pairs as cp, identity; a = sys.argv[3:]; print(json.dumps(cp.product_problems(a[0], a[1:])))"
  },
  {
   "group": "C",
@@ -367,15 +385,15 @@
  },
  {
   "group": "D",
-  "case": "blocking wait: completions 25 ms apart recorded 25.13 ms apart (|error| <= 1 ms)",
+  "case": "blocking wait: completions 25 ms apart recorded 24.59 ms apart (|error| <= 1 ms)",
   "ok": true,
-  "detail": "(0.025131273083388805, [0.0042, 0.0038, 0.0039, 0.0031, 0.0031, 0.0031, 0.0034, 0.003, 0.0033, 0.0031, 0.0032, 0.0033], [0.0042, 0.0033, 0.0039, 0.0035, 0.0036, 0.0033, 0.0034, 0.0032, 0.0039, 0.0033, 0.0033, 0.0033])"
+  "detail": "(0.024591673631221056, [0.004, 0.003, 0.0039, 0.0038, 0.0038, 0.0033, 0.0039, 0.003, 0.0031, 0.0034, 0.0038, 0.0031], [0.0031, 0.0032, 0.0031, 0.0029, 0.0033, 0.0031, 0.0037, 0.0031, 0.0039, 0.0037, 0.0032, 0.0034])"
  },
  {
   "group": "D",
-  "case": "control discriminates: legacy polled wait records 50.36 ms (error > 1 ms)",
+  "case": "control discriminates: legacy polled wait records 50.40 ms (error > 1 ms)",
   "ok": true,
-  "detail": "(0.05036381492391229, [0.0174, 0.0169, 0.0169, 0.017, 0.0173, 0.0165, 0.0167, 0.017, 0.0167, 0.0167, 0.017, 0.0169], [0.0423, 0.0424, 0.0424, 0.0426, 0.0423, 0.0421, 0.0422, 0.0424, 0.0423, 0.0422, 0.042, 0.0423])"
+  "detail": "(0.050399144645780325, [0.0169, 0.0173, 0.0174, 0.0167, 0.0165, 0.0169, 0.0172, 0.0169, 0.0173, 0.0169, 0.0169, 0.017], [0.0427, 0.0423, 0.0422, 0.0429, 0.0425, 0.0422, 0.0423, 0.0423, 0.0424, 0.0426, 0.0423, 0.0419])"
  },
  {
   "group": "E",
@@ -417,13 +435,13 @@
   "group": "E",
   "case": "source re-verification: clean frozen head -> accepted",
   "ok": true,
-  "detail": "epoch\": 1792355152.410135, \"deadline_epoch\": 1792357852.410135, \"end_epoch\": 1792355152.542421, \"remaining_budget_s\": 2699.868, \"released_after_s\": 0.132, \"cleanup_margin_s\": 10, \"unreaped_pids\": []}\n"
+  "detail": "\": [], \"lock_wait_s\": 2.3186206817626953e-05, \"locks_released_after_s\": 0.469, \"worker_pid\": 1404040, \"worker_rc\": 1, \"worker_killed_at_deadline\": false, \"session_leftovers_killed\": [], \"reason\": \"\"}\n"
  },
  {
   "group": "E",
   "case": "source re-verification: wrong source_head -> fatal before any resource",
   "ok": true,
-  "detail": "-motioncorr-rc0/W-D11/ctl-work/e-repo', 'diff', '--name-only', 'be8540e61ce6a81256d6742151e388a509798fbe', '0000000000000000000000000000000000000000', '--', 'src']' returned non-zero exit status 128.\n"
+  "detail": "-motioncorr-rc0/W-D11/ctl-work/e-repo', 'diff', '--name-only', '52963ac0e2ba6078f3ae17c9ebb46e9096281bfb', '0000000000000000000000000000000000000000', '--', 'src']' returned non-zero exit status 128.\n"
  },
  {
   "group": "E",
@@ -451,8 +469,32 @@
  },
  {
   "group": "F",
-  "case": "integrated timed_payload -> run_window finally: unreapable payload, lock released within the 20 s budget (19.69193996861577), INCOMPLETE, payload recorded unreaped",
+  "case": "integrated, unreapable payload: lock released within the 20 s budget (17.959285671822727), window INCOMPLETE",
   "ok": true,
-  "detail": "{'lock_acquired_s': 0.10704351868480444, 'lock_released_s': 19.69193996861577, 'budget_s': 20, 'driver_still_running_after': False, 'marker': {'status': 'incomplete', 'reason': 'RuntimeError: payload main (pid 4089348) not reaped after SIGKILL; GPU state unknown', 'workload': 'w', 'window': 1, 'posi"
+  "detail": "{'mode': 'unreapable', 'lock_acquired_s': 0.10634731967002153, 'lock_released_s': 17.959285671822727, 'budget_s': 20, 'driver_still_running_after': False, 'holder_record': {'manifest_sha256': '1bca80bc5009274a9fdc97593062ae2182b96c5966d73d477ff0a7757c7534f3', 'workload': 'w', 'window': 1, 'budget_s'"
+ },
+ {
+  "group": "F",
+  "case": "integrated, third fsync blocks (emit, review of 5b430d4b): lock released within the 20 s budget (18.473117496818304), window INCOMPLETE",
+  "ok": true,
+  "detail": "{'mode': 'fsync:3', 'lock_acquired_s': 0.10645403619855642, 'lock_released_s': 18.473117496818304, 'budget_s': 20, 'driver_still_running_after': False, 'holder_record': {'manifest_sha256': '4f9d80f5d435245f4db0211d37b1e91a2e456a847a52e3a44a9669b842f8ffc7', 'workload': 'w', 'window': 1, 'budget_s': 2"
+ },
+ {
+  "group": "F",
+  "case": "integrated, open() of a per-run log blocks: lock released within the 20 s budget (18.471907588653266), window INCOMPLETE",
+  "ok": true,
+  "detail": "{'mode': 'open-log', 'lock_acquired_s': 0.10627217032015324, 'lock_released_s': 18.471907588653266, 'budget_s': 20, 'driver_still_running_after': False, 'holder_record': {'manifest_sha256': '8b5ead6556275cbf9183dc756025399d54f818650e742a024e4a0931d6b3469e', 'workload': 'w', 'window': 1, 'budget_s': "
+ },
+ {
+  "group": "F",
+  "case": "worker does not inherit the lock: no lock fd in the worker; killing only the holder frees the lock in 0.029 s while the worker is alive",
+  "ok": true,
+  "detail": "{'mode': 'inherit', 'lock_acquired_s': 0.10682643111795187, 'lock_released_s': None, 'budget_s': 60, 'driver_still_running_after': False, 'holder_record': {}, 'worker_marker_status': None, 'unreaped_pids': None, 'inherit': {'workers': [1404730], 'worker_lock_fds': {1404730: []}, 'lock_free_after_hol"
+ },
+ {
+  "group": "G",
+  "case": "launcher: a failed window aborts the campaign (one run invoked, no later window, non-zero exit)",
+  "ok": true,
+  "detail": "{'launcher_rc': 1, 'run_invocations': 1, 'runs': ['/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-confirm/docs/rc0/stale_cuda_oom/raw/'], 'all_invocations': 3}"
  }
 ]

@@ -30,6 +30,9 @@
 [PASS] B identity true but with problems, zero comparisons, position 99: INCOMPLETE
 [PASS] B marker deadline beyond the header deadline: INCOMPLETE
 [PASS] B marker records an unreaped process: INCOMPLETE
+[PASS] B lock-holder record missing: INCOMPLETE
+[PASS] B lock-holder killed the worker at its deadline: INCOMPLETE
+[PASS] B lock-holder killed leftover processes: INCOMPLETE
 [PASS] B window 2 missing: INCOMPLETE
 [PASS] B window 1 truncated: INCOMPLETE
 [PASS] B zero pairs: INCOMPLETE
@@ -54,13 +57,13 @@
 [PASS] C identity failure recorded once, evidence kept, not retried
 [PASS] C watchdog kills and reaps a hung payload at the per-payload timeout; pair rerun
 [PASS] C window deadline: payload killed at the deadline, incomplete, lock released, no orphans
-[PASS] C deadline covers the lock wait: incomplete, no payload started
+[PASS] C deadline covers the lock wait: the holder gives up, no worker or payload started
 [PASS] C delayed product check: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans
 [PASS] C delayed cleanup: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans
 [PASS] C aggregate release: pending samplers and a stalled registered child: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans
 [PASS] C binary changed after freezing: fatal before any resource
-[PASS] D blocking wait: completions 25 ms apart recorded 25.13 ms apart (|error| <= 1 ms)
-[PASS] D control discriminates: legacy polled wait records 50.36 ms (error > 1 ms)
+[PASS] D blocking wait: completions 25 ms apart recorded 24.59 ms apart (|error| <= 1 ms)
+[PASS] D control discriminates: legacy polled wait records 50.40 ms (error > 1 ms)
 [PASS] E completion marker after the release deadline, or with an unreaped process, becomes incomplete
 [PASS] E release: one shared reap deadline for 3 unreapable processes (1.52 s for a 2 s deadline; 5 s each before), unreaped recorded, lock released
 [PASS] E mask rule: no CPU-mask observation -> invalid (no CPU-mask observation)
@@ -73,7 +76,11 @@
 [PASS] E source re-verification: changed build equivalence -> fatal before any resource
 [PASS] E source re-verification: vendored stats changed -> fatal before any resource
 [PASS] E source re-verification: untracked file in the tree (not clean) -> fatal before any resource
-[PASS] F integrated timed_payload -> run_window finally: unreapable payload, lock released within the 20 s budget (19.69193996861577), INCOMPLETE, payload recorded unreaped
+[PASS] F integrated, unreapable payload: lock released within the 20 s budget (17.959285671822727), window INCOMPLETE
+[PASS] F integrated, third fsync blocks (emit, review of 5b430d4b): lock released within the 20 s budget (18.473117496818304), window INCOMPLETE
+[PASS] F integrated, open() of a per-run log blocks: lock released within the 20 s budget (18.471907588653266), window INCOMPLETE
+[PASS] F worker does not inherit the lock: no lock fd in the worker; killing only the holder frees the lock in 0.029 s while the worker is alive
+[PASS] G launcher: a failed window aborts the campaign (one run invoked, no later window, non-zero exit)
 
-76/76 controls as required
+83/83 controls as required
 SUITE_RC=0

@@ -8,7 +8,8 @@ usage: controls.py --work DIR --cpu-binary MOTIONCORR_CPU --tutorial DIR --cpus 
   C  run: dry-run windows with stub payloads, a private lock file, short frozen budgets
   D  timing: completions 25 ms apart recorded 25 +- 1 ms apart; the legacy polled wait fails the same check
   E  unit rules: completion marker after the deadline, CPU-mask rule, per-window source re-verification
-  F  integrated: an unreapable payload still releases the window's lock within its budget
+  F  integrated (control_integrated.py): unreapable payload, stalled fsync, stalled open, lock not inherited
+  G  launcher (control_launcher.py): a failed window aborts the campaign
 Every case states the required outcome; the script exits non-zero if any case differs.
 """
 import argparse, json, os, shutil, stat, statistics, struct, subprocess, sys, time
@@ -195,10 +196,17 @@ def stream(mpath, i, d_fix=0.0, spread=0.01, fail=(), warm_fail=None, identity_o
     return recs
 
 
-def write_window(out, mpath, i, recs, marker=None):
+def write_window(out, mpath, i, recs, marker=None, holder=None):
     wd = out / 'w' / f'window{i}'
     wd.mkdir(parents=True, exist_ok=True)
     (wd / 'runs.jsonl').write_text(''.join(json.dumps(r) + '\n' for r in recs))
+    hr = {'manifest_sha256': cp.sha256(mpath), 'workload': 'w', 'window': i, 'budget_s': 2700,
+          'start_epoch': 1000.0, 'deadline_epoch': 3700.0, 'locks': json.loads(mpath.read_text())['locks'],
+          'lock_wait_s': 0.0, 'locks_released_after_s': 2601.0, 'worker_pid': 1, 'worker_rc': 0,
+          'worker_killed_at_deadline': False, 'session_leftovers_killed': [], 'reason': ''}
+    if holder != 'missing':
+        hr.update(holder or {})
+        (wd / 'holder.json').write_text(json.dumps(hr))
     mk = {'status': 'complete', 'manifest_sha256': cp.sha256(mpath), 'workload': 'w', 'window': i,
           'positions': len(json.loads(mpath.read_text())['workloads']['w']['plan']), 'budget_s': 2700,
           'start_epoch': 1000.0, 'deadline_epoch': 3700.0, 'end_epoch': 3600.0, 'remaining_budget_s': 100.0,
@@ -218,7 +226,7 @@ def combine_label(out, mpath):
 
 
 def group_b(o, work):
-    def scenario(name, want, mutate=None, n=16, gen=None, marker=None, check=None):
+    def scenario(name, want, mutate=None, n=16, gen=None, marker=None, check=None, holder=None):
         out = work / f'b-{name}'; out.mkdir(parents=True)
         mpath = out / 'manifest.json'
         manifest(mpath, n=n)
@@ -227,7 +235,7 @@ def group_b(o, work):
             if mutate and i == 1:
                 recs = mutate(recs)
             if recs is not None:
-                write_window(out, mpath, i, recs, marker if i == 1 else None)
+                write_window(out, mpath, i, recs, marker if i == 1 else None, holder if i == 1 else None)
         label, j = combine_label(out, mpath)
         ok = label == want and (check is None or check(j))
         case('B', f'{name}: {want}', ok, f'label={label} reasons={j.get("incomplete_reasons", j)}')
@@ -264,6 +272,12 @@ def group_b(o, work):
              gen=lambda mp, i: stream(mp, i, spread=0.004), marker={'deadline_epoch': 9700.0, 'end_epoch': 3600.0})
     scenario('marker records an unreaped process', 'INCOMPLETE', n=256, gen=lambda mp, i: stream(mp, i, spread=0.004),
              marker={'unreaped_pids': [4242]})
+    scenario('lock-holder record missing', 'INCOMPLETE', n=256, gen=lambda mp, i: stream(mp, i, spread=0.004),
+             holder='missing')
+    scenario('lock-holder killed the worker at its deadline', 'INCOMPLETE', n=256,
+             gen=lambda mp, i: stream(mp, i, spread=0.004), holder={'worker_killed_at_deadline': True, 'worker_rc': -9})
+    scenario('lock-holder killed leftover processes', 'INCOMPLETE', n=256,
+             gen=lambda mp, i: stream(mp, i, spread=0.004), holder={'session_leftovers_killed': [4243]})
     scenario('window 2 missing', 'INCOMPLETE', gen=lambda mp, i: stream(mp, i) if i == 1 else None)
     scenario('window 1 truncated', 'INCOMPLETE', mutate=lambda rs: rs[:len(rs) // 2])
     scenario('zero pairs', 'INCOMPLETE', gen=lambda mp, i: stream(mp, i)[:4],
@@ -423,10 +437,11 @@ def group_c(o, work):
     time.sleep(1)
     r, el = run(d, mp)
     os.killpg(holder.pid, 9); holder.wait(); time.sleep(1)
-    inc = d / 'out' / 'w' / 'window1' / 'incomplete.json'
-    case('C', 'deadline covers the lock wait: incomplete, no payload started',
-         inc.is_file() and 'waiting' in json.loads(inc.read_text())['reason'] and not (d / 'state' / 'count-main').exists(),
-         inc.read_text() if inc.is_file() else r.stderr[-300:])
+    hj = d / 'out' / 'w' / 'window1' / 'holder.json'
+    case('C', 'deadline covers the lock wait: the holder gives up, no worker or payload started',
+         hj.is_file() and 'waiting' in json.loads(hj.read_text())['reason'] and json.loads(hj.read_text())['worker_pid'] is None
+         and not (d / 'state' / 'count-main').exists() and r.returncode != 0,
+         hj.read_text() if hj.is_file() else r.stderr[-300:])
 
     # Each window budget (here 15 s, standing for 2700 s) must contain the cleanup: work ends at
     # budget - CLEANUP_MARGIN_S and the locks are released by the budget.
@@ -576,10 +591,24 @@ def group_e(o, work):
 
 # ---------------------------------------------------------------- F (integrated: unreapable payload)
 def group_f(o, work):
-    import control_unreapable
-    ok, detail = control_unreapable.integrated(HERE, work / 'f-unreapable', o.payload_cpus, o.runner_cpus, budget=20)
-    case('F', 'integrated timed_payload -> run_window finally: unreapable payload, lock released within the '
-              f'20 s budget ({detail["lock_released_s"]}), INCOMPLETE, payload recorded unreaped', ok, detail)
+    import control_integrated
+    for mode, what in (('unreapable', 'unreapable payload'), ('fsync:3', 'third fsync blocks (emit, review of 5b430d4b)'),
+                       ('open-log', 'open() of a per-run log blocks')):
+        ok, detail = control_integrated.integrated(HERE, work / f'f-{mode.replace(":", "")}', mode, o.payload_cpus,
+                                                   o.runner_cpus, budget=20)
+        case('F', f'integrated, {what}: lock released within the 20 s budget ({detail["lock_released_s"]}), '
+                  'window INCOMPLETE', ok, detail)
+    ok, detail = control_integrated.integrated(HERE, work / 'f-inherit', 'inherit', o.payload_cpus, o.runner_cpus,
+                                               budget=60)
+    case('F', 'worker does not inherit the lock: no lock fd in the worker; killing only the holder frees the lock '
+              f'in {detail["inherit"].get("lock_free_after_holder_kill_s")} s while the worker is alive', ok, detail)
+
+
+def group_g(o, work):
+    import control_launcher
+    ok, detail = control_launcher.launcher_abort(HERE / 'confirm_4gpus.sh', work / 'g-launcher')
+    case('G', 'launcher: a failed window aborts the campaign (one run invoked, no later window, non-zero exit)',
+         ok, detail)
 
 
 def main():
@@ -597,6 +626,7 @@ def main():
     group_d(o, work)
     group_e(o, work)
     group_f(o, work)
+    group_g(o, work)
     n_bad = sum(not r['ok'] for r in RESULTS)
     (work / 'controls.json').write_text(json.dumps(RESULTS, indent=1))
     print(f'\n{len(RESULTS) - n_bad}/{len(RESULTS)} controls as required')

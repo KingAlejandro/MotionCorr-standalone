@@ -1,4 +1,4 @@
-# Confirmatory timing for tutG and e10216L (#228, D14): FROZEN DESIGN (round-7 revision, 202fd5bf follow-up), NOT RUN
+# Confirmatory timing for tutG and e10216L (#228, D14): FROZEN DESIGN (round-8 revision), NOT RUN
 
 The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No timed pair runs before the coordinator's "GO"**, which follows a re-check by R-D11. After GO the four windows run once and the results are committed as evidence.
 
@@ -8,25 +8,20 @@ The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No time
 | `confirm_pairs.py` | Driver. `freeze` writes the manifest; `run` executes one window under the deadline, verifying everything first; `combine` validates the evidence and assigns the D14 label. |
 | `vendor/` | Byte copies of `tools/profiling/lib/stats.py` and `identity.py`, hashed in the manifest. |
 | `confirm_4gpus.sh` | Launcher: `freeze`, then `windows` (tutG-1, e10216L-1, tutG-2, e10216L-2, then combine). |
-| `control_unreapable.py` | Integrated unreapable-payload control (`timed_payload` → `run_window` finally); also run against the `202fd5bf` driver. |
+| `control_integrated.py` | Integrated controls: unreapable payload, stalled fsync, stalled open, lock not inherited by the worker. Supersedes `control_unreapable.py`. |
+| `control_launcher.py` | Launcher abort control: a failed window stops the campaign. |
 | `controls.py`, `controls/` | Synthetic and dry-run controls and their output. No GPU payload; locks only on a private temporary file. |
 
 ## Frozen state
 
-| Item | Value |
-|---|---|
-| Frozen source | `21b19aac0099acb27b70507090bb83e463cded33`, clean checkout `W-D11/src-confirm`; it stays clean |
-| `confirm_pairs.py` | sha256 `785736739b41e1f619db660e0d8ee97bb62a3763442447cfab0e58a2506e2516` |
-| `rule.txt` | sha256 `c3b55a0a66024512d64b6721e890035d494a2a61732451a243e42011a38bf85a` |
-| `vendor/stats.py`, `vendor/identity.py` | sha256 `8d61e054…173c7c`, `e44cfd0f…be4645` (unchanged) |
-| `manifest.json` | sha256 `cb3c396b077d01aff368e9188cb2056ad6c724e4e0322e0a6d1596d1e24782cf` (copy here; the run uses `W-D11/confirm4/manifest.json`) |
-| Window budget | 2700 s total lock tenure: work by 2690 s, release by 2700 s; an unreapable payload ends the window INCOMPLETE and does not hold the locks |
-| Frozen masks and locks | payload 88–95, runner 120–123; `/tmp/motioncorr-bench.lock`, `/tmp/motioncorr-gpu3-correctness.lock` |
-| Binaries | main `c2263c22…f8dd`; fix `29b894f0…c185`, built from `78aae2d3`, source-equivalent to `21b19aac` |
-| Inputs | tutG 26 files, e10216L 4; `verify` passed for both after freezing, with no lock taken |
-| Superseded | designs frozen at `38fbfa6f`, `8aed9b0b`, `6b797438` and `202fd5bf`, kept in `superseded-*/` |
+FROZEN_STATE_PLACEHOLDER
 
-Later evidence commits on the branch do not change the frozen files. Every window re-verifies them before taking a lock.
+## Changes for review R-D11 round 8 (supersedes the design frozen at `21b19aac`/`5b430d4b`)
+
+| Finding | Change | Where | Controls (author-reported) |
+|---|---|---|---|
+| P2-1: blocking evidence I/O (fsync in `emit`, other writes and opens) while the locks are held | **Structural.** `run` is now a lock-holder (`run_window`, `confirm_pairs.py:614`). It verifies, creates the window directory and opens `worker.log` before any lock. While holding the locks it only flocks (fds opened `O_CLOEXEC`, :638), starts the worker in a new session with `close_fds` (:656), waits on it with a bound (:659), scans `/proc` (`session_pids`, :599) and closes fds (:672). All worker I/O, supervision, evidence and cleanup happen in `worker_main` (:413), whose children stay in its session (`process_group=0`, :146, :181, :470). At the hard deadline (start + 2700 − `HOLDER_RESERVE_S` = 2 s, :596) the holder SIGKILLs every process in the worker's session and closes the lock fds, whatever the worker is blocked on. Only afterwards does it write `holder.json`, in a daemon thread joined for at most 5 s (:689). The release depends only on the holder closing its own fds, which no worker operation can delay. That covers fsync, write, open, NFS stalls, a stuck payload and uninterruptible sleep alike. `combine` requires a `holder.json` showing a clean, in-time worker exit (:816) | `confirm_pairs.py` :146, :181, :413–430, :470, :596–700, :816, :894–911; `rule.txt` "Locks" (:50–60) | Integrated, `control_integrated.py`. **Stalled 3rd fsync** (`emit`): FAIL on `5b430d4b` (lock never released), PASS here. **Stalled open() of a per-run log**: FAIL on `5b430d4b`, PASS here. **Unreapable payload**: still PASS. **Lock not inherited**: the worker holds no fd on the lock file, and killing only the holder frees the lock at once while the worker is alive: PASS |
+| P2-2: `|| true` let the campaign continue after a failed window | `confirm_4gpus.sh` stops at the first window whose holder exits non-zero and runs no further window. Nothing is restarted; `combine` then labels what exists and the launcher exits non-zero. Declared in `rule.txt` "Campaign" | `confirm_4gpus.sh` :18, :36–56; `rule.txt` :110–113 | `control_launcher.py`, with a stub driver that fails every `run`: FAIL on the `5b430d4b` launcher (only the stub hook added): 4 runs, exit 0. PASS here: exactly 1 run (tutG window 1), non-zero exit |
 
 ## Change for the 14:33Z review of `202fd5bf` (supersedes the design frozen at `202fd5bf`)
 

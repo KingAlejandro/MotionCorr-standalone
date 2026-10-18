@@ -1,6 +1,6 @@
 FROZEN DESIGN, NOT YET RUN. W-D11 confirmatory timing for #228 (D14). Revision of 2026-10-18 after review
-R-D11 round 7 and the 14:33Z review of 202fd5bf; supersedes the designs frozen at 38fbfa6f, 8aed9b0b,
-6b797438 and 202fd5bf. The maintainer chose option (a). No timed pair may
+R-D11 round 8 (5b430d4b); supersedes the designs frozen at 38fbfa6f, 8aed9b0b, 6b797438, 202fd5bf and
+21b19aac/5b430d4b. The maintainer chose option (a). No timed pair may
 run before the coordinator's "GO". Once run, this file and confirm_pairs.py are never edited; any correction
 is a separate dated note.
 
@@ -47,6 +47,17 @@ Timing    Wall = CLOCK_MONOTONIC at reap minus CLOCK_MONOTONIC at spawn; a waite
           work deadline. A payload not reaped by then is recorded as failure 'unreaped' (GPU state unknown,
           never a verified-clean GPU) and ends the window INCOMPLETE; release retries its reap, records it
           in unreaped_pids and releases the locks.
+Locks     Each window is run by a lock-holder process (confirm_pairs.py run). It verifies the manifest,
+          creates the window directory and opens its files BEFORE taking any lock. While holding the
+          locks it only flocks, starts the window's worker in a new session, waits for it with a bound,
+          scans /proc and closes fds. The lock fds are O_CLOEXEC and the worker is started with
+          close_fds, so the worker never shares them. All of the worker's children (payloads, samplers,
+          checks) stay in its session. At the holder's hard deadline, start + 2700 - 2 s, it SIGKILLs every
+          process in the worker's session and closes the lock fds, whatever the worker is doing (blocked
+          in fsync, write, open, a stuck payload or uninterruptible I/O). Only after that does it write
+          holder.json, in a bounded best-effort write; the release never depends on it. A worker killed at
+          the deadline, a non-zero worker exit, leftover session processes or a missing holder.json make
+          the window INCOMPLETE.
 Deadline  45 min (2700 s) per window from the first lock request is the TOTAL lock tenure, cleanup
           included. Work (lock waits, the idle-GPU wait, payloads and checks) must end by 2700 - 10 s; the
           remaining 10 s (CLEANUP_MARGIN_S) are reserved for release, which must finish by 2700 s. Every lock-held step is bounded by the remaining time: GPU queries, the whole product
@@ -96,8 +107,14 @@ Identity  The first comparison pair of each window is compared with tools/profil
           (full MRC header except the writer timestamp, payload, path-normalised STAR/EPS). A failure is
           recorded, its two product trees are kept (identity-failure/), it is never retried for a different
           outcome, and it makes the workload INCOMPLETE.
+Campaign  confirm_4gpus.sh runs the declared windows in order and stops at the first window whose
+          holder exits non-zero (incomplete, unreaped payload, unknown GPU state, worker killed at the
+          deadline, lock wait expired). No further window runs and nothing is restarted or substituted;
+          combine then labels what exists (INCOMPLETE for any missing window).
 Combine   `confirm_pairs.py combine` validates before any statistic: the manifest and the vendored stats
-          hash; exactly 2 windows, each with complete.json matching the manifest hash, with a non-negative
+          hash; exactly 2 windows, each with a holder.json showing a clean, in-time worker exit (rc 0, not
+          killed, no leftover processes, locks released within the budget) and complete.json matching the
+          manifest hash, with a non-negative
           remaining budget and an end time before the deadline; and each window's complete chronological
           record stream: exactly one header matching the manifest (venue, GPU, the frozen CPU masks, disjoint,
           the frozen non-empty lock list, deadline = start + budget) with dry_run explicitly false, the lock

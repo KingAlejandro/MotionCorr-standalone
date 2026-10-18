@@ -1,0 +1,18 @@
+start 2026-10-18T20:16:23Z HEAD=cb3699ac73c8af20ed47f52a0be8504a049b03e1 status=0 mask=40-47 host=small-refmac-machine venv=/home/ubuntu/.mc-venv bench_lock=/home/ubuntu/mc-rc0-paired-20261017/W-QF-asan-shakedown-cb3699ac/private-probe.lock
+configure rc=0
+build rc=0 2026-10-18T20:19:32Z
+CMAKE_HOME_DIRECTORY:INTERNAL=/home/ubuntu/mc-rc0-paired-20261017/W-QF-asan-shakedown-cb3699ac/src
+CXX_FLAGS = -fsanitize=address,undefined -fno-omit-frame-pointer -O2 -g -DNDEBUG -std=gnu++17 -fopenmp
+motioncorr sha256: e04e7d3d0d51fcd3a0f570d20c2d42143c31f244e8585bba8156728aa742396c
+runner_numerics sha256: 08ec92399e2bd5c2c09da3c89827b15e6bf74ac05c3076d1eda54664d15e23ae
+Test project /home/ubuntu/mc-rc0-paired-20261017/W-QF-asan-shakedown-cb3699ac/build-asan
+    Start 55: EerMemorySafety
+1/1 Test #55: EerMemorySafety ..................   Passed   33.63 sec
+
+100% tests passed out of 1
+
+Total Test time (real) =  33.63 sec
+ctest rc=0
+sanitizer lines in ctest output: 0
+decoder sources == 97fb9fda: yes
+verdict PASS end 2026-10-18T20:20:06Z

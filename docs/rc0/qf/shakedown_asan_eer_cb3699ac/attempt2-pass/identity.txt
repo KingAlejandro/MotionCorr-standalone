@@ -1,0 +1,13 @@
+host: small-refmac-machine
+g++: g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake: cmake version 4.4.3
+python: 3.12.3 numpy 2.5.3
+src: cb3699ac73c8af20ed47f52a0be8504a049b03e1 status-lines=0
+ldd motioncorr:
+	libasan.so.8 => /lib/x86_64-linux-gnu/libasan.so.8 (0x00007945e3e00000)
+	libubsan.so.1 => /lib/x86_64-linux-gnu/libubsan.so.1 (0x00007945e2a00000)
+ldd runner_numerics:
+	libasan.so.8 => /lib/x86_64-linux-gnu/libasan.so.8 (0x00007a1ef1a00000)
+	libubsan.so.1 => /lib/x86_64-linux-gnu/libubsan.so.1 (0x00007a1ef0600000)
+ldd release-style check (no sanitizer runtime expected): /usr/bin/true
+0

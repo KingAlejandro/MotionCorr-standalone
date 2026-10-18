@@ -3,6 +3,7 @@
 import argparse
 from collections import Counter
 from pathlib import Path
+import random
 import struct
 import subprocess
 import tempfile
@@ -56,6 +57,31 @@ def encode(compression, width, electrons):
     code(gap, 0)
     return bytes(sum(bits[k + b] << b for b in range(min(8, len(bits) - k)))
                  for k in range(0, len(bits), 8))
+
+
+def decode(compression, data, total=None):
+    """Scalar decoder: electrons and bits consumed, up to the run that reaches total.
+
+    The terminal symbol is never consumed. With total None every code starting in
+    data is parsed, and a trailing partial code reads zeros."""
+    rle, sym = (8, 4) if compression == 65000 else (7, 2 if compression == 65002 else 4)
+    bits = [(byte >> b) & 1 for byte in data for b in range(8)]
+    def take(i, n):
+        return sum(bits[i + b] << b for b in range(n) if i + b < len(bits))
+    electrons, pos, i = [], 0, 0
+    while i < len(bits):
+        p = take(i, rle)
+        i += rle
+        pos += p
+        if total is not None and pos >= total:
+            break
+        if rle == 8 or p != (1 << rle) - 1:
+            s = take(i, sym)
+            i += sym
+        if p != (1 << rle) - 1:
+            electrons.append((pos, s ^ (10 if sym == 4 else 3)))
+            pos += 1
+    return electrons, i
 
 
 def write_eer(path, compression, strips, width=4096, omit=(), counts=None, offsets=None):
@@ -162,6 +188,29 @@ def main():
                     assert 'This frame is skipped' in log, log
                     assert (root/'render.bin').read_bytes() == expected_image(
                         width, 1, [[0, 1, 2]], [electrons[0], electrons[1], []])
+            # A fraction cut k bytes short must be skipped even when the next fraction is
+            # a valid stream whose first k bytes are exactly the missing tail (#231 P2-1).
+            rng = random.Random(comp)
+            nsym = 4 if comp == 65002 else 16
+            picks = [(p, rng.randrange(nsym)) for p in sorted(rng.sample(range(width*width), 2000))]
+            while True:
+                whole = encode(comp, width, picks)
+                decoded, used = decode(comp, whole, width*width)
+                assert decoded == picks
+                # The last byte must hold a consumed bit, or a cut may remove only
+                # the unread terminal symbol and padding.
+                if used > 8 * (len(whole) - 1):
+                    break
+                picks.pop()
+            for k in range(1, 7):
+                after = decode(comp, whole[-k:])[0]
+                neighbour = encode(comp, width, after)
+                assert neighbour[:k] == whole[-k:], (comp, k)
+                write_eer(root/'borrow.eer', comp, [strips[0], whole[:-k], neighbour], width)
+                log = run([helper, 'render_eer_groups', 'borrow.eer', 'render.bin', 1, 1, 2], root)
+                assert log.count('This frame is skipped') == 1 and ' frame 2. ' in log, (comp, k, log)
+                assert (root/'render.bin').read_bytes() == expected_image(
+                    width, 1, [[0], [1], [2]], [electrons[0], [], after]), (comp, k)
 
         # D6 corrupt fraction (short 3-byte first strip) in a full motioncorr batch
         # must skip-and-warn without heap OOB write, and complete both movies.
@@ -217,6 +266,14 @@ def main():
             path_be = root/f'int-min-be-{field}.mrcs'
             path_be.write_bytes(head_be)
             damaged.append(path_be)
+        # Positive dimensions whose product overflows long (#231 P3-1). nx stays at
+        # SWAPTRIG so the byte-order test reads each header in its own order.
+        for order in '<>':
+            head = bytearray(1024)
+            struct.pack_into(order + '4i', head, 0, 65535, (1 << 31) - 1, (1 << 31) - 1, 2)
+            path = root/f'dim-overflow-{"le" if order == "<" else "be"}.mrcs'
+            path.write_bytes(head)
+            damaged.append(path)
         for i, path in enumerate(damaged):
             out = root/f'out-{i}'
             (root/'movies.star').write_text(STAR_HEADER + f'{path.name} 1\nhealthy.eer 1\n')
@@ -224,6 +281,8 @@ def main():
                        '--eer_grouping', 4, '--j', 2, '--bin_factor', 8, '--angpix', 1,
                        '--skip_report_pdf'], root, expected=1)
             assert f'Motion correction failed for 1 movie(s): {path.name}.' in log, log
+            if path.name.startswith('dim-overflow'):
+                assert f'readMRC: invalid dimensions in header of image {path.name}' in log, log
             assert (out/'healthy.star').is_file() and (out/'healthy.mrc').is_file(), log
             assert not (out/'corrected_micrographs.star').exists(), log
             bad_products = [p.name for p in out.glob(path.stem + '.*') if p.suffix != '.log']

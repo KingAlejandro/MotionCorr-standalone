@@ -1,4 +1,4 @@
-# Confirmatory timing for tutG and e10216L (#228, D14): FROZEN DESIGN, NOT RUN
+# Confirmatory timing for tutG and e10216L (#228, D14): FROZEN DESIGN (round-5 revision), NOT RUN
 
 The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No timed pair runs before the coordinator's "GO"**, which follows a re-check by R-D11. After GO the four windows run once and the results are committed as evidence.
 
@@ -6,22 +6,28 @@ The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No time
 |---|---|
 | `rule.txt` | The declared design. Frozen; corrections go in dated notes only. |
 | `confirm_pairs.py` | Driver. `freeze` writes the manifest; `run` executes one window under the deadline, verifying everything first; `combine` validates the evidence and assigns the D14 label. |
+| `vendor/` | Byte copies of `tools/profiling/lib/stats.py` and `identity.py`, hashed in the manifest. |
 | `confirm_4gpus.sh` | Launcher: `freeze`, then `windows` (tutG-1, e10216L-1, tutG-2, e10216L-2, then combine). |
 | `controls.py`, `controls/` | Synthetic and dry-run controls and their output. No GPU payload; locks only on a private temporary file. |
 
 ## Frozen state
 
-| Item | Value |
-|---|---|
-| Frozen source | `72152947c2fa8240541447fbefc360016958366e`, clean checkout `W-D11/src-confirm` |
-| `confirm_pairs.py` sha256 | `ab4e68edd3388ed2baf2203d65be6342b454680a0c4338777289c08ec46aced2` |
-| `rule.txt` sha256 | `346399f8d324f4820490b0ed0ab871ae7e91b205bff7b087094118fe0bc215b8` |
-| `manifest.json` sha256 | `c6b92eee15bf5593fca4e22cdfba9d727152a98321457ec01b5709445b0b52d9` (copy here; the run uses `W-D11/confirm4/manifest.json`) |
-| Binaries | main `c2263c22…f8dd`; fix `29b894f0…c185`, built from `78aae2d3`, source-equivalent to `72152947` (checked by `freeze`) |
-| Plan | tutG: 136 positions per window (64 AB + 64 BA + 8 null pairs); e10216L: 96 per window (44 + 44 + 8) |
-| Inputs hashed | tutG 26 files (24 movies, gain, STAR); e10216L 4 files |
+FROZEN_STATE_PLACEHOLDER
 
-Later evidence commits on the branch do not change these files. The frozen hashes are verified again at the start of every window.
+## Changes for review R-D11 round 5 (supersedes the design frozen at `38fbfa6f`)
+
+Only what the six findings require. Line numbers are in `confirm_pairs.py`.
+
+| # | Finding | Change | Where | Control (`controls/ctl-run.txt`) |
+|---|---|---|---|---|
+| 1 | `combine` accepted incomplete or contradictory streams | Strict chronological validation of each window: exactly one header matching the manifest (venue, GPU, masks, locks) with `dry_run` explicitly false; the lock record; two successful warm-ups; per position its attempts (payload, payload, pair record) with consecutive `seq`, pair records consistent with their payloads (including `seqs`), retained walls equal to the payload walls; exactly one successful identity record after the first retained pair; nothing after the last position | `validate_window` :528–607, called from `combine` :610 | At N = 256, each of the reviewer's cases gives INCOMPLETE: headers removed, identity removed, payloads removed, every payload a resource failure, order reversed, retained walls ≠ payload walls. So do: another venue in the header, one position out of order, truncation, zero pairs, a malformed record, a missing window, a dry-run header and a warm-up failure. A real dry-run stream from the driver passes every check except the dry-run flag |
+| 2 | Polled `wait(timeout)` quantised completion to 50 ms | `timed_payload`: blocking `p.wait()`, wall = monotonic at reap − monotonic at spawn; the timeout is a watchdog thread that kills the process group | :136–157 (`p.wait()` :154, watchdog :144) | Completions 25 ms apart recorded **24.99 ms** apart (error ≤ 1 ms; 12 alternating repetitions of `sleep 0.300`/`0.325`). The legacy polled wait records **50.40 ms** on the same payloads, so the control can fail. A hung payload is killed by the watchdog at 3.0–4.0 s with a 3 s timeout |
+| 3 | Deadline not enforced across lock-held work | `left()` bounds GPU queries, the product/PDF check (:464) and the identity check, which runs in a child process with `timeout=left()` (:490); sampler joins are bounded (:456); release waits ≤ 5 s after SIGKILL; `completion_status` (:262, used at :514) never writes `complete.json` after the deadline; `combine` rejects a negative remaining budget or an end time after the deadline (:634) | :378, :456, :464, :490, :262, :514, :634 | `completion_status` gives incomplete after the deadline. Synthetic markers with −2.0 s remaining, or written after the deadline, give INCOMPLETE. Dry-run deadline window: payload killed, incomplete, lock released, no orphans |
+| 4 | Source not re-verified per window; helpers importable from mutable paths | `verify` (:318) checks before any lock: `source_head`, clean tree, driver location in the frozen tree, build-equivalence statement, and hashes of `confirm_pairs.py`, `rule.txt` and the vendored `vendor/stats.py`/`identity.py` (byte copies of `tools/profiling/lib`, :30). Git and setup errors are fatal. No bytecode is written, so the tree stays clean (:18). `combine` uses the vendored, hash-checked stats | :18, :30, :318–345 | A throwaway git repository with the frozen directory: clean head accepted; wrong head, invalid source path, changed equivalence, changed vendored stats and an untracked file are all fatal before any resource. This control found a real defect: importing the helpers wrote `__pycache__` into the checkout, so window 2 would have failed. Fixed by `dont_write_bytecode` |
+| 5 | Warm-up failures bypassed the failure rule | Any unsuccessful warm-up ends the window as INCOMPLETE; `combine` also rejects a failed warm-up | :475–478, :573 | Dry run: a fix warm-up product failure gives incomplete.json ("warm-up fix failed"). Synthetic: a warm-up failure gives INCOMPLETE |
+| 6 | Missing CPU-mask evidence accepted | The watcher observes the executable and its mask first, polling `/proc` every 2 ms before any GPU query (:425); `classify` (:244) makes a run invalid without an observation, if the sampler did not finish, or if the mask differs | :244–259, :425–434, :460 | `classify`: no observation, unfinished sampler and a different mask are invalid; a valid observation is valid. Dry run: every timed payload has an observed mask equal to the payload mask |
+
+Control suite (all groups A–E) on 4GPUs CPUs 24–39 with no GPU payload, using the frozen driver and rule: **65/65 as required**.
 
 ## Changes for review R-D11 round 4
 

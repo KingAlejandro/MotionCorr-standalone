@@ -13,7 +13,7 @@ MAIN=$W/build-main-nvcomp/motioncorr; FIX=$W/build-fix-nvcomp/motioncorr
 TUT=/home/alex/motioncorr-validation-20261011-vm/tutorial-data; E10216=$W/perf-e10216
 G="--use_own --dose_weighting --dose_per_frame 1.277 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 8 --ingest nvcomp"
 EL="--use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --gpu 0 --j 8 --patch_x 5 --patch_y 5 --ingest compact"
-export PATH=/home/alex/.mc-venv/bin:/usr/local/cuda-12.8/bin:$PATH
+export PATH=/home/alex/.mc-venv/bin:/usr/local/cuda-12.8/bin:$PATH PYTHONDONTWRITEBYTECODE=1
 export CUDA_VISIBLE_DEVICES=$UUID CUDA_DEVICE_ORDER=PCI_BUS_ID OMP_NUM_THREADS=8
 unset GLIBC_TUNABLES OMP_PROC_BIND OMP_PLACES
 
@@ -23,7 +23,7 @@ freeze)
   mkdir -p $E
   [ ! -e $E/manifest.json ] || { echo "manifest exists: frozen once"; exit 1; }
   python3 $D/confirm_pairs.py freeze --manifest $E/manifest.json --venue "4GPUs GPU3 $UUID, payload 88-95, runner 120-123" \
-    --src $SRC --main-sha 71ab841e69869b615555bb02f8f393db59c22d73 --fix-sha "$(git -C $SRC rev-parse HEAD)" \
+    --gpu-uuid $UUID --src $SRC --main-sha 71ab841e69869b615555bb02f8f393db59c22d73 \
     --fix-build-sha 78aae2d3e79298913c904f0616a27432119d3988 \
     --a $MAIN --a-sha256 c2263c22611dc72bf575b7c40410d7be8dfca100f8f3319023e9bef62ec9f8dd \
     --b $FIX --b-sha256 29b894f0643f1b8f1cbcb33954165bd70f1613f9095be36e963660f7939ac185 \
@@ -39,7 +39,7 @@ windows)
       --lock /tmp/motioncorr-bench.lock --lock /tmp/motioncorr-gpu3-correctness.lock --samplers || true
   done
   for w in tutG e10216L; do
-    python3 $D/confirm_pairs.py combine --manifest $E/manifest.json --workload $w --out $E --src $SRC --result $E/$w-result.json
+    python3 $D/confirm_pairs.py combine --manifest $E/manifest.json --workload $w --out $E --result $E/$w-result.json
   done ;;
 *) echo "usage: $0 freeze|windows"; exit 2 ;;
 esac

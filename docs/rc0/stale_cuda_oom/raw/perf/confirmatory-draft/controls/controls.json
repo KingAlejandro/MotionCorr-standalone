@@ -97,93 +97,153 @@
  },
  {
   "group": "B",
-  "case": "complete-null-effect: PASS",
+  "case": "complete, null effect: PASS",
   "ok": true,
   "detail": "label=PASS reasons=[]"
  },
  {
   "group": "B",
-  "case": "complete-resolved-slowdown: FAIL",
+  "case": "complete, N=256 null effect: PASS",
+  "ok": true,
+  "detail": "label=PASS reasons=[]"
+ },
+ {
+  "group": "B",
+  "case": "complete, resolved slowdown: FAIL",
   "ok": true,
   "detail": "label=FAIL reasons=[]"
  },
  {
   "group": "B",
-  "case": "complete-wide-spread: UNRESOLVED",
+  "case": "complete, wide spread: UNRESOLVED",
   "ok": true,
   "detail": "label=UNRESOLVED reasons=[]"
  },
  {
   "group": "B",
-  "case": "window-2-missing: INCOMPLETE",
+  "case": "headers removed: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: missing or incomplete header', 'window 2: missing or incomplete header', 'comparison pairs 0 (0 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval (too few pairs)']"
+ },
+ {
+  "group": "B",
+  "case": "identity removed: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: first-pair identity record missing', 'window 2: first-pair identity record missing', 'comparison pairs 2 (2 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval (too few pairs)']"
+ },
+ {
+  "group": "B",
+  "case": "payload records removed: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=[\"window 1: expected warmup payload main seq 1, found {'pair': 'AB', 'position': 1, 'order': 'main,fix', 'attempt': 1, 'retained': Tru\", \"window 2: expected warmup payload main seq 1, found {'pair': 'AB', 'position': 1, 'order': 'main,fix', 'attempt': 1, 'retained': Tru\", 'c"
+ },
+ {
+  "group": "B",
+  "case": "every payload a resource failure: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: warm-up main failed', 'window 1: warm-up fix failed', 'window 1: position 1: pair record contradicts its payloads', 'window 2: warm-up main failed', 'window 2: warm-up fix failed', 'window 2: position 1: pair record contradicts its payloads', 'comparison pairs 0 "
+ },
+ {
+  "group": "B",
+  "case": "record order reversed: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: missing or incomplete header', 'window 2: missing or incomplete header', 'comparison pairs 0 (0 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval (too few pairs)']"
+ },
+ {
+  "group": "B",
+  "case": "retained walls differ from payloads: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: position 1: retained walls differ from the payload records', 'window 2: position 1: retained walls differ from the payload records', 'comparison pairs 0 (0 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval (too few pairs)']"
+ },
+ {
+  "group": "B",
+  "case": "window 2 missing: INCOMPLETE",
   "ok": true,
   "detail": "label=INCOMPLETE reasons=['window 2: no completion marker', 'comparison pairs 8 (4 AB / 4 BA), declared 16 balanced', 'null pairs 8, declared 16']"
  },
  {
   "group": "B",
-  "case": "window-1-truncated-no-marker: INCOMPLETE",
+  "case": "window 1 truncated: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['window 1: no completion marker (synthetic truncation)', 'comparison pairs 8 (4 AB / 4 BA), declared 16 balanced', 'null pairs 8, declared 16']"
+  "detail": "label=INCOMPLETE reasons=['window 1: expected timed payload mainb seq 17, found None', 'window 1: expected timed payload main seq 17, found None', 'window 1: position 8: records missing or out of order', 'comparison pairs 12 (6 AB / 6 BA), declared 16 balanced', 'null pairs 11, declared 16']"
  },
  {
   "group": "B",
-  "case": "window-1-truncated-forged-marker: INCOMPLETE",
+  "case": "zero pairs: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['window 1: retained positions 5 of 16', 'comparison pairs 11 (6 AB / 5 BA), declared 16 balanced', 'null pairs 10, declared 16']"
+  "detail": "label=INCOMPLETE reasons=['window 1: expected timed payload main seq 3, found None', 'window 1: expected timed payload fix seq 3, found None', 'window 1: position 1: records missing or out of order', 'window 2: expected timed payload main seq 3, found None', 'window 2: expected timed payload fix seq"
  },
  {
   "group": "B",
-  "case": "zero-pairs: INCOMPLETE",
+  "case": "malformed record: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['window 1: retained positions 0 of 16', 'window 2: retained positions 0 of 16', 'comparison pairs 0 (0 AB / 0 BA), declared 16 balanced', 'null pairs 0, declared 16', 'no confidence interval (too few pairs)']"
+  "detail": "label=INCOMPLETE reasons=['window 1: expected timed payload fix seq 4, found {not json', 'window 1: position 1: records missing or out of order', 'comparison pairs 8 (4 AB / 4 BA), declared 16 balanced', 'null pairs 8, declared 16']"
  },
  {
   "group": "B",
-  "case": "malformed-record: INCOMPLETE",
+  "case": "one position in the wrong order: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['window 1: malformed record at line 4', 'window 1: retained positions 15 of 16', 'comparison pairs 15 (7 AB / 8 BA), declared 16 balanced']"
+  "detail": "label=INCOMPLETE reasons=['window 1: position 3: pair record contradicts its payloads', 'comparison pairs 10 (5 AB / 5 BA), declared 16 balanced', 'null pairs 8, declared 16']"
  },
  {
   "group": "B",
-  "case": "order-swapped-at-one-position: INCOMPLETE",
+  "case": "identity failed: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['window 1: position 3 order mainb,main differs from the plan', 'null pairs 15, declared 16']"
+  "detail": "label=INCOMPLETE reasons=['window 1: product identity failed or missing']"
  },
  {
   "group": "B",
-  "case": "identity-failed: INCOMPLETE",
+  "case": "dry-run header: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['product identity failed']"
+  "detail": "label=INCOMPLETE reasons=['window 1: dry run (no GPU checks or no input/source checks), never a verdict']"
  },
  {
   "group": "B",
-  "case": "fix-arm-product-failure (arm-dependent): INCOMPLETE",
+  "case": "header for another venue: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: header does not match the manifest']"
+ },
+ {
+  "group": "B",
+  "case": "warm-up failure (fix): INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: warm-up fix failed']"
+ },
+ {
+  "group": "B",
+  "case": "fix-arm product failure (arm-dependent): INCOMPLETE",
   "ok": true,
   "detail": "label=INCOMPLETE reasons=['systematic payload failures: payload failures on the fix arm only (arm-dependent)']"
  },
  {
   "group": "B",
-  "case": "two-payload-failures (recurrent): INCOMPLETE",
+  "case": "two payload failures (recurrent): INCOMPLETE",
   "ok": true,
   "detail": "label=INCOMPLETE reasons=['systematic payload failures: 2 payload failures (exit/timeout/product)']"
  },
  {
   "group": "B",
-  "case": "one-isolated-main-failure: PASS",
+  "case": "one isolated main failure: PASS",
   "ok": true,
   "detail": "label=PASS reasons=[]"
  },
  {
   "group": "B",
-  "case": "dry-run-header: INCOMPLETE",
+  "case": "marker with negative remaining budget: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['window 1: dry run (no GPU checks or no input hashing), never a verdict']"
+  "detail": "label=INCOMPLETE reasons=['window 1: completion marker invalid or after the deadline']"
  },
  {
   "group": "B",
-  "case": "manifest-missing: INCOMPLETE (no exception)",
+  "case": "marker written after the deadline: INCOMPLETE",
   "ok": true,
-  "detail": "{'workload': 'w', 'label': 'INCOMPLETE', 'incomplete_reasons': [\"evidence unreadable: FileNotFoundError: [Errno 2] No such file or directory: '/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/b-manifest-missing/absent.json'\"]}"
+  "detail": "label=INCOMPLETE reasons=['window 1: completion marker invalid or after the deadline']"
+ },
+ {
+  "group": "B",
+  "case": "manifest missing: INCOMPLETE (no exception)",
+  "ok": true,
+  "detail": "{'workload': 'w', 'stats_sha256': '8d61e0544b462ba91a0258f445c37c252b37cf0ddc293eaf31543cbcf0173c7c', 'label': 'INCOMPLETE', 'incomplete_reasons': [\"evidence unreadable: FileNotFoundError: [Errno 2] No such file or directory: '/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/b-manifest missing/absen"
  },
  {
   "group": "B",
@@ -193,27 +253,33 @@
  },
  {
   "group": "C",
-  "case": "healthy dry-run window completes (complete.json)",
+  "case": "healthy dry-run windows complete; lock released; no orphans",
   "ok": true,
-  "detail": "{\"status\": \"complete\", \"reason\": \"\", \"workload\": \"w\", \"window\": 1, \"positions\": 16, \"manifest_sha256\": \"214211b7ff9ea1f69b722d72a5e575b7694beec31efa13ca15a3722b3262cd2b\", \"remaining_budget_s\": 588.9}\n"
+  "detail": "{\"status\": \"complete\", \"reason\": \"\", \"workload\": \"w\", \"window\": 1, \"positions\": 16, \"manifest_sha256\": \"5d1d51494abf408c6fa718bdc6ee905abb16393225a5a0c0f6fb9d2b4d8e5f16\", \"remaining_budget_s\": 590.213, \"end_epoch\": 1792319365.166758, \"deadline_epoch\": 1792319955.3795528}\n"
  },
  {
   "group": "C",
-  "case": "healthy window: lock released, no orphans",
+  "case": "every timed payload has an observed CPU mask equal to the payload mask",
   "ok": true,
-  "detail": ""
+  "detail": "[{'seq': 3, 'phase': 'timed', 'label': 'main', 'rc': 0, 'wall_s': 0.217947, 'pdf_pages': 10, 'observed_mask': '24,25,26,27,28,29,30,31'}]"
  },
  {
   "group": "C",
-  "case": "dry-run windows combine to INCOMPLETE (never a verdict), counts otherwise complete",
+  "case": "real driver streams pass the sequence validation; only the dry-run flag makes them INCOMPLETE",
   "ok": true,
-  "detail": "['window 1: dry run (no GPU checks or no input hashing), never a verdict', 'window 2: dry run (no GPU checks or no input hashing), never a verdict']"
+  "detail": "['window 1: dry run (no GPU checks or no input/source checks), never a verdict', 'window 2: dry run (no GPU checks or no input/source checks), never a verdict']"
  },
  {
   "group": "C",
   "case": "exit-0 product failure on fix: classified \"product\", pair rerun in the same position",
   "ok": true,
-  "detail": "[{'seq': 13, 'phase': 'timed', 'label': 'fix', 'rc': 0, 'wall_s': 0.0364, 'cpu_s': 0.021, 'pdf_pages': None, 'failure': 'product', 'detail': 'logfile.pdf pages None, expected 10'}, {'pair': 'BA', 'position': 6, 'order': 'fix,main', 'attempt': 2, 'retained': True, 'walls': {'fix': 0.0337, 'main': 0.0"
+  "detail": "[{'seq': 13, 'phase': 'timed', 'label': 'fix', 'rc': 0, 'wall_s': 0.270223, 'pdf_pages': None, 'failure': 'product', 'detail': 'logfile.pdf pages None, expected 10', 'observed_mask': '24,25,26,27,28,29,30,31'}, {'pair': 'BA', 'position': 6, 'order': 'fix,main', 'attempt': 2, 'retained': True, 'seqs'"
+ },
+ {
+  "group": "C",
+  "case": "unsuccessful warm-up ends the window as incomplete",
+  "ok": true,
+  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"RuntimeError: warm-up fix failed: product (logfile.pdf pages None, expected 10)\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"35ad0334a0b71e9f757a27f32307f8ac48ad8cb2b7d7f3c6f01ab350611c6590\",\n \"remaining_budget_s\": 599.471,\n \"end_epo"
  },
  {
   "group": "C",
@@ -223,26 +289,104 @@
  },
  {
   "group": "C",
-  "case": "per-payload timeout kills and reaps the payload, pair rerun",
+  "case": "watchdog kills and reaps a hung payload at the per-payload timeout; pair rerun",
   "ok": true,
-  "detail": "[{'seq': 6, 'phase': 'timed', 'label': 'main', 'rc': -9, 'wall_s': 3.0033, 'cpu_s': 0.018, 'failure': 'timeout', 'detail': 'killed after 3 s'}]"
+  "detail": "[{'seq': 6, 'phase': 'timed', 'label': 'main', 'rc': -9, 'wall_s': 3.003054, 'failure': 'timeout', 'detail': 'killed after 3 s', 'observed_mask': '24,25,26,27,28,29,30,31'}]"
  },
  {
   "group": "C",
-  "case": "window deadline: stops within budget, incomplete.json, lock released, no orphans",
+  "case": "window deadline: payload killed at the deadline, incomplete, lock released, no orphans",
   "ok": true,
-  "detail": "elapsed 20 s; {\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline reached\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"9bbcdf8b3969e84d0f78d2100e576d1de8dc53f795dd35b27e68cc20b8981df5\",\n \"remaining_budget_s\": -0.2\n}"
+  "detail": "elapsed 20.1 s; {\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline reached\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"0779405fae52786a4bd2bc3e665b70fd7da0dc1a8f5f43dcd898badff83de94b\",\n \"remaining_budget_s\": -0.019,\n \"end_epoch\": 1792319436.4552379,\n \"deadlin"
  },
  {
   "group": "C",
   "case": "deadline covers the lock wait: incomplete, no payload started",
   "ok": true,
-  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline passed waiting for /mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-private.lock\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"8fc85fe47327d51aefcd51f45f5b5ccab642cc4331e555cd6b80f6dcc963c82c\",\n \"remaining_bud"
+  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline passed waiting for /mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-private.lock\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"2d5f3a41dca2a4f3b487d8147f9727b1f9199d726a9aaed745a31eaa3a9adbc5\",\n \"remaining_bud"
  },
  {
   "group": "C",
-  "case": "provenance mismatch (binary changed after freeze) is fatal before any resource",
+  "case": "binary changed after freezing: fatal before any resource",
   "ok": true,
-  "detail": "provenance check failed: main binary hash\n"
+  "detail": "provenance check failed: main binary\n"
+ },
+ {
+  "group": "D",
+  "case": "blocking wait: completions 25 ms apart recorded 24.99 ms apart (|error| <= 1 ms)",
+  "ok": true,
+  "detail": "(0.024990965612232685, [0.0041, 0.0042, 0.0042, 0.004, 0.0049, 0.0045, 0.0039, 0.004, 0.0039, 0.005, 0.0039, 0.0042], [0.004, 0.0042, 0.0043, 0.0048, 0.0037, 0.0041, 0.0043, 0.0039, 0.0037, 0.0042, 0.0045, 0.0041])"
+ },
+ {
+  "group": "D",
+  "case": "control discriminates: legacy polled wait records 50.40 ms (error > 1 ms)",
+  "ok": true,
+  "detail": "(0.05040334165096283, [0.0167, 0.0172, 0.0175, 0.017, 0.0168, 0.0173, 0.0173, 0.017, 0.017, 0.017, 0.017, 0.0173], [0.0423, 0.0424, 0.043, 0.0426, 0.0427, 0.0423, 0.0423, 0.0427, 0.0425, 0.0423, 0.0424, 0.0422])"
+ },
+ {
+  "group": "E",
+  "case": "completion marker after the deadline becomes incomplete",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "E",
+  "case": "mask rule: no CPU-mask observation -> invalid (no CPU-mask observation)",
+  "ok": true,
+  "detail": "('resource', 'no CPU-mask observation')"
+ },
+ {
+  "group": "E",
+  "case": "mask rule: sampler did not finish -> invalid (sampler did not finish)",
+  "ok": true,
+  "detail": "('resource', 'sampler did not finish')"
+ },
+ {
+  "group": "E",
+  "case": "mask rule: different observed mask -> invalid (payload mask)",
+  "ok": true,
+  "detail": "('resource', 'payload mask 0')"
+ },
+ {
+  "group": "E",
+  "case": "mask rule: valid observation -> valid",
+  "ok": true,
+  "detail": "None"
+ },
+ {
+  "group": "E",
+  "case": "source re-verification: clean frozen head -> accepted",
+  "ok": true,
+  "detail": "ions\": 16, \"manifest_sha256\": \"f2774835c16b9c968431870a87da9efdad21c48996909a87d142aacbc04cbf78\", \"remaining_budget_s\": 2699.958, \"end_epoch\": 1792319469.0223396, \"deadline_epoch\": 1792322168.979853}\n"
+ },
+ {
+  "group": "E",
+  "case": "source re-verification: wrong source_head -> fatal before any resource",
+  "ok": true,
+  "detail": "-motioncorr-rc0/W-D11/ctl-work/e-repo', 'diff', '--name-only', '04b0423ec9e0e70d1e137544068570fe5ed190b3', '0000000000000000000000000000000000000000', '--', 'src']' returned non-zero exit status 128.\n"
+ },
+ {
+  "group": "E",
+  "case": "source re-verification: invalid source path -> fatal before any resource",
+  "ok": true,
+  "detail": "provenance check failed: git/setup error: Command '['git', '-C', '/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/no-such-repo', 'rev-parse', 'HEAD']' returned non-zero exit status 128.\n"
+ },
+ {
+  "group": "E",
+  "case": "source re-verification: changed build equivalence -> fatal before any resource",
+  "ok": true,
+  "detail": "provenance check failed: build equivalence\n"
+ },
+ {
+  "group": "E",
+  "case": "source re-verification: vendored stats changed -> fatal before any resource",
+  "ok": true,
+  "detail": "provenance check failed: vendor/stats.py, source tree not clean\n"
+ },
+ {
+  "group": "E",
+  "case": "source re-verification: untracked file in the tree (not clean) -> fatal before any resource",
+  "ok": true,
+  "detail": "provenance check failed: source tree not clean\n"
  }
 ]

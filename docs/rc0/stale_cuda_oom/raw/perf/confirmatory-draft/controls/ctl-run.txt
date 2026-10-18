@@ -14,30 +14,54 @@
 [PASS] A synthetic e10216 (3 movies) tree with a 6-page PDF accepted
 [PASS] A synthetic e10216 (3 movies) tree with a 9-page PDF rejected
 [PASS] A expected pages: 24 movies -> 30, 3 movies -> 6
-[PASS] B complete-null-effect: PASS
-[PASS] B complete-resolved-slowdown: FAIL
-[PASS] B complete-wide-spread: UNRESOLVED
-[PASS] B window-2-missing: INCOMPLETE
-[PASS] B window-1-truncated-no-marker: INCOMPLETE
-[PASS] B window-1-truncated-forged-marker: INCOMPLETE
-[PASS] B zero-pairs: INCOMPLETE
-[PASS] B malformed-record: INCOMPLETE
-[PASS] B order-swapped-at-one-position: INCOMPLETE
-[PASS] B identity-failed: INCOMPLETE
-[PASS] B fix-arm-product-failure (arm-dependent): INCOMPLETE
-[PASS] B two-payload-failures (recurrent): INCOMPLETE
-[PASS] B one-isolated-main-failure: PASS
-[PASS] B dry-run-header: INCOMPLETE
-[PASS] B manifest-missing: INCOMPLETE (no exception)
+[PASS] B complete, null effect: PASS
+[PASS] B complete, N=256 null effect: PASS
+[PASS] B complete, resolved slowdown: FAIL
+[PASS] B complete, wide spread: UNRESOLVED
+[PASS] B headers removed: INCOMPLETE
+[PASS] B identity removed: INCOMPLETE
+[PASS] B payload records removed: INCOMPLETE
+[PASS] B every payload a resource failure: INCOMPLETE
+[PASS] B record order reversed: INCOMPLETE
+[PASS] B retained walls differ from payloads: INCOMPLETE
+[PASS] B window 2 missing: INCOMPLETE
+[PASS] B window 1 truncated: INCOMPLETE
+[PASS] B zero pairs: INCOMPLETE
+[PASS] B malformed record: INCOMPLETE
+[PASS] B one position in the wrong order: INCOMPLETE
+[PASS] B identity failed: INCOMPLETE
+[PASS] B dry-run header: INCOMPLETE
+[PASS] B header for another venue: INCOMPLETE
+[PASS] B warm-up failure (fix): INCOMPLETE
+[PASS] B fix-arm product failure (arm-dependent): INCOMPLETE
+[PASS] B two payload failures (recurrent): INCOMPLETE
+[PASS] B one isolated main failure: PASS
+[PASS] B marker with negative remaining budget: INCOMPLETE
+[PASS] B marker written after the deadline: INCOMPLETE
+[PASS] B manifest missing: INCOMPLETE (no exception)
 [PASS] B labels are exactly PASS / UNRESOLVED / FAIL / INCOMPLETE
-[PASS] C healthy dry-run window completes (complete.json)
-[PASS] C healthy window: lock released, no orphans
-[PASS] C dry-run windows combine to INCOMPLETE (never a verdict), counts otherwise complete
+[PASS] C healthy dry-run windows complete; lock released; no orphans
+[PASS] C every timed payload has an observed CPU mask equal to the payload mask
+[PASS] C real driver streams pass the sequence validation; only the dry-run flag makes them INCOMPLETE
 [PASS] C exit-0 product failure on fix: classified "product", pair rerun in the same position
+[PASS] C unsuccessful warm-up ends the window as incomplete
 [PASS] C identity failure recorded once, evidence kept, not retried
-[PASS] C per-payload timeout kills and reaps the payload, pair rerun
-[PASS] C window deadline: stops within budget, incomplete.json, lock released, no orphans
+[PASS] C watchdog kills and reaps a hung payload at the per-payload timeout; pair rerun
+[PASS] C window deadline: payload killed at the deadline, incomplete, lock released, no orphans
 [PASS] C deadline covers the lock wait: incomplete, no payload started
-[PASS] C provenance mismatch (binary changed after freeze) is fatal before any resource
+[PASS] C binary changed after freezing: fatal before any resource
+[PASS] D blocking wait: completions 25 ms apart recorded 24.99 ms apart (|error| <= 1 ms)
+[PASS] D control discriminates: legacy polled wait records 50.40 ms (error > 1 ms)
+[PASS] E completion marker after the deadline becomes incomplete
+[PASS] E mask rule: no CPU-mask observation -> invalid (no CPU-mask observation)
+[PASS] E mask rule: sampler did not finish -> invalid (sampler did not finish)
+[PASS] E mask rule: different observed mask -> invalid (payload mask)
+[PASS] E mask rule: valid observation -> valid
+[PASS] E source re-verification: clean frozen head -> accepted
+[PASS] E source re-verification: wrong source_head -> fatal before any resource
+[PASS] E source re-verification: invalid source path -> fatal before any resource
+[PASS] E source re-verification: changed build equivalence -> fatal before any resource
+[PASS] E source re-verification: vendored stats changed -> fatal before any resource
+[PASS] E source re-verification: untracked file in the tree (not clean) -> fatal before any resource
 
-41/41 controls as required
+65/65 controls as required

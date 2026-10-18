@@ -4,6 +4,8 @@
 
 The fix clears a recoverable pending CUDA error when a movie fails, so the next movie keeps its ingest route. On main `71ab841e`, a movie that fails with a device out-of-memory error makes the next movie in the same job lose its route (nvCOMP → compact under `--ingest auto`; CPU preprocessing on the compact route), or be refused under a pinned `--ingest nvcomp`. On the fix, every following movie keeps its standalone route and its products are identical to a standalone run. The failed movie fails as before, nothing is left on the device, and fatal handling is unchanged.
 
+Healthy-input timing against the D14 margin (section 6): **tutL Pass**; **tutG and e10216L Unresolved**, with upper bounds of +0.63% and +0.70% and medians of +0.000 s and +0.001 s. No workload shows a resolved slowdown.
+
 - Source: main `71ab841e69869b615555bb02f8f393db59c22d73`; fix code `e723a737`; control `443842e9`/`78aae2d3`; CUDA-only required list `518fd61d`; temp-dir cleanup `0bc857f0`; strict control `1576a0c5`; evidence commits on top. `src/` is identical from `e723a737` on.
 - Host `4GPUs`: A100 80GB PCIe `GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d` (GPU3), driver 570.86.10, CPUs 88–95 (`taskset`), `/tmp/motioncorr-gpu3-correctness.lock` held for every GPU run, bench lock probed before every build and GPU batch.
 - Builds: Release, g++ 13.3.0, CMake 3.28.3, CUDA 12.8 sm80, nvCOMP 5.3.0.16, `-DBUILD_TESTING=ON`; recipe `raw/tools/build.sh` (from `docs/rc0/qf/tools/build.sh`).
@@ -105,15 +107,58 @@ Native, 4GPUs, CPUs 88–95, GPU3 by UUID under its lock, `-j1`, `raw/tools/run_
 
 ### 6. Performance
 
-**Definitive measurement: exclusive SCARF GPU node (review round 1). SCARF job `3634350`, PENDING at the time of writing; results will be added here.** Design, declared in `raw/perf/scarf/wd11_pairs.py` (docstring, copied to `rule.txt` by the job before any timed run) and `raw/perf/scarf/wd11_timing.sbatch`:
-- Venue: one exclusive `scarf23` A100 node (`-p gpu --gres=gpu:1 --exclusive --constraint=scarf23`). CUDA 12.8.0 (SCARF module path), nvCOMP 5.3.0.16 staged from 4GPUs for internal testing (library sha256 `1ef19010…3ca5`, same as 4GPUs). Main `71ab841e` and the fix (`da402cab`; `src/` identical to `e723a737`) are built inside the allocation with identical options (Release, sm80, nvCOMP on, `motioncorr` target).
-- Payload pinned to the first 8 CPUs of the GPU's NUMA-local affinity; the driver and its `nvidia-smi` sampler run on the next 8. Inputs are copied to node-local `/tmp` and verified by sha256. Warm cache: one discarded warm-up per arm.
-- Workloads: tutG, tutL and e10216L, exactly as below.
-- Per workload: a pilot of 6 pairs (AB BA ×3), recorded separately and excluded from the result. Then sizing from the pilot only: s = 1.4826·MAD(pilot d), N = the smallest even N with 1.96·1.2533·s/√N ≤ 0.5% of the pilot's median main wall (true difference assumed 0), floored at 32 and capped at 128. The definitive run then executes exactly once: N/2 AB + N/2 BA pairs, plus 16 AA′ null pairs (8 AA′, 8 A′A), one null block after every N/16 comparison blocks.
-- Exclusion only for a non-zero exit or a recorded resource violation (foreign GPU process, failed GPU query); the pair is rerun in the same position and order, at most 3 attempts.
-- Reported per workload: median d, 95% CI (`lib/stats.median_ci`), CI upper as % of median main wall, null median/CI/range, per-arm median and IQR, and "upper ≤ 0.5%" or "unresolved". No pass/fail; the 0.5% margin has not been accepted by the maintainer.
+**Definitive measurement (D14 labels): 4GPUs GPU3, declared design, run once.** The maintainer accepted the 0.5% margin (D14):
+- **Pass:** no resolved slowdown, and the upper 95% CI bound of median(fix − main) is ≤ +0.5% of the median main whole-job wall.
+- **Unresolved:** the bound is above 0.5%.
+- **Fail:** a resolved slowdown, i.e. the CI lies entirely above zero.
 
-**Earlier measurement on 4GPUs (superseded by the SCARF design; review R-D11 noted that tutL window 2 retained 11 AB / 9 BA pairs, which is unbalanced).**
+| Workload | Label | N (AB/BA) | Median d | 95% CI of median d | CI as % of main wall | Main / fix median wall (IQR) | AA null (16 pairs) |
+|---|---|---|---|---|---|---|---|
+| tutG: tutorial ×24, global, nvCOMP | **Unresolved** | 128 (64/64) | +0.000 s (+0.00%) | −0.017..+0.029 s | −0.38%..**+0.63%** | 4.563 (0.066) / 4.566 (0.078) s | replacement: −0.015 s, CI −0.123..+0.078 |
+| tutL: tutorial ×24, 5×5, nvCOMP | **Pass** | 128 (64/64) | −0.013 s (−0.23%) | −0.026..+0.004 s | −0.48%..**+0.07%** | 5.448 (0.115) / 5.433 (0.077) s | +0.030 s, CI −0.043..+0.147 (replacement −0.006 s, CI −0.052..+0.081) |
+| e10216L: EMPIAR-10216 ×3, 5×5, compact | **Unresolved** | 72 (36/36) | +0.001 s (+0.02%) | −0.024..+0.040 s | −0.42%..**+0.70%** | 5.802 (0.109) / 5.813 (0.079) s | +0.041 s, CI −0.083..+0.090 |
+
+No workload shows a resolved slowdown, and all three medians are within ±0.013 s (0.23%) of zero. Two workloads are Unresolved because their pair-to-pair spread is too wide to bound the effect at 0.5%. Their pilots predicted this before the definitive runs: tutG's pilot spread of 0.244 s needed N > 128, so the design ran at the cap with an expected upper bound of 1.16%. e10216L sized N = 72 with an expected bound of 0.49%, and achieved 0.70%. Per the declared design, neither was extended.
+
+- **Venue and lanes.** 4GPUs, A100 80 GB GPU3 `GPU-b2cb2c39…` by UUID. Payload on CPUs 88–95 (NUMA node 1); the driver, `mpstat` and `nvidia-smi` samplers on CPUs 120–123. Each window held `/tmp/motioncorr-bench.lock` and the GPU3 lock throughout:
+
+  | Window | Start–end (UTC, 2026-10-18) | Bench-lock wait |
+  |---|---|---|
+  | tutG | 01:34:35–02:01:03 | 0 s |
+  | tutL | 02:10:22–02:41:22 | 559 s (another worker's window) |
+  | e10216L | 02:41:22–03:00:39 | — |
+  | tutG replacement null | 03:00:54–03:03:57 | — |
+  | tutL replacement null | 03:03:57–03:07:25 | — |
+
+  All windows were under 45 min.
+- **Builds.** The recorded identical Release sm80 + nvCOMP builds: main `71ab841e` `c2263c22…f8dd`, fix `78aae2d3` `29b894f0…c185` (`src/` identical to `e723a737` and to the head). Warm page cache, one discarded warm-up per arm. THP `madvise`. `GLIBC_TUNABLES`, `OMP_PROC_BIND` and `OMP_PLACES` unset; `OMP_NUM_THREADS=8`.
+- **Design** (`raw/perf/4gpus/rule.txt`, recorded before the first timed run): a 6-pair pilot per workload, recorded in `pilot.json` and excluded from the result. N is sized from the pilot to an expected upper bound of ≤ 0.5%, with a floor of 32 and a cap of 128. The definitive phase is exactly N/2 AB + N/2 BA pairs with 16 interleaved AA′ nulls, run once. Exclusion is only for a non-zero exit or a foreign GPU3 process, rerun in the same position.
+- **Integrity:**
+
+  | Workload | Timed runs | Non-zero exits | Foreign GPU3 processes | Rejected pairs | Products |
+  |---|---|---|---|---|---|
+  | tutG | 302 | 0 | 0 | 0 | first AB pair identical |
+  | tutL | 302 | 0 | 0 | 0 | first AB pair identical |
+  | e10216L | 190 | 0 | 0 | 0 | first AB pair identical |
+
+  Product identity uses `lib/identity.compare_trees`: full MRC header except the writer timestamp, payload, path-normalised STAR/EPS.
+- **Host load** (`*/mpstat.txt.gz`, `*/nvidia-smi.csv`, `*/compute-apps.txt`, 10 s samples):
+
+  | Window | 1-min load at start | Other CPUs busy (mean cores) | Other GPUs |
+  |---|---|---|---|
+  | tutG | 1.4 | 1.6 | GPU0–2 0% utilisation; one foreign process seen on GPU1, not GPU3 |
+  | tutL | 12.0 | 4.5 | GPU0–2 0% utilisation |
+  | e10216L | 5.4 | 1.3 | GPU0–2 0% utilisation |
+
+  The payload lane was 20–36% busy.
+- **Null defect, corrected.** The first driver named run directories after the arm label, so the AA′ null's output path contained an apostrophe. That breaks the unquoted Ghostscript command line, and the A′ arm skipped its PDF render with exit code 0. In tutG, A′ ran 0.20 s faster and used 0.51 s less CPU, giving a null median of −0.212 s, CI −0.280..−0.174, which is invalid.
+  - The comparison arms were unaffected: their directories are named A and B.
+  - The fixed driver (`wd11_pairs.fixed.py`) was installed at 02:02:41Z, before the tutL and e10216L driver processes started (02:10:22Z and 02:41:22Z). Their A′ CPU times match A (10.31 vs 10.23 s; 18.19 vs 18.11 s), so their interleaved nulls are valid.
+  - tutG's null is replaced by a separate 16-pair window run with the fixed driver. A tutL replacement null was also run; it was not needed and is reported alongside.
+  - The defective driver is retained as `wd11_pairs.defective.py`. The D14 labels depend only on the comparison CI.
+- **SCARF job `3634350`** (same design; the staged driver was fixed before it could start) was cancelled while still PENDING (`QOSGrpNodeLimit`), so the result is not duplicated (`raw/perf/scarf/CANCELLED-3634350.txt`).
+
+**Earlier exploratory measurement on 4GPUs (`mcprof compare`, superseded by the definitive run above; review R-D11 noted that tutL window 2 retained 11 AB / 9 BA pairs, which is unbalanced).**
 
 `tools/profiling/mcprof.py compare` (docs/profiling.md), main `71ab841e` (`c2263c22…f8dd`) vs fix `78aae2d3` (`29b894f0…c185`; `src/` identical to `e723a737`). Both built by `raw/tools/build.sh`: Release, g++ 13.3.0, CUDA 12.8 sm80, nvCOMP 5.3.0.16, same CMake options. Same lane for every arm: CPUs 88–95 (`taskset`), GPU3 by UUID, THP `madvise`, `GLIBC_TUNABLES` unset, `OMP_PROC_BIND`/`OMP_PLACES` unset. The kit held `/tmp/motioncorr-bench.lock` and the GPU3 lock for each invocation (0 s waits) and settled the GPU first. Inputs on local ext4 (tutorial under `/home`, e10216 under `/mnt/clathrin`), warm page cache: one warm-up run per arm, discarded. Balanced AB/BA order, rounds with foreign CPU on the lane are discarded for both arms, round-1 products compared byte for byte (MRC header with only the writer timestamp masked, payload, path-normalised STAR/EPS). No instrumented, witness or balloon run in these windows.
 
@@ -141,5 +186,5 @@ Window 1 (8 pairs, 99.2% CI = full range): tutG +0.026 s (−0.101..+0.163), nul
 - No genuine sticky-error control (TST2). The fatal path is covered by the unchanged predicate, injected-code tests and the code argument above.
 - The in-product OOM uses one A100 80 GB with a balloon, not a smaller card, and four three-movie sequences.
 - `ProfilingKit` failed at first run in both CUDA-only batches and passed on rerun (above); its cause is not established.
-- The 4GPUs timing (20 pairs) leaves effects below 0.44–2.2% unresolved. The definitive exclusive-node SCARF measurement (job `3634350`) was pending when this was written.
+- Timing (D14): tutL Pass; tutG and e10216L Unresolved (upper bounds +0.63% and +0.70%, no resolved slowdown). The declared design does not allow extension, so those two stay Unresolved unless a new, separately declared measurement is run.
 - #226 D2 and D3 are unchanged and stay open.

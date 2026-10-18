@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""W-D11 paired timing on one exclusive SCARF GPU node: main vs fix, with AA nulls.
+"""W-D11 paired timing: main vs fix, with AA nulls (exclusive SCARF node, or 4GPUs GPU3 in a bench-lock window).
 
 DECLARED DESIGN (fixed before any timed run; the job copies this text to rule.txt first):
   Arms      A = main 71ab841e, B = fix. Null: A vs A' (the same main binary under two labels).
@@ -30,7 +30,9 @@ DECLARED DESIGN (fixed before any timed run; the job copies this text to rule.tx
       tools/profiling/lib/identity.compare_trees (full MRC header except the writer timestamp,
       payload, path-normalised STAR/EPS).
 
-usage: wd11_pairs.py --name W --a BIN --b BIN --data DIR --cpus LIST --src SRCTREE --out DIR -- ARGS...
+usage: wd11_pairs.py --name W --a BIN --b BIN --data DIR --cpus LIST --src SRCTREE --out DIR [--gpu-uuid UUID] -- ARGS...
+  --gpu-uuid restricts the resource-violation check to that GPU (shared host); the caller sets
+  CUDA_VISIBLE_DEVICES for the payload.
 """
 import argparse, json, math, os, resource, shutil, subprocess, sys, threading, time
 from pathlib import Path
@@ -40,8 +42,11 @@ PILOT_PAIRS, N_MIN, N_MAX, NULL_PAIRS, MAX_ATTEMPTS = 6, 32, 128, 16, 3
 Z_MEDIAN = 1.96 * 1.2533
 
 
+GPU_SEL = []
+
+
 def gpu_pids():
-    r = subprocess.run(['nvidia-smi', '--query-compute-apps=pid', '--format=csv,noheader'],
+    r = subprocess.run(['nvidia-smi'] + GPU_SEL + ['--query-compute-apps=pid', '--format=csv,noheader'],
                        capture_output=True, text=True)
     if r.returncode != 0:
         return None
@@ -60,8 +65,13 @@ def main():
     ap = argparse.ArgumentParser()
     for k in ('name', 'a', 'b', 'data', 'cpus', 'src', 'out'):
         ap.add_argument('--' + k, required=True)
+    ap.add_argument('--gpu-uuid', default=None)
+    ap.add_argument('--null-only', action='store_true',
+                    help='replacement null: warm-up, then 8 null blocks [AA\', A\'A] only')
     ap.add_argument('args', nargs=argparse.REMAINDER)
     o = ap.parse_args()
+    if o.gpu_uuid:
+        GPU_SEL[:] = ['-i', o.gpu_uuid]
     args = [x for x in o.args if x != '--']
     sys.path.insert(0, str(Path(o.src) / 'tools' / 'profiling'))
     from lib import stats, identity  # noqa: E402
@@ -76,7 +86,9 @@ def main():
 
     def run(phase, arm, binary, keep=False):
         seq[0] += 1
-        dst = scratch / f'{seq[0]:04d}-{arm}'
+        # The label must not reach the output path: an apostrophe there breaks the unquoted
+        # Ghostscript command line, the A' arm silently skips its PDF render, and the null is biased.
+        dst = scratch / f'{seq[0]:04d}-{arm.replace(chr(39), "p")}'
         dst.mkdir()
         before = gpu_pids()
         r0 = resource.getrusage(resource.RUSAGE_CHILDREN)
@@ -121,6 +133,24 @@ def main():
 
     A, B, A2 = ('A', o.a), ('B', o.b), ("A'", o.a)
     run('warmup', *A); run('warmup', *B)
+    if o.null_only:
+        null = []
+        for pos in range(1, NULL_PAIRS + 1):
+            first, second = (A, A2) if pos % 2 else (A2, A)
+            w, _ = pair('null-only', first, second, 'null', pos)
+            if w is None:
+                sys.exit(f'{o.name}: null pair {pos} rejected {MAX_ATTEMPTS} times')
+            null.append({'order': first[0] + second[0], 'd': w["A'"] - w['A'], 'A': w['A'], "A'": w["A'"]})
+        d0 = [x['d'] for x in null]
+        ci0 = stats.median_ci(d0)
+        res = {'workload': o.name, 'null_pairs': len(d0), 'null_median_s': stats.median(d0),
+               'null_ci95_s': ci0[:2] if ci0 else None, 'null_ci_confidence': ci0[2] if ci0 else None,
+               'null_range_s': [min(d0), max(d0)], 'median_wall_A_s': stats.median([x['A'] for x in null]),
+               'pairs': null}
+        (out / 'null_result.json').write_text(json.dumps(res, indent=1))
+        print(json.dumps({k: res[k] for k in ('workload', 'null_pairs', 'null_median_s', 'null_ci95_s', 'null_range_s')}))
+        shutil.rmtree(scratch, ignore_errors=True)
+        return
 
     # Pilot: excluded from the result.
     pilot = []

@@ -127,9 +127,52 @@ Per the coordinator's updated resource policy (no timing on `4GPUs`; SCARF `ibis
 - **Lock & Lane:** `/tmp/motioncorr-cpu64-bench.lock` held via `tools/profiling/mcprof.py compare`; payload pinned to CPUs `48-55` (`--j 8`), sampler pinned to CPUs `56-59`.
 - **Workload:** 2-movie tutorial subset (`/home/ubuntu/mc-rc0-paired-20261017/work/tutorial/movies.star`, sha256 `65b1c972db5b06f4bd556f3118948ee0da35589a1f06e8a120ce33ffc7724f05`), `--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref gain.mrc --seed 1 --expected_frames 24 --j 8` (**without** `--skip_report_pdf`).
 
-| Comparison | Retained Pairs (Order) | Arm A Med Wall (IQR, Range) | Arm B Med Wall (IQR, Range) | Median $\Delta T = B - A$ | 95%+ CI of Median | Sign Test | Noise ($1.4826 \cdot \text{MAD}$) | Null Max $|\Delta T|$ | Verdict (`mcprof compare`) | Product Identity |
+| Comparison | Retained Pairs (Order) | Arm A Med Wall (IQR, Range) | Arm B Med Wall (IQR, Range) | Median $\Delta T = B - A$ | 95%+ CI of Median | Sign Test | Noise ($1.4826 \cdot \text{MAD}$) | Null Max $|\Delta T|$ | Verdict (`mcprof compare` / D14) | Product Identity |
 |---|---|---|---|---|---|---|---|---|---|---|
-| **`fix` vs `main` (AB/BA)** | `8 / 8` (`4 AB, 4 BA`, `0` discarded, `0.00` foreign lane cores) | `17.630 s` (`0.130 s`, `17.511–17.661 s`) | `17.681 s` (`0.282 s`, `17.494–18.367 s`) | **`+0.051 s` (`+0.29%`)** | **`[-0.131, +0.717] s`** (`99.2%`) | `4+/4-` (`p = 1.000`) | `0.141 s` | `0.293 s` (`0.050 s` ex. 1 spike) | **not resolved (below noise `0.424 s`)** — no regression | **PASS** (`12` files, `2` MRCs) |
-| **`main_null` vs `main` (AA null)** | `6 / 6` (`3 AB, 3 BA`, `0` discarded, `0.00` foreign lane cores) | `17.703 s` (`0.042 s`, `17.650–17.832 s`) | `17.691 s` (`0.059 s`, `17.650–18.125 s`) | **`+0.018 s` (`+0.10%`)** | **`[-0.049, +0.293] s`** (`96.9%`) | `4+/2-` (`p = 0.688`) | `0.067 s` | `0.293 s` | **not resolved (below noise `0.171 s`)** | **PASS** (`12` files, `2` MRCs) |
+| **Round-0 `fix` vs `main` (AB/BA)** | `8 / 8` (`4 AB, 4 BA`, `0` discarded, `0.00` foreign lane cores) | `17.630 s` (`0.130 s`, `17.511–17.661 s`) | `17.681 s` (`0.282 s`, `17.494–18.367 s`) | **`+0.051 s` (`+0.29%`)** | **`[-0.131, +0.717] s`** (`99.2%`, upper bound **`+4.06%`**) | `4+/4-` (`p = 1.000`) | `0.141 s` | `0.293 s` (`0.050 s` ex. 1 spike) | **Unresolved** (`not resolved (below noise 0.424 s)`; CI upper bound `+4.06% > +0.5%`) | **PASS** (`12` files, `2` MRCs) |
+| **Round-0 `main_null` vs `main` (AA null)** | `6 / 6` (`3 AB, 3 BA`, `0` discarded, `0.00` foreign lane cores) | `17.703 s` (`0.042 s`, `17.650–17.832 s`) | `17.691 s` (`0.059 s`, `17.650–18.125 s`) | **`+0.018 s` (`+0.10%`)** | **`[-0.049, +0.293] s`** (`96.9%`) | `4+/2-` (`p = 0.688`) | `0.067 s` | `0.293 s` | **not resolved (below noise `0.171 s`)** | **PASS** (`12` files, `2` MRCs) |
 
-Raw artifacts: `raw/cpu64_timing/ab_compare/{provenance.json,runs.jsonl,identity.json,compare.json,report.md}` and `raw/cpu64_timing/aa_null/{provenance.json,runs.jsonl,identity.json,compare.json,report.md}`.
+Raw round-0 artifacts: `raw/cpu64_timing/ab_compare/{provenance.json,runs.jsonl,identity.json,compare.json,report.md}` and `raw/cpu64_timing/aa_null/{provenance.json,runs.jsonl,identity.json,compare.json,report.md}`.
+
+---
+
+## 8. Revision Round 1: Pilot Study & Pre-Specified Definitive Design (D14)
+
+At $N = 8$ pairs, the binomial order-statistic CI (`tools/profiling/lib/stats.py` `median_ci`) uses the sample minimum and maximum (`[d(1), d(8)]`, `99.22%` coverage), so a single ext4 disk-writeback spike (`+0.717 s` in round 8 on `/dev/vda1`) set the upper confidence bound to `+4.06%`, leaving the 8-pair comparison **unresolved** under the maintainer's **D14 `+0.5%` margin**.
+
+### A. Separate Pilot Study (`raw/cpu64_pilot/`, excluded from the definitive result)
+To select the workload with the best relative precision per unit time and size $N$ in advance, a separate 4-pair balanced AB/BA pilot (`r01..r04` alternating `AB, BA, AB, BA`, plus 1 discarded warmup per arm) was run on `cpu64` under `/tmp/motioncorr-cpu64-bench.lock` (`CPUs 48-55`, `--j 8`, `mcprof` sampler on `56-59`, THP `madvise`, inputs and run trees staged in `/dev/shm` `tmpfs` to eliminate virtual-disk writeback stalls, report generation ON):
+
+| Pilot Workload | Pairs | `main` Med Wall $T_{\text{main}}$ | Pair Time ($2 T_{\text{main}}$) | Paired Diffs $d = \text{fix} - \text{main}$ (s) | SD $s_d$ (s) | Robust SD $1.4826\cdot\text{MAD}$ (s) | $\sigma_{\text{rel}} = \frac{\max(s_d, \text{MAD}_{\text{sd}})}{T_{\text{main}}}$ | Relative Precision per $\sqrt{\text{min}}$ ($\sigma_{\text{rel}}\sqrt{2T_{\text{main}}/60}$) | Expected CI Half-Width at $N=32$ ($0.516\,\sigma_{\text{rel}}$) |
+|---|---|---|---|---|---|---|---|---|---|
+| **2-movie tutorial (`movies2.star`)** | `4` (`2 AB, 2 BA`) | `17.5711 s` | `35.14 s` | `+0.0858, +0.0554, -0.0180, +0.0025` | `0.0477 s` (`0.271%`) | `0.0544 s` (`0.310%`) | **`0.3098%`** | **`0.2371%`** | **`0.1598%`** ($\le 0.50\%$) |
+| **8-movie tutorial (`movies8.star`)** | `4` (`2 AB, 2 BA`) | `68.6199 s` | `137.24 s` | `-0.7921, +0.5156, +0.8426, +0.7057` | `0.7521 s` (`1.096%`) | `0.2424 s` (`0.353%`) | **`1.0960%`** | **`1.6576%`** | **`0.5652%`** ($> 0.50\%$) |
+
+**Workload selection from pilot:** The **2-movie tutorial workload (`movies2.star`)** achieves **`0.2371%` vs `1.6576%`** relative spread per $\sqrt{\text{minute}}$ (**7.0× better relative precision per unit time** than the 8-movie workload, because pairing A and B across a 17.6 s window cancels background host drift far better than across a 68.6 s window), while exercising the full multi-movie report path (`corrected_micrographs.star`, all 3 `MDavg.addToCPlot2D(plot2Db, EMDL_UNDEFINED, label, 1.)` calls producing `corrected_micrographs_all_rlnAccumMotion{Total,Early,Late}.eps`, per-movie `_shifts.eps`, and `logfile.pdf`).
+
+### B. Pre-Specified Definitive Design (`run_definitive_cpu64.sh`, fixed before execution)
+1. **Venue & Lock:** `cpu64` (`small-refmac-machine`, 2× AMD EPYC 7763 64-Core Processor, THP `always [madvise] never`, `GLIBC_TUNABLES` unset), holding `/tmp/motioncorr-cpu64-bench.lock` via `flock`.
+2. **Binaries, Affinity & Threads:** Matched Release CPU binaries (`main` `1afa03b5` sha256 `307a030b03785201342a57c4d8adae14120d87676fa6bec7e62f8959d5b03a35`; `fix` `b82d25f4` sha256 `68dc7ac11049bb15be3caa90af10adb6c7bb7e44b752d797080b9ca1a79d96f9`), payload pinned to `CPUs 48-55` (single 8-core CCD on NUMA node 1, `--j 8`, `OMP_NUM_THREADS=8`), `mcprof` sampler pinned to `CPUs 56-59`.
+3. **Workload & Options:** `movies2.star` (`20170629_00021_frameImage.tiff`, `20170629_00022_frameImage.tiff`, sha256 `aa019332ca8825b26f89ffd94d382f46a1a64749b052ede953a48e40107fd69e`) + `gain.mrc` staged in `/dev/shm` `tmpfs`; options `--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref gain.mrc --seed 1 --expected_frames 24 --j 8` (**report generation ON**, no `--skip_report_pdf`).
+4. **Sample Size, Seed & Deterministic Order:**
+   - **AB/BA (`main` vs `fix`):** `1` unrecorded warmup per arm (`r00`), followed by **$N = 32$ pairs** (`--pairs 32 --max-rounds 32`), deterministic alternating order: odd rounds `r01, r03, ..., r31` = `AB` (`16` pairs) and even rounds `r02, r04, ..., r32` = `BA` (`16` pairs) — **exact `16 AB / 16 BA` balance**. At $N = 32$, `stats.median_ci` selects order statistics `[d(10), d(23)]` (`97.99%` coverage, $z = 0.516$), giving an expected CI half-width of $0.516 \times 0.3098\% = \mathbf{0.160\%} \le +0.50\%$ (`+0.088 s`).
+   - **AA Null (`main` vs `main_null`):** `1` unrecorded warmup per arm (`r00`), followed by **$N_{\text{null}} = 12$ pairs** (`--pairs 12 --max-rounds 12`), deterministic alternating order: odd rounds `r01, r03, ..., r11` = `AB` (`6` pairs) and even rounds `r02, r04, ..., r12` = `BA` (`6` pairs) — **exact `6 AB / 6 BA` balance** (`stats.median_ci` order statistics `[d(3), d(10)]`, `96.14%` coverage).
+   - ** MotionCorr RNG seed:** `--seed 1` (deterministic hot-pixel RNG).
+5. **Exclusion Rule:** Before each round `mcprof` waits up to `300 s` (`--lane-wait 300`) for `CPUs 48-55` foreign CPU $\le 0.25$ cores. A pair is discarded only if either arm has `rc != 0`, `< 2` MRC products, an unverified executable image, a payload affinity mismatch (`!= [48..55]`), or recorded foreign lane CPU $> 0.25$ cores during the run; any discard removes both arms of the pair. The declared design is run **once** (`--pairs 32 --max-rounds 32` and `--pairs 12 --max-rounds 12`) without adding runs.
+6. **D14 Decision Rule:**
+   - **Pass:** no resolved slowdown, and upper $\ge 95\%$ CI bound of $\text{median}(\text{fix} - \text{main}) \le +0.5\%$ of $\text{median}(\text{main})$ whole-job wall time.
+   - **Unresolved:** no resolved slowdown, and upper $\ge 95\%$ CI bound $> +0.5\%$ of $\text{median}(\text{main})$.
+   - **Fail:** resolved slowdown.
+
+### C. Definitive Comparison Results (`raw/cpu64_definitive/`)
+
+Executed once on `cpu64` under `/tmp/motioncorr-cpu64-bench.lock` (`2026-10-18T01:57:57Z` to `2026-10-18T02:25:36Z`, `0` discarded pairs in both series, max foreign CPU on `CPUs 48-55` $\le 0.006$ cores, host `load1 = 5.10–10.19`):
+
+| Series | Retained Pairs (Order) | Arm A Med Wall (IQR, Range) | Arm B Med Wall (IQR, Range) | Median $\Delta T = B - A$ | $\ge 95\%$ CI of Median | Upper CI Bound vs `main` Med | Sign Test | Noise ($1.4826 \cdot \text{MAD}$) | Null Max $|\Delta T|$ | `mcprof compare` Verdict | **D14 Verdict (`+0.5%` = `+0.0870 s`)** | Product Identity |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Definitive `fix` vs `main` (`ab_32`)** | `32 / 32` (`16 AB, 16 BA`, `0` discarded) | `17.398 s` (`0.113 s`, `17.228–17.561 s`) | `17.400 s` (`0.086 s`, `17.237–17.616 s`) | **`-0.000068 s` (`-0.0004%`)** | **`[-0.084329, +0.051712] s`** (`[-0.4847%, +0.2972%]`, `97.99%` cov., `[d(10), d(23)]`) | **`+0.051712 s` (`+0.2972%` $\le +0.50\%$)** | `16+/16-` (`p = 1.000`) | `0.115883 s` (`0.6661%`) | `0.258634 s` (`1.4799%`) | `not resolved (below noise 0.116 s)` | **`Pass`** (`+0.2972% <= +0.50%`) | **PASS** (`12` files, `2` MRCs) |
+| **Definitive `main_null` vs `main` (`aa_12`)** | `12 / 12` (`6 AB, 6 BA`, `0` discarded) | `17.476 s` (`0.078 s`, `17.377–17.612 s`) | `17.425 s` (`0.061 s`, `17.349–17.511 s`) | **`-0.042996 s` (`-0.2460%`)** | **`[-0.180871, +0.038215] s`** (`[-1.0350%, +0.2187%]`, `96.14%` cov., `[d(3), d(10)]`) | `+0.038215 s` (`+0.2187%`) | `4+/8-` (`p = 0.388`) | `0.111503 s` (`0.6380%`) | `0.258634 s` (`1.4799%`) | `not resolved (below noise 0.112 s)` | — (null control) | **PASS** (`12` files, `2` MRCs) |
+
+- **Positional breakdown (`ab_32`):** When `fix` ran second (`AB`, $n = 16$), median $\Delta T = -0.078\text{ s}$; when `fix` ran first (`BA`, $n = 16$), median $\Delta T = +0.054\text{ s}$; second-position cost $= -0.066\text{ s}$.
+- **Paired IQR (`ab_32`):** `[-0.090088, +0.057857] s`; full range `[-0.141, +0.276] s`.
+- **Raw artifacts:** `run_definitive_cpu64.sh`, `raw/cpu64_definitive/definitive_summary.json`, `raw/cpu64_definitive/ab_32/{provenance.json,runs.jsonl,identity.json,compare.json,report.md}`, and `raw/cpu64_definitive/aa_12/{provenance.json,runs.jsonl,identity.json,compare.json,report.md}`.

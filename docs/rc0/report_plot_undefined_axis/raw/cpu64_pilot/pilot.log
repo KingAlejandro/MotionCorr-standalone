@@ -1,0 +1,99 @@
+=== 0. Pilot Provenance (cpu64) ===
+2026-10-18T01:36:12Z
+small-refmac-machine
+Linux small-refmac-machine 6.8.0-86-generic #87-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 22 18:03:36 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+CPU(s):                               64
+Model name:                           AMD EPYC 7763 64-Core Processor
+Thread(s) per core:                   1
+Socket(s):                            2
+NUMA node(s):                         2
+NUMA node0 CPU(s):                    0-31
+NUMA node1 CPU(s):                    32-63
+always [madvise] never
+GLIBC_TUNABLES=<unset>
+cmake version 4.4.3
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+10.02.1
+Python 3.12.3
+307a030b03785201342a57c4d8adae14120d87676fa6bec7e62f8959d5b03a35  /home/ubuntu/mc-w-d13/build-main/motioncorr
+68dc7ac11049bb15be3caa90af10adb6c7bb7e44b752d797080b9ca1a79d96f9  /home/ubuntu/mc-w-d13/build-fix/motioncorr
+aa019332ca8825b26f89ffd94d382f46a1a64749b052ede953a48e40107fd69e  movies2.star
+eef3adc4330dcf9a6fef568818595fffea15dc8c3215040f1733884d2b121c6d  movies8.star
+8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1  gain.mrc
+df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0  Movies/20170629_00021_frameImage.tiff
+cc55f13d606463acbad23a4d42f2e48e60ee9cd783eeca0f1957a103b748ac47  Movies/20170629_00022_frameImage.tiff
+87c2640f5c2200c2f8e62e7dd50f4aa2d694fac2238743560b7c705fb0e61f3f  Movies/20170629_00023_frameImage.tiff
+70e075416ee6b682600277b21bf626c51f2c0b98f0f23dafe6a3478ea1766595  Movies/20170629_00024_frameImage.tiff
+798cf7b0cd24aef070d69525543214bdd60a3900667d7d3a32dfe3bffe9fce1a  Movies/20170629_00025_frameImage.tiff
+f989391b9d0e3e3b927a8de59d60179ade0b7ae5075ce7c3a9a5002ae2254ae3  Movies/20170629_00026_frameImage.tiff
+adb4fbf597ca78387b22c4a2452c7351499f7b78fb2da67bc5fdd52e4bc58a39  Movies/20170629_00027_frameImage.tiff
+b990365a74752daecbf437aab4b6b235197bf9932f18541246ed1e72ea629e2c  Movies/20170629_00028_frameImage.tiff
+=== Waiting for /tmp/motioncorr-cpu64-bench.lock 2026-10-18T01:36:14Z ===
+=== Acquired /tmp/motioncorr-cpu64-bench.lock 2026-10-18T01:38:53Z ===
+=== 1. Pilot Workload A: 2-movie tutorial (4 balanced AB/BA pairs, warmup 1, CPUs 48-55) ===
+mcprof: main     warmup r00 wall 17.641 s
+mcprof: fix      warmup r00 wall 17.569 s
+mcprof: main     round  r01 wall 17.543 s
+mcprof: fix      round  r01 wall 17.629 s
+mcprof: fix      round  r02 wall 17.571 s
+mcprof: main     round  r02 wall 17.515 s
+mcprof: main     round  r03 wall 17.599 s
+mcprof: fix      round  r03 wall 17.581 s
+mcprof: fix      round  r04 wall 17.615 s
+mcprof: main     round  r04 wall 17.612 s
+mcprof: wrote /dev/shm/mc-w-d13-pilot/pilot_2mov/report.md
+=== 2. Pilot Workload B: 8-movie tutorial (4 balanced AB/BA pairs, warmup 1, CPUs 48-55) ===
+mcprof: main     warmup r00 wall 69.095 s
+mcprof: fix      warmup r00 wall 69.803 s
+mcprof: main     round  r01 wall 68.981 s
+mcprof: fix      round  r01 wall 68.189 s
+mcprof: fix      round  r02 wall 68.763 s
+mcprof: main     round  r02 wall 68.248 s
+mcprof: main     round  r03 wall 68.976 s
+mcprof: fix      round  r03 wall 69.818 s
+mcprof: fix      round  r04 wall 68.970 s
+mcprof: main     round  r04 wall 68.264 s
+mcprof: wrote /dev/shm/mc-w-d13-pilot/pilot_8mov/report.md
+{
+  "pilot_2mov": {
+    "label": "2-movie tutorial",
+    "n_pairs": 4,
+    "main_median_s": 17.5711,
+    "fix_median_s": 17.5977,
+    "diffs_s": [
+      0.0858,
+      0.0554,
+      -0.018,
+      0.0025
+    ],
+    "median_diff_s": 0.0289,
+    "sd_diff_s": 0.0477,
+    "robust_sd_mad_s": 0.0544,
+    "iqr_diff_s": 0.0657,
+    "rel_sigma_pct": 0.3098,
+    "pair_time_s": 35.14,
+    "rel_sigma_per_sqrt_min_pct": 0.2371,
+    "expected_ci_halfwidth_pct_at_N32": 0.1598
+  },
+  "pilot_8mov": {
+    "label": "8-movie tutorial",
+    "n_pairs": 4,
+    "main_median_s": 68.6199,
+    "fix_median_s": 68.8667,
+    "diffs_s": [
+      -0.7921,
+      0.5156,
+      0.8426,
+      0.7057
+    ],
+    "median_diff_s": 0.6107,
+    "sd_diff_s": 0.7521,
+    "robust_sd_mad_s": 0.2424,
+    "iqr_diff_s": 0.5513,
+    "rel_sigma_pct": 1.096,
+    "pair_time_s": 137.24,
+    "rel_sigma_per_sqrt_min_pct": 1.6576,
+    "expected_ci_halfwidth_pct_at_N32": 0.5652
+  }
+}
+PILOT_CPU64_COMPLETE 2026-10-18T01:53:32Z

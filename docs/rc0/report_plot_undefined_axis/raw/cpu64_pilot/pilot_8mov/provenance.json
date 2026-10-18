@@ -1,0 +1,187 @@
+{
+ "instrument": "mcprof compare",
+ "command": [
+  "/home/ubuntu/mc-w-d13/src-fix/tools/profiling/mcprof.py",
+  "compare",
+  "main=/home/ubuntu/mc-w-d13/build-main/motioncorr",
+  "fix=/home/ubuntu/mc-w-d13/build-fix/motioncorr",
+  "--source",
+  "main=/home/ubuntu/mc-w-d13/src-main",
+  "--source",
+  "fix=/home/ubuntu/mc-w-d13/src-fix",
+  "--commit",
+  "main=1afa03b57afbae42138ee30c3545b57b5a74c321",
+  "--commit",
+  "fix=b82d25f4dda6bca746e4206fed1272851cc6a5ce",
+  "--data",
+  "/dev/shm/mc-w-d13-pilot/data",
+  "--star",
+  "movies8.star",
+  "--work",
+  "/dev/shm/mc-w-d13-pilot/pilot_8mov",
+  "--cpus",
+  "48-55",
+  "--runner-cpus",
+  "56-59",
+  "--no-lock",
+  "--warmup",
+  "1",
+  "--pairs",
+  "4",
+  "--max-rounds",
+  "6",
+  "--",
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.277",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--bfactor",
+  "150",
+  "--gainref",
+  "gain.mrc",
+  "--seed",
+  "1",
+  "--expected_frames",
+  "24",
+  "--j",
+  "8"
+ ],
+ "kit": {
+  "path": "/home/ubuntu/mc-w-d13/src-fix/tools/profiling",
+  "commit": null,
+  "dirty": null
+ },
+ "binaries": {
+  "main": {
+   "path": "/home/ubuntu/mc-w-d13/build-main/motioncorr",
+   "realpath": "/home/ubuntu/mc-w-d13/build-main/motioncorr",
+   "sha256": "307a030b03785201342a57c4d8adae14120d87676fa6bec7e62f8959d5b03a35",
+   "size": 2614536,
+   "source": {
+    "source_dir": "/home/ubuntu/mc-w-d13/src-main",
+    "commit": "1afa03b57afbae42138ee30c3545b57b5a74c321",
+    "dirty": null,
+    "origin": "given on command line"
+   },
+   "has_profile_option": true,
+   "has_device_timing_option": true,
+   "device_timing_detection": "--use_own --help",
+   "linked": {
+    "libfftw3.so.3": "/lib/x86_64-linux-gnu/libfftw3.so.3",
+    "libfftw3f.so.3": "/lib/x86_64-linux-gnu/libfftw3f.so.3",
+    "libtiff.so.6": "/lib/x86_64-linux-gnu/libtiff.so.6"
+   }
+  },
+  "fix": {
+   "path": "/home/ubuntu/mc-w-d13/build-fix/motioncorr",
+   "realpath": "/home/ubuntu/mc-w-d13/build-fix/motioncorr",
+   "sha256": "68dc7ac11049bb15be3caa90af10adb6c7bb7e44b752d797080b9ca1a79d96f9",
+   "size": 2614536,
+   "source": {
+    "source_dir": "/home/ubuntu/mc-w-d13/src-fix",
+    "commit": "b82d25f4dda6bca746e4206fed1272851cc6a5ce",
+    "dirty": null,
+    "origin": "given on command line"
+   },
+   "has_profile_option": true,
+   "has_device_timing_option": true,
+   "device_timing_detection": "--use_own --help",
+   "linked": {
+    "libfftw3.so.3": "/lib/x86_64-linux-gnu/libfftw3.so.3",
+    "libfftw3f.so.3": "/lib/x86_64-linux-gnu/libfftw3f.so.3",
+    "libtiff.so.6": "/lib/x86_64-linux-gnu/libtiff.so.6"
+   }
+  }
+ },
+ "host": {
+  "hostname": "small-refmac-machine",
+  "platform": "Linux-6.8.0-86-generic-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "cpu_count": 64,
+  "load1_5_15": [
+   9.5927734375,
+   9.14990234375,
+   7.88623046875
+  ],
+  "lane_cpus": [
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   54,
+   55
+  ],
+  "time_utc": "2026-10-18T01:41:55Z",
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "clocksource": "kvm-clock",
+  "thp_enabled": "always [madvise] never",
+  "thp_defrag": "always defer defer+madvise [madvise] never",
+  "perf_event_paranoid": "4",
+  "env": {
+   "OMP_NUM_THREADS": "8"
+  }
+ },
+ "gpu": null,
+ "arms": [
+  "main",
+  "fix"
+ ],
+ "input": {
+  "cwd": "/dev/shm/mc-w-d13-pilot/data",
+  "star": "movies8.star",
+  "movies": [
+   "Movies/20170629_00021_frameImage.tiff",
+   "Movies/20170629_00022_frameImage.tiff",
+   "Movies/20170629_00023_frameImage.tiff",
+   "Movies/20170629_00024_frameImage.tiff",
+   "Movies/20170629_00025_frameImage.tiff",
+   "Movies/20170629_00026_frameImage.tiff",
+   "Movies/20170629_00027_frameImage.tiff",
+   "Movies/20170629_00028_frameImage.tiff"
+  ],
+  "staged": false,
+  "star_sha256": "eef3adc4330dcf9a6fef568818595fffea15dc8c3215040f1733884d2b121c6d"
+ },
+ "payload_args": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.277",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--bfactor",
+  "150",
+  "--gainref",
+  "gain.mrc",
+  "--seed",
+  "1",
+  "--expected_frames",
+  "24",
+  "--j",
+  "8"
+ ],
+ "payload_env": {},
+ "locks": [],
+ "noise_floor_s": 0.0,
+ "vram_instrument": "none",
+ "allow_product_difference": false,
+ "settle": {
+  "settled": true,
+  "waited_s": 0.0
+ },
+ "series": {
+  "target_clean_rounds": 4,
+  "max_rounds": 6,
+  "rounds_run": 4,
+  "clean_rounds": 4,
+  "reached_target": true
+ }
+}

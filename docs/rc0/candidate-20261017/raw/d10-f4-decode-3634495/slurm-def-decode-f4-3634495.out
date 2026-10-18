@@ -1,0 +1,27 @@
+cpu-bind=MASK - cn1091, task  0  0 [42769]: mask 0xffffffffffffffff set
+=== 0. Provenance ===
+2026-10-18T09:09:25Z
+cn1091.scarf.rl.ac.uk
+CPU(s):                                  64
+Model name:                              AMD EPYC 7502P 32-Core Processor
+Thread(s) per core:                      2
+Socket(s):                               1
+NUMA node(s):                            4
+NUMA node0 CPU(s):                       0-7,32-39
+NUMA node1 CPU(s):                       8-15,40-47
+NUMA node2 CPU(s):                       16-23,48-55
+NUMA node3 CPU(s):                       24-31,56-63
+[always] madvise never
+GLIBC_TUNABLES=<unset>
+cmake version 3.31.8
+g++ (GCC) 11.5.0 20240719 (Red Hat 11.5.0-14)
+Python 3.9.25
+6bb669407e1ac426f2053fafa0a75bff481b26c131de2827324731e4159a226e  /tmp/wd10-decf4-3634495/build-main-helper/runner_numerics
+15f6e2c80a602c4878ae1916a29e0971df9982a6a4e2eac594db5bfab6c44746  /tmp/wd10-decf4-3634495/build-fix/runner_numerics
+2a46fd6123a7240e95acb324681c281964ec21da9037e05d66d9ab37319e9fed  /tmp/wd10-decf4-3634495/data/e10474f4.eer
+e10474f4: completed 8/32 AB/BA pairs
+e10474f4: completed 16/32 AB/BA pairs
+e10474f4: completed 24/32 AB/BA pairs
+e10474f4: completed 32/32 AB/BA pairs
+DONE e10474f4: main=83.1310s fix=83.1200s diff=-0.0092s (-0.01%) CI=[-0.0528, +0.0016]s ([-0.06%, +0.00%]) null_max=0.1520s
+DEF_DECODE_F4_COMPLETE 2026-10-18T11:15:10Z

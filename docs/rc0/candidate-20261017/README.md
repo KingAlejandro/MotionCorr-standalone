@@ -350,3 +350,20 @@ The remaining findings are adopted in §8.1, §8.2 and §10:
 - the `bench_polls_held` count wording;
 - the #202 `ci.yml` delta;
 - `metadata_table.cpp:1721`.
+
+## 12. Supplementary D10 decode timing, Falcon 4 (SCARF job 3634495)
+
+This was recorded after #231 merged and is supplementary to its accepted D14 evidence. The raw files are in `raw/d10-f4-decode-3634495/`, copied from SCARF `/work4/scd/scarf1415/W-D10/` on 2026-10-18. The earlier local copy was lost when the Mac's `/tmp` was cleared on reboot.
+
+**Setup**
+- **Node:** exclusive SCARF CPU node `cn1091`, AMD EPYC 7502P, THP `madvise`, GCC 11.5.0, cmake 3.31.8.
+- **Workload:** `runner_numerics count_eer`, upsampling 1, 16 threads, `taskset -c 0-15`.
+- **Input:** one EMPIAR-10474 Falcon 4 movie, `e10474f4.eer`, sha256 `2a46fd61…9fed`.
+- **Arms:** main-helper `runner_numerics` sha256 `6bb66940…226e`; fix `runner_numerics` sha256 `15f6e2c8…4746`. Both were built from tarballs. The job does not record the tarballs' source revisions, so identify the arms by these binary hashes.
+- **Design:** 32 AB/BA pairs, then 12 AA nulls run sequentially. The maintainer accepted the sequential nulls on 2026-10-18.
+
+**Result**
+- Median main 83.131 s; fix − main −0.009 s (−0.01 %).
+- CI −0.053 … +0.0016 s at 98.0 % coverage, so the upper bound is +0.002 %, within the 0.5 % rule.
+- Largest null |Δ| 0.152 s.
+- Attempt 1 (job 3634352) hit its time limit before producing a Falcon 4 statistic.

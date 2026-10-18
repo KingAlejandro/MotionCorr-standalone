@@ -123,7 +123,7 @@
   "group": "B",
   "case": "headers removed: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['window 1: missing or incomplete header', 'window 2: missing or incomplete header', 'comparison pairs 0 (0 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval (too few pairs)']"
+  "detail": "label=INCOMPLETE reasons=['window 1: missing or incomplete header', 'window 1: completion marker inconsistent with the header or budget, or late', 'window 2: missing or incomplete header', 'window 2: completion marker inconsistent with the header or budget, or late', 'comparison pairs 0 (0 AB / 0 BA"
  },
  {
   "group": "B",
@@ -135,7 +135,7 @@
   "group": "B",
   "case": "payload records removed: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=[\"window 1: expected warmup payload main seq 1, found {'pair': 'AB', 'position': 1, 'order': 'main,fix', 'attempt': 1, 'retained': Tru\", \"window 2: expected warmup payload main seq 1, found {'pair': 'AB', 'position': 1, 'order': 'main,fix', 'attempt': 1, 'retained': Tru\", 'c"
+  "detail": "label=INCOMPLETE reasons=[\"window 1: expected warmup payload main seq 1, found {'pair': 'AB', 'position': 1, 'order': 'main,fix', 'attempt': 1, 'retained': Tru\", 'window 1: completion marker inconsistent with the header or budget, or late', \"window 2: expected warmup payload main seq 1, found {'pair"
  },
  {
   "group": "B",
@@ -147,13 +147,43 @@
   "group": "B",
   "case": "record order reversed: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['window 1: missing or incomplete header', 'window 2: missing or incomplete header', 'comparison pairs 0 (0 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval (too few pairs)']"
+  "detail": "label=INCOMPLETE reasons=['window 1: missing or incomplete header', 'window 1: completion marker inconsistent with the header or budget, or late', 'window 2: missing or incomplete header', 'window 2: completion marker inconsistent with the header or budget, or late', 'comparison pairs 0 (0 AB / 0 BA"
  },
  {
   "group": "B",
   "case": "retained walls differ from payloads: INCOMPLETE",
   "ok": true,
   "detail": "label=INCOMPLETE reasons=['window 1: position 1: retained walls differ from the payload records', 'window 2: position 1: retained walls differ from the payload records', 'comparison pairs 0 (0 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval (too few pairs)']"
+ },
+ {
+  "group": "B",
+  "case": "every payload reports CPU mask 0: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: position 1: retained payload lacks its CPU-mask or product evidence', 'window 2: position 1: retained payload lacks its CPU-mask or product evidence', 'comparison pairs 0 (0 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval "
+ },
+ {
+  "group": "B",
+  "case": "mask and PDF-page observations removed: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: position 1: retained payload lacks its CPU-mask or product evidence', 'window 2: position 1: retained payload lacks its CPU-mask or product evidence', 'comparison pairs 0 (0 AB / 0 BA), declared 256 balanced', 'null pairs 0, declared 16', 'no confidence interval "
+ },
+ {
+  "group": "B",
+  "case": "header with overlapping masks and no locks: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: header does not match the manifest (venue, GPU, masks, locks or budget)', 'window 2: header does not match the manifest (venue, GPU, masks, locks or budget)']"
+ },
+ {
+  "group": "B",
+  "case": "identity true but with problems, zero comparisons, position 99: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: product identity failed, missing or inconsistent', 'window 2: product identity failed, missing or inconsistent']"
+ },
+ {
+  "group": "B",
+  "case": "marker deadline beyond the header deadline: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: completion marker inconsistent with the header or budget, or late']"
  },
  {
   "group": "B",
@@ -189,7 +219,7 @@
   "group": "B",
   "case": "identity failed: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['window 1: product identity failed or missing']"
+  "detail": "label=INCOMPLETE reasons=['window 1: product identity failed, missing or inconsistent']"
  },
  {
   "group": "B",
@@ -201,7 +231,7 @@
   "group": "B",
   "case": "header for another venue: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['window 1: header does not match the manifest']"
+  "detail": "label=INCOMPLETE reasons=['window 1: header does not match the manifest (venue, GPU, masks, locks or budget)']"
  },
  {
   "group": "B",
@@ -231,13 +261,13 @@
   "group": "B",
   "case": "marker with negative remaining budget: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['window 1: completion marker invalid or after the deadline']"
+  "detail": "label=INCOMPLETE reasons=['window 1: completion marker inconsistent with the header or budget, or late']"
  },
  {
   "group": "B",
   "case": "marker written after the deadline: INCOMPLETE",
   "ok": true,
-  "detail": "label=INCOMPLETE reasons=['window 1: completion marker invalid or after the deadline']"
+  "detail": "label=INCOMPLETE reasons=['window 1: completion marker inconsistent with the header or budget, or late']"
  },
  {
   "group": "B",
@@ -255,13 +285,13 @@
   "group": "C",
   "case": "healthy dry-run windows complete; lock released; no orphans",
   "ok": true,
-  "detail": "{\"status\": \"complete\", \"reason\": \"\", \"workload\": \"w\", \"window\": 1, \"positions\": 16, \"manifest_sha256\": \"5d1d51494abf408c6fa718bdc6ee905abb16393225a5a0c0f6fb9d2b4d8e5f16\", \"remaining_budget_s\": 590.213, \"end_epoch\": 1792319365.166758, \"deadline_epoch\": 1792319955.3795528}\n"
+  "detail": " \"window\": 1, \"positions\": 16, \"manifest_sha256\": \"d218b4a45a42b1c25331b4ad0552892724c144e2fff48694a0ba98a4d198beb3\", \"budget_s\": 600, \"start_epoch\": 1792320928.3723664, \"deadline_epoch\": 1792321528.3723664, \"end_epoch\": 1792320941.6193962, \"remaining_budget_s\": 586.753, \"released_after_s\": 13.247}\n"
  },
  {
   "group": "C",
   "case": "every timed payload has an observed CPU mask equal to the payload mask",
   "ok": true,
-  "detail": "[{'seq': 3, 'phase': 'timed', 'label': 'main', 'rc': 0, 'wall_s': 0.217947, 'pdf_pages': 10, 'observed_mask': '24,25,26,27,28,29,30,31'}]"
+  "detail": "[{'seq': 3, 'phase': 'timed', 'label': 'main', 'rc': 0, 'wall_s': 0.221302, 'pdf_pages': 10, 'observed_mask': '24,25,26,27,28,29,30,31'}]"
  },
  {
   "group": "C",
@@ -273,13 +303,13 @@
   "group": "C",
   "case": "exit-0 product failure on fix: classified \"product\", pair rerun in the same position",
   "ok": true,
-  "detail": "[{'seq': 13, 'phase': 'timed', 'label': 'fix', 'rc': 0, 'wall_s': 0.270223, 'pdf_pages': None, 'failure': 'product', 'detail': 'logfile.pdf pages None, expected 10', 'observed_mask': '24,25,26,27,28,29,30,31'}, {'pair': 'BA', 'position': 6, 'order': 'fix,main', 'attempt': 2, 'retained': True, 'seqs'"
+  "detail": "[{'seq': 13, 'phase': 'timed', 'label': 'fix', 'rc': 0, 'wall_s': 0.223722, 'pdf_pages': None, 'failure': 'product', 'detail': 'logfile.pdf pages None, expected 10', 'observed_mask': '24,25,26,27,28,29,30,31'}, {'pair': 'BA', 'position': 6, 'order': 'fix,main', 'attempt': 2, 'retained': True, 'seqs'"
  },
  {
   "group": "C",
   "case": "unsuccessful warm-up ends the window as incomplete",
   "ok": true,
-  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"RuntimeError: warm-up fix failed: product (logfile.pdf pages None, expected 10)\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"35ad0334a0b71e9f757a27f32307f8ac48ad8cb2b7d7f3c6f01ab350611c6590\",\n \"remaining_budget_s\": 599.471,\n \"end_epo"
+  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"RuntimeError: warm-up fix failed: product (logfile.pdf pages None, expected 10)\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"66c37f4305ae01a6e00a376e6c6f94a34daf1a0f7e2801f9808b126ea1f17a56\",\n \"budget_s\": 600,\n \"start_epoch\": 1792320"
  },
  {
   "group": "C",
@@ -291,19 +321,31 @@
   "group": "C",
   "case": "watchdog kills and reaps a hung payload at the per-payload timeout; pair rerun",
   "ok": true,
-  "detail": "[{'seq': 6, 'phase': 'timed', 'label': 'main', 'rc': -9, 'wall_s': 3.003054, 'failure': 'timeout', 'detail': 'killed after 3 s', 'observed_mask': '24,25,26,27,28,29,30,31'}]"
+  "detail": "[{'seq': 6, 'phase': 'timed', 'label': 'main', 'rc': -9, 'wall_s': 3.0037, 'failure': 'timeout', 'detail': 'killed after 3 s', 'observed_mask': '24,25,26,27,28,29,30,31'}]"
  },
  {
   "group": "C",
   "case": "window deadline: payload killed at the deadline, incomplete, lock released, no orphans",
   "ok": true,
-  "detail": "elapsed 20.1 s; {\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline reached\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"0779405fae52786a4bd2bc3e665b70fd7da0dc1a8f5f43dcd898badff83de94b\",\n \"remaining_budget_s\": -0.019,\n \"end_epoch\": 1792319436.4552379,\n \"deadlin"
+  "detail": "elapsed 20.1 s; {\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline reached\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"44ccba93f5531d281a0e687e2cef0911ef91cd79bb9208aa070ccfafc205e78f\",\n \"budget_s\": 20,\n \"start_epoch\": 1792321006.149878,\n \"deadline_epoch\": 179"
  },
  {
   "group": "C",
   "case": "deadline covers the lock wait: incomplete, no payload started",
   "ok": true,
-  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline passed waiting for /mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-private.lock\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"2d5f3a41dca2a4f3b487d8147f9727b1f9199d726a9aaed745a31eaa3a9adbc5\",\n \"remaining_bud"
+  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline passed waiting for /mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-private.lock\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"04790dc9cd0f11305466fffddfeb21c2790c39fa7010514f56aa4c0ba606d098\",\n \"budget_s\": 12"
+ },
+ {
+  "group": "C",
+  "case": "delayed product check: resources released within budget + 10 s, INCOMPLETE, no orphans",
+  "ok": true,
+  "detail": "elapsed 15.1 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '-B', '-c', 'import sys, json; sys.path[:0] = [sys.argv[1], sys.argv[2]]; import confirm_pairs as cp, identity; a = sys.argv[3:]; print(json.dumps(cp.product_problems(a[0], a[1:]))"
+ },
+ {
+  "group": "C",
+  "case": "delayed cleanup: resources released within budget + 10 s, INCOMPLETE, no orphans",
+  "ok": true,
+  "detail": "elapsed 15.1 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['rm', '-rf', '/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-delayed-cleanup/scratch/wd11c-w-w1/0001-main']' timed out after 14.610555476509035 seconds\", 'workload': 'w', 'window': 1, 'positions': 16, 'manifest_"
  },
  {
   "group": "C",
@@ -313,15 +355,15 @@
  },
  {
   "group": "D",
-  "case": "blocking wait: completions 25 ms apart recorded 24.99 ms apart (|error| <= 1 ms)",
+  "case": "blocking wait: completions 25 ms apart recorded 24.94 ms apart (|error| <= 1 ms)",
   "ok": true,
-  "detail": "(0.024990965612232685, [0.0041, 0.0042, 0.0042, 0.004, 0.0049, 0.0045, 0.0039, 0.004, 0.0039, 0.005, 0.0039, 0.0042], [0.004, 0.0042, 0.0043, 0.0048, 0.0037, 0.0041, 0.0043, 0.0039, 0.0037, 0.0042, 0.0045, 0.0041])"
+  "detail": "(0.024936375208199024, [0.0046, 0.0037, 0.0045, 0.0038, 0.0049, 0.0037, 0.004, 0.0041, 0.0041, 0.0038, 0.0045, 0.004], [0.004, 0.0047, 0.0046, 0.004, 0.0042, 0.0042, 0.0039, 0.0038, 0.0037, 0.0038, 0.0038, 0.0039])"
  },
  {
   "group": "D",
-  "case": "control discriminates: legacy polled wait records 50.40 ms (error > 1 ms)",
+  "case": "control discriminates: legacy polled wait records 50.10 ms (error > 1 ms)",
   "ok": true,
-  "detail": "(0.05040334165096283, [0.0167, 0.0172, 0.0175, 0.017, 0.0168, 0.0173, 0.0173, 0.017, 0.017, 0.017, 0.017, 0.0173], [0.0423, 0.0424, 0.043, 0.0426, 0.0427, 0.0423, 0.0423, 0.0427, 0.0425, 0.0423, 0.0424, 0.0422])"
+  "detail": "(0.05009652907028794, [0.0167, 0.0169, 0.0167, 0.0168, 0.0165, 0.0169, 0.0163, 0.0177, 0.017, 0.017, 0.0169, 0.0166], [0.0419, 0.0421, 0.0419, 0.042, 0.0418, 0.0421, 0.0416, 0.0423, 0.0419, 0.042, 0.0419, 0.042])"
  },
  {
   "group": "E",
@@ -357,13 +399,13 @@
   "group": "E",
   "case": "source re-verification: clean frozen head -> accepted",
   "ok": true,
-  "detail": "ions\": 16, \"manifest_sha256\": \"f2774835c16b9c968431870a87da9efdad21c48996909a87d142aacbc04cbf78\", \"remaining_budget_s\": 2699.958, \"end_epoch\": 1792319469.0223396, \"deadline_epoch\": 1792322168.979853}\n"
+  "detail": "04ea3bf7b6e265\", \"budget_s\": 2700, \"start_epoch\": 1792321094.2437356, \"deadline_epoch\": 1792323794.2437356, \"end_epoch\": 1792321094.2866428, \"remaining_budget_s\": 2699.957, \"released_after_s\": 0.043}\n"
  },
  {
   "group": "E",
   "case": "source re-verification: wrong source_head -> fatal before any resource",
   "ok": true,
-  "detail": "-motioncorr-rc0/W-D11/ctl-work/e-repo', 'diff', '--name-only', '04b0423ec9e0e70d1e137544068570fe5ed190b3', '0000000000000000000000000000000000000000', '--', 'src']' returned non-zero exit status 128.\n"
+  "detail": "-motioncorr-rc0/W-D11/ctl-work/e-repo', 'diff', '--name-only', '28470a3be6ca9d52bd97b20c4e742736113ee899', '0000000000000000000000000000000000000000', '--', 'src']' returned non-zero exit status 128.\n"
  },
  {
   "group": "E",

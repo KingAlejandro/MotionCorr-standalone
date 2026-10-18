@@ -157,6 +157,42 @@ def timed_payload(cmd, cwd, stdout, timeout, on_start=None):
     return p, rc, wall, bool(fired)
 
 
+# ---------------------------------------------------------------- bounded children
+CHILDREN, CHILD_LOCK = set(), threading.Lock()
+CLEANUP_MARGIN_S = 10            # declared: release completes within the deadline plus this margin
+
+
+def run_child(cmd, timeout):
+    """Run a child process in its own process group, registered so that Window.release() kills it,
+    and killed here when `timeout` (the remaining window time) expires. Returns (rc, stdout)."""
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, start_new_session=True)
+    with CHILD_LOCK:
+        CHILDREN.add(p)
+    try:
+        out, _ = p.communicate(timeout=max(timeout, 0.01))
+        return p.returncode, out
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(p.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        p.wait()
+        raise
+    finally:
+        with CHILD_LOCK:
+            CHILDREN.discard(p)
+
+
+def child_json(code, args, timeout):
+    """Evaluate one expression of this module (or the vendored helpers) in a bounded child; JSON result."""
+    rc, out = run_child([sys.executable, '-B', '-c', 'import sys, json; sys.path[:0] = [sys.argv[1], sys.argv[2]]; '
+                         'import confirm_pairs as cp, identity; a = sys.argv[3:]; print(json.dumps(' + code + '))',
+                         str(HERE), str(HERE / 'vendor')] + [str(x) for x in args], timeout)
+    if rc != 0:
+        raise RuntimeError(f'bounded check failed (exit {rc})')
+    return json.loads(out)
+
+
 # ---------------------------------------------------------------- resources
 class Gpu:
     """Occupancy checks on one GPU by UUID. uuid None = dry run (no GPU checks; never a verdict)."""
@@ -167,13 +203,13 @@ class Gpu:
         if self.uuid is None:
             return set()
         try:
-            r = subprocess.run(['nvidia-smi', '-i', self.uuid, '--query-compute-apps=pid', '--format=csv,noheader'],
-                               capture_output=True, text=True, timeout=max(timeout, 0.1))
+            rc, out = run_child(['nvidia-smi', '-i', self.uuid, '--query-compute-apps=pid', '--format=csv,noheader'],
+                                timeout)
         except (OSError, subprocess.TimeoutExpired):
             return None
-        if r.returncode != 0:
+        if rc != 0:
             return None
-        return {int(x) for x in r.stdout.split() if x.strip().isdigit()}
+        return {int(x) for x in out.split() if x.strip().isdigit()}
 
     def local_cpus(self):
         r = subprocess.run(['nvidia-smi', '-i', self.uuid, '--query-gpu=pci.bus_id', '--format=csv,noheader'],
@@ -223,7 +259,9 @@ class Window:
                 raise RuntimeError(f'{path} was replaced while locked')
 
     def release(self):
-        for p in self.children + self.samplers:
+        with CHILD_LOCK:
+            queries = list(CHILDREN)                      # GPU queries, product/identity checks, deletions
+        for p in self.children + self.samplers + queries:
             try:
                 os.killpg(p.pid, signal.SIGKILL)
             except (ProcessLookupError, PermissionError):
@@ -304,7 +342,11 @@ def freeze(o):
         raise SystemExit('source tree not clean')
     if HERE != (src / 'docs/rc0/stale_cuda_oom/raw/perf/confirmatory-draft').resolve():
         raise SystemExit('the driver must run from the frozen source tree')
+    payload, runner = parse_cpus(o.payload_cpus), parse_cpus(o.runner_cpus)
+    if payload & runner or not o.lock:
+        raise SystemExit('payload and runner masks must be disjoint, and at least one lock is required')
     m = {'status': 'frozen', 'venue': o.venue, 'gpu_uuid': o.gpu_uuid,
+         'payload_cpus': fmt_cpus(payload), 'runner_cpus': fmt_cpus(runner), 'locks': o.lock,
          'frozen_files': {f: sha256(HERE / f) for f in FROZEN_FILES},
          'source_tree': str(src), 'source_head': head, 'main_sha': o.main_sha, 'fix_sha': head,
          'fix_build_sha': o.fix_build_sha, 'fix_build_equivalence': source_equivalence(src, o.fix_build_sha, head),
@@ -365,7 +407,7 @@ def run_window(o):
     budget_s, payload_timeout_s = m['budget_s'], m['payload_timeout_s']
     t_start, wall_start = time.monotonic(), time.time()
     deadline = t_start + budget_s
-    win = Window(deadline, o.lock or [])
+    win = Window(deadline, m['locks'])
     status, reason = 'incomplete', 'not started'
 
     def on_signal(sig, frame):
@@ -374,6 +416,7 @@ def run_window(o):
     bins = {'main': m['binaries']['main']['path'], 'fix': m['binaries']['fix']['path']}
     bins['mainb'] = bins['main']
     scratch = Path(o.scratch) / f'wd11c-{o.workload}-w{o.window}'
+    kept = []
 
     def left():
         r = win.remaining()
@@ -383,7 +426,7 @@ def run_window(o):
 
     try:
         allowed = os.sched_getaffinity(0)
-        payload, runner = parse_cpus(o.cpus), parse_cpus(o.runner_cpus)
+        payload, runner = parse_cpus(m['payload_cpus']), parse_cpus(m['runner_cpus'])
         gpu_cpus = gpu.local_cpus() if o.gpu_uuid else allowed
         if not (payload <= allowed & gpu_cpus) or not (runner <= allowed) or payload & runner:
             raise SystemExit(f'CPU masks invalid: payload {fmt_cpus(payload)}, runner {fmt_cpus(runner)}, '
@@ -392,7 +435,7 @@ def run_window(o):
         emit({'header': {'manifest_sha256': sha256(o.manifest), 'workload': o.workload, 'window': o.window,
                          'venue': m['venue'], 'gpu_uuid': o.gpu_uuid, 'payload_cpus': fmt_cpus(payload),
                          'runner_cpus': fmt_cpus(runner), 'gpu_local_cpus': fmt_cpus(gpu_cpus),
-                         'locks': o.lock or [], 'dry_run': dry, 'start_epoch': wall_start,
+                         'locks': m['locks'], 'dry_run': dry, 'start_epoch': wall_start,
                          'deadline_epoch': wall_start + budget_s}})
         t_lock = time.monotonic()
         win.acquire()
@@ -461,7 +504,7 @@ def run_window(o):
             if verdict:
                 rec.update(failure=verdict[0], detail=verdict[1])
             else:
-                problems, pages = product_problems(dst, w['movies'], timeout=min(60, left()))
+                problems, pages = child_json('cp.product_problems(a[0], a[1:])', [dst] + w['movies'], left())
                 rec['pdf_pages'] = pages
                 if problems:
                     rec.update(failure='product', detail='; '.join(problems[:5]))
@@ -469,7 +512,7 @@ def run_window(o):
                 rec['observed_mask'] = fmt_cpus(mask['mask'])
             emit(rec)
             if not keep:
-                shutil.rmtree(dst, ignore_errors=True)
+                run_child(['rm', '-rf', str(dst)], left())
             return rec, dst
 
         for label in ('main', 'fix'):                      # warm-ups: any failure ends the window
@@ -486,20 +529,13 @@ def run_window(o):
                       'retained': ok, 'seqs': [r1['seq'], r2['seq']],
                       'walls': {first: r1.get('wall_s'), second: r2.get('wall_s')}})
                 if keep and ok:
-                    # bounded by the remaining window time: identity runs in a child process
-                    r = subprocess.run([sys.executable, '-B', '-c',
-                                        'import sys, json; sys.path.insert(0, sys.argv[1]); import identity; '
-                                        'print(json.dumps(identity.compare_trees(sys.argv[2], sys.argv[3])))',
-                                        str(HERE / 'vendor'), str(d1), str(d2)],
-                                       capture_output=True, text=True, timeout=left())
-                    ident = json.loads(r.stdout)
+                    ident = child_json('identity.compare_trees(a[0], a[1])', [d1, d2], left())
                     emit({'identity': {'position': pos, 'identical': ident['identical'], 'problems': ident['problems'],
                                        'compared': ident['compared'], 'mrc_compared': ident['mrc_compared']}})
                     if not ident['identical']:
-                        keepdir = out / 'identity-failure'
-                        shutil.copytree(d1, keepdir / d1.name); shutil.copytree(d2, keepdir / d2.name)
-                if keep:
-                    shutil.rmtree(d1, ignore_errors=True); shutil.rmtree(d2, ignore_errors=True)
+                        kept.extend([d1, d2])                 # copied to the evidence after release
+                if keep and not (ok and kept):
+                    run_child(['rm', '-rf', str(d1), str(d2)], left())
                 if ok:
                     break
             else:
@@ -510,14 +546,17 @@ def run_window(o):
         status, reason = 'incomplete', f'{type(exc).__name__}: {exc}'
     finally:
         win.release()
-        shutil.rmtree(scratch, ignore_errors=True)
+        released_after_s, end_epoch, remaining = time.monotonic() - t_start, time.time(), win.remaining()
         final = completion_status(status, deadline)
         if final != status:
             reason = 'deadline passed before the completion marker'
+        for d in kept:                                    # after release: identity-failure evidence
+            shutil.copytree(d, out / 'identity-failure' / d.name, dirs_exist_ok=True)
+        shutil.rmtree(scratch, ignore_errors=True)
         marker = {'status': final, 'reason': reason, 'workload': o.workload, 'window': o.window,
-                  'positions': len(w['plan']), 'manifest_sha256': sha256(o.manifest),
-                  'remaining_budget_s': round(win.remaining(), 3), 'end_epoch': time.time(),
-                  'deadline_epoch': wall_start + budget_s}
+                  'positions': len(w['plan']), 'manifest_sha256': sha256(o.manifest), 'budget_s': budget_s,
+                  'start_epoch': wall_start, 'deadline_epoch': wall_start + budget_s, 'end_epoch': end_epoch,
+                  'remaining_budget_s': round(remaining, 3), 'released_after_s': round(released_after_s, 3)}
         (out / ('complete.json' if final == 'complete' else 'incomplete.json')).write_text(json.dumps(marker, indent=1))
         subprocess.run(['gzip', '-rq', str(out / 'logs')], timeout=60)
         print(json.dumps(marker))
@@ -536,7 +575,7 @@ def validate_window(lines, m, w, plan, i, manifest_hash, reasons):
         try:
             recs.append(json.loads(line))
         except json.JSONDecodeError:
-            reasons.append(pfx + f'malformed record at line {n}'); return [], None
+            reasons.append(pfx + f'malformed record at line {n}'); return [], None, None
     it = iter(recs)
     nxt = lambda: next(it, None)
     h = nxt()
@@ -544,16 +583,20 @@ def validate_window(lines, m, w, plan, i, manifest_hash, reasons):
     need = ('manifest_sha256', 'workload', 'window', 'venue', 'gpu_uuid', 'payload_cpus', 'runner_cpus',
             'gpu_local_cpus', 'locks', 'dry_run', 'deadline_epoch')
     if not hd or any(k not in hd for k in need):
-        reasons.append(pfx + 'missing or incomplete header'); return [], None
+        reasons.append(pfx + 'missing or incomplete header'); return [], None, None
     if (hd['manifest_sha256'] != manifest_hash or hd['workload'] != w['_name'] or hd['window'] != i
-            or hd['venue'] != m['venue'] or hd['gpu_uuid'] != m.get('gpu_uuid')):
-        reasons.append(pfx + 'header does not match the manifest')
+            or hd['venue'] != m['venue'] or hd['gpu_uuid'] != m.get('gpu_uuid')
+            or hd['payload_cpus'] != m['payload_cpus'] or hd['runner_cpus'] != m['runner_cpus']
+            or hd['locks'] != m['locks'] or not m['locks']
+            or parse_cpus(hd['payload_cpus']) & parse_cpus(hd['runner_cpus'])
+            or abs(hd['deadline_epoch'] - hd.get('start_epoch', math.inf) - m['budget_s']) > 1e-3):
+        reasons.append(pfx + 'header does not match the manifest (venue, GPU, masks, locks or budget)')
     if hd['dry_run'] is not False:
         reasons.append(pfx + 'dry run (no GPU checks or no input/source checks), never a verdict')
     if any(isinstance(r, dict) and 'header' in r for r in recs[1:]):
         reasons.append(pfx + 'more than one header')
     if 'locks_acquired_after_s' not in (nxt() or {}):
-        reasons.append(pfx + 'lock record missing'); return [], None
+        reasons.append(pfx + 'lock record missing'); return [], None, None
     counts = {a: {'attempts': 0, **{k: 0 for k in PAYLOAD_FAILURES + ('resource',)}} for a in LABELS}
     seq = [0]
 
@@ -568,7 +611,7 @@ def validate_window(lines, m, w, plan, i, manifest_hash, reasons):
     for label in ('main', 'fix'):
         r = payload('warmup', label)
         if r is None:
-            return [], None
+            return [], None, None
         if 'failure' in r or r.get('rc') != 0:
             reasons.append(pfx + f'warm-up {label} failed')
     retained, ident = [], []
@@ -577,7 +620,7 @@ def validate_window(lines, m, w, plan, i, manifest_hash, reasons):
             r1, r2 = payload('timed', first), payload('timed', second)
             pr = nxt()
             if r1 is None or r2 is None or not isinstance(pr, dict) or pr.get('position') != pos:
-                reasons.append(pfx + f'position {pos}: records missing or out of order'); return retained, counts
+                reasons.append(pfx + f'position {pos}: records missing or out of order'); return retained, counts, hd
             for r in (r1, r2):
                 counts[r['label']]['attempts'] += 1
                 if 'failure' in r:
@@ -585,26 +628,33 @@ def validate_window(lines, m, w, plan, i, manifest_hash, reasons):
             ok = 'failure' not in r1 and 'failure' not in r2 and r1.get('rc') == 0 and r2.get('rc') == 0
             if (pr.get('order') != f'{first},{second}' or pr.get('pair') != kind or pr.get('attempt') != attempt
                     or pr.get('retained') is not ok or pr.get('seqs') != [r1['seq'], r2['seq']]):
-                reasons.append(pfx + f'position {pos}: pair record contradicts its payloads'); return retained, counts
+                reasons.append(pfx + f'position {pos}: pair record contradicts its payloads'); return retained, counts, hd
+            if ok and any(r.get('observed_mask') != m['payload_cpus'] or r.get('pdf_pages') != w['expected_pdf_pages']
+                          for r in (r1, r2)):
+                reasons.append(pfx + f'position {pos}: retained payload lacks its CPU-mask or product evidence')
+                return retained, counts, hd
             if ok:
                 ws = pr.get('walls') or {}
                 if ws.get(first) != r1.get('wall_s') or ws.get(second) != r2.get('wall_s') or None in ws.values():
                     reasons.append(pfx + f'position {pos}: retained walls differ from the payload records')
-                    return retained, counts
+                    return retained, counts, hd
                 retained.append((kind, ws))
                 if pos == 1:
                     ir = nxt()
                     if not isinstance(ir, dict) or 'identity' not in ir:
-                        reasons.append(pfx + 'first-pair identity record missing'); return retained, counts
+                        reasons.append(pfx + 'first-pair identity record missing'); return retained, counts, hd
                     ident.append(ir['identity'])
                 break
         else:
-            reasons.append(pfx + f'position {pos}: no retained attempt'); return retained, counts
+            reasons.append(pfx + f'position {pos}: no retained attempt'); return retained, counts, hd
     if nxt() is not None:
         reasons.append(pfx + 'records after the last planned position')
-    if len(ident) != 1 or ident[0].get('identical') is not True:
-        reasons.append(pfx + 'product identity failed or missing')
-    return retained, counts
+    all_ident = [r['identity'] for r in recs if isinstance(r, dict) and 'identity' in r]
+    if (len(all_ident) != 1 or len(ident) != 1 or ident[0].get('position') != 1 or ident[0].get('identical') is not True
+            or ident[0].get('problems') != [] or not ident[0].get('compared', 0) >= 1
+            or not ident[0].get('mrc_compared', 0) >= 1):
+        reasons.append(pfx + 'product identity failed, missing or inconsistent')
+    return retained, counts, hd
 
 
 def combine(o):
@@ -628,11 +678,15 @@ def combine(o):
                                + (f' ({json.loads(inc.read_text()).get("reason")})' if inc.is_file() else ''))
                 continue
             mk = json.loads((wd / 'complete.json').read_text())
-            if (mk.get('status') != 'complete' or mk.get('manifest_sha256') != mh
+            retained, c, hd = validate_window((wd / 'runs.jsonl').read_text().splitlines(), m, w, plan, i, mh, reasons)
+            hd = hd or {}
+            if (mk.get('status') != 'complete' or mk.get('manifest_sha256') != mh or mk.get('workload') != o.workload
+                    or mk.get('window') != i or mk.get('positions') != len(plan) or mk.get('budget_s') != m['budget_s']
+                    or mk.get('start_epoch') != hd.get('start_epoch') or mk.get('deadline_epoch') != hd.get('deadline_epoch')
                     or not isinstance(mk.get('remaining_budget_s'), (int, float)) or mk['remaining_budget_s'] < 0
-                    or mk.get('end_epoch', math.inf) > mk.get('deadline_epoch', -math.inf)):
-                reasons.append(f'window {i}: completion marker invalid or after the deadline')
-            retained, c = validate_window((wd / 'runs.jsonl').read_text().splitlines(), m, w, plan, i, mh, reasons)
+                    or not mk.get('end_epoch', math.inf) <= mk.get('deadline_epoch', -math.inf)
+                    or not 0 <= mk.get('released_after_s', math.inf) <= m['budget_s']):
+                reasons.append(f'window {i}: completion marker inconsistent with the header or budget, or late')
             for kind, ws in retained:
                 if kind == 'null':
                     null.append(ws['mainb'] - ws['main'])
@@ -687,16 +741,16 @@ def main():
     sub = ap.add_subparsers(dest='cmd', required=True)
     f = sub.add_parser('freeze')
     for k in ('manifest', 'venue', 'gpu-uuid', 'src', 'main-sha', 'fix-build-sha', 'a', 'a-sha256', 'b', 'b-sha256',
-              'build-settings'):
+              'build-settings', 'payload-cpus', 'runner-cpus'):
         f.add_argument('--' + k, required=True)
+    f.add_argument('--lock', action='append', required=True, help='lock file held for each whole window')
     f.add_argument('--windows', type=int, default=2)
     f.add_argument('--workload', action='append', required=True, help='name:N:datadir:motioncorr args')
     r = sub.add_parser('run')
-    for k in ('manifest', 'workload', 'out', 'cpus', 'runner-cpus', 'scratch'):
+    for k in ('manifest', 'workload', 'out', 'scratch'):
         r.add_argument('--' + k, required=True)
     r.add_argument('--window', type=int, required=True)
     r.add_argument('--gpu-uuid', default=None, help='omit only for a dry run with a stub payload')
-    r.add_argument('--lock', action='append', help='lock file held for the whole window (4GPUs)')
     r.add_argument('--samplers', action='store_true', help='mpstat and nvidia-smi every 10 s')
     r.add_argument('--dry-run-inputs', action='store_true', help='controls only: skip input and source checks')
     c = sub.add_parser('combine')

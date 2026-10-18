@@ -139,11 +139,13 @@ VENUE, UUID = 'control venue', 'GPU-control'
 
 
 def manifest(path, n=16, windows=2, extra=None):
-    m = {'status': 'CONTROL', 'venue': VENUE, 'gpu_uuid': UUID,
+    m = {'status': 'CONTROL', 'venue': VENUE, 'gpu_uuid': UUID, 'payload_cpus': '88,89,90,91,92,93,94,95',
+         'runner_cpus': '120,121,122,123', 'locks': ['/tmp/b.lock', '/tmp/g.lock'],
          'frozen_files': {f: cp.sha256(HERE / f) for f in cp.FROZEN_FILES}, 'binaries': {},
          'budget_s': 2700, 'payload_timeout_s': 120,
          'workloads': {'w': {'n': n, 'windows': windows, 'movies': [], 'args': [], 'data': '/nonexistent',
-                             'inputs': {}, 'plan': [f'{a},{b},{k}' for a, b, k in cp.plan_window(n, windows)]}}}
+                             'expected_pdf_pages': 30, 'inputs': {},
+                             'plan': [f'{a},{b},{k}' for a, b, k in cp.plan_window(n, windows)]}}}
     m.update(extra or {})
     path.write_text(json.dumps(m))
     return m
@@ -154,15 +156,16 @@ def stream(mpath, i, d_fix=0.0, spread=0.01, fail=(), warm_fail=None, identity_o
     product failures; warm_fail: arm whose warm-up failed."""
     m = json.loads(mpath.read_text())
     recs = [{'header': {'manifest_sha256': cp.sha256(mpath), 'workload': 'w', 'window': i, 'venue': VENUE,
-                        'gpu_uuid': UUID, 'payload_cpus': '88-95', 'runner_cpus': '120-123',
-                        'gpu_local_cpus': '0-123', 'locks': ['b', 'g'], 'dry_run': dry,
+                        'gpu_uuid': UUID, 'payload_cpus': m['payload_cpus'], 'runner_cpus': m['runner_cpus'],
+                        'gpu_local_cpus': '0-123', 'locks': m['locks'], 'dry_run': dry,
                         'start_epoch': 1000.0, 'deadline_epoch': 3700.0}},
             {'locks_acquired_after_s': 0.0}]
     seq = [0]
 
     def pl(phase, label, wall, failure=None):
         seq[0] += 1
-        r = {'seq': seq[0], 'phase': phase, 'label': label, 'rc': 0, 'wall_s': wall}
+        r = {'seq': seq[0], 'phase': phase, 'label': label, 'rc': 0, 'wall_s': wall,
+             'observed_mask': m['payload_cpus'], 'pdf_pages': 30}
         if failure:
             r.update(failure=failure, detail='synthetic')
         recs.append(r)
@@ -195,8 +198,10 @@ def write_window(out, mpath, i, recs, marker=None):
     wd = out / 'w' / f'window{i}'
     wd.mkdir(parents=True, exist_ok=True)
     (wd / 'runs.jsonl').write_text(''.join(json.dumps(r) + '\n' for r in recs))
-    mk = {'status': 'complete', 'manifest_sha256': cp.sha256(mpath), 'remaining_budget_s': 100.0,
-          'end_epoch': 3600.0, 'deadline_epoch': 3700.0}
+    mk = {'status': 'complete', 'manifest_sha256': cp.sha256(mpath), 'workload': 'w', 'window': i,
+          'positions': len(json.loads(mpath.read_text())['workloads']['w']['plan']), 'budget_s': 2700,
+          'start_epoch': 1000.0, 'deadline_epoch': 3700.0, 'end_epoch': 3600.0, 'remaining_budget_s': 100.0,
+          'released_after_s': 2600.0}
     mk.update(marker or {})
     (wd / 'complete.json').write_text(json.dumps(mk))
 
@@ -242,6 +247,20 @@ def group_b(o, work):
          lambda rs: [dict(r, walls={k: v + 0.001 for k, v in r['walls'].items()}) if r.get('retained') else r for r in rs]),
     ):
         scenario(name, 'INCOMPLETE', n=256, gen=lambda mp, i, mut=mut: mut(stream(mp, i, spread=0.004)))
+    for name, mut in (
+        ('every payload reports CPU mask 0', lambda rs: [dict(r, observed_mask='0') if is_payload(r) else r for r in rs]),
+        ('mask and PDF-page observations removed',
+         lambda rs: [{k: v for k, v in r.items() if k not in ('observed_mask', 'pdf_pages')} if is_payload(r) else r
+                     for r in rs]),
+        ('header with overlapping masks and no locks',
+         lambda rs: [{'header': dict(rs[0]['header'], runner_cpus='88,120', locks=[])}] + rs[1:]),
+        ('identity true but with problems, zero comparisons, position 99',
+         lambda rs: [{'identity': dict(r['identity'], problems=['x'], compared=0, mrc_compared=0, position=99)}
+                     if 'identity' in r else r for r in rs]),
+    ):
+        scenario(name, 'INCOMPLETE', n=256, gen=lambda mp, i, mut=mut: mut(stream(mp, i, spread=0.004)))
+    scenario('marker deadline beyond the header deadline', 'INCOMPLETE', n=256,
+             gen=lambda mp, i: stream(mp, i, spread=0.004), marker={'deadline_epoch': 9700.0, 'end_epoch': 3600.0})
     scenario('window 2 missing', 'INCOMPLETE', gen=lambda mp, i: stream(mp, i) if i == 1 else None)
     scenario('window 1 truncated', 'INCOMPLETE', mutate=lambda rs: rs[:len(rs) // 2])
     scenario('zero pairs', 'INCOMPLETE', gen=lambda mp, i: stream(mp, i)[:4],
@@ -316,19 +335,22 @@ def group_c(o, work):
                 (d / 'state' / f'mode-{arm}').write_text(modes[arm])
         mp = d / 'manifest.json'
         m = manifest(mp, n=16, extra={'budget_s': budget, 'payload_timeout_s': timeout, 'gpu_uuid': None,
+                                      'payload_cpus': cp.fmt_cpus(cp.parse_cpus(o.payload_cpus)),
+                                      'runner_cpus': cp.fmt_cpus(cp.parse_cpus(o.runner_cpus)), 'locks': [str(lockfile)],
                                       'binaries': {a: {'path': str(b), 'sha256': cp.sha256(b)} for a, b in bins.items()}})
-        m['workloads']['w'].update(movies=movies, data=str(data), args=['--x', '1'])
+        m['workloads']['w'].update(movies=movies, data=str(data), args=['--x', '1'],
+                                   expected_pdf_pages=cp.expected_pdf_pages(len(movies)))
         mp.write_text(json.dumps(m))
         return d, mp
 
-    def run(d, mp, window=1, lock=True):
-        cmd = [sys.executable, str(HERE / 'confirm_pairs.py'), 'run', '--manifest', str(mp), '--workload', 'w',
-               '--window', str(window), '--out', str(d / 'out'), '--cpus', o.payload_cpus,
-               '--runner-cpus', o.runner_cpus, '--scratch', str(d / 'scratch'), '--dry-run-inputs']
-        if lock:
-            cmd += ['--lock', str(lockfile)]
+    def run(d, mp, window=1, path_stub=None):
+        cmd = [sys.executable, '-B', str(HERE / 'confirm_pairs.py'), 'run', '--manifest', str(mp), '--workload', 'w',
+               '--window', str(window), '--out', str(d / 'out'), '--scratch', str(d / 'scratch'), '--dry-run-inputs']
+        env = dict(os.environ)
+        if path_stub:                                     # e.g. a slow gs or rm earlier on PATH
+            env['PATH'] = f'{path_stub}:{env["PATH"]}'
         t0 = time.monotonic()
-        r = subprocess.run(cmd, capture_output=True, text=True)
+        r = subprocess.run(cmd, capture_output=True, text=True, env=env)
         return r, time.monotonic() - t0
 
     lock_free = lambda: subprocess.run(['flock', '-n', str(lockfile), 'true']).returncode == 0
@@ -402,6 +424,20 @@ def group_c(o, work):
          inc.is_file() and 'waiting' in json.loads(inc.read_text())['reason'] and not (d / 'state' / 'count-main').exists(),
          inc.read_text() if inc.is_file() else r.stderr[-300:])
 
+    for name, tool in (('delayed product check', 'gs'), ('delayed cleanup', 'rm')):
+        d, mp = setup(name.replace(' ', '-'), {}, budget=15)
+        stub_dir = d / 'slowbin'; stub_dir.mkdir()
+        (stub_dir / tool).write_text(f'#!/bin/sh\nexec sleep 120 # slow {tool} for {d}\n')
+        (stub_dir / tool).chmod(0o755)
+        r, el = run(d, mp, path_stub=stub_dir)
+        wd = d / 'out' / 'w' / 'window1'
+        inc = wd / 'incomplete.json'
+        mk = json.loads(inc.read_text()) if inc.is_file() else {}
+        case('C', f'{name}: resources released within budget + {cp.CLEANUP_MARGIN_S} s, INCOMPLETE, no orphans',
+             inc.is_file() and not (wd / 'complete.json').exists()
+             and mk.get('released_after_s', 1e9) <= 15 + cp.CLEANUP_MARGIN_S and lock_free() and no_orphans(d),
+             f'elapsed {el:.1f} s, marker {mk}')
+
     d, mp = setup('provenance', {})
     (d / 'main').write_text((d / 'main').read_text() + '# changed after freeze\n')
     r, _ = run(d, mp)
@@ -470,7 +506,9 @@ def group_e(o, work):
 
     def attempt(name, edit_manifest=None, edit_repo=None, want_ok=False):
         mp = work / f'e-{name}.json'
-        m = manifest(mp, extra={'source_tree': str(repo), 'source_head': head, 'fix_build_sha': head,
+        m = manifest(mp, extra={'source_tree': str(repo), 'source_head': head, 'fix_build_sha': head, 'locks': [],
+                                'payload_cpus': cp.fmt_cpus(cp.parse_cpus(o.payload_cpus)),
+                                'runner_cpus': cp.fmt_cpus(cp.parse_cpus(o.runner_cpus)),
                                 'fix_build_equivalence': 'binary built from the frozen head',
                                 'frozen_files': {f: cp.sha256(ddir / f) for f in cp.FROZEN_FILES},
                                 'binaries': {a: {'path': str(stub), 'sha256': cp.sha256(stub)} for a in ('main', 'fix')}})
@@ -482,8 +520,8 @@ def group_e(o, work):
             edit_repo()
         out = work / f'e-out-{name}'
         r = subprocess.run([sys.executable, str(ddir / 'confirm_pairs.py'), 'run', '--manifest', str(mp), '--workload', 'w',
-                            '--window', '1', '--out', str(out), '--cpus', o.payload_cpus, '--runner-cpus', o.runner_cpus,
-                            '--scratch', str(work / 'e-scratch')], capture_output=True, text=True)
+                            '--window', '1', '--out', str(out), '--scratch', str(work / 'e-scratch')],
+                           capture_output=True, text=True)
         refused = r.returncode != 0 and 'provenance check failed' in (r.stdout + r.stderr) and not out.exists()
         passed_verify = out.exists()
         ok = passed_verify if want_ok else refused

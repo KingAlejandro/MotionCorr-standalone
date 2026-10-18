@@ -1,5 +1,5 @@
 FROZEN DESIGN, NOT YET RUN. W-D11 confirmatory timing for #228 (D14). Revision of 2026-10-18 after review
-R-D11 round 5; supersedes the design frozen at 38fbfa6f. The maintainer chose option (a). No timed pair may
+R-D11 round 6; supersedes the designs frozen at 38fbfa6f and 8aed9b0b. The maintainer chose option (a). No timed pair may
 run before the coordinator's "GO". Once run, this file and confirm_pairs.py are never edited; any correction
 is a separate dated note.
 
@@ -11,7 +11,8 @@ Labels    Exactly one of PASS / UNRESOLVED / FAIL / INCOMPLETE per workload.
           UNRESOLVED  = neither.
           INCOMPLETE  = any evidence check below fails; this overrides the statistical label.
 Venue     4GPUs only, declared before any run: GPU3 GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, selected by
-          UUID (CUDA_VISIBLE_DEVICES). Payload CPUs 88-95 and runner CPUs 120-123 (NUMA node 1). Both masks
+          UUID (CUDA_VISIBLE_DEVICES). Payload CPUs 88-95 and runner CPUs 120-123 (NUMA node 1) and the two
+          locks below are frozen in the manifest; every window reads them from it. Both masks
           must lie in the driver's allowed CPU set; the payload mask must also lie in the GPU's PCI-local CPU
           list (sysfs). Disjoint masks; the payload's actual mask is read from /proc during each run.
           No other venue, no venue switching, and no choice between results after seeing an outcome.
@@ -42,9 +43,12 @@ Timing    Wall = CLOCK_MONOTONIC at reap minus CLOCK_MONOTONIC at spawn, complet
           wait(). The per-payload timeout and the window deadline are enforced by an independent watchdog
           thread that kills the payload's process group; nothing polls the payload for completion.
 Deadline  45 min per window from the first lock request, covering the lock waits, the idle-GPU wait and
-          all payloads. Every lock-held step is bounded by the remaining time (GPU queries, product and PDF
-          checks, the identity check, which runs in a child process, sampler joins and cleanup).
-          complete.json is never written once the deadline has passed (incomplete.json instead). Each window holds /tmp/motioncorr-bench.lock and /tmp/motioncorr-gpu3-correctness.lock
+          all payloads. Every lock-held step is bounded by the remaining time: GPU queries, the whole product
+          check (structure and PDF) and the identity check run as registered child processes killed at the
+          deadline; per-run deletion is a bounded child; sampler joins are bounded; copying identity-failure
+          evidence happens only after release. On release every registered child, payload and sampler is
+          killed and reaped, then the locks are released; release completes within the deadline plus a
+          declared cleanup margin of 10 s. complete.json is never written once the deadline has passed. Each window holds /tmp/motioncorr-bench.lock and /tmp/motioncorr-gpu3-correctness.lock
           for its whole duration (inode checked). Per-payload timeout 120 s (a healthy run takes 4.5-6 s);
           a timed-out payload's process group is killed and reaped. On any exit (completion, deadline,
           error, SIGTERM/SIGINT) the payload, the mpstat/nvidia-smi samplers and both locks are released.
@@ -86,12 +90,16 @@ Identity  The first comparison pair of each window is compared with tools/profil
 Combine   `confirm_pairs.py combine` validates before any statistic: the manifest and the vendored stats
           hash; exactly 2 windows, each with complete.json matching the manifest hash, with a non-negative
           remaining budget and an end time before the deadline; and each window's complete chronological
-          record stream: exactly one header matching the manifest (venue, GPU, CPU masks, locks) with
-          dry_run explicitly false, the lock record, two successful warm-ups, then for every planned
-          position in order its attempts (payload, payload, pair record) with consecutive seq numbers, each
-          pair record consistent with its payloads, retained walls equal to the payload walls, exactly one
-          successful identity record after the first retained pair, and no records after the last
-          position. Then N comparison pairs balanced AB/BA, 16 null pairs and a CI. Missing, reordered,
+          record stream: exactly one header matching the manifest (venue, GPU, the frozen CPU masks, disjoint,
+          the frozen non-empty lock list, deadline = start + budget) with dry_run explicitly false, the lock
+          record, two successful warm-ups, then for every planned position in order its attempts (payload,
+          payload, pair record) with consecutive seq numbers, each pair record consistent with its payloads,
+          every retained payload carrying an observed CPU mask equal to the frozen payload mask and a
+          product check with the expected page count, retained walls equal to the payload walls, exactly
+          one identity record in the stream, at position 1, identical, with no problems and at least one
+          (MRC) comparison, and no records after the last position. The completion marker must match the
+          header (start, deadline), the workload, window, positions and budget, with remaining budget >= 0,
+          an end time not after the deadline and a release time within the budget. Then N comparison pairs balanced AB/BA, 16 null pairs and a CI. Missing, reordered,
           contradictory or late evidence gives INCOMPLETE, never an exception. Then: median(d), distribution-free 95% CI (tools/profiling/lib/stats.median_ci), CI as %
           of the median main wall, per-arm median and IQR, null median/CI/range, per-window counts.
 Report    Per workload: label, the statistics above, attempts/failures by arm, identity, host load (mpstat,

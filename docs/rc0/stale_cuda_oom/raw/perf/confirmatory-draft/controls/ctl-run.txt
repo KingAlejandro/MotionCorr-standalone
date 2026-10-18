@@ -24,6 +24,11 @@
 [PASS] B every payload a resource failure: INCOMPLETE
 [PASS] B record order reversed: INCOMPLETE
 [PASS] B retained walls differ from payloads: INCOMPLETE
+[PASS] B every payload reports CPU mask 0: INCOMPLETE
+[PASS] B mask and PDF-page observations removed: INCOMPLETE
+[PASS] B header with overlapping masks and no locks: INCOMPLETE
+[PASS] B identity true but with problems, zero comparisons, position 99: INCOMPLETE
+[PASS] B marker deadline beyond the header deadline: INCOMPLETE
 [PASS] B window 2 missing: INCOMPLETE
 [PASS] B window 1 truncated: INCOMPLETE
 [PASS] B zero pairs: INCOMPLETE
@@ -49,9 +54,11 @@
 [PASS] C watchdog kills and reaps a hung payload at the per-payload timeout; pair rerun
 [PASS] C window deadline: payload killed at the deadline, incomplete, lock released, no orphans
 [PASS] C deadline covers the lock wait: incomplete, no payload started
+[PASS] C delayed product check: resources released within budget + 10 s, INCOMPLETE, no orphans
+[PASS] C delayed cleanup: resources released within budget + 10 s, INCOMPLETE, no orphans
 [PASS] C binary changed after freezing: fatal before any resource
-[PASS] D blocking wait: completions 25 ms apart recorded 24.99 ms apart (|error| <= 1 ms)
-[PASS] D control discriminates: legacy polled wait records 50.40 ms (error > 1 ms)
+[PASS] D blocking wait: completions 25 ms apart recorded 24.94 ms apart (|error| <= 1 ms)
+[PASS] D control discriminates: legacy polled wait records 50.10 ms (error > 1 ms)
 [PASS] E completion marker after the deadline becomes incomplete
 [PASS] E mask rule: no CPU-mask observation -> invalid (no CPU-mask observation)
 [PASS] E mask rule: sampler did not finish -> invalid (sampler did not finish)
@@ -64,4 +71,4 @@
 [PASS] E source re-verification: vendored stats changed -> fatal before any resource
 [PASS] E source re-verification: untracked file in the tree (not clean) -> fatal before any resource
 
-65/65 controls as required
+72/72 controls as required

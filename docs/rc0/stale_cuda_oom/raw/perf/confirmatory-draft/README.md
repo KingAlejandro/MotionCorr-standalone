@@ -9,6 +9,20 @@ The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No time
 | `confirm_4gpus.sh` | Launcher: `freeze`, then `windows` (tutG-1, e10216L-1, tutG-2, e10216L-2, then combine). |
 | `controls.py`, `controls/` | Synthetic and dry-run controls and their output. No GPU payload; locks only on a private temporary file. |
 
+## Frozen state
+
+| Item | Value |
+|---|---|
+| Frozen source | `72152947c2fa8240541447fbefc360016958366e`, clean checkout `W-D11/src-confirm` |
+| `confirm_pairs.py` sha256 | `ab4e68edd3388ed2baf2203d65be6342b454680a0c4338777289c08ec46aced2` |
+| `rule.txt` sha256 | `346399f8d324f4820490b0ed0ab871ae7e91b205bff7b087094118fe0bc215b8` |
+| `manifest.json` sha256 | `c6b92eee15bf5593fca4e22cdfba9d727152a98321457ec01b5709445b0b52d9` (copy here; the run uses `W-D11/confirm4/manifest.json`) |
+| Binaries | main `c2263c22…f8dd`; fix `29b894f0…c185`, built from `78aae2d3`, source-equivalent to `72152947` (checked by `freeze`) |
+| Plan | tutG: 136 positions per window (64 AB + 64 BA + 8 null pairs); e10216L: 96 per window (44 + 44 + 8) |
+| Inputs hashed | tutG 26 files (24 movies, gain, STAR); e10216L 4 files |
+
+Later evidence commits on the branch do not change these files. The frozen hashes are verified again at the start of every window.
+
 ## Changes for review R-D11 round 4
 
 | # | Finding | Change | Control (`controls/ctl-run.txt`) |

@@ -156,6 +156,8 @@ No workload shows a resolved slowdown, and all three medians are within ±0.013 
   - The fixed driver (`wd11_pairs.fixed.py`) was installed at 02:02:41Z, before the tutL and e10216L driver processes started (02:10:22Z and 02:41:22Z). Their A′ CPU times match A (10.31 vs 10.23 s; 18.19 vs 18.11 s), so their interleaved nulls are valid.
   - tutG's null is replaced by a separate 16-pair window run with the fixed driver. A tutL replacement null was also run; it was not needed and is reported alongside.
   - The defective driver is retained as `wd11_pairs.defective.py`. The D14 labels depend only on the comparison CI.
+- **Clarifications** (review R-D11 round 3, P3): the rule's statement that the last null block follows the last comparison block did not hold for e10216L (N = 72): its last null block came after comparison pair 64 of 72. Also, the comment in `timing4b.sh` wrongly lists tutL as having a defective null. Both are corrected in `raw/perf/4gpus/CLARIFICATIONS.md`; the executed files are unchanged. No measured value or label changes.
+- **Confirmatory design for tutG and e10216L: DRAFT / NOT RUN** (`raw/perf/confirmatory-draft/`). It is ready if the maintainer chooses to run it instead of accepting D14 as unmet for #228.
 - **SCARF job `3634350`** (same design; the staged driver was fixed before it could start) was cancelled while still PENDING (`QOSGrpNodeLimit`), so the result is not duplicated (`raw/perf/scarf/CANCELLED-3634350.txt`).
 
 **Earlier exploratory measurement on 4GPUs (`mcprof compare`, superseded by the definitive run above; review R-D11 noted that tutL window 2 retained 11 AB / 9 BA pairs, which is unbalanced).**

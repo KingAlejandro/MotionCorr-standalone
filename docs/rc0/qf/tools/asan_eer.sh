@@ -2,7 +2,8 @@
 # QF item 15b: EerMemorySafety (#231, D10) under ASan+UBSan on the frozen SHA. CPU build only, no GPU.
 # Required: QF_W (holds src/, the frozen checkout), QF_SHA, QF_CPUS. Gated on the bench lock (probe only).
 # Optional, for running on another host: QF_VENV (default /home/alex/.mc-venv, the 4GPUs venv with cmake and
-# numpy) and QF_BENCH_LOCK (default /tmp/motioncorr-bench.lock, the 4GPUs bench lock). QF runs with the defaults.
+# numpy) and QF_BENCH_LOCK (default /tmp/motioncorr-bench.lock, the 4GPUs bench lock). QF runs with the defaults:
+# a run on the frozen SHA with a non-default QF_BENCH_LOCK does not count for item 15 (UNRUN).
 # Builds $QF_W/build-asan with #231's sanitizer flags (RelWithDebInfo, -fsanitize=address,undefined
 # -fno-omit-frame-pointer), checks the binary is instrumented, runs ctest -R '^EerMemorySafety$' with
 # default sanitizer options (the test fails on any AddressSanitizer, LeakSanitizer or "runtime error:"
@@ -15,6 +16,9 @@ D10_TESTED=97fb9fda   # #231's tested code head (src unchanged to its merge head
 DECODER="src/renderEER.cpp src/renderEER.h src/rwMRC.h src/strings.cpp"
 VENV=${QF_VENV:-/home/alex/.mc-venv} BENCH=${QF_BENCH_LOCK:-/tmp/motioncorr-bench.lock}
 export PATH=$VENV/bin:$PATH
+WARN=
+[ "$BENCH" = /tmp/motioncorr-bench.lock ] || WARN="WARNING: QF_BENCH_LOCK=$BENCH is not the canonical /tmp/motioncorr-bench.lock; this run does not count for QF item 15 (UNRUN)"
+[ -n "$WARN" ] && echo "$WARN" >&2
 unset ASAN_OPTIONS UBSAN_OPTIONS LSAN_OPTIONS PYTHONOPTIMIZE
 cd $SRC || exit 90
 [ "$(git rev-parse HEAD)" = "$QF_SHA" ] || { echo "HEAD != QF_SHA" | tee $O.log; echo 91 > $O.exit; exit 91; }
@@ -22,6 +26,7 @@ cd $SRC || exit 90
 until flock -n $BENCH true; do echo "bench lock held, waiting $(date -u +%T)" >> $O.waits; sleep 60; done
 mkdir -p $W/logs; v=0
 {
+  [ -n "$WARN" ] && echo "$WARN"
   echo "start $(date -u +%FT%TZ) HEAD=$(git rev-parse HEAD) status=$(git status --porcelain | wc -l) mask=$QF_CPUS host=$(hostname) venv=$VENV bench_lock=$BENCH"
   SAN='-fsanitize=address,undefined -fno-omit-frame-pointer'
   taskset -c $QF_CPUS cmake -S $SRC -B $B -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DCUDA=OFF \

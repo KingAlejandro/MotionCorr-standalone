@@ -9,9 +9,8 @@ ctest-<cfg>.{log,junit.xml,exit}. Collection, JUnit and logs are synthetic; the 
 markers and grade_ctest.py are real. Needs ctest on PATH. Exit 0 only if every case has its expected
 verdict:
   clean CPU / CUDA without #228, clean CUDA with #228                         PASS
-  rerun: ProfilingKit failed, rerun completed with exit 0 and fresh JUnit     PASS
-  rerun: missing .exit / exit 127 / stale passing JUnit / no rerun given      FAIL
-  rerun: EerMemorySafety failed (not load-sensitive), passing rerun           FAIL
+  main run with ProfilingKit failed, no rerun / a complete passing rerun supplied   FAIL
+             (the rerun's evidence is reported in the grade file and never changes the verdict)
   D11: production guard without its test integration / integration without guard   FAIL
   inventory: a grade adds only ctest-<cfg>.grade.json and no __pycache__ under src/   PASS,
              with a control showing the inventory sees the .pyc an unguarded import writes
@@ -59,7 +58,7 @@ def junit(path, status):
 
 
 def make(root, name, sources, cfg, main_fail=(), rerun=None):
-    """sources: file -> 'base'|'d11'. rerun: None or dict(exit=..., junit_age=..., tests=[...])."""
+    """sources: file -> 'base'|'d11'. rerun: None or dict(exit=..., tests=[...])."""
     W = root / name
     src = W / 'src'
     for rel in FILES:
@@ -98,18 +97,13 @@ def make(root, name, sources, cfg, main_fail=(), rerun=None):
         + f'validate_test_collection rc=0\ntest_ci_fail_closed rc=0\nctest rc={rc} end {iso(now - 200)}\n')
     junit(Path(f'{pre}.junit.xml'), {n: ('failed' if n in main_fail else 'passed') for n in names})
     Path(f'{pre}.exit').write_text(f'{rc}\n')
-    os.utime(f'{pre}.exit', (now - 200, now - 200))
     if rerun is not None:
         r = W / f'ctest-{cfg}-rerun'
         Path(f'{r}.log').write_text(
             f'start {iso(now - 100)} cfg={cfg} HEAD={sha} status=0\nbinary sha256: {bsha}\n'
             f'ctest rc={rerun["exit"]} end {iso(now - 60)}\n')
         junit(Path(f'{r}.junit.xml'), {n: 'passed' for n in rerun['tests']})
-        jt = now - rerun.get('junit_age', 70)
-        os.utime(f'{r}.junit.xml', (jt, jt))
-        if rerun.get('exit_file', True):
-            Path(f'{r}.exit').write_text(f'{rerun["exit"]}\n')
-            os.utime(f'{r}.exit', (now - 60, now - 60))
+        Path(f'{r}.exit').write_text(f'{rerun["exit"]}\n')
     return W, sha
 
 
@@ -136,18 +130,14 @@ def main():
     d11 = {r: 'd11' for r in FILES}
     prod_only = dict(base, **{'src/motioncorr_runner.cpp': 'd11'})
     no_prod = dict(d11, **{'src/motioncorr_runner.cpp': 'base'})
-    PK, EER = ['ProfilingKit'], ['EerMemorySafety']
-    ok_rerun = dict(exit=0, tests=PK)
+    PK = ['ProfilingKit']
+    ok_rerun = dict(exit=0, tests=PK)  # a complete, passing rerun: still must not change the verdict
     cases = [  # name, sources, cfg, main_fail, rerun, rerun-tag?, expected verdict, expected d11 case
         ('clean-cpu-without', base, 'cpu', (), None, False, 'PASS', 'without_d11'),
         ('clean-cuda-without', base, 'cuda', (), None, False, 'PASS', 'without_d11'),
         ('clean-cuda-with', d11, 'cuda', (), None, False, 'PASS', 'with_d11'),
-        ('rerun-legit', base, 'cuda', PK, ok_rerun, True, 'PASS', 'without_d11'),
-        ('rerun-missing-exit', base, 'cuda', PK, dict(ok_rerun, exit_file=False), True, 'FAIL', 'without_d11'),
-        ('rerun-exit-127', base, 'cuda', PK, dict(ok_rerun, exit=127), True, 'FAIL', 'without_d11'),
-        ('rerun-stale-junit', base, 'cuda', PK, dict(ok_rerun, junit_age=1000), True, 'FAIL', 'without_d11'),
-        ('rerun-not-given', base, 'cuda', PK, None, False, 'FAIL', 'without_d11'),
-        ('rerun-eer-not-load-sensitive', base, 'cuda', EER, dict(exit=0, tests=EER), True, 'FAIL', 'without_d11'),
+        ('main-failed-no-rerun', base, 'cuda', PK, None, False, 'FAIL', 'without_d11'),
+        ('main-failed-passing-rerun-supplied', base, 'cuda', PK, ok_rerun, True, 'FAIL', 'without_d11'),
         ('d11-production-guard-only', prod_only, 'cuda', (), None, False, 'FAIL', 'inconsistent'),
         ('d11-integration-without-guard', no_prod, 'cuda', (), None, False, 'FAIL', 'inconsistent'),
     ]
@@ -159,6 +149,9 @@ def main():
             rc, g, out = grade(W, sha, cfg, *(['--rerun-tag', 'rerun'] if tag else []))
             got, case = g.get('verdict'), g.get('d11', {}).get('case')
             hit = got == want and case == want_case and (rc == 0) == (want == 'PASS')
+            if rr is not None:  # the rerun is reported as information
+                info = g.get('rerun_info_not_graded', {})
+                hit = hit and info.get('exit') == '0' and info.get('junit') == {n: 'passed' for n in rr['tests']}
             bad += not hit
             why = '; '.join(g.get('failures', []))[:240]
             print(f"{'ok ' if hit else 'BAD'} {name}: {got} rc={rc} d11={case} (want {want}/{want_case}) {why}")

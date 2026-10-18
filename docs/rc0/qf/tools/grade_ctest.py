@@ -25,15 +25,13 @@ the grader also shows that the frozen validator enforces CUDA_REQUIRED_TESTS on 
 CUDA is detected from its CMakeCache.txt, the run's log says the CUDA-only tests were required, and
 the same collection minus CudaStaleErrorAfterOom is rejected.
 
---rerun-tag: the load-sensitive tests named per configuration in the runbook may be rerun once with
-`run_ctest.sh <cfg> <TAG> '^(name|...)$'`. A main-run failure confined to them passes only if that rerun
-completed (its .exit is 0 and its log ends with `ctest rc=0`), ran after the main run on the same SHA and
-binary, wrote its JUnit file during that invocation (mtime between the log's start time and the .exit
-file), and that JUnit file holds exactly the failed tests, all passed. Both results are kept in the grade
-file. The frozen validator is loaded with bytecode writing disabled, so nothing is written under src/.
+Any failed, skipped, not-run or missing test in the main run makes the verdict FAIL; nothing excuses it.
+--rerun-tag TAG only copies the evidence of a rerun made with `run_ctest.sh <cfg> <TAG> '^(name|...)$'`
+(its .exit, log header and ctest rc line, and JUnit statuses) into the grade file as information for the
+QF operator, who dispositions a load-sensitive failure by hand in the D4 record. It never changes the
+verdict. The frozen validator is loaded with bytecode writing disabled, so nothing is written under src/.
 """
 import argparse
-import datetime
 import hashlib
 import importlib.util
 import json
@@ -60,7 +58,7 @@ D11_MARKERS = {  # file -> text #228 adds there (checked against 71ab841e..5b430
     'tools/validate_test_collection.py': None,  # D11_TEST in CUDA_REQUIRED_TESTS (from the module)
     'tools/test_ci_fail_closed.py': f'CUDA_SUITE = ["{D11_TEST}"]',
 }
-LOAD_SENSITIVE = {'cpu': {'ProfilingKit'}, 'cuda': {'ProfilingKit', 'MultiGpuScheduling'},
+LOAD_SENSITIVE = {'cpu': {'ProfilingKit'}, 'cuda': {'ProfilingKit', 'MultiGpuScheduling'},  # reported only
                   'nvcomp': {'ProfilingKit', 'MultiGpuScheduling'}}
 # Tests the runbook names per item; each must be collected and pass in the listed configurations.
 NAMED = {
@@ -97,37 +95,19 @@ def sha256(path):
     return h.hexdigest()
 
 
-def check_rerun(rpre, cfg, sha, binary_sha, main_exit, failed):
-    """Statuses of the failed tests in the rerun, and every reason the rerun cannot excuse them."""
+def rerun_info(rpre):
+    """Evidence of a rerun, reported as found. Information only: it never enters the verdict."""
     log, junit, ex = Path(f'{rpre}.log'), Path(f'{rpre}.junit.xml'), Path(f'{rpre}.exit')
-    missing = [str(f.name) for f in (log, junit, ex) if not f.is_file()]
-    if missing:
-        return {}, [f'missing {missing}']
-    probs = []
-    text = log.read_text(errors='replace')
-    m = re.match(r'start (\S+) cfg=(\S+) HEAD=(\S+) status=(\d+)', text)
-    if not (m and m.group(2) == cfg and m.group(3) == sha and m.group(4) == '0'):
-        probs.append(f'log header is not cfg={cfg} HEAD={sha} status=0')
-    if f'binary sha256: {binary_sha}' not in text:
-        probs.append('logged binary differs from build-<cfg>/motioncorr')
-    rc = ex.read_text().strip()
-    if rc != '0' or not re.search(r'^ctest rc=0 end ', text, re.M):
-        probs.append(f'rerun exit {rc!r} (log: {re.findall(r"^ctest rc=.*", text, re.M)})')
-    if m:
-        start = datetime.datetime.strptime(m.group(1), '%Y-%m-%dT%H:%M:%SZ').replace(
-            tzinfo=datetime.timezone.utc).timestamp()
-        if start < int(main_exit.stat().st_mtime):
-            probs.append('rerun started before the main run finished')
-        jt = junit.stat().st_mtime
-        if not start <= jt <= ex.stat().st_mtime:
-            probs.append('JUnit file was not written by this rerun invocation (mtime outside its start..exit)')
-    st = junit_status(junit)
-    if sorted(st) != sorted(failed):
-        probs.append(f'rerun JUnit holds {sorted(st)}, not exactly the failed tests {sorted(failed)}')
-    statuses = {n: st.get(n, 'absent') for n in failed}
-    if any(v != 'passed' for v in statuses.values()):
-        probs.append(f'rerun statuses {statuses}')
-    return statuses, probs
+    info = {'exit': ex.read_text().strip() if ex.is_file() else 'missing'}
+    if log.is_file():
+        text = log.read_text(errors='replace')
+        info['log_header'] = text.splitlines()[0] if text else ''
+        info['log_ctest_rc'] = re.findall(r'^ctest rc=.*', text, re.M)
+        info['log_binary_sha256'] = (re.findall(r'binary sha256: ([0-9a-f]{64})', text) or [None])[0]
+    else:
+        info['log'] = 'missing'
+    info['junit'] = junit_status(junit) if junit.is_file() else 'missing'
+    return info
 
 
 def git(src, *args):  # GIT_OPTIONAL_LOCKS=0: `git status` must not refresh the frozen checkout's index
@@ -221,17 +201,12 @@ def main():
     counts = {k: sum(v == k for v in st.values()) for k in ('passed', 'failed', 'skipped', 'not_run')}
     g['counts'] = counts
     bad = sorted(n for n, v in st.items() if v != 'passed')
-    reruns, rerun_problems = {}, []
-    if bad and a.rerun_tag and set(bad) <= LOAD_SENSITIVE[a.cfg] and all(st[n] == 'failed' for n in bad):
-        reruns, rerun_problems = check_rerun(W / f'ctest-{a.cfg}-{a.rerun_tag}', a.cfg, SHA,
-                                             g['binary_sha256'], Path(f'{pre}.exit'), bad)
-        if not rerun_problems:
-            bad = []
-    g['load_sensitive_reruns'] = {'tests': reruns, 'problems': rerun_problems}
-    for prob in rerun_problems:
-        fails.append(f'rerun does not count: {prob}')
+    g['not_passed'] = bad
+    g['not_passed_load_sensitive'] = sorted(set(bad) & LOAD_SENSITIVE[a.cfg])  # operator disposition in D4
+    if a.rerun_tag:
+        g['rerun_info_not_graded'] = rerun_info(W / f'ctest-{a.cfg}-{a.rerun_tag}')
     need(not bad, f'tests not passed: {bad}')
-    need(exit_rc == '0' or (reruns and not rerun_problems and not bad), f'ctest exit {exit_rc}')
+    need(exit_rc == '0', f'ctest exit {exit_rc}')
 
     named = {}
     for item, (cfgs, names) in NAMED.items():

@@ -168,11 +168,29 @@ To select the workload with the best relative precision per unit time and size $
 
 Executed once on `cpu64` under `/tmp/motioncorr-cpu64-bench.lock` (`2026-10-18T01:57:57Z` to `2026-10-18T02:25:36Z`, `0` discarded pairs in both series, max foreign CPU on `CPUs 48-55` $\le 0.006$ cores, host `load1 = 5.10–10.19`):
 
-| Series | Retained Pairs (Order) | Arm A Med Wall (IQR, Range) | Arm B Med Wall (IQR, Range) | Median $\Delta T = B - A$ | $\ge 95\%$ CI of Median | Upper CI Bound vs `main` Med | Sign Test | Noise ($1.4826 \cdot \text{MAD}$) | Null Max $|\Delta T|$ | `mcprof compare` Verdict | **D14 Verdict (`+0.5%` = `+0.0870 s`)** | Product Identity |
+| Series | Retained Pairs (Order) | Arm A Med Wall (IQR, Range) | Arm B Med Wall (IQR, Range) | Median $\Delta T = B - A$ | $\ge 95\%$ CI of Median | Upper CI Bound vs `main` Med | Sign Test | Noise ($1.4826 \cdot \text{MAD}$) | Null Max $|\Delta T|$ | `mcprof compare` Verdict | **D14 Status (`+0.5%` = `+0.0870 s`)** | Product Identity |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **Definitive `fix` vs `main` (`ab_32`)** | `32 / 32` (`16 AB, 16 BA`, `0` discarded) | `17.398 s` (`0.113 s`, `17.228–17.561 s`) | `17.400 s` (`0.086 s`, `17.237–17.616 s`) | **`-0.000068 s` (`-0.0004%`)** | **`[-0.084329, +0.051712] s`** (`[-0.4847%, +0.2972%]`, `97.99%` cov., `[d(10), d(23)]`) | **`+0.051712 s` (`+0.2972%` $\le +0.50\%$)** | `16+/16-` (`p = 1.000`) | `0.115883 s` (`0.6661%`) | `0.258634 s` (`1.4799%`) | `not resolved (below noise 0.116 s)` | **`Pass`** (`+0.2972% <= +0.50%`) | **PASS** (`12` files, `2` MRCs) |
-| **Definitive `main_null` vs `main` (`aa_12`)** | `12 / 12` (`6 AB, 6 BA`, `0` discarded) | `17.476 s` (`0.078 s`, `17.377–17.612 s`) | `17.425 s` (`0.061 s`, `17.349–17.511 s`) | **`-0.042996 s` (`-0.2460%`)** | **`[-0.180871, +0.038215] s`** (`[-1.0350%, +0.2187%]`, `96.14%` cov., `[d(3), d(10)]`) | `+0.038215 s` (`+0.2187%`) | `4+/8-` (`p = 0.388`) | `0.111503 s` (`0.6380%`) | `0.258634 s` (`1.4799%`) | `not resolved (below noise 0.112 s)` | — (null control) | **PASS** (`12` files, `2` MRCs) |
+| **Round-1 `fix` vs `main` (`ab_32`, sequential)** | `32 / 32` (`16 AB, 16 BA`, `0` discarded) | `17.398 s` (`0.113 s`, `17.228–17.561 s`) | `17.400 s` (`0.086 s`, `17.237–17.616 s`) | **`-0.000068 s` (`-0.0004%`)** | **`[-0.084329, +0.051712] s`** (`[-0.4847%, +0.2972%]`, `97.99%` cov., `[d(10), d(23)]`) | **`+0.051712 s` (`+0.2972%`)** | `16+/16-` (`p = 1.000`) | `0.115883 s` (`0.6661%`) | `0.258634 s` (`1.4799%`) | `not resolved (below noise 0.116 s)` | **within 0.5 % numerically (upper +0.297 %); protocol deviation: nulls sequential, not interleaved; superseded by the interleaved run below** | **PASS** (`12` files, `2` MRCs) |
+| **Round-1 `main_null` vs `main` (`aa_12`, sequential)** | `12 / 12` (`6 AB, 6 BA`, `0` discarded) | `17.476 s` (`0.078 s`, `17.377–17.612 s`) | `17.425 s` (`0.061 s`, `17.349–17.511 s`) | **`-0.042996 s` (`-0.2460%`)** | **`[-0.180871, +0.038215] s`** (`[-1.0350%, +0.2187%]`, `96.14%` cov., `[d(3), d(10)]`) | `+0.038215 s` (`+0.2187%`) | `4+/8-` (`p = 0.388`) | `0.111503 s` (`0.6380%`) | `0.258634 s` (`1.4799%`) | `not resolved (below noise 0.112 s)` | — (sequential null control, superseded below) | **PASS** (`12` files, `2` MRCs) |
 
 - **Positional breakdown (`ab_32`):** When `fix` ran second (`AB`, $n = 16$), median $\Delta T = -0.078\text{ s}$; when `fix` ran first (`BA`, $n = 16$), median $\Delta T = +0.054\text{ s}$; second-position cost $= -0.066\text{ s}$.
 - **Paired IQR (`ab_32`):** `[-0.090088, +0.057857] s`; full range `[-0.141, +0.276] s`.
 - **Raw artifacts:** `run_definitive_cpu64.sh`, `raw/cpu64_definitive/definitive_summary.json`, `raw/cpu64_definitive/ab_32/{provenance.json,runs.jsonl,identity.json,compare.json,report.md}`, and `raw/cpu64_definitive/aa_12/{provenance.json,runs.jsonl,identity.json,compare.json,report.md}`.
+
+---
+
+## 9. Revision Round 2: Pre-Specified Interleaved Definitive Comparison (`wd13_interleaved_pairs.py`)
+
+Because `mcprof.py compare` ran the 32 comparison pairs and the 12 null pairs as two sequential series in Section 8.C rather than interleaving the nulls across the comparison window, a fresh pre-specified interleaved definitive comparison (`wd13_interleaved_pairs.py`, invoked by `run_interleaved_cpu64.sh`) is declared in advance and committed before execution:
+
+1. **Venue, Lock, CPUs & Binaries:** Same as Section 8.B (`cpu64`, `/tmp/motioncorr-cpu64-bench.lock`, payload on `CPUs 48-55` `--j 8`, driver/sampler on `CPUs 56-59`, THP `madvise`, `GLIBC_TUNABLES` unset; `A` = `main` `1afa03b5` sha256 `307a030b03785201342a57c4d8adae14120d87676fa6bec7e62f8959d5b03a35`; `B` = `fix` `b82d25f4` sha256 `68dc7ac11049bb15be3caa90af10adb6c7bb7e44b752d797080b9ca1a79d96f9`; $A'$ = same `main` binary under directory tag `A2`, avoiding any `'` character in filesystem paths passed to Ghostscript).
+2. **Workload & Sizing:** 2-movie tutorial subset (`movies2.star` in `/dev/shm` `tmpfs`, report generation ON), sized from the recorded pilot (`raw/cpu64_pilot/pilot_summary.json`; no new pilot run).
+3. **Interleaved Order (48 definitive pairs = 96 runs, after 1 discarded warmup per arm):**
+   - `16` comparison blocks `blk = 1..16`, each block `[AB, BA]` (**$N = 32$ comparison pairs: `16 AB / 16 BA`**).
+   - After every $k = 2$-nd comparison block (`blk in {2, 4, 6, 8, 10, 12, 14, 16}`), run `1` null block `[AA', A'A]` (**$N_{\text{null}} = 16$ interleaved null pairs: `8 AA' / 8 A'A`**).
+   - Each of the 8 cycles ($c = 1 \dots 8$) runs the 6-pair sequence `AB, BA, AB, BA, AA', A'A`; the final null block (`blk = 16`, positions `47–48`) follows the final comparison block (`blk = 16`, positions `45–46`).
+4. **Exclusion & Immediate Same-Position Retry Rule:**
+   - Before each run, wait up to `300 s` for foreign CPU on `CPUs 48-55` $\le 0.25$ cores.
+   - Discard a pair only if either run has `rc != 0`, `< 2` MRC products, missing/empty `logfile.pdf`, unverified executable path, payload affinity mismatch (`!= [48..55]`), or foreign CPU $> 0.25$ cores on `CPUs 48-55` during the run.
+   - Rerun any discarded pair immediately in the exact same position and order, up to `3` attempts.
+5. **Pre-Run Declaration Artifacts:** Written to `rule.txt`, `design.json`, and `declared_timestamps.json` before the first warmup/timed run.

@@ -1,6 +1,6 @@
 # Post-freeze validation plan (DRAFT)
 
-Status: **draft, revision 7, stays DRAFT until the freeze** (after R-REL rounds 2 and 3, R-REL-B, the R-QA2 audits of PR #201, the 11:54Z review of revision 6, and the maintainer decisions D1, D2, T3, D4, D5, D6, D7, D10, D12, D13 and D14). Written against main `cb3699ac`; source line numbers are at that SHA. RC0 is an **evaluation** release, not a stable one (D7). This is the heavy validation campaign that runs **after** the RC0 freeze, on the frozen SHA. It is a plan:
+Status: **draft, revision 8, stays DRAFT until the freeze** (after R-REL rounds 2, 3 and 4, R-REL-B, the R-QA2 audits of PR #201, the 11:54Z review of revision 6, and the maintainer decisions D1, D2, T3, D4, D5, D6, D7, D10, D11, D12, D13 and D14). Written against main `e3871ca2`; source line numbers are at that SHA. RC0 is an **evaluation** release, not a stable one (D7). This is the heavy validation campaign that runs **after** the RC0 freeze, on the frozen SHA. It is a plan:
 every row is **UNRUN** and every result cell is **pending**. Resource lanes, locks and venues are those recorded on
 [#198](https://github.com/KingAlejandro/MotionCorr-standalone/issues/198) (checked 2026-10-16 19:21Z) and must be re-checked
 at run time (`AGENTS.md`: check occupancy before running work; leave unrelated processes alone; record actual resources).
@@ -16,10 +16,10 @@ cover. Nothing here changes a gate or tolerance (`docs/gate_contract.md`).
 | D4 (a) | F is a `main` commit; push CI and full QF on F; later evidence commits touch only `docs/rc0` and `docs/release`; the maintainer names the tag target (`RELEASE_CHECKLIST.md` §10). This plan runs on F |
 | D5, D6 | F3/F3b fail closed (Class A); F4 compressed MRC and the EER skip-and-warn publish (Class D) |
 | D10 (done, #231) | damaged EER container or MRC header: movie-level rejection (Class A); decode overrun: the retained D6 skip-and-warn (Class D); whole-IFD truncation: shorter movie (Class D). Inputs outside the enumerated tested cases stay Class E: no arbitrary-damaged-input claim |
-| D11 (pending, #228) | stale CUDA error after a handled OOM; **not merged**. D14 timing 1 PASS / 2 UNRESOLVED, confirmatory run approved. If it merges, `CudaStaleErrorAfterOom` joins the required CUDA tests (conditional counts CUDA 108, nvCOMP 111, set by the QF runbook update) |
+| D11 (done, #228 `e3871ca2`) | stale CUDA error after a handled OOM (#226 D1) is fixed; `CudaStaleErrorAfterOom` is a required CUDA test (expected counts CPU 74, CUDA 108, nvCOMP 111; none observed on `e3871ca2` yet). D14 final PASS on all three workloads, measured on #228's own code, not the composition: the composed check is QF on F. Recovery control in section 4.6 |
 | D12 | licence and notices review (#18) **deferred**, not a freeze blocker |
 | D13 (done, #230) | `ReportPlotUndefinedAxis` is a required test |
-| D14 | 0.5 % performance rule for D10, D11 and D13, plus the 2026-10-18 addenda; **#226 D2 and D3 remain deferred until after RC0** |
+| D14 | 0.5 % performance rule for D10, D11 and D13, plus the 2026-10-18 addenda; final PASS for all three on their recorded runs (D11: tutL +0.07 %, tutG +0.110 %, e10216L +0.114 % upper bounds, its own code); **#226 D2 and D3 remain deferred until after RC0** |
 
 ## 0. Priority 1: S1, CPU versus CUDA local alignment (PROVISIONAL)
 
@@ -92,7 +92,7 @@ Options:
 - patches: none, 3 x 3, 5 x 5 (a value of 2 is skipped by the program, `src/motioncorr_runner.cpp:309-315`);
 - dose weighting off/on (voltage must be within 2 kV of 100, 200 or 300), `--save_noDW` (only produces a separate file with dose weighting), `--even_odd_split`, `--grouping_for_ps` with `--ps_size`, `--float16`;
 - `--bin_factor` 1, 2 and a non-integer value (binned dimensions must be even); early binning on and `--no_early_binning` (on CUDA, early binning prevents the
-  resident session, `:2279`);
+  resident session, `:2300`);
 - `--group_frames`, `--first_frame_sum`/`--last_frame_sum`, `--max_iter`;
 - gain with `--gain_rot` 0-3 and `--gain_flip` 0-2; defect text file and defect map; `--skip_defect`; `--seed`;
 - EER grouping and upsampling -1, 1, 2 (and 3 on 4096 x 4096 only; 2048 x 2048 and 2-bit sub-pixel EER take only 1 and 2), including a
@@ -157,12 +157,12 @@ a build without the backend) fail before any movie is processed.
 | Pinned route cannot be honoured | `--ingest nvcomp` or `--ingest compact` on an ineligible movie; EER overflow with pinned compact | #208 overflow controls and #204: exit 1, no MRC/STAR for the movie, no witness line |
 | Unsupported MRC mode, SerialEM defect text, malformed TIFF | MRC modes 3/4; a SerialEM-format `.txt`; `DamagedMovie` fixtures | refused at read or initialise (`src/rwMRC.h:209-228`, `src/motioncorr_runner.cpp:268-273`; `DamagedMovie` test) |
 | Damaged EER container or MRC header (D10, #231 **merged**), **enumerated cases only** | the generated `EerMemorySafety` fixtures: invalid strip size or range, failed `TIFFSetDirectory` or `TIFFReadRawStrip`, missing mandatory tag, malformed legacy footer or word count, invalid 2K upsampling, MRC headers with an `INT_MIN` field or an overflowing dimension product, one damaged file next to a healthy one | exit 1, the failed movie named, no completion STAR for it, no joint output, the healthy movie published (D10 record `docs/rc0/eer_memory_safety/`; `src/renderEER.cpp:339-421`, `src/rwMRC.h:150-151, 231-238`). This class is **separate from the D6 skip-and-warn** (Class D) and from whole-IFD truncation (Class D). It does not cover inputs outside these cases (Class E) |
-| Truncated raw MRC movie, gain reference, defect map (F3/F3b, **merged**, #205 `f67a5866`) | truncated copies, every mode (`TruncatedMrcMovie`, `TruncatedGainDefect` and their `Cuda` variants are the existing controls) | exit 1; named message `Failed to read frame N (0-based) of FILE: the movie is truncated or unreadable.` (gain reference and defect map: `Failed to read the gain reference` / `... the defect map FILE: the file is truncated or unreadable.`); no completion STAR, no joint output; a truncated gain or defect map fails **every** movie and the job (`src/motioncorr_runner.cpp:2467-2477, 640-647, 2031-2038, 5244-5248`; PR #205). Compressed MRC is not covered (F4) |
+| Truncated raw MRC movie, gain reference, defect map (F3/F3b, **merged**, #205 `f67a5866`) | truncated copies, every mode (`TruncatedMrcMovie`, `TruncatedGainDefect` and their `Cuda` variants are the existing controls) | exit 1; named message `Failed to read frame N (0-based) of FILE: the movie is truncated or unreadable.` (gain reference and defect map: `Failed to read the gain reference` / `... the defect map FILE: the file is truncated or unreadable.`); no completion STAR, no joint output; a truncated gain or defect map fails **every** movie and the job (`src/motioncorr_runner.cpp:2488-2498, 640-647, 2031-2038, 5265-5269`; PR #205). Compressed MRC is not covered (F4) |
 | Write faults and late-writer faults | `WriteFaults*`, `OutputStageFaults`, `ImageWriteFaults` | the existing tests: exit non-zero without a signal, the product path and movie named, earlier movies' bytes unchanged, no completion record for the failed movie, not added to the joint STAR (`tests/test_write_faults.py:15-30`) |
 | Injected fatal CUDA error | `CudaResidentRetryFailures`, `CudaFaultMatrix`, `CudaPreprocessingFailurePaths` (error codes injected, not a poisoned device) | #207: exit 1, refusal, no publication; **later movies in the same process are refused** at session initialisation, so "healthy movies retained" applies to movies completed before the fault |
 
 After a Class A failure record what is left on disk: a truncated destination MRC, earlier complete products of the same movie, and an auxiliary
-`<movie>_PS.mrc` written before global alignment when `--grouping_for_ps` is used (`src/motioncorr_runner.cpp:3329`; `SUPPORT.md` §6). The completion marker is the
+`<movie>_PS.mrc` written before global alignment when `--grouping_for_ps` is used (`src/motioncorr_runner.cpp:3350`; `SUPPORT.md` §6). The completion marker is the
 per-movie STAR, not file presence.
 
 ### 4.2 Class B: report failure
@@ -208,7 +208,7 @@ table. Run only in an authorised scratch lane, under a sanitizer where stated, a
 | nvCOMP: corrupt Deflate body | nvCOMP documents undefined behaviour for corrupt compressed input (D1); the route assumes complete, unmodified files; use `--ingest compact` for files of unknown integrity | D1; #134 |
 | nvCOMP: file changing between tag scan and read | not detected (follow-up #215) | #215 |
 | Genuine device poisoning | no genuine-poisoning test exists (all fatal-path tests inject error codes, TST2, #213) | #213 |
-| QM follow-ups (#226): D1 stale CUDA error after OOM, D2 config-L admission gap, D3 late OOM failure | **D1 is D11 (#228): PENDING, not merged** (D14 timing 1 PASS / 2 UNRESOLVED; confirmatory run approved); it stays here until it merges. **D2 and D3 are deferred until after RC0** ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)). The balloon qualification (PR #225) produced genuine device out-of-memory failures that were clean, but did not cover hosts below about 36 GiB of RAM, `--eer_upsampling 2`, `--grouping_for_ps`, `--bin_factor`, float32 MRC or multi-GPU; on main a stale CUDA error makes the next movie fall back one route step, and under a pinned `--ingest nvcomp` that next movie is refused | #226; `SUPPORT.md` §8 "GPU memory (QM)" |
+| QM follow-ups still open (#226): D2 config-L admission gap, D3 late OOM failure | **D2 and D3 are deferred until after RC0** ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226) stays open). D1 (stale CUDA error after a handled OOM) was fixed by D11 (#228, merged) and moved to the recovery controls (section 4.6). The balloon qualification (PR #225) produced genuine device out-of-memory failures that were clean, but did not cover hosts below about 36 GiB of RAM, `--eer_upsampling 2`, `--grouping_for_ps`, `--bin_factor`, float32 MRC or multi-GPU | #226; `SUPPORT.md` §8 "GPU memory (QM)" |
 
 ### 4.6 Class R: recovery controls (must complete)
 
@@ -216,10 +216,12 @@ Injected recoverable CUDA failure: exit 0, one WARNING, products identical to th
 CUDA-to-CPU fallback under `--gpu`, identical to `d7171b81`). The six CPU-backend checks of CUDA-linked binaries without `--gpu` are a separate control.
 Re-verify both on the frozen SHA. Neither is device-poisoning evidence. Real device out-of-memory behaviour (VRAM balloon, genuine `cudaMalloc` failures) is covered separately by PR #225 within the limits in `SUPPORT.md` §8.
 
+**Handled device OOM, then the next movie (D11, #228 merged).** After a movie fails with a handled device OOM, the next movie in the same process keeps its own route (`--ingest auto` and pinned `--ingest nvcomp`) and its products are identical to a standalone run; the failed movie fails as before, with no products. Control: `CudaStaleErrorAfterOom` (strict product comparison; a fault shim sets the runtime's own last-error slot), run on F in the CUDA configurations, plus the balloon three-movie jobs on one A100 as recorded in `docs/rc0/stale_cuda_oom/`. It is **not** device-poisoning evidence (no genuine sticky-error control, TST2), fatal-path handling is unchanged, and the D14 timing was measured on #228's own code, not the composition with main.
+
 ### 4.7 Controls that already exist, and what they do not cover
 
 - CUDA tests: `CudaFaultMatrix`, `CudaPreprocessingFailurePaths`, `CudaNvcompAcceptanceFailures`, `CudaNvcompReconstructionFailures`, `CudaResidentRetryFailures`;
-  `CudaU16FailurePaths` exists only when configured with `-DMOTIONCORR_U16_TEST_MOVIE=<uint16 TIFF>` (`CMakeLists.txt:973-992`), and a test that was not
+  `CudaU16FailurePaths` exists only when configured with `-DMOTIONCORR_U16_TEST_MOVIE=<uint16 TIFF>` (`CMakeLists.txt:988-1007`), and a test that was not
   registered is not an executed pass.
 - All fatal-path CUDA tests inject error codes; a genuine device-poisoning control is post-RC0 (TST2, [#213](https://github.com/KingAlejandro/MotionCorr-standalone/issues/213)).
 
@@ -272,7 +274,7 @@ From the #186 evidence at main `116eb04a` (not the frozen SHA; re-measure at fre
   39.3 GiB. Behaviour when the session cannot be allocated was qualified with a VRAM balloon on one A100 80 GB (PR #225, `483e881d`): streaming fallback or a
   clean failure, with floors per geometry, a non-monotone band below the full-speed floor and a stale-error route degradation (#226); the table and limits are in `SUPPORT.md` §8 "GPU memory (QM)". Host RAM for the streaming
   route is about 36 GiB for 11520 x 8184 x 50 (hosts below that are untested).
-- Host RAM: `--grouping_for_ps` on the resident CUDA path downloads the full Fourier movie to the host (`src/motioncorr_runner.cpp:3230-3237`),
+- Host RAM: `--grouping_for_ps` on the resident CUDA path downloads the full Fourier movie to the host (`src/motioncorr_runner.cpp:3251-3258`),
   about one extra float-movie-sized allocation; include it in any RAM budget for that option.
 - EER upsampling 2 quadruples movie storage: a 144-group Falcon 4 movie completed at 79,522 MiB sampled NVML process VRAM on an 81,920 MiB card (calculated 80,520 MiB; about 2.3 GiB remained), host RSS 21,547 MiB compact versus 40,171 MiB float (single runs, PR #208). A sample, not an upper bound or guaranteed fit; little observed headroom on 80 GB.
 - Disk: 21 GB corpus, plus scratch for products (a 300 GB cap was set for the RC0 pre-freeze programme on #198).

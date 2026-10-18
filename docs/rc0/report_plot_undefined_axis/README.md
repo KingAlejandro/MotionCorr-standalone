@@ -170,8 +170,8 @@ Executed once on `cpu64` under `/tmp/motioncorr-cpu64-bench.lock` (`2026-10-18T0
 
 | Series | Retained Pairs (Order) | Arm A Med Wall (IQR, Range) | Arm B Med Wall (IQR, Range) | Median $\Delta T = B - A$ | $\ge 95\%$ CI of Median | Upper CI Bound vs `main` Med | Sign Test | Noise ($1.4826 \cdot \text{MAD}$) | Null Max $|\Delta T|$ | `mcprof compare` Verdict | **D14 Status (`+0.5%` = `+0.0870 s`)** | Product Identity |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **Round-1 `fix` vs `main` (`ab_32`, sequential)** | `32 / 32` (`16 AB, 16 BA`, `0` discarded) | `17.398 s` (`0.113 s`, `17.228–17.561 s`) | `17.400 s` (`0.086 s`, `17.237–17.616 s`) | **`-0.000068 s` (`-0.0004%`)** | **`[-0.084329, +0.051712] s`** (`[-0.4847%, +0.2972%]`, `97.99%` cov., `[d(10), d(23)]`) | **`+0.051712 s` (`+0.2972%`)** | `16+/16-` (`p = 1.000`) | `0.115883 s` (`0.6661%`) | `0.258634 s` (`1.4799%`) | `not resolved (below noise 0.116 s)` | **within 0.5 % numerically (upper +0.297 %); protocol deviation: nulls sequential, not interleaved; superseded by the interleaved run below** | **PASS** (`12` files, `2` MRCs) |
-| **Round-1 `main_null` vs `main` (`aa_12`, sequential)** | `12 / 12` (`6 AB, 6 BA`, `0` discarded) | `17.476 s` (`0.078 s`, `17.377–17.612 s`) | `17.425 s` (`0.061 s`, `17.349–17.511 s`) | **`-0.042996 s` (`-0.2460%`)** | **`[-0.180871, +0.038215] s`** (`[-1.0350%, +0.2187%]`, `96.14%` cov., `[d(3), d(10)]`) | `+0.038215 s` (`+0.2187%`) | `4+/8-` (`p = 0.388`) | `0.111503 s` (`0.6380%`) | `0.258634 s` (`1.4799%`) | `not resolved (below noise 0.112 s)` | — (sequential null control, superseded below) | **PASS** (`12` files, `2` MRCs) |
+| **Round-1 `fix` vs `main` (`ab_32`, sequential)** | `32 / 32` (`16 AB, 16 BA`, `0` discarded) | `17.398 s` (`0.113 s`, `17.228–17.561 s`) | `17.400 s` (`0.086 s`, `17.237–17.616 s`) | **`-0.000068 s` (`-0.0004%`)** | **`[-0.084329, +0.051712] s`** (`[-0.4847%, +0.2972%]`, `97.99%` cov., `[d(10), d(23)]`) | **`+0.051712 s` (`+0.2972%`)** | `16+/16-` (`p = 1.000`) | `0.115883 s` (`0.6661%`) | `0.258634 s` (`1.4799%`) | `not resolved (below noise 0.116 s)` | **D14 PASS: upper +0.297 % ≤ 0.5 %; nulls sequential rather than interleaved, deviation accepted by the maintainer 2026-10-18 ([#198](https://github.com/KingAlejandro/MotionCorr-standalone/issues/198))** | **PASS** (`12` files, `2` MRCs) |
+| **Round-1 `main_null` vs `main` (`aa_12`, sequential)** | `12 / 12` (`6 AB, 6 BA`, `0` discarded) | `17.476 s` (`0.078 s`, `17.377–17.612 s`) | `17.425 s` (`0.061 s`, `17.349–17.511 s`) | **`-0.042996 s` (`-0.2460%`)** | **`[-0.180871, +0.038215] s`** (`[-1.0350%, +0.2187%]`, `96.14%` cov., `[d(3), d(10)]`) | `+0.038215 s` (`+0.2187%`) | `4+/8-` (`p = 0.388`) | `0.111503 s` (`0.6380%`) | `0.258634 s` (`1.4799%`) | `not resolved (below noise 0.112 s)` | — (sequential null control) | **PASS** (`12` files, `2` MRCs) |
 
 - **Positional breakdown (`ab_32`):** When `fix` ran second (`AB`, $n = 16$), median $\Delta T = -0.078\text{ s}$; when `fix` ran first (`BA`, $n = 16$), median $\Delta T = +0.054\text{ s}$; second-position cost $= -0.066\text{ s}$.
 - **Paired IQR (`ab_32`):** `[-0.090088, +0.057857] s`; full range `[-0.141, +0.276] s`.
@@ -179,18 +179,36 @@ Executed once on `cpu64` under `/tmp/motioncorr-cpu64-bench.lock` (`2026-10-18T0
 
 ---
 
-## 9. Revision Round 2: Pre-Specified Interleaved Definitive Comparison (`wd13_interleaved_pairs.py`)
+## 9. Revision Round 2: Supplementary Confirmation — Interleaved Definitive Run (`raw/cpu64_interleaved/`)
 
-Because `mcprof.py compare` ran the 32 comparison pairs and the 12 null pairs as two sequential series in Section 8.C rather than interleaving the nulls across the comparison window, a fresh pre-specified interleaved definitive comparison (`wd13_interleaved_pairs.py`, invoked by `run_interleaved_cpu64.sh`) is declared in advance and committed before execution:
+While the maintainer decision of 2026-10-18 accepted the Section 8.C sequential-null run (`upper +0.297% <= +0.5%`), the fresh pre-specified interleaved comparison (`wd13_interleaved_pairs.py`, invoked by `run_interleaved_cpu64.sh`, declared and committed in `7ab2ca33` / `af75be48` before execution) had already started on `cpu64` and completed once without extension (`2026-10-18T09:26:50Z` to `2026-10-18T09:57:03Z`). It is recorded here as **supplementary confirmation**:
 
 1. **Venue, Lock, CPUs & Binaries:** Same as Section 8.B (`cpu64`, `/tmp/motioncorr-cpu64-bench.lock`, payload on `CPUs 48-55` `--j 8`, driver/sampler on `CPUs 56-59`, THP `madvise`, `GLIBC_TUNABLES` unset; `A` = `main` `1afa03b5` sha256 `307a030b03785201342a57c4d8adae14120d87676fa6bec7e62f8959d5b03a35`; `B` = `fix` `b82d25f4` sha256 `68dc7ac11049bb15be3caa90af10adb6c7bb7e44b752d797080b9ca1a79d96f9`; $A'$ = same `main` binary under directory tag `A2`, avoiding any `'` character in filesystem paths passed to Ghostscript).
 2. **Workload & Sizing:** 2-movie tutorial subset (`movies2.star` in `/dev/shm` `tmpfs`, report generation ON), sized from the recorded pilot (`raw/cpu64_pilot/pilot_summary.json`; no new pilot run).
 3. **Interleaved Order (48 definitive pairs = 96 runs, after 1 discarded warmup per arm):**
    - `16` comparison blocks `blk = 1..16`, each block `[AB, BA]` (**$N = 32$ comparison pairs: `16 AB / 16 BA`**).
-   - After every $k = 2$-nd comparison block (`blk in {2, 4, 6, 8, 10, 12, 14, 16}`), run `1` null block `[AA', A'A]` (**$N_{\text{null}} = 16$ interleaved null pairs: `8 AA' / 8 A'A`**).
-   - Each of the 8 cycles ($c = 1 \dots 8$) runs the 6-pair sequence `AB, BA, AB, BA, AA', A'A`; the final null block (`blk = 16`, positions `47–48`) follows the final comparison block (`blk = 16`, positions `45–46`).
-4. **Exclusion & Immediate Same-Position Retry Rule:**
-   - Before each run, wait up to `300 s` for foreign CPU on `CPUs 48-55` $\le 0.25$ cores.
-   - Discard a pair only if either run has `rc != 0`, `< 2` MRC products, missing/empty `logfile.pdf`, unverified executable path, payload affinity mismatch (`!= [48..55]`), or foreign CPU $> 0.25$ cores on `CPUs 48-55` during the run.
-   - Rerun any discarded pair immediately in the exact same position and order, up to `3` attempts.
-5. **Pre-Run Declaration Artifacts:** Written to `rule.txt`, `design.json`, and `declared_timestamps.json` before the first warmup/timed run.
+   - After every $k = 2$-nd comparison block (`blk in {2, 4, 6, 8, 10, 12, 14, 16}`), `1` null block `[AA', A'A]` (**$N_{\text{null}} = 16$ interleaved null pairs: `8 AA' / 8 A'A`**).
+   - Each of the 8 cycles ($c = 1 \dots 8$) ran `AB, BA, AB, BA, AA', A'A`; the final null block (`blk = 16`, positions `47–48`) followed the final comparison block (`blk = 16`, positions `45–46`).
+4. **Declared-Design Timestamps (`raw/cpu64_interleaved/declared_timestamps.json` & `script_timestamps.txt`):**
+   - Pre-run git commit: `af75be485454856b1c7fd993fd4a1bc574d2d414`
+   - `wd13_interleaved_pairs.py` mtime: `2026-10-18T09:26:48.340282Z`
+   - `run_interleaved_cpu64.sh` mtime: `2026-10-18T09:26:48.473281Z`
+   - `rule.txt` mtime: `2026-10-18T09:26:50.419272Z`
+   - `design.json` mtime: `2026-10-18T09:26:50.428272Z`
+   - Recorded before first warmup run (`seq=001`): `2026-10-18T09:26:50.429361Z` (first warmup `start_utc`: `2026-10-18T09:26:51.431072Z`).
+
+### Supplementary Interleaved Result Table (`raw/cpu64_interleaved/result.json`)
+
+| Interleaved Series | Retained Pairs (Order, Discards) | Arm 1 Med Wall (IQR, Range) | Arm 2 Med Wall (IQR, Range) | Median $\Delta T$ | $\ge 95\%$ CI of Median | Upper CI Bound (% of `main` Med) | Full Pair Range | Sign Test | Noise ($1.4826 \cdot \text{MAD}$) | **D14 Label (`\le +0.50\%` = `+0.0872 s`)** | Product Identity |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Comparison `fix` vs `main` ($B - A$)** | **`32 / 32`** (`16 AB, 16 BA`, `0` discards, `0` retries) | `17.432 s` (`0.077 s`, `17.228–17.535 s`) | `17.419 s` (`0.092 s`, `17.246–17.974 s`) | **`-0.019844 s` (`-0.1138%`)** | **`[-0.061352, +0.045522] s`** (`[-0.3520%, +0.2611%]`, `97.99%` cov., `[d(10), d(23)]`) | **`+0.045522 s` (`+0.2611%`)** | `[-0.196796, +0.553295] s` | `13+/19-` (`p = 0.377`) | `0.094184 s` (`0.5403%`) | **`PASS`** (`+0.2611% <= +0.50%`) | **PASS** (`12` files, `2` MRCs) |
+| **Interleaved Null `A'` vs `A` ($A' - A$)** | **`16 / 16`** (`8 AA', 8 A'A`, `0` discards, `0` retries) | `17.420 s` (`0.041 s`, `17.346–17.558 s`) | `17.455 s` (`0.075 s`, `17.326–17.782 s`) | **`+0.031359 s` (`+0.1800%`)** | **`[-0.048927, +0.107723] s`** (`[-0.2809%, +0.6184%]`, `97.87%` cov., `[d(4), d(13)]`) | `+0.107723 s` (`+0.6184%`) | `[-0.128656, +0.355071] s` (max $|\Delta T| = 0.355071\text{ s}$) | `11+/5-` (`p = 0.210`) | `0.092173 s` (`0.5291%`) | — (interleaved null) | — |
+
+### Open Audit Against R-D11 Round 4 Timing-Driver Lessons (`wd13_interleaved_pairs.py`)
+Per the coordinator's guidance for an already-running interleaved job, each of the 6 points from the R-D11 round 4 review is reported openly for `wd13_interleaved_pairs.py`:
+1. **Completeness:** All 48 planned positions (`1..48`), exact counts (`32` comparison pairs `16 AB / 16 BA`, `16` null pairs `8 AA' / 8 A'A`), and all 98 run records (`2` warmups + `96` definitive runs) are present in `pairs.jsonl` and `runs.jsonl` (`incomplete: null`). In the driver code itself, an incomplete run without `ci` fell back to `"UNRESOLVED"` rather than a separate `"INCOMPLETE"` string; in this execution `incomplete` was `null` and all 48 pairs completed on attempt 1.
+2. **Identity:** Checked on the first retained `AB` pair via `tools/profiling/lib/identity.py` (`compare_trees`: `identical: true`, `12` files, `2` MRCs, `problems: []`); in `wd13_interleaved_pairs.py`, any identity mismatch sets `incomplete` and blocks `PASS`.
+3. **Failures:** `0` failed or discarded runs across all 98 executions (`33` `A` comp/warmup, `33` `B` comp/warmup, `16` `A` null, `16` `A'` null; `discarded_pair_attempts: 0`).
+4. **Provenance:** Binary SHA-256s (`307a030b...` and `68dc7ac1...`), input SHA-256s (`inputs.sha256`), and `design.json` / `rule.txt` were written and verified before the first run.
+5. **Products:** Every run verified `rc == 0`, `mrc_products == 2`, and `logfile_pdf_bytes > 0` (`103,827 B` on every run in `runs.jsonl`). Per-run `run.log` and output trees were cleaned from `/dev/shm` after each pair to stay within the `tmpfs` / disk cap (only `interleaved.log` and `runs.jsonl` were retained, and `logfile.pdf` was checked by byte size rather than page-count parsing).
+6. **Labels:** `result.json` reports `"d14_label": "PASS"`.

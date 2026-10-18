@@ -1,0 +1,58 @@
+W-D13 interleaved paired CPU timing driver for Issue #229 (D13 / D14).
+
+DECLARED DESIGN (written to rule.txt and design.json before the first timed run):
+  Venue & Lock:
+    - Host: cpu64 (small-refmac-machine, 2x AMD EPYC 7763 64-Core, THP madvise,
+      GLIBC_TUNABLES unset).
+    - Mutex lock: /tmp/motioncorr-cpu64-bench.lock held via flock for the entire window.
+  Arms & Binaries (matched Release builds, -O3 -DNDEBUG -std=gnu++17 -fopenmp, -DCUDA=OFF):
+    - A  (main 1afa03b57afbae42138ee30c3545b57b5a74c321):
+        /home/ubuntu/mc-w-d13/build-main/motioncorr
+        sha256 307a030b03785201342a57c4d8adae14120d87676fa6bec7e62f8959d5b03a35
+    - B  (fix  b82d25f4dda6bca746e4206fed1272851cc6a5ce):
+        /home/ubuntu/mc-w-d13/build-fix/motioncorr
+        sha256 68dc7ac11049bb15be3caa90af10adb6c7bb7e44b752d797080b9ca1a79d96f9
+    - A2 (representing A', the identical main binary under a shell/gs-safe directory label):
+        /home/ubuntu/mc-w-d13/build-main/motioncorr
+        sha256 307a030b03785201342a57c4d8adae14120d87676fa6bec7e62f8959d5b03a35
+  Affinity & Threads:
+    - Payload pinned to CPUs 48-55 (single 8-core CCD on NUMA node 1, --j 8, OMP_NUM_THREADS=8).
+    - Driver/sampler pinned to CPUs 56-59.
+  Workload & Options (sized from the separate recorded pilot raw/cpu64_pilot/pilot_summary.json):
+    - Input: 2-movie tutorial subset (movies2.star: 20170629_00021_frameImage.tiff,
+      20170629_00022_frameImage.tiff + gain.mrc, staged in /dev/shm tmpfs).
+    - Options: --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5
+      --bfactor 150 --gainref gain.mrc --seed 1 --expected_frames 24 --j 8
+      (report generation ON: no --skip_report_pdf; generates logfile.pdf and all EPS plots).
+  Pilot Sizing (from recorded pilot raw/cpu64_pilot/pilot_summary.json, not rerun):
+    - Pilot 2-movie median(main) M = 17.5711 s, target T = 0.005 * M = 0.087856 s (+0.5%).
+    - Pilot paired-difference spread: SD = 0.0477 s (0.271%), robust SD (1.4826*MAD) = 0.0544 s
+      (0.310%). At N = 32 pairs, stats.median_ci uses order statistics [d(10), d(23)] (97.99%
+      coverage, normal quantile z = 0.516), giving expected CI half-width 0.160% <= 0.50%
+      (and normal-approximation 1.96 * 1.2533 * s / sqrt(32) = 0.0236 s = 0.134% <= 0.50%).
+  Definitive Interleaved Schedule (run once, never extended):
+    1. Warm-up: 1 run of A, 1 run of B (discarded from analysis, recorded in runs.jsonl).
+    2. Definitive: N = 32 comparison pairs (16 AB / 16 BA) interleaved with N_null = 16 null
+       pairs (8 AA' / 8 A'A), k = 2 (48 pairs = 96 runs total):
+       - 16 comparison blocks blk = 1..16, each block is [AB, BA].
+       - After every k = 2-nd comparison block (blk in {2, 4, 6, 8, 10, 12, 14, 16}),
+         run one null block [AA', A'A].
+       - The last null block (blk = 16, positions 47-48) follows the last comparison block
+         (blk = 16, positions 45-46).
+       - Per-pair differences:
+           comparison pair (AB or BA): d  = wall(B)  - wall(A)
+           null pair       (AA' or A'A): d0 = wall(A') - wall(A)
+  Exclusion & Immediate Same-Position Retry Rule:
+    - Before each run, wait up to 300 s for foreign CPU on lane 48-55 <= 0.25 cores.
+    - A pair is discarded only if either run in the pair has:
+        * non-zero exit status (rc != 0),
+        * fewer than 2 MRC products or missing/empty logfile.pdf,
+        * unverified executable path (/proc/<pid>/exe != realpath(binary)),
+        * payload CPU affinity mismatch (/proc/<pid>/status != [48,49,50,51,52,53,54,55]), or
+        * recorded foreign CPU > 0.25 cores on lane 48-55 during the run.
+    - A discarded pair is rerun immediately in the exact same position and order, up to
+      MAX_ATTEMPTS = 3 attempts; if all 3 attempts fail, the run stops and is reported incomplete.
+  D14 Decision Rule:
+    - PASS:       no resolved slowdown, and upper >=95% CI bound of median(d) <= +0.5% of median(wall A).
+    - UNRESOLVED: no resolved slowdown, and upper >=95% CI bound of median(d) > +0.5% of median(wall A).
+    - FAIL:       resolved slowdown (CI lower bound > 0 and |median(d)| > noise).

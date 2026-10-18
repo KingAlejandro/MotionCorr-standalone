@@ -238,7 +238,7 @@ exec "{sys.executable}" "$@"
             "MultiGpuScheduling",
             "NativeMovieStaging",
             "GainCacheOwnership",
-            "JointStarPublication",
+            "JointStarPublication", "EerMemorySafety",
             # --profile contract (docs/stage_profile.md).
             "StageProfile",
             "CudaValidationParser",
@@ -273,7 +273,7 @@ exec "{sys.executable}" "$@"
                         "DefectParser", "GlobalIfftElision", "PatchRetryState",
                         "CpuDoseSymmetry", "CpuDoseSymmetryBase",
                         "OutputTreeComparator", "MultiGpuScheduling", "NativeMovieStaging",
-                        "GainCacheOwnership", "JointStarPublication",
+                        "GainCacheOwnership", "JointStarPublication", "EerMemorySafety",
                         "MicrographModelBounds", "CompressedMovieSequence",
                         "RunnerInterpolateRecenter", "RunnerInterpolateShifts",
                         "StageProfile", "CudaValidationParser", "HostBufferReuse",

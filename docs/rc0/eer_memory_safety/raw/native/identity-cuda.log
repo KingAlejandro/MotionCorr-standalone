@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D10/run_identity.py", line 194, in <module>
+    main()
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D10/run_identity.py", line 178, in main
+    run_case("cuda", fam, cfg, ups, cpus, uuid, lock, lfs)
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D10/run_identity.py", line 161, in run_case
+    print(f"[{res[status]}] {case_name}: complete_rc={comp_full.returncode} prod_rc={comp_prod.returncode} mrc_sha={arm_info[fix][mrc_sha256][:16]} main={arm_info[main][wall_s]:.1f}s fix={arm_info[fix][wall_s]:.1f}s", flush=True)
+                  ^^^^^^
+NameError: name 'status' is not defined

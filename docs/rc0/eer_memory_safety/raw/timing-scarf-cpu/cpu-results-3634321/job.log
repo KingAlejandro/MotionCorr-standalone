@@ -1,0 +1,33 @@
+=== 0. Provenance ===
+2026-10-18T00:44:24Z
+cn070.scarf.rl.ac.uk
+CPU(s):                                  64
+Model name:                              AMD EPYC 7502 32-Core Processor
+Thread(s) per core:                      2
+Socket(s):                               1
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-63
+[always] madvise never
+GLIBC_TUNABLES=<unset>
+cmake version 3.31.8
+g++ (GCC) 11.5.0 20240719 (Red Hat 11.5.0-14)
+9.54.0
+Python 3.9.25
+=== 1. Unpack sources ===
+=== 2. Build Release CPU binaries inside allocation ===
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+b718700c5cb4294b8f3b073817ccd5c1860e880fd7363eaad5e224b7da6c0e7f  /tmp/wd10-cpu-3634321/build-main/motioncorr
+8a72db9fcd901bf1fe9e6472a2de3cb512b26ce64b79171b94e118def9f4bb9d  /tmp/wd10-cpu-3634321/build-fix/motioncorr
+d184ea10c44da0b8efc053633e72b2d8b238da11947c0e9d0b9a8ccacc2a2cff  /tmp/wd10-cpu-3634321/build-main-helper/runner_numerics
+b1cdb8ae243a71fe5d0a54f14ed52f9f71db059c9644a38d779bbef3d9b7098a  /tmp/wd10-cpu-3634321/build-fix/runner_numerics
+=== 3. Stage EER inputs node-local & warm page cache ===
+3fc5feb61f487f0f4f6ec1317ae033138fe50e7da80e3b5b16bab3aaff2403f5  /tmp/wd10-cpu-3634321/data-12963/Movies/movie1.eer
+6d4f3e5f9a6b837c637dc7098420e1c0cdfbbd61c9305a7780568f67c7134050  /tmp/wd10-cpu-3634321/data-12963/gain.gain
+fad4d37cc4b7b73076e3dd94c44be8a343f37f60b218e8057424b2154c9878ba  /tmp/wd10-cpu-3634321/data-f3/Movies/movie1.eer
+2a46fd6123a7240e95acb324681c281964ec21da9037e05d66d9ab37319e9fed  /tmp/wd10-cpu-3634321/data-f4/Movies/movie1.eer
+=== 4. Host EER decode-focused paired timing (AB/BA + AA null, 8 pairs) ===
+Traceback (most recent call last):
+  File "<stdin>", line 48, in <module>
+AttributeError: module 'lib.stats' has no attribute 'bootstrap_ci'

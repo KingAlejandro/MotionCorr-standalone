@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D10/src/tests/test_eer_memory_safety.py", line 235, in <module>
+    main()
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D10/src/tests/test_eer_memory_safety.py", line 174, in main
+    log = run([binary, '--i', 'movies.star', '--o', str(out_d6)+'/', '--use_own',
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D10/src/tests/test_eer_memory_safety.py", line 86, in run
+    assert p.returncode == expected, (cmd, p.returncode, log[-6000:])
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ([PosixPath('/mnt/clathrin/alex-motioncorr-rc0/W-D10/build-main-cpu/motioncorr'), '--i', 'movies.star', '--o', '/tmp/eer-safety-gcgvs8ka/out-d6/', '--use_own', '--eer_grouping', 4, '--j', 2, '--bin_factor', 8, '--angpix', 1, '--skip_report_pdf'], -6, ' Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * short-batch.eer\n  * healthy.eer\n Correcting beam-induced motions using our own implementation ...\n Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.\n000/??? sec ~~(,_,">                                                          [oo]WARNING: The number of pixels is not right in short-batch.eer frame 1. Probably this frame is corrupted. This frame is skipped.\nfree(): invalid next size (fast)\n')

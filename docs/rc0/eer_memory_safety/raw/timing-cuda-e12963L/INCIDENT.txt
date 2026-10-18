@@ -1,0 +1,26 @@
+Coordinator note (T3 thread 9cf60de2), written 2026-10-18T02:11:39Z.
+
+1. W-D10c (Gemini 4) started an earlier instance of wd10_cuda_window.sh at about 01:37Z.
+   It queued on /tmp/motioncorr-bench.lock behind W-D11's window.
+
+2. The coordinator killed that instance, believing the fix build predated cac82f8c.
+   That belief was wrong:
+   - cac82f8c was committed at 00:26:29Z.
+   - build-fix-cpu objects were built at 00:26:34Z.
+   - build-fix-nvcomp objects were built at 00:27:10Z.
+   - 97fb9fda is test-only.
+
+3. As far as the coordinator knows, the killed instance never acquired the bench lock,
+   so it produced no timed runs. This cannot now be confirmed from files: the restarted
+   instance truncates window.txt and rewrites the driver outputs. That also erased the
+   correction note the coordinator had written into window.txt.
+
+4. The coordinator restarted the window at 01:56:56Z (window-run2.out).
+   - It acquired the lock at 02:01:03Z and finished at 02:10:22Z.
+   - The definitive phase ran once, as declared in rule.txt:
+     6-pair pilot excluded; N=32 (16 AB / 16 BA) plus 16 AA nulls.
+   - Integrity: 110 runs, 0 non-zero exits, 0 foreign GPU processes, 0 pair retries.
+   - This run is the only result reported.
+
+5. rule.txt carries the W-D11 driver docstring, because W-D10c reused that driver
+   (wd10_pairs.py). The design text is the same D14 design.

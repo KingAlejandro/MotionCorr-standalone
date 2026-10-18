@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <cstring>
 #include <cstdint>
+#include <climits>
+#include <exception>
 #include <limits>
 #include <iomanip>
 
@@ -361,6 +363,88 @@ int main(int argc, char **argv)
                       static_cast<std::streamsize>(sizeof(float)) * nx * rows);
             out.close(); // flush before judging success: ~ofstream would swallow it
             require(out.good(), "Failed writing raw samples");
+            return 0;
+        }
+
+        if (std::string(argv[1]) == "count_eer") {
+            require(argc == 6, "Usage: runner_numerics count_eer movie upsampling grouping threads");
+            EERRenderer renderer;
+            renderer.read(argv[2], textToInteger(argv[3]));
+            const int grouping = textToInteger(argv[4]), threads = textToInteger(argv[5]);
+            require(grouping > 0 && threads > 0, "grouping and threads must be positive");
+            const int groups = renderer.getNFrames() / grouping;
+            std::vector<std::exception_ptr> errors(groups);
+            long long electrons = 0;
+            #pragma omp parallel for num_threads(threads) reduction(+:electrons)
+            for (int g = 0; g < groups; g++) {
+                try {
+                    MultidimArray<float> image;
+                    electrons += renderer.renderFrames(g * grouping + 1, (g + 1) * grouping, image);
+                } catch (...) {
+                    errors[g] = std::current_exception();
+                }
+            }
+            for (const auto &error : errors) if (error) std::rethrow_exception(error);
+            std::cout << "electrons " << electrons << '\n';
+            return 0;
+        }
+
+        if (std::string(argv[1]) == "render_eer_groups") {
+            // Render every group of an EER movie the way the runner does: one
+            // renderFrames call per group from an OpenMP team, errors captured per
+            // group and rethrown on the serial path (#221). Writes, per group, the
+            // nonzero pixels as (int64 index, float count) after an int64 header
+            // {width, height, groups} and an int64 pair count per group, so a test
+            // can compare the decode exactly without writing whole frames.
+            require(argc == 7,
+                    "Usage: runner_numerics render_eer_groups movie output upsampling grouping threads");
+            const int upsampling = textToInteger(argv[4]);
+            const int grouping = textToInteger(argv[5]);
+            const int threads = textToInteger(argv[6]);
+            require(grouping > 0 && threads > 0, "grouping and threads must be positive");
+            EERRenderer renderer;
+            renderer.read(argv[2], upsampling);
+            const int groups = renderer.getNFrames() / grouping;
+            std::vector<MultidimArray<float> > images(groups);
+            std::vector<std::exception_ptr> errors(groups);
+            #pragma omp parallel for num_threads(threads)
+            for (int g = 0; g < groups; g++) {
+                try {
+                    renderer.renderFrames(g * grouping + 1, (g + 1) * grouping, images[g]);
+                } catch (...) {
+                    errors[g] = std::current_exception();
+                }
+            }
+            for (int g = 0; g < groups; g++)
+                if (errors[g]) std::rethrow_exception(errors[g]);
+            std::ofstream out(argv[3], std::ios::binary);
+            require(out.good(), "Cannot open render output");
+            const int64_t head[3] = {renderer.getWidth(), renderer.getHeight(), groups};
+            out.write(reinterpret_cast<const char*>(head), sizeof(head));
+            for (int g = 0; g < groups; g++) {
+                std::vector<std::pair<int64_t, float> > nonzero;
+                FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(images[g])
+                    if (DIRECT_MULTIDIM_ELEM(images[g], n) != 0)
+                        nonzero.emplace_back((int64_t)n, DIRECT_MULTIDIM_ELEM(images[g], n));
+                const int64_t count = nonzero.size();
+                out.write(reinterpret_cast<const char*>(&count), sizeof(count));
+                for (const auto &p : nonzero) {
+                    out.write(reinterpret_cast<const char*>(&p.first), sizeof(p.first));
+                    out.write(reinterpret_cast<const char*>(&p.second), sizeof(p.second));
+                }
+            }
+            out.close(); // flush before judging success: ~ofstream would swallow it
+            require(out.good(), "Failed writing render output");
+            return 0;
+        }
+        if (std::string(argv[1]) == "integer_to_string") {
+            // -INT_MIN overflows; the formatted value must still be exact (#221).
+            for (int value : {INT_MIN, INT_MIN + 1, -1, 0, 7, INT_MAX})
+                require(integerToString(value) == std::to_string(value),
+                        "integerToString(" + std::to_string(value) + ") gave " + integerToString(value));
+            require(integerToString(INT_MIN, 12) == "-02147483648",
+                    "integerToString(INT_MIN, 12) gave " + integerToString(INT_MIN, 12));
+            std::cout << "PASS integerToString\n";
             return 0;
         }
 

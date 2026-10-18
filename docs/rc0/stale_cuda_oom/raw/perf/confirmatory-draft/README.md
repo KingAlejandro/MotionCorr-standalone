@@ -12,7 +12,20 @@ The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No time
 
 ## Frozen state
 
-FROZEN_STATE_PLACEHOLDER
+| Item | Value |
+|---|---|
+| Frozen source | `2e4f6543bd9b125f77781c36119eefb690120aa1`, clean checkout `W-D11/src-confirm`; it stays clean |
+| `confirm_pairs.py` | sha256 `4d5bb2056ecc73d893e2cfa83705332d00289539d75956eb1537e782108834cc` |
+| `rule.txt` | sha256 `c58154824cc024a082fa5f99cf1e84b44973baf7794de22ebb4c25b6936160db` |
+| `vendor/stats.py`, `vendor/identity.py` | sha256 `8d61e054…173c7c`, `e44cfd0f…be4645` (unchanged) |
+| `manifest.json` | sha256 `c2d86d1c6cfe7e4fd1112065ccf45911efedd2d99f289f44cbea7c6a3a9e7c23` (copy here; the run uses `W-D11/confirm4/manifest.json`) |
+| Window budget | 2700 s total lock tenure: work by 2690 s, release by 2700 s |
+| Frozen masks and locks | payload 88–95, runner 120–123; `/tmp/motioncorr-bench.lock`, `/tmp/motioncorr-gpu3-correctness.lock` |
+| Binaries | main `c2263c22…f8dd`; fix `29b894f0…c185`, built from `78aae2d3`, source-equivalent to `2e4f6543` |
+| Inputs | tutG 26 files, e10216L 4; `verify` passed for both after freezing, with no lock taken |
+| Superseded | designs frozen at `38fbfa6f`, `8aed9b0b` and `6b797438`, kept in `superseded-*/` |
+
+Later evidence commits on the branch do not change the frozen files. Every window re-verifies them before taking a lock.
 
 ## Change for review R-D11 round 7 (supersedes the design frozen at `6b797438`)
 

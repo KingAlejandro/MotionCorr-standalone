@@ -1,34 +1,38 @@
-# DRAFT / NOT RUN: confirmatory timing for tutG and e10216L (#228, D14)
+# Confirmatory timing for tutG and e10216L (#228, D14): FROZEN DESIGN, NOT RUN
 
-Prepared 2026-10-18 after review R-D11 round 3. **No timing has been run with these files.** The maintainer decides between running this design (option a) and accepting D14 as unmet with an explicit exception (option b).
+The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No timed pair runs before the coordinator's "GO"**, which follows a re-check by R-D11. After GO the four windows run once and the results are committed as evidence.
 
-- `rule.txt`: the declared design. It is frozen once run; corrections go in a dated note.
-- `confirm_pairs.py`: the driver. `run` executes one window; `combine` merges a workload's windows and applies the D14 labels.
-- `wd11_confirm.sbatch`: SCARF exclusive-node job (primary venue). Set `FIX_SHA` to the PR head and refresh the staged bundle at submission.
-- `confirm_4gpus.sh`: 4GPUs GPU3 fallback. One bench-lock window per segment.
-
-## What changes against the executed 4GPUs design
-
-| Gap found in review | Draft |
+| File | Role |
 |---|---|
-| Last null block not after the last comparison block when N/2 is not a multiple of 8 (e10216L, N = 72) | Null block j follows comparison block ceil(j·B/K) inside each window, so the last always follows the last comparison block. Checked for N = 256, 176, 72, 200 and 64. |
-| Arm label `A'` in the output path broke the unquoted `gs` call, and the run still exited 0 | Labels are `main`, `fix`, `mainb` ([a-z]+ only). |
-| Exit 0 was taken as a complete product | Each run must have: per movie a structurally complete MRC and a non-empty STAR; the joint STAR; and `logfile.pdf` with exactly 3 + movies pages, counted by Ghostscript. Otherwise the run is invalid and its pair is rerun in the same position (≤ 3 attempts). Every run's stdout/stderr is kept. |
-| Pilot-based N undershot (e10216L: 0.70% achieved against 0.49% expected) | Sized from the completed 4GPUs definitive runs, which serve as the pilot, by scaling the observed CI upper bound by √N, with a 1.25 margin: tutG N = 256, e10216L N = 176. Fixed in advance and not extended. |
-| One window per workload | Two equal windows per workload, each balanced and with its own 4 null blocks, run in the order tutG-1, e10216L-1, tutG-2, e10216L-2. |
+| `rule.txt` | The declared design. Frozen; corrections go in dated notes only. |
+| `confirm_pairs.py` | Driver. `freeze` writes the manifest; `run` executes one window under the deadline, verifying everything first; `combine` validates the evidence and assigns the D14 label. |
+| `confirm_4gpus.sh` | Launcher: `freeze`, then `windows` (tutG-1, e10216L-1, tutG-2, e10216L-2, then combine). |
+| `controls.py`, `controls/` | Synthetic and dry-run controls and their output. No GPU payload; locks only on a private temporary file. |
 
-The completeness check was exercised on a kept 4GPUs output tree whose MRCs had been deleted. It reported both missing MRCs and counted the 5-page `logfile.pdf` of that 2-movie job. That was a code check, not a timing run.
+## Changes for review R-D11 round 4
 
-## Estimated wall time
+| # | Finding | Change | Control (`controls/ctl-run.txt`) |
+|---|---|---|---|
+| 1 | PDF expectation wrong for more than 3 movies | `expected_pdf_pages = 3 + (3 if movies > 3) + movies`, from `motioncorr_runner.cpp:1723–1745`: tutG 30, e10216L 6 | Real CPU-build products with 4 and 3 movies: 10 and 6 pages, complete. Synthetic 24-movie tree: 30 pages accepted, 27 and 24 rejected. Synthetic e10216 tree: 6 accepted, 9 rejected |
+| 2 | `combine` could PASS incomplete evidence | It validates the manifest, both windows, completion markers, every planned position and order, counts, balance and the CI first; any gap gives INCOMPLETE, never an exception | Missing window, truncated window (with and without a forged marker), zero pairs, malformed record, swapped order and missing manifest all give INCOMPLETE; complete data gives PASS, FAIL or UNRESOLVED as constructed |
+| 3 | Identity failure did not block PASS | Recorded, both trees kept in `identity-failure/`, never retried, workload INCOMPLETE | Synthetic: INCOMPLETE with "product identity failed". Dry run: recorded once, evidence kept |
+| 4 | Pre-existing GPU occupants; GPU/CPU mapping | Rejects occupants before each run and failed queries; samples during the run; GPU by UUID; payload mask ⊆ allowed ∩ GPU-local CPUs (sysfs `local_cpulist`), runner ⊆ allowed, disjoint, actual mask read from `/proc` | Code path only: needs the GPU, so it is not exercisable without a payload |
+| 5 | 45-min window not enforced | One deadline from the first lock request covers lock waits, the idle-GPU wait and all payloads; 120 s per-payload timeout; `finally` and SIGTERM kill and reap children and samplers and release the locks; an unfinished window gives INCOMPLETE | Dry run: payload timeout kills and reaps, pair rerun; window deadline gives incomplete.json, lock released, no orphans; deadline during the lock wait gives incomplete with no payload started |
+| 6 | Provenance and staging | `freeze` records driver/rule hashes, source SHAs, binary hashes, build settings, arguments, input hashes, venue and plan; `run` re-verifies before any lock; setup and git errors are fatal. A clean `src-confirm` checkout of the frozen head is used (the old `src-head` lacked the driver). The fix binary was built from `78aae2d3`, source-equivalent to the head (identical `src/`, comment-only `CMakeLists.txt`); `freeze` checks this | Dry run: a binary changed after freezing is fatal before any resource (no output, lock free) |
+| 7 | Failure classification | resource / exit / timeout / product per run; attempts and failures by arm; ≥ 2 payload failures, or any on fix alone, give INCOMPLETE; 3 failed attempts at one position end the window | Synthetic: one fix product failure gives INCOMPLETE; failures on main and mainb give INCOMPLETE; one isolated main failure still gives PASS. Dry run: exit-0 product failure on fix classified "product" and rerun in the same position |
+| 8 | Structural checks | Positive dimensions, `nsymbt` ≥ 0, mode 2, MAP stamp, exact size; joint STAR rows equal to the expected movie set | Real-tree mutations rejected: zero dimension, negative nsymbt, truncated MRC, empty per-movie STAR, joint STAR missing a movie, with no rows, or deleted, PDF deleted |
+| 9 | Sizing wording; venue | Called a planning heuristic; N fixed; 4GPUs declared as the only venue; no switching or choosing between results | Not applicable |
+| 10 | Labels | Exactly PASS / UNRESOLVED / FAIL / INCOMPLETE | Checked for every synthetic result |
 
-Per-run cost is taken from the executed 4GPUs windows: tutG 26.5 min for 302 runs (5.3 s each), e10216L 19.3 min for 190 runs (6.1 s each). About 0.3 s per run is added for the product and PDF checks.
+Controls ran on 4GPUs CPUs 24–39 (node 0) with no GPU payload: **41/41 as required**. The two real products came from the CPU-only build `05fc48e5…`.
 
-| Window | Runs (2 warm-up + 2 × pairs) | Estimate |
-|---|---|---|
-| tutG 1 or 2 (64 AB + 64 BA + 8 null pairs) | 274 | ~26 min |
-| e10216L 1 or 2 (44 AB + 44 BA + 8 null pairs) | 194 | ~21 min |
+## Estimated window times (after GO)
 
-- **4GPUs GPU3:** 4 windows, each ≤ 45 min with margin. About 94 min of window time, plus waits for other workers' bench-lock windows between windows. Builds are already recorded.
-- **SCARF exclusive node:** the same 4 windows back to back, about 94 min if a SCARF A100 runs at 4GPUs speed. Add staging and two in-allocation builds (~10–15 min). The job requests 3 h. Queue wait (`QOSGrpNodeLimit`) is not included.
+Per-run cost comes from the executed 4GPUs windows (tutG 5.3 s, e10216L 6.1 s per run, including overhead), plus about 0.4 s for the product, PDF and mask checks. Each window: 2 warm-up runs, then 2 × (N/4 comparison + 8 null) pairs.
 
-Reruns of invalid pairs add about 11 s (tutG) or 13 s (e10216L) each.
+| Window | Runs | Estimate | Deadline |
+|---|---|---|---|
+| tutG-1, tutG-2 | 274 each | ~26 min | 45 min |
+| e10216L-1, e10216L-2 | 194 each | ~22 min | 45 min |
+
+That is about 96 min of window time in total, plus any wait for other workers' bench-lock windows. A wait counts against the window's deadline.

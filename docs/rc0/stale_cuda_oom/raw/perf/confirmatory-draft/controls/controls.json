@@ -1,0 +1,248 @@
+[
+ {
+  "group": "A",
+  "case": "real CPU product, 4 movies: complete, 10 pages",
+  "ok": true,
+  "detail": "rc=0 pages=10 problems=[]"
+ },
+ {
+  "group": "A",
+  "case": "real CPU product, 3 movies: complete, 6 pages",
+  "ok": true,
+  "detail": "rc=0 pages=6 problems=[]"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: zero dimension (nx = 0)",
+  "ok": true,
+  "detail": "['Movies/20170629_00021_frameImage.mrc header invalid (dims 0x3838x1, mode 2, nsymbt 0)']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: negative nsymbt",
+  "ok": true,
+  "detail": "['Movies/20170629_00021_frameImage.mrc header invalid (dims 3710x3838x1, mode 2, nsymbt -4)']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: truncated MRC",
+  "ok": true,
+  "detail": "['Movies/20170629_00021_frameImage.mrc size 4096, expected 56956944']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: per-movie STAR empty",
+  "ok": true,
+  "detail": "['Movies/20170629_00021_frameImage.star missing or empty']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: joint STAR missing one movie",
+  "ok": true,
+  "detail": "['joint STAR lists 3 micrographs, not the expected 4']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: joint STAR with no rows",
+  "ok": true,
+  "detail": "['joint STAR lists 0 micrographs, not the expected 4']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: joint STAR deleted",
+  "ok": true,
+  "detail": "['joint STAR missing or malformed']"
+ },
+ {
+  "group": "A",
+  "case": "mutation rejected: logfile.pdf deleted",
+  "ok": true,
+  "detail": "['logfile.pdf pages None, expected 10']"
+ },
+ {
+  "group": "A",
+  "case": "synthetic 24-movie tree with a 30-page PDF accepted",
+  "ok": true,
+  "detail": "pages=30 problems=[]"
+ },
+ {
+  "group": "A",
+  "case": "synthetic 24-movie tree with a 27-page PDF rejected",
+  "ok": true,
+  "detail": "pages=27 problems=['logfile.pdf pages 27, expected 30']"
+ },
+ {
+  "group": "A",
+  "case": "synthetic 24-movie tree with a 24-page PDF rejected",
+  "ok": true,
+  "detail": "pages=24 problems=['logfile.pdf pages 24, expected 30']"
+ },
+ {
+  "group": "A",
+  "case": "synthetic e10216 (3 movies) tree with a 6-page PDF accepted",
+  "ok": true,
+  "detail": "pages=6 problems=[]"
+ },
+ {
+  "group": "A",
+  "case": "synthetic e10216 (3 movies) tree with a 9-page PDF rejected",
+  "ok": true,
+  "detail": "pages=9 problems=['logfile.pdf pages 9, expected 6']"
+ },
+ {
+  "group": "A",
+  "case": "expected pages: 24 movies -> 30, 3 movies -> 6",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "B",
+  "case": "complete-null-effect: PASS",
+  "ok": true,
+  "detail": "label=PASS reasons=[]"
+ },
+ {
+  "group": "B",
+  "case": "complete-resolved-slowdown: FAIL",
+  "ok": true,
+  "detail": "label=FAIL reasons=[]"
+ },
+ {
+  "group": "B",
+  "case": "complete-wide-spread: UNRESOLVED",
+  "ok": true,
+  "detail": "label=UNRESOLVED reasons=[]"
+ },
+ {
+  "group": "B",
+  "case": "window-2-missing: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 2: no completion marker', 'comparison pairs 8 (4 AB / 4 BA), declared 16 balanced', 'null pairs 8, declared 16']"
+ },
+ {
+  "group": "B",
+  "case": "window-1-truncated-no-marker: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: no completion marker (synthetic truncation)', 'comparison pairs 8 (4 AB / 4 BA), declared 16 balanced', 'null pairs 8, declared 16']"
+ },
+ {
+  "group": "B",
+  "case": "window-1-truncated-forged-marker: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: retained positions 5 of 16', 'comparison pairs 11 (6 AB / 5 BA), declared 16 balanced', 'null pairs 10, declared 16']"
+ },
+ {
+  "group": "B",
+  "case": "zero-pairs: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: retained positions 0 of 16', 'window 2: retained positions 0 of 16', 'comparison pairs 0 (0 AB / 0 BA), declared 16 balanced', 'null pairs 0, declared 16', 'no confidence interval (too few pairs)']"
+ },
+ {
+  "group": "B",
+  "case": "malformed-record: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: malformed record at line 4', 'window 1: retained positions 15 of 16', 'comparison pairs 15 (7 AB / 8 BA), declared 16 balanced']"
+ },
+ {
+  "group": "B",
+  "case": "order-swapped-at-one-position: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: position 3 order mainb,main differs from the plan', 'null pairs 15, declared 16']"
+ },
+ {
+  "group": "B",
+  "case": "identity-failed: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['product identity failed']"
+ },
+ {
+  "group": "B",
+  "case": "fix-arm-product-failure (arm-dependent): INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['systematic payload failures: payload failures on the fix arm only (arm-dependent)']"
+ },
+ {
+  "group": "B",
+  "case": "two-payload-failures (recurrent): INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['systematic payload failures: 2 payload failures (exit/timeout/product)']"
+ },
+ {
+  "group": "B",
+  "case": "one-isolated-main-failure: PASS",
+  "ok": true,
+  "detail": "label=PASS reasons=[]"
+ },
+ {
+  "group": "B",
+  "case": "dry-run-header: INCOMPLETE",
+  "ok": true,
+  "detail": "label=INCOMPLETE reasons=['window 1: dry run (no GPU checks or no input hashing), never a verdict']"
+ },
+ {
+  "group": "B",
+  "case": "manifest-missing: INCOMPLETE (no exception)",
+  "ok": true,
+  "detail": "{'workload': 'w', 'label': 'INCOMPLETE', 'incomplete_reasons': [\"evidence unreadable: FileNotFoundError: [Errno 2] No such file or directory: '/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/b-manifest-missing/absent.json'\"]}"
+ },
+ {
+  "group": "B",
+  "case": "labels are exactly PASS / UNRESOLVED / FAIL / INCOMPLETE",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "C",
+  "case": "healthy dry-run window completes (complete.json)",
+  "ok": true,
+  "detail": "{\"status\": \"complete\", \"reason\": \"\", \"workload\": \"w\", \"window\": 1, \"positions\": 16, \"manifest_sha256\": \"214211b7ff9ea1f69b722d72a5e575b7694beec31efa13ca15a3722b3262cd2b\", \"remaining_budget_s\": 588.9}\n"
+ },
+ {
+  "group": "C",
+  "case": "healthy window: lock released, no orphans",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "C",
+  "case": "dry-run windows combine to INCOMPLETE (never a verdict), counts otherwise complete",
+  "ok": true,
+  "detail": "['window 1: dry run (no GPU checks or no input hashing), never a verdict', 'window 2: dry run (no GPU checks or no input hashing), never a verdict']"
+ },
+ {
+  "group": "C",
+  "case": "exit-0 product failure on fix: classified \"product\", pair rerun in the same position",
+  "ok": true,
+  "detail": "[{'seq': 13, 'phase': 'timed', 'label': 'fix', 'rc': 0, 'wall_s': 0.0364, 'cpu_s': 0.021, 'pdf_pages': None, 'failure': 'product', 'detail': 'logfile.pdf pages None, expected 10'}, {'pair': 'BA', 'position': 6, 'order': 'fix,main', 'attempt': 2, 'retained': True, 'walls': {'fix': 0.0337, 'main': 0.0"
+ },
+ {
+  "group": "C",
+  "case": "identity failure recorded once, evidence kept, not retried",
+  "ok": true,
+  "detail": "[{'position': 1, 'identical': False, 'problems': ['1 file(s) differ'], 'compared': 9, 'mrc_compared': 4}]"
+ },
+ {
+  "group": "C",
+  "case": "per-payload timeout kills and reaps the payload, pair rerun",
+  "ok": true,
+  "detail": "[{'seq': 6, 'phase': 'timed', 'label': 'main', 'rc': -9, 'wall_s': 3.0033, 'cpu_s': 0.018, 'failure': 'timeout', 'detail': 'killed after 3 s'}]"
+ },
+ {
+  "group": "C",
+  "case": "window deadline: stops within budget, incomplete.json, lock released, no orphans",
+  "ok": true,
+  "detail": "elapsed 20 s; {\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline reached\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"9bbcdf8b3969e84d0f78d2100e576d1de8dc53f795dd35b27e68cc20b8981df5\",\n \"remaining_budget_s\": -0.2\n}"
+ },
+ {
+  "group": "C",
+  "case": "deadline covers the lock wait: incomplete, no payload started",
+  "ok": true,
+  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline passed waiting for /mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-private.lock\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"8fc85fe47327d51aefcd51f45f5b5ccab642cc4331e555cd6b80f6dcc963c82c\",\n \"remaining_bud"
+ },
+ {
+  "group": "C",
+  "case": "provenance mismatch (binary changed after freeze) is fatal before any resource",
+  "ok": true,
+  "detail": "provenance check failed: main binary hash\n"
+ }
+]

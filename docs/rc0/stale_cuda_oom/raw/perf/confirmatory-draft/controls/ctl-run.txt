@@ -1,0 +1,43 @@
+[PASS] A real CPU product, 4 movies: complete, 10 pages
+[PASS] A real CPU product, 3 movies: complete, 6 pages
+[PASS] A mutation rejected: zero dimension (nx = 0)
+[PASS] A mutation rejected: negative nsymbt
+[PASS] A mutation rejected: truncated MRC
+[PASS] A mutation rejected: per-movie STAR empty
+[PASS] A mutation rejected: joint STAR missing one movie
+[PASS] A mutation rejected: joint STAR with no rows
+[PASS] A mutation rejected: joint STAR deleted
+[PASS] A mutation rejected: logfile.pdf deleted
+[PASS] A synthetic 24-movie tree with a 30-page PDF accepted
+[PASS] A synthetic 24-movie tree with a 27-page PDF rejected
+[PASS] A synthetic 24-movie tree with a 24-page PDF rejected
+[PASS] A synthetic e10216 (3 movies) tree with a 6-page PDF accepted
+[PASS] A synthetic e10216 (3 movies) tree with a 9-page PDF rejected
+[PASS] A expected pages: 24 movies -> 30, 3 movies -> 6
+[PASS] B complete-null-effect: PASS
+[PASS] B complete-resolved-slowdown: FAIL
+[PASS] B complete-wide-spread: UNRESOLVED
+[PASS] B window-2-missing: INCOMPLETE
+[PASS] B window-1-truncated-no-marker: INCOMPLETE
+[PASS] B window-1-truncated-forged-marker: INCOMPLETE
+[PASS] B zero-pairs: INCOMPLETE
+[PASS] B malformed-record: INCOMPLETE
+[PASS] B order-swapped-at-one-position: INCOMPLETE
+[PASS] B identity-failed: INCOMPLETE
+[PASS] B fix-arm-product-failure (arm-dependent): INCOMPLETE
+[PASS] B two-payload-failures (recurrent): INCOMPLETE
+[PASS] B one-isolated-main-failure: PASS
+[PASS] B dry-run-header: INCOMPLETE
+[PASS] B manifest-missing: INCOMPLETE (no exception)
+[PASS] B labels are exactly PASS / UNRESOLVED / FAIL / INCOMPLETE
+[PASS] C healthy dry-run window completes (complete.json)
+[PASS] C healthy window: lock released, no orphans
+[PASS] C dry-run windows combine to INCOMPLETE (never a verdict), counts otherwise complete
+[PASS] C exit-0 product failure on fix: classified "product", pair rerun in the same position
+[PASS] C identity failure recorded once, evidence kept, not retried
+[PASS] C per-payload timeout kills and reaps the payload, pair rerun
+[PASS] C window deadline: stops within budget, incomplete.json, lock released, no orphans
+[PASS] C deadline covers the lock wait: incomplete, no payload started
+[PASS] C provenance mismatch (binary changed after freeze) is fatal before any resource
+
+41/41 controls as required

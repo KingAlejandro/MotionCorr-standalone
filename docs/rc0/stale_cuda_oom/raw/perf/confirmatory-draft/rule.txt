@@ -1,57 +1,81 @@
-DRAFT / NOT RUN. Declared design for the W-D11 confirmatory timing of #228 (prepared 2026-10-18).
-To be run only if the maintainer chooses option (a). Once run, this file and confirm_pairs.py are
-not edited; any correction is added as a separate dated note.
+FROZEN DESIGN, NOT YET RUN. W-D11 confirmatory timing for #228 (D14). Frozen 2026-10-18; the maintainer
+chose option (a). No timed pair may run before the coordinator's "GO" after re-check R-D11. Once run, this
+file and confirm_pairs.py are never edited; any correction is a separate dated note.
 
-Purpose   Settle D14 for the two workloads left Unresolved by the 4GPUs definitive run (tutG +0.63%,
-          e10216L +0.70%). tutL (Pass) is not rerun.
-D14       Pass = no resolved slowdown AND upper 95% CI bound of median(fix - main) <= +0.5% of the
-          median main whole-job wall. Unresolved = the bound is above 0.5%. Fail = resolved slowdown,
-          i.e. the CI lies entirely above zero. A workload with an incomplete window is Incomplete.
-Arms      main = main 71ab841e; fix = PR #228 head (src/ identical to e723a737); mainb = the main
-          binary under a second label (null). Labels are [a-z]+ only; run directories are
-          <seq>-<label>, so no label character can reach a shell command line or path quoting.
-Builds    Identical Release, sm80, nvCOMP 5.3.0.16, same compiler and CMake options for both arms.
-          4GPUs: the recorded builds (main c2263c22..f8dd, fix 29b894f0..c185). SCARF: both built
-          inside the allocation from the same bundle (wd11_confirm.sbatch).
-Workloads tutG    tutorial 24 movies, --use_own --dose_weighting --dose_per_frame 1.277 --bfactor 150
-                  --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 8 --ingest nvcomp
-          e10216L EMPIAR-10216 int16 MRC, 3 movies (one file under three names), --use_own
+Purpose   Settle D14 for the two workloads the 4GPUs definitive run left UNRESOLVED (tutG +0.63%,
+          e10216L +0.70%). tutL (PASS) is not rerun. Nothing from the earlier runs is pooled with this one.
+Labels    Exactly one of PASS / UNRESOLVED / FAIL / INCOMPLETE per workload.
+          FAIL        = resolved slowdown: the 95% CI of median(fix - main) lies entirely above zero.
+          PASS        = not FAIL, and the CI upper bound <= +0.5% of the median main whole-job wall.
+          UNRESOLVED  = neither.
+          INCOMPLETE  = any evidence check below fails; this overrides the statistical label.
+Venue     4GPUs only, declared before any run: GPU3 GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, selected by
+          UUID (CUDA_VISIBLE_DEVICES). Payload CPUs 88-95 and runner CPUs 120-123 (NUMA node 1). Both masks
+          must lie in the driver's allowed CPU set; the payload mask must also lie in the GPU's PCI-local CPU
+          list (sysfs). Disjoint masks; the payload's actual mask is read from /proc during each run.
+          No other venue, no venue switching, and no choice between results after seeing an outcome.
+Arms      main = main 71ab841e69869b615555bb02f8f393db59c22d73; fix = PR #228 head; mainb = main binary
+          under a second label (null). Labels are [a-z]+; run directories are <seq>-<label>.
+Binaries  The recorded identical Release sm80 + nvCOMP 5.3.0.16 builds (W-D11 build.sh, same compiler, flags
+          and CMake options): main sha256 c2263c22611dc72bf575b7c40410d7be8dfca100f8f3319023e9bef62ec9f8dd
+          from 71ab841e; fix sha256 29b894f0643f1b8f1cbcb33954165bd70f1613f9095be36e963660f7939ac185 built
+          from 78aae2d3. 78aae2d3 is source-equivalent to the head: src/ identical, CMakeLists.txt differs
+          in comment lines only. The freeze step checks this and refuses otherwise (rebuild from the head).
+Workloads tutG    tutorial-data, 24 movies + gain, --use_own --dose_weighting --dose_per_frame 1.277
+                  --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 8 --ingest nvcomp
+          e10216L W-D11/perf-e10216, EMPIAR-10216 (sha256 f399bd30...3a56) under three names, --use_own
                   --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --gpu 0 --j 8
                   --patch_x 5 --patch_y 5 --ingest compact
-Sizing    No new pilot. The completed 4GPUs definitive runs ARE the pilot (raw/perf/4gpus/*/result.json):
-            tutG    N=128, median d +0.000 s, CI upper +0.0288 s, target 0.5% x 4.563 s = 0.0228 s
-            e10216L N=72,  median d +0.001 s, CI upper +0.0404 s, target 0.5% x 5.802 s = 0.0290 s
-          The CI half-width scales as 1/sqrt(N). N = observed N x (observed upper / target)^2 gives
-          204 (tutG) and 140 (e10216L). The MAD-based normal estimate (80 and 58) is not used: the
-          differences are heavy-tailed, and e10216L's earlier pilot-based sizing undershot (0.70% achieved
-          against 0.49% expected). With a 1.25 margin, rounded up to a multiple of 4:
-            tutG    N = 256 (128 AB + 128 BA), expected upper about 0.45%
-            e10216L N = 176 (88 AB + 88 BA),   expected upper about 0.45%
-          N is fixed here and is never extended or reduced after any timed run.
-Nulls     16 null pairs per workload (8 [main,mainb], 8 [mainb,main]), interleaved.
-Windows   Each workload is split into 2 equal windows. Each window has N/4 comparison blocks
-          [main,fix],[fix,main] and 4 null blocks [main,mainb],[mainb,main]. Within a window null block
-          j (1..4) follows comparison block ceil(j*B/4), B = N/4, so the last null block follows the last
-          comparison block (confirm_pairs.plan_window; checked for every N used). Each window starts with
-          one discarded warm-up run per arm. Window order: tutG-1, e10216L-1, tutG-2, e10216L-2.
-          Estimated length: tutG about 26 min, e10216L about 21 min per window, i.e. each <= 45 min.
-Run check A run is valid only if: exit 0; no foreign process on the selected GPU during it (and the GPU
-          query succeeded); and the products are complete: per movie a mode-2 MRC whose size matches its
-          header and a non-empty motion STAR; the joint STAR; and logfile.pdf with exactly 3 + movies
-          pages, counted by Ghostscript (27 for tutG, 6 for e10216L). Each run's stdout/stderr is kept
-          (logs/<seq>-<label>.txt.gz). The checks run after the timed interval and are not timed.
-Exclusion A pair with an invalid run is rerun in the same position and order, up to 3 attempts. If all
-          3 fail, the window stops and the workload is reported Incomplete. Nothing else excludes a pair.
-Timing    Wall = CLOCK_MONOTONIC from spawn to reap of the payload. Payload pinned by taskset; driver and
-          samplers on separate CPUs.
-Report    Per workload, windows combined: median d, distribution-free 95% CI (tools/profiling/lib/
-          stats.median_ci), CI as % of median main wall, D14 label, null median/CI/range, per-arm median
-          and IQR, run integrity (exits, product failures, foreign GPU processes, reruns), product identity
-          of each window's first comparison pair (lib/identity.compare_trees), host load per window.
-Venue     Primary: SCARF exclusive GPU node, -p gpu --gres=gpu:1 --exclusive --constraint=scarf23;
-          the four windows run back to back in one allocation. Payload on the first 8 CPUs of the GPU's
-          NUMA-local affinity, driver on the next 8.
-          Fallback: 4GPUs GPU3 (GPU-b2cb2c39-...) by UUID, payload CPUs 88-95 (NUMA node 1), driver and
-          mpstat/nvidia-smi samplers on CPUs 120-123. Each window holds /tmp/motioncorr-bench.lock and
-          the GPU3 lock for its whole duration and releases them between windows.
-          The venue used is recorded. Results from the two venues are never pooled.
+N         Fixed: tutG N = 256 (128 AB + 128 BA); e10216L N = 176 (88 AB + 88 BA). Not changed for any reason.
+          Planning heuristic only: the completed 4GPUs definitive runs serve as historical pilot data. The
+          observed CI upper bound (tutG +0.0288 s at N=128; e10216L +0.0404 s at N=72) scaled by sqrt(N) to
+          the target (0.5% of 4.563 s and 5.802 s) gives 204 and 140; x 1.25 margin, rounded up to a
+          multiple of 4. This heuristic does not guarantee the bound; the result is whatever the data give.
+Nulls     16 null pairs per workload (8 [main,mainb], 8 [mainb,main]).
+Windows   Two equal windows per workload, run once each in the order tutG-1, e10216L-1, tutG-2, e10216L-2.
+          Every window has N/4 comparison blocks [main,fix],[fix,main] and 4 null blocks; null block j (1..4)
+          follows comparison block ceil(j*B/4), B = N/4, so the last null block follows the last comparison
+          block. One discarded warm-up run per arm (main, fix) starts each window. The plan is frozen in the
+          manifest. Pooling the two windows is predeclared; per-window counts are reported.
+Deadline  45 min per window from the first lock request, covering the lock waits, the idle-GPU wait and
+          all payloads. Each window holds /tmp/motioncorr-bench.lock and /tmp/motioncorr-gpu3-correctness.lock
+          for its whole duration (inode checked). Per-payload timeout 120 s (a healthy run takes 4.5-6 s);
+          a timed-out payload's process group is killed and reaped. On any exit (completion, deadline,
+          error, SIGTERM/SIGINT) the payload, the mpstat/nvidia-smi samplers and both locks are released.
+          A window that does not complete writes incomplete.json; the workload is then INCOMPLETE. No window
+          is repeated or substituted and N is never reduced.
+Provenance Frozen in manifest.json by `confirm_pairs.py freeze` before any resource is requested: driver
+          and rule sha256, frozen source head (full SHA, clean tree), main/fix SHAs, fix build SHA and its
+          equivalence, both binary paths and sha256, build settings, workload arguments, the sha256 of every
+          input file (movies, gain, movies.star), venue, N, windows, the full plan, budget and timeouts.
+          `run` re-verifies the driver, rule, binaries and all inputs before taking a lock; any mismatch,
+          setup error or git error is fatal and no window starts.
+Run check A run is valid only if ALL hold:
+            - no compute process on GPU3 immediately before it, and the GPU query succeeded;
+            - no foreign GPU3 process and no failed GPU query while it runs (sampled every 0.25 s);
+            - the payload's CPU mask equals the payload mask;
+            - exit status 0 within the payload timeout;
+            - complete products: per movie an MRC with positive dimensions, nsymbt >= 0, mode 2, MAP stamp and
+              size = 1024 + nsymbt + 4*nx*ny*nz; a non-empty motion STAR; the joint STAR whose
+              data_micrographs loop lists exactly the expected Movies/<stem>.mrc set; and logfile.pdf with
+              exactly 3 + (3 if movies > 3) + movies pages counted by Ghostscript (tutG 30, e10216L 6).
+          Each run's stdout/stderr is kept (logs/<seq>-<label>.txt.gz). Checks run after the timed interval.
+Failures  Classified per run as: resource (GPU occupancy, failed query, mask), exit, timeout, product
+          (exit 0 but incomplete products). A pair with an invalid run is rerun in the same position and
+          order, up to 3 attempts; a position that fails 3 times ends the window (INCOMPLETE).
+          Attempts and failures are reported per arm (main, fix, mainb) and class.
+          Systematic payload failures make the workload INCOMPLETE (no unconditional PASS) unless explained
+          in a dated note: >= 2 exit/timeout/product failures in the workload, or >= 1 on the fix arm with
+          none on main/mainb (arm-dependent). Resource failures are environmental and reported only.
+Identity  The first comparison pair of each window is compared with tools/profiling/lib/identity.compare_trees
+          (full MRC header except the writer timestamp, payload, path-normalised STAR/EPS). A failure is
+          recorded, its two product trees are kept (identity-failure/), it is never retried for a different
+          outcome, and it makes the workload INCOMPLETE.
+Combine   `confirm_pairs.py combine` validates before any statistic: the manifest; exactly 2 windows, each
+          with complete.json matching the manifest hash and a header that is not a dry run; every planned
+          position retained exactly once in the planned order; N comparison pairs balanced AB/BA; 16 null
+          pairs; parseable records; a CI. Missing, malformed or truncated evidence gives INCOMPLETE, not an
+          exception. Then: median(d), distribution-free 95% CI (tools/profiling/lib/stats.median_ci), CI as %
+          of the median main wall, per-arm median and IQR, null median/CI/range, per-window counts.
+Report    Per workload: label, the statistics above, attempts/failures by arm, identity, host load (mpstat,
+          nvidia-smi every 10 s), window times and lock waits.

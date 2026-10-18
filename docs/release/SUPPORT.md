@@ -135,7 +135,7 @@ float route; late binning needs `--no_early_binning`. Session-initialisation fai
 | MRC / MRCS | mode 2 (float32), mode 12 (float16), mode 101 (4-bit) | none | yes | yes | no | n/a | `float` | `src/rwMRC.h:206, 216-227` | pending RC0 QF |
 | MRC / MRCS | modes 3, 4 (complex); any other mode | none | refused at read | refused | refused | n/a | n/a | `src/rwMRC.h:209-228` | pending RC0 QF |
 | `.mrc/.mrcs` + `.bz2`/`.xz`/`.zst` | per header | external `pbzip2`, `xz` or `zstd` must be on `PATH`. One sequential frame reader (`:2474`); only `pbzip2` takes a thread count (`-cdkp<N>`, N = the IO-thread setting, `:2141`), `xz -cdk` and `zstd -cdk` take none | yes | yes | **no** (excluded from compact and nvCOMP) | no | `float` | `src/image.h:1824-1861, 1896-1907`; `src/motioncorr_runner.cpp:2299, 2384, 2474` | pending RC0 QF |
-| EER | counts, rendered on the host; square 2048 x 2048 or 4096 x 4096 only | EER | yes (float movie) | yes | **yes**, only if `eer_grouping` x (4 if `--eer_upsampling -1`, else 1) <= 65535, rendered into uint16 (#196) | n/a | `compact`, otherwise `float` (logged: "can exceed 65535 counts per pixel; using the float movie") | `:2358-2373`; `src/renderEER.cpp:169-174, 225-229, 264-267` | pending RC0 QF |
+| EER | counts, rendered on the host; square 2048 x 2048 or 4096 x 4096 only | EER | yes (float movie) | yes | **yes**, only if `eer_grouping` x (4 if `--eer_upsampling -1`, else 1) <= 65535, rendered into uint16 (#196) | n/a | `compact`, otherwise `float` (logged: "can exceed 65535 counts per pixel; using the float movie") | `:2358-2373`; `src/renderEER.cpp:169-174, 225-229, 264-267, 272-275` | pending RC0 QF |
 
 **Compact-ingest matrix (#123): placeholder.** The adapted compact-ingest support matrix of #123 is to be run on the frozen executable as part of QF. Result: pending RC0 QF.
 
@@ -180,7 +180,7 @@ Shape and format restrictions the cells above do not repeat:
 - **EER defect replacement** on the compact EER route uses the host path (`Iframes_u16` x gain); the sparse device gather is reachable only with
   nvCOMP input (PR #208).
 - **EER memory (single runs per arm, PR #208, A100 80 GB, main `1db86902`).** `--eer_upsampling 2` doubles both dimensions
-  (`src/renderEER.cpp:356-375`), so every movie buffer is four times larger (upsampling 3: sixteen times). Host RSS with the compact route
+  (`src/renderEER.cpp:430-449`), so every movie buffer is four times larger (upsampling 3: sixteen times). Host RSS with the compact route
   was 34-39 % lower than the float route at upsampling 1 and 43-47 % lower at 2 and 3; there was no saving at -1 (not investigated). Device
   memory is unchanged, because the resident device buffers are float whatever the host staging type. A 144-group Falcon 4 movie at
   upsampling 2 **completed with 79,522 MiB of sampled NVML process VRAM** (one run per arm, 81,920 MiB card, about 2.3 GiB remained; calculated 80,520 MiB),
@@ -254,7 +254,7 @@ qualification. The CUDA column says only what source shows; "not claimed" means 
 | Local patches (`--patch_x N --patch_y M`) | yes; a value of exactly 2 prints "too small ... Patch based alignment will be skipped" (`:309-315`) | yes, device patch alignment (`:3549-3558`) with resident retry for non-converged patches (#197) | as cited | pending RC0 QF |
 | Dose weighting (`--dose_weighting`, `--angpix`, `--voltage`, `--dose_per_frame`, `--preexposure`) | yes; **voltage must be within 2 kV of 100, 200 or 300** or the movie fails | yes, in VRAM when a session is resident; CPU fallback exists | `:4095-4108, 4122` | pending RC0 QF |
 | `--save_noDW` | yes (streamed unweighted sum, #178); **needs `--dose_weighting`**: without dose weighting the unweighted sum is the main `.mrc` and no `_noDW.mrc` is written | yes. At `1db86902` six CPU-backend checks (CUDA-linked binaries run **without** `--gpu`) and **one** injected recoverable CUDA-to-CPU fallback under `--gpu` (injected `cudaMalloc` failure #16) all matched the pre-#178 build `d7171b81` (PR #209); not real out-of-memory or device poisoning; frozen-SHA rerun pending | `:3380` (`pre_dw_sum_needed`), `:4068-4074`, resume `:793`; #198 item C1 | pending RC0 QF |
-| `--even_odd_split` (`_EVN.mrc`, `_ODD.mrc`) | yes | yes | `:3380, 3982-3990` | pending RC0 QF |
+| `--even_odd_split` (`_EVN.mrc`, `_ODD.mrc`) | yes | yes | `:3380, 3982-3990`; CUDA reconstruction `:3991-4016`; `_ODD.mrc`/`_EVN.mrc` publication `:4077-4086` | pending RC0 QF |
 | `--bin_factor` (non-integer allowed) | yes; early binning is on by default when binning; **the binned dimensions must both be even** or the movie fails | early binning (the default when binning) skips the resident session and compact staging, so the movie takes the float route and the global FFT stays on the CPU; late binning needs `--no_early_binning`. Route-invariance of late/early binning was checked on valid input (PR #204) | `:183, 218-220, 2279, 2384, 3136-3140, 3166-3172`; late binning `:5062-5064` | pending RC0 QF |
 | `--group_frames N` | yes; fewer than 3 groups after grouping skips the movie; a non-dividing remainder goes to the **last** groups (`:2186-2196`) | identical across routes for `--group_frames 4` (PR #207) | `:2175-2196` | pending RC0 QF |
 | `--eer_grouping`, `--eer_upsampling` | yes; see §2 for accepted values, shapes and the trailing-fraction rule | compact route only within the uint16 limit; **upsampling 2 quadruples the movie storage: a 144-group Falcon 4 movie completed with 79,522 MiB of sampled NVML process VRAM on an 81,920 MiB card, one run per arm, about 2.3 GiB observed remaining (2,398 MiB); little observed headroom, not a guaranteed fit** (§2, PR #208) | `:2358-2373` | pending RC0 QF |
@@ -361,7 +361,7 @@ healthy movies for a published dataset.
    `fread` or seek failure) is now checked at every read, so a truncated movie no longer runs on unread memory. This is movie-level rejection (the criterion of
    `POST_FREEZE_TEST_PLAN.md` §4.1): exit 1, no completion STAR for the movie, no joint output for the batch. The named messages are:
    - movie frames: `Failed to read frame N (0-based) of FILE: the movie is truncated or unreadable.` (`src/motioncorr_runner.cpp:2467-2477`, all five read routes through one helper);
-   - gain reference: `Failed to read the gain reference FILE: the file is truncated or unreadable.` (`:640-647, 2031-2038`; EER gain `src/renderEER.h:131`);
+   - gain reference: `Failed to read the gain reference FILE: the file is truncated or unreadable.` (`:640-647, 2031-2038`; EER gain `src/renderEER.h:133-137`);
    - defect map: `Failed to read the defect map FILE: ...` (`:5244-5248`).
    A truncated gain or defect map fails **every** movie and the job (exit 1, no products); with `--gain_rot` the gain is read before any movie. Valid input is byte-identical to
    `1db86902` and the truncated cases fail on `1db86902` (PR #205; tests `TruncatedMrcMovie`, `TruncatedGainDefect` and their `Cuda` variants). This does **not** cover compressed

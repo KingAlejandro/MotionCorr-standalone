@@ -271,6 +271,8 @@ void EERRenderer::read(FileName _fn_movie, int eer_upsampling)
 
 		if (width != height || (width != EER_4K && width != EER_2K))
 			REPORT_ERROR("Currently we support only 4096x4096 or 2048x2048 pixel EER movies.");
+		if (width == EER_2K && eer_upsampling != 1 && eer_upsampling != 2)
+			REPORT_ERROR("Invalid EER upsamle for 2K images. This must be 2 or 1.");
 
 		total_pixels = (long long)width * height;
 

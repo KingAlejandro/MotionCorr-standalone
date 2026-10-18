@@ -1,4 +1,4 @@
-# Confirmatory timing for tutG and e10216L (#228, D14): FROZEN DESIGN (round-8 revision), NOT RUN
+# Confirmatory timing for tutG and e10216L (#228, D14): FROZEN DESIGN (round-8 revision), RUN ONCE 2026-10-18: tutG PASS, e10216L PASS (evidence in `../confirmatory-4gpus/`)
 
 The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No timed pair runs before the coordinator's "GO"**, which follows a re-check by R-D11. After GO the four windows run once and the results are committed as evidence.
 

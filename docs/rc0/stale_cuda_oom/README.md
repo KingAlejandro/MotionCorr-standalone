@@ -4,7 +4,11 @@
 
 The fix clears a recoverable pending CUDA error when a movie fails, so the next movie keeps its ingest route. On main `71ab841e`, a movie that fails with a device out-of-memory error makes the next movie in the same job lose its route (nvCOMP → compact under `--ingest auto`; CPU preprocessing on the compact route), or be refused under a pinned `--ingest nvcomp`. On the fix, every following movie keeps its standalone route and its products are identical to a standalone run. The failed movie fails as before, nothing is left on the device, and fatal handling is unchanged.
 
-Healthy-input timing against the D14 margin (section 6): **tutL Pass**; **tutG and e10216L Unresolved**, with upper bounds of +0.63% and +0.70% and medians of +0.000 s and +0.001 s. No workload shows a resolved slowdown.
+**Final D14 result for #228 (healthy-input timing, section 6): all three workloads PASS.**
+- **tutL PASS:** first definitive run, upper bound +0.07%.
+- **tutG PASS and e10216L PASS:** single attended confirmatory campaign, upper bounds +0.110% and +0.114% of the median main wall, medians −5.27 ms and −16.8 ms.
+
+The confirmatory campaign supersedes the earlier UNRESOLVED results for tutG (+0.63%) and e10216L (+0.70%), which are kept below as history. The timing measures #228's own code (frozen driver source `0b11f6a8`; fix binary built from `78aae2d3`, source-equivalent), not a composition with current main.
 
 - Source: main `71ab841e69869b615555bb02f8f393db59c22d73`; fix code `e723a737`; control `443842e9`/`78aae2d3`; CUDA-only required list `518fd61d`; temp-dir cleanup `0bc857f0`; strict control `1576a0c5`; evidence commits on top. `src/` is identical from `e723a737` on.
 - Host `4GPUs`: A100 80GB PCIe `GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d` (GPU3), driver 570.86.10, CPUs 88–95 (`taskset`), `/tmp/motioncorr-gpu3-correctness.lock` held for every GPU run, bench lock probed before every build and GPU batch.
@@ -107,6 +111,29 @@ Native, 4GPUs, CPUs 88–95, GPU3 by UUID under its lock, `-j1`, `raw/tools/run_
 
 ### 6. Performance
 
+**Final: confirmatory measurement of tutG and e10216L (D14). Single attended campaign on 4GPUs GPU3, 2026-10-18, PASS for both.**
+- **Design:** frozen before running (`raw/perf/confirmatory-draft/`; source `0b11f6a8`, driver `86f2db90…`, rule `077b26d1…`, launcher `44d599b9…`, manifest `ea4c9dd6…`). Fixed N: tutG 256, e10216L 176. Balanced AB/BA in two windows per workload, 16 interleaved AA nulls each, lock-holder windows ≤ 2700 s, campaign abort on any failed window. Re-checked by R-D11 through round 9 (GO-ATTENDED).
+- **Operation:** run once by the coordinator as operator, attended, with no operator interventions. No WARN, OVERRUN or ORPHAN events in `operator-watch.log`; host clean afterwards.
+- **What was timed:** #228's own code: main `71ab841e` (`c2263c22…`) against the fix built from `78aae2d3` (`29b894f0…`; `src/` identical to `0b11f6a8`). This is not a composition with current main.
+
+| Workload | Label | Pairs (AB/BA) | Median fix − main | 95% CI of median | CI as % of main wall | Main / fix median wall (IQR) | AA null (16 pairs) |
+|---|---|---|---|---|---|---|---|
+| tutG: tutorial ×24, global, nvCOMP | **PASS** | 256 (128/128) | −5.27 ms | −14.05..+4.94 ms | −0.313%..**+0.110%** | 4.489 (0.080) / 4.483 (0.077) s | −38.4 ms, CI −98.4..+22.5 ms |
+| e10216L: EMPIAR-10216 ×3, 5×5, compact | **PASS** | 176 (88/88) | −16.85 ms | −35.47..+7.36 ms | −0.552%..**+0.114%** | 6.431 (0.097) / 6.421 (0.090) s | +19.4 ms, CI −25.6..+95.9 ms |
+
+| Window | Lock wait | Locks released after (budget 2700 s) | Worker rc | Killed at deadline | Leftovers |
+|---|---|---|---|---|---|
+| tutG w1 | < 0.1 ms | 1448.7 s | 0 | no | none |
+| e10216L w1 | < 0.1 ms | 1303.2 s | 0 | no | none |
+| tutG w2 | < 0.1 ms | 1435.5 s | 0 | no | none |
+| e10216L w2 | < 0.1 ms | 1310.1 s | 0 | no | none |
+
+- **Integrity:** every timed attempt valid (tutG 272 main, 256 fix and 16 mainb attempts; e10216L 192, 176 and 16), with 0 exit, timeout, product or resource failures and no reruns. First-pair product identity passed in every window. Every window header has `dry_run` false and GPU3 `GPU-b2cb2c39…`.
+- **Independent re-check:** `combine` re-run from the committed raw ledgers and frozen manifest with the frozen driver (`raw/perf/confirmatory-4gpus/recombine/`) reproduces both campaign results **exactly** (identical JSON: labels, bounds, medians, nulls, counts).
+- **Evidence:** `raw/perf/confirmatory-4gpus/` (see its README).
+
+**History (superseded by the confirmatory campaign for tutG and e10216L; tutL's PASS stands).**
+
 **Definitive measurement (D14 labels): 4GPUs GPU3, declared design, run once.** The maintainer accepted the 0.5% margin (D14):
 - **Pass:** no resolved slowdown, and the upper 95% CI bound of median(fix − main) is ≤ +0.5% of the median main whole-job wall.
 - **Unresolved:** the bound is above 0.5%.
@@ -188,5 +215,5 @@ Window 1 (8 pairs, 99.2% CI = full range): tutG +0.026 s (−0.101..+0.163), nul
 - No genuine sticky-error control (TST2). The fatal path is covered by the unchanged predicate, injected-code tests and the code argument above.
 - The in-product OOM uses one A100 80 GB with a balloon, not a smaller card, and four three-movie sequences.
 - `ProfilingKit` failed at first run in both CUDA-only batches and passed on rerun (above); its cause is not established.
-- Timing (D14): tutL Pass; tutG and e10216L Unresolved (upper bounds +0.63% and +0.70%, no resolved slowdown). The declared design does not allow extension, so those two stay Unresolved unless a new, separately declared measurement is run.
+- Timing (D14): PASS on all three workloads. tutL from the first definitive run; tutG and e10216L from the single confirmatory campaign, which supersedes their earlier UNRESOLVED results. Measured on #228's own code on one A100 host (4GPUs GPU3), not on a composition with current main.
 - #226 D2 and D3 are unchanged and stay open.

@@ -1,8 +1,10 @@
 # RC0 D10: host EER memory safety (#221)
 
 - **Base:** `71ab841e69869b615555bb02f8f393db59c22d73`.
-- **Tested source:** `97fb9fda5902f4bd5c2aab7c40ae4064637b5125`. Any later commit on
-  this branch is evidence-only and touches only `docs/rc0/eer_memory_safety/`.
+- **Tested source:** `97fb9fda5902f4bd5c2aab7c40ae4064637b5125`. `src/`, `tools/` and
+  `CMakeLists.txt` are unchanged since. Later commits touch only `docs/rc0/eer_memory_safety/`,
+  except W-D10d, which adds two cases to `tests/test_eer_memory_safety.py` (see
+  [Added test cases](#added-test-cases-w-d10d-review-findings-p2-1-and-p3-1)).
 - **Status:** native evidence and D14 timing are recorded below. Independent review
   (#198) is in progress. There is no merge recommendation yet, and merging needs
   maintainer approval (D3).
@@ -77,6 +79,62 @@ Records are in [`raw/native/`](raw/native/), with summaries in
 **Note on the control arms.** Independent reviewer R-D10a found that four of the six control arms
 predate the final build. The coordinator had missed this. R-D10a has rebuilt the head and is rerunning all six arms;
 its result will be recorded here when its review is complete.
+
+## Added test cases (W-D10d, review findings P2-1 and P3-1)
+
+The W-D10d commit adds two cases inside `EerMemorySafety`. No CTest name changes, and
+`git diff 97fb9fda HEAD -- src tools CMakeLists.txt` is empty.
+
+- **Borrowed neighbour (P2-1).** The case covers codecs 65000, 65001 and 65002, with k = 1…6.
+  - **Fixture:** fraction 2 is a 2000-electron stream cut k bytes short. Fraction 3 is a valid
+    stream whose first k bytes are exactly the removed tail, so a decoder that reads past the
+    fraction end decodes fraction 2 completely.
+  - **Fixture guard:** the decoder never reads the terminal symbol, so a cut could remove only
+    unread bits. The fixture therefore asserts that the uncut stream's last byte holds a consumed
+    run-length bit. Seed 65001 needed one electron dropped to meet this; without the guard, its
+    k = 1 case is a valid stream that head correctly accepts.
+  - **Required:** exactly one D6 skip, for frame 2. The `render_eer_groups` output must equal
+    the image with frame 2 omitted and frame 3 rendered.
+- **MRC dimension product (P3-1).**
+  - **Fixture:** little- and big-endian `.mrcs` headers with nx = 65535, ny = nz = 2^31−1 and
+    mode 2. nx = 65535 is the largest value that avoids a byte swap. x·y fits in `long`;
+    x·y·n does not.
+  - **Required:** the same per-movie failure as the INT_MIN cases (exit 1, healthy movie
+    published, no failed-movie products, no joint STAR), plus
+    `readMRC: invalid dimensions in header of image <name>`.
+
+**Discrimination (4GPUs, CPU Release builds).**
+[`w_d10d_discrimination.py`](w_d10d_discrimination.py) runs each new case separately. The
+base build is `71ab841e` with the head's `tests/test_runner_numerics.cpp`. M2 removes
+`if (pos + 2 >= pos_limit)` at `src/renderEER.cpp:642`, in a scratch copy only.
+
+| Build | Borrow cases pass | MRC cases pass | `EerMemorySafety` |
+|---|---|---|---|
+| head | 18/18 | 2/2 | pass |
+| base `71ab841e` | 4/18 (65000 k = 3–6). The other 14 are accepted without a skip | 0/2 | fails at the first new case, `(65000, 1)`, after passing every earlier 65000 case |
+| M2 | 16/18 (65000 k = 1, 2 accepted) | 2/2 | fails at `(65000, 1)` |
+
+**Base on the MRC cases:**
+- Runs were capped at 16 GiB with `ulimit -v`. Base was not run uncapped, because it sizes
+  buffers from the header.
+- Under the cap, the header read throws `std::bad_alloc`. That ends the whole job with exit 1
+  before the healthy movie is corrected.
+- There is no per-movie failure report and no healthy products.
+
+These counts differ from R-D10a's 13/18 because the fixture streams differ.
+
+**CTest on `8932a83a`.** This is the pre-rebase SHA; its `src/`, `tests/`, `tools/` and
+`CMakeLists.txt` are identical to the pushed W-D10d commit.
+- **Sources:** git checkouts, not archives, so `CiFailClosedControls` can resolve git refs.
+- **Results:**
+  - CPU 71/71.
+  - CUDA 104/104 and CUDA+nvCOMP 107/107, on GPU2 with `CUDA_VISIBLE_DEVICES=GPU-063e5232-…`
+    and the GPU2 correctness lock held.
+  - `EerMemorySafety` under ASan+UBSan: pass.
+- **Composed check:** merge `e70c846b` of main `1afa03b5` and this head gives CPU 73/73.
+- **Records:** binary SHA-256s, logs and the build and run scripts are in
+  [`raw/native-w-d10d/`](raw/native-w-d10d/). `gpu-identity.txt` lists all four GPUs because
+  `nvidia-smi` ignores `CUDA_VISIBLE_DEVICES`.
 
 ## Performance (D14)
 

@@ -1,0 +1,20 @@
+Internal ctest changing into directory: /mnt/clathrin/alex-motioncorr-rc0/W-D10d/build-m2-cpu
+Test project /mnt/clathrin/alex-motioncorr-rc0/W-D10d/build-m2-cpu
+    Start 52: EerMemorySafety
+1/1 Test #52: EerMemorySafety ..................***Failed    4.35 sec
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D10d/src-m2/tests/test_eer_memory_safety.py", line 309, in <module>
+    main()
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D10d/src-m2/tests/test_eer_memory_safety.py", line 211, in main
+    assert log.count('This frame is skipped') == 1 and ' frame 2. ' in log, (comp, k, log)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (65000, 1, '')
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   4.35 sec
+
+The following tests FAILED:
+	 52 - EerMemorySafety (Failed)
+Errors while running CTest

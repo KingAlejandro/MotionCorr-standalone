@@ -1,0 +1,21 @@
+m2 {"case": "borrow-65000-k1", "rc": 0, "skips": 0, "frame2_skipped": false, "image_equals_omitted": false, "pass": false}
+m2 {"case": "borrow-65000-k2", "rc": 0, "skips": 0, "frame2_skipped": false, "image_equals_omitted": false, "pass": false}
+m2 {"case": "borrow-65000-k3", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65000-k4", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65000-k5", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65000-k6", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65001-k1", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65001-k2", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65001-k3", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65001-k4", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65001-k5", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65001-k6", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65002-k1", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65002-k2", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65002-k3", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65002-k4", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65002-k5", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "borrow-65002-k6", "rc": 0, "skips": 1, "frame2_skipped": true, "image_equals_omitted": true, "pass": true}
+m2 {"case": "dim-overflow-le", "rc": 1, "invalid_dimensions": true, "failed_movie_reported": true, "healthy_complete": true, "joint_star": false, "failed_movie_products": [], "log_tail": ["/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x74681f02a1ca]", "/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x74681f02a28b]", "/mnt/clathrin/alex-motioncorr-rc0/W-D10d/build-m2-cpu/motioncorr(+0x48975) [0x5fd036d55975]", "==================", "ERROR: ", "Motion correction failed for 1 movie(s): dim-overflow-le.mrcs. Successful per-movie outputs were retained; joint output was not generated."], "pass": true}
+m2 {"case": "dim-overflow-be", "rc": 1, "invalid_dimensions": true, "failed_movie_reported": true, "healthy_complete": true, "joint_star": false, "failed_movie_products": [], "log_tail": ["/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x72a605a2a1ca]", "/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x72a605a2a28b]", "/mnt/clathrin/alex-motioncorr-rc0/W-D10d/build-m2-cpu/motioncorr(+0x48975) [0x591728834975]", "==================", "ERROR: ", "Motion correction failed for 1 movie(s): dim-overflow-be.mrcs. Successful per-movie outputs were retained; joint output was not generated."], "pass": true}
+m2 SUMMARY 18 / 20 pass

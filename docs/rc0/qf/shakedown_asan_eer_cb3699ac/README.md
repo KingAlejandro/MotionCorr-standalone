@@ -14,7 +14,7 @@ run. Nothing was timed.
 
 | | Attempt 1 | Attempt 2 |
 |---|---|---|
-| Tool sha256 | `8f6c9798…2d2ca770` | `847357f6…76d5885b` (committed) |
+| Tool sha256 | `8f6c9798…2d2ca770` | `847357f6…76d5885b` (committed at `a5d3a26a`) |
 | Source | `cb3699ac`, clean | `cb3699ac`, clean (fresh build tree) |
 | Configure / build | rc 0 / rc 0 | rc 0 / rc 0 |
 | Instrumentation | `-fsanitize=address,undefined` in `flags.make`; `motioncorr` and `runner_numerics` linked to libasan.so.8 and libubsan.so.1 | same (`attempt2-pass/identity.txt`) |
@@ -34,3 +34,6 @@ sanitizer line count.
 
 Records: `attempt1-fail/` and `attempt2-pass/` (`asan-eer.log`, `asan-eer.ctest.log`, `asan-eer.exit`,
 `tool-sha256.txt`; `identity.txt` for attempt 2).
+
+The tool was revised after this shakedown, at `6adf0ad6` (sha256 `aeed6e06…b62f3b`): it now prints a `WARNING` line
+when `QF_BENCH_LOCK` is not the default. No other behaviour changed, so the shakedown was not repeated.

@@ -228,6 +228,21 @@ def main():
             assert not (out/'corrected_micrographs.star').exists(), log
             bad_products = [p.name for p in out.glob(path.stem + '.*') if p.suffix != '.log']
             assert not bad_products, bad_products
+
+        # 2K 65000/65001 with --eer_upsampling -1 must fail in read() on the
+        # serial thread without leaking parallel RelionError backtrace buffers.
+        strip_2k = encode(65000, 2048, [(100, 0), (10000, 3)])
+        strip_4k = encode(65001, 4096, [(100, 0), (10000, 3)])
+        write_eer(root/'bad-2k-up-1.eer', 65000, [strip_2k]*12, 2048)
+        write_eer(root/'healthy-4k.eer', 65001, [strip_4k]*12, 4096)
+        out_2k = root/'out-2k-up-1'
+        (root/'movies.star').write_text(STAR_HEADER + 'bad-2k-up-1.eer 1\nhealthy-4k.eer 1\n')
+        log = run([binary, '--i', 'movies.star', '--o', str(out_2k)+'/', '--use_own',
+                   '--eer_grouping', 4, '--eer_upsampling', -1, '--j', 2, '--bin_factor', 8,
+                   '--angpix', 1, '--skip_report_pdf'], root, expected=1)
+        assert 'Invalid EER upsamle for 2K images.' in log, log
+        assert (out_2k/'healthy-4k.star').is_file() and (out_2k/'healthy-4k.mrc').is_file(), log
+        assert not (out_2k/'corrected_micrographs.star').exists(), log
     print('PASS EerMemorySafety: scalar valid identity, isolated corrupt fractions, clean per-movie failures')
 
 

@@ -68,7 +68,8 @@ def main():
             continue
         probe()
         work = result_dir/source.stem
-        work.mkdir(exist_ok=True)
+        shutil.rmtree(work, ignore_errors=True)
+        work.mkdir(parents=True)
         bad = work/source.name
         if not bad.exists():
             bad.symlink_to(source)

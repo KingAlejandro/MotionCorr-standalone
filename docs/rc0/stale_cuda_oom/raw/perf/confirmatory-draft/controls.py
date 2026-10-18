@@ -8,6 +8,7 @@ usage: controls.py --work DIR --cpu-binary MOTIONCORR_CPU --tutorial DIR --cpus 
   C  run: dry-run windows with stub payloads, a private lock file, short frozen budgets
   D  timing: completions 25 ms apart recorded 25 +- 1 ms apart; the legacy polled wait fails the same check
   E  unit rules: completion marker after the deadline, CPU-mask rule, per-window source re-verification
+  F  integrated: an unreapable payload still releases the window's lock within its budget
 Every case states the required outcome; the script exits non-zero if any case differs.
 """
 import argparse, json, os, shutil, stat, statistics, struct, subprocess, sys, time
@@ -465,7 +466,7 @@ def group_d(o, work):
         return time.monotonic() - t0
 
     def current(cmd):
-        _, rc, wall, fired = cp.timed_payload(cmd, None, subprocess.DEVNULL, 120)
+        _, rc, wall, fired, unreaped = cp.timed_payload(cmd, None, subprocess.DEVNULL, 120)
         return wall
 
     rows = {}
@@ -573,6 +574,14 @@ def group_e(o, work):
     attempt('untracked file in the tree (not clean)', edit_repo=lambda: (repo / 'stray.txt').write_text('x'))
 
 
+# ---------------------------------------------------------------- F (integrated: unreapable payload)
+def group_f(o, work):
+    import control_unreapable
+    ok, detail = control_unreapable.integrated(HERE, work / 'f-unreapable', o.payload_cpus, o.runner_cpus, budget=20)
+    case('F', 'integrated timed_payload -> run_window finally: unreapable payload, lock released within the '
+              f'20 s budget ({detail["lock_released_s"]}), INCOMPLETE, payload recorded unreaped', ok, detail)
+
+
 def main():
     ap = argparse.ArgumentParser()
     for k in ('work', 'cpu-binary', 'tutorial', 'cpus', 'payload-cpus', 'runner-cpus'):
@@ -587,6 +596,7 @@ def main():
     group_c(o, work)
     group_d(o, work)
     group_e(o, work)
+    group_f(o, work)
     n_bad = sum(not r['ok'] for r in RESULTS)
     (work / 'controls.json').write_text(json.dumps(RESULTS, indent=1))
     print(f'\n{len(RESULTS) - n_bad}/{len(RESULTS)} controls as required')

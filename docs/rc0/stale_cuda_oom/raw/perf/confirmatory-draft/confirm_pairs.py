@@ -133,34 +133,46 @@ def product_problems(out, movies, timeout=60):
 
 
 # ---------------------------------------------------------------- timing
+REAP_GRACE_S = 2                 # after the timeout's SIGKILL, how long the supervisor waits for the reap
+
+
 def timed_payload(cmd, cwd, stdout, timeout, on_start=None):
-    """Run one payload. Completion is a BLOCKING wait(); wall = monotonic(reap) - monotonic(spawn).
-    The timeout is enforced by an independent watchdog that kills the process group, so it never
-    quantises the measurement (Popen.wait(timeout=...) polls with sleeps of up to 50 ms)."""
+    """Run one payload. A waiter thread does the BLOCKING wait() and timestamps the reap, so
+    wall = monotonic(reap) - monotonic(spawn) exactly (no polled Popen.wait(timeout=...), which
+    quantises to 50 ms). A watchdog SIGKILLs the process group at `timeout`. The supervisor (caller)
+    waits on the waiter's event for at most timeout + REAP_GRACE_S, so it returns even if the
+    payload can never be reaped. Returns (p, rc, wall, timed_out, unreaped); rc/wall are None if unreaped."""
     t0 = time.monotonic()
     p = subprocess.Popen(cmd, cwd=cwd, stdout=stdout, stderr=subprocess.STDOUT, start_new_session=True)
-    done, fired = threading.Event(), []
+    reaped, fired, result = threading.Event(), [], {}
+
+    def waiter():
+        rc = p.wait()
+        result['wall'], result['rc'] = time.monotonic() - t0, rc
+        reaped.set()
 
     def watchdog():
-        if not done.wait(max(timeout, 0)):
+        if not reaped.wait(max(timeout, 0)):
             fired.append(True)
             try:
                 os.killpg(p.pid, signal.SIGKILL)
-            except ProcessLookupError:
+            except (ProcessLookupError, PermissionError, OSError):
                 pass
+    threading.Thread(target=waiter, daemon=True).start()
     wd = threading.Thread(target=watchdog, daemon=True); wd.start()
     if on_start:
         on_start(p)
-    rc = p.wait()
-    wall = time.monotonic() - t0
-    done.set(); wd.join()
-    return p, rc, wall, bool(fired)
+    if not reaped.wait(max(timeout, 0) + REAP_GRACE_S):
+        return p, None, None, True, True                 # never reaped: the caller ends the window
+    wd.join(timeout=1)
+    return p, result['rc'], result['wall'], bool(fired), False
 
 
 # ---------------------------------------------------------------- bounded children
 CHILDREN, CHILD_LOCK = set(), threading.Lock()
 CLEANUP_MARGIN_S = 10            # reserved INSIDE the window budget: work ends at budget - margin, release by budget
 RELEASE_DEADLINE = [math.inf]    # monotonic; set per window, bounds every post-SIGKILL reap
+UNLOCK_RESERVE_S = 0.5           # reaping stops this long before the release deadline, so the unlock is inside it
 
 
 def run_child(cmd, timeout):
@@ -178,7 +190,7 @@ def run_child(cmd, timeout):
         except ProcessLookupError:
             pass
         try:
-            p.wait(timeout=max(RELEASE_DEADLINE[0] - time.monotonic(), 0.01))
+            p.wait(timeout=max(RELEASE_DEADLINE[0] - UNLOCK_RESERVE_S - time.monotonic(), 0.01))
         except subprocess.TimeoutExpired:
             raise                                         # left registered: release() records it
         raise
@@ -276,7 +288,7 @@ class Window:
                 pass
         for p in procs:                                   # ... then reap all against ONE shared deadline
             try:
-                p.wait(timeout=max(self.release_deadline - time.monotonic(), 0.01))
+                p.wait(timeout=max(self.release_deadline - UNLOCK_RESERVE_S - time.monotonic(), 0.01))
             except subprocess.TimeoutExpired:
                 self.unreaped.append(p.pid)               # recorded; the locks are released regardless
         self.children, self.samplers = [], []
@@ -472,7 +484,9 @@ def run_window(o):
             if before is None or before:
                 rec.update(failure='resource', detail=f'GPU occupied or query failed before the run: {before}')
                 emit(rec); return rec, dst
-            budget = min(payload_timeout_s, left())
+            budget = min(payload_timeout_s, left() - REAP_GRACE_S)   # spawn-to-supervisor bound <= work deadline
+            if budget <= 0:
+                raise TimeoutError('deadline reached')
             violations, mask = [], {}
             stop = threading.Event()
 
@@ -503,10 +517,16 @@ def run_window(o):
                 th = threading.Thread(target=watch, args=(p,), daemon=True); th.start(); threads.append(th)
 
             with open(out / 'logs' / f'{tag}.txt', 'w') as so:
-                p, rc, wall, timed_out = timed_payload(
+                p, rc, wall, timed_out, unreaped = timed_payload(
                     ['taskset', '-c', fmt_cpus(payload), bins[label], '--i', 'movies.star', '--o', str(dst) + '/']
                     + w['args'], w['data'], so, budget, started)
             stop.set()
+            if unreaped:
+                # SIGKILLed but not reaped: the GPU state is unknown, so the window cannot be trusted. The
+                # payload stays registered; release() retries the reap and records it as unreaped.
+                rec.update(failure='unreaped', detail='payload not reaped after SIGKILL; GPU state unknown')
+                emit(rec)
+                raise RuntimeError(f'payload {label} (pid {p.pid}) not reaped after SIGKILL; GPU state unknown')
             for th in threads:
                 th.join(timeout=min(15, max(win.remaining(), 0.1)))
             win.children.remove(p)

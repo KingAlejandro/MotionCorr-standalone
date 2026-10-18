@@ -1,5 +1,6 @@
 FROZEN DESIGN, NOT YET RUN. W-D11 confirmatory timing for #228 (D14). Revision of 2026-10-18 after review
-R-D11 round 7; supersedes the designs frozen at 38fbfa6f, 8aed9b0b and 6b797438. The maintainer chose option (a). No timed pair may
+R-D11 round 7 and the 14:33Z review of 202fd5bf; supersedes the designs frozen at 38fbfa6f, 8aed9b0b,
+6b797438 and 202fd5bf. The maintainer chose option (a). No timed pair may
 run before the coordinator's "GO". Once run, this file and confirm_pairs.py are never edited; any correction
 is a separate dated note.
 
@@ -39,9 +40,13 @@ Windows   Two equal windows per workload, run once each in the order tutG-1, e10
           follows comparison block ceil(j*B/4), B = N/4, so the last null block follows the last comparison
           block. One discarded warm-up run per arm (main, fix) starts each window. The plan is frozen in the
           manifest. Pooling the two windows is predeclared; per-window counts are reported.
-Timing    Wall = CLOCK_MONOTONIC at reap minus CLOCK_MONOTONIC at spawn, completion taken by a blocking
-          wait(). The per-payload timeout and the window deadline are enforced by an independent watchdog
-          thread that kills the payload's process group; nothing polls the payload for completion.
+Timing    Wall = CLOCK_MONOTONIC at reap minus CLOCK_MONOTONIC at spawn; a waiter thread takes the reap
+          with a blocking wait() and records that time. The per-payload timeout and the window deadline are
+          enforced by an independent watchdog thread that kills the payload's process group; nothing polls
+          the payload for completion. The supervisor waits for the waiter at most timeout + 2 s, inside the
+          work deadline. A payload not reaped by then is recorded as failure 'unreaped' (GPU state unknown,
+          never a verified-clean GPU) and ends the window INCOMPLETE; release retries its reap, records it
+          in unreaped_pids and releases the locks.
 Deadline  45 min (2700 s) per window from the first lock request is the TOTAL lock tenure, cleanup
           included. Work (lock waits, the idle-GPU wait, payloads and checks) must end by 2700 - 10 s; the
           remaining 10 s (CLEANUP_MARGIN_S) are reserved for release, which must finish by 2700 s. Every lock-held step is bounded by the remaining time: GPU queries, the whole product
@@ -49,7 +54,8 @@ Deadline  45 min (2700 s) per window from the first lock request is the TOTAL lo
           deadline; per-run deletion is a bounded child; sampler joins are bounded; copying identity-failure
           evidence happens only after release. On release every registered process group (payload,
           samplers, registered children) is sent SIGKILL first, then all are reaped against one shared
-          release deadline (2700 s); any post-SIGKILL reap elsewhere is bounded by the same deadline. A
+          release deadline (2700 s; reaping stops 0.5 s before it so the unlock is inside the budget); any
+          post-SIGKILL reap elsewhere is bounded by the same deadline. A
           process that cannot be reaped is recorded and the locks are released regardless. complete.json is
           written only if the work ended in time, release finished by 2700 s and nothing went unreaped. Each window holds /tmp/motioncorr-bench.lock and /tmp/motioncorr-gpu3-correctness.lock
           for its whole duration (inode checked). Per-payload timeout 120 s (a healthy run takes 4.5-6 s);

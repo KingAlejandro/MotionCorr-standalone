@@ -1,4 +1,4 @@
-# Confirmatory timing for tutG and e10216L (#228, D14): FROZEN DESIGN (round-7 revision), NOT RUN
+# Confirmatory timing for tutG and e10216L (#228, D14): FROZEN DESIGN (round-7 revision, 202fd5bf follow-up), NOT RUN
 
 The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No timed pair runs before the coordinator's "GO"**, which follows a re-check by R-D11. After GO the four windows run once and the results are committed as evidence.
 
@@ -8,24 +8,18 @@ The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No time
 | `confirm_pairs.py` | Driver. `freeze` writes the manifest; `run` executes one window under the deadline, verifying everything first; `combine` validates the evidence and assigns the D14 label. |
 | `vendor/` | Byte copies of `tools/profiling/lib/stats.py` and `identity.py`, hashed in the manifest. |
 | `confirm_4gpus.sh` | Launcher: `freeze`, then `windows` (tutG-1, e10216L-1, tutG-2, e10216L-2, then combine). |
+| `control_unreapable.py` | Integrated unreapable-payload control (`timed_payload` → `run_window` finally); also run against the `202fd5bf` driver. |
 | `controls.py`, `controls/` | Synthetic and dry-run controls and their output. No GPU payload; locks only on a private temporary file. |
 
 ## Frozen state
 
-| Item | Value |
-|---|---|
-| Frozen source | `2e4f6543bd9b125f77781c36119eefb690120aa1`, clean checkout `W-D11/src-confirm`; it stays clean |
-| `confirm_pairs.py` | sha256 `4d5bb2056ecc73d893e2cfa83705332d00289539d75956eb1537e782108834cc` |
-| `rule.txt` | sha256 `c58154824cc024a082fa5f99cf1e84b44973baf7794de22ebb4c25b6936160db` |
-| `vendor/stats.py`, `vendor/identity.py` | sha256 `8d61e054…173c7c`, `e44cfd0f…be4645` (unchanged) |
-| `manifest.json` | sha256 `c2d86d1c6cfe7e4fd1112065ccf45911efedd2d99f289f44cbea7c6a3a9e7c23` (copy here; the run uses `W-D11/confirm4/manifest.json`) |
-| Window budget | 2700 s total lock tenure: work by 2690 s, release by 2700 s |
-| Frozen masks and locks | payload 88–95, runner 120–123; `/tmp/motioncorr-bench.lock`, `/tmp/motioncorr-gpu3-correctness.lock` |
-| Binaries | main `c2263c22…f8dd`; fix `29b894f0…c185`, built from `78aae2d3`, source-equivalent to `2e4f6543` |
-| Inputs | tutG 26 files, e10216L 4; `verify` passed for both after freezing, with no lock taken |
-| Superseded | designs frozen at `38fbfa6f`, `8aed9b0b` and `6b797438`, kept in `superseded-*/` |
+FROZEN_STATE_PLACEHOLDER
 
-Later evidence commits on the branch do not change the frozen files. Every window re-verifies them before taking a lock.
+## Change for the 14:33Z review of `202fd5bf` (supersedes the design frozen at `202fd5bf`)
+
+| Finding | Change | Where | Control (author-reported) |
+|---|---|---|---|
+| After the watchdog's SIGKILL, an unreapable payload left the caller in an unbounded `p.wait()`, so `run_window`'s `finally: release()` was never reached and the locks stayed held past 2700 s | A waiter thread does the blocking `wait()` and records the reap time, so successful runs keep exact wall times with no polled `wait(timeout)`. The supervisor waits on the waiter's event for at most timeout + `REAP_GRACE_S` (2 s), with the payload budget reduced by that grace so it ends inside the work deadline. A payload still unreaped is recorded as failure `unreaped` ("GPU state unknown") and ends the window INCOMPLETE; `release()` retries its reap, records it in `unreaped_pids` and releases the locks. Reaping stops `UNLOCK_RESERVE_S` (0.5 s) before the release deadline, so the unlock lands inside the budget | `confirm_pairs.py` :136–170 (`timed_payload`, waiter :149, bounded supervisor :165), :175, :193, :291, :487, :527; `rule.txt` :43–49 | `control_unreapable.py`: the real `run` with only the payload replaced by a process SIGKILL cannot reap. **Against the `202fd5bf` driver: FAIL**: lock acquired at 0.21 s, never released in 35 s, driver blocked, no marker. **Against this driver: PASS**: lock released at 19.6 s of a 20 s budget (driver `released_after_s` 19.5), INCOMPLETE, payload in `unreaped_pids`. Timing control still exact (25 ms recorded as 24.9 ms) |
 
 ## Change for review R-D11 round 7 (supersedes the design frozen at `6b797438`)
 

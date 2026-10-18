@@ -291,13 +291,13 @@
   "group": "C",
   "case": "healthy dry-run windows complete; lock released; no orphans",
   "ok": true,
-  "detail": "56\": \"f30c52328867995d6152e1c0c8d01262ed9fa7757f4912efbb2109e9bfb8fe25\", \"budget_s\": 600, \"start_epoch\": 1792322776.6376584, \"deadline_epoch\": 1792323376.6376584, \"end_epoch\": 1792322789.8797126, \"remaining_budget_s\": 586.758, \"released_after_s\": 13.242, \"cleanup_margin_s\": 10, \"unreaped_pids\": []}\n"
+  "detail": "256\": \"9a47bc515007653ad44ae89a179eca45fd3568dee105cb894d40ba299c0cd3a1\", \"budget_s\": 600, \"start_epoch\": 1792355017.1571987, \"deadline_epoch\": 1792355617.1571987, \"end_epoch\": 1792355030.327778, \"remaining_budget_s\": 586.829, \"released_after_s\": 13.171, \"cleanup_margin_s\": 10, \"unreaped_pids\": []}\n"
  },
  {
   "group": "C",
   "case": "every timed payload has an observed CPU mask equal to the payload mask",
   "ok": true,
-  "detail": "[{'seq': 3, 'phase': 'timed', 'label': 'main', 'rc': 0, 'wall_s': 0.220761, 'pdf_pages': 10, 'observed_mask': '24,25,26,27,28,29,30,31'}]"
+  "detail": "[{'seq': 3, 'phase': 'timed', 'label': 'main', 'rc': 0, 'wall_s': 0.218206, 'pdf_pages': 10, 'observed_mask': '24,25,26,27,28,29,30,31'}]"
  },
  {
   "group": "C",
@@ -309,13 +309,13 @@
   "group": "C",
   "case": "exit-0 product failure on fix: classified \"product\", pair rerun in the same position",
   "ok": true,
-  "detail": "[{'seq': 13, 'phase': 'timed', 'label': 'fix', 'rc': 0, 'wall_s': 0.223822, 'pdf_pages': None, 'failure': 'product', 'detail': 'logfile.pdf pages None, expected 10', 'observed_mask': '24,25,26,27,28,29,30,31'}, {'pair': 'BA', 'position': 6, 'order': 'fix,main', 'attempt': 2, 'retained': True, 'seqs'"
+  "detail": "[{'seq': 13, 'phase': 'timed', 'label': 'fix', 'rc': 0, 'wall_s': 0.219892, 'pdf_pages': None, 'failure': 'product', 'detail': 'logfile.pdf pages None, expected 10', 'observed_mask': '24,25,26,27,28,29,30,31'}, {'pair': 'BA', 'position': 6, 'order': 'fix,main', 'attempt': 2, 'retained': True, 'seqs'"
  },
  {
   "group": "C",
   "case": "unsuccessful warm-up ends the window as incomplete",
   "ok": true,
-  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"RuntimeError: warm-up fix failed: product (logfile.pdf pages None, expected 10)\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"bcc8aad56f80974ed6179d96fb67cde59236a45927b71a41ba8d92d90cf069d3\",\n \"budget_s\": 600,\n \"start_epoch\": 1792322"
+  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"RuntimeError: warm-up fix failed: product (logfile.pdf pages None, expected 10)\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"71900affdefb1883dcc1eca90fd205f6e02942cdb1b4c64b2b1d10371c9cbc00\",\n \"budget_s\": 600,\n \"start_epoch\": 1792355"
  },
  {
   "group": "C",
@@ -327,19 +327,19 @@
   "group": "C",
   "case": "watchdog kills and reaps a hung payload at the per-payload timeout; pair rerun",
   "ok": true,
-  "detail": "[{'seq': 6, 'phase': 'timed', 'label': 'main', 'rc': -9, 'wall_s': 3.003057, 'failure': 'timeout', 'detail': 'killed after 3 s', 'observed_mask': '24,25,26,27,28,29,30,31'}]"
+  "detail": "[{'seq': 6, 'phase': 'timed', 'label': 'main', 'rc': -9, 'wall_s': 3.003718, 'failure': 'timeout', 'detail': 'killed after 3 s', 'observed_mask': '24,25,26,27,28,29,30,31'}]"
  },
  {
   "group": "C",
   "case": "window deadline: payload killed at the deadline, incomplete, lock released, no orphans",
   "ok": true,
-  "detail": "elapsed 10.1 s; {\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline reached\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"07752547a953afc25cb04b606e5428356e32ca444542c9df008d0794be8d0473\",\n \"budget_s\": 20,\n \"start_epoch\": 1792322854.5777695,\n \"deadline_epoch\": 17"
+  "detail": "elapsed 8.1 s; {\n \"status\": \"incomplete\",\n \"reason\": \"RuntimeError: warm-up fix failed: timeout (killed after 4 s)\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"01abbad4c54208b8abab8b300dcb2a816461c080eaf8111e933c180b57248188\",\n \"budget_s\": 20,\n \"start_epoch\": 1792355096.1"
  },
  {
   "group": "C",
   "case": "deadline covers the lock wait: incomplete, no payload started",
   "ok": true,
-  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline passed waiting for /mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-private.lock\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"30f87bf73e863cac95689adf5f2cb6a97e6982bc8ca61a83e47089feee52d6b7\",\n \"budget_s\": 12"
+  "detail": "{\n \"status\": \"incomplete\",\n \"reason\": \"TimeoutError: deadline passed waiting for /mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-private.lock\",\n \"workload\": \"w\",\n \"window\": 1,\n \"positions\": 16,\n \"manifest_sha256\": \"ea929f5f1389e81fd9ac0ac81ea99cb1b1a95a1ca7d6deaa530633052ec1e2d7\",\n \"budget_s\": 12"
  },
  {
   "group": "C",
@@ -351,7 +351,7 @@
   "group": "C",
   "case": "delayed cleanup: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans",
   "ok": true,
-  "detail": "elapsed 5.1 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['rm', '-rf', '/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-delayed-cleanup/scratch/wd11c-w-w1/0001-main']' timed out after 4.612600302323699 seconds\", 'workload': 'w', 'window': 1, 'positions': 16, 'manifest_sh"
+  "detail": "elapsed 5.1 s, marker {'status': 'incomplete', 'reason': \"TimeoutExpired: Command '['rm', '-rf', '/mnt/clathrin/alex-motioncorr-rc0/W-D11/ctl-work/c-delayed-cleanup/scratch/wd11c-w-w1/0001-main']' timed out after 4.603314285166562 seconds\", 'workload': 'w', 'window': 1, 'positions': 16, 'manifest_sh"
  },
  {
   "group": "C",
@@ -367,15 +367,15 @@
  },
  {
   "group": "D",
-  "case": "blocking wait: completions 25 ms apart recorded 24.99 ms apart (|error| <= 1 ms)",
+  "case": "blocking wait: completions 25 ms apart recorded 25.13 ms apart (|error| <= 1 ms)",
   "ok": true,
-  "detail": "(0.02499311463907361, [0.0048, 0.0037, 0.0044, 0.0039, 0.0043, 0.0041, 0.0048, 0.0041, 0.0051, 0.0037, 0.0047, 0.0042], [0.0046, 0.0046, 0.0037, 0.0046, 0.0039, 0.0046, 0.0042, 0.0042, 0.004, 0.0044, 0.0039, 0.0042])"
+  "detail": "(0.025131273083388805, [0.0042, 0.0038, 0.0039, 0.0031, 0.0031, 0.0031, 0.0034, 0.003, 0.0033, 0.0031, 0.0032, 0.0033], [0.0042, 0.0033, 0.0039, 0.0035, 0.0036, 0.0033, 0.0034, 0.0032, 0.0039, 0.0033, 0.0033, 0.0033])"
  },
  {
   "group": "D",
-  "case": "control discriminates: legacy polled wait records 50.47 ms (error > 1 ms)",
+  "case": "control discriminates: legacy polled wait records 50.36 ms (error > 1 ms)",
   "ok": true,
-  "detail": "(0.05047400062903762, [0.0167, 0.0169, 0.017, 0.017, 0.0169, 0.0171, 0.017, 0.017, 0.0181, 0.0173, 0.0175, 0.017], [0.0423, 0.0427, 0.0423, 0.0423, 0.0424, 0.0425, 0.0426, 0.0426, 0.0429, 0.043, 0.0424, 0.0423])"
+  "detail": "(0.05036381492391229, [0.0174, 0.0169, 0.0169, 0.017, 0.0173, 0.0165, 0.0167, 0.017, 0.0167, 0.0167, 0.017, 0.0169], [0.0423, 0.0424, 0.0424, 0.0426, 0.0423, 0.0421, 0.0422, 0.0424, 0.0423, 0.0422, 0.042, 0.0423])"
  },
  {
   "group": "E",
@@ -385,9 +385,9 @@
  },
  {
   "group": "E",
-  "case": "release: one shared reap deadline for 3 unreapable processes (2.02 s for a 2 s deadline; 5 s each before), unreaped recorded, lock released",
+  "case": "release: one shared reap deadline for 3 unreapable processes (1.52 s for a 2 s deadline; 5 s each before), unreaped recorded, lock released",
   "ok": true,
-  "detail": "2.02 s [4000000, 4000001, 4000002]"
+  "detail": "1.52 s [4000000, 4000001, 4000002]"
  },
  {
   "group": "E",
@@ -417,13 +417,13 @@
   "group": "E",
   "case": "source re-verification: clean frozen head -> accepted",
   "ok": true,
-  "detail": "ch\": 1792322911.9944868, \"deadline_epoch\": 1792325611.9944868, \"end_epoch\": 1792322912.1234355, \"remaining_budget_s\": 2699.871, \"released_after_s\": 0.129, \"cleanup_margin_s\": 10, \"unreaped_pids\": []}\n"
+  "detail": "epoch\": 1792355152.410135, \"deadline_epoch\": 1792357852.410135, \"end_epoch\": 1792355152.542421, \"remaining_budget_s\": 2699.868, \"released_after_s\": 0.132, \"cleanup_margin_s\": 10, \"unreaped_pids\": []}\n"
  },
  {
   "group": "E",
   "case": "source re-verification: wrong source_head -> fatal before any resource",
   "ok": true,
-  "detail": "-motioncorr-rc0/W-D11/ctl-work/e-repo', 'diff', '--name-only', '6dc0174fa74985fbe1a98c910a21f5d07ae1856b', '0000000000000000000000000000000000000000', '--', 'src']' returned non-zero exit status 128.\n"
+  "detail": "-motioncorr-rc0/W-D11/ctl-work/e-repo', 'diff', '--name-only', 'be8540e61ce6a81256d6742151e388a509798fbe', '0000000000000000000000000000000000000000', '--', 'src']' returned non-zero exit status 128.\n"
  },
  {
   "group": "E",
@@ -448,5 +448,11 @@
   "case": "source re-verification: untracked file in the tree (not clean) -> fatal before any resource",
   "ok": true,
   "detail": "provenance check failed: source tree not clean\n"
+ },
+ {
+  "group": "F",
+  "case": "integrated timed_payload -> run_window finally: unreapable payload, lock released within the 20 s budget (19.69193996861577), INCOMPLETE, payload recorded unreaped",
+  "ok": true,
+  "detail": "{'lock_acquired_s': 0.10704351868480444, 'lock_released_s': 19.69193996861577, 'budget_s': 20, 'driver_still_running_after': False, 'marker': {'status': 'incomplete', 'reason': 'RuntimeError: payload main (pid 4089348) not reaped after SIGKILL; GPU state unknown', 'workload': 'w', 'window': 1, 'posi"
  }
 ]

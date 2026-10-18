@@ -1,7 +1,11 @@
 # RC0 D10: host EER memory safety (#221)
 
-Base: `71ab841e69869b615555bb02f8f393db59c22d73`. Work is pending native
-qualification and independent review; no merge recommendation yet.
+- **Base:** `71ab841e69869b615555bb02f8f393db59c22d73`.
+- **Tested source:** `97fb9fda5902f4bd5c2aab7c40ae4064637b5125`. Any later commit on
+  this branch is evidence-only and touches only `docs/rc0/eer_memory_safety/`.
+- **Status:** native evidence and D14 timing are recorded below. Independent review
+  (#198) is in progress. There is no merge recommendation yet, and merging needs
+  maintainer approval (D3).
 
 ## Design and preserved behavior
 
@@ -43,3 +47,79 @@ paired-loop bounds and helper modes. Corrected the 8+4 partial-symbol acceptance
 added physical strip-range validation and catch-all exception transport, and wrote
 the generated regression and qualification evidence here. The original worktree
 was read only and remains untouched.
+
+## Native evidence (4GPUs)
+
+Records are in [`raw/native/`](raw/native/), with summaries in
+[`positive_controls_summary.json`](positive_controls_summary.json),
+[`identity_summary.json`](identity_summary.json) and
+[`binaries.sha256`](binaries.sha256).
+
+**Toolchain:** GCC 13.3.0, CMake 3.28.3, CUDA 12.8 (sm80), nvCOMP 5.3.0.16, LibTIFF 4.5.1.
+
+**Binaries and source.** The fix binaries were built from the W-D10 source tree:
+- CPU at 00:26:35Z; CUDA, nvCOMP and ASan by 00:27Z.
+- That was after `cac82f8c`, committed at 00:26:29Z, so the builds include it.
+- `97fb9fda` changes only `tests/test_eer_memory_safety.py` and `native_controls.py`.
+- At `97fb9fda` the source tree is clean, and `make -n motioncorr` in every
+  `build-fix-*` tree reports nothing to compile or link.
+- The binaries therefore correspond to the tested source. That holds for the CTest runs, the identity runs, the ASan valid-grouping run and the upsampling −1 control arms. It does not hold for the four control arms described in the table.
+
+| Check | Result |
+|---|---|
+| CTest, fix | CPU 71/71, CUDA 104/104, CUDA+nvCOMP 107/107 (`ctest-fix-*.log`) |
+| CTest, composed with main | Merge `8d6b14a9` = `adb32785` (tree of main `1afa03b5`) + `97fb9fda`. CPU 73/73, including `InputFormats`, `CutDownMovie` and `EerMemorySafety` (`ctest-composed-cpu.log`) |
+| Damaged-input controls, fix | 37 V-EER fixture cases. All cases controlled, 0 sanitizer reports (`controls-fix-*.log`). Only the upsampling −1 arms (CPU and ASan+UBSan, 00:29–00:31Z) ran on the final binaries. The four upsampling 1 and 2 arms ran from 23:28Z to 00:23Z on earlier fix builds, before `cac82f8c`, so they do not test the final source. See the note below the table |
+| Damaged-input controls, main (negative control) | Under ASan: sanitizer reports in 35 of 37 cases. CPU build: 27 of 37 cases controlled (`controls-main-*.log`) |
+| Valid groupings under ASan | 28/28 pass (`asan-valid-groupings.log`) |
+| Identity, main `71ab841e` vs fix | 24/24 byte-identical, on CPU and CUDA. Covers EMPIAR-12963 (with EER gain), 10474 Falcon 3 and 10474 Falcon 4, each at G and L and upsampling 1 and 2 (`identity-*.log`) |
+
+**Note on the control arms.** Independent reviewer R-D10a found that four of the six control arms
+predate the final build. The coordinator had missed this. R-D10a has rebuilt the head and is rerunning all six arms;
+its result will be recorded here when its review is complete.
+
+## Performance (D14)
+
+**D14 rule, per workload:** the upper bound of the distribution-free CI of the median
+paired difference (fix − main) must be ≤ +0.5 % of the median main wall time.
+
+**Design (fixed before any run, then run once):**
+- A pilot, excluded from the result.
+- N = 32 balanced pairs (16 AB / 16 BA) plus at least 12 A/A' null pairs.
+- Identical builds and conditions.
+
+**Venues:**
+- **CPU:** exclusive SCARF nodes. Both arms were built inside the allocation, from
+  tarballs whose `src/`, `tests/`, `tools/` and `CMakeLists.txt` match `97fb9fda` and
+  `71ab841e` file for file.
+- **CUDA:** 4GPUs GPU2, pinned by UUID, with payload CPUs 112–119. The run held
+  `/tmp/motioncorr-bench.lock`.
+
+The CIs below are the tools' order-statistic intervals, with coverage of at least 95 %:
+98.0 % for N = 32, 96.1 % for N = 12.
+
+| Workload | Median main | Median fix − main | CI of median | Upper bound | Null median, CI | D14 |
+|---|---|---|---|---|---|---|
+| CPU whole job, 12963 L (`--j 16`) | 9.509 s | −0.025 s (−0.26 %) | −0.040 … −0.007 s | −0.07 % | −0.010 s, −0.043 … +0.022 s | pass |
+| CPU whole job, 10474 F3 L (`--j 16`) | 15.151 s | +0.002 s (+0.01 %) | −0.018 … +0.029 s | +0.19 % | +0.005 s, −0.018 … +0.061 s | pass |
+| Host decode, 12963 | 4.402 s | +0.0002 s (+0.00 %) | −0.0019 … +0.0029 s | +0.07 % | +0.0018 s, −0.0024 … +0.0058 s | pass |
+| Host decode, 10474 F3 | 7.360 s | +0.0017 s (+0.02 %) | −0.0014 … +0.0070 s | +0.09 % | −0.0002 s, −0.0030 … +0.0045 s | pass |
+| Host decode, 10474 F4 | — | — | — | — | — | **not yet measured.** Attempt 1 (job 3634352) hit the 1:30 limit at 24/32 pairs before any F4 statistic was written. Attempt 2 (job 3634495) uses the same declared design, F4 only, with a 4:00 limit |
+| CUDA compact whole job, 12963 L (nvCOMP build, `--j 8`) | 4.833 s | −0.024 s (−0.49 %) | −0.059 … +0.014 s | +0.30 % | −0.004 s, −0.099 … +0.037 s (16 pairs) | pass |
+
+**Integrity of the runs:**
+- No pair was discarded in any workload.
+- The CUDA run made 110 runs: 0 non-zero exits, 0 foreign GPU processes, 0 retries.
+- Products from the first definitive AB pair are identical in every whole-job workload.
+
+**Records:**
+- CPU: [`raw/timing-scarf-cpu/`](raw/timing-scarf-cpu/).
+  - Jobs 3634353 (12963) and 3634354 (F3) are the whole-job runs.
+  - Job 3634352 is the decode run.
+  - Jobs 3634321 and 3634331 are the earlier 8-pair pilots.
+  - The per-run directories stay on SCARF in `/work4/scd/scarf1415/W-D10/`.
+- CUDA: [`raw/timing-cuda-e12963L/`](raw/timing-cuda-e12963L/). Read `INCIDENT.txt`
+  there: the coordinator killed an earlier, queued instance of the window by mistake.
+  That instance had no timed runs, and the run reported here is the only result.
+- SCARF GPU job 3634351, a backup for the same CUDA workload, was cancelled before it
+  started, so the result is not duplicated.

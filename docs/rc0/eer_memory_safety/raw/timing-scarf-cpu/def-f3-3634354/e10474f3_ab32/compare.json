@@ -1,0 +1,332 @@
+{
+ "runs": {
+  "arms": [
+   "main",
+   "fix"
+  ],
+  "summary": {
+   "main": {
+    "n": 32,
+    "wall_median_s": 15.150732924492331,
+    "wall_iqr_s": 0.043873628754226957,
+    "wall_min_s": 15.086369878990809,
+    "wall_max_s": 15.282619660982164,
+    "cpu_median_s": 142.50195300000001,
+    "rss_median_bytes": 9944502272.0,
+    "minflt_median": 241619.0,
+    "majflt_max": 9,
+    "wall_outlier_rounds": [
+     14,
+     23
+    ],
+    "vram_peak_process_bytes": null,
+    "vram_peak_process_bytes_max": null,
+    "vram_peak_device_delta_bytes": null,
+    "vram_peak_device_delta_bytes_max": null,
+    "lane_foreign_cores_max": 0.09253268411341968,
+    "load1_range": [
+     7.98,
+     10.94
+    ]
+   },
+   "fix": {
+    "n": 32,
+    "wall_median_s": 15.16156269449857,
+    "wall_iqr_s": 0.05587682999612298,
+    "wall_min_s": 15.09994541000924,
+    "wall_max_s": 15.387183227983769,
+    "cpu_median_s": 142.34211950000002,
+    "rss_median_bytes": 9934893056.0,
+    "minflt_median": 240275.0,
+    "majflt_max": 10,
+    "wall_outlier_rounds": [
+     3,
+     24
+    ],
+    "vram_peak_process_bytes": null,
+    "vram_peak_process_bytes_max": null,
+    "vram_peak_device_delta_bytes": null,
+    "vram_peak_device_delta_bytes_max": null,
+    "lane_foreign_cores_max": 0.09203499800407675,
+    "load1_range": [
+     7.59,
+     10.88
+    ]
+   }
+  },
+  "discarded_rounds": [],
+  "discard_audit": {
+   "planned": 32,
+   "retained": 32,
+   "discarded": 0,
+   "triggered_alone": {
+    "main": 0,
+    "fix": 0
+   },
+   "triggered_any": {
+    "main": 0,
+    "fix": 0
+   },
+   "kept_orders": {
+    "AB": 16,
+    "BA": 16
+   },
+   "warnings": []
+  },
+  "comparisons": {
+   "fix": {
+    "n_pairs": 32,
+    "diffs_s": [
+     0.10630370699800551,
+     -0.019179843977326527,
+     0.1386493799800519,
+     0.002515016996767372,
+     0.027467130013974383,
+     -0.045657856011530384,
+     -0.007500453008105978,
+     0.05231573502533138,
+     0.07677168701775372,
+     0.02902313499362208,
+     -0.04725003702333197,
+     -0.0146553730010055,
+     0.012930166005389765,
+     -0.15759449795586988,
+     0.01248413001303561,
+     0.10252658795798197,
+     -0.02341796801192686,
+     -0.0059413920098450035,
+     -0.011445654003182426,
+     0.006205399986356497,
+     0.018744625034742057,
+     0.02850472100544721,
+     -0.1574443859863095,
+     0.2571030519902706,
+     0.0007574369956273586,
+     -0.018105163995642215,
+     -0.01859575801063329,
+     -0.027834931970573962,
+     0.05265624000458047,
+     -0.0172226759896148,
+     0.10556512701441534,
+     -0.09900793796987273
+    ],
+    "floor_s": 0.0,
+    "min_pairs": 6,
+    "median_diff_s": 0.0016362269961973652,
+    "q1_diff_s": -0.0187417795023066,
+    "q3_diff_s": 0.034846285001549404,
+    "min_diff_s": -0.15759449795586988,
+    "max_diff_s": 0.2571030519902706,
+    "median_a_s": 15.150732924492331,
+    "median_b_s": 15.16156269449857,
+    "relative_median_diff": 0.00010799655728550781,
+    "noise_s": 0.03906606301613501,
+    "robust_sd_diff_s": 0.03906606301613501,
+    "ci": {
+     "low_s": -0.018105163995642215,
+     "high_s": 0.02850472100544721,
+     "confidence": 0.9799383929930627
+    },
+    "sign_test": {
+     "positive": 17,
+     "negative": 15,
+     "ties": 0,
+     "p_two_sided": 0.860050065908581
+    },
+    "resolution_s": 0.03906606301613501,
+    "resolved": false,
+    "verdict": "not resolved (below noise 0.039 s)",
+    "reason": "CI of median includes 0",
+    "positional": {
+     "n_ab": 16,
+     "n_ba": 16,
+     "median_diff_ab_s": 0.012707148009212688,
+     "median_diff_ba_s": -0.010298382505425252,
+     "second_position_cost_s": 0.01150276525731897,
+     "order_corrected_effect_s": 0.0012043827518937178
+    }
+   }
+  },
+  "lane_waits": [
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 1
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 2
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 3
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 4
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 5
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 6
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 7
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 8
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 9
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 10
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 11
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 12
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 13
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 14
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 15
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 16
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 17
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 18
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 19
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 20
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 21
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 22
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 23
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 24
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 25
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 26
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 27
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 28
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 29
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 30
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 31
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 32
+   }
+  ]
+ },
+ "identity": {
+  "fix": {
+   "root_a": "/work4/scd/scarf1415/W-D10/def-f3-3634354/e10474f3_ab32/runs/main-r01/out",
+   "root_b": "/work4/scd/scarf1415/W-D10/def-f3-3634354/e10474f3_ab32/runs/fix-r01/out",
+   "only_a": [],
+   "only_b": [],
+   "compared": 4,
+   "mrc_compared": 1,
+   "excluded": [
+    {
+     "file": "Movies/movie1.log",
+     "reason": "timing values in per-movie logs"
+    }
+   ],
+   "differences": [],
+   "problems": [],
+   "identical": true
+  }
+ }
+}

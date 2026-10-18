@@ -1,0 +1,182 @@
+start 2026-10-18T00:06:43Z cfg=cuda HEAD=73296a150721fe67b5e414de88a807203b9dc50b status=0
+mask: 88-95 gpu: GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d
+binary sha256: 783cff5ca4ad3b8d0d80dd7a3b6fda2e6ef7317b4a7f9d81cd41ac4c19659274
+  Test #106: CudaErrorClass
+
+Total Tests: 106
+=== CTest Collection Validation: PASS === 
+  Collected tests: 106
+    - CpuDoseSymmetry                [REQUIRED]
+    - CpuDoseSymmetryBase            [REQUIRED]
+    - CpuUnweightedStream            [ADDITIVE]
+    - PatchRetryState                [REQUIRED]
+    - RunnerInterpolateRecenter      [REQUIRED]
+    - FloatPlanCache                 [ADDITIVE]
+    - MrcHeaderStats                 [REQUIRED]
+    - PdfConcat                      [REQUIRED]
+    - DefectParser                   [REQUIRED]
+    - DeflateLayout                  [REQUIRED]
+    - DeflateLayoutMutant_span_wrap  [REQUIRED]
+    - DeflateLayoutMutant_stage_sum  [REQUIRED]
+    - DeflateLayoutMutant_reserve_round [REQUIRED]
+    - DeflateLayoutMutant_layout_table [REQUIRED]
+    - DeflateLayoutMutant_arena_start [REQUIRED]
+    - DeflateLayoutMutant_drain_step [REQUIRED]
+    - Adler32Arithmetic              [REQUIRED]
+    - Adler32KernelHost              [REQUIRED]
+    - StageProfileThreads            [REQUIRED]
+    - FrameBufferPool                [REQUIRED]
+    - ScratchArena                   [REQUIRED]
+    - ReaderPool                     [ADDITIVE]
+    - ReaderPoolMutant_spin          [ADDITIVE]
+    - ReaderPoolMutant_nowait        [ADDITIVE]
+    - DefectNeighbours               [REQUIRED]
+    - DefectMergeMutant_append_only  [ADDITIVE]
+    - DefectMergeMutant_no_order_check [ADDITIVE]
+    - DefectMergeMutant_swap_xy      [ADDITIVE]
+    - NvcompAcceptanceDiagnostics    [REQUIRED]
+    - ProfilingKit                   [REQUIRED]
+    - GainCacheOwnership             [REQUIRED]
+    - NvcompGuards                   [REQUIRED]
+    - SyntheticRegression            [REQUIRED]
+    - HotPixelRngDeterminism         [REQUIRED]
+    - RunnerExposure                 [REQUIRED]
+    - Runner_failure                 [REQUIRED]
+    - Runner_invalid                 [REQUIRED]
+    - Runner_resume                  [REQUIRED]
+    - Runner_tomography              [REQUIRED]
+    - RunnerLateBin                  [REQUIRED]
+    - RunnerExportedUnits            [REQUIRED]
+    - GainCache                      [REQUIRED]
+    - TiffRead                       [REQUIRED]
+    - DamagedMovie                   [REQUIRED]
+    - TruncatedMrcMovie              [REQUIRED]
+    - TruncatedGainDefect            [REQUIRED]
+    - CompressedMovieSequence        [REQUIRED]
+    - InputFormats                   [REQUIRED]
+    - CutDownMovie                   [REQUIRED]
+    - GlobalIfftElision              [REQUIRED]
+    - HostBufferReuse                [REQUIRED]
+    - StageProfile                   [REQUIRED]
+    - RunnerModelParser              [REQUIRED]
+    - MicrographModelBounds          [REQUIRED]
+    - RunnerInterpolateShifts        [REQUIRED]
+    - WriteFaults                    [REQUIRED]
+    - WriteFaultsSync                [REQUIRED]
+    - WriteFaultsMultiProduct        [REQUIRED]
+    - OutputStageFaults              [REQUIRED]
+    - LogfileFromEps                 [REQUIRED]
+    - LogfileFromEpsMutant_always_eps [REQUIRED]
+    - LogfileFromEpsMutant_late_guard [REQUIRED]
+    - LogfileFromEpsMutant_eps_order [REQUIRED]
+    - LogfileFromEpsMutant_placeholder [REQUIRED]
+    - LogfileFromEpsMutant_concat_cleanup [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - CudaValidationParser           [REQUIRED]
+    - MultiGpuScheduling             [REQUIRED]
+    - OutputTreeComparator           [REQUIRED]
+    - JointStarPublication           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+    - NativeMovieStaging             [REQUIRED]
+    - RunnerInterpolateShiftsCuda    [ADDITIVE]
+    - StageProfileDeviceTiming       [ADDITIVE]
+    - SignedMrcStaging               [ADDITIVE]
+    - TruncatedMrcMovieCuda          [ADDITIVE]
+    - TruncatedGainDefectCuda        [ADDITIVE]
+    - CudaU16StagingEquivalence      [ADDITIVE]
+    - CudaWrapperUploadFailure       [ADDITIVE]
+    - CudaFaultMatrix                [ADDITIVE]
+    - CudaPatchWorkspace             [ADDITIVE]
+    - CudaPatchBatch                 [ADDITIVE]
+    - CudaVramAlias                  [ADDITIVE]
+    - CudaPatchBatchMutant_shift_retired [ADDITIVE]
+    - CudaPatchBatchMutant_never_retire [ADDITIVE]
+    - CudaPatchBatchMutant_extract_no_remap [ADDITIVE]
+    - CudaPatchBatchMutant_scale_divide [ADDITIVE]
+    - CudaPatchBatchMutant_shift_wrong_half [ADDITIVE]
+    - CudaPatchBatchMutant_perpatch_wrong_half [ADDITIVE]
+    - CudaVramAliasMutant_arena_overlap [ADDITIVE]
+    - CudaVramAliasMutant_arena_work_over_buffers [ADDITIVE]
+    - CudaVramAliasMutant_refusal_off [ADDITIVE]
+    - CudaVramAliasMutant_dw_scratch_over_fourier [ADDITIVE]
+    - CudaDeviceGainPool             [ADDITIVE]
+    - CudaDeviceGainCleanupFatal     [ADDITIVE]
+    - CudaGeometryRetention          [ADDITIVE]
+    - CudaGeometryRetentionMutant_no_take [ADDITIVE]
+    - CudaGeometryRetentionMutant_return_failed [ADDITIVE]
+    - CudaGeometryRetentionMutant_keep_taken_alias [ADDITIVE]
+    - CudaDoseNormalization          [ADDITIVE]
+    - CudaDoseSessionPlan            [ADDITIVE]
+    - CudaResidentRetryFailures      [ADDITIVE]
+    - CudaPreprocessingFailurePaths  [ADDITIVE]
+    - CudaStaleErrorAfterOom         [ADDITIVE]
+    - CudaDoseWeightAlias            [ADDITIVE]
+    - CudaErrorClass                 [ADDITIVE]
+validate_test_collection rc=0
+Internal ctest changing into directory: /mnt/clathrin/alex-motioncorr-rc0/W-D11/build-comp-cuda
+Test project /mnt/clathrin/alex-motioncorr-rc0/W-D11/build-comp-cuda
+    Start 30: ProfilingKit
+1/1 Test #30: ProfilingKit .....................***Failed  177.45 sec
+...............................................................EE.....................................................................
+======================================================================
+ERROR: test_actual_cli_full_input_does_not_expect_metadata_products (tests.test_import_subset_boundaries.MultipleStarLoops.test_actual_cli_full_input_does_not_expect_metadata_products)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-comp/tools/profiling/tests/test_import_subset_boundaries.py", line 162, in test_actual_cli_full_input_does_not_expect_metadata_products
+    self.run_cli(False)
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-comp/tools/profiling/tests/test_import_subset_boundaries.py", line 151, in run_cli
+    result = cli(args)
+             ^^^^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-comp/tools/profiling/tests/test_import_subset_boundaries.py", line 23, in cli
+    return subprocess.run([sys.executable, *flags, mcprof.__file__, *args],
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-comp/tools/profiling/mcprof.py', 'run', 'A=/tmp/tmpa2nq7ryl/binary', '--data', '/tmp/tmpa2nq7ryl/data', '--work', '/tmp/tmpa2nq7ryl/work', '--no-lock', '--warmup', '0', '--rounds', '1', '--lane-wait', '0', '--keep-outputs']' timed out after 30 seconds
+
+======================================================================
+ERROR: test_actual_cli_subset_preserves_all_other_loop_rows (tests.test_import_subset_boundaries.MultipleStarLoops.test_actual_cli_subset_preserves_all_other_loop_rows)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-comp/tools/profiling/tests/test_import_subset_boundaries.py", line 165, in test_actual_cli_subset_preserves_all_other_loop_rows
+    self.run_cli(True)
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-comp/tools/profiling/tests/test_import_subset_boundaries.py", line 151, in run_cli
+    result = cli(args)
+             ^^^^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-comp/tools/profiling/tests/test_import_subset_boundaries.py", line 23, in cli
+    return subprocess.run([sys.executable, *flags, mcprof.__file__, *args],
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-comp/tools/profiling/mcprof.py', 'run', 'A=/tmp/tmphql7i473/binary', '--data', '/tmp/tmphql7i473/data', '--work', '/tmp/tmphql7i473/work', '--no-lock', '--warmup', '0', '--rounds', '1', '--lane-wait', '0', '--keep-outputs', '--movies', '2']' timed out after 30 seconds
+
+----------------------------------------------------------------------
+Ran 134 tests in 175.869s
+
+FAILED (errors=2)
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) = 177.45 sec
+
+The following tests FAILED:
+	 30 - ProfilingKit (Failed)
+Errors while running CTest
+ctest rc=8 end 2026-10-18T00:09:40Z

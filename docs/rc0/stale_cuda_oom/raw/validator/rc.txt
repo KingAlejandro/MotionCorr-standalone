@@ -1,0 +1,6 @@
+build-fix-cpu rc=0 (src-head 0bc857f0 validator)
+build-fix-cuda rc=0 (src-head)
+build-fix-nvcomp rc=0 (src-head)
+build-main-nvcomp rc=1 (src-head; Missing required test(s): CudaStaleErrorAfterOom)
+build-comp-cuda rc=0 (src-comp2 054a942a, tree 3afd6bcd)
+build-comp-nvcomp rc=0 (src-comp2)

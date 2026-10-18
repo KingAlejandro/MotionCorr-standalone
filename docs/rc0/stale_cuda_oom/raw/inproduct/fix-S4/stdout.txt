@@ -1,0 +1,112 @@
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/e10441.tif
+  * Movies/tut26.tiff
+  * Movies/e10164.mrcs
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.
+000/??? sec ~~(,_,">                                                          [oo]ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-D11/src-fix/src/acc/cuda/cuda_alignpatch.cu at line 1121 (error-code 2)
+in: /mnt/clathrin/alex-motioncorr-rc0/W-D11/src-fix/src/acc/cuda/cuda_settings.h, line 65
+ERROR: 
+
+A GPU-function failed to execute.
+
+ If this occured at the start of a run, you might have GPUs which
+are incompatible with either the data or your installation of relion.
+If you 
+
+	-> INSTALLED RELION YOURSELF: if you e.g. specified -DCUDA_ARCH=50
+	   and are trying ot run on a compute 3.5 GPU (-DCUDA_ARCH=3.5), or 
+	   a similar mismatch on AMD or Intel GPUs, this may happen.
+
+	-> HAVE MULTIPLE GPUS OF DIFFERNT VERSIONS: relion needs at least NVIDIA 
+	   GPUs with compute 5.0 or AMD MI GPUs with archtiecture gfx906. 
+	   You may be trying to use a GPU architectures older than these. 
+	   If you have multiple generations, try specifying --gpu <X>
+	   with X=0. Then try X=1 in a new run, and so on. The numbering of
+	   GPUs may not be obvious from the driver or intuition. For a list
+	   of NVIDIA and AMD GPU compute generations and architectures, see 
+
+	   en.wikipedia.org/wiki/CUDA#Version_features_and_specifications and 
+	   docs.amd.com/bundle/Hardware_and_Software_Reference_Guide/page/Hardware_and_Software_Support.html
+
+	-> ARE USING DOUBLE-PRECISION GPU CODE: relion has been written so
+	   as to not require this, and may thus have unforeseen requirements
+	   when run in this mode. If you think it is nonetheless necessary,
+	   please consult the developers with this error.
+
+If this occurred at the middle or end of a run, it might be that
+
+	-> YOUR DATA OR PARAMETERS WERE UNEXPECTED: execution on GPUs is 
+	   subject to many restrictions, and relion is written to work within
+	   common restraints. If you have exotic data or settings, unexpected
+	   configurations may occur. See also above point regarding 
+	   double precision.
+If none of the above applies, please report the error to the relion
+developers at github.com/3dem/relion/issues.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr(+0x5b087) [0x5a24c00c7087]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr(+0x19975f) [0x5a24c020575f]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr(+0x1a5aeb) [0x5a24c0211aeb]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr(+0xf98d0) [0x5a24c01658d0]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr(+0x117251) [0x5a24c0183251]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr(+0x11ce1a) [0x5a24c0188e1a]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr(+0x50d86) [0x5a24c00bcd86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x700f3b22a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x700f3b22a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr(+0x518f5) [0x5a24c00bd8f5]
+==================
+ERROR: 
+
+A GPU-function failed to execute.
+
+ If this occured at the start of a run, you might have GPUs which
+are incompatible with either the data or your installation of relion.
+If you 
+
+	-> INSTALLED RELION YOURSELF: if you e.g. specified -DCUDA_ARCH=50
+	   and are trying ot run on a compute 3.5 GPU (-DCUDA_ARCH=3.5), or 
+	   a similar mismatch on AMD or Intel GPUs, this may happen.
+
+	-> HAVE MULTIPLE GPUS OF DIFFERNT VERSIONS: relion needs at least NVIDIA 
+	   GPUs with compute 5.0 or AMD MI GPUs with archtiecture gfx906. 
+	   You may be trying to use a GPU architectures older than these. 
+	   If you have multiple generations, try specifying --gpu <X>
+	   with X=0. Then try X=1 in a new run, and so on. The numbering of
+	   GPUs may not be obvious from the driver or intuition. For a list
+	   of NVIDIA and AMD GPU compute generations and architectures, see 
+
+	   en.wikipedia.org/wiki/CUDA#Version_features_and_specifications and 
+	   docs.amd.com/bundle/Hardware_and_Software_Reference_Guide/page/Hardware_and_Software_Support.html
+
+	-> ARE USING DOUBLE-PRECISION GPU CODE: relion has been written so
+	   as to not require this, and may thus have unforeseen requirements
+	   when run in this mode. If you think it is nonetheless necessary,
+	   please consult the developers with this error.
+
+If this occurred at the middle or end of a run, it might be that
+
+	-> YOUR DATA OR PARAMETERS WERE UNEXPECTED: execution on GPUs is 
+	   subject to many restrictions, and relion is written to work within
+	   common restraints. If you have exotic data or settings, unexpected
+	   configurations may occur. See also above point regarding 
+	   double precision.
+If none of the above applies, please report the error to the relion
+developers at github.com/3dem/relion/issues.
+Continuing with the remaining movies.
+0.52/1.55 min ...................~~(,_,">                                     [oo]  32/  48 sec .......................................~~(,_,">                 [oo]Movies/e10164.mrcs: Not a TIFF or MDI file, bad magic number 7420 (0x1cfc).
+  33/  33 sec ............................................................~~(,_,"> yum!
+in: /mnt/clathrin/alex-motioncorr-rc0/W-D11/src-fix/src/motioncorr_runner.cpp, line 1093
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/e10441.tif. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr(+0x5b087) [0x5a24c00c7087]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr(+0x2e333) [0x5a24c009a333]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr(+0x50d86) [0x5a24c00bcd86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x700f3b22a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x700f3b22a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-nvcomp/motioncorr(+0x518f5) [0x5a24c00bd8f5]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/e10441.tif. Successful per-movie outputs were retained; joint output was not generated.

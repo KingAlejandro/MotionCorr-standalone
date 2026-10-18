@@ -1,0 +1,325 @@
+{
+ "runs": {
+  "arms": [
+   "main",
+   "fix"
+  ],
+  "summary": {
+   "main": {
+    "n": 8,
+    "wall_median_s": 4.5912024499848485,
+    "wall_iqr_s": 0.06084387516602874,
+    "wall_min_s": 4.512342280708253,
+    "wall_max_s": 4.7735392935574055,
+    "cpu_median_s": 8.676867999999999,
+    "rss_median_bytes": 380958720.0,
+    "minflt_median": 125788.0,
+    "majflt_max": 22,
+    "wall_outlier_rounds": [
+     2
+    ],
+    "vram_peak_process_bytes": 3418357760.0,
+    "vram_peak_process_bytes_max": 3418357760,
+    "vram_peak_device_delta_bytes": 3427598336.0,
+    "vram_peak_device_delta_bytes_max": 3427598336,
+    "lane_foreign_cores_max": 0.15982040852364168,
+    "load1_range": [
+     2.95654296875,
+     5.88623046875
+    ]
+   },
+   "fix": {
+    "n": 8,
+    "wall_median_s": 4.638217185623944,
+    "wall_iqr_s": 0.08199345204047859,
+    "wall_min_s": 4.561112251132727,
+    "wall_max_s": 4.69225440453738,
+    "cpu_median_s": 8.7243265,
+    "rss_median_bytes": 380940288.0,
+    "minflt_median": 125798.5,
+    "majflt_max": 22,
+    "wall_outlier_rounds": [],
+    "vram_peak_process_bytes": 3418357760.0,
+    "vram_peak_process_bytes_max": 3418357760,
+    "vram_peak_device_delta_bytes": 3427598336.0,
+    "vram_peak_device_delta_bytes_max": 3427598336,
+    "lane_foreign_cores_max": 0.1481082789725853,
+    "load1_range": [
+     2.80908203125,
+     5.49462890625
+    ]
+   }
+  },
+  "discarded_rounds": [
+   {
+    "round": 4,
+    "reasons": [
+     "main: foreign CPU on lane 0.48 cores"
+    ],
+    "triggered_by": [
+     "main"
+    ],
+    "order": "BA"
+   },
+   {
+    "round": 7,
+    "reasons": [
+     "main: foreign CPU on lane 0.27 cores"
+    ],
+    "triggered_by": [
+     "main"
+    ],
+    "order": "AB"
+   }
+  ],
+  "discard_audit": {
+   "planned": 10,
+   "retained": 8,
+   "discarded": 2,
+   "triggered_alone": {
+    "main": 2,
+    "fix": 0
+   },
+   "triggered_any": {
+    "main": 2,
+    "fix": 0
+   },
+   "kept_orders": {
+    "AB": 4,
+    "BA": 4
+   },
+   "warnings": [
+    "arm main alone triggered 2 of 2 discards: the flagged condition may come from the arm itself, and dropping those pairs can bias the verdict"
+   ]
+  },
+  "comparisons": {
+   "fix": {
+    "n_pairs": 8,
+    "diffs_s": [
+     -0.01387166976928711,
+     -0.1013224208727479,
+     0.0032478459179401398,
+     0.09721574746072292,
+     0.10403655469417572,
+     0.1625325819477439,
+     -0.05859357863664627,
+     0.048769970424473286
+    ],
+    "floor_s": 0.0,
+    "min_pairs": 6,
+    "median_diff_s": 0.026008908171206713,
+    "q1_diff_s": -0.0250521469861269,
+    "q3_diff_s": 0.09892094926908612,
+    "min_diff_s": -0.1013224208727479,
+    "max_diff_s": 0.1625325819477439,
+    "median_a_s": 4.5912024499848485,
+    "median_b_s": 4.638217185623944,
+    "relative_median_diff": 0.0056649447404116425,
+    "noise_s": 0.11062752433279528,
+    "robust_sd_diff_s": 0.11062752433279528,
+    "ci": {
+     "low_s": -0.1013224208727479,
+     "high_s": 0.1625325819477439,
+     "confidence": 0.9921875
+    },
+    "sign_test": {
+     "positive": 5,
+     "negative": 3,
+     "ties": 0,
+     "p_two_sided": 0.7265625
+    },
+    "resolution_s": 0.1319275014102459,
+    "resolved": false,
+    "verdict": "not resolved (below noise 0.132 s)",
+    "reason": "CI of median includes 0",
+    "positional": {
+     "n_ab": 4,
+     "n_ba": 4,
+     "median_diff_ab_s": -0.005311911925673485,
+     "median_diff_ba_s": 0.0764032625593245,
+     "second_position_cost_s": -0.040857587242498994,
+     "order_corrected_effect_s": 0.03554567531682551
+    }
+   }
+  },
+  "lane_waits": [
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 1
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 2
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 3
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 4
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 5
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 6
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 7
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 8
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 9
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 10
+   }
+  ]
+ },
+ "identity": {
+  "fix": {
+   "root_a": "/mnt/clathrin/alex-motioncorr-rc0/W-D11/perf/tutG-ab/runs/main-r01/out",
+   "root_b": "/mnt/clathrin/alex-motioncorr-rc0/W-D11/perf/tutG-ab/runs/fix-r01/out",
+   "only_a": [],
+   "only_b": [],
+   "compared": 81,
+   "mrc_compared": 24,
+   "excluded": [
+    {
+     "file": "Movies/20170629_00021_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00022_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00023_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00024_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00025_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00026_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00027_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00028_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00029_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00030_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00031_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00035_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00036_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00037_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00039_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00040_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00042_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00043_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00044_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00045_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00046_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00047_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00048_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00049_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "all_batches.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "batch.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "header.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "logfile.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    }
+   ],
+   "differences": [],
+   "problems": [],
+   "identical": true
+  }
+ }
+}

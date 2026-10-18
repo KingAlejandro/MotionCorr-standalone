@@ -1,0 +1,12 @@
+Working on Movies/tut26.tiff with 8 thread(s).
+
+Movie size: X = 3710 Y = 3838 N = 24
+Frames to be used: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+Frame grouping: n_frames = 24, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 
+interpolate_shifts = 0
+
+Movie FFT: batch=1 R2C work=56986624 C2R work=56986624 shared work=56986624 inverse tile=56986624 bytes
+nvCOMP ingestion: chunk=6/24 frames x 4 chunks, slots=2, scratch=410073744/1367678976 bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0), pinned staging=100663296/268435456 reserved, 68338816 used (2 x 33063768 payload), nvCOMP temp=0, input alignment=4, span-read frames=24/24
+CUDA Error in /mnt/clathrin/alex-motioncorr-rc0/W-D11/src-main/src/acc/cuda/cuda_movie_session.cu:2012 : out of memory
+Device ingestion failed recoverably for Movies/tut26.tiff; re-reading the movie with the host reader.

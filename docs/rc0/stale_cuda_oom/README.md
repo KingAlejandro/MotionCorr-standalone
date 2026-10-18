@@ -29,7 +29,7 @@ A failure inside session `initialize()` never showed this, because `discard_prep
 
 **Why only recoverable errors are cleared.** A poisoning code (`cudaErrorPoisonsContext`: illegal address, launch failure, ECC, …) in either the session's latched fatal state or the pending slot gives `CUDA_RETRY_FATAL`, and the guard then leaves the slot untouched: exactly what main does. The peek-then-clear order is the existing idiom in `BatchedPatchAlignmentWorkspace::decline()`. Clearing a recoverable code cannot hide a dead context in any case: a poisoned context returns its sticky error from every later CUDA call, independent of the last-error slot.
 
-**Why the healthy path is unchanged.** On a movie that completes, the guard's destructor makes one `std::uncaught_exceptions()` call (a thread-local read) and returns. No CUDA call, synchronisation or `cudaGetLastError` is added to any kernel or per-movie path; nothing in `src/acc/cuda` changes. The timing comparison below measures this.
+**Why the healthy path is unchanged.** Per `executeOwnMotionCorrection` call, the guard adds two `std::uncaught_exceptions()` calls (thread-local reads): one when it is constructed (`motioncorr_runner.cpp:2299`) and one in its destructor (`:2291`), which then returns on a completed movie. No CUDA call, synchronisation or `cudaGetLastError` is added to any kernel or per-movie path; nothing in `src/acc/cuda` changes. The timing comparison below measures this.
 
 Not changed: admission (#226 D2/D3), thresholds, the per-movie failure contract, the failure messages.
 
@@ -56,11 +56,19 @@ The #225 balloon (`W-QM/balloon`, sha256 `3ede9c4f…7686`, copied) holds GPU3 m
 
 `tests/run_stale_cuda_error_controls.py` with `MC_ALIGN_ALLOC_FAULT=genuine` in the test-only `motioncorr_faultinject` shim: the first `cudaMalloc` issued from a `cudaAlignPatch*` function is replaced by a real `cudaMalloc` of 2^50 bytes, which the runtime fails and records in its own last-error slot (`pending-after=cudaErrorMemoryAllocation` is asserted). On the 48×40×6 fixture this is the global-alignment workspace allocation (`cuda_alignpatch.cu:536`). Three identical movies, fault in movie a; b and c must keep their route, show no CUDA error or fallback, match a standalone run of b, and the process must exit with no device allocation outstanding.
 
+Product checks are strict (revised after review R-D11):
+- **Inventory.** The standalone reference must contain exactly `Movies/b.mrc`, `Movies/b.star` and the joint `corrected_micrographs.star`. A faulted job must contain exactly the MRC and STAR of b and c: nothing for a, and no joint STAR, since the job failed.
+- **MRC.** Each MRC goes through `docs/issue85_laneC/compare_output_trees.validate_mrc`: the full 1024-byte header with only the `Relion    <date>` writer timestamp masked (the established mask), the extended header, the payload, and the structural checks.
+- **STAR.** The per-movie STAR is compared byte for byte apart from its own movie name.
+- **Self-tests.** Before the fault rows, on copies of each reference tree, the comparison must reject: a flipped header byte 40 (cell dimension, the reviewer's case); a flipped payload byte; a missing STAR in the tested tree; and a STAR missing from both the reference and the tested tree. It must accept the identical tree and a timestamp-only difference.
+
+Strict version, at the head (`raw/ctest-control/strict/`; references and self-tests pass in every run):
+
 | Row | main `71ab841e` + shim (`443842e9`) | fix |
 |---|---|---|
 | nvCOMP, pinned `--ingest nvcomp` | FAIL: b refused, job names a and b | PASS |
 | nvCOMP, `--ingest auto` | FAIL: b route compact, `:2012` out of memory | PASS |
-| compact, `--ingest auto` | FAIL: b "Falling back to CPU preprocessing" | PASS |
+| compact, `--ingest auto` | FAIL: b "Falling back to CPU preprocessing" | PASS (also on the CUDA build without nvCOMP, `--no-nvcomp`) |
 
 Raw output: `raw/ctest-control/{ctl,fix}/`. Registered in `CMakeLists.txt` for both CUDA builds (`--no-nvcomp` without nvCOMP, which runs the compact row only).
 
@@ -112,7 +120,7 @@ Window 2 (20 retained pairs each; d = second arm − first arm, positive = slowe
 
 Window 1 (8 pairs, 99.2% CI = full range): tutG +0.026 s (−0.101..+0.163), null −0.020; tutL −0.028 s (−0.117..+0.101), null +0.007; e10216L +0.094 s (−0.186..+0.293), null −0.048. All unresolved, which is why window 2 used 20 pairs.
 
-**Reading.** No comparison resolves a slowdown. In window 2 each fix−main median is within 0.03 s of its main−main null run in the same window: +0.021 vs +0.019 (tutG), +0.004 vs +0.027 (tutL), +0.039 vs +0.042 (e10216L). All three nulls show a positive median of 0.4–0.6% for the second-listed arm, and the tutL null's CI excludes zero, so a bias of that size exists in this setup independent of the code. At 95.9% the data exclude a fix slowdown larger than the CI upper bound: 0.024 s (0.44%) on tutL, 0.101 s (2.2%) on tutG, 0.130 s (1.9%) on e10216L. A smaller effect cannot be distinguished from the null with this data. This is consistent with the code argument (one thread-local read per movie), but it is not proof of zero cost. 1–3 rounds per comparison were discarded for foreign CPU on the lane (`report.md` lists them). Raw records: `raw/perf/{perf,perf2}/<workload>-<ab|null>/` (`provenance.json`, `runs.jsonl`, `compare.json`, `identity.json`, `report.md`).
+**Reading.** No comparison resolves a slowdown. In window 2 each fix−main median is within 0.03 s of its main−main null run in the same window: +0.021 vs +0.019 (tutG), +0.004 vs +0.027 (tutL), +0.039 vs +0.042 (e10216L). All three nulls show a positive median of 0.4–0.6% for the second-listed arm, and the tutL null's CI excludes zero, so a bias of that size exists in this setup independent of the code. At 95.9% the data exclude a fix slowdown larger than the CI upper bound: 0.024 s (0.44%) on tutL, 0.101 s (2.2%) on tutG, 0.130 s (1.9%) on e10216L. A smaller effect cannot be distinguished from the null with this data. This is consistent with the code argument (two thread-local reads per movie), but it is not proof of zero cost. 1–3 rounds per comparison were discarded for foreign CPU on the lane (`report.md` lists them). Raw records: `raw/perf/{perf,perf2}/<workload>-<ab|null>/` (`provenance.json`, `runs.jsonl`, `compare.json`, `identity.json`, `report.md`).
 
 ## Limitations
 

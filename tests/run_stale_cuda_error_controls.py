@@ -19,42 +19,129 @@ Three identical movies a, b, c per row; the fault fires in movie a.
   3  compact, --ingest auto    uncompressed 16-bit TIFF: b and c take compact without
                                the CPU-preprocessing fallback, products identical.
 Rows 1 and 2 are skipped on a build without nvCOMP only if --no-nvcomp is given.
+
+Products are compared strictly. Every movie that must have products has exactly its
+corrected MRC and its motion STAR, and a failed job has no joint STAR. Each MRC goes
+through docs/issue85_laneC/compare_output_trees.validate_mrc, so the whole header
+(only the established "Relion    <date>" writer timestamp masked), the extended header
+and the payload are compared, together with the MRC's structure. The STAR is compared
+byte for byte, apart from its own movie name. Before any fault row, the comparison is
+shown to reject a changed header byte, a changed payload byte and a missing STAR (in
+the tested tree alone, and in both the reference and the tested tree), and to accept a
+timestamp-only difference.
 """
 from __future__ import annotations
 import argparse
+import importlib.util
 import os
 import shutil
-import struct
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from test_gain_cache import synthetic_frames, write_star  # noqa: E402
+from test_gain_cache import NX, NY, synthetic_frames, write_star  # noqa: E402
 from run_nvcomp_reconstruction_controls import write_deflate_tiff  # noqa: E402
 from run_preprocessing_failure_controls import write_tiff  # noqa: E402
 
 MOVIES = ("a", "b", "c")
+PRODUCTS = (".mrc", ".star")
+JOINT_STAR = Path("corrected_micrographs.star")
+
+_spec = importlib.util.spec_from_file_location(
+    "stale_cuda_comparator",
+    Path(__file__).resolve().parents[1] / "docs/issue85_laneC/compare_output_trees.py")
+comparator = importlib.util.module_from_spec(_spec)
+sys.modules[_spec.name] = comparator
+_spec.loader.exec_module(comparator)
 
 
-def mrc_payload(path: Path) -> bytes:
-    """Pixels only: the MRC label area carries a wall-clock timestamp."""
-    data = path.read_bytes()
-    nsymbt = struct.unpack_from("<i", data, 92)[0]
-    return data[1024 + nsymbt:]
+def products(out: Path, movie: str) -> tuple[dict, list[str]]:
+    """Comparable digests of one movie's corrected MRC and motion STAR, and problems.
 
-
-def products(out: Path, movie: str) -> dict[str, bytes]:
-    found = {}
-    for p in sorted((out / "Movies").glob(movie + "*")):
-        if p.suffix == ".mrc":
-            found[p.name[len(movie):]] = mrc_payload(p)
-        elif p.suffix == ".star":
+    A missing product is a problem, not an absent key that could compare equal."""
+    found, problems = {}, []
+    for suffix in PRODUCTS:
+        path = out / "Movies" / (movie + suffix)
+        if not path.is_file():
+            problems.append(f"{movie}{suffix} missing")
+        elif suffix == ".mrc":
+            try:
+                found[suffix] = comparator.validate_mrc(path, (NX, NY, 1))
+            except comparator.ValidationError as exc:
+                problems.append(str(exc))
+        else:
             # The STAR names its own movie; nothing else in it may differ.
-            found[p.name[len(movie):]] = p.read_bytes().replace(
+            found[suffix] = path.read_bytes().replace(
                 f"Movies/{movie}.".encode(), b"Movies/MOVIE.")
-    return found
+    return found, problems
+
+
+def inventory(out: Path) -> set[Path]:
+    return {p.relative_to(out) for p in out.rglob("*") if p.suffix in PRODUCTS}
+
+
+def compare_movie(out: Path, movie: str, ref: dict) -> list[str]:
+    got, problems = products(out, movie)
+    for suffix in PRODUCTS:
+        if suffix in got and got[suffix] != ref.get(suffix):
+            problems.append(f"{movie}{suffix} differs from the standalone reference")
+    return problems
+
+
+def check_reference(out: Path) -> tuple[dict, list[str]]:
+    ref, problems = products(out, "b")
+    expected = {Path("Movies/b.mrc"), Path("Movies/b.star"), JOINT_STAR}
+    if inventory(out) != expected:
+        problems.append(f"reference inventory {sorted(map(str, inventory(out)))}, "
+                        f"expected {sorted(map(str, expected))}")
+    return ref, problems
+
+
+def comparison_self_tests(ref_out: Path, scratch: Path) -> list[str]:
+    """The comparison must be able to fail for the defects it claims to see."""
+    def mutated(name, change):
+        tree = scratch / name
+        shutil.rmtree(tree, ignore_errors=True)
+        shutil.copytree(ref_out, tree)
+        change(tree)
+        return tree
+
+    def poke(offset):
+        def change(tree):
+            path = tree / "Movies/b.mrc"
+            data = bytearray(path.read_bytes())
+            data[offset] ^= 0x01
+            path.write_bytes(bytes(data))
+        return change
+
+    def retime(tree):
+        path = tree / "Movies/b.mrc"
+        data = path.read_bytes()
+        stamp = comparator.TIMESTAMP.search(data[:1024])
+        if not stamp:
+            raise RuntimeError("the writer label has no timestamp to mask")
+        path.write_bytes(data[:stamp.start()] + b"01-Jan-99  00:00:00" + data[stamp.end():])
+
+    ref, problems = check_reference(ref_out)
+    if problems:
+        return [f"reference not usable: {problems}"]
+    failures = []
+    cases = [
+        ("identical tree accepted", ref_out, False),
+        ("timestamp-only difference accepted", mutated("retimed", retime), False),
+        ("header byte 40 (cell dimension) rejected", mutated("header", poke(40)), True),
+        ("payload byte rejected", mutated("payload", poke(2048)), True),
+        ("missing STAR rejected", mutated("nostar", lambda t: (t / "Movies/b.star").unlink()), True),
+    ]
+    for what, tree, must_fail in cases:
+        if bool(compare_movie(tree, "b", ref)) != must_fail:
+            failures.append(what)
+    both = mutated("nostar-both", lambda t: (t / "Movies/b.star").unlink())
+    if not check_reference(both)[1] or not compare_movie(both, "b", products(both, "b")[0]):
+        failures.append("STAR missing from reference and tested tree rejected")
+    return failures
 
 
 def run(binary: Path, root: Path, label: str, star: str, ingest: str, fault: bool,
@@ -107,13 +194,18 @@ def controls(a: argparse.Namespace, root: Path) -> int:
     for kind in fixtures:
         rc, text, out, routes = run(binary, root, f"ref-{kind}", f"{kind}-b.star",
                                     kind, False, a.cpus)
-        refs[kind] = products(out, "b")
-        ok = rc == 0 and routes.get("b") == kind and refs[kind]
+        refs[kind], problems = check_reference(out)
+        ok = rc == 0 and routes.get("b") == kind and not problems
         print(f"[{'PASS' if ok else 'FAIL'}] reference {kind:<8} rc={rc} route={routes.get('b')} "
-              f"products={len(refs[kind])}")
+              f"inventory={sorted(map(str, inventory(out)))}" + (f"  {problems}" if problems else ""))
         if not ok:
-            print("  the fixture does not take its route when healthy; every row below "
-                  "would be vacuous")
+            print("  the fixture does not take its route with complete products when healthy; "
+                  "every row below would be vacuous")
+            return 1
+        bad = comparison_self_tests(out, root / "selftest" / kind)
+        print(f"[{'PASS' if not bad else 'FAIL'}] comparison self-tests on the {kind} reference"
+              + (f"  failed: {bad}" if bad else ""))
+        if bad:
             return 1
 
     rows = [("nvcomp", "nvcomp"), ("nvcomp", "auto"), ("compact", "auto")]
@@ -134,13 +226,14 @@ def controls(a: argparse.Namespace, root: Path) -> int:
             "job fails for movie a only":
                 rc != 0 and len(failed_line) == 1
                 and "failed for 1 movie(s): Movies/a" in failed_line[0],
-            "movie a has no products": not products(out, "a"),
+            "product inventory is b and c only, no joint STAR":
+                inventory(out) == {Path(f"Movies/{m}{x}") for m in MOVIES[1:] for x in PRODUCTS},
             "b and c keep their route": routes.get("b") == kind and routes.get("c") == kind,
             "no CUDA error or fallback in b and c":
                 "CUDA Error" not in later_logs and "Falling back" not in later_logs
                 and "failed recoverably" not in later_logs,
             "b and c products identical to b alone":
-                products(out, "b") == refs[kind] and products(out, "c") == refs[kind],
+                not compare_movie(out, "b", refs[kind]) and not compare_movie(out, "c", refs[kind]),
             "no device allocation left at exit":
                 "[faultinject] remaining-owned=0 stale-releases=0" in text,
         }

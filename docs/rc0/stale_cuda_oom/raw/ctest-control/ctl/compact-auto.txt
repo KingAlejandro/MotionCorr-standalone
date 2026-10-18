@@ -1,0 +1,120 @@
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/a.tif
+  * Movies/b.tif
+  * Movies/c.tif
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.
+000/??? sec ~~(,_,">                                                          [oo]
+   0/   0 sec ...................~~(,_,">                                     [oo]
+   0/   0 sec .......................................~~(,_,">                 [oo]
+   0/   0 sec ............................................................~~(,_,"> yum!
+Movies/a.tif: Cannot get "Predictor" tag as plugin is not configured.
+[alignfault] genuine cudaMalloc(1125899906842624) for a 8000-byte alignment allocation: pending-before=cudaSuccess returned=cudaErrorMemoryAllocation pending-after=cudaErrorMemoryAllocation
+ERROR: out of memory in /mnt/clathrin/alex-motioncorr-rc0/W-D11/src-ctl/src/acc/cuda/cuda_alignpatch.cu at line 536 (error-code 2)
+in: /mnt/clathrin/alex-motioncorr-rc0/W-D11/src-ctl/src/acc/cuda/cuda_settings.h, line 65
+ERROR: 
+
+A GPU-function failed to execute.
+
+ If this occured at the start of a run, you might have GPUs which
+are incompatible with either the data or your installation of relion.
+If you 
+
+	-> INSTALLED RELION YOURSELF: if you e.g. specified -DCUDA_ARCH=50
+	   and are trying ot run on a compute 3.5 GPU (-DCUDA_ARCH=3.5), or 
+	   a similar mismatch on AMD or Intel GPUs, this may happen.
+
+	-> HAVE MULTIPLE GPUS OF DIFFERNT VERSIONS: relion needs at least NVIDIA 
+	   GPUs with compute 5.0 or AMD MI GPUs with archtiecture gfx906. 
+	   You may be trying to use a GPU architectures older than these. 
+	   If you have multiple generations, try specifying --gpu <X>
+	   with X=0. Then try X=1 in a new run, and so on. The numbering of
+	   GPUs may not be obvious from the driver or intuition. For a list
+	   of NVIDIA and AMD GPU compute generations and architectures, see 
+
+	   en.wikipedia.org/wiki/CUDA#Version_features_and_specifications and 
+	   docs.amd.com/bundle/Hardware_and_Software_Reference_Guide/page/Hardware_and_Software_Support.html
+
+	-> ARE USING DOUBLE-PRECISION GPU CODE: relion has been written so
+	   as to not require this, and may thus have unforeseen requirements
+	   when run in this mode. If you think it is nonetheless necessary,
+	   please consult the developers with this error.
+
+If this occurred at the middle or end of a run, it might be that
+
+	-> YOUR DATA OR PARAMETERS WERE UNEXPECTED: execution on GPUs is 
+	   subject to many restrictions, and relion is written to work within
+	   common restraints. If you have exotic data or settings, unexpected
+	   configurations may occur. See also above point regarding 
+	   double precision.
+If none of the above applies, please report the error to the relion
+developers at github.com/3dem/relion/issues.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x578010273087]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(+0x1c36af) [0x5780103b16af]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(_Z33cudaAlignPatchDeviceWithWorkspaceR23PatchAlignmentWorkspaceP6float2iiidRSt6vectorIdSaIdEES6_idiRSob+0xf2c) [0x5780103b66ec]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(_Z27cudaAlignPatchDeviceInArenaP6float2iiidRSt6vectorIdSaIdEES4_idiRSoPvmb+0x1fc) [0x5780103bcb8c]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(_ZN16MotioncorrRunner16alignPatchDeviceEP6float2iiidRSt6vectorIdSaIdEES5_RSobPvm+0x5d) [0x578010303bad]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(_ZN16MotioncorrRunner26executeOwnMotionCorrectionER10Micrographi+0x55af) [0x57801032b03f]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(_ZN16MotioncorrRunner3runEv+0x228a) [0x578010334d6a]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(main+0x296) [0x578010266d86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7aa71182a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7aa71182a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(_start+0x25) [0x578010267945]
+==================
+ERROR: 
+
+A GPU-function failed to execute.
+
+ If this occured at the start of a run, you might have GPUs which
+are incompatible with either the data or your installation of relion.
+If you 
+
+	-> INSTALLED RELION YOURSELF: if you e.g. specified -DCUDA_ARCH=50
+	   and are trying ot run on a compute 3.5 GPU (-DCUDA_ARCH=3.5), or 
+	   a similar mismatch on AMD or Intel GPUs, this may happen.
+
+	-> HAVE MULTIPLE GPUS OF DIFFERNT VERSIONS: relion needs at least NVIDIA 
+	   GPUs with compute 5.0 or AMD MI GPUs with archtiecture gfx906. 
+	   You may be trying to use a GPU architectures older than these. 
+	   If you have multiple generations, try specifying --gpu <X>
+	   with X=0. Then try X=1 in a new run, and so on. The numbering of
+	   GPUs may not be obvious from the driver or intuition. For a list
+	   of NVIDIA and AMD GPU compute generations and architectures, see 
+
+	   en.wikipedia.org/wiki/CUDA#Version_features_and_specifications and 
+	   docs.amd.com/bundle/Hardware_and_Software_Reference_Guide/page/Hardware_and_Software_Support.html
+
+	-> ARE USING DOUBLE-PRECISION GPU CODE: relion has been written so
+	   as to not require this, and may thus have unforeseen requirements
+	   when run in this mode. If you think it is nonetheless necessary,
+	   please consult the developers with this error.
+
+If this occurred at the middle or end of a run, it might be that
+
+	-> YOUR DATA OR PARAMETERS WERE UNEXPECTED: execution on GPUs is 
+	   subject to many restrictions, and relion is written to work within
+	   common restraints. If you have exotic data or settings, unexpected
+	   configurations may occur. See also above point regarding 
+	   double precision.
+If none of the above applies, please report the error to the relion
+developers at github.com/3dem/relion/issues.
+Continuing with the remaining movies.
+Movies/b.tif: Cannot get "Predictor" tag as plugin is not configured.
+Movies/c.tif: Cannot get "Predictor" tag as plugin is not configured.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-D11/src-ctl/src/motioncorr_runner.cpp, line 1093
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/a.tif. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x578010273087]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(+0x5632f) [0x57801024432f]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(main+0x296) [0x578010266d86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7aa71182a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7aa71182a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-D11/build-ctl-nvcomp/motioncorr_faultinject(_start+0x25) [0x578010267945]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/a.tif. Successful per-movie outputs were retained; joint output was not generated.
+[faultinject] remaining-owned=0 stale-releases=0

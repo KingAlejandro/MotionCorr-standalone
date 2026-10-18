@@ -5,6 +5,8 @@ Ensures that CTest collection is fail-closed:
 - Fails if 0 tests are collected.
 - Fails if the suite contains fewer than the expected minimum number of tests.
 - Fails if any declared required test is missing from the collected test list.
+- In a CUDA build (CMakeCache.txt has CUDA:BOOL=ON, or --cuda), also requires
+  CUDA_REQUIRED_TESTS.
 """
 
 from __future__ import annotations
@@ -162,6 +164,29 @@ DEFAULT_REQUIRED_TESTS = [
 ]
 
 
+# Required only in CUDA builds, so a CPU-only collection is not asked for tests it
+# cannot register. Collection needs no GPU. Every entry must be registered in every
+# CUDA configuration, with and without nvCOMP.
+CUDA_REQUIRED_TESTS = [
+    # #226 D1: a handled allocation failure must not leave a stale last error that
+    # degrades or refuses the next movie. The only test that sets the runtime's real
+    # last-error slot before a healthy movie.
+    "CudaStaleErrorAfterOom",
+]
+
+
+def build_has_cuda(test_dir: Path) -> bool:
+    """CUDA option of the inspected build. A build directory without a CMake cache
+    cannot say, so it is an error rather than a silent CPU-only verdict."""
+    cache = test_dir / "CMakeCache.txt"
+    if not cache.is_file():
+        raise RuntimeError(f"no CMakeCache.txt in {test_dir}: cannot tell whether CUDA is enabled")
+    for line in cache.read_text(errors="replace").splitlines():
+        if line.startswith("CUDA:BOOL="):
+            return line.split("=", 1)[1].strip().upper() in ("ON", "1", "TRUE", "YES", "Y")
+    return False
+
+
 def load_ctest_json(
     test_dir: Optional[Path] = None,
     json_path: Optional[Path] = None,
@@ -186,11 +211,15 @@ def validate_tests(
     ctest_data: Dict[str, Any],
     min_count: int = 1,
     required_tests: Optional[Sequence[str]] = None,
+    cuda: bool = False,
 ) -> Tuple[bool, Dict[str, Any]]:
     tests = ctest_data.get("tests", [])
     collected_names = [t.get("name", "") for t in tests if isinstance(t, dict)]
 
-    req = list(required_tests) if required_tests is not None else list(DEFAULT_REQUIRED_TESTS)
+    if required_tests is not None:
+        req = list(required_tests)
+    else:
+        req = list(DEFAULT_REQUIRED_TESTS) + (list(CUDA_REQUIRED_TESTS) if cuda else [])
     missing = [name for name in req if name not in collected_names]
 
     # A test whose command starts with an empty argument is registered but
@@ -256,6 +285,9 @@ def main() -> int:
                         help="Minimum number of tests that must be collected (default: 23)")
     parser.add_argument("--required-tests", nargs="*", default=None,
                         help="Explicit list of required test names (default: standard MotionCorr suite)")
+    parser.add_argument("--cuda", action="store_true",
+                        help="Also require CUDA_REQUIRED_TESTS (automatic with a --test-dir "
+                             "whose CMakeCache.txt has CUDA:BOOL=ON)")
     parser.add_argument("--quiet", action="store_true",
                         help="Quiet output")
     parser.add_argument("--dump-json", type=Path, default=None,
@@ -264,6 +296,7 @@ def main() -> int:
 
     try:
         data = load_ctest_json(opts.test_dir, opts.json)
+        cuda = opts.cuda or (opts.test_dir is not None and build_has_cuda(opts.test_dir))
     except Exception as exc:
         print(f"ERROR: Failed to obtain CTest JSON data: {exc}", file=sys.stderr)
         return 2
@@ -272,6 +305,7 @@ def main() -> int:
         ctest_data=data,
         min_count=opts.min_count,
         required_tests=opts.required_tests,
+        cuda=cuda,
     )
 
     if opts.dump_json:
@@ -280,6 +314,7 @@ def main() -> int:
 
     if not opts.quiet:
         print(f"=== CTest Collection Validation: {report['status']} === ")
+        print(f"  CUDA-only required tests: {'required' if cuda else 'not required'}")
         print(f"  Collected tests: {report['collected_count']}")
         for t in report["collected_tests"]:
             mark = "REQUIRED" if t in report["required_tests"] else "ADDITIVE"

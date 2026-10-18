@@ -1,0 +1,86 @@
+[PASS] A real CPU product, 4 movies: complete, 10 pages
+[PASS] A real CPU product, 3 movies: complete, 6 pages
+[PASS] A mutation rejected: zero dimension (nx = 0)
+[PASS] A mutation rejected: negative nsymbt
+[PASS] A mutation rejected: truncated MRC
+[PASS] A mutation rejected: per-movie STAR empty
+[PASS] A mutation rejected: joint STAR missing one movie
+[PASS] A mutation rejected: joint STAR with no rows
+[PASS] A mutation rejected: joint STAR deleted
+[PASS] A mutation rejected: logfile.pdf deleted
+[PASS] A synthetic 24-movie tree with a 30-page PDF accepted
+[PASS] A synthetic 24-movie tree with a 27-page PDF rejected
+[PASS] A synthetic 24-movie tree with a 24-page PDF rejected
+[PASS] A synthetic e10216 (3 movies) tree with a 6-page PDF accepted
+[PASS] A synthetic e10216 (3 movies) tree with a 9-page PDF rejected
+[PASS] A expected pages: 24 movies -> 30, 3 movies -> 6
+[PASS] B complete, null effect: PASS
+[PASS] B complete, N=256 null effect: PASS
+[PASS] B complete, resolved slowdown: FAIL
+[PASS] B complete, wide spread: UNRESOLVED
+[PASS] B headers removed: INCOMPLETE
+[PASS] B identity removed: INCOMPLETE
+[PASS] B payload records removed: INCOMPLETE
+[PASS] B every payload a resource failure: INCOMPLETE
+[PASS] B record order reversed: INCOMPLETE
+[PASS] B retained walls differ from payloads: INCOMPLETE
+[PASS] B every payload reports CPU mask 0: INCOMPLETE
+[PASS] B mask and PDF-page observations removed: INCOMPLETE
+[PASS] B header with overlapping masks and no locks: INCOMPLETE
+[PASS] B identity true but with problems, zero comparisons, position 99: INCOMPLETE
+[PASS] B marker deadline beyond the header deadline: INCOMPLETE
+[PASS] B marker records an unreaped process: INCOMPLETE
+[PASS] B lock-holder record missing: INCOMPLETE
+[PASS] B lock-holder killed the worker at its deadline: INCOMPLETE
+[PASS] B lock-holder killed leftover processes: INCOMPLETE
+[PASS] B window 2 missing: INCOMPLETE
+[PASS] B window 1 truncated: INCOMPLETE
+[PASS] B zero pairs: INCOMPLETE
+[PASS] B malformed record: INCOMPLETE
+[PASS] B one position in the wrong order: INCOMPLETE
+[PASS] B identity failed: INCOMPLETE
+[PASS] B dry-run header: INCOMPLETE
+[PASS] B header for another venue: INCOMPLETE
+[PASS] B warm-up failure (fix): INCOMPLETE
+[PASS] B fix-arm product failure (arm-dependent): INCOMPLETE
+[PASS] B two payload failures (recurrent): INCOMPLETE
+[PASS] B one isolated main failure: PASS
+[PASS] B marker with negative remaining budget: INCOMPLETE
+[PASS] B marker written after the deadline: INCOMPLETE
+[PASS] B manifest missing: INCOMPLETE (no exception)
+[PASS] B labels are exactly PASS / UNRESOLVED / FAIL / INCOMPLETE
+[PASS] C healthy dry-run windows complete; lock released; no orphans
+[PASS] C every timed payload has an observed CPU mask equal to the payload mask
+[PASS] C real driver streams pass the sequence validation; only the dry-run flag makes them INCOMPLETE
+[PASS] C exit-0 product failure on fix: classified "product", pair rerun in the same position
+[PASS] C unsuccessful warm-up ends the window as incomplete
+[PASS] C identity failure recorded once, evidence kept, not retried
+[PASS] C watchdog kills and reaps a hung payload at the per-payload timeout; pair rerun
+[PASS] C window deadline: payload killed at the deadline, incomplete, lock released, no orphans
+[PASS] C deadline covers the lock wait: the holder gives up, no worker or payload started
+[PASS] C delayed product check: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans
+[PASS] C delayed cleanup: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans
+[PASS] C aggregate release: pending samplers and a stalled registered child: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans
+[PASS] C binary changed after freezing: fatal before any resource
+[PASS] D blocking wait: completions 25 ms apart recorded 24.59 ms apart (|error| <= 1 ms)
+[PASS] D control discriminates: legacy polled wait records 50.40 ms (error > 1 ms)
+[PASS] E completion marker after the release deadline, or with an unreaped process, becomes incomplete
+[PASS] E release: one shared reap deadline for 3 unreapable processes (1.52 s for a 2 s deadline; 5 s each before), unreaped recorded, lock released
+[PASS] E mask rule: no CPU-mask observation -> invalid (no CPU-mask observation)
+[PASS] E mask rule: sampler did not finish -> invalid (sampler did not finish)
+[PASS] E mask rule: different observed mask -> invalid (payload mask)
+[PASS] E mask rule: valid observation -> valid
+[PASS] E source re-verification: clean frozen head -> accepted
+[PASS] E source re-verification: wrong source_head -> fatal before any resource
+[PASS] E source re-verification: invalid source path -> fatal before any resource
+[PASS] E source re-verification: changed build equivalence -> fatal before any resource
+[PASS] E source re-verification: vendored stats changed -> fatal before any resource
+[PASS] E source re-verification: untracked file in the tree (not clean) -> fatal before any resource
+[PASS] F integrated, unreapable payload: lock released within the 20 s budget (17.959285671822727), window INCOMPLETE
+[PASS] F integrated, third fsync blocks (emit, review of 5b430d4b): lock released within the 20 s budget (18.473117496818304), window INCOMPLETE
+[PASS] F integrated, open() of a per-run log blocks: lock released within the 20 s budget (18.471907588653266), window INCOMPLETE
+[PASS] F worker does not inherit the lock: no lock fd in the worker; killing only the holder frees the lock in 0.029 s while the worker is alive
+[PASS] G launcher: a failed window aborts the campaign (one run invoked, no later window, non-zero exit)
+
+83/83 controls as required
+SUITE_RC=0

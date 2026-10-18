@@ -2276,6 +2276,27 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		refuse_fallback_if_fatal(movie_session->getFailureState(), boundary);
 		movie_session.reset();
 	};
+	// Issue #226 D1. A failed cudaMalloc checked by HANDLE_ERROR (cudaAlignPatch*,
+	// and its cuFFT plan creation) throws without reading the thread's last-error
+	// slot, so cudaErrorMemoryAllocation stays pending and the next movie's first
+	// HANDLE_ERROR(cudaGetLastError()) reports it as that movie's own failure.
+	// When this movie leaves by exception, release the session and decide from its
+	// preserved state plus the pending slot, as discard_preprocessing_session does:
+	// clear the slot only when the verdict is recoverable. A poisoning code is left
+	// pending, exactly as before. Runs only on unwind; the healthy path is unchanged.
+	struct FailedMovieCudaErrorGuard {
+		std::unique_ptr<CudaMovieSession> &session;
+		const int uncaught_at_entry;
+		~FailedMovieCudaErrorGuard() {
+			if (std::uncaught_exceptions() == uncaught_at_entry) return;
+			const CudaFailureState no_session{};
+			if (session) session->release();
+			const CudaRetryDecision decision = cudaRetryDecisionFor(
+			    session ? session->getFailureState() : no_session, cudaPeekAtLastError());
+			if (decision.verdict == CUDA_RETRY_PERMITTED)
+				(void)cudaGetLastError();
+		}
+	} failed_movie_cuda_error_guard{movie_session, std::uncaught_exceptions()};
 	if (use_gpu && !early_binning) {
 		StageScope session_scope("session setup");
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);

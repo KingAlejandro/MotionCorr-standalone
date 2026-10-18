@@ -1,5 +1,5 @@
 FROZEN DESIGN, NOT YET RUN. W-D11 confirmatory timing for #228 (D14). Revision of 2026-10-18 after review
-R-D11 round 6; supersedes the designs frozen at 38fbfa6f and 8aed9b0b. The maintainer chose option (a). No timed pair may
+R-D11 round 7; supersedes the designs frozen at 38fbfa6f, 8aed9b0b and 6b797438. The maintainer chose option (a). No timed pair may
 run before the coordinator's "GO". Once run, this file and confirm_pairs.py are never edited; any correction
 is a separate dated note.
 
@@ -42,13 +42,16 @@ Windows   Two equal windows per workload, run once each in the order tutG-1, e10
 Timing    Wall = CLOCK_MONOTONIC at reap minus CLOCK_MONOTONIC at spawn, completion taken by a blocking
           wait(). The per-payload timeout and the window deadline are enforced by an independent watchdog
           thread that kills the payload's process group; nothing polls the payload for completion.
-Deadline  45 min per window from the first lock request, covering the lock waits, the idle-GPU wait and
-          all payloads. Every lock-held step is bounded by the remaining time: GPU queries, the whole product
+Deadline  45 min (2700 s) per window from the first lock request is the TOTAL lock tenure, cleanup
+          included. Work (lock waits, the idle-GPU wait, payloads and checks) must end by 2700 - 10 s; the
+          remaining 10 s (CLEANUP_MARGIN_S) are reserved for release, which must finish by 2700 s. Every lock-held step is bounded by the remaining time: GPU queries, the whole product
           check (structure and PDF) and the identity check run as registered child processes killed at the
           deadline; per-run deletion is a bounded child; sampler joins are bounded; copying identity-failure
-          evidence happens only after release. On release every registered child, payload and sampler is
-          killed and reaped, then the locks are released; release completes within the deadline plus a
-          declared cleanup margin of 10 s. complete.json is never written once the deadline has passed. Each window holds /tmp/motioncorr-bench.lock and /tmp/motioncorr-gpu3-correctness.lock
+          evidence happens only after release. On release every registered process group (payload,
+          samplers, registered children) is sent SIGKILL first, then all are reaped against one shared
+          release deadline (2700 s); any post-SIGKILL reap elsewhere is bounded by the same deadline. A
+          process that cannot be reaped is recorded and the locks are released regardless. complete.json is
+          written only if the work ended in time, release finished by 2700 s and nothing went unreaped. Each window holds /tmp/motioncorr-bench.lock and /tmp/motioncorr-gpu3-correctness.lock
           for its whole duration (inode checked). Per-payload timeout 120 s (a healthy run takes 4.5-6 s);
           a timed-out payload's process group is killed and reaped. On any exit (completion, deadline,
           error, SIGTERM/SIGINT) the payload, the mpstat/nvidia-smi samplers and both locks are released.
@@ -99,7 +102,7 @@ Combine   `confirm_pairs.py combine` validates before any statistic: the manifes
           one identity record in the stream, at position 1, identical, with no problems and at least one
           (MRC) comparison, and no records after the last position. The completion marker must match the
           header (start, deadline), the workload, window, positions and budget, with remaining budget >= 0,
-          an end time not after the deadline and a release time within the budget. Then N comparison pairs balanced AB/BA, 16 null pairs and a CI. Missing, reordered,
+          an end time not after the deadline, a release time within the budget and no unreaped process. Then N comparison pairs balanced AB/BA, 16 null pairs and a CI. Missing, reordered,
           contradictory or late evidence gives INCOMPLETE, never an exception. Then: median(d), distribution-free 95% CI (tools/profiling/lib/stats.median_ci), CI as %
           of the median main wall, per-arm median and IQR, null median/CI/range, per-window counts.
 Report    Per workload: label, the statistics above, attempts/failures by arm, identity, host load (mpstat,

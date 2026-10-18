@@ -159,7 +159,8 @@ def timed_payload(cmd, cwd, stdout, timeout, on_start=None):
 
 # ---------------------------------------------------------------- bounded children
 CHILDREN, CHILD_LOCK = set(), threading.Lock()
-CLEANUP_MARGIN_S = 10            # declared: release completes within the deadline plus this margin
+CLEANUP_MARGIN_S = 10            # reserved INSIDE the window budget: work ends at budget - margin, release by budget
+RELEASE_DEADLINE = [math.inf]    # monotonic; set per window, bounds every post-SIGKILL reap
 
 
 def run_child(cmd, timeout):
@@ -176,11 +177,15 @@ def run_child(cmd, timeout):
             os.killpg(p.pid, signal.SIGKILL)
         except ProcessLookupError:
             pass
-        p.wait()
+        try:
+            p.wait(timeout=max(RELEASE_DEADLINE[0] - time.monotonic(), 0.01))
+        except subprocess.TimeoutExpired:
+            raise                                         # left registered: release() records it
         raise
     finally:
-        with CHILD_LOCK:
-            CHILDREN.discard(p)
+        if p.returncode is not None:
+            with CHILD_LOCK:
+                CHILDREN.discard(p)
 
 
 def child_json(code, args, timeout):
@@ -236,9 +241,11 @@ def fmt_cpus(cpus):
 
 
 class Window:
-    """Every resource of one window; release() is idempotent, bounded, and runs on every exit path."""
-    def __init__(self, deadline, locks):
-        self.deadline, self.lock_paths, self.fds, self.children, self.samplers = deadline, locks, [], [], []
+    """Every resource of one window; release() is idempotent, bounded, and runs on every exit path.
+    deadline = end of work (start + budget - CLEANUP_MARGIN_S); release_deadline = start + budget."""
+    def __init__(self, deadline, release_deadline, locks):
+        self.deadline, self.release_deadline = deadline, release_deadline
+        self.lock_paths, self.fds, self.children, self.samplers, self.unreaped = locks, [], [], [], []
 
     def remaining(self):
         return self.deadline - time.monotonic()
@@ -261,15 +268,17 @@ class Window:
     def release(self):
         with CHILD_LOCK:
             queries = list(CHILDREN)                      # GPU queries, product/identity checks, deletions
-        for p in self.children + self.samplers + queries:
+        procs = self.children + self.samplers + queries
+        for p in procs:                                   # SIGKILL every process group first ...
             try:
                 os.killpg(p.pid, signal.SIGKILL)
-            except (ProcessLookupError, PermissionError):
+            except (ProcessLookupError, PermissionError, OSError):
                 pass
+        for p in procs:                                   # ... then reap all against ONE shared deadline
             try:
-                p.wait(timeout=5)                         # after SIGKILL, reaping is immediate
+                p.wait(timeout=max(self.release_deadline - time.monotonic(), 0.01))
             except subprocess.TimeoutExpired:
-                pass
+                self.unreaped.append(p.pid)               # recorded; the locks are released regardless
         self.children, self.samplers = [], []
         for fd in self.fds:
             try:
@@ -297,9 +306,10 @@ def classify(timed_out, rc, sampler_alive, observed_mask, payload_mask, violatio
     return None
 
 
-def completion_status(status, deadline_monotonic):
-    """Never 'complete' once the deadline has passed (rule.txt "Deadline")."""
-    return status if status != 'complete' or time.monotonic() <= deadline_monotonic else 'incomplete'
+def completion_status(status, release_deadline_monotonic, unreaped=()):
+    """Never 'complete' once the window budget (release deadline) has passed or a process went unreaped."""
+    ok = time.monotonic() <= release_deadline_monotonic and not unreaped
+    return status if status != 'complete' or ok else 'incomplete'
 
 
 # ---------------------------------------------------------------- freeze / verify
@@ -406,8 +416,10 @@ def run_window(o):
 
     budget_s, payload_timeout_s = m['budget_s'], m['payload_timeout_s']
     t_start, wall_start = time.monotonic(), time.time()
-    deadline = t_start + budget_s
-    win = Window(deadline, m['locks'])
+    deadline = t_start + budget_s - CLEANUP_MARGIN_S          # end of work
+    release_deadline = t_start + budget_s                      # locks released by here (budget includes cleanup)
+    RELEASE_DEADLINE[0] = release_deadline
+    win = Window(deadline, release_deadline, m['locks'])
     status, reason = 'incomplete', 'not started'
 
     def on_signal(sig, frame):
@@ -546,8 +558,9 @@ def run_window(o):
         status, reason = 'incomplete', f'{type(exc).__name__}: {exc}'
     finally:
         win.release()
-        released_after_s, end_epoch, remaining = time.monotonic() - t_start, time.time(), win.remaining()
-        final = completion_status(status, deadline)
+        released_after_s, end_epoch = time.monotonic() - t_start, time.time()
+        remaining = release_deadline - time.monotonic()
+        final = completion_status(status, release_deadline, win.unreaped)
         if final != status:
             reason = 'deadline passed before the completion marker'
         for d in kept:                                    # after release: identity-failure evidence
@@ -556,7 +569,8 @@ def run_window(o):
         marker = {'status': final, 'reason': reason, 'workload': o.workload, 'window': o.window,
                   'positions': len(w['plan']), 'manifest_sha256': sha256(o.manifest), 'budget_s': budget_s,
                   'start_epoch': wall_start, 'deadline_epoch': wall_start + budget_s, 'end_epoch': end_epoch,
-                  'remaining_budget_s': round(remaining, 3), 'released_after_s': round(released_after_s, 3)}
+                  'remaining_budget_s': round(remaining, 3), 'released_after_s': round(released_after_s, 3),
+                  'cleanup_margin_s': CLEANUP_MARGIN_S, 'unreaped_pids': win.unreaped}
         (out / ('complete.json' if final == 'complete' else 'incomplete.json')).write_text(json.dumps(marker, indent=1))
         subprocess.run(['gzip', '-rq', str(out / 'logs')], timeout=60)
         print(json.dumps(marker))
@@ -685,7 +699,8 @@ def combine(o):
                     or mk.get('start_epoch') != hd.get('start_epoch') or mk.get('deadline_epoch') != hd.get('deadline_epoch')
                     or not isinstance(mk.get('remaining_budget_s'), (int, float)) or mk['remaining_budget_s'] < 0
                     or not mk.get('end_epoch', math.inf) <= mk.get('deadline_epoch', -math.inf)
-                    or not 0 <= mk.get('released_after_s', math.inf) <= m['budget_s']):
+                    or not 0 <= mk.get('released_after_s', math.inf) <= m['budget_s']
+                    or mk.get('unreaped_pids') != []):
                 reasons.append(f'window {i}: completion marker inconsistent with the header or budget, or late')
             for kind, ws in retained:
                 if kind == 'null':

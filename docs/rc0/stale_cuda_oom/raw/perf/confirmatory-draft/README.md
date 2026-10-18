@@ -1,4 +1,4 @@
-# Confirmatory timing for tutG and e10216L (#228, D14): FROZEN DESIGN (round-6 revision), NOT RUN
+# Confirmatory timing for tutG and e10216L (#228, D14): FROZEN DESIGN (round-7 revision), NOT RUN
 
 The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No timed pair runs before the coordinator's "GO"**, which follows a re-check by R-D11. After GO the four windows run once and the results are committed as evidence.
 
@@ -12,20 +12,15 @@ The maintainer chose to run it (option a). Venue: **4GPUs GPU3 only**. **No time
 
 ## Frozen state
 
-| Item | Value |
-|---|---|
-| Frozen source | `01b978355c3dde8e2f1844632fc80fb229bc9a2e`, clean checkout `W-D11/src-confirm`; it stays clean |
-| `confirm_pairs.py` | sha256 `bab739eff0bde3c52327401010c53a6daf05c4caea2a2768411658ee00eacd3e` |
-| `rule.txt` | sha256 `c513fe568ca53a8325e459522e742d45e94bca7de639a8fee713a5bf78c88a9c` |
-| `vendor/stats.py`, `vendor/identity.py` | sha256 `8d61e054…173c7c`, `e44cfd0f…be4645` (unchanged) |
-| `manifest.json` | sha256 `3f4a05aff2f454a7f72edda49736374b7edfcec9ccdb634c951fe4c5681ce6cf` (copy here; the run uses `W-D11/confirm4/manifest.json`) |
-| Frozen masks and locks | payload 88–95, runner 120–123; `/tmp/motioncorr-bench.lock`, `/tmp/motioncorr-gpu3-correctness.lock` |
-| Binaries | main `c2263c22…f8dd`; fix `29b894f0…c185`, built from `78aae2d3`, source-equivalent to `01b97835` (`src/` identical, 5 comment lines in `CMakeLists.txt`) |
-| Plan | tutG 136 positions per window (30-page PDF); e10216L 96 per window (6 pages) |
-| Inputs | tutG 26 files, e10216L 4; `verify` passed for both after freezing, with no lock taken |
-| Superseded | designs and manifests frozen at `38fbfa6f` (`c6b92eee…`) and `8aed9b0b` (`af88a4e9…`), kept in `superseded-*/` |
+FROZEN_STATE_PLACEHOLDER
 
-Later evidence commits on the branch do not change the frozen files. Every window re-verifies them before taking a lock.
+## Change for review R-D11 round 7 (supersedes the design frozen at `6b797438`)
+
+| Finding | Change | Where | Control (`controls/ctl-run.txt`) |
+|---|---|---|---|
+| Cleanup sat outside the 45-min budget; the 10 s margin was not enforced | The 2700 s budget is the total lock tenure: work ends at `start + 2700 − 10` (the deadline every bounded step uses) and release must finish by `start + 2700` (`confirm_pairs.py:419–422`, `CLEANUP_MARGIN_S` :162, `RELEASE_DEADLINE` :163). `release()` sends SIGKILL to every registered process group (payload, samplers, children) first, then reaps all of them against that one shared deadline. Unreapable processes are recorded and the locks released regardless (:272–281). The post-SIGKILL reap in `run_child` is bounded by the same deadline (:181). `complete.json` requires release by the deadline and nothing unreaped (:309, :563); the marker records `unreaped_pids` (:573) and `combine` requires it empty (:703). `rule.txt:45–55` | `confirm_pairs.py` :162–163, :181, :246, :272–281, :309, :419–422, :563, :573, :703; `rule.txt` :45–55 | With a 15 s budget standing for 2700 s, locks were released at **5.010 s** (delayed product check), **5.008 s** (delayed deletion) and **5.012 s** (aggregate: pending `mpstat` and `nvidia-smi` samplers plus a stalled registered child). All are within 15 s with ~10 s to spare, INCOMPLETE, nothing unreaped, no orphans. Unit control: three unreapable processes reaped against one 2 s deadline in **2.02 s** (5 s each before), unreaped recorded, lock released. A marker with an unreaped process gives INCOMPLETE |
+
+Full suite on 4GPUs CPUs 24–39 with no GPU payload, using the frozen driver and rule: **75/75 as required**.
 
 ## Changes for review R-D11 round 6 (supersedes the design frozen at `8aed9b0b`)
 

@@ -201,7 +201,7 @@ def write_window(out, mpath, i, recs, marker=None):
     mk = {'status': 'complete', 'manifest_sha256': cp.sha256(mpath), 'workload': 'w', 'window': i,
           'positions': len(json.loads(mpath.read_text())['workloads']['w']['plan']), 'budget_s': 2700,
           'start_epoch': 1000.0, 'deadline_epoch': 3700.0, 'end_epoch': 3600.0, 'remaining_budget_s': 100.0,
-          'released_after_s': 2600.0}
+          'released_after_s': 2600.0, 'cleanup_margin_s': 10, 'unreaped_pids': []}
     mk.update(marker or {})
     (wd / 'complete.json').write_text(json.dumps(mk))
 
@@ -261,6 +261,8 @@ def group_b(o, work):
         scenario(name, 'INCOMPLETE', n=256, gen=lambda mp, i, mut=mut: mut(stream(mp, i, spread=0.004)))
     scenario('marker deadline beyond the header deadline', 'INCOMPLETE', n=256,
              gen=lambda mp, i: stream(mp, i, spread=0.004), marker={'deadline_epoch': 9700.0, 'end_epoch': 3600.0})
+    scenario('marker records an unreaped process', 'INCOMPLETE', n=256, gen=lambda mp, i: stream(mp, i, spread=0.004),
+             marker={'unreaped_pids': [4242]})
     scenario('window 2 missing', 'INCOMPLETE', gen=lambda mp, i: stream(mp, i) if i == 1 else None)
     scenario('window 1 truncated', 'INCOMPLETE', mutate=lambda rs: rs[:len(rs) // 2])
     scenario('zero pairs', 'INCOMPLETE', gen=lambda mp, i: stream(mp, i)[:4],
@@ -343,9 +345,10 @@ def group_c(o, work):
         mp.write_text(json.dumps(m))
         return d, mp
 
-    def run(d, mp, window=1, path_stub=None):
+    def run(d, mp, window=1, path_stub=None, extra=()):
         cmd = [sys.executable, '-B', str(HERE / 'confirm_pairs.py'), 'run', '--manifest', str(mp), '--workload', 'w',
-               '--window', str(window), '--out', str(d / 'out'), '--scratch', str(d / 'scratch'), '--dry-run-inputs']
+               '--window', str(window), '--out', str(d / 'out'), '--scratch', str(d / 'scratch'), '--dry-run-inputs',
+               *extra]
         env = dict(os.environ)
         if path_stub:                                     # e.g. a slow gs or rm earlier on PATH
             env['PATH'] = f'{path_stub}:{env["PATH"]}'
@@ -424,19 +427,24 @@ def group_c(o, work):
          inc.is_file() and 'waiting' in json.loads(inc.read_text())['reason'] and not (d / 'state' / 'count-main').exists(),
          inc.read_text() if inc.is_file() else r.stderr[-300:])
 
-    for name, tool in (('delayed product check', 'gs'), ('delayed cleanup', 'rm')):
-        d, mp = setup(name.replace(' ', '-'), {}, budget=15)
+    # Each window budget (here 15 s, standing for 2700 s) must contain the cleanup: work ends at
+    # budget - CLEANUP_MARGIN_S and the locks are released by the budget.
+    for name, tools, extra in (('delayed product check', ('gs',), ()), ('delayed cleanup', ('rm',), ()),
+                               ('aggregate release: pending samplers and a stalled registered child',
+                                ('gs', 'mpstat', 'nvidia-smi'), ('--samplers',))):
+        d, mp = setup(name.split(':')[0].replace(' ', '-'), {}, budget=15)
         stub_dir = d / 'slowbin'; stub_dir.mkdir()
-        (stub_dir / tool).write_text(f'#!/bin/sh\nexec sleep 120 # slow {tool} for {d}\n')
-        (stub_dir / tool).chmod(0o755)
-        r, el = run(d, mp, path_stub=stub_dir)
+        for tool in tools:
+            (stub_dir / tool).write_text(f'#!/bin/sh\nexec sleep 1000 # slow {tool} for {d}\n')
+            (stub_dir / tool).chmod(0o755)
+        r, el = run(d, mp, path_stub=stub_dir, extra=extra)
         wd = d / 'out' / 'w' / 'window1'
         inc = wd / 'incomplete.json'
         mk = json.loads(inc.read_text()) if inc.is_file() else {}
-        case('C', f'{name}: resources released within budget + {cp.CLEANUP_MARGIN_S} s, INCOMPLETE, no orphans',
-             inc.is_file() and not (wd / 'complete.json').exists()
-             and mk.get('released_after_s', 1e9) <= 15 + cp.CLEANUP_MARGIN_S and lock_free() and no_orphans(d),
-             f'elapsed {el:.1f} s, marker {mk}')
+        case('C', f'{name}: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans',
+             inc.is_file() and not (wd / 'complete.json').exists() and mk.get('released_after_s', 1e9) <= 15
+             and mk.get('remaining_budget_s', -1) >= 0 and mk.get('unreaped_pids') == [] and lock_free()
+             and no_orphans(d), f'elapsed {el:.1f} s, marker {mk}')
 
     d, mp = setup('provenance', {})
     (d / 'main').write_text((d / 'main').read_text() + '# changed after freeze\n')
@@ -478,9 +486,35 @@ def group_d(o, work):
 
 # ---------------------------------------------------------------- E (unit rules: deadline marker, mask, source)
 def group_e(o, work):
-    case('E', 'completion marker after the deadline becomes incomplete',
+    case('E', 'completion marker after the release deadline, or with an unreaped process, becomes incomplete',
          cp.completion_status('complete', time.monotonic() - 0.001) == 'incomplete'
+         and cp.completion_status('complete', time.monotonic() + 10, [123]) == 'incomplete'
          and cp.completion_status('complete', time.monotonic() + 10) == 'complete')
+
+    class Unreapable:                                     # a process SIGKILL cannot reap (e.g. stuck in D state)
+        def __init__(self, pid):
+            self.pid = pid
+
+        def wait(self, timeout=None):
+            time.sleep(timeout)
+            raise subprocess.TimeoutExpired('x', timeout)
+    lockfile = work / 'e-release.lock'
+    now = time.monotonic()
+    win = cp.Window(now, now + 2.0, [str(lockfile)])
+    win.acquire()
+    fakes = [Unreapable(4_000_000 + k) for k in range(3)]
+    win.children, win.samplers = [fakes[0]], [fakes[1]]
+    with cp.CHILD_LOCK:
+        cp.CHILDREN.add(fakes[2])
+    t0 = time.monotonic()
+    win.release()
+    el = time.monotonic() - t0
+    with cp.CHILD_LOCK:
+        cp.CHILDREN.discard(fakes[2])
+    free = subprocess.run(['flock', '-n', str(lockfile), 'true']).returncode == 0
+    case('E', f'release: one shared reap deadline for 3 unreapable processes ({el:.2f} s for a 2 s deadline; '
+              f'5 s each before), unreaped recorded, lock released',
+         el <= 2.5 and sorted(win.unreaped) == [f.pid for f in fakes] and free, f'{el:.2f} s {win.unreaped}')
     mask = cp.parse_cpus(o.payload_cpus)
     for name, args, want in (
         ('no CPU-mask observation', (False, 0, False, None, mask, [], 1), 'no CPU-mask observation'),

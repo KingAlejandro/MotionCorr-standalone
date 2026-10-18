@@ -29,6 +29,7 @@
 [PASS] B header with overlapping masks and no locks: INCOMPLETE
 [PASS] B identity true but with problems, zero comparisons, position 99: INCOMPLETE
 [PASS] B marker deadline beyond the header deadline: INCOMPLETE
+[PASS] B marker records an unreaped process: INCOMPLETE
 [PASS] B window 2 missing: INCOMPLETE
 [PASS] B window 1 truncated: INCOMPLETE
 [PASS] B zero pairs: INCOMPLETE
@@ -54,12 +55,14 @@
 [PASS] C watchdog kills and reaps a hung payload at the per-payload timeout; pair rerun
 [PASS] C window deadline: payload killed at the deadline, incomplete, lock released, no orphans
 [PASS] C deadline covers the lock wait: incomplete, no payload started
-[PASS] C delayed product check: resources released within budget + 10 s, INCOMPLETE, no orphans
-[PASS] C delayed cleanup: resources released within budget + 10 s, INCOMPLETE, no orphans
+[PASS] C delayed product check: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans
+[PASS] C delayed cleanup: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans
+[PASS] C aggregate release: pending samplers and a stalled registered child: locks released within the 15 s budget (cleanup inside it), INCOMPLETE, no orphans
 [PASS] C binary changed after freezing: fatal before any resource
-[PASS] D blocking wait: completions 25 ms apart recorded 24.94 ms apart (|error| <= 1 ms)
-[PASS] D control discriminates: legacy polled wait records 50.10 ms (error > 1 ms)
-[PASS] E completion marker after the deadline becomes incomplete
+[PASS] D blocking wait: completions 25 ms apart recorded 24.99 ms apart (|error| <= 1 ms)
+[PASS] D control discriminates: legacy polled wait records 50.47 ms (error > 1 ms)
+[PASS] E completion marker after the release deadline, or with an unreaped process, becomes incomplete
+[PASS] E release: one shared reap deadline for 3 unreapable processes (2.02 s for a 2 s deadline; 5 s each before), unreaped recorded, lock released
 [PASS] E mask rule: no CPU-mask observation -> invalid (no CPU-mask observation)
 [PASS] E mask rule: sampler did not finish -> invalid (sampler did not finish)
 [PASS] E mask rule: different observed mask -> invalid (payload mask)
@@ -71,4 +74,4 @@
 [PASS] E source re-verification: vendored stats changed -> fatal before any resource
 [PASS] E source re-verification: untracked file in the tree (not clean) -> fatal before any resource
 
-72/72 controls as required
+75/75 controls as required

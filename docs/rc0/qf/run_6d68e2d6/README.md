@@ -122,5 +122,5 @@ separate venue, not a QF item.
 - **Occupancy:** no foreign compute process at the start or before the window.
 - **Wall times:** phase A (builds, CTest, ASan) 23:31–00:09Z; phase B 00:10–01:10Z; phase C 01:10–01:15Z,
   on 2026-10-18/19. These are not timing results.
-- **Scratch:** W-QF is 7.7 GB at the end, and the programme area is 88 GB of its 300 GB cap.
+- **Scratch:** W-QF is 7.7 GB at the end. The programme area measured 88 GB at 01:17Z and 80 GB at 01:45Z, against its 300 GB cap.
 - **Drivers:** `raw/drivers/`, outside `tools/`, so the tools stay equal to F.

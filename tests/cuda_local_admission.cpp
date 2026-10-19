@@ -32,6 +32,12 @@ int main() {
             if (session.admitLocalAlignment(102, 102, 24, 150, 0) != (free >= required))
                 throw std::runtime_error("incorrect admission boundary");
         }
+        const size_t retry = (size_t)24 * 102 * (102 / 2 + 1) * sizeof(cufftComplex);
+        for (const size_t free : {retry - 1, retry, retry + 1}) {
+            available = free;
+            if (session.admitPatchRetry(102, 102, 24) != (free >= retry))
+                throw std::runtime_error("incorrect conditional retry admission boundary");
+        }
         constrained = false;
         session.release();
         if (cudaGetLastError() != cudaSuccess) throw std::runtime_error("pending CUDA error");

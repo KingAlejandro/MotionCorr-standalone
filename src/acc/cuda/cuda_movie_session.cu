@@ -2227,6 +2227,22 @@ bool CudaMovieSession::admitLocalAlignment(int patch_w, int patch_h, int n_group
     return false;
 }
 
+bool CudaMovieSession::admitPatchRetry(int patch_w, int patch_h, int n_groups) {
+    if (!is_initialized || failure_state.isPoisoned()) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    // Only a non-converged patch needs downloadPatchSpectra's additional full
+    // spectrum stack. Reserving it unconditionally changes passing routes.
+    const size_t required = (size_t)n_groups * patch_h * (patch_w / 2 + 1) * sizeof(cufftComplex);
+    size_t free_bytes = 0, total_bytes = 0;
+    HANDLE_ERROR(cudaMemGetInfo(&free_bytes, &total_bytes));
+    if (required <= free_bytes) return true;
+    logfile << "Resident patch retry admission declined: requires " << required
+            << " bytes, available " << free_bytes
+            << " bytes; falling back to streaming pipeline." << std::endl;
+    recordFailure(cudaErrorMemoryAllocation, "patch retry admission", __LINE__);
+    return false;
+}
+
 bool CudaMovieSession::preparePatchInVram(
     int x_start, int y_start,
     int patch_w, int patch_h,

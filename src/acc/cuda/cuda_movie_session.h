@@ -68,6 +68,7 @@ public:
     // After preprocessing, admit the local stage including its cuFFT work areas.
     bool admitLocalAlignment(int patch_w, int patch_h, int n_groups,
                              RFLOAT scaled_B, RFLOAT ccf_downsample);
+    bool admitPatchRetry(int patch_w, int patch_h, int n_groups);
 
     // Release all persistent GPU allocations and plans
     void release();

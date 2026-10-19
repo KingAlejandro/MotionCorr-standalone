@@ -1,65 +1,82 @@
 # S1.1/S1.2: frozen RC0 breadth and longevity sweep
 
-First complete pass over all ten #186 families, measured on 2026-10-19. Frozen source F is `6d68e2d6ec45c37b75fd0f4aaff8272f192b7029`. No product source, default or gate was changed. Tracking: [#238](https://github.com/KingAlejandro/MotionCorr-standalone/issues/238).
+Measured on 2026-10-19 at frozen source F, `6d68e2d6ec45c37b75fd0f4aaff8272f192b7029`. This supersedes the 16-movie first pass in this PR. Tracking: [#238](https://github.com/KingAlejandro/MotionCorr-standalone/issues/238). Product source, defaults and acceptance gates are unchanged.
 
 ## Current result
 
-The first pass comprises **16 distinct movies, 32 CPU/CUDA pairs** (5×5 and 3×3). The additional locally staged movies are being processed separately; the first-pass counts below are complete, not an estimate of the full EMPIAR populations.
+The primary sample contains **114 byte-distinct movies: 24 tutorial movies and 10 in each of the other nine #186 families**, each at 5×5 (config L) and 3×3. There are 228 primary pairs and 251 completed F pairs including venue repetitions. Each CPU/CUDA pair uses the same input, options and host. [per_movie.csv](per_movie.csv) identifies the primary sample, venue, host, allocation, CPU mask, GPU UUID, input hash, patch rows/counts/differing sets, relative RMSE and backend metrics; complete comparator reports remain directly readable under [evidence](evidence).
 
-For the incidence summary, **large S1 disagreement** means relative RMSE ≥0.1. This is a descriptive screen for the large disagreement discussed in SUPPORT §0, not an acceptance gate. The unchanged `compare_motioncorr.py --gate backend` outcome, all metrics and the continuous relative RMSE are retained separately in [per_movie.csv](per_movie.csv) and [evidence/analysis](evidence/analysis). Backend failures can occur below this screen, including absolute-error failures on large-dynamic-range inputs.
+**One retained native failure:** the SCARF 40 GB A100 ran out of memory on the first 10441 movie at 3×3 (CUDA exit 1, `cuda_alignpatch.cu:1121`, error 2). Its CPU arm exited 0 with 9 converged patches and 450 local-shift rows. CUDA convergence and relative RMSE are **UNRUN**, not zero. The same movie and nine additional 10441 movies completed both grids on the 80 GB 4GPUs venue. See [failed_attempts.csv](failed_attempts.csv). The evidence validator deliberately exits 1 for the retained native failure; completed-pair, coverage and control checks are reported separately in [validation.json](validation.json).
 
-| family | distinct movies | large S1 5×5 | large S1 3×3 | relative RMSE 5×5 | relative RMSE 3×3 | backend FAIL 5×5 / 3×3 |
-|---|---:|---:|---:|---|---|---|
-| e10028 | 2 | 0/2 | 0/2 | 0.0128603–0.0140085 | 0.014208–0.0142256 | 2 / 2 |
-| e10164 | 1 | 0/1 | 0/1 | 0.00125191 | 0.00153384 | 0 / 1 |
-| e10216 | 1 | 1/1 | 1/1 | 0.434362 | 0.196182 | 1 / 1 |
-| e10361 | 2 | 0/2 | 0/2 | 0.00680919–0.00909065 | 0.00765729–0.0101048 | 2 / 2 |
-| e10441 | 1 | 0/1 | 0/1 | 0.00712118 | 0.00742159 | 0 / 0 |
-| e10474f3 | 2 | 1/2 | 0/2 | 0.0201855–0.599858 | 0.0433468–0.0433551 | 1 / 2 |
-| e10474f4 | 2 | 0/2 | 0/2 | 0.0209341–0.0229488 | 0.0217086–0.0264645 | 0 / 0 |
-| e10641 | 2 | 1/2 | 0/2 | 0.0415992–0.807827 | 0.0223716–0.0343092 | 2 / 2 |
-| e12963 | 1 | 1/1 | 0/1 | 0.499014 | 0.0781668 | 1 / 1 |
-| tutorial | 2 | 0/2 | 0/2 | 0.00649463–0.00835825 | 0.00664285–0.00900204 | 0 / 0 |
+For incidence, **large S1 disagreement** means relative RMSE ≥0.1. This descriptive screen continues the first-pass convention for SUPPORT §0's large disagreement; it is not an acceptance gate. The frozen `compare_motioncorr.py --gate backend` result is retained separately. A screen-negative row can still fail that gate.
 
-The 5×5 large-disagreement cases all have non-converging patches and different accepted sets. The second 10641 movie is a new example: CPU keeps 8 patches, CUDA 9, with CUDA-only patch (5,2), and relative RMSE **0.807827**. The first 10641 movie keeps zero patches on both backends and has relative RMSE 0.0415992.
+| family | movies | large S1 5×5 | large S1 3×3 | backend FAIL 5×5 / 3×3 | primary venue |
+|---|---:|---:|---:|---:|---|
+| e10028 | 10 | 0/10 | 0/10 | 10 / 10 | 4GPUs |
+| e10164 | 10 | 0/10 | 0/10 | 6 / 8 | 4GPUs, SCARF |
+| e10216 | 10 | 7/10 | 5/10 | 10 / 10 | SCARF |
+| e10361 | 10 | 0/10 | 0/10 | 10 / 10 | 4GPUs |
+| e10441 | 10 | 0/10 | 0/10 | 4 / 4 | 4GPUs |
+| e10474f3 | 10 | 4/10 | 1/10 | 6 / 9 | SCARF |
+| e10474f4 | 10 | 0/10 | 0/10 | 5 / 6 | 4GPUs, SCARF |
+| e10641 | 10 | 5/10 | 0/10 | 8 / 6 | 4GPUs |
+| e12963 | 10 | 7/10 | 3/10 | 10 / 10 | 4GPUs |
+| tutorial | 24 | 0/24 | 0/24 | 0 / 0 | 4GPUs |
 
-Non-convergence is **not necessary**: the 10216 3×3 run keeps all 9 patches on each backend (531 local-shift rows each) and still has relative RMSE **0.196182**. Matching accepted sets do not guarantee agreement. These observations associate patch rejection with the large 5×5 cases; they do not establish a universal classifier or a new causal mechanism.
+At 5×5, 20/23 screen-positive pairs have a non-converging patch on at least one backend and 14/23 have different accepted sets. The screen is positive in 20/31 pairs with non-convergence and 3/83 without it. At 3×3, 5/9 screen-positive pairs have a non-converging patch on at least one backend and 2/9 have different accepted sets. The screen is positive in 5/14 pairs with non-convergence and 4/100 without it. Non-convergence is associated with incidence, but it is neither necessary nor sufficient in this sample.
 
-## Longevity
+The first 10216 3×3 movie has all nine patches accepted on both backends yet relative RMSE 0.196182. The second original corpus movie, `e10216-01` (input SHA beginning `c3b841e9`), has **zero accepted patches on both backends at both grids**, relative RMSE 1.248469 and global-coordinate RMS difference 44.6509 px (maximum 168.4257 px); it reproduces on both venues. Large disagreements with matching accepted sets, including global-trajectory failures, must not all be attributed to a patch acceptance flip. These are associations in this sample, not a universal classifier or a causal mechanism. Mechanism work is tracked separately in [PR #250](https://github.com/KingAlejandro/MotionCorr-standalone/pull/250); this sweep did not independently repeat it.
 
-Coarse probes use `6b6adf44`, `c499b1d3` and `2ff18e93`, all older than `116eb04a`, on the S1-positive first 10216 and Falcon 3 movies, 5×5. Each older CPU product is compared against F before that older CUDA result is interpreted. The complete records are under `evidence/analysis/*-cpu.json` and `*-cpu-exact.json`; the sweep is invalid for any probe whose CPU control fails.
+## Longevity and controls
 
-**6/6 older CPU controls are identical**, including the exact comparator. All six CPU/CUDA probes reproduce relative RMSE 0.434362 (10216) and 0.599858 (Falcon 3). S1 is present at all three sampled older revisions, extending the observed range back to `2ff18e93` (2026-09-27) through F. No absent endpoint, introduction commit or continuous per-commit proof is established.
+**28/28 older CPU-versus-F controls are identical**, each against F on the same venue before interpreting the corresponding old CUDA probe. Ten older SHAs were run, all older than `116eb04a`. Full revisions and source archive hashes are in [preparation/revisions.json](preparation/revisions.json) and [preparation/local-archives.sha256](preparation/local-archives.sha256); [longevity.csv](longevity.csv) contains every probe, backend verdict, relative RMSE, patch count/set and required CPU control.
 
-Identity requires exact MRC core header bytes 0–223, payload bytes, extended header and per-movie STAR bytes, plus the unchanged comparator `--gate exact --require-complete-coverage`. Unmasked MRC labels contain timestamps and differ; the comparator checks their normalized form. Logs, plots, PDFs and the joint-output inventory are outside this CPU control. This is same-backend identity, not scientific equivalence.
+Rounded values are shown below; individual venue probes retain full precision in the CSV.
 
-## Provenance and reproduction
+| older SHA | 10216 5×5 relative RMSE | 10216 3×3 | Falcon 3 5×5 | identical CPU controls |
+|---|---:|---:|---:|---:|
+| `e875d5fe` | 0.021936 | 0.555101 | 0.592989 | 5/5 |
+| `8477dc1b` | 0.021936 | 0.555101 | UNRUN | 2/2 |
+| `f6c41e24` | 0.018004 | 0.185328 | 0.593955 | 5/5 |
+| `ef7e4c0a` | 0.018128 | 0.185341 | UNRUN | 2/2 |
+| `58fd513a` | 0.434362 | UNRUN | UNRUN | 1/1 |
+| `2368063f` | 0.434362 | 0.196182 | UNRUN | 2/2 |
+| `c24ae8c2` | 0.430011 | 0.196361 | UNRUN | 2/2 |
+| `2ff18e93` | 0.434362 | 0.196182 | 0.599858 | 3/3 |
+| `c499b1d3` | 0.434362 | 0.196182 | 0.599858 | 3/3 |
+| `6b6adf44` | 0.434362 | 0.196182 | 0.599858 | 3/3 |
 
-- Both frozen binaries are the QF builds on 4GPUs, rehashed against `docs/rc0/qf/run_6d68e2d6/`: CPU `43cab2b74e97e948172c656d2b3041b562d24e733de1a5727a54624c12749b42`; CUDA+nvCOMP `2e00e0e8fb75aafaf23f15a3c2a142c7d35b6e30477d594244ecba495a5bb6b3`.
-- Every arm uses `taskset -c 96-103`, `--j 8`, and the GPU0 correctness lock per invocation, with bench-lock probes. CUDA is selected by UUID `GPU-eddb42fe-4f9a-adde-76d3-b924e14add54`, with process-descendant UUID sampling. Every completed CUDA arm in this snapshot witnessed that UUID only.
-- CPU arms use the CPU-only QF binary on the same 4GPUs host. A separate F CPU Release build on cpu64 exited 0, but no cpu64 movie arm is part of this evidence. A gateway transfer of the second 10164 movie failed after 57 MiB; the partial scratch file was renamed `.failed-transfer` and was not used. This venue choice avoids bulk product transfers and uses the expressly permitted QF binary reuse.
-- Input/gain SHA-256 and original corpus matches are in [evidence/manifest.json](evidence/manifest.json). All 52 currently staged, byte-distinct movies were inventoried. The original #186 examples are ordered first. This is a directory census of the staged corpus, not a search of the whole host or a claim that EMPIAR has no more movies.
-- Exact argv, binary hashes, input hashes, CPU mask, environment, exit statuses, occupancy and GPU witnesses are retained in `evidence/runs/*/run.json`. The STAR paths are relative `Movies/...`; products were checked under `out/Movies/...`, including dotted-name normalization and `.mrc` to `.mrcs` links.
-- Options follow `families.json`: `--use_own --dose_weighting --bfactor 150 --seed 1 --j 8`, family gain/dose/EER parameters, and the explicit patch grid. Corpus voltage/dose placeholders remain placeholders; this is a backend comparison, not a scientific recipe validation. F and later old builds also use expected frame counts and ingest witnesses. `2ff18e93` omits the then-unsupported expected-frame/ingest flags; its decoded STAR row counts are still checked.
-- Older sources were copied with `git archive` containing CMakeLists, src and upstream notices. All six configurations use `-DCMAKE_BUILD_TYPE=Release`; configure/build commands, statuses, flags, cache and binary hashes are in [evidence/builds](evidence/builds). No nvCOMP is needed for the older int16-MRC/EER float-route probes.
-- Raw per-movie STARs, logs, GNU time logs and witnesses are compressed. Their time fields are retained only because the backend comparator requires the process log; **no timing claim is made**. No MRC or executable is committed. Full products remain in `/mnt/clathrin/alex-motioncorr-s1/sweep`.
+For 10216 5×5, the native sampled interval from screen-negative `ef7e4c0a` (0.018128) to screen-positive `58fd513a` (0.434362) narrows the earlier interval. **Both endpoints still fail the unchanged backend gate.** The parent of `58fd513a` differs from `ef7e4c0a` only in a default CMake CUDA-architecture setting; both measured CUDA builds explicitly set architecture 80. That parent comparison is source evidence, not a native parent run or a causal attribution; see [preparation/FFT-boundary-source.txt](preparation/FFT-boundary-source.txt).
 
-Run on 4GPUs, with tools copied into that scratch tree:
+10216 3×3 and Falcon 3 5×5 are already screen-positive at the earliest native revision tested, `e875d5fe` (2026-09-24). That build dispatches CUDA global alignment and CPU local alignment; native CUDA patch alignment starts in later probes (dispatch evidence: [preparation/dispatch-history.txt](preparation/dispatch-history.txt)). There is no single sampled introduction shared by these cases, and no continuous per-commit proof. `d01f512d` compiled successfully for CPU/CUDA but was not run, so this is not an earliest-buildable-runtime claim.
+
+Older CPU identity covers exact MRC core bytes 0–223, payload, extended header and per-movie STAR, plus the frozen `--gate exact --require-complete-coverage` comparator with timestamp-normalized MRC labels. Unmasked label timestamps differ. Logs, plots, PDFs and joint-output inventory are outside the control; this is same-backend product identity, not scientific equivalence.
+
+**8/8 cross-venue identity checks pass** on the common 10216 first movie at 5×5: SCARF CPU versus cpu64 CPU, and SCARF CUDA versus 4GPUs CUDA, for each of four SCARF allocations. Complete product-region hashes and the precise scope are in [preparation/cross-venue/controls.json](preparation/cross-venue/controls.json). These controls do not generalize identity to other inputs. Every numerical backend pair in this sweep still remains on one host.
+
+## Selection, venue and provenance
+
+- All 52 initially staged movies completed both grids after resumption. **Original PID 1831303 did not finish:** its queued arm received SIGTERM during lock/affinity migration and the controller raised `CalledProcessError`; the original controller numeric exit was not retained. Its log and queued-restart record are retained. The resumed pass has `staged-resume.exit=0`. No native payload was signalled. The routed expansion and final 10441 pass also exited 0.
+- All 24 available tutorial movies were used. Other families retain the original staged corpus movies and add spaced directory selections to reach 10 each. Every family had at least ten distinct inputs available; none requires a smaller-denominator exception. This selection is not a whole-accession census. Sixty-two added movies were fetched with free-space checks under `/mnt/clathrin/alex-motioncorr-s1/sweep/data`; URLs, argv, exits, headers, hashes and selection are in [evidence/acquisition](evidence/acquisition). SCARF staging independently verifies those hashes in node-local `/tmp`, including reuse of verified cached files. [evidence/manifest.json](evidence/manifest.json) records all 114 inputs and gain identities; original corpus hashes match.
+- Primary 10216/Falcon 3 pairs use SCARF; 10441, 10641, 12963, 10028, 10361 and tutorial use 4GPUs. Falcon 4 uses two 4GPUs movies plus eight SCARF movies; 10164 uses one plus nine. Whole pairs are selected once per movie, never cross-venue arms. Venue repetitions and per-venue incidence remain in [family_summary.json](family_summary.json); [preparation/venue_assignment.json](preparation/venue_assignment.json) records the routing.
+- 4GPUs uses the rehashed QF F binaries: CPU `43cab2b74e97e948172c656d2b3041b562d24e733de1a5727a54624c12749b42`, CUDA+nvCOMP `2e00e0e8fb75aafaf23f15a3c2a142c7d35b6e30477d594244ecba495a5bb6b3`. Both arms use `taskset -c 96-103` and `--j 8`. Every GPU arm takes its physical-GPU correctness lock and checks the benchmark lock; available GPUs are selected by UUID, with process-descendant UUID witnesses. Actual selections are recorded per row. Early records omit hostname and runner hash; the table explicitly identifies host evidence from scratch paths plus the collection-host inventory instead of inventing per-arm observations.
+- SCARF F and older CPU/CUDA builds are separate Release builds from `git archive`; F CUDA enables nvCOMP. Builds ran on the CPU `scarf` partition with configure/build exit statuses checked. GPU runs use non-exclusive `gpu-devel` allocations, one GPU, 8 CPUs and 48 GB RAM, excluding the four known-bad nodes; observed successful node is `gn0005`, with its 40 GB A100, distinct from the 4GPUs 80 GB model. `TMPDIR` and movies/products use node-local `/tmp`. Scripts were uploaded separately and checksum-verified before launch; retained script hashes identify immutable versions. cpu64's F CPU control uses its own Release binary, 8-CPU affinity and `motioncorr-cpu64-bench.lock`. Hardware and runtime versions are retained in run/host/build records and [preparation/runtime_versions.json](preparation/runtime_versions.json).
+- Recipe options remain `--use_own --dose_weighting --bfactor 150 --seed 1 --j 8`, the family gain/dose/EER parameters, and the explicit patch grid. Relative `Movies/...` input paths keep products under each run's `out/Movies/...`. Legacy builds omit unsupported ingest/expected-frame flags; decoded STAR row counts remain checked. Corpus dose/voltage placeholders are not scientifically validated recipes.
+- The frozen comparator hash is `cb37991af515c5529f31ac48adb157771b1ac21b8308ba28735362f36085e46b`. The first 32 comparison records selected its QF path but lacked a captured hash. Rechecking retained products with the frozen hashed comparator reproduced all 32 gate reports and metrics after path normalization; original reports and [evidence/comparator-rechecks/equivalence.json](evidence/comparator-rechecks/equivalence.json) are retained.
+- Setup/transport/controller failures are retained separately from native failures: the initial fetch bookkeeping exception, obsolete UUID-probe setup, rejected second GPU submissions, and a later Falcon 4 download/curl-56 failure. The recovered SCARF campaign step `3645685.0` completed with Slurm exit `0:0`; its login-side launcher disappeared without writing exit/release sentinels. After checking all 34 pairs and successful non-extern steps, the idle allocation was released explicitly (exit 0). The missing original launcher status and recovery command are retained in `evidence/scarf/launch-b5/completion-recovery.json`. A recovery step against an expired allocation failed before executing its script. These attempts are not counted as completed pairs. Their logs/exits and the historical controller sources remain in evidence and [preparation/controller_sources](preparation/controller_sources).
+
+## Reproduction and evidence layout
+
+The authoritative commands and exit statuses are the per-arm `run.json`, comparator argv/reports, build commands/status/cache/flags/hash files, acquisition records and Slurm accounting. Helpers live only under this evidence directory. `sweep.py` and `scarf_sweep_v1.py` implement checked single arms; campaign helpers select the recorded manifest and explicit venues. Archived operational scripts include fixed historical job IDs and are evidence, not launch instructions. Use a fresh writable scratch tree and the recorded source/input hashes for a new campaign; runners refuse to overwrite native run directories.
+
+Generate the review tables from the retained evidence, from this directory:
 
 ```sh
-W=/mnt/clathrin/alex-motioncorr-s1/sweep
-SRC=/mnt/clathrin/alex-motioncorr-rc0/W-QF/src
-PY=/home/alex/.mc-venv/bin/python3
-taskset -c 96-103 "$PY" "$W/tools/sweep.py" inventory --root "$W" --source "$SRC"
-taskset -c 96-103 "$PY" "$W/tools/campaign.py" --root "$W"
-bash "$W/tools/build_older.sh"
-taskset -c 96-103 "$PY" "$W/tools/longevity.py" --root "$W"
-taskset -c 96-103 "$PY" "$W/tools/campaign.py" --root "$W" --extras
-"$PY" "$W/tools/collect.py" --root "$W"
+python3 tools/summarize.py evidence
+python3 tools/summarize_longevity.py evidence
+python3 tools/validate_evidence.py evidence --require-complete
 ```
 
-The runner refuses to overwrite a run directory. Use a fresh scratch directory for a new run; the campaign can resume already completed arms. Generate CSV/family counts locally with `python3 tools/summarize.py evidence` from this directory.
+The last command is expected to exit 1 for the retained SCARF native failure. Check the individual validity, breadth and control fields in `validation.json`. Per-run STAR/log/witness/time files are compressed into `evidence/raw-*.tar.gz`, indexed by member SHA-256 in `evidence/raw_files.json`; `pack_raw.py` verifies contents before moving individual raw files into those archives. Tables generated before and after packaging are byte-identical. JSON comparison/run records remain directly readable. No MRC or executable is committed. Time-log fields are retained as required comparator evidence; no timing claim is made.
 
-## Limits and remaining work
-
-This PR is opened after the first complete ten-family pass, as requested. The 36 additional staged movies are not yet part of the first-pass table. Wider sampling toward ≥10 movies in every family, additional downloads, the second 10164/10216 original corpus movies, an earlier absent-S1 endpoint or exact introduction bisection, older-build 3×3 arms, S1.3 CCF logging, and S1.4 downstream CTF/FSC/B-factor are not established here. No support/default/gate change or merge is proposed.
+Not run here: the complete EMPIAR populations; exhaustive per-commit history or native `d01f512d`; older-SHA probes beyond the selected 10216/Falcon 3 movies; independent S1.3 mechanism experiments or S1.4 downstream CTF/FSC/B-factor validation. No support, gate or default change is proposed.

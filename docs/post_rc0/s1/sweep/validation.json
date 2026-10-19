@@ -1,10 +1,251 @@
 {
-  "frozen_pairs": 32,
-  "distinct_movies": 16,
-  "completed_arms": 76,
-  "cuda_uuid_witnesses": 38,
-  "cpu_identity_controls": 6,
-  "all_arm_exit_statuses_zero": true,
-  "local_shift_row_counts_consistent": true,
-  "no_committed_mrcs": true
+  "validator_sha256": "7f81b18e16342a09ed154f7b57c597ff4c9ddc6bf34ecda03f4292a6d54e77b2",
+  "native_runs": 566,
+  "cuda_runs": 283,
+  "successful_native_runs": 565,
+  "completed_pair_observation_checks_valid": true,
+  "early_comparator_records_without_per_run_hash": [
+    "analysis/e10641-01-p5-F-cuda.json",
+    "analysis/e10216-00-p5-F-cuda.json",
+    "analysis/e10641-00-p5-F-cuda.json",
+    "analysis/e12963-00-p3-F-cuda.json",
+    "analysis/e10441-00-p5-F-cuda.json",
+    "analysis/e10216-00-p3-F-cuda.json",
+    "analysis/e10641-01-p3-F-cuda.json",
+    "analysis/e10641-00-p3-F-cuda.json",
+    "analysis/e10441-00-p3-F-cuda.json",
+    "analysis/e12963-00-p5-F-cuda.json",
+    "analysis/e10474f3-00-p3-F-cuda.json",
+    "analysis/tutorial-00-p3-F-cuda.json",
+    "analysis/e10474f4-00-p5-F-cuda.json",
+    "analysis/e10164-00-p3-F-cuda.json",
+    "analysis/e10028-00-p5-F-cuda.json",
+    "analysis/e10361-00-p3-F-cuda.json",
+    "analysis/e10028-01-p5-F-cuda.json",
+    "analysis/e10474f4-01-p5-F-cuda.json",
+    "analysis/e10361-01-p3-F-cuda.json",
+    "analysis/e10474f3-01-p3-F-cuda.json",
+    "analysis/tutorial-01-p3-F-cuda.json",
+    "analysis/e10474f3-00-p5-F-cuda.json",
+    "analysis/tutorial-00-p5-F-cuda.json",
+    "analysis/e10474f4-00-p3-F-cuda.json",
+    "analysis/e10028-00-p3-F-cuda.json",
+    "analysis/e10164-00-p5-F-cuda.json",
+    "analysis/e10361-00-p5-F-cuda.json",
+    "analysis/e10028-01-p3-F-cuda.json",
+    "analysis/e10474f4-01-p3-F-cuda.json",
+    "analysis/e10361-01-p5-F-cuda.json",
+    "analysis/e10474f3-01-p5-F-cuda.json",
+    "analysis/tutorial-01-p5-F-cuda.json"
+  ],
+  "retained_pairs": 251,
+  "failures": [
+    {
+      "record": "scarf/venue-3645644/runs/e10441-00-p3-F-cuda/run.json",
+      "reason": "native exit is not zero"
+    }
+  ],
+  "cpu_controls": [
+    {
+      "record": "analysis/e10216-00-p5-2ff18e93-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10216-00-p5-6b6adf44-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10216-00-p5-c499b1d3-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10474f3-00-p5-6b6adf44-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10216-00-p3-c499b1d3-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10474f3-00-p5-2ff18e93-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10216-00-p3-6b6adf44-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10474f3-00-p5-c499b1d3-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10216-00-p3-2ff18e93-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10216-00-p3-e875d5fe-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10474f3-00-p5-e875d5fe-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10216-00-p5-f6c41e24-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10216-00-p3-f6c41e24-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10216-00-p5-e875d5fe-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "analysis/e10474f3-00-p5-f6c41e24-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/venue-3645589/analysis/e10216-00-p5-2368063f-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/venue-3645589/analysis/e10216-00-p5-8477dc1b-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/venue-3645589/analysis/e10216-00-p5-ef7e4c0a-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/venue-3645589/analysis/e10216-00-p3-ef7e4c0a-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/venue-3645589/analysis/e10216-00-p3-8477dc1b-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/venue-3645589/analysis/e10216-00-p3-2368063f-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/venue-3645589/analysis/e10216-00-p3-e875d5fe-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/venue-3645589/analysis/e10216-00-p5-c24ae8c2-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/venue-3645589/analysis/e10216-00-p5-f6c41e24-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/venue-3645589/analysis/e10216-00-p3-c24ae8c2-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/venue-3645589/analysis/e10216-00-p3-f6c41e24-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/venue-3645589/analysis/e10216-00-p5-e875d5fe-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    },
+    {
+      "record": "scarf/crosscontrol-3645685/analysis/e10216-00-p5-58fd513a-cpu.json",
+      "identical": true,
+      "exact_comparator_exit_status": 0
+    }
+  ],
+  "cpu_controls_all_identical": true,
+  "coverage": {
+    "e10028": {
+      "distinct_inputs_both_grids": 10,
+      "primary_distinct_inputs_both_grids": 10,
+      "at_least_ten": true
+    },
+    "e10164": {
+      "distinct_inputs_both_grids": 10,
+      "primary_distinct_inputs_both_grids": 10,
+      "at_least_ten": true
+    },
+    "e10216": {
+      "distinct_inputs_both_grids": 10,
+      "primary_distinct_inputs_both_grids": 10,
+      "at_least_ten": true
+    },
+    "e10361": {
+      "distinct_inputs_both_grids": 10,
+      "primary_distinct_inputs_both_grids": 10,
+      "at_least_ten": true
+    },
+    "e10441": {
+      "distinct_inputs_both_grids": 10,
+      "primary_distinct_inputs_both_grids": 10,
+      "at_least_ten": true
+    },
+    "e10474f3": {
+      "distinct_inputs_both_grids": 10,
+      "primary_distinct_inputs_both_grids": 10,
+      "at_least_ten": true
+    },
+    "e10474f4": {
+      "distinct_inputs_both_grids": 10,
+      "primary_distinct_inputs_both_grids": 10,
+      "at_least_ten": true
+    },
+    "e10641": {
+      "distinct_inputs_both_grids": 10,
+      "primary_distinct_inputs_both_grids": 10,
+      "at_least_ten": true
+    },
+    "e12963": {
+      "distinct_inputs_both_grids": 10,
+      "primary_distinct_inputs_both_grids": 10,
+      "at_least_ten": true
+    },
+    "tutorial": {
+      "distinct_inputs_both_grids": 24,
+      "primary_distinct_inputs_both_grids": 24,
+      "at_least_ten": true
+    }
+  },
+  "breadth_at_least_ten_all_families": true,
+  "early_comparator_rechecks_complete": true,
+  "cross_venue_controls_complete": true,
+  "cross_venue_controls": {
+    "comparisons": 8,
+    "identical": 8,
+    "scope": "common e10216-00 5x5 movie, complete main MRC byte regions with timestamp normalization and per-movie STAR"
+  }
 }

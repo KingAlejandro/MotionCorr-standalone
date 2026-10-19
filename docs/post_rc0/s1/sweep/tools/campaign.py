@@ -15,15 +15,22 @@ import sys
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument("--root", required=True)
 p.add_argument("--extras", action="store_true")
+p.add_argument("--all", action="store_true", help="all manifest rows, S1-positive families first")
+p.add_argument("--wait-lock", action="store_true")
+p.add_argument("--manifest", help="fixed input selection, e.g. original staged pass")
 a = p.parse_args()
 root = Path(a.root).resolve()
 tool = root / "tools/sweep.py"
 source = "/mnt/clathrin/alex-motioncorr-rc0/W-QF/src"
 qf = "/mnt/clathrin/alex-motioncorr-rc0/W-QF"
 lock = open(root / "campaign.lock", "a")
-fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-rows = json.loads((root / "manifest.json").read_text())["movies"]
-rows = sorted((r for r in rows if (r["rank"] >= 2) == a.extras), key=lambda r: (r["rank"], r["family"]))
+fcntl.flock(lock, fcntl.LOCK_EX | (0 if a.wait_lock else fcntl.LOCK_NB))
+rows = json.loads((Path(a.manifest) if a.manifest else root / "manifest.json").read_text())["movies"]
+if a.all:
+    order = ["e10216", "e10474f3", "e10641", "e12963", "e10028", "e10361", "e10441", "e10474f4", "e10164", "tutorial"]
+    rows = sorted(rows, key=lambda r: (order.index(r["family"]), r["rank"]))
+else:
+    rows = sorted((r for r in rows if (r["rank"] >= 2) == a.extras), key=lambda r: (r["rank"], r["family"]))
 for row in rows:
     for patches in (5, 3):
         tag = row["id"] + "-p" + str(patches)
@@ -43,4 +50,4 @@ for row in rows:
             subprocess.run(cmd, check=True)
         subprocess.run([sys.executable, str(tool), "analyze", "--root", str(root), "--source", source,
                         "--ref", labels[0], "--test", labels[1], "--patches", str(patches)], check=True)
-print("COMPLETE", "extras" if a.extras else "first-pass", flush=True)
+print("COMPLETE", "all" if a.all else ("extras" if a.extras else "first-pass"), flush=True)

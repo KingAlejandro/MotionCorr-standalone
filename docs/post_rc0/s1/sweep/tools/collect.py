@@ -41,8 +41,17 @@ for src in sorted((root / "analysis").glob("*.json")):
     copy(src, out / "analysis" / src.name)
 for src in sorted((root / "build-records").glob("*")):
     copy(src, out / "builds" / (src.name + ".gz"), True)
-if (root / "longevity.json").is_file():
-    copy(root / "longevity.json", out / "longevity.json")
+for src in root.glob("longevity*.json"):
+    copy(src, out / src.name)
+for src in (root / "acquisition").glob("*"):
+    if src.is_file():
+        compress = src.suffix == ".log"
+        copy(src, out / "acquisition" / (src.name + (".gz" if compress else "")), compress)
+for src in root.glob("*.exit"):
+    copy(src, out / src.name)
+for name in ("lane.json", "continuation-status.json", "queued-restart.json"):
+    if (root / name).is_file():
+        copy(root / name, out / name)
 for run in sorted((root / "runs").iterdir()):
     if not run.is_dir():
         continue
@@ -57,7 +66,7 @@ for run in sorted((root / "runs").iterdir()):
         rel = src.relative_to(root)
         compress = src.name != "run.json"
         copy(src, out / (str(rel) + (".gz" if compress else "")), compress)
-for name in ("first-pass.log", "extras.log", "longevity.log"):
+for name in ("first-pass.log", "extras.log", "longevity.log", "fetch-breadth.log", "breadth.log", "breadth-routed.log", "route-breadth.log", "longevity-continuation.log", "older-continuation-build.log"):
     if a.first_pass and name == "extras.log":
         continue
     if (root / name).is_file():

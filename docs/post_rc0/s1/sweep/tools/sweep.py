@@ -106,6 +106,9 @@ def bench_free(path):
 
 def arm(a):
     root = Path(a.root).resolve()
+    lane_file = root / "lane.json"
+    lane = json.loads(lane_file.read_text()) if lane_file.is_file() else dict(index=0, uuid=GPU, cpus="96-103")
+    gpu_uuid = lane["uuid"]
     row = next(r for r in json.loads((root / "manifest.json").read_text())["movies"] if r["id"] == a.movie)
     f = row["recipe"]
     out = root / "runs" / a.label
@@ -169,18 +172,18 @@ Movies/{name} 1
         args += ["--gpu", "0"]
         if not a.legacy:
             args += ["--ingest", "auto"]
-    cpus = "48-55" if a.cpu64 else "96-103"
+    cpus = "48-55" if a.cpu64 else lane["cpus"]
     env = dict(os.environ, OMP_NUM_THREADS="8", OPENBLAS_NUM_THREADS="1",
-               CUDA_VISIBLE_DEVICES=GPU if a.gpu else "",
+               CUDA_VISIBLE_DEVICES=gpu_uuid if a.gpu else "",
                LD_LIBRARY_PATH="/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib")
     cmd = ["taskset", "-c", cpus, "/usr/bin/time", "-v", "-o", str(out / "time-v.log")] + args
-    lockname = "/tmp/motioncorr-cpu64-bench.lock" if a.cpu64 else "/tmp/motioncorr-gpu0-correctness.lock"
+    lockname = "/tmp/motioncorr-cpu64-bench.lock" if a.cpu64 else "/tmp/motioncorr-gpu%s-correctness.lock" % lane["index"]
     bench = "/tmp/motioncorr-bench.lock"
     rec = dict(label=a.label, movie=a.movie, source=a.sha, binary=str(binary), binary_sha256=bh,
                runner_sha256=sha(Path(__file__)), hostname=os.uname().nodename,
                movie_sha256=row["movie_sha256"], gain_sha256=row["gain_sha256"],
                input_star_sha256=sha(inp / "movies.star"), argv=cmd, cwd=str(inp), cpu_mask=cpus,
-               lock=lockname, gpu=a.gpu, requested_gpu_uuid=GPU if a.gpu else None,
+               lock=lockname, gpu=a.gpu, requested_gpu_uuid=gpu_uuid if a.gpu else None,
                environment={k: env[k] for k in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "CUDA_VISIBLE_DEVICES", "LD_LIBRARY_PATH")})
     stop = threading.Event()
     witnessed = set()
@@ -195,28 +198,53 @@ Movies/{name} 1
                     children = []
                 family.update(children)
                 pending.extend(children)
-            q = subprocess.run(["nvidia-smi", "--query-compute-apps=gpu_uuid,pid", "--format=csv,noheader"], capture_output=True, text=True)
+            try:
+                q = subprocess.run(["nvidia-smi", "--query-compute-apps=gpu_uuid,pid", "--format=csv,noheader"], capture_output=True, text=True, timeout=10)
+            except subprocess.TimeoutExpired:
+                continue
             for line in q.stdout.splitlines():
                 u, p = [v.strip() for v in line.split(",")]
                 if int(p) in family:
                     witnessed.add(u)
             stop.wait(.2)
-    with open(lockname, "a") as lock:
-        while True:
-            if not a.cpu64 and not bench_free(bench):
-                time.sleep(5)
-                continue
-            fcntl.flock(lock, fcntl.LOCK_EX)
-            if a.cpu64 or bench_free(bench):
-                break
-            fcntl.flock(lock, fcntl.LOCK_UN)
+    # Optional fallback lanes avoid waiting behind a long, unrelated lane holder.
+    # Selection precedes the payload and is recorded by UUID, never CUDA ordinal.
+    candidates = [lane] + lane.get("fallback_lanes", [])
+    lock = None
+    while lock is None:
+        if not a.cpu64 and not bench_free(bench):
             time.sleep(5)
+            continue
+        for candidate in candidates:
+            assert candidate["cpus"] == cpus or a.cpu64
+            path = "/tmp/motioncorr-cpu64-bench.lock" if a.cpu64 else "/tmp/motioncorr-gpu%s-correctness.lock" % candidate["index"]
+            fd = open(path, "a")
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                fd.close()
+                continue
+            if not a.cpu64 and not bench_free(bench):
+                fd.close()
+                continue
+            occupancy = ""
+            if a.gpu:
+                occupancy = subprocess.run(["nvidia-smi", "--query-compute-apps=gpu_uuid,pid", "--format=csv,noheader"], capture_output=True, text=True, check=True, timeout=10).stdout
+                if candidate["uuid"] in occupancy:
+                    fd.close()
+                    continue
+            lock, lockname, gpu_uuid = fd, path, candidate["uuid"]
+            break
+        if lock is None:
+            time.sleep(5)
+    with lock:
+        env["CUDA_VISIBLE_DEVICES"] = gpu_uuid if a.gpu else ""
+        rec["environment"]["CUDA_VISIBLE_DEVICES"] = env["CUDA_VISIBLE_DEVICES"]
+        rec["lock"] = lockname
+        rec["requested_gpu_uuid"] = gpu_uuid if a.gpu else None
         rec["start_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         if a.gpu:
-            occupancy = subprocess.run(["nvidia-smi", "--query-compute-apps=gpu_uuid,pid", "--format=csv,noheader"], capture_output=True, text=True, check=True).stdout
             rec["occupancy_before"] = occupancy
-            if GPU in occupancy:
-                raise RuntimeError("foreign process on selected GPU")
         write(out / "run.json", rec)
         with (out / "stdout.log").open("w") as log:
             p = subprocess.Popen(cmd, cwd=inp, env=env, stdout=log, stderr=subprocess.STDOUT)

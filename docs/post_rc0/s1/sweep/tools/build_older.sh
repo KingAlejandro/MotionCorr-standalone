@@ -5,7 +5,8 @@ set -eu
 W=/mnt/clathrin/alex-motioncorr-s1/sweep
 export PATH=/home/alex/.mc-venv/bin:/usr/local/cuda-12.8/bin:$PATH
 mkdir -p "$W/build-records"
-for sha in 6b6adf44 c499b1d3 2ff18e93; do
+if [ "$#" = 0 ]; then set -- 6b6adf44 c499b1d3 2ff18e93; fi
+for sha in "$@"; do
   mkdir -p "$W/src-$sha"
   tar -xzf "/mnt/clathrin/alex-motioncorr-s1/motioncorr-s1-$sha.tar.gz" -C "$W/src-$sha"
   sha256sum "/mnt/clathrin/alex-motioncorr-s1/motioncorr-s1-$sha.tar.gz" >> "$W/build-records/archives.sha256"

@@ -1,0 +1,23 @@
+git show e875d5fe:src/motioncorr_runner.cpp (exit 0)
+2309: bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global) {
+2310: #ifdef _CUDA_ENABLED
+2311: 	if (use_gpu && is_global) {
+2312: 		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile);
+2313: 	}
+2314: #endif
+2315: 	std::vector<Image<float> > Iccs(n_threads);
+2316: 	MultidimArray<fComplex> Fref;
+2317: 	std::vector<MultidimArray<fComplex> > Fccs(n_threads);
+2318: 	MultidimArray<float> weight;
+
+git show f6c41e24:src/motioncorr_runner.cpp (exit 0)
+2309: bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global) {
+2310: #ifdef _CUDA_ENABLED
+2311: 	if (use_gpu) {
+2312: 		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, is_global);
+2313: 	}
+2314: #endif
+2315: 	std::vector<Image<float> > Iccs(n_threads);
+2316: 	MultidimArray<fComplex> Fref;
+2317: 	std::vector<MultidimArray<fComplex> > Fccs(n_threads);
+2318: 	MultidimArray<float> weight;

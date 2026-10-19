@@ -1,0 +1,86 @@
+{
+  "4GPUs": [
+    {
+      "argv": [
+        "/home/alex/.mc-venv/bin/python3",
+        "-c",
+        "import sys,numpy; print(sys.version); print(numpy.__version__)"
+      ],
+      "exit_status": 0,
+      "stdout": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]\n2.5.3\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "exit_status": 0,
+      "stdout": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "pkg-config",
+        "--modversion",
+        "fftw3",
+        "fftw3f",
+        "libtiff-4"
+      ],
+      "exit_status": 0,
+      "stdout": "3.3.10\n3.3.10\n4.5.1\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/local/cuda-12.8/bin/nvcc",
+        "--version"
+      ],
+      "exit_status": 0,
+      "stdout": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0\n",
+      "stderr": ""
+    }
+  ],
+  "SCARF": [
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-c",
+        "import sys,numpy; print(sys.version); print(numpy.__version__)"
+      ],
+      "exit_status": 0,
+      "stdout": "3.9.25 (main, Aug  6 2026, 00:00:00) \n[GCC 11.5.0 20240719 (Red Hat 11.5.0-14)]\n1.22.4\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "exit_status": 0,
+      "stdout": "g++ (GCC) 11.5.0 20240719 (Red Hat 11.5.0-14)\nCopyright (C) 2021 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "pkg-config",
+        "--modversion",
+        "fftw3",
+        "fftw3f",
+        "libtiff-4"
+      ],
+      "exit_status": 0,
+      "stdout": "3.3.8\n3.3.8\n4.4.0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/bin/nvcc",
+        "--version"
+      ],
+      "exit_status": 0,
+      "stdout": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0\n",
+      "stderr": ""
+    }
+  ]
+}

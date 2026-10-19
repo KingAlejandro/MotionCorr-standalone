@@ -1,0 +1,514 @@
+{
+  "gate_profile": "backend",
+  "tolerances": {
+    "max_shift_error": 0.05,
+    "shift_rmse": 0.02,
+    "image_rmse": 0.02,
+    "image_max_err": 5.0,
+    "image_relative_rmse": 0.001
+  },
+  "checks": {
+    "motion_trajectory": {
+      "num_frames": 39,
+      "max_abs_diff_x": 0.05658999999999992,
+      "max_abs_diff_y": 0.01818099999999978,
+      "max_shift_error": 0.05658999999999992,
+      "coord_rms_error": 0.02746429964097448,
+      "per_frame_diffs": [
+        {
+          "frame": 1,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 2,
+          "dx": 0.00924999999999998,
+          "dy": -0.009247000000000005
+        },
+        {
+          "frame": 3,
+          "dx": 0.026089999999999947,
+          "dy": -0.002199000000000062
+        },
+        {
+          "frame": 4,
+          "dx": 0.027059999999999973,
+          "dy": 0.0020160000000000178
+        },
+        {
+          "frame": 5,
+          "dx": 0.003070000000000017,
+          "dy": 0.0007440000000000779
+        },
+        {
+          "frame": 6,
+          "dx": 0.018889999999999962,
+          "dy": 0.00387000000000004
+        },
+        {
+          "frame": 7,
+          "dx": 0.009909999999999974,
+          "dy": 0.011700999999999961
+        },
+        {
+          "frame": 8,
+          "dx": 0.009809999999999985,
+          "dy": 0.012143000000000015
+        },
+        {
+          "frame": 9,
+          "dx": 0.04781000000000002,
+          "dy": 0.007028000000000034
+        },
+        {
+          "frame": 10,
+          "dx": 0.03822000000000003,
+          "dy": 0.007790999999999881
+        },
+        {
+          "frame": 11,
+          "dx": 0.028320000000000012,
+          "dy": 0.009447999999999901
+        },
+        {
+          "frame": 12,
+          "dx": 0.011009999999999964,
+          "dy": 0.014034000000000102
+        },
+        {
+          "frame": 13,
+          "dx": 0.029649999999999954,
+          "dy": 0.010058000000000344
+        },
+        {
+          "frame": 14,
+          "dx": 0.02897000000000005,
+          "dy": 0.009989000000000026
+        },
+        {
+          "frame": 15,
+          "dx": 0.03956000000000004,
+          "dy": 0.010352999999999835
+        },
+        {
+          "frame": 16,
+          "dx": 0.009979999999999878,
+          "dy": 0.013260999999999967
+        },
+        {
+          "frame": 17,
+          "dx": 0.02847999999999995,
+          "dy": 0.01818099999999978
+        },
+        {
+          "frame": 18,
+          "dx": 0.008809999999999985,
+          "dy": 0.009727999999999959
+        },
+        {
+          "frame": 19,
+          "dx": 0.04096000000000011,
+          "dy": 0.0016529999999996825
+        },
+        {
+          "frame": 20,
+          "dx": 0.008720000000000061,
+          "dy": 0.005917999999999868
+        },
+        {
+          "frame": 21,
+          "dx": 0.01252999999999993,
+          "dy": 0.010337999999999958
+        },
+        {
+          "frame": 22,
+          "dx": 0.016429999999999945,
+          "dy": 0.010955000000000048
+        },
+        {
+          "frame": 23,
+          "dx": 0.029189999999999827,
+          "dy": 0.009571999999999914
+        },
+        {
+          "frame": 24,
+          "dx": 0.017249999999999988,
+          "dy": 0.014626999999999946
+        },
+        {
+          "frame": 25,
+          "dx": 0.01200000000000001,
+          "dy": 0.005665999999999727
+        },
+        {
+          "frame": 26,
+          "dx": 0.01756000000000002,
+          "dy": 0.01491599999999993
+        },
+        {
+          "frame": 27,
+          "dx": 0.01797000000000004,
+          "dy": 0.014215000000000089
+        },
+        {
+          "frame": 28,
+          "dx": 0.018450000000000077,
+          "dy": 0.0060709999999999376
+        },
+        {
+          "frame": 29,
+          "dx": 0.05658999999999992,
+          "dy": 0.013142999999999905
+        },
+        {
+          "frame": 30,
+          "dx": 0.03116999999999992,
+          "dy": 2.799999999991698e-05
+        },
+        {
+          "frame": 31,
+          "dx": 0.04259000000000013,
+          "dy": 0.006524999999999892
+        },
+        {
+          "frame": 32,
+          "dx": 0.00558000000000014,
+          "dy": 0.012873000000000356
+        },
+        {
+          "frame": 33,
+          "dx": 0.021720000000000184,
+          "dy": 0.014038999999999913
+        },
+        {
+          "frame": 34,
+          "dx": 0.014929999999999888,
+          "dy": 0.012079000000000395
+        },
+        {
+          "frame": 35,
+          "dx": 0.0323500000000001,
+          "dy": 0.005377000000000187
+        },
+        {
+          "frame": 36,
+          "dx": 0.03877000000000019,
+          "dy": 0.009989000000000026
+        },
+        {
+          "frame": 37,
+          "dx": 0.01957999999999993,
+          "dy": 0.007064999999999877
+        },
+        {
+          "frame": 38,
+          "dx": 0.005319999999999991,
+          "dy": 0.004271000000000136
+        },
+        {
+          "frame": 39,
+          "dx": 0.019439999999999902,
+          "dy": 0.015270999999999813
+        }
+      ],
+      "passed": false,
+      "fail_reasons": [
+        "Max shift error 0.056590 > 0.050000",
+        "Coord RMS shift error 0.027464 > 0.020000",
+        "STAR metadata differences: 235 discrepancies found"
+      ]
+    },
+    "star_fields": {
+      "num_differences": 235,
+      "differences": [
+        "Loop 'local_shift' row count mismatch: 741 vs 819",
+        "Value diff in local_shift row 547 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 548 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 549 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 550 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 551 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 552 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 553 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 554 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 555 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 556 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 557 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 558 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 559 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 560 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 561 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 562 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 563 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 564 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 565 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 566 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 567 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 568 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 569 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 570 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 571 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 572 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 573 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 574 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 575 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 576 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 577 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 578 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 579 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 580 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 581 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 582 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 583 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 584 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 585 _rlnCoordinateX: 2046.000000 vs 1227.000000",
+        "Value diff in local_shift row 586 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 587 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 588 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 589 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 590 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 591 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 592 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 593 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 594 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 595 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 596 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 597 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 598 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 599 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 600 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 601 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 602 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 603 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 604 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 605 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 606 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 607 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 608 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 609 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 610 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 611 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 612 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 613 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 614 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 615 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 616 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 617 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 618 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 619 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 620 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 621 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 622 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 623 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 624 _rlnCoordinateX: 2865.000000 vs 2046.000000",
+        "Value diff in local_shift row 625 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 626 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 627 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 628 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 629 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 630 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 631 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 632 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 633 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 634 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 635 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 636 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 637 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 638 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 639 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 640 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 641 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 642 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 643 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 644 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 645 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 646 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 647 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 648 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 649 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 650 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 651 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 652 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 653 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 654 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 655 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 656 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 657 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 658 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 659 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 660 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 661 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 662 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 663 _rlnCoordinateX: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 664 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 664 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 665 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 665 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 666 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 666 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 667 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 667 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 668 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 668 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 669 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 669 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 670 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 670 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 671 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 671 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 672 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 672 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 673 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 673 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 674 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 674 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 675 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 675 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 676 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 676 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 677 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 677 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 678 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 678 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 679 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 679 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 680 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 680 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 681 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 681 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 682 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 682 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 683 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 683 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 684 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 684 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 685 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 685 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 686 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 686 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 687 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 687 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 688 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 688 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 689 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 689 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 690 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 690 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 691 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 691 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 692 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 692 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 693 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 693 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 694 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 694 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 695 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 695 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 696 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 696 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 697 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 697 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 698 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 698 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 699 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 699 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 700 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 700 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 701 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 701 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 702 _rlnCoordinateX: 408.000000 vs 3684.000000",
+        "Value diff in local_shift row 702 _rlnCoordinateY: 3684.000000 vs 2865.000000",
+        "Value diff in local_shift row 703 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 704 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 705 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 706 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 707 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 708 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 709 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 710 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 711 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 712 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 713 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 714 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 715 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 716 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 717 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 718 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 719 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 720 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 721 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 722 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 723 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 724 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 725 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 726 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 727 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 728 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 729 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 730 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 731 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 732 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 733 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 734 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 735 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 736 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 737 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 738 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 739 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 740 _rlnCoordinateX: 3684.000000 vs 408.000000",
+        "Value diff in local_shift row 741 _rlnCoordinateX: 3684.000000 vs 408.000000"
+      ],
+      "passed": false,
+      "fail_reasons": [
+        "STAR metadata differences: 235 discrepancies found"
+      ]
+    },
+    "corrected_image": {
+      "num_pixels": 16777216,
+      "pixel_identical": false,
+      "max_abs_pixel_error": 4.012169361114502,
+      "rmse": 0.2094356160443604,
+      "relative_rmse": 0.2745200317273321,
+      "relative_rmse_denominator": "reference_pixel_population_std",
+      "relative_rmse_denominator_value": 0.7629156048341966,
+      "ref_pixel_min": 1.0323665142059326,
+      "ref_pixel_max": 35.41862487792969,
+      "ref_pixel_mean": 5.638582229614258,
+      "ref_pixel_std": 0.7629156048341966,
+      "test_pixel_min": 1.114447832107544,
+      "test_pixel_max": 35.17270278930664,
+      "test_pixel_mean": 5.638455390930176,
+      "test_pixel_std": 0.769397497177124,
+      "core_header_diff_bytes": 11,
+      "label_header_diff_bytes": 1,
+      "normalized_label_diff_bytes": 0,
+      "geometry_matches": true,
+      "relative_rmse_diagnostic": {
+        "value": 0.2745200317273321,
+        "threshold": 0.001,
+        "status": "FAIL",
+        "blocking": false
+      },
+      "passed": false,
+      "fail_reasons": [
+        "Image RMSE 2.094356e-01 > 2.000000e-02"
+      ]
+    }
+  },
+  "overall_status": "FAIL",
+  "metrics": {
+    "user_time_sec": 17.11,
+    "system_time_sec": 3.73,
+    "cpu_percent": 381,
+    "elapsed_str": "0:05.46",
+    "elapsed_sec": 5.46,
+    "max_rss_kb": 2406164,
+    "exit_status": 0,
+    "max_rss_mb": 2349.77
+  },
+  "coverage": {
+    "motion_and_star": true,
+    "corrected_image": true,
+    "complete": true,
+    "required": true
+  }
+}

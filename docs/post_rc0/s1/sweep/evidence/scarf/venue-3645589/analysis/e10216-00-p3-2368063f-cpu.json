@@ -1,0 +1,143 @@
+{
+  "comparator_sha256": "cb37991af515c5529f31ac48adb157771b1ac21b8308ba28735362f36085e46b",
+  "cpu_only_patches": [],
+  "e10216-00-p3-2368063f-cpu": {
+    "accepted_patches": 9,
+    "accepted_set": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "local_shift_rows": 531,
+    "rejected_set": [],
+    "rows_per_center": {
+      "(2046, 2046)": 59,
+      "(2046, 3411)": 59,
+      "(2046, 681)": 59,
+      "(3411, 2046)": 59,
+      "(3411, 3411)": 59,
+      "(3411, 681)": 59,
+      "(681, 2046)": 59,
+      "(681, 3411)": 59,
+      "(681, 681)": 59
+    }
+  },
+  "e10216-00-p3-F-cpu": {
+    "accepted_patches": 9,
+    "accepted_set": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "local_shift_rows": 531,
+    "rejected_set": [],
+    "rows_per_center": {
+      "(2046, 2046)": 59,
+      "(2046, 3411)": 59,
+      "(2046, 681)": 59,
+      "(3411, 2046)": 59,
+      "(3411, 3411)": 59,
+      "(3411, 681)": 59,
+      "(681, 2046)": 59,
+      "(681, 3411)": 59,
+      "(681, 681)": 59
+    }
+  },
+  "exact_comparator_argv": [
+    "/usr/bin/python3",
+    "/home/vol05/scarf1415/mc-post-rc0-s1/src-F/tools/compare_motioncorr.py",
+    "--ref",
+    "/tmp/mc-s1-3645589/runs/e10216-00-p3-F-cpu",
+    "--test",
+    "/tmp/mc-s1-3645589/runs/e10216-00-p3-2368063f-cpu",
+    "--gate",
+    "exact",
+    "--require-complete-coverage",
+    "--json-out",
+    "/tmp/mc-s1-3645589/analysis/e10216-00-p3-2368063f-cpu-exact.json"
+  ],
+  "exact_comparator_exit_status": 0,
+  "identical": true,
+  "identity": {
+    "core_header": true,
+    "extended_header": true,
+    "labels_unmasked": false,
+    "payload": true,
+    "payload_sha256": [
+      "d74de7019551f1436bd19c109c3dedb9bf41a303c1baf66cc0e819ee6fbaabe2",
+      "d74de7019551f1436bd19c109c3dedb9bf41a303c1baf66cc0e819ee6fbaabe2"
+    ],
+    "star": true
+  },
+  "movie": "e10216-00",
+  "reference": "e10216-00-p3-F-cpu",
+  "test": "e10216-00-p3-2368063f-cpu",
+  "test_only_patches": [],
+  "venue": "SCARF"
+}

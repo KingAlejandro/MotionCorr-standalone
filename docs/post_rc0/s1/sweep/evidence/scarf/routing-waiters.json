@@ -1,0 +1,22 @@
+{
+  "native_payloads_signaled": false,
+  "stopped_waiters": [
+    {
+      "pid": 3482795,
+      "argv": [
+        "bash",
+        "/home/vol05/scarf1415/mc-post-rc0-s1/tools/scarf_followon_v1.sh"
+      ],
+      "signal": "SIGTERM"
+    },
+    {
+      "pid": 3487374,
+      "argv": [
+        "bash",
+        "/home/vol05/scarf1415/mc-post-rc0-s1/tools/scarf_prefetch_followon_v1.sh"
+      ],
+      "signal": "SIGTERM"
+    }
+  ],
+  "rationale": "assign 10641 and 12963 to 4GPUs; next SCARF allocation covers 10441/F4/10164"
+}

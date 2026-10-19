@@ -1,0 +1,477 @@
+{
+  "inventory": {
+    "e10028": {
+      "directory": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10028/data/Micrographs/Micrographs_part1",
+      "staged_distinct_paths": 8
+    },
+    "e10164": {
+      "directory": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10164/data/frames",
+      "staged_distinct_paths": 1
+    },
+    "e10216": {
+      "directory": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data",
+      "staged_distinct_paths": 1
+    },
+    "e10361": {
+      "directory": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10361/data/PS_18_2_4",
+      "staged_distinct_paths": 8
+    },
+    "e10441": {
+      "directory": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames",
+      "staged_distinct_paths": 1
+    },
+    "e10474f3": {
+      "directory": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification",
+      "staged_distinct_paths": 4
+    },
+    "e10474f4": {
+      "directory": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification",
+      "staged_distinct_paths": 2
+    },
+    "e10641": {
+      "directory": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10641/data/Movies/Dataset",
+      "staged_distinct_paths": 2
+    },
+    "e12963": {
+      "directory": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data",
+      "staged_distinct_paths": 1
+    },
+    "tutorial": {
+      "directory": "/home/alex/motioncorr-validation-20261011-vm/tutorial-data/Movies",
+      "staged_distinct_paths": 24
+    }
+  },
+  "movies": [
+    {
+      "expected_corpus_sha256": "70f850d3deff2274fac8515d7d38c6654aab1791f7aa2cca5a8b61b43b26eb7c",
+      "family": "e10441",
+      "gain_sha256": "b6036c9bab66fecb5c13fd5fed360c20405169b4d438d57b6a8d99801ff81b1e",
+      "gain_source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/200509_gain.mrc",
+      "id": "e10441-00",
+      "movie_bytes": 732798334,
+      "movie_sha256": "70f850d3deff2274fac8515d7d38c6654aab1791f7aa2cca5a8b61b43b26eb7c",
+      "movie_source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+      "rank": 0,
+      "recipe": {
+        "angpix": 0.5685,
+        "container": "u8 LZW BigTIFF",
+        "cs": 2.7,
+        "dose": 0.999033,
+        "dose_source": "recipe: accession XML dose per frame",
+        "frames": 50,
+        "gain": "EMPIAR-10441/data/frames/200509_gain.mrc",
+        "gain_link": "gain.mrc",
+        "id": "e10441",
+        "label": "EMPIAR-10441",
+        "movies": [
+          "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif"
+        ],
+        "nx": 11520,
+        "ny": 8184,
+        "skip_j": [
+          4
+        ],
+        "skip_j_reason": "lock-time budget: estimate exceeded ~10 h, so --j 4 is dropped for the two largest families",
+        "voltage": 200
+      },
+      "relative_path": "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif"
+    },
+    {
+      "expected_corpus_sha256": null,
+      "family": "e10441",
+      "gain_sha256": "b6036c9bab66fecb5c13fd5fed360c20405169b4d438d57b6a8d99801ff81b1e",
+      "gain_source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/200509_gain.mrc",
+      "id": "e10441-01",
+      "movie_bytes": 731494030,
+      "movie_sha256": "9c8f5ee0a691f7fa2c59d1ad68e8ac857830ed7fc232409ec5ad55b4ab9cc5ef",
+      "movie_source": "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_109-10_0001.tif",
+      "rank": 1,
+      "recipe": {
+        "angpix": 0.5685,
+        "container": "u8 LZW BigTIFF",
+        "cs": 2.7,
+        "dose": 0.999033,
+        "dose_source": "recipe: accession XML dose per frame",
+        "frames": 50,
+        "gain": "EMPIAR-10441/data/frames/200509_gain.mrc",
+        "gain_link": "gain.mrc",
+        "id": "e10441",
+        "label": "EMPIAR-10441",
+        "movies": [
+          "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif"
+        ],
+        "nx": 11520,
+        "ny": 8184,
+        "skip_j": [
+          4
+        ],
+        "skip_j_reason": "lock-time budget: estimate exceeded ~10 h, so --j 4 is dropped for the two largest families",
+        "voltage": 200
+      },
+      "relative_path": "EMPIAR-10441/data/frames/20May09_3A-3_109-10_0001.tif",
+      "acquisition_record": "a535e180488676c5.json",
+      "header_probe": {
+        "container": "TIFF/EER",
+        "nx": 11520,
+        "ny": 8184,
+        "raw_frames": 50,
+        "frames": 50,
+        "grouping": 1,
+        "unused_raw_tail": 0
+      }
+    },
+    {
+      "expected_corpus_sha256": null,
+      "family": "e10441",
+      "gain_sha256": "b6036c9bab66fecb5c13fd5fed360c20405169b4d438d57b6a8d99801ff81b1e",
+      "gain_source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/200509_gain.mrc",
+      "id": "e10441-02",
+      "movie_bytes": 732711430,
+      "movie_sha256": "9a7981f373151e9e29d965786aa83233ebcb46a52c48f104a3d81a2e95f70bf1",
+      "movie_source": "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_142_0006.tif",
+      "rank": 2,
+      "recipe": {
+        "angpix": 0.5685,
+        "container": "u8 LZW BigTIFF",
+        "cs": 2.7,
+        "dose": 0.999033,
+        "dose_source": "recipe: accession XML dose per frame",
+        "frames": 50,
+        "gain": "EMPIAR-10441/data/frames/200509_gain.mrc",
+        "gain_link": "gain.mrc",
+        "id": "e10441",
+        "label": "EMPIAR-10441",
+        "movies": [
+          "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif"
+        ],
+        "nx": 11520,
+        "ny": 8184,
+        "skip_j": [
+          4
+        ],
+        "skip_j_reason": "lock-time budget: estimate exceeded ~10 h, so --j 4 is dropped for the two largest families",
+        "voltage": 200
+      },
+      "relative_path": "EMPIAR-10441/data/frames/20May09_3A-3_142_0006.tif",
+      "acquisition_record": "90c33452972d6ed5.json",
+      "header_probe": {
+        "container": "TIFF/EER",
+        "nx": 11520,
+        "ny": 8184,
+        "raw_frames": 50,
+        "frames": 50,
+        "grouping": 1,
+        "unused_raw_tail": 0
+      }
+    },
+    {
+      "expected_corpus_sha256": null,
+      "family": "e10441",
+      "gain_sha256": "b6036c9bab66fecb5c13fd5fed360c20405169b4d438d57b6a8d99801ff81b1e",
+      "gain_source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/200509_gain.mrc",
+      "id": "e10441-03",
+      "movie_bytes": 736058892,
+      "movie_sha256": "da07ad043392b5d6e71d2a108e045f8eeb2de73fba959dfa6ce1ff8b45c7aeaf",
+      "movie_source": "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_222_0002.tif",
+      "rank": 3,
+      "recipe": {
+        "angpix": 0.5685,
+        "container": "u8 LZW BigTIFF",
+        "cs": 2.7,
+        "dose": 0.999033,
+        "dose_source": "recipe: accession XML dose per frame",
+        "frames": 50,
+        "gain": "EMPIAR-10441/data/frames/200509_gain.mrc",
+        "gain_link": "gain.mrc",
+        "id": "e10441",
+        "label": "EMPIAR-10441",
+        "movies": [
+          "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif"
+        ],
+        "nx": 11520,
+        "ny": 8184,
+        "skip_j": [
+          4
+        ],
+        "skip_j_reason": "lock-time budget: estimate exceeded ~10 h, so --j 4 is dropped for the two largest families",
+        "voltage": 200
+      },
+      "relative_path": "EMPIAR-10441/data/frames/20May09_3A-3_222_0002.tif",
+      "acquisition_record": "b0372d03de48b120.json",
+      "header_probe": {
+        "container": "TIFF/EER",
+        "nx": 11520,
+        "ny": 8184,
+        "raw_frames": 50,
+        "frames": 50,
+        "grouping": 1,
+        "unused_raw_tail": 0
+      }
+    },
+    {
+      "expected_corpus_sha256": null,
+      "family": "e10441",
+      "gain_sha256": "b6036c9bab66fecb5c13fd5fed360c20405169b4d438d57b6a8d99801ff81b1e",
+      "gain_source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/200509_gain.mrc",
+      "id": "e10441-04",
+      "movie_bytes": 735652738,
+      "movie_sha256": "d98f70461b4affc0451a91a9c857ac5aa85052c0e90c747fd4eed6e7c1ccddfd",
+      "movie_source": "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_285_0007.tif",
+      "rank": 4,
+      "recipe": {
+        "angpix": 0.5685,
+        "container": "u8 LZW BigTIFF",
+        "cs": 2.7,
+        "dose": 0.999033,
+        "dose_source": "recipe: accession XML dose per frame",
+        "frames": 50,
+        "gain": "EMPIAR-10441/data/frames/200509_gain.mrc",
+        "gain_link": "gain.mrc",
+        "id": "e10441",
+        "label": "EMPIAR-10441",
+        "movies": [
+          "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif"
+        ],
+        "nx": 11520,
+        "ny": 8184,
+        "skip_j": [
+          4
+        ],
+        "skip_j_reason": "lock-time budget: estimate exceeded ~10 h, so --j 4 is dropped for the two largest families",
+        "voltage": 200
+      },
+      "relative_path": "EMPIAR-10441/data/frames/20May09_3A-3_285_0007.tif",
+      "acquisition_record": "485d2d426d572647.json",
+      "header_probe": {
+        "container": "TIFF/EER",
+        "nx": 11520,
+        "ny": 8184,
+        "raw_frames": 50,
+        "frames": 50,
+        "grouping": 1,
+        "unused_raw_tail": 0
+      }
+    },
+    {
+      "expected_corpus_sha256": null,
+      "family": "e10441",
+      "gain_sha256": "b6036c9bab66fecb5c13fd5fed360c20405169b4d438d57b6a8d99801ff81b1e",
+      "gain_source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/200509_gain.mrc",
+      "id": "e10441-05",
+      "movie_bytes": 738981598,
+      "movie_sha256": "d000b345eb4a761c04c38754b0864ddd2ad646c318c561ea82ee914e360a6b56",
+      "movie_source": "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_353_0003.tif",
+      "rank": 5,
+      "recipe": {
+        "angpix": 0.5685,
+        "container": "u8 LZW BigTIFF",
+        "cs": 2.7,
+        "dose": 0.999033,
+        "dose_source": "recipe: accession XML dose per frame",
+        "frames": 50,
+        "gain": "EMPIAR-10441/data/frames/200509_gain.mrc",
+        "gain_link": "gain.mrc",
+        "id": "e10441",
+        "label": "EMPIAR-10441",
+        "movies": [
+          "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif"
+        ],
+        "nx": 11520,
+        "ny": 8184,
+        "skip_j": [
+          4
+        ],
+        "skip_j_reason": "lock-time budget: estimate exceeded ~10 h, so --j 4 is dropped for the two largest families",
+        "voltage": 200
+      },
+      "relative_path": "EMPIAR-10441/data/frames/20May09_3A-3_353_0003.tif",
+      "acquisition_record": "97f54e25dccb7671.json",
+      "header_probe": {
+        "container": "TIFF/EER",
+        "nx": 11520,
+        "ny": 8184,
+        "raw_frames": 50,
+        "frames": 50,
+        "grouping": 1,
+        "unused_raw_tail": 0
+      }
+    },
+    {
+      "expected_corpus_sha256": null,
+      "family": "e10441",
+      "gain_sha256": "b6036c9bab66fecb5c13fd5fed360c20405169b4d438d57b6a8d99801ff81b1e",
+      "gain_source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/200509_gain.mrc",
+      "id": "e10441-06",
+      "movie_bytes": 740499164,
+      "movie_sha256": "a7e0e8f9295ec8afc1feee6b626262e9e18449f9acdd71776e4b1a037abecc59",
+      "movie_source": "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_425_0008.tif",
+      "rank": 6,
+      "recipe": {
+        "angpix": 0.5685,
+        "container": "u8 LZW BigTIFF",
+        "cs": 2.7,
+        "dose": 0.999033,
+        "dose_source": "recipe: accession XML dose per frame",
+        "frames": 50,
+        "gain": "EMPIAR-10441/data/frames/200509_gain.mrc",
+        "gain_link": "gain.mrc",
+        "id": "e10441",
+        "label": "EMPIAR-10441",
+        "movies": [
+          "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif"
+        ],
+        "nx": 11520,
+        "ny": 8184,
+        "skip_j": [
+          4
+        ],
+        "skip_j_reason": "lock-time budget: estimate exceeded ~10 h, so --j 4 is dropped for the two largest families",
+        "voltage": 200
+      },
+      "relative_path": "EMPIAR-10441/data/frames/20May09_3A-3_425_0008.tif",
+      "acquisition_record": "1cdeb02b422228c9.json",
+      "header_probe": {
+        "container": "TIFF/EER",
+        "nx": 11520,
+        "ny": 8184,
+        "raw_frames": 50,
+        "frames": 50,
+        "grouping": 1,
+        "unused_raw_tail": 0
+      }
+    },
+    {
+      "expected_corpus_sha256": null,
+      "family": "e10441",
+      "gain_sha256": "b6036c9bab66fecb5c13fd5fed360c20405169b4d438d57b6a8d99801ff81b1e",
+      "gain_source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/200509_gain.mrc",
+      "id": "e10441-07",
+      "movie_bytes": 743496766,
+      "movie_sha256": "19bd83f9ab4d0fd1ba04f7e3f66104efe6172676d12f73c1c2b906a42b4f268e",
+      "movie_source": "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_513_0004.tif",
+      "rank": 7,
+      "recipe": {
+        "angpix": 0.5685,
+        "container": "u8 LZW BigTIFF",
+        "cs": 2.7,
+        "dose": 0.999033,
+        "dose_source": "recipe: accession XML dose per frame",
+        "frames": 50,
+        "gain": "EMPIAR-10441/data/frames/200509_gain.mrc",
+        "gain_link": "gain.mrc",
+        "id": "e10441",
+        "label": "EMPIAR-10441",
+        "movies": [
+          "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif"
+        ],
+        "nx": 11520,
+        "ny": 8184,
+        "skip_j": [
+          4
+        ],
+        "skip_j_reason": "lock-time budget: estimate exceeded ~10 h, so --j 4 is dropped for the two largest families",
+        "voltage": 200
+      },
+      "relative_path": "EMPIAR-10441/data/frames/20May09_3A-3_513_0004.tif",
+      "acquisition_record": "d44258294a6f432e.json",
+      "header_probe": {
+        "container": "TIFF/EER",
+        "nx": 11520,
+        "ny": 8184,
+        "raw_frames": 50,
+        "frames": 50,
+        "grouping": 1,
+        "unused_raw_tail": 0
+      }
+    },
+    {
+      "expected_corpus_sha256": null,
+      "family": "e10441",
+      "gain_sha256": "b6036c9bab66fecb5c13fd5fed360c20405169b4d438d57b6a8d99801ff81b1e",
+      "gain_source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/200509_gain.mrc",
+      "id": "e10441-08",
+      "movie_bytes": 746152394,
+      "movie_sha256": "34152b13dfb07e28b5153d9b108326142b81d0edb32d8f4f5bb3d8efbec42087",
+      "movie_source": "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_602_0009.tif",
+      "rank": 8,
+      "recipe": {
+        "angpix": 0.5685,
+        "container": "u8 LZW BigTIFF",
+        "cs": 2.7,
+        "dose": 0.999033,
+        "dose_source": "recipe: accession XML dose per frame",
+        "frames": 50,
+        "gain": "EMPIAR-10441/data/frames/200509_gain.mrc",
+        "gain_link": "gain.mrc",
+        "id": "e10441",
+        "label": "EMPIAR-10441",
+        "movies": [
+          "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif"
+        ],
+        "nx": 11520,
+        "ny": 8184,
+        "skip_j": [
+          4
+        ],
+        "skip_j_reason": "lock-time budget: estimate exceeded ~10 h, so --j 4 is dropped for the two largest families",
+        "voltage": 200
+      },
+      "relative_path": "EMPIAR-10441/data/frames/20May09_3A-3_602_0009.tif",
+      "acquisition_record": "79a206aa2ceb50d3.json",
+      "header_probe": {
+        "container": "TIFF/EER",
+        "nx": 11520,
+        "ny": 8184,
+        "raw_frames": 50,
+        "frames": 50,
+        "grouping": 1,
+        "unused_raw_tail": 0
+      }
+    },
+    {
+      "expected_corpus_sha256": null,
+      "family": "e10441",
+      "gain_sha256": "b6036c9bab66fecb5c13fd5fed360c20405169b4d438d57b6a8d99801ff81b1e",
+      "gain_source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/200509_gain.mrc",
+      "id": "e10441-09",
+      "movie_bytes": 735680184,
+      "movie_sha256": "ea3af42c295eb0dd72921f204b53ca9b9dc27dfdf4bc750db918913769f48ca6",
+      "movie_source": "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_690_0005.tif",
+      "rank": 9,
+      "recipe": {
+        "angpix": 0.5685,
+        "container": "u8 LZW BigTIFF",
+        "cs": 2.7,
+        "dose": 0.999033,
+        "dose_source": "recipe: accession XML dose per frame",
+        "frames": 50,
+        "gain": "EMPIAR-10441/data/frames/200509_gain.mrc",
+        "gain_link": "gain.mrc",
+        "id": "e10441",
+        "label": "EMPIAR-10441",
+        "movies": [
+          "EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif"
+        ],
+        "nx": 11520,
+        "ny": 8184,
+        "skip_j": [
+          4
+        ],
+        "skip_j_reason": "lock-time budget: estimate exceeded ~10 h, so --j 4 is dropped for the two largest families",
+        "voltage": 200
+      },
+      "relative_path": "EMPIAR-10441/data/frames/20May09_3A-3_690_0005.tif",
+      "acquisition_record": "976606316d81c9a4.json",
+      "header_probe": {
+        "container": "TIFF/EER",
+        "nx": 11520,
+        "ny": 8184,
+        "raw_frames": 50,
+        "frames": 50,
+        "grouping": 1,
+        "unused_raw_tail": 0
+      }
+    }
+  ],
+  "source": "6d68e2d6"
+}

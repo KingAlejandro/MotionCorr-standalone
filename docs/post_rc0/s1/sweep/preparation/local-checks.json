@@ -1,0 +1,41 @@
+{
+  "checks": [
+    {
+      "command": "python3 tools/summarize.py evidence",
+      "exit_status": 0
+    },
+    {
+      "command": "python3 tools/summarize_longevity.py evidence",
+      "exit_status": 0
+    },
+    {
+      "command": "python3 tools/pack_raw.py evidence",
+      "exit_status": 0,
+      "raw_members": 3483,
+      "archives": 7
+    },
+    {
+      "command": "python3 tools/validate_evidence.py evidence --require-complete",
+      "exit_status": 1,
+      "reason": "one retained native CUDA OOM failure; completed-pair/coverage/control checks valid"
+    },
+    {
+      "command": "git diff --check",
+      "exit_status": 0
+    },
+    {
+      "command": "git diff --cached --check",
+      "exit_status": 0
+    }
+  ],
+  "packaged_tables_byte_identical": true,
+  "local_integrity_checks": {
+    "raw_member_hashes": true,
+    "no_mrc_or_executable_payloads": true,
+    "input_sha256_distinct": 114,
+    "release_build_caches": true,
+    "python_compile": true,
+    "bash_syntax": true,
+    "readme_local_links": true
+  }
+}

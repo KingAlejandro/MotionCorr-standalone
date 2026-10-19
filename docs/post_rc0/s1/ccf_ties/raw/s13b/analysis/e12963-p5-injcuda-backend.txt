@@ -1,0 +1,37 @@
+========================================================================
+ MOTIONCORR ACCEPTANCE GATE REPORT
+========================================================================
+Gate Profile:      BACKEND
+Overall Status:    FAIL
+------------------------------------------------------------------------
+ERRORS / UNRESOLVED INPUTS:
+   ! Backend profile requires --test-log with successful process status
+------------------------------------------------------------------------
+1. MOTION TRAJECTORY:
+   Frames evaluated:     39
+   Coordinate RMS error: 0.000000 px (threshold: 0.020000)
+   Max absolute shift:   0.000000 px (threshold: 0.050000)
+   Status:               PASS
+
+2. CORRECTED IMAGE PARITY:
+   Pixel-identical:      False
+   Image RMSE:           3.782815e-01 (threshold: 2.000000e-02)
+   Max absolute diff:    5.906199e+00 (threshold: 5.000000e+00)
+   Relative RMSE:        4.991146e-01 (threshold: 1.000000e-03 in relaxed/custom gate)
+     diagnostic status: FAIL (nonblocking; backend profile only)
+     denominator:        reference pixel population std = 7.579052e-01
+     equivalent to:      absolute RMSE <= 7.579052e-04 for this reference
+   Normalized headers:   Core metadata: 12 diff bytes, Non-timestamp labels: 0 diff bytes
+   Status:               FAIL
+     ! Image RMSE 3.782815e-01 > 2.000000e-02
+     ! Image max pixel error 5.906199e+00 > 5.000000e+00
+
+3. STAR FIELDS & METADATA:
+   Normalized diff count: 352
+   Status:                FAIL
+     - Loop 'local_shift' row count mismatch: 858 vs 897
+     - Value diff in local_shift row 547 _rlnCoordinateX: 1227.000000 vs 408.000000
+     - Value diff in local_shift row 548 _rlnCoordinateX: 1227.000000 vs 408.000000
+     - Value diff in local_shift row 549 _rlnCoordinateX: 1227.000000 vs 408.000000
+     - Value diff in local_shift row 550 _rlnCoordinateX: 1227.000000 vs 408.000000
+========================================================================

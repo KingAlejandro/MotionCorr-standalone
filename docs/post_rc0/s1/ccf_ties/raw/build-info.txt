@@ -1,0 +1,41 @@
+# S1.3 builds on 4GPUs (4-gpu-vm), 2026-10-19T14:11:19Z
+source tarballs (git archive, paths: CMakeLists.txt COPYING LICENSE AUTHORS SOURCE_MANIFEST.txt README.md src tests tools scripts):
+7200b474298307aad7d7c1bb45ebe5a6dd863921a3df44aa8d8afc8718c56545  tools/s13-prod.tar.gz
+65544ecdce327fca8095e3124c72599c9dd0c9cf3e3a1c2a2605dcb6ee97ab68  tools/s13-diag.tar.gz
+
+build prod-cpu rc=0 2026-10-19T13:07:44Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+db15536e23de17ca5501f8ed350fa236f1a0eed4424774371ed6a2c218d4ec1b  /mnt/clathrin/alex-motioncorr-s1ccf/build-prod-cpu/motioncorr
+build diag-cpu rc=0 2026-10-19T13:10:07Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+767fd76ffd5215d4c50ee8bb349ebb519210fc775d64055c2e5aeb7ea65e12c1  /mnt/clathrin/alex-motioncorr-s1ccf/build-diag-cpu/motioncorr
+build prod-nvcomp rc=0 2026-10-19T13:13:55Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+1824a7fba1934a94ebdd7b7dc1d443490d08f1df96aba7be54a337f84f6cbf5e  /mnt/clathrin/alex-motioncorr-s1ccf/build-prod-nvcomp/motioncorr
+build diag-nvcomp rc=0 2026-10-19T13:17:24Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+2e9b01788dcac6ee7cc88ebe120f0da756bcb2843cade410d3dd374cb508ecb0  /mnt/clathrin/alex-motioncorr-s1ccf/build-diag-nvcomp/motioncorr
+BUILDS-DONE st=0
+
+build-diag-cpu: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+  CMAKE_BUILD_TYPE:STRING=Release
+  CUDA:BOOL=OFF
+build-diag-nvcomp: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+  CUDA_FLAGS = -O3 -DNDEBUG -std=c++17 "--generate-code=arch=compute_80,code=[compute_80,sm_80]" -Xcompiler -fopenmp
+  CMAKE_BUILD_TYPE:STRING=Release
+  CUDA:BOOL=ON
+  NVCOMP_ROOT:UNINITIALIZED=/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive
+  USE_NVCOMP:BOOL=ON
+build-prod-cpu: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+  CMAKE_BUILD_TYPE:STRING=Release
+  CUDA:BOOL=OFF
+build-prod-nvcomp: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+  CUDA_FLAGS = -O3 -DNDEBUG -std=c++17 "--generate-code=arch=compute_80,code=[compute_80,sm_80]" -Xcompiler -fopenmp
+  CMAKE_BUILD_TYPE:STRING=Release
+  CUDA:BOOL=ON
+  NVCOMP_ROOT:UNINITIALIZED=/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive
+  USE_NVCOMP:BOOL=ON
+
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Build cuda_12.8.r12.8/compiler.35404655_0
+cmake version 3.28.3
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, NVIDIA A100 80GB PCIe, 570.86.10
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, NVIDIA A100 80GB PCIe, 570.86.10
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, NVIDIA A100 80GB PCIe, 570.86.10
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, NVIDIA A100 80GB PCIe, 570.86.10

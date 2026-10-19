@@ -1,0 +1,163 @@
+diff --git a/src/acc/cuda/cuda_alignpatch.cu b/src/acc/cuda/cuda_alignpatch.cu
+index 26350d69..253a91a7 100644
+--- a/src/acc/cuda/cuda_alignpatch.cu
++++ b/src/acc/cuda/cuda_alignpatch.cu
+@@ -313,6 +313,36 @@ static void diagDumpDeviceWeight(const char *tag, int patch, int call, const flo
+     diagDumpRaw(tag, patch, call, 0, "wt", wt.data(), wt.size() * sizeof(float), 1, ccf_nfy, ccf_nfx);
+ }
+ 
++__global__ void fourierShiftKernel(
++    float2 *d_Fframes,
++    const float *d_shiftx,
++    const float *d_shifty,
++    int nfx, int nfy, int nfy_half,
++    int n_frames);
++
++// S1.3b DIAGNOSTIC ONLY: the shift is formed as updatePatchShifts forms it
++// (-delta / (float)n in float) and applied by the production kernel.
++void cudaDiagApplyGlobalDelta(void *d_Fframes, int n_frames, int nx, int ny, const double *dx, const double *dy) {
++    if (n_frames < 2) return;
++    std::vector<float> sx(n_frames), sy(n_frames);
++    for (int i = 0; i < n_frames; i++) {
++        sx[i] = -(float)dx[i] / (float)nx;
++        sy[i] = -(float)dy[i] / (float)ny;
++    }
++    float *d_sx = nullptr, *d_sy = nullptr;
++    const size_t bytes = n_frames * sizeof(float);
++    const int nfx = nx / 2 + 1, nfy = ny;
++    if (cudaMalloc(&d_sx, bytes) != cudaSuccess || cudaMalloc(&d_sy, bytes) != cudaSuccess ||
++        cudaMemcpy(d_sx, sx.data(), bytes, cudaMemcpyHostToDevice) != cudaSuccess ||
++        cudaMemcpy(d_sy, sy.data(), bytes, cudaMemcpyHostToDevice) != cudaSuccess)
++        REPORT_ERROR("S1.3b diagnostic global-delta upload failed");
++    dim3 block(16, 16, 1), grid((nfx + 15) / 16, (nfy + 15) / 16, n_frames - 1);
++    fourierShiftKernel<<<grid, block>>>((float2*)d_Fframes, d_sx, d_sy, nfx, nfy, nfy / 2, n_frames);
++    if (cudaGetLastError() != cudaSuccess || cudaDeviceSynchronize() != cudaSuccess)
++        REPORT_ERROR("S1.3b diagnostic global-delta kernel failed");
++    cudaFree(d_sx); cudaFree(d_sy);
++}
++
+ __global__ void fourierShiftKernel(
+     float2 *d_Fframes,
+     const float *d_shiftx,
+diff --git a/src/diag_ccf.h b/src/diag_ccf.h
+index f0098eb1..fffaf903 100644
+--- a/src/diag_ccf.h
++++ b/src/diag_ccf.h
+@@ -129,6 +129,40 @@ inline void diagCcfWrite(const char *tag, int patch, int iter, int frame, const
+ 	std::fclose(f);
+ }
+ 
++// S1.3b DIAGNOSTIC ONLY: global-trajectory capture and override.
++// MC_DIAG_GLOBAL_SHIFTS_OUT=<file> writes the global trajectory exactly (%.17g).
++// MC_DIAG_GLOBAL_SHIFTS=<file> (same format) replaces it: the frames receive an
++// extra Fourier shift by (injected - own), frames with an exactly zero
++// difference are left untouched, and the injected values are what the run
++// records. Injecting a run's own file is therefore a no-op.
++inline void diagGlobalShiftsOut(const std::vector<double> &x, const std::vector<double> &y) {
++	const char *p = std::getenv("MC_DIAG_GLOBAL_SHIFTS_OUT");
++	if (!p) return;
++	if (FILE *f = std::fopen(p, "w")) {
++		for (size_t i = 0; i < x.size(); i++) std::fprintf(f, "%zu %.17g %.17g\n", i + 1, x[i], y[i]);
++		std::fclose(f);
++	}
++}
++// Returns false when no override is requested. Fails loudly on a malformed file.
++inline bool diagGlobalShiftsIn(size_t n, std::vector<double> &x, std::vector<double> &y) {
++	const char *p = std::getenv("MC_DIAG_GLOBAL_SHIFTS");
++	if (!p) return false;
++	FILE *f = std::fopen(p, "r");
++	if (!f) { std::fprintf(stderr, "MC_DIAG_GLOBAL_SHIFTS: cannot open %s\n", p); std::abort(); }
++	x.assign(n, 0.0); y.assign(n, 0.0);
++	size_t i, got = 0; double a, b;
++	while (std::fscanf(f, "%zu %lf %lf", &i, &a, &b) == 3) {
++		if (i < 1 || i > n) { std::fprintf(stderr, "MC_DIAG_GLOBAL_SHIFTS: frame %zu out of range\n", i); std::abort(); }
++		x[i - 1] = a; y[i - 1] = b; got++;
++	}
++	std::fclose(f);
++	if (got != n) { std::fprintf(stderr, "MC_DIAG_GLOBAL_SHIFTS: %zu rows for %zu frames\n", got, n); std::abort(); }
++	return true;
++}
++// Defined in cuda_alignpatch.cu: the production fourierShiftKernel applied to a
++// resident full-spectrum movie, frames 2..n, shift (dx, dy) px per frame.
++void cudaDiagApplyGlobalDelta(void *d_Fframes, int n_frames, int nx, int ny, const double *dx, const double *dy);
++
+ // Raw little-endian dumps: <dir>/<tag>_p<iy>_<ix>_c<call>_it<iter>_<kind>.bin
+ // kind "in": n_frames x ccf_nfy x ccf_nfx complex float, the CCF window of the
+ // spectra entering this iteration; "map": n_frames x ccf_ny x ccf_nx float;
+diff --git a/src/motioncorr_runner.cpp b/src/motioncorr_runner.cpp
+index 873c051b..162e33d0 100644
+--- a/src/motioncorr_runner.cpp
++++ b/src/motioncorr_runner.cpp
+@@ -3372,6 +3372,64 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
+ 		alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+ 	}
+ 	RCTOC(TIMING_GLOBAL_ALIGNMENT);
++	{ // S1.3b DIAGNOSTIC ONLY: global-trajectory capture/override (diag_ccf.h)
++		std::vector<double> ox(xshifts.begin(), xshifts.end()), oy(yshifts.begin(), yshifts.end()), ix, iy;
++		diagGlobalShiftsOut(ox, oy);
++		if (diagGlobalShiftsIn(ox.size(), ix, iy)) {
++			std::vector<double> dx(ox.size()), dy(ox.size());
++			bool any = false;
++			for (size_t i = 0; i < ox.size(); i++) {
++				dx[i] = ix[i] - ox[i]; dy[i] = iy[i] - oy[i];
++				any = any || dx[i] != 0.0 || dy[i] != 0.0;
++				xshifts[i] = ix[i]; yshifts[i] = iy[i];
++			}
++			logfile << "S1.3b DIAGNOSTIC: global trajectory overridden from " << std::getenv("MC_DIAG_GLOBAL_SHIFTS")
++			        << (any ? "" : " (identical to own: no shift applied)") << std::endl;
++			if (any) {
++				if (dx[0] != 0.0 || dy[0] != 0.0) REPORT_ERROR("S1.3b: frame 1 must stay at the origin");
++#ifdef _CUDA_ENABLED
++				if (movie_session)
++					cudaDiagApplyGlobalDelta(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, dx.data(), dy.data());
++				else
++#endif
++				for (int i = 1; i < n_frames; i++)
++					if (dx[i] != 0.0 || dy[i] != 0.0)
++						shiftNonSquareImageInFourierTransform(Fframes[i], -dx[i] / nx, -dy[i] / ny);
++			}
++		}
++	}
++	// S1.3b DIAGNOSTIC ONLY: full-frame spectra after the global shifts (read-only).
++	auto diag_full_dump = [&](const char *kind) {
++		const char *dir = std::getenv("MC_DIAG_FULL_DUMP");
++		if (!dir) return;
++		const char *list = std::getenv("MC_DIAG_FULL_FRAMES");
++		std::string sl = list ? list : "2,11,21";
++		size_t a = 0;
++		while (a < sl.size()) {
++			size_t b = sl.find(',', a); if (b == std::string::npos) b = sl.size();
++			const int f = std::atoi(sl.substr(a, b - a).c_str()) - 1; a = b + 1;
++			if (f < 0 || f >= n_frames) continue;
++			const bool spec = std::string(kind) == "spec";
++			const size_t n = spec ? (size_t)ny * (nx / 2 + 1) * 2 : (size_t)ny * nx;
++			std::vector<float> h(n);
++#ifdef _CUDA_ENABLED
++			if (movie_session) {
++				const void *src = spec ? (const void *)(movie_session->getDeviceFourierFrames() + (size_t)f * ny * (nx / 2 + 1))
++				                       : (const void *)(movie_session->getDeviceRealFrames() + (size_t)f * ny * nx);
++				if (cudaMemcpy(h.data(), src, n * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess)
++					REPORT_ERROR("S1.3b full dump read-back failed");
++			} else
++#endif
++			{
++				const float *src = spec ? (const float *)Fframes[f].data : Iframes[f]().data;
++				std::copy(src, src + n, h.begin());
++			}
++			char name[1024];
++			std::snprintf(name, sizeof(name), "%s/%s_fr%d_%dx%d.bin", dir, kind, f + 1, ny, spec ? nx / 2 + 1 : nx);
++			if (FILE *o = std::fopen(name, "wb")) { std::fwrite(h.data(), sizeof(float), n, o); std::fclose(o); }
++		}
++	};
++	diag_full_dump("spec");
+ 	MC_STAGE("allocate reconstruction");
+ 	for (int i = 0, ilim = xshifts.size(); i < ilim; i++) {
+ 		// Should be in the original pixel size
+@@ -3442,6 +3500,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
+ 	}
+ 	}
+ 	RCTOC(TIMING_GLOBAL_IFFT);
++	diag_full_dump("real"); // S1.3b DIAGNOSTIC ONLY
+ 
+ 	// Patch based alignment
+ 	MC_STAGE("patch alignment");

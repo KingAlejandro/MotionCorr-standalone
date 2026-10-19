@@ -48,6 +48,7 @@
 #include <cstdlib>
 
 #include <string>
+#include <vector>
 #include <iostream>
 #include <fstream>
 #include "src/macros.h"
@@ -122,7 +123,7 @@ public:
         Happy debugging!
      **/
 
-    void **backtrace_buffer;
+    std::vector<void*> backtrace_buffer;
     size_t size;
 #endif
 

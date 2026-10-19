@@ -399,6 +399,10 @@ if(BUILD_TESTING)
     # The malformed-input cases hang the pre-#98 parser; bound them so a
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
+    add_executable(relion_error_ownership tests/test_relion_error_ownership.cpp src/error.cpp)
+    target_include_directories(relion_error_ownership PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    add_test(NAME RelionErrorOwnership COMMAND relion_error_ownership)
+    add_test(NAME RelionErrorUnprinted COMMAND relion_error_ownership --unprinted)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
     add_test(NAME NvcompAcceptanceDiagnostics
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_nvcomp_acceptance_diagnostics.py)

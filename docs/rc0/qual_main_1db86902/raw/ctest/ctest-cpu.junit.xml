@@ -1,0 +1,660 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Linux-c++"
+	tests="59"
+	failures="1"
+	disabled="0"
+	skipped="0"
+	hostname="4-gpu-vm"
+	time="371"
+	timestamp="2026-10-16T19:42:31"
+	>
+	<testcase name="CpuUnweightedStream" classname="CpuUnweightedStream" time="0.0948307" status="run">
+		<properties/>
+		<system-out>stream/reference pixels, splits, model time and float rounding PASS; scratch bound PASS
+</system-out>
+	</testcase>
+	<testcase name="PatchRetryState" classname="PatchRetryState" time="0.0417214" status="run">
+		<properties/>
+		<system-out>Issue #69 patch retry shift-state contract (CPU, no device)
+  patch 256x256, 4 groups, scaled_B=20.0, truth (frame-0 relative): (+0.00,+0.00) (+2.70,-1.80) (-3.40,+2.20) (+1.90,-3.10)
+
+  converged reference          ( +0.000, +0.000) ( -2.637, +1.755) ( +3.394, -2.198) ( -1.846, +3.041)   |v| = 6.2485
+  max |recovered + truth| = 0.0630 px  (converged=yes)
+
+  attempt 1 (S1)               ( +0.000, +0.000) ( -4.367, +3.041) ( +3.594, -2.307) ( -3.378, +4.726)   |v| = 8.9615
+  arm A: reset (S2)            ( +0.000, +0.000) ( -4.367, +3.041) ( +3.594, -2.307) ( -3.378, +4.726)   |v| = 8.9615
+  arm B: no reset (S1+S2)      ( +0.000, +0.000) ( -8.734, +6.081) ( +7.189, -4.615) ( -6.756, +9.452)   |v| = 17.9231
+  |arm A| = 8.9615   |arm B| = 17.9231   ratio B/A = 2.0000
+  max |armA - S1|              = 0.000e+00 px
+  max |armB - (S1 + armA)|     = 0.000e+00 px
+
+PASS alignPatch accumulates into the caller's vectors and does not
+     re-derive them, so re-entering without a reset publishes S1+S2.
+     Restoring the ve...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="RunnerInterpolateRecenter" classname="RunnerInterpolateRecenter" time="0.00853297" status="run">
+		<properties/>
+		<system-out>PASS archived witness, slope 1 (X only) (bug reproduced and fixed)
+PASS slope +2 X / -1.5 Y, nonzero origin both axes (bug reproduced and fixed)
+PASS unequal last group, negative X slope, piecewise (bug reproduced and fixed)
+PASS zero-origin control (no-op) (no-op control)
+PASS empty-input guard
+PASS issue97 interpolate_recenter
+</system-out>
+	</testcase>
+	<testcase name="FloatPlanCache" classname="FloatPlanCache" time="0.0158348" status="run">
+		<properties/>
+		<system-out>in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/jaz/single_particle/new_ft.cpp, line 589
+ERROR: 
+NewFFT::FloatPlan: cached plan has a different size
+PASS float plan cache
+</system-out>
+	</testcase>
+	<testcase name="MrcHeaderStats" classname="MrcHeaderStats" time="0.0158912" status="run">
+		<properties/>
+		<system-out>PASS fused MRC header statistics (13 cases)
+</system-out>
+	</testcase>
+	<testcase name="PdfConcat" classname="PdfConcat" time="0.0841485" status="run">
+		<properties/>
+		<system-out>GPL Ghostscript 10.02.1: Unrecoverable error, exit code 1
+PASS one-input concatenation copied 193 B exactly
+ ERROR in executing: gs -dNOPAUSE -sDEVICE=pdfwrite -sOUTPUTFILE=test_pdf_concat_tmp/from_notapdf.pdf -dBATCH test_pdf_concat_tmp/notapdf.pdf  &gt; /dev/null
+PASS non-PDF input was not copied
+</system-out>
+	</testcase>
+	<testcase name="DefectParser" classname="DefectParser" time="0.0185999" status="run">
+		<properties/>
+		<system-out>== valid input ==
+  PASS  single rect 0 0 2 3 -&gt; 6 px
+  PASS  two rects -&gt; 22 px
+  PASS  no trailing newline -&gt; 6 px
+  PASS  blank lines and padding tolerated -&gt; 6 px
+== empty / whitespace ==
+  PASS  empty file -&gt; no error, 0 px
+  PASS  whitespace-only -&gt; no error, 0 px
+== malformed (must be rejected) ==
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/motioncorr_runner.cpp, line 5073
+ERROR: 
+Malformed defect record (record 2, line 2) of /tmp/motioncorr_defect_test_3891527/m1.txt: field 'x' is "BAD", which is not an integer. The MotionCor2 txt defect format does not support comments, headers or non-integer fields.
+  PASS  issue #98 reproducer 'BAD TOKEN' rejected
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/motioncorr_runner.cpp, line 5073
+ERROR: 
+Malformed defect record (record 1, line 1) of /tmp/motioncorr_defect_test_3891527/m2.txt: field 'x' is "BAD", which is not an integer. The MotionCor2 txt defect format does not support comments, headers or non-integer fields.
+  PASS  malformed FIRST reje...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="DeflateLayout" classname="DeflateLayout" time="0.0123698" status="run">
+		<properties/>
+		<system-out>deflate layout: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="Adler32Arithmetic" classname="Adler32Arithmetic" time="0.811082" status="run">
+		<properties/>
+		<system-out>PASS: 7 ordinary lengths, actual production arithmetic over 512MiB logical ff bytes; old uint64 model fails 645a3c03 vs 2a2a3c03
+</system-out>
+	</testcase>
+	<testcase name="Adler32KernelHost" classname="Adler32KernelHost" time="0.00396477" status="run">
+		<properties/>
+		<system-out>PASS: actual kernel body, one CPU lane: healthy/full/short, failed-status and short-size null-output guards
+</system-out>
+	</testcase>
+	<testcase name="StageProfileThreads" classname="StageProfileThreads" time="0.655692" status="run">
+		<properties/>
+		<system-out>ok   a path swapped to a symlink after enable() is not written through
+ok   the profile went to the inode enable() created
+ok   workers ran concurrently with the owner
+ok   owner sub-stage recorded exactly n times
+ok   worker markers ignored
+ok   profile written without error
+</system-out>
+	</testcase>
+	<testcase name="FrameBufferPool" classname="FrameBufferPool" time="0.040528" status="run">
+		<properties/>
+		<system-out>ok   acquire gives an ny x nx buffer
+ok   release retains one frame and empties the array
+ok   next acquire reuses the retained buffer
+ok   reused buffer is fully writable
+ok   retained count and bytes stay within the bound
+ok   a small buffer is freed, not pooled
+ok   a non-owning alias is never pooled
+ok   a different-size buffer is not handed out for this geometry
+ok   buffers of a never-requested (binned) size are not retained
+ok   after binned releases a full-frame buffer is still retained for reuse
+ok   and it is the one handed out next
+ok   same-size reacquire keeps the owned buffer (pooled)
+ok   same-size reacquire does not consume or add a retained buffer
+ok   same-size reacquire keeps the owned buffer (pool disabled)
+ok   same-size reacquire does not consume or add a retained buffer
+ok   geometry A fills the pool
+ok   releasing the current geometry into a full pool evicts an old one
+ok   the next acquisition of the new geometry reuses it
+ok   a sustained new geometry fully replaces the old one, with...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="ScratchArena" classname="ScratchArena" time="0.00533199" status="run">
+		<properties/>
+		<system-out>scratch arena: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="ReaderPool" classname="ReaderPool" time="0.572353" status="run">
+		<properties/>
+		<system-out>idle 8-thread team: 0.000 cpu-s over 0.401 s wall
+reader pool: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="ReaderPoolMutant_spin" classname="ReaderPoolMutant_spin" time="0.573887" status="run">
+		<properties/>
+		<system-out>idle 8-thread team: 1.488 cpu-s over 0.400 s wall
+FAIL: idle helpers consumed CPU between jobs
+1 failure(s)
+</system-out>
+	</testcase>
+	<testcase name="ReaderPoolMutant_nowait" classname="ReaderPoolMutant_nowait" time="0.0303669" status="run">
+		<properties/>
+		<system-out>FAIL: runTeam returned before every thread finished
+FAIL: runTeam returned before every thread finished
+FAIL: runTeam returned before every thread finished
+FAIL: runTeam returned before every thread finished
+4 failure(s)
+</system-out>
+	</testcase>
+	<testcase name="DefectNeighbours" classname="DefectNeighbours" time="0.00686264" status="run">
+		<properties/>
+		<system-out>  isolated + edges + corners   defects=10 ranks=136
+  5x5 dense block              defects=25 ranks=264
+  full row and column          defects=87 ranks=1656
+  d_max=4 (EER radius)         defects=17 ranks=1103
+  merge == full-mask scan      trials=200 entries=9673
+defect neighbours: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="DefectMergeMutant_append_only" classname="DefectMergeMutant_append_only" time="0.00547642" status="run">
+		<properties/>
+		<system-out>  isolated + edges + corners   defects=10 ranks=136
+  5x5 dense block              defects=25 ranks=264
+  full row and column          defects=87 ranks=1656
+  d_max=4 (EER radius)         defects=17 ranks=1103
+FAIL: merge != full scan, trial 1 (pre 27, hits 27)
+negative control: defect detected (1 check(s) failed)
+</system-out>
+	</testcase>
+	<testcase name="DefectMergeMutant_no_order_check" classname="DefectMergeMutant_no_order_check" time="0.00608404" status="run">
+		<properties/>
+		<system-out>  isolated + edges + corners   defects=10 ranks=136
+  5x5 dense block              defects=25 ranks=264
+  full row and column          defects=87 ranks=1656
+  d_max=4 (EER radius)         defects=17 ranks=1103
+  merge == full-mask scan      trials=200 entries=9673
+FAIL: unsorted pre-mask list is refused
+FAIL: unsorted hit list is refused
+FAIL: an index in both lists is refused
+FAIL: a repeated index is refused
+FAIL: a negative index is refused
+negative control: defect detected (5 check(s) failed)
+</system-out>
+	</testcase>
+	<testcase name="DefectMergeMutant_swap_xy" classname="DefectMergeMutant_swap_xy" time="0.00445226" status="run">
+		<properties/>
+		<system-out>  isolated + edges + corners   defects=10 ranks=136
+  5x5 dense block              defects=25 ranks=264
+  full row and column          defects=87 ranks=1656
+  d_max=4 (EER radius)         defects=17 ranks=1103
+FAIL: merge != full scan, trial 1 (pre 27, hits 27)
+negative control: defect detected (1 check(s) failed)
+</system-out>
+	</testcase>
+	<testcase name="NvcompAcceptanceDiagnostics" classname="NvcompAcceptanceDiagnostics" time="0.150475" status="run">
+		<properties/>
+		<system-out>PASS: missing movie log rejects with child streams and exit verdict retained
+</system-out>
+	</testcase>
+	<testcase name="ProfilingKit" classname="ProfilingKit" time="185.448" status="fail">
+		<failure message="Failed"/>
+		<properties/>
+		<system-out>...............................................................EE.....................................................................
+======================================================================
+ERROR: test_actual_cli_full_input_does_not_expect_metadata_products (tests.test_import_subset_boundaries.MultipleStarLoops.test_actual_cli_full_input_does_not_expect_metadata_products)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/tools/profiling/tests/test_import_subset_boundaries.py", line 162, in test_actual_cli_full_input_does_not_expect_metadata_products
+    self.run_cli(False)
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/tools/profiling/tests/test_import_subset_boundaries.py", line 151, in run_cli
+    result = cli(args)
+             ^^^^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/tools/profiling/tests/test_import_subset_boundaries.py", line 23, in cli
+    return subprocess.run([sys.executable, *flags, mcprof.__file__, *args],
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/tools/profiling/mcprof.py', 'run', 'A=/tmp/tmp39z87_e1/binary', '--data', '/tmp/tmp39z87_e1/data', '--work', '/tmp/tmp39z87_e1/work', '--no-lock', '--warmup', '0', '--rounds', '1', '--lane-wait', '0', '--keep-outputs']' timed out after 30 seconds
+
+======================================================================
+ERROR: test_actual_cli_subset_preserves_all_other_loop_rows (tests.test_import_subset_boundaries.MultipleStarLoops.test_actual_cli_subset_preserves_all_other_loop_rows)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/tools/profiling/tests/test_import_subset_boundaries.py", line 165, in test_actual_cli_subset_preserves_all_other_loop_rows
+    self.run_cli(True)
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/tools/profiling/tests/test_import_subset_boundaries.py", line 151, in run_cli
+    result = cli(args)
+             ^^^^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/tools/profiling/tests/test_import_subset_boundaries.py", line 23, in cli
+    return subprocess.run([sys.executable, *flags, mcprof.__file__, *args],
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/tools/profiling/mcprof.py', 'run', 'A=/tmp/tmp5bqib08z/binary', '--data', '/tmp/tmp5bqib08z/data', '--work', '/tmp/tmp5bqib08z/work', '--no-lock', '--warmup', '0', '--rounds', '1', '--lane-wait', '0', '--keep-outputs', '--movies', '2']' timed out after 30 seconds
+
+----------------------------------------------------------------------
+Ran 134 tests in 185.174s
+
+FAILED (errors=2)
+</system-out>
+	</testcase>
+	<testcase name="GainCacheOwnership" classname="GainCacheOwnership" time="5.51556" status="run">
+		<properties/>
+		<system-out>PASS: candidate
+PASS: old-production-selection
+PASS: omit-owner-selection
+PASS: omit-live-lease
+PASS: optimized interpreter reran all actual-header controls
+</system-out>
+	</testcase>
+	<testcase name="NvcompGuards" classname="NvcompGuards" time="0.0535291" status="run">
+		<properties/>
+		<system-out>nvcomp guards: 32 CudaMovieSession members, declaration and definition agree on all of them
+</system-out>
+	</testcase>
+	<testcase name="SyntheticRegression" classname="SyntheticRegression" time="0.911567" status="run">
+		<properties/>
+		<system-out>Results for --j 1 vs Expected Old Baseline:
+  Image Max Pixel Difference: 0.000000e+00
+  Image RMSE:                 0.000000e+00
+  Shift Max Difference (px):  0.000000e+00
+  Shift RMSD (px):            0.000000e+00
+Results for --j 4 vs Expected Old Baseline:
+  Image Max Pixel Difference: 0.000000e+00
+  Image RMSE:                 0.000000e+00
+  Shift Max Difference (px):  0.000000e+00
+  Shift RMSD (px):            0.000000e+00
+
+SUCCESS: All synthetic regression tests passed with bit-for-bit identity!
+</system-out>
+	</testcase>
+	<testcase name="HotPixelRngDeterminism" classname="HotPixelRngDeterminism" time="0.674134" status="run">
+		<properties/>
+		<system-out>Precondition: full 5x5 hot block detected (27 hot pixels total) -&gt; Gaussian branch reached.
+probe.mrc pixel bytes: 36864; differing: 0
+
+SUCCESS: hot-pixel replacement is independent of movie order and count.
+</system-out>
+	</testcase>
+	<testcase name="RunnerExposure" classname="RunnerExposure" time="0.695477" status="run">
+		<properties/>
+		<system-out>PASS runner exposure
+</system-out>
+	</testcase>
+	<testcase name="Runner_failure" classname="Runner_failure" time="0.191453" status="run">
+		<properties/>
+		<system-out>PASS runner failure
+</system-out>
+	</testcase>
+	<testcase name="Runner_invalid" classname="Runner_invalid" time="0.181133" status="run">
+		<properties/>
+		<system-out>PASS runner invalid
+</system-out>
+	</testcase>
+	<testcase name="Runner_resume" classname="Runner_resume" time="3.75314" status="run">
+		<properties/>
+		<system-out>PASS runner resume
+</system-out>
+	</testcase>
+	<testcase name="Runner_tomography" classname="Runner_tomography" time="0.589957" status="run">
+		<properties/>
+		<system-out>PASS runner tomography
+</system-out>
+	</testcase>
+	<testcase name="RunnerLateBin" classname="RunnerLateBin" time="0.942404" status="run">
+		<properties/>
+		<system-out>PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS runner late_bin
+</system-out>
+	</testcase>
+	<testcase name="RunnerExportedUnits" classname="RunnerExportedUnits" time="0.192031" status="run">
+		<properties/>
+		<system-out>PASS serialized units and unchanged runtime model
+PASS runner exported_units
+</system-out>
+	</testcase>
+	<testcase name="GainCache" classname="GainCache" time="1.27138" status="run">
+		<properties/>
+		<system-out>  identity: gain of 1.0 reproduces the no-gain output exactly
+  control:  gain of 2.0 does change the output (the checks above can fail)
+  reuse:    second movie in a run matches the first, and matches a solo run
+gain cache: all cases exact
+</system-out>
+	</testcase>
+	<testcase name="TiffRead" classname="TiffRead" time="1.05917" status="run">
+		<properties/>
+		<system-out>  u16_deflate_rps1: 3 frame(s) 29x37, 111 row sums and 3219 samples exact
+  u16_raw_rps7: 2 frame(s) 16x50, 100 row sums and 1600 samples exact
+  packed4bit_k2sr: 1 frame(s) 7420x7676, 7676 row sums and 474880 samples exact
+TIFF read: all cases exact
+</system-out>
+	</testcase>
+	<testcase name="DamagedMovie" classname="DamagedMovie" time="3.44925" status="run">
+		<properties/>
+		<system-out>Running TIFF integrity and expected-frame validation test suite...
+  [PASS] test_strip_truncation
+  [PASS] test_ifd_directory_truncation
+  [PASS] test_hard_truncation
+  [PASS] test_corrupt_header
+  [PASS] test_expected_frames_cli
+  [PASS] test_expected_frames_star
+  [PASS] test_positive_control_short_valid_movie
+  [PASS] test_batch_permutations
+  [PASS] test_resume_isolation
+  [PASS] test_expected_frame_contract
+  [PASS] test_tomogram_expected_frames
+All TIFF integrity and expected-frame validation tests PASSED.
+</system-out>
+	</testcase>
+	<testcase name="CompressedMovieSequence" classname="CompressedMovieSequence" time="0.878484" status="run">
+		<properties/>
+		<system-out>PASS: six compressed movies after a plain movie; exact core headers/pixels, STAR files present
+</system-out>
+	</testcase>
+	<testcase name="GlobalIfftElision" classname="GlobalIfftElision" time="1.85292" status="run">
+		<properties/>
+		<system-out>PASS: global inverse FFT elision preserves every product
+  A dose-weighting independence of EVN/ODD  ok
+  C patch alignment still contributes       ok
+  D elided branch matches non-elided branch ok (product set;
+                                                pixels cannot fail)
+  E _noDW.mrc independent of --dose_weighting ok
+  B determinism on the eliding arm          ok (defence in depth;
+                                                power undemonstrated)
+</system-out>
+	</testcase>
+	<testcase name="HostBufferReuse" classname="HostBufferReuse" time="3.88535" status="run">
+		<properties/>
+		<system-out>ok   nopool run exits 0
+ok   disabled pool reported accurately
+ok   pool run exits 0
+ok   default allocator mode reported (glibc defaults, pooled buffers)
+ok   perturbed run exits 0
+ok   thresholds run exits 0
+ok   no pool vs pool: same product inventory (10 files)
+ok   no pool vs pool: byte-identical products
+ok   no pool vs pool+MALLOC_PERTURB_: same product inventory (10 files)
+ok   no pool vs pool+MALLOC_PERTURB_: byte-identical products
+ok   no pool vs opt-in thresholds+MALLOC_PERTURB_: same product inventory (10 files)
+ok   no pool vs opt-in thresholds+MALLOC_PERTURB_: byte-identical products
+ok   mixed-geometry defaults run exits 0
+ok   mixed-geometry perturbed run exits 0
+ok   mixed geometry defaults vs reuse+perturbed: same product inventory (10 files)
+ok   mixed geometry defaults vs reuse+perturbed: byte-identical products
+ok   user-provided malloc settings are not overridden by the opt-in
+PASS
+</system-out>
+	</testcase>
+	<testcase name="StageProfile" classname="StageProfile" time="2.09147" status="run">
+		<properties/>
+		<system-out>ok   both runs exit 0
+ok   same product inventory (4 files)
+ok   identical corrected_micrographs.star
+ok   identical mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/test-data/synthetic/synthetic_movie.mrc
+ok   identical mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/test-data/synthetic/synthetic_movie.star
+ok   identical mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/test-data/synthetic/synthetic_movie_noDW.mrc
+ok   one movie and one process record
+ok   stages tile the movie (140.805 vs 140.805 ms)
+ok   all expected stages in order: ['setup', 'read gain', 'session and device ingest', 'host read movie', 'allocate host sum', 'gain and sum', 'hot pixels', 'fix defects', 'release preprocessing', 'global fft', 'power spectrum', 'global alignment', 'allocate reconstruction', 'global ifft', 'patch alignment', 'fit polynomial', 'release alignment', 'unweighted sums', 'dose weighting', 'movie teardown', 'submit model and plot']
+ok   host read movie contains its own work (host read movie/READ_MOVIE: 5.776 of 5.816 ms)
+ok   globa...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="RunnerModelParser" classname="RunnerModelParser" time="0.214907" status="run">
+		<properties/>
+		<system-out>duplicate rejected
+nonfinite rejected
+truncated rejected
+negative_index rejected
+trailing rejected
+invalid_index rejected
+missing_coefficient rejected
+legacy empty trailing string preserved
+PASS runner model_parser
+</system-out>
+	</testcase>
+	<testcase name="MicrographModelBounds" classname="MicrographModelBounds" time="1.66395" status="run">
+		<properties/>
+		<system-out>PASS 7 valid and 11 malformed saved-EER parser/completion controls; decoding unrun
+PASS 38 malformed saved models; sparse, fractional, mask and round-trip controls
+PASS actual resume repairs invalid hot-pixel records; valid resume is unchanged
+</system-out>
+	</testcase>
+	<testcase name="RunnerInterpolateShifts" classname="RunnerInterpolateShifts" time="0.632339" status="run">
+		<properties/>
+		<system-out>PASS runner interpolate_shifts
+</system-out>
+	</testcase>
+	<testcase name="WriteFaults" classname="WriteFaults" time="0.666451" status="run">
+		<properties/>
+		<system-out>  phase 1: a.mrc 1049600 B, sha256 8ad4365ca6b4af0e
+    log check: claim_present=True corrected=True
+  phase 2: exit 1, b.mrc truncated to 600000 B, no b.star, a.mrc unchanged
+  phase 3: exit 0, b.mrc 1049600 B, joint STAR lists both, a.mrc still sha256 8ad4365ca6b4af0e
+  phase 4: finite hard limit 8388608 B -&gt; exit 1, MotionCorr reported the short write on c.mrc, c.mrc truncated to 600000 B, no c.star
+fail-closed image writes: ok
+</system-out>
+	</testcase>
+	<testcase name="WriteFaultsSync" classname="WriteFaultsSync" time="0.695787" status="run">
+		<properties/>
+		<system-out>extra runner options: --sync_output
+  phase 1: a.mrc 1049600 B, sha256 8ad4365ca6b4af0e
+    log check: claim_present=False corrected=False
+  phase 2: exit 1, b.mrc truncated to 600000 B, no b.star, a.mrc unchanged
+  phase 3: exit 0, b.mrc 1049600 B, joint STAR lists both, a.mrc still sha256 8ad4365ca6b4af0e
+  phase 4: finite hard limit 8388608 B -&gt; exit 1, MotionCorr reported the short write on c.mrc, c.mrc truncated to 600000 B, no c.star
+fail-closed image writes: ok
+</system-out>
+	</testcase>
+	<testcase name="WriteFaultsMultiProduct" classname="WriteFaultsMultiProduct" time="0.657196" status="run">
+		<properties/>
+		<system-out>extra runner options: --save_noDW --even_odd_split
+  phase 1: a.mrc 1049600 B, sha256 c3d316322108902f
+    log check: claim_present=True corrected=True
+  phase 2: exit 1, b.mrc truncated to 600000 B, no b.star, a.mrc unchanged
+  phase 3: exit 0, b.mrc 1049600 B, joint STAR lists both, a.mrc still sha256 c3d316322108902f
+  phase 4: finite hard limit 8388608 B -&gt; exit 1, MotionCorr reported the short write on c.mrc, c.mrc truncated to 600000 B, no c.star
+fail-closed image writes: ok
+</system-out>
+	</testcase>
+	<testcase name="OutputStageFaults" classname="OutputStageFaults" time="0.545207" status="run">
+		<properties/>
+		<system-out>control arm: the same command without the fault exits 0
+PASS: the job reported failure (exit 1) rather than aborting
+PASS: the micrograph written before the PDF stage survived
+output stage faults: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEps" classname="LogfileFromEps" time="4.09537" status="run">
+		<properties/>
+		<system-out>PASS fresh run renders logfile.pdf from EPS (header list + batch list), one render
+PASS incremental run with a prior all_batches.pdf keeps the concatenation
+PASS Ghostscript failure (immediate and delayed) reports, exits 0 and leaves no logfile.pdf, as before
+PASS an unwritable logfile.pdf is reported without failing the job or terminating
+logfile from EPS: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_always_eps" classname="LogfileFromEpsMutant_always_eps" time="0.54821" status="run">
+		<properties/>
+		<system-out>PASS fresh run renders logfile.pdf from EPS (header list + batch list), one render
+FAIL: incremental run rendered logfile.pdf from this run's EPS although a prior all_batches.pdf exists: the earlier batches would be lost: [{'args': ['-sDEVICE=pdfwrite', '-dNOPAUSE', '-dBATCH', '-dSAFER', '-dDEVICEWIDTHPOINTS=800', '-dDEVICEHEIGHTPOINTS=800', '-sOutputFile=/tmp/logfile-from-eps-l0gpjbpm/fresh/header.pdf', '@/tmp/logfile-from-eps-l0gpjbpm/fresh/header.pdf.lst'], 'out': '/tmp/logfile-from-eps-l0gpjbpm/fresh/header.pdf', 'list': ['/tmp/logfile-from-eps-l0gpjbpm/fresh/corrected_micrographs_all_rlnAccumMotionTotal.eps', '/tmp/logfile-from-eps-l0gpjbpm/fresh/corrected_micrographs_all_rlnAccumMotionEarly.eps', '/tmp/logfile-from-eps-l0gpjbpm/fresh/corrected_micrographs_all_rlnAccumMotionLate.eps']}, {'args': ['-sDEVICE=pdfwrite', '-dNOPAUSE', '-dBATCH', '-dSAFER', '-dDEVICEWIDTHPOINTS=800', '-dDEVICEHEIGHTPOINTS=800', '-sOutputFile=/tmp/logfile-from-eps-l0gpjbpm/fresh/batch.pdf', '@/tmp/logfile-from-eps-l0gpjbpm/fres...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_late_guard" classname="LogfileFromEpsMutant_late_guard" time="0.416943" status="run">
+		<properties/>
+		<system-out>FAIL: fresh run still concatenated header.pdf + all_batches.pdf into logfile.pdf
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_eps_order" classname="LogfileFromEpsMutant_eps_order" time="0.309999" status="run">
+		<properties/>
+		<system-out>FAIL: EPS-direct logfile.pdf must list header EPS followed by batch EPS, in order: ['/tmp/logfile-from-eps-8ytsq79b/fresh/Movies/a_shifts.eps', '/tmp/logfile-from-eps-8ytsq79b/fresh/Movies/b_shifts.eps', '/tmp/logfile-from-eps-8ytsq79b/fresh/corrected_micrographs_all_rlnAccumMotionTotal.eps', '/tmp/logfile-from-eps-8ytsq79b/fresh/corrected_micrographs_all_rlnAccumMotionEarly.eps', '/tmp/logfile-from-eps-8ytsq79b/fresh/corrected_micrographs_all_rlnAccumMotionLate.eps']
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_placeholder" classname="LogfileFromEpsMutant_placeholder" time="0.959226" status="run">
+		<properties/>
+		<system-out>PASS fresh run renders logfile.pdf from EPS (header list + batch list), one render
+PASS incremental run with a prior all_batches.pdf keeps the concatenation
+FAIL: gs fail: a failed logfile.pdf render left a file behind; the concatenation it replaced left none
+</system-out>
+	</testcase>
+	<testcase name="CiFailClosedControls" classname="CiFailClosedControls" time="25.6725" status="run">
+		<properties/>
+		<system-out>........
+----------------------------------------------------------------------
+Ran 8 tests in 25.526s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="CudaValidationParser" classname="CudaValidationParser" time="0.0843216" status="run">
+		<properties/>
+		<system-out>PASS
+</system-out>
+	</testcase>
+	<testcase name="MultiGpuScheduling" classname="MultiGpuScheduling" time="114.86" status="run">
+		<properties/>
+		<system-out>ok   case_roundtrip_and_metadata
+ok   case_empty_required_products_refused
+ok   case_empty_shard_rejected
+ok   case_output_name_collision
+ok   case_duplicate_movie_in_input
+ok   case_collapsed_spaces_are_a_collision
+ok   case_decorated_output_collision
+ok   case_manifest_digest_binds_parsed_snapshot
+ok   case_real_output_suffixes_attributed
+ok   case_dotted_shift_plot_root
+ok   case_aggregate_name_shadowing
+ok   case_star_parser_refusals
+ok   case_clean_merge
+ok   case_lost_output
+ok   case_duplicate_and_misrouted_output
+ok   case_unassigned_movie_output
+ok   case_failed_worker_blocks_merge
+ok   case_missing_status_blocks_merge
+ok   case_failed_device_witness_blocks_merge
+ok   case_missing_worker_directory
+ok   case_link_staging_with_aggregate
+ok   case_link_refusal_falls_back_to_copy
+ok   case_launcher_exit_digests_are_reused
+ok   case_change_after_worker_exit_detected
+ok   case_preserved_aggregate_change_after_exit_detected
+ok   case_exit_digest_records_validated
+ok   case_timestamp_barrier_failure_fails_cl...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="OutputTreeComparator" classname="OutputTreeComparator" time="1.02134" status="run">
+		<properties/>
+		<system-out>test_changed_header_field_is_detected (__main__.TestOutputTreeComparator.test_changed_header_field_is_detected) ... ok
+test_changed_pixel_is_detected (__main__.TestOutputTreeComparator.test_changed_pixel_is_detected) ... ok
+test_changed_star_is_detected (__main__.TestOutputTreeComparator.test_changed_star_is_detected) ... ok
+test_cli_exit_code_agrees_with_the_report_it_writes (__main__.TestOutputTreeComparator.test_cli_exit_code_agrees_with_the_report_it_writes)
+A comparator that prints FAIL and exits 0 certifies the opposite of ... ok
+test_equal_complete_trees_pass_with_only_timestamp_and_log_timing_differences (__main__.TestOutputTreeComparator.test_equal_complete_trees_pass_with_only_timestamp_and_log_timing_differences) ... ok
+test_extended_header_is_included_in_length_and_payload_offset (__main__.TestOutputTreeComparator.test_extended_header_is_included_in_length_and_payload_offset) ... ok
+test_extra_movie_product_is_rejected (__main__.TestOutputTreeComparator.test_extra_movie_product_is_rejected) ... ok...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="JointStarPublication" classname="JointStarPublication" time="1.3501" status="run">
+		<properties/>
+		<system-out>PASS joint STAR healthy
+PASS joint STAR open
+PASS joint STAR rename
+LIMIT soft=128 hard=8192
+PASS joint STAR limit
+LIMIT soft=128 hard=8192
+PASS joint STAR write-limit
+PASS direct/glob optics association and binned sampling; STAR-reference pixels unchanged
+PASS joint STAR actual runner failure and repair; completed products unchanged
+</system-out>
+	</testcase>
+	<testcase name="ImageWriteFaults" classname="ImageWriteFaults" time="0.0780847" status="run">
+		<properties/>
+		<system-out>  inherited RLIMIT_FSIZE: soft=infinity hard=infinity
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/rwMRC.h, line 621
+ERROR: 
+Failed to write image data (1048576 bytes) to /tmp/mc_write_faults_3923154/big.mrc: File too large
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/image.h, line 570
+ERROR: 
+Failed to flush and close image file /tmp/mc_write_faults_3923154/small.mrc: File too large
+  destructor dropped 1464 unflushable bytes without terminating
+  inherited RLIMIT_FSIZE: soft=8388608 hard=8388608  (finite-hard-limit control child)
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/rwMRC.h, line 621
+ERROR: 
+Failed to write image data (1048576 bytes) to /tmp/mc_write_faults_3923157/big.mrc: File too large
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/src/image.h, line 570
+ERROR: 
+Failed to flush and close image file /tmp/mc_write_faults_3923157/small.mrc: File too large
+  destructor dropped 1464 unflushable bytes without terminating
+image write faults: ok (finite hard limit)
+  finite-hard-...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="NativeMovieStaging" classname="NativeMovieStaging" time="0.482064" status="run">
+		<properties/>
+		<system-out>
+native uint16 staging contract: 16 frames of 1534x2046 (98080 kB payload)
+ok     bind() sizes the frame vector
+ok     mapping covers the whole movie
+ok     every frame carries the movie geometry
+ok     frames alias the mapping (destroyData=false, nzyxdimAlloc set)
+ok     frame slices are laid out in ascending order
+ok     Image::read's coreAllocateReuse() keeps the bound slice
+ok     writes through the alias read back per frame
+ok     discardThrough() returns the consumed pages (48972 kB of about 49040 kB)
+ok     discardThrough() leaves unconsumed frames byte-intact
+ok     release() clears the frame vector
+ok     release() is idempotent and leaves no capacity
+ok     instrument sees the mapping arrive (98088 kB of 98080 kB)
+ok     release() returns the payload (4 kB retained of 98080 kB)
+       [control] per-frame heap: grew 98068 kB, retained 116 kB after free
+       [control] NOTE: this host's allocator also returns per-frame heap
+       storage, so the assertion above is not discriminating here; the
+      ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+</testsuite>

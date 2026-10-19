@@ -1,0 +1,145 @@
+start 2026-10-16T19:54:10Z cfg=nvcomp HEAD=1db869025507ac801845b4001b84e6bc0e77a645 status=0
+mask: pid 3946398's current affinity list: 0-123
+  Test #92: CudaErrorClass
+
+Total Tests: 92
+=== CTest Collection Validation: PASS === 
+  Collected tests: 92
+    - CpuUnweightedStream            [ADDITIVE]
+    - PatchRetryState                [REQUIRED]
+    - RunnerInterpolateRecenter      [REQUIRED]
+    - FloatPlanCache                 [ADDITIVE]
+    - MrcHeaderStats                 [REQUIRED]
+    - PdfConcat                      [REQUIRED]
+    - DefectParser                   [REQUIRED]
+    - DeflateLayout                  [REQUIRED]
+    - Adler32Arithmetic              [REQUIRED]
+    - Adler32KernelHost              [REQUIRED]
+    - StageProfileThreads            [REQUIRED]
+    - FrameBufferPool                [REQUIRED]
+    - ScratchArena                   [REQUIRED]
+    - ReaderPool                     [ADDITIVE]
+    - ReaderPoolMutant_spin          [ADDITIVE]
+    - ReaderPoolMutant_nowait        [ADDITIVE]
+    - DefectNeighbours               [REQUIRED]
+    - DefectMergeMutant_append_only  [ADDITIVE]
+    - DefectMergeMutant_no_order_check [ADDITIVE]
+    - DefectMergeMutant_swap_xy      [ADDITIVE]
+    - NvcompAcceptanceDiagnostics    [REQUIRED]
+    - ProfilingKit                   [REQUIRED]
+    - GainCacheOwnership             [REQUIRED]
+    - NvcompGuards                   [REQUIRED]
+    - SyntheticRegression            [REQUIRED]
+    - HotPixelRngDeterminism         [REQUIRED]
+    - RunnerExposure                 [REQUIRED]
+    - Runner_failure                 [REQUIRED]
+    - Runner_invalid                 [REQUIRED]
+    - Runner_resume                  [REQUIRED]
+    - Runner_tomography              [REQUIRED]
+    - RunnerLateBin                  [REQUIRED]
+    - RunnerExportedUnits            [REQUIRED]
+    - GainCache                      [REQUIRED]
+    - TiffRead                       [REQUIRED]
+    - DamagedMovie                   [REQUIRED]
+    - CompressedMovieSequence        [REQUIRED]
+    - GlobalIfftElision              [REQUIRED]
+    - HostBufferReuse                [REQUIRED]
+    - StageProfile                   [REQUIRED]
+    - RunnerModelParser              [REQUIRED]
+    - MicrographModelBounds          [REQUIRED]
+    - RunnerInterpolateShifts        [REQUIRED]
+    - WriteFaults                    [REQUIRED]
+    - WriteFaultsSync                [REQUIRED]
+    - WriteFaultsMultiProduct        [REQUIRED]
+    - OutputStageFaults              [REQUIRED]
+    - LogfileFromEps                 [ADDITIVE]
+    - LogfileFromEpsMutant_always_eps [ADDITIVE]
+    - LogfileFromEpsMutant_late_guard [ADDITIVE]
+    - LogfileFromEpsMutant_eps_order [ADDITIVE]
+    - LogfileFromEpsMutant_placeholder [ADDITIVE]
+    - CiFailClosedControls           [REQUIRED]
+    - CudaValidationParser           [REQUIRED]
+    - MultiGpuScheduling             [REQUIRED]
+    - OutputTreeComparator           [REQUIRED]
+    - JointStarPublication           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+    - NativeMovieStaging             [REQUIRED]
+    - RunnerInterpolateShiftsCuda    [ADDITIVE]
+    - StageProfileDeviceTiming       [ADDITIVE]
+    - SignedMrcStaging               [ADDITIVE]
+    - CudaU16StagingEquivalence      [ADDITIVE]
+    - CudaWrapperUploadFailure       [ADDITIVE]
+    - CudaFaultMatrix                [ADDITIVE]
+    - CudaPatchWorkspace             [ADDITIVE]
+    - CudaPatchBatch                 [ADDITIVE]
+    - CudaVramAlias                  [ADDITIVE]
+    - CudaPatchBatchMutant_shift_retired [ADDITIVE]
+    - CudaPatchBatchMutant_never_retire [ADDITIVE]
+    - CudaPatchBatchMutant_extract_no_remap [ADDITIVE]
+    - CudaPatchBatchMutant_scale_divide [ADDITIVE]
+    - CudaPatchBatchMutant_shift_wrong_half [ADDITIVE]
+    - CudaPatchBatchMutant_perpatch_wrong_half [ADDITIVE]
+    - CudaVramAliasMutant_arena_overlap [ADDITIVE]
+    - CudaVramAliasMutant_arena_work_over_buffers [ADDITIVE]
+    - CudaVramAliasMutant_refusal_off [ADDITIVE]
+    - CudaVramAliasMutant_dw_scratch_over_fourier [ADDITIVE]
+    - CudaDeviceGainPool             [ADDITIVE]
+    - CudaDeviceGainCleanupFatal     [ADDITIVE]
+    - CudaGeometryRetention          [ADDITIVE]
+    - CudaGeometryRetentionMutant_no_take [ADDITIVE]
+    - CudaGeometryRetentionMutant_return_failed [ADDITIVE]
+    - CudaGeometryRetentionMutant_keep_taken_alias [ADDITIVE]
+    - CudaDoseNormalization          [ADDITIVE]
+    - CudaDoseSessionPlan            [ADDITIVE]
+    - CudaPreprocessingFailurePaths  [ADDITIVE]
+    - CudaAdler32                    [ADDITIVE]
+    - CudaNvcompAcceptanceFailures   [ADDITIVE]
+    - CudaNvcompReconstructionFailures [ADDITIVE]
+    - CudaDoseWeightAlias            [ADDITIVE]
+    - CudaErrorClass                 [ADDITIVE]
+validate_test_collection rc=0
+Internal ctest changing into directory: /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp
+Test project /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp
+      Start  1: CpuUnweightedStream
+ 1/92 Test  #1: CpuUnweightedStream ............................   Passed    0.10 sec
+      Start  2: PatchRetryState
+ 2/92 Test  #2: PatchRetryState ................................   Passed    0.05 sec
+      Start  3: RunnerInterpolateRecenter
+ 3/92 Test  #3: RunnerInterpolateRecenter ......................   Passed    0.02 sec
+      Start  4: FloatPlanCache
+ 4/92 Test  #4: FloatPlanCache .................................   Passed    0.02 sec
+      Start  5: MrcHeaderStats
+ 5/92 Test  #5: MrcHeaderStats .................................   Passed    0.02 sec
+      Start  6: PdfConcat
+ 6/92 Test  #6: PdfConcat ......................................   Passed    0.10 sec
+      Start  7: DefectParser
+ 7/92 Test  #7: DefectParser ...................................   Passed    0.04 sec
+      Start  8: DeflateLayout
+ 8/92 Test  #8: DeflateLayout ..................................   Passed    0.01 sec
+      Start  9: Adler32Arithmetic
+ 9/92 Test  #9: Adler32Arithmetic ..............................   Passed    0.78 sec
+      Start 10: Adler32KernelHost
+10/92 Test #10: Adler32KernelHost ..............................   Passed    0.00 sec
+      Start 11: StageProfileThreads
+11/92 Test #11: StageProfileThreads ............................   Passed    0.80 sec
+      Start 12: FrameBufferPool
+12/92 Test #12: FrameBufferPool ................................   Passed    0.04 sec
+      Start 13: ScratchArena
+13/92 Test #13: ScratchArena ...................................   Passed    0.01 sec
+      Start 14: ReaderPool
+14/92 Test #14: ReaderPool .....................................   Passed    0.61 sec
+      Start 15: ReaderPoolMutant_spin
+15/92 Test #15: ReaderPoolMutant_spin ..........................   Passed    0.58 sec
+      Start 16: ReaderPoolMutant_nowait
+16/92 Test #16: ReaderPoolMutant_nowait ........................   Passed    0.03 sec
+      Start 17: DefectNeighbours
+17/92 Test #17: DefectNeighbours ...............................   Passed    0.01 sec
+      Start 18: DefectMergeMutant_append_only
+18/92 Test #18: DefectMergeMutant_append_only ..................   Passed    0.01 sec
+      Start 19: DefectMergeMutant_no_order_check
+19/92 Test #19: DefectMergeMutant_no_order_check ...............   Passed    0.01 sec
+      Start 20: DefectMergeMutant_swap_xy
+20/92 Test #20: DefectMergeMutant_swap_xy ......................   Passed    0.01 sec
+      Start 21: NvcompAcceptanceDiagnostics
+21/92 Test #21: NvcompAcceptanceDiagnostics ....................   Passed    0.18 sec
+      Start 22: ProfilingKit

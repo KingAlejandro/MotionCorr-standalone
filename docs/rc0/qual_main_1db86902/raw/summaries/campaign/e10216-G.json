@@ -1,0 +1,615 @@
+{
+ "family": "e10216",
+ "config": "G",
+ "movie": "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+ "runs": {
+  "auto": {
+   "label": "e10216-G-auto",
+   "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+   "binary_sha256": "77db3f9268589158347f3710f904c0238e53de4e1a12703f2ca1d7cb84412a99",
+   "args": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--expected_frames",
+    "59",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/out-auto/",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--ingest",
+    "auto",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/witness-auto.txt"
+   ],
+   "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/inputs/e10216",
+   "cpu_mask": "104-111",
+   "env": {
+    "CUDA_VISIBLE_DEVICES": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+    "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "1",
+    "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+   },
+   "extra_env": {},
+   "gpu_run": true,
+   "start_utc": "2026-10-16T20:18:14Z",
+   "lock_wait_s": 0.0,
+   "bench_gate": {
+    "bench_polls_held": 0,
+    "bench_waited_s": 0.0
+   },
+   "gpu1_precheck": {
+    "waited_s": 0.1,
+    "foreign": []
+   },
+   "rc": 0,
+   "wall_s": 2.66,
+   "gpu_witness": {
+    "uuids_seen_for_pid": [],
+    "peak_mib": 0,
+    "smi_samples": 10,
+    "pid_hits": 0,
+    "on_gpu1_only": null
+   },
+   "max_rss_kib": 2199864,
+   "time_exit_status": 0,
+   "elapsed": "0:02.60",
+   "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/logs/e10216-G-auto.stdout",
+   "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/logs/e10216-G-auto.time",
+   "ingest_witness": [
+    "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs compact"
+   ]
+  },
+  "float": {
+   "label": "e10216-G-float",
+   "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+   "binary_sha256": "77db3f9268589158347f3710f904c0238e53de4e1a12703f2ca1d7cb84412a99",
+   "args": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--expected_frames",
+    "59",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/out-float/",
+    "--j",
+    "8",
+    "--gpu",
+    "0",
+    "--ingest",
+    "float",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/witness-float.txt"
+   ],
+   "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/inputs/e10216",
+   "cpu_mask": "104-111",
+   "env": {
+    "CUDA_VISIBLE_DEVICES": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+    "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "1",
+    "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+   },
+   "extra_env": {},
+   "gpu_run": true,
+   "start_utc": "2026-10-16T20:18:17Z",
+   "lock_wait_s": 0.0,
+   "bench_gate": {
+    "bench_polls_held": 0,
+    "bench_waited_s": 0.0
+   },
+   "gpu1_precheck": {
+    "waited_s": 0.1,
+    "foreign": []
+   },
+   "rc": 0,
+   "wall_s": 3.863,
+   "gpu_witness": {
+    "uuids_seen_for_pid": [],
+    "peak_mib": 0,
+    "smi_samples": 13,
+    "pid_hits": 0,
+    "on_gpu1_only": null
+   },
+   "max_rss_kib": 4074644,
+   "time_exit_status": 0,
+   "elapsed": "0:03.69",
+   "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/logs/e10216-G-float.stdout",
+   "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/logs/e10216-G-float.time",
+   "ingest_witness": [
+    "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs float"
+   ]
+  },
+  "cpu": {
+   "label": "e10216-G-cpu",
+   "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-cpu/motioncorr",
+   "binary_sha256": "dd86cd419c43dc83d732c7b70cff2bb40c5459674ba65f9b9ba5ee85a6b26439",
+   "args": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--expected_frames",
+    "59",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/out-cpu/",
+    "--j",
+    "8",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/witness-cpu.txt"
+   ],
+   "cwd": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/inputs/e10216",
+   "cpu_mask": "104-111",
+   "env": {
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "1",
+    "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+   },
+   "extra_env": {},
+   "gpu_run": false,
+   "start_utc": "2026-10-16T20:18:21Z",
+   "rc": 0,
+   "wall_s": 22.013,
+   "max_rss_kib": 7859448,
+   "time_exit_status": 0,
+   "elapsed": "0:21.96",
+   "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/logs/e10216-G-cpu.stdout",
+   "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/logs/e10216-G-cpu.time",
+   "ingest_witness": [
+    "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs float"
+   ]
+  }
+ },
+ "checks": {
+  "auto_vs_float": {
+   "strict_all_files_rc": 1,
+   "declared_route_log_allowance_rc": 1,
+   "products_only_rc": 0,
+   "log_line_diff": {
+    "only_in_A": [
+     "Staging this movie as native signed 16-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 1979711488 bytes for 59 x 4096 x 4096 samples, released before any float movie is materialized.",
+     "Released native int16 host staging after device forward FFT.",
+     "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/out-auto/Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc"
+    ],
+    "only_in_B": [
+     "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-QUAL/campaign/e10216-G/out-float/Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc"
+    ]
+   },
+   "allowance_prefixes": [
+    "nvCOMP ingestion",
+    "Staging this movie as native",
+    "Released native uint",
+    "Materialized native uint"
+   ],
+   "detail_tail": {
+    "strict": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.log\n",
+    "declared": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nAllowed added .log line prefixes (dropped from BOTH arms): 'nvCOMP ingestion', 'Staging this movie as native', 'Released native uint', 'Materialized native uint'\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.log\n"
+   },
+   "identity-strict": {
+    "status": "FAIL",
+    "different_files": [
+     "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.log"
+    ],
+    "different_products": [],
+    "mrc_payload_sha256": {
+     "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc": "704b80dd3f5055cf2e5a57aa41bc05f74ad0025f6f927595bab52b2669663ee4"
+    }
+   },
+   "identity-declared": {
+    "status": "FAIL",
+    "different_files": [
+     "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.log"
+    ],
+    "different_products": [],
+    "mrc_payload_sha256": {
+     "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc": "704b80dd3f5055cf2e5a57aa41bc05f74ad0025f6f927595bab52b2669663ee4"
+    }
+   },
+   "identity-products": {
+    "status": "PASS",
+    "different_files": [],
+    "different_products": [],
+    "mrc_payload_sha256": {
+     "Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc": "704b80dd3f5055cf2e5a57aa41bc05f74ad0025f6f927595bab52b2669663ee4"
+    }
+   }
+  },
+  "cpu_vs_cuda_auto_backend_gate_DIAGNOSTIC_ONLY": {
+   "rc": 1,
+   "tail": "========================================================================\n MOTIONCORR ACCEPTANCE GATE REPORT\n========================================================================\nGate Profile:      BACKEND\nOverall Status:    FAIL\n------------------------------------------------------------------------\n1. MOTION TRAJECTORY:\n   Frames evaluated:     59\n   Coordinate RMS error: 0.016577 px (threshold: 0.020000)\n   Max absolute shift:   0.032670 px (threshold: 0.050000)\n   Status:               PASS\n\n2. CORRECTED IMAGE PARITY:\n   Pixel-identical:      False\n   Image RMSE:           3.937356e-01 (threshold: 2.000000e-02)\n   Max absolute diff:    2.341843e+00 (threshold: 5.000000e+00)\n   Relative RMSE:        1.659088e-02 (threshold: 1.000000e-03 in relaxed/custom gate)\n     diagnostic status: FAIL (nonblocking; backend profile only)\n     denominator:        reference pixel population std = 2.373206e+01\n     equivalent to:      absolute RMSE <= 2.373206e-02 for this reference\n   Normalized headers:   Core metadata: 8 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               FAIL\n     ! Image RMSE 3.937356e-01 > 2.000000e-02\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n\n5. PROCESS METRICS:\n   Wall clock time:      0:02.60\n   User CPU time:        1.22 s\n   Peak RSS memory:      2148.3 MB (2199864 KB)\n   Process exit status:  0\n========================================================================\n",
+   "json_checks": {
+    "motion_trajectory": {
+     "num_frames": 59,
+     "max_abs_diff_x": 0.03266999999999953,
+     "max_abs_diff_y": 0.025219999999997356,
+     "max_shift_error": 0.03266999999999953,
+     "coord_rms_error": 0.01657671559697685,
+     "per_frame_diffs": [
+      {
+       "frame": 1,
+       "dx": 0.0,
+       "dy": 0.0
+      },
+      {
+       "frame": 2,
+       "dx": 0.0011250000000000426,
+       "dy": -0.015159999999998064
+      },
+      {
+       "frame": 3,
+       "dx": -0.005831000000000031,
+       "dy": -0.014520000000000977
+      },
+      {
+       "frame": 4,
+       "dx": 0.0,
+       "dy": -0.017260000000000275
+      },
+      {
+       "frame": 5,
+       "dx": -0.0032440000000000246,
+       "dy": -0.01716000000000406
+      },
+      {
+       "frame": 6,
+       "dx": -0.0022539999999999782,
+       "dy": -0.02177999999999969
+      },
+      {
+       "frame": 7,
+       "dx": 0.0035809999999999453,
+       "dy": -0.009380000000000166
+      },
+      {
+       "frame": 8,
+       "dx": -0.003550000000000001,
+       "dy": -0.02027999999999963
+      },
+      {
+       "frame": 9,
+       "dx": -0.004510000000000014,
+       "dy": -0.00876999999999839
+      },
+      {
+       "frame": 10,
+       "dx": -0.00266999999999995,
+       "dy": -0.009280000000003952
+      },
+      {
+       "frame": 11,
+       "dx": 0.0,
+       "dy": -0.018180000000000973
+      },
+      {
+       "frame": 12,
+       "dx": -0.013570000000000082,
+       "dy": -0.009610000000002117
+      },
+      {
+       "frame": 13,
+       "dx": 0.007309999999999928,
+       "dy": -0.013109999999997513
+      },
+      {
+       "frame": 14,
+       "dx": 0.005779999999999674,
+       "dy": -0.017279999999999518
+      },
+      {
+       "frame": 15,
+       "dx": 0.005889999999999951,
+       "dy": -0.019829999999998904
+      },
+      {
+       "frame": 16,
+       "dx": 0.0005799999999998029,
+       "dy": -0.01688000000000045
+      },
+      {
+       "frame": 17,
+       "dx": 0.0019999999999997797,
+       "dy": -0.014630000000003918
+      },
+      {
+       "frame": 18,
+       "dx": 0.00132000000000021,
+       "dy": -0.010309999999996933
+      },
+      {
+       "frame": 19,
+       "dx": 0.002169999999999561,
+       "dy": -0.013439999999995678
+      },
+      {
+       "frame": 20,
+       "dx": 0.01805000000000012,
+       "dy": -0.019939999999998292
+      },
+      {
+       "frame": 21,
+       "dx": -0.00026999999999999247,
+       "dy": -0.010300000000000864
+      },
+      {
+       "frame": 22,
+       "dx": -0.012499999999999734,
+       "dy": -0.013500000000000512
+      },
+      {
+       "frame": 23,
+       "dx": -0.00582000000000038,
+       "dy": -0.013600000000003831
+      },
+      {
+       "frame": 24,
+       "dx": -0.011810000000000098,
+       "dy": -0.006250000000001421
+      },
+      {
+       "frame": 25,
+       "dx": 0.00140000000000029,
+       "dy": -0.013289999999997804
+      },
+      {
+       "frame": 26,
+       "dx": -0.00503000000000009,
+       "dy": -0.007819999999995275
+      },
+      {
+       "frame": 27,
+       "dx": -0.006340000000000234,
+       "dy": -0.012830000000001007
+      },
+      {
+       "frame": 28,
+       "dx": -0.0011499999999999844,
+       "dy": -0.01114000000000459
+      },
+      {
+       "frame": 29,
+       "dx": 0.005810000000000315,
+       "dy": -0.013059999999995853
+      },
+      {
+       "frame": 30,
+       "dx": 0.0006599999999998829,
+       "dy": -0.012160000000001503
+      },
+      {
+       "frame": 31,
+       "dx": -0.000560000000000116,
+       "dy": -0.021270000000001232
+      },
+      {
+       "frame": 32,
+       "dx": 0.0003500000000000725,
+       "dy": -0.017499999999998295
+      },
+      {
+       "frame": 33,
+       "dx": 0.003150000000000208,
+       "dy": -0.01721000000000572
+      },
+      {
+       "frame": 34,
+       "dx": -0.00682000000000027,
+       "dy": -0.017279999999999518
+      },
+      {
+       "frame": 35,
+       "dx": -0.004760000000000542,
+       "dy": -0.011810000000004095
+      },
+      {
+       "frame": 36,
+       "dx": -0.0018599999999997507,
+       "dy": -0.013649999999998386
+      },
+      {
+       "frame": 37,
+       "dx": -0.004699999999999704,
+       "dy": -0.005670000000002062
+      },
+      {
+       "frame": 38,
+       "dx": 0.003949999999999676,
+       "dy": -0.013170000000002346
+      },
+      {
+       "frame": 39,
+       "dx": -0.003670000000000062,
+       "dy": -0.014449999999996521
+      },
+      {
+       "frame": 40,
+       "dx": -0.03266999999999953,
+       "dy": -0.01758999999999844
+      },
+      {
+       "frame": 41,
+       "dx": 0.011190000000000033,
+       "dy": -0.013519999999999754
+      },
+      {
+       "frame": 42,
+       "dx": 0.0,
+       "dy": -0.014469999999995764
+      },
+      {
+       "frame": 43,
+       "dx": -0.007349999999999746,
+       "dy": -0.013460000000002026
+      },
+      {
+       "frame": 44,
+       "dx": -0.015390000000000015,
+       "dy": -0.013179999999998415
+      },
+      {
+       "frame": 45,
+       "dx": -0.017490000000000006,
+       "dy": -0.021700000000002717
+      },
+      {
+       "frame": 46,
+       "dx": -0.007359999999999811,
+       "dy": -0.0020999999999986585
+      },
+      {
+       "frame": 47,
+       "dx": -0.005300000000000082,
+       "dy": -0.009979999999998768
+      },
+      {
+       "frame": 48,
+       "dx": 0.003089999999999815,
+       "dy": -0.006289999999999907
+      },
+      {
+       "frame": 49,
+       "dx": 0.009699999999999598,
+       "dy": -0.01214000000000226
+      },
+      {
+       "frame": 50,
+       "dx": -0.01672999999999991,
+       "dy": -0.01808000000000476
+      },
+      {
+       "frame": 51,
+       "dx": 0.004389999999999894,
+       "dy": -0.025219999999997356
+      },
+      {
+       "frame": 52,
+       "dx": -0.009009999999999962,
+       "dy": -0.014780000000001792
+      },
+      {
+       "frame": 53,
+       "dx": 0.00851000000000024,
+       "dy": -0.01389999999999958
+      },
+      {
+       "frame": 54,
+       "dx": -0.0019499999999998963,
+       "dy": -0.01345999999999492
+      },
+      {
+       "frame": 55,
+       "dx": -0.002889999999999837,
+       "dy": -0.004919999999998481
+      },
+      {
+       "frame": 56,
+       "dx": 0.009020000000000472,
+       "dy": -0.0146000000000015
+      },
+      {
+       "frame": 57,
+       "dx": -0.012970000000000148,
+       "dy": -0.012860000000003424
+      },
+      {
+       "frame": 58,
+       "dx": -0.0026000000000001577,
+       "dy": -0.013030000000000541
+      },
+      {
+       "frame": 59,
+       "dx": 0.012750000000000483,
+       "dy": -0.0018199999999950478
+      }
+     ],
+     "passed": true,
+     "fail_reasons": []
+    },
+    "star_fields": {
+     "num_differences": 0,
+     "differences": [],
+     "passed": true
+    },
+    "corrected_image": {
+     "num_pixels": 16777216,
+     "pixel_identical": false,
+     "max_abs_pixel_error": 2.3418426513671875,
+     "rmse": 0.3937356483620502,
+     "relative_rmse": 0.016590877895637554,
+     "relative_rmse_denominator": "reference_pixel_population_std",
+     "relative_rmse_denominator_value": 23.73205630460218,
+     "ref_pixel_min": 103.9867935180664,
+     "ref_pixel_max": 348.0623474121094,
+     "ref_pixel_mean": 192.17514038085938,
+     "ref_pixel_std": 23.73205630460218,
+     "test_pixel_min": 103.6829605102539,
+     "test_pixel_max": 347.825927734375,
+     "test_pixel_mean": 192.17684936523438,
+     "test_pixel_std": 23.732011795043945,
+     "core_header_diff_bytes": 8,
+     "label_header_diff_bytes": 2,
+     "normalized_label_diff_bytes": 0,
+     "geometry_matches": true,
+     "relative_rmse_diagnostic": {
+      "value": 0.016590877895637554,
+      "threshold": 0.001,
+      "status": "FAIL",
+      "blocking": false
+     },
+     "passed": false,
+     "fail_reasons": [
+      "Image RMSE 3.937356e-01 > 2.000000e-02"
+     ]
+    }
+   }
+  }
+ },
+ "runs_ok": [
+  "auto",
+  "cpu",
+  "float"
+ ],
+ "output_dims_xyz": [
+  4096,
+  4096,
+  1
+ ],
+ "output_mode": 2,
+ "dims_match_family_geometry": true,
+ "mrc_whole_file_sha256": {
+  "cpu": {
+   "size": 67109888,
+   "sha256_whole_file": "72a98a429ae59ee9b5360569ffa5e7f067dcec0a1090ef2c08228e6e1dbb88e2"
+  },
+  "float": {
+   "size": 67109888,
+   "sha256_whole_file": "f8abf369610a88c6f75747a6800ae59411899a782d4f3392e88253c8e921f830"
+  },
+  "auto": {
+   "size": 67109888,
+   "sha256_whole_file": "6b7d7b4b627235ba2717bfc8c926157556272235ec9695cbe2bcff56cc678905"
+  }
+ }
+}

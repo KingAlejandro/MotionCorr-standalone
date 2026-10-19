@@ -1,0 +1,1517 @@
+{
+ "arms": {
+  "s0": {
+   "run": {
+    "label": "G-s0",
+    "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+    "binary_sha256": "77db3f9268589158347f3710f904c0238e53de4e1a12703f2ca1d7cb84412a99",
+    "args": [
+     "--i",
+     "/home/alex/motioncorr-validation-20261011-vm/tutorial-data/movies.star",
+     "--o",
+     "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/s0/",
+     "--j",
+     "8",
+     "--gpu",
+     "0",
+     "--use_own",
+     "--dose_weighting",
+     "--dose_per_frame",
+     "1.277",
+     "--bfactor",
+     "150",
+     "--seed",
+     "1",
+     "--expected_frames",
+     "24",
+     "--gainref",
+     "Movies/gain.mrc",
+     "--ingest",
+     "auto"
+    ],
+    "cwd": "/home/alex/motioncorr-validation-20261011-vm/tutorial-data",
+    "cpu_mask": "104-111",
+    "env": {
+     "CUDA_VISIBLE_DEVICES": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+     "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+     "OMP_NUM_THREADS": "8",
+     "OPENBLAS_NUM_THREADS": "1",
+     "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64:/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib"
+    },
+    "extra_env": {
+     "CUDA_VISIBLE_DEVICES": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+     "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+    },
+    "gpu_run": false,
+    "start_utc": "2026-10-16T20:40:21Z",
+    "rc": 0,
+    "wall_s": 4.596,
+    "max_rss_kib": 372048,
+    "time_exit_status": 0,
+    "elapsed": "0:04.57",
+    "stdout": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/logs/G-s0.stdout",
+    "time_log": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/logs/G-s0.time"
+   }
+  },
+  "w1": {
+   "devices": [
+    1
+   ],
+   "device_uuids": [
+    "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d"
+   ],
+   "cpu_masks": [
+    "64-71,104-111"
+   ],
+   "j": 16,
+   "argv": [
+    "/home/alex/.mc-venv/bin/python3",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/tools/multi_gpu/run_dataset.py",
+    "--binary",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+    "--star",
+    "/home/alex/motioncorr-validation-20261011-vm/tutorial-data/movies.star",
+    "--out",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/w1",
+    "--launcher-args=--devices GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d --cpus '64-71,104-111' --cpu-budget 16",
+    "--required-products=.mrc,.star,_shifts.eps",
+    "--",
+    "--use_own",
+    "--j",
+    "16",
+    "--max_io_threads",
+    "16",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--expected_frames",
+    "24",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--ingest",
+    "auto"
+   ],
+   "rc": 0,
+   "wall_s_outer": 6.04,
+   "contract": {
+    "checks": {
+     "dataset_ready": true,
+     "aggregate_pass": true,
+     "workers_pass": true,
+     "worker_products_partition_input": true,
+     "every_worker_nonempty": true,
+     "shards_disjoint_and_cover_input": true,
+     "worker_products_match_a_shard": true,
+     "merged_inventory_24": true,
+     "joint_star_row_order_equals_input": true,
+     "joint_star_paths_inside_merged": true,
+     "logfile_pdf_present": true,
+     "worker_aggregates_diverted_not_published": true,
+     "no_leftover_processes": true
+    },
+    "problems": [],
+    "dataset_status": {
+     "verdict": "PASS",
+     "dataset_ready": true,
+     "workers_complete": true,
+     "ownership_mode": "linux-child-subreaper",
+     "process_ownership_errors": [],
+     "cleanup": "No observed live PID/birth descendants",
+     "dataset_wall_s": 5.697464588098228,
+     "worker_phase_wall_s": 5.078403443098068,
+     "aggregate_phase_wall_s": 0.5996955633163452,
+     "aggregate_cpu_mask": "64-71,104-111",
+     "failure": null,
+     "binary_sha256": "77db3f9268589158347f3710f904c0238e53de4e1a12703f2ca1d7cb84412a99",
+     "input_star_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041"
+    },
+    "aggregate": {
+     "verdict": "PASS",
+     "dataset_ready": true,
+     "input_type": "spa",
+     "row_order": null,
+     "problems": [],
+     "joint_star_problems": null
+    },
+    "workers_status": {
+     "verdict": "PASS",
+     "n_workers": 1,
+     "cpu_masks": [
+      "64-71,104-111"
+     ],
+     "cpu_budget_covered": 16,
+     "devices": [
+      {
+       "smi_index": "1",
+       "uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+       "name": "NVIDIA A100 80GB PCIe",
+       "memory_total": "81920 MiB",
+       "selector": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d"
+      }
+     ],
+     "worker_records": [
+      {
+       "cpu_mask": "64-71,104-111"
+      }
+     ]
+    },
+    "sampled_peak_gpu_memory_mib": {
+     "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d": 3258.0
+    },
+    "shard_manifest_keys": [
+     "canonical_movies",
+     "canonical_output_roots",
+     "input_sha256",
+     "input_star",
+     "input_type",
+     "labels",
+     "movie_block",
+     "n_movies",
+     "n_shards",
+     "partition",
+     "shards"
+    ],
+    "worker_movie_counts": {
+     "w0": 24
+    },
+    "shard_members_counts": {
+     "shard_1way_0.star": 24
+    },
+    "logfile_pdf": {
+     "exists": true,
+     "bytes": 177891,
+     "pages": 30
+    },
+    "worker_aggregate_rows_under__workers": {
+     "w0": 24
+    },
+    "leftover_motioncorr_processes_after_run": []
+   }
+  },
+  "w2": {
+   "devices": [
+    1,
+    2
+   ],
+   "device_uuids": [
+    "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+   ],
+   "cpu_masks": [
+    "104-111",
+    "64-71"
+   ],
+   "j": 8,
+   "argv": [
+    "/home/alex/.mc-venv/bin/python3",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/tools/multi_gpu/run_dataset.py",
+    "--binary",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+    "--star",
+    "/home/alex/motioncorr-validation-20261011-vm/tutorial-data/movies.star",
+    "--out",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/w2",
+    "--launcher-args=--devices GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d,GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598 --cpus '104-111;64-71' --cpu-budget 16",
+    "--required-products=.mrc,.star,_shifts.eps",
+    "--",
+    "--use_own",
+    "--j",
+    "8",
+    "--max_io_threads",
+    "8",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--expected_frames",
+    "24",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--ingest",
+    "auto"
+   ],
+   "rc": 0,
+   "wall_s_outer": 4.6,
+   "contract": {
+    "checks": {
+     "dataset_ready": true,
+     "aggregate_pass": true,
+     "workers_pass": true,
+     "worker_products_partition_input": true,
+     "every_worker_nonempty": true,
+     "shards_disjoint_and_cover_input": true,
+     "worker_products_match_a_shard": true,
+     "merged_inventory_24": true,
+     "joint_star_row_order_equals_input": true,
+     "joint_star_paths_inside_merged": true,
+     "logfile_pdf_present": true,
+     "worker_aggregates_diverted_not_published": true,
+     "no_leftover_processes": true
+    },
+    "problems": [],
+    "dataset_status": {
+     "verdict": "PASS",
+     "dataset_ready": true,
+     "workers_complete": true,
+     "ownership_mode": "linux-child-subreaper",
+     "process_ownership_errors": [],
+     "cleanup": "No observed live PID/birth descendants",
+     "dataset_wall_s": 4.303937980905175,
+     "worker_phase_wall_s": 3.488198553211987,
+     "aggregate_phase_wall_s": 0.789731103926897,
+     "aggregate_cpu_mask": "64-71,104-111",
+     "failure": null,
+     "binary_sha256": "77db3f9268589158347f3710f904c0238e53de4e1a12703f2ca1d7cb84412a99",
+     "input_star_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041"
+    },
+    "aggregate": {
+     "verdict": "PASS",
+     "dataset_ready": true,
+     "input_type": "spa",
+     "row_order": null,
+     "problems": [],
+     "joint_star_problems": null
+    },
+    "workers_status": {
+     "verdict": "PASS",
+     "n_workers": 2,
+     "cpu_masks": [
+      "104-111",
+      "64-71"
+     ],
+     "cpu_budget_covered": 16,
+     "devices": [
+      {
+       "smi_index": "1",
+       "uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+       "name": "NVIDIA A100 80GB PCIe",
+       "memory_total": "81920 MiB",
+       "selector": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d"
+      },
+      {
+       "smi_index": "2",
+       "uuid": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+       "name": "NVIDIA A100 80GB PCIe",
+       "memory_total": "81920 MiB",
+       "selector": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      }
+     ],
+     "worker_records": [
+      {
+       "cpu_mask": "104-111"
+      },
+      {
+       "cpu_mask": "64-71"
+      }
+     ]
+    },
+    "sampled_peak_gpu_memory_mib": {
+     "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d": 3202.0,
+     "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598": 3202.0
+    },
+    "shard_manifest_keys": [
+     "canonical_movies",
+     "canonical_output_roots",
+     "input_sha256",
+     "input_star",
+     "input_type",
+     "labels",
+     "movie_block",
+     "n_movies",
+     "n_shards",
+     "partition",
+     "shards"
+    ],
+    "worker_movie_counts": {
+     "w0": 12,
+     "w1": 12
+    },
+    "shard_members_counts": {
+     "shard_2way_0.star": 12,
+     "shard_2way_1.star": 12
+    },
+    "logfile_pdf": {
+     "exists": true,
+     "bytes": 177890,
+     "pages": 30
+    },
+    "worker_aggregate_rows_under__workers": {
+     "w0": 12,
+     "w1": 12
+    },
+    "leftover_motioncorr_processes_after_run": []
+   }
+  },
+  "w4": {
+   "devices": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "device_uuids": [
+    "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+    "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+    "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+   ],
+   "cpu_masks": [
+    "104-107",
+    "108-111",
+    "64-67",
+    "68-71"
+   ],
+   "j": 4,
+   "argv": [
+    "/home/alex/.mc-venv/bin/python3",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/src/tools/multi_gpu/run_dataset.py",
+    "--binary",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/build-nvcomp/motioncorr",
+    "--star",
+    "/home/alex/motioncorr-validation-20261011-vm/tutorial-data/movies.star",
+    "--out",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/w4",
+    "--launcher-args=--devices GPU-eddb42fe-4f9a-adde-76d3-b924e14add54,GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d,GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598,GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d --cpus '104-107;108-111;64-67;68-71' --cpu-budget 16",
+    "--required-products=.mrc,.star,_shifts.eps",
+    "--",
+    "--use_own",
+    "--j",
+    "4",
+    "--max_io_threads",
+    "4",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--expected_frames",
+    "24",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--ingest",
+    "auto"
+   ],
+   "rc": 0,
+   "wall_s_outer": 4.0,
+   "contract": {
+    "checks": {
+     "dataset_ready": true,
+     "aggregate_pass": true,
+     "workers_pass": true,
+     "worker_products_partition_input": true,
+     "every_worker_nonempty": true,
+     "shards_disjoint_and_cover_input": true,
+     "worker_products_match_a_shard": true,
+     "merged_inventory_24": true,
+     "joint_star_row_order_equals_input": true,
+     "joint_star_paths_inside_merged": true,
+     "logfile_pdf_present": true,
+     "worker_aggregates_diverted_not_published": true,
+     "no_leftover_processes": true
+    },
+    "problems": [],
+    "dataset_status": {
+     "verdict": "PASS",
+     "dataset_ready": true,
+     "workers_complete": true,
+     "ownership_mode": "linux-child-subreaper",
+     "process_ownership_errors": [],
+     "cleanup": "No observed live PID/birth descendants",
+     "dataset_wall_s": 3.866173288784921,
+     "worker_phase_wall_s": 3.171449755318463,
+     "aggregate_phase_wall_s": 0.6652158815413713,
+     "aggregate_cpu_mask": "64-71,104-111",
+     "failure": null,
+     "binary_sha256": "77db3f9268589158347f3710f904c0238e53de4e1a12703f2ca1d7cb84412a99",
+     "input_star_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041"
+    },
+    "aggregate": {
+     "verdict": "PASS",
+     "dataset_ready": true,
+     "input_type": "spa",
+     "row_order": null,
+     "problems": [],
+     "joint_star_problems": null
+    },
+    "workers_status": {
+     "verdict": "PASS",
+     "n_workers": 4,
+     "cpu_masks": [
+      "104-107",
+      "108-111",
+      "64-67",
+      "68-71"
+     ],
+     "cpu_budget_covered": 16,
+     "devices": [
+      {
+       "smi_index": "0",
+       "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+       "name": "NVIDIA A100 80GB PCIe",
+       "memory_total": "81920 MiB",
+       "selector": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+      },
+      {
+       "smi_index": "1",
+       "uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+       "name": "NVIDIA A100 80GB PCIe",
+       "memory_total": "81920 MiB",
+       "selector": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d"
+      },
+      {
+       "smi_index": "2",
+       "uuid": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+       "name": "NVIDIA A100 80GB PCIe",
+       "memory_total": "81920 MiB",
+       "selector": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      },
+      {
+       "smi_index": "3",
+       "uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+       "name": "NVIDIA A100 80GB PCIe",
+       "memory_total": "81920 MiB",
+       "selector": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+      }
+     ],
+     "worker_records": [
+      {
+       "cpu_mask": "104-107"
+      },
+      {
+       "cpu_mask": "108-111"
+      },
+      {
+       "cpu_mask": "64-67"
+      },
+      {
+       "cpu_mask": "68-71"
+      }
+     ]
+    },
+    "sampled_peak_gpu_memory_mib": {
+     "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54": 3202.0,
+     "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d": 3258.0,
+     "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598": 3258.0,
+     "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d": 3258.0
+    },
+    "shard_manifest_keys": [
+     "canonical_movies",
+     "canonical_output_roots",
+     "input_sha256",
+     "input_star",
+     "input_type",
+     "labels",
+     "movie_block",
+     "n_movies",
+     "n_shards",
+     "partition",
+     "shards"
+    ],
+    "worker_movie_counts": {
+     "w0": 6,
+     "w1": 6,
+     "w2": 6,
+     "w3": 6
+    },
+    "shard_members_counts": {
+     "shard_4way_0.star": 6,
+     "shard_4way_1.star": 6,
+     "shard_4way_2.star": 6,
+     "shard_4way_3.star": 6
+    },
+    "logfile_pdf": {
+     "exists": true,
+     "bytes": 177890,
+     "pages": 30
+    },
+    "worker_aggregate_rows_under__workers": {
+     "w0": 6,
+     "w1": 6,
+     "w2": 6,
+     "w3": 6
+    },
+    "leftover_motioncorr_processes_after_run": []
+   }
+  }
+ },
+ "comparisons": {
+  "s0_vs_w1": {
+   "identity_lib_status": "PASS",
+   "identity_lib_detail": {
+    "root_a": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/cmp/s0",
+    "root_b": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/cmp/w1",
+    "only_a": [],
+    "only_b": [],
+    "compared": 81,
+    "mrc_compared": 24,
+    "excluded": [
+     {
+      "file": "Movies/20170629_00021_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00022_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00023_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00024_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00025_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00026_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00027_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00028_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00029_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00030_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00031_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00035_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00036_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00037_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00039_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00040_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00042_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00043_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00044_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00045_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00046_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00047_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00048_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00049_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "all_batches.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "batch.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "header.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "logfile.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     }
+    ],
+    "differences": [],
+    "problems": [],
+    "identical": true
+   },
+   "compare_output_trees_products_only_rc": 0,
+   "products_only_status": "PASS",
+   "products_only_different": [],
+   "compare_output_trees_full_rc": 1,
+   "full_status": "FAIL",
+   "full_different_files": [
+    "Movies/20170629_00021_frameImage.log",
+    "Movies/20170629_00022_frameImage.log",
+    "Movies/20170629_00023_frameImage.log",
+    "Movies/20170629_00024_frameImage.log",
+    "Movies/20170629_00025_frameImage.log",
+    "Movies/20170629_00026_frameImage.log",
+    "Movies/20170629_00027_frameImage.log",
+    "Movies/20170629_00028_frameImage.log",
+    "Movies/20170629_00029_frameImage.log",
+    "Movies/20170629_00030_frameImage.log",
+    "Movies/20170629_00031_frameImage.log",
+    "Movies/20170629_00035_frameImage.log",
+    "Movies/20170629_00036_frameImage.log",
+    "Movies/20170629_00037_frameImage.log",
+    "Movies/20170629_00039_frameImage.log",
+    "Movies/20170629_00040_frameImage.log",
+    "Movies/20170629_00042_frameImage.log",
+    "Movies/20170629_00043_frameImage.log",
+    "Movies/20170629_00044_frameImage.log",
+    "Movies/20170629_00045_frameImage.log",
+    "Movies/20170629_00046_frameImage.log",
+    "Movies/20170629_00047_frameImage.log",
+    "Movies/20170629_00048_frameImage.log",
+    "Movies/20170629_00049_frameImage.log"
+   ],
+   "full_tail": "_frameImage.log\n  DIFF Movies/20170629_00030_frameImage.log\n  DIFF Movies/20170629_00031_frameImage.log\n  DIFF Movies/20170629_00035_frameImage.log\n  DIFF Movies/20170629_00036_frameImage.log\n  DIFF Movies/20170629_00037_frameImage.log\n  DIFF Movies/20170629_00039_frameImage.log\n  DIFF Movies/20170629_00040_frameImage.log\n  DIFF Movies/20170629_00042_frameImage.log\n  DIFF Movies/20170629_00043_frameImage.log\n  DIFF Movies/20170629_00044_frameImage.log\n  DIFF Movies/20170629_00045_frameImage.log\n"
+  },
+  "s0_vs_w2": {
+   "identity_lib_status": "PASS",
+   "identity_lib_detail": {
+    "root_a": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/cmp/s0",
+    "root_b": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/cmp/w2",
+    "only_a": [],
+    "only_b": [],
+    "compared": 81,
+    "mrc_compared": 24,
+    "excluded": [
+     {
+      "file": "Movies/20170629_00021_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00022_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00023_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00024_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00025_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00026_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00027_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00028_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00029_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00030_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00031_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00035_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00036_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00037_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00039_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00040_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00042_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00043_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00044_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00045_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00046_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00047_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00048_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00049_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "all_batches.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "batch.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "header.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "logfile.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     }
+    ],
+    "differences": [],
+    "problems": [],
+    "identical": true
+   },
+   "compare_output_trees_products_only_rc": 0,
+   "products_only_status": "PASS",
+   "products_only_different": [],
+   "compare_output_trees_full_rc": 1,
+   "full_status": "FAIL",
+   "full_different_files": [
+    "Movies/20170629_00036_frameImage.log"
+   ],
+   "full_tail": "Validated 24 movies, 24 MRC images, 25 STAR files, 341735520 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20170629_00036_frameImage.log\n"
+  },
+  "s0_vs_w4": {
+   "identity_lib_status": "PASS",
+   "identity_lib_detail": {
+    "root_a": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/cmp/s0",
+    "root_b": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/cmp/w4",
+    "only_a": [],
+    "only_b": [],
+    "compared": 81,
+    "mrc_compared": 24,
+    "excluded": [
+     {
+      "file": "Movies/20170629_00021_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00022_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00023_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00024_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00025_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00026_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00027_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00028_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00029_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00030_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00031_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00035_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00036_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00037_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00039_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00040_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00042_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00043_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00044_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00045_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00046_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00047_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00048_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00049_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "all_batches.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "batch.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "header.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "logfile.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     }
+    ],
+    "differences": [],
+    "problems": [],
+    "identical": true
+   },
+   "compare_output_trees_products_only_rc": 0,
+   "products_only_status": "PASS",
+   "products_only_different": [],
+   "compare_output_trees_full_rc": 1,
+   "full_status": "FAIL",
+   "full_different_files": [
+    "Movies/20170629_00021_frameImage.log",
+    "Movies/20170629_00022_frameImage.log",
+    "Movies/20170629_00023_frameImage.log",
+    "Movies/20170629_00024_frameImage.log",
+    "Movies/20170629_00025_frameImage.log",
+    "Movies/20170629_00026_frameImage.log",
+    "Movies/20170629_00027_frameImage.log",
+    "Movies/20170629_00028_frameImage.log",
+    "Movies/20170629_00029_frameImage.log",
+    "Movies/20170629_00030_frameImage.log",
+    "Movies/20170629_00031_frameImage.log",
+    "Movies/20170629_00035_frameImage.log",
+    "Movies/20170629_00036_frameImage.log",
+    "Movies/20170629_00037_frameImage.log",
+    "Movies/20170629_00039_frameImage.log",
+    "Movies/20170629_00040_frameImage.log",
+    "Movies/20170629_00042_frameImage.log",
+    "Movies/20170629_00043_frameImage.log",
+    "Movies/20170629_00044_frameImage.log",
+    "Movies/20170629_00045_frameImage.log",
+    "Movies/20170629_00046_frameImage.log",
+    "Movies/20170629_00047_frameImage.log",
+    "Movies/20170629_00048_frameImage.log",
+    "Movies/20170629_00049_frameImage.log"
+   ],
+   "full_tail": "_frameImage.log\n  DIFF Movies/20170629_00030_frameImage.log\n  DIFF Movies/20170629_00031_frameImage.log\n  DIFF Movies/20170629_00035_frameImage.log\n  DIFF Movies/20170629_00036_frameImage.log\n  DIFF Movies/20170629_00037_frameImage.log\n  DIFF Movies/20170629_00039_frameImage.log\n  DIFF Movies/20170629_00040_frameImage.log\n  DIFF Movies/20170629_00042_frameImage.log\n  DIFF Movies/20170629_00043_frameImage.log\n  DIFF Movies/20170629_00044_frameImage.log\n  DIFF Movies/20170629_00045_frameImage.log\n"
+  },
+  "w1_vs_w2": {
+   "identity_lib_status": "PASS",
+   "identity_lib_detail": {
+    "root_a": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/cmp/w1",
+    "root_b": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/cmp/w2",
+    "only_a": [],
+    "only_b": [],
+    "compared": 81,
+    "mrc_compared": 24,
+    "excluded": [
+     {
+      "file": "Movies/20170629_00021_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00022_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00023_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00024_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00025_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00026_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00027_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00028_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00029_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00030_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00031_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00035_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00036_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00037_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00039_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00040_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00042_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00043_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00044_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00045_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00046_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00047_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00048_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00049_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "all_batches.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "batch.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "header.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "logfile.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     }
+    ],
+    "differences": [],
+    "problems": [],
+    "identical": true
+   },
+   "compare_output_trees_products_only_rc": 0,
+   "products_only_status": "PASS",
+   "products_only_different": [],
+   "compare_output_trees_full_rc": 1,
+   "full_status": "FAIL",
+   "full_different_files": [
+    "Movies/20170629_00021_frameImage.log",
+    "Movies/20170629_00022_frameImage.log",
+    "Movies/20170629_00023_frameImage.log",
+    "Movies/20170629_00024_frameImage.log",
+    "Movies/20170629_00025_frameImage.log",
+    "Movies/20170629_00026_frameImage.log",
+    "Movies/20170629_00027_frameImage.log",
+    "Movies/20170629_00028_frameImage.log",
+    "Movies/20170629_00029_frameImage.log",
+    "Movies/20170629_00030_frameImage.log",
+    "Movies/20170629_00031_frameImage.log",
+    "Movies/20170629_00035_frameImage.log",
+    "Movies/20170629_00036_frameImage.log",
+    "Movies/20170629_00037_frameImage.log",
+    "Movies/20170629_00039_frameImage.log",
+    "Movies/20170629_00040_frameImage.log",
+    "Movies/20170629_00042_frameImage.log",
+    "Movies/20170629_00043_frameImage.log",
+    "Movies/20170629_00044_frameImage.log",
+    "Movies/20170629_00045_frameImage.log",
+    "Movies/20170629_00046_frameImage.log",
+    "Movies/20170629_00047_frameImage.log",
+    "Movies/20170629_00048_frameImage.log",
+    "Movies/20170629_00049_frameImage.log"
+   ],
+   "full_tail": "_frameImage.log\n  DIFF Movies/20170629_00030_frameImage.log\n  DIFF Movies/20170629_00031_frameImage.log\n  DIFF Movies/20170629_00035_frameImage.log\n  DIFF Movies/20170629_00036_frameImage.log\n  DIFF Movies/20170629_00037_frameImage.log\n  DIFF Movies/20170629_00039_frameImage.log\n  DIFF Movies/20170629_00040_frameImage.log\n  DIFF Movies/20170629_00042_frameImage.log\n  DIFF Movies/20170629_00043_frameImage.log\n  DIFF Movies/20170629_00044_frameImage.log\n  DIFF Movies/20170629_00045_frameImage.log\n"
+  },
+  "w1_vs_w4": {
+   "identity_lib_status": "PASS",
+   "identity_lib_detail": {
+    "root_a": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/cmp/w1",
+    "root_b": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/cmp/w4",
+    "only_a": [],
+    "only_b": [],
+    "compared": 81,
+    "mrc_compared": 24,
+    "excluded": [
+     {
+      "file": "Movies/20170629_00021_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00022_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00023_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00024_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00025_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00026_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00027_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00028_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00029_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00030_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00031_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00035_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00036_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00037_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00039_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00040_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00042_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00043_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00044_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00045_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00046_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00047_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00048_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00049_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "all_batches.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "batch.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "header.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "logfile.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     }
+    ],
+    "differences": [],
+    "problems": [],
+    "identical": true
+   },
+   "compare_output_trees_products_only_rc": 0,
+   "products_only_status": "PASS",
+   "products_only_different": [],
+   "compare_output_trees_full_rc": 1,
+   "full_status": "FAIL",
+   "full_different_files": [
+    "Movies/20170629_00021_frameImage.log",
+    "Movies/20170629_00022_frameImage.log",
+    "Movies/20170629_00023_frameImage.log",
+    "Movies/20170629_00024_frameImage.log",
+    "Movies/20170629_00025_frameImage.log",
+    "Movies/20170629_00026_frameImage.log",
+    "Movies/20170629_00027_frameImage.log",
+    "Movies/20170629_00028_frameImage.log",
+    "Movies/20170629_00029_frameImage.log",
+    "Movies/20170629_00030_frameImage.log",
+    "Movies/20170629_00031_frameImage.log",
+    "Movies/20170629_00035_frameImage.log",
+    "Movies/20170629_00036_frameImage.log",
+    "Movies/20170629_00037_frameImage.log",
+    "Movies/20170629_00039_frameImage.log",
+    "Movies/20170629_00040_frameImage.log",
+    "Movies/20170629_00042_frameImage.log",
+    "Movies/20170629_00043_frameImage.log",
+    "Movies/20170629_00044_frameImage.log",
+    "Movies/20170629_00045_frameImage.log",
+    "Movies/20170629_00046_frameImage.log",
+    "Movies/20170629_00047_frameImage.log",
+    "Movies/20170629_00048_frameImage.log",
+    "Movies/20170629_00049_frameImage.log"
+   ],
+   "full_tail": "_frameImage.log\n  DIFF Movies/20170629_00030_frameImage.log\n  DIFF Movies/20170629_00031_frameImage.log\n  DIFF Movies/20170629_00035_frameImage.log\n  DIFF Movies/20170629_00036_frameImage.log\n  DIFF Movies/20170629_00037_frameImage.log\n  DIFF Movies/20170629_00039_frameImage.log\n  DIFF Movies/20170629_00040_frameImage.log\n  DIFF Movies/20170629_00042_frameImage.log\n  DIFF Movies/20170629_00043_frameImage.log\n  DIFF Movies/20170629_00044_frameImage.log\n  DIFF Movies/20170629_00045_frameImage.log\n"
+  },
+  "w2_vs_w4": {
+   "identity_lib_status": "PASS",
+   "identity_lib_detail": {
+    "root_a": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/cmp/w2",
+    "root_b": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/multigpu/G/cmp/w4",
+    "only_a": [],
+    "only_b": [],
+    "compared": 81,
+    "mrc_compared": 24,
+    "excluded": [
+     {
+      "file": "Movies/20170629_00021_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00022_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00023_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00024_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00025_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00026_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00027_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00028_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00029_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00030_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00031_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00035_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00036_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00037_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00039_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00040_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00042_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00043_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00044_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00045_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00046_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00047_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00048_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "Movies/20170629_00049_frameImage.log",
+      "reason": "timing values in per-movie logs"
+     },
+     {
+      "file": "all_batches.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "batch.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "header.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     },
+     {
+      "file": "logfile.pdf",
+      "reason": "Ghostscript creation date and /ID"
+     }
+    ],
+    "differences": [],
+    "problems": [],
+    "identical": true
+   },
+   "compare_output_trees_products_only_rc": 0,
+   "products_only_status": "PASS",
+   "products_only_different": [],
+   "compare_output_trees_full_rc": 1,
+   "full_status": "FAIL",
+   "full_different_files": [
+    "Movies/20170629_00021_frameImage.log",
+    "Movies/20170629_00022_frameImage.log",
+    "Movies/20170629_00023_frameImage.log",
+    "Movies/20170629_00024_frameImage.log",
+    "Movies/20170629_00025_frameImage.log",
+    "Movies/20170629_00026_frameImage.log",
+    "Movies/20170629_00027_frameImage.log",
+    "Movies/20170629_00028_frameImage.log",
+    "Movies/20170629_00029_frameImage.log",
+    "Movies/20170629_00030_frameImage.log",
+    "Movies/20170629_00031_frameImage.log",
+    "Movies/20170629_00035_frameImage.log",
+    "Movies/20170629_00036_frameImage.log",
+    "Movies/20170629_00037_frameImage.log",
+    "Movies/20170629_00039_frameImage.log",
+    "Movies/20170629_00040_frameImage.log",
+    "Movies/20170629_00042_frameImage.log",
+    "Movies/20170629_00043_frameImage.log",
+    "Movies/20170629_00044_frameImage.log",
+    "Movies/20170629_00045_frameImage.log",
+    "Movies/20170629_00046_frameImage.log",
+    "Movies/20170629_00047_frameImage.log",
+    "Movies/20170629_00048_frameImage.log",
+    "Movies/20170629_00049_frameImage.log"
+   ],
+   "full_tail": "_frameImage.log\n  DIFF Movies/20170629_00030_frameImage.log\n  DIFF Movies/20170629_00031_frameImage.log\n  DIFF Movies/20170629_00035_frameImage.log\n  DIFF Movies/20170629_00036_frameImage.log\n  DIFF Movies/20170629_00037_frameImage.log\n  DIFF Movies/20170629_00039_frameImage.log\n  DIFF Movies/20170629_00040_frameImage.log\n  DIFF Movies/20170629_00042_frameImage.log\n  DIFF Movies/20170629_00043_frameImage.log\n  DIFF Movies/20170629_00044_frameImage.log\n  DIFF Movies/20170629_00045_frameImage.log\n"
+  }
+ },
+ "mrc_sha256_whole_file_first3": {
+  "s0": {
+   "20170629_00021_frameImage.mrc": "38448e4138acf54d489883cfda96dab4e46209fc759dcc200f66cb7092f328e6",
+   "20170629_00022_frameImage.mrc": "d9324b6929a5a9a24e081bb35d278425082d62d621732a2d0af7f5c23a583843",
+   "20170629_00023_frameImage.mrc": "48ef2c66d0283d9979f61b357577319c3e7d6d56c080f657a80370bab92043aa"
+  },
+  "w1": {
+   "20170629_00021_frameImage.mrc": "c6b6e04f8f6895416a4490e2b4ee7b166329bd20795b6406e88c50ecb73b2d7a",
+   "20170629_00022_frameImage.mrc": "da08cfc8840626985e506d0b695c02f00db7609539baecbade0694d8847451b6",
+   "20170629_00023_frameImage.mrc": "fdabb8441c3914fcf5a4a6b823659f96da6038ca6dff34ef90f9c0c577b09071"
+  },
+  "w2": {
+   "20170629_00021_frameImage.mrc": "2f4e484d5471bc4da9a63aafbafa6dbe7c2738c5da146b2ca6b50516fc632aad",
+   "20170629_00022_frameImage.mrc": "97c8328b20d36081abad38ccab97e0299b456fceaf939652eb5bb414d5eabafc",
+   "20170629_00023_frameImage.mrc": "44e592b0521903275f92ec2ade82c59b6d4f16ead5a9085829e0847ebb859221"
+  },
+  "w4": {
+   "20170629_00021_frameImage.mrc": "def3668801720792f92c3eee1eb5323c5c14be809e0d080345192a2cfb1e6d4f",
+   "20170629_00022_frameImage.mrc": "414f958f29e57debebc2e9930235f20355c011daacd5c3ec5abf24ce27e89908",
+   "20170629_00023_frameImage.mrc": "0149a13271e5491e794f2fdca6e96553ad7709aa42278cc7d0190a06e2cb10b6"
+  }
+ },
+ "controls": {
+  "positive_untouched_copy": {
+   "identity_lib": "PASS",
+   "compare_output_trees_full_rc": 0
+  },
+  "negative_flipped_payload_byte": {
+   "identity_lib": "FAIL",
+   "compare_output_trees_full_rc": 1
+  }
+ }
+}

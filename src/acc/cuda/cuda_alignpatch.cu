@@ -318,6 +318,36 @@ __global__ void fourierShiftKernel(
     const float *d_shiftx,
     const float *d_shifty,
     int nfx, int nfy, int nfy_half,
+    int n_frames);
+
+// S1.3b DIAGNOSTIC ONLY: the shift is formed as updatePatchShifts forms it
+// (-delta / (float)n in float) and applied by the production kernel.
+void cudaDiagApplyGlobalDelta(void *d_Fframes, int n_frames, int nx, int ny, const double *dx, const double *dy) {
+    if (n_frames < 2) return;
+    std::vector<float> sx(n_frames), sy(n_frames);
+    for (int i = 0; i < n_frames; i++) {
+        sx[i] = -(float)dx[i] / (float)nx;
+        sy[i] = -(float)dy[i] / (float)ny;
+    }
+    float *d_sx = nullptr, *d_sy = nullptr;
+    const size_t bytes = n_frames * sizeof(float);
+    const int nfx = nx / 2 + 1, nfy = ny;
+    if (cudaMalloc(&d_sx, bytes) != cudaSuccess || cudaMalloc(&d_sy, bytes) != cudaSuccess ||
+        cudaMemcpy(d_sx, sx.data(), bytes, cudaMemcpyHostToDevice) != cudaSuccess ||
+        cudaMemcpy(d_sy, sy.data(), bytes, cudaMemcpyHostToDevice) != cudaSuccess)
+        REPORT_ERROR("S1.3b diagnostic global-delta upload failed");
+    dim3 block(16, 16, 1), grid((nfx + 15) / 16, (nfy + 15) / 16, n_frames - 1);
+    fourierShiftKernel<<<grid, block>>>((float2*)d_Fframes, d_sx, d_sy, nfx, nfy, nfy / 2, n_frames);
+    if (cudaGetLastError() != cudaSuccess || cudaDeviceSynchronize() != cudaSuccess)
+        REPORT_ERROR("S1.3b diagnostic global-delta kernel failed");
+    cudaFree(d_sx); cudaFree(d_sy);
+}
+
+__global__ void fourierShiftKernel(
+    float2 *d_Fframes,
+    const float *d_shiftx,
+    const float *d_shifty,
+    int nfx, int nfy, int nfy_half,
     int n_frames)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;

@@ -129,6 +129,40 @@ inline void diagCcfWrite(const char *tag, int patch, int iter, int frame, const 
 	std::fclose(f);
 }
 
+// S1.3b DIAGNOSTIC ONLY: global-trajectory capture and override.
+// MC_DIAG_GLOBAL_SHIFTS_OUT=<file> writes the global trajectory exactly (%.17g).
+// MC_DIAG_GLOBAL_SHIFTS=<file> (same format) replaces it: the frames receive an
+// extra Fourier shift by (injected - own), frames with an exactly zero
+// difference are left untouched, and the injected values are what the run
+// records. Injecting a run's own file is therefore a no-op.
+inline void diagGlobalShiftsOut(const std::vector<double> &x, const std::vector<double> &y) {
+	const char *p = std::getenv("MC_DIAG_GLOBAL_SHIFTS_OUT");
+	if (!p) return;
+	if (FILE *f = std::fopen(p, "w")) {
+		for (size_t i = 0; i < x.size(); i++) std::fprintf(f, "%zu %.17g %.17g\n", i + 1, x[i], y[i]);
+		std::fclose(f);
+	}
+}
+// Returns false when no override is requested. Fails loudly on a malformed file.
+inline bool diagGlobalShiftsIn(size_t n, std::vector<double> &x, std::vector<double> &y) {
+	const char *p = std::getenv("MC_DIAG_GLOBAL_SHIFTS");
+	if (!p) return false;
+	FILE *f = std::fopen(p, "r");
+	if (!f) { std::fprintf(stderr, "MC_DIAG_GLOBAL_SHIFTS: cannot open %s\n", p); std::abort(); }
+	x.assign(n, 0.0); y.assign(n, 0.0);
+	size_t i, got = 0; double a, b;
+	while (std::fscanf(f, "%zu %lf %lf", &i, &a, &b) == 3) {
+		if (i < 1 || i > n) { std::fprintf(stderr, "MC_DIAG_GLOBAL_SHIFTS: frame %zu out of range\n", i); std::abort(); }
+		x[i - 1] = a; y[i - 1] = b; got++;
+	}
+	std::fclose(f);
+	if (got != n) { std::fprintf(stderr, "MC_DIAG_GLOBAL_SHIFTS: %zu rows for %zu frames\n", got, n); std::abort(); }
+	return true;
+}
+// Defined in cuda_alignpatch.cu: the production fourierShiftKernel applied to a
+// resident full-spectrum movie, frames 2..n, shift (dx, dy) px per frame.
+void cudaDiagApplyGlobalDelta(void *d_Fframes, int n_frames, int nx, int ny, const double *dx, const double *dy);
+
 // Raw little-endian dumps: <dir>/<tag>_p<iy>_<ix>_c<call>_it<iter>_<kind>.bin
 // kind "in": n_frames x ccf_nfy x ccf_nfx complex float, the CCF window of the
 // spectra entering this iteration; "map": n_frames x ccf_ny x ccf_nx float;

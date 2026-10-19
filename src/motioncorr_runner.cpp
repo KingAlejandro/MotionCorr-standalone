@@ -3372,6 +3372,32 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
 	}
 	RCTOC(TIMING_GLOBAL_ALIGNMENT);
+	{ // S1.3b DIAGNOSTIC ONLY: global-trajectory capture/override (diag_ccf.h)
+		std::vector<double> ox(xshifts.begin(), xshifts.end()), oy(yshifts.begin(), yshifts.end()), ix, iy;
+		diagGlobalShiftsOut(ox, oy);
+		if (diagGlobalShiftsIn(ox.size(), ix, iy)) {
+			std::vector<double> dx(ox.size()), dy(ox.size());
+			bool any = false;
+			for (size_t i = 0; i < ox.size(); i++) {
+				dx[i] = ix[i] - ox[i]; dy[i] = iy[i] - oy[i];
+				any = any || dx[i] != 0.0 || dy[i] != 0.0;
+				xshifts[i] = ix[i]; yshifts[i] = iy[i];
+			}
+			logfile << "S1.3b DIAGNOSTIC: global trajectory overridden from " << std::getenv("MC_DIAG_GLOBAL_SHIFTS")
+			        << (any ? "" : " (identical to own: no shift applied)") << std::endl;
+			if (any) {
+				if (dx[0] != 0.0 || dy[0] != 0.0) REPORT_ERROR("S1.3b: frame 1 must stay at the origin");
+#ifdef _CUDA_ENABLED
+				if (movie_session)
+					cudaDiagApplyGlobalDelta(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, dx.data(), dy.data());
+				else
+#endif
+				for (int i = 1; i < n_frames; i++)
+					if (dx[i] != 0.0 || dy[i] != 0.0)
+						shiftNonSquareImageInFourierTransform(Fframes[i], -dx[i] / nx, -dy[i] / ny);
+			}
+		}
+	}
 	MC_STAGE("allocate reconstruction");
 	for (int i = 0, ilim = xshifts.size(); i < ilim; i++) {
 		// Should be in the original pixel size

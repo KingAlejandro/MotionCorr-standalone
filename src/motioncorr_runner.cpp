@@ -3398,6 +3398,38 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			}
 		}
 	}
+	// S1.3b DIAGNOSTIC ONLY: full-frame spectra after the global shifts (read-only).
+	auto diag_full_dump = [&](const char *kind) {
+		const char *dir = std::getenv("MC_DIAG_FULL_DUMP");
+		if (!dir) return;
+		const char *list = std::getenv("MC_DIAG_FULL_FRAMES");
+		std::string sl = list ? list : "2,11,21";
+		size_t a = 0;
+		while (a < sl.size()) {
+			size_t b = sl.find(',', a); if (b == std::string::npos) b = sl.size();
+			const int f = std::atoi(sl.substr(a, b - a).c_str()) - 1; a = b + 1;
+			if (f < 0 || f >= n_frames) continue;
+			const bool spec = std::string(kind) == "spec";
+			const size_t n = spec ? (size_t)ny * (nx / 2 + 1) * 2 : (size_t)ny * nx;
+			std::vector<float> h(n);
+#ifdef _CUDA_ENABLED
+			if (movie_session) {
+				const void *src = spec ? (const void *)(movie_session->getDeviceFourierFrames() + (size_t)f * ny * (nx / 2 + 1))
+				                       : (const void *)(movie_session->getDeviceRealFrames() + (size_t)f * ny * nx);
+				if (cudaMemcpy(h.data(), src, n * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess)
+					REPORT_ERROR("S1.3b full dump read-back failed");
+			} else
+#endif
+			{
+				const float *src = spec ? (const float *)Fframes[f].data : Iframes[f]().data;
+				std::copy(src, src + n, h.begin());
+			}
+			char name[1024];
+			std::snprintf(name, sizeof(name), "%s/%s_fr%d_%dx%d.bin", dir, kind, f + 1, ny, spec ? nx / 2 + 1 : nx);
+			if (FILE *o = std::fopen(name, "wb")) { std::fwrite(h.data(), sizeof(float), n, o); std::fclose(o); }
+		}
+	};
+	diag_full_dump("spec");
 	MC_STAGE("allocate reconstruction");
 	for (int i = 0, ilim = xshifts.size(); i < ilim; i++) {
 		// Should be in the original pixel size
@@ -3468,6 +3500,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 	}
 	RCTOC(TIMING_GLOBAL_IFFT);
+	diag_full_dump("real"); // S1.3b DIAGNOSTIC ONLY
 
 	// Patch based alignment
 	MC_STAGE("patch alignment");

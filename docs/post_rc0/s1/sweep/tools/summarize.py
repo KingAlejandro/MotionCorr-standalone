@@ -31,7 +31,7 @@ for path in sorted((a.evidence / "analysis").glob("*-F-cuda.json")):
                      any_nonconvergence=min(ref["accepted_patches"], test["accepted_patches"]) < grid*grid,
                      differing_accepted_sets=bool(x["cpu_only_patches"] or x["test_only_patches"])))
 with (a.evidence.parent / "per_movie.csv").open("w") as f:
-    w = csv.DictWriter(f, fieldnames=list(rows[0]))
+    w = csv.DictWriter(f, fieldnames=list(rows[0]), lineterminator="\n")
     w.writeheader()
     w.writerows(rows)
 summary = {}

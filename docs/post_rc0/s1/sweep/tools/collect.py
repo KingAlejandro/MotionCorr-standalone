@@ -65,7 +65,7 @@ for name in ("first-pass.log", "extras.log", "longevity.log"):
 qf = Path("/mnt/clathrin/alex-motioncorr-rc0/W-QF")
 for cfg in ("cpu", "nvcomp"):
     for name in ("CMakeCache.txt", "CMakeFiles/motioncorr_core.dir/flags.make"):
-        copy(qf / ("build-" + cfg) / name, out / "frozen-builds" / (cfg + "-" + Path(name).name))
+        copy(qf / ("build-" + cfg) / name, out / "frozen-builds" / (cfg + "-" + Path(name).name + ".gz"), True)
     src = qf / ("build-" + cfg) / "motioncorr"
     h = hashlib.sha256(src.read_bytes()).hexdigest()
     (out / "frozen-builds" / (cfg + ".sha256")).write_text(h + "  " + str(src) + "\n")

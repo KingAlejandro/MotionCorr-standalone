@@ -1,0 +1,12 @@
+PASS options m0 late_bin2: routes ['float']/['compact'] session True identity True
+PASS options m0 early_bin2_default: routes ['float']/['float'] session False identity True
+PASS options m0 early_bin2_explicit: routes ['float']/['float'] session False identity True
+PASS options m0 noDW_evenodd: routes ['float']/['compact'] session True identity True
+FAIL options m0 ps_group4: routes ['float']/['compact'] session True identity False
+PASS options m1 late_bin2: routes ['float']/['compact'] session True identity True
+PASS options m1 early_bin2_default: routes ['float']/['float'] session False identity True
+PASS options m1 early_bin2_explicit: routes ['float']/['float'] session False identity True
+PASS options m1 noDW_evenodd: routes ['float']/['compact'] session True identity True
+FAIL options m1 ps_group4: routes ['float']/['compact'] session True identity False
+
+10 records, 2 not passing

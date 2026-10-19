@@ -1,0 +1,1338 @@
+{
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/gpu3run.sh",
+ "cpu": false,
+ "matrix": [],
+ "refuse": [],
+ "compressed": [],
+ "damaged": [],
+ "errors": [
+  {
+   "mode": 1,
+   "variant": "truncated-mid-frame",
+   "arms": {
+    "float": {
+     "label": "e-m1-truncated-mid-frame-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m1-truncated-mid-frame-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m1-truncated-mid-frame-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": true,
+   "unaligned_sum_mean": {
+    "float": "8726.2",
+    "auto": "8726.2",
+    "compact": "8726.2"
+   },
+   "pass": false
+  },
+  {
+   "mode": 1,
+   "variant": "truncated-one-byte",
+   "arms": {
+    "float": {
+     "label": "e-m1-truncated-one-byte-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m1-truncated-one-byte-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m1-truncated-one-byte-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "nan",
+    "auto": "15285.4",
+    "compact": "15285.4"
+   },
+   "pass": false
+  },
+  {
+   "mode": 1,
+   "variant": "truncated-header",
+   "arms": {
+    "float": {
+     "label": "e-m1-truncated-header-float",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    },
+    "auto": {
+     "label": "e-m1-truncated-header-auto",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    },
+    "compact": {
+     "label": "e-m1-truncated-header-compact",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 1,
+   "variant": "header-only",
+   "arms": {
+    "float": {
+     "label": "e-m1-header-only-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m1-header-only-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m1-header-only-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "2.30121e-44",
+    "auto": "0",
+    "compact": "0"
+   },
+   "pass": false
+  },
+  {
+   "mode": 1,
+   "variant": "claims-12-frames-has-8",
+   "arms": {
+    "float": {
+     "label": "e-m1-claim12-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m1-claim12-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m1-claim12-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "nan",
+    "auto": "17467.2",
+    "compact": "17467.2"
+   },
+   "pass": false
+  },
+  {
+   "mode": 1,
+   "variant": "claims-24-frames-has-8",
+   "arms": {
+    "float": {
+     "label": "e-m1-claim24-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m1-claim24-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m1-claim24-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "17467.2",
+    "auto": "17467.2",
+    "compact": "17467.2"
+   },
+   "pass": false
+  },
+  {
+   "mode": 1,
+   "variant": "expected_frames-mismatch",
+   "arms": {
+    "float": {
+     "label": "e-m1-expect-wrong-float",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1018 :: Movie movie.mrcs frame count mismatch: expected 11 frames, but decoded 8 frames. || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    },
+    "auto": {
+     "label": "e-m1-expect-wrong-auto",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1018 :: Movie movie.mrcs frame count mismatch: expected 11 frames, but decoded 8 frames. || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    },
+    "compact": {
+     "label": "e-m1-expect-wrong-compact",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1018 :: Movie movie.mrcs frame count mismatch: expected 11 frames, but decoded 8 frames. || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 0,
+   "variant": "truncated-mid-frame",
+   "arms": {
+    "float": {
+     "label": "e-m0-truncated-mid-frame-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m0-truncated-mid-frame-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m0-truncated-mid-frame-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": true,
+   "unaligned_sum_mean": {
+    "float": "34.9079",
+    "auto": "34.9079",
+    "compact": "34.9079"
+   },
+   "pass": false
+  },
+  {
+   "mode": 0,
+   "variant": "truncated-one-byte",
+   "arms": {
+    "float": {
+     "label": "e-m0-truncated-one-byte-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m0-truncated-one-byte-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m0-truncated-one-byte-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "nan",
+    "auto": "61.1371",
+    "compact": "61.1371"
+   },
+   "pass": false
+  },
+  {
+   "mode": 0,
+   "variant": "truncated-header",
+   "arms": {
+    "float": {
+     "label": "e-m0-truncated-header-float",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    },
+    "auto": {
+     "label": "e-m0-truncated-header-auto",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    },
+    "compact": {
+     "label": "e-m0-truncated-header-compact",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 0,
+   "variant": "header-only",
+   "arms": {
+    "float": {
+     "label": "e-m0-header-only-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m0-header-only-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m0-header-only-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "1.66243e-43",
+    "auto": "0",
+    "compact": "0"
+   },
+   "pass": false
+  },
+  {
+   "mode": 0,
+   "variant": "claims-12-frames-has-8",
+   "arms": {
+    "float": {
+     "label": "e-m0-claim12-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m0-claim12-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m0-claim12-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "nan",
+    "auto": "69.8647",
+    "compact": "69.8647"
+   },
+   "pass": false
+  },
+  {
+   "mode": 0,
+   "variant": "claims-24-frames-has-8",
+   "arms": {
+    "float": {
+     "label": "e-m0-claim24-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m0-claim24-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m0-claim24-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "69.8647",
+    "auto": "69.8647",
+    "compact": "69.8647"
+   },
+   "pass": false
+  },
+  {
+   "mode": 6,
+   "variant": "truncated-mid-frame",
+   "arms": {
+    "float": {
+     "label": "e-m6-truncated-mid-frame-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m6-truncated-mid-frame-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m6-truncated-mid-frame-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": true,
+   "unaligned_sum_mean": {
+    "float": "128723",
+    "auto": "128723",
+    "compact": "128723"
+   },
+   "pass": false
+  },
+  {
+   "mode": 6,
+   "variant": "truncated-one-byte",
+   "arms": {
+    "float": {
+     "label": "e-m6-truncated-one-byte-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m6-truncated-one-byte-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m6-truncated-one-byte-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "nan",
+    "auto": "225280",
+    "compact": "225280"
+   },
+   "pass": false
+  },
+  {
+   "mode": 6,
+   "variant": "truncated-header",
+   "arms": {
+    "float": {
+     "label": "e-m6-truncated-header-float",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    },
+    "auto": {
+     "label": "e-m6-truncated-header-auto",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    },
+    "compact": {
+     "label": "e-m6-truncated-header-compact",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 6,
+   "variant": "header-only",
+   "arms": {
+    "float": {
+     "label": "e-m6-header-only-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m6-header-only-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m6-header-only-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "2.29848e-44",
+    "auto": "0",
+    "compact": "0"
+   },
+   "pass": false
+  },
+  {
+   "mode": 6,
+   "variant": "claims-12-frames-has-8",
+   "arms": {
+    "float": {
+     "label": "e-m6-claim12-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m6-claim12-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m6-claim12-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "nan",
+    "auto": "257461",
+    "compact": "257461"
+   },
+   "pass": false
+  },
+  {
+   "mode": 6,
+   "variant": "claims-24-frames-has-8",
+   "arms": {
+    "float": {
+     "label": "e-m6-claim24-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m6-claim24-auto",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "compact": {
+     "label": "e-m6-claim24-compact",
+     "rc": 0,
+     "witness": [
+      "compact"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "257461",
+    "auto": "257461",
+    "compact": "257461"
+   },
+   "pass": false
+  },
+  {
+   "mode": 2,
+   "variant": "truncated-mid-frame",
+   "arms": {
+    "float": {
+     "label": "e-m2-truncated-mid-frame-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m2-truncated-mid-frame-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": true,
+   "unaligned_sum_mean": {
+    "float": "25.4522",
+    "auto": "25.4522"
+   },
+   "pass": false
+  },
+  {
+   "mode": 2,
+   "variant": "truncated-one-byte",
+   "arms": {
+    "float": {
+     "label": "e-m2-truncated-one-byte-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m2-truncated-one-byte-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": true,
+   "unaligned_sum_mean": {
+    "float": "49.2062",
+    "auto": "49.2062"
+   },
+   "pass": false
+  },
+  {
+   "mode": 2,
+   "variant": "truncated-header",
+   "arms": {
+    "float": {
+     "label": "e-m2-truncated-header-float",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    },
+    "auto": {
+     "label": "e-m2-truncated-header-auto",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 2,
+   "variant": "header-only",
+   "arms": {
+    "float": {
+     "label": "e-m2-header-only-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m2-header-only-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "2.29984e-44",
+    "auto": "2.28315e-44"
+   },
+   "pass": false
+  },
+  {
+   "mode": 2,
+   "variant": "claims-12-frames-has-8",
+   "arms": {
+    "float": {
+     "label": "e-m2-claim12-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m2-claim12-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": true,
+   "unaligned_sum_mean": {
+    "float": "55.5619",
+    "auto": "55.5619"
+   },
+   "pass": false
+  },
+  {
+   "mode": 2,
+   "variant": "claims-24-frames-has-8",
+   "arms": {
+    "float": {
+     "label": "e-m2-claim24-float",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    },
+    "auto": {
+     "label": "e-m2-claim24-auto",
+     "rc": 0,
+     "witness": [
+      "float"
+     ],
+     "completion_star": [
+      "corrected_micrographs.star",
+      "movie.star"
+     ],
+     "mrc_products": [
+      "movie.mrc"
+     ],
+     "tail": ""
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": false,
+   "any_published": true,
+   "products_identical_float_vs_auto": false,
+   "unaligned_sum_mean": {
+    "float": "57.9003",
+    "auto": "57.9003"
+   },
+   "pass": false
+  },
+  {
+   "mode": 2,
+   "variant": "expected_frames-mismatch",
+   "arms": {
+    "float": {
+     "label": "e-m2-expect-wrong-float",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1018 :: Movie movie.mrcs frame count mismatch: expected 11 frames, but decoded 8 frames. || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    },
+    "auto": {
+     "label": "e-m2-expect-wrong-auto",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1018 :: Movie movie.mrcs frame count mismatch: expected 11 frames, but decoded 8 frames. || in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  }
+ ]
+}

@@ -1,0 +1,37 @@
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/1739_Fractions.mrcs
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.
+000/??? sec ~~(,_,">                                                          [oo]
+   0/   0 sec ............................................................~~(,_,"> yum!
+Since RELION 3.1, --early_binning is on by default. Use --no_early_binning to disable it.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 2411
+ERROR: 
+--ingest compact was requested but the compact native staging did not apply to Movies/1739_Fractions.mrcs. Either there is no resident CUDA session, or this movie is not an unsigned 8- or 16-bit TIFF, a raw integer MRC (mode 0, 1 or 6), or an EER whose grouped counts fit uint16. Refusing to continue on a different path under a pinned --ingest.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/build/cuda-nvcomp-1db86902/motioncorr(+0x68207) [0x61deebe33207]
+/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/build/cuda-nvcomp-1db86902/motioncorr(+0x39b63) [0x61deebe04b63]
+/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/build/cuda-nvcomp-1db86902/motioncorr(+0x13cb61) [0x61deebf07b61]
+/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/build/cuda-nvcomp-1db86902/motioncorr(+0x5df06) [0x61deebe28f06]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x708b4342a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x708b4342a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/build/cuda-nvcomp-1db86902/motioncorr(+0x5ea75) [0x61deebe29a75]
+==================
+ERROR: 
+--ingest compact was requested but the compact native staging did not apply to Movies/1739_Fractions.mrcs. Either there is no resident CUDA session, or this movie is not an unsigned 8- or 16-bit TIFF, a raw integer MRC (mode 0, 1 or 6), or an EER whose grouped counts fit uint16. Refusing to continue on a different path under a pinned --ingest.
+Continuing with the remaining movies.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/src/src/motioncorr_runner.cpp, line 1089
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/1739_Fractions.mrcs. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/build/cuda-nvcomp-1db86902/motioncorr(+0x68207) [0x61deebe33207]
+/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/build/cuda-nvcomp-1db86902/motioncorr(+0x3bc79) [0x61deebe06c79]
+/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/build/cuda-nvcomp-1db86902/motioncorr(+0x5df06) [0x61deebe28f06]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x708b4342a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x708b4342a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-MRC-Q/build/cuda-nvcomp-1db86902/motioncorr(+0x5ea75) [0x61deebe29a75]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/1739_Fractions.mrcs. Successful per-movie outputs were retained; joint output was not generated.

@@ -1,0 +1,56 @@
+{
+  "title": "Motion, corrected.",
+  "duration": 180,
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "scenes": [
+    {"id":"s00","start":0,"end":10,"title":"Motion, corrected.","chapter":"THE BRIEF","cues":[
+      [0.6,4.8,"We came to STFC to make scientific software faster."],
+      [5.0,9.7,"Then we asked the agents to make the presentation. Naturally."]]},
+    {"id":"s01","start":10,"end":22,"title":"Tiny particles. Big workload.","chapter":"THE SCIENCE","cues":[
+      [10.5,15.6,"In cryo-electron microscopy, tiny movements can blur the picture."],
+      [15.8,21.7,"RELION's motion correction aligns movie frames so the useful signal adds up."]]},
+    {"id":"s02","start":22,"end":34,"title":"Find the drift. Undo the drift.","chapter":"THE ALGORITHM","cues":[
+      [22.5,27.8,"Estimate the motion, shift the frames, then combine them with dose weighting."],
+      [28.0,33.7,"Simple to say. Rather less simple when there are millions of pixels."]]},
+    {"id":"s03","start":34,"end":46,"title":"One challenge. Three routes.","chapter":"THE MISSION","cues":[
+      [34.5,39.7,"We took a standalone RELION-derived engine and explored three acceleration routes:"],
+      [39.9,45.7,"CUDA, JAX and Metal. Different hardware. One very demanding scientific reference."]]},
+    {"id":"s04","start":46,"end":60,"title":"Antigravity. Very down-to-earth work.","chapter":"THE EXPERIENCE","cues":[
+      [46.5,51.8,"At this STFC, Google and PA hackathon, Antigravity became our workshop."],
+      [52.0,56.4,"We used it heavily to investigate code, develop changes and iterate."],
+      [56.6,59.7,"There was still plenty of debugging. Gravity, apparently, still works."]]},
+    {"id":"s05","start":60,"end":75,"title":"We built a team of agents.","chapter":"THE AGENT TEAM","cues":[
+      [60.5,65.4,"We created specialist agents for our Gemini Enterprise workflow."],
+      [65.6,70.0,"An architect proposes. A critic challenges. Review and testing agents check."],
+      [70.2,74.7,"Basically, a very productive meeting where everyone has actually read the code."]]},
+    {"id":"s06","start":75,"end":88,"title":"Automation. With a human merge button.","chapter":"THE WORKFLOW","cues":[
+      [75.5,80.8,"On Google Cloud, Gemini-powered workers triage issues, propose fixes and review pull requests."],
+      [81.0,87.7,"Small scopes, explicit checks, and humans making the final call. No automatic victory lap."]]},
+    {"id":"s07","start":88,"end":100,"title":"Make it repeatable first.","chapter":"THE FOUNDATION","cues":[
+      [88.5,93.8,"We tackled thread-dependent randomness and built reproducible comparisons."],
+      [94.0,99.7,"The fixed CPU matched across one and four threads on all twenty-four tutorial movies."]]},
+    {"id":"s08","start":100,"end":113,"title":"The tests had notes.","chapter":"THE REALITY CHECK","cues":[
+      [100.5,105.8,"CUDA passed the small synthetic global-alignment tests. Real movies revealed image differences."],
+      [106.0,112.7,"So we kept the numerical gates, recorded the failures and traced the pipeline. Science, not vibes."]]},
+    {"id":"s09","start":113,"end":124,"title":"Fast kernel. Same queue.","chapter":"THE PLOT TWIST","cues":[
+      [113.5,118.4,"Then came the classic twist: faster GPU kernels, but no whole-movie speedup yet."],
+      [118.6,123.7,"The CPU was still doing the expensive reconstruction. We had accelerated the wrong queue."]]},
+    {"id":"s10","start":124,"end":137,"title":"Follow the bottleneck.","chapter":"THE NEXT BREAKTHROUGH","cues":[
+      [124.5,130.8,"The newest CUDA pull request moves that reconstruction work onto the GPU, with streaming buffers."],
+      [131.0,136.7,"Its early report is promising. Stage timings are not whole-pipeline speedups. The asterisk stays."]]},
+    {"id":"s11","start":137,"end":149,"title":"Three routes. Different milestones.","chapter":"THE FRONTIER","cues":[
+      [137.5,142.8,"Metal now has a global-alignment implementation proposed for Apple silicon. JAX is an exploration track."],
+      [143.0,148.7,"Different stages of progress, shared reference tests. We are building evidence, not just backends."]]},
+    {"id":"s12","start":149,"end":163,"title":"Faster iteration. Better questions.","chapter":"WHAT WE LEARNED","cues":[
+      [149.5,154.4,"Our biggest lesson: agents help most when the task and the test are both clear."],
+      [154.6,158.6,"Antigravity helped us iterate. Independent checks challenged our assumptions."],
+      [158.8,162.7,"The humans supplied the scientific judgment. And the snacks."]]},
+    {"id":"s13","start":163,"end":175,"title":"And yes. We delegated the video.","chapter":"THE PRESENTATION","cues":[
+      [163.5,169.0,"We leave with GPU prototypes, reusable agents, tougher tests and a much clearer next step."],
+      [169.2,174.6,"Then we gave the agents one final issue: make this look good in three minutes."]]},
+    {"id":"s14","start":175,"end":180,"title":"Motion, corrected.","chapter":"STFC × GOOGLE × PA","cues":[
+      [175.1,179.6,"Motion, corrected. Hype, tested."]]}
+  ]
+}

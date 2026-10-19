@@ -90,6 +90,19 @@ python3 tools/multi_gpu/run_dataset.py \
 
 Basis: the decision record [`docs/rc0/decoder_trust_and_dependencies.md`](docs/rc0/decoder_trust_and_dependencies.md), section 3.
 
+When built with Apple Metal support on macOS (`-DMETAL=ON`), passing `--metal` enables Metal acceleration on Apple Silicon:
+
+```sh
+# Build with Apple Metal support (macOS only)
+cmake -S . -B build-metal -DMETAL=ON
+cmake --build build-metal --parallel
+
+# Run with Metal acceleration for global alignment
+./build-metal/motioncorr --i movies.star --o MotionCorr --use_own --metal --metal_device 0 --j 1
+```
+
+**Metal status:** Issue #30 establishes the opt-in macOS build, device discovery, CLI backend selection (`--metal`, `--metal_device <id>`), and fail-closed dispatch interface. The full iterative alignment loop and FFT kernels on Metal are implemented in Issue #32; see the [Metal backend contract](docs/metal_backend_contract.md). CPU-only builds remain default and free of Metal frameworks.
+
 You can also supply a movie file or quoted file wildcard directly when `--angpix` and `--voltage` are specified. This standalone build repairs a RELION 5.1 direct-input crash caused by missing per-movie metadata.
 
 ```sh

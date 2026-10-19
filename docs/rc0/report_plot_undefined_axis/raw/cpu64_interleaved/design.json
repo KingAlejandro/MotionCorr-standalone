@@ -1,0 +1,345 @@
+{
+  "declared_at_utc": "2026-10-18T09:26:50.420343Z",
+  "workload": "tutorial_2mov",
+  "star": "movies2.star",
+  "cpus_payload": [
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55
+  ],
+  "cpus_runner": [
+    56,
+    57,
+    58,
+    59
+  ],
+  "binary_A_main": {
+    "path": "/home/ubuntu/mc-w-d13/build-main/motioncorr",
+    "sha256": "307a030b03785201342a57c4d8adae14120d87676fa6bec7e62f8959d5b03a35"
+  },
+  "binary_B_fix": {
+    "path": "/home/ubuntu/mc-w-d13/build-fix/motioncorr",
+    "sha256": "68dc7ac11049bb15be3caa90af10adb6c7bb7e44b752d797080b9ca1a79d96f9"
+  },
+  "binary_A_prime": {
+    "label": "A'",
+    "dir_tag": "A2",
+    "path": "/home/ubuntu/mc-w-d13/build-main/motioncorr",
+    "sha256": "307a030b03785201342a57c4d8adae14120d87676fa6bec7e62f8959d5b03a35"
+  },
+  "pilot_reference": {
+    "source_file": "/home/ubuntu/mc-w-d13/pilot/pilot_summary.json",
+    "pilot_pairs": 4,
+    "pilot_main_median_s": 17.5711,
+    "pilot_sd_diff_s": 0.0477,
+    "pilot_robust_sd_mad_s": 0.0544,
+    "pilot_rel_sigma_per_sqrt_min_pct": 0.2371
+  },
+  "d14_margin_pct": 0.5,
+  "pilot_target_s": 0.087856,
+  "N_comparison_pairs": 32,
+  "N_AB": 16,
+  "N_BA": 16,
+  "N_null_pairs": 16,
+  "N_AA_prime": 8,
+  "N_A_prime_A": 8,
+  "interleaving_k_blocks": 2,
+  "total_definitive_pairs": 48,
+  "max_attempts_per_pair": 3,
+  "foreign_lane_cores_limit": 0.25,
+  "plan_orders": [
+    {
+      "position": 1,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 1
+    },
+    {
+      "position": 2,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 1
+    },
+    {
+      "position": 3,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 2
+    },
+    {
+      "position": 4,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 2
+    },
+    {
+      "position": 5,
+      "kind": "null",
+      "order": "AA'",
+      "after_comp_block": 2
+    },
+    {
+      "position": 6,
+      "kind": "null",
+      "order": "A'A",
+      "after_comp_block": 2
+    },
+    {
+      "position": 7,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 3
+    },
+    {
+      "position": 8,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 3
+    },
+    {
+      "position": 9,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 4
+    },
+    {
+      "position": 10,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 4
+    },
+    {
+      "position": 11,
+      "kind": "null",
+      "order": "AA'",
+      "after_comp_block": 4
+    },
+    {
+      "position": 12,
+      "kind": "null",
+      "order": "A'A",
+      "after_comp_block": 4
+    },
+    {
+      "position": 13,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 5
+    },
+    {
+      "position": 14,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 5
+    },
+    {
+      "position": 15,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 6
+    },
+    {
+      "position": 16,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 6
+    },
+    {
+      "position": 17,
+      "kind": "null",
+      "order": "AA'",
+      "after_comp_block": 6
+    },
+    {
+      "position": 18,
+      "kind": "null",
+      "order": "A'A",
+      "after_comp_block": 6
+    },
+    {
+      "position": 19,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 7
+    },
+    {
+      "position": 20,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 7
+    },
+    {
+      "position": 21,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 8
+    },
+    {
+      "position": 22,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 8
+    },
+    {
+      "position": 23,
+      "kind": "null",
+      "order": "AA'",
+      "after_comp_block": 8
+    },
+    {
+      "position": 24,
+      "kind": "null",
+      "order": "A'A",
+      "after_comp_block": 8
+    },
+    {
+      "position": 25,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 9
+    },
+    {
+      "position": 26,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 9
+    },
+    {
+      "position": 27,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 10
+    },
+    {
+      "position": 28,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 10
+    },
+    {
+      "position": 29,
+      "kind": "null",
+      "order": "AA'",
+      "after_comp_block": 10
+    },
+    {
+      "position": 30,
+      "kind": "null",
+      "order": "A'A",
+      "after_comp_block": 10
+    },
+    {
+      "position": 31,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 11
+    },
+    {
+      "position": 32,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 11
+    },
+    {
+      "position": 33,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 12
+    },
+    {
+      "position": 34,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 12
+    },
+    {
+      "position": 35,
+      "kind": "null",
+      "order": "AA'",
+      "after_comp_block": 12
+    },
+    {
+      "position": 36,
+      "kind": "null",
+      "order": "A'A",
+      "after_comp_block": 12
+    },
+    {
+      "position": 37,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 13
+    },
+    {
+      "position": 38,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 13
+    },
+    {
+      "position": 39,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 14
+    },
+    {
+      "position": 40,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 14
+    },
+    {
+      "position": 41,
+      "kind": "null",
+      "order": "AA'",
+      "after_comp_block": 14
+    },
+    {
+      "position": 42,
+      "kind": "null",
+      "order": "A'A",
+      "after_comp_block": 14
+    },
+    {
+      "position": 43,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 15
+    },
+    {
+      "position": 44,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 15
+    },
+    {
+      "position": 45,
+      "kind": "comp",
+      "order": "AB",
+      "after_comp_block": 16
+    },
+    {
+      "position": 46,
+      "kind": "comp",
+      "order": "BA",
+      "after_comp_block": 16
+    },
+    {
+      "position": 47,
+      "kind": "null",
+      "order": "AA'",
+      "after_comp_block": 16
+    },
+    {
+      "position": 48,
+      "kind": "null",
+      "order": "A'A",
+      "after_comp_block": 16
+    }
+  ]
+}

@@ -1,0 +1,222 @@
+cpu-bind=MASK - cn070, task  0  0 [207050]: mask 0xffffffffffffffff set
+=== 0. Provenance ===
+2026-10-18T01:28:28Z
+cn070.scarf.rl.ac.uk
+CPU(s):                                  64
+Model name:                              AMD EPYC 7502 32-Core Processor
+Thread(s) per core:                      2
+Socket(s):                               1
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-63
+[always] madvise never
+GLIBC_TUNABLES=<unset>
+cmake version 3.31.8
+g++ (GCC) 11.5.0 20240719 (Red Hat 11.5.0-14)
+Python 3.9.25
+6a017db68bc6da72e9fbfbacb7dc6f1fff5506806ac1aa15e07b97f856a9aa1f  /tmp/wd10-12963-3634353/build-main/motioncorr
+a3f2a19e6d134e65eac1eb3de3a49fba4ed6190427bbc065baeabf3e4f547ae8  /tmp/wd10-12963-3634353/build-fix/motioncorr
+3fc5feb61f487f0f4f6ec1317ae033138fe50e7da80e3b5b16bab3aaff2403f5  /tmp/wd10-12963-3634353/data-12963/Movies/movie1.eer
+6d4f3e5f9a6b837c637dc7098420e1c0cdfbbd61c9305a7780568f67c7134050  /tmp/wd10-12963-3634353/data-12963/gain.gain
+=== Definitive AB/BA (32 pairs: 16 AB + 16 BA, warmup 1) ===
+mcprof: main     warmup r00 wall 9.576 s
+mcprof: fix      warmup r00 wall 9.502 s
+mcprof: main     round  r01 wall 9.509 s
+mcprof: fix      round  r01 wall 9.474 s
+mcprof: fix      round  r02 wall 9.480 s
+mcprof: main     round  r02 wall 9.478 s
+mcprof: main     round  r03 wall 9.505 s
+mcprof: fix      round  r03 wall 9.481 s
+mcprof: fix      round  r04 wall 9.456 s
+mcprof: main     round  r04 wall 9.503 s
+mcprof: main     round  r05 wall 9.482 s
+mcprof: fix      round  r05 wall 9.498 s
+mcprof: fix      round  r06 wall 9.499 s
+mcprof: main     round  r06 wall 9.573 s
+mcprof: main     round  r07 wall 9.541 s
+mcprof: fix      round  r07 wall 9.498 s
+mcprof: fix      round  r08 wall 9.538 s
+mcprof: main     round  r08 wall 9.563 s
+mcprof: main     round  r09 wall 9.566 s
+mcprof: fix      round  r09 wall 9.504 s
+mcprof: fix      round  r10 wall 9.516 s
+mcprof: main     round  r10 wall 9.649 s
+mcprof: main     round  r11 wall 9.516 s
+mcprof: fix      round  r11 wall 9.487 s
+mcprof: fix      round  r12 wall 9.519 s
+mcprof: main     round  r12 wall 9.464 s
+mcprof: main     round  r13 wall 9.522 s
+mcprof: fix      round  r13 wall 9.501 s
+mcprof: fix      round  r14 wall 9.474 s
+mcprof: main     round  r14 wall 9.515 s
+mcprof: main     round  r15 wall 9.508 s
+mcprof: fix      round  r15 wall 9.501 s
+mcprof: fix      round  r16 wall 9.513 s
+mcprof: main     round  r16 wall 9.440 s
+mcprof: main     round  r17 wall 9.488 s
+mcprof: fix      round  r17 wall 9.489 s
+mcprof: fix      round  r18 wall 9.485 s
+mcprof: main     round  r18 wall 9.485 s
+mcprof: main     round  r19 wall 9.584 s
+mcprof: fix      round  r19 wall 9.475 s
+mcprof: fix      round  r20 wall 9.497 s
+mcprof: main     round  r20 wall 9.474 s
+mcprof: main     round  r21 wall 9.517 s
+mcprof: fix      round  r21 wall 9.469 s
+mcprof: fix      round  r22 wall 9.490 s
+mcprof: main     round  r22 wall 9.507 s
+mcprof: main     round  r23 wall 9.528 s
+mcprof: fix      round  r23 wall 9.494 s
+mcprof: fix      round  r24 wall 9.487 s
+mcprof: main     round  r24 wall 9.464 s
+mcprof: main     round  r25 wall 9.511 s
+mcprof: fix      round  r25 wall 9.483 s
+mcprof: fix      round  r26 wall 9.484 s
+mcprof: main     round  r26 wall 9.503 s
+mcprof: main     round  r27 wall 9.509 s
+mcprof: fix      round  r27 wall 9.484 s
+mcprof: fix      round  r28 wall 9.481 s
+mcprof: main     round  r28 wall 9.476 s
+mcprof: main     round  r29 wall 9.509 s
+mcprof: fix      round  r29 wall 9.483 s
+mcprof: fix      round  r30 wall 9.483 s
+mcprof: main     round  r30 wall 9.610 s
+mcprof: main     round  r31 wall 9.546 s
+mcprof: fix      round  r31 wall 9.482 s
+mcprof: fix      round  r32 wall 9.487 s
+mcprof: main     round  r32 wall 9.504 s
+mcprof: wrote /work4/scd/scarf1415/W-D10/def-e12963-3634353/e12963_ab32/report.md
+=== Definitive AA Null (12 pairs, warmup 1) ===
+mcprof: main     warmup r00 wall 9.517 s
+mcprof: main_null warmup r00 wall 9.496 s
+mcprof: main     round  r01 wall 9.485 s
+mcprof: main_null round  r01 wall 9.488 s
+mcprof: main_null round  r02 wall 9.474 s
+mcprof: main     round  r02 wall 9.528 s
+mcprof: main     round  r03 wall 9.489 s
+mcprof: main_null round  r03 wall 9.446 s
+mcprof: main_null round  r04 wall 9.493 s
+mcprof: main     round  r04 wall 9.518 s
+mcprof: main     round  r05 wall 9.521 s
+mcprof: main_null round  r05 wall 9.515 s
+mcprof: main_null round  r06 wall 9.498 s
+mcprof: main     round  r06 wall 9.512 s
+mcprof: main     round  r07 wall 9.486 s
+mcprof: main_null round  r07 wall 9.509 s
+mcprof: main_null round  r08 wall 9.494 s
+mcprof: main     round  r08 wall 9.466 s
+mcprof: main     round  r09 wall 9.494 s
+mcprof: main_null round  r09 wall 9.491 s
+mcprof: main_null round  r10 wall 9.501 s
+mcprof: main     round  r10 wall 9.474 s
+mcprof: main     round  r11 wall 9.531 s
+mcprof: main_null round  r11 wall 9.501 s
+mcprof: main_null round  r12 wall 9.463 s
+mcprof: main     round  r12 wall 9.510 s
+mcprof: wrote /work4/scd/scarf1415/W-D10/def-e12963-3634353/e12963_aa12/report.md
+# MotionCorr compare: main vs fix
+
+## Provenance
+
+- kit: `None`
+- arm `main`: `/tmp/wd10-12963-3634353/build-main/motioncorr` sha256 `6a017db68bc6da72`; source `71ab841e69869b615555bb02f8f393db59c22d73` (given on command line); --profile present
+  - linked: libfftw3.so.3=/lib64/libfftw3.so.3, libfftw3f.so.3=/lib64/libfftw3f.so.3, libtiff.so.5=/lib64/libtiff.so.5
+- arm `fix`: `/tmp/wd10-12963-3634353/build-fix/motioncorr` sha256 `a3f2a19e6d134e65`; source `97fb9fda5902f4bd5c2aab7c40ae4064637b5125` (given on command line); --profile present
+  - linked: libfftw3.so.3=/lib64/libfftw3.so.3, libfftw3f.so.3=/lib64/libfftw3f.so.3, libtiff.so.5=/lib64/libtiff.so.5
+- host: cn070.scarf.rl.ac.uk, AMD EPYC 7502 32-Core Processor, 64 CPUs, lane 0-15, load1 4.7, clocksource tsc, THP [always] madvise never
+- settle: {"settled": true, "waited_s": 0.0}
+- rounds: 32 run, 32 clean, target 32 clean, at most 32
+- input: `movies.star` in `/tmp/wd10-12963-3634353/data-12963`, 1 movies, STAR sha256 `ae611d612a3f8979`
+- payload options: `--use_own --dose_weighting --dose_per_frame 1.282051282051282 --patch_x 5 --patch_y 5 --bfactor 150 --gainref gain.gain --eer_grouping 49 --eer_upsampling 1 --expected_frames 39 --seed 1 --skip_report_pdf --j 16`
+- command: `/tmp/wd10-12963-3634353/src-fix/tools/profiling/mcprof.py compare main=/tmp/wd10-12963-3634353/build-main/motioncorr fix=/tmp/wd10-12963-3634353/build-fix/motioncorr --source main=/tmp/wd10-12963-3634353/src-main --source fix=/tmp/wd10-12963-3634353/src-fix --commit main=71ab841e69869b615555bb02f8f393db59c22d73 --commit fix=97fb9fda5902f4bd5c2aab7c40ae4064637b5125 --data /tmp/wd10-12963-3634353/data-12963 --star movies.star --work /work4/scd/scarf1415/W-D10/def-e12963-3634353/e12963_ab32 --cpus 0-15 --runner-cpus 16-19 --warmup 1 --pairs 32 --no-lock -- --use_own --dose_weighting --dose_per_frame 1.282051282051282 --patch_x 5 --patch_y 5 --bfactor 150 --gainref gain.gain --eer_grouping 49 --eer_upsampling 1 --expected_frames 39 --seed 1 --skip_report_pdf --j 16`
+
+## Unprofiled wall and resources
+
+Instrument: mcprof run: unprofiled process, wall from CLOCK_MONOTONIC, CPU/RSS/faults from wait4, VRAM from NVML sampling.
+
+| arm | runs | wall med s | wall IQR s | wall range s | CPU med s | peak RSS MiB | minflt med | majflt max | VRAM proc MiB | VRAM dev delta MiB |
+|---|---|---|---|---|---|---|---|---|---|---|
+| main | 32 | 9.509 | 0.044 | 9.440-9.649 | 85.840 | 6561 | 171592 | 12 | - | - |
+| fix | 32 | 9.487 | 0.017 | 9.456-9.538 | 85.625 | 6554 | 171603 | 13 | - | - |
+
+VRAM columns are sampled peaks and therefore lower bounds. "proc" is NVML's per-process used memory (includes the CUDA context); "dev delta" is device used memory minus the idle baseline taken just before the run.
+
+- `main`: load1 5.8-13.4, max foreign CPU on lane 0.10 cores, wall outlier rounds [10, 30]
+- `fix`: load1 5.7-13.2, max foreign CPU on lane 0.14 cores, wall outlier rounds [8]
+
+Rounds: 32 planned, 32 retained, 0 discarded (a discard removes the whole round, every arm). Discards triggered by: `main` 0 (alone 0), `fix` 0 (alone 0). Kept orders: AB 16, BA 16.
+
+Lane wait before round: r1 1 s, r2 1 s, r3 1 s, r4 1 s, r5 1 s, r6 1 s, r7 1 s, r8 1 s, r9 1 s, r10 1 s, r11 1 s, r12 1 s, r13 1 s, r14 1 s, r15 1 s, r16 1 s, r17 1 s, r18 1 s, r19 1 s, r20 1 s, r21 1 s, r22 1 s, r23 1 s, r24 1 s, r25 1 s, r26 1 s, r27 1 s, r28 1 s, r29 1 s, r30 1 s, r31 1 s, r32 1 s.
+
+### `fix` vs `main`: **not resolved (below noise 0.033 s)**
+
+| pairs | median B-A s | IQR s | range s | CI of median s | noise s | sign test | relative |
+|---|---|---|---|---|---|---|---|
+| 32 | -0.025 | -0.044..+0.000 | -0.134..+0.073 | -0.040..-0.007 (98.0%) | 0.033 | 9+/23- p=0.0201 | -0.26% |
+
+Reason: |median| does not exceed noise. Positive differences mean `fix` is slower.
+Positional: median B-A when `fix` ran second -0.029 s (n=16), first -0.017 s (n=16); cost of running second -0.006 s.
+Paired differences (s): -0.035, +0.002, -0.025, -0.047, +0.015, -0.074, -0.043, -0.025, -0.062, -0.134, -0.029, +0.056, -0.020, -0.040, -0.007, +0.073, +0.001, +0.000, -0.109, +0.023, -0.048, -0.017, -0.034, +0.023, -0.029, -0.019, -0.025, +0.005, -0.026, -0.128, -0.064, -0.016
+
+## Product identity
+
+Instrument: lib/identity.py: complete MRC header + extended header + payload, writer clock masked, path-normalised STAR/EPS, round 1.
+
+| arm vs base | result | files compared | MRC compared | excluded | problems |
+|---|---|---|---|---|---|
+| fix | PASS | 4 | 1 | 1 | - |
+
+Excluded: per-movie `.log` (timing values) and `.pdf` (Ghostscript dates). All MRC header/label and extended-header bytes are compared; only the known first-label Relion writer timestamp is masked.
+# MotionCorr compare: main vs main_null
+
+## Provenance
+
+- kit: `None`
+- arm `main`: `/tmp/wd10-12963-3634353/build-main/motioncorr` sha256 `6a017db68bc6da72`; source `71ab841e69869b615555bb02f8f393db59c22d73` (given on command line); --profile present
+  - linked: libfftw3.so.3=/lib64/libfftw3.so.3, libfftw3f.so.3=/lib64/libfftw3f.so.3, libtiff.so.5=/lib64/libtiff.so.5
+- arm `main_null`: `/tmp/wd10-12963-3634353/build-main/motioncorr` sha256 `6a017db68bc6da72`; source `71ab841e69869b615555bb02f8f393db59c22d73` (given on command line); --profile present
+  - linked: libfftw3.so.3=/lib64/libfftw3.so.3, libfftw3f.so.3=/lib64/libfftw3f.so.3, libtiff.so.5=/lib64/libtiff.so.5
+- host: cn070.scarf.rl.ac.uk, AMD EPYC 7502 32-Core Processor, 64 CPUs, lane 0-15, load1 10.7, clocksource tsc, THP [always] madvise never
+- settle: {"settled": true, "waited_s": 0.0}
+- rounds: 12 run, 12 clean, target 12 clean, at most 12
+- input: `movies.star` in `/tmp/wd10-12963-3634353/data-12963`, 1 movies, STAR sha256 `ae611d612a3f8979`
+- payload options: `--use_own --dose_weighting --dose_per_frame 1.282051282051282 --patch_x 5 --patch_y 5 --bfactor 150 --gainref gain.gain --eer_grouping 49 --eer_upsampling 1 --expected_frames 39 --seed 1 --skip_report_pdf --j 16`
+- command: `/tmp/wd10-12963-3634353/src-fix/tools/profiling/mcprof.py compare main=/tmp/wd10-12963-3634353/build-main/motioncorr main_null=/tmp/wd10-12963-3634353/build-main/motioncorr --source main=/tmp/wd10-12963-3634353/src-main --source main_null=/tmp/wd10-12963-3634353/src-main --commit main=71ab841e69869b615555bb02f8f393db59c22d73 --commit main_null=71ab841e69869b615555bb02f8f393db59c22d73 --data /tmp/wd10-12963-3634353/data-12963 --star movies.star --work /work4/scd/scarf1415/W-D10/def-e12963-3634353/e12963_aa12 --cpus 0-15 --runner-cpus 16-19 --warmup 1 --pairs 12 --no-lock -- --use_own --dose_weighting --dose_per_frame 1.282051282051282 --patch_x 5 --patch_y 5 --bfactor 150 --gainref gain.gain --eer_grouping 49 --eer_upsampling 1 --expected_frames 39 --seed 1 --skip_report_pdf --j 16`
+
+## Unprofiled wall and resources
+
+Instrument: mcprof run: unprofiled process, wall from CLOCK_MONOTONIC, CPU/RSS/faults from wait4, VRAM from NVML sampling.
+
+| arm | runs | wall med s | wall IQR s | wall range s | CPU med s | peak RSS MiB | minflt med | majflt max | VRAM proc MiB | VRAM dev delta MiB |
+|---|---|---|---|---|---|---|---|---|---|---|
+| main | 12 | 9.502 | 0.032 | 9.466-9.531 | 85.739 | 6576 | 172308 | 7 | - | - |
+| main_null | 12 | 9.494 | 0.016 | 9.446-9.515 | 85.716 | 6561 | 171262 | 0 | - | - |
+
+VRAM columns are sampled peaks and therefore lower bounds. "proc" is NVML's per-process used memory (includes the CUDA context); "dev delta" is device used memory minus the idle baseline taken just before the run.
+
+- `main`: load1 7.4-10.2, max foreign CPU on lane 0.09 cores, wall outlier rounds none
+- `main_null`: load1 7.3-9.3, max foreign CPU on lane 0.09 cores, wall outlier rounds [3]
+
+Rounds: 12 planned, 12 retained, 0 discarded (a discard removes the whole round, every arm). Discards triggered by: `main` 0 (alone 0), `main_null` 0 (alone 0). Kept orders: AB 6, BA 6.
+
+Lane wait before round: r1 1 s, r2 1 s, r3 1 s, r4 1 s, r5 1 s, r6 1 s, r7 1 s, r8 1 s, r9 1 s, r10 1 s, r11 1 s, r12 1 s.
+
+### `main_null` vs `main`: **not resolved (below noise 0.038 s)**
+
+| pairs | median B-A s | IQR s | range s | CI of median s | noise s | sign test | relative |
+|---|---|---|---|---|---|---|---|
+| 12 | -0.010 | -0.033..+0.007 | -0.054..+0.028 | -0.043..+0.022 (96.1%) | 0.038 | 4+/8- p=0.388 | -0.11% |
+
+Reason: CI of median includes 0. Positive differences mean `main_null` is slower.
+Positional: median B-A when `main_null` ran second -0.005 s (n=6), first -0.019 s (n=6); cost of running second +0.007 s.
+Paired differences (s): +0.002, -0.054, -0.043, -0.025, -0.006, -0.014, +0.022, +0.028, -0.004, +0.026, -0.029, -0.047
+
+## Product identity
+
+Instrument: lib/identity.py: complete MRC header + extended header + payload, writer clock masked, path-normalised STAR/EPS, round 1.
+
+| arm vs base | result | files compared | MRC compared | excluded | problems |
+|---|---|---|---|---|---|
+| main_null | PASS | 4 | 1 | 1 | - |
+
+Excluded: per-movie `.log` (timing values) and `.pdf` (Ghostscript dates). All MRC header/label and extended-header bytes are compared; only the known first-label Relion writer timestamp is masked.
+DEF_E12963_COMPLETE 2026-10-18T01:44:35Z

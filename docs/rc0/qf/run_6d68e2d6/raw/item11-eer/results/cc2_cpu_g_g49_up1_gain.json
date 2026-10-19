@@ -1,0 +1,40 @@
+{
+ "case": "cc2_cpu_g_g49_up1_gain",
+ "desc": "CPU-only: 12963 g49 up1 gain config L",
+ "recorded": {
+  "base0ac2726a": {
+   "rc": 0,
+   "routes": []
+  },
+  "cand1db86902": {
+   "rc": 0,
+   "routes": []
+  }
+ },
+ "recorded_compare_rc": 0,
+ "arms": {
+  "ref_cpu_1db86902": {
+   "rc": 0,
+   "routes": [],
+   "binary_sha256": "dd86cd419c43dc83d732c7b70cff2bb40c5459674ba65f9b9ba5ee85a6b26439",
+   "gpu_witness": null,
+   "max_rss_kib": 6281172,
+   "wall_s": 31.38
+  },
+  "cpu": {
+   "rc": 0,
+   "routes": [],
+   "binary_sha256": "43cab2b74e97e948172c656d2b3041b562d24e733de1a5727a54624c12749b42",
+   "gpu_witness": null,
+   "max_rss_kib": 6318096,
+   "wall_s": 30.522
+  }
+ },
+ "problems": [],
+ "compare": {
+  "rc": 0,
+  "tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nAllowed added .log line prefixes (dropped from BOTH arms): 'Staging this movie as native', 'Released native uint', 'Materialized native uint', 'EER grouping'\nComparison: complete non-PDF tree; status=PASS; different files=0\n"
+ },
+ "inventory": {},
+ "verdict": "PASS"
+}

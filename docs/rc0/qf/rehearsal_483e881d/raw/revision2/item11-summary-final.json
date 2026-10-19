@@ -1,0 +1,220 @@
+{
+ "record": "PR #208 qual/rc0-eer-compact @ a5fa5429, docs/rc0/qual_eer_compact/evidence/{cases,results}",
+ "recipe_sha256": "0c5fd2d04380efaded2e60a3df37e05ec2619ebdba69e636428ba37dffdc4c05",
+ "binaries": {
+  "nvcomp": "f8bd37409897b3dbf3c398e3bc8b4aaefbf00ca38204e806d27832a4ca3e899b",
+  "cpu": "57256b875ab1bbcb45a398210d138c1f92a6e55b9edb71c8b2c5fcf57ca2b0ea",
+  "ref_cpu_1db86902": "dd86cd419c43dc83d732c7b70cff2bb40c5459674ba65f9b9ba5ee85a6b26439"
+ },
+ "cases": {
+  "b1_trunc60": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "b2_randbytes": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "b3_stripff": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "b4_stripzero": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "b5_trunc60_noexp": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "b6_wronggain": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c01_f3_g40_up1": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c02_f4_g40_up1": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c03_g_g49_up1_gain": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c04_g_g49_up1_nogain": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c05_f3_g45_up1_rem": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c06_f4_g37_up1_rem": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c07_g_g47_up1_gain_rem": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c08_f3_g1_up1_sub": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c09_g_g1_up1_gain_sub": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c10_f3_g40_up2": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c11_g_g49_up2_gain": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c12_g_g49_up2_nogain": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c13_f3_g40_up-1": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c14_g_g49_up-1_nogain": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "c15_f3_g200_up3": {
+   "verdict": "UNRUN",
+   "reason": "--skip-heavy"
+  },
+  "c16_g_g150_up3": {
+   "verdict": "UNRUN",
+   "reason": "--skip-heavy"
+  },
+  "c17_g_g49_up-1_gain_expectfail": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "cc1_cpu_f3_g40_up1": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "cc2_cpu_g_g49_up1_gain": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "cc3_cpu_f3_g40_upm1": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "d1_g_up1_gain_defect": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "d2_g_up1_gain_defectblock": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "d3_g_up2_gain_defectblock": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "m1_f4_g40_up2_full": {
+   "verdict": "UNRUN",
+   "reason": "--skip-heavy"
+  },
+  "m2_f4_g40_up2_100groups": {
+   "verdict": "UNRUN",
+   "reason": "--skip-heavy"
+  },
+  "o1_ovf_upm1_g16384": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "o1n_NOGUARD_upm1_g16384": {
+   "verdict": "N/A",
+   "reason": "guard-removed mutant; run with --noguard-binary (item11_noguard_control.sh)"
+  },
+  "o2_ovf_upm1_g16383": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "o3_boundary_up1_g65535": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "o4_ovf_up1_g65536": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "o5_ovf_up2_g65536_8K": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "x1_syn65000_4k_up1": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "x2_syn65000_4k_upm1": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "x3_syn65002_2k_up1": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "x4_syn65002_2k_up2": {
+   "verdict": "PASS",
+   "problems": []
+  },
+  "x5_syn65001_2k_up2": {
+   "verdict": "PASS",
+   "problems": []
+  }
+ },
+ "negative_controls": {
+  "b2_randbytes": {
+   "mutation": "one payload byte flipped in the float arm's movie2.mrc",
+   "problems": [
+    "float: Movies/movie2.mrc payload fd04fcbdea9c283c != #208 a5150f7edfe39764",
+    "auto vs float MRC payloads differ: ['Movies/movie2.mrc']"
+   ],
+   "rejected": true
+  },
+  "b3_stripff": {
+   "mutation": "D6 skip warning removed from the auto arm's output",
+   "problems": [
+    "auto: D6 skip warnings at [] != #208 [701]"
+   ],
+   "rejected": true
+  },
+  "b6_wronggain": {
+   "mutation": "per-movie and joint STAR planted after the refusal",
+   "problems": [
+    "auto: exited 1 but wrote a completion (joint) STAR",
+    "auto: published ['Movies/movie1.star'] != #208 []",
+    "auto: joint STAR True != #208 False",
+    "auto vs float per-movie STARs differ"
+   ],
+   "rejected": true
+  },
+  "o1_ovf_upm1_g16384": {
+   "mutation": "an MRC planted in the refused compact arm",
+   "problems": [
+    "compact: refused but published ['Movies/movie.mrc']"
+   ],
+   "rejected": true
+  }
+ },
+ "totals": {
+  "PASS": 37,
+  "FAIL": 0,
+  "UNRUN": 4,
+  "N/A": 1
+ },
+ "negative_controls_all_rejected": true
+}

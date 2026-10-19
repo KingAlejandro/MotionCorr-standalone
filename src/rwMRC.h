@@ -146,7 +146,9 @@ DataType parseMRCHeader(MRChead *header, long int img_select,  bool isStack=fals
 	swap = 0;
 	char *b = (char*) header;
 	int i;
-	if ((abs(header->mode) > SWAPTRIG) || (abs(header->nx) > SWAPTRIG))
+	// abs() is undefined for INT_MIN, which a damaged header can hold.
+	if (header->mode < -SWAPTRIG || header->mode > SWAPTRIG ||
+	    header->nx < -SWAPTRIG || header->nx > SWAPTRIG)
 	{
 #ifdef DEBUG
 		fprintf(stderr, "Warning: Swapping header byte order for 4-byte types\n");
@@ -191,8 +193,6 @@ DataType parseMRCHeader(MRChead *header, long int img_select,  bool isStack=fals
 	else
 		_nDim = 1;
 
-	data.setDimensions(_xDim, _yDim, _zDim, _nDim);
-
 	DataType datatype;
 
 	switch (header->mode)
@@ -227,6 +227,15 @@ DataType parseMRCHeader(MRChead *header, long int img_select,  bool isStack=fals
 	default:
 		REPORT_ERROR((std::string)"readMRC: unsupported MRC mode " + integerToString(header->mode));
 	}
+
+	const long int max_dim = std::numeric_limits<long int>::max();
+	if (_xDim <= 0 || _yDim <= 0 || _zDim <= 0 || _nDim <= 0 ||
+	    _yDim > max_dim / _xDim ||
+	    _zDim > max_dim / (_xDim * _yDim) ||
+	    _nDim > max_dim / (_xDim * _yDim * _zDim))
+		REPORT_ERROR("readMRC: invalid dimensions in header of image " + name);
+
+	data.setDimensions(_xDim, _yDim, _zDim, _nDim);
 	offset = MRCSIZE + header->nsymbt;
 
 	MDMainHeader.setValue(EMDL_IMAGE_STATS_MIN,(RFLOAT)header->amin);
@@ -259,9 +268,21 @@ int readMRC(long int img_select, bool isStack=false, const FileName &name="")
 
 	MRChead *header = (MRChead*)askMemory(sizeof(MRChead));
 	if (fread(header, MRCSIZE, 1, fimg) < 1)
+	{
+		freeMemory(header, sizeof(MRChead));
 		REPORT_ERROR("rwMRC: error in reading header of image " + name);
+	}
 
-	DataType datatype = parseMRCHeader(header, img_select, isStack, name);
+	DataType datatype;
+	try
+	{
+		datatype = parseMRCHeader(header, img_select, isStack, name);
+	}
+	catch (...)
+	{
+		freeMemory(header, sizeof(MRChead));
+		throw;
+	}
 
 	if (isStack && dataflag<0) // Don't read the individual header and the data if not necessary
 	{

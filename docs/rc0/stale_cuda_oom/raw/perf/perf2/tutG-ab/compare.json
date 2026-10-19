@@ -1,0 +1,365 @@
+{
+ "runs": {
+  "arms": [
+   "main",
+   "fix"
+  ],
+  "summary": {
+   "main": {
+    "n": 20,
+    "wall_median_s": 4.563096827361733,
+    "wall_iqr_s": 0.058072988176718354,
+    "wall_min_s": 4.508402549661696,
+    "wall_max_s": 4.734591447748244,
+    "cpu_median_s": 8.6757105,
+    "rss_median_bytes": 380913664.0,
+    "minflt_median": 125725.5,
+    "majflt_max": 17,
+    "wall_outlier_rounds": [
+     3,
+     17
+    ],
+    "vram_peak_process_bytes": 3418357760.0,
+    "vram_peak_process_bytes_max": 3418357760,
+    "vram_peak_device_delta_bytes": 3427598336.0,
+    "vram_peak_device_delta_bytes_max": 3427598336,
+    "lane_foreign_cores_max": 0.20475135198012714,
+    "load1_range": [
+     2.51171875,
+     3.16845703125
+    ]
+   },
+   "fix": {
+    "n": 20,
+    "wall_median_s": 4.576125230174512,
+    "wall_iqr_s": 0.15548953413963318,
+    "wall_min_s": 4.482935769483447,
+    "wall_max_s": 4.760211608372629,
+    "cpu_median_s": 8.6751825,
+    "rss_median_bytes": 380966912.0,
+    "minflt_median": 125790.0,
+    "majflt_max": 18,
+    "wall_outlier_rounds": [],
+    "vram_peak_process_bytes": 3418357760.0,
+    "vram_peak_process_bytes_max": 3418357760,
+    "vram_peak_device_delta_bytes": 3427598336.0,
+    "vram_peak_device_delta_bytes_max": 3427598336,
+    "lane_foreign_cores_max": 0.0,
+    "load1_range": [
+     2.390625,
+     3.173828125
+    ]
+   }
+  },
+  "discarded_rounds": [],
+  "discard_audit": {
+   "planned": 20,
+   "retained": 20,
+   "discarded": 0,
+   "triggered_alone": {
+    "main": 0,
+    "fix": 0
+   },
+   "triggered_any": {
+    "main": 0,
+    "fix": 0
+   },
+   "kept_orders": {
+    "AB": 10,
+    "BA": 10
+   },
+   "warnings": []
+  },
+  "comparisons": {
+   "fix": {
+    "n_pairs": 20,
+    "diffs_s": [
+     0.041972095146775246,
+     0.03280271589756012,
+     -0.17284024972468615,
+     0.10058754403144121,
+     0.167768444865942,
+     -0.00458468496799469,
+     -0.18415593914687634,
+     0.07310419157147408,
+     -0.02105263713747263,
+     0.1490716217085719,
+     -0.05522344168275595,
+     0.20585786178708076,
+     0.009452336467802525,
+     0.10791391134262085,
+     -0.1305475039407611,
+     -0.02927970513701439,
+     -0.00477181002497673,
+     0.040811569429934025,
+     -0.05623251758515835,
+     0.11816074885427952
+    ],
+    "floor_s": 0.0,
+    "min_pairs": 6,
+    "median_diff_s": 0.021127526182681322,
+    "q1_diff_s": -0.03576563927344978,
+    "q3_diff_s": 0.10241913585923612,
+    "min_diff_s": -0.18415593914687634,
+    "max_diff_s": 0.20585786178708076,
+    "median_a_s": 4.563096827361733,
+    "median_b_s": 4.576125230174512,
+    "relative_median_diff": 0.004630085001921102,
+    "noise_s": 0.1139459729237482,
+    "robust_sd_diff_s": 0.1139459729237482,
+    "ci": {
+     "low_s": -0.02927970513701439,
+     "high_s": 0.10058754403144121,
+     "confidence": 0.9586105346679688
+    },
+    "sign_test": {
+     "positive": 11,
+     "negative": 9,
+     "ties": 0,
+     "p_two_sided": 0.8238029479980469
+    },
+    "resolution_s": 0.1139459729237482,
+    "resolved": false,
+    "verdict": "not resolved (below noise 0.114 s)",
+    "reason": "CI of median includes 0",
+    "positional": {
+     "n_ab": 10,
+     "n_ba": 10,
+     "median_diff_ab_s": -0.03813803941011429,
+     "median_diff_ba_s": 0.08684586780145764,
+     "second_position_cost_s": -0.062491953605785966,
+     "order_corrected_effect_s": 0.024353914195671678
+    }
+   }
+  },
+  "lane_waits": [
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 1
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 2
+   },
+   {
+    "waited_s": 3.0,
+    "busy_cores": 0.19,
+    "round": 3
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 4
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 5
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 6
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 7
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 8
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 9
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 10
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 11
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 12
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 13
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 14
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 15
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 16
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 17
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 18
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 19
+   },
+   {
+    "waited_s": 1.0,
+    "busy_cores": 0.0,
+    "round": 20
+   }
+  ]
+ },
+ "identity": {
+  "fix": {
+   "root_a": "/mnt/clathrin/alex-motioncorr-rc0/W-D11/perf2/tutG-ab/runs/main-r01/out",
+   "root_b": "/mnt/clathrin/alex-motioncorr-rc0/W-D11/perf2/tutG-ab/runs/fix-r01/out",
+   "only_a": [],
+   "only_b": [],
+   "compared": 81,
+   "mrc_compared": 24,
+   "excluded": [
+    {
+     "file": "Movies/20170629_00021_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00022_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00023_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00024_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00025_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00026_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00027_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00028_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00029_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00030_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00031_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00035_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00036_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00037_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00039_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00040_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00042_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00043_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00044_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00045_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00046_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00047_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00048_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "Movies/20170629_00049_frameImage.log",
+     "reason": "timing values in per-movie logs"
+    },
+    {
+     "file": "all_batches.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "batch.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "header.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    },
+    {
+     "file": "logfile.pdf",
+     "reason": "Ghostscript creation date and /ID"
+    }
+   ],
+   "differences": [],
+   "problems": [],
+   "identical": true
+  }
+ }
+}

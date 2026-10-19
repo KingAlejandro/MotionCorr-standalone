@@ -189,8 +189,10 @@ exec "{sys.executable}" "$@"
             "RunnerExportedUnits",
             "GainCache",
             "TiffRead",
-            "DamagedMovie",
+            "DamagedMovie", "TruncatedMrcMovie", "TruncatedGainDefect",
             "CompressedMovieSequence",
+            "InputFormats",
+            "CutDownMovie",
             "RunnerModelParser",
             "MicrographModelBounds",
             "CiFailClosedControls",
@@ -199,6 +201,8 @@ exec "{sys.executable}" "$@"
             "DefectParser",
             "GlobalIfftElision",
             "PatchRetryState",
+            "CpuDoseSymmetry",
+            "CpuDoseSymmetryBase",
             "OutputTreeComparator",
             "RunnerInterpolateRecenter",
             "RunnerInterpolateShifts",
@@ -210,6 +214,7 @@ exec "{sys.executable}" "$@"
             "DefectNeighbours",
             # #127 output stage.
             "MrcHeaderStats",
+            "ReportPlotUndefinedAxis",
             "PdfConcat",
             # #127 writer fail-closed variants.
             "WriteFaultsSync",
@@ -217,10 +222,24 @@ exec "{sys.executable}" "$@"
             "NvcompGuards",
             "NvcompAcceptanceDiagnostics",
             "OutputStageFaults",
+            # #185/#200 logfile.pdf rendering and its compiled mutants.
+            "LogfileFromEps",
+            "LogfileFromEpsMutant_always_eps",
+            "LogfileFromEpsMutant_late_guard",
+            "LogfileFromEpsMutant_eps_order",
+            "LogfileFromEpsMutant_placeholder",
+            "LogfileFromEpsMutant_concat_cleanup",
+            # #134 item 2 checked arithmetic: compiled mutants of DeflateLayout.
+            "DeflateLayoutMutant_span_wrap",
+            "DeflateLayoutMutant_stage_sum",
+            "DeflateLayoutMutant_reserve_round",
+            "DeflateLayoutMutant_layout_table",
+            "DeflateLayoutMutant_arena_start",
+            "DeflateLayoutMutant_drain_step",
             "MultiGpuScheduling",
             "NativeMovieStaging",
             "GainCacheOwnership",
-            "JointStarPublication",
+            "JointStarPublication", "EerMemorySafety",
             # --profile contract (docs/stage_profile.md).
             "StageProfile",
             "CudaValidationParser",
@@ -253,12 +272,22 @@ exec "{sys.executable}" "$@"
         # only thing that can reject the collection is the missing-name check.
         for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults",
                         "DefectParser", "GlobalIfftElision", "PatchRetryState",
+                        "CpuDoseSymmetry", "CpuDoseSymmetryBase",
                         "OutputTreeComparator", "MultiGpuScheduling", "NativeMovieStaging",
-                        "GainCacheOwnership", "JointStarPublication",
+                        "GainCacheOwnership", "JointStarPublication", "EerMemorySafety",
                         "MicrographModelBounds", "CompressedMovieSequence",
                         "RunnerInterpolateRecenter", "RunnerInterpolateShifts",
+                        "ReportPlotUndefinedAxis",
                         "StageProfile", "CudaValidationParser", "HostBufferReuse",
-                        "StageProfileThreads", "FrameBufferPool", "ProfilingKit"):
+                        "StageProfileThreads", "FrameBufferPool", "ProfilingKit",
+                        "LogfileFromEps", "LogfileFromEpsMutant_always_eps",
+                        "LogfileFromEpsMutant_late_guard", "LogfileFromEpsMutant_eps_order",
+                        "LogfileFromEpsMutant_placeholder",
+                        "LogfileFromEpsMutant_concat_cleanup",
+                        "DeflateLayout", "DeflateLayoutMutant_span_wrap",
+                        "DeflateLayoutMutant_stage_sum", "DeflateLayoutMutant_reserve_round",
+                        "DeflateLayoutMutant_layout_table", "DeflateLayoutMutant_arena_start",
+                        "DeflateLayoutMutant_drain_step"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)
                 self.assertEqual(len(names), len(INTEGRATED_SUITE),
@@ -299,6 +328,42 @@ exec "{sys.executable}" "$@"
                 )
                 self.assertEqual(res_bad.returncode, 1, "empty command program must fail validation")
                 self.assertIn("would report BAD_COMMAND: NvcompGuards\n", res_bad.stdout)
+
+        # Case E (#226 D1): a CUDA build also requires CUDA_REQUIRED_TESTS. Restated
+        # here for the same reason INTEGRATED_SUITE is. Selected by --cuda, and
+        # automatically from a --test-dir whose CMakeCache.txt has CUDA:BOOL=ON.
+        CUDA_SUITE = ["CudaStaleErrorAfterOom"]
+        def collect(names):
+            return json.dumps({"kind": "ctestInfo", "version": {"major": 1, "minor": 0},
+                               "tests": [runnable(n) for n in names]})
+        for dropped in CUDA_SUITE:
+            with self.subTest(cuda_dropped=dropped):
+                names = [n for n in INTEGRATED_SUITE + CUDA_SUITE if n != dropped]
+                names.append("AdditiveFillerTest")
+                res = subprocess.run([sys.executable, str(VALIDATE_COLLECTION), "--cuda"],
+                                     input=collect(names), capture_output=True, text=True)
+                self.assertEqual(res.returncode, 1, f"CUDA collection missing {dropped} must fail")
+                self.assertIn(f"Missing required test(s): {dropped}", res.stdout)
+        res = subprocess.run([sys.executable, str(VALIDATE_COLLECTION), "--cuda"],
+                             input=collect(INTEGRATED_SUITE + CUDA_SUITE),
+                             capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, f"Complete CUDA collection must pass:\n{res.stdout}")
+        # The automatic selection, through a real ctest over a stub build directory:
+        # the same CPU-only collection passes with CUDA:BOOL=OFF and fails with ON.
+        if shutil.which("ctest"):
+            for cuda_value, expected in (("OFF", 0), ("ON", 1)):
+                with self.subTest(cache_cuda=cuda_value):
+                    build = self.sandbox / f"stub-build-{cuda_value}"
+                    build.mkdir()
+                    (build / "CMakeCache.txt").write_text(f"CUDA:BOOL={cuda_value}\n")
+                    (build / "CTestTestfile.cmake").write_text("".join(
+                        f'add_test({n} "{sys.executable}" "{n}.py")\n' for n in INTEGRATED_SUITE))
+                    res = subprocess.run([sys.executable, str(VALIDATE_COLLECTION),
+                                          "--test-dir", str(build)],
+                                         capture_output=True, text=True)
+                    self.assertEqual(res.returncode, expected, res.stdout + res.stderr)
+                    if expected:
+                        self.assertIn("Missing required test(s): CudaStaleErrorAfterOom", res.stdout)
 
     def test_4_missing_fixture_or_truth_fails(self) -> None:
         """Control 4: Missing fixture movie, missing truth file, or malformed manifest fails verify_fixtures."""

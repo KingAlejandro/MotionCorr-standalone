@@ -5,6 +5,8 @@ Ensures that CTest collection is fail-closed:
 - Fails if 0 tests are collected.
 - Fails if the suite contains fewer than the expected minimum number of tests.
 - Fails if any declared required test is missing from the collected test list.
+- In a CUDA build (CMakeCache.txt has CUDA:BOOL=ON, or --cuda), also requires
+  CUDA_REQUIRED_TESTS.
 """
 
 from __future__ import annotations
@@ -29,8 +31,16 @@ DEFAULT_REQUIRED_TESTS = [
     "GainCache",
     "TiffRead",
     "DamagedMovie",
+    # RC0 F3: the only test that sees a short raw MRC read being dropped.
+    "TruncatedMrcMovie",
+    # RC0 F3b: the only test that sees a short gain or defect-map read being dropped.
+    "TruncatedGainDefect",
     # Sequential compressed readers must close/reap their decoder before reuse.
     "CompressedMovieSequence",
+    # Every movie container, sample type and codec the readers accept, with
+    # rejections and pinned known failures (test-data/generate_format_fixtures.py).
+    "InputFormats",
+    "CutDownMovie",
     "RunnerModelParser",
     "MicrographModelBounds",
     "CiFailClosedControls",
@@ -63,6 +73,11 @@ DEFAULT_REQUIRED_TESTS = [
     # collected; the CUDA-only CudaErrorClass is not listed here, matching
     # the existing exclusion of CudaWrapperUploadFailure.
     "PatchRetryState",
+    # CPU dose weighting (#179, #220): exact bits against the frozen base
+    # doseWeighting, including the FMA-contraction signed-zero case, for the
+    # selected path and for the forced original path.
+    "CpuDoseSymmetry",
+    "CpuDoseSymmetryBase",
     # Issue #85 lane C: each arm's MRC/STAR inventory and structure is checked
     # independently before pairwise image equality is considered.
     "OutputTreeComparator",
@@ -89,6 +104,9 @@ DEFAULT_REQUIRED_TESTS = [
     # any of amin/amax/amean/arms and every product comparator would still pass,
     # because both sides would be reading the same drifted header.
     "MrcHeaderStats",
+    # Issue #229: addToCPlot2D with EMDL_UNDEFINED (-1) on the x-axis must not
+    # index label2offset[-1], while still rejecting missing defined labels.
+    "ReportPlotUndefinedAxis",
     "PdfConcat",
     # Added with the #127 background output writer. WriteFaults exercises the
     # deferred path (failure raised on the worker thread, collected afterwards);
@@ -112,14 +130,61 @@ DEFAULT_REQUIRED_TESTS = [
     # difference the scope guard makes; a check for "non-zero exit" would pass
     # on the defect.
     "OutputStageFaults",
+    # logfile.pdf rendering (#185, #200). LogfileFromEps is the only test that
+    # sees which Ghostscript calls the report makes (EPS-direct vs concatenation
+    # when an earlier all_batches.pdf exists) and that a failed render leaves no
+    # logfile.pdf. Each LogfileFromEpsMutant_* is a compiled runner with one
+    # defect that the script must reject (--expect-fail); the names come from a
+    # CMake loop, so a mutant dropped from that loop would otherwise leave the
+    # script's own checks unproven for that defect with the suite still green.
+    "LogfileFromEps",
+    "LogfileFromEpsMutant_always_eps",
+    "LogfileFromEpsMutant_late_guard",
+    "LogfileFromEpsMutant_eps_order",
+    "LogfileFromEpsMutant_placeholder",
+    "LogfileFromEpsMutant_concat_cleanup",
+    # Checked arithmetic on the nvCOMP admission path (#134 item 2, RC0 T3). Each
+    # DeflateLayoutMutant_* is a compiled copy of DeflateLayout with one overflow
+    # check removed from a header, which the test must reject (WILL_FAIL); the names
+    # come from a CMake function, so a mutant dropped from it would leave that check
+    # unproven with the suite still green.
+    "DeflateLayoutMutant_span_wrap",
+    "DeflateLayoutMutant_stage_sum",
+    "DeflateLayoutMutant_reserve_round",
+    "DeflateLayoutMutant_layout_table",
+    "DeflateLayoutMutant_arena_start",
+    "DeflateLayoutMutant_drain_step",
     # Issue #95: the only test that can observe the native sample staging
     # ownership contract, for both widths the compact route admits. Registered
     # under if(UNIX) beside ImageWriteFaults.
     "MultiGpuScheduling",
     "NativeMovieStaging",
     "GainCacheOwnership",
-    "JointStarPublication",
+    "JointStarPublication", "EerMemorySafety",
 ]
+
+
+# Required only in CUDA builds, so a CPU-only collection is not asked for tests it
+# cannot register. Collection needs no GPU. Every entry must be registered in every
+# CUDA configuration, with and without nvCOMP.
+CUDA_REQUIRED_TESTS = [
+    # #226 D1: a handled allocation failure must not leave a stale last error that
+    # degrades or refuses the next movie. The only test that sets the runtime's real
+    # last-error slot before a healthy movie.
+    "CudaStaleErrorAfterOom",
+]
+
+
+def build_has_cuda(test_dir: Path) -> bool:
+    """CUDA option of the inspected build. A build directory without a CMake cache
+    cannot say, so it is an error rather than a silent CPU-only verdict."""
+    cache = test_dir / "CMakeCache.txt"
+    if not cache.is_file():
+        raise RuntimeError(f"no CMakeCache.txt in {test_dir}: cannot tell whether CUDA is enabled")
+    for line in cache.read_text(errors="replace").splitlines():
+        if line.startswith("CUDA:BOOL="):
+            return line.split("=", 1)[1].strip().upper() in ("ON", "1", "TRUE", "YES", "Y")
+    return False
 
 
 def load_ctest_json(
@@ -146,11 +211,15 @@ def validate_tests(
     ctest_data: Dict[str, Any],
     min_count: int = 1,
     required_tests: Optional[Sequence[str]] = None,
+    cuda: bool = False,
 ) -> Tuple[bool, Dict[str, Any]]:
     tests = ctest_data.get("tests", [])
     collected_names = [t.get("name", "") for t in tests if isinstance(t, dict)]
 
-    req = list(required_tests) if required_tests is not None else list(DEFAULT_REQUIRED_TESTS)
+    if required_tests is not None:
+        req = list(required_tests)
+    else:
+        req = list(DEFAULT_REQUIRED_TESTS) + (list(CUDA_REQUIRED_TESTS) if cuda else [])
     missing = [name for name in req if name not in collected_names]
 
     # A test whose command starts with an empty argument is registered but
@@ -216,6 +285,9 @@ def main() -> int:
                         help="Minimum number of tests that must be collected (default: 23)")
     parser.add_argument("--required-tests", nargs="*", default=None,
                         help="Explicit list of required test names (default: standard MotionCorr suite)")
+    parser.add_argument("--cuda", action="store_true",
+                        help="Also require CUDA_REQUIRED_TESTS (automatic with a --test-dir "
+                             "whose CMakeCache.txt has CUDA:BOOL=ON)")
     parser.add_argument("--quiet", action="store_true",
                         help="Quiet output")
     parser.add_argument("--dump-json", type=Path, default=None,
@@ -224,6 +296,7 @@ def main() -> int:
 
     try:
         data = load_ctest_json(opts.test_dir, opts.json)
+        cuda = opts.cuda or (opts.test_dir is not None and build_has_cuda(opts.test_dir))
     except Exception as exc:
         print(f"ERROR: Failed to obtain CTest JSON data: {exc}", file=sys.stderr)
         return 2
@@ -232,6 +305,7 @@ def main() -> int:
         ctest_data=data,
         min_count=opts.min_count,
         required_tests=opts.required_tests,
+        cuda=cuda,
     )
 
     if opts.dump_json:
@@ -240,6 +314,7 @@ def main() -> int:
 
     if not opts.quiet:
         print(f"=== CTest Collection Validation: {report['status']} === ")
+        print(f"  CUDA-only required tests: {'required' if cuda else 'not required'}")
         print(f"  Collected tests: {report['collected_count']}")
         for t in report["collected_tests"]:
             mark = "REQUIRED" if t in report["required_tests"] else "ADDITIVE"

@@ -1,0 +1,75 @@
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/20170629_00021_frameImage.tiff
+  * Movies/20170629_00022_frameImage.tiff
+  * Movies/20170629_00023_frameImage.tiff
+  * Movies/20170629_00024_frameImage.tiff
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.
+000/??? sec ~~(,_,">                                                          [oo]1.08/4.33 min ...............~~(,_,">                                          [oo]2.05/4.10 min ..............................~~(,_,">                           [oo]2.98/3.97 min .............................................~~(,_,">            [oo]3.90/3.90 min ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /mnt/clathrin/alex-motioncorr-rc0/W-D13/runs/asan-main/corrected_micrographs.star
+ Now generating logfile.pdf ... 
+=================================================================
+==746084==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x52200011b8f8 at pc 0x65457c44f8bb bp 0x7ffc9ba326f0 sp 0x7ffc9ba326e0
+READ of size 8 at 0x52200011b8f8 thread T0
+    #0 0x65457c44f8ba in MetaDataTable::addToCPlot2D(CPlot2D*, EMDLabel, EMDLabel, double, double, double, double, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-main/src/metadata_table.cpp:1721
+    #1 0x65457c5e166b in MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName) /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-main/src/motioncorr_runner.cpp:1730
+    #2 0x65457c615dbd in MotioncorrRunner::run() /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-main/src/motioncorr_runner.cpp:1102
+    #3 0x65457c1345d4 in main /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-main/src/apps/run_motioncorr.cpp:100
+    #4 0x7c59de82a1c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #5 0x7c59de82a28a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #6 0x65457c1382b4 in _start (/mnt/clathrin/alex-motioncorr-rc0/W-D13/build-main-asan/motioncorr+0x12f22b4) (BuildId: 5b74c0ac8fc2808f5ac9fb54fdbb1edfa60242e6)
+
+0x52200011b8f8 is located 8 bytes before 5000-byte region [0x52200011b900,0x52200011cc88)
+allocated by thread T0 here:
+    #0 0x7c59e00fe548 in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:95
+    #1 0x65457c4119a8 in std::__new_allocator<double>::allocate(unsigned long, void const*) /usr/include/c++/13/bits/new_allocator.h:151
+    #2 0x65457c4119a8 in std::allocator_traits<std::allocator<double> >::allocate(std::allocator<double>&, unsigned long) /usr/include/c++/13/bits/alloc_traits.h:482
+    #3 0x65457c4119a8 in std::_Vector_base<double, std::allocator<double> >::_M_allocate(unsigned long) /usr/include/c++/13/bits/stl_vector.h:381
+    #4 0x65457c4119a8 in std::_Vector_base<long, std::allocator<long> >::_M_allocate(unsigned long) /usr/include/c++/13/bits/stl_vector.h:378
+    #5 0x65457c4119a8 in std::_Vector_base<long, std::allocator<long> >::_M_create_storage(unsigned long) /usr/include/c++/13/bits/stl_vector.h:398
+    #6 0x65457c4119a8 in std::_Vector_base<long, std::allocator<long> >::_Vector_base(unsigned long, std::allocator<long> const&) /usr/include/c++/13/bits/stl_vector.h:335
+    #7 0x65457c4119a8 in std::vector<long, std::allocator<long> >::vector(unsigned long, long const&, std::allocator<long> const&) /usr/include/c++/13/bits/stl_vector.h:571
+    #8 0x65457c4119a8 in MetaDataTable::clear() /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-main/src/metadata_table.cpp:161
+    #9 0x65457c5de2a3 in MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName) /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-main/src/motioncorr_runner.cpp:1598
+    #10 0x65457c615dbd in MotioncorrRunner::run() /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-main/src/motioncorr_runner.cpp:1102
+    #11 0x65457c1345d4 in main /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-main/src/apps/run_motioncorr.cpp:100
+    #12 0x7c59de82a1c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #13 0x7c59de82a28a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #14 0x65457c1382b4 in _start (/mnt/clathrin/alex-motioncorr-rc0/W-D13/build-main-asan/motioncorr+0x12f22b4) (BuildId: 5b74c0ac8fc2808f5ac9fb54fdbb1edfa60242e6)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /mnt/clathrin/alex-motioncorr-rc0/W-D13/src-main/src/metadata_table.cpp:1721 in MetaDataTable::addToCPlot2D(CPlot2D*, EMDLabel, EMDLabel, double, double, double, double, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)
+Shadow bytes around the buggy address:
+  0x52200011b600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52200011b680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52200011b700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52200011b780: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52200011b800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x52200011b880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa[fa]
+  0x52200011b900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52200011b980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52200011ba00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52200011ba80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52200011bb00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==746084==ABORTING

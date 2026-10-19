@@ -38,6 +38,7 @@
 static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
+#include "src/cpu_dose_symmetry_mode.h"
 #include "src/native_movie_staging.h"
 #include "src/defect_neighbours.h"
 #ifdef _CUDA_ENABLED
@@ -639,7 +640,10 @@ void MotioncorrRunner::prepareGainReference(bool write_gain)
 	if (write_gain)
 	{
 		Image<RFLOAT> Iin, Iout;
-		Iin.read(fn_gain_reference);
+		// Image::read reports a short raw MRC only through a negative return (0 is success).
+		if (Iin.read(fn_gain_reference) < 0)
+			REPORT_ERROR("Failed to read the gain reference " + fn_gain_reference +
+			             ": the file is truncated or unreadable.");
 
 		if (gain_rotation == 0)
 			Iout() = Iin();
@@ -1869,7 +1873,12 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 		// the same pages at the price of a second render.
 		RCTIC(TIMING_W_GS_LOGFILE);
 		if (!logfile_from_eps)
-			concatenatePDFfiles(report_out + "logfile.pdf", report_out + "header.pdf", report_out + "all_batches.pdf");
+		{
+			// Same contract as the EPS-direct render: a failed logfile.pdf leaves
+			// no partial or earlier file behind. Not reachable in aggregate mode.
+			if (!concatenatePDFfiles(report_out + "logfile.pdf", report_out + "header.pdf", report_out + "all_batches.pdf"))
+				removeRegularFileIfPresent(report_out + "logfile.pdf");
+		}
 		if (aggregate_only) {
 			requireAggregatePdf(report_out + "header.pdf");
 			requireAggregatePdf(report_out + "batch.pdf");
@@ -2020,7 +2029,13 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 		if (is_eer)
 			renderer.loadEERGain(fn_gain_reference, gain_cache());
 		else
-			gain_cache.read(fn_gain_reference);
+		{
+			// A short raw MRC leaves the rest of the array unread, and the size check below
+			// sees only the header, so the stale data would be multiplied into every movie.
+			if (gain_cache.read(fn_gain_reference) < 0)
+				REPORT_ERROR("Failed to read the gain reference " + fn_gain_reference +
+				             ": the file is truncated or unreadable.");
+		}
 		if (XSIZE(gain_cache()) != nx || YSIZE(gain_cache()) != ny)
 			REPORT_ERROR("The size of the image and the size of the gain reference do not match. Make sure the gain reference has been rotated if necessary.");
 		gain_cache_name = fn_gain_reference;
@@ -2261,6 +2276,27 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		refuse_fallback_if_fatal(movie_session->getFailureState(), boundary);
 		movie_session.reset();
 	};
+	// Issue #226 D1. A failed cudaMalloc checked by HANDLE_ERROR (cudaAlignPatch*,
+	// and its cuFFT plan creation) throws without reading the thread's last-error
+	// slot, so cudaErrorMemoryAllocation stays pending and the next movie's first
+	// HANDLE_ERROR(cudaGetLastError()) reports it as that movie's own failure.
+	// When this movie leaves by exception, release the session and decide from its
+	// preserved state plus the pending slot, as discard_preprocessing_session does:
+	// clear the slot only when the verdict is recoverable. A poisoning code is left
+	// pending, exactly as before. Runs only on unwind; the healthy path is unchanged.
+	struct FailedMovieCudaErrorGuard {
+		std::unique_ptr<CudaMovieSession> &session;
+		const int uncaught_at_entry;
+		~FailedMovieCudaErrorGuard() {
+			if (std::uncaught_exceptions() == uncaught_at_entry) return;
+			const CudaFailureState no_session{};
+			if (session) session->release();
+			const CudaRetryDecision decision = cudaRetryDecisionFor(
+			    session ? session->getFailureState() : no_session, cudaPeekAtLastError());
+			if (decision.verdict == CUDA_RETRY_PERMITTED)
+				(void)cudaGetLastError();
+		}
+	} failed_movie_cuda_error_guard{movie_session, std::uncaught_exceptions()};
 	if (use_gpu && !early_binning) {
 		StageScope session_scope("session setup");
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
@@ -2446,6 +2482,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		// rethrow on the serial path, where run()'s caller records the failure and
 		// continues with the remaining movies.
 		std::vector<std::exception_ptr> read_errors(n_frames);
+		// Image<T>::read reports a short or unseekable raw MRC only through a negative
+		// return (-1 seek, -2 short fread); 0 is success and TIFF always returns 0.
+		// Dropping it published products built from unread frame memory. One message
+		// for every destination type, so the failure does not depend on the ingest route.
+		auto read_movie_frame = [&](auto &frame_image, int iframe) {
+			const int err = frame_image.read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
+			if (err < 0)
+				REPORT_ERROR("Failed to read frame " + integerToString(frames[iframe]) + " (0-based) of " +
+				             fn_mic + ": the movie is truncated or unreadable.");
+		};
 		#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			try {
@@ -2462,19 +2508,19 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				else if (compact_stage == COMPACT_U16)
 					// Same reader, same guards, same per-row Y-flip; only the destination
 					// sample type differs, and castPage2T's UShort branch is then a memcpy.
-					Iframes_u16[iframe].read(fn_mic, true, frames[iframe], false, true);
+					read_movie_frame(Iframes_u16[iframe], iframe);
 				else if (compact_stage == COMPACT_U8)
 					// As above; castPage2T's UChar branch is the memcpy here.
-					Iframes_u8[iframe].read(fn_mic, true, frames[iframe], false, true);
+					read_movie_frame(Iframes_u8[iframe], iframe);
 				else if (compact_stage == COMPACT_S16)
 					// MRC mode 1: castPage2T's SShort branch is the memcpy here.
-					Iframes_s16[iframe].read(fn_mic, true, frames[iframe], false, true);
+					read_movie_frame(Iframes_s16[iframe], iframe);
 				else if (compact_stage == COMPACT_S8)
 					// MRC mode 0: castPage2T's SChar branch is the memcpy here.
-					Iframes_s8[iframe].read(fn_mic, true, frames[iframe], false, true);
+					read_movie_frame(Iframes_s8[iframe], iframe);
 #endif
 				else
-					Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
+					read_movie_frame(Iframes[iframe], iframe);
 			} catch (...) {
 				read_errors[iframe] = std::current_exception();
 			}
@@ -4839,6 +4885,93 @@ int MotioncorrRunner::findGoodSize(int request) {
 	return request; // return as it is
 }
 
+const char *MotioncorrRunner::doseWeightingPath() {
+	return MOTIONCORR_CPU_DOSE_SYMMETRY ? "symmetric" : "original";
+}
+
+#if MOTIONCORR_CPU_DOSE_SYMMETRY
+// On FMA targets the compiler may contract the complex multiply/divide, and
+// vectorised and scalar copies of a loop contract differently. An empty asm
+// statement stops GCC and Clang from vectorising the pixel loops, which keeps
+// the per-pixel code, and its exact bits (+-0, NaN signs), of the original
+// loop. Without FMA no contraction is possible and the loops are unchanged.
+#if defined(__FMA__) || defined(__ARM_FEATURE_FMA) || defined(__FP_FAST_FMAF)
+#define DOSE_PIXEL_SCALAR() asm volatile("")
+#else
+#define DOSE_PIXEL_SCALAR() ((void)0)
+#endif
+
+// dose is equivalent dose at 300 kV at the END of the frame.
+// This implements the model by Timothy Grant & Nikolaus Grigorieff on eLife, 2015
+// doi: 10.7554/eLife.06980
+void MotioncorrRunner::doseWeighting(std::vector<MultidimArray<fComplex> > &Fframes, std::vector<RFLOAT> doses, RFLOAT apix) {
+	const int nfx = XSIZE(Fframes[0]), nfy = YSIZE(Fframes[0]);
+	const int nfy_half = nfy / 2;
+	const RFLOAT nfy2 = (RFLOAT)nfy * nfy;
+	const RFLOAT nfx2 = (RFLOAT)(nfx - 1) * (nfx - 1) * 4; // assuming nx is even
+	const int n_frames= Fframes.size();
+	const RFLOAT A = 0.245, B = -1.665, C = 2.81;
+	// The dose model depends on ky squared. Rows y and nfy-y therefore
+	// have bit-identical weights, but independent complex pixels. Calculate
+	// each weight once; retain both original complex operations and their
+	// float stores. DC and the even-height Nyquist row are processed once.
+	const int independent_rows = nfy == 0 ? 0 : nfy_half + 1;
+
+	const int tile_width = 64;
+	#pragma omp parallel num_threads(n_threads)
+	{
+		// Frame-major weights keep both exp evaluation and application bounded.
+		// Only scalars are shared between row partners; their pixels stay distinct.
+		std::vector<RFLOAT> weights(static_cast<size_t>(n_frames) * tile_width);
+		std::vector<RFLOAT> norms(tile_width);
+		#pragma omp for
+		for (int y = 0; y < independent_rows; y++) {
+			const int ly = y;
+			const int mirror_y = y == 0 ? 0 : nfy - y;
+			const RFLOAT ly2 = (RFLOAT)ly * ly / nfy2;
+			for (int begin = 0; begin < nfx; begin += tile_width) {
+				const int width = std::min(tile_width, nfx - begin);
+				for (int local = 0; local < width; local++) {
+					const int x = begin + local;
+					const RFLOAT dinv2 = ly2 + (RFLOAT)x * x / nfx2;
+					const RFLOAT dinv = std::sqrt(dinv2) / apix;
+					const RFLOAT Ne = (A * std::pow(dinv, B) + C) * 2;
+					RFLOAT sum_weight_sq = 0;
+					for (int iframe = 0; iframe < n_frames; iframe++) {
+						const RFLOAT weight = std::exp(- doses[iframe] / Ne);
+						if (std::isnan(weight)) {
+							std::cerr << "dose = " << doses[iframe] << " Ne = " << Ne << " frm = " << iframe << " lx = " << x << " ly = " << ly << " reso = " << 1 / dinv << " weight = " << weight << (mirror_y != y ? " (also applies to mirrored row ly = -ly)" : "") << std::endl;
+						}
+						sum_weight_sq += weight * weight;
+						weights[static_cast<size_t>(iframe) * tile_width + local] = weight;
+					}
+					norms[local] = std::sqrt(sum_weight_sq);
+					if (std::isnan(norms[local])) {
+						std::cerr << " Ne = " << Ne << " lx = " << x << " ly = " << ly << " reso = " << 1 / dinv << " sum_weight_sq NaN" << (mirror_y != y ? " (also applies to mirrored row ly = -ly)" : "") << std::endl;
+						REPORT_ERROR("Shouldn't happen.");
+					}
+				}
+				const int row_count = mirror_y == y ? 1 : 2;
+				for (int row = 0; row < row_count; row++) {
+					const int output_y = row == 0 ? y : mirror_y;
+					for (int iframe = 0; iframe < n_frames; iframe++) {
+						const size_t offset = static_cast<size_t>(iframe) * tile_width;
+						// Keep separate multiply/divide passes and float stores.
+						for (int local = 0; local < width; local++) {
+							DIRECT_A2D_ELEM(Fframes[iframe], output_y, begin + local) *= weights[offset + local];
+							DOSE_PIXEL_SCALAR();
+						}
+						for (int local = 0; local < width; local++) {
+							DIRECT_A2D_ELEM(Fframes[iframe], output_y, begin + local) /= norms[local];
+							DOSE_PIXEL_SCALAR();
+						}
+					}
+				}
+			}
+		}
+	}
+}
+#else
 // dose is equivalent dose at 300 kV at the END of the frame.
 // This implements the model by Timothy Grant & Nikolaus Grigorieff on eLife, 2015
 // doi: 10.7554/eLife.06980
@@ -4882,6 +5015,7 @@ void MotioncorrRunner::doseWeighting(std::vector<MultidimArray<fComplex> > &Ffra
 		}
 	}
 }
+#endif
 
 // shiftx, shifty is relative to the (real space) image size
 void MotioncorrRunner::shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty) {
@@ -5129,7 +5263,9 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 	{
 		// Defect map
 		Image<float> Idefect;
-		Idefect.read(fn_defect);
+		if (Idefect.read(fn_defect) < 0)
+			REPORT_ERROR("Failed to read the defect map " + fn_defect +
+			             ": the file is truncated or unreadable.");
 		if (ny != YSIZE(Idefect()) || nx != XSIZE(Idefect()))
 			REPORT_ERROR("The size of the defect map is not the same as that of the movie.");
 

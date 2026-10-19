@@ -1,0 +1,19 @@
+start 2026-10-19T00:04:31Z HEAD=6d68e2d6ec45c37b75fd0f4aaff8272f192b7029 status=0 mask=96-103 host=4-gpu-vm venv=/home/alex/.mc-venv bench_lock=/tmp/motioncorr-bench.lock
+configure rc=0
+build rc=0 2026-10-19T00:09:04Z
+CMAKE_HOME_DIRECTORY:INTERNAL=/mnt/clathrin/alex-motioncorr-rc0/W-QF/src
+CXX_FLAGS = -fsanitize=address,undefined -fno-omit-frame-pointer -O2 -g -DNDEBUG -std=gnu++17 -fopenmp
+motioncorr sha256: 4bc1cc2daf5aa9b859e0d1cb806b26cd76c9e8f59fccc3c0fd2a6fc4081ea144
+runner_numerics sha256: 1887af588f64107bb626581f38d03fd326e2ea6cf601bffac0930b7e036bf62b
+Internal ctest changing into directory: /mnt/clathrin/alex-motioncorr-rc0/W-QF/build-asan
+Test project /mnt/clathrin/alex-motioncorr-rc0/W-QF/build-asan
+    Start 55: EerMemorySafety
+1/1 Test #55: EerMemorySafety ..................   Passed   46.17 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =  46.18 sec
+ctest rc=0
+sanitizer lines in ctest output: 0
+decoder sources == 97fb9fda: yes
+verdict PASS end 2026-10-19T00:09:51Z

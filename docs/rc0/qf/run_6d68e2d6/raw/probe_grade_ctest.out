@@ -1,0 +1,11 @@
+ok  clean-cpu-without: PASS rc=0 d11=without_d11 (want PASS/without_d11) 
+ok  clean-cuda-without: PASS rc=0 d11=without_d11 (want PASS/without_d11) 
+ok  clean-cuda-with: PASS rc=0 d11=with_d11 (want PASS/with_d11) 
+ok  main-failed-no-rerun: FAIL rc=1 d11=without_d11 (want FAIL/without_d11) tests not passed: ['ProfilingKit']; ctest exit 8
+ok  main-failed-passing-rerun-supplied: FAIL rc=1 d11=without_d11 (want FAIL/without_d11) tests not passed: ['ProfilingKit']; ctest exit 8
+ok  d11-production-guard-only: FAIL rc=1 d11=inconsistent (want FAIL/inconsistent) D11 markers inconsistent: {'src/motioncorr_runner.cpp': True, 'tests/cuda_fault_inject_shim.cpp': False, 'tests/run_stale_cuda_error_controls.py': False, 'CMakeLists.txt': False, 'tools/validate_test_collection.py': False, 'tools/test_ci_fa
+ok  d11-integration-without-guard: FAIL rc=1 d11=inconsistent (want FAIL/inconsistent) D11 markers inconsistent: {'src/motioncorr_runner.cpp': False, 'tests/cuda_fault_inject_shim.cpp': True, 'tests/run_stale_cuda_error_controls.py': True, 'CMakeLists.txt': True, 'tools/validate_test_collection.py': True, 'tools/test_ci_fail_
+ok  inventory: grade rc=0, added=['ctest-cpu.grade.json'], changed=[]
+ok  inventory control (unguarded import): new files ['src/tools/__pycache__', 'src/tools/__pycache__/validate_test_collection.cpython-314.pyc']
+PROBE PASS
+probe rc=0

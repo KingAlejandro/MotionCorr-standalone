@@ -1,0 +1,7 @@
+[PASS] reference nvcomp   rc=0 route=nvcomp products=2
+[PASS] reference compact  rc=0 route=compact products=2
+[PASS] nvcomp   --ingest nvcomp  rc=1 routes={'a': 'nvcomp', 'b': 'nvcomp', 'c': 'nvcomp'}
+[PASS] nvcomp   --ingest auto    rc=1 routes={'a': 'nvcomp', 'b': 'nvcomp', 'c': 'nvcomp'}
+[PASS] compact  --ingest auto    rc=1 routes={'a': 'compact', 'b': 'compact', 'c': 'compact'}
+
+PASS: a genuine handled allocation failure leaves the next movies on their route with identical products

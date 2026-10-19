@@ -1,0 +1,35 @@
+W-D11 paired timing: main vs fix, with AA nulls (exclusive SCARF node, or 4GPUs GPU3 in a bench-lock window).
+
+DECLARED DESIGN (fixed before any timed run; the job copies this text to rule.txt first):
+  Arms      A = main 71ab841e, B = fix. Null: A vs A' (the same main binary under two labels).
+  Measures  d  = wall(B) - wall(A) per comparison pair; d0 = wall(A') - wall(A) per null pair.
+            Wall is CLOCK_MONOTONIC from spawn to reap of the payload.
+  Per workload, in this order:
+   1. Warm-up: one run of A, one of B. Discarded.
+   2. PILOT: 6 comparison pairs, orders AB BA AB BA AB BA. Recorded separately (pilot.json),
+      never part of the result.
+   3. SIZING, from the pilot only, written to design.json before the definitive phase:
+        s = 1.4826 * MAD(pilot d), M = median(pilot wall A), target T = 0.005 * M.
+        Assuming a true median difference of 0, the expected upper 95% bound of median(d) is
+        about 1.96 * 1.2533 * s / sqrt(N). N = smallest even number with that <= T,
+        floored at 32 and capped at 128. If the cap binds, design.json says the target is not
+        expected to be reachable; the cap is run anyway.
+   4. DEFINITIVE, run exactly once, never extended: N comparison pairs, exactly N/2 AB and N/2 BA,
+      and 16 null pairs (8 AA', 8 A'A). Run order: blocks [AB, BA]; after every k-th block
+      one null block [AA', A'A], k = N/16 (N/2 blocks, 8 null blocks), the last null block
+      following the last comparison block.
+  Exclusion: a pair is discarded only if a run in it exits non-zero, or a recorded resource
+      violation occurred (a GPU compute process that is not the payload appeared, or the GPU
+      process query failed). A discarded pair is rerun immediately in the same position and
+      order, up to 3 attempts; if all fail, the workload stops and is reported incomplete.
+  Report, per workload: median(d), its distribution-free 95% CI
+      (tools/profiling/lib/stats.median_ci), the CI upper bound as % of median wall A, the null
+      median/CI/range, per-arm median and IQR, and "upper <= 0.5%" or "unresolved". No pass/fail.
+  Identity: the first definitive AB pair's products are compared with
+      tools/profiling/lib/identity.compare_trees (full MRC header except the writer timestamp,
+      payload, path-normalised STAR/EPS).
+
+usage: wd11_pairs.py --name W --a BIN --b BIN --data DIR --cpus LIST --src SRCTREE --out DIR [--gpu-uuid UUID] -- ARGS...
+  --gpu-uuid restricts the resource-violation check to that GPU (shared host); the caller sets
+  CUDA_VISIBLE_DEVICES for the payload.
+

@@ -1,0 +1,16 @@
+run_ctest cpu rc=0 exit=8
+grade cpu rc=1
+cpu: FAIL collected=74 reference=74 d11=with_d11 counts={'passed': 73, 'failed': 1, 'skipped': 0, 'not_run': 0}
+  - tests not passed: ['ProfilingKit']
+  - ctest exit 8
+run_ctest cuda rc=0 exit=8
+grade cuda rc=1
+cuda: FAIL collected=108 reference=108 d11=with_d11 counts={'passed': 107, 'failed': 1, 'skipped': 0, 'not_run': 0}
+  - tests not passed: ['ProfilingKit']
+  - ctest exit 8
+run_ctest nvcomp rc=0 exit=8
+grade nvcomp rc=1
+nvcomp: FAIL collected=111 reference=111 d11=with_d11 counts={'passed': 110, 'failed': 1, 'skipped': 0, 'not_run': 0}
+  - tests not passed: ['ProfilingKit']
+  - ctest exit 8
+end src HEAD 6d68e2d6ec45c37b75fd0f4aaff8272f192b7029 porcelain=0

@@ -29,6 +29,14 @@
 //                       the session's float buffers (derived from the input TIFF)
 // These return controlled error codes at the actual U16 allocation, upload, or
 // post-launch status-check boundary. They do not simulate a genuinely poisoned GPU.
+//
+// Issue #226 D1, confined to this test-only binary:
+//   MC_ALIGN_ALLOC_FAULT=genuine  the first cudaMalloc issued from a cudaAlignPatch*
+//                       function is replaced by a REAL cudaMalloc of an impossible size.
+//                       The runtime itself fails it, so its own last-error slot holds
+//                       cudaErrorMemoryAllocation exactly as after a device OOM; a
+//                       returned code alone would leave that slot clean and could not
+//                       reproduce a stale error. Fires once per process.
 
 #include <cuda_runtime.h>
 #include <cstdio>
@@ -50,15 +58,21 @@ namespace {
 // so any drift fails loudly rather than silently selecting the wrong call.
 std::set<void*> g_owned;
 size_t g_stale = 0;
-// MC_RESIDENT_RETRY_COUNT: count completed downloadPatchSpectra invocations, i.e.
-// retries whose input was built from the resident frames. Counted at the call's own
-// cudaFree of the spectra buffer, which the nested preparePatchInVram frees do not match.
+// MC_RESIDENT_RETRY_COUNT: witnesses for the resident retry preparation (#197).
+// One downloadPatchSpectra invocation is recognised at its own cudaFree of the spectra
+// buffer, which the nested preparePatchInVram frees do not match. It counts as
+// successful only if every device-to-host spectrum copy it issued returned success;
+// g_resident_spectra_copied is the number of such copies.
 bool g_count_resident_retry = false;
 long g_resident_retry_preps = 0;
+long g_resident_retry_failed = 0;
+long g_resident_spectra_copied = 0;
+bool g_resident_copy_failed = false;
 void report_owned() {
     std::fprintf(stderr, "[faultinject] remaining-owned=%zu stale-releases=%zu\n", g_owned.size(), g_stale);
     if (g_count_resident_retry)
-        std::fprintf(stderr, "[faultinject] resident-retry-preparations=%ld\n", g_resident_retry_preps);
+        std::fprintf(stderr, "[faultinject] resident-retry-preparations=%ld failed=%ld spectra-copied=%ld\n",
+                     g_resident_retry_preps, g_resident_retry_failed, g_resident_spectra_copied);
 }
 long  g_seen = 0;
 long  g_at = -1;
@@ -77,6 +91,8 @@ const char *g_preprocess_fault = nullptr;
 bool g_preprocess_injected = false;
 bool g_preprocess_release_injected = false;
 bool g_workspace_cleanup_injected = false;
+bool g_align_alloc_fault = false;
+bool g_align_alloc_injected = false;
 
 // Test binary only, exported with -rdynamic. Resolve the real production caller
 // rather than relying on a fixture-specific allocation ordinal or byte count.
@@ -90,15 +106,6 @@ bool called_from(const char *name) {
             std::strstr(info.dli_sname, name)) return true;
     }
     return false;
-}
-
-// MC_FAULT_ONLY_CVD: with several workers sharing one environment, inject only in the
-// worker whose CUDA_VISIBLE_DEVICES contains this text.
-bool fault_device_selected() {
-    const char *only = std::getenv("MC_FAULT_ONLY_CVD");
-    if (!only) return true;
-    const char *visible = std::getenv("CUDA_VISIBLE_DEVICES");
-    return visible && std::strstr(visible, only);
 }
 
 bool preprocess_mode(const char *name) {
@@ -130,6 +137,8 @@ void init_once() {
     const char *stage = std::getenv("MC_U16_STAGE_BYTES");
     if (stage) g_u16_stage_bytes = (size_t)std::strtoull(stage, nullptr, 10);
     g_preprocess_fault = std::getenv("MC_PREPROCESS_FAULT");
+    const char *align_fault = std::getenv("MC_ALIGN_ALLOC_FAULT");
+    g_align_alloc_fault = align_fault && std::strcmp(align_fault, "genuine") == 0;
     const char *count_ordinal = std::getenv("MC_COUNT_FAULT_ORDINAL");
     g_count_at = count_ordinal ? std::atol(count_ordinal) : 0;
     const char *count_code = std::getenv("MC_COUNT_FAULT_CODE");
@@ -198,6 +207,18 @@ extern "C" cudaError_t __wrap_cudaGetDeviceCount(int *count) {
 
 extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
     init_once();
+    if (g_align_alloc_fault && !g_align_alloc_injected && called_from("cudaAlignPatch")) {
+        g_align_alloc_injected = true;
+        const cudaError_t before = cudaPeekAtLastError();
+        const size_t impossible = (size_t)1 << 50;
+        const cudaError_t result = __real_cudaMalloc(ptr, impossible);
+        if (ptr) *ptr = nullptr;
+        std::fprintf(stderr, "[alignfault] genuine cudaMalloc(%zu) for a %zu-byte alignment "
+                     "allocation: pending-before=%s returned=%s pending-after=%s\n",
+                     impossible, size, cudaGetErrorName(before), cudaGetErrorName(result),
+                     cudaGetErrorName(cudaPeekAtLastError()));
+        return result;
+    }
     if (g_preprocess_injected)
         std::fprintf(stderr, "[preprocessfault] later cudaMalloc size=%zu\n", size);
     if (!g_preprocess_injected && g_preprocess_fault) {
@@ -218,7 +239,7 @@ extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
         if (!g_preprocess_injected &&
             (preprocess_mode("resident-retry-recoverable") ||
              preprocess_mode("resident-retry-fatal")) &&
-            fault_device_selected() && called_from("downloadPatchSpectra")) {
+            called_from("downloadPatchSpectra")) {
             if (ptr) *ptr = nullptr;
             return inject_preprocess(preprocess_mode("resident-retry-fatal"),
                                      "downloadPatchSpectra");
@@ -277,6 +298,11 @@ extern "C" cudaError_t __wrap_cudaMemcpy(void *dst, const void *src, size_t coun
         return cudaErrorMemoryAllocation;
     }
     const cudaError_t result = __real_cudaMemcpy(dst, src, count, kind);
+    if (g_count_resident_retry && kind == cudaMemcpyDeviceToHost &&
+        called_from("downloadPatchSpectra") && !called_from("preparePatchInVram")) {
+        if (result == cudaSuccess) ++g_resident_spectra_copied;
+        else g_resident_copy_failed = true;
+    }
     if (stage_upload && result == cudaSuccess) {
         g_u16_stage_upload_seen = true;
         std::fprintf(stderr, "[u16fault] stage-h2d-ok size=%zu\n", count);
@@ -287,8 +313,10 @@ extern "C" cudaError_t __wrap_cudaMemcpy(void *dst, const void *src, size_t coun
 extern "C" cudaError_t __wrap_cudaFree(void *ptr) {
     init_once();
     if (ptr && g_count_resident_retry && called_from("downloadPatchSpectra") &&
-        !called_from("preparePatchInVram"))
-        ++g_resident_retry_preps;
+        !called_from("preparePatchInVram")) {
+        ++(g_resident_copy_failed ? g_resident_retry_failed : g_resident_retry_preps);
+        g_resident_copy_failed = false;
+    }
     if (ptr && !g_owned.count(ptr)) ++g_stale;
     const bool stage_free = ptr && ptr == g_u16_stage_ptr;
     if (stage_free) std::fprintf(stderr, "[u16fault] stage-free-request ptr=%p\n", ptr);

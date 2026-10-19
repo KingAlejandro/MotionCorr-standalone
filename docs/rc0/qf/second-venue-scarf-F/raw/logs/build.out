@@ -1,0 +1,26 @@
+=== configure cpu 2026-10-18T23:46:42Z
+configure cpu rc=0
+CMAKE_HOME_DIRECTORY:INTERNAL=/home/vol05/scarf1415/mc-rc0-scarfF/src
+=== build cpu 2026-10-18T23:46:51Z
+build cpu rc=0 2026-10-18T23:47:50Z
+6cf4c43d29fb501a07c150d035a64be235ad3b2152be79851a946d529bfeb7a3  /home/vol05/scarf1415/mc-rc0-scarfF/build-cpu/motioncorr
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+=== configure cuda 2026-10-18T23:47:50Z
+configure cuda rc=0
+CMAKE_HOME_DIRECTORY:INTERNAL=/home/vol05/scarf1415/mc-rc0-scarfF/src
+=== build cuda 2026-10-18T23:48:05Z
+build cuda rc=0 2026-10-18T23:50:01Z
+4e280b1e2c049ff991a05fdecab7492f018aa96049ec50c8eaf0bde11c3f68a5  /home/vol05/scarf1415/mc-rc0-scarfF/build-cuda/motioncorr
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+=== configure nvcomp 2026-10-18T23:50:01Z
+configure nvcomp rc=0
+CMAKE_HOME_DIRECTORY:INTERNAL=/home/vol05/scarf1415/mc-rc0-scarfF/src
+=== build nvcomp 2026-10-18T23:50:16Z
+build nvcomp rc=0 2026-10-18T23:52:13Z
+682cfc88c380283203b5064ac13021672ad94a63f20516fe4afe65bc07d16ce5  /home/vol05/scarf1415/mc-rc0-scarfF/build-nvcomp/motioncorr
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+ctest -N cpu: Total Tests: 74
+ctest -N cuda: Total Tests: 108
+ctest -N nvcomp: Total Tests: 111
+ALL_BUILDS_DONE
+build_scarf.sh rc=0

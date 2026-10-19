@@ -7,15 +7,23 @@ cuda_fault_inject_shim.cpp (MC_PREPROCESS_FAULT=resident-retry-*) fails the firs
 cudaMalloc inside CudaMovieSession::downloadPatchSpectra, which builds the retry input.
 No GPU is poisoned; the fault is an injected error code at that allocation.
 
-  healthy      resident retry preparation runs; reference products
+  healthy      resident retry preparation runs and succeeds; reference products
   recoverable  WARNING, the movie is re-read from the device, products identical
   fatal        poisoned-context refusal, no products, non-zero exit
+
+"Identical" means the complete MRC header and extended header (only the run timestamp in
+the label is masked, as in docs/issue85_laneC/compare_output_trees.py), every pixel, and
+the per-movie STAR with the output root spelled away. Before it is used on the arms the
+comparison is shown to reject a header, a pixel and a STAR difference.
 """
 import argparse
 import os
 import random
+import re
+import shutil
 import struct
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -86,12 +94,65 @@ def write_star(path):
         "_rlnMicrographMovieName #1\n_rlnOpticsGroup #2\nMovies/control.tiff 1\n")
 
 
-def mrc_pixels(path):
-    """Pixel bytes only: the label area carries a wall-clock timestamp."""
+TIMESTAMP = re.compile(rb"(?<=Relion    )[0-9]{2}-[A-Za-z]{3}-[0-9]{2}  [0-9]{2}:[0-9]{2}:[0-9]{2}")
+
+
+def mrc_parts(path):
+    """(header + extended header with the run timestamp masked, pixel bytes)."""
     data = path.read_bytes()
     nx, ny, nz, mode = struct.unpack("<4i", data[:16])
     require(mode == 2 and (nx, ny, nz) == (NX, NY, 1), f"unexpected MRC {path}: {nx}x{ny}x{nz} mode {mode}")
-    return data[-(nx * ny * nz * 4):]
+    header_size = 1024 + struct.unpack_from("<i", data, 92)[0]
+    require(len(data) == header_size + nx * ny * nz * 4, f"unexpected MRC size {path}")
+    return TIMESTAMP.sub(b"00-XXX-00  00:00:00", data[:header_size]), data[header_size:]
+
+
+def star_text(out):
+    """Per-movie STAR content with the output root spelled away."""
+    return (out / "Movies/control.star").read_bytes().replace(str(out).encode(), b"<ROOT>")
+
+
+def differences(reference, candidate):
+    found = []
+    header_a, pixels_a = mrc_parts(reference / "Movies/control.mrc")
+    header_b, pixels_b = mrc_parts(candidate / "Movies/control.mrc")
+    if header_a != header_b:
+        found.append("MRC header")
+    if pixels_a != pixels_b:
+        found.append("MRC pixels")
+    if star_text(reference) != star_text(candidate):
+        found.append("per-movie STAR")
+    return found
+
+
+def comparison_discriminates(reference, work):
+    """The comparison must reject a header, a pixel and a STAR difference."""
+    for what, edit in (("MRC header", lambda d: patch_bytes(d / "Movies/control.mrc", 40, b"\x00\x00\x80\x3f")),
+                       ("MRC pixels", lambda d: patch_bytes(d / "Movies/control.mrc", -4, b"\x00\x00\x80\x3f")),
+                       ("per-movie STAR", lambda d: edit_star(d / "Movies/control.star"))):
+        copy = work / ("tampered-" + what.replace(" ", "-"))
+        shutil.copytree(reference, copy)
+        star = copy / "Movies/control.star"  # a relocated tree records its own root
+        star.write_bytes(star.read_bytes().replace(str(reference).encode(), str(copy).encode()))
+        require(not differences(reference, copy), "an unmodified copy must compare identical")
+        edit(copy)
+        found = differences(reference, copy)
+        require(found == [what], f"comparison did not isolate a {what} difference: {found}")
+
+
+def patch_bytes(path, offset, value):
+    data = bytearray(path.read_bytes())
+    start = offset if offset >= 0 else len(data) + offset
+    require(bytes(data[start:start + len(value)]) != value, "tamper would not change the file")
+    data[start:start + len(value)] = value
+    path.write_bytes(bytes(data))
+
+
+def edit_star(path):
+    text = path.read_text()
+    edited = re.sub(r"(?m)^(\S+\s+)(-?[0-9]+\.[0-9]+)", lambda m: m.group(1) + "9" + m.group(2), text, count=1)
+    require(edited != text, "STAR tamper found nothing to change")
+    path.write_text(edited)
 
 
 def products(out):
@@ -108,6 +169,19 @@ def main():
     work = args.workdir.resolve() if args.workdir else Path(tempfile.mkdtemp(prefix="mc-resident-retry-"))
     if args.workdir:
         work.mkdir(parents=True, exist_ok=False)
+    # A temporary directory is removed on success and kept, with its path printed, on failure.
+    # A directory named with --workdir belongs to the caller and is always kept.
+    try:
+        status = run_controls(binary, work)
+    except BaseException:
+        print(f"FAILED: work directory kept at {work}", file=sys.stderr)
+        raise
+    if not args.workdir:
+        shutil.rmtree(work)
+    return status
+
+
+def run_controls(binary, work):
     data = work / "input"
     write_tiff(data / "Movies/control.tiff", synthetic_frames())
     write_star(data / "movies.star")
@@ -129,32 +203,40 @@ def main():
                 f"{name}: no completed non-converged resident attempt was produced")
         require("remaining-owned=0 stale-releases=0" in r.stderr,
                 f"{name}: owned CUDA allocation cleanup was not complete")
-        count = [l for l in r.stderr.splitlines() if "resident-retry-preparations=" in l]
-        require(len(count) == 1, f"{name}: missing resident-retry-preparations witness")
-        return out, r.returncode, text, int(count[0].rsplit("=", 1)[1])
+        witness = re.findall(r"resident-retry-preparations=(\d+) failed=(\d+) spectra-copied=(\d+)", r.stderr)
+        require(len(witness) == 1, f"{name}: missing resident retry witness")
+        return out, r.returncode, text, tuple(int(v) for v in witness[0])
 
-    healthy, rc, text, built = run("healthy", "none")
+    healthy, rc, text, (prepared, failed, copied) = run("healthy", "none")
+    # Positive witness, checked first so that a silent failure of the preparation is named
+    # as such: a downloadPatchSpectra invocation finished with every one of its NFRAMES
+    # spectrum copies (one group per frame) returning success.
+    require((prepared, failed, copied) == (1, 0, NFRAMES),
+            f"healthy: resident retry preparation did not succeed once (prepared={prepared} "
+            f"failed={failed} spectra copied={copied}, expected 1, 0, {NFRAMES}; exit {rc})")
     require(rc == 0, f"healthy run failed:\n{text[-2000:]}")
     require("second native alignment succeeded" in text, "healthy run did not converge on the retry")
-    require(built == 1, f"healthy: expected one resident retry preparation, saw {built}")
-    require("WARNING: resident retry preparation" not in text and "[preprocessfault]" not in text,
-            "healthy run took the download path")
-    reference = {p: (healthy / p).read_bytes() for p in products(healthy) if p.endswith(".mrc")}
-    require(set(reference) == {"Movies/control.mrc"}, f"healthy inventory: {products(healthy)}")
-    print("PASS healthy: resident retry preparation ran, retry converged, products complete")
+    require("WARNING:" not in text and "[preprocessfault]" not in text and "CUDA Error in" not in text,
+            "healthy run took the download path or logged a CUDA error")
+    require(set(p for p in products(healthy) if p.endswith(".mrc")) == {"Movies/control.mrc"},
+            f"healthy inventory: {products(healthy)}")
+    comparison_discriminates(healthy, work)
+    print("PASS healthy: resident retry preparation succeeded, retry converged, comparison rejects "
+          "header, pixel and STAR differences")
 
-    out, rc, text, built = run("recoverable", "resident-retry-recoverable")
+    out, rc, text, (prepared, failed, copied) = run("recoverable", "resident-retry-recoverable")
     require("injected cudaErrorMemoryAllocation at downloadPatchSpectra; pending slot cleared" in text,
             "recoverable: injection did not reach downloadPatchSpectra")
     require(rc == 0, f"recoverable: movie was lost:\n{text[-2000:]}")
     require("WARNING: resident retry preparation did not complete for patch" in text and
             "retrying from the downloaded frames" in text, "recoverable: missing runner WARNING")
     require("Refusing to retry" not in text, "recoverable: classified as fatal")
-    require(built == 0, f"recoverable: a resident retry preparation completed ({built})")
+    require((prepared, failed, copied) == (0, 0, 0),
+            f"recoverable: a resident retry preparation ran past the fault ({prepared}, {failed}, {copied})")
     require(products(out) == products(healthy), f"recoverable inventory: {products(out)}")
-    require(mrc_pixels(out / "Movies/control.mrc") == mrc_pixels(healthy / "Movies/control.mrc"),
-            "recoverable: pixels differ from the resident-retry products")
-    print("PASS recoverable: WARNING, download path taken, pixels identical")
+    found = differences(healthy, out)
+    require(not found, f"recoverable: products differ from the resident-retry products: {found}")
+    print("PASS recoverable: WARNING, download path taken, MRC header and pixels and STAR identical")
 
     out, rc, text, _ = run("fatal", "resident-retry-fatal")
     require("injected cudaErrorIllegalAddress at downloadPatchSpectra; pending slot cleared" in text,

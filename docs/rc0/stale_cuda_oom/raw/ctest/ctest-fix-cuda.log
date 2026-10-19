@@ -1,0 +1,390 @@
+start 2026-10-17T22:54:29Z cfg=cuda HEAD=78aae2d3e79298913c904f0616a27432119d3988 status=0
+mask: 88-95 gpu: GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d
+binary sha256: 6ef09b5a33df0fca5263de344bcf4de40ddeabe9fd7e26c20753f1f47bb44dc2
+  Test #104: CudaErrorClass
+
+Total Tests: 104
+=== CTest Collection Validation: PASS === 
+  Collected tests: 104
+    - CpuDoseSymmetry                [REQUIRED]
+    - CpuDoseSymmetryBase            [REQUIRED]
+    - CpuUnweightedStream            [ADDITIVE]
+    - PatchRetryState                [REQUIRED]
+    - RunnerInterpolateRecenter      [REQUIRED]
+    - FloatPlanCache                 [ADDITIVE]
+    - MrcHeaderStats                 [REQUIRED]
+    - PdfConcat                      [REQUIRED]
+    - DefectParser                   [REQUIRED]
+    - DeflateLayout                  [REQUIRED]
+    - DeflateLayoutMutant_span_wrap  [REQUIRED]
+    - DeflateLayoutMutant_stage_sum  [REQUIRED]
+    - DeflateLayoutMutant_reserve_round [REQUIRED]
+    - DeflateLayoutMutant_layout_table [REQUIRED]
+    - DeflateLayoutMutant_arena_start [REQUIRED]
+    - DeflateLayoutMutant_drain_step [REQUIRED]
+    - Adler32Arithmetic              [REQUIRED]
+    - Adler32KernelHost              [REQUIRED]
+    - StageProfileThreads            [REQUIRED]
+    - FrameBufferPool                [REQUIRED]
+    - ScratchArena                   [REQUIRED]
+    - ReaderPool                     [ADDITIVE]
+    - ReaderPoolMutant_spin          [ADDITIVE]
+    - ReaderPoolMutant_nowait        [ADDITIVE]
+    - DefectNeighbours               [REQUIRED]
+    - DefectMergeMutant_append_only  [ADDITIVE]
+    - DefectMergeMutant_no_order_check [ADDITIVE]
+    - DefectMergeMutant_swap_xy      [ADDITIVE]
+    - NvcompAcceptanceDiagnostics    [REQUIRED]
+    - ProfilingKit                   [REQUIRED]
+    - GainCacheOwnership             [REQUIRED]
+    - NvcompGuards                   [REQUIRED]
+    - SyntheticRegression            [REQUIRED]
+    - HotPixelRngDeterminism         [REQUIRED]
+    - RunnerExposure                 [REQUIRED]
+    - Runner_failure                 [REQUIRED]
+    - Runner_invalid                 [REQUIRED]
+    - Runner_resume                  [REQUIRED]
+    - Runner_tomography              [REQUIRED]
+    - RunnerLateBin                  [REQUIRED]
+    - RunnerExportedUnits            [REQUIRED]
+    - GainCache                      [REQUIRED]
+    - TiffRead                       [REQUIRED]
+    - DamagedMovie                   [REQUIRED]
+    - TruncatedMrcMovie              [REQUIRED]
+    - TruncatedGainDefect            [REQUIRED]
+    - CompressedMovieSequence        [REQUIRED]
+    - GlobalIfftElision              [REQUIRED]
+    - HostBufferReuse                [REQUIRED]
+    - StageProfile                   [REQUIRED]
+    - RunnerModelParser              [REQUIRED]
+    - MicrographModelBounds          [REQUIRED]
+    - RunnerInterpolateShifts        [REQUIRED]
+    - WriteFaults                    [REQUIRED]
+    - WriteFaultsSync                [REQUIRED]
+    - WriteFaultsMultiProduct        [REQUIRED]
+    - OutputStageFaults              [REQUIRED]
+    - LogfileFromEps                 [REQUIRED]
+    - LogfileFromEpsMutant_always_eps [REQUIRED]
+    - LogfileFromEpsMutant_late_guard [REQUIRED]
+    - LogfileFromEpsMutant_eps_order [REQUIRED]
+    - LogfileFromEpsMutant_placeholder [REQUIRED]
+    - LogfileFromEpsMutant_concat_cleanup [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - CudaValidationParser           [REQUIRED]
+    - MultiGpuScheduling             [REQUIRED]
+    - OutputTreeComparator           [REQUIRED]
+    - JointStarPublication           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+    - NativeMovieStaging             [REQUIRED]
+    - RunnerInterpolateShiftsCuda    [ADDITIVE]
+    - StageProfileDeviceTiming       [ADDITIVE]
+    - SignedMrcStaging               [ADDITIVE]
+    - TruncatedMrcMovieCuda          [ADDITIVE]
+    - TruncatedGainDefectCuda        [ADDITIVE]
+    - CudaU16StagingEquivalence      [ADDITIVE]
+    - CudaWrapperUploadFailure       [ADDITIVE]
+    - CudaFaultMatrix                [ADDITIVE]
+    - CudaPatchWorkspace             [ADDITIVE]
+    - CudaPatchBatch                 [ADDITIVE]
+    - CudaVramAlias                  [ADDITIVE]
+    - CudaPatchBatchMutant_shift_retired [ADDITIVE]
+    - CudaPatchBatchMutant_never_retire [ADDITIVE]
+    - CudaPatchBatchMutant_extract_no_remap [ADDITIVE]
+    - CudaPatchBatchMutant_scale_divide [ADDITIVE]
+    - CudaPatchBatchMutant_shift_wrong_half [ADDITIVE]
+    - CudaPatchBatchMutant_perpatch_wrong_half [ADDITIVE]
+    - CudaVramAliasMutant_arena_overlap [ADDITIVE]
+    - CudaVramAliasMutant_arena_work_over_buffers [ADDITIVE]
+    - CudaVramAliasMutant_refusal_off [ADDITIVE]
+    - CudaVramAliasMutant_dw_scratch_over_fourier [ADDITIVE]
+    - CudaDeviceGainPool             [ADDITIVE]
+    - CudaDeviceGainCleanupFatal     [ADDITIVE]
+    - CudaGeometryRetention          [ADDITIVE]
+    - CudaGeometryRetentionMutant_no_take [ADDITIVE]
+    - CudaGeometryRetentionMutant_return_failed [ADDITIVE]
+    - CudaGeometryRetentionMutant_keep_taken_alias [ADDITIVE]
+    - CudaDoseNormalization          [ADDITIVE]
+    - CudaDoseSessionPlan            [ADDITIVE]
+    - CudaResidentRetryFailures      [ADDITIVE]
+    - CudaPreprocessingFailurePaths  [ADDITIVE]
+    - CudaStaleErrorAfterOom         [ADDITIVE]
+    - CudaDoseWeightAlias            [ADDITIVE]
+    - CudaErrorClass                 [ADDITIVE]
+validate_test_collection rc=0
+Internal ctest changing into directory: /mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-cuda
+Test project /mnt/clathrin/alex-motioncorr-rc0/W-D11/build-fix-cuda
+        Start   1: CpuDoseSymmetry
+  1/104 Test   #1: CpuDoseSymmetry ................................   Passed    2.12 sec
+        Start   2: CpuDoseSymmetryBase
+  2/104 Test   #2: CpuDoseSymmetryBase ............................   Passed    2.60 sec
+        Start   3: CpuUnweightedStream
+  3/104 Test   #3: CpuUnweightedStream ............................   Passed    0.09 sec
+        Start   4: PatchRetryState
+  4/104 Test   #4: PatchRetryState ................................   Passed    0.04 sec
+        Start   5: RunnerInterpolateRecenter
+  5/104 Test   #5: RunnerInterpolateRecenter ......................   Passed    0.01 sec
+        Start   6: FloatPlanCache
+  6/104 Test   #6: FloatPlanCache .................................   Passed    0.02 sec
+        Start   7: MrcHeaderStats
+  7/104 Test   #7: MrcHeaderStats .................................   Passed    0.02 sec
+        Start   8: PdfConcat
+  8/104 Test   #8: PdfConcat ......................................   Passed    0.09 sec
+        Start   9: DefectParser
+  9/104 Test   #9: DefectParser ...................................   Passed    0.02 sec
+        Start  10: DeflateLayout
+ 10/104 Test  #10: DeflateLayout ..................................   Passed    0.01 sec
+        Start  11: DeflateLayoutMutant_span_wrap
+ 11/104 Test  #11: DeflateLayoutMutant_span_wrap ..................   Passed    0.01 sec
+        Start  12: DeflateLayoutMutant_stage_sum
+ 12/104 Test  #12: DeflateLayoutMutant_stage_sum ..................   Passed    0.01 sec
+        Start  13: DeflateLayoutMutant_reserve_round
+ 13/104 Test  #13: DeflateLayoutMutant_reserve_round ..............   Passed    0.01 sec
+        Start  14: DeflateLayoutMutant_layout_table
+ 14/104 Test  #14: DeflateLayoutMutant_layout_table ...............   Passed    0.01 sec
+        Start  15: DeflateLayoutMutant_arena_start
+ 15/104 Test  #15: DeflateLayoutMutant_arena_start ................   Passed    0.01 sec
+        Start  16: DeflateLayoutMutant_drain_step
+ 16/104 Test  #16: DeflateLayoutMutant_drain_step .................   Passed    0.01 sec
+        Start  17: Adler32Arithmetic
+ 17/104 Test  #17: Adler32Arithmetic ..............................   Passed    0.78 sec
+        Start  18: Adler32KernelHost
+ 18/104 Test  #18: Adler32KernelHost ..............................   Passed    0.00 sec
+        Start  19: StageProfileThreads
+ 19/104 Test  #19: StageProfileThreads ............................   Passed    0.62 sec
+        Start  20: FrameBufferPool
+ 20/104 Test  #20: FrameBufferPool ................................   Passed    0.04 sec
+        Start  21: ScratchArena
+ 21/104 Test  #21: ScratchArena ...................................   Passed    0.01 sec
+        Start  22: ReaderPool
+ 22/104 Test  #22: ReaderPool .....................................   Passed    0.56 sec
+        Start  23: ReaderPoolMutant_spin
+ 23/104 Test  #23: ReaderPoolMutant_spin ..........................   Passed    0.55 sec
+        Start  24: ReaderPoolMutant_nowait
+ 24/104 Test  #24: ReaderPoolMutant_nowait ........................   Passed    0.03 sec
+        Start  25: DefectNeighbours
+ 25/104 Test  #25: DefectNeighbours ...............................   Passed    0.01 sec
+        Start  26: DefectMergeMutant_append_only
+ 26/104 Test  #26: DefectMergeMutant_append_only ..................   Passed    0.01 sec
+        Start  27: DefectMergeMutant_no_order_check
+ 27/104 Test  #27: DefectMergeMutant_no_order_check ...............   Passed    0.01 sec
+        Start  28: DefectMergeMutant_swap_xy
+ 28/104 Test  #28: DefectMergeMutant_swap_xy ......................   Passed    0.01 sec
+        Start  29: NvcompAcceptanceDiagnostics
+ 29/104 Test  #29: NvcompAcceptanceDiagnostics ....................   Passed    0.18 sec
+        Start  30: ProfilingKit
+ 30/104 Test  #30: ProfilingKit ...................................***Failed  173.76 sec
+...............................................................EE.....................................................................
+======================================================================
+ERROR: test_actual_cli_full_input_does_not_expect_metadata_products (tests.test_import_subset_boundaries.MultipleStarLoops.test_actual_cli_full_input_does_not_expect_metadata_products)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-fix/tools/profiling/tests/test_import_subset_boundaries.py", line 162, in test_actual_cli_full_input_does_not_expect_metadata_products
+    self.run_cli(False)
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-fix/tools/profiling/tests/test_import_subset_boundaries.py", line 151, in run_cli
+    result = cli(args)
+             ^^^^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-fix/tools/profiling/tests/test_import_subset_boundaries.py", line 23, in cli
+    return subprocess.run([sys.executable, *flags, mcprof.__file__, *args],
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-fix/tools/profiling/mcprof.py', 'run', 'A=/tmp/tmpyczzs7ey/binary', '--data', '/tmp/tmpyczzs7ey/data', '--work', '/tmp/tmpyczzs7ey/work', '--no-lock', '--warmup', '0', '--rounds', '1', '--lane-wait', '0', '--keep-outputs']' timed out after 30 seconds
+
+======================================================================
+ERROR: test_actual_cli_subset_preserves_all_other_loop_rows (tests.test_import_subset_boundaries.MultipleStarLoops.test_actual_cli_subset_preserves_all_other_loop_rows)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-fix/tools/profiling/tests/test_import_subset_boundaries.py", line 165, in test_actual_cli_subset_preserves_all_other_loop_rows
+    self.run_cli(True)
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-fix/tools/profiling/tests/test_import_subset_boundaries.py", line 151, in run_cli
+    result = cli(args)
+             ^^^^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-fix/tools/profiling/tests/test_import_subset_boundaries.py", line 23, in cli
+    return subprocess.run([sys.executable, *flags, mcprof.__file__, *args],
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '/mnt/clathrin/alex-motioncorr-rc0/W-D11/src-fix/tools/profiling/mcprof.py', 'run', 'A=/tmp/tmpmu_rzvue/binary', '--data', '/tmp/tmpmu_rzvue/data', '--work', '/tmp/tmpmu_rzvue/work', '--no-lock', '--warmup', '0', '--rounds', '1', '--lane-wait', '0', '--keep-outputs', '--movies', '2']' timed out after 30 seconds
+
+----------------------------------------------------------------------
+Ran 134 tests in 172.127s
+
+FAILED (errors=2)
+
+        Start  31: GainCacheOwnership
+ 31/104 Test  #31: GainCacheOwnership .............................   Passed    4.86 sec
+        Start  32: NvcompGuards
+ 32/104 Test  #32: NvcompGuards ...................................   Passed    0.04 sec
+        Start  33: SyntheticRegression
+ 33/104 Test  #33: SyntheticRegression ............................   Passed    0.71 sec
+        Start  34: HotPixelRngDeterminism
+ 34/104 Test  #34: HotPixelRngDeterminism .........................   Passed    0.59 sec
+        Start  35: RunnerExposure
+ 35/104 Test  #35: RunnerExposure .................................   Passed    0.64 sec
+        Start  36: Runner_failure
+ 36/104 Test  #36: Runner_failure .................................   Passed    0.17 sec
+        Start  37: Runner_invalid
+ 37/104 Test  #37: Runner_invalid .................................   Passed    0.19 sec
+        Start  38: Runner_resume
+ 38/104 Test  #38: Runner_resume ..................................   Passed    2.79 sec
+        Start  39: Runner_tomography
+ 39/104 Test  #39: Runner_tomography ..............................   Passed    0.52 sec
+        Start  40: RunnerLateBin
+ 40/104 Test  #40: RunnerLateBin ..................................   Passed    0.94 sec
+        Start  41: RunnerExportedUnits
+ 41/104 Test  #41: RunnerExportedUnits ............................   Passed    0.15 sec
+        Start  42: GainCache
+ 42/104 Test  #42: GainCache ......................................   Passed    1.44 sec
+        Start  43: TiffRead
+ 43/104 Test  #43: TiffRead .......................................   Passed    1.06 sec
+        Start  44: DamagedMovie
+ 44/104 Test  #44: DamagedMovie ...................................   Passed    4.39 sec
+        Start  45: TruncatedMrcMovie
+ 45/104 Test  #45: TruncatedMrcMovie ..............................   Passed    8.76 sec
+        Start  46: TruncatedGainDefect
+ 46/104 Test  #46: TruncatedGainDefect ............................   Passed    3.34 sec
+        Start  47: CompressedMovieSequence
+ 47/104 Test  #47: CompressedMovieSequence ........................   Passed    0.81 sec
+        Start  48: GlobalIfftElision
+ 48/104 Test  #48: GlobalIfftElision ..............................   Passed    1.80 sec
+        Start  49: HostBufferReuse
+ 49/104 Test  #49: HostBufferReuse ................................   Passed    3.35 sec
+        Start  50: StageProfile
+ 50/104 Test  #50: StageProfile ...................................   Passed    2.03 sec
+        Start  51: RunnerModelParser
+ 51/104 Test  #51: RunnerModelParser ..............................   Passed    0.24 sec
+        Start  52: MicrographModelBounds
+ 52/104 Test  #52: MicrographModelBounds ..........................   Passed    2.00 sec
+        Start  53: RunnerInterpolateShifts
+ 53/104 Test  #53: RunnerInterpolateShifts ........................   Passed    0.61 sec
+        Start  54: WriteFaults
+ 54/104 Test  #54: WriteFaults ....................................   Passed    0.64 sec
+        Start  55: WriteFaultsSync
+ 55/104 Test  #55: WriteFaultsSync ................................   Passed    0.95 sec
+        Start  56: WriteFaultsMultiProduct
+ 56/104 Test  #56: WriteFaultsMultiProduct ........................   Passed    0.67 sec
+        Start  57: OutputStageFaults
+ 57/104 Test  #57: OutputStageFaults ..............................   Passed    0.63 sec
+        Start  58: LogfileFromEps
+ 58/104 Test  #58: LogfileFromEps .................................   Passed    4.78 sec
+        Start  59: LogfileFromEpsMutant_always_eps
+ 59/104 Test  #59: LogfileFromEpsMutant_always_eps ................   Passed    0.47 sec
+        Start  60: LogfileFromEpsMutant_late_guard
+ 60/104 Test  #60: LogfileFromEpsMutant_late_guard ................   Passed    0.34 sec
+        Start  61: LogfileFromEpsMutant_eps_order
+ 61/104 Test  #61: LogfileFromEpsMutant_eps_order .................   Passed    0.27 sec
+        Start  62: LogfileFromEpsMutant_placeholder
+ 62/104 Test  #62: LogfileFromEpsMutant_placeholder ...............   Passed    0.83 sec
+        Start  63: LogfileFromEpsMutant_concat_cleanup
+ 63/104 Test  #63: LogfileFromEpsMutant_concat_cleanup ............   Passed    4.04 sec
+        Start  64: CiFailClosedControls
+ 64/104 Test  #64: CiFailClosedControls ...........................   Passed   23.11 sec
+        Start  65: CudaValidationParser
+ 65/104 Test  #65: CudaValidationParser ...........................   Passed    0.07 sec
+        Start  66: MultiGpuScheduling
+ 66/104 Test  #66: MultiGpuScheduling .............................   Passed   91.38 sec
+        Start  67: OutputTreeComparator
+ 67/104 Test  #67: OutputTreeComparator ...........................   Passed    0.87 sec
+        Start  68: JointStarPublication
+ 68/104 Test  #68: JointStarPublication ...........................   Passed    1.03 sec
+        Start  69: ImageWriteFaults
+ 69/104 Test  #69: ImageWriteFaults ...............................   Passed    0.04 sec
+        Start  70: NativeMovieStaging
+ 70/104 Test  #70: NativeMovieStaging .............................   Passed    0.44 sec
+        Start  71: RunnerInterpolateShiftsCuda
+ 71/104 Test  #71: RunnerInterpolateShiftsCuda ....................   Passed    1.38 sec
+        Start  72: StageProfileDeviceTiming
+ 72/104 Test  #72: StageProfileDeviceTiming .......................   Passed    3.08 sec
+        Start  73: SignedMrcStaging
+ 73/104 Test  #73: SignedMrcStaging ...............................   Passed    6.70 sec
+        Start  74: TruncatedMrcMovieCuda
+ 74/104 Test  #74: TruncatedMrcMovieCuda ..........................   Passed   53.02 sec
+        Start  75: TruncatedGainDefectCuda
+ 75/104 Test  #75: TruncatedGainDefectCuda ........................   Passed   24.54 sec
+        Start  76: CudaU16StagingEquivalence
+ 76/104 Test  #76: CudaU16StagingEquivalence ......................   Passed    0.43 sec
+        Start  77: CudaWrapperUploadFailure
+ 77/104 Test  #77: CudaWrapperUploadFailure .......................   Passed    0.40 sec
+        Start  78: CudaFaultMatrix
+ 78/104 Test  #78: CudaFaultMatrix ................................   Passed    7.85 sec
+        Start  79: CudaPatchWorkspace
+ 79/104 Test  #79: CudaPatchWorkspace .............................   Passed    0.57 sec
+        Start  80: CudaPatchBatch
+ 80/104 Test  #80: CudaPatchBatch .................................   Passed    2.10 sec
+        Start  81: CudaVramAlias
+ 81/104 Test  #81: CudaVramAlias ..................................   Passed    0.88 sec
+        Start  82: CudaPatchBatchMutant_shift_retired
+ 82/104 Test  #82: CudaPatchBatchMutant_shift_retired .............   Passed    2.05 sec
+        Start  83: CudaPatchBatchMutant_never_retire
+ 83/104 Test  #83: CudaPatchBatchMutant_never_retire ..............   Passed    2.06 sec
+        Start  84: CudaPatchBatchMutant_extract_no_remap
+ 84/104 Test  #84: CudaPatchBatchMutant_extract_no_remap ..........   Passed    2.06 sec
+        Start  85: CudaPatchBatchMutant_scale_divide
+ 85/104 Test  #85: CudaPatchBatchMutant_scale_divide ..............   Passed    2.17 sec
+        Start  86: CudaPatchBatchMutant_shift_wrong_half
+ 86/104 Test  #86: CudaPatchBatchMutant_shift_wrong_half ..........   Passed    2.17 sec
+        Start  87: CudaPatchBatchMutant_perpatch_wrong_half
+ 87/104 Test  #87: CudaPatchBatchMutant_perpatch_wrong_half .......   Passed    2.14 sec
+        Start  88: CudaVramAliasMutant_arena_overlap
+ 88/104 Test  #88: CudaVramAliasMutant_arena_overlap ..............   Passed    0.89 sec
+        Start  89: CudaVramAliasMutant_arena_work_over_buffers
+ 89/104 Test  #89: CudaVramAliasMutant_arena_work_over_buffers ....   Passed    0.90 sec
+        Start  90: CudaVramAliasMutant_refusal_off
+ 90/104 Test  #90: CudaVramAliasMutant_refusal_off ................   Passed    0.92 sec
+        Start  91: CudaVramAliasMutant_dw_scratch_over_fourier
+ 91/104 Test  #91: CudaVramAliasMutant_dw_scratch_over_fourier ....   Passed    0.90 sec
+        Start  92: CudaDeviceGainPool
+ 92/104 Test  #92: CudaDeviceGainPool .............................   Passed    0.42 sec
+        Start  93: CudaDeviceGainCleanupFatal
+ 93/104 Test  #93: CudaDeviceGainCleanupFatal .....................   Passed    0.39 sec
+        Start  94: CudaGeometryRetention
+ 94/104 Test  #94: CudaGeometryRetention ..........................   Passed    0.40 sec
+        Start  95: CudaGeometryRetentionMutant_no_take
+ 95/104 Test  #95: CudaGeometryRetentionMutant_no_take ............   Passed    0.43 sec
+        Start  96: CudaGeometryRetentionMutant_return_failed
+ 96/104 Test  #96: CudaGeometryRetentionMutant_return_failed ......   Passed    0.41 sec
+        Start  97: CudaGeometryRetentionMutant_keep_taken_alias
+ 97/104 Test  #97: CudaGeometryRetentionMutant_keep_taken_alias ...   Passed    0.40 sec
+        Start  98: CudaDoseNormalization
+ 98/104 Test  #98: CudaDoseNormalization ..........................   Passed    1.84 sec
+        Start  99: CudaDoseSessionPlan
+ 99/104 Test  #99: CudaDoseSessionPlan ............................   Passed    0.42 sec
+        Start 100: CudaResidentRetryFailures
+100/104 Test #100: CudaResidentRetryFailures ......................   Passed    5.71 sec
+        Start 101: CudaPreprocessingFailurePaths
+101/104 Test #101: CudaPreprocessingFailurePaths ..................   Passed    5.15 sec
+        Start 102: CudaStaleErrorAfterOom
+102/104 Test #102: CudaStaleErrorAfterOom .........................   Passed    1.13 sec
+        Start 103: CudaDoseWeightAlias
+103/104 Test #103: CudaDoseWeightAlias ............................   Passed    2.69 sec
+        Start 104: CudaErrorClass
+104/104 Test #104: CudaErrorClass .................................   Passed    0.00 sec
+
+99% tests passed, 1 tests failed out of 104
+
+Label Time Summary:
+cuda        = 136.62 sec*proc (34 tests)
+hardware    = 136.61 sec*proc (33 tests)
+
+Total Test time (real) = 490.33 sec
+
+The following tests FAILED:
+	 30 - ProfilingKit (Failed)
+Errors while running CTest
+ctest rc=8 end 2026-10-17T23:02:39Z

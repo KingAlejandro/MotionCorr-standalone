@@ -98,6 +98,56 @@ add_library(motioncorr_core STATIC ${MOTIONCORR_SOURCES}
     "${CMAKE_CURRENT_BINARY_DIR}/macros.cpp")
 target_include_directories(motioncorr_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_definitions(motioncorr_core PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG)
+
+# CPU dose weighting: the symmetric-row path (#179, #220) is bit-exact and
+# measured only on x86-64 GCC without FMA code generation. AUTO enables it there
+# and keeps the original loop everywhere else; ON is for sites whose toolchain
+# passes CpuDoseSymmetry. src/cpu_dose_symmetry_mode.h makes the decision from the
+# real compile flags; the check below only reports it, and CpuDoseSymmetry fails
+# if the compiled path disagrees with this report.
+set(MOTIONCORR_CPU_DOSE_SYMMETRY AUTO CACHE STRING
+    "CPU dose-weighting symmetric rows: AUTO (qualified toolchains only), ON or OFF")
+set_property(CACHE MOTIONCORR_CPU_DOSE_SYMMETRY PROPERTY STRINGS AUTO ON OFF)
+string(TOUPPER "${MOTIONCORR_CPU_DOSE_SYMMETRY}" _dose_symmetry)
+if(_dose_symmetry STREQUAL "OFF")
+    set(_dose_symmetry_mode 0)
+elseif(_dose_symmetry STREQUAL "ON")
+    set(_dose_symmetry_mode 1)
+elseif(_dose_symmetry STREQUAL "AUTO")
+    set(_dose_symmetry_mode 2)
+else()
+    message(FATAL_ERROR "MOTIONCORR_CPU_DOSE_SYMMETRY must be AUTO, ON or OFF, not '${MOTIONCORR_CPU_DOSE_SYMMETRY}'")
+endif()
+target_compile_definitions(motioncorr_core PRIVATE MOTIONCORR_CPU_DOSE_SYMMETRY_MODE=${_dose_symmetry_mode})
+include(CheckCXXSourceCompiles)
+set(CMAKE_REQUIRED_DEFINITIONS -DMOTIONCORR_CPU_DOSE_SYMMETRY_MODE=${_dose_symmetry_mode})
+set(CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}")
+set(CMAKE_TRY_COMPILE_CONFIGURATION "${CMAKE_BUILD_TYPE}")
+unset(MOTIONCORR_DOSE_SYMMETRY_SELECTED CACHE)
+check_cxx_source_compiles("#include \"src/cpu_dose_symmetry_mode.h\"
+#if !MOTIONCORR_CPU_DOSE_SYMMETRY
+#error original path
+#endif
+int main() { return 0; }" MOTIONCORR_DOSE_SYMMETRY_SELECTED)
+unset(CMAKE_REQUIRED_DEFINITIONS)
+unset(CMAKE_REQUIRED_INCLUDES)
+unset(CMAKE_TRY_COMPILE_CONFIGURATION)
+if(MOTIONCORR_DOSE_SYMMETRY_SELECTED)
+    set(MOTIONCORR_DOSE_WEIGHTING_PATH symmetric)
+else()
+    set(MOTIONCORR_DOSE_WEIGHTING_PATH original)
+endif()
+if(_dose_symmetry STREQUAL "AUTO" AND MOTIONCORR_DOSE_SYMMETRY_SELECTED)
+    message(STATUS "CPU dose weighting: symmetric rows (AUTO: qualified x86-64 GCC without FMA)")
+elseif(_dose_symmetry STREQUAL "AUTO")
+    message(STATUS "CPU dose weighting: original loop (AUTO: ${CMAKE_CXX_COMPILER_ID} on ${CMAKE_SYSTEM_PROCESSOR} "
+        "with these flags is not the qualified x86-64 GCC without FMA). To opt in after CpuDoseSymmetry "
+        "passes on this toolchain: -DMOTIONCORR_CPU_DOSE_SYMMETRY=ON")
+elseif(_dose_symmetry STREQUAL "ON")
+    message(STATUS "CPU dose weighting: symmetric rows (forced ON; requires CpuDoseSymmetry to pass on this toolchain)")
+else()
+    message(STATUS "CPU dose weighting: original loop (forced OFF)")
+endif()
 target_link_libraries(motioncorr_core PUBLIC
     PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
     motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)
@@ -162,6 +212,30 @@ include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
+    add_executable(cpu_dose_symmetry tests/test_cpu_dose_symmetry.cpp)
+    target_link_libraries(cpu_dose_symmetry PRIVATE motioncorr_core)
+    if(UNIX AND NOT APPLE)
+        target_compile_definitions(cpu_dose_symmetry PRIVATE MOTIONCORR_EXP_WITNESS)
+        target_link_options(cpu_dose_symmetry PRIVATE "LINKER:--wrap=exp" "LINKER:--wrap=expf")
+    endif()
+    add_test(NAME CpuDoseSymmetry COMMAND cpu_dose_symmetry --expect-path ${MOTIONCORR_DOSE_WEIGHTING_PATH})
+    # The original loop, compiled into its own runner object, so CI exercises the
+    # fallback path whichever path the library selected.
+    add_executable(cpu_dose_symmetry_base tests/test_cpu_dose_symmetry.cpp src/motioncorr_runner.cpp)
+    target_compile_definitions(cpu_dose_symmetry_base PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG
+        MOTIONCORR_CPU_DOSE_SYMMETRY_MODE=0)
+    target_link_libraries(cpu_dose_symmetry_base PRIVATE motioncorr_core)
+    if(UNIX AND NOT APPLE)
+        target_compile_definitions(cpu_dose_symmetry_base PRIVATE MOTIONCORR_EXP_WITNESS)
+        target_link_options(cpu_dose_symmetry_base PRIVATE "LINKER:--wrap=exp" "LINKER:--wrap=expf")
+    endif()
+    add_test(NAME CpuDoseSymmetryBase COMMAND cpu_dose_symmetry_base --expect-path original)
+    option(BUILD_CPU_DOSE_BENCH "Build the uninstrumented CPU dose benchmark" OFF)
+    if(BUILD_CPU_DOSE_BENCH)
+        # The benchmark has no call-count wrappers or instrumentation in exp().
+        add_executable(cpu_dose_bench tests/test_cpu_dose_symmetry.cpp)
+        target_link_libraries(cpu_dose_bench PRIVATE motioncorr_core)
+    endif()
     add_executable(cpu_unweighted_stream tests/test_cpu_unweighted_stream.cpp)
     target_link_libraries(cpu_unweighted_stream PRIVATE motioncorr_core)
     if(UNIX AND NOT APPLE)
@@ -184,6 +258,11 @@ if(BUILD_TESTING)
         COMMAND $<TARGET_FILE:runner_numerics> float_plan_cache)
     add_test(NAME MrcHeaderStats
         COMMAND $<TARGET_FILE:runner_numerics> mrc_stats)
+    # Issue #229: report plot path calls addToCPlot2D with EMDL_UNDEFINED (-1) as
+    # the x-axis; it must produce 1..N without indexing label2offset[-1] while
+    # preserving missing-label and non-numeric-label errors for defined labels.
+    add_test(NAME ReportPlotUndefinedAxis
+        COMMAND $<TARGET_FILE:runner_numerics> plot2d_undefined_axis)
     add_executable(pdf_concat tests/test_pdf_concat.cpp)
     target_link_libraries(pdf_concat PRIVATE motioncorr_core)
     add_test(NAME PdfConcat COMMAND pdf_concat)
@@ -196,6 +275,51 @@ if(BUILD_TESTING)
     add_executable(deflate_layout tests/test_deflate_layout.cpp)
     target_include_directories(deflate_layout PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME DeflateLayout COMMAND deflate_layout)
+    # Compiled negative controls for the checked arithmetic on the nvCOMP admission
+    # path (#134 item 2). Each mutant removes one overflow check from a header and
+    # must turn DeflateLayout red. The target text must exist exactly once, so an
+    # edited header stops the configure step instead of building an unmutated control.
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+                 "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_checked_arith.h"
+                 "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_deflate_layout.h"
+                 "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_scratch_arena.h")
+    function(add_deflate_layout_mutant _mutant _header _from _to)
+        file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/${_header}" _text)
+        string(FIND "${_text}" "${_from}" _first)
+        string(FIND "${_text}" "${_from}" _last REVERSE)
+        if(_first EQUAL -1 OR NOT _first EQUAL _last)
+            message(FATAL_ERROR "deflate layout mutant ${_mutant}: target missing or not unique in ${_header}")
+        endif()
+        string(REPLACE "${_from}" "${_to}" _text "${_text}")
+        set(_dir "${CMAKE_CURRENT_BINARY_DIR}/mutants/deflate_layout_${_mutant}")
+        file(WRITE "${_dir}/src/acc/cuda/${_header}" "${_text}")
+        add_executable(deflate_layout_${_mutant} tests/test_deflate_layout.cpp)
+        # The mutant tree is searched first, so its header shadows the real one.
+        target_include_directories(deflate_layout_${_mutant} PRIVATE
+            "${_dir}" "${CMAKE_CURRENT_SOURCE_DIR}")
+        add_test(NAME DeflateLayoutMutant_${_mutant} COMMAND deflate_layout_${_mutant})
+        set_tests_properties(DeflateLayoutMutant_${_mutant} PROPERTIES WILL_FAIL TRUE TIMEOUT 120)
+    endfunction()
+    # One mutant per hardened entry point; the direct boundary tests in
+    # test_deflate_layout.cpp are the primary coverage of every other check.
+    add_deflate_layout_mutant(span_wrap cuda_checked_arith.h
+        "return addU64(offset, n, end_u) && convertExact(end_u, end);"
+        "end_u = offset + n; return convertExact(end_u, end);")
+    add_deflate_layout_mutant(stage_sum cuda_deflate_layout.h
+        "if (!mc_checked::addSize(slot, (size_t)size_at(s), cursor)) return false;"
+        "cursor = slot + (size_t)size_at(s);")
+    add_deflate_layout_mutant(reserve_round cuda_deflate_layout.h
+        "return mc_checked::alignUpChecked(padded, (size_t)32 << 20, out);"
+        "out = alignUp(padded, (size_t)32 << 20); return true;")
+    add_deflate_layout_mutant(layout_table cuda_deflate_layout.h
+        "if (!mc_checked::mulSize(chunk_strips, elem, bytes)) { ok = false; return (size_t)0; }"
+        "bytes = chunk_strips * elem;")
+    add_deflate_layout_mutant(arena_start cuda_scratch_arena.h
+        "if (!mc_checked::alignUpChecked(used_, alignment, start)) return 0;"
+        "start = alignUp(used_, alignment);")
+    add_deflate_layout_mutant(drain_step cuda_checked_arith.h
+        "if (k >= n_chunks) return false;"
+        "if (k < 0) return false; k = (int)((unsigned)k + 1u); return k >= 0;")   # wraps past INT_MAX
     add_executable(adler32_arithmetic tests/test_adler32.cpp)
     target_include_directories(adler32_arithmetic PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME Adler32Arithmetic COMMAND adler32_arithmetic)
@@ -331,10 +455,58 @@ if(BUILD_TESTING)
         add_test(NAME DamagedMovie
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_damaged_movie.py
                 --binary $<TARGET_FILE:motioncorr>)
+        # RC0 F3: a truncated raw MRC movie fails its movie and publishes nothing.
+        add_test(NAME TruncatedMrcMovie
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_truncated_mrc_movie.py
+                --binary $<TARGET_FILE:motioncorr>)
+        set_tests_properties(TruncatedMrcMovie PROPERTIES TIMEOUT 600)
+        # RC0 F3b: a truncated raw MRC gain reference or defect map fails instead of being applied.
+        add_test(NAME TruncatedGainDefect
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_truncated_gain_defect.py
+                --binary $<TARGET_FILE:motioncorr>)
+        set_tests_properties(TruncatedGainDefect PROPERTIES TIMEOUT 600)
         add_test(NAME CompressedMovieSequence
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compressed_movie_sequence.py
                 --binary $<TARGET_FILE:motioncorr>)
         set_tests_properties(CompressedMovieSequence PROPERTIES TIMEOUT 120)
+        # Every container, sample type and codec the readers accept (issue #186 follow-up).
+        # The compressed-MRC cases need the decoders the reader pipes through; a missing
+        # one is reported UNRUN and only tolerated when it is absent at configure time.
+        # CI sets MC_REQUIRE_ALL_DECODERS=ON, so a missing decoder fails configuration there
+        # instead of being waived; elsewhere the waiver is explicit in the configure output.
+        option(MC_REQUIRE_ALL_DECODERS "Fail configuration if pbzip2 or zstd is missing (no UNRUN waiver)" OFF)
+        set(_input_format_unrun "")
+        foreach(_decoder pbzip2 zstd)
+            find_program(_decoder_path_${_decoder} ${_decoder})
+            if(NOT _decoder_path_${_decoder})
+                if(MC_REQUIRE_ALL_DECODERS)
+                    message(FATAL_ERROR "${_decoder} not found and MC_REQUIRE_ALL_DECODERS=ON")
+                endif()
+                message(WARNING "${_decoder} not found: InputFormats and RealCutdown waive its compressed-MRC "
+                                "cases (UNRUN). Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the waiver.")
+                list(APPEND _input_format_unrun --allow-unrun ${_decoder})
+            endif()
+        endforeach()
+        add_test(NAME InputFormats
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_input_formats.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>
+                ${_input_format_unrun})
+        set_tests_properties(InputFormats PROPERTIES TIMEOUT 600)
+        # tools/cut_down_movie.py keeps exactly the requested frames in every container.
+        add_test(NAME CutDownMovie
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_cut_down_movie.py
+                --helper $<TARGET_FILE:runner_numerics>)
+        set_tests_properties(CutDownMovie PROPERTIES TIMEOUT 300)
+        # Opt-in: cut-down real movies, one per corpus family (test-data/real_cutdown_manifest.json).
+        # Point MC_REAL_CUTDOWN_DIR at a copy of the assets to register it.
+        set(MC_REAL_CUTDOWN_DIR "" CACHE PATH "Directory holding the cut-down real movies (opt-in RealCutdown test)")
+        if(MC_REAL_CUTDOWN_DIR)
+            add_test(NAME RealCutdown
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_real_cutdown.py
+                    --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>
+                    --assets ${MC_REAL_CUTDOWN_DIR} ${_input_format_unrun})
+            set_tests_properties(RealCutdown PROPERTIES TIMEOUT 1800)
+        endif()
         add_test(NAME GlobalIfftElision
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_global_ifft_elision.py
                 --binary $<TARGET_FILE:motioncorr>)
@@ -347,6 +519,10 @@ if(BUILD_TESTING)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)
+        add_test(NAME EerMemorySafety
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_eer_memory_safety.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>)
+        set_tests_properties(EerMemorySafety PROPERTIES TIMEOUT 600)
         add_test(NAME MicrographModelBounds
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_micrograph_model_bounds.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics>)
@@ -385,7 +561,8 @@ if(BUILD_TESTING)
         # mutant runner below must fail the same script: one takes the EPS-direct
         # route although a prior all_batches.pdf exists, one asks for that prior
         # file again after the batch pass has written it, one lists the EPS in
-        # the wrong order, one leaves an empty logfile.pdf after a failed render.
+        # the wrong order, one leaves an empty logfile.pdf after a failed render, one keeps a
+        # partial or stale logfile.pdf after a failed concatenation.
         add_test(NAME LogfileFromEps
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_logfile_from_eps.py
                 --binary $<TARGET_FILE:motioncorr>)
@@ -401,7 +578,9 @@ if(BUILD_TESTING)
         set(_mutant_eps_order_4 "logfile_fn_eps.insert(logfile_fn_eps.end(), header_fn_eps.begin(), header_fn_eps.end());")
         set(_mutant_placeholder_1 "logfile_fn_eps, aggregate_only, false)")
         set(_mutant_placeholder_2 "logfile_fn_eps, aggregate_only, true)")
-        foreach(_mutant always_eps late_guard eps_order placeholder)
+        set(_mutant_concat_cleanup_1 "removeRegularFileIfPresent(report_out + \"logfile.pdf\");")
+        set(_mutant_concat_cleanup_2 "(void)0;")
+        foreach(_mutant always_eps late_guard eps_order placeholder concat_cleanup)
             file(READ "${_runner}" _mutant_source)
             set(_pair 1)
             while(DEFINED _mutant_${_mutant}_${_pair})
@@ -480,6 +659,15 @@ if(BUILD_TESTING AND CUDA)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_signed_mrc_staging.py
                 --binary $<TARGET_FILE:motioncorr> --gpu 0)
         set_tests_properties(SignedMrcStaging PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # RC0 F3: the same truncated raw MRC movies on every --ingest route.
+        add_test(NAME TruncatedMrcMovieCuda
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_truncated_mrc_movie.py
+                --binary $<TARGET_FILE:motioncorr> --gpu 0 --ingest auto,compact,float)
+        set_tests_properties(TruncatedMrcMovieCuda PROPERTIES LABELS "cuda;hardware" TIMEOUT 900)
+        add_test(NAME TruncatedGainDefectCuda
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_truncated_gain_defect.py
+                --binary $<TARGET_FILE:motioncorr> --gpu 0 --ingest auto,compact,float)
+        set_tests_properties(TruncatedGainDefectCuda PROPERTIES LABELS "cuda;hardware" TIMEOUT 900)
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         # Issue #85 lane C: uint16 staging must reproduce the float path's device
@@ -712,6 +900,21 @@ if(BUILD_TESTING AND CUDA)
                 --binary $<TARGET_FILE:motioncorr_faultinject>)
         set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 900)
+        # Issue #226 D1: a genuine handled allocation failure in alignment must not
+        # leave a stale last error that degrades or refuses the next movie. Registered
+        # in every CUDA build, so it is in CUDA_REQUIRED_TESTS
+        # (tools/validate_test_collection.py), which applies when CUDA:BOOL=ON.
+        if(USE_NVCOMP)
+            set(_stale_cuda_args "")
+        else()
+            set(_stale_cuda_args "--no-nvcomp")
+        endif()
+        add_test(NAME CudaStaleErrorAfterOom
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_stale_cuda_error_controls.py
+                --binary $<TARGET_FILE:motioncorr_faultinject> ${_stale_cuda_args})
+        set_tests_properties(CudaStaleErrorAfterOom PROPERTIES
+            LABELS "cuda;hardware" TIMEOUT 600)
         # The same two reconstruction-cleanup controls on the nvCOMP ingest arm.
         # run_preprocessing_failure_controls.py builds its fixture with
         # TIFFTAG_COMPRESSION = 1, so the fast path declines it and

@@ -1,0 +1,46 @@
+{
+  "input_star": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/item12-retry/inputs/mixed/movies.star",
+  "input_sha256": "d478c5863aed986f7e98117574a1a8819c4f7de8f7863d5eae5d6bf1643fc36c",
+  "movie_block": "movies",
+  "labels": [
+    "rlnMicrographMovieName",
+    "rlnOpticsGroup"
+  ],
+  "n_movies": 4,
+  "n_shards": 1,
+  "partition": "contiguous",
+  "canonical_movies": [
+    "Movies/20170629_00026_frameImage.tiff",
+    "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.tif",
+    "Movies/20170629_00031_frameImage.tiff",
+    "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.tif"
+  ],
+  "canonical_output_roots": [
+    "Movies/20170629_00026_frameImage",
+    "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41",
+    "Movies/20170629_00031_frameImage",
+    "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04"
+  ],
+  "shards": [
+    {
+      "index": 0,
+      "path": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/item12-retry/dataset/d1/workers/shards/shard_1way_0.star",
+      "sha256": "d478c5863aed986f7e98117574a1a8819c4f7de8f7863d5eae5d6bf1643fc36c",
+      "n_movies": 4,
+      "first_input_row": 0,
+      "movies": [
+        "Movies/20170629_00026_frameImage.tiff",
+        "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.tif",
+        "Movies/20170629_00031_frameImage.tiff",
+        "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.tif"
+      ],
+      "output_roots": [
+        "Movies/20170629_00026_frameImage",
+        "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41",
+        "Movies/20170629_00031_frameImage",
+        "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04"
+      ]
+    }
+  ],
+  "input_type": "spa"
+}

@@ -1,0 +1,14 @@
+[PASS] reference nvcomp   rc=0 route=nvcomp inventory=['Movies/b.mrc', 'Movies/b.star', 'corrected_micrographs.star']
+[PASS] comparison self-tests on the nvcomp reference
+[PASS] reference compact  rc=0 route=compact inventory=['Movies/b.mrc', 'Movies/b.star', 'corrected_micrographs.star']
+[PASS] comparison self-tests on the compact reference
+[FAIL] nvcomp   --ingest nvcomp  rc=1 routes={'a': 'nvcomp', 'c': 'nvcomp'}  failed: ['job fails for movie a only', 'product inventory is b and c only, no joint STAR', 'b and c keep their route', 'no CUDA error or fallback in b and c', 'b and c products identical to b alone']
+    [alignfault] genuine cudaMalloc(1125899906842624) for a 8000-byte alignment allocation: pending-before=cudaSuccess returned=cudaErrorMemoryAllocation pending-af
+    --ingest nvcomp was requested but the device ingest did not run for Movies/b.tiff. Either this build has no nvCOMP, there is no resident CUDA session, or the en
+    --ingest nvcomp was requested but the device ingest did not run for Movies/b.tiff. Either this build has no nvCOMP, there is no resident CUDA session, or the en
+[FAIL] nvcomp   --ingest auto    rc=1 routes={'a': 'nvcomp', 'b': 'compact', 'c': 'nvcomp'}  failed: ['b and c keep their route', 'no CUDA error or fallback in b and c']
+    [alignfault] genuine cudaMalloc(1125899906842624) for a 8000-byte alignment allocation: pending-before=cudaSuccess returned=cudaErrorMemoryAllocation pending-af
+[FAIL] compact  --ingest auto    rc=1 routes={'a': 'compact', 'b': 'compact', 'c': 'compact'}  failed: ['no CUDA error or fallback in b and c']
+    [alignfault] genuine cudaMalloc(1125899906842624) for a 8000-byte alignment allocation: pending-before=cudaSuccess returned=cudaErrorMemoryAllocation pending-af
+
+FAIL: ['nvcomp-nvcomp', 'nvcomp-auto', 'compact-auto']

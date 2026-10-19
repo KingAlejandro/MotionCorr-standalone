@@ -1,0 +1,197 @@
+{
+ "case": {
+  "name": "m0_swapped_nx128_inherited",
+  "mode": 0,
+  "nx": 128,
+  "ny": 128,
+  "nz": 8,
+  "route": "compact",
+  "big": true,
+  "expect_fail": true
+ },
+ "arms": {
+  "big-float": {
+   "label": "big-float",
+   "rc": 0,
+   "witness": [
+    "float"
+   ],
+   "completion_star": [
+    "corrected_micrographs.star",
+    "movie.star"
+   ],
+   "mrc_products": [
+    "movie.mrc"
+   ]
+  },
+  "big-auto": {
+   "label": "big-auto",
+   "rc": 0,
+   "witness": [
+    "compact"
+   ],
+   "completion_star": [
+    "corrected_micrographs.star",
+    "movie.star"
+   ],
+   "mrc_products": [
+    "movie.mrc"
+   ]
+  },
+  "big-compact": {
+   "label": "big-compact",
+   "rc": 0,
+   "witness": [
+    "compact"
+   ],
+   "completion_star": [
+    "corrected_micrographs.star",
+    "movie.star"
+   ],
+   "mrc_products": [
+    "movie.mrc"
+   ]
+  },
+  "big-cpu": {
+   "label": "big-cpu",
+   "rc": 0,
+   "witness": [],
+   "completion_star": [
+    "corrected_micrographs.star",
+    "movie.star"
+   ],
+   "mrc_products": [
+    "movie.mrc"
+   ]
+  },
+  "little-float": {
+   "label": "little-float",
+   "rc": 0,
+   "witness": [
+    "float"
+   ],
+   "completion_star": [
+    "corrected_micrographs.star",
+    "movie.star"
+   ],
+   "mrc_products": [
+    "movie.mrc"
+   ]
+  },
+  "little-auto": {
+   "label": "little-auto",
+   "rc": 0,
+   "witness": [
+    "compact"
+   ],
+   "completion_star": [
+    "corrected_micrographs.star",
+    "movie.star"
+   ],
+   "mrc_products": [
+    "movie.mrc"
+   ]
+  },
+  "little-compact": {
+   "label": "little-compact",
+   "rc": 0,
+   "witness": [
+    "compact"
+   ],
+   "completion_star": [
+    "corrected_micrographs.star",
+    "movie.star"
+   ],
+   "mrc_products": [
+    "movie.mrc"
+   ]
+  },
+  "little-cpu": {
+   "label": "little-cpu",
+   "rc": 0,
+   "witness": [],
+   "completion_star": [
+    "corrected_micrographs.star",
+    "movie.star"
+   ],
+   "mrc_products": [
+    "movie.mrc"
+   ]
+  }
+ },
+ "compare": {
+  "big: float vs auto": {
+   "identical": true,
+   "problems": [],
+   "mrc_compared": 1,
+   "compared": 9,
+   "differences": [],
+   "only_a": [],
+   "only_b": []
+  },
+  "big: float vs compact": {
+   "identical": true,
+   "problems": [],
+   "mrc_compared": 1,
+   "compared": 9,
+   "differences": [],
+   "only_a": [],
+   "only_b": []
+  },
+  "little: float vs auto": {
+   "identical": true,
+   "problems": [],
+   "mrc_compared": 1,
+   "compared": 9,
+   "differences": [],
+   "only_a": [],
+   "only_b": []
+  },
+  "little: float vs compact": {
+   "identical": true,
+   "problems": [],
+   "mrc_compared": 1,
+   "compared": 9,
+   "differences": [],
+   "only_a": [],
+   "only_b": []
+  },
+  "float: big vs little": {
+   "identical": true,
+   "problems": [],
+   "mrc_compared": 1,
+   "compared": 9,
+   "differences": [],
+   "only_a": [],
+   "only_b": []
+  },
+  "auto: big vs little": {
+   "identical": true,
+   "problems": [],
+   "mrc_compared": 1,
+   "compared": 9,
+   "differences": [],
+   "only_a": [],
+   "only_b": []
+  },
+  "compact: big vs little": {
+   "identical": true,
+   "problems": [],
+   "mrc_compared": 1,
+   "compared": 9,
+   "differences": [],
+   "only_a": [],
+   "only_b": []
+  },
+  "cpu: big vs little": {
+   "identical": true,
+   "problems": [],
+   "mrc_compared": 1,
+   "compared": 9,
+   "differences": [],
+   "only_a": [],
+   "only_b": []
+  }
+ },
+ "all_hold": true
+}

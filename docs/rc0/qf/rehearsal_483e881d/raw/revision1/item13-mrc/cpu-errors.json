@@ -1,0 +1,479 @@
+{
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/tools.r1/qf_lane_exec.sh",
+ "cpu": true,
+ "matrix": [],
+ "refuse": [],
+ "compressed": [],
+ "damaged": [],
+ "errors": [
+  {
+   "mode": 1,
+   "variant": "truncated-mid-frame",
+   "arms": {
+    "cpu": {
+     "label": "e-m1-truncated-mid-frame-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 4 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 5 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 1,
+   "variant": "truncated-one-byte",
+   "arms": {
+    "cpu": {
+     "label": "e-m1-truncated-one-byte-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 7 (0-based) of movie.mrcs: the movie is truncated or unreadable. || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 1092 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 1,
+   "variant": "truncated-header",
+   "arms": {
+    "cpu": {
+     "label": "e-m1-truncated-header-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 1092 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 1,
+   "variant": "header-only",
+   "arms": {
+    "cpu": {
+     "label": "e-m1-header-only-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 4 (0-based) of movie.mrcs: the movie is truncated or unreadable. /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 5 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 1,
+   "variant": "claims-12-frames-has-8",
+   "arms": {
+    "cpu": {
+     "label": "e-m1-claim12-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 8 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 9 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 1,
+   "variant": "claims-24-frames-has-8",
+   "arms": {
+    "cpu": {
+     "label": "e-m1-claim24-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 12 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 13 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 1,
+   "variant": "expected_frames-mismatch",
+   "arms": {
+    "cpu": {
+     "label": "e-m1-expect-wrong-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 1021 :: Movie movie.mrcs frame count mismatch: expected 11 frames, but decoded 8 frames. || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 1092 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 0,
+   "variant": "truncated-mid-frame",
+   "arms": {
+    "cpu": {
+     "label": "e-m0-truncated-mid-frame-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 4 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 5 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 0,
+   "variant": "truncated-one-byte",
+   "arms": {
+    "cpu": {
+     "label": "e-m0-truncated-one-byte-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 7 (0-based) of movie.mrcs: the movie is truncated or unreadable. || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 1092 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 0,
+   "variant": "truncated-header",
+   "arms": {
+    "cpu": {
+     "label": "e-m0-truncated-header-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 1092 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 0,
+   "variant": "header-only",
+   "arms": {
+    "cpu": {
+     "label": "e-m0-header-only-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 0 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 4 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 0,
+   "variant": "claims-12-frames-has-8",
+   "arms": {
+    "cpu": {
+     "label": "e-m0-claim12-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 8 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 9 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 0,
+   "variant": "claims-24-frames-has-8",
+   "arms": {
+    "cpu": {
+     "label": "e-m0-claim24-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 12 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 13 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 6,
+   "variant": "truncated-mid-frame",
+   "arms": {
+    "cpu": {
+     "label": "e-m6-truncated-mid-frame-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 4 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 5 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 6,
+   "variant": "truncated-one-byte",
+   "arms": {
+    "cpu": {
+     "label": "e-m6-truncated-one-byte-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 7 (0-based) of movie.mrcs: the movie is truncated or unreadable. || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 1092 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 6,
+   "variant": "truncated-header",
+   "arms": {
+    "cpu": {
+     "label": "e-m6-truncated-header-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 1092 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 6,
+   "variant": "header-only",
+   "arms": {
+    "cpu": {
+     "label": "e-m6-header-only-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 4 (0-based) of movie.mrcs: the movie is truncated or unreadable. /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 5 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 6,
+   "variant": "claims-12-frames-has-8",
+   "arms": {
+    "cpu": {
+     "label": "e-m6-claim12-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 8 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 9 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 6,
+   "variant": "claims-24-frames-has-8",
+   "arms": {
+    "cpu": {
+     "label": "e-m6-claim24-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 12 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 13 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 2,
+   "variant": "truncated-mid-frame",
+   "arms": {
+    "cpu": {
+     "label": "e-m2-truncated-mid-frame-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 4 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 5 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 2,
+   "variant": "truncated-one-byte",
+   "arms": {
+    "cpu": {
+     "label": "e-m2-truncated-one-byte-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 7 (0-based) of movie.mrcs: the movie is truncated or unreadable. || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 1092 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 2,
+   "variant": "truncated-header",
+   "arms": {
+    "cpu": {
+     "label": "e-m2-truncated-header-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/rwMRC.h, line 262 :: rwMRC: error in reading header of image movie.mrcs || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 1092 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 2,
+   "variant": "header-only",
+   "arms": {
+    "cpu": {
+     "label": "e-m2-header-only-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 0 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 4 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 2,
+   "variant": "claims-12-frames-has-8",
+   "arms": {
+    "cpu": {
+     "label": "e-m2-claim12-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 8 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 9 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 2,
+   "variant": "claims-24-frames-has-8",
+   "arms": {
+    "cpu": {
+     "label": "e-m2-claim24-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 12 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470 :: Failed to read frame 13 (0-based) of movie.mrcs: the movie is truncated or unreadable. in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 2470"
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  },
+  {
+   "mode": 2,
+   "variant": "expected_frames-mismatch",
+   "arms": {
+    "cpu": {
+     "label": "e-m2-expect-wrong-cpu",
+     "rc": 1,
+     "witness": [],
+     "completion_star": [],
+     "mrc_products": [],
+     "tail": "in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 1021 :: Movie movie.mrcs frame count mismatch: expected 11 frames, but decoded 8 frames. || in: /mnt/clathrin/alex-motioncorr-rc0/W-QF-PREP/src/src/motioncorr_runner.cpp, line 1092 :: Motion correction failed for 1 movie(s): movie.mrcs. Successful per-movie outputs were retained; joint output was not generated."
+    }
+   },
+   "route_consistent": true,
+   "all_failed_explicitly": true,
+   "any_published": false,
+   "pass": true
+  }
+ ],
+ "options": []
+}

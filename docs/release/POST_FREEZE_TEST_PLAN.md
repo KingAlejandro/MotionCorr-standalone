@@ -1,6 +1,6 @@
-# Post-freeze validation plan (DRAFT)
+# Post-freeze validation plan
 
-Status: **draft, revision 8, stays DRAFT until the freeze** (after R-REL rounds 2, 3 and 4, R-REL-B, the R-QA2 audits of PR #201, the 11:54Z review of revision 6, and the maintainer decisions D1, D2, T3, D4, D5, D6, D7, D10, D11, D12, D13 and D14). Written against main `e3871ca2`; source line numbers are at that SHA. RC0 is an **evaluation** release, not a stable one (D7). This is the heavy validation campaign that runs **after** the RC0 freeze, on the frozen SHA. It is a plan:
+Status: **active from 2026-10-19**, after the v0.1.0-rc0 release (frozen source F = `6d68e2d6`, tag target `b4e8ae4d`). No owners are assigned yet. Revision 9; the text is revision 8 apart from this status line (revision 8 was after R-REL rounds 2, 3 and 4, R-REL-B, the R-QA2 audits of PR #201, the 11:54Z review of revision 6, and the maintainer decisions D1, D2, T3, D4, D5, D6, D7, D10, D11, D12, D13 and D14). Written against main `e3871ca2`; source line numbers are at that SHA. RC0 is an **evaluation** release, not a stable one (D7). This is the heavy validation campaign that runs **after** the RC0 freeze, on the frozen SHA. It is a plan:
 every row is **UNRUN** and every result cell is **pending**. Resource lanes, locks and venues are those recorded on
 [#198](https://github.com/KingAlejandro/MotionCorr-standalone/issues/198) (checked 2026-10-16 19:21Z) and must be re-checked
 at run time (`AGENTS.md`: check occupancy before running work; leave unrelated processes alone; record actual resources).

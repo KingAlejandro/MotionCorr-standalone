@@ -1,0 +1,7 @@
+ok  rc 127, no files, expect=poison_one: 2 problem(s); first: ['no dataset_status.json', 'no workers/status.json']
+ok  rc 127, no files, expect=poison_both: 2 problem(s); first: ['no dataset_status.json', 'no workers/status.json']
+ok  rc 127, no files, expect=pass: 2 problem(s); first: ['no dataset_status.json', 'no workers/status.json']
+ok  FAIL status, no workers/status.json: 1 problem(s); first: ['no workers/status.json']
+ok  FAIL status, workers present, fault never ran, expect=poison_one: 5 problem(s); first: ['w0: healthy worker rc 1', 'w0: healthy worker incomplete ([])']
+ok  FAIL status, workers present, fault never ran, expect=poison_both: 4 problem(s); first: ['w0: fault not attributed (injected/refusal lines missing)', 'w0: healthy movie 20170629_00026_frameImage lost products ([])']
+PROBE PASS

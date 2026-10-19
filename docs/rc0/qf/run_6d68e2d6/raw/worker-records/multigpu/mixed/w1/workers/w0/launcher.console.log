@@ -1,0 +1,16 @@
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/20170629_00021_frameImage.tiff
+  * Movies/20170629_00022_frameImage.tiff
+  * Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.tif
+  * Movies/20170629_00023_frameImage.tiff
+  * Movies/20170629_00024_frameImage.tiff
+  * Movies/2019-06-21_20-39-45_801_eer_data_4096x4096.eer
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.
+000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ..........~~(,_,">                                               [oo]   1/   3 sec ...................~~(,_,">                                     [oo]Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.tif: too few valid local trajectories to fit local motion model.
+   5/  10 sec ..............................~~(,_,">                           [oo]   6/   9 sec .......................................~~(,_,">                 [oo]   6/   7 sec ..................................................~~(,_,">       [oo]  12/  12 sec ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /mnt/clathrin/alex-motioncorr-rc0/W-QF/multigpu/mixed/w1/workers/w0/corrected_micrographs.star

@@ -1,0 +1,45 @@
+{
+ "cfg": "cpu",
+ "qf_sha": "6d68e2d6ec45c37b75fd0f4aaff8272f192b7029",
+ "src_head": "6d68e2d6ec45c37b75fd0f4aaff8272f192b7029",
+ "d11": {
+  "case": "with_d11",
+  "markers": {
+   "src/motioncorr_runner.cpp": true,
+   "tests/cuda_fault_inject_shim.cpp": true,
+   "tests/run_stale_cuda_error_controls.py": true,
+   "CMakeLists.txt": true,
+   "tools/validate_test_collection.py": true,
+   "tools/test_ci_fail_closed.py": true
+  },
+  "8cc1a377_is_ancestor": true,
+  "validator_enforcement": {
+   "build_has_cuda": false,
+   "log_line": true
+  }
+ },
+ "collected": 74,
+ "required": 66,
+ "reference_count": 74,
+ "binary_sha256": "43cab2b74e97e948172c656d2b3041b562d24e733de1a5727a54624c12749b42",
+ "ctest_exit": "0",
+ "counts": {
+  "passed": 74,
+  "failed": 0,
+  "skipped": 0,
+  "not_run": 0
+ },
+ "not_passed": [],
+ "not_passed_load_sensitive": [],
+ "named_tests": {
+  "TruncatedMrcMovie": "passed",
+  "TruncatedGainDefect": "passed",
+  "CpuDoseSymmetry": "passed",
+  "CpuDoseSymmetryBase": "passed",
+  "PatchRetryState": "passed",
+  "EerMemorySafety": "passed",
+  "ReportPlotUndefinedAxis": "passed"
+ },
+ "failures": [],
+ "verdict": "PASS"
+}

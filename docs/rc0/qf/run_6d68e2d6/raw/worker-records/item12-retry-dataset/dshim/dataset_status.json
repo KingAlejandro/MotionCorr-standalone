@@ -1,0 +1,657 @@
+{
+  "workers_complete": true,
+  "dataset_ready": true,
+  "verdict": "PASS",
+  "input_star_sha256": "d478c5863aed986f7e98117574a1a8819c4f7de8f7863d5eae5d6bf1643fc36c",
+  "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+  "binary_sha256": "72588df8ec5ca225deb594e17fb76270c4d620d3fd6d9fb80c9e43e4ad203c83",
+  "endpoint": "successful staged products, canonical joint STAR and full report publication",
+  "dataset_wall_s": 7.883944175206125,
+  "ownership_mode": "linux-child-subreaper",
+  "worker_phase_wall_s": 7.442685413174331,
+  "aggregate_cpu_mask": "96-111",
+  "aggregate_phase_wall_s": 0.42074421513825655,
+  "cleanup": "No observed live PID/birth descendants",
+  "process_ownership_errors": [],
+  "tree_rss": {
+    "status": "SAMPLED",
+    "unavailable": null,
+    "errors": [],
+    "interval_s": 0.1,
+    "units": "KiB",
+    "peak_simultaneous_sum_rss_kib": 3790684,
+    "note": "Current RSS summed at each observation, not summed VmHWM. Shared pages are counted more than once. Sampled peak may miss brief peaks/children born and exited between polls; PSS is optional. Only exact PID/start roots and their observed descendants are owned.",
+    "samples": [
+      {
+        "monotonic_s": 7828939.757787632,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22148,
+            "pss_kib": 12761
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23156,
+            "pss_kib": 13760
+          }
+        ],
+        "rss_sum_kib": 45304,
+        "pss_sum_kib": 26521,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828940.150806895,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22200,
+            "pss_kib": 12814
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23160,
+            "pss_kib": 13764
+          },
+          {
+            "pid": 1667697,
+            "ppid": 1667689,
+            "pgid": 1667697,
+            "start_ticks": 782893964,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 85696,
+            "pss_kib": 74585
+          },
+          {
+            "pid": 1667698,
+            "ppid": 1667689,
+            "pgid": 1667698,
+            "start_ticks": 782893965,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 85560,
+            "pss_kib": 74544
+          }
+        ],
+        "rss_sum_kib": 216616,
+        "pss_sum_kib": 175707,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828940.574098615,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22236,
+            "pss_kib": 12850
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23184,
+            "pss_kib": 13788
+          },
+          {
+            "pid": 1667697,
+            "ppid": 1667689,
+            "pgid": 1667697,
+            "start_ticks": 782893964,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 291944,
+            "pss_kib": 278262
+          },
+          {
+            "pid": 1667698,
+            "ppid": 1667689,
+            "pgid": 1667698,
+            "start_ticks": 782893965,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 287848,
+            "pss_kib": 273322
+          }
+        ],
+        "rss_sum_kib": 625212,
+        "pss_sum_kib": 578222,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828941.739444101,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22244,
+            "pss_kib": 12855
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23200,
+            "pss_kib": 13802
+          },
+          {
+            "pid": 1667697,
+            "ppid": 1667689,
+            "pgid": 1667697,
+            "start_ticks": 782893964,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 1825784,
+            "pss_kib": 1853042
+          },
+          {
+            "pid": 1667698,
+            "ppid": 1667689,
+            "pgid": 1667698,
+            "start_ticks": 782893965,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 1919456,
+            "pss_kib": 1898752
+          }
+        ],
+        "rss_sum_kib": 3790684,
+        "pss_sum_kib": 3778451,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828942.443256546,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22244,
+            "pss_kib": 12856
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23204,
+            "pss_kib": 13806
+          },
+          {
+            "pid": 1667697,
+            "ppid": 1667689,
+            "pgid": 1667697,
+            "start_ticks": 782893964,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 1928932,
+            "pss_kib": 1908143
+          },
+          {
+            "pid": 1667698,
+            "ppid": 1667689,
+            "pgid": 1667698,
+            "start_ticks": 782893965,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 881184,
+            "pss_kib": 296636
+          }
+        ],
+        "rss_sum_kib": 2855564,
+        "pss_sum_kib": 2231441,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828942.956204331,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22248,
+            "pss_kib": 12860
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23208,
+            "pss_kib": 13810
+          },
+          {
+            "pid": 1667697,
+            "ppid": 1667689,
+            "pgid": 1667697,
+            "start_ticks": 782893964,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 318160,
+            "pss_kib": 297181
+          },
+          {
+            "pid": 1667698,
+            "ppid": 1667689,
+            "pgid": 1667698,
+            "start_ticks": 782893965,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 427008,
+            "pss_kib": 407722
+          }
+        ],
+        "rss_sum_kib": 790624,
+        "pss_sum_kib": 731573,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828943.501346321,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22248,
+            "pss_kib": 12860
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23212,
+            "pss_kib": 13814
+          },
+          {
+            "pid": 1667697,
+            "ppid": 1667689,
+            "pgid": 1667697,
+            "start_ticks": 782893964,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 576560,
+            "pss_kib": 555580
+          },
+          {
+            "pid": 1667698,
+            "ppid": 1667689,
+            "pgid": 1667698,
+            "start_ticks": 782893965,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 576312,
+            "pss_kib": 555418
+          }
+        ],
+        "rss_sum_kib": 1198332,
+        "pss_sum_kib": 1137672,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828944.036319739,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22256,
+            "pss_kib": 12868
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23216,
+            "pss_kib": 13818
+          },
+          {
+            "pid": 1667697,
+            "ppid": 1667689,
+            "pgid": 1667697,
+            "start_ticks": 782893964,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 576560,
+            "pss_kib": 555580
+          },
+          {
+            "pid": 1667698,
+            "ppid": 1667689,
+            "pgid": 1667698,
+            "start_ticks": 782893965,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 576312,
+            "pss_kib": 555418
+          }
+        ],
+        "rss_sum_kib": 1198344,
+        "pss_sum_kib": 1137684,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828944.569290395,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22260,
+            "pss_kib": 12872
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23220,
+            "pss_kib": 13822
+          },
+          {
+            "pid": 1667697,
+            "ppid": 1667689,
+            "pgid": 1667697,
+            "start_ticks": 782893964,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 576560,
+            "pss_kib": 555580
+          },
+          {
+            "pid": 1667698,
+            "ppid": 1667689,
+            "pgid": 1667698,
+            "start_ticks": 782893965,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 576312,
+            "pss_kib": 555418
+          }
+        ],
+        "rss_sum_kib": 1198352,
+        "pss_sum_kib": 1137692,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828945.104566087,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22264,
+            "pss_kib": 12880
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23220,
+            "pss_kib": 13822
+          },
+          {
+            "pid": 1667697,
+            "ppid": 1667689,
+            "pgid": 1667697,
+            "start_ticks": 782893964,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 576560,
+            "pss_kib": 555580
+          },
+          {
+            "pid": 1667698,
+            "ppid": 1667689,
+            "pgid": 1667698,
+            "start_ticks": 782893965,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 576312,
+            "pss_kib": 555418
+          }
+        ],
+        "rss_sum_kib": 1198356,
+        "pss_sum_kib": 1137700,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828945.654295802,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22268,
+            "pss_kib": 12880
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23228,
+            "pss_kib": 13830
+          },
+          {
+            "pid": 1667697,
+            "ppid": 1667689,
+            "pgid": 1667697,
+            "start_ticks": 782893964,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 576560,
+            "pss_kib": 555580
+          },
+          {
+            "pid": 1667698,
+            "ppid": 1667689,
+            "pgid": 1667698,
+            "start_ticks": 782893965,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 546808,
+            "pss_kib": 525914
+          }
+        ],
+        "rss_sum_kib": 1168864,
+        "pss_sum_kib": 1108204,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828946.147462379,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22284,
+            "pss_kib": 12896
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23280,
+            "pss_kib": 13883
+          },
+          {
+            "pid": 1667697,
+            "ppid": 1667689,
+            "pgid": 1667697,
+            "start_ticks": 782893964,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 576560,
+            "pss_kib": 570563
+          }
+        ],
+        "rss_sum_kib": 622124,
+        "pss_sum_kib": 597342,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828946.554577811,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22288,
+            "pss_kib": 12901
+          },
+          {
+            "pid": 1667689,
+            "ppid": 1667686,
+            "pgid": 1667689,
+            "start_ticks": 782893948,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 27936,
+            "pss_kib": 18416
+          },
+          {
+            "pid": 1667697,
+            "ppid": 1667689,
+            "pgid": 1667697,
+            "start_ticks": 782893964,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault",
+            "rss_kib": 422108,
+            "pss_kib": 416490
+          }
+        ],
+        "rss_sum_kib": 472332,
+        "pss_sum_kib": 447807,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828946.953838363,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 25852,
+            "pss_kib": 16681
+          }
+        ],
+        "rss_sum_kib": 25852,
+        "pss_sum_kib": 16681,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7828947.340685369,
+        "processes": [
+          {
+            "pid": 1667686,
+            "ppid": 1667417,
+            "pgid": 1656266,
+            "start_ticks": 782893938,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 25856,
+            "pss_kib": 16540
+          },
+          {
+            "pid": 1667789,
+            "ppid": 1667686,
+            "pgid": 1667789,
+            "start_ticks": 782894693,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22600,
+            "pss_kib": 13146
+          }
+        ],
+        "rss_sum_kib": 48456,
+        "pss_sum_kib": 29686,
+        "errors": []
+      }
+    ]
+  }
+}

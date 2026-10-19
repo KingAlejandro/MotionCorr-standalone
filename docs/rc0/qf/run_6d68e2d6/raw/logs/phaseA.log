@@ -1,0 +1,14 @@
+phaseA start 2026-10-18T23:31:48Z
+build.sh rc=0
+run_ctest cpu exit=0
+cpu: PASS collected=74 reference=74 d11=with_d11 counts={'passed': 74, 'failed': 0, 'skipped': 0, 'not_run': 0}
+grade cpu rc=0
+run_ctest cuda exit=0
+cuda: PASS collected=108 reference=108 d11=with_d11 counts={'passed': 108, 'failed': 0, 'skipped': 0, 'not_run': 0}
+grade cuda rc=0
+run_ctest nvcomp exit=0
+nvcomp: PASS collected=111 reference=111 d11=with_d11 counts={'passed': 111, 'failed': 0, 'skipped': 0, 'not_run': 0}
+grade nvcomp rc=0
+verdict PASS end 2026-10-19T00:09:51Z
+asan_eer rc=0
+phaseA end 2026-10-19T00:09:51Z

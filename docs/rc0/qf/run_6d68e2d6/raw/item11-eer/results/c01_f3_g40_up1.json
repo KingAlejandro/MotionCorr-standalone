@@ -1,0 +1,95 @@
+{
+ "case": "c01_f3_g40_up1",
+ "desc": "Falcon3 corpus default g40 up1 (58 groups)",
+ "recorded": {
+  "auto": {
+   "rc": 0,
+   "routes": [
+    "compact"
+   ]
+  },
+  "float": {
+   "rc": 0,
+   "routes": [
+    "float"
+   ]
+  }
+ },
+ "recorded_compare_rc": 0,
+ "arms": {
+  "auto": {
+   "rc": 0,
+   "routes": [
+    "compact"
+   ],
+   "binary_sha256": "2e00e0e8fb75aafaf23f15a3c2a142c7d35b6e30477d594244ecba495a5bb6b3",
+   "gpu_witness": {
+    "uuids_seen_for_pid": [
+     "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    ],
+    "peak_mib": 8726,
+    "smi_samples": 22,
+    "pid_hits": 20,
+    "on_lane_gpu_only": true
+   },
+   "max_rss_kib": 3318192,
+   "wall_s": 8.994
+  },
+  "float": {
+   "rc": 0,
+   "routes": [
+    "float"
+   ],
+   "binary_sha256": "2e00e0e8fb75aafaf23f15a3c2a142c7d35b6e30477d594244ecba495a5bb6b3",
+   "gpu_witness": {
+    "uuids_seen_for_pid": [
+     "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    ],
+    "peak_mib": 8726,
+    "smi_samples": 24,
+    "pid_hits": 22,
+    "on_lane_gpu_only": true
+   },
+   "max_rss_kib": 5386604,
+   "wall_s": 10.509
+  }
+ },
+ "problems": [],
+ "compare": {
+  "rc": 0,
+  "tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 16777216 pixels per arm\nAllowed added .log line prefixes (dropped from BOTH arms): 'Staging this movie as native', 'Released native uint', 'Materialized native uint', 'EER grouping'\nComparison: complete non-PDF tree; status=PASS; different files=0\n"
+ },
+ "inventory": {
+  "auto": {
+   "products": {
+    "Movies/movie.mrc": "f721697ceeee08ca",
+    "Movies/movie.star": "star"
+   },
+   "stars": {
+    "Movies/movie.star": "d249cc3c10cde111a4d5658116bd3d999db416a0bfe5a19be7fc10fb5b442cfb",
+    "corrected_micrographs.star": "1bcc0bf1b7e5b6915a9ccfea410ac7b3bbcd57642dd73194b819805c5541249a"
+   },
+   "frames": {
+    "movie.log": 58
+   },
+   "joint_star": true,
+   "skip_warning_frames": []
+  },
+  "float": {
+   "products": {
+    "Movies/movie.mrc": "f721697ceeee08ca",
+    "Movies/movie.star": "star"
+   },
+   "stars": {
+    "Movies/movie.star": "d249cc3c10cde111a4d5658116bd3d999db416a0bfe5a19be7fc10fb5b442cfb",
+    "corrected_micrographs.star": "1bcc0bf1b7e5b6915a9ccfea410ac7b3bbcd57642dd73194b819805c5541249a"
+   },
+   "frames": {
+    "movie.log": 58
+   },
+   "joint_star": true,
+   "skip_warning_frames": []
+  }
+ },
+ "verdict": "PASS"
+}

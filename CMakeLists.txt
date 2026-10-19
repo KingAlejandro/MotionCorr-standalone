@@ -796,6 +796,11 @@ if(BUILD_TESTING AND CUDA)
             "scratch.block = reinterpret_cast<char*>(d_Fframes);" "LINKER:--wrap=cudaMalloc")
         # Worker-lifetime device gain retention: the produced sum is the oracle,
         # so a wrongly reused or wrongly retired buffer changes pixels.
+        add_executable(cuda_local_admission tests/cuda_local_admission.cpp)
+        target_link_libraries(cuda_local_admission PRIVATE motioncorr_core)
+        target_link_options(cuda_local_admission PRIVATE "LINKER:--wrap=cudaMemGetInfo")
+        add_test(NAME CudaLocalAdmission COMMAND cuda_local_admission)
+        set_tests_properties(CudaLocalAdmission PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
         add_executable(cuda_device_gain_pool tests/cuda_device_gain_pool.cpp)
         target_link_libraries(cuda_device_gain_pool PRIVATE motioncorr_core)
         target_link_options(cuda_device_gain_pool PRIVATE

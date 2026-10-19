@@ -704,6 +704,7 @@ void CudaMovieSession::release() {
     cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
     sz_cached_Ipatches = 0;
     sz_cached_patch_spectrum = 0;
+    patch_preparation_bytes = 0;
     cached_ngroups_alloc = 0;
     uploaded_group_start.clear();
     uploaded_group_size.clear();
@@ -2180,6 +2181,52 @@ bool CudaMovieSession::releasePatchAlignmentWorkspace() {
     return ok;
 }
 
+bool CudaMovieSession::admitLocalAlignment(int patch_w, int patch_h, int n_groups,
+                                         RFLOAT scaled_B, RFLOAT ccf_downsample) {
+    if (!is_initialized || failure_state.isPoisoned()) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    // Ask cuFFT for the work sizes of the actual plans, with automatic device
+    // allocation disabled. A fixed margin or cufftEstimateMany is insufficient
+    // for geometries whose factorisation needs a large R2C work area (#226 D2).
+    auto plan_bytes = [&](int w, int h, cufftType type, size_t &bytes) -> bool {
+        cufftHandle plan = 0;
+        mc_cuda::ScopedCufftPlan owner(&failure_state);
+        CUFFT_CHECK(cufftCreate(&plan));
+        owner.take(plan);
+        CUFFT_CHECK(cufftSetAutoAllocation(plan, 0));
+        int n[2] = {h, w};
+        const int real = w * h, comp = (w / 2 + 1) * h;
+        CUFFT_CHECK(cufftMakePlanMany(plan, 2, n, nullptr, 1,
+            type == CUFFT_R2C ? real : comp, nullptr, 1,
+            type == CUFFT_R2C ? comp : real, type, n_groups, &bytes));
+        CUFFT_CHECK(owner.releaseAll());
+        return true;
+    };
+    int wx = 0, wy = 0;
+    patchSpectrumWindow(patch_w, patch_h, scaled_B, ccf_downsample, wx, wy);
+    size_t prep_work = 0, align_work = 0;
+    if (!plan_bytes(patch_w, patch_h, CUFFT_R2C, prep_work) ||
+        !plan_bytes(wx, wy, CUFFT_C2R, align_work)) return false;
+    const size_t patch_real = (size_t)n_groups * patch_w * patch_h * sizeof(float);
+    const size_t patch_comp = (size_t)n_groups * (patch_w / 2 + 1) * patch_h * sizeof(cufftComplex);
+    const size_t tile = (size_t)ny * nfx * sizeof(cufftComplex);
+    patch_preparation_bytes = patch_real + prep_work + 2 * n_groups * sizeof(int) +
+                              (patch_comp > tile ? patch_comp : 0);
+    const size_t window = (size_t)wy * (wx / 2 + 1);
+    const size_t alignment = (2 * n_groups + 1) * window * sizeof(cufftComplex) +
+        window * sizeof(float) + (size_t)n_groups * wx * wy * sizeof(float) +
+        4 * n_groups * sizeof(float) + align_work;
+    size_t free_bytes = 0, total_bytes = 0;
+    HANDLE_ERROR(cudaMemGetInfo(&free_bytes, &total_bytes));
+    const size_t required = patch_preparation_bytes + alignment;
+    if (required <= free_bytes) return true;
+    logfile << "Local alignment admission declined: requires " << required
+            << " bytes of workspace, available " << free_bytes
+            << " bytes; falling back to streaming pipeline." << std::endl;
+    recordFailure(cudaErrorMemoryAllocation, "local alignment admission", __LINE__);
+    return false;
+}
+
 bool CudaMovieSession::preparePatchInVram(
     int x_start, int y_start,
     int patch_w, int patch_h,
@@ -2389,7 +2436,9 @@ void CudaMovieSession::alignPatchesBatched(
     BatchedPatchAlignmentWorkspace &workspace = batched_patch_alignment_workspace;
     const size_t per_patch = BatchedPatchAlignmentWorkspace::bytesPerPatch(
         n_groups, patch_w, patch_h, scaled_B, ccf_downsample);
-    int chunk = choosePatchBatchChunk(n_patches, per_patch, free_bytes, total_bytes, cap);
+    const size_t alignment_free = free_bytes > patch_preparation_bytes
+        ? free_bytes - patch_preparation_bytes : 0;
+    int chunk = choosePatchBatchChunk(n_patches, per_patch, alignment_free, total_bytes, cap);
     // The estimate omits allocator granularity and the cuFFT work area, so a
     // declined reservation is retried smaller before giving up.
     while (chunk > 0 && !workspace.reserve(chunk, n_groups, patch_w, patch_h, scaled_B,

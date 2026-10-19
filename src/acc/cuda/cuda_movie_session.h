@@ -65,6 +65,9 @@ public:
 
     // Allocate persistent buffers and single-frame cuFFT plans
     bool initialize();
+    // After preprocessing, admit the local stage including its cuFFT work areas.
+    bool admitLocalAlignment(int patch_w, int patch_h, int n_groups,
+                             RFLOAT scaled_B, RFLOAT ccf_downsample);
 
     // Release all persistent GPU allocations and plans
     void release();
@@ -405,6 +408,7 @@ private:
     void *d_fft_work = nullptr;
     cufftComplex *d_inverse_tile = nullptr;
     bool is_initialized = false;
+    size_t patch_preparation_bytes = 0;
 
     // What d_Fframes currently holds. The ingest path borrows that allocation as
     // scratch instead of allocating its own staging, so the transition out of

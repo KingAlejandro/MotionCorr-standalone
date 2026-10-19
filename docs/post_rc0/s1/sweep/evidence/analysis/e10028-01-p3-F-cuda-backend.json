@@ -1,0 +1,157 @@
+{
+  "gate_profile": "backend",
+  "tolerances": {
+    "max_shift_error": 0.05,
+    "shift_rmse": 0.02,
+    "image_rmse": 0.02,
+    "image_max_err": 5.0,
+    "image_relative_rmse": 0.001
+  },
+  "checks": {
+    "motion_trajectory": {
+      "num_frames": 16,
+      "max_abs_diff_x": 0.01653199999999977,
+      "max_abs_diff_y": 0.004906999999999995,
+      "max_shift_error": 0.01653199999999977,
+      "coord_rms_error": 0.007059247839713487,
+      "per_frame_diffs": [
+        {
+          "frame": 1,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 2,
+          "dx": 0.0004029999999999312,
+          "dy": 0.0010759999999999659
+        },
+        {
+          "frame": 3,
+          "dx": -0.0046879999999998034,
+          "dy": -0.0004630000000001022
+        },
+        {
+          "frame": 4,
+          "dx": 0.004761999999999933,
+          "dy": -0.0004170000000001117
+        },
+        {
+          "frame": 5,
+          "dx": 0.012362999999999902,
+          "dy": -0.0005379999999999274
+        },
+        {
+          "frame": 6,
+          "dx": 0.004450999999999983,
+          "dy": 0.0009660000000000224
+        },
+        {
+          "frame": 7,
+          "dx": 0.00886600000000004,
+          "dy": -0.004906999999999995
+        },
+        {
+          "frame": 8,
+          "dx": 0.004509000000000096,
+          "dy": -0.0033650000000000624
+        },
+        {
+          "frame": 9,
+          "dx": 0.0002939999999997944,
+          "dy": -0.0007770000000000277
+        },
+        {
+          "frame": 10,
+          "dx": 0.0031810000000001004,
+          "dy": -0.0004470000000000862
+        },
+        {
+          "frame": 11,
+          "dx": 0.008593000000000295,
+          "dy": -0.0006040000000000489
+        },
+        {
+          "frame": 12,
+          "dx": 0.005444999999999922,
+          "dy": -0.0021689999999998655
+        },
+        {
+          "frame": 13,
+          "dx": 0.01653199999999977,
+          "dy": 0.0026240000000000707
+        },
+        {
+          "frame": 14,
+          "dx": 0.00510199999999994,
+          "dy": 0.0011670000000000291
+        },
+        {
+          "frame": 15,
+          "dx": -0.0021559999999998247,
+          "dy": 0.0007489999999999997
+        },
+        {
+          "frame": 16,
+          "dx": -3.2000000000032e-05,
+          "dy": -0.003222999999999976
+        }
+      ],
+      "passed": true,
+      "fail_reasons": []
+    },
+    "star_fields": {
+      "num_differences": 0,
+      "differences": [],
+      "passed": true
+    },
+    "corrected_image": {
+      "num_pixels": 16777216,
+      "pixel_identical": false,
+      "max_abs_pixel_error": 1562.955078125,
+      "rmse": 5.53321182093093,
+      "relative_rmse": 0.014225551780223432,
+      "relative_rmse_denominator": "reference_pixel_population_std",
+      "relative_rmse_denominator_value": 388.9628962317849,
+      "ref_pixel_min": 4585.5078125,
+      "ref_pixel_max": 13806.666015625,
+      "ref_pixel_mean": 8362.13671875,
+      "ref_pixel_std": 388.9628962317849,
+      "test_pixel_min": 4557.0927734375,
+      "test_pixel_max": 13807.025390625,
+      "test_pixel_mean": 8363.146484375,
+      "test_pixel_std": 389.1302795410156,
+      "core_header_diff_bytes": 9,
+      "label_header_diff_bytes": 1,
+      "normalized_label_diff_bytes": 0,
+      "geometry_matches": true,
+      "relative_rmse_diagnostic": {
+        "value": 0.014225551780223432,
+        "threshold": 0.001,
+        "status": "FAIL",
+        "blocking": false
+      },
+      "passed": false,
+      "fail_reasons": [
+        "Image RMSE 5.533212e+00 > 2.000000e-02",
+        "Image max pixel error 1.562955e+03 > 5.000000e+00"
+      ]
+    }
+  },
+  "overall_status": "FAIL",
+  "metrics": {
+    "user_time_sec": 0.96,
+    "system_time_sec": 3.08,
+    "cpu_percent": 276,
+    "elapsed_str": "0:01.46",
+    "elapsed_sec": 1.46,
+    "max_rss_kb": 1527608,
+    "exit_status": 0,
+    "max_rss_mb": 1491.8
+  },
+  "coverage": {
+    "motion_and_star": true,
+    "corrected_image": true,
+    "complete": true,
+    "required": true
+  }
+}

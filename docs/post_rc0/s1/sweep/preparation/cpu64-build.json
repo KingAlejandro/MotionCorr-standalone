@@ -1,0 +1,29 @@
+{
+  "host": "cpu64 via ccp4-gateway",
+  "source": "6d68e2d6ec45c37b75fd0f4aaff8272f192b7029",
+  "archive": "/tmp/motioncorr-s1-F-6d68e2d6.tar.gz",
+  "source_root": "/home/ubuntu/mc-post-rc0-s1/src-F",
+  "lock": "/tmp/motioncorr-cpu64-bench.lock",
+  "cpu_mask": "48-55",
+  "configure_argv": [
+    "cmake",
+    "-S",
+    "src-F",
+    "-B",
+    "build-F",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCUDA=OFF",
+    "-DBUILD_TESTING=OFF"
+  ],
+  "configure_exit_status": 0,
+  "build_argv": [
+    "cmake",
+    "--build",
+    "build-F",
+    "-j8"
+  ],
+  "build_exit_status": 0,
+  "binary_sha256": "8c33bd8685dd6083d6eb28b04a65f7c4a8ec872838b4511b22641923a0e1f334",
+  "CXX_FLAGS": "-O3 -DNDEBUG -std=gnu++17 -fopenmp",
+  "movie_runs": "UNRUN; frozen QF CPU binary reused on 4GPUs"
+}

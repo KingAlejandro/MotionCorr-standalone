@@ -189,7 +189,7 @@ lower bound) and includes the CUDA context (`docs/workload_corpus/gpu/README.md`
 **Qualification measurements at `1db86902` (PR #209).** Peak host RSS (GiB) of the single-movie worker process from `/usr/bin/time -v`, one movie per
 family, `--j 8`, `docs/workload_corpus/families.json` options. Source `1db869025507ac801845b4001b84e6bc0e77a645` (clean clone), host 4GPUs
 (4-gpu-vm, 4 x A100 80 GB PCIe, driver 570.86.10, g++ 13.3.0, CUDA 12.8.61, nvCOMP 5.3.0.16, THP `madvise`), lane GPU1 and CPUs 104-111, Release builds
-(CPU binary `dd86cd41...6b26439`, CUDA+nvCOMP `77db3f92...12a99`; full hashes in `docs/rc0/qual_main_1db86902/raw/summaries/build-info.txt` on PR #209's branch).
+(CPU binary `dd86cd41...6b26439`, CUDA+nvCOMP `77db3f92...12a99`; full hashes in `docs/rc0/qual_main_1db86902/raw/summaries/build-info.txt`).
 One sample per cell for the seven family rows; no variability is available. Routes are the `--ingest_witness` values. Not a performance claim. **Exception:** the EMPIAR-10641 row below is from PR #207 and is a **two-movie** process peak with **two passes per arm** (CPU-only: one pass per arm); the Falcon 4 row is one run per arm from PR #208. They are not single-movie samples.
 
 | Family | cfg | auto route | RSS auto | RSS `--ingest float` | RSS CPU build |

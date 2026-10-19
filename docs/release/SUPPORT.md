@@ -24,9 +24,8 @@ scientific non-inferiority certificate (Tier D below).
 
 > **S1 — CPU versus CUDA local alignment (PROVISIONAL).** In the tested movies (EMPIAR-10216, 10474 Falcon 3 and 12963, 5×5 patches), CPU and CUDA local-alignment products differ substantially (relative RMSE 0.43–0.60). This was already present before RC0 (`116eb04a`). The difference is amplified by patch acceptance and the inherited unweighted polynomial fit. It also occurs among trajectories accepted on both backends; matching convergence status does not guarantee agreement. In the inspected cases the initiating events are frames where two cross-correlation peaks are within a few float ulps and the two backends order them differently. Making CUDA use the CPU tie rule (#70) changed two outputs slightly but did not explain the discrepancy. Whether the small map differences are pure rounding is not established. Other CUDA defects are not excluded, and no scientific equivalence or preference for either backend is established.
 
-Evidence: diagnosis [PR #212](https://github.com/KingAlejandro/MotionCorr-standalone/pull/212) (`docs/rc0/diag_s1/`, on that branch) and the
-backend diagnostic table in [PR #209](https://github.com/KingAlejandro/MotionCorr-standalone/pull/209) (`docs/rc0/qual_main_1db86902/`,
-on that branch). Figures from #209 (main `1db86902`, `compare_motioncorr.py --gate backend`, relative RMSE CPU versus CUDA, config L =
+Evidence: diagnosis [PR #212](https://github.com/KingAlejandro/MotionCorr-standalone/pull/212) (`docs/rc0/diag_s1/`) and the
+backend diagnostic table in [PR #209](https://github.com/KingAlejandro/MotionCorr-standalone/pull/209) (`docs/rc0/qual_main_1db86902/`). Figures from #209 (main `1db86902`, `compare_motioncorr.py --gate backend`, relative RMSE CPU versus CUDA, config L =
 `--patch_x 5 --patch_y 5`): 10474 Falcon 3 0.5999, 12963 0.499, 10216 0.4344; tutorial 0.0084, 10361 0.0091, 10164 0.0013, 10028 0.014. Config G
 (global only) is 0.0015-0.023 on all seven families. Global-shift gates are met in all 14 cases. Consequences for users:
 
@@ -461,7 +460,7 @@ Two further statements: a file that changes **between the tag scan and the strip
 
 ### GPU memory (QM)
 
-Evidence: [PR #225](https://github.com/KingAlejandro/MotionCorr-standalone/pull/225) (`docs/rc0/qual_qm_vram/` on that branch, main `483e881d`): 162 runs on one A100 80 GB with a VRAM balloon, 0 crashes, 0 hangs, 0 wrong outputs;
+Evidence: [PR #225](https://github.com/KingAlejandro/MotionCorr-standalone/pull/225) (`docs/rc0/qual_qm_vram/`, main `483e881d`): 162 runs on one A100 80 GB with a VRAM balloon, 0 crashes, 0 hangs, 0 wrong outputs;
 every completed constrained run was identical to its unconstrained run and every failure was clean (no products written). Audited by R-QM
 ([audit](https://github.com/KingAlejandro/MotionCorr-standalone/pull/225#issuecomment-6234250216)). Of the three defects it found ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)), **D1 (stale CUDA error after a handled out-of-memory) is fixed by D11 ([PR #228](https://github.com/KingAlejandro/MotionCorr-standalone/pull/228), merged `e3871ca2`)**; the quoted table and text below predate that fix, and its D1 sentence is revised in place (marked). D2 (config-L admission gap) and D3 (late OOM failure) are **deferred until after RC0** (#226 stays open); none changes output. The wording below is R-QM's, not the worker's first draft.
 

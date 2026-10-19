@@ -1,0 +1,74 @@
+build_scarf.sh rc=0
+== cpu
+6cf4c43d29fb501a07c150d035a64be235ad3b2152be79851a946d529bfeb7a3  build-cpu/motioncorr
+sha256sum: build-cpu/motioncorr_faultinject: No such file or directory
+sha256sum: build-cpu/motioncorr_resident_retry_fault: No such file or directory
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
+CUDA:BOOL=OFF
+Python3_EXECUTABLE:UNINITIALIZED=/home/vol05/scarf1415/mc-rc0-scarfF/venv/bin/python3
+CMAKE_HOME_DIRECTORY:INTERNAL=/home/vol05/scarf1415/mc-rc0-scarfF/src
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED - Success
+ldd (LD_LIBRARY_PATH unset):
+	libfftw3.so.3 => /lib64/libfftw3.so.3 (0x0000150c42e23000)
+	libfftw3f.so.3 => /lib64/libfftw3f.so.3 (0x0000150c42c27000)
+	libgomp.so.1 => /lib64/libgomp.so.1 (0x0000150c42be1000)
+	libtiff.so.5 => /lib64/libtiff.so.5 (0x0000150c42b58000)
+	libstdc++.so.6 => /lib64/libstdc++.so.6 (0x0000150c42800000)
+ctest -N: Total Tests: 74
+== cuda
+4e280b1e2c049ff991a05fdecab7492f018aa96049ec50c8eaf0bde11c3f68a5  build-cuda/motioncorr
+e65086d70c5bcf052b7cea2e05860881d4ac01a9d12c0832aa4447799432e94b  build-cuda/motioncorr_faultinject
+bb144e4532df4212e8b513411743601d6c0313fd7c42cc2652877fe2e1093e9f  build-cuda/motioncorr_resident_retry_fault
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CUDA_ARCHITECTURES:UNINITIALIZED=80
+CMAKE_CUDA_COMPILER:STRING=/apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/bin/nvcc
+CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
+CUDA:BOOL=ON
+Python3_EXECUTABLE:UNINITIALIZED=/home/vol05/scarf1415/mc-rc0-scarfF/venv/bin/python3
+USE_NVCOMP:BOOL=OFF
+CMAKE_HOME_DIRECTORY:INTERNAL=/home/vol05/scarf1415/mc-rc0-scarfF/src
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED - Success
+ldd (LD_LIBRARY_PATH unset):
+	libfftw3.so.3 => /lib64/libfftw3.so.3 (0x000014eb163bb000)
+	libfftw3f.so.3 => /lib64/libfftw3f.so.3 (0x000014eb161bf000)
+	libgomp.so.1 => /lib64/libgomp.so.1 (0x000014eb16179000)
+	libtiff.so.5 => /lib64/libtiff.so.5 (0x000014eb160f0000)
+	libcudart.so.12 => /apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/lib/libcudart.so.12 (0x000014eb15c00000)
+	libcufft.so.11 => /apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/lib/libcufft.so.11 (0x000014eb04a00000)
+	libstdc++.so.6 => /lib64/libstdc++.so.6 (0x000014eb04600000)
+ 0x000000000000000f (RPATH)              Library rpath: [/apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/lib:]
+ctest -N: Total Tests: 108
+== nvcomp
+682cfc88c380283203b5064ac13021672ad94a63f20516fe4afe65bc07d16ce5  build-nvcomp/motioncorr
+9dd9a7d651575cb392117ad76c4b5454330c0e3edda7281eef7977cfc7d24da6  build-nvcomp/motioncorr_faultinject
+d17a9c0c36fcd564d3371518729fd3ce8d36405471018b97e6381e2fbd12ae89  build-nvcomp/motioncorr_resident_retry_fault
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CUDA_ARCHITECTURES:UNINITIALIZED=80
+CMAKE_CUDA_COMPILER:STRING=/apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/bin/nvcc
+CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
+CUDA:BOOL=ON
+NVCOMP_INCLUDE_DIR:PATH=/home/vol05/scarf1415/nvcomp-sdk/include
+NVCOMP_LIB:FILEPATH=/home/vol05/scarf1415/nvcomp-sdk/lib/libnvcomp.so
+NVCOMP_ROOT:UNINITIALIZED=/home/vol05/scarf1415/nvcomp-sdk
+Python3_EXECUTABLE:UNINITIALIZED=/home/vol05/scarf1415/mc-rc0-scarfF/venv/bin/python3
+USE_NVCOMP:BOOL=ON
+CMAKE_HOME_DIRECTORY:INTERNAL=/home/vol05/scarf1415/mc-rc0-scarfF/src
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED - Success
+ldd (LD_LIBRARY_PATH unset):
+	libfftw3.so.3 => /lib64/libfftw3.so.3 (0x0000149e03236000)
+	libfftw3f.so.3 => /lib64/libfftw3f.so.3 (0x0000149e0303a000)
+	libgomp.so.1 => /lib64/libgomp.so.1 (0x0000149e02ff4000)
+	libtiff.so.5 => /lib64/libtiff.so.5 (0x0000149e02f6b000)
+	libcudart.so.12 => /apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/lib/libcudart.so.12 (0x0000149e02a00000)
+	libcufft.so.11 => /apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/lib/libcufft.so.11 (0x0000149df1800000)
+	libnvcomp.so.5 => /home/vol05/scarf1415/nvcomp-sdk/lib/libnvcomp.so.5 (0x0000149deeb73000)
+	libstdc++.so.6 => /lib64/libstdc++.so.6 (0x0000149dee800000)
+ 0x000000000000000f (RPATH)              Library rpath: [/apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/lib:/home/vol05/scarf1415/nvcomp-sdk/lib:]
+ctest -N: Total Tests: 111

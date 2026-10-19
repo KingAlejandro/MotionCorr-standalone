@@ -1,0 +1,32 @@
+date 2026-10-18T23:53:03Z host gnx002.scarf.rl.ac.uk slurm_job 3636957 step 1
+QF_CPUS=12-15,28-31 QF_GPU_UUID=GPU-d4169778-fe7f-06ef-3807-b9e301b3b459 QF_GPU_LOCK=/tmp/motioncorr-wscarf-gpu-correctness.lock
+CUDA_VISIBLE_DEVICES(slurm)=0
+0, GPU-d4169778-fe7f-06ef-3807-b9e301b3b459, NVIDIA A100-SXM4-40GB, 580.178.04, 40960 MiB, 00000000:81:00.0
+compute-apps: []
+Driver Version                                         : 580.178.04
+CUDA Version                                           : 13.0
+THP enabled: [always] madvise never defrag: always defer defer+madvise [madvise] never
+CPU(s):                                  32
+Model name:                              AMD EPYC 7252 8-Core Processor
+Thread(s) per core:                      2
+Socket(s):                               2
+CPU(s) scaling MHz:                      98%
+NUMA node(s):                            2
+kernel 5.14.0-687.53.1.el9_8.x86_64; Rocky Linux release 9.8 (Blue Onyx)
+g++ (GCC) 11.5.0 20240719 (Red Hat 11.5.0-14)
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+cmake version 3.31.8
+python 3.12.3 numpy 2.5.3 /home/vol05/scarf1415/mc-rc0-scarfF/venv/bin/python3
+PIL absent
+nvcomp: /home/vol05/scarf1415/nvcomp-sdk/lib/libnvcomp.so.5.3.0.16
+#define NVCOMP_VERSION_H
+#define NVCOMP_VER_MAJOR 5
+#define NVCOMP_VER_MINOR 3
+#define NVCOMP_VER_PATCH 0
+#define NVCOMP_VER_BUILD 16
+#define NVCOMP_VER MAKE_SEMANTIC_VERSION(NVCOMP_VER_MAJOR, NVCOMP_VER_MINOR, NVCOMP_VER_PATCH)
+gs 9.54.0  pbzip2 /home/vol05/scarf1415/bin/pbzip2  zstd /usr/bin/zstd  xz /usr/bin/xz
+src HEAD 6d68e2d6ec45c37b75fd0f4aaff8272f192b7029 porcelain=0 appledouble=0
+/dev/nvme0n1p8                            791G  5.3G  786G   1% /tmp
+panfs://130.246.139.193/scarf/home/vol05  4.6T  2.3T  2.4T  49% /home/vol05

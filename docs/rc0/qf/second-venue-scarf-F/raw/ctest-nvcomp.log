@@ -1,0 +1,460 @@
+start 2026-10-19T00:08:40Z cfg=nvcomp HEAD=6d68e2d6ec45c37b75fd0f4aaff8272f192b7029 status=0
+mask: 12-15,28-31 gpu: GPU-d4169778-fe7f-06ef-3807-b9e301b3b459
+binary sha256: 682cfc88c380283203b5064ac13021672ad94a63f20516fe4afe65bc07d16ce5
+  Test #111: CudaErrorClass
+
+Total Tests: 111
+=== CTest Collection Validation: PASS === 
+  CUDA-only required tests: required
+  Collected tests: 111
+    - CpuDoseSymmetry                [REQUIRED]
+    - CpuDoseSymmetryBase            [REQUIRED]
+    - CpuUnweightedStream            [ADDITIVE]
+    - PatchRetryState                [REQUIRED]
+    - RunnerInterpolateRecenter      [REQUIRED]
+    - FloatPlanCache                 [ADDITIVE]
+    - MrcHeaderStats                 [REQUIRED]
+    - ReportPlotUndefinedAxis        [REQUIRED]
+    - PdfConcat                      [REQUIRED]
+    - DefectParser                   [REQUIRED]
+    - DeflateLayout                  [REQUIRED]
+    - DeflateLayoutMutant_span_wrap  [REQUIRED]
+    - DeflateLayoutMutant_stage_sum  [REQUIRED]
+    - DeflateLayoutMutant_reserve_round [REQUIRED]
+    - DeflateLayoutMutant_layout_table [REQUIRED]
+    - DeflateLayoutMutant_arena_start [REQUIRED]
+    - DeflateLayoutMutant_drain_step [REQUIRED]
+    - Adler32Arithmetic              [REQUIRED]
+    - Adler32KernelHost              [REQUIRED]
+    - StageProfileThreads            [REQUIRED]
+    - FrameBufferPool                [REQUIRED]
+    - ScratchArena                   [REQUIRED]
+    - ReaderPool                     [ADDITIVE]
+    - ReaderPoolMutant_spin          [ADDITIVE]
+    - ReaderPoolMutant_nowait        [ADDITIVE]
+    - DefectNeighbours               [REQUIRED]
+    - DefectMergeMutant_append_only  [ADDITIVE]
+    - DefectMergeMutant_no_order_check [ADDITIVE]
+    - DefectMergeMutant_swap_xy      [ADDITIVE]
+    - NvcompAcceptanceDiagnostics    [REQUIRED]
+    - ProfilingKit                   [REQUIRED]
+    - GainCacheOwnership             [REQUIRED]
+    - NvcompGuards                   [REQUIRED]
+    - SyntheticRegression            [REQUIRED]
+    - HotPixelRngDeterminism         [REQUIRED]
+    - RunnerExposure                 [REQUIRED]
+    - Runner_failure                 [REQUIRED]
+    - Runner_invalid                 [REQUIRED]
+    - Runner_resume                  [REQUIRED]
+    - Runner_tomography              [REQUIRED]
+    - RunnerLateBin                  [REQUIRED]
+    - RunnerExportedUnits            [REQUIRED]
+    - GainCache                      [REQUIRED]
+    - TiffRead                       [REQUIRED]
+    - DamagedMovie                   [REQUIRED]
+    - TruncatedMrcMovie              [REQUIRED]
+    - TruncatedGainDefect            [REQUIRED]
+    - CompressedMovieSequence        [REQUIRED]
+    - InputFormats                   [REQUIRED]
+    - CutDownMovie                   [REQUIRED]
+    - GlobalIfftElision              [REQUIRED]
+    - HostBufferReuse                [REQUIRED]
+    - StageProfile                   [REQUIRED]
+    - RunnerModelParser              [REQUIRED]
+    - EerMemorySafety                [REQUIRED]
+    - MicrographModelBounds          [REQUIRED]
+    - RunnerInterpolateShifts        [REQUIRED]
+    - WriteFaults                    [REQUIRED]
+    - WriteFaultsSync                [REQUIRED]
+    - WriteFaultsMultiProduct        [REQUIRED]
+    - OutputStageFaults              [REQUIRED]
+    - LogfileFromEps                 [REQUIRED]
+    - LogfileFromEpsMutant_always_eps [REQUIRED]
+    - LogfileFromEpsMutant_late_guard [REQUIRED]
+    - LogfileFromEpsMutant_eps_order [REQUIRED]
+    - LogfileFromEpsMutant_placeholder [REQUIRED]
+    - LogfileFromEpsMutant_concat_cleanup [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - CudaValidationParser           [REQUIRED]
+    - MultiGpuScheduling             [REQUIRED]
+    - OutputTreeComparator           [REQUIRED]
+    - JointStarPublication           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+    - NativeMovieStaging             [REQUIRED]
+    - RunnerInterpolateShiftsCuda    [ADDITIVE]
+    - StageProfileDeviceTiming       [ADDITIVE]
+    - SignedMrcStaging               [ADDITIVE]
+    - TruncatedMrcMovieCuda          [ADDITIVE]
+    - TruncatedGainDefectCuda        [ADDITIVE]
+    - CudaU16StagingEquivalence      [ADDITIVE]
+    - CudaWrapperUploadFailure       [ADDITIVE]
+    - CudaFaultMatrix                [ADDITIVE]
+    - CudaPatchWorkspace             [ADDITIVE]
+    - CudaPatchBatch                 [ADDITIVE]
+    - CudaVramAlias                  [ADDITIVE]
+    - CudaPatchBatchMutant_shift_retired [ADDITIVE]
+    - CudaPatchBatchMutant_never_retire [ADDITIVE]
+    - CudaPatchBatchMutant_extract_no_remap [ADDITIVE]
+    - CudaPatchBatchMutant_scale_divide [ADDITIVE]
+    - CudaPatchBatchMutant_shift_wrong_half [ADDITIVE]
+    - CudaPatchBatchMutant_perpatch_wrong_half [ADDITIVE]
+    - CudaVramAliasMutant_arena_overlap [ADDITIVE]
+    - CudaVramAliasMutant_arena_work_over_buffers [ADDITIVE]
+    - CudaVramAliasMutant_refusal_off [ADDITIVE]
+    - CudaVramAliasMutant_dw_scratch_over_fourier [ADDITIVE]
+    - CudaDeviceGainPool             [ADDITIVE]
+    - CudaDeviceGainCleanupFatal     [ADDITIVE]
+    - CudaGeometryRetention          [ADDITIVE]
+    - CudaGeometryRetentionMutant_no_take [ADDITIVE]
+    - CudaGeometryRetentionMutant_return_failed [ADDITIVE]
+    - CudaGeometryRetentionMutant_keep_taken_alias [ADDITIVE]
+    - CudaDoseNormalization          [ADDITIVE]
+    - CudaDoseSessionPlan            [ADDITIVE]
+    - CudaResidentRetryFailures      [ADDITIVE]
+    - CudaPreprocessingFailurePaths  [ADDITIVE]
+    - CudaStaleErrorAfterOom         [REQUIRED]
+    - CudaAdler32                    [ADDITIVE]
+    - CudaNvcompAcceptanceFailures   [ADDITIVE]
+    - CudaNvcompReconstructionFailures [ADDITIVE]
+    - CudaDoseWeightAlias            [ADDITIVE]
+    - CudaErrorClass                 [ADDITIVE]
+validate_test_collection rc=0
+Internal ctest changing into directory: /home/vol05/scarf1415/mc-rc0-scarfF/build-nvcomp
+Test project /home/vol05/scarf1415/mc-rc0-scarfF/build-nvcomp
+        Start   1: CpuDoseSymmetry
+  1/111 Test   #1: CpuDoseSymmetry ................................   Passed    2.00 sec
+        Start   2: CpuDoseSymmetryBase
+  2/111 Test   #2: CpuDoseSymmetryBase ............................   Passed    2.44 sec
+        Start   3: CpuUnweightedStream
+  3/111 Test   #3: CpuUnweightedStream ............................   Passed    0.08 sec
+        Start   4: PatchRetryState
+  4/111 Test   #4: PatchRetryState ................................   Passed    0.05 sec
+        Start   5: RunnerInterpolateRecenter
+  5/111 Test   #5: RunnerInterpolateRecenter ......................   Passed    0.02 sec
+        Start   6: FloatPlanCache
+  6/111 Test   #6: FloatPlanCache .................................   Passed    0.02 sec
+        Start   7: MrcHeaderStats
+  7/111 Test   #7: MrcHeaderStats .................................   Passed    0.03 sec
+        Start   8: ReportPlotUndefinedAxis
+  8/111 Test   #8: ReportPlotUndefinedAxis ........................   Passed    0.03 sec
+        Start   9: PdfConcat
+  9/111 Test   #9: PdfConcat ......................................   Passed    0.14 sec
+        Start  10: DefectParser
+ 10/111 Test  #10: DefectParser ...................................   Passed    0.18 sec
+        Start  11: DeflateLayout
+ 11/111 Test  #11: DeflateLayout ..................................   Passed    0.01 sec
+        Start  12: DeflateLayoutMutant_span_wrap
+ 12/111 Test  #12: DeflateLayoutMutant_span_wrap ..................   Passed    0.01 sec
+        Start  13: DeflateLayoutMutant_stage_sum
+ 13/111 Test  #13: DeflateLayoutMutant_stage_sum ..................   Passed    0.01 sec
+        Start  14: DeflateLayoutMutant_reserve_round
+ 14/111 Test  #14: DeflateLayoutMutant_reserve_round ..............   Passed    0.01 sec
+        Start  15: DeflateLayoutMutant_layout_table
+ 15/111 Test  #15: DeflateLayoutMutant_layout_table ...............   Passed    0.01 sec
+        Start  16: DeflateLayoutMutant_arena_start
+ 16/111 Test  #16: DeflateLayoutMutant_arena_start ................   Passed    0.01 sec
+        Start  17: DeflateLayoutMutant_drain_step
+ 17/111 Test  #17: DeflateLayoutMutant_drain_step .................   Passed    0.01 sec
+        Start  18: Adler32Arithmetic
+ 18/111 Test  #18: Adler32Arithmetic ..............................   Passed    0.73 sec
+        Start  19: Adler32KernelHost
+ 19/111 Test  #19: Adler32KernelHost ..............................   Passed    0.00 sec
+        Start  20: StageProfileThreads
+ 20/111 Test  #20: StageProfileThreads ............................   Passed    0.06 sec
+        Start  21: FrameBufferPool
+ 21/111 Test  #21: FrameBufferPool ................................   Passed    0.03 sec
+        Start  22: ScratchArena
+ 22/111 Test  #22: ScratchArena ...................................   Passed    0.02 sec
+        Start  23: ReaderPool
+ 23/111 Test  #23: ReaderPool .....................................   Passed    0.51 sec
+        Start  24: ReaderPoolMutant_spin
+ 24/111 Test  #24: ReaderPoolMutant_spin ..........................   Passed    0.51 sec
+        Start  25: ReaderPoolMutant_nowait
+ 25/111 Test  #25: ReaderPoolMutant_nowait ........................   Passed    0.03 sec
+        Start  26: DefectNeighbours
+ 26/111 Test  #26: DefectNeighbours ...............................   Passed    0.01 sec
+        Start  27: DefectMergeMutant_append_only
+ 27/111 Test  #27: DefectMergeMutant_append_only ..................   Passed    0.00 sec
+        Start  28: DefectMergeMutant_no_order_check
+ 28/111 Test  #28: DefectMergeMutant_no_order_check ...............   Passed    0.01 sec
+        Start  29: DefectMergeMutant_swap_xy
+ 29/111 Test  #29: DefectMergeMutant_swap_xy ......................   Passed    0.00 sec
+        Start  30: NvcompAcceptanceDiagnostics
+ 30/111 Test  #30: NvcompAcceptanceDiagnostics ....................   Passed    0.18 sec
+        Start  31: ProfilingKit
+ 31/111 Test  #31: ProfilingKit ...................................***Failed   78.05 sec
+.............................................................E....................EEEE.E..............................................
+======================================================================
+ERROR: test_schema_invalid_export_preserves_existing_work (tests.test_import_subset_boundaries.ImportedTracePreflight.test_schema_invalid_export_preserves_existing_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/src/tools/profiling/tests/test_import_subset_boundaries.py", line 37, in tearDown
+    self.tmp.cleanup()
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 950, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 930, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 796, in rmtree
+    onexc(os.rmdir, path, err)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 794, in rmtree
+    os.rmdir(path, dir_fd=dir_fd)
+OSError: [Errno 39] Directory not empty: '/scratch/scarf1415/relion-container-tests/tmp/tmp6b9ckqnj'
+
+======================================================================
+ERROR: test_missing_required_column_is_named (tests.test_metrics.Robustness.test_missing_required_column_is_named)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/src/tools/profiling/tests/test_metrics.py", line 143, in tearDown
+    self.tmp.cleanup()
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 950, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 930, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 796, in rmtree
+    onexc(os.rmdir, path, err)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 794, in rmtree
+    os.rmdir(path, dir_fd=dir_fd)
+OSError: [Errno 39] Directory not empty: '/scratch/scarf1415/relion-container-tests/tmp/tmpm8f8h7e6'
+
+======================================================================
+ERROR: test_no_nvtx_gives_whole_trace (tests.test_metrics.Robustness.test_no_nvtx_gives_whole_trace)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/src/tools/profiling/tests/test_metrics.py", line 143, in tearDown
+    self.tmp.cleanup()
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 950, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 930, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 796, in rmtree
+    onexc(os.rmdir, path, err)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 794, in rmtree
+    os.rmdir(path, dir_fd=dir_fd)
+OSError: [Errno 39] Directory not empty: '/scratch/scarf1415/relion-container-tests/tmp/tmpt9x4qr4f'
+
+======================================================================
+ERROR: test_not_sqlite (tests.test_metrics.Robustness.test_not_sqlite)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/src/tools/profiling/tests/test_metrics.py", line 143, in tearDown
+    self.tmp.cleanup()
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 950, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 930, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 796, in rmtree
+    onexc(os.rmdir, path, err)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 794, in rmtree
+    os.rmdir(path, dir_fd=dir_fd)
+OSError: [Errno 39] Directory not empty: '/scratch/scarf1415/relion-container-tests/tmp/tmp9xh9sgzw'
+
+======================================================================
+ERROR: test_optional_tables_absent (tests.test_metrics.Robustness.test_optional_tables_absent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/src/tools/profiling/tests/test_metrics.py", line 143, in tearDown
+    self.tmp.cleanup()
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 950, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 930, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 796, in rmtree
+    onexc(os.rmdir, path, err)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 794, in rmtree
+    os.rmdir(path, dir_fd=dir_fd)
+OSError: [Errno 39] Directory not empty: '/scratch/scarf1415/relion-container-tests/tmp/tmp1u4_tnr6'
+
+======================================================================
+ERROR: test_unmatched_free_is_an_error (tests.test_metrics.Robustness.test_unmatched_free_is_an_error)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/src/tools/profiling/tests/test_metrics.py", line 143, in tearDown
+    self.tmp.cleanup()
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 950, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 930, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 796, in rmtree
+    onexc(os.rmdir, path, err)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 794, in rmtree
+    os.rmdir(path, dir_fd=dir_fd)
+OSError: [Errno 39] Directory not empty: '/scratch/scarf1415/relion-container-tests/tmp/tmpzj4btdrb'
+
+----------------------------------------------------------------------
+Ran 134 tests in 73.609s
+
+FAILED (errors=6)
+
+        Start  32: GainCacheOwnership
+ 32/111 Test  #32: GainCacheOwnership .............................   Passed    4.52 sec
+        Start  33: NvcompGuards
+ 33/111 Test  #33: NvcompGuards ...................................   Passed    0.04 sec
+        Start  34: SyntheticRegression
+ 34/111 Test  #34: SyntheticRegression ............................   Passed    1.01 sec
+        Start  35: HotPixelRngDeterminism
+ 35/111 Test  #35: HotPixelRngDeterminism .........................   Passed    0.84 sec
+        Start  36: RunnerExposure
+ 36/111 Test  #36: RunnerExposure .................................   Passed    1.07 sec
+        Start  37: Runner_failure
+ 37/111 Test  #37: Runner_failure .................................   Passed    0.23 sec
+        Start  38: Runner_invalid
+ 38/111 Test  #38: Runner_invalid .................................   Passed    0.24 sec
+        Start  39: Runner_resume
+ 39/111 Test  #39: Runner_resume ..................................   Passed    5.70 sec
+        Start  40: Runner_tomography
+ 40/111 Test  #40: Runner_tomography ..............................   Passed    0.82 sec
+        Start  41: RunnerLateBin
+ 41/111 Test  #41: RunnerLateBin ..................................   Passed    1.38 sec
+        Start  42: RunnerExportedUnits
+ 42/111 Test  #42: RunnerExportedUnits ............................   Passed    0.25 sec
+        Start  43: GainCache
+ 43/111 Test  #43: GainCache ......................................   Passed    1.89 sec
+        Start  44: TiffRead
+ 44/111 Test  #44: TiffRead .......................................   Passed    0.79 sec
+        Start  45: DamagedMovie
+ 45/111 Test  #45: DamagedMovie ...................................   Passed    8.05 sec
+        Start  46: TruncatedMrcMovie
+ 46/111 Test  #46: TruncatedMrcMovie ..............................   Passed   20.05 sec
+        Start  47: TruncatedGainDefect
+ 47/111 Test  #47: TruncatedGainDefect ............................   Passed    7.67 sec
+        Start  48: CompressedMovieSequence
+ 48/111 Test  #48: CompressedMovieSequence ........................   Passed    1.28 sec
+        Start  49: InputFormats
+ 49/111 Test  #49: InputFormats ...................................   Passed   54.28 sec
+        Start  50: CutDownMovie
+ 50/111 Test  #50: CutDownMovie ...................................   Passed    4.05 sec
+        Start  51: GlobalIfftElision
+ 51/111 Test  #51: GlobalIfftElision ..............................   Passed    2.84 sec
+        Start  52: HostBufferReuse
+ 52/111 Test  #52: HostBufferReuse ................................   Passed    4.20 sec
+        Start  53: StageProfile
+ 53/111 Test  #53: StageProfile ...................................   Passed    3.41 sec
+        Start  54: RunnerModelParser
+ 54/111 Test  #54: RunnerModelParser ..............................   Passed    0.35 sec
+        Start  55: EerMemorySafety
+ 55/111 Test  #55: EerMemorySafety ................................   Passed   20.44 sec
+        Start  56: MicrographModelBounds
+ 56/111 Test  #56: MicrographModelBounds ..........................   Passed    3.37 sec
+        Start  57: RunnerInterpolateShifts
+ 57/111 Test  #57: RunnerInterpolateShifts ........................   Passed    0.80 sec
+        Start  58: WriteFaults
+ 58/111 Test  #58: WriteFaults ....................................   Passed    0.81 sec
+        Start  59: WriteFaultsSync
+ 59/111 Test  #59: WriteFaultsSync ................................   Passed    1.80 sec
+        Start  60: WriteFaultsMultiProduct
+ 60/111 Test  #60: WriteFaultsMultiProduct ........................   Passed    1.05 sec
+        Start  61: OutputStageFaults
+ 61/111 Test  #61: OutputStageFaults ..............................   Passed    0.74 sec
+        Start  62: LogfileFromEps
+ 62/111 Test  #62: LogfileFromEps .................................   Passed    5.03 sec
+        Start  63: LogfileFromEpsMutant_always_eps
+ 63/111 Test  #63: LogfileFromEpsMutant_always_eps ................   Passed    0.65 sec
+        Start  64: LogfileFromEpsMutant_late_guard
+ 64/111 Test  #64: LogfileFromEpsMutant_late_guard ................   Passed    0.43 sec
+        Start  65: LogfileFromEpsMutant_eps_order
+ 65/111 Test  #65: LogfileFromEpsMutant_eps_order .................   Passed    0.39 sec
+        Start  66: LogfileFromEpsMutant_placeholder
+ 66/111 Test  #66: LogfileFromEpsMutant_placeholder ...............   Passed    1.04 sec
+        Start  67: LogfileFromEpsMutant_concat_cleanup
+ 67/111 Test  #67: LogfileFromEpsMutant_concat_cleanup ............   Passed    4.32 sec
+        Start  68: CiFailClosedControls
+ 68/111 Test  #68: CiFailClosedControls ...........................   Passed   24.25 sec
+        Start  69: CudaValidationParser
+ 69/111 Test  #69: CudaValidationParser ...........................   Passed    0.06 sec
+        Start  70: MultiGpuScheduling
+ 70/111 Test  #70: MultiGpuScheduling .............................   Passed   80.36 sec
+        Start  71: OutputTreeComparator
+ 71/111 Test  #71: OutputTreeComparator ...........................   Passed    2.10 sec
+        Start  72: JointStarPublication
+ 72/111 Test  #72: JointStarPublication ...........................   Passed    1.60 sec
+        Start  73: ImageWriteFaults
+ 73/111 Test  #73: ImageWriteFaults ...............................   Passed    0.14 sec
+        Start  74: NativeMovieStaging
+ 74/111 Test  #74: NativeMovieStaging .............................   Passed    0.10 sec
+        Start  75: RunnerInterpolateShiftsCuda
+ 75/111 Test  #75: RunnerInterpolateShiftsCuda ....................   Passed    2.26 sec
+        Start  76: StageProfileDeviceTiming
+ 76/111 Test  #76: StageProfileDeviceTiming .......................   Passed    5.08 sec
+        Start  77: SignedMrcStaging
+ 77/111 Test  #77: SignedMrcStaging ...............................   Passed   10.55 sec
+        Start  78: TruncatedMrcMovieCuda
+ 78/111 Test  #78: TruncatedMrcMovieCuda ..........................   Passed   87.66 sec
+        Start  79: TruncatedGainDefectCuda
+ 79/111 Test  #79: TruncatedGainDefectCuda ........................   Passed   46.62 sec
+        Start  80: CudaU16StagingEquivalence
+ 80/111 Test  #80: CudaU16StagingEquivalence ......................   Passed    0.70 sec
+        Start  81: CudaWrapperUploadFailure
+ 81/111 Test  #81: CudaWrapperUploadFailure .......................   Passed    0.67 sec
+        Start  82: CudaFaultMatrix
+ 82/111 Test  #82: CudaFaultMatrix ................................   Passed   11.55 sec
+        Start  83: CudaPatchWorkspace
+ 83/111 Test  #83: CudaPatchWorkspace .............................   Passed    0.83 sec
+        Start  84: CudaPatchBatch
+ 84/111 Test  #84: CudaPatchBatch .................................   Passed    1.78 sec
+        Start  85: CudaVramAlias
+ 85/111 Test  #85: CudaVramAlias ..................................   Passed    0.95 sec
+        Start  86: CudaPatchBatchMutant_shift_retired
+ 86/111 Test  #86: CudaPatchBatchMutant_shift_retired .............   Passed    1.78 sec
+        Start  87: CudaPatchBatchMutant_never_retire
+ 87/111 Test  #87: CudaPatchBatchMutant_never_retire ..............   Passed    1.79 sec
+        Start  88: CudaPatchBatchMutant_extract_no_remap
+ 88/111 Test  #88: CudaPatchBatchMutant_extract_no_remap ..........   Passed    1.77 sec
+        Start  89: CudaPatchBatchMutant_scale_divide
+ 89/111 Test  #89: CudaPatchBatchMutant_scale_divide ..............   Passed    1.79 sec
+        Start  90: CudaPatchBatchMutant_shift_wrong_half
+ 90/111 Test  #90: CudaPatchBatchMutant_shift_wrong_half ..........   Passed    1.73 sec
+        Start  91: CudaPatchBatchMutant_perpatch_wrong_half
+ 91/111 Test  #91: CudaPatchBatchMutant_perpatch_wrong_half .......   Passed    1.76 sec
+        Start  92: CudaVramAliasMutant_arena_overlap
+ 92/111 Test  #92: CudaVramAliasMutant_arena_overlap ..............   Passed    0.94 sec
+        Start  93: CudaVramAliasMutant_arena_work_over_buffers
+ 93/111 Test  #93: CudaVramAliasMutant_arena_work_over_buffers ....   Passed    0.90 sec
+        Start  94: CudaVramAliasMutant_refusal_off
+ 94/111 Test  #94: CudaVramAliasMutant_refusal_off ................   Passed    0.90 sec
+        Start  95: CudaVramAliasMutant_dw_scratch_over_fourier
+ 95/111 Test  #95: CudaVramAliasMutant_dw_scratch_over_fourier ....   Passed    0.92 sec
+        Start  96: CudaDeviceGainPool
+ 96/111 Test  #96: CudaDeviceGainPool .............................   Passed    0.71 sec
+        Start  97: CudaDeviceGainCleanupFatal
+ 97/111 Test  #97: CudaDeviceGainCleanupFatal .....................   Passed    0.63 sec
+        Start  98: CudaGeometryRetention
+ 98/111 Test  #98: CudaGeometryRetention ..........................   Passed    0.65 sec
+        Start  99: CudaGeometryRetentionMutant_no_take
+ 99/111 Test  #99: CudaGeometryRetentionMutant_no_take ............   Passed    0.67 sec
+        Start 100: CudaGeometryRetentionMutant_return_failed
+100/111 Test #100: CudaGeometryRetentionMutant_return_failed ......   Passed    0.66 sec
+        Start 101: CudaGeometryRetentionMutant_keep_taken_alias
+101/111 Test #101: CudaGeometryRetentionMutant_keep_taken_alias ...   Passed    0.64 sec
+        Start 102: CudaDoseNormalization
+102/111 Test #102: CudaDoseNormalization ..........................   Passed    1.71 sec
+        Start 103: CudaDoseSessionPlan
+103/111 Test #103: CudaDoseSessionPlan ............................   Passed    0.63 sec
+        Start 104: CudaResidentRetryFailures
+104/111 Test #104: CudaResidentRetryFailures ......................   Passed    7.04 sec
+        Start 105: CudaPreprocessingFailurePaths
+105/111 Test #105: CudaPreprocessingFailurePaths ..................   Passed    8.12 sec
+        Start 106: CudaStaleErrorAfterOom
+106/111 Test #106: CudaStaleErrorAfterOom .........................   Passed    5.74 sec
+        Start 107: CudaAdler32
+107/111 Test #107: CudaAdler32 ....................................   Passed    1.72 sec
+        Start 108: CudaNvcompAcceptanceFailures
+108/111 Test #108: CudaNvcompAcceptanceFailures ...................   Passed    8.03 sec
+        Start 109: CudaNvcompReconstructionFailures
+109/111 Test #109: CudaNvcompReconstructionFailures ...............   Passed    5.53 sec
+        Start 110: CudaDoseWeightAlias
+110/111 Test #110: CudaDoseWeightAlias ............................   Passed    4.36 sec
+        Start 111: CudaErrorClass
+111/111 Test #111: CudaErrorClass .................................   Passed    0.02 sec
+
+99% tests passed, 1 tests failed out of 111
+
+Label Time Summary:
+cuda        = 229.77 sec*proc (37 tests)
+hardware    = 229.75 sec*proc (36 tests)
+
+Total Test time (real) = 589.72 sec
+
+The following tests FAILED:
+	 31 - ProfilingKit (Failed)
+Errors while running CTest
+ctest rc=8 end 2026-10-19T00:18:30Z

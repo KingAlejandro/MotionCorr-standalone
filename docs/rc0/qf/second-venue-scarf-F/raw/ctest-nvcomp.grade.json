@@ -1,0 +1,75 @@
+{
+ "cfg": "nvcomp",
+ "qf_sha": "6d68e2d6ec45c37b75fd0f4aaff8272f192b7029",
+ "src_head": "6d68e2d6ec45c37b75fd0f4aaff8272f192b7029",
+ "d11": {
+  "case": "with_d11",
+  "markers": {
+   "src/motioncorr_runner.cpp": true,
+   "tests/cuda_fault_inject_shim.cpp": true,
+   "tests/run_stale_cuda_error_controls.py": true,
+   "CMakeLists.txt": true,
+   "tools/validate_test_collection.py": true,
+   "tools/test_ci_fail_closed.py": true
+  },
+  "8cc1a377_is_ancestor": true,
+  "validator_enforcement": {
+   "build_has_cuda": true,
+   "log_line": true,
+   "full_collection_passes": true,
+   "minus_d11_rejected": true,
+   "minus_d11_missing": [
+    "CudaStaleErrorAfterOom"
+   ]
+  }
+ },
+ "collected": 111,
+ "required": 67,
+ "reference_count": 111,
+ "binary_sha256": "682cfc88c380283203b5064ac13021672ad94a63f20516fe4afe65bc07d16ce5",
+ "ctest_exit": "8",
+ "counts": {
+  "passed": 110,
+  "failed": 1,
+  "skipped": 0,
+  "not_run": 0
+ },
+ "not_passed": [
+  "ProfilingKit"
+ ],
+ "not_passed_load_sensitive": [
+  "ProfilingKit"
+ ],
+ "rerun_info_not_graded": {
+  "exit": "0",
+  "log_header": "start 2026-10-19T00:31:30Z cfg=nvcomp HEAD=6d68e2d6ec45c37b75fd0f4aaff8272f192b7029 status=0",
+  "log_ctest_rc": [
+   "ctest rc=0 end 2026-10-19T00:32:21Z"
+  ],
+  "log_binary_sha256": "682cfc88c380283203b5064ac13021672ad94a63f20516fe4afe65bc07d16ce5",
+  "junit": {
+   "ProfilingKit": "passed"
+  }
+ },
+ "named_tests": {
+  "TruncatedMrcMovie": "passed",
+  "TruncatedGainDefect": "passed",
+  "TruncatedMrcMovieCuda": "passed",
+  "TruncatedGainDefectCuda": "passed",
+  "CpuDoseSymmetry": "passed",
+  "CpuDoseSymmetryBase": "passed",
+  "PatchRetryState": "passed",
+  "CudaResidentRetryFailures": "passed",
+  "EerMemorySafety": "passed",
+  "ReportPlotUndefinedAxis": "passed",
+  "CudaNvcompAcceptanceFailures": "passed",
+  "CudaNvcompReconstructionFailures": "passed",
+  "CudaAdler32": "passed",
+  "CudaStaleErrorAfterOom": "passed"
+ },
+ "failures": [
+  "tests not passed: ['ProfilingKit']",
+  "ctest exit 8"
+ ],
+ "verdict": "FAIL"
+}

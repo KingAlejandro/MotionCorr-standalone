@@ -1,0 +1,1447 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Linux-c++"
+	tests="111"
+	failures="1"
+	disabled="0"
+	skipped="0"
+	hostname="gnx002.scarf.rl.ac.uk"
+	time="589"
+	timestamp="2026-10-19T01:08:40"
+	>
+	<testcase name="CpuDoseSymmetry" classname="CpuDoseSymmetry" time="1.99546" status="run">
+		<properties/>
+		<system-out>production doseWeighting path: symmetric
+1681 cases: exact complex bits and exp-call bound PASS
+</system-out>
+	</testcase>
+	<testcase name="CpuDoseSymmetryBase" classname="CpuDoseSymmetryBase" time="2.43943" status="run">
+		<properties/>
+		<system-out>production doseWeighting path: original
+1681 cases: exact complex bits and exp-call bound PASS
+</system-out>
+	</testcase>
+	<testcase name="CpuUnweightedStream" classname="CpuUnweightedStream" time="0.0840974" status="run">
+		<properties/>
+		<system-out>stream/reference pixels, splits, model time and float rounding PASS; scratch bound PASS
+</system-out>
+	</testcase>
+	<testcase name="PatchRetryState" classname="PatchRetryState" time="0.0466893" status="run">
+		<properties/>
+		<system-out>Issue #69 patch retry shift-state contract (CPU, no device)
+  patch 256x256, 4 groups, scaled_B=20.0, truth (frame-0 relative): (+0.00,+0.00) (+2.70,-1.80) (-3.40,+2.20) (+1.90,-3.10)
+
+  converged reference          ( +0.000, +0.000) ( -2.637, +1.755) ( +3.394, -2.198) ( -1.846, +3.041)   |v| = 6.2485
+  max |recovered + truth| = 0.0630 px  (converged=yes)
+
+  attempt 1 (S1)               ( +0.000, +0.000) ( -4.367, +3.041) ( +3.594, -2.307) ( -3.378, +4.726)   |v| = 8.9615
+  arm A: reset (S2)            ( +0.000, +0.000) ( -4.367, +3.041) ( +3.594, -2.307) ( -3.378, +4.726)   |v| = 8.9615
+  arm B: no reset (S1+S2)      ( +0.000, +0.000) ( -8.734, +6.081) ( +7.189, -4.615) ( -6.756, +9.452)   |v| = 17.9231
+  |arm A| = 8.9615   |arm B| = 17.9231   ratio B/A = 2.0000
+  max |armA - S1|              = 0.000e+00 px
+  max |armB - (S1 + armA)|     = 0.000e+00 px
+
+PASS alignPatch accumulates into the caller's vectors and does not
+     re-derive them, so re-entering without a reset publishes S1+S2.
+     Restoring the ve...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="RunnerInterpolateRecenter" classname="RunnerInterpolateRecenter" time="0.0185792" status="run">
+		<properties/>
+		<system-out>PASS archived witness, slope 1 (X only) (bug reproduced and fixed)
+PASS slope +2 X / -1.5 Y, nonzero origin both axes (bug reproduced and fixed)
+PASS unequal last group, negative X slope, piecewise (bug reproduced and fixed)
+PASS zero-origin control (no-op) (no-op control)
+PASS empty-input guard
+PASS issue97 interpolate_recenter
+</system-out>
+	</testcase>
+	<testcase name="FloatPlanCache" classname="FloatPlanCache" time="0.0238494" status="run">
+		<properties/>
+		<system-out>in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/jaz/single_particle/new_ft.cpp, line 589
+ERROR: 
+NewFFT::FloatPlan: cached plan has a different size
+PASS float plan cache
+</system-out>
+	</testcase>
+	<testcase name="MrcHeaderStats" classname="MrcHeaderStats" time="0.0346781" status="run">
+		<properties/>
+		<system-out>PASS fused MRC header statistics (13 cases)
+</system-out>
+	</testcase>
+	<testcase name="ReportPlotUndefinedAxis" classname="ReportPlotUndefinedAxis" time="0.0273989" status="run">
+		<properties/>
+		<system-out>in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/metadata_table.cpp, line 1729
+ERROR: 
+MetaDataTable::addToCPlot2D ERROR: cannot find x-axis label
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/metadata_table.cpp, line 1747
+ERROR: 
+MetaDataTable::addToCPlot2D ERROR: cannot find y-axis label
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/metadata_table.cpp, line 1747
+ERROR: 
+MetaDataTable::addToCPlot2D ERROR: cannot find y-axis label
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/metadata_table.cpp, line 1742
+ERROR: 
+MetaDataTable::addToCPlot2D ERROR: can only plot x-axis double, int or long int
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/metadata_table.cpp, line 1760
+ERROR: 
+MetaDataTable::addToCPlot2D ERROR: can only plot y-axis double, int or long int
+PASS addToCPlot2D EMDL_UNDEFINED x-axis and missing-label errors
+</system-out>
+	</testcase>
+	<testcase name="PdfConcat" classname="PdfConcat" time="0.144023" status="run">
+		<properties/>
+		<system-out>GPL Ghostscript 9.54.0: Unrecoverable error, exit code 1
+PASS one-input concatenation copied 193 B exactly
+ ERROR in executing: gs -dNOPAUSE -sDEVICE=pdfwrite -sOUTPUTFILE=test_pdf_concat_tmp/from_notapdf.pdf -dBATCH test_pdf_concat_tmp/notapdf.pdf  &gt; /dev/null
+PASS non-PDF input was not copied
+</system-out>
+	</testcase>
+	<testcase name="DefectParser" classname="DefectParser" time="0.180395" status="run">
+		<properties/>
+		<system-out>== valid input ==
+  PASS  single rect 0 0 2 3 -&gt; 6 px
+  PASS  two rects -&gt; 22 px
+  PASS  no trailing newline -&gt; 6 px
+  PASS  blank lines and padding tolerated -&gt; 6 px
+== empty / whitespace ==
+  PASS  empty file -&gt; no error, 0 px
+  PASS  whitespace-only -&gt; no error, 0 px
+== malformed (must be rejected) ==
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/motioncorr_runner.cpp, line 5207
+ERROR: 
+Malformed defect record (record 2, line 2) of /scratch/scarf1415/relion-container-tests/tmp/motioncorr_defect_test_900977/m1.txt: field 'x' is "BAD", which is not an integer. The MotionCor2 txt defect format does not support comments, headers or non-integer fields.
+  PASS  issue #98 reproducer 'BAD TOKEN' rejected
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/motioncorr_runner.cpp, line 5207
+ERROR: 
+Malformed defect record (record 1, line 1) of /scratch/scarf1415/relion-container-tests/tmp/motioncorr_defect_test_900977/m2.txt: field 'x' is "BAD", which is not an integer. The MotionCor2 txt defect format does not support...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="DeflateLayout" classname="DeflateLayout" time="0.00849439" status="run">
+		<properties/>
+		<system-out>deflate layout: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="DeflateLayoutMutant_span_wrap" classname="DeflateLayoutMutant_span_wrap" time="0.00793502" status="run">
+		<properties/>
+		<system-out>FAIL: offset 2^64-10 + 20 wraps to 9 and is declined
+FAIL: a length that wraps the end past 2^64 is declined
+2 check(s) failed
+</system-out>
+	</testcase>
+	<testcase name="DeflateLayoutMutant_stage_sum" classname="DeflateLayoutMutant_stage_sum" time="0.00781413" status="run">
+		<properties/>
+		<system-out>FAIL: stage sum of 2^64 is declined and out untouched
+FAIL: one huge strip whose slot padding wraps the sum is declined
+2 check(s) failed
+</system-out>
+	</testcase>
+	<testcase name="DeflateLayoutMutant_reserve_round" classname="DeflateLayoutMutant_reserve_round" time="0.00814759" status="run">
+		<properties/>
+		<system-out>FAIL: one byte more is declined and out untouched
+FAIL: the saturating form returns SIZE_MAX, which no pinned cap admits
+2 check(s) failed
+</system-out>
+	</testcase>
+	<testcase name="DeflateLayoutMutant_layout_table" classname="DeflateLayoutMutant_layout_table" time="0.00828847" status="run">
+		<properties/>
+		<system-out>FAIL: layout fits == oracle (status table wraps)
+FAIL: an accepted layout holds the exact offsets (status table wraps)
+2 check(s) failed
+</system-out>
+	</testcase>
+	<testcase name="DeflateLayoutMutant_arena_start" classname="DeflateLayoutMutant_arena_start" time="0.00799247" status="run">
+		<properties/>
+		<system-out>FAIL: the next aligned start would wrap to 0: refused, not returned as the arena base
+1 check(s) failed
+</system-out>
+	</testcase>
+	<testcase name="DeflateLayoutMutant_drain_step" classname="DeflateLayoutMutant_drain_step" time="0.00779328" status="run">
+		<properties/>
+		<system-out>FAIL: step stops at INT_MAX without incrementing past it
+FAIL: one chunk: steps 0 and 1
+FAIL: zero chunks: only step 0
+FAIL: the loop visits exactly n_chunks + 1 steps
+FAIL: the loop visits exactly n_chunks + 1 steps
+FAIL: the loop visits exactly n_chunks + 1 steps
+FAIL: the loop visits exactly n_chunks + 1 steps
+7 check(s) failed
+</system-out>
+	</testcase>
+	<testcase name="Adler32Arithmetic" classname="Adler32Arithmetic" time="0.729488" status="run">
+		<properties/>
+		<system-out>PASS: 7 ordinary lengths, actual production arithmetic over 512MiB logical ff bytes; old uint64 model fails 645a3c03 vs 2a2a3c03
+</system-out>
+	</testcase>
+	<testcase name="Adler32KernelHost" classname="Adler32KernelHost" time="0.00381677" status="run">
+		<properties/>
+		<system-out>PASS: actual kernel body, one CPU lane: healthy/full/short, failed-status and short-size null-output guards
+</system-out>
+	</testcase>
+	<testcase name="StageProfileThreads" classname="StageProfileThreads" time="0.0633577" status="run">
+		<properties/>
+		<system-out>ok   a path swapped to a symlink after enable() is not written through
+ok   the profile went to the inode enable() created
+ok   workers ran concurrently with the owner
+ok   owner sub-stage recorded exactly n times
+ok   worker markers ignored
+ok   profile written without error
+</system-out>
+	</testcase>
+	<testcase name="FrameBufferPool" classname="FrameBufferPool" time="0.0255053" status="run">
+		<properties/>
+		<system-out>ok   acquire gives an ny x nx buffer
+ok   release retains one frame and empties the array
+ok   next acquire reuses the retained buffer
+ok   reused buffer is fully writable
+ok   retained count and bytes stay within the bound
+ok   a small buffer is freed, not pooled
+ok   a non-owning alias is never pooled
+ok   a different-size buffer is not handed out for this geometry
+ok   buffers of a never-requested (binned) size are not retained
+ok   after binned releases a full-frame buffer is still retained for reuse
+ok   and it is the one handed out next
+ok   same-size reacquire keeps the owned buffer (pooled)
+ok   same-size reacquire does not consume or add a retained buffer
+ok   same-size reacquire keeps the owned buffer (pool disabled)
+ok   same-size reacquire does not consume or add a retained buffer
+ok   geometry A fills the pool
+ok   releasing the current geometry into a full pool evicts an old one
+ok   the next acquisition of the new geometry reuses it
+ok   a sustained new geometry fully replaces the old one, with...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="ScratchArena" classname="ScratchArena" time="0.0167553" status="run">
+		<properties/>
+		<system-out>scratch arena: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="ReaderPool" classname="ReaderPool" time="0.51147" status="run">
+		<properties/>
+		<system-out>idle 8-thread team: 0.000 cpu-s over 0.400 s wall
+reader pool: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="ReaderPoolMutant_spin" classname="ReaderPoolMutant_spin" time="0.511865" status="run">
+		<properties/>
+		<system-out>idle 8-thread team: 2.515 cpu-s over 0.400 s wall
+FAIL: idle helpers consumed CPU between jobs
+1 failure(s)
+</system-out>
+	</testcase>
+	<testcase name="ReaderPoolMutant_nowait" classname="ReaderPoolMutant_nowait" time="0.0258592" status="run">
+		<properties/>
+		<system-out>FAIL: runTeam returned before every thread finished
+FAIL: runTeam returned before every thread finished
+FAIL: runTeam returned before every thread finished
+FAIL: runTeam returned before every thread finished
+4 failure(s)
+</system-out>
+	</testcase>
+	<testcase name="DefectNeighbours" classname="DefectNeighbours" time="0.00540768" status="run">
+		<properties/>
+		<system-out>  isolated + edges + corners   defects=10 ranks=136
+  5x5 dense block              defects=25 ranks=264
+  full row and column          defects=87 ranks=1656
+  d_max=4 (EER radius)         defects=17 ranks=1103
+  merge == full-mask scan      trials=200 entries=9673
+defect neighbours: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="DefectMergeMutant_append_only" classname="DefectMergeMutant_append_only" time="0.00342425" status="run">
+		<properties/>
+		<system-out>  isolated + edges + corners   defects=10 ranks=136
+  5x5 dense block              defects=25 ranks=264
+  full row and column          defects=87 ranks=1656
+  d_max=4 (EER radius)         defects=17 ranks=1103
+FAIL: merge != full scan, trial 1 (pre 27, hits 27)
+negative control: defect detected (1 check(s) failed)
+</system-out>
+	</testcase>
+	<testcase name="DefectMergeMutant_no_order_check" classname="DefectMergeMutant_no_order_check" time="0.00521071" status="run">
+		<properties/>
+		<system-out>  isolated + edges + corners   defects=10 ranks=136
+  5x5 dense block              defects=25 ranks=264
+  full row and column          defects=87 ranks=1656
+  d_max=4 (EER radius)         defects=17 ranks=1103
+  merge == full-mask scan      trials=200 entries=9673
+FAIL: unsorted pre-mask list is refused
+FAIL: unsorted hit list is refused
+FAIL: an index in both lists is refused
+FAIL: a repeated index is refused
+FAIL: a negative index is refused
+negative control: defect detected (5 check(s) failed)
+</system-out>
+	</testcase>
+	<testcase name="DefectMergeMutant_swap_xy" classname="DefectMergeMutant_swap_xy" time="0.00338529" status="run">
+		<properties/>
+		<system-out>  isolated + edges + corners   defects=10 ranks=136
+  5x5 dense block              defects=25 ranks=264
+  full row and column          defects=87 ranks=1656
+  d_max=4 (EER radius)         defects=17 ranks=1103
+FAIL: merge != full scan, trial 1 (pre 27, hits 27)
+negative control: defect detected (1 check(s) failed)
+</system-out>
+	</testcase>
+	<testcase name="NvcompAcceptanceDiagnostics" classname="NvcompAcceptanceDiagnostics" time="0.179967" status="run">
+		<properties/>
+		<system-out>PASS: missing movie log rejects with child streams and exit verdict retained
+</system-out>
+	</testcase>
+	<testcase name="ProfilingKit" classname="ProfilingKit" time="78.0524" status="fail">
+		<failure message="Failed"/>
+		<properties/>
+		<system-out>.............................................................E....................EEEE.E..............................................
+======================================================================
+ERROR: test_schema_invalid_export_preserves_existing_work (tests.test_import_subset_boundaries.ImportedTracePreflight.test_schema_invalid_export_preserves_existing_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/src/tools/profiling/tests/test_import_subset_boundaries.py", line 37, in tearDown
+    self.tmp.cleanup()
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 950, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 930, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 796, in rmtree
+    onexc(os.rmdir, path, err)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 794, in rmtree
+    os.rmdir(path, dir_fd=dir_fd)
+OSError: [Errno 39] Directory not empty: '/scratch/scarf1415/relion-container-tests/tmp/tmp6b9ckqnj'
+
+======================================================================
+ERROR: test_missing_required_column_is_named (tests.test_metrics.Robustness.test_missing_required_column_is_named)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/src/tools/profiling/tests/test_metrics.py", line 143, in tearDown
+    self.tmp.cleanup()
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 950, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 930, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 796, in rmtree
+    onexc(os.rmdir, path, err)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 794, in rmtree
+    os.rmdir(path, dir_fd=dir_fd)
+OSError: [Errno 39] Directory not empty: '/scratch/scarf1415/relion-container-tests/tmp/tmpm8f8h7e6'
+
+======================================================================
+ERROR: test_no_nvtx_gives_whole_trace (tests.test_metrics.Robustness.test_no_nvtx_gives_whole_trace)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/src/tools/profiling/tests/test_metrics.py", line 143, in tearDown
+    self.tmp.cleanup()
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 950, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 930, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 796, in rmtree
+    onexc(os.rmdir, path, err)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 794, in rmtree
+    os.rmdir(path, dir_fd=dir_fd)
+OSError: [Errno 39] Directory not empty: '/scratch/scarf1415/relion-container-tests/tmp/tmpt9x4qr4f'
+
+======================================================================
+ERROR: test_not_sqlite (tests.test_metrics.Robustness.test_not_sqlite)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/src/tools/profiling/tests/test_metrics.py", line 143, in tearDown
+    self.tmp.cleanup()
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 950, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 930, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 796, in rmtree
+    onexc(os.rmdir, path, err)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 794, in rmtree
+    os.rmdir(path, dir_fd=dir_fd)
+OSError: [Errno 39] Directory not empty: '/scratch/scarf1415/relion-container-tests/tmp/tmp9xh9sgzw'
+
+======================================================================
+ERROR: test_optional_tables_absent (tests.test_metrics.Robustness.test_optional_tables_absent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/src/tools/profiling/tests/test_metrics.py", line 143, in tearDown
+    self.tmp.cleanup()
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 950, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 930, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 796, in rmtree
+    onexc(os.rmdir, path, err)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 794, in rmtree
+    os.rmdir(path, dir_fd=dir_fd)
+OSError: [Errno 39] Directory not empty: '/scratch/scarf1415/relion-container-tests/tmp/tmp1u4_tnr6'
+
+======================================================================
+ERROR: test_unmatched_free_is_an_error (tests.test_metrics.Robustness.test_unmatched_free_is_an_error)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/src/tools/profiling/tests/test_metrics.py", line 143, in tearDown
+    self.tmp.cleanup()
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 950, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/tempfile.py", line 930, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 796, in rmtree
+    onexc(os.rmdir, path, err)
+  File "/home/vol05/scarf1415/mc-rc0-scarfF/uvpython/cpython-3.12.3-linux-x86_64-gnu/lib/python3.12/shutil.py", line 794, in rmtree
+    os.rmdir(path, dir_fd=dir_fd)
+OSError: [Errno 39] Directory not empty: '/scratch/scarf1415/relion-container-tests/tmp/tmpzj4btdrb'
+
+----------------------------------------------------------------------
+Ran 134 tests in 73.609s
+
+FAILED (errors=6)
+</system-out>
+	</testcase>
+	<testcase name="GainCacheOwnership" classname="GainCacheOwnership" time="4.51823" status="run">
+		<properties/>
+		<system-out>PASS: candidate
+PASS: old-production-selection
+PASS: omit-owner-selection
+PASS: omit-live-lease
+PASS: optimized interpreter reran all actual-header controls
+</system-out>
+	</testcase>
+	<testcase name="NvcompGuards" classname="NvcompGuards" time="0.0382579" status="run">
+		<properties/>
+		<system-out>nvcomp guards: 32 CudaMovieSession members, declaration and definition agree on all of them
+</system-out>
+	</testcase>
+	<testcase name="SyntheticRegression" classname="SyntheticRegression" time="1.01494" status="run">
+		<properties/>
+		<system-out>Results for --j 1 vs Expected Old Baseline:
+  Image Max Pixel Difference: 0.000000e+00
+  Image RMSE:                 0.000000e+00
+  Shift Max Difference (px):  0.000000e+00
+  Shift RMSD (px):            0.000000e+00
+Results for --j 4 vs Expected Old Baseline:
+  Image Max Pixel Difference: 0.000000e+00
+  Image RMSE:                 0.000000e+00
+  Shift Max Difference (px):  0.000000e+00
+  Shift RMSD (px):            0.000000e+00
+
+SUCCESS: All synthetic regression tests passed with bit-for-bit identity!
+</system-out>
+	</testcase>
+	<testcase name="HotPixelRngDeterminism" classname="HotPixelRngDeterminism" time="0.837774" status="run">
+		<properties/>
+		<system-out>Precondition: full 5x5 hot block detected (27 hot pixels total) -&gt; Gaussian branch reached.
+probe.mrc pixel bytes: 36864; differing: 0
+
+SUCCESS: hot-pixel replacement is independent of movie order and count.
+</system-out>
+	</testcase>
+	<testcase name="RunnerExposure" classname="RunnerExposure" time="1.06538" status="run">
+		<properties/>
+		<system-out>PASS runner exposure
+</system-out>
+	</testcase>
+	<testcase name="Runner_failure" classname="Runner_failure" time="0.233381" status="run">
+		<properties/>
+		<system-out>PASS runner failure
+</system-out>
+	</testcase>
+	<testcase name="Runner_invalid" classname="Runner_invalid" time="0.241562" status="run">
+		<properties/>
+		<system-out>PASS runner invalid
+</system-out>
+	</testcase>
+	<testcase name="Runner_resume" classname="Runner_resume" time="5.70177" status="run">
+		<properties/>
+		<system-out>PASS runner resume
+</system-out>
+	</testcase>
+	<testcase name="Runner_tomography" classname="Runner_tomography" time="0.815474" status="run">
+		<properties/>
+		<system-out>PASS runner tomography
+</system-out>
+	</testcase>
+	<testcase name="RunnerLateBin" classname="RunnerLateBin" time="1.37796" status="run">
+		<properties/>
+		<system-out>PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS exact late-bin sum
+PASS runner late_bin
+</system-out>
+	</testcase>
+	<testcase name="RunnerExportedUnits" classname="RunnerExportedUnits" time="0.245145" status="run">
+		<properties/>
+		<system-out>PASS serialized units and unchanged runtime model
+PASS runner exported_units
+</system-out>
+	</testcase>
+	<testcase name="GainCache" classname="GainCache" time="1.88639" status="run">
+		<properties/>
+		<system-out>  identity: gain of 1.0 reproduces the no-gain output exactly
+  control:  gain of 2.0 does change the output (the checks above can fail)
+  reuse:    second movie in a run matches the first, and matches a solo run
+gain cache: all cases exact
+</system-out>
+	</testcase>
+	<testcase name="TiffRead" classname="TiffRead" time="0.785048" status="run">
+		<properties/>
+		<system-out>  u16_deflate_rps1: 3 frame(s) 29x37, 111 row sums and 3219 samples exact
+  u16_raw_rps7: 2 frame(s) 16x50, 100 row sums and 1600 samples exact
+  packed4bit_k2sr: 1 frame(s) 7420x7676, 7676 row sums and 474880 samples exact
+TIFF read: all cases exact
+</system-out>
+	</testcase>
+	<testcase name="DamagedMovie" classname="DamagedMovie" time="8.05181" status="run">
+		<properties/>
+		<system-out>Running TIFF integrity and expected-frame validation test suite...
+  [PASS] test_strip_truncation
+  [PASS] test_ifd_directory_truncation
+  [PASS] test_hard_truncation
+  [PASS] test_corrupt_header
+  [PASS] test_expected_frames_cli
+  [PASS] test_expected_frames_star
+  [PASS] test_positive_control_short_valid_movie
+  [PASS] test_batch_permutations
+  [PASS] test_resume_isolation
+  [PASS] test_expected_frame_contract
+  [PASS] test_tomogram_expected_frames
+All TIFF integrity and expected-frame validation tests PASSED.
+</system-out>
+	</testcase>
+	<testcase name="TruncatedMrcMovie" classname="TruncatedMrcMovie" time="20.0502" status="run">
+		<properties/>
+		<system-out>PASS self-check: identical per-movie trees compare identical
+PASS self-check: STAR missing from the batch is caught (per-movie inventories differ: only single ['good.star'], only batch [])
+PASS self-check: EPS missing from the batch is caught (per-movie inventories differ: only single ['good_shifts.eps'], only batch [])
+PASS self-check: STAR changed is caught (good.star: differs after root normalisation)
+PASS self-check: extra product in the batch is caught (per-movie inventories differ: only single [], only batch ['good_extra.star'])
+PASS self-check: STAR missing from the single-movie tree is caught (per-movie inventories differ: only single [], only batch ['good.star'])
+PASS mode 0: valid movie exits 0 and publishes (rc=0)
+PASS mode 0, mid-frame: truncated movie fails the job (rc=1)
+PASS mode 0, mid-frame: reports 'Failed to read frame 4 (0-based) of movie.mrcs: the movie is truncated or unreadable.'
+PASS mode 0, mid-frame: no MRC/STAR/EPS product published: none
+PASS mode 0, frame-boundary: truncated movie...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="TruncatedGainDefect" classname="TruncatedGainDefect" time="7.66527" status="run">
+		<properties/>
+		<system-out>PASS mode 1, gain: valid file exits 0 and publishes (rc=0)
+PASS mode 1, gain, mid-image: job fails (rc=1)
+PASS mode 1, gain, mid-image: reports 'Failed to read the gain reference gain.mrc: the file is truncated or unreadable.'
+PASS mode 1, gain, mid-image: no MRC/STAR/EPS product published: none
+PASS mode 1, gain, tail-short: job fails (rc=1)
+PASS mode 1, gain, tail-short: reports 'Failed to read the gain reference gain.mrc: the file is truncated or unreadable.'
+PASS mode 1, gain, tail-short: no MRC/STAR/EPS product published: none
+PASS mode 1, gain, header-only: job fails (rc=1)
+PASS mode 1, gain, header-only: reports 'Failed to read the gain reference gain.mrc: the file is truncated or unreadable.'
+PASS mode 1, gain, header-only: no MRC/STAR/EPS product published: none
+PASS mode 1, gain, two movies: job fails and publishes nothing (rc=1, products none)
+PASS mode 1, gain-rot1: valid file exits 0 and publishes (rc=0)
+PASS mode 1, gain-rot1, mid-image: job fails (rc=1)
+PASS mode 1, gain-rot1, mid-image: report...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CompressedMovieSequence" classname="CompressedMovieSequence" time="1.2847" status="run">
+		<properties/>
+		<system-out>PASS: six compressed movies after a plain movie; exact core headers/pixels, STAR files present
+</system-out>
+	</testcase>
+	<testcase name="InputFormats" classname="InputFormats" time="54.2754" status="run">
+		<properties/>
+		<system-out>wrote 125 files, 114 cases {'accept': 89, 'known_failure': 1, 'characterise': 5, 'reject': 18, 'not_run': 1} to /scratch/scarf1415/relion-container-tests/tmp/mc-formats-okmr5q0j/fixtures
+decode checks
+end-to-end runs
+rejections and known failures
+
+case                            check   result   detail
+eer_legacy_container            -       NOT RUN  pre-TIFF EER container (Falcon 3 prototypes). renderEER.cpp's legacy path never sets width
+mrc_mode2_f32                   decode  PASS     
+mrc_mode0_s8                    decode  PASS     
+mrc_mode1_s16                   decode  PASS     
+mrc_mode6_u16                   decode  PASS     
+mrc_mode12_f16                  decode  PASS     
+mrc_mode101_4bit                decode  PASS     
+mrc_mode2_f32_bigendian         decode  PASS     
+mrc_mode1_s16_bigendian         decode  PASS     
+mrc_mode6_u16_fei2              decode  PASS     
+mrc_mode1_s16_seri              decode  PASS     
+tiff_u8_none                    decode  PASS     
+tiff_u8_lzw                   ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CutDownMovie" classname="CutDownMovie" time="4.0504" status="run">
+		<properties/>
+		<system-out>  tiff_u16_deflate_p2 frames 2-4       PASS 
+  bigtiff_u8_lzw frames 2-4            PASS 
+  eer 65001 first 20 fractions         PASS 
+  eer 65002 first 20 fractions         PASS 
+  mrc_le_mode2_fei2 frames 1-2         PASS 
+  mrc_be_mode2 frames 1-2              PASS 
+  mrc_be_mode0_256 frames 1-2          PASS 
+  mrc_be_mode1_256 frames 1-2          PASS 
+  mrc_be_mode1 without machine stamp   PASS 
+  mrc_mode101_crop                     PASS 
+  mrc_mode6_crop                       PASS 
+  mrc xz frames 0-2                    PASS 
+  mrc zst frames 0-2                   PASS 
+  oversized header not decoded         PASS 
+  inconsistent header refused          PASS cannot determine a consistent MRC header (0 byte orders fit)
+cut_down_movie: 0 failure(s)
+</system-out>
+	</testcase>
+	<testcase name="GlobalIfftElision" classname="GlobalIfftElision" time="2.84134" status="run">
+		<properties/>
+		<system-out>PASS: global inverse FFT elision preserves every product
+  A dose-weighting independence of EVN/ODD  ok
+  C patch alignment still contributes       ok
+  D elided branch matches non-elided branch ok (product set;
+                                                pixels cannot fail)
+  E _noDW.mrc independent of --dose_weighting ok
+  B determinism on the eliding arm          ok (defence in depth;
+                                                power undemonstrated)
+</system-out>
+	</testcase>
+	<testcase name="HostBufferReuse" classname="HostBufferReuse" time="4.20342" status="run">
+		<properties/>
+		<system-out>ok   nopool run exits 0
+ok   disabled pool reported accurately
+ok   pool run exits 0
+ok   default allocator mode reported (glibc defaults, pooled buffers)
+ok   perturbed run exits 0
+ok   thresholds run exits 0
+ok   no pool vs pool: same product inventory (10 files)
+ok   no pool vs pool: byte-identical products
+ok   no pool vs pool+MALLOC_PERTURB_: same product inventory (10 files)
+ok   no pool vs pool+MALLOC_PERTURB_: byte-identical products
+ok   no pool vs opt-in thresholds+MALLOC_PERTURB_: same product inventory (10 files)
+ok   no pool vs opt-in thresholds+MALLOC_PERTURB_: byte-identical products
+ok   mixed-geometry defaults run exits 0
+ok   mixed-geometry perturbed run exits 0
+ok   mixed geometry defaults vs reuse+perturbed: same product inventory (10 files)
+ok   mixed geometry defaults vs reuse+perturbed: byte-identical products
+ok   user-provided malloc settings are not overridden by the opt-in
+PASS
+</system-out>
+	</testcase>
+	<testcase name="StageProfile" classname="StageProfile" time="3.41255" status="run">
+		<properties/>
+		<system-out>ok   both runs exit 0
+ok   same product inventory (4 files)
+ok   identical corrected_micrographs.star
+ok   identical home/vol05/scarf1415/mc-rc0-scarfF/src/test-data/synthetic/synthetic_movie.mrc
+ok   identical home/vol05/scarf1415/mc-rc0-scarfF/src/test-data/synthetic/synthetic_movie.star
+ok   identical home/vol05/scarf1415/mc-rc0-scarfF/src/test-data/synthetic/synthetic_movie_noDW.mrc
+ok   one movie and one process record
+ok   stages tile the movie (104.784 vs 104.784 ms)
+ok   all expected stages in order: ['setup', 'read gain', 'session and device ingest', 'host read movie', 'allocate host sum', 'gain and sum', 'hot pixels', 'fix defects', 'release preprocessing', 'global fft', 'power spectrum', 'global alignment', 'allocate reconstruction', 'global ifft', 'patch alignment', 'fit polynomial', 'release alignment', 'unweighted sums', 'dose weighting', 'movie teardown', 'submit model and plot']
+ok   host read movie contains its own work (host read movie/READ_MOVIE: 4.24 of 4.245 ms)
+ok   global fft contains i...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="RunnerModelParser" classname="RunnerModelParser" time="0.350403" status="run">
+		<properties/>
+		<system-out>duplicate rejected
+nonfinite rejected
+truncated rejected
+negative_index rejected
+trailing rejected
+invalid_index rejected
+missing_coefficient rejected
+legacy empty trailing string preserved
+PASS runner model_parser
+</system-out>
+	</testcase>
+	<testcase name="EerMemorySafety" classname="EerMemorySafety" time="20.4411" status="run">
+		<properties/>
+		<system-out>PASS EerMemorySafety: scalar valid identity, isolated corrupt fractions, clean per-movie failures
+</system-out>
+	</testcase>
+	<testcase name="MicrographModelBounds" classname="MicrographModelBounds" time="3.37037" status="run">
+		<properties/>
+		<system-out>PASS 7 valid and 11 malformed saved-EER parser/completion controls; decoding unrun
+PASS 38 malformed saved models; sparse, fractional, mask and round-trip controls
+PASS actual resume repairs invalid hot-pixel records; valid resume is unchanged
+</system-out>
+	</testcase>
+	<testcase name="RunnerInterpolateShifts" classname="RunnerInterpolateShifts" time="0.80469" status="run">
+		<properties/>
+		<system-out>PASS runner interpolate_shifts
+</system-out>
+	</testcase>
+	<testcase name="WriteFaults" classname="WriteFaults" time="0.812143" status="run">
+		<properties/>
+		<system-out>  phase 1: a.mrc 1049600 B, sha256 2b251a3d1bd1610d
+    log check: claim_present=True corrected=True
+  phase 2: exit 1, b.mrc truncated to 600000 B, no b.star, a.mrc unchanged
+  phase 3: exit 0, b.mrc 1049600 B, joint STAR lists both, a.mrc still sha256 2b251a3d1bd1610d
+  phase 4: finite hard limit 8388608 B -&gt; exit 1, MotionCorr reported the short write on c.mrc, c.mrc truncated to 600000 B, no c.star
+fail-closed image writes: ok
+</system-out>
+	</testcase>
+	<testcase name="WriteFaultsSync" classname="WriteFaultsSync" time="1.80338" status="run">
+		<properties/>
+		<system-out>extra runner options: --sync_output
+  phase 1: a.mrc 1049600 B, sha256 b5678dacc5260898
+    log check: claim_present=False corrected=False
+  phase 2: exit 1, b.mrc truncated to 600000 B, no b.star, a.mrc unchanged
+  phase 3: exit 0, b.mrc 1049600 B, joint STAR lists both, a.mrc still sha256 b5678dacc5260898
+  phase 4: finite hard limit 8388608 B -&gt; exit 1, MotionCorr reported the short write on c.mrc, c.mrc truncated to 600000 B, no c.star
+fail-closed image writes: ok
+</system-out>
+	</testcase>
+	<testcase name="WriteFaultsMultiProduct" classname="WriteFaultsMultiProduct" time="1.04983" status="run">
+		<properties/>
+		<system-out>extra runner options: --save_noDW --even_odd_split
+  phase 1: a.mrc 1049600 B, sha256 7421ffb1e09bc2db
+    log check: claim_present=True corrected=True
+  phase 2: exit 1, b.mrc truncated to 600000 B, no b.star, a.mrc unchanged
+  phase 3: exit 0, b.mrc 1049600 B, joint STAR lists both, a.mrc still sha256 7421ffb1e09bc2db
+  phase 4: finite hard limit 8388608 B -&gt; exit 1, MotionCorr reported the short write on c.mrc, c.mrc truncated to 600000 B, no c.star
+fail-closed image writes: ok
+</system-out>
+	</testcase>
+	<testcase name="OutputStageFaults" classname="OutputStageFaults" time="0.736988" status="run">
+		<properties/>
+		<system-out>control arm: the same command without the fault exits 0
+PASS: the job reported failure (exit 1) rather than aborting
+PASS: the micrograph written before the PDF stage survived
+output stage faults: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEps" classname="LogfileFromEps" time="5.02915" status="run">
+		<properties/>
+		<system-out>PASS fresh run renders logfile.pdf from EPS (header list + batch list), one render
+PASS incremental run with a prior all_batches.pdf keeps the concatenation
+PASS Ghostscript failure (immediate, delayed, after a partial write, over a stale logfile.pdf) reports, exits 0 and leaves no logfile.pdf
+PASS a failed concatenation leaves no logfile.pdf (partial write, stale file)
+PASS an unwritable logfile.pdf is reported without failing the job or terminating
+logfile from EPS: all checks passed
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_always_eps" classname="LogfileFromEpsMutant_always_eps" time="0.648304" status="run">
+		<properties/>
+		<system-out>PASS fresh run renders logfile.pdf from EPS (header list + batch list), one render
+FAIL: incremental run rendered logfile.pdf from this run's EPS although a prior all_batches.pdf exists: the earlier batches would be lost: [{'args': ['-sDEVICE=pdfwrite', '-dNOPAUSE', '-dBATCH', '-dSAFER', '-dDEVICEWIDTHPOINTS=800', '-dDEVICEHEIGHTPOINTS=800', '-sOutputFile=/scratch/scarf1415/relion-container-tests/tmp/logfile-from-eps-1zy5z6qm/fresh/batch.pdf', '@/scratch/scarf1415/relion-container-tests/tmp/logfile-from-eps-1zy5z6qm/fresh/batch.pdf.lst'], 'out': '/scratch/scarf1415/relion-container-tests/tmp/logfile-from-eps-1zy5z6qm/fresh/batch.pdf', 'list': ['/scratch/scarf1415/relion-container-tests/tmp/logfile-from-eps-1zy5z6qm/fresh/Movies/a_shifts.eps', '/scratch/scarf1415/relion-container-tests/tmp/logfile-from-eps-1zy5z6qm/fresh/Movies/b_shifts.eps', '/scratch/scarf1415/relion-container-tests/tmp/logfile-from-eps-1zy5z6qm/fresh/Movies/c_shifts.eps']}, {'args': ['-sDEVICE=pdfwrite', '-dNOPAUSE', '-dBATCH', '-dSAFER', '...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_late_guard" classname="LogfileFromEpsMutant_late_guard" time="0.428881" status="run">
+		<properties/>
+		<system-out>FAIL: fresh run still concatenated header.pdf + all_batches.pdf into logfile.pdf
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_eps_order" classname="LogfileFromEpsMutant_eps_order" time="0.390622" status="run">
+		<properties/>
+		<system-out>FAIL: EPS-direct logfile.pdf must list header EPS followed by batch EPS, in order: ['/scratch/scarf1415/relion-container-tests/tmp/logfile-from-eps-m8euursb/fresh/Movies/a_shifts.eps', '/scratch/scarf1415/relion-container-tests/tmp/logfile-from-eps-m8euursb/fresh/Movies/b_shifts.eps', '/scratch/scarf1415/relion-container-tests/tmp/logfile-from-eps-m8euursb/fresh/corrected_micrographs_all_rlnAccumMotionTotal.eps', '/scratch/scarf1415/relion-container-tests/tmp/logfile-from-eps-m8euursb/fresh/corrected_micrographs_all_rlnAccumMotionEarly.eps', '/scratch/scarf1415/relion-container-tests/tmp/logfile-from-eps-m8euursb/fresh/corrected_micrographs_all_rlnAccumMotionLate.eps']
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_placeholder" classname="LogfileFromEpsMutant_placeholder" time="1.03552" status="run">
+		<properties/>
+		<system-out>PASS fresh run renders logfile.pdf from EPS (header list + batch list), one render
+PASS incremental run with a prior all_batches.pdf keeps the concatenation
+FAIL: gs fail: a failed logfile.pdf render left a file behind; the concatenation it replaced left none
+</system-out>
+	</testcase>
+	<testcase name="LogfileFromEpsMutant_concat_cleanup" classname="LogfileFromEpsMutant_concat_cleanup" time="4.31933" status="run">
+		<properties/>
+		<system-out>PASS fresh run renders logfile.pdf from EPS (header list + batch list), one render
+PASS incremental run with a prior all_batches.pdf keeps the concatenation
+PASS Ghostscript failure (immediate, delayed, after a partial write, over a stale logfile.pdf) reports, exits 0 and leaves no logfile.pdf
+FAIL: concat partial: a failed concatenation left a logfile.pdf behind
+</system-out>
+	</testcase>
+	<testcase name="CiFailClosedControls" classname="CiFailClosedControls" time="24.245" status="run">
+		<properties/>
+		<system-out>........
+----------------------------------------------------------------------
+Ran 8 tests in 24.166s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="CudaValidationParser" classname="CudaValidationParser" time="0.0560949" status="run">
+		<properties/>
+		<system-out>PASS
+</system-out>
+	</testcase>
+	<testcase name="MultiGpuScheduling" classname="MultiGpuScheduling" time="80.3554" status="run">
+		<properties/>
+		<system-out>ok   case_roundtrip_and_metadata
+ok   case_empty_required_products_refused
+ok   case_empty_shard_rejected
+ok   case_output_name_collision
+ok   case_duplicate_movie_in_input
+ok   case_collapsed_spaces_are_a_collision
+ok   case_decorated_output_collision
+ok   case_manifest_digest_binds_parsed_snapshot
+ok   case_real_output_suffixes_attributed
+ok   case_dotted_shift_plot_root
+ok   case_aggregate_name_shadowing
+ok   case_star_parser_refusals
+ok   case_clean_merge
+ok   case_lost_output
+ok   case_duplicate_and_misrouted_output
+ok   case_unassigned_movie_output
+ok   case_failed_worker_blocks_merge
+ok   case_missing_status_blocks_merge
+ok   case_failed_device_witness_blocks_merge
+ok   case_missing_worker_directory
+ok   case_link_staging_with_aggregate
+ok   case_link_refusal_falls_back_to_copy
+ok   case_launcher_exit_digests_are_reused
+ok   case_change_after_worker_exit_detected
+ok   case_preserved_aggregate_change_after_exit_detected
+ok   case_exit_digest_records_validated
+ok   case_timestamp_barrier_failure_fails_cl...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="OutputTreeComparator" classname="OutputTreeComparator" time="2.10485" status="run">
+		<properties/>
+		<system-out>test_changed_header_field_is_detected (__main__.TestOutputTreeComparator.test_changed_header_field_is_detected) ... ok
+test_changed_pixel_is_detected (__main__.TestOutputTreeComparator.test_changed_pixel_is_detected) ... ok
+test_changed_star_is_detected (__main__.TestOutputTreeComparator.test_changed_star_is_detected) ... ok
+test_cli_exit_code_agrees_with_the_report_it_writes (__main__.TestOutputTreeComparator.test_cli_exit_code_agrees_with_the_report_it_writes)
+A comparator that prints FAIL and exits 0 certifies the opposite of ... ok
+test_equal_complete_trees_pass_with_only_timestamp_and_log_timing_differences (__main__.TestOutputTreeComparator.test_equal_complete_trees_pass_with_only_timestamp_and_log_timing_differences) ... ok
+test_extended_header_is_included_in_length_and_payload_offset (__main__.TestOutputTreeComparator.test_extended_header_is_included_in_length_and_payload_offset) ... ok
+test_extra_movie_product_is_rejected (__main__.TestOutputTreeComparator.test_extra_movie_product_is_rejected) ... ok...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="JointStarPublication" classname="JointStarPublication" time="1.59566" status="run">
+		<properties/>
+		<system-out>PASS joint STAR healthy
+PASS joint STAR open
+PASS joint STAR rename
+LIMIT soft=128 hard=8192
+PASS joint STAR limit
+LIMIT soft=128 hard=8192
+PASS joint STAR write-limit
+PASS direct/glob optics association and binned sampling; STAR-reference pixels unchanged
+PASS joint STAR actual runner failure and repair; completed products unchanged
+</system-out>
+	</testcase>
+	<testcase name="ImageWriteFaults" classname="ImageWriteFaults" time="0.140326" status="run">
+		<properties/>
+		<system-out>  inherited RLIMIT_FSIZE: soft=infinity hard=infinity
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/rwMRC.h, line 642
+ERROR: 
+Failed to write image data (1048576 bytes) to /scratch/scarf1415/relion-container-tests/tmp/mc_write_faults_906858/big.mrc: File too large
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/image.h, line 570
+ERROR: 
+Failed to flush and close image file /scratch/scarf1415/relion-container-tests/tmp/mc_write_faults_906858/small.mrc: File too large
+  destructor dropped 1464 unflushable bytes without terminating
+  inherited RLIMIT_FSIZE: soft=8388608 hard=8388608  (finite-hard-limit control child)
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/rwMRC.h, line 642
+ERROR: 
+Failed to write image data (1048576 bytes) to /scratch/scarf1415/relion-container-tests/tmp/mc_write_faults_906859/big.mrc: File too large
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/image.h, line 570
+ERROR: 
+Failed to flush and close image file /scratch/scarf1415/relion-container-tests/tmp/mc_write_faults_906859/small.m...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="NativeMovieStaging" classname="NativeMovieStaging" time="0.0958734" status="run">
+		<properties/>
+		<system-out>
+native uint16 staging contract: 16 frames of 1534x2046 (98080 kB payload)
+ok     bind() sizes the frame vector
+ok     mapping covers the whole movie
+ok     every frame carries the movie geometry
+ok     frames alias the mapping (destroyData=false, nzyxdimAlloc set)
+ok     frame slices are laid out in ascending order
+ok     Image::read's coreAllocateReuse() keeps the bound slice
+ok     writes through the alias read back per frame
+ok     discardThrough() returns the consumed pages (49032 kB of about 49040 kB)
+ok     discardThrough() leaves unconsumed frames byte-intact
+ok     release() clears the frame vector
+ok     release() is idempotent and leaves no capacity
+ok     instrument sees the mapping arrive (98088 kB of 98080 kB)
+ok     release() returns the payload (4 kB retained of 98080 kB)
+       [control] per-frame heap: grew 98064 kB, retained 30760 kB after free
+       [control] per-frame heap retains 30760 kB of 98080 kB, so the
+       assertion above can fail for the defect it covers
+
+native uint8 staging ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="RunnerInterpolateShiftsCuda" classname="RunnerInterpolateShiftsCuda" time="2.26154" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS runner interpolate_shifts
+</system-out>
+	</testcase>
+	<testcase name="StageProfileDeviceTiming" classname="StageProfileDeviceTiming" time="5.08039" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>ok   both runs exit 0
+ok   same product inventory (4 files)
+ok   identical corrected_micrographs.star
+ok   identical home/vol05/scarf1415/mc-rc0-scarfF/src/test-data/synthetic/synthetic_movie.mrc
+ok   identical home/vol05/scarf1415/mc-rc0-scarfF/src/test-data/synthetic/synthetic_movie.star
+ok   identical home/vol05/scarf1415/mc-rc0-scarfF/src/test-data/synthetic/synthetic_movie_noDW.mrc
+ok   one movie and one process record
+ok   stages tile the movie (104.437 vs 104.437 ms)
+ok   all expected stages in order: ['setup', 'read gain', 'session and device ingest', 'host read movie', 'allocate host sum', 'gain and sum', 'hot pixels', 'fix defects', 'release preprocessing', 'global fft', 'power spectrum', 'global alignment', 'allocate reconstruction', 'global ifft', 'patch alignment', 'fit polynomial', 'release alignment', 'unweighted sums', 'dose weighting', 'movie teardown', 'submit model and plot']
+ok   host read movie contains its own work (host read movie/READ_MOVIE: 4.218 of 4.223 ms)
+ok   global fft contains ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="SignedMrcStaging" classname="SignedMrcStaging" time="10.549" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS int8 (28925) and int16 (34873) fixtures both contain negative samples
+PASS uint16 fixture contains 131072 samples above 32767
+PASS mode 0: both arms exit 0
+PASS mode 0: witness says compact / float
+PASS mode 0 (int8): compact products identical to float: no differences
+PASS control: one flipped payload byte is detected
+PASS control: unsigned expansion of the int8 fixture fails identity
+PASS mode 1: both arms exit 0
+PASS mode 1: witness says compact / float
+PASS mode 1 (int16): compact products identical to float: no differences
+PASS control: unsigned expansion of the int16 fixture fails identity
+PASS mode 6: both arms exit 0
+PASS mode 6: witness says compact / float
+PASS mode 6 (uint16): compact products identical to float: no differences
+PASS control: --ingest compact refuses a float32 MRC (rc=1)
+PASS float32 MRC under --ingest auto stays on the float path
+
+All signed MRC staging checks passed
+</system-out>
+	</testcase>
+	<testcase name="TruncatedMrcMovieCuda" classname="TruncatedMrcMovieCuda" time="87.6553" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS self-check: identical per-movie trees compare identical
+PASS self-check: STAR missing from the batch is caught (per-movie inventories differ: only single ['good.star'], only batch [])
+PASS self-check: EPS missing from the batch is caught (per-movie inventories differ: only single ['good_shifts.eps'], only batch [])
+PASS self-check: STAR changed is caught (good.star: differs after root normalisation)
+PASS self-check: extra product in the batch is caught (per-movie inventories differ: only single [], only batch ['good_extra.star'])
+PASS self-check: STAR missing from the single-movie tree is caught (per-movie inventories differ: only single [], only batch ['good.star'])
+PASS mode 0 ingest=auto: valid movie exits 0 and publishes (rc=0)
+PASS mode 0 ingest=auto: valid movie took the compact route
+PASS mode 0 ingest=auto, mid-frame: truncated movie fails the job (rc=1)
+PASS mode 0 ingest=auto, mid-frame: reports 'Failed to read frame 4 (0-based) of movie.mrcs: the movie is truncated or unreadable.'
+PASS mode 0 ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="TruncatedGainDefectCuda" classname="TruncatedGainDefectCuda" time="46.617" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS mode 1 ingest=auto, gain: valid file exits 0 and publishes (rc=0)
+PASS mode 1 ingest=auto, gain, mid-image: job fails (rc=1)
+PASS mode 1 ingest=auto, gain, mid-image: reports 'Failed to read the gain reference gain.mrc: the file is truncated or unreadable.'
+PASS mode 1 ingest=auto, gain, mid-image: no MRC/STAR/EPS product published: none
+PASS mode 1 ingest=auto, gain, tail-short: job fails (rc=1)
+PASS mode 1 ingest=auto, gain, tail-short: reports 'Failed to read the gain reference gain.mrc: the file is truncated or unreadable.'
+PASS mode 1 ingest=auto, gain, tail-short: no MRC/STAR/EPS product published: none
+PASS mode 1 ingest=auto, gain, header-only: job fails (rc=1)
+PASS mode 1 ingest=auto, gain, header-only: reports 'Failed to read the gain reference gain.mrc: the file is truncated or unreadable.'
+PASS mode 1 ingest=auto, gain, header-only: no MRC/STAR/EPS product published: none
+PASS mode 1 ingest=auto, gain, two movies: job fails and publishes nothing (rc=1, products none)
+PASS mode 1 ingest=auto, ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaU16StagingEquivalence" classname="CudaU16StagingEquivalence" time="0.697408" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>Native staging contract: uint16
+uint16 fixture: 5 negative-zero products, 5 zero-gain pixels, 5 subnormal products
+PASS uint16 no gain: sum and all 5 resident frames are byte-identical
+PASS uint16 plain gain: sum and all 5 resident frames are byte-identical
+PASS uint16 hostile gain: sum and all 5 resident frames are byte-identical
+PASS negative control: one-count change detected (unaligned sum differs)
+PASS frame-oracle control: changed resident frame detected (resident frame 4 differs)
+All uint16 staging equivalence checks passed
+Native staging contract: uint8
+uint8 fixture: 5 negative-zero products, 5 zero-gain pixels, 5 subnormal products
+PASS uint8 no gain: sum and all 5 resident frames are byte-identical
+PASS uint8 plain gain: sum and all 5 resident frames are byte-identical
+PASS uint8 hostile gain: sum and all 5 resident frames are byte-identical
+PASS negative control: one-count change detected (unaligned sum differs)
+PASS frame-oracle control: changed resident frame detected (resident frame 4 differs)
+...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaWrapperUploadFailure" classname="CudaWrapperUploadFailure" time="0.667999" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>All six failed uploads returned false and released their allocations
+</system-out>
+	</testcase>
+	<testcase name="CudaFaultMatrix" classname="CudaFaultMatrix" time="11.5464" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>Ownership control: one production session sequence, failures=0
+Ownership control: one production session sequence, failures=0
+Ownership control: one production session sequence, failures=0
+Ownership control: one production session sequence, failures=0
+Enumeration control: one production boundary case, failures=0
+Enumeration control: one production boundary case, failures=0
+Enumeration control: one production boundary case, failures=0
+Enumeration control: one production boundary case, failures=0
+Enumeration control: one production boundary case, failures=0
+Enumeration control: one production boundary case, failures=0
+ERROR: out of memory in /home/vol05/scarf1415/mc-rc0-scarfF/src/src/acc/cuda/cuda_alignpatch.cu at line 536 (error-code 2)
+Issue #69 CUDA fault matrix. Clean run uses: cudaMalloc=51 cudaFree (after release)=47 cudaEventCreate=34 cudaEventDestroy (after release)=34 cufftDestroy (after release)=5 cudaMemcpy H2D=25 cudaMemcpy D2H=24 cudaMemcpy D2D=4 cudaMemset=5 cudaDeviceSynchronize=6 cufftCreate=7 ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchWorkspace" classname="CudaPatchWorkspace" time="0.834998" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>ERROR: out of memory in /home/vol05/scarf1415/mc-rc0-scarfF/src/src/acc/cuda/cuda_alignpatch.cu at line 536 (error-code 2)
+PASS: 13 exact actual-path input/key/movie controls; 3 reuse calls had zero setup resources
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/acc/cuda/cuda_settings.h, line 65
+ERROR: 
+
+A GPU-function failed to execute.
+
+ If this occured at the start of a run, you might have GPUs which
+are incompatible with either the data or your installation of relion.
+If you 
+
+	-&gt; INSTALLED RELION YOURSELF: if you e.g. specified -DCUDA_ARCH=50
+	   and are trying ot run on a compute 3.5 GPU (-DCUDA_ARCH=3.5), or 
+	   a similar mismatch on AMD or Intel GPUs, this may happen.
+
+	-&gt; HAVE MULTIPLE GPUS OF DIFFERNT VERSIONS: relion needs at least NVIDIA 
+	   GPUs with compute 5.0 or AMD MI GPUs with archtiecture gfx906. 
+	   You may be trying to use a GPU architectures older than these. 
+	   If you have multiple generations, try specifying --gpu &lt;X&gt;
+	   with X=0. Then try X=1 in a new run, and so on. The numberi...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatch" classname="CudaPatchBatch" time="1.77525" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS: window extraction matches the frequency definition
+PASS: 22 direct windowed/full-spectrum comparisons
+PASS: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: chunk-size arithmetic
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/acc/cuda/cuda_alignpatch.cu, line 843
+ERROR: 
+Fatal CUDA error allocating the batched patch workspace
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/acc/cuda/cuda_alignpatch.cu, line 885
+ERROR: 
+Fatal CUDA state refuses batched patch workspace
+PASS: 12 reservation fault controls (declines keep nothing and record nothing; fatal is not retried)
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/acc/cuda/cuda_alignpatch.cu, line 988
+ERROR: 
+cuFFT error: code 6
+in: /home/vol05/scarf1415/mc-rc0-scarfF/src/src/acc/cuda/cuda_movie_session.cu, line 2428
+ERROR: 
+CUDA device context is unusable during batched patch preparation (patch 1 of 9): an illegal memory access was encountered. Refusing to retry alignment on a poisoned context.
+PASS: 5 session fault contro...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaVramAlias" classname="CudaVramAlias" time="0.951929" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS: 3 global arena comparisons (need 79697408 B, work 35444736 B)
+PASS: 4 real-space readers refused while borrowed
+PASS: dose-weighting scratch in the consumed movie
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatchMutant_shift_retired" classname="CudaPatchBatchMutant_shift_retired" time="1.78422" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: window extraction matches the frequency definition
+RAN: 22 direct windowed/full-spectrum comparisons
+RAN: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: mutant produced 62 detected mismatches
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatchMutant_never_retire" classname="CudaPatchBatchMutant_never_retire" time="1.79298" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: window extraction matches the frequency definition
+RAN: 22 direct windowed/full-spectrum comparisons
+RAN: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: mutant produced 430 detected mismatches
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatchMutant_extract_no_remap" classname="CudaPatchBatchMutant_extract_no_remap" time="1.77091" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: window extraction matches the frequency definition
+RAN: 22 direct windowed/full-spectrum comparisons
+RAN: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: mutant produced 117 detected mismatches
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatchMutant_scale_divide" classname="CudaPatchBatchMutant_scale_divide" time="1.78814" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: window extraction matches the frequency definition
+RAN: 22 direct windowed/full-spectrum comparisons
+RAN: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: mutant produced 109 detected mismatches
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatchMutant_shift_wrong_half" classname="CudaPatchBatchMutant_shift_wrong_half" time="1.72737" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: window extraction matches the frequency definition
+RAN: 22 direct windowed/full-spectrum comparisons
+RAN: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: mutant produced 56 detected mismatches
+</system-out>
+	</testcase>
+	<testcase name="CudaPatchBatchMutant_perpatch_wrong_half" classname="CudaPatchBatchMutant_perpatch_wrong_half" time="1.76136" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: window extraction matches the frequency definition
+RAN: 22 direct windowed/full-spectrum comparisons
+RAN: 15 session-level batched/per-patch comparisons (prep into slots included)
+PASS: mutant produced 27 detected mismatches
+</system-out>
+	</testcase>
+	<testcase name="CudaVramAliasMutant_arena_overlap" classname="CudaVramAliasMutant_arena_overlap" time="0.935922" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: 3 global arena comparisons (need 79697408 B, work 35444736 B)
+RAN: 4 real-space readers refused while borrowed
+RAN: dose-weighting scratch in the consumed movie
+PASS: mutant detected (8 mismatches)
+</system-out>
+	</testcase>
+	<testcase name="CudaVramAliasMutant_arena_work_over_buffers" classname="CudaVramAliasMutant_arena_work_over_buffers" time="0.898162" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: 3 global arena comparisons (need 79697408 B, work 35444736 B)
+RAN: 4 real-space readers refused while borrowed
+RAN: dose-weighting scratch in the consumed movie
+PASS: mutant detected (4 mismatches)
+</system-out>
+	</testcase>
+	<testcase name="CudaVramAliasMutant_refusal_off" classname="CudaVramAliasMutant_refusal_off" time="0.902134" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: 3 global arena comparisons (need 79697408 B, work 35444736 B)
+RAN: 0 real-space readers refused while borrowed
+RAN: dose-weighting scratch in the consumed movie
+PASS: mutant detected (7 mismatches)
+</system-out>
+	</testcase>
+	<testcase name="CudaVramAliasMutant_dw_scratch_over_fourier" classname="CudaVramAliasMutant_dw_scratch_over_fourier" time="0.922189" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>RAN: 3 global arena comparisons (need 79697408 B, work 35444736 B)
+RAN: 4 real-space readers refused while borrowed
+RAN: dose-weighting scratch in the consumed movie
+PASS: mutant detected (2 mismatches)
+</system-out>
+	</testcase>
+	<testcase name="CudaDeviceGainPool" classname="CudaDeviceGainPool" time="0.710944" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>CUDA_VISIBLE_DEVICES=GPU-d4169778-fe7f-06ef-3807-b9e301b3b459 visible_count=1
+CUDA device index=0 UUID=GPU-d4169778-fe7f-06ef-3807-b9e301b3b459 name=NVIDIA A100-SXM4-40GB
+Testing retained gain A -&gt; B -&gt; A...
+  PASS: A -&gt; B -&gt; A, reuse, geometry change
+Testing gain -&gt; no gain -&gt; gain...
+  PASS: gain -&gt; no gain -&gt; gain, and generation 0
+Testing device selection restored after a retained-gain drop...
+  PASS: owning device selected, caller's device restored
+Testing one-GPU logic-only selection owner0/current1; actual device1 UNRUN...
+Testing interleaved session gain leases...
+Testing early stale-gain retirement before movie admission...
+Testing runner gain identity ordering and uniqueness...
+  PASS: identity is per-resolution, geometry-checked and per-runner
+Testing retained gain invalidation after a session failure...
+  PASS: failed session retires the retained gain
+Tracked allocation ledger selector=all allocated_bytes=777856 freed_bytes=777856 stale_frees=0 live_buffers=0
+PASS: worker-lifetime device gain pool...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaDeviceGainCleanupFatal" classname="CudaDeviceGainCleanupFatal" time="0.627214" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>CUDA_VISIBLE_DEVICES=GPU-d4169778-fe7f-06ef-3807-b9e301b3b459 visible_count=1
+CUDA device index=0 UUID=GPU-d4169778-fe7f-06ef-3807-b9e301b3b459 name=NVIDIA A100-SXM4-40GB
+Testing recoverable session -&gt; fatal retained-gain cleanup...
+  PASS: cleanup-origin fatal retires before a fresh session; tracked fixture released
+Tracked allocation ledger selector=cleanup-fatal allocated_bytes=25344 freed_bytes=25344 stale_frees=0 live_buffers=0
+PASS: worker-lifetime device gain pool controls
+</system-out>
+	</testcase>
+	<testcase name="CudaGeometryRetention" classname="CudaGeometryRetention" time="0.648037" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>Testing retained geometry reuse...
+Testing a geometry change discards the entry before allocating...
+Testing a failed session frees instead of returning...
+Testing two live sessions never share the entry...
+PASS: retained geometry controls (0 failed checks)
+</system-out>
+	</testcase>
+	<testcase name="CudaGeometryRetentionMutant_no_take" classname="CudaGeometryRetentionMutant_no_take" time="0.66633" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>Testing retained geometry reuse...
+CHECK FAILED: a key hit still allocated the movie buffers
+CHECK FAILED: a key hit still created cuFFT plans
+CHECK FAILED: the poisoned movie did not take the entry
+Testing a geometry change discards the entry before allocating...
+Testing a failed session frees instead of returning...
+Testing two live sessions never share the entry...
+PASS: mutant detected (3 failed checks)
+</system-out>
+	</testcase>
+	<testcase name="CudaGeometryRetentionMutant_return_failed" classname="CudaGeometryRetentionMutant_return_failed" time="0.661952" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>Testing retained geometry reuse...
+Testing a geometry change discards the entry before allocating...
+Testing a failed session frees instead of returning...
+CHECK FAILED: a failed session returned its geometry while the guard's drop was refused
+Testing two live sessions never share the entry...
+PASS: mutant detected (1 failed checks)
+</system-out>
+	</testcase>
+	<testcase name="CudaGeometryRetentionMutant_keep_taken_alias" classname="CudaGeometryRetentionMutant_keep_taken_alias" time="0.638446" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>Testing retained geometry reuse...
+CHECK FAILED: poisoned retained movie failed
+CHECK FAILED: a poisoned retained geometry changed products
+Testing a geometry change discards the entry before allocating...
+CHECK FAILED: geometry fixture movie failed
+CHECK FAILED: changed-geometry movie failed
+CHECK FAILED: a changed key reused the old plans or buffers
+CHECK FAILED: the mismatching entry was not freed before the new movie allocated
+CHECK FAILED: the changed geometry was not retained
+Testing a failed session frees instead of returning...
+CHECK FAILED: failure fixture movie failed
+CHECK FAILED: failure fixture initialization
+CHECK FAILED: a taken entry stayed in the pool slot
+CHECK FAILED: failure fixture pipeline
+CHECK FAILED: a failed session returned its geometry to the pool
+CHECK FAILED: lease fixture movie failed
+CHECK FAILED: lease holder initialization
+CHECK FAILED: failing session admitted beside the lease holder
+CHECK FAILED: lease fixture pipeline
+CHECK FAILED: a failed session returned its geometry wh...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaDoseNormalization" classname="CudaDoseNormalization" time="1.71117" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS: 100 exact null/polynomial reconstructions; 1365 exact weighted Fourier frames; consecutive changed dose/apix/geometry calls
+PASS: global FFTs bit-identical to the per-frame-synchronised oracle with one device wait each; exec failure refused, drained, unleaked; negative control detected
+PASS: 36 session-mode reconstructions exact, 1 allocation, 0 frame copies, resident input intact; negative controls detected
+PASS: session-mode block allocation fault refused success and freed nothing it did not own
+PASS: selected actual-path dose fault refused success and released all owners
+PASS: selected actual-path dose fault refused success and released all owners
+PASS: selected actual-path dose fault refused success and released all owners
+PASS: selected actual-path dose fault refused success and released all owners
+PASS: selected actual-path dose fault refused success and released all owners
+PASS: exact reconstruction-scoped dose normalization controls (injected codes, not poisoned hardware)
+</system-out>
+	</testcase>
+	<testcase name="CudaDoseSessionPlan" classname="CudaDoseSessionPlan" time="0.625993" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS borrowed session C2R 32x24 polynomial=0 fault=0; no extra plans, resident input preserved, owner checked
+PASS borrowed session C2R 35x29 polynomial=0 fault=0; no extra plans, resident input preserved, owner checked
+PASS borrowed session C2R 32x24 polynomial=1 fault=0; no extra plans, resident input preserved, owner checked
+PASS borrowed session C2R 35x29 polynomial=1 fault=0; no extra plans, resident input preserved, owner checked
+PASS borrowed session C2R 32x24 polynomial=0 fault=2; no extra plans, resident input preserved, owner checked
+PASS borrowed session C2R 32x24 polynomial=0 fault=5; no extra plans, resident input preserved, owner checked
+PASS: exact reconstruction-scoped dose normalization controls (injected codes, not poisoned hardware)
+</system-out>
+	</testcase>
+	<testcase name="CudaResidentRetryFailures" classname="CudaResidentRetryFailures" time="7.0432" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS healthy: resident retry preparation succeeded, retry converged, comparison rejects header, pixel and STAR differences
+PASS recoverable: WARNING, download path taken, MRC header and pixels and STAR identical
+PASS fatal: refused, non-zero exit, no products
+RESIDENT_RETRY_PASS
+</system-out>
+	</testcase>
+	<testcase name="CudaPreprocessingFailurePaths" classname="CudaPreprocessingFailurePaths" time="8.12313" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS preprocessing failure controls; artifacts: /scratch/scarf1415/relion-container-tests/tmp/mc-preprocessing-qykw8w4w
+Injected status codes only; genuine device poisoning remains untested.
+</system-out>
+	</testcase>
+	<testcase name="CudaStaleErrorAfterOom" classname="CudaStaleErrorAfterOom" time="5.74367" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>[PASS] reference nvcomp   rc=0 route=nvcomp inventory=['Movies/b.mrc', 'Movies/b.star', 'corrected_micrographs.star']
+[PASS] comparison self-tests on the nvcomp reference
+[PASS] reference compact  rc=0 route=compact inventory=['Movies/b.mrc', 'Movies/b.star', 'corrected_micrographs.star']
+[PASS] comparison self-tests on the compact reference
+[PASS] nvcomp   --ingest nvcomp  rc=1 routes={'a': 'nvcomp', 'b': 'nvcomp', 'c': 'nvcomp'}
+[PASS] nvcomp   --ingest auto    rc=1 routes={'a': 'nvcomp', 'b': 'nvcomp', 'c': 'nvcomp'}
+[PASS] compact  --ingest auto    rc=1 routes={'a': 'compact', 'b': 'compact', 'c': 'compact'}
+
+PASS: a genuine handled allocation failure leaves the next movies on their route with identical products
+</system-out>
+	</testcase>
+	<testcase name="CudaAdler32" classname="CudaAdler32" time="1.71686" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS: actual Adler kernel all
+</system-out>
+	</testcase>
+	<testcase name="CudaNvcompAcceptanceFailures" classname="CudaNvcompAcceptanceFailures" time="8.02566" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>[
+  {
+    "label": "healthy",
+    "returncode": 0,
+    "products": [
+      "Movies/control.mrc",
+      "Movies/control.star",
+      "corrected_micrographs.star"
+    ],
+    "chunk_frames": 2,
+    "chunks": 3,
+    "gain_launches": 3,
+    "path": "nvcomp",
+    "identical_to_c2": true,
+    "pass": true,
+    "command": [
+      "/home/vol05/scarf1415/mc-rc0-scarfF/build-nvcomp/motioncorr_nvcomp_acceptance",
+      "--i",
+      "movies.star",
+      "--o",
+      "/scratch/scarf1415/relion-container-tests/tmp/mc-adler-accept-8fupyk1g/healthy/",
+      "--use_own",
+      "--gpu",
+      "0",
+      "--j",
+      "1",
+      "--max_io_threads",
+      "1",
+      "--patch_x",
+      "2",
+      "--patch_y",
+      "2",
+      "--max_iter",
+      "1",
+      "--bfactor",
+      "150",
+      "--seed",
+      "1",
+      "--angpix",
+      "1.0",
+      "--voltage",
+      "300",
+      "--ingest",
+      "nvcomp",
+      "--ingest_witness",
+      "/scratch/scarf1415/relion-container-tests/tmp/mc-adler-accept-8fupyk1g/healthy.witness"
+    ]
+  }...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaNvcompReconstructionFailures" classname="CudaNvcompReconstructionFailures" time="5.52669" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>fixture: 48x40x6 Adobe Deflate, RowsPerStrip=1, 16-bit (22268 bytes)
+[PASS] healthy nvCOMP      rc=0 path=nvcomp products=3
+[PASS] unweighted-release-fatal   rc=1 path=nvcomp products=0
+[PASS] dw-release-fatal           rc=1 path=nvcomp products=0
+[UNRUN] mutant rows: no --mutant-binary given, so nothing here shows the guard can stay silent
+[PASS] sparse-recoverable         rc=0 route=nvcomp products=3/3
+        recoverable defect-update failure: the movie must be recovered from the device, not lost with it
+        route witnesses seen: none (reported, not asserted)
+[PASS] ingest-teardown-fatal      rc=0 route=compact products=3/3
+        teardown fails after the worker returned success: the ingest must not be reported as successful
+        route witnesses seen: none (reported, not asserted)
+[PASS] tiff-open-partial          rc=0 route=compact products=3/3
+        some ingest threads get no TIFF handle: the team must not deadlock, and the movie must fall back
+
+PASS: reconstruction-cleanup controls hold on the...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="CudaDoseWeightAlias" classname="CudaDoseWeightAlias" time="4.36236" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda;hardware"/>
+		</properties>
+		<system-out>PASS dose-weighting alias: carved by default, not with --save_noDW/--even_odd_split, dose-weighted micrograph identical
+PASS mutant predicate carves with --save_noDW and is detected
+</system-out>
+	</testcase>
+	<testcase name="CudaErrorClass" classname="CudaErrorClass" time="0.0199445" status="run">
+		<properties>
+			<property name="cmake_labels" value="cuda"/>
+		</properties>
+		<system-out>21 classifier cases (13 poisoning, 8 recoverable), 0 failures  [CUDART_VERSION 12080]
+13 retry cases (8 fatal, 5 permitted), 0 failures
+8 session-state sequences, 0 failures
+PASS classifier separates poisoned-context codes from recoverable ones,
+     and a fatal error already consumed by a helper -- leaving the
+     last-error slot clear -- still refuses the retry, while a recorded
+     recoverable allocation failure still permits the supported path.
+     A later fatal error is latched monotonically by the production
+     session state even when an earlier recoverable one was recorded
+     and the last-error slot has since been cleared. A fatal error
+     consumed by the FALLBACK preparation, after a permitted
+     pre-fallback check and with the slot cleared, also refuses the
+     CUDA re-dispatch.
+     These cover the predicates only; no real poisoned context is
+     synthesised anywhere in this suite, and no device is used.
+</system-out>
+	</testcase>
+</testsuite>

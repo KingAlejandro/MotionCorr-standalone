@@ -442,6 +442,7 @@ Two further statements: a file that changes **between the tag scan and the strip
 - Resume (§5). Multi-GPU is process-per-device only (§4).
 - **GPU memory: free-VRAM floors per geometry, the streaming fallback and a non-monotone gap: see "GPU memory (QM)" at the end of this section.** Binning is not a memory workaround on the strength of this page: early binning skips the resident session (`:2300`) and does the global FFT on the CPU, changes the output sampling, and the later CUDA stages' memory behaviour is unqualified.
 - **Host RAM with `--grouping_for_ps` on CUDA:** one extra Fourier movie on the host (§3).
+- **Post-RC0 #235:** ProfilingKit selftests now use local `/tmp` scratch, including child processes, to avoid PanFS/network `TMPDIR` cleanup `ENOTEMPTY`. A supplied EER gain section now fails explicitly if Pillow is missing; optional EER inputs remain optional. Local semantic negative controls and affected CTests passed; PanFS itself was not retested. See `docs/post_rc0/issue235/`.
 - The `ProfilingKit` test has a 30 s subprocess timeout (`tools/profiling/tests/test_import_subset_boundaries.py`) that is load sensitive; it
   failed once under host load about 27 in the Linux CPU qualification and passed on rerun (PR #209). Run CTest on a quiet host, or record it.
 - Resident retry (#197), 10641: host RSS 2.07 GiB with the resident retry versus 7.0 GiB before #197; one resident retry allocates 504 MiB of

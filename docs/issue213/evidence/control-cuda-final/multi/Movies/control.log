@@ -1,0 +1,45 @@
+Working on Movies/control.tiff with 4 thread(s).
+
+Limitted the number of IO threads per movie to 2 thread(s).
+Movie size: X = 512 Y = 512 N = 12
+Frames to be used: 1 2 3 4 5 6 7 8 9 10 11 12
+Frame grouping: n_frames = 12, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 
+interpolate_shifts = 0
+
+Movie FFT: batch=1 R2C work=1052672 C2R work=1052672 shared work=1052672 inverse tile=1052672 bytes
+Staging this movie as native unsigned 16-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 6291456 bytes for 12 x 512 x 512 samples, released before any float movie is materialized.
+In unaligned sum, Mean = 25317.4 Std = 2276.68 Hotpixel threshold = 38977.4
+Detected 0 hot pixels to be corrected.
+Fixed hot pixels.
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+Released native uint16 host staging after device forward FFT.
+
+Global alignment:
+ Iteration 1: RMSD = 7.82361 px
+ Iteration 2: RMSD = 0.722048 px
+ Iteration 3: RMSD = 0.048227 px
+ [CUDA Global Alignment Profile]
+   Per-kernel timing:            not measured (enable with --profile)
+   Total GPU alignment time:     1.49 ms
+   Buffer VRAM:                  15.65 MiB
+   cuFFT workspace VRAM:         1.71 MiB
+   Peak GPU memory allocated:    17.36 MiB
+   Buffer placement:             borrowed dead device memory, nothing allocated
+ [CUDA Global Alignment] completed; converged=yes
+Reconstructing globally aligned frames (CUDA in-VRAM)...
+
+Local alignments:
+Patches: X = 3 Y = 3
+Batched patch alignment: 9 patches, chunk size 4 (cap 4, 3 chunk(s)); free device memory 80690 of 81153 MiB; workspace 16 MiB + cuFFT work 1 MiB, retained until alignment release.
+Batched patch alignment: device memory in use rose by at most 26 MiB (sampled after each chunk).
+Patch (1, 1): 1 / 9, X range = [0, 170), Y range = [0, 170), Center = (84, 84)
+ Iteration 1: RMSD = 0.10 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     0.24 ms
+   Buffer VRAM:                  16.51 MiB
+   cuFFT workspace VRAM:         1.34 MiB
+   Peak GPU memory allocated:    17.85 MiB
+ [CUDA Patch Alignment] completed; converged=no
+CUDA Error in /mnt/clathrin/alex-motioncorr-213/src-min/src/acc/cuda/cuda_movie_session.cu:2333 : an illegal memory access was encountered

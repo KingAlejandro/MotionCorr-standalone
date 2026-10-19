@@ -252,3 +252,21 @@ Per-family GPU and CPU timing tables are in `docs/workload_corpus/{cpu,gpu}/`; d
 ## 7. Sign-off
 
 Maintainer review of this report, the scope decision and the tag are separate steps (`RELEASE_CHECKLIST.md` §10). Frozen source SHA F: `6d68e2d6`. Tag target T (named by the maintainer; F or a later docs-only evidence commit): pending. `git diff F T -- . ':!docs/rc0' ':!docs/release'` empty: pending. Maintainer sign-off: pending (QF on F is recorded in `docs/rc0/qf/run_6d68e2d6/`).
+
+## 8. Post-RC0 changes
+
+- **#213, tests only**, tested PR source head `f25c958041cc59e6b6c9d2336c7f85092b0fff81`
+  (subsequent publication changes are documentation only): opt-in genuine CUDA
+  sticky-context control; production sources and existing injected tests
+  unchanged. Local Python syntax/grader predicate checks and Release CPU CMake
+  configuration/collection passed (74 CPU tests collected; destructive test
+  absent). CPU executables/CTest were not run. Native CUDA and CUDA+nvCOMP
+  controls **passed** (healthy, genuine single/three-movie fault, single-worker
+  dataset failure/cleanup); before/after GPU health passed. The compiled CUDA
+  detection mutant failed the intended refusal assertion, with real error 700
+  still witnessed; original source/binary restored exactly. Both Release builds
+  succeeded. No QF, full CTest suite, known-motion/corpus, performance or
+  scientific rerun; those results retain their earlier SHA. Tests-only re-entry
+  under `POST_FREEZE_TEST_PLAN.md` §9.4 reruns the affected controls, not QF.
+  Evidence and remaining scope: [`docs/issue213/README.md`](../issue213/README.md);
+  limitation: `SUPPORT.md` §8.

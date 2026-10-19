@@ -353,8 +353,9 @@ healthy movies for a published dataset.
      "no report was produced", not a successful run; the numerical products are the MRC and STAR files.
 3. A pinned `--ingest` that cannot be honoured fails the movie before any host decode (§2).
 4. A fatal CUDA error refuses any CPU fallback and fails the movie (`src/motioncorr_runner.cpp:2260-2272`). A
-   recoverable device-ingest failure re-reads the movie on the host and continues (`:2341-2346`). The fatal-path CUDA tests inject error
-   codes; **genuine device poisoning is not tested** and is post-RC0 work (TST2, [#213](https://github.com/KingAlejandro/MotionCorr-standalone/issues/213)).
+   recoverable device-ingest failure re-reads the movie on the host and continues (`:2341-2346`). The ordinary fatal-path CUDA tests inject error
+   codes. The opt-in genuine sticky-context control covers one resident-retry boundary
+   on an A100 (TST2, [#213](https://github.com/KingAlejandro/MotionCorr-standalone/issues/213)); see §8 for limits.
 5. **Truncated or short raw MRC movies, gain references and defect maps fail closed (F3/F3b, D5; merged, #205 `f67a5866`).** The negative return of `Image::read` (short
    `fread` or seek failure) is now checked at every read, so a truncated movie no longer runs on unread memory. This is movie-level rejection (the criterion of
    `POST_FREEZE_TEST_PLAN.md` §4.1): exit 1, no completion STAR for the movie, no joint output for the batch. The named messages are:
@@ -416,6 +417,19 @@ Two further statements: a file that changes **between the tag scan and the strip
 
 ## 8. Known limitations
 
+- **Genuine CUDA context poisoning (#213): bounded native coverage.** An opt-in,
+  test-only `CudaStickyContext` control now launches an illegal device write in
+  the runner's context and checks sticky-error observation, attributed refusal,
+  no publication, later-movie containment and worker/dataset failure. It is
+  excluded from ordinary CTest collection (`MC_ENABLE_STICKY_CUDA_TEST=OFF`).
+  A reserved idle GPU and the driver's canonical per-GPU lock are required;
+  see [`docs/issue213/README.md`](../issue213/README.md) for the runbook and actual
+  evidence at `f25c9580`: CUDA and CUDA+nvCOMP controls passed on one A100 with
+  CUDA 12.8; a compiled CUDA mutant disabling the boundary refusal was rejected.
+  Before/after GPU health checks passed. Coverage is one resident-retry boundary
+  and one dataset worker with a synthetic fixture; other fault sites, genuine
+  nvCOMP-ingest poisoning, late-product rollback and other devices/toolkits are
+  untested. Existing injected controls and frozen RC0 results keep their scope/SHA.
 - **The `0.001` relative-RMSE diagnostic fails for CUDA versus CPU.** On the 24 tutorial movies CUDA versus fixed CPU
   `--j 1` gives relative RMSE 0.002899-0.010082 against 0.001 (0/24 pass the relaxed profile; every other relaxed check
   passes). The explicit `--gate backend` profile records this as a non-blocking diagnostic. This is a strict CPU-agreement
@@ -473,7 +487,7 @@ every completed constrained run was identical to its unconstrained run and every
 > | 4096²×144 (Falcon 4 EER, compact) | 19 / 20 GiB | 12–18.5 GiB | ≤ 11 GiB |
 > | 11520×8184×50 (K3-class u8 TIFF, compact) | 37.5 / 39 GiB | 22–36.5 GiB | ≤ 21 GiB |
 >
-> Below the resident session threshold, the movie falls back to the streaming route (identical output, 3–9× slower, and several times the host RAM: about 36 GiB RSS for 11520×8184×50, 21 GiB for 4096²×144, and 7.7 GiB for 4096²×59; hosts with insufficient RAM are untested). Below the streaming floor, the movie fails cleanly after host preprocessing with an out-of-memory error and writes no products. **Completion is not monotone in free VRAM:** in the ~0.5–1.5 GiB band **between the streaming range and the full-speed floor** (8.0–8.5, 19–19.5, and 37.0–38.5 GiB above), the resident session is admitted before gain/sum or patch-stage buffers are allocated, so global alignment falls back to CPU preprocessing (8.0 and 37.0 GiB) and local (patch) alignment **fails** with a patch-stage out-of-memory error (8.5, 19–19.5, and 37.5–38.5 GiB) even though lower free VRAM completes via streaming (#226 D2). Do not size runs in that gap or right at the floor. [Revised after D11, #228 `e3871ca2`; R-QM measured the old behaviour on `483e881d`:] After a movie fails with a handled device out-of-memory error in a multi-movie run, the next movie in the same process keeps its own route and produces the same products as a standalone run, under `--ingest auto` and under a pinned `--ingest nvcomp` (on main before D11 it fell back one route step, or was refused under a pinned nvcomp; #226 D1). This was shown on one A100 with a VRAM balloon, on a strict-product test (`CudaStaleErrorAfterOom`) and in three-movie jobs; fatal-error handling is unchanged (the fix is a scope guard at `src/motioncorr_runner.cpp:2279-2299`, registered as `CudaStaleErrorAfterOom`, `CMakeLists.txt:913-917`), and no genuine sticky-error (poisoned-device) control exists (TST2). `--ingest compact` refuses immediately (~1 s, no products) when the resident session cannot be created. Not covered here: `--eer_upsampling 2` (see §2), `--grouping_for_ps` (+1 Fourier movie in host RAM, §3), `--bin_factor`, float32 MRC, and real smaller GPUs (whose driver reservation may differ from the 80 GB A100).
+> Below the resident session threshold, the movie falls back to the streaming route (identical output, 3–9× slower, and several times the host RAM: about 36 GiB RSS for 11520×8184×50, 21 GiB for 4096²×144, and 7.7 GiB for 4096²×59; hosts with insufficient RAM are untested). Below the streaming floor, the movie fails cleanly after host preprocessing with an out-of-memory error and writes no products. **Completion is not monotone in free VRAM:** in the ~0.5–1.5 GiB band **between the streaming range and the full-speed floor** (8.0–8.5, 19–19.5, and 37.0–38.5 GiB above), the resident session is admitted before gain/sum or patch-stage buffers are allocated, so global alignment falls back to CPU preprocessing (8.0 and 37.0 GiB) and local (patch) alignment **fails** with a patch-stage out-of-memory error (8.5, 19–19.5, and 37.5–38.5 GiB) even though lower free VRAM completes via streaming (#226 D2). Do not size runs in that gap or right at the floor. [Revised after D11, #228 `e3871ca2`; R-QM measured the old behaviour on `483e881d`:] After a movie fails with a handled device out-of-memory error in a multi-movie run, the next movie in the same process keeps its own route and produces the same products as a standalone run, under `--ingest auto` and under a pinned `--ingest nvcomp` (on main before D11 it fell back one route step, or was refused under a pinned nvcomp; #226 D1). This was shown on one A100 with a VRAM balloon, on a strict-product test (`CudaStaleErrorAfterOom`) and in three-movie jobs; fatal-error handling is unchanged (the fix is a scope guard at `src/motioncorr_runner.cpp:2279-2299`, registered as `CudaStaleErrorAfterOom`, `CMakeLists.txt:913-917`), and the genuine sticky-error control is limited to one resident-retry boundary on one A100 (TST2, #213; §8). `--ingest compact` refuses immediately (~1 s, no products) when the resident session cannot be created. Not covered here: `--eer_upsampling 2` (see §2), `--grouping_for_ps` (+1 Fourier movie in host RAM, §3), `--bin_factor`, float32 MRC, and real smaller GPUs (whose driver reservation may differ from the 80 GB A100).
 
 Caveats that stay with the table: the floors are **free GiB at launch measured with a VRAM balloon on one A100 80 GB, not nominal card sizes**; card-size conclusions are estimates and were not
 measured (the 80 GB card's driver reserve was 766 MiB; a small card's may differ); one movie per family, bracketed at 1 GiB / 0.5 GiB steps (NVML sampling is a lower bound), and the e10361 floor was

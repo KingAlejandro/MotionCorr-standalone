@@ -1,0 +1,27 @@
+--- a/src/motioncorr_runner.cpp
++++ b/src/motioncorr_runner.cpp
+@@ -3762,6 +3762,24 @@
+ 					RCTIC(TIMING_PATCH_ALIGN);
+ 					converged = alignPatch(Fpatches, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
+ 					RCTOC(TIMING_PATCH_ALIGN);
++				}
++				// W-DIAG-S1 DIAGNOSTIC ONLY (scratch build, never merged): log every
++				// patch's final group shifts, and optionally drop named converged
++				// patches from the fit. No arithmetic is changed.
++				if (getenv("MC_DIAG_DUMP")) {
++					std::ostringstream diag;
++					diag.precision(9);
++					diag << "DIAG patch " << iy + 1 << " " << ix + 1 << " center " << x_center << " " << y_center
++					     << " converged=" << (converged ? 1 : 0) << " shifts";
++					for (int g = 0; g < n_groups; g++) diag << " " << local_xshifts[g] << "," << local_yshifts[g];
++					logfile << diag.str() << std::endl;
++				}
++				if (converged && getenv("MC_DIAG_DROP")) {
++					const std::string key = "(" + std::to_string(iy + 1) + "," + std::to_string(ix + 1) + ")";
++					if (std::string(getenv("MC_DIAG_DROP")).find(key) != std::string::npos) {
++						logfile << "DIAG dropping converged patch " << key << " from the fit" << std::endl;
++						continue;
++					}
+ 				}
+ 				if (!converged) continue;
+ 

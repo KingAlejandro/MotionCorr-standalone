@@ -253,10 +253,21 @@ Per-family GPU and CPU timing tables are in `docs/workload_corpus/{cpu,gpu}/`; d
 
 Maintainer review of this report, the scope decision and the tag are separate steps (`RELEASE_CHECKLIST.md` §10). Frozen source SHA F: `6d68e2d6`. Tag target T (named by the maintainer; F or a later docs-only evidence commit): pending. `git diff F T -- . ':!docs/rc0' ':!docs/release'` empty: pending. Maintainer sign-off: pending (QF on F is recorded in `docs/rc0/qf/run_6d68e2d6/`).
 
+## Post-RC0 #246: fake CLI compiler-settle timeout
+
+PR implementation head `927e5b5cfa51cf72187f182ecffd0693111c71f7`, base `c8844894` (following commit is evidence/docs only).
+Re-entry class: tests only (§9.4). On 4GPUs, with CPUs 72–79 and local `TMPDIR=/tmp`, full ProfilingKit fails before
+the fix with exactly the two target 30-second CLI timeouts, and passes after: **134/134 internal tests, zero skips**.
+A private sleeping `cc1` is verified alive and visible to the production compiler scanner during each CLI case;
+the fixed CLI's provenance records that same witness. The production settle default and all deadlines/gates are unchanged.
+The bench lock protected other agents from this compiler-presence control. No C++ build or GPU execution was performed.
+UNRUN: full CTest, QF, performance and scientific campaigns. Evidence: `docs/post_rc0/issue246/README.md`.
+This identifies the independent harness cause of #245's retained 75/76 CPU record and failed rerun; those historical results remain FAIL.
+
 
 ## Post-RC0 re-entry: #226 D3
 
-Validated PR implementation head: `4cd851677bfda80e60ef189cb1ff668cef721043` (CUDA source; subsequent evidence commits are documentation only).
+Validated PR implementation head: `4cd851677bfda80e60ef189cb1ff668cef721043` (CUDA source; later updates are test/documentation only).
 Release builds and full CTest pass: CPU **74/74** on cpu64, CUDA **109/109** and CUDA+nvCOMP **112/112** on an A100.
 `CudaEarlyStreamingOom` passes. The original QM balloon harness on the original GPU1 UUID reproduces the late
 16/21 GiB failures on `c8844894`; G/L × auto/float now refuse early with required/available memory, no failed-movie
@@ -266,3 +277,5 @@ No numerical gate, tolerance or completed-product difference is introduced. Not 
 scientific S1, performance qualification, macOS, native multi-GPU publication, real smaller GPUs, host-RAM
 exhaustion, genuine device poisoning or optional upsampling/binning/PS matrices. Those rows retain their earlier
 SHA and verdict; a new tag remains a maintainer decision.
+
+The branch incorporates main `36913740` (#247, ProfilingKit tests/docs only). Runtime sources and CMake configuration are identical to native-tested `4cd85167`; native rows keep that tested SHA.

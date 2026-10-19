@@ -79,3 +79,12 @@ Not rerun: the complete frozen QF campaign, scientific S1, timing qualification,
 macOS, native multi-GPU publication, real smaller GPUs, host-RAM exhaustion,
 genuine poisoned-device execution, or optional EER upsampling/binning/PS matrices.
 Earlier QF rows retain their original frozen SHA; this is a bounded defect re-entry.
+
+## Current main
+
+The branch incorporates main `36913740` (#247). Its production sources and CMake
+configuration are byte-identical to the native-tested implementation head above;
+`git diff 4cd85167 -- src CMakeLists.txt` is empty. Main's change is confined to
+ProfilingKit tests and documentation. Its compiler-presence control and affected
+134-test pass are retained in `docs/post_rc0/issue246/`; current-head CI exercises
+that updated test. Native/full-suite receipts here retain their actual tested SHA.

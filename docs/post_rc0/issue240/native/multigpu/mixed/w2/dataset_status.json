@@ -1,0 +1,961 @@
+{
+  "workers_complete": true,
+  "dataset_ready": true,
+  "verdict": "PASS",
+  "input_star_sha256": "c240e3b52443ff8b15a641ba7241b3456927e96d36fe09c3d03f39ba83962ef2",
+  "binary": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+  "binary_sha256": "2e00e0e8fb75aafaf23f15a3c2a142c7d35b6e30477d594244ecba495a5bb6b3",
+  "endpoint": "successful staged products, canonical joint STAR and full report publication",
+  "dataset_wall_s": 12.2067113770172,
+  "ownership_mode": "linux-child-subreaper",
+  "worker_phase_wall_s": 11.58191823773086,
+  "aggregate_cpu_mask": "112-119",
+  "aggregate_phase_wall_s": 0.5815926529467106,
+  "cleanup": "No observed live PID/birth descendants",
+  "process_ownership_errors": [],
+  "tree_rss": {
+    "status": "SAMPLED",
+    "unavailable": null,
+    "errors": [],
+    "interval_s": 0.1,
+    "units": "KiB",
+    "peak_simultaneous_sum_rss_kib": 4542392,
+    "note": "Current RSS summed at each observation, not summed VmHWM. Shared pages are counted more than once. Sampled peak may miss brief peaks/children born and exited between polls; PSS is optional. Only exact PID/start roots and their observed descendants are owned.",
+    "samples": [
+      {
+        "monotonic_s": 7870515.923312664,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 21964,
+            "pss_kib": 12062
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23068,
+            "pss_kib": 13020
+          }
+        ],
+        "rss_sum_kib": 45032,
+        "pss_sum_kib": 25082,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870516.389636141,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22004,
+            "pss_kib": 12105
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23108,
+            "pss_kib": 13063
+          },
+          {
+            "pid": 1821953,
+            "ppid": 1821942,
+            "pgid": 1821953,
+            "start_ticks": 787051579,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 98448,
+            "pss_kib": 87205
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 94580,
+            "pss_kib": 84590
+          }
+        ],
+        "rss_sum_kib": 238140,
+        "pss_sum_kib": 196963,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870516.896557257,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22024,
+            "pss_kib": 12126
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23116,
+            "pss_kib": 13071
+          },
+          {
+            "pid": 1821953,
+            "ppid": 1821942,
+            "pgid": 1821953,
+            "start_ticks": 787051579,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 306688,
+            "pss_kib": 285759
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 305140,
+            "pss_kib": 284589
+          }
+        ],
+        "rss_sum_kib": 656968,
+        "pss_sum_kib": 595545,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870517.469655533,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22040,
+            "pss_kib": 12140
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23120,
+            "pss_kib": 13072
+          },
+          {
+            "pid": 1821953,
+            "ppid": 1821942,
+            "pgid": 1821953,
+            "start_ticks": 787051579,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 686896,
+            "pss_kib": 667430
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "S",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 671144,
+            "pss_kib": 677162
+          }
+        ],
+        "rss_sum_kib": 1403200,
+        "pss_sum_kib": 1369804,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870518.067475679,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22040,
+            "pss_kib": 12142
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23120,
+            "pss_kib": 13073
+          },
+          {
+            "pid": 1821953,
+            "ppid": 1821942,
+            "pgid": 1821953,
+            "start_ticks": 787051579,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 1273772,
+            "pss_kib": 1262345
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "S",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 1777060,
+            "pss_kib": 1794555
+          }
+        ],
+        "rss_sum_kib": 3095992,
+        "pss_sum_kib": 3082115,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870518.604500916,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22044,
+            "pss_kib": 12141
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23120,
+            "pss_kib": 13068
+          },
+          {
+            "pid": 1821953,
+            "ppid": 1821942,
+            "pgid": 1821953,
+            "start_ticks": 787051579,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 1871892,
+            "pss_kib": 1866168
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "S",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 2625336,
+            "pss_kib": 1542156
+          }
+        ],
+        "rss_sum_kib": 4542392,
+        "pss_sum_kib": 3433533,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870519.307680876,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22056,
+            "pss_kib": 12154
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23124,
+            "pss_kib": 13072
+          },
+          {
+            "pid": 1821953,
+            "ppid": 1821942,
+            "pgid": 1821953,
+            "start_ticks": 787051579,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 1165472,
+            "pss_kib": 309223
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 1721716,
+            "pss_kib": 1757538
+          }
+        ],
+        "rss_sum_kib": 2932368,
+        "pss_sum_kib": 2091987,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870519.895924659,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22056,
+            "pss_kib": 12158
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23124,
+            "pss_kib": 13083
+          },
+          {
+            "pid": 1821953,
+            "ppid": 1821942,
+            "pgid": 1821953,
+            "start_ticks": 787051579,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 542508,
+            "pss_kib": 524150
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 1951148,
+            "pss_kib": 1963113
+          }
+        ],
+        "rss_sum_kib": 2538836,
+        "pss_sum_kib": 2512504,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870520.484236329,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22060,
+            "pss_kib": 12162
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23128,
+            "pss_kib": 13083
+          },
+          {
+            "pid": 1821953,
+            "ppid": 1821942,
+            "pgid": 1821953,
+            "start_ticks": 787051579,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 581668,
+            "pss_kib": 561095
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 2115044,
+            "pss_kib": 2108090
+          }
+        ],
+        "rss_sum_kib": 2741900,
+        "pss_sum_kib": 2694430,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870521.08071133,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22076,
+            "pss_kib": 12179
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23128,
+            "pss_kib": 13083
+          },
+          {
+            "pid": 1821953,
+            "ppid": 1821942,
+            "pgid": 1821953,
+            "start_ticks": 787051579,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 581668,
+            "pss_kib": 561095
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 2340000,
+            "pss_kib": 2323659
+          }
+        ],
+        "rss_sum_kib": 2966872,
+        "pss_sum_kib": 2910016,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870521.736564021,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22080,
+            "pss_kib": 12183
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23128,
+            "pss_kib": 13083
+          },
+          {
+            "pid": 1821953,
+            "ppid": 1821942,
+            "pgid": 1821953,
+            "start_ticks": 787051579,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 581668,
+            "pss_kib": 560600
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 2508308,
+            "pss_kib": 2487477
+          }
+        ],
+        "rss_sum_kib": 3135184,
+        "pss_sum_kib": 3073343,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870522.415783939,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22084,
+            "pss_kib": 12186
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23136,
+            "pss_kib": 13090
+          },
+          {
+            "pid": 1821953,
+            "ppid": 1821942,
+            "pgid": 1821953,
+            "start_ticks": 787051579,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 581668,
+            "pss_kib": 560815
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 2737704,
+            "pss_kib": 2716867
+          }
+        ],
+        "rss_sum_kib": 3364592,
+        "pss_sum_kib": 3302958,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870523.01838067,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22088,
+            "pss_kib": 12190
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23136,
+            "pss_kib": 13090
+          },
+          {
+            "pid": 1821953,
+            "ppid": 1821942,
+            "pgid": 1821953,
+            "start_ticks": 787051579,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 386548,
+            "pss_kib": 365694
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 2861364,
+            "pss_kib": 2861279
+          }
+        ],
+        "rss_sum_kib": 3293136,
+        "pss_sum_kib": 3252253,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870523.552651364,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22096,
+            "pss_kib": 12198
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 29760,
+            "pss_kib": 19589
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 3032644,
+            "pss_kib": 3026329
+          }
+        ],
+        "rss_sum_kib": 3084500,
+        "pss_sum_kib": 3058116,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870524.128426796,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22100,
+            "pss_kib": 12203
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 29760,
+            "pss_kib": 19589
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 3229260,
+            "pss_kib": 3255712
+          }
+        ],
+        "rss_sum_kib": 3281120,
+        "pss_sum_kib": 3287504,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870524.745552755,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22104,
+            "pss_kib": 12205
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 29760,
+            "pss_kib": 19588
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 3425872,
+            "pss_kib": 3420311
+          }
+        ],
+        "rss_sum_kib": 3477736,
+        "pss_sum_kib": 3452104,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870525.282941445,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22104,
+            "pss_kib": 12207
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 29760,
+            "pss_kib": 19590
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 3491416,
+            "pss_kib": 3485862
+          }
+        ],
+        "rss_sum_kib": 3543280,
+        "pss_sum_kib": 3517659,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870525.770969086,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22116,
+            "pss_kib": 12219
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 29760,
+            "pss_kib": 19589
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 3319892,
+            "pss_kib": 1587112
+          }
+        ],
+        "rss_sum_kib": 3371768,
+        "pss_sum_kib": 1618920,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870526.275275061,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22120,
+            "pss_kib": 12223
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 29760,
+            "pss_kib": 19589
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 1698136,
+            "pss_kib": 1694116
+          }
+        ],
+        "rss_sum_kib": 1750016,
+        "pss_sum_kib": 1725928,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870526.755199154,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22124,
+            "pss_kib": 12225
+          },
+          {
+            "pid": 1821942,
+            "ppid": 1821937,
+            "pgid": 1821942,
+            "start_ticks": 787051557,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 29760,
+            "pss_kib": 19587
+          },
+          {
+            "pid": 1821954,
+            "ppid": 1821942,
+            "pgid": 1821954,
+            "start_ticks": 787051580,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr",
+            "rss_kib": 559452,
+            "pss_kib": 502217
+          }
+        ],
+        "rss_sum_kib": 611336,
+        "pss_sum_kib": 534029,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870527.20569519,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 25524,
+            "pss_kib": 15725
+          }
+        ],
+        "rss_sum_kib": 25524,
+        "pss_sum_kib": 15725,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870527.633908215,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 25524,
+            "pss_kib": 15686
+          },
+          {
+            "pid": 1822409,
+            "ppid": 1821937,
+            "pgid": 1822409,
+            "start_ticks": 787052718,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22464,
+            "pss_kib": 12416
+          }
+        ],
+        "rss_sum_kib": 47988,
+        "pss_sum_kib": 28102,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870528.020187396,
+        "processes": [
+          {
+            "pid": 1821937,
+            "ppid": 1821321,
+            "pgid": 1810799,
+            "start_ticks": 787051546,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 25660,
+            "pss_kib": 15835
+          }
+        ],
+        "rss_sum_kib": 25660,
+        "pss_sum_kib": 15835,
+        "errors": []
+      }
+    ]
+  }
+}

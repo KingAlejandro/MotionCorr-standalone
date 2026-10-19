@@ -1,6 +1,7 @@
 #ifdef _CUDA_ENABLED
 
 #include "src/acc/cuda/cuda_alignpatch.h"
+#include "src/diag_ccf.h" // S1.3 DIAGNOSTIC ONLY
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/error.h"
 #include "src/acc/cuda/cuda_scoped_resources.h"
@@ -259,6 +260,57 @@ __global__ void findPeakAndInterpolateKernel(
         d_cur_xshifts[iframe] = cur_x * ccf_scale_x;
         d_cur_yshifts[iframe] = cur_y * ccf_scale_y;
     }
+}
+
+// S1.3 DIAGNOSTIC ONLY: copy the CCF maps and the kernel's candidate shifts back,
+// write one record per frame, and check a host recomputation of the kernel's
+// selection and subpixel step against what the kernel produced. Read-back only.
+static void diagCcfDevice(const char *tag, int patch, int call, int iter, const float *d_Iccs,
+                          const float *d_cx, const float *d_cy, int n_frames, int ccf_nx, int ccf_ny,
+                          int search_range, float scale_x, float scale_y, bool dump) {
+    std::vector<float> h((size_t)n_frames * ccf_ny * ccf_nx), cx(n_frames), cy(n_frames);
+    if (cudaMemcpy(h.data(), d_Iccs, h.size() * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess ||
+        cudaMemcpy(cx.data(), d_cx, n_frames * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess ||
+        cudaMemcpy(cy.data(), d_cy, n_frames * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess)
+        REPORT_ERROR("S1.3 diagnostic read-back failed");
+    if (diagCcfPath())
+        for (int f = 0; f < n_frames; f++) {
+            const float *I = h.data() + (size_t)f * ccf_ny * ccf_nx;
+            DiagCcfStat lane = diagCcfStat(I, ccf_nx, ccf_ny, search_range, -1000000000, 0);
+            DiagCcfStat st = diagCcfStat(I, ccf_nx, ccf_ny, search_range, lane.lane_x, lane.lane_y);
+            const int px = st.lane_x, py = st.lane_y;
+            const float m = st.sel;
+            const float dxn = st.vpx + st.vnx - 2.0f * m, dyn = st.vpy + st.vny - 2.0f * m;
+            const float hx = ((std::fabs(dxn) > 1e-15f) ? (px - 0.5f * (st.vpx - st.vnx) / dxn) : px) * scale_x;
+            const float hy = ((std::fabs(dyn) > 1e-15f) ? (py - 0.5f * (st.vpy - st.vny) / dyn) : py) * scale_y;
+            const bool ok = std::fabs(cx[f] - hx) <= 1e-3f && std::fabs(cy[f] - hy) <= 1e-3f;
+            diagCcfWrite(tag, patch, iter, f, st, px, py, cx[f], cy[f], ok ? "emul-ok" : "emul-MISMATCH");
+        }
+    if (dump)
+        diagDumpRaw(tag, patch, call, iter, "map", h.data(), h.size() * sizeof(float), n_frames, ccf_ny, ccf_nx);
+}
+
+// S1.3 DIAGNOSTIC ONLY: dump the CCF window of the spectra entering an iteration,
+// cropped with the reference/CCF kernels' own remap, and the weights.
+static void diagDumpDeviceInput(const char *tag, int patch, int call, int iter, const float2 *d_F,
+                                int n_frames, int data_nfx, int data_nfy, int ccf_nfx, int ccf_nfy) {
+    std::vector<float2> full((size_t)n_frames * data_nfy * data_nfx);
+    if (cudaMemcpy(full.data(), d_F, full.size() * sizeof(float2), cudaMemcpyDeviceToHost) != cudaSuccess)
+        REPORT_ERROR("S1.3 diagnostic input read-back failed");
+    std::vector<float2> in((size_t)n_frames * ccf_nfy * ccf_nfx);
+    for (int f = 0; f < n_frames; f++)
+        for (int y = 0; y < ccf_nfy; y++) {
+            const int ly = (y > ccf_nfy / 2) ? (y - ccf_nfy + data_nfy) : y;
+            for (int x = 0; x < ccf_nfx; x++)
+                in[((size_t)f * ccf_nfy + y) * ccf_nfx + x] = full[((size_t)f * data_nfy + ly) * data_nfx + x];
+        }
+    diagDumpRaw(tag, patch, call, iter, "in", in.data(), in.size() * sizeof(float2), n_frames, ccf_nfy, ccf_nfx);
+}
+static void diagDumpDeviceWeight(const char *tag, int patch, int call, const float *d_w, int ccf_nfx, int ccf_nfy) {
+    std::vector<float> wt((size_t)ccf_nfy * ccf_nfx);
+    if (cudaMemcpy(wt.data(), d_w, wt.size() * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess)
+        REPORT_ERROR("S1.3 diagnostic weight read-back failed");
+    diagDumpRaw(tag, patch, call, 0, "wt", wt.data(), wt.size() * sizeof(float), 1, ccf_nfy, ccf_nfx);
 }
 
 __global__ void fourierShiftKernel(
@@ -603,7 +655,14 @@ bool cudaAlignPatchDeviceWithWorkspace(
     float accumulated_cufft_ms = 0.0f;
     float accumulated_d2h_ms = 0.0f;
 
+    // S1.3 DIAGNOSTIC ONLY
+    const char *diag_tag = is_global ? "cuda-global" : (windowed ? "cuda-single" : "cuda-full");
+    const int diag_label = is_global ? -1 : g_diag_patch;
+    const bool diag_dump = diagDumpMaps(diag_label);
+    const int diag_call = diag_dump ? diagNextCall() : 0;
+    if (diag_dump) diagDumpDeviceWeight(diag_tag, diag_label, diag_call, d_weight, ccf_nfx, ccf_nfy);
     for (int iter = 1; iter <= max_iter; iter++) {
+        if (diag_dump) diagDumpDeviceInput(diag_tag, diag_label, diag_call, iter, d_Fframes, n_frames, data_nfx, data_nfy, ccf_nfx, ccf_nfy);
         // 1. Reference computation
         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
         computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, data_nfx, data_nfy, n_frames);
@@ -639,6 +698,9 @@ bool cudaAlignPatchDeviceWithWorkspace(
             (float)ccf_scale_x, (float)ccf_scale_y, n_frames
         );
         ALIGN_LAUNCH(cudaGetLastError());
+        if (diagCcfPath() || diag_dump) // S1.3 DIAGNOSTIC ONLY: read-back, no arithmetic change
+            diagCcfDevice(diag_tag, diag_label, diag_call, iter, d_Iccs, d_cur_xshifts, d_cur_yshifts,
+                          n_frames, ccf_nx, ccf_ny, search_range, (float)ccf_scale_x, (float)ccf_scale_y, diag_dump);
         if (timed) {
             ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
             ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
@@ -974,8 +1036,18 @@ void cudaAlignPatchBatchDevice(
         logs[p] = PatchBatchLog();
     }
     ALIGN_CUDA(cudaEventRecord(w.ev_start));
+    // S1.3 DIAGNOSTIC ONLY
+    std::vector<int> diag_call(n_patches, 0);
+    for (int p = 0; p < n_patches; p++)
+        if (diagDumpMaps(g_diag_batch_base + p)) {
+            diag_call[p] = diagNextCall();
+            diagDumpDeviceWeight("cuda-batched", g_diag_batch_base + p, diag_call[p], w.d_weight, ccf_nfx, ccf_nfy);
+        }
     for (int iter = 1; iter <= max_iter && !active.empty(); iter++) {
         for (const int p : active) {
+            if (diag_call[p])
+                diagDumpDeviceInput("cuda-batched", g_diag_batch_base + p, diag_call[p], iter,
+                                    w.d_Fpatches + p * w.slots.fframes, n_frames, ccf_nfx, ccf_nfy, ccf_nfx, ccf_nfy);
             float2 *d_Fframes = w.d_Fpatches + p * w.slots.fframes;
             float2 *d_Fref = w.d_Fref + p * w.slots.fref;
             float2 *d_Fccs = w.d_Fccs + p * w.slots.fccs;
@@ -992,6 +1064,10 @@ void cudaAlignPatchBatchDevice(
                 (float)w.geo.ccf_scale_x, (float)w.geo.ccf_scale_y, n_frames
             );
             ALIGN_LAUNCH(cudaGetLastError());
+            if (diagCcfPath() || diag_call[p]) // S1.3 DIAGNOSTIC ONLY: read-back, no arithmetic change
+                diagCcfDevice("cuda-batched", g_diag_batch_base + p, diag_call[p], iter, d_Iccs,
+                              d_cur_x + p * n, d_cur_y + p * n, n_frames, ccf_nx, ccf_ny, search_range,
+                              (float)w.geo.ccf_scale_x, (float)w.geo.ccf_scale_y, diag_call[p] != 0);
         }
         // The iteration's one wait, for every active patch at once.
         ALIGN_CUDA(cudaMemcpy(w.h_cur.data(), w.d_cur, sz_all_shifts, cudaMemcpyDeviceToHost));

@@ -38,6 +38,7 @@
 static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
+#include "src/diag_ccf.h" // S1.3 DIAGNOSTIC ONLY
 #include "src/cpu_dose_symmetry_mode.h"
 #include "src/native_movie_staging.h"
 #include "src/defect_neighbours.h"
@@ -3503,6 +3504,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					boxes.push_back({x_start, y_start, x_end - x_start, y_end - y_start});
 				}
 			}
+			g_diag_patch_x = patch_x; // S1.3 DIAGNOSTIC ONLY
 			RCTIC(TIMING_PATCH_ALIGN);
 			movie_session->alignPatchesBatched(boxes, n_groups, group_start.data(), group_size.data(),
 				bfactor / (prescaling * prescaling), max_iter, ccf_downsample, patchBatchCap(), batched);
@@ -3511,10 +3513,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 
 		int ipatch = 1;
+		g_diag_patch_x = patch_x; // S1.3 DIAGNOSTIC ONLY
 		for (int iy = 0; iy < patch_y; iy++) {
 			for (int ix = 0; ix < patch_x; ix++) {
 				int x_start, x_end, y_start, y_end;
 				patch_bounds(iy, ix, x_start, x_end, y_start, y_end);
+				g_diag_patch = iy * patch_x + ix; // S1.3 DIAGNOSTIC ONLY
 
 				int x_center = (x_start + x_end - 1) / 2, y_center = (y_start + y_end - 1) / 2;
 				logfile << "Patch (" << iy + 1 << ", " << ix + 1 << "): " << ipatch << " / " << patch_x * patch_y;
@@ -3837,6 +3841,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			}
 		}
 		Fpatches.clear();
+		g_diag_patch = -1; // S1.3 DIAGNOSTIC ONLY
 #ifdef _CUDA_ENABLED
 		if (d_patch_fcomplex_buffer) {
             cufftComplex *owned = d_patch_fcomplex_buffer;
@@ -4739,7 +4744,29 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
 
+	// S1.3 DIAGNOSTIC ONLY: per-frame CCF records and optional raw dumps (read-only).
+	const int diag_label = is_global ? -1 : g_diag_patch;
+	const bool diag_on = diagCcfPath() != nullptr, diag_dump = diagDumpMaps(diag_label);
+	const int diag_call = diag_dump ? diagNextCall() : 0;
+	std::vector<DiagCcfStat> diag_stats(diag_on ? n_frames : 0);
+	std::vector<int> diag_pos(diag_on ? 2 * n_frames : 0);
+	std::vector<float> diag_maps(diag_dump ? (size_t)n_frames * ccf_ny * ccf_nx : 0);
+	if (diag_dump) {
+		std::vector<float> wt((size_t)ccf_nfy * ccf_nfx);
+		for (int y = 0; y < ccf_nfy; y++) for (int x = 0; x < ccf_nfx; x++) wt[(size_t)y * ccf_nfx + x] = DIRECT_A2D_ELEM(weight, y, x);
+		diagDumpRaw("cpu", diag_label, diag_call, 0, "wt", wt.data(), wt.size() * sizeof(float), 1, ccf_nfy, ccf_nfx);
+	}
 	for (int iter = 1; iter	<= max_iter; iter++) {
+		if (diag_dump) {
+			std::vector<fComplex> in((size_t)n_frames * ccf_nfy * ccf_nfx);
+			for (int iframe = 0; iframe < n_frames; iframe++)
+				for (int y = 0; y < ccf_nfy; y++) {
+					const int ly = (y > ccf_nfy_half) ? (y - ccf_nfy + nfy) : y;
+					for (int x = 0; x < ccf_nfx; x++)
+						in[((size_t)iframe * ccf_nfy + y) * ccf_nfx + x] = DIRECT_A2D_ELEM(Fframes[iframe], ly, x);
+				}
+			diagDumpRaw("cpu", diag_label, diag_call, iter, "in", in.data(), in.size() * sizeof(fComplex), n_frames, ccf_nfy, ccf_nfx);
+		}
 		RCTIC(TIMING_MAKE_REF);
 		Fref.initZeros();
 
@@ -4789,6 +4816,12 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 				}
 			}
 
+			if (diag_on) {
+				diag_stats[iframe] = diagCcfStat(Iccs[tid]().data, ccf_nx, ccf_ny, search_range, posx, posy);
+				diag_pos[2 * iframe] = posx; diag_pos[2 * iframe + 1] = posy;
+			}
+			if (diag_dump)
+				std::memcpy(diag_maps.data() + (size_t)iframe * ccf_ny * ccf_nx, Iccs[tid]().data, (size_t)ccf_ny * ccf_nx * sizeof(float));
 			int ipx_n = posx - 1, ipx = posx, ipx_p = posx + 1, ipy_n = posy - 1, ipy = posy, ipy_p = posy + 1;
 			if (ipx_n < 0) ipx_n = ccf_nx + ipx_n;
 			if (ipx < 0) ipx = ccf_nx + ipx;
@@ -4822,6 +4855,12 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			RCTOC(TIMING_CCF_FIND_MAX);
 		}
 
+		if (diag_on)
+			for (int f = 0; f < n_frames; f++)
+				diagCcfWrite(is_global ? "cpu-global" : "cpu", diag_label, iter, f, diag_stats[f],
+				             diag_pos[2 * f], diag_pos[2 * f + 1], cur_xshifts[f], cur_yshifts[f], "cpu-actual");
+		if (diag_dump)
+			diagDumpRaw("cpu", diag_label, diag_call, iter, "map", diag_maps.data(), diag_maps.size() * sizeof(float), n_frames, ccf_ny, ccf_nx);
 		// Set origin
 		RFLOAT x_sumsq = 0, y_sumsq = 0;
 		for (int iframe = n_frames - 1; iframe >= 0; iframe--) { // do frame 0 last!

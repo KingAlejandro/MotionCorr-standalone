@@ -3,9 +3,11 @@ import json
 import os
 from pathlib import Path
 import sqlite3
+import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 HERE = Path(__file__).resolve().parent
@@ -148,8 +150,32 @@ class MultipleStarLoops(unittest.TestCase):
                     "--warmup", "0", "--rounds", "1", "--lane-wait", "0", "--keep-outputs"]
             if subset:
                 args += ["--movies", "2"]
-            result = cli(args)
-            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            compiler = None
+            try:
+                if Path("/proc").is_dir():
+                    # A live compiler anywhere on Linux must not stall these
+                    # fake-payload CLI tests inside their 30-second deadline.
+                    cc1 = Path(tmp) / "cc1"
+                    shutil.copy2(shutil.which("sleep"), cc1)
+                    compiler = subprocess.Popen([str(cc1), "120"])
+                    witness = "%s:cc1" % compiler.pid
+                    for _ in range(100):
+                        if witness in prov.compilers_running():
+                            break
+                        time.sleep(0.01)
+                    self.assertIn(witness, prov.compilers_running())
+                    print("compiler control active: " + witness, flush=True)
+                result = cli(args)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                if compiler is not None:
+                    self.assertIsNone(compiler.poll())
+                    settle = json.loads((work / "provenance.json").read_text())["settle"]
+                    self.assertFalse(settle["settled"])
+                    self.assertIn(witness, settle["compilers"])
+            finally:
+                if compiler is not None:
+                    compiler.terminate()
+                    compiler.wait(timeout=5)
             expected = ["Movies/a.tiff", "Movies/b.tiff"] + ([] if subset else ["Movies/c.tiff"])
             staged = json.loads((work / "provenance.json").read_text())["input"]
             self.assertEqual(staged["movies"], expected)

@@ -1,6 +1,6 @@
 # S1.3: CCF near-tie logging, CPU vs CUDA local alignment
 
-Post-RC0 campaign item S1.3 (`docs/release/POST_FREEZE_TEST_PLAN.md` §0, issue [#238](https://github.com/KingAlejandro/MotionCorr-standalone/issues/238)). Frozen source F = `6d68e2d6`. Diagnosis only: no product source, gate or default was changed, and no timing claim is made. This is Tier B evidence (CPU agreement), not a scientific-outcome claim.
+Post-RC0 campaign item S1.3 (`docs/release/POST_FREEZE_TEST_PLAN.md` §0, issue [#238](https://github.com/KingAlejandro/MotionCorr-standalone/issues/238)); S1.3b (amplitude/backend decomposition of the patch-input difference) is folded into Result (b). Frozen source F = `6d68e2d6`. Diagnosis only: no product source, gate or default was changed, and no timing claim is made. This is Tier B evidence (CPU agreement), not a scientific-outcome claim.
 
 ## Result
 
@@ -21,25 +21,43 @@ Divergences that are not integer-peak near-ties also occur, but none starts an S
 - **(1,1):** has the same kind of frame-1 near-tie at iteration 1 (1 and 3 ulps, 1.60 px jump) but re-converges to 0.31 px.
 - **Fit attribution:** refitting CUDA's STAR observations with (2,1) taken from CPU reduces the model-field difference from 1.81/0.515 px (max/rms) to 0.79/0.146 px. Taking (1,1), (2,1) and (2,3) from CPU reduces it to 0.12/0.032 px (`raw/analysis/e10216-p3-fitattr.json`).
 
-**(b) Map differences vs floating-point rounding: consistent with rounding at every stage measured; no systematic CUDA difference found in the CCF/peak path. Established for the measured stages; three items stay open (below).**
+**(b) Map differences vs floating-point rounding: the CCF computation and peak search are rounding-consistent, but the patch inputs carry a systematic CUDA-specific term from the global inverse FFT (S1.3b, below). Established for 10216 5×5 and 12963 5×5. The remaining patch-input difference is the global-trajectory difference, which starts from rounding.**
 
-| stage | CPU vs CUDA, all five cases | reading |
+| stage | CPU vs CUDA | reading |
 |---|---|---|
-| CCF computation, each backend's float32 map vs a float64 recomputation from its own dumped inputs | CPU ≤9.3 ulps at the peak (≤4.0e-7 rel.); CUDA ≤9.4 ulps (≤4.4e-7 rel.) | FFT/reduction rounding, same size on both backends |
-| global alignment, iteration 1 inputs (CCF window) | ≤2.7e-7 relative | preprocessing rounding |
-| global alignment maps | ≤7 ulps local at iteration 1 (≤9 later), offset ≤3 ulps; no integer-peak difference in any global frame; candidate shifts ≤0.045 px at iteration 1; final global trajectories ≤0.038 px apart | rounding acting on the quadratic subpixel step |
-| patch inputs, iteration 1 | median 0.29–0.64% relative (max 0.95%), except frame 1 (global shift pinned to 0 on both): ≤3.5e-7. The fitted phase difference is a translation equal to the global-trajectory difference (median residual 0.0001–0.0009 px for 10216/10641, 0.003 px for the EER movies; amplitude differs by a median 3e-4–6e-4) | propagated global-shift difference |
-| patch maps | up to 2.1e-3 relative, mostly a uniform offset (≤25,200 ulps, which cannot change argmax or the quadratic step) plus a local part ≤259 ulps at iteration 1. Float64 maps built from the two backends' inputs differ by the same amount to three significant figures | entirely input-driven, not CCF arithmetic |
-| phase-shift application (each backend's own increments applied to its own input, vs its next-iteration input) | CPU ≤1.1e-8; CUDA ≤5.7e-7, growing with phase (up to 72 rad) | CUDA's float phase and `__sincosf` cost 6–90× CPU's error, still ~4 orders below the patch-input differences |
+| CCF computation, each backend's float32 map vs a float64 recomputation from its own dumped inputs (all five cases) | CPU ≤9.3 ulps at the peak (≤4.0e-7 rel.); CUDA ≤9.4 ulps (≤4.4e-7 rel.) | FFT/reduction rounding, same size on both backends |
+| global alignment, iteration 1 inputs (CCF window, all five cases) | ≤2.7e-7 relative | preprocessing rounding |
+| global alignment maps (all five cases) | ≤7 ulps local at iteration 1 (≤9 later), offset ≤3 ulps; no integer-peak difference in any global frame; candidate shifts ≤0.045 px at iteration 1; final global trajectories ≤0.038 px apart | rounding acting on the quadratic subpixel step |
+| full-frame spectra after equal global shifts (S1.3b, 10216 and 12963, frames 2/11/21) | ≤1.93e-6 relative over the whole spectrum, including CUDA's float shift kernel at large phases | rounding |
+| **real frames after the global inverse FFT, same spectra** (S1.3b) | differ by 7.0e-4–1.0e-2 relative, entirely as a per-row constant h(y). CPU matches a float64 `irfft2` of its spectrum to 1.5e-7. CUDA (cuFFT C2R) adds h(y) = −Im(IFFT_y of the spectrum's kx = nx/2 column), to a residual of 2e-6 (rms 0.14) and 6e-8 (rms 0.014) at frame 11; frames 2 and 21 are covered by the patch prediction below | **systematic.** A sub-pixel shift makes the Nyquist column non-Hermitian (anti-Hermitian part 0.7–2.0 rel.). FFTW discards that part; cuFFT turns it into a row offset across the frame |
+| patch inputs, iteration 1 (S1.3b decomposition) | measured CPU vs CUDA: 2.9e-3 (10216), 6.5e-3 (12963) relative. CPU with CUDA's global trajectory reproduces the amplitude residual (3.60e-4 vs 3.68e-4; 5.85e-4 vs 6.02e-4; frame-by-frame r = 0.9995 / 0.9998). At equal trajectories CUDA still differs by 1.6e-3 / 6.4e-3, all in the kx = 0 column; h(y) predicts it to ≤5.8e-7 in all 150 patch-frames checked (25 patches × frames 2/11/21 × 2 movies) | two parts: shift/crop geometry of the global-trajectory difference (translation plus the amplitude residual), and the cuFFT row term, which dominates in 12963 |
+| patch maps (all five cases) | up to 2.1e-3 relative, mostly a uniform offset (≤25,200 ulps, which cannot change argmax or the quadratic step) plus a local part ≤259 ulps at iteration 1. Float64 maps built from the two backends' inputs differ by the same amount to three significant figures | entirely input-driven, not CCF arithmetic |
+| phase-shift application on patch windows (own increments on own input) | CPU ≤1.1e-8; CUDA ≤5.7e-7, growing with phase (up to 72 rad) | float phase and `__sincosf`; negligible |
 
-The chain is therefore:
-1. Rounding-level map differences (≤7 ulps) in global alignment produce ≤0.045 px subpixel differences.
-2. These give global trajectories that differ by ≤0.038 px.
-3. That changes the patch inputs by a median 0.29–0.64%.
-4. The changed inputs change local map values by tens to hundreds of ulps.
-5. That is enough to reorder CCF peak candidates that are within a few ulps.
+So the near-tied peaks are reordered by input differences with two sources:
+- **Rounding-initiated:** global trajectories differ by ≤0.038 px, starting from ≤7-ulp map differences.
+- **Systematic:** cuFFT's C2R row term, present whenever a frame's x-shift is fractional.
+
+**Equal global trajectories do not remove the flips (S1.3b test 3).** CUDA was run with CPU's global trajectory injected and compared against CPU:
+- **12963:** all 5 S1-relevant patches still diverge, at the same frames with margins within 3 ulps of before; relative RMSE 0.4999 (was 0.4990).
+- **10216:** the decisive (1,4) frame-46 event recurs exactly (picks (0,−1) / (2,3), margins 0 / 5 ulps), but CUDA's (1,4) now converges (last RMSD 0.425 instead of 2.40), so relative RMSE falls to 0.0210 (was 0.4344).
+
+Because the remaining input difference at equal trajectories is the row term to within 5.8e-7, these flips are attributed to the row term. That attribution is inferred: removing the term has not been tested.
 
 The peaks are badly conditioned in float32. They sit on a large pedestal: in 10216, peak values are ~36,130 while the next separate maximum is only ~3,300 ulps lower. The top pixels of a peak are often within a few ulps, and in 10216 3×3 (2,1) the y-curvature at the CPU pick is 7 ulps. In 3/9 S1-relevant events (10216 5×5 (1,4), 10474-F3 (1,2), 10641 (5,2)), float64 maps of a backend's own inputs order the two candidates opposite to its float32 map (by ≤0.08 ulp): there the float32 CCF rounding itself decides a tie at the 0–1-ulp level. In the other 6/9, both backends' float64 maps keep their own float32 order, so the input difference decides.
+
+### S1.3b method (10216 5×5, 12963 5×5)
+
+Diagnostic commits `61c3a85e` and `c8fa55f5` on `diag/s1-ccf-ties` ([`diag_s1_3b_override_fulldump.diff`](diag_s1_3b_override_fulldump.diff)):
+- `MC_DIAG_GLOBAL_SHIFTS_OUT` writes the global trajectory exactly.
+- `MC_DIAG_GLOBAL_SHIFTS` injects a trajectory right after global alignment, as an extra Fourier shift by (injected − own). CUDA uses its production shift kernel, CPU its own shift function, and frames with zero difference are skipped.
+- `MC_DIAG_FULL_DUMP` dumps full-frame spectra after the shifts and real frames after the inverse FFT.
+
+Runs and checks:
+- **Neutrality:** with its own trajectory injected, each backend is byte-identical to production (4/4). The instrumented own runs are byte-identical too (4/4), and the full-dump runs equal their counterparts (4/4). The per-frame records equal the S1.3 records byte for byte.
+- **16 runs, all exit 0, on 4GPUs lane GPU2** under its lock; CUDA runs UUID-witnessed.
+- **Tools:** `campaign_b.sh`/`post_b.sh`/`pairs.py` (pairs P0–P4), `campaign_c.sh`/`fullframe.py`/`hpredict.py`.
+- **Outputs:** under [`raw/s13b/`](raw/s13b/), including `first_separation_table_b.md` and `counts_b.json` for test 3.
 
 ## Cases
 
@@ -137,8 +155,13 @@ done
 
 ## Open
 
-- **Amplitude part of the patch-input difference** (median 3e-4–6e-4 of amplitude, after the translation is accounted for). Inferred to come from the different sub-pixel global shift interacting with the patch crop; not tested. In the EER movies the translation fit is noisier (p95 residual 0.012–0.014 px).
-- **CUDA phase-shift accuracy outside the CCF window**, for example full-frame global shifts at phases above ~72 rad: not measured. Inside the window it is ≤5.7e-7.
-- **Preprocessing** was compared only through the global-alignment CCF window at iteration 1 (≤2.7e-7).
+- **Does removing the cuFFT row term remove the flips?** It accounts for the equal-trajectory input difference to ≤5.8e-7. A diagnostic CUDA run that matches FFTW (dropping the Nyquist column's anti-Hermitian part before C2R) would establish it as the cause of the 12963 flips. Not run.
+- **Does the row term reach products?** CUDA real-space frames carry it after the global inverse FFT. Whether the published micrographs do, and how much of the G-config CPU–CUDA difference (~0.017) it explains, was not measured. Any fix is a product change and a maintainer decision.
+- **The row term in the other three cases:** 10216 3×3, Falcon 3 and 10641 were not run with S1.3b. The term exists whenever a frame's x-shift is fractional, but its size there was not measured.
 - **Breadth:** one movie per family, the five S1-positive cases known on 2026-10-19. The 36 extra staged movies of #243 were not examined. No SCARF or second-venue run.
 - **Consequences:** S1 still matters only as far as S1.4 (downstream CTF/FSC/B-factor) shows. Nothing here says which backend's output is better.
+
+S1.3b closes three of S1.3's open items:
+- the amplitude part is the shift/crop geometry;
+- CUDA's full-frame shift accuracy is ≤1.93e-6 (full spectra after equal shifts);
+- preprocessing plus shifts agree full-band to ≤1.93e-6.

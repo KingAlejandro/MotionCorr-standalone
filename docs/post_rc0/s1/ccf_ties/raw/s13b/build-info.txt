@@ -1,0 +1,27 @@
+# S1.3b builds on 4GPUs, diag2 = diag/s1-ccf-ties 61c3a85e, diag3 = c8fa55f5
+de789e9a364673dde63207c24babd6fd4e14de31cc49f236728e0178b6022b6b  tools/s13b-diag.tar.gz
+d73c43638dd61f1ec0d7c083b66c71ee06501dfc48fa6676ed3cf60c78668b84  tools/s13b-diag3.tar.gz
+build diag2-cpu rc=0 2026-10-19T14:30:28Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+76cdf52bc621f2d72fb4a86d742d4f4a1f4dfa9efdef11f81eacaf70259c2972  /mnt/clathrin/alex-motioncorr-s1ccf/build-diag2-cpu/motioncorr
+build diag2-nvcomp rc=0 2026-10-19T14:31:31Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+c5383b3a49db2b90ac143d9626aa3227ec430cf8db3a396929b898950a088cc8  /mnt/clathrin/alex-motioncorr-s1ccf/build-diag2-nvcomp/motioncorr
+BUILDS-DONE st=0
+build diag3-cpu rc=0 2026-10-19T14:55:33Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+897927984d862376c11ba5e670d02a73691562c2e2033a3caaa1e5a6ca026d1a  /mnt/clathrin/alex-motioncorr-s1ccf/build-diag3-cpu/motioncorr
+build diag3-nvcomp rc=0 2026-10-19T14:56:35Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+df82595bbfc44708481b690e5344842aa69904985f05d0a859a1a8738da66eab  /mnt/clathrin/alex-motioncorr-s1ccf/build-diag3-nvcomp/motioncorr
+BUILDS-DONE st=0
+build-diag2-cpu: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+  CMAKE_BUILD_TYPE:STRING=Release
+  CUDA:BOOL=OFF
+build-diag2-nvcomp: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+  CMAKE_BUILD_TYPE:STRING=Release
+  CUDA:BOOL=ON
+  USE_NVCOMP:BOOL=ON
+build-diag3-cpu: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+  CMAKE_BUILD_TYPE:STRING=Release
+  CUDA:BOOL=OFF
+build-diag3-nvcomp: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+  CMAKE_BUILD_TYPE:STRING=Release
+  CUDA:BOOL=ON
+  USE_NVCOMP:BOOL=ON

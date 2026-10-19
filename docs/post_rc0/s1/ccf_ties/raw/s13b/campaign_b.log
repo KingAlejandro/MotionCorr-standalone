@@ -1,0 +1,36 @@
+{"label": "e10216-p5-d2-cpu-own", "rc": 0, "wall_s": 38.52, "gpu_witness_uuids": [], "bench_wait_s": 0.0}
+{"label": "e10216-p5-d2-cuda-own", "rc": 0, "wall_s": 11.71, "gpu_witness_uuids": ["GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"], "bench_wait_s": 0.0}
+{"label": "e10216-p5-d2-cpu-negctl", "rc": 0, "wall_s": 37.95, "gpu_witness_uuids": [], "bench_wait_s": 0.0}
+{"label": "e10216-p5-d2-cuda-negctl", "rc": 0, "wall_s": 2.74, "gpu_witness_uuids": ["GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"], "bench_wait_s": 0.0}
+{"label": "e10216-p5-d2-cpu-injcuda", "rc": 0, "wall_s": 38.35, "gpu_witness_uuids": [], "bench_wait_s": 0.0}
+{"label": "e10216-p5-d2-cuda-injcpu", "rc": 0, "wall_s": 10.51, "gpu_witness_uuids": ["GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"], "bench_wait_s": 0.0}
+{"label": "e12963-p5-d2-cpu-own", "rc": 0, "wall_s": 28.07, "gpu_witness_uuids": [], "bench_wait_s": 0.0}
+{"label": "e12963-p5-d2-cuda-own", "rc": 0, "wall_s": 9.26, "gpu_witness_uuids": ["GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"], "bench_wait_s": 0.0}
+{"label": "e12963-p5-d2-cpu-negctl", "rc": 0, "wall_s": 25.92, "gpu_witness_uuids": [], "bench_wait_s": 0.0}
+{"label": "e12963-p5-d2-cuda-negctl", "rc": 0, "wall_s": 5.62, "gpu_witness_uuids": ["GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"], "bench_wait_s": 0.0}
+{"label": "e12963-p5-d2-cpu-injcuda", "rc": 0, "wall_s": 28.35, "gpu_witness_uuids": [], "bench_wait_s": 0.0}
+{"label": "e12963-p5-d2-cuda-injcpu", "rc": 0, "wall_s": 8.88, "gpu_witness_uuids": ["GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"], "bench_wait_s": 0.0}
+CAMPAIGN-B-DONE
+identity e10216 cpu rc=0
+records e10216 cpu d2-own == S1.3 diag-on: rc=0
+identity e10216 cuda rc=0
+records e10216 cuda d2-own == S1.3 diag-on: rc=0
+pairs e10216 rc=0
+traj e10216 injcpu rc=0
+maps e10216 injcpu rc=0
+backend e10216 injcpu rc=1 (recorded, not graded)    Relative RMSE:        2.095403e-02 (threshold: 1.000000e-03 in relaxed/custom gate)
+traj e10216 injcuda rc=0
+maps e10216 injcuda rc=0
+backend e10216 injcuda rc=1 (recorded, not graded)    Relative RMSE:        4.358049e-01 (threshold: 1.000000e-03 in relaxed/custom gate)
+identity e12963 cpu rc=0
+records e12963 cpu d2-own == S1.3 diag-on: rc=0
+identity e12963 cuda rc=0
+records e12963 cuda d2-own == S1.3 diag-on: rc=0
+pairs e12963 rc=0
+traj e12963 injcpu rc=0
+maps e12963 injcpu rc=0
+backend e12963 injcpu rc=1 (recorded, not graded)    Relative RMSE:        4.999455e-01 (threshold: 1.000000e-03 in relaxed/custom gate)
+traj e12963 injcuda rc=0
+maps e12963 injcuda rc=0
+backend e12963 injcuda rc=1 (recorded, not graded)    Relative RMSE:        4.991146e-01 (threshold: 1.000000e-03 in relaxed/custom gate)
+POST-B-DONE

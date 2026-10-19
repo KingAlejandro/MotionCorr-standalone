@@ -941,6 +941,17 @@ if(BUILD_TESTING AND CUDA)
             target_link_libraries(motioncorr_nvcomp_acceptance PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
             target_link_options(motioncorr_nvcomp_acceptance PRIVATE
                 "-rdynamic" "LINKER:--wrap=cudaMemcpyAsync" "LINKER:--wrap=cudaLaunchKernel")
+            add_executable(motioncorr_tiff_identity
+                src/apps/run_motioncorr.cpp tests/cuda_tiff_identity_shim.cpp)
+            target_link_libraries(motioncorr_tiff_identity PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+            target_link_options(motioncorr_tiff_identity PRIVATE
+                "-rdynamic" "LINKER:--wrap=TIFFOpen" "LINKER:--wrap=TIFFClose" "LINKER:--wrap=pread")
+            add_test(NAME CudaNvcompTiffIdentity
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_tiff_identity_controls.py
+                    --binary $<TARGET_FILE:motioncorr_tiff_identity>)
+            set_tests_properties(CudaNvcompTiffIdentity PROPERTIES
+                LABELS "cuda;hardware" TIMEOUT 900)
             add_test(NAME CudaNvcompAcceptanceFailures
                 COMMAND ${Python3_EXECUTABLE}
                     ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_nvcomp_acceptance_controls.py

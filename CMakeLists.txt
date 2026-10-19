@@ -409,6 +409,8 @@ if(BUILD_TESTING)
     add_test(NAME ProfilingKit
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/profiling/mcprof.py selftest)
     set_tests_properties(ProfilingKit PROPERTIES TIMEOUT 300)
+    add_test(NAME DatasetFinalization
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_dataset_finalization.py)
     add_test(NAME GainCacheOwnership
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_gain_cache_host.py
             --cxx ${CMAKE_CXX_COMPILER})

@@ -29,7 +29,18 @@ def cleanup(owned, ownership):
     return 'Owned PID/birth groups reaped; observed descendants absent or zombies'
 
 
+class _RestorationFailed(Exception):
+    """Preserve the finalization override without returning from finally."""
+
+
 def main(argv=None) -> int:
+    try:
+        return _main(argv)
+    except _RestorationFailed:
+        return 3
+
+
+def _main(argv=None) -> int:
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--binary',required=True)
     ap.add_argument('--star',required=True)
@@ -169,7 +180,7 @@ def main(argv=None) -> int:
             status['dataset_ready']=False;status['verdict']='FAIL'
         (out/'dataset_status.json').write_text(json.dumps(status,indent=2)+'\n')
         run_multi_gpu._restore_signal_handlers(old)
-        if restoration_failed:return 3
+        if restoration_failed:raise _RestorationFailed
 
 if __name__=='__main__':
     raise SystemExit(main())

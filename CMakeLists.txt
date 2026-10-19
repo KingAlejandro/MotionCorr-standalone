@@ -945,7 +945,7 @@ if(BUILD_TESTING AND CUDA)
                 src/apps/run_motioncorr.cpp tests/cuda_tiff_identity_shim.cpp)
             target_link_libraries(motioncorr_tiff_identity PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
             target_link_options(motioncorr_tiff_identity PRIVATE
-                "-rdynamic" "LINKER:--wrap=TIFFOpen" "LINKER:--wrap=TIFFClose" "LINKER:--wrap=pread")
+                "-rdynamic" "LINKER:--wrap=TIFFOpen" "LINKER:--wrap=TIFFClose" "LINKER:--wrap=pread" "LINKER:--wrap=__pread_chk")
             add_test(NAME CudaNvcompTiffIdentity
                 COMMAND ${Python3_EXECUTABLE}
                     ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_tiff_identity_controls.py

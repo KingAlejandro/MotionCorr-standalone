@@ -47,6 +47,8 @@ void mutate(const char *when) {
 extern "C" TIFF *__real_TIFFOpen(const char *, const char *);
 extern "C" void __real_TIFFClose(TIFF *);
 extern "C" ssize_t __real_pread(int, void *, size_t, off_t);
+// GCC's fortified CUDA host compilation redirects the actual span read here.
+extern "C" ssize_t __real___pread_chk(int, void *, size_t, off_t, size_t);
 extern "C" TIFF *__wrap_TIFFOpen(const char *name, const char *mode) {
     const bool ingest = from_ingest();
     if (ingest && opens++ == 0) movie = name;
@@ -67,4 +69,9 @@ extern "C" void __wrap_TIFFClose(TIFF *t) {
 extern "C" ssize_t __wrap_pread(int fd, void *dst, size_t n, off_t offset) {
     if (fd == reader_fd) mutate("strip-read");
     return __real_pread(fd, dst, n, offset);
+}
+
+extern "C" ssize_t __wrap___pread_chk(int fd, void *dst, size_t n, off_t offset, size_t capacity) {
+    if (fd == reader_fd) mutate("strip-read");
+    return __real___pread_chk(fd, dst, n, offset, capacity);
 }

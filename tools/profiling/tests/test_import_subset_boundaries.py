@@ -147,7 +147,7 @@ class MultipleStarLoops(unittest.TestCase):
             binary = make_binary(str(Path(tmp) / "binary"))
             work = Path(tmp) / "work"
             args = ["run", "A=" + binary, "--data", str(data), "--work", str(work), "--no-lock",
-                    "--warmup", "0", "--rounds", "1", "--lane-wait", "0", "--keep-outputs"]
+                    "--warmup", "0", "--rounds", "1", "--lane-wait", "0", "--settle-timeout", "0", "--keep-outputs"]
             if subset:
                 args += ["--movies", "2"]
             compiler = None

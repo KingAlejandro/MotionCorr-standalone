@@ -17,6 +17,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 from run_resident_retry_controls import require, synthetic_frames, write_star, write_tiff
@@ -27,12 +28,25 @@ def command(argv, **kwargs):
                           stderr=subprocess.PIPE, timeout=20, **kwargs).stdout
 
 
-def gpu_state(uuid, work, name):
-    state = command(["nvidia-smi", "-i", uuid, "--query-gpu=uuid,memory.used,utilization.gpu,"
-                     "ecc.errors.uncorrected.volatile.total", "--format=csv,noheader,nounits"])
+def gpu_state(uuid, work, name, settle=False):
+    query = ["nvidia-smi", "-i", uuid, "--query-gpu=uuid,memory.used,utilization.gpu,"
+             "ecc.errors.uncorrected.volatile.total", "--format=csv,noheader,nounits"]
+    state = command(query)
+    samples = [state]
+    # Utilization samples include the recently exited test process. Give that
+    # sample a bounded time to expire; the final idle/health requirements stay
+    # identical, and a foreign compute process still fails the health check.
+    if settle:
+        for _ in range(10):
+            if state.strip().split(",")[2].strip() == "0":
+                break
+            time.sleep(0.5)
+            state = command(query)
+            samples.append(state)
     detail = command(["nvidia-smi", "-i", uuid, "-q"])
     apps = command(["nvidia-smi", "--query-compute-apps=gpu_uuid,pid", "--format=csv,noheader"])
-    (work / (name + "-nvidia-smi.txt")).write_text(state + detail + "\nCompute apps:\n" + apps)
+    (work / (name + "-nvidia-smi.txt")).write_text(
+        "".join(samples) + detail + "\nCompute apps:\n" + apps)
     fields = [x.strip() for x in state.strip().split(",")]
     require(len(fields) == 4 and fields[0] == uuid, "GPU identity/health query failed")
     require(not any(line.split(",")[0].strip() == uuid for line in apps.splitlines()),
@@ -198,7 +212,7 @@ def main():
             try:
                 run_controls(binary, work, uuid)
             finally:
-                after = gpu_state(uuid, work, "after")
+                after = gpu_state(uuid, work, "after", settle=True)
                 require(after == before, "uncorrected volatile ECC count changed")
     except BaseException:
         print(f"FAILED: evidence retained at {work}", file=sys.stderr)

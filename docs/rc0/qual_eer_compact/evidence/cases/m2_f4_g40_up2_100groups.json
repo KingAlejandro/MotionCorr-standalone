@@ -1,0 +1,49 @@
+{
+ "name": "m2_f4_g40_up2_100groups",
+ "desc": "Falcon4 up2, groups 1-100 only (predicted ~56.6 GiB device, fits)",
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.0",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "8",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "40",
+  "--eer_upsampling",
+  "2",
+  "--expected_frames",
+  "144",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--first_frame_sum",
+  "1",
+  "--last_frame_sum",
+  "100"
+ ],
+ "arms": [
+  {
+   "name": "auto",
+   "ingest": "auto"
+  },
+  {
+   "name": "float",
+   "ingest": "float"
+  }
+ ],
+ "compare": [
+  "auto",
+  "float"
+ ],
+ "keep_mrc": false,
+ "witness": true
+}

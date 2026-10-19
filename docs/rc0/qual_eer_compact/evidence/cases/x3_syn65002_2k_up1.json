@@ -1,0 +1,39 @@
+{
+ "name": "x3_syn65002_2k_up1",
+ "desc": "synthetic tag 65002 (detailed, 2-bit subpixel), 2K, up1",
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.0",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "8",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "40",
+  "--eer_upsampling",
+  "1"
+ ],
+ "arms": [
+  {
+   "name": "auto",
+   "ingest": "auto"
+  },
+  {
+   "name": "float",
+   "ingest": "float"
+  }
+ ],
+ "compare": [
+  "auto",
+  "float"
+ ],
+ "keep_mrc": false,
+ "witness": true
+}

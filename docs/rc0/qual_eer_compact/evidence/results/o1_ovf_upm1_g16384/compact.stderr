@@ -1,0 +1,28 @@
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/motioncorr_runner.cpp, line 2411
+ERROR: 
+--ingest compact was requested but the compact native staging did not apply to Movies/movie.eer. Either there is no resident CUDA session, or this movie is not an unsigned 8- or 16-bit TIFF, a raw integer MRC (mode 0, 1 or 6), or an EER whose grouped counts fit uint16. Refusing to continue on a different path under a pinned --ingest.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x68207) [0x5f0747a70207]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x39b63) [0x5f0747a41b63]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x13cb61) [0x5f0747b44b61]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x5df06) [0x5f0747a65f06]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x776dc1e2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x776dc1e2a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x5ea75) [0x5f0747a66a75]
+==================
+ERROR: 
+--ingest compact was requested but the compact native staging did not apply to Movies/movie.eer. Either there is no resident CUDA session, or this movie is not an unsigned 8- or 16-bit TIFF, a raw integer MRC (mode 0, 1 or 6), or an EER whose grouped counts fit uint16. Refusing to continue on a different path under a pinned --ingest.
+Continuing with the remaining movies.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/motioncorr_runner.cpp, line 1089
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/movie.eer. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x68207) [0x5f0747a70207]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x3bc79) [0x5f0747a43c79]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x5df06) [0x5f0747a65f06]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x776dc1e2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x776dc1e2a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x5ea75) [0x5f0747a66a75]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/movie.eer. Successful per-movie outputs were retained; joint output was not generated.

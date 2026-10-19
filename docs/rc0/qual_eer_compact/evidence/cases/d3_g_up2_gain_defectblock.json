@@ -1,0 +1,49 @@
+{
+ "name": "d3_g_up2_gain_defectblock",
+ "desc": "12963 gain up2, defect file incl. 22x22 block",
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.282051",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "8",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "49",
+  "--eer_upsampling",
+  "2",
+  "--expected_frames",
+  "39",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--gainref",
+  "gain.gain",
+  "--defect_file",
+  "defect.txt"
+ ],
+ "arms": [
+  {
+   "name": "auto",
+   "ingest": "auto"
+  },
+  {
+   "name": "float",
+   "ingest": "float"
+  }
+ ],
+ "compare": [
+  "auto",
+  "float"
+ ],
+ "keep_mrc": false,
+ "witness": true
+}

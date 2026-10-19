@@ -1,0 +1,31 @@
+Size of input gain: X = 4096 Y = 4096 Expected: X = 2048 Y = 2048
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/renderEER.h, line 169
+ERROR: 
+Unsupported gain size in EERRenderer::loadEERGain()
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x68207) [0x6036c30f4207]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x14fcab) [0x6036c31dbcab]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x108f0a) [0x6036c3194f0a]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x130287) [0x6036c31bc287]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x13cb61) [0x6036c31c8b61]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x5df06) [0x6036c30e9f06]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x75e5a322a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x75e5a322a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x5ea75) [0x6036c30eaa75]
+==================
+ERROR: 
+Unsupported gain size in EERRenderer::loadEERGain()
+Continuing with the remaining movies.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/motioncorr_runner.cpp, line 1089
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/movie.eer. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x68207) [0x6036c30f4207]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x3bc79) [0x6036c30c7c79]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x5df06) [0x6036c30e9f06]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x75e5a322a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x75e5a322a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr(+0x5ea75) [0x6036c30eaa75]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/movie.eer. Successful per-movie outputs were retained; joint output was not generated.

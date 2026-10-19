@@ -1,0 +1,45 @@
+{
+ "name": "c05_f3_g45_up1_rem",
+ "desc": "Falcon3 g45: 51 groups, 36 fractions dropped",
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.0",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "8",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "45",
+  "--eer_upsampling",
+  "1",
+  "--expected_frames",
+  "51",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5"
+ ],
+ "arms": [
+  {
+   "name": "auto",
+   "ingest": "auto"
+  },
+  {
+   "name": "float",
+   "ingest": "float"
+  }
+ ],
+ "compare": [
+  "auto",
+  "float"
+ ],
+ "keep_mrc": false,
+ "witness": true
+}

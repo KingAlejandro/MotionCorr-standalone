@@ -1,0 +1,52 @@
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/movie.eer
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.
+000/??? sec ~~(,_,">                                                          [oo]in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/renderEER.cpp, line 593
+ERROR: 
+Invalid EER upsamle for 2K images. This must be 2 or 1.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/renderEER.cpp, line 593
+ERROR: 
+Invalid EER upsamle for 2K images. This must be 2 or 1.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/renderEER.cpp, line 593
+ERROR: 
+Invalid EER upsamle for 2K images. This must be 2 or 1.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/renderEER.cpp, line 593
+ERROR: 
+Invalid EER upsamle for 2K images. This must be 2 or 1.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/renderEER.cpp, line 593
+ERROR: 
+Invalid EER upsamle for 2K images. This must be 2 or 1.
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/renderEER.cpp, line 593
+ERROR: 
+Invalid EER upsamle for 2K images. This must be 2 or 1.
+=== Backtrace  ===
+../../build/cpu-1db86902/motioncorr(+0x55737) [0x5a52e8bc2737]
+../../build/cpu-1db86902/motioncorr(+0x139ad4) [0x5a52e8ca6ad4]
+../../build/cpu-1db86902/motioncorr(+0xea935) [0x5a52e8c57935]
+/lib/x86_64-linux-gnu/libgomp.so.1(GOMP_parallel+0x47) [0x76ea0d8bf977]
+../../build/cpu-1db86902/motioncorr(+0xfc7e5) [0x5a52e8c697e5]
+../../build/cpu-1db86902/motioncorr(+0x10abfa) [0x5a52e8c77bfa]
+../../build/cpu-1db86902/motioncorr(+0x4ba26) [0x5a52e8bb8a26]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x76ea0ca2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x76ea0ca2a28b]
+../../build/cpu-1db86902/motioncorr(+0x4bfd5) [0x5a52e8bb8fd5]
+==================
+ERROR: 
+Invalid EER upsamle for 2K images. This must be 2 or 1.
+Continuing with the remaining movies.
+   0/   0 sec ............................................................~~(,_,"> yum!
+in: /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/src-1db86902/src/motioncorr_runner.cpp, line 1089
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/movie.eer. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+../../build/cpu-1db86902/motioncorr(+0x55737) [0x5a52e8bc2737]
+../../build/cpu-1db86902/motioncorr(+0x2d093) [0x5a52e8b9a093]
+../../build/cpu-1db86902/motioncorr(+0x4ba26) [0x5a52e8bb8a26]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x76ea0ca2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x76ea0ca2a28b]
+../../build/cpu-1db86902/motioncorr(+0x4bfd5) [0x5a52e8bb8fd5]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/movie.eer. Successful per-movie outputs were retained; joint output was not generated.

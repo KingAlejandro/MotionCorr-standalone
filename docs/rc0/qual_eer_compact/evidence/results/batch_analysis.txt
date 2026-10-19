@@ -1,0 +1,42 @@
+== b1_trunc60 auto==float products: True
+  auto rc 1 joint False nwarn 0 [] ERR ['Motion correction failed for 1 movie(s): Movies/movie2.eer. Successful per-movie outputs were retained; joint output was not generated.', 'Movie Movies/movie2.eer frame count mismatch: expected 58 frames, but decoded 34 frames.']
+     {'Movies/movie1.mrc': 'f8cf9fbdc6229b99', 'Movies/movie1.star': 'star:269544 B', 'Movies/movie3.mrc': '5e67ac8b928c1258', 'Movies/movie3.star': 'star:266196 B'}
+     {'movie1.log': ('4096', '4096', '58'), 'movie3.log': ('4096', '4096', '58')}
+  float rc 1 joint False nwarn 0 [] ERR ['Motion correction failed for 1 movie(s): Movies/movie2.eer. Successful per-movie outputs were retained; joint output was not generated.', 'Movie Movies/movie2.eer frame count mismatch: expected 58 frames, but decoded 34 frames.']
+     {'Movies/movie1.mrc': 'f8cf9fbdc6229b99', 'Movies/movie1.star': 'star:269544 B', 'Movies/movie3.mrc': '5e67ac8b928c1258', 'Movies/movie3.star': 'star:266196 B'}
+     {'movie1.log': ('4096', '4096', '58'), 'movie3.log': ('4096', '4096', '58')}
+== b2_randbytes auto==float products: False
+  auto rc 0 joint True nwarn 0 [] ERR []
+     {'Movies/movie1.mrc': 'f8cf9fbdc6229b99', 'Movies/movie1.star': 'star:269544 B', 'Movies/movie2.mrc': 'a5150f7edfe39764', 'Movies/movie2.star': 'star:269355 B', 'Movies/movie3.mrc': '5e67ac8b928c1258', 'Movies/movie3.star': 'star:266196 B', 'corrected_micrographs.star': 'star:1183 B'}
+     {'movie1.log': ('4096', '4096', '58'), 'movie2.log': ('4096', '4096', '58'), 'movie3.log': ('4096', '4096', '58')}
+  float rc 0 joint True nwarn 0 [] ERR []
+     {'Movies/movie1.mrc': 'f8cf9fbdc6229b99', 'Movies/movie1.star': 'star:269544 B', 'Movies/movie2.mrc': 'a5150f7edfe39764', 'Movies/movie2.star': 'star:269355 B', 'Movies/movie3.mrc': '5e67ac8b928c1258', 'Movies/movie3.star': 'star:266196 B', 'corrected_micrographs.star': 'star:1189 B'}
+     {'movie1.log': ('4096', '4096', '58'), 'movie2.log': ('4096', '4096', '58'), 'movie3.log': ('4096', '4096', '58')}
+== b3_stripff auto==float products: False
+  auto rc 0 joint True nwarn 1 ['WARNING: The number of pixels is not right in Movies/movie2.eer frame 701. Probably this frame is corrupted. This frame is skipped.'] ERR []
+     {'Movies/movie1.mrc': 'f8cf9fbdc6229b99', 'Movies/movie1.star': 'star:269544 B', 'Movies/movie2.mrc': '4a6e9d15cbf51feb', 'Movies/movie2.star': 'star:268950 B', 'Movies/movie3.mrc': '5e67ac8b928c1258', 'Movies/movie3.star': 'star:266196 B', 'corrected_micrographs.star': 'star:1171 B'}
+     {'movie1.log': ('4096', '4096', '58'), 'movie2.log': ('4096', '4096', '58'), 'movie3.log': ('4096', '4096', '58')}
+  float rc 0 joint True nwarn 1 ['WARNING: The number of pixels is not right in Movies/movie2.eer frame 701. Probably this frame is corrupted. This frame is skipped.'] ERR []
+     {'Movies/movie1.mrc': 'f8cf9fbdc6229b99', 'Movies/movie1.star': 'star:269544 B', 'Movies/movie2.mrc': '4a6e9d15cbf51feb', 'Movies/movie2.star': 'star:268950 B', 'Movies/movie3.mrc': '5e67ac8b928c1258', 'Movies/movie3.star': 'star:266196 B', 'corrected_micrographs.star': 'star:1177 B'}
+     {'movie1.log': ('4096', '4096', '58'), 'movie2.log': ('4096', '4096', '58'), 'movie3.log': ('4096', '4096', '58')}
+== b4_stripzero auto==float products: False
+  auto rc 0 joint True nwarn 1 ['WARNING: The number of pixels is not right in Movies/movie2.eer frame 901. Probably this frame is corrupted. This frame is skipped.'] ERR []
+     {'Movies/movie1.mrc': 'f8cf9fbdc6229b99', 'Movies/movie1.star': 'star:269544 B', 'Movies/movie2.mrc': 'b32417d9d4b8b984', 'Movies/movie2.star': 'star:269220 B', 'Movies/movie3.mrc': '5e67ac8b928c1258', 'Movies/movie3.star': 'star:266196 B', 'corrected_micrographs.star': 'star:1183 B'}
+     {'movie1.log': ('4096', '4096', '58'), 'movie2.log': ('4096', '4096', '58'), 'movie3.log': ('4096', '4096', '58')}
+  float rc 0 joint True nwarn 1 ['WARNING: The number of pixels is not right in Movies/movie2.eer frame 901. Probably this frame is corrupted. This frame is skipped.'] ERR []
+     {'Movies/movie1.mrc': 'f8cf9fbdc6229b99', 'Movies/movie1.star': 'star:269544 B', 'Movies/movie2.mrc': 'b32417d9d4b8b984', 'Movies/movie2.star': 'star:269220 B', 'Movies/movie3.mrc': '5e67ac8b928c1258', 'Movies/movie3.star': 'star:266196 B', 'corrected_micrographs.star': 'star:1189 B'}
+     {'movie1.log': ('4096', '4096', '58'), 'movie2.log': ('4096', '4096', '58'), 'movie3.log': ('4096', '4096', '58')}
+== b5_trunc60_noexp auto==float products: False
+  auto rc 0 joint True nwarn 0 [] ERR []
+     {'Movies/movie1.mrc': 'f8cf9fbdc6229b99', 'Movies/movie1.star': 'star:269544 B', 'Movies/movie2.mrc': 'f71de09c42d7a044', 'Movies/movie2.star': 'star:136122 B', 'Movies/movie3.mrc': '5e67ac8b928c1258', 'Movies/movie3.star': 'star:266196 B', 'corrected_micrographs.star': 'star:1207 B'}
+     {'movie1.log': ('4096', '4096', '58'), 'movie2.log': ('4096', '4096', '34'), 'movie3.log': ('4096', '4096', '58')}
+  float rc 0 joint True nwarn 0 [] ERR []
+     {'Movies/movie1.mrc': 'f8cf9fbdc6229b99', 'Movies/movie1.star': 'star:269544 B', 'Movies/movie2.mrc': 'f71de09c42d7a044', 'Movies/movie2.star': 'star:136122 B', 'Movies/movie3.mrc': '5e67ac8b928c1258', 'Movies/movie3.star': 'star:266196 B', 'corrected_micrographs.star': 'star:1213 B'}
+     {'movie1.log': ('4096', '4096', '58'), 'movie2.log': ('4096', '4096', '34'), 'movie3.log': ('4096', '4096', '58')}
+== b6_wronggain auto==float products: True
+  auto rc 1 joint False nwarn 0 [] ERR ['Motion correction failed for 2 movie(s): Movies/movie1.eer Movies/movie2.eer. Successful per-movie outputs were retained; joint output was n', 'Unsupported gain size in EERRenderer::loadEERGain()']
+     {}
+     {'movie1.log': ('4096', '4096', '39'), 'movie2.log': ('4096', '4096', '39')}
+  float rc 1 joint False nwarn 0 [] ERR ['Motion correction failed for 2 movie(s): Movies/movie1.eer Movies/movie2.eer. Successful per-movie outputs were retained; joint output was n', 'Unsupported gain size in EERRenderer::loadEERGain()']
+     {}
+     {'movie1.log': ('4096', '4096', '39'), 'movie2.log': ('4096', '4096', '39')}

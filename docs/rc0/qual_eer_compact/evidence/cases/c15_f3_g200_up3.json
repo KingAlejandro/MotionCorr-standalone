@@ -1,0 +1,45 @@
+{
+ "name": "c15_f3_g200_up3",
+ "desc": "Falcon3 g200 up3 (16384x16384), 11 groups, rem 131",
+ "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/build/cuda-nvcomp/motioncorr",
+ "options": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.0",
+  "--bfactor",
+  "150",
+  "--seed",
+  "1",
+  "--j",
+  "8",
+  "--gpu",
+  "0",
+  "--eer_grouping",
+  "200",
+  "--eer_upsampling",
+  "3",
+  "--expected_frames",
+  "11",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5"
+ ],
+ "arms": [
+  {
+   "name": "auto",
+   "ingest": "auto"
+  },
+  {
+   "name": "float",
+   "ingest": "float"
+  }
+ ],
+ "compare": [
+  "auto",
+  "float"
+ ],
+ "keep_mrc": false,
+ "witness": true
+}

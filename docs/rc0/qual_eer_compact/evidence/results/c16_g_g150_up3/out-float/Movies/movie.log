@@ -1,0 +1,374 @@
+Working on Movies/movie.eer with 8 thread(s).
+
+Movie size: X = 16384 Y = 16384 N = 12
+Frames to be used: 1 2 3 4 5 6 7 8 9 10 11 12
+Frame grouping: n_frames = 12, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 
+interpolate_shifts = 0
+
+Movie FFT: batch=1 R2C work=1073872896 C2R work=1073872896 shared work=1073872896 inverse tile=1073872896 bytes
+In unaligned sum, Mean = 2.09604 Std = 1.45016 Hotpixel threshold = 10.797
+Detected 3686 hot pixels to be corrected.
+Fixed hot pixels.
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+
+Global alignment:
+ Iteration 1: RMSD = 3.31983 px
+ Iteration 2: RMSD = 2.03693 px
+ Iteration 3: RMSD = 1.78739 px
+ Iteration 4: RMSD = 0.86822 px
+ Iteration 5: RMSD = 0.582027 px
+ [CUDA Global Alignment Profile]
+   Per-kernel timing:            not measured (enable with --profile)
+   Total GPU alignment time:     125.39 ms
+   Buffer VRAM:                  13921.92 MiB
+   cuFFT workspace VRAM:         768.38 MiB
+   Peak GPU memory allocated:    14690.30 MiB
+   Buffer placement:             borrowed dead device memory, nothing allocated
+ [CUDA Global Alignment] completed; converged=no
+Reconstructing globally aligned frames (CUDA in-VRAM)...
+
+Local alignments:
+Patches: X = 5 Y = 5
+Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 54090 of 81153 MiB; workspace 423 MiB + cuFFT work 34 MiB, retained until alignment release.
+Batched patch alignment: device memory in use rose by at most 1448 MiB (sampled after each chunk).
+Patch (1, 1): 1 / 25, X range = [0, 3276), Y range = [0, 3276), Center = (1637, 1637)
+ Iteration 1: RMSD = 2.19 px
+ Iteration 2: RMSD = 0.75 px
+ Iteration 3: RMSD = 0.48 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     4.55 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (1, 2): 2 / 25, X range = [3276, 6552), Y range = [0, 3276), Center = (4913, 1637)
+ Iteration 1: RMSD = 6.47 px
+ Iteration 2: RMSD = 0.83 px
+ Iteration 3: RMSD = 0.59 px
+ Iteration 4: RMSD = 0.17 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     4.55 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (1, 3): 3 / 25, X range = [6552, 9828), Y range = [0, 3276), Center = (8189, 1637)
+ Iteration 1: RMSD = 3.81 px
+ Iteration 2: RMSD = 0.71 px
+ Iteration 3: RMSD = 0.27 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     4.55 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (1, 4): 4 / 25, X range = [9828, 13104), Y range = [0, 3276), Center = (11465, 1637)
+ Iteration 1: RMSD = 2.95 px
+ Iteration 2: RMSD = 0.65 px
+ Iteration 3: RMSD = 0.34 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     4.55 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (1, 5): 5 / 25, X range = [13104, 16380), Y range = [0, 3276), Center = (14741, 1637)
+ Iteration 1: RMSD = 2.61 px
+ Iteration 2: RMSD = 0.86 px
+ Iteration 3: RMSD = 1.44 px
+ Iteration 4: RMSD = 0.38 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     5.81 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (2, 1): 6 / 25, X range = [0, 3276), Y range = [3276, 6552), Center = (1637, 4913)
+ Iteration 1: RMSD = 3.72 px
+ Iteration 2: RMSD = 0.60 px
+ Iteration 3: RMSD = 0.34 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     5.81 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (2, 2): 7 / 25, X range = [3276, 6552), Y range = [3276, 6552), Center = (4913, 4913)
+ Iteration 1: RMSD = 2.77 px
+ Iteration 2: RMSD = 1.50 px
+ Iteration 3: RMSD = 0.77 px
+ Iteration 4: RMSD = 0.52 px
+ Iteration 5: RMSD = 0.27 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     5.81 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (2, 3): 8 / 25, X range = [6552, 9828), Y range = [3276, 6552), Center = (8189, 4913)
+ Iteration 1: RMSD = 5.88 px
+ Iteration 2: RMSD = 1.91 px
+ Iteration 3: RMSD = 2.30 px
+ Iteration 4: RMSD = 0.74 px
+ Iteration 5: RMSD = 0.74 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     5.81 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=no
+ Iteration 1: RMSD = 5.88 px
+ Iteration 2: RMSD = 1.91 px
+ Iteration 3: RMSD = 2.30 px
+ Iteration 4: RMSD = 0.74 px
+ Iteration 5: RMSD = 0.74 px
+ [CUDA Patch Alignment Profile]
+   Per-kernel timing:            not measured (enable with --profile)
+   Total GPU alignment time:     8.77 ms
+   Buffer VRAM:                  564.28 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    598.54 MiB
+ [CUDA Patch Alignment] completed; converged=no
+Patch (2, 4): 9 / 25, X range = [9828, 13104), Y range = [3276, 6552), Center = (11465, 4913)
+ Iteration 1: RMSD = 6.85 px
+ Iteration 2: RMSD = 1.14 px
+ Iteration 3: RMSD = 1.17 px
+ Iteration 4: RMSD = 0.33 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     4.85 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (2, 5): 10 / 25, X range = [13104, 16380), Y range = [3276, 6552), Center = (14741, 4913)
+ Iteration 1: RMSD = 2.52 px
+ Iteration 2: RMSD = 0.91 px
+ Iteration 3: RMSD = 0.24 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     4.85 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (3, 1): 11 / 25, X range = [0, 3276), Y range = [6552, 9828), Center = (1637, 8189)
+ Iteration 1: RMSD = 14.48 px
+ Iteration 2: RMSD = 15.33 px
+ Iteration 3: RMSD = 0.63 px
+ Iteration 4: RMSD = 0.33 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     4.85 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (3, 2): 12 / 25, X range = [3276, 6552), Y range = [6552, 9828), Center = (4913, 8189)
+ Iteration 1: RMSD = 2.29 px
+ Iteration 2: RMSD = 0.61 px
+ Iteration 3: RMSD = 0.34 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     4.85 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (3, 3): 13 / 25, X range = [6552, 9828), Y range = [6552, 9828), Center = (8189, 8189)
+ Iteration 1: RMSD = 5.55 px
+ Iteration 2: RMSD = 1.74 px
+ Iteration 3: RMSD = 0.43 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     4.88 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (3, 4): 14 / 25, X range = [9828, 13104), Y range = [6552, 9828), Center = (11465, 8189)
+ Iteration 1: RMSD = 7.64 px
+ Iteration 2: RMSD = 1.01 px
+ Iteration 3: RMSD = 0.53 px
+ Iteration 4: RMSD = 0.24 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     4.88 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (3, 5): 15 / 25, X range = [13104, 16380), Y range = [6552, 9828), Center = (14741, 8189)
+ Iteration 1: RMSD = 1.71 px
+ Iteration 2: RMSD = 0.40 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     4.88 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (4, 1): 16 / 25, X range = [0, 3276), Y range = [9828, 13104), Center = (1637, 11465)
+ Iteration 1: RMSD = 8.49 px
+ Iteration 2: RMSD = 4.77 px
+ Iteration 3: RMSD = 4.86 px
+ Iteration 4: RMSD = 2.72 px
+ Iteration 5: RMSD = 3.90 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     4.88 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=no
+ Iteration 1: RMSD = 8.49 px
+ Iteration 2: RMSD = 4.77 px
+ Iteration 3: RMSD = 4.86 px
+ Iteration 4: RMSD = 2.72 px
+ Iteration 5: RMSD = 3.90 px
+ [CUDA Patch Alignment Profile]
+   Per-kernel timing:            not measured (enable with --profile)
+   Total GPU alignment time:     8.62 ms
+   Buffer VRAM:                  564.28 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    598.54 MiB
+ [CUDA Patch Alignment] completed; converged=no
+Patch (4, 2): 17 / 25, X range = [3276, 6552), Y range = [9828, 13104), Center = (4913, 11465)
+ Iteration 1: RMSD = 3.98 px
+ Iteration 2: RMSD = 1.49 px
+ Iteration 3: RMSD = 0.58 px
+ Iteration 4: RMSD = 0.21 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     6.53 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (4, 3): 18 / 25, X range = [6552, 9828), Y range = [9828, 13104), Center = (8189, 11465)
+ Iteration 1: RMSD = 2.23 px
+ Iteration 2: RMSD = 1.45 px
+ Iteration 3: RMSD = 1.24 px
+ Iteration 4: RMSD = 0.93 px
+ Iteration 5: RMSD = 0.65 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     6.53 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=no
+ Iteration 1: RMSD = 2.23 px
+ Iteration 2: RMSD = 1.45 px
+ Iteration 3: RMSD = 1.24 px
+ Iteration 4: RMSD = 0.93 px
+ Iteration 5: RMSD = 0.65 px
+ [CUDA Patch Alignment Profile]
+   Per-kernel timing:            not measured (enable with --profile)
+   Total GPU alignment time:     8.68 ms
+   Buffer VRAM:                  564.28 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    598.54 MiB
+ [CUDA Patch Alignment] completed; converged=no
+Patch (4, 4): 19 / 25, X range = [9828, 13104), Y range = [9828, 13104), Center = (11465, 11465)
+ Iteration 1: RMSD = 1.69 px
+ Iteration 2: RMSD = 1.00 px
+ Iteration 3: RMSD = 0.22 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     6.53 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (4, 5): 20 / 25, X range = [13104, 16380), Y range = [9828, 13104), Center = (14741, 11465)
+ Iteration 1: RMSD = 21.08 px
+ Iteration 2: RMSD = 1.15 px
+ Iteration 3: RMSD = 0.39 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     6.53 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (5, 1): 21 / 25, X range = [0, 3276), Y range = [13104, 16380), Center = (1637, 14741)
+ Iteration 1: RMSD = 1.58 px
+ Iteration 2: RMSD = 1.06 px
+ Iteration 3: RMSD = 0.38 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     5.74 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (5, 2): 22 / 25, X range = [3276, 6552), Y range = [13104, 16380), Center = (4913, 14741)
+ Iteration 1: RMSD = 3.07 px
+ Iteration 2: RMSD = 1.77 px
+ Iteration 3: RMSD = 0.89 px
+ Iteration 4: RMSD = 0.72 px
+ Iteration 5: RMSD = 0.33 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     5.74 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (5, 3): 23 / 25, X range = [6552, 9828), Y range = [13104, 16380), Center = (8189, 14741)
+ Iteration 1: RMSD = 18.39 px
+ Iteration 2: RMSD = 20.03 px
+ Iteration 3: RMSD = 0.70 px
+ Iteration 4: RMSD = 0.38 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     5.74 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (5, 4): 24 / 25, X range = [9828, 13104), Y range = [13104, 16380), Center = (11465, 14741)
+ Iteration 1: RMSD = 15.68 px
+ Iteration 2: RMSD = 0.78 px
+ Iteration 3: RMSD = 0.58 px
+ Iteration 4: RMSD = 0.25 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            4 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     5.74 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+Patch (5, 5): 25 / 25, X range = [13104, 16380), Y range = [13104, 16380), Center = (14741, 14741)
+ Iteration 1: RMSD = 3.85 px
+ Iteration 2: RMSD = 0.79 px
+ Iteration 3: RMSD = 0.49 px
+ [CUDA Patch Alignment Profile]
+   Batched alignment:            1 patches together; time and VRAM below are for all of them
+   Total GPU alignment time:     1.05 ms
+   Buffer VRAM:                  423.54 MiB
+   cuFFT workspace VRAM:         34.25 MiB
+   Peak GPU memory allocated:    457.79 MiB
+ [CUDA Patch Alignment] completed; converged=yes
+
+Polynomial fit RMSD: X = 8.59 px Y = 2.75 px
+Pre-exposure: = 0.00
+Dose weighting and summing frames (CUDA in-VRAM)...
+Dose-weighting scratch borrowed from the consumed real-space movie
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 12, Size: 16384x16384
+  Peak VRAM: 0.00 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 411.35 ms
+Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-EER-Q/runs/c16_g_g150_up3/out-float/Movies/movie.mrc
+Full movie wall time: 19.383 s

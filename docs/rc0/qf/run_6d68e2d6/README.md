@@ -46,11 +46,11 @@ Item 15's ASan build (`RelWithDebInfo`, ASan+UBSan) is `4bc1cc2d…a144` (`motio
 | 5 | Route/product campaign | **PASS** | 14/14 (7 families × G/L): auto/compact/float complete with their routes witnessed; compact refused only on 10028 (G and L) with nothing published; products identical to auto. CPU-vs-CUDA `--gate backend` recorded, **not graded** (Tier B) | `raw/summaries/campaign/`, `raw/logs/item5_campaign.out` |
 | 6 | CPU identity vs Q1 `1db86902` | **PASS** | `ref_cpu_vs_cpu` products-only PASS 14/14; the strict all-files comparison also passes 14/14 (reference `dd86cd41…6b26439`, hash-checked) | `checks.ref_cpu_vs_cpu` in each campaign case |
 | 7 | #178 CPU unweighted path | **PASS** | 6/6 cases (noDW G/L, evenodd G/L, evenodd 23-frame L, nodose G) identical to `d7171b81`; the injected recoverable `cudaMalloc` failure at ordinal 16 reaches the CPU line and is identical. The injected code is not a real out-of-memory condition | `raw/summaries/fallback178/` |
-| 8 | Multi-GPU publication | **PASS** | 8 arms (G/L × w1/w2/w4, mixed w1/w2), every dataset contract PASS: workers on distinct sampled UUIDs, shards partition the input, joint STAR order, `logfile.pdf` 30 pages from real Ghostscript, no leftover process. All pairs identical (products-only and identity lib, including s0); positive control PASS, flipped-byte control FAIL. Window: all four GPU locks plus the bench lock, 0 compute processes, CPUs 96–111 | `raw/summaries/multigpu/`, `raw/logs/item8_*.out` |
+| 8 | Multi-GPU publication | **PASS** | 8 arms (G/L × w1/w2/w4, mixed w1/w2), every dataset contract PASS: workers on distinct sampled UUIDs, shards partition the input, joint STAR order, `logfile.pdf` 30 pages from real Ghostscript, no leftover process. All pairs identical (products-only and identity lib, including s0); positive control PASS, flipped-byte control FAIL. Window: all four GPU locks plus the bench lock, 0 compute processes, CPUs 96–111 | `raw/summaries/multigpu/`, `raw/worker-records/multigpu/`, `raw/logs/item8_*.out` |
 | 9 | Adapted #123 matrix | **PASS** | 16/16 rows and 28/28 arms witnessed on the lane UUID only, gain-effect control `differs: true`, rc 0, on **both** CUDA executables; source F, 0 modified files | `raw/matrix-{nvcomp,cuda}.json` |
 | 10 | `CpuDoseSymmetry` + `Base` | **PASS** | both pass in CPU, CUDA and CUDA+nvCOMP; `MOTIONCORR_CPU_DOSE_SYMMETRY=AUTO` selects `symmetric` (production path) in all three; g++ 13.3.0; flags `-O3 -DNDEBUG -std=gnu++17 -fopenmp`, no `-march=native`/`-mfma` | `raw/logs/configure-*.log`, grade files |
 | 11 | EER compact #208 replay | **PASS** | 41/41 recorded cases PASS, 0 UNRUN (o1n is N/A here and runs in the guard-removed control); negative controls 4/4 rejected; guard-removed control o1n and o5n PASS (compact ≠ float without the guard) | `raw/item11-eer/summary{,-noguard}.json` |
-| 12 | Resident retry #207 | **PASS** | `PatchRetryState` and `CudaResidentRetryFailures` pass; single-GPU 4/4 (retried 41/30/9/25, remaining-owned 0); dataset (GPU0 + GPU2 `GPU-063e5232…`) PASS: d1/d2/dshim identical, dpoison and dpoison_both refuse as #207 | `raw/item12-retry/results/` |
+| 12 | Resident retry #207 | **PASS** | `PatchRetryState` and `CudaResidentRetryFailures` pass; single-GPU 4/4 (retried 41/30/9/25, remaining-owned 0); dataset (GPU0 + GPU2 `GPU-063e5232…`) PASS: d1/d2/dshim identical, dpoison and dpoison_both refuse as #207 | `raw/item12-retry/results/`, `raw/worker-records/item12-retry-dataset/` |
 | 13 | Raw integer MRC #204 harness | **FAIL** (dispositioned) | 14 runs graded. Every record matches #204 except one case, `m0_swapped_nx128_inherited` (2 problems); the 6 KNOWN-F4 records are as expected. Driver exit 1 | `raw/item13-mrc/grade.json` |
 | 14 | macOS | not graded | builds and runs; not qualified; known CPU CTest differences (below) | `raw/item14-macos/` |
 | 15 | EER memory safety (D10) | **PASS** | (a) `EerMemorySafety` passes in all three grade files; (b) `asan-eer.exit` 0: build rc 0, `-fsanitize=address,undefined` in `flags.make`, both executables linked to libasan and libubsan, `EerMemorySafety` 1/1 passed, default `QF_BENCH_LOCK` (no warning); (c) `decoder sources == 97fb9fda: yes` | `raw/asan-eer.*` |
@@ -61,6 +61,36 @@ Probes: `probe_campaign_refusal`, `probe_matrix_fallback_witness`, `probe_item12
 `probe_multigpu_dryrun` all PROBE PASS. The item 8 `--dry-run` paths printed their plans (`raw/logs/`).
 `probe_item13_exit` FAILs; see the disposition.
 
+## Worker records for items 8 and 12 (added after review)
+
+`raw/worker-records/` holds the non-product records of every multi-GPU arm (item 8: G/L × w1/w2/w4, mixed
+w1/w2) and every item 12 dataset arm (d1, d2, dshim, dpoison, dpoison_both), copied unchanged from W-QF
+scratch: `dataset_status.json`, `workers/status.json` (with the launcher's per-PID `gpu_witness`),
+`aggregate.{json,log}`, `workers.log`, the shard manifest and shard STARs, each worker's
+`launcher.console.log` and `command.json`, `merged/_workers/merge.log`, the driver logs, item 8's
+comparison JSONs, and a `file-listing.tsv` (size and path of every file in the arm's tree). No product is
+included. 222 files, 1.57 MB.
+
+| Arm | Workers | Worker rcs | Distinct devices witnessed | All PIDs on intended distinct devices | Dataset |
+|---|---|---|---|---|---|
+| item 8 G and L, w1 / w2 / w4 | 1 / 2 / 4 | all 0 | 1 / 2 / 4 | true (no wrong device, no unwitnessed PID) | PASS, ready |
+| item 8 mixed, w1 / w2 | 1 / 2 | all 0 | 1 / 2 | true | PASS, ready |
+| item 12 d1 / d2 / dshim | 1 / 2 / 2 | all 0 | 1 / 2 / 2 | true | PASS, ready |
+| item 12 dpoison | 2 | **[0, 1]** | 2 | true | FAIL, not ready (expected) |
+| item 12 dpoison_both | 2 | [1, 1] | 2 | true | FAIL, not ready (expected) |
+
+**dpoison attribution:**
+- The fault wrapper logged `fault=off` for worker 0 (GPU0 `GPU-eddb42fe…`) and `fault=on` for worker 1 (GPU2
+  `GPU-063e5232…`).
+- `[preprocessfault] injected` and `Refusing to retry alignment on a poisoned context` appear only in
+  worker 1's console. In dpoison_both they appear in both consoles.
+- Worker 0 kept both of its movies' per-movie STARs. Worker 1 kept its earlier tutorial movie and has no
+  output for its 10641 movie. Neither poison arm has a `merged/` tree.
+
+**Not recoverable:** the item 12 driver deletes every `.mrc` and `.pdf` under `item12-retry/dataset/` after
+grading (`tools/item12_retry.py:446`), so the MRC half of the product sets the grader checked is not in
+scratch. The listings show the surviving STARs, logs and EPS files. The MRCs were not reconstructed.
+
 ## Dispositions
 
 **Item 13 (and `probe_item13_exit`): FAIL under the frozen criterion; operator disposition: expected
@@ -70,8 +100,9 @@ behaviour change, accepted (W-QF, 2026-10-19).**
   expected failure: read little-endian, nx = 128 becomes `INT_MIN`, `abs(INT_MIN)` is negative, and the
   inherited test in `src/rwMRC.h` `parseMRCHeader` never detected the byte swap. #204's CUDA record was
   "PASS" in the sense "fails the same way on every route"; its CPU record was FAIL.
-- **Cause:** #231 (D10, `55e30154`; commit `37297bef`) replaced `abs(mode|nx) > SWAPTRIG` with ordered
-  comparisons (the F5 header fix). The swap is now detected and the movie is processed.
+- **Cause:** #231 (D10, `55e30154`) replaced `abs(mode|nx) > SWAPTRIG` with ordered comparisons (the F5
+  header fix; commit `1a54f813`, F's `src/rwMRC.h:149-151`; the later commit `37297bef` added the mode and
+  dimension validation). The swap is now detected and the movie is processed.
 - **Observed on F:** every arm completes with rc 0, a completion STAR (`corrected_micrographs.star`,
   `movie.star`) and an MRC product: CPU, and CUDA `float`, `auto` and `compact` (routes witnessed float,
   compact, compact). The grader therefore reports CUDA PASS→FAIL and CPU FAIL→PASS.

@@ -371,11 +371,11 @@ healthy movies for a published dataset.
    here"), so some corruption that is reported only at the end of the stream (for example a missing final byte or a bad index CRC) is
    **accepted**. Short reads are still caught. **You must validate compressed inputs independently before processing**: `xz -t FILE`,
    `zstd -t FILE`, `bzip2 -t FILE` (or `pbzip2 -t FILE`). Scheduled fix: [#214](https://github.com/KingAlejandro/MotionCorr-standalone/issues/214).
-7. **Big-endian mode-0 MRC with nx = 128 (F5): outcome not re-established after D10.** Up to `483e881d` the swap heuristic was `abs(header->mode) > SWAPTRIG || abs(header->nx) > SWAPTRIG`; a byte-swapped
+7. **Big-endian mode-0 MRC with nx = 128 (F5): processed on F, but not pinned by a test.** Up to `483e881d` the swap heuristic was `abs(header->mode) > SWAPTRIG || abs(header->nx) > SWAPTRIG`; a byte-swapped
    nx of 128 is `INT_MIN`, for which `abs` is undefined behaviour, and the movie failed identically on every tested route of the GCC build (W-MRC-Q, PR #204; R-QA1). #231 replaced the test with ordered comparisons
-   (`src/rwMRC.h:149-151`), so `abs(INT_MIN)` no longer occurs and the undefined-behaviour rationale no longer applies. By source reading, a byte-swapped `INT_MIN` field now takes the swap branch, but **the F5 input itself
-   (a valid big-endian mode-0 movie with nx = 128) has not been run on main** and no test pins its outcome: the `EerMemorySafety` MRC cases cover damaged `INT_MIN` headers and an overflowing dimension product, which fail the
-   movie (above), not this case. Do not rely on either outcome for such a file until a control exists. Document-only for RC0.
+   (`src/rwMRC.h:149-151`), so `abs(INT_MIN)` no longer occurs and the undefined-behaviour rationale no longer applies. A byte-swapped `INT_MIN` field now takes the swap branch. **Observed on F at QF** (`docs/rc0/qf/run_6d68e2d6/README.md`, item 13 disposition): the F5 input
+   is processed on every route (CPU; CUDA `float`, `auto`, `compact`), the CUDA routes give identical products, and every arm's products equal those of the same pixels written little-endian (supplementary run).
+   No CTest pins this outcome: the `EerMemorySafety` MRC cases cover damaged `INT_MIN` headers and an overflowing dimension product, which fail the movie (above), not this case. Document-only for RC0.
 
 Auxiliary versus numerical products: the corrected MRC(s) and the per-movie and joint STAR files carry the
 results. `logfile.pdf`, `header.pdf`, `batch.pdf`, the shift EPS plots, `.log` and `_PS.mrc` are auxiliary reports.

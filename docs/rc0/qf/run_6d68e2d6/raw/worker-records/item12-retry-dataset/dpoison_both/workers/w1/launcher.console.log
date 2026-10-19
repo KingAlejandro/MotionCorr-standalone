@@ -1,0 +1,38 @@
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/20170629_00031_frameImage.tiff
+  * Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.tif
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.
+000/??? sec ~~(,_,">                                                          [oo]   1/   2 sec ..............................~~(,_,">                           [oo][preprocessfault] injected cudaErrorIllegalAddress at downloadPatchSpectra; pending slot cleared
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QF/src/src/motioncorr_runner.cpp, line 3704
+ERROR: 
+CUDA device context is unusable for Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.tif (patch 1, 1): an illegal memory access was encountered. Refusing to retry alignment on a poisoned context.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x653f62d38167]
+/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault(+0x538b1) [0x653f62d058b1]
+/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault(_ZN16MotioncorrRunner3runEv+0x22b1) [0x653f62dfa801]
+/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault(main+0x296) [0x653f62d2b7e6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7de33062a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7de33062a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault(_start+0x25) [0x653f62d2c3a5]
+==================
+ERROR: 
+CUDA device context is unusable for Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.tif (patch 1, 1): an illegal memory access was encountered. Refusing to retry alignment on a poisoned context.
+Continuing with the remaining movies.
+   3/   3 sec ............................................................~~(,_,"> yum!
+in: /mnt/clathrin/alex-motioncorr-rc0/W-QF/src/src/motioncorr_runner.cpp, line 1093
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.tif. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x653f62d38167]
+/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault(+0x56c45) [0x653f62d08c45]
+/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault(main+0x296) [0x653f62d2b7e6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7de33062a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7de33062a28b]
+/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr_resident_retry_fault(_start+0x25) [0x653f62d2c3a5]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.tif. Successful per-movie outputs were retained; joint output was not generated.
+[faultinject] remaining-owned=0 stale-releases=0

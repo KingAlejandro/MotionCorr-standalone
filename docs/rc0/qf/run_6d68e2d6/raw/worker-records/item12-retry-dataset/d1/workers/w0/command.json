@@ -1,0 +1,47 @@
+{
+  "index": 0,
+  "command": [
+    "taskset",
+    "-c",
+    "96-103",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr",
+    "--i",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QF/item12-retry/dataset/d1/workers/shards/shard_1way_0.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QF/item12-retry/dataset/d1/workers/w0/",
+    "--gpu",
+    "0",
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--j",
+    "8",
+    "--skip_report_pdf"
+  ],
+  "pid": 1667435,
+  "cuda_visible_devices": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+  "device": {
+    "smi_index": "0",
+    "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+    "name": "NVIDIA A100 80GB PCIe",
+    "memory_total": "81920 MiB",
+    "selector": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+  },
+  "cpu_mask": "96-103",
+  "cpu_mask_width": 8,
+  "omp": {
+    "OMP_NUM_THREADS": "8",
+    "OMP_PROC_BIND": null,
+    "OMP_PLACES": null
+  },
+  "worker_extra": []
+}

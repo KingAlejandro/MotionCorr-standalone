@@ -1,0 +1,57 @@
+{
+  "input_star": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/item12-retry/inputs/mixed/movies.star",
+  "input_sha256": "d478c5863aed986f7e98117574a1a8819c4f7de8f7863d5eae5d6bf1643fc36c",
+  "movie_block": "movies",
+  "labels": [
+    "rlnMicrographMovieName",
+    "rlnOpticsGroup"
+  ],
+  "n_movies": 4,
+  "n_shards": 2,
+  "partition": "contiguous",
+  "canonical_movies": [
+    "Movies/20170629_00026_frameImage.tiff",
+    "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.tif",
+    "Movies/20170629_00031_frameImage.tiff",
+    "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.tif"
+  ],
+  "canonical_output_roots": [
+    "Movies/20170629_00026_frameImage",
+    "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41",
+    "Movies/20170629_00031_frameImage",
+    "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04"
+  ],
+  "shards": [
+    {
+      "index": 0,
+      "path": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/item12-retry/dataset/dshim/workers/shards/shard_2way_0.star",
+      "sha256": "42c7b76d176651d6cc21ec2652c6406c214f0b96cd65534112ce18e804d1ba5a",
+      "n_movies": 2,
+      "first_input_row": 0,
+      "movies": [
+        "Movies/20170629_00026_frameImage.tiff",
+        "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.tif"
+      ],
+      "output_roots": [
+        "Movies/20170629_00026_frameImage",
+        "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41"
+      ]
+    },
+    {
+      "index": 1,
+      "path": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/item12-retry/dataset/dshim/workers/shards/shard_2way_1.star",
+      "sha256": "51288d0bf53c7824fde07e363bd794a21c1ec5eeaa224c3d460cd69077eed6cf",
+      "n_movies": 2,
+      "first_input_row": 2,
+      "movies": [
+        "Movies/20170629_00031_frameImage.tiff",
+        "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.tif"
+      ],
+      "output_roots": [
+        "Movies/20170629_00031_frameImage",
+        "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04"
+      ]
+    }
+  ],
+  "input_type": "spa"
+}

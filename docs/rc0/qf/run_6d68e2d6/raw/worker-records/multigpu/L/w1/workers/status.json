@@ -1,0 +1,1211 @@
+{
+  "input_star": "/home/alex/motioncorr-validation-20261011-vm/tutorial-data/movies.star",
+  "binary": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-nvcomp/motioncorr",
+  "n_workers": 1,
+  "worker_args": [
+    "--use_own",
+    "--j",
+    "16",
+    "--max_io_threads",
+    "16",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--expected_frames",
+    "24",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--ingest",
+    "auto",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--skip_report_pdf"
+  ],
+  "cpus": "96-103,104-111",
+  "cpu_masks": [
+    "96-103,104-111"
+  ],
+  "cpu_mask_widths": [
+    16
+  ],
+  "cpu_budget_requested": 16,
+  "cpu_budget_covered": 16,
+  "cpu_masks_disjoint": true,
+  "cpu_masks_disjoint_note": "false means workers shared cores. Allowed, but such a run is an oversubscription measurement, not a fixed-budget scaling point; --cpu-budget refuses it for that reason.",
+  "launcher_allocation": "96-111",
+  "omp_requested": {
+    "OMP_NUM_THREADS": null,
+    "OMP_PROC_BIND": null,
+    "OMP_PLACES": null
+  },
+  "omp_note": "as requested on the command line. The value each worker was actually given, including the mask-width default for OMP_NUM_THREADS and anything inherited from the environment, is in that worker's command.json.",
+  "cpu_seconds_total": 10.086,
+  "minor_faults_total": 182686,
+  "major_faults_total": 0,
+  "faults_note": "exact, from getrusage(RUSAGE_CHILDREN). Per-run total should be near constant for a fixed dataset; if the rate per second falls as workers are added, fault handling is a shared bottleneck rather than per-process work.",
+  "cpu_seconds_total_note": "getrusage(RUSAGE_CHILDREN) delta across the run: exact, unsampled, and includes the ghostscript grandchildren each worker reaps.",
+  "mean_cores_busy": 1.63,
+  "mean_cores_busy_note": "cpu_seconds_total / launcher wall. Achieved parallelism averaged over the whole run, including the serial tails. Compare against cpu_budget_covered: a scaling number is only meaningful when the budget was actually used.",
+  "affinity_problems": null,
+  "phase_rollup": {
+    "max_setup_seconds": 0.961,
+    "max_tail_seconds": 0.195,
+    "first_product_spread": 0.0,
+    "n_workers_missing_setup": 0,
+    "n_workers_missing_tail": 0,
+    "note": "first_product_spread is the stagger between workers reaching their first product. If per-process CUDA setup serialises across concurrent workers this grows with worker count; if setup is genuinely parallel it stays near zero."
+  },
+  "started_at": "2026-10-19T01:12:14.500+00:00",
+  "ended_at": "2026-10-19T01:12:20.670+00:00",
+  "wall_seconds": 6.17,
+  "wall_seconds_note": "bookkeeping only; this tool makes no throughput claim and is not a benchmark. #26 owns the measurement matrix.",
+  "final_worker_tail_seconds": 0.0,
+  "final_worker_tail_note": "spread between the first and last worker to exit. Load imbalance is one of the candidate limits on static workers; this makes it observable, it does not attribute it.",
+  "manifest": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/multigpu/L/w1/workers/shards/shard_manifest.json",
+  "manifest_sha256": "ff443569b97cf5630ef846bffaf91804fae822045456b4983428c0cf431267f5",
+  "workers": [
+    {
+      "index": 0,
+      "pid": 1665498,
+      "returncode": 0,
+      "log": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/multigpu/L/w1/workers/w0/launcher.console.log",
+      "started_at": "2026-10-19T01:12:14.508+00:00",
+      "ended_at": "2026-10-19T01:12:20.018+00:00",
+      "exit_observed": true,
+      "observed_until_at": "2026-10-19T01:12:20.018+00:00",
+      "wall_seconds": 5.509,
+      "rss_hwm_kib": 378712,
+      "rss_status": "MEASURED",
+      "rss_note": "worker process only; ghostscript children excluded; sampled every 0.5s",
+      "cpu_seconds_sampled": 9.63,
+      "minor_faults": 138384,
+      "major_faults": 0,
+      "mean_threads_running": 1.75,
+      "cpu_mask": "96-103,104-111",
+      "cpu_mask_width": 16,
+      "cpu_affinity": {
+        "requested": "96-103,104-111",
+        "witnessed_at_launch": "96-111",
+        "later_observations": [
+          "96-111"
+        ],
+        "verdict": "MATCH",
+        "note": "read back from /proc/<pid>/status Cpus_allowed_list rather than assumed from the taskset argument, so a cpuset that narrows the mask is visible. later_observations is the 0.5 s sampler trace and records any change after launch."
+      },
+      "phases": {
+        "n_products": 24,
+        "setup_seconds": 0.961,
+        "produce_seconds": 4.354,
+        "tail_seconds": 0.195,
+        "first_product_offset": 0.961,
+        "product_offsets": [
+          0.961,
+          1.215,
+          1.417,
+          1.568,
+          1.77,
+          1.924,
+          2.127,
+          2.281,
+          2.483,
+          2.685,
+          2.887,
+          3.038,
+          3.241,
+          3.393,
+          3.596,
+          3.799,
+          3.951,
+          4.153,
+          4.355,
+          4.557,
+          4.708,
+          4.91,
+          5.113,
+          5.315
+        ],
+        "inter_product_seconds": [
+          0.254,
+          0.202,
+          0.152,
+          0.202,
+          0.154,
+          0.203,
+          0.154,
+          0.202,
+          0.202,
+          0.202,
+          0.152,
+          0.203,
+          0.152,
+          0.203,
+          0.203,
+          0.152,
+          0.202,
+          0.202,
+          0.202,
+          0.151,
+          0.202,
+          0.202,
+          0.202
+        ],
+        "poll_interval": 0.05,
+        "completion_marker": "per-movie STAR appearance after image writes close",
+        "note": "marker observations can lag appearance by one poll interval; not STAR-close or full-movie timestamps. Tail includes remaining model STAR/plots/aggregate/report/drain work; setup+produce+tail partition the worker wall",
+        "binary_movie_wall_sum": 5.0,
+        "binary_movie_walls": [
+          0.713,
+          0.221,
+          0.194,
+          0.179,
+          0.177,
+          0.178,
+          0.177,
+          0.192,
+          0.182,
+          0.183,
+          0.191,
+          0.184,
+          0.18,
+          0.179,
+          0.18,
+          0.181,
+          0.178,
+          0.2,
+          0.179,
+          0.194,
+          0.175,
+          0.209,
+          0.192,
+          0.182
+        ],
+        "binary_movie_walls_missing": []
+      },
+      "exit_digest": {
+        "status": "complete",
+        "outputs": {
+          "Movies/20170629_00021_frameImage.log": {
+            "sha256": "129b26ed7111f194638879f115aeefe80d6067b4da11a6e18d4369340797c107",
+            "key": [
+              2064,
+              17564839,
+              14816,
+              1792372335357065450,
+              1792372335357065450
+            ]
+          },
+          "Movies/20170629_00021_frameImage.mrc": {
+            "sha256": "44c005ce16d60b4bd417931b174d3ea028d4ef430b3dd9f2b10500fdf5e97ca5",
+            "key": [
+              2064,
+              17564840,
+              56956944,
+              1792372335452077100,
+              1792372335452077100
+            ]
+          },
+          "Movies/20170629_00021_frameImage.star": {
+            "sha256": "04810f874f4726e2b74431db3c7aef3bc1eab43f7ccfa21853f1f2603ac28221",
+            "key": [
+              2064,
+              17564842,
+              44556,
+              1792372335454077346,
+              1792372335454077346
+            ]
+          },
+          "Movies/20170629_00021_frameImage_shifts.eps": {
+            "sha256": "15170a36a727f43a8d1786b8c46409d792c40a1d1551d0d5030805a8354dc1bc",
+            "key": [
+              2064,
+              17564843,
+              92323,
+              1792372335458077836,
+              1792372335458077836
+            ]
+          },
+          "Movies/20170629_00022_frameImage.log": {
+            "sha256": "13fbe0fe595ec72ebdd4aa196b413113fc226c18abc14a32d487a3596b1dc62f",
+            "key": [
+              2064,
+              17564841,
+              14769,
+              1792372335579092675,
+              1792372335579092675
+            ]
+          },
+          "Movies/20170629_00022_frameImage.mrc": {
+            "sha256": "b1279124e39e59656539466697bc5ee8fc9f69560276915722bb298b8ff96db2",
+            "key": [
+              2064,
+              17564844,
+              56956944,
+              1792372335686105797,
+              1792372335686105797
+            ]
+          },
+          "Movies/20170629_00022_frameImage.star": {
+            "sha256": "66117779deaf93e7d350829ccd82fe9c696af646e7133e885bdc84a731db1b3d",
+            "key": [
+              2064,
+              17564846,
+              44421,
+              1792372335688106043,
+              1792372335688106043
+            ]
+          },
+          "Movies/20170629_00022_frameImage_shifts.eps": {
+            "sha256": "b45373f6350e35a3a801413e1f61ababd549b673c60c6a67a566310e13f335f4",
+            "key": [
+              2064,
+              17564847,
+              92322,
+              1792372335692106533,
+              1792372335692106533
+            ]
+          },
+          "Movies/20170629_00023_frameImage.log": {
+            "sha256": "c837b9058fa3f47ff562a857639f23834af0510f39fbd0cf3abb696ec3dd247e",
+            "key": [
+              2064,
+              17564845,
+              14768,
+              1792372335774116589,
+              1792372335774116589
+            ]
+          },
+          "Movies/20170629_00023_frameImage.mrc": {
+            "sha256": "14cfc4153b16fb302cb9e07661e96378f4fed44f52b78b0895880c9a7d7195f8",
+            "key": [
+              2064,
+              17564848,
+              56956944,
+              1792372335874128853,
+              1792372335874128853
+            ]
+          },
+          "Movies/20170629_00023_frameImage.star": {
+            "sha256": "2cefbc8f6c200ec4b0718ae5fad7560b39e760728f652aed41ec27c9b6c5b873",
+            "key": [
+              2064,
+              17564850,
+              44340,
+              1792372335876129098,
+              1792372335876129098
+            ]
+          },
+          "Movies/20170629_00023_frameImage_shifts.eps": {
+            "sha256": "0d17afc374ee47a26b42f9d72361205e9496e6467ceaa0cde3eed91bac771ba8",
+            "key": [
+              2064,
+              17564851,
+              92294,
+              1792372335879129466,
+              1792372335879129466
+            ]
+          },
+          "Movies/20170629_00024_frameImage.log": {
+            "sha256": "fa8d036ee4e72abf74d16515f4909d6511b2963d1038601aad6ac4d7d2c70b8d",
+            "key": [
+              2064,
+              17564849,
+              14769,
+              1792372335955138786,
+              1792372335955138786
+            ]
+          },
+          "Movies/20170629_00024_frameImage.mrc": {
+            "sha256": "5c38fe2d1ccbbd517ae4635933543844b15c66b6dd146169046a3e6be91cc74d",
+            "key": [
+              2064,
+              17564852,
+              56956944,
+              1792372336052150683,
+              1792372336052150683
+            ]
+          },
+          "Movies/20170629_00024_frameImage.star": {
+            "sha256": "bb3150fbff77c6511c82edfbd67898706484d32033a84b7f80870eaa4232429f",
+            "key": [
+              2064,
+              17564854,
+              44448,
+              1792372336054150928,
+              1792372336054150928
+            ]
+          },
+          "Movies/20170629_00024_frameImage_shifts.eps": {
+            "sha256": "3deb05867a768b24c8b27898b9554ba6fdfc235c2f8f3084f904e466996acdbc",
+            "key": [
+              2064,
+              17564855,
+              92300,
+              1792372336057151296,
+              1792372336057151296
+            ]
+          },
+          "Movies/20170629_00025_frameImage.log": {
+            "sha256": "f262cf24af26056e56c99aa68d3479deeac7c7482ffdf94d1f21270d901ce82d",
+            "key": [
+              2064,
+              17564853,
+              14767,
+              1792372336133160617,
+              1792372336133160617
+            ]
+          },
+          "Movies/20170629_00025_frameImage.mrc": {
+            "sha256": "eba3c19438193c5d8d8424e4e8d421d6bc6d6ca096664b84177791966ce98bb5",
+            "key": [
+              2064,
+              17564856,
+              56956944,
+              1792372336231172636,
+              1792372336231172636
+            ]
+          },
+          "Movies/20170629_00025_frameImage.star": {
+            "sha256": "38f78d0fa89db5f8a61bd1ef9d34aaae753dc83638a46c8d4734f119d00cdba4",
+            "key": [
+              2064,
+              17564858,
+              44826,
+              1792372336233172881,
+              1792372336233172881
+            ]
+          },
+          "Movies/20170629_00025_frameImage_shifts.eps": {
+            "sha256": "72ea6ec2225e49d7f8666d14c9bf5f8e274c3d15d94ea1254254aaa10ed4f64b",
+            "key": [
+              2064,
+              17564859,
+              92296,
+              1792372336237173372,
+              1792372336237173372
+            ]
+          },
+          "Movies/20170629_00026_frameImage.log": {
+            "sha256": "2f23d8ba040a1b729ad7bf98bcbc751ef01d1c2566c1ab05f0095aeeef29d097",
+            "key": [
+              2064,
+              17564857,
+              14739,
+              1792372336312182570,
+              1792372336312182570
+            ]
+          },
+          "Movies/20170629_00026_frameImage.mrc": {
+            "sha256": "1c139f9d98ca7d7617eed7268b8725409672ad95e642fd3662d806871a2b4f5d",
+            "key": [
+              2064,
+              17564860,
+              56956944,
+              1792372336411194712,
+              1792372336411194712
+            ]
+          },
+          "Movies/20170629_00026_frameImage.star": {
+            "sha256": "1b66bda45b2ff78043afea5b9308b60eedefacbb4e2661a03764345b268d200f",
+            "key": [
+              2064,
+              17564862,
+              44394,
+              1792372336413194957,
+              1792372336413194957
+            ]
+          },
+          "Movies/20170629_00026_frameImage_shifts.eps": {
+            "sha256": "f986a8269be45c64352522fb8bd62fa175a63d9b895ac66aee65c63685c2d608",
+            "key": [
+              2064,
+              17564863,
+              92309,
+              1792372336416195325,
+              1792372336416195325
+            ]
+          },
+          "Movies/20170629_00027_frameImage.log": {
+            "sha256": "a95d2709dc9c3625d6166c3d8707b71ebd360a1cbfea392e6809cc170f4631af",
+            "key": [
+              2064,
+              17564861,
+              14738,
+              1792372336490204401,
+              1792372336490204401
+            ]
+          },
+          "Movies/20170629_00027_frameImage.mrc": {
+            "sha256": "d7f1f8728a01cb8c2337528d3f50db8f503b076bedd51f3fff991feff2ab00ef",
+            "key": [
+              2064,
+              17564864,
+              56956944,
+              1792372336591216788,
+              1792372336591216788
+            ]
+          },
+          "Movies/20170629_00027_frameImage.star": {
+            "sha256": "fc9db7600231a29d397d6419df107b22e5293e66e0b471af7386479444c2a092",
+            "key": [
+              2064,
+              17564866,
+              44637,
+              1792372336593217033,
+              1792372336593217033
+            ]
+          },
+          "Movies/20170629_00027_frameImage_shifts.eps": {
+            "sha256": "8de752ac34a6d06245f44bfae619ce885456e568d926e037872e2a3d51f1c402",
+            "key": [
+              2064,
+              17564867,
+              92297,
+              1792372336596217401,
+              1792372336596217401
+            ]
+          },
+          "Movies/20170629_00028_frameImage.log": {
+            "sha256": "ec047397480d9180120005bbb778bae1f77ae46933902bafa79c2570876ba3ec",
+            "key": [
+              2064,
+              17564865,
+              14741,
+              1792372336683228071,
+              1792372336683228071
+            ]
+          },
+          "Movies/20170629_00028_frameImage.mrc": {
+            "sha256": "65a4b67c2367644c44ab097d6a8634a405cd1dca95e2c9e5835e7dfbf976c8dc",
+            "key": [
+              2064,
+              17564868,
+              56956944,
+              1792372336784240458,
+              1792372336784240458
+            ]
+          },
+          "Movies/20170629_00028_frameImage.star": {
+            "sha256": "1586c4b00c0f87c0cacf14e177d5fc6f4070350639dde53d12fe3344f9f00c54",
+            "key": [
+              2064,
+              17564870,
+              44313,
+              1792372336786240703,
+              1792372336786240703
+            ]
+          },
+          "Movies/20170629_00028_frameImage_shifts.eps": {
+            "sha256": "d55d71dc5641fd220365392ad10099af91996472d1a08cfa93686719195b1711",
+            "key": [
+              2064,
+              17564871,
+              94737,
+              1792372336789241071,
+              1792372336789241071
+            ]
+          },
+          "Movies/20170629_00029_frameImage.log": {
+            "sha256": "6c5ecdd5aabbefb9d625c75a67387d89bc4db34c1a9b9d9aaf1fae180183ad26",
+            "key": [
+              2064,
+              17564869,
+              14766,
+              1792372336880252232,
+              1792372336880252232
+            ]
+          },
+          "Movies/20170629_00029_frameImage.mrc": {
+            "sha256": "7db588c453707000602cd12372f56c4ecfaf4d94d63baca8a860a15dc9972b87",
+            "key": [
+              2064,
+              17564872,
+              56956944,
+              1792372336981264619,
+              1792372336981264619
+            ]
+          },
+          "Movies/20170629_00029_frameImage.star": {
+            "sha256": "5362bb59d2c530bb664e1d9ca16a14cceb0f3f5d8ec53542f23abef81ac9de30",
+            "key": [
+              2064,
+              17564874,
+              44718,
+              1792372336983264864,
+              1792372336983264864
+            ]
+          },
+          "Movies/20170629_00029_frameImage_shifts.eps": {
+            "sha256": "cb246f2cf38b9a67bad5af665cf9188f3a14856f5526d136f09a675146753ac9",
+            "key": [
+              2064,
+              17564875,
+              92277,
+              1792372336986265232,
+              1792372336986265232
+            ]
+          },
+          "Movies/20170629_00030_frameImage.log": {
+            "sha256": "785184ffa198a2074a9179735164cfa1607d4b36b90a3cc75371ca12154b4d3e",
+            "key": [
+              2064,
+              17564873,
+              14738,
+              1792372337064274799,
+              1792372337064274799
+            ]
+          },
+          "Movies/20170629_00030_frameImage.mrc": {
+            "sha256": "01f200fe2ed833c971543c4d365f692fa41fc756b8cc9ebcf6347894d5788b20",
+            "key": [
+              2064,
+              17564876,
+              56956944,
+              1792372337165287187,
+              1792372337165287187
+            ]
+          },
+          "Movies/20170629_00030_frameImage.star": {
+            "sha256": "6bd1a47c3f9944595229b2459432be5bffdf4ad375c666710585661df05f798e",
+            "key": [
+              2064,
+              17564878,
+              44448,
+              1792372337167287432,
+              1792372337167287432
+            ]
+          },
+          "Movies/20170629_00030_frameImage_shifts.eps": {
+            "sha256": "7b10c3560c195f50a02b72ba45146fc634e721195979c2ec9aac2079a5e8f76a",
+            "key": [
+              2064,
+              17564879,
+              92321,
+              1792372337170287800,
+              1792372337170287800
+            ]
+          },
+          "Movies/20170629_00031_frameImage.log": {
+            "sha256": "54cd11ce2e438fedaf2d75f9eeb29baed7a82196913fbda048dc8cc4e7c8d427",
+            "key": [
+              2064,
+              17564877,
+              14740,
+              1792372337256298348,
+              1792372337256298348
+            ]
+          },
+          "Movies/20170629_00031_frameImage.mrc": {
+            "sha256": "82f02736eda7b0e6b67ebf4759c2b92e505ff96e55f3c6797bce98c052915367",
+            "key": [
+              2064,
+              17564880,
+              56956944,
+              1792372337356310613,
+              1792372337356310613
+            ]
+          },
+          "Movies/20170629_00031_frameImage.star": {
+            "sha256": "87150af6e40276da42a48d17420465ee801640f89057280a5bea260e88b74a7a",
+            "key": [
+              2064,
+              17564882,
+              44610,
+              1792372337358310858,
+              1792372337358310858
+            ]
+          },
+          "Movies/20170629_00031_frameImage_shifts.eps": {
+            "sha256": "f44fbb7d7b77413f6f26ee38e4e835355c11baf24d9fd3b5181938da8edbfe1f",
+            "key": [
+              2064,
+              17564883,
+              92292,
+              1792372337362311349,
+              1792372337362311349
+            ]
+          },
+          "Movies/20170629_00035_frameImage.log": {
+            "sha256": "9e121bfa16652c173da544a28bc13055f64a961a454adb58d7463ba406b31e39",
+            "key": [
+              2064,
+              17564881,
+              14739,
+              1792372337442321161,
+              1792372337442321161
+            ]
+          },
+          "Movies/20170629_00035_frameImage.mrc": {
+            "sha256": "7125a5564093e89d338cf9e0783a7b33bce546ae3cfcfeb100ee09a911e437ef",
+            "key": [
+              2064,
+              17564884,
+              56956944,
+              1792372337541333304,
+              1792372337541333304
+            ]
+          },
+          "Movies/20170629_00035_frameImage.star": {
+            "sha256": "0500abb77e9b213e90a9d87c7db9837c95cbabc2838925ff94e917e6f7734bd9",
+            "key": [
+              2064,
+              17564886,
+              44340,
+              1792372337543333549,
+              1792372337543333549
+            ]
+          },
+          "Movies/20170629_00035_frameImage_shifts.eps": {
+            "sha256": "3b7672fa9349ef0860e2bef339e4ff1d0bcb9ddba17a57ecdcaa6999e2cbf8a3",
+            "key": [
+              2064,
+              17564887,
+              94753,
+              1792372337546333917,
+              1792372337546333917
+            ]
+          },
+          "Movies/20170629_00036_frameImage.log": {
+            "sha256": "94c9d32b251996707312eba8a8c8d9c2e71b6584c15bcf408d1a3244b7901db6",
+            "key": [
+              2064,
+              17564885,
+              14768,
+              1792372337623343361,
+              1792372337623343361
+            ]
+          },
+          "Movies/20170629_00036_frameImage.mrc": {
+            "sha256": "60a6a940384cbb4f777edc8b15d209879e82b1d237313d214d77404fea9aaf02",
+            "key": [
+              2064,
+              17564888,
+              56956944,
+              1792372337722355504,
+              1792372337722355504
+            ]
+          },
+          "Movies/20170629_00036_frameImage.star": {
+            "sha256": "12e45c259855e9610355934eb9f05556124c21f3eb00fc4b049c7b9a820c80c6",
+            "key": [
+              2064,
+              17564890,
+              44664,
+              1792372337724355749,
+              1792372337724355749
+            ]
+          },
+          "Movies/20170629_00036_frameImage_shifts.eps": {
+            "sha256": "6e7bc6442f3f71040501b1f6165f51b1e1dca85526444d85764e026af1449702",
+            "key": [
+              2064,
+              17564891,
+              92314,
+              1792372337727356117,
+              1792372337727356117
+            ]
+          },
+          "Movies/20170629_00037_frameImage.log": {
+            "sha256": "ee7770334449a6ebf1e9d85cc250f9b5fc5e651deb6a589d6fd8ed73bd1ac67a",
+            "key": [
+              2064,
+              17564889,
+              14739,
+              1792372337802365316,
+              1792372337802365316
+            ]
+          },
+          "Movies/20170629_00037_frameImage.mrc": {
+            "sha256": "a679426418394549e6e6b1bc68928c4f7920ff2098c239650468e4f93d01cbb8",
+            "key": [
+              2064,
+              17564892,
+              56956944,
+              1792372337899377213,
+              1792372337899377213
+            ]
+          },
+          "Movies/20170629_00037_frameImage.star": {
+            "sha256": "5608a184e287f7dcd084598af879b42e10d022a7d28531629cde9028f4e65538",
+            "key": [
+              2064,
+              17564894,
+              44286,
+              1792372337901377458,
+              1792372337901377458
+            ]
+          },
+          "Movies/20170629_00037_frameImage_shifts.eps": {
+            "sha256": "6d8e6b4de890c86de5f594ffd71d7e606cf0583104a6ddd49a6701279b8bf232",
+            "key": [
+              2064,
+              17564895,
+              92326,
+              1792372337904377826,
+              1792372337904377826
+            ]
+          },
+          "Movies/20170629_00039_frameImage.log": {
+            "sha256": "c38e37c7f5655ad75ce95370810d39f6fa687648aeae08b64c04c405d44dc093",
+            "key": [
+              2064,
+              17564893,
+              14741,
+              1792372337983387516,
+              1792372337983387516
+            ]
+          },
+          "Movies/20170629_00039_frameImage.mrc": {
+            "sha256": "ebb624549615a2f3f130b6a4f824a7ba37d027e9ee6440a178ba8543e4d1cb46",
+            "key": [
+              2064,
+              17564896,
+              56956944,
+              1792372338085400027,
+              1792372338085400027
+            ]
+          },
+          "Movies/20170629_00039_frameImage.star": {
+            "sha256": "db91ad132b5da7f7b5d24e25a9f2b583a02d31980a34b103a31e23fc8df74d5b",
+            "key": [
+              2064,
+              17564898,
+              44340,
+              1792372338087400272,
+              1792372338087400272
+            ]
+          },
+          "Movies/20170629_00039_frameImage_shifts.eps": {
+            "sha256": "1a14090f7922b149b34ef36460b4baf9628225da6f9908448a231c4056cb86c3",
+            "key": [
+              2064,
+              17564899,
+              94721,
+              1792372338091400763,
+              1792372338091400763
+            ]
+          },
+          "Movies/20170629_00040_frameImage.log": {
+            "sha256": "32a7be5aaca13f225bb70204f2e6bd20f2b37e4975ac265b7a180307a521cc78",
+            "key": [
+              2064,
+              17564897,
+              14741,
+              1792372338165409839,
+              1792372338165409839
+            ]
+          },
+          "Movies/20170629_00040_frameImage.mrc": {
+            "sha256": "4ddcc488d29154fda0d36038d102baeb992d8c8aa9f946469203038edb18ecc8",
+            "key": [
+              2064,
+              17564900,
+              56956944,
+              1792372338267422351,
+              1792372338267422351
+            ]
+          },
+          "Movies/20170629_00040_frameImage.star": {
+            "sha256": "cd8c8cfd8fe2f33068a2a5ad5b236459f5b24d7dcb2fdcba2a9ddc643bc3fc2b",
+            "key": [
+              2064,
+              17564902,
+              44367,
+              1792372338269422596,
+              1792372338269422596
+            ]
+          },
+          "Movies/20170629_00040_frameImage_shifts.eps": {
+            "sha256": "a6d8e73671f349770283fb11fb401278bf81031ff99a2ab77dc27ecffa950be5",
+            "key": [
+              2064,
+              17564903,
+              92340,
+              1792372338273423087,
+              1792372338273423087
+            ]
+          },
+          "Movies/20170629_00042_frameImage.log": {
+            "sha256": "dadffbf4b0007edfdbc935cb6e9e4e8c64c3135fe85c5be546c14c00ce07886c",
+            "key": [
+              2064,
+              17564901,
+              14740,
+              1792372338344431795,
+              1792372338344431795
+            ]
+          },
+          "Movies/20170629_00042_frameImage.mrc": {
+            "sha256": "a6ed83b39b842cdf89e2d427d0e031bfe12db4bb2ab50717b4b738512f6f2b92",
+            "key": [
+              2064,
+              17564904,
+              56956944,
+              1792372338441443693,
+              1792372338441443693
+            ]
+          },
+          "Movies/20170629_00042_frameImage.star": {
+            "sha256": "e5e3e3fd6cbe33332f32d174bd2bea4f7ed3551083e66349a26aca2e794ae5d2",
+            "key": [
+              2064,
+              17564906,
+              44448,
+              1792372338443443939,
+              1792372338443443939
+            ]
+          },
+          "Movies/20170629_00042_frameImage_shifts.eps": {
+            "sha256": "6ecda910bd163453f4abcd321862d7af5014e46ad06687a5a629e99e59840565",
+            "key": [
+              2064,
+              17564907,
+              92287,
+              1792372338446444307,
+              1792372338446444307
+            ]
+          },
+          "Movies/20170629_00043_frameImage.log": {
+            "sha256": "0a7ae28dda76e6aa5b75167ebf058c62eb744a358f94f516cc52d5851141a7cf",
+            "key": [
+              2064,
+              17564905,
+              14798,
+              1792372338545456450,
+              1792372338545456450
+            ]
+          },
+          "Movies/20170629_00043_frameImage.mrc": {
+            "sha256": "23413749bad75dc00e92bdb55284f1c4a8660b7311aab0801dd337013e891625",
+            "key": [
+              2064,
+              17564908,
+              56956944,
+              1792372338646468838,
+              1792372338646468838
+            ]
+          },
+          "Movies/20170629_00043_frameImage.star": {
+            "sha256": "1add7676afe238482d7be0e87fcc0258dadc1761f8f6635d46af04f98a139634",
+            "key": [
+              2064,
+              17564910,
+              44421,
+              1792372338648469084,
+              1792372338648469084
+            ]
+          },
+          "Movies/20170629_00043_frameImage_shifts.eps": {
+            "sha256": "3273a8f433fa8e3d2351d791bb64785caaeed4c2e1fd56ace23f952ae252d10b",
+            "key": [
+              2064,
+              17564911,
+              92347,
+              1792372338652469574,
+              1792372338652469574
+            ]
+          },
+          "Movies/20170629_00044_frameImage.log": {
+            "sha256": "741b321dd5a8f607538716cea2bf84f600d2fb3856556d4ce49790581272fec5",
+            "key": [
+              2064,
+              17564909,
+              14739,
+              1792372338725478528,
+              1792372338725478528
+            ]
+          },
+          "Movies/20170629_00044_frameImage.mrc": {
+            "sha256": "473b5e82c7ac1c30379c4309c250cdd49a9e2c78c03955b14565381ac8029765",
+            "key": [
+              2064,
+              17564912,
+              56956944,
+              1792372338826490917,
+              1792372338826490917
+            ]
+          },
+          "Movies/20170629_00044_frameImage.star": {
+            "sha256": "0c487c9fe9b0e3d76d0159aa1a1d7f8ca058b2a4e86f8d0a2dd29a19dcb4de65",
+            "key": [
+              2064,
+              17564914,
+              44475,
+              1792372338828491162,
+              1792372338828491162
+            ]
+          },
+          "Movies/20170629_00044_frameImage_shifts.eps": {
+            "sha256": "0d476826be34dc02250ae2c124334ff2f679d8ebbccf14af40497864f0109534",
+            "key": [
+              2064,
+              17564915,
+              94729,
+              1792372338831491530,
+              1792372338831491530
+            ]
+          },
+          "Movies/20170629_00045_frameImage.log": {
+            "sha256": "4077e9559fac618ea560da78e0402d40cd82e915c0f67715ad64c614a8f14ee1",
+            "key": [
+              2064,
+              17564913,
+              14706,
+              1792372338921502570,
+              1792372338921502570
+            ]
+          },
+          "Movies/20170629_00045_frameImage.mrc": {
+            "sha256": "63afda97557fcbc1ad6b14942f00c32f126c10618603567d6a131b206559386c",
+            "key": [
+              2064,
+              17564916,
+              56956944,
+              1792372339019514590,
+              1792372339019514590
+            ]
+          },
+          "Movies/20170629_00045_frameImage.star": {
+            "sha256": "06ea16dabc7d065b0f5cdb5290e98218e983d416a5d210c27243315435671101",
+            "key": [
+              2064,
+              17564918,
+              44340,
+              1792372339021514836,
+              1792372339021514836
+            ]
+          },
+          "Movies/20170629_00045_frameImage_shifts.eps": {
+            "sha256": "b3e87f746e09fb74d058f4a528910daf1c1e5fe449bc81efb127fa7b27921b0b",
+            "key": [
+              2064,
+              17564919,
+              94714,
+              1792372339025515326,
+              1792372339025515326
+            ]
+          },
+          "Movies/20170629_00046_frameImage.log": {
+            "sha256": "b3e1168efb25d89b1bc1917003119250dc4cc009d0a438e0a290c63a02d38e95",
+            "key": [
+              2064,
+              17564917,
+              14707,
+              1792372339097524158,
+              1792372339097524158
+            ]
+          },
+          "Movies/20170629_00046_frameImage.mrc": {
+            "sha256": "11b0075d6c5aed9b381cfc5fd6bc8759658b840bfb6c7f664efe8b9cb7b757a3",
+            "key": [
+              2064,
+              17564920,
+              56956944,
+              1792372339193535934,
+              1792372339193535934
+            ]
+          },
+          "Movies/20170629_00046_frameImage.star": {
+            "sha256": "6e0fe205652f2ad3a20f94ba3f5c620d4213c5c7c9db6536c633d0e01b74d142",
+            "key": [
+              2064,
+              17564922,
+              44637,
+              1792372339195536179,
+              1792372339195536179
+            ]
+          },
+          "Movies/20170629_00046_frameImage_shifts.eps": {
+            "sha256": "a5c93c4d146c0984db44c85420e587e9a080d46743b1e832281014b8d28dc56d",
+            "key": [
+              2064,
+              17564923,
+              92353,
+              1792372339199536670,
+              1792372339199536670
+            ]
+          },
+          "Movies/20170629_00047_frameImage.log": {
+            "sha256": "002070efa77e053934d759d82cfaab88a82fa60a93540b72d54ad4dcad7fdbc2",
+            "key": [
+              2064,
+              17564921,
+              14739,
+              1792372339307549918,
+              1792372339307549918
+            ]
+          },
+          "Movies/20170629_00047_frameImage.mrc": {
+            "sha256": "13a7ec853b82c01b5fd70184e8288361c3ce3a7496cbbeb9a7fbd8b0d82c18a3",
+            "key": [
+              2064,
+              17564924,
+              56956944,
+              1792372339405561939,
+              1792372339405561939
+            ]
+          },
+          "Movies/20170629_00047_frameImage.star": {
+            "sha256": "efe693c239b8e9d6282dbe38df0d26dd8396e0ab45de84d378940abb3587d744",
+            "key": [
+              2064,
+              17564926,
+              44502,
+              1792372339407562185,
+              1792372339407562185
+            ]
+          },
+          "Movies/20170629_00047_frameImage_shifts.eps": {
+            "sha256": "1eab3721822457ca7ed1b192cf1de816a51b8f114ad57d968db2753b1306e1ea",
+            "key": [
+              2064,
+              17564927,
+              94742,
+              1792372339410562553,
+              1792372339410562553
+            ]
+          },
+          "Movies/20170629_00048_frameImage.log": {
+            "sha256": "5173c650640816503bb821726a7446bcc8281577432a6407096423644bd4450c",
+            "key": [
+              2064,
+              17564925,
+              14740,
+              1792372339500573593,
+              1792372339500573593
+            ]
+          },
+          "Movies/20170629_00048_frameImage.mrc": {
+            "sha256": "f324ec806a8385f5073d9fd0c6196b3a8dd18d7bbc180c42e41fff1189969d7a",
+            "key": [
+              2064,
+              17564928,
+              56956944,
+              1792372339600585859,
+              1792372339600585859
+            ]
+          },
+          "Movies/20170629_00048_frameImage.star": {
+            "sha256": "cce3d9c0905cd997a867288c5b1782cb3d4437a7f999f798e946e95cf47ca529",
+            "key": [
+              2064,
+              17564930,
+              44745,
+              1792372339601585982,
+              1792372339601585982
+            ]
+          },
+          "Movies/20170629_00048_frameImage_shifts.eps": {
+            "sha256": "8c417619c6d7090320b793b19c61e0a1db6cede0b78e0f6dde05ef4a161755d8",
+            "key": [
+              2064,
+              17564931,
+              94726,
+              1792372339605586473,
+              1792372339605586473
+            ]
+          },
+          "Movies/20170629_00049_frameImage.log": {
+            "sha256": "e3287fc749bf2fed8bbf3d1214cc00821ff94bab5171ecd1e3cc37e9bc0eeec0",
+            "key": [
+              2064,
+              17564929,
+              14739,
+              1792372339683596041,
+              1792372339683596041
+            ]
+          },
+          "Movies/20170629_00049_frameImage.mrc": {
+            "sha256": "55467ca91cc8dcca1608ee6b5a298e2e422cb33256fb26efd90dd99e447cd03a",
+            "key": [
+              2064,
+              17564932,
+              56956944,
+              1792372339777607571,
+              1792372339777607571
+            ]
+          },
+          "Movies/20170629_00049_frameImage.star": {
+            "sha256": "e8cfa3b811469b2d68aa04c79fa77ef01699e25141d97cee57705977660cef90",
+            "key": [
+              2064,
+              17564933,
+              44637,
+              1792372339779607817,
+              1792372339779607817
+            ]
+          },
+          "Movies/20170629_00049_frameImage_shifts.eps": {
+            "sha256": "8b50b4760ba008af872932ded988b9743029bf3bc8de116f3dbe58dcf6c7b5d7",
+            "key": [
+              2064,
+              17564934,
+              94673,
+              1792372339782608185,
+              1792372339782608185
+            ]
+          },
+          "corrected_micrographs.star": {
+            "sha256": "0e3394cd864e851e38ae281c3b58f07d6f8458be360cdceade1c59ec7645fee7",
+            "key": [
+              2064,
+              17564935,
+              6643,
+              1792372339790609166,
+              1792372339790609166
+            ]
+          }
+        },
+        "seconds": 0.638
+      }
+    }
+  ],
+  "devices": [
+    {
+      "smi_index": "0",
+      "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_total": "81920 MiB",
+      "selector": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    }
+  ],
+  "termination_signal": null,
+  "sampled_peak_gpu_memory_mib": {
+    "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54": 3362.0
+  },
+  "sampled_peak_gpu_memory_note": "max nvidia-smi used_gpu_memory of each worker pid, sampled every 0.5s: a lower bound on the true peak; null means the worker was never observed with a reading",
+  "gpu_witness": {
+    "expected": {
+      "1665498": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    },
+    "witnessed": {
+      "1665498": [
+        "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+      ]
+    },
+    "unwitnessed_pids": [],
+    "wrong_device": [],
+    "shared_devices": [],
+    "distinct_devices_witnessed": 1,
+    "all_pids_witnessed_on_intended_distinct_devices": true,
+    "sampler_errors": [],
+    "n_samples": 11
+  },
+  "process_cleanup": {
+    "ownership_mode": "linux-child-subreaper",
+    "complete": true,
+    "observed_live_before_cleanup": [],
+    "unexpected_descendants": false,
+    "error": null,
+    "scope": "Linux child-subreaper adopts unsampled surviving worker orphans; other platforms offer observed-only simulated CPU controls, not arbitrary native descendant containment. Checked PID/birth before every TERM/KILL; original worker return codes preserved."
+  },
+  "process_ownership_errors": [],
+  "workers_complete": true,
+  "dataset_ready": false,
+  "verdict": "PASS"
+}

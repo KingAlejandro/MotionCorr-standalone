@@ -1,0 +1,159 @@
+{
+  "input_star": "/home/alex/motioncorr-validation-20261011-vm/tutorial-data/movies.star",
+  "input_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041",
+  "movie_block": "movies",
+  "labels": [
+    "rlnMicrographMovieName",
+    "rlnOpticsGroup"
+  ],
+  "n_movies": 24,
+  "n_shards": 4,
+  "partition": "contiguous",
+  "canonical_movies": [
+    "Movies/20170629_00021_frameImage.tiff",
+    "Movies/20170629_00022_frameImage.tiff",
+    "Movies/20170629_00023_frameImage.tiff",
+    "Movies/20170629_00024_frameImage.tiff",
+    "Movies/20170629_00025_frameImage.tiff",
+    "Movies/20170629_00026_frameImage.tiff",
+    "Movies/20170629_00027_frameImage.tiff",
+    "Movies/20170629_00028_frameImage.tiff",
+    "Movies/20170629_00029_frameImage.tiff",
+    "Movies/20170629_00030_frameImage.tiff",
+    "Movies/20170629_00031_frameImage.tiff",
+    "Movies/20170629_00035_frameImage.tiff",
+    "Movies/20170629_00036_frameImage.tiff",
+    "Movies/20170629_00037_frameImage.tiff",
+    "Movies/20170629_00039_frameImage.tiff",
+    "Movies/20170629_00040_frameImage.tiff",
+    "Movies/20170629_00042_frameImage.tiff",
+    "Movies/20170629_00043_frameImage.tiff",
+    "Movies/20170629_00044_frameImage.tiff",
+    "Movies/20170629_00045_frameImage.tiff",
+    "Movies/20170629_00046_frameImage.tiff",
+    "Movies/20170629_00047_frameImage.tiff",
+    "Movies/20170629_00048_frameImage.tiff",
+    "Movies/20170629_00049_frameImage.tiff"
+  ],
+  "canonical_output_roots": [
+    "Movies/20170629_00021_frameImage",
+    "Movies/20170629_00022_frameImage",
+    "Movies/20170629_00023_frameImage",
+    "Movies/20170629_00024_frameImage",
+    "Movies/20170629_00025_frameImage",
+    "Movies/20170629_00026_frameImage",
+    "Movies/20170629_00027_frameImage",
+    "Movies/20170629_00028_frameImage",
+    "Movies/20170629_00029_frameImage",
+    "Movies/20170629_00030_frameImage",
+    "Movies/20170629_00031_frameImage",
+    "Movies/20170629_00035_frameImage",
+    "Movies/20170629_00036_frameImage",
+    "Movies/20170629_00037_frameImage",
+    "Movies/20170629_00039_frameImage",
+    "Movies/20170629_00040_frameImage",
+    "Movies/20170629_00042_frameImage",
+    "Movies/20170629_00043_frameImage",
+    "Movies/20170629_00044_frameImage",
+    "Movies/20170629_00045_frameImage",
+    "Movies/20170629_00046_frameImage",
+    "Movies/20170629_00047_frameImage",
+    "Movies/20170629_00048_frameImage",
+    "Movies/20170629_00049_frameImage"
+  ],
+  "shards": [
+    {
+      "index": 0,
+      "path": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/multigpu/L/w4/workers/shards/shard_4way_0.star",
+      "sha256": "339750185ae57db1b7e276e9f634685f350e52ba7a7814870a81c819232e156c",
+      "n_movies": 6,
+      "first_input_row": 0,
+      "movies": [
+        "Movies/20170629_00021_frameImage.tiff",
+        "Movies/20170629_00022_frameImage.tiff",
+        "Movies/20170629_00023_frameImage.tiff",
+        "Movies/20170629_00024_frameImage.tiff",
+        "Movies/20170629_00025_frameImage.tiff",
+        "Movies/20170629_00026_frameImage.tiff"
+      ],
+      "output_roots": [
+        "Movies/20170629_00021_frameImage",
+        "Movies/20170629_00022_frameImage",
+        "Movies/20170629_00023_frameImage",
+        "Movies/20170629_00024_frameImage",
+        "Movies/20170629_00025_frameImage",
+        "Movies/20170629_00026_frameImage"
+      ]
+    },
+    {
+      "index": 1,
+      "path": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/multigpu/L/w4/workers/shards/shard_4way_1.star",
+      "sha256": "2b6955fa6aded629e1f091686078ffe0ef3624669420bfdb8df36cf5847d4585",
+      "n_movies": 6,
+      "first_input_row": 6,
+      "movies": [
+        "Movies/20170629_00027_frameImage.tiff",
+        "Movies/20170629_00028_frameImage.tiff",
+        "Movies/20170629_00029_frameImage.tiff",
+        "Movies/20170629_00030_frameImage.tiff",
+        "Movies/20170629_00031_frameImage.tiff",
+        "Movies/20170629_00035_frameImage.tiff"
+      ],
+      "output_roots": [
+        "Movies/20170629_00027_frameImage",
+        "Movies/20170629_00028_frameImage",
+        "Movies/20170629_00029_frameImage",
+        "Movies/20170629_00030_frameImage",
+        "Movies/20170629_00031_frameImage",
+        "Movies/20170629_00035_frameImage"
+      ]
+    },
+    {
+      "index": 2,
+      "path": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/multigpu/L/w4/workers/shards/shard_4way_2.star",
+      "sha256": "bedef3bc025bb060cdcf6a671b3fdecf5d811a8ec5d889871668dac69bf5f1c1",
+      "n_movies": 6,
+      "first_input_row": 12,
+      "movies": [
+        "Movies/20170629_00036_frameImage.tiff",
+        "Movies/20170629_00037_frameImage.tiff",
+        "Movies/20170629_00039_frameImage.tiff",
+        "Movies/20170629_00040_frameImage.tiff",
+        "Movies/20170629_00042_frameImage.tiff",
+        "Movies/20170629_00043_frameImage.tiff"
+      ],
+      "output_roots": [
+        "Movies/20170629_00036_frameImage",
+        "Movies/20170629_00037_frameImage",
+        "Movies/20170629_00039_frameImage",
+        "Movies/20170629_00040_frameImage",
+        "Movies/20170629_00042_frameImage",
+        "Movies/20170629_00043_frameImage"
+      ]
+    },
+    {
+      "index": 3,
+      "path": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/multigpu/L/w4/workers/shards/shard_4way_3.star",
+      "sha256": "c4ec8c3c0ff2c331cea6ab520228285a0a3dc5c9ebfbe491a68d579546bbca41",
+      "n_movies": 6,
+      "first_input_row": 18,
+      "movies": [
+        "Movies/20170629_00044_frameImage.tiff",
+        "Movies/20170629_00045_frameImage.tiff",
+        "Movies/20170629_00046_frameImage.tiff",
+        "Movies/20170629_00047_frameImage.tiff",
+        "Movies/20170629_00048_frameImage.tiff",
+        "Movies/20170629_00049_frameImage.tiff"
+      ],
+      "output_roots": [
+        "Movies/20170629_00044_frameImage",
+        "Movies/20170629_00045_frameImage",
+        "Movies/20170629_00046_frameImage",
+        "Movies/20170629_00047_frameImage",
+        "Movies/20170629_00048_frameImage",
+        "Movies/20170629_00049_frameImage"
+      ]
+    }
+  ],
+  "input_type": "spa"
+}

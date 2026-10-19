@@ -1,0 +1,65 @@
+{
+  "input_star": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/inputs/mixed/movies.star",
+  "input_sha256": "c240e3b52443ff8b15a641ba7241b3456927e96d36fe09c3d03f39ba83962ef2",
+  "movie_block": "movies",
+  "labels": [
+    "rlnMicrographMovieName",
+    "rlnOpticsGroup"
+  ],
+  "n_movies": 6,
+  "n_shards": 2,
+  "partition": "contiguous",
+  "canonical_movies": [
+    "Movies/20170629_00021_frameImage.tiff",
+    "Movies/20170629_00022_frameImage.tiff",
+    "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.tif",
+    "Movies/20170629_00023_frameImage.tiff",
+    "Movies/20170629_00024_frameImage.tiff",
+    "Movies/2019-06-21_20-39-45_801_eer_data_4096x4096.eer"
+  ],
+  "canonical_output_roots": [
+    "Movies/20170629_00021_frameImage",
+    "Movies/20170629_00022_frameImage",
+    "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41",
+    "Movies/20170629_00023_frameImage",
+    "Movies/20170629_00024_frameImage",
+    "Movies/2019-06-21_20-39-45_801_eer_data_4096x4096"
+  ],
+  "shards": [
+    {
+      "index": 0,
+      "path": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/multigpu/mixed/w2/workers/shards/shard_2way_0.star",
+      "sha256": "3cf400f7b753f2d5aceca48bfb0566f4bf736161afc7f91f928a2796347f8398",
+      "n_movies": 3,
+      "first_input_row": 0,
+      "movies": [
+        "Movies/20170629_00021_frameImage.tiff",
+        "Movies/20170629_00022_frameImage.tiff",
+        "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.tif"
+      ],
+      "output_roots": [
+        "Movies/20170629_00021_frameImage",
+        "Movies/20170629_00022_frameImage",
+        "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41"
+      ]
+    },
+    {
+      "index": 1,
+      "path": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/multigpu/mixed/w2/workers/shards/shard_2way_1.star",
+      "sha256": "e17b26cfb569cf3a38f30b3757b538dcf61675328a357ecd0dbeab5517aa4dc9",
+      "n_movies": 3,
+      "first_input_row": 3,
+      "movies": [
+        "Movies/20170629_00023_frameImage.tiff",
+        "Movies/20170629_00024_frameImage.tiff",
+        "Movies/2019-06-21_20-39-45_801_eer_data_4096x4096.eer"
+      ],
+      "output_roots": [
+        "Movies/20170629_00023_frameImage",
+        "Movies/20170629_00024_frameImage",
+        "Movies/2019-06-21_20-39-45_801_eer_data_4096x4096"
+      ]
+    }
+  ],
+  "input_type": "spa"
+}

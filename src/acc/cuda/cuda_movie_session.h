@@ -409,7 +409,6 @@ private:
     void *d_fft_work = nullptr;
     cufftComplex *d_inverse_tile = nullptr;
     bool is_initialized = false;
-    size_t patch_preparation_bytes = 0;
 
     // What d_Fframes currently holds. The ingest path borrows that allocation as
     // scratch instead of allocating its own staging, so the transition out of

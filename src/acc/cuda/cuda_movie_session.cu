@@ -704,7 +704,6 @@ void CudaMovieSession::release() {
     cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
     sz_cached_Ipatches = 0;
     sz_cached_patch_spectrum = 0;
-    patch_preparation_bytes = 0;
     cached_ngroups_alloc = 0;
     uploaded_group_start.clear();
     uploaded_group_size.clear();
@@ -2210,7 +2209,7 @@ bool CudaMovieSession::admitLocalAlignment(int patch_w, int patch_h, int n_group
     const size_t patch_real = (size_t)n_groups * patch_w * patch_h * sizeof(float);
     const size_t patch_comp = (size_t)n_groups * (patch_w / 2 + 1) * patch_h * sizeof(cufftComplex);
     const size_t tile = (size_t)ny * nfx * sizeof(cufftComplex);
-    patch_preparation_bytes = patch_real + prep_work + 2 * n_groups * sizeof(int) +
+    const size_t patch_preparation_bytes = patch_real + prep_work + 2 * n_groups * sizeof(int) +
                               (patch_comp > tile ? patch_comp : 0);
     const size_t window = (size_t)wy * (wx / 2 + 1);
     const size_t alignment = (2 * n_groups + 1) * window * sizeof(cufftComplex) +
@@ -2452,9 +2451,7 @@ void CudaMovieSession::alignPatchesBatched(
     BatchedPatchAlignmentWorkspace &workspace = batched_patch_alignment_workspace;
     const size_t per_patch = BatchedPatchAlignmentWorkspace::bytesPerPatch(
         n_groups, patch_w, patch_h, scaled_B, ccf_downsample);
-    const size_t alignment_free = free_bytes > patch_preparation_bytes
-        ? free_bytes - patch_preparation_bytes : 0;
-    int chunk = choosePatchBatchChunk(n_patches, per_patch, alignment_free, total_bytes, cap);
+    int chunk = choosePatchBatchChunk(n_patches, per_patch, free_bytes, total_bytes, cap);
     // The estimate omits allocator granularity and the cuFFT work area, so a
     // declined reservation is retried smaller before giving up.
     while (chunk > 0 && !workspace.reserve(chunk, n_groups, patch_w, patch_h, scaled_B,

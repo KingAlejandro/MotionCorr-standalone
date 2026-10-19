@@ -1,0 +1,18 @@
+--- qm_batch.py
++++ qm_batch.py
+@@ -14,3 +14,3 @@
+-W = Path('/mnt/clathrin/alex-motioncorr-rc0/W-QM')
+-SRC = W / 'src'
+-BIN = W / 'build-nvcomp' / 'motioncorr'
++W = Path('/mnt/clathrin/alex-motioncorr-226')
++SRC = W / 'base'
++BIN = W / os.environ.get('QM_BUILD', 'build-base') / 'motioncorr'
+@@ -22 +22 @@
+-RUNS = W / 'runs'
++RUNS = W / os.environ.get('QM_RUNS', 'runs-base')
+@@ -161 +161 @@
+-        env = dict(os.environ, CUDA_VISIBLE_DEVICES='1')
++        env = dict(os.environ, CUDA_VISIBLE_DEVICES=UUID)
+@@ -279 +279 @@
+-        env = dict(os.environ, CUDA_VISIBLE_DEVICES='1')
++        env = dict(os.environ, CUDA_VISIBLE_DEVICES=UUID)

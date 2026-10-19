@@ -1,0 +1,127 @@
+== baseline for e10441-L-compact@40
+  exit=0 timeout=False wall=8.46s free_before=81154MiB peak_above_base=40274MiB peak_app=40266MiB witness=['compact'] products=True balloon_gone=True strict_rc=None products_rc=None note=this is the unconstrained baseline
+== e10441-L-compact@40
+  exit=0 timeout=False wall=7.92s free_before=40957MiB peak_above_base=39838MiB peak_app=37924MiB witness=['compact'] products=True balloon_gone=True strict_rc=1 products_rc=0 note=None
+== e10441-L-compact@24
+  exit=1 timeout=False wall=1.13s free_before=24573MiB peak_above_base=18MiB peak_app=22MiB witness=[] products=False balloon_gone=True strict_rc=None products_rc=None note=candidate tree incomplete; strict whole-tree comparison not applicable
+== e10441-L-compact@16
+  exit=1 timeout=False wall=1.08s free_before=16381MiB peak_above_base=18MiB peak_app=414MiB witness=[] products=False balloon_gone=True strict_rc=None products_rc=None note=candidate tree incomplete; strict whole-tree comparison not applicable
+== baseline for e10441-G-compact@40
+  exit=0 timeout=False wall=7.72s free_before=81154MiB peak_above_base=37932MiB peak_app=37924MiB witness=['compact'] products=True balloon_gone=True strict_rc=None products_rc=None note=this is the unconstrained baseline
+== e10441-G-compact@40
+  exit=0 timeout=False wall=7.42s free_before=40957MiB peak_above_base=37930MiB peak_app=37924MiB witness=['compact'] products=True balloon_gone=True strict_rc=0 products_rc=0 note=None
+== e10441-G-compact@24
+  exit=1 timeout=False wall=1.13s free_before=24573MiB peak_above_base=17MiB peak_app=22MiB witness=[] products=False balloon_gone=True strict_rc=None products_rc=None note=candidate tree incomplete; strict whole-tree comparison not applicable
+== e10441-G-compact@16
+  exit=1 timeout=False wall=1.13s free_before=16381MiB peak_above_base=18MiB peak_app=24MiB witness=[] products=False balloon_gone=True strict_rc=None products_rc=None note=candidate tree incomplete; strict whole-tree comparison not applicable
+== baseline for e10441-L-float@40
+  exit=0 timeout=False wall=12.21s free_before=81154MiB peak_above_base=40274MiB peak_app=40266MiB witness=['float'] products=True balloon_gone=True strict_rc=None products_rc=None note=this is the unconstrained baseline
+== e10441-L-float@40
+  exit=0 timeout=False wall=12.41s free_before=40957MiB peak_above_base=39790MiB peak_app=39832MiB witness=['float'] products=True balloon_gone=True strict_rc=1 products_rc=0 note=None
+== e10441-L-float@24
+  exit=0 timeout=False wall=64.1s free_before=24573MiB peak_above_base=20580MiB peak_app=20574MiB witness=['float'] products=True balloon_gone=True strict_rc=1 products_rc=0 note=None
+== e10441-L-float@16
+  exit=1 timeout=False wall=27.76s free_before=16381MiB peak_above_base=1510MiB peak_app=1504MiB witness=['float'] products=False balloon_gone=True strict_rc=None products_rc=None note=candidate tree incomplete; strict whole-tree comparison not applicable
+== baseline for e10441-G-float@40
+  exit=0 timeout=False wall=11.79s free_before=81154MiB peak_above_base=37842MiB peak_app=37834MiB witness=['float'] products=True balloon_gone=True strict_rc=None products_rc=None note=this is the unconstrained baseline
+== e10441-G-float@40
+  exit=0 timeout=False wall=12.05s free_before=40957MiB peak_above_base=37840MiB peak_app=37834MiB witness=['float'] products=True balloon_gone=True strict_rc=0 products_rc=0 note=None
+== e10441-G-float@24
+  exit=0 timeout=False wall=53.51s free_before=24573MiB peak_above_base=20038MiB peak_app=22056MiB witness=['float'] products=True balloon_gone=True strict_rc=1 products_rc=0 note=None
+== e10441-G-float@16
+  exit=1 timeout=False wall=28.67s free_before=16381MiB peak_above_base=1510MiB peak_app=1504MiB witness=['float'] products=False balloon_gone=True strict_rc=None products_rc=None note=candidate tree incomplete; strict whole-tree comparison not applicable
+== baseline for mmA-L-auto@16
+  exit=0 timeout=False wall=7.04s free_before=81154MiB peak_above_base=39914MiB peak_app=39906MiB witness=['compact', 'nvcomp'] products=True balloon_gone=True strict_rc=None products_rc=None note=this is the unconstrained baseline
+== mmA-L-auto@16
+  exit=1 timeout=False wall=28.97s free_before=16381MiB peak_above_base=3236MiB peak_app=3202MiB witness=['float', 'compact'] products=False balloon_gone=True strict_rc=None products_rc=None note=per-movie _109-21_0003: present=False strict=None products=None; 6_frameImage: present=True strict=1 products=1
+== baseline for mmB-L-auto@16
+  exit=0 timeout=False wall=9.03s free_before=81154MiB peak_above_base=37572MiB peak_app=39906MiB witness=['compact', 'compact'] products=True balloon_gone=True strict_rc=None products_rc=None note=this is the unconstrained baseline
+== mmB-L-auto@16
+  exit=1 timeout=False wall=47.32s free_before=16381MiB peak_above_base=11854MiB peak_app=11848MiB witness=['float', 'compact'] products=False balloon_gone=True strict_rc=None products_rc=None note=per-movie _109-21_0003: present=False strict=None products=None; n20_08_57_33: present=True strict=1 products=1
+== mmA-L-auto@24
+  exit=0 timeout=False wall=64.81s free_before=24573MiB peak_above_base=22062MiB peak_app=20574MiB witness=['float', 'nvcomp'] products=True balloon_gone=True strict_rc=None products_rc=None note=per-movie _109-21_0003: present=True strict=1 products=1; 6_frameImage: present=True strict=1 products=1
+== baseline for mmA-G-auto@16
+  exit=0 timeout=False wall=6.81s free_before=81154MiB peak_above_base=37572MiB peak_app=37564MiB witness=['compact', 'nvcomp'] products=True balloon_gone=True strict_rc=None products_rc=None note=this is the unconstrained baseline
+== mmA-G-auto@16
+  exit=1 timeout=False wall=29.11s free_before=16381MiB peak_above_base=3208MiB peak_app=3230MiB witness=['float', 'compact'] products=False balloon_gone=True strict_rc=None products_rc=None note=per-movie _109-21_0003: present=False strict=None products=None; 6_frameImage: present=True strict=1 products=1
+  probe 40 GiB -> PASS exit=0 route=compact fallback_warn=False wall=7.47s free_meas=40957MiB products_rc=0 strict_rc=1
+  probe 24 GiB -> FAIL exit=0 route=float fallback_warn=True wall=65.14s free_meas=24573MiB products_rc=0 strict_rc=1
+  probe 32 GiB -> FAIL exit=0 route=float fallback_warn=True wall=66.47s free_meas=32765MiB products_rc=0 strict_rc=1
+  probe 36 GiB -> FAIL exit=0 route=float fallback_warn=True wall=65.9s free_meas=36861MiB products_rc=0 strict_rc=1
+  probe 38 GiB -> FAIL exit=1 route=compact fallback_warn=False wall=22.89s free_meas=38909MiB products_rc=None strict_rc=None
+  probe 39 GiB -> PASS exit=0 route=compact fallback_warn=False wall=7.57s free_meas=39933MiB products_rc=0 strict_rc=1
+FLOOR e10441-L-auto resident: fails at 38 GiB free, passes at 39 GiB free (tol 1)
+  probe 24 GiB -> PASS exit=0 route=float fallback_warn=True wall=61.69s free_meas=24573MiB products_rc=0 strict_rc=1
+  probe 16 GiB -> FAIL exit=1 route=float fallback_warn=True wall=28.36s free_meas=16381MiB products_rc=None strict_rc=None
+  probe 20 GiB -> FAIL exit=1 route=float fallback_warn=True wall=30.88s free_meas=20477MiB products_rc=None strict_rc=None
+  probe 22 GiB -> PASS exit=0 route=float fallback_warn=True wall=65.71s free_meas=22525MiB products_rc=0 strict_rc=1
+  probe 21 GiB -> FAIL exit=1 route=float fallback_warn=True wall=31.72s free_meas=21501MiB products_rc=None strict_rc=None
+FLOOR e10441-L-auto completes: fails at 21 GiB free, passes at 22 GiB free (tol 1)
+  probe 24 GiB -> PASS exit=0 route=compact fallback_warn=False wall=12.01s free_meas=24573MiB products_rc=0 strict_rc=1
+  probe 16 GiB -> FAIL exit=0 route=float fallback_warn=True wall=43.46s free_meas=16381MiB products_rc=0 strict_rc=1
+  probe 20 GiB -> PASS exit=0 route=compact fallback_warn=False wall=11.8s free_meas=20477MiB products_rc=0 strict_rc=1
+  probe 18 GiB -> FAIL exit=0 route=float fallback_warn=True wall=41.55s free_meas=18429MiB products_rc=0 strict_rc=1
+  probe 19 GiB -> FAIL exit=1 route=compact fallback_warn=False wall=19.9s free_meas=19453MiB products_rc=None strict_rc=None
+FLOOR e10474f4-L-auto resident: fails at 19 GiB free, passes at 20 GiB free (tol 1)
+  probe 16 GiB -> PASS exit=0 route=float fallback_warn=True wall=40.96s free_meas=16381MiB products_rc=0 strict_rc=1
+  probe 2 GiB -> FAIL exit=1 route=float fallback_warn=True wall=22.46s free_meas=2045MiB products_rc=None strict_rc=None
+  probe 9 GiB -> FAIL exit=1 route=float fallback_warn=True wall=22.25s free_meas=9213MiB products_rc=None strict_rc=None
+  probe 12.5 GiB -> PASS exit=0 route=float fallback_warn=True wall=41.09s free_meas=12797MiB products_rc=0 strict_rc=1
+  probe 11 GiB -> FAIL exit=1 route=float fallback_warn=True wall=23.82s free_meas=11261MiB products_rc=None strict_rc=None
+  probe 12 GiB -> PASS exit=0 route=float fallback_warn=True wall=42.53s free_meas=12285MiB products_rc=0 strict_rc=1
+FLOOR e10474f4-L-auto completes: fails at 11 GiB free, passes at 12 GiB free (tol 1)
+  probe 16 GiB -> PASS exit=0 route=compact fallback_warn=False wall=2.69s free_meas=16381MiB products_rc=0 strict_rc=1
+  probe 4 GiB -> FAIL exit=1 route=float fallback_warn=True wall=6.66s free_meas=4093MiB products_rc=None strict_rc=None
+  probe 10 GiB -> PASS exit=0 route=compact fallback_warn=False wall=2.69s free_meas=10237MiB products_rc=0 strict_rc=1
+  probe 7 GiB -> FAIL exit=0 route=float fallback_warn=True wall=14.02s free_meas=7165MiB products_rc=0 strict_rc=1
+  probe 8.5 GiB -> FAIL exit=1 route=compact fallback_warn=False wall=5.66s free_meas=8701MiB products_rc=None strict_rc=None
+  probe 9 GiB -> PASS exit=0 route=compact fallback_warn=False wall=2.69s free_meas=9213MiB products_rc=0 strict_rc=1
+FLOOR e10216-L-auto resident: fails at 8.5 GiB free, passes at 9 GiB free (tol 1)
+  probe 16 GiB -> PASS exit=0 route=nvcomp fallback_warn=False wall=1.18s free_meas=16381MiB products_rc=0 strict_rc=1
+  probe 1 GiB -> FAIL exit=1 route=float fallback_warn=True wall=2.74s free_meas=1021MiB products_rc=None strict_rc=None
+  probe 8.5 GiB -> PASS exit=0 route=nvcomp fallback_warn=False wall=1.18s free_meas=8701MiB products_rc=0 strict_rc=1
+  probe 5 GiB -> PASS exit=0 route=nvcomp fallback_warn=False wall=1.18s free_meas=5117MiB products_rc=0 strict_rc=1
+  probe 3 GiB -> FAIL exit=0 route=float fallback_warn=True wall=5.91s free_meas=3069MiB products_rc=0 strict_rc=1
+  probe 4 GiB -> PASS exit=0 route=nvcomp fallback_warn=False wall=1.18s free_meas=4093MiB products_rc=0 strict_rc=1
+FLOOR tutorial-L-auto resident: fails at 3 GiB free, passes at 4 GiB free (tol 1)
+  probe 40 GiB -> PASS exit=0 route=compact fallback_warn=False wall=7.32s free_meas=40957MiB products_rc=0 strict_rc=0
+  probe 24 GiB -> FAIL exit=0 route=float fallback_warn=True wall=56.31s free_meas=24573MiB products_rc=0 strict_rc=1
+  probe 32 GiB -> FAIL exit=0 route=float fallback_warn=True wall=56.81s free_meas=32765MiB products_rc=0 strict_rc=1
+  probe 36 GiB -> FAIL exit=0 route=float fallback_warn=True wall=60.24s free_meas=36861MiB products_rc=0 strict_rc=1
+  probe 38 GiB -> PASS exit=0 route=compact fallback_warn=False wall=7.22s free_meas=38909MiB products_rc=0 strict_rc=0
+  probe 37 GiB -> PASS exit=0 route=compact fallback_warn=False wall=59.97s free_meas=37885MiB products_rc=0 strict_rc=1
+FLOOR e10441-G-auto resident: fails at 36 GiB free, passes at 37 GiB free (tol 1)
+  probe 24 GiB -> PASS exit=0 route=float fallback_warn=True wall=56.59s free_meas=24573MiB products_rc=0 strict_rc=1
+  probe 16 GiB -> FAIL exit=1 route=float fallback_warn=True wall=28.01s free_meas=16381MiB products_rc=None strict_rc=None
+  probe 20 GiB -> FAIL exit=1 route=float fallback_warn=True wall=30.22s free_meas=20477MiB products_rc=None strict_rc=None
+  probe 22 GiB -> PASS exit=0 route=float fallback_warn=True wall=52.91s free_meas=22525MiB products_rc=0 strict_rc=1
+  probe 21 GiB -> FAIL exit=1 route=float fallback_warn=True wall=29.87s free_meas=21501MiB products_rc=None strict_rc=None
+FLOOR e10441-G-auto completes: fails at 21 GiB free, passes at 22 GiB free (tol 1)
+  probe 24 GiB -> PASS exit=0 route=compact fallback_warn=False wall=11.35s free_meas=24573MiB products_rc=0 strict_rc=0
+  probe 16 GiB -> FAIL exit=0 route=float fallback_warn=True wall=36.73s free_meas=16381MiB products_rc=0 strict_rc=1
+  probe 20 GiB -> PASS exit=0 route=compact fallback_warn=False wall=11.34s free_meas=20477MiB products_rc=0 strict_rc=0
+  probe 18 GiB -> FAIL exit=0 route=float fallback_warn=True wall=37.18s free_meas=18429MiB products_rc=0 strict_rc=1
+  probe 19 GiB -> PASS exit=0 route=compact fallback_warn=False wall=11.4s free_meas=19453MiB products_rc=0 strict_rc=0
+FLOOR e10474f4-G-auto resident: fails at 18 GiB free, passes at 19 GiB free (tol 1)
+  probe 16 GiB -> PASS exit=0 route=float fallback_warn=True wall=37.4s free_meas=16381MiB products_rc=0 strict_rc=1
+  probe 2 GiB -> FAIL exit=1 route=float fallback_warn=True wall=22.17s free_meas=2045MiB products_rc=None strict_rc=None
+  probe 9 GiB -> FAIL exit=1 route=float fallback_warn=True wall=23.17s free_meas=9213MiB products_rc=None strict_rc=None
+  probe 12.5 GiB -> PASS exit=0 route=float fallback_warn=True wall=37.12s free_meas=12797MiB products_rc=0 strict_rc=1
+  probe 11 GiB -> FAIL exit=1 route=float fallback_warn=True wall=24.18s free_meas=11261MiB products_rc=None strict_rc=None
+  probe 12 GiB -> PASS exit=0 route=float fallback_warn=True wall=37.42s free_meas=12285MiB products_rc=0 strict_rc=1
+FLOOR e10474f4-G-auto completes: fails at 11 GiB free, passes at 12 GiB free (tol 1)
+  probe 16 GiB -> PASS exit=0 route=compact fallback_warn=False wall=2.29s free_meas=16381MiB products_rc=0 strict_rc=0
+  probe 4 GiB -> FAIL exit=1 route=float fallback_warn=True wall=6.52s free_meas=4093MiB products_rc=None strict_rc=None
+  probe 10 GiB -> PASS exit=0 route=compact fallback_warn=False wall=2.18s free_meas=10237MiB products_rc=0 strict_rc=0
+  probe 7 GiB -> FAIL exit=0 route=float fallback_warn=True wall=12.0s free_meas=7165MiB products_rc=0 strict_rc=1
+  probe 8.5 GiB -> PASS exit=0 route=compact fallback_warn=False wall=2.13s free_meas=8701MiB products_rc=0 strict_rc=0
+  probe 8 GiB -> PASS exit=0 route=compact fallback_warn=False wall=13.76s free_meas=8189MiB products_rc=0 strict_rc=1
+FLOOR e10216-G-auto resident: fails at 7 GiB free, passes at 8 GiB free (tol 1)
+  probe 16 GiB -> PASS exit=0 route=nvcomp fallback_warn=False wall=1.23s free_meas=16381MiB products_rc=0 strict_rc=0
+  probe 1 GiB -> FAIL exit=1 route=float fallback_warn=True wall=2.69s free_meas=1021MiB products_rc=None strict_rc=None
+  probe 8.5 GiB -> PASS exit=0 route=nvcomp fallback_warn=False wall=1.13s free_meas=8701MiB products_rc=0 strict_rc=0
+  probe 5 GiB -> PASS exit=0 route=nvcomp fallback_warn=False wall=1.18s free_meas=5117MiB products_rc=0 strict_rc=0
+  probe 3 GiB -> FAIL exit=0 route=float fallback_warn=True wall=5.21s free_meas=3069MiB products_rc=0 strict_rc=1
+  probe 4 GiB -> PASS exit=0 route=nvcomp fallback_warn=False wall=1.18s free_meas=4093MiB products_rc=0 strict_rc=0
+FLOOR tutorial-G-auto resident: fails at 3 GiB free, passes at 4 GiB free (tol 1)
+ALL_DONE

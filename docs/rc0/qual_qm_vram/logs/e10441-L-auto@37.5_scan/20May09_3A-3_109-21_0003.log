@@ -1,0 +1,39 @@
+Working on Movies/20May09_3A-3_109-21_0003.tif with 8 thread(s).
+
+Movie size: X = 11520 Y = 8184 N = 50
+Frames to be used: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+Frame grouping: n_frames = 50, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 | 48 | 49 | 50 | 
+interpolate_shifts = 0
+
+Movie FFT: batch=1 R2C work=377184192 C2R work=377184192 shared work=377184192 inverse tile=377184192 bytes
+nvCOMP ingestion declined (bits per sample != 16); using the host reader.
+Staging this movie as native unsigned 8-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 4713984000 bytes for 50 x 11520 x 8184 samples, released before any float movie is materialized.
+In unaligned sum, Mean = 14.2075 Std = 3.94819 Hotpixel threshold = 37.8966
+Detected 1403 hot pixels to be corrected.
+Fixed hot pixels.
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+Released native uint8 host staging after device forward FFT.
+
+Global alignment:
+ Iteration 1: RMSD = 3.95927 px
+ Iteration 2: RMSD = 0.522925 px
+ Iteration 3: RMSD = 0.271611 px
+ [CUDA Global Alignment Profile]
+   Per-kernel timing:            not measured (enable with --profile)
+   Total GPU alignment time:     121.74 ms
+   Buffer VRAM:                  20422.35 MiB
+   cuFFT workspace VRAM:         1200.78 MiB
+   Peak GPU memory allocated:    21623.13 MiB
+   Buffer placement:             borrowed dead device memory, nothing allocated
+ [CUDA Global Alignment] completed; converged=yes
+Reconstructing globally aligned frames (CUDA in-VRAM)...
+
+Local alignments:
+Patches: X = 5 Y = 5
+Batched patch alignment: 25 patches, chunk size 0 (cap 4, 0 chunk(s)); free device memory 917 of 81153 MiB; workspace does not fit, using per-patch alignment.
+Patch (1, 1): 1 / 25, X range = [0, 2304), Y range = [0, 1636), Center = (1151, 817)
+cuFFT Error in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_movie_session.cu:2277 : 5
+WARNING: resident patch preparation did not complete for patch (1, 1); recorded cuFFT error code 5 at preparePatchInVram:2277. Classified recoverable, so this patch is re-attempted through alignPatch(), which re-dispatches CUDA on the same device -- this is not a CPU fallback.
+CUDA Error in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_fft_prep.cu:324 : out of memory
+WARNING: CUDA patch preparation declined for patch (1, 1); classified recoverable, continuing with host patch preparation.

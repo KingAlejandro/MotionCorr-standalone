@@ -1,0 +1,209 @@
+{
+ "spec": "mmB-L-auto@16",
+ "family": "mmB",
+ "config": "L",
+ "ingest": "auto",
+ "target_free_gib": 16.0,
+ "movies": [
+  "Movies/20May09_3A-3_109-21_0003.tif",
+  "Movies/PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33.tif"
+ ],
+ "identity": {
+  "e10441": {
+   "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+   "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+   "bytes": 732798334
+  },
+  "e10361": {
+   "movie": "Movies/PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33.tif",
+   "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-12_0007_Jan20_08.57.33.tif",
+   "bytes": 710039128
+  }
+ },
+ "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 1.0 --bfactor 150 --seed 1 --i movies.star --j 8 --o /mnt/clathrin/alex-motioncorr-rc0/W-QM/runs/mmB-L-auto@16/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-rc0/W-QM/runs/mmB-L-auto@16/witness.txt --patch_x 5 --patch_y 5",
+ "binary_sha256_head": null,
+ "bench_lock_wait_s": 0,
+ "gpu_free_before_balloon_mib": 81154,
+ "free_vram_after_balloon_mib": 16381,
+ "balloon_held_mib": 64350,
+ "gpu_used_before_run_mib": 64773,
+ "timed_out": false,
+ "wall_s": 48.84,
+ "exit": 1,
+ "sampled": {
+  "n": 188,
+  "peak_gpu_used_mib": 76627,
+  "peak_motioncorr_above_baseline_mib": 11854,
+  "peak_compute_app_mib": 11848,
+  "min_free_mib": 4528
+ },
+ "balloon_gone": true,
+ "gpu_used_after_mib": 1,
+ "gpu_apps_after": {},
+ "products": {
+  "20May09_3A-3_109-21_0003": {
+   ".mrc": false,
+   ".star": false,
+   ".log": true
+  },
+  "PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33": {
+   ".mrc": true,
+   ".star": true,
+   ".log": true
+  }
+ },
+ "joint_star": false,
+ "witness": [
+  "Movies/20May09_3A-3_109-21_0003.tif float",
+  "Movies/PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33.tif compact"
+ ],
+ "log_lines": {
+  "20May09_3A-3_109-21_0003.log": [
+   "ERROR: Movie buffer allocation failed: out of memory",
+   "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline."
+  ],
+  "PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33.log": [
+   "nvCOMP ingestion declined (bits per sample != 16); using the host reader.",
+   "Staging this movie as native unsigned 8-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 1461335040 bytes for 62 x 5760 x 4092 samples, released before any float movie is materialized.",
+   "CUDA Error in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_movie_session.cu:913 : out of memory",
+   "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing.",
+   "Materialized native uint8 frames as float for CPU fallback.",
+   "Buffer VRAM:                  6329.98 MiB",
+   "cuFFT workspace VRAM:         372.48 MiB",
+   "Peak GPU memory allocated:    6702.47 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB",
+   "cuFFT workspace VRAM:         14.82 MiB",
+   "Peak GPU memory allocated:    267.96 MiB",
+   "Buffer VRAM:                  253.15 MiB"
+  ]
+ },
+ "stdout_tail": [
+  "Continuing with the remaining movies.",
+  "in: /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/motioncorr_runner.cpp, line 1092",
+  "ERROR: ",
+  "Motion correction failed for 1 movie(s): Movies/20May09_3A-3_109-21_0003.tif. Successful per-movie outputs were retained; joint output was not generated.",
+  "=== Backtrace  ===",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr(+0x5afd7) [0x6256c815efd7]",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr(+0x2e281) [0x6256c8132281]",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr(+0x50cd6) [0x6256c8154cd6]",
+  "/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7368f6e2a1ca]",
+  "/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7368f6e2a28b]",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr(+0x51845) [0x6256c8155845]",
+  "==================",
+  "ERROR: ",
+  "Motion correction failed for 1 movie(s): Movies/20May09_3A-3_109-21_0003.tif. Successful per-movie outputs were retained; joint output was not generated."
+ ],
+ "max_rss_mib": 36180,
+ "all_products": false,
+ "compare": {
+  "per_movie": {
+   "20May09_3A-3_109-21_0003": {
+    "candidate_products_present": false
+   },
+   "PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33": {
+    "candidate_products_present": true,
+    "strict_rc": 1,
+    "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 23569920 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33.log\n",
+    "products_rc": 0,
+    "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 23569920 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+    "log_line_diff": {
+     "only_in_baseline": [
+      "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+      "Released native uint8 host staging after device forward FFT.",
+      "Buffer placement:             borrowed dead device memory, nothing allocated",
+      "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+      "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 69382 of 81153 MiB; workspace 178 MiB + cuFFT work 14 MiB, retained until alignment release.",
+      "Batched patch alignment: device memory in use rose by at most 870 MiB (sampled after each chunk).",
+      "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+      "Buffer VRAM:                  178.46 MiB",
+      "Peak GPU memory allocated:    193.27 MiB",
+      "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+      "Buffer VRAM:                  178.46 MiB",
+      "Peak GPU memory allocated:    193.27 MiB",
+      "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+      "Buffer VRAM:                  178.46 MiB",
+      "Peak GPU memory allocated:    193.27 MiB",
+      "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+      "Buffer VRAM:                  178.46 MiB",
+      "Peak GPU memory allocated:    193.27 MiB",
+      "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+      "Buffer VRAM:                  178.46 MiB"
+     ],
+     "only_in_candidate": [
+      "CUDA Error in /mnt/clathrin/alex-motioncorr-rc0/W-QM/src/src/acc/cuda/cuda_movie_session.cu:913 : out of memory",
+      "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing.",
+      "Materialized native uint8 frames as float for CPU fallback.",
+      "Computing full-frame Fourier transforms (CUDA)...",
+      "Reconstructing globally aligned frames (CUDA)...",
+      "Buffer VRAM:                  253.15 MiB",
+      "Peak GPU memory allocated:    267.96 MiB",
+      "Buffer VRAM:                  253.15 MiB",
+      "Peak GPU memory allocated:    267.96 MiB",
+      "Buffer VRAM:                  253.15 MiB",
+      "Peak GPU memory allocated:    267.96 MiB",
+      "Buffer VRAM:                  253.15 MiB",
+      "Peak GPU memory allocated:    267.96 MiB",
+      "Buffer VRAM:                  253.15 MiB",
+      "Peak GPU memory allocated:    267.96 MiB",
+      "Buffer VRAM:                  253.15 MiB",
+      "Peak GPU memory allocated:    267.96 MiB",
+      "Buffer VRAM:                  253.15 MiB",
+      "Peak GPU memory allocated:    267.96 MiB",
+      "Buffer VRAM:                  253.15 MiB"
+     ]
+    }
+   }
+  }
+ },
+ "deleted_mrc": [
+  "out/Movies/PS_18_2_4_CTEM_103-12_0007_Jan20_08_57_33.mrc"
+ ]
+}

@@ -1,0 +1,146 @@
+{
+ "spec": "tutorial-L-auto@16",
+ "family": "tutorial",
+ "config": "L",
+ "ingest": "auto",
+ "target_free_gib": 16.0,
+ "movies": [
+  "Movies/20170629_00026_frameImage.tiff"
+ ],
+ "identity": {
+  "tutorial": {
+   "movie": "Movies/20170629_00026_frameImage.tiff",
+   "source": "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00026_frameImage.tiff",
+   "bytes": 132754590,
+   "gain": "gain.mrc"
+  }
+ },
+ "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-rc0/W-QM/build-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 1.277 --bfactor 150 --seed 1 --expected_frames 24 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-rc0/W-QM/runs/tutorial-L-auto@16/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-rc0/W-QM/runs/tutorial-L-auto@16/witness.txt --patch_x 5 --patch_y 5",
+ "binary_sha256_head": null,
+ "bench_lock_wait_s": 0,
+ "gpu_free_before_balloon_mib": 81154,
+ "free_vram_after_balloon_mib": 16381,
+ "balloon_held_mib": 64350,
+ "gpu_used_before_run_mib": 64773,
+ "timed_out": false,
+ "wall_s": 1.17,
+ "exit": 0,
+ "sampled": {
+  "n": 5,
+  "peak_gpu_used_mib": 68037,
+  "peak_motioncorr_above_baseline_mib": 3264,
+  "peak_compute_app_mib": 3206,
+  "min_free_mib": 13118
+ },
+ "balloon_gone": true,
+ "gpu_used_after_mib": 1,
+ "gpu_apps_after": {},
+ "products": {
+  "20170629_00026_frameImage": {
+   ".mrc": true,
+   ".star": true,
+   ".log": true
+  }
+ },
+ "joint_star": true,
+ "witness": [
+  "Movies/20170629_00026_frameImage.tiff nvcomp"
+ ],
+ "log_lines": {
+  "20170629_00026_frameImage.log": [
+   "nvCOMP ingestion: chunk=6/24 frames x 4 chunks, slots=2, scratch=410073744/1367678976 bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0), pinned staging=100663296/268435456 reserved, 68338816 used (2 x 33063768 payload), nvCOMP temp=0, input alignment=4, span-read frames=24/24",
+   "nvCOMP ingestion: pinned staging pool grown to 100663296 bytes for a 68338816-byte request (worker lifetime)",
+   "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+   "Buffer VRAM:                  1482.91 MiB",
+   "cuFFT workspace VRAM:         86.68 MiB",
+   "Peak GPU memory allocated:    1569.59 MiB",
+   "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+   "Buffer VRAM:                  41.42 MiB",
+   "cuFFT workspace VRAM:         3.41 MiB",
+   "Peak GPU memory allocated:    44.83 MiB",
+   "Batched alignment:            4 patches together; time and VRAM below are for all of them"
+  ]
+ },
+ "stdout_tail": [
+  "Using CUDA acceleration on GPU device 0 for global alignment.",
+  " Using our own implementation based on MOTIONCOR2 algorithm",
+  " to correct beam-induced motion for the following micrographs: ",
+  "  * Movies/20170629_00026_frameImage.tiff",
+  " Correcting beam-induced motions using our own implementation ...",
+  " Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.",
+  " Generating joint STAR file ... ",
+  " Written: /mnt/clathrin/alex-motioncorr-rc0/W-QM/runs/tutorial-L-auto@16/out/corrected_micrographs.star",
+  " Now generating logfile.pdf ... ",
+  " Done! Written: /mnt/clathrin/alex-motioncorr-rc0/W-QM/runs/tutorial-L-auto@16/out/logfile.pdf"
+ ],
+ "max_rss_mib": 351,
+ "all_products": true,
+ "compare": {
+  "strict_rc": 1,
+  "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 14238980 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20170629_00026_frameImage.log\n",
+  "products_rc": 0,
+  "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 14238980 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+  "log_line_diff": {
+   "only_in_baseline": [
+    "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 77942 of 81153 MiB; workspace 41 MiB + cuFFT work 3 MiB, retained until alignment release.",
+    "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-QM/runs/tutorial-L-auto@none/out/Movies/20170629_00026_frameImage.mrc"
+   ],
+   "only_in_candidate": [
+    "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 13173 of 81153 MiB; workspace 41 MiB + cuFFT work 3 MiB, retained until alignment release.",
+    "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-rc0/W-QM/runs/tutorial-L-auto@16/out/Movies/20170629_00026_frameImage.mrc"
+   ]
+  }
+ },
+ "deleted_mrc": [
+  "out/Movies/20170629_00026_frameImage.mrc"
+ ]
+}

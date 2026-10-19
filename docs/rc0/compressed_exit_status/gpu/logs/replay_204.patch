@@ -1,0 +1,20 @@
+--- src/docs/rc0/qual_mrc_staging/synth_mrc_matrix.py	2026-10-19 12:44:06.307158271 +0000
++++ replay_204.py	2026-10-19 13:23:55.753006788 +0000
+@@ -27,7 +27,7 @@
+ 
+ import numpy as np
+ 
+-ROOT = Path(__file__).resolve().parents[3]
++ROOT = Path("/mnt/clathrin/alex-motioncorr-214/src")
+ sys.path.insert(0, str(ROOT / "test-data"))
+ sys.path.insert(0, str(ROOT / "tools" / "profiling"))
+ import generate_synthetic_fixture as gen  # noqa: E402
+@@ -443,7 +443,7 @@
+                         rec["vs_uncompressed"] = compare_named(ref, a)
+                     else:
+                         rec["fail_text"] = err_msg(a["text"])
+-                    expect_ok = not (codec == "bz2" and vname == "native")
++                    expect_ok = True  # Native pbzip2 installed in task scratch.
+                     rec["route_ok"] = args.cpu or (a["witness"] == ["float"] if a["rc"] == 0 else not a["witness"] or True)
+                     rec["pass"] = (a["rc"] == 0 and rec["vs_uncompressed"]["identical"] and rec["route_ok"]) \
+                         if expect_ok else (a["rc"] != 0 and not a["completion_star"] and not a["mrc_products"])

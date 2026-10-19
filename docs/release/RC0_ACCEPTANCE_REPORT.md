@@ -252,3 +252,26 @@ Per-family GPU and CPU timing tables are in `docs/workload_corpus/{cpu,gpu}/`; d
 ## 7. Sign-off
 
 Maintainer review of this report, the scope decision and the tag are separate steps (`RELEASE_CHECKLIST.md` §10). Frozen source SHA F: `6d68e2d6`. Tag target T (named by the maintainer; F or a later docs-only evidence commit): pending. `git diff F T -- . ':!docs/rc0' ':!docs/release'` empty: pending. Maintainer sign-off: pending (QF on F is recorded in `docs/rc0/qf/run_6d68e2d6/`).
+
+## 8. Post-RC0 fixes
+
+**#214 — compressed MRC decoder status.** Source/test PR head
+`39aca256c248e6209c6cbf8edc183b7400551b43`; later commits record docs/evidence only.
+Full reads now drain to EOF and reject decoder failure before processing;
+header-only/subsets retain early close and need independent integrity validation.
+No numerical gate or supported-configuration changes.
+
+Rerun: Release builds for CPU/CUDA/CUDA+nvCOMP; full CTest **77/77**, **110/111**
+(only the two independent #246 import-subset timeouts, reproduced on one unchanged
+test retry with compiler occupancy recorded), **114/114**; native pbzip2/xz/zstd
+checks and 12 strict healthy GPU baseline comparisons; #204 compressed replay
+**49/49**. Local macOS: 74 pass, 2 skips, documented `SyntheticRegression` failure.
+Real compressed EMPIAR-10028 movie on cpu64: seven interleaved timing pairs after
+warm-up, with identical MRC/STAR products; median paired change -0.110 s, IQR
+0.480 s (whole-process measurement; no stable speedup/no-regression claim).
+
+[Evidence, commands and limits](../rc0/compressed_exit_status/README.md).
+Not rerun: full QF beyond affected compressed-format rows, real EER campaigns,
+multi-GPU endpoints, soak, other real-movie performance rows or Tier D science.
+Frozen-F results keep their original SHA. Independent review and current-head CI
+remain required before merge; #246 is being fixed separately.

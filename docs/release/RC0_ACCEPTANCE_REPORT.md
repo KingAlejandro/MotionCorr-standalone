@@ -252,3 +252,16 @@ Per-family GPU and CPU timing tables are in `docs/workload_corpus/{cpu,gpu}/`; d
 ## 7. Sign-off
 
 Maintainer review of this report, the scope decision and the tag are separate steps (`RELEASE_CHECKLIST.md` §10). Frozen source SHA F: `6d68e2d6`. Tag target T (named by the maintainer; F or a later docs-only evidence commit): pending. `git diff F T -- . ':!docs/rc0' ':!docs/release'` empty: pending. Maintainer sign-off: pending (QF on F is recorded in `docs/rc0/qf/run_6d68e2d6/`).
+
+## Post-RC0 #239: RelionError backtrace ownership
+
+PR implementation head `1c14e8882b4754903da4499f1ceca5fd8037f630` (base `c8844894`; subsequent commit is evidence/docs only).
+Re-entry class: shared source, §9.4. All three Release builds and collection checks passed on 4GPUs.
+Full CTest: CPU **75/76 (FAIL: known ProfilingKit 30-second subprocess timeout)**; CUDA **110/110 PASS**;
+CUDA+nvCOMP **113/113 PASS**, zero skips in every configuration. F counts 74/108/111 increase by two ownership tests.
+Native GPU suites ran on GPU3 UUID under its lock and an eight-CPU taskset cap.
+LeakSanitizer reports 6,400 leaked bytes before the fix and none after; old copy/print fails ASan, fixed throw/copy/assignment/repeated-print paths pass with exact format checks.
+The single permitted CPU ProfilingKit rerun also **FAILED** (two 30-second CLI timeouts), recorded separately in `docs/post_rc0/issue239/README.md`;
+no further rerun was attempted. CPU re-entry remains blocked pending maintainer disposition or a separate harness fix.
+UNRUN on this source head: full QF route/product campaigns, independent scientific acceptance and performance qualification.
+Their earlier rows retain their earlier SHAs. No product, metadata, gate or tolerance change.

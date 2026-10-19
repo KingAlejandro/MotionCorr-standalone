@@ -1,0 +1,17 @@
+rerun TMPDIR=/tmp/wscarf-tmp /dev/nvme0n1p8 xfs   791G  5.3G  786G   1% /tmp
+run_ctest cpu rerun rc=0 exit=0
+grade cpu --rerun-tag rerun rc=1
+cpu: FAIL collected=74 reference=74 d11=with_d11 counts={'passed': 73, 'failed': 1, 'skipped': 0, 'not_run': 0}
+  - tests not passed: ['ProfilingKit']
+  - ctest exit 8
+run_ctest cuda rerun rc=0 exit=0
+grade cuda --rerun-tag rerun rc=1
+cuda: FAIL collected=108 reference=108 d11=with_d11 counts={'passed': 107, 'failed': 1, 'skipped': 0, 'not_run': 0}
+  - tests not passed: ['ProfilingKit']
+  - ctest exit 8
+run_ctest nvcomp rerun rc=0 exit=0
+grade nvcomp --rerun-tag rerun rc=1
+nvcomp: FAIL collected=111 reference=111 d11=with_d11 counts={'passed': 110, 'failed': 1, 'skipped': 0, 'not_run': 0}
+  - tests not passed: ['ProfilingKit']
+  - ctest exit 8
+end src HEAD 6d68e2d6ec45c37b75fd0f4aaff8272f192b7029 porcelain=0

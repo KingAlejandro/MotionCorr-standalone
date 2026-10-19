@@ -1,0 +1,40 @@
+--- qm_batch.py
++++ qm_batch.py
+@@ -11,15 +11,15 @@
+ import json, os, re, shutil, signal, subprocess, sys, threading, time
+ from pathlib import Path
+ 
+-W = Path('/mnt/clathrin/alex-motioncorr-rc0/W-QM')
+-SRC = W / 'src'
+-BIN = W / 'build-nvcomp' / 'motioncorr'
++W = Path('/mnt/clathrin/alex-motioncorr-226')
++SRC = W / 'base'
++BIN = W / os.environ.get('QM_BUILD', 'build-base') / 'motioncorr'
+ BALLOON = W / 'balloon'
+ PY = '/home/alex/.mc-venv/bin/python3'
+ CMP = SRC / 'docs/issue85_laneC/compare_output_trees.py'
+ UUID = 'GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d'
+ CPUS = '104-111'
+-RUNS = W / 'runs'
++RUNS = W / os.environ.get('QM_RUNS', 'runs-base')
+ INPUTS = W / 'inputs'
+ DROOT = W / 'dataroot'
+ V = Path.home() / 'motioncorr-validation-20261011-vm'
+@@ -158,7 +158,7 @@
+         self.held = 0
+ 
+     def start(self, hold_mib):
+-        env = dict(os.environ, CUDA_VISIBLE_DEVICES='1')
++        env = dict(os.environ, CUDA_VISIBLE_DEVICES=UUID)
+         self.p = subprocess.Popen([str(BALLOON), str(hold_mib)], env=env, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, text=True, preexec_fn=os.setsid)
+         line = self.p.stdout.readline()
+@@ -276,7 +276,7 @@
+         t0 = time.time()
+         th = threading.Thread(target=sampler, args=(base_used,), daemon=True)
+         th.start()
+-        env = dict(os.environ, CUDA_VISIBLE_DEVICES='1')
++        env = dict(os.environ, CUDA_VISIBLE_DEVICES=UUID)
+         p = subprocess.Popen(cmd, cwd=inputs, env=env, stdout=open(root / 'stdout.txt', 'w'),
+                              stderr=subprocess.STDOUT, preexec_fn=os.setsid)
+         try:

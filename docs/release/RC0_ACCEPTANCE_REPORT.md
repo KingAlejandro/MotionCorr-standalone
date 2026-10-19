@@ -252,3 +252,14 @@ Per-family GPU and CPU timing tables are in `docs/workload_corpus/{cpu,gpu}/`; d
 ## 7. Sign-off
 
 Maintainer review of this report, the scope decision and the tag are separate steps (`RELEASE_CHECKLIST.md` §10). Frozen source SHA F: `6d68e2d6`. Tag target T (named by the maintainer; F or a later docs-only evidence commit): pending. `git diff F T -- . ':!docs/rc0' ':!docs/release'` empty: pending. Maintainer sign-off: pending (QF on F is recorded in `docs/rc0/qf/run_6d68e2d6/`).
+
+## Post-RC0 #246: fake CLI compiler-settle timeout
+
+PR implementation head `927e5b5cfa51cf72187f182ecffd0693111c71f7`, base `c8844894` (following commit is evidence/docs only).
+Re-entry class: tests only (§9.4). On 4GPUs, with CPUs 72–79 and local `TMPDIR=/tmp`, full ProfilingKit fails before
+the fix with exactly the two target 30-second CLI timeouts, and passes after: **134/134 internal tests, zero skips**.
+A private sleeping `cc1` is verified alive and visible to the production compiler scanner during each CLI case;
+the fixed CLI's provenance records that same witness. The production settle default and all deadlines/gates are unchanged.
+The bench lock protected other agents from this compiler-presence control. No C++ build or GPU execution was performed.
+UNRUN: full CTest, QF, performance and scientific campaigns. Evidence: `docs/post_rc0/issue246/README.md`.
+This identifies the independent harness cause of #245's retained 75/76 CPU record and failed rerun; those historical results remain FAIL.

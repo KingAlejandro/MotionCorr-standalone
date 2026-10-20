@@ -320,6 +320,25 @@ __global__ void fourierShiftKernel(
     int nfx, int nfy, int nfy_half,
     int n_frames);
 
+// S1.3c DIAGNOSTIC ONLY: Hermitian projection of the kx = 0 and kx = nx/2
+// columns of one ny x (nx/2+1) half spectrum. One thread per pair (ky, -ky).
+__global__ void diagHermitianEdgeColumnsKernel(float2 *F, int nfx, int ny, int col) {
+    const int ky = blockIdx.x * blockDim.x + threadIdx.x;
+    if (ky > ny / 2) return;
+    const int my = (ny - ky) % ny;
+    float2 a = F[(size_t)ky * nfx + col], b = F[(size_t)my * nfx + col];
+    const float2 h = make_float2(0.5f * (a.x + b.x), 0.5f * (a.y - b.y));
+    F[(size_t)ky * nfx + col] = h;
+    F[(size_t)my * nfx + col] = make_float2(h.x, -h.y);
+}
+
+void cudaDiagHermitianEdgeColumns(void *d_half, int nx, int ny) {
+    const int nfx = nx / 2 + 1, threads = 256, blocks = (ny / 2 + 1 + threads - 1) / threads;
+    diagHermitianEdgeColumnsKernel<<<blocks, threads>>>((float2*)d_half, nfx, ny, 0);
+    diagHermitianEdgeColumnsKernel<<<blocks, threads>>>((float2*)d_half, nfx, ny, nfx - 1);
+    if (cudaGetLastError() != cudaSuccess) REPORT_ERROR("S1.3c diagnostic Hermitian projection launch failed");
+}
+
 // S1.3b DIAGNOSTIC ONLY: the shift is formed as updatePatchShifts forms it
 // (-delta / (float)n in float) and applied by the production kernel.
 void cudaDiagApplyGlobalDelta(void *d_Fframes, int n_frames, int nx, int ny, const double *dx, const double *dy) {

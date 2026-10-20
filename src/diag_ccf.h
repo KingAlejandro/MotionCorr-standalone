@@ -163,6 +163,16 @@ inline bool diagGlobalShiftsIn(size_t n, std::vector<double> &x, std::vector<dou
 // resident full-spectrum movie, frames 2..n, shift (dx, dy) px per frame.
 void cudaDiagApplyGlobalDelta(void *d_Fframes, int n_frames, int nx, int ny, const double *dx, const double *dy);
 
+// S1.3c DIAGNOSTIC ONLY: before a cuFFT C2R of a shifted half spectrum, project
+// the kx = 0 and kx = nx/2 columns onto their Hermitian part,
+// F(ky) <- (F(ky) + conj F(-ky)) / 2 (FFTW's effective treatment; #253).
+// MC_DIAG_C2R_HERMITIAN_GLOBAL=1: global inverse FFT (cuda_movie_session.cu).
+// MC_DIAG_C2R_HERMITIAN_DW=1: dose-weighted product C2R (cuda_realspace_dw.cu).
+inline bool diagC2rHermitianGlobal() { static const bool on = std::getenv("MC_DIAG_C2R_HERMITIAN_GLOBAL") != nullptr; return on; }
+inline bool diagC2rHermitianDw() { static const bool on = std::getenv("MC_DIAG_C2R_HERMITIAN_DW") != nullptr; return on; }
+// Defined in cuda_alignpatch.cu; launched on the legacy default stream.
+void cudaDiagHermitianEdgeColumns(void *d_half, int nx, int ny);
+
 // Raw little-endian dumps: <dir>/<tag>_p<iy>_<ix>_c<call>_it<iter>_<kind>.bin
 // kind "in": n_frames x ccf_nfy x ccf_nfx complex float, the CCF window of the
 // spectra entering this iteration; "map": n_frames x ccf_ny x ccf_nx float;

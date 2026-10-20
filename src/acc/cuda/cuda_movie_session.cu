@@ -2118,6 +2118,7 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
             drain_after_failure();
             return false;
         }
+        if (diagC2rHermitianGlobal()) cudaDiagHermitianEdgeColumns(d_inverse_tile, nx, ny); // S1.3c DIAGNOSTIC ONLY (on the copy)
         const cufftResult res = cufftExecC2R(plan_c2r, d_inverse_tile,
                                              (cufftReal*)(d_Iframes + (size_t)iframe * real_stride));
         if (res != CUFFT_SUCCESS) {

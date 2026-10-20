@@ -1,6 +1,7 @@
 #ifdef _CUDA_ENABLED
 
 #include "src/acc/cuda/cuda_realspace_dw.h"
+#include "src/diag_ccf.h" // S1.3c DIAGNOSTIC ONLY
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/error.h"
 
@@ -385,6 +386,7 @@ bool cudaDoseWeightAndInterpolateDevice(
 
         // Inverse FFT
         if (timed) HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
+        if (diagC2rHermitianDw()) cudaDiagHermitianEdgeColumns(d_Fframe, nx, ny); // S1.3c DIAGNOSTIC ONLY (weighted copy)
         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
         if (timed) {
             HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));

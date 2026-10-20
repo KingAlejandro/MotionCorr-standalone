@@ -2119,8 +2119,11 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
             return false;
         }
         if (diagC2rHermitianGlobal()) cudaDiagHermitianEdgeColumns(d_inverse_tile, nx, ny); // S1.3c DIAGNOSTIC ONLY (on the copy)
+        const float diag_null_sigma = diagNullSeed() ? cudaDiagNyquistRowTermRms(d_inverse_tile, nx, ny) : 0.0f; // S1.3c-null
         const cufftResult res = cufftExecC2R(plan_c2r, d_inverse_tile,
                                              (cufftReal*)(d_Iframes + (size_t)iframe * real_stride));
+        if (diagNullSeed() && res == CUFFT_SUCCESS) // S1.3c-null DIAGNOSTIC ONLY
+            cudaDiagAddSignedRows(d_Iframes + (size_t)iframe * real_stride, nx, ny, diag_null_sigma, diagNullSeed(), 0, iframe);
         if (res != CUFFT_SUCCESS) {
             logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " << res << std::endl;
             recordCufftFailure(res, __func__, __LINE__);

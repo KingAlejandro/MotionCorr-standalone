@@ -173,6 +173,17 @@ inline bool diagC2rHermitianDw() { static const bool on = std::getenv("MC_DIAG_C
 // Defined in cuda_alignpatch.cu; launched on the legacy default stream.
 void cudaDiagHermitianEdgeColumns(void *d_half, int nx, int ny);
 
+// S1.3c-null DIAGNOSTIC ONLY: a perturbation of h(y)'s size but not its shape.
+// MC_DIAG_NULL_ROWS=<seed>: after the global inverse C2R and the DW product
+// C2R, add sigma * s(y) to every pixel of row y, where s(y) = +-1 from a hash of
+// (seed, site, frame, y) and sigma is the rms over rows of h(y) =
+// -Im(sum_ky F(nx/2, ky) exp(2 pi i ky y / ny)), the row term cuFFT adds at
+// 4096^2 (#253), computed from that frame's spectrum before the C2R.
+inline unsigned diagNullSeed() { static const char *p = std::getenv("MC_DIAG_NULL_ROWS"); static const unsigned s = p ? (unsigned)std::strtoul(p, nullptr, 10) : 0u; return s; }
+// Defined in cuda_alignpatch.cu (legacy default stream; synchronous).
+float cudaDiagNyquistRowTermRms(const void *d_half, int nx, int ny);
+void cudaDiagAddSignedRows(float *d_real, int nx, int ny, float sigma, unsigned seed, int site, int frame);
+
 // Raw little-endian dumps: <dir>/<tag>_p<iy>_<ix>_c<call>_it<iter>_<kind>.bin
 // kind "in": n_frames x ccf_nfy x ccf_nfx complex float, the CCF window of the
 // spectra entering this iteration; "map": n_frames x ccf_ny x ccf_nx float;

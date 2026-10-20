@@ -387,7 +387,9 @@ bool cudaDoseWeightAndInterpolateDevice(
         // Inverse FFT
         if (timed) HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
         if (diagC2rHermitianDw()) cudaDiagHermitianEdgeColumns(d_Fframe, nx, ny); // S1.3c DIAGNOSTIC ONLY (weighted copy)
+        const float diag_null_sigma = diagNullSeed() ? cudaDiagNyquistRowTermRms(d_Fframe, nx, ny) : 0.0f; // S1.3c-null
         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
+        if (diagNullSeed()) cudaDiagAddSignedRows((float*)d_Iframe, nx, ny, diag_null_sigma, diagNullSeed(), 1, iframe); // S1.3c-null
         if (timed) {
             HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
             HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));

@@ -320,6 +320,50 @@ __global__ void fourierShiftKernel(
     int nfx, int nfy, int nfy_half,
     int n_frames);
 
+// S1.3c-null DIAGNOSTIC ONLY (see diag_ccf.h).
+__global__ void diagNyquistRowTermKernel(const float2 *F, int nfx, int ny, float *h) {
+    const int y = blockIdx.x * blockDim.x + threadIdx.x;
+    if (y >= ny) return;
+    double acc = 0.0;
+    for (int ky = 0; ky < ny; ky++) {
+        const long long m = ((long long)ky * y) % ny;
+        double s, c;
+        sincospi(2.0 * (double)m / (double)ny, &s, &c);
+        const float2 v = F[(size_t)ky * nfx + (nfx - 1)];
+        acc += (double)v.x * s + (double)v.y * c; // Im(v * e^{i theta})
+    }
+    h[y] = (float)(-acc);
+}
+
+float cudaDiagNyquistRowTermRms(const void *d_half, int nx, int ny) {
+    float *d_h = nullptr;
+    std::vector<float> h(ny);
+    if (cudaMalloc(&d_h, ny * sizeof(float)) != cudaSuccess) REPORT_ERROR("S1.3c-null alloc failed");
+    diagNyquistRowTermKernel<<<(ny + 127) / 128, 128>>>((const float2*)d_half, nx / 2 + 1, ny, d_h);
+    if (cudaGetLastError() != cudaSuccess || cudaMemcpy(h.data(), d_h, ny * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess)
+        REPORT_ERROR("S1.3c-null row-term kernel failed");
+    cudaFree(d_h);
+    double ss = 0.0;
+    for (float v : h) ss += (double)v * v;
+    return (float)std::sqrt(ss / ny);
+}
+
+__device__ __forceinline__ unsigned diagMix(unsigned h) {
+    h ^= h >> 16; h *= 0x85EBCA6Bu; h ^= h >> 13; h *= 0xC2B2AE35u; h ^= h >> 16; return h;
+}
+
+__global__ void diagAddSignedRowsKernel(float *R, int nx, int ny, float sigma, unsigned seed, int site, int frame) {
+    const int x = blockIdx.x * blockDim.x + threadIdx.x, y = blockIdx.y;
+    if (x >= nx || y >= ny) return;
+    const unsigned h = diagMix(diagMix(diagMix(seed * 0x9E3779B1u ^ (unsigned)site) ^ (unsigned)frame) ^ (unsigned)y);
+    R[(size_t)y * nx + x] += (h & 1u) ? sigma : -sigma;
+}
+
+void cudaDiagAddSignedRows(float *d_real, int nx, int ny, float sigma, unsigned seed, int site, int frame) {
+    diagAddSignedRowsKernel<<<dim3((nx + 255) / 256, ny), 256>>>(d_real, nx, ny, sigma, seed, site, frame);
+    if (cudaGetLastError() != cudaSuccess) REPORT_ERROR("S1.3c-null row-offset launch failed");
+}
+
 // S1.3c DIAGNOSTIC ONLY: Hermitian projection of the kx = 0 and kx = nx/2
 // columns of one ny x (nx/2+1) half spectrum. One thread per pair (ky, -ky).
 __global__ void diagHermitianEdgeColumnsKernel(float2 *F, int nfx, int ny, int col) {

@@ -19,7 +19,7 @@ static __global__ void projectHermitianColumnsKernel(cufftComplex *data, int nx,
     const size_t a = (size_t)y * (nx / 2 + 1) + x;
     const size_t b = (size_t)((ny - y) % ny) * (nx / 2 + 1) + x;
     const cufftComplex u = frame[a], v = frame[b];
-    if (a == b) { frame[a].y = 0.0f; return; }
+    if (a == b) { if (u.y != 0.0f) frame[a].y = 0.0f; return; }
     // Preserve already Hermitian pairs, including their real bits.
     if (u.x == v.x && u.y == -v.y) return;
     const cufftComplex h = make_cuFloatComplex(0.5f * u.x + 0.5f * v.x,
@@ -28,7 +28,7 @@ static __global__ void projectHermitianColumnsKernel(cufftComplex *data, int nx,
     frame[b] = make_cuFloatComplex(h.x, -h.y);
 }
 
-inline cudaError_t projectHermitianColumns(cufftComplex *data, int nx, int ny, int batch = 1) {
+static inline cudaError_t projectHermitianColumns(cufftComplex *data, int nx, int ny, int batch = 1) {
     const dim3 grid((ny / 2 + 1 + 255) / 256, nx % 2 == 0 && nx > 1 ? 2 : 1, batch);
     projectHermitianColumnsKernel<<<grid, 256>>>(data, nx, ny);
     return cudaGetLastError();

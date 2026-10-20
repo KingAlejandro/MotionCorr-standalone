@@ -752,6 +752,13 @@ if(BUILD_TESTING AND CUDA)
             add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-mismatch)
             set_tests_properties(${test_prefix}_${mutant} PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
         endfunction()
+        add_executable(cuda_hermitian_inverse tests/cuda_hermitian_inverse.cpp)
+        target_link_libraries(cuda_hermitian_inverse PRIVATE motioncorr_core)
+        add_test(NAME CudaHermitianInverse COMMAND cuda_hermitian_inverse)
+        set_tests_properties(CudaHermitianInverse PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        mc_cuda_mutant(CudaHermitianInverseMutant tests/cuda_hermitian_inverse.cpp cuda_movie_session no_projection
+            "mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny)"
+            "cudaSuccess")
         # shift_retired: retired patches keep receiving phase shifts.
         mc_cuda_mutant(CudaPatchBatchMutant tests/cuda_patch_batch.cpp cuda_alignpatch shift_retired
             "for (int j = 0; j < (int)active.size(); ++j) { const int p = active[j];"

@@ -1,5 +1,6 @@
 // Native exact-byte oracle against the frozen pre-prototype CUDA kernels.
 // Original formulas below are deliberately independent of the new plane helper.
+// The inverse oracle applies #253's required boundary policy independently on the host.
 // Returned-code faults are test-only, not physically poisoned GPU contexts.
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_movie_session.h"
@@ -349,6 +350,22 @@ std::vector<float> oracle(const Input &in, const ThirdOrderPolynomialModel *mode
         gpu(cudaMemcpy(frame, in.values.data()+j*tile, tile*sizeof(float2), cudaMemcpyHostToDevice), "oracle frame upload");
         originalDoseWeightKernel<<<grid,block>>>(frame,nfx,in.ny,in.ny/2,nx2,ny2,(float)in.apix,doses,in.count,j);
         gpu(cudaGetLastError(), "oracle dose launch"); gpu(cudaDeviceSynchronize(), "oracle dose completion");
+        // These fixtures deliberately contain arbitrary complex boundary values.
+        // Preserve the predecessor dose/interpolation arithmetic, but give its
+        // inverse the same defined real-image policy as FFTW (#253).
+        std::vector<float2> boundary(tile);
+        gpu(cudaMemcpy(boundary.data(), frame, tile*sizeof(float2), cudaMemcpyDeviceToHost), "oracle boundary download");
+        for (int x : {0, in.nx % 2 == 0 ? in.nx/2 : 0}) {
+            for (int y = 0; y <= in.ny/2; ++y) {
+                const size_t a = (size_t)y*nfx+x, b = (size_t)((in.ny-y)%in.ny)*nfx+x;
+                if (a == b) { boundary[a].y = 0; continue; }
+                const float2 u = boundary[a], v = boundary[b];
+                if (u.x == v.x && u.y == -v.y) continue;
+                const float re = (u.x+v.x)*0.5f, im = (u.y-v.y)*0.5f;
+                boundary[a] = make_float2(re, im); boundary[b] = make_float2(re, -im);
+            }
+        }
+        gpu(cudaMemcpy(frame, boundary.data(), tile*sizeof(float2), cudaMemcpyHostToDevice), "oracle boundary upload");
         fft(cufftExecC2R(plan,(cufftComplex*)frame,real), "oracle inverse FFT");
         gpu(cudaDeviceSynchronize(), "oracle inverse completion");
         if (model) {
@@ -439,9 +456,10 @@ void exactCases() {
             require(allocations == 5 && plane_bytes == (size_t)(in.nx/2+1)*in.ny*sizeof(float) && plane_freed,
                     "reconstruction denominator plane allocation/ownership wrong");
             require(violation.empty(), violation.c_str());
-            // The weight kernel writes the C2R input directly: no per-frame D2D copy.
+            // Weight, Hermitian projection and accumulation each check their launch;
+            // the weight kernel still writes C2R scratch directly, without a D2D copy.
             // (Before this change frame_copies was `count`; that shape now fails here.)
-            require(launch_checks == 1+2*count && execs == count && frame_copies == 0,
+            require(launch_checks == 1+3*count && execs == count && frame_copies == 0,
                     "dose precompute/per-frame launch count changed or a per-frame D2D copy came back");
             // One checked normalization completion and one total-timer wait in
             // both modes; three telemetry waits per frame only when timed.

@@ -93,11 +93,11 @@ static bool run(int nx, int ny, double sx, double sy, bool plans, bool session_o
     cudaReleaseCachedFrames();
     // The host dose wrapper infers an even nx from the half-spectrum width.
     if (nx % 2 == 0) {
-    Image<float> sum;
-    sum().reshape(ny, nx);
-    std::vector<RFLOAT> doses(2, 0);
-    require(cudaDoseWeightAndInterpolate(spectra, sum, doses, 1.0, nullptr, 0, std::cerr), "dose inverse");
-    ok = compare("dose", MULTIDIM_ARRAY(sum()), reference, nx, ny, std::sqrt(2.0f)) && ok;
+        Image<float> sum;
+        sum().reshape(ny, nx);
+        std::vector<RFLOAT> doses(2, 0);
+        require(cudaDoseWeightAndInterpolate(spectra, sum, doses, 1.0, nullptr, 0, std::cerr), "dose inverse");
+        ok = compare("dose", MULTIDIM_ARRAY(sum()), reference, nx, ny, std::sqrt(2.0f)) && ok;
     }
     if (plans) {
         // Characterisation only: full-size PlanMany batch 1 and batch 2. Production

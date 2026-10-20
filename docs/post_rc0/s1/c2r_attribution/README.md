@@ -4,70 +4,52 @@ Post-RC0 S1 campaign ([#238](https://github.com/KingAlejandro/MotionCorr-standal
 
 ## Result
 
-**h(y) explains about half of S1 on 4096² movies. Removing it takes the screen-positive 4096² configurations from 27 to 15: 13 disappear, 1 new one appears, 14 remain.** Measured on all 19 screen-positive 4096² movies of #243, both grids.
+**Removing h(y) reduces S1 incidence beyond reshuffling, by about 10 of 60 configurations on the 4096² families: 27 → 17 (−37%).** Measured as a full census of the #243 sample (10 movies each of 10216, 12963 and Falcon 3, both grids, 60 configurations) against the sweep's frozen-F CPU products.
+- **Transitions:** 13 configurations go + → − and 3 go − → +. McNemar exact p = 0.021.
+- **Size-matched random nulls** move incidence 27 → 27 (3 / 3 discordant, p = 1) and 27 → 29 (3 / 5, p = 0.73). The null adds a random-sign per-row constant with the same rms as each frame's h(y).
+- **Directly against the nulls:** #254 has 12 / 2 and 14 / 2 discordant pairs (p = 0.013, 0.004).
+- **Per family it is not individually significant:**
+  - Falcon 3: 5 → 1 (4 / 0, p = 0.125).
+  - 10216: 12 → 7 (6 / 1, p = 0.125).
+  - 12963: 10 → 9 (3 / 2, p = 1). Removing h(y) does not lower 12963's incidence.
 
-**What remains is the S1.3 near-tie mechanism, now driven only by global-trajectory differences, plus one global-alignment failure.** With h(y) removed:
-- **12963 5×5:** CPU and CUDA global trajectories still differ by 0.03 px, and that alone reproduces S1 (relative RMSE 0.316). Two S1-relevant patches flip at 1–3-ulp near-ties.
-- **Equal trajectories and h(y) removed:** CUDA patch inputs match CPU to ≤5.9e-7, and no S1-relevant patch remains in 10216 5×5 or 12963 5×5.
-- **The 15 positive configurations after the toggle (14 kept, 1 created):**
-  - 13 have CPU/CUDA global trajectories 0.018–0.30 px apart.
-  - The other two are 10216-01 (both grids): its global alignment does not converge, the trajectories end 177 px apart, and the toggle cannot change it.
+**#254 (all five CUDA C2R sites) gives the same S1 outcome as the two-site diagnostic toggle in all 60 configurations.** Its products are byte-identical to the toggle's in 41 of the 42 4GPUs configurations. In the one that differs (10216-02 5×5) relative RMSE agrees to four digits (0.0211), and all 18 SCARF values agree to every printed digit. So the two CCF-inverse projections contribute nothing to incidence here.
 
-**Removing h(y) is not monotone.** The near-tie lottery is reshuffled rather than only thinned: 10216-07 5×5 goes 0.037 → 0.995 (new S1), and 12963-01 5×5 goes 0.147 → 0.828.
+**On 10641 (5760×4092, no cuFFT leak) #254 takes S1 from 5 → 4 (1 / 0, p = 1).** The null raises 10641's incidence (5 → 9 and 5 → 11). There it adds a perturbation that the frames do not otherwise carry, so it is not a matched null at that size.
 
-**Non-4096 control:** on 10641 (5760×4092) cuFFT does not leak, the toggle is rounding-level (1.9e-8 on the real frames), and both 10641 5×5 positives stay S1-positive with unchanged relative RMSE (0.8078, 0.8794).
+**What is left after h(y) is removed** is the S1.3 near-tie mechanism, driven by sub-pixel global-trajectory differences between CPU and CUDA. This is unchanged from the previous revision of this PR:
+- With equal trajectories and h(y) removed, CUDA patch inputs match CPU to ≤5.9e-7, and no S1-relevant patch remains (Part 2).
+- With 12963's own 0.03 px trajectory difference, S1 returns (0.316).
+- 10216-01 (both grids) is a global-alignment failure, with trajectories 177 px apart, and the toggle cannot change it.
 
-**Products:** h(y) is a small part of the global-only CPU/CUDA level in the two 4096² movies tested. With the DW projection, the DW micrograph moves 0.0166 → 0.0165 (10216-00) and 0.0227 → 0.0209 (12963-00). It is a large part in 10028 under config L: 0.014–0.034 → 0.005–0.015 with both projections, a 34–76% reduction.
+**Products:** h(y) is ≤8% of the global-only CPU/CUDA level in 10216-00 and 12963-00 (Part 4).
 
-### Per family (CPU vs CUDA; toggle off → global + DW projection on)
+The earlier "27 → 15" figure came from rerunning screen-positive configurations only. It is superseded: the census shows that the selection was biased (regression to the mean). One created positive (10216-07 5×5) was visible in that sample; the census found 3.
 
-| family (frame size) | movies | 5×5 S1 | 3×3 S1 | change |
-|---|---:|---|---|---|
-| 10216 (4096²) | 8 | 7 → 5 | 5 → 2 | 6 removed, 1 created (07 5×5) |
-| 12963 (4096²) | 7 | 7 → 6 | 3 → 1 | 3 removed |
-| Falcon 3 (4096²) | 4 | 4 → 1 | 1 → 0 | 4 removed |
-| 10028 (4096², negative control) | 3 | 0 → 0 | 0 → 0 | relative RMSE 0.014–0.034 → 0.005–0.015 |
-| Falcon 4 (4096², negative control) | 2 | 0 → 0 | 0 → 0 | 0.021–0.027 → 0.014–0.019 |
-| 10641 (5760×4092, non-4096 control) | 2 | 2 → 2 | 0 → 0 | unchanged |
+## Census (CPU vs CUDA, 4096² families, both grids)
 
-Incidence here is over the movies run, which were #243's screen-positive 4096² movies plus the controls. The other 11 movies of these three 4096² families were not rerun. Since the toggle created one positive among the 11 screen-negative configurations of positive movies, the after-toggle incidence for whole families is not established.
+Off → #254 transitions (stays+, + → −, − → +, stays−) with McNemar exact p. The GLOBAL+DW toggle gives identical tables. The nulls are off → off-plus-random-rows, seeds 1 and 2.
 
-### Per configuration
+| family | grid | off | #254 | transitions off → #254 | p | null1 (transitions, p) | null2 (transitions, p) |
+|---|---|---:|---:|---|---:|---|---|
+| 10216 | 5×5 | 7 | 5 | 4, 3, 1, 2 | 0.625 | 7 (6, 1, 1, 2; 1.0) | 8 (7, 0, 1, 2; 1.0) |
+| 10216 | 3×3 | 5 | 2 | 2, 3, 0, 5 | 0.25 | 5 (5, 0, 0, 5; 1.0) | 4 (4, 1, 0, 5; 1.0) |
+| 12963 | 5×5 | 7 | 7 | 6, 1, 1, 2 | 1.0 | 8 (7, 0, 1, 2; 1.0) | 9 (7, 0, 2, 1; 0.5) |
+| 12963 | 3×3 | 3 | 2 | 1, 2, 1, 6 | 1.0 | 4 (3, 0, 1, 6; 1.0) | 5 (3, 0, 2, 5; 0.5) |
+| Falcon 3 | 5×5 | 4 | 1 | 1, 3, 0, 6 | 0.25 | 3 (3, 1, 0, 6; 1.0) | 2 (2, 2, 0, 6; 0.5) |
+| Falcon 3 | 3×3 | 1 | 0 | 0, 1, 0, 9 | 1.0 | 0 (0, 1, 0, 9; 1.0) | 1 (1, 0, 0, 9; 1.0) |
+| **pooled** | 5×5 | 18 | 13 | 11, 7, 2, 10 | 0.18 | 18 (16, 2, 2, 10; 1.0) | 19 (16, 2, 3, 9; 1.0) |
+| **pooled** | 3×3 | 9 | 4 | 3, 6, 1, 20 | 0.125 | 9 (8, 1, 1, 20; 1.0) | 10 (8, 1, 2, 19; 1.0) |
+| **pooled** | both | 27 | 17 | 14, 13, 3, 30 | **0.021** | 27 (24, 3, 3, 30; 1.0) | 29 (24, 3, 5, 28; 0.73) |
+| 10641 (5760×4092) | both | 5 | 4 | 4, 1, 0, 15 | 1.0 | 9 (4, 1, 5, 10; 0.22) | 11 (4, 1, 7, 8; 0.070) |
 
-"acc." is patches kept CPU / CUDA; * marks differing accepted sets.
+Per-configuration values for all 80 configurations are in [`raw/census/census_table.md`](raw/census/census_table.md). All tables are in [`raw/census/census_4096.json`](raw/census/census_4096.json) and [`raw/census/census_all.json`](raw/census/census_all.json).
 
-| venue | movie | grid | off | global | global+DW | acc. off → global+DW | S1 |
-|---|---|---|---:|---:|---:|---|---|
-| 4GPUs | 10216-00 | 5×5 | 0.4344 | 0.0175 | 0.0173 | 21/20* → 21/21 | gone |
-| 4GPUs | 10216-00 | 3×3 | 0.1962 | 0.1828 | 0.1828 | 9/9 → 9/9 | kept |
-| 4GPUs | 10216-01 | 5×5 / 3×3 | 1.2485 | 1.2485 | 1.2485 | 0/0 → 0/0 | kept (global alignment fails) |
-| 4GPUs | 10216-02 | 5×5 | 0.3278 | 0.0213 | 0.0211 | 19/19* → 19/19 | gone |
-| 4GPUs | 10216-03 | 5×5 | 1.2569 | 0.2407 | 0.2407 | 6/8* → 6/6 | kept |
-| 4GPUs | 10216-06 | 5×5 | 0.4831 | 0.0534 | 0.0532 | 12/11* → 12/12 | gone |
-| SCARF | 10216-07 | 5×5 | 0.0371 | 0.9951 | 0.9951 | 11/11 → 11/12* | **created** |
-| SCARF | 10216-07 | 3×3 | 0.7270 | 0.0887 | 0.0886 | 8/9* → 8/8 | gone |
-| SCARF | 10216-08 | 5×5 | 0.2441 | 1.0452 | 1.0452 | 9/9 → 9/9* | kept |
-| SCARF | 10216-08 | 3×3 | 0.9902 | 0.0539 | 0.0539 | 8/9* → 8/8 | gone |
-| SCARF | 10216-09 | 5×5 | 0.9123 | 0.9129 | 0.9129 | 10/11* → 10/11* | kept |
-| SCARF | 10216-09 | 3×3 | 0.1135 | 0.0985 | 0.0984 | 8/8 → 8/8 | gone |
-| 4GPUs | 12963-00 | 5×5 | 0.4990 | 0.3156 | 0.3155 | 22/23* → 22/23* | kept |
-| 4GPUs | 12963-01 | 5×5 | 0.1469 | 0.8279 | 0.8278 | 5/5 → 5/6* | kept |
-| 4GPUs | 12963-02 | 5×5 | 0.4618 | 0.0527 | 0.0517 | 19/19* → 19/19 | gone |
-| 4GPUs | 12963-03 | 5×5 | 0.7326 | 0.6619 | 0.6618 | 11/11* → 11/11* | kept |
-| 4GPUs | 12963-03 | 3×3 | 0.1188 | 0.0731 | 0.0720 | 9/9 → 9/9 | gone |
-| 4GPUs | 12963-04 | 5×5 | 1.0028 | 0.3729 | 0.3727 | 10/8* → 10/10 | kept |
-| 4GPUs | 12963-04 | 3×3 | 0.3048 | 0.0967 | 0.0962 | 9/9 → 9/9 | gone |
-| 4GPUs | 12963-05 | 5×5 | 0.3895 | 0.1311 | 0.1309 | 4/4 → 4/4 | kept |
-| 4GPUs | 12963-05 | 3×3 | 0.2876 | 0.2549 | 0.2548 | 5/5 → 5/5 | kept |
-| 4GPUs | 12963-07 | 5×5 | 0.2745 | 0.1784 | 0.1780 | 19/21* → 19/20* | kept |
-| 4GPUs | Falcon 3-00 | 5×5 | 0.5999 | 0.5941 | 0.5940 | 20/21* → 20/21* | kept |
-| 4GPUs | Falcon 3-02 | 5×5 / 3×3 | 0.1603 / 0.1016 | 0.0218 / 0.0224 | 0.0189 / 0.0195 | 25/25, 9/9 | gone |
-| 4GPUs | Falcon 3-03 | 5×5 | 0.2911 | 0.0213 | 0.0187 | 25/25 → 25/25 | gone |
-| SCARF | Falcon 3-04 | 5×5 | 0.2734 | 0.0316 | 0.0300 | 25/25 → 25/25 | gone |
-| 4GPUs | 10641-01 | 5×5 | 0.8078 | 0.8078 | 0.8078 | 8/9* → 8/9* | kept (non-4096) |
-| 4GPUs | 10641-07 | 5×5 | 0.8794 | 0.8794 | 0.8794 | 7/7* → 7/7* | kept (non-4096) |
+**The null and its validation.** Diagnostic commit `8c8277e8` adds `MC_DIAG_NULL_ROWS=<seed>` ([`diag_s1_3c_null_rows.diff`](diag_s1_3c_null_rows.diff)). After the global inverse C2R and the DW product C2R, it adds σ·s(y) to every pixel of row y:
+- s(y) = ±1, hashed from the seed, site, frame and row;
+- σ is the rms of that frame's h(y) = −Im(Σ_ky F(nx/2, ky) e^{2πi·ky·y/ny}), computed from the spectrum before the C2R.
 
-Negative grids of positive movies and the 10028/Falcon 4/10641 3×3 rows are in [`raw/attribution_all.json`](raw/attribution_all.json). None turned positive except 10216-07 5×5. The S1 cases that remain with the projection on have global-trajectory differences listed in [`raw/remaining_s1_global_traj_diff.json`](raw/remaining_s1_global_traj_diff.json).
+On 10216-00 frames 2, 11 and 21 (`raw/census/4gpus/nullcheck.json`), the null's row rms equals h(y)'s rms (0.02393 / 0.14127 / 0.06807 against 0.02393 / 0.14127 / 0.06807). Within-row variation is ~1e-6, and the correlation with h(y) is ≤0.036 in absolute value.
 
 ## Part 2: equal trajectories with h(y) removed (S1.3 inputs, 5×5)
 
@@ -101,7 +83,17 @@ h(y) reaches both published sums, but in these two movies it is ≤8% of the glo
 
 ## Method
 
-Diagnostic commit `1c82dfcd` on the unmerged branch `diag/s1-ccf-ties` ([`diag_s1_3c_c2r_hermitian.diff`](diag_s1_3c_c2r_hermitian.diff)) adds two env toggles. Each applies the #253 projection F(ky) ← (F(ky) + conj F(−ky))/2 to the kx = 0 and kx = nx/2 columns of the half spectrum, on the copy fed to cuFFT:
+**Census arms.** All runs in the census use CPU references from the #243 sweep: the frozen-F product on 4GPUs, or on SCARF the sweep's `build-F-cpu` rerun on the same node as the CUDA arms after re-downloading the movies from EBI with SHA-256 checks. The CUDA arms are:
+- off, on (GLOBAL+DW toggle) and null1/null2, from diag5 (`8c8277e8` = `1c82dfcd` + null toggle; 4GPUs `fa3fddcc…`, SCARF `487c7075…`);
+- PR #254 head `8b55d5da`, built in a separate tree (Release, CUDA+nvCOMP; 4GPUs `71e226f1…`, SCARF `64c29a8e…`). Its `src` differs from F only by the projection at the five C2R sites.
+
+Neutrality and replay checks:
+- **4GPUs:** all 42 diag5 off arms and all 20 10641 off arms are byte-identical to the sweep's CUDA products. All 30 diag5 on arms that overlap with the earlier diag4 runs are byte-identical to them. #254 vs on: 41/42 identical (`raw/census/4gpus/identity_on_vs_pr254.jsonl`).
+- **SCARF:** the off arms reproduce the sweep's recorded relative RMSE to every printed digit in both SCARF jobs (18/18 each).
+
+Runs: 4GPUs 292 (lane GPU2 with its lock, CPUs 112–119, UUID-witnessed); SCARF 144 (jobs 3646484 and 3646496, gn0003). All exited 0. Records: `raw/census/4gpus/runs-4gpus.tar.gz`, `raw/census/scarf*/runs.tar.gz`, build info in `raw/census/4gpus/build-info.txt` and `raw/census/scarf*/`. Tools: `campaign_n.sh`, `campaign_p.sh`, `s13n-*`/`s13p-*` SCARF scripts, `census_rows.py`, `census.py` (McNemar exact, two-sided binomial on the discordant pairs) and `nullcheck.py`.
+
+**Earlier S1.3c runs (positive-only sample, parts 2–4).** Diagnostic commit `1c82dfcd` on the unmerged branch `diag/s1-ccf-ties` ([`diag_s1_3c_c2r_hermitian.diff`](diag_s1_3c_c2r_hermitian.diff)) adds two env toggles. Each applies the #253 projection F(ky) ← (F(ky) + conj F(−ky))/2 to the kx = 0 and kx = nx/2 columns of the half spectrum, on the copy fed to cuFFT:
 - `MC_DIAG_C2R_HERMITIAN_GLOBAL=1` before the global inverse C2R (`computeGlobalInverseFFT`);
 - `MC_DIAG_C2R_HERMITIAN_DW=1` before the DW product C2R (`cuda_realspace_dw.cu`).
 
@@ -117,7 +109,8 @@ Diagnostic commit `1c82dfcd` on the unmerged branch `diag/s1-ccf-ties` ([`diag_s
 
 ## Open
 
-- **After-toggle incidence for whole families.** The 11 screen-negative movies of 10216, 12963 and Falcon 3 were not rerun, and the toggle can create positives.
+- **Per-family significance.** With 20 configurations per family, no single family's change is significant (Falcon 3 and 10216 p = 0.125; 12963 p = 1). Only the pooled 4096² result is (p = 0.021). Two null seeds were run; more would tighten the null band.
+- **Why 12963 does not respond** while Falcon 3 and 10216 do. In 12963 the global-trajectory differences alone keep S1 (Part 2) and are larger (up to 0.15 px).
 - **Why the remaining global trajectories differ by up to 0.30 px.** S1.3 traced ≤0.045 px to rounding. Larger differences (12963-04 0.15 px, 10216-09 0.30 px) were not analysed.
 - **10216-01's global-alignment failure** on both backends: diagnosed only to "non-converging, trajectories 177 px apart".
 - **The rest of the global-only product difference** (~0.017–0.023 without h(y)) is not decomposed.

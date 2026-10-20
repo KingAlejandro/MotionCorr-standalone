@@ -218,7 +218,7 @@ Do not attribute every event to peak arithmetic: 17 other first separations have
 This is a **read-only engineering analysis presented for review**. Figures are visual summaries of retained PR #250 evidence and review cross-checks, not fresh native experiments:
 
 - [Figure 1](figures/s1-image-rmse.svg): five recorded production image-relative-RMSE values.
-- [Figure 2](figures/accepted-patch-fit.svg): four host fit-only common-accepted-patch comparisons. Not regenerated images.
-- [Figure 3](figures/peak-curvature-replay.svg): existing expression versus stable-denominator *same-input host replay*, not modified native GPU execution.
+- [Figure 2](figures/peak-curvature-replay.svg): existing expression versus stable-denominator *same-input host replay*, not modified native GPU execution.
+- [Figure 3](figures/accepted-patch-fit.svg): four host fit-only common-accepted-patch comparisons. Not regenerated images.
 
 Source references are pinned to frozen revision F; evidence references pin PR #250's head. Outstanding causal boundaries are explicit above. **No new production fix, gate modification, merge or scientific-performance claim is made by this report.**

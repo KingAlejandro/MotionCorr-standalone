@@ -50,7 +50,9 @@ static bool run(int nx, int ny, double sx, double sy, bool plans, bool session_o
         state ^= state << 13; state ^= state >> 17; state ^= state << 5;
         v = float(state & 65535) / 65536.0f - 0.5f;
     }
-    std::vector<MultidimArray<fComplex>> spectra(2);
+    // Odd-width frame strides need not preserve cuFFT complex alignment.
+    const int frames = nx % 2 ? 1 : 2;
+    std::vector<MultidimArray<fComplex>> spectra(frames);
     for (auto &f : spectra) f.resizeNoCp(2, 1, ny, nx / 2 + 1);
     auto *f = MULTIDIM_ARRAY(spectra[0]);
     auto forward = fftwf_plan_dft_r2c_2d(ny, nx, image.data(), (fftwf_complex*)f, FFTW_ESTIMATE);
@@ -62,7 +64,7 @@ static bool run(int nx, int ny, double sx, double sy, bool plans, bool session_o
         const fComplex shift(float(std::cos(phase) / nr), float(std::sin(phase) / nr));
         f[(size_t)y * (nx / 2 + 1) + x] *= shift;
     }
-    std::memcpy(MULTIDIM_ARRAY(spectra[1]), f, nf * sizeof(fComplex));
+    if (frames > 1) std::memcpy(MULTIDIM_ARRAY(spectra[1]), f, nf * sizeof(fComplex));
     // FFTW C2R destroys its input; both backends get fresh copies of the same bytes.
     std::vector<fComplex> fftw_input(f, f + nf);
     auto inverse = fftwf_plan_dft_c2r_2d(ny, nx, (fftwf_complex*)fftw_input.data(),
@@ -72,10 +74,10 @@ static bool run(int nx, int ny, double sx, double sy, bool plans, bool session_o
     std::cout << "shift=" << sx << "," << sy << '\n';
     bool ok = true;
     {
-        CudaMovieSession session(nx, ny, 2, 0, std::cerr);
+        CudaMovieSession session(nx, ny, frames, 0, std::cerr);
         require(session.initialize(), "session initialize");
         check(cudaMemcpy(session.getDeviceFourierFrames(), f, nf * sizeof(fComplex), cudaMemcpyHostToDevice));
-        check(cudaMemcpy(session.getDeviceFourierFrames() + nf, f, nf * sizeof(fComplex), cudaMemcpyHostToDevice));
+        if (frames > 1) check(cudaMemcpy(session.getDeviceFourierFrames() + nf, f, nf * sizeof(fComplex), cudaMemcpyHostToDevice));
         require(session.computeGlobalInverseFFT(), "session inverse");
         std::vector<Image<float>> got;
         require(session.downloadRealFrames(got), "session download");

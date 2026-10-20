@@ -1,0 +1,13 @@
+# S1.3c 4GPUs build: diag4 = diag/s1-ccf-ties 1c82dfcd (CUDA+nvCOMP); CPU arms: sweep frozen-F CPU products (part 3), prod-cpu db15536e (part 4), diag2/3-cpu (part 2 references, S1.3b)
+17066aa1413714627ad7f252c90b5b8a101cb80fb7ea74245025577e7f914f5d  tools/s13c-diag4.tar.gz
+build diag4-nvcomp rc=0 2026-10-20T00:52:35Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+441097ea6aa3814c2eac8ae5194a4e56b2305ebbf1f3a67b5de23eee9c807776  /mnt/clathrin/alex-motioncorr-s1ccf/build-diag4-nvcomp/motioncorr
+BUILDS-DONE st=0
+CUDA_FLAGS = -O3 -DNDEBUG -std=c++17 "--generate-code=arch=compute_80,code=[compute_80,sm_80]" -Xcompiler -fopenmp
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+CMAKE_BUILD_TYPE:STRING=Release
+CUDA:BOOL=ON
+USE_NVCOMP:BOOL=ON
+
+sweep CPU binary (reference products, part 3):
+{('/mnt/clathrin/alex-motioncorr-rc0/W-QF/build-cpu/motioncorr', '43cab2b74e97e948172c656d2b3041b562d24e733de1a5727a54624c12749b42')}

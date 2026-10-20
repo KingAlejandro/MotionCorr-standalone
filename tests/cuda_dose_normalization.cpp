@@ -328,6 +328,25 @@ void coefficients(const ThirdOrderPolynomialModel &model, int iframe, float *x, 
         y[i] = (float)(model.coeffY(c)*z + model.coeffY(c+1)*z2 + model.coeffY(c+2)*z3);
     }
 }
+// Independent host projection for inverse-oracle scratch. cuFFT R2C can also
+// leave boundary-pair roundoff; preserve its original resident bytes separately.
+void projectInverseBoundaryOnHost(cufftComplex *frame, int nx, int ny) {
+    const int nfx = nx/2+1;
+    const size_t tile = (size_t)nfx*ny;
+    std::vector<cufftComplex> boundary(tile);
+    gpu(cudaMemcpy(boundary.data(), frame, tile*sizeof(cufftComplex), cudaMemcpyDeviceToHost), "oracle boundary download");
+    for (int x : {0, nx % 2 == 0 ? nx/2 : 0}) {
+        for (int y = 0; y <= ny/2; ++y) {
+            const size_t a = (size_t)y*nfx+x, b = (size_t)((ny-y)%ny)*nfx+x;
+            if (a == b) { boundary[a].y = 0; continue; }
+            const cufftComplex u = boundary[a], v = boundary[b];
+            if (u.x == v.x && u.y == -v.y) continue;
+            const float re = (u.x+v.x)*0.5f, im = (u.y-v.y)*0.5f;
+            boundary[a] = make_cuFloatComplex(re, im); boundary[b] = make_cuFloatComplex(re, -im);
+        }
+    }
+    gpu(cudaMemcpy(frame, boundary.data(), tile*sizeof(cufftComplex), cudaMemcpyHostToDevice), "oracle boundary upload");
+}
 std::vector<float> oracle(const Input &in, const ThirdOrderPolynomialModel *model) {
     const int nfx = in.nx/2+1;
     const size_t tile = (size_t)nfx*in.ny, pixels = (size_t)in.nx*in.ny;
@@ -350,22 +369,9 @@ std::vector<float> oracle(const Input &in, const ThirdOrderPolynomialModel *mode
         gpu(cudaMemcpy(frame, in.values.data()+j*tile, tile*sizeof(float2), cudaMemcpyHostToDevice), "oracle frame upload");
         originalDoseWeightKernel<<<grid,block>>>(frame,nfx,in.ny,in.ny/2,nx2,ny2,(float)in.apix,doses,in.count,j);
         gpu(cudaGetLastError(), "oracle dose launch"); gpu(cudaDeviceSynchronize(), "oracle dose completion");
-        // These fixtures deliberately contain arbitrary complex boundary values.
-        // Preserve the predecessor dose/interpolation arithmetic, but give its
-        // inverse the same defined real-image policy as FFTW (#253).
-        std::vector<float2> boundary(tile);
-        gpu(cudaMemcpy(boundary.data(), frame, tile*sizeof(float2), cudaMemcpyDeviceToHost), "oracle boundary download");
-        for (int x : {0, in.nx % 2 == 0 ? in.nx/2 : 0}) {
-            for (int y = 0; y <= in.ny/2; ++y) {
-                const size_t a = (size_t)y*nfx+x, b = (size_t)((in.ny-y)%in.ny)*nfx+x;
-                if (a == b) { boundary[a].y = 0; continue; }
-                const float2 u = boundary[a], v = boundary[b];
-                if (u.x == v.x && u.y == -v.y) continue;
-                const float re = (u.x+v.x)*0.5f, im = (u.y-v.y)*0.5f;
-                boundary[a] = make_float2(re, im); boundary[b] = make_float2(re, -im);
-            }
-        }
-        gpu(cudaMemcpy(frame, boundary.data(), tile*sizeof(float2), cudaMemcpyHostToDevice), "oracle boundary upload");
+        // Arbitrary complex fixtures use the same defined real-image policy
+        // as FFTW, without changing the predecessor dose/interpolation formulas.
+        projectInverseBoundaryOnHost((cufftComplex*)frame, in.nx, in.ny);
         fft(cufftExecC2R(plan,(cufftComplex*)frame,real), "oracle inverse FFT");
         gpu(cudaDeviceSynchronize(), "oracle inverse completion");
         if (model) {
@@ -611,6 +617,7 @@ void fftSyncCases() {
         gpu(cudaMemcpy(want_f.data(),df,ctile*frames*sizeof(cufftComplex),cudaMemcpyDeviceToHost),"oracle f download");
         for (int j = 0; j < frames; ++j) {
             gpu(cudaMemcpy(tile,df+j*ctile,ctile*sizeof(cufftComplex),cudaMemcpyDeviceToDevice),"oracle preserve copy");
+            projectInverseBoundaryOnHost(tile, nx, ny);
             fft(cufftExecC2R(inv,tile,dr2+j*rpix),"oracle C2R"); gpu(cudaDeviceSynchronize(),"oracle C2R wait");
         }
         gpu(cudaMemcpy(want_r.data(),dr2,rpix*frames*sizeof(float),cudaMemcpyDeviceToHost),"oracle r download");

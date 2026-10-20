@@ -1,0 +1,83 @@
+diff --git a/src/acc/cuda/cuda_alignpatch.cu b/src/acc/cuda/cuda_alignpatch.cu
+index 253a91a7..18c374c4 100644
+--- a/src/acc/cuda/cuda_alignpatch.cu
++++ b/src/acc/cuda/cuda_alignpatch.cu
+@@ -320,6 +320,25 @@ __global__ void fourierShiftKernel(
+     int nfx, int nfy, int nfy_half,
+     int n_frames);
+ 
++// S1.3c DIAGNOSTIC ONLY: Hermitian projection of the kx = 0 and kx = nx/2
++// columns of one ny x (nx/2+1) half spectrum. One thread per pair (ky, -ky).
++__global__ void diagHermitianEdgeColumnsKernel(float2 *F, int nfx, int ny, int col) {
++    const int ky = blockIdx.x * blockDim.x + threadIdx.x;
++    if (ky > ny / 2) return;
++    const int my = (ny - ky) % ny;
++    float2 a = F[(size_t)ky * nfx + col], b = F[(size_t)my * nfx + col];
++    const float2 h = make_float2(0.5f * (a.x + b.x), 0.5f * (a.y - b.y));
++    F[(size_t)ky * nfx + col] = h;
++    F[(size_t)my * nfx + col] = make_float2(h.x, -h.y);
++}
++
++void cudaDiagHermitianEdgeColumns(void *d_half, int nx, int ny) {
++    const int nfx = nx / 2 + 1, threads = 256, blocks = (ny / 2 + 1 + threads - 1) / threads;
++    diagHermitianEdgeColumnsKernel<<<blocks, threads>>>((float2*)d_half, nfx, ny, 0);
++    diagHermitianEdgeColumnsKernel<<<blocks, threads>>>((float2*)d_half, nfx, ny, nfx - 1);
++    if (cudaGetLastError() != cudaSuccess) REPORT_ERROR("S1.3c diagnostic Hermitian projection launch failed");
++}
++
+ // S1.3b DIAGNOSTIC ONLY: the shift is formed as updatePatchShifts forms it
+ // (-delta / (float)n in float) and applied by the production kernel.
+ void cudaDiagApplyGlobalDelta(void *d_Fframes, int n_frames, int nx, int ny, const double *dx, const double *dy) {
+diff --git a/src/acc/cuda/cuda_movie_session.cu b/src/acc/cuda/cuda_movie_session.cu
+index 65014b3f..e53fe9ec 100644
+--- a/src/acc/cuda/cuda_movie_session.cu
++++ b/src/acc/cuda/cuda_movie_session.cu
+@@ -2118,6 +2118,7 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
+             drain_after_failure();
+             return false;
+         }
++        if (diagC2rHermitianGlobal()) cudaDiagHermitianEdgeColumns(d_inverse_tile, nx, ny); // S1.3c DIAGNOSTIC ONLY (on the copy)
+         const cufftResult res = cufftExecC2R(plan_c2r, d_inverse_tile,
+                                              (cufftReal*)(d_Iframes + (size_t)iframe * real_stride));
+         if (res != CUFFT_SUCCESS) {
+diff --git a/src/acc/cuda/cuda_realspace_dw.cu b/src/acc/cuda/cuda_realspace_dw.cu
+index 24ac36ca..c287ba58 100644
+--- a/src/acc/cuda/cuda_realspace_dw.cu
++++ b/src/acc/cuda/cuda_realspace_dw.cu
+@@ -1,6 +1,7 @@
+ #ifdef _CUDA_ENABLED
+ 
+ #include "src/acc/cuda/cuda_realspace_dw.h"
++#include "src/diag_ccf.h" // S1.3c DIAGNOSTIC ONLY
+ #include "src/acc/cuda/cuda_settings.h"
+ #include "src/error.h"
+ 
+@@ -385,6 +386,7 @@ bool cudaDoseWeightAndInterpolateDevice(
+ 
+         // Inverse FFT
+         if (timed) HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
++        if (diagC2rHermitianDw()) cudaDiagHermitianEdgeColumns(d_Fframe, nx, ny); // S1.3c DIAGNOSTIC ONLY (weighted copy)
+         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
+         if (timed) {
+             HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
+diff --git a/src/diag_ccf.h b/src/diag_ccf.h
+index fffaf903..b097cd0a 100644
+--- a/src/diag_ccf.h
++++ b/src/diag_ccf.h
+@@ -163,6 +163,16 @@ inline bool diagGlobalShiftsIn(size_t n, std::vector<double> &x, std::vector<dou
+ // resident full-spectrum movie, frames 2..n, shift (dx, dy) px per frame.
+ void cudaDiagApplyGlobalDelta(void *d_Fframes, int n_frames, int nx, int ny, const double *dx, const double *dy);
+ 
++// S1.3c DIAGNOSTIC ONLY: before a cuFFT C2R of a shifted half spectrum, project
++// the kx = 0 and kx = nx/2 columns onto their Hermitian part,
++// F(ky) <- (F(ky) + conj F(-ky)) / 2 (FFTW's effective treatment; #253).
++// MC_DIAG_C2R_HERMITIAN_GLOBAL=1: global inverse FFT (cuda_movie_session.cu).
++// MC_DIAG_C2R_HERMITIAN_DW=1: dose-weighted product C2R (cuda_realspace_dw.cu).
++inline bool diagC2rHermitianGlobal() { static const bool on = std::getenv("MC_DIAG_C2R_HERMITIAN_GLOBAL") != nullptr; return on; }
++inline bool diagC2rHermitianDw() { static const bool on = std::getenv("MC_DIAG_C2R_HERMITIAN_DW") != nullptr; return on; }
++// Defined in cuda_alignpatch.cu; launched on the legacy default stream.
++void cudaDiagHermitianEdgeColumns(void *d_half, int nx, int ny);
++
+ // Raw little-endian dumps: <dir>/<tag>_p<iy>_<ix>_c<call>_it<iter>_<kind>.bin
+ // kind "in": n_frames x ccf_nfy x ccf_nfx complex float, the CCF window of the
+ // spectra entering this iteration; "map": n_frames x ccf_ny x ccf_nx float;

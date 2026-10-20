@@ -1,0 +1,32 @@
+========================================================================
+ MOTIONCORR ACCEPTANCE GATE REPORT
+========================================================================
+Gate Profile:      BACKEND
+Overall Status:    FAIL
+------------------------------------------------------------------------
+ERRORS / UNRESOLVED INPUTS:
+   ! Backend profile requires --test-log with successful process status
+------------------------------------------------------------------------
+1. MOTION TRAJECTORY:
+   Frames evaluated:     59
+   Coordinate RMS error: 0.016577 px (threshold: 0.020000)
+   Max absolute shift:   0.032670 px (threshold: 0.050000)
+   Status:               PASS
+
+2. CORRECTED IMAGE PARITY:
+   Pixel-identical:      False
+   Image RMSE:           3.656962e-01 (threshold: 2.000000e-02)
+   Max absolute diff:    2.881354e+01 (threshold: 5.000000e+00)
+   Relative RMSE:        1.746057e-02 (threshold: 1.000000e-03 in relaxed/custom gate)
+     diagnostic status: FAIL (nonblocking; backend profile only)
+     denominator:        reference pixel population std = 2.094412e+01
+     equivalent to:      absolute RMSE <= 2.094412e-02 for this reference
+   Normalized headers:   Core metadata: 8 diff bytes, Non-timestamp labels: 0 diff bytes
+   Status:               FAIL
+     ! Image RMSE 3.656962e-01 > 2.000000e-02
+     ! Image max pixel error 2.881354e+01 > 5.000000e+00
+
+3. STAR FIELDS & METADATA:
+   Normalized diff count: 0
+   Status:                PASS
+========================================================================

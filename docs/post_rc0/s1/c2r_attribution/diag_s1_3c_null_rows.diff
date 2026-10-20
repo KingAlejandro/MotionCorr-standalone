@@ -1,0 +1,107 @@
+diff --git a/src/acc/cuda/cuda_alignpatch.cu b/src/acc/cuda/cuda_alignpatch.cu
+index 18c374c4..1ef36c5f 100644
+--- a/src/acc/cuda/cuda_alignpatch.cu
++++ b/src/acc/cuda/cuda_alignpatch.cu
+@@ -320,6 +320,50 @@ __global__ void fourierShiftKernel(
+     int nfx, int nfy, int nfy_half,
+     int n_frames);
+ 
++// S1.3c-null DIAGNOSTIC ONLY (see diag_ccf.h).
++__global__ void diagNyquistRowTermKernel(const float2 *F, int nfx, int ny, float *h) {
++    const int y = blockIdx.x * blockDim.x + threadIdx.x;
++    if (y >= ny) return;
++    double acc = 0.0;
++    for (int ky = 0; ky < ny; ky++) {
++        const long long m = ((long long)ky * y) % ny;
++        double s, c;
++        sincospi(2.0 * (double)m / (double)ny, &s, &c);
++        const float2 v = F[(size_t)ky * nfx + (nfx - 1)];
++        acc += (double)v.x * s + (double)v.y * c; // Im(v * e^{i theta})
++    }
++    h[y] = (float)(-acc);
++}
++
++float cudaDiagNyquistRowTermRms(const void *d_half, int nx, int ny) {
++    float *d_h = nullptr;
++    std::vector<float> h(ny);
++    if (cudaMalloc(&d_h, ny * sizeof(float)) != cudaSuccess) REPORT_ERROR("S1.3c-null alloc failed");
++    diagNyquistRowTermKernel<<<(ny + 127) / 128, 128>>>((const float2*)d_half, nx / 2 + 1, ny, d_h);
++    if (cudaGetLastError() != cudaSuccess || cudaMemcpy(h.data(), d_h, ny * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess)
++        REPORT_ERROR("S1.3c-null row-term kernel failed");
++    cudaFree(d_h);
++    double ss = 0.0;
++    for (float v : h) ss += (double)v * v;
++    return (float)std::sqrt(ss / ny);
++}
++
++__device__ __forceinline__ unsigned diagMix(unsigned h) {
++    h ^= h >> 16; h *= 0x85EBCA6Bu; h ^= h >> 13; h *= 0xC2B2AE35u; h ^= h >> 16; return h;
++}
++
++__global__ void diagAddSignedRowsKernel(float *R, int nx, int ny, float sigma, unsigned seed, int site, int frame) {
++    const int x = blockIdx.x * blockDim.x + threadIdx.x, y = blockIdx.y;
++    if (x >= nx || y >= ny) return;
++    const unsigned h = diagMix(diagMix(diagMix(seed * 0x9E3779B1u ^ (unsigned)site) ^ (unsigned)frame) ^ (unsigned)y);
++    R[(size_t)y * nx + x] += (h & 1u) ? sigma : -sigma;
++}
++
++void cudaDiagAddSignedRows(float *d_real, int nx, int ny, float sigma, unsigned seed, int site, int frame) {
++    diagAddSignedRowsKernel<<<dim3((nx + 255) / 256, ny), 256>>>(d_real, nx, ny, sigma, seed, site, frame);
++    if (cudaGetLastError() != cudaSuccess) REPORT_ERROR("S1.3c-null row-offset launch failed");
++}
++
+ // S1.3c DIAGNOSTIC ONLY: Hermitian projection of the kx = 0 and kx = nx/2
+ // columns of one ny x (nx/2+1) half spectrum. One thread per pair (ky, -ky).
+ __global__ void diagHermitianEdgeColumnsKernel(float2 *F, int nfx, int ny, int col) {
+diff --git a/src/acc/cuda/cuda_movie_session.cu b/src/acc/cuda/cuda_movie_session.cu
+index e53fe9ec..dcb9fd71 100644
+--- a/src/acc/cuda/cuda_movie_session.cu
++++ b/src/acc/cuda/cuda_movie_session.cu
+@@ -2119,8 +2119,11 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
+             return false;
+         }
+         if (diagC2rHermitianGlobal()) cudaDiagHermitianEdgeColumns(d_inverse_tile, nx, ny); // S1.3c DIAGNOSTIC ONLY (on the copy)
++        const float diag_null_sigma = diagNullSeed() ? cudaDiagNyquistRowTermRms(d_inverse_tile, nx, ny) : 0.0f; // S1.3c-null
+         const cufftResult res = cufftExecC2R(plan_c2r, d_inverse_tile,
+                                              (cufftReal*)(d_Iframes + (size_t)iframe * real_stride));
++        if (diagNullSeed() && res == CUFFT_SUCCESS) // S1.3c-null DIAGNOSTIC ONLY
++            cudaDiagAddSignedRows(d_Iframes + (size_t)iframe * real_stride, nx, ny, diag_null_sigma, diagNullSeed(), 0, iframe);
+         if (res != CUFFT_SUCCESS) {
+             logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " << res << std::endl;
+             recordCufftFailure(res, __func__, __LINE__);
+diff --git a/src/acc/cuda/cuda_realspace_dw.cu b/src/acc/cuda/cuda_realspace_dw.cu
+index c287ba58..0a804948 100644
+--- a/src/acc/cuda/cuda_realspace_dw.cu
++++ b/src/acc/cuda/cuda_realspace_dw.cu
+@@ -387,7 +387,9 @@ bool cudaDoseWeightAndInterpolateDevice(
+         // Inverse FFT
+         if (timed) HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
+         if (diagC2rHermitianDw()) cudaDiagHermitianEdgeColumns(d_Fframe, nx, ny); // S1.3c DIAGNOSTIC ONLY (weighted copy)
++        const float diag_null_sigma = diagNullSeed() ? cudaDiagNyquistRowTermRms(d_Fframe, nx, ny) : 0.0f; // S1.3c-null
+         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
++        if (diagNullSeed()) cudaDiagAddSignedRows((float*)d_Iframe, nx, ny, diag_null_sigma, diagNullSeed(), 1, iframe); // S1.3c-null
+         if (timed) {
+             HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
+             HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
+diff --git a/src/diag_ccf.h b/src/diag_ccf.h
+index b097cd0a..ea45dd78 100644
+--- a/src/diag_ccf.h
++++ b/src/diag_ccf.h
+@@ -173,6 +173,17 @@ inline bool diagC2rHermitianDw() { static const bool on = std::getenv("MC_DIAG_C
+ // Defined in cuda_alignpatch.cu; launched on the legacy default stream.
+ void cudaDiagHermitianEdgeColumns(void *d_half, int nx, int ny);
+ 
++// S1.3c-null DIAGNOSTIC ONLY: a perturbation of h(y)'s size but not its shape.
++// MC_DIAG_NULL_ROWS=<seed>: after the global inverse C2R and the DW product
++// C2R, add sigma * s(y) to every pixel of row y, where s(y) = +-1 from a hash of
++// (seed, site, frame, y) and sigma is the rms over rows of h(y) =
++// -Im(sum_ky F(nx/2, ky) exp(2 pi i ky y / ny)), the row term cuFFT adds at
++// 4096^2 (#253), computed from that frame's spectrum before the C2R.
++inline unsigned diagNullSeed() { static const char *p = std::getenv("MC_DIAG_NULL_ROWS"); static const unsigned s = p ? (unsigned)std::strtoul(p, nullptr, 10) : 0u; return s; }
++// Defined in cuda_alignpatch.cu (legacy default stream; synchronous).
++float cudaDiagNyquistRowTermRms(const void *d_half, int nx, int ny);
++void cudaDiagAddSignedRows(float *d_real, int nx, int ny, float sigma, unsigned seed, int site, int frame);
++
+ // Raw little-endian dumps: <dir>/<tag>_p<iy>_<ix>_c<call>_it<iter>_<kind>.bin
+ // kind "in": n_frames x ccf_nfy x ccf_nfx complex float, the CCF window of the
+ // spectra entering this iteration; "map": n_frames x ccf_ny x ccf_nx float;

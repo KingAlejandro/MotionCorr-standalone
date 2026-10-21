@@ -752,6 +752,13 @@ if(BUILD_TESTING AND CUDA)
             add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-mismatch)
             set_tests_properties(${test_prefix}_${mutant} PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
         endfunction()
+        add_executable(cuda_peak_fit tests/cuda_peak_fit.cu)
+        target_link_libraries(cuda_peak_fit PRIVATE motioncorr_core)
+        add_test(NAME CudaPeakFit COMMAND cuda_peak_fit)
+        set_tests_properties(CudaPeakFit PROPERTIES LABELS "cuda;hardware" TIMEOUT 60)
+        mc_cuda_mutant(CudaPeakFitMutant tests/cuda_peak_fit.cu cuda_alignpatch float_denominator
+            "double denom_x = vp_x + vn_x - 2.0 * maxval;"
+            "double denom_x = float(vp_x) + float(vn_x) - 2.0f * float(maxval);")
         # shift_retired: retired patches keep receiving phase shifts.
         mc_cuda_mutant(CudaPatchBatchMutant tests/cuda_patch_batch.cpp cuda_alignpatch shift_retired
             "for (int j = 0; j < (int)active.size(); ++j) { const int p = active[j];"

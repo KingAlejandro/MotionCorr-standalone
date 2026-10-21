@@ -253,6 +253,14 @@ Per-family GPU and CPU timing tables are in `docs/workload_corpus/{cpu,gpu}/`; d
 
 Maintainer review of this report, the scope decision and the tag are separate steps (`RELEASE_CHECKLIST.md` §10). Frozen source SHA F: `6d68e2d6`. Tag target T (named by the maintainer; F or a later docs-only evidence commit): pending. `git diff F T -- . ':!docs/rc0' ':!docs/release'` empty: pending. Maintainer sign-off: pending (QF on F is recorded in `docs/rc0/qf/run_6d68e2d6/`).
 
+## Post-RC0 #235: test hygiene
+
+PR implementation head `d7e797f9bc01f155733f2dee3cdec3a473c3c288` (base `c8844894`; subsequent changes are evidence/docs only).
+Re-entry class: tests only, §9.4. Local macOS arm64 Release build rc 0; affected CTests
+`ProfilingKit`, `TestHygiene235`, `TruncatedGainDefect` passed 3/3. Both new controls fail on unfixed source and pass on this head.
+ProfilingKit's direct run: 134 internal tests, one existing platform skip. No numerical gate changed.
+UNRUN: PanFS, native CUDA, QF and full CTest; no qualification result at F is relabelled.
+Evidence and commands: `docs/post_rc0/issue235/README.md`.
 ## Post-RC0 #246: fake CLI compiler-settle timeout
 
 PR implementation head `927e5b5cfa51cf72187f182ecffd0693111c71f7`, base `c8844894` (following commit is evidence/docs only).

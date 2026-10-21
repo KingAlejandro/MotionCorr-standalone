@@ -99,6 +99,13 @@ The replay of **32,195 native CUDA frame-iteration records**, corresponding to 6
 
 ## C. Fourier phase shifting and C2R: real-image input-contract violation
 
+> **Update, 21 October 2026.** Since this review was written:
+> - [#253](https://github.com/KingAlejandro/MotionCorr-standalone/issues/253) reproduced the leak in a standalone cuFFT 12.8 vs FFTW program, and found it depends on frame size. Only 4096×4096 leaks, at about 8e-3 relative. 3710×3838, 3838×3710, 4092×5760, 1024² and 742×768 discard the anti-Hermitian part, as FFTW does.
+> - [PR #254](https://github.com/KingAlejandro/MotionCorr-standalone/pull/254) projects kx=0 and kx=nx/2 before all five CUDA C2R calls.
+> - [PR #255](https://github.com/KingAlejandro/MotionCorr-standalone/pull/255) measures the S1 contribution over 10216, 12963 and Falcon 3 (10 movies each, both grids, 60 configurations): S1-positive configurations fall from 27 to 17 with #254 (McNemar p = 0.021), while matched random row-offset nulls stay at 27 and 29. Falcon 3 goes from 5 to 1, 10216 from 12 to 7, and 12963 from 10 to 9. The two CCF-site projections add no measurable effect.
+>
+> The causal statements below refer to the evidence at PR #250.
+
 **Affected steps:** 7d→8 (patch-input reconstruction), 7b/10 (reduced correlation inverse), and 14 (dose-weighted output inverse). **Origin:** CPU behavior inherited from the RELION reference; CUDA adds a backend for which Hermitian input is an explicit documented requirement. **Confidence:** confirmed invalid input representation; contribution to S1 measured incompletely.
 
 For a real image, the R2C half-spectrum must preserve conjugacy on \(k_x=0\), and on \(k_x=N_x/2\) if \(N_x\) is even:

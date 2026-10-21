@@ -41,6 +41,9 @@ int main(int argc, char** argv) {
             {"flat", 36000, 36000, 36000, 36000, 36000},
             {"one-ulp-plateau", 1, 1, std::nextafter(1.0f, 0.0f),
                 std::nextafter(1.0f, 0.0f), 1},
+            {"unique-one-ulp-peak", 1, std::nextafter(1.0f, 0.0f), std::nextafter(1.0f, 0.0f),
+                std::nextafter(1.0f, 0.0f), std::nextafter(1.0f, 0.0f), 0, 0, 1},
+            {"integer-tie", 1, 1, 0.5f, 0.75f, 0.5f, 0, 0, 1},
             {"below-guard", 0, -2e-16f, -4e-16f, -4e-16f, -2e-16f},
             {"at-guard", 0, -eps, 0, 0, -eps},
             {"above-guard", 0, -std::nextafter(eps, 1.0f), 0,
@@ -50,7 +53,10 @@ int main(int argc, char** argv) {
             // Preserve the existing unbracketed fit rather than clamp it here.
             {"search-boundary", 100, 100.25f, 99.5f, 99.75f, 100.5f, 1, -1, 1, 2.5f, 1.25f},
             {"positive-curvature", 0, 2, 1, 1, 2},
-            {"large-finite", 2e38f, 1.9e38f, 1.8e38f, 1.8e38f, 1.9e38f}
+            {"large-finite", 2e38f, 1.9e38f, 1.8e38f, 1.8e38f, 1.9e38f},
+            {"nan-neighbour", 1, std::numeric_limits<float>::quiet_NaN(), 0, 0.5f, 0},
+            {"infinite-peak", std::numeric_limits<float>::infinity(), 1, 0, 1, 0},
+            {"infinite-neighbour", 1, std::numeric_limits<float>::infinity(), 0, 0.5f, 0}
         };
         constexpr int n = 16;
         std::vector<float> maps(cases.size() * n * n, -1e29f);
@@ -81,6 +87,8 @@ int main(int argc, char** argv) {
             const float rx = reference(c.x, c.m, c.xp, c.xn, c.sx);
             const float ry = reference(c.y, c.m, c.yp, c.yn, c.sy);
             auto matches = [](float got, float ref) {
+                if (!std::isfinite(ref))
+                    return std::isnan(ref) ? std::isnan(got) : got == ref;
                 return std::isfinite(got) && std::abs(double(got) - ref) <=
                     std::numeric_limits<float>::epsilon() * std::abs(double(ref));
             };

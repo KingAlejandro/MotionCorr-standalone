@@ -3,10 +3,11 @@
 from __future__ import annotations
 import argparse
 import json
+import gzip
 import math
 from pathlib import Path
 import numpy as np
-from check_realistic_motion import runtime_field, errors
+from check_realistic_motion import runtime_field, vector_metrics
 
 ARMS=['cpu-none','cpu-global','cpu-local','cpu-both','cpu-double','cuda-none','cuda-global','cuda-local','cuda-both']
 CONDITIONS=['dose1','dose05','dose2','dose4','outmodel','nonsquare','pedestal0','pedestal32','contrast025','contrast4']
@@ -73,11 +74,13 @@ def summarize(root):
             x,y=np.meshgrid(np.linspace(32,r['nx']-33,129),np.linspace(32,r['ny']-33,129));x,y=x.ravel(),y.ravel()
             fields={a:runtime_field(models[name,a],r,x,y) for a in ARMS}
             for dc in ['none','global','local','both']:
-                m=errors(fields['cuda-'+dc],fields['cpu-'+dc],r['pixel_size'])
+                delta=fields['cuda-'+dc]-fields['cpu-'+dc]
+                m=dict(px=vector_metrics(delta),angstrom=vector_metrics(delta*r['pixel_size']))
                 agreement.append(dict(condition=c,seed=seed,dc=dc,field_distance=m))
             for arm in ARMS:
                 if arm=='cpu-double':continue
-                m=errors(fields[arm],fields['cpu-double'],r['pixel_size'])
+                delta=fields[arm]-fields['cpu-double']
+                m=dict(px=vector_metrics(delta),angstrom=vector_metrics(delta*r['pixel_size']))
                 reference.append(dict(condition=c,seed=seed,arm=arm,field_distance=m,
                                       within_descriptive_001px=m['px']['max']<=.001))
     temporal=[]
@@ -97,6 +100,8 @@ def summarize(root):
 
 def main():
     ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--root',type=Path,required=True);ap.add_argument('--json',type=Path,required=True)
-    args=ap.parse_args();args.json.write_text(json.dumps(summarize(args.root),indent=2,allow_nan=False)+'\n')
+    args=ap.parse_args();data=json.dumps(summarize(args.root),indent=2,allow_nan=False)+'\n'
+    if args.json.suffix=='.gz': args.json.write_bytes(gzip.compress(data.encode(),mtime=0))
+    else: args.json.write_text(data)
 
 if __name__=='__main__':main()

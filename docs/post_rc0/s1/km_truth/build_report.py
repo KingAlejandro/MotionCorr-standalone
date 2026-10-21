@@ -2,9 +2,10 @@
 """Render the compact, standalone census view from committed numerical evidence."""
 from pathlib import Path
 import json
+import gzip
 import html
 ROOT=Path(__file__).resolve().parent
-s=json.loads((ROOT/'SUMMARY.json').read_text())
+s=json.loads(gzip.decompress((ROOT/'SUMMARY.json.gz').read_bytes()))
 n=json.loads((ROOT/'native_v2_metrics.json').read_text())
 # Keep the interactive artifact small; full per-frame and per-seed fields remain in JSON.
 dictkeys=['condition','arm','median_field_px','median_field_angstrom','global_nonconverged','local_disabled','field_distance_failures','invalid_sampling','median_global_rms_px','median_local_rms_px']

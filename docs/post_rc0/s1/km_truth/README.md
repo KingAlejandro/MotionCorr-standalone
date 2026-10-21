@@ -11,7 +11,7 @@ Noisy fails accuracy; original checker aborts on CPU noisy and both repeated
 estimates because their finite sampling coordinates leave the fixed ROI.
 Flat/repeated are unidentifiable characterization cases. No process exit is
 used as an accuracy verdict. Per-case px/Å RMS/P95/max and global iteration
-outcomes are in [native_v2_metrics.json](native_v2_metrics.json). Raw checker
+outcomes are in the [table](native_v2_table.md) and [JSON](native_v2_metrics.json). Raw checker
 outputs remain separate from independent field-only metrics for checker errors.
 
 The original checker/adapter problem was reported on
@@ -66,3 +66,11 @@ For one output, run `tools/check_realistic_motion.py` with `--receipt`,
 and keeps total, global, local, border, time, convergence and STAR-roundtrip
 statistics distinct. `tools/summarize_realistic_motion.py` refuses an incomplete
 100×9 census and computes paired seed statistics and CPU/CUDA/reference distances.
+
+Completed infrastructure checks at `59ccaa43`: Linux CI
+[run 39595686283](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39595686283)
+passed. The observation hook's on/off native control preserves MRC core header,
+payload and serialized STAR exactly; timestamp labels are excluded explicitly.
+The diagnostic branch later added its own model hook at `afba50a4`; source diff
+from the pinned numerical snapshot is observation-only. This census keeps its
+original `97fd8107` plus retained JSON observation overlay throughout.

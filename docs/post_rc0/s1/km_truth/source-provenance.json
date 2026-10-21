@@ -15,5 +15,10 @@
     "cpu": "~/.mc-venv/bin/cmake -S {main,diag}-src -B {main,diag}-build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF; taskset -c 40-47 cmake --build ... -j8",
     "cuda": "PATH=/usr/local/cuda-12.8/bin:$PATH cmake -S {main,diag}-src -B {main,diag}-build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80; taskset -c 96-103 cmake --build ... -j8",
     "overlay": "patch -p1 <capture_runtime_model.patch; cmake --build ../diag-build -j8"
-  }
+  },
+  "generator_sha256": "a10f694abafc71c146d0e0f2eeb2b1cf2c58131b2dbf6c1b66800405bd126380",
+  "native_runner_sha256": "80ae39ebb0d2059a823f10147c8e538799c11147eb7e907c1811f62fedac2816",
+  "generator_revision": "59ccaa43d6db724d5daee011d22ab0b0f4bafa18",
+  "later_diagnostic_head": "afba50a4cebf5238ec2d267ff3ec07d272b13395",
+  "later_head_difference": "11-line observation-only model capture; numerical source unchanged; census remains pinned"
 }

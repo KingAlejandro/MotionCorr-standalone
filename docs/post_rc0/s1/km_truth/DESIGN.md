@@ -86,3 +86,19 @@ worst regressions alongside the category. Numeric reference proximity is a
 separate descriptive maximum field distance ≤0.001 px, not a release threshold.
 Sign-test ties use absolute RMS delta ≤1e-9 px; no multiple-condition claim is
 made without noting the exploratory multiplicity.
+
+The independent coefficient/derivative bounds in `mapping-bounds.json` give
+||J_displacement||∞ < 0.009 across every 32-pixel synthesis halo. Thus the
+forward maps are injective and orientation preserving there; displacement
+bounds keep inverse iterations inside the halo. Per-tile numerical closure is
+recorded separately, rather than being used as the sole inverse argument.
+
+Execution order is allowed to vary without changing the frozen population.
+The pedestal32 condition was prefetched while the out-of-model/nonsquare
+expectations were synthesized; all ten predeclared seeds remain included.
+The serial generator's incomplete seed8 payload was retained under
+`interrupted-generation/` during controller parallelization; it had no receipt
+and was never an estimator input. Regeneration used the same declared seed.
+CPU sum duplicates are archived on 4GPUs with tar byte comparison and remote
+archive SHA256 verification before duplicate cleanup, preserving evidence while
+maintaining cpu64 headroom.

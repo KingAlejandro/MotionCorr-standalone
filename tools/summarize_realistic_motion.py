@@ -26,7 +26,7 @@ def paired(a,b):
 
 
 def summarize(root):
-    rows=[];models={};receipts={};missing=[]
+    rows=[];models={};receipts={};missing=[];full={}
     for c in CONDITIONS:
         for seed in range(10):
             name=f'{c}-s{seed:02d}'
@@ -36,7 +36,7 @@ def summarize(root):
             for arm in ARMS:
                 out=root/'results'/name/arm
                 if not (out/'metrics.json').exists():missing.append(str(out/'metrics.json'));continue
-                m=json.loads((out/'metrics.json').read_text());run=json.loads((out/'RUN.json').read_text())
+                m=json.loads((out/'metrics.json').read_text());run=json.loads((out/'RUN.json').read_text());full[c,seed,arm]=m
                 if run['exit']:raise ValueError('process failure cannot enter accuracy table')
                 models[name,arm]=json.loads((out/'runtime.json').read_text())
                 rows.append(dict(condition=c,seed=seed,arm=arm,field_px=m['field']['px'],field_angstrom=m['field']['angstrom'],
@@ -80,7 +80,15 @@ def summarize(root):
                 m=errors(fields[arm],fields['cpu-double'],r['pixel_size'])
                 reference.append(dict(condition=c,seed=seed,arm=arm,field_distance=m,
                                       within_descriptive_001px=m['px']['max']<=.001))
-    return dict(schema='motion-counting-summary/1',rows=rows,table=table,paired=comparisons,
+    temporal=[]
+    for c in CONDITIONS:
+        for arm in ARMS:
+            for frame in range(receipts[f'{c}-s00']['recipe']['frames']):
+                row=dict(condition=c,arm=arm,frame=frame+1)
+                for family in ['field','global_trajectory','local_component']:
+                    row[family+'_median_px']={k:float(np.median([full[c,seed,arm][family]['per_frame_px'][frame][k] for seed in range(10)])) for k in ['rms','p95','max']}
+                temporal.append(row)
+    return dict(schema='motion-counting-summary/1',rows=rows,table=table,paired=comparisons,temporal=temporal,
                 backend_agreement=agreement,double_reference_distance=reference,
                 statistics='Exact two-sided sign tests of paired per-seed RMS; |delta|<=1e-9 px ties; exploratory multiplicity',
                 limitations=['Fixed 129x129 spatial lattice, not pooled detector pixels','Noise seeds share one generated scene',

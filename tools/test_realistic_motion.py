@@ -7,10 +7,25 @@ import tempfile
 import unittest
 import numpy as np
 import check_realistic_motion as check
-from summarize_realistic_motion import paired
+from summarize_realistic_motion import paired, summarize
 gen=check.gen
 
 class Realistic(unittest.TestCase):
+    def test_refuse_incomplete_census(self):
+        with tempfile.TemporaryDirectory() as t:
+            with self.assertRaisesRegex(ValueError,'incomplete census'):
+                summarize(Path(t))
+
+    def test_runtime_polynomial_nonsquare(self):
+        r=gen.recipe(nx=256,ny=192,frames=40)
+        x=np.array([0.,128.,255.]);y=np.array([12.,94.,191.])
+        cx=np.zeros(18);cy=np.zeros(18);cx[8]=.0002;cy[16]=.001
+        m={'global':np.zeros((40,2)).tolist(),'coeff_x':cx.tolist(),'coeff_y':cy.tolist()}
+        result=check.runtime_field(m,r,x,y)
+        for f in [0,1,39]:
+            want=np.stack([.0002*f**3*(x/256-.5)**2,.001*f**2*(x/256-.5)*(y/192-.5)],axis=-1)
+            np.testing.assert_allclose(result[f],want,atol=1e-14)
+
     def test_paired_seed_statistics(self):
         a=np.ones(10); good=paired(a,a*.8);bad=paired(a,a*1.2)
         self.assertEqual(good['wins'],10);self.assertEqual(good['losses'],0)

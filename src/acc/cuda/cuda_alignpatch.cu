@@ -309,13 +309,14 @@ static void diagCcfDevice(const char *tag, int patch, int call, int iter, const 
                 // Conditional same-map dose: preserve each axis magnitude of the
                 // double-versus-float correction, randomise only its direction.
                 const unsigned h = diagFitHash(diagFitHash(diagFitHash(diagFitNull() ^ unsigned(patch + 2)) ^ unsigned(iter)) ^ unsigned(f));
-                const float ax = std::abs(bx - fx), ay = std::abs(by - fy);
-                cx[f] = fx + ((h & 1u) ? ax : -ax);
-                cy[f] = fy + ((h & 2u) ? ay : -ay);
+                const float baseline_x = cx[f], baseline_y = cy[f];
+                const float ax = std::abs(bx - baseline_x), ay = std::abs(by - baseline_y);
+                cx[f] = baseline_x + ((h & 1u) ? ax : -ax);
+                cy[f] = baseline_y + ((h & 2u) ? ay : -ay);
                 if (const char *path = std::getenv("MC_DIAG_NULL_RECORD")) {
                     FILE *o = std::fopen(path, "a");
                     if (!o) REPORT_ERROR("cannot open null dose record");
-                    std::fprintf(o, "%d %d %d %.17g %.17g %.17g %.17g %.17g %.17g\n", patch, iter, f, fx, fy, bx, by, cx[f], cy[f]);
+                    std::fprintf(o, "%d %d %d %.17g %.17g %.17g %.17g %.17g %.17g\n", patch, iter, f, baseline_x, baseline_y, bx, by, cx[f], cy[f]);
                     std::fclose(o);
                 }
             }

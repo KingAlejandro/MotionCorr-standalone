@@ -263,6 +263,22 @@ __global__ void findPeakAndInterpolateKernel(
     }
 }
 
+// S1 peak-fit attribution ONLY. Never included in the production fix.
+static constexpr bool DIAG_DOUBLE_FIT = false;
+static bool diagZeroDc() { static bool on = std::getenv("MC_DIAG_ZERO_CCF_DC") != nullptr; return on; }
+static unsigned diagFitNull() { static unsigned seed = std::getenv("MC_DIAG_FIT_NULL") ? std::strtoul(std::getenv("MC_DIAG_FIT_NULL"), nullptr, 10) : 0; return seed; }
+__global__ void diagZeroCcfDcKernel(float2 *F, size_t stride, int n) {
+    int f = blockIdx.x * blockDim.x + threadIdx.x;
+    if (f < n) F[(size_t)f * stride] = make_float2(0, 0);
+}
+static unsigned diagFitHash(unsigned h) {
+    h ^= h >> 16; h *= 0x85EBCA6Bu; h ^= h >> 13; h *= 0xC2B2AE35u; h ^= h >> 16; return h;
+}
+static float diagDoubleVertex(int p, float m, float vp, float vn, float scale) {
+    const double d = double(vp) + double(vn) - 2.0 * double(m);
+    return float((std::abs(d) > double(1e-15f) ? p - 0.5 * (double(vp) - double(vn)) / d : p) * double(scale));
+}
+
 // S1.3 DIAGNOSTIC ONLY: copy the CCF maps and the kernel's candidate shifts back,
 // write one record per frame, and check a host recomputation of the kernel's
 // selection and subpixel step against what the kernel produced. Read-back only.
@@ -282,11 +298,34 @@ static void diagCcfDevice(const char *tag, int patch, int call, int iter, const 
             const int px = st.lane_x, py = st.lane_y;
             const float m = st.sel;
             const float dxn = st.vpx + st.vnx - 2.0f * m, dyn = st.vpy + st.vny - 2.0f * m;
-            const float hx = ((std::fabs(dxn) > 1e-15f) ? (px - 0.5f * (st.vpx - st.vnx) / dxn) : px) * scale_x;
-            const float hy = ((std::fabs(dyn) > 1e-15f) ? (py - 0.5f * (st.vpy - st.vny) / dyn) : py) * scale_y;
+            const float fx = ((std::fabs(dxn) > 1e-15f) ? (px - 0.5f * (st.vpx - st.vnx) / dxn) : px) * scale_x;
+            const float fy = ((std::fabs(dyn) > 1e-15f) ? (py - 0.5f * (st.vpy - st.vny) / dyn) : py) * scale_y;
+            const float bx = diagDoubleVertex(px, m, st.vpx, st.vnx, scale_x);
+            const float by = diagDoubleVertex(py, m, st.vpy, st.vny, scale_y);
+            const float hx = DIAG_DOUBLE_FIT ? bx : fx;
+            const float hy = DIAG_DOUBLE_FIT ? by : fy;
             const bool ok = std::fabs(cx[f] - hx) <= 1e-3f && std::fabs(cy[f] - hy) <= 1e-3f;
+            if (diagFitNull()) {
+                // Conditional same-map dose: preserve each axis magnitude of the
+                // double-versus-float correction, randomise only its direction.
+                const unsigned h = diagFitHash(diagFitHash(diagFitHash(diagFitNull() ^ unsigned(patch + 2)) ^ unsigned(iter)) ^ unsigned(f));
+                const float ax = std::abs(bx - fx), ay = std::abs(by - fy);
+                cx[f] = fx + ((h & 1u) ? ax : -ax);
+                cy[f] = fy + ((h & 2u) ? ay : -ay);
+                if (const char *path = std::getenv("MC_DIAG_NULL_RECORD")) {
+                    FILE *o = std::fopen(path, "a");
+                    if (!o) REPORT_ERROR("cannot open null dose record");
+                    std::fprintf(o, "%d %d %d %.17g %.17g %.17g %.17g %.17g %.17g\n", patch, iter, f, fx, fy, bx, by, cx[f], cy[f]);
+                    std::fclose(o);
+                }
+            }
             diagCcfWrite(tag, patch, iter, f, st, px, py, cx[f], cy[f], ok ? "emul-ok" : "emul-MISMATCH");
         }
+    if (diagFitNull()) {
+        if (cudaMemcpy(const_cast<float*>(d_cx), cx.data(), n_frames * sizeof(float), cudaMemcpyHostToDevice) != cudaSuccess ||
+            cudaMemcpy(const_cast<float*>(d_cy), cy.data(), n_frames * sizeof(float), cudaMemcpyHostToDevice) != cudaSuccess)
+            REPORT_ERROR("null candidate upload failed");
+    }
     if (dump)
         diagDumpRaw(tag, patch, call, iter, "map", h.data(), h.size() * sizeof(float), n_frames, ccf_ny, ccf_nx);
 }
@@ -713,7 +752,11 @@ bool cudaAlignPatchDeviceWithWorkspace(
         // 3. Batched cuFFT C2R
         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_cufft));
         ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
-        ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
+        if (diagZeroDc()) {
+                diagZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);
+                ALIGN_LAUNCH(cudaGetLastError());
+            }
+            ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
         if (timed) {
             ALIGN_CUDA(cudaEventRecord(ev_stop_cufft));
             ALIGN_CUDA(cudaEventSynchronize(ev_stop_cufft));
@@ -1090,6 +1133,10 @@ void cudaAlignPatchBatchDevice(
             computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, w.d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, ccf_nfx, ccf_nfy, n_frames);
             ALIGN_LAUNCH(cudaGetLastError());
             ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
+            if (diagZeroDc()) {
+                diagZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);
+                ALIGN_LAUNCH(cudaGetLastError());
+            }
             ALIGN_CUFFT(cufftExecC2R(w.plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
             findPeakAndInterpolateKernel<<<n_frames, 256>>>(
                 d_Iccs, d_cur_x + p * n, d_cur_y + p * n,

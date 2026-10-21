@@ -99,6 +99,7 @@ jobs:
           python3 tools/test_known_motion.py --binary "$PWD/build/motioncorr"
           python3 tools/test_known_motion_verdicts.py -v
           python3 tools/test_known_motion_runner.py -v
+          python3 tools/test_motion_diagnostics.py -v
           python3 tools/test_ci_fail_closed.py -v
 
       - name: Canonical fixture digests are NumPy-version independent

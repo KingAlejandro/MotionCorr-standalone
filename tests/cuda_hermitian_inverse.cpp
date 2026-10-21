@@ -15,6 +15,22 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include "cuda_hermitian_check.h"
+
+extern "C" {
+cufftResult __real_cufftMakePlanMany(cufftHandle, int, int*, int*, int, int, int*, int, int, cufftType, int, size_t*);
+cufftResult __real_cufftExecC2R(cufftHandle, cufftComplex*, cufftReal*);
+cufftResult __wrap_cufftMakePlanMany(cufftHandle p, int rank, int *n, int *ie, int is, int id, int *oe, int os, int od, cufftType t, int b, size_t *w) {
+    auto r = __real_cufftMakePlanMany(p, rank, n, ie, is, id, oe, os, od, t, b, w);
+    hermitian_test::remember(p, rank, n, is, id, t, b, r); return r;
+}
+static bool raw_characterization = false;
+cufftResult __wrap_cufftExecC2R(cufftHandle p, cufftComplex *in, cufftReal *out) {
+    if (!raw_characterization) hermitian_test::check(p, in);
+    return __real_cufftExecC2R(p, in, out);
+}
+}
+static bool expect_invariant_failure = false;
 
 static void require(bool ok, const char *what) {
     if (!ok) throw std::runtime_error(what);
@@ -112,7 +128,9 @@ static bool run(int nx, int ny, double sx, double sy, bool plans, bool session_o
                                      CUFFT_C2R, batch, &work) == CUFFT_SUCCESS, "cuFFT plan many");
             for (int b = 0; b < batch; ++b)
                 check(cudaMemcpy(din + b * nf, f, nf * sizeof(cufftComplex), cudaMemcpyHostToDevice));
+            raw_characterization = true;
             require(cufftExecC2R(plan, din, dout) == CUFFT_SUCCESS, "cuFFT exec");
+            raw_characterization = false;
             check(cudaDeviceSynchronize());
             check(cudaMemcpy(image.data(), dout, nr * sizeof(float), cudaMemcpyDeviceToHost));
             compare(batch == 1 ? "raw_planmany_batch1" : "raw_planmany_batch2", image.data(), reference, nx, ny);
@@ -124,10 +142,10 @@ static bool run(int nx, int ny, double sx, double sy, bool plans, bool session_o
 }
 int main(int argc, char **argv) {
     try {
-        bool expect_mismatch = false, matrix = false, session_only = false;
+        bool matrix = false, session_only = false;
         for (int i = 1; i < argc; ++i) {
             const std::string a = argv[i];
-            if (a == "--expect-mismatch") { expect_mismatch = true; session_only = true; }
+            if (a == "--expect-invariant-failure") expect_invariant_failure = true;
             else if (a == "--matrix") matrix = true;
             else throw std::runtime_error("unknown argument");
         }
@@ -136,7 +154,7 @@ int main(int argc, char **argv) {
         int version = 0; require(cufftGetVersion(&version) == CUFFT_SUCCESS, "cuFFT version");
         std::cout << std::setprecision(12) << "device=" << prop.name << " cufft=" << version << '\n';
         bool ok = run(4096, 4096, 0.3, 0.2, matrix, session_only);
-        if (!expect_mismatch) {
+        if (!expect_invariant_failure) {
             // Isolated x/y shifts and odd/even boundaries exercise both columns,
             // self-paired rows, and absence of an x-Nyquist column at odd nx.
             for (auto shift : {std::pair<double,double>{0.3,0}, {0,0.2}, {1,2}, {0,0}})
@@ -146,7 +164,10 @@ int main(int argc, char **argv) {
             if (matrix) for (auto dims : {std::pair<int,int>{5760,4092}, {3710,3838}, {7676,7420}, {11520,8184}})
                 ok = run(dims.first, dims.second, 0.3, 0.2, true, false) && ok;
         }
-        if (expect_mismatch) { require(!ok, "mutant did not cause mismatch"); return 0; }
+        if (expect_invariant_failure) throw std::runtime_error("mutant did not violate invariant");
+        std::cout << "INVARIANT PASS inverses=" << hermitian_test::checked << '\n';
         return ok ? 0 : 1;
+    } catch (const hermitian_test::Violation &e) {
+        std::cerr << e.what() << '\n'; return expect_invariant_failure ? 0 : 1;
     } catch (const std::exception &e) { std::cerr << e.what() << '\n'; return 2; }
 }

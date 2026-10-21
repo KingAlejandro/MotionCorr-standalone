@@ -749,16 +749,39 @@ if(BUILD_TESTING AND CUDA)
             add_executable(${_exe}_${mutant} ${test_source} "${_mutant_cu}")
             target_link_libraries(${_exe}_${mutant} PRIVATE motioncorr_core)
             target_link_options(${_exe}_${mutant} PRIVATE ${ARGN})
-            add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-mismatch)
+            if(test_prefix MATCHES "Hermitian")
+                target_compile_definitions(${_exe}_${mutant} PRIVATE MC_CHECK_HERMITIAN)
+                add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-invariant-failure)
+            else()
+                add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-mismatch)
+            endif()
             set_tests_properties(${test_prefix}_${mutant} PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
         endfunction()
         add_executable(cuda_hermitian_inverse tests/cuda_hermitian_inverse.cpp)
         target_link_libraries(cuda_hermitian_inverse PRIVATE motioncorr_core)
         add_test(NAME CudaHermitianInverse COMMAND cuda_hermitian_inverse)
         set_tests_properties(CudaHermitianInverse PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        set(HERMITIAN_WRAPS "LINKER:--wrap=cufftMakePlanMany" "LINKER:--wrap=cufftExecC2R")
+        target_link_options(cuda_hermitian_inverse PRIVATE ${HERMITIAN_WRAPS})
         mc_cuda_mutant(CudaHermitianInverseMutant tests/cuda_hermitian_inverse.cpp cuda_movie_session no_projection
-            "mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny)"
-            "cudaSuccess")
+            "mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianInverseMutant tests/cuda_hermitian_inverse.cpp cuda_fft_prep wrapper_no_projection
+            "mc_cuda::projectHermitianColumns(d_comp, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianInverseMutant tests/cuda_hermitian_inverse.cpp cuda_realspace_dw dose_no_projection
+            "mc_cuda::projectHermitianColumns((cufftComplex*)d_Fframe, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        add_executable(cuda_hermitian_ccf tests/cuda_patch_batch.cpp)
+        target_compile_definitions(cuda_hermitian_ccf PRIVATE MC_CHECK_HERMITIAN)
+        target_link_libraries(cuda_hermitian_ccf PRIVATE motioncorr_core)
+        target_link_options(cuda_hermitian_ccf PRIVATE ${PATCH_BATCH_WRAPS})
+        add_test(NAME CudaHermitianCCF COMMAND cuda_hermitian_ccf)
+        set_tests_properties(CudaHermitianCCF PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Include the following inverse in the match to distinguish the two sites.
+        mc_cuda_mutant(CudaHermitianCCFMutant tests/cuda_patch_batch.cpp cuda_alignpatch ccf_perpatch_no_projection
+            "ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));\n        ALIGN_CUFFT(cufftExecC2R(plan_c2r"
+            "ALIGN_LAUNCH(cudaSuccess);\n        ALIGN_CUFFT(cufftExecC2R(plan_c2r" ${PATCH_BATCH_WRAPS})
+        mc_cuda_mutant(CudaHermitianCCFMutant tests/cuda_patch_batch.cpp cuda_alignpatch ccf_batched_no_projection
+            "ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));\n            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r"
+            "ALIGN_LAUNCH(cudaSuccess);\n            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r" ${PATCH_BATCH_WRAPS})
         # shift_retired: retired patches keep receiving phase shifts.
         mc_cuda_mutant(CudaPatchBatchMutant tests/cuda_patch_batch.cpp cuda_alignpatch shift_retired
             "for (int j = 0; j < (int)active.size(); ++j) { const int p = active[j];"

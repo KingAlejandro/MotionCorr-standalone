@@ -750,7 +750,9 @@ if(BUILD_TESTING AND CUDA)
             target_link_libraries(${_exe}_${mutant} PRIVATE motioncorr_core)
             target_include_directories(${_exe}_${mutant} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda")
             target_link_options(${_exe}_${mutant} PRIVATE ${ARGN})
-            if(test_prefix MATCHES "Hermitian")
+            if(test_prefix MATCHES "Oracle")
+                add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-oracle-failure)
+            elseif(test_prefix MATCHES "Hermitian")
                 target_compile_definitions(${_exe}_${mutant} PRIVATE MC_CHECK_HERMITIAN)
                 add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-invariant-failure)
             else()
@@ -770,6 +772,25 @@ if(BUILD_TESTING AND CUDA)
             "mc_cuda::projectHermitianColumns(d_comp, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
         mc_cuda_mutant(CudaHermitianInverseMutant tests/cuda_hermitian_inverse.cpp cuda_realspace_dw dose_no_projection
             "mc_cuda::projectHermitianColumns((cufftComplex*)d_Fframe, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        # Output-oracle mutants (invariant check off): removing the projection, or
+        # zeroing the whole boundary columns (a Hermitian but wrong operator), must
+        # be rejected by the host-projected reference.
+        set(ZERO_BOUNDARY "([&]{ const size_t pitch_ = (size_t)(nx / 2 + 1) * sizeof(cufftComplex); cudaMemset2D(PTR, pitch_, 0, sizeof(cufftComplex), ny); if (nx % 2 == 0) cudaMemset2D((PTR) + nx / 2, pitch_, 0, sizeof(cufftComplex), ny); return cudaGetLastError(); }())")
+        function(mc_zero_boundary_expr out ptr)
+            string(REPLACE "PTR" "${ptr}" _expr "${ZERO_BOUNDARY}")
+            set(${out} "${_expr}" PARENT_SCOPE)
+        endfunction()
+        mc_zero_boundary_expr(_zero_session d_inverse_tile)
+        mc_zero_boundary_expr(_zero_wrapper d_comp)
+        mc_zero_boundary_expr(_zero_dose "(cufftComplex*)d_Fframe")
+        mc_cuda_mutant(CudaHermitianOracleMutant tests/cuda_hermitian_inverse.cpp cuda_movie_session oracle_session_no_projection
+            "mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianOracleMutant tests/cuda_hermitian_inverse.cpp cuda_movie_session oracle_session_zero_boundary
+            "mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny)" "${_zero_session}" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianOracleMutant tests/cuda_hermitian_inverse.cpp cuda_fft_prep oracle_wrapper_zero_boundary
+            "mc_cuda::projectHermitianColumns(d_comp, nx, ny)" "${_zero_wrapper}" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianOracleMutant tests/cuda_hermitian_inverse.cpp cuda_realspace_dw oracle_dose_zero_boundary
+            "mc_cuda::projectHermitianColumns((cufftComplex*)d_Fframe, nx, ny)" "${_zero_dose}" ${HERMITIAN_WRAPS})
         add_executable(cuda_hermitian_ccf tests/cuda_patch_batch.cpp)
         target_compile_definitions(cuda_hermitian_ccf PRIVATE MC_CHECK_HERMITIAN)
         target_link_libraries(cuda_hermitian_ccf PRIVATE motioncorr_core)

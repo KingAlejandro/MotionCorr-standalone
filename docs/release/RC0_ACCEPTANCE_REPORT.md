@@ -268,3 +268,13 @@ after passes 134/134 while verified `cc1` children remain alive) resolve the CPU
 The superseded cpu64 full-suite attempt was interrupted and is not used as re-entry evidence.
 UNRUN on this source head: full QF route/product campaigns, independent scientific acceptance and performance qualification.
 Their earlier rows retain their earlier SHAs. No product, metadata, gate or tolerance change.
+## Post-RC0 #246: fake CLI compiler-settle timeout
+
+PR implementation head `927e5b5cfa51cf72187f182ecffd0693111c71f7`, base `c8844894` (following commit is evidence/docs only).
+Re-entry class: tests only (§9.4). On 4GPUs, with CPUs 72–79 and local `TMPDIR=/tmp`, full ProfilingKit fails before
+the fix with exactly the two target 30-second CLI timeouts, and passes after: **134/134 internal tests, zero skips**.
+A private sleeping `cc1` is verified alive and visible to the production compiler scanner during each CLI case;
+the fixed CLI's provenance records that same witness. The production settle default and all deadlines/gates are unchanged.
+The bench lock protected other agents from this compiler-presence control. No C++ build or GPU execution was performed.
+UNRUN: full CTest, QF, performance and scientific campaigns. Evidence: `docs/post_rc0/issue246/README.md`.
+This identifies the independent harness cause of #245's retained 75/76 CPU record and failed rerun; those historical results remain FAIL.

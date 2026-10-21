@@ -3,7 +3,10 @@
 Candidate under POST_FREEZE_TEST_PLAN §9, class CUDA/shared. Base: main
 `3691374061f782bc84531fd1c79d017ddcb5a7c2`. Implementation: `e539660c`; final
 CUDA-test oracle: `adf990fd9801e1124814e3c4fcb30a3a7fd8ff42`. All subsequent
-changes in this PR are documentation/evidence only. [PR #254](https://github.com/KingAlejandro/MotionCorr-standalone/pull/254).
+changes through `8b55d5da` were documentation/evidence only. The
+[2026-10-21 review response](review-20261021/README.md) adds deterministic
+test-only C2R invariant checks and supersedes the numerical mutant contract below.
+[PR #254](https://github.com/KingAlejandro/MotionCorr-standalone/pull/254).
 
 The CUDA inverse consumption scratch is projected on kx=0 and (only for even
 nx) kx=nx/2: each ky pair becomes `(F(ky) + conj(F(-ky)))/2`.
@@ -33,9 +36,11 @@ crop/folding policy or establish scientific correctness of that policy.
 
 The new `CudaHermitianInverse` feeds identical FFTW R2C plus fractional-shift
 bytes to the production session inverse, host fallback inverse and dose-weighted
-inverse. It checks both frames and resident-spectrum preservation. The primary
-4096² case must fail on main and pass on the fix; the compiled session mutant
-removes the projection and must produce a numerical mismatch. Small integer,
+inverse. It checks both frames and resident-spectrum preservation. The fixed
+4096² case must agree with FFTW. The original compiled session mutant used a
+numerical mismatch as its negative control; that hardware-specific contract is
+superseded by the deterministic five-site invariant/mutation coverage linked
+above. Small integer,
 zero, x-only, y-only, combined and even/odd controls cover boundary geometry.
 `--matrix` also characterises unprojected `cufftMakePlanMany` batch 1/2 and the
 fixed production paths at all five requested full-frame sizes. Raw plan results
@@ -73,8 +78,9 @@ Identical FFTW-generated half-spectrum bytes, shift `(0.3, 0.2)` pixels,
 | Dose-weighted inverse (zero-dose equal weights) | 0.0121215657 FAIL | 4.64054968e-07 PASS |
 
 The session launch-removal mutant gives the main-sized error and the normal test
-exits **1**. The fixed test exits **0**, main exits **1**. The mutant's
-`--expect-mismatch` control exits **0** only after detecting a numerical mismatch;
+exits **1**. The fixed test exits **0**, main exits **1**. In the original
+evidence, the mutant's
+`--expect-mismatch` control exited **0** only after detecting a numerical mismatch;
 a CUDA/setup error is not an accepted mismatch. The new test's bounds were set
 before measurement: maximum relative error and normalized RMS error ≤2e-6.
 All small integer/zero/fractional and even/odd controls pass on the fix.

@@ -54,6 +54,13 @@ class Diagnostics(unittest.TestCase):
         good = run(truth)
         self.assertEqual(good["accuracy_status"], "PASS")
         self.assertLess(good["signal"]["true_motion_bilinear"]["rmse"], good["signal"]["uncorrected"]["rmse"])
+        self.assertEqual(good["signal"]["estimated_motion_bilinear"],
+                         good["signal"]["true_motion_bilinear"])
+        zero = run(np.zeros_like(truth))
+        self.assertEqual(zero["signal"]["estimated_motion_bilinear"],
+                         zero["signal"]["uncorrected"])
+        self.assertGreater(run(-truth)["signal"]["estimated_motion_bilinear"]["rmse"],
+                           good["signal"]["estimated_motion_bilinear"]["rmse"])
         for bad in [-truth, truth[..., ::-1], truth*.885, truth+1,
                     np.roll(truth, 1, axis=0)]:
             with self.subTest(mutant=float(bad.sum())):
@@ -103,6 +110,29 @@ class Diagnostics(unittest.TestCase):
             (root/"candidate.star").write_text(text)
             star_result = check.check_case(a, "affine", root/"candidate.star")
             self.assertLess(star_result["field_px"]["max"], 1e-12)
+            # Malformed identifiers must be input errors, never wrapped indices
+            # or ignored duplicate coefficients in the permissive legacy reader.
+            star_command = [sys.executable, str(Path(check.__file__)), "--fixtures", str(a),
+                            "--case", "affine", "--candidate", str(root/"malformed.star"),
+                            "--json", str(root/"malformed.json")]
+            variants = [
+                text.replace("5 -3.25 2.125", "0 -3.25 2.125"),
+                text.replace("5 -3.25 2.125", "6 -3.25 2.125"),
+                text.replace("5 -3.25 2.125", "4 -3.25 2.125"),
+                text.replace("5 -3.25 2.125\n", ""),
+                text.replace("1 0.0\n", "0 0.0\n"),
+                text.replace("35 0.0", "36 0.0"),
+                text.replace("35 0.0", "-1 0.0"),
+                text.replace("35 0.0\n", ""),
+                text.replace("_rlnImageSizeZ 5", "_rlnImageSizeZ 1"),
+                text.replace("_rlnImageSizeZ 5", "_rlnImageSizeZ 9999999999"),
+            ]
+            for malformed in variants:
+                (root/"malformed.star").write_text(malformed)
+                proc = subprocess.run(star_command, capture_output=True, text=True)
+                self.assertEqual(proc.returncode, 2, proc.stderr)
+                self.assertIn("INPUT ERROR:", proc.stderr)
+                self.assertNotIn("Traceback", proc.stderr)
             # Published-pixel accuracy is distinct from a correct field.
             gen.write_mrc_stack(root/"sum.mrc", np.zeros((1, 96, 128)), .885)
             pixels = check.check_case(a, "affine", a/"affine_field.npy", root/"sum.mrc")

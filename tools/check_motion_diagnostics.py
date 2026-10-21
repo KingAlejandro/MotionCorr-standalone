@@ -73,6 +73,78 @@ def evaluate(r, movie, target, truth, field, roi):
         signal_status="CHARACTERIZATION", application_consistency_status="NOT_TESTED")
 
 
+def validate_star_rows(path, recipe):
+    """Validate numeric tables before the permissive legacy reader indexes arrays."""
+    blocks = {}
+    current = None
+    for raw in path.read_text().splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if not line:
+            continue
+        if line.startswith("data_"):
+            current = line[5:]
+            if current in blocks:
+                raise ValueError(f"duplicate STAR block: {current}")
+            blocks[current] = []
+        elif current is not None:
+            blocks[current].append(line)
+
+    def rows(block, expected_columns, expected_ids):
+        lines = blocks.get(block, [])
+        if not lines or lines[0] != "loop_":
+            raise ValueError(f"missing STAR {block} loop")
+        columns, data = [], []
+        for line in lines[1:]:
+            tokens = line.split()
+            if line.startswith("_") and not data:
+                if len(tokens) != 1:
+                    raise ValueError(f"invalid STAR {block} column")
+                columns.append(tokens[0])
+            else:
+                data.append(tokens)
+        if len(columns) != len(expected_columns) or set(columns) != set(expected_columns):
+            raise ValueError(f"invalid STAR {block} columns")
+        index = columns.index(expected_columns[0])
+        seen = set()
+        for row in data:
+            if len(row) != len(columns):
+                raise ValueError(f"invalid STAR {block} row width")
+            identifier = int(row[index])
+            if identifier not in expected_ids or identifier in seen:
+                raise ValueError(f"out-of-range or duplicate STAR {block} identifier: {identifier}")
+            seen.add(identifier)
+            if not all(np.isfinite(float(value)) for i, value in enumerate(row) if i != index):
+                raise ValueError(f"nonfinite STAR {block} value")
+        if seen != expected_ids:
+            raise ValueError(f"incomplete STAR {block} identifiers")
+
+    general = {}
+    for line in blocks.get("general", []):
+        tokens = line.split()
+        if len(tokens) != 2 or not tokens[0].startswith("_") or tokens[0] in general:
+            raise ValueError("invalid or duplicate STAR general metadata")
+        general[tokens[0]] = tokens[1]
+    version = int(general.get("_rlnMotionModelVersion", "0"))
+    # Bound geometry before the legacy reader allocates/indexes frame arrays.
+    for key, expected in [("_rlnImageSizeX", recipe["nx"]),
+                          ("_rlnImageSizeY", recipe["ny"]),
+                          ("_rlnImageSizeZ", recipe["frames"])]:
+        if int(general[key]) != expected:
+            raise ValueError("unsupported STAR geometry")
+    if (version not in (0, 1) or int(general.get("_rlnMicrographStartFrame", "1")) != 1
+            or float(general.get("_rlnMicrographBinning", "1")) != 1.
+            or not np.isclose(float(general["_rlnMicrographOriginalPixelSize"]),
+                              recipe["pixel_size"], rtol=0, atol=1e-6)):
+        raise ValueError("unsupported STAR metadata")
+    n_frames = recipe["frames"]
+    rows("global_shift", ["_rlnMicrographFrameNumber", "_rlnMicrographShiftX",
+                          "_rlnMicrographShiftY"], set(range(1, n_frames+1)))
+    if version == 1:
+        rows("local_motion_model", ["_rlnMotionModelCoeffsIdx", "_rlnMotionModelCoeff"], set(range(36)))
+    elif "local_motion_model" in blocks:
+        raise ValueError("local coefficients require motion model version 1")
+
+
 def check_case(fixtures, name, candidate, summed_image=None):
     m = json.loads((fixtures/"MANIFEST.json").read_text())
     if m["schema"] != gen.SCHEMA:
@@ -88,6 +160,7 @@ def check_case(fixtures, name, candidate, summed_image=None):
             raise ValueError(f"fixture hash mismatch: {f}")
     r = c["recipe"]
     if candidate.suffix == ".star":
+        validate_star_rows(candidate, r)
         s = read_motion_star(candidate)
         if (s.nx, s.ny, s.n_frames, s.first_frame, s.binning) != (r["nx"], r["ny"], r["frames"], 1, 1.) or s.motion_model_version not in (0, 1) or not np.isclose(s.pixel_size, r["pixel_size"], rtol=0, atol=1e-6):
             raise ValueError("unsupported STAR geometry, frame origin, binning, model or pixel size")

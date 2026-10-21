@@ -83,17 +83,28 @@ python3 test-data/generate_motion_diagnostics.py --outdir /tmp/km-v2-new
 # An exact-truth positive control, NOT an estimator result:
 python3 tools/check_motion_diagnostics.py --fixtures /tmp/km-v2-new \
   --case affine --candidate /tmp/km-v2-new/affine_field.npy --json /tmp/control.json
-# After separately running MotionCorr on affine.star from the fixture directory:
+# One bounded native CPU run (requires a separately built binary):
+motioncorr_binary=/absolute/path/to/build/motioncorr
+# Use a fresh output directory and run where the relative movie path resolves.
+( cd /tmp/km-v2-new && OMP_NUM_THREADS=1 "$motioncorr_binary" \
+    --i fractional.star --o /tmp/km-v2-native --use_own --j 1 \
+    --patch_x 1 --patch_y 1 --bin_factor 1 --seed 1 --skip_defect \
+    --save_noDW --first_frame_sum 1 --last_frame_sum 5 --skip_logfile )
 python3 tools/check_motion_diagnostics.py --fixtures /tmp/km-v2-new \
-  --case affine --candidate /path/to/output/affine.star \
-  --summed-image /path/to/output/affine.mrc --json /tmp/estimated.json
+  --case fractional --candidate /tmp/km-v2-native/fractional.star \
+  --summed-image /tmp/km-v2-native/fractional.mrc --json /tmp/estimated.json
 ```
 
+The native command above is a reproducible recipe, not a reported run in this PR.
+The existing end-to-end launcher does not yet run this new family automatically.
 Use all five frames, binning 1, no dose weighting for the optional summed-image
 comparison. A dense candidate NPY must have shape `(5,96,128,2)`, in pixels, with
 this exact coordinate/gauge convention. It also provides an offline adapter
 boundary for other estimators; no external dataset or network access is required.
 STAR evaluation reuses the existing metadata reader only, not its corrector.
+The adapter first requires bounded matching geometry and complete, unique frame
+IDs 1–5 and (for model 1) coefficient IDs 0–35; malformed tables exit 2 before
+the legacy reader can index arrays.
 It measures serialized coefficients; full-precision native coefficients and their
 separate serialization losses (#265) remain future work. Missing/invalid/nonfinite
 inputs fail with exit 2. Fixture file hashes are checked against the generated

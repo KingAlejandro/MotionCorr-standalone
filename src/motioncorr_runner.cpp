@@ -4053,6 +4053,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 
 skip_fitting:
+    // Diagnostic only: capture the applied model before STAR serialization.
+    if (const char *path = std::getenv("MC_DIAG_MODEL_OUT")) {
+        if (FILE *f = std::fopen(path, "w")) {
+            std::fprintf(f, "geometry %d %d %d %.17g %d\n", nx, ny, n_frames, double(prescaling), first_frame_sum);
+            const auto *poly = dynamic_cast<const ThirdOrderPolynomialModel *>(mic.model);
+            std::fprintf(f, "model %d\n", poly ? 1 : 0);
+            if (poly) for (int i = 0; i < 18; ++i)
+                std::fprintf(f, "%d %.17g %.17g\n", i, double(poly->coeffX(i)), double(poly->coeffY(i)));
+            std::fclose(f);
+        }
+    }
 	MC_STAGE("release alignment");
 #ifdef _CUDA_ENABLED
 	// Local alignment scratch belongs to this movie, but reconstruction no longer

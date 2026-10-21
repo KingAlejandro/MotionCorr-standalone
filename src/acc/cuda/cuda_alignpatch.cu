@@ -236,7 +236,7 @@ __global__ void findPeakAndInterpolateKernel(
     }
 
     if (threadIdx.x == 0) {
-        float maxval = s_max[0];
+        const double maxval = s_max[0];
         int posx = s_posx[0];
         int posy = s_posy[0];
 
@@ -247,16 +247,18 @@ __global__ void findPeakAndInterpolateKernel(
         int ipy   = posy;     if (ipy < 0)   ipy   = ccf_ny + ipy;
         int ipy_p = posy + 1; if (ipy_p < 0) ipy_p = ccf_ny + ipy_p;
 
+        // Promote before arithmetic: the float CCF can carry a large DC pedestal.
+        // Keep the existing guard threshold; only its curvature evaluation changes.
         const float EPS = 1e-15f;
-        float vp_x = d_Iccs[frame_offset + ipy * ccf_nx + ipx_p];
-        float vn_x = d_Iccs[frame_offset + ipy * ccf_nx + ipx_n];
-        float denom_x = vp_x + vn_x - 2.0f * maxval;
-        float cur_x = (fabsf(denom_x) > EPS) ? (posx - 0.5f * (vp_x - vn_x) / denom_x) : posx;
+        double vp_x = d_Iccs[frame_offset + ipy * ccf_nx + ipx_p];
+        double vn_x = d_Iccs[frame_offset + ipy * ccf_nx + ipx_n];
+        double denom_x = vp_x + vn_x - 2.0 * maxval;
+        double cur_x = (fabs(denom_x) > EPS) ? (posx - 0.5 * (vp_x - vn_x) / denom_x) : posx;
 
-        float vp_y = d_Iccs[frame_offset + ipy_p * ccf_nx + ipx];
-        float vn_y = d_Iccs[frame_offset + ipy_n * ccf_nx + ipx];
-        float denom_y = vp_y + vn_y - 2.0f * maxval;
-        float cur_y = (fabsf(denom_y) > EPS) ? (posy - 0.5f * (vp_y - vn_y) / denom_y) : posy;
+        double vp_y = d_Iccs[frame_offset + ipy_p * ccf_nx + ipx];
+        double vn_y = d_Iccs[frame_offset + ipy_n * ccf_nx + ipx];
+        double denom_y = vp_y + vn_y - 2.0 * maxval;
+        double cur_y = (fabs(denom_y) > EPS) ? (posy - 0.5 * (vp_y - vn_y) / denom_y) : posy;
 
         d_cur_xshifts[iframe] = cur_x * ccf_scale_x;
         d_cur_yshifts[iframe] = cur_y * ccf_scale_y;
@@ -264,7 +266,7 @@ __global__ void findPeakAndInterpolateKernel(
 }
 
 // S1 peak-fit attribution ONLY. Never included in the production fix.
-static constexpr bool DIAG_DOUBLE_FIT = false;
+static constexpr bool DIAG_DOUBLE_FIT = true;
 static bool diagZeroDc() { static bool on = std::getenv("MC_DIAG_ZERO_CCF_DC") != nullptr; return on; }
 static unsigned diagFitNull() { static unsigned seed = std::getenv("MC_DIAG_FIT_NULL") ? std::strtoul(std::getenv("MC_DIAG_FIT_NULL"), nullptr, 10) : 0; return seed; }
 __global__ void diagZeroCcfDcKernel(float2 *F, size_t stride, int n) {

@@ -1,0 +1,20 @@
+[
+  {
+    "controller_pid": 1831303,
+    "arm_pid": 1964918,
+    "label": "e10028-06-p3-F-cpu",
+    "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-s1/sweep/tools/sweep.py arm --root /mnt/clathrin/alex-motioncorr-s1/sweep --movie e10028-06 --label e10028-06-p3-F-cpu --binary /mnt/clathrin/alex-motioncorr-rc0/W-QF/build-cpu/motioncorr --sha 6d68e2d6 --patches 3 ",
+    "action": "terminate queued arm and resume controller with adaptive lanes",
+    "signal": "SIGTERM",
+    "native_payload_started": false
+  },
+  {
+    "controller_pid": 1914862,
+    "arm_pid": 1964897,
+    "label": "e10216-00-p5-f6c41e24-cuda",
+    "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-s1/sweep/tools/sweep.py arm --root /mnt/clathrin/alex-motioncorr-s1/sweep --movie e10216-00 --label e10216-00-p5-f6c41e24-cuda --binary /mnt/clathrin/alex-motioncorr-s1/sweep/build-f6c41e24-cuda/motioncorr --sha f6c41e24 --patches 5 --gpu --legacy ",
+    "action": "terminate queued arm and resume controller with adaptive lanes",
+    "signal": "SIGTERM",
+    "native_payload_started": false
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "sacct",
+    "-j",
+    "3645581,3645584,3645586,3645589,3645644,3645672,3645685,3645738",
+    "--format=JobID,JobName,Partition,State,ExitCode,NodeList,AllocCPUS,ReqMem",
+    "-P"
+  ],
+  "exit_status": 0,
+  "stdout": "JobID|JobName|Partition|State|ExitCode|NodeList|AllocCPUS|ReqMem\n3645581|mcs1-build|scarf|COMPLETED|0:0|cn1072|8|48G\n3645581.batch|batch||COMPLETED|0:0|cn1072|8|\n3645581.extern|extern||COMPLETED|0:0|cn1072|8|\n3645584|mcs1-c|gpu-devel|CANCELLED by 101415|0:0|gn0005|8|48G\n3645584.extern|extern||COMPLETED|0:0|gn0005|8|\n3645584.0|bash||FAILED|1:0|gn0005|8|\n3645586|mcs1-bisect-build|scarf|COMPLETED|0:0|cn1072|8|48G\n3645586.batch|batch||COMPLETED|0:0|cn1072|8|\n3645586.extern|extern||COMPLETED|0:0|cn1072|8|\n3645589|mcs1-a2|gpu-devel|CANCELLED by 101415|0:0|gn0005|8|48G\n3645589.extern|extern||COMPLETED|0:0|gn0005|8|\n3645589.0|bash||COMPLETED|0:0|gn0005|8|\n3645589.1|bash||COMPLETED|0:0|gn0005|8|\n3645589.2|bash||COMPLETED|0:0|gn0005|8|\n3645589.3|python3||COMPLETED|0:0|gn0005|8|\n3645589.4|bash||COMPLETED|0:0|gn0005|8|\n3645644|mcs1-b3|gpu-devel|CANCELLED by 101415|0:0|gn0005|8|48G\n3645644.extern|extern||COMPLETED|0:0|gn0005|8|\n3645644.0|bash||FAILED|1:0|gn0005|8|\n3645644.1|bash||COMPLETED|0:0|gn0005|8|\n3645644.2|bash||CANCELLED|0:15|gn0005|8|\n3645672|mcs1-b4|gpu-devel|CANCELLED by 101415|0:0|gn0005|8|48G\n3645672.extern|extern||COMPLETED|0:0|gn0005|8|\n3645672.0|bash||FAILED|1:0|gn0005|8|\n3645672.1|bash||CANCELLED|0:15|gn0005|8|\n3645672.2|bash||COMPLETED|0:0|gn0005|8|\n3645672.3|bash||COMPLETED|0:0|gn0005|8|\n3645672.4|bash||FAILED|2:0|gn0005|8|\n3645685|mcs1-b5|gpu-devel|CANCELLED by 101415|0:0|gn0005|8|48G\n3645685.extern|extern||COMPLETED|0:0|gn0005|8|\n3645685.0|bash||COMPLETED|0:0|gn0005|8|\n3645685.1|bash||COMPLETED|0:0|gn0005|8|\n3645685.2|bash||COMPLETED|0:0|gn0005|8|\n3645685.3|bash||COMPLETED|0:0|gn0005|8|\n3645685.4|bash||COMPLETED|0:0|gn0005|8|\n3645685.5|ps||COMPLETED|0:0|gn0005|8|\n3645685.6|bash||COMPLETED|0:0|gn0005|8|\n3645685.7|bash||COMPLETED|0:0|gn0005|8|\n3645738|mcs1-boundary-build|scarf|COMPLETED|0:0|cn050|8|48G\n3645738.batch|batch||COMPLETED|0:0|cn050|8|\n3645738.extern|extern||COMPLETED|0:0|cn050|8|\n",
+  "stderr": ""
+}

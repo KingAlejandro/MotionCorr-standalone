@@ -1,0 +1,116 @@
+{
+  "gate_profile": "backend",
+  "tolerances": {
+    "max_shift_error": 0.05,
+    "shift_rmse": 0.02,
+    "image_rmse": 0.02,
+    "image_max_err": 5.0,
+    "image_relative_rmse": 0.001
+  },
+  "checks": {
+    "motion_trajectory": {
+      "num_frames": 8,
+      "max_abs_diff_x": 0.0027499999999999747,
+      "max_abs_diff_y": 0.0019099999999996342,
+      "max_shift_error": 0.0027499999999999747,
+      "coord_rms_error": 0.0017464929143858423,
+      "per_frame_diffs": [
+        {
+          "frame": 1,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 2,
+          "dx": 0.0012099999999999889,
+          "dy": 0.0014600000000002389
+        },
+        {
+          "frame": 3,
+          "dx": 0.0027499999999999747,
+          "dy": 0.000620000000000509
+        },
+        {
+          "frame": 4,
+          "dx": 0.0006999999999999229,
+          "dy": 0.0007999999999999119
+        },
+        {
+          "frame": 5,
+          "dx": 0.0018899999999999473,
+          "dy": 0.00040999999999957737
+        },
+        {
+          "frame": 6,
+          "dx": 0.0007200000000000539,
+          "dy": 0.0019099999999996342
+        },
+        {
+          "frame": 7,
+          "dx": 0.0014499999999999513,
+          "dy": 0.0003600000000005821
+        },
+        {
+          "frame": 8,
+          "dx": 0.0011300000000000754,
+          "dy": 0.000560000000000116
+        }
+      ],
+      "passed": true,
+      "fail_reasons": []
+    },
+    "star_fields": {
+      "num_differences": 0,
+      "differences": [],
+      "passed": true
+    },
+    "corrected_image": {
+      "num_pixels": 56955920,
+      "pixel_identical": false,
+      "max_abs_pixel_error": 6.904592037200928,
+      "rmse": 0.012140561068534107,
+      "relative_rmse": 0.003462685653989218,
+      "relative_rmse_denominator": "reference_pixel_population_std",
+      "relative_rmse_denominator_value": 3.5061112332121356,
+      "ref_pixel_min": -8.553638458251953,
+      "ref_pixel_max": 46.62526321411133,
+      "ref_pixel_mean": 3.508087158203125,
+      "ref_pixel_std": 3.5061112332121356,
+      "test_pixel_min": -8.565459251403809,
+      "test_pixel_max": 46.6368522644043,
+      "test_pixel_mean": 3.5080864429473877,
+      "test_pixel_std": 3.5062313079833984,
+      "core_header_diff_bytes": 8,
+      "label_header_diff_bytes": 1,
+      "normalized_label_diff_bytes": 0,
+      "geometry_matches": true,
+      "relative_rmse_diagnostic": {
+        "value": 0.003462685653989218,
+        "threshold": 0.001,
+        "status": "FAIL",
+        "blocking": false
+      },
+      "passed": false,
+      "fail_reasons": [
+        "Image max pixel error 6.904592e+00 > 5.000000e+00"
+      ]
+    }
+  },
+  "overall_status": "FAIL",
+  "metrics": {
+    "user_time_sec": 0.85,
+    "system_time_sec": 1.13,
+    "cpu_percent": 136,
+    "elapsed_str": "0:01.45",
+    "elapsed_sec": 1.45,
+    "max_rss_kb": 935588,
+    "exit_status": 0,
+    "max_rss_mb": 913.66
+  },
+  "coverage": {
+    "motion_and_star": true,
+    "corrected_image": true,
+    "complete": true,
+    "required": true
+  }
+}

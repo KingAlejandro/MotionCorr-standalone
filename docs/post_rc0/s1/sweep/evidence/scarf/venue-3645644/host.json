@@ -1,0 +1,32 @@
+[
+  {
+    "args": "hostname",
+    "returncode": 0,
+    "stdout": "gn0005.scarf.rl.ac.uk\n",
+    "stderr": ""
+  },
+  {
+    "args": "lscpu",
+    "returncode": 0,
+    "stdout": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           43 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  64\nOn-line CPU(s) list:                     0-63\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 7302 16-Core Processor\nCPU family:                              23\nModel:                                   49\nThread(s) per core:                      2\nCore(s) per socket:                      16\nSocket(s):                               2\nStepping:                                0\nFrequency boost:                         enabled\nCPU(s) scaling MHz:                      93%\nCPU max MHz:                             3310.5459\nCPU min MHz:                             1500.0000\nBogoMIPS:                                5999.90\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov succor smca sev sev_es\nVirtualization:                          AMD-V\nL1d cache:                               1 MiB (32 instances)\nL1i cache:                               1 MiB (32 instances)\nL2 cache:                                16 MiB (32 instances)\nL3 cache:                                256 MiB (16 instances)\nNUMA node(s):                            2\nNUMA node0 CPU(s):                       0-15,32-47\nNUMA node1 CPU(s):                       16-31,48-63\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Mitigation; untrained return thunk; SMT enabled with STIBP protection\nVulnerability Spec rstack overflow:      Mitigation; Safe RET\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; IBPB conditional; STIBP always-on; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Mitigation; IBPB before exit to userspace\n",
+    "stderr": ""
+  },
+  {
+    "args": "nvidia-smi -L",
+    "returncode": 0,
+    "stdout": "GPU 0: NVIDIA A100-SXM4-40GB (UUID: GPU-9349c6e7-7c6a-4f26-1ac1-e30f606986a0)\n",
+    "stderr": ""
+  },
+  {
+    "args": "df -h /tmp",
+    "returncode": 0,
+    "stdout": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda8       307G   71G  236G  24% /tmp\n",
+    "stderr": ""
+  },
+  {
+    "args": "cat /proc/self/status",
+    "returncode": 0,
+    "stdout": "Name:\tcat\nUmask:\t0022\nState:\tR (running)\nTgid:\t69246\nNgid:\t0\nPid:\t69246\nPPid:\t69225\nTracerPid:\t0\nUid:\t101415\t101415\t101415\t101415\nGid:\t101004\t101004\t101004\t101004\nFDSize:\t64\nGroups:\t101004 \nNStgid:\t69246\nNSpid:\t69246\nNSpgid:\t69225\nNSsid:\t69215\nVmPeak:\t    3224 kB\nVmSize:\t    3224 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t    1780 kB\nVmRSS:\t    1780 kB\nRssAnon:\t     124 kB\nRssFile:\t    1656 kB\nRssShmem:\t       0 kB\nVmData:\t     360 kB\nVmStk:\t     136 kB\nVmExe:\t      16 kB\nVmLib:\t    1664 kB\nVmPTE:\t      44 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/1028811\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000000000\nSigCgt:\t0000000000000000\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\t00000033,00000033\nCpus_allowed_list:\t0-1,4-5,32-33,36-37\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000003\nMems_allowed_list:\t0-1\nvoluntary_ctxt_switches:\t0\nnonvoluntary_ctxt_switches:\t0\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+    "stderr": ""
+  }
+]

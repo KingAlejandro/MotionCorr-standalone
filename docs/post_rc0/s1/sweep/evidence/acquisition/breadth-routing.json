@@ -1,0 +1,42 @@
+{
+  "previous_pid": 2009755,
+  "previous_argv": [
+    "/home/alex/.mc-venv/bin/python3",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/tools/campaign.py",
+    "--root",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep",
+    "--all",
+    "--wait-lock"
+  ],
+  "native_payloads_signaled": false,
+  "rationale": "same-venue family assignment: SCARF handles 10216/F3/10441/F4/10164; 4GPUs handles the rest",
+  "signals": [
+    {
+      "pid": 2009755,
+      "signal": "SIGSTOP"
+    },
+    {
+      "pid": 2009755,
+      "signal": "SIGTERM"
+    },
+    {
+      "pid": 2009755,
+      "signal": "SIGCONT"
+    }
+  ],
+  "children_allowed_to_finish": [
+    "2067507"
+  ],
+  "previous_controller_exit": "143",
+  "finish_current_movie": "e10216-06",
+  "new_argv": [
+    "/home/alex/.mc-venv/bin/python3",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/tools/campaign_routed_v1.py",
+    "--root",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep",
+    "--all",
+    "--exclude-families",
+    "e10216,e10474f3,e10441,e10474f4,e10164",
+    "--wait-lock"
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "backend_status": "FAIL",
+  "comparator_argv": [
+    "/usr/bin/python3",
+    "/home/vol05/scarf1415/mc-post-rc0-s1/src-F/tools/compare_motioncorr.py",
+    "--ref",
+    "/tmp/mc-s1-3645589/runs/e10216-00-p3-e875d5fe-cpu",
+    "--test",
+    "/tmp/mc-s1-3645589/runs/e10216-00-p3-e875d5fe-cuda",
+    "--test-log",
+    "/tmp/mc-s1-3645589/runs/e10216-00-p3-e875d5fe-cuda/time-v.log",
+    "--gate",
+    "backend",
+    "--json-out",
+    "/tmp/mc-s1-3645589/analysis/e10216-00-p3-e875d5fe-cuda-backend.json"
+  ],
+  "comparator_exit_status": 1,
+  "comparator_sha256": "cb37991af515c5529f31ac48adb157771b1ac21b8308ba28735362f36085e46b",
+  "cpu_only_patches": [
+    [
+      2,
+      1
+    ]
+  ],
+  "e10216-00-p3-e875d5fe-cpu": {
+    "accepted_patches": 9,
+    "accepted_set": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "local_shift_rows": 531,
+    "rejected_set": [],
+    "rows_per_center": {
+      "(2046, 2046)": 59,
+      "(2046, 3411)": 59,
+      "(2046, 681)": 59,
+      "(3411, 2046)": 59,
+      "(3411, 3411)": 59,
+      "(3411, 681)": 59,
+      "(681, 2046)": 59,
+      "(681, 3411)": 59,
+      "(681, 681)": 59
+    }
+  },
+  "e10216-00-p3-e875d5fe-cuda": {
+    "accepted_patches": 8,
+    "accepted_set": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "local_shift_rows": 472,
+    "rejected_set": [
+      [
+        2,
+        1
+      ]
+    ],
+    "rows_per_center": {
+      "(2046, 2046)": 59,
+      "(2046, 3411)": 59,
+      "(2046, 681)": 59,
+      "(3411, 2046)": 59,
+      "(3411, 3411)": 59,
+      "(3411, 681)": 59,
+      "(681, 3411)": 59,
+      "(681, 681)": 59
+    }
+  },
+  "large_disagreement_relative_rmse_ge_0_1": true,
+  "movie": "e10216-00",
+  "reference": "e10216-00-p3-e875d5fe-cpu",
+  "relative_rmse": 0.5551012115123861,
+  "test": "e10216-00-p3-e875d5fe-cuda",
+  "test_only_patches": [],
+  "venue": "SCARF"
+}

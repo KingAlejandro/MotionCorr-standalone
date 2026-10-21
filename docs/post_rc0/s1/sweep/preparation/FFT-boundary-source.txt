@@ -1,0 +1,25 @@
+$ git diff ef7e4c0a 58fd513a^ -- src
+exit_status=0
+
+$ git diff ef7e4c0a 58fd513a^ -- CMakeLists.txt
+exit_status=0
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b24f7feb..d05bf88f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -51,6 +51,9 @@ target_link_libraries(motioncorr_core PUBLIC
+ option(CUDA "Build with CUDA acceleration" OFF)
+ if(CUDA)
+     enable_language(CUDA)
++    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
++        set(CMAKE_CUDA_ARCHITECTURES 80)
++    endif()
+     set(CMAKE_CUDA_STANDARD 17)
+     set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+     find_package(CUDAToolkit REQUIRED)
+
+$ git show -s --format=%H %p %cI %s 58fd513a
+exit_status=0
+58fd513a24958a415ea6d8eb0dae8ec107cc938b be4c71e0 2026-09-24T15:09:14+01:00 feat(cuda): accelerate forward FFT, inverse FFT, and patch preparation on GPU
+
+Interpretation: source comparison only for parent be4c71e0; no native parent probe. Both measured endpoint builds explicitly set CMAKE_CUDA_ARCHITECTURES=80. The native measured bracket is ef7e4c0a to 58fd513a; this sweep does not establish the causal mechanism.

@@ -1,0 +1,26 @@
+{
+  "job": "3645685",
+  "original_launcher_exit_status": "not retained; exit/release sentinels missing",
+  "numerical_pairs": 34,
+  "all_pair_native_exits_zero": true,
+  "native_campaign_step": "3645685.0",
+  "native_campaign_step_state": "COMPLETED",
+  "native_campaign_step_exit_code": "0:0",
+  "accounting_argv": [
+    "sacct",
+    "-j",
+    "3645685",
+    "--format=JobID,JobName,State,ExitCode,NodeList",
+    "-P"
+  ],
+  "accounting_exit_status": 0,
+  "accounting_stdout": "JobID|JobName|State|ExitCode|NodeList\n3645685|mcs1-b5|RUNNING|0:0|gn0005\n3645685.extern|extern|RUNNING|0:0|gn0005\n3645685.0|bash|COMPLETED|0:0|gn0005\n3645685.1|bash|COMPLETED|0:0|gn0005\n3645685.2|bash|COMPLETED|0:0|gn0005\n3645685.3|bash|COMPLETED|0:0|gn0005\n3645685.4|bash|COMPLETED|0:0|gn0005\n3645685.5|ps|COMPLETED|0:0|gn0005\n3645685.6|bash|COMPLETED|0:0|gn0005\n3645685.7|bash|COMPLETED|0:0|gn0005\n",
+  "action": "release owned allocation after all non-extern steps completed successfully",
+  "release_argv": [
+    "scancel",
+    "3645685"
+  ],
+  "release_exit_status": 0,
+  "release_stdout": "",
+  "release_stderr": ""
+}

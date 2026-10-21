@@ -1,0 +1,57 @@
+{
+  "primary": {
+    "4GPUs": [
+      "tutorial",
+      "e10028",
+      "e10361",
+      "e10641",
+      "e12963",
+      "e10441",
+      "e10474f4-00",
+      "e10474f4-01",
+      "e10164-00"
+    ],
+    "SCARF": [
+      "e10216",
+      "e10474f3",
+      "e10474f4 ranks 2-9",
+      "e10164 ranks 1-9"
+    ]
+  },
+  "scarf_allocations": {
+    "3645589": {
+      "families": [
+        "e10216",
+        "e10474f3"
+      ],
+      "status": "complete, exit 0"
+    },
+    "3645644": {
+      "families": [
+        "e10441"
+      ],
+      "status": "5x5 pair complete; 3x3 CUDA exit 1, out of memory; no numerical verdict for 3x3"
+    },
+    "3645672": {
+      "families": [
+        "e10474f4",
+        "e10164"
+      ],
+      "status": "curl exit 56 before any F4/10164 native run; control pair complete"
+    },
+    "3645685": {
+      "families": [
+        "e10474f4 ranks 2-9",
+        "e10164 ranks 1-9"
+      ],
+      "status": "34/34 pairs complete; native campaign step 3645685.0 COMPLETED 0:0; original launcher exit/release sentinels missing; allocation explicitly released with exit 0 after all steps completed; completion-recovery.json retained"
+    }
+  },
+  "reason": "10441 uses 4GPUs after the retained 40GB SCARF CUDA failure. F4/10164 reuse three complete 4GPUs movies and add seventeen new SCARF movies, avoiding a repeated failed download. Both arms of every pair stay on one host.",
+  "reused_complete_4gpu_pairs": [
+    "e10474f4-00",
+    "e10474f4-01",
+    "e10164-00"
+  ],
+  "completed_4gpu_status": "staged-resume.exit=0; breadth-routed.exit=0; extend-10441.exit=0"
+}

@@ -1,0 +1,270 @@
+{
+  "backend_status": "FAIL",
+  "comparator_argv": [
+    "/home/alex/.mc-venv/bin/python3",
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QF/src/tools/compare_motioncorr.py",
+    "--ref",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/runs/e10641-07-p5-F-cpu",
+    "--test",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/runs/e10641-07-p5-F-cuda",
+    "--test-log",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/runs/e10641-07-p5-F-cuda/time-v.log",
+    "--gate",
+    "backend",
+    "--json-out",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/analysis/e10641-07-p5-F-cuda-backend.json"
+  ],
+  "comparator_exit_status": 1,
+  "comparator_sha256": "cb37991af515c5529f31ac48adb157771b1ac21b8308ba28735362f36085e46b",
+  "cpu_only_patches": [
+    [
+      5,
+      3
+    ]
+  ],
+  "e10641-07-p5-F-cpu": {
+    "accepted_patches": 7,
+    "accepted_set": [
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        5,
+        3
+      ]
+    ],
+    "local_shift_rows": 490,
+    "rejected_set": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        5,
+        5
+      ]
+    ],
+    "rows_per_center": {
+      "(1727, 408)": 70,
+      "(2879, 1226)": 70,
+      "(2879, 2044)": 70,
+      "(2879, 3680)": 70,
+      "(4031, 2862)": 70,
+      "(5183, 2044)": 70,
+      "(575, 1226)": 70
+    }
+  },
+  "e10641-07-p5-F-cuda": {
+    "accepted_patches": 7,
+    "accepted_set": [
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        4,
+        4
+      ]
+    ],
+    "local_shift_rows": 490,
+    "rejected_set": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        5,
+        5
+      ]
+    ],
+    "rows_per_center": {
+      "(1727, 408)": 70,
+      "(2879, 1226)": 70,
+      "(2879, 2044)": 70,
+      "(4031, 1226)": 70,
+      "(4031, 2862)": 70,
+      "(5183, 2044)": 70,
+      "(575, 1226)": 70
+    }
+  },
+  "large_disagreement_relative_rmse_ge_0_1": true,
+  "movie": "e10641-07",
+  "reference": "e10641-07-p5-F-cpu",
+  "relative_rmse": 0.8794348156030843,
+  "test": "e10641-07-p5-F-cuda",
+  "test_only_patches": [
+    [
+      2,
+      4
+    ]
+  ]
+}

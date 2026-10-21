@@ -1,0 +1,157 @@
+{
+  "gate_profile": "backend",
+  "tolerances": {
+    "max_shift_error": 0.05,
+    "shift_rmse": 0.02,
+    "image_rmse": 0.02,
+    "image_max_err": 5.0,
+    "image_relative_rmse": 0.001
+  },
+  "checks": {
+    "motion_trajectory": {
+      "num_frames": 16,
+      "max_abs_diff_x": 0.02967999999999993,
+      "max_abs_diff_y": 0.004569999999999963,
+      "max_shift_error": 0.02967999999999993,
+      "coord_rms_error": 0.014289544201968075,
+      "per_frame_diffs": [
+        {
+          "frame": 1,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 2,
+          "dx": -0.016950000000000007,
+          "dy": 0.00248000000000001
+        },
+        {
+          "frame": 3,
+          "dx": -0.018079999999999985,
+          "dy": 0.0002500000000000002
+        },
+        {
+          "frame": 4,
+          "dx": -0.011229999999999962,
+          "dy": -0.0019299999999999873
+        },
+        {
+          "frame": 5,
+          "dx": -0.018000000000000016,
+          "dy": 0.004569999999999963
+        },
+        {
+          "frame": 6,
+          "dx": -0.014720000000000066,
+          "dy": 0.004369999999999985
+        },
+        {
+          "frame": 7,
+          "dx": -0.010599999999999943,
+          "dy": -0.0021100000000000008
+        },
+        {
+          "frame": 8,
+          "dx": -0.02967999999999993,
+          "dy": 0.0020300000000000318
+        },
+        {
+          "frame": 9,
+          "dx": -0.014310000000000045,
+          "dy": 0.00017000000000000348
+        },
+        {
+          "frame": 10,
+          "dx": -0.010579999999999812,
+          "dy": -0.0019699999999999718
+        },
+        {
+          "frame": 11,
+          "dx": -0.01434000000000002,
+          "dy": 0.0025399999999999867
+        },
+        {
+          "frame": 12,
+          "dx": -0.0043399999999997885,
+          "dy": 0.002610000000000001
+        },
+        {
+          "frame": 13,
+          "dx": -0.009190000000000031,
+          "dy": 0.00038000000000000533
+        },
+        {
+          "frame": 14,
+          "dx": -0.011330000000000062,
+          "dy": -0.0016300000000000012
+        },
+        {
+          "frame": 15,
+          "dx": -0.003889999999999949,
+          "dy": 0.00023999999999999022
+        },
+        {
+          "frame": 16,
+          "dx": -0.011849999999999916,
+          "dy": 0.002173999999999999
+        }
+      ],
+      "passed": true,
+      "fail_reasons": []
+    },
+    "star_fields": {
+      "num_differences": 0,
+      "differences": [],
+      "passed": true
+    },
+    "corrected_image": {
+      "num_pixels": 16777216,
+      "pixel_identical": false,
+      "max_abs_pixel_error": 1028.10498046875,
+      "rmse": 8.931008557092428,
+      "relative_rmse": 0.021778310198069948,
+      "relative_rmse_denominator": "reference_pixel_population_std",
+      "relative_rmse_denominator_value": 410.0873059418502,
+      "ref_pixel_min": 4578.005859375,
+      "ref_pixel_max": 14384.798828125,
+      "ref_pixel_mean": 8639.8466796875,
+      "ref_pixel_std": 410.0873059418502,
+      "test_pixel_min": 4581.01513671875,
+      "test_pixel_max": 14413.703125,
+      "test_pixel_mean": 8638.65234375,
+      "test_pixel_std": 410.1579895019531,
+      "core_header_diff_bytes": 9,
+      "label_header_diff_bytes": 1,
+      "normalized_label_diff_bytes": 0,
+      "geometry_matches": true,
+      "relative_rmse_diagnostic": {
+        "value": 0.021778310198069948,
+        "threshold": 0.001,
+        "status": "FAIL",
+        "blocking": false
+      },
+      "passed": false,
+      "fail_reasons": [
+        "Image RMSE 8.931009e+00 > 2.000000e-02",
+        "Image max pixel error 1.028105e+03 > 5.000000e+00"
+      ]
+    }
+  },
+  "overall_status": "FAIL",
+  "metrics": {
+    "user_time_sec": 0.98,
+    "system_time_sec": 3.21,
+    "cpu_percent": 283,
+    "elapsed_str": "0:01.48",
+    "elapsed_sec": 1.48,
+    "max_rss_kb": 1607796,
+    "exit_status": 0,
+    "max_rss_mb": 1570.11
+  },
+  "coverage": {
+    "motion_and_star": true,
+    "corrected_image": true,
+    "complete": true,
+    "required": true
+  }
+}

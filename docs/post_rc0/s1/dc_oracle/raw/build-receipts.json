@@ -1,0 +1,60 @@
+{
+ "native_source": "afba50a4cebf5238ec2d267ff3ec07d272b13395",
+ "combined_parent": "31309df0e61277f77b6a9c5210beaca67a582249",
+ "builds": {
+  "cpu64_initial_release": {
+   "configure_exit": 0,
+   "build_exit": 0,
+   "command": "~/.mc-venv/bin/cmake -S src -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_CUDA=OFF; ~/.mc-venv/bin/cmake --build build --target motioncorr -j8",
+   "note": "ENABLE_CUDA was unused; CUDA default OFF is independently verified in CMakeCache/source-validation. This records the actual initial command."
+  },
+  "4GPUs_initial_release": {
+   "configure_exit": 0,
+   "build_exit": 0,
+   "command": "cmake -S src -B build -DCMAKE_BUILD_TYPE=Release -DCUDA=ON -DUSE_NVCOMP=ON -DNVCOMP_ROOT=/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive -DBUILD_TESTING=OFF -DCMAKE_CUDA_COMPILER=/usr/local/cuda-12.8/bin/nvcc -DCMAKE_CUDA_ARCHITECTURES=80; cmake --build build --target motioncorr -j8"
+  },
+  "cpu64_model_capture_rebuild": {
+   "exit": 0,
+   "command": "~/.mc-venv/bin/cmake --build build --target motioncorr -j4"
+  },
+  "4GPUs_model_capture_rebuild": {
+   "exit": 0,
+   "command": "cmake --build build --target motioncorr -j4"
+  },
+  "4GPUs_parent": {
+   "configure_exit": 0,
+   "build_exit": 0
+  },
+  "4GPUs_test_targets": {
+   "configure_exit": 0,
+   "build_exit": 0,
+   "targets": [
+    "cuda_peak_fit",
+    "runner_numerics",
+    "cuda_hermitian_ccf"
+   ]
+  }
+ },
+ "test_exits": {
+  "CudaPeakFit": 0,
+  "CudaHermitianCCF": 0,
+  "RunnerInterpolateRecenter": 0,
+  "FloatPlanCache": 0,
+  "MrcHeaderStats": 0
+ },
+ "administrative_attempts": [
+  {
+   "configure_exit": 1,
+   "host": "4GPUs",
+   "reason": "BUILD_TESTING default ON selected system Python without NumPy; no binary was built. Fixed with BUILD_TESTING=OFF for early handoff and later configured tests with ~/.mc-venv/bin/python."
+  },
+  {
+   "source": "97fd8107",
+   "status": "Preliminary build/controls superseded by model-capture source afba50a4; retained under preliminary-runs, excluded from final 600."
+  },
+  {
+   "status": "Initial local-relay input tar stream was terminated after a faster direct host-to-host SSH route was confirmed. Its receiver exited 2. The successful transfer was independently hash-verified for all 30 inputs."
+  }
+ ],
+ "limits": "Full Release CTest suites, controlled performance, motion-truth and downstream scientific qualification were not executed in this task."
+}

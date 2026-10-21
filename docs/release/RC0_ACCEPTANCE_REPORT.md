@@ -253,6 +253,16 @@ Per-family GPU and CPU timing tables are in `docs/workload_corpus/{cpu,gpu}/`; d
 
 Maintainer review of this report, the scope decision and the tag are separate steps (`RELEASE_CHECKLIST.md` §10). Frozen source SHA F: `6d68e2d6`. Tag target T (named by the maintainer; F or a later docs-only evidence commit): pending. `git diff F T -- . ':!docs/rc0' ':!docs/release'` empty: pending. Maintainer sign-off: pending (QF on F is recorded in `docs/rc0/qf/run_6d68e2d6/`).
 
+## Post-RC0 #240: dataset finalization warning
+
+PR implementation head `ed24e44b614ec158ffa919a356efaa2806b9c309` (base `c8844894`; following commit is evidence/docs only).
+Re-entry class: multi-GPU tooling, §9.4. Strict Python 3.14 compile fails on the old source and passes here;
+16 exit/status subcases preserve failure and restoration precedence. Existing scheduling tests passed 71/71 on macOS and Linux, including failure injections.
+Native 4GPUs re-entry: G/L × 1/2/4 workers plus mixed × 1/2, **8/8 endpoints PASS**; product identity and byte-flip controls discriminate.
+The eight-CPU cap was retained (8/4/2 threads per worker); all four GPU locks plus the bench lock were held.
+Production binaries are unchanged F `6d68e2d6` Release builds, identified by hash in the evidence.
+UNRUN on this tooling head: full QF, fresh scientific/performance acceptance and unrelated route/format campaigns.
+Historical F results retain F. Evidence: `docs/post_rc0/issue240/README.md`.
 ## Post-RC0 #246: fake CLI compiler-settle timeout
 
 PR implementation head `927e5b5cfa51cf72187f182ecffd0693111c71f7`, base `c8844894` (following commit is evidence/docs only).

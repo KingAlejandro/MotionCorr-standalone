@@ -153,27 +153,38 @@ large/noisy seed campaigns and downstream science were not run. No merge is requ
 
 ## Published-data reuse decision
 
-[Střelák et al., 2023](https://www.mdpi.com/2072-666X/14/10/1835)
-compare aligners using phantom movies, but the paper's phantom EMPIAR accession is
-still printed as pending. Their [experiment scripts](https://github.com/danielmarchan3/ComparisonMovieAlignment-cryoEM)
-provide a useful optional replication route, not a verified downloadable truth
-corpus. No external movie or script is copied into this PR.
+No turnkey dataset was verified that combines independent realistic frame noise,
+exact nonzero motion, clean references, a clear reuse license and CI-sized inputs.
+The following primary-source candidates were considered (2026-10-21). These are
+optional offline routes, not downloaded or vendored dependencies.
+
+| Candidate and provenance | Reuse decision and limits |
+|---|---|
+| [Střelák et al., 2023](https://pmc.ncbi.nlm.nih.gov/articles/PMC10609077/); [archived reproduction scripts](https://zenodo.org/records/8186837), 104.4 kB, CC BY 4.0 | Best published phantom baseline: grid/disc/cross scenes, translation/radial deformation, filtered ice and independent Poisson sampling through Xmipp. The paper lists the phantom EMPIAR deposit as pending; no later deposit was verified. The inspected generator does not model CTF, detector response or radiation damage. Use for a later independent-generator comparison, after exporting truth and reference. |
+| [Warped-image movie and generator](https://zenodo.org/records/15617030), CC BY 4.0 | Optional deformation smoke test: 142,239,904-byte float32 MRC, 40×927×959; metadata specifies 5.4 Å/px while MRC cell lengths are zero. Seed 42, 10×3×3 cubic B-spline controls within ±8 px, bicubic backward warp and zero padding. One averaged experimental image is repeatedly warped: its residual noise moves with the signal. No independent shot noise, dose evolution or genuinely clean target; unsuitable as low-dose accuracy truth. |
+| [Parakeet](https://github.com/rosalindfranklininstitute/parakeet), GPLv3; [publication](https://pmc.ncbi.nlm.nih.gov/articles/PMC8548082/), [staged output tutorial](https://rosalindfranklininstitute.github.io/parakeet/tutorial.html) | Physically richer offline candidate with multislice optics, ice, detector and Poisson models. Its [motion model](https://github.com/rosalindfranklininstitute/parakeet/blob/main/src/parakeet/sample/motion.py) includes particle drift/interactions/noise. Requires a verified track exporter and a defensible projected-motion definition; not ready-made dense field truth. Keep external rather than copying GPLv3 simulator code into this change. |
+| [Roodmus 2024](https://journals.iucr.org/m/issues/2024/06/00/rq5011/index.html); [fractionated dataset](https://data.4tu.nl/datasets/fe5e7ef0-b6a5-49a4-a2cd-4ecb53edf83f), 16.4 GB, CC BY 4.0 | Published data omit beam-induced motion. Useful zero-motion controls, not nonzero-motion truth; too large for mandatory CI. |
+| [NoiseFlow, ICPR 2022](https://github.com/sheilaya/NoiseFlow) | Research-only: linked synthetic clean PNG/dense .flo archive, molecular Blender scenes with CTF/Gaussian noise/MTF. Loader converts uint8 rather than raw-count MRC. Archive contents/size and an explicit code/data license were not verified. Do not vendor or automatically download until licensing and coordinate conventions are resolved. |
 
 The [Xmipp phantom source](https://github.com/I2PC/xmipp3/blob/main/src/xmipp/libraries/reconstruction/phantom_movie.cpp)
-carries GPL-2.0-or-later notices, compatible with this repository. Its current
-implementation reverses time and uses backward sampling; paper equations alone
-are insufficient to translate its motion convention. Before importing a phantom,
-pin the generator commit, command, input/output hashes, software and data licenses;
-export its clean target and independently validated forward/inverse maps, convert
-them to the documented frame-0 gauge and dense candidate contract, and test closure.
-The source link here is discovery provenance, not a pinned executable dependency.
-The script repository's reuse license must be verified separately before copying.
+carries GPL-2.0-or-later notices. It reverses time, uses backward sampling and emits
+no truth/reference sidecar. A separate zero-motion rerun can change padded dimensions
+and the seeded scene, so it is not automatically a matching clean reference.
+Before adoption, pin the generator commit, command, input/output hashes and licenses;
+export clean reference and maps **from the same run**, validate forward/inverse
+closure, and convert to this document's frame-0 gauge. Current source links are
+research provenance, not pinned executable dependencies. Published ideas may be
+implemented independently with citations; no external source is copied here.
 
-**Decision:** retain the tiny independent analytic family for routine CI. Treat
-Xmipp as a later optional offline cross-generator comparison, once its provenance,
-truth sidecar and target are validated. Do not download a large corpus in CI or
-label static particle/micrograph datasets as motion truth. Larger realism studies
-should separately add nonlinear inverse closure, seed populations, CTF/dose/detector
-models, grouping/binning, frequency transfer and Nyquist controls, then held-out
-real-data scientific validation under #238/#61. They must retain every noisy or
-ambiguous result rather than hiding it inside a gate-only aggregate.
+**Decision:** retain the tiny analytic family for CI, prioritize a pinned Xmipp
+comparison offline, and reserve Parakeet for a later realism study. The downloadable
+warped-image candidate can test coordinate handling only. The dense NPY evaluator
+interface is an offline adapter boundary for estimates on this family; arbitrary
+external movies still require their own validated fixture schema, reference,
+geometry/units, ROI and gauge adapter, which this PR does not implement.
+
+Later versions should separately add nonlinear inverse closure, seed populations,
+CTF/dose/detector models, grouping/binning, frequency transfer and Nyquist controls,
+then held-out scientific validation under #238/#61. Retain every noisy or ambiguous
+result rather than hiding it inside a gate-only aggregate. No large downloads or
+external simulator implementation are part of this PR.

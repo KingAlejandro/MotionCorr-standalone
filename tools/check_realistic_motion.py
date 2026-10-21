@@ -41,7 +41,7 @@ def evaluate(r, model, serialized=None):
     if not r['control']:
         t=np.arange(r['frames'])/(r['frames']-1)
         g=-np.stack([8*(-np.expm1(-t/.1))+4*t,-5*(-np.expm1(-t/.15))-2*t],axis=-1)
-    result=dict(schema='motion-counting-metrics/1',gauge='frame-0 material; no registration',
+    result=dict(schema='motion-counting-metrics/2',gauge='frame-0 material; no registration',
                 lattice=dict(shape=[129,129],roi=[32,r['ny']-33,32,r['nx']-33],endpoints_inclusive=True),
                 field=errors(field,truth,r['pixel_size']),global_trajectory=errors(np.array(model['global']),g,r['pixel_size']),
                 local_component=errors(field-np.array(model['global'])[:,None,:],truth-g[:,None,:],r['pixel_size']),
@@ -67,11 +67,17 @@ def convergence(log):
     text=Path(log).read_text()
     global_text=text.split('Global alignment:',1)[1].split('Local alignments:',1)[0]
     it=[float(a) for a in re.findall(r'Iteration \d+: RMSD = (\S+) px',global_text)]
+    def verdict(block,values,kind):
+        native=re.findall(r'\[CUDA '+kind+r' Alignment\] completed; converged=(yes|no)',block)
+        if native: return native[-1]=='yes'
+        if not values or values[-1]==.5: return None
+        return values[-1]<.5
     patches=[]
     for block in re.split(r'Patch \(\d+, \d+\):',text)[1:]:
         vals=[float(a) for a in re.findall(r'Iteration \d+: RMSD = (\S+) px',block)]
-        patches.append(dict(final_increment_px=vals[-1] if vals else None,converged=bool(vals and vals[-1]<.5)))
-    return dict(global_iterations=len(it),global_increment_px=it,global_converged=bool(it and it[-1]<.5),patches=patches)
+        patches.append(dict(final_increment_px=vals[-1] if vals else None,converged=verdict(block,vals,'Patch')))
+    return dict(global_iterations=len(it),global_increment_px=it,global_converged=verdict(global_text,it,'Global'),patches=patches,
+                source='explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous')
 
 
 def main():

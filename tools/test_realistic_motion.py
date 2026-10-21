@@ -11,6 +11,16 @@ from summarize_realistic_motion import paired, summarize
 gen=check.gen
 
 class Realistic(unittest.TestCase):
+    def test_native_convergence_beats_rounded_rmsd(self):
+        with tempfile.TemporaryDirectory() as t:
+            p=Path(t)/'movie.log'
+            p.write_text('Global alignment:\n Iteration 2: RMSD = 0.50 px\n [CUDA Global Alignment] completed; converged=yes\nLocal alignments:\nPatch (1, 1):\n Iteration 2: RMSD = 0.50 px\n [CUDA Patch Alignment] completed; converged=yes\n')
+            d=check.convergence(p)
+            self.assertIs(d['global_converged'],True)
+            self.assertIs(d['patches'][0]['converged'],True)
+            p.write_text('Global alignment:\n Iteration 5: RMSD = 0.5 px\nLocal alignments:\n')
+            self.assertIsNone(check.convergence(p)['global_converged'])
+
     def test_refuse_incomplete_census(self):
         with tempfile.TemporaryDirectory() as t:
             with self.assertRaisesRegex(ValueError,'incomplete census'):

@@ -38,12 +38,13 @@ def summarize(root):
                 out=root/'results'/name/arm
                 if not (out/'metrics.json').exists():missing.append(str(out/'metrics.json'));continue
                 m=json.loads((out/'metrics.json').read_text());run=json.loads((out/'RUN.json').read_text());full[c,seed,arm]=m
+                if m['schema']!='motion-counting-metrics/2':raise ValueError('re-evaluate legacy convergence accounting before summary')
                 if run['exit']:raise ValueError('process failure cannot enter accuracy table')
                 models[name,arm]=json.loads((out/'runtime.json').read_text())
                 rows.append(dict(condition=c,seed=seed,arm=arm,field_px=m['field']['px'],field_angstrom=m['field']['angstrom'],
                     global_px=m['global_trajectory']['px'],local_px=m['local_component']['px'],
                     global_converged=m['convergence']['global_converged'],local_enabled=m['local_enabled'],
-                    patches_converged=sum(p['converged'] for p in m['convergence']['patches']),
+                    patches_converged=sum(p['converged'] is True for p in m['convergence']['patches']),
                     patches_total=len(m['convergence']['patches']),field_distance_status=m['field_distance_status'],
                     sampling_status=m['sampling_status'],star_roundtrip_loss_px=m['star_roundtrip_loss']['px']))
     if missing:raise ValueError(f'incomplete census: {len(missing)} missing; first: {missing[:5]}')
@@ -58,7 +59,8 @@ def summarize(root):
                 worst_field_max_px=max(r['field_px']['max'] for r in rr),
                 median_global_rms_px=float(np.median([r['global_px']['rms'] for r in rr])),
                 median_local_rms_px=float(np.median([r['local_px']['rms'] for r in rr])),
-                global_nonconverged=sum(not r['global_converged'] for r in rr),
+                global_nonconverged=sum(r['global_converged'] is False for r in rr),
+                global_convergence_unknown=sum(r['global_converged'] is None for r in rr),
                 local_disabled=sum(not r['local_enabled'] for r in rr),
                 field_distance_failures=sum(r['field_distance_status']=='FAIL' for r in rr),
                 invalid_sampling=sum(r['sampling_status']!='VALID' for r in rr)))

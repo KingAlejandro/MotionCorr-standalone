@@ -783,6 +783,13 @@ if(BUILD_TESTING AND CUDA)
         mc_cuda_mutant(CudaHermitianCCFMutant tests/cuda_patch_batch.cpp cuda_alignpatch ccf_batched_no_projection
             "ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));\n            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r"
             "ALIGN_LAUNCH(cudaSuccess);\n            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r" ${PATCH_BATCH_WRAPS})
+        add_executable(cuda_peak_fit tests/cuda_peak_fit.cu)
+        target_link_libraries(cuda_peak_fit PRIVATE motioncorr_core)
+        add_test(NAME CudaPeakFit COMMAND cuda_peak_fit)
+        set_tests_properties(CudaPeakFit PROPERTIES LABELS "cuda;hardware" TIMEOUT 60)
+        mc_cuda_mutant(CudaPeakFitMutant tests/cuda_peak_fit.cu cuda_alignpatch float_denominator
+            "double denom_x = vp_x + vn_x - 2.0 * maxval;"
+            "double denom_x = float(vp_x) + float(vn_x) - 2.0f * float(maxval);")
         # shift_retired: retired patches keep receiving phase shifts.
         mc_cuda_mutant(CudaPatchBatchMutant tests/cuda_patch_batch.cpp cuda_alignpatch shift_retired
             "for (int j = 0; j < (int)active.size(); ++j) { const int p = active[j];"

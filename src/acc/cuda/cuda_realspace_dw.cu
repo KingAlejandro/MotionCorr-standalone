@@ -156,8 +156,11 @@ __global__ void interpolateAndAccumulatePolynomialKernel(
     float x_target = (float)ix - x_fitted;
     float y_target = (float)iy - y_fitted;
 
-    int x0 = (int)floorf(x_target);
-    int y0 = (int)floorf(y_target);
+    // Branch decision in double, as on the CPU: near nx-1 a float step is 2.4e-4 px, so a smaller
+    // shift rounds away in x_target and sends an interpolable pixel to the border fallback (#259).
+    // The weights below keep the float x_target.
+    int x0 = (int)floor((double)ix - (double)x_fitted);
+    int y0 = (int)floor((double)iy - (double)y_fitted);
     int x1 = x0 + 1;
     int y1 = y0 + 1;
 

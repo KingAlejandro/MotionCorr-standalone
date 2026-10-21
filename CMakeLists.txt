@@ -799,6 +799,14 @@ if(BUILD_TESTING AND CUDA)
         target_link_libraries(cuda_realspace_border_branch PRIVATE motioncorr_core)
         add_test(NAME CudaRealspaceBorderBranch COMMAND cuda_realspace_border_branch)
         set_tests_properties(CudaRealspaceBorderBranch PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Mutants restore the float floor in one axis; the other axis and the
+        # control cases must still match.
+        mc_cuda_mutant(CudaRealspaceBorderBranchMutant tests/cuda_realspace_border_branch.cpp cuda_realspace_dw x_float
+            "int x0 = (int)floor((double)ix - (double)x_fitted);"
+            "int x0 = (int)floorf(x_target);")
+        mc_cuda_mutant(CudaRealspaceBorderBranchMutant tests/cuda_realspace_border_branch.cpp cuda_realspace_dw y_float
+            "int y0 = (int)floor((double)iy - (double)y_fitted);"
+            "int y0 = (int)floorf(y_target);")
         # Worker-lifetime device gain retention: the produced sum is the oracle,
         # so a wrongly reused or wrongly retired buffer changes pixels.
         add_executable(cuda_device_gain_pool tests/cuda_device_gain_pool.cpp)

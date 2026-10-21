@@ -20,22 +20,19 @@ def done(n):
 
 
 def main():
-    (ROOT/'controls').mkdir(exist_ok=True); pending = [n for n in names if not done(n)]
-    todo = list(names)
-    while todo or resident():
-        for n in resident():
-            if done(n):
-                if (FIX/n/'RECEIPT.json').exists():
-                    shutil.rmtree(FIX/n); print('released', n, flush=True)
-        while todo and len(resident()) < MAX_IN_FLIGHT and shutil.disk_usage(ROOT).free > 30*(1 << 30):
-            n = todo.pop(0)
-            if done(n): continue
-            subprocess.run([str(ROOT/'pull.sh'), n], check=True)
-            if not (FIX/n/'RECEIPT.json').exists(): print('pull failed', n, flush=True); todo.append(n); time.sleep(30); continue
+    """Fixtures are pushed from 4GPUs (push_fixtures.sh); this only runs seed-0 controls and releases movies."""
+    (ROOT/'controls').mkdir(exist_ok=True)
+    penv = dict(ENV, PYTHONPATH=ENV['PYTHONPATH']+':'+str(ROOT/'repo/tools')+':'+str(ROOT/'repo/test-data'))
+    while True:
+        for n in names:
+            if not (FIX/n/'RECEIPT.json').exists(): continue
             if n.endswith('-s00') and not (ROOT/'controls'/f'{n}.json').exists():
-                p = subprocess.run(['python3', str(ROOT/'repo/tools/image_batch.py'), 'controls', str(ROOT), n, str(ROOT/'controls'/f'{n}.json')], env=dict(ENV, PYTHONPATH=ENV['PYTHONPATH']+':'+str(ROOT/'repo/tools')+':'+str(ROOT/'repo/test-data')))
+                p = subprocess.run(['python3', str(ROOT/'repo/tools/image_batch.py'), 'controls', str(ROOT), n, str(ROOT/'controls'/f'{n}.json')], env=penv)
                 print('controls', n, p.returncode, flush=True)
                 if p.returncode: (ROOT/'controls'/f'{n}.json').write_text(json.dumps(dict(error='controls failed', returncode=p.returncode)))
+            if done(n) and (FIX/n/'movie.mrcs').exists():
+                shutil.rmtree(FIX/n); print('released', n, flush=True)
+        if all(done(n) for n in names) and not resident(): break
         time.sleep(20)
     print('all released', flush=True)
 

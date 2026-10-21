@@ -128,12 +128,15 @@ static bool run(int nx, int ny, double sx, double sy, bool plans, bool session_o
                                      CUFFT_C2R, batch, &work) == CUFFT_SUCCESS, "cuFFT plan many");
             for (int b = 0; b < batch; ++b)
                 check(cudaMemcpy(din + b * nf, f, nf * sizeof(cufftComplex), cudaMemcpyHostToDevice));
+            std::cout << "CHARACTERIZATION ONLY: invalid raw C2R input; numerical leakage is platform-specific\n";
             raw_characterization = true;
             require(cufftExecC2R(plan, din, dout) == CUFFT_SUCCESS, "cuFFT exec");
             raw_characterization = false;
             check(cudaDeviceSynchronize());
             check(cudaMemcpy(image.data(), dout, nr * sizeof(float), cudaMemcpyDeviceToHost));
-            compare(batch == 1 ? "raw_planmany_batch1" : "raw_planmany_batch2", image.data(), reference, nx, ny);
+            const bool discarded = compare(batch == 1 ? "raw_planmany_batch1" : "raw_planmany_batch2", image.data(), reference, nx, ny);
+            std::cout << (discarded ? "No numerical leak observed (invariant remains the negative control)\n"
+                                   : "Numerical leak observed (characterization, not a test failure)\n");
             require(cufftDestroy(plan) == CUFFT_SUCCESS, "cuFFT destroy");
             check(cudaFree(din)); check(cudaFree(dout));
         }

@@ -4855,6 +4855,8 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			RCTOC(TIMING_CCF_CALC);
 
 			RCTIC(TIMING_CCF_IFFT);
+			// Diagnostic CPU DC control, isolated from all production branches.
+			if (std::getenv("MC_DIAG_ZERO_CCF_DC")) DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = Complex(0, 0);
 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
 			RCTOC(TIMING_CCF_IFFT);
 

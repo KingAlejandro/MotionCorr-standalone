@@ -38,6 +38,7 @@
 static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
+#include "src/diag_ccf.h" // S1.3 DIAGNOSTIC ONLY
 #include "src/cpu_dose_symmetry_mode.h"
 #include "src/native_movie_staging.h"
 #include "src/defect_neighbours.h"
@@ -3371,6 +3372,64 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
 	}
 	RCTOC(TIMING_GLOBAL_ALIGNMENT);
+	{ // S1.3b DIAGNOSTIC ONLY: global-trajectory capture/override (diag_ccf.h)
+		std::vector<double> ox(xshifts.begin(), xshifts.end()), oy(yshifts.begin(), yshifts.end()), ix, iy;
+		diagGlobalShiftsOut(ox, oy);
+		if (diagGlobalShiftsIn(ox.size(), ix, iy)) {
+			std::vector<double> dx(ox.size()), dy(ox.size());
+			bool any = false;
+			for (size_t i = 0; i < ox.size(); i++) {
+				dx[i] = ix[i] - ox[i]; dy[i] = iy[i] - oy[i];
+				any = any || dx[i] != 0.0 || dy[i] != 0.0;
+				xshifts[i] = ix[i]; yshifts[i] = iy[i];
+			}
+			logfile << "S1.3b DIAGNOSTIC: global trajectory overridden from " << std::getenv("MC_DIAG_GLOBAL_SHIFTS")
+			        << (any ? "" : " (identical to own: no shift applied)") << std::endl;
+			if (any) {
+				if (dx[0] != 0.0 || dy[0] != 0.0) REPORT_ERROR("S1.3b: frame 1 must stay at the origin");
+#ifdef _CUDA_ENABLED
+				if (movie_session)
+					cudaDiagApplyGlobalDelta(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, dx.data(), dy.data());
+				else
+#endif
+				for (int i = 1; i < n_frames; i++)
+					if (dx[i] != 0.0 || dy[i] != 0.0)
+						shiftNonSquareImageInFourierTransform(Fframes[i], -dx[i] / nx, -dy[i] / ny);
+			}
+		}
+	}
+	// S1.3b DIAGNOSTIC ONLY: full-frame spectra after the global shifts (read-only).
+	auto diag_full_dump = [&](const char *kind) {
+		const char *dir = std::getenv("MC_DIAG_FULL_DUMP");
+		if (!dir) return;
+		const char *list = std::getenv("MC_DIAG_FULL_FRAMES");
+		std::string sl = list ? list : "2,11,21";
+		size_t a = 0;
+		while (a < sl.size()) {
+			size_t b = sl.find(',', a); if (b == std::string::npos) b = sl.size();
+			const int f = std::atoi(sl.substr(a, b - a).c_str()) - 1; a = b + 1;
+			if (f < 0 || f >= n_frames) continue;
+			const bool spec = std::string(kind) == "spec";
+			const size_t n = spec ? (size_t)ny * (nx / 2 + 1) * 2 : (size_t)ny * nx;
+			std::vector<float> h(n);
+#ifdef _CUDA_ENABLED
+			if (movie_session) {
+				const void *src = spec ? (const void *)(movie_session->getDeviceFourierFrames() + (size_t)f * ny * (nx / 2 + 1))
+				                       : (const void *)(movie_session->getDeviceRealFrames() + (size_t)f * ny * nx);
+				if (cudaMemcpy(h.data(), src, n * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess)
+					REPORT_ERROR("S1.3b full dump read-back failed");
+			} else
+#endif
+			{
+				const float *src = spec ? (const float *)Fframes[f].data : Iframes[f]().data;
+				std::copy(src, src + n, h.begin());
+			}
+			char name[1024];
+			std::snprintf(name, sizeof(name), "%s/%s_fr%d_%dx%d.bin", dir, kind, f + 1, ny, spec ? nx / 2 + 1 : nx);
+			if (FILE *o = std::fopen(name, "wb")) { std::fwrite(h.data(), sizeof(float), n, o); std::fclose(o); }
+		}
+	};
+	diag_full_dump("spec");
 	MC_STAGE("allocate reconstruction");
 	for (int i = 0, ilim = xshifts.size(); i < ilim; i++) {
 		// Should be in the original pixel size
@@ -3441,6 +3500,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 	}
 	RCTOC(TIMING_GLOBAL_IFFT);
+	diag_full_dump("real"); // S1.3b DIAGNOSTIC ONLY
 
 	// Patch based alignment
 	MC_STAGE("patch alignment");
@@ -3503,6 +3563,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					boxes.push_back({x_start, y_start, x_end - x_start, y_end - y_start});
 				}
 			}
+			g_diag_patch_x = patch_x; // S1.3 DIAGNOSTIC ONLY
 			RCTIC(TIMING_PATCH_ALIGN);
 			movie_session->alignPatchesBatched(boxes, n_groups, group_start.data(), group_size.data(),
 				bfactor / (prescaling * prescaling), max_iter, ccf_downsample, patchBatchCap(), batched);
@@ -3511,10 +3572,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 
 		int ipatch = 1;
+		g_diag_patch_x = patch_x; // S1.3 DIAGNOSTIC ONLY
 		for (int iy = 0; iy < patch_y; iy++) {
 			for (int ix = 0; ix < patch_x; ix++) {
 				int x_start, x_end, y_start, y_end;
 				patch_bounds(iy, ix, x_start, x_end, y_start, y_end);
+				g_diag_patch = iy * patch_x + ix; // S1.3 DIAGNOSTIC ONLY
 
 				int x_center = (x_start + x_end - 1) / 2, y_center = (y_start + y_end - 1) / 2;
 				logfile << "Patch (" << iy + 1 << ", " << ix + 1 << "): " << ipatch << " / " << patch_x * patch_y;
@@ -3837,6 +3900,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			}
 		}
 		Fpatches.clear();
+		g_diag_patch = -1; // S1.3 DIAGNOSTIC ONLY
 #ifdef _CUDA_ENABLED
 		if (d_patch_fcomplex_buffer) {
             cufftComplex *owned = d_patch_fcomplex_buffer;
@@ -4667,6 +4731,10 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, is_global);
 	}
 #endif
+	const bool diag_double = diagCcfDouble(), diag_zero_dc = diagCcfDc(is_global);
+    std::vector<Image<double>> Iccs64(diag_double ? n_threads : 0);
+    std::vector<MultidimArray<dComplex>> Fccs64(diag_double ? n_threads : 0);
+    MultidimArray<dComplex> Fref64;
 	std::vector<Image<float> > Iccs(n_threads);
 	MultidimArray<fComplex> Fref;
 	std::vector<MultidimArray<fComplex> > Fccs(n_threads);
@@ -4710,6 +4778,14 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	const int nfy_half = nfy / 2;
 
 	Fref.reshape(ccf_nfy, ccf_nfx);
+    if (diag_double) {
+        Fref64.reshape(ccf_nfy, ccf_nfx);
+        for (int i = 0; i < n_threads; ++i) {
+            Iccs64[i]().reshape(ccf_ny, ccf_nx);
+            Fccs64[i].reshape(ccf_nfy, ccf_nfx);
+        }
+    }
+
 	for (int i = 0; i < n_threads; i++) {
 		Iccs[i]().reshape(ccf_ny, ccf_nx);
 		Fccs[i].reshape(Fref);
@@ -4739,9 +4815,32 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
 
+	// S1.3 DIAGNOSTIC ONLY: per-frame CCF records and optional raw dumps (read-only).
+	const int diag_label = is_global ? -1 : g_diag_patch;
+	const bool diag_on = diagCcfPath() != nullptr, diag_dump = diagDumpMaps(diag_label);
+	const int diag_call = diag_dump ? diagNextCall() : 0;
+	std::vector<DiagCcfStat> diag_stats(diag_on ? n_frames : 0);
+	std::vector<int> diag_pos(diag_on ? 2 * n_frames : 0);
+	std::vector<float> diag_maps(diag_dump && !diag_double ? (size_t)n_frames * ccf_ny * ccf_nx : 0);
+	if (diag_dump) {
+		std::vector<float> wt((size_t)ccf_nfy * ccf_nfx);
+		for (int y = 0; y < ccf_nfy; y++) for (int x = 0; x < ccf_nfx; x++) wt[(size_t)y * ccf_nfx + x] = DIRECT_A2D_ELEM(weight, y, x);
+		diagDumpRaw("cpu", diag_label, diag_call, 0, "wt", wt.data(), wt.size() * sizeof(float), 1, ccf_nfy, ccf_nfx);
+	}
 	for (int iter = 1; iter	<= max_iter; iter++) {
+		if (diag_dump) {
+			std::vector<fComplex> in((size_t)n_frames * ccf_nfy * ccf_nfx);
+			for (int iframe = 0; iframe < n_frames; iframe++)
+				for (int y = 0; y < ccf_nfy; y++) {
+					const int ly = (y > ccf_nfy_half) ? (y - ccf_nfy + nfy) : y;
+					for (int x = 0; x < ccf_nfx; x++)
+						in[((size_t)iframe * ccf_nfy + y) * ccf_nfx + x] = DIRECT_A2D_ELEM(Fframes[iframe], ly, x);
+				}
+			diagDumpRaw("cpu", diag_label, diag_call, iter, "in", in.data(), in.size() * sizeof(fComplex), n_frames, ccf_nfy, ccf_nfx);
+		}
 		RCTIC(TIMING_MAKE_REF);
 		Fref.initZeros();
+        if (diag_double) Fref64.initZeros();
 
 		#pragma omp parallel for num_threads(n_threads)
 		for (int y = 0; y < ccf_nfy; y++) {
@@ -4749,6 +4848,10 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			for (int x = 0; x < ccf_nfx; x++) {
 				for (int iframe = 0; iframe < n_frames; iframe++) {
 					DIRECT_A2D_ELEM(Fref, y, x) += DIRECT_A2D_ELEM(Fframes[iframe], ly, x);
+                    if (diag_double) {
+                        const auto z = DIRECT_A2D_ELEM(Fframes[iframe], ly, x);
+                        DIRECT_A2D_ELEM(Fref64, y, x) += dComplex(double(z.real), double(z.imag));
+                    }
 				}
 			}
 		}
@@ -4762,14 +4865,30 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			for (int y = 0; y < ccf_nfy; y++) {
 				const int ly = (y > ccf_nfy_half) ? (y - ccf_nfy + nfy) : y;
 				for (int x = 0; x < ccf_nfx; x++) {
+                    if (diag_double) {
+                        const auto z = DIRECT_A2D_ELEM(Fframes[iframe], ly, x);
+                        const dComplex f(double(z.real), double(z.imag));
+                        DIRECT_A2D_ELEM(Fccs64[tid], y, x) =
+                            (DIRECT_A2D_ELEM(Fref64, y, x) - f) * f.conj() * double(DIRECT_A2D_ELEM(weight, y, x));
+                    } else {
 					DIRECT_A2D_ELEM(Fccs[tid], y, x) = (DIRECT_A2D_ELEM(Fref, y, x) - DIRECT_A2D_ELEM(Fframes[iframe], ly, x)) *
 					                                    DIRECT_A2D_ELEM(Fframes[iframe], ly, x).conj() * DIRECT_A2D_ELEM(weight, y, x);
+                    }
 				}
 			}
 			RCTOC(TIMING_CCF_CALC);
 
 			RCTIC(TIMING_CCF_IFFT);
+            if (diag_double) {
+                if (diag_zero_dc) DIRECT_A2D_ELEM(Fccs64[tid], 0, 0) = dComplex(0, 0);
+                NewFFT::inverseFourierTransform(Fccs64[tid], Iccs64[tid]());
+            } else {
+                if (diag_zero_dc) DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0, 0);
 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
+            }
+            auto ccf_at = [&](int y, int x) -> double {
+                return diag_double ? DIRECT_A2D_ELEM(Iccs64[tid](), y, x) : DIRECT_A2D_ELEM(Iccs[tid](), y, x);
+            };
 			RCTOC(TIMING_CCF_IFFT);
 
 			RCTIC(TIMING_CCF_FIND_MAX);
@@ -4780,7 +4899,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 
 				for (int x = -search_range; x <= search_range; x++) {
 					const int ix = (x < 0) ? ccf_nx + x : x;
-					RFLOAT val = DIRECT_A2D_ELEM(Iccs[tid](), iy, ix);
+					RFLOAT val = ccf_at(iy, ix);
 //					std::cout << "(x, y) = " << x << ", " << y << ", (ix, iy) = " << ix << " , " << iy << " val = " << val << std::endl;
 					if (val > maxval) {
 						posx = x; posy = y;
@@ -4789,6 +4908,12 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 				}
 			}
 
+			if (diag_on) {
+				diag_stats[iframe] = diag_double ? diagCcfStat(Iccs64[tid]().data, ccf_nx, ccf_ny, search_range, posx, posy) : diagCcfStat(Iccs[tid]().data, ccf_nx, ccf_ny, search_range, posx, posy);
+				diag_pos[2 * iframe] = posx; diag_pos[2 * iframe + 1] = posy;
+			}
+			if (diag_dump && !diag_double)
+				std::memcpy(diag_maps.data() + (size_t)iframe * ccf_ny * ccf_nx, Iccs[tid]().data, (size_t)ccf_ny * ccf_nx * sizeof(float));
 			int ipx_n = posx - 1, ipx = posx, ipx_p = posx + 1, ipy_n = posy - 1, ipy = posy, ipy_p = posy + 1;
 			if (ipx_n < 0) ipx_n = ccf_nx + ipx_n;
 			if (ipx < 0) ipx = ccf_nx + ipx;
@@ -4799,16 +4924,16 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 
 			// Quadratic interpolation by Jasenko
 			RFLOAT vp, vn;
-			vp = DIRECT_A2D_ELEM(Iccs[tid](), ipy, ipx_p);
-			vn = DIRECT_A2D_ELEM(Iccs[tid](), ipy, ipx_n);
+			vp = ccf_at(ipy, ipx_p);
+			vn = ccf_at(ipy, ipx_n);
  			if (std::abs(vp + vn - 2.0 * maxval) > EPS) {
 				cur_xshifts[iframe] = posx - 0.5 * (vp - vn) / (vp + vn - 2.0 * maxval);
 			} else {
 				cur_xshifts[iframe] = posx;
 			}
 
-			vp = DIRECT_A2D_ELEM(Iccs[tid](), ipy_p, ipx);
-			vn = DIRECT_A2D_ELEM(Iccs[tid](), ipy_n, ipx);
+			vp = ccf_at(ipy_p, ipx);
+			vn = ccf_at(ipy_n, ipx);
  			if (std::abs(vp + vn - 2.0 * maxval) > EPS) {
 				cur_yshifts[iframe] = posy - 0.5 * (vp - vn) / (vp + vn - 2.0 * maxval);
 			} else {
@@ -4819,9 +4944,18 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 #ifdef DEBUG_OWN
 			std::cout << "tid " << tid << " Frame " << 1 + iframe << ": raw shift x = " << posx << " y = " << posy << " cc = " << maxval << " interpolated x = " << cur_xshifts[iframe] << " y = " << cur_yshifts[iframe] << std::endl;
 #endif
+            if (diag_dump && diag_double)
+                diagDumpRaw("cpu64", diag_label, diag_call, iter, ("map64fr" + std::to_string(iframe + 1)).c_str(),
+                    Iccs64[tid]().data, (size_t)ccf_ny * ccf_nx * sizeof(double), 1, ccf_ny, ccf_nx);
 			RCTOC(TIMING_CCF_FIND_MAX);
 		}
 
+		if (diag_on)
+			for (int f = 0; f < n_frames; f++)
+				diagCcfWrite(is_global ? "cpu-global" : "cpu", diag_label, iter, f, diag_stats[f],
+				             diag_pos[2 * f], diag_pos[2 * f + 1], cur_xshifts[f], cur_yshifts[f], "cpu-actual");
+		if (diag_dump && !diag_double)
+			diagDumpRaw("cpu", diag_label, diag_call, iter, "map", diag_maps.data(), diag_maps.size() * sizeof(float), n_frames, ccf_ny, ccf_nx);
 		// Set origin
 		RFLOAT x_sumsq = 0, y_sumsq = 0;
 		for (int iframe = n_frames - 1; iframe >= 0; iframe--) { // do frame 0 last!

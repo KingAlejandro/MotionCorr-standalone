@@ -1,5 +1,6 @@
 #include "src/acc/cuda/cuda_hermitian.cuh"
 #include "src/acc/cuda/cuda_movie_session.h"
+#include "src/diag_ccf.h" // S1.3 DIAGNOSTIC ONLY
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/stage_profile.h"
@@ -2447,6 +2448,7 @@ void CudaMovieSession::alignPatchesBatched(
             return;
         }
         for (int j = 0; j < count; j++) xs[j].assign(n_groups, (RFLOAT)0), ys[j].assign(n_groups, (RFLOAT)0);
+        g_diag_batch_base = first; // S1.3 DIAGNOSTIC ONLY
         cudaAlignPatchBatchDevice(workspace, count, n_groups, patch_w, patch_h, scaled_B,
                                   xs.data(), ys.data(), max_iter, ccf_downsample, device_id,
                                   logs.data());

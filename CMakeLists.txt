@@ -794,6 +794,11 @@ if(BUILD_TESTING AND CUDA)
         mc_cuda_mutant(CudaVramAliasMutant tests/cuda_vram_alias.cpp cuda_movie_session dw_scratch_over_fourier
             "scratch.block = reinterpret_cast<char*>(d_Iframes);"
             "scratch.block = reinterpret_cast<char*>(d_Fframes);" "LINKER:--wrap=cudaMalloc")
+        # #259: the local warp's border branch must match the CPU's double decision.
+        add_executable(cuda_realspace_border_branch tests/cuda_realspace_border_branch.cpp)
+        target_link_libraries(cuda_realspace_border_branch PRIVATE motioncorr_core)
+        add_test(NAME CudaRealspaceBorderBranch COMMAND cuda_realspace_border_branch)
+        set_tests_properties(CudaRealspaceBorderBranch PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
         # Worker-lifetime device gain retention: the produced sum is the oracle,
         # so a wrongly reused or wrongly retired buffer changes pixels.
         add_executable(cuda_device_gain_pool tests/cuda_device_gain_pool.cpp)

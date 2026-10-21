@@ -1,0 +1,267 @@
+[
+ {
+  "case": "e10216-09",
+  "original_native_record": {
+   "label": "e10216-09-p5-map-cpu",
+   "sweep_label": "e10216-09-p5-F-cuda",
+   "sweep_cwd": "/mnt/clathrin/alex-motioncorr-peakfit/extra/inputs/e10216-09",
+   "source_sha": "4837b210",
+   "config": "L",
+   "gpu": false,
+   "binary": "/mnt/clathrin/alex-motioncorr-peakfit/build-A0/motioncorr",
+   "binary_sha256": "473587594d839b46b07e3990fdaf6bdd54e3c920bc692d550da89cc1f4183e7e",
+   "argv": [
+    "taskset",
+    "-c",
+    "40-47",
+    "/usr/bin/time",
+    "-v",
+    "-o",
+    "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10216-09-p5-map-cpu/time-v.log",
+    "/mnt/clathrin/alex-motioncorr-peakfit/build-A0/motioncorr",
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10216-09-p5-map-cpu/",
+    "--j",
+    "8",
+    "--seed",
+    "1",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--expected_frames",
+    "59",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10216-09-p5-map-cpu/witness.txt"
+   ],
+   "cpu_mask": "40-47",
+   "lane_lock": "/tmp/motioncorr-peakfit-mapcpu1.lock",
+   "extra_env": {
+    "MC_DIAG_CCF": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10216-09-p5-map-cpu/ccf.txt",
+    "MC_DIAG_GLOBAL_SHIFTS_OUT": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10216-09-p5-map-cpu/global.txt",
+    "MC_DIAG_MAPS": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10216-09-p5-map-cpu/maps",
+    "MC_DIAG_MAP_PATCHES": "1,1;3,3"
+   },
+   "cuda_visible_devices": "",
+   "bench_wait_s": 0,
+   "lane_lock_wait_s": 0.0,
+   "start_utc": "2026-10-21T01:26:08Z",
+   "rc": 0,
+   "wall_s": 33.61,
+   "gpu_witness_uuids": []
+  },
+  "original_native_record_matches_pr261_manifest": true,
+  "buffers": {
+   "in": {
+    "shape": [
+     59,
+     216,
+     109
+    ],
+    "origin": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10216-09-p5-map-cpu/maps/cpu_p1_1_c1_it1_in.bin",
+    "sha256_now": "46c7f8f02394635f594a0ec270440f5adf725bd36d56dab26a16616831c3d257",
+    "bytes": 11112768,
+    "historical_bin_hash_in_pr261": false
+   },
+   "wt": {
+    "shape": [
+     1,
+     216,
+     109
+    ],
+    "origin": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10216-09-p5-map-cpu/maps/cpu_p1_1_c1_it0_wt.bin",
+    "sha256_now": "f438f6aac7988a8e5248425b0875c8febaa24f42cbdcafa2e22b8b837997f6f8",
+    "bytes": 94176,
+    "historical_bin_hash_in_pr261": false
+   }
+  }
+ },
+ {
+  "case": "e12963-00",
+  "original_native_record": {
+   "label": "e12963-00-p5-map-cpu",
+   "sweep_label": "e12963-00-p5-F-cuda",
+   "sweep_cwd": "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e12963-00",
+   "source_sha": "4837b210",
+   "config": "L",
+   "gpu": false,
+   "binary": "/mnt/clathrin/alex-motioncorr-peakfit/build-A0/motioncorr",
+   "binary_sha256": "473587594d839b46b07e3990fdaf6bdd54e3c920bc692d550da89cc1f4183e7e",
+   "argv": [
+    "taskset",
+    "-c",
+    "48-55",
+    "/usr/bin/time",
+    "-v",
+    "-o",
+    "/mnt/clathrin/alex-motioncorr-peakfit/runs/e12963-00-p5-map-cpu/time-v.log",
+    "/mnt/clathrin/alex-motioncorr-peakfit/build-A0/motioncorr",
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.282051282051282",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-peakfit/runs/e12963-00-p5-map-cpu/",
+    "--j",
+    "8",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--expected_frames",
+    "39",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-peakfit/runs/e12963-00-p5-map-cpu/witness.txt",
+    "--gainref",
+    "gain.gain",
+    "--eer_grouping",
+    "49",
+    "--eer_upsampling",
+    "1"
+   ],
+   "cpu_mask": "48-55",
+   "lane_lock": "/tmp/motioncorr-peakfit-mapcpu2.lock",
+   "extra_env": {
+    "MC_DIAG_CCF": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e12963-00-p5-map-cpu/ccf.txt",
+    "MC_DIAG_GLOBAL_SHIFTS_OUT": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e12963-00-p5-map-cpu/global.txt",
+    "MC_DIAG_MAPS": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e12963-00-p5-map-cpu/maps",
+    "MC_DIAG_MAP_PATCHES": "5,4"
+   },
+   "cuda_visible_devices": "",
+   "bench_wait_s": 0,
+   "lane_lock_wait_s": 0.0,
+   "start_utc": "2026-10-21T01:42:18Z",
+   "rc": 0,
+   "wall_s": 24.32,
+   "gpu_witness_uuids": []
+  },
+  "original_native_record_matches_pr261_manifest": true,
+  "buffers": {
+   "in": {
+    "shape": [
+     39,
+     216,
+     109
+    ],
+    "origin": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e12963-00-p5-map-cpu/maps/cpu_p5_4_c1_it1_in.bin",
+    "sha256_now": "d5aa522afb37d34c69e3f5ec1750d51b35a65fd35bd75b77b60848229e249af8",
+    "bytes": 7345728,
+    "historical_bin_hash_in_pr261": false
+   },
+   "wt": {
+    "shape": [
+     1,
+     216,
+     109
+    ],
+    "origin": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e12963-00-p5-map-cpu/maps/cpu_p5_4_c1_it0_wt.bin",
+    "sha256_now": "f438f6aac7988a8e5248425b0875c8febaa24f42cbdcafa2e22b8b837997f6f8",
+    "bytes": 94176,
+    "historical_bin_hash_in_pr261": false
+   }
+  }
+ },
+ {
+  "case": "e10474f3-00",
+  "original_native_record": {
+   "label": "e10474f3-00-p5-map-cpu",
+   "sweep_label": "e10474f3-00-p5-F-cuda",
+   "sweep_cwd": "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f3-00",
+   "source_sha": "4837b210",
+   "config": "L",
+   "gpu": false,
+   "binary": "/mnt/clathrin/alex-motioncorr-peakfit/build-A0/motioncorr",
+   "binary_sha256": "473587594d839b46b07e3990fdaf6bdd54e3c920bc692d550da89cc1f4183e7e",
+   "argv": [
+    "taskset",
+    "-c",
+    "32-39",
+    "/usr/bin/time",
+    "-v",
+    "-o",
+    "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10474f3-00-p5-map-cpu/time-v.log",
+    "/mnt/clathrin/alex-motioncorr-peakfit/build-A0/motioncorr",
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1",
+    "--i",
+    "movies.star",
+    "--o",
+    "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10474f3-00-p5-map-cpu/",
+    "--j",
+    "8",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--expected_frames",
+    "58",
+    "--ingest_witness",
+    "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10474f3-00-p5-map-cpu/witness.txt",
+    "--eer_grouping",
+    "40",
+    "--eer_upsampling",
+    "1"
+   ],
+   "cpu_mask": "32-39",
+   "lane_lock": "/tmp/motioncorr-peakfit-mapcpu0.lock",
+   "extra_env": {
+    "MC_DIAG_CCF": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10474f3-00-p5-map-cpu/ccf.txt",
+    "MC_DIAG_GLOBAL_SHIFTS_OUT": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10474f3-00-p5-map-cpu/global.txt",
+    "MC_DIAG_MAPS": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10474f3-00-p5-map-cpu/maps",
+    "MC_DIAG_MAP_PATCHES": "1,2"
+   },
+   "cuda_visible_devices": "",
+   "bench_wait_s": 0,
+   "lane_lock_wait_s": 0.0,
+   "start_utc": "2026-10-21T01:14:46Z",
+   "rc": 0,
+   "wall_s": 34.09,
+   "gpu_witness_uuids": []
+  },
+  "original_native_record_matches_pr261_manifest": true,
+  "buffers": {
+   "in": {
+    "shape": [
+     58,
+     216,
+     109
+    ],
+    "origin": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10474f3-00-p5-map-cpu/maps/cpu_p1_2_c1_it1_in.bin",
+    "sha256_now": "854dead0c56b3259ffa98fe646767f770da3700f4f2562ebce760f0a21330e08",
+    "bytes": 10924416,
+    "historical_bin_hash_in_pr261": false
+   },
+   "wt": {
+    "shape": [
+     1,
+     216,
+     109
+    ],
+    "origin": "/mnt/clathrin/alex-motioncorr-peakfit/runs/e10474f3-00-p5-map-cpu/maps/cpu_p1_2_c1_it0_wt.bin",
+    "sha256_now": "f438f6aac7988a8e5248425b0875c8febaa24f42cbdcafa2e22b8b837997f6f8",
+    "bytes": 94176,
+    "historical_bin_hash_in_pr261": false
+   }
+  }
+ }
+]

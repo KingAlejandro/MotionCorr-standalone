@@ -1,0 +1,178 @@
+{
+  "rows": [
+    {
+      "row": "E1 default-off neutrality",
+      "verdict": "PASS",
+      "detail": {
+        "p2_equal": true,
+        "p3_equal": true,
+        "exits": [
+          0,
+          0,
+          0
+        ],
+        "p3_quality_files": [],
+        "p1_files": 13
+      }
+    },
+    {
+      "row": "E2 report-on, solver-consistent",
+      "verdict": "PASS",
+      "detail": {
+        "products_identical_to_P1": true,
+        "exit": 0,
+        "errors": []
+      }
+    },
+    {
+      "row": "E3 forced max_iter=1 limit and local drops",
+      "verdict": "PASS",
+      "detail": {
+        "products_identical_to_P5": true,
+        "exits": [
+          0,
+          0
+        ],
+        "errors": []
+      }
+    },
+    {
+      "row": "E4 product write failure reported",
+      "verdict": "PASS",
+      "detail": {
+        "exits": [
+          1,
+          1
+        ],
+        "retained_products_identical": true,
+        "errors": []
+      }
+    },
+    {
+      "row": "E5 sidecar write failure",
+      "verdict": "PASS",
+      "detail": {
+        "products_identical_to_P1": true,
+        "exit": 0,
+        "sidecars": 5,
+        "errors": []
+      }
+    },
+    {
+      "row": "E6 aggregate write failure",
+      "verdict": "PASS",
+      "detail": {
+        "products_identical_to_P1": true,
+        "exit": 0,
+        "sidecars": 6,
+        "summary_is_dir": true,
+        "warning": true
+      }
+    },
+    {
+      "row": "E7 old/missing/stale sidecar resume",
+      "verdict": "PASS",
+      "detail": {
+        "exits": [
+          0,
+          0
+        ],
+        "joint_star_equal": true,
+        "flat_products_equal": true,
+        "all_products_equal": true,
+        "errors": []
+      }
+    },
+    {
+      "row": "E8 too-few-observations fallback reported",
+      "verdict": "PASS",
+      "detail": {
+        "products_identical_to_P13": true,
+        "exits": [
+          0,
+          0
+        ],
+        "errors": []
+      }
+    },
+    {
+      "row": "N1 integer state->converged rejected",
+      "verdict": "PASS",
+      "detail": "checker must reject"
+    },
+    {
+      "row": "N2 voxel byte flip rejected",
+      "verdict": "PASS",
+      "detail": "comparator must reject"
+    },
+    {
+      "row": "N3 flat identifiable claim rejected",
+      "verdict": "PASS",
+      "detail": "checker must reject"
+    },
+    {
+      "row": "N4 failed movie claimed published rejected",
+      "verdict": "PASS",
+      "detail": "checker must reject"
+    },
+    {
+      "row": "N5 patch iteration count rejected",
+      "verdict": "PASS",
+      "detail": "checker must reject"
+    }
+  ],
+  "facts": {
+    "P4_global_states": {
+      "affine": "converged",
+      "flat": "converged",
+      "fractional": "iteration_limit",
+      "integer": "iteration_limit",
+      "noisy": "iteration_limit",
+      "zero": "converged"
+    },
+    "P4_local": {
+      "affine": [
+        "retained",
+        null,
+        9
+      ],
+      "flat": [
+        "retained",
+        null,
+        9
+      ],
+      "fractional": [
+        "retained",
+        null,
+        9
+      ],
+      "integer": [
+        "retained",
+        null,
+        9
+      ],
+      "noisy": [
+        "retained",
+        null,
+        9
+      ],
+      "zero": [
+        "retained",
+        null,
+        9
+      ]
+    },
+    "P4_prediction_differences": {},
+    "P6_local": [
+      4,
+      "retained",
+      null
+    ],
+    "P14_local": [
+      0,
+      "global_only",
+      "too_few_converged_observations",
+      0
+    ]
+  }
+}

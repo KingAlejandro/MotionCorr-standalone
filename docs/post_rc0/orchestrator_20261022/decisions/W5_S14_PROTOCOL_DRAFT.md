@@ -18,9 +18,12 @@ Particle-count retention and noise variance alone do not establish known SSNR
 harm. Historical control targets fitted using the endpoint cannot validate it.
 
 The two-movie EMPIAR-12963 pilot is an independent collection pilot, not a
-sufficient confirmatory particle/half-map study. Past acquisition proposals
+sufficient confirmatory particle/half-map study, and is already exposed. It is
+outside the 114-movie sweep inventory, not an additional untouched holdout.
+Past acquisition proposals
 (256/1024 movies or roughly 270 GiB) are not staged data or present permission
-to acquire them. No larger acquisition is proposed by this draft.
+to acquire them. No larger acquisition is authorized by this draft. A disjoint
+S1-family holdout may require a new bounded acquisition proposal, as below.
 
 ## Freeze before outcomes
 
@@ -32,6 +35,28 @@ remaining uncertainty. Unknown required values block that analysis. Record
 whether prior scientific outcomes or tuning used the collection; correction
 runtime/image diagnostics are a separate exposure field, not automatically a
 claim of untouched scientific data.
+
+All 114 sweep movies have development exposure through the S1 compatibility
+campaign (#243), not only the tutorial. The 30 movies from e10216/e12963/e10474f3
+also form the #255/#261/#271 development censuses. Selected existing movies are
+in the frozen #262 Tier C queue; selection/planned use is distinguished from
+completed execution in the metadata inventory. New CTF/FSC endpoints would not
+undo prior use of their correction/image outcomes for development or selection.
+The per-movie exposure fields record these known uses without opening new
+outcomes; a complete scientific-endpoint exposure audit remains incomplete.
+
+**M6 cohort question:** must confirmatory S1-family movies be disjoint by raw
+movie identity/hash from the 114 exposed development movies and the separate
+12963 pilot? The proposed conservative design excludes those movies from the
+confirmatory cohort and retains them for development/exploratory analysis.
+If that disjointness is required, an S1 accession needs additional movies with
+resolved acquisition metadata and matched downstream assets. Prepare explicit
+IDs, byte/resource limits, licence/provenance and staging boundaries before
+requesting acquisition; none is approved here. Disjoint movies alone do not
+establish an independent collection/session. M6 must define that unit and how
+the required S1-family and independent-collection scope is met. Any decision
+to reuse exposed data must label the resulting analysis as such, rather than
+asserting it is a new holdout.
 
 Select at least one S1 family and an independent collection by a prospective
 metadata-only rule, never by which candidate produced a favourable outcome.
@@ -49,6 +74,9 @@ an explicitly frozen and independently qualified route; historical hybrid
 outputs do not qualify a changed C2. Baseline products remain immutable. Any
 candidate change requires a versioned comparison and explicit treatment of
 already exposed outcomes.
+Refresh the eventual #65 protocol against this explicit C2 identity and policy
+dispositions, rather than treating its historical `3e3a1967` base as the new
+candidate. The current protocol-source head `2afbb314` is context, not C2.
 
 ## Matched analysis and outcomes
 

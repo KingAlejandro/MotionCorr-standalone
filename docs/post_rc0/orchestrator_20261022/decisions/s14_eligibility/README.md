@@ -16,6 +16,16 @@ also recipe assertions, not fresh header/archive verification. The old manifest'
 probe and must not be used as the present acquired count. Presence/size alone
 neither proves integrity nor establishes 114 independent scientific replicates.
 
+All 114 movies have S1 correction/runtime/image development exposure through
+#243; the 30 e10216/e12963/e10474f3 movies also belong to the #255/#261/#271
+censuses. This is not a claim that their downstream scientific outcomes were
+untouched. The tutorial's historical scientific study is already unblinded;
+individual downstream scientific exposure for the other movies remains to be
+audited. `exposure_metadata_sources.json` records known membership and the 51
+movies selected for the frozen #262 Tier C queue. Selection and the retained
+20:45 status snapshot are distinguished from actual completed/current execution.
+No new outcome is inspected to build this membership record.
+
 | Family | Movie files observed / recipe rows | Dose provenance in recipe | Scientific admission now |
 | --- | --- | --- | --- |
 | tutorial | 24/24 | Historical tutorial value | Developmental/unblinded; not a new holdout |
@@ -59,6 +69,15 @@ complete independent protocol review. No choice can rely on candidate-favourable
 scientific outcomes. Relevant policy/truth criteria, explicit C2 freeze and M6
 approval still precede held-out analysis. No larger acquisition or new scientific
 run is implicitly authorized by this inventory.
+
+M6 must decide the confirmatory disjointness and collection/session definition.
+The proposed design excludes the 114 development movies and the separate,
+already exposed two-movie 12963 pilot from a new holdout. That pilot is outside
+this sweep inventory. If disjoint S1-family movies are required, additional
+acquisition with an explicit metadata/input/downstream plan may be needed;
+presence of another filename alone does not prove independent collection
+provenance. This remains a decision prerequisite, not acquisition permission
+or scientific admission.
 
 The [official archive metadata cross-check](archive_metadata/README.md) corroborates
 some recipe fields and records an unresolved EER rendering/grouping/pixel-size

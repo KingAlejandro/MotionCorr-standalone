@@ -3,7 +3,8 @@
 This completes the queue-hygiene proposal requested by the Notion plan; it
 does not close or merge a PR. The six current heads, PR bodies and complete
 connector-normalized discussion timelines were read. Local Git object metadata
-confirms their changes are confined to `docs/`. This is a disposition review,
+confirms their three-dot PR contributions are confined to `docs/` (merge base
+to head, not a two-dot subtraction of the current GitHub base tip). This is a disposition review,
 not a fresh native run, full source/evidence audit, licence audit, archive
 extraction or latest-head merge recommendation. Independent packet review is
 pending. Historical results remain attached to their original source/input
@@ -23,9 +24,13 @@ identities and gates.
 No blanket documentation landing is proposed. The changed-path logical-byte
 inventory is 21,149,940 (#243), 9,389,331 (#250), 14,862,011 (#255), 44,180 (#256),
 155,824,354 (#261) and 8,519,938 (#271). These are current-tree sizes at changed
-paths against each recorded base, **not** Git pack/transfer sizes, disk use,
+paths selected by each recorded three-dot diff, **not** Git pack/transfer sizes, disk use,
 deduplicated totals or proof that all referenced remote artifacts exist.
 `W7_DOCS_DISPOSITION.provenance.json` contains exact SHAs, paths and the method.
+The provenance records both the GitHub base tip and the actual comparison merge
+base. For #250 these differ: `36913740` is the base tip, `c8844894` the merge
+base. A two-dot comparison includes unrelated main-side changes and is not the
+329-path PR-contribution inventory reported here.
 The existing M2 choices for #273/#274 remain separate; no evidence is removed
 by this proposal.
 

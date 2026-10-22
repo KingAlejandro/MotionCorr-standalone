@@ -2,7 +2,8 @@
 
 This prepares the decisions required by the revised Notion plan. It adopts no
 policy, changes no source or output, and contains no newly executed native test.
-The three active workers own C1, DC conditioning and first-divergence diagnosis.
+This brief covers both global and local nonconvergence; their current handling
+and consequences differ and must not be collapsed into one success flag.
 
 ## Observed boundary and separate meanings
 
@@ -16,11 +17,34 @@ successful movies, fails the job and withholds joint outputs. Dataset tooling
 then requires successful worker and aggregate statuses before `dataset_ready`.
 These are source observations, not native qualification of a new policy.
 
+Existing local handling is part of M4. In CUDA builds a completed device patch
+attempt that did not converge is retried once from the same input; shift vectors
+are reset before the second attempt (`:3529–3545,3656–3700`). This existing
+recovery path is distinct from selecting a new quality-policy retry. After the
+last attempt an unconverged patch is skipped (`:3812`); too few retained local
+observations cause global-only fallback with a stderr message (`:3856`). CPU-only
+builds take the CPU alignment path once. CUDA logs `converged=`, while CPU logs
+RMSD without that explicit verdict. A global-only sidecar would leave local
+drop/fallback behavior unreported and would not satisfy the phase requirement.
+
+Convergence can differ by backend on the same input. The retained #273 packet
+at `805d9de2`, `docs/post_rc0/parallel_20261022/numerics/README.md:186–201`, records
+CPU iteration limits but CUDA convergence for integer and fractional cases, and
+different converged-patch counts for affine/noisy cases. These remain accuracy
+failures under their original gates. A policy refusing nonconvergence could
+therefore refuse CPU output while publishing CUDA output for the same movie;
+convergence would still not certify accuracy. The ignored global result and
+local skip/fallback also concern inherited RELION behavior (reference `ad0b230`,
+issue #268). Refusal or a new numerical retry changes that compatibility and
+requires the project's explicit parity sign-off as well as M4 disposition.
+
 Convergence, observability and evaluation validity must remain separate:
 
 | Proposed field | States | Meaning and provenance |
 | --- | --- | --- |
 | `global_alignment` | `converged`, `iteration_limit`, `operator_error`, `not_run`, `unknown_legacy` | Actual solver result; retain iteration count and final incremental RMSD. |
+| `local_alignment` | Per-patch attempt/convergence states; attempted, retried, converged and dropped counts | Record existing retry outcomes and remaining observations separately; a dropped patch is not a successful motion estimate. |
+| `local_model` | `retained`, `global_only`, `not_requested`, `unknown_legacy`, with reason | Distinguish insufficient converged observations, guard rejection and other model/fallback decisions from global convergence. |
 | `motion_identifiability` | `identifiable`, `no_signal`, `ambiguous`, `not_assessed` | Requires a declared criterion/evidence. Convergence alone cannot establish it. |
 | `peak_validity` | `bracketed`, `boundary_maximum`, `flat_or_degenerate`, `nonfinite`, `not_assessed` | Actual stage observations; M5 determines consequences. |
 | `sampling` | `valid`, `outside_fixed_roi`, `not_evaluated` | Evaluator property. It is not an intrinsic observability or solver state. |
@@ -34,6 +58,8 @@ metadata/output ownership, remain atomic, and survive batch/aggregate reporting.
 Neither the existence of an image nor exit 0 may be interpreted as convergence.
 Historical records without status must be `unknown_legacy`, never inferred PASS.
 The resume treatment of those records requires an explicit compatibility choice.
+Attempt accounting is needed to derive `not_run`: the current CUDA function can
+return true for zero frames, so the existing bool alone cannot supply that state.
 
 The retained #273 checker reports four UNIDENTIFIABLE arms: flat CPU/CUDA have
 VALID sampling; repeated-pattern CPU/CUDA leave the ROI. Noisy CPU/CUDA also
@@ -44,8 +70,8 @@ These are checker characterization states, not implemented production abstention
 
 | Option | Products and exit behavior to decide | Evidence needed | Present readiness |
 | --- | --- | --- | --- |
-| Report only | Preserve correction and process success behavior, but publish explicit per-movie and aggregate quality status/warnings. | Capture the real return value on CPU/resident/streaming routes; prove healthy MRC/trajectory identity and accurate mixed-batch status; define old-resume handling. | Smallest prospective prototype; native behavior UNRUN. This can make nonconvergence visible but does not improve motion recovery. |
-| Refuse | Treat iteration limit as a failed movie before corrected-image/STAR completion publication; retain healthy movies and fail the dataset. | Define treatment of earlier auxiliary products; exercise writer draining, aggregate exclusion, rerun/resume and mixed healthy/failing jobs. | Existing failure path is available, but rerouting quality into it is an intentional publication change, not an already qualified fix. |
+| Report only | Preserve correction and process success behavior, but publish global and local attempt/drop/fallback states per movie and in aggregates. | Capture CPU/resident/streaming outcomes; prove healthy MRC/trajectory identity and accurate mixed-batch status; define old-resume handling. | Smallest prospective prototype; native behavior UNRUN. Reporting makes the states visible without improving recovery. |
+| Refuse | Define which global or local failure/fallback makes a movie fail before corrected-image/STAR completion publication; retain healthy movies and fail the dataset. | Define coverage/minimum observations, earlier auxiliary products, writer draining, aggregate exclusion and resume. Exercise identical movies with backend-divergent convergence. | Can intentionally produce different publication membership by backend; inherited RELION parity needs sign-off. No rule is selected here. |
 | Retry | Retry only under a separately specified recovery condition and hard resource/attempt bound; expose both attempts and final disposition. | A prospectively justified recovery method and truth/reconstruction evidence, not another identical-state attempt. Define restoration, source/input identity and final report/refusal behavior. | Not ready to adopt. W4 must establish which altered input/objective could recover information. No iteration/search increase or coarse tracker is selected here. |
 | Document | Preserve current code and document the limitation. | Accurate user-facing limitations and compatibility record. | Available as a disposition, but alone does **not** satisfy the phase requirement that nonconvergence is no longer silent in machine-readable outcomes. |
 
@@ -53,6 +79,12 @@ No complete four-policy implementation is proposed. Start with one minimal
 observation prototype only if needed to resolve M4, then test the selected policy
 after maintainer disposition. Reporting and refusal are not scientific accuracy
 certificates. A retry must not conceal the original iteration-limit event.
+M4 must explicitly state whether its selected consequences apply to global
+alignment, local patch failures, model fallback, or a declared combination. Both
+global and local states must be observable even if their consequences differ.
+The existing same-input local retry is preserved unless a separately reviewed
+change is selected; the Retry option concerns a justified additional/changed
+strategy, not a claim that production currently never retries.
 
 Prospective controls for whichever minimal prototype is authorized:
 
@@ -70,6 +102,11 @@ Prospective controls for whichever minimal prototype is authorized:
    quality state, exit, worker status, membership, products and resume behavior
    must match the chosen contract. Include output-write failure so successful
    numerical work cannot mask failed publication.
+6. Retained backend-divergent convergence and local attempt controls: distinguish
+   first attempt, existing retry, final dropped patch, too-few-observations
+   fallback and retained model. Verify both numerical status and intended
+   publication membership on CPU/resident/streaming routes; do not infer a CPU
+   verdict by parsing CUDA-only log fields.
 
 Every new native control above is UNRUN. Do not convert this checklist into a
 PASS or relax a numerical threshold to obtain the preferred state.

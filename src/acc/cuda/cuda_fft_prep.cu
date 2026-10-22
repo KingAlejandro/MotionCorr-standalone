@@ -1,3 +1,4 @@
+#include "src/acc/cuda/cuda_hermitian.cuh"
 #include "cuda_fft_prep.h"
 #include <cuda_runtime.h>
 #include <cufft.h>
@@ -251,6 +252,7 @@ bool cudaInverseFFT2D(
             ? (s_d_cached_Iframes + (size_t)iframe * ny * nx)
             : d_real_single;
 
+        HANDLE_ERROR(mc_cuda::projectHermitianColumns(d_comp, nx, ny));
         CUFFT_CHECK(cufftExecC2R(plan_c2r, d_comp, (cufftReal*)target_d_real));
         HANDLE_ERROR(cudaMemcpy(MULTIDIM_ARRAY(Iframes[iframe]()), target_d_real, sz_real, cudaMemcpyDeviceToHost));
     }

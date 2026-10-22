@@ -1,0 +1,73 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Users/alex.konstantinov/Documents/MotionCorr",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stdout": "c8844894c7c6366abf297699b5312e4b775eb5b0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Users/alex.konstantinov/Documents/MotionCorr",
+        "status",
+        "--short"
+      ],
+      "exit": 0,
+      "stdout": "?? pr117-fix-measure-20260929/\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--verify",
+        "refs/heads/t3/1544d45f"
+      ],
+      "exit": 128,
+      "stdout": "",
+      "stderr": "fatal: Needed a single revision\n"
+    },
+    {
+      "argv": [
+        "git",
+        "cat-file",
+        "-t",
+        "1f0a58bf6e0639d8b62f74da52f250cc664c0b30"
+      ],
+      "exit": 0,
+      "stdout": "commit\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "reflog",
+        "-8",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stdout": "6a2e6c1d HEAD@{0}: commit (merge): Merge standalone D3 required-collection repair normally\nfe104f21 HEAD@{1}: commit (merge): Merge D3 guard controls into D2 admission integration\nad0c61a3 HEAD@{2}: checkout: moving from 226-d2-d3-20261022 to integration/226-d2-d3-20261022\n1f0a58bf HEAD@{3}: Branch: renamed refs/heads/t3/1544d45f to refs/heads/226-d2-d3-20261022\n1f0a58bf HEAD@{5}: reset: moving to HEAD\n1f0a58bf HEAD@{6}: \n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--verify",
+        "refs/heads/226-d2-d3-20261022"
+      ],
+      "exit": 0,
+      "stdout": "1f0a58bf6e0639d8b62f74da52f250cc664c0b30\n",
+      "stderr": ""
+    }
+  ],
+  "initial_t3_branch_observation": "HEAD reflog shows t3/1544d45f renamed to 226-d2-d3-20261022 before this agent checkout. The renamed starting ref remains at 1f0a58bf; no ref repair/recreation needed or performed."
+}

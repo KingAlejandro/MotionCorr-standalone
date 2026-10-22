@@ -180,6 +180,74 @@ class ActualCli(unittest.TestCase):
         self.assertEqual(c['label'], 'bind-G'); self.assertTrue(c['base'].endswith('/base') and c['candidate'].endswith('/cand') and c['report_sha256'])
 
 
+class LaneHashCli(unittest.TestCase):
+    """lane-hash against a retained baseline that has hashes (comparator report) and STAR files but no MRC images, as the RC0 QF trees do."""
+    @classmethod
+    def setUpClass(cls):
+        import shutil, struct
+        spec = importlib.util.spec_from_file_location('tree_fixture2', REPO / 'tests/test_compare_output_trees.py')
+        m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+        cls.root = r = pathlib.Path(tempfile.mkdtemp(dir=TMP)); cls.m = m
+        b = m.TestOutputTreeComparator(); b.manifest = {'schema_version': 1, 'movies': [f'Movies/m{i:02}.tiff' for i in range(24)], 'expected_shape_xyz': [4, 3, 1],
+                                                      'joint_star': 'corrected_micrographs.star'}
+        cls.builder = b
+        b._write_tree(r / 'orig'); b._write_tree(r / 'orig2')       # each tree is written natively: STAR paths must lie inside their own root
+        (r / 'manifest.json').write_text(json.dumps(b.manifest))
+        (r / 'scr').mkdir(); os.symlink(REPO, r / 'scr/src'); (r / 'frozen/multigpu/G').mkdir(parents=True); (r / 'data').mkdir()
+        (r / 'data/movies.star').write_text('unused'); (r / 'frozen/multigpu/G/manifest.json').write_text(json.dumps(b.manifest))
+        cls.env = dict(os.environ, C1_SCR=str(r / 'scr'), C1_TUTORIAL=str(r / 'data'), C1_FROZEN_RC0=str(r / 'frozen'), QF_W=str(r / 'scr'), QF_CPUS='0',
+                       QF_GPU_UUID='GPU-test', QF_GPU_LOCK=str(r / 'gpu.lock'), OPENBLAS_NUM_THREADS='1')
+        CMP = REPO / 'docs/issue85_laneC/compare_output_trees.py'
+        subprocess.run([sys.executable, '-I', str(CMP), str(r / 'orig'), str(r / 'orig2'), '--manifest', str(r / 'manifest.json'), '--products-only', '--json-out', str(r / 'retained.json')], check=True,
+                       capture_output=True)
+        b._write_tree(r / 'retained_tree')                                      # retained baseline tree: STAR/eps/log only
+        for p in list((r / 'retained_tree').rglob('*.mrc')) + list((r / 'retained_tree').rglob('*.pdf')): p.unlink()
+        cls.struct, cls.shutil = struct, shutil
+
+    def fresh(self, name, mutate=None):
+        d = self.root / name; self.builder._write_tree(d)
+        if mutate: mutate(d)
+        return d
+
+    def cli(self, fresh, label, retained_json=None, retained_tree=None):
+        r = subprocess.run([sys.executable, '-B', str(HERE / 'c1_tutorial24.py'), 'lane-hash', 'G', str(retained_tree or self.root / 'retained_tree'),
+                            str(retained_json or self.root / 'retained.json'), str(fresh), label], env=self.env, capture_output=True, text=True)
+        return r, json.loads((self.root / 'scr/t24/compare' / f'{label}.class.json').read_text())
+
+    def test_identical_when_hashes_and_star_match_and_retained_has_no_mrc(self):
+        self.assertEqual(len(list((self.root / 'retained_tree').rglob('*.mrc'))), 0)
+        r, c = self.cli(self.fresh('f_ok'), 'lh-ok-G'); self.assertEqual((r.returncode, c['state']), (0, 'IDENTICAL'), r.stdout + r.stderr)
+
+    def test_one_pixel_difference_is_different(self):
+        def flip(d):
+            p = d / 'Movies/m00.mrc'; b = bytearray(p.read_bytes()); self.struct.pack_into('<f', b, 1032, 123.0); p.write_bytes(b)
+        r, c = self.cli(self.fresh('f_px', flip), 'lh-px-G'); self.assertEqual((r.returncode, c['state'], c['products']), (1, 'DIFFERENT', ['Movies/m00.mrc']), r.stdout + r.stderr)
+
+    def test_star_difference_is_different(self):
+        def edit(d):
+            p = d / 'Movies/m01.star'; p.write_bytes(p.read_bytes() + b'# changed\n')
+        r, c = self.cli(self.fresh('f_star', edit), 'lh-star-G'); self.assertEqual((r.returncode, c['state'], c['products']), (1, 'DIFFERENT', ['Movies/m01.star']), r.stdout + r.stderr)
+
+    def test_invalid_inputs_are_invalid_never_identical(self):
+        def trunc(d): p = d / 'Movies/m00.mrc'; p.write_bytes(p.read_bytes()[:-4])
+        r, c = self.cli(self.fresh('f_tr', trunc), 'lh-trunc-G'); self.assertEqual((r.returncode, c['state']), (2, 'INVALID'))
+        def missing_star(d): (d / 'Movies/m02.star').unlink()
+        r, c = self.cli(self.fresh('f_ms', missing_star), 'lh-ms-G'); self.assertEqual((r.returncode, c['state']), (2, 'INVALID'))
+        bad = json.loads((self.root / 'retained.json').read_text()); k = sorted(bad['mrc_sha256'])[0]
+        for name, mutate in {'hash missing': lambda d: d['mrc_sha256'].pop(k), 'base != candidate': lambda d: d['mrc_sha256'][k].update(candidate_payload='0' * 64),
+                             'malformed hash': lambda d: d['mrc_sha256'][k].update(base_payload='xyz', candidate_payload='xyz'), 'not a PASS': lambda d: d.update(status='FAIL')}.items():
+            with self.subTest(name):
+                d = json.loads((self.root / 'retained.json').read_text()); mutate(d); jp = self.root / f'ret-{name.replace(" ", "_").replace("!=", "ne")}.json'; jp.write_text(json.dumps(d))
+                r, c = self.cli(self.fresh('f_' + jp.stem), 'lh-' + jp.stem + '-G', retained_json=jp); self.assertEqual((r.returncode, c['state']), (2, 'INVALID'), c['reasons'])
+        r, c = self.cli(self.fresh('f_nr'), 'lh-noretained-G', retained_json=self.root / 'does-not-exist.json'); self.assertEqual((r.returncode, c['state']), (2, 'INVALID'))
+        (self.root / 'rt2').mkdir(); r, c = self.cli(self.fresh('f_rt'), 'lh-notree-G', retained_tree=self.root / 'rt2'); self.assertEqual((r.returncode, c['state']), (2, 'INVALID'))
+
+    def test_class_file_binds_to_attribute_expectations(self):
+        r, c = self.cli(self.fresh('f_bind'), 'lh-bind-G')
+        self.assertEqual((c['label'], c['base'], c['candidate'].endswith('f_bind')), ('lh-bind-G', str(self.root / 'retained_tree'), True))
+        self.assertTrue(c['report_sha256'])
+
+
 @unittest.skipUnless(sys.platform.startswith('linux'), 'process-group ownership needs /proc (Linux); run on 4GPUs')
 class LaneRunner(unittest.TestCase):
     def setUp(self):

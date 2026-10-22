@@ -4,6 +4,10 @@
   c1_tutorial24.py run ARM BINARY G|L [--cpu]       one arm, command as RC0 QF's s0 reference (--j 2, + --ingest_witness on CUDA); nonblocking GPU3 lease
   c1_tutorial24.py dataset ARM BINARY G|L           one-worker run_dataset.py endpoint (needs the lease held by c1_gpu_run.sh: C1_LEASE_HELD=1)
   c1_tutorial24.py compare BASE_TREE CAND_TREE LABEL    comparator + validation; writes compare/LABEL.{json,run.json,class.json}; exit 0 IDENTICAL, 1 DIFFERENT, 2 INVALID
+  c1_tutorial24.py lane-hash CFG RETAINED_TREE RETAINED_JSON FRESH_TREE LABEL
+                                                    lane control against the retained RC0 baseline whose MRC images no longer exist (the QF driver deleted *.mrc/*.pdf after
+                                                    grading): the 24 fresh MRC header/extended/payload hashes must equal the hashes in the retained comparator report, and the
+                                                    25 fresh STAR files must equal the retained STAR files after output-root normalization; exit 0 IDENTICAL, 1 DIFFERENT, 2 INVALID
   c1_tutorial24.py attribute CFG                    attribution from the validated class files only; exit 0 complete, 1 complete with blockers, 2 invalid
 A comparison is DIFFERENT only when the comparator wrote a complete, internally consistent products report (24 movies, expected product names only, no
 duplicates, status/rc agree). Anything else (missing/truncated/malformed report, 'reason' errors, rc outside 0/1, wrong counts) is INVALID and never
@@ -169,6 +173,72 @@ def compare(base, cand, label):
     sys.exit({'IDENTICAL': 0, 'DIFFERENT': 1}.get(cls['state'], 2))
 
 
+def _norm_star(path, root):
+    t = Path(path).read_bytes().decode('latin-1')
+    for spelling in {str(root), str(Path(root).resolve())}:
+        t = t.replace(spelling, '<OUTROOT>')
+    return t.encode('latin-1')
+
+
+def lane_hash(cfg, retained_tree, retained_json, fresh_tree, label):
+    """Fixed contract unchanged: 24 movies, 24 MRC, 25 STAR (24 per-movie + joint) on the fresh side; the retained side must prove the same 24 MRC hashes and own the 25 STAR files."""
+    out = T24 / 'compare'; out.mkdir(parents=True, exist_ok=True)
+    rep = out / f'{label}.json'
+    if rep.exists(): raise SystemExit(f'{rep} exists; refusing to overwrite a comparison report')
+    mp = FROZEN / f'multigpu/{cfg}/manifest.json'; manifest = _load(mp) or {}
+    reasons, products, per = [], [], {}
+    if not mp.exists(): reasons.append('manifest missing')
+    exp = expected_products(manifest) if manifest else set()
+    exp_mrc = {x for x in exp if x.endswith('.mrc')}; exp_star = {x for x in exp if x.endswith('.star')}
+    # 1. the fresh tree is validated against the fixed contract by the comparator itself (self-comparison also yields its hashes)
+    selfrep = out / f'{label}.fresh-selfcheck.json'
+    cmd = [sys.executable, '-I', str(CMP), str(fresh_tree), str(fresh_tree), '--manifest', str(mp), '--input-star', str(DATA / 'movies.star'), '--products-only', '--json-out', str(selfrep)]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    fresh = _load(selfrep); fcls = classify(r.returncode, fresh, manifest) if manifest else {'state': 'INVALID', 'reasons': ['manifest missing']}
+    if fcls['state'] != 'IDENTICAL': reasons.append(f'fresh tree failed the fixed 24-movie/24-MRC/25-STAR validation: {fcls["reasons"]}')
+    # 2. the retained comparator report must itself be a complete validated PASS carrying the 24 baseline hashes (base == candidate for every hash)
+    ret = _load(retained_json)
+    rcls = classify(0, ret, manifest) if manifest and isinstance(ret, dict) else {'state': 'INVALID', 'reasons': ['retained report missing or not JSON']}
+    if rcls['state'] != 'IDENTICAL': reasons.append(f'retained report is not a complete validated PASS: {rcls["reasons"]}')
+    hexs = lambda v: isinstance(v, str) and len(v) == 64 and all(c in '0123456789abcdef' for c in v)
+    ret_hash = {}
+    if rcls['state'] == 'IDENTICAL':
+        m = ret['mrc_sha256']
+        if set(m) != exp_mrc: reasons.append('retained report MRC inventory differs from the manifest')
+        for k in sorted(set(m) & exp_mrc):
+            v = m[k]
+            ok = all(hexs(v.get(f'{side}_{part}')) for side in ('base', 'candidate') for part in ('header', 'extended', 'payload')) and \
+                 all(v[f'base_{part}'] == v[f'candidate_{part}'] for part in ('header', 'extended', 'payload'))
+            if not ok: reasons.append(f'retained hashes for {k} malformed or base != candidate')
+            else: ret_hash[k] = {part: v[f'base_{part}'] for part in ('header', 'extended', 'payload')}
+    # 3. fresh hashes versus retained hashes
+    if fcls['state'] == 'IDENTICAL' and len(ret_hash) == len(exp_mrc):
+        fm = fresh['mrc_sha256']
+        for k in sorted(exp_mrc):
+            same = all(fm[k][f'base_{part}'] == ret_hash[k][part] for part in ('header', 'extended', 'payload'))
+            per[k] = {'equal': same, 'retained_payload': ret_hash[k]['payload'], 'fresh_payload': fm[k]['base_payload']}
+            if not same: products.append(k)
+    # 4. STAR products: retained tree files versus fresh files, output root normalized (the comparator's own text rule)
+    for k in sorted(exp_star):
+        a, b = Path(retained_tree) / k, Path(fresh_tree) / k
+        if not a.is_file() or not b.is_file():
+            reasons.append(f'{k}: missing in the {"retained" if not a.is_file() else "fresh"} tree'); continue
+        same = _norm_star(a, retained_tree) == _norm_star(b, fresh_tree); per[k] = {'equal': same}
+        if not same: products.append(k)
+    state = 'INVALID' if reasons else ('DIFFERENT' if products else 'IDENTICAL')
+    report = {'method': 'retained-hashes+STAR', 'status': 'PASS' if state == 'IDENTICAL' else 'FAIL', 'cfg': cfg, 'retained_tree': str(retained_tree), 'retained_json': str(retained_json),
+              'retained_json_sha256': _sha(retained_json) if Path(retained_json).is_file() else None, 'fresh_tree': str(fresh_tree), 'different_products': sorted(products),
+              'per_product': per, 'reasons': reasons, 'fresh_selfcheck': str(selfrep), 'fresh_selfcheck_rc': r.returncode}
+    rep.write_text(json.dumps(report, indent=1) + '\n')
+    run = {'cmd': cmd, 'rc': r.returncode, 'stdout': r.stdout, 'stderr': r.stderr, 'manifest': str(mp), 'manifest_sha256': _sha(mp) if mp.exists() else None,
+           'input_star_sha256': _sha(DATA / 'movies.star'), 'comparator_sha256': _sha(CMP), 'report_sha256': _sha(rep)}
+    (out / f'{label}.run.json').write_text(json.dumps(run, indent=1) + '\n')
+    cls = {'state': state, 'products': sorted(products), 'reasons': reasons, 'label': label, 'base': str(retained_tree), 'candidate': str(fresh_tree), 'report_sha256': run['report_sha256']}
+    (out / f'{label}.class.json').write_text(json.dumps(cls, indent=1) + '\n')
+    print(label, state, reasons or f'{len(products)} differing products')
+    sys.exit({'IDENTICAL': 0, 'DIFFERENT': 1}.get(state, 2))
+
+
 def attribute(cfg):
     """Per changed product (F -> C1): which arm reproduces C1's bytes. Reads only validated class files; invalid/missing input is never identity.
 
@@ -245,6 +315,7 @@ if __name__ == '__main__':
     if c == 'run': run(sys.argv[2], sys.argv[3], sys.argv[4], '--cpu' in sys.argv)
     elif c == 'dataset': dataset(sys.argv[2], sys.argv[3], sys.argv[4])
     elif c == 'compare': compare(*sys.argv[2:5])
+    elif c == 'lane-hash': lane_hash(*sys.argv[2:7])
     elif c == 'attribute':
         r = attribute(sys.argv[2]); print(json.dumps({k: v for k, v in r.items() if k != 'product_attribution'}, indent=1))
         sys.exit(attribute_exit(r))

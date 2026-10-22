@@ -41,3 +41,16 @@ their run records are rc 0. Packet 2 adds only the `C1_T24_DIR` override to `c1_
   SIGKILL), waits until it is empty and reaps the child, all before the post-run health check and the lease release. A timeout stays a timeout failure (rc None); a
   descendant outliving a successful child is rc 38; processes surviving cleanup are rc 39. Cleanup and PIDs are recorded in `cleanup`.
 * The lane tests need Linux `/proc`: they run on 4GPUs (host-only, sleep-only children) with `C1_TEST_REPO` pointing at the exact checkout; they are skipped on macOS.
+
+## Iteration 2 stop and the retained-baseline lane control (packet 4)
+
+Iteration 2 (`chain-i2.sh`, packet `1aac4159`) stopped at `i2-cmp-lane-G` (exit 2, INVALID) after `i2-run-F-fresh-G` (exit 0), as designed. Root cause: the retained RC0 trees
+`W-QF/multigpu/{G,L}/{s0,w1,w2,w4}` contain no `*.mrc` files. The QF driver `docs/rc0/qf/tools/multigpu_publication.py` deletes every `*.mrc` and `*.pdf` after grading
+(`p.unlink()` loops near lines 310-316 and 440-447) and removes its `cmp/` trees; it keeps the comparator reports `cmp-*-products.json`, which carry header/extended/payload sha256
+for all 24 MRCs of each tree, and the 25 STAR files. The F-fresh run itself was correct: 24-row input STAR identical to the manifest hash, 24 witness lines all `nvcomp`, 24 MRC/24 STAR/24 EPS/24 log
+plus the joint STAR (the earlier "one witness line" was my progress print slicing the list to its first element).
+
+Repair (tooling only, fixed contract unchanged: 24 movies, 24 MRC, 25 STAR): `c1_tutorial24.py lane-hash` compares F-fresh with the retained baseline by (1) validating the fresh tree with the comparator
+(self-comparison, which also yields its hashes), (2) requiring the retained comparator report to be a complete validated PASS whose 24 MRC hash triples satisfy base == candidate, (3) requiring
+every fresh MRC header/extended/payload hash to equal the retained hash, and (4) requiring the 25 fresh STAR files to equal the retained STAR files after output-root normalization. Missing, malformed
+or inconsistent inputs are INVALID, never identity. Attribution still requires the lane control IDENTICAL. No comparison between fresh arms changed.

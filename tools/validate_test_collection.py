@@ -77,6 +77,8 @@ DEFAULT_REQUIRED_TESTS = [
     "PeakFitArithmeticMutant_float-denominator",
     "PeakFitArithmeticMutant_early-store",
     "PeakFitArithmeticMutant_wrong-scale",
+    # #226 D2: complete conditional retry live-byte and overflow accounting.
+    "PatchRetryAdmission",
     # CPU dose weighting (#179, #220): exact bits against the frozen base
     # doseWeighting, including the FMA-contraction signed-zero case, for the
     # selected path and for the forced original path.
@@ -178,6 +180,7 @@ CUDA_REQUIRED_TESTS = [
     # degrades or refuses the next movie. The only test that sets the runtime's real
     # last-error slot before a healthy movie.
     "CudaStaleErrorAfterOom",
+    "CudaLocalAdmission",
 ]
 
 

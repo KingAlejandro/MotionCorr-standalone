@@ -1,0 +1,42 @@
+{
+  "input_star": "/mnt/clathrin/alex-motioncorr-213/control-nvcomp-final/input/multi.star",
+  "input_sha256": "f6b5f4115bedb4a9a4768b6a5a199164531c5d81a6430652f7250e11893577bf",
+  "movie_block": "movies",
+  "labels": [
+    "rlnMicrographMovieName",
+    "rlnOpticsGroup"
+  ],
+  "n_movies": 3,
+  "n_shards": 1,
+  "partition": "contiguous",
+  "canonical_movies": [
+    "Movies/control.tiff",
+    "Movies/after1.tiff",
+    "Movies/after2.tiff"
+  ],
+  "canonical_output_roots": [
+    "Movies/control",
+    "Movies/after1",
+    "Movies/after2"
+  ],
+  "shards": [
+    {
+      "index": 0,
+      "path": "/mnt/clathrin/alex-motioncorr-213/control-nvcomp-final/dataset/workers/shards/shard_1way_0.star",
+      "sha256": "f6b5f4115bedb4a9a4768b6a5a199164531c5d81a6430652f7250e11893577bf",
+      "n_movies": 3,
+      "first_input_row": 0,
+      "movies": [
+        "Movies/control.tiff",
+        "Movies/after1.tiff",
+        "Movies/after2.tiff"
+      ],
+      "output_roots": [
+        "Movies/control",
+        "Movies/after1",
+        "Movies/after2"
+      ]
+    }
+  ],
+  "input_type": "spa"
+}

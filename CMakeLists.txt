@@ -428,6 +428,12 @@ if(BUILD_TESTING)
     add_test(NAME ProfilingKit
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/profiling/mcprof.py selftest)
     set_tests_properties(ProfilingKit PROPERTIES TIMEOUT 300)
+    if(UNIX)
+        # Real detached CPU children and temporary flocks; never invokes CUDA.
+        add_test(NAME StickyCudaProcessLifecycle
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_sticky_cuda_process_lifecycle.py)
+        set_tests_properties(StickyCudaProcessLifecycle PROPERTIES TIMEOUT 60)
+    endif()
     add_test(NAME GainCacheOwnership
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_gain_cache_host.py
             --cxx ${CMAKE_CXX_COMPILER})
@@ -992,6 +998,27 @@ if(BUILD_TESTING AND CUDA)
                 --binary $<TARGET_FILE:motioncorr_resident_retry_fault>)
         set_tests_properties(CudaResidentRetryFailures PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 600)
+        # A real illegal device write can trigger an Xid. Never collect it in the
+        # ordinary hardware suite; the driver also requires a UUID, an idle GPU,
+        # the canonical per-device lock and an allocation of at most eight CPUs.
+        option(MC_ENABLE_STICKY_CUDA_TEST "Enable destructive, isolated CUDA context test (#213)" OFF)
+        if(MC_ENABLE_STICKY_CUDA_TEST)
+            add_executable(motioncorr_sticky_fault
+                src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp
+                tests/cuda_sticky_fault.cu)
+            target_link_libraries(motioncorr_sticky_fault PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+            target_link_options(motioncorr_sticky_fault PRIVATE "-rdynamic"
+                "LINKER:--wrap=_Z20cudaAlignPatchDeviceP6float2iiidRSt6vectorIdSaIdEES4_idiRSob"
+                "LINKER:--wrap=_Z33cudaAlignPatchDeviceWithWorkspaceR23PatchAlignmentWorkspaceP6float2iiidRSt6vectorIdSaIdEES6_idiRSob"
+                "LINKER:--wrap=_Z25cudaAlignPatchBatchDeviceR30BatchedPatchAlignmentWorkspaceiiiidPSt6vectorIdSaIdEES4_idiP13PatchBatchLog"
+                "LINKER:--wrap=_Z14cudaAlignPatchRSt6vectorI13MultidimArrayI8tComplexIfEESaIS3_EEiidRS_IdSaIdEES9_idiRSob"
+                "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaLaunchKernel")
+            add_test(NAME CudaStickyContext
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_sticky_cuda_control.py
+                    --binary $<TARGET_FILE:motioncorr_sticky_fault>)
+            set_tests_properties(CudaStickyContext PROPERTIES
+                LABELS "cuda;hardware;destructive;opt-in" TIMEOUT 1200 RUN_SERIAL TRUE)
+        endif()
         add_test(NAME CudaPreprocessingFailurePaths
             COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py

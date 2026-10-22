@@ -1,0 +1,286 @@
+[
+ {
+  "case": "zero",
+  "native_exit": 0,
+  "dc": "none",
+  "checker_exit": 0,
+  "checker_message": "zero: gate accuracy=PASS; signal=CHARACTERIZATION",
+  "field_px": {
+   "rms": 0.0,
+   "p95": 0.0,
+   "max": 0.0
+  },
+  "field_angstrom": {
+   "rms": 0.0,
+   "p95": 0.0,
+   "max": 0.0
+  },
+  "field_gate": "PASS",
+  "checker_status": "PASS",
+  "image": {
+   "uncorrected": {
+    "rmse": 0.0,
+    "contrast_normalized_rmse": 0.0,
+    "mean_error": 0.0
+   },
+   "true_motion_bilinear": {
+    "rmse": 0.0,
+    "contrast_normalized_rmse": 0.0,
+    "mean_error": 0.0
+   },
+   "estimated_motion_bilinear": {
+    "rmse": 0.0,
+    "contrast_normalized_rmse": 0.0,
+    "mean_error": 0.0
+   },
+   "published_sum_divided_by_frames": {
+    "rmse": 1.1129693120892625e-05,
+    "contrast_normalized_rmse": 1.1174255694669063e-05,
+    "mean_error": -1.099374571822409e-06
+   }
+  }
+ },
+ {
+  "case": "integer",
+  "native_exit": 0,
+  "dc": "none",
+  "checker_exit": 1,
+  "checker_message": "integer: gate accuracy=FAIL; signal=CHARACTERIZATION",
+  "field_px": {
+   "rms": 0.29786778665475044,
+   "p95": 0.48769178867805424,
+   "max": 0.48769178867805424
+  },
+  "field_angstrom": {
+   "rms": 0.2636129911894542,
+   "p95": 0.431607232980078,
+   "max": 0.431607232980078
+  },
+  "field_gate": "FAIL",
+  "checker_status": "FAIL",
+  "image": {
+   "uncorrected": {
+    "rmse": 0.6294498329247489,
+    "contrast_normalized_rmse": 0.6319700949358554,
+    "mean_error": -0.0023172690318180797
+   },
+   "true_motion_bilinear": {
+    "rmse": 0.0,
+    "contrast_normalized_rmse": 0.0,
+    "mean_error": 0.0
+   },
+   "estimated_motion_bilinear": {
+    "rmse": 0.03560936860368568,
+    "contrast_normalized_rmse": 0.03575194539731887,
+    "mean_error": -0.00013916638168669142
+   },
+   "published_sum_divided_by_frames": {
+    "rmse": 0.02630162611603737,
+    "contrast_normalized_rmse": 0.02640693613146232,
+    "mean_error": -8.513071952620521e-05
+   }
+  }
+ },
+ {
+  "case": "fractional",
+  "native_exit": 0,
+  "dc": "none",
+  "checker_exit": 1,
+  "checker_message": "fractional: gate accuracy=FAIL; signal=CHARACTERIZATION",
+  "field_px": {
+   "rms": 0.5921536730251702,
+   "p95": 0.7948194679573471,
+   "max": 0.7948194679573471
+  },
+  "field_angstrom": {
+   "rms": 0.5240560006272756,
+   "p95": 0.7034152291422523,
+   "max": 0.7034152291422523
+  },
+  "field_gate": "FAIL",
+  "checker_status": "FAIL",
+  "image": {
+   "uncorrected": {
+    "rmse": 0.4550866865088168,
+    "contrast_normalized_rmse": 0.4569088137503783,
+    "mean_error": -0.0011611553338857672
+   },
+   "true_motion_bilinear": {
+    "rmse": 0.02357382905470023,
+    "contrast_normalized_rmse": 0.023668216601912408,
+    "mean_error": -6.632381835237176e-05
+   },
+   "estimated_motion_bilinear": {
+    "rmse": 0.1347650142302321,
+    "contrast_normalized_rmse": 0.13530460154605126,
+    "mean_error": 0.00041666447825953464
+   },
+   "published_sum_divided_by_frames": {
+    "rmse": 0.13761205971240997,
+    "contrast_normalized_rmse": 0.1381630495282882,
+    "mean_error": 0.00047152978368103504
+   }
+  }
+ },
+ {
+  "case": "affine",
+  "native_exit": 0,
+  "dc": "none",
+  "checker_exit": 1,
+  "checker_message": "affine: gate accuracy=FAIL; signal=CHARACTERIZATION",
+  "field_px": {
+   "rms": 0.45474292342088196,
+   "p95": 0.8389729255617366,
+   "max": 1.029511788133801
+  },
+  "field_angstrom": {
+   "rms": 0.4024474872274806,
+   "p95": 0.742491039122137,
+   "max": 0.9111179324984138
+  },
+  "field_gate": "FAIL",
+  "checker_status": "FAIL",
+  "image": {
+   "uncorrected": {
+    "rmse": 0.45412299930470584,
+    "contrast_normalized_rmse": 0.4559412680270907,
+    "mean_error": -0.0018126993097810349
+   },
+   "true_motion_bilinear": {
+    "rmse": 0.021541174428325656,
+    "contrast_normalized_rmse": 0.021627423404410172,
+    "mean_error": -6.0467113914507874e-05
+   },
+   "estimated_motion_bilinear": {
+    "rmse": 0.1088487382642568,
+    "contrast_normalized_rmse": 0.1092845590805554,
+    "mean_error": -0.0009351736685037025
+   },
+   "published_sum_divided_by_frames": {
+    "rmse": 0.10865087062120438,
+    "contrast_normalized_rmse": 0.10908590170295475,
+    "mean_error": -0.0009081424796022475
+   }
+  }
+ },
+ {
+  "case": "pedestal",
+  "native_exit": 0,
+  "dc": "none",
+  "checker_exit": 1,
+  "checker_message": "pedestal: gate accuracy=FAIL; signal=CHARACTERIZATION",
+  "field_px": {
+   "rms": 2.3945009135517155,
+   "p95": 4.0720413799013375,
+   "max": 4.398997726755499
+  },
+  "field_angstrom": {
+   "rms": 2.119133308493268,
+   "p95": 3.6037566212126833,
+   "max": 3.8931129881786166
+  },
+  "field_gate": "FAIL",
+  "checker_status": "FAIL",
+  "image": {
+   "uncorrected": {
+    "rmse": 0.11353016387802327,
+    "contrast_normalized_rmse": 0.4559408651930274,
+    "mean_error": -0.0004515362600973062
+   },
+   "true_motion_bilinear": {
+    "rmse": 0.005386038484081602,
+    "contrast_normalized_rmse": 0.021630507369244406,
+    "mean_error": -1.3555210040027483e-05
+   },
+   "estimated_motion_bilinear": {
+    "rmse": 0.11353016387802327,
+    "contrast_normalized_rmse": 0.4559408651930274,
+    "mean_error": -0.0004515362600973062
+   },
+   "published_sum_divided_by_frames": {
+    "rmse": 0.11352824419736862,
+    "contrast_normalized_rmse": 0.45593249824568877,
+    "mean_error": -0.00011486477160360664
+   }
+  }
+ },
+ {
+  "case": "noisy",
+  "native_exit": 0,
+  "dc": "none",
+  "checker_exit": 2,
+  "checker_message": "INPUT ERROR: candidate samples outside fixed valid detector region",
+  "field_px": {
+   "rms": 2.6474150479459193,
+   "p95": 4.945276016691183,
+   "max": 11.19089344214544
+  },
+  "field_angstrom": {
+   "rms": 2.342962317432139,
+   "p95": 4.376569274771697,
+   "max": 9.903940696298715
+  },
+  "field_gate": "FAIL",
+  "checker_status": "ABORT_NO_RESULT"
+ },
+ {
+  "case": "flat",
+  "native_exit": 0,
+  "dc": "none",
+  "checker_exit": 0,
+  "checker_message": "flat: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION",
+  "field_px": {
+   "rms": 2.37787654746835,
+   "p95": 3.8830561417522667,
+   "max": 3.8830561417522667
+  },
+  "field_angstrom": {
+   "rms": 2.1044207445094902,
+   "p95": 3.4365046854507564,
+   "max": 3.4365046854507564
+  },
+  "field_gate": "FAIL",
+  "checker_status": "UNIDENTIFIABLE",
+  "image": {
+   "uncorrected": {
+    "rmse": 0.0,
+    "contrast_normalized_rmse": null,
+    "mean_error": 0.0
+   },
+   "true_motion_bilinear": {
+    "rmse": 0.0,
+    "contrast_normalized_rmse": null,
+    "mean_error": 0.0
+   },
+   "estimated_motion_bilinear": {
+    "rmse": 0.0,
+    "contrast_normalized_rmse": null,
+    "mean_error": 0.0
+   },
+   "published_sum_divided_by_frames": {
+    "rmse": 0.0,
+    "contrast_normalized_rmse": null,
+    "mean_error": 0.0
+   }
+  }
+ },
+ {
+  "case": "repeated",
+  "native_exit": 0,
+  "dc": "none",
+  "checker_exit": 2,
+  "checker_message": "INPUT ERROR: candidate samples outside fixed valid detector region",
+  "field_px": {
+   "rms": 18.68232578869665,
+   "p95": 31.642843286436825,
+   "max": 31.642843286436825
+  },
+  "field_angstrom": {
+   "rms": 16.533858322996537,
+   "p95": 28.00391630849659,
+   "max": 28.00391630849659
+  },
+  "field_gate": "FAIL",
+  "checker_status": "ABORT_NO_RESULT"
+ }
+]

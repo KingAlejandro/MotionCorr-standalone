@@ -1,5 +1,9 @@
 # Issue #226 post-RC0 memory admission
 
+PR #252's later retry-lifetime correction is documented in
+[retry-admission-review.md](retry-admission-review.md). The native results below
+retain their recorded revisions and do not qualify that follow-up.
+
 Base: `c8844894c7c6366abf297699b5312e4b775eb5b0`. Implementation head: `bb34855434e0293ad559781697610d742765ebcd` (supersedes the incomplete estimate at `124a8708`). D1 is already fixed.
 
 D2 queries the cuFFT work sizes for the actual patch R2C and alignment C2R

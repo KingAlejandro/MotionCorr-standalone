@@ -248,6 +248,10 @@ if(BUILD_TESTING)
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
     add_test(NAME PatchRetryState COMMAND patch_retry_state)
+    # #226 D2: retry lifetime arithmetic, checked without CUDA or a GPU.
+    add_executable(patch_retry_admission tests/test_patch_retry_admission.cpp)
+    target_include_directories(patch_retry_admission PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME PatchRetryAdmission COMMAND patch_retry_admission)
     add_executable(defect_parser tests/test_defect_parser.cpp)
     target_link_libraries(defect_parser PRIVATE motioncorr_core)
     # Pure C++ arithmetic regression (issue #97). Registered above the

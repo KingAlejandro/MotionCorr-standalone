@@ -3704,7 +3704,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					// download path below.
 					bool resident_retry_prep_done = false;
 					if (movie_session && device_prep_ok &&
-					    !movie_session->admitPatchRetry(patch_w, patch_h, n_groups)) {
+					    !movie_session->admitPatchRetry(patch_w, patch_h, n_groups,
+					        bfactor / (prescaling * prescaling), ccf_downsample)) {
 						refuse_fallback_if_fatal(movie_session->getFailureState(), "patch retry admission");
 						// Preserve both globally aligned representations: patch preparation
 						// reads the real frames; dose weighting later reads the spectra.

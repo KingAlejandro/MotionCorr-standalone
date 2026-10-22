@@ -201,6 +201,7 @@ exec "{sys.executable}" "$@"
             "DefectParser",
             "GlobalIfftElision",
             "PatchRetryState",
+            "PatchRetryAdmission",
             "CpuDoseSymmetry",
             "CpuDoseSymmetryBase",
             "OutputTreeComparator",
@@ -271,7 +272,7 @@ exec "{sys.executable}" "$@"
         # Case B: a required test is absent, the count gate is satisfied, so the
         # only thing that can reject the collection is the missing-name check.
         for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults",
-                        "DefectParser", "GlobalIfftElision", "PatchRetryState",
+                        "DefectParser", "GlobalIfftElision", "PatchRetryState", "PatchRetryAdmission",
                         "CpuDoseSymmetry", "CpuDoseSymmetryBase",
                         "OutputTreeComparator", "MultiGpuScheduling", "NativeMovieStaging",
                         "GainCacheOwnership", "JointStarPublication", "EerMemorySafety",

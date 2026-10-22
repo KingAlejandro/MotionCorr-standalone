@@ -43,7 +43,7 @@ jobs:
             zstd
 
       - name: Install required numerical validation dependencies
-        run: python3 -m pip install 'numpy>=2.4.0,<3'
+        run: python3 -m pip install 'numpy>=2.4.0,<3' 'scipy>=1.10,<2'
 
       - name: Comparator failure controls
         run: python3 tools/test_compare_motioncorr.py -v
@@ -100,6 +100,7 @@ jobs:
           python3 tools/test_known_motion_verdicts.py -v
           python3 tools/test_known_motion_runner.py -v
           python3 tools/test_motion_diagnostics.py -v
+          python3 tools/test_realistic_motion.py -v
           python3 tools/test_ci_fail_closed.py -v
 
       - name: Canonical fixture digests are NumPy-version independent

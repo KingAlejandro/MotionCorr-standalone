@@ -1,0 +1,111 @@
+{
+  "kind": "host C++ helper regression; no MotionCorr movie/CUDA execution",
+  "base": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+  "legacy_runner_sha256": "8a3a1ad80edebc6959abbb80d118a0a358f703ff5041a0ade4995cbc2307d903",
+  "legacy_block_sha256": "e783ccd4d1c34ccaff8cd0f84a1a1289d30148fb6e5117025023f7006ead5faf",
+  "fixed_test_sha256": "7b939e067d669047dde903f1c7ae8fc0d8703a4a7e503e2a25d088a816e88875",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin\n",
+  "rows": [
+    {
+      "case": "legacy_exact_runner_block",
+      "compile_argv": [
+        "clang++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-I",
+        "/tmp/motioncorr-guard264-parent-20261022/legacy_exact_runner_block",
+        "-I",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/work-264-centered-guard-20261022",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/work-264-centered-guard-20261022/tests/test_local_motion_distortion_guard.cpp",
+        "-o",
+        "/tmp/motioncorr-guard264-parent-20261022/legacy_exact_runner_block/test"
+      ],
+      "compile_exit": 0,
+      "test_exit": 1,
+      "stdout": "FAIL checks=51 failed=45\n",
+      "stderr": "FAIL legacy accepted harmful x finite-pair maximum\nFAIL legacy accepted harmful x unchanged strict threshold\nFAIL legacy rejected valid x finite-pair maximum\nFAIL legacy rejected valid x unchanged strict threshold\nFAIL legacy accepted harmful y finite-pair maximum\nFAIL legacy accepted harmful y unchanged strict threshold\nFAIL legacy rejected valid y finite-pair maximum\nFAIL legacy rejected valid y unchanged strict threshold\nFAIL cross term exactly at threshold finite-pair maximum\nFAIL cross term exactly at threshold unchanged strict threshold\nFAIL cross term above threshold finite-pair maximum\nFAIL last horizontal pair stays inside image finite-pair maximum\nFAIL last horizontal pair stays inside image unchanged strict threshold\nFAIL last vertical pair stays inside image finite-pair maximum\nFAIL last vertical pair stays inside image unchanged strict threshold\nFAIL exhaustive grid 1x1 polynomial 0\nFAIL exhaustive grid 1x1 polynomial 1\nFAIL exhaustive grid 1x1 polynomial 2\nFAIL exhaustive grid 1x1 polynomial 3\nFAIL exhaustive grid 1x1 polynomial 4\nFAIL exhaustive grid 1x5 polynomial 0\nFAIL exhaustive grid 1x5 polynomial 1\nFAIL exhaustive grid 1x5 polynomial 2\nFAIL exhaustive grid 1x5 polynomial 3\nFAIL exhaustive grid 1x5 polynomial 4\nFAIL exhaustive grid 5x1 polynomial 0\nFAIL exhaustive grid 5x1 polynomial 1\nFAIL exhaustive grid 5x1 polynomial 2\nFAIL exhaustive grid 5x1 polynomial 3\nFAIL exhaustive grid 5x1 polynomial 4\nFAIL exhaustive grid 2x2 polynomial 0\nFAIL exhaustive grid 2x2 polynomial 1\nFAIL exhaustive grid 2x2 polynomial 2\nFAIL exhaustive grid 2x2 polynomial 3\nFAIL exhaustive grid 2x2 polynomial 4\nFAIL exhaustive grid 7x11 polynomial 0\nFAIL exhaustive grid 7x11 polynomial 1\nFAIL exhaustive grid 7x11 polynomial 2\nFAIL exhaustive grid 7x11 polynomial 3\nFAIL exhaustive grid 7x11 polynomial 4\nFAIL exhaustive grid 100x80 polynomial 0\nFAIL exhaustive grid 100x80 polynomial 1\nFAIL exhaustive grid 100x80 polynomial 2\nFAIL exhaustive grid 100x80 polynomial 3\nFAIL exhaustive grid 100x80 polynomial 4\n",
+      "header_sha256": "0e5cd053bd90a9097ea25a037a65b3f0bbe7059db0cf000cd07c849d21bcadd6",
+      "binary_sha256": "5397debff58e5805932d3f036a8af1aac5cf01717aab5c8e47a97f289109cbe9"
+    },
+    {
+      "case": "fixed",
+      "compile_argv": [
+        "clang++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-I",
+        "/tmp/motioncorr-guard264-parent-20261022/fixed",
+        "-I",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/work-264-centered-guard-20261022",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/work-264-centered-guard-20261022/tests/test_local_motion_distortion_guard.cpp",
+        "-o",
+        "/tmp/motioncorr-guard264-parent-20261022/fixed/test"
+      ],
+      "compile_exit": 0,
+      "test_exit": 0,
+      "stdout": "PASS checks=51 failed=0\n",
+      "stderr": "",
+      "header_sha256": "02d8f5c1c45d2f2e9637b44e6be67089e8abff0f863c761fc29294168f44c146",
+      "binary_sha256": "363fe8076bd3f54778727683e6ff10f99b08cfdfc9efc715ba8aface3910ac95"
+    },
+    {
+      "case": "mutant_uncentred",
+      "compile_argv": [
+        "clang++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-I",
+        "/tmp/motioncorr-guard264-parent-20261022/mutant_uncentred",
+        "-I",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/work-264-centered-guard-20261022",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/work-264-centered-guard-20261022/tests/test_local_motion_distortion_guard.cpp",
+        "-o",
+        "/tmp/motioncorr-guard264-parent-20261022/mutant_uncentred/test"
+      ],
+      "compile_exit": 0,
+      "test_exit": 1,
+      "stdout": "FAIL checks=51 failed=37\n",
+      "stderr": "FAIL legacy accepted harmful x finite-pair maximum\nFAIL legacy accepted harmful x unchanged strict threshold\nFAIL legacy rejected valid x finite-pair maximum\nFAIL legacy rejected valid x unchanged strict threshold\nFAIL legacy accepted harmful y finite-pair maximum\nFAIL legacy accepted harmful y unchanged strict threshold\nFAIL legacy rejected valid y finite-pair maximum\nFAIL legacy rejected valid y unchanged strict threshold\nFAIL cross term exactly at threshold finite-pair maximum\nFAIL cross term exactly at threshold unchanged strict threshold\nFAIL cross term above threshold finite-pair maximum\nFAIL last horizontal pair stays inside image finite-pair maximum\nFAIL last horizontal pair stays inside image unchanged strict threshold\nFAIL last vertical pair stays inside image finite-pair maximum\nFAIL last vertical pair stays inside image unchanged strict threshold\nFAIL exhaustive grid 1x5 polynomial 0\nFAIL exhaustive grid 1x5 polynomial 1\nFAIL exhaustive grid 1x5 polynomial 2\nFAIL exhaustive grid 1x5 polynomial 3\nFAIL exhaustive grid 5x1 polynomial 0\nFAIL exhaustive grid 5x1 polynomial 1\nFAIL exhaustive grid 5x1 polynomial 2\nFAIL exhaustive grid 5x1 polynomial 3\nFAIL exhaustive grid 5x1 polynomial 4\nFAIL exhaustive grid 2x2 polynomial 0\nFAIL exhaustive grid 2x2 polynomial 2\nFAIL exhaustive grid 2x2 polynomial 4\nFAIL exhaustive grid 7x11 polynomial 0\nFAIL exhaustive grid 7x11 polynomial 1\nFAIL exhaustive grid 7x11 polynomial 2\nFAIL exhaustive grid 7x11 polynomial 3\nFAIL exhaustive grid 7x11 polynomial 4\nFAIL exhaustive grid 100x80 polynomial 0\nFAIL exhaustive grid 100x80 polynomial 1\nFAIL exhaustive grid 100x80 polynomial 2\nFAIL exhaustive grid 100x80 polynomial 3\nFAIL exhaustive grid 100x80 polynomial 4\n",
+      "header_sha256": "d531871fa4a34986d375ac3f79053490cd8eb6eb512bb3d642d15955add1e347",
+      "binary_sha256": "e1928907487dd16182c4e71ec429ba5e876f1a7f83cba7fdfceafc61577358c0"
+    },
+    {
+      "case": "mutant_invalid_last_pair",
+      "compile_argv": [
+        "clang++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-I",
+        "/tmp/motioncorr-guard264-parent-20261022/mutant_invalid_last_pair",
+        "-I",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/work-264-centered-guard-20261022",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/work-264-centered-guard-20261022/tests/test_local_motion_distortion_guard.cpp",
+        "-o",
+        "/tmp/motioncorr-guard264-parent-20261022/mutant_invalid_last_pair/test"
+      ],
+      "compile_exit": 0,
+      "test_exit": 1,
+      "stdout": "FAIL checks=51 failed=10\n",
+      "stderr": "FAIL legacy rejected valid x finite-pair maximum\nFAIL legacy rejected valid y finite-pair maximum\nFAIL last horizontal pair stays inside image finite-pair maximum\nFAIL last horizontal pair stays inside image unchanged strict threshold\nFAIL last vertical pair stays inside image finite-pair maximum\nFAIL last vertical pair stays inside image unchanged strict threshold\nFAIL exhaustive grid 5x1 polynomial 4\nFAIL exhaustive grid 2x2 polynomial 4\nFAIL exhaustive grid 7x11 polynomial 4\nFAIL exhaustive grid 100x80 polynomial 4\n",
+      "header_sha256": "4ba6c2cf4cfc580502a9e1d7d5bf24b9c5db13c135f794c17f96001bd0797526",
+      "binary_sha256": "f46d7d6538f6eb1e0a17a668065831d9ae6b8965fbb842ee8ec809e43f1f8666"
+    }
+  ],
+  "limitations": [
+    "Standalone production guard helper exercised with independent finite-grid polynomial oracle.",
+    "End-to-end CPU/CUDA/native fitting/publication not executed; current source review and CI pending.",
+    "No guard threshold or gate relaxed; mutations and exact legacy block must exit1 ordinarily."
+  ]
+}

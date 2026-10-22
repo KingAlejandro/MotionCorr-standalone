@@ -117,6 +117,35 @@ The protected root remained at `c8844894` with its original untracked
 
 ## Limits and prior identities
 
+### Review follow-up: require the planning control
+
+Review of `35d2f950` found that the new hardware control was registered but
+omitted from both `CUDA_REQUIRED_TESTS` in `tools/validate_test_collection.py`
+and the independent `CUDA_SUITE` in `tools/test_ci_fail_closed.py`. Both now
+require `CudaStreamingPlanClassificationCleanup`. The existing drop-one control
+therefore also rejects its omission while keeping the inventory count unchanged.
+
+`collection-review-before.json` retains actual validator CLI calls over constructed
+CPU/CUDA inventories derived from the independent collection fixture. The old
+validator accepts the complete CPU and CUDA inventories and also incorrectly
+accepts the CUDA inventory with the new control replaced by an additive filler.
+`collection-review-after.json` records the same inputs: complete CPU/CUDA collections
+exit 0; omitting the new control exits 1 and names the missing test. These are
+host collection-policy checks, not actual CTest or native executions.
+
+The focused existing unittest also **PASS**:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  /Users/alex.konstantinov/.local/bin/python3 -B -m unittest \
+  tools.test_ci_fail_closed.TestCiFailClosedControls.test_3_zero_or_missing_collected_tests_fails -v
+```
+
+`collection-review-unittest.log` retains its result, including existing CPU,
+drop-one CUDA, empty-command and automatic CUDA-cache selection controls.
+Production, CMake, native test sources and the original receipt archive are
+unchanged by this follow-up. No native run or build was repeated.
+
 All fatal and library failures here are **simulated classifier returns** around
 real healthy native GPU work. Genuine poisoned contexts, actual failing cuFFT
 teardown, real low-memory devices, nvCOMP configuration, full suites, QF,

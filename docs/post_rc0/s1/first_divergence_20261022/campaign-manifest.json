@@ -1,0 +1,67 @@
+{
+  "schema": "w4-first-divergence-campaign/1",
+  "frozen_before_launch": true,
+  "native_process_cap": 24,
+  "native_processes_planned": 12,
+  "source": {
+    "composition": "805d9de27898b4a10e6212e65098d5995a40fdb1",
+    "numerical_native_source": "d751ff28594902eca75d665ff116e662653481aa",
+    "overlay": "make_overlay.py + w4_inject.h on a git-archive of 805d9de2; test build only"
+  },
+  "fixtures": {
+    "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+    "source_dir": "/mnt/clathrin/alex-motioncorr-residual-ccf-20261022-805d9de2/fixtures",
+    "cases": ["integer", "fractional"],
+    "note": "copied read-only and hash-verified; never regenerated"
+  },
+  "resources": {
+    "host": "4-gpu-vm",
+    "cpus": [14, 15],
+    "gpu_uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+    "gpu_lock": "/tmp/motioncorr-gpu1-correctness.lock (exclusive nonblocking, held through final health)",
+    "build_lock": "/tmp/motioncorr-build.lock (exclusive nonblocking; busy = stop, exit 75)",
+    "bench_lock": "/tmp/motioncorr-bench.lock probed nonblocking and recorded only; correctness does not wait",
+    "compile_parallel": 2,
+    "runtime": "--j 1, OMP/BLAS threads 1",
+    "scratch_cap_gib": 80
+  },
+  "argv": "BINARY --i CASE.star --o ROOT/runs/LABEL/out --use_own --j 1 --patch_x 1 --patch_y 1 --bin_factor 1 --seed 1 --skip_defect --save_noDW --first_frame_sum 1 --last_frame_sum 5 --skip_logfile [--gpu 0 on CUDA]; cwd ROOT/fixtures; every arm sets MC_W4_STATE",
+  "truth_shift_files": {
+    "integer": "frame f: x=-f, y=2f (fixture field[f,0,0,:])",
+    "fractional": "frame f: x=-0.8125 f, y=0.53125 f (fixture field[f,0,0,:])",
+    "integer_perturbed": "integer truth with frame 4 x += 1.0"
+  },
+  "arms": [
+    {"label": "neutral-cpu-integer", "backend": "cpu", "case": "integer", "env": {},
+     "stage": "overlay neutrality",
+     "expected": "no W4 witness line; global-final equals #275 runs/cpu-integer-off state/global.txt exactly; STAR equal after output-prefix normalization; MRC equal except Relion timestamp label; checker accuracy FAIL (historical)"},
+    {"label": "neutral-cuda-integer", "backend": "cuda", "case": "integer", "env": {},
+     "stage": "overlay neutrality",
+     "expected": "as neutral-cpu-integer against #275 runs/cuda-integer-off"},
+    {"label": "truth-cpu-integer", "backend": "cpu", "case": "integer", "env": {"MC_W4_GLOBAL_SHIFTS": "truth-integer.txt"},
+     "stage": "known-correct field -> actual reconstruction and STAR serialization",
+     "expected": "witness line; global-final equals truth exactly; STAR vs runtime max vector <= 5e-6 px; checker accuracy PASS by construction (not an estimator result); published_sum_divided_by_frames contrast_normalized_rmse <= 1e-3"},
+    {"label": "truth-cuda-integer", "backend": "cuda", "case": "integer", "env": {"MC_W4_GLOBAL_SHIFTS": "truth-integer.txt"},
+     "stage": "known-correct field -> actual reconstruction and STAR serialization", "expected": "as truth-cpu-integer"},
+    {"label": "truth-cpu-fractional", "backend": "cpu", "case": "fractional", "env": {"MC_W4_GLOBAL_SHIFTS": "truth-fractional.txt"},
+     "stage": "known-correct field -> actual reconstruction and STAR serialization", "expected": "as truth-cpu-integer"},
+    {"label": "truth-cuda-fractional", "backend": "cuda", "case": "fractional", "env": {"MC_W4_GLOBAL_SHIFTS": "truth-fractional.txt"},
+     "stage": "known-correct field -> actual reconstruction and STAR serialization", "expected": "as truth-cpu-integer"},
+    {"label": "perturbed-cpu-integer", "backend": "cpu", "case": "integer", "env": {"MC_W4_GLOBAL_SHIFTS": "truth-integer-perturbed.txt"},
+     "stage": "negative control for the injection and checker",
+     "expected": "witness line; global-final equals perturbed file; checker accuracy FAIL; published-sum contrast_normalized_rmse at least 10x the matching truth arm"},
+    {"label": "perturbed-cuda-integer", "backend": "cuda", "case": "integer", "env": {"MC_W4_GLOBAL_SHIFTS": "truth-integer-perturbed.txt"},
+     "stage": "negative control for the injection and checker", "expected": "as perturbed-cpu-integer"},
+    {"label": "fixedref-cpu-integer", "backend": "cpu", "case": "integer", "env": {"MC_W4_FIXED_REF": "1"},
+     "stage": "actual float CCF/peak/parabola path with a fixed known template (unshifted frame 0) instead of the sum-of-others reference",
+     "expected": "witness line; offline float32-map emulation (attempt03) predicts trajectory equal to truth (0 px); a nonzero error contradicts that the integer failure needs the sum-of-others reference"},
+    {"label": "fixedref-cuda-integer", "backend": "cuda", "case": "integer", "env": {"MC_W4_FIXED_REF": "1"},
+     "stage": "fixed known template", "expected": "as fixedref-cpu-integer"},
+    {"label": "fixedref-cpu-fractional", "backend": "cpu", "case": "fractional", "env": {"MC_W4_FIXED_REF": "1"},
+     "stage": "fixed known template",
+     "expected": "witness line; checker accuracy FAIL with field rms roughly 0.26-0.34 px (offline double 0.260, float32-map 0.335); a PASS contradicts the separable-parabola attribution"},
+    {"label": "fixedref-cuda-fractional", "backend": "cuda", "case": "fractional", "env": {"MC_W4_FIXED_REF": "1"},
+     "stage": "fixed known template", "expected": "as fixedref-cpu-fractional"}
+  ],
+  "stop_conditions": "any neutrality mismatch; missing or unexpected witness line; nonzero application exit; GPU health/ECC/app/UUID failure; busy lock. Failures are retained; no silent retry or reselection."
+}

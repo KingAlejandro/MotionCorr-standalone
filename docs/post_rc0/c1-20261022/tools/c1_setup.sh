@@ -8,11 +8,11 @@ cd "$C1_SCR"
 git init -q src
 git -C src fetch -q --no-tags https://github.com/KingAlejandro/MotionCorr-standalone.git +refs/heads/main:refs/remotes/origin/main
 git -C src cat-file -e 3691374061f782bc84531fd1c79d017ddcb5a7c2
-git -C src fetch -q --no-tags in/thin.bundle +integration/c1-20261022:refs/heads/c1
+git -C src fetch -q --no-tags "$C1_SCR/in/thin.bundle" +integration/c1-20261022:refs/heads/c1
 git -C src checkout -q c1
 [ "$(git -C src rev-parse HEAD)" = "$C1_SHA" ] || { echo "HEAD != C1_SHA"; exit 91; }
 [ -z "$(git -C src status --porcelain)" ] || { echo "dirty"; exit 92; }
-git -C src fetch -q --no-tags in/prs.bundle '+refs/c1/*:refs/c1/*'
+git -C src fetch -q --no-tags "$C1_SCR/in/prs.bundle" '+refs/c1/*:refs/c1/*'
 git -C src archive --format=tar HEAD > source.tar
 sha256sum source.tar > source.tar.sha256
 (cd src && git ls-files -z | xargs -0 sha256sum) > source-files.sha256

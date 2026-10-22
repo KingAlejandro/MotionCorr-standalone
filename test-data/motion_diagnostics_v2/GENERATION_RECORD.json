@@ -1,0 +1,278 @@
+{
+  "schema": "motion-diagnostics/2",
+  "numpy": "2.3.5",
+  "cases": {
+    "zero": {
+      "recipe": {
+        "schema": "motion-diagnostics/2",
+        "name": "zero",
+        "nx": 128,
+        "ny": 96,
+        "frames": 5,
+        "pixel_size": 0.885,
+        "seed": 238262,
+        "pedestal": 100.0,
+        "contrast": 1.0,
+        "noise": 0.0,
+        "signal": "multiband",
+        "role": "gate",
+        "motion": "zero"
+      },
+      "closure": {
+        "forward_inverse_max_px": 0.0,
+        "inverse_forward_max_px": 0.0,
+        "continuous_signal_max_abs": 0.0
+      },
+      "files": {
+        "zero.mrcs": "c80e92704c034ccd6e87c0c1ce3e4ceea23aac87aa83d13b0dfe738aa95d3b86",
+        "zero_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+        "zero_field.npy": "255348d18b272e6759324d669b9c17aaf7e3f56ee3a48d50185eda96713f2f4d",
+        "zero.star": "3c3084c06c72b2b3d4cc9d94fbf17b623ff4a7c46030e014e0bf7cc67fa2de1f"
+      },
+      "roi": [
+        12,
+        84,
+        12,
+        116
+      ]
+    },
+    "integer": {
+      "recipe": {
+        "schema": "motion-diagnostics/2",
+        "name": "integer",
+        "nx": 128,
+        "ny": 96,
+        "frames": 5,
+        "pixel_size": 0.885,
+        "seed": 238262,
+        "pedestal": 100.0,
+        "contrast": 1.0,
+        "noise": 0.0,
+        "signal": "multiband",
+        "role": "gate",
+        "motion": "integer"
+      },
+      "closure": {
+        "forward_inverse_max_px": 0.0,
+        "inverse_forward_max_px": 0.0,
+        "continuous_signal_max_abs": 0.0
+      },
+      "files": {
+        "integer.mrcs": "faaa3f9eeb7f1a785f51f6ab62b23e21a02b93a24a81c46b83b41c0590bc0b31",
+        "integer_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+        "integer_field.npy": "3b1f50a5c9297ba5030de6e305560daa1c25f9154cd527d9b002af15ae91d0ac",
+        "integer.star": "8b3e4817dffff9c2deaab7d8f3196f49607818cbf5523c3bc397f6cf1bd09637"
+      },
+      "roi": [
+        12,
+        84,
+        12,
+        116
+      ]
+    },
+    "fractional": {
+      "recipe": {
+        "schema": "motion-diagnostics/2",
+        "name": "fractional",
+        "nx": 128,
+        "ny": 96,
+        "frames": 5,
+        "pixel_size": 0.885,
+        "seed": 238262,
+        "pedestal": 100.0,
+        "contrast": 1.0,
+        "noise": 0.0,
+        "signal": "multiband",
+        "role": "gate",
+        "motion": "fractional"
+      },
+      "closure": {
+        "forward_inverse_max_px": 0.0,
+        "inverse_forward_max_px": 0.0,
+        "continuous_signal_max_abs": 0.0
+      },
+      "files": {
+        "fractional.mrcs": "2dc7308553d476fdf51e31ddbbfdc381c9e22032f65a19c3dc87e754988a7c86",
+        "fractional_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+        "fractional_field.npy": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+        "fractional.star": "c051dd18dae87367b0eab06e8ba0d4f75a9841ed46d5b5d327c3e66b960d2dbc"
+      },
+      "roi": [
+        12,
+        84,
+        12,
+        116
+      ]
+    },
+    "affine": {
+      "recipe": {
+        "schema": "motion-diagnostics/2",
+        "name": "affine",
+        "nx": 128,
+        "ny": 96,
+        "frames": 5,
+        "pixel_size": 0.885,
+        "seed": 238262,
+        "pedestal": 100.0,
+        "contrast": 1.0,
+        "noise": 0.0,
+        "signal": "multiband",
+        "role": "gate",
+        "motion": "affine"
+      },
+      "closure": {
+        "forward_inverse_max_px": 4.322062729257126e-14,
+        "inverse_forward_max_px": 3.1776437161565096e-14,
+        "continuous_signal_max_abs": 4.263256414560601e-14
+      },
+      "files": {
+        "affine.mrcs": "1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a",
+        "affine_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+        "affine_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+        "affine.star": "0a08c285c4ec09aceaef93423033c01830afc6b8f07063697133ceb64b066491"
+      },
+      "roi": [
+        12,
+        84,
+        12,
+        116
+      ]
+    },
+    "pedestal": {
+      "recipe": {
+        "schema": "motion-diagnostics/2",
+        "name": "pedestal",
+        "nx": 128,
+        "ny": 96,
+        "frames": 5,
+        "pixel_size": 0.885,
+        "seed": 238262,
+        "pedestal": 4096.0,
+        "contrast": 0.25,
+        "noise": 0.0,
+        "signal": "multiband",
+        "role": "gate",
+        "motion": "affine"
+      },
+      "closure": {
+        "forward_inverse_max_px": 4.322062729257126e-14,
+        "inverse_forward_max_px": 3.1776437161565096e-14,
+        "continuous_signal_max_abs": 9.094947017729282e-13
+      },
+      "files": {
+        "pedestal.mrcs": "29016d8818bbd7be3491cca0822734a7e297a84642cf78c0847e61b447e03073",
+        "pedestal_target.npy": "47b9d9fffbcef586812b8cdfb82b13012ade6a92350431e169d63fd206ea4910",
+        "pedestal_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+        "pedestal.star": "4a0f869b217b75e4315342e64ce8b5adad4fc7c9c57b9033cc23af1aa385fa53"
+      },
+      "roi": [
+        12,
+        84,
+        12,
+        116
+      ]
+    },
+    "noisy": {
+      "recipe": {
+        "schema": "motion-diagnostics/2",
+        "name": "noisy",
+        "nx": 128,
+        "ny": 96,
+        "frames": 5,
+        "pixel_size": 0.885,
+        "seed": 238262,
+        "pedestal": 100.0,
+        "contrast": 1.0,
+        "noise": 4.0,
+        "signal": "multiband",
+        "role": "characterization",
+        "motion": "affine"
+      },
+      "closure": {
+        "forward_inverse_max_px": 4.322062729257126e-14,
+        "inverse_forward_max_px": 3.1776437161565096e-14,
+        "continuous_signal_max_abs": 4.263256414560601e-14
+      },
+      "files": {
+        "noisy.mrcs": "5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3",
+        "noisy_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+        "noisy_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+        "noisy.star": "c321865e4fc769d9af55bc86af0a0b390abdcdb029137a9aeb5d6743b81a6891"
+      },
+      "roi": [
+        12,
+        84,
+        12,
+        116
+      ]
+    },
+    "flat": {
+      "recipe": {
+        "schema": "motion-diagnostics/2",
+        "name": "flat",
+        "nx": 128,
+        "ny": 96,
+        "frames": 5,
+        "pixel_size": 0.885,
+        "seed": 238262,
+        "pedestal": 100.0,
+        "contrast": 1.0,
+        "noise": 0.0,
+        "signal": "flat",
+        "role": "characterization",
+        "motion": "fractional"
+      },
+      "closure": {
+        "forward_inverse_max_px": 0.0,
+        "inverse_forward_max_px": 0.0,
+        "continuous_signal_max_abs": 0.0
+      },
+      "files": {
+        "flat.mrcs": "c2e25c3fcd1df4d92e9124c44dd6d9b5b6f1b8354dc1266af84c9da2ce96eabc",
+        "flat_target.npy": "5641f26812579bc93caf73d46ada5741416b195a0a9f8ee9f330f0348bf340e4",
+        "flat_field.npy": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+        "flat.star": "ecc8c830bf2aa05b7043a0a09bfc6a0d21d8540dccab9e1ad64f7dd608bd40e8"
+      },
+      "roi": [
+        12,
+        84,
+        12,
+        116
+      ]
+    },
+    "repeated": {
+      "recipe": {
+        "schema": "motion-diagnostics/2",
+        "name": "repeated",
+        "nx": 128,
+        "ny": 96,
+        "frames": 5,
+        "pixel_size": 0.885,
+        "seed": 238262,
+        "pedestal": 100.0,
+        "contrast": 1.0,
+        "noise": 0.0,
+        "signal": "repeated",
+        "role": "characterization",
+        "motion": "fractional"
+      },
+      "closure": {
+        "forward_inverse_max_px": 0.0,
+        "inverse_forward_max_px": 0.0,
+        "continuous_signal_max_abs": 0.0
+      },
+      "files": {
+        "repeated.mrcs": "887e895add295b1305affb09b8c7f5177103680c45f94dd60c4ab0e4e7deb19c",
+        "repeated_target.npy": "a655b5dddcbb1473165fe8265e644ad0596de8308a0024e46467170fb8d86378",
+        "repeated_field.npy": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+        "repeated.star": "db3580a1bf5774fbc52304db9cf7a452477f3a24ccc2d046986d8c8794904a1d"
+      },
+      "roi": [
+        12,
+        84,
+        12,
+        116
+      ]
+    }
+  }
+}

@@ -1,0 +1,693 @@
+{
+  "kind": "generator and evaluator positive controls; NOT estimator runs",
+  "cases": {
+    "zero": {
+      "role": "gate",
+      "gauge": "fixed frame-0 material coordinates; no registration",
+      "accuracy_status": "PASS",
+      "field_distance_status": "PASS",
+      "identifiable": true,
+      "field_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "field_angstrom": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "border_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "per_frame_px": [
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        }
+      ],
+      "global_mean_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "local_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "signal": {
+        "uncorrected": {
+          "rmse": 0.0,
+          "contrast_normalized_rmse": 0.0,
+          "mean_error": 0.0
+        },
+        "true_motion_bilinear": {
+          "rmse": 0.0,
+          "contrast_normalized_rmse": 0.0,
+          "mean_error": 0.0
+        },
+        "estimated_motion_bilinear": {
+          "rmse": 0.0,
+          "contrast_normalized_rmse": 0.0,
+          "mean_error": 0.0
+        }
+      },
+      "signal_status": "CHARACTERIZATION",
+      "application_consistency_status": "NOT_TESTED",
+      "case": "zero",
+      "candidate_sha256": "255348d18b272e6759324d669b9c17aaf7e3f56ee3a48d50185eda96713f2f4d",
+      "fixture_files": {
+        "zero.mrcs": "c80e92704c034ccd6e87c0c1ce3e4ceea23aac87aa83d13b0dfe738aa95d3b86",
+        "zero_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+        "zero_field.npy": "255348d18b272e6759324d669b9c17aaf7e3f56ee3a48d50185eda96713f2f4d",
+        "zero.star": "3c3084c06c72b2b3d4cc9d94fbf17b623ff4a7c46030e014e0bf7cc67fa2de1f"
+      }
+    },
+    "integer": {
+      "role": "gate",
+      "gauge": "fixed frame-0 material coordinates; no registration",
+      "accuracy_status": "PASS",
+      "field_distance_status": "PASS",
+      "identifiable": true,
+      "field_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "field_angstrom": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "border_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "per_frame_px": [
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        }
+      ],
+      "global_mean_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "local_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "signal": {
+        "uncorrected": {
+          "rmse": 0.6294498329247489,
+          "contrast_normalized_rmse": 0.6319700949358554,
+          "mean_error": -0.0023172690318180797
+        },
+        "true_motion_bilinear": {
+          "rmse": 0.0,
+          "contrast_normalized_rmse": 0.0,
+          "mean_error": 0.0
+        },
+        "estimated_motion_bilinear": {
+          "rmse": 0.0,
+          "contrast_normalized_rmse": 0.0,
+          "mean_error": 0.0
+        }
+      },
+      "signal_status": "CHARACTERIZATION",
+      "application_consistency_status": "NOT_TESTED",
+      "case": "integer",
+      "candidate_sha256": "3b1f50a5c9297ba5030de6e305560daa1c25f9154cd527d9b002af15ae91d0ac",
+      "fixture_files": {
+        "integer.mrcs": "faaa3f9eeb7f1a785f51f6ab62b23e21a02b93a24a81c46b83b41c0590bc0b31",
+        "integer_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+        "integer_field.npy": "3b1f50a5c9297ba5030de6e305560daa1c25f9154cd527d9b002af15ae91d0ac",
+        "integer.star": "8b3e4817dffff9c2deaab7d8f3196f49607818cbf5523c3bc397f6cf1bd09637"
+      }
+    },
+    "fractional": {
+      "role": "gate",
+      "gauge": "fixed frame-0 material coordinates; no registration",
+      "accuracy_status": "PASS",
+      "field_distance_status": "PASS",
+      "identifiable": true,
+      "field_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "field_angstrom": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "border_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "per_frame_px": [
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        }
+      ],
+      "global_mean_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "local_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "signal": {
+        "uncorrected": {
+          "rmse": 0.4550866865088168,
+          "contrast_normalized_rmse": 0.4569088137503783,
+          "mean_error": -0.0011611553338857672
+        },
+        "true_motion_bilinear": {
+          "rmse": 0.02357382905470023,
+          "contrast_normalized_rmse": 0.023668216601912408,
+          "mean_error": -6.632381835237176e-05
+        },
+        "estimated_motion_bilinear": {
+          "rmse": 0.02357382905470023,
+          "contrast_normalized_rmse": 0.023668216601912408,
+          "mean_error": -6.632381835237176e-05
+        }
+      },
+      "signal_status": "CHARACTERIZATION",
+      "application_consistency_status": "NOT_TESTED",
+      "case": "fractional",
+      "candidate_sha256": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+      "fixture_files": {
+        "fractional.mrcs": "2dc7308553d476fdf51e31ddbbfdc381c9e22032f65a19c3dc87e754988a7c86",
+        "fractional_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+        "fractional_field.npy": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+        "fractional.star": "c051dd18dae87367b0eab06e8ba0d4f75a9841ed46d5b5d327c3e66b960d2dbc"
+      }
+    },
+    "affine": {
+      "role": "gate",
+      "gauge": "fixed frame-0 material coordinates; no registration",
+      "accuracy_status": "PASS",
+      "field_distance_status": "PASS",
+      "identifiable": true,
+      "field_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "field_angstrom": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "border_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "per_frame_px": [
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        }
+      ],
+      "global_mean_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "local_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "signal": {
+        "uncorrected": {
+          "rmse": 0.45412299930470584,
+          "contrast_normalized_rmse": 0.4559412680270907,
+          "mean_error": -0.0018126993097810349
+        },
+        "true_motion_bilinear": {
+          "rmse": 0.021541174428325656,
+          "contrast_normalized_rmse": 0.021627423404410172,
+          "mean_error": -6.0467113914507874e-05
+        },
+        "estimated_motion_bilinear": {
+          "rmse": 0.021541174428325656,
+          "contrast_normalized_rmse": 0.021627423404410172,
+          "mean_error": -6.0467113914507874e-05
+        }
+      },
+      "signal_status": "CHARACTERIZATION",
+      "application_consistency_status": "NOT_TESTED",
+      "case": "affine",
+      "candidate_sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+      "fixture_files": {
+        "affine.mrcs": "1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a",
+        "affine_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+        "affine_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+        "affine.star": "0a08c285c4ec09aceaef93423033c01830afc6b8f07063697133ceb64b066491"
+      }
+    },
+    "pedestal": {
+      "role": "gate",
+      "gauge": "fixed frame-0 material coordinates; no registration",
+      "accuracy_status": "PASS",
+      "field_distance_status": "PASS",
+      "identifiable": true,
+      "field_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "field_angstrom": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "border_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "per_frame_px": [
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        }
+      ],
+      "global_mean_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "local_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "signal": {
+        "uncorrected": {
+          "rmse": 0.11353016387802327,
+          "contrast_normalized_rmse": 0.4559408651930274,
+          "mean_error": -0.0004515362600973062
+        },
+        "true_motion_bilinear": {
+          "rmse": 0.005386038484081602,
+          "contrast_normalized_rmse": 0.021630507369244406,
+          "mean_error": -1.3555210040027483e-05
+        },
+        "estimated_motion_bilinear": {
+          "rmse": 0.005386038484081602,
+          "contrast_normalized_rmse": 0.021630507369244406,
+          "mean_error": -1.3555210040027483e-05
+        }
+      },
+      "signal_status": "CHARACTERIZATION",
+      "application_consistency_status": "NOT_TESTED",
+      "case": "pedestal",
+      "candidate_sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+      "fixture_files": {
+        "pedestal.mrcs": "29016d8818bbd7be3491cca0822734a7e297a84642cf78c0847e61b447e03073",
+        "pedestal_target.npy": "47b9d9fffbcef586812b8cdfb82b13012ade6a92350431e169d63fd206ea4910",
+        "pedestal_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+        "pedestal.star": "4a0f869b217b75e4315342e64ce8b5adad4fc7c9c57b9033cc23af1aa385fa53"
+      }
+    },
+    "noisy": {
+      "role": "characterization",
+      "gauge": "fixed frame-0 material coordinates; no registration",
+      "accuracy_status": "PASS",
+      "field_distance_status": "PASS",
+      "identifiable": true,
+      "field_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "field_angstrom": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "border_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "per_frame_px": [
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        }
+      ],
+      "global_mean_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "local_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "signal": {
+        "uncorrected": {
+          "rmse": 1.8398193560026619,
+          "contrast_normalized_rmse": 1.8471858315940317,
+          "mean_error": 0.008353184023473986
+        },
+        "true_motion_bilinear": {
+          "rmse": 1.3149793556672902,
+          "contrast_normalized_rmse": 1.320244417856724,
+          "mean_error": 0.01125653816658238
+        },
+        "estimated_motion_bilinear": {
+          "rmse": 1.3149793556672902,
+          "contrast_normalized_rmse": 1.320244417856724,
+          "mean_error": 0.01125653816658238
+        }
+      },
+      "signal_status": "CHARACTERIZATION",
+      "application_consistency_status": "NOT_TESTED",
+      "case": "noisy",
+      "candidate_sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+      "fixture_files": {
+        "noisy.mrcs": "5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3",
+        "noisy_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+        "noisy_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+        "noisy.star": "c321865e4fc769d9af55bc86af0a0b390abdcdb029137a9aeb5d6743b81a6891"
+      }
+    },
+    "flat": {
+      "role": "characterization",
+      "gauge": "fixed frame-0 material coordinates; no registration",
+      "accuracy_status": "UNIDENTIFIABLE",
+      "field_distance_status": "PASS",
+      "identifiable": false,
+      "field_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "field_angstrom": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "border_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "per_frame_px": [
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        }
+      ],
+      "global_mean_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "local_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "signal": {
+        "uncorrected": {
+          "rmse": 0.0,
+          "contrast_normalized_rmse": null,
+          "mean_error": 0.0
+        },
+        "true_motion_bilinear": {
+          "rmse": 0.0,
+          "contrast_normalized_rmse": null,
+          "mean_error": 0.0
+        },
+        "estimated_motion_bilinear": {
+          "rmse": 0.0,
+          "contrast_normalized_rmse": null,
+          "mean_error": 0.0
+        }
+      },
+      "signal_status": "CHARACTERIZATION",
+      "application_consistency_status": "NOT_TESTED",
+      "case": "flat",
+      "candidate_sha256": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+      "fixture_files": {
+        "flat.mrcs": "c2e25c3fcd1df4d92e9124c44dd6d9b5b6f1b8354dc1266af84c9da2ce96eabc",
+        "flat_target.npy": "5641f26812579bc93caf73d46ada5741416b195a0a9f8ee9f330f0348bf340e4",
+        "flat_field.npy": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+        "flat.star": "ecc8c830bf2aa05b7043a0a09bfc6a0d21d8540dccab9e1ad64f7dd608bd40e8"
+      }
+    },
+    "repeated": {
+      "role": "characterization",
+      "gauge": "fixed frame-0 material coordinates; no registration",
+      "accuracy_status": "UNIDENTIFIABLE",
+      "field_distance_status": "PASS",
+      "identifiable": false,
+      "field_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "field_angstrom": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "border_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "per_frame_px": [
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        {
+          "rms": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        }
+      ],
+      "global_mean_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "local_error_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "signal": {
+        "uncorrected": {
+          "rmse": 0.42687223210138525,
+          "contrast_normalized_rmse": 0.6051034756702337,
+          "mean_error": -0.018514501131497704
+        },
+        "true_motion_bilinear": {
+          "rmse": 0.008904370800019313,
+          "contrast_normalized_rmse": 0.012622197731682208,
+          "mean_error": -0.0006081599455613357
+        },
+        "estimated_motion_bilinear": {
+          "rmse": 0.008904370800019313,
+          "contrast_normalized_rmse": 0.012622197731682208,
+          "mean_error": -0.0006081599455613357
+        }
+      },
+      "signal_status": "CHARACTERIZATION",
+      "application_consistency_status": "NOT_TESTED",
+      "case": "repeated",
+      "candidate_sha256": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+      "fixture_files": {
+        "repeated.mrcs": "887e895add295b1305affb09b8c7f5177103680c45f94dd60c4ab0e4e7deb19c",
+        "repeated_target.npy": "a655b5dddcbb1473165fe8265e644ad0596de8308a0024e46467170fb8d86378",
+        "repeated_field.npy": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+        "repeated.star": "db3580a1bf5774fbc52304db9cf7a452477f3a24ccc2d046986d8c8794904a1d"
+      }
+    }
+  }
+}

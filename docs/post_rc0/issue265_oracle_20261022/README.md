@@ -2,7 +2,9 @@
 # #265 native round-trip oracle (preparation only)
 
 Result: on the constructed fixtures the real `ThirdOrderPolynomialModel::write` then `::read` changes coefficients and
-shift fields, and the same fixtures round-trip with zero error when the coefficient text is written at `%.17g`.
+shift fields. A TEST-ONLY file with the coefficient text rewritten at `%.17g` round-trips bit-exactly for 10 of the 11 fixtures.
+For F09 the real reader rejects that file (a subnormal token), so the frozen K2 criterion, bit-identity for every fixture, is
+**NOT MET**. It is a failure, not a partial pass, and it is retained.
 This is a prerequisite oracle. It is not a production fix, not an accuracy claim about any movie, and not a performance or
 science result. #265 stays FILED ONLY pending the maintainer's parity decision. Source is unchanged.
 
@@ -57,7 +59,10 @@ Ranges are 0-indexed frames: early 0-5, mid 6-17, late24 18-23, gap 24-33, late4
 | F10_neg_z3_all_corners | real-write-read | 4 | 2.713e-06 | 5.995e-04 | 2.356e-02 | 5.835e-02 | 1.723e-01 | 2.845e-01 | 3.813e-01 | 5.642e-01 | 5.642e-01 |
 | F10_neg_z3_all_corners | fullprecision-test-only | 0 | 0.000e+00 | 0.000e+00 | 0.000e+00 | 0.000e+00 | 0.000e+00 | 0.000e+00 | 0.000e+00 | 0.000e+00 | 0.000e+00 |
 
-Worst sample per real-write-read fixture (by vector error):
+Worst sample per real-write-read fixture (by vector error). The location is not always unique: the listed one is the first in
+iteration order (G1 before G2). F03 and F09 are pure-time terms, so all 52 positions at frame 49 in both geometries tie (F00/F01 trivially, all zero).
+In F04, F08, F10 and the K3 control, G1 (0,0) ties with G2 (0,0), since both normalise to (-0.5, -0.5). F02, F05, F06 and F07 have a single maximum.
+The values are not affected.
 | fixture | geometry | frame | px | py | pre (x,y) | post (x,y) | err (x,y) | vec |
 |---|---|---|---|---|---|---|---|---|
 | F02_ordinary | G2 | 49 | 5759 | 0 | (16.9229, -10.1871) | (16.9094, -10.187) | (-1.348e-02, 1.123e-04) | 1.348e-02 |
@@ -73,11 +78,12 @@ Worst sample per real-write-read fixture (by vector error):
 Controls against the criteria declared beforehand:
 
 - K1 (zero and exactly representable fixtures, real route): met. F00 and F01 read back bit-identical, error exactly 0.
-- K2 (full-precision file, every fixture): met for 10 of 11. F09 failed: the real reader throws
+- K2 (full-precision file, every fixture; frozen in `PRE_RUN_CRITERIA.txt`): **NOT MET**. 10 of 11 fixtures are bit-exact
+  (F00-F08, F10); F09 failed and is retained as a failure. The real reader throws
   `Invalid floating-point STAR value: 4.9406564584124654e-324`. The follow-up table `fixtures_followup_subnormal.txt`
   (written after seeing this, results in `receipts/followup_subnormal/`) shows the smallest normal double and 1e-300 round-trip bit-exactly
   while subnormals (`1e-310`, `4.94e-324`) are rejected by this reader. This is the libc++ `istream >> double` underflow behaviour on
-  this Mac; libstdc++ was not measured.
+  this Mac. Linux GCC/libstdc++ behaviour was not measured; see "Unmeasured boundaries".
 - K3 (injected +1e-6 in Y idx 17 of F02): met. Measured max |dy| 0.02941225000000003 px at G1, frame 49, pixel (0,0); predicted
   0.029412249999999918; relative difference 3.8e-15; dx exactly 0.
 - Coefficient detail is in `receipts/iteration2/coefficients.csv` (all 36 per fixture per route, bit patterns, written token). For
@@ -87,27 +93,57 @@ Controls against the criteria declared beforehand:
 
 - The real writer changed 36 of 36 coefficients in F02 (ordinary values) and in F07. Per-fixture counts are in the table. Largest coefficient abs
   error is 4.6e-6 in the negative-value fixture F06 and 5e-7 in the positive-value fixture F05 (F02: 4.8e-6), consistent with 5 vs 6 decimals.
+- Significant-digit loss, from the native tokens (`coefficients.csv`): the fixed branch (0.001 <= |v| <= 100000) keeps 6 decimals for positive and 5 for negative values, so
+  the number of significant digits depends on magnitude. F02 X1 -0.021437781265 is written `-0.02144` (4 digits); F03 -0.00122271287007 is written `-0.00122` (3 digits);
+  F02 X4 -0.0087465321098 is written `-0.00875`. The scientific branch (|v| < 0.001 or |v| > 100000) keeps 7 significant digits for positive and 6 for
+  negative values: F02 X2 0.00041873901234 is written `4.187390e-04`, F02 X8 -5.8473629101e-05 is written `-5.84736e-05`, and F08 123456.789 is written `1.234568e+05`.
+  In F02 those scientific-branch losses are 4.5e-12 to 2.9e-11 absolute (X2, X5, X8, X11); the dominant absolute error comes from the fixed branch.
 - Field error grows with frame: F10 gives 0.0006 px over frames 0-5 and 0.56 px over frames 44-49. On a 24-frame range (late24) the
   constructed fixtures give at most 0.058 px (F10), 0.037 px (F07). The 0.34 to 0.56 px values need frames up to 49 and are on constructed coefficients.
   These fixtures therefore do not reproduce or confirm the 0.36-0.38 px in the #265 report for a real movie. That needs the actual
   pre-write native coefficients of that run, which this task did not have and did not reconstruct.
 - F05/F06 contain coefficients up to ~1e5 in the z-linear slot, so their shifts are about 1e8 px. They probe the format switches, not plausible motion.
-  F08 and F09 probe the 12-character width (`1e-300` is written as `1.000000e-30`, 100000.5 as `1.00000e+05`); they are non-physical.
+  F08 and F09 probe the format limits and are non-physical. The 12-character cap truncates only text that would be 13 characters or longer: a
+  three-digit exponent (`1e-300` becomes `1.000000e-30`, `4.94e-324` becomes `4.940656e-32`) and `-99999.99999995` (`-100000.0000`, not `-100000.00000`).
+  Other F08 losses are scientific-branch precision, not the cap: 100000.1234567 becomes `1.000001e+05` (reads back as 100000.1), and **-100000.5** becomes
+  `-1.00000e+05` (abs error 0.5), while +100000.5 round-trips exactly as `1.000005e+05`.
 - All numbers are properties of the constructed coefficients and this toolchain's `snprintf`/`istream`. No claim about any real movie, CUDA, performance or science.
 
 ## Iterations retained
 
 - Iteration 1 (`receipts/iteration1_json_escape_defect/`): numerically complete, but `summary.json` was invalid JSON because the reader's
   multi-line error text was not escaped. Kept as is. Iteration 2 reran with the escape fix and an `any_read_failed` field; its `samples_full.csv`
-  and `coefficients.csv` hashes are identical to iteration 1's (`6da068ed…`, `720f1663…`). The fixture table was not changed.
-- The follow-up table was added after observing iteration 1 and is labelled as such.
+  and `coefficients.csv` hashes are identical to iteration 1's (`6da068ed…`, `720f1663…`). The fixture table was not changed. The iteration-1 hashes were not
+  recorded in its receipt directory; see `RETROSPECTIVE_PROVENANCE.md`.
+- The follow-up table was added after observing iteration 1 and is labelled as such. Its receipt lacks binary, source and build identifiers; they are
+  supplied after the fact in `RETROSPECTIVE_PROVENANCE.md`, which says plainly that they were not captured at run time.
+
+## Unmeasured boundaries
+
+- Linux GCC/libstdc++: whether `istream >> double` accepts subnormal and full-precision tokens there is not measured. No claim is made either way, and it must be measured
+  before any write-side decision about subnormals.
+- Interoperability with RELION's own reader and writer, and with older MotionCorr builds, for full-precision motion tables is not run.
+- Results come from AppleClang arm64 `-O3`, which may contract multiply-adds inside `getShiftAt`. Pre and post use the same compiled function, so exact-zero results and K3
+  are unaffected; last-bit values may differ from the qualified Linux x86-64 GCC build.
+- The pre-write reference in a real run is not `mic.model` when early binning is active: `MotioncorrRunner::writeModel` writes a copy whose coefficients are multiplied
+  by `bin_factor` (`src/motioncorr_runner.cpp`, `writeModel`). A real capture must take that exported copy. See `DESIGN_NOTE.md`.
+
+## Corrections after review R1
+
+Independent review R1 of bb08502e (`review/R1_opus/`, copied verbatim, sha256 in `review/R1_opus/SHA256SUMS.txt`) confirmed the numbers and asked for wording and provenance fixes.
+This follow-up commit changes documentation only: the K2 status above (M1), the future-change classification in `DESIGN_NOTE.md` (M2), the width-cap versus
+significant-digit text (L1), the tokens cited in `DESIGN_NOTE.md` (L2), the tie note on worst samples (L3), `RETROSPECTIVE_PROVENANCE.md` (L4), and the early-binning and
+Linux/interoperability notes. Fixtures, criteria, harness, `run.sh`, all `receipts/` and the source are unchanged. No run was repeated.
 
 ## Files
 
 `fixtures.txt`, `PRE_RUN_CRITERIA.txt`, `FROZEN_BEFORE_RUN.txt`, `fixtures_followup_subnormal.txt`, `harness/roundtrip_oracle.cpp`,
-`harness/summarize_receipt.py` (renders the tables above from `summary.json`), `run.sh`, `DESIGN_NOTE.md`, `receipts/`.
+`harness/summarize_receipt.py` (renders the tables above from `summary.json`), `run.sh`, `DESIGN_NOTE.md`, `receipts/`,
+`RETROSPECTIVE_PROVENANCE.md`, `review/R1_opus/`.
 
 ## Unresolved
 
-Maintainer authorisation of a parity-breaking change to CPU STAR output (CPU/RELION `ad0b230` parity). Real pre-write coefficients
-for the 10641 case are still needed to size the real-movie effect. No source fix is implied or prepared.
+Maintainer authorisation of a parity-breaking change to STAR output on both the CPU and CUDA routes (RELION `ad0b230` parity; the write path is shared). Real pre-write
+coefficients for the 10641 case (the `bin_factor`-scaled exported copy if early binning applies) are still needed to size the real-movie effect. Linux libstdc++ subnormal
+and full-precision reader behaviour, RELION interoperability, a write-side policy for subnormal and non-finite coefficients, and a separate decision on `global_shift` table precision are open.
+No source fix is implied or prepared.

@@ -124,7 +124,7 @@ def tier_b(ev):
                     fb = sum(1 for a, b in zip(per_arm['none'], per_arm[arm]) if a and b and a['failure']['union'] and not b['failure']['union'])
                     fc = sum(1 for a, b in zip(per_arm['none'], per_arm[arm]) if a and b and not a['failure']['union'] and b['failure']['union'])
                     pairs.append(dict(condition=c, backend=backend, arm=arm, metric=metric, pairs=len(deltas), wins=w, losses=l, ties=t,
-                                      sign_p=p, median_delta=md, category=cat if deltas else 'UNRUN',
+                                      sign_p=p, median_delta=md, category=(cat if len(deltas) == 10 else ('IN_PROGRESS' if deltas else 'UNRUN')),
                                       failure_fixed=fb, failure_new=fc, failure_mcnemar_p=mcnemar_p(fb, fc)))
     return rows, pairs, regress
 

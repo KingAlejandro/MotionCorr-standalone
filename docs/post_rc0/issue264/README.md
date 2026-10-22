@@ -84,3 +84,21 @@ The legacy extraction is source-pinned; mutations use isolated temporary headers
 The scripts do not edit production source, old evidence, shared caches, or remote
 machines. The recorded original attempt is immutable; later results belong in a
 new directory with the then-current test/helper hashes.
+
+## Clarification, 22 October 2026 (later commits)
+
+The record above describes `4b0e4e73`/`91380b3f` and is unchanged. Later commits on
+`verify/264-native-20261022` add:
+
+- Two more registered device-free CTests from `runner_numerics`: `LocalMotionGuardModel` (the
+  helper on the real `ThirdOrderPolynomialModel` against an all-pixel-pair scan, including the
+  strict early-exit case from review F1) and `LocalMotionGuardCall` (a source pin on the single
+  runner call, threshold 3 and strict `>`). Both are in the required collection and the mock
+  inventories. The "75 registered" count above predates them.
+- `verify_model_controls.py` and `host_controls/`; see `host_controls/INDEX.md`. Attempt01 is
+  **INVALID** (stale binaries) even though its raw JSON says `all_expected: true`; attempt02 is the
+  valid host result.
+- Independent reviews with responses: `review-round1/`, `review-round2/` (verbatim reports).
+- Native qualification frozen in `native/FROZEN.md` (iteration 1, candidate `0a1f64ab`) and a
+  proposed N3-only iteration 2 in `native/n3-iter2/FROZEN-ITER2.md` (review F5). Native results
+  are not recorded in this branch yet; until they are, treat N1–N4 as unrun here.

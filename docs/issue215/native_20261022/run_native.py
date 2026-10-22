@@ -20,7 +20,7 @@ CUDA = "/usr/local/cuda-12.8"
 NVCOMP = "/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive"
 HEAD = os.environ.get("MC_SOURCE_HEAD", "fc1c8e6f18fe1f33d4a7cc68da2fbc467bd01c16")
 ENV = dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1",
-           MKL_NUM_THREADS="1", NUMEXPR_NUM_THREADS="1", CUDA_VISIBLE_DEVICES=UUID,
+           MKL_NUM_THREADS="1", NUMEXPR_NUM_THREADS="1", PYTHONDONTWRITEBYTECODE="1", CUDA_VISIBLE_DEVICES=UUID,
            PATH=CUDA + "/bin:" + os.environ["PATH"],
            LD_LIBRARY_PATH=CUDA + "/lib64:" + NVCOMP + "/lib")
 

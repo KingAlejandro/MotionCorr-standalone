@@ -23,8 +23,14 @@ def main():
     assert sorted(os.sched_getaffinity(0)) == [8, 9]
     assert json.loads((BUILT / "exit.json").read_text())["status"] == "FAIL"
     expected = json.loads((n.ROOT / "expected-source.json").read_text())
-    source = {str(p.relative_to(BUILT / "src")): hashlib.sha256(p.read_bytes()).hexdigest()
+    original_files = json.loads((BUILT / "source-files.json").read_text())["files"]
+    actual = {str(p.relative_to(BUILT / "src")): hashlib.sha256(p.read_bytes()).hexdigest()
               for p in sorted((BUILT / "src").rglob("*")) if p.is_file()}
+    source = {name: actual[name] for name in original_files}
+    assert source == original_files, "archive source changed after build"
+    generated = {name: digest for name, digest in actual.items() if name not in original_files}
+    assert all("__pycache__" in Path(name).parts and Path(name).suffix == ".pyc"
+               for name in generated), generated
     digest = hashlib.sha256(json.dumps(source, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     assert digest == expected["canonical_files_sha256"] and len(source) == expected["file_count"]
     binaries = json.loads((BUILT / "binaries.json").read_text())
@@ -32,6 +38,7 @@ def main():
         assert hashlib.sha256(Path(path).read_bytes()).hexdigest() == digest
     n.save("reuse-verification.json", dict(status="PASS", source_head=n.HEAD,
            source_files=len(source), canonical_files_sha256=expected["canonical_files_sha256"],
+           generated_python_bytecode=generated,
            binaries=binaries, previous_exit=json.loads((BUILT / "exit.json").read_text())))
     n.command("host-controls", [n.PYTHON, str(BUILT / "src/tests/test_tiff_identity_later_chunk.py"),
               "--host-binary", str(BUILT / "build/tiff_identity_host_control")], timeout=60)

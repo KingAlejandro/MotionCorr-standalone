@@ -1,0 +1,38 @@
+== cpu: iteration-1 anchored update, norm of each term per frame 1..4 (px)
+native - truth(centre)                                   0.524  0.717  1.150  0.760
+quantization: native - parabola(double map)              0.435  0.476  0.500  0.491
+  of which frame-0 anchor term                           0.452  0.452  0.452  0.452
+  of which frame-f term                                  0.044  0.025  0.074  0.079
+parabola vs continuous max (soo objective)               0.265  0.191  0.402  0.308
+sum-of-others vs fixed template                          0.107  0.060  0.125  0.110
+native input vs analytic render                          0.000  0.001  0.001  0.001
+window + deformation: R_fm - truth(centre)               0.226  0.266  0.564  0.380
+  of which window only (pure-translation equivalent)     0.237  0.290  0.605  0.431
+  of which deformation only                              0.012  0.026  0.044  0.055
+identity max abs 1.11e-16
+truth interval range (x,y) per frame 1..4: [[0.185, 0.139], [0.369, 0.278], [0.553, 0.418], [0.736, 0.557]]
+native states vs R_fm / truth(centre), last captured iteration, norms: [0.15047661920080413, 0.2180064222530134, 0.334958862876177, 0.1774470517930104] [0.34483171881220825, 0.4453019479766676, 0.8987751119940193, 0.5563174161047112]
+  replay specified_double_5it_tol0.5                    it= 5 conv=False to R_fm [0.263, 0.184, 0.33, 0.339] to truth [0.3, 0.286, 0.584, 0.441]
+  replay parabola_double_50it_tol1e-9                   it=50 conv=False to R_fm [0.022, 0.015, 0.024, 0.028] to truth [0.232, 0.271, 0.568, 0.39]
+  replay continuous_soo_double_5it_tol0.5               it= 1 conv=True to R_fm [0.107, 0.059, 0.124, 0.11] to truth [0.275, 0.236, 0.469, 0.369]
+  replay continuous_soo_double_50it_tol1e-9             it=11 conv=True to R_fm [0.0, 0.001, 0.003, 0.002] to truth [0.226, 0.267, 0.562, 0.381]
+  replay fixed_template_continuous_double_5it_tol0.5    it= 1 conv=True to R_fm [0.0, 0.001, 0.001, 0.001] to truth [0.226, 0.266, 0.564, 0.379]
+== cuda: iteration-1 anchored update, norm of each term per frame 1..4 (px)
+native - truth(centre)                                   0.457  0.298  0.390  0.366
+quantization: native - parabola(double map)              0.034  0.130  0.072  0.064
+  of which frame-0 anchor term                           0.098  0.098  0.098  0.098
+  of which frame-f term                                  0.126  0.037  0.026  0.161
+parabola vs continuous max (soo objective)               0.350  0.247  0.292  0.453
+sum-of-others vs fixed template                          0.125  0.097  0.112  0.177
+native input vs analytic render                          0.000  0.001  0.001  0.001
+window + deformation: R_fm - truth(centre)               0.242  0.026  0.229  0.041
+  of which window only (pure-translation equivalent)     0.233  0.006  0.264  0.079
+  of which deformation only                              0.009  0.022  0.038  0.046
+identity max abs 5.55e-17
+truth interval range (x,y) per frame 1..4: [[0.185, 0.139], [0.369, 0.278], [0.553, 0.418], [0.736, 0.557]]
+native states vs R_fm / truth(centre), last captured iteration, norms: [0.4129084797062161, 0.422869444309659, 0.49945589798963563, 0.31964788370872993] [0.5043515353143868, 0.43339833249928505, 0.41262641786019, 0.27824461299022224]
+  replay specified_double_5it_tol0.5                    it= 2 conv=True to R_fm [0.11, 0.183, 0.365, 0.397] to truth [0.345, 0.2, 0.458, 0.418]
+  replay parabola_double_50it_tol1e-9                   it=50 conv=False to R_fm [0.046, 0.014, 0.065, 0.11] to truth [0.25, 0.032, 0.252, 0.143]
+  replay continuous_soo_double_5it_tol0.5               it= 2 conv=True to R_fm [0.027, 0.025, 0.03, 0.046] to truth [0.268, 0.05, 0.222, 0.06]
+  replay continuous_soo_double_50it_tol1e-9             it=11 conv=True to R_fm [0.003, 0.001, 0.003, 0.001] to truth [0.239, 0.026, 0.226, 0.042]
+  replay fixed_template_continuous_double_5it_tol0.5    it= 1 conv=True to R_fm [0.0, 0.001, 0.001, 0.001] to truth [0.242, 0.026, 0.228, 0.043]

@@ -1,0 +1,123 @@
+{
+ "schema": "gpu-worker-v2-host-controls/1",
+ "python": "3.13.7 (main, Aug 18 2025, 19:02:43) [Clang 20.1.4 ]",
+ "platform": "darwin",
+ "worker_sha256": "610dca3b41c5c4f6c807bd9ab61857113b69f9cefe7e579be836ff24c7fba98f",
+ "test_sha256": "52b051048563df5f68dcdbae0dd23deaab0d04f706813529aac59c9b28c4010e",
+ "results": [
+  {
+   "control": "C1 foreign process before first launch: no launch",
+   "result": "PASS",
+   "exit": 75,
+   "stop": [
+    {
+     "reason": [
+      "foreign process on target UUID before launch"
+     ],
+     "before": "J0-ok",
+     "gpu": {
+      "utc": "2026-10-22T22:04:59Z",
+      "gpus": "0, GPU-other-0, 1 MiB, 0 %, 0\n2, GPU-00000000-test-test-test-000000000002, 1 MiB, 0 %, 0\n",
+      "apps": "GPU-00000000-test-test-test-000000000002, 424242, 10 MiB\n",
+      "exits": [
+       0,
+       0
+      ],
+      "target_pids": [
+       424242
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "control": "C2 nonzero ECC: no launch",
+   "result": "PASS",
+   "exit": 75
+  },
+  {
+   "control": "C3 failed nvidia-smi query: no launch",
+   "result": "PASS",
+   "exit": 75
+  },
+  {
+   "control": "C3b UUID at wrong index: no launch",
+   "result": "PASS",
+   "exit": 75
+  },
+  {
+   "control": "C4 clean queue: both jobs recorded, own GPU process not foreign",
+   "result": "PASS",
+   "exit": 0,
+   "stderr": ""
+  },
+  {
+   "control": "C5 foreign appears mid-job: job recorded with foreign, stop before next launch",
+   "result": "PASS",
+   "exit": 75,
+   "resource": {
+    "foreign_on_target_during": {
+     "999999": "2026-10-22T22:05:03Z"
+    },
+    "foreign_on_target_after": [
+     999999
+    ],
+    "problems_after": []
+   }
+  },
+  {
+   "control": "C6 existing incomplete directory untouched and skipped",
+   "result": "PASS",
+   "exit": 0,
+   "before": {
+    "partial.log": "2d0ffd0d61facda134ae7325f59317526607541e74443c1a45c224fb36bb2525"
+   },
+   "after": {
+    "partial.log": "2d0ffd0d61facda134ae7325f59317526607541e74443c1a45c224fb36bb2525"
+   }
+  },
+  {
+   "control": "C7 timeout: owned descendants reaped, record kept, no foreign signal, lease released",
+   "result": "PASS",
+   "exit": 75,
+   "status": "TIMEOUT",
+   "signals": [
+    [
+     15,
+     73154,
+     "2026-10-22T22:05:09Z"
+    ],
+    [
+     15,
+     73158,
+     "2026-10-22T22:05:09Z"
+    ]
+   ],
+   "cleanup_errors": [],
+   "leftovers": [],
+   "sentinel_log": "ready\n"
+  },
+  {
+   "control": "C8 cancellation (SIGTERM to worker): owned descendants reaped, record kept, no foreign signal, lease released",
+   "result": "PASS",
+   "exit": 4,
+   "status": "CANCELLED",
+   "signals": [
+    [
+     15,
+     73203,
+     "2026-10-22T22:05:10Z"
+    ],
+    [
+     15,
+     73213,
+     "2026-10-22T22:05:10Z"
+    ]
+   ],
+   "cleanup_errors": [],
+   "leftovers": [],
+   "sentinel_log": "ready\n"
+  }
+ ],
+ "limits": "Host mock controls with a fake nvidia-smi; no GPU, no motioncorr. On macOS the ownership helper runs in observed-descendants polling mode; Linux child-subreaper adoption is not exercised here."
+}

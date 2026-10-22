@@ -30,6 +30,20 @@ hash-checked against the remote originals: [receipts/](receipts/) ([INDEX](recei
 - No `gpu-final` receipt exists: the coordinator was killed before its cleanup
   block. Its flock was released by the kernel at process exit.
 
+## Review R1 and worker v3 (2026-10-22)
+
+Independent review R1 ([review-r1/REVIEW.md](review-r1/REVIEW.md), verbatim)
+found five material defects (M1–M5) and moderate gaps (m6–m12) in v2. v2 and
+its controls below are kept unchanged as the reviewed version but **must not be
+deployed**. The proposed successor is `tools/gpu_worker_v3.py`
+(`a0510eaa…c106c9`); finding-by-finding responses are in
+[review-r1/RESPONSES.md](review-r1/RESPONSES.md) and its host mock controls in
+[gpu_worker_v3_controls/](gpu_worker_v3_controls/README.md) (final harness
+`73735e79…`: 22/22 PASS; 9/9 mutants rejected). v3 is not deployed and has not
+run on Linux; a fresh review comes before any Linux host mock or deployment.
+Namespace-aware evaluation/matrix support is not implemented, so evaluation of
+any resumed namespace is blocked until a reviewed reader exists.
+
 ## Successor worker (proposed, not deployed)
 
 [`tools/gpu_worker_v2.py`](../tools/gpu_worker_v2.py) (SHA-256 `610dca3b…98f`)
@@ -86,5 +100,18 @@ While cleaning up after the first mutant run I ran a name-based
   assigns, recorded), `--cpu 13`, `--job-timeout 3600`. Old `runs/` directories,
   including the interrupted one, stay as they are. Evaluation reads both
   namespaces and records which one each row came from.
-- Command once approved:
-  `python3 -B tools/gpu_worker_v2.py --root $R --queue <frozen queue> --runs-dir $R/runs-gpu-r2-<date> --binaries $R/binaries.json --cpu 13 --uuid <UUID> --gpu-index <n> --lock /tmp/motioncorr-gpu<n>-correctness.lock`
+- ~~Command once approved (v2)~~: superseded by review R1; do not use v2.
+- Null replicate required before any contention attribution (m12):
+  [proposed-null-replicate-gpu-r2.json](proposed-null-replicate-gpu-r2.json)
+  (`39fd2c0f…`), the 57 CUDA Tier C jobs that ran before the foreign onset with
+  clean GPU2 snapshots. If their replicate is not byte-stable, no difference in
+  the 54-job replicate can be attributed to contention. The comparison tool does
+  not exist yet. UNRUN.
+- v3 command shape, only after review, an exclusive lane and a Linux host mock.
+  Copy the proposal file to `$R/resume-gpu-r2/` and verify its hash; copy
+  `tools/multi_gpu/process_ownership.py` (`8de59b8c…`) beside the worker as
+  `$R/tools/multi_gpu/process_ownership.py`:
+  `python3 -B $R/tools/gpu_worker_v3.py --root $R --queue $R/resume-gpu-r2/proposed-resume-gpu-r2.json --queue-sha256 80120b7c5136f855908e408d8ef9776b37775369ce0e42b02b0b4d5ae7e69cd1 --expected-jobs 297 --binaries $R/binaries.json --binaries-sha256 28d84f5d09ba58ffdf065db002737a8125a0ad7c8abd4db8eb832e09d1ecb7e9 --runs-dir $R/runs-gpu-r2-<UTC date> --uuid <assigned UUID> --gpu-index <its index> --cpu 13`
+  (lease `/tmp/motioncorr-gpu<index>-correctness.lock` is derived from the index).
+  The 54-job and 57-job replicates would each be a separate invocation with its
+  own fresh namespace, hash and expected count.

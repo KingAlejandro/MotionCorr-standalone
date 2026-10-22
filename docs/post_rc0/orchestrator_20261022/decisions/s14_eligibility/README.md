@@ -1,7 +1,7 @@
 # Provisional S1.4 data eligibility inventory
 
 Metadata-only preparation, **not an approved cohort, complete acquisition audit,
-source freeze or scientific result**. No download, image decode, raw payload hash,
+source freeze or scientific result**. No movie/gain/particle/map download, image decode, raw payload hash,
 reconstruction or refinement was performed. No new scientific outcomes were
 opened. The current S1 sweep manifest was read as metadata, and a single read-only
 filesystem `stat` query checked the explicitly listed movie/gain paths plus the
@@ -59,3 +59,7 @@ complete independent protocol review. No choice can rely on candidate-favourable
 scientific outcomes. Relevant policy/truth criteria, explicit C2 freeze and M6
 approval still precede held-out analysis. No larger acquisition or new scientific
 run is implicitly authorized by this inventory.
+
+The [official archive metadata cross-check](archive_metadata/README.md) corroborates
+some recipe fields and records an unresolved EER rendering/grouping/pixel-size
+mapping for EMPIAR-12963. It changes no campaign options or admission verdict.

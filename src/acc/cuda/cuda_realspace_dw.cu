@@ -1,3 +1,4 @@
+#include "src/acc/cuda/cuda_hermitian.cuh"
 #ifdef _CUDA_ENABLED
 
 #include "src/acc/cuda/cuda_realspace_dw.h"
@@ -385,6 +386,7 @@ bool cudaDoseWeightAndInterpolateDevice(
 
         // Inverse FFT
         if (timed) HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
+        LAUNCH_HANDLE_ERROR(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fframe, nx, ny));
         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
         if (timed) {
             HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));

@@ -1,0 +1,228 @@
+device=NVIDIA A100 80GB PCIe cufft=11303
+oracle self-test PASS (rejects unprojected, zeroed-boundary, zero and altered-interior buffers)
+shift=0.3,0.2
+Movie FFT: batch=1 R2C work=67141632 C2R work=67141632 shared work=67141632 inverse tile=67141632 bytes
+session nx=4096 ny=4096 max_relative=4.24393911377e-07 relative_rmse=2.76902340429e-07 row_mean_rms_over_max=7.47564658353e-10 PASS
+session nx=4096 ny=4096 max_relative=4.24393911377e-07 relative_rmse=2.76902340429e-07 row_mean_rms_over_max=7.47564658353e-10 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=4096 ny=4096 max_relative=4.24393911377e-07 relative_rmse=2.76902340429e-07 row_mean_rms_over_max=7.47564658353e-10 PASS
+wrapper nx=4096 ny=4096 max_relative=4.24393911377e-07 relative_rmse=2.76902340429e-07 row_mean_rms_over_max=7.47564658353e-10 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 2, Size: 4096x4096
+  Peak VRAM: 288.08 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 203.90 ms
+dose nx=4096 ny=4096 max_relative=4.41693350193e-07 relative_rmse=2.78002800086e-07 row_mean_rms_over_max=7.56515767289e-10 PASS
+shift=0.3,0
+Movie FFT: batch=1 R2C work=12672 C2R work=12672 shared work=12672 inverse tile=12672 bytes
+session nx=64 ny=48 max_relative=2.3329773438e-07 relative_rmse=1.56797260355e-07 row_mean_rms_over_max=5.50081311685e-09 PASS
+session nx=64 ny=48 max_relative=2.3329773438e-07 relative_rmse=1.56797260355e-07 row_mean_rms_over_max=5.50081311685e-09 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+Movie FFT: batch=1 R2C work=12672 C2R work=12672 shared work=12672 inverse tile=12672 bytes
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=64 ny=48 max_relative=2.3329773438e-07 relative_rmse=1.56797260355e-07 row_mean_rms_over_max=5.50081311685e-09 PASS
+wrapper nx=64 ny=48 max_relative=2.3329773438e-07 relative_rmse=1.56797260355e-07 row_mean_rms_over_max=5.50081311685e-09 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 2, Size: 64x48
+  Peak VRAM: 0.05 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 0.78 ms
+dose nx=64 ny=48 max_relative=2.1337126277e-07 relative_rmse=1.56367002975e-07 row_mean_rms_over_max=5.85067908757e-09 PASS
+shift=0,0.2
+Movie FFT: batch=1 R2C work=12672 C2R work=12672 shared work=12672 inverse tile=12672 bytes
+session nx=64 ny=48 max_relative=2.3071065202e-07 relative_rmse=1.54398139232e-07 row_mean_rms_over_max=5.06571866876e-09 PASS
+session nx=64 ny=48 max_relative=2.3071065202e-07 relative_rmse=1.54398139232e-07 row_mean_rms_over_max=5.06571866876e-09 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+Movie FFT: batch=1 R2C work=12672 C2R work=12672 shared work=12672 inverse tile=12672 bytes
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=64 ny=48 max_relative=2.3071065202e-07 relative_rmse=1.54398139232e-07 row_mean_rms_over_max=5.06571866876e-09 PASS
+wrapper nx=64 ny=48 max_relative=2.3071065202e-07 relative_rmse=1.54398139232e-07 row_mean_rms_over_max=5.06571866876e-09 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 2, Size: 64x48
+  Peak VRAM: 0.05 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 0.83 ms
+dose nx=64 ny=48 max_relative=2.56105781824e-07 relative_rmse=1.59335216332e-07 row_mean_rms_over_max=7.19804458514e-09 PASS
+shift=1,2
+Movie FFT: batch=1 R2C work=12672 C2R work=12672 shared work=12672 inverse tile=12672 bytes
+session nx=64 ny=48 max_relative=3.06602510861e-07 relative_rmse=1.51048320471e-07 row_mean_rms_over_max=8.94091703754e-09 PASS
+session_vs_known_image nx=64 ny=48 max_relative=4.17895677956e-07 relative_rmse=1.97420873104e-07 row_mean_rms_over_max=8.86926292299e-09 PASS
+session nx=64 ny=48 max_relative=3.06602510861e-07 relative_rmse=1.51048320471e-07 row_mean_rms_over_max=8.94091703754e-09 PASS
+session_vs_known_image nx=64 ny=48 max_relative=4.17895677956e-07 relative_rmse=1.97420873104e-07 row_mean_rms_over_max=8.86926292299e-09 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+Movie FFT: batch=1 R2C work=12672 C2R work=12672 shared work=12672 inverse tile=12672 bytes
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=64 ny=48 max_relative=3.06602510861e-07 relative_rmse=1.51048320471e-07 row_mean_rms_over_max=8.94091703754e-09 PASS
+wrapper_vs_known_image nx=64 ny=48 max_relative=4.17895677956e-07 relative_rmse=1.97420873104e-07 row_mean_rms_over_max=8.86926292299e-09 PASS
+wrapper nx=64 ny=48 max_relative=3.06602510861e-07 relative_rmse=1.51048320471e-07 row_mean_rms_over_max=8.94091703754e-09 PASS
+wrapper_vs_known_image nx=64 ny=48 max_relative=4.17895677956e-07 relative_rmse=1.97420873104e-07 row_mean_rms_over_max=8.86926292299e-09 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 2, Size: 64x48
+  Peak VRAM: 0.05 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 1.33 ms
+dose nx=64 ny=48 max_relative=3.82081088696e-07 relative_rmse=1.60588479401e-07 row_mean_rms_over_max=9.9004724839e-09 PASS
+dose_vs_known_image nx=64 ny=48 max_relative=4.85892004867e-07 relative_rmse=2.03761861422e-07 row_mean_rms_over_max=9.56694815485e-09 PASS
+shift=0,0
+Movie FFT: batch=1 R2C work=12672 C2R work=12672 shared work=12672 inverse tile=12672 bytes
+session nx=64 ny=48 max_relative=3.68951733496e-07 relative_rmse=1.52523795692e-07 row_mean_rms_over_max=1.00291227336e-08 PASS
+session_vs_known_image nx=64 ny=48 max_relative=3.58196295391e-07 relative_rmse=1.84218421497e-07 row_mean_rms_over_max=1.03325313486e-08 PASS
+session nx=64 ny=48 max_relative=3.68951733496e-07 relative_rmse=1.52523795692e-07 row_mean_rms_over_max=1.00291227336e-08 PASS
+session_vs_known_image nx=64 ny=48 max_relative=3.58196295391e-07 relative_rmse=1.84218421497e-07 row_mean_rms_over_max=1.03325313486e-08 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+Movie FFT: batch=1 R2C work=12672 C2R work=12672 shared work=12672 inverse tile=12672 bytes
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=64 ny=48 max_relative=3.68951733496e-07 relative_rmse=1.52523795692e-07 row_mean_rms_over_max=1.00291227336e-08 PASS
+wrapper_vs_known_image nx=64 ny=48 max_relative=3.58196295391e-07 relative_rmse=1.84218421497e-07 row_mean_rms_over_max=1.03325313486e-08 PASS
+wrapper nx=64 ny=48 max_relative=3.68951733496e-07 relative_rmse=1.52523795692e-07 row_mean_rms_over_max=1.00291227336e-08 PASS
+wrapper_vs_known_image nx=64 ny=48 max_relative=3.58196295391e-07 relative_rmse=1.84218421497e-07 row_mean_rms_over_max=1.03325313486e-08 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 2, Size: 64x48
+  Peak VRAM: 0.05 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 1.19 ms
+dose nx=64 ny=48 max_relative=3.86288250867e-07 relative_rmse=1.59354317854e-07 row_mean_rms_over_max=9.59242386537e-09 PASS
+dose_vs_known_image nx=64 ny=48 max_relative=4.18077781136e-07 relative_rmse=1.91342006553e-07 row_mean_rms_over_max=9.58696183699e-09 PASS
+shift=0.3,0.2
+Movie FFT: batch=1 R2C work=12032 C2R work=12032 shared work=12032 inverse tile=12032 bytes
+session nx=63 ny=47 max_relative=2.29365503049e-07 relative_rmse=1.68578172199e-07 row_mean_rms_over_max=5.85197121423e-09 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+Movie FFT: batch=1 R2C work=12032 C2R work=12032 shared work=12032 inverse tile=12032 bytes
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=63 ny=47 max_relative=2.29365503049e-07 relative_rmse=1.68578172199e-07 row_mean_rms_over_max=5.85197121423e-09 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+shift=1,2
+Movie FFT: batch=1 R2C work=12032 C2R work=12032 shared work=12032 inverse tile=12032 bytes
+session nx=63 ny=47 max_relative=3.67383802754e-07 relative_rmse=1.67556109767e-07 row_mean_rms_over_max=7.57026778931e-09 PASS
+session_vs_known_image nx=63 ny=47 max_relative=5.96993825651e-07 relative_rmse=2.89860850393e-07 row_mean_rms_over_max=1.32515183816e-08 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+Movie FFT: batch=1 R2C work=12032 C2R work=12032 shared work=12032 inverse tile=12032 bytes
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=63 ny=47 max_relative=3.67383802754e-07 relative_rmse=1.67556109767e-07 row_mean_rms_over_max=7.57026778931e-09 PASS
+wrapper_vs_known_image nx=63 ny=47 max_relative=5.96993825651e-07 relative_rmse=2.89860850393e-07 row_mean_rms_over_max=1.32515183816e-08 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+shift=0.3,0.2 hermitian_input
+Movie FFT: batch=1 R2C work=12032 C2R work=12032 shared work=12032 inverse tile=12032 bytes
+session nx=63 ny=47 max_relative=2.29439490233e-07 relative_rmse=1.68595306161e-07 row_mean_rms_over_max=5.90856341362e-09 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=63 ny=47 max_relative=2.29439490233e-07 relative_rmse=1.68595306161e-07 row_mean_rms_over_max=5.90856341362e-09 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+shift=0.3,0.2
+Movie FFT: batch=1 R2C work=12408 C2R work=12408 shared work=12408 inverse tile=12408 bytes
+session nx=64 ny=47 max_relative=2.25486843231e-07 relative_rmse=1.49235450348e-07 row_mean_rms_over_max=4.31686753197e-09 PASS
+session nx=64 ny=47 max_relative=2.25486843231e-07 relative_rmse=1.49235450348e-07 row_mean_rms_over_max=4.31686753197e-09 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+Movie FFT: batch=1 R2C work=12408 C2R work=12408 shared work=12408 inverse tile=12408 bytes
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=64 ny=47 max_relative=2.25486843231e-07 relative_rmse=1.49235450348e-07 row_mean_rms_over_max=4.31686753197e-09 PASS
+wrapper nx=64 ny=47 max_relative=2.25486843231e-07 relative_rmse=1.49235450348e-07 row_mean_rms_over_max=4.31686753197e-09 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 2, Size: 64x47
+  Peak VRAM: 0.05 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 0.57 ms
+dose nx=64 ny=47 max_relative=1.72801316106e-07 relative_rmse=1.48553034838e-07 row_mean_rms_over_max=4.53310551021e-09 PASS
+shift=1,2
+Movie FFT: batch=1 R2C work=12408 C2R work=12408 shared work=12408 inverse tile=12408 bytes
+session nx=64 ny=47 max_relative=3.42608871939e-07 relative_rmse=1.4439174526e-07 row_mean_rms_over_max=8.05570201254e-09 PASS
+session_vs_known_image nx=64 ny=47 max_relative=6.26843516934e-07 relative_rmse=2.58805249265e-07 row_mean_rms_over_max=1.58000806554e-08 PASS
+session nx=64 ny=47 max_relative=3.42608871939e-07 relative_rmse=1.4439174526e-07 row_mean_rms_over_max=8.05570201254e-09 PASS
+session_vs_known_image nx=64 ny=47 max_relative=6.26843516934e-07 relative_rmse=2.58805249265e-07 row_mean_rms_over_max=1.58000806554e-08 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+Movie FFT: batch=1 R2C work=12408 C2R work=12408 shared work=12408 inverse tile=12408 bytes
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=64 ny=47 max_relative=3.42608871939e-07 relative_rmse=1.4439174526e-07 row_mean_rms_over_max=8.05570201254e-09 PASS
+wrapper_vs_known_image nx=64 ny=47 max_relative=6.26843516934e-07 relative_rmse=2.58805249265e-07 row_mean_rms_over_max=1.58000806554e-08 PASS
+wrapper nx=64 ny=47 max_relative=3.42608871939e-07 relative_rmse=1.4439174526e-07 row_mean_rms_over_max=8.05570201254e-09 PASS
+wrapper_vs_known_image nx=64 ny=47 max_relative=6.26843516934e-07 relative_rmse=2.58805249265e-07 row_mean_rms_over_max=1.58000806554e-08 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 2, Size: 64x47
+  Peak VRAM: 0.05 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 0.60 ms
+dose nx=64 ny=47 max_relative=3.42667283936e-07 relative_rmse=1.44771875541e-07 row_mean_rms_over_max=8.09022479994e-09 PASS
+dose_vs_known_image nx=64 ny=47 max_relative=5.8850481924e-07 relative_rmse=2.59863207558e-07 row_mean_rms_over_max=1.42719194241e-08 PASS
+shift=0.3,0.2 hermitian_input
+Movie FFT: batch=1 R2C work=12408 C2R work=12408 shared work=12408 inverse tile=12408 bytes
+session nx=64 ny=47 max_relative=2.21427526034e-07 relative_rmse=1.49142881278e-07 row_mean_rms_over_max=4.0702691495e-09 PASS
+session nx=64 ny=47 max_relative=2.21427526034e-07 relative_rmse=1.49142881278e-07 row_mean_rms_over_max=4.0702691495e-09 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=64 ny=47 max_relative=2.21427526034e-07 relative_rmse=1.49142881278e-07 row_mean_rms_over_max=4.0702691495e-09 PASS
+wrapper nx=64 ny=47 max_relative=2.21427526034e-07 relative_rmse=1.49142881278e-07 row_mean_rms_over_max=4.0702691495e-09 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 2, Size: 64x47
+  Peak VRAM: 0.05 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 0.75 ms
+dose nx=64 ny=47 max_relative=1.73905543789e-07 relative_rmse=1.48656299874e-07 row_mean_rms_over_max=4.26849233569e-09 PASS
+shift=0.3,0.2
+Movie FFT: batch=1 R2C work=12288 C2R work=12288 shared work=12288 inverse tile=12288 bytes
+session nx=63 ny=48 max_relative=2.60097342383e-07 relative_rmse=1.82027367699e-07 row_mean_rms_over_max=5.03858048062e-09 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+Movie FFT: batch=1 R2C work=12288 C2R work=12288 shared work=12288 inverse tile=12288 bytes
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=63 ny=48 max_relative=2.60097342383e-07 relative_rmse=1.82027367699e-07 row_mean_rms_over_max=5.03858048062e-09 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+shift=1,2
+Movie FFT: batch=1 R2C work=12288 C2R work=12288 shared work=12288 inverse tile=12288 bytes
+session nx=63 ny=48 max_relative=4.48084175001e-07 relative_rmse=1.82448690748e-07 row_mean_rms_over_max=1.29762229601e-08 PASS
+session_vs_known_image nx=63 ny=48 max_relative=5.96993825651e-07 relative_rmse=2.36650042419e-07 row_mean_rms_over_max=1.2256290598e-08 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+Movie FFT: batch=1 R2C work=12288 C2R work=12288 shared work=12288 inverse tile=12288 bytes
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=63 ny=48 max_relative=4.48084175001e-07 relative_rmse=1.82448690748e-07 row_mean_rms_over_max=1.29762229601e-08 PASS
+wrapper_vs_known_image nx=63 ny=48 max_relative=5.96993825651e-07 relative_rmse=2.36650042419e-07 row_mean_rms_over_max=1.2256290598e-08 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+shift=0.3,0.2 hermitian_input
+Movie FFT: batch=1 R2C work=12288 C2R work=12288 shared work=12288 inverse tile=12288 bytes
+session nx=63 ny=48 max_relative=2.60097342383e-07 relative_rmse=1.82027367699e-07 row_mean_rms_over_max=5.03858048062e-09 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=63 ny=48 max_relative=2.60097342383e-07 relative_rmse=1.82027367699e-07 row_mean_rms_over_max=5.03858048062e-09 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+shift=0.3,0.2 hermitian_input
+Movie FFT: batch=1 R2C work=12672 C2R work=12672 shared work=12672 inverse tile=12672 bytes
+session nx=64 ny=48 max_relative=1.98694425966e-07 relative_rmse=1.55608769312e-07 row_mean_rms_over_max=4.21565647749e-09 PASS
+session nx=64 ny=48 max_relative=1.98694425966e-07 relative_rmse=1.55608769312e-07 row_mean_rms_over_max=4.21565647749e-09 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=64 ny=48 max_relative=1.98694425966e-07 relative_rmse=1.55608769312e-07 row_mean_rms_over_max=4.21565647749e-09 PASS
+wrapper nx=64 ny=48 max_relative=1.98694425966e-07 relative_rmse=1.55608769312e-07 row_mean_rms_over_max=4.21565647749e-09 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 2, Size: 64x48
+  Peak VRAM: 0.05 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 0.70 ms
+dose nx=64 ny=48 max_relative=1.90697190654e-07 relative_rmse=1.59674365787e-07 row_mean_rms_over_max=6.09793910381e-09 PASS
+INVARIANT PASS inverses=82

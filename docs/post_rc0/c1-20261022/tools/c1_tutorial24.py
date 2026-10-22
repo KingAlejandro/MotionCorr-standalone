@@ -32,9 +32,11 @@ def run(arm, binary, cfg, cpu=False):
     if cfg == 'L': args += ['--patch_x', '5', '--patch_y', '5']
     wit = d / 'ingest-witness.txt'
     if not cpu: args += ['--gpu', '0']
-    args += ['--ingest_witness', str(wit)]
+    else:       # CPU-only binaries have no ingest route: drop the CUDA-route options
+        i = args.index('--ingest'); del args[i:i + 2]
+    if not cpu: args += ['--ingest_witness', str(wit)]
     rec = q.run_case(f'{arm}-{cfg}', binary, args, cwd, d / 'logs', gpu=not cpu,
-                     extra_env={'OMP_NUM_THREADS': '2'}, witness=wit)
+                     extra_env={'OMP_NUM_THREADS': '2'}, witness=None if cpu else wit)
     rec['input_star_sha256'] = q.sha256_file(DATA / 'movies.star')
     (d / 'RUN.json').write_text(json.dumps(rec, indent=1) + '\n')
     print(arm, cfg, 'rc', rec.get('rc'), 'wall_s', rec.get('wall_s'), 'witness', rec.get('ingest_witness', [])[:1])

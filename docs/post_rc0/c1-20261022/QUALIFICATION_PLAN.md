@@ -52,6 +52,9 @@ reconciliation and a distinct stage name in a distinct frozen iteration. (7) `c1
 it runs `c1_health_check.py`, which applies the checks of the project's existing guard (`docs/rc0/issue226/d2/native_retry_20261022/support/health.py`
 `snapshot()`): lane UUID/model, volatile and aggregate ECC counts, remapped-row counters, retired pages, no compute process. Kernel Xid inspection needs
 privileged log access and stays **UNRUN**; a health PASS in the receipts means exactly those checks. `test_c1_wrappers.py` (8 host tests) covers both.
+Same pass, resources: the #269 census and #267 case drivers hardcode `--j 8`/`OMP_NUM_THREADS=8` and the census picks GPUs in order 2,3,1,0. Lane-adapted
+derivatives (`make_c1_derived.py`; diffs in `c1_census_runner.diff`, `c1_run_v2_cases.diff`) use `--j 2`, OMP 2 and GPU3 only, with the lease held by
+`c1_gpu_run.sh` for the whole campaign; command lines are otherwise identical, so results compare with the retained runs.
 
 ## Rows (verdicts are filled in `RESULTS.md` from retained receipts)
 

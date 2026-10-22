@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """#269 100-movie census on the C1 binaries (arm 'none' only; C1 has no MC_DIAG hooks), lane GPU3 + CPUs 8-9.
 
-  c1_census.py run BACKEND BINARY RESULTS_NAME     wraps tools/run_realistic_motion_census.py with the GPU choice forced to GPU3
+  c1_census.py run BACKEND BINARY RESULTS_NAME     wraps c1_census_runner.py (tools/run_realistic_motion_census.py with --j 2 and GPU3 only)
   c1_census.py compare RESULTS_NAME REF_ROOT REF_ARM BACKEND OUT.json
         exact comparison (decoded sum payload + STAR text) of every C1 movie against a retained arm directory layout
         REF_ROOT/<movie>/<REF_ARM>/output/movie.{mrc,star}; also STAR-serialised field metrics vs injected truth for both sides
@@ -19,14 +19,8 @@ sys.path[:0] = [str(SRC / 'tools'), str(SRC / 'test-data')]
 def run(backend, binary, results):
     ROOT.mkdir(exist_ok=True)
     if not (ROOT / 'fixtures').exists(): os.symlink(os.environ['C1_KM_FIXTURES'], ROOT / 'fixtures')
-    import run_realistic_motion_census as m
-    uuid = os.environ['C1_GPU_UUID']
-    def lock_gpu():                                  # GPU3 only; the stock helper walks GPUs 2,3,1,0
-        f = open(os.environ['C1_GPU_LOCK'], 'a')
-        try: fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError: f.close(); raise SystemExit('GPU3 correctness lock contended; stopping')
-        return f, 3, uuid
-    m.lock_gpu = lock_gpu
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import c1_census_runner as m          # lane-adapted derivative (make_c1_derived.py): --j 2, GPU3-only lease
     sys.argv = ['census', '--root', str(ROOT), '--binary', binary, '--backend', backend, '--cpus', os.environ['C1_CPUS'],
                 '--dc-arms', 'none', '--double-conditions', '--results', results, '--max-idle-seconds', '600']
     m.main()

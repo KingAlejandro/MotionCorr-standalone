@@ -4,5 +4,5 @@
 set -u
 D=$(dirname "$0"); source "$D/c1_env.sh" || exit 1
 exec 9>"$C1_GPU_LOCK"; flock -n 9 || { echo "GPU3 correctness lock contended; stopping"; exit 5; }
-export CUDA_VISIBLE_DEVICES=$C1_GPU_UUID CUDA_DEVICE_ORDER=PCI_BUS_ID
+export CUDA_VISIBLE_DEVICES=$C1_GPU_UUID CUDA_DEVICE_ORDER=PCI_BUS_ID C1_LEASE_HELD=1
 exec "$D/c1_health.sh" "$@"

@@ -337,6 +337,22 @@ multi-GPU endpoints, soak, other real-movie performance rows or Tier D science.
 Frozen-F results keep their original SHA. Independent review and current-head CI
 remain required before merge; #246 is being fixed separately.
 
+## Post-RC0 #239: RelionError backtrace ownership
+
+PR implementation head `1c14e8882b4754903da4499f1ceca5fd8037f630` (base `c8844894`; subsequent commits are evidence/docs only).
+Re-entry class: shared source, §9.4. All three Release builds and collection checks passed on 4GPUs.
+Full CTest: CPU **75/76 (FAIL: ProfilingKit harness defect #246)**; CUDA **110/110 PASS**;
+CUDA+nvCOMP **113/113 PASS**, zero skips in every configuration. F counts 74/108/111 increase by two ownership tests.
+Native GPU suites ran on GPU3 UUID under its lock and an eight-CPU taskset cap.
+LeakSanitizer reports 6,400 leaked bytes before the fix and none after; old copy/print fails ASan, fixed throw/copy/assignment/repeated-print paths pass with exact format checks.
+The single permitted CPU ProfilingKit rerun also **FAILED** (two 30-second CLI timeouts), recorded separately in `docs/post_rc0/issue239/README.md`;
+the occupancy snapshot records live `cc1`/`cc1plus` processes. #246 identifies the cause: the fake CLI tests allow
+300 seconds of compiler settling inside a 30-second subprocess deadline. The separate #246 control and test-only fix (PR #247; full ProfilingKit before fails with the same two timeouts,
+after passes 134/134 while verified `cc1` children remain alive) resolve the CPU re-entry question for #245; no maintainer waiver or RelionError change is needed. Original failures remain FAIL.
+The superseded cpu64 full-suite attempt was interrupted and is not used as re-entry evidence.
+UNRUN on this source head: full QF route/product campaigns, independent scientific acceptance and performance qualification.
+Their earlier rows retain their earlier SHAs. No product, metadata, gate or tolerance change.
+
 ## Post-RC0 #246: fake CLI compiler-settle timeout
 
 PR implementation head `927e5b5cfa51cf72187f182ecffd0693111c71f7`, base `c8844894` (following commit is evidence/docs only).

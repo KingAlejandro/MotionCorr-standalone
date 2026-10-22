@@ -146,6 +146,7 @@ struct Result {
     bool converged = false;
     Stack out;
     unsigned long long eligible = 0, zeroed = 0;
+    bool wrong_stage = false; // the call was counted against the other stage
 };
 
 unsigned long long counter(int site, int stage, int kind) { return experimentCcfDcState().count[site][stage][kind].load(); }
@@ -223,7 +224,7 @@ Result run(const Case &c, int path, int arm, const Stack &in) {
     r.xs.assign(xs.begin(), xs.end()); r.ys.assign(ys.begin(), ys.end());
     r.eligible = counter(site, stage, 0) - e0;
     r.zeroed = counter(site, stage, 1) - z0;
-    if (counter(site, 1 - stage, 0) != other0) throw SetupError("call counted against the wrong stage");
+    r.wrong_stage = counter(site, 1 - stage, 0) != other0;
     return r;
 }
 
@@ -397,7 +398,7 @@ int main(int argc, char **argv) {
                     for (int ip = 0; ip < N_PED; ip++) {
                         const Result &r = res[ip];
                         // G1: every eligible frame is zeroed iff the stage is selected.
-                        gate(1, r.eligible > 0 && r.zeroed == (sel ? r.eligible : 0), tag + " counters");
+                        gate(1, !r.wrong_stage && r.eligible > 0 && r.zeroed == (sel ? r.eligible : 0), tag + " counters");
                         if (!c.gate) continue;
                         // G4: resident DC bytes and frame 0 untouched.
                         bool g4 = true;

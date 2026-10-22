@@ -14,11 +14,17 @@ import generate_motion_diagnostics as gen
 from motion_field import read_motion_star, read_mrc
 
 
+class InvalidSamplingError(ValueError):
+    """A finite candidate cannot sample the entire fixed evaluation ROI."""
+
+
 def sample(image, p):
     """Standalone bilinear detector sampling; reject, never clip, outside coordinates."""
     x, y = p[..., 0], p[..., 1]
-    if not np.isfinite(p).all() or x.min() < 0 or y.min() < 0 or x.max() >= image.shape[1]-1 or y.max() >= image.shape[0]-1:
-        raise ValueError("candidate samples outside fixed valid detector region")
+    if not np.isfinite(p).all():
+        raise ValueError("nonfinite sampling coordinates")
+    if x.min() < 0 or y.min() < 0 or x.max() >= image.shape[1]-1 or y.max() >= image.shape[0]-1:
+        raise InvalidSamplingError("candidate samples outside fixed valid detector region")
     ix, iy = np.floor(x).astype(int), np.floor(y).astype(int)
     dx, dy = x-ix, y-iy
     return ((1-dy)*((1-dx)*image[iy, ix]+dx*image[iy, ix+1]) +
@@ -53,10 +59,14 @@ def evaluate(r, movie, target, truth, field, roi):
     border[sl] = False
     px = vector_metrics(inner)
     aa = vector_metrics(inner*r["pixel_size"])
-    corrected, oracle = [], []
-    for f in range(r["frames"]):
-        corrected.append(sample(movie[f].astype(float), (q-field[f])[sl]))
-        oracle.append(sample(movie[f].astype(float), (q-truth[f])[sl]))
+    # Invalid truth sampling is still an input error. Candidate sampling quality
+    # is independent of field distance, and must not discard those diagnostics.
+    oracle = [sample(movie[f].astype(float), (q-truth[f])[sl]) for f in range(r["frames"])]
+    sampling_status = "VALID"
+    try:
+        corrected = [sample(movie[f].astype(float), (q-field[f])[sl]) for f in range(r["frames"])]
+    except InvalidSamplingError:
+        sampling_status = "OUTSIDE_FIXED_ROI"
     t = target[sl].astype(float)
     accuracy = aa["rms"] <= .20 and aa["p95"] <= .40 and aa["max"] <= .80
     return dict(role=r["role"], gauge="fixed frame-0 material coordinates; no registration",
@@ -69,7 +79,9 @@ def evaluate(r, movie, target, truth, field, roi):
         local_error_px=vector_metrics(inner-inner.mean(axis=(1, 2), keepdims=True)),
         signal=dict(uncorrected=signal_metrics(movie[:, y0:y1, x0:x1].astype(float).mean(axis=0), t),
                     true_motion_bilinear=signal_metrics(np.mean(oracle, axis=0), t),
-                    estimated_motion_bilinear=signal_metrics(np.mean(corrected, axis=0), t)),
+                    estimated_motion_bilinear=(signal_metrics(np.mean(corrected, axis=0), t)
+                                               if sampling_status == "VALID" else None)),
+        sampling_status=sampling_status,
         signal_status="CHARACTERIZATION", application_consistency_status="NOT_TESTED")
 
 
@@ -198,6 +210,8 @@ if __name__ == "__main__":
         print(f"INPUT ERROR: {exc}", file=sys.stderr)
         sys.exit(2)
     args.json.write_text(json.dumps(result, indent=2, allow_nan=False)+"\n")
-    print(f"{result['case']}: {result['role']} accuracy={result['accuracy_status']}; signal=CHARACTERIZATION")
+    print(f"{result['case']}: {result['role']} accuracy={result['accuracy_status']}; "
+          f"signal=CHARACTERIZATION; sampling={result['sampling_status']}")
     # A characterization FAIL remains visible and never becomes an accuracy PASS.
-    sys.exit(1 if result["role"] == "gate" and result["accuracy_status"] == "FAIL" else 0)
+    sys.exit(1 if result["sampling_status"] != "VALID" or
+             (result["role"] == "gate" and result["accuracy_status"] == "FAIL") else 0)

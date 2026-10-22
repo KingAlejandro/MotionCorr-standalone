@@ -53,6 +53,7 @@ class Diagnostics(unittest.TestCase):
             return check.evaluate(r, movie, target, truth, field, [12, 84, 12, 116])
         good = run(truth)
         self.assertEqual(good["accuracy_status"], "PASS")
+        self.assertEqual(good["sampling_status"], "VALID")
         self.assertLess(good["signal"]["true_motion_bilinear"]["rmse"], good["signal"]["uncorrected"]["rmse"])
         self.assertEqual(good["signal"]["estimated_motion_bilinear"],
                          good["signal"]["true_motion_bilinear"])
@@ -68,14 +69,128 @@ class Diagnostics(unittest.TestCase):
         bad = truth.copy()
         bad[2] += (gen.grid(r)-[64, 48])*.05
         self.assertEqual(run(bad)["accuracy_status"], "FAIL")
-        for bad in [truth*np.nan, truth+200, truth[:, :-1]]:
+        for bad in [truth*np.nan, truth[:, :-1]]:
             with self.assertRaises(ValueError):
                 run(bad)
+
+    def test_finite_outside_sampling_retains_field_metrics(self):
+        for name in ["affine", "noisy", "repeated"]:
+            with self.subTest(case=name):
+                r = gen.recipe(name)
+                movie, target, truth = gen.render(r)
+                field = truth+200
+                before = field.copy()
+                result = check.evaluate(r, movie, target, truth, field, [12, 84, 12, 116])
+                self.assertEqual(result["sampling_status"], "OUTSIDE_FIXED_ROI")
+                self.assertEqual(result["field_distance_status"], "FAIL")
+                self.assertEqual(result["accuracy_status"], "UNIDENTIFIABLE" if name == "repeated" else "FAIL")
+                for metrics, scale in [(result["field_px"], 1), (result["field_angstrom"], .885),
+                                       (result["border_px"], 1), (result["global_mean_error_px"], 1)]:
+                    for v in metrics.values():
+                        self.assertAlmostEqual(v, np.hypot(200, 200)*scale)
+                self.assertEqual(len(result["per_frame_px"]), r["frames"])
+                self.assertLess(result["local_error_px"]["max"], 1e-10)
+                self.assertIsNone(result["signal"]["estimated_motion_bilinear"])
+                self.assertEqual(result["signal_status"], "CHARACTERIZATION")
+                self.assertEqual(result["application_consistency_status"], "NOT_TESTED")
+                control = check.evaluate(r, movie, target, truth, truth, [12, 84, 12, 116])
+                for key in ["uncorrected", "true_motion_bilinear"]:
+                    self.assertEqual(result["signal"][key], control["signal"][key])
+                json.dumps(result, allow_nan=False)
+                np.testing.assert_array_equal(field, before)
+
+        # One invalid sample in the final frame invalidates the whole candidate
+        # average, without discarding the earlier frames' field diagnostics.
+        r = gen.recipe("affine")
+        movie, target, truth = gen.render(r)
+        field = truth.copy()
+        field[-1, 12, 12, 0] = 13
+        result = check.evaluate(r, movie, target, truth, field, [12, 84, 12, 116])
+        self.assertEqual(result["sampling_status"], "OUTSIDE_FIXED_ROI")
+        self.assertIsNone(result["signal"]["estimated_motion_bilinear"])
+        self.assertEqual(result["per_frame_px"][0]["max"], 0)
+        self.assertGreater(result["per_frame_px"][-1]["max"], 12)
+
+    def test_malformed_inputs_remain_input_errors(self):
+        r = gen.recipe("affine")
+        movie, target, truth = gen.render(r)
+        inputs = [movie, target, truth, truth.copy()]
+        for i in range(len(inputs)):
+            for value in [np.nan, np.inf, -np.inf]:
+                with self.subTest(input=i, value=value):
+                    args = [a.copy() for a in inputs]
+                    args[i].flat[0] = value
+                    with self.assertRaisesRegex(ValueError, "nonfinite input"):
+                        check.evaluate(r, *args, [12, 84, 12, 116])
+            args = inputs.copy()
+            args[i] = args[i][:-1]
+            with self.assertRaisesRegex(ValueError, "geometry mismatch"):
+                check.evaluate(r, *args, [12, 84, 12, 116])
+        # A corrupt truth map must not be mistaken for poor candidate quality.
+        with self.assertRaises(ValueError):
+            check.evaluate(r, movie, target, truth+200, truth, [12, 84, 12, 116])
 
     def test_bilinear_independent_plane(self):
         y, x = np.mgrid[:20, :30]
         p = np.array([[3.2, 4.7], [12.6, 17.2]])
         np.testing.assert_allclose(check.sample(2*x+3*y+4, p), 2*p[:, 0]+3*p[:, 1]+4)
+        for p in [[[-.01, 3]], [[29, 3]], [[3, -.01]], [[3, 19]], [[np.inf, 3]]]:
+            with self.assertRaises(ValueError):
+                check.sample(2*x+3*y+4, np.array(p))
+
+    def test_invalid_sampling_cli_contract(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            fixtures = root/"fixtures"
+            gen.generate(fixtures)
+            candidate, report = root/"candidate.npy", root/"report.json"
+            command = [sys.executable, str(Path(check.__file__)), "--fixtures", str(fixtures),
+                       "--case", "affine", "--candidate", str(candidate), "--json", str(report)]
+            gen.write_mrc_stack(root/"sum.mrc", np.zeros((1, 96, 128)), .885)
+            command += ["--summed-image", str(root/"sum.mrc")]
+            for name in ["affine", "noisy", "repeated"]:
+                with self.subTest(case=name):
+                    command[command.index("--case")+1] = name
+                    np.save(candidate, np.load(fixtures/f"{name}_field.npy")+200)
+                    outputs = []
+                    for _ in range(2):
+                        proc = subprocess.run(command, capture_output=True, text=True)
+                        self.assertEqual(proc.returncode, 1, proc.stderr)
+                        self.assertEqual(proc.stderr, "")
+                        self.assertIn("sampling=OUTSIDE_FIXED_ROI", proc.stdout)
+                        result = json.loads(report.read_text())
+                        self.assertEqual(result["sampling_status"], "OUTSIDE_FIXED_ROI")
+                        self.assertIsNone(result["signal"]["estimated_motion_bilinear"])
+                        self.assertGreater(result["field_px"]["rms"], 280)
+                        # The #272 wrapper copies the signal map, including nulls.
+                        self.assertIn("published_sum_divided_by_frames", result["signal"])
+                        outputs.append((proc.stdout, report.read_bytes()))
+                    self.assertEqual(*outputs)
+            # Valid characterization failures retain the previous exit 0 policy.
+            command[command.index("--case")+1] = "noisy"
+            np.save(candidate, np.load(fixtures/"noisy_field.npy")+1)
+            proc = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            result = json.loads(report.read_text())
+            self.assertEqual(result["accuracy_status"], "FAIL")
+            self.assertEqual(result["sampling_status"], "VALID")
+            for bad in [np.zeros((1, 2)), np.full((5, 96, 128, 2), np.nan),
+                        np.full((5, 96, 128, 2), np.inf), np.full((5, 96, 128, 2), -np.inf)]:
+                report.unlink(missing_ok=True)
+                np.save(candidate, bad)
+                proc = subprocess.run(command, capture_output=True, text=True)
+                self.assertEqual(proc.returncode, 2, proc.stderr)
+                self.assertIn("INPUT ERROR:", proc.stderr)
+                self.assertNotIn("Traceback", proc.stderr)
+                self.assertFalse(report.exists())
+            # Invalid candidate sampling must not mask a malformed optional sum.
+            np.save(candidate, np.load(fixtures/"noisy_field.npy")+200)
+            for bad_sum in [np.zeros((1, 95, 128)), np.full((1, 96, 128), np.nan)]:
+                gen.write_mrc_stack(root/"sum.mrc", bad_sum, .885)
+                proc = subprocess.run(command, capture_output=True, text=True)
+                self.assertEqual(proc.returncode, 2, proc.stderr)
+                self.assertIn("INPUT ERROR:", proc.stderr)
+                self.assertFalse(report.exists())
 
     def test_ambiguity_and_noise_roles(self):
         for name in ["flat", "repeated", "noisy"]:
@@ -110,6 +225,11 @@ class Diagnostics(unittest.TestCase):
             (root/"candidate.star").write_text(text)
             star_result = check.check_case(a, "affine", root/"candidate.star")
             self.assertLess(star_result["field_px"]["max"], 1e-12)
+            (root/"outside.star").write_text(text.replace("5 -3.25 2.125", "5 -203.25 2.125"))
+            outside = check.check_case(a, "affine", root/"outside.star")
+            self.assertEqual(outside["sampling_status"], "OUTSIDE_FIXED_ROI")
+            self.assertAlmostEqual(outside["field_px"]["rms"], 200/np.sqrt(5))
+            self.assertIsNone(outside["signal"]["estimated_motion_bilinear"])
             # Malformed identifiers must be input errors, never wrapped indices
             # or ignored duplicate coefficients in the permissive legacy reader.
             star_command = [sys.executable, str(Path(check.__file__)), "--fixtures", str(a),

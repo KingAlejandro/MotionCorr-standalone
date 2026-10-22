@@ -149,7 +149,7 @@
    },
    "category": "co-causes: inherited weight shape (x normalized by nx/2+1) and separable 3-point quadratic interpolation on a correlated peak, with parabola-driven nonconvergence at N=5; float32 map quantization contributes; no single exclusive cause",
    "first_divergence": "relative to the inherited objective: sub-pixel peak estimate in global iteration 1 departs from the maximum of the objective it estimates (the source specifies quadratic interpolation); the sum-of-others reference makes offsets fractional and the cross term biases the slice fits; input, forward FFT and reconstruction/STAR verified; weights verified for fidelity to the inherited formula only",
-   "uncertainty": "quantization share not separately bounded natively; native tie choices are backend-specific; nonconvergence shown for N=5 only (reviewer N=9/13/20 probes converge by 50 iterations, so stopping can be a co-cause); isotropic weight alone passes offline but fails a reviewer N=20 fractional probe",
+   "uncertainty": "quantization share not separately bounded natively; native tie choices are backend-specific; nonconvergence shown for N=5 only (reviewer N=9 errors fall below 0.07 px by 50 iterations and N=13/20 errors approach zero, all still not converged at tolerance 1e-9, so stopping can be a co-cause); isotropic weight alone passes offline but fails a reviewer N=20 fractional probe",
    "next": "two separate cross-linked HELD/file-only questions: (1) alignment weight x-normalization, (2) peak estimate with sum-of-others gain and stopping; no fix or adoption recommended. W2 DC arms change the quantization term only",
    "stage_evidence": {
     "native_retained_rms_px": 0.29786846691579577,
@@ -157,7 +157,7 @@
     "offline_exact_maximum_rms_px": 0.09021623377156977,
     "offline_parabola_tol1e9_50_rms_px": 0.8971429563807556,
     "offline_fixed_frame0_double_rms_px": 1.8041858878557174e-07,
-    "iteration1_native_vs_exact_max_px": 1.2211272228504533,
+    "iteration1_native_vs_double_map_parabola_px_max": 1.2211272228504533,
     "native_truth_injection": {
      "all_met": true,
      "runtime_rms_px": 0.0,
@@ -204,7 +204,7 @@
     "offline_exact_maximum_rms_px": 0.03746543039000405,
     "offline_parabola_tol1e9_50_rms_px": 0.39017178729008123,
     "offline_fixed_frame0_double_rms_px": 0.26040108078194146,
-    "iteration1_native_vs_exact_max_px": 0.6319394144550468,
+    "iteration1_native_vs_double_map_parabola_px_max": 0.6319394144550468,
     "native_truth_injection": {
      "all_met": true,
      "runtime_rms_px": 0.0,
@@ -502,7 +502,7 @@
    },
    "category": "co-causes: inherited weight shape (x normalized by nx/2+1) and separable 3-point quadratic interpolation on a correlated peak, with parabola-driven nonconvergence at N=5; float32 map quantization contributes; no single exclusive cause",
    "first_divergence": "relative to the inherited objective: sub-pixel peak estimate in global iteration 1 departs from the maximum of the objective it estimates (the source specifies quadratic interpolation); the sum-of-others reference makes offsets fractional and the cross term biases the slice fits; input, forward FFT and reconstruction/STAR verified; weights verified for fidelity to the inherited formula only",
-   "uncertainty": "quantization share not separately bounded natively; native tie choices are backend-specific; nonconvergence shown for N=5 only (reviewer N=9/13/20 probes converge by 50 iterations, so stopping can be a co-cause); isotropic weight alone passes offline but fails a reviewer N=20 fractional probe",
+   "uncertainty": "quantization share not separately bounded natively; native tie choices are backend-specific; nonconvergence shown for N=5 only (reviewer N=9 errors fall below 0.07 px by 50 iterations and N=13/20 errors approach zero, all still not converged at tolerance 1e-9, so stopping can be a co-cause); isotropic weight alone passes offline but fails a reviewer N=20 fractional probe",
    "next": "two separate cross-linked HELD/file-only questions: (1) alignment weight x-normalization, (2) peak estimate with sum-of-others gain and stopping; no fix or adoption recommended. W2 DC arms change the quantization term only",
    "stage_evidence": {
     "native_retained_rms_px": 0.2850249673388219,
@@ -510,7 +510,7 @@
     "offline_exact_maximum_rms_px": 0.09021771656068524,
     "offline_parabola_tol1e9_50_rms_px": 0.30324136568753934,
     "offline_fixed_frame0_double_rms_px": 6.492631050315283e-08,
-    "iteration1_native_vs_exact_max_px": 1.2211273023504672,
+    "iteration1_native_vs_double_map_parabola_px_max": 1.2211273023504672,
     "native_truth_injection": {
      "all_met": true,
      "runtime_rms_px": 0.0,
@@ -557,7 +557,7 @@
     "offline_exact_maximum_rms_px": 0.037464773507326465,
     "offline_parabola_tol1e9_50_rms_px": 0.3909503922444841,
     "offline_fixed_frame0_double_rms_px": 0.2604010345495914,
-    "iteration1_native_vs_exact_max_px": 0.1604879051195907,
+    "iteration1_native_vs_double_map_parabola_px_max": 0.1604879051195907,
     "native_truth_injection": {
      "all_met": true,
      "runtime_rms_px": 0.0,
@@ -831,5 +831,5 @@
   "review/round1/indep.json": "c5a206d717846b1beb0682a59a66d1aa5889c9f4ccfeee38e41e1d0b88835df0",
   "review/round1/ndep.log": "71b1840be8cbeacae2066eb51c2f58d628dc7a01663b034835636108bfc4b1ee"
  },
- "script_sha256": "6df8e55fbddb82d395aae2d50e0ae0d0ba8cc824a479440ebf4fa1495772c826"
+ "script_sha256": "a290902e59d14e24a8debe6f058c3cbf6fc7176d18c0aaaf4c787e77e0df7a6b"
 }

@@ -23,7 +23,7 @@ def simple(case, be):
                 offline_exact_maximum_rms_px=r['sum_of_others_double_continuous']['rms_px'],
                 offline_parabola_tol1e9_50_rms_px=r['sum_of_others_double_tol1e-9_max_iter50']['rms_px'],
                 offline_fixed_frame0_double_rms_px=r['fixed_frame0_double']['rms_px'],
-                iteration1_native_vs_exact_max_px=max(x['native_minus_exact_parabola_px'] for x in b['S2_iteration1_same_state']),
+                iteration1_native_vs_double_map_parabola_px_max=max(x['native_minus_exact_parabola_px'] for x in b['S2_iteration1_same_state']),
                 native_truth_injection=n[f'truth-{be}-{case}'], native_fixed_frame0=n[f'fixedref-{be}-{case}'],
                 native_neutral=n.get(f'neutral-{be}-{case}'))
 
@@ -33,7 +33,7 @@ TEXT = {
    uncertainty='does not exercise sub-pixel estimation', next='none'),
  'integer': dict(category='co-causes: inherited weight shape (x normalized by nx/2+1) and separable 3-point quadratic interpolation on a correlated peak, with parabola-driven nonconvergence at N=5; float32 map quantization contributes; no single exclusive cause',
    first_divergence='relative to the inherited objective: sub-pixel peak estimate in global iteration 1 departs from the maximum of the objective it estimates (the source specifies quadratic interpolation); the sum-of-others reference makes offsets fractional and the cross term biases the slice fits; input, forward FFT and reconstruction/STAR verified; weights verified for fidelity to the inherited formula only',
-   uncertainty='quantization share not separately bounded natively; native tie choices are backend-specific; nonconvergence shown for N=5 only (reviewer N=9/13/20 probes converge by 50 iterations, so stopping can be a co-cause); isotropic weight alone passes offline but fails a reviewer N=20 fractional probe',
+   uncertainty='quantization share not separately bounded natively; native tie choices are backend-specific; nonconvergence shown for N=5 only (reviewer N=9 errors fall below 0.07 px by 50 iterations and N=13/20 errors approach zero, all still not converged at tolerance 1e-9, so stopping can be a co-cause); isotropic weight alone passes offline but fails a reviewer N=20 fractional probe',
    next='two separate cross-linked HELD/file-only questions: (1) alignment weight x-normalization, (2) peak estimate with sum-of-others gain and stopping; no fix or adoption recommended. W2 DC arms change the quantization term only'),
  'fractional': dict(category='same co-causes as integer; under the inherited weight the parabola bias persists with an ideal template',
    first_divergence='relative to the inherited objective: sub-pixel peak estimate, biased even against a single known template (offline 0.26 px double; native fixed-template CPU 0.31 px, CUDA 0.49 px); reconstruction and STAR verified natively',

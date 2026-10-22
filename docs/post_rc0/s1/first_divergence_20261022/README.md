@@ -33,10 +33,13 @@ independent reviewer replay with an isotropic diagnostic weight and the
 unchanged parabola passes both 5-frame fixtures (0.043 / 0.049 px). Weight shape
 and estimator are co-causes on these fixtures; either change alone suffices
 offline. The isotropic weight is not a safe change either: a reviewer probe
-with 20 synthetic frames diverges to 11.8 px with it (0.28 px with the
-production weight). Nonconvergence is shown for 5 frames only; reviewer probes
-at 9, 13 and 20 frames converge slowly and reach truth by 50 iterations, so at
-other frame counts the stopping rule can be a co-cause.
+with 20 synthetic fractional-motion frames gives 11.8 px error with it
+(0.28 px with the production weight); the integer counterpart is 0.041 px.
+Only one of eight isotropic probe rows shows this large divergence.
+Nonconvergence is shown for 5 frames only; reviewer probes at 9 frames reach
+errors below 0.07 px by 50 iterations, and 13/20 frames approach zero, without
+meeting the 1e-9 convergence criterion. At other frame counts the stopping rule
+can therefore be a co-cause.
 
 Float32 quantization of the pedestal-dominated CCF map is a further error
 source (peak curvature is only 4–7 ULPs), but it is not needed for the simple
@@ -106,9 +109,16 @@ SciPy, one numeric thread.
 | Forward FFT | captured iteration-1 spectra vs double `rfft2/N` | max abs 2.0e-6 (integer), 5.1e-6 (fractional); DC 100.0046 |
 | Weights | captured float weights vs double evaluation of the inherited formula | ≤ 6e-8 (fidelity to the inherited formula only) |
 | CCF map (all 100 captured records) | peak second differences; float inverse error | curvature 4–7 ULPs at the ~40004 pedestal; window range ≤ 517 ULPs; inverse error ≤ 2.5 ULPs; every finite difference is an integer number of ULPs, so each native vertex offset is a ratio of small integers and the trajectory is rational (e.g. −0.7, −12/7) |
-| Same-state iteration 1 | native candidate vs the same parabola rule on the double-precision map of the same state | up to 1.22 px (frame 1, both backends; vs the continuous maximum: 0.58 px) |
+| Same-state iteration 1 | native candidate vs the same parabola rule on the double-precision map of the same state | up to 1.22 px (frame 1, both backends); this isolates the map/quantization/tie effect on the same parabola rule, not estimator bias or truth error |
 | Estimator oracle | 81 known offsets in [−1,1]², actual target, production-weighted objective, double | parabola max 0.544 px, RMS 0.313 px; integer offsets exact; exact maximum ≤ 5.7e-7 px |
 | Peak geometry | Hessian at the exact peak | Hxy/Hxx 0.68, Hxy/Hyy 0.85, curvature ratio 7.3; the cross-term formula reproduces the parabola output within 0.0026 px, so each 1D slice fit is near exact and the error comes from slicing through the integer winner |
+
+For that same frame-1 candidate, the distance to the continuous maximum is
+0.576 px; this is not the maximum over frames (integer CPU frame 0 reaches
+1.041 px). The historical `exact_objective_parabola` and
+`native_minus_exact_parabola_px` fields in `offline/attempt03.json` mean the
+parabola rule on the double map; the continuous maximum is stored separately.
+Those retained scripts and outputs are unchanged.
 
 Offline replays from the identical captured iteration-1 spectra. Only the first
 row is the specified algorithm; each other row changes one component (field
@@ -133,9 +143,11 @@ Interpretation:
   not converge even after 50 iterations, so for these fixtures the stopping rule
   only decides where the non-converging trajectory is cut. This is specific to
   N = 5: the reviewer's linearization gives an unstable eigenvalue −1.196 at
-  N = 5 but −0.98 to −0.85 at N = 9–20, and synthetic 9/13/20-frame probes reach
-  truth by 50 iterations while still failing at 5 iterations / 0.5 px. There
-  the stopping rule is a co-cause.
+  N = 5 but −0.98 to −0.85 at N = 9–20. By 50 iterations the synthetic probes
+  have errors 0.044 / 0.067 px at N = 9 (integer / fractional) and approximately
+  zero at N = 13/20, while all remain `converged=False` at tolerance 1e-9.
+  Their errors at 5 iterations / 0.5 px still fail the truth gate, so there
+  the stopping rule can be a co-cause.
 - With one known template the parabola is exact for integer offsets, so integer
   motion is recovered once the blended reference is removed. The blended
   sum-of-others reference makes iteration-1 offsets fractional even for integer

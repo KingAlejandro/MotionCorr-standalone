@@ -1,0 +1,249 @@
+{
+  "issue": {
+    "issue": {
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/226",
+      "title": "Memory admission on smaller GPUs: stale CUDA error after OOM degrades the next movie's route; config-L admission gap; late OOM failure (QM D1–D3)",
+      "issue_number": 226,
+      "body": "**Summary.** RC0 memory-admission qualification (QM, PR #225 @ `qual/rc0-qm-vram`, `main` `483e881d`) emulated smaller GPUs with a VRAM balloon on an A100 80 GB: 162 runs, 0 crashes, 0 hangs, 0 wrong outputs. Every completed run was identical to its unconstrained run, and every failure was clean. It found three defects. None changes output; they affect speed, admission and diagnostics.\n\n## D1: a stale CUDA error degrades the next movie's route\n- **What happens:** after a movie fails with a device out-of-memory error, the next movie in the same job loses its fast route although it fits. For example, a 3.2 GiB tutorial movie with ~15 GiB free falls off nvCOMP. Products stay identical, and the movie after that is back on its normal route.\n- **Likely cause:** a `cudaErrorMemoryAllocation` left pending and picked up by the next `HANDLE_ERROR(cudaGetLastError())` (`src/acc/cuda/cuda_movie_session.cu:913`, `:2012`). This contradicts the contract stated at `:34`, which says the last error is reset before the caller regains control.\n- **Status of the cause:** a standalone CUDA reproducer shows the mechanism (`logs/stale_repro.out` in #225); it is **not yet confirmed inside the product**.\n\n## D2: config-L admission gap\n- **What happens:** admission checks only the resident session buffers. In a band just above each streaming-only range, the session is admitted, patch alignment then runs out of device memory, and the movie fails, although the streaming route would have completed at that free VRAM.\n- **Measured bands:** 10441 at 37.5–38.5 GiB free; e10474 Falcon 4 at 19–19.5; e10216 at 8.5.\n- **Config G:** has no failing band; it degrades to CPU preprocessing instead (10441: 60 s vs 7 s).\n\n## D3: late, misleading failure below the streaming floor\n- **What happens:** 10441 at 16 GiB free fails only after ~30 s, having reached ~35.7 GiB of host RSS.\n- **The message:** it ends with a generic \"incompatible GPU\" text plus a backtrace, although stdout does say out of memory.\n- **Untested:** hosts with less than ~36 GiB of RAM.\n\n## RC0 disposition (proposed)\nDocument the per-geometry VRAM floors, the streaming fallback and these behaviours in the release docs (DOC1). No code change before freeze; the maintainer decides.\n\n## Post-RC0 fixes\n- **D1:** clear the pending error on every handled-OOM path, and add a two-movie regression control.\n- **D2:** include the patch-alignment workspace in the config-L admission estimate, or fall back to streaming on a patch-alignment OOM.\n- **D3:** admit or refuse early on a host-plus-device estimate, with a clear out-of-memory message.\n\nRefs: #198 (QM, R-DESIGN), #225, #197 (resident retry), #213.\n",
+      "state": "open",
+      "user": {
+        "login": "KingAlejandro",
+        "name": "KingAlejandro",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/72450765?v=4",
+        "id": 72450765
+      },
+      "assignees": null,
+      "labels": null,
+      "milestone": null,
+      "state_reason": null,
+      "comments": 3,
+      "created_at": "2026-10-17T12:52:54Z",
+      "updated_at": "2026-10-19T14:58:02Z",
+      "closed_at": null,
+      "display_url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/226",
+      "display_title": "Memory admission on smaller GPUs: stale CUDA error after OOM degrades the next movie's route; config-L admission gap; late OOM failure (QM D1–D3)"
+    },
+    "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/226",
+    "title": "Memory admission on smaller GPUs: stale CUDA error after OOM degrades the next movie's route; config-L admission gap; late OOM failure (QM D1–D3)",
+    "display_url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/226",
+    "display_title": "Memory admission on smaller GPUs: stale CUDA error after OOM degrades the next movie's route; config-L admission gap; late OOM failure (QM D1–D3)"
+  },
+  "issueComments": {
+    "comments": [
+      {
+        "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/226#issuecomment-6234270398",
+        "body": "**Update from the R-QM audit (Gemini 4): D1 traced at source, with a stronger caveat.** https://github.com/KingAlejandro/MotionCorr-standalone/pull/225#issuecomment-6234250216\n\n**Mechanism:**\n- In `cudaAlignPatch` (`cuda_alignpatch.cu:1121`, `:539`), `HANDLE_ERROR(cudaMalloc(...))` → `HandleError` (`cuda_settings.h:51–67`) throws through `CRITICAL(ERRGPUKERN)` **without calling `cudaGetLastError()`**, so the runtime's per-thread last error stays `cudaErrorMemoryAllocation`. A `cufftMakePlanMany` `CUFFT_ALLOC_FAILED` (`:586`) behaves the same way.\n- The per-movie handler (`motioncorr_runner.cpp:1049–1083`) does not clear it either.\n- The next movie's first post-kernel `HANDLE_ERROR(cudaGetLastError())` (`cuda_movie_session.cu:2012` on nvCOMP, `:913` on compact) consumes the stale error.\n- The comment at `cuda_movie_session.cu:34–40` holds only when the wrapped call is `cudaGetLastError()` itself.\n\n**Why the 24 GiB case is unaffected:** a failure in session `initialize()` is cleared by `discard_preprocessing_session()` → `cudaRetryDecisionFor(failure, cudaGetLastError())`.\n\n**Effect:**\n- Under `--ingest auto`, the next movie falls back one route step, with identical output.\n- **Under a pinned `--ingest nvcomp`, the next (valid) movie is refused**: `nvcomp_ingested = false` → `motioncorr_runner.cpp:2327–2331`.\n- The movie after that is unaffected.\n\n**Fix direction:** classify and clear the pending error on the per-movie failure path, or in `HandleError` for allocation failures. Do it through the existing failure-state classification, so a real sticky device error is never masked. Add a two-movie regression control (OOM, then a valid movie, with `--ingest nvcomp` pinned).",
+        "user": {
+          "login": "KingAlejandro",
+          "name": "KingAlejandro",
+          "email": null,
+          "avatar_url": "https://avatars.githubusercontent.com/u/72450765?v=4",
+          "id": 72450765
+        },
+        "id": 6234270398,
+        "pull_request_review_id": null,
+        "in_reply_to_id": null,
+        "created_at": null,
+        "updated_at": null,
+        "review": null,
+        "side": null,
+        "line": null,
+        "start_line": null,
+        "path": null,
+        "body_html": "<p dir=\"auto\"><strong>Update from the R-QM audit (Gemini 4): D1 traced at source, with a stronger caveat.</strong> <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5898506708\" data-permission-text=\"Title is private\" data-url=\"https://github.com/KingAlejandro/MotionCorr-standalone/issues/225\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/KingAlejandro/MotionCorr-standalone/pull/225/hovercard?comment_id=6234250216&amp;comment_type=issue_comment\" href=\"https://github.com/KingAlejandro/MotionCorr-standalone/pull/225#issuecomment-6234250216\">#225 (comment)</a></p>\n<p dir=\"auto\"><strong>Mechanism:</strong></p>\n<ul dir=\"auto\">\n<li>In <code class=\"notranslate\">cudaAlignPatch</code> (<code class=\"notranslate\">cuda_alignpatch.cu:1121</code>, <code class=\"notranslate\">:539</code>), <code class=\"notranslate\">HANDLE_ERROR(cudaMalloc(...))</code> → <code class=\"notranslate\">HandleError</code> (<code class=\"notranslate\">cuda_settings.h:51–67</code>) throws through <code class=\"notranslate\">CRITICAL(ERRGPUKERN)</code> <strong>without calling <code class=\"notranslate\">cudaGetLastError()</code></strong>, so the runtime's per-thread last error stays <code class=\"notranslate\">cudaErrorMemoryAllocation</code>. A <code class=\"notranslate\">cufftMakePlanMany</code> <code class=\"notranslate\">CUFFT_ALLOC_FAILED</code> (<code class=\"notranslate\">:586</code>) behaves the same way.</li>\n<li>The per-movie handler (<code class=\"notranslate\">motioncorr_runner.cpp:1049–1083</code>) does not clear it either.</li>\n<li>The next movie's first post-kernel <code class=\"notranslate\">HANDLE_ERROR(cudaGetLastError())</code> (<code class=\"notranslate\">cuda_movie_session.cu:2012</code> on nvCOMP, <code class=\"notranslate\">:913</code> on compact) consumes the stale error.</li>\n<li>The comment at <code class=\"notranslate\">cuda_movie_session.cu:34–40</code> holds only when the wrapped call is <code class=\"notranslate\">cudaGetLastError()</code> itself.</li>\n</ul>\n<p dir=\"auto\"><strong>Why the 24 GiB case is unaffected:</strong> a failure in session <code class=\"notranslate\">initialize()</code> is cleared by <code class=\"notranslate\">discard_preprocessing_session()</code> → <code class=\"notranslate\">cudaRetryDecisionFor(failure, cudaGetLastError())</code>.</p>\n<p dir=\"auto\"><strong>Effect:</strong></p>\n<ul dir=\"auto\">\n<li>Under <code class=\"notranslate\">--ingest auto</code>, the next movie falls back one route step, with identical output.</li>\n<li><strong>Under a pinned <code class=\"notranslate\">--ingest nvcomp</code>, the next (valid) movie is refused</strong>: <code class=\"notranslate\">nvcomp_ingested = false</code> → <code class=\"notranslate\">motioncorr_runner.cpp:2327–2331</code>.</li>\n<li>The movie after that is unaffected.</li>\n</ul>\n<p dir=\"auto\"><strong>Fix direction:</strong> classify and clear the pending error on the per-movie failure path, or in <code class=\"notranslate\">HandleError</code> for allocation failures. Do it through the existing failure-state classification, so a real sticky device error is never masked. Add a two-movie regression control (OOM, then a valid movie, with <code class=\"notranslate\">--ingest nvcomp</code> pinned).</p>"
+      },
+      {
+        "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/226#issuecomment-6256282946",
+        "body": "D1 is fixed by #228, merged as `e3871ca2` (D14 PASS, recorded in #198). D2 and D3 remain deferred to after RC0, so this issue stays open.",
+        "user": {
+          "login": "KingAlejandro",
+          "name": "KingAlejandro",
+          "email": null,
+          "avatar_url": "https://avatars.githubusercontent.com/u/72450765?v=4",
+          "id": 72450765
+        },
+        "id": 6256282946,
+        "pull_request_review_id": null,
+        "in_reply_to_id": null,
+        "created_at": null,
+        "updated_at": null,
+        "review": null,
+        "side": null,
+        "line": null,
+        "start_line": null,
+        "path": null,
+        "body_html": "<p dir=\"auto\">D1 is fixed by <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5903728049\" data-permission-text=\"Title is private\" data-url=\"https://github.com/KingAlejandro/MotionCorr-standalone/issues/228\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/KingAlejandro/MotionCorr-standalone/pull/228/hovercard\" href=\"https://github.com/KingAlejandro/MotionCorr-standalone/pull/228\">#228</a>, merged as <code class=\"notranslate\">e3871ca2</code> (D14 PASS, recorded in <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5889971551\" data-permission-text=\"Title is private\" data-url=\"https://github.com/KingAlejandro/MotionCorr-standalone/issues/198\" data-hovercard-type=\"issue\" data-hovercard-url=\"/KingAlejandro/MotionCorr-standalone/issues/198/hovercard\" href=\"https://github.com/KingAlejandro/MotionCorr-standalone/issues/198\">#198</a>). D2 and D3 remain deferred to after RC0, so this issue stays open.</p>"
+      },
+      {
+        "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/226#issuecomment-6270274471",
+        "body": "D2: https://github.com/KingAlejandro/MotionCorr-standalone/pull/252; D3: https://github.com/KingAlejandro/MotionCorr-standalone/pull/251 — ready for independent review, with before/after QM balloon evidence and full three-configuration CTest; neither merged.\n",
+        "user": {
+          "login": "KingAlejandro",
+          "name": "KingAlejandro",
+          "email": null,
+          "avatar_url": "https://avatars.githubusercontent.com/u/72450765?v=4",
+          "id": 72450765
+        },
+        "id": 6270274471,
+        "pull_request_review_id": null,
+        "in_reply_to_id": null,
+        "created_at": null,
+        "updated_at": null,
+        "review": null,
+        "side": null,
+        "line": null,
+        "start_line": null,
+        "path": null,
+        "body_html": "<p dir=\"auto\">D2: <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5926258342\" data-permission-text=\"Title is private\" data-url=\"https://github.com/KingAlejandro/MotionCorr-standalone/issues/252\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/KingAlejandro/MotionCorr-standalone/pull/252/hovercard\" href=\"https://github.com/KingAlejandro/MotionCorr-standalone/pull/252\">#252</a>; D3: <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5926111724\" data-permission-text=\"Title is private\" data-url=\"https://github.com/KingAlejandro/MotionCorr-standalone/issues/251\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/KingAlejandro/MotionCorr-standalone/pull/251/hovercard\" href=\"https://github.com/KingAlejandro/MotionCorr-standalone/pull/251\">#251</a> — ready for independent review, with before/after QM balloon evidence and full three-configuration CTest; neither merged.</p>"
+      }
+    ],
+    "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/226",
+    "title": "KingAlejandro/MotionCorr-standalone Issue #226 comments",
+    "display_url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/226",
+    "display_title": "KingAlejandro/MotionCorr-standalone Issue #226 comments"
+  },
+  "pr251": {
+    "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/251",
+    "number": 251,
+    "state": "open",
+    "merged": false,
+    "mergeable": true,
+    "draft": false,
+    "body": "#226 D3 now refuses an undersized streaming global-alignment workspace before host movie preprocessing, with a named out-of-GPU-memory message giving required and available bytes. Failed movies publish no MRC/STAR or joint STAR; a following valid movie still matches its standalone reference.\n\nEvidence: Release/full CTest passes CPU 74/74, CUDA 109/109 and CUDA+nvCOMP 112/112. On the original locked A100 UUID and QM balloon harness, all eight G/L × auto/float failures at 16/21 GiB refuse in 1.13–1.58 s at 743 MiB RSS (single observations; before 33.29–42.48 s and about 35.7 GiB). All four 22 GiB controls and the unconstrained references have identical products. The actual unfixed results fail the regression predicate; the fixed results pass. [Commands, hashes, raw receipts and limits](https://github.com/KingAlejandro/MotionCorr-standalone/blob/4c82012b2995c5255fa1fecf29ade9b3108e4d8c/docs/rc0/issue226/d3/README.md).\n\nThe native-tested implementation is `4cd85167`; current main's #247 update changes tests/docs only, with runtime sources and CMake unchanged. No gate, tolerance, dependency or numerical operation changed. Full QF, scientific S1 and performance qualification were not rerun.\n\nNext action: independent source/evidence review and current-head CI. Refs #226 (D3 only); D2 is a separate PR. No merge or tag requested.\n",
+    "title": "#226 D3: refuse insufficient CUDA memory before host preprocessing",
+    "base": "main",
+    "base_sha": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+    "head": "fix/226-d3-early-oom",
+    "head_sha": "4c82012b2995c5255fa1fecf29ade9b3108e4d8c",
+    "head_repo_id": 1383202469,
+    "head_repo_full_name": "KingAlejandro/MotionCorr-standalone",
+    "merge_commit_sha": "dcf71e88dddfca687f39966d33be2e7660ed0949",
+    "user": {
+      "login": "KingAlejandro",
+      "name": "KingAlejandro",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/72450765?v=4",
+      "id": 72450765
+    },
+    "requested_reviewers": null,
+    "requested_team_reviewers": null,
+    "created_at": "2026-10-19T14:48:57Z",
+    "updated_at": "2026-10-19T15:00:04Z",
+    "closed_at": null,
+    "merged_at": null,
+    "commits": 4,
+    "changed_files": 20,
+    "additions": 2507,
+    "deletions": 3,
+    "display_url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/251",
+    "display_title": "#226 D3: refuse insufficient CUDA memory before host preprocessing"
+  },
+  "pr252": {
+    "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/252",
+    "number": 252,
+    "state": "open",
+    "merged": false,
+    "mergeable": true,
+    "draft": false,
+    "body": "### Complete retry accounting at `868d1fbb`\n\nConditional retry admission now includes one full-spectrum stack plus the fresh alignment reference, weights, complex/real CCFs, four shift arrays and actual cuFFT workspace. Existing live allocations are already excluded by the free-memory query. Checked arithmetic rejects invalid or overflowing sizes; normal route selection and numerical operations are preserved.\n\nLocal macOS validation: CPU build PASS; PatchRetryAdmission/PatchRetryState 2/2 PASS; ASan/UBSan, required-test collection and four discriminating arithmetic mutants PASS. The reported 175,000,000-byte headroom interval now declines. [Design, exact commands and limits](https://github.com/KingAlejandro/MotionCorr-standalone/blob/868d1fbb2394119a88dc5b02fdff77618109320b/docs/rc0/issue226/d2/retry-admission-review.md). [Production-pin CI at `868d1fbb`](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39764361539) **PASS**: CPU CTest 75/75 including PatchRetryAdmission, known-motion/smoke checks and CUDA compile-only. Fresh bounded native evidence for this implementation is recorded below; the older full-suite/15-point campaign retains its original source identity.\n\n\n### Native follow-up, 2026-10-22\n\nEvidence package `ad0c61a3` adds only records/test support; compiled production remains `868d1fbb2394119a88dc5b02fdff77618109320b`.\n\n- CUDA+nvCOMP Release build **PASS**, focused host controls **2/2 PASS**, real-cuFFT native admission boundaries **28/28 PASS**. The complete e10216 retry requirement is **191,819,184 bytes**; **175,000,000** declines. An S-only budget mutant rebuilds, fails the intended assertion with exit 1, and the restored helper passes.\n- One frozen e10216 movie: unconstrained reference plus 8/8.5/8.75 GiB cases all exit 0; strict MRC/STAR identity **3/3 PASS**. The 8.5 GiB arm takes streaming retry, but its free bytes are below S: the incomplete-budget defect is discriminated by the native boundaries/mutant. Whole-tree comparisons remain **FAIL**, differing only in per-movie route/memory logs.\n- GPU3 UUID `GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d`, CPUs10–13, compile2/runtime1; 198 health samples checked, all three owned balloons reaped, final GPU idle and locks released. Preparation failures are retained.\n- Independent Sol source/evidence review found no material issue, verified all 156 archived members and all 266 pinned production identities, and recomputed six retained STAR comparisons. MRC/binary/source-archive identities were checked through receipts; those artifacts were not independently rehashed by the reviewer.\n\n[Exact commands, source/input/binary hashes, archive index and limitations](https://github.com/KingAlejandro/MotionCorr-standalone/blob/ad0c61a369499b9d1444b804cd9850a167fea646/docs/rc0/issue226/d2/native_retry_20261022/README.md). [Current-head Linux CI at `ad0c61a3`](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39805081438) **PASS**: CPU build/checks and CUDA compile-only (no GPU execution). Full suites, D3 integration, scientific and performance qualification were not rerun.\n\n---\n\n#226 D2 now accounts for actual cuFFT patch-alignment workspaces and admits the conditional retry spectrum stack only when needed. Insufficient headroom preserves corrected/aligned frames and uses the existing streaming paths.\n\nEvidence: on the same locked A100 UUID and QM balloon harness, all six reproduced failing points now complete with identical products. All nine passing neighbours retain their ingest, preprocessing and batch routes, including e10216 at 16 GiB. Three unconstrained references also match across revisions. Release/full CTest passes CPU 74/74, CUDA 109/109 and CUDA+nvCOMP 112/112; the small native admission boundary control passes in both GPU suites. The unfixed balloon predicate fails at six points; the fixed predicate passes all 15. [Commands, raw receipts, hashes and limits](https://github.com/KingAlejandro/MotionCorr-standalone/blob/1fd0aea6/docs/rc0/issue226/d2/README.md).\n\nNative-tested implementation is `bb348554`; the subsequent main #247 merge changes tests/docs only, with production sources/CMake unchanged. No numerical operation, gate, tolerance or dependency changed. New fallback host RSS samples reach about 40.8/25.8/7.8 GiB for 10441/Falcon4/10216; host exhaustion and physical smaller cards remain untested. Full QF, scientific S1 and performance qualification were not rerun.\n\nNext action: current-head CI and separately qualified D3 integration. Refs #226 (D2 only); D3 is addressed separately in #251. Do not merge or tag as part of this task.\n",
+    "title": "#226 D2: include patch workspaces in CUDA admission",
+    "base": "main",
+    "base_sha": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+    "head": "fix/226-d2-patch-admission",
+    "head_sha": "ad0c61a369499b9d1444b804cd9850a167fea646",
+    "head_repo_id": 1383202469,
+    "head_repo_full_name": "KingAlejandro/MotionCorr-standalone",
+    "merge_commit_sha": "9f936be34701d98da15926680ac8d69e492c21e4",
+    "user": {
+      "login": "KingAlejandro",
+      "name": "KingAlejandro",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/72450765?v=4",
+      "id": 72450765
+    },
+    "requested_reviewers": null,
+    "requested_team_reviewers": null,
+    "created_at": "2026-10-19T14:57:49Z",
+    "updated_at": "2026-10-22T15:35:32Z",
+    "closed_at": null,
+    "merged_at": null,
+    "commits": 7,
+    "changed_files": 42,
+    "additions": 9347,
+    "deletions": 4,
+    "display_url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/252",
+    "display_title": "#226 D2: include patch workspaces in CUDA admission"
+  },
+  "reviews251": {
+    "reviews": [
+      {
+        "id": "PRR_kwDOUnH-pc8AAAABTDUbwQ",
+        "state": "COMMENTED",
+        "body": "Reviewed production accounting, error/resource handling, the small regression control and retained native evidence at 4c82012b. I found no blocking defect. The full-spectrum/CCF/shift counts and queried C2R plan match the actual nonresident global-aligner allocations and geometry. The plan is released before free memory is rechecked, and the documented necessary-memory check does not promise protection against fragmentation or concurrent allocations.\n\nI checked the raw 74/109/112 full-suite receipts, all eight named early-refusal records, the passing strict-product comparison reports, and current-head CI (both jobs pass; CUDA CI is compile-only). The 4cd85167-to-head comparison contains no src/ or CMake changes, so the native-tested implementation remains applicable. The preserved first CPU environment failure is correctly distinguished from its complete passing rerun.\n\nNonblocking test hardening: CudaEarlyStreamingOom's one-byte budget deliberately skips the new cuFFT planning branch. The retained 21 GiB probes cover successful planning followed by refusal, but focused wrappers for CUFFT_ALLOC_FAILED, other plan errors and fatal runtime state during plan creation/destruction would protect the new classifier/cleanup boundary. In particular, assert that an earlier fatal planning status cannot be obscured by cleanup and then reported as ordinary OOM. This is a coverage recommendation; I did not reproduce a misclassification.",
+        "submitted_at": "2026-10-19T15:00:04Z",
+        "author": {
+          "login": "KingAlejandro",
+          "name": "KingAlejandro",
+          "email": null,
+          "avatar_url": "https://avatars.githubusercontent.com/u/72450765?v=4",
+          "id": null
+        }
+      }
+    ]
+  },
+  "reviews252": {
+    "reviews": [
+      {
+        "id": "PRR_kwDOUnH-pc8AAAABTDWX2g",
+        "state": "COMMENTED",
+        "body": "Reviewed 1fd0aea6 against the actual allocation lifetimes and retained final evidence. The corrected-frame preservation on initial decline and real/Fourier preservation on retry decline look sound. I verified the 74/109/112 full-suite receipts, 15 final constrained product comparisons, three cross-revision comparisons, and the absence of src/CMake changes since native-tested bb348554. The superseded attempts are appropriately retained and excluded.\n\nI found one remaining gap in the new conditional retry admission, detailed inline: it admits the spectrum download without budgeting the fresh alignment workspace immediately used by the retry. This does not invalidate the fifteen recorded passes, and it is not evidence of numerical corruption, but it leaves an avoidable low-memory failure interval. I would address that gap before treating D2 admission as complete.\n\nIntegration note for #251/#252: both add a different CUDA required test and modify the explicit CUDA_SUITE in test_ci_fail_closed.py. When the branches are combined, retain both tests in both lists and rerun the collection/fail-closed controls; either branch's current passing suite qualifies only its own new control.",
+        "submitted_at": "2026-10-19T15:02:30Z",
+        "author": {
+          "login": "KingAlejandro",
+          "name": "KingAlejandro",
+          "email": null,
+          "avatar_url": "https://avatars.githubusercontent.com/u/72450765?v=4",
+          "id": null
+        }
+      }
+    ]
+  },
+  "inline251": {
+    "review_threads": []
+  },
+  "inline252": {
+    "review_threads": [
+      {
+        "id": "PRRT_kwDOUnH-pc6t-feY",
+        "is_resolved": false,
+        "is_outdated": true,
+        "path": "src/acc/cuda/cuda_movie_session.cu",
+        "line": null,
+        "diff_side": "RIGHT",
+        "start_line": null,
+        "start_diff_side": "RIGHT",
+        "original_line": 2237,
+        "original_start_line": 2234,
+        "resolved_by": null,
+        "comments": [
+          {
+            "id": "PRRC_kwDOUnH-pc8AAAABATelQg",
+            "database_id": 4315391298,
+            "body": "[P2] Admit the complete retry peak, not only the downloaded spectrum\n\nThis checks only S = n_groups * patch_h * (patch_w/2+1) * sizeof(cufftComplex). downloadPatchSpectra frees its temporary S before returning, but the following alignPatch dispatches cudaAlignPatch, which allocates S again and creates a fresh PatchAlignmentWorkspace (cuda_alignpatch.cu:1121–1139 and 536–552). The session's original alignment workspace remains live until the later releasePatchAlignmentWorkspace call, so its buffers/work area cannot satisfy the fresh allocation.\n\nFor the retained e10216 case (59 groups, 818×818 patches, 216×216 CCF), S is 158,299,360 bytes. The fresh reference, weights, CCF arrays and four shift arrays add 22,407,056 bytes before any cuFFT workspace. Thus, for example, 175,000,000 free bytes passes this check but cannot fit the retry's minimum 180,706,416-byte simultaneous allocation. Both retained 8.5 and 8.75 GiB runs use batch chunk 0; the initial local admission's two spectrum-window terms are consumed by the original patch buffer and original alignment workspace, not a reserve for this retry. This is allocation-lifetime/source accounting, not a newly executed GPU probe.\n\nPlease keep the check conditional on non-convergence, but include the fresh retry alignment buffers and actual cuFFT work, or explicitly release/reuse the old alignment workspace before retry. Add an end-to-end boundary control where S fits but S plus the retry workspace does not. The current unit test expects admission at S exactly, so it codifies the incomplete bound and cannot detect this gap.",
+            "created_at": "2026-10-19T15:02:30Z",
+            "updated_at": "2026-10-19T15:02:30Z",
+            "author": {
+              "login": "KingAlejandro",
+              "name": "KingAlejandro",
+              "email": null,
+              "avatar_url": "https://avatars.githubusercontent.com/u/72450765?v=4",
+              "id": null
+            },
+            "viewer_did_author": true
+          }
+        ]
+      }
+    ]
+  }
+}

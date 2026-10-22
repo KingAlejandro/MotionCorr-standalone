@@ -1,0 +1,25 @@
+--- a/qm_batch.py
++++ b/qm_batch.py
+@@ -14 +14 @@
+-W = Path('/mnt/clathrin/alex-motioncorr-rc0/W-QM')
++W = Path('/mnt/clathrin/alex-226-d2-d3-integration-20261022T154900Z')
+@@ -16 +16 @@
+-BIN = W / 'build-nvcomp' / 'motioncorr'
++BIN = W / 'build' / 'motioncorr'
+@@ -20,2 +20,2 @@
+-UUID = 'GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d'
+-CPUS = '104-111'
++UUID = 'GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d'
++CPUS = '10-13'
+@@ -129 +129 @@
+-             '--i', 'movies.star', '--j', '8']
++             '--i', 'movies.star', '--j', '1']
+@@ -136 +136 @@
+-         '--expected_frames', str(fam['frames']), '--i', 'movies.star', '--j', '8']
++         '--expected_frames', str(fam['frames']), '--i', 'movies.star', '--j', '1']
+@@ -161 +161 @@
+-        env = dict(os.environ, CUDA_VISIBLE_DEVICES='1')
++        env = dict(os.environ, CUDA_VISIBLE_DEVICES=UUID)
+@@ -279 +279 @@
+-        env = dict(os.environ, CUDA_VISIBLE_DEVICES='1')
++        env = dict(os.environ, CUDA_VISIBLE_DEVICES=UUID)

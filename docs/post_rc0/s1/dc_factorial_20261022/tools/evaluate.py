@@ -10,6 +10,11 @@ tools/check_realistic_motion.py and tools/check_realistic_image.evaluate_sum wit
 #272's hash-verified truth caches; Tier C uses tools/compare_motioncorr.py
 --gate backend for CPU-vs-CUDA and its relative-RMSE formula for arm-vs-none.
 A record with a nonzero exit is reported as such and never evaluated as success.
+
+Revision r2 (controls only): IDENTICAL means raw byte equality of every MRC
+core header 0:224, payload and STAR. An index STAR that differs only by the
+run-directory path is DIFFERENT_PATH_ONLY, with the raw diff retained. Output
+goes to eval/controls-r2-<tag>.json (`evaluate.py controls ROOT TAG`); earlier controls outputs are never overwritten.
 """
 import hashlib, json, os, subprocess, sys
 from pathlib import Path
@@ -197,7 +202,10 @@ def tier_c():
 
 
 def controls():
-    """Plain (option OFF) vs experiment none: MRC header 0:224, payload and STAR bytes."""
+    """Plain (option OFF) vs experiment none: MRC header 0:224, payload and STAR bytes (rule r2)."""
+    import difflib
+    out = EVAL / ('controls-r2-%s.json' % sys.argv[3])  # tag, e.g. tierA or final
+    if out.exists(): raise RuntimeError(f'{out} exists; controls outputs are never overwritten')
     rs = runs('')
     rows = []
     for name, rec in rs.items():
@@ -209,17 +217,27 @@ def controls():
         a, b = ROOT / 'runs' / name, ROOT / 'runs' / other
         mrcs = sorted(p.relative_to(a) for p in a.rglob('*.mrc'))
         stars = sorted(p.relative_to(a) for p in a.rglob('*.star'))
-        diffs = []
+        diffs, path_only, raw_diffs = [], [], {}
         for rel in mrcs:
             x, y = (a / rel).read_bytes(), (b / rel).read_bytes()
             ext = int(np.frombuffer(x[92:96], '<i4')[0])
             if x[:224] != y[:224] or x[1024 + ext:] != y[1024 + ext:] or len(x) != len(y): diffs.append(str(rel))
         for rel in stars:
-            if (a / rel).read_bytes() != (b / rel).read_bytes(): diffs.append(str(rel))
-        rows.append(dict(control=name, against=other, mrc=len(mrcs), star=len(stars), differing=diffs,
-                         status='IDENTICAL' if not diffs and mrcs and stars else 'DIFFERENT'))
-    (EVAL / 'controls.json').write_text(json.dumps(rows, indent=1) + '\n')
-    for r in rows: print(r['control'], r['status'], r.get('differing'))
+            x, y = (a / rel).read_bytes(), (b / rel).read_bytes()
+            if x == y: continue
+            raw_diffs[str(rel)] = list(difflib.unified_diff(x.decode(errors='replace').splitlines(),
+                                                            y.decode(errors='replace').splitlines(), lineterm='', n=0))
+            # Normalization scope: only the two run-directory paths, replaced by the same token.
+            if x.replace(str(a).encode(), b'RUN') == y.replace(str(b).encode(), b'RUN'): path_only.append(str(rel))
+            else: diffs.append(str(rel))
+        status = 'UNRUN_OR_FAILED' if not (mrcs and stars) else (
+            'DIFFERENT' if diffs else ('DIFFERENT_PATH_ONLY' if path_only else 'IDENTICAL'))
+        rows.append(dict(control=name, against=other, mrc=len(mrcs), star=len(stars), status=status,
+                         differing=diffs, differing_only_by_run_directory_path=path_only,
+                         normalization=dict(scope='STAR bytes only', replaced=[str(a), str(b)], token='RUN'),
+                         raw_star_diffs=raw_diffs))
+    out.write_text(json.dumps(dict(rule='r2', evaluator_sha256=sha256(__file__), rows=rows), indent=1) + '\n')
+    for r in rows: print(r['control'], r['status'], r.get('differing'), 'path-only:', r.get('differing_only_by_run_directory_path'))
 
 
 def status():

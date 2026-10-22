@@ -19,3 +19,12 @@ a retained receipt, a numerical option, a gate, or the expected collections. No 
 
 Limits: the host controls use mock reports and programs; they are not native evidence. Attribution is at the level of the four builds (N, only254, only260, only270);
 single-fix reproduction is exact-byte reproduction of C1's product by that build alone, N-only reproduction is the combination, and interactions stay unresolved.
+
+## Iteration record
+
+Iteration 1 of T24 (packet `772f2cf5`, `chain-3.sh`) failed in orchestration, not in the tools: the one-off chain script escaped `$SC` inside a remote heredoc, so every
+arm after F-fresh launched with `/t24/...` or `/build-nvcomp/...` paths and failed before running; all 36 resulting comparisons were correctly classified INVALID and the
+attribution stayed INVALID (the fail-closed handling worked as designed). Retained unchanged in `t24/`: F-fresh G/L (valid, rc 0, nvcomp witness), the failed stage
+receipts, the INVALID class files, and the F-cpu runs that were launched with correct paths. Iteration 2 (`C1_T24_DIR=t24-i2`, stage names `i2-*`, chain written locally
+and copied, not generated through nested quoting) re-runs every GPU arm in its own directory; the iteration-1 F-cpu arms may be used as the CPU baseline only if
+their run records are rc 0. Packet 2 adds only the `C1_T24_DIR` override to `c1_tutorial24.py`.

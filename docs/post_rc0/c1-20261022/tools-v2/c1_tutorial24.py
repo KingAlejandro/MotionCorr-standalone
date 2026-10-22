@@ -12,7 +12,7 @@ counts as identity or as a difference. N reproduces the combination of #254+#260
 import hashlib, json, os, subprocess, sys
 from pathlib import Path
 
-SCR = Path(os.environ['C1_SCR']); SRC = SCR / 'src'; T24 = SCR / 't24'
+SCR = Path(os.environ['C1_SCR']); SRC = SCR / 'src'; T24 = SCR / os.environ.get('C1_T24_DIR', 't24')   # a new iteration uses a new directory
 DATA = Path(os.environ['C1_TUTORIAL']); FROZEN = Path(os.environ['C1_FROZEN_RC0'])
 sys.path.insert(0, str(SRC / 'docs/rc0/qf/tools'))
 import qual_lib as q  # noqa: E402  (QF_* variables are set by c1_env.sh)

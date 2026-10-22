@@ -402,7 +402,7 @@ results. `logfile.pdf`, `header.pdf`, `batch.pdf`, the shift EPS plots, `.log` a
 Basis: maintainer decision D2 on #198 and the decision record [`docs/rc0/decoder_trust_and_dependencies.md`](../rc0/decoder_trust_and_dependencies.md) §3 (merged, #199 `a1ab83f2`).
 This page makes no legal claim beyond these statements.
 
-### Decoder trust boundary (D1, option 1: trusted-input precondition; no code change)
+### Decoder trust boundary (D1, option 1: trusted-input precondition)
 
 On builds configured with `-DUSE_NVCOMP=ON` (default OFF), `--ingest auto` sends **eligible TIFFs** (16-bit, Deflate or Adobe-Deflate, one row per
 strip, no predictor, native byte order; full list in §2) to NVIDIA nvCOMP's GPU Deflate decoder. nvCOMP 5.3 documents **undefined behaviour for
@@ -411,8 +411,11 @@ sizes and offsets, the decoder status, the decoded length and an Adler-32 checks
 behaviour on a corrupt Deflate body**. This route therefore **assumes complete, unmodified acquisition files**. **Use `--ingest compact` for
 files of unknown integrity or files that are still being written.**
 
-Two further statements: a file that changes **between the tag scan and the strip read is not detected** (follow-up
-[#215](https://github.com/KingAlejandro/MotionCorr-standalone/issues/215), post-RC0), and **checked arithmetic on the pre-decode offset/size path is in force
+Post-RC0 [#215](https://github.com/KingAlejandro/MotionCorr-standalone/issues/215) pins the tag-scan descriptor's
+`st_dev`, `st_ino`, `st_size` and nanosecond `st_mtim`. A failed identity check on a fresh reader handle or the path,
+or before each chunk's decoder submission, declines into the existing host reader (`auto`; pinned `nvcomp` still refuses).
+This detects ordinary growth and replacement; it does not lock the file or validate its Deflate body. The complete,
+unmodified-input precondition remains unchanged. **Checked arithmetic on the pre-decode offset/size path is in force
 (T3, #217 merged `483e881d`)**: an overflow or an unreadable strip offset becomes a named decline (§2). The trusted-input precondition for the Deflate body is unchanged.
 
 ## 8. Known limitations
@@ -430,6 +433,11 @@ Two further statements: a file that changes **between the tag scan and the strip
   and one dataset worker with a synthetic fixture; other fault sites, genuine
   nvCOMP-ingest poisoning, late-product rollback and other devices/toolkits are
   untested. Existing injected controls and frozen RC0 results keep their scope/SHA.
+- **nvCOMP input identity (#215, post-RC0):** identity checks detect growth/replacement between the tag scan and decoder submission,
+  but cannot exclude a concurrent writer after the check or same-size edits with restored timestamps. Continue to supply complete,
+  immutable, trusted files (§7); this is not a corrupt-Deflate safety guarantee. The RC0 binary itself has no identity check.
+  Post-RC0 controls and native route/product evidence: [#215 record](../issue215/README.md).
+
 - **The `0.001` relative-RMSE diagnostic fails for CUDA versus CPU.** On the 24 tutorial movies CUDA versus fixed CPU
   `--j 1` gives relative RMSE 0.002899-0.010082 against 0.001 (0/24 pass the relaxed profile; every other relaxed check
   passes). The explicit `--gate backend` profile records this as a non-blocking diagnostic. This is a strict CPU-agreement

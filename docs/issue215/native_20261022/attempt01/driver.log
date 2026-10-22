@@ -1,0 +1,17 @@
+software 0
+configure 0
+build 0
+libraries 0
+host-controls 0
+pre-gpus 0
+pre-apps 0
+pre-xml 0
+Traceback (most recent call last):
+  File "/mnt/clathrin/motioncorr-215-native-20261022-409be643-a01/run_native.py", line 147, in <module>
+    main()
+  File "/mnt/clathrin/motioncorr-215-native-20261022-409be643-a01/run_native.py", line 131, in main
+    health("pre", require_idle=True)
+  File "/mnt/clathrin/motioncorr-215-native-20261022-409be643-a01/run_native.py", line 88, in health
+    assert ecc in ("0", "N/A"), ("uncorrected ECC", ecc)
+           ^^^^^^^^^^^^^^^^^^^
+AssertionError: ('uncorrected ECC', None)

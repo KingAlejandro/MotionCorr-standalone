@@ -18,6 +18,7 @@
 #if defined(_NVCOMP_ENABLED)
 #include <tiffio.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include <cerrno>
 #include <cstring>
 #include <cstdint>
@@ -1345,6 +1346,14 @@ struct PinnedStagePool {
 };
 thread_local PinnedStagePool t_pinned_stage;
 
+// Pin the descriptor used for the tag scan, not a separate path lookup.
+// This detects ordinary replacement/growth; it is not a lock against writers.
+bool sameTiffIdentity(const struct stat &a, const struct stat &b) {
+    return a.st_dev == b.st_dev && a.st_ino == b.st_ino &&
+           a.st_size == b.st_size &&
+           a.st_mtim.tv_sec == b.st_mtim.tv_sec &&
+           a.st_mtim.tv_nsec == b.st_mtim.tv_nsec;
+}
 // pread until n bytes have arrived. A short file, an error or EOF is a refusal,
 // as a short TIFFReadRawStrip was. pread leaves the descriptor's offset alone,
 // so it does not disturb the LibTIFF handle that owns fd.
@@ -1413,10 +1422,28 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // read with one pread of its whole span instead of one LibTIFF call per
     // strip; anything else keeps the per-strip TIFFReadRawStrip reader.
     std::vector<char> frame_contiguous(num_req_frames, 0);
+    struct stat tag_identity{};
+    auto decline_identity = [&]() -> bool {
+        logfile << "nvCOMP ingestion declined (TIFF file identity changed or unavailable)"
+                   "; using the host reader." << std::endl;
+        return false;
+    };
+    auto path_unchanged = [&]() -> bool {
+        struct stat current{};
+        return stat(fn_mic.c_str(), &current) == 0 && sameTiffIdentity(tag_identity, current);
+    };
+    auto handle_unchanged = [&](TIFF *t) -> bool {
+        struct stat current{};
+        return fstat(TIFFFileno(t), &current) == 0 && sameTiffIdentity(tag_identity, current);
+    };
     {
         StageScope tag_scope("ingest tag scan");
         TIFF *tif = TIFFOpen(fn_mic.c_str(), "r");
         if (!tif) return false;
+        if (fstat(TIFFFileno(tif), &tag_identity) != 0) {
+            TIFFClose(tif);
+            return decline_identity();
+        }
         bool ok = true;
         const char *reject = nullptr;
         // Raw Deflate decompression reproduces only what LibTIFF would do for one
@@ -1808,6 +1835,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // region and competed with the thread submitting GPU work
     // (docs/nvcomp_ingest_pipeline.md). Handles are opened here, on the calling
     // thread, so a refused open declines the whole ingest before any chunk is staged.
+    if (!path_unchanged()) return decline_identity();
     const int io_threads = n_threads > 0 ? n_threads : 4;
     struct TiffHandles {
         std::vector<TIFF *> h;
@@ -1818,6 +1846,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     for (int t = 0; t < io_threads; t++) {
         tiffs.h[t] = TIFFOpen(fn_mic.c_str(), "r");
         if (!tiffs.h[t]) all_open = false;
+        else if (!handle_unchanged(tiffs.h[t]) || !path_unchanged()) return decline_identity();
     }
     if (!all_open) {
         logfile << "WARNING: nvCOMP ingestion could not open a TIFF handle for every reader"
@@ -1996,6 +2025,10 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             }
             HANDLE_ERROR(cudaEventRecord(ev_h2d_done[j], copy_stream));
 
+            // Payload is staged. Recheck before handing any of it to nvCOMP,
+            // including replacement of the path while an old inode stayed open.
+            if (!path_unchanged()) return decline_identity();
+            for (TIFF *t : tiffs.h) if (!handle_unchanged(t)) return decline_identity();
             phase.next("ingest decompress submit");
             HANDLE_ERROR(cudaStreamWaitEvent(stream, ev_h2d_done[j], 0));
             if (nvcompBatchedDeflateDecompressAsync(

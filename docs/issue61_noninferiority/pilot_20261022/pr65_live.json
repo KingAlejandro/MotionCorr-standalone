@@ -1,0 +1,65 @@
+{
+  "utc": "2026-10-22T15:04:26.985689+00:00",
+  "argv": [
+    "gh",
+    "pr",
+    "view",
+    "65",
+    "--json",
+    "url,title,body,comments,reviews,headRefOid"
+  ],
+  "exit": 0,
+  "response_sha256": "ea82c86617f9defeeacc8ffd01784e840d52c62556f8fdd4708bc500f0e3387f",
+  "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/65",
+  "title": "Preregistered scientific non-inferiority study of CPU, native CUDA and all-FFTW hybrid motion correction (#61)",
+  "latest_comments": [
+    {
+      "id": "IC_kwDOUnH-pc8AAAABZnDZtg",
+      "author": {
+        "login": "KingAlejandro"
+      },
+      "authorAssociation": "OWNER",
+      "body": "Review: keep the preregistration immutable and separate from production code. The main value is methodological: endpoints, margins and decision rules were fixed before outcomes, which is exactly what later scientific comparison should inherit. Results should be appended against the frozen protocol rather than editing it to fit current CUDA behaviour; no numerical gate or backend default should change on this PR alone.",
+      "createdAt": "2026-10-06T09:45:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#issuecomment-6013639094",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOUnH-pc8AAAABdIF1fA",
+      "author": {
+        "login": "KingAlejandro"
+      },
+      "authorAssociation": "OWNER",
+      "body": "Recommendation: defer pending a consistent public scientific disposition. At head 45f07f14 the committed README opens with an inconclusive outcome, and Amendment 2/latest detailed review withdraw the Stage B PASS verdicts because S1 is untested. The PR body still advertises Stage B PASS, >=99.97%/99.99% effective-data retention, and that the endpoint can see its own margin. Those claims must be clearly marked superseded or replaced in the body before this is used as an evidence handoff.\n\nA control declared harmful by its measured rho cannot independently validate the lower-bound false-pass rule; the recorded rejection near 8.5% loss does not establish sensitivity at the 5% margin. Keep measured values, frozen protocol, amendments and inconclusive verdict together. The current-main comparison confirms evidence/analysis-script scope, 593 commits behind cb3699ac; historical estimates do not certify current CUDA or authorize gate/default changes. This is a source-report/discussion and diff-inventory review, with no reconstruction rerun or independent reanalysis of the raw data.",
+      "createdAt": "2026-10-18T11:54:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#issuecomment-6249608572",
+      "viewerDidAuthor": true
+    }
+  ],
+  "headRefOid": "c0ee115c8348df54732f47dbef930b541b2a364a",
+  "body": "### Prospective calibration tooling at `c0ee115c`\n\nAdded a hash-bound, seeded movie\u00d7half particle-subset planner with paired jackknives and a descriptive endpoint-frequency summary with explicit protocol inputs. Neither supplies accepted harm truth or scientific acceptance policy. Both retain scientific **INCONCLUSIVE** and refuse existing outputs.\n\nHost controls **19/19 PASS**, including both actual CLIs, plus existing **20/20 certificate controls PASS**. Independent Sol review found two STAR-identity defects in the first version; both are repaired with old-code-failing regressions, and follow-up review found no new material issue. The real-input planner generated a separate 92-job plan; all 46 STAR subsets exactly preserve the earlier ordinary-data selections. Execution of the small exploratory pilot is recorded separately. Particle retention is not exact SSNR rho or scientific validation.\n\nExisting analyser, frozen protocol, historical evidence and production code are unchanged. Current-head CI is pending. The following certificate-head results retain their original source identity.\n\n---\n\nStage B remains **INCONCLUSIVE**. The earlier Stage B PASS, \u226599.97%/99.99% effective-data retention and \u201cthe endpoint can see its own margin\u201d claims in this description are withdrawn under the frozen protocol\u2019s Amendment 2. Measured rejection near 8.5% loss does not establish sensitivity at the 5% margin; S1 and coverage at that margin remain unvalidated.\n\nThis PR records the preregistered #61 CPU/native-CUDA/all-FFTW comparison, its measured endpoints, controls, amendments and limitations. The historical runs consumed #36 outputs at `5407373`; they do not qualify current CUDA. Movie is the replication unit (22 within-collection held-out movies), with no independent second collection. Stage A sensitivity limits and Stage C\u2019s missing positive control/seed variability remain explicit. The frozen protocol, recorded results, margins, production sources and backend defaults are unchanged.\n\nAt `cf67fa47`, the Stage B analyser recomputes both local baseline half-map payload hashes and validates certificate structure and identity binding. A certificate can contribute identity-bound descriptive entries; self-reported coverage, measured rejection and supplied design targets cannot establish scientific certification. The gate remains INCONCLUSIVE until an independent harm definition and prospective coverage/operating-characteristic policy are accepted and implemented. No noise or thinning truth, sample count or scientific acceptance default is chosen here.\n\nHost validation: seven pinned-analyser subprocesses reproduce the four certificate holes; 20 repaired-analyser subprocesses PASS. Synthetic endpoint estimates, jackknife SEs and bounds are exactly preserved; full-sample estimates match the retained FSC exports. Historical raw-map/interval reanalysis, reconstruction, remote compute, native GPU execution and performance validation are **UNRUN**. Independent source review found one aliased hash-set test fixture, repaired at `34dc6bd6`. Both independently targeted mismatch controls pass, and mutants omitting either digest comparison are rejected. No analyser or scientific-boundary finding remained. Follow-up Sol review confirms the finding is resolved with no new material issue. [Prior certificate-head Linux CI at 34dc6bd6](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39775006271) **PASS**: CPU build/checks and CUDA compile-only. The certificate controls were run locally; CI does not establish scientific qualification.\n\n[Study and disposition](docs/issue61_noninferiority/README.md), [frozen protocol and amendments](docs/issue61_noninferiority/PROTOCOL.md), [certificate repair, exact controls and limitations](docs/issue61_noninferiority/CERTIFICATE_VALIDATION.md). This remains evidence/analysis work for #61; it does not close the open scientific qualification or authorize a gate/default change. No merge requested.\n",
+  "reviews": [
+    {
+      "submittedAt": "2026-09-26T11:59:15Z",
+      "state": "COMMENTED",
+      "commit": {
+        "oid": "ef5935e17718bb377ea18d4ca88143490b41c24d"
+      }
+    },
+    {
+      "submittedAt": "2026-09-28T06:40:47Z",
+      "state": "COMMENTED",
+      "commit": {
+        "oid": "ef5935e17718bb377ea18d4ca88143490b41c24d"
+      }
+    }
+  ]
+}

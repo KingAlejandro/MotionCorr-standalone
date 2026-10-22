@@ -1,0 +1,29 @@
+{
+  "utc": "2026-10-22T15:15:02.508619+00:00",
+  "argv": [
+    "ssh",
+    "-J",
+    "ccp4-gateway",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "4GPUs",
+    "taskset",
+    "-c",
+    "14-15",
+    "env",
+    "OMP_NUM_THREADS=1",
+    "OPENBLAS_NUM_THREADS=1",
+    "MKL_NUM_THREADS=1",
+    "VECLIB_MAXIMUM_THREADS=1",
+    "NUMEXPR_NUM_THREADS=1",
+    "BLIS_NUM_THREADS=1",
+    "CUDA_VISIBLE_DEVICES=",
+    "/home/alex/.mc-venv/bin/python3",
+    "-"
+  ],
+  "remote_script_sha256": "a0a33191556b25136518a9c366874462d38dcc1221e5e13aa87e2942c5dc3743",
+  "exit": 0,
+  "stderr": ""
+}

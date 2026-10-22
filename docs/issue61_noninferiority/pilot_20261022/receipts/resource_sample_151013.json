@@ -1,0 +1,65 @@
+{
+  "utc": "2026-10-22T15:10:13.009592+00:00",
+  "processes": [
+    {
+      "pid": 3000015,
+      "cmdline": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/mc-i61-pilot-c0ee115c-q21hhr8l/supervise.py ",
+      "status": {
+        "Name": "python3",
+        "State": "S (sleeping)",
+        "PPid": "1",
+        "Threads": "1",
+        "Cpus_allowed_list": "14-15"
+      },
+      "environment": [
+        "OMP_NUM_THREADS=1",
+        "OPENBLAS_NUM_THREADS=1",
+        "MKL_NUM_THREADS=1",
+        "VECLIB_MAXIMUM_THREADS=1",
+        "NUMEXPR_NUM_THREADS=1",
+        "BLIS_NUM_THREADS=1",
+        "CUDA_VISIBLE_DEVICES="
+      ]
+    },
+    {
+      "pid": 3000016,
+      "cmdline": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/mc-i61-pilot-c0ee115c-q21hhr8l/run_pilot.py execute /mnt/clathrin/mc-i61-pilot-c0ee115c-q21hhr8l ",
+      "status": {
+        "Name": "python3",
+        "State": "S (sleeping)",
+        "PPid": "3000015",
+        "Threads": "1",
+        "Cpus_allowed_list": "14-15"
+      },
+      "environment": [
+        "OMP_NUM_THREADS=1",
+        "OPENBLAS_NUM_THREADS=1",
+        "MKL_NUM_THREADS=1",
+        "VECLIB_MAXIMUM_THREADS=1",
+        "NUMEXPR_NUM_THREADS=1",
+        "BLIS_NUM_THREADS=1",
+        "CUDA_VISIBLE_DEVICES="
+      ]
+    },
+    {
+      "pid": 3000665,
+      "cmdline": "/opt/relion/bin/relion_reconstruct --i /mnt/clathrin/mc-i61-plan-c0ee115c-dbe9tcqr/plan/stars/baseline/held.star --o /mnt/clathrin/mc-i61-pilot-c0ee115c-q21hhr8l/rec/baseline/held_half2_class001_unfil.mrc --sym D2 --subset 2 --pad 2 --ctf ",
+      "status": {
+        "Name": "relion_reconstr",
+        "State": "R (running)",
+        "PPid": "3000646",
+        "Threads": "1",
+        "Cpus_allowed_list": "14-15"
+      },
+      "environment": [
+        "BLIS_NUM_THREADS=1",
+        "CUDA_VISIBLE_DEVICES=",
+        "MKL_NUM_THREADS=1",
+        "NUMEXPR_NUM_THREADS=1",
+        "OMP_NUM_THREADS=1",
+        "OPENBLAS_NUM_THREADS=1",
+        "VECLIB_MAXIMUM_THREADS=1"
+      ]
+    }
+  ]
+}

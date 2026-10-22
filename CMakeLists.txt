@@ -210,6 +210,9 @@ install(TARGETS motioncorr RUNTIME DESTINATION bin)
 
 include(CTest)
 if(BUILD_TESTING)
+    # The same byte-preservation checker used by the native C2R oracle.
+    add_executable(hermitian_projection_oracle tests/test_hermitian_projection_oracle.cpp)
+    add_test(NAME HermitianProjectionOracle COMMAND hermitian_projection_oracle)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
     add_executable(cpu_dose_symmetry tests/test_cpu_dose_symmetry.cpp)

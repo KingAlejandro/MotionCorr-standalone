@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include "cuda_hermitian_check.h"
+#include "hermitian_projection_oracle.h"
 
 extern "C" {
 cufftResult __real_cufftMakePlanMany(cufftHandle, int, int*, int*, int, int, int*, int, int, cufftType, int, size_t*);
@@ -48,6 +49,9 @@ cufftResult __wrap_cufftExecC2R(cufftHandle p, cufftComplex *in, cufftReal *out)
 }
 static bool expect_invariant_failure = false, expect_oracle_failure = false;
 using cd = std::complex<double>;
+using hermitian_oracle::boundary_column;
+using hermitian_oracle::project_reference;
+using hermitian_oracle::verify_projection;
 
 static void require(bool ok, const char *what) {
     if (!ok) throw std::runtime_error(what);
@@ -75,28 +79,7 @@ static bool compare(const char *path, const float *got, const std::vector<double
     return ok;
 }
 
-// ---- Independent valid-input reference ------------------------------------
-// The CUDA path receives a spectrum whose x=0 / x=nx/2 columns are not
-// conjugate-symmetric. The reference never feeds that to an inverse: it first
-// projects the columns on the host (in double): conjugate pair -> (u+conj(v))/2
-// stored as h and conj(h); self-conjugate bins -> real part. Everything else
-// is untouched.
-static bool boundary_column(int x, int nx) { return x == 0 || (nx % 2 == 0 && nx > 1 && x == nx / 2); }
-static std::vector<cd> project_reference(const float *f, int nx, int ny) {
-    const int w = nx / 2 + 1;
-    std::vector<cd> z((size_t)w * ny);
-    for (size_t i = 0; i < z.size(); ++i) z[i] = cd(f[2 * i], f[2 * i + 1]);
-    for (int x = 0; x < w; ++x) {
-        if (!boundary_column(x, nx)) continue;
-        for (int y = 0; y <= ny / 2; ++y) {
-            const size_t a = (size_t)y * w + x, b = (size_t)((ny - y) % ny) * w + x;
-            if (a == b) { z[a] = cd(z[a].real(), 0.0); continue; }
-            const cd h = 0.5 * (z[a] + std::conj(z[b]));
-            z[a] = h; z[b] = std::conj(h);
-        }
-    }
-    return z;
-}
+// project_reference and verify_projection are shared with the host-only test.
 // Explicit full-complex inverse DFT of a valid half spectrum: the omitted
 // columns are the conjugates of the stored ones (weight 2); the self-conjugate
 // columns count once. No FFT library involved.
@@ -126,38 +109,9 @@ static std::vector<double> fftw_double_inverse(std::vector<cd> z, int nx, int ny
     return out;
 }
 
-// Checks one production consumption buffer against the specified operator:
-// interior bins bit-identical to the input spectrum; boundary-column bins equal
-// to the host projection (within float rounding of the 0.5*(u+v) arithmetic);
-// self-conjugate bins exactly real; an already-Hermitian input bit-identical.
-// A zero buffer is Hermitian, so the projection values are compared, not just
-// the symmetry.
-static bool verify_projection(const char *label, const std::vector<cufftComplex> &buf, const float *f,
-                              const std::vector<cd> &z, int nx, int ny, bool already_hermitian, bool quiet = false) {
-    const int w = nx / 2 + 1;
-    size_t interior_bad = 0, boundary_bad = 0, real_bad = 0;
-    for (int y = 0; y < ny; ++y) for (int x = 0; x < w; ++x) {
-        const size_t i = (size_t)y * w + x, j = (size_t)((ny - y) % ny) * w + x;
-        if (!boundary_column(x, nx)) {
-            interior_bad += buf[i].x != f[2 * i] || buf[i].y != f[2 * i + 1];
-            continue;
-        }
-        const double tol = 3e-7 * (std::abs(cd(f[2 * i], f[2 * i + 1])) + std::abs(cd(f[2 * j], f[2 * j + 1])));
-        boundary_bad += std::abs(cd(buf[i].x, buf[i].y) - z[i]) > tol;
-        if (i == j) real_bad += buf[i].y != 0.0f;
-    }
-    size_t differing = 0;
-    if (already_hermitian)
-        for (size_t i = 0; i < (size_t)w * ny; ++i) differing += buf[i].x != f[2 * i] || buf[i].y != f[2 * i + 1];
-    const bool ok = !interior_bad && !boundary_bad && !real_bad && !differing;
-    if (!quiet)
-        std::cout << label << " projection interior_changed=" << interior_bad << " boundary_wrong=" << boundary_bad
-                  << " self_conjugate_not_real=" << real_bad << " hermitian_passthrough_diff=" << differing
-                  << (ok ? " PASS" : " FAIL") << '\n';
-    return ok;
-}
 // The oracle must be able to fail: each defect below has to be rejected.
 static void oracle_self_test() {
+    hermitian_oracle::signed_zero_self_test<cufftComplex>();
     for (auto dims : {std::pair<int,int>{8, 6}, {7, 5}, {8, 5}, {7, 6}}) {
         const int nx = dims.first, ny = dims.second, w = nx / 2 + 1;
         const size_t nf = (size_t)w * ny;
@@ -252,6 +206,7 @@ static bool run(int nx, int ny, double sx, double sy, bool plans, bool session_o
     if (hermitian_input) {
         const auto zh = project_reference(fp, nx, ny);
         for (size_t i = 0; i < nf; ++i) { fp[2 * i] = float(zh[i].real()); fp[2 * i + 1] = float(zh[i].imag()); }
+        hermitian_oracle::add_signed_zero_fixture(fp, nx, ny);
     }
     if (frames > 1) std::memcpy(MULTIDIM_ARRAY(spectra[1]), f, nf * sizeof(fComplex));
     const std::vector<float> input(fp, fp + 2 * nf);

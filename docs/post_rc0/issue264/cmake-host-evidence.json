@@ -1,0 +1,54 @@
+{
+  "tested_source": "4b0e4e736884777ca738c7865a37876a5e9b9e86",
+  "host": "macOS arm64; AppleClang",
+  "commands": [
+    [
+      "cmake",
+      "-S",
+      ".",
+      "-B",
+      "/tmp/motioncorr-guard264-cmake-20261022",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DBUILD_TESTING=ON",
+      "-DCUDA=OFF",
+      "-DPython3_EXECUTABLE=/Users/alex.konstantinov/.local/bin/python3"
+    ],
+    [
+      "cmake",
+      "--build",
+      "/tmp/motioncorr-guard264-cmake-20261022",
+      "--target",
+      "local_motion_distortion_guard",
+      "--parallel",
+      "1"
+    ],
+    [
+      "ctest",
+      "--test-dir",
+      "/tmp/motioncorr-guard264-cmake-20261022",
+      "-R",
+      "^LocalMotionDistortionGuard$",
+      "--output-on-failure"
+    ],
+    [
+      "/Users/alex.konstantinov/.local/bin/python3",
+      "-B",
+      "tools/validate_test_collection.py",
+      "--test-dir",
+      "/tmp/motioncorr-guard264-cmake-20261022"
+    ]
+  ],
+  "results": [
+    "configuration PASS; pbzip2 waiver warning, related tests UNRUN",
+    "focused build PASS",
+    "focused CTest1/1 PASS",
+    "full collection FAIL, other native targets unbuilt, not full-suite validation"
+  ],
+  "files": {
+    "cmake-configure.log": "c50572d8799d5bc582dc2d3418b8549bf0cd9d593cd6109e387367209435139d",
+    "cmake-focused-build.log": "75f7cbb4948e7d6ded0ea0a4ac26aa2a11fe541109fbc7e634c8432bb880e0ea",
+    "cmake-focused-ctest.log": "fd96177367b555258a68a64fb494d4aa45b33848e6ee527b7e7b1b70b5650930",
+    "cmake-partial-collection.log": "ec8317bb438415c4ac97c7857d196f971a51bf540fcf7fbd0946ec939d8eb2e3"
+  },
+  "native_movie_GPU_science": "UNRUN"
+}

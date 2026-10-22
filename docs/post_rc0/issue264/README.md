@@ -58,9 +58,19 @@ one thread and the busy shared host was checked before the bounded controls.
 
 `LocalMotionDistortionGuard` is registered as a device-free CTest in CPU and CUDA
 builds, and added to the required collection plus both mock suite inventories.
-Full CMake/CPU/CUDA builds, full CTest collection/execution, independent latest-head
-review, CI, and native movie/fitting/reconstruction/publication checks are **UNRUN**
-at this record. Standalone compilation does not prove those broader claims.
+A later host CMake pass on source `4b0e4e736884777ca738c7865a37876a5e9b9e86`
+configured CPU Release successfully, built only `local_motion_distortion_guard`
+with `--parallel 1`, and ran its registered CTest: **1/1 PASS**. Logs are retained.
+This local configuration warns that pbzip2 is absent, so compressed-MRC coverage
+would be waived; those tests were not run. Full collection validation deliberately
+remains **FAIL** on this partial build: 75 tests are registered but other native
+targets have not been built and their command programs are unavailable. This is
+not full-suite validation or a new product regression. Exact commands and hashes
+are in `cmake-host-evidence.json`.
+
+Full application CPU/CUDA builds, complete runnable CTest collection/execution,
+independent latest-head review, CI, and native movie/fitting/reconstruction/
+publication checks remain **UNRUN** at this record. Standalone compilation does not prove those broader claims.
 No historical truth outcome is relabelled and no tolerance/gate is relaxed.
 
 Reproduce into a new output directory (refuses an existing directory):

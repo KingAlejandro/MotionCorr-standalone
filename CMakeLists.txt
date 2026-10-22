@@ -248,6 +248,10 @@ if(BUILD_TESTING)
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
     add_test(NAME PatchRetryState COMMAND patch_retry_state)
+    # Device-free controls for the exact predicate used by the CUDA border test.
+    add_executable(realspace_border_validation tests/test_realspace_border_validation.cpp)
+    add_test(NAME RealspaceBorderValidation COMMAND realspace_border_validation)
+    set_tests_properties(RealspaceBorderValidation PROPERTIES LABELS "host" TIMEOUT 30)
     add_executable(defect_parser tests/test_defect_parser.cpp)
     target_link_libraries(defect_parser PRIVATE motioncorr_core)
     # Pure C++ arithmetic regression (issue #97). Registered above the

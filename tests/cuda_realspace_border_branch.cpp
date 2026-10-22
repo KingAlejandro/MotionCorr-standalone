@@ -13,6 +13,7 @@
 // non-control case differs from the oracle. Control cases must always match.
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/micrograph_model.h"
+#include "realspace_border_validation.h"
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -84,8 +85,8 @@ long runCase(const Case &c, std::vector<std::string> &report) {
             bool interpolated;
             const double want = cpuValue(c, img, x, y, &interpolated);
             (void)interpolated;
-            const double err = std::fabs((double)sum()(y, x) - want);
-            if (err >= 0.05) {
+            double err;
+            if (realspace_border_test::pixelDiffers((double)sum()(y, x), want, c.name, x, y, err)) {
                 bad++;
                 if (err > worst) { worst = err; bx = x; by = y; want_at_worst = want; }
             }
@@ -99,7 +100,7 @@ long runCase(const Case &c, std::vector<std::string> &report) {
 }
 } // namespace
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) try {
     bool expect_mismatch = false;
     for (int i = 1; i < argc; i++)
         if (!std::strcmp(argv[i], "--expect-mismatch")) expect_mismatch = true;
@@ -148,4 +149,7 @@ int main(int argc, char **argv) {
     }
     std::cout << "PASS: " << (int)(sizeof(cases) / sizeof(cases[0])) << " cases match the CPU branch decision\n";
     return 0;
+} catch (const std::exception &exc) {
+    std::cerr << "FAIL: " << exc.what() << '\n';
+    return 1;
 }

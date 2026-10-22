@@ -1,0 +1,34 @@
+{
+  "native_host_status": "UNRUN",
+  "reason": "shared build lock busy, one attempt, no retry",
+  "code_head": "135ee09e0925deb933bfd0f4ce7e24d6ddbd080a",
+  "source_archive_sha256": "405e8faa11602bb7de92d49cd5bc6e58772d46909fad87f2290bca80272b3a59",
+  "adapter_body_sha256": "2d04cc4348bf657e2fa0140e401276605736462c7b5c337abc26d840379d6e54",
+  "adapter_matches_verbatim": true,
+  "fixture_manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+  "used_native_members": {
+    "cases-cpu/affine/affine.star": "f560b29e3d4521e1b4d5ca97fa3d649181970b49db90714e9a257709d20c97a8",
+    "cases-cuda/affine/affine.star": "c9e5ab3668de215f66e911abe0fc299bd5d1e563d623c93869ef4efdfc1a0b7f",
+    "cases-cpu/noisy/noisy.star": "9dc77e8ad53879aa40e7f4ad8ac2523e4b70ceb2e620097302202bee69ca8171",
+    "cases-cuda/noisy/noisy.star": "ae6a9e79a769bcf67b712d69550bb3be566e853983f3873705d68e1e14ad6db7"
+  },
+  "local_checks": {
+    "configure": "PASS",
+    "syntax_runner": "PASS",
+    "syntax_adapter": "PASS",
+    "ci_collection_drop_one": "PASS",
+    "generated_declaration_collection": "PASS",
+    "unbuilt_runnable_collection": "FAIL: binaries absent, retained; no missing required registration"
+  },
+  "native_checks": {
+    "release_build": "UNRUN",
+    "oracle": "UNRUN",
+    "mutants": "UNRUN",
+    "focused_recenter_model": "UNRUN",
+    "binary_hash": "UNRUN: no binary built"
+  },
+  "prior_research_sha256": {
+    "/tmp/motioncorr-residual-research-ToeBLl/analyze.py": "e690913784e7070498366e58d911588f267a80edc4af5711ed3c26ab734a7a21",
+    "/tmp/motioncorr-residual-research-ToeBLl/result.json": "43ee39dcffccf4cda3b54981b7c8427f0226ae173351f5c3dac6e1faee5a9431"
+  }
+}

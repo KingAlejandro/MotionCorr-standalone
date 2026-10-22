@@ -96,17 +96,15 @@ def main():
         (logs/name).write_bytes((build/name).read_bytes())
     run('linked-libraries', ['ldd',binary])
     run('collection', ['ctest','--test-dir',build,'--show-only=json-v1'])
-    run('required-collection', [sys.executable,src/'tools/validate_test_collection.py','--test-dir',build])
-    collection=json.loads((logs/'collection.stdout').read_text())
-    # Drop actual new registrations one at a time, replacing each with an
-    # additive filler so a count check cannot mask the missing-name failure.
-    for name in ['RunnerFitBoundary','RunnerFitBoundaryMutant_sign','RunnerFitBoundaryMutant_axis-normalization','RunnerFitBoundaryMutant_frame-origin']:
-        dropped=dict(collection)
-        dropped['tests']=[t for t in collection['tests'] if t['name']!=name]
-        assert len(dropped['tests']) == len(collection['tests'])-1
-        dropped['tests'].append(dict(name='AdditiveFillerTest',command=['/bin/true']))
-        run('drop-'+name,[sys.executable,src/'tools/validate_test_collection.py'],expected=1,input=json.dumps(dropped))
-        assert 'Missing required test(s): '+name in (logs/('drop-'+name+'.stdout')).read_text()
+    run('declared-required-collection', [sys.executable,
+        src/'docs/post_rc0/s1/fit_boundary_20261022/check_registration.py',src,build,logs])
+    # Check real runnable commands for the four newly required registrations.
+    # Unrelated C++ helpers are deliberately unbuilt by this focused lane.
+    names=['RunnerFitBoundary','RunnerFitBoundaryMutant_sign',
+           'RunnerFitBoundaryMutant_axis-normalization','RunnerFitBoundaryMutant_frame-origin']
+    focused=dict(tests=[t for t in json.loads((logs/'collection.stdout').read_text())['tests'] if t['name'] in names])
+    run('focused-runnable-collection', [sys.executable,src/'tools/validate_test_collection.py',
+        '--min-count','4','--required-tests',*names],input=json.dumps(focused))
     run('focused-ctest', ['ctest','--test-dir',build,'--output-on-failure','-j','1','--output-junit',logs/'focused.xml',
         '-R','^(RunnerFitBoundary.*|RunnerInterpolateRecenter|RunnerInterpolateShifts|MicrographModelBounds|RunnerModelParser)$'])
     run('oracle-direct', [binary,'fit_boundary'])

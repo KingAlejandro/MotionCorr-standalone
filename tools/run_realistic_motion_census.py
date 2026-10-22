@@ -39,8 +39,8 @@ def lock_gpu():
 def run_seed(args,fixture,out,device):
     r=json.loads((fixture/'RECEIPT.json').read_text())
     if digest(fixture/'movie.mrcs')!=r['files']['movie.mrcs']: raise ValueError('movie hash mismatch')
-    arms=[(dc,False) for dc in ['none','global','local','both']]
-    if args.backend=='cpu': arms += [('none',True)]
+    arms=[(dc,False) for dc in args.dc_arms]
+    if args.backend=='cpu' and (args.double_conditions is None or fixture.name.rsplit('-s',1)[0] in args.double_conditions): arms += [('none',True)]
     rows=[]
     for dc,double in arms:
         name=args.backend+'-'+('double' if double else dc)
@@ -71,13 +71,17 @@ def main():
     ap.add_argument('--root',type=Path,required=True); ap.add_argument('--binary',type=Path,required=True)
     ap.add_argument('--backend',choices=['cpu','cuda'],required=True); ap.add_argument('--cpus',required=True)
     ap.add_argument('--max-idle-seconds',type=int,default=3600)
+    # Defaults reproduce the 900-arm census; the synthetic-combined study narrows them.
+    ap.add_argument('--dc-arms',nargs='+',default=['none','global','local','both'],choices=['none','global','local','both'])
+    ap.add_argument('--double-conditions',nargs='*',default=None,help='CPU double-CCF arm only for these conditions (default: every condition)')
+    ap.add_argument('--results',default='results'); ap.add_argument('--conditions',nargs='+',default=CONDITIONS)
     args=ap.parse_args(); args.root=args.root.resolve(); args.binary=args.binary.resolve()
     args.binary_sha256=digest(args.binary)
-    results=args.root/'results'; results.mkdir(exist_ok=True)
+    results=args.root/args.results; results.mkdir(exist_ok=True)
     start_idle=time.time()
     while True:
         pending=False; found=False
-        for c in CONDITIONS:
+        for c in args.conditions:
             for seed in range(10):
                 name=f'{c}-s{seed:02d}'; fixture=args.root/'fixtures'/name
                 out=results/name; out.mkdir(exist_ok=True)

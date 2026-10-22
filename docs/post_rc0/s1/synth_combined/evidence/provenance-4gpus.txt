@@ -1,0 +1,70 @@
+combined-candidate-cuda-build.exit 0
+combined-plain-control-cuda-build.exit 0
+no270-plain-cuda-build.exit 0
+5a449c8f3e2a9eedaf8ce662b366824b7385ee2334884e249d71c2858065bf36  combined-candidate-cuda/motioncorr
+9e26784f63059bb81be4129f8357fb10de9ef960ad7187b7acecd3da20cf2009  combined-plain-control-cuda/motioncorr
+9293237cb0fa133e878fe98590e5e2005a37dc9026e51bcdd32e1ee0765399ec  no270-plain-cuda/motioncorr
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CUDA_ARCHITECTURES:UNINITIALIZED=80
+CMAKE_CUDA_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+USE_NVCOMP:BOOL=ON
+//ADVANCED property for variable: CMAKE_CUDA_FLAGS_RELEASE
+CMAKE_CUDA_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_CXX_FLAGS_RELEASE
+CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+GPU 0: NVIDIA A100 80GB PCIe (UUID: GPU-eddb42fe-4f9a-adde-76d3-b924e14add54)
+GPU 1: NVIDIA A100 80GB PCIe (UUID: GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d)
+GPU 2: NVIDIA A100 80GB PCIe (UUID: GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598)
+GPU 3: NVIDIA A100 80GB PCIe (UUID: GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d)
+Cuda compilation tools, release 12.8, V12.8.61
+e69409306ec022edb832092f146c5d9e2b6671c12a228b89416e125e4da9bf5f  combined-candidate.tar.gz
+5a3cea390fa5359f717e4ec23033cd1dcc088e0f13cf338a8eabb603a4888c59  combined-plain-control.tar.gz
+f11c022b42f14eb36f188de0ece7d2b9041ade6de09499369d0ebc166f0a5006  no270-plain.tar.gz
+movie-hash a71b9dfa5d91e3516e9638fac1cf97574b0c2aecbcf7164d97a89e591e2e8440 receipt "movie.mrcs": "a71b9dfa5d91e3516e9638fac1cf97574b0c2aecbcf7164d97a89e591e2e8440"
+5a449c8f3e2a9eedaf8ce662b366824b7385ee2334884e249d71c2858065bf36  combined-candidate-cuda/motioncorr
+exit 0
+zero 0
+integer 0
+fractional 0
+affine 0
+pedestal 0
+noisy 0
+flat 0
+repeated 0
+9e26784f63059bb81be4129f8357fb10de9ef960ad7187b7acecd3da20cf2009  combined-plain-control-cuda/motioncorr
+exit 0
+zero 0
+integer 0
+fractional 0
+affine 0
+pedestal 0
+noisy 0
+flat 0
+repeated 0
+---compare movie
+movie.mrc IDENTICAL d90c9c0dff6c9e6f
+movie.star IDENTICAL a53c2bff6f708d69
+---compare v2
+zero.mrc MISSING False False
+zero.star MISSING False False
+integer.mrc MISSING False False
+integer.star MISSING False False
+fractional.mrc MISSING False False
+fractional.star MISSING False False
+affine.mrc MISSING False False
+affine.star MISSING False False
+pedestal.mrc MISSING False False
+pedestal.star MISSING False False
+noisy.mrc MISSING False False
+noisy.star MISSING False False
+flat.mrc MISSING False False
+flat.star MISSING False False
+repeated.mrc MISSING False False
+repeated.star MISSING False False
+done
+6b2733bd516d4c51333fa1981256137d084854cfaca4dd8af90a85be96f18c3b  truth-4096x4096.npy
+ff084df764348da7b89626d37963546f0fc11e6ed3912347b0e5e6f532963145  truth-5760x4092.npy
+results-comb {(0, '61dbf83d', '5a449c8f3e2a9eed'): 100, (0, '77c4e598', '5a449c8f3e2a9eed'): 100}
+results-plain270 {(0, '61dbf83d', '9e26784f63059bb8'): 50, (0, '77c4e598', '9e26784f63059bb8'): 50}
+results-no270 {(0, '77c4e598', '9293237cb0fa133e'): 50, (0, '61dbf83d', '9293237cb0fa133e'): 50}

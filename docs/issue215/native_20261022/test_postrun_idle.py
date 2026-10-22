@@ -78,6 +78,40 @@ class Controls(unittest.TestCase):
     def test_idle_after_deadline_fails(self):
         self.run_sequence([sample()], RuntimeError, delay=5)
 
+    def test_completion_timestamp_does_not_cross_deadline_between_reads(self):
+        class CrossingClock(FakeClock):
+            armed = False
+
+            def monotonic(self):
+                value = self.now
+                if self.armed:
+                    self.now = 10.001  # Scheduling pause after the completion read.
+                return value
+
+        original_validate = policy.validate
+        for completion in (9.999, 10.0):
+            with self.subTest(completion=completion):
+                clock = CrossingClock()
+                validated = []
+
+                def validate_at_boundary(value):
+                    original_validate(value)
+                    validated.append(value)
+                    if len(validated) == 2:
+                        clock.now = completion
+                        clock.armed = True
+
+                with patch.object(policy, "validate", validate_at_boundary):
+                    if completion < policy.WINDOW_SECONDS:
+                        result = policy.settle(lambda *_: sample(), lambda _: None,
+                                               monotonic=clock.monotonic, sleep=clock.sleep)
+                        self.assertEqual(result["elapsed_seconds"], completion)
+                        self.assertLess(result["elapsed_seconds"], result["window_seconds"])
+                    else:
+                        with self.assertRaises(RuntimeError):
+                            policy.settle(lambda *_: sample(), lambda _: None,
+                                          monotonic=clock.monotonic, sleep=clock.sleep)
+
     def test_every_health_field_at_every_sample_is_fatal(self):
         changes = [
             ("volatile_uncorrected_ecc", key, "1") for key in HEALTH["volatile_uncorrected_ecc"]

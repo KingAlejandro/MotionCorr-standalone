@@ -42,12 +42,13 @@ def settle(read_sample, record, *, monotonic=time.monotonic, sleep=time.sleep):
         sample = read_sample(index, deadline)
         record(dict(sample=index, elapsed_seconds=monotonic() - start, **sample))
         validate(sample)
-        if monotonic() >= deadline:
+        completed = monotonic()
+        if completed >= deadline:
             raise RuntimeError("post-run idle sampling exceeded deadline")
         consecutive = consecutive + 1 if sample["utilization"] == 0 else 0
         if consecutive == 2:
             return dict(status="PASS", samples=index + 1, consecutive_idle=consecutive,
-                        elapsed_seconds=monotonic() - start,
+                        elapsed_seconds=completed - start,
                         window_seconds=WINDOW_SECONDS, spacing_seconds=SPACING_SECONDS)
         sleep(min(SPACING_SECONDS, max(0, deadline - monotonic())))
         index += 1

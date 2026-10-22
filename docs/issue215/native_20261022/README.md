@@ -230,6 +230,31 @@ are checked against those member hashes. `archive-verification.json` and
 witnesses. The health parser also accepts the retained driver570 XML and
 rejects ten altered/missing-health/UUID cases (`health-parser-controls.log`).
 
+## Review follow-up: completion timestamp
+
+Review of `6454879353b2cc492690aa7ae082d549f919563c` found that separate
+monotonic reads for the final deadline check and reported elapsed time could
+return PASS with elapsed time beyond ten seconds after a scheduling pause.
+The driver now checks and reports one completion timestamp. A deterministic
+boundary control reproduces the old failure (`10.001 != 9.999`), accepts a
+completion at 9.999 seconds, and rejects a completion exactly at 10 seconds.
+
+Host verification uses `PYTHONDONTWRITEBYTECODE=1`, numeric threads1 and
+`/Users/alex.konstantinov/.local/bin/python3` with these commands:
+
+```sh
+python3 docs/issue215/native_20261022/test_postrun_idle.py -v
+python3 docs/issue215/native_20261022/test_receipt_health.py
+```
+
+All **9 settling test methods PASS**; all **10 XML rejection controls PASS**.
+The [old-code boundary failure](deadline-before.log) and
+[fixed settling controls](deadline-after.log) are retained separately; the
+text transcripts omit trailing whitespace.
+These are host-only checks. Attempt04's original 1.70-second completion,
+driver identities, native results and all four archives are unchanged; the
+repaired driver has **not** been rerun natively.
+
 ## Allocation and limits
 
 Only GPU2, UUID `GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598`, CPUs8–9,

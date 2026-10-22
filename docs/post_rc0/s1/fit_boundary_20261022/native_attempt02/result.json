@@ -1,0 +1,181 @@
+{
+  "schema": "fit-boundary-native-attempt/2",
+  "attempt": "native_attempt02",
+  "attempt_status": "FAIL",
+  "native_host_oracle_status": "UNRUN",
+  "blocked": true,
+  "reason": "unchanged declaration-check helper cannot parse CMake 3.28 bracket-quoted test names; stopped without repair or retry",
+  "defect": {
+    "path": "docs/post_rc0/s1/fit_boundary_20261022/check_registration.py",
+    "lines": [
+      22,
+      30
+    ],
+    "example_generated": "add_test([=[RunnerFitBoundary]=] ...)",
+    "parsed_name": "[=[RunnerFitBoundary]=]",
+    "ctest_name": "RunnerFitBoundary",
+    "declarations": 84,
+    "collected": 84
+  },
+  "source_commit": "5c8f6b4f9242510545f852c15065bd93e762a2a1",
+  "oracle_code_commit": "135ee09e0925deb933bfd0f4ce7e24d6ddbd080a",
+  "source_archive_sha256": "48fee9dbbc6536f4ab2aa27fcc87fdfd2778f31e63623a37d0715ff431feb5d1",
+  "source_regular_files": 7475,
+  "source_after_unchanged": true,
+  "compiled_oracle_source_sha256": "f40146aacb2e2664c2c9201addc532d32d5a50b9262f1f2f0ca44094de34f696",
+  "adapter_sha256": "d44dbbb1b9ebfc4af20788993466f945201b2c37864de819cbe818163366680f",
+  "adapter_body_sha256": "2d04cc4348bf657e2fa0140e401276605736462c7b5c337abc26d840379d6e54",
+  "adapter_matches_verbatim": true,
+  "binary_sha256": {
+    "runner_numerics": "07f3fd30ec9654fc7104a1b7e9176fedc5e85b799dbf385154626a667dc2582c",
+    "motioncorr": "94c292d8d9ee6edfaa56c20674ee1186ade41f8b6b9ba99e68cad9569121728f"
+  },
+  "frozen_expectations_sha256": {
+    "docs/post_rc0/s1/fit_boundary_20261022/EXPECTATIONS.md": "8c66a365471922ad385c925dedb6cd3b711f6c291e704e3caabd34ebc73c3e69",
+    "docs/post_rc0/s1/fit_boundary_20261022/frozen.json": "38c02d1e0ca661d9eb3f6a338f406d9f3db0c56315b1deb793dee8c36a2c9319"
+  },
+  "bounds": {
+    "coefficient_abs_px": 1e-07,
+    "field_vector_max_px": 2e-05,
+    "condition_admission": 6000
+  },
+  "checks": {
+    "admission": "PASS",
+    "release_configure": "PASS",
+    "release_cpu_build": "PASS",
+    "binary_identity": "PASS",
+    "ctest_show_only": "PASS: 84 declarations, all 4 new commands present; no test execution",
+    "declared_required_collection": "FAIL: AssertionError at check_registration.py:30 before required/drop-one validation",
+    "targeted_runnable_collection": "UNRUN",
+    "required_and_four_drop_one_controls": "UNRUN",
+    "native_oracle_7_cases": "UNRUN",
+    "native_three_mutants": "UNRUN",
+    "focused_recenter_model": "UNRUN",
+    "ci_drop_one_controls": "UNRUN",
+    "full_runnable_collection": "UNRUN: 33 unrelated helper registrations have no command in focused tree",
+    "native_cuda": "UNRUN",
+    "full_suite": "UNRUN",
+    "corpus": "UNRUN",
+    "reconstruction": "UNRUN",
+    "science": "UNRUN",
+    "performance": "UNRUN"
+  },
+  "native_measurements": {
+    "coefficients": null,
+    "field": null,
+    "rank": null,
+    "condition": null,
+    "mutant_rejection_counts": null
+  },
+  "resources": {
+    "host": "4-gpu-vm",
+    "scratch": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt02-20261022-5c8f6b4f",
+    "pid": 3036046,
+    "driver_exit": 1,
+    "launch_utc": "2026-10-22T16:39:43.774146+00:00",
+    "release_utc": "2026-10-22T16:41:50.515566+00:00",
+    "reconciled_utc": "2026-10-22T16:42:41.044491+00:00",
+    "compile_cpus": [
+      8,
+      9
+    ],
+    "compile_parallel": 2,
+    "runtime_cpus": [
+      8
+    ],
+    "numeric_threads": 1,
+    "gpu_used": false,
+    "owned_locks_released": true,
+    "lock_probes": [
+      {
+        "path": "/tmp/motioncorr-fit-boundary-cpu8-9.lock",
+        "status": "FREE"
+      },
+      {
+        "path": "/tmp/motioncorr-build.lock",
+        "status": "FREE"
+      }
+    ],
+    "driver_absent": true,
+    "owned_process_matches": []
+  },
+  "qualification_limits": [
+    "No native oracle, mutants or focused controls executed; no native numerical conclusion.",
+    "Enclosing processMovie admission/coefficient rejection/publication paths are outside the seam.",
+    "No GPU/scientific/performance qualification or timing comparison.",
+    "Historical attempt3032254 remains exit75/UNRUN; no historical receipt or frozen expectation was relabelled."
+  ],
+  "commands": [
+    {
+      "name": "hostname",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "occupancy",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "lock-owners",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "disk",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "gpu-health",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "gpu-apps",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "compiler",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "cmake-version",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "python-version",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "configure",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "build",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "linked-libraries",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "collection",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "name": "declared-required-collection",
+      "exit": 1,
+      "expected": 0
+    }
+  ],
+  "preservation": "Only native_attempt02 evidence and appended parent README; no source/test/CMake/helper logic changes, pushes, publication, foreign process/cache/service changes."
+}

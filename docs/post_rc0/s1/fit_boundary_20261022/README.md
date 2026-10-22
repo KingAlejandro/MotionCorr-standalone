@@ -136,3 +136,45 @@ the pre-existing untracked `pr117-fix-measure-20260929/`; a read-only receipt
 is retained. The isolated implementation branch is committed and ready for
 parent review. Native verification needs a separately authorized future
 attempt after resource coordination; this lane does not retry the busy lock.
+
+
+## Native attempt02 — 2026-10-22, separate qualification result
+
+The sections above describe the original historical attempt and retain their
+original bytes/statuses. The parent-observed build-lock state change at
+16:35:54 UTC authorized one new attempt, documented in
+[native_attempt02/README.md](native_attempt02/README.md) and
+[native_attempt02/result.json](native_attempt02/result.json).
+
+**Attempt02 FAIL / blocked, exit1; native host oracle remains UNRUN.** Source
+archive is `5c8f6b4f9242510545f852c15065bd93e762a2a1`, SHA256
+`48fee9dbbc6536f4ab2aa27fcc87fdfd2778f31e63623a37d0715ff431feb5d1`.
+All 7,475 regular source files match the unpacked tree before/after build;
+the compiled oracle source and unchanged production body match 135ee09e.
+No source/test/CMake/helper logic or frozen expectation was changed.
+
+On 4-gpu-vm, fresh scratch
+`/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt02-20261022-5c8f6b4f`,
+PID 3036046 acquired the CPU 8–9 and shared build locks nonblocking. Release
+CPU configuration/build of runner_numerics and motioncorr **PASS**, exit0,
+with parallel 2 on CPUs8–9. Executable hashes and compile/link identities
+are retained. Runtime driver affinity was CPU 8, numeric threads 1, no GPU use.
+
+CTest collects 84 registrations, including all four new commands. The unchanged
+`check_registration.py:30` then fails before native test execution: CMake 3.28.3
+bracket-quotes names (`[=[RunnerFitBoundary]=]`), which its shlex parser keeps
+literally while CTest reports `RunnerFitBoundary`. Full raw declarations,
+collection JSON, stderr and name diff are retained. No repair or retry followed.
+
+New targeted runnable validation, required/four-drop-one controls, seven-case
+oracle, all three mutants, focused recenter/model controls and CI drop-one check
+are **UNRUN**. Full runnable collection is **UNRUN** with unrelated helpers
+unbuilt. No coefficient/field/rank/condition/mutant measurement exists.
+Enclosing acceptance/rejection/publication paths, GPU, full suite/corpus,
+reconstruction, science and performance remain outside this qualification.
+
+Release at 16:41:50.515566 UTC records all owned locks released; reconciliation
+at 16:42:41 UTC finds PID absent, no task processes and both locks FREE.
+Original clean worktree, root checkout, historical result/archive and frozen
+inputs were preserved. Compact indexed receipts are in native_attempt02;
+parent owns subsequent review/publication and any separately authorized repair.

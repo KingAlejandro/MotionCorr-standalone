@@ -13,16 +13,13 @@ from each arm's own bound, so a rerun with an absent or insensitive control woul
 emitted PASS.  It is now enforced in code, and enforced against the right condition: a
 control must be *rejected at the harm margin*, not merely be distinguishable from 1.
 
-Concretely, a positive control certifies B1 only if BOTH
-    point estimate rho_ctrl <= MARGIN          (the control really is at or beyond harm)
-    upper one-sided 95% bound < MARGIN         (and the test actually rejects it)
-hold.  A control that is displaced from 1 but still passes the margin -- which is what
-`ctrl_noise_f005` did at rho = 0.9666, bound 0.9567 -- certifies nothing, because it never
-exercises the decision the endpoint has to make.  Controls may come from this tree or from a
-separate certificate produced by an equivalent run (see --sensitivity), in which case the
-certificate must carry its own proof that the two pipelines agree.
+Measured rejection is descriptive: it does not independently establish that a control is
+harmful.  Historical noise targets are unvalidated estimates, not known truth.  No accepted
+forward harm model or coverage-validation policy is implemented here, so a certificate cannot
+restore scientific PASS.  Its baseline payload digests must still bind to this local run before
+its controls can be reported as identity-bound, unvalidated descriptive evidence.
 """
-import glob, json, math, os, sys
+import glob, hashlib, json, math, os, sys
 import numpy as np
 from scipy.stats import t as tdist
 
@@ -221,59 +218,108 @@ for a in ALL:
         res["arms"][a]["held22_jackknife"] = jk
 
 # --------------------------------------------------------------------------------------
-# Validity precondition, enforced.  See PROTOCOL.md Amendments 1 and 2.
-#
-# Three defects in the first version of this block were found in review and are fixed here:
-#
-#  (a) candidates were drawn from res["arms"], which contains the REAL arms.  A degraded real
-#      arm could therefore certify sensitivity for the other real arm -- precisely the hole the
-#      gate exists to close.  Candidates are now restricted to declared controls plus
-#      certificate entries.
-#  (b) the certificate's equivalence proof was copied into the output and never checked, so a
-#      certificate from a demonstrably different pipeline would still gate the verdicts.  It is
-#      now authenticated, and rejected unless it carries bit_identical == True.
-#  (c) "S1: no control at or beyond the margin earns a PASS" was vacuous.  A one-sided lower
-#      bound satisfies lower95 <= rho by construction, so any control CLASSIFIED harmful by its
-#      measured rho can never pass.  S1 carries information only for a control that was
-#      DESIGNED at or beyond the margin and whose measured rho nevertheless landed above it.
-#      It is now evaluated that way and reported UNTESTED when no control did so.
+# Validity precondition.  See PROTOCOL.md Amendments 1 and 2 and CERTIFICATE_VALIDATION.md.
+# Identity binding is necessary, but neither identity nor a JSON assertion validates science.
 # --------------------------------------------------------------------------------------
 CONTROL_PREFIX = "ctrl_"
 
 
-def load_certificate(path, margin):
-    """Return (entries, status).  A certificate that cannot prove pipeline equivalence is
-    rejected outright rather than silently trusted."""
-    if not path:
-        return [], {"used": False, "reason": "no certificate supplied"}
-    if not os.path.exists(path):
-        return [], {"used": False, "reason": f"certificate path does not exist: {path}"}
+def finite_number(value):
     try:
-        cert = json.load(open(path))
-    except Exception as exc:                                   # noqa: BLE001
-        return [], {"used": False, "reason": f"certificate is not readable JSON: {exc}"}
-    proof = cert.get("equivalence_proof") or {}
+        return type(value) in (int, float) and math.isfinite(value)
+    except OverflowError:
+        return False
+
+
+def local_baseline_digests():
+    """Historical certificate convention: SHA-256 over bytes 1024+ (labels excluded)."""
+    digests = {}
+    for half in ("1", "2"):
+        path = f"{ROOT}/rec/cpu/held22_half{half}_class001_unfil.mrc"
+        h = hashlib.sha256()
+        size = 0
+        with open(path, "rb") as fh:
+            fh.seek(1024)
+            for chunk in iter(lambda: fh.read(1 << 22), b""):
+                h.update(chunk)
+                size += len(chunk)
+        if not size:
+            raise ValueError(f"empty or truncated CPU baseline payload: {path}")
+        digests[half] = h.hexdigest()
+    return digests
+
+
+def load_certificate(path, margin):
+    """Return identity-bound descriptive entries, never scientific certification.
+
+    This validates structure and local identity only.  Remote provenance, control truth and
+    coverage cannot be authenticated by self-reported certificate fields.
+    """
+    def reject(reason):
+        return [], {"used": False, "path": path, "reason": reason,
+                    "identity_binding_verified": False, "scientific_certification_accepted": False}
+
+    if not path:
+        return reject("no certificate supplied")
+    try:
+        with open(path) as fh:
+            cert = json.load(fh)
+    except (OSError, ValueError) as exc:
+        return reject(f"certificate is not readable JSON: {exc}")
+    if not isinstance(cert, dict):
+        return reject("certificate must be a JSON object")
+    proof = cert.get("equivalence_proof")
+    if not isinstance(proof, dict):
+        return reject("equivalence_proof must be an object")
     if proof.get("bit_identical") is not True:
-        return [], {"used": False, "path": path,
-                    "reason": ("certificate does not prove that the control run and this run are "
-                               "the same computation (equivalence_proof.bit_identical is "
-                               f"{proof.get('bit_identical')!r}); refusing to gate on it")}
-    if float(cert.get("margin", -1)) != float(margin):
-        return [], {"used": False, "path": path,
-                    "reason": f"certificate margin {cert.get('margin')!r} != analysis margin {margin}"}
+        return reject("equivalence_proof.bit_identical must be true; insufficient identity evidence")
+    if not finite_number(cert.get("margin")) or cert["margin"] != margin:
+        return reject(f"certificate margin {cert.get('margin')!r} != analysis margin {margin}")
+    for key in ("cpu_baseline_half_map_payload_sha256_this_host",
+                "cpu_baseline_half_map_payload_sha256_peer_host"):
+        hashes = proof.get(key)
+        if not isinstance(hashes, dict) or any(
+                not isinstance(hashes.get(h), str) or len(hashes[h]) != 64
+                or any(ch not in "0123456789abcdef" for ch in hashes[h]) for h in ("1", "2")):
+            return reject(f"{key} must contain both half-map SHA-256 digests")
+    try:
+        local = local_baseline_digests()
+    except (OSError, ValueError) as exc:
+        return reject(f"local CPU baseline digest binding unavailable: {exc}")
+    for key in ("cpu_baseline_half_map_payload_sha256_this_host",
+                "cpu_baseline_half_map_payload_sha256_peer_host"):
+        if any(proof[key][h] != local[h] for h in ("1", "2")):
+            return reject(f"{key} digest mismatch against recomputed local CPU baseline payloads")
+    controls = cert.get("controls")
+    if not isinstance(controls, list):
+        return reject("certificate controls must be a list")
     out = []
-    for c in cert.get("controls", []):
-        if not isinstance(c, dict) or not str(c.get("control", "")).startswith(CONTROL_PREFIX):
-            continue
+    seen = set()
+    for c in controls:
+        if (not isinstance(c, dict) or not isinstance(c.get("control"), str)
+                or not c["control"].startswith(CONTROL_PREFIX) or c["control"] in seen):
+            return reject("certificate controls must have unique ctrl_ names; real arms cannot certify")
+        seen.add(c["control"])
+        values = [c.get(k) for k in ("lower95", "rho", "upper95")]
+        if any(v is not None and not finite_number(v) for v in values):
+            return reject(f"non-finite or non-numeric control estimate/interval: {c['control']}")
+        lower, point, upper = values
+        if ((lower is not None and (point is None or lower > point))
+                or (upper is not None and (point is None or upper < point))):
+            return reject(f"unordered control interval: {c['control']}")
         out.append({"control": c.get("control"), "source": cert.get("source", path),
                     "rho": c.get("rho"), "upper95": c.get("upper95"), "lower95": c.get("lower95"),
-                    "designed_rho": c.get("designed_rho"), "why": c.get("why", "")})
+                    "certificate_designed_rho_unvalidated": c.get("designed_rho"), "why": ""})
     return out, {"used": True, "path": path, "n_controls": len(out),
+                 "use": "identity-bound descriptive evidence only",
+                 "identity_binding_verified": True, "local_cpu_baseline_payload_sha256": local,
+                 "scientific_certification_accepted": False,
+                 "coverage_demonstration_unvalidated": cert.get("coverage_demonstration"),
                  "equivalence_proof": proof}
 
 
 def control_candidates(res, cert_entries):
-    """Declared controls from this run, plus authenticated certificate entries."""
+    """Declared controls plus identity-bound, unvalidated certificate entries."""
     out = []
     for a, entry in res["arms"].items():
         if not a.startswith(CONTROL_PREFIX):
@@ -287,17 +333,18 @@ def control_candidates(res, cert_entries):
             continue
         out.append({"control": a, "source": "this run", "rho": jk["point_estimate"],
                     "upper95": jk["upper95_one_sided"], "lower95": jk["lower95_one_sided"],
-                    "designed_rho": DESIGNED_RHO.get(a), "why": ""})
+                    "designed_rho": HISTORICAL_RHO_TARGETS.get(a), "why": ""})
     for c in cert_entries:
         c = dict(c)
-        c.setdefault("designed_rho", DESIGNED_RHO.get(c.get("control")))
+        # Certificate assertions cannot replace even the historical reference targets.
+        c["designed_rho"] = HISTORICAL_RHO_TARGETS.get(c.get("control"))
         out.append(c)
     return out
 
 
-# Designed (target) rho per control, fixed when the control was constructed, independent of what
-# it measured.  Only these values can make S1 informative.
-DESIGNED_RHO = {"ctrl_noise_f005": 0.952, "ctrl_noise_f0062": 0.950, "ctrl_noise_f0076": 0.950,
+# Historical targets, retained for description, NOT accepted control truth.  The noise model
+# was contradicted and fitted; prospective thinning truth is also not accepted here.
+HISTORICAL_RHO_TARGETS = {"ctrl_noise_f005": 0.952, "ctrl_noise_f0062": 0.950, "ctrl_noise_f0076": 0.950,
                 "ctrl_noise_f011": 0.929, "ctrl_noise_f020": 0.833, "ctrl_envelope_b20": 1.000}
 
 MARGIN_B1 = MARGIN["B1_rho"]
@@ -305,21 +352,21 @@ cert_entries, cert_status = load_certificate(SENSITIVITY_CERT, MARGIN_B1)
 cands = control_candidates(res, cert_entries)
 
 for c in cands:
-    at_harm = c["rho"] is not None and c["rho"] <= MARGIN_B1
+    at_harm = finite_number(c["rho"]) and c["rho"] <= MARGIN_B1
     c["at_or_beyond_harm_measured"] = at_harm
-    c["designed_at_or_beyond_harm"] = (c.get("designed_rho") is not None
-                                       and c["designed_rho"] <= MARGIN_B1)
-    c["rejected_at_margin"] = bool(at_harm and c["upper95"] is not None
+    c["design_validated"] = False
+    c["design_validation_reason"] = "no accepted independent forward harm model; historical targets are not truth"
+    c["designed_at_or_beyond_harm"] = False
+    c["rejected_at_margin"] = bool(at_harm and finite_number(c["upper95"])
                                    and c["upper95"] < MARGIN_B1)
-    c["earned_a_pass"] = (None if c["lower95"] is None else bool(c["lower95"] >= MARGIN_B1))
-    if not c["why"]:
-        c["why"] = ("certifies B1" if c["rejected_at_margin"] else
-                    "milder than the harm margin, so it never exercises the decision"
-                    if not at_harm else
-                    "at or beyond harm but the interval does not exclude the margin")
+    c["earned_a_pass"] = (None if not finite_number(c["lower95"]) else bool(c["lower95"] >= MARGIN_B1))
+    c["why"] = ("measured rejection only; does not certify B1 without validated control truth"
+                if c["rejected_at_margin"] else "does not establish sensitivity at the harm margin")
 
-# S2 -- positive rejection.  Real empirical content.  Unattainable exactly AT the margin.
-certifying = [c for c in cands if c["rejected_at_margin"]]
+# Preserve observed rejection as description, distinct from independently known harm.
+measured_rejections = [c for c in cands if c["rejected_at_margin"]]
+observed_boundary = max(measured_rejections, key=lambda c: c["rho"], default=None)
+certifying = [c for c in measured_rejections if c["design_validated"] and c["designed_at_or_beyond_harm"]]
 boundary = max(certifying, key=lambda c: c["rho"], default=None)
 
 # S1 -- can a harmful arm earn a PASS?  Informative ONLY for a control designed at or beyond
@@ -330,46 +377,46 @@ s1_informative = [c for c in cands if c["designed_at_or_beyond_harm"]
 s1_failures = [c for c in s1_informative if c["earned_a_pass"]]
 s1_state = ("FAILED" if s1_failures else "PASSED" if s1_informative else "UNTESTED")
 
-# Amendment 2: a PASS at the margin additionally requires a coverage demonstration, because
-# neither S2 (unattainable at the margin) nor S1 (untested here) speaks to the margin itself.
-coverage = res.get("coverage_demonstration") or (
-    json.load(open(SENSITIVITY_CERT)).get("coverage_demonstration")
-    if cert_status.get("used") else None)
+# Amendment 2 additionally requires validated coverage.  An upper bound cannot reject when
+# the sample point equals the margin; that says nothing about a control's unknown true rho.
+coverage = cert_status.get("coverage_demonstration_unvalidated")
+coverage_validation = {
+    "status": "UNVALIDATED", "accepted": False,
+    "reason": ("no maintainer-approved coverage/operating-characteristic validation policy is "
+               "implemented; supplied coverage assertions cannot establish margin sensitivity")}
 
 res["validity"] = {
     "rule": ("PROTOCOL Amendment 1 requires a control at or beyond the harm margin to be "
              "positively rejected (S2).  Amendment 2 additionally requires a coverage "
-             "demonstration at the margin before a real-arm PASS may stand, because S2 is "
-             "unattainable at the margin and S1 is vacuous unless a margin-designed control "
-             "measures above the margin."),
+             "demonstration at the margin before a real-arm PASS may stand.  Measured rejection "
+             "cannot define control truth, and historical targets cannot validate S1 or S2."),
     "margin": MARGIN_B1,
     "candidates": cands,
     "certificate": cert_status,
     "S2_sensitivity_demonstrated": bool(certifying),
     "S2_certifying_controls": [c["control"] for c in certifying],
+    "S2_measured_rejections_unvalidated": [c["control"] for c in measured_rejections],
+    "observed_rejection_boundary_rho_unvalidated": (observed_boundary["rho"] if observed_boundary else None),
     "demonstrated_detection_boundary_rho": (boundary["rho"] if boundary else None),
-    "S2_at_the_exact_margin_is_unattainable_by_construction": True,
+    "S2_rejection_when_point_equals_margin_is_unattainable_by_construction": True,
     "S1_state": s1_state,
     "S1_informative_controls": [c["control"] for c in s1_informative],
     "S1_note": ("lower95 <= rho by construction, so a control measuring at or below the margin "
                 "cannot pass; only a margin-designed control measuring ABOVE the margin tests S1"),
     "coverage_demonstration_at_margin": coverage,
+    "coverage_validation": coverage_validation,
 }
 
-margin_sensitivity_proven = bool(certifying) and bool(coverage)
+margin_sensitivity_proven = bool(certifying) and coverage_validation["accepted"]
 res["validity"]["margin_sensitivity_proven"] = margin_sensitivity_proven
 res["validity"]["sensitivity_demonstrated"] = margin_sensitivity_proven
 
 if not margin_sensitivity_proven:
-    if not certifying:
-        reason = ("validity precondition FAILED (S2): no declared control at or beyond the "
-                  f"{MARGIN_B1} harm margin was rejected by the test")
-    else:
-        reason = (f"sensitivity AT the {MARGIN_B1} harm margin is UNPROVEN: the test is "
-                  f"demonstrated to reject only at rho <= "
-                  f"{boundary['rho']:.5f}, S1 is {s1_state}, and no coverage demonstration at "
-                  "the margin exists.  Real-arm Stage B verdicts are withdrawn to INCONCLUSIVE "
-                  "under PROTOCOL Amendment 2.")
+    reason = (f"sensitivity AT the {MARGIN_B1} harm margin is UNPROVEN: no accepted independent "
+              "forward harm model validates control truth, and no maintainer-approved coverage/"
+              "operating-characteristic validation policy is implemented.  Measured rejection, "
+              "historical targets and certificate assertions are descriptive only.  Real-arm "
+              "Stage B verdicts remain INCONCLUSIVE under PROTOCOL Amendment 2.")
     res["validity"]["forced_inconclusive"] = True
     res["validity"]["reason"] = reason
     for a in REAL:
@@ -398,7 +445,7 @@ for c in v["candidates"]:
     r = "-" if c["rho"] is None else f"{c['rho']:.5f}"
     u = "-" if c["upper95"] is None else f"{c['upper95']:.5f}"
     print(f"   control {c['control']:20s} rho={r:>8s} upper95={u:>8s}"
-          f" certifies={c['rejected_at_margin']}  [{c['source']}] {c['why']}")
+          f" measured_rejection={c['rejected_at_margin']}  [{c['source']}] {c['why']}")
 if not v["margin_sensitivity_proven"]:
     print("   -> every real-arm Stage B verdict withdrawn to INCONCLUSIVE")
 print()

@@ -1,0 +1,282 @@
+--- a/src/motioncorr_runner.cpp
++++ b/src/motioncorr_runner.cpp
+@@ -1,3 +1,4 @@
++#include "src/residual_capture.h" // retained test-build overlay only
+ /***************************************************************************
+  *
+  * Author: "Sjors H.W. Scheres"
+@@ -3371,6 +3372,12 @@
+ 		alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+ 	}
+ 	RCTOC(TIMING_GLOBAL_ALIGNMENT);
++    if (const char *dir=std::getenv("MC_CCF_STATE")) {
++        FILE *f=residual::open(std::string(dir)+"/global.txt","w");
++        for(size_t i=0;i<xshifts.size();++i) std::fprintf(f,"%zu %.17g %.17g\n",i+1,double(xshifts[i]),double(yshifts[i]));
++        residual::checked(std::fclose(f)==0);
++    }
++
+ 	MC_STAGE("allocate reconstruction");
+ 	for (int i = 0, ilim = xshifts.size(); i < ilim; i++) {
+ 		// Should be in the original pixel size
+@@ -3504,6 +3511,7 @@
+ 				}
+ 			}
+ 			RCTIC(TIMING_PATCH_ALIGN);
++            residual::patch_x=patch_x;
+ 			movie_session->alignPatchesBatched(boxes, n_groups, group_start.data(), group_size.data(),
+ 				bfactor / (prescaling * prescaling), max_iter, ccf_downsample, patchBatchCap(), batched);
+ 			RCTOC(TIMING_PATCH_ALIGN);
+@@ -3511,11 +3519,13 @@
+ #endif
+ 
+ 		int ipatch = 1;
++        residual::patch_x=patch_x;
+ 		for (int iy = 0; iy < patch_y; iy++) {
+ 			for (int ix = 0; ix < patch_x; ix++) {
+ 				int x_start, x_end, y_start, y_end;
+ 				patch_bounds(iy, ix, x_start, x_end, y_start, y_end);
+ 
++                residual::patch=iy*patch_x+ix;
+ 				int x_center = (x_start + x_end - 1) / 2, y_center = (y_start + y_end - 1) / 2;
+ 				logfile << "Patch (" << iy + 1 << ", " << ix + 1 << "): " << ipatch << " / " << patch_x * patch_y;
+ 				logfile << ", X range = [" << x_start << ", " << x_end << "), Y range = [" << y_start << ", " << y_end << ")";
+@@ -3989,6 +3999,14 @@
+ 	}
+ 
+ skip_fitting:
++    if(const char *dir=std::getenv("MC_CCF_STATE")) {
++        FILE *f=residual::open(std::string(dir)+"/model.txt","w");
++        const auto *poly=dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
++        std::fprintf(f,"geometry %d %d %d %.17g %d model %d\n",nx,ny,n_frames,double(prescaling),first_frame_sum,poly?1:0);
++        if(poly) for(int i=0;i<18;++i) std::fprintf(f,"%d %.17g %.17g\n",i,double(poly->coeffX(i)),double(poly->coeffY(i)));
++        residual::checked(std::fclose(f)==0);
++    }
++
+ 	MC_STAGE("release alignment");
+ #ifdef _CUDA_ENABLED
+ 	// Local alignment scratch belongs to this movie, but reconstruction no longer
+@@ -4739,7 +4757,18 @@
+ 	}
+ 	RCTOC(TIMING_PREP_WEIGHT);
+ 
++
++    const std::string cap=residual::begin(is_global?"cpu-global":"cpu",is_global?-1:residual::patch,pnx,pny,ccf_nx,ccf_ny,n_frames,search_range,ccf_scale_x,ccf_scale_y,scaled_B);
++    residual::raw(cap,0,"weight",weight.data,size_t(ccf_nfy)*ccf_nfx*sizeof(float));
+ 	for (int iter = 1; iter	<= max_iter; iter++) {
++        residual::shifts(cap,iter,"before",xshifts,yshifts);
++        if(!cap.empty()) {
++            std::vector<fComplex> in(size_t(n_frames)*ccf_nfy*ccf_nfx);
++            for(int f=0;f<n_frames;++f) for(int y=0;y<ccf_nfy;++y) for(int x=0;x<ccf_nfx;++x)
++                in[(size_t(f)*ccf_nfy+y)*ccf_nfx+x]=DIRECT_A2D_ELEM(Fframes[f],y>ccf_nfy_half?y-ccf_nfy+nfy:y,x);
++            residual::raw(cap,iter,"input",in.data(),in.size()*sizeof(fComplex));
++        }
++
+ 		RCTIC(TIMING_MAKE_REF);
+ 		Fref.initZeros();
+ 
+@@ -4753,6 +4782,7 @@
+ 			}
+ 		}
+ 		RCTOC(TIMING_MAKE_REF);
++        residual::raw(cap,iter,"reference",Fref.data,size_t(ccf_nfy)*ccf_nfx*sizeof(fComplex));
+ 
+ 		#pragma omp parallel for num_threads(n_threads)
+ 		for (int iframe = 0; iframe < n_frames; iframe++) {
+@@ -4769,7 +4799,11 @@
+ 			RCTOC(TIMING_CCF_CALC);
+ 
+ 			RCTIC(TIMING_CCF_IFFT);
++
++            if(!cap.empty()) residual::raw(cap,iter,("spectrum-f"+std::to_string(iframe)).c_str(),Fccs[tid].data,size_t(ccf_nfy)*ccf_nfx*sizeof(fComplex));
+ 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
++            if(!cap.empty()) residual::raw(cap,iter,("map-f"+std::to_string(iframe)).c_str(),Iccs[tid]().data,size_t(ccf_ny)*ccf_nx*sizeof(float));
++
+ 			RCTOC(TIMING_CCF_IFFT);
+ 
+ 			RCTIC(TIMING_CCF_FIND_MAX);
+@@ -4822,6 +4856,7 @@
+ 			RCTOC(TIMING_CCF_FIND_MAX);
+ 		}
+ 
++        residual::shifts(cap,iter,"candidate",cur_xshifts,cur_yshifts);
+ 		// Set origin
+ 		RFLOAT x_sumsq = 0, y_sumsq = 0;
+ 		for (int iframe = n_frames - 1; iframe >= 0; iframe--) { // do frame 0 last!
+@@ -4838,6 +4873,7 @@
+ //			std::cout << "Shift for Frame " << iframe << ": delta_x = " << cur_xshifts[iframe] << " delta_y = " << cur_yshifts[iframe] << std::endl;
+ 		}
+ 
++        residual::shifts(cap,iter,"after",xshifts,yshifts);
+ 		// Apply shifts
+ 		// Since the image is not necessarily square, we cannot use the method in fftw.cpp
+ 		RCTIC(TIMING_FOURIER_SHIFT);
+--- a/src/acc/cuda/cuda_alignpatch.cu
++++ b/src/acc/cuda/cuda_alignpatch.cu
+@@ -2,6 +2,7 @@
+ #ifdef _CUDA_ENABLED
+ 
+ #include "src/acc/cuda/cuda_alignpatch.h"
++#include "src/residual_capture.h"
+ #include "src/acc/cuda/cuda_settings.h"
+ #include "src/error.h"
+ #include "src/acc/cuda/cuda_scoped_resources.h"
+@@ -606,7 +607,13 @@
+     float accumulated_cufft_ms = 0.0f;
+     float accumulated_d2h_ms = 0.0f;
+ 
++
++    const std::string cap=residual::begin(is_global?"cuda-global":(windowed?"cuda-window":"cuda-full"),is_global?-1:residual::patch,pnx,pny,ccf_nx,ccf_ny,n_frames,search_range,float(ccf_scale_x),float(ccf_scale_y),scaled_B);
++    residual::device(cap,0,"weight",d_weight,size_t(ccf_nfx)*ccf_nfy*sizeof(float));
+     for (int iter = 1; iter <= max_iter; iter++) {
++        residual::shifts(cap,iter,"before",xshifts,yshifts);
++        residual::input(cap,iter,d_Fframes,n_frames,data_nfx,data_nfy,ccf_nfx,ccf_nfy);
++
+         // 1. Reference computation
+         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
+         computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, data_nfx, data_nfy, n_frames);
+@@ -626,6 +633,9 @@
+         // 3. Batched cuFFT C2R
+         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_cufft));
+         ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
++
++        residual::device(cap,iter,"reference",d_Fref,size_t(ccf_nfx)*ccf_nfy*sizeof(float2));
++        residual::device(cap,iter,"spectrum",d_Fccs,size_t(n_frames)*ccf_nfx*ccf_nfy*sizeof(float2));
+         ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
+         if (timed) {
+             ALIGN_CUDA(cudaEventRecord(ev_stop_cufft));
+@@ -665,8 +675,12 @@
+             accumulated_d2h_ms += iter_d2h_ms;
+         }
+ 
++
++        residual::device(cap,iter,"map",d_Iccs,size_t(n_frames)*ccf_nx*ccf_ny*sizeof(float));
++        residual::shifts(cap,iter,"candidate",h_cur_xshifts,h_cur_yshifts);
+         const RFLOAT rmsd = updatePatchShifts(h_cur_xshifts.data(), h_cur_yshifts.data(),
+             h_shiftx.data(), h_shifty.data(), xshifts, yshifts, n_frames, pnx, pny);
++        residual::shifts(cap,iter,"after",xshifts,yshifts);
+ 
+         // Apply Fourier phase shifts on GPU
+         if (n_frames > 1) {
+@@ -978,18 +992,30 @@
+         logs[p] = PatchBatchLog();
+     }
+     ALIGN_CUDA(cudaEventRecord(w.ev_start));
++
++    std::vector<std::string> caps(n_patches);
++    for(int p=0;p<n_patches;++p) {
++        caps[p]=residual::begin("cuda-batched",residual::batch_base+p,pnx,pny,ccf_nx,ccf_ny,n_frames,search_range,float(w.geo.ccf_scale_x),float(w.geo.ccf_scale_y),scaled_B);
++        residual::device(caps[p],0,"weight",w.d_weight,size_t(ccf_nfx)*ccf_nfy*sizeof(float));
++    }
+     for (int iter = 1; iter <= max_iter && !active.empty(); iter++) {
+         for (const int p : active) {
+             float2 *d_Fframes = w.d_Fpatches + p * w.slots.fframes;
+             float2 *d_Fref = w.d_Fref + p * w.slots.fref;
+             float2 *d_Fccs = w.d_Fccs + p * w.slots.fccs;
+             float *d_Iccs = w.d_Iccs + p * w.slots.iccs;
++
++            residual::shifts(caps[p],iter,"before",xshifts[p],yshifts[p]);
++            residual::input(caps[p],iter,d_Fframes,n_frames,ccf_nfx,ccf_nfy,ccf_nfx,ccf_nfy);
+             // Window slots: the frame dims are the window's, the remap the identity.
+             computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, ccf_nfx, ccf_nfy, n_frames);
+             ALIGN_LAUNCH(cudaGetLastError());
+             computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, w.d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, ccf_nfx, ccf_nfy, n_frames);
+             ALIGN_LAUNCH(cudaGetLastError());
+             ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
++
++            residual::device(caps[p],iter,"reference",d_Fref,size_t(ccf_nfx)*ccf_nfy*sizeof(float2));
++            residual::device(caps[p],iter,"spectrum",d_Fccs,size_t(n_frames)*ccf_nfx*ccf_nfy*sizeof(float2));
+             ALIGN_CUFFT(cufftExecC2R(w.plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
+             findPeakAndInterpolateKernel<<<n_frames, 256>>>(
+                 d_Iccs, d_cur_x + p * n, d_cur_y + p * n,
+@@ -998,12 +1024,20 @@
+             );
+             ALIGN_LAUNCH(cudaGetLastError());
+         }
++
++        for(const int p:active) residual::device(caps[p],iter,"map",w.d_Iccs+p*w.slots.iccs,size_t(n_frames)*ccf_nx*ccf_ny*sizeof(float));
+         // The iteration's one wait, for every active patch at once.
+         ALIGN_CUDA(cudaMemcpy(w.h_cur.data(), w.d_cur, sz_all_shifts, cudaMemcpyDeviceToHost));
+         for (const int p : active) {
++
++            if(!caps[p].empty()) {
++                std::vector<float> x(h_cur_x+p*n,h_cur_x+(p+1)*n), y(h_cur_y+p*n,h_cur_y+(p+1)*n);
++                residual::shifts(caps[p],iter,"candidate",x,y);
++            }
+             const RFLOAT rmsd = updatePatchShifts(h_cur_x + p * n, h_cur_y + p * n,
+                 h_shift_x + p * n, h_shift_y + p * n, xshifts[p], yshifts[p],
+                 n_frames, pnx, pny);
++            residual::shifts(caps[p],iter,"after",xshifts[p],yshifts[p]);
+             logs[p].rmsd.push_back(rmsd);
+             if (rmsd < tolerance) logs[p].converged = true;
+         }
+--- a/src/acc/cuda/cuda_movie_session.cu
++++ b/src/acc/cuda/cuda_movie_session.cu
+@@ -1,5 +1,6 @@
+ #include "src/acc/cuda/cuda_hermitian.cuh"
+ #include "src/acc/cuda/cuda_movie_session.h"
++#include "src/residual_capture.h"
+ #include "src/acc/cuda/cuda_settings.h"
+ #include "src/acc/cuda/cuda_realspace_dw.h"
+ #include "src/stage_profile.h"
+@@ -2447,6 +2448,7 @@
+             return;
+         }
+         for (int j = 0; j < count; j++) xs[j].assign(n_groups, (RFLOAT)0), ys[j].assign(n_groups, (RFLOAT)0);
++        residual::batch_base=first;
+         cudaAlignPatchBatchDevice(workspace, count, n_groups, patch_w, patch_h, scaled_B,
+                                   xs.data(), ys.data(), max_iter, ccf_downsample, device_id,
+                                   logs.data());
+--- /dev/null
++++ b/src/residual_capture.h
+@@ -0,0 +1,51 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++// Test-build observation overlay only. No numerical switches or device writes.
++#ifndef MC_RESIDUAL_CAPTURE_H
++#define MC_RESIDUAL_CAPTURE_H
++#include <cstdio>
++#include <cstdlib>
++#include <string>
++#include <vector>
++namespace residual {
++inline int patch = -1, patch_x = 1, batch_base = 0, sequence = 0;
++inline const char *directory() { return std::getenv("MC_CCF_CAPTURE"); }
++inline void checked(bool ok) { if (!ok) { std::perror("residual capture"); std::abort(); } }
++inline FILE *open(const std::string &p, const char *mode) { FILE *f=std::fopen(p.c_str(),mode); checked(f!=nullptr); return f; }
++inline void raw(const std::string &stem, int it, const char *kind, const void *p, size_t bytes) {
++    if (stem.empty()) return;
++    FILE *f=open(stem+"-i"+std::to_string(it)+"-"+kind+".bin","wb");
++    checked(std::fwrite(p,1,bytes,f)==bytes); checked(std::fclose(f)==0);
++}
++inline std::string begin(const char *tag, int label, int nx,int ny,int cx,int cy,int n,int search,double sx,double sy,double B) {
++    if (!directory()) return {};
++    int iy=label<0?0:label/patch_x+1, ix=label<0?0:label%patch_x+1;
++    const char *selected=std::getenv("MC_CCF_PATCH");
++    if (label>=0 && (!selected || std::to_string(iy)+","+std::to_string(ix)!=selected)) return {};
++    std::string stem=std::string(directory())+"/c"+std::to_string(++sequence);
++    FILE *f=open(stem+".json","w");
++    std::fprintf(f,"{\"tag\":\"%s\",\"patch_yx\":[%d,%d],\"call\":%d,\"patch_nxy\":[%d,%d],\"ccf_nxy\":[%d,%d],\"frames\":%d,\"search\":%d,\"scale_xy\":[%.17g,%.17g],\"B\":%.17g}\n",tag,iy,ix,sequence,nx,ny,cx,cy,n,search,sx,sy,B);
++    checked(std::fclose(f)==0); return stem;
++}
++template<class T> inline void shifts(const std::string &stem,int it,const char *kind,const std::vector<T>&x,const std::vector<T>&y) {
++    if(stem.empty()) return;
++    std::vector<double> both; for(size_t f=0;f<x.size();++f) {both.push_back(x[f]);both.push_back(y[f]);}
++    raw(stem,it,kind,both.data(),both.size()*sizeof(double));
++}
++#ifdef __CUDACC__
++inline void device(const std::string &stem,int it,const char *kind,const void *p,size_t bytes) {
++    if(stem.empty()) return;
++    std::vector<unsigned char> h(bytes);
++    checked(cudaMemcpy(h.data(),p,bytes,cudaMemcpyDeviceToHost)==cudaSuccess);
++    raw(stem,it,kind,h.data(),bytes);
++}
++inline void input(const std::string &stem,int it,const float2 *p,int n,int dx,int dy,int cx,int cy) {
++    if(stem.empty()) return;
++    std::vector<float2> h(size_t(n)*dx*dy), cropped(size_t(n)*cx*cy);
++    checked(cudaMemcpy(h.data(),p,h.size()*sizeof(float2),cudaMemcpyDeviceToHost)==cudaSuccess);
++    for(int f=0;f<n;++f) for(int y=0;y<cy;++y) for(int x=0;x<cx;++x)
++        cropped[(size_t(f)*cy+y)*cx+x]=h[(size_t(f)*dy+(y>cy/2?y-cy+dy:y))*dx+x];
++    raw(stem,it,"input",cropped.data(),cropped.size()*sizeof(float2));
++}
++#endif
++}
++#endif

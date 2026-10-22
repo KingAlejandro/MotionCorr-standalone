@@ -1,0 +1,152 @@
+{
+  "status": "PASS",
+  "utc": "2026-10-22T16:38:59.267732+00:00",
+  "expanded_neutrality": [
+    {
+      "case": "integer",
+      "backend": "cpu",
+      "status": "PASS",
+      "checks": {
+        "*.star-inventory": true,
+        "integer.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "integer.mrc": true,
+        "*.mrcs-inventory": true,
+        "global.txt": true,
+        "model.txt": true
+      }
+    },
+    {
+      "case": "integer",
+      "backend": "cuda",
+      "status": "PASS",
+      "checks": {
+        "*.star-inventory": true,
+        "integer.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "integer.mrc": true,
+        "*.mrcs-inventory": true,
+        "global.txt": true,
+        "model.txt": true
+      }
+    },
+    {
+      "case": "fractional",
+      "backend": "cpu",
+      "status": "PASS",
+      "checks": {
+        "*.star-inventory": true,
+        "fractional.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "fractional.mrc": true,
+        "*.mrcs-inventory": true,
+        "global.txt": true,
+        "model.txt": true
+      }
+    },
+    {
+      "case": "fractional",
+      "backend": "cuda",
+      "status": "PASS",
+      "checks": {
+        "*.star-inventory": true,
+        "fractional.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "fractional.mrc": true,
+        "*.mrcs-inventory": true,
+        "global.txt": true,
+        "model.txt": true
+      }
+    },
+    {
+      "case": "affine",
+      "backend": "cpu",
+      "status": "PASS",
+      "checks": {
+        "*.star-inventory": true,
+        "affine.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc": true,
+        "*.mrcs-inventory": true,
+        "global.txt": true,
+        "model.txt": true
+      }
+    },
+    {
+      "case": "affine",
+      "backend": "cuda",
+      "status": "PASS",
+      "checks": {
+        "*.star-inventory": true,
+        "affine.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc": true,
+        "*.mrcs-inventory": true,
+        "global.txt": true,
+        "model.txt": true
+      }
+    },
+    {
+      "case": "noisy",
+      "backend": "cpu",
+      "status": "PASS",
+      "checks": {
+        "*.star-inventory": true,
+        "noisy.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "noisy.mrc": true,
+        "*.mrcs-inventory": true,
+        "global.txt": true,
+        "model.txt": true
+      }
+    },
+    {
+      "case": "noisy",
+      "backend": "cuda",
+      "status": "PASS",
+      "checks": {
+        "*.star-inventory": true,
+        "noisy.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "noisy.mrc": true,
+        "*.mrcs-inventory": true,
+        "global.txt": true,
+        "model.txt": true
+      }
+    }
+  ],
+  "application_processes": 16,
+  "native_exit_zero": 16,
+  "unchanged_truth_checker_failures": 16,
+  "same_map_candidates_exact": 300,
+  "source_faithful_updates_exact": 60,
+  "normalization": "all MRC bytes except exact Relion timestamp; all STAR bytes except arm output prefix; pre-write state exact",
+  "source_archive_sha256": "1df4099244aca2b09a59df39c732f94640dfcf1fae9c3ca18b390dd669b9d8dc",
+  "overlay_patch_sha256": "061c5c5be6b427cb6643605ac1473e21beeb9e45fea1bd022500eec651a787e4",
+  "source_files": {
+    "test-data/generate_motion_diagnostics.py": "5e781bb290b3f12b38f6dc7ec18bb955d56331219dc0216321e010ecbcdaf4cc",
+    "test-data/generate_known_motion_fixture.py": "f28fbf516f8c2f7a3ae1b6133d54d3cc1e0708e2f90644cce30a845f4bbcef4f",
+    "tools/check_motion_diagnostics.py": "2be34b821ce9c351abaeab5c0280478362cf90ba774df7f529caced9e360eb16",
+    "tools/motion_field.py": "d72cfad7175368fa6d0727c2727c49780328951c6f4d3ecc20e9ac662ac2e810"
+  },
+  "tools": {
+    "direct_witness.py": "54526632e5d721a63d28b2807a8e8c5ec7a9c18c3b89862a39c142c855d2a24a",
+    "run.py": "b297d65079651811f5ed21dccfbd25c7999f3e5384fb3858fda9e1a0ffedcd57",
+    "final_analysis.py": "ffce91c5d7c97b4c531700b9e039a72c52bb782a1eba66df4380964028ebac72",
+    "analyze_receipt.py": "6c0f0cc857742ab381c741d742cc6c9eb0495734c4c66200b630443b065b5f98",
+    "direct-witness-attempt1.py": "5a195d7c6960007282b053d9c117ffb437a519bfa0c5b159ef4f70a73b4c1821",
+    "replay.py": "142d1d7084a8dbaae917a600e21a81efeaf5cf6f17a960c90b3a0cea5e309418",
+    "build.py": "16c0da340ad636e0bf72a432ba2a5a271f7034989f1d4e87ecc4a4f543e4821e",
+    "replay-final.py": "5b0c3bff932c3134344caf53778a302cd88109bdd6af649415c58f10fe90090f",
+    "verify_evidence.py": "ae492923cafa688d00e9b7bc614ea008ede5ea60882686736223e0c79799da85",
+    "pack.py": "e806587f631bdaf68bfb0ca02cc7c3726b4b1c9aed152159c772bb66aa04f9cb"
+  }
+}

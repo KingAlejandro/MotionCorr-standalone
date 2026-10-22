@@ -1,0 +1,5 @@
+CXX=/usr/bin/c++
+DEFS=-DHAVE_JPEG -DHAVE_PNG -DHAVE_TIFF -DMOTIONCORR_CPU_DOSE_SYMMETRY_MODE=2
+INCS=-I/mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/src-base
+CXXFLAGS=-O3 -DNDEBUG -std=gnu++17 -fopenmp
+LIBS= /usr/lib/x86_64-linux-gnu/libfftw3.so /usr/lib/x86_64-linux-gnu/libfftw3f.so /usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so /usr/lib/x86_64-linux-gnu/libpthread.a /usr/lib/x86_64-linux-gnu/libtiff.so /usr/lib/x86_64-linux-gnu/libpng.so /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/x86_64-linux-gnu/libz.so 

@@ -1,0 +1,34 @@
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
+CMAKE_CXX_FLAGS:STRING=
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+CUDA:BOOL=OFF
+MOTIONCORR_CPU_DOSE_SYMMETRY:STRING=AUTO
+TIMING:BOOL=OFF
+CMAKE_HOME_DIRECTORY:INTERNAL=/mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/src-base
+--- flags.make
+
+C_DEFINES = -DHAVE_JPEG -DHAVE_PNG -DHAVE_TIFF -DMOTIONCORR_CPU_DOSE_SYMMETRY_MODE=2
+
+C_INCLUDES = -I/mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/src-base
+
+C_FLAGS = -O3 -DNDEBUG -std=gnu99
+
+CXX_DEFINES = -DHAVE_JPEG -DHAVE_PNG -DHAVE_TIFF -DMOTIONCORR_CPU_DOSE_SYMMETRY_MODE=2
+
+CXX_INCLUDES = -I/mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/src-base
+
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+
+--- link.txt
+/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/motioncorr.dir/src/apps/run_motioncorr.cpp.o -o motioncorr  libmotioncorr_core.a /usr/lib/x86_64-linux-gnu/libfftw3.so /usr/lib/x86_64-linux-gnu/libfftw3f.so /usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so /usr/lib/x86_64-linux-gnu/libpthread.a /usr/lib/x86_64-linux-gnu/libtiff.so /usr/lib/x86_64-linux-gnu/libpng.so /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/x86_64-linux-gnu/libz.so 
+-rw-rw-r-- 1 alex alex 7445314 2026-10-22 21:09:22.836124391 +0000 /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/build-base-cpu/libmotioncorr_core.a
+0a387aec60cae97721eccea46b3afa1a09d00f9c5c7ac63efd9cf2af11f6e72a  /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/build-base-cpu/libmotioncorr_core.a
+cuda/cufft/nvcomp symbols in library: 0
+cuda libs in base motioncorr ldd: 0
+--- compiler
+c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+GNU ld (GNU Binutils for Ubuntu) 2.42
+ldd (Ubuntu GLIBC 2.39-0ubuntu8.9) 2.39
+ii  libc6:amd64      2.39-0ubuntu8.9         amd64        GNU C Library: Shared libraries
+ii  libstdc++6:amd64 14.2.0-4ubuntu2~24.04.1 amd64        GNU Standard C++ Library v3

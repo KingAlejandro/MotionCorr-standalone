@@ -59,7 +59,7 @@ Where this program behaves differently from RELION 5.1's built-in CPU motion cor
 | Worker reports; failed movie | per-movie files may remain | `--skip_report_pdf` for multi-GPU workers; no rollback: partial or earlier per-movie files and an early `_PS.mrc` can remain, joint outputs withheld, §6 | Verified |
 | Corrupt EER fractions | skipped with a warning (inherited) | preserved: wrong-pixel-count fractions are skipped and the movie publishes; supply `--expected_frames`, §2 | Decided (D6) |
 | EER decoder bounds and damaged container | out-of-bounds host access and a process abort on malformed or truncated EER, verified on the inherited code ([#221](https://github.com/KingAlejandro/MotionCorr-standalone/issues/221)) | each decoder loop is bounded by its own fraction's bytes and by electron-vector capacity; a fraction that would overrun takes the D6 skip-and-warn path; a damaged TIFF/EER container fails that **movie**, not the process. Valid input is byte-identical to before. A **bounded** result: see §2 for what is and is not claimed | Decided (D10); **merged** (#231, `55e30154`); deliberate divergence from RELION 5.1 |
-| Compressed MRC integrity | decompressor exit status not checked (inherited) | unchanged; validate inputs with `xz -t`/`zstd -t`/`bzip2 -t`, §6 item 6 | Decided (D5/F4, fix #214) |
+| Compressed MRC integrity | decompressor exit status not checked (inherited) | RC0 unchanged; post-RC0 #214 checks full reads; subsets still need independent validation, §6 item 6 | D5/F4; post-RC0 #214 evidence (see §8) |
 | MRC mode 0, early binning, dose-weighting voltages | mode 0 read as signed int8; early binning on by default when `--bin_factor` is not 1; dose weighting only at 100/200/300 kV | unchanged. **GPU users:** with `--bin_factor` other than 1, default early binning bypasses the resident CUDA session and compact host staging (the movie takes the `float` route and the global FFT runs on the CPU); late binning needs `--no_early_binning` (`src/motioncorr_runner.cpp:2300, 2405`; §2, §3). RELION users who pass `--bin_factor 2` expecting lower GPU memory use will not get the resident path by default | Verified |
 | Options | all RELION 5.1 `relion_run_motioncorr` options | all still parsed; new, additive: `--seed`, `--expected_frames`, `--ingest`, `--ingest_witness`, `--profile`, `--profile_device_timing`, `--sync_output`, `--skip_report_pdf`, `--aggregate_only`. The only change in meaning is `--gpu` under `--use_own` | Verified |
 
@@ -365,11 +365,8 @@ healthy movies for a published dataset.
    A truncated gain or defect map fails **every** movie and the job (exit 1, no products); with `--gain_rot` the gain is read before any movie. Valid input is byte-identical to
    `1db86902` and the truncated cases fail on `1db86902` (PR #205; tests `TruncatedMrcMovie`, `TruncatedGainDefect` and their `Cuda` variants). This does **not** cover compressed
    MRC (item 6, F4); EER has its own rules (D6 and D10, §2). Frozen-SHA rerun of the two required tests: **PASS** on F (QF item 4, with the `Cuda` variants).
-6. **Compressed MRC (`.bz2`/`.xz`/`.zst`) integrity is not fully checked (F4, documented RC0 limitation, D5).** The decoder's exit status is not
-   checked after a complete read (`src/image.h:1958-1963`, `pclose` result ignored, "exit status is not a complete-file integrity check
-   here"), so some corruption that is reported only at the end of the stream (for example a missing final byte or a bad index CRC) is
-   **accepted**. Short reads are still caught. **You must validate compressed inputs independently before processing**: `xz -t FILE`,
-   `zstd -t FILE`, `bzip2 -t FILE` (or `pbzip2 -t FILE`). Scheduled fix: [#214](https://github.com/KingAlejandro/MotionCorr-standalone/issues/214).
+6. **Compressed MRC (`.bz2`/`.xz`/`.zst`), D5/F4, post-RC0 #214.** RC0 ignores decoder exit status and can publish a complete-looking stream despite a missing final byte, corrupt index CRC or nonzero decoder exit (#204). The post-RC0 fix explicitly drains full-movie reads to EOF and checks `pclose` before alignment and publication. A read error or nonzero status fails that movie (Class A: exit 1, no completion STAR, no joint output; healthy movies continue). This intentional rejection changes inherited failure behavior under #214; healthy products are required to remain identical.
+   Header-only and frame-subset reads retain early close: status is ignored because SIGPIPE is legitimate. A subset is any selection omitting a frame, **even if it reaches the last frame**; an explicit selection covering all frames is a full read. Short reads needed for the selected frames still fail. For subsets, and for RC0, validate independently before processing: `xz -t FILE`, `zstd -t FILE`, `bzip2 -t FILE` (or `pbzip2 -t FILE`). Qualification status and retained evidence: [#214 record](../rc0/compressed_exit_status/README.md); native and timing results, including the independent #246 test-harness exception, are recorded there.
 7. **Big-endian mode-0 MRC with nx = 128 (F5): processed on F, but not pinned by a test.** Up to `483e881d` the swap heuristic was `abs(header->mode) > SWAPTRIG || abs(header->nx) > SWAPTRIG`; a byte-swapped
    nx of 128 is `INT_MIN`, for which `abs` is undefined behaviour, and the movie failed identically on every tested route of the GCC build (W-MRC-Q, PR #204; R-QA1). #231 replaced the test with ordered comparisons
    (`src/rwMRC.h:149-151`), so `abs(INT_MIN)` no longer occurs and the undefined-behaviour rationale no longer applies. A byte-swapped `INT_MIN` field now takes the swap branch. **Observed on F at QF** (`docs/rc0/qf/run_6d68e2d6/README.md`, item 13 disposition): the F5 input
@@ -385,7 +382,7 @@ results. `logfile.pdf`, `header.pdf`, `batch.pdf`, the shift EPS plots, `.log` a
   5.3.0.16 and CUDA 12.8 (PR #209). See "Optional proprietary dependencies" below.
 - **Ghostscript** (`gs`): needed for `logfile.pdf`, `header.pdf` and `batch.pdf`. A single-process run without it still
   writes the MRC, STAR and EPS products, but the PDF reports are absent or empty (§6); `run_dataset.py` fails (§4).
-- **pbzip2 / xz / zstd**: only for compressed MRC input (§2). The same tools (`xz -t`, `zstd -t`, `bzip2 -t`/`pbzip2 -t`) are needed to validate compressed inputs first (§6 item 6).
+- **pbzip2 / xz / zstd**: only for compressed MRC input (§2). Use `xz -t`, `zstd -t`, `bzip2 -t`/`pbzip2 -t` before subset reads (and before all RC0 reads; §6 item 6).
 - **Python 3 with NumPy**: required at configure time when `BUILD_TESTING=ON` (`CMakeLists.txt:422-428`); the CMake
   configure fails with "BUILD_TESTING=ON requires Python 3 with 'numpy' installed." (reproduced locally). `README.md` now
   says so beside the build prerequisites. The tools under `tools/` also need NumPy.
@@ -437,6 +434,8 @@ unmodified-input precondition remains unchanged. **Checked arithmetic on the pre
   but cannot exclude a concurrent writer after the check or same-size edits with restored timestamps. Continue to supply complete,
   immutable, trusted files (§7); this is not a corrupt-Deflate safety guarantee. The RC0 binary itself has no identity check.
   Post-RC0 controls and native route/product evidence: [#215 record](../issue215/README.md).
+
+- **Compressed MRC (D5/F4, #214):** full-movie decoder-status rejection is fixed in post-RC0 source; header-only and subset reads intentionally do not certify the stream. Native CUDA execution, CTest re-entry (with the independent #246 test-harness exception) and real-movie drain timing are recorded in the [evidence](../rc0/compressed_exit_status/README.md). RC0 retains the original limitation (§6 item 6).
 
 - **The `0.001` relative-RMSE diagnostic fails for CUDA versus CPU.** On the 24 tutorial movies CUDA versus fixed CPU
   `--j 1` gives relative RMSE 0.002899-0.010082 against 0.001 (0/24 pass the relaxed profile; every other relaxed check

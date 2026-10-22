@@ -313,6 +313,30 @@ Not rerun on this candidate: the full QF campaign, the other corpus families,
 multi-GPU publication/scaling, performance gates, SCARF or Tier D science.
 Those rows retain their earlier SHA and are **not retested** here. No new tag or
 maintainer sign-off is implied by this re-entry record.
+
+## 8. Post-RC0 fixes
+
+**#214 — compressed MRC decoder status.** Source/test PR head
+`39aca256c248e6209c6cbf8edc183b7400551b43`; later commits record docs/evidence only.
+Full reads now drain to EOF and reject decoder failure before processing;
+header-only/subsets retain early close and need independent integrity validation.
+No numerical gate or supported-configuration changes.
+
+Rerun: Release builds for CPU/CUDA/CUDA+nvCOMP; full CTest **77/77**, **110/111**
+(only the two independent #246 import-subset timeouts, reproduced on one unchanged
+test retry with compiler occupancy recorded), **114/114**; native pbzip2/xz/zstd
+checks and 12 strict healthy GPU baseline comparisons; #204 compressed replay
+**49/49**. Local macOS: 74 pass, 2 skips, documented `SyntheticRegression` failure.
+Real compressed EMPIAR-10028 movie on cpu64: seven interleaved timing pairs after
+warm-up, with identical MRC/STAR products; median paired change -0.110 s, IQR
+0.480 s (whole-process measurement; no stable speedup/no-regression claim).
+
+[Evidence, commands and limits](../rc0/compressed_exit_status/README.md).
+Not rerun: full QF beyond affected compressed-format rows, real EER campaigns,
+multi-GPU endpoints, soak, other real-movie performance rows or Tier D science.
+Frozen-F results keep their original SHA. Independent review and current-head CI
+remain required before merge; #246 is being fixed separately.
+
 ## Post-RC0 #246: fake CLI compiler-settle timeout
 
 PR implementation head `927e5b5cfa51cf72187f182ecffd0693111c71f7`, base `c8844894` (following commit is evidence/docs only).

@@ -506,6 +506,12 @@ if(BUILD_TESTING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compressed_movie_sequence.py
                 --binary $<TARGET_FILE:motioncorr>)
         set_tests_properties(CompressedMovieSequence PROPERTIES TIMEOUT 120)
+        foreach(codec bz2 xz zst)
+            add_test(NAME CompressedMrcStatus_${codec}
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compressed_mrc_status.py
+                    --binary $<TARGET_FILE:motioncorr> --codec ${codec})
+            set_tests_properties(CompressedMrcStatus_${codec} PROPERTIES TIMEOUT 300 SKIP_RETURN_CODE 77)
+        endforeach()
         # Every container, sample type and codec the readers accept (issue #186 follow-up).
         # The compressed-MRC cases need the decoders the reader pipes through; a missing
         # one is reported UNRUN and only tolerated when it is absent at configure time.

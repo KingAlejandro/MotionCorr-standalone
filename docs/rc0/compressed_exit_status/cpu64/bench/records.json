@@ -1,0 +1,554 @@
+[
+  {
+    "block": -1,
+    "warmup": true,
+    "arm": "baseline",
+    "command": [
+      "/tmp/motioncorr-214/build-baseline/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/-1-baseline/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.421842493116856
+  },
+  {
+    "block": -1,
+    "warmup": true,
+    "arm": "fixed",
+    "command": [
+      "/tmp/motioncorr-214/build-src/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/-1-fixed/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.86523116752505,
+    "identity": {
+      "root_a": "/tmp/motioncorr-214/bench/-1-baseline/out",
+      "root_b": "/tmp/motioncorr-214/bench/-1-fixed/out",
+      "only_a": [],
+      "only_b": [],
+      "compared": 8,
+      "mrc_compared": 1,
+      "excluded": [
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "movie_mrc.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    }
+  },
+  {
+    "block": 0,
+    "warmup": false,
+    "arm": "fixed",
+    "command": [
+      "/tmp/motioncorr-214/build-src/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/0-fixed/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.73364019021392
+  },
+  {
+    "block": 0,
+    "warmup": false,
+    "arm": "baseline",
+    "command": [
+      "/tmp/motioncorr-214/build-baseline/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/0-baseline/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.99004551395774,
+    "identity": {
+      "root_a": "/tmp/motioncorr-214/bench/0-baseline/out",
+      "root_b": "/tmp/motioncorr-214/bench/0-fixed/out",
+      "only_a": [],
+      "only_b": [],
+      "compared": 8,
+      "mrc_compared": 1,
+      "excluded": [
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "movie_mrc.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    }
+  },
+  {
+    "block": 1,
+    "warmup": false,
+    "arm": "baseline",
+    "command": [
+      "/tmp/motioncorr-214/build-baseline/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/1-baseline/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.53357069566846
+  },
+  {
+    "block": 1,
+    "warmup": false,
+    "arm": "fixed",
+    "command": [
+      "/tmp/motioncorr-214/build-src/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/1-fixed/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.70796440914273,
+    "identity": {
+      "root_a": "/tmp/motioncorr-214/bench/1-baseline/out",
+      "root_b": "/tmp/motioncorr-214/bench/1-fixed/out",
+      "only_a": [],
+      "only_b": [],
+      "compared": 8,
+      "mrc_compared": 1,
+      "excluded": [
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "movie_mrc.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    }
+  },
+  {
+    "block": 2,
+    "warmup": false,
+    "arm": "fixed",
+    "command": [
+      "/tmp/motioncorr-214/build-src/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/2-fixed/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 54.11257165670395
+  },
+  {
+    "block": 2,
+    "warmup": false,
+    "arm": "baseline",
+    "command": [
+      "/tmp/motioncorr-214/build-baseline/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/2-baseline/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.82881726697087,
+    "identity": {
+      "root_a": "/tmp/motioncorr-214/bench/2-baseline/out",
+      "root_b": "/tmp/motioncorr-214/bench/2-fixed/out",
+      "only_a": [],
+      "only_b": [],
+      "compared": 8,
+      "mrc_compared": 1,
+      "excluded": [
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "movie_mrc.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    }
+  },
+  {
+    "block": 3,
+    "warmup": false,
+    "arm": "baseline",
+    "command": [
+      "/tmp/motioncorr-214/build-baseline/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/3-baseline/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.805166736245155
+  },
+  {
+    "block": 3,
+    "warmup": false,
+    "arm": "fixed",
+    "command": [
+      "/tmp/motioncorr-214/build-src/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/3-fixed/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.48811012879014,
+    "identity": {
+      "root_a": "/tmp/motioncorr-214/bench/3-baseline/out",
+      "root_b": "/tmp/motioncorr-214/bench/3-fixed/out",
+      "only_a": [],
+      "only_b": [],
+      "compared": 8,
+      "mrc_compared": 1,
+      "excluded": [
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "movie_mrc.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    }
+  },
+  {
+    "block": 4,
+    "warmup": false,
+    "arm": "fixed",
+    "command": [
+      "/tmp/motioncorr-214/build-src/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/4-fixed/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.7337856516242
+  },
+  {
+    "block": 4,
+    "warmup": false,
+    "arm": "baseline",
+    "command": [
+      "/tmp/motioncorr-214/build-baseline/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/4-baseline/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.8440980874002,
+    "identity": {
+      "root_a": "/tmp/motioncorr-214/bench/4-baseline/out",
+      "root_b": "/tmp/motioncorr-214/bench/4-fixed/out",
+      "only_a": [],
+      "only_b": [],
+      "compared": 8,
+      "mrc_compared": 1,
+      "excluded": [
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "movie_mrc.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    }
+  },
+  {
+    "block": 5,
+    "warmup": false,
+    "arm": "baseline",
+    "command": [
+      "/tmp/motioncorr-214/build-baseline/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/5-baseline/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.809585340321064
+  },
+  {
+    "block": 5,
+    "warmup": false,
+    "arm": "fixed",
+    "command": [
+      "/tmp/motioncorr-214/build-src/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/5-fixed/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 55.65743777900934,
+    "identity": {
+      "root_a": "/tmp/motioncorr-214/bench/5-baseline/out",
+      "root_b": "/tmp/motioncorr-214/bench/5-fixed/out",
+      "only_a": [],
+      "only_b": [],
+      "compared": 8,
+      "mrc_compared": 1,
+      "excluded": [
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "movie_mrc.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    }
+  },
+  {
+    "block": 6,
+    "warmup": false,
+    "arm": "fixed",
+    "command": [
+      "/tmp/motioncorr-214/build-src/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/6-fixed/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 53.87195101380348
+  },
+  {
+    "block": 6,
+    "warmup": false,
+    "arm": "baseline",
+    "command": [
+      "/tmp/motioncorr-214/build-baseline/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/tmp/motioncorr-214/bench/6-baseline/out/",
+      "--use_own",
+      "--j",
+      "8",
+      "--skip_logfile",
+      "--patch_x",
+      "1",
+      "--patch_y",
+      "1",
+      "--seed",
+      "1"
+    ],
+    "rc": 0,
+    "seconds": 54.11797748506069,
+    "identity": {
+      "root_a": "/tmp/motioncorr-214/bench/6-baseline/out",
+      "root_b": "/tmp/motioncorr-214/bench/6-fixed/out",
+      "only_a": [],
+      "only_b": [],
+      "compared": 8,
+      "mrc_compared": 1,
+      "excluded": [
+        {
+          "file": "logfile.pdf",
+          "reason": "Ghostscript creation date and /ID"
+        },
+        {
+          "file": "movie_mrc.log",
+          "reason": "timing values in per-movie logs"
+        }
+      ],
+      "differences": [],
+      "problems": [],
+      "identical": true
+    }
+  }
+]

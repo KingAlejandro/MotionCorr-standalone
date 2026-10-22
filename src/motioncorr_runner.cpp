@@ -2597,6 +2597,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
 		}
+		if (isCompressedMRC && n_frames == nn)
+			compressedMRCreader.finish();
 	}
 	RCTOC(TIMING_READ_MOVIE);
 	MC_STAGE("allocate host sum");

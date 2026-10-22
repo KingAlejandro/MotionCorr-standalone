@@ -37,6 +37,7 @@ DEFAULT_REQUIRED_TESTS = [
     "TruncatedGainDefect",
     # Sequential compressed readers must close/reap their decoder before reuse.
     "CompressedMovieSequence",
+    "CompressedMrcStatus_bz2", "CompressedMrcStatus_xz", "CompressedMrcStatus_zst",
     # Every movie container, sample type and codec the readers accept, with
     # rejections and pinned known failures (test-data/generate_format_fixtures.py).
     "InputFormats",

@@ -251,6 +251,14 @@ if(BUILD_TESTING)
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
     add_test(NAME PatchRetryState COMMAND patch_retry_state)
+    # #257: device-free exact-rational controls, shared with the actual CUDA
+    # kernel test. Host replays establish arithmetic only, not GPU execution.
+    add_executable(peak_fit_arithmetic tests/peak_fit_arithmetic.cpp)
+    add_test(NAME PeakFitArithmetic COMMAND peak_fit_arithmetic)
+    foreach(_mutation float-denominator early-store wrong-scale)
+        add_test(NAME PeakFitArithmeticMutant_${_mutation}
+            COMMAND peak_fit_arithmetic --expect-mismatch ${_mutation})
+    endforeach()
     add_executable(defect_parser tests/test_defect_parser.cpp)
     target_link_libraries(defect_parser PRIVATE motioncorr_core)
     # Pure C++ arithmetic regression (issue #97). Registered above the
@@ -807,6 +815,13 @@ if(BUILD_TESTING AND CUDA)
         mc_cuda_mutant(CudaHermitianCCFMutant tests/cuda_patch_batch.cpp cuda_alignpatch ccf_batched_no_projection
             "ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));\n            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r"
             "ALIGN_LAUNCH(cudaSuccess);\n            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r" ${PATCH_BATCH_WRAPS})
+        add_executable(cuda_peak_fit tests/cuda_peak_fit.cu)
+        target_link_libraries(cuda_peak_fit PRIVATE motioncorr_core)
+        add_test(NAME CudaPeakFit COMMAND cuda_peak_fit)
+        set_tests_properties(CudaPeakFit PROPERTIES LABELS "cuda;hardware" TIMEOUT 60)
+        mc_cuda_mutant(CudaPeakFitMutant tests/cuda_peak_fit.cu cuda_alignpatch float_denominator
+            "double denom_x = vp_x + vn_x - 2.0 * maxval;"
+            "double denom_x = float(vp_x) + float(vn_x) - 2.0f * float(maxval);")
         # shift_retired: retired patches keep receiving phase shifts.
         mc_cuda_mutant(CudaPatchBatchMutant tests/cuda_patch_batch.cpp cuda_alignpatch shift_retired
             "for (int j = 0; j < (int)active.size(); ++j) { const int p = active[j];"

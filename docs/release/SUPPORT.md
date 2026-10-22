@@ -475,8 +475,7 @@ unmodified-input precondition remains unchanged. **Checked arithmetic on the pre
     fixed the test and is **merged** (`ecb7d7f7`); it passes on macOS at `cb3699ac`. This does not qualify macOS.
   - `NativeMovieStaging` is Linux-only and is skipped.
   No unqualified "macOS supported" statement is made anywhere in these documents. Section 3 of `docs/release/RELEASE_CHECKLIST.md`.
-- `python3 tools/multi_gpu/run_dataset.py` emits a `SyntaxWarning: 'return' in a 'finally' block` on Python 3.14
-  (`run_dataset.py:172`). Cosmetic as of this draft.
+- **Post-RC0 #240:** the Python 3.14 `return`-in-`finally` warning in `run_dataset.py` is fixed. Exit codes and status-write/restoration precedence are preserved, including exceptions in the try body. Strict compilation, 16 semantic subcases, 71 scheduling cases and 8 native dataset endpoints passed; see `docs/post_rc0/issue240/README.md`. Frozen C++ binaries were reused; this is a tooling re-entry result.
 
 ### GPU memory (QM)
 

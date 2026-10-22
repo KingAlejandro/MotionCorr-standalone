@@ -450,6 +450,8 @@ if(BUILD_TESTING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_sticky_cuda_process_lifecycle.py)
         set_tests_properties(StickyCudaProcessLifecycle PROPERTIES TIMEOUT 60)
     endif()
+    add_test(NAME DatasetFinalization
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_dataset_finalization.py)
     add_test(NAME GainCacheOwnership
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_gain_cache_host.py
             --cxx ${CMAKE_CXX_COMPILER})

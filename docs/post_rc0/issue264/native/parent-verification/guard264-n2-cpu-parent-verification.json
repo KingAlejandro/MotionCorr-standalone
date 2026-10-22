@@ -1,0 +1,24 @@
+{
+  "readback_utc": "2026-10-22T22:00:25.609819+00:00",
+  "raw_sha256": "91d8710913bfe7ed9d87c7e047bfe2bfaf262e9aa6460798a903f8b7ef276aa2",
+  "base_source": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+  "candidate_native_source": "0a1f64ab3e192c3ebad57b35149d872b21331730",
+  "sources_clean": true,
+  "binary_sha256": {
+    "base": "95288c4aa794c5cc080519eb0e46ab6c71c518fd4c7126ee71054544d76a8f71",
+    "cand": "c0c0437844728d55428d9a27de59b1d3dd8f6c2433ca13d2f23abd8fd1cc4d3a"
+  },
+  "inputs": {
+    "movie_count": 24,
+    "movies_star_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041",
+    "gain_sha256": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1"
+  },
+  "N2_CPU": "PASS: native exits0, no guard fallback,24 local models,24MRC/25STAR each; comparator products and complete non-PDF tree PASS with zero differences; all24MRC header/extended/payload hash triples equal",
+  "resources": "CPUs14\u201315, --j1/OMP1; no GPU; no timing claim",
+  "gpu_admission": "REFUSED BEFORE LAUNCH: n2-gpu exit3, foreignPID3276184; no GPU arm directories; chain exit1, N3/N4 UNRUN",
+  "limitations": [
+    "Uses original frozen comparator and recorded hash triples; no native rerun or direct second MRC scan.",
+    "N2 CPU only, not CUDA/native aggregate/science/performance qualification.",
+    "Source review R3 did not inspect this N2 evidence."
+  ]
+}

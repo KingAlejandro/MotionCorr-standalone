@@ -65,6 +65,12 @@ measured-only harm, design override and absent certificate. The positive identit
 checks that valid binding remains usable for description while certification stays closed.
 
 Recorded result: **PASS**, 7 pinned-analyser subprocesses and 20 fixed-analyser subprocesses.
+Independent source review found one fixture alias: both certificate hash sets originally
+referenced the same dictionary, so a one-sided mutation changed both sides. The fixtures now
+use independent dictionaries and require the untargeted side to remain unchanged and the
+rejection reason to name the targeted side. The 7/20 subprocess controls pass again. Two
+temporary analyser mutants, each omitting one side's local digest comparison, are both
+rejected by the corrected controls. The analyser itself is unchanged by this review repair.
 All synthetic descriptive results, including nonzero jackknife SEs and bounds, compare exactly
 before/after (digest `33b5b7d10ffefd46a13592a91ac67931fce3a1b225e78c1d7c59bd58674bd529`).
 Full-sample B1/B2/B3 values for both real arms and both analysis sets, and CPU/real-arm point

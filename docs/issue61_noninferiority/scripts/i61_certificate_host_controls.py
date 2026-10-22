@@ -75,8 +75,8 @@ def main():
             digests[str(half)] = hashlib.sha256(payload).hexdigest()
         certificate = {"margin": .95, "source": "synthetic host control, NOT scientific evidence",
                        "equivalence_proof": {"bit_identical": True,
-                           "cpu_baseline_half_map_payload_sha256_this_host": digests,
-                           "cpu_baseline_half_map_payload_sha256_peer_host": digests},
+                           "cpu_baseline_half_map_payload_sha256_this_host": dict(digests),
+                           "cpu_baseline_half_map_payload_sha256_peer_host": dict(digests)},
                        "controls": [{"control": "ctrl_noise_f011", "rho": .90,
                                      "lower95": .89, "upper95": .91, "designed_rho": .929}],
                        "coverage_demonstration": "yes"}
@@ -162,8 +162,12 @@ def main():
                 assert not res["validity"]["certificate"]["used"], name
             for key in ("cpu_baseline_half_map_payload_sha256_this_host", "cpu_baseline_half_map_payload_sha256_peer_host"):
                 cert = copy.deepcopy(certificate)
+                other = next(k for k in cert["equivalence_proof"] if k != key and k.endswith("host"))
+                untouched = dict(cert["equivalence_proof"][other])
                 cert["equivalence_proof"][key]["2"] = "0" * 64
-                assert not run("mismatch_" + key, cert)["validity"]["certificate"]["used"]
+                assert cert["equivalence_proof"][other] == untouched, "hash-set fixture alias"
+                status = run("mismatch_" + key, cert)["validity"]["certificate"]
+                assert not status["used"] and status["reason"].startswith(key), (key, status)
             half1 = maps / "held22_half1_class001_unfil.mrc"
             original = half1.read_bytes()
             header_change = bytearray(original)

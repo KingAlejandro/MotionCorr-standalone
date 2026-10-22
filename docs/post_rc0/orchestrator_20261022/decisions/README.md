@@ -4,7 +4,10 @@
 interface, publication behavior, PR state, support class or default. Independent
 review round 1 is retained in [review-round1](review-round1/REVIEW.md);
 its F1–F5 corrections are recorded in [the response](review-round1/RESPONSE.md).
-A fresh round-2 review of the integrated corrections is pending. It is preparation for M2, M4/M5, M6 and M8 in the updated
+Round 2 independently closed F1–F5 and found no DRAFT publication blocker.
+Its single M2 wording finding is corrected with a parent Git merge preview;
+[round-2 report and response](review-round2/RESPONSE.md) retain that boundary.
+No third independent review or policy approval is claimed. It is preparation for M2, M4/M5, M6 and M8 in the updated
 [Notion plan](https://app.notion.com/p/644bae9e6ac648889b0fdcf0a3aa3fc9), not a
 request to adopt decisions before the missing evidence is supplied.
 

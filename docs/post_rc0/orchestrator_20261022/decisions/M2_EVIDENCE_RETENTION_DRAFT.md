@@ -48,13 +48,22 @@ be bound to the new identity. Qualification of `e77a51a2` is still incomplete;
 this brief neither transfers its results to a new identity nor chooses a merge
 mode.
 
-Landing #273/#274 is not a docs-only merge. Relative to C1, an ordinary merge of
-`805d9de2` adds 4 commits and 41 blobs (3,025,652 bytes) and changes source and
-tests; `a1036901` adds 3 commits and 38 blobs (1,825,744) and changes source and
-the CI workflow. A docs-only landing would be a new commit that adds the 36/32
-unique files and records the pinned heads. Merging either directly onto main
-instead of after C1 imports 298 / 132 blobs (48,447,241 / 7,026,217 bytes),
-because both heads contain earlier selected layers.
+A normal merge of either pinned head onto C1 needs conflict resolution.
+`git merge-tree --write-tree` (Git 2.56.0) reports #273 conflicts in
+`CMakeLists.txt` and `docs/release/RC0_ACCEPTANCE_REPORT.md`, and #274 in
+`tools/test_ci_fail_closed.py`. Apart from those conflicted files, the synthetic
+merged trees add only their 36/32 unique docs paths: no `src/`, `tests/` or
+`.github/` path changes. Keep C1's test registrations and failure checks if a
+later merge is chosen. This preview is not a resolved merge or its validation;
+`M2_merge_preview_e77a51a2.json` retains the commands, paths and conflict output.
+
+The 4/3 new commits and 41/38 new blobs (3,025,652 / 1,825,744 logical bytes)
+count reachable history relative to C1. Intermediate source-named blobs in those
+ranges do not imply production-source or CI-workflow changes in the merged tree.
+A docs-only landing would instead be a new commit that adds the 36/32 unique
+files and records the pinned heads. Merging either directly onto main rather
+than after C1 imports 298 / 132 blobs (48,447,241 / 7,026,217 bytes), because
+both heads contain earlier selected layers.
 
 ## Choices for the maintainer
 

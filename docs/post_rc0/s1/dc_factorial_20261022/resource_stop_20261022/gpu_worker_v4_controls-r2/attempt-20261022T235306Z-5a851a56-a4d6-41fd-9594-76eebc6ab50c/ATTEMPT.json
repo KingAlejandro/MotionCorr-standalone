@@ -1,0 +1,58 @@
+{
+ "schema": "gpu-worker-v4-controls-r2/1",
+ "namespace": "attempt-20261022T235306Z-5a851a56-a4d6-41fd-9594-76eebc6ab50c",
+ "start_utc": "2026-10-22T23:53:06Z",
+ "session_id": "8864b6f5-c104-4b3b-8024-85b7fde2b670",
+ "runner_pid": 14053,
+ "uid": 502,
+ "ncpu": 14,
+ "load_avg": [
+  8.65771484375,
+  9.77294921875,
+  15.9306640625
+ ],
+ "numeric_threads": 1,
+ "inputs": {
+  "worker": {
+   "path": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/gpu_worker_v4.py",
+   "sha256": "071a1588c9ceda73c2d974309b20f6b51beb5211e393752871496f32e084c853"
+  },
+  "harness": {
+   "path": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py",
+   "sha256": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d"
+  },
+  "runner": {
+   "path": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/run_v4_controls_r2.py",
+   "sha256": "1dd8c2e3b71b144d8cd2546bfe8d2459bcba5c1652a015fd3ebd46bc986fcd5d"
+  },
+  "campaign": {
+   "path": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/campaign.py",
+   "sha256": "8701cf248f247d03eb95c36e99bf9d3a9eaf0ad28660460646afc7128cf84eae"
+  },
+  "process_ownership": {
+   "path": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/tools/multi_gpu/process_ownership.py",
+   "sha256": "8de59b8cd741630f8188ef5e98b4877415df90f3bddd8a4a99013e0e7ff908cb"
+  }
+ },
+ "admission": {
+  "ancestor_pids": [
+   1,
+   14052,
+   14053,
+   16404,
+   16516,
+   23920
+  ],
+  "other_author_or_control_processes": [
+   {
+    "pid": 23952,
+    "ppid": 23920,
+    "uid": 502,
+    "cmd": "/bin/sh -c { trap '' TERM; read -r _ <&3; kill -TERM 0; sleep 5; kill -KILL 0; } </dev/null >/dev/null 2>&1 &\\012exec \"$@\" 3<&- t3-claude /Users/alex.konstantinov/.local/bin/claude-unified --output-format stream-json --verbose --input-format stream-json --thinking adaptive --thinking-display summarized --effort high --model claude-opus-5-5 --permission-prompt-tool stdio --resume=8864b6f5-c104-4b3b-8024-85b7fde2b670 --allowedTools mcp__t3-code__* --tools default --permission-mode bypassPermissions --allow-dangerously-skip-permissions --include-partial-messages --add-dir /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479 --add-dir /Users/alex.konstantinov/.t3/userdata/attachments --thinking-display summarized --settings {\"fastMode\":false,\"showThinkingSummaries\":true}"
+   }
+  ]
+ },
+ "status": "REFUSED_UNRUN",
+ "reason": "another author-session or v4 control process is live",
+ "end_utc": "2026-10-22T23:53:07Z"
+}

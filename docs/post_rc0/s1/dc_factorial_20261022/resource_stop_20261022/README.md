@@ -30,6 +30,19 @@ hash-checked against the remote originals: [receipts/](receipts/) ([INDEX](recei
 - No `gpu-final` receipt exists: the coordinator was killed before its cleanup
   block. Its flock was released by the kernel at process exit.
 
+## Review R2, owner collision and worker v4 (2026-10-23)
+
+Review R2 ([review-r2/REVIEW.md](review-r2/REVIEW.md), verbatim) found a Linux-only material defect
+in v3 (R2-M1: the worker's own new-session `nvidia-smi` queries would be adopted as owned on Linux) and
+moderate gaps. v3 stays frozen and must not be deployed. The proposed successor is
+`tools/gpu_worker_v4.py` (`071a1588…`); responses in [review-r2/RESPONSES.md](review-r2/RESPONSES.md).
+During the v4 control runs orphan copies of the author session ran concurrently; see
+[collision_20261022/](collision_20261022/README.md) for the inventory, recovery actions and attempt
+trust. The one authorized fresh attempt in [gpu_worker_v4_controls-r2/](gpu_worker_v4_controls-r2/README.md)
+was refused by its runner and is UNRUN. v4 is not deployed and has not run on Linux; a fresh
+independent review comes before any Linux host mock. Namespace-aware evaluation stays unimplemented
+and evaluation of any resumed namespace is blocked.
+
 ## Review R1 and worker v3 (2026-10-22)
 
 Independent review R1 ([review-r1/REVIEW.md](review-r1/REVIEW.md), verbatim)

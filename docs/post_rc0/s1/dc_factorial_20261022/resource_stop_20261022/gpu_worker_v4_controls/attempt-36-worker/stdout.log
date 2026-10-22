@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py", line 636, in <module>
+    main()
+    ~~~~^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py", line 624, in main
+    for name, (ok, detail) in controls(W).items():
+                              ~~~~~~~~^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py", line 485, in controls
+    C['K19c query held in flight across cancellation, emulated adoption: CANCELLED 4, tree reaped'] = single(
+                                                                                                      ~~~~~~^
+        t, W, ('hold_tree', 'ok'), dict(hold_s=4.0), tree_hold('CANCELLED', 4), fault='emulate_adoption',
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        over=dict(job_timeout=600), during=cancel_held)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py", line 337, in single
+    code = f.wait(p, timeout)
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py", line 254, in wait
+    try: return p.wait(timeout=timeout)
+                ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/subprocess.py", line 1280, in wait
+    return self._wait(timeout=timeout)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/subprocess.py", line 2060, in _wait
+    time.sleep(delay)
+    ~~~~~~~~~~^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py", line 615, in _terminate
+    raise KeyboardInterrupt('SIGTERM')
+KeyboardInterrupt: SIGTERM

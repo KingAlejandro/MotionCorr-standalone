@@ -1,5 +1,26 @@
 # Host fit-boundary oracle, 2026-10-22
 
+## Current bounded result: attempt04 PASS
+
+[Attempt04](native_attempt04/README.md) qualifies the constructed-input host
+oracle: seven baseline cases, all three mutants with seven ordinary rejections
+each in registered and direct modes, and eight focused CTests **PASS**. Actual
+compiled test source is `15516b6436ed7d97f395358155e94e9e89cc4a1f`;
+later evidence/documentation commits do not change the compiled subject.
+The query-normalization mutant preserves the baseline fit's observation count,
+rank, conditioning and coefficient error. Frozen coefficient 1e-7 px, field
+2e-5 px and admission bounds are unchanged.
+
+Attempts01–03 retain their original lock-stop, registration failure and old
+fit-dimension-mutant failure. Their archives, results and compiled identities
+are preserved. The chronological account below describes each historical state;
+its initial UNRUN statements are not the current attempt04 disposition.
+No production defect or estimator-accuracy improvement is demonstrated.
+Enclosing production acceptance/publication, full suites, GPU, corpus,
+scientific and performance qualification remain **UNRUN**.
+
+## Historical implementation and attempt01
+
 Implementation is on `test/fit-boundary-oracle-20261022`, based on PR273
 `805d9de27898b4a10e6212e65098d5995a40fdb1`. Oracle code commit is
 `135ee09e0925deb933bfd0f4ce7e24d6ddbd080a`; subsequent changes are evidence

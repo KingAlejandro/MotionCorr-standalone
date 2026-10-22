@@ -9,7 +9,7 @@ run_case_nb()  replacement for qual_lib.run_case on the GPU3 lane with the stop-
                * the lease is never nested: callers must not hold it around run_case_nb.
 Same child command line, environment handling, GPU sampler and record fields as qual_lib.run_case (rc, wall_s, gpu_witness, ...).
 """
-import fcntl, os, subprocess, sys, time
+import fcntl, os, signal, subprocess, sys, time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -30,6 +30,34 @@ def _bench_probe():
 def install():
     import qual_lib
     qual_lib.wait_bench_free = lambda *a, **k: _bench_probe()
+
+
+def group_members(pgid):
+    """Live processes of the session/process group this runner created (its own child's group; nothing else is ever signalled)."""
+    out = []
+    for d in os.listdir('/proc'):
+        if d.isdigit():
+            try:
+                f = open(f'/proc/{d}/stat').read().rsplit(')', 1)[1].split()
+                if f[0] != 'Z' and int(f[2]) == pgid and int(f[3]) == pgid: out.append(int(d))      # live, and pgrp+session equal the child's pid
+            except (OSError, ValueError, IndexError):
+                pass
+    return sorted(out)
+
+
+def reap_group(pgid, grace=10.0):
+    """Terminate (SIGTERM, then SIGKILL) every remaining member of the child's own session and wait until none is left."""
+    members = group_members(pgid); rec = {'members_before': members, 'sigterm': False, 'sigkill': False}
+    if not members: rec['remaining'] = []; return rec
+    for sig, key, wait in ((signal.SIGTERM, 'sigterm', grace), (signal.SIGKILL, 'sigkill', 5.0)):
+        for p in group_members(pgid):
+            try: os.kill(p, sig); rec[key] = True
+            except ProcessLookupError: pass
+        end = time.time() + wait
+        while time.time() < end and group_members(pgid): time.sleep(0.1)
+        if not group_members(pgid): break
+    rec['remaining'] = group_members(pgid)
+    return rec
 
 
 def health(label):
@@ -63,15 +91,26 @@ def run_case_nb(label, binary, args, cwd, logdir, gpu, extra_env=None, witness=N
                 rec.update(rc=None, error=f'pre-run GPU health failed rc={pre}; stopped before launch'); return rec
         t0 = time.monotonic()
         with open(stdout_p, 'wb') as out:
-            proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=out, stderr=subprocess.STDOUT)
+            proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=out, stderr=subprocess.STDOUT, start_new_session=True)   # own session: only its members are reaped
             sampler = q.GpuSampler(proc.pid) if gpu else None
             if sampler: sampler.start()
             try:
                 rec['rc'] = proc.wait(timeout=timeout)
             except subprocess.TimeoutExpired:
-                proc.kill(); rec['rc'] = None; rec['error'] = 'timeout; killed (own child)'
+                rec['rc'] = None; rec['error'] = f'timeout after {timeout}s; own process group terminated'
+                rec['cleanup'] = reap_group(proc.pid)
+                try: proc.wait(timeout=10)
+                except subprocess.TimeoutExpired: rec['error'] += '; child not reapable'
             finally:
                 if sampler: sampler.stop()
+            if 'cleanup' not in rec:        # normal exit: nothing of the child's session may outlive it
+                rec['cleanup'] = reap_group(proc.pid)
+                if rec['cleanup']['members_before']:
+                    rec['child_rc'] = rec.get('rc'); rec['error'] = f'descendants outlived the child: {rec["cleanup"]["members_before"]} (terminated)'
+                    if rec.get('rc') == 0: rec['rc'] = 38
+            if rec['cleanup'].get('remaining'):
+                rec['error'] = (rec.get('error') or '') + f'; processes still alive after cleanup: {rec["cleanup"]["remaining"]}'
+                if rec.get('rc') == 0: rec['rc'] = 39
         rec['wall_s'] = round(time.monotonic() - t0, 3)
         if sampler:
             rec['gpu_witness'] = {'uuids_seen_for_pid': sorted(sampler.uuids), 'peak_mib': sampler.peak_mib, 'smi_samples': sampler.samples,

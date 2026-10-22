@@ -28,3 +28,16 @@ attribution stayed INVALID (the fail-closed handling worked as designed). Retain
 receipts, the INVALID class files, and the F-cpu runs that were launched with correct paths. Iteration 2 (`C1_T24_DIR=t24-i2`, stage names `i2-*`, chain written locally
 and copied, not generated through nested quoting) re-runs every GPU arm in its own directory; the iteration-1 F-cpu arms may be used as the CPU baseline only if
 their run records are rc 0. Packet 2 adds only the `C1_T24_DIR` override to `c1_tutorial24.py`.
+
+## Corrections after the parent's real-CLI and timeout controls (packet 3)
+
+* `classify` expects `star_count == n + 1` (the comparator counts the n per-movie STAR files plus the joint STAR); the first host tests had repeated the same wrong
+  count in their mock reports. New controls run the actual `compare` wrapper against the actual comparator on tiny trees (tests/test_compare_output_trees.py builder):
+  identical -> rc 0 IDENTICAL, one-pixel difference -> rc 1 DIFFERENT with the product named, truncated tree -> rc 2 INVALID, provenance retained.
+* `attribute` now requires the frozen-lane control `F-fresh_vs_F-retained` to be IDENTICAL: DIFFERENT is a blocker (exit 1), missing or INVALID makes the attribution
+  INVALID (exit 2). Cached class files are validated for schema (state/products consistent, unique strings), label, the expected base/candidate trees and the
+  stored comparator report hash; absent `products` is no longer treated as `[]`.
+* `run_case_nb` starts the child in its own session and, on timeout or when anything of that session outlives a finished child, terminates only that session (SIGTERM, then
+  SIGKILL), waits until it is empty and reaps the child, all before the post-run health check and the lease release. A timeout stays a timeout failure (rc None); a
+  descendant outliving a successful child is rc 38; processes surviving cleanup are rc 39. Cleanup and PIDs are recorded in `cleanup`.
+* The lane tests need Linux `/proc`: they run on 4GPUs (host-only, sleep-only children) with `C1_TEST_REPO` pointing at the exact checkout; they are skipped on macOS.

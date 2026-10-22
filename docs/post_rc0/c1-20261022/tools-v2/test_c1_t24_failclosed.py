@@ -6,10 +6,10 @@ preserved; N-only reproduction is labelled as the combined composition; the lane
 uses LOCK_NB, and propagates a failed post-run health check as rc 37 while the lease is still held.
 usage: python3 test_c1_t24_failclosed.py
 """
-import fcntl, importlib, json, os, pathlib, stat, subprocess, sys, tempfile, unittest
+import fcntl, importlib, importlib.util, json, os, pathlib, stat, subprocess, sys, tempfile, unittest
 
 HERE = pathlib.Path(__file__).resolve().parent
-REPO = HERE.parents[3]
+REPO = pathlib.Path(os.environ['C1_TEST_REPO']) if os.environ.get('C1_TEST_REPO') else HERE.parents[3]      # remote runs point this at the exact checkout
 TMP = pathlib.Path(tempfile.mkdtemp(prefix='mc-c1-t24-test-'))
 (TMP / 'scr').mkdir(); os.symlink(REPO, TMP / 'scr/src')
 (TMP / 'frozen/multigpu/G').mkdir(parents=True); (TMP / 'frozen/multigpu/L').mkdir(parents=True); (TMP / 'data').mkdir()
@@ -25,7 +25,7 @@ P = lambda i: f'Movies/20170629_{i:05d}_frameImage.mrc'
 
 def report(prods=(), status=None, **kw):
     prods = list(prods); status = status or ('FAIL' if prods else 'PASS')
-    side = {'movie_count': 24, 'mrc_count': 24, 'star_count': 24}
+    side = {'movie_count': 24, 'mrc_count': 24, 'star_count': 25}      # 24 per-movie STAR + the joint STAR, as the comparator reports
     r = {'status': status, 'base': side, 'candidate': side, 'different_files': prods, 'different_products': prods,
          'comparison_scope': 'products', 'mrc_sha256': {P(i): {} for i in range(24)}}
     r.update(kw); return r
@@ -43,7 +43,8 @@ class Classify(unittest.TestCase):
         bad = {
             'reason error': (1, {'status': 'FAIL', 'reason': 'candidate has missing STAR'}),
             'no report': (1, None), 'rc 2': (2, report()), 'rc 0 but FAIL': (0, report([P(1)])), 'rc 1 but PASS': (1, report()),
-            'bad status': (1, report([P(1)], status='MAYBE')), 'fewer movies': (1, report([P(1)], base={'movie_count': 23, 'mrc_count': 23, 'star_count': 23})),
+            'bad status': (1, report([P(1)], status='MAYBE')), 'fewer movies': (1, report([P(1)], base={'movie_count': 23, 'mrc_count': 23, 'star_count': 24})),
+            'star count 24 (not n+1)': (1, report([P(1)], base={'movie_count': 24, 'mrc_count': 24, 'star_count': 24})),
             'wrong scope': (1, report([P(1)], comparison_scope='complete non-PDF tree')),
             'duplicate product': (1, report([P(1), P(1)])), 'foreign product': (1, report(['Movies/other.mrc'])),
             'products not in files': (1, report([P(1)], different_files=[P(2)])),
@@ -60,8 +61,18 @@ class Attribution(unittest.TestCase):
         (t24.T24 / 'compare').mkdir(parents=True, exist_ok=True)
         for f in (t24.T24 / 'compare').glob('*'): f.unlink()
 
-    def put(self, label, state, products=(), reasons=()):
-        (t24.T24 / 'compare' / f'{label}.class.json').write_text(json.dumps({'state': state, 'products': list(products), 'reasons': list(reasons)}))
+    def put(self, label, state, products=(), reasons=(), base=None, cand=None, report=True):
+        cfg = label[-1]; T = t24.T24.name
+        def trees(lab):
+            x, y = lab.rsplit('-', 1)[0].split('_vs_'); d = lambda a: f'/{T}/{a}-{cfg}/out'
+            return (f'/multigpu/{cfg}/s0', d(x)) if y == 'F-retained' else (d(x), d(y))      # the lane control compares retained F (base) with F-fresh (candidate)
+        b, c = trees(label)
+        rep = t24.T24 / 'compare' / f'{label}.json'
+        if report: rep.write_text(json.dumps({'stub': label}))
+        import hashlib
+        h = hashlib.sha256(rep.read_bytes()).hexdigest() if rep.exists() else None
+        (t24.T24 / 'compare' / f'{label}.class.json').write_text(json.dumps({'state': state, 'products': list(products), 'reasons': list(reasons), 'label': label,
+                                                                           'base': base or b, 'candidate': cand or c, 'report_sha256': h}))
 
     def arms(self, f_c1, f_arm, arm_c1):
         self.put('F-fresh_vs_c1-G', 'DIFFERENT' if f_c1 else 'IDENTICAL', f_c1)
@@ -99,11 +110,77 @@ class Attribution(unittest.TestCase):
         self.assertTrue(c.startswith('COMBINED_NUMERICS_COMPOSITION_ONLY'), c); self.assertEqual(r['blockers'], [])
         self.assertIn('not attribution to an individual fix', r['note'])
 
+    def test_lane_control_must_be_identical(self):
+        self.arms([P(1)], {'N': [P(1)], 'only254': [P(1)], 'only260': [], 'only270': []}, {'N': [], 'only254': [], 'only260': [P(1)], 'only270': [P(1)]})
+        self.assertEqual(t24.attribute_exit(t24.attribute('G')), 0)                      # healthy baseline for the cases below
+        self.put('F-fresh_vs_F-retained-G', 'DIFFERENT', [P(9)])
+        r = t24.attribute('G'); self.assertEqual(r['status'], 'COMPLETE')
+        self.assertTrue(any('lane control' in b for b in r['blockers'])); self.assertEqual(t24.attribute_exit(r), 1)
+        self.put('F-fresh_vs_F-retained-G', 'INVALID', reasons=['truncated'])
+        r = t24.attribute('G'); self.assertEqual((r['status'], t24.attribute_exit(r)), ('INVALID', 2))
+        (t24.T24 / 'compare' / 'F-fresh_vs_F-retained-G.class.json').unlink()
+        r = t24.attribute('G'); self.assertEqual((r['status'], t24.attribute_exit(r)), ('INVALID', 2))
+
+    def test_class_schema_and_bindings_are_validated(self):
+        def fresh(): self.arms([P(1)], {'N': [P(1)], 'only254': [], 'only260': [], 'only270': []}, {'N': [], 'only254': [P(1)], 'only260': [P(1)], 'only270': [P(1)]})
+        fresh(); self.assertEqual(t24.attribute('G')['status'], 'COMPLETE')
+        for name, mutate in {
+            'identical with products': lambda: self.put('N_vs_c1-G', 'IDENTICAL', [P(2)]),
+            'different without products': lambda: self.put('N_vs_c1-G', 'DIFFERENT', []),
+            'products duplicated': lambda: self.put('N_vs_c1-G', 'DIFFERENT', [P(2), P(2)]),
+            'wrong base binding': lambda: self.put('N_vs_c1-G', 'IDENTICAL', base='/t24-i2/only254-G/out'),
+            'wrong candidate binding': lambda: self.put('N_vs_c1-G', 'IDENTICAL', cand='/t24-i2/F-fresh-G/out'),
+            'report missing': lambda: (t24.T24 / 'compare' / 'N_vs_c1-G.json').unlink(),
+            'report changed after classification': lambda: (t24.T24 / 'compare' / 'N_vs_c1-G.json').write_text('{"tampered": 1}'),
+            'products key absent': lambda: (t24.T24 / 'compare' / 'N_vs_c1-G.class.json').write_text(json.dumps({'state': 'DIFFERENT', 'label': 'N_vs_c1-G'})),
+        }.items():
+            with self.subTest(name):
+                fresh(); mutate(); r = t24.attribute('G')
+                self.assertEqual(r['status'], 'INVALID', (name, r)); self.assertEqual(t24.attribute_exit(r), 2)
+
     def test_transitivity_inconsistency_is_a_blocker(self):
         self.arms([P(7)], {'N': [P(7)], 'only254': [], 'only260': [], 'only270': []}, {'N': [], 'only254': [], 'only260': [P(7)], 'only270': [P(7)]})
         r = t24.attribute('G'); self.assertTrue(any('inconsistency' in b for b in r['blockers']))
 
 
+class ActualCli(unittest.TestCase):
+    """The actual `compare` wrapper against the actual comparator on tiny trees (tests/test_compare_output_trees.py builder; 24 movies of 4x3 pixels)."""
+    @classmethod
+    def setUpClass(cls):
+        import struct
+        spec = importlib.util.spec_from_file_location('tree_fixture', REPO / 'tests/test_compare_output_trees.py')
+        m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+        cls.root = pathlib.Path(tempfile.mkdtemp(dir=TMP))
+        b = m.TestOutputTreeComparator(); b.manifest = {'schema_version': 1, 'movies': [f'Movies/m{i:02}.tiff' for i in range(24)], 'expected_shape_xyz': [4, 3, 1],
+                                                      'joint_star': 'corrected_micrographs.star'}
+        for d in ('base', 'cand', 'cand_diff', 'cand_trunc'): b._write_tree(cls.root / d)
+        p = cls.root / 'cand_diff/Movies/m00.mrc'; x = bytearray(p.read_bytes()); struct.pack_into('<f', x, 1032, 123.0); p.write_bytes(x)
+        p = cls.root / 'cand_trunc/Movies/m00.mrc'; p.write_bytes(p.read_bytes()[:-4])
+        (cls.root / 'scr').mkdir(); os.symlink(REPO, cls.root / 'scr/src'); (cls.root / 'frozen/multigpu/G').mkdir(parents=True); (cls.root / 'data').mkdir()
+        (cls.root / 'data/movies.star').write_text('unused: this fixture manifest pins no input hash')
+        (cls.root / 'manifest.json').write_text(json.dumps(b.manifest)); (cls.root / 'frozen/multigpu/G/manifest.json').write_text(json.dumps(b.manifest))
+        cls.env = dict(os.environ, C1_SCR=str(cls.root / 'scr'), C1_TUTORIAL=str(cls.root / 'data'), C1_FROZEN_RC0=str(cls.root / 'frozen'), QF_W=str(cls.root / 'scr'),
+                       QF_CPUS='0', QF_GPU_UUID='GPU-test', QF_GPU_LOCK=str(cls.root / 'gpu.lock'), OPENBLAS_NUM_THREADS='1')
+
+    def cli(self, cand, label):
+        r = subprocess.run([sys.executable, '-B', str(HERE / 'c1_tutorial24.py'), 'compare', str(self.root / 'base'), str(self.root / cand), label],
+                           env=self.env, capture_output=True, text=True)
+        c = json.loads((self.root / 'scr/t24/compare' / f'{label}.class.json').read_text())
+        return r, c
+
+    def test_identical_different_invalid_through_the_real_wrapper_and_comparator(self):
+        r, c = self.cli('cand', 'identical-G'); self.assertEqual((r.returncode, c['state']), (0, 'IDENTICAL'), r.stdout + r.stderr)
+        r, c = self.cli('cand_diff', 'diff-G'); self.assertEqual((r.returncode, c['state'], c['products']), (1, 'DIFFERENT', ['Movies/m00.mrc']), r.stdout + r.stderr)
+        r, c = self.cli('cand_trunc', 'trunc-G'); self.assertEqual((r.returncode, c['state']), (2, 'INVALID'), r.stdout + r.stderr)
+        run = json.loads((self.root / 'scr/t24/compare/diff-G.run.json').read_text())
+        self.assertEqual(run['rc'], 1); self.assertTrue(run['report_sha256'] and run['comparator_sha256'] and run['cmd'])     # provenance retained
+
+    def test_report_binding_survives_a_real_classification(self):
+        self.cli('cand', 'bind-G'); c = json.loads((self.root / 'scr/t24/compare/bind-G.class.json').read_text())
+        self.assertEqual(c['label'], 'bind-G'); self.assertTrue(c['base'].endswith('/base') and c['candidate'].endswith('/cand') and c['report_sha256'])
+
+
+@unittest.skipUnless(sys.platform.startswith('linux'), 'process-group ownership needs /proc (Linux); run on 4GPUs')
 class LaneRunner(unittest.TestCase):
     def setUp(self):
         self.d = pathlib.Path(tempfile.mkdtemp(dir=TMP)); (self.d / 'bin').mkdir()
@@ -145,6 +222,41 @@ class LaneRunner(unittest.TestCase):
 
     def test_pre_health_failure_stops_before_launch(self):
         r = self.run_(MOCK_PRE='6'); self.assertIsNone(r['rc']); self.assertIn('pre-run', r['error']); self.assertFalse(self.marker.exists())
+
+    def own_pid_script(self, name, body):
+        pid = self.d / f'{name}.pid'; self.sh(f'bin/{name}', f'#!/bin/sh\n{body.format(pid=pid)}\n'); return self.d / f'bin/{name}', pid
+
+    @staticmethod
+    def alive(pid):
+        try: os.kill(pid, 0)
+        except ProcessLookupError: return False
+        try: return open(f'/proc/{pid}/stat').read().rsplit(')', 1)[1].split()[0] != 'Z'
+        except OSError: return os.path.exists(f'/proc/{pid}')
+
+    def test_timeout_terminates_reaps_and_cleans_before_health_and_lease_release(self):
+        child, pidf = self.own_pid_script('grand', 'sleep 120 &\necho $! > {pid}\nsleep 120')
+        seen = []; real = lane.health
+        def spy(label):
+            if label.endswith('-post'): seen.append(self.alive(int(pidf.read_text())))      # descendant must already be gone
+            return 0, 'ok'
+        lane.health = spy
+        try:
+            r = lane.run_case_nb('t', child, [], self.d, self.d / 'logs', True, timeout=2)
+        finally: lane.health = real
+        gp = int(pidf.read_text())
+        self.assertIsNone(r['rc']); self.assertIn('timeout', r['error']); self.assertIn('process group terminated', r['error'])
+        self.assertIn(gp, r['cleanup']['members_before']); self.assertEqual(r['cleanup']['remaining'], [])
+        self.assertFalse(self.alive(gp)); self.assertEqual(seen, [False])
+        self.assertTrue(r['cleanup']['sigterm'])
+
+    def test_descendant_outliving_a_successful_child_is_terminated_and_fails(self):
+        child, pidf = self.own_pid_script('orphan', 'sleep 120 &\necho $! > {pid}\nexit 0')
+        r = lane.run_case_nb('t', child, [], self.d, self.d / 'logs', True, timeout=20)
+        gp = int(pidf.read_text()); self.assertEqual((r['rc'], r['child_rc']), (38, 0)); self.assertIn('outlived', r['error'])
+        self.assertIn(gp, r['cleanup']['members_before']); self.assertFalse(self.alive(gp))
+
+    def test_clean_child_reports_no_cleanup_needed(self):
+        r = self.run_(); self.assertEqual(r['cleanup']['members_before'], []); self.assertEqual(r['rc'], 0)
 
     def test_post_health_failure_after_successful_child_is_rc37_with_lease_held(self):
         seen = []

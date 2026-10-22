@@ -116,8 +116,9 @@ def classify(rc, report, manifest):
     n = len(manifest.get('movies') or [])
     for side in ('base', 'candidate'):
         s = report.get(side)
-        if not isinstance(s, dict) or s.get('movie_count') != n or s.get('mrc_count') != n or s.get('star_count') != n:
-            bad.append(f'{side} validation summary missing or not {n} movies/MRC/STAR')
+        # the comparator counts the n per-movie STAR files plus the joint STAR
+        if not isinstance(s, dict) or s.get('movie_count') != n or s.get('mrc_count') != n or s.get('star_count') != n + 1:
+            bad.append(f'{side} validation summary missing or not {n} movies, {n} MRC and {n + 1} STAR (per-movie + joint)')
     if report.get('comparison_scope') != 'products': bad.append(f'comparison_scope {report.get("comparison_scope")!r}')
     mrc = report.get('mrc_sha256')
     if not isinstance(mrc, dict) or len(mrc) != n: bad.append('mrc_sha256 map missing or incomplete')
@@ -157,6 +158,7 @@ def _compare(base, cand, label, cfg=None):
            'manifest_sha256': _sha(mp) if mp.exists() else None, 'input_star_sha256': _sha(DATA / 'movies.star'), 'comparator_sha256': _sha(CMP),
            'report_sha256': _sha(rep) if rep.exists() else None}
     (out / f'{label}.run.json').write_text(json.dumps(run, indent=1) + '\n')
+    cls.update(label=label, base=str(base), candidate=str(cand), report_sha256=run['report_sha256'])      # bindings checked by attribute()
     (out / f'{label}.class.json').write_text(json.dumps(cls, indent=1) + '\n')
     return cls
 
@@ -168,31 +170,53 @@ def compare(base, cand, label):
 
 
 def attribute(cfg):
-    """Per changed product (F -> C1): which arm reproduces C1's bytes. Reads only validated class files; invalid/missing input is never identity."""
-    def get(label):
+    """Per changed product (F -> C1): which arm reproduces C1's bytes. Reads only validated class files; invalid/missing input is never identity.
+
+    Every class file is checked for schema (state, products list of unique strings, IDENTICAL has none, DIFFERENT has some) and binding (label, the arms'
+    expected tree paths, and the stored comparator report hash). The frozen-lane control F-fresh vs the retained RC0 F tree must be IDENTICAL."""
+    import hashlib
+
+    def get(label, base_end=None, cand_end=None):
         try:
             c = json.loads((T24 / 'compare' / f'{label}.class.json').read_text())
         except (OSError, ValueError):
             return None, f'{label}: class file missing or unreadable'
-        if c.get('state') not in ('IDENTICAL', 'DIFFERENT'):
-            return None, f'{label}: {c.get("state")} {c.get("reasons")}'
-        return set(c.get('products') or []), None
+        if not isinstance(c, dict) or c.get('state') not in ('IDENTICAL', 'DIFFERENT', 'INVALID'):
+            return None, f'{label}: malformed class file'
+        if c['state'] == 'INVALID':
+            return None, f'{label}: INVALID {c.get("reasons")}'
+        prods = c.get('products')
+        if not isinstance(prods, list) or not all(isinstance(x, str) for x in prods) or len(set(prods)) != len(prods):
+            return None, f'{label}: products missing, not strings or duplicated'
+        if (c['state'] == 'IDENTICAL') != (not prods):
+            return None, f'{label}: state {c["state"]} inconsistent with {len(prods)} products'
+        if c.get('label') != label: return None, f'{label}: class file bound to label {c.get("label")!r}'
+        for key, end in (('base', base_end), ('candidate', cand_end)):
+            if end is not None and not str(c.get(key, '')).rstrip('/').endswith(end): return None, f'{label}: {key} {c.get(key)!r} is not {end}'
+        rep = T24 / 'compare' / f'{label}.json'
+        try: h = hashlib.sha256(rep.read_bytes()).hexdigest()
+        except OSError: return None, f'{label}: comparator report missing'
+        if c.get('report_sha256') != h: return None, f'{label}: comparator report changed after classification'
+        return set(prods), None
     problems, out = [], {'cfg': cfg, 'status': 'INVALID', 'note': 'N reproduces the combination #254+#260+#270; it is not attribution to an individual fix'}
     arms = ('N', 'only254', 'only260', 'only270')
-    f_c1, e = get(f'F-fresh_vs_c1-{cfg}')
+    f_dir = f'/{T24.name}/F-fresh-{cfg}/out'; arm_dir = lambda a: f'/{T24.name}/{a}-{cfg}/out'
+    f_c1, e = get(f'F-fresh_vs_c1-{cfg}', f_dir, arm_dir('c1'))
     if e: problems.append(e)
     f_arm, arm_c1 = {}, {}
     for a in arms:
-        f_arm[a], e1 = get(f'F-fresh_vs_{a}-{cfg}')
-        arm_c1[a], e2 = get(f'{a}_vs_c1-{cfg}')
+        f_arm[a], e1 = get(f'F-fresh_vs_{a}-{cfg}', f_dir, arm_dir(a))
+        arm_c1[a], e2 = get(f'{a}_vs_c1-{cfg}', arm_dir(a), arm_dir('c1'))
         problems += [x for x in (e1, e2) if x]
-    lane, e = get(f'F-fresh_vs_F-retained-{cfg}')
-    out['lane_control_F_fresh_vs_F_retained'] = ('MISSING_OR_INVALID: ' + e) if e else ('IDENTICAL' if not lane else f'DIFFERENT {sorted(lane)[:5]}')
+    lane, e = get(f'F-fresh_vs_F-retained-{cfg}', f'/multigpu/{cfg}/s0', f_dir)
+    if e: problems.append('lane control ' + e)
     if problems:
         out['problems'] = problems
         (T24 / f'attribution-{cfg}.json').write_text(json.dumps(out, indent=1) + '\n')
         return out
     rows, blockers = {}, []
+    out['lane_control_F_fresh_vs_F_retained'] = 'IDENTICAL' if not lane else f'DIFFERENT {sorted(lane)[:5]}'
+    if lane: blockers.append(f'lane control F-fresh vs retained RC0 F differs in {len(lane)} products: the lane/tooling does not reproduce the frozen baseline')
     for prod in sorted(f_c1):
         repro = [a for a in arms if prod not in arm_c1[a]]
         incons = [a for a in repro if prod not in f_arm[a]]
@@ -211,6 +235,11 @@ def attribute(cfg):
     return out
 
 
+def attribute_exit(r):
+    """0 complete without blockers; 1 complete with blockers (unattributed, N->C1 change, lane control not identical, ...); 2 invalid input."""
+    return 2 if r['status'] != 'COMPLETE' else (1 if r['blockers'] else 0)
+
+
 if __name__ == '__main__':
     c = sys.argv[1]
     if c == 'run': run(sys.argv[2], sys.argv[3], sys.argv[4], '--cpu' in sys.argv)
@@ -218,4 +247,4 @@ if __name__ == '__main__':
     elif c == 'compare': compare(*sys.argv[2:5])
     elif c == 'attribute':
         r = attribute(sys.argv[2]); print(json.dumps({k: v for k, v in r.items() if k != 'product_attribution'}, indent=1))
-        sys.exit(2 if r['status'] != 'COMPLETE' else (1 if r['blockers'] else 0))
+        sys.exit(attribute_exit(r))

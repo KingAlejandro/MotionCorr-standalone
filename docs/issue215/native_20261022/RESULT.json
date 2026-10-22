@@ -1,0 +1,72 @@
+{
+  "source_head": "fc1c8e6f18fe1f33d4a7cc68da2fbc467bd01c16",
+  "source_file_count": 7260,
+  "native_gpu_index": 2,
+  "native_gpu_uuid": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+  "cpu_affinity": [
+    8,
+    9
+  ],
+  "numeric_threads": 1,
+  "build_parallel": 2,
+  "configure": "PASS",
+  "cuda_nvcomp_compile": "PASS",
+  "local_focused_host_checks": "4/4 PASS",
+  "remote_focused_host_checks": "4/4 PASS",
+  "fake_cuda_controls": "18/18 PASS (host only)",
+  "later_chunk_native": "8/8 PASS",
+  "early_identity_native": "9/9 PASS",
+  "native_subprocess_exits": [
+    0,
+    0
+  ],
+  "fixed_mutation_acceptance": [
+    true,
+    true
+  ],
+  "mutant_fixed_predicate_acceptance": [
+    false,
+    false
+  ],
+  "attempt01": "FAIL receipt XML schema; native UNRUN",
+  "attempt02": "FAIL receipt source inventory; native UNRUN",
+  "attempt03_driver": "FAIL immediate post-run idle check sampled 6% utilization",
+  "original_postrun_hardware_fields": "PASS from original XML captured under lock",
+  "read_only_followup_idle_and_hardware": "PASS",
+  "further_gpu_workloads_after_idle_failure": 0,
+  "gate_waivers": 0,
+  "production_changes": false,
+  "pushes": false,
+  "limits": [
+    "Instrumented fixture-specific CUDA correctness evidence only",
+    "No performance or scientific qualification",
+    "Full suite not rerun",
+    "Arbitrary corrupt-Deflate safety not established"
+  ],
+  "archives": [
+    {
+      "path": "/mnt/clathrin/motioncorr-215-native-20261022-409be643-a01/raw-evidence.tar.gz",
+      "bytes": 386569,
+      "sha256": "503cb2ef22541461c7dcb20660a46b2f8ccb33abafd5cba215d7daa070e38601",
+      "indexed_members": 170,
+      "status": "PASS",
+      "verification": "all archived bytes rehashed"
+    },
+    {
+      "path": "/mnt/clathrin/motioncorr-215-native-20261022-409be643-a02/raw-evidence.tar.gz",
+      "bytes": 6514,
+      "sha256": "61252e69c41a8354d2e804701be573def38f869e9efdfde0c67aca689086375f",
+      "indexed_members": 9,
+      "status": "PASS",
+      "verification": "all archived bytes rehashed"
+    },
+    {
+      "path": "/mnt/clathrin/motioncorr-215-native-20261022-409be643-a03/raw-evidence.tar.gz",
+      "bytes": 1200438,
+      "sha256": "5be33e5e262e3036ee638da0d4cd740b5f616f90467211d96287179059006996",
+      "indexed_members": 373,
+      "status": "PASS",
+      "verification": "all archived bytes rehashed"
+    }
+  ]
+}

@@ -364,6 +364,15 @@ Production binaries are unchanged F `6d68e2d6` Release builds, identified by has
 UNRUN on this tooling head: full QF, fresh scientific/performance acceptance and unrelated route/format campaigns.
 Historical F results retain F. Evidence: `docs/post_rc0/issue240/README.md`.
 
+## Post-RC0 #235: test hygiene
+
+PR implementation head `d7e797f9bc01f155733f2dee3cdec3a473c3c288` (base `c8844894`; subsequent changes are evidence/docs only).
+Re-entry class: tests only, §9.4. Local macOS arm64 Release build rc 0; affected CTests
+`ProfilingKit`, `TestHygiene235`, `TruncatedGainDefect` passed 3/3. Both new controls fail on unfixed source and pass on this head.
+ProfilingKit's direct run: 134 internal tests, one existing platform skip. No numerical gate changed.
+UNRUN: PanFS, native CUDA, QF and full CTest; no qualification result at F is relabelled.
+Evidence and commands: `docs/post_rc0/issue235/README.md`.
+
 ## Post-RC0 #246: fake CLI compiler-settle timeout
 
 PR implementation head `927e5b5cfa51cf72187f182ecffd0693111c71f7`, base `c8844894` (following commit is evidence/docs only).

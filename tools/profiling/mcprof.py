@@ -22,6 +22,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import unittest
 
@@ -655,8 +656,22 @@ def cmd_report(a, rest):
 
 
 def cmd_selftest(a, rest):
-    suite = unittest.defaultTestLoader.discover(os.path.join(HERE, "tests"), top_level_dir=HERE)
-    res = unittest.TextTestRunner(verbosity=2 if a.verbose else 1).run(suite)
+    # Network TMPDIRs can retain open/unlinked files and fail rmdir with
+    # ENOTEMPTY. Keep selftest scratch (including subprocesses) on local /tmp.
+    old_tempdir = tempfile.tempdir
+    old_tmpdir = os.environ.get("TMPDIR")
+    with tempfile.TemporaryDirectory(prefix="mcprof-selftest-", dir="/tmp") as scratch:
+        try:
+            tempfile.tempdir = scratch
+            os.environ["TMPDIR"] = scratch
+            suite = unittest.defaultTestLoader.discover(os.path.join(HERE, "tests"), top_level_dir=HERE)
+            res = unittest.TextTestRunner(verbosity=2 if a.verbose else 1).run(suite)
+        finally:
+            tempfile.tempdir = old_tempdir
+            if old_tmpdir is None:
+                os.environ.pop("TMPDIR", None)
+            else:
+                os.environ["TMPDIR"] = old_tmpdir
     return 0 if res.wasSuccessful() and res.testsRun > 0 else 1
 
 

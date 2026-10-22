@@ -96,8 +96,7 @@ bool fitBoundaryOracle(const std::string& mutation)
         require(frames.size() == (c.missing_row ? 40u : 45u), "incorrect observed mask size");
         int rank=0; RFLOAT condition=0;
         ThirdOrderPolynomialModel model = fitBoundaryProductionAdapter(frames,xs,ys,shifts_x,shifts_y,
-            mutation == "axis-normalization" ? 96 : 128,
-            mutation == "axis-normalization" ? 128 : 96,rank,condition);
+            128,96,rank,condition);
         require(rank == 18 && std::isfinite(condition) && condition < 6000,
                 std::string(c.name)+": rank/condition admission failed");
         long double temporal[2][3] = {};
@@ -117,7 +116,11 @@ bool fitBoundaryOracle(const std::string& mutation)
         // Actual pre-write model evaluation; fixed ROI, every 0-based frame.
         for (int f=0; f<5; ++f) for (int y=12; y<84; ++y) for (int x=12; x<116; ++x) {
             RFLOAT vx,vy;
-            require(model.getShiftAt(f,x/128.0-.5,y/96.0-.5,vx,vy)==0, "native model query failed");
+            // Mutate only the fit-to-field coordinate boundary. The fitted
+            // inputs, geometry, coefficients and rank/condition stay baseline.
+            const RFLOAT query_x = x/(mutation == "axis-normalization" ? 96.0 : 128.0)-.5;
+            const RFLOAT query_y = y/(mutation == "axis-normalization" ? 128.0 : 96.0)-.5;
+            require(model.getShiftAt(f,query_x,query_y,vx,vy)==0, "native model query failed");
             require(std::isfinite(vx) && std::isfinite(vy), "nonfinite native field");
             const long double tx = f*(-13.L/16-(.012L*(x-64)-.008L*(y-48))/4);
             const long double ty = f*(17.L/32-(.006L*(x-64)-.010L*(y-48))/4);

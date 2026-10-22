@@ -1,0 +1,26 @@
+{
+  "schema": "fit-axis-evaluation-mutant/1",
+  "frozen_utc": "2026-10-22T17:03:18.817111+00:00",
+  "historical_head": "baf85d50b592b414e9843bb5cd0c4e6318e8ff74",
+  "old_test_sha256": "f40146aacb2e2664c2c9201addc532d32d5a50b9262f1f2f0ca44094de34f696",
+  "new_test_sha256": "362c3a204dec3b2577ffd8d303029956b2100230d8d86f06a0f63bfbe9d1f6fd",
+  "old_fit": "        ThirdOrderPolynomialModel model = fitBoundaryProductionAdapter(frames,xs,ys,shifts_x,shifts_y,\n            mutation == \"axis-normalization\" ? 96 : 128,\n            mutation == \"axis-normalization\" ? 128 : 96,rank,condition);",
+  "new_fit": "        ThirdOrderPolynomialModel model = fitBoundaryProductionAdapter(frames,xs,ys,shifts_x,shifts_y,\n            128,96,rank,condition);",
+  "old_query": "            require(model.getShiftAt(f,x/128.0-.5,y/96.0-.5,vx,vy)==0, \"native model query failed\");",
+  "new_query": "            // Mutate only the fit-to-field coordinate boundary. The fitted\n            // inputs, geometry, coefficients and rank/condition stay baseline.\n            const RFLOAT query_x = x/(mutation == \"axis-normalization\" ? 96.0 : 128.0)-.5;\n            const RFLOAT query_y = y/(mutation == \"axis-normalization\" ? 128.0 : 96.0)-.5;\n            require(model.getShiftAt(f,query_x,query_y,vx,vy)==0, \"native model query failed\");",
+  "semantics": "Fit original geometry128x96 with identical observation inputs; axis-normalization changes only model-query x/96-.5,y/128-.5; baseline query x/128-.5,y/96-.5 remains unchanged.",
+  "frozen_bounds": {
+    "coefficient_abs_px": 1e-07,
+    "field_vector_max_px": 2e-05,
+    "condition_admission": 6000
+  },
+  "historical_attempt03": "FAIL: old mutant swapped fit dimensions, exact-all9 rank/condition admission exception; not an ordinary oracle kill. Baseline7/existing4/sign7/frame7 successes remain historical.",
+  "api_evidence": {
+    "production_fit": "src/motioncorr_runner.cpp:3861-3899 uses patch_xs/nx-.5 and patch_ys/ny-.5",
+    "model_query": "src/micrograph_model.cpp:35 getShiftAt consumes already normalized x/y; Micrograph::getShiftAt normalizes by width/height before forwarding to model",
+    "production_source_sha256": {
+      "src/motioncorr_runner.cpp": "8a3a1ad80edebc6959abbb80d118a0a358f703ff5041a0ade4995cbc2307d903",
+      "src/micrograph_model.cpp": "609c401d00bcd2fdee2c484da315ff5d809d2e5a81ef11df7733c65d129d5756"
+    }
+  }
+}

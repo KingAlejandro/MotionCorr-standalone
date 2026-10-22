@@ -138,3 +138,86 @@ This tests-only change supplies the affected native controls under post-freeze
 policy §9.4; no QF rerun is required. Full CPU/CUDA/nvCOMP suites, Tier A,
 known-motion/corpus identity, performance and scientific acceptance were not
 rerun and retain their earlier source revisions.
+
+## Cancellation ownership follow-up (2026-10-22)
+
+Source base: `21002113c52e933d5c85281e6347a4f6b5e28bb2` (PR #244).
+The [spawn-registration review](https://github.com/KingAlejandro/MotionCorr-standalone/pull/244#discussion_r4314688675)
+and [repeated-cancellation review](https://github.com/KingAlejandro/MotionCorr-standalone/pull/244#discussion_r4314915622)
+identified two driver-only gaps: cancellation before the detached child's handle
+was assigned, and another signal escaping the TERM/reap grace period.
+
+`run_process` now temporarily defers Python SIGINT/SIGTERM handlers across spawn
+and handle registration. It delivers a pending cancellation inside the cleanup
+`try`, preserving SIGINT's `KeyboardInterrupt` and the driver's SIGTERM error.
+The handler enters deferral before delivering the first cancellation; further
+signals cannot interrupt cleanup, including its TERM grace and KILL/reap waits.
+The original handlers return after cleanup. The OS signal mask is never blocked
+across exec. The existing 150-second TERM grace, 10-second KILL/reap limit,
+timeout failure, command receipts, genuine CUDA fault and product predicates
+are unchanged. No production source or recorded native evidence is changed.
+
+The new device-free `StickyCudaProcessLifecycle` CTest runs actual `main` and
+`run_process`, real detached Python children and temporary real flocks. GPU/host
+admission and health queries are replaced. Two spawn-window signal variants and
+all four repeated SIGINT/SIGTERM combinations require the child to be reaped and
+its process group absent **before** post-run health checking; the lease must
+still exclude a competing open during signaling, waits and health checking, and
+be acquirable afterward. A TERM-ignoring child requires KILL escalation. Other
+cases cover timeout rejection, spawn failure and completed exit 0/1 receipts.
+The test also checks exec signal masks and handler restoration. Negative
+controls always kill/reap their own child even after an assertion fails.
+
+Local validation on macOS arm64, Python 3.13.7, serial execution with
+`OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1`:
+
+```sh
+python3 tests/test_sticky_cuda_process_lifecycle.py -v
+cmake -S . -B build/issue213-lifecycle -DCMAKE_BUILD_TYPE=Release \
+  -DCUDA=OFF -DBUILD_TESTING=ON \
+  -DPython3_EXECUTABLE=/Users/alex.konstantinov/.local/bin/python3
+ctest --test-dir build/issue213-lifecycle -R '^StickyCudaProcessLifecycle$' \
+  -j1 --output-on-failure
+python3 -m py_compile tests/run_sticky_cuda_control.py \
+  tests/test_sticky_cuda_process_lifecycle.py
+git diff --check
+```
+
+Results: focused CTest **PASS** (1/1; five unittest methods, ten cases), CPU
+configure **PASS**, syntax and whitespace checks **PASS**. The first configure
+with `/opt/homebrew/bin/python3` selected Python 3.14.8 without NumPy and failed;
+the explicit Python 3.13.7 above imports NumPy 2.4.2. No CPU binary was built.
+Existing host occupancy was checked; unrelated busy processes were left alone.
+
+For the discriminating negative control, load only `run_process` from the exact
+base into the same driver module, then run the two cancellation methods:
+
+```sh
+python3 - <<'PY'
+import ast, io, subprocess, sys, unittest
+sys.path.insert(0, 'tests')
+import test_sticky_cuda_process_lifecycle as checks
+base = '21002113c52e933d5c85281e6347a4f6b5e28bb2'
+source = subprocess.check_output(
+    ['git', 'show', base + ':tests/run_sticky_cuda_control.py'], text=True)
+node = next(n for n in ast.parse(source).body
+            if isinstance(n, ast.FunctionDef) and n.name == 'run_process')
+exec(compile(ast.Module(body=[node], type_ignores=[]), '<old-run_process>', 'exec'),
+     checks.driver.__dict__)
+suite = unittest.TestSuite(checks.Lifecycle(name) for name in (
+    'test_spawn_registration_cancellation',
+    'test_repeated_cancellation_during_term_reap'))
+result = unittest.TextTestRunner(stream=io.StringIO()).run(suite)
+assert len(result.failures) == 6 and not result.errors
+assert all('child was not reaped' in trace for _, trace in result.failures)
+print('PASS: unchanged base rejected in all six cancellation variants')
+PY
+```
+
+Result: **PASS** as a negative control (six expected unreaped-child assertion
+failures against old code, zero errors; harness cleanup reaped the children).
+The current source's genuine CUDA fault control is **UNRUN**: no GPU allocation
+was used. Linux execution, full suites, performance and scientific validation
+are **UNRUN** for this follow-up; prior native results above retain their own
+source revision and scope. Ready for independent source review and current-head
+CI; this local CPU evidence alone is not a merge or native qualification verdict.

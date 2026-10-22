@@ -8,6 +8,7 @@ Each arm is a fresh process; no cudaDeviceReset is used. Logs are retained on
 failure, including the mandatory post-run nvidia-smi health check.
 """
 import argparse
+import contextlib
 import hashlib
 import json
 import os
@@ -57,16 +58,74 @@ def gpu_state(uuid, work, name, settle=False):
     return fields[3]
 
 
+@contextlib.contextmanager
+def _process_cancellation():
+    """Defer Python cancellation across spawn/registration and TERM/reap.
+
+    Do not block OS signals around Popen: that would pass a blocked signal mask
+    through exec to the child. Once cancellation is delivered, keep subsequent
+    signals deferred until cleanup has finished and the old handlers return.
+    """
+    previous = {sig: signal.getsignal(sig) for sig in (signal.SIGINT, signal.SIGTERM)}
+    deferred = True
+    pending = None
+
+    def interrupt(signum, frame):
+        nonlocal deferred, pending
+        if deferred:
+            if pending is None:
+                pending = (signum, frame)
+            return
+        # Shield cleanup before invoking a handler that can raise. In particular,
+        # a second cancellation must not escape while unwinding the first one.
+        deferred = True
+        handler = previous[signum]
+        if callable(handler):
+            handler(signum, frame)
+        else:
+            raise RuntimeError(f"driver interrupted by signal {signum}")
+
+    def resume():
+        nonlocal deferred
+        deferred = False
+        if pending is not None:
+            interrupt(*pending)
+
+    def defer():
+        nonlocal deferred
+        deferred = True
+
+    try:
+        for sig, handler in previous.items():
+            if handler != signal.SIG_IGN:
+                signal.signal(sig, interrupt)
+        yield resume, defer
+        # On normal completion the child has been reaped; do not swallow a
+        # cancellation recorded between wait's return and handler restoration.
+        resume()
+    finally:
+        for sig, handler in previous.items():
+            signal.signal(sig, handler)
+
+
 def run_process(argv, cwd, env, work, name, timeout=120):
     # The outer timeout is a failure, never an accepted fatal exit. Fresh process
     # groups bound direct movie runs; the dataset launcher reaps its own workers.
-    with (work / (name + ".txt")).open("w") as log:
-        process = subprocess.Popen(argv, cwd=cwd, env=env, stdout=log,
-                                   stderr=subprocess.STDOUT, start_new_session=True)
+    with (work / (name + ".txt")).open("w") as log, _process_cancellation() as (resume, defer):
+        process = None
         try:
-            rc = process.wait(timeout=timeout)
+            process = subprocess.Popen(argv, cwd=cwd, env=env, stdout=log,
+                                       stderr=subprocess.STDOUT, start_new_session=True)
+            # A pending interruption is delivered only after assignment, inside
+            # the cleanup-protected region.
+            resume()
+            try:
+                rc = process.wait(timeout=timeout)
+            finally:
+                defer()
         except BaseException as error:
-            if process.poll() is None:
+            defer()
+            if process is not None and process.poll() is None:
                 os.killpg(process.pid, signal.SIGTERM)
                 try:
                     # The dataset coordinator gives its nested launcher up to

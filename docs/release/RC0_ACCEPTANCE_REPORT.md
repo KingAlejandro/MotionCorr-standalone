@@ -263,3 +263,60 @@ the fixed CLI's provenance records that same witness. The production settle defa
 The bench lock protected other agents from this compiler-presence control. No C++ build or GPU execution was performed.
 UNRUN: full CTest, QF, performance and scientific campaigns. Evidence: `docs/post_rc0/issue246/README.md`.
 This identifies the independent harness cause of #245's retained 75/76 CPU record and failed rerun; those historical results remain FAIL.
+
+## Post-RC0 #253: CUDA C2R boundary contract
+
+[PR #254](https://github.com/KingAlejandro/MotionCorr-standalone/pull/254), class **CUDA/shared** under
+POST_FREEZE_TEST_PLAN §9. Base main `36913740`; implementation `e539660cc6fc56e32ad29ef25ee28dee3e0dcbbc`;
+final CUDA-test oracle `adf990fd9801e1124814e3c4fcb30a3a7fd8ff42`. The five CUDA C2R consumers project
+non-Hermitian self-conjugate columns in consumption scratch. CPU code and resident spectra are unchanged.
+Intentional CUDA product differences reproduce FFTW's real inverse to rounding; maintainer sign-off is pending.
+No dependency, numerical tolerance, convergence or publication-policy change.
+
+On 4GPUs, A100 80 GB PCIe GPU3 `GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d`, CPUs 88–95, GPU correctness lock,
+benchmark-lock checks, Release, CUDA 12.8.61/cuFFT 11.3.3: full CTest **74/74 CPU** (`e539660c`),
+**110/110 CUDA** and **113/113 CUDA+nvCOMP** (`adf990fd`), zero skips. The intervening change is only the
+CUDA dose-test oracle, excluded from the CPU build; CPU sources/configuration are identical. Both CUDA builds
+also pass the adapted #123 matrix, **16/16 cases and 28 native arms each**, with UUID and gain-effect controls.
+The full CTest includes the relevant truncation, patch/reconstruction, failure/publication and D11 controls.
+
+The 4096² production inverse test fails on main and the session launch-removal mutant (exit 1), and passes on
+the fix (exit 0): maximum relative error **0.0121215 → 5.22079e-7**. The native five-size PlanMany matrix reproduces
+the leak at 4096²; the other requested geometries stay at rounding in this fixture. All five C2R sites and their
+input provenance are audited in the evidence. Initial harness/oracle failures remain retained; the final full
+nvCOMP suite was rerun after correcting its inverse oracle, without relaxing its exact-byte checks.
+
+For the requested EMPIAR-10216 `FoilHole_14961495…1739` movie, all eight G/L × CPU/CUDA × main/fixed runs exit 0.
+CPU pixels/core headers and movie STARs are identical before/after. CUDA-vs-CPU relative micrograph RMSE (non-DW / DW):
+G **0.0196406 / 0.0165909 → 0.0193900 / 0.0164632**; 5×5 L **0.823504 / 0.434362 → 0.0369230 / 0.0173291**.
+The serialized local model's coefficient relative RMSE is **0.374524 → 0.00784136**; its evaluated field relative
+RMSE is **0.206829 → 0.00472496** (definition and STAR-formatting limitation in the evidence). Every
+`compare_motioncorr.py --gate backend` record remains **FAIL**, retained for the record only. **S1 is not closed.**
+
+Re-entry is scoped: the full seven-family QF route campaign, full EER/#204/retry dataset replays, multi-GPU
+publication, optional external-fixture `CudaU16FailurePaths`, sanitizer, other platforms/devices/cuFFT versions,
+D14 timing and downstream CTF/FSC/B-factor are **not rerun** on this candidate. Their earlier rows keep their
+original SHAs; this does not turn them into candidate passes. Supported configurations and the frozen RC0/tag
+record are unchanged. No merge or new tag is recommended by this evidence alone; independent review,
+current-head CI and maintainer sign-off remain required.
+
+Evidence, full audit, commands, hashes, counts, failures and limits: [issue253/README.md](../post_rc0/issue253/README.md).
+Implementation CI on `adf990fd`, run [39351741856](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39351741856),
+passes Ubuntu build/smoke and CUDA compile-only; native evidence is the separate record above.
+## Post-freeze candidate #257: CUDA peak-fit arithmetic
+
+PR #260, production `531e9db4`, final tests `6c23ba1d` (base main `36913740`):
+CUDA-only fit promotion; CPU source, integer peak selection, thresholds, gates
+and output interfaces unchanged. Native Release CTest on 4GPUs passes CPU
+74/74, CUDA 110/110 and CUDA+nvCOMP 113/113, with no skips. The actual production
+kernel passes the captured pedestal/edge controls; the float-denominator mutant
+fails the named witness. CPU and CUDA known-motion launchers pass their existing
+aggregate policy, retaining the noisy characterization accuracy failure.
+
+The legacy Tier A exact fixture fails on this branch. A retained frozen-F CPU
+control and this branch's CPU output match exactly on that fixture; the mismatch
+is already present in the control. No tolerance was changed. Raw records and
+limits: [#257 evidence](../post_rc0/issue257/README.md). Combined S1 attribution
+is separate PR #261. A new full QF, performance cost, downstream S1.4 and other
+hardware/toolchains are unrun; earlier qualification rows keep their original
+SHA. Candidate only, no merge/tag/sign-off by this agent.

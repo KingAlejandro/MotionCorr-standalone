@@ -1,0 +1,227 @@
+{
+  "source": {
+    "revision": "d751ff28594902eca75d665ff116e662653481aa",
+    "tree": "d3572b7c1dc9ebd10182ee8cd1e741e14010a581",
+    "scratch": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28",
+    "archive_sha256": "7511b53c37460dcf60c8ee4c7fce2e73bef32b283a4f29a6caf9a1c674048f18",
+    "merged_parents": [
+      "1f0a58bf6e0639d8b62f74da52f250cc664c0b30",
+      "b7f4517669b3eae2f7d83f767b1ef6c7bf3681ad",
+      "2b23fd3cebcab116240ece1566fb7f3510423a25",
+      "09ee7cb0a48a3f9bc0301239af475134cb78cd6d"
+    ]
+  },
+  "host_archive": {
+    "status": "PASS",
+    "archive_sha256": "487f267e6a09f07937a0302f86f67c8dd4d46a815b9cb391f368b9264575352c",
+    "files": 39
+  },
+  "native_archive": {
+    "status": "PASS",
+    "archive_sha256": "def6ab01874e4ff5a118feb3e307f80e6bdcee5973358cd3b0484526b3ec2435",
+    "files": 536
+  },
+  "source_admission": {
+    "utc": "2026-10-22T14:39:47.595832+00:00",
+    "count": 7421,
+    "status": "PASS",
+    "manifest_sha256": "5563f5e40ed00d14d1af3ee1fae819c86a49ba971fbf47cec680b8a739f5cdd4"
+  },
+  "binaries": {
+    "build-cpu/motioncorr": "ad912663461712892c17d1cb33e92d2cee5058fc940ea11bfb438d9ca71da722",
+    "build-cpu/hermitian_projection_oracle": "3fd121998ae39b3db8ef3eb5d45a76fa8dac7c8551e5b6aa5ef53d0e34eb1375",
+    "build-cpu/peak_fit_arithmetic": "28e8f61f707c21f429e4c8f66f32bd702f7658fc7d6704c6d36fb8c43cb419b4",
+    "build-cpu/realspace_border_validation": "ddde217710b13ed76b051b30eb9f75f338158608639136f93900469f82337283",
+    "build-cuda/motioncorr": "cc96a8b629d6c249f46d7f1ea8fc904c6672713c5c0e283fc2c1d4535772fe96",
+    "build-cuda/hermitian_projection_oracle": "3fd121998ae39b3db8ef3eb5d45a76fa8dac7c8551e5b6aa5ef53d0e34eb1375",
+    "build-cuda/peak_fit_arithmetic": "28e8f61f707c21f429e4c8f66f32bd702f7658fc7d6704c6d36fb8c43cb419b4",
+    "build-cuda/realspace_border_validation": "ddde217710b13ed76b051b30eb9f75f338158608639136f93900469f82337283",
+    "build-cuda/cuda_hermitian_inverse": "70dcbdf0541fb99cba61c9a92b9c425ee709ddde4e8a900ff3dbdf31f587f3cc",
+    "build-cuda/cuda_hermitian_ccf": "28af61c0d8279a4fb5c158f13ddfcca001b6ec8274f1c80b791af76819590b28",
+    "build-cuda/cuda_peak_fit": "c1a39f08968c38e564a4e62742c26628e23be48567ba0f5c863f873dee70b15e",
+    "build-cuda/cuda_realspace_border_branch": "71b112b2974ef94a7f035638f631cef583d28f3d7978b38ac074942e0525547e",
+    "build-cuda/cuda_hermitian_inverse_no_projection": "dd72a38d10e7f88cd9b43384700ac13303e2d687186c8a82d90a00ef9048870d",
+    "build-cuda/cuda_hermitian_inverse_wrapper_no_projection": "49b722c597e6c59152560d4a7662b93abd48bb741bee667204575f753235473d",
+    "build-cuda/cuda_hermitian_inverse_dose_no_projection": "b71a43ea262304fe1d2e93c1f050b4882ea4b40b83391f63e11c9d20e6d45b3a",
+    "build-cuda/cuda_hermitian_inverse_oracle_session_no_projection": "7bcf3f8982a4f405ba6c44a3c04274bf0264b241c43eda29cab978f6e776732f",
+    "build-cuda/cuda_hermitian_inverse_oracle_session_zero_boundary": "aca9e9f758abae9fae801fb15fba42062e5ad9354d8d20c78c30a9a8b75d0cd9",
+    "build-cuda/cuda_hermitian_inverse_oracle_wrapper_zero_boundary": "d6deb6c2bc5559f4ba2cef26425b4889299cf8f332088021f6d77fd526d4db57",
+    "build-cuda/cuda_hermitian_inverse_oracle_dose_zero_boundary": "d72755eeadbb4ccf8fb65e568c077bb48537263331964e5699da43cf77f7d1bd",
+    "build-cuda/cuda_patch_batch_ccf_perpatch_no_projection": "3c31a748a13d0ff215ac26e61a67e80d72550d0b846b7693dee0b25880cd7cfc",
+    "build-cuda/cuda_patch_batch_ccf_batched_no_projection": "e2ba81f25362b3fc40a7938f4e9dde3a8b5591bddbe6e4dc82babeea738f8374",
+    "build-cuda/cuda_peak_fit_float_denominator": "cd7468acfe3ac0f187c6075d6251f34214fa22ab7c006245aed4b5f0d4d5cd76",
+    "build-cuda/cuda_realspace_border_branch_x_float": "98af36eea8ecef428e71b6e3cf018ac809ad68aef01c4e1f84cea6396cf89a1b",
+    "build-cuda/cuda_realspace_border_branch_y_float": "2bcc5a42f85072b92d82c473d2a99966a793c0df7f417cf53a4290c45c5f9622"
+  },
+  "host_ctest": {
+    "status": "PASS",
+    "total": 6,
+    "exit": 0
+  },
+  "native_ctest": {
+    "status": "PASS",
+    "total": 16,
+    "skipped": 0,
+    "exit": 0
+  },
+  "raw_native_mutants": [
+    {
+      "label": "raw-cuda_hermitian_inverse_no_projection",
+      "argv": [
+        "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_hermitian_inverse_no_projection"
+      ],
+      "cwd": "/home/alex",
+      "exit": 1,
+      "expected": 1,
+      "utc": "2026-10-22T14:40:10.282218+00:00",
+      "affinity": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "diagnostic": "INVARIANT FAIL",
+      "diagnostic_found": true
+    },
+    {
+      "label": "raw-cuda_hermitian_inverse_wrapper_no_projection",
+      "argv": [
+        "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_hermitian_inverse_wrapper_no_projection"
+      ],
+      "cwd": "/home/alex",
+      "exit": 1,
+      "expected": 1,
+      "utc": "2026-10-22T14:40:13.281829+00:00",
+      "affinity": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "diagnostic": "INVARIANT FAIL",
+      "diagnostic_found": true
+    },
+    {
+      "label": "raw-cuda_hermitian_inverse_dose_no_projection",
+      "argv": [
+        "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_hermitian_inverse_dose_no_projection"
+      ],
+      "cwd": "/home/alex",
+      "exit": 1,
+      "expected": 1,
+      "utc": "2026-10-22T14:40:16.782207+00:00",
+      "affinity": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "diagnostic": "INVARIANT FAIL",
+      "diagnostic_found": true
+    },
+    {
+      "label": "raw-cuda_patch_batch_ccf_perpatch_no_projection",
+      "argv": [
+        "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_patch_batch_ccf_perpatch_no_projection"
+      ],
+      "cwd": "/home/alex",
+      "exit": 1,
+      "expected": 1,
+      "utc": "2026-10-22T14:40:17.498833+00:00",
+      "affinity": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "diagnostic": "INVARIANT FAIL",
+      "diagnostic_found": true
+    },
+    {
+      "label": "raw-cuda_patch_batch_ccf_batched_no_projection",
+      "argv": [
+        "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_patch_batch_ccf_batched_no_projection"
+      ],
+      "cwd": "/home/alex",
+      "exit": 1,
+      "expected": 1,
+      "utc": "2026-10-22T14:40:18.224240+00:00",
+      "affinity": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "diagnostic": "INVARIANT FAIL",
+      "diagnostic_found": true
+    },
+    {
+      "label": "raw-cuda_peak_fit_float_denominator",
+      "argv": [
+        "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_peak_fit_float_denominator"
+      ],
+      "cwd": "/home/alex",
+      "exit": 1,
+      "expected": 1,
+      "utc": "2026-10-22T14:40:18.915757+00:00",
+      "affinity": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "diagnostic": "exact-rounded-zero",
+      "diagnostic_found": true
+    },
+    {
+      "label": "raw-cuda_realspace_border_branch_x_float",
+      "argv": [
+        "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_realspace_border_branch_x_float"
+      ],
+      "cwd": "/home/alex",
+      "exit": 1,
+      "expected": 1,
+      "utc": "2026-10-22T14:40:20.067282+00:00",
+      "affinity": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "diagnostic": "FAIL:",
+      "diagnostic_found": true
+    },
+    {
+      "label": "raw-cuda_realspace_border_branch_y_float",
+      "argv": [
+        "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_realspace_border_branch_y_float"
+      ],
+      "cwd": "/home/alex",
+      "exit": 1,
+      "expected": 1,
+      "utc": "2026-10-22T14:40:21.229788+00:00",
+      "affinity": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "diagnostic": "FAIL:",
+      "diagnostic_found": true
+    }
+  ],
+  "native_arms": {
+    "total": 16,
+    "exit_zero": 16
+  },
+  "no_performance_claim": true,
+  "no_scientific_aggregate_pass": true,
+  "limitations": [
+    "No full CTest",
+    "No nvCOMP build/run",
+    "No 100-movie census",
+    "No real-movie 4096 arm",
+    "No downstream science",
+    "No timing comparison"
+  ]
+}

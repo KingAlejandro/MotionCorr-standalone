@@ -210,6 +210,9 @@ install(TARGETS motioncorr RUNTIME DESTINATION bin)
 
 include(CTest)
 if(BUILD_TESTING)
+    # The same byte-preservation checker used by the native C2R oracle.
+    add_executable(hermitian_projection_oracle tests/test_hermitian_projection_oracle.cpp)
+    add_test(NAME HermitianProjectionOracle COMMAND hermitian_projection_oracle)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
     add_executable(cpu_dose_symmetry tests/test_cpu_dose_symmetry.cpp)
@@ -248,6 +251,18 @@ if(BUILD_TESTING)
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
     add_test(NAME PatchRetryState COMMAND patch_retry_state)
+    # #257: device-free exact-rational controls, shared with the actual CUDA
+    # kernel test. Host replays establish arithmetic only, not GPU execution.
+    add_executable(peak_fit_arithmetic tests/peak_fit_arithmetic.cpp)
+    add_test(NAME PeakFitArithmetic COMMAND peak_fit_arithmetic)
+    foreach(_mutation float-denominator early-store wrong-scale)
+        add_test(NAME PeakFitArithmeticMutant_${_mutation}
+            COMMAND peak_fit_arithmetic --expect-mismatch ${_mutation})
+    endforeach()
+    # Device-free controls for the exact predicate used by the CUDA border test.
+    add_executable(realspace_border_validation tests/test_realspace_border_validation.cpp)
+    add_test(NAME RealspaceBorderValidation COMMAND realspace_border_validation)
+    set_tests_properties(RealspaceBorderValidation PROPERTIES LABELS "host" TIMEOUT 30)
     add_executable(defect_parser tests/test_defect_parser.cpp)
     target_link_libraries(defect_parser PRIVATE motioncorr_core)
     # Pure C++ arithmetic regression (issue #97). Registered above the
@@ -748,10 +763,69 @@ if(BUILD_TESTING AND CUDA)
             get_filename_component(_exe "${test_source}" NAME_WE)
             add_executable(${_exe}_${mutant} ${test_source} "${_mutant_cu}")
             target_link_libraries(${_exe}_${mutant} PRIVATE motioncorr_core)
+            target_include_directories(${_exe}_${mutant} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda")
             target_link_options(${_exe}_${mutant} PRIVATE ${ARGN})
-            add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-mismatch)
+            if(test_prefix MATCHES "Oracle")
+                add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-oracle-failure)
+            elseif(test_prefix MATCHES "Hermitian")
+                target_compile_definitions(${_exe}_${mutant} PRIVATE MC_CHECK_HERMITIAN)
+                add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-invariant-failure)
+            else()
+                add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-mismatch)
+            endif()
             set_tests_properties(${test_prefix}_${mutant} PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
         endfunction()
+        add_executable(cuda_hermitian_inverse tests/cuda_hermitian_inverse.cpp)
+        target_link_libraries(cuda_hermitian_inverse PRIVATE motioncorr_core)
+        add_test(NAME CudaHermitianInverse COMMAND cuda_hermitian_inverse)
+        set_tests_properties(CudaHermitianInverse PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        set(HERMITIAN_WRAPS "LINKER:--wrap=cufftMakePlanMany" "LINKER:--wrap=cufftExecC2R")
+        target_link_options(cuda_hermitian_inverse PRIVATE ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianInverseMutant tests/cuda_hermitian_inverse.cpp cuda_movie_session no_projection
+            "mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianInverseMutant tests/cuda_hermitian_inverse.cpp cuda_fft_prep wrapper_no_projection
+            "mc_cuda::projectHermitianColumns(d_comp, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianInverseMutant tests/cuda_hermitian_inverse.cpp cuda_realspace_dw dose_no_projection
+            "mc_cuda::projectHermitianColumns((cufftComplex*)d_Fframe, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        # Output-oracle mutants (invariant check off): removing the projection, or
+        # zeroing the whole boundary columns (a Hermitian but wrong operator), must
+        # be rejected by the host-projected reference.
+        set(ZERO_BOUNDARY "([&]{ const size_t pitch_ = (size_t)(nx / 2 + 1) * sizeof(cufftComplex); cudaMemset2D(PTR, pitch_, 0, sizeof(cufftComplex), ny); if (nx % 2 == 0) cudaMemset2D((PTR) + nx / 2, pitch_, 0, sizeof(cufftComplex), ny); return cudaGetLastError(); }())")
+        function(mc_zero_boundary_expr out ptr)
+            string(REPLACE "PTR" "${ptr}" _expr "${ZERO_BOUNDARY}")
+            set(${out} "${_expr}" PARENT_SCOPE)
+        endfunction()
+        mc_zero_boundary_expr(_zero_session d_inverse_tile)
+        mc_zero_boundary_expr(_zero_wrapper d_comp)
+        mc_zero_boundary_expr(_zero_dose "(cufftComplex*)d_Fframe")
+        mc_cuda_mutant(CudaHermitianOracleMutant tests/cuda_hermitian_inverse.cpp cuda_movie_session oracle_session_no_projection
+            "mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianOracleMutant tests/cuda_hermitian_inverse.cpp cuda_movie_session oracle_session_zero_boundary
+            "mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny)" "${_zero_session}" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianOracleMutant tests/cuda_hermitian_inverse.cpp cuda_fft_prep oracle_wrapper_zero_boundary
+            "mc_cuda::projectHermitianColumns(d_comp, nx, ny)" "${_zero_wrapper}" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianOracleMutant tests/cuda_hermitian_inverse.cpp cuda_realspace_dw oracle_dose_zero_boundary
+            "mc_cuda::projectHermitianColumns((cufftComplex*)d_Fframe, nx, ny)" "${_zero_dose}" ${HERMITIAN_WRAPS})
+        add_executable(cuda_hermitian_ccf tests/cuda_patch_batch.cpp)
+        target_compile_definitions(cuda_hermitian_ccf PRIVATE MC_CHECK_HERMITIAN)
+        target_link_libraries(cuda_hermitian_ccf PRIVATE motioncorr_core)
+        target_link_options(cuda_hermitian_ccf PRIVATE ${PATCH_BATCH_WRAPS})
+        add_test(NAME CudaHermitianCCF COMMAND cuda_hermitian_ccf)
+        set_tests_properties(CudaHermitianCCF PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Include the following inverse in the match to distinguish the two sites.
+        mc_cuda_mutant(CudaHermitianCCFMutant tests/cuda_patch_batch.cpp cuda_alignpatch ccf_perpatch_no_projection
+            "ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));\n        ALIGN_CUFFT(cufftExecC2R(plan_c2r"
+            "ALIGN_LAUNCH(cudaSuccess);\n        ALIGN_CUFFT(cufftExecC2R(plan_c2r" ${PATCH_BATCH_WRAPS})
+        mc_cuda_mutant(CudaHermitianCCFMutant tests/cuda_patch_batch.cpp cuda_alignpatch ccf_batched_no_projection
+            "ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));\n            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r"
+            "ALIGN_LAUNCH(cudaSuccess);\n            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r" ${PATCH_BATCH_WRAPS})
+        add_executable(cuda_peak_fit tests/cuda_peak_fit.cu)
+        target_link_libraries(cuda_peak_fit PRIVATE motioncorr_core)
+        add_test(NAME CudaPeakFit COMMAND cuda_peak_fit)
+        set_tests_properties(CudaPeakFit PROPERTIES LABELS "cuda;hardware" TIMEOUT 60)
+        mc_cuda_mutant(CudaPeakFitMutant tests/cuda_peak_fit.cu cuda_alignpatch float_denominator
+            "double denom_x = vp_x + vn_x - 2.0 * maxval;"
+            "double denom_x = float(vp_x) + float(vn_x) - 2.0f * float(maxval);")
         # shift_retired: retired patches keep receiving phase shifts.
         mc_cuda_mutant(CudaPatchBatchMutant tests/cuda_patch_batch.cpp cuda_alignpatch shift_retired
             "for (int j = 0; j < (int)active.size(); ++j) { const int p = active[j];"
@@ -794,6 +868,19 @@ if(BUILD_TESTING AND CUDA)
         mc_cuda_mutant(CudaVramAliasMutant tests/cuda_vram_alias.cpp cuda_movie_session dw_scratch_over_fourier
             "scratch.block = reinterpret_cast<char*>(d_Iframes);"
             "scratch.block = reinterpret_cast<char*>(d_Fframes);" "LINKER:--wrap=cudaMalloc")
+        # #259: the local warp's border branch must match the CPU's double decision.
+        add_executable(cuda_realspace_border_branch tests/cuda_realspace_border_branch.cpp)
+        target_link_libraries(cuda_realspace_border_branch PRIVATE motioncorr_core)
+        add_test(NAME CudaRealspaceBorderBranch COMMAND cuda_realspace_border_branch)
+        set_tests_properties(CudaRealspaceBorderBranch PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Mutants restore the float floor in one axis; the other axis and the
+        # control cases must still match.
+        mc_cuda_mutant(CudaRealspaceBorderBranchMutant tests/cuda_realspace_border_branch.cpp cuda_realspace_dw x_float
+            "int x0 = (int)floor((double)ix - (double)x_fitted);"
+            "int x0 = (int)floorf(x_target);")
+        mc_cuda_mutant(CudaRealspaceBorderBranchMutant tests/cuda_realspace_border_branch.cpp cuda_realspace_dw y_float
+            "int y0 = (int)floor((double)iy - (double)y_fitted);"
+            "int y0 = (int)floorf(y_target);")
         # Worker-lifetime device gain retention: the produced sum is the oracle,
         # so a wrongly reused or wrongly retired buffer changes pixels.
         add_executable(cuda_device_gain_pool tests/cuda_device_gain_pool.cpp)

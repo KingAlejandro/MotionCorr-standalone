@@ -1,0 +1,47 @@
+{
+  "utc": "2026-10-22T14:32:18.460091+00:00",
+  "steps": [
+    {
+      "argv": [
+        "ssh",
+        "-J",
+        "ccp4-gateway",
+        "-o",
+        "BatchMode=yes",
+        "4GPUs",
+        "taskset -c 10-13 bash -s"
+      ],
+      "stdin": "set -eu\nS=/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28\nkill -0 \"$(cat \"$S/build.pid\")\" 2>/dev/null && { ps -p \"$(cat \"$S/build.pid\")\" -o pid,stat,args; test -f \"$S/build.exit\"; }\ntest \"$(cat \"$S/build.exit\")\" = 1\nmv \"$S/logs\" \"$S/build-attempt1-logs\"\nmv \"$S/build-driver.log\" \"$S/build-attempt1-driver.log\"\nmv \"$S/build.exit\" \"$S/build-attempt1.exit\"\nmv \"$S/build.pid\" \"$S/build-attempt1.pid\"\nmv \"$S/build_remote.py\" \"$S/build_remote.attempt1.py\"\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "scp",
+        "-o",
+        "ProxyJump=ccp4-gateway",
+        "docs/post_rc0/parallel_20261022/numerics/build_remote.py",
+        "4GPUs:/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "ssh",
+        "-J",
+        "ccp4-gateway",
+        "-o",
+        "BatchMode=yes",
+        "4GPUs",
+        "taskset -c 10-13 bash -s"
+      ],
+      "stdin": "S=/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28\nnohup taskset -c 10-13 /usr/bin/python3 \"$S/build_remote.py\" \"$S\" > \"$S/build-driver.log\" 2>&1 < /dev/null &\necho $! > \"$S/build.pid\"\ncat \"$S/build.pid\"\n",
+      "exit": 0,
+      "stdout": "2980726\n",
+      "stderr": ""
+    }
+  ]
+}

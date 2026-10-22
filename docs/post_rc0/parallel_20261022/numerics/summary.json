@@ -1,0 +1,1741 @@
+{
+  "source": "d751ff28594902eca75d665ff116e662653481aa",
+  "schema": "motion-diagnostics/2",
+  "native_arms": 16,
+  "native_process_exit_zero": 16,
+  "checker_status_counts": {
+    "FAIL": 10,
+    "PASS": 2,
+    "UNIDENTIFIABLE": 4
+  },
+  "sampling_status_counts": {
+    "OUTSIDE_FIXED_ROI": 4,
+    "VALID": 12
+  },
+  "global_status_counts": {
+    "CONVERGED": 12,
+    "ITERATION_LIMIT": 4
+  },
+  "no_scientific_aggregate_pass": true,
+  "no_timing_claim": true,
+  "rows": [
+    {
+      "backend": "cpu",
+      "case": "zero",
+      "native_exit": 0,
+      "checker_exit": 0,
+      "checker_status": "PASS",
+      "sampling_status": "VALID",
+      "field_gate": "PASS",
+      "field_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "field_angstrom": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "global_alignment": {
+        "status": "CONVERGED",
+        "basis": "printed RMSD versus unchanged 0.5 px threshold",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 0.0
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": []
+      },
+      "patch_alignment": [],
+      "patch_converged": 0,
+      "patch_total": 0,
+      "motion_model_version": 0,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "64bd481ecc62cc19c3ff20573368d7a9ed1ac87dc19585b2b12e0929e35ffd23",
+      "star_sha256": "baa09a10e0583bf703a2f73d83abaf007ec49a660fcb1bb8aefc3b33559af429"
+    },
+    {
+      "backend": "cpu",
+      "case": "integer",
+      "native_exit": 0,
+      "checker_exit": 1,
+      "checker_status": "FAIL",
+      "sampling_status": "VALID",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 0.29786778665475044,
+        "p95": 0.48769178867805424,
+        "max": 0.48769178867805424
+      },
+      "field_angstrom": {
+        "rms": 0.2636129911894542,
+        "p95": 0.431607232980078,
+        "max": 0.431607232980078
+      },
+      "global_alignment": {
+        "status": "ITERATION_LIMIT",
+        "basis": "printed RMSD versus unchanged 0.5 px threshold",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 5.71299
+          },
+          {
+            "iteration": 2,
+            "rmsd_px": 0.867494
+          },
+          {
+            "iteration": 3,
+            "rmsd_px": 0.57658
+          },
+          {
+            "iteration": 4,
+            "rmsd_px": 0.974519
+          },
+          {
+            "iteration": 5,
+            "rmsd_px": 0.923235
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": []
+      },
+      "patch_alignment": [],
+      "patch_converged": 0,
+      "patch_total": 0,
+      "motion_model_version": 0,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "a1f4e8cd1deb3e0cdf36797a63ff9e289a81b4e03653b76c67b5805a936ce684",
+      "star_sha256": "259a59360b3cde321195dccc07837d1ed0584b97b818c7d9f8ef5d6ec4f14f35"
+    },
+    {
+      "backend": "cpu",
+      "case": "fractional",
+      "native_exit": 0,
+      "checker_exit": 1,
+      "checker_status": "FAIL",
+      "sampling_status": "VALID",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 0.5921536730251702,
+        "p95": 0.7948194679573471,
+        "max": 0.7948194679573471
+      },
+      "field_angstrom": {
+        "rms": 0.5240560006272756,
+        "p95": 0.7034152291422523,
+        "max": 0.7034152291422523
+      },
+      "global_alignment": {
+        "status": "ITERATION_LIMIT",
+        "basis": "printed RMSD versus unchanged 0.5 px threshold",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 2.67662
+          },
+          {
+            "iteration": 2,
+            "rmsd_px": 0.735208
+          },
+          {
+            "iteration": 3,
+            "rmsd_px": 0.760209
+          },
+          {
+            "iteration": 4,
+            "rmsd_px": 0.716634
+          },
+          {
+            "iteration": 5,
+            "rmsd_px": 1.2464
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": []
+      },
+      "patch_alignment": [],
+      "patch_converged": 0,
+      "patch_total": 0,
+      "motion_model_version": 0,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "8eb9611455fc575978f6c76319d6ff170dedd8cd0aa6a953538ffb21306f6f8b",
+      "star_sha256": "4f419457ee91955468b42a1b67c1c24f4141f61a2f1812a8ae84a30913081478"
+    },
+    {
+      "backend": "cpu",
+      "case": "affine",
+      "native_exit": 0,
+      "checker_exit": 1,
+      "checker_status": "FAIL",
+      "sampling_status": "VALID",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 0.45474292342088196,
+        "p95": 0.8389729255617366,
+        "max": 1.029511788133801
+      },
+      "field_angstrom": {
+        "rms": 0.4024474872274806,
+        "p95": 0.742491039122137,
+        "max": 0.9111179324984138
+      },
+      "global_alignment": {
+        "status": "CONVERGED",
+        "basis": "printed RMSD versus unchanged 0.5 px threshold",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 2.50009
+          },
+          {
+            "iteration": 2,
+            "rmsd_px": 0.618338
+          },
+          {
+            "iteration": 3,
+            "rmsd_px": 0.614909
+          },
+          {
+            "iteration": 4,
+            "rmsd_px": 0.306687
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": []
+      },
+      "patch_alignment": [
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.329762
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.490189
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.950926
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.0998224
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.569374
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.300762
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.31917
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.579153
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.367989
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.757239
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.362606
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.447708
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.349928
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        }
+      ],
+      "patch_converged": 9,
+      "patch_total": 9,
+      "motion_model_version": 1,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "394adc7e5abafd8dd7728e448cd4b93b01f0d4ee38ef92bfbb8e0f82df04ea87",
+      "star_sha256": "f560b29e3d4521e1b4d5ca97fa3d649181970b49db90714e9a257709d20c97a8"
+    },
+    {
+      "backend": "cpu",
+      "case": "pedestal",
+      "native_exit": 0,
+      "checker_exit": 1,
+      "checker_status": "FAIL",
+      "sampling_status": "VALID",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 2.3945009135517155,
+        "p95": 4.0720413799013375,
+        "max": 4.398997726755499
+      },
+      "field_angstrom": {
+        "rms": 2.119133308493268,
+        "p95": 3.6037566212126833,
+        "max": 3.8931129881786166
+      },
+      "global_alignment": {
+        "status": "CONVERGED",
+        "basis": "printed RMSD versus unchanged 0.5 px threshold",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 0.0
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": []
+      },
+      "patch_alignment": [
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        }
+      ],
+      "patch_converged": 9,
+      "patch_total": 9,
+      "motion_model_version": 1,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "9da290140f3dc54011ca17af0573f894c6f59b9adffdc64f818199a448a917c8",
+      "star_sha256": "ad084d840d1f510596507c3efb2dead59b3829ac975d6668869ab3fdfbf7673b"
+    },
+    {
+      "backend": "cpu",
+      "case": "noisy",
+      "native_exit": 0,
+      "checker_exit": 1,
+      "checker_status": "FAIL",
+      "sampling_status": "OUTSIDE_FIXED_ROI",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 2.6474150479459193,
+        "p95": 4.945276016691183,
+        "max": 11.19089344214544
+      },
+      "field_angstrom": {
+        "rms": 2.342962317432139,
+        "p95": 4.376569274771697,
+        "max": 9.903940696298715
+      },
+      "global_alignment": {
+        "status": "ITERATION_LIMIT",
+        "basis": "printed RMSD versus unchanged 0.5 px threshold",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 1.85486
+          },
+          {
+            "iteration": 2,
+            "rmsd_px": 1.19205
+          },
+          {
+            "iteration": 3,
+            "rmsd_px": 1.35101
+          },
+          {
+            "iteration": 4,
+            "rmsd_px": 1.26005
+          },
+          {
+            "iteration": 5,
+            "rmsd_px": 1.40998
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": []
+      },
+      "patch_alignment": [
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 2.25021
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.800448
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.452546
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 1.60617
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.526592
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.416659
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 3.8124
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 1.21254
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.681383
+            },
+            {
+              "iteration": 4,
+              "rmsd_px": 0.613557
+            },
+            {
+              "iteration": 5,
+              "rmsd_px": 0.243603
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 1.29588
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.307921
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 7.44627
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 1.28123
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 1.23388
+            },
+            {
+              "iteration": 4,
+              "rmsd_px": 1.27657
+            },
+            {
+              "iteration": 5,
+              "rmsd_px": 0.403117
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 8.99486
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 2.66464
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 1.11025
+            },
+            {
+              "iteration": 4,
+              "rmsd_px": 0.243494
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 3.2947
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 1.76948
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.649574
+            },
+            {
+              "iteration": 4,
+              "rmsd_px": 0.241993
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 6.84995
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 1.08621
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.47798
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "printed RMSD versus unchanged 0.5 px threshold",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 1.00256
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.559942
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.424884
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": []
+        }
+      ],
+      "patch_converged": 9,
+      "patch_total": 9,
+      "motion_model_version": 1,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "f353c077578cef6c64cd120f510efbd9d06f09deb38e16028049bfb9a397b4ec",
+      "star_sha256": "9dc77e8ad53879aa40e7f4ad8ac2523e4b70ceb2e620097302202bee69ca8171"
+    },
+    {
+      "backend": "cpu",
+      "case": "flat",
+      "native_exit": 0,
+      "checker_exit": 0,
+      "checker_status": "UNIDENTIFIABLE",
+      "sampling_status": "VALID",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 2.37787654746835,
+        "p95": 3.8830561417522667,
+        "max": 3.8830561417522667
+      },
+      "field_angstrom": {
+        "rms": 2.1044207445094902,
+        "p95": 3.4365046854507564,
+        "max": 3.4365046854507564
+      },
+      "global_alignment": {
+        "status": "CONVERGED",
+        "basis": "printed RMSD versus unchanged 0.5 px threshold",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 0.0
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": []
+      },
+      "patch_alignment": [],
+      "patch_converged": 0,
+      "patch_total": 0,
+      "motion_model_version": 0,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "7c57c5dab84475751a7386d78987042aafb2f74a1d34f2fec69f2041b75b6aef",
+      "star_sha256": "ee62be3ea44afcc1eeb37b1db3b0ecae081d9dfaf4f4ec671613768918ba1e3a"
+    },
+    {
+      "backend": "cpu",
+      "case": "repeated",
+      "native_exit": 0,
+      "checker_exit": 1,
+      "checker_status": "UNIDENTIFIABLE",
+      "sampling_status": "OUTSIDE_FIXED_ROI",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 18.68232578869665,
+        "p95": 31.642843286436825,
+        "max": 31.642843286436825
+      },
+      "field_angstrom": {
+        "rms": 16.533858322996537,
+        "p95": 28.00391630849659,
+        "max": 28.00391630849659
+      },
+      "global_alignment": {
+        "status": "CONVERGED",
+        "basis": "printed RMSD versus unchanged 0.5 px threshold",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 10.2299
+          },
+          {
+            "iteration": 2,
+            "rmsd_px": 6.26897
+          },
+          {
+            "iteration": 3,
+            "rmsd_px": 6.71193
+          },
+          {
+            "iteration": 4,
+            "rmsd_px": 0.223607
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": []
+      },
+      "patch_alignment": [],
+      "patch_converged": 0,
+      "patch_total": 0,
+      "motion_model_version": 0,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "dbc8ab887a0e7b7dfb128562fa4bf1f6b763357c72d7bdbf31703a9c7f35901f",
+      "star_sha256": "57482c3db71e3999c4850d3ba790d434d784fb54bd17dfee4a4b4dd00592ca6d"
+    },
+    {
+      "backend": "cuda",
+      "case": "zero",
+      "native_exit": 0,
+      "checker_exit": 0,
+      "checker_status": "PASS",
+      "sampling_status": "VALID",
+      "field_gate": "PASS",
+      "field_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "field_angstrom": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "global_alignment": {
+        "status": "CONVERGED",
+        "basis": "explicit native CUDA verdict",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 0.0
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": [
+          "yes"
+        ]
+      },
+      "patch_alignment": [],
+      "patch_converged": 0,
+      "patch_total": 0,
+      "motion_model_version": 0,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "d51feca6eb5f660711b6d54275115ec24269bf6cd2e5b649be4575a25a3ab6fe",
+      "star_sha256": "baa09a10e0583bf703a2f73d83abaf007ec49a660fcb1bb8aefc3b33559af429"
+    },
+    {
+      "backend": "cuda",
+      "case": "integer",
+      "native_exit": 0,
+      "checker_exit": 1,
+      "checker_status": "FAIL",
+      "sampling_status": "VALID",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 0.2850258109094684,
+        "p95": 0.467056334884776,
+        "max": 0.467056334884776
+      },
+      "field_angstrom": {
+        "rms": 0.2522478426548795,
+        "p95": 0.41334485637302676,
+        "max": 0.41334485637302676
+      },
+      "global_alignment": {
+        "status": "CONVERGED",
+        "basis": "explicit native CUDA verdict",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 7.22021
+          },
+          {
+            "iteration": 2,
+            "rmsd_px": 2.23051
+          },
+          {
+            "iteration": 3,
+            "rmsd_px": 0.988703
+          },
+          {
+            "iteration": 4,
+            "rmsd_px": 0.523113
+          },
+          {
+            "iteration": 5,
+            "rmsd_px": 0.345044
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": [
+          "yes"
+        ]
+      },
+      "patch_alignment": [],
+      "patch_converged": 0,
+      "patch_total": 0,
+      "motion_model_version": 0,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "de5bee9afae6f9ef57427387ea56c042ad7b96547029f485926253d5f147f0a9",
+      "star_sha256": "f40ab53af1a4273afd53b7a5dd15e2746c7a5d72aa6f7ffff80a0012f5c570c6"
+    },
+    {
+      "backend": "cuda",
+      "case": "fractional",
+      "native_exit": 0,
+      "checker_exit": 1,
+      "checker_status": "FAIL",
+      "sampling_status": "VALID",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 0.3794256954134761,
+        "p95": 0.608179917869704,
+        "max": 0.608179917869704
+      },
+      "field_angstrom": {
+        "rms": 0.3357917404409264,
+        "p95": 0.5382392273146881,
+        "max": 0.5382392273146881
+      },
+      "global_alignment": {
+        "status": "CONVERGED",
+        "basis": "explicit native CUDA verdict",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 2.80135
+          },
+          {
+            "iteration": 2,
+            "rmsd_px": 0.477261
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": [
+          "yes"
+        ]
+      },
+      "patch_alignment": [],
+      "patch_converged": 0,
+      "patch_total": 0,
+      "motion_model_version": 0,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "9a8f0ab326330e36ec9535933c9368621a8d96542e32a18595a4a63bb3b8ba7b",
+      "star_sha256": "719a8d89b4d5321bf66afeb48dbd94c3e89e5b0bf34c96865222c88589c206a5"
+    },
+    {
+      "backend": "cuda",
+      "case": "affine",
+      "native_exit": 0,
+      "checker_exit": 1,
+      "checker_status": "FAIL",
+      "sampling_status": "VALID",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 0.3231458938843417,
+        "p95": 0.6142026979643092,
+        "max": 0.9231206564860022
+      },
+      "field_angstrom": {
+        "rms": 0.2859841160876424,
+        "p95": 0.5435693876984135,
+        "max": 0.816961780990112
+      },
+      "global_alignment": {
+        "status": "CONVERGED",
+        "basis": "explicit native CUDA verdict",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 2.78324
+          },
+          {
+            "iteration": 2,
+            "rmsd_px": 0.472634
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": [
+          "yes"
+        ]
+      },
+      "patch_alignment": [
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.34
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.43
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.76
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.48
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "ITERATION_LIMIT",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.57
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.67
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.73
+            },
+            {
+              "iteration": 4,
+              "rmsd_px": 0.78
+            },
+            {
+              "iteration": 5,
+              "rmsd_px": 0.78
+            },
+            {
+              "iteration": 1,
+              "rmsd_px": 0.57
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.67
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.73
+            },
+            {
+              "iteration": 4,
+              "rmsd_px": 0.78
+            },
+            {
+              "iteration": 5,
+              "rmsd_px": 0.78
+            }
+          ],
+          "attempts": 2,
+          "explicit_cuda_verdicts": [
+            "no",
+            "no"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.18
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.5
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.41
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.98
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.32
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.4
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.15
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        }
+      ],
+      "patch_converged": 8,
+      "patch_total": 9,
+      "motion_model_version": 1,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "3d92f682473d4e7d10c765deb1cd0bf0f155cca0e744f47b0428af617b0d2359",
+      "star_sha256": "c9e5ab3668de215f66e911abe0fc299bd5d1e563d623c93869ef4efdfc1a0b7f"
+    },
+    {
+      "backend": "cuda",
+      "case": "pedestal",
+      "native_exit": 0,
+      "checker_exit": 1,
+      "checker_status": "FAIL",
+      "sampling_status": "VALID",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 2.3945009135517155,
+        "p95": 4.0720413799013375,
+        "max": 4.398997726755499
+      },
+      "field_angstrom": {
+        "rms": 2.119133308493268,
+        "p95": 3.6037566212126833,
+        "max": 3.8931129881786166
+      },
+      "global_alignment": {
+        "status": "CONVERGED",
+        "basis": "explicit native CUDA verdict",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 0.0
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": [
+          "yes"
+        ]
+      },
+      "patch_alignment": [
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.0
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        }
+      ],
+      "patch_converged": 9,
+      "patch_total": 9,
+      "motion_model_version": 1,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "3aae22d689e8f3e1c36e2d31f4dec3b8bb17743d9068403257b63ec2c8114c52",
+      "star_sha256": "ad084d840d1f510596507c3efb2dead59b3829ac975d6668869ab3fdfbf7673b"
+    },
+    {
+      "backend": "cuda",
+      "case": "noisy",
+      "native_exit": 0,
+      "checker_exit": 1,
+      "checker_status": "FAIL",
+      "sampling_status": "OUTSIDE_FIXED_ROI",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 2.9784448633906364,
+        "p95": 5.1499058452691235,
+        "max": 21.600514563105534
+      },
+      "field_angstrom": {
+        "rms": 2.6359237041007133,
+        "p95": 4.557666673063174,
+        "max": 19.1164553883484
+      },
+      "global_alignment": {
+        "status": "ITERATION_LIMIT",
+        "basis": "explicit native CUDA verdict",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 1.89356
+          },
+          {
+            "iteration": 2,
+            "rmsd_px": 0.662723
+          },
+          {
+            "iteration": 3,
+            "rmsd_px": 0.592997
+          },
+          {
+            "iteration": 4,
+            "rmsd_px": 0.701403
+          },
+          {
+            "iteration": 5,
+            "rmsd_px": 0.529881
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": [
+          "no"
+        ]
+      },
+      "patch_alignment": [
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 1.75
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.65
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.27
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 1.63
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 1.36
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.47
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "ITERATION_LIMIT",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 4.99
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 1.36
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.51
+            },
+            {
+              "iteration": 4,
+              "rmsd_px": 0.68
+            },
+            {
+              "iteration": 5,
+              "rmsd_px": 0.79
+            },
+            {
+              "iteration": 1,
+              "rmsd_px": 4.99
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 1.36
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.51
+            },
+            {
+              "iteration": 4,
+              "rmsd_px": 0.68
+            },
+            {
+              "iteration": 5,
+              "rmsd_px": 0.79
+            }
+          ],
+          "attempts": 2,
+          "explicit_cuda_verdicts": [
+            "no",
+            "no"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 2.75
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.57
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.31
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 1.71
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.83
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.48
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 9.19
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 5.47
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 1.13
+            },
+            {
+              "iteration": 4,
+              "rmsd_px": 0.7
+            },
+            {
+              "iteration": 5,
+              "rmsd_px": 0.43
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 3.39
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.89
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.42
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 0.9
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.37
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        },
+        {
+          "status": "CONVERGED",
+          "basis": "explicit native CUDA verdict",
+          "iterations": [
+            {
+              "iteration": 1,
+              "rmsd_px": 1.82
+            },
+            {
+              "iteration": 2,
+              "rmsd_px": 0.63
+            },
+            {
+              "iteration": 3,
+              "rmsd_px": 0.33
+            }
+          ],
+          "attempts": 1,
+          "explicit_cuda_verdicts": [
+            "yes"
+          ]
+        }
+      ],
+      "patch_converged": 8,
+      "patch_total": 9,
+      "motion_model_version": 1,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "311014847ea7b740b825d46a2b74b97c5a9bb2af529f17e21311a53e7c00e1f0",
+      "star_sha256": "ae6a9e79a769bcf67b712d69550bb3be566e853983f3873705d68e1e14ad6db7"
+    },
+    {
+      "backend": "cuda",
+      "case": "flat",
+      "native_exit": 0,
+      "checker_exit": 0,
+      "checker_status": "UNIDENTIFIABLE",
+      "sampling_status": "VALID",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 2.37787654746835,
+        "p95": 3.8830561417522667,
+        "max": 3.8830561417522667
+      },
+      "field_angstrom": {
+        "rms": 2.1044207445094902,
+        "p95": 3.4365046854507564,
+        "max": 3.4365046854507564
+      },
+      "global_alignment": {
+        "status": "CONVERGED",
+        "basis": "explicit native CUDA verdict",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 0.0
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": [
+          "yes"
+        ]
+      },
+      "patch_alignment": [],
+      "patch_converged": 0,
+      "patch_total": 0,
+      "motion_model_version": 0,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "6c7f59b611163fe670280e53598dd6a16c991862d7540746bb802cc751baae9d",
+      "star_sha256": "ee62be3ea44afcc1eeb37b1db3b0ecae081d9dfaf4f4ec671613768918ba1e3a"
+    },
+    {
+      "backend": "cuda",
+      "case": "repeated",
+      "native_exit": 0,
+      "checker_exit": 1,
+      "checker_status": "UNIDENTIFIABLE",
+      "sampling_status": "OUTSIDE_FIXED_ROI",
+      "field_gate": "FAIL",
+      "field_px": {
+        "rms": 68.67462629585252,
+        "p95": 127.90873516398322,
+        "max": 127.90873516398322
+      },
+      "field_angstrom": {
+        "rms": 60.77704427182949,
+        "p95": 113.19923062012515,
+        "max": 113.19923062012515
+      },
+      "global_alignment": {
+        "status": "CONVERGED",
+        "basis": "explicit native CUDA verdict",
+        "iterations": [
+          {
+            "iteration": 1,
+            "rmsd_px": 36.7764
+          },
+          {
+            "iteration": 2,
+            "rmsd_px": 21.3787
+          },
+          {
+            "iteration": 3,
+            "rmsd_px": 35.5225
+          },
+          {
+            "iteration": 4,
+            "rmsd_px": 0.223607
+          }
+        ],
+        "attempts": 1,
+        "explicit_cuda_verdicts": [
+          "yes"
+        ]
+      },
+      "patch_alignment": [],
+      "patch_converged": 0,
+      "patch_total": 0,
+      "motion_model_version": 0,
+      "local_fit_missing_warning": false,
+      "native_log_sha256": "d2001e8da90244bd6f7bc996bf61b20aff5442d51b205077e18a433bf3cec9ac",
+      "star_sha256": "bf7cb16166d0ef1712d75a2e78baa84a2900d3abf7fb0ee49b8c1041af1460f6"
+    }
+  ]
+}

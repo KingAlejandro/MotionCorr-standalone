@@ -1,0 +1,396 @@
+{
+  "main-G": {
+    "DW": {
+      "exit_status": 1,
+      "overall_status": "FAIL",
+      "image": {
+        "num_pixels": 16777216,
+        "pixel_identical": false,
+        "max_abs_pixel_error": 2.3418426513671875,
+        "rmse": 0.3937356483620502,
+        "relative_rmse": 0.016590877895637554,
+        "relative_rmse_denominator": "reference_pixel_population_std",
+        "relative_rmse_denominator_value": 23.73205630460218,
+        "ref_pixel_min": 103.9867935180664,
+        "ref_pixel_max": 348.0623474121094,
+        "ref_pixel_mean": 192.17514038085938,
+        "ref_pixel_std": 23.73205630460218,
+        "test_pixel_min": 103.6829605102539,
+        "test_pixel_max": 347.825927734375,
+        "test_pixel_mean": 192.17684936523438,
+        "test_pixel_std": 23.732011795043945,
+        "core_header_diff_bytes": 8,
+        "label_header_diff_bytes": 3,
+        "normalized_label_diff_bytes": 0,
+        "geometry_matches": true,
+        "relative_rmse_diagnostic": {
+          "value": 0.016590877895637554,
+          "threshold": 0.001,
+          "status": "FAIL",
+          "blocking": false
+        },
+        "passed": false,
+        "fail_reasons": [
+          "Image RMSE 3.937356e-01 > 2.000000e-02"
+        ]
+      }
+    },
+    "nonDW": {
+      "exit_status": 1,
+      "overall_status": "FAIL",
+      "image": {
+        "num_pixels": 16777216,
+        "pixel_identical": false,
+        "max_abs_pixel_error": 19.70751953125,
+        "rmse": 3.5879845265639063,
+        "relative_rmse": 0.01964060800296863,
+        "relative_rmse_denominator": "reference_pixel_population_std",
+        "relative_rmse_denominator_value": 182.6819478308203,
+        "ref_pixel_min": 612.0169067382812,
+        "ref_pixel_max": 2563.027099609375,
+        "ref_pixel_mean": 1476.125244140625,
+        "ref_pixel_std": 182.6819478308203,
+        "test_pixel_min": 614.0009155273438,
+        "test_pixel_max": 2561.692138671875,
+        "test_pixel_mean": 1476.131591796875,
+        "test_pixel_std": 182.68240356445312,
+        "core_header_diff_bytes": 6,
+        "label_header_diff_bytes": 3,
+        "normalized_label_diff_bytes": 0,
+        "geometry_matches": true,
+        "relative_rmse_diagnostic": {
+          "value": 0.01964060800296863,
+          "threshold": 0.001,
+          "status": "FAIL",
+          "blocking": false
+        },
+        "passed": false,
+        "fail_reasons": [
+          "Image RMSE 3.587985e+00 > 2.000000e-02",
+          "Image max pixel error 1.970752e+01 > 5.000000e+00"
+        ]
+      }
+    },
+    "local_model": null
+  },
+  "main-L": {
+    "DW": {
+      "exit_status": 1,
+      "overall_status": "FAIL",
+      "image": {
+        "num_pixels": 16777216,
+        "pixel_identical": false,
+        "max_abs_pixel_error": 97.28605651855469,
+        "rmse": 9.0973339774684,
+        "relative_rmse": 0.43436215906335873,
+        "relative_rmse_denominator": "reference_pixel_population_std",
+        "relative_rmse_denominator_value": 20.944121829317567,
+        "ref_pixel_min": 112.09441375732422,
+        "ref_pixel_max": 351.1203308105469,
+        "ref_pixel_mean": 192.17388916015625,
+        "ref_pixel_std": 20.944121829317567,
+        "test_pixel_min": 112.08352661132812,
+        "test_pixel_max": 342.5456848144531,
+        "test_pixel_mean": 192.17535400390625,
+        "test_pixel_std": 20.904338836669922,
+        "core_header_diff_bytes": 8,
+        "label_header_diff_bytes": 1,
+        "normalized_label_diff_bytes": 0,
+        "geometry_matches": true,
+        "relative_rmse_diagnostic": {
+          "value": 0.43436215906335873,
+          "threshold": 0.001,
+          "status": "FAIL",
+          "blocking": false
+        },
+        "passed": false,
+        "fail_reasons": [
+          "Image RMSE 9.097334e+00 > 2.000000e-02",
+          "Image max pixel error 9.728606e+01 > 5.000000e+00"
+        ]
+      }
+    },
+    "nonDW": {
+      "exit_status": 1,
+      "overall_status": "FAIL",
+      "image": {
+        "num_pixels": 16777216,
+        "pixel_identical": false,
+        "max_abs_pixel_error": 1058.73193359375,
+        "rmse": 125.78862330347394,
+        "relative_rmse": 0.823504057221391,
+        "relative_rmse_denominator": "reference_pixel_population_std",
+        "relative_rmse_denominator_value": 152.7480310514814,
+        "ref_pixel_min": 760.9431762695312,
+        "ref_pixel_max": 2468.48046875,
+        "ref_pixel_mean": 1476.1318359375,
+        "ref_pixel_std": 152.7480310514814,
+        "test_pixel_min": 768.5298461914062,
+        "test_pixel_max": 2384.825927734375,
+        "test_pixel_mean": 1476.138671875,
+        "test_pixel_std": 152.75186157226562,
+        "core_header_diff_bytes": 9,
+        "label_header_diff_bytes": 2,
+        "normalized_label_diff_bytes": 0,
+        "geometry_matches": true,
+        "relative_rmse_diagnostic": {
+          "value": 0.823504057221391,
+          "threshold": 0.001,
+          "status": "FAIL",
+          "blocking": false
+        },
+        "passed": false,
+        "fail_reasons": [
+          "Image RMSE 1.257886e+02 > 2.000000e-02",
+          "Image max pixel error 1.058732e+03 > 5.000000e+00"
+        ]
+      }
+    },
+    "local_model": {
+      "serialized_coefficients": {
+        "rmse": 0.2880551335372057,
+        "relative_rmse": 0.374524019005197,
+        "reference_std": 0.7691232575745924,
+        "relative_l2": 0.37040134360051397,
+        "max_abs": 0.9315150000000001
+      },
+      "evaluated_field": {
+        "rmse": 1.1809661166556196,
+        "relative_rmse": 0.20682868883224673,
+        "reference_std": 5.709875759128705,
+        "relative_l2": 0.20675139455365557,
+        "max_abs": 6.2618769401600245
+      },
+      "definition": "Serialized STAR polynomial only; z=0..58, 21x21 grid including -0.5,+0.5 on each axis; relative RMSE = RMS(error)/population std(CPU field); relative L2 = RMS(error)/RMS(CPU field)."
+    }
+  },
+  "fixed-G": {
+    "DW": {
+      "exit_status": 1,
+      "overall_status": "FAIL",
+      "image": {
+        "num_pixels": 16777216,
+        "pixel_identical": false,
+        "max_abs_pixel_error": 2.297760009765625,
+        "rmse": 0.3907063646670133,
+        "relative_rmse": 0.016463232669444095,
+        "relative_rmse_denominator": "reference_pixel_population_std",
+        "relative_rmse_denominator_value": 23.73205630460218,
+        "ref_pixel_min": 103.9867935180664,
+        "ref_pixel_max": 348.0623474121094,
+        "ref_pixel_mean": 192.17514038085938,
+        "ref_pixel_std": 23.73205630460218,
+        "test_pixel_min": 103.71154022216797,
+        "test_pixel_max": 347.8388977050781,
+        "test_pixel_mean": 192.17514038085938,
+        "test_pixel_std": 23.731918334960938,
+        "core_header_diff_bytes": 8,
+        "label_header_diff_bytes": 2,
+        "normalized_label_diff_bytes": 0,
+        "geometry_matches": true,
+        "relative_rmse_diagnostic": {
+          "value": 0.016463232669444095,
+          "threshold": 0.001,
+          "status": "FAIL",
+          "blocking": false
+        },
+        "passed": false,
+        "fail_reasons": [
+          "Image RMSE 3.907064e-01 > 2.000000e-02"
+        ]
+      }
+    },
+    "nonDW": {
+      "exit_status": 1,
+      "overall_status": "FAIL",
+      "image": {
+        "num_pixels": 16777216,
+        "pixel_identical": false,
+        "max_abs_pixel_error": 19.4276123046875,
+        "rmse": 3.5422097260931555,
+        "relative_rmse": 0.019390036991359192,
+        "relative_rmse_denominator": "reference_pixel_population_std",
+        "relative_rmse_denominator_value": 182.6819478308203,
+        "ref_pixel_min": 612.0169067382812,
+        "ref_pixel_max": 2563.027099609375,
+        "ref_pixel_mean": 1476.125244140625,
+        "ref_pixel_std": 182.6819478308203,
+        "test_pixel_min": 613.8765258789062,
+        "test_pixel_max": 2561.16015625,
+        "test_pixel_mean": 1476.125244140625,
+        "test_pixel_std": 182.68186950683594,
+        "core_header_diff_bytes": 5,
+        "label_header_diff_bytes": 2,
+        "normalized_label_diff_bytes": 0,
+        "geometry_matches": true,
+        "relative_rmse_diagnostic": {
+          "value": 0.019390036991359192,
+          "threshold": 0.001,
+          "status": "FAIL",
+          "blocking": false
+        },
+        "passed": false,
+        "fail_reasons": [
+          "Image RMSE 3.542210e+00 > 2.000000e-02",
+          "Image max pixel error 1.942761e+01 > 5.000000e+00"
+        ]
+      }
+    },
+    "local_model": null
+  },
+  "fixed-L": {
+    "DW": {
+      "exit_status": 1,
+      "overall_status": "FAIL",
+      "image": {
+        "num_pixels": 16777216,
+        "pixel_identical": false,
+        "max_abs_pixel_error": 28.878005981445312,
+        "rmse": 0.36294223336895215,
+        "relative_rmse": 0.017329073824470687,
+        "relative_rmse_denominator": "reference_pixel_population_std",
+        "relative_rmse_denominator_value": 20.944121829317567,
+        "ref_pixel_min": 112.09441375732422,
+        "ref_pixel_max": 351.1203308105469,
+        "ref_pixel_mean": 192.17388916015625,
+        "ref_pixel_std": 20.944121829317567,
+        "test_pixel_min": 111.73973846435547,
+        "test_pixel_max": 351.6822204589844,
+        "test_pixel_mean": 192.1738739013672,
+        "test_pixel_std": 20.944292068481445,
+        "core_header_diff_bytes": 7,
+        "label_header_diff_bytes": 2,
+        "normalized_label_diff_bytes": 0,
+        "geometry_matches": true,
+        "relative_rmse_diagnostic": {
+          "value": 0.017329073824470687,
+          "threshold": 0.001,
+          "status": "FAIL",
+          "blocking": false
+        },
+        "passed": false,
+        "fail_reasons": [
+          "Image RMSE 3.629422e-01 > 2.000000e-02",
+          "Image max pixel error 2.887801e+01 > 5.000000e+00"
+        ]
+      }
+    },
+    "nonDW": {
+      "exit_status": 1,
+      "overall_status": "FAIL",
+      "image": {
+        "num_pixels": 16777216,
+        "pixel_identical": false,
+        "max_abs_pixel_error": 177.8125,
+        "rmse": 5.6399145137304565,
+        "relative_rmse": 0.03692299321245986,
+        "relative_rmse_denominator": "reference_pixel_population_std",
+        "relative_rmse_denominator_value": 152.7480310514814,
+        "ref_pixel_min": 760.9431762695312,
+        "ref_pixel_max": 2468.48046875,
+        "ref_pixel_mean": 1476.1318359375,
+        "ref_pixel_std": 152.7480310514814,
+        "test_pixel_min": 759.4996337890625,
+        "test_pixel_max": 2476.221923828125,
+        "test_pixel_mean": 1476.1318359375,
+        "test_pixel_std": 152.7421112060547,
+        "core_header_diff_bytes": 8,
+        "label_header_diff_bytes": 2,
+        "normalized_label_diff_bytes": 0,
+        "geometry_matches": true,
+        "relative_rmse_diagnostic": {
+          "value": 0.03692299321245986,
+          "threshold": 0.001,
+          "status": "FAIL",
+          "blocking": false
+        },
+        "passed": false,
+        "fail_reasons": [
+          "Image RMSE 5.639915e+00 > 2.000000e-02",
+          "Image max pixel error 1.778125e+02 > 5.000000e+00"
+        ]
+      }
+    },
+    "local_model": {
+      "serialized_coefficients": {
+        "rmse": 0.006030975304954582,
+        "relative_rmse": 0.007841363845858835,
+        "reference_std": 0.7691232575745924,
+        "relative_l2": 0.007755047892205555,
+        "max_abs": 0.023789999999999978
+      },
+      "evaluated_field": {
+        "rmse": 0.02697892072549911,
+        "relative_rmse": 0.0047249575758923235,
+        "reference_std": 5.709875759128705,
+        "relative_l2": 0.00472319180447413,
+        "max_abs": 0.17623777340000402
+      },
+      "definition": "Serialized STAR polynomial only; z=0..58, 21x21 grid including -0.5,+0.5 on each axis; relative RMSE = RMS(error)/population std(CPU field); relative L2 = RMS(error)/RMS(CPU field)."
+    }
+  },
+  "CPU-control-G": {
+    "STAR": {
+      "equal": true,
+      "bytes_identical": true
+    },
+    "DW": {
+      "core_header_identical": true,
+      "labels_equal_after_date_normalization": true,
+      "pixels_identical": true,
+      "metrics": {
+        "rmse": 0.0,
+        "relative_rmse": 0.0,
+        "reference_std": 23.73205630460218,
+        "relative_l2": 0.0,
+        "max_abs": 0.0
+      },
+      "sha256_pixels": "5192c542d206c23e4d2edc0e3c94ff05dbd2bbf73d08f1559a053803db2274d5"
+    },
+    "nonDW": {
+      "core_header_identical": true,
+      "labels_equal_after_date_normalization": true,
+      "pixels_identical": true,
+      "metrics": {
+        "rmse": 0.0,
+        "relative_rmse": 0.0,
+        "reference_std": 182.6819478308203,
+        "relative_l2": 0.0,
+        "max_abs": 0.0
+      },
+      "sha256_pixels": "ae0c4d31613df835320f8bd61cfee4a29dd70d6e5ea4340e5d81e6094f0b1eaa"
+    }
+  },
+  "CPU-control-L": {
+    "STAR": {
+      "equal": true,
+      "bytes_identical": true
+    },
+    "DW": {
+      "core_header_identical": true,
+      "labels_equal_after_date_normalization": true,
+      "pixels_identical": true,
+      "metrics": {
+        "rmse": 0.0,
+        "relative_rmse": 0.0,
+        "reference_std": 20.944121829317567,
+        "relative_l2": 0.0,
+        "max_abs": 0.0
+      },
+      "sha256_pixels": "9dbcb4c1863adda0fcbf2f705914edaca740e4f5820aba06eacbb658015823ec"
+    },
+    "nonDW": {
+      "core_header_identical": true,
+      "labels_equal_after_date_normalization": true,
+      "pixels_identical": true,
+      "metrics": {
+        "rmse": 0.0,
+        "relative_rmse": 0.0,
+        "reference_std": 152.7480310514814,
+        "relative_l2": 0.0,
+        "max_abs": 0.0
+      },
+      "sha256_pixels": "6da0c0314ac4e6488edd5c79fd424a6162187c3ea206c5fd21ba9851768fb060"
+    }
+  }
+}

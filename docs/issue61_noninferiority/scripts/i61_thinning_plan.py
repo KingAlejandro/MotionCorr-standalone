@@ -12,7 +12,6 @@ import hashlib
 import json
 from pathlib import Path
 import re
-import shlex
 
 
 def sha256(data):
@@ -33,10 +32,55 @@ def unique_object(pairs):
 
 
 def tokens(line):
-    lexer = shlex.shlex(line, posix=True)
-    lexer.whitespace_split = True
-    lexer.escape = ""  # STAR paths are not shell escapes.
-    return list(lexer)
+    """Bounded, single-line STAR tokens, with no shell quote/escape semantics.
+
+    '#' begins a comment only at a token boundary. Quotes delimit a token only
+    at its start, and close only before whitespace/end; embedded quotes and
+    backslashes are literal. Semicolon text fields and exotic separators are
+    unsupported rather than reinterpreted.
+    """
+    whitespace = " \t\r\n"
+    if any((ord(c) < 32 or ord(c) == 127 or c.isspace()) and c not in whitespace
+           for c in line):
+        raise ValueError("unsupported control character/whitespace in particle syntax")
+    fields, i = [], 0
+    while i < len(line):
+        if line[i] in whitespace:
+            i += 1
+            continue
+        if line[i] == "#":
+            break
+        if line[i] == ";":
+            raise ValueError("unsupported semicolon particle value")
+        if line[i] in "\"'":
+            quote = line[i]
+            start = i = i + 1
+            while i < len(line):
+                if line[i] in "\r\n":
+                    break
+                if line[i] == quote and (i + 1 == len(line) or line[i + 1] in whitespace):
+                    break
+                i += 1
+            if i == len(line) or line[i] != quote:
+                raise ValueError("unterminated/unsupported quoted particle value")
+            fields.append(line[start:i])
+            i += 1
+        else:
+            start = i
+            while i < len(line) and line[i] not in whitespace:
+                i += 1
+            fields.append(line[start:i])
+    return fields
+
+
+def image_identity(image):
+    """Numeric stack index + exact decoded stack identifier; no filesystem aliasing."""
+    match = re.fullmatch(r"([0-9]+)@([^@]+)", image)
+    if not match or not match[1].lstrip("0"):
+        raise ValueError("unsupported image reference: require positive ASCII index@stack (one @)")
+    # Strip zeros instead of converting an arbitrarily long integer. Equality
+    # is numeric for positive decimal indices without an integer-size limit.
+    return match[1].lstrip("0"), match[2]
 
 
 def read_particles(data):
@@ -83,7 +127,7 @@ def read_particles(data):
         row["index"] = index
         row["movie"] = row["values"][indices["_rlnMicrographName"]]
         row["half"] = row["values"][indices["_rlnRandomSubset"]]
-        image = row["values"][indices["_rlnImageName"]]
+        image = image_identity(row["values"][indices["_rlnImageName"]])
         if row["half"] not in ("1", "2") or image in images:
             raise ValueError("invalid half assignment or duplicate image identity")
         images.add(image)

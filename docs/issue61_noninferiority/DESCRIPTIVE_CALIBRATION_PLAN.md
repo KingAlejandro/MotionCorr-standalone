@@ -51,11 +51,32 @@ half for every full/jackknife subset. Subset names are safe numeric labels, with
 mapping in the manifest. Non-held-out source movies are excluded from every subset.
 
 All surviving particle row bytes, column headers, optics and surrounding metadata/comments
-are preserved. Quoted single-line tokens and CRLF are supported. This is a deliberately
-narrow parser: multiline particle values, missing values, duplicate columns/image identities,
-invalid half labels, inconsistent row widths and multiple particle loops are refused. It is
-not a general STAR or optics validator. It preserves other blocks without interpreting them;
-it does not validate optics references, particle-stack availability, stack pixels or CTF values.
+are preserved. The bounded single-line STAR lexer uses space/tab separators and LF/CRLF
+line endings. A `#` begins a comment only at a token boundary; `movie_A#development` is
+one literal name. Single/double quotes delimit a value only at its start and close only
+before whitespace/end. Quotes inside unquoted tokens, non-closing quotes inside quoted
+tokens, and backslashes are literal. Thus `movie_'A'` cannot alias `movie_A`. Quoted paths
+with whitespace, literal `#` and embedded quotes are supported. Unterminated quotes,
+unquoted semicolon-prefixed values, control characters and other whitespace separators are refused.
+Validation includes non-held source rows and finishes before output creation.
+
+Image references must contain exactly one `@`, a positive ASCII decimal index before it,
+and a nonempty stack identifier after it. Leading index zeros are removed **for duplicate
+identity comparison only**: `000001@stack.mrcs` and `1@stack.mrcs` are the same identity,
+including across movies or halves. Quoted and unquoted spellings decode before comparison.
+The stack identifier remains exact; equal indices in different stack identifiers are allowed.
+All source rows participate in the duplicate check. Original references and raw row bytes
+are never rewritten. Zero, signed, fractional, missing or non-ASCII indices and extra `@`
+characters are unsupported and refused. This is a metadata-reference identity check: it
+does not resolve filesystem paths, symlinks, hard links or stack aliases, compare stack pixels,
+or validate optics associations.
+
+This is a deliberately narrow parser: multiline particle values, missing values, duplicate
+columns/image identities, invalid half labels, inconsistent row widths and multiple particle
+loops are refused. It is not a general STAR or optics validator. It preserves other blocks
+without interpreting them; it does not validate optics references, particle-stack availability,
+stack pixels or CTF values. Host parsing/preservation does not establish compatibility of
+these syntaxes or line endings with a particular downstream reconstruction executable.
 
 `jobs.json` contains argument arrays, an explicit project working directory (for relative
 stack paths), original half selections, input STAR hashes, output/log paths and UNRUN status.
@@ -190,3 +211,43 @@ Environment checked 2026-10-22: macOS arm64; Python 3.13.7, NumPy 2.4.2, SciPy 1
 `ps -Ao pid,pcpu,comm`, `uptime`, `df -h .` showed unrelated busy Refmac/security/browser work,
 load 11.62/12.58/13.28 and 18 GiB free. Those processes were left alone. These sequential small
 host checks provide correctness evidence, not timing measurements. No new dependency was added.
+
+## Independent-review lexical and particle-identity repairs (2026-10-22)
+
+The independent review of `ae5a08a75217f4741858ea4b5237fc4d7168d453`
+(`/tmp/i61-independent-review-dSfMBtXs/review-receipt.json`) found two material P2 defects:
+shell tokenization truncated an unregistered last-column `movie_A#development` to
+`movie_A` (and stripped embedded quotes), and raw-string image comparison missed
+`000001@stack.mrcs` versus `1@stack.mrcs` across halves. The bounded STAR lexer and
+normalized positive-index identity comparison above repair these defects without rewriting
+rows or changing selection ranking, reconstruction settings or scientific policy.
+
+The final 19-test package suite was first run against an exported AE planner/summary with
+the new tests: **FAIL**, exit 1 with 25 failing subcases. The retained log reproduces both
+review counterexamples through the actual CLI, plus quote aliasing, unsupported indices and
+lexical cases. An earlier version of this regression run had 17 failing subcases; its log is
+also retained. The first fixed run passed 19/19. The final run, after tightening the lexical
+refusal control to use a non-held row with otherwise complete held strata and adding quoted
+numeric-alias cases, passed **19/19**. No implementation test failure or tolerance change
+was needed. CLI controls verify every generated subset excludes unregistered names, reject
+numeric aliases within/across halves before output creation, preserve quoted/special values
+and raw CRLF row bytes, and allow equal indices in distinct stack identifiers. Unsupported
+lexical syntax in non-held rows and malformed/zero indices fail before output creation.
+The original seeded selection, paired jackknife, byte/metadata preservation, plan-only and
+summary arithmetic controls remain included.
+
+Existing certificate controls: **PASS**, 20 analyser subprocesses, descriptive endpoint digest
+`33b5b7d10ffefd46a13592a91ac67931fce3a1b225e78c1d7c59bd58674bd529` unchanged.
+Commands use `/Users/alex.konstantinov/.local/bin/python3` with the same six numeric thread
+controls set to one. `ps` occupancy was checked; unrelated work was left running. Logs,
+exact commands/exit codes, pinned AE regression scripts/tests and the review receipt are in
+`/tmp/i61-pr65-lexical-fixes-EdbcgCi3/`. The package command is the unittest discovery command
+above; the certificate command uses that scratch directory for `--out certificate-controls.json`.
+`git diff --check` passes. Only this new design note, planner and package tests change from AE;
+the OC summary, existing analyser/protocol/history, production source and dependencies are
+unchanged. The final commit and scope hashes are recorded in the scratch validation receipt.
+
+These are host-only synthetic checks. The parent's real-input AE plan remains evidence for
+AE only; it was not modified or regenerated here. Reconstruction, post-processing, SSH,
+remote/native GPU execution, performance and scientific qualification are **UNRUN**. The
+scientific verdict remains **INCONCLUSIVE** with no accepted harm truth or OC gate policy.

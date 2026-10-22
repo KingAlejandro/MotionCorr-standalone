@@ -196,6 +196,104 @@ class PlannerControls(unittest.TestCase):
         repeat = subprocess.run(command, env={**os.environ, **THREADS}, capture_output=True)
         self.assertEqual(repeat.returncode, 2)
 
+    def lexical_cli(self, rows, movies=("movie_A", "movie_B"), name="lexical"):
+        """Use the real CLI; movie is last so '#' truncation cannot hide in row width."""
+        source = ("data_particles\nloop_\n_rlnImageName #1\n_rlnRandomSubset #2\n"
+                  "_rlnCustomMetadata #3\n_rlnMicrographName #4\n" + "".join(rows)).encode()
+        self.particles.write_bytes(source)
+        self.design.write_bytes(encoded({"particles_sha256": thinning.sha256(source),
+                                         "held_movies": list(movies)}))
+        out = self.root / name
+        result = subprocess.run([
+            sys.executable, str(SCRIPTS / "i61_thinning_plan.py"),
+            "--particles", str(self.particles), "--design", str(self.design),
+            "--out", str(out), "--seed", "61", "--retain-fraction", "1",
+            "--project-root", str(self.root), "--reconstruct-program", "/never/executed",
+            "--sym", "D2", "--pad", "2", "--ctf", "no"],
+            env={**os.environ, **THREADS}, text=True, capture_output=True)
+        return result, out, source
+
+    @staticmethod
+    def lexical_rows():
+        return ["000001@stack.mrcs 1 meta movie_A\n", "000002@stack.mrcs 2 meta movie_A\n",
+                "000003@stack.mrcs 1 meta movie_B\n", "000004@stack.mrcs 2 meta movie_B\n"]
+
+    def test_cli_literal_hash_cannot_include_unregistered_movie(self):
+        rows = self.lexical_rows()
+        rows += [f"{5 + h}@stack.mrcs {h} meta movie_A#development\n" for h in (1, 2)]
+        result, out, source = self.lexical_cli(rows)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        manifest = json.loads((out / "manifest.json").read_bytes())
+        self.assertEqual(manifest["inputs"]["particles"]["count"], 6)
+        for subset in manifest["subsets"]:
+            expected = [r for r in rows[:4] if r.split()[-1] != subset["omitted_movie"]]
+            data = (out / subset["star"]).read_bytes()
+            self.assertEqual(data, source[:source.index(rows[0].encode())] + "".join(expected).encode())
+            self.assertNotIn(b"#development", data)
+
+    def test_cli_embedded_quotes_cannot_alias_registered_movie(self):
+        for quote in ("'", '"'):
+            with self.subTest(quote=quote):
+                rows = self.lexical_rows()
+                rows += [f"{5 + h}@stack.mrcs {h} meta movie_{quote}A{quote}\n" for h in (1, 2)]
+                result, out, _ = self.lexical_cli(rows, name="quote" + str(ord(quote)))
+                self.assertEqual(result.returncode, 0, result.stderr)
+                for subset in json.loads((out / "manifest.json").read_bytes())["subsets"]:
+                    data = (out / subset["star"]).read_bytes()
+                    self.assertNotIn(f"movie_{quote}A{quote}".encode(), data)
+                    self.assertEqual(subset["count"], 4 if subset["subset"] == "held" else 2)
+
+    def test_cli_numeric_index_alias_refused_before_output(self):
+        for half in ("1", "2"):
+            for i, image in enumerate(("1@stack.mrcs", '"0001@stack.mrcs"')):
+                with self.subTest(half=half, image=image):
+                    rows = self.lexical_rows() + [f"{image} {half} meta movie_B\n"]
+                    result, out, _ = self.lexical_cli(rows, name=f"alias{half}-{i}")
+                    self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                    self.assertIn("duplicate image identity", result.stderr)
+                    self.assertFalse(out.exists())
+
+    def test_cli_invalid_stack_indices_refused_before_output(self):
+        for i, image in enumerate(("0@stack.mrcs", "0000@stack.mrcs", "-1@stack.mrcs",
+                                   "+1@stack.mrcs", "1.0@stack.mrcs", "1e0@stack.mrcs",
+                                   "@stack.mrcs", "stack.mrcs", "1@", "1@@stack.mrcs",
+                                   "\u0661@stack.mrcs")):
+            with self.subTest(image=image):
+                rows = self.lexical_rows()
+                rows[0] = rows[0].replace("000001@stack.mrcs", image)
+                result, out, _ = self.lexical_cli(rows, name=f"badindex{i}")
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertIn("image reference", result.stderr)
+                self.assertFalse(out.exists())
+
+    def test_cli_unsupported_lexical_syntax_refused_before_output(self):
+        for i, movie in enumerate(("'movie_A", '"movie_A', "'movie_A'junk", "\"movie_A\"junk",
+                                   "movie_\x00A", "movie_\vA", "movie_\u00a0A", ";movie_A")):
+            with self.subTest(movie=movie):
+                # Malformed non-held rows must also be refused, even when every
+                # registered movie x half is otherwise complete.
+                rows = self.lexical_rows() + [f"000005@stack.mrcs 1 meta {movie}\n"]
+                result, out, _ = self.lexical_cli(rows, name=f"badlex{i}")
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertIn("PLAN REFUSED", result.stderr)
+                self.assertFalse(out.exists())
+
+    def test_cli_quoted_special_values_and_distinct_stack_identity(self):
+        movies = ("Motion Corr/movie A#'x'.mrc", 'MotionCorr/movie"B".mrc')
+        rows = [
+            f'''"000001@stack dir/a#b.mrcs" 1 'O'Brien # unit' "{movies[0]}" # comment\r\n''',
+            f'''"2@stack dir/a#b.mrcs" 2 meta'quote' "{movies[0]}"\r\n''',
+            f'''"1@other stack.mrcs" 1 'back\\slash' '{movies[1]}'\r\n''',
+            f'''"000002@other stack.mrcs" 2 'say "hi"' '{movies[1]}'\r\n''']
+        result, out, source = self.lexical_cli(rows, movies=movies)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for arm in ("baseline", "thinned"):
+            self.assertEqual((out / f"stars/{arm}/held.star").read_bytes(), source)
+        _, _, parsed = thinning.read_particles(source)
+        self.assertEqual([r["movie"] for r in parsed], [movies[0], movies[0], movies[1], movies[1]])
+        self.assertEqual([r["values"][2] for r in parsed],
+                         ["O'Brien # unit", "meta'quote'", "back\\slash", 'say "hi"'])
+
 
 class SummaryControls(unittest.TestCase):
     def setUp(self):

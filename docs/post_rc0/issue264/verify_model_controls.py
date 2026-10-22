@@ -6,7 +6,7 @@ then for each guard-helper mutant rewrites src/local_motion_guard.h in the copy 
 runner and the test are both rebuilt against it. Call mutants edit a copy of
 motioncorr_runner.cpp read by the source-pin mode. Never touches the worktree.
 """
-import argparse, hashlib, json, os, pathlib, subprocess, sys
+import argparse, hashlib, json, os, pathlib, subprocess, sys, time
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--out', type=pathlib.Path, required=True)
@@ -72,15 +72,22 @@ header_cases = [
     ('mutant_x_component_only', mutate(good_header, ('if (largest_delta < std::abs(y2 - y1)) largest_delta = std::abs(y2 - y1);\n', '')), 1),
 ]
 rows = []
+seen = set()
 for label, text, expected in header_cases:
+    # make compares mtimes at coarse resolution; a header rewritten within the
+    # same tick as the last link is silently not rebuilt (attempt 01).
+    time.sleep(2)
     header.write_text(text)
     binary_sha = build('build_' + label)
+    assert binary_sha not in seen, (label, 'binary not rebuilt for this header')
+    seen.add(binary_sha)
     p = run('model_' + label, [str(binary), 'local_motion_guard_model'])
     ordinary = p.stdout.startswith('PASS checks=' if expected == 0 else 'FAIL checks=')
     rows.append({'case': label, 'header_sha256': sha(text.encode()), 'binary_sha256': binary_sha,
                  'expected_exit': expected, 'exit': p.returncode, 'ordinary_outcome': ordinary,
                  'summary': p.stdout.strip().splitlines()[-1] if p.stdout.strip() else '',
                  'ok': p.returncode == expected and ordinary})
+time.sleep(2)
 header.write_text(good_header)
 restored_sha = build('build_restored')
 p = run('model_restored', [str(binary), 'local_motion_guard_model'])

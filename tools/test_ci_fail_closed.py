@@ -201,6 +201,10 @@ exec "{sys.executable}" "$@"
             "DefectParser",
             "GlobalIfftElision",
             "PatchRetryState",
+            "PeakFitArithmetic",
+            "PeakFitArithmeticMutant_float-denominator",
+            "PeakFitArithmeticMutant_early-store",
+            "PeakFitArithmeticMutant_wrong-scale",
             "CpuDoseSymmetry",
             "CpuDoseSymmetryBase",
             "OutputTreeComparator",
@@ -332,7 +336,7 @@ exec "{sys.executable}" "$@"
         # Case E (#226 D1): a CUDA build also requires CUDA_REQUIRED_TESTS. Restated
         # here for the same reason INTEGRATED_SUITE is. Selected by --cuda, and
         # automatically from a --test-dir whose CMakeCache.txt has CUDA:BOOL=ON.
-        CUDA_SUITE = ["CudaStaleErrorAfterOom"]
+        CUDA_SUITE = ["CudaStaleErrorAfterOom", "CudaPeakFit", "CudaPeakFitMutant_float_denominator"]
         def collect(names):
             return json.dumps({"kind": "ctestInfo", "version": {"major": 1, "minor": 0},
                                "tests": [runnable(n) for n in names]})
@@ -363,7 +367,9 @@ exec "{sys.executable}" "$@"
                                          capture_output=True, text=True)
                     self.assertEqual(res.returncode, expected, res.stdout + res.stderr)
                     if expected:
-                        self.assertIn("Missing required test(s): CudaStaleErrorAfterOom", res.stdout)
+                        self.assertIn("Missing required test(s):", res.stdout)
+                        for name in CUDA_SUITE:
+                            self.assertIn(name, res.stdout)
 
     def test_4_missing_fixture_or_truth_fails(self) -> None:
         """Control 4: Missing fixture movie, missing truth file, or malformed manifest fails verify_fixtures."""

@@ -303,3 +303,20 @@ current-head CI and maintainer sign-off remain required.
 Evidence, full audit, commands, hashes, counts, failures and limits: [issue253/README.md](../post_rc0/issue253/README.md).
 Implementation CI on `adf990fd`, run [39351741856](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39351741856),
 passes Ubuntu build/smoke and CUDA compile-only; native evidence is the separate record above.
+## Post-freeze candidate #257: CUDA peak-fit arithmetic
+
+PR #260, production `531e9db4`, final tests `6c23ba1d` (base main `36913740`):
+CUDA-only fit promotion; CPU source, integer peak selection, thresholds, gates
+and output interfaces unchanged. Native Release CTest on 4GPUs passes CPU
+74/74, CUDA 110/110 and CUDA+nvCOMP 113/113, with no skips. The actual production
+kernel passes the captured pedestal/edge controls; the float-denominator mutant
+fails the named witness. CPU and CUDA known-motion launchers pass their existing
+aggregate policy, retaining the noisy characterization accuracy failure.
+
+The legacy Tier A exact fixture fails on this branch. A retained frozen-F CPU
+control and this branch's CPU output match exactly on that fixture; the mismatch
+is already present in the control. No tolerance was changed. Raw records and
+limits: [#257 evidence](../post_rc0/issue257/README.md). Combined S1 attribution
+is separate PR #261. A new full QF, performance cost, downstream S1.4 and other
+hardware/toolchains are unrun; earlier qualification rows keep their original
+SHA. Candidate only, no merge/tag/sign-off by this agent.

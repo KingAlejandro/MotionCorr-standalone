@@ -2,15 +2,110 @@
 """Independent inverse, sign/orientation and counting-statistics negative controls."""
 import json
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import numpy as np
 import check_realistic_motion as check
 from summarize_realistic_motion import paired, summarize
 gen=check.gen
 
 class Realistic(unittest.TestCase):
+    @staticmethod
+    def translation_control(root, outside=False):
+        r=gen.recipe(nx=128,ny=96,frames=5,control='translation')
+        g=np.stack([-np.arange(5),2*np.arange(5)],axis=-1).astype(float)
+        if outside: g[-1,0]-=200
+        m=dict(global_=g.tolist(),coeff_x=[0.]*18,coeff_y=[0.]*18,local_enabled=False)
+        m['global']=m.pop('global_')
+        star=root/'movie.star'
+        star.write_text('data_general\n_rlnImageSizeX 128\n_rlnImageSizeY 96\n_rlnImageSizeZ 5\n'
+                        '_rlnMicrographOriginalPixelSize 0.885\n_rlnMicrographStartFrame 1\n'
+                        '_rlnMicrographBinning 1\n_rlnMotionModelVersion 0\n'
+                        'data_global_shift\nloop_\n_rlnMicrographFrameNumber #1\n'
+                        '_rlnMicrographShiftX #2\n_rlnMicrographShiftY #3\n'+
+                        ''.join(f'{f+1} {x} {y}\n' for f,(x,y) in enumerate(g)))
+        check.validate_star_rows(star,r)
+        return r,m,check.read_motion_star(star)
+
+    def test_finite_outside_runtime_and_star_keep_metrics(self):
+        with tempfile.TemporaryDirectory() as t:
+            r,m,star=self.translation_control(Path(t),outside=True)
+            before=json.dumps(m)
+            result=check.evaluate(r,m,star)
+            self.assertEqual(result['sampling_status'],'OUTSIDE_FIXED_ROI')
+            self.assertEqual(result['field_distance_status'],'FAIL')
+            self.assertEqual(result['role'],'characterization')
+            self.assertEqual(result['lattice']['roi'],[32,63,32,95])
+            for family in ['field','global_trajectory','border','serialized_field']:
+                self.assertAlmostEqual(result[family]['px']['rms'],200/np.sqrt(5))
+                self.assertAlmostEqual(result[family]['angstrom']['max'],200*.885)
+                self.assertEqual(result[family]['per_frame_px'][0]['max'],0)
+                self.assertEqual(result[family]['per_frame_px'][-1]['max'],200)
+            self.assertEqual(result['local_component']['px']['max'],0)
+            self.assertEqual(result['star_roundtrip_loss']['px']['max'],0)
+            self.assertTrue(result['signal_transfer_status'].startswith('UNRUN:'))
+            json.dumps(result,allow_nan=False)
+            self.assertEqual(json.dumps(m),before)
+
+    def test_finite_outside_cli_is_characterization_not_input_error(self):
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t); receipt=root/'RECEIPT.json'; runtime=root/'runtime.json'
+            log=root/'movie.log'; report=root/'report.json'
+            log.write_text('Global alignment:\n Iteration 5: RMSD = 1.0 px\nLocal alignments:\n')
+            command=[sys.executable,str(Path(check.__file__)),'--receipt',str(receipt),
+                     '--runtime',str(runtime),'--star',str(root/'movie.star'),
+                     '--log',str(log),'--json',str(report)]
+            for outside in [False,True]:
+                r,m,_=self.translation_control(root,outside=outside)
+                receipt.write_text(json.dumps(dict(schema=gen.SCHEMA,recipe=r)))
+                runtime.write_text(json.dumps(m))
+                proc=subprocess.run(command,capture_output=True,text=True)
+                # This field-only characterization CLI retains exit 0; v2's
+                # separate image-sampling CLI uses exit 1 for an outside ROI.
+                self.assertEqual(proc.returncode,0,proc.stderr)
+                result=json.loads(report.read_text())
+                self.assertEqual(result['sampling_status'],'OUTSIDE_FIXED_ROI' if outside else 'VALID')
+                self.assertEqual(result['field_distance_status'],'FAIL' if outside else 'PASS')
+                self.assertIs(result['convergence']['global_converged'],False)
+                self.assertEqual(len(result['identity']),4)
+                self.assertNotIn('signal',result)  # no image metrics in this evaluator
+            report.unlink()
+            m['global'][-1][0]=float('nan'); runtime.write_text(json.dumps(m))
+            self.assertNotEqual(subprocess.run(command,capture_output=True).returncode,0)
+            self.assertFalse(report.exists())
+
+    def test_summary_counts_finite_outside_characterization(self):
+        import summarize_realistic_motion as summary
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t); r,good,_=self.translation_control(root)
+            _,outside,_=self.translation_control(root,outside=True)
+            for seed in range(10):
+                name=f'dose1-s{seed:02d}'; fixture=root/'fixtures'/name
+                fixture.mkdir(parents=True)
+                (fixture/'RECEIPT.json').write_text(json.dumps(dict(recipe=r)))
+                for arm in summary.ARMS:
+                    model=outside if arm=='cpu-both' else good
+                    metrics=check.evaluate(r,model)
+                    metrics['star_roundtrip_loss']=check.errors(np.zeros((5,1,2)),np.zeros((5,1,2)),r['pixel_size'])
+                    metrics['convergence']=dict(global_converged=False if arm=='cpu-both' else True,patches=[])
+                    out=root/'results'/name/arm; out.mkdir(parents=True)
+                    for filename,data in [('metrics.json',metrics),('runtime.json',model),('RUN.json',dict(exit=0))]:
+                        (out/filename).write_text(json.dumps(data,allow_nan=False))
+            # Complete synthetic consumer controls, not retained native records.
+            with patch.object(summary,'CONDITIONS',['dose1']): result=summary.summarize(root)
+            table={row['arm']:row for row in result['table']}
+            self.assertEqual(table['cpu-both']['invalid_sampling'],10)
+            self.assertEqual(table['cpu-both']['field_distance_failures'],10)
+            self.assertEqual(table['cpu-both']['global_nonconverged'],10)
+            self.assertAlmostEqual(table['cpu-both']['median_field_px']['rms'],200/np.sqrt(5))
+            self.assertEqual(table['cpu-none']['invalid_sampling'],0)
+            self.assertEqual(table['cpu-none']['field_distance_failures'],0)
+            self.assertEqual(len(result['rows']),90)
+            json.dumps(result,allow_nan=False)
+
     def test_native_convergence_beats_rounded_rmsd(self):
         with tempfile.TemporaryDirectory() as t:
             p=Path(t)/'movie.log'

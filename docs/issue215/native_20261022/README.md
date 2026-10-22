@@ -1,13 +1,86 @@
 # PR248 native later-chunk controls, 2026-10-22
 
-Implementation worktree: `t3-409be643`, branch
+Initial implementation worktree: `t3-409be643`, branch
 `work/248-native-laterchunk-20261022`, pinned source
 `fc1c8e6f18fe1f33d4a7cc68da2fbc467bd01c16`.
 The parent/root checkouts and historical evidence are untouched.
 Issue215, PR248 body/review and inline discussion were read live before work;
 the captured discussion is retained here.
 
-## Actual result
+## Actual result: attempt04 PASS
+
+Iteration worktree `t3-7a8fa0b5`, branch
+`native248-settle-attempt04-20261022`, starts at local
+`698cddea4faad612cf397f6c7a08c861ca55fef2` without moving another branch.
+Live issue215/PR248 discussion was read again and is retained under attempt04;
+remote PR248 remained `fc1c8e6f`. This iteration changes only the experiment
+driver, its host controls and new evidence/documentation. Parent owns review,
+push, PR body and Notion work.
+
+Attempt04 overall driver **PASS**: unchanged later-chunk controls **8/8 PASS**,
+unchanged early controls **9/9 PASS**, both subprocess exits0, strict initial
+idle/health **PASS**, bounded post-run idle/health **PASS**, and all pinned source,
+source-archive, three binary and driver-file hashes **PASS** before/after.
+There was no recompilation. All three historical archive hashes also passed
+before and after; their FAIL verdicts and bytes remain unchanged.
+
+The explicitly authorized [post-run settling policy](settling-policy.md) requires
+two consecutive idle samples, spaced by one second after sample completion,
+within a ten-second monotonic window including query execution. The thresholds
+remain 0% utilization, no assigned-GPU apps and memory <=16 MiB, with all existing
+hardware fields healthy and index/UUID correct. Only nonzero utilization on an
+otherwise healthy, empty GPU may settle. Other errors fail immediately and
+receive no retry. Initial preflight and all numerical/product gates are unchanged.
+
+Actual post-run sequence was **0%, 0%**, both 1 MiB, no apps, all hardware fields
+healthy; the two checks completed within the bounded window. Native execution
+therefore did not exercise a nonzero-utilization settling transition.
+The fake-clock host controls exercise **6% -> 0% -> 0% PASS**, persistent-busy
+timeout, single-idle insufficiency/consecutive-count reset, deadline overrun,
+read failure, and immediate rejection of every health field error/missing field,
+UUID/index, app and memory violation at each sample position. All eight test
+methods **PASS** locally and remotely. The control invokes the original one-shot
+driver and confirms it still rejects the initial 6% in a 6%-then-0% sequence.
+The existing XML parser controls also **PASS**, rejecting ten altered/missing
+health/UUID cases. The unchanged 18-case host acceptance harness **PASS** remotely.
+
+Fresh scratch:
+`/mnt/clathrin/motioncorr-215-native-20261022-7a8fa0b5-a04`.
+Execution provenance window: 2026-10-22 14:53:04–14:53:30 UTC; native harness
+commands ran 14:53:14–14:53:27 UTC. These timestamps are not performance results.
+The runner was launched with `nohup env PYTHONDONTWRITEBYTECODE=1
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+taskset -c 8-9 /usr/bin/python3 run_attempt04.py`.
+It held the GPU2 correctness lock through strict preflight, both harnesses and
+post-health, probed/released the bench lock, and captured occupancy at launch.
+No build lock was needed. Exact argv/affinity/exits are in attempt04 receipts.
+
+The compiled source remains `fc1c8e6f18fe1f33d4a7cc68da2fbc467bd01c16` and
+binaries remain in attempt01's scratch. [Driver identities](attempt04/driver-identity.json)
+record the distinct experiment implementation; [pre](attempt04/pre-reuse-verification.json)
+and [post](attempt04/post-reuse-verification.json) receipts verify all 7,260
+source files, source archive and all three binaries. An independent local Git
+archive reproduced the pinned source/archive hashes. Fixed later-grow/replace
+both satisfy the same acceptance predicate; successful nvCOMP mutants both
+fail it, while retaining full original MRC/STAR identity. Earlier conversion
+again verifies both device destinations against the independent oracle.
+See [new witnesses](attempt04-native-witnesses.log).
+
+Attempt04's separately indexed archive has 390 members, SHA256
+`931d96145ba4ab369303ce81fd118a550f614c9efe6c9e0e8581c9ca693fb48f`.
+It was packaged once, verified on host and downloaded alongside all three old
+archives. Every member and compact receipt was independently rehashed.
+[Verification](attempt04-archive-verification.json) retains the old FAILs and new
+PASS. Reproduce with `PYTHONDONTWRITEBYTECODE=1 python3
+ docs/issue215/native_20261022/verify_attempt04.py <download-directory>` where
+files are named `attempt01.tar.gz` through `attempt04.tar.gz`.
+The verifier does not rewrite historical evidence.
+
+No timings, scientific qualification, full-suite result, newer compiled source,
+or reclassification of historical attempts is claimed. The limitations below
+continue to apply.
+
+## Retained attempt03 result: driver FAIL
 
 CUDA+nvCOMP compilation **PASS**. Native later-chunk controls **8/8 PASS**;
 optional existing early-identity controls **9/9 PASS**. Both test subprocesses
@@ -17,9 +90,9 @@ immediate post-run *idle* assertion sampled 6% utilization, although memory was
 same post-run XML, captured while holding the original correctness lock, are
 **PASS**: zero volatile uncorrected SRAM/DRAM ECC, no pending/failed remap, no
 recovery action. A later read-only check under the reacquired GPU2 lock reports
-0% utilization, 1 MiB, no apps, and hardware health **PASS**. No further GPU
-workload, reset, gate waiver, or overwritten original verdict followed that
-failure. See `attempt03/reconciliation.json` and the original `exit.json`.
+0% utilization, 1 MiB, no apps, and hardware health **PASS**. Before the explicitly authorized attempt04, no further GPU
+workload followed that failure. No reset, gate waiver or overwritten original
+verdict occurred. See `attempt03/reconciliation.json` and the original `exit.json`.
 
 These results qualify this small valid-body fixture and instrumented binaries.
 They do not qualify arbitrary corrupt Deflate, performance, Tier D science,
@@ -146,6 +219,9 @@ member's size/hash. The archive directories are respectively:
   failure; 9 indexed members.
 - `/mnt/clathrin/motioncorr-215-native-20261022-409be643-a03`: native results,
   original idle failure and read-only reconciliation; 373 indexed members.
+- `/mnt/clathrin/motioncorr-215-native-20261022-7a8fa0b5-a04`: new bounded-driver
+  PASS, unchanged 8+9 native controls and all host/identity checks; 390 indexed
+  members. Historical archives were read and rehashed, never repackaged.
 
 Every archive member was rehashed after packaging on host and independently
 verified after download to local temporary storage. The compact receipts here

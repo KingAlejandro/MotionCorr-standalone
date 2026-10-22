@@ -33,7 +33,11 @@
   "attempt03_driver": "FAIL immediate post-run idle check sampled 6% utilization",
   "original_postrun_hardware_fields": "PASS from original XML captured under lock",
   "read_only_followup_idle_and_hardware": "PASS",
-  "further_gpu_workloads_after_idle_failure": 0,
+  "further_gpu_workloads_after_idle_failure": {
+    "before_attempt04": 0,
+    "attempt04_native_harnesses": 2,
+    "attempt04_control_rows": 17
+  },
   "gate_waivers": 0,
   "production_changes": false,
   "pushes": false,
@@ -67,6 +71,39 @@
       "indexed_members": 373,
       "status": "PASS",
       "verification": "all archived bytes rehashed"
+    },
+    {
+      "path": "/mnt/clathrin/motioncorr-215-native-20261022-7a8fa0b5-a04/raw-evidence.tar.gz",
+      "bytes": 1234011,
+      "sha256": "931d96145ba4ab369303ce81fd118a550f614c9efe6c9e0e8581c9ca693fb48f",
+      "indexed_members": 390,
+      "status": "PASS",
+      "verification": "all archived bytes rehashed"
     }
-  ]
+  ],
+  "attempt04_driver": "PASS",
+  "attempt04_later_chunk_native": "8/8 PASS",
+  "attempt04_early_identity_native": "9/9 PASS",
+  "attempt04_native_subprocess_exits": [
+    0,
+    0
+  ],
+  "attempt04_idle_policy": "two consecutive idle; one-second spacing; ten-second monotonic deadline; only healthy/empty nonzero utilization may settle",
+  "attempt04_postrun_utilization": [
+    0,
+    0
+  ],
+  "attempt04_preflight_idle_and_health": "PASS (strict original one-shot)",
+  "attempt04_postrun_idle_and_health": "PASS",
+  "attempt04_idle_host_tests": "8/8 methods PASS locally and remotely; includes original one-shot 6%-then-0% rejection",
+  "attempt04_existing_health_parser_tests": "PASS; ten rejection controls",
+  "attempt04_existing_host_controls": "18/18 PASS",
+  "attempt04_source_and_binary_verification": "PASS before and after; all 7260 source files + source archive + three binaries",
+  "attempt04_driver_identity": "attempt04/driver-identity.json; file hashes verified before/after and against archive",
+  "attempt04_historical_archives": "all three original hashes PASS before/after and independently after download; old FAIL verdicts unchanged",
+  "attempt04_recompiled": false,
+  "attempt04_numerical_or_product_gate_changes": false,
+  "attempt04_branch": "native248-settle-attempt04-20261022",
+  "attempt04_base": "698cddea4faad612cf397f6c7a08c861ca55fef2",
+  "attempt04_remote_pr_head": "fc1c8e6f18fe1f33d4a7cc68da2fbc467bd01c16"
 }

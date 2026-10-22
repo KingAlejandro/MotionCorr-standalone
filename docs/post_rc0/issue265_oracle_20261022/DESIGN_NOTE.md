@@ -76,7 +76,7 @@ would give shorter files but depends on the standard library's floating-point `t
 - The write path is shared source, not CPU-only. `MetaDataTable::getValueToString` and `ThirdOrderPolynomialModel::write` are compiled into `motioncorr_core` in every
   configuration, and the STAR is written by `MotioncorrRunner::writeModel` from the backend-common run loop and `saveModel`. A full-precision motion table therefore changes
   CUDA-route STAR output as well as CPU. Under `docs/release/POST_FREEZE_TEST_PLAN.md` §9 item 4 that is the "CUDA or shared source" class: full CTest on all three
-  configurations, the checklist rows the changed route touches, the format rows its code touches, and native execution on a GPU. Compilation does not qualify it.
+  configurations, the checklist rows the changed route touches, and native execution on a GPU. Also include the format rows its code touches from the CPU-only list. Compilation does not qualify it.
 - Because the change alters STAR output and breaks parity with RELION `ad0b230`, it needs maintainer sign-off first (`AGENTS.md`; §9 item 2). Scheduling it separately from C1 is a recommendation, not a rule.
 - Unmeasured and open: Linux libstdc++ reading of subnormal and full-precision tokens; RELION reader/writer interoperability with full-precision motion tables; a write-side policy for subnormal and
   non-finite coefficients; and `global_shift` precision (above).

@@ -10,7 +10,7 @@ science result. #265 stays FILED ONLY pending the maintainer's parity decision. 
 
 ## What was run
 
-- Source: `3691374061f782bc84531fd1c79d017ddcb5a7c2` (main), clean (`receipts/iteration2/source_dirty.txt` empty). The
+- Source: `3691374061f782bc84531fd1c79d017ddcb5a7c2` (main); the recorded dirty check covers `src` and `CMakeLists.txt` only (`receipts/iteration2/source_dirty.txt` empty). The
   harness is not part of the CMake build and no `src/`, tests or CMake file was touched.
 - Library: `motioncorr_core` built with the project's own CMake (Release, `-DCUDA=OFF -DBUILD_TESTING=OFF`, `-j1`, exit 0).
   Harness flags, defines, includes and link line are copied from that build's `flags.make` / `link.txt` (`receipts/iteration2/build_options.txt`).
@@ -97,7 +97,7 @@ Controls against the criteria declared beforehand:
   the number of significant digits depends on magnitude. F02 X1 -0.021437781265 is written `-0.02144` (4 digits); F03 -0.00122271287007 is written `-0.00122` (3 digits);
   F02 X4 -0.0087465321098 is written `-0.00875`. The scientific branch (|v| < 0.001 or |v| > 100000) keeps 7 significant digits for positive and 6 for
   negative values: F02 X2 0.00041873901234 is written `4.187390e-04`, F02 X8 -5.8473629101e-05 is written `-5.84736e-05`, and F08 123456.789 is written `1.234568e+05`.
-  In F02 those scientific-branch losses are 4.5e-12 to 2.9e-11 absolute (X2, X5, X8, X11); the dominant absolute error comes from the fixed branch.
+  In F02 the 13 scientific-branch coefficients lose 3.5e-12 to 4.8e-10 absolute; the dominant absolute error comes from the fixed branch.
 - Field error grows with frame: F10 gives 0.0006 px over frames 0-5 and 0.56 px over frames 44-49. On a 24-frame range (late24) the
   constructed fixtures give at most 0.058 px (F10), 0.037 px (F07). The 0.34 to 0.56 px values need frames up to 49 and are on constructed coefficients.
   These fixtures therefore do not reproduce or confirm the 0.36-0.38 px in the #265 report for a real movie. That needs the actual

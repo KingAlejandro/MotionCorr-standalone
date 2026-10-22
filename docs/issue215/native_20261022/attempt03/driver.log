@@ -1,0 +1,18 @@
+host-controls 0
+pre-gpus 0
+pre-apps 0
+pre-xml 0
+later-controls 0
+early-controls 0
+post-gpus 0
+post-apps 0
+post-xml 0
+Traceback (most recent call last):
+  File "/mnt/clathrin/motioncorr-215-native-20261022-409be643-a03/run_retry.py", line 75, in <module>
+    main()
+  File "/mnt/clathrin/motioncorr-215-native-20261022-409be643-a03/run_retry.py", line 63, in main
+    n.health("post", require_idle=True)
+  File "/mnt/clathrin/motioncorr-215-native-20261022-409be643-a03/run_native.py", line 99, in health
+    assert int(row[3].split()[0]) <= 16 and int(row[4].split()[0]) == 0, row
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['2', 'GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598', 'NVIDIA A100 80GB PCIe', '1 MiB', '6 %']

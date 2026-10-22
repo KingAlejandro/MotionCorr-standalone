@@ -1,0 +1,30 @@
+small-refmac-machine
+Linux small-refmac-machine 6.8.0-86-generic #87-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 22 18:03:36 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+2026-10-19T13:31:50Z
+76fa8112b829d4e3e9d95f7f869513da5e64b39d
+taskset -c 24-31; OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=1; no timing lock (correctness only)
+Architecture:                         x86_64
+CPU op-mode(s):                       32-bit, 64-bit
+Address sizes:                        48 bits physical, 48 bits virtual
+Byte Order:                           Little Endian
+CPU(s):                               64
+On-line CPU(s) list:                  0-63
+Vendor ID:                            AuthenticAMD
+Model name:                           AMD EPYC 7763 64-Core Processor
+CPU family:                           25
+Model:                                1
+Thread(s) per core:                   1
+Core(s) per socket:                   32
+Socket(s):                            2
+Stepping:                             1
+BogoMIPS:                             4890.81
+Flags:                                fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm rep_good nopl cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr wbnoinvd arat npt lbrv nrip_save tsc_scale vmcb_clean flushbyasid pausefilter pfthreshold v_vmsave_vmload vgif umip pku ospke vaes vpclmulqdq rdpid overflow_recov succor fsrm arch_capabilities
+Virtualization:                       AMD-V
+Hypervisor vendor:                    KVM
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]
+2.5.3
+CONFIG_RC=0
+BUILD_RC=0
+compilers before CTest: ['3095639:cc1plus', '3095798:cc1plus', '3095800:cc1plus', '3095802:cc1plus', '3095815:cc1plus', '3095858:cc1plus', '3095863:cc1plus', '3095871:cc1plus']
+DRIVER_EXIT=8 2026-10-19T13:37:05Z

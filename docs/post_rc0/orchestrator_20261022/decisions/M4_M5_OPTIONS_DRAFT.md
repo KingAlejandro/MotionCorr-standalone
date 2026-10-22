@@ -22,8 +22,8 @@ attempt that did not converge is retried once from the same input; shift vectors
 are reset before the second attempt (`:3529–3545,3656–3700`). This existing
 recovery path is distinct from selecting a new quality-policy retry. After the
 last attempt an unconverged patch is skipped (`:3812`); too few retained local
-observations cause global-only fallback with a stderr message (`:3856`). CPU-only
-builds take the CPU alignment path once. CUDA logs `converged=`, while CPU logs
+observations cause global-only fallback with a stderr message (`:3856`). The CPU
+route takes one alignment attempt, including CUDA builds with no device attempt. CUDA logs `converged=`, while CPU logs
 RMSD without that explicit verdict. A global-only sidecar would leave local
 drop/fallback behavior unreported and would not satisfy the phase requirement.
 

@@ -1,0 +1,71 @@
+{
+  "status": "PASS",
+  "native_execution": "UNRUN",
+  "controls": [
+    {
+      "control": "old wrapper+stage+exact prerequisite block reproduces namespace FAIL",
+      "exit": 1,
+      "status": "PASS"
+    },
+    {
+      "control": "new wrapper+actual stage+exact namespace block with own active receipts and old markers",
+      "exit": 0,
+      "status": "PASS"
+    },
+    {
+      "control": "atomic one-shot marker refuses reinvocation, receipts unchanged",
+      "exit": 4,
+      "status": "PASS"
+    },
+    {
+      "control": "existing lease file works and lease free after reap",
+      "exit": 0,
+      "status": "PASS"
+    },
+    {
+      "control": "genuine stale namespace blocks: cpu1d-v2-cpu-c1.reserved",
+      "exit": 1,
+      "status": "PASS"
+    },
+    {
+      "control": "genuine stale namespace blocks: cpu1d-v2-cpu-c1.exit",
+      "exit": 1,
+      "status": "PASS"
+    },
+    {
+      "control": "genuine stale namespace blocks: cpu1d-prereq.unknown",
+      "exit": 1,
+      "status": "PASS"
+    },
+    {
+      "control": "genuine stale namespace blocks: cpu1d-unknown.dangling",
+      "exit": 1,
+      "status": "PASS"
+    },
+    {
+      "control": "stale own prerequisite reservation blocks in actual stage wrapper",
+      "exit": 4,
+      "status": "PASS"
+    },
+    {
+      "control": "foreign held lease stops before chain",
+      "exit": 7,
+      "status": "PASS"
+    },
+    {
+      "control": "child nonzero exit propagates with reap",
+      "exit": 5,
+      "status": "PASS"
+    },
+    {
+      "control": "missing parent GO stops before chain",
+      "exit": 9,
+      "status": "PASS"
+    },
+    {
+      "control": "lease open failure distinct from contention",
+      "exit": 8,
+      "status": "PASS"
+    }
+  ]
+}

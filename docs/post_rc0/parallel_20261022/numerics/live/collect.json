@@ -1,0 +1,18 @@
+{
+  "utc": "2026-10-22T14:41:21.918790+00:00",
+  "argv": [
+    "ssh",
+    "-J",
+    "ccp4-gateway",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "4GPUs",
+    "taskset -c 10-13 bash -s"
+  ],
+  "stdin": "set -eu\nS=/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28\n/home/alex/.mc-venv/bin/python3 \"$S/summarize.py\" \"$S\"\n/home/alex/.mc-venv/bin/python3 \"$S/collect_remote.py\" \"$S\"\n",
+  "exit": 0,
+  "stdout": "cpu zero PASS VALID rms_px=0 CONVERGED patches=0/0\ncpu integer FAIL VALID rms_px=0.297867787 ITERATION_LIMIT patches=0/0\ncpu fractional FAIL VALID rms_px=0.592153673 ITERATION_LIMIT patches=0/0\ncpu affine FAIL VALID rms_px=0.454742923 CONVERGED patches=9/9\ncpu pedestal FAIL VALID rms_px=2.39450091 CONVERGED patches=9/9\ncpu noisy FAIL OUTSIDE_FIXED_ROI rms_px=2.64741505 ITERATION_LIMIT patches=9/9\ncpu flat UNIDENTIFIABLE VALID rms_px=2.37787655 CONVERGED patches=0/0\ncpu repeated UNIDENTIFIABLE OUTSIDE_FIXED_ROI rms_px=18.6823258 CONVERGED patches=0/0\ncuda zero PASS VALID rms_px=0 CONVERGED patches=0/0\ncuda integer FAIL VALID rms_px=0.285025811 CONVERGED patches=0/0\ncuda fractional FAIL VALID rms_px=0.379425695 CONVERGED patches=0/0\ncuda affine FAIL VALID rms_px=0.323145894 CONVERGED patches=8/9\ncuda pedestal FAIL VALID rms_px=2.39450091 CONVERGED patches=9/9\ncuda noisy FAIL OUTSIDE_FIXED_ROI rms_px=2.97844486 ITERATION_LIMIT patches=8/9\ncuda flat UNIDENTIFIABLE VALID rms_px=2.37787655 CONVERGED patches=0/0\ncuda repeated UNIDENTIFIABLE OUTSIDE_FIXED_ROI rms_px=68.6746263 CONVERGED patches=0/0\n536 receipt files 1390257 archive bytes\n",
+  "stderr": ""
+}

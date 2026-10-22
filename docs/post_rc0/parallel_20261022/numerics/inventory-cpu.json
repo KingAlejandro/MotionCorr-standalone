@@ -1,0 +1,90 @@
+[
+  {
+    "name": "HermitianProjectionOracle",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cpu/hermitian_projection_oracle"
+    ],
+    "properties": [
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cpu"
+      }
+    ]
+  },
+  {
+    "name": "PeakFitArithmetic",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cpu/peak_fit_arithmetic"
+    ],
+    "properties": [
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cpu"
+      }
+    ]
+  },
+  {
+    "name": "PeakFitArithmeticMutant_float-denominator",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cpu/peak_fit_arithmetic",
+      "--expect-mismatch",
+      "float-denominator"
+    ],
+    "properties": [
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cpu"
+      }
+    ]
+  },
+  {
+    "name": "PeakFitArithmeticMutant_early-store",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cpu/peak_fit_arithmetic",
+      "--expect-mismatch",
+      "early-store"
+    ],
+    "properties": [
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cpu"
+      }
+    ]
+  },
+  {
+    "name": "PeakFitArithmeticMutant_wrong-scale",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cpu/peak_fit_arithmetic",
+      "--expect-mismatch",
+      "wrong-scale"
+    ],
+    "properties": [
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cpu"
+      }
+    ]
+  },
+  {
+    "name": "RealspaceBorderValidation",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cpu/realspace_border_validation"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "host"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 30.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cpu"
+      }
+    ]
+  }
+]

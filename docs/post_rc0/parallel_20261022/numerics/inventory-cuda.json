@@ -1,0 +1,382 @@
+[
+  {
+    "name": "CudaHermitianInverse",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_hermitian_inverse"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaHermitianInverseMutant_no_projection",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_hermitian_inverse_no_projection",
+      "--expect-invariant-failure"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaHermitianInverseMutant_wrapper_no_projection",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_hermitian_inverse_wrapper_no_projection",
+      "--expect-invariant-failure"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaHermitianInverseMutant_dose_no_projection",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_hermitian_inverse_dose_no_projection",
+      "--expect-invariant-failure"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaHermitianOracleMutant_oracle_session_no_projection",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_hermitian_inverse_oracle_session_no_projection",
+      "--expect-oracle-failure"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaHermitianOracleMutant_oracle_session_zero_boundary",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_hermitian_inverse_oracle_session_zero_boundary",
+      "--expect-oracle-failure"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaHermitianOracleMutant_oracle_wrapper_zero_boundary",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_hermitian_inverse_oracle_wrapper_zero_boundary",
+      "--expect-oracle-failure"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaHermitianOracleMutant_oracle_dose_zero_boundary",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_hermitian_inverse_oracle_dose_zero_boundary",
+      "--expect-oracle-failure"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaHermitianCCF",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_hermitian_ccf"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaHermitianCCFMutant_ccf_perpatch_no_projection",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_patch_batch_ccf_perpatch_no_projection",
+      "--expect-invariant-failure"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaHermitianCCFMutant_ccf_batched_no_projection",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_patch_batch_ccf_batched_no_projection",
+      "--expect-invariant-failure"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaPeakFit",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_peak_fit"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 60.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaPeakFitMutant_float_denominator",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_peak_fit_float_denominator",
+      "--expect-mismatch"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaRealspaceBorderBranch",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_realspace_border_branch"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaRealspaceBorderBranchMutant_x_float",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_realspace_border_branch_x_float",
+      "--expect-mismatch"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  },
+  {
+    "name": "CudaRealspaceBorderBranchMutant_y_float",
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda/cuda_realspace_border_branch_y_float",
+      "--expect-mismatch"
+    ],
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "cuda",
+          "hardware"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/build-cuda"
+      }
+    ]
+  }
+]

@@ -1,0 +1,51 @@
+[
+  {
+    "utc": "2026-10-22T14:30:15.672172+00:00",
+    "argv": [
+      "ssh",
+      "-J",
+      "ccp4-gateway",
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=10",
+      "4GPUs",
+      "taskset -c 10-13 mkdir /mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28"
+    ],
+    "stdin": null,
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "utc": "2026-10-22T14:30:31.791750+00:00",
+    "argv": [
+      "scp",
+      "-o",
+      "ProxyJump=ccp4-gateway",
+      "build/parallel-numerics-20261022/source.tar.gz",
+      "docs/post_rc0/parallel_20261022/numerics/build_remote.py",
+      "4GPUs:/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28/"
+    ],
+    "stdin": null,
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "utc": "2026-10-22T14:30:34.413438+00:00",
+    "argv": [
+      "ssh",
+      "-J",
+      "ccp4-gateway",
+      "-o",
+      "BatchMode=yes",
+      "4GPUs",
+      "taskset -c 10-13 bash -s"
+    ],
+    "stdin": "set -eu\nS=/mnt/clathrin/alex-motioncorr-parallel-20261022-numerics-d751ff28\nmkdir \"$S/src\"\ntar -xzf \"$S/source.tar.gz\" -C \"$S/src\"\ncd \"$S\"\nnohup taskset -c 10-13 /usr/bin/python3 \"$S/build_remote.py\" \"$S\" > \"$S/build-driver.log\" 2>&1 < /dev/null &\necho $! > \"$S/build.pid\"\ncat \"$S/build.pid\"\n",
+    "exit": 0,
+    "stdout": "2979256\n",
+    "stderr": ""
+  }
+]

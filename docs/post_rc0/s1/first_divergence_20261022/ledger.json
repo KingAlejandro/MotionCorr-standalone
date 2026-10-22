@@ -1,9 +1,54 @@
 {
- "kind": "W4 16-arm attribution ledger; diagnosis only, historical outcomes unchanged",
+ "kind": "W4 16-arm attribution ledger; diagnosis only, historical outcomes unchanged; revised after independent review round 1 (pre-review version at 7d85898d)",
  "historical_totals": {
   "PASS": 2,
   "FAIL": 10,
   "UNIDENTIFIABLE": 4
+ },
+ "scope": "earliest divergence is relative to the inherited objective including its weight; nonconvergence bounded to N=5; no single exclusive cause; no fix or adoption recommendation",
+ "held_questions": [
+  "alignment B-factor weight x-normalization nx/2+1 vs nx (inconsistent with dose weighting nx^2)",
+  "separable 3-point peak estimate on correlated peaks with sum-of-others gain N/(N-1) and the 5-iteration/0.5 px stop"
+ ],
+ "fixedref_fractional_bands": {
+  "frozen_manifest": "roughly 0.26-0.34 px (daaa2217)",
+  "evaluator": "0.2-0.45 px (analyze_native.py, 98855b28)",
+  "cpu_px": 0.30773463482065194,
+  "cuda_px": 0.4946752771623017,
+  "cuda_outcome": "NOT MET under both bands"
+ },
+ "guard_exclusion": {
+  "excluded_model0_1x1": [
+   "integer",
+   "fractional",
+   "flat",
+   "repeated"
+  ],
+  "pedestal": "model 1, 9 patches: #264/#265 not excluded by proof; all-zero observations and coefficients make an effect unlikely (inference)",
+  "untested": [
+   "affine",
+   "noisy"
+  ]
+ },
+ "review_round1": {
+  "response": "review/round1-response.md",
+  "artifacts": "review/round1-artifacts.json",
+  "isotropic_weight_parabola_5it_rms_px": {
+   "integer": 0.042753979005298384,
+   "fractional": 0.048543322986772865
+  },
+  "linearized_sum_of_others_eigenvalues_N5": {
+   "production": [
+    0.6954528027824337,
+    -1.1954528027824338
+   ],
+   "isotropic": [
+    0.01913538605024606,
+    -0.5191353860502461
+   ]
+  },
+  "frame_count_probe_log": "review/round1/ndep.log (synthetic phase-ramp frames; N=9/13/20 reach truth by 50 iterations with the production weight; isotropic N=20 fractional 11.8 px)",
+  "disagreement_F7": "same-state comparator is the parabola rule on the double map (1.221 px frame 1), not the continuous maximum (0.576 px)"
  },
  "estimator_oracle": {
   "production": {
@@ -102,10 +147,10 @@
     "local_error_rms_px": 3.271777995764706e-14,
     "published_sum_cnrmse": 0.02640693613146232
    },
-   "category": "estimator limit (separable parabola on an anisotropic weighted peak) with parabola-driven nonconvergence; float32 map quantization contributes",
-   "first_divergence": "sub-pixel peak estimate in global iteration 1: the sum-of-others reference makes offsets fractional and the 3-point separable parabola is biased; upstream input, forward FFT and weights verified; downstream reconstruction and STAR verified natively by truth injection",
-   "uncertainty": "quantization share is not separately bounded natively; exact native tie choices are backend-specific",
-   "next": "separate held issue for the estimator/weight shape (RELION-inherited); any repair needs its own versioned gate contract and review. W2 DC arms change the quantization term only",
+   "category": "co-causes: inherited weight shape (x normalized by nx/2+1) and separable 3-point quadratic interpolation on a correlated peak, with parabola-driven nonconvergence at N=5; float32 map quantization contributes; no single exclusive cause",
+   "first_divergence": "relative to the inherited objective: sub-pixel peak estimate in global iteration 1 departs from the maximum of the objective it estimates (the source specifies quadratic interpolation); the sum-of-others reference makes offsets fractional and the cross term biases the slice fits; input, forward FFT and reconstruction/STAR verified; weights verified for fidelity to the inherited formula only",
+   "uncertainty": "quantization share not separately bounded natively; native tie choices are backend-specific; nonconvergence shown for N=5 only (reviewer N=9/13/20 probes converge by 50 iterations, so stopping can be a co-cause); isotropic weight alone passes offline but fails a reviewer N=20 fractional probe",
+   "next": "two separate cross-linked HELD/file-only questions: (1) alignment weight x-normalization, (2) peak estimate with sum-of-others gain and stopping; no fix or adoption recommended. W2 DC arms change the quantization term only",
    "stage_evidence": {
     "native_retained_rms_px": 0.29786846691579577,
     "offline_specified_double_rms_px": 0.5865146918847374,
@@ -149,9 +194,9 @@
     "local_error_rms_px": 4.408597810693288e-14,
     "published_sum_cnrmse": 0.1381630495282882
    },
-   "category": "estimator limit (separable parabola bias) with parabola-driven nonconvergence; float32 map quantization contributes",
-   "first_divergence": "sub-pixel peak estimate: biased even against a single known template (offline 0.26 px double; native fixed-template CPU 0.31 px, CUDA 0.49 px); reconstruction and STAR verified natively",
-   "uncertainty": "native fixed-template CUDA magnitude (0.495 px) was outside the frozen 0.2-0.45 px band; frame 4 iteration-1 candidate differs from CPU by about one integer winner per axis, inferred near-tie flip, no map capture for that arm",
+   "category": "same co-causes as integer; under the inherited weight the parabola bias persists with an ideal template",
+   "first_divergence": "relative to the inherited objective: sub-pixel peak estimate, biased even against a single known template (offline 0.26 px double; native fixed-template CPU 0.31 px, CUDA 0.49 px); reconstruction and STAR verified natively",
+   "uncertainty": "fixedref-cuda-fractional 0.495 px is NOT MET under both the frozen manifest band (roughly 0.26-0.34 px, daaa2217) and the evaluator band 0.2-0.45 px (analyze_native.py, 98855b28); frame 4 iteration-1 candidate differs from CPU by about one integer winner per axis, inferred near-tie flip, no map capture; N=5 bound as for integer",
    "next": "capture the fixed-template CUDA map for frame 4 if the tie flip matters; otherwise as integer",
    "stage_evidence": {
     "native_retained_rms_px": 0.592154243624607,
@@ -216,9 +261,9 @@
     "local_error_rms_px": 0.29563025893842465,
     "published_sum_cnrmse": 0.45593249824568877
    },
-   "category": "float32 CCF map resolution under the 4096 pedestal (CCF DC, #262 domain): no information survives",
-   "first_divergence": "CCF map, global iteration 1: exact window range 0.125 vs float32 ULP 8 at the 6.7e7 DC term; the float map is one value over all 9025 window points, every frame ties, zero motion; all 9 patches also log RMSD 0 at iteration 1",
-   "uncertainty": "offline from regenerated hash-identical fixtures plus native logs/STAR; no native map capture; patch maps not computed",
+   "category": "inferred: float32 CCF map resolution under the 4096 pedestal (CCF DC, #262 domain)",
+   "first_divergence": "inferred CCF map, global iteration 1: exact window range 0.125 vs float32 ULP 8 at the 6.7e7 DC term; offline float32 rounding gives one value over all 9025 window points, so every frame would tie; native global and all 9 patches (model 1) return zero motion with RMSD 0",
+   "uncertainty": "offline from regenerated hash-identical fixtures plus native logs/STAR; no native map capture; patch maps not computed; ran model 1 with 9 patches, so #264/#265 are not excluded by proof (zero polynomial cannot exceed either guard domain: inference; guard decision not logged; runtime coefficients not captured)",
    "next": "W2 DC-conditioning arms already target this; a native global-map capture would confirm the single-value map directly",
    "first_iteration_objective": [
     {
@@ -455,10 +500,10 @@
     "local_error_rms_px": 3.10201465054451e-14,
     "published_sum_cnrmse": 0.0456910760896163
    },
-   "category": "estimator limit (separable parabola on an anisotropic weighted peak) with parabola-driven nonconvergence; float32 map quantization contributes",
-   "first_divergence": "sub-pixel peak estimate in global iteration 1: the sum-of-others reference makes offsets fractional and the 3-point separable parabola is biased; upstream input, forward FFT and weights verified; downstream reconstruction and STAR verified natively by truth injection",
-   "uncertainty": "quantization share is not separately bounded natively; exact native tie choices are backend-specific",
-   "next": "separate held issue for the estimator/weight shape (RELION-inherited); any repair needs its own versioned gate contract and review. W2 DC arms change the quantization term only",
+   "category": "co-causes: inherited weight shape (x normalized by nx/2+1) and separable 3-point quadratic interpolation on a correlated peak, with parabola-driven nonconvergence at N=5; float32 map quantization contributes; no single exclusive cause",
+   "first_divergence": "relative to the inherited objective: sub-pixel peak estimate in global iteration 1 departs from the maximum of the objective it estimates (the source specifies quadratic interpolation); the sum-of-others reference makes offsets fractional and the cross term biases the slice fits; input, forward FFT and reconstruction/STAR verified; weights verified for fidelity to the inherited formula only",
+   "uncertainty": "quantization share not separately bounded natively; native tie choices are backend-specific; nonconvergence shown for N=5 only (reviewer N=9/13/20 probes converge by 50 iterations, so stopping can be a co-cause); isotropic weight alone passes offline but fails a reviewer N=20 fractional probe",
+   "next": "two separate cross-linked HELD/file-only questions: (1) alignment weight x-normalization, (2) peak estimate with sum-of-others gain and stopping; no fix or adoption recommended. W2 DC arms change the quantization term only",
    "stage_evidence": {
     "native_retained_rms_px": 0.2850249673388219,
     "offline_specified_double_rms_px": 0.49338749697133083,
@@ -502,9 +547,9 @@
     "local_error_rms_px": 3.042460198919589e-14,
     "published_sum_cnrmse": 0.07915427386770646
    },
-   "category": "estimator limit (separable parabola bias) with parabola-driven nonconvergence; float32 map quantization contributes",
-   "first_divergence": "sub-pixel peak estimate: biased even against a single known template (offline 0.26 px double; native fixed-template CPU 0.31 px, CUDA 0.49 px); reconstruction and STAR verified natively",
-   "uncertainty": "native fixed-template CUDA magnitude (0.495 px) was outside the frozen 0.2-0.45 px band; frame 4 iteration-1 candidate differs from CPU by about one integer winner per axis, inferred near-tie flip, no map capture for that arm",
+   "category": "same co-causes as integer; under the inherited weight the parabola bias persists with an ideal template",
+   "first_divergence": "relative to the inherited objective: sub-pixel peak estimate, biased even against a single known template (offline 0.26 px double; native fixed-template CPU 0.31 px, CUDA 0.49 px); reconstruction and STAR verified natively",
+   "uncertainty": "fixedref-cuda-fractional 0.495 px is NOT MET under both the frozen manifest band (roughly 0.26-0.34 px, daaa2217) and the evaluator band 0.2-0.45 px (analyze_native.py, 98855b28); frame 4 iteration-1 candidate differs from CPU by about one integer winner per axis, inferred near-tie flip, no map capture; N=5 bound as for integer",
    "next": "capture the fixed-template CUDA map for frame 4 if the tie flip matters; otherwise as integer",
    "stage_evidence": {
     "native_retained_rms_px": 0.37942529987418505,
@@ -569,9 +614,9 @@
     "local_error_rms_px": 0.29563025893842465,
     "published_sum_cnrmse": 0.455909189215585
    },
-   "category": "float32 CCF map resolution under the 4096 pedestal (CCF DC, #262 domain): no information survives",
-   "first_divergence": "CCF map, global iteration 1: exact window range 0.125 vs float32 ULP 8 at the 6.7e7 DC term; the float map is one value over all 9025 window points, every frame ties, zero motion; all 9 patches also log RMSD 0 at iteration 1",
-   "uncertainty": "offline from regenerated hash-identical fixtures plus native logs/STAR; no native map capture; patch maps not computed",
+   "category": "inferred: float32 CCF map resolution under the 4096 pedestal (CCF DC, #262 domain)",
+   "first_divergence": "inferred CCF map, global iteration 1: exact window range 0.125 vs float32 ULP 8 at the 6.7e7 DC term; offline float32 rounding gives one value over all 9025 window points, so every frame would tie; native global and all 9 patches (model 1) return zero motion with RMSD 0",
+   "uncertainty": "offline from regenerated hash-identical fixtures plus native logs/STAR; no native map capture; patch maps not computed; ran model 1 with 9 patches, so #264/#265 are not excluded by proof (zero polynomial cannot exceed either guard domain: inference; guard decision not logged; runtime coefficients not captured)",
    "next": "W2 DC-conditioning arms already target this; a native global-map capture would confirm the single-value map directly",
    "first_iteration_objective": [
     {
@@ -782,7 +827,9 @@
   "ledger/attempt01.json": "da05b5578828ab6114371a512fd2cffd92faba72445eb8168e67cafc6b344c59",
   "offline/attempt03.json": "766cbcfb7cc35ada411c4516d023fbe7cc6d1868a211e41203aad661fef47890",
   "estimator/attempt02.json": "bc06251a1025427dad57b53f608194553f4b39cde9d10a55eddff48dea032cfd",
-  "native/evaluation-attempt01.json": "19706cc62153505d428f5c78c0197052f736578387b4e2f67b956b7508880ff1"
+  "native/evaluation-attempt01.json": "19706cc62153505d428f5c78c0197052f736578387b4e2f67b956b7508880ff1",
+  "review/round1/indep.json": "c5a206d717846b1beb0682a59a66d1aa5889c9f4ccfeee38e41e1d0b88835df0",
+  "review/round1/ndep.log": "71b1840be8cbeacae2066eb51c2f58d628dc7a01663b034835636108bfc4b1ee"
  },
- "script_sha256": "6f7de0fc5e580e67b9de9a9cd2dfb91bd8f84d6ae0ee4d1ce790a2c62f1a9862"
+ "script_sha256": "6df8e55fbddb82d395aae2d50e0ae0d0ba8cc824a479440ebf4fa1495772c826"
 }

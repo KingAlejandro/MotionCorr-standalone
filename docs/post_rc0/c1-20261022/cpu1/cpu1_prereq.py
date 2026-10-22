@@ -32,7 +32,7 @@ for d in ('t24-cpu1', 'census', 'census-ref-cpu', 'v2/cpu-unset', 'v2/cpuF-unset
 check('fresh_stage_names', not list((SC / 'logs').glob('cpu1-*')), None)
 text = Path(sys.argv[1]).read_text()
 code = '\n'.join(l for l in text.splitlines() if not l.lstrip().startswith('#'))
-check('chain_has_no_gpu_helper', not re.search(r'nvidia-smi|c1_gpu_run|c1_occupancy|c1_health|--gpu|GPU_LOCK|CUDA_VISIBLE_DEVICES=[^ ]*[A-Za-z0-9]', code), None)
+check('chain_has_no_gpu_helper', not re.search(r'nvidia-smi|c1_gpu_run|c1_occupancy|c1_health|--gpu|GPU_LOCK|CUDA_VISIBLE_DEVICES=[^ \n]*[A-Za-z0-9]', code), None)
 check('chain_sets_empty_cuda_visible_devices', 'export CUDA_VISIBLE_DEVICES=' in code, None)
 Path(sys.argv[2]).write_text(json.dumps({'checks': res, 'failed': bad}, indent=1, default=str) + '\n')
 for k, v in res.items(): print('PASS' if v['ok'] else 'FAIL', k)

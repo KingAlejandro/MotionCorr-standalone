@@ -90,6 +90,10 @@ DEFAULT_REQUIRED_TESTS = [
     # RunnerInterpolateShifts drives the binary end to end and is the only test
     # that can see the recenter call site still being wired up.
     "RunnerInterpolateRecenter",
+    "RunnerFitBoundary",
+    "RunnerFitBoundaryMutant_sign",
+    "RunnerFitBoundaryMutant_axis-normalization",
+    "RunnerFitBoundaryMutant_frame-origin",
     "RunnerInterpolateShifts",
     # Added by the #85/#126 nvCOMP ingest composition. All three are device-free
     # and deliberately registered outside if(CUDA): the aligned raw-Deflate layout

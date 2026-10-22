@@ -13,16 +13,154 @@
 #include <exception>
 #include <limits>
 #include <iomanip>
+#include <array>
+
+// Compiled only into this test target; CMake extracts the unchanged inline
+// production design-matrix/SVD block. No production entry point is added.
+ThirdOrderPolynomialModel fitBoundaryProductionAdapter(
+    const std::vector<RFLOAT>& frames, const std::vector<RFLOAT>& xs,
+    const std::vector<RFLOAT>& ys, const std::vector<RFLOAT>& shifts_x,
+    const std::vector<RFLOAT>& shifts_y, int nx, int ny, int& rank, RFLOAT& condition);
 
 void require(bool condition, const std::string &message)
 {
     if (!condition) throw std::runtime_error(message);
 }
 
+// Independent affine truth and exact rational temporal projection are derived
+// in docs/post_rc0/s1/fit_boundary_20261022/{README.md,freeze.py,frozen.json}.
+// These are fit-boundary observations, not CCF measurements or movie recovery.
+bool fitBoundaryOracle(const std::string& mutation)
+{
+    require(sizeof(RFLOAT) == sizeof(double), "fit boundary precision budget requires double RFLOAT");
+    require(mutation.empty() || mutation == "sign" || mutation == "axis-normalization" ||
+            mutation == "frame-origin", "unknown fit boundary mutant");
+    constexpr long double coefficient_bound = 1e-7L, field_bound = 2e-5L;
+    // P=(T^T T)^-1 T^T, T[f,k]=(f+1/2)^(k+1), evaluated with exact
+    // fractions offline. This 3x5 temporal oracle is independent of the native
+    // 40/45-by-18 design and Numerical Recipes SVD; no NumPy fit is expected.
+    const long double projection[3][5] = {
+        {583357.L/606474,119903.L/110268,7775.L/202158,-869603.L/1212948,58451.L/202158},
+        {-1792.L/3063,-1778.L/3063,150.L/1021,1792.L/3063,-284.L/1021},
+        {25294.L/303237,2077.L/27567,-3610.L/101079,-28357.L/303237,5882.L/101079}
+    };
+    struct Case {
+        const char* name;
+        int missing_row, missing_col; // 1-based (iy+1, ix+1), as native logs.
+        std::array<long double,5> gx, gy;
+        bool exact_global;
+    };
+    const std::array<long double,5> exact_x = {0,-13.L/16,-26.L/16,-39.L/16,-52.L/16};
+    const std::array<long double,5> exact_y = {0,17.L/32,34.L/32,51.L/32,68.L/32};
+    const std::vector<Case> cases = {
+        {"exact-all9",0,0,exact_x,exact_y,true},
+        {"exact-affine-mask",2,1,exact_x,exact_y,true},
+        {"exact-noisy-mask",1,3,exact_x,exact_y,true},
+        // Decimal globals are literal retained STAR inputs, not pre-write
+        // globals. Their member hashes and provenance are in frozen.json.
+        {"archive-affine-cpu",0,0,{0,-1,-1.35238L,-1.88095L,-2.88571L},
+            {0,.309524L,.733333L,.8L,1.753571L},false},
+        {"archive-affine-cuda",2,1,{0,-1.19048L,-1.76190L,-2.39524L,-3.44762L},
+            {0,1.1L,1.3L,1.466667L,2.45L},false},
+        {"archive-noisy-cpu",0,0,{0,-.90476L,-.90476L,-2.70952L,-3.18452L},
+            {0,.898413L,.346032L,1.865079L,1.498413L},false},
+        {"archive-noisy-cuda",1,3,{0,-.51190L,-.70714L,-1.72619L,-1.64286L},
+            {0,.402778L,.511111L,1.168254L,.152778L},false}
+    };
+    bool all_pass = true;
+    for (const Case& c : cases) {
+        std::vector<RFLOAT> frames, xs, ys, shifts_x, shifts_y;
+        for (int row=1; row<=3; ++row) for (int col=1; col<=3; ++col) {
+            if (row == c.missing_row && col == c.missing_col) continue;
+            const int x = 20+42*(col-1), y = 15+32*(row-1);
+            // q-forward(q): correction sign; original unbinned pixels per
+            // 0-based frame. The two unequal axis normalizations matter.
+            const long double rx = -13.L/16 - (.012L*(x-64)-.008L*(y-48))/4;
+            const long double ry = 17.L/32 - (.006L*(x-64)-.010L*(y-48))/4;
+            std::vector<RFLOAT> lx(5), ly(5), ix(5), iy(5);
+            std::vector<int> start={0,1,2,3,4}, size(5,1);
+            for (int f=0; f<5; ++f) {
+                lx[f] = f*rx-c.gx[f]; ly[f] = f*ry-c.gy[f];
+                if (mutation == "sign") { lx[f] = -lx[f]; ly[f] = -ly[f]; }
+            }
+            // Actual interpolation, as the default non-interpolated production
+            // branch uses it to find the first-frame origin. For group=1 this
+            // is -.5*E_1. Do not replace it with the analytic expression.
+            MotioncorrRunner::interpolateShifts(start,size,lx,ly,5,ix,iy);
+            for (int f=0; f<5; ++f) {
+                frames.push_back(f + (mutation == "frame-origin" ? 0 : .5));
+                xs.push_back(x); ys.push_back(y);
+                shifts_x.push_back(lx[f]-ix[0]); shifts_y.push_back(ly[f]-iy[0]);
+            }
+        }
+        require(frames.size() == (c.missing_row ? 40u : 45u), "incorrect observed mask size");
+        int rank=0; RFLOAT condition=0;
+        ThirdOrderPolynomialModel model = fitBoundaryProductionAdapter(frames,xs,ys,shifts_x,shifts_y,
+            128,96,rank,condition);
+        require(rank == 18 && std::isfinite(condition) && condition < 6000,
+                std::string(c.name)+": rank/condition admission failed");
+        long double temporal[2][3] = {};
+        for (int k=0; k<3; ++k) for (int f=0; f<5; ++f) {
+            temporal[0][k] += projection[k][f]*(exact_x[f]-c.gx[f]+(exact_x[1]-c.gx[1])/2);
+            temporal[1][k] += projection[k][f]*(exact_y[f]-c.gy[f]+(exact_y[1]-c.gy[1])/2);
+        }
+        long double coefficient_error=0;
+        for (int i=0; i<18; ++i) {
+            const long double want_x = i<3 ? temporal[0][i] : i==3 ? -48.L/125 : i==9 ? 24.L/125 : 0;
+            const long double want_y = i<3 ? temporal[1][i] : i==3 ? -24.L/125 : i==9 ? 6.L/25 : 0;
+            require(std::isfinite(model.coeffX(i)) && std::isfinite(model.coeffY(i)), "nonfinite native coefficient");
+            coefficient_error = std::max({coefficient_error,std::abs(model.coeffX(i)-want_x),std::abs(model.coeffY(i)-want_y)});
+        }
+        long double field_error=0, truth_sum=0, truth_max=0;
+        size_t count=0;
+        // Actual pre-write model evaluation; fixed ROI, every 0-based frame.
+        for (int f=0; f<5; ++f) for (int y=12; y<84; ++y) for (int x=12; x<116; ++x) {
+            RFLOAT vx,vy;
+            // Mutate only the fit-to-field coordinate boundary. The fitted
+            // inputs, geometry, coefficients and rank/condition stay baseline.
+            const RFLOAT query_x = x/(mutation == "axis-normalization" ? 96.0 : 128.0)-.5;
+            const RFLOAT query_y = y/(mutation == "axis-normalization" ? 128.0 : 96.0)-.5;
+            require(model.getShiftAt(f,query_x,query_y,vx,vy)==0, "native model query failed");
+            require(std::isfinite(vx) && std::isfinite(vy), "nonfinite native field");
+            const long double tx = f*(-13.L/16-(.012L*(x-64)-.008L*(y-48))/4);
+            const long double ty = f*(17.L/32-(.006L*(x-64)-.010L*(y-48))/4);
+            const long double hx = f*(temporal[0][0]+f*(temporal[0][1]+f*temporal[0][2]));
+            const long double hy = f*(temporal[1][0]+f*(temporal[1][1]+f*temporal[1][2]));
+            const long double expected_x = tx-exact_x[f]+hx, expected_y = ty-exact_y[f]+hy;
+            field_error = std::max(field_error,std::hypot(vx-expected_x,vy-expected_y));
+            const long double truth_error = std::hypot(vx+c.gx[f]-tx,vy+c.gy[f]-ty);
+            truth_sum += truth_error*truth_error; truth_max = std::max(truth_max,truth_error); ++count;
+        }
+        const bool pass = coefficient_error<=coefficient_bound && field_error<=field_bound;
+        require(mutation.empty() || !pass, std::string(c.name)+": mutant escaped the fixed oracle");
+        all_pass &= pass;
+        std::cout << std::setprecision(17) << (pass ? "PASS " : "ORACLE REJECT ") << c.name
+                  << " mutant=" << (mutation.empty() ? "none" : mutation)
+                  << " n=" << frames.size() << " rank=" << rank << " condition=" << condition
+                  << " coefficient_max_abs_px=" << coefficient_error << " field_oracle_max_px=" << field_error
+                  << " composed_truth_rms_px=" << std::sqrt(truth_sum/count)
+                  << " composed_truth_max_px=" << truth_max
+                  << (c.exact_global ? " exact-global" : " archived-global-characterization") << '\n';
+    }
+    return all_pass;
+}
+
 int main(int argc, char **argv)
 {
     try {
         require(argc >= 2, "Usage: runner_numerics <mode> [input output]");
+        if (std::string(argv[1]) == "fit_boundary" || std::string(argv[1]) == "fit_boundary_expect_rejection") {
+            const bool expect_rejection = std::string(argv[1]) == "fit_boundary_expect_rejection";
+            require(argc == 2 || argc == 3, "fit boundary takes at most one mutant");
+            require(!expect_rejection || argc == 3, "expected rejection requires a named mutant");
+            const bool accepted = fitBoundaryOracle(argc == 3 ? argv[2] : "");
+            if (expect_rejection) {
+                require(!accepted, "fit boundary oracle accepted mutant");
+                std::cout << "PASS fixed oracle rejected " << argv[2] << '\n';
+                return 0;
+            }
+            return accepted ? 0 : 1;
+        }
         if (std::string(argv[1]) == "interpolate_recenter") {
             // Regression for issue #97: --interpolate_shifts recentered every frame against
             // interpolated_xshifts[0] *in place*, so iteration zero zeroed the origin that

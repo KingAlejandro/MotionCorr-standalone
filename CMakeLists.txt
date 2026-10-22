@@ -214,6 +214,48 @@ if(BUILD_TESTING)
     add_executable(hermitian_projection_oracle tests/test_hermitian_projection_oracle.cpp)
     add_test(NAME HermitianProjectionOracle COMMAND hermitian_projection_oracle)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
+    # Test-only entry to the inline production fitter, without a second typed
+    # implementation or any production refactor. Fail closed if its boundaries
+    # disappear or become ambiguous. The extracted arithmetic is byte-unchanged.
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/motioncorr_runner.cpp" _fit_source)
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/motioncorr_runner.cpp")
+    set(_fit_start "\t\tMatrix2D <RFLOAT> matA(n_obs, n_params);")
+    set(_fit_end "\n#ifdef DEBUG_OWN\n\t\tstd::cout << \"Polynomial fitting coefficients for X and Y:\"")
+    foreach(_marker _fit_start _fit_end)
+        string(FIND "${_fit_source}" "${${_marker}}" _first)
+        if(_first LESS 0)
+            message(FATAL_ERROR "Fit oracle: missing ${_marker}")
+        endif()
+        # Use the suffix to detect duplicate boundaries.
+        string(LENGTH "${${_marker}}" _marker_size)
+        math(EXPR _after "${_first} + ${_marker_size}")
+        string(SUBSTRING "${_fit_source}" ${_after} -1 _tail)
+        string(FIND "${_tail}" "${${_marker}}" _second)
+        if(NOT _second EQUAL -1)
+            message(FATAL_ERROR "Fit oracle: ambiguous ${_marker}")
+        endif()
+        set(${_marker}_pos ${_first})
+    endforeach()
+    math(EXPR _fit_size "${_fit_end_pos} - ${_fit_start_pos}")
+    if(_fit_size LESS 1)
+        message(FATAL_ERROR "Fit oracle: reversed boundaries")
+    endif()
+    string(SUBSTRING "${_fit_source}" ${_fit_start_pos} ${_fit_size} _fit_body)
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/fit_boundary_adapter.cpp"
+        "// Test-only extraction from motioncorr_runner.cpp; upstream notices follow.\n")
+    # Retain the complete upstream copyright/license notice in the derived TU.
+    string(FIND "${_fit_source}" "*/" _notice_end)
+    math(EXPR _notice_size "${_notice_end} + 2")
+    string(SUBSTRING "${_fit_source}" 0 ${_notice_size} _fit_notice)
+    file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/fit_boundary_adapter.cpp"
+        "${_fit_notice}\n#include \"src/motioncorr_runner.h\"\n#include \"src/matrix2d.h\"\n"
+        "ThirdOrderPolynomialModel fitBoundaryProductionAdapter(const std::vector<RFLOAT>& patch_frames, const std::vector<RFLOAT>& patch_xs, const std::vector<RFLOAT>& patch_ys, const std::vector<RFLOAT>& patch_xshifts, const std::vector<RFLOAT>& patch_yshifts, int nx, int ny, int& rank, RFLOAT& condition) {\n"
+        "const int n_obs = patch_frames.size(), n_params = 18;\n${_fit_body}\n"
+        "Matrix2D<RFLOAT> u, v; Matrix1D<RFLOAT> w; svdcmp(matA, u, w, v);\n"
+        "RFLOAT lo = 1e30, hi = 0; rank = 0; for (int j=0; j<n_params; ++j) { if(w(j)>1e-10) ++rank; lo=std::min(lo,w(j)); hi=std::max(hi,w(j)); } condition=hi/lo;\n"
+        "ThirdOrderPolynomialModel model; model.coeffX=coeffX; model.coeffY=coeffY; return model; }\n")
+    target_sources(runner_numerics PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/fit_boundary_adapter.cpp")
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
     add_executable(cpu_dose_symmetry tests/test_cpu_dose_symmetry.cpp)
     target_link_libraries(cpu_dose_symmetry PRIVATE motioncorr_core)
@@ -269,6 +311,12 @@ if(BUILD_TESTING)
     # find_package(Python3 ... REQUIRED) line because it needs no interpreter.
     add_test(NAME RunnerInterpolateRecenter
         COMMAND $<TARGET_FILE:runner_numerics> interpolate_recenter)
+    add_test(NAME RunnerFitBoundary
+        COMMAND $<TARGET_FILE:runner_numerics> fit_boundary)
+    foreach(_mutation sign axis-normalization frame-origin)
+        add_test(NAME RunnerFitBoundaryMutant_${_mutation}
+            COMMAND $<TARGET_FILE:runner_numerics> fit_boundary_expect_rejection ${_mutation})
+    endforeach()
     add_test(NAME FloatPlanCache
         COMMAND $<TARGET_FILE:runner_numerics> float_plan_cache)
     add_test(NAME MrcHeaderStats

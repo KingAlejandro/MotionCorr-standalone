@@ -1,0 +1,448 @@
+{
+  "schema": "fit-boundary-native-attempt/3",
+  "attempt": "native_attempt03",
+  "attempt_status": "FAIL",
+  "reason": "axis-normalization mutant raises rank/condition admission exception on exact-all9; not ordinary oracle rejection; stopped without retuning/retry",
+  "support_source": {
+    "utc": "2026-10-22T16:53:26.593226+00:00",
+    "support_commit": "0bcb09b248c6bca1eb5db70bad37dbf429fa1cbd",
+    "compiled_source_commit": "5c8f6b4f9242510545f852c15065bd93e762a2a1",
+    "oracle_code_commit": "135ee09e0925deb933bfd0f4ce7e24d6ddbd080a",
+    "local_archive": "/tmp/motioncorr-fit-native-attempt03-0bcb09b2-source.tar",
+    "source_archive_sha256": "677bc91a21ebba2c31fc20ff5a2ff13e00477de5c4bc71c68cc1fe98ae37adf5",
+    "source_archive_bytes": 134973440,
+    "remote_scratch": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+    "driver_sha256": "2d7e415558faf85fa7355045978d20200e24adc0274a0e624c1e741cc52171d0",
+    "reuse_reference_sha256": "df1808e95ad2507a3a6579982c156f0d204b77cd4997ad07e4d8e0d8201797e4",
+    "checker_sha256": "502780ffaa1cfe5d66d924274b13140032706299d5d5c94fffead4f3bfe88c58"
+  },
+  "compiled_identity": {
+    "source_commit": "5c8f6b4f9242510545f852c15065bd93e762a2a1",
+    "oracle_code_commit": "135ee09e0925deb933bfd0f4ce7e24d6ddbd080a",
+    "rebuilt": false,
+    "subject_binary_sha256": {
+      "runner_numerics": "07f3fd30ec9654fc7104a1b7e9176fedc5e85b799dbf385154626a667dc2582c",
+      "motioncorr": "94c292d8d9ee6edfaa56c20674ee1186ade41f8b6b9ba99e68cad9569121728f"
+    },
+    "adapter_sha256": "d44dbbb1b9ebfc4af20788993466f945201b2c37864de819cbe818163366680f",
+    "oracle_source_sha256": "f40146aacb2e2664c2c9201addc532d32d5a50b9262f1f2f0ca44094de34f696",
+    "prior_source_files_verified": 7475,
+    "all_retained_build_and_dependency_hashes_verified": true,
+    "old_source_and_build_unchanged_after": true
+  },
+  "checks": {
+    "host_registration_regressions": "PASS 11/11; historical checker FAIL 3/11 as negative control",
+    "reuse_identity": "PASS; no fresh compilation",
+    "declared_required_collection": "PASS 84, all required names, four drop-one controls",
+    "targeted_actual_runnable_collection": "PASS 8 actual commands",
+    "targeted_runnable_drop_one": "PASS 4/4 ordinary missing-required-name rejections",
+    "focused_ctest": "FAIL 7/8, exit8",
+    "native_oracle_registered": "PASS 7/7 cases",
+    "sign_mutant_registered": "PASS 7/7 ordinary oracle rejections; expectation-mode exit0",
+    "frame_origin_mutant_registered": "PASS 7/7 ordinary oracle rejections; expectation-mode exit0",
+    "axis_normalization_mutant_registered": "FAIL admission exception exact-all9; zero ordinary oracle rejections observed",
+    "focused_existing_recenter_model": "PASS 4/4",
+    "oracle_direct": "UNRUN after focused CTest failure",
+    "direct_mutants": "UNRUN after focused CTest failure",
+    "ci_drop_one_controls": "UNRUN after focused CTest failure",
+    "full_runnable_collection": "UNRUN; 33 unrelated helper binaries remain unbuilt",
+    "full_suite": "UNRUN",
+    "gpu": "UNRUN",
+    "corpus": "UNRUN",
+    "reconstruction": "UNRUN",
+    "science": "UNRUN",
+    "performance": "UNRUN"
+  },
+  "bounds": {
+    "coefficient_abs_px": 1e-07,
+    "field_vector_max_px": 2e-05,
+    "condition_admission": 6000,
+    "unchanged": true
+  },
+  "native_oracle": {
+    "cases": [
+      {
+        "case": "exact-all9",
+        "mutant": "none",
+        "status": "PASS",
+        "n": 45,
+        "rank": 18,
+        "condition": 4069.2536437806307,
+        "coefficient_max_abs_px": 4.598643514597267e-15,
+        "field_oracle_max_px": 2.3226023012250472e-15,
+        "composed_truth_rms_px": 5.624329474944654e-16,
+        "composed_truth_max_px": 2.3226023012250472e-15
+      },
+      {
+        "case": "exact-affine-mask",
+        "mutant": "none",
+        "status": "PASS",
+        "n": 40,
+        "rank": 18,
+        "condition": 4768.469731039116,
+        "coefficient_max_abs_px": 8.766763899027696e-15,
+        "field_oracle_max_px": 4.124863806529592e-15,
+        "composed_truth_rms_px": 9.986446262950445e-16,
+        "composed_truth_max_px": 4.124863806529592e-15
+      },
+      {
+        "case": "exact-noisy-mask",
+        "mutant": "none",
+        "status": "PASS",
+        "n": 40,
+        "rank": 18,
+        "condition": 5399.937886072048,
+        "coefficient_max_abs_px": 8.221721914392077e-15,
+        "field_oracle_max_px": 4.776034735792302e-15,
+        "composed_truth_rms_px": 9.626540688000028e-16,
+        "composed_truth_max_px": 4.776034735792302e-15
+      },
+      {
+        "case": "archive-affine-cpu",
+        "mutant": "none",
+        "status": "PASS",
+        "n": 45,
+        "rank": 18,
+        "condition": 4069.2536437806307,
+        "coefficient_max_abs_px": 4.712737942032003e-14,
+        "field_oracle_max_px": 5.123059884635096e-15,
+        "composed_truth_rms_px": 0.24216226644651087,
+        "composed_truth_max_px": 0.342411992028721
+      },
+      {
+        "case": "archive-affine-cuda",
+        "mutant": "none",
+        "status": "PASS",
+        "n": 40,
+        "rank": 18,
+        "condition": 4768.469731039116,
+        "coefficient_max_abs_px": 5.770937770047753e-14,
+        "field_oracle_max_px": 1.1272805368957262e-14,
+        "composed_truth_rms_px": 0.3329231343015606,
+        "composed_truth_max_px": 0.529455354450827
+      },
+      {
+        "case": "archive-noisy-cpu",
+        "mutant": "none",
+        "status": "PASS",
+        "n": 45,
+        "rank": 18,
+        "condition": 4069.2536437806307,
+        "coefficient_max_abs_px": 9.107886566199665e-14,
+        "field_oracle_max_px": 1.2974429256897861e-14,
+        "composed_truth_rms_px": 0.5751518901312408,
+        "composed_truth_max_px": 1.0885143569229483
+      },
+      {
+        "case": "archive-noisy-cuda",
+        "mutant": "none",
+        "status": "PASS",
+        "n": 40,
+        "rank": 18,
+        "condition": 5399.937886072048,
+        "coefficient_max_abs_px": 9.27166329822704e-14,
+        "field_oracle_max_px": 1.0529850297368701e-14,
+        "composed_truth_rms_px": 0.40957204885977794,
+        "composed_truth_max_px": 0.7894312668955618
+      }
+    ],
+    "max_coefficient_abs_error_px": 9.27166329822704e-14,
+    "max_field_oracle_vector_error_px": 1.2974429256897861e-14
+  },
+  "mutants": {
+    "sign": {
+      "ordinary_rejections": 7,
+      "registered_exit": 0
+    },
+    "frame_origin": {
+      "ordinary_rejections": 7,
+      "registered_exit": 0
+    },
+    "axis_normalization": {
+      "ordinary_rejections": 0,
+      "registered_exit": 1,
+      "exception": "exact-all9: rank/condition admission failed",
+      "rank": null,
+      "condition": null,
+      "coefficient_error": null,
+      "field_error": null
+    }
+  },
+  "resources": {
+    "host": "4-gpu-vm",
+    "scratch": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+    "pid": 3039133,
+    "launch_utc": "2026-10-22T16:54:33.941967+00:00",
+    "release_utc": "2026-10-22T16:54:44.049653+00:00",
+    "reconciled_utc": "2026-10-22T16:55:50.115145+00:00",
+    "launch_affinity": [
+      8,
+      9
+    ],
+    "execution_and_verification_affinity": [
+      8
+    ],
+    "numeric_threads": 1,
+    "gpu_used": false,
+    "locks_released": true,
+    "lock_probes": [
+      {
+        "path": "/tmp/motioncorr-fit-boundary-cpu8-9.lock",
+        "status": "FREE"
+      },
+      {
+        "path": "/tmp/motioncorr-build.lock",
+        "status": "FREE"
+      }
+    ],
+    "driver_absent": true,
+    "owned_process_matches": []
+  },
+  "launcher_setup_failure": "First wrapper SyntaxError before execution; retained transport. Corrected receipt-writing only, verified no prior launch state; one actual native driver launch.",
+  "qualification_limits": [
+    "Normalization mutant discrimination remains FAIL; complete qualification is not achieved.",
+    "Default oracle uses constructed point residuals; archived CPU/CUDA globals are counterfactual composition inputs, not new CUDA execution or scientific passes.",
+    "Enclosing production acceptance, rejection and publication are outside the seam.",
+    "No fresh compile, direct mutant exit1 verification, full suite, GPU, science or performance qualification."
+  ],
+  "commands": [
+    {
+      "name": "hostname",
+      "argv": [
+        "hostname"
+      ],
+      "cwd": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+      "start": "2026-10-22T16:54:34.005766+00:00",
+      "end": "2026-10-22T16:54:34.007554+00:00",
+      "exit": 0,
+      "expected": 0,
+      "affinity": [
+        8
+      ]
+    },
+    {
+      "name": "occupancy",
+      "argv": [
+        "ps",
+        "-u",
+        "alex",
+        "-o",
+        "pid,ppid,psr,pcpu,comm,args",
+        "--sort=-pcpu"
+      ],
+      "cwd": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+      "start": "2026-10-22T16:54:34.007744+00:00",
+      "end": "2026-10-22T16:54:34.109537+00:00",
+      "exit": 0,
+      "expected": 0,
+      "affinity": [
+        8
+      ]
+    },
+    {
+      "name": "linked-libraries",
+      "argv": [
+        "ldd",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt02-20261022-5c8f6b4f/build/runner_numerics"
+      ],
+      "cwd": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+      "start": "2026-10-22T16:54:40.746300+00:00",
+      "end": "2026-10-22T16:54:40.756590+00:00",
+      "exit": 0,
+      "expected": 0,
+      "affinity": [
+        8
+      ]
+    },
+    {
+      "name": "collection",
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2/ctest-view",
+        "--show-only=json-v1"
+      ],
+      "cwd": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+      "start": "2026-10-22T16:54:40.757048+00:00",
+      "end": "2026-10-22T16:54:40.777538+00:00",
+      "exit": 0,
+      "expected": 0,
+      "affinity": [
+        8
+      ]
+    },
+    {
+      "name": "declared-required-collection",
+      "argv": [
+        "/home/alex/.mc-venv/bin/python3",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2/source/docs/post_rc0/s1/fit_boundary_20261022/check_registration.py",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2/source",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2/ctest-view",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2/receipts"
+      ],
+      "cwd": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+      "start": "2026-10-22T16:54:40.777935+00:00",
+      "end": "2026-10-22T16:54:41.153491+00:00",
+      "exit": 0,
+      "expected": 0,
+      "affinity": [
+        8
+      ]
+    },
+    {
+      "name": "focused-runnable-collection",
+      "argv": [
+        "/home/alex/.mc-venv/bin/python3",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2/source/tools/validate_test_collection.py",
+        "--min-count",
+        "8",
+        "--required-tests",
+        "RunnerFitBoundary",
+        "RunnerFitBoundaryMutant_sign",
+        "RunnerFitBoundaryMutant_axis-normalization",
+        "RunnerFitBoundaryMutant_frame-origin",
+        "RunnerInterpolateRecenter",
+        "RunnerInterpolateShifts",
+        "MicrographModelBounds",
+        "RunnerModelParser"
+      ],
+      "cwd": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+      "start": "2026-10-22T16:54:41.154910+00:00",
+      "end": "2026-10-22T16:54:41.214364+00:00",
+      "exit": 0,
+      "expected": 0,
+      "affinity": [
+        8
+      ]
+    },
+    {
+      "name": "runnable-drop-RunnerFitBoundary",
+      "argv": [
+        "/home/alex/.mc-venv/bin/python3",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2/source/tools/validate_test_collection.py",
+        "--min-count",
+        "7",
+        "--required-tests",
+        "RunnerFitBoundary",
+        "RunnerFitBoundaryMutant_sign",
+        "RunnerFitBoundaryMutant_axis-normalization",
+        "RunnerFitBoundaryMutant_frame-origin",
+        "RunnerInterpolateRecenter",
+        "RunnerInterpolateShifts",
+        "MicrographModelBounds",
+        "RunnerModelParser"
+      ],
+      "cwd": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+      "start": "2026-10-22T16:54:41.214940+00:00",
+      "end": "2026-10-22T16:54:41.273814+00:00",
+      "exit": 1,
+      "expected": 1,
+      "affinity": [
+        8
+      ]
+    },
+    {
+      "name": "runnable-drop-RunnerFitBoundaryMutant_sign",
+      "argv": [
+        "/home/alex/.mc-venv/bin/python3",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2/source/tools/validate_test_collection.py",
+        "--min-count",
+        "7",
+        "--required-tests",
+        "RunnerFitBoundary",
+        "RunnerFitBoundaryMutant_sign",
+        "RunnerFitBoundaryMutant_axis-normalization",
+        "RunnerFitBoundaryMutant_frame-origin",
+        "RunnerInterpolateRecenter",
+        "RunnerInterpolateShifts",
+        "MicrographModelBounds",
+        "RunnerModelParser"
+      ],
+      "cwd": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+      "start": "2026-10-22T16:54:41.274584+00:00",
+      "end": "2026-10-22T16:54:41.333572+00:00",
+      "exit": 1,
+      "expected": 1,
+      "affinity": [
+        8
+      ]
+    },
+    {
+      "name": "runnable-drop-RunnerFitBoundaryMutant_axis-normalization",
+      "argv": [
+        "/home/alex/.mc-venv/bin/python3",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2/source/tools/validate_test_collection.py",
+        "--min-count",
+        "7",
+        "--required-tests",
+        "RunnerFitBoundary",
+        "RunnerFitBoundaryMutant_sign",
+        "RunnerFitBoundaryMutant_axis-normalization",
+        "RunnerFitBoundaryMutant_frame-origin",
+        "RunnerInterpolateRecenter",
+        "RunnerInterpolateShifts",
+        "MicrographModelBounds",
+        "RunnerModelParser"
+      ],
+      "cwd": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+      "start": "2026-10-22T16:54:41.334333+00:00",
+      "end": "2026-10-22T16:54:41.393338+00:00",
+      "exit": 1,
+      "expected": 1,
+      "affinity": [
+        8
+      ]
+    },
+    {
+      "name": "runnable-drop-RunnerFitBoundaryMutant_frame-origin",
+      "argv": [
+        "/home/alex/.mc-venv/bin/python3",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2/source/tools/validate_test_collection.py",
+        "--min-count",
+        "7",
+        "--required-tests",
+        "RunnerFitBoundary",
+        "RunnerFitBoundaryMutant_sign",
+        "RunnerFitBoundaryMutant_axis-normalization",
+        "RunnerFitBoundaryMutant_frame-origin",
+        "RunnerInterpolateRecenter",
+        "RunnerInterpolateShifts",
+        "MicrographModelBounds",
+        "RunnerModelParser"
+      ],
+      "cwd": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+      "start": "2026-10-22T16:54:41.394160+00:00",
+      "end": "2026-10-22T16:54:41.452746+00:00",
+      "exit": 1,
+      "expected": 1,
+      "affinity": [
+        8
+      ]
+    },
+    {
+      "name": "focused-ctest",
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2/ctest-view",
+        "--output-on-failure",
+        "-j",
+        "1",
+        "--no-tests=error",
+        "--output-junit",
+        "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2/receipts/focused.xml",
+        "-R",
+        "^(RunnerFitBoundary.*|RunnerInterpolateRecenter|RunnerInterpolateShifts|MicrographModelBounds|RunnerModelParser)$"
+      ],
+      "cwd": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2",
+      "start": "2026-10-22T16:54:41.453515+00:00",
+      "end": "2026-10-22T16:54:44.039666+00:00",
+      "exit": 8,
+      "expected": 0,
+      "affinity": [
+        8
+      ]
+    }
+  ],
+  "preservation": "Historical attempt01/02 evidence and frozen inputs unchanged; only registration support/new regressions/new driver and documentation/evidence changed; no production/native math changes or publication."
+}

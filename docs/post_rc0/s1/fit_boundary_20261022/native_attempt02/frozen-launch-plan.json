@@ -1,0 +1,50 @@
+{
+  "frozen_utc": "2026-10-22T16:39:32.736093+00:00",
+  "launch_argv": [
+    "taskset",
+    "-c",
+    "8-9",
+    "/home/alex/.mc-venv/bin/python3",
+    "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt02-20261022-5c8f6b4f/run_remote.py",
+    "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt02-20261022-5c8f6b4f",
+    "48fee9dbbc6536f4ab2aa27fcc87fdfd2778f31e63623a37d0715ff431feb5d1",
+    "5c8f6b4f9242510545f852c15065bd93e762a2a1"
+  ],
+  "env_overrides": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "CUDA_VISIBLE_DEVICES": ""
+  },
+  "driver_source_sha256": "c30d15751234592645fa1f2d7e299d5da23c607314937a16765e051985cf489a",
+  "driver_commands": "Exactly the unmodified run_remote.py at source_commit; literal paths resolve under remote_scratch",
+  "source": {
+    "utc": "2026-10-22T16:38:26.740299+00:00",
+    "source_commit": "5c8f6b4f9242510545f852c15065bd93e762a2a1",
+    "oracle_code_commit": "135ee09e0925deb933bfd0f4ce7e24d6ddbd080a",
+    "local_archive": "/tmp/motioncorr-fit-native-attempt02-5c8f6b4f-source.tar",
+    "source_archive_sha256": "48fee9dbbc6536f4ab2aa27fcc87fdfd2778f31e63623a37d0715ff431feb5d1",
+    "source_archive_bytes": 133806080,
+    "remote_scratch": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt02-20261022-5c8f6b4f",
+    "driver_sha256": "c30d15751234592645fa1f2d7e299d5da23c607314937a16765e051985cf489a",
+    "frozen_expectations_sha256": {
+      "docs/post_rc0/s1/fit_boundary_20261022/EXPECTATIONS.md": "8c66a365471922ad385c925dedb6cd3b711f6c291e704e3caabd34ebc73c3e69",
+      "docs/post_rc0/s1/fit_boundary_20261022/frozen.json": "38c02d1e0ca661d9eb3f6a338f406d9f3db0c56315b1deb793dee8c36a2c9319"
+    },
+    "max_cpus_including_children": 2,
+    "compile_affinity": [
+      8,
+      9
+    ],
+    "compile_parallel": 2,
+    "runtime_affinity": [
+      8
+    ],
+    "numeric_threads": 1
+  },
+  "full_runnable_collection": "UNRUN; unrelated helpers remain unbuilt; targeted runnable validation is planned, no placeholder executables",
+  "no_retry": true
+}

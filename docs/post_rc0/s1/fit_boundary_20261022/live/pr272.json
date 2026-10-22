@@ -1,0 +1,14 @@
+{
+  "utc": "2026-10-22T16:21:42.292730+00:00",
+  "argv": [
+    "gh",
+    "pr",
+    "view",
+    "272",
+    "--json",
+    "number,url,title,body,headRefOid,comments,reviews"
+  ],
+  "exit": 0,
+  "stdout": "{\"body\":\"### Evaluator integration at `1f0a58bf`\\n\\nNormally integrated #269 at `1b29b7f9`, including #267\u2019s repaired exit/status/null contract. Fixed documented evaluator invocation and stale JSON reuse after a checker input error. Each checker writes to a private fresh path; cached historical JSON is retained on error and never consumed as new output. Actual wrapper CLI controls **4/4 PASS**; inherited diagnostics **11/11**, realistic **13/13**, image **4/4**, verdict **8/8**, runner **8/8 PASS**. All eight ordinary wrapper rows exactly preserve old metrics except additive sampling status. Independent source review found no material issue; [Current-head Linux CI](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39773439720) **PASS**: CPU build/checks and CUDA compile-only. This CI result does not establish native GPU or scientific qualification. Historical evidence, source identities, ROI, truth, field fallback, gates and production code are unchanged. No new native campaign or scientific/performance qualification.\\n\\n---\\n\\nTest/evidence only; no production change, no merge.\\n\\n**Result.** On one build with #254+#260+#270 and the DC-oracle hooks (`diag/combined-candidate` d044aaaa), all 400 #269 census runs (100 movies \u00d7 CPU/CUDA \u00d7 DC none/both) exit 0 and reproduce #269's field RMS to \u22644.9e-7 px. The new image check (signal transfer / FRC per band vs the generator's own clean scene) sees the DC effect only at pedestal 32: transfer 0.926\u21920.991 (CPU), 0.931\u21920.991 (CUDA), 10/10 seeds, p=0.00195. #270 changes images only in the outer 8 px (53/37/10 better/worse/tie, p=0.113). Toggle-off build is byte-identical to plain #254+#260+#270 on CPU and CUDA. Negative controls (zero-motion, wrong-sign) score \u22480 transfer vs \u22481 for the oracle sum. #267's noisy/repeated cases abort the unchanged checker (reported as a limitation); all gate cases still FAIL.\\n\\nDetails, tables, controls, provenance: docs/post_rc0/s1/synth_combined/README.md. Targets #269's branch because it extends its evaluator and runner (optional flags; defaults unchanged).\\n\\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\",\"comments\":[],\"headRefOid\":\"1f0a58bf6e0639d8b62f74da52f250cc664c0b30\",\"number\":272,\"reviews\":[],\"title\":\"test: combined-build synthetic testing and image-level truth check (#267 cases, #269 census)\",\"url\":\"https://github.com/KingAlejandro/MotionCorr-standalone/pull/272\"}\n",
+  "stderr": ""
+}

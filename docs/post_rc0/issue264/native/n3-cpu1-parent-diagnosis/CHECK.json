@@ -1,0 +1,101 @@
+{
+  "utc": "2026-10-22T23:52:44.681555+00:00",
+  "reviewed_head": "cbd298a747b77c672c63e58fa050ddf7907a5229",
+  "native_source": "3751bd05a95412dff468557141f2e7e01ad21831",
+  "archive_sha256": "3cc13020d35aaf7113fe16878e8eb63c11652863fd73c0da3974fc7fa09f2760",
+  "platform": "macOS-26.7.1-arm64-arm-64bit-Mach-O",
+  "evidence_layer": "Read-only retained STAR parsing; no native, original grader, MRC payload or full-precision trace execution. No regrade.",
+  "pairs": [
+    {
+      "case": "A_x_legacy_false_accept",
+      "frame_rows": 12,
+      "all_3_arms_exact_printed_numeric_equality": true,
+      "legacy_raw_blocks_equal": false,
+      "all_noncomment_nonblank_block_lines_equal": true
+    },
+    {
+      "case": "A_y_legacy_false_accept",
+      "frame_rows": 12,
+      "all_3_arms_exact_printed_numeric_equality": true,
+      "legacy_raw_blocks_equal": false,
+      "all_noncomment_nonblank_block_lines_equal": true
+    },
+    {
+      "case": "B_x_legacy_false_reject",
+      "frame_rows": 12,
+      "all_3_arms_exact_printed_numeric_equality": true,
+      "legacy_raw_blocks_equal": false,
+      "all_noncomment_nonblank_block_lines_equal": true
+    },
+    {
+      "case": "B_y_legacy_false_reject",
+      "frame_rows": 12,
+      "all_3_arms_exact_printed_numeric_equality": true,
+      "legacy_raw_blocks_equal": false,
+      "all_noncomment_nonblank_block_lines_equal": true
+    },
+    {
+      "case": "E_xy_nonsquare_near_threshold",
+      "frame_rows": 12,
+      "all_3_arms_exact_printed_numeric_equality": true,
+      "legacy_raw_blocks_equal": false,
+      "all_noncomment_nonblank_block_lines_equal": true
+    },
+    {
+      "case": "F_mild_both_accept",
+      "frame_rows": 12,
+      "all_3_arms_exact_printed_numeric_equality": true,
+      "legacy_raw_blocks_equal": true,
+      "all_noncomment_nonblank_block_lines_equal": true
+    },
+    {
+      "case": "G_large_both_reject",
+      "frame_rows": 12,
+      "all_3_arms_exact_printed_numeric_equality": true,
+      "legacy_raw_blocks_equal": true,
+      "all_noncomment_nonblank_block_lines_equal": true
+    },
+    {
+      "case": "Z_no_overlay",
+      "frame_rows": 12,
+      "all_3_arms_exact_printed_numeric_equality": true,
+      "legacy_raw_blocks_equal": true,
+      "all_noncomment_nonblank_block_lines_equal": true
+    }
+  ],
+  "files": {
+    "n3-cpu1/ov-base-cpu/A_x_legacy_false_accept/out/km_local_nonsquare.star": "d9586422eba930c13f58795d7e2d87daa6fb97b0679260119cb43f071ad2bb8d",
+    "n3-cpu1/ov-base-cpu/A_y_legacy_false_accept/out/km_local_nonsquare.star": "ff8424caf7d3a7944a9c9944b4c7b2506e8874c49690870917aa3ecf3029726f",
+    "n3-cpu1/ov-base-cpu/B_x_legacy_false_reject/out/km_local_nonsquare.star": "947b20153863ea162c96426b165896b395d5a0477ca4ebd54f1e2e1359b5748f",
+    "n3-cpu1/ov-base-cpu/B_y_legacy_false_reject/out/km_local_nonsquare.star": "947b20153863ea162c96426b165896b395d5a0477ca4ebd54f1e2e1359b5748f",
+    "n3-cpu1/ov-base-cpu/E_xy_nonsquare_near_threshold/out/km_local_nonsquare.star": "947b20153863ea162c96426b165896b395d5a0477ca4ebd54f1e2e1359b5748f",
+    "n3-cpu1/ov-base-cpu/F_mild_both_accept/out/km_local_nonsquare.star": "4cf13b52efe547a2b2018061358ef2e143d822c87baa2805567ccedb9a972bca",
+    "n3-cpu1/ov-base-cpu/G_large_both_reject/out/km_local_nonsquare.star": "947b20153863ea162c96426b165896b395d5a0477ca4ebd54f1e2e1359b5748f",
+    "n3-cpu1/ov-base-cpu/Z_no_overlay/out/km_local_nonsquare.star": "b460aa791c0dd38f4437dd64e73f7b16c92e434f4ca100cbab7df2e381429e35",
+    "n3-cpu1/ov-cand-cpu/A_x_legacy_false_accept/out/km_local_nonsquare.star": "947b20153863ea162c96426b165896b395d5a0477ca4ebd54f1e2e1359b5748f",
+    "n3-cpu1/ov-cand-cpu/A_y_legacy_false_accept/out/km_local_nonsquare.star": "947b20153863ea162c96426b165896b395d5a0477ca4ebd54f1e2e1359b5748f",
+    "n3-cpu1/ov-cand-cpu/B_x_legacy_false_reject/out/km_local_nonsquare.star": "70931e6cdbab316bcd58076f985d04dd7d50562ac4b46e77427664b6ee8a4ea1",
+    "n3-cpu1/ov-cand-cpu/B_y_legacy_false_reject/out/km_local_nonsquare.star": "5310e546fea206b49762b9ddfac52a1c21cd95c35f870936a94edd5388a15090",
+    "n3-cpu1/ov-cand-cpu/E_xy_nonsquare_near_threshold/out/km_local_nonsquare.star": "1085a70406b6495d6817908b20aba4bfd63b30098b3965658fadb70444ccb487",
+    "n3-cpu1/ov-cand-cpu/F_mild_both_accept/out/km_local_nonsquare.star": "4cf13b52efe547a2b2018061358ef2e143d822c87baa2805567ccedb9a972bca",
+    "n3-cpu1/ov-cand-cpu/G_large_both_reject/out/km_local_nonsquare.star": "947b20153863ea162c96426b165896b395d5a0477ca4ebd54f1e2e1359b5748f",
+    "n3-cpu1/ov-cand-cpu/Z_no_overlay/out/km_local_nonsquare.star": "b460aa791c0dd38f4437dd64e73f7b16c92e434f4ca100cbab7df2e381429e35",
+    "n3-cpu1/ov-mut-cpu/A_x_legacy_false_accept/out/km_local_nonsquare.star": "d9586422eba930c13f58795d7e2d87daa6fb97b0679260119cb43f071ad2bb8d",
+    "n3-cpu1/ov-mut-cpu/A_y_legacy_false_accept/out/km_local_nonsquare.star": "ff8424caf7d3a7944a9c9944b4c7b2506e8874c49690870917aa3ecf3029726f",
+    "n3-cpu1/ov-mut-cpu/B_x_legacy_false_reject/out/km_local_nonsquare.star": "947b20153863ea162c96426b165896b395d5a0477ca4ebd54f1e2e1359b5748f",
+    "n3-cpu1/ov-mut-cpu/B_y_legacy_false_reject/out/km_local_nonsquare.star": "947b20153863ea162c96426b165896b395d5a0477ca4ebd54f1e2e1359b5748f",
+    "n3-cpu1/ov-mut-cpu/E_xy_nonsquare_near_threshold/out/km_local_nonsquare.star": "947b20153863ea162c96426b165896b395d5a0477ca4ebd54f1e2e1359b5748f",
+    "n3-cpu1/ov-mut-cpu/F_mild_both_accept/out/km_local_nonsquare.star": "4cf13b52efe547a2b2018061358ef2e143d822c87baa2805567ccedb9a972bca",
+    "n3-cpu1/ov-mut-cpu/G_large_both_reject/out/km_local_nonsquare.star": "947b20153863ea162c96426b165896b395d5a0477ca4ebd54f1e2e1359b5748f",
+    "n3-cpu1/ov-mut-cpu/Z_no_overlay/out/km_local_nonsquare.star": "b460aa791c0dd38f4437dd64e73f7b16c92e434f4ca100cbab7df2e381429e35"
+  },
+  "controls": {
+    "1e-6_value_change_detected": true,
+    "missing_row_rejected": true,
+    "duplicate_row_rejected": true,
+    "nonfinite_rejected": true,
+    "real_writer_following_model_changes_raw_not_rows": true
+  },
+  "original_subset": "FAIL retained:3pairsPASS/5pairsFAIL,24CPUrowsPASS,16CUDArowsUNRUN; no new subset verdict",
+  "diagnostic_conclusion": "Five pair failures coincide exactly with comment/blank formatting in raw global-block comparison. All24 retained printed trajectories equal across arms; full-precision/machine-state equality is not established."
+}

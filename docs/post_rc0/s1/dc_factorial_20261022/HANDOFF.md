@@ -81,3 +81,12 @@ Branch `experiment/262-four-arm-20261022` in
 `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479`; not pushed.
 Iteration-1 scratch `/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-59ff5811`
 (builds and Phase 0, 458 MiB) is retained.
+
+## Update 2026-10-22T21:59Z
+
+The CUDA worker (wrapper 3119381, coordinator 3119383) was stopped by the parent
+at 21:40Z for foreign GPU occupancy; `worker-cuda-13.exit` is 137 and no CUDA
+worker is running. Its GPU2 lock is no longer held. CPU workers 3119420,
+3119494, 3119584 continue. The completion criterion above now applies to the
+CPU queue only; the CUDA queue remains incomplete until an approved resume (see
+`resource_stop_20261022/README.md`).

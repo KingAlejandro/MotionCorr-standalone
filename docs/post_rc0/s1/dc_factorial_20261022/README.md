@@ -1,5 +1,15 @@
 # #262 four-arm CCF DC experiment — PARTIAL, native campaign still running
 
+**Update 2026-10-22T21:59Z: CUDA queue stopped for a resource conflict.** A
+foreign process occupied all four GPUs from about 21:26Z; the parent stopped
+only the CUDA worker at 21:40Z (exit 137). One GPU directory is
+INTERRUPTED/INCOMPLETE and 54 completed CUDA records have foreign GPU2
+occupancy recorded around them; see [resource_stop_20261022/](resource_stop_20261022/README.md).
+CPU workers continue. At 21:59Z: Tier B CUDA 402/402 and CPU 245/402 exit 0;
+Tier C CUDA 111 exit 0, 1 interrupted, 296 UNRUN; Tier C CPU 408 UNRUN. A GPU
+resume needs an exclusive lane and review; none is authorized. The figures
+below are the 20:45Z snapshot.
+
 Status at 2026-10-22T20:45Z: **PARTIAL / live-job handoff.** Phase 0 iteration 2
 PASSES; Tier A is complete; Tier B is about 48% evaluated; Tier C has not started.
 No M3 recommendation is made. Native cost is UNRUN. Exit 0 is not a truth PASS.

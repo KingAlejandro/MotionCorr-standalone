@@ -1,0 +1,9 @@
+FAIL C1 foreign process before first launch: no launch
+PASS C2 nonzero ECC: no launch
+PASS C3 failed nvidia-smi query: no launch
+PASS C3b UUID at wrong index: no launch
+PASS C4 clean queue: both jobs recorded, own GPU process not foreign
+FAIL C5 foreign appears mid-job: job recorded with foreign, stop before next launch
+PASS C6 existing incomplete directory untouched and skipped
+PASS C7 timeout: owned descendants reaped, record kept, no foreign signal, lease released
+PASS C8 cancellation (SIGTERM to worker): owned descendants reaped, record kept, no foreign signal, lease released

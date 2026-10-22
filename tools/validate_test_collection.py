@@ -176,6 +176,7 @@ CUDA_REQUIRED_TESTS = [
     "CudaStaleErrorAfterOom",
     "CudaLocalAdmission",
     "CudaEarlyStreamingOom",
+    # #226 D3: preserve planning errors through cuFFT cleanup.
     "CudaStreamingPlanClassificationCleanup",
 ]
 

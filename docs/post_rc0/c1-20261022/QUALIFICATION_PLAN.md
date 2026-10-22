@@ -34,6 +34,19 @@ Decoders: `pbzip2` is not on the default PATH. The pinned private copy (`/mnt/cl
 `-DMC_REQUIRE_ALL_DECODERS=ON`, so a missing decoder fails configuration instead of becoming an optional-decoder waiver. Build lock: W2 held it at
 19:07 UTC (PID 3062911, verified by the parent); C1 does not wait in a loop. Configure-only trees (E1) do not compile and do not take the lock.
 
+## Pre-launch tooling iteration
+
+Source `579bfad8` (scratch `…-c1-20261022-579bfad8c6f1`, setup only, no native results; retained, not reused) was superseded before any native launch
+after the parent's harness review of the qualification tools: (1) `c1_sticky.sh` held the GPU3 lease around a driver that takes that lease itself;
+(2) post-run health failures were discarded by `c1_ctest.sh`, `c1_item.sh`, `c1_sticky.sh` (exit 37 injected, wrapper exit 0 reproduced);
+(3) the sticky driver hardcodes `--j 4`/`OMP_NUM_THREADS=4` against a 2-CPU lane; (4) a single-worker dataset needs no second device;
+(5) the legacy item 12 uses `--j 8` and exact-output/retry-count expectations that predate #254/#260/#270. Corrections, tooling only:
+no outer sticky lock; every wrapper propagates a failed post-check as exit 37 and stops on a failed pre-check (`test_c1_wrappers.py` reproduces the
+parent's mocks and asserts the corrected behaviour); the sticky row runs only in a parent-granted window of at least 4 CPUs (`C1_STICKY_CPUS`), never
+oversubscribed and with an unedited driver; item 12 is derived by `make_c1_item12.py` (diff in `c1_item12.diff`) with `--j 2`, C1-derived retry
+expectations, and the #207/1db86902 comparisons kept as `legacy_*` keys that are never counted as pass or problem. The bench lock is probed and
+recorded, not waited on (#198 policy; `c1_lane.py`).
+
 ## Rows (verdicts are filled in `RESULTS.md` from retained receipts)
 
 | ID | Row | Command / tool | PASS criterion |
@@ -44,17 +57,18 @@ Decoders: `pbzip2` is not on the default PATH. The pinned private copy (`/mnt/cl
 | E1 | Expected collection | `c1_expected_union.py` (configure-only trees of main, each PR head, C1) | expected = main ∪ per-PR additions equals C1 listing in all 3 configs; no test removed; every required-list name collected |
 | C1-cpu / cuda / nvcomp | Full CTest, three actual configurations | `c1_ctest.sh`, `c1_grade_ctest.py` | JUnit set == E1 expected == `ctest -N`; all pass; none skipped/not run; `validate_test_collection` rc 0; (cpu) `test_ci_fail_closed` rc 0 |
 | F1 | Focused registrations | table from E1 `added_by_pr` | every PR-added test (#254 Hermitian*, #260 PeakFit*, #270 Realspace*, #251 EarlyStreamingOom/ClassificationCleanup, #252 LocalAdmission/PatchRetryAdmission, #244, #241 TestHygiene235, #242 DatasetFinalization, #245 RelionError*, #249 CompressedMrcStatus_*) present in JUnit and passed in each configuration that registers it. #241/#242/#245 are checked here because they are absent from `DEFAULT_REQUIRED_TESTS`. The grader additionally names `TestHygiene235`, `DatasetFinalization`, `RelionErrorOwnership` and `RelionErrorUnprinted` explicitly (all four must be in the JUnit and pass in every configuration, independent of the old lists) |
-| S1 | #244 genuine sticky context, opt-in | `c1_sticky.sh cuda|nvcomp` | driver exit 0 with its own health checks; separate build trees with `MC_ENABLE_STICKY_CUDA_TEST=ON` |
+| S1 | #244 genuine sticky context, opt-in | `C1_STICKY_CPUS=<>=4 CPUs> c1_sticky.sh cuda|nvcomp` | driver exit 0 with its own held-lease health checks; separate build trees with `MC_ENABLE_STICKY_CUDA_TEST=ON`. Needs a parent-granted window of >=4 CPUs (driver hardcodes `--j 4`); **UNRUN until granted**. The driver also covers the one-worker dataset failure endpoint |
 | T24 | 24 tutorial movies G/L vs frozen RC0 | `c1_tutorial24.py`; arms F-fresh (6d68e2d6 nvcomp build, read in place), N (merge #254+#260+#270 only), only254, only260, only270, C1; compare to retained F `multigpu/{G,L}/s0` | products compared with `compare_output_trees --products-only`. Expected: C1 == N (D2/D3, #241–#249 must not change products); every F→C1 difference reproduced by a named numerics arm; F-fresh == F-retained (lane control). Witness `nvcomp` on every movie. CPU: F cpu vs C1 cpu, expected identical |
 | K267 | #267 eight cases, CPU + CUDA | `c1_v2.sh` | native runs complete; checker/field results retained exactly as measured (history: all non-zero cases FAIL); comparison with retained #273 composition |
 | K269 | #269 100 movies, CPU + CUDA, arm none | `c1_census.py` | exit 0 per movie; C1 CUDA == retained numerics-only plain build; C1 CPU == retained main CPU; field metrics vs injected truth reported unchanged in kind (FAIL/limits retained, not judged by C1) |
 | K272 | #272 image check on the C1 census sums | `image_batch.py` via existing SciPy venv | reported; no gate |
-| R12 | Class R recovery, resident retry (#197/#207 record) incl. D2 admission | `c1_item.sh 12` | QF item 12 single-GPU criteria |
+| R12 | Class R recovery, resident retry (#197) incl. D2 admission | `c1_item.sh 12` (`c1_item12.py`) | adapted item 12: frozen/count/rec/fatal arms of C1 itself pass the unchanged internal rules; retried count is C1's own (non-zero); legacy #207/1db86902 comparisons reported separately |
+| D12 | One-worker dataset rows (healthy aggregation and one-worker poisoned failure) | `c1_item.sh 12ds`; `c1_tutorial24.py dataset` (24 movies G/L, vs standalone arm) | grade_dataset rules d1/dpoison_1w; 24-movie 1-worker endpoint PASS with products equal to the standalone arm. Two-worker, 4-worker and UUID-selective poison arms need a second device: UNRUN |
 | R9 | adapted #123 compact matrix (route witness, compact/nvcomp ingest) | `c1_item.sh 9cuda|9nvcomp` | 16/16 rows, 28/28 arms UUID witnessed |
-| A13 | Class A/D rows MRC staging, truncation, compressed | `c1_item.sh 13` (+ CTest rows) | item 13 grade PASS |
+| A13 | Class A/D rows: truncation, damaged, compressed | CTest rows (Truncated*, DamagedMovie, WriteFaults, CompressedMrcStatus_*, EerMemorySafety, CudaFaultMatrix ...) | QF item 13 (vendored real-data harness hardcodes `--j 8`) is **UNRUN** on the 2-CPU lane |
 | W1 | nvCOMP route witness on eligible TIFF | `--ingest_witness` in T24 arms | witness `nvcomp` for each of 24 movies, G and L |
 
-Rows needing another device (multi-GPU 1/2/4 worker arms, `run_dataset` dataset endpoint, item 12 dataset part) stay **UNRUN** until the parent allocates a device.
+Rows that need a second device (2- and 4-worker arms, UUID-selective poison, multi-device publication) stay **UNRUN** until the parent allocates one; one-worker dataset rows are not blanket-UNRUN (D12).
 Not rerun by W1 and therefore keep their earlier SHA: full seven-family product campaign (QF items 5/6), #178 fallback (7), EER matrix (11), ASan (15),
 SCARF, soak, performance, downstream science, genuine nvCOMP-ingest poisoning.
 Intended output differences to be attributed (not approved by this plan): #254/#260/#270 CUDA products; #249 compressed MRC late-decoder failure now rejects

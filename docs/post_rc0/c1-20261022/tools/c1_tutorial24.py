@@ -3,6 +3,8 @@
 
   c1_tutorial24.py run ARM BINARY G|L [--cpu]     one arm, command as RC0 QF's s0 reference (--j 2 on the 2-CPU lane, + --ingest_witness)
   c1_tutorial24.py compare BASE_TREE CAND_TREE LABEL   compare_output_trees --products-only, JSON under $C1_SCR/t24/compare/
+  c1_tutorial24.py dataset ARM BINARY G|L          one-worker run_dataset.py endpoint on GPU3 (CPUs 8-9, --j 2), graded from its own status files and
+                                                  compared (products) with the standalone arm ARM-CFG of the same binary; call inside the GPU3 lock
   c1_tutorial24.py attribute CFG                  which differing products each single-fix arm reproduces, from the compare JSONs
 Inputs are read in place: the tutorial movies and gain are symlinked into a per-arm cwd; nothing is written to the data directory.
 """
@@ -13,6 +15,8 @@ SCR = Path(os.environ['C1_SCR']); SRC = SCR / 'src'; T24 = SCR / 't24'
 DATA = Path(os.environ['C1_TUTORIAL']); FROZEN = Path(os.environ['C1_FROZEN_RC0'])
 sys.path.insert(0, str(SRC / 'docs/rc0/qf/tools'))
 import qual_lib as q  # noqa: E402  (QF_* variables are set by c1_env.sh)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import c1_lane; c1_lane.install()  # noqa: E402  (bench lock probed, not waited on)
 
 CMP = SRC / 'docs/issue85_laneC/compare_output_trees.py'
 BASE_ARGS = ['--use_own', '--dose_weighting', '--dose_per_frame', '1.277', '--bfactor', '150', '--seed', '1',
@@ -35,6 +39,54 @@ def run(arm, binary, cfg, cpu=False):
     (d / 'RUN.json').write_text(json.dumps(rec, indent=1) + '\n')
     print(arm, cfg, 'rc', rec.get('rc'), 'wall_s', rec.get('wall_s'), 'witness', rec.get('ingest_witness', [])[:1])
     sys.exit(0 if rec.get('rc') == 0 else 1)
+
+
+def _load(p):
+    try: return json.loads(Path(p).read_text())
+    except (OSError, ValueError): return None
+
+
+def dataset(arm, binary, cfg):
+    d = T24 / f'{arm}-ds-{cfg}'; cwd = d / 'cwd'
+    if d.exists(): raise SystemExit(f'{d} exists; refusing to overwrite')
+    cwd.mkdir(parents=True); os.symlink(DATA / 'Movies', cwd / 'Movies')
+    (cwd / 'movies.star').write_bytes((DATA / 'movies.star').read_bytes())
+    wargs = [*BASE_ARGS, *(['--patch_x', '5', '--patch_y', '5'] if cfg == 'L' else []), '--j', '2']
+    out = d / 'out'
+    cmd = ['taskset', '-c', q.CPUS, q.PY, str(SRC / 'tools/multi_gpu/run_dataset.py'), '--binary', str(binary), '--star', 'movies.star',
+           '--out', str(out), f"--launcher-args=--devices {q.LANE_GPU_UUID} --cpus '{q.CPUS}'", '--', *wargs]
+    env = q.base_env(False); env['OMP_NUM_THREADS'] = '2'
+    p = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True)
+    (d / 'driver.log').write_text(p.stdout + '\n--stderr--\n' + p.stderr)
+    ds, ws = _load(out / 'dataset_status.json'), _load(out / 'workers/status.json')
+    probs = []
+    if p.returncode: probs.append(f'driver rc {p.returncode}')
+    if not ds or not ws: probs.append('missing dataset_status.json or workers/status.json')
+    else:
+        if not (ds.get('verdict') == 'PASS' and ds.get('dataset_ready') and ds.get('workers_complete')): probs.append(f'dataset {ds.get("verdict")}/{ds.get("dataset_ready")}')
+        if ws.get('verdict') != 'PASS' or ws.get('n_workers') != 1: probs.append(f'workers {ws.get("verdict")} n={ws.get("n_workers")}')
+        gw = ws.get('gpu_witness') or {}
+        if not gw.get('all_pids_witnessed_on_intended_distinct_devices') or gw.get('distinct_devices_witnessed') != 1: probs.append(f'device witness {gw}')
+        if [x.get('uuid') for x in ws.get('devices') or []] != [q.LANE_GPU_UUID]: probs.append('worker device is not the lane GPU3 UUID')
+        pc = ws.get('process_cleanup') or {}
+        if not pc.get('complete') or pc.get('unexpected_descendants'): probs.append(f'cleanup {pc}')
+        if ds.get('process_ownership_errors'): probs.append('process ownership errors')
+    merged = out / 'merged'
+    nm = len(list((merged / 'Movies').glob('*.mrc'))) if merged.exists() else 0
+    if nm != 24 or not (merged / 'corrected_micrographs.star').exists(): probs.append(f'merged tree: {nm} mrc, joint STAR {(merged / "corrected_micrographs.star").exists()}')
+    rec = {'arm': arm, 'cfg': cfg, 'binary': str(binary), 'binary_sha256': q.sha256_file(binary), 'problems': probs}
+    base = T24 / f'{arm}-{cfg}' / 'out'
+    if merged.exists() and base.exists():
+        r = subprocess.run([sys.executable, '-I', str(CMP), str(base), str(merged), '--manifest', str(FROZEN / ('multigpu/' + cfg + '/manifest.json')),
+                            '--input-star', str(DATA / 'movies.star'), '--products-only', '--json-out', str(d / 'vs-standalone.json')], capture_output=True, text=True)
+        rec['products_vs_standalone_rc'] = r.returncode
+        if r.returncode: probs.append(f'products differ from the standalone {arm}-{cfg} arm (rc {r.returncode})')
+    else:
+        probs.append('no standalone arm to compare with')
+    rec['verdict'] = 'PASS' if not probs else 'FAIL'
+    (d / 'DATASET.json').write_text(json.dumps(rec, indent=1) + '\n')
+    print(arm, cfg, rec['verdict'], probs)
+    sys.exit(0 if not probs else 1)
 
 
 def compare(base, cand, label):
@@ -75,5 +127,6 @@ def attribute(cfg):
 if __name__ == '__main__':
     c = sys.argv[1]
     if c == 'run': run(sys.argv[2], sys.argv[3], sys.argv[4], '--cpu' in sys.argv)
+    elif c == 'dataset': dataset(sys.argv[2], sys.argv[3], sys.argv[4])
     elif c == 'compare': compare(*sys.argv[2:5])
     elif c == 'attribute': attribute(sys.argv[2])

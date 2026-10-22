@@ -2,15 +2,17 @@
 # Full CTest of one configuration (no exclusions), lane GPU3/CPUs 8-9. usage: c1_ctest.sh cpu|cuda|nvcomp
 # Derived from docs/rc0/qf/tools/run_ctest.sh: no wait on the bench lock (policy #198: correctness does not wait; the probe is only recorded),
 # numeric threads 1, nonblocking GPU lock held for the batch, foreign GPU process => stop (no waiting loop).
+# Health: a failed pre-check stops the run (exit 3); a failed post-check makes the wrapper exit 37 even when CTest passed.
 set -u
-source "$(dirname "$0")/c1_env.sh" || exit 1
+D=$(dirname "$0"); source "$D/c1_env.sh" || exit 1
 cfg=$1; B=$C1_SCR/build-$cfg; O=$C1_SCR/ctest-$cfg
 cd "$C1_SCR/src" || exit 90
 [ "$(git rev-parse HEAD)" = "$C1_SHA" ] && [ -z "$(git status --porcelain)" ] || { echo "source not exact/clean"; exit 92; }
 if [ "$cfg" != cpu ]; then
   export CUDA_VISIBLE_DEVICES=$C1_GPU_UUID CUDA_DEVICE_ORDER=PCI_BUS_ID
   exec 9>"$C1_GPU_LOCK"; flock -n 9 || { echo "GPU3 correctness lock contended; stopping"; exit 5; }
-  "$(dirname "$0")/c1_occupancy.sh" "ctest-$cfg-pre" || exit 3
+  "$D/c1_occupancy.sh" "ctest-$cfg-pre"; pre=$?; echo $pre > $O.health-pre.exit
+  [ $pre -eq 0 ] || { echo "pre-run health failed rc=$pre"; exit 3; }
 fi
 {
   echo "start $(date -u +%FT%TZ) cfg=$cfg HEAD=$(git rev-parse HEAD) status=$(git status --porcelain | wc -l)"
@@ -24,5 +26,8 @@ fi
   echo $rc > $O.exit
 } > $O.log 2>&1
 rc=$(cat $O.exit 2>/dev/null || echo 99)
-[ "$cfg" != cpu ] && "$(dirname "$0")/c1_occupancy.sh" "ctest-$cfg-post"
+if [ "$cfg" != cpu ]; then
+  "$D/c1_occupancy.sh" "ctest-$cfg-post"; post=$?; echo $post > $O.health-post.exit
+  if [ $post -ne 0 ]; then echo "post-run health failed rc=$post (ctest rc=$rc)" | tee -a $O.log >&2; [ $rc -eq 0 ] && rc=37; fi
+fi
 exit $rc

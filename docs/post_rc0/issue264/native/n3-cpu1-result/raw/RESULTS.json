@@ -1,0 +1,731 @@
+{
+ "kind": "TEST-ONLY overlay builds; not production or ordinary-movie qualification",
+ "summary": {
+  "runs": {
+   "PASS": 24,
+   "FAIL": 0,
+   "UNRUN": 16
+  },
+  "pairs": {
+   "PASS": 3,
+   "FAIL": 5
+  },
+  "n4": "PASS"
+ },
+ "rows": [
+  {
+   "arm": "ov-base-cpu",
+   "case": "A_x_legacy_false_accept",
+   "algorithm": "legacy",
+   "rc": 0,
+   "binary_sha256": "3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "predicted_reject": false,
+   "predicted_value": 1.7534201954397395,
+   "max_coeff_excess_over_1e-7rel": 2.160078e-12,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-base-cpu",
+   "case": "B_x_legacy_false_reject",
+   "algorithm": "legacy",
+   "rc": 0,
+   "binary_sha256": "3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [
+    3.28298
+   ],
+   "observed_reject": true,
+   "local_model_in_star": false,
+   "predicted_reject": true,
+   "predicted_value": 3.2829812485164966,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-base-cpu",
+   "case": "A_y_legacy_false_accept",
+   "algorithm": "legacy",
+   "rc": 0,
+   "binary_sha256": "3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "predicted_reject": false,
+   "predicted_value": 1.7551319648093842,
+   "max_coeff_excess_over_1e-7rel": 3.06244e-12,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-base-cpu",
+   "case": "B_y_legacy_false_reject",
+   "algorithm": "legacy",
+   "rc": 0,
+   "binary_sha256": "3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [
+    3.28813
+   ],
+   "observed_reject": true,
+   "local_model_in_star": false,
+   "predicted_reject": true,
+   "predicted_value": 3.2881283422459893,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-base-cpu",
+   "case": "E_xy_nonsquare_near_threshold",
+   "algorithm": "legacy",
+   "rc": 0,
+   "binary_sha256": "3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [
+    3.24
+   ],
+   "observed_reject": true,
+   "local_model_in_star": false,
+   "predicted_reject": true,
+   "predicted_value": 3.24,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-base-cpu",
+   "case": "F_mild_both_accept",
+   "algorithm": "legacy",
+   "rc": 0,
+   "binary_sha256": "3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "predicted_reject": false,
+   "predicted_value": 0.021484375,
+   "max_coeff_excess_over_1e-7rel": 4.5011e-14,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-base-cpu",
+   "case": "G_large_both_reject",
+   "algorithm": "legacy",
+   "rc": 0,
+   "binary_sha256": "3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [
+    5.45455
+   ],
+   "observed_reject": true,
+   "local_model_in_star": false,
+   "predicted_reject": true,
+   "predicted_value": 5.454545454545454,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-base-cpu",
+   "case": "Z_no_overlay",
+   "algorithm": "legacy",
+   "rc": 0,
+   "binary_sha256": "3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425",
+   "gpu_uuids": [],
+   "overlay_lines": [],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-cand-cpu",
+   "case": "A_x_legacy_false_accept",
+   "algorithm": "finite",
+   "rc": 0,
+   "binary_sha256": "789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [
+    3.18182
+   ],
+   "observed_reject": true,
+   "local_model_in_star": false,
+   "predicted_reject": true,
+   "predicted_value": 3.1818181818181817,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-cand-cpu",
+   "case": "B_x_legacy_false_reject",
+   "algorithm": "finite",
+   "rc": 0,
+   "binary_sha256": "789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "predicted_reject": false,
+   "predicted_value": 2.7,
+   "max_coeff_excess_over_1e-7rel": 3.659295e-12,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-cand-cpu",
+   "case": "A_y_legacy_false_accept",
+   "algorithm": "finite",
+   "rc": 0,
+   "binary_sha256": "789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [
+    3.18182
+   ],
+   "observed_reject": true,
+   "local_model_in_star": false,
+   "predicted_reject": true,
+   "predicted_value": 3.1818181818181817,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-cand-cpu",
+   "case": "B_y_legacy_false_reject",
+   "algorithm": "finite",
+   "rc": 0,
+   "binary_sha256": "789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "predicted_reject": false,
+   "predicted_value": 2.7,
+   "max_coeff_excess_over_1e-7rel": 3.15481e-12,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-cand-cpu",
+   "case": "E_xy_nonsquare_near_threshold",
+   "algorithm": "finite",
+   "rc": 0,
+   "binary_sha256": "789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "predicted_reject": false,
+   "predicted_value": 2.97,
+   "max_coeff_excess_over_1e-7rel": 4.440347e-13,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-cand-cpu",
+   "case": "F_mild_both_accept",
+   "algorithm": "finite",
+   "rc": 0,
+   "binary_sha256": "789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "predicted_reject": false,
+   "predicted_value": 0.021484375,
+   "max_coeff_excess_over_1e-7rel": 4.5011e-14,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-cand-cpu",
+   "case": "G_large_both_reject",
+   "algorithm": "finite",
+   "rc": 0,
+   "binary_sha256": "789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [
+    5.45455
+   ],
+   "observed_reject": true,
+   "local_model_in_star": false,
+   "predicted_reject": true,
+   "predicted_value": 5.454545454545454,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-cand-cpu",
+   "case": "Z_no_overlay",
+   "algorithm": "finite",
+   "rc": 0,
+   "binary_sha256": "789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405",
+   "gpu_uuids": [],
+   "overlay_lines": [],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-mut-cpu",
+   "case": "A_x_legacy_false_accept",
+   "algorithm": "uncentred",
+   "rc": 0,
+   "binary_sha256": "7e0b2cab13d5a7336aab42f5ac74729a1548a32a075b4b9ee0d81cff10a2f110",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "predicted_reject": false,
+   "predicted_value": 1.7488599348534202,
+   "max_coeff_excess_over_1e-7rel": 2.160078e-12,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-mut-cpu",
+   "case": "B_x_legacy_false_reject",
+   "algorithm": "uncentred",
+   "rc": 0,
+   "binary_sha256": "7e0b2cab13d5a7336aab42f5ac74729a1548a32a075b4b9ee0d81cff10a2f110",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [
+    3.27615
+   ],
+   "observed_reject": true,
+   "local_model_in_star": false,
+   "predicted_reject": true,
+   "predicted_value": 3.276145264657014,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-mut-cpu",
+   "case": "A_y_legacy_false_accept",
+   "algorithm": "uncentred",
+   "rc": 0,
+   "binary_sha256": "7e0b2cab13d5a7336aab42f5ac74729a1548a32a075b4b9ee0d81cff10a2f110",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "predicted_reject": false,
+   "predicted_value": 1.7482893450635386,
+   "max_coeff_excess_over_1e-7rel": 3.06244e-12,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-mut-cpu",
+   "case": "B_y_legacy_false_reject",
+   "algorithm": "uncentred",
+   "rc": 0,
+   "binary_sha256": "7e0b2cab13d5a7336aab42f5ac74729a1548a32a075b4b9ee0d81cff10a2f110",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [
+    3.27786
+   ],
+   "observed_reject": true,
+   "local_model_in_star": false,
+   "predicted_reject": true,
+   "predicted_value": 3.277860962566845,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-mut-cpu",
+   "case": "E_xy_nonsquare_near_threshold",
+   "algorithm": "uncentred",
+   "rc": 0,
+   "binary_sha256": "7e0b2cab13d5a7336aab42f5ac74729a1548a32a075b4b9ee0d81cff10a2f110",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [
+    3.23578
+   ],
+   "observed_reject": true,
+   "local_model_in_star": false,
+   "predicted_reject": true,
+   "predicted_value": 3.23578125,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-mut-cpu",
+   "case": "F_mild_both_accept",
+   "algorithm": "uncentred",
+   "rc": 0,
+   "binary_sha256": "7e0b2cab13d5a7336aab42f5ac74729a1548a32a075b4b9ee0d81cff10a2f110",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "predicted_reject": false,
+   "predicted_value": 0.021484375,
+   "max_coeff_excess_over_1e-7rel": 4.5011e-14,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-mut-cpu",
+   "case": "G_large_both_reject",
+   "algorithm": "uncentred",
+   "rc": 0,
+   "binary_sha256": "7e0b2cab13d5a7336aab42f5ac74729a1548a32a075b4b9ee0d81cff10a2f110",
+   "gpu_uuids": [],
+   "overlay_lines": [
+    [
+     "192",
+     "768",
+     "512",
+     "12"
+    ]
+   ],
+   "guard_values": [
+    5.45455
+   ],
+   "observed_reject": true,
+   "local_model_in_star": false,
+   "predicted_reject": true,
+   "predicted_value": 5.454545454545454,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-mut-cpu",
+   "case": "Z_no_overlay",
+   "algorithm": "uncentred",
+   "rc": 0,
+   "binary_sha256": "7e0b2cab13d5a7336aab42f5ac74729a1548a32a075b4b9ee0d81cff10a2f110",
+   "gpu_uuids": [],
+   "overlay_lines": [],
+   "guard_values": [],
+   "observed_reject": false,
+   "local_model_in_star": true,
+   "problems": [],
+   "status": "PASS"
+  },
+  {
+   "arm": "ov-base-cuda",
+   "case": "A_x_legacy_false_accept",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-base-cuda",
+   "case": "B_x_legacy_false_reject",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-base-cuda",
+   "case": "A_y_legacy_false_accept",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-base-cuda",
+   "case": "B_y_legacy_false_reject",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-base-cuda",
+   "case": "E_xy_nonsquare_near_threshold",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-base-cuda",
+   "case": "F_mild_both_accept",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-base-cuda",
+   "case": "G_large_both_reject",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-base-cuda",
+   "case": "Z_no_overlay",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-cand-cuda",
+   "case": "A_x_legacy_false_accept",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-cand-cuda",
+   "case": "B_x_legacy_false_reject",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-cand-cuda",
+   "case": "A_y_legacy_false_accept",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-cand-cuda",
+   "case": "B_y_legacy_false_reject",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-cand-cuda",
+   "case": "E_xy_nonsquare_near_threshold",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-cand-cuda",
+   "case": "F_mild_both_accept",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-cand-cuda",
+   "case": "G_large_both_reject",
+   "status": "UNRUN"
+  },
+  {
+   "arm": "ov-cand-cuda",
+   "case": "Z_no_overlay",
+   "status": "UNRUN"
+  }
+ ],
+ "base_vs_candidate": [
+  {
+   "backend": "cpu",
+   "case": "A_x_legacy_false_accept",
+   "same_global_shifts": false,
+   "same_decision": false,
+   "image_data_equal": false,
+   "status": "FAIL"
+  },
+  {
+   "backend": "cpu",
+   "case": "B_x_legacy_false_reject",
+   "same_global_shifts": false,
+   "same_decision": false,
+   "image_data_equal": false,
+   "status": "FAIL"
+  },
+  {
+   "backend": "cpu",
+   "case": "A_y_legacy_false_accept",
+   "same_global_shifts": false,
+   "same_decision": false,
+   "image_data_equal": false,
+   "status": "FAIL"
+  },
+  {
+   "backend": "cpu",
+   "case": "B_y_legacy_false_reject",
+   "same_global_shifts": false,
+   "same_decision": false,
+   "image_data_equal": false,
+   "status": "FAIL"
+  },
+  {
+   "backend": "cpu",
+   "case": "E_xy_nonsquare_near_threshold",
+   "same_global_shifts": false,
+   "same_decision": false,
+   "image_data_equal": false,
+   "status": "FAIL"
+  },
+  {
+   "backend": "cpu",
+   "case": "F_mild_both_accept",
+   "same_global_shifts": true,
+   "same_decision": true,
+   "image_data_equal": true,
+   "status": "PASS"
+  },
+  {
+   "backend": "cpu",
+   "case": "G_large_both_reject",
+   "same_global_shifts": true,
+   "same_decision": true,
+   "image_data_equal": true,
+   "status": "PASS"
+  },
+  {
+   "backend": "cpu",
+   "case": "Z_no_overlay",
+   "same_global_shifts": true,
+   "same_decision": true,
+   "image_data_equal": true,
+   "status": "PASS"
+  }
+ ],
+ "n4_mutant": {
+  "mutant_rows_match_uncentred_predictions": true,
+  "cases_where_mutant_decision_differs_from_candidate": [
+   "A_x_legacy_false_accept",
+   "B_x_legacy_false_reject",
+   "A_y_legacy_false_accept",
+   "B_y_legacy_false_reject",
+   "E_xy_nonsquare_near_threshold"
+  ],
+  "status": "PASS"
+ }
+}

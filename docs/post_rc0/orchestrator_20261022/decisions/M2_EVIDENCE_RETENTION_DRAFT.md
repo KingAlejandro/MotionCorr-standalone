@@ -1,40 +1,86 @@
 # M2 evidence retention — unapproved decision brief
 
-Current source-only inventory is pinned to C1 `e77a51a220cb0d91f4ac3c7fac211876d0c6833f`
-against main `3691374061f782bc84531fd1c79d017ddcb5a7c2`.
-`M2_c1_docs_inventory_e77a51a2.json` and `inventory_c1_docs.py` retain the method
-and exact Git tree identities. This is a byte/path inventory, not source review,
-native qualification, pack-size measurement, or adoption of a retention policy.
+**DRAFT / UNAPPROVED / UNRUN as a decision.** All figures are local Git object
+metadata (no blob content read, no archive opened, no fetch), pinned to C1
+`e77a51a220cb0d91f4ac3c7fac211876d0c6833f` against main
+`3691374061f782bc84531fd1c79d017ddcb5a7c2` (an ancestor of C1). They are not a
+source review, native qualification, transfer-size measurement or retention policy.
+Recipe and validation: `inventory_c1_docs.py` (explicit `--repo/--candidate/--base/--pr`
+inputs, standard library only) and `M2_history_object_inventory_e77a51a2.json`.
+`M2_c1_docs_inventory_e77a51a2.json` is the earlier tip-tree inventory, unchanged;
+the new script regenerates it byte-for-byte.
 
-The changed current documentation blobs total 48,385,636 logical bytes across
-756 files (48,300,778 unique blob bytes). Eleven archives account for 38,643,183
-bytes. The largest, inherited through the selected #269 stack, is
-`docs/post_rc0/s1/km_truth/raw.tar.gz` (34,973,613 bytes). These are complete
-changed-blob sizes, not predicted compressed Git transfer or incremental disk cost.
+## What the Notion question covers
 
-The separate #273 integration packet's 36 unique documentation paths and #274's
-32 are absent from this C1 tree. Their exact source heads and historical evidence
-remain on their existing published branches. The #275/#276 diagnostic packets
-are likewise not selected C1 layers. Excluding those layers does not mean the
-remaining component branches contain no bulk evidence; the inventory shows it.
+Notion M2: "Whether bulky evidence trees from #273 and #274 land on main or stay
+archived on branches." That question concerns the first two rows below, about
+4.1 MB. The 40 MB-scale bulk is in the selected C1 layers and is outside its wording.
 
-M2 choices for the maintainer:
+| Layer | Content | Size (logical bytes) |
+| --- | --- | ---: |
+| #273 unique tree (head `805d9de2`) | 36 files under `docs/post_rc0/parallel_20261022/numerics{,/live}`; 3 archives 1,427,214; largest `native-receipts.tar.gz` | **2,748,458** |
+| #274 unique tree (head `a1036901`) | 32 files under `docs/rc0/issue226/integration_20261022{,/support}`; 1 archive, `raw-logs.tgz` | **1,328,117** |
+| C1 tip tree, changed docs vs main | 756 files (48,300,778 unique blobs); 11 archives 38,643,183 | 48,385,636 |
+| of which `docs/post_rc0/s1/km_truth` | 48 files, absent from main; `raw.tar.gz` 34,973,613; all 48 blobs identical to selected #269 head `1b29b7f9` (an ancestor of C1) | 40,290,016 |
+| C1 reachable new history, main..C1 | 102 commits (24 merges), 947 blobs; 53,455,930 under `docs/` (name hint); 730 blobs / 49,466,987 are in the tip tree, 217 / 10,944,718 are history-only | **60,411,705** |
+| Local packed disk for those 947 blobs | `objectsize:disk` in this clone; packing-specific, **not** a transfer or storage size | ~40.6 MB (40,633,122) |
 
-1. Retain this selected-component evidence tree and keep #273/#274 integration
-   packets archived on their branches. This needs no candidate source rewrite,
-   but keeps the existing component archive footprint.
-2. Extract a compact main-tree acceptance/index record and retain the bulky
-   component/integration evidence at pinned immutable commit/archive references.
-   Before any extraction, freeze the complete inventory, archive digests,
-   retrieval links and retention owner, verify retrieval and licence/access,
-   and independently check that no source/test fixture or required acceptance
-   evidence was accidentally removed. A docs-only candidate revision still
-   needs explicit source-tree/provenance accounting; do not credit its new SHA
-   with tests from an earlier SHA without that distinction.
-3. Keep all evidence including #273/#274 on main only by explicit scope change;
-   this is outside the presently selected C1 layers and must not silently merge
-   diagnostic production overlays or old integration histories.
+The two unique trees are absent from C1 by path (one 5,701-byte and one 2,250-byte
+blob in them are content-identical to blobs already at C1 under other paths).
+For scale, main's `docs/` is 6,642 files / 69,865,100 bytes.
 
-No file, archive, branch or input has been removed. No remote cache or historical
-PASS/FAIL/UNRUN record has changed. A retention decision is not permission to
-relax validation or merge C1, and archive existence is not provenance by itself.
+## History and merge mode
+
+Tip size and history size differ. A merge commit or rebase of the selected C1
+layers imports all 947 blobs (60.4 MB logical) even if a later commit deletes the
+bulky files; only a squash merge, a fresh compact commit with the component
+histories kept off main, or a history rewrite avoids the 217 history-only blobs,
+and only the last two avoid the tip bulk too. A squash would still import the 730
+tip blobs (49.5 MB). Any of those would give C1 a different commit and tree
+identity from the qualified `e77a51a2`. Which commit carries the tests would need
+its own accounting. This brief does not evaluate, choose or recommend one; it is
+a maintainer/plan decision.
+
+Landing #273/#274 is not a docs-only merge. Relative to C1, an ordinary merge of
+`805d9de2` adds 4 commits and 41 blobs (3,025,652 bytes) and changes source and
+tests; `a1036901` adds 3 commits and 38 blobs (1,825,744) and changes source and
+the CI workflow. A docs-only landing would be a new commit that adds the 36/32
+unique files and records the pinned heads. Merging either directly onto main
+instead of after C1 imports 298 / 132 blobs (48,447,241 / 7,026,217 bytes),
+because both heads contain earlier selected layers.
+
+## Choices for the maintainer
+
+1. **Keep #273/#274 integration trees on their branches** (current state). Main
+   gains nothing from them. The pinned heads must then be retained as evidence
+   (see W7/M8: no deletion of those branches without a verified retrieval path).
+2. **Land only their unique trees on main** after C1, as a docs-only change with
+   pinned source heads recorded: +2.75 MB and +1.33 MB logical. This needs a
+   latest-head review of what is claimed, and adds no source.
+3. **Compact main-tree record plus retained archives.** Freeze the inventory,
+   archive digests, retrieval links and retention owner; verify retrieval and
+   licence/access; check that no source, test fixture or acceptance evidence was
+   removed. A docs-only revision needs explicit provenance accounting and cannot
+   inherit an earlier SHA's test results. Under a merge-commit merge this
+   saves nothing in history, per above.
+
+Widening question: **do you want M2 widened to cover C1's own bulk** (the #269
+`km_truth` tree, 40.3 MB at the tip, and the other ten archives), or kept to
+#273/#274? Without widening, the 60.4 MB history import is accepted as part of
+C1. Widening makes the squash/rewrite/compact-commit alternatives above live
+choices, and each needs an explicit decision about C1's qualification identity.
+
+## Constraints on any option
+
+- `docs/` is not inert. At C1, tests, tools or CMake read paths under `docs/`
+  (e.g. `docs/issue85_laneC/compare_output_trees.py` and
+  `tutorial_24_movie_manifest.json`, `docs/rc0/qf/tools`,
+  `docs/issue213/evidence/`, the last of which C1 changes). A line grep finds
+  `docs/` in 57 files of `src`, `tests`, `tools`, `cmake`, `.github` and
+  `CMakeLists.txt`; those hits are not yet classified as runtime reads versus
+  comments. Source, tests, fixtures and tools must remain reproducible under any
+  option, so classify them before moving or deleting anything.
+- No file, archive, branch or input has been removed or moved, no archive was
+  opened or executed, and no historical PASS/FAIL/UNRUN record has changed. Archive
+  existence is not provenance. A retention choice is not permission to relax
+  validation or to merge C1.

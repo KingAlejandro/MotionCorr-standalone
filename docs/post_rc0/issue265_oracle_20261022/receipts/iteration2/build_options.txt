@@ -1,0 +1,9 @@
+CXX=/usr/bin/c++
+Apple clang version 21.0.0 (clang-2100.3.34.2)
+Target: arm64-apple-darwin25.6.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+DEFS=-DHAVE_JPEG -DHAVE_PNG -DHAVE_TIFF -DMOTIONCORR_CPU_DOSE_SYMMETRY_MODE=2
+INCS=-I/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-076fb679 -I/opt/homebrew/opt/libomp/include -isystem /opt/homebrew/Cellar/fftw/3.3.11/include -isystem /opt/homebrew/include
+CXXFLAGS=-O3 -DNDEBUG -std=gnu++17 -arch arm64 -Xpreprocessor -fopenmp
+LIBS= /opt/homebrew/Cellar/fftw/3.3.11/lib/libfftw3.dylib /opt/homebrew/Cellar/fftw/3.3.11/lib/libfftw3f.dylib /opt/homebrew/opt/libomp/lib/libomp.dylib /opt/homebrew/lib/libtiff.dylib /opt/homebrew/lib/libpng.dylib /opt/homebrew/lib/libjpeg.dylib /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib/libz.tbd

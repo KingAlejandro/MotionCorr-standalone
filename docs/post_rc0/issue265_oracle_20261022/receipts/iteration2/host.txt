@@ -1,0 +1,6 @@
+Darwin SCMAC-7L9P2F 25.6.0 Darwin Kernel Version 25.6.0: Tue Aug 18 17:48:46 PDT 2026; root:xnu-12377.161.15.700.19~2/RELEASE_ARM64_T6041 arm64
+27.0
+Apple M4 Pro
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1
+occupancy before run: uptime load 4.6; top CPU = WindowServer/loginwindow/jamf (system); run single threaded
+library: cmake -S <src> -B build -DCMAKE_BUILD_TYPE=Release -DCUDA=OFF -DBUILD_TESTING=OFF ; cmake --build build --target motioncorr_core -j1

@@ -1,0 +1,13 @@
+Host: macOS (Darwin 25.6.0), 14 CPUs, load avg ~6.5 at start from desktop apps (no competing numeric job).
+Python /Users/alex.konstantinov/.local/bin/python3 3.13.7, NumPy 2.4.2.
+Env for every run: OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 MKL_NUM_THREADS=1; python -B.
+A=/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c3dca0d (HEAD 0777348396a96ae666435f605e017c9d8071b57a, clean, read only)
+D=$A/docs/post_rc0/s1/first_divergence_20261022/affine_patch_oracle
+RAW=/tmp/mc-residual-review.h52lh3/raw  INDEX=/tmp/mc-residual-review.h52lh3/receipts/file-index.json (sha256 31255dab..., read in place)
+
+1. REVIEW_SCRATCH=$R/scratch python3 -B controls/run_redirected.py $D/attempt02-affine_patch_oracle.py $A $RAW $INDEX $R/repro-attempt02.json      exit 0
+   (author script unmodified; only its /tmp mkdtemp is redirected so no new /tmp/motioncorr-affine-patch-oracle-* dir is created)
+2. same wrapper, $D/supplement_post_hoc.py $A $RAW $INDEX $D/attempt02-affine_patch_oracle.py $D/attempt02.json $R/repro-supplement01.json       exit 0
+3. python3 -B -I controls/independent_controls.py $RAW $INDEX $D/attempt02.json $R/independent_controls.json                                       exit 0
+4. python3 -B -I controls/ge_power_and_rmsd.py $RAW $INDEX $D/attempt02.json $R/ge_power_and_rmsd.json                                             exit 0
+No SSH, build, native MotionCorr, GPU, push, comment or Notion write. No repo/worktree edits.

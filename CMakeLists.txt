@@ -400,6 +400,18 @@ if(BUILD_TESTING)
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    # Device-free validation of the later-chunk shim, using a deliberately fake
+    # CUDA API. This validates interposition/failure controls, never GPU decoding.
+    add_executable(tiff_identity_host_control
+        tests/tiff_identity_host/control.cpp tests/cuda_tiff_identity_shim.cpp)
+    target_include_directories(tiff_identity_host_control PRIVATE tests/tiff_identity_host)
+    target_compile_definitions(tiff_identity_host_control PRIVATE MC_TIFF_IDENTITY_CONVERSION_PROBE)
+    target_link_libraries(tiff_identity_host_control PRIVATE TIFF::TIFF ${CMAKE_DL_LIBS})
+    set_target_properties(tiff_identity_host_control PROPERTIES ENABLE_EXPORTS ON)
+    add_test(NAME TiffIdentityLaterChunkHostControls
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_tiff_identity_later_chunk.py
+            --host-binary $<TARGET_FILE:tiff_identity_host_control>)
+    set_tests_properties(TiffIdentityLaterChunkHostControls PROPERTIES TIMEOUT 60)
     add_test(NAME NvcompAcceptanceDiagnostics
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_nvcomp_acceptance_diagnostics.py)
     # Profiling kit (docs/profiling.md): Nsight SQLite queries and derived
@@ -952,6 +964,42 @@ if(BUILD_TESTING AND CUDA)
                     --binary $<TARGET_FILE:motioncorr_tiff_identity>)
             set_tests_properties(CudaNvcompTiffIdentity PROPERTIES
                 LABELS "cuda;hardware" TIMEOUT 900)
+            # Test-only copies export the exact conversion kernel stub. The
+            # first-chunk-only mutant retains fresh-handle checks and omits ONLY
+            # the later per-chunk identity checks; normal core source is untouched.
+            set(_identity_cu "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_movie_session.cu")
+            set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_identity_cu}")
+            file(READ "${_identity_cu}" _identity_source)
+            set(_identity_check "            if (!path_unchanged()) return decline_identity();\n            for (TIFF *t : tiffs.h) if (!handle_unchanged(t)) return decline_identity();")
+            string(FIND "${_identity_source}" "${_identity_check}" _first)
+            string(FIND "${_identity_source}" "${_identity_check}" _last REVERSE)
+            if(_first EQUAL -1 OR NOT _first EQUAL _last)
+                message(FATAL_ERROR "TIFF first-chunk mutant: per-chunk checks missing or not unique")
+            endif()
+            string(REPLACE "${_identity_check}" "            if (k == 0) {\n${_identity_check}\n            }"
+                _identity_mutant "${_identity_source}")
+            set(_identity_mutant_cu "${CMAKE_CURRENT_BINARY_DIR}/mutants/cuda_movie_session_identity_first_chunk.cu")
+            file(WRITE "${_identity_mutant_cu}" "${_identity_mutant}")
+            foreach(_variant later first_chunk)
+                set(_target motioncorr_tiff_identity_${_variant})
+                add_executable(${_target} src/apps/run_motioncorr.cpp
+                    tests/cuda_tiff_identity_shim.cpp tests/cuda_tiff_identity_probe.cu)
+                target_link_libraries(${_target} PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+                target_compile_definitions(${_target} PRIVATE MC_TIFF_IDENTITY_CONVERSION_PROBE)
+                target_compile_options(${_target} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler -fopenmp>)
+                target_link_options(${_target} PRIVATE "-rdynamic"
+                    "LINKER:--wrap=TIFFOpen" "LINKER:--wrap=TIFFClose"
+                    "LINKER:--wrap=pread" "LINKER:--wrap=__pread_chk" "LINKER:--wrap=cudaLaunchKernel")
+            endforeach()
+            target_compile_definitions(motioncorr_tiff_identity_first_chunk PRIVATE
+                MC_TIFF_IDENTITY_SESSION_SOURCE="${_identity_mutant_cu}")
+            add_test(NAME CudaNvcompTiffIdentityLaterChunk
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_tiff_identity_later_chunk_controls.py
+                    --binary $<TARGET_FILE:motioncorr_tiff_identity_later>
+                    --mutant-binary $<TARGET_FILE:motioncorr_tiff_identity_first_chunk>)
+            set_tests_properties(CudaNvcompTiffIdentityLaterChunk PROPERTIES
+                LABELS "cuda;hardware" TIMEOUT 1500)
             add_test(NAME CudaNvcompAcceptanceFailures
                 COMMAND ${Python3_EXECUTABLE}
                     ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_nvcomp_acceptance_controls.py

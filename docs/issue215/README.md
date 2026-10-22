@@ -1,5 +1,8 @@
 # #215: TIFF identity across nvCOMP ingest passes
 
+Later-chunk regression follow-up: [test design, local checks and UNRUN native plan](later-chunk.md).
+The evidence below retains its historical revision and results.
+
 Code/test head: `76fa8112b829d4e3e9d95f7f869513da5e64b39d`, based on main
 `c8844894`. Production changes first appeared at `bf2e2d4a`; `76fa8112` only
 corrects the test shim for GCC's fortified `__pread_chk` call. Later evidence

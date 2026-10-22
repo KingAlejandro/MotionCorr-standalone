@@ -490,6 +490,17 @@ measured (the 80 GB card's driver reserve was 766 MiB; a small card's may differ
 not bisected; host-RAM exhaustion (hosts below about 36 GiB for 11520×8184×50) is untested; multi-GPU, `e10028`, `e10164` and `e10641` were not run (PR #225 README limitations, R-QM section 4). The QM
 status in the qualification lists is **completed (pre-freeze, on `483e881d`), with these documented limits**.
 
+
+**Post-RC0 #226 D3 — source candidate `4cd85167`.** [Evidence and re-entry record](../rc0/issue226/d3/README.md).
+For the 11520×8184×50 movie, G/L × auto/float at 16 and 21 GiB free now refuse before host movie preprocessing,
+with a named out-of-GPU-memory message giving required and available bytes. The eight probes take 1.13–1.58 s
+and 743 MiB host RSS (before: 33.29–42.48 s and about 35.7 GiB RSS), with no movie MRC/STAR or joint STAR.
+All four 22 GiB controls still complete with identical products: the measured streaming floor stays **22 GiB**.
+The necessary-memory check includes the Fourier/CCF buffers and queries the actual cuFFT work size when the
+buffers alone fit. It is not a host-RAM fit guarantee or a guarantee against later allocation failures.
+These are single observations on one balloon-constrained A100; the historical table's real-card and option caveats remain.
+D2's local-admission gap is a separate fix; no other geometry's floor is requalified by these D3 probes.
+
 ## 9. CPU dose-weighting symmetry (#220): qualified-toolchain contract (MERGED)
 
 **Status: MERGED** ([PR #220](https://github.com/KingAlejandro/MotionCorr-standalone/pull/220), a lean port of #179, register item C5, `71ab841e`). The contract below was re-checked against the merged source

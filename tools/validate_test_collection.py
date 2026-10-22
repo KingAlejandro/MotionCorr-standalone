@@ -175,6 +175,8 @@ CUDA_REQUIRED_TESTS = [
     # last-error slot before a healthy movie.
     "CudaStaleErrorAfterOom",
     "CudaLocalAdmission",
+    "CudaEarlyStreamingOom",
+    "CudaStreamingPlanClassificationCleanup",
 ]
 
 

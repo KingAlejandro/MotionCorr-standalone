@@ -52,8 +52,8 @@ would give shorter files but depends on the standard library's floating-point `t
   `Invalid floating-point STAR value`, because libc++ sets failbit on underflow. Today the same coefficient is silently written
   as an exponent-truncated number that reads back as a different tiny value. A full-precision writer would turn that
   case from a wrong value into an unreadable file on libc++. Whether the project's Linux GCC / libstdc++ reader accepts
-  subnormals was not measured here (Mac only), and it is not assumed to match; it must be measured before any write-side decision.
-  The frozen K2 criterion (full-precision bit-identity for every fixture) is therefore NOT MET in the oracle's results (F09 read failure), and that failure is retained. Real motion coefficients are never subnormal; a future change should still
+  subnormals was unmeasured at the Mac run. The later [Linux follow-up](linux_followup/) measures one GCC13.3/libstdc++14.2/glibc2.39 build accepting them bit-exactly. Full-precision subnormal files therefore read on that Linux build and fail on the measured libc++ build; cross-platform portability belongs in the open write-side policy.
+  The frozen K2 criterion (full-precision bit-identity for every fixture) is therefore NOT MET in the oracle's results (F09 read failure), and that failure is retained. These constructed subnormal probes establish no physical relevance; a future change must still
   decide whether to flush or reject them at write time.
 - Files written at full precision are still ordinary whitespace-separated doubles, so the current reader parses them (measured). RELION's reader
   shares this parsing code by inheritance; it was not run here. Existing 5-6 decimal files keep reading unchanged. Non-finite values are already rejected by
@@ -78,5 +78,4 @@ would give shorter files but depends on the standard library's floating-point `t
   CUDA-route STAR output as well as CPU. Under `docs/release/POST_FREEZE_TEST_PLAN.md` §9 item 4 that is the "CUDA or shared source" class: full CTest on all three
   configurations, the checklist rows the changed route touches, and native execution on a GPU. Also include the format rows its code touches from the CPU-only list. Compilation does not qualify it.
 - Because the change alters STAR output and breaks parity with RELION `ad0b230`, it needs maintainer sign-off first (`AGENTS.md`; §9 item 2). Scheduling it separately from C1 is a recommendation, not a rule.
-- Unmeasured and open: Linux libstdc++ reading of subnormal and full-precision tokens; RELION reader/writer interoperability with full-precision motion tables; a write-side policy for subnormal and
-  non-finite coefficients; and `global_shift` precision (above).
+- One Linux build is now measured in [linux_followup/](linux_followup/). Other toolchains, RELION reader/writer interoperability, a write-side policy for subnormal/non-finite coefficients and cross-platform portability, and `global_shift` precision remain open.

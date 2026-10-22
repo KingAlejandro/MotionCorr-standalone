@@ -83,7 +83,7 @@ Controls against the criteria declared beforehand:
   `Invalid floating-point STAR value: 4.9406564584124654e-324`. The follow-up table `fixtures_followup_subnormal.txt`
   (written after seeing this, results in `receipts/followup_subnormal/`) shows the smallest normal double and 1e-300 round-trip bit-exactly
   while subnormals (`1e-310`, `4.94e-324`) are rejected by this reader. This is the libc++ `istream >> double` underflow behaviour on
-  this Mac. Linux GCC/libstdc++ behaviour was not measured; see "Unmeasured boundaries".
+  this Mac. Linux behaviour was unmeasured at that time. The later [Linux follow-up](linux_followup/) measures one GCC13.3/libstdc++14.2/glibc2.39 build accepting these tokens bit-exactly; Mac K2 remains NOT MET.
 - K3 (injected +1e-6 in Y idx 17 of F02): met. Measured max |dy| 0.02941225000000003 px at G1, frame 49, pixel (0,0); predicted
   0.029412249999999918; relative difference 3.8e-15; dx exactly 0.
 - Coefficient detail is in `receipts/iteration2/coefficients.csv` (all 36 per fixture per route, bit patterns, written token). For
@@ -118,10 +118,9 @@ Controls against the criteria declared beforehand:
 - The follow-up table was added after observing iteration 1 and is labelled as such. Its receipt lacks binary, source and build identifiers; they are
   supplied after the fact in `RETROSPECTIVE_PROVENANCE.md`, which says plainly that they were not captured at run time.
 
-## Unmeasured boundaries
+## Platform boundaries and remaining measurements
 
-- Linux GCC/libstdc++: whether `istream >> double` accepts subnormal and full-precision tokens there is not measured. No claim is made either way, and it must be measured
-  before any write-side decision about subnormals.
+- Later measurement, 22 October2026: [Linux follow-up](linux_followup/) shows the real reader accepts the frozen full-precision/subnormal tokens bit-exactly on one GCC13.3/libstdc++14.2/glibc2.39 build. Other toolchains and RELION remain unmeasured; portability and write-side policy are still open.
 - Interoperability with RELION's own reader and writer, and with older MotionCorr builds, for full-precision motion tables is not run.
 - Results come from AppleClang arm64 `-O3`, which may contract multiply-adds inside `getShiftAt`. Pre and post use the same compiled function, so exact-zero results and K3
   are unaffected; last-bit values may differ from the qualified Linux x86-64 GCC build.
@@ -144,6 +143,5 @@ Linux/interoperability notes. Fixtures, criteria, harness, `run.sh`, all `receip
 ## Unresolved
 
 Maintainer authorisation of a parity-breaking change to STAR output on both the CPU and CUDA routes (RELION `ad0b230` parity; the write path is shared). Real pre-write
-coefficients for the 10641 case (the `bin_factor`-scaled exported copy if early binning applies) are still needed to size the real-movie effect. Linux libstdc++ subnormal
-and full-precision reader behaviour, RELION interoperability, a write-side policy for subnormal and non-finite coefficients, and a separate decision on `global_shift` table precision are open.
+coefficients for the 10641 case (the `bin_factor`-scaled exported copy if early binning applies) are still needed to size the real-movie effect. One Linux reader build is measured in [linux_followup/](linux_followup/); other toolchains, RELION interoperability, a write-side policy for subnormal and non-finite coefficients (including the measured Mac/Linux portability split), and a separate decision on `global_shift` table precision remain open.
 No source fix is implied or prepared.

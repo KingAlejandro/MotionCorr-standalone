@@ -1,0 +1,788 @@
+{
+ "kind": "W4 16-arm attribution ledger; diagnosis only, historical outcomes unchanged",
+ "historical_totals": {
+  "PASS": 2,
+  "FAIL": 10,
+  "UNIDENTIFIABLE": 4
+ },
+ "estimator_oracle": {
+  "production": {
+   "offsets": 81,
+   "parabola_error_max_px": 0.5439993103546489,
+   "parabola_error_rms_px": 0.31349540706245566,
+   "continuous_error_max_px": 5.689658962765157e-07,
+   "integer_offset_parabola_error_max_px": 0.0,
+   "peak_hessian_at_zero": [
+    [
+     -0.0059757683237656335,
+     -0.0040429885664556315
+    ],
+    [
+     -0.0040429885664556315,
+     -0.004781361642532494
+    ]
+   ],
+   "hxy_over_hxx": 0.6765638069295064,
+   "hxy_over_hyy": 0.8455726357302319,
+   "curvature_eigenvalue_ratio": 7.327840736523131,
+   "cross_term_prediction_max_deviation_px": 0.0026037178256498755
+  },
+  "isotropic_x_over_nx_diagnostic": {
+   "offsets": 81,
+   "parabola_error_max_px": 0.1685726889875793,
+   "parabola_error_rms_px": 0.09697131321673319,
+   "continuous_error_max_px": 1.909444607957564e-07,
+   "integer_offset_parabola_error_max_px": 8.494505099321259e-11,
+   "peak_hessian_at_zero": [
+    [
+     -0.019495334895224925,
+     -0.0031149012145032327
+    ],
+    [
+     -0.0031149012145032327,
+     -0.010735846085860937
+    ]
+   ],
+   "hxy_over_hxx": 0.1597767481935475,
+   "hxy_over_hyy": 0.2901402637101462,
+   "curvature_eigenvalue_ratio": 2.10345566882429,
+   "cross_term_prediction_max_deviation_px": 0.003188160118658453
+  },
+  "unweighted_diagnostic": {
+   "offsets": 81,
+   "parabola_error_max_px": 0.09048223988018428,
+   "parabola_error_rms_px": 0.047202868662777044,
+   "continuous_error_max_px": 2.8175940962644805e-09,
+   "integer_offset_parabola_error_max_px": 0.0,
+   "peak_hessian_at_zero": [
+    [
+     -0.10563874220349956,
+     0.009819481512946399
+    ],
+    [
+     0.009819481512946399,
+     -0.056169642240902054
+    ]
+   ],
+   "hxy_over_hxx": -0.09295341186503736,
+   "hxy_over_hyy": -0.17481830257761496,
+   "curvature_eigenvalue_ratio": 1.9803474375614563,
+   "cross_term_prediction_max_deviation_px": 0.023121736702378604
+  }
+ },
+ "rows": [
+  {
+   "backend": "cpu",
+   "case": "zero",
+   "historical": {
+    "accuracy": "PASS",
+    "sampling": "VALID",
+    "identifiable": true,
+    "field_rms_px": 0.0,
+    "field_rms_angstrom": 0.0,
+    "global_mean_error_rms_px": 0.0,
+    "local_error_rms_px": 0.0,
+    "published_sum_cnrmse": 1.1174255694669063e-05
+   },
+   "category": "control; no divergence",
+   "first_divergence": "none: identical frames give symmetric CCFs and exact zero candidates",
+   "uncertainty": "does not exercise sub-pixel estimation",
+   "next": "none"
+  },
+  {
+   "backend": "cpu",
+   "case": "integer",
+   "historical": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "identifiable": true,
+    "field_rms_px": 0.29786778665475044,
+    "field_rms_angstrom": 0.2636129911894542,
+    "global_mean_error_rms_px": 0.29786778665477237,
+    "local_error_rms_px": 3.271777995764706e-14,
+    "published_sum_cnrmse": 0.02640693613146232
+   },
+   "category": "estimator limit (separable parabola on an anisotropic weighted peak) with parabola-driven nonconvergence; float32 map quantization contributes",
+   "first_divergence": "sub-pixel peak estimate in global iteration 1: the sum-of-others reference makes offsets fractional and the 3-point separable parabola is biased; upstream input, forward FFT and weights verified; downstream reconstruction and STAR verified natively by truth injection",
+   "uncertainty": "quantization share is not separately bounded natively; exact native tie choices are backend-specific",
+   "next": "separate held issue for the estimator/weight shape (RELION-inherited); any repair needs its own versioned gate contract and review. W2 DC arms change the quantization term only",
+   "stage_evidence": {
+    "native_retained_rms_px": 0.29786846691579577,
+    "offline_specified_double_rms_px": 0.5865146918847374,
+    "offline_exact_maximum_rms_px": 0.09021623377156977,
+    "offline_parabola_tol1e9_50_rms_px": 0.8971429563807556,
+    "offline_fixed_frame0_double_rms_px": 1.8041858878557174e-07,
+    "iteration1_native_vs_exact_max_px": 1.2211272228504533,
+    "native_truth_injection": {
+     "all_met": true,
+     "runtime_rms_px": 0.0,
+     "checker": "PASS",
+     "field_rms_px": 0.0,
+     "published_sum_cnrmse": 1.0700702317134178e-05
+    },
+    "native_fixed_frame0": {
+     "all_met": true,
+     "runtime_rms_px": 0.0,
+     "checker": "PASS",
+     "field_rms_px": 0.0,
+     "published_sum_cnrmse": 1.0700702317134178e-05
+    },
+    "native_neutral": {
+     "all_met": true,
+     "runtime_rms_px": 0.29786846691579577,
+     "checker": "FAIL",
+     "field_rms_px": 0.29786778665475044,
+     "published_sum_cnrmse": 0.02640693613146232
+    }
+   }
+  },
+  {
+   "backend": "cpu",
+   "case": "fractional",
+   "historical": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "identifiable": true,
+    "field_rms_px": 0.5921536730251702,
+    "field_rms_angstrom": 0.5240560006272756,
+    "global_mean_error_rms_px": 0.5921536730251736,
+    "local_error_rms_px": 4.408597810693288e-14,
+    "published_sum_cnrmse": 0.1381630495282882
+   },
+   "category": "estimator limit (separable parabola bias) with parabola-driven nonconvergence; float32 map quantization contributes",
+   "first_divergence": "sub-pixel peak estimate: biased even against a single known template (offline 0.26 px double; native fixed-template CPU 0.31 px, CUDA 0.49 px); reconstruction and STAR verified natively",
+   "uncertainty": "native fixed-template CUDA magnitude (0.495 px) was outside the frozen 0.2-0.45 px band; frame 4 iteration-1 candidate differs from CPU by about one integer winner per axis, inferred near-tie flip, no map capture for that arm",
+   "next": "capture the fixed-template CUDA map for frame 4 if the tie flip matters; otherwise as integer",
+   "stage_evidence": {
+    "native_retained_rms_px": 0.592154243624607,
+    "offline_specified_double_rms_px": 0.36891069264795157,
+    "offline_exact_maximum_rms_px": 0.03746543039000405,
+    "offline_parabola_tol1e9_50_rms_px": 0.39017178729008123,
+    "offline_fixed_frame0_double_rms_px": 0.26040108078194146,
+    "iteration1_native_vs_exact_max_px": 0.6319394144550468,
+    "native_truth_injection": {
+     "all_met": true,
+     "runtime_rms_px": 0.0,
+     "checker": "PASS",
+     "field_rms_px": 0.0,
+     "published_sum_cnrmse": 7.129589399378448e-06
+    },
+    "native_fixed_frame0": {
+     "all_met": true,
+     "runtime_rms_px": 0.3077349290617265,
+     "checker": "FAIL",
+     "field_rms_px": 0.30773463482065194,
+     "published_sum_cnrmse": 0.05242526484698757
+    },
+    "native_neutral": null
+   }
+  },
+  {
+   "backend": "cpu",
+   "case": "affine",
+   "historical": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "identifiable": true,
+    "field_rms_px": 0.45474292342088196,
+    "field_rms_angstrom": 0.4024474872274806,
+    "global_mean_error_rms_px": 0.4244925385553548,
+    "local_error_rms_px": 0.16308651419477022,
+    "published_sum_cnrmse": 0.10908590170295475
+   },
+   "category": "global stage: same estimator mechanism (descriptive); local stage unresolved",
+   "first_divergence": "not localized: global replay against the frame-centre displacement gives specified double 0.358 px vs exact maximum 0.023 px (a global shift is not the affine field); 5/9 patches stop after one update below 0.5 px",
+   "uncertainty": "patch CCFs measure patch-average motion; no patch-level known-template oracle yet; #276 validates the fit only with constructed observations",
+   "next": "patch-level known-template CCF/peak oracle on the #275 (2,1) capture, then feed exact patch observations through the #276-validated fit path",
+   "global_replay_descriptive": {
+    "native_iterations": null,
+    "native_vs_centre": null,
+    "native_vs_roi_mean": null,
+    "specified_double": 0.3577760894138705,
+    "continuous_double": 0.02274825125996109,
+    "continuous_double_tol1e-9_max_iter50": 0.028834673618811417
+   }
+  },
+  {
+   "backend": "cpu",
+   "case": "pedestal",
+   "historical": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "identifiable": true,
+    "field_rms_px": 2.3945009135517155,
+    "field_rms_angstrom": 2.119133308493268,
+    "global_mean_error_rms_px": 2.3761812588689417,
+    "local_error_rms_px": 0.29563025893842465,
+    "published_sum_cnrmse": 0.45593249824568877
+   },
+   "category": "float32 CCF map resolution under the 4096 pedestal (CCF DC, #262 domain): no information survives",
+   "first_divergence": "CCF map, global iteration 1: exact window range 0.125 vs float32 ULP 8 at the 6.7e7 DC term; the float map is one value over all 9025 window points, every frame ties, zero motion; all 9 patches also log RMSD 0 at iteration 1",
+   "uncertainty": "offline from regenerated hash-identical fixtures plus native logs/STAR; no native map capture; patch maps not computed",
+   "next": "W2 DC-conditioning arms already target this; a native global-map capture would confirm the single-value map directly",
+   "first_iteration_objective": [
+    {
+     "frame": 0,
+     "dc_term": 67108901.19165555,
+     "peak": 67108901.25759274,
+     "window_range": 0.12515589594841003,
+     "float32_ulp_at_peak": 8.0,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 1,
+     "dc_term": 67108901.13355006,
+     "peak": 67108901.19938706,
+     "window_range": 0.124860480427742,
+     "float32_ulp_at_peak": 8.0,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 2,
+     "dc_term": 67108900.95703633,
+     "peak": 67108901.02290368,
+     "window_range": 0.12480147182941437,
+     "float32_ulp_at_peak": 8.0,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 3,
+     "dc_term": 67108900.72095229,
+     "peak": 67108900.78679289,
+     "window_range": 0.12475784122943878,
+     "float32_ulp_at_peak": 8.0,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 4,
+     "dc_term": 67108900.4401905,
+     "peak": 67108900.50612223,
+     "window_range": 0.12485140562057495,
+     "float32_ulp_at_peak": 8.0,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    }
+   ]
+  },
+  {
+   "backend": "cpu",
+   "case": "noisy",
+   "historical": {
+    "accuracy": "FAIL",
+    "sampling": "OUTSIDE_FIXED_ROI",
+    "identifiable": true,
+    "field_rms_px": 2.6474150479459193,
+    "field_rms_angstrom": 2.342962317432139,
+    "global_mean_error_rms_px": 1.2450692996512154,
+    "local_error_rms_px": 2.336366596909939,
+    "published_sum_cnrmse": 1.3988903496637914
+   },
+   "category": "unresolved; global estimate appears noise-limited",
+   "first_divergence": "not localized: exact-maximum global replay does not improve against the frame-centre displacement (0.99 px vs specified double 0.84 px); local stage and OUTSIDE_FIXED_ROI sampling follow",
+   "uncertainty": "single noise seed; centre displacement is only a descriptive reference for an affine field",
+   "next": "#238 plan C repeated independent noise seeds with a known-template oracle, after the simple-case estimator question is dispositioned",
+   "global_replay_descriptive": {
+    "native_iterations": null,
+    "native_vs_centre": null,
+    "native_vs_roi_mean": null,
+    "specified_double": 0.842411895226593,
+    "continuous_double": 0.9877228022616851,
+    "continuous_double_tol1e-9_max_iter50": 0.9411724486223939
+   }
+  },
+  {
+   "backend": "cpu",
+   "case": "flat",
+   "historical": {
+    "accuracy": "UNIDENTIFIABLE",
+    "sampling": "VALID",
+    "identifiable": false,
+    "field_rms_px": 2.37787654746835,
+    "field_rms_angstrom": 2.1044207445094902,
+    "global_mean_error_rms_px": 2.37787654746835,
+    "local_error_rms_px": 0.0,
+    "published_sum_cnrmse": null
+   },
+   "category": "intrinsic unidentifiability (no signal)",
+   "first_divergence": "none in arithmetic: exact window range is 0; the zero estimate is the only information-free output; field distance equals truth magnitude",
+   "uncertainty": "no quality state is emitted, so this is not a declared abstention (#268/M4)",
+   "next": "quality-state policy (M4); no accuracy work",
+   "first_iteration_objective": [
+    {
+     "frame": 0,
+     "dc_term": 40000.0,
+     "peak": 40000.0,
+     "window_range": 0.0,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 1,
+     "dc_term": 40000.0,
+     "peak": 40000.0,
+     "window_range": 0.0,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 2,
+     "dc_term": 40000.0,
+     "peak": 40000.0,
+     "window_range": 0.0,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 3,
+     "dc_term": 40000.0,
+     "peak": 40000.0,
+     "window_range": 0.0,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 4,
+     "dc_term": 40000.0,
+     "peak": 40000.0,
+     "window_range": 0.0,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    }
+   ]
+  },
+  {
+   "backend": "cpu",
+   "case": "repeated",
+   "historical": {
+    "accuracy": "UNIDENTIFIABLE",
+    "sampling": "OUTSIDE_FIXED_ROI",
+    "identifiable": false,
+    "field_rms_px": 18.68232578869665,
+    "field_rms_angstrom": 16.533858322996537,
+    "global_mean_error_rms_px": 18.68232578869665,
+    "local_error_rms_px": 0.0,
+    "published_sum_cnrmse": 0.10796077188522503
+   },
+   "category": "intrinsic periodic ambiguity (x mod 16, y unidentifiable) with float32 ties; out-of-ROI sampling is a consequence",
+   "first_divergence": "CCF maximum selection: exact window range ~0.04 (~10 ULPs), 475-1710 tied float maxima; native picks large aliases (CPU x 14.5/30/13.5/12.5), which sample outside the fixed ROI",
+   "uncertainty": "alias choice is tie-order dependent (CPU 18.7 px vs CUDA 68.7 px RMS)",
+   "next": "quality-state policy (M4); no accuracy work",
+   "first_iteration_objective": [
+    {
+     "frame": 0,
+     "dc_term": 40000.0,
+     "peak": 40000.019923085056,
+     "window_range": 0.03984617012611125,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 7,
+     "float32_max_ties": 1710
+    },
+    {
+     "frame": 1,
+     "dc_term": 40000.0,
+     "peak": 40000.01896553537,
+     "window_range": 0.03793107074307045,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 9,
+     "float32_max_ties": 1140
+    },
+    {
+     "frame": 2,
+     "dc_term": 40000.0,
+     "peak": 40000.0186258945,
+     "window_range": 0.037251789013680536,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 9,
+     "float32_max_ties": 475
+    },
+    {
+     "frame": 3,
+     "dc_term": 40000.0,
+     "peak": 40000.01896548513,
+     "window_range": 0.0379309702620958,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 9,
+     "float32_max_ties": 1140
+    },
+    {
+     "frame": 4,
+     "dc_term": 40000.0,
+     "peak": 40000.01992306143,
+     "window_range": 0.03984612286876654,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 7,
+     "float32_max_ties": 1710
+    }
+   ]
+  },
+  {
+   "backend": "cuda",
+   "case": "zero",
+   "historical": {
+    "accuracy": "PASS",
+    "sampling": "VALID",
+    "identifiable": true,
+    "field_rms_px": 0.0,
+    "field_rms_angstrom": 0.0,
+    "global_mean_error_rms_px": 0.0,
+    "local_error_rms_px": 0.0,
+    "published_sum_cnrmse": 1.152056079497421e-05
+   },
+   "category": "control; no divergence",
+   "first_divergence": "none: identical frames give symmetric CCFs and exact zero candidates",
+   "uncertainty": "does not exercise sub-pixel estimation",
+   "next": "none"
+  },
+  {
+   "backend": "cuda",
+   "case": "integer",
+   "historical": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "identifiable": true,
+    "field_rms_px": 0.2850258109094684,
+    "field_rms_angstrom": 0.2522478426548795,
+    "global_mean_error_rms_px": 0.2850258109094546,
+    "local_error_rms_px": 3.10201465054451e-14,
+    "published_sum_cnrmse": 0.0456910760896163
+   },
+   "category": "estimator limit (separable parabola on an anisotropic weighted peak) with parabola-driven nonconvergence; float32 map quantization contributes",
+   "first_divergence": "sub-pixel peak estimate in global iteration 1: the sum-of-others reference makes offsets fractional and the 3-point separable parabola is biased; upstream input, forward FFT and weights verified; downstream reconstruction and STAR verified natively by truth injection",
+   "uncertainty": "quantization share is not separately bounded natively; exact native tie choices are backend-specific",
+   "next": "separate held issue for the estimator/weight shape (RELION-inherited); any repair needs its own versioned gate contract and review. W2 DC arms change the quantization term only",
+   "stage_evidence": {
+    "native_retained_rms_px": 0.2850249673388219,
+    "offline_specified_double_rms_px": 0.49338749697133083,
+    "offline_exact_maximum_rms_px": 0.09021771656068524,
+    "offline_parabola_tol1e9_50_rms_px": 0.30324136568753934,
+    "offline_fixed_frame0_double_rms_px": 6.492631050315283e-08,
+    "iteration1_native_vs_exact_max_px": 1.2211273023504672,
+    "native_truth_injection": {
+     "all_met": true,
+     "runtime_rms_px": 0.0,
+     "checker": "PASS",
+     "field_rms_px": 0.0,
+     "published_sum_cnrmse": 1.0897700507578511e-05
+    },
+    "native_fixed_frame0": {
+     "all_met": true,
+     "runtime_rms_px": 0.0,
+     "checker": "PASS",
+     "field_rms_px": 0.0,
+     "published_sum_cnrmse": 1.0897700507578511e-05
+    },
+    "native_neutral": {
+     "all_met": true,
+     "runtime_rms_px": 0.2850249673388219,
+     "checker": "FAIL",
+     "field_rms_px": 0.2850258109094684,
+     "published_sum_cnrmse": 0.0456910760896163
+    }
+   }
+  },
+  {
+   "backend": "cuda",
+   "case": "fractional",
+   "historical": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "identifiable": true,
+    "field_rms_px": 0.3794256954134761,
+    "field_rms_angstrom": 0.3357917404409264,
+    "global_mean_error_rms_px": 0.3794256954134824,
+    "local_error_rms_px": 3.042460198919589e-14,
+    "published_sum_cnrmse": 0.07915427386770646
+   },
+   "category": "estimator limit (separable parabola bias) with parabola-driven nonconvergence; float32 map quantization contributes",
+   "first_divergence": "sub-pixel peak estimate: biased even against a single known template (offline 0.26 px double; native fixed-template CPU 0.31 px, CUDA 0.49 px); reconstruction and STAR verified natively",
+   "uncertainty": "native fixed-template CUDA magnitude (0.495 px) was outside the frozen 0.2-0.45 px band; frame 4 iteration-1 candidate differs from CPU by about one integer winner per axis, inferred near-tie flip, no map capture for that arm",
+   "next": "capture the fixed-template CUDA map for frame 4 if the tie flip matters; otherwise as integer",
+   "stage_evidence": {
+    "native_retained_rms_px": 0.37942529987418505,
+    "offline_specified_double_rms_px": 0.36891069025543094,
+    "offline_exact_maximum_rms_px": 0.037464773507326465,
+    "offline_parabola_tol1e9_50_rms_px": 0.3909503922444841,
+    "offline_fixed_frame0_double_rms_px": 0.2604010345495914,
+    "iteration1_native_vs_exact_max_px": 0.1604879051195907,
+    "native_truth_injection": {
+     "all_met": true,
+     "runtime_rms_px": 0.0,
+     "checker": "PASS",
+     "field_rms_px": 0.0,
+     "published_sum_cnrmse": 6.719379827626635e-06
+    },
+    "native_fixed_frame0": {
+     "all_met": false,
+     "runtime_rms_px": 0.4946763784241645,
+     "checker": "FAIL",
+     "field_rms_px": 0.4946752771623017,
+     "published_sum_cnrmse": 0.034140227448816174
+    },
+    "native_neutral": null
+   }
+  },
+  {
+   "backend": "cuda",
+   "case": "affine",
+   "historical": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "identifiable": true,
+    "field_rms_px": 0.3231458938843417,
+    "field_rms_angstrom": 0.2859841160876424,
+    "global_mean_error_rms_px": 0.24146783329894306,
+    "local_error_rms_px": 0.21474765241143895,
+    "published_sum_cnrmse": 0.06585857418914276
+   },
+   "category": "global stage: same estimator mechanism (descriptive); local stage unresolved",
+   "first_divergence": "not localized: global replay against the frame-centre displacement gives specified double 0.358 px vs exact maximum 0.023 px (a global shift is not the affine field); 5/9 patches stop after one update below 0.5 px",
+   "uncertainty": "patch CCFs measure patch-average motion; no patch-level known-template oracle yet; #276 validates the fit only with constructed observations",
+   "next": "patch-level known-template CCF/peak oracle on the #275 (2,1) capture, then feed exact patch observations through the #276-validated fit path",
+   "global_replay_descriptive": {
+    "native_iterations": null,
+    "native_vs_centre": null,
+    "native_vs_roi_mean": null,
+    "specified_double": 0.35777578742652183,
+    "continuous_double": 0.02275851074770427,
+    "continuous_double_tol1e-9_max_iter50": 0.028829613733464803
+   }
+  },
+  {
+   "backend": "cuda",
+   "case": "pedestal",
+   "historical": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "identifiable": true,
+    "field_rms_px": 2.3945009135517155,
+    "field_rms_angstrom": 2.119133308493268,
+    "global_mean_error_rms_px": 2.3761812588689417,
+    "local_error_rms_px": 0.29563025893842465,
+    "published_sum_cnrmse": 0.455909189215585
+   },
+   "category": "float32 CCF map resolution under the 4096 pedestal (CCF DC, #262 domain): no information survives",
+   "first_divergence": "CCF map, global iteration 1: exact window range 0.125 vs float32 ULP 8 at the 6.7e7 DC term; the float map is one value over all 9025 window points, every frame ties, zero motion; all 9 patches also log RMSD 0 at iteration 1",
+   "uncertainty": "offline from regenerated hash-identical fixtures plus native logs/STAR; no native map capture; patch maps not computed",
+   "next": "W2 DC-conditioning arms already target this; a native global-map capture would confirm the single-value map directly",
+   "first_iteration_objective": [
+    {
+     "frame": 0,
+     "dc_term": 67108901.19165555,
+     "peak": 67108901.25759274,
+     "window_range": 0.12515589594841003,
+     "float32_ulp_at_peak": 8.0,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 1,
+     "dc_term": 67108901.13355006,
+     "peak": 67108901.19938706,
+     "window_range": 0.124860480427742,
+     "float32_ulp_at_peak": 8.0,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 2,
+     "dc_term": 67108900.95703633,
+     "peak": 67108901.02290368,
+     "window_range": 0.12480147182941437,
+     "float32_ulp_at_peak": 8.0,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 3,
+     "dc_term": 67108900.72095229,
+     "peak": 67108900.78679289,
+     "window_range": 0.12475784122943878,
+     "float32_ulp_at_peak": 8.0,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 4,
+     "dc_term": 67108900.4401905,
+     "peak": 67108900.50612223,
+     "window_range": 0.12485140562057495,
+     "float32_ulp_at_peak": 8.0,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    }
+   ]
+  },
+  {
+   "backend": "cuda",
+   "case": "noisy",
+   "historical": {
+    "accuracy": "FAIL",
+    "sampling": "OUTSIDE_FIXED_ROI",
+    "identifiable": true,
+    "field_rms_px": 2.9784448633906364,
+    "field_rms_angstrom": 2.6359237041007133,
+    "global_mean_error_rms_px": 1.1606627770145383,
+    "local_error_rms_px": 2.7429902884098896,
+    "published_sum_cnrmse": 1.37558509540428
+   },
+   "category": "unresolved; global estimate appears noise-limited",
+   "first_divergence": "not localized: exact-maximum global replay does not improve against the frame-centre displacement (0.99 px vs specified double 0.84 px); local stage and OUTSIDE_FIXED_ROI sampling follow",
+   "uncertainty": "single noise seed; centre displacement is only a descriptive reference for an affine field",
+   "next": "#238 plan C repeated independent noise seeds with a known-template oracle, after the simple-case estimator question is dispositioned",
+   "global_replay_descriptive": {
+    "native_iterations": null,
+    "native_vs_centre": null,
+    "native_vs_roi_mean": null,
+    "specified_double": 0.8424097267039358,
+    "continuous_double": 0.9877203176413951,
+    "continuous_double_tol1e-9_max_iter50": 0.941218500397066
+   }
+  },
+  {
+   "backend": "cuda",
+   "case": "flat",
+   "historical": {
+    "accuracy": "UNIDENTIFIABLE",
+    "sampling": "VALID",
+    "identifiable": false,
+    "field_rms_px": 2.37787654746835,
+    "field_rms_angstrom": 2.1044207445094902,
+    "global_mean_error_rms_px": 2.37787654746835,
+    "local_error_rms_px": 0.0,
+    "published_sum_cnrmse": null
+   },
+   "category": "intrinsic unidentifiability (no signal)",
+   "first_divergence": "none in arithmetic: exact window range is 0; the zero estimate is the only information-free output; field distance equals truth magnitude",
+   "uncertainty": "no quality state is emitted, so this is not a declared abstention (#268/M4)",
+   "next": "quality-state policy (M4); no accuracy work",
+   "first_iteration_objective": [
+    {
+     "frame": 0,
+     "dc_term": 40000.0,
+     "peak": 40000.0,
+     "window_range": 0.0,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 1,
+     "dc_term": 40000.0,
+     "peak": 40000.0,
+     "window_range": 0.0,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 2,
+     "dc_term": 40000.0,
+     "peak": 40000.0,
+     "window_range": 0.0,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 3,
+     "dc_term": 40000.0,
+     "peak": 40000.0,
+     "window_range": 0.0,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    },
+    {
+     "frame": 4,
+     "dc_term": 40000.0,
+     "peak": 40000.0,
+     "window_range": 0.0,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 1,
+     "float32_max_ties": 9025
+    }
+   ]
+  },
+  {
+   "backend": "cuda",
+   "case": "repeated",
+   "historical": {
+    "accuracy": "UNIDENTIFIABLE",
+    "sampling": "OUTSIDE_FIXED_ROI",
+    "identifiable": false,
+    "field_rms_px": 68.67462629585252,
+    "field_rms_angstrom": 60.77704427182949,
+    "global_mean_error_rms_px": 68.67462629585253,
+    "local_error_rms_px": 0.0,
+    "published_sum_cnrmse": 0.10796198644726199
+   },
+   "category": "intrinsic periodic ambiguity (x mod 16, y unidentifiable) with float32 ties; out-of-ROI sampling is a consequence",
+   "first_divergence": "CCF maximum selection: exact window range ~0.04 (~10 ULPs), 475-1710 tied float maxima; native picks large aliases (CPU x 14.5/30/13.5/12.5), which sample outside the fixed ROI",
+   "uncertainty": "alias choice is tie-order dependent (CPU 18.7 px vs CUDA 68.7 px RMS)",
+   "next": "quality-state policy (M4); no accuracy work",
+   "first_iteration_objective": [
+    {
+     "frame": 0,
+     "dc_term": 40000.0,
+     "peak": 40000.019923085056,
+     "window_range": 0.03984617012611125,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 7,
+     "float32_max_ties": 1710
+    },
+    {
+     "frame": 1,
+     "dc_term": 40000.0,
+     "peak": 40000.01896553537,
+     "window_range": 0.03793107074307045,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 9,
+     "float32_max_ties": 1140
+    },
+    {
+     "frame": 2,
+     "dc_term": 40000.0,
+     "peak": 40000.0186258945,
+     "window_range": 0.037251789013680536,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 9,
+     "float32_max_ties": 475
+    },
+    {
+     "frame": 3,
+     "dc_term": 40000.0,
+     "peak": 40000.01896548513,
+     "window_range": 0.0379309702620958,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 9,
+     "float32_max_ties": 1140
+    },
+    {
+     "frame": 4,
+     "dc_term": 40000.0,
+     "peak": 40000.01992306143,
+     "window_range": 0.03984612286876654,
+     "float32_ulp_at_peak": 0.00390625,
+     "float32_distinct_values": 7,
+     "float32_max_ties": 1710
+    }
+   ]
+  }
+ ],
+ "inputs": {
+  "ledger/attempt01.json": "da05b5578828ab6114371a512fd2cffd92faba72445eb8168e67cafc6b344c59",
+  "offline/attempt03.json": "766cbcfb7cc35ada411c4516d023fbe7cc6d1868a211e41203aad661fef47890",
+  "estimator/attempt02.json": "bc06251a1025427dad57b53f608194553f4b39cde9d10a55eddff48dea032cfd",
+  "native/evaluation-attempt01.json": "19706cc62153505d428f5c78c0197052f736578387b4e2f67b956b7508880ff1"
+ },
+ "script_sha256": "6f7de0fc5e580e67b9de9a9cd2dfb91bd8f84d6ae0ee4d1ce790a2c62f1a9862"
+}

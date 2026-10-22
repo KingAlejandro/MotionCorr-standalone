@@ -1,0 +1,49 @@
+{
+  "utc": "2026-10-22T14:33:24.040714+00:00",
+  "worktree": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-409be643",
+  "base": "fc1c8e6f18fe1f33d4a7cc68da2fbc467bd01c16",
+  "branch": "work/248-native-laterchunk-20261022",
+  "python": "/Users/alex.konstantinov/.local/bin/python3",
+  "numeric_threads": 1,
+  "configure_exit": 0,
+  "build_exit": 0,
+  "ctest_exit": 0,
+  "ctest_passed": 4,
+  "commands": [
+    [
+      "cmake",
+      "-S",
+      ".",
+      "-B",
+      "build-issue215-local",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DCUDA=OFF",
+      "-DBUILD_TESTING=ON",
+      "-DPython3_EXECUTABLE=/Users/alex.konstantinov/.local/bin/python3"
+    ],
+    [
+      "cmake",
+      "--build",
+      "build-issue215-local",
+      "--target",
+      "tiff_identity_host_control",
+      "--parallel",
+      "2"
+    ],
+    [
+      "ctest",
+      "--test-dir",
+      "build-issue215-local",
+      "-R",
+      "TiffIdentityLaterChunkHostControls|NvcompAcceptanceDiagnostics|NvcompGuards|OutputTreeComparator",
+      "--output-on-failure",
+      "-j1"
+    ]
+  ],
+  "env": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "limits": "Host-only checks; native evidence recorded separately. Local occupancy snapshot was taken after these focused checks."
+}

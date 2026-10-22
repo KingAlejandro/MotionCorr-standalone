@@ -922,6 +922,25 @@ if(BUILD_TESTING AND CUDA)
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_early_streaming_oom.py
                 --binary $<TARGET_FILE:motioncorr_faultinject>)
         set_tests_properties(CudaEarlyStreamingOom PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        # #226 D3: real runner/planner ownership, simulated status returns only.
+        add_executable(motioncorr_streaming_plan_fault
+            src/apps/run_motioncorr.cpp tests/cuda_fault_inject_shim.cpp
+            tests/cuda_streaming_plan_fault_shim.cpp)
+        target_link_libraries(motioncorr_streaming_plan_fault PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+        target_link_options(motioncorr_streaming_plan_fault PRIVATE
+            "-rdynamic" "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaMemcpy"
+            "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetLastError"
+            "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cudaGetDeviceCount"
+            "LINKER:--wrap=cudaMemGetInfo" "LINKER:--wrap=cudaStreamSynchronize"
+            "LINKER:--wrap=TIFFOpen" "LINKER:--wrap=cudaPeekAtLastError"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftSetAutoAllocation"
+            "LINKER:--wrap=cufftMakePlanMany" "LINKER:--wrap=cufftDestroy")
+        add_test(NAME CudaStreamingPlanClassificationCleanup
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_streaming_plan_classification_cleanup.py
+                --binary $<TARGET_FILE:motioncorr_streaming_plan_fault>)
+        set_tests_properties(CudaStreamingPlanClassificationCleanup PROPERTIES
+            LABELS "cuda;hardware" TIMEOUT 300)
         # The same two reconstruction-cleanup controls on the nvCOMP ingest arm.
         # run_preprocessing_failure_controls.py builds its fixture with
         # TIFFTAG_COMPRESSION = 1, so the fast path declines it and

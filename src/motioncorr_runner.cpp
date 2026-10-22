@@ -2490,6 +2490,9 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				result = cufftMakePlanMany(plan, 2, n, nullptr, 1, wy * (wx / 2 + 1),
 				                           nullptr, 1, wy * wx, CUFFT_C2R, n_frames, &work);
 			failure.recordCufft(result, "streaming alignment admission", __LINE__);
+			// cuFFT cleanup may consume/replace the pending runtime status. Latch
+			// any fatal planning error before cleanup can obscure it with an OOM.
+			failure.record(cudaPeekAtLastError(), "streaming alignment admission", __LINE__);
 			const cufftResult cleanup = owner.releaseAll();
 			if (result == CUFFT_SUCCESS) result = cleanup;
 			const CudaRetryDecision decision = cudaRetryDecisionFor(failure, cudaPeekAtLastError());

@@ -9,8 +9,11 @@ This record starts directly at `c0ee115c8348df54732f47dbef930b541b2a364a`. The l
 issue 61 and PR 65 discussion, frozen protocol/amendments, architecture note,
 `CERTIFICATE_VALIDATION.md`, `DESCRIPTIVE_CALIBRATION_PLAN.md`, existing reconstruction
 and postprocess drivers, and analyser were read before implementation. The current
-PR head was `34dc6bd61a2f55e57a7d65f057b5961d70e2eb12`; its body still contains
-superseded PASS claims. This pilot changes no historical record or scientific gate.
+snapshot `pr65_live.json`, captured **2026-10-22 15:04:26 UTC**, records PR head
+`c0ee115c8348df54732f47dbef930b541b2a364a` and a body that explicitly withdraws the
+superseded Stage B PASS claims. The earlier certificate-head account at `34dc6bd6`
+does not describe that snapshot. Published green CI at C0 covers C0 only, not this
+pilot or these later repairs. This pilot changes no historical record or scientific gate.
 Publication belongs to the parent; no push, comment or merge was made.
 
 ## Fixed scope and inputs
@@ -24,7 +27,7 @@ input STAR, working directory, D2 symmetry, padding 2, CTF and half selection re
 exact. No delete-one jobs, re-extraction, accelerated arm, seed scan or outcome-based
 selection was authorized or performed. The old AE plan was preserved.
 
-The read-only source is
+The consumed source is
 `/home/alex/mc-issue61/proj/cpu/Extract61/particles.star`, SHA-256
 `2a282d0421386c703dc125037a51ed6f35774b78cd421b4584426295f8425ede`.
 It contains 4452 particles. Excluding the two historical development movies leaves
@@ -46,8 +49,14 @@ Successful scratch: `4GPUs:/mnt/clathrin/mc-i61-pilot-c0ee115c-q21hhr8l`.
 The one-shot driver serializes numerical jobs under
 `/tmp/motioncorr-i61-cpu-14-15.lock`, with affinity **14–15**, six numerical thread
 controls set to **1**, `CUDA_VISIBLE_DEVICES` empty, and no `--nv` container option.
-The project, historical data and frozen plan are mounted read-only. Writable home,
-tmp, logs and outputs are private to this new scratch. The old global benchmark
+The executed driver requested read-only project/data/plan mounts and private home/tmp,
+but **historical mount isolation was not established**: the shared wrapper inserted
+a writable project bind before the duplicate read-only bind, and both postprocess
+logs record duplicate-destination and refused-HOME-override warnings. The installed
+runtime was SingularityCE 4.1.1, whose duplicate-bind handling retains the earlier
+mount; default home/tmp mounts were enabled. Unchanged input hashes were verified
+after execution, which does not establish read-only mounts or private home/tmp.
+Logs and numerical outputs were placed in the new scratch. The old global benchmark
 lock was probed and immediately released; it was not held over this CPU-only pilot.
 No build was needed, so compilation and the shared build lock were unused.
 
@@ -83,7 +92,7 @@ new driver assumed `/usr/bin/apptainer`; the installation is `/usr/local/bin/app
 There were **zero numerical launches**. The narrow fix resolves the runtime from
 PATH and fails if absent. A regression checks a non-system installation prefix and
 missing-runtime refusal. The failed scratch and stderr are retained; a fresh scratch
-received the fixed driver. The final driver checks **PASS, 4/4**, covering output-only
+received the fixed driver. The historically executed driver checks **PASS, 4/4**, covering output-only
 staging, exclusion of jackknives, refusal of changed settings/cwd/half rosters,
 CPU-only environment and runtime resolution. No existing source or policy changed.
 
@@ -168,9 +177,11 @@ by the newly verified complete stack hashes, not inferred from source names alon
 - `driver_tests.json`: final four safety checks, exact command and exit 0.
   `receipts/final_reconciliation.json`: preserved input identities and final counts.
 
-Reproduction must use another new scratch and a separately authorized launch. This
-one-shot execution directory cannot be resumed or overwritten: existing start,
-output, completion and failure receipts are deliberately exclusive. No new
+Reproduction must use another new scratch and a separately authorized launch. The
+historical driver's exclusive STARTED receipt blocked ordinary reentry, but it did
+not reject pre-existing products or failed-preflight receipts before a first numerical
+launch. The future-driver repair below closes that gap. No historical directory may
+be resumed or overwritten. No new
 third-party dependency was added; the driver/tests use Python's standard library.
 
 The first full staged whitespace check flagged RELION-emitted trailing spaces in
@@ -179,3 +190,40 @@ was corrected; the five affected raw receipts were packaged with deterministic
 lossless gzip, never trimmed or numerically changed. Decompression reproduces every
 original remote digest. The final full C0-to-pilot whitespace check passes. This is
 artifact packaging, with no numerical tolerance, protocol or gate change.
+
+## Bounded review repairs after `2364016`
+
+The updated `run_pilot.py` is a **future invocation**, numerically **UNRUN**. The
+executed-driver digest `909f9f205e2e8a582b84f0e6b69457d95719a149d9b775852872e7ceb6db71f8`
+in `receipts/LAUNCH_INTENT.json`, all original receipts and the first failed preflight
+remain unchanged. The original six jobs were not rerun. Raw measurements and the
+POSTHOC EXPLORATORY / INCONCLUSIVE disposition above retain their original meaning.
+
+Future numerical launches bypass the unmodified shared wrapper and invoke the
+same pinned image's `/opt/relion/bin/relion_reconstruct` or `relion_postprocess`
+directly. All internal numerical arguments, project cwd, defaults and settings are
+preserved. The staged historical-wrapper argv remains in receipts alongside the
+new actual `launch_argv`. Preflight requires SingularityCE 4.1.1 and supported
+options, pins the probed runtime/configuration hashes, checks both internal binary
+hashes, and fails on setup warnings or a different configuration. An allowlist removes inherited runtime bind/GPU/overlay and
+environment overrides. `--contain`, explicit `--home` / `--workdir`, and disabled
+hostfs/admin binds replace the implicit home/tmp/cwd mounts; historical data
+(including the project), frozen plan and copied sources are read-only, with unique
+bind destinations and private writable scratch/home/tmp. See the versioned
+[runtime source](https://github.com/sylabs/singularity/blob/v4.1.1/internal/pkg/runtime/engine/singularity/container_linux.go#L1589-L1599)
+and [SingularityCE 4.1 bind documentation](https://docs.sylabs.io/guides/4.1/user-guide/bind_paths_and_mounts.html).
+
+Both entry points refuse existing products (including sidecars/logs), failed
+preflight, prior execution receipts, and symlinked product/runtime directories
+before any numerical subprocess. Preflight also refuses partial/successful prior
+preflight artifacts; its exclusive `PREFLIGHT_STARTED.json` distinguishes a fresh
+corrected-driver preflight. Execute accepts that fresh successful preflight, retains
+the exclusive STARTED barrier, and never overwrites a previous failure receipt.
+Reserved empty output directories remain allowed. This protects cooperative
+one-shot use under the existing CPU ownership lock, not hostile concurrent mutation.
+
+New intent, controls and results live only in `review_repairs/`; they do not amend
+old hash snapshots. [Repair verification](review_repairs/VERIFICATION.md) records
+exact commands, the old/fixed counterexamples, the single nonnumerical mount probe,
+resource release, and remaining limitations. No production/analyser/protocol/math,
+gate, default, FILEONLY or third-party dependency changed.

@@ -1,0 +1,44 @@
+{
+  "utc": "2026-10-22T15:45:03.861950+00:00",
+  "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "docs/issue61_noninferiority/pilot_20261022",
+    "-p",
+    "test_run_pilot.py",
+    "-v"
+  ],
+  "exit": 0,
+  "driver_sha256": "8c973cb99398b4065c6bf403ffa5907de3beb796f9d730ee567134a145c09f15",
+  "tests_sha256": "73ce5e606af5634c4651a3fa4cb563795e53f2970c07ef041b608a3bb84a0433",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "BLIS_NUM_THREADS": "1"
+  },
+  "log_sha256": "7342b7e4da7c817f781eced67ccd896d6df0c2a10d9fe1f51bf120be55bf2c3e",
+  "old_runtime_control": {
+    "argv": [
+      "/Users/alex.konstantinov/.local/bin/python3",
+      "-B",
+      "docs/issue61_noninferiority/pilot_20261022/test_run_pilot.py",
+      "Container.test_runtime_environment_cannot_inject_bind_overlay_home_or_gpu",
+      "-v"
+    ],
+    "extra_environment": {
+      "PILOT_DRIVER_UNDER_TEST": "/tmp/pr65-pilot-repairs-e2048909/original/run_pilot.py"
+    },
+    "exit": 1,
+    "log": "/tmp/pr65-pilot-repairs-e2048909/old_runtime_controls.log",
+    "log_sha256": "3c06be13c20e1c8ac1f66fe3b6056ac7acc4a6506af4e62ecb752aaf79cb3891",
+    "evidence": "Original environment inherits injected SINGULARITY_BIND/BINDPATH, APPTAINER_BIND/BINDPATH, GPU/overlay controls and RELION_CONTAINER_RUN_ARGS; assertion fails."
+  }
+}

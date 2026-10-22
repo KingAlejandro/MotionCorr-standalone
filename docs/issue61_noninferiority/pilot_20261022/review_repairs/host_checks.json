@@ -1,0 +1,91 @@
+{
+  "utc": "2026-10-22T15:39:35.098417+00:00",
+  "base": "23640166559bde2357c4852d776d69322297a1aa",
+  "python": "/Users/alex.konstantinov/.local/bin/python3",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "BLIS_NUM_THREADS": "1"
+  },
+  "runs": [
+    {
+      "label": "original_four",
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "/tmp/pr65-pilot-repairs-e2048909/original",
+        "-p",
+        "test_run_pilot.py",
+        "-v"
+      ],
+      "extra_environment": {},
+      "exit": 0,
+      "full_log": "/tmp/pr65-pilot-repairs-e2048909/original_four.log",
+      "log_sha256": "7cd2bc3bcc6dd864f17f519cacca2210dbcdd56b278c0d98b16b8d4befaaa233",
+      "summary": "ing.test_runtime_resolution_accepts_non_system_prefix_and_refuses_missing) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.003s\n\nOK\n"
+    },
+    {
+      "label": "old_refusal_regressions",
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-B",
+        "docs/issue61_noninferiority/pilot_20261022/test_run_pilot.py",
+        "Refusal.test_execute_rejects_products_and_prior_markers_before_popen",
+        "Refusal.test_preflight_rejects_prior_products_and_partial_preflight_before_reads",
+        "-v"
+      ],
+      "extra_environment": {
+        "PILOT_DRIVER_UNDER_TEST": "/tmp/pr65-pilot-repairs-e2048909/original/run_pilot.py"
+      },
+      "exit": 1,
+      "full_log": "/tmp/pr65-pilot-repairs-e2048909/old_refusal_regressions.log",
+      "log_sha256": "52d57ab6dc24c7ba675544e31739184a7e20fc5e6e9a3094d6213a2b08f44c05",
+      "summary": "_call\n    raise effect\nAssertionError: Popen reached\n\n----------------------------------------------------------------------\nRan 2 tests in 0.493s\n\nFAILED (failures=16, errors=11)\n",
+      "reached_intercepted_Popen": 16,
+      "examples": [
+        "  test_execute_rejects_products_and_prior_markers_before_popen (__main__.Refusal.test_execute_rejects_products_and_prior_markers_before_popen) (name='rec/baseline/held_half1_class001_unfil.mrc') ... FAIL",
+        "  test_execute_rejects_products_and_prior_markers_before_popen (__main__.Refusal.test_execute_rejects_products_and_prior_markers_before_popen) (name='preflight_FAIL.json') ... FAIL",
+        "  test_preflight_rejects_prior_products_and_partial_preflight_before_reads (__main__.Refusal.test_preflight_rejects_prior_products_and_partial_preflight_before_reads) (name='rec/baseline/held_half1_class001_unfil.mrc') ... ERROR",
+        "  test_preflight_rejects_prior_products_and_partial_preflight_before_reads (__main__.Refusal.test_preflight_rejects_prior_products_and_partial_preflight_before_reads) (name='preflight_FAIL.json') ... ERROR",
+        "ERROR: test_preflight_rejects_prior_products_and_partial_preflight_before_reads (__main__.Refusal.test_preflight_rejects_prior_products_and_partial_preflight_before_reads) (name='rec/baseline/held_half1_class001_unfil.mrc')",
+        "ERROR: test_preflight_rejects_prior_products_and_partial_preflight_before_reads (__main__.Refusal.test_preflight_rejects_prior_products_and_partial_preflight_before_reads) (name='preflight_FAIL.json')",
+        "FAIL: test_execute_rejects_products_and_prior_markers_before_popen (__main__.Refusal.test_execute_rejects_products_and_prior_markers_before_popen) (name='rec/baseline/held_half1_class001_unfil.mrc')",
+        "FAIL: test_execute_rejects_products_and_prior_markers_before_popen (__main__.Refusal.test_execute_rejects_products_and_prior_markers_before_popen) (name='preflight_FAIL.json')"
+      ]
+    },
+    {
+      "label": "fixed_all",
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "docs/issue61_noninferiority/pilot_20261022",
+        "-p",
+        "test_run_pilot.py",
+        "-v"
+      ],
+      "extra_environment": {},
+      "exit": 0,
+      "full_log": "/tmp/pr65-pilot-repairs-e2048909/fixed_all.log",
+      "log_sha256": "e8b3c3dc46b37a551beb00a84ce8f41c6896b3668ff309e5e40a344bf134fd11",
+      "summary": "ng.test_runtime_resolution_accepts_non_system_prefix_and_refuses_missing) ... ok\n\n----------------------------------------------------------------------\nRan 14 tests in 0.698s\n\nOK\n"
+    }
+  ],
+  "files": {
+    "/tmp/pr65-pilot-repairs-e2048909/original/run_pilot.py": "909f9f205e2e8a582b84f0e6b69457d95719a149d9b775852872e7ceb6db71f8",
+    "docs/issue61_noninferiority/pilot_20261022/run_pilot.py": "d086c4337cd5c27a1ac6eb2082d4045f25425d4d2379ac8a8499f10e34370fa4",
+    "docs/issue61_noninferiority/pilot_20261022/test_run_pilot.py": "75ec2c7a4c10f46233a055fcc2fb12fa902b1fac2a99a900d5ab966266daa43f"
+  },
+  "initial_fixture_failure": "First expanded suite: 4 CLI subcases failed on /var versus /private/var root-prefix fixture; fixture now resolves its path. No numerical process launched."
+}

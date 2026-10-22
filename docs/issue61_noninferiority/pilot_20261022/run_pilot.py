@@ -32,6 +32,15 @@ EXPECTED = {
     str(PROJECT/'MaskCreate/job020/mask.mrc'): '48a32f4dc7baa2285bbd81ead93281b80387f54cec12e496d3c656dd3507a975',
     str(PROJECT/'mtf_k2_200kV.star'): '8027b174b87bb74888d3b8514223ddf9bd3e493fac43c65756e61b0bc5da2d4c',
 }
+INTERNAL_BINARIES = {
+    '/opt/relion/bin/relion_reconstruct': 'ddc192470703eb91a3f022cca8a448da034ce09fc7faf5e49832f67fcec9cf07',
+    '/opt/relion/bin/relion_postprocess': '2e4fdd6be721a8b6b57e5699c11dbdf713543dcce46401eac306cbf942bcb3ae',
+}
+RUNTIME_VERSION = 'singularity-ce version 4.1.1'
+RUNTIME_SHA256 = '994f404350a92a919264e16e1239f409ac550b3fa8118e80cdee1634fc36ff0a'
+RUNTIME_CONFIG = Path('/etc/singularity/singularity.conf')
+CONFIG_SHA256 = '689e885019d07677a45140f33fc569b7d91addf2b8de337fa642ea54c9c9599b'
+ROOT_PREFIX = '/mnt/clathrin/mc-i61-pilot-c0ee115c-'
 
 
 def utc():
@@ -92,22 +101,110 @@ def probe(argv):
 
 
 def environment(root):
-    e = os.environ.copy()
-    # A private writable home/tmp; all historical project/data mounts are read-only.
-    args = ['--cleanenv', '--bind', '/home/alex/mc-issue61:/home/alex/mc-issue61:ro',
-            '--bind', '/home/alex/relion-container-tests:/home/alex/relion-container-tests:ro',
-            '--bind', f'{PROJECT}:{PROJECT}:ro', '--bind', f'{PLAN.parent}:{PLAN.parent}:ro', '--bind', f'{root}:{root}',
-            '--env', 'CUDA_VISIBLE_DEVICES=', '--env', f'TMPDIR={root}/tmp',
-            '--env', f'HOME={root}/home']
+    # --cleanenv alone does not remove host runtime control variables. Do not
+    # inherit binds, overlays, GPU flags, ENV_* overrides, or wrapper settings.
+    e = {k: os.environ[k] for k in ('PATH', 'HOME', 'USER', 'LOGNAME', 'LANG', 'LC_ALL', 'TZ')
+         if k in os.environ}
+    e.update({k: '1' for k in THREADS})
+    e.update(CUDA_VISIBLE_DEVICES='', TMPDIR=str(root/'tmp'),
+             SINGULARITY_TMPDIR=str(root/'tmp'), SINGULARITY_CACHEDIR=str(root/'tmp'),
+             APPTAINER_TMPDIR=str(root/'tmp'), APPTAINER_CACHEDIR=str(root/'tmp'))
+    return e
+
+
+def container_options(root):
+    # SingularityCE 4.1.1 --contain suppresses implicit cwd/home/tmp mounts.
+    # --home and --workdir select private writable home and tmp/var_tmp.
+    # HISTORY already contains PROJECT: never add a second project bind.
+    mounts = [(HISTORY, 'ro'), (PLAN.parent, 'ro'), (root, 'rw'), (root/'sources', 'ro')]
+    if (not root.is_absolute() or root == HISTORY or root.is_relative_to(HISTORY)
+            or HISTORY.is_relative_to(root) or root == PLAN.parent
+            or root.is_relative_to(PLAN.parent) or PLAN.parent.is_relative_to(root)):
+        raise ValueError('scratch overlaps protected inputs')
+    for path, _ in mounts:
+        if any(c in str(path) for c in ':,\n\r'):
+            raise ValueError('unsupported bind path')
+    args = ['--cleanenv', '--contain', '--no-mount', 'hostfs,bind-paths',
+            '--home', f'{root}/home:{root}/home', '--workdir', str(root/'container_work'),
+            '--pwd', str(PROJECT)]
+    for path, mode in mounts:
+        args += ['--bind', f'{path}:{path}:{mode}']
+    args += ['--env', 'CUDA_VISIBLE_DEVICES=', '--env', f'TMPDIR={root}/tmp']
     for k in THREADS:
         args += ['--env', k+'=1']
-        e[k] = '1'
-    e.update(CUDA_VISIBLE_DEVICES='', RELION_CONTAINER_IMAGE=str(IMAGE),
-             RELION_CONTAINER_RUNTIME='apptainer', RELION_CONTAINER_RUN_ARGS=' '.join(args),
-             APPTAINER_TMPDIR=str(root/'tmp'), APPTAINER_CACHEDIR=str(root/'tmp'))
-    for k in ('SINGULARITYENV_HOME', 'APPTAINERENV_HOME', 'APPTAINER_CONTAINER', 'SINGULARITY_CONTAINER'):
-        e.pop(k, None)
-    return e
+    return args
+
+
+def container_argv(root, runtime, command):
+    return [str(runtime), 'exec', *container_options(root), str(IMAGE), *command]
+
+
+def numerical_argv(root, runtime, argv):
+    name = Path(argv[0]).name
+    internal = '/opt/relion/bin/'+name
+    if argv[0] != str(BIN/name) or internal not in INTERNAL_BINARIES:
+        raise ValueError('unsupported numerical executable')
+    return container_argv(root, runtime, [internal, *argv[1:]])
+
+
+def verify_container(root):
+    runtime = executable('apptainer')
+    # Fail closed outside the exact runtime/configuration whose mounts were probed.
+    if digest(runtime) != RUNTIME_SHA256 or digest(RUNTIME_CONFIG) != CONFIG_SHA256:
+        raise RuntimeError('unsupported runtime/configuration identity')
+    env = environment(root)
+    checks = []
+    for cmd in ([str(runtime), '--version'], [str(runtime), 'exec', '--help']):
+        result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+        checks.append({'argv': cmd, 'exit': result.returncode,
+                       'stdout': result.stdout, 'stderr': result.stderr})
+        if result.returncode:
+            raise RuntimeError('runtime inspection failed')
+    if checks[0]['stdout'].strip() != RUNTIME_VERSION:
+        raise RuntimeError('unsupported runtime version')
+    for flag in ('--cleanenv', '--contain', '--no-mount', '--home', '--workdir', '--pwd', '--bind', '--env'):
+        if flag not in checks[1]['stdout']:
+            raise RuntimeError('unsupported runtime option: '+flag)
+    for name in ('home', 'tmp', 'container_work'):
+        path = root/name
+        if path.is_symlink() or (path.exists() and (not path.is_dir() or any(path.iterdir()))):
+            raise FileExistsError('private runtime directory is not fresh: '+str(path))
+        path.mkdir(exist_ok=True)
+    cmd = container_argv(root, runtime, ['/usr/bin/sha256sum', *INTERNAL_BINARIES])
+    result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+    hashes = {line.split()[1]: line.split()[0] for line in result.stdout.splitlines()}
+    if result.returncode or result.stderr or hashes != INTERNAL_BINARIES:
+        raise RuntimeError('container binary/isolation setup check failed: '+result.stderr)
+    return {'runtime': str(runtime), 'checks': checks, 'options': container_options(root),
+            'binaries': {'argv': cmd, 'exit': result.returncode, 'stdout': result.stdout, 'stderr': result.stderr}}
+
+
+def refuse_used(root, stage):
+    """Allow fresh preflight -> execute only; retain every earlier artifact."""
+    names = ['STARTED.json', 'DONE.json', 'products.json', 'analyser_attempt.json', 'launch_resources.json']
+    names += [f'rec/{arm}/held_half{half}_class001_unfil.mrc'
+              for arm in ('baseline', 'thinned') for half in (1, 2)]
+    names += ['pp/cpu/held22', 'pp/thinned/held22']
+    if stage == 'preflight':
+        names += ['PREFLIGHT_STARTED.json', 'preflight.json', 'execution_plan.json']
+    conflicts = [root/n for n in names if os.path.lexists(root/n)]
+    for pattern in ('*_FAIL.json', 'job_*', 'map_*'):
+        conflicts.extend(root.glob(pattern))
+    if stage == 'preflight':
+        conflicts.extend(root.glob('historical_*'))
+    # Refuse every product, including undeclared postprocess sidecars and logs.
+    # Empty reserved directories are allowed; symlinks (even dangling) are not.
+    for name in ('rec', 'pp', 'logs', 'results'):
+        path = root/name
+        if os.path.lexists(path) and (path.is_symlink() or not path.is_dir()):
+            conflicts.append(path)
+        elif path.is_dir():
+            conflicts.extend(p for p in path.rglob('*') if p.is_symlink() or not p.is_dir())
+    for name in ('sources', 'home', 'tmp', 'container_work'):
+        if (root/name).is_symlink():
+            conflicts.append(root/name)
+    if conflicts:
+        raise FileExistsError('refusing used pilot scratch: '+str(sorted(set(conflicts))[0]))
 
 
 def selected_jobs(jobs, root):
@@ -128,6 +225,8 @@ def selected_jobs(jobs, root):
 
 def preflight(root):
     assert set(os.sched_getaffinity(0)) == {14, 15}
+    refuse_used(root, 'preflight')
+    save(root/'PREFLIGHT_STARTED.json', {'utc': utc(), 'pid': os.getpid()})
     src = root/'sources'
     source_hashes = json.loads((src/'source_hashes.json').read_text())
     for name, value in source_hashes.items():
@@ -191,9 +290,11 @@ def preflight(root):
         item = identity(Path(name), mrc=name.endswith('.mrc'))
         inputs.append(item)
         assert item['sha256'] == expected, f'historical identity mismatch: {name}'
+    container = verify_container(root)
     inputs += [identity(RUNNER), identity(source), identity(PLAN/'manifest.json'), identity(PLAN/'jobs.json'),
                identity(PLAN.parent/'design.json'), identity(PLAN.parent/'PLAN_RUN.json'),
-               identity(PLAN.parent/'PILOT_INTENT.json'), identity(Path(sys.executable)), identity(executable('apptainer'))]
+               identity(PLAN.parent/'PILOT_INTENT.json'), identity(Path(sys.executable)),
+               identity(Path(container['runtime'])), identity(RUNTIME_CONFIG)]
     # Establish exact historical command, omitted-option defaults, and observed threshold.
     command_lines = [x for x in (HISTORY/'jobs_postprocess.txt').read_text().splitlines()
                      if '/rec/cpu/held22_half1_class001_unfil.mrc' in x]
@@ -231,8 +332,7 @@ def preflight(root):
     e = environment(root)
     receipt = {'utc': utc(), 'status': 'PASS', 'source_commit': BASE, 'hostname': socket.gethostname(),
                'affinity': sorted(os.sched_getaffinity(0)), 'no_controlled_timings': True,
-               'environment': {k: e[k] for k in (*THREADS, 'CUDA_VISIBLE_DEVICES', 'RELION_CONTAINER_IMAGE',
-                             'RELION_CONTAINER_RUNTIME', 'RELION_CONTAINER_RUN_ARGS', 'APPTAINER_TMPDIR', 'APPTAINER_CACHEDIR')},
+               'environment': e, 'container': container,
                'inputs': inputs, 'stacks': list(stacks.values()), 'source_hashes': source_hashes,
                'subsets': subsets, 'historical': historical, 'global_lock_probe': global_probe,
                'occupancy': probe(['ps', '-eo', 'pid,psr,pcpu,args', '--sort=-pcpu']),
@@ -245,10 +345,14 @@ def preflight(root):
 
 def execute(root):
     assert set(os.sched_getaffinity(0)) == {14, 15}
-    # Exclusive start marker forbids re-entering a failed or interrupted pilot.
-    save(root/'STARTED.json', {'utc': utc(), 'pid': os.getpid(), 'affinity': sorted(os.sched_getaffinity(0))})
+    refuse_used(root, 'execute')
+    if not (root/'PREFLIGHT_STARTED.json').is_file():
+        raise RuntimeError('fresh corrected-driver preflight required')
     receipt = json.loads((root/'preflight.json').read_text())
     assert receipt['status'] == 'PASS' and digest(root/'execution_plan.json') == receipt['execution_plan_sha256']
+    assert receipt['container']['options'] == container_options(root)
+    # Exclusive start marker forbids re-entering a failed or interrupted pilot.
+    save(root/'STARTED.json', {'utc': utc(), 'pid': os.getpid(), 'affinity': sorted(os.sched_getaffinity(0))})
     # Reconcile exact files after preflight, immediately before any numerical work.
     for item in receipt['inputs'] + receipt['stacks']:
         assert digest(Path(item['path'])) == item['sha256'], item['path']
@@ -266,10 +370,12 @@ def execute(root):
     records = []
     for i, job in enumerate(plan['reconstruct'] + plan['postprocess']):
         log = root/job['log']
-        record = {'index': i, 'argv': job['argv'], 'cwd': job['cwd'], 'start_utc': utc(), 'status': 'RUNNING'}
+        argv = numerical_argv(root, receipt['container']['runtime'], job['argv'])
+        record = {'index': i, 'argv': job['argv'], 'launch_argv': argv,
+                  'cwd': job['cwd'], 'start_utc': utc(), 'status': 'RUNNING'}
         save(root/f'job_{i}_started.json', record)
         with log.open('xb') as out:
-            p = subprocess.Popen(job['argv'], cwd=job['cwd'], env=env, stdout=out, stderr=subprocess.STDOUT)
+            p = subprocess.Popen(argv, cwd=job['cwd'], env=env, stdout=out, stderr=subprocess.STDOUT)
             save(root/f'job_{i}_pid.json', {'pid': p.pid, 'utc': utc(), 'affinity': sorted(os.sched_getaffinity(p.pid))})
             code = p.wait()
         text = log.read_text(errors='replace')
@@ -303,19 +409,21 @@ def execute(root):
          'B1_analysis': 'UNRUN' if analyser_exit else 'SEE_ANALYSER', 'SE_CI_power_sensitivity': 'UNRUN'})
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('stage', choices=['preflight','execute'])
     ap.add_argument('root', type=Path)
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
     root = args.root.resolve(strict=True)
-    assert str(root).startswith('/mnt/clathrin/mc-i61-pilot-c0ee115c-') and root != PLAN.parent
+    assert str(root).startswith(ROOT_PREFIX) and root != PLAN.parent
     with open('/tmp/motioncorr-i61-cpu-14-15.lock', 'a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         try:
             (preflight if args.stage == 'preflight' else execute)(root)
         except BaseException as exc:
-            save(root/f'{args.stage}_FAIL.json', {'utc': utc(), 'pid': os.getpid(), 'error': repr(exc)})
+            failure = root/f'{args.stage}_FAIL.json'
+            if not os.path.lexists(failure):
+                save(failure, {'utc': utc(), 'pid': os.getpid(), 'error': repr(exc)})
             raise
 
 

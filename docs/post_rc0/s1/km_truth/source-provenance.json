@@ -1,0 +1,30 @@
+{
+  "main": {
+    "revision": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+    "source_archive_sha256": "a14e080e3877d7d912022bce2a066b288a4a071a9914b829f9b69df4c68731f6"
+  },
+  "fixture": {
+    "revision": "88b34ae06416a3cde233889fe5a0f244b1c16bf4"
+  },
+  "diagnostic": {
+    "revision": "97fd81070566af0358ccc839b6804a99b6bf52c1",
+    "source_archive_sha256": "657ac58746fe4e553f23cf50e32733def0712d34b910b8adbe68f0c4942561c1"
+  },
+  "observation_patch_sha256": "488b1ecffa8f16b8203ed9e3635b7055b37728ec5a4a28efb6bfabf62e3b6196",
+  "build_commands": {
+    "cpu": "~/.mc-venv/bin/cmake -S {main,diag}-src -B {main,diag}-build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF; taskset -c 40-47 cmake --build ... -j8",
+    "cuda": "PATH=/usr/local/cuda-12.8/bin:$PATH cmake -S {main,diag}-src -B {main,diag}-build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80; taskset -c 96-103 cmake --build ... -j8",
+    "overlay": "patch -p1 <capture_runtime_model.patch; cmake --build ../diag-build -j8"
+  },
+  "generator_sha256": "a10f694abafc71c146d0e0f2eeb2b1cf2c58131b2dbf6c1b66800405bd126380",
+  "native_runner_sha256": "80ae39ebb0d2059a823f10147c8e538799c11147eb7e907c1811f62fedac2816",
+  "generator_revision": "59ccaa43d6db724d5daee011d22ab0b0f4bafa18",
+  "later_diagnostic_head": "afba50a4cebf5238ec2d267ff3ec07d272b13395",
+  "later_head_difference": "11-line observation-only model capture; numerical source unchanged; census remains pinned",
+  "analysis_code_revision": "4916ec04149703336764396ff763ae372acd20fe",
+  "analysis_tools_sha256": {
+    "tools/check_realistic_motion.py": "b0ab099a256e458b1c8aea6c2ff5d9ceacab10dd81945b025e96e5c8a87b7ff9",
+    "tools/summarize_realistic_motion.py": "6e1a67dc62c0f34a067e1a886124e6df4a94236bd239c8cf4103b5438bb043c4",
+    "tools/test_realistic_motion.py": "89885201fc75e8c49b280d7e131d293fe1d510b3565f235bb1efd07918244d70"
+  }
+}

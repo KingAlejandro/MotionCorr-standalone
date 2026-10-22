@@ -1,0 +1,25 @@
+{
+  "root": "/mnt/clathrin/mc-i61-pilot-c0ee115c-e037cwvq",
+  "failed_driver_sha256": "77f55f366d0a3656fe36e02d5161114dc5ef7d317ab66f2aa8c2f1168cedc203",
+  "failed_driver_size": 17601,
+  "driver_retained": "/mnt/clathrin/mc-i61-pilot-c0ee115c-e037cwvq/run_pilot.py",
+  "source_pin": "c0ee115c8348df54732f47dbef930b541b2a364a",
+  "numerical_started_receipts": [],
+  "preflight_exit": 1,
+  "inspection_utc": "2026-10-22T15:19:11.761549+00:00",
+  "inspection_argv": [
+    "ssh",
+    "-J",
+    "ccp4-gateway",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "4GPUs",
+    "taskset",
+    "-c",
+    "14-15",
+    "/home/alex/.mc-venv/bin/python3",
+    "-"
+  ]
+}

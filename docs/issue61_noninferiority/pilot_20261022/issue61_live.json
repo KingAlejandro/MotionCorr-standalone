@@ -1,0 +1,47 @@
+{
+  "utc": "2026-10-22T15:04:25.351863+00:00",
+  "argv": [
+    "gh",
+    "issue",
+    "view",
+    "61",
+    "--json",
+    "title,body,comments,url"
+  ],
+  "exit": 0,
+  "response_sha256": "f49c0dd1bcc7b51de848a14ca003f04271d711b2f20901c9a655619968eb26f5",
+  "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/61",
+  "title": "Measure scientific non-inferiority of CPU, CUDA and hybrid motion correction",
+  "latest_comments": [
+    {
+      "id": "IC_kwDOUnH-pc8AAAABXaJJnQ",
+      "author": {
+        "login": "KingAlejandro"
+      },
+      "authorAssociation": "OWNER",
+      "body": "## Outcome reversed on review: Stage B verdicts withdrawn to INCONCLUSIVE\n\nFollowing the Codex and Copilot reviews of [PR #65](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65) at `ef5935e`, and a second review round on the fixes themselves, **the non-inferiority conclusion I posted on 2026-09-25 does not stand.** Full disposition in the [PR thread](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65); the substance for this issue:\n\n### What was wrong\n\nThe validity precondition claimed the endpoint could resolve its harm margin because `ctrl_noise_f005` sat 5.8 SE from `rho = 1.0`. It did not: that control measured `rho = 0.9666` and **passed** the 0.95 margin, so it never exercised the decision the endpoint makes. I added four margin-calibrated controls and a criterion **S1** \u2014 \"no control at or beyond the margin may earn a PASS\" \u2014 and reported it demonstrated at `rho = 0.94914`.\n\n**S1 is vacuous.** A one-sided lower bound satisfies `lower95 <= rho` by construction, so any control classified harmful by its measured `rho` can never pass; the criterion could not fail. It has content only for a margin-designed control whose measured `rho` lands *above* the margin, and none did.\n\nThat leaves only positive rejection, demonstrated at `rho = 0.9146` \u2014 an 8.5% effective-data loss, not the 5% margin. **Sensitivity at the prespecified harm margin is unproven**, so every Stage B verdict for `default` and `allfftw` is withdrawn from PASS to INCONCLUSIVE under [Amendment 2](https://github.com/KingAlejandro/MotionCorr-standalone/blob/feat/issue-61-scientific-noninferiority/docs/issue61_noninferiority/PROTOCOL.md#10-amendments).\n\n### Revised answer to this issue's pass criteria\n\n| Stage | Endpoint | `default` | `allfftw` |\n| --- | --- | --- | --- |\n| A | CTF max resolution / defocus / FoM | PASS* | PASS* |\n| **B** | **effective-data fraction `rho`** | **INCONCLUSIVE** | **INCONCLUSIVE** |\n| B | `d143`, auto-B | INCONCLUSIVE | INCONCLUSIVE |\n| C | `d143`, auto-B after independent refinement | PASS** | PASS** / INCONCLUSIVE |\n\n\\* Stage A's own controls show it cannot detect a 5% loss, and CTF max resolution does not move even under a 20% one.\n\\*\\* Stage C has **no positive control at all**, and its within-arm seed spread (0.062 \u00c5) exceeds every between-arm difference it measured.\n\n**No prespecified endpoint supports a non-inferiority conclusion for either backend.** That is a statement about the evidence, not about the backends.\n\n### What does still stand\n\n- Both accelerated arms are **measurably indistinguishable from CPU at the precision achieved**: observed effective-data loss 4.1e-5 and 1.9e-5, bounds 162x and 610x inside the allowed loss, under a matched design now verified field-by-field (18 named fields, 6 arms, 144 stacks, one shared metadata digest).\n- The endpoint **does** detect an 8.5% loss and tracks four designed degradation levels quantitatively \u2014 it is not inert.\n- The specificity result is unaffected and remains the sharpest thing here: a deterministic envelope removing **81% of 3-2 \u00c5 power** leaves FSC and resolution **unchanged**. Image difference does not imply signal loss. This still converges with #60's independent finding that the 0.001 relative-RMSE limit is a near-binary \"not bit-identical\" detector.\n- No measurement changed. Every endpoint value, bound and all 72 pixel digests reproduce exactly. **No margin, threshold or gate was relaxed** \u2014 both amendments are tightenings, and the second removes a conclusion.\n\n### The one experiment that would resolve it\n\n\u226520 independent noise realisations of a margin-designed control (`f = 0.062`), full jackknife each, counting how many wrongly yield `lower95 >= 0.95`; plus a replicate set at the real arms' precision scale (`SE ~ 1.6e-4` vs `~8e-3`). \u2248920 reconstructions + 460 post-processing runs, ~50 min of exclusive `cpu64` lock. **Not run** \u2014 it is a design-validation study rather than a review fix, so I have left the decision to you.\n\nCompute: `cpu64` cores 32-63 / NUMA node 1, \u226412 concurrent, behind the issue-96 validation lock, `ctffind` untouched, no GPU and no SCARF allocation. Read-only passes on `4GPUs` used cores 120-123, outside both reservations. Not merging or closing.\n",
+      "createdAt": "2026-09-28T08:01:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/61#issuecomment-5865884061",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOUnH-pc8AAAABawXzYg",
+      "author": {
+        "login": "KingAlejandro"
+      },
+      "authorAssociation": "OWNER",
+      "body": "Data point for this study, from #171 (experimental `--fft_size_policy fast`: 7-smooth padded FFTs, hidden and off by default).\n\n**Speed:** 96 movies 25.88 \u2192 22.64 s (\u221213.4%), 24 movies 7.19 \u2192 6.13 s (\u221212.6%). Products differ, so these are speed-only verdicts.\n\n**Validation against the CPU reference, existing gates unchanged:** it fails.\n\n| what is padded | movies passing | worst image RMSE (gate 0.02) | max local trajectory change |\n|---|---|---|---|\n| nothing (default) | 24/24 | 0.009 | 0.065 px |\n| frames and patches | 0/24 | 0.049 | 0.72 px |\n| frames only | 0/24 | 0.046 | 0.74 px |\n| patches only | 3/24 | 0.038 | 0.36 px |\n\n**Where the error comes from:**\n- **Frame padding** replaces the periodic wrap at the image edges with mean fill: 58% of the squared error is in the outer 8 px.\n- **Patch padding** changes the fitted local motion model by up to 0.36 px.\n- Dose weighting is not the cause.\n\n**The current gates are also too coarse to validate a mode like this.** A dose-weight grid wrong by 1% of each axis falls below their resolution. Any future non-identical speed mode needs finer, calibrated gates first (#60).",
+      "createdAt": "2026-10-09T22:43:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/61#issuecomment-6090519394",
+      "viewerDidAuthor": true
+    }
+  ]
+}

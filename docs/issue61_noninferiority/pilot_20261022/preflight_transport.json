@@ -1,0 +1,21 @@
+{
+  "utc": "2026-10-22T15:07:17.360949+00:00",
+  "argv": [
+    "ssh",
+    "-J",
+    "ccp4-gateway",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "4GPUs",
+    "taskset",
+    "-c",
+    "14-15",
+    "/home/alex/.mc-venv/bin/python3",
+    "-"
+  ],
+  "exit": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"/mnt/clathrin/mc-i61-pilot-c0ee115c-e037cwvq/run_pilot.py\", line 315, in <module>\n    main()\n  File \"/mnt/clathrin/mc-i61-pilot-c0ee115c-e037cwvq/run_pilot.py\", line 308, in main\n    (preflight if args.stage == 'preflight' else execute)(root)\n  File \"/mnt/clathrin/mc-i61-pilot-c0ee115c-e037cwvq/run_pilot.py\", line 188, in preflight\n    identity(PLAN.parent/'PILOT_INTENT.json'), identity(Path(sys.executable)), identity(Path('/usr/bin/apptainer'))]\n                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/mnt/clathrin/mc-i61-pilot-c0ee115c-e037cwvq/run_pilot.py\", line 58, in identity\n    before = path.stat()\n             ^^^^^^^^^^^\n  File \"/usr/lib/python3.12/pathlib.py\", line 842, in stat\n    return os.stat(self, follow_symlinks=follow_symlinks)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/usr/bin/apptainer'\n"
+}

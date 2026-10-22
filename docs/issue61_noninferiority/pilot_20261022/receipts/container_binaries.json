@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "apptainer",
+    "exec",
+    "--cleanenv",
+    "--bind",
+    "/mnt/clathrin/mc-i61-pilot-c0ee115c-q21hhr8l:/mnt/clathrin/mc-i61-pilot-c0ee115c-q21hhr8l",
+    "--env",
+    "CUDA_VISIBLE_DEVICES=",
+    "--env",
+    "OMP_NUM_THREADS=1",
+    "/home/alex/relion-container-tests/sifs/relion-5.1.0-cuda12.8-sm80-full-plus-tomo-r2.sif",
+    "sha256sum",
+    "/opt/relion/bin/relion_reconstruct",
+    "/opt/relion/bin/relion_postprocess"
+  ],
+  "exit": 0,
+  "stdout": "ddc192470703eb91a3f022cca8a448da034ce09fc7faf5e49832f67fcec9cf07  /opt/relion/bin/relion_reconstruct\n2e4fdd6be721a8b6b57e5699c11dbdf713543dcce46401eac306cbf942bcb3ae  /opt/relion/bin/relion_postprocess\n",
+  "stderr": "",
+  "affinity": [
+    14,
+    15
+  ]
+}

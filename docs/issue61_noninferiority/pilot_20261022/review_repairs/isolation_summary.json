@@ -1,0 +1,252 @@
+{
+  "utc": "2026-10-22T15:40:58.758555+00:00",
+  "end_utc": "2026-10-22T15:40:59.440660+00:00",
+  "root": "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv",
+  "status": "PASS",
+  "driver_sha256": "d086c4337cd5c27a1ac6eb2082d4045f25425d4d2379ac8a8499f10e34370fa4",
+  "affinity": [
+    14,
+    15
+  ],
+  "numerical_launches": 0,
+  "runtime_identity": {
+    "path": "/usr/bin/singularity",
+    "resolved": "/usr/bin/singularity",
+    "size": 48113512,
+    "sha256": "994f404350a92a919264e16e1239f409ac550b3fa8118e80cdee1634fc36ff0a"
+  },
+  "wrapper_sha256": "be2323ed9461dd893f70ab2250f6ee5b0deaaa4ea7003c34b693f3798d9311ae",
+  "image_stat": {
+    "path": "/home/alex/relion-container-tests/sifs/relion-5.1.0-cuda12.8-sm80-full-plus-tomo-r2.sif",
+    "size": 9496313856,
+    "mtime_ns": 1777572336176300232
+  },
+  "container": {
+    "argv": [
+      "/usr/bin/singularity",
+      "exec",
+      "--cleanenv",
+      "--contain",
+      "--no-mount",
+      "hostfs,bind-paths",
+      "--home",
+      "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/home:/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/home",
+      "--workdir",
+      "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/container_work",
+      "--pwd",
+      "/home/alex/mc-issue61/proj/cpu",
+      "--bind",
+      "/home/alex/mc-issue61:/home/alex/mc-issue61:ro",
+      "--bind",
+      "/mnt/clathrin/mc-i61-plan-c0ee115c-dbe9tcqr:/mnt/clathrin/mc-i61-plan-c0ee115c-dbe9tcqr:ro",
+      "--bind",
+      "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv:/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv:rw",
+      "--bind",
+      "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/sources:/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/sources:ro",
+      "--env",
+      "CUDA_VISIBLE_DEVICES=",
+      "--env",
+      "TMPDIR=/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/tmp",
+      "--env",
+      "OMP_NUM_THREADS=1",
+      "--env",
+      "OPENBLAS_NUM_THREADS=1",
+      "--env",
+      "MKL_NUM_THREADS=1",
+      "--env",
+      "VECLIB_MAXIMUM_THREADS=1",
+      "--env",
+      "NUMEXPR_NUM_THREADS=1",
+      "--env",
+      "BLIS_NUM_THREADS=1",
+      "/home/alex/relion-container-tests/sifs/relion-5.1.0-cuda12.8-sm80-full-plus-tomo-r2.sif",
+      "/bin/sh",
+      "-ec",
+      "\nprintf 'ENV_HOME=%s\nENV_TMPDIR=%s\nENV_CUDA=%s\n' \"$HOME\" \"$TMPDIR\" \"$CUDA_VISIBLE_DEVICES\"\ntest \"$CUDA_VISIBLE_DEVICES\" = ''\ntest \"$OMP_NUM_THREADS\" = 1\ntest \"$OPENBLAS_NUM_THREADS\" = 1\ntest \"$MKL_NUM_THREADS\" = 1\ntest \"$VECLIB_MAXIMUM_THREADS\" = 1\ntest \"$NUMEXPR_NUM_THREADS\" = 1\ntest \"$BLIS_NUM_THREADS\" = 1\nprintf 'CWD=%s\n' \"$PWD\"\ngrep Cpus_allowed_list /proc/self/status\nprintf 'MOUNTINFO_BEGIN\n'\ncat /proc/self/mountinfo\nprintf 'MOUNTINFO_END\n'\ntest -z \"$(find /dev -name 'nvidia*' -print -quit)\"\nprintf 'output\n' > \"$1/output/write.txt\"\nprintf 'home\n' > \"$HOME/write.txt\"\nprintf 'tmpdir\n' > \"$TMPDIR/write.txt\"\nprintf 'tmp\n' > /tmp/i61-review-write.txt\nprintf 'vartmp\n' > /var/tmp/i61-review-write.txt\nif (printf 'must not write\n' > \"$1/sources/fixture.txt\") 2> \"$1/output/ro_error.txt\"; then\n    echo 'READONLY_FIXTURE_WRITABLE'; exit 42\nfi\nprintf 'BINARY_HASHES_BEGIN\n'\n/usr/bin/sha256sum /opt/relion/bin/relion_reconstruct /opt/relion/bin/relion_postprocess\nprintf 'BINARY_HASHES_END\n'\n",
+      "probe",
+      "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv"
+    ],
+    "exit": 0,
+    "stdout": "ENV_HOME=/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/home\nENV_TMPDIR=/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/tmp\nENV_CUDA=\nCWD=/home/alex/mc-issue61/proj/cpu\nCpus_allowed_list:\t14-15\nMOUNTINFO_BEGIN\n276 170 0:55 / / rw,nodev,relatime unbindable - overlay overlay ro,lowerdir=/var/lib/singularity/mnt/session/overlay-lowerdir:/var/lib/singularity/mnt/session/rootfs,redirect_dir=on,nouserxattr\n352 276 0:54 /dev /dev rw,nosuid,relatime master:84 - tmpfs tmpfs rw,size=65536k,uid=1004,gid=1004,inode64\n353 352 0:59 / /dev/shm rw,nosuid,nodev,relatime - tmpfs tmpfs rw,uid=1004,gid=1004,inode64\n354 352 0:60 / /dev/pts rw,nosuid,noexec,relatime - devpts devpts rw,gid=5,mode=620,ptmxmode=666\n355 352 0:5 /tty /dev/tty rw,nosuid,relatime master:23 - devtmpfs udev rw,size=226982236k,nr_inodes=56745559,mode=755,inode64\n356 352 0:5 /null /dev/null rw,nosuid,relatime master:23 - devtmpfs udev rw,size=226982236k,nr_inodes=56745559,mode=755,inode64\n357 352 0:5 /zero /dev/zero rw,nosuid,relatime master:23 - devtmpfs udev rw,size=226982236k,nr_inodes=56745559,mode=755,inode64\n358 352 0:5 /random /dev/random rw,nosuid,relatime master:23 - devtmpfs udev rw,size=226982236k,nr_inodes=56745559,mode=755,inode64\n359 352 0:5 /urandom /dev/urandom rw,nosuid,relatime master:23 - devtmpfs udev rw,size=226982236k,nr_inodes=56745559,mode=755,inode64\n360 276 0:23 / /proc rw,nosuid,nodev,noexec,relatime master:72 - proc proc rw\n361 360 0:32 / /proc/sys/fs/binfmt_misc rw,relatime master:74 - autofs systemd-1 rw,fd=32,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=58375\n362 361 0:35 / /proc/sys/fs/binfmt_misc rw,nosuid,nodev,noexec,relatime master:75 - binfmt_misc binfmt_misc rw\n372 276 0:22 / /sys rw,nosuid,nodev,relatime - sysfs sysfs rw\n375 276 8:16 /mc-i61-review-isolation-n1yv6cjv/home /mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/home rw,nosuid,nodev,relatime master:80 - ext4 /dev/sdb rw\n376 276 8:16 /mc-i61-review-isolation-n1yv6cjv/container_work/tmp /tmp rw,nosuid,nodev,relatime master:80 - ext4 /dev/sdb rw\n396 276 8:16 /mc-i61-review-isolation-n1yv6cjv/container_work/var_tmp /var/tmp rw,nosuid,nodev,relatime master:80 - ext4 /dev/sdb rw\n397 276 0:54 /etc/resolv.conf /etc/resolv.conf rw,nosuid,relatime master:84 - tmpfs tmpfs rw,size=65536k,uid=1004,gid=1004,inode64\n398 276 0:54 /etc/passwd /etc/passwd rw,nosuid,relatime master:84 - tmpfs tmpfs rw,size=65536k,uid=1004,gid=1004,inode64\n399 276 0:54 /etc/group /etc/group rw,nosuid,relatime master:84 - tmpfs tmpfs rw,size=65536k,uid=1004,gid=1004,inode64\n403 276 8:1 /home/alex/mc-issue61 /home/alex/mc-issue61 ro,nosuid,nodev,relatime master:22 - ext4 /dev/sda1 rw,discard,errors=remount-ro,commit=30\n404 276 8:16 /mc-i61-plan-c0ee115c-dbe9tcqr /mnt/clathrin/mc-i61-plan-c0ee115c-dbe9tcqr ro,nosuid,nodev,relatime master:80 - ext4 /dev/sdb rw\n405 276 8:16 /mc-i61-review-isolation-n1yv6cjv /mnt/clathrin/mc-i61-review-isolation-n1yv6cjv rw,nosuid,nodev,relatime master:80 - ext4 /dev/sdb rw\n406 405 8:16 /mc-i61-review-isolation-n1yv6cjv/sources /mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/sources ro,nosuid,nodev,relatime master:80 - ext4 /dev/sdb rw\nMOUNTINFO_END\nBINARY_HASHES_BEGIN\nddc192470703eb91a3f022cca8a448da034ce09fc7faf5e49832f67fcec9cf07  /opt/relion/bin/relion_reconstruct\n2e4fdd6be721a8b6b57e5699c11dbdf713543dcce46401eac306cbf942bcb3ae  /opt/relion/bin/relion_postprocess\nBINARY_HASHES_END\n",
+    "stderr": ""
+  },
+  "verified_mounts": {
+    "/home/alex/mc-issue61": [
+      "403",
+      "276",
+      "8:1",
+      "/home/alex/mc-issue61",
+      "/home/alex/mc-issue61",
+      "ro,nosuid,nodev,relatime",
+      "master:22",
+      "-",
+      "ext4",
+      "/dev/sda1",
+      "rw,discard,errors=remount-ro,commit=30"
+    ],
+    "/home/alex/mc-issue61/proj/cpu": [
+      "403",
+      "276",
+      "8:1",
+      "/home/alex/mc-issue61",
+      "/home/alex/mc-issue61",
+      "ro,nosuid,nodev,relatime",
+      "master:22",
+      "-",
+      "ext4",
+      "/dev/sda1",
+      "rw,discard,errors=remount-ro,commit=30"
+    ],
+    "/mnt/clathrin/mc-i61-plan-c0ee115c-dbe9tcqr": [
+      "404",
+      "276",
+      "8:16",
+      "/mc-i61-plan-c0ee115c-dbe9tcqr",
+      "/mnt/clathrin/mc-i61-plan-c0ee115c-dbe9tcqr",
+      "ro,nosuid,nodev,relatime",
+      "master:80",
+      "-",
+      "ext4",
+      "/dev/sdb",
+      "rw"
+    ],
+    "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/sources": [
+      "406",
+      "405",
+      "8:16",
+      "/mc-i61-review-isolation-n1yv6cjv/sources",
+      "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/sources",
+      "ro,nosuid,nodev,relatime",
+      "master:80",
+      "-",
+      "ext4",
+      "/dev/sdb",
+      "rw"
+    ],
+    "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/output": [
+      "405",
+      "276",
+      "8:16",
+      "/mc-i61-review-isolation-n1yv6cjv",
+      "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv",
+      "rw,nosuid,nodev,relatime",
+      "master:80",
+      "-",
+      "ext4",
+      "/dev/sdb",
+      "rw"
+    ],
+    "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/home": [
+      "375",
+      "276",
+      "8:16",
+      "/mc-i61-review-isolation-n1yv6cjv/home",
+      "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/home",
+      "rw,nosuid,nodev,relatime",
+      "master:80",
+      "-",
+      "ext4",
+      "/dev/sdb",
+      "rw"
+    ],
+    "/tmp": [
+      "376",
+      "276",
+      "8:16",
+      "/mc-i61-review-isolation-n1yv6cjv/container_work/tmp",
+      "/tmp",
+      "rw,nosuid,nodev,relatime",
+      "master:80",
+      "-",
+      "ext4",
+      "/dev/sdb",
+      "rw"
+    ],
+    "/var/tmp": [
+      "396",
+      "276",
+      "8:16",
+      "/mc-i61-review-isolation-n1yv6cjv/container_work/var_tmp",
+      "/var/tmp",
+      "rw,nosuid,nodev,relatime",
+      "master:80",
+      "-",
+      "ext4",
+      "/dev/sdb",
+      "rw"
+    ]
+  },
+  "ro_fixture_error": "probe: 32: cannot create /mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/sources/fixture.txt: Read-only file system\n",
+  "raw_transport": {
+    "path": "/tmp/pr65-pilot-repairs-e2048909/isolation_transport.json",
+    "sha256": "155b86eed98cecfd05b2f0980adde27feeb8d418efe90095a9572d3d23053a25",
+    "ssh_exit": 0,
+    "stderr": ""
+  },
+  "remote_receipts": [
+    "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/INTENT.json",
+    "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/RESULT.json",
+    "/mnt/clathrin/mc-i61-review-isolation-n1yv6cjv/sources/run_pilot.py"
+  ],
+  "config_sha256": "689e885019d07677a45140f33fc569b7d91addf2b8de337fa642ea54c9c9599b",
+  "config_mount_directives": [
+    "allow setuid = yes",
+    "mount proc = yes",
+    "mount sys = yes",
+    "mount dev = yes",
+    "mount devpts = yes",
+    "mount home = yes",
+    "mount tmp = yes",
+    "mount hostfs = no",
+    "bind path = /etc/localtime",
+    "bind path = /etc/hosts",
+    "user bind control = yes",
+    "enable fusemount = yes",
+    "enable overlay = try",
+    "enable underlay = yes",
+    "mount slave = yes"
+  ],
+  "runtime_version": {
+    "argv": [
+      "/usr/bin/singularity",
+      "--version"
+    ],
+    "exit": 0,
+    "stdout": "singularity-ce version 4.1.1\n",
+    "stderr": ""
+  },
+  "runtime_help_sha256": "9c1de6bf70d03bf8d367dcef5830fb6fe2d63ccccc195b087610aceee26c9f4b",
+  "occupancy_top": [
+    "    PID PSR %CPU COMMAND",
+    "3016456  15  900 ps",
+    "3016392  83  105 pgrep",
+    "3016391  77  104 pgrep",
+    "3016453  14 80.0 python3",
+    "2919721 107 27.8 rsyslogd",
+    "2966712   2 23.6 MainThread",
+    "2965030   1 11.2 MainThread",
+    "2964156   2  4.8 code-6d62b1d5da",
+    "2992016  38  3.8 claude",
+    "2963990   2  2.8 sshd",
+    "3016393  40  1.6 sshd",
+    "2964353  25  1.4 MainThread",
+    "2919673  22  0.9 systemd-journal",
+    "2964317  25  0.5 MainThread",
+    "2946309 106  0.4 code-c2d1b13fdc",
+    "2992155  21  0.4 claude"
+  ],
+  "gpu_processes_readonly": {
+    "argv": [
+      "nvidia-smi",
+      "--query-compute-apps=pid,gpu_uuid,process_name",
+      "--format=csv,noheader"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "source_basis": [
+    "https://github.com/sylabs/singularity/blob/v4.1.1/internal/pkg/runtime/engine/singularity/container_linux.go#L1589-L1599",
+    "https://docs.sylabs.io/guides/4.1/user-guide/bind_paths_and_mounts.html"
+  ]
+}

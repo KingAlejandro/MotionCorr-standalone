@@ -178,3 +178,43 @@ at 16:42:41 UTC finds PID absent, no task processes and both locks FREE.
 Original clean worktree, root checkout, historical result/archive and frozen
 inputs were preserved. Compact indexed receipts are in native_attempt02;
 parent owns subsequent review/publication and any separately authorized repair.
+
+
+## Native attempt03 — registration repair and retained mutant failure
+
+[Attempt03 report](native_attempt03/README.md) and
+[separate result](native_attempt03/result.json) retain the single authorized run.
+Only declaration support/new host regressions and a reuse-only evidence driver
+changed. Fixed registration regressions **PASS 11/11**; historical checker fails
+three of those tests. Frozen math, CMake, oracle/native tests, adapter, inputs,
+coefficient 1e-7/field 2e-5 px bounds and all historical receipts remain unchanged.
+
+After full matching source/build/test/generated-adapter/binary verification,
+attempt03 reused attempt02's successful `5c8f6b4f` compiled subjects (oracle
+`135ee09e`); **no fresh compilation** is claimed. New support commit is
+`0bcb09b248c6bca1eb5db70bad37dbf429fa1cbd`. Fresh outputs are isolated under
+`/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt03-20261022-0bcb09b2`.
+
+**PASS:** 84 declarations with all required names and four drop-one controls; eight actual
+focused runnable commands and four runnable drop-one controls; native baseline
+oracle 7/7; sign/frame-origin seven ordinary rejections each; existing focused
+recenter/model controls 4/4. Baseline maximum coefficient error is 9.2716633e-14 px
+and maximum field-oracle error is 1.2974429e-14 px, under unchanged bounds.
+
+**FAIL / incomplete qualification:** axis-normalization mutant throws
+`exact-all9: rank/condition admission failed`, rather than ordinary oracle
+rejection. Focused CTest is 7/8, exit 8; driver PID 3039133 exits 1. Native rank and
+condition for the failed mutant were not printed. No retuning, repair or native
+retry followed. Direct oracle/mutant commands and CI drop-one check are **UNRUN**
+after this stop; full runnable collection, full suite, GPU/corpus/reconstruction,
+science and performance remain **UNRUN**. Enclosing production acceptance and
+publication are outside this seam; archived-global fields remain characterizations.
+
+One launcher wrapper SyntaxError occurred before any process started and is
+retained separately; correcting its receipt newline syntax started the sole
+native attempt. Actual driver launch 16:54:33.941967 UTC; lock release
+16:54:44.049653 UTC; reconciliation 16:55:50.115145 UTC confirms PID absent,
+no owned processes, both locks FREE and reused build/source unchanged. Execution
+used CPU 8/numeric threads 1, no GPU. New compact indexed evidence includes full
+untruncated native rows; old result.json/frozen.json/archives and old checkouts
+are preserved. No push, main merge, comment, Notion or production change.

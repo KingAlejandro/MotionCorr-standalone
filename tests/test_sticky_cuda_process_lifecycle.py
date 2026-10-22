@@ -241,5 +241,44 @@ class Lifecycle(unittest.TestCase):
                 self.exercise("success", completed_rc=rc)
 
 
+class FailureAttribution(unittest.TestCase):
+    evidence = Path(__file__).resolve().parents[1] / "docs/issue213/evidence"
+
+    def test_retained_native_failure_records(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for backend in ("cuda", "nvcomp"):
+                for arm, count in (("single", 1), ("multi", 3)):
+                    with self.subTest(backend=backend, arm=arm):
+                        console = (self.evidence / f"control-{backend}-final/{arm}.txt").read_text()
+                        driver.fault_verdict(1, console, Path(tmp), count)
+
+    def test_corrupt_final_records_rejected_despite_startup_names(self):
+        console = (self.evidence / "control-cuda-final/multi.txt").read_text()
+        prefix = "Motion correction failed for 3 movie(s): "
+        names = "Movies/control.tiff Movies/after1.tiff Movies/after2.tiff"
+        suffix = ". Successful per-movie outputs were retained; joint output was not generated."
+        record = prefix + names + suffix
+        self.assertEqual(console.count(record), 2)
+        corrupt = [
+            prefix + "Movies/control.tiff Movies/after1.tiff" + suffix,
+            prefix + "Movies/control.tiff Movies/after1.tiff Movies/after1.tiff" + suffix,
+            prefix + "Movies/control.tiff Movies/after1.tiff Movies/unknown.tiff" + suffix,
+            prefix + "Movies/after1.tiff Movies/after2.tiff" + suffix,
+            "Motion correction failed for 2 movie(s): " + names + suffix,
+            prefix + names,  # Missing the rest of the final record.
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            for replacement in corrupt:
+                with self.subTest(record=replacement):
+                    bad = console.replace(record, replacement)
+                    # The unmodified startup still contains every expected name.
+                    self.assertTrue(all(f"  * {name}" in bad for name in names.split()))
+                    with self.assertRaisesRegex(RuntimeError, "final.*failure record"):
+                        driver.fault_verdict(1, bad, Path(tmp), 3)
+            # A valid first copy must not hide a corrupt repeated error record.
+            with self.assertRaisesRegex(RuntimeError, "final.*failure record"):
+                driver.fault_verdict(1, console.replace(record, corrupt[1], 1), Path(tmp), 3)
+
+
 if __name__ == "__main__":
     unittest.main()

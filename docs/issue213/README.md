@@ -221,3 +221,29 @@ was used. Linux execution, full suites, performance and scientific validation
 are **UNRUN** for this follow-up; prior native results above retain their own
 source revision and scope. Ready for independent source review and current-head
 CI; this local CPU evidence alone is not a merge or native qualification verdict.
+
+## Exact failure attribution follow-up (2026-10-22)
+
+The nonblocking review note on PR #244 observed that startup already lists all
+input movies. The old verdict therefore accepted a final failure record that
+omitted or duplicated a movie. The driver now parses every final failure-record
+copy and requires the declared count and exact expected movie set, including no
+duplicates. Ordinary repeated error printing remains valid.
+
+Using source base `9a6fed5d106a2121d0be03e1985f4a7113bcb361`, the same device-free
+control now has seven methods: the ten lifecycle cases above, four retained
+CUDA/nvCOMP single/multi log replays, and seven corrupt-attribution cases. The
+replays test the updated verdict against recorded text; they are not new native
+execution. Corrupt records cover missing, duplicate and unexpected names,
+missing faulting movie, wrong count, truncated record, and a corrupt repeated
+copy beside a valid one. Startup names remain present in every corrupted log.
+
+Validation on the same macOS/Python environment with one numerical-library
+thread: `python3 tests/test_sticky_cuda_process_lifecycle.py -v` **7/7 PASS**;
+the focused `StickyCudaProcessLifecycle` CTest **1/1 PASS**; Python compilation
+and `git diff --check` **PASS**. Loading only `fault_verdict` from the source base
+into the new control demonstrates six false accepts in the old predicate. The
+wrong-count case already failed in the old predicate; the other six now fail
+too. The old-function transcript is retained locally at
+`build/issue213-lifecycle/old-attribution-control.log`. No new GPU execution,
+production change, tolerance change or scientific claim is made.

@@ -154,8 +154,20 @@ def fault_verdict(rc, console, out, count, allowed_files=()):
     require(re.search(r"CUDA device context is unusable for [^\n]*Movies/control\.tiff \(patch 1, 1\)", text)
             and "Refusing to retry alignment on a poisoned context" in text,
             "fatal refusal missing or attributed to the wrong movie/patch")
-    require(f"Motion correction failed for {count} movie(s):" in text,
-            "job did not attribute all failed/unprocessed movies")
+    # Startup lists every input, so names elsewhere in the log cannot establish
+    # final failure attribution. Error printing can repeat this record; validate
+    # every copy rather than accepting one correct copy beside a corrupt one.
+    records = re.findall(r"Motion correction failed for [^\r\n]*", text)
+    require(records, "job did not attribute all failed/unprocessed movies")
+    expected = {"Movies/control.tiff", *(f"Movies/after{i}.tiff" for i in range(1, count))}
+    for record in records:
+        match = re.fullmatch(
+            r"Motion correction failed for (\d+) movie\(s\): (.+)\. "
+            r"Successful per-movie outputs were retained; joint output was not generated\.", record)
+        require(match is not None, "malformed final movie failure record")
+        movies = match[2].split()
+        require(int(match[1]) == count and len(movies) == count and set(movies) == expected,
+                "final failure record has missing, duplicate or unexpected movies")
     require("[sticky] PRODUCT_KERNEL_AFTER_FAULT" not in console,
             "product dispatched a kernel on the poisoned context")
     # Logs alone are allowed: refuse every product, completion marker and partial
@@ -163,8 +175,6 @@ def fault_verdict(rc, console, out, count, allowed_files=()):
     unexpected = [str(p.relative_to(out)) for p in out.rglob("*")
                   if p.is_file() and p.suffix != ".log" and str(p.relative_to(out)) not in allowed_files]
     require(not unexpected, f"failed movies published products/partial products: {unexpected}")
-    for i in range(1, count):
-        require(f"Movies/after{i}.tiff" in text, "later movie absent from failure attribution")
 
 
 def run_controls(binary, work, uuid):

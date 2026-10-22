@@ -1,0 +1,57 @@
+{
+  "frozen_utc": "2026-10-22T17:06:28.384861+00:00",
+  "argv": [
+    "taskset",
+    "-c",
+    "8-9",
+    "/home/alex/.mc-venv/bin/python3",
+    "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt04-20261022-15516b64/run_attempt04.py",
+    "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt04-20261022-15516b64",
+    "ab7283a09dc6421033cff8be0e9bf7847cdb4e5d5c437ecc5e6b7d352759ccec",
+    "15516b6436ed7d97f395358155e94e9e89cc4a1f"
+  ],
+  "env_overrides": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "CUDA_VISIBLE_DEVICES": "",
+    "TMPDIR": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt04-20261022-15516b64/tmp"
+  },
+  "source": {
+    "utc": "2026-10-22T17:05:51.133166+00:00",
+    "compiled_source_commit": "15516b6436ed7d97f395358155e94e9e89cc4a1f",
+    "historical_compiled_source": "5c8f6b4f9242510545f852c15065bd93e762a2a1",
+    "historical_oracle_code": "135ee09e0925deb933bfd0f4ce7e24d6ddbd080a",
+    "new_test_sha256": "362c3a204dec3b2577ffd8d303029956b2100230d8d86f06a0f63bfbe9d1f6fd",
+    "local_archive": "/tmp/motioncorr-fit-native-attempt04-15516b64-source.tar",
+    "source_archive_sha256": "ab7283a09dc6421033cff8be0e9bf7847cdb4e5d5c437ecc5e6b7d352759ccec",
+    "source_archive_bytes": 136222720,
+    "remote_scratch": "/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt04-20261022-15516b64",
+    "driver_sha256": "3cbdb7bcf5e04d9fe31982349be85848d3d328dd7b8ae2dd0df61bcaea304fe1",
+    "frozen_semantics_sha256": "fc335cc08fb3f8fa012e7d8e3c3a42ef73c31ca51563e3b52823d87152dd00c5",
+    "frozen_bounds_sha256": "38c02d1e0ca661d9eb3f6a338f406d9f3db0c56315b1deb793dee8c36a2c9319",
+    "fresh_compile": true,
+    "reused_artifacts": false
+  },
+  "driver_commands": "Exact committed run_attempt04.py; fresh Release CPU targets runner_numerics/motioncorr; 8 focused CTests/direct baseline/all3 direct mutants/required+targeted drop-one/focused CI unittest",
+  "wrapper_sha256": "5e3ef790a0e24f86d2369f2661683a50768c3f7dab1f077d65609ee0a8b4ec09",
+  "no_retry": true,
+  "fresh_compile": true,
+  "reuse_artifacts": false,
+  "build_cpus": [
+    8,
+    9
+  ],
+  "build_parallel": 2,
+  "runtime_cpu": [
+    8
+  ],
+  "bounds": {
+    "coefficient_abs_px": 1e-07,
+    "field_vector_max_px": 2e-05,
+    "condition_admission": 6000
+  }
+}

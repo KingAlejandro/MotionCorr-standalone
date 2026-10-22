@@ -218,3 +218,44 @@ no owned processes, both locks FREE and reused build/source unchanged. Execution
 used CPU 8/numeric threads 1, no GPU. New compact indexed evidence includes full
 untruncated native rows; old result.json/frozen.json/archives and old checkouts
 are preserved. No push, main merge, comment, Notion or production change.
+
+
+## Native attempt04 — query-boundary mutant, focused host PASS
+
+[Attempt04 report](native_attempt04/README.md), [result](native_attempt04/result.json)
+and [native rows](native_attempt04/native-metrics.json) bind the separate attempt.
+The new compiled source is `15516b6436ed7d97f395358155e94e9e89cc4a1f`, with
+fresh test source SHA256 `362c3a204dec3b2577ffd8d303029956b2100230d8d86f06a0f63bfbe9d1f6fd`.
+The original 135ee09e baseline implementation and 5c8f6b4f compiled subjects retain
+their historical identities. No old result, archive, source or binary is relabelled.
+
+Only test wiring changes: fit always receives original 128×96 geometry; the new
+axis-normalization mutant swaps width/height only in coordinates passed to actual
+model.getShiftAt. Source inspection confirms the model consumes normalized x/y,
+and the production caller explicitly normalizes by nx/ny. The semantics, exact
+wiring blocks and whole-test inverse-hash control were committed before output.
+Production src, CMake, generated adapter/body, oracle values, masks, archived
+globals and coefficient 1e-7/field 2e-5/admission <6000 bounds are byte-unchanged.
+
+**PASS:** fresh Release CPU build; eight focused CTests; seven baseline cases both
+registered/direct; all three mutants each seven ordinary rejections both
+registered/direct (direct exit 1/empty stderr); four existing controls; all required
+registrations, targeted actual runnable collection, both four-drop-one checks,
+and the focused CI collection unittest. Axis native n/rank/condition/coefficient
+error exactly equal baseline in all seven cases, with field error about .764 px.
+Baseline maximum coefficient error 9.2716633e-14 px and field error 1.2974429e-14 px
+remain within unchanged gates. No admission exception counts as a mutant kill.
+
+Fresh scratch `/mnt/clathrin/alex-motioncorr-fit-boundary-native-attempt04-20261022-15516b64`;
+source archive `ab7283a09dc6421033cff8be0e9bf7847cdb4e5d5c437ecc5e6b7d352759ccec`.
+PID 3040697 exits 0; owned locks release 17:08:51.470624 UTC. Reconciliation
+17:09:11 UTC confirms PID absent, no owned processes, both locks FREE, current
+source/build unchanged, and historical attempt02/03 source/build/receipt hashes
+unchanged. Build used CPUs 8–9/parallel 2; runtime CPU 8/numeric threads 1; no GPU.
+
+Attempt03 remains **FAIL** for its old fit-dimension mutant admission exception,
+with 7 baseline PASS/4 existing PASS/sign+frame kills preserved. Attempt04's PASS
+qualifies only the new query-boundary mutant and focused constructed-input host
+oracle. Enclosing production acceptance/rejection/publication, full runnable
+collection (33 helpers unbuilt), full suite, GPU, corpus, reconstruction, science
+and performance remain **UNRUN**. Parent owns complete-package review/publication.

@@ -1,5 +1,36 @@
 # Combined-build synthetic testing (#267 cases, #269 census, new image check)
 
+## Evaluator integration, 2026-10-22
+
+The repaired #267 checker (`66952415`) is integrated through #269
+(`1b29b7f9`) by a normal merge. The historical results below and every file in
+`evidence/` retain their original source identities and statuses. No native
+campaign has been rerun or requalified at this integration head.
+
+`eval_v2.py` now finds the source root above its own path, so the documented
+command works from the committed location and helpers copied under a source
+root remain usable. Each checker runs with a fresh private report path. Only
+a report written by that invocation with exit 0 or 1 is consumed and saved as
+`RUNDIR/CASE.checker.json`. An input-error exit 2 does not consume or replace
+an older cached report: its row is `ABORT_NO_RESULT`, without image or sampling
+status, while the independent field-only distance remains available for a
+valid STAR. The wrapper's exit 0 means the batch was evaluated, not that its
+native runs, field gates or checker results passed.
+
+Finite estimates outside the fixed detector ROI now retain the checker field
+metrics, `sampling_status=OUTSIDE_FIXED_ROI`, exit 1 and JSON null for
+`image.estimated_motion_bilinear`. Other signal metrics remain present. The
+fixed ROI, truth, field fallback and numerical gates are unchanged. Malformed
+or nonfinite summed images remain input errors, not quality failures.
+
+`OPENBLAS_NUM_THREADS=1 python3 tools/test_combined_eval.py -v` exercises the
+actual wrapper and checker CLIs with small generated fixtures: source-path
+discovery, copied helpers, ordinary reports, finite invalid sampling, nulls,
+deterministic output, and cached success followed by malformed/nonfinite sums.
+These are host contract controls, not estimator or scientific qualification.
+
+## Historical combined-build results
+
 **Result.** On one build containing all three candidate CUDA fixes (#254, #260, #270) plus the DC-oracle
 hooks, both synthetic families behave as published, and the new image-level check sees the DC effect:
 

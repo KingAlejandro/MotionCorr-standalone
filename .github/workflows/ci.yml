@@ -102,6 +102,7 @@ jobs:
           python3 tools/test_motion_diagnostics.py -v
           python3 tools/test_realistic_motion.py -v
           python3 tools/test_realistic_image.py -v
+          python3 tools/test_combined_eval.py -v
           python3 tools/test_ci_fail_closed.py -v
 
       - name: Canonical fixture digests are NumPy-version independent

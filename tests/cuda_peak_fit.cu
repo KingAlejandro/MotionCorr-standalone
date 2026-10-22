@@ -9,6 +9,9 @@
 #include <limits>
 #include <stdexcept>
 #include <vector>
+#include "peak_fit_reference.h"
+
+namespace ref = peak_fit_reference;
 
 __global__ void findPeakAndInterpolateKernel(const float*, float*, float*,
     int, int, int, float, float, int);
@@ -22,9 +25,12 @@ struct Case {
     float m, xp, xn, yp, yn;
     int x = 0, y = 0, range = 0;
     float sx = 4, sy = 3;
+    const ref::Case* exact = nullptr;
 };
 
-static float reference(int pos, float m, float vp, float vn, float scale) {
+// Retained algebra/classification coverage, including non-finite inputs. The
+// finite grid fixtures below instead use the independent exact-rational oracle.
+static float characterization_reference(int pos, float m, float vp, float vn, float scale) {
     const double denom = double(vp) + double(vn) - 2.0 * double(m);
     const double vertex = std::abs(denom) > double(1e-15f)
         ? pos - 0.5 * (double(vp) - double(vn)) / denom : pos;
@@ -35,7 +41,7 @@ int main(int argc, char** argv) {
     const bool expect_mismatch = argc == 2 && !std::strcmp(argv[1], "--expect-mismatch");
     try {
         const float eps = 1e-15f;
-        const std::vector<Case> cases = {
+        std::vector<Case> cases = {
             {"captured-pedestal", 36366.4296875f, 36365.69140625f, 36366.359375f,
                 36366.359375f, 36365.69140625f, 0, 0, 1},
             {"flat", 36000, 36000, 36000, 36000, 36000},
@@ -58,6 +64,11 @@ int main(int argc, char** argv) {
             {"infinite-peak", std::numeric_limits<float>::infinity(), 1, 0, 1, 0},
             {"infinite-neighbour", 1, std::numeric_limits<float>::infinity(), 0, 0.5f, 0}
         };
+        for (const auto& c : ref::cases()) {
+            cases.push_back({c.name, c.sample(c.m), c.sample(c.xp), c.sample(c.xn),
+                c.sample(c.yp), c.sample(c.yn), c.x, c.y, c.range,
+                ref::rounded(c.sx), ref::rounded(c.sy), &c});
+        }
         constexpr int n = 16;
         std::vector<float> maps(cases.size() * n * n, -1e29f);
         for (size_t i = 0; i < cases.size(); ++i) {
@@ -76,6 +87,7 @@ int main(int argc, char** argv) {
         check(cudaMemcpy(dm, maps.data(), maps.size() * sizeof(float), cudaMemcpyHostToDevice));
         int mismatches = 0;
         bool pedestal_mismatch = false;
+        bool exact_pedestal_mismatch = false, rounded_zero_mismatch = false;
         for (size_t i = 0; i < cases.size(); ++i) {
             const auto& c = cases[i];
             findPeakAndInterpolateKernel<<<1, 256>>>(dm + i * n * n, dx, dy,
@@ -84,24 +96,32 @@ int main(int argc, char** argv) {
             float x, y;
             check(cudaMemcpy(&x, dx, sizeof(float), cudaMemcpyDeviceToHost));
             check(cudaMemcpy(&y, dy, sizeof(float), cudaMemcpyDeviceToHost));
-            const float rx = reference(c.x, c.m, c.xp, c.xn, c.sx);
-            const float ry = reference(c.y, c.m, c.yp, c.yn, c.sy);
+            const float rx = c.exact ? ref::expected(*c.exact, false)
+                : characterization_reference(c.x, c.m, c.xp, c.xn, c.sx);
+            const float ry = c.exact ? ref::expected(*c.exact, true)
+                : characterization_reference(c.y, c.m, c.yp, c.yn, c.sy);
             auto matches = [](float got, float ref) {
                 if (!std::isfinite(ref))
                     return std::isnan(ref) ? std::isnan(got) : got == ref;
                 return std::isfinite(got) && std::abs(double(got) - ref) <=
                     std::numeric_limits<float>::epsilon() * std::abs(double(ref));
             };
-            const bool ok = matches(x, rx) && matches(y, ry);
+            // These selected finite rationals have certified nearest-float
+            // expectations. One ULP is too loose to reject early-store/scale
+            // errors, so require equality here; retain the old gates above.
+            const bool ok = c.exact ? (x == rx && y == ry) : (matches(x, rx) && matches(y, ry));
             mismatches += !ok;
             if (i == 0) pedestal_mismatch = !ok;
+            if (!std::strcmp(c.name, "exact-pedestal")) exact_pedestal_mismatch = !ok;
+            if (!std::strcmp(c.name, "exact-rounded-zero")) rounded_zero_mismatch = !ok;
             std::cout << std::setprecision(17) << c.name << " got=" << x << ',' << y
                       << " reference=" << rx << ',' << ry << " match=" << ok << '\n';
         }
         check(cudaFree(dy)); check(cudaFree(dx)); check(cudaFree(dm));
         // Require the named pedestal witness, not an unrelated failure, to kill
         // the float-denominator mutant. CUDA errors always fail above.
-        return expect_mismatch ? (pedestal_mismatch ? 0 : 1) : (mismatches ? 1 : 0);
+        return expect_mismatch ? ((pedestal_mismatch && exact_pedestal_mismatch &&
+            rounded_zero_mismatch) ? 0 : 1) : (mismatches ? 1 : 0);
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
         return 1;

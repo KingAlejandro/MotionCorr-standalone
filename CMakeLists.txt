@@ -248,6 +248,14 @@ if(BUILD_TESTING)
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
     add_test(NAME PatchRetryState COMMAND patch_retry_state)
+    # #257: device-free exact-rational controls, shared with the actual CUDA
+    # kernel test. Host replays establish arithmetic only, not GPU execution.
+    add_executable(peak_fit_arithmetic tests/peak_fit_arithmetic.cpp)
+    add_test(NAME PeakFitArithmetic COMMAND peak_fit_arithmetic)
+    foreach(_mutation float-denominator early-store wrong-scale)
+        add_test(NAME PeakFitArithmeticMutant_${_mutation}
+            COMMAND peak_fit_arithmetic --expect-mismatch ${_mutation})
+    endforeach()
     add_executable(defect_parser tests/test_defect_parser.cpp)
     target_link_libraries(defect_parser PRIVATE motioncorr_core)
     # Pure C++ arithmetic regression (issue #97). Registered above the

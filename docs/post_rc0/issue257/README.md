@@ -2,8 +2,14 @@
 
 PR #260 fixes the fit on the stored float CCF samples, independently of #254.
 Base: main `3691374061f782bc84531fd1c79d017ddcb5a7c2`. Production implementation:
-`531e9db40c10799627e7a06efd9462f16e868a1f`; final test revision:
-`6c23ba1d10364507db39c51745af5a7a2dbf0c06`. Later commits add evidence only.
+`531e9db40c10799627e7a06efd9462f16e868a1f`; native test revision:
+`6c23ba1d10364507db39c51745af5a7a2dbf0c06`. Commits after that through
+`d888ab11` add evidence only.
+
+The native results below describe that retained revision. The
+[2026-10-22 review response](arithmetic-control/README.md) adds independent
+exact-rational expectations and host controls on top of `d888ab11`; its expanded
+CUDA test has **not** been compiled or run natively.
 
 The five selected samples and the parabola vertex are evaluated in double.
 The existing float threshold `1e-15f` is promoted for the strict `abs(denom) > EPS`

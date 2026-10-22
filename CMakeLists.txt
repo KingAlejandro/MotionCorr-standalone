@@ -266,6 +266,13 @@ if(BUILD_TESTING)
     # preserving missing-label and non-numeric-label errors for defined labels.
     add_test(NAME ReportPlotUndefinedAxis
         COMMAND $<TARGET_FILE:runner_numerics> plot2d_undefined_axis)
+    # Issue #264: guard helper on the real ThirdOrderPolynomialModel, and a
+    # source pin on its single runner call and strict threshold.
+    add_test(NAME LocalMotionGuardModel
+        COMMAND $<TARGET_FILE:runner_numerics> local_motion_guard_model)
+    add_test(NAME LocalMotionGuardCall
+        COMMAND $<TARGET_FILE:runner_numerics> local_motion_guard_call
+                ${CMAKE_CURRENT_SOURCE_DIR}/src/motioncorr_runner.cpp)
     add_executable(pdf_concat tests/test_pdf_concat.cpp)
     target_link_libraries(pdf_concat PRIVATE motioncorr_core)
     add_test(NAME PdfConcat COMMAND pdf_concat)

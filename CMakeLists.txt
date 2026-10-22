@@ -259,6 +259,10 @@ if(BUILD_TESTING)
         add_test(NAME PeakFitArithmeticMutant_${_mutation}
             COMMAND peak_fit_arithmetic --expect-mismatch ${_mutation})
     endforeach()
+    # Device-free controls for the exact predicate used by the CUDA border test.
+    add_executable(realspace_border_validation tests/test_realspace_border_validation.cpp)
+    add_test(NAME RealspaceBorderValidation COMMAND realspace_border_validation)
+    set_tests_properties(RealspaceBorderValidation PROPERTIES LABELS "host" TIMEOUT 30)
     add_executable(defect_parser tests/test_defect_parser.cpp)
     target_link_libraries(defect_parser PRIVATE motioncorr_core)
     # Pure C++ arithmetic regression (issue #97). Registered above the
@@ -864,6 +868,19 @@ if(BUILD_TESTING AND CUDA)
         mc_cuda_mutant(CudaVramAliasMutant tests/cuda_vram_alias.cpp cuda_movie_session dw_scratch_over_fourier
             "scratch.block = reinterpret_cast<char*>(d_Iframes);"
             "scratch.block = reinterpret_cast<char*>(d_Fframes);" "LINKER:--wrap=cudaMalloc")
+        # #259: the local warp's border branch must match the CPU's double decision.
+        add_executable(cuda_realspace_border_branch tests/cuda_realspace_border_branch.cpp)
+        target_link_libraries(cuda_realspace_border_branch PRIVATE motioncorr_core)
+        add_test(NAME CudaRealspaceBorderBranch COMMAND cuda_realspace_border_branch)
+        set_tests_properties(CudaRealspaceBorderBranch PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Mutants restore the float floor in one axis; the other axis and the
+        # control cases must still match.
+        mc_cuda_mutant(CudaRealspaceBorderBranchMutant tests/cuda_realspace_border_branch.cpp cuda_realspace_dw x_float
+            "int x0 = (int)floor((double)ix - (double)x_fitted);"
+            "int x0 = (int)floorf(x_target);")
+        mc_cuda_mutant(CudaRealspaceBorderBranchMutant tests/cuda_realspace_border_branch.cpp cuda_realspace_dw y_float
+            "int y0 = (int)floor((double)iy - (double)y_fitted);"
+            "int y0 = (int)floorf(y_target);")
         # Worker-lifetime device gain retention: the produced sum is the oracle,
         # so a wrongly reused or wrongly retired buffer changes pixels.
         add_executable(cuda_device_gain_pool tests/cuda_device_gain_pool.cpp)

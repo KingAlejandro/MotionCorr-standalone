@@ -5,6 +5,30 @@ Tested source: `e77a51a220cb0d91f4ac3c7fac211876d0c6833f` (14 normal merges on m
 qualification tooling only (production-source delta empty; proven by `git diff e77a51a2 <commit> -- . ':!docs/post_rc0/c1-20261022'`). Resources: 4GPUs, GPU3 `GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d`, CPUs 8-9, builds `-j2`, no timing claims.
 Independent source review: [review/REVIEW.md](review/REVIEW.md) (no material source finding; advisories answered in [review/ADVISORY_RESPONSE.md](review/ADVISORY_RESPONSE.md)). Receipts: [evidence/STAGES.md](evidence/STAGES.md) and [evidence/STAGES-iteration3.md](evidence/STAGES-iteration3.md), `evidence/summary/`, raw `evidence/c1-evidence-e77a51a2.tgz` and `evidence/c1-evidence-iteration3.tgz`.
 
+## Dated CPU supplement, 22 October 2026 23:40 UTC
+
+The table below retains the original iteration-3 checkpoint. Later CPU-only evidence
+is separate and supersedes its blanket `UNRUN` wording only for the completed rows
+listed here. Native tested source remains `e77a51a220cb0d91f4ac3c7fac211876d0c6833f`;
+all later commits are documents/tooling. No previous failed iteration is relabelled.
+
+| Row | Current measured CPU status | Exact evidence and limits |
+| --- | --- | --- |
+| T24 CPU G | **PASS**, bounded engineering comparison | Parent readback22:59:43Z: native0/comparator0,24 movies/24 MRC/25 STAR each side, all24 MRC header/ext/payload hashes agree, no differing products. [G packet](cpu1d/parent-G-20261022/README.md). |
+| T24 CPU L | **PASS**, bounded engineering comparison | Parent readback23:24:59Z: same complete inventory/hash/comparator checks for5×5 local. [L packet](cpu1d/parent-L-20261022/README.md). Both use unchanged output-root normalization for STAR, not raw-tree byte identity. |
+| K267 CPU | **1 PASS / 5 FAIL / 2 UNIDENTIFIABLE** | C1 field/status metrics equal same-host frozen-F in all8 rows. Four native/evaluation/check stages exited0. Image/science acceptance is not implied. Historical noisy/repeated ABORT reports remain separate from repaired current sampling reports. [Single launch](cpu1d/actual-launch-attempt1/README.md). |
+| K269 CPU census | **INCOMPLETE / live** at23:36:38Z | Exact chain wrapper3311648/start816540337 and chain3311661/start816540340, UID1004,CPU8–9; stage3322586/start816744577 in census. Ten prior stage exits0, no stop/done marker. This dated process observation is not a completion claim. |
+| K272 CPU image and remaining recovery/GPU rows | **UNRUN / pending** | No result is inferred from the active chain. Full qualification remains incomplete; INCONCLUSIVE decision status, if later emitted, is not aggregatePASS. |
+
+The separate `cpu1d` chain launched exactly once22:42:36Z. It keeps the numerical
+helpers, stage bodies and exit allow-sets fixed, with startup-only namespace repairs;
+failed cpu1c attempts remain retained. G/L CPU comparisons do not complete CUDA L
+attribution or classify the known-motion image/census results. Current-head CI at
+`9035a6e6` passed CPU build/smoke and CUDA compile-only, not native/science/performance.
+No C1 merge recommendation follows. GPU experiments are paused under the maintainer's
+choice to continue CPU and reviews. M2 review scope/M4 prototype direction/M8 parking
+choices are recorded separately in PR281; no production policy or gate was adopted.
+
 ## Rows
 
 | Row | Verdict | Evidence and limits |

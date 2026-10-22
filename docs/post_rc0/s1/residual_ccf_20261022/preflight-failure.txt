@@ -1,0 +1,5 @@
+Local make_overlay.py attempt 1 exited 1 before writing source/patch or launching MotionCorr:
+AssertionError: ('src/motioncorr_runner.cpp', '\t\t\t\tpatch_bounds(iy, ix, x_start, x_end, y_start, y_end);', 2)
+Cause: source has a bounds call for batched box preparation and another in the logging loop.
+Corrected the observation insertion anchor to the unique x_center declaration; attempt 2 exited 0.
+No native process was launched by either attempt. The first empty /tmp staging directory is retained.

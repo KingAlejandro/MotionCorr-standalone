@@ -1,0 +1,65 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "control": "correlation-sign-axis-zero",
+      "translation_xy": [
+        0,
+        0
+      ],
+      "expected_shift_xy": [
+        0,
+        0
+      ]
+    },
+    {
+      "control": "correlation-sign-axis-zero",
+      "translation_xy": [
+        3,
+        0
+      ],
+      "expected_shift_xy": [
+        -3,
+        0
+      ]
+    },
+    {
+      "control": "correlation-sign-axis-zero",
+      "translation_xy": [
+        0,
+        -2
+      ],
+      "expected_shift_xy": [
+        0,
+        2
+      ]
+    },
+    {
+      "control": "correlation-sign-axis-zero",
+      "translation_xy": [
+        3,
+        -2
+      ],
+      "expected_shift_xy": [
+        -3,
+        2
+      ]
+    },
+    {
+      "control": "quadratic-fractional-and-scale",
+      "expected_shift_xy": [
+        0.5,
+        -1.125
+      ]
+    },
+    {
+      "control": "direct-complex-DFT-Hermitian-normalization",
+      "max_abs": 1.0587086762825493e-12
+    },
+    {
+      "control": "flat-ties-retained",
+      "ties": 81
+    }
+  ],
+  "numpy": "2.4.2"
+}

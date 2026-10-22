@@ -1,0 +1,38 @@
+{
+  "case": "integer",
+  "backend": "cuda",
+  "call": 1,
+  "iteration": 1,
+  "frame": 1,
+  "rows": [
+    {
+      "boundary": "captured-C2R",
+      "values": {
+        "2,-6": "40004.701281060107284",
+        "2,-5": "40004.718656325218614",
+        "2,-4": "40004.71778421480704",
+        "3,-6": "40004.717784220728014",
+        "3,-5": "40004.71865631830871",
+        "3,-4": "40004.701281040483753"
+      },
+      "gap_x3_minus_x2_at_yminus5": "-6.90990376028821629e-09",
+      "winner_between_adjacent_x": 2,
+      "mantissa_bits": 63
+    },
+    {
+      "boundary": "long-double-reference-product",
+      "values": {
+        "2,-6": "40004.702098160449513",
+        "2,-5": "40004.719473433769377",
+        "2,-4": "40004.718601331085036",
+        "3,-6": "40004.718601330541404",
+        "3,-5": "40004.719473435834125",
+        "3,-4": "40004.702098165082884"
+      },
+      "gap_x3_minus_x2_at_yminus5": "2.0647483722768811276e-09",
+      "winner_between_adjacent_x": 3,
+      "mantissa_bits": 63
+    }
+  ],
+  "interpretation": "Direct Fourier sums corroborate a near-tie reversal at the captured-reference/product boundary; no native trajectory or physical forward-double reference."
+}

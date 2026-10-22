@@ -31,15 +31,22 @@ For scale, main's `docs/` is 6,642 files / 69,865,100 bytes.
 
 ## History and merge mode
 
-Tip size and history size differ. A merge commit or rebase of the selected C1
-layers imports all 947 blobs (60.4 MB logical) even if a later commit deletes the
-bulky files; only a squash merge, a fresh compact commit with the component
-histories kept off main, or a history rewrite avoids the 217 history-only blobs,
-and only the last two avoid the tip bulk too. A squash would still import the 730
-tip blobs (49.5 MB). Any of those would give C1 a different commit and tree
-identity from the qualified `e77a51a2`. Which commit carries the tests would need
-its own accounting. This brief does not evaluate, choose or recommend one; it is
-a maintainer/plan decision.
+Tip size and history size differ. An ordinary merge of the selected C1 history
+makes all 947 new blobs (60.4 MB logical) reachable, even if a later commit deletes
+the bulky files. A squash onto the stated main tree can retain an identical tip
+tree while avoiding the 217 history-only blobs; it still needs the 730 new blobs
+present in the candidate tip (49.5 MB). A fresh compact composition that excludes
+the bulky tip paths and keeps the component histories off main can avoid that
+bulk too. A history rewrite only saves the objects actually excluded by its
+resulting tree and ancestry; it is not automatically a storage reduction.
+
+The current plan requires normal merges. None of these alternatives is selected
+or authorized here. A squash or rewrite changes commit identity; a compact tree
+also changes tree identity. Any alternative needs explicit maintainer approval,
+source/fixture/dependency accounting and a decision about which validation can
+be bound to the new identity. Qualification of `e77a51a2` is still incomplete;
+this brief neither transfers its results to a new identity nor chooses a merge
+mode.
 
 Landing #273/#274 is not a docs-only merge. Relative to C1, an ordinary merge of
 `805d9de2` adds 4 commits and 41 blobs (3,025,652 bytes) and changes source and
@@ -66,9 +73,10 @@ because both heads contain earlier selected layers.
 
 Widening question: **do you want M2 widened to cover C1's own bulk** (the #269
 `km_truth` tree, 40.3 MB at the tip, and the other ten archives), or kept to
-#273/#274? Without widening, the 60.4 MB history import is accepted as part of
-C1. Widening makes the squash/rewrite/compact-commit alternatives above live
-choices, and each needs an explicit decision about C1's qualification identity.
+#273/#274? The narrow M2 wording does not itself approve the 60.4 MB history import.
+Widening would bring C1 retention into that decision; any change to the planned
+normal-merge composition needs a separate explicit decision about its identity
+and qualification.
 
 ## Constraints on any option
 

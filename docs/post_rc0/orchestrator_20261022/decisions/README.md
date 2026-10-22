@@ -2,13 +2,15 @@
 
 **DRAFT / UNAPPROVED.** This packet changes no source, threshold, quality-state
 interface, publication behavior, PR state, support class or default. Independent
-review is pending. It is preparation for M2, M4/M5, M6 and M8 in the updated
+review round 1 is retained in [review-round1](review-round1/REVIEW.md);
+its F1–F5 corrections are recorded in [the response](review-round1/RESPONSE.md).
+A fresh round-2 review of the integrated corrections is pending. It is preparation for M2, M4/M5, M6 and M8 in the updated
 [Notion plan](https://app.notion.com/p/644bae9e6ac648889b0fdcf0a3aa3fc9), not a
 request to adopt decisions before the missing evidence is supplied.
 
 | Item | Draft | What remains |
 | --- | --- | --- |
-| M2 evidence retention | [Current-tree inventory and choices](M2_EVIDENCE_RETENTION_DRAFT.md) | Maintainer retention decision; source/fixture/evidence retrieval checks for any later extraction. No deletion performed. |
+| M2 evidence retention | [Tip-tree/history inventories and choices](M2_EVIDENCE_RETENTION_DRAFT.md) | Maintainer retention decision; source/fixture/evidence retrieval checks for any later extraction. No deletion performed. |
 | M4 nonconvergence / M5 peak-edge policy | [Source-bound options and prospective controls](M4_M5_OPTIONS_DRAFT.md) | Independent review, only useful minimal prototypes, selected-contract native qualification and maintainer disposition. No four-policy implementation. |
 | M6 / S1.4 | [Protocol refresh](W5_S14_PROTOCOL_DRAFT.md) | Metadata-only collection eligibility/input/downstream manifest, independently justified harm/operating-characteristic design, reviewed concrete preregistration, C2 freeze/required truth gates and M6 approval. No new held-out outcomes inspected. |
 | M8 legacy PRs | [Preserve/park/close proposal](M8_LEGACY_DISPOSITION_DRAFT.md) | Maintainer choice. #64/#138/#46/#52 remain open; no branch deletion proposed. |
@@ -35,8 +37,11 @@ questions are held/file-only. None is silently folded into C1 or a scientific PA
 
 `MANIFEST.json` binds the drafts and raw REST snapshots copied at preparation.
 Snapshot existence/hash binding is not scientific provenance, source review or
-future freshness. The archived M2 script contains explicit original-host paths
-and a predecessor /tmp inventory dependency; it is an exact method record, not
-a portable execution driver. No script in this packet should launch computation.
+future freshness. `inventory_c1_docs.py` is a standard-library Git-metadata
+recipe with explicit `--repo/--candidate/--base/--pr` inputs. Its earlier version
+read an uncommitted sibling predecessor JSON; the current recipe has no such
+dependency. `M2_history_object_inventory_e77a51a2.json` records history/object
+accounting and validation; local packed sizes are not transfer predictions.
+No script in this packet launches numerical or native experiments.
 All numerical/native experiments proposed by these briefs are UNRUN. Their
 worked planning arithmetic and historical measurements are labelled separately.

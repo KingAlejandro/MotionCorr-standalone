@@ -12,6 +12,7 @@ request to adopt decisions before the missing evidence is supplied.
 | M4 nonconvergence / M5 peak-edge policy | [Source-bound options and prospective controls](M4_M5_OPTIONS_DRAFT.md) | Independent review, only useful minimal prototypes, selected-contract native qualification and maintainer disposition. No four-policy implementation. |
 | M6 / S1.4 | [Protocol refresh](W5_S14_PROTOCOL_DRAFT.md) | Metadata-only collection eligibility/input/downstream manifest, independently justified harm/operating-characteristic design, reviewed concrete preregistration, C2 freeze/required truth gates and M6 approval. No new held-out outcomes inspected. |
 | M8 legacy PRs | [Preserve/park/close proposal](M8_LEGACY_DISPOSITION_DRAFT.md) | Maintainer choice. #64/#138/#46/#52 remain open; no branch deletion proposed. |
+| W7 documentation queue | [Six evidence-PR disposition choices](W7_DOCS_DISPOSITION_DRAFT.md) | Independent review and retention/retrieval decisions before any closure or landing. #243/#250/#255/#256/#261/#271 remain open; dated body clarifications on #255/#256 preserve their original evidence. |
 
 A [provisional data-eligibility inventory](s14_eligibility/README.md) records 114
 movie files present with expected sizes but unverified content hashes, 26 missing

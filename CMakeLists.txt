@@ -157,6 +157,36 @@ if(TIMING)
     add_compile_definitions(TIMING)
 endif()
 
+# Issue #268 prototype, default OFF: compile the observation-only quality
+# report and its --experimental_quality_report flag. Not an approved schema or
+# policy; see docs/post_rc0/issue268_quality_prototype_20261023/DESIGN.md.
+option(MOTIONCORR_EXPERIMENTAL_QUALITY_REPORT "Build the experimental #268 quality-report prototype" OFF)
+if(MOTIONCORR_EXPERIMENTAL_QUALITY_REPORT)
+    find_package(Git QUIET)
+    set(_mc_quality_revision "unknown")
+    set(_mc_quality_dirty "unknown")
+    if(GIT_FOUND)
+        execute_process(COMMAND "${GIT_EXECUTABLE}" -C "${CMAKE_CURRENT_SOURCE_DIR}" rev-parse HEAD
+            OUTPUT_VARIABLE _mc_quality_revision_out RESULT_VARIABLE _mc_quality_rc
+            OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+        if(_mc_quality_rc EQUAL 0)
+            set(_mc_quality_revision "${_mc_quality_revision_out}")
+            execute_process(COMMAND "${GIT_EXECUTABLE}" -C "${CMAKE_CURRENT_SOURCE_DIR}" status --porcelain
+                --untracked-files=no OUTPUT_VARIABLE _mc_quality_status ERROR_QUIET)
+            if(_mc_quality_status STREQUAL "")
+                set(_mc_quality_dirty "false")
+            else()
+                set(_mc_quality_dirty "true")
+            endif()
+        endif()
+    endif()
+    # Configure-time identity only; evidence must still hash the exact source.
+    add_compile_definitions(MC_EXPERIMENTAL_QUALITY_REPORT
+        MC_QUALITY_SOURCE_REVISION="${_mc_quality_revision}"
+        MC_QUALITY_SOURCE_DIRTY="${_mc_quality_dirty}")
+    message(STATUS "Experimental #268 quality report: ON (revision ${_mc_quality_revision}, dirty ${_mc_quality_dirty})")
+endif()
+
 option(CUDA "Build with CUDA acceleration" OFF)
 if(CUDA)
     # Establish the project default before enable_language(CUDA), which has
@@ -463,6 +493,12 @@ if(BUILD_TESTING)
     # suite does not link, so no compiled test can observe it.
     add_test(NAME NvcompGuards
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_nvcomp_guards.py)
+    if(MOTIONCORR_EXPERIMENTAL_QUALITY_REPORT)
+        # Checker logic only; the native controls are a separate frozen campaign.
+        add_test(NAME QualityReportCheckerSelftest
+            COMMAND ${Python3_EXECUTABLE} -B
+                ${CMAKE_CURRENT_SOURCE_DIR}/docs/post_rc0/issue268_quality_prototype_20261023/quality_controls.py selftest)
+    endif()
     execute_process(
         COMMAND "${Python3_EXECUTABLE}" -c "import numpy"
         RESULT_VARIABLE _NUMPY_CHECK

@@ -6,6 +6,7 @@
 #include "src/error.h"
 #include "src/acc/cuda/cuda_scoped_resources.h"
 #include "src/stage_profile.h"
+#include "src/quality_report.h"
 
 #include <cuda_runtime.h>
 #include <cufft.h>
@@ -606,6 +607,10 @@ bool cudaAlignPatchDeviceWithWorkspace(
     float accumulated_cufft_ms = 0.0f;
     float accumulated_d2h_ms = 0.0f;
 
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+    int iterations_run = 0;
+    RFLOAT last_rmsd = std::numeric_limits<RFLOAT>::quiet_NaN();
+#endif
     for (int iter = 1; iter <= max_iter; iter++) {
         // 1. Reference computation
         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
@@ -685,12 +690,20 @@ bool cudaAlignPatchDeviceWithWorkspace(
         }
 
         logfile << " Iteration " << iter << ": RMSD = " << rmsd << " px" << std::endl;
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+        iterations_run = iter;
+        last_rmsd = rmsd;
+#endif
 
         if (rmsd < tolerance) {
             converged = true;
             break;
         }
     }
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+    // #268 prototype: the actual solver result, for whichever caller captured it.
+    mcquality::noteSolve(iterations_run, last_rmsd, converged, max_iter, tolerance);
+#endif
 
     ALIGN_CUDA(cudaEventRecord(ev_stop_total));
     ALIGN_CUDA(cudaEventSynchronize(ev_stop_total));

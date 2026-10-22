@@ -48,14 +48,16 @@ returned `bool` is kept separately as `solver_returned`.
 Schema `motioncorr-quality-prototype/0`. Fields (names are prototype names):
 
 - `global_alignment.state`: `converged` | `iteration_limit` | `not_run` |
-  `operator_error` (exception while the solver was active) | `not_assessed`
-  (movie failed before global alignment). Plus `route`, `iterations`,
+  `operator_error` (exception between the start of global alignment and the
+  solver's return) | `not_assessed` (movie failed before global alignment).
+  Plus `route` (`cpu`, `cuda_resident`, `cuda_streaming`), `iterations`,
   `max_iter`, `tolerance_px` (the unchanged 0.5), `final_incremental_rmsd_px`,
   `solver_returned`.
 - `local_alignment`: `state` (`attempted` | `not_requested` | `not_assessed`),
   `patches_planned`, `solver_attempts`, `same_input_retries`,
   `device_preparation_declined`, `converged_patches`, `dropped_patches`, and a
-  per-patch list of actual attempts (`route`, `kind` = `first` |
+  per-patch list of actual attempts (`route` = `cpu` | `cuda_batched` |
+  `cuda_resident_patch` | `cuda_host_staged`, `kind` = `first` |
   `same_input_retry`, iterations, final RMSD, converged).
 - `local_model.state`: `retained` | `global_only` | `not_requested` |
   `not_assessed`, with `reason` `too_few_converged_observations`

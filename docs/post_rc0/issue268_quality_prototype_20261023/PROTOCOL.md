@@ -36,7 +36,7 @@ except the MRC creation timestamp bytes, and voxel data identical; joint
 ignoring `*.quality*.json`, `quality_summary*.json`, PDF/EPS (dates) and logs
 (wall time). Exit status identical. All runs use the same relative paths.
 
-## Native processes (remote, at most 16; this manifest has 12)
+## Native processes (remote, at most 16; this manifest has 12, 14 after A1)
 
 | P | Binary | Input batch / patches | Extra | Purpose |
 | --- | --- | --- | --- | --- |
@@ -104,6 +104,33 @@ E7. P11 and P12 exit 0 with identical joint STAR and identical flat products
 (flat reprocessed in both). P11 aggregate: zero, integer `unknown_legacy`
 `sidecar_missing`; affine `unknown_legacy` `sidecar_stale`; fractional, noisy
 `resumed_sidecar`; flat `this_run`; `quality_evidence_complete=false`.
+
+## Amendment A1 (before any remote evidence run)
+
+A local Mac development run of P1–P12 (not evidence) showed that P6 retains
+the local model (5/9 patches converge in one iteration), so E3 does not reach
+the too-few-observations fallback. A local probe with the unmodified base binary
+showed `integer`, 3×3, `--max_iter 1` prints "too few valid local
+trajectories". Added rows, raising the manifest to 14 processes:
+
+| P | Binary | Input / patches | Extra | Purpose |
+| --- | --- | --- | --- | --- |
+| P13 | B0 | integer, 3×3 | `--max_iter 1` | reference |
+| P14 | B2 | integer, 3×3 | `--max_iter 1`, flag | too-few fallback reported |
+
+E8. P14 products and exit identical to P13; global `iteration_limit`,
+iterations=1 (forced); `local_model=global_only`, reason
+`too_few_converged_observations`, observations ≤ 18; the STAR has no local
+model block; patch counts match the log.
+
+## Amendment A2 (before any remote evidence run)
+
+A second local development run failed E5 only because the five sidecars'
+`products.micrograph.sha256` differed from P4's: the MRC header's first label
+holds the write time, which the product comparison already masks. The sidecar
+binds the exact file bytes, which is intended. E5 now compares P9 and P4
+sidecars excluding identity and the two product SHA-256 values, and separately
+requires every P9 sidecar to bind P9's own STAR, micrograph and movie bytes.
 
 ## Checker negative controls (no native process)
 

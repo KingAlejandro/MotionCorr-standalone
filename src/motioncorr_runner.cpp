@@ -26,6 +26,7 @@
 #include <stdexcept>
 #include <thread>
 #include <filesystem>
+#include <map>
 #include <set>
 #include <atomic>
 #include <sstream>
@@ -156,6 +157,11 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 		}
 	}
 	sync_output = parser.checkOption("--sync_output", "Write output products on the main thread instead of a background writer thread (same products, same order).");
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+	quality_report = parser.checkOption("--experimental_quality_report", "(EXPERIMENTAL, issue #268 prototype) Write a per-movie alignment quality sidecar and quality_summary.json. Observation only: products, publication and exit status are unchanged.");
+	if (quality_report)
+		for (int i = 0; i < argc; i++) quality_identity.argv.push_back(argv[i]);
+#endif
 	const std::string ingest_arg = parser.getOption("--ingest", "Movie ingest path: auto (default), nvcomp, compact or float. Anything but auto fails a movie that cannot use that path, instead of silently using another.", "auto");
 	fn_ingest_witness = parser.getOption("--ingest_witness", "Append one \"movie path\" line per movie to this file. Diagnostic; writes nothing when unset.", "");
 	if      (ingest_arg == "auto")    ingest_mode = INGEST_AUTO;
@@ -250,6 +256,11 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	if (ingest_mode == INGEST_NVCOMP)
 		REPORT_ERROR("--ingest nvcomp needs a build configured with USE_NVCOMP=ON; this one is not.");
 #endif
+#endif
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+	// Only the own-implementation movie loop is observed.
+	if (quality_report && (aggregate_only || !do_own))
+		REPORT_ERROR("--experimental_quality_report is implemented only for --use_own movie processing, not --aggregate_only or --use_motioncor2.");
 #endif
 	// Initialise verb for non-parallel execution
 	verb = 1;
@@ -991,6 +1002,9 @@ void MotioncorrRunner::run()
 	// Indexed by movie, so the report below stays in input order however the
 	// deferred write failures arrive.
 	std::vector<char> movie_failed(fn_micrographs.size(), 0);
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+	if (quality_report) beginQualityReport();
+#endif
 	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
 	{
 		output_movie_index = imic;
@@ -1011,6 +1025,17 @@ void MotioncorrRunner::run()
 		if (!do_own && !do_motioncor2)
 			REPORT_ERROR("Bug: by now it should be clear whether to use MotionCor2 or own implementation ...");
 		bool result = false;
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+		if (quality_report) {
+			quality_movies[imic].processed = true;
+			active_quality = &quality_movies[imic];
+			// No sidecar from an earlier run may survive a reprocessing attempt.
+			std::string error;
+			if (!mcquality::supersede(getOutputFileNames(fn_micrographs[imic]).withoutExtension() + ".quality.json",
+			                          quality_identity.run_id, error))
+				std::cerr << "WARNING: experimental quality report: " << error << std::endl;
+		}
+#endif
 		// Before header parsing, so a movie that fails to open is still recorded.
 		StageProfile::instance().beginMovie(imic, fn_micrographs[imic]);
 		try
@@ -1056,6 +1081,12 @@ void MotioncorrRunner::run()
 			result = false;
 		}
 		StageProfile::instance().endMovie(result);
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+		if (quality_report) {
+			quality_movies[imic].computation_ok = result;
+			active_quality = nullptr;
+		}
+#endif
 		if (!result)
 			movie_failed[imic] = 1;
 		collectWriteFailures(movie_failed);
@@ -1077,6 +1108,13 @@ void MotioncorrRunner::run()
 	collectWriteFailures(movie_failed);
 	output_writer.reset();
 	output_movie_index = -1;
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+	// Every product of this run has landed or failed; publication is now known.
+	if (quality_report) {
+		try { writeQualitySidecars(movie_failed); }
+		catch (...) { std::cerr << "WARNING: experimental quality sidecars incomplete: unexpected error while writing them." << std::endl; }
+	}
+#endif
 
 	std::vector<FileName> failed_movies;
 	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
@@ -1089,6 +1127,9 @@ void MotioncorrRunner::run()
 	{
 		// The job fails below; the profile still gets its process record.
 		StageProfile::instance().endRun((int)fn_micrographs.size());
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+		if (quality_report) writeQualitySummary("withheld_movie_failures");
+#endif
 		std::string message = "Motion correction failed for " + integerToString(failed_movies.size()) + " movie(s):";
 		for (const FileName &movie : failed_movies) message += " " + movie;
 		REPORT_ERROR(message + ". Successful per-movie outputs were retained; joint output was not generated.");
@@ -1103,8 +1144,14 @@ void MotioncorrRunner::run()
 			generateLogFilePDFAndWriteStarFiles();
 		} catch (...) {
 			StageProfile::instance().endRun((int)fn_micrographs.size());
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+			if (quality_report) writeQualitySummary("failed");
+#endif
 			throw;
 		}
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+		if (quality_report) writeQualitySummary("published");
+#endif
 		if (StageProfile::instance().enabled()) {
 			const StageProfile::Sample pdf_end = StageProfile::sampleThread();
 			StageProfile::instance().addThreadTask("main", "joint star and logfile pdf",
@@ -1569,6 +1616,97 @@ void MotioncorrRunner::collectWriteFailures(std::vector<char> &movie_failed)
 		}
 	}
 }
+
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+void MotioncorrRunner::beginQualityReport()
+{
+	quality_identity.run_id = mcquality::makeRunId();
+	quality_identity.source_revision = MC_QUALITY_SOURCE_REVISION;
+	quality_identity.source_dirty = MC_QUALITY_SOURCE_DIRTY;
+	quality_identity.binary_sha256 = mcquality::selfBinarySha256();
+	quality_identity.backend = use_gpu ? "cuda" : "cpu";
+	quality_identity.gpu_id = use_gpu ? gpu_id : -1;
+	quality_identity.options = {
+		{"max_iter", integerToString(max_iter)}, {"tolerance_px", "0.5"}, {"search_range_px", "50"},
+		{"patch_x", integerToString(patch_x)}, {"patch_y", integerToString(patch_y)},
+		{"group_frames", integerToString(group)}, {"bin_factor", floatToString(bin_factor)},
+		{"bfactor", floatToString(bfactor)}, {"ccf_downsample", floatToString(ccf_downsample)},
+		{"early_binning", early_binning ? "true" : "false"},
+		{"interpolate_shifts", interpolate_shifts ? "true" : "false"},
+		{"first_frame_sum", integerToString(first_frame_sum)}, {"last_frame_sum", integerToString(last_frame_sum)},
+		{"dose_weighting", do_dose_weighting ? "true" : "false"}, {"skip_defect", skip_defect ? "true" : "false"},
+		{"threads", integerToString(n_threads)}, {"only_do_unfinished", continue_old ? "true" : "false"}};
+	quality_movies.assign(fn_micrographs.size(), mcquality::MovieQuality());
+	quality_entries.clear();
+	// A previous aggregate must not outlive this run if its replacement fails.
+	std::string error;
+	if (!mcquality::supersede(fn_out + "quality_summary.json", quality_identity.run_id, error))
+		std::cerr << "WARNING: experimental quality report: " << error << std::endl;
+}
+
+void MotioncorrRunner::writeQualitySidecars(const std::vector<char> &movie_failed)
+{
+	std::map<std::string, size_t> processed;
+	for (size_t i = 0; i < fn_micrographs.size(); i++) processed[fn_micrographs[i]] = i;
+	quality_entries.clear();
+	auto this_run = [&](size_t i) {
+		mcquality::MovieQuality &q = quality_movies[i];
+		q.write_failed = q.computation_ok && movie_failed[i];
+		const FileName average = getOutputFileNames(fn_micrographs[i]);
+		const FileName root = average.withoutExtension();
+		mcquality::SummaryEntry entry;
+		entry.movie = fn_micrographs[i];
+		entry.source = "this_run";
+		entry.sidecar_path = root + ".quality.json";
+		entry.global_state = mcquality::globalState(q);
+		entry.local_model_state = q.model_state;
+		entry.publication_state = mcquality::publicationState(q);
+		std::string error;
+		if (mcquality::writeSidecar(entry.sidecar_path, quality_identity, fn_micrographs[i], q,
+		                            root + ".star", average, error)) {
+			entry.sidecar_sha256 = mcquality::sha256File(entry.sidecar_path);
+		} else {
+			entry.sidecar_write_failed = true;
+			entry.sidecar_write_error = error;
+			std::cerr << "WARNING: experimental quality sidecar not written for " << fn_micrographs[i]
+			          << ": " << error << std::endl;
+		}
+		return entry;
+	};
+	// Joint-membership order first, then any processed movie not in it.
+	std::set<size_t> listed;
+	for (const FileName &movie : fn_ori_micrographs) {
+		auto it = processed.find(movie);
+		if (it != processed.end() && quality_movies[it->second].processed) {
+			quality_entries.push_back(this_run(it->second));
+			listed.insert(it->second);
+			continue;
+		}
+		const FileName average = getOutputFileNames(movie);
+		const FileName root = average.withoutExtension();
+		mcquality::SummaryEntry entry;
+		mcquality::readResumedSidecar(root + ".quality.json", movie, root + ".star", average, entry);
+		quality_entries.push_back(entry);
+	}
+	for (size_t i = 0; i < fn_micrographs.size(); i++)
+		if (quality_movies[i].processed && !listed.count(i)) quality_entries.push_back(this_run(i));
+}
+
+void MotioncorrRunner::writeQualitySummary(const std::string &joint_state)
+{
+	const std::string path = fn_out + "quality_summary.json";
+	const std::string joint = fn_out + (is_tomo ? "corrected_tilt_series.star" : "corrected_micrographs.star");
+	std::string error;
+	try {
+		if (!mcquality::writeSummary(path, quality_identity, quality_entries, joint_state, joint, error))
+			std::cerr << "WARNING: experimental quality summary not written (" << path << "): " << error << std::endl;
+		else if (verb > 0)
+			std::cout << " Experimental quality summary: " << path << std::endl;
+	} catch (const std::exception &e) {
+		std::cerr << "WARNING: experimental quality summary not written (" << path << "): " << e.what() << std::endl;
+	}
+}
+#endif
 
 namespace {
 void requireAggregatePdf(const FileName &filename) {
@@ -3441,17 +3579,40 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	logfile << std::endl << "Global alignment:" << std::endl;
 	MC_STAGE("global alignment");
 	RCTIC(TIMING_GLOBAL_ALIGNMENT);
+	// The publication path below does not act on this result (#268).
+	bool global_converged = false;
+	{
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+	mcquality::SolveCapture global_capture(active_quality != nullptr);
+	if (active_quality) active_quality->global_started = true;
+#endif
 #ifdef _CUDA_ENABLED
 	if (movie_session) {
 		// The real-space movie is dead until the inverse FFT below rewrites it,
 		// so the alignment's scratch lives there (docs/vram_live_ranges.md).
 		size_t arena_bytes = 0;
 		void *arena = movie_session->borrowRealFramesForGlobalAlignment(arena_bytes);
-		alignPatchDevice(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true, arena, arena_bytes);
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+		if (active_quality) active_quality->global_route = "cuda_resident";
+#endif
+		global_converged = alignPatchDevice(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true, arena, arena_bytes);
 	} else
 #endif
 	{
-		alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+		if (active_quality) active_quality->global_route = use_gpu ? "cuda_streaming" : "cpu";
+#endif
+		global_converged = alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+	}
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+	if (active_quality) {
+		active_quality->global_finished = true;
+		active_quality->global_returned = global_converged;
+		active_quality->global_solve = global_capture.record;
+	}
+#else
+	(void)global_converged;
+#endif
 	}
 	RCTOC(TIMING_GLOBAL_ALIGNMENT);
 	MC_STAGE("allocate reconstruction");
@@ -3535,6 +3696,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 
 	if (do_local) {
 		const int patch_nx = nx / patch_x, patch_ny = ny / patch_y, n_patches = patch_x * patch_y;
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+		if (active_quality) {
+			active_quality->local_state = "attempted";
+			active_quality->patches_planned = n_patches;
+		}
+#endif
 		std::vector<RFLOAT> patch_xshifts, patch_yshifts, patch_frames, patch_xs, patch_ys;
 		std::vector<MultidimArray<fComplex> > Fpatches(n_groups);
 
@@ -3603,6 +3770,24 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				logfile << "Patch (" << iy + 1 << ", " << ix + 1 << "): " << ipatch << " / " << patch_x * patch_y;
 				logfile << ", X range = [" << x_start << ", " << x_end << "), Y range = [" << y_start << ", " << y_end << ")";
 				logfile << ", Center = (" << x_center << ", " << y_center << ")" << std::endl;
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+				mcquality::PatchRecord *qpatch = nullptr;
+				if (active_quality) {
+					active_quality->patches.emplace_back();
+					qpatch = &active_quality->patches.back();
+					qpatch->index = ipatch; qpatch->iy = iy + 1; qpatch->ix = ix + 1;
+				}
+				// One record per actual solver run on this patch.
+				auto note_attempt = [&](const char *route, const mcquality::SolveRecord &solve, bool returned) {
+					if (!qpatch) return;
+					mcquality::Attempt attempt;
+					attempt.route = route;
+					attempt.kind = qpatch->attempts.empty() ? "first" : "same_input_retry";
+					attempt.solve = solve;
+					attempt.solver_returned = returned;
+					qpatch->attempts.push_back(attempt);
+				};
+#endif
 				ipatch++;
 
 				std::vector<RFLOAT> local_xshifts(n_groups), local_yshifts(n_groups);
@@ -3628,6 +3813,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					converged = batch_outcome->log.converged;
 					local_xshifts = batch_outcome->xshifts;
 					local_yshifts = batch_outcome->yshifts;
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+					{
+						// The batched solver's own per-iteration record.
+						mcquality::SolveRecord solve;
+						const std::vector<RFLOAT> &rmsd = batch_outcome->log.rmsd;
+						solve.ran = !rmsd.empty();
+						solve.iterations = (int)rmsd.size();
+						if (solve.ran) solve.final_rmsd_px = rmsd.back();
+						solve.converged = batch_outcome->log.converged;
+						solve.max_iter = max_iter;
+						solve.tolerance_px = 0.5;
+						note_attempt("cuda_batched", solve, converged);
+					}
+#endif
 				} else if (movie_session) {
 					RCTIC(TIMING_PREP_PATCH);
 					// Only each group's CCF window is kept (cudaExtractPatchWindow).
@@ -3658,11 +3857,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					if (device_prep_ok) {
 						RCTIC(TIMING_PATCH_ALIGN);
 						movie_session->getPatchAlignmentWorkspace().setSpectrumWindowed(true);
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+						mcquality::SolveCapture capture(qpatch != nullptr);
+#endif
 						converged = cudaAlignPatchDeviceWithWorkspace(movie_session->getPatchAlignmentWorkspace(), d_patch_fcomplex_buffer, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, max_iter, ccf_downsample, gpu_id, logfile, false);
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+						note_attempt("cuda_resident_patch", capture.record, converged);
+#endif
 						RCTOC(TIMING_PATCH_ALIGN);
 					}
 				}
 				if (movie_session && !device_prep_ok) {
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+					if (qpatch) qpatch->device_preparation_declined = true;
+#endif
 					// Issue #69, corrected after review. The question here is whether a
 					// retry is safe, and it must NOT be answered from a later
 					// cudaGetLastError() read.
@@ -3905,9 +4113,18 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					RCTOC(TIMING_PREP_PATCH);
 
 					RCTIC(TIMING_PATCH_ALIGN);
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+					mcquality::SolveCapture capture(qpatch != nullptr);
+#endif
 					converged = alignPatch(Fpatches, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+					note_attempt(use_gpu ? "cuda_host_staged" : "cpu", capture.record, converged);
+#endif
 					RCTOC(TIMING_PATCH_ALIGN);
 				}
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+				if (qpatch) qpatch->converged = converged;
+#endif
 				if (!converged) continue;
 
 				std::vector<RFLOAT> interpolated_xshifts(n_frames), interpolated_yshifts(n_frames);
@@ -3951,7 +4168,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		const int n_obs = patch_frames.size();
 		const int n_params = 18;
 
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+		if (active_quality) active_quality->observations = n_obs;
+#endif
 		if (n_obs <= n_params) {
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+			if (active_quality) {
+				active_quality->model_state = "global_only";
+				active_quality->model_reason = "too_few_converged_observations";
+			}
+#endif
 			std::cerr << fn_mic << ": too few valid local trajectories to fit local motion model." << std::endl;
 			mic.model = NULL;
 			goto skip_fitting; // TODO: Refactor!
@@ -4032,7 +4258,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 //			std::cout << fn_mic << " " << z << " largest delta: " << largest_delta << std::endl;
 			if (largest_delta > MAXIMUM_TOLERANCE) break;
 		}
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+		if (active_quality) active_quality->largest_delta_px = largest_delta;
+#endif
 		if (largest_delta > MAXIMUM_TOLERANCE) {
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+			if (active_quality) {
+				active_quality->model_state = "global_only";
+				active_quality->model_reason = "distortion_guard_rejected";
+			}
+#endif
 			std::cerr << fn_mic << ": could not fit a reasonable local motion model (delta > " << largest_delta << "). Global trajectory alone is used." << std::endl;
 			delete model;
 			goto skip_fitting; // TODO: Refactor!
@@ -4070,6 +4305,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		}
 		rms_x = std::sqrt(rms_x / n_obs) * prescaling; rms_y = std::sqrt(rms_y / n_obs) * prescaling;
 		logfile << std::endl << "Polynomial fit RMSD: X = " << rms_x << " px Y = " << rms_y << " px" << std::endl;
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+		if (active_quality) {
+			active_quality->fit_rmsd_x_px = rms_x;
+			active_quality->fit_rmsd_y_px = rms_y;
+			const bool rejected = rms_x >= fit_rmsd_threshold || rms_y >= fit_rmsd_threshold;
+			active_quality->model_state = rejected ? "global_only" : "retained";
+			if (rejected) active_quality->model_reason = "fit_rmsd_above_threshold";
+		}
+#endif
 		if (rms_x >= fit_rmsd_threshold || rms_y >= fit_rmsd_threshold) {
 			logfile << "The polynomial motion model did not explain the observation very well." << std::endl;
 			logfile << "Local correction is disabled for this micrograph." << std::endl;
@@ -4085,6 +4329,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		RCTOC(TIMING_FIT_POLYNOMIAL);
 	} else { // !do_local
 		mic.model = NULL;
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+		if (active_quality) {
+			active_quality->local_state = "not_requested";
+			active_quality->model_state = "not_requested";
+			active_quality->model_reason = "patch_grid_below_3x3";
+		}
+#endif
 	}
 
 skip_fitting:
@@ -4838,6 +5089,10 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
 
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+	int iterations_run = 0;
+	RFLOAT last_rmsd = std::numeric_limits<RFLOAT>::quiet_NaN();
+#endif
 	for (int iter = 1; iter	<= max_iter; iter++) {
 		RCTIC(TIMING_MAKE_REF);
 		Fref.initZeros();
@@ -4949,12 +5204,19 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		// Test convergence
 		RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
 		logfile << " Iteration " << iter << ": RMSD = " << rmsd << " px" << std::endl;
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+		iterations_run = iter;
+		last_rmsd = rmsd;
+#endif
 
 		if (rmsd < tolerance) {
 			converged = true;
 			break;
 		}
 	}
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+	mcquality::noteSolve(iterations_run, last_rmsd, converged, max_iter, tolerance);
+#endif
 
 #ifdef DEBUG_OWN
 	for (int iframe = 0; iframe < n_frames; iframe++) {

@@ -332,7 +332,8 @@ exec "{sys.executable}" "$@"
         # Case E (#226 D1): a CUDA build also requires CUDA_REQUIRED_TESTS. Restated
         # here for the same reason INTEGRATED_SUITE is. Selected by --cuda, and
         # automatically from a --test-dir whose CMakeCache.txt has CUDA:BOOL=ON.
-        CUDA_SUITE = ["CudaStaleErrorAfterOom"]
+        CUDA_SUITE = ["CudaStaleErrorAfterOom", "CudaEarlyStreamingOom",
+                      "CudaStreamingPlanClassificationCleanup"]
         def collect(names):
             return json.dumps({"kind": "ctestInfo", "version": {"major": 1, "minor": 0},
                                "tests": [runnable(n) for n in names]})

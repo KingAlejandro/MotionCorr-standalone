@@ -440,7 +440,7 @@ Two further statements: a file that changes **between the tag scan and the strip
 - `--max_iter 5` non-convergence: 41 of 50 patches in EMPIAR-10641 and 30 of 50 in EMPIAR-10216 did not converge in the
   #186 pass; those movies spend most of their time in the retry (`docs/workload_corpus/gpu/README.md`). Data dependent.
 - Resume (§5). Multi-GPU is process-per-device only (§4).
-- **GPU memory: free-VRAM floors per geometry, the streaming fallback and a non-monotone gap: see "GPU memory (QM)" at the end of this section.** Binning is not a memory workaround on the strength of this page: early binning skips the resident session (`:2300`) and does the global FFT on the CPU, changes the output sampling, and the later CUDA stages' memory behaviour is unqualified.
+- **GPU memory: free-VRAM floors per geometry, the streaming fallback and post-RC0 admission updates: see "GPU memory (QM)" at the end of this section.** Binning is not a memory workaround on the strength of this page: early binning skips the resident session (`:2300`) and does the global FFT on the CPU, changes the output sampling, and the later CUDA stages' memory behaviour is unqualified.
 - **Host RAM with `--grouping_for_ps` on CUDA:** one extra Fourier movie on the host (§3).
 - **ProfilingKit compiler settling, post-RC0 #246:** the two fake import/subset CLI tests now pass `--settle-timeout 0`. Previously any live host compiler could trigger the default 300 s settle wait inside their 30 s subprocess deadline; this explains #245's two timeout errors (its occupancy records `cc1`/`cc1plus`). A live-`cc1` control fails before and passes after the fix (134/134 internal tests). Production defaults and test deadlines are unchanged; see `docs/post_rc0/issue246/README.md`. Historical timeout failures, including PR #209's reported load-sensitive event, are not relabelled as passes.
 - Resident retry (#197), 10641: host RSS 2.07 GiB with the resident retry versus 7.0 GiB before #197; one resident retry allocates 504 MiB of
@@ -461,7 +461,7 @@ Two further statements: a file that changes **between the tag scan and the strip
 
 Evidence: [PR #225](https://github.com/KingAlejandro/MotionCorr-standalone/pull/225) (`docs/rc0/qual_qm_vram/`, main `483e881d`): 162 runs on one A100 80 GB with a VRAM balloon, 0 crashes, 0 hangs, 0 wrong outputs;
 every completed constrained run was identical to its unconstrained run and every failure was clean (no products written). Audited by R-QM
-([audit](https://github.com/KingAlejandro/MotionCorr-standalone/pull/225#issuecomment-6234250216)). Of the three defects it found ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)), **D1 (stale CUDA error after a handled out-of-memory) is fixed by D11 ([PR #228](https://github.com/KingAlejandro/MotionCorr-standalone/pull/228), merged `e3871ca2`)**; the quoted table and text below predate that fix, and its D1 sentence is revised in place (marked). D2 (config-L admission gap) and D3 (late OOM failure) are **deferred until after RC0** (#226 stays open); none changes output. The wording below is R-QM's, not the worker's first draft.
+([audit](https://github.com/KingAlejandro/MotionCorr-standalone/pull/225#issuecomment-6234250216)). Of the three defects it found ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)), **D1 (stale CUDA error after a handled out-of-memory) is fixed by D11 ([PR #228](https://github.com/KingAlejandro/MotionCorr-standalone/pull/228), merged `e3871ca2`)**; the quoted table and text below predate that fix, and its D1 sentence is revised in place (marked). D2 (config-L admission gap) and D3 (late OOM failure) were **deferred until after RC0** (#226 stays open until both are resolved). The quotation below records the historical QM measurements; the separate post-RC0 candidate updates supersede only their stated defect rows.
 
 > **GPU memory.** The resident CUDA route keeps the movie on the device twice (real space and Fourier space, about 8 bytes × pixels × frames) plus 0.7–4.2 GiB of workspace. The table gives the minimum **free GPU memory at launch** (`nvidia-smi` free memory before `motioncorr` creates its ~0.4 GiB CUDA context, not nominal card size) for the full-speed route, measured with `--use_own --gpu 0 --j 8` on one A100 80 GB card using a VRAM balloon (one movie per family; leave 1–2 GiB of margin):
 >
@@ -478,6 +478,17 @@ Caveats that stay with the table: the floors are **free GiB at launch measured w
 measured (the 80 GB card's driver reserve was 766 MiB; a small card's may differ); one movie per family, bracketed at 1 GiB / 0.5 GiB steps (NVML sampling is a lower bound), and the e10361 floor was
 not bisected; host-RAM exhaustion (hosts below about 36 GiB for 11520×8184×50) is untested; multi-GPU, `e10028`, `e10164` and `e10641` were not run (PR #225 README limitations, R-QM section 4). The QM
 status in the qualification lists is **completed (pre-freeze, on `483e881d`), with these documented limits**.
+
+
+**Post-RC0 #226 D3 — source candidate `4cd85167`.** [Evidence and re-entry record](../rc0/issue226/d3/README.md).
+For the 11520×8184×50 movie, G/L × auto/float at 16 and 21 GiB free now refuse before host movie preprocessing,
+with a named out-of-GPU-memory message giving required and available bytes. The eight probes take 1.13–1.58 s
+and 743 MiB host RSS (before: 33.29–42.48 s and about 35.7 GiB RSS), with no movie MRC/STAR or joint STAR.
+All four 22 GiB controls still complete with identical products: the measured streaming floor stays **22 GiB**.
+The necessary-memory check includes the Fourier/CCF buffers and queries the actual cuFFT work size when the
+buffers alone fit. It is not a host-RAM fit guarantee or a guarantee against later allocation failures.
+These are single observations on one balloon-constrained A100; the historical table's real-card and option caveats remain.
+D2's local-admission gap is a separate fix; no other geometry's floor is requalified by these D3 probes.
 
 ## 9. CPU dose-weighting symmetry (#220): qualified-toolchain contract (MERGED)
 

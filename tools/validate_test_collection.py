@@ -172,6 +172,9 @@ CUDA_REQUIRED_TESTS = [
     # degrades or refuses the next movie. The only test that sets the runtime's real
     # last-error slot before a healthy movie.
     "CudaStaleErrorAfterOom",
+    "CudaEarlyStreamingOom",
+    # #226 D3: preserve planning errors through cuFFT cleanup.
+    "CudaStreamingPlanClassificationCleanup",
 ]
 
 

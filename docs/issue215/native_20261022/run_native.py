@@ -70,6 +70,23 @@ def unlock(handle):
     handle.close()
 
 
+def parse_health(path):
+    gpu = ET.parse(path).getroot().find("gpu")
+    assert gpu.findtext("uuid") == UUID
+    fields = ("sram_uncorrectable_parity", "sram_uncorrectable_secded", "dram_uncorrectable")
+    ecc = {name: gpu.findtext("ecc_errors/volatile/" + name) for name in fields}
+    assert all(value == "0" for value in ecc.values()), ("uncorrected ECC", ecc)
+    pending = gpu.findtext("retired_pages/pending_blacklist")
+    recovery = gpu.findtext("gpu_recovery_action")
+    remap = {name: gpu.findtext("remapped_rows/" + name)
+             for name in ("remapped_row_pending", "remapped_row_failure")}
+    assert pending in ("No", "N/A"), ("pending retirement", pending)
+    assert recovery == "None", ("recovery needed", recovery)
+    assert all(value == "No" for value in remap.values()), ("row remap", remap)
+    return dict(uuid=UUID, volatile_uncorrected_ecc=ecc, pending_retirement=pending,
+                recovery_action=recovery, remapped_rows=remap)
+
+
 def health(phase, require_idle=False):
     command(phase + "-gpus", ["nvidia-smi", "--query-gpu=index,uuid,name,memory.used,utilization.gpu", "--format=csv,noheader"])
     command(phase + "-apps", ["nvidia-smi", "--query-compute-apps=gpu_uuid,pid,process_name,used_gpu_memory", "--format=csv,noheader"])
@@ -80,17 +97,9 @@ def health(phase, require_idle=False):
     assert UUID not in (ROOT / (phase + "-apps.log")).read_text(), "assigned GPU has compute apps"
     if require_idle:
         assert int(row[3].split()[0]) <= 16 and int(row[4].split()[0]) == 0, row
-    gpu = ET.parse(ROOT / (phase + "-xml.log")).getroot().find("gpu")
-    assert gpu.findtext("uuid") == UUID
-    ecc = gpu.findtext("ecc_errors/volatile/uncorrected/total")
-    pending = gpu.findtext("retired_pages/pending_blacklist")
-    recovery = gpu.findtext("gpu_recovery_action")
-    assert ecc in ("0", "N/A"), ("uncorrected ECC", ecc)
-    assert pending in ("No", "N/A"), ("pending retirement", pending)
-    assert recovery in (None, "None", "N/A"), ("recovery needed", recovery)
-    save(phase + "-health.json", dict(status="PASS", utc=utc(), uuid=UUID,
-         index=2, volatile_uncorrected_ecc=ecc, pending_retirement=pending,
-         recovery_action=recovery, require_idle=require_idle))
+    parsed = parse_health(ROOT / (phase + "-xml.log"))
+    save(phase + "-health.json", dict(status="PASS", utc=utc(), index=2,
+                                     require_idle=require_idle, **parsed))
 
 
 def main():

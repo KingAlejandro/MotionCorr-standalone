@@ -37,7 +37,7 @@ export C1_GPU_LOCK={W / 'fake-gpu-lock'}
 ''')
         occ = '#!/bin/sh\ncase "$1" in\n  *-post) exit ${MOCK_POST_RC:-0};;\n  *) exit ${MOCK_PRE_RC:-0};;\nesac\n'
         (W / 'tools/c1_occupancy.sh').write_text(occ); (W / 'tools/c1_occupancy.sh').chmod(0o755)
-        for n in ('c1_ctest.sh', 'c1_item.sh', 'c1_v2.sh', 'c1_sticky.sh', 'c1_health.sh'):
+        for n in ('c1_ctest.sh', 'c1_item.sh', 'c1_v2.sh', 'c1_sticky.sh', 'c1_health.sh', 'c1_stage.sh', 'c1_health_check.py'):
             shutil.copy(SRC / n, W / 'tools' / n)
 
     def run_(self, script, *args, **env):
@@ -81,6 +81,44 @@ export C1_GPU_LOCK={W / 'fake-gpu-lock'}
         os.chmod(self.W / 'scratch/build-sticky-cuda/motioncorr_sticky_fault', 0o755)
         self.assertEqual(self.run_('c1_sticky.sh', 'cuda', C1_STICKY_CPUS='8-11', MOCK_POST_RC='37').returncode, 37)
         self.assertEqual(self.run_('c1_sticky.sh', 'cuda', C1_STICKY_CPUS='8-9').returncode, 2)   # fewer than 4 CPUs refused
+
+
+    def test_stage_name_is_reserved_exclusively(self):
+        out = self.W / 'marks'; script = f"echo x >> {out}; sleep 1"
+        procs = [subprocess.Popen(['bash', str(self.W / 'tools/c1_stage.sh'), 'same', 'sh', '-c', script],
+                                  env=dict(os.environ), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) for _ in range(4)]
+        rcs = sorted(p.wait(timeout=20) for p in procs)
+        self.assertEqual(rcs, [0, 4, 4, 4], rcs)                       # exactly one launcher ran
+        self.assertEqual(out.read_text().count('x'), 1)
+        # a finished, a partial (no .exit) and a stray-artifact name are all refused afterwards
+        self.assertEqual(self.run_('c1_stage.sh', 'same', 'true').returncode, 4)
+        L = self.W / 'scratch/logs'; (L / 'partial.started').write_text('t')
+        self.assertEqual(self.run_('c1_stage.sh', 'partial', 'true').returncode, 4)
+        self.assertEqual(self.run_('c1_stage.sh', 'fresh', 'sh', '-c', 'exit 7').returncode, 7)
+        self.assertEqual((L / 'fresh.exit').read_text().strip(), '7')
+
+    XML = """<nvidia_smi_log><gpu><uuid>{uuid}</uuid><product_name>NVIDIA A100 80GB PCIe</product_name>
+<fb_memory_usage><used>1 MiB</used></fb_memory_usage><utilization><gpu_util>0 %</gpu_util></utilization>
+<ecc_errors><volatile><sram_correctable>{v}</sram_correctable><dram_uncorrectable>0</dram_uncorrectable></volatile>
+<aggregate><sram_correctable>0</sram_correctable><dram_uncorrectable>0</dram_uncorrectable></aggregate></ecc_errors>
+<remapped_rows><remapped_row_corr>0</remapped_row_corr><remapped_row_unc>0</remapped_row_unc><remapped_row_pending>No</remapped_row_pending>
+<remapped_row_failure>No</remapped_row_failure></remapped_rows><retired_pages><pending_blacklist>No</pending_blacklist></retired_pages>
+<processes>{procs}</processes></gpu></nvidia_smi_log>"""
+
+    def health(self, **kw):
+        d = dict(uuid='GPU-test-harness-only', v='0', procs=''); d.update(kw)
+        (self.W / 'bin/nvidia-smi').write_text('#!/bin/sh\ncat <<EOF\n' + self.XML.format(**d) + '\nEOF\n'); (self.W / 'bin/nvidia-smi').chmod(0o755)
+        e = dict(os.environ, PATH=f"{self.W / 'bin'}{os.pathsep}{os.environ['PATH']}", C1_SCR=str(self.W / 'scratch'), C1_GPU_UUID='GPU-test-harness-only')
+        return subprocess.run([sys.executable, str(SRC / 'c1_health_check.py'), 'lbl'], env=e, capture_output=True, text=True, timeout=20)
+
+    def test_gpu_health_is_more_than_an_apps_snapshot(self):
+        self.assertEqual(self.health().returncode, 0)
+        self.assertEqual(self.health(v='3').returncode, 6)                                  # ECC count
+        self.assertEqual(self.health(uuid='GPU-other').returncode, 6)                       # identity
+        self.assertEqual(self.health(procs='<process_info><pid>42</pid></process_info>').returncode, 3)
+        (self.W / 'bin/nvidia-smi').write_text('#!/bin/sh\nexit 9\n')
+        e = dict(os.environ, PATH=f"{self.W / 'bin'}{os.pathsep}{os.environ['PATH']}", C1_SCR=str(self.W / 'scratch'), C1_GPU_UUID='x')
+        self.assertEqual(subprocess.run([sys.executable, str(SRC / 'c1_health_check.py'), 'lbl'], env=e, capture_output=True).returncode, 4)
 
 
 if __name__ == '__main__':

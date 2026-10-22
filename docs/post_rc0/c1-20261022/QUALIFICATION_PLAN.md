@@ -36,7 +36,7 @@ Decoders: `pbzip2` is not on the default PATH. The pinned private copy (`/mnt/cl
 
 ## Pre-launch tooling iteration
 
-Source `579bfad8` (scratch `…-c1-20261022-579bfad8c6f1`, setup only, no native results; retained, not reused) was superseded before any native launch
+Sources `579bfad8` and `0f98ab76` (scratches `…-579bfad8c6f1` and `…-0f98ab762e37`, setup only, no native results; retained, not reused) were superseded before any native launch
 after the parent's harness review of the qualification tools: (1) `c1_sticky.sh` held the GPU3 lease around a driver that takes that lease itself;
 (2) post-run health failures were discarded by `c1_ctest.sh`, `c1_item.sh`, `c1_sticky.sh` (exit 37 injected, wrapper exit 0 reproduced);
 (3) the sticky driver hardcodes `--j 4`/`OMP_NUM_THREADS=4` against a 2-CPU lane; (4) a single-worker dataset needs no second device;
@@ -46,6 +46,12 @@ parent's mocks and asserts the corrected behaviour); the sticky row runs only in
 oversubscribed and with an unedited driver; item 12 is derived by `make_c1_item12.py` (diff in `c1_item12.diff`) with `--j 2`, C1-derived retry
 expectations, and the #207/1db86902 comparisons kept as `legacy_*` keys that are never counted as pass or problem. The bench lock is probed and
 recorded, not waited on (#198 policy; `c1_lane.py`).
+Second review round (same pre-launch window): (6) `c1_stage.sh` now reserves the stage name atomically (`mkdir`) before writing or spawning anything and
+refuses any existing reservation or artifact, live or dead, with exit 4, so a stage name can never run twice; a retry needs explicit PID/exit
+reconciliation and a distinct stage name in a distinct frozen iteration. (7) `c1_occupancy.sh` no longer treats an apps-only snapshot as health:
+it runs `c1_health_check.py`, which applies the checks of the project's existing guard (`docs/rc0/issue226/d2/native_retry_20261022/support/health.py`
+`snapshot()`): lane UUID/model, volatile and aggregate ECC counts, remapped-row counters, retired pages, no compute process. Kernel Xid inspection needs
+privileged log access and stays **UNRUN**; a health PASS in the receipts means exactly those checks. `test_c1_wrappers.py` (8 host tests) covers both.
 
 ## Rows (verdicts are filled in `RESULTS.md` from retained receipts)
 

@@ -8,7 +8,11 @@ export C1_GPU_LOCK=/tmp/motioncorr-gpu3-correctness.lock
 export C1_BUILD_LOCK=/tmp/motioncorr-build.lock
 export C1_PY=/home/alex/.mc-venv/bin/python3
 export C1_NVCOMP=/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive
-export PATH=/usr/local/cuda-12.8/bin:/home/alex/.mc-venv/bin:$PATH
+# pbzip2 is absent from the default PATH on 4GPUs. The #249 evidence pins one private copy (read in place, job PATH only, no installation).
+export C1_PBZIP2_DIR=/mnt/clathrin/alex-motioncorr-214/tools/usr/bin
+export C1_PBZIP2_SHA256=35410d199baebff55262e43cac9e8cdf9d14b540143c8e70ee53c6cf8ca9f21e
+[ "$(sha256sum $C1_PBZIP2_DIR/pbzip2 | cut -c1-64)" = "$C1_PBZIP2_SHA256" ] || { echo "pbzip2 pin mismatch" >&2; return 1 2>/dev/null || exit 1; }
+export PATH=$C1_PBZIP2_DIR:/usr/local/cuda-12.8/bin:/home/alex/.mc-venv/bin:$PATH
 export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64:$C1_NVCOMP/lib
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
 unset PYTHONOPTIMIZE OMP_PROC_BIND OMP_PLACES

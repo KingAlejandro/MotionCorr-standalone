@@ -25,7 +25,7 @@ def run(cmd, **kw):
 def names(tree, cfg):
     b = tree / f'build-{cfg}'
     r = run(['taskset', '-c', os.environ['C1_CPUS'], 'cmake', '-S', str(tree / 'src'), '-B', str(b),
-             '-DCMAKE_BUILD_TYPE=Release', '-DBUILD_TESTING=ON', f"-DPython3_EXECUTABLE={os.environ['C1_PY']}", *CFG[cfg]])
+             '-DCMAKE_BUILD_TYPE=Release', '-DBUILD_TESTING=ON', f"-DPython3_EXECUTABLE={os.environ['C1_PY']}", '-DMC_REQUIRE_ALL_DECODERS=ON', *CFG[cfg]])
     if r.returncode:
         raise SystemExit(f'configure failed {tree} {cfg}: {r.stderr[-800:]}')
     t = run(['ctest', '--test-dir', str(b), '-N']).stdout

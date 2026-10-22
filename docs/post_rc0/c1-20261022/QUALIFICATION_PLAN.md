@@ -29,6 +29,11 @@ shared build lock `/tmp/motioncorr-build.lock` and GPU3 lock `/tmp/motioncorr-gp
 fresh occupancy before each stage, scratch `/mnt/clathrin/alex-motioncorr-c1-20261022-<source SHA12>` (<=160 GiB), inputs read in place. No timing claims.
 GPU0/1/2 and CPUs 10–15 belong to other workers and are not touched. Correctness does not wait for the bench lock (#198 policy); its state is recorded.
 
+Decoders: `pbzip2` is not on the default PATH. The pinned private copy (`/mnt/clathrin/alex-motioncorr-214/tools/usr/bin/pbzip2`, sha256
+`35410d19…f21e`, v1.1.13, all libraries resolve) is verified by `c1_env.sh` and placed on the job PATH only; every configure uses
+`-DMC_REQUIRE_ALL_DECODERS=ON`, so a missing decoder fails configuration instead of becoming an optional-decoder waiver. Build lock: W2 held it at
+19:07 UTC (PID 3062911, verified by the parent); C1 does not wait in a loop. Configure-only trees (E1) do not compile and do not take the lock.
+
 ## Rows (verdicts are filled in `RESULTS.md` from retained receipts)
 
 | ID | Row | Command / tool | PASS criterion |

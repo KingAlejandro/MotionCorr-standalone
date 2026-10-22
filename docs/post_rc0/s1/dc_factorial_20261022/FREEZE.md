@@ -180,3 +180,19 @@ qualified cpu64 slot under `motioncorr-cpu64-bench.lock`:
 - Report whole-movie wall and stage timers; paired per-movie median ratio vs
   none with a movie-clustered bootstrap 95% interval; the null arm bounds noise.
   A difference inside the null interval is reported as not detected, not as zero.
+
+## Revision 2026-10-22 (iteration 2)
+
+Iteration 1 (`59ff5811`, scratch `...-59ff5811`) Phase 0 is retained as a
+mutant-control FAIL: the unmutated stage oracle passed on the CPU and CUDA
+builds and 7/10 restoring mutants were killed, but `cpu_stage_swap` (CPU and
+CUDA builds) and `cuda_single_stage_swap` exited 2 (the oracle raised the
+wrong-stage counter as a setup error). Records: `raw/iter1-59ff5811/`.
+
+Iteration 2 source is `3eee0a4b4e367f9b57f950c440c89679a5ec9c93`. It changes
+only `tests/experiment_ccf_dc_stage.cpp`: a call counted against the other
+stage is now a G1 failure (exit 1). Production sources, CMake, mutant
+definitions, gates and thresholds are unchanged. Every build, Phase 0 and the
+campaign are rerun from this SHA in fresh scratch
+`/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b` (cap 120 GiB for
+both iterations together). The endpoints, matrix and order above apply unchanged.

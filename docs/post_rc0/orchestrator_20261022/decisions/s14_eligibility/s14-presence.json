@@ -1,0 +1,878 @@
+{
+  "kind": "fresh metadata-only filesystem stat; no raw-integrity or scientific claim",
+  "utc": "2026-10-22T20:06:54.219994+00:00",
+  "manifest_sha256": "8525c7df143795d4b6b7248a190b8634bee04a9a5ba51a47a67352179330fe89",
+  "command": [
+    "ssh",
+    "-J",
+    "ccp4-gateway",
+    "-oBatchMode=yes",
+    "-oConnectTimeout=10",
+    "-oConnectionAttempts=1",
+    "4GPUs",
+    "xargs -0 stat -L --printf='%n\\t%s\\t%F\\n' --"
+  ],
+  "exit": 123,
+  "requested": 232,
+  "observed": 206,
+  "missing": [
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10164-01/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10164-02/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10164-03/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10164-04/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10164-05/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10164-06/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10164-07/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10164-08/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10164-09/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10216-07/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10216-08/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10216-09/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f3-04/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f3-05/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f3-06/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f3-07/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f3-08/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f3-09/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f4-02/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f4-03/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f4-04/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f4-05/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f4-06/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f4-07/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f4-08/movies.star",
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f4-09/movies.star"
+  ],
+  "rows": {
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff": {
+      "bytes": 126550106,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00022_frameImage.tiff": {
+      "bytes": 129567782,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00023_frameImage.tiff": {
+      "bytes": 131245904,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00024_frameImage.tiff": {
+      "bytes": 131735614,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00025_frameImage.tiff": {
+      "bytes": 130134480,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00026_frameImage.tiff": {
+      "bytes": 132754590,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00027_frameImage.tiff": {
+      "bytes": 133754728,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00028_frameImage.tiff": {
+      "bytes": 133960502,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00029_frameImage.tiff": {
+      "bytes": 131961632,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00030_frameImage.tiff": {
+      "bytes": 131259748,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00031_frameImage.tiff": {
+      "bytes": 132157138,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00035_frameImage.tiff": {
+      "bytes": 134600552,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00036_frameImage.tiff": {
+      "bytes": 134642532,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00037_frameImage.tiff": {
+      "bytes": 134726088,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00039_frameImage.tiff": {
+      "bytes": 134190674,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00040_frameImage.tiff": {
+      "bytes": 134017162,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00042_frameImage.tiff": {
+      "bytes": 132281636,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00043_frameImage.tiff": {
+      "bytes": 131963598,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00044_frameImage.tiff": {
+      "bytes": 134677684,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00045_frameImage.tiff": {
+      "bytes": 134666858,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00046_frameImage.tiff": {
+      "bytes": 134394390,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00047_frameImage.tiff": {
+      "bytes": 134471280,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00048_frameImage.tiff": {
+      "bytes": 134412868,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00049_frameImage.tiff": {
+      "bytes": 134103752,
+      "kind": "regular file"
+    },
+    "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc": {
+      "bytes": 56956944,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10028/data/Micrographs/Micrographs_part1/031_movie.mrcs": {
+      "bytes": 1073742848,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10028/data/Micrographs/Micrographs_part1/091_movie.mrcs": {
+      "bytes": 1073742848,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10028/data/Micrographs/Micrographs_part1/151_movie.mrcs": {
+      "bytes": 1073742848,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10028/data/Micrographs/Micrographs_part1/211_movie.mrcs": {
+      "bytes": 1073742848,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10028/data/Micrographs/Micrographs_part1/271_movie.mrcs": {
+      "bytes": 1073742848,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10028/data/Micrographs/Micrographs_part1/331_movie.mrcs": {
+      "bytes": 1073742848,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10028/data/Micrographs/Micrographs_part1/391_movie.mrcs": {
+      "bytes": 1073742848,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10028/data/Micrographs/Micrographs_part1/451_movie.mrcs": {
+      "bytes": 1073742848,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-12_0007_Jan20_08.57.33.tif": {
+      "bytes": 710039128,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-18_0004_Jan20_09.12.45.tif": {
+      "bytes": 708051618,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-23_0002_Jan20_09.25.31.tif": {
+      "bytes": 711885346,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-28_0008_Jan20_09.40.09.tif": {
+      "bytes": 714323750,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-33_0005_Jan20_09.53.18.tif": {
+      "bytes": 706773142,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-39_0003_Jan20_10.09.01.tif": {
+      "bytes": 710708230,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-44_0000_Jan20_10.21.58.tif": {
+      "bytes": 661175670,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-49_0006_Jan20_10.36.54.tif": {
+      "bytes": 706074818,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/200509_gain.mrc": {
+      "bytes": 377119744,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif": {
+      "bytes": 732798334,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_20-39-45.801_eer_data_4096x4096.eer": {
+      "bytes": 1215708772,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_20-57-59.233_eer_data_4096x4096.eer": {
+      "bytes": 1213974236,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_21-16-10.817_eer_data_4096x4096.eer": {
+      "bytes": 1211384724,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_21-35-38.415_eer_data_4096x4096.eer": {
+      "bytes": 1213703188,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer": {
+      "bytes": 2931223304,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919967_Data_10919593_10919595_20200711_002422_Fractions.mrc.eer": {
+      "bytes": 2927735032,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10641/data/Movies/CountCDSRef_HM70-1_65-9_0000_Oct28_19.44.32.mrc": {
+      "bytes": 94280704,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10641/data/Movies/Dataset/HM70-1_10-A-002_0002_Oct28_23.00.41.tif": {
+      "bytes": 170391276,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10641/data/Movies/Dataset/HM70-1_10-A-004_0008_Oct28_23.06.04.tif": {
+      "bytes": 170864882,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-12963/data/EMPIAR-Deposition/GainReference/20230326_221855_EER_GainReference.gain": {
+      "bytes": 33874221,
+      "kind": "regular file"
+    },
+    "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674725_Data_4659374_4659376_20230406_014501_EER.eer": {
+      "bytes": 873093330,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10164/data/frames/TS_01_000_0.0.mrc": {
+      "bytes": 455648384,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc": {
+      "bytes": 1979712512,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10028/data/Micrographs/Micrographs_part1/001_movie.mrcs": {
+      "bytes": 1073742848,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10028/data/Micrographs/Micrographs_part1/302_movie.mrcs": {
+      "bytes": 1073742848,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10164/data/frames/TS_01_001_3.0.mrc": {
+      "bytes": 455648384,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10164/data/frames/TS_05_032_48.0.mrc": {
+      "bytes": 455648384,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10164/data/frames/TS_10_023_-36.0.mrc": {
+      "bytes": 455648384,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10164/data/frames/TS_15_014_-21.0.mrc": {
+      "bytes": 455648384,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10164/data/frames/TS_20_004_6.0.mrc": {
+      "bytes": 569560224,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10164/data/frames/TS_41_036_54.0.mrc": {
+      "bytes": 569560224,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10164/data/frames/TS_46_027_-42.0.mrc": {
+      "bytes": 569560224,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10164/data/frames/TS_51_018_-27.0.mrc": {
+      "bytes": 569560224,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10164/data/frames/TS_56_009_15.0.mrc": {
+      "bytes": 569560224,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10216/data/FoilHole_14961496_Data_14966722_14966723_20180615_1742_Fractions.mrc": {
+      "bytes": 1979712512,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10216/data/FoilHole_14961743_Data_14966722_14966723_20180616_0101_Fractions.mrc": {
+      "bytes": 1979712512,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10216/data/FoilHole_14962024_Data_14966722_14966723_20180616_0825_Fractions.mrc": {
+      "bytes": 1979712512,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10216/data/FoilHole_14963131_Data_14966722_14966723_20180616_1559_Fractions.mrc": {
+      "bytes": 1979712512,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10216/data/FoilHole_14963739_Data_14966722_14966723_20180616_2325_Fractions.mrc": {
+      "bytes": 1979712512,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10216/data/FoilHole_14965025_Data_14966722_14966723_20180617_0654_Fractions.mrc": {
+      "bytes": 1979712512,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10216/data/FoilHole_14966017_Data_14966722_14966723_20180617_1418_Fractions.mrc": {
+      "bytes": 1979712512,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10216/data/FoilHole_17063931_Data_14966722_14966723_20180617_1843_Fractions.mrc": {
+      "bytes": 1979712512,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10216/data/FoilHole_17067881_Data_14966722_14966723_20180617_2252_Fractions.mrc": {
+      "bytes": 1979712512,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_103-10_0000_Jan20_08.51.00.tif": {
+      "bytes": 708886436,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10361/data/PS_18_2_4/PS.18.2.4_CTEM_110-16_0004_Jan20_11.25.10.tif": {
+      "bytes": 724417086,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_109-10_0001.tif": {
+      "bytes": 731494030,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_142_0006.tif": {
+      "bytes": 732711430,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_222_0002.tif": {
+      "bytes": 736058892,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_285_0007.tif": {
+      "bytes": 735652738,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_353_0003.tif": {
+      "bytes": 738981598,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_425_0008.tif": {
+      "bytes": 740499164,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_513_0004.tif": {
+      "bytes": 743496766,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_602_0009.tif": {
+      "bytes": 746152394,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10441/data/frames/20May09_3A-3_690_0005.tif": {
+      "bytes": 735680184,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_20-32-04.700_eer_data_4096x4096.eer": {
+      "bytes": 1212244964,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_22-11-55.361_eer_data_4096x4096.eer": {
+      "bytes": 1212436916,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-21_23-43-39.840_eer_data_4096x4096.eer": {
+      "bytes": 1210285628,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-22_01-14-22.808_eer_data_4096x4096.eer": {
+      "bytes": 1212250884,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-22_02-45-31.984_eer_data_4096x4096.eer": {
+      "bytes": 1212729228,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon3_75K_magnification/2019-06-22_04-15-13.637_eer_data_4096x4096.eer": {
+      "bytes": 1214251604,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919930_Data_10919593_10919595_20200710_235618_Fractions.mrc.eer": {
+      "bytes": 2942869976,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919994_Data_10919593_10919595_20200711_004341_Fractions.mrc.eer": {
+      "bytes": 2925956104,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10920059_Data_10919593_10919595_20200711_012901_Fractions.mrc.eer": {
+      "bytes": 2928209496,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10920385_Data_10919593_10919595_20200711_020502_Fractions.mrc.eer": {
+      "bytes": 2928329304,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10920432_Data_10919593_10919595_20200711_024042_Fractions.mrc.eer": {
+      "bytes": 2931283720,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10920481_Data_10919593_10919595_20200711_031635_Fractions.mrc.eer": {
+      "bytes": 2934513816,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10920882_Data_10919593_10919595_20200711_040818_Fractions.mrc.eer": {
+      "bytes": 2941422840,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10920926_Data_10919593_10919595_20200711_045151_Fractions.mrc.eer": {
+      "bytes": 2937386520,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10641/data/Movies/Dataset/HM70-1_10-A-001_0000_Oct28_22.58.05.tif": {
+      "bytes": 162897444,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10641/data/Movies/Dataset/HM70-1_11-A-009_0007_Oct29_00.08.34.tif": {
+      "bytes": 166157082,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10641/data/Movies/Dataset/HM70-1_12-A-008_0003_Oct29_01.27.36.tif": {
+      "bytes": 159962382,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10641/data/Movies/Dataset/HM70-1_20-A-005_0000_Oct29_07.53.26.tif": {
+      "bytes": 171238988,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10641/data/Movies/Dataset/HM70-1_21-A-012_0005_Oct29_09.07.43.tif": {
+      "bytes": 164266404,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10641/data/Movies/Dataset/HM70-1_23-A-009_0001_Oct29_10.24.33.tif": {
+      "bytes": 171297466,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10641/data/Movies/Dataset/HM70-1_65-33_0007_Oct28_20.37.07.tif": {
+      "bytes": 170755866,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-10641/data/Movies/Dataset/HM70-1_8-A-029_0003_Oct28_21.45.24.tif": {
+      "bytes": 157734758,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674709_Data_4659374_4659376_20230406_014355_EER.eer": {
+      "bytes": 884747442,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674724_Data_4659374_4659376_20230406_014450_EER.eer": {
+      "bytes": 875096562,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674747_Data_4659374_4659376_20230406_014534_EER.eer": {
+      "bytes": 885663890,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674770_Data_4659374_4659376_20230406_015428_EER.eer": {
+      "bytes": 878150306,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674781_Data_4659374_4659376_20230406_020253_EER.eer": {
+      "bytes": 876211362,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674814_Data_4659374_4659376_20230406_014703_EER.eer": {
+      "bytes": 878379186,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674858_Data_4659374_4659376_20230406_020623_EER.eer": {
+      "bytes": 864667970,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674873_Data_4659374_4659376_20230406_015948_EER.eer": {
+      "bytes": 859777794,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/data/EMPIAR-12963/data/EMPIAR-Deposition/RawMicrographs/Images-Disc1/GridSquare_4650264/Data/FoilHole_4674926_Data_4659374_4659376_20230406_015904_EER.eer": {
+      "bytes": 883183170,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10028-00/movies.star": {
+      "bytes": 302,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10028-01/movies.star": {
+      "bytes": 302,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10028-02/movies.star": {
+      "bytes": 302,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10028-03/movies.star": {
+      "bytes": 302,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10028-04/movies.star": {
+      "bytes": 302,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10028-05/movies.star": {
+      "bytes": 302,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10028-06/movies.star": {
+      "bytes": 302,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10028-07/movies.star": {
+      "bytes": 302,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10028-08/movies.star": {
+      "bytes": 302,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10028-09/movies.star": {
+      "bytes": 302,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10164-00/movies.star": {
+      "bytes": 307,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10216-00/movies.star": {
+      "bytes": 358,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10216-01/movies.star": {
+      "bytes": 358,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10216-02/movies.star": {
+      "bytes": 358,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10216-03/movies.star": {
+      "bytes": 358,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10216-04/movies.star": {
+      "bytes": 358,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10216-05/movies.star": {
+      "bytes": 358,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10216-06/movies.star": {
+      "bytes": 358,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10361-00/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10361-01/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10361-02/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10361-03/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10361-04/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10361-05/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10361-06/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10361-07/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10361-08/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10361-09/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10441-00/movies.star": {
+      "bytes": 318,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10441-01/movies.star": {
+      "bytes": 318,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10441-02/movies.star": {
+      "bytes": 315,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10441-03/movies.star": {
+      "bytes": 315,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10441-04/movies.star": {
+      "bytes": 315,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10441-05/movies.star": {
+      "bytes": 315,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10441-06/movies.star": {
+      "bytes": 315,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10441-07/movies.star": {
+      "bytes": 315,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10441-08/movies.star": {
+      "bytes": 315,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10441-09/movies.star": {
+      "bytes": 315,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f3-00/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f3-01/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f3-02/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f3-03/movies.star": {
+      "bytes": 334,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f4-00/movies.star": {
+      "bytes": 362,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10474f4-01/movies.star": {
+      "bytes": 362,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10641-00/movies.star": {
+      "bytes": 326,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10641-01/movies.star": {
+      "bytes": 326,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10641-02/movies.star": {
+      "bytes": 326,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10641-03/movies.star": {
+      "bytes": 326,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10641-04/movies.star": {
+      "bytes": 326,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10641-05/movies.star": {
+      "bytes": 326,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10641-06/movies.star": {
+      "bytes": 326,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10641-07/movies.star": {
+      "bytes": 326,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10641-08/movies.star": {
+      "bytes": 323,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e10641-09/movies.star": {
+      "bytes": 325,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e12963-00/movies.star": {
+      "bytes": 349,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e12963-01/movies.star": {
+      "bytes": 349,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e12963-02/movies.star": {
+      "bytes": 349,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e12963-03/movies.star": {
+      "bytes": 349,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e12963-04/movies.star": {
+      "bytes": 349,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e12963-05/movies.star": {
+      "bytes": 349,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e12963-06/movies.star": {
+      "bytes": 349,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e12963-07/movies.star": {
+      "bytes": 349,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e12963-08/movies.star": {
+      "bytes": 349,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/e12963-09/movies.star": {
+      "bytes": 349,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-00/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-01/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-02/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-03/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-04/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-05/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-06/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-07/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-08/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-09/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-10/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-11/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-12/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-13/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-14/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-15/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-16/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-17/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-18/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-19/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-20/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-21/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-22/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    },
+    "/mnt/clathrin/alex-motioncorr-s1/sweep/inputs/tutorial-23/movies.star": {
+      "bytes": 319,
+      "kind": "regular file"
+    }
+  },
+  "stdout_sha256": "e94e5c2f9ce9b67ad70e14417b46818b86ce1aa8b6603586f23b9837198041a9",
+  "stderr_sha256": "366a6f57a8020211e74ae84493ed55ab47dd975d9c8d280566016b326cadb5b4",
+  "raw_payload_rehashed": false,
+  "new_download": false,
+  "image_decode": false,
+  "scientific_endpoint_access": false
+}

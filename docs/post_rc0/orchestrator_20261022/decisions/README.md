@@ -13,6 +13,11 @@ request to adopt decisions before the missing evidence is supplied.
 | M6 / S1.4 | [Protocol refresh](W5_S14_PROTOCOL_DRAFT.md) | Metadata-only collection eligibility/input/downstream manifest, independently justified harm/operating-characteristic design, reviewed concrete preregistration, C2 freeze/required truth gates and M6 approval. No new held-out outcomes inspected. |
 | M8 legacy PRs | [Preserve/park/close proposal](M8_LEGACY_DISPOSITION_DRAFT.md) | Maintainer choice. #64/#138/#46/#52 remain open; no branch deletion proposed. |
 
+A [provisional data-eligibility inventory](s14_eligibility/README.md) records 114
+movie files present with expected sizes but unverified content hashes, 26 missing
+conventional STAR paths, and unresolved dose/downstream/provenance fields. It
+admits no scientific cohort and starts no computation.
+
 The [six source reviews and original ledger](../W1_REVIEW_AND_LEDGER.md) remain
 pinned to their stated heads; that earlier snapshot is not silently refreshed
 by this draft. C1 qualification is still active at e77a51a2 and is **not complete**.

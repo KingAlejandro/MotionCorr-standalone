@@ -181,6 +181,9 @@ CUDA_REQUIRED_TESTS = [
     # last-error slot before a healthy movie.
     "CudaStaleErrorAfterOom",
     "CudaLocalAdmission",
+    "CudaEarlyStreamingOom",
+    # #226 D3: preserve planning errors through cuFFT cleanup.
+    "CudaStreamingPlanClassificationCleanup",
 ]
 
 

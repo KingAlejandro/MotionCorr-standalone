@@ -1,0 +1,110 @@
+{
+  "base_sha": "c8844894c7c6366abf297699b5312e4b775eb5b0",
+  "implementation_sha": "4cd851677bfda80e60ef189cb1ff668cef721043",
+  "release_builds": true,
+  "native_gpu_uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+  "native_cpus": "104-111",
+  "ctest_gpu_uuid": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+  "ctest_cpus": "80-87",
+  "cpu64_cpus": "0-7",
+  "receipts": {
+    "configure-d3-nvcomp": 0,
+    "build-d3-nvcomp": 0,
+    "configure-d3-cuda": 0,
+    "build-d3-cuda": 0,
+    "ctest-d3-final-cuda": 0,
+    "ctest-d3-final-nvcomp": 0,
+    "collection-d3-cuda": 0,
+    "collection-d3-nvcomp": 0,
+    "d3-unit-gpu1": 0
+  },
+  "ctest_counts": {
+    "cpu": 74,
+    "cuda": 109,
+    "nvcomp": 112
+  },
+  "binaries": "21b4d7242953a875580490a79c2a6c821f4aaa2746317c7c06b4bbd3fcbf708a  /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr\n5d3042004438e5c07cf5a01d1e1b7da538b637fa62c2f49be1a84841d164d1a7  /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr\n0f28e8e59af0305039c92d1fc3a66d6064752c3005a127900eb03c67d8cc5926  /mnt/clathrin/alex-motioncorr-226/build-d3-cuda/motioncorr\n",
+  "input_hash_check": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif: OK\n/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/200509_gain.mrc: OK\n/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10474/data/EER_raw_movies_Falcon4_47K_magnification/FoilHole_10919949_Data_10919593_10919595_20200711_001116_Fractions.mrc.eer: OK\n/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc: OK\n",
+  "cross_unconstrained": [
+    {
+      "case": "e10441-G-auto",
+      "command": [
+        "/home/alex/.mc-venv/bin/python3",
+        "-I",
+        "/mnt/clathrin/alex-motioncorr-226/base/docs/issue85_laneC/compare_output_trees.py",
+        "/mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-auto@none/out",
+        "/mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-auto@none/out",
+        "--manifest",
+        "/mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-auto@22/manifest.json",
+        "--input-star",
+        "/mnt/clathrin/alex-motioncorr-226/inputs/e10441/movies.star",
+        "--products-only",
+        "--json-out",
+        "/mnt/clathrin/alex-motioncorr-226/logs/cross-d3-e10441-G-auto.json"
+      ],
+      "exit": 0,
+      "stdout": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+      "stderr": ""
+    },
+    {
+      "case": "e10441-G-float",
+      "command": [
+        "/home/alex/.mc-venv/bin/python3",
+        "-I",
+        "/mnt/clathrin/alex-motioncorr-226/base/docs/issue85_laneC/compare_output_trees.py",
+        "/mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-float@none/out",
+        "/mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-float@none/out",
+        "--manifest",
+        "/mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-float@22/manifest.json",
+        "--input-star",
+        "/mnt/clathrin/alex-motioncorr-226/inputs/e10441/movies.star",
+        "--products-only",
+        "--json-out",
+        "/mnt/clathrin/alex-motioncorr-226/logs/cross-d3-e10441-G-float.json"
+      ],
+      "exit": 0,
+      "stdout": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+      "stderr": ""
+    },
+    {
+      "case": "e10441-L-auto",
+      "command": [
+        "/home/alex/.mc-venv/bin/python3",
+        "-I",
+        "/mnt/clathrin/alex-motioncorr-226/base/docs/issue85_laneC/compare_output_trees.py",
+        "/mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-auto@none/out",
+        "/mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-auto@none/out",
+        "--manifest",
+        "/mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-auto@22/manifest.json",
+        "--input-star",
+        "/mnt/clathrin/alex-motioncorr-226/inputs/e10441/movies.star",
+        "--products-only",
+        "--json-out",
+        "/mnt/clathrin/alex-motioncorr-226/logs/cross-d3-e10441-L-auto.json"
+      ],
+      "exit": 0,
+      "stdout": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+      "stderr": ""
+    },
+    {
+      "case": "e10441-L-float",
+      "command": [
+        "/home/alex/.mc-venv/bin/python3",
+        "-I",
+        "/mnt/clathrin/alex-motioncorr-226/base/docs/issue85_laneC/compare_output_trees.py",
+        "/mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-float@none/out",
+        "/mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-float@none/out",
+        "--manifest",
+        "/mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-float@22/manifest.json",
+        "--input-star",
+        "/mnt/clathrin/alex-motioncorr-226/inputs/e10441/movies.star",
+        "--products-only",
+        "--json-out",
+        "/mnt/clathrin/alex-motioncorr-226/logs/cross-d3-e10441-L-float.json"
+      ],
+      "exit": 0,
+      "stdout": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+      "stderr": ""
+    }
+  ]
+}

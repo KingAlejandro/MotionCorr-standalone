@@ -61,7 +61,7 @@ git diff --check
 - **PASS:** diff whitespace check; byte comparison confirms all seven cases,
   x/y mutant registrations, production `.cu`, LICENSE, COPYING and source
   manifest unchanged relative to the base.
-- **BLOCKED:** full CMake configuration/CTest registration execution. Command:
+- **Initial CMake attempt failed:** configuration/CTest registration. Command:
   `OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 CMAKE_BUILD_PARALLEL_LEVEL=1 cmake -S . -B build/p2-border-validation/cmake -DCMAKE_BUILD_TYPE=Release -DCUDA=OFF -DBUILD_TESTING=ON`.
   Exit 1: selected Python 3.14.8 lacks NumPy, required by existing CMake checks.
   System Python also lacks NumPy. No dependency or policy workaround applied.
@@ -70,3 +70,20 @@ Native CUDA compilation/execution, native old-floor mutant runs, scientific
 qualification and performance are **UNRUN** (no local nvcc). No retained native
 results are requalified by this change and no combined-#272 evidence is used.
 No push, merge, GitHub comment, Notion write, remote job or GPU job performed.
+
+## Parent registration check
+
+The existing `/Users/alex.konstantinov/.local/bin/python3` has NumPy, so the
+parent completed the registration check at `838660e5` without installing or
+changing dependencies. With all three thread caps set to 1:
+
+```sh
+cmake -S . -B build/p2-border-validation/cmake -DCMAKE_BUILD_TYPE=Release -DCUDA=OFF -DBUILD_TESTING=ON -DPython3_EXECUTABLE=/Users/alex.konstantinov/.local/bin/python3
+cmake --build build/p2-border-validation/cmake --target realspace_border_validation --parallel 1
+ctest --test-dir build/p2-border-validation/cmake -R '^RealspaceBorderValidation$' -j1 --output-on-failure
+```
+
+Configure and focused build **PASS**; focused CTest **1/1 PASS**. Configure
+retains the existing missing-pbzip2 waiver for unrelated compressed-MRC cases;
+those cases were not executed. Full CTest and native CUDA remain **UNRUN**.
+This documentation follow-up changes no tested source or CMake registration.

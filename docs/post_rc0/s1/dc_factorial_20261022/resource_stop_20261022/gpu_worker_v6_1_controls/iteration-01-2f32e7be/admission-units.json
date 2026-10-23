@@ -1,0 +1,106 @@
+{
+ "schema": "run-v6-admission-units/1",
+ "runner": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/run_v6_1_controls.py",
+ "runner_sha256": "e026bdae4c4bd6b7e3083cfea402e872f83208c799b8e91609884837389e35d5",
+ "test_sha256": "193a51c1a17d1af9fd5a5fd82c7990eb71ffcbce141b80c9c724aedaf0ed10f1",
+ "results": [
+  {
+   "control": "refused r2 tree (watchdog child of the owner) is admitted",
+   "result": "PASS",
+   "admitted": true,
+   "reason": "admitted",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "orphan duplicate Claude with the same --resume (PPID 1) is refused",
+   "result": "PASS",
+   "admitted": false,
+   "reason": "another process of the author session is live",
+   "other_authors": [
+    75362
+   ],
+   "control_processes": []
+  },
+  {
+   "control": "space-separated --resume token outside the owner tree is refused",
+   "result": "PASS",
+   "admitted": false,
+   "reason": "another process of the author session is live",
+   "other_authors": [
+    75363
+   ],
+   "control_processes": []
+  },
+  {
+   "control": "wrong owner birth is refused",
+   "result": "PASS",
+   "admitted": false,
+   "reason": "owner birth does not match",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "owner PID that is not an ancestor is refused",
+   "result": "PASS",
+   "admitted": false,
+   "reason": "owner PID is not an ancestor of this runner",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "owner without the exact token (different id) is refused",
+   "result": "PASS",
+   "admitted": false,
+   "reason": "owner lacks the exact --resume token",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "unrelated commands mentioning the id are admitted",
+   "result": "PASS",
+   "admitted": true,
+   "reason": "admitted",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "unrelated launcher.py / smi.py are admitted",
+   "result": "PASS",
+   "admitted": true,
+   "reason": "admitted",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "a live foreign v6 harness is refused",
+   "result": "PASS",
+   "admitted": false,
+   "reason": "another v4/v5/v6/v6.1 control process is live",
+   "other_authors": [],
+   "control_processes": [
+    6001
+   ]
+  },
+  {
+   "control": "a live control under the owner but outside the runner chain is refused",
+   "result": "PASS",
+   "admitted": false,
+   "reason": "another v4/v5/v6/v6.1 control process is live",
+   "other_authors": [],
+   "control_processes": [
+    6002
+   ]
+  },
+  {
+   "control": "a mock process in another gpu_worker_v6_controls namespace is refused",
+   "result": "PASS",
+   "admitted": false,
+   "reason": "another v4/v5/v6/v6.1 control process is live",
+   "other_authors": [],
+   "control_processes": [
+    6003
+   ]
+  }
+ ]
+}

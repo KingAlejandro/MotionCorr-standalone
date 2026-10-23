@@ -1,0 +1,393 @@
+--- gpu_worker_v6.py
++++ gpu_worker_v6_1.py
+@@ -1,6 +1,9 @@
+ #!/usr/bin/env python3
+ # SPDX-License-Identifier: GPL-2.0-or-later
+-"""#262 GPU worker v6 (PROPOSED, not deployed). Supersedes v5 after review R4; v2-v5 stay frozen.
++"""#262 GPU worker v6.1 (PROPOSED, not deployed). R5 repair; v2-v6 stay frozen.
++
++AMENDMENT-v6.1.md: observer errors arriving during cleanup use the existing checked original-group
++fallback and retain uncertainty. The identity checks and lease-hold policy are unchanged.
+ 
+ v6 implements resource_stop_20261022/CONTRACT-v6.md: the lease hold is established before any receipt
+ I/O and no write error can escape it; record writes are best-effort atomic with a typed safe stop
+@@ -78,7 +81,7 @@
+ completion; 77 census incomplete; 78 job timeout; 79 RECORD_WRITE_FAILED after verified cleanup. CLEANUP_FAILED never exits.
+ 
+ Namespace-aware evaluation and matrix generation are NOT implemented: evaluate.py
+-and matrix.py read ROOT/runs only, so a v6 namespace must not be evaluated until
++and matrix.py read ROOT/runs only, so a v6.1 namespace must not be evaluated until
+ a reviewed reader exists. Out of scope (CONTRACT-v5.md): per-launch binary re-hashing,
+ campaign.admit's blocking admission flock, and the RESOURCE classification of a job that exits
+ before creating a CUDA context (empty witness halts the resume by design).
+@@ -281,7 +284,12 @@
+             groups |= {r['pgid'] for r in own.known_live()} - {os.getpgrp()}
+             for g in sorted(groups):
+                 if not own.table.group_live(g): continue
+-                if own.errors or not own.verified_group(g):
++                verified = not own.errors and own.verified_group(g)
++                if own.errors:
++                    errors.append('observer errors during cleanup: ' + '; '.join(own.errors))
++                    signal_job_group(root, grace, signalled, own.table)  # site: late observer-errors branch
++                    return signalled, errors
++                if not verified:
+                     errors.append(f'refused signal {int(signum)} to unverified group {g}'); continue
+                 try: os.killpg(g, signum); signalled.append([int(signum), g, campaign.utc()])
+                 except ProcessLookupError: pass
+@@ -408,11 +416,11 @@
+         if j.get('model'): extra['MC_DIAG_MODEL_OUT'] = str(out / 'runtime.json')
+         extra.update(CUDA_VISIBLE_DEVICES=self.a.uuid, CUDA_DEVICE_ORDER='PCI_BUS_ID')
+         prefix = shlex.split(self.a.prefix.format(cpu=self.a.cpu, out=out))
+-        rec = dict(schema='dc262-run/v6', id=j['id'], tier=j['tier'], backend=j['backend'], arm=j['arm'], build=j['build'],
++        rec = dict(schema='dc262-run/v6.1', id=j['id'], tier=j['tier'], backend=j['backend'], arm=j['arm'], build=j['build'],
+                    group=j['group'], source_sha=self.binding['source_sha'], binary=binary['path'],
+                    binary_sha256=binary['sha256'], argv=prefix + [binary['path']] + args, cwd=j['cwd'], env=extra,
+                    cpu=str(self.a.cpu), host=socket.gethostname(), inputs={}, bench_lock=campaign.bench_status(),
+-                   start_utc=campaign.utc(), status=None, exit=None, gpu_witness_uuids=[], worker='gpu_worker_v6',
++                   start_utc=campaign.utc(), status=None, exit=None, gpu_witness_uuids=[], worker='gpu_worker_v6_1',
+                    binding=self.binding, ownership_mode=None)
+         return rec
+ 
+@@ -432,7 +440,7 @@
+         try:
+             rec = self.base_record(j, binary, out)
+         except Exception:
+-            self.write(out, dict(schema='dc262-run/v6', worker='gpu_worker_v6', id=j['id'], status='JOB_STAGE_ERROR', exit=None,
++            self.write(out, dict(schema='dc262-run/v6.1', worker='gpu_worker_v6_1', id=j['id'], status='JOB_STAGE_ERROR', exit=None,
+                                  gpu_witness_uuids=[], stage_error=traceback.format_exc(), binding=self.binding))
+             return dict(status='JOB_STAGE_ERROR'), 'JOB_STAGE'
+         rec['ownership_mode'] = own.mode
+@@ -582,7 +590,7 @@
+             return EXIT['INVALID']
+         try:
+             self.runs.mkdir(parents=True, exist_ok=True)
+-            self.log = open(self.runs / f'worker-v6-{a.cpu}.log', 'a')
++            self.log = open(self.runs / f'worker-v6_1-{a.cpu}.log', 'a')
+             lease = open(self.lock_path, 'a')
+         except OSError as e:
+             print(json.dumps(dict(kind='PRELEASE_IO_ERROR', utc=campaign.utc(), error=repr(e), binding=self.binding)))
+--- test_gpu_worker_v6.py
++++ test_gpu_worker_v6_1.py
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ # SPDX-License-Identifier: GPL-2.0-or-later
+-"""Host mock controls for gpu_worker_v6.py (successor of the v4 harness c2b6e80a; CONTRACT-v6.md). Every GPU query is a fake nvidia-smi; no GPU, no motioncorr.
++"""Host mock controls for gpu_worker_v6_1.py (AMENDMENT-v6.1.md; R5) (successor of the v4 harness c2b6e80a; CONTRACT-v6.md). Every GPU query is a fake nvidia-smi; no GPU, no motioncorr.
+ 
+ Signals are sent only to processes this harness created or that the mock jobs
+ recorded, after re-checking PID, birth identity, process group and session, and
+@@ -15,7 +15,7 @@
+ a zombie) to real processes. That exercises the ordering/ownership branch; it
+ is not Linux execution, which remains UNRUN.
+ 
+-usage: test_gpu_worker_v6.py --json OUT.json [--worker PATH] [--only K25b,K27]
++usage: test_gpu_worker_v6_1.py --json OUT.json [--worker PATH] [--only K25b,K27]
+ --group selects base/r3/r4; --only selects named R3/R4 controls. Results are PASS, FAIL or UNRUN.
+ """
+ import argparse, fcntl, hashlib, json, os, shutil, signal, subprocess, sys, tempfile, textwrap, time, traceback
+@@ -453,7 +453,7 @@
+                              sampler=r['resource']['sampler'], missing_keys=[k for k in CAMPAIGN_RUN_KEYS if k not in r]) for r in recs if r]
+         return (c == 0 and len(d['records']) == 2 and all(x['status'] == 'EXITED' and x['exit'] == 0 and x['witness'] == [UUID]
+                 and x['sampler']['ok'] > 0 and x['sampler']['failed'] == 0 and not x['sampler']['foreign_on_target_during']
+-                and not x['missing_keys'] and x['schema'] == 'dc262-run/v6' and x['worker'] == 'gpu_worker_v6'
++                and not x['missing_keys'] and x['schema'] == 'dc262-run/v6.1' and x['worker'] == 'gpu_worker_v6_1'
+                 for x in d['records']) and d['final'][0]['census']['complete'] and f.lease_free())
+     with tempfile.TemporaryDirectory() as t:
+         C['K5 clean queue via platform /usr/bin/time prefix (grandchild route), witness, schema, census'] = single(
+@@ -696,7 +696,7 @@
+     return out
+ 
+ 
+-R4_IDS = ['K25a', 'K25c', 'K14R', 'K25W', 'K31a', 'K31b', 'K31c', 'K32', 'K32W', 'K33', 'K34', 'K35a', 'K35b']
++R4_IDS = ['K25a', 'K25c', 'K14R', 'K25W', 'K31a', 'K31b', 'K31c', 'K32', 'K32W', 'K33', 'K34', 'K35a', 'K35b', 'K36']
+ R3_IDS = ['K25b', 'K27', 'K28', 'K29', 'K30', 'K5P']
+ 
+ 
+@@ -799,6 +799,7 @@
+         'K34 activation failure: zero-job FINAL, exit 75, lease released': activation,
+         'K35a SIGHUP mid-job: cancellation reaps tree, lease released': cancel_hup,
+         'K35b SIGHUP held: worker alive and lease held': lambda: held('main_refresh_after_flag', hup=True),
++        'K36 late observer error: checked fallback, uncertainty retained (synthetic only)': lambda: k36(W),
+     }
+     return {name: fn() for name, fn in table.items() if not only or name.split()[0] in only}
+ 
+@@ -859,7 +860,8 @@
+         def verified_group(self, g): return True
+     class Root:
+         pid = 900000
+-        def poll(self): return 0
++        returncode = 0  # reaped-root interface used by root_exited (R5-1)
++        def poll(self): return self.returncode
+     calls, real = [], os.killpg
+     os.killpg = lambda g, s: calls.append([g, int(s)])
+     try:
+@@ -869,6 +871,49 @@
+     groups = sorted({g for g, _ in calls})
+     d = dict(own_group=me, groups_signalled=groups, errors=errors)
+     return me not in groups and 900002 in groups, d
++
++
++def k36(W):
++    """R5-2 synthetic live-root interleavings. No process or real signal call."""
++    from unittest.mock import patch
++    m = load(W, 'gpu_worker_k36')
++    class Root:
++        pid = 900001
++        returncode = None
++        mc_birth = 17
++        def wait(self, timeout=None): self.returncode = 0; return 0
++        def poll(self): raise AssertionError('must not reap before checked fallback')
++        def send_signal(self, sig): raise AssertionError('valid synthetic group must use group signalling')
++    class Table:
++        def read(self, pid): return dict(pid=pid, ppid=os.getpid(), pgid=900001, start=17, state='R')
++        def group_live(self, g): return True
++    class Own:
++        def __init__(self, mode): self.errors = []; self.table = Table(); self.n = 0; self.mode = mode
++        def refresh(self):
++            self.n += 1
++            if self.mode == 'refresh' and self.n == 2: self.errors.append('synthetic late observer error')
++        def known_live(self): return [self.table.read(900001)]
++        def verified_group(self, g):
++            if self.mode.startswith('verify'): self.errors.append('synthetic error inside group verification')
++            return self.mode != 'verify_false'
++    cases = {}; ok = True
++    for mode in ('healthy', 'refresh', 'verify_true', 'verify_false'):
++        own = Own(mode); root = Root()
++        with patch.object(m.subprocess, 'Popen', side_effect=AssertionError('forbidden Popen')), \
++                patch.object(m.os, 'kill', side_effect=AssertionError('forbidden PID signal')), \
++                patch.object(m.signal, 'signal', side_effect=AssertionError('forbidden handler installation')), \
++                patch.object(m.os, 'getpgrp', return_value=800000), patch.object(m.os, 'getsid', return_value=root.pid), \
++                patch.object(m.os, 'killpg') as group, patch.object(m, 'signal_job_group', wraps=m.signal_job_group) as fallback:
++            signals, errors = m.terminate_owned(own, root, 0)
++        healthy = mode == 'healthy'
++        good = ([list(call.args) for call in group.call_args_list] == [[root.pid, signal.SIGTERM], [root.pid, signal.SIGKILL]]
++                and fallback.call_count == (0 if healthy else 1) and bool(errors) == (not healthy)
++                and (healthy or (own.errors and all(row[1] == 'root-group' for row in signals))))
++        cases[mode] = dict(result='PASS' if good else 'FAIL', signals=signals, errors=errors,
++                           fallback_calls=fallback.call_count, group_calls=[list(call.args) for call in group.call_args_list],
++                           refresh_calls=own.n, root_returncode=root.returncode, uncertainty_retained=bool(errors))
++        ok = ok and bool(good)
++    return ok, dict(scope='synthetic only; Popen/process table/signals mocked; no lease/process qualification', cases=cases)
+ 
+ 
+ def smi_pids(f):
+@@ -925,16 +970,17 @@
+ def main():
+     signal.signal(signal.SIGTERM, _terminate)
+     ap = argparse.ArgumentParser(); ap.add_argument('--json', required=True)
+-    ap.add_argument('--worker', default=str(TOOLS / 'gpu_worker_v6.py')); ap.add_argument('--only', default=''); ap.add_argument('--group', choices=['base', 'r3', 'r4'])
++    ap.add_argument('--worker', default=str(TOOLS / 'gpu_worker_v6_1.py')); ap.add_argument('--only', default=''); ap.add_argument('--group', choices=['base', 'r3', 'r4'])
+     a = ap.parse_args()
+     W = Path(a.worker).resolve()
+     results = []
+     only = [x for x in a.only.split(',') if x]
+-    valid = set(R3_IDS + R4_IDS)
++    valid = set(R3_IDS + R4_IDS + ['K22'])
+     if only and not set(only) <= valid: ap.error('unknown --only controls: ' + ','.join(sorted(set(only) - valid)))
+     if only:
+         items = list(r3_controls(W, [x for x in only if x not in R4_IDS] or ['NONE']).items())
+         items += list(r4_controls(W, only).items())
++        if 'K22' in only: items.append(('K22 own process group never signalled (synthetic)', k22(W)))
+     elif a.group == 'base': items = list(controls(W).items())
+     elif a.group == 'r3': items = list(r3_controls(W, R3_IDS).items())
+     elif a.group == 'r4': items = list(r4_controls(W, None).items())
+@@ -943,7 +989,7 @@
+         res = 'UNRUN' if ok is None else ('PASS' if ok else 'FAIL')
+         results.append(dict(control=name, result=res, detail=detail))
+         print(res + ' ' + name, flush=True)
+-    Path(a.json).write_text(json.dumps(dict(schema='gpu-worker-v6-host-controls/1', python=sys.version, platform=sys.platform,
++    Path(a.json).write_text(json.dumps(dict(schema='gpu-worker-v6.1-host-controls/1', python=sys.version, platform=sys.platform,
+         worker=str(W), worker_sha256=sha(W), test_sha256=sha(__file__), ownership_sha256=sha(REPO / 'tools/multi_gpu/process_ownership.py'),
+         results=results, limits='macOS host mocks; fake nvidia-smi for every query; ProcessOwnership polling mode, with '
+         'test-only emulation of the Linux adoption rule where stated; Linux subreaper execution UNRUN; /usr/bin/time prefix '
+--- run_v6_controls.py
++++ run_v6_1_controls.py
+@@ -1,8 +1,8 @@
+ #!/usr/bin/env python3
+ # SPDX-License-Identifier: GPL-2.0-or-later
+-"""One retained serial control suite for gpu_worker_v6 (CONTRACT-v6.md; replaces the r2 runner after R3-M1).
++"""One retained serial control suite for gpu_worker_v6_1 (CONTRACT-v6.md + AMENDMENT-v6.1.md; replaces the r2 runner after R3-M1).
+ 
+-usage: run_v6_controls.py BASE --session-id ID --owner-pid PID --owner-birth JSON
++usage: run_v6_1_controls.py BASE --session-id ID --owner-pid PID --owner-birth JSON
+                           --expect-worker SHA --expect-harness SHA
+ 
+ Admission (pure function `admission`, unit-tested on synthetic process tables):
+@@ -11,7 +11,7 @@
+   token. Substrings are not used, so the runner's own --session-id never selects the runner;
+ - another author is any process outside the owner's process tree carrying that exact token (the
+   owner's own helpers, such as T3's parent-death watchdog, are inside its tree);
+-- a control process is one whose argv names test_gpu_worker_v*.py, run_v[456]_controls*.py or a
++- a control process is one whose argv names test_gpu_worker_v*.py, run_v[456](?:_1)?_controls*.py or a
+   gpu_worker_v*_controls* path, outside this runner's own ancestor chain;
+ - the 1- and 5-minute load averages must not exceed the logical CPU count.
+ A refusal writes REFUSED_UNRUN and exits 75; there is no waiting or retry. The load check is a
+@@ -19,7 +19,7 @@
+ 
+ Run: a nonblocking lifetime fcntl lease on BASE/.lease; an immutable namespace
+ BASE/attempt-<UTC>-<uuid4>/ with TMPDIR inside it; frozen, hashed copies of every input; then, serially,
+-the real worker's full harness and each targeted mutant from v6_mutants.json with --only, each in its
++the real worker's full harness and each targeted mutant from v6_1_mutants.json with --only, each in its
+ own session under a 180 s bound. A bound overrun gets SIGTERM then SIGKILL only after a fresh
+ PID/birth/session/UID check; if that identity cannot be established the runner records
+ CLEANUP_UNVERIFIED_LEASE_HELD and keeps the lease until an operator stops it.
+@@ -32,10 +32,10 @@
+ sys.path.insert(0, str(REPO / 'tools/multi_gpu'))
+ from process_ownership import ProcessTable  # noqa: E402
+ 
+-INPUTS = {'worker': TOOLS / 'gpu_worker_v6.py', 'harness': TOOLS / 'test_gpu_worker_v6.py',
+-          'mutants': TOOLS / 'v6_mutants.json', 'runner': Path(__file__).resolve(), 'campaign': TOOLS / 'campaign.py',
++INPUTS = {'worker': TOOLS / 'gpu_worker_v6_1.py', 'harness': TOOLS / 'test_gpu_worker_v6_1.py',
++          'mutants': TOOLS / 'v6_1_mutants.json', 'runner': Path(__file__).resolve(), 'campaign': TOOLS / 'campaign.py',
+           'process_ownership': REPO / 'tools/multi_gpu/process_ownership.py'}
+-CONTROL_RE = re.compile(r'(?:^|[\s/])(?:test_gpu_worker_v\d+\.py|run_v[456]_controls\w*\.py)(?:\s|$)|gpu_worker_v\d+_controls')
++CONTROL_RE = re.compile(r'(?:^|[\s/])(?:test_gpu_worker_v\d+(?:_1)?\.py|run_v[456](?:_1)?_controls\w*\.py)(?:\s|$)|gpu_worker_v\d+(?:_1)?_controls')
+ BOUND_S = 180
+ 
+ 
+@@ -71,7 +71,7 @@
+     controls = [r for r in rows if r['pid'] not in chain and CONTROL_RE.search(r['cmd'])]
+     d.update(other_authors=authors, control_processes=controls, owner_family_size=len(family))
+     if authors: return False, 'another process of the author session is live', d
+-    if controls: return False, 'another v4/v5/v6 control process is live', d
++    if controls: return False, 'another v4/v5/v6/v6.1 control process is live', d
+     return True, 'admitted', d
+ 
+ 
+@@ -116,7 +116,7 @@
+     base.mkdir(parents=True, exist_ok=True)
+     ns = base / f"attempt-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}-{uuid.uuid4()}"
+     ns.mkdir()
+-    rec = dict(schema='gpu-worker-v6-controls/1', namespace=ns.name, start_utc=utc(), session_id=sid, owner_pid=owner_pid,
++    rec = dict(schema='gpu-worker-v6.1-controls/1', namespace=ns.name, start_utc=utc(), session_id=sid, owner_pid=owner_pid,
+                owner_birth=owner_birth, runner_pid=os.getpid(), uid=os.getuid(), ncpu=os.cpu_count(), load_avg=os.getloadavg(),
+                numeric_threads=1, inputs={k: dict(path=str(p), sha256=sha(p)) for k, p in INPUTS.items()})
+     def write(): (ns / 'ATTEMPT.json').write_text(json.dumps(rec, indent=1, default=str) + '\n')
+@@ -143,16 +143,16 @@
+         shutil.copy2(p, dst); assert sha(dst) == rec['inputs'][k]['sha256']
+     (ns / 'tmp').mkdir()
+     env = dict(os.environ, OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1', VECLIB_MAXIMUM_THREADS='1', TMPDIR=str(ns / 'tmp'))
+-    harness = frozen / 'test_gpu_worker_v6.py'
+-    plan = [('worker-' + g, frozen / 'gpu_worker_v6.py', None, g) for g in ('base', 'r3', 'r4')]
+-    mutants = json.loads((frozen / 'v6_mutants.json').read_text())
+-    src = (frozen / 'gpu_worker_v6.py').read_text()
++    harness = frozen / 'test_gpu_worker_v6_1.py'
++    plan = [('worker-' + g, frozen / 'gpu_worker_v6_1.py', None, g) for g in ('base', 'r3', 'r4')]
++    mutants = json.loads((frozen / 'v6_1_mutants.json').read_text())
++    src = (frozen / 'gpu_worker_v6_1.py').read_text()
+     for name, spec in mutants.items():
+         s = src
+         for a, b in spec['replace']:
+             if s.count(a) != 1: refuse(f'mutant {name}: replacement target not unique')
+             s = s.replace(a, b)
+-        path = frozen / f'_v6mutant_{name}.py'; path.write_text(s)
++        path = frozen / f'_v6_1mutant_{name}.py'; path.write_text(s)
+         plan.append((name, path, spec['only'], None))
+     rec['status'] = 'RUNNING'; rec['runs'] = []; write()
+     for name, worker, only, group in plan:
+--- test_v6_static.py
++++ test_v6_1_static.py
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ # SPDX-License-Identifier: GPL-2.0-or-later
+-"""Data-only v6 checks: fake Popen/process tables/signals, no worker, query or job process.
++"""Data-only v6.1 checks (AMENDMENT-v6.1.md): fake Popen/process tables/signals, no worker, query or job process.
+ 
+ Run under a nonblocking lifetime lease in a fresh UUID scratch namespace. These checks do not
+ admit the provider-bound real-worker suite and cannot qualify process cleanup or Linux/GPU use.
+@@ -219,25 +219,58 @@
+             self.assertIn(signal.SIGHUP, events)
+ 
+     def test_embedded_mock_scripts_compile_without_execution(self):
+-        harness = load(TOOLS / 'test_gpu_worker_v6.py')
++        harness = load(TOOLS / 'test_gpu_worker_v6_1.py')
+         for name in ['IDENT', 'MOCK_JOB', 'FAKE_SMI', 'FAULT_ENTRY', 'LAUNCHER', 'EMULATE']:
+             with self.subTest(script=name): compile(getattr(harness, name), name, 'exec')
+ 
++    def test_k22_exact_fixture_interface_and_own_group_exclusion(self):
++        harness = load(TOOLS / 'test_gpu_worker_v6_1.py')
++        with patch.object(M.subprocess, 'Popen', side_effect=AssertionError('forbidden Popen')), \
++                patch.object(M.os, 'kill', side_effect=AssertionError('forbidden PID signal')), \
++                patch.object(M.os, 'killpg', side_effect=AssertionError('forbidden real group signal')), \
++                patch.object(M.signal, 'signal', side_effect=AssertionError('forbidden handler')):
++            ok, detail = harness.k22(Path(TARGET))
++        self.assertTrue(ok, detail)
++        self.assertNotIn(detail['own_group'], detail['groups_signalled'])
++        self.assertIn(900002, detail['groups_signalled'])
++
++    def test_k36_healthy_and_late_error_interleavings(self):
++        harness = load(TOOLS / 'test_gpu_worker_v6_1.py')
++        ok, detail = harness.k36(Path(TARGET))
++        self.assertTrue(ok, detail)
++        self.assertEqual(detail['cases']['healthy']['fallback_calls'], 0)
++        for mode in ['refresh', 'verify_true', 'verify_false']:
++            self.assertEqual(detail['cases'][mode]['fallback_calls'], 1)
++            self.assertTrue(detail['cases'][mode]['uncertainty_retained'])
++
++    def test_new_version_controls_are_excluded_without_owner_rule_change(self):
++        runner = load(TOOLS / 'run_v6_1_controls.py')
++        rows = [dict(pid=11, ppid=1, uid=502, start=[4, 5], cmd='claude --resume=synthetic-owner'),
++                dict(pid=12, ppid=11, uid=502, cmd='python run_v6_1_controls.py')]
++        self.assertTrue(runner.admission(rows, 12, 11, [4, 5], 'synthetic-owner')[0])
++        for cmd in ['python test_gpu_worker_v6_1.py', 'python run_v6_1_controls.py BASE',
++                    'python /tmp/gpu_worker_v6_1_controls/attempt/mock_job']:
++            with self.subTest(cmd=cmd):
++                ok, reason, _ = runner.admission(rows + [dict(pid=13, ppid=11, uid=502, cmd=cmd)],
++                                                  12, 11, [4, 5], 'synthetic-owner')
++                self.assertFalse(ok)
++                self.assertIn('control process', reason)
++
+     def test_nonprovider_ancestor_is_refused_without_spoof(self):
+-        runner = load(TOOLS / 'run_v6_controls.py')
++        runner = load(TOOLS / 'run_v6_1_controls.py')
+         rows = [dict(pid=11, ppid=1, uid=502, start=[4, 5], cmd='codex app-server'),
+-                dict(pid=12, ppid=11, uid=502, cmd='python run_v6_controls.py')]
++                dict(pid=12, ppid=11, uid=502, cmd='python run_v6_1_controls.py')]
+         ok, why, _ = runner.admission(rows, 12, 11, [4, 5], 'synthetic-no-claude-session')
+         self.assertFalse(ok); self.assertIn('lacks the exact --resume token', why)
+ 
+ 
+ def main():
+-    global M
+-    ap = argparse.ArgumentParser(); ap.add_argument('--worker', default=str(TOOLS / 'gpu_worker_v6.py')); ap.add_argument('--json', required=True)
+-    a = ap.parse_args(); M = load(a.worker)
++    global M, TARGET
++    ap = argparse.ArgumentParser(); ap.add_argument('--worker', default=str(TOOLS / 'gpu_worker_v6_1.py')); ap.add_argument('--json', required=True)
++    a = ap.parse_args(); TARGET = a.worker; M = load(a.worker)
+     suite = unittest.defaultTestLoader.loadTestsFromTestCase(Checks)
+     result = unittest.TextTestRunner(verbosity=2).run(suite)
+-    Path(a.json).write_text(json.dumps(dict(schema='dc262-v6-data-only/1', worker_sha256=hashlib.sha256(Path(a.worker).read_bytes()).hexdigest(),
++    Path(a.json).write_text(json.dumps(dict(schema='dc262-v6.1-data-only/1', worker_sha256=hashlib.sha256(Path(a.worker).read_bytes()).hexdigest(),
+         test_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), tests=result.testsRun,
+         failures=[dict(test=str(t), trace=s) for t, s in result.failures], errors=[dict(test=str(t), trace=s) for t, s in result.errors],
+         result='PASS' if result.wasSuccessful() else 'FAIL', limits='Synthetic Popen/process tables/signals only; process cleanup, real-worker suite, Linux and GPU UNRUN.'), indent=1)+'\n')
+--- v6_mutants.json
++++ v6_1_mutants.json
+@@ -143,5 +143,27 @@
+     "            for s in (signal.SIGTERM, signal.SIGINT): signal.signal(s, lambda *_: self.cancel.set())"
+    ]
+   ]
++ },
++ "late_observer_root_signal_removed": {
++  "only": [
++   "K36"
++  ],
++  "replace": [
++   [
++    "                    signal_job_group(root, grace, signalled, own.table)  # site: late observer-errors branch\n",
++    ""
++   ]
++  ]
++ },
++ "k22_own_group_exclusion_removed": {
++  "only": [
++   "K22"
++  ],
++  "replace": [
++   [
++    "    groups.discard(os.getpgrp())\n",
++    ""
++   ]
++  ]
+  }
+ }

@@ -1,0 +1,182 @@
+{
+ "K22": [
+  true,
+  {
+   "own_group": 11583,
+   "groups_signalled": [
+    900000,
+    900002
+   ],
+   "errors": []
+  }
+ ],
+ "K36": [
+  true,
+  {
+   "scope": "synthetic only; Popen/process table/signals mocked; no lease/process qualification",
+   "cases": {
+    "healthy": {
+     "result": "PASS",
+     "signals": [
+      [
+       15,
+       900001,
+       "2026-10-23T12:59:39Z"
+      ],
+      [
+       9,
+       900001,
+       "2026-10-23T12:59:39Z"
+      ]
+     ],
+     "errors": [],
+     "fallback_calls": 0,
+     "group_calls": [
+      [
+       900001,
+       15
+      ],
+      [
+       900001,
+       9
+      ]
+     ],
+     "refresh_calls": 3,
+     "root_returncode": null,
+     "uncertainty_retained": false
+    },
+    "refresh": {
+     "result": "PASS",
+     "signals": [
+      [
+       15,
+       "root-group",
+       900001,
+       "2026-10-23T12:59:39Z"
+      ],
+      [
+       9,
+       "root-group",
+       900001,
+       "2026-10-23T12:59:39Z"
+      ]
+     ],
+     "errors": [
+      "observer errors during cleanup: synthetic late observer error"
+     ],
+     "fallback_calls": 1,
+     "group_calls": [
+      [
+       900001,
+       15
+      ],
+      [
+       900001,
+       9
+      ]
+     ],
+     "refresh_calls": 2,
+     "root_returncode": 0,
+     "uncertainty_retained": true
+    },
+    "verify_true": {
+     "result": "PASS",
+     "signals": [
+      [
+       15,
+       "root-group",
+       900001,
+       "2026-10-23T12:59:39Z"
+      ],
+      [
+       9,
+       "root-group",
+       900001,
+       "2026-10-23T12:59:39Z"
+      ]
+     ],
+     "errors": [
+      "observer errors during cleanup: synthetic error inside group verification"
+     ],
+     "fallback_calls": 1,
+     "group_calls": [
+      [
+       900001,
+       15
+      ],
+      [
+       900001,
+       9
+      ]
+     ],
+     "refresh_calls": 2,
+     "root_returncode": 0,
+     "uncertainty_retained": true
+    },
+    "verify_false": {
+     "result": "PASS",
+     "signals": [
+      [
+       15,
+       "root-group",
+       900001,
+       "2026-10-23T12:59:39Z"
+      ],
+      [
+       9,
+       "root-group",
+       900001,
+       "2026-10-23T12:59:39Z"
+      ]
+     ],
+     "errors": [
+      "observer errors during cleanup: synthetic error inside group verification"
+     ],
+     "fallback_calls": 1,
+     "group_calls": [
+      [
+       900001,
+       15
+      ],
+      [
+       900001,
+       9
+      ]
+     ],
+     "refresh_calls": 2,
+     "root_returncode": 0,
+     "uncertainty_retained": true
+    }
+   }
+  }
+ ],
+ "K28_K30": {
+  "K28 census with malformed RUN.json (unit)": [
+   true,
+   {
+    "census": {
+     "expected": 2,
+     "counts": {
+      "UNREADABLE_RUN_JSON": 1,
+      "EXITED": 1
+     },
+     "complete": false,
+     "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+     "exited_nonzero": 0,
+     "not_complete": [
+      "A"
+     ]
+    },
+    "error": null
+   }
+  ],
+  "K30 time prefix selection and worker default prefix (static unit)": [
+   true,
+   {
+    "darwin": "/usr/bin/time -l -o {out}/time-v.log",
+    "linux": "/usr/bin/time -v -o {out}/time-v.log",
+    "worker_default": "taskset -c {cpu} /usr/bin/time -v -o {out}/time-v.log"
+   }
+  ]
+ }
+}

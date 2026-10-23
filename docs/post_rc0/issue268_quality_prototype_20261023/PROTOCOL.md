@@ -162,8 +162,11 @@ part of this evidence manifest.
 The header sentence "Frozen before any native run of prototype code" is not
 literally true for amendments A1 and A2. Both were written after local macOS
 development runs of the prototype (`/tmp/q268-dev1`, `/tmp/q268-dev2`), so they
-are prospective only for the remote Linux campaign. Development failures that
-led to them (a checker crash on a negative control, the dev2 E5 failure) were
-not retained as files; only the summary results in
-`evidence_c347f59f/local_dev/` exist. The text above is otherwise unchanged.
+are prospective only for the remote Linux campaign, together with the probe of
+the unmodified base binary (`/tmp/q268-probe-lP1c`) that selected the A1 case.
+The local run trees remain on the development Mac only and are not committed.
+The failing check outputs that led to fixes (a checker crash on negative control
+N4 in dev1; E5 FAIL in dev2) were overwritten when the same trees were re-checked
+with the fixed checker; only the post-fix results in
+`evidence_c347f59f/local_dev/` are retained. The text above is otherwise unchanged.
 Hardening controls for the next source revision are in `PROTOCOL_V2.md`.

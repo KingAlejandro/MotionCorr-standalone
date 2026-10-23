@@ -30,6 +30,17 @@ hash-checked against the remote originals: [receipts/](receipts/) ([INDEX](recei
 - No `gpu-final` receipt exists: the coordinator was killed before its cleanup
   block. Its flock was released by the kernel at process exit.
 
+## Review R3 and worker v5 (2026-10-23)
+
+Review R3 ([review-r3/REVIEW.md](review-r3/REVIEW.md)) found no material worker defect in v4. It did find
+that the r2 runner's corrected owner rule still selected the runner itself (R3-M1), that the
+`unbounded_child_wait` mutant was testable (R3-m1), and that the refresh-exception branches skipped root
+signalling (R3-m2), along with integrity minors. [CONTRACT-v5.md](CONTRACT-v5.md) was frozen first;
+`tools/gpu_worker_v5.py`, its harness, the owner-bound runner `run_v5_controls.py` and their
+controls follow it ([gpu_worker_v5_controls/](gpu_worker_v5_controls/README.md),
+[review-r3/RESPONSES.md](review-r3/RESPONSES.md)). v4 stays frozen. Namespace evaluation stays
+unimplemented and blocked; GPU readiness stays blocked.
+
 ## Review R2, owner collision and worker v4 (2026-10-23)
 
 Review R2 ([review-r2/REVIEW.md](review-r2/REVIEW.md), verbatim) found a Linux-only material defect

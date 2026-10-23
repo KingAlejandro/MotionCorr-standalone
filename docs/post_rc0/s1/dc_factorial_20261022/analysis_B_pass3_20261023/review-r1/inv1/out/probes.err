@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/private/tmp/motioncorr-dc-B-pass3-analysis-review-r1-20261023-sonnet/scripts/lockrun.py", line 6, in <module>
+    runpy.run_path(script, run_name='__main__')
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "scripts/final_probes.py", line 7, in <module>
+    S=json.load(open(SNAP+'/SNAPSHOT.json')); E=json.load(open(SNAP+'/EVALUATIONS.json'))
+                ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'snap/SNAPSHOT.json'

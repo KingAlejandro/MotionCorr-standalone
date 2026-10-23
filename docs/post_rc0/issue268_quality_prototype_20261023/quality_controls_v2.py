@@ -190,7 +190,10 @@ def products(out: Path) -> dict:
     return result
 
 
-LOG_DROP = re.compile(rb"^(Full movie wall time:|in: .*, line \d+$)|\(\+0x[0-9a-f]+\) \[0x[0-9a-f]+\]$")
+# Wall time, and error backtraces that name the binary/source path or carry
+# addresses (Linux "bin(+0x..) [0x..]", macOS "N  bin  0x.. symbol + off").
+LOG_DROP = re.compile(rb"^(Full movie wall time:|in: .*, line \d+$|\d+\s+\S+\s+0x[0-9a-f]+ )"
+                      rb"|\(\+0x[0-9a-f]+\) \[0x[0-9a-f]+\]$")
 
 
 def logs(out: Path) -> dict:
@@ -528,17 +531,20 @@ def check(args) -> int:
         return d["exits"] == [0, 0] and d["products"] and not errs, d
     guarded("R8 too-few fallback with bound limit", ["Q14", "Q15"], r8)
 
-    def r9():
+    def r9():  # PROTOCOL_V2 amendment A1: unknown options only warn
         stderr = (R("Q16") / "stderr.txt").read_bytes()
-        d = dict(exit=ex("Q16"), names_option=b"experimental_quality_report" in stderr,
-                 products=len(products(R("Q16") / "out")))
-        return d["exit"] != 0 and d["names_option"] and d["products"] == 0, d
-    guarded("R9 OFF build rejects the flag", ["Q16"], r9)
+        d = dict(exit=ex("Q16"),
+                 warns=b"Option --experimental_quality_report" in stderr and b"is not a valid RELION argument" in stderr,
+                 products=products(R("Q16") / "out") == products(R("Q1") / "out"),
+                 logs=logs(R("Q16") / "out") == logs(R("Q1") / "out"),
+                 quality=[k for k in tree_hashes(R("Q16") / "out") if b"quality" in bytes.fromhex(k)])
+        return d["exit"] == 0 and d["warns"] and d["products"] and d["logs"] and not d["quality"], d
+    guarded("R9 OFF build warns about the flag and is otherwise neutral", ["Q1", "Q16"], r9)
 
     def r10():
         found = {q: tmp_files(R(q)) for q, *_ in PLAN if have(q)}
         return not any(found.values()), {k: v for k, v in found.items() if v}
-    guarded("R10 no temporary files left", [q for q, *_ in PLAN], r10)
+    guarded("R10 no temporary files left (runs present)", [], r10)
 
     rows += negative_controls(root, v2sha, revision)
     (root / "results.json").write_text(json.dumps(dict(rows=rows, facts=facts), indent=2, default=repr) + "\n")
@@ -588,7 +594,7 @@ def negative_controls(root: Path, v2sha: str, revision: str) -> list:
     if (q4 / "run.json").exists():
         rows.append(row("PC untouched Q4 copy accepted", not report_run(clone("Q4", "PC"), v2sha, revision), "must accept"))
         for i, (name, fn) in enumerate(sidecar_cases):
-            run = clone("Q4", f"NC{i}")
+            run = clone("Q4", f"NCS{i}")
             edit_json(side_path(run, "affine"), fn)
             rows.append(row(name + " rejected", bool(report_run(run, v2sha, revision)), "must reject"))
         run = clone("Q4", "NC3")

@@ -114,3 +114,13 @@ sidecar write failed); `joint_output.state` = `published` |
 - Identifiability and peak validity are not assessed (M5 and W4 own them).
 - Hashing the input movie and products costs time proportional to file size
   when the flag is on.
+
+## Correction (23 October 2026)
+
+"the parser rejects it as unknown" above is false. MotionCorr's argument parser
+only warns about unknown options: an OFF build given
+`--experimental_quality_report` prints `WARNING: Option
+--experimental_quality_report is not a valid RELION argument` on stderr,
+processes the movies normally and writes no quality files. This was found in a
+local development run of the v2 harness (`/tmp/q268v2-dev1`, Q16) and is
+unchanged by design: the parser's behaviour is production behaviour.

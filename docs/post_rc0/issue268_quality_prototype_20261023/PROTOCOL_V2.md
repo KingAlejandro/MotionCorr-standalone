@@ -40,7 +40,27 @@ Fixtures: `generate_motion_diagnostics.py` output that must equal
 | Q13 | V2 | batch6, 3×3, `flat.quality.json` pre-created as a directory | flag | products/exit equal Q1; summary records the flat sidecar write failure |
 | Q14 | V0 | integer, 3×3, `--max_iter 1` | — | reference |
 | Q15 | V2 | same | flag | products equal Q14; `global_only`/`too_few_converged_observations`, `min_observations_exclusive` 18 (bound), fit and distortion limits null |
-| Q16 | V1 | batch6, 3×3 | flag | the OFF build rejects the unknown option: non-zero exit, stderr names the option, no output products |
+| Q16 | V1 | batch6, 3×3 | flag | superseded by amendment A1 (originally: non-zero exit, no products) |
+
+## Amendment A1 (23 October 2026, before any remote run of v2)
+
+The first local development run of the v2 harness on `1215febd`
+(`/tmp/q268v2-dev1`, macOS, encoding pair skipped) showed that Q16's frozen
+expectation was wrong: the parser only warns about unknown options, so the OFF
+build exits 0 and processes the batch. The same run's checker crashed on a
+negative-control directory name collision before writing results. Q16's
+expectation is replaced, prospectively for the remote campaign only:
+
+Q16. Exit 0; stderr contains `Option --experimental_quality_report` and
+`is not a valid RELION argument`; products and logs equal Q1; no quality file.
+
+The same development run showed that log comparison must also ignore error
+backtrace frames and the `in: <source file>, line N` line, which name the binary
+or source checkout and carry addresses (they differ between V0 and V2 builds in
+the failure runs Q11/Q12). The log rule is therefore: equal after removing
+`Full movie wall time:` lines, `in: …, line N` lines and backtrace frame lines.
+On macOS `/proc/self/exe` is absent, so `binary_sha256` is `unavailable` and
+the identity checks only pass on Linux.
 
 ## Strengthened checker (applies to every V2 report run)
 

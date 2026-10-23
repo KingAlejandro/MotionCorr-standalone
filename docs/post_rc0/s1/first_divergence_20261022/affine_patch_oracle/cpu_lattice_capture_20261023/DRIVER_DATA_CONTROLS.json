@@ -1,0 +1,157 @@
+{
+  "driver_sha256": "75731b61426a91d00a32e3e7163dfd3410c50fc456d5c38aee177339a5f8ae1f",
+  "suite_sha256": "430f9b76c489f565cdd284e761ff985a8435ec54d6db8e38bbbcf7b4fe8fdb02",
+  "argv": [
+    "docs/post_rc0/s1/first_divergence_20261022/affine_patch_oracle/cpu_lattice_capture_20261023/check_driver_data.py",
+    "/tmp/mc-residual-review.h52lh3/raw/runs/cpu-affine-on",
+    "/tmp/motioncorr-w4-cpu-lattice-driver-controls-20261023-0120"
+  ],
+  "results": [
+    {
+      "case": "positive",
+      "expected": true,
+      "accepted": true,
+      "checks": {
+        "state/global.txt": true,
+        "state/model.txt": true,
+        "affine.log": true,
+        "*.star-inventory": true,
+        "affine.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": true,
+        "affine.mrc:labels": true,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "timestamp_only",
+      "expected": true,
+      "accepted": true,
+      "checks": {
+        "state/global.txt": true,
+        "state/model.txt": true,
+        "affine.log": true,
+        "*.star-inventory": true,
+        "affine.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": true,
+        "affine.mrc:labels": true,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "payload",
+      "expected": false,
+      "accepted": false,
+      "checks": {
+        "state/global.txt": true,
+        "state/model.txt": true,
+        "affine.log": true,
+        "*.star-inventory": true,
+        "affine.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": false,
+        "affine.mrc:labels": true,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "label",
+      "expected": false,
+      "accepted": false,
+      "checks": {
+        "state/global.txt": true,
+        "state/model.txt": true,
+        "affine.log": true,
+        "*.star-inventory": true,
+        "affine.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": true,
+        "affine.mrc:labels": false,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "STAR",
+      "expected": false,
+      "accepted": false,
+      "checks": {
+        "state/global.txt": true,
+        "state/model.txt": true,
+        "affine.log": true,
+        "*.star-inventory": true,
+        "affine.star": false,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": true,
+        "affine.mrc:labels": true,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "state",
+      "expected": false,
+      "accepted": false,
+      "checks": {
+        "state/global.txt": false,
+        "state/model.txt": true,
+        "affine.log": true,
+        "*.star-inventory": true,
+        "affine.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": true,
+        "affine.mrc:labels": true,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "log",
+      "expected": false,
+      "accepted": false,
+      "checks": {
+        "state/global.txt": true,
+        "state/model.txt": true,
+        "affine.log": false,
+        "*.star-inventory": true,
+        "affine.star": true,
+        "corrected_micrographs.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": true,
+        "affine.mrc:labels": true,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "capture_positive",
+      "expected": true,
+      "accepted": true
+    },
+    {
+      "case": "wrong_selector",
+      "expected": false,
+      "accepted": false
+    },
+    {
+      "case": "wrong_frames",
+      "expected": false,
+      "accepted": false
+    },
+    {
+      "case": "extra_call",
+      "expected": false,
+      "accepted": false
+    },
+    {
+      "case": "empty_array",
+      "expected": false,
+      "accepted": false
+    }
+  ],
+  "all_as_expected": true,
+  "scope": "Data only. No native child, timeout, signal or cleanup path executed."
+}

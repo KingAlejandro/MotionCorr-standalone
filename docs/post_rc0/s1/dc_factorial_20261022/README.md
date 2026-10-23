@@ -1,5 +1,14 @@
 # #262 four-arm CCF DC experiment — PARTIAL, native campaign still running
 
+**Current publication checkpoint, 23 October 2026:** read the
+[qualified partial Tier B analysis](analysis_B_pass3_20261023/README.md) and
+[publication/resource audit](publication_checkpoint_20261023/README.md).
+The frozen snapshot has734 EVALUATED experiments plus2 plain CUDA controls;
+its arithmetic was independently reproduced, with dependence, multiplicity,
+tiny-effect and incomplete-cohort limits retained. CPU workers continue.
+GPU work is paused. Worker-v5 live mocks, Linux and resumed-namespace evaluation
+remain unrun/blocked. Older snapshots below keep their dates and counts.
+
 **Update 2026-10-22T21:59Z: CUDA queue stopped for a resource conflict.** A
 foreign process occupied all four GPUs from about 21:26Z; the parent stopped
 only the CUDA worker at 21:40Z (exit 137). One GPU directory is
@@ -134,9 +143,11 @@ one exclusive reservation.
 ## M3 options (no recommendation yet)
 
 none / global / local / both, decided by the maintainer after Tier B and Tier C
-complete and an independent review. Current evidence: `both` is the only arm
-that removes the pedestal-driven truth failure on both backends; global-only
-introduces Tier A regressions on integer (both backends) and CUDA affine; no
-arm makes any nonzero Tier A case pass its field gate.
+complete and an independent review. Current evidence: `both` reduces descriptive pedestal-driven error on both
+backends, but9/10 pedestal32 field gates still FAIL per backend in the frozen
+Tier B snapshot. Global-only introduces Tier A regressions on integer (both
+backends) and CUDA affine; no arm makes any nonzero Tier A case pass its field
+gate. The earlier wording that conditioning removed the truth failure was an
+overstatement, corrected at this publication checkpoint.
 
 See [HANDOFF.md](HANDOFF.md) for live-job ownership and commands.

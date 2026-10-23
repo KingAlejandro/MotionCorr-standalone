@@ -210,6 +210,19 @@ class Checks(unittest.TestCase):
                 self.assertEqual(code, 79)
                 self.assertTrue('RECORD_WRITE_FAILED' in out.getvalue() or any('RECORD_WRITE_FAILED' in p.read_text() for p in Path(t).glob('STOP-*')))
 
+    def test_sighup_handler_installed_inside_lease_backstop(self):
+        with tempfile.TemporaryDirectory() as t:
+            w = self.worker(t); events = []
+            with patch.object(w, 'bind', return_value=([], {}, [])), patch.object(w, 'locked_main', return_value=0), \
+                    patch.object(M.signal, 'signal', side_effect=lambda sig, fn: events.append(sig)):
+                self.assertEqual(w.main(), 0)
+            self.assertIn(signal.SIGHUP, events)
+
+    def test_embedded_mock_scripts_compile_without_execution(self):
+        harness = load(TOOLS / 'test_gpu_worker_v6.py')
+        for name in ['IDENT', 'MOCK_JOB', 'FAKE_SMI', 'FAULT_ENTRY', 'LAUNCHER', 'EMULATE']:
+            with self.subTest(script=name): compile(getattr(harness, name), name, 'exec')
+
     def test_nonprovider_ancestor_is_refused_without_spoof(self):
         runner = load(TOOLS / 'run_v6_controls.py')
         rows = [dict(pid=11, ppid=1, uid=502, start=[4, 5], cmd='codex app-server'),

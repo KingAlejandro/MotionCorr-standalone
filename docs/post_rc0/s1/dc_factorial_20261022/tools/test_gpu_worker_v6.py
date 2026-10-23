@@ -16,7 +16,7 @@ a zombie) to real processes. That exercises the ordering/ownership branch; it
 is not Linux execution, which remains UNRUN.
 
 usage: test_gpu_worker_v6.py --json OUT.json [--worker PATH] [--only K25b,K27]
---only runs only the named R3 controls (K25a, K25b, K27, K28, K29, K30); results are PASS, FAIL or UNRUN.
+--group selects base/r3/r4; --only selects named R3/R4 controls. Results are PASS, FAIL or UNRUN.
 """
 import argparse, fcntl, hashlib, json, os, shutil, signal, subprocess, sys, tempfile, textwrap, time, traceback
 from pathlib import Path
@@ -717,7 +717,10 @@ def r4_controls(W, only):
             d.update(receipt_seen=bool(f.receipts('CLEANUP_FAILED_LEASE_HELD')) or 'CLEANUP_FAILED_LEASE_HELD' in text,
                      stderr_fallback='receipt_write_error' in text, root_recorded=bool(roots),
                      roots_alive=[x for x in roots if f.reg.alive(x)], jobs_alive=[x for x in jobs if f.reg.alive(x)],
-                     tree_alive=[x for x in tree if f.reg.alive(x)], worker_alive=bool(f.worker_ident and f.reg.alive(f.worker_ident)),
+                     tree_alive=[x for x in tree if f.reg.alive(x)],
+                     wrapper_topology=bool(roots and jobs and jobs[0]['pgid'] == roots[0]['pid'] and jobs[0]['pid'] != roots[0]['pid']),
+                     same_group_tree_alive=[x for x in tree if roots and x['pgid'] == roots[0]['pid'] and f.reg.alive(x)],
+                     escapees_alive=[x for x in tree if roots and x['pgid'] != roots[0]['pid'] and f.reg.alive(x)], worker_alive=bool(f.worker_ident and f.reg.alive(f.worker_ident)),
                      lease_held=not f.lease_free(), run=f.run('J0-' + mode))
             if hup and d['worker_alive']:
                 d['hup'] = f.reg.kill(f.worker_ident, signal.SIGHUP); time.sleep(0.2)
@@ -737,7 +740,8 @@ def r4_controls(W, only):
             if write_fault: ok = ok and d.get('stderr_fallback')
             else: ok = ok and r.get('status') == 'CLEANUP_FAILED' and any(x[1] in ('root', 'root-group') for x in signals)
             if wrapper:
-                ok = ok and bool(d.get('tree_alive')) and any(x[1] == 'root-group' for x in signals)
+                ok = (ok and d.get('wrapper_topology') and not d.get('same_group_tree_alive')
+                      and len(d.get('escapees_alive', [])) == 2 and any(x[1] == 'root-group' for x in signals))
                 if sys.platform == 'linux': ok = ok and r.get('ownership_mode') == 'linux-child-subreaper'
             if hup: ok = ok and d.get('alive_after_hup') and d.get('held_after_hup')
             return bool(ok)

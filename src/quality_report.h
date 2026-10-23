@@ -25,6 +25,7 @@ namespace mcquality {
 // What one solver call actually did. Filled only by the solver itself.
 struct SolveRecord
 {
+	bool noted = false;        // a solver reported; otherwise every field is unknown
 	bool ran = false;          // false: the solver returned without iterating
 	int iterations = 0;
 	int max_iter = 0;
@@ -56,6 +57,7 @@ inline void noteSolve(int iterations, double final_rmsd_px, bool converged,
                       int max_iter, double tolerance_px)
 {
 	if (!active_solve) return;
+	active_solve->noted = true;
 	active_solve->ran = iterations > 0;
 	active_solve->iterations = iterations;
 	active_solve->final_rmsd_px = final_rmsd_px;
@@ -76,6 +78,7 @@ struct PatchRecord
 {
 	int index = 0, iy = 0, ix = 0;
 	bool device_preparation_declined = false;
+	bool completed = false;  // the existing converged/dropped decision was reached
 	bool converged = false;
 	std::vector<Attempt> attempts;
 };
@@ -96,7 +99,10 @@ struct MovieQuality
 	std::vector<PatchRecord> patches;
 	std::string model_state = "not_assessed";  // retained, global_only, not_requested
 	std::string model_reason;
-	int observations = -1;
+	// Copied from the production locals when their branch is reached.
+	int observations = -1, min_observations_exclusive = -1;
+	double distortion_limit_px = std::numeric_limits<double>::quiet_NaN();
+	double fit_rmsd_limit_px = std::numeric_limits<double>::quiet_NaN();
 	double largest_delta_px = std::numeric_limits<double>::quiet_NaN();
 	double fit_rmsd_x_px = std::numeric_limits<double>::quiet_NaN();
 	double fit_rmsd_y_px = std::numeric_limits<double>::quiet_NaN();
@@ -123,11 +129,17 @@ struct SummaryEntry
 	std::string movie;
 	std::string source;          // this_run, resumed_sidecar, unknown_legacy
 	std::string reason;          // unknown_legacy reason
+	bool output_root_collision = false;
 	std::string sidecar_path, sidecar_sha256;
 	bool sidecar_write_failed = false;
 	std::string sidecar_write_error;
 	std::string global_state, local_model_state, publication_state;
 };
+
+// Well-formed UTF-8 becomes a JSON string; anything else the labelled object
+// {"non_utf8_bytes_hex": "..."}. Exposed for the unit control.
+std::string jsonText(const std::string &text);
+bool wellFormedUtf8(const std::string &text);
 
 std::string makeRunId();
 std::string sha256File(const std::string &path);   // "" if unreadable
@@ -146,7 +158,9 @@ bool writeSidecar(const std::string &path, const RunIdentity &id, const std::str
                   const std::string &micrograph_path, std::string &error);
 
 // Validate a prior sidecar for a resumed (skipped, complete) movie and fill the
-// entry's states, or set source=unknown_legacy with the reason.
+// entry's states, or set source=unknown_legacy with the reason (sidecar_missing,
+// sidecar_invalid for any schema/type/vocabulary/invariant violation,
+// sidecar_stale for a valid sidecar bound to other products).
 void readResumedSidecar(const std::string &path, const std::string &movie,
                         const std::string &star_path, const std::string &micrograph_path,
                         SummaryEntry &entry);

@@ -497,7 +497,11 @@ if(BUILD_TESTING)
         # Checker logic only; the native controls are a separate frozen campaign.
         add_test(NAME QualityReportCheckerSelftest
             COMMAND ${Python3_EXECUTABLE} -B
-                ${CMAKE_CURRENT_SOURCE_DIR}/docs/post_rc0/issue268_quality_prototype_20261023/quality_controls.py selftest)
+                ${CMAKE_CURRENT_SOURCE_DIR}/docs/post_rc0/issue268_quality_prototype_20261023/quality_controls_v2.py selftest)
+        add_executable(quality_report_unit
+            docs/post_rc0/issue268_quality_prototype_20261023/test_quality_report.cpp)
+        target_link_libraries(quality_report_unit PRIVATE motioncorr_core)
+        add_test(NAME QualityReportUnit COMMAND quality_report_unit)
     endif()
     execute_process(
         COMMAND "${Python3_EXECUTABLE}" -c "import numpy"

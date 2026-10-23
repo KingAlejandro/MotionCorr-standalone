@@ -568,6 +568,9 @@ void MotioncorrRunner::initialise()
 	}
 
 	bool warned = false;
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+	quality_ori_processed.clear();
+#endif
 
 	for (long int imic = 0; imic < fn_mic_given_all.size(); imic++)
 	{
@@ -602,6 +605,9 @@ void MotioncorrRunner::initialise()
 
 		if (!ignore_this)
 		{
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+			quality_ori_processed.push_back(process_this ? (long)fn_micrographs.size() - 1 : -1);
+#endif
 			fn_ori_micrographs.push_back(fn_mic_given_all[imic]);
 			optics_group_ori_micrographs.push_back(optics_group_given_all[imic]);
 			pre_exposure_ori_micrographs.push_back(pre_exposure_given_all[imic]);
@@ -1627,7 +1633,7 @@ void MotioncorrRunner::beginQualityReport()
 	quality_identity.backend = use_gpu ? "cuda" : "cpu";
 	quality_identity.gpu_id = use_gpu ? gpu_id : -1;
 	quality_identity.options = {
-		{"max_iter", integerToString(max_iter)}, {"tolerance_px", "0.5"}, {"search_range_px", "50"},
+		{"max_iter", integerToString(max_iter)},
 		{"patch_x", integerToString(patch_x)}, {"patch_y", integerToString(patch_y)},
 		{"group_frames", integerToString(group)}, {"bin_factor", floatToString(bin_factor)},
 		{"bfactor", floatToString(bfactor)}, {"ccf_downsample", floatToString(ccf_downsample)},
@@ -1646,50 +1652,57 @@ void MotioncorrRunner::beginQualityReport()
 
 void MotioncorrRunner::writeQualitySidecars(const std::vector<char> &movie_failed)
 {
-	std::map<std::string, size_t> processed;
-	for (size_t i = 0; i < fn_micrographs.size(); i++) processed[fn_micrographs[i]] = i;
 	quality_entries.clear();
-	auto this_run = [&](size_t i) {
+	// Occurrences sharing an output root can overwrite each other's products, so
+	// none of them can be bound to the files that survive (DESIGN_V2.md, F1).
+	std::map<std::string, int> root_uses;
+	for (const FileName &movie : fn_ori_micrographs)
+		root_uses[getOutputFileNames(movie).withoutExtension()]++;
+	for (size_t k = 0; k < fn_ori_micrographs.size(); k++) {
+		const FileName &movie = fn_ori_micrographs[k];
+		const FileName average = getOutputFileNames(movie);
+		const FileName root = average.withoutExtension();
+		const bool collision = root_uses[root] > 1;
+		const long i = k < quality_ori_processed.size() ? quality_ori_processed[k] : -1;
+		mcquality::SummaryEntry entry;
+		entry.movie = movie;
+		entry.output_root_collision = collision;
+		if (i < 0 || !quality_movies[i].processed) {
+			if (collision) {
+				entry.source = "unknown_legacy";
+				entry.reason = "output_root_collision";
+				entry.publication_state = "ambiguous_output_root";
+			} else {
+				mcquality::readResumedSidecar(root + ".quality.json", movie, root + ".star", average, entry);
+			}
+			quality_entries.push_back(entry);
+			continue;
+		}
 		mcquality::MovieQuality &q = quality_movies[i];
 		q.write_failed = q.computation_ok && movie_failed[i];
-		const FileName average = getOutputFileNames(fn_micrographs[i]);
-		const FileName root = average.withoutExtension();
-		mcquality::SummaryEntry entry;
-		entry.movie = fn_micrographs[i];
 		entry.source = "this_run";
-		entry.sidecar_path = root + ".quality.json";
+		// Observations of this occurrence's own computation.
 		entry.global_state = mcquality::globalState(q);
 		entry.local_model_state = q.model_state;
+		if (collision) {
+			entry.publication_state = "ambiguous_output_root";
+			quality_entries.push_back(entry);
+			continue;
+		}
 		entry.publication_state = mcquality::publicationState(q);
+		entry.sidecar_path = root + ".quality.json";
 		std::string error;
-		if (mcquality::writeSidecar(entry.sidecar_path, quality_identity, fn_micrographs[i], q,
+		if (mcquality::writeSidecar(entry.sidecar_path, quality_identity, movie, q,
 		                            root + ".star", average, error)) {
 			entry.sidecar_sha256 = mcquality::sha256File(entry.sidecar_path);
 		} else {
 			entry.sidecar_write_failed = true;
 			entry.sidecar_write_error = error;
-			std::cerr << "WARNING: experimental quality sidecar not written for " << fn_micrographs[i]
+			std::cerr << "WARNING: experimental quality sidecar not written for " << movie
 			          << ": " << error << std::endl;
 		}
-		return entry;
-	};
-	// Joint-membership order first, then any processed movie not in it.
-	std::set<size_t> listed;
-	for (const FileName &movie : fn_ori_micrographs) {
-		auto it = processed.find(movie);
-		if (it != processed.end() && quality_movies[it->second].processed) {
-			quality_entries.push_back(this_run(it->second));
-			listed.insert(it->second);
-			continue;
-		}
-		const FileName average = getOutputFileNames(movie);
-		const FileName root = average.withoutExtension();
-		mcquality::SummaryEntry entry;
-		mcquality::readResumedSidecar(root + ".quality.json", movie, root + ".star", average, entry);
 		quality_entries.push_back(entry);
 	}
-	for (size_t i = 0; i < fn_micrographs.size(); i++)
-		if (quality_movies[i].processed && !listed.count(i)) quality_entries.push_back(this_run(i));
 }
 
 void MotioncorrRunner::writeQualitySummary(const std::string &joint_state)
@@ -3822,8 +3835,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 						solve.iterations = (int)rmsd.size();
 						if (solve.ran) solve.final_rmsd_px = rmsd.back();
 						solve.converged = batch_outcome->log.converged;
+						solve.noted = true;
 						solve.max_iter = max_iter;
-						solve.tolerance_px = 0.5;
+						// The batched log does not carry its tolerance.
+						solve.tolerance_px = std::numeric_limits<double>::quiet_NaN();
 						note_attempt("cuda_batched", solve, converged);
 					}
 #endif
@@ -4123,7 +4138,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					RCTOC(TIMING_PATCH_ALIGN);
 				}
 #ifdef MC_EXPERIMENTAL_QUALITY_REPORT
-				if (qpatch) qpatch->converged = converged;
+				if (qpatch) {
+					qpatch->converged = converged;
+					qpatch->completed = true;
+				}
 #endif
 				if (!converged) continue;
 
@@ -4169,7 +4187,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		const int n_params = 18;
 
 #ifdef MC_EXPERIMENTAL_QUALITY_REPORT
-		if (active_quality) active_quality->observations = n_obs;
+		if (active_quality) {
+			active_quality->observations = n_obs;
+			active_quality->min_observations_exclusive = n_params;
+		}
 #endif
 		if (n_obs <= n_params) {
 #ifdef MC_EXPERIMENTAL_QUALITY_REPORT
@@ -4259,7 +4280,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			if (largest_delta > MAXIMUM_TOLERANCE) break;
 		}
 #ifdef MC_EXPERIMENTAL_QUALITY_REPORT
-		if (active_quality) active_quality->largest_delta_px = largest_delta;
+		if (active_quality) {
+			active_quality->largest_delta_px = largest_delta;
+			active_quality->distortion_limit_px = MAXIMUM_TOLERANCE;
+		}
 #endif
 		if (largest_delta > MAXIMUM_TOLERANCE) {
 #ifdef MC_EXPERIMENTAL_QUALITY_REPORT
@@ -4309,12 +4333,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		if (active_quality) {
 			active_quality->fit_rmsd_x_px = rms_x;
 			active_quality->fit_rmsd_y_px = rms_y;
-			const bool rejected = rms_x >= fit_rmsd_threshold || rms_y >= fit_rmsd_threshold;
-			active_quality->model_state = rejected ? "global_only" : "retained";
-			if (rejected) active_quality->model_reason = "fit_rmsd_above_threshold";
+			active_quality->fit_rmsd_limit_px = fit_rmsd_threshold;
+			active_quality->model_state = "retained";  // replaced below if the production test rejects it
 		}
 #endif
 		if (rms_x >= fit_rmsd_threshold || rms_y >= fit_rmsd_threshold) {
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+			if (active_quality) {
+				active_quality->model_state = "global_only";
+				active_quality->model_reason = "fit_rmsd_above_threshold";
+			}
+#endif
 			logfile << "The polynomial motion model did not explain the observation very well." << std::endl;
 			logfile << "Local correction is disabled for this micrograph." << std::endl;
 			delete mic.model;

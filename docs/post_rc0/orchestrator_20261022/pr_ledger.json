@@ -1,0 +1,985 @@
+{
+ "snapshot_utc": "2026-10-22T19:5x (live gh refresh)",
+ "main": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+ "open_prs": 29,
+ "rows": [
+  {
+   "pr": 46,
+   "title": "docs(metal): local patch alignment and dose-weighting feasibility ADR (#35)",
+   "head": "2ef82b0279d0db7403daf9ba6c2943888f3a0321",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-18T11:55:07Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-09-27T20:56:00Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-09-27T20:56:51Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 52,
+   "title": "test(metal): record real tutorial movie validation",
+   "head": "edb57b5d91ec0719d7285a16a4771b886d979e65",
+   "base": "feat/issue-35-metal-patch-feasibility",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-18T11:55:05Z",
+   "checks": [],
+   "checks_all_success": false,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 64,
+   "title": "research(#60): calibrate the numerical gates by controlled perturbation \u2014 result is inconclusive",
+   "head": "401a810ff7bbb100bff84b14c3cc3c536eb9cc9f",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-18T11:55:02Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-09-28T07:39:12Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-09-28T07:39:47Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "copilot-pull-request-reviewer[bot]",
+     "state": "COMMENTED",
+     "commit": "059d8dd31fcc3e59d19dd4f54c53143e14d1c74a",
+     "on_current_head": false
+    },
+    {
+     "user": "chatgpt-codex-connector[bot]",
+     "state": "COMMENTED",
+     "commit": "059d8dd31fcc3e59d19dd4f54c53143e14d1c74a",
+     "on_current_head": false
+    }
+   ],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 65,
+   "title": "Preregistered scientific non-inferiority study of CPU, native CUDA and all-FFTW hybrid motion correction (#61)",
+   "head": "2afbb3140789a22121bec640983755932ab551d4",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T16:03:40Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T16:02:15Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T16:03:00Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "copilot-pull-request-reviewer[bot]",
+     "state": "COMMENTED",
+     "commit": "ef5935e17718bb377ea18d4ca88143490b41c24d",
+     "on_current_head": false
+    },
+    {
+     "user": "chatgpt-codex-connector[bot]",
+     "state": "COMMENTED",
+     "commit": "ef5935e17718bb377ea18d4ca88143490b41c24d",
+     "on_current_head": false
+    }
+   ],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 138,
+   "title": "feat(cuda): nvCOMP Deflate for 8-bit samples and any RowsPerStrip (moves the trust boundary \u2014 see the policy note)",
+   "head": "875857f1ba3390c53cdf97f68afaa2a1f1e4832b",
+   "base": "main",
+   "draft": false,
+   "mergeable": "CONFLICTING",
+   "merge_state": "DIRTY",
+   "updated": "2026-10-18T11:56:02Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-05T14:16:07Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-05T14:16:29Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "chatgpt-codex-connector[bot]",
+     "state": "COMMENTED",
+     "commit": "875857f1ba3390c53cdf97f68afaa2a1f1e4832b",
+     "on_current_head": true
+    }
+   ],
+   "github_review_on_current_head": true,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 241,
+   "title": "Fix #235: profiling scratch cleanup and visible EER dependency failure",
+   "head": "6c72a87b464486175bd91175b2b5c304da54fabe",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-21T11:31:41Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-21T11:36:47Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-21T11:37:13Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": {
+    "reviewer": "this task (W1 sonnet-5-5)",
+    "head_reviewed": "6c72a87b",
+    "result": "no material finding; follow-up: required-test list"
+   },
+   "historical_sha_equivalence_note": "native evidence not required for claim (tests-only); local macOS only, d7e797f9 base c8844894; no production src changed on main since c8844894",
+   "native_exact_head_evidence": "none recorded for this head"
+  },
+  {
+   "pr": 242,
+   "title": "Fix #240: preserve dataset finalization without a finally return",
+   "head": "430699df47b76568555ce043b4d5d3279ee6fd56",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-21T11:31:54Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-21T11:38:39Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-21T11:36:50Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": {
+    "reviewer": "this task (W1 sonnet-5-5)",
+    "head_reviewed": "430699df",
+    "result": "no material finding"
+   },
+   "historical_sha_equivalence_note": "native 4GPUs 8/8 dataset endpoints on ed24e44b-class tooling with frozen F binaries; Python-only change; no C++ rebuild",
+   "native_exact_head_evidence": "none recorded for this head"
+  },
+  {
+   "pr": 243,
+   "title": "docs: expand S1 sweep to 114 movies and bracket older-build disagreement",
+   "head": "f5cc1464dfab1fdff2091bff8055842f182615ce",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-21T00:04:09Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-21T00:08:49Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-21T00:10:45Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "d31a60dc43c920d7c29a6b5e7fb2777431dbdd11",
+     "on_current_head": false
+    }
+   ],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 244,
+   "title": "test(cuda): add isolated genuine sticky-context control (#213)",
+   "head": "1b8239b1518e882a26fc77f061d48c0e4afb3632",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T10:57:15Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T10:50:59Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T10:53:14Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "88444f3ede34ffb0022d2c6b5bf06995e4620faf",
+     "on_current_head": false
+    },
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "88444f3ede34ffb0022d2c6b5bf06995e4620faf",
+     "on_current_head": false
+    }
+   ],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 245,
+   "title": "Fix #239: own RelionError backtraces across exception copies",
+   "head": "b8b8adbf12978ef580b227eac512da938a0f8225",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-21T11:32:07Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-21T11:37:04Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-21T11:38:26Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "6530c96dfbb776c4b45abc94f621752c024473b3",
+     "on_current_head": false
+    }
+   ],
+   "github_review_on_current_head": false,
+   "w1_local_review": {
+    "reviewer": "this task (W1 sonnet-5-5)",
+    "head_reviewed": "b8b8adbf",
+    "result": "no material finding; earlier non-blocking follow-up still open"
+   },
+   "historical_sha_equivalence_note": "native 3-config CTest at 1c14e888 (CPU 75/76 FAIL=#246 harness, CUDA 110/110, nvCOMP 113/113); src/error.* identical on current head; main moved only docs+#246 test since base",
+   "native_exact_head_evidence": "none recorded for this head"
+  },
+  {
+   "pr": 248,
+   "title": "Fix #215: pin TIFF identity across nvCOMP ingest",
+   "head": "855b134e6503096c84f3ac11308f5fdb4a70e1b0",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T15:29:50Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T15:27:50Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T15:26:27Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "bbca38380b1cfd4b03e0e8007ea32deb72b493e5",
+     "on_current_head": false
+    }
+   ],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 249,
+   "title": "Fix #214: reject late compressed MRC decoder failures",
+   "head": "5791f69e775f8151b953e159f45ba8b20a33bf12",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T11:37:40Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-21T11:36:57Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-21T11:37:30Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "8487264904b0b2ee0750d2c146485630c7243dbc",
+     "on_current_head": false
+    }
+   ],
+   "github_review_on_current_head": false,
+   "w1_local_review": {
+    "reviewer": "this task (W1 sonnet-5-5)",
+    "head_reviewed": "5791f69e",
+    "result": "no material finding; both acceptance entries retained"
+   },
+   "historical_sha_equivalence_note": "native at 39aca256 (CPU 77/77, CUDA 110/111 #246 pair, nvCOMP 114/114); src identical on head; later commits docs + #247 merge",
+   "native_exact_head_evidence": "none recorded for this head"
+  },
+  {
+   "pr": 250,
+   "title": "docs(s1.3): CCF near-tie logging, CPU vs CUDA local alignment (evidence only)",
+   "head": "7fc9733f3b02cd34f7dd3dde7e8a89e7ed7ff1bf",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-20T10:05:53Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-19T15:08:53Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-19T15:08:10Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "c324067723b6b0903bba16fe8b7562e53a931441",
+     "on_current_head": false
+    },
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "c324067723b6b0903bba16fe8b7562e53a931441",
+     "on_current_head": false
+    },
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "c324067723b6b0903bba16fe8b7562e53a931441",
+     "on_current_head": false
+    },
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "7fc9733f3b02cd34f7dd3dde7e8a89e7ed7ff1bf",
+     "on_current_head": true
+    },
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "7fc9733f3b02cd34f7dd3dde7e8a89e7ed7ff1bf",
+     "on_current_head": true
+    }
+   ],
+   "github_review_on_current_head": true,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 251,
+   "title": "#226 D3: refuse insufficient CUDA memory before host preprocessing",
+   "head": "1dbdd47e875422655ad54bd453be01addb2fef5a",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T16:12:18Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T16:06:20Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T16:07:36Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "4c82012b2995c5255fa1fecf29ade9b3108e4d8c",
+     "on_current_head": false
+    }
+   ],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 252,
+   "title": "#226 D2: include patch workspaces in CUDA admission",
+   "head": "ad0c61a369499b9d1444b804cd9850a167fea646",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T15:35:32Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T15:33:16Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T15:34:00Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "1fd0aea62e70901af625987a250799af5edda4af",
+     "on_current_head": false
+    }
+   ],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 254,
+   "title": "Fix non-Hermitian CUDA C2R boundary inputs (#253)",
+   "head": "b7f4517669b3eae2f7d83f767b1ef6c7bf3681ad",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T11:10:23Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T11:07:16Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T10:56:25Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "8b55d5dae8815e4648758620750496e4acd533c5",
+     "on_current_head": false
+    },
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "af2a5900357e8e4dcdd83fb833ccb7e4fdaa5817",
+     "on_current_head": false
+    }
+   ],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 255,
+   "title": "docs(s1.3c): attribute S1 to the cuFFT C2R row term h(y): census with null (evidence only)",
+   "head": "23a320a65aafaa41631a051f49e2c36ad99092dd",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-21T00:07:02Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-20T03:07:49Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-20T03:06:13Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "23a320a65aafaa41631a051f49e2c36ad99092dd",
+     "on_current_head": true
+    }
+   ],
+   "github_review_on_current_head": true,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 256,
+   "title": "docs(audit): stage-by-stage CPU/CUDA numerical correctness review",
+   "head": "f62572947572259abd197c1deaa024c3a1020e13",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-21T08:12:58Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-21T00:09:18Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-21T00:08:37Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 260,
+   "title": "Fix #257: evaluate CUDA subpixel peak fit in double",
+   "head": "2b23fd3cebcab116240ece1566fb7f3510423a25",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T11:00:36Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T10:52:08Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T10:56:53Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "d888ab111b1965aeda484a928e76f421112737e0",
+     "on_current_head": false
+    }
+   ],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 261,
+   "title": "S1: full peak-fit census and bilateral CCF conditioning evidence",
+   "head": "c89e74c212a3196d2ad14a58626e9da539d37893",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-21T08:07:11Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-21T02:09:30Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-21T02:09:00Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [
+    {
+     "user": "KingAlejandro",
+     "state": "COMMENTED",
+     "commit": "c89e74c212a3196d2ad14a58626e9da539d37893",
+     "on_current_head": true
+    }
+   ],
+   "github_review_on_current_head": true,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 267,
+   "title": "test: add known-motion diagnostics with analytic inverse truth",
+   "head": "6695241523d7285d4f0480abf1c4a2c6423c3617",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T10:54:53Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T10:41:25Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T10:41:14Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 269,
+   "title": "test: measure CCF DC accuracy with 100 seeded motion-truth movies",
+   "head": "1b29b7f9eea1976a0b7a9e2ef5f9ca00477324b1",
+   "base": "test/known-motion-diagnostics-v2",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T11:58:23Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T11:54:50Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T11:54:22Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": {
+    "reviewer": "this task (W1 sonnet-5-5)",
+    "head_reviewed": "1b29b7f9",
+    "result": "no material finding in checker/metrics sources; 1 low (see report)"
+   },
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "none recorded for this head"
+  },
+  {
+   "pr": 270,
+   "title": "Fix #259: CUDA local warp takes the border branch in double",
+   "head": "09ee7cb0a48a3f9bc0301239af475134cb78cd6d",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T11:03:40Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T10:59:38Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T11:00:12Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 271,
+   "title": "S1 #262: double-CCF reference and split DC census (evidence only)",
+   "head": "12339b6bbaa8c05ba0cb7109e792412b6e5bcf07",
+   "base": "main",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-21T12:44:16Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-21T12:49:15Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-21T12:51:14Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 272,
+   "title": "test: combined-build synthetic testing and image-level truth check (#267 cases, #269 census)",
+   "head": "1f0a58bf6e0639d8b62f74da52f250cc664c0b30",
+   "base": "test/realistic-motion-truth",
+   "draft": false,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T11:57:30Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T11:53:05Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T11:54:52Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": {
+    "reviewer": "this task (W1 sonnet-5-5)",
+    "head_reviewed": "1f0a58bf",
+    "result": "no material finding; same low item inherited from #267 checker"
+   },
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "none recorded for this head"
+  },
+  {
+   "pr": 273,
+   "title": "test: validate composed CUDA numerical fixes on A100",
+   "head": "805d9de27898b4a10e6212e65098d5995a40fdb1",
+   "base": "test/synth-combined-image-check",
+   "draft": true,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T15:05:42Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T14:57:02Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T14:59:00Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 274,
+   "title": "Integrate D2 retry admission with D3 early-refusal guard",
+   "head": "a1036901bbc17900a0c515ad047efb50449c14f7",
+   "base": "fix/226-d2-patch-admission",
+   "draft": true,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T16:54:55Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T16:27:48Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T16:41:56Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 275,
+   "title": "Record neutral residual CCF captures and precision replay",
+   "head": "6ae486785334fca635cfc9ad9e86026d656f3943",
+   "base": "cuda-numeric-fixes-integration",
+   "draft": true,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T17:04:16Z",
+   "checks": [
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T17:03:48Z"
+    ],
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T17:02:45Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  },
+  {
+   "pr": 276,
+   "title": "Add native host fit-boundary oracle and discriminating controls",
+   "head": "1499e8ed238a0f6337c6e3e065d0c48db3b1f7b3",
+   "base": "cuda-numeric-fixes-integration",
+   "draft": true,
+   "mergeable": "MERGEABLE",
+   "merge_state": "CLEAN",
+   "updated": "2026-10-22T17:49:48Z",
+   "checks": [
+    [
+     "CUDA compile only (no GPU execution)",
+     "success",
+     "2026-10-22T17:46:12Z"
+    ],
+    [
+     "Build & Smoke Check (Ubuntu Linux)",
+     "success",
+     "2026-10-22T17:47:31Z"
+    ]
+   ],
+   "checks_all_success": true,
+   "github_reviews": [],
+   "github_review_on_current_head": false,
+   "w1_local_review": null,
+   "historical_sha_equivalence_note": "",
+   "native_exact_head_evidence": "not examined in this task"
+  }
+ ]
+}

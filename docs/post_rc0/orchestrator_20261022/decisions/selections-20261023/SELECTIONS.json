@@ -1,0 +1,71 @@
+{
+  "recorded_utc": "2026-10-22T23:11:45.928877+00:00",
+  "local_date": "2026-10-23 Europe/London",
+  "source": "Explicit user selections in current MotionCorr orchestrator thread",
+  "M2": {
+    "selection": "Include C1 bulk",
+    "scope": "Review C1 known-motion packet and reachable Git history in addition to #273/#274",
+    "does_not_authorize": [
+      "deletion",
+      "moving evidence",
+      "history rewrite",
+      "merge-mode change",
+      "merge"
+    ],
+    "review_task": "motioncorr-plan-20261023-m2-bulk-retention-sonnet-r1",
+    "model": "claude-sonnet-5-5"
+  },
+  "M4": {
+    "selection": "Report quality; preserve publication",
+    "scope": "Next minimal observation prototype for global and local nonconvergence",
+    "production_policy_adopted": false,
+    "prototype_task": "motioncorr-plan-20261023-m4-report-quality-opus-r1",
+    "model": "claude-opus-5-5"
+  },
+  "M8": {
+    "selection": "Leave open and mark parked",
+    "implemented": [
+      {
+        "PR": 64,
+        "head": "401a810ff7bbb100bff84b14c3cc3c536eb9cc9f",
+        "state": "OPEN",
+        "parked_marker": true,
+        "original_body_sha256": "54bc1723147d687ed36cab3a5e65ea04717ccd6c0ebf48e97f0b44447c92df8e",
+        "original_body_preserved": true,
+        "source_changed": false
+      },
+      {
+        "PR": 138,
+        "head": "875857f1ba3390c53cdf97f68afaa2a1f1e4832b",
+        "state": "OPEN",
+        "parked_marker": true,
+        "original_body_sha256": "3fbac5068f3031ecd5877b7627e6e4edf7e225fd1e4832c5f2e1e5467e125a0f",
+        "original_body_preserved": true,
+        "source_changed": false
+      },
+      {
+        "PR": 46,
+        "head": "2ef82b0279d0db7403daf9ba6c2943888f3a0321",
+        "state": "OPEN",
+        "parked_marker": true,
+        "original_body_sha256": "398f92d550db19ed8cc3ce720ace25c2ae45176861b2e0618d4caf583eaa7e6f",
+        "original_body_preserved": true,
+        "source_changed": false
+      },
+      {
+        "PR": 52,
+        "head": "edb57b5d91ec0719d7285a16a4771b886d979e65",
+        "state": "OPEN",
+        "parked_marker": true,
+        "original_body_sha256": "268be5cb22dec31a1cf67f06f3ff9e0bb9612dbedf71eed56fd431ed6af3956e",
+        "original_body_preserved": true,
+        "source_changed": false
+      }
+    ]
+  },
+  "GPU": {
+    "selection": "Continue CPU and reviews for now",
+    "state": "GPU experiments paused; no exclusive-lane intervention selected"
+  },
+  "other_decisions": "No M1/M3/M5/M6/M7/C2/support-class/retention-policy adoption implied"
+}

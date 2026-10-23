@@ -1,0 +1,20 @@
+# Exact invocations (all read-only; cwd = /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-7bb498b8; PY=/Users/alex.konstantinov/.local/bin/python3)
+git --version                                   # git version 2.56.0
+git rev-parse --verify -q <ref>^{commit}        # for 1b15f10b bbf24607 e77a51a2 36913740 d585570c 1b29b7f9 805d9de2 a1036901 6f78f16d
+git merge-base [--is-ancestor] ...; git rev-list --count 36913740..bbf24607 / e77a51a2..bbf24607
+git diff --name-only e77a51a2 bbf24607 | grep -v '^docs/'                       # 0 lines
+git grep -n -I -E 'docs/' e77a51a2 -- src tests tools cmake .github CMakeLists.txt  > grep-e77.txt   # 85 lines
+git grep -n -I -w docs   e77a51a2 -- (same pathspec)                                # +5 lines incl. 2 false positives
+$PY -I -B scripts/archives_and_refs.py   <repo> out/     # archives, digests, tar headers, ref presence (3.6 s)
+$PY -I -B scripts/payload_ext_scan.py    <repo> out/     # header-only member extension scan
+$PY -I -B scripts/classify_docs_refs.py  <repo> out/     # 90 hit lines / 60 files
+$PY -I -B scripts/composition.py         <repo> out/
+$PY -I -B scripts/history_groups.py      <repo> out/
+$PY -I -B scripts/recorded_digests.py    <repo> out/
+$PY -I -B scripts/inventory_c1_docs.pr281.py --repo <repo> --candidate {e77|bbf full sha} --base 3691374061f782bc84531fd1c79d017ddcb5a7c2 \
+   --pr 273=805d9de27898b4a10e6212e65098d5995a40fdb1:docs/post_rc0/parallel_20261022/numerics \
+   --pr 274=a1036901bbc17900a0c515ad047efb50449c14f7:docs/rc0/issue226/integration_20261022 \
+   --focus docs/post_rc0/s1/km_truth --ancestor 269=1b29b7f9eea1976a0b7a9e2ef5f9ca00477324b1 --tree-out out/tree_X.json --history-out out/history_X.json   # exit 0 both
+$PY -I -B scripts/build_tables.py /tmp/motioncorr-m2-retention-review-20261023
+# ad-hoc one-off reads (git show / git ls-tree / git cat-file -s / git for-each-ref --points-at/--contains / git count-objects -vH / git rev-parse --is-shallow-repository)
+# NOT run: git merge-tree --write-tree, checkout, fetch, gc, any tar extraction, any test/build/ssh/network.

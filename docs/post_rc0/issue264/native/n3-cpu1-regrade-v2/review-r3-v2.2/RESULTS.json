@@ -1,0 +1,449 @@
+[
+  {
+    "name": "occupancy",
+    "ok": true,
+    "load": [
+      8.556640625,
+      9.12548828125,
+      8.01953125
+    ],
+    "free": 5994622976,
+    "python": "3.13.7 (main, Aug 18 2025, 19:02:43) [Clang 20.1.4 ]",
+    "python_sha256": "127b5dc839447e76f0ed6a6c3b3097dc7903547d2f1a1fe21d7fc40c20b7bc65",
+    "threads": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1"
+    }
+  },
+  {
+    "name": "live-clean",
+    "ok": true,
+    "exit": 0,
+    "expected": 0,
+    "changed": [],
+    "calls": 15,
+    "problems": [],
+    "private_environment": true
+  },
+  {
+    "name": "live-stale",
+    "ok": true,
+    "exit": 0,
+    "expected": 0,
+    "changed": [],
+    "calls": 15,
+    "problems": [],
+    "private_environment": true
+  },
+  {
+    "name": "live-private-real-refresh",
+    "ok": true,
+    "exit": 0,
+    "expected": 0,
+    "changed": [],
+    "calls": 15,
+    "problems": [],
+    "private_environment": true
+  },
+  {
+    "name": "live-original-guard",
+    "ok": true,
+    "exit": 1,
+    "expected": 1,
+    "changed": [
+      "tree0/.git/index"
+    ],
+    "calls": 3,
+    "problems": [
+      "invalid input: tree0: .git/index changed during the check"
+    ],
+    "private_environment": true
+  },
+  {
+    "name": "live-source-binding",
+    "ok": true,
+    "exit": 1,
+    "expected": 1,
+    "changed": [],
+    "calls": 15,
+    "problems": [
+      "tree0: diff_sha256 '7dd8b748441dd3b23c6b947f1e1e1189f755e8e83cb00e6dcc9dd414efa1c858' != 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'",
+      "tree0: status [' M src/motioncorr_runner.cpp'] != []",
+      "tree0: runner_sha256 '4487e24377581c1a43c957c7700c8b49920de7b8500c05590cee74996ef73f42' != 'a5f42e5130b4b9a11ff6d3dc211fe4cbe20ad9656a639fc4386f25c289dd74b4'"
+    ],
+    "private_environment": true
+  },
+  {
+    "name": "stream-positive",
+    "ok": true,
+    "exit": 0,
+    "expected": 0,
+    "error": null,
+    "result": {
+      "size": 4,
+      "sha256": "88d4266fd4e6338d13b845fcf289579d209c897823b9217da3e161936f031589"
+    },
+    "reads": [
+      {
+        "request": 5,
+        "read": 4
+      },
+      {
+        "request": 1,
+        "read": 0
+      }
+    ],
+    "source_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849"
+  },
+  {
+    "name": "stream-growth",
+    "ok": true,
+    "exit": 1,
+    "expected": 1,
+    "error": "binary grew past 4 bytes",
+    "result": null,
+    "reads": [
+      {
+        "request": 5,
+        "read": 5
+      }
+    ],
+    "source_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849"
+  },
+  {
+    "name": "stream-growth-bound-mutant",
+    "ok": true,
+    "exit": 1,
+    "expected": 1,
+    "error": "binary changed identity during hash",
+    "result": null,
+    "reads": [
+      {
+        "request": 5,
+        "read": 5
+      },
+      {
+        "request": 0,
+        "read": 0
+      }
+    ],
+    "source_sha256": "d2252bd75fdb74f618a9bf1f5d5840b910077e40d2799df9aa4fbaa985040c44"
+  },
+  {
+    "name": "stream-growth-combo-mutant",
+    "ok": true,
+    "exit": 0,
+    "expected": 0,
+    "error": null,
+    "result": {
+      "size": 5,
+      "sha256": "36bbe50ed96841d10443bcb670d6554f0a34b761be67ec9c4a8ad2c0c44ca42c"
+    },
+    "reads": [
+      {
+        "request": 5,
+        "read": 5
+      },
+      {
+        "request": 0,
+        "read": 0
+      }
+    ],
+    "source_sha256": "5caac97fde507e35d0e9aa6e1bd9375c996c25ce7a7c10c2ef1ebac09126c98e"
+  },
+  {
+    "name": "stream-rewrite",
+    "ok": true,
+    "exit": 1,
+    "expected": 1,
+    "error": "binary changed identity during hash",
+    "result": null,
+    "reads": [
+      {
+        "request": 5,
+        "read": 4
+      },
+      {
+        "request": 1,
+        "read": 0
+      }
+    ],
+    "source_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849"
+  },
+  {
+    "name": "stream-rewrite-mutant",
+    "ok": true,
+    "exit": 0,
+    "expected": 0,
+    "error": null,
+    "result": {
+      "size": 4,
+      "sha256": "17f488f768db8fbe7a408a9469203c61e03b5fe43214b95a00e7c0c52d2fd933"
+    },
+    "reads": [
+      {
+        "request": 5,
+        "read": 4
+      },
+      {
+        "request": 1,
+        "read": 0
+      }
+    ],
+    "source_sha256": "719f24b71b5cbd82ec649e58b54163c98c184ee4d9db2170ec46c4d296339073"
+  },
+  {
+    "name": "stream-replace",
+    "ok": true,
+    "exit": 1,
+    "expected": 1,
+    "error": "binary changed identity during hash",
+    "result": null,
+    "reads": [
+      {
+        "request": 5,
+        "read": 4
+      },
+      {
+        "request": 1,
+        "read": 0
+      }
+    ],
+    "source_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849"
+  },
+  {
+    "name": "stream-replace-mutant",
+    "ok": true,
+    "exit": 0,
+    "expected": 0,
+    "error": null,
+    "result": {
+      "size": 4,
+      "sha256": "88d4266fd4e6338d13b845fcf289579d209c897823b9217da3e161936f031589"
+    },
+    "reads": [
+      {
+        "request": 5,
+        "read": 4
+      },
+      {
+        "request": 1,
+        "read": 0
+      }
+    ],
+    "source_sha256": "719f24b71b5cbd82ec649e58b54163c98c184ee4d9db2170ec46c4d296339073"
+  },
+  {
+    "name": "proc-parent",
+    "ok": true,
+    "hits": [
+      [
+        "58401",
+        "cmdline"
+      ]
+    ],
+    "fake_proc": true
+  },
+  {
+    "name": "ancestor-mutant",
+    "ok": true,
+    "exact_hits": [
+      [
+        "58401",
+        "cmdline"
+      ]
+    ],
+    "mutant_hits": [],
+    "acceptance_changing": true
+  },
+  {
+    "name": "proc-other",
+    "ok": true,
+    "hits": [
+      [
+        "999999",
+        "cmdline"
+      ]
+    ],
+    "fake_proc": true
+  },
+  {
+    "name": "proc-sibling",
+    "ok": true,
+    "hits": [],
+    "fake_proc": true
+  },
+  {
+    "name": "proc-launch",
+    "ok": true,
+    "hits": [],
+    "fake_proc": true
+  },
+  {
+    "name": "proc-cwd",
+    "ok": true,
+    "hits": [
+      [
+        "999999",
+        "cwd"
+      ]
+    ],
+    "fake_proc": true
+  },
+  {
+    "name": "proc-fd",
+    "ok": true,
+    "hits": [
+      [
+        "999999",
+        "fd"
+      ]
+    ],
+    "fake_proc": true
+  },
+  {
+    "name": "proc-self",
+    "ok": true,
+    "hits": [],
+    "fake_proc": true
+  },
+  {
+    "name": "package-positive",
+    "ok": true,
+    "package_bytes": 122880,
+    "content_bytes": 103273,
+    "package_sha256": "e57532004e0cd3e9095c2d7bfce688ec518a3a058f17a61678417e251899ae75"
+  },
+  {
+    "name": "package-driver",
+    "ok": true,
+    "error": "package member identity mismatch: remote_run_v2_2.py"
+  },
+  {
+    "name": "package-manifest",
+    "ok": true,
+    "error": "package manifest hash mismatch"
+  },
+  {
+    "name": "package-source",
+    "ok": true,
+    "error": "package source revision mismatch"
+  },
+  {
+    "name": "package-extra",
+    "ok": true,
+    "error": "package member set mismatch"
+  },
+  {
+    "name": "package-missing",
+    "ok": true,
+    "error": "package member set mismatch"
+  },
+  {
+    "name": "package-symlink",
+    "ok": true,
+    "error": "package member is not a bounded regular file: CONTRACT.md"
+  },
+  {
+    "name": "driver-cli-parse",
+    "ok": true
+  },
+  {
+    "name": "driver-local-refusal",
+    "ok": true,
+    "exit": 1,
+    "stderr": "refused: requires Linux Python >=3.8; local execution is forbidden\n"
+  },
+  {
+    "name": "compare-private-ignored",
+    "ok": true
+  },
+  {
+    "name": "compare-original-rejected",
+    "ok": true
+  },
+  {
+    "name": "retained-tar-input",
+    "ok": true,
+    "path": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-d9b98408/docs/post_rc0/issue264/native/n3-cpu1-result/raw/evidence.tar",
+    "sha256": "3cc13020d35aaf7113fe16878e8eb63c11652863fd73c0da3974fc7fa09f2760"
+  },
+  {
+    "name": "retained-tar-grade",
+    "ok": true,
+    "exit": 2,
+    "consumed": 117
+  },
+  {
+    "name": "mrc-valid",
+    "ok": true,
+    "accepted": true,
+    "sha256": "861efb8d4c478f78e64797c8778b90fba42d6427aeeb5a6cff1437b02f4bb960",
+    "size": 1573888
+  },
+  {
+    "name": "mrc-truncated",
+    "ok": true,
+    "accepted": false,
+    "sha256": "298f64f5ca36591c0924b74ccd01b481eeb68acb5caf32f56c82dc4defc288b1",
+    "size": 1573887
+  },
+  {
+    "name": "mrc-header",
+    "ok": true,
+    "accepted": false,
+    "sha256": "d10cf4bd37edafa73d1835eadc6210679c39ec65eed88e8894dc815d364c58b9",
+    "size": 1024
+  },
+  {
+    "name": "mrc-extra",
+    "ok": true,
+    "accepted": false,
+    "sha256": "55cc31d6e94eeb4d91a3619b2a5c2177e1b5c9a6fbca38520fca1c8479c85d8b",
+    "size": 1573889
+  },
+  {
+    "name": "mrc-map",
+    "ok": true,
+    "accepted": false,
+    "sha256": "41bf0b9a1214f695dabebe09447a970aa93800d78f6098e28b299dc07af2d137",
+    "size": 1573888
+  },
+  {
+    "name": "rows-exponent",
+    "ok": true,
+    "equal": true,
+    "error": null
+  },
+  {
+    "name": "rows-signed-y",
+    "ok": true,
+    "equal": false,
+    "error": null
+  },
+  {
+    "name": "rows-changed-y",
+    "ok": true,
+    "equal": false,
+    "error": null
+  },
+  {
+    "name": "rows-frame12",
+    "ok": true,
+    "equal": false,
+    "error": "11 frames"
+  },
+  {
+    "name": "rows-unicode",
+    "ok": true,
+    "equal": false,
+    "error": "non-ASCII line in global block: '1 \u0660 0'"
+  },
+  {
+    "name": "all-controls",
+    "ok": true
+  }
+]

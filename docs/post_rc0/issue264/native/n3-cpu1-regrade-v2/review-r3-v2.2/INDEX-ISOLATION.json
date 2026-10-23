@@ -1,0 +1,87 @@
+[
+  {
+    "bypass": false,
+    "exit": 0,
+    "expected": 0,
+    "before": {
+      "sha256": "061da6910fd7fa561ccd222765e8c6c1bbf2aa22fdf2735d7fa04bc869999ddf",
+      "stat": [
+        16777230,
+        228263389,
+        269,
+        1792760657508075068,
+        1792760657508261652
+      ]
+    },
+    "after": {
+      "sha256": "061da6910fd7fa561ccd222765e8c6c1bbf2aa22fdf2735d7fa04bc869999ddf",
+      "stat": [
+        16777230,
+        228263389,
+        269,
+        1792760657508075068,
+        1792760657508261652
+      ]
+    },
+    "refresh": [
+      {
+        "selected": "/private/tmp/motioncorr-guard264-v22-review-r3-20261023-codex/c0a3aeda-f76d-4724-a4ff-aeef7286e732/index-isolation-exact/private-index-ta51h4kn/index",
+        "before": {
+          "sha256": "a13f3794e7a41f4eac745864430df3acd67b61e3066840accd56d9e99f80582e",
+          "stat": [
+            16777230,
+            228263417,
+            269,
+            1792760657709945365,
+            1792760657710287033
+          ]
+        },
+        "after": {
+          "sha256": "a13f3794e7a41f4eac745864430df3acd67b61e3066840accd56d9e99f80582e",
+          "stat": [
+            16777230,
+            228263418,
+            269,
+            1792760657808578613,
+            1792760657809102281
+          ]
+        },
+        "exit": 0
+      }
+    ],
+    "stdout": "precheck-live PASS []\n",
+    "source_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849",
+    "kind": "procedure-isolation detection; guard still rejects bypass",
+    "ok": true
+  },
+  {
+    "bypass": true,
+    "exit": 1,
+    "expected": 1,
+    "before": {
+      "sha256": "87258a11668f3ad5e7be394e106eda37ea80e90d28f8686af62918dc7576a6ef",
+      "stat": [
+        16777230,
+        228263472,
+        269,
+        1792760657961766664,
+        1792760657962030207
+      ]
+    },
+    "after": {
+      "sha256": "c0bc51410839de5864a3243915ae74f40a8f6fc6912e7a1a9437fc549fd739d3",
+      "stat": [
+        16777230,
+        228263500,
+        269,
+        1792760658120440729,
+        1792760658120814272
+      ]
+    },
+    "refresh": [],
+    "stdout": "precheck-live FAIL ['invalid input: tree: .git/index changed during the check']\n",
+    "source_sha256": "b76e6a897ac8f8b2f7560b7a33930d88a2b77bc08c27318048881d2974620277",
+    "kind": "procedure-isolation detection; guard still rejects bypass",
+    "ok": false
+  }
+]

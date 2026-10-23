@@ -1,0 +1,9 @@
+# Parent review binding and scratch ownership note
+
+At23:48UTC the parent verified the response at92a65539: all18 copied reviewer artifact hashes match, report SHA256 b5a5f4f762fe934d6d842fc212d6c67438ac0162e8362eb0e64cdf72949d8c05, and frozen protocol/results/scripts are byte-identical to07773483. The F1–F4 README corrections were inspected against the report and retained outputs. No numerical experiment or gate was rerun or changed. The reviewer file self-hash remains invalid by construction and is not used; its other17 bindings and the separate copy manifest verify.
+
+The parent assigned exactly one affine review task. App thread history records two T3 restart/resume continuations: ordinal1 and2 cancelled, ordinal3 completed23:45:33UTC. A nested opus-r1-independent directory appeared during that review. No second affine review thread was found in the live task inventory; no process command referencing that nested path was present in the23:46 process query. Its writer's provenance was not established, so those artifacts are excluded from publication and conclusions. The retained primary report explicitly did not consume them. No additional independent review is claimed.
+
+Separately, the same app restart investigation found duplicate local DC author processes. Those exact owned orphan PID/UID/birth/argv trees were stopped and their overlapping mock results held for reconciliation. That incident does not establish the identity of the unowned affine writer. No remote/native/GPU process was signalled. The primary affine artifact hashes, protocol and native-capture input bindings remain intact; no unknown artifact is used to support this draft.
+
+Scope remains one affine patch and offline diagnosis. Full-field failure attribution, all other patches, fit and proposed16-process capture remain incomplete/unrun; GPU capture stays HELD under the maintainer choice. No science, performance, policy or merge acceptance.

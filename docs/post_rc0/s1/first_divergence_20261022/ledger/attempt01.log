@@ -1,0 +1,9 @@
+pedestal [(0.12515589594841003, 8.0, 1), (0.124860480427742, 8.0, 1)]
+flat [(0.0, 0.00390625, 1), (0.0, 0.00390625, 1)]
+repeated [(0.03984617012611125, 0.00390625, 7), (0.03793107074307045, 0.00390625, 9)]
+integer [(1.9756401941049262, 0.00390625, 501), (1.9541504869048367, 0.00390625, 501)]
+cpu-affine native 0.5436 {'specified_double': 0.3578, 'continuous_double': 0.0227, 'continuous_double_tol1e-9_max_iter50': 0.0288}
+cuda-affine native 0.3753 {'specified_double': 0.3578, 'continuous_double': 0.0228, 'continuous_double_tol1e-9_max_iter50': 0.0288}
+cpu-noisy native 0.5865 {'specified_double': 0.8424, 'continuous_double': 0.9877, 'continuous_double_tol1e-9_max_iter50': 0.9412}
+cuda-noisy native 1.2971 {'specified_double': 0.8424, 'continuous_double': 0.9877, 'continuous_double_tol1e-9_max_iter50': 0.9412}
+single-iteration patches [('cpu', 'affine', 5, 9), ('cpu', 'pedestal', 9, 9), ('cpu', 'noisy', 0, 9), ('cuda', 'affine', 5, 9), ('cuda', 'pedestal', 9, 9), ('cuda', 'noisy', 0, 9)]

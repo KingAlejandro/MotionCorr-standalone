@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c3dca0d/docs/post_rc0/s1/first_divergence_20261022/affine_patch_oracle/attempt01-affine_patch_oracle.py", line 282, in <module>
+    maps=np.stack([arr(f'{base}c2-i{k}-map-f{f}.bin', '<f4', (PY, PX)) for f in range(NF)]),
+                   ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c3dca0d/docs/post_rc0/s1/first_divergence_20261022/affine_patch_oracle/attempt01-affine_patch_oracle.py", line 259, in arr
+    return np.frombuffer(load(rel), dt).reshape(shape)
+                         ~~~~^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c3dca0d/docs/post_rc0/s1/first_divergence_20261022/affine_patch_oracle/attempt01-affine_patch_oracle.py", line 43, in load
+    raw = (RAW / rel).read_bytes()
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/pathlib/_abc.py", line 625, in read_bytes
+    with self.open(mode='rb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/pathlib/_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/mc-residual-review.h52lh3/raw/runs/cuda-affine-on/capture/c2-i1-map-f0.bin'

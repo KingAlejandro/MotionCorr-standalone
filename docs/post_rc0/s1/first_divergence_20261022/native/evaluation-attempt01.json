@@ -1,0 +1,1554 @@
+{
+ "kind": "W4 native campaign evaluation",
+ "summary": {
+  "neutral-cpu-integer": {
+   "all_met": true,
+   "runtime_rms_px": 0.29786846691579577,
+   "checker": "FAIL",
+   "field_rms_px": 0.29786778665475044,
+   "published_sum_cnrmse": 0.02640693613146232
+  },
+  "neutral-cuda-integer": {
+   "all_met": true,
+   "runtime_rms_px": 0.2850249673388219,
+   "checker": "FAIL",
+   "field_rms_px": 0.2850258109094684,
+   "published_sum_cnrmse": 0.0456910760896163
+  },
+  "truth-cpu-integer": {
+   "all_met": true,
+   "runtime_rms_px": 0.0,
+   "checker": "PASS",
+   "field_rms_px": 0.0,
+   "published_sum_cnrmse": 1.0700702317134178e-05
+  },
+  "truth-cuda-integer": {
+   "all_met": true,
+   "runtime_rms_px": 0.0,
+   "checker": "PASS",
+   "field_rms_px": 0.0,
+   "published_sum_cnrmse": 1.0897700507578511e-05
+  },
+  "truth-cpu-fractional": {
+   "all_met": true,
+   "runtime_rms_px": 0.0,
+   "checker": "PASS",
+   "field_rms_px": 0.0,
+   "published_sum_cnrmse": 7.129589399378448e-06
+  },
+  "truth-cuda-fractional": {
+   "all_met": true,
+   "runtime_rms_px": 0.0,
+   "checker": "PASS",
+   "field_rms_px": 0.0,
+   "published_sum_cnrmse": 6.719379827626635e-06
+  },
+  "perturbed-cpu-integer": {
+   "all_met": true,
+   "runtime_rms_px": 0.4472135954999579,
+   "checker": "FAIL",
+   "field_rms_px": 0.4472135954999579,
+   "published_sum_cnrmse": 0.06481142868154025
+  },
+  "perturbed-cuda-integer": {
+   "all_met": true,
+   "runtime_rms_px": 0.4472135954999579,
+   "checker": "FAIL",
+   "field_rms_px": 0.4472135954999579,
+   "published_sum_cnrmse": 0.06481140624030352
+  },
+  "fixedref-cpu-integer": {
+   "all_met": true,
+   "runtime_rms_px": 0.0,
+   "checker": "PASS",
+   "field_rms_px": 0.0,
+   "published_sum_cnrmse": 1.0700702317134178e-05
+  },
+  "fixedref-cuda-integer": {
+   "all_met": true,
+   "runtime_rms_px": 0.0,
+   "checker": "PASS",
+   "field_rms_px": 0.0,
+   "published_sum_cnrmse": 1.0897700507578511e-05
+  },
+  "fixedref-cpu-fractional": {
+   "all_met": true,
+   "runtime_rms_px": 0.3077349290617265,
+   "checker": "FAIL",
+   "field_rms_px": 0.30773463482065194,
+   "published_sum_cnrmse": 0.05242526484698757
+  },
+  "fixedref-cuda-fractional": {
+   "all_met": false,
+   "runtime_rms_px": 0.4946763784241645,
+   "checker": "FAIL",
+   "field_rms_px": 0.4946752771623017,
+   "published_sum_cnrmse": 0.034140227448816174
+  }
+ },
+ "arms": {
+  "neutral-cpu-integer": {
+   "backend": "cpu",
+   "case": "integer",
+   "env": {},
+   "exit": 0,
+   "checker_exit": 1,
+   "witness_injected": 0,
+   "witness_fixed": 0,
+   "global_rmsd_log": [
+    5.71299,
+    0.867494,
+    0.57658,
+    0.974519,
+    0.923235
+   ],
+   "runtime_global_xy": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -0.6999999999999997,
+     1.9
+    ],
+    [
+     -1.7142857142857144,
+     3.604761904761904
+    ],
+    [
+     -3.1523809523809523,
+     5.933333333333333
+    ],
+    [
+     -4.1952380952380945,
+     8.2
+    ]
+   ],
+   "iterations_recorded": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "runtime_vs_truth": {
+    "rms_px": 0.29786846691579577,
+    "max_px": 0.48769437662194004
+   },
+   "star_vs_runtime_max_px": 4.286772356145891e-06,
+   "checker": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "field_px": {
+     "rms": 0.29786778665475044,
+     "p95": 0.48769178867805424,
+     "max": 0.48769178867805424
+    },
+    "field_angstrom": {
+     "rms": 0.2636129911894542,
+     "p95": 0.431607232980078,
+     "max": 0.431607232980078
+    },
+    "published_sum": {
+     "rmse": 0.02630162611603737,
+     "contrast_normalized_rmse": 0.02640693613146232,
+     "mean_error": -8.513071952620521e-05
+    },
+    "true_motion_bilinear": {
+     "rmse": 0.0,
+     "contrast_normalized_rmse": 0.0,
+     "mean_error": 0.0
+    },
+    "uncorrected": {
+     "rmse": 0.6294498329247489,
+     "contrast_normalized_rmse": 0.6319700949358554,
+     "mean_error": -0.0023172690318180797
+    }
+   },
+   "files": {
+    "runs/neutral-cpu-integer/checker.json": "4e4cda10a24a104d404cf6669b802ddd6d79669abfd161979be2355289967fff",
+    "runs/neutral-cpu-integer/out/corrected_micrographs.star": "fdd4d6ca8f2af1c2935e862d1b9f5d6cba1d2a2f26950be0dc3d0632ca7faf1e",
+    "runs/neutral-cpu-integer/out/corrected_micrographs_all_rlnAccumMotionEarly.eps": "0d230c494b5c5a6e152d1bc9f12fcea566f53508348dcbc85702b77eae17a779",
+    "runs/neutral-cpu-integer/out/corrected_micrographs_all_rlnAccumMotionLate.eps": "31cdecd22f7b44ed455413be773d31d98adfd636f2756a89f055636dab69ba11",
+    "runs/neutral-cpu-integer/out/corrected_micrographs_all_rlnAccumMotionTotal.eps": "609b0ab8b4c175e46544e57598812627412b4bdddd1f6f7533a12ac4fb7aa026",
+    "runs/neutral-cpu-integer/out/integer.log": "5f89d76205c25c81038efa50738409541569b5a56e1c11ca82d1b2a49a0a3456",
+    "runs/neutral-cpu-integer/out/integer.mrc": "354bda73bc99fee82515265449ef1d9120ac8a471e1a90c49d3af883086dc113",
+    "runs/neutral-cpu-integer/out/integer.star": "259a59360b3cde321195dccc07837d1ed0584b97b818c7d9f8ef5d6ec4f14f35",
+    "runs/neutral-cpu-integer/out/integer_shifts.eps": "b85165ba9d69e00a1a762edd71eb07af6538de7ab54a98ac5836fd6c1084ef86",
+    "runs/neutral-cpu-integer/out/logfile.pdf": "55ab024e8f084a7375eabade7c2fc8053c761ac61c190d2ed55e7b31cc1e89e7",
+    "runs/neutral-cpu-integer/out/logfile.pdf.lst": "5f88f4f1ff0739135dc243de65ebccfbc9551611e6b400698484a8b8b7c2382f",
+    "runs/neutral-cpu-integer/state/global-final.txt": "63b9154ff8f6e60886c92a07adec08aace66cde2009aa477b56281710287724f",
+    "runs/neutral-cpu-integer/state/global-iterations.txt": "13d3275382e50300601baff21d40f96234139b18377b81f5099045361f7ec4fa"
+   },
+   "expectations": [
+    {
+     "expectation": "exit 0",
+     "met": true
+    },
+    {
+     "expectation": "no witness",
+     "met": true
+    },
+    {
+     "expectation": "runtime trajectory equals #275 capture-off exactly",
+     "met": true
+    },
+    {
+     "expectation": "STAR equal after output-prefix normalization",
+     "met": true
+    },
+    {
+     "expectation": "MRC equal except timestamp label",
+     "met": true
+    },
+    {
+     "expectation": "checker accuracy FAIL (historical)",
+     "met": true
+    }
+   ]
+  },
+  "neutral-cuda-integer": {
+   "backend": "cuda",
+   "case": "integer",
+   "env": {},
+   "exit": 0,
+   "checker_exit": 1,
+   "witness_injected": 0,
+   "witness_fixed": 0,
+   "global_rmsd_log": [
+    7.22021,
+    2.23051,
+    0.988703,
+    0.523113,
+    0.345044
+   ],
+   "runtime_global_xy": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -0.9333333671092987,
+     1.6666667759418488
+    ],
+    [
+     -2.1666666343808174,
+     3.916666902601719
+    ],
+    [
+     -3.4476191252470016,
+     6.133333660662174
+    ],
+    [
+     -4.0999999940395355,
+     7.833333373069763
+    ]
+   ],
+   "iterations_recorded": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "runtime_vs_truth": {
+    "rms_px": 0.2850249673388219,
+    "max_px": 0.46705539966096826
+   },
+   "star_vs_runtime_max_px": 3.3745558351543208e-06,
+   "checker": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "field_px": {
+     "rms": 0.2850258109094684,
+     "p95": 0.467056334884776,
+     "max": 0.467056334884776
+    },
+    "field_angstrom": {
+     "rms": 0.2522478426548795,
+     "p95": 0.41334485637302676,
+     "max": 0.41334485637302676
+    },
+    "published_sum": {
+     "rmse": 0.04550886154174805,
+     "contrast_normalized_rmse": 0.0456910760896163,
+     "mean_error": -6.430169378290884e-06
+    },
+    "true_motion_bilinear": {
+     "rmse": 0.0,
+     "contrast_normalized_rmse": 0.0,
+     "mean_error": 0.0
+    },
+    "uncorrected": {
+     "rmse": 0.6294498329247489,
+     "contrast_normalized_rmse": 0.6319700949358554,
+     "mean_error": -0.0023172690318180797
+    }
+   },
+   "files": {
+    "runs/neutral-cuda-integer/checker.json": "36f23f31b570ddfb1b1a4e3713d49a8e42c029910611089c9c3052297c67dc9b",
+    "runs/neutral-cuda-integer/out/corrected_micrographs.star": "209a632c81523b84c6d8fb45ad022a215df9978e6b5ae43c341efd72f887b6a8",
+    "runs/neutral-cuda-integer/out/corrected_micrographs_all_rlnAccumMotionEarly.eps": "0842b7bd0c60508d9f5eebd952deb39754a74ec4503fd566057acee9f55061b5",
+    "runs/neutral-cuda-integer/out/corrected_micrographs_all_rlnAccumMotionLate.eps": "0e25da9c577e59ea716edab44f799fd2dd6166217aac930d9db68354ffa56748",
+    "runs/neutral-cuda-integer/out/corrected_micrographs_all_rlnAccumMotionTotal.eps": "49cddaa1c4b0d8254e59d8759659483d3733c4c7ca04882872faad190758aa76",
+    "runs/neutral-cuda-integer/out/integer.log": "55f8f662c4b89cf37e14ed2d6b8bb54bebc23f9fcae3704f88d15f58a76d65ca",
+    "runs/neutral-cuda-integer/out/integer.mrc": "a9b914e98334ed75d738771cc25183cdfcec6ce099a177fa755182a17489e2b9",
+    "runs/neutral-cuda-integer/out/integer.star": "f40ab53af1a4273afd53b7a5dd15e2746c7a5d72aa6f7ffff80a0012f5c570c6",
+    "runs/neutral-cuda-integer/out/integer_shifts.eps": "24fb9b3150408ae3937c2347b2c5ddcdcd956e31ceedbf717c59b38396324f00",
+    "runs/neutral-cuda-integer/out/logfile.pdf": "c2125d63f9e7b85cb1238c27dac7b490377e9ed9492c18fea4a6da498051273a",
+    "runs/neutral-cuda-integer/out/logfile.pdf.lst": "764fcb00ea161a875cd06701bcd8078a6d5a0eb8de6e71a997dc2747652d71f6",
+    "runs/neutral-cuda-integer/state/global-final.txt": "1713462b822205581ef67ad5f872de1ba50d796d64afdc371ff8306b7e88640f",
+    "runs/neutral-cuda-integer/state/global-iterations.txt": "caffec43d1ff35fef2891162f2ffa57b10355981f8683fbb136fbd75f1837bab"
+   },
+   "expectations": [
+    {
+     "expectation": "exit 0",
+     "met": true
+    },
+    {
+     "expectation": "no witness",
+     "met": true
+    },
+    {
+     "expectation": "runtime trajectory equals #275 capture-off exactly",
+     "met": true
+    },
+    {
+     "expectation": "STAR equal after output-prefix normalization",
+     "met": true
+    },
+    {
+     "expectation": "MRC equal except timestamp label",
+     "met": true
+    },
+    {
+     "expectation": "checker accuracy FAIL (historical)",
+     "met": true
+    }
+   ]
+  },
+  "truth-cpu-integer": {
+   "backend": "cpu",
+   "case": "integer",
+   "env": {
+    "MC_W4_GLOBAL_SHIFTS": "truth-integer.txt"
+   },
+   "exit": 0,
+   "checker_exit": 0,
+   "witness_injected": 1,
+   "witness_fixed": 0,
+   "global_rmsd_log": [],
+   "runtime_global_xy": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -1.0,
+     2.0
+    ],
+    [
+     -2.0,
+     4.0
+    ],
+    [
+     -3.0,
+     6.0
+    ],
+    [
+     -4.0,
+     8.0
+    ]
+   ],
+   "iterations_recorded": [
+    0
+   ],
+   "runtime_vs_truth": {
+    "rms_px": 0.0,
+    "max_px": 0.0
+   },
+   "star_vs_runtime_max_px": 0.0,
+   "checker": {
+    "accuracy": "PASS",
+    "sampling": "VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "published_sum": {
+     "rmse": 1.0658028259058483e-05,
+     "contrast_normalized_rmse": 1.0700702317134178e-05,
+     "mean_error": -1.099374571822409e-06
+    },
+    "true_motion_bilinear": {
+     "rmse": 0.0,
+     "contrast_normalized_rmse": 0.0,
+     "mean_error": 0.0
+    },
+    "uncorrected": {
+     "rmse": 0.6294498329247489,
+     "contrast_normalized_rmse": 0.6319700949358554,
+     "mean_error": -0.0023172690318180797
+    }
+   },
+   "files": {
+    "runs/truth-cpu-integer/checker.json": "2f3947bd2da6025a3c9a2abf7077e9291dbb1041082a937a5b13c179d6fa94c1",
+    "runs/truth-cpu-integer/out/corrected_micrographs.star": "7eb7376f469e6b3d9f6a3e147828c77792ebce31473a73e1126706547fd19e8d",
+    "runs/truth-cpu-integer/out/corrected_micrographs_all_rlnAccumMotionEarly.eps": "f4f42e8a84a0ce936728e41784e2f90e83dfaf1b52ef9ed20643ada637beb336",
+    "runs/truth-cpu-integer/out/corrected_micrographs_all_rlnAccumMotionLate.eps": "ca3efe5c791649495066b88286bcd7645f24cfc76fad71e2698beee6d7680434",
+    "runs/truth-cpu-integer/out/corrected_micrographs_all_rlnAccumMotionTotal.eps": "03bc41e5964f8a40e40a03713ca260a88eeb50fe371fca3ceda5a2e745b30485",
+    "runs/truth-cpu-integer/out/integer.log": "3cd2790b2da7dc9b20e61d0981fa58d92c3bf4d83aeda3f3f8f3371172637fc1",
+    "runs/truth-cpu-integer/out/integer.mrc": "a6fa079ec5f57859a3c2893b73cdf57c7536f112d1469918c7489ed6d7cdacae",
+    "runs/truth-cpu-integer/out/integer.star": "c1906150f072b8dfc70e6ab3853b8ed8fa304b45ca11d82b8716661d8bca58a1",
+    "runs/truth-cpu-integer/out/integer_shifts.eps": "72183062235e9c9a41ed70faadede012fedf715ce97f569ff47460594c5d7041",
+    "runs/truth-cpu-integer/out/logfile.pdf": "6a4ccc8089c9a99fbb4c5ba428806ada8a0d1a9824ee8546351c2a127c8e8780",
+    "runs/truth-cpu-integer/out/logfile.pdf.lst": "6a65496898982a36eda544e8ff000ca31b9e0b70fd41897fb9ca6f128ea77ffd",
+    "runs/truth-cpu-integer/state/global-final.txt": "628da1d36b6e1eeb3f84e2ba70800cef6f36f58d9771466d26c6b65689c58a1d",
+    "runs/truth-cpu-integer/state/global-iterations.txt": "628da1d36b6e1eeb3f84e2ba70800cef6f36f58d9771466d26c6b65689c58a1d"
+   },
+   "expectations": [
+    {
+     "expectation": "exit 0",
+     "met": true
+    },
+    {
+     "expectation": "witness once",
+     "met": true
+    },
+    {
+     "expectation": "runtime equals injected file exactly",
+     "met": true
+    },
+    {
+     "expectation": "STAR vs runtime <= 5e-6 px",
+     "met": true
+    },
+    {
+     "expectation": "checker accuracy PASS by construction",
+     "met": true
+    },
+    {
+     "expectation": "published sum contrast-normalized RMSE <= 1e-3",
+     "met": true
+    }
+   ]
+  },
+  "truth-cuda-integer": {
+   "backend": "cuda",
+   "case": "integer",
+   "env": {
+    "MC_W4_GLOBAL_SHIFTS": "truth-integer.txt"
+   },
+   "exit": 0,
+   "checker_exit": 0,
+   "witness_injected": 1,
+   "witness_fixed": 0,
+   "global_rmsd_log": [],
+   "runtime_global_xy": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -1.0,
+     2.0
+    ],
+    [
+     -2.0,
+     4.0
+    ],
+    [
+     -3.0,
+     6.0
+    ],
+    [
+     -4.0,
+     8.0
+    ]
+   ],
+   "iterations_recorded": [
+    0
+   ],
+   "runtime_vs_truth": {
+    "rms_px": 0.0,
+    "max_px": 0.0
+   },
+   "star_vs_runtime_max_px": 0.0,
+   "checker": {
+    "accuracy": "PASS",
+    "sampling": "VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "published_sum": {
+     "rmse": 1.0854240827029571e-05,
+     "contrast_normalized_rmse": 1.0897700507578511e-05,
+     "mean_error": -1.2226594208186725e-06
+    },
+    "true_motion_bilinear": {
+     "rmse": 0.0,
+     "contrast_normalized_rmse": 0.0,
+     "mean_error": 0.0
+    },
+    "uncorrected": {
+     "rmse": 0.6294498329247489,
+     "contrast_normalized_rmse": 0.6319700949358554,
+     "mean_error": -0.0023172690318180797
+    }
+   },
+   "files": {
+    "runs/truth-cuda-integer/checker.json": "7826e85eb1451a2b09d4ca6c903bf420848e71b83508880accac43c6b78c13fd",
+    "runs/truth-cuda-integer/out/corrected_micrographs.star": "c55f284246f8117e489be1b6fd4819b6cce20e392e16bf9bb82f4a83c1293e8b",
+    "runs/truth-cuda-integer/out/corrected_micrographs_all_rlnAccumMotionEarly.eps": "f4f42e8a84a0ce936728e41784e2f90e83dfaf1b52ef9ed20643ada637beb336",
+    "runs/truth-cuda-integer/out/corrected_micrographs_all_rlnAccumMotionLate.eps": "ca3efe5c791649495066b88286bcd7645f24cfc76fad71e2698beee6d7680434",
+    "runs/truth-cuda-integer/out/corrected_micrographs_all_rlnAccumMotionTotal.eps": "03bc41e5964f8a40e40a03713ca260a88eeb50fe371fca3ceda5a2e745b30485",
+    "runs/truth-cuda-integer/out/integer.log": "5e76880fdb2f72c4259f0c55205e094bb4c7041372e318fb8ac86e14dc687762",
+    "runs/truth-cuda-integer/out/integer.mrc": "8b857615511df92748bd5849c2097d1949be1b3eda2657361d46f9d15821abfb",
+    "runs/truth-cuda-integer/out/integer.star": "c1906150f072b8dfc70e6ab3853b8ed8fa304b45ca11d82b8716661d8bca58a1",
+    "runs/truth-cuda-integer/out/integer_shifts.eps": "f9c4454facf83ddf223e2156ac67059c6956cd5640eb2c2ac31fdce21fd93bc9",
+    "runs/truth-cuda-integer/out/logfile.pdf": "4d6783f2d784f2fb8a1f56383f69f3c08044a5b8ec7047cd4dfa7cea5eac8c88",
+    "runs/truth-cuda-integer/out/logfile.pdf.lst": "2c9312d22be3e2a6354797d776485f01eea74d204f2868a3c01d44ece0bda60c",
+    "runs/truth-cuda-integer/state/global-final.txt": "628da1d36b6e1eeb3f84e2ba70800cef6f36f58d9771466d26c6b65689c58a1d",
+    "runs/truth-cuda-integer/state/global-iterations.txt": "628da1d36b6e1eeb3f84e2ba70800cef6f36f58d9771466d26c6b65689c58a1d"
+   },
+   "expectations": [
+    {
+     "expectation": "exit 0",
+     "met": true
+    },
+    {
+     "expectation": "witness once",
+     "met": true
+    },
+    {
+     "expectation": "runtime equals injected file exactly",
+     "met": true
+    },
+    {
+     "expectation": "STAR vs runtime <= 5e-6 px",
+     "met": true
+    },
+    {
+     "expectation": "checker accuracy PASS by construction",
+     "met": true
+    },
+    {
+     "expectation": "published sum contrast-normalized RMSE <= 1e-3",
+     "met": true
+    }
+   ]
+  },
+  "truth-cpu-fractional": {
+   "backend": "cpu",
+   "case": "fractional",
+   "env": {
+    "MC_W4_GLOBAL_SHIFTS": "truth-fractional.txt"
+   },
+   "exit": 0,
+   "checker_exit": 0,
+   "witness_injected": 1,
+   "witness_fixed": 0,
+   "global_rmsd_log": [],
+   "runtime_global_xy": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -0.8125,
+     0.53125
+    ],
+    [
+     -1.625,
+     1.0625
+    ],
+    [
+     -2.4375,
+     1.59375
+    ],
+    [
+     -3.25,
+     2.125
+    ]
+   ],
+   "iterations_recorded": [
+    0
+   ],
+   "runtime_vs_truth": {
+    "rms_px": 0.0,
+    "max_px": 0.0
+   },
+   "star_vs_runtime_max_px": 0.0,
+   "checker": {
+    "accuracy": "PASS",
+    "sampling": "VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "published_sum": {
+     "rmse": 7.101156825228827e-06,
+     "contrast_normalized_rmse": 7.129589399378448e-06,
+     "mean_error": -1.270546817977447e-06
+    },
+    "true_motion_bilinear": {
+     "rmse": 0.02357382905470023,
+     "contrast_normalized_rmse": 0.023668216601912408,
+     "mean_error": -6.632381835237176e-05
+    },
+    "uncorrected": {
+     "rmse": 0.4550866865088168,
+     "contrast_normalized_rmse": 0.4569088137503783,
+     "mean_error": -0.0011611553338857672
+    }
+   },
+   "files": {
+    "runs/truth-cpu-fractional/checker.json": "562e5d15fc1ccf936e1ad9f825b39dd9148a91d0876c662ed0e244789bbff87a",
+    "runs/truth-cpu-fractional/out/corrected_micrographs.star": "aced5b5619d181e420dcc09ed4c576bc3c81cef517d2d084b127620e1595e4c5",
+    "runs/truth-cpu-fractional/out/corrected_micrographs_all_rlnAccumMotionEarly.eps": "af28cfc201390836d6ea892e800c356f7a8ea214abe5f359502cedd431b24b56",
+    "runs/truth-cpu-fractional/out/corrected_micrographs_all_rlnAccumMotionLate.eps": "560d57ea87b616a575f1744c257dab4258cb06bedb50661acf99547d159d410d",
+    "runs/truth-cpu-fractional/out/corrected_micrographs_all_rlnAccumMotionTotal.eps": "c9ad2e694c8a7bc38c8b95c3b701210b1b566f0256135499acc94e61cc441059",
+    "runs/truth-cpu-fractional/out/fractional.log": "f8be932d88fac6dcb874d43137f968af851aa88f4ad1555282b00dbb03d3bd26",
+    "runs/truth-cpu-fractional/out/fractional.mrc": "86d0371b31945f0563922231cf8bfed8b1ec0173fed15b621fabf4836799e7a6",
+    "runs/truth-cpu-fractional/out/fractional.star": "6711fc2c08d07ebe6b897053cf867491f41cca8b6f3942876049b7d20f6972ac",
+    "runs/truth-cpu-fractional/out/fractional_shifts.eps": "4b587c6d4c971204fcbbbc3dafe56625cd700275cbb61a52e1fad50ecac8a711",
+    "runs/truth-cpu-fractional/out/logfile.pdf": "770e71d3065bf5c56830d1fb1a8386353ecb2834523da0d6efb06a789455e8d7",
+    "runs/truth-cpu-fractional/out/logfile.pdf.lst": "88c25f55b46f479512fb646a4817b017d0d9d836bc5640c09c76c1206c0ce952",
+    "runs/truth-cpu-fractional/state/global-final.txt": "b8735be2d2307adfc0a353c6fae5aa903bb816b71176e2fffa5017890fb917d7",
+    "runs/truth-cpu-fractional/state/global-iterations.txt": "b8735be2d2307adfc0a353c6fae5aa903bb816b71176e2fffa5017890fb917d7"
+   },
+   "expectations": [
+    {
+     "expectation": "exit 0",
+     "met": true
+    },
+    {
+     "expectation": "witness once",
+     "met": true
+    },
+    {
+     "expectation": "runtime equals injected file exactly",
+     "met": true
+    },
+    {
+     "expectation": "STAR vs runtime <= 5e-6 px",
+     "met": true
+    },
+    {
+     "expectation": "checker accuracy PASS by construction",
+     "met": true
+    },
+    {
+     "expectation": "published sum contrast-normalized RMSE <= 1e-3",
+     "met": true
+    }
+   ]
+  },
+  "truth-cuda-fractional": {
+   "backend": "cuda",
+   "case": "fractional",
+   "env": {
+    "MC_W4_GLOBAL_SHIFTS": "truth-fractional.txt"
+   },
+   "exit": 0,
+   "checker_exit": 0,
+   "witness_injected": 1,
+   "witness_fixed": 0,
+   "global_rmsd_log": [],
+   "runtime_global_xy": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -0.8125,
+     0.53125
+    ],
+    [
+     -1.625,
+     1.0625
+    ],
+    [
+     -2.4375,
+     1.59375
+    ],
+    [
+     -3.25,
+     2.125
+    ]
+   ],
+   "iterations_recorded": [
+    0
+   ],
+   "runtime_vs_truth": {
+    "rms_px": 0.0,
+    "max_px": 0.0
+   },
+   "star_vs_runtime_max_px": 0.0,
+   "checker": {
+    "accuracy": "PASS",
+    "sampling": "VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "published_sum": {
+     "rmse": 6.692583156109322e-06,
+     "contrast_normalized_rmse": 6.719379827626635e-06,
+     "mean_error": -1.0698269079512102e-06
+    },
+    "true_motion_bilinear": {
+     "rmse": 0.02357382905470023,
+     "contrast_normalized_rmse": 0.023668216601912408,
+     "mean_error": -6.632381835237176e-05
+    },
+    "uncorrected": {
+     "rmse": 0.4550866865088168,
+     "contrast_normalized_rmse": 0.4569088137503783,
+     "mean_error": -0.0011611553338857672
+    }
+   },
+   "files": {
+    "runs/truth-cuda-fractional/checker.json": "7c2ef703091ea035bb9eceafb0e8503dfc4efa876252b0bc0c3d9592ef056370",
+    "runs/truth-cuda-fractional/out/corrected_micrographs.star": "58aef9633c3d924fbb8d995021c58cb6ca1b9af156b04df3f03edf2218caeb87",
+    "runs/truth-cuda-fractional/out/corrected_micrographs_all_rlnAccumMotionEarly.eps": "af28cfc201390836d6ea892e800c356f7a8ea214abe5f359502cedd431b24b56",
+    "runs/truth-cuda-fractional/out/corrected_micrographs_all_rlnAccumMotionLate.eps": "560d57ea87b616a575f1744c257dab4258cb06bedb50661acf99547d159d410d",
+    "runs/truth-cuda-fractional/out/corrected_micrographs_all_rlnAccumMotionTotal.eps": "c9ad2e694c8a7bc38c8b95c3b701210b1b566f0256135499acc94e61cc441059",
+    "runs/truth-cuda-fractional/out/fractional.log": "dd0c8160c59cbaa65f07c6d1939781d46d5608c1cca75b5ab88d795d4b68607d",
+    "runs/truth-cuda-fractional/out/fractional.mrc": "71000bc2419d6dd8d401b798922970d94dad6e9e44321520049184ec00c11e49",
+    "runs/truth-cuda-fractional/out/fractional.star": "6711fc2c08d07ebe6b897053cf867491f41cca8b6f3942876049b7d20f6972ac",
+    "runs/truth-cuda-fractional/out/fractional_shifts.eps": "aa4abad063c281be6661700e50db911ba9761a1ad833e0909b9c8ce037e273e5",
+    "runs/truth-cuda-fractional/out/logfile.pdf": "4c2a79250b0e83151177e209619b20061bcce73bc43d2c38fa5a364052d03d8b",
+    "runs/truth-cuda-fractional/out/logfile.pdf.lst": "37d1b65e0ed3fb8773f0670e3e5670ed7c3e274a03acea9dd5121d2cefecd317",
+    "runs/truth-cuda-fractional/state/global-final.txt": "b8735be2d2307adfc0a353c6fae5aa903bb816b71176e2fffa5017890fb917d7",
+    "runs/truth-cuda-fractional/state/global-iterations.txt": "b8735be2d2307adfc0a353c6fae5aa903bb816b71176e2fffa5017890fb917d7"
+   },
+   "expectations": [
+    {
+     "expectation": "exit 0",
+     "met": true
+    },
+    {
+     "expectation": "witness once",
+     "met": true
+    },
+    {
+     "expectation": "runtime equals injected file exactly",
+     "met": true
+    },
+    {
+     "expectation": "STAR vs runtime <= 5e-6 px",
+     "met": true
+    },
+    {
+     "expectation": "checker accuracy PASS by construction",
+     "met": true
+    },
+    {
+     "expectation": "published sum contrast-normalized RMSE <= 1e-3",
+     "met": true
+    }
+   ]
+  },
+  "perturbed-cpu-integer": {
+   "backend": "cpu",
+   "case": "integer",
+   "env": {
+    "MC_W4_GLOBAL_SHIFTS": "truth-integer-perturbed.txt"
+   },
+   "exit": 0,
+   "checker_exit": 1,
+   "witness_injected": 1,
+   "witness_fixed": 0,
+   "global_rmsd_log": [],
+   "runtime_global_xy": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -1.0,
+     2.0
+    ],
+    [
+     -2.0,
+     4.0
+    ],
+    [
+     -3.0,
+     6.0
+    ],
+    [
+     -3.0,
+     8.0
+    ]
+   ],
+   "iterations_recorded": [
+    0
+   ],
+   "runtime_vs_truth": {
+    "rms_px": 0.4472135954999579,
+    "max_px": 1.0
+   },
+   "star_vs_runtime_max_px": 0.0,
+   "checker": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "field_px": {
+     "rms": 0.4472135954999579,
+     "p95": 1.0,
+     "max": 1.0
+    },
+    "field_angstrom": {
+     "rms": 0.39578403201746276,
+     "p95": 0.885,
+     "max": 0.885
+    },
+    "published_sum": {
+     "rmse": 0.06455296277999878,
+     "contrast_normalized_rmse": 0.06481142868154025,
+     "mean_error": -0.0001619554968783632
+    },
+    "true_motion_bilinear": {
+     "rmse": 0.0,
+     "contrast_normalized_rmse": 0.0,
+     "mean_error": 0.0
+    },
+    "uncorrected": {
+     "rmse": 0.6294498329247489,
+     "contrast_normalized_rmse": 0.6319700949358554,
+     "mean_error": -0.0023172690318180797
+    }
+   },
+   "files": {
+    "runs/perturbed-cpu-integer/checker.json": "e6d994ee3a611b792784783c99bec79b3ab8273ea15b2c276bdfdb8e60f078a4",
+    "runs/perturbed-cpu-integer/out/corrected_micrographs.star": "1175ee523d0611380e136c409e59bdd7a7156e5410173f6c37608416bf7ccbbc",
+    "runs/perturbed-cpu-integer/out/corrected_micrographs_all_rlnAccumMotionEarly.eps": "f4f42e8a84a0ce936728e41784e2f90e83dfaf1b52ef9ed20643ada637beb336",
+    "runs/perturbed-cpu-integer/out/corrected_micrographs_all_rlnAccumMotionLate.eps": "bf0e2219332c2278143ab0f2585c087bf94db335916382e9fd67b98cf9f4a821",
+    "runs/perturbed-cpu-integer/out/corrected_micrographs_all_rlnAccumMotionTotal.eps": "3780b66d77b02f7c986e24fb24c582fa7640dd03020ae2262b9a2b0038d909c6",
+    "runs/perturbed-cpu-integer/out/integer.log": "2cb6dbfb61217a4dd8b1068f8038c702ca4be021efd33aecd51cf0fe94713278",
+    "runs/perturbed-cpu-integer/out/integer.mrc": "d8515787c045daea34c5d4bcd68e53df98242f3c82298ead80154bd8323f0cc8",
+    "runs/perturbed-cpu-integer/out/integer.star": "fc3b9b3d5e767a7d4bcc39400e1ae0b7bf5e15decb6be22abea278c65d2af969",
+    "runs/perturbed-cpu-integer/out/integer_shifts.eps": "7cfebd45de80c9b0395c734f1f8d062e73160292499566339c6df4f114ad172c",
+    "runs/perturbed-cpu-integer/out/logfile.pdf": "e6ac33d5ee8ae7e69959211e3234d4035d90fd69d43f5d574cea7731690188ec",
+    "runs/perturbed-cpu-integer/out/logfile.pdf.lst": "62f0e492c0acfab6db47a09387c19ee5585fa7f73e3c6c1d3b47559605afcb96",
+    "runs/perturbed-cpu-integer/state/global-final.txt": "bc867a61f19f8e4a07e36e72202a93ae64864c13c4223d7a2534410be0dcefd3",
+    "runs/perturbed-cpu-integer/state/global-iterations.txt": "bc867a61f19f8e4a07e36e72202a93ae64864c13c4223d7a2534410be0dcefd3"
+   },
+   "expectations": [
+    {
+     "expectation": "exit 0",
+     "met": true
+    },
+    {
+     "expectation": "witness once",
+     "met": true
+    },
+    {
+     "expectation": "runtime equals injected file exactly",
+     "met": true
+    },
+    {
+     "expectation": "STAR vs runtime <= 5e-6 px",
+     "met": true
+    },
+    {
+     "expectation": "checker accuracy FAIL",
+     "met": true
+    },
+    {
+     "expectation": "published sum error >= 10x truth arm",
+     "met": true
+    }
+   ]
+  },
+  "perturbed-cuda-integer": {
+   "backend": "cuda",
+   "case": "integer",
+   "env": {
+    "MC_W4_GLOBAL_SHIFTS": "truth-integer-perturbed.txt"
+   },
+   "exit": 0,
+   "checker_exit": 1,
+   "witness_injected": 1,
+   "witness_fixed": 0,
+   "global_rmsd_log": [],
+   "runtime_global_xy": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -1.0,
+     2.0
+    ],
+    [
+     -2.0,
+     4.0
+    ],
+    [
+     -3.0,
+     6.0
+    ],
+    [
+     -3.0,
+     8.0
+    ]
+   ],
+   "iterations_recorded": [
+    0
+   ],
+   "runtime_vs_truth": {
+    "rms_px": 0.4472135954999579,
+    "max_px": 1.0
+   },
+   "star_vs_runtime_max_px": 0.0,
+   "checker": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "field_px": {
+     "rms": 0.4472135954999579,
+     "p95": 1.0,
+     "max": 1.0
+    },
+    "field_angstrom": {
+     "rms": 0.39578403201746276,
+     "p95": 0.885,
+     "max": 0.885
+    },
+    "published_sum": {
+     "rmse": 0.06455294042825699,
+     "contrast_normalized_rmse": 0.06481140624030352,
+     "mean_error": -0.00016203190898522735
+    },
+    "true_motion_bilinear": {
+     "rmse": 0.0,
+     "contrast_normalized_rmse": 0.0,
+     "mean_error": 0.0
+    },
+    "uncorrected": {
+     "rmse": 0.6294498329247489,
+     "contrast_normalized_rmse": 0.6319700949358554,
+     "mean_error": -0.0023172690318180797
+    }
+   },
+   "files": {
+    "runs/perturbed-cuda-integer/checker.json": "a947c2c93242204bb71e85fa0f131e052b21a8874dbb72d2277a06e1d5fc4308",
+    "runs/perturbed-cuda-integer/out/corrected_micrographs.star": "62b3b299cef1c14f01f38b5061722dd121e987ee5f7f858f11007aa73abe98cd",
+    "runs/perturbed-cuda-integer/out/corrected_micrographs_all_rlnAccumMotionEarly.eps": "f4f42e8a84a0ce936728e41784e2f90e83dfaf1b52ef9ed20643ada637beb336",
+    "runs/perturbed-cuda-integer/out/corrected_micrographs_all_rlnAccumMotionLate.eps": "bf0e2219332c2278143ab0f2585c087bf94db335916382e9fd67b98cf9f4a821",
+    "runs/perturbed-cuda-integer/out/corrected_micrographs_all_rlnAccumMotionTotal.eps": "3780b66d77b02f7c986e24fb24c582fa7640dd03020ae2262b9a2b0038d909c6",
+    "runs/perturbed-cuda-integer/out/integer.log": "8e7e921b6ea48787ebf9ca2612fb7f71f8be9e0c8d4cba65c821655ce2ba8f2e",
+    "runs/perturbed-cuda-integer/out/integer.mrc": "d5ea7457c321352255e1e847fa6c61dae860373e73ff825ab40944cb7ca14ea1",
+    "runs/perturbed-cuda-integer/out/integer.star": "fc3b9b3d5e767a7d4bcc39400e1ae0b7bf5e15decb6be22abea278c65d2af969",
+    "runs/perturbed-cuda-integer/out/integer_shifts.eps": "a048f6e7ed1eb0398f45207e66fd3dfae5f5e5a68b936c2146c088bf6cc68349",
+    "runs/perturbed-cuda-integer/out/logfile.pdf": "c4ffa0faa6a2d4a368ca50ca7c2654d29e731a88b4deda89f12c792c032e3c9c",
+    "runs/perturbed-cuda-integer/out/logfile.pdf.lst": "9d9b305a6b74c7803aa4ae827f995965e26d60bc1236f3d7a07f4a12ba7fa307",
+    "runs/perturbed-cuda-integer/state/global-final.txt": "bc867a61f19f8e4a07e36e72202a93ae64864c13c4223d7a2534410be0dcefd3",
+    "runs/perturbed-cuda-integer/state/global-iterations.txt": "bc867a61f19f8e4a07e36e72202a93ae64864c13c4223d7a2534410be0dcefd3"
+   },
+   "expectations": [
+    {
+     "expectation": "exit 0",
+     "met": true
+    },
+    {
+     "expectation": "witness once",
+     "met": true
+    },
+    {
+     "expectation": "runtime equals injected file exactly",
+     "met": true
+    },
+    {
+     "expectation": "STAR vs runtime <= 5e-6 px",
+     "met": true
+    },
+    {
+     "expectation": "checker accuracy FAIL",
+     "met": true
+    },
+    {
+     "expectation": "published sum error >= 10x truth arm",
+     "met": true
+    }
+   ]
+  },
+  "fixedref-cpu-integer": {
+   "backend": "cpu",
+   "case": "integer",
+   "env": {
+    "MC_W4_FIXED_REF": "1"
+   },
+   "exit": 0,
+   "checker_exit": 0,
+   "witness_injected": 0,
+   "witness_fixed": 1,
+   "global_rmsd_log": [
+    5.47723,
+    0.0
+   ],
+   "runtime_global_xy": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -1.0,
+     2.0
+    ],
+    [
+     -2.0,
+     4.0
+    ],
+    [
+     -3.0,
+     6.0
+    ],
+    [
+     -4.0,
+     8.0
+    ]
+   ],
+   "iterations_recorded": [
+    1,
+    2
+   ],
+   "runtime_vs_truth": {
+    "rms_px": 0.0,
+    "max_px": 0.0
+   },
+   "star_vs_runtime_max_px": 0.0,
+   "checker": {
+    "accuracy": "PASS",
+    "sampling": "VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "published_sum": {
+     "rmse": 1.0658028259058483e-05,
+     "contrast_normalized_rmse": 1.0700702317134178e-05,
+     "mean_error": -1.099374571822409e-06
+    },
+    "true_motion_bilinear": {
+     "rmse": 0.0,
+     "contrast_normalized_rmse": 0.0,
+     "mean_error": 0.0
+    },
+    "uncorrected": {
+     "rmse": 0.6294498329247489,
+     "contrast_normalized_rmse": 0.6319700949358554,
+     "mean_error": -0.0023172690318180797
+    }
+   },
+   "files": {
+    "runs/fixedref-cpu-integer/checker.json": "7b4846235a4ec96e60280ee6caf71a9af6384a809d2d6a7dcab740c85aded896",
+    "runs/fixedref-cpu-integer/out/corrected_micrographs.star": "4a4c1f6cb36fcbb5a5bb14c96b74e28c0df87be47a35a49dd0b0e7b1a3c157da",
+    "runs/fixedref-cpu-integer/out/corrected_micrographs_all_rlnAccumMotionEarly.eps": "f4f42e8a84a0ce936728e41784e2f90e83dfaf1b52ef9ed20643ada637beb336",
+    "runs/fixedref-cpu-integer/out/corrected_micrographs_all_rlnAccumMotionLate.eps": "ca3efe5c791649495066b88286bcd7645f24cfc76fad71e2698beee6d7680434",
+    "runs/fixedref-cpu-integer/out/corrected_micrographs_all_rlnAccumMotionTotal.eps": "03bc41e5964f8a40e40a03713ca260a88eeb50fe371fca3ceda5a2e745b30485",
+    "runs/fixedref-cpu-integer/out/integer.log": "f2f3451eaeb1931c302e59d0c266ffc842c6009141105d35ee85fcba8a3e153a",
+    "runs/fixedref-cpu-integer/out/integer.mrc": "771bb0aed1bb9b09378842af46b08880c87aa915ff773df4978772eb513eeee1",
+    "runs/fixedref-cpu-integer/out/integer.star": "c1906150f072b8dfc70e6ab3853b8ed8fa304b45ca11d82b8716661d8bca58a1",
+    "runs/fixedref-cpu-integer/out/integer_shifts.eps": "34a9289fdb9942c9e5b814cd3182259271e39f5940524f21b738db3dad618375",
+    "runs/fixedref-cpu-integer/out/logfile.pdf": "4b455b9aa331afb6386873e2214715e251ad0b558bd2d55646a1263d5d7eb48a",
+    "runs/fixedref-cpu-integer/out/logfile.pdf.lst": "feac54ed094681bb84f1b6c1883434d96035d23d93a624e08c31668863430818",
+    "runs/fixedref-cpu-integer/state/global-final.txt": "628da1d36b6e1eeb3f84e2ba70800cef6f36f58d9771466d26c6b65689c58a1d",
+    "runs/fixedref-cpu-integer/state/global-iterations.txt": "85f0fd31c594b4c261282dd3a88d4b8662ae66ae0561ed622811478fa41955ca"
+   },
+   "expectations": [
+    {
+     "expectation": "exit 0",
+     "met": true
+    },
+    {
+     "expectation": "witness once",
+     "met": true
+    },
+    {
+     "expectation": "runtime trajectory equals truth (0 px)",
+     "met": true
+    }
+   ]
+  },
+  "fixedref-cuda-integer": {
+   "backend": "cuda",
+   "case": "integer",
+   "env": {
+    "MC_W4_FIXED_REF": "1"
+   },
+   "exit": 0,
+   "checker_exit": 0,
+   "witness_injected": 0,
+   "witness_fixed": 1,
+   "global_rmsd_log": [
+    5.47723,
+    0.0
+   ],
+   "runtime_global_xy": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -1.0,
+     2.0
+    ],
+    [
+     -2.0,
+     4.0
+    ],
+    [
+     -3.0,
+     6.0
+    ],
+    [
+     -4.0,
+     8.0
+    ]
+   ],
+   "iterations_recorded": [
+    1,
+    2
+   ],
+   "runtime_vs_truth": {
+    "rms_px": 0.0,
+    "max_px": 0.0
+   },
+   "star_vs_runtime_max_px": 0.0,
+   "checker": {
+    "accuracy": "PASS",
+    "sampling": "VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "published_sum": {
+     "rmse": 1.0854240827029571e-05,
+     "contrast_normalized_rmse": 1.0897700507578511e-05,
+     "mean_error": -1.2226594208186725e-06
+    },
+    "true_motion_bilinear": {
+     "rmse": 0.0,
+     "contrast_normalized_rmse": 0.0,
+     "mean_error": 0.0
+    },
+    "uncorrected": {
+     "rmse": 0.6294498329247489,
+     "contrast_normalized_rmse": 0.6319700949358554,
+     "mean_error": -0.0023172690318180797
+    }
+   },
+   "files": {
+    "runs/fixedref-cuda-integer/checker.json": "b355b54d9d58a3bc910b02b0f0ff283930da5d48e1e656e316fec5ec9d3d245e",
+    "runs/fixedref-cuda-integer/out/corrected_micrographs.star": "809ba65e6ad85449db0ca4a09574c92afca79307216c0e3cf724cf197a4323f6",
+    "runs/fixedref-cuda-integer/out/corrected_micrographs_all_rlnAccumMotionEarly.eps": "f4f42e8a84a0ce936728e41784e2f90e83dfaf1b52ef9ed20643ada637beb336",
+    "runs/fixedref-cuda-integer/out/corrected_micrographs_all_rlnAccumMotionLate.eps": "ca3efe5c791649495066b88286bcd7645f24cfc76fad71e2698beee6d7680434",
+    "runs/fixedref-cuda-integer/out/corrected_micrographs_all_rlnAccumMotionTotal.eps": "03bc41e5964f8a40e40a03713ca260a88eeb50fe371fca3ceda5a2e745b30485",
+    "runs/fixedref-cuda-integer/out/integer.log": "1f1ba41436217b59e1508a5d6f77898996d39d4261b5ba7d451e4f016918e2bd",
+    "runs/fixedref-cuda-integer/out/integer.mrc": "39afcb20cc64819c2f151991341d9d5951cd1a82207f4b0e289a15bdafd32377",
+    "runs/fixedref-cuda-integer/out/integer.star": "c1906150f072b8dfc70e6ab3853b8ed8fa304b45ca11d82b8716661d8bca58a1",
+    "runs/fixedref-cuda-integer/out/integer_shifts.eps": "169df5e2be3673dd31a12f1608a7a3f0dfb7d78647bfbb59a1c01a0685644f8a",
+    "runs/fixedref-cuda-integer/out/logfile.pdf": "5af6d157a5d58236c80d520823af79a2a78b1620c476f99e48bede149912b190",
+    "runs/fixedref-cuda-integer/out/logfile.pdf.lst": "4f9da014ab9207c9af572f4897b7ba308990c7da7d09fe13095ca6c238deacd4",
+    "runs/fixedref-cuda-integer/state/global-final.txt": "628da1d36b6e1eeb3f84e2ba70800cef6f36f58d9771466d26c6b65689c58a1d",
+    "runs/fixedref-cuda-integer/state/global-iterations.txt": "85f0fd31c594b4c261282dd3a88d4b8662ae66ae0561ed622811478fa41955ca"
+   },
+   "expectations": [
+    {
+     "expectation": "exit 0",
+     "met": true
+    },
+    {
+     "expectation": "witness once",
+     "met": true
+    },
+    {
+     "expectation": "runtime trajectory equals truth (0 px)",
+     "met": true
+    }
+   ]
+  },
+  "fixedref-cpu-fractional": {
+   "backend": "cpu",
+   "case": "fractional",
+   "env": {
+    "MC_W4_FIXED_REF": "1"
+   },
+   "exit": 0,
+   "checker_exit": 1,
+   "witness_injected": 0,
+   "witness_fixed": 1,
+   "global_rmsd_log": [
+    2.19599,
+    0.213568
+   ],
+   "runtime_global_xy": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -0.35714285714285715,
+     0.22857142857142856
+    ],
+    [
+     -1.8095238095238095,
+     1.05
+    ],
+    [
+     -2.1666666666666665,
+     1.35
+    ],
+    [
+     -3.1666666666666665,
+     2.1
+    ]
+   ],
+   "iterations_recorded": [
+    1,
+    2
+   ],
+   "runtime_vs_truth": {
+    "rms_px": 0.3077349290617265,
+    "max_px": 0.5467764123963845
+   },
+   "star_vs_runtime_max_px": 3.809523809517046e-06,
+   "checker": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "field_px": {
+     "rms": 0.30773463482065194,
+     "p95": 0.5467790290793897,
+     "max": 0.5467790290793897
+    },
+    "field_angstrom": {
+     "rms": 0.272345151816277,
+     "p95": 0.4838994407352598,
+     "max": 0.4838994407352598
+    },
+    "published_sum": {
+     "rmse": 0.052216194570064545,
+     "contrast_normalized_rmse": 0.05242526484698757,
+     "mean_error": -0.0001619188260519877
+    },
+    "true_motion_bilinear": {
+     "rmse": 0.02357382905470023,
+     "contrast_normalized_rmse": 0.023668216601912408,
+     "mean_error": -6.632381835237176e-05
+    },
+    "uncorrected": {
+     "rmse": 0.4550866865088168,
+     "contrast_normalized_rmse": 0.4569088137503783,
+     "mean_error": -0.0011611553338857672
+    }
+   },
+   "files": {
+    "runs/fixedref-cpu-fractional/checker.json": "09d67d2c5836f7a7b3a0c962b8b00e27caa26e367ed1f4f516e9da3ca915d3dc",
+    "runs/fixedref-cpu-fractional/out/corrected_micrographs.star": "a5cc0e1f608f89d608c3d6a8636fc2f026f83525b7cf1db424b503c4003c296f",
+    "runs/fixedref-cpu-fractional/out/corrected_micrographs_all_rlnAccumMotionEarly.eps": "80a3ece522732995b43f1d5af22948a2e43a3da130ccd7a7890d4dd91b24dc59",
+    "runs/fixedref-cpu-fractional/out/corrected_micrographs_all_rlnAccumMotionLate.eps": "84f00128868865a3a1de2943af6f4b91885637965fb8842f9574a769274b4ef5",
+    "runs/fixedref-cpu-fractional/out/corrected_micrographs_all_rlnAccumMotionTotal.eps": "d55ece733fa8c7cd671791c3c994865a3ea061fee69bfcac09e48163ff0d2194",
+    "runs/fixedref-cpu-fractional/out/fractional.log": "94a00aed8c75bf50d3b5778c4f0fdfff69e90256d326a709d6f59d5f9d7db96d",
+    "runs/fixedref-cpu-fractional/out/fractional.mrc": "5ab8ca05cdd29a513df9a96f42d5710cb06460be7b3dd51cd2e23fc5b874ab5d",
+    "runs/fixedref-cpu-fractional/out/fractional.star": "64a4fcdc9f3808a9d15ff79ff0d6f3a8a2d86c2e3ffbc251fb6ab114b2bf7acb",
+    "runs/fixedref-cpu-fractional/out/fractional_shifts.eps": "3b8fa3ecc02ab932472f8ce5a5afa46c2734c7baf8314383da439c0319f1dad4",
+    "runs/fixedref-cpu-fractional/out/logfile.pdf": "84c98c700deb56cf846facb03369e2c3e652feaf7d00acb3b2567a4804cc424a",
+    "runs/fixedref-cpu-fractional/out/logfile.pdf.lst": "659e3a3af410462713333237194bc7a23d3b7967f0fb7896fbcdc47a3e4795af",
+    "runs/fixedref-cpu-fractional/state/global-final.txt": "ee3189528ef227bfda5e8fd855c39da078a52bb94d0e9a7701408b38d1223f30",
+    "runs/fixedref-cpu-fractional/state/global-iterations.txt": "179daa768c79288a4c61d2b26e3b5274c3c7867b3cc03c53badc283cb0798e04"
+   },
+   "expectations": [
+    {
+     "expectation": "exit 0",
+     "met": true
+    },
+    {
+     "expectation": "witness once",
+     "met": true
+    },
+    {
+     "expectation": "checker accuracy FAIL",
+     "met": true
+    },
+    {
+     "expectation": "field rms within 0.2-0.45 px (prediction 0.26-0.34)",
+     "met": true
+    }
+   ]
+  },
+  "fixedref-cuda-fractional": {
+   "backend": "cuda",
+   "case": "fractional",
+   "env": {
+    "MC_W4_FIXED_REF": "1"
+   },
+   "exit": 0,
+   "checker_exit": 1,
+   "witness_injected": 0,
+   "witness_fixed": 1,
+   "global_rmsd_log": [
+    2.56238,
+    0.211262
+   ],
+   "runtime_global_xy": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -0.3571428656578064,
+     0.13333334028720856
+    ],
+    [
+     -1.8095238655805588,
+     1.0499999523162842
+    ],
+    [
+     -2.1666666716337204,
+     1.25
+    ],
+    [
+     -3.7619046792387962,
+     2.7333332523703575
+    ]
+   ],
+   "iterations_recorded": [
+    1,
+    2
+   ],
+   "runtime_vs_truth": {
+    "rms_px": 0.4946763784241645,
+    "max_px": 0.795057071263486
+   },
+   "star_vs_runtime_max_px": 4.6860395337003834e-06,
+   "checker": {
+    "accuracy": "FAIL",
+    "sampling": "VALID",
+    "field_px": {
+     "rms": 0.4946752771623017,
+     "p95": 0.795053865400955,
+     "max": 0.795053865400955
+    },
+    "field_angstrom": {
+     "rms": 0.437787620288637,
+     "p95": 0.7036226708798452,
+     "max": 0.7036226708798452
+    },
+    "published_sum": {
+     "rmse": 0.034004077315330505,
+     "contrast_normalized_rmse": 0.034140227448816174,
+     "mean_error": -1.880755735328421e-05
+    },
+    "true_motion_bilinear": {
+     "rmse": 0.02357382905470023,
+     "contrast_normalized_rmse": 0.023668216601912408,
+     "mean_error": -6.632381835237176e-05
+    },
+    "uncorrected": {
+     "rmse": 0.4550866865088168,
+     "contrast_normalized_rmse": 0.4569088137503783,
+     "mean_error": -0.0011611553338857672
+    }
+   },
+   "files": {
+    "runs/fixedref-cuda-fractional/checker.json": "5522c45dc35f8f7883d20676ad93f2a89dc343e532d773106606dada7cf73c8e",
+    "runs/fixedref-cuda-fractional/out/corrected_micrographs.star": "13dc7c9642388ef532775e35369768da287378fc24dc0cab3e5e71895a5c89b7",
+    "runs/fixedref-cuda-fractional/out/corrected_micrographs_all_rlnAccumMotionEarly.eps": "32e46badd2e75d7add01687a2336025a0a0cd2b13d6278a37527247cb8eb9076",
+    "runs/fixedref-cuda-fractional/out/corrected_micrographs_all_rlnAccumMotionLate.eps": "394eea0fd095169e94e7527ef59b0296110f7649b24e3e10391fa69783c24e7b",
+    "runs/fixedref-cuda-fractional/out/corrected_micrographs_all_rlnAccumMotionTotal.eps": "16b8c8f73b7511a9ae3641d577ecd51a2df127fa9e0cbcfe730f20b458c94baa",
+    "runs/fixedref-cuda-fractional/out/fractional.log": "feb7891d71b9452ee05da24239f666d7a6e72b7b70ea6e094c7ec32875b5c812",
+    "runs/fixedref-cuda-fractional/out/fractional.mrc": "67d179a03095151ef66ffe0f2fe8bf623f69d1c6e96487e75613fad13b64125d",
+    "runs/fixedref-cuda-fractional/out/fractional.star": "92bdda8cacab615a39996d5de56ae9b41ef8227fbac2b0b650ba133ebfccf4ca",
+    "runs/fixedref-cuda-fractional/out/fractional_shifts.eps": "e42cce8b9d6a3da01a2e9a9f99b15e7edd0a016a3103c5a3ade771467b1f6bfe",
+    "runs/fixedref-cuda-fractional/out/logfile.pdf": "23c081eafe62bc15cd31c62245d907e641d5dabe0edaacb8cc402caa01b1cb52",
+    "runs/fixedref-cuda-fractional/out/logfile.pdf.lst": "306f9311abfd73655ccd3dc35096d3e6c7879016602e7aa92b32d6047d2a32f5",
+    "runs/fixedref-cuda-fractional/state/global-final.txt": "898b69cb6dfa3cc41caae301f288ef3233f7a5467af449eca53525a096139cb8",
+    "runs/fixedref-cuda-fractional/state/global-iterations.txt": "328401a198057470dbd1551feb3aa74ce55b5016758dffa5b13f65110864e911"
+   },
+   "expectations": [
+    {
+     "expectation": "exit 0",
+     "met": true
+    },
+    {
+     "expectation": "witness once",
+     "met": true
+    },
+    {
+     "expectation": "checker accuracy FAIL",
+     "met": true
+    },
+    {
+     "expectation": "field rms within 0.2-0.45 px (prediction 0.26-0.34)",
+     "met": false
+    }
+   ]
+  }
+ },
+ "inputs": {
+  "utc": "2026-10-22T19:20:31.119178+00:00",
+  "fixtures": {
+   "MANIFEST.json": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+   "fractional.mrcs": "2dc7308553d476fdf51e31ddbbfdc381c9e22032f65a19c3dc87e754988a7c86",
+   "fractional.star": "c051dd18dae87367b0eab06e8ba0d4f75a9841ed46d5b5d327c3e66b960d2dbc",
+   "fractional_field.npy": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+   "fractional_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+   "integer.mrcs": "faaa3f9eeb7f1a785f51f6ab62b23e21a02b93a24a81c46b83b41c0590bc0b31",
+   "integer.star": "8b3e4817dffff9c2deaab7d8f3196f49607818cbf5523c3bc397f6cf1bd09637",
+   "integer_field.npy": "3b1f50a5c9297ba5030de6e305560daa1c25f9154cd527d9b002af15ae91d0ac",
+   "integer_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70"
+  },
+  "shift_files": {
+   "truth-integer.txt": {
+    "sha256": "c9a8560213d3f971ead8a94e9cac7db1d99edb4a0eb3e50e71aa980861cda7f3",
+    "values": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      -1.0,
+      2.0
+     ],
+     [
+      -2.0,
+      4.0
+     ],
+     [
+      -3.0,
+      6.0
+     ],
+     [
+      -4.0,
+      8.0
+     ]
+    ]
+   },
+   "truth-fractional.txt": {
+    "sha256": "9d1514cd09e5ff196f3edb5606b0e17dcedd29adc535be84a842d1fdc54f3b58",
+    "values": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      -0.8125,
+      0.53125
+     ],
+     [
+      -1.625,
+      1.0625
+     ],
+     [
+      -2.4375,
+      1.59375
+     ],
+     [
+      -3.25,
+      2.125
+     ]
+    ]
+   },
+   "truth-integer-perturbed.txt": {
+    "sha256": "de5795c69cc0e14d5c433cbcf1272242a849b31d10bf1d178d4cf0d8dcdd3dd5",
+    "values": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      -1.0,
+      2.0
+     ],
+     [
+      -2.0,
+      4.0
+     ],
+     [
+      -3.0,
+      6.0
+     ],
+     [
+      -3.0,
+      8.0
+     ]
+    ]
+   }
+  },
+  "binaries": {
+   "cpu": "8d868ddc2a8b81e3c3c5dc3982dee029031bbe7e9ed4801c9aaf540ce2174ad0",
+   "cuda": "fb509ef3458855df1d2038adf63b903635d61617a2be47e5dba1afb319aa7e29"
+  }
+ },
+ "build": {
+  "cpu": "8d868ddc2a8b81e3c3c5dc3982dee029031bbe7e9ed4801c9aaf540ce2174ad0",
+  "cuda": "fb509ef3458855df1d2038adf63b903635d61617a2be47e5dba1afb319aa7e29"
+ },
+ "source_identity": {
+  "utc": "2026-10-22T19:15:34.763138+00:00",
+  "host": "4-gpu-vm",
+  "affinity": [
+   14,
+   15
+  ],
+  "source_archive_sha256": "1df4099244aca2b09a59df39c732f94640dfcf1fae9c3ca18b390dd669b9d8dc",
+  "make_overlay_sha256": "eafac8713770416634c0013a94007920fa97247e934e0304781ea73d04ad4184",
+  "w4_inject_sha256": "c7ee2e592dc07421ea1e8f2bcb1483227099de53057e0f5823236ddc84e29df9",
+  "driver_sha256": "b44db352f784b3721bba0ab614a777c21111fa4c35c6d644fbb158c79b27b6f6",
+  "overlay_changed_files": {
+   "src/acc/cuda/cuda_alignpatch.cu": {
+    "before": "2d71d2d5ffeb73ad8b7a89e45f084ce35c8e688c3d00572b3df7e96f401a1eb0",
+    "after": "c0abceafc79e3eef549ac8625c12de12b3fb242f24371bd25a8606b2e63c83f3"
+   },
+   "src/motioncorr_runner.cpp": {
+    "before": "8a3a1ad80edebc6959abbb80d118a0a358f703ff5041a0ade4995cbc2307d903",
+    "after": "dc4142016ae0fac80416fad1e240e656c4bbec10c016317062f585d894a165e8"
+   },
+   "src/w4_inject.h": {
+    "before": null,
+    "after": "c7ee2e592dc07421ea1e8f2bcb1483227099de53057e0f5823236ddc84e29df9"
+   }
+  },
+  "archived_files": 7457
+ },
+ "script_sha256": "dffc7835189e0cb2e0a9b6c03b669bb0d64b72552f1d971edeb398f8df371182"
+}

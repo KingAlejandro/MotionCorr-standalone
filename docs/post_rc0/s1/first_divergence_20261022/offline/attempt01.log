@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-2bde2d1f/docs/post_rc0/s1/first_divergence_20261022/offline_stages.py", line 152, in <module>
+    m = np.frombuffer(load(f'{base}-i{it}-map-f{f}.bin'), '<f4').reshape(NY, NX)
+                      ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-2bde2d1f/docs/post_rc0/s1/first_divergence_20261022/offline_stages.py", line 31, in load
+    b = (RAW/rel).read_bytes()
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/pathlib/_abc.py", line 625, in read_bytes
+    with self.open(mode='rb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/pathlib/_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/mc-residual-review.h52lh3/raw/runs/cuda-integer-on/capture/c1-i1-map-f0.bin'

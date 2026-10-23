@@ -1,0 +1,13 @@
+neutral-cpu-integer {'all_met': True, 'runtime_rms_px': 0.29786846691579577, 'checker': 'FAIL', 'field_rms_px': 0.29786778665475044, 'published_sum_cnrmse': 0.02640693613146232}
+neutral-cuda-integer {'all_met': True, 'runtime_rms_px': 0.2850249673388219, 'checker': 'FAIL', 'field_rms_px': 0.2850258109094684, 'published_sum_cnrmse': 0.0456910760896163}
+truth-cpu-integer {'all_met': True, 'runtime_rms_px': 0.0, 'checker': 'PASS', 'field_rms_px': 0.0, 'published_sum_cnrmse': 1.0700702317134178e-05}
+truth-cuda-integer {'all_met': True, 'runtime_rms_px': 0.0, 'checker': 'PASS', 'field_rms_px': 0.0, 'published_sum_cnrmse': 1.0897700507578511e-05}
+truth-cpu-fractional {'all_met': True, 'runtime_rms_px': 0.0, 'checker': 'PASS', 'field_rms_px': 0.0, 'published_sum_cnrmse': 7.129589399378448e-06}
+truth-cuda-fractional {'all_met': True, 'runtime_rms_px': 0.0, 'checker': 'PASS', 'field_rms_px': 0.0, 'published_sum_cnrmse': 6.719379827626635e-06}
+perturbed-cpu-integer {'all_met': True, 'runtime_rms_px': 0.4472135954999579, 'checker': 'FAIL', 'field_rms_px': 0.4472135954999579, 'published_sum_cnrmse': 0.06481142868154025}
+perturbed-cuda-integer {'all_met': True, 'runtime_rms_px': 0.4472135954999579, 'checker': 'FAIL', 'field_rms_px': 0.4472135954999579, 'published_sum_cnrmse': 0.06481140624030352}
+fixedref-cpu-integer {'all_met': True, 'runtime_rms_px': 0.0, 'checker': 'PASS', 'field_rms_px': 0.0, 'published_sum_cnrmse': 1.0700702317134178e-05}
+fixedref-cuda-integer {'all_met': True, 'runtime_rms_px': 0.0, 'checker': 'PASS', 'field_rms_px': 0.0, 'published_sum_cnrmse': 1.0897700507578511e-05}
+fixedref-cpu-fractional {'all_met': True, 'runtime_rms_px': 0.3077349290617265, 'checker': 'FAIL', 'field_rms_px': 0.30773463482065194, 'published_sum_cnrmse': 0.05242526484698757}
+fixedref-cuda-fractional {'all_met': False, 'runtime_rms_px': 0.4946763784241645, 'checker': 'FAIL', 'field_rms_px': 0.4946752771623017, 'published_sum_cnrmse': 0.034140227448816174}
+NOT MET fixedref-cuda-fractional field rms within 0.2-0.45 px (prediction 0.26-0.34)

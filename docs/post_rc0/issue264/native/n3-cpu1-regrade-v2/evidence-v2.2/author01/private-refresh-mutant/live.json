@@ -1,0 +1,90 @@
+{
+ "kind": "cpu1 regrade v2.2 precheck-live (private index, fixed Git options)",
+ "grader_sha256": "b76e6a897ac8f8b2f7560b7a33930d88a2b77bc08c27318048881d2974620277",
+ "amendment_sha256": "74d46b46dfb1a74705f58510696c92802a8a321dc5a59baef2b45b0060681a88",
+ "python": "3.13.7",
+ "problems": [
+  "invalid input: src-cand: .git/index changed during the check"
+ ],
+ "scratch_root": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-mutant/scratch",
+ "expect_sha256": "8914f870827fc742b178c9fe4bedcf4cb89a4fbef0f3e980f68b2e3ac6467d53",
+ "trees": {
+  "src-cand": {
+   "git_calls": [
+    {
+     "args": [
+      "rev-parse",
+      "HEAD"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215739,
+       269,
+       1792759727757352100,
+       1792759727757608893
+      ],
+      "sha256": "428a6952a386f84f5d21a5369efd5646c50bdde2b8a262e4023d6b2d3a3d5acb"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215739,
+       269,
+       1792759727757352100,
+       1792759727757608893
+      ],
+      "sha256": "428a6952a386f84f5d21a5369efd5646c50bdde2b8a262e4023d6b2d3a3d5acb"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-mutant/private-index-8ptnb603/index",
+     "private_sha256": "428a6952a386f84f5d21a5369efd5646c50bdde2b8a262e4023d6b2d3a3d5acb"
+    },
+    {
+     "args": [
+      "diff",
+      "--no-ext-diff",
+      "--no-textconv"
+     ],
+     "original_before": {
+      "stat": [
+       16777230,
+       228215739,
+       269,
+       1792759727757352100,
+       1792759727757608893
+      ],
+      "sha256": "428a6952a386f84f5d21a5369efd5646c50bdde2b8a262e4023d6b2d3a3d5acb"
+     },
+     "original_after": {
+      "stat": [
+       16777230,
+       228215795,
+       269,
+       1792759728367018381,
+       1792759728367235590
+      ],
+      "sha256": "a96408c148d5d49d13def174a7258c105db4200c357159bab164bdb2ccf271e2"
+     },
+     "private_index": "/private/tmp/motioncorr-guard264-v22-author-5d60fd8e-3da5-4d96-84bf-60ab511fdb90/private-refresh-mutant/private-index-8ptnb603/index",
+     "private_sha256": "428a6952a386f84f5d21a5369efd5646c50bdde2b8a262e4023d6b2d3a3d5acb"
+    }
+   ],
+   "index_before": {
+    "stat": [
+     16777230,
+     228215739,
+     269,
+     1792759727757352100,
+     1792759727757608893
+    ],
+    "sha256": "428a6952a386f84f5d21a5369efd5646c50bdde2b8a262e4023d6b2d3a3d5acb"
+   }
+  }
+ },
+ "binaries": {},
+ "processes": {
+  "referring_to_scratch": [],
+  "unreadable": 0
+ },
+ "verdict": "FAIL"
+}

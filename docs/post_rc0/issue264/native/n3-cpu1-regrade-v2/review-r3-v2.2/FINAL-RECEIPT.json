@@ -1,0 +1,62 @@
+{
+  "utc": "2026-10-23T13:05:20.825737+00:00",
+  "review_workspace": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6a6c6f43",
+  "review_branch": "guard264-regrade-v22-r3-review",
+  "review_workspace_head": "1f0a58bf6e0639d8b62f74da52f250cc664c0b30",
+  "author_worktree": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-d9b98408",
+  "reviewed_branch": "verify/264-regrade-v22-sol-20261023",
+  "reviewed_head_final": "593c9e2cc53663655a1628ab7500fadddee5d261",
+  "commands": [
+    {
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-I",
+        "-B",
+        "/private/tmp/motioncorr-guard264-v22-review-r3-20261023-codex/c0a3aeda-f76d-4724-a4ff-aeef7286e732/review_controls.py"
+      ],
+      "tool_session": 43668,
+      "exit": 0,
+      "reaped": true,
+      "records": 46
+    },
+    {
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-I",
+        "-B",
+        "/private/tmp/motioncorr-guard264-v22-review-r3-20261023-codex/c0a3aeda-f76d-4724-a4ff-aeef7286e732/index_isolation_control.py"
+      ],
+      "exit": 1,
+      "reaped": true,
+      "retry": false,
+      "records": 2,
+      "failed_assertion": "bypass was rejected after diff before planned status-refresh hook; expected exit 1 was observed"
+    }
+  ],
+  "lease_pid": 83655,
+  "lease_tool_session": 21578,
+  "cap": 402653184,
+  "load": [
+    8.2021484375,
+    8.7431640625,
+    8.08447265625
+  ],
+  "intentional_writes": "only review UUID namespace; own index/source reads use GIT_OPTIONAL_LOCKS=0; no author status",
+  "remote_native_gpu": "UNRUN",
+  "git_version": "git version 2.54.0 (Apple Git-157)",
+  "final_source_hashes": {
+    "regrade_v2_2.py": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849",
+    "remote_run_v2_2.py": "07263bb9bc57fd9e6ba9ad900818c18153a6f8022a793fe99f408446ae670b32",
+    "package_v2_2.py": "7df36524cfb3117c0a6da01f2284703c3a7ca6f02a92ec0fc357037e39c75f70",
+    "test_regrade_v2_2.py": "205027aba2b0c2cacc3acb33a2f8473253e114cd7bb3a4db34df09e1890a5da7"
+  },
+  "source_hashes_unchanged": true,
+  "checksum_entry_counts": {
+    "SHA256SUMS-v2.1": 15,
+    "SHA256SUMS-v2.2": 88
+  },
+  "all_checksum_entries_match": true,
+  "review_complete_utc": "2026-10-23T13:07:03.461825+00:00",
+  "logical_bytes_before_whitelist": 2801014,
+  "under_cap": true
+}

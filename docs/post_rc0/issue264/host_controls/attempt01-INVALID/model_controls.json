@@ -1,0 +1,428 @@
+{
+  "kind": "host runner_numerics controls on the real ThirdOrderPolynomialModel; no movie, no CUDA",
+  "head": "46381b2a36c43b78f026dd6c926dfd809443724d",
+  "archive_sha256": "0309411ee31db955122c76220ba4c624c5b7176ff462d36bbaaddd9d3f53cf13",
+  "python": "/Users/alex.konstantinov/.local/bin/python3",
+  "jobs": 2,
+  "cmake_args": [
+    "-DCUDA=OFF"
+  ],
+  "test_source_sha256": "7b94597f42290092500ede1b4d29ee767a53836cb496bd0d5ac2e9b499177c03",
+  "helper_sha256": "02d8f5c1c45d2f2e9637b44e6be67089e8abff0f863c761fc29294168f44c146",
+  "runner_sha256": "439041e3ece1dadfb1af06f2b00f804fabe4b0f5ec564572113491b14aa1280b",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin\n",
+  "rows": [
+    {
+      "case": "fixed",
+      "header_sha256": "02d8f5c1c45d2f2e9637b44e6be67089e8abff0f863c761fc29294168f44c146",
+      "binary_sha256": "cc54eccd1066cc8895fe95bdafa9f05ace01c49daf18476552636ecf0f9e8e4e",
+      "expected_exit": 0,
+      "exit": 0,
+      "ordinary_outcome": true,
+      "summary": "PASS checks=779 failed=0 reject=95 accept=85",
+      "ok": true
+    },
+    {
+      "case": "legacy_exact_block_36913740",
+      "header_sha256": "2f1d371cd7e456ee379535459b390e17a83591c6d4fb39ebb43cf35e3045ea04",
+      "binary_sha256": "46649795ca0971429fc1c4ff928ccdecd994f17c685767f9e7d726c72e753369",
+      "expected_exit": 1,
+      "exit": 1,
+      "ordinary_outcome": true,
+      "summary": "FAIL checks=779 failed=489 reject=95 accept=85",
+      "ok": true
+    },
+    {
+      "case": "mutant_ge_early_exit",
+      "header_sha256": "4d272e0de739319897bf786b918c4bb0a31aa79a9ffc36d6b03551c60721f102",
+      "binary_sha256": "6cb5702921bc1c81d35007d0b46c439bb042d857a772f2bcf8fd8b5350ac389c",
+      "expected_exit": 1,
+      "exit": 1,
+      "ordinary_outcome": true,
+      "summary": "FAIL checks=779 failed=4 reject=95 accept=85",
+      "ok": true
+    },
+    {
+      "case": "mutant_uncentred",
+      "header_sha256": "d531871fa4a34986d375ac3f79053490cd8eb6eb512bb3d642d15955add1e347",
+      "binary_sha256": "6cb5702921bc1c81d35007d0b46c439bb042d857a772f2bcf8fd8b5350ac389c",
+      "expected_exit": 1,
+      "exit": 1,
+      "ordinary_outcome": true,
+      "summary": "FAIL checks=779 failed=4 reject=95 accept=85",
+      "ok": true
+    },
+    {
+      "case": "mutant_invalid_last_pair",
+      "header_sha256": "4ba6c2cf4cfc580502a9e1d7d5bf24b9c5db13c135f794c17f96001bd0797526",
+      "binary_sha256": "7bb19726065bb7777e03b821131738b0eab9ae73438113c113d60b177115f297",
+      "expected_exit": 1,
+      "exit": 1,
+      "ordinary_outcome": true,
+      "summary": "FAIL checks=779 failed=195 reject=95 accept=85",
+      "ok": true
+    },
+    {
+      "case": "mutant_swapped_dimensions",
+      "header_sha256": "ec102ec2bedc2899ccd836bb58d3f89a190a82c1a52adcf845b0fda36b131955",
+      "binary_sha256": "f46c4dc46ade3e39f7cac14ffd7ee4e958faa94d547208642990275b206381e3",
+      "expected_exit": 1,
+      "exit": 1,
+      "ordinary_outcome": true,
+      "summary": "FAIL checks=779 failed=342 reject=95 accept=85",
+      "ok": true
+    },
+    {
+      "case": "mutant_x_component_only",
+      "header_sha256": "87d2728df5e12fcb0cf3ea635645f9e72cb803838a5f4603860e6695c637a945",
+      "binary_sha256": "f46c4dc46ade3e39f7cac14ffd7ee4e958faa94d547208642990275b206381e3",
+      "expected_exit": 1,
+      "exit": 1,
+      "ordinary_outcome": true,
+      "summary": "FAIL checks=779 failed=342 reject=95 accept=85",
+      "ok": true
+    },
+    {
+      "case": "fixed_restored",
+      "binary_sha256": "cc54eccd1066cc8895fe95bdafa9f05ace01c49daf18476552636ecf0f9e8e4e",
+      "expected_exit": 0,
+      "exit": 0,
+      "summary": "PASS checks=779 failed=0 reject=95 accept=85",
+      "ok": true
+    },
+    {
+      "case": "call:fixed",
+      "runner_sha256": "439041e3ece1dadfb1af06f2b00f804fabe4b0f5ec564572113491b14aa1280b",
+      "expected_exit": 0,
+      "exit": 0,
+      "message": "PASS single guard call with unchanged arguments and strict threshold",
+      "ok": true
+    },
+    {
+      "case": "call:call_swapped_nx_ny",
+      "runner_sha256": "b194fc03a72661633b39c7dc2436f7d57e075e8e336a4387fe26efc9f519be02",
+      "expected_exit": 1,
+      "exit": 1,
+      "message": "Guard call, threshold or strict comparison changed",
+      "ok": true
+    },
+    {
+      "case": "call:call_frames_minus_one",
+      "runner_sha256": "ec87fcc09c7ee5347ac431b856ead233751a3b40bf377fe05bba04dae170c70d",
+      "expected_exit": 1,
+      "exit": 1,
+      "message": "Guard call, threshold or strict comparison changed",
+      "ok": true
+    },
+    {
+      "case": "call:runner_ge_decision",
+      "runner_sha256": "87158d781776e964e8301695ab6515a1348c7985b87cd14a5549e7e1c6e7c868",
+      "expected_exit": 1,
+      "exit": 1,
+      "message": "Guard call, threshold or strict comparison changed",
+      "ok": true
+    },
+    {
+      "case": "call:runner_tolerance_4",
+      "runner_sha256": "3bae71d6cb9e10bf33051214ca871bb72294c88ed7946c9f143a40f6feca9b4d",
+      "expected_exit": 1,
+      "exit": 1,
+      "message": "Guard call, threshold or strict comparison changed",
+      "ok": true
+    },
+    {
+      "case": "call:second_helper_call",
+      "runner_sha256": "41cf7cb866b01f43551c41086cb33e92dbf88544b7982b660a49eefc8721a074",
+      "expected_exit": 1,
+      "exit": 1,
+      "message": "Expected exactly one guard helper call",
+      "ok": true
+    }
+  ],
+  "commands": [
+    {
+      "label": "configure",
+      "argv": [
+        "cmake",
+        "-S",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/src",
+        "-B",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTING=ON",
+        "-DPython3_EXECUTABLE=/Users/alex.konstantinov/.local/bin/python3",
+        "-DCUDA=OFF"
+      ],
+      "exit": 0,
+      "stdout_tail": "YMMETRY=ON\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n-- Found Threads: TRUE\n-- Found Python3: /Users/alex.konstantinov/.local/bin/python3 (found version \"3.13.7\") found components: Interpreter\n-- Configuring done (4.1s)\n-- Generating done (0.4s)\n-- Build files have been written to: /private/tmp/mc264-verify-20261022/mac-model-controls-01/build\n",
+      "stderr_tail": "CMake Warning at CMakeLists.txt:495 (message):\n  pbzip2 not found: InputFormats and RealCutdown waive its compressed-MRC\n  cases (UNRUN).  Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the\n  waiver.\n\n\n"
+    },
+    {
+      "label": "build_fixed",
+      "argv": [
+        "cmake",
+        "--build",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build",
+        "--target",
+        "runner_numerics",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout_tail": " object CMakeFiles/motioncorr_core.dir/src/transformations.cpp.o\n[ 98%] Building CXX object CMakeFiles/motioncorr_core.dir/macros.cpp.o\n[ 98%] Linking CXX static library libmotioncorr_core.a\n[ 98%] Built target motioncorr_core\n[ 98%] Building CXX object CMakeFiles/runner_numerics.dir/tests/test_runner_numerics.cpp.o\n[100%] Linking CXX executable runner_numerics\n[100%] Built target runner_numerics\n",
+      "stderr_tail": " insecure) [-Wformat-security]\n  191 |             fprintf(stdout, cheese);\n      |                             ^~~~~~\n/private/tmp/mc264-verify-20261022/mac-model-controls-01/src/src/time.cpp:191:29: note: treat the string as an argument to avoid this\n  191 |             fprintf(stdout, cheese);\n      |                             ^\n      |                             \"%s\", \n1 warning generated.\n"
+    },
+    {
+      "label": "model_fixed",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_model"
+      ],
+      "exit": 0,
+      "stdout_tail": "PASS checks=779 failed=0 reject=95 accept=85\n",
+      "stderr_tail": ""
+    },
+    {
+      "label": "build_legacy_exact_block_36913740",
+      "argv": [
+        "cmake",
+        "--build",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build",
+        "--target",
+        "runner_numerics",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout_tail": "[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o\n[  1%] Linking CXX static library libmotioncorr_core.a\n[ 98%] Built target motioncorr_core\n[ 98%] Building CXX object CMakeFiles/runner_numerics.dir/tests/test_runner_numerics.cpp.o\n[100%] Linking CXX executable runner_numerics\n[100%] Built target runner_numerics\n",
+      "stderr_tail": "ecommended that you use snprintf(3) instead.\")\n      | ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'\n  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))\n      |                                                       ^\n4 warnings generated.\n"
+    },
+    {
+      "label": "model_legacy_exact_block_36913740",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_model"
+      ],
+      "exit": 1,
+      "stdout_tail": "FAIL checks=779 failed=489 reject=95 accept=85\n",
+      "stderr_tail": "ll maximum\nFAIL 100x80 frames 6 case 1 early-exit value\nFAIL 100x80 frames 6 case 2 full maximum\nFAIL 100x80 frames 6 case 2 early-exit value\nFAIL 100x80 frames 6 case 3 full maximum\nFAIL 100x80 frames 6 case 3 early-exit value\nFAIL 100x80 frames 6 case 4 full maximum\nFAIL 100x80 frames 6 case 4 early-exit value\nFAIL 100x80 frames 6 case 5 full maximum\nFAIL 100x80 frames 6 case 5 early-exit value\n"
+    },
+    {
+      "label": "build_mutant_ge_early_exit",
+      "argv": [
+        "cmake",
+        "--build",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build",
+        "--target",
+        "runner_numerics",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout_tail": "[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o\n[  1%] Linking CXX static library libmotioncorr_core.a\n[ 98%] Built target motioncorr_core\n[ 98%] Building CXX object CMakeFiles/runner_numerics.dir/tests/test_runner_numerics.cpp.o\n[100%] Linking CXX executable runner_numerics\n[100%] Built target runner_numerics\n",
+      "stderr_tail": "ecommended that you use snprintf(3) instead.\")\n      | ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'\n  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))\n      |                                                       ^\n4 warnings generated.\n"
+    },
+    {
+      "label": "model_mutant_ge_early_exit",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_model"
+      ],
+      "exit": 1,
+      "stdout_tail": "FAIL checks=779 failed=4 reject=95 accept=85\n",
+      "stderr_tail": "FAIL strict exit: exact frame then larger frame maximum\nFAIL strict exit: exact frame then larger frame decision\nFAIL strict exit: exact frame then larger, Y along y maximum\nFAIL strict exit: exact frame then larger, Y along y decision\n"
+    },
+    {
+      "label": "build_mutant_uncentred",
+      "argv": [
+        "cmake",
+        "--build",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build",
+        "--target",
+        "runner_numerics",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout_tail": "[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o\n[  1%] Linking CXX static library libmotioncorr_core.a\n[ 98%] Built target motioncorr_core\n[100%] Linking CXX executable runner_numerics\n[100%] Built target runner_numerics\n",
+      "stderr_tail": "ecommended that you use snprintf(3) instead.\")\n      | ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'\n  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))\n      |                                                       ^\n4 warnings generated.\n"
+    },
+    {
+      "label": "model_mutant_uncentred",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_model"
+      ],
+      "exit": 1,
+      "stdout_tail": "FAIL checks=779 failed=4 reject=95 accept=85\n",
+      "stderr_tail": "FAIL strict exit: exact frame then larger frame maximum\nFAIL strict exit: exact frame then larger frame decision\nFAIL strict exit: exact frame then larger, Y along y maximum\nFAIL strict exit: exact frame then larger, Y along y decision\n"
+    },
+    {
+      "label": "build_mutant_invalid_last_pair",
+      "argv": [
+        "cmake",
+        "--build",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build",
+        "--target",
+        "runner_numerics",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout_tail": "[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o\n[  1%] Linking CXX static library libmotioncorr_core.a\n[ 98%] Built target motioncorr_core\n[ 98%] Building CXX object CMakeFiles/runner_numerics.dir/tests/test_runner_numerics.cpp.o\n[100%] Linking CXX executable runner_numerics\n[100%] Built target runner_numerics\n",
+      "stderr_tail": "ecommended that you use snprintf(3) instead.\")\n      | ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'\n  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))\n      |                                                       ^\n4 warnings generated.\n"
+    },
+    {
+      "label": "model_mutant_invalid_last_pair",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_model"
+      ],
+      "exit": 1,
+      "stdout_tail": "FAIL checks=779 failed=195 reject=95 accept=85\n",
+      "stderr_tail": "ll maximum\nFAIL 100x80 frames 5 case 2 early-exit value\nFAIL 100x80 frames 5 case 5 full maximum\nFAIL 100x80 frames 5 case 5 early-exit value\nFAIL 100x80 frames 6 case 0 full maximum\nFAIL 100x80 frames 6 case 0 early-exit value\nFAIL 100x80 frames 6 case 4 full maximum\nFAIL 100x80 frames 6 case 4 early-exit value\nFAIL 100x80 frames 6 case 5 full maximum\nFAIL 100x80 frames 6 case 5 early-exit value\n"
+    },
+    {
+      "label": "build_mutant_swapped_dimensions",
+      "argv": [
+        "cmake",
+        "--build",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build",
+        "--target",
+        "runner_numerics",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout_tail": "[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o\n[  1%] Linking CXX static library libmotioncorr_core.a\n[ 98%] Built target motioncorr_core\n[ 98%] Building CXX object CMakeFiles/runner_numerics.dir/tests/test_runner_numerics.cpp.o\n[100%] Linking CXX executable runner_numerics\n[100%] Built target runner_numerics\n",
+      "stderr_tail": "ecommended that you use snprintf(3) instead.\")\n      | ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'\n  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))\n      |                                                       ^\n4 warnings generated.\n"
+    },
+    {
+      "label": "model_mutant_swapped_dimensions",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_model"
+      ],
+      "exit": 1,
+      "stdout_tail": "FAIL checks=779 failed=342 reject=95 accept=85\n",
+      "stderr_tail": "1 early-exit value\nFAIL 100x80 frames 6 case 2 full maximum\nFAIL 100x80 frames 6 case 2 early-exit value\nFAIL 100x80 frames 6 case 2 decision\nFAIL 100x80 frames 6 case 3 full maximum\nFAIL 100x80 frames 6 case 3 early-exit value\nFAIL 100x80 frames 6 case 4 full maximum\nFAIL 100x80 frames 6 case 4 early-exit value\nFAIL 100x80 frames 6 case 5 full maximum\nFAIL 100x80 frames 6 case 5 early-exit value\n"
+    },
+    {
+      "label": "build_mutant_x_component_only",
+      "argv": [
+        "cmake",
+        "--build",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build",
+        "--target",
+        "runner_numerics",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout_tail": "[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o\n[  1%] Linking CXX static library libmotioncorr_core.a\n[ 98%] Built target motioncorr_core\n[100%] Linking CXX executable runner_numerics\n[100%] Built target runner_numerics\n",
+      "stderr_tail": "ecommended that you use snprintf(3) instead.\")\n      | ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'\n  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))\n      |                                                       ^\n4 warnings generated.\n"
+    },
+    {
+      "label": "model_mutant_x_component_only",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_model"
+      ],
+      "exit": 1,
+      "stdout_tail": "FAIL checks=779 failed=342 reject=95 accept=85\n",
+      "stderr_tail": "1 early-exit value\nFAIL 100x80 frames 6 case 2 full maximum\nFAIL 100x80 frames 6 case 2 early-exit value\nFAIL 100x80 frames 6 case 2 decision\nFAIL 100x80 frames 6 case 3 full maximum\nFAIL 100x80 frames 6 case 3 early-exit value\nFAIL 100x80 frames 6 case 4 full maximum\nFAIL 100x80 frames 6 case 4 early-exit value\nFAIL 100x80 frames 6 case 5 full maximum\nFAIL 100x80 frames 6 case 5 early-exit value\n"
+    },
+    {
+      "label": "build_restored",
+      "argv": [
+        "cmake",
+        "--build",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build",
+        "--target",
+        "runner_numerics",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout_tail": "[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o\n[  1%] Linking CXX static library libmotioncorr_core.a\n[ 98%] Built target motioncorr_core\n[ 98%] Building CXX object CMakeFiles/runner_numerics.dir/tests/test_runner_numerics.cpp.o\n[100%] Linking CXX executable runner_numerics\n[100%] Built target runner_numerics\n",
+      "stderr_tail": "ecommended that you use snprintf(3) instead.\")\n      | ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'\n  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))\n      |                                                       ^\n4 warnings generated.\n"
+    },
+    {
+      "label": "model_restored",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_model"
+      ],
+      "exit": 0,
+      "stdout_tail": "PASS checks=779 failed=0 reject=95 accept=85\n",
+      "stderr_tail": ""
+    },
+    {
+      "label": "call_fixed",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_call",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/runner_fixed.cpp"
+      ],
+      "exit": 0,
+      "stdout_tail": "PASS single guard call with unchanged arguments and strict threshold\n",
+      "stderr_tail": ""
+    },
+    {
+      "label": "call_call_swapped_nx_ny",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_call",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/runner_call_swapped_nx_ny.cpp"
+      ],
+      "exit": 1,
+      "stdout_tail": "",
+      "stderr_tail": "Guard call, threshold or strict comparison changed\n"
+    },
+    {
+      "label": "call_call_frames_minus_one",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_call",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/runner_call_frames_minus_one.cpp"
+      ],
+      "exit": 1,
+      "stdout_tail": "",
+      "stderr_tail": "Guard call, threshold or strict comparison changed\n"
+    },
+    {
+      "label": "call_runner_ge_decision",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_call",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/runner_runner_ge_decision.cpp"
+      ],
+      "exit": 1,
+      "stdout_tail": "",
+      "stderr_tail": "Guard call, threshold or strict comparison changed\n"
+    },
+    {
+      "label": "call_runner_tolerance_4",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_call",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/runner_runner_tolerance_4.cpp"
+      ],
+      "exit": 1,
+      "stdout_tail": "",
+      "stderr_tail": "Guard call, threshold or strict comparison changed\n"
+    },
+    {
+      "label": "call_second_helper_call",
+      "argv": [
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/build/runner_numerics",
+        "local_motion_guard_call",
+        "/private/tmp/mc264-verify-20261022/mac-model-controls-01/runner_second_helper_call.cpp"
+      ],
+      "exit": 1,
+      "stdout_tail": "",
+      "stderr_tail": "Expected exactly one guard helper call\n"
+    }
+  ],
+  "all_expected": true
+}

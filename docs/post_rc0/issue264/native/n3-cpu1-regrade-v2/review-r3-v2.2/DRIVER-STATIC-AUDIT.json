@@ -1,0 +1,19 @@
+{
+  "platform_before_operation": 75,
+  "lease_nonblocking": 89,
+  "thread_names": [
+    "OMP_NUM_THREADS",
+    "OPENBLAS_NUM_THREADS",
+    "MKL_NUM_THREADS",
+    "NUMEXPR_NUM_THREADS",
+    "VECLIB_MAXIMUM_THREADS"
+  ],
+  "phase_sequence": "live-pre,files-pre,grade,live-post,files-post,compare-live,compare-files,verify-package",
+  "output_bound_reason": "initial 2MiB + fixed reports/atomic temporaries/private-index, each <=1MiB; external 180s timeout provided by plan",
+  "limits": [
+    "real Linux runtime UNRUN",
+    "package extraction and external wrapper parent-owned procedure, not executed",
+    "permission-denied proc entries reported as limitation",
+    "stable input, not adversarial race proof"
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "CONTROLS-R2B.json": {
+    "sha256": "fe9a58c5af566bc1a7a909865f9a606b3a054e2856897ae7e4cfde09258f586d",
+    "records": 36,
+    "unexpected_failures": [
+      {
+        "name": "git_environment_exact",
+        "exit": 1,
+        "expected": 0,
+        "ok": false,
+        "observed_optional_locks": [
+          "0"
+        ],
+        "git_calls": 15,
+        "problems": [
+          "src-cand: .git/index changed during the check"
+        ],
+        "instrumented": false
+      },
+      {
+        "name": "git_environment_mutant",
+        "exit": 1,
+        "expected": 0,
+        "ok": false,
+        "observed_optional_locks": [
+          "1"
+        ],
+        "git_calls": 15,
+        "problems": [
+          "src-cand: .git/index changed during the check"
+        ],
+        "instrumented": false
+      }
+    ]
+  },
+  "MUTANT-AUDIT-R2B.json": {
+    "sha256": "e227f438419bb794caaa62494799ce75e79d9cc8928b80f6a4fe5dc40f6e08b6",
+    "records": 33
+  },
+  "STATIC_AUDIT.json": {
+    "sha256": "5bb31f7059e904b61f2d9a4b059f06c0cfe3f4a95ef2a9e692fce5407a330bfb",
+    "records": [
+      "hashlist",
+      "head_tracked_bytes"
+    ]
+  },
+  "git_environment_exact": {
+    "verdict": "FAIL",
+    "problems": [
+      "src-cand: .git/index changed during the check"
+    ],
+    "git_calls": 15,
+    "optional_locks": [
+      "0"
+    ],
+    "live_sha256": "3d0802e001c5b75a8e23ceecd1c3463776c23c92416ed070dabd2d0f0d19355c"
+  },
+  "git_environment_mutant": {
+    "verdict": "FAIL",
+    "problems": [
+      "src-cand: .git/index changed during the check"
+    ],
+    "git_calls": 15,
+    "optional_locks": [
+      "1"
+    ],
+    "live_sha256": "c8087b3fef0953f01e42f2e8460f1315be3d176e1d1357587e8316dad0f8476f"
+  }
+}

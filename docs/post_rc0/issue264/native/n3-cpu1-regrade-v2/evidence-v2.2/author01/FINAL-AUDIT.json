@@ -1,0 +1,10 @@
+{
+ "initial_audit": "FAIL: audit incorrectly treated committed new additions as old files; assertion retained in tool output. No experimental rerun or source change.",
+ "corrected_query": "intersect git diff --name-only BASE with git ls-tree -r --name-only BASE",
+ "old_files_changed": [
+  "docs/post_rc0/issue264/native/n3-cpu1-regrade-v2/README.md"
+ ],
+ "expected_only_readme": true,
+ "experimental_campaign_rerun": false,
+ "source_changes_after_campaign": false
+}

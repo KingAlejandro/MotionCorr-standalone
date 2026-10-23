@@ -43,6 +43,9 @@ DEFAULT_REQUIRED_TESTS = [
     "CutDownMovie",
     "RunnerModelParser",
     "MicrographModelBounds",
+    "LocalMotionDistortionGuard",
+    "LocalMotionGuardModel",
+    "LocalMotionGuardCall",
     "CiFailClosedControls",
     # Added by the #99 fail-closed write group (PR105). WriteFaults is the
     # end-to-end runner control; ImageWriteFaults is the unit-level

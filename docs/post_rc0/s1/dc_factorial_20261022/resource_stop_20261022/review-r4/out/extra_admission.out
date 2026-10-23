@@ -1,0 +1,9 @@
+PASS owner birth tuple (macOS ProcessTable form) vs JSON list birth -> admitted
+PASS owner uses space form --resume ID (own token) admitted -> admitted
+PASS parent of owner carries the exact token (outside owner family) -> refused as other author -> another process of the author session is live
+PASS owner row missing from process table -> owner PID is not an ancestor of this runner
+PASS ppid cycle among ancestors does not loop -> admitted
+FAIL foreign process with token joined by quotes in a shell string -> admitted
+PASS token with trailing suffix is not the token (unrelated) -> admitted
+PASS control name as argv of a sibling reader (less run_v5_controls.py) is refused (fail-safe false positive) -> another v4/v5 control process is live
+PASS path under another gpu_worker_v4_controls namespace is refused -> another v4/v5 control process is live

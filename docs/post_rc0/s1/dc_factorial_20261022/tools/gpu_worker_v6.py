@@ -56,15 +56,17 @@ on the target that is not a live, birth-matched owned descendant. A failed
 sample, a foreign process, a timeout, owned survivors or a failed post-job
 query stops the worker before the next launch.
 
-Cleanup signals only process groups re-verified as owned by
-tools/multi_gpu/process_ownership.py immediately before each TERM/KILL, never the
-worker's own group. All waits are bounded. If owned processes cannot be shown to
-be gone, the job's RUN.json gets status CLEANUP_FAILED, a
-CLEANUP_FAILED_LEASE_HELD receipt is written, and only then does the worker hold
-the lease indefinitely; an operator inspects it and stops it with SIGKILL.
+Cleanup signals verified owned groups, or the original job group while its
+root remains unreaped and its birth, parent, PGID and SID are verified; failed
+group identity checks permit only root-handle signalling. The worker's own group
+is excluded. All cleanup waits are bounded. Unverified cleanup establishes an
+indefinite lease hold before best-effort CLEANUP_FAILED_LEASE_HELD I/O. Job
+records carry CLEANUP_FAILED when writable. An operator must inspect the hold
+before stopping that worker; escaped descendants are never guessed or signalled.
 
-Every exit path after the lease writes a typed receipt; errors before the lease
-(runs-dir creation, log or lease open) print a typed JSON receipt to stdout only.
+Post-lease receipts are best-effort atomic with guarded stderr fallback. No file
+receipt is promised on unwritable storage. Errors before the lease (runs-dir
+creation, log or lease open) print a typed JSON receipt to stdout only.
 FINAL carries an exact census of all expected queue ids. "Complete" means every
 id reached a RUN.json with status EXITED, whatever the native exit code; FINAL
 also reports how many of those exited nonzero. Exit 0 requires completeness;

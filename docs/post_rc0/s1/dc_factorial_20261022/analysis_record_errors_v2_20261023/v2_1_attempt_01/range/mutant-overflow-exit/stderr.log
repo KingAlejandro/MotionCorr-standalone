@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_1_attempt_01/range/mutants/restore-default-float.py", line 304, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_1_attempt_01/range/mutants/restore-default-float.py", line 285, in main
+    (out / 'tierB-v2.json').write_text(json.dumps(result, indent=1, allow_nan=False) + '\n')
+                                       ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+ValueError: Out of range float values are not JSON compliant: inf

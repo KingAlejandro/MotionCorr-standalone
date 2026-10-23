@@ -1,0 +1,29 @@
+{
+ "schema": "gpu-worker-v5-host-controls/1",
+ "python": "3.14.8 (main, Sep 30 2026, 17:55:09) [Clang 21.0.0 (clang-2100.3.34.2)]",
+ "platform": "darwin",
+ "worker": "/private/tmp/motioncorr-dc-worker-v5-review-r4-20261023-sonnet/inv-a01ff47e-3d27-4e4a-8d0e-c1f6857ac9ce/target/tools/_r4mutant_census_raises.py",
+ "worker_sha256": "fbddd02a2c575d6a624658910f7e99a1fe8d50c41dff852b24ca20a85703c8d3",
+ "test_sha256": "a2b320be9772707118426ef9d979938828897a051f21e2c5d82765527a9d3a6a",
+ "ownership_sha256": "8de59b8cd741630f8188ef5e98b4877415df90f3bddd8a4a99013e0e7ff908cb",
+ "results": [
+  {
+   "control": "K28 census with malformed RUN.json (unit)",
+   "result": "FAIL",
+   "detail": {
+    "census": null,
+    "error": "JSONDecodeError('Expecting property name enclosed in double quotes: line 1 column 2 (char 1)')"
+   }
+  },
+  {
+   "control": "K30 time prefix selection and worker default prefix (static unit)",
+   "result": "PASS",
+   "detail": {
+    "darwin": "/usr/bin/time -l -o {out}/time-v.log",
+    "linux": "/usr/bin/time -v -o {out}/time-v.log",
+    "worker_default": "taskset -c {cpu} /usr/bin/time -v -o {out}/time-v.log"
+   }
+  }
+ ],
+ "limits": "macOS host mocks; fake nvidia-smi for every query; ProcessOwnership polling mode, with test-only emulation of the Linux adoption rule where stated; Linux subreaper execution UNRUN; /usr/bin/time prefix tested, taskset prefix UNRUN; uninterruptible-sleep query hang not reproducible."
+}

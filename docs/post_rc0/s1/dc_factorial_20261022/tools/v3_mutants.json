@@ -1,0 +1,23 @@
+{
+ "no_admission_occupancy": {"expect_fail": ["K3"], "replace": [
+  ["problems = self.smi.admission_problems(st) + ([f'process on target UUID: {st[\"target_pids\"]}'] if st['target_pids'] else [])", "problems = self.smi.admission_problems(st)"],
+  ["        if before['target_pids']: problems.append(f'process on target UUID: {before[\"target_pids\"]}')\n", ""]]},
+ "unbounded_child_wait": {"expect_fail": ["K14"], "replace": [
+  ["try: p.wait(timeout=self.a.cleanup_grace)\n            except subprocess.TimeoutExpired: cleanup_errors.append(f'job root {p.pid} not reaped')", "p.wait()"]]},
+ "no_group_signal": {"expect_fail": ["K12", "K13"], "replace": [
+  ["try: os.killpg(g, signum); signalled.append", "try: signalled.append"]]},
+ "v2_resume_semantics": {"expect_fail": ["K1", "K8"], "replace": [
+  ["if self.runs.exists() and any(self.runs.iterdir()): problems.append", "if False: problems.append"],
+  ["if code is None: code = EXIT['OK'] if census['complete'] else EXIT['INCOMPLETE']", "if code is None: code = EXIT['OK']"],
+  ["                try:\n                    rec, outcome = self.run_job(", "                if (self.runs / j['id']).exists(): continue\n                try:\n                    rec, outcome = self.run_job("]]},
+ "no_queue_hash_binding": {"expect_fail": ["K1"], "replace": [
+  ["if qsha != a.queue_sha256: problems.append", "if False: problems.append"]]},
+ "owned_by_identity_keys": {"expect_fail": ["K16"], "replace": [
+  ["    return {r['pid']: r['start'] for r in own.known_live()}", "    with own._lock: return dict(own.identities)"]]},
+ "no_cancel_before_popen": {"expect_fail": ["K11"], "replace": [
+  ["if self.cancel.is_set():  # last check immediately before Popen", "if False:  # last check immediately before Popen"]]},
+ "ecc_na_accepted": {"expect_fail": ["K2a"], "replace": [
+  ["if rows[0][4] != '0':", "if rows[0][4] not in ('0', '[N/A]'):"]]},
+ "sampler_failures_uncounted": {"expect_fail": ["K7"], "replace": [
+  ["                                sampler['failed'] += 1\n", "                                pass\n"]]}
+}

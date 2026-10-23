@@ -1,0 +1,129 @@
+{
+ "schema": "dc262-provider-design-observation/1",
+ "utc": "2026-10-23T13:29:56Z",
+ "observation_id": 1792762196809074000,
+ "host": "SCMAC-7L9P2F",
+ "pid": 12056,
+ "uid": 502,
+ "occupancy_scope": "aggregate load and bounded own ancestry only; no unrelated process inventory/arguments",
+ "load": [
+  3.96923828125,
+  5.08203125,
+  6.12744140625
+ ],
+ "logical_cpus": 14,
+ "free_bytes": 4234649600,
+ "cap_bytes": 16777216,
+ "private_inspection_lease": "nonblocking flock held through observation write; not a proposed controller lease",
+ "cwd": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36",
+ "public_environment": {
+  "CODEX_SESSION_ID": "01a16643-3b64-71a0-9dda-4223aeae755f",
+  "CODEX_THREAD_ID": "01a16643-3b64-71a0-9dda-4223aeae755f",
+  "CODEX_TOOL_CALL_ID": "exec-955354e9-0e7c-45a0-869c-f3f350108dd0"
+ },
+ "relevant_environment_key_names": [
+  "CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS",
+  "CODEX_CI",
+  "CODEX_HOME",
+  "CODEX_INTERNAL_ORIGINATOR_OVERRIDE",
+  "CODEX_SESSION_ID",
+  "CODEX_THREAD_ID",
+  "CODEX_TOOL_CALL_ID",
+  "CODEX_VERSION",
+  "PWD"
+ ],
+ "ancestry_bound": 12,
+ "ancestry": [
+  {
+   "pid": 12056,
+   "ppid": 58401,
+   "uid": 502,
+   "birth": [
+    1792762196,
+    689914
+   ],
+   "pgid": 12056,
+   "executable": "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/bin/python3.13",
+   "cwd": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36",
+   "argv_public_projection": {
+    "available": true,
+    "recognized_modes": [],
+    "exact_public_id_matches": [],
+    "raw_argv_retained": false,
+    "environment_parsed": false
+   },
+   "birth_and_parent_stable": true
+  },
+  {
+   "pid": 58401,
+   "ppid": 16516,
+   "uid": 502,
+   "birth": [
+    1792750711,
+    394411
+   ],
+   "pgid": 58401,
+   "executable": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+   "cwd": "/Users/alex.konstantinov",
+   "argv_public_projection": {
+    "available": true,
+    "recognized_modes": [
+     "app-server"
+    ],
+    "exact_public_id_matches": [],
+    "raw_argv_retained": false,
+    "environment_parsed": false
+   },
+   "birth_and_parent_stable": true
+  },
+  {
+   "pid": 16516,
+   "ppid": 16404,
+   "uid": 502,
+   "birth": [
+    1792712299,
+    612664
+   ],
+   "pgid": 16516,
+   "executable": "/Users/alex.konstantinov/Applications/T3 Code (Nightly).app/Contents/MacOS/T3 Code (Nightly)",
+   "cwd": "/Users/alex.konstantinov",
+   "argv_public_projection": {
+    "available": true,
+    "recognized_modes": [],
+    "exact_public_id_matches": [],
+    "raw_argv_retained": false,
+    "environment_parsed": false
+   },
+   "birth_and_parent_stable": true
+  },
+  {
+   "pid": 16404,
+   "ppid": 1,
+   "uid": 502,
+   "birth": [
+    1792712295,
+    610406
+   ],
+   "pgid": 16404,
+   "executable": "/Users/alex.konstantinov/Applications/T3 Code (Nightly).app/Contents/MacOS/T3 Code (Nightly)",
+   "cwd": "/",
+   "argv_public_projection": {
+    "available": true,
+    "recognized_modes": [],
+    "exact_public_id_matches": [],
+    "raw_argv_retained": false,
+    "environment_parsed": false
+   },
+   "birth_and_parent_stable": true
+  }
+ ],
+ "sdk_struct_sizes": {
+  "stat": 136,
+  "vnode": 152,
+  "paths": 2352
+ },
+ "sdk_header": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/proc_info.h",
+ "sdk_header_sha256": "e427fa96b348537b21552b9de71e01039410bcad2cedee5584c5e5fddafd70fc",
+ "inspector_sha256": "13f78c08b3b4bc993d41164238a138e73f94cce040f6695bef6b6c06e65fb7aa",
+ "limits": "observation only; env markers are inherited/self-assertable, no unique per-thread OS owner or cross-thread host exclusivity follows"
+}

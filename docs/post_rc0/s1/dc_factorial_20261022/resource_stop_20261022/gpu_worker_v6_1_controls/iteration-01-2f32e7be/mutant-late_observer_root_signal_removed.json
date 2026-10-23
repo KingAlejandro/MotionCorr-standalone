@@ -1,0 +1,15 @@
+{
+ "schema": "dc262-v6.1-data-only/1",
+ "worker_sha256": "1bf984e308c519e3e2908df173e04d0e7e7d75b4727cc04ce104a9c38f6ba81f",
+ "test_sha256": "80321093f2a6897edf133ee82f4d408b01738fb11266f08a41822158ef87957d",
+ "tests": 17,
+ "failures": [
+  {
+   "test": "test_k36_healthy_and_late_error_interleavings (__main__.Checks.test_k36_healthy_and_late_error_interleavings)",
+   "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_1_static.py\", line 240, in test_k36_healthy_and_late_error_interleavings\n    self.assertTrue(ok, detail)\n    ~~~~~~~~~~~~~~~^^^^^^^^^^^^\nAssertionError: False is not true : {'scope': 'synthetic only; Popen/process table/signals mocked; no lease/process qualification', 'cases': {'healthy': {'result': 'PASS', 'signals': [[15, 900001, '2026-10-23T12:59:40Z'], [9, 900001, '2026-10-23T12:59:40Z']], 'errors': [], 'fallback_calls': 0, 'group_calls': [[900001, <Signals.SIGTERM: 15>], [900001, <Signals.SIGKILL: 9>]], 'refresh_calls': 3, 'root_returncode': None, 'uncertainty_retained': False}, 'refresh': {'result': 'FAIL', 'signals': [], 'errors': ['observer errors during cleanup: synthetic late observer error'], 'fallback_calls': 0, 'group_calls': [], 'refresh_calls': 2, 'root_returncode': None, 'uncertainty_retained': True}, 'verify_true': {'result': 'FAIL', 'signals': [], 'errors': ['observer errors during cleanup: synthetic error inside group verification'], 'fallback_calls': 0, 'group_calls': [], 'refresh_calls': 2, 'root_returncode': None, 'uncertainty_retained': True}, 'verify_false': {'result': 'FAIL', 'signals': [], 'errors': ['observer errors during cleanup: synthetic error inside group verification'], 'fallback_calls': 0, 'group_calls': [], 'refresh_calls': 2, 'root_returncode': None, 'uncertainty_retained': True}}}\n"
+  }
+ ],
+ "errors": [],
+ "result": "FAIL",
+ "limits": "Synthetic Popen/process tables/signals only; process cleanup, real-worker suite, Linux and GPU UNRUN."
+}

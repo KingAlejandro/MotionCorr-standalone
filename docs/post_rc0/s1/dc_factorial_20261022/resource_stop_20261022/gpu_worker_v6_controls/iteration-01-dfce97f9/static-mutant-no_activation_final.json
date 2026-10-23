@@ -1,0 +1,15 @@
+{
+ "schema": "dc262-v6-data-only/1",
+ "worker_sha256": "23f849f4d98633f771c3ed43a4e09c8c730e0a3df704eca138aa761694894e11",
+ "test_sha256": "870835d4335c5e93b59b2c35f6cfd645e9eea8cbaf11f2e031a77014737145fd",
+ "tests": 12,
+ "failures": [
+  {
+   "test": "test_zero_job_activation_failure_final (__main__.Checks.test_zero_job_activation_failure_final)",
+   "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py\", line 192, in test_zero_job_activation_failure_final\n    final = list(Path(t).glob('FINAL-*.json')); self.assertEqual(len(final), 1)\n                                                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\nAssertionError: 0 != 1\n"
+  }
+ ],
+ "errors": [],
+ "result": "FAIL",
+ "limits": "Synthetic Popen/process tables/signals only; process cleanup, real-worker suite, Linux and GPU UNRUN."
+}

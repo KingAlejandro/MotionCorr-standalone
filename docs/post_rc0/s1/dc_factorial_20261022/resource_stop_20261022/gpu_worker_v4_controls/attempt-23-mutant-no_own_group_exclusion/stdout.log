@@ -1,0 +1,30 @@
+PASS K1 invalid binding refused before lease/output (exit 64)
+PASS K2a ECC [N/A] fails closed
+PASS K2b ECC 1
+PASS K2c UUID at wrong index
+PASS K3 foreign process before launch
+PASS K4a query nonzero exit
+PASS K4b query timeout (bounded, query process killed)
+PASS K4c malformed compute-app row
+PASS K5 clean queue via /usr/bin/time prefix (grandchild route), witness, schema, census
+PASS K6 foreign appears mid-job: recorded, stop before next launch, census incomplete
+PASS K7 mid-job query failure counted, stop before next launch
+PASS K8 restart after NOT_LAUNCHED cannot pass
+PASS K9 directory collision: nonzero stop, foreign directory untouched
+PASS K10 cancel during main-loop admission query: no launch
+PASS K11 cancel during pre-launch recheck: CANCELLED_BEFORE_LAUNCH, no Popen
+PASS K12 timeout: child, setsid grandchild and detached sleep reaped; sentinel unsignalled (own-group exclusion: K22)
+PASS K13 SIGTERM mid-job: tree reaped, CANCELLED, sentinel unsignalled (own-group exclusion: K22)
+PASS K14 observer error during timeout: CLEANUP_FAILED record and receipt, lease held
+PASS K15 observer refresh failure before launch: no launch
+PASS K16 PID reuse: exited owned PID with new birth is foreign
+PASS K17 input admission failure typed (exit 65)
+PASS K18 final health query failure after complete census (exit 76)
+PASS K15L observer failure before any launch, Linux restore emulated: exit 75, lease released
+PASS K19a query held in flight across job exit, emulated adoption: clean exit 0
+PASS K19b query held in flight across timeout, emulated adoption: TIMEOUT 78, tree reaped
+PASS K19c query held in flight across cancellation, emulated adoption: CANCELLED 4, tree reaped
+PASS K20 query process never owned under emulated adoption (unit; positive control adopted)
+FAIL K22 own process group never signalled (unit, injected process view)
+PASS K23 OK requires a successful sample and the route witness
+PASS K24 error before the lease: typed stdout receipt, exit 74

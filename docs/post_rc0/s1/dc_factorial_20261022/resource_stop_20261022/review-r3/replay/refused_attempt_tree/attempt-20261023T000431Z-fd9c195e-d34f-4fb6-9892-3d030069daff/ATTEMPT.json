@@ -1,0 +1,59 @@
+{
+ "schema": "gpu-worker-v4-controls-r2/1",
+ "namespace": "attempt-20261023T000431Z-fd9c195e-d34f-4fb6-9892-3d030069daff",
+ "start_utc": "2026-10-23T00:04:31Z",
+ "session_id": "8864b6f5-c104-4b3b-8024-85b7fde2b670",
+ "runner_pid": 62385,
+ "uid": 502,
+ "ncpu": 14,
+ "load_avg": [
+  7.8974609375,
+  7.5302734375,
+  10.8798828125
+ ],
+ "numeric_threads": 1,
+ "inputs": {
+  "worker": {
+   "path": "/private/tmp/motioncorr-dc-worker-v4-review-r3-20261023-opus/inv-68728dae-abb5-4481-a169-5cd09328e32c/target/docs/post_rc0/s1/dc_factorial_20261022/tools/gpu_worker_v4.py",
+   "sha256": "071a1588c9ceda73c2d974309b20f6b51beb5211e393752871496f32e084c853"
+  },
+  "harness": {
+   "path": "/private/tmp/motioncorr-dc-worker-v4-review-r3-20261023-opus/inv-68728dae-abb5-4481-a169-5cd09328e32c/target/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py",
+   "sha256": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d"
+  },
+  "runner": {
+   "path": "/private/tmp/motioncorr-dc-worker-v4-review-r3-20261023-opus/inv-68728dae-abb5-4481-a169-5cd09328e32c/target/docs/post_rc0/s1/dc_factorial_20261022/tools/run_v4_controls_r2.py",
+   "sha256": "071e36f8baf2b2a3c3770ef51a3349144dbe9549bb733cd336e6d5e7e0a5f5fe"
+  },
+  "campaign": {
+   "path": "/private/tmp/motioncorr-dc-worker-v4-review-r3-20261023-opus/inv-68728dae-abb5-4481-a169-5cd09328e32c/target/docs/post_rc0/s1/dc_factorial_20261022/tools/campaign.py",
+   "sha256": "8701cf248f247d03eb95c36e99bf9d3a9eaf0ad28660460646afc7128cf84eae"
+  },
+  "process_ownership": {
+   "path": "/private/tmp/motioncorr-dc-worker-v4-review-r3-20261023-opus/inv-68728dae-abb5-4481-a169-5cd09328e32c/target/tools/multi_gpu/process_ownership.py",
+   "sha256": "8de59b8cd741630f8188ef5e98b4877415df90f3bddd8a4a99013e0e7ff908cb"
+  }
+ },
+ "admission_owner_pid": 62385,
+ "admission": {
+  "ancestor_pids": [
+   1,
+   14052,
+   16404,
+   16516,
+   23920,
+   62385
+  ],
+  "other_author_or_control_processes": [
+   {
+    "pid": 23952,
+    "ppid": 23920,
+    "uid": 502,
+    "cmd": "/bin/sh -c { trap '' TERM; read -r _ <&3; kill -TERM 0; sleep 5; kill -KILL 0; } </dev/null >/dev/null 2>&1 &\\012exec \"$@\" 3<&- t3-claude /Users/x/.local/bin/claude-unified --output-format stream-json --resume=8864b6f5-c104-4b3b-8024-85b7fde2b670 --add-dir /wt"
+   }
+  ]
+ },
+ "status": "REFUSED_UNRUN",
+ "reason": "another author-session or v4 control process is live",
+ "end_utc": "2026-10-23T00:04:31Z"
+}

@@ -1,0 +1,58 @@
+test_all_normal_record_errors_are_typed_79_after_cleanup (__main__.Checks.test_all_normal_record_errors_are_typed_79_after_cleanup) ... ok
+test_atomic_write_failure_keeps_previous_record (__main__.Checks.test_atomic_write_failure_keeps_previous_record) ... ok
+test_cleanup_uncertainty_outranks_both_stage_faults (__main__.Checks.test_cleanup_uncertainty_outranks_both_stage_faults) ... 
+  test_cleanup_uncertainty_outranks_both_stage_faults (__main__.Checks.test_cleanup_uncertainty_outranks_both_stage_faults) (fault='outputs') ... FAIL
+  test_cleanup_uncertainty_outranks_both_stage_faults (__main__.Checks.test_cleanup_uncertainty_outranks_both_stage_faults) (fault='witness') ... FAIL
+test_embedded_mock_scripts_compile_without_execution (__main__.Checks.test_embedded_mock_scripts_compile_without_execution) ... 
+  test_embedded_mock_scripts_compile_without_execution (__main__.Checks.test_embedded_mock_scripts_compile_without_execution) (script='FAULT_ENTRY') ... ERROR
+test_hold_before_io_and_broken_stderr (__main__.Checks.test_hold_before_io_and_broken_stderr) ... ok
+test_nonprovider_ancestor_is_refused_without_spoof (__main__.Checks.test_nonprovider_ancestor_is_refused_without_spoof) ... ok
+test_original_group_term_kill_before_wait (__main__.Checks.test_original_group_term_kill_before_wait) ... ok
+test_outputs_fault_alone_is_jobstage_with_record (__main__.Checks.test_outputs_fault_alone_is_jobstage_with_record) ... ok
+test_reaped_or_foreign_group_never_signalled (__main__.Checks.test_reaped_or_foreign_group_never_signalled) ... ok
+test_receipt_fallback_and_run_write_never_raise (__main__.Checks.test_receipt_fallback_and_run_write_never_raise) ... ok
+test_run_write_safe_outcome_only_after_cleanup (__main__.Checks.test_run_write_safe_outcome_only_after_cleanup) ... ok
+test_sighup_handler_installed_inside_lease_backstop (__main__.Checks.test_sighup_handler_installed_inside_lease_backstop) ... ok
+test_uncertain_branches_are_separate (__main__.Checks.test_uncertain_branches_are_separate) ... ok
+test_zero_job_activation_failure_final (__main__.Checks.test_zero_job_activation_failure_final) ... ok
+
+======================================================================
+ERROR: test_embedded_mock_scripts_compile_without_execution (__main__.Checks.test_embedded_mock_scripts_compile_without_execution) (script='FAULT_ENTRY')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py", line 224, in test_embedded_mock_scripts_compile_without_execution
+    with self.subTest(script=name): compile(getattr(harness, name), name, 'exec')
+                                    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "FAULT_ENTRY", line 99
+    out.write(json.dumps(row) + '
+                                ^
+SyntaxError: unterminated string literal (detected at line 99)
+
+======================================================================
+FAIL: test_cleanup_uncertainty_outranks_both_stage_faults (__main__.Checks.test_cleanup_uncertainty_outranks_both_stage_faults) (fault='outputs')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py", line 167, in test_cleanup_uncertainty_outranks_both_stage_faults
+    self.assertEqual(outcome, 'CLEANUP_FAILED')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'JOB_STAGE' != 'CLEANUP_FAILED'
+- JOB_STAGE
++ CLEANUP_FAILED
+
+
+======================================================================
+FAIL: test_cleanup_uncertainty_outranks_both_stage_faults (__main__.Checks.test_cleanup_uncertainty_outranks_both_stage_faults) (fault='witness')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py", line 167, in test_cleanup_uncertainty_outranks_both_stage_faults
+    self.assertEqual(outcome, 'CLEANUP_FAILED')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'JOB_STAGE' != 'CLEANUP_FAILED'
+- JOB_STAGE
++ CLEANUP_FAILED
+
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.050s
+
+FAILED (failures=2, errors=1)

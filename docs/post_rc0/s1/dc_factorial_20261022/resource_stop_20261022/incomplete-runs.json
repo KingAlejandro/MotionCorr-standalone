@@ -1,0 +1,210 @@
+{
+ "schema": "dc262-incomplete-runs/1",
+ "scan_utc_note": "read-only scan after the 21:40Z stop",
+ "rows": [
+  {
+   "id": "B-dose05-s04-cpu-both",
+   "status": "IN_PROGRESS (live CPU worker at scan time)",
+   "reason": "owned by a running CPU worker; not interrupted",
+   "files": {
+    "ingest.txt": {
+     "bytes": 17,
+     "sha256": "5b5653b13f0d144401f40f07f47d055a6e27ab327c3148be655f31027b2d7874",
+     "mtime": 1792705391.7186317
+    },
+    "output/movie.log": {
+     "bytes": 483,
+     "sha256": "3ca1458c646514b511124a7d696ffa6a41e3104bf3232babea421ee86d1171a8",
+     "mtime": 1792705391.7186317
+    },
+    "stderr.log": {
+     "bytes": 0,
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mtime": 1792705391.7096305
+    },
+    "stdout.log": {
+     "bytes": 360,
+     "sha256": "4cb2b1524497fca3af34368fddce3f09ae91055057faf961dd3b2aae006bd439",
+     "mtime": 1792705391.7176316
+    },
+    "time-v.log": {
+     "bytes": 0,
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mtime": 1792705391.712631
+    }
+   },
+   "time_v_exit": []
+  },
+  {
+   "id": "B-dose05-s04-cpu-global",
+   "status": "IN_PROGRESS (live CPU worker at scan time)",
+   "reason": "owned by a running CPU worker; not interrupted",
+   "files": {
+    "ingest.txt": {
+     "bytes": 17,
+     "sha256": "5b5653b13f0d144401f40f07f47d055a6e27ab327c3148be655f31027b2d7874",
+     "mtime": 1792705386.939024
+    },
+    "output/movie.log": {
+     "bytes": 483,
+     "sha256": "3ca1458c646514b511124a7d696ffa6a41e3104bf3232babea421ee86d1171a8",
+     "mtime": 1792705386.939024
+    },
+    "stderr.log": {
+     "bytes": 0,
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mtime": 1792705386.9280224
+    },
+    "stdout.log": {
+     "bytes": 360,
+     "sha256": "4cb2b1524497fca3af34368fddce3f09ae91055057faf961dd3b2aae006bd439",
+     "mtime": 1792705386.9380238
+    },
+    "time-v.log": {
+     "bytes": 0,
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mtime": 1792705386.931023
+    }
+   },
+   "time_v_exit": []
+  },
+  {
+   "id": "B-dose05-s04-cpu-local",
+   "status": "IN_PROGRESS (live CPU worker at scan time)",
+   "reason": "owned by a running CPU worker; not interrupted",
+   "files": {
+    "ingest.txt": {
+     "bytes": 17,
+     "sha256": "5b5653b13f0d144401f40f07f47d055a6e27ab327c3148be655f31027b2d7874",
+     "mtime": 1792705387.2610648
+    },
+    "output/movie.log": {
+     "bytes": 483,
+     "sha256": "3ca1458c646514b511124a7d696ffa6a41e3104bf3232babea421ee86d1171a8",
+     "mtime": 1792705387.2610648
+    },
+    "stderr.log": {
+     "bytes": 0,
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mtime": 1792705387.2500634
+    },
+    "stdout.log": {
+     "bytes": 360,
+     "sha256": "4cb2b1524497fca3af34368fddce3f09ae91055057faf961dd3b2aae006bd439",
+     "mtime": 1792705387.2600646
+    },
+    "time-v.log": {
+     "bytes": 0,
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mtime": 1792705387.253064
+    }
+   },
+   "time_v_exit": []
+  },
+  {
+   "id": "C-e12963-03-p3-cuda-both",
+   "status": "INTERRUPTED/INCOMPLETE",
+   "reason": "coordinator 3119383 was SIGSTOPped then SIGKILLed by the parent resource stop after this child finished; RUN.json was never written. Product files and a time -v \"Exit status: 0\" exist but are unadmitted: not EXIT0, not evaluated, never PASS, never rerun in place.",
+   "files": {
+    "Movies/FoilHole_4674747_Data_4659374_4659376_20230406_014534_EER.log": {
+     "bytes": 7225,
+     "sha256": "3b941470f86f29e0a72d4005c8a6092c6e45dd902b0dadd9e82f0f47359f7eef",
+     "mtime": 1792705195.2896497
+    },
+    "Movies/FoilHole_4674747_Data_4659374_4659376_20230406_014534_EER.mrc": {
+     "bytes": 67109888,
+     "sha256": "9af5cfdcac954564e4cf3397decb137236ab737492c2f72b7a39b8506c18704b",
+     "mtime": 1792705195.5656848
+    },
+    "Movies/FoilHole_4674747_Data_4659374_4659376_20230406_014534_EER.star": {
+     "bytes": 28859,
+     "sha256": "cef4b5c51d329998270cf278a6a57a8b34962ab0983bf1327583c0c1ed0f2f47",
+     "mtime": 1792705195.6186914
+    },
+    "Movies/FoilHole_4674747_Data_4659374_4659376_20230406_014534_EER_shifts.eps": {
+     "bytes": 72703,
+     "sha256": "9dcb46e36364e7ba6b65a6e374ff20ecc682b995203b8ab385f44819d9875b9f",
+     "mtime": 1792705195.6236923
+    },
+    "all_batches.pdf": {
+     "bytes": 18802,
+     "sha256": "1589a2e57801ffb4fd537db1b3fce7d8654e089bc8f8db25272d71b4e1dcb9e2",
+     "mtime": 1792705196.3807886
+    },
+    "batch.pdf": {
+     "bytes": 18802,
+     "sha256": "1589a2e57801ffb4fd537db1b3fce7d8654e089bc8f8db25272d71b4e1dcb9e2",
+     "mtime": 1792705196.281776
+    },
+    "batch.pdf.lst": {
+     "bytes": 165,
+     "sha256": "8828848c29ca0e6609af90df81fe4b6c4005bfee3804980e01201b1662f08cc2",
+     "mtime": 1792705195.6416945
+    },
+    "corrected_micrographs.star": {
+     "bytes": 869,
+     "sha256": "59a5db5e47adede6ffd40e9a9a971c5637c28ab15ee90c367823a43271afdabc",
+     "mtime": 1792705195.6256924
+    },
+    "corrected_micrographs_all_rlnAccumMotionEarly.eps": {
+     "bytes": 75689,
+     "sha256": "bfa6607f2779cbf916e4c4ca415542ceefd61917bcc697863ce6335a2c9cc00a",
+     "mtime": 1792705195.6356938
+    },
+    "corrected_micrographs_all_rlnAccumMotionLate.eps": {
+     "bytes": 75699,
+     "sha256": "204a45f6042ddd0368c9b92a50bde90cd5a143cf55dab3306fcd8b0399108484",
+     "mtime": 1792705195.6416945
+    },
+    "corrected_micrographs_all_rlnAccumMotionTotal.eps": {
+     "bytes": 75701,
+     "sha256": "3c94ddcb5c1cd255ddaaf90264b803b97afcde66d709c9db8cb2dcd47eaba52c",
+     "mtime": 1792705195.630693
+    },
+    "header.pdf": {
+     "bytes": 24835,
+     "sha256": "277371f1e389936cf5efcbcea7f29446cb8401f445519dce8119eb56bd4de80b",
+     "mtime": 1792705196.336783
+    },
+    "header.pdf.lst": {
+     "bytes": 416,
+     "sha256": "6ab6fc5e780f1488af6de941fbec2204df093bbfc4a4d7037c858e1668f6c4df",
+     "mtime": 1792705195.6426945
+    },
+    "logfile.pdf": {
+     "bytes": 37863,
+     "sha256": "9b4dc67cdc16e92f139f4318cc055d3f9f17a40c0b53fa179bf96b7f38847d24",
+     "mtime": 1792705196.3707871
+    },
+    "runtime.json": {
+     "bytes": 2446,
+     "sha256": "937ba657c9d3f04cec46902980c47cfde82afe79ef50bd9825f09e7b2bdec09e",
+     "mtime": 1792705195.166634
+    },
+    "stderr.log": {
+     "bytes": 187,
+     "sha256": "a973babd226ee9a8c402cb6fde74055c93ec9a95c68a5360dc1e58367b3db4e0",
+     "mtime": 1792705196.4307947
+    },
+    "stdout.log": {
+     "bytes": 1049,
+     "sha256": "9a30c807647f3ff773055c0a5fa3a1eb86eb483ae600e4a16a40c27185af66fe",
+     "mtime": 1792705196.3807886
+    },
+    "time-v.log": {
+     "bytes": 1253,
+     "sha256": "465914d41ab6e6917641cb79f753d3db64c9b3a0504f05b5d6eab783196d2f2b",
+     "mtime": 1792705196.5788136
+    },
+    "witness.txt": {
+     "bytes": 77,
+     "sha256": "71792e9482802ebe75b662b3ef0273b18d7204a8ad1531aaebfbf061d541833f",
+     "mtime": 1792705180.1407228
+    }
+   },
+   "time_v_exit": [
+    "Exit status: 0"
+   ]
+  }
+ ]
+}

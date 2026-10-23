@@ -1,0 +1,12 @@
+{
+  "full": {
+    "command": "git diff --cached --check",
+    "exit": 2,
+    "output": "attempt-01/frozen-base/out/tables.md:26: trailing whitespace."
+  },
+  "scoped": {
+    "command": "git diff --cached --check -- . ':!docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/frozen-base/out/tables.md'",
+    "exit": 0
+  },
+  "action": "Exact frozen-base generated receipt preserved; no numerical/control rerun"
+}

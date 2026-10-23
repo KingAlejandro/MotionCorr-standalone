@@ -1,0 +1,20 @@
+[
+  {
+    "script": "focused-probes.py",
+    "exit": 1,
+    "phase": "parse failure; no checks executed",
+    "retained": "probe-iteration01-FAIL.json"
+  },
+  {
+    "script": "focused-probes-iteration02.py",
+    "exit": 0,
+    "result": "K22 FAIL caught, K28/K30 PASS, synthetic branch output",
+    "retained": "focused-probes.json"
+  },
+  {
+    "script": "late-error-and-k22-counterfactual.py",
+    "exit": 0,
+    "result": "diagnostic output retained; no adopted source amendment",
+    "retained": "late-error-and-k22-counterfactual.json"
+  }
+]

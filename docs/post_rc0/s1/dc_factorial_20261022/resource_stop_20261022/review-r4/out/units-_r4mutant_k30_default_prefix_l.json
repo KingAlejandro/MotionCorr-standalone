@@ -1,0 +1,41 @@
+{
+ "schema": "gpu-worker-v5-host-controls/1",
+ "python": "3.14.8 (main, Sep 30 2026, 17:55:09) [Clang 21.0.0 (clang-2100.3.34.2)]",
+ "platform": "darwin",
+ "worker": "/private/tmp/motioncorr-dc-worker-v5-review-r4-20261023-sonnet/inv-a01ff47e-3d27-4e4a-8d0e-c1f6857ac9ce/target/tools/_r4mutant_k30_default_prefix_l.py",
+ "worker_sha256": "3b9880d876b205763156c1b2f9080178c5296c35e4f48c214feaa2514cedf962",
+ "test_sha256": "a2b320be9772707118426ef9d979938828897a051f21e2c5d82765527a9d3a6a",
+ "ownership_sha256": "8de59b8cd741630f8188ef5e98b4877415df90f3bddd8a4a99013e0e7ff908cb",
+ "results": [
+  {
+   "control": "K28 census with malformed RUN.json (unit)",
+   "result": "PASS",
+   "detail": {
+    "census": {
+     "expected": 2,
+     "counts": {
+      "UNREADABLE_RUN_JSON": 1,
+      "EXITED": 1
+     },
+     "complete": false,
+     "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+     "exited_nonzero": 0,
+     "not_complete": [
+      "A"
+     ]
+    },
+    "error": null
+   }
+  },
+  {
+   "control": "K30 time prefix selection and worker default prefix (static unit)",
+   "result": "FAIL",
+   "detail": {
+    "darwin": "/usr/bin/time -l -o {out}/time-v.log",
+    "linux": "/usr/bin/time -v -o {out}/time-v.log",
+    "worker_default": "taskset -c {cpu} /usr/bin/time -l -o {out}/time-v.log"
+   }
+  }
+ ],
+ "limits": "macOS host mocks; fake nvidia-smi for every query; ProcessOwnership polling mode, with test-only emulation of the Linux adoption rule where stated; Linux subreaper execution UNRUN; /usr/bin/time prefix tested, taskset prefix UNRUN; uninterruptible-sleep query hang not reproducible."
+}

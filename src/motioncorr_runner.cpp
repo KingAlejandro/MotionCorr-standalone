@@ -38,6 +38,7 @@
 static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
+#include "src/experiment_ccf_dc.h" // EXPERIMENT ONLY (#262); empty unless MC_EXPERIMENT_CCF_DC
 #include "src/cpu_dose_symmetry_mode.h"
 #include "src/native_movie_staging.h"
 #include "src/defect_neighbours.h"
@@ -3989,6 +3990,23 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 
 skip_fitting:
+#ifdef MC_EXPERIMENT_CCF_DC // EXPERIMENT ONLY (#262): verbatim #269 capture_runtime_model.patch body
+	// Observation only: runtime coefficients before lossy STAR serialization.
+	if (const char *path = std::getenv("MC_DIAG_MODEL_OUT")) {
+		FILE *f = std::fopen(path, "w");
+		if (!f) REPORT_ERROR("Cannot open MC_DIAG_MODEL_OUT");
+		std::fprintf(f, "{\"global\":[");
+		for (size_t i = 0; i < xshifts.size(); ++i)
+			std::fprintf(f, "%s[%.17g,%.17g]", i ? "," : "", double(xshifts[i] * prescaling), double(yshifts[i] * prescaling));
+		const auto *observed = dynamic_cast<const ThirdOrderPolynomialModel *>(mic.model);
+		std::fprintf(f, "],\"coeff_x\":[");
+		for (int i = 0; i < 18; ++i) std::fprintf(f, "%s%.17g", i ? "," : "", observed ? double(observed->coeffX(i)) : 0.0);
+		std::fprintf(f, "],\"coeff_y\":[");
+		for (int i = 0; i < 18; ++i) std::fprintf(f, "%s%.17g", i ? "," : "", observed ? double(observed->coeffY(i)) : 0.0);
+		std::fprintf(f, "],\"local_enabled\":%s}\n", observed ? "true" : "false");
+		if (std::fclose(f)) REPORT_ERROR("Cannot close MC_DIAG_MODEL_OUT");
+	}
+#endif
 	MC_STAGE("release alignment");
 #ifdef _CUDA_ENABLED
 	// Local alignment scratch belongs to this movie, but reconstruction no longer
@@ -4767,6 +4785,9 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 				}
 			}
 			RCTOC(TIMING_CCF_CALC);
+#ifdef MC_EXPERIMENT_CCF_DC
+			if (experimentCcfDcZero(is_global, EXP_DC_CPU, 1)) DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);
+#endif
 
 			RCTIC(TIMING_CCF_IFFT);
 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());

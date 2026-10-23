@@ -1,0 +1,60 @@
+{
+ "schema": "dc262-v6-static-attempt/1",
+ "namespace": "/tmp/motioncorr-dc262-v6-sol-static-c1bdf59e-7be6-43b8-9d65-7f7978775593",
+ "uuid": "c1bdf59e-7be6-43b8-9d65-7f7978775593",
+ "source_sha": "dfce97f99607216e6300d1bb9ac6d18fde5189d5",
+ "utc": "2026-10-23T01:05:32Z",
+ "python": "3.13.7 (main, Aug 18 2025, 19:02:43) [Clang 20.1.4 ]",
+ "load": [
+  4.5029296875,
+  8.1064453125,
+  12.720703125
+ ],
+ "logical_cpus": 14,
+ "affinity": "UNAVAILABLE: macOS has no sched_getaffinity; no pinning applied",
+ "numeric_threads": 1,
+ "scratch_cap_bytes": 268435456,
+ "lifetime_lease": "nonblocking flock acquired",
+ "ancestry": [
+  {
+   "pid": 19333,
+   "ppid": 21517,
+   "uid": 502,
+   "cmd": "/Users/alex.konstantinov/.local/bin/python3 -B /tmp/dc262-verify-v6-static.py"
+  },
+  {
+   "pid": 21517,
+   "ppid": 16516,
+   "uid": 502,
+   "cmd": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/../CodexCLI.app/Contents/MacOS/codex app-server"
+  },
+  {
+   "pid": 16516,
+   "ppid": 16404,
+   "uid": 502,
+   "cmd": "/Users/alex.konstantinov/Applications/T3 Code (Nightly).app/Contents/MacOS/T3 Code (Nightly) --require /Users/alex.konstantinov/Applications/T3 Code (Nightly).app/Contents/Resources/app.asar/apps/desktop/dist-electron/compileCache.cjs /Users/alex.kon"
+  },
+  {
+   "pid": 16404,
+   "ppid": 1,
+   "uid": 502,
+   "cmd": "/Users/alex.konstantinov/Applications/T3 Code (Nightly).app/Contents/MacOS/T3 Code (Nightly)"
+  },
+  {
+   "pid": 1,
+   "ppid": 0,
+   "uid": 0,
+   "cmd": "/sbin/launchd"
+  }
+ ],
+ "old_author_is_ancestor": false,
+ "real_worker_suite": "UNRUN: frozen --resume owner binding unavailable in Codex ancestry; not invoked, no spoofing",
+ "matching_live_controls": [],
+ "source_hashes": {
+  "v6_mutants.json": "662d040fbe65aae559a2638d5d2ffa0e2bceaf161c6d2652aa97875e22aa7c25",
+  "test_gpu_worker_v6.py": "7c96eb4ea115c8f6565e4a9cbf60594742b2287c00f2f7ff74ecea9f246c91e9",
+  "gpu_worker_v6.py": "4d247311bab4f31338b4678e5ebb18aa7237e99918b1c03f6d744bfac291a345",
+  "test_v6_static.py": "870835d4335c5e93b59b2c35f6cfd645e9eea8cbaf11f2e031a77014737145fd"
+ },
+ "commands": []
+}

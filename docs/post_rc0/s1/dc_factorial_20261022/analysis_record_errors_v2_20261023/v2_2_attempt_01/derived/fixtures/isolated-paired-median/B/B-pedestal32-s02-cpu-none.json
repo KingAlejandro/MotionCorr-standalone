@@ -1,0 +1,48 @@
+{
+ "id": "B-pedestal32-s02-cpu-none",
+ "exit": 0,
+ "backend": "cpu",
+ "arm": "none",
+ "group": "pedestal32-s02",
+ "status": "EVALUATED",
+ "truth": {
+  "schema": "motion-counting-metrics/2",
+  "sampling_status": "VALID",
+  "field_distance_status": "FAIL",
+  "local_enabled": true,
+  "convergence": {
+   "global_converged": true
+  },
+  "field": {
+   "px": {
+    "rms": -5e+307,
+    "p95": 3.2,
+    "max": 4.2
+   },
+   "angstrom": {
+    "rms": 1.9470000000000003
+   }
+  },
+  "global_trajectory": {
+   "px": {
+    "rms": 2.2
+   }
+  },
+  "local_component": {
+   "px": {
+    "rms": 2.2
+   }
+  }
+ },
+ "image": {
+  "schema": "motion-image-truth/1",
+  "interior": {
+   "transfer_inband": 0.5,
+   "bands": [
+    {
+     "transfer": 0.3
+    }
+   ]
+  }
+ }
+}

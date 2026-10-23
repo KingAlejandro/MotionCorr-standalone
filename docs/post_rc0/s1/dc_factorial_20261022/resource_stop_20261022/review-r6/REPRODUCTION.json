@@ -1,0 +1,84 @@
+{
+  "source": "2f32e7be4d75c4451d46fbef66a87540716f48c6",
+  "final": "52ad29a1531a1fb1cbe3df2254eac319a05f7f37",
+  "load": [
+    6.84326171875,
+    8.4296875,
+    8.1689453125
+  ],
+  "utc": "2026-10-23T13:09:10Z",
+  "inputs": {
+    "test_gpu_worker_v6_1.py": "13c0bdecedf844c510748e740b676d8dd20a64b5004c9fb986d5555aa044dd6f",
+    "test_run_v6_admission.py": "193a51c1a17d1af9fd5a5fd82c7990eb71ffcbce141b80c9c724aedaf0ed10f1",
+    "run_v6_1_controls.py": "e026bdae4c4bd6b7e3083cfea402e872f83208c799b8e91609884837389e35d5",
+    "campaign.py": "8701cf248f247d03eb95c36e99bf9d3a9eaf0ad28660460646afc7128cf84eae",
+    "gpu_worker_v6.py": "df141c02d2432144f2cafb8cba3e703618ae8cbfee8361437f6ddfa628f1508c",
+    "v6_1_mutants.json": "a99a785b93aca7f22802cfa728f3f4de6b217b964b90d841a0adbf166c9436da",
+    "gpu_worker_v6_1.py": "704e21205d223194d3067ffd7bccc1d02fe6126fe16307816f95d0344c5b1f79",
+    "test_v6_1_static.py": "80321093f2a6897edf133ee82f4d408b01738fb11266f08a41822158ef87957d"
+  },
+  "scope": "data-only; no actual Popen, PID/group signal, signal handler installation or process harness",
+  "checked_fallback_ast_unchanged": true,
+  "result": "PASS within data-only scope",
+  "commands": [
+    {
+      "name": "static-units",
+      "mode": "guarded runpy in lease-holder interpreter",
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-B",
+        "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_1_static.py",
+        "--json",
+        "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/static-units.json"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "admission-units",
+      "mode": "guarded runpy in lease-holder interpreter",
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-B",
+        "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/tools/test_run_v6_admission.py",
+        "--runner",
+        "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/tools/run_v6_1_controls.py",
+        "--json",
+        "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/admission-units.json"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "mutant-late_observer_root_signal_removed",
+      "mode": "guarded runpy in lease-holder interpreter",
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-B",
+        "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_1_static.py",
+        "--worker",
+        "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_1_controls/iteration-01-2f32e7be/late_observer_root_signal_removed.py",
+        "--json",
+        "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/mutant-late_observer_root_signal_removed.json"
+      ],
+      "exit": 1
+    },
+    {
+      "name": "mutant-k22_own_group_exclusion_removed",
+      "mode": "guarded runpy in lease-holder interpreter",
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-B",
+        "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_1_static.py",
+        "--worker",
+        "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_1_controls/iteration-01-2f32e7be/k22_own_group_exclusion_removed.py",
+        "--json",
+        "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/mutant-k22_own_group_exclusion_removed.json"
+      ],
+      "exit": 1
+    }
+  ],
+  "end_load": [
+    6.84326171875,
+    8.4296875,
+    8.1689453125
+  ]
+}

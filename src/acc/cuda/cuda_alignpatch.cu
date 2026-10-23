@@ -2,6 +2,7 @@
 #ifdef _CUDA_ENABLED
 
 #include "src/acc/cuda/cuda_alignpatch.h"
+#include "src/experiment_ccf_dc.h" // EXPERIMENT ONLY (#262); empty unless MC_EXPERIMENT_CCF_DC
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/error.h"
 #include "src/acc/cuda/cuda_scoped_resources.h"
@@ -40,6 +41,14 @@ namespace {
 const int ALIGN_MAX_BUFFERS = 8;
 const int ALIGN_MAX_EVENTS  = 8;
 } // namespace
+
+#ifdef MC_EXPERIMENT_CCF_DC
+// EXPERIMENT ONLY (#262): zero each frame's CCF scratch DC bin; never resident spectra.
+__global__ void experimentZeroCcfDcKernel(float2 *d_Fccs, size_t stride, int n_frames) {
+    const int f = blockIdx.x * blockDim.x + threadIdx.x;
+    if (f < n_frames) d_Fccs[(size_t)f * stride] = make_float2(0.f, 0.f);
+}
+#endif
 
 static int findGoodSizeCuda(int request) {
     const int good_numbers[] = {192, 216, 256, 288, 324,
@@ -625,6 +634,12 @@ bool cudaAlignPatchDeviceWithWorkspace(
 
         // 3. Batched cuFFT C2R
         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_cufft));
+#ifdef MC_EXPERIMENT_CCF_DC
+        if (experimentCcfDcZero(is_global, EXP_DC_CUDA_SINGLE, n_frames)) {
+            experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);
+            ALIGN_LAUNCH(cudaGetLastError());
+        }
+#endif
         ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
         ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
         if (timed) {
@@ -989,6 +1004,12 @@ void cudaAlignPatchBatchDevice(
             ALIGN_LAUNCH(cudaGetLastError());
             computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, w.d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, ccf_nfx, ccf_nfy, n_frames);
             ALIGN_LAUNCH(cudaGetLastError());
+#ifdef MC_EXPERIMENT_CCF_DC
+            if (experimentCcfDcZero(false, EXP_DC_CUDA_BATCHED, n_frames)) {
+                experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);
+                ALIGN_LAUNCH(cudaGetLastError());
+            }
+#endif
             ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
             ALIGN_CUFFT(cufftExecC2R(w.plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
             findPeakAndInterpolateKernel<<<n_frames, 256>>>(

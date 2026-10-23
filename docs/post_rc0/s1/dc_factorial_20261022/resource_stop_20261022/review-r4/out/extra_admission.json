@@ -1,0 +1,65 @@
+[
+ {
+  "case": "owner birth tuple (macOS ProcessTable form) vs JSON list birth",
+  "admitted": true,
+  "expected": true,
+  "result": "PASS",
+  "reason": "admitted"
+ },
+ {
+  "case": "owner uses space form --resume ID (own token) admitted",
+  "admitted": true,
+  "expected": true,
+  "result": "PASS",
+  "reason": "admitted"
+ },
+ {
+  "case": "parent of owner carries the exact token (outside owner family) -> refused as other author",
+  "admitted": false,
+  "expected": false,
+  "result": "PASS",
+  "reason": "another process of the author session is live"
+ },
+ {
+  "case": "owner row missing from process table",
+  "admitted": false,
+  "expected": false,
+  "result": "PASS",
+  "reason": "owner PID is not an ancestor of this runner"
+ },
+ {
+  "case": "ppid cycle among ancestors does not loop",
+  "admitted": true,
+  "expected": true,
+  "result": "PASS",
+  "reason": "admitted"
+ },
+ {
+  "case": "foreign process with token joined by quotes in a shell string",
+  "admitted": true,
+  "expected": false,
+  "result": "FAIL",
+  "reason": "admitted"
+ },
+ {
+  "case": "token with trailing suffix is not the token (unrelated)",
+  "admitted": true,
+  "expected": true,
+  "result": "PASS",
+  "reason": "admitted"
+ },
+ {
+  "case": "control name as argv of a sibling reader (less run_v5_controls.py) is refused (fail-safe false positive)",
+  "admitted": false,
+  "expected": false,
+  "result": "PASS",
+  "reason": "another v4/v5 control process is live"
+ },
+ {
+  "case": "path under another gpu_worker_v4_controls namespace is refused",
+  "admitted": false,
+  "expected": false,
+  "result": "PASS",
+  "reason": "another v4/v5 control process is live"
+ }
+]

@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/range/mutants/restore-uncaught-integer.py", line 367, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/range/mutants/restore-uncaught-integer.py", line 336, in main
+    result = tier_b(ev)
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/range/mutants/restore-uncaught-integer.py", line 236, in tier_b
+    recs, audits, global_errors = read_records(ev)
+                                  ~~~~~~~~~~~~^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/range/mutants/restore-uncaught-integer.py", line 158, in read_records
+    if not finite_number(g(m, *ks)):
+           ~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/range/mutants/restore-uncaught-integer.py", line 65, in finite_number
+    return type(v) in (int, float) and math.isfinite(v)
+                                       ~~~~~~~~~~~~~^^^
+OverflowError: int too large to convert to float

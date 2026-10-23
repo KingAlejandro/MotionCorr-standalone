@@ -1,0 +1,60 @@
+{
+  "scope": "data only; Popen, kill/killpg and signal handler installation forbidden; no process qualification",
+  "time_utc": "2026-10-23T12:45:04Z",
+  "K28_K30": {
+    "K28 census with malformed RUN.json (unit)": [
+      true,
+      {
+        "census": {
+          "expected": 2,
+          "counts": {
+            "UNREADABLE_RUN_JSON": 1,
+            "EXITED": 1
+          },
+          "complete": false,
+          "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+          "exited_nonzero": 0,
+          "not_complete": [
+            "A"
+          ]
+        },
+        "error": null
+      }
+    ],
+    "K30 time prefix selection and worker default prefix (static unit)": [
+      true,
+      {
+        "darwin": "/usr/bin/time -l -o {out}/time-v.log",
+        "linux": "/usr/bin/time -v -o {out}/time-v.log",
+        "worker_default": "taskset -c {cpu} /usr/bin/time -v -o {out}/time-v.log"
+      }
+    ]
+  },
+  "K22_original": {
+    "result": "FAIL",
+    "exception": "AttributeError(\"'Root' object has no attribute 'returncode'\")",
+    "trace": "Traceback (most recent call last):\n  File \"/tmp/motioncorr-dc-worker-v6-review-r5-20261023-codex/inv-f02b09aa-12dd-4b6d-b34f-83d4671763fc/focused-probes-iteration02.py\", line 16, in <module>\n    result['K22_original']=H.k22(W)\n                           ~~~~~^^^\n  File \"/private/tmp/motioncorr-dc-worker-v6-review-r5-20261023-codex/inv-f02b09aa-12dd-4b6d-b34f-83d4671763fc/exact/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v6.py\", line 866, in k22\n    signalled, errors = m.terminate_owned(Own(), Root(), 0.05)\n                        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\n  File \"/private/tmp/motioncorr-dc-worker-v6-review-r5-20261023-codex/inv-f02b09aa-12dd-4b6d-b34f-83d4671763fc/exact/docs/post_rc0/s1/dc_factorial_20261022/tools/gpu_worker_v6.py\", line 293, in terminate_owned\n    while time.monotonic() < deadline and (not root_exited(root, own.table) or own.known_live()):\n                                               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/private/tmp/motioncorr-dc-worker-v6-review-r5-20261023-codex/inv-f02b09aa-12dd-4b6d-b34f-83d4671763fc/exact/docs/post_rc0/s1/dc_factorial_20261022/tools/gpu_worker_v6.py\", line 215, in root_exited\n    if root.returncode is not None: return True\n       ^^^^^^^^^^^^^^^\nAttributeError: 'Root' object has no attribute 'returncode'\n"
+  },
+  "healthy_control": {
+    "signals": [
+      [
+        15,
+        900001,
+        "2026-10-23T12:45:04Z"
+      ]
+    ],
+    "errors": [],
+    "fallback_calls": 0,
+    "group_calls": 1,
+    "refresh_calls": 2
+  },
+  "late_observer_error": {
+    "signals": [],
+    "errors": [
+      "refused signal 15 to unverified group 900001"
+    ],
+    "fallback_calls": 0,
+    "group_calls": 0,
+    "refresh_calls": 2
+  }
+}

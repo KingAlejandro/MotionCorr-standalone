@@ -1,0 +1,11 @@
+PASS refused r2 tree (watchdog child of the owner) is admitted -> admitted
+PASS orphan duplicate Claude with the same --resume (PPID 1) is refused -> another process of the author session is live
+PASS space-separated --resume token outside the owner tree is refused -> another process of the author session is live
+PASS wrong owner birth is refused -> owner birth does not match
+PASS owner PID that is not an ancestor is refused -> owner PID is not an ancestor of this runner
+FAIL owner without the exact token (different id) is refused -> admitted
+FAIL unrelated commands mentioning the id are admitted -> another process of the author session is live
+PASS unrelated launcher.py / smi.py are admitted -> admitted
+PASS a live foreign v5 harness is refused -> another v4/v5 control process is live
+PASS a live control under the owner but outside the runner chain is refused -> another v4/v5 control process is live
+PASS a mock process in another gpu_worker_v5_controls namespace is refused -> another v4/v5 control process is live

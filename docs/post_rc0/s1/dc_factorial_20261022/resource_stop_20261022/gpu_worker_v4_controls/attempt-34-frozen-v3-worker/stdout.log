@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py", line 635, in <module>
+    if __name__ == '__main__':
+        ^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py", line 623, in main
+    results = []
+    
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py", line 462, in controls
+    Path(t, 'fault.flag').write_text('x')
+    
+    ...<2 lines>...
+        and not f.receipts('CLEANUP_FAILED_LEASE_HELD') and not (f.t / 'own.txt').exists(),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py", line 336, in single
+    if during: during(f, p, detail)
+           ^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py", line 253, in wait
+    def wait(self, p, timeout=60):
+                    ^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/subprocess.py", line 1280, in wait
+    return self._wait(timeout=timeout)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/subprocess.py", line 2060, in _wait
+    time.sleep(delay)
+    ~~~~~~~~~~^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v4.py", line 614, in _terminate
+    # The runner's bounded fallback sends SIGTERM first; unwinding runs every control's finally cleanup.
+KeyboardInterrupt: SIGTERM

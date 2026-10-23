@@ -1,0 +1,15 @@
+{
+ "schema": "dc262-v6-data-only/1",
+ "worker_sha256": "24d5918d9f7edf603914ed177c607c0e6f6ba02bd0cfe772bc3b7065bf4d307b",
+ "test_sha256": "848e38d410b3680630b47f6a5fe7d9eade99536d0e31cf7a5d44c197342637a7",
+ "tests": 14,
+ "failures": [
+  {
+   "test": "test_original_group_term_kill_before_wait (__main__.Checks.test_original_group_term_kill_before_wait)",
+   "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py\", line 130, in test_original_group_term_kill_before_wait\n    self.assertEqual(calls, [[root.pid, int(signal.SIGTERM)], [root.pid, int(signal.SIGKILL)]])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: [] != [[900001, 15], [900001, 9]]\n\nSecond list contains 2 additional elements.\nFirst extra element 0:\n[900001, 15]\n\n- []\n+ [[900001, 15], [900001, 9]]\n"
+  }
+ ],
+ "errors": [],
+ "result": "FAIL",
+ "limits": "Synthetic Popen/process tables/signals only; process cleanup, real-worker suite, Linux and GPU UNRUN."
+}

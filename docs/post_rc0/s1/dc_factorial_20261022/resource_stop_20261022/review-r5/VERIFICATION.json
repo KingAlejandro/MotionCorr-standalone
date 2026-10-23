@@ -1,0 +1,358 @@
+{
+  "tools": {
+    "gpu_worker_v6.py": {
+      "sha256": "df141c02d2432144f2cafb8cba3e703618ae8cbfee8361437f6ddfa628f1508c",
+      "matches_manifest": true,
+      "same_at_tested_source": true
+    },
+    "test_gpu_worker_v6.py": {
+      "sha256": "0fe17877776351843eb1e2c71ce1cb8c349c047c26e2630595f81af0a037ccc0",
+      "matches_manifest": true,
+      "same_at_tested_source": true
+    },
+    "run_v6_controls.py": {
+      "sha256": "3ddbb3434666f41390810364c1c6f2587a683045896669e48ea2a070c566fec7",
+      "matches_manifest": true,
+      "same_at_tested_source": true
+    },
+    "test_run_v6_admission.py": {
+      "sha256": "193a51c1a17d1af9fd5a5fd82c7990eb71ffcbce141b80c9c724aedaf0ed10f1",
+      "matches_manifest": true,
+      "same_at_tested_source": true
+    },
+    "test_v6_static.py": {
+      "sha256": "848e38d410b3680630b47f6a5fe7d9eade99536d0e31cf7a5d44c197342637a7",
+      "matches_manifest": true,
+      "same_at_tested_source": true
+    },
+    "v6_mutants.json": {
+      "sha256": "662d040fbe65aae559a2638d5d2ffa0e2bceaf161c6d2652aa97875e22aa7c25",
+      "matches_manifest": true,
+      "same_at_tested_source": true
+    }
+  },
+  "frozen": {
+    "tools/multi_gpu/process_ownership.py": {
+      "same_as_exact_base": true,
+      "matches_manifest": true,
+      "sha256": "8de59b8cd741630f8188ef5e98b4877415df90f3bddd8a4a99013e0e7ff908cb"
+    },
+    "docs/post_rc0/s1/dc_factorial_20261022/tools/campaign.py": {
+      "same_as_exact_base": true,
+      "matches_manifest": true,
+      "sha256": "8701cf248f247d03eb95c36e99bf9d3a9eaf0ad28660460646afc7128cf84eae"
+    },
+    "docs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/CONTRACT-v5.md": {
+      "same_as_exact_base": true,
+      "matches_manifest": true,
+      "sha256": "34800fe196f44a0b5629e77ad8b60c21ed43c6cb1ac1227a5ea8d82543d3e414"
+    },
+    "docs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/CONTRACT-v6.md": {
+      "same_as_exact_base": true,
+      "matches_manifest": true,
+      "sha256": "672b8845dec725a3983637531a72adcd855bae7fc8ce013949f24e43dc9175c6"
+    },
+    "docs/post_rc0/s1/dc_factorial_20261022/tools/gpu_worker_v2.py": {
+      "same_as_exact_base": true,
+      "matches_manifest": true,
+      "sha256": "610dca3b41c5c4f6c807bd9ab61857113b69f9cefe7e579be836ff24c7fba98f"
+    },
+    "docs/post_rc0/s1/dc_factorial_20261022/tools/gpu_worker_v3.py": {
+      "same_as_exact_base": true,
+      "matches_manifest": true,
+      "sha256": "a0510eaae583c4c01ce20829b0656957c6d5c9094f6c1d3ca154438ce8c106c9"
+    },
+    "docs/post_rc0/s1/dc_factorial_20261022/tools/gpu_worker_v4.py": {
+      "same_as_exact_base": true,
+      "matches_manifest": true,
+      "sha256": "071a1588c9ceda73c2d974309b20f6b51beb5211e393752871496f32e084c853"
+    },
+    "docs/post_rc0/s1/dc_factorial_20261022/tools/gpu_worker_v5.py": {
+      "same_as_exact_base": true,
+      "matches_manifest": true,
+      "sha256": "1e3d6f0aa140a3a23b8b1510f0f4730f27b510b2fa8603dc8345c3401ddb1b44"
+    },
+    "docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v5.py": {
+      "same_as_exact_base": true,
+      "matches_manifest": true,
+      "sha256": "a2b320be9772707118426ef9d979938828897a051f21e2c5d82765527a9d3a6a"
+    },
+    "docs/post_rc0/s1/dc_factorial_20261022/tools/run_v5_controls.py": {
+      "same_as_exact_base": true,
+      "matches_manifest": true,
+      "sha256": "4f70d4fa7f81bf5284a76545eabffea065bc31bb963ff5e0f86a3134ff24f838"
+    },
+    "docs/post_rc0/s1/dc_factorial_20261022/tools/v5_mutants.json": {
+      "same_as_exact_base": true,
+      "matches_manifest": true,
+      "sha256": "c82e22b37268252a50b01d855766a679c21a45b5f62dfc10b1be9850f8ce583d"
+    }
+  },
+  "original_reviews": {
+    "R3": {
+      "retained_sha256": "275d97aedc0ce1a80d770a1d6bd74c0ab228a3d2d7b55df23ebdf30892ecf220",
+      "original_exists": true,
+      "byte_equal": true
+    },
+    "R4": {
+      "retained_sha256": "cf7fcbade78cf2512d83b1b27e1487ee699cf57403b5153ef483737c6d8903f9",
+      "original_exists": true,
+      "byte_equal": true
+    }
+  },
+  "author_iterations": {
+    "iteration-01-dfce97f9": {
+      "result": "PASS",
+      "tests": 12,
+      "failures": [],
+      "errors": []
+    },
+    "iteration-02-15daad22-FAIL": {
+      "result": "FAIL",
+      "tests": 14,
+      "failures": [],
+      "errors": [
+        {
+          "test": "test_embedded_mock_scripts_compile_without_execution (__main__.Checks.test_embedded_mock_scripts_compile_without_execution) (script='FAULT_ENTRY')",
+          "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py\", line 224, in test_embedded_mock_scripts_compile_without_execution\n    with self.subTest(script=name): compile(getattr(harness, name), name, 'exec')\n                                    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"FAULT_ENTRY\", line 99\n    out.write(json.dumps(row) + '\n                                ^\nSyntaxError: unterminated string literal (detected at line 99)\n"
+        }
+      ]
+    },
+    "iteration-03-1c0e4e86": {
+      "result": "PASS",
+      "tests": 14,
+      "failures": [],
+      "errors": []
+    },
+    "iteration-04-f5946de1-final-source": {
+      "result": "PASS",
+      "tests": 14,
+      "failures": [],
+      "errors": []
+    }
+  },
+  "transfer": {
+    "declared": {
+      "utc": "2026-10-23T00:54:49.479980+00:00",
+      "head": "c823cc630451411812406f35dd906b17197c3ed3",
+      "file_sha256": "de3709767a39e0a49130648ce493190cb58e8f24055a3554ac3954c6cff3e72c",
+      "file_bytes": 39012,
+      "source_path": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/gpu_worker_v6.py",
+      "terminal_failure": "API500ADCreauthentication",
+      "scope": "originalworktreepreserved; canonicalworktransferredtonewCodex6.1Solworktree; no furtherClaude continuation"
+    },
+    "source_still_exists": true,
+    "byte_size_match": true,
+    "sha256_match": true
+  },
+  "changed_paths": [
+    "M\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/README.md",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/HASHES.txt",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/POSTCHECK.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/README.md",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/SOURCE-HASHES.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/TRANSFER.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/issue-262-comments-live.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/issue-262-live.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/.lease",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/ATTEMPT.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/K28-K30.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/K28-K30.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/MUTANTS.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/PREFLIGHT.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/admission-units.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/admission-units.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/campaign.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/errors_branch_root_signal_removed.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/initial_branch_root_signal_removed.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/jobstage_before_cleanup.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/loop_branch_root_signal_removed.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/no_activation_final.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/record_write_unchecked.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/root_only_no_group.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-errors_branch_root_signal_removed.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-errors_branch_root_signal_removed.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-initial_branch_root_signal_removed.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-initial_branch_root_signal_removed.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-jobstage_before_cleanup.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-jobstage_before_cleanup.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-loop_branch_root_signal_removed.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-loop_branch_root_signal_removed.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-no_activation_final.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-no_activation_final.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-record_write_unchecked.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-record_write_unchecked.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-root_only_no_group.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-root_only_no_group.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-unguarded_hold_receipt.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-mutant-unguarded_hold_receipt.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-units.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/static-units.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/tools/multi_gpu/process_ownership.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-01-dfce97f9/unguarded_hold_receipt.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/.lease",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/ATTEMPT.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/K28-K30.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/K28-K30.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/MUTANTS.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/PREFLIGHT.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/admission-units.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/admission-units.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/campaign.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/errors_branch_root_signal_removed.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/initial_branch_root_signal_removed.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/jobstage_before_cleanup.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/loop_branch_root_signal_removed.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/no_activation_final.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/no_sighup_handler.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/record_write_unchecked.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/root_only_no_group.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-errors_branch_root_signal_removed.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-errors_branch_root_signal_removed.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-initial_branch_root_signal_removed.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-initial_branch_root_signal_removed.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-jobstage_before_cleanup.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-jobstage_before_cleanup.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-loop_branch_root_signal_removed.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-loop_branch_root_signal_removed.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-no_activation_final.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-no_activation_final.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-no_sighup_handler.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-no_sighup_handler.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-record_write_unchecked.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-record_write_unchecked.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-root_only_no_group.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-root_only_no_group.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-unguarded_hold_receipt.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-mutant-unguarded_hold_receipt.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-units.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/static-units.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/tools/multi_gpu/process_ownership.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-02-15daad22-FAIL/unguarded_hold_receipt.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/.lease",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/ATTEMPT.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/K28-K30.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/K28-K30.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/MUTANTS.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/PREFLIGHT.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/admission-units.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/admission-units.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/campaign.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/errors_branch_root_signal_removed.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/initial_branch_root_signal_removed.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/jobstage_before_cleanup.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/loop_branch_root_signal_removed.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/no_activation_final.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/no_sighup_handler.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/record_write_unchecked.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/root_only_no_group.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-errors_branch_root_signal_removed.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-errors_branch_root_signal_removed.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-initial_branch_root_signal_removed.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-initial_branch_root_signal_removed.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-jobstage_before_cleanup.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-jobstage_before_cleanup.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-loop_branch_root_signal_removed.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-loop_branch_root_signal_removed.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-no_activation_final.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-no_activation_final.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-no_sighup_handler.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-no_sighup_handler.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-record_write_unchecked.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-record_write_unchecked.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-root_only_no_group.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-root_only_no_group.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-unguarded_hold_receipt.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-mutant-unguarded_hold_receipt.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-units.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/static-units.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/tools/multi_gpu/process_ownership.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-03-1c0e4e86/unguarded_hold_receipt.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/.lease",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/ATTEMPT.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/K28-K30.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/K28-K30.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/MUTANTS.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/PREFLIGHT.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/admission-units.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/admission-units.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/campaign.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/errors_branch_root_signal_removed.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/initial_branch_root_signal_removed.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/jobstage_before_cleanup.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/loop_branch_root_signal_removed.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/no_activation_final.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/no_sighup_handler.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/record_write_unchecked.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/root_only_no_group.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-errors_branch_root_signal_removed.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-errors_branch_root_signal_removed.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-initial_branch_root_signal_removed.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-initial_branch_root_signal_removed.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-jobstage_before_cleanup.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-jobstage_before_cleanup.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-loop_branch_root_signal_removed.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-loop_branch_root_signal_removed.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-no_activation_final.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-no_activation_final.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-no_sighup_handler.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-no_sighup_handler.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-record_write_unchecked.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-record_write_unchecked.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-root_only_no_group.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-root_only_no_group.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-unguarded_hold_receipt.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-mutant-unguarded_hold_receipt.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-units.json",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/static-units.out",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/tools/multi_gpu/process_ownership.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/iteration-04-f5946de1-final-source/unguarded_hold_receipt.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/transfer-to-final.patch",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/verify-final-source.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/verify-iteration-01.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_controls/verify-iterations-02-03.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/review-r4/RESPONSES-v6.md",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/tools/gpu_worker_v6.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/tools/run_v6_controls.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v6.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/tools/test_run_v6_admission.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py",
+    "A\tdocs/post_rc0/s1/dc_factorial_20261022/tools/v6_mutants.json"
+  ],
+  "source_commit_to_final_tool_changes": [],
+  "AGENTS.md": {
+    "current_matches_final": true,
+    "sha256": "67d4e7261f24d6cb5277f2a8d416ad153f71f2ea73f4c1a2c0fad9021b0e0975"
+  },
+  "docs/release/POST_FREEZE_TEST_PLAN.md": {
+    "current_matches_final": true,
+    "sha256": "f143aab0e94c7e4eb4c5cbb16400d39f63bed16096930cdd948624716c18e164"
+  },
+  "plan_sha256": "13e074f9b21066695c1d48ff8fd2285fc30524871beebab4a5ffb69b5f9a2796",
+  "reviewer_worktree": {
+    "path": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-ab8909ee",
+    "head": "1f0a58bf6e0639d8b62f74da52f250cc664c0b30",
+    "status": ""
+  },
+  "author_worktree": {
+    "path": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36",
+    "head": "1fe458ecc33e9eb2e89f8617d6394854e7a5b6f2",
+    "branch": "experiment/262-worker-v6-sol-20261023",
+    "status": ""
+  },
+  "runtime": {
+    "python": "3.13.7 (main, Aug 18 2025, 19:02:43) [Clang 20.1.4 ]",
+    "executable": "/Users/alex.konstantinov/.local/bin/python3",
+    "executable_sha256_postcheck": "127b5dc839447e76f0ed6a6c3b3097dc7903547d2f1a1fe21d7fc40c20b7bc65",
+    "host": "SCMAC-7L9P2F",
+    "platform": "macOS-26.7.1-arm64-arm-64bit-Mach-O",
+    "load": [
+      9.7109375,
+      7.53662109375,
+      6.17822265625
+    ],
+    "numeric_threads": 1,
+    "affinity": "macOS unpinned",
+    "utc": "2026-10-23T12:47:57Z"
+  }
+}

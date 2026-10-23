@@ -1,0 +1,42 @@
+{
+  "live_root_healthy": {
+    "signals": [
+      [
+        15,
+        900001,
+        "2026-10-23T12:46:51Z"
+      ],
+      [
+        9,
+        900001,
+        "2026-10-23T12:46:51Z"
+      ]
+    ],
+    "errors": [],
+    "fallback_calls": 0,
+    "group_calls": 2,
+    "refresh_calls": 3
+  },
+  "live_root_late_error": {
+    "signals": [],
+    "errors": [
+      "refused signal 15 to unverified group 900001",
+      "refused signal 9 to unverified group 900001"
+    ],
+    "fallback_calls": 0,
+    "group_calls": 0,
+    "refresh_calls": 3
+  },
+  "K22_fixture_only_counterfactual": {
+    "result": "PASS",
+    "detail": {
+      "own_group": 19748,
+      "groups_signalled": [
+        900000,
+        900002
+      ],
+      "errors": []
+    },
+    "change": "in-memory fake Root.returncode=0 only; no author file changed"
+  }
+}

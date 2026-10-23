@@ -156,3 +156,14 @@ Remote 4GPUs CPU only: cores 14–15 (NUMA0), one numeric thread per process
 3315461 / chain 3315463 to have no live compute. No GPU process, no
 `nvidia-smi`. Local Mac runs are development checks on one thread and are not
 part of this evidence manifest.
+
+## Correction (23 October 2026, after review R1)
+
+The header sentence "Frozen before any native run of prototype code" is not
+literally true for amendments A1 and A2. Both were written after local macOS
+development runs of the prototype (`/tmp/q268-dev1`, `/tmp/q268-dev2`), so they
+are prospective only for the remote Linux campaign. Development failures that
+led to them (a checker crash on a negative control, the dev2 E5 failure) were
+not retained as files; only the summary results in
+`evidence_c347f59f/local_dev/` exist. The text above is otherwise unchanged.
+Hardening controls for the next source revision are in `PROTOCOL_V2.md`.

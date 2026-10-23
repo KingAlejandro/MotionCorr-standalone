@@ -215,7 +215,7 @@ FAULT_ENTRY = EMULATE + textwrap.dedent('''\
         if cur:
             row = dict(pid=root.pid, start=cur['start'], pgid=cur['pgid'], sid=os.getsid(root.pid))
             with open(os.path.join(os.path.dirname(os.environ['FAKE_FAULT_FLAG']), 'root.txt'), 'a') as out:
-                out.write(json.dumps(row) + '\n')
+                out.write(json.dumps(row) + '\\n')
         return orig_terminate(own, root, grace)
     m.terminate_owned = record_terminate
     sys.exit(m.main(sys.argv[2:]))

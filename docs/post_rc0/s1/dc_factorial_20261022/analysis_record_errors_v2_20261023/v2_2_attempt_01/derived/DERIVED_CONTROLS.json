@@ -1,0 +1,4294 @@
+{
+ "source_sha": "070e3eab2af455f391395eacfcb8340a9abe2792",
+ "target_sha256": "c2f391822b880fba20b7a9571e4d5150fa3b365bd18afff2e44f90fef939ef45",
+ "python": "/Users/alex.konstantinov/.local/bin/python3",
+ "python_sha256": "127b5dc839447e76f0ed6a6c3b3097dc7903547d2f1a1fe21d7fc40c20b7bc65",
+ "numeric_threads": 1,
+ "checks": [
+  {
+   "name": "finite-large-median/R2-hash-bindings",
+   "actual": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "9c320cfae3cf6a719dd3e85c9f045740a13e00bf03f531c54a7ad156886d6496",
+    "B-pedestal32-s01-cpu-global.json": "f3905f000751dfc211c4a1216b2e68626578c9c5a097f1190ef32bf094a80163",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "44753e8495c89e2d5f46d35298205cc6f9d6203794aa4b931d014e1ec9d3b4ab",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "b92dfb5a34dbac5e2b19b890bb440599dc593d2e796461fc69c798f68e28dfee",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "ba09e912051f1e5818add12687f2fde05fbaa9eaba22412b907d541da1f78880",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "bcae12346cd18fa8abc61e619fce98de8810d17fa616e04a456adaab706968a1",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "2e5586e2fd1e29d2c3b427b56ca9ad0100599f28c6f88c19f36b88e34246a620",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "d60f65448887546f5ca1c57d1eb47be94d078372c1efa109fe1847b27731460c",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "6909be091e4bc488907a05962b9eb4b35994c6e51d4dd40e36d6c92acc117fb7",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "9d7efe3178055c503c6f5f7817c5fe1a81d85535954e5a9087c7b06a3ee4a535",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "expected": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "9c320cfae3cf6a719dd3e85c9f045740a13e00bf03f531c54a7ad156886d6496",
+    "B-pedestal32-s01-cpu-global.json": "f3905f000751dfc211c4a1216b2e68626578c9c5a097f1190ef32bf094a80163",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "44753e8495c89e2d5f46d35298205cc6f9d6203794aa4b931d014e1ec9d3b4ab",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "b92dfb5a34dbac5e2b19b890bb440599dc593d2e796461fc69c798f68e28dfee",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "ba09e912051f1e5818add12687f2fde05fbaa9eaba22412b907d541da1f78880",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "bcae12346cd18fa8abc61e619fce98de8810d17fa616e04a456adaab706968a1",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "2e5586e2fd1e29d2c3b427b56ca9ad0100599f28c6f88c19f36b88e34246a620",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "d60f65448887546f5ca1c57d1eb47be94d078372c1efa109fe1847b27731460c",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "6909be091e4bc488907a05962b9eb4b35994c6e51d4dd40e36d6c92acc117fb7",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "9d7efe3178055c503c6f5f7817c5fe1a81d85535954e5a9087c7b06a3ee4a535",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/immutable-inputs",
+   "actual": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "9c320cfae3cf6a719dd3e85c9f045740a13e00bf03f531c54a7ad156886d6496",
+    "B-pedestal32-s01-cpu-global.json": "f3905f000751dfc211c4a1216b2e68626578c9c5a097f1190ef32bf094a80163",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "44753e8495c89e2d5f46d35298205cc6f9d6203794aa4b931d014e1ec9d3b4ab",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "b92dfb5a34dbac5e2b19b890bb440599dc593d2e796461fc69c798f68e28dfee",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "ba09e912051f1e5818add12687f2fde05fbaa9eaba22412b907d541da1f78880",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "bcae12346cd18fa8abc61e619fce98de8810d17fa616e04a456adaab706968a1",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "2e5586e2fd1e29d2c3b427b56ca9ad0100599f28c6f88c19f36b88e34246a620",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "d60f65448887546f5ca1c57d1eb47be94d078372c1efa109fe1847b27731460c",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "6909be091e4bc488907a05962b9eb4b35994c6e51d4dd40e36d6c92acc117fb7",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "9d7efe3178055c503c6f5f7817c5fe1a81d85535954e5a9087c7b06a3ee4a535",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "expected": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "9c320cfae3cf6a719dd3e85c9f045740a13e00bf03f531c54a7ad156886d6496",
+    "B-pedestal32-s01-cpu-global.json": "f3905f000751dfc211c4a1216b2e68626578c9c5a097f1190ef32bf094a80163",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "44753e8495c89e2d5f46d35298205cc6f9d6203794aa4b931d014e1ec9d3b4ab",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "b92dfb5a34dbac5e2b19b890bb440599dc593d2e796461fc69c798f68e28dfee",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "ba09e912051f1e5818add12687f2fde05fbaa9eaba22412b907d541da1f78880",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "bcae12346cd18fa8abc61e619fce98de8810d17fa616e04a456adaab706968a1",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "2e5586e2fd1e29d2c3b427b56ca9ad0100599f28c6f88c19f36b88e34246a620",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "d60f65448887546f5ca1c57d1eb47be94d078372c1efa109fe1847b27731460c",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "6909be091e4bc488907a05962b9eb4b35994c6e51d4dd40e36d6c92acc117fb7",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "9d7efe3178055c503c6f5f7817c5fe1a81d85535954e5a9087c7b06a3ee4a535",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/exit-and-files",
+   "actual": [
+    2,
+    true,
+    true
+   ],
+   "expected": [
+    2,
+    true,
+    true
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/strict-json",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/record-inputs-not-relabelled",
+   "actual": [
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ]
+   ],
+   "expected": [
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ]
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/global-input-errors",
+   "actual": 0,
+   "expected": 0,
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/none/input-coverage",
+   "actual": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "expected": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/none/input-counts",
+   "actual": [
+    10,
+    10,
+    []
+   ],
+   "expected": [
+    10,
+    10,
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/global/input-coverage",
+   "actual": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "expected": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/global/input-counts",
+   "actual": [
+    10,
+    10,
+    []
+   ],
+   "expected": [
+    10,
+    10,
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/matched-inputs",
+   "actual": [
+    10,
+    {
+     "expected": 10,
+     "matched": 10,
+     "error": 0,
+     "missing": 0,
+     "unrun": 0
+    },
+    []
+   ],
+   "expected": [
+    10,
+    {
+     "expected": 10,
+     "matched": 10,
+     "error": 0,
+     "missing": 0,
+     "unrun": 0
+    },
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/finite-delta-accounting",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/WLT-accounting",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/derived-events-count",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/no-missing-events",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/no-fabricated-missing-cells",
+   "actual": "UNRUN",
+   "expected": "UNRUN",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s00-cpu-global",
+   "actual": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+   "expected": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s00-cpu-none",
+   "actual": "9c320cfae3cf6a719dd3e85c9f045740a13e00bf03f531c54a7ad156886d6496",
+   "expected": "9c320cfae3cf6a719dd3e85c9f045740a13e00bf03f531c54a7ad156886d6496",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s01-cpu-global",
+   "actual": "f3905f000751dfc211c4a1216b2e68626578c9c5a097f1190ef32bf094a80163",
+   "expected": "f3905f000751dfc211c4a1216b2e68626578c9c5a097f1190ef32bf094a80163",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s01-cpu-none",
+   "actual": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+   "expected": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s02-cpu-global",
+   "actual": "44753e8495c89e2d5f46d35298205cc6f9d6203794aa4b931d014e1ec9d3b4ab",
+   "expected": "44753e8495c89e2d5f46d35298205cc6f9d6203794aa4b931d014e1ec9d3b4ab",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s02-cpu-none",
+   "actual": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+   "expected": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s03-cpu-global",
+   "actual": "b92dfb5a34dbac5e2b19b890bb440599dc593d2e796461fc69c798f68e28dfee",
+   "expected": "b92dfb5a34dbac5e2b19b890bb440599dc593d2e796461fc69c798f68e28dfee",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s03-cpu-none",
+   "actual": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+   "expected": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s04-cpu-global",
+   "actual": "ba09e912051f1e5818add12687f2fde05fbaa9eaba22412b907d541da1f78880",
+   "expected": "ba09e912051f1e5818add12687f2fde05fbaa9eaba22412b907d541da1f78880",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s04-cpu-none",
+   "actual": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+   "expected": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s05-cpu-global",
+   "actual": "bcae12346cd18fa8abc61e619fce98de8810d17fa616e04a456adaab706968a1",
+   "expected": "bcae12346cd18fa8abc61e619fce98de8810d17fa616e04a456adaab706968a1",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s05-cpu-none",
+   "actual": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+   "expected": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s06-cpu-global",
+   "actual": "2e5586e2fd1e29d2c3b427b56ca9ad0100599f28c6f88c19f36b88e34246a620",
+   "expected": "2e5586e2fd1e29d2c3b427b56ca9ad0100599f28c6f88c19f36b88e34246a620",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s06-cpu-none",
+   "actual": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+   "expected": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s07-cpu-global",
+   "actual": "d60f65448887546f5ca1c57d1eb47be94d078372c1efa109fe1847b27731460c",
+   "expected": "d60f65448887546f5ca1c57d1eb47be94d078372c1efa109fe1847b27731460c",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s07-cpu-none",
+   "actual": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+   "expected": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s08-cpu-global",
+   "actual": "6909be091e4bc488907a05962b9eb4b35994c6e51d4dd40e36d6c92acc117fb7",
+   "expected": "6909be091e4bc488907a05962b9eb4b35994c6e51d4dd40e36d6c92acc117fb7",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s08-cpu-none",
+   "actual": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+   "expected": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s09-cpu-global",
+   "actual": "9d7efe3178055c503c6f5f7817c5fe1a81d85535954e5a9087c7b06a3ee4a535",
+   "expected": "9d7efe3178055c503c6f5f7817c5fe1a81d85535954e5a9087c7b06a3ee4a535",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/audit-hash/B-pedestal32-s09-cpu-none",
+   "actual": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778",
+   "expected": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778",
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/error-state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/suppressed-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/coverage-explains-derived",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/no-selected-cohort-median",
+   "actual": null,
+   "expected": null,
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/precise-operations",
+   "actual": [
+    [
+     "cell_median",
+     "rms"
+    ],
+    [
+     "paired_median",
+     "rms"
+    ]
+   ],
+   "expected": [
+    [
+     "cell_median",
+     "rms"
+    ],
+    [
+     "paired_median",
+     "rms"
+    ]
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/null-cell-median",
+   "actual": [
+    null,
+    "EVALUATION_ERROR",
+    1
+   ],
+   "expected": [
+    null,
+    "EVALUATION_ERROR",
+    1
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/finite-deltas",
+   "actual": [
+    10,
+    0
+   ],
+   "expected": [
+    10,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-median/cell-blocks-all-own-inference",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/R2-hash-bindings",
+   "actual": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+    "B-pedestal32-s01-cpu-global.json": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "expected": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+    "B-pedestal32-s01-cpu-global.json": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/immutable-inputs",
+   "actual": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+    "B-pedestal32-s01-cpu-global.json": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "expected": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+    "B-pedestal32-s01-cpu-global.json": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/exit-and-files",
+   "actual": [
+    2,
+    true,
+    true
+   ],
+   "expected": [
+    2,
+    true,
+    true
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/strict-json",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/record-inputs-not-relabelled",
+   "actual": [
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ]
+   ],
+   "expected": [
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ]
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/global-input-errors",
+   "actual": 0,
+   "expected": 0,
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/none/input-coverage",
+   "actual": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "expected": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/none/input-counts",
+   "actual": [
+    10,
+    10,
+    []
+   ],
+   "expected": [
+    10,
+    10,
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/global/input-coverage",
+   "actual": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "expected": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/global/input-counts",
+   "actual": [
+    10,
+    10,
+    []
+   ],
+   "expected": [
+    10,
+    10,
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/matched-inputs",
+   "actual": [
+    10,
+    {
+     "expected": 10,
+     "matched": 10,
+     "error": 0,
+     "missing": 0,
+     "unrun": 0
+    },
+    []
+   ],
+   "expected": [
+    10,
+    {
+     "expected": 10,
+     "matched": 10,
+     "error": 0,
+     "missing": 0,
+     "unrun": 0
+    },
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/finite-delta-accounting",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/WLT-accounting",
+   "actual": 9,
+   "expected": 9,
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/derived-events-count",
+   "actual": 1,
+   "expected": 1,
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/no-missing-events",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/no-fabricated-missing-cells",
+   "actual": "UNRUN",
+   "expected": "UNRUN",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s00-cpu-global",
+   "actual": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+   "expected": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s00-cpu-none",
+   "actual": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+   "expected": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s01-cpu-global",
+   "actual": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+   "expected": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s01-cpu-none",
+   "actual": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+   "expected": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s02-cpu-global",
+   "actual": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+   "expected": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s02-cpu-none",
+   "actual": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+   "expected": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s03-cpu-global",
+   "actual": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+   "expected": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s03-cpu-none",
+   "actual": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+   "expected": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s04-cpu-global",
+   "actual": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+   "expected": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s04-cpu-none",
+   "actual": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+   "expected": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s05-cpu-global",
+   "actual": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+   "expected": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s05-cpu-none",
+   "actual": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+   "expected": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s06-cpu-global",
+   "actual": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+   "expected": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s06-cpu-none",
+   "actual": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+   "expected": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s07-cpu-global",
+   "actual": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+   "expected": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s07-cpu-none",
+   "actual": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+   "expected": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s08-cpu-global",
+   "actual": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+   "expected": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s08-cpu-none",
+   "actual": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+   "expected": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s09-cpu-global",
+   "actual": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+   "expected": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/audit-hash/B-pedestal32-s09-cpu-none",
+   "actual": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778",
+   "expected": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778",
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/error-state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/suppressed-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/coverage-explains-derived",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/no-selected-cohort-median",
+   "actual": null,
+   "expected": null,
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/precise-operations",
+   "actual": [
+    [
+     "paired_subtraction",
+     "rms",
+     0
+    ]
+   ],
+   "expected": [
+    [
+     "paired_subtraction",
+     "rms",
+     0
+    ]
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/cell-remains-complete",
+   "actual": [
+    "COMPLETE",
+    0
+   ],
+   "expected": [
+    "COMPLETE",
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/finite-deltas",
+   "actual": [
+    9,
+    1
+   ],
+   "expected": [
+    9,
+    1
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/regression-not-lost-or-invented",
+   "actual": [
+    -1e+308,
+    1e+308,
+    null,
+    0
+   ],
+   "expected": [
+    -1e+308,
+    1e+308,
+    null,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-large-difference/unaffected-comparison",
+   "actual": [
+    "improves",
+    0.001953125
+   ],
+   "expected": [
+    "improves",
+    0.001953125
+   ],
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/immutable-inputs",
+   "actual": {
+    "B-pedestal32-s00-cpu-global.json": "bd90fd14a0a0d0ae93ca3154c91edcbf53ddeb221863468a49fc9088cf612442",
+    "B-pedestal32-s00-cpu-none.json": "343df6a8f99b648a0884966ff000df33d85c52fc1074c099c29b43986d987830",
+    "B-pedestal32-s01-cpu-global.json": "a2bde9ed9836ccd21f014877f44103a9fd8f6d5226f3641382b932338ea194ce",
+    "B-pedestal32-s01-cpu-none.json": "f4dfb378a2cd5ba303a1218b6849847b57545e111f3e79d7ff3d7468934c21e7",
+    "B-pedestal32-s02-cpu-global.json": "874b37b26ffa832cf6a60ca9dbffb47369c056ab7ce5d4d7c0b3d94a482c4f0e",
+    "B-pedestal32-s02-cpu-none.json": "a6589f76848bad82194422a72e6d9d3797d86703a16c08a75c4029591557c099",
+    "B-pedestal32-s03-cpu-global.json": "4d51f383734a36262fa40a248b4ada13fcbf6fdb8f3df2b2b360c178bc58ff79",
+    "B-pedestal32-s03-cpu-none.json": "3e6fe424190084c91a773273e754ee0dc44efcb78bcb990dc6b744480c3f3121",
+    "B-pedestal32-s04-cpu-global.json": "360ef15454a14e9d2fc6f6b434f38c28cc44d31ad7922994d2f076f72cfd3503",
+    "B-pedestal32-s04-cpu-none.json": "d96632ad4053ef2cc290d19553511a16804566eca514d9b5740de9ec055c355f",
+    "B-pedestal32-s05-cpu-global.json": "3a064f9ded6885a903d3e26bc53265d7a3eba50b6c27c92013bb276c09746949",
+    "B-pedestal32-s05-cpu-none.json": "1b930b67d60d66d466ee63198323e3384554560be6c3532b14f43750d9b9f436",
+    "B-pedestal32-s06-cpu-global.json": "9af1bcd2c8a2cceccb2c3032a0d95309a773a523db93515b85b189cc0dcd1bab",
+    "B-pedestal32-s06-cpu-none.json": "ef6845c7d26aeb8d4709bdda1a365a66a1539456b855abc362a216b90a818e9f",
+    "B-pedestal32-s07-cpu-global.json": "e1cf330c44260e8f5091c22c7446a663df43fc70150e644145256159b3b91b77",
+    "B-pedestal32-s07-cpu-none.json": "3a7ccd85d7ece9e53ebd430af82deed16eeb39100d8e42e92e1895ae603e5006",
+    "B-pedestal32-s08-cpu-global.json": "1d9f9ce9062652dc60783e19eed8ed217d936bb16ffbe9d8580fa32120b9f31c",
+    "B-pedestal32-s08-cpu-none.json": "a31e6cb27125d0aadd677ca9079955fbcebfd5c0614dc14d373bd88aee10ffac",
+    "B-pedestal32-s09-cpu-global.json": "32fb9ecd31f71737f16926d75585c8bfef5005e5b298f69c6a982697a61bec84",
+    "B-pedestal32-s09-cpu-none.json": "4fe45be0371d357713c42eea63ceaf5f03b2bb9e79891be352f3f75df1435616"
+   },
+   "expected": {
+    "B-pedestal32-s00-cpu-global.json": "bd90fd14a0a0d0ae93ca3154c91edcbf53ddeb221863468a49fc9088cf612442",
+    "B-pedestal32-s00-cpu-none.json": "343df6a8f99b648a0884966ff000df33d85c52fc1074c099c29b43986d987830",
+    "B-pedestal32-s01-cpu-global.json": "a2bde9ed9836ccd21f014877f44103a9fd8f6d5226f3641382b932338ea194ce",
+    "B-pedestal32-s01-cpu-none.json": "f4dfb378a2cd5ba303a1218b6849847b57545e111f3e79d7ff3d7468934c21e7",
+    "B-pedestal32-s02-cpu-global.json": "874b37b26ffa832cf6a60ca9dbffb47369c056ab7ce5d4d7c0b3d94a482c4f0e",
+    "B-pedestal32-s02-cpu-none.json": "a6589f76848bad82194422a72e6d9d3797d86703a16c08a75c4029591557c099",
+    "B-pedestal32-s03-cpu-global.json": "4d51f383734a36262fa40a248b4ada13fcbf6fdb8f3df2b2b360c178bc58ff79",
+    "B-pedestal32-s03-cpu-none.json": "3e6fe424190084c91a773273e754ee0dc44efcb78bcb990dc6b744480c3f3121",
+    "B-pedestal32-s04-cpu-global.json": "360ef15454a14e9d2fc6f6b434f38c28cc44d31ad7922994d2f076f72cfd3503",
+    "B-pedestal32-s04-cpu-none.json": "d96632ad4053ef2cc290d19553511a16804566eca514d9b5740de9ec055c355f",
+    "B-pedestal32-s05-cpu-global.json": "3a064f9ded6885a903d3e26bc53265d7a3eba50b6c27c92013bb276c09746949",
+    "B-pedestal32-s05-cpu-none.json": "1b930b67d60d66d466ee63198323e3384554560be6c3532b14f43750d9b9f436",
+    "B-pedestal32-s06-cpu-global.json": "9af1bcd2c8a2cceccb2c3032a0d95309a773a523db93515b85b189cc0dcd1bab",
+    "B-pedestal32-s06-cpu-none.json": "ef6845c7d26aeb8d4709bdda1a365a66a1539456b855abc362a216b90a818e9f",
+    "B-pedestal32-s07-cpu-global.json": "e1cf330c44260e8f5091c22c7446a663df43fc70150e644145256159b3b91b77",
+    "B-pedestal32-s07-cpu-none.json": "3a7ccd85d7ece9e53ebd430af82deed16eeb39100d8e42e92e1895ae603e5006",
+    "B-pedestal32-s08-cpu-global.json": "1d9f9ce9062652dc60783e19eed8ed217d936bb16ffbe9d8580fa32120b9f31c",
+    "B-pedestal32-s08-cpu-none.json": "a31e6cb27125d0aadd677ca9079955fbcebfd5c0614dc14d373bd88aee10ffac",
+    "B-pedestal32-s09-cpu-global.json": "32fb9ecd31f71737f16926d75585c8bfef5005e5b298f69c6a982697a61bec84",
+    "B-pedestal32-s09-cpu-none.json": "4fe45be0371d357713c42eea63ceaf5f03b2bb9e79891be352f3f75df1435616"
+   },
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/exit-and-files",
+   "actual": [
+    2,
+    true,
+    true
+   ],
+   "expected": [
+    2,
+    true,
+    true
+   ],
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/strict-json",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/record-inputs-not-relabelled",
+   "actual": [
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ]
+   ],
+   "expected": [
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ]
+   ],
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/global-input-errors",
+   "actual": 0,
+   "expected": 0,
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/none/input-coverage",
+   "actual": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "expected": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/none/input-counts",
+   "actual": [
+    10,
+    10,
+    []
+   ],
+   "expected": [
+    10,
+    10,
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/global/input-coverage",
+   "actual": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "expected": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/global/input-counts",
+   "actual": [
+    10,
+    10,
+    []
+   ],
+   "expected": [
+    10,
+    10,
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/matched-inputs",
+   "actual": [
+    10,
+    {
+     "expected": 10,
+     "matched": 10,
+     "error": 0,
+     "missing": 0,
+     "unrun": 0
+    },
+    []
+   ],
+   "expected": [
+    10,
+    {
+     "expected": 10,
+     "matched": 10,
+     "error": 0,
+     "missing": 0,
+     "unrun": 0
+    },
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/finite-delta-accounting",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/WLT-accounting",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/derived-events-count",
+   "actual": 1,
+   "expected": 1,
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/no-missing-events",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/no-fabricated-missing-cells",
+   "actual": "UNRUN",
+   "expected": "UNRUN",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s00-cpu-global",
+   "actual": "bd90fd14a0a0d0ae93ca3154c91edcbf53ddeb221863468a49fc9088cf612442",
+   "expected": "bd90fd14a0a0d0ae93ca3154c91edcbf53ddeb221863468a49fc9088cf612442",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s00-cpu-none",
+   "actual": "343df6a8f99b648a0884966ff000df33d85c52fc1074c099c29b43986d987830",
+   "expected": "343df6a8f99b648a0884966ff000df33d85c52fc1074c099c29b43986d987830",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s01-cpu-global",
+   "actual": "a2bde9ed9836ccd21f014877f44103a9fd8f6d5226f3641382b932338ea194ce",
+   "expected": "a2bde9ed9836ccd21f014877f44103a9fd8f6d5226f3641382b932338ea194ce",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s01-cpu-none",
+   "actual": "f4dfb378a2cd5ba303a1218b6849847b57545e111f3e79d7ff3d7468934c21e7",
+   "expected": "f4dfb378a2cd5ba303a1218b6849847b57545e111f3e79d7ff3d7468934c21e7",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s02-cpu-global",
+   "actual": "874b37b26ffa832cf6a60ca9dbffb47369c056ab7ce5d4d7c0b3d94a482c4f0e",
+   "expected": "874b37b26ffa832cf6a60ca9dbffb47369c056ab7ce5d4d7c0b3d94a482c4f0e",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s02-cpu-none",
+   "actual": "a6589f76848bad82194422a72e6d9d3797d86703a16c08a75c4029591557c099",
+   "expected": "a6589f76848bad82194422a72e6d9d3797d86703a16c08a75c4029591557c099",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s03-cpu-global",
+   "actual": "4d51f383734a36262fa40a248b4ada13fcbf6fdb8f3df2b2b360c178bc58ff79",
+   "expected": "4d51f383734a36262fa40a248b4ada13fcbf6fdb8f3df2b2b360c178bc58ff79",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s03-cpu-none",
+   "actual": "3e6fe424190084c91a773273e754ee0dc44efcb78bcb990dc6b744480c3f3121",
+   "expected": "3e6fe424190084c91a773273e754ee0dc44efcb78bcb990dc6b744480c3f3121",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s04-cpu-global",
+   "actual": "360ef15454a14e9d2fc6f6b434f38c28cc44d31ad7922994d2f076f72cfd3503",
+   "expected": "360ef15454a14e9d2fc6f6b434f38c28cc44d31ad7922994d2f076f72cfd3503",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s04-cpu-none",
+   "actual": "d96632ad4053ef2cc290d19553511a16804566eca514d9b5740de9ec055c355f",
+   "expected": "d96632ad4053ef2cc290d19553511a16804566eca514d9b5740de9ec055c355f",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s05-cpu-global",
+   "actual": "3a064f9ded6885a903d3e26bc53265d7a3eba50b6c27c92013bb276c09746949",
+   "expected": "3a064f9ded6885a903d3e26bc53265d7a3eba50b6c27c92013bb276c09746949",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s05-cpu-none",
+   "actual": "1b930b67d60d66d466ee63198323e3384554560be6c3532b14f43750d9b9f436",
+   "expected": "1b930b67d60d66d466ee63198323e3384554560be6c3532b14f43750d9b9f436",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s06-cpu-global",
+   "actual": "9af1bcd2c8a2cceccb2c3032a0d95309a773a523db93515b85b189cc0dcd1bab",
+   "expected": "9af1bcd2c8a2cceccb2c3032a0d95309a773a523db93515b85b189cc0dcd1bab",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s06-cpu-none",
+   "actual": "ef6845c7d26aeb8d4709bdda1a365a66a1539456b855abc362a216b90a818e9f",
+   "expected": "ef6845c7d26aeb8d4709bdda1a365a66a1539456b855abc362a216b90a818e9f",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s07-cpu-global",
+   "actual": "e1cf330c44260e8f5091c22c7446a663df43fc70150e644145256159b3b91b77",
+   "expected": "e1cf330c44260e8f5091c22c7446a663df43fc70150e644145256159b3b91b77",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s07-cpu-none",
+   "actual": "3a7ccd85d7ece9e53ebd430af82deed16eeb39100d8e42e92e1895ae603e5006",
+   "expected": "3a7ccd85d7ece9e53ebd430af82deed16eeb39100d8e42e92e1895ae603e5006",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s08-cpu-global",
+   "actual": "1d9f9ce9062652dc60783e19eed8ed217d936bb16ffbe9d8580fa32120b9f31c",
+   "expected": "1d9f9ce9062652dc60783e19eed8ed217d936bb16ffbe9d8580fa32120b9f31c",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s08-cpu-none",
+   "actual": "a31e6cb27125d0aadd677ca9079955fbcebfd5c0614dc14d373bd88aee10ffac",
+   "expected": "a31e6cb27125d0aadd677ca9079955fbcebfd5c0614dc14d373bd88aee10ffac",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s09-cpu-global",
+   "actual": "32fb9ecd31f71737f16926d75585c8bfef5005e5b298f69c6a982697a61bec84",
+   "expected": "32fb9ecd31f71737f16926d75585c8bfef5005e5b298f69c6a982697a61bec84",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/audit-hash/B-pedestal32-s09-cpu-none",
+   "actual": "4fe45be0371d357713c42eea63ceaf5f03b2bb9e79891be352f3f75df1435616",
+   "expected": "4fe45be0371d357713c42eea63ceaf5f03b2bb9e79891be352f3f75df1435616",
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/error-state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/suppressed-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/coverage-explains-derived",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/only-pair-operation",
+   "actual": [
+    [
+     "paired_median",
+     "rms"
+    ]
+   ],
+   "expected": [
+    [
+     "paired_median",
+     "rms"
+    ]
+   ],
+   "passed": true
+  },
+  {
+   "name": "isolated-paired-median/rows-complete",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/immutable-inputs",
+   "actual": {
+    "B-pedestal32-s00-cpu-global.json": "7a517b28cfaf0237744c2932609396377d58b83047d058fa2671cf924a9302a5",
+    "B-pedestal32-s00-cpu-none.json": "74eb72d1d0f04047a40617d133bcb85e094689c9126b060747c6f0ad6a3db7e6",
+    "B-pedestal32-s01-cpu-global.json": "ceaba4e1fab954c79244e63b210369f87418f36b7c09ac71b35b233406fc350a",
+    "B-pedestal32-s01-cpu-none.json": "b7bd5d50bfad352cfb5bc9c065f5e841aeeeec01dbdb895dcd2bcfe0a3056abf",
+    "B-pedestal32-s02-cpu-global.json": "55b6d268ea67fc267961c18ce1e94e963dbafe04ce2f83e51f6531836626544f",
+    "B-pedestal32-s02-cpu-none.json": "edd7fa0138288496b162a0ff151d3126ba45f064ca74ac500bbe893f8b0092a2",
+    "B-pedestal32-s03-cpu-global.json": "6b93eeb6c9d64ef4f4c456421bf1ccc0e68937de3a195a8e135576c93c8cf172",
+    "B-pedestal32-s03-cpu-none.json": "72c9f76830bcd1b461cb1ac69c9c6fa7481f5214a84345518a4b0548adef64ed",
+    "B-pedestal32-s04-cpu-global.json": "26113de5cd75ee491959ba9d93907c76e39558a2eed3a4de328477b445d64538",
+    "B-pedestal32-s04-cpu-none.json": "0751e142f3702b2b4782c9162ac3b9c92e16df9cacdc8cded1f672d268b82ffd",
+    "B-pedestal32-s05-cpu-global.json": "8d920aae5cbfcc650249b1176d73dda7258ec3b4ab5843598b91a0d97724aa6b",
+    "B-pedestal32-s05-cpu-none.json": "b0dda657799282b64a69e0d637cdf01bd594dd971e30cab00441b4b08eaf8f52",
+    "B-pedestal32-s06-cpu-global.json": "bb7894daa8c6c7d2278bba09ce91d062a7c08d491d86080455805778862b3103",
+    "B-pedestal32-s06-cpu-none.json": "79a48fe3d314bc57cad3ef14c2ae2c43482c603e2d9b449ebdbbbd1c5bbce8f7",
+    "B-pedestal32-s07-cpu-global.json": "f63e851103bbd81c846c9899bfdf7944a418a834f9c1e49d3c0f567ffafcdd97",
+    "B-pedestal32-s07-cpu-none.json": "0fc5d7ec63392f312b88aeee0a57e4cebcb2e0fe6ea9b5dbe85f1e6d15973e2b",
+    "B-pedestal32-s08-cpu-global.json": "47b118fab24e23c9551cc3905c24e1bc2875044261bbf88ad792c043d6bb60d4",
+    "B-pedestal32-s08-cpu-none.json": "182f09768b3042d843da2fecfad06e650efbb9035fb4079d4b2ae05f810c644f",
+    "B-pedestal32-s09-cpu-global.json": "e8b4b359c242efe14330cf428e94d38cf22db27481fcc4f8e358162109ce06d1",
+    "B-pedestal32-s09-cpu-none.json": "156ae7f2c35da637682db308ff0dae8b1d80bc5414cde24336ef145ff4375b99"
+   },
+   "expected": {
+    "B-pedestal32-s00-cpu-global.json": "7a517b28cfaf0237744c2932609396377d58b83047d058fa2671cf924a9302a5",
+    "B-pedestal32-s00-cpu-none.json": "74eb72d1d0f04047a40617d133bcb85e094689c9126b060747c6f0ad6a3db7e6",
+    "B-pedestal32-s01-cpu-global.json": "ceaba4e1fab954c79244e63b210369f87418f36b7c09ac71b35b233406fc350a",
+    "B-pedestal32-s01-cpu-none.json": "b7bd5d50bfad352cfb5bc9c065f5e841aeeeec01dbdb895dcd2bcfe0a3056abf",
+    "B-pedestal32-s02-cpu-global.json": "55b6d268ea67fc267961c18ce1e94e963dbafe04ce2f83e51f6531836626544f",
+    "B-pedestal32-s02-cpu-none.json": "edd7fa0138288496b162a0ff151d3126ba45f064ca74ac500bbe893f8b0092a2",
+    "B-pedestal32-s03-cpu-global.json": "6b93eeb6c9d64ef4f4c456421bf1ccc0e68937de3a195a8e135576c93c8cf172",
+    "B-pedestal32-s03-cpu-none.json": "72c9f76830bcd1b461cb1ac69c9c6fa7481f5214a84345518a4b0548adef64ed",
+    "B-pedestal32-s04-cpu-global.json": "26113de5cd75ee491959ba9d93907c76e39558a2eed3a4de328477b445d64538",
+    "B-pedestal32-s04-cpu-none.json": "0751e142f3702b2b4782c9162ac3b9c92e16df9cacdc8cded1f672d268b82ffd",
+    "B-pedestal32-s05-cpu-global.json": "8d920aae5cbfcc650249b1176d73dda7258ec3b4ab5843598b91a0d97724aa6b",
+    "B-pedestal32-s05-cpu-none.json": "b0dda657799282b64a69e0d637cdf01bd594dd971e30cab00441b4b08eaf8f52",
+    "B-pedestal32-s06-cpu-global.json": "bb7894daa8c6c7d2278bba09ce91d062a7c08d491d86080455805778862b3103",
+    "B-pedestal32-s06-cpu-none.json": "79a48fe3d314bc57cad3ef14c2ae2c43482c603e2d9b449ebdbbbd1c5bbce8f7",
+    "B-pedestal32-s07-cpu-global.json": "f63e851103bbd81c846c9899bfdf7944a418a834f9c1e49d3c0f567ffafcdd97",
+    "B-pedestal32-s07-cpu-none.json": "0fc5d7ec63392f312b88aeee0a57e4cebcb2e0fe6ea9b5dbe85f1e6d15973e2b",
+    "B-pedestal32-s08-cpu-global.json": "47b118fab24e23c9551cc3905c24e1bc2875044261bbf88ad792c043d6bb60d4",
+    "B-pedestal32-s08-cpu-none.json": "182f09768b3042d843da2fecfad06e650efbb9035fb4079d4b2ae05f810c644f",
+    "B-pedestal32-s09-cpu-global.json": "e8b4b359c242efe14330cf428e94d38cf22db27481fcc4f8e358162109ce06d1",
+    "B-pedestal32-s09-cpu-none.json": "156ae7f2c35da637682db308ff0dae8b1d80bc5414cde24336ef145ff4375b99"
+   },
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/exit-and-files",
+   "actual": [
+    0,
+    true,
+    true
+   ],
+   "expected": [
+    0,
+    true,
+    true
+   ],
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/strict-json",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/record-inputs-not-relabelled",
+   "actual": [
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ]
+   ],
+   "expected": [
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ]
+   ],
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/global-input-errors",
+   "actual": 0,
+   "expected": 0,
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/none/input-coverage",
+   "actual": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "expected": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/none/input-counts",
+   "actual": [
+    10,
+    10,
+    []
+   ],
+   "expected": [
+    10,
+    10,
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/global/input-coverage",
+   "actual": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "expected": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/global/input-counts",
+   "actual": [
+    10,
+    10,
+    []
+   ],
+   "expected": [
+    10,
+    10,
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/matched-inputs",
+   "actual": [
+    10,
+    {
+     "expected": 10,
+     "matched": 10,
+     "error": 0,
+     "missing": 0,
+     "unrun": 0
+    },
+    []
+   ],
+   "expected": [
+    10,
+    {
+     "expected": 10,
+     "matched": 10,
+     "error": 0,
+     "missing": 0,
+     "unrun": 0
+    },
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/finite-delta-accounting",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/WLT-accounting",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/derived-events-count",
+   "actual": 0,
+   "expected": 0,
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/no-missing-events",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/no-fabricated-missing-cells",
+   "actual": "UNRUN",
+   "expected": "UNRUN",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s00-cpu-global",
+   "actual": "7a517b28cfaf0237744c2932609396377d58b83047d058fa2671cf924a9302a5",
+   "expected": "7a517b28cfaf0237744c2932609396377d58b83047d058fa2671cf924a9302a5",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s00-cpu-none",
+   "actual": "74eb72d1d0f04047a40617d133bcb85e094689c9126b060747c6f0ad6a3db7e6",
+   "expected": "74eb72d1d0f04047a40617d133bcb85e094689c9126b060747c6f0ad6a3db7e6",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s01-cpu-global",
+   "actual": "ceaba4e1fab954c79244e63b210369f87418f36b7c09ac71b35b233406fc350a",
+   "expected": "ceaba4e1fab954c79244e63b210369f87418f36b7c09ac71b35b233406fc350a",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s01-cpu-none",
+   "actual": "b7bd5d50bfad352cfb5bc9c065f5e841aeeeec01dbdb895dcd2bcfe0a3056abf",
+   "expected": "b7bd5d50bfad352cfb5bc9c065f5e841aeeeec01dbdb895dcd2bcfe0a3056abf",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s02-cpu-global",
+   "actual": "55b6d268ea67fc267961c18ce1e94e963dbafe04ce2f83e51f6531836626544f",
+   "expected": "55b6d268ea67fc267961c18ce1e94e963dbafe04ce2f83e51f6531836626544f",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s02-cpu-none",
+   "actual": "edd7fa0138288496b162a0ff151d3126ba45f064ca74ac500bbe893f8b0092a2",
+   "expected": "edd7fa0138288496b162a0ff151d3126ba45f064ca74ac500bbe893f8b0092a2",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s03-cpu-global",
+   "actual": "6b93eeb6c9d64ef4f4c456421bf1ccc0e68937de3a195a8e135576c93c8cf172",
+   "expected": "6b93eeb6c9d64ef4f4c456421bf1ccc0e68937de3a195a8e135576c93c8cf172",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s03-cpu-none",
+   "actual": "72c9f76830bcd1b461cb1ac69c9c6fa7481f5214a84345518a4b0548adef64ed",
+   "expected": "72c9f76830bcd1b461cb1ac69c9c6fa7481f5214a84345518a4b0548adef64ed",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s04-cpu-global",
+   "actual": "26113de5cd75ee491959ba9d93907c76e39558a2eed3a4de328477b445d64538",
+   "expected": "26113de5cd75ee491959ba9d93907c76e39558a2eed3a4de328477b445d64538",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s04-cpu-none",
+   "actual": "0751e142f3702b2b4782c9162ac3b9c92e16df9cacdc8cded1f672d268b82ffd",
+   "expected": "0751e142f3702b2b4782c9162ac3b9c92e16df9cacdc8cded1f672d268b82ffd",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s05-cpu-global",
+   "actual": "8d920aae5cbfcc650249b1176d73dda7258ec3b4ab5843598b91a0d97724aa6b",
+   "expected": "8d920aae5cbfcc650249b1176d73dda7258ec3b4ab5843598b91a0d97724aa6b",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s05-cpu-none",
+   "actual": "b0dda657799282b64a69e0d637cdf01bd594dd971e30cab00441b4b08eaf8f52",
+   "expected": "b0dda657799282b64a69e0d637cdf01bd594dd971e30cab00441b4b08eaf8f52",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s06-cpu-global",
+   "actual": "bb7894daa8c6c7d2278bba09ce91d062a7c08d491d86080455805778862b3103",
+   "expected": "bb7894daa8c6c7d2278bba09ce91d062a7c08d491d86080455805778862b3103",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s06-cpu-none",
+   "actual": "79a48fe3d314bc57cad3ef14c2ae2c43482c603e2d9b449ebdbbbd1c5bbce8f7",
+   "expected": "79a48fe3d314bc57cad3ef14c2ae2c43482c603e2d9b449ebdbbbd1c5bbce8f7",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s07-cpu-global",
+   "actual": "f63e851103bbd81c846c9899bfdf7944a418a834f9c1e49d3c0f567ffafcdd97",
+   "expected": "f63e851103bbd81c846c9899bfdf7944a418a834f9c1e49d3c0f567ffafcdd97",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s07-cpu-none",
+   "actual": "0fc5d7ec63392f312b88aeee0a57e4cebcb2e0fe6ea9b5dbe85f1e6d15973e2b",
+   "expected": "0fc5d7ec63392f312b88aeee0a57e4cebcb2e0fe6ea9b5dbe85f1e6d15973e2b",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s08-cpu-global",
+   "actual": "47b118fab24e23c9551cc3905c24e1bc2875044261bbf88ad792c043d6bb60d4",
+   "expected": "47b118fab24e23c9551cc3905c24e1bc2875044261bbf88ad792c043d6bb60d4",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s08-cpu-none",
+   "actual": "182f09768b3042d843da2fecfad06e650efbb9035fb4079d4b2ae05f810c644f",
+   "expected": "182f09768b3042d843da2fecfad06e650efbb9035fb4079d4b2ae05f810c644f",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s09-cpu-global",
+   "actual": "e8b4b359c242efe14330cf428e94d38cf22db27481fcc4f8e358162109ce06d1",
+   "expected": "e8b4b359c242efe14330cf428e94d38cf22db27481fcc4f8e358162109ce06d1",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/audit-hash/B-pedestal32-s09-cpu-none",
+   "actual": "156ae7f2c35da637682db308ff0dae8b1d80bc5414cde24336ef145ff4375b99",
+   "expected": "156ae7f2c35da637682db308ff0dae8b1d80bc5414cde24336ef145ff4375b99",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/no-derived-errors",
+   "actual": [],
+   "expected": [],
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/complete-cell",
+   "actual": "COMPLETE",
+   "expected": "COMPLETE",
+   "passed": true
+  },
+  {
+   "name": "representable-near-boundary/no-clamp",
+   "actual": [
+    2e+307,
+    "harms",
+    0.001953125
+   ],
+   "expected": [
+    2e+307,
+    "harms",
+    0.001953125
+   ],
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/immutable-inputs",
+   "actual": {
+    "B-pedestal32-s00-cpu-global.json": "a9799f5596eff8d63f39e4f193ae832951789781092f6b238d850f9c04b90a81",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "04a8240db7e55e089d815bdf0b38679584336f9cb4fe574566651d6e8ea54533",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "02ba864bf7e6cc37c1b93c72daa268b4d96ca45427d25ad552764274079c06df",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "973e4bc9ed2574033e1a1911150772165b90b299fa4cc556dc0bc0011a584e63",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "5ab041a92f41c7a543c21c2d2e433abe26f8a86d0bb00ba4a20379864bf58185",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "6fa51312b15f61f7c1e6b7aee134b391fe890095805cd9ff331ffcca385bf7a4",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "5d041fcbd1ef48ee122b16c100e9659dea5d64c772cff04503cb773d272528ba",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "b0271a9c9bdf8b65f77c15b1b19a3b92427d9872e40abf8f6611b6f3f59aea78",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "d1d94b70057f13903e1c6dde3af2176766fc8922c223bb91c0e1bd98353888cc",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "1dd841b349a0f2360ba3c7192a411b66e4c76504317c723ec47a00fc673deb4e",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   },
+   "expected": {
+    "B-pedestal32-s00-cpu-global.json": "a9799f5596eff8d63f39e4f193ae832951789781092f6b238d850f9c04b90a81",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "04a8240db7e55e089d815bdf0b38679584336f9cb4fe574566651d6e8ea54533",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "02ba864bf7e6cc37c1b93c72daa268b4d96ca45427d25ad552764274079c06df",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "973e4bc9ed2574033e1a1911150772165b90b299fa4cc556dc0bc0011a584e63",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "5ab041a92f41c7a543c21c2d2e433abe26f8a86d0bb00ba4a20379864bf58185",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "6fa51312b15f61f7c1e6b7aee134b391fe890095805cd9ff331ffcca385bf7a4",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "5d041fcbd1ef48ee122b16c100e9659dea5d64c772cff04503cb773d272528ba",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "b0271a9c9bdf8b65f77c15b1b19a3b92427d9872e40abf8f6611b6f3f59aea78",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "d1d94b70057f13903e1c6dde3af2176766fc8922c223bb91c0e1bd98353888cc",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "1dd841b349a0f2360ba3c7192a411b66e4c76504317c723ec47a00fc673deb4e",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   },
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/exit-and-files",
+   "actual": [
+    2,
+    true,
+    true
+   ],
+   "expected": [
+    2,
+    true,
+    true
+   ],
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/strict-json",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/record-inputs-not-relabelled",
+   "actual": [
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ]
+   ],
+   "expected": [
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ]
+   ],
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/global-input-errors",
+   "actual": 0,
+   "expected": 0,
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/none/input-coverage",
+   "actual": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "expected": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/none/input-counts",
+   "actual": [
+    10,
+    10,
+    []
+   ],
+   "expected": [
+    10,
+    10,
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/global/input-coverage",
+   "actual": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "expected": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/global/input-counts",
+   "actual": [
+    10,
+    10,
+    []
+   ],
+   "expected": [
+    10,
+    10,
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/matched-inputs",
+   "actual": [
+    10,
+    {
+     "expected": 10,
+     "matched": 10,
+     "error": 0,
+     "missing": 0,
+     "unrun": 0
+    },
+    []
+   ],
+   "expected": [
+    10,
+    {
+     "expected": 10,
+     "matched": 10,
+     "error": 0,
+     "missing": 0,
+     "unrun": 0
+    },
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/finite-delta-accounting",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/WLT-accounting",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/derived-events-count",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/no-missing-events",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/no-fabricated-missing-cells",
+   "actual": "UNRUN",
+   "expected": "UNRUN",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s00-cpu-global",
+   "actual": "a9799f5596eff8d63f39e4f193ae832951789781092f6b238d850f9c04b90a81",
+   "expected": "a9799f5596eff8d63f39e4f193ae832951789781092f6b238d850f9c04b90a81",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s00-cpu-none",
+   "actual": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+   "expected": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s01-cpu-global",
+   "actual": "04a8240db7e55e089d815bdf0b38679584336f9cb4fe574566651d6e8ea54533",
+   "expected": "04a8240db7e55e089d815bdf0b38679584336f9cb4fe574566651d6e8ea54533",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s01-cpu-none",
+   "actual": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+   "expected": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s02-cpu-global",
+   "actual": "02ba864bf7e6cc37c1b93c72daa268b4d96ca45427d25ad552764274079c06df",
+   "expected": "02ba864bf7e6cc37c1b93c72daa268b4d96ca45427d25ad552764274079c06df",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s02-cpu-none",
+   "actual": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+   "expected": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s03-cpu-global",
+   "actual": "973e4bc9ed2574033e1a1911150772165b90b299fa4cc556dc0bc0011a584e63",
+   "expected": "973e4bc9ed2574033e1a1911150772165b90b299fa4cc556dc0bc0011a584e63",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s03-cpu-none",
+   "actual": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+   "expected": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s04-cpu-global",
+   "actual": "5ab041a92f41c7a543c21c2d2e433abe26f8a86d0bb00ba4a20379864bf58185",
+   "expected": "5ab041a92f41c7a543c21c2d2e433abe26f8a86d0bb00ba4a20379864bf58185",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s04-cpu-none",
+   "actual": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+   "expected": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s05-cpu-global",
+   "actual": "6fa51312b15f61f7c1e6b7aee134b391fe890095805cd9ff331ffcca385bf7a4",
+   "expected": "6fa51312b15f61f7c1e6b7aee134b391fe890095805cd9ff331ffcca385bf7a4",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s05-cpu-none",
+   "actual": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+   "expected": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s06-cpu-global",
+   "actual": "5d041fcbd1ef48ee122b16c100e9659dea5d64c772cff04503cb773d272528ba",
+   "expected": "5d041fcbd1ef48ee122b16c100e9659dea5d64c772cff04503cb773d272528ba",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s06-cpu-none",
+   "actual": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+   "expected": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s07-cpu-global",
+   "actual": "b0271a9c9bdf8b65f77c15b1b19a3b92427d9872e40abf8f6611b6f3f59aea78",
+   "expected": "b0271a9c9bdf8b65f77c15b1b19a3b92427d9872e40abf8f6611b6f3f59aea78",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s07-cpu-none",
+   "actual": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+   "expected": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s08-cpu-global",
+   "actual": "d1d94b70057f13903e1c6dde3af2176766fc8922c223bb91c0e1bd98353888cc",
+   "expected": "d1d94b70057f13903e1c6dde3af2176766fc8922c223bb91c0e1bd98353888cc",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s08-cpu-none",
+   "actual": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+   "expected": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s09-cpu-global",
+   "actual": "1dd841b349a0f2360ba3c7192a411b66e4c76504317c723ec47a00fc673deb4e",
+   "expected": "1dd841b349a0f2360ba3c7192a411b66e4c76504317c723ec47a00fc673deb4e",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/audit-hash/B-pedestal32-s09-cpu-none",
+   "actual": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df",
+   "expected": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df",
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/error-state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/suppressed-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/coverage-explains-derived",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/seven-sites",
+   "actual": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "all-cell-median-sites/event-count",
+   "actual": 7,
+   "expected": 7,
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/immutable-inputs",
+   "actual": {
+    "B-pedestal32-s00-cpu-global.json": "468ec249b097d7ad127b389abeda44451ddff8688dab707dfea3ab9db43e8e4f",
+    "B-pedestal32-s00-cpu-none.json": "a4e146d7de938c252b4266c3c6939c8dca0238af75c6141027af463fb718746b",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   },
+   "expected": {
+    "B-pedestal32-s00-cpu-global.json": "468ec249b097d7ad127b389abeda44451ddff8688dab707dfea3ab9db43e8e4f",
+    "B-pedestal32-s00-cpu-none.json": "a4e146d7de938c252b4266c3c6939c8dca0238af75c6141027af463fb718746b",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   },
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/exit-and-files",
+   "actual": [
+    2,
+    true,
+    true
+   ],
+   "expected": [
+    2,
+    true,
+    true
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/strict-json",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/record-inputs-not-relabelled",
+   "actual": [
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ]
+   ],
+   "expected": [
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ],
+    [
+     "EVALUATED",
+     "EVALUATED",
+     []
+    ]
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/global-input-errors",
+   "actual": 0,
+   "expected": 0,
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/none/input-coverage",
+   "actual": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "expected": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/none/input-counts",
+   "actual": [
+    10,
+    10,
+    []
+   ],
+   "expected": [
+    10,
+    10,
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/global/input-coverage",
+   "actual": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "expected": {
+    "expected": 10,
+    "present": 10,
+    "evaluated": 10,
+    "missing": 0,
+    "unrun": 0,
+    "error": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/global/input-counts",
+   "actual": [
+    10,
+    10,
+    []
+   ],
+   "expected": [
+    10,
+    10,
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/matched-inputs",
+   "actual": [
+    10,
+    {
+     "expected": 10,
+     "matched": 10,
+     "error": 0,
+     "missing": 0,
+     "unrun": 0
+    },
+    []
+   ],
+   "expected": [
+    10,
+    {
+     "expected": 10,
+     "matched": 10,
+     "error": 0,
+     "missing": 0,
+     "unrun": 0
+    },
+    []
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/finite-delta-accounting",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/WLT-accounting",
+   "actual": 9,
+   "expected": 9,
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/derived-events-count",
+   "actual": 1,
+   "expected": 1,
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/no-missing-events",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/no-fabricated-missing-cells",
+   "actual": "UNRUN",
+   "expected": "UNRUN",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s00-cpu-global",
+   "actual": "468ec249b097d7ad127b389abeda44451ddff8688dab707dfea3ab9db43e8e4f",
+   "expected": "468ec249b097d7ad127b389abeda44451ddff8688dab707dfea3ab9db43e8e4f",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s00-cpu-none",
+   "actual": "a4e146d7de938c252b4266c3c6939c8dca0238af75c6141027af463fb718746b",
+   "expected": "a4e146d7de938c252b4266c3c6939c8dca0238af75c6141027af463fb718746b",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s01-cpu-global",
+   "actual": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+   "expected": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s01-cpu-none",
+   "actual": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+   "expected": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s02-cpu-global",
+   "actual": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+   "expected": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s02-cpu-none",
+   "actual": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+   "expected": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s03-cpu-global",
+   "actual": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+   "expected": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s03-cpu-none",
+   "actual": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+   "expected": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s04-cpu-global",
+   "actual": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+   "expected": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s04-cpu-none",
+   "actual": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+   "expected": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s05-cpu-global",
+   "actual": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+   "expected": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s05-cpu-none",
+   "actual": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+   "expected": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s06-cpu-global",
+   "actual": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+   "expected": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s06-cpu-none",
+   "actual": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+   "expected": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s07-cpu-global",
+   "actual": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+   "expected": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s07-cpu-none",
+   "actual": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+   "expected": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s08-cpu-global",
+   "actual": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+   "expected": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s08-cpu-none",
+   "actual": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+   "expected": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s09-cpu-global",
+   "actual": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+   "expected": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/audit-hash/B-pedestal32-s09-cpu-none",
+   "actual": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df",
+   "expected": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df",
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/error-state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/suppressed-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "finite-integer-difference/coverage-explains-derived",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "restore-cell-median/immutable-inputs",
+   "actual": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "9c320cfae3cf6a719dd3e85c9f045740a13e00bf03f531c54a7ad156886d6496",
+    "B-pedestal32-s01-cpu-global.json": "f3905f000751dfc211c4a1216b2e68626578c9c5a097f1190ef32bf094a80163",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "44753e8495c89e2d5f46d35298205cc6f9d6203794aa4b931d014e1ec9d3b4ab",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "b92dfb5a34dbac5e2b19b890bb440599dc593d2e796461fc69c798f68e28dfee",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "ba09e912051f1e5818add12687f2fde05fbaa9eaba22412b907d541da1f78880",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "bcae12346cd18fa8abc61e619fce98de8810d17fa616e04a456adaab706968a1",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "2e5586e2fd1e29d2c3b427b56ca9ad0100599f28c6f88c19f36b88e34246a620",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "d60f65448887546f5ca1c57d1eb47be94d078372c1efa109fe1847b27731460c",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "6909be091e4bc488907a05962b9eb4b35994c6e51d4dd40e36d6c92acc117fb7",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "9d7efe3178055c503c6f5f7817c5fe1a81d85535954e5a9087c7b06a3ee4a535",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "expected": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "9c320cfae3cf6a719dd3e85c9f045740a13e00bf03f531c54a7ad156886d6496",
+    "B-pedestal32-s01-cpu-global.json": "f3905f000751dfc211c4a1216b2e68626578c9c5a097f1190ef32bf094a80163",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "44753e8495c89e2d5f46d35298205cc6f9d6203794aa4b931d014e1ec9d3b4ab",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "b92dfb5a34dbac5e2b19b890bb440599dc593d2e796461fc69c798f68e28dfee",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "ba09e912051f1e5818add12687f2fde05fbaa9eaba22412b907d541da1f78880",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "bcae12346cd18fa8abc61e619fce98de8810d17fa616e04a456adaab706968a1",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "2e5586e2fd1e29d2c3b427b56ca9ad0100599f28c6f88c19f36b88e34246a620",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "d60f65448887546f5ca1c57d1eb47be94d078372c1efa109fe1847b27731460c",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "6909be091e4bc488907a05962b9eb4b35994c6e51d4dd40e36d6c92acc117fb7",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "9d7efe3178055c503c6f5f7817c5fe1a81d85535954e5a9087c7b06a3ee4a535",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "passed": true
+  },
+  {
+   "name": "restore-cell-median/report-loss",
+   "actual": [
+    1,
+    false,
+    false
+   ],
+   "expected": [
+    1,
+    false,
+    false
+   ],
+   "passed": true
+  },
+  {
+   "name": "restore-cell-median/strict-serialization-mechanism",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "restore-cell-median/mutant-rejected",
+   "actual": "REJECT",
+   "expected": "REJECT",
+   "passed": true
+  },
+  {
+   "name": "restore-paired-subtraction/immutable-inputs",
+   "actual": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+    "B-pedestal32-s01-cpu-global.json": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "expected": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+    "B-pedestal32-s01-cpu-global.json": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "passed": true
+  },
+  {
+   "name": "restore-paired-subtraction/report-loss",
+   "actual": [
+    1,
+    false,
+    false
+   ],
+   "expected": [
+    1,
+    false,
+    false
+   ],
+   "passed": true
+  },
+  {
+   "name": "restore-paired-subtraction/strict-serialization-mechanism",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "restore-paired-subtraction/mutant-rejected",
+   "actual": "REJECT",
+   "expected": "REJECT",
+   "passed": true
+  },
+  {
+   "name": "restore-regression-emission/immutable-inputs",
+   "actual": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+    "B-pedestal32-s01-cpu-global.json": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "expected": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+    "B-pedestal32-s01-cpu-global.json": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "passed": true
+  },
+  {
+   "name": "restore-regression-emission/report-loss",
+   "actual": [
+    1,
+    false,
+    false
+   ],
+   "expected": [
+    1,
+    false,
+    false
+   ],
+   "passed": true
+  },
+  {
+   "name": "restore-regression-emission/strict-serialization-mechanism",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "restore-regression-emission/mutant-rejected",
+   "actual": "REJECT",
+   "expected": "REJECT",
+   "passed": true
+  },
+  {
+   "name": "restore-paired-median/immutable-inputs",
+   "actual": {
+    "B-pedestal32-s00-cpu-global.json": "bd90fd14a0a0d0ae93ca3154c91edcbf53ddeb221863468a49fc9088cf612442",
+    "B-pedestal32-s00-cpu-none.json": "343df6a8f99b648a0884966ff000df33d85c52fc1074c099c29b43986d987830",
+    "B-pedestal32-s01-cpu-global.json": "a2bde9ed9836ccd21f014877f44103a9fd8f6d5226f3641382b932338ea194ce",
+    "B-pedestal32-s01-cpu-none.json": "f4dfb378a2cd5ba303a1218b6849847b57545e111f3e79d7ff3d7468934c21e7",
+    "B-pedestal32-s02-cpu-global.json": "874b37b26ffa832cf6a60ca9dbffb47369c056ab7ce5d4d7c0b3d94a482c4f0e",
+    "B-pedestal32-s02-cpu-none.json": "a6589f76848bad82194422a72e6d9d3797d86703a16c08a75c4029591557c099",
+    "B-pedestal32-s03-cpu-global.json": "4d51f383734a36262fa40a248b4ada13fcbf6fdb8f3df2b2b360c178bc58ff79",
+    "B-pedestal32-s03-cpu-none.json": "3e6fe424190084c91a773273e754ee0dc44efcb78bcb990dc6b744480c3f3121",
+    "B-pedestal32-s04-cpu-global.json": "360ef15454a14e9d2fc6f6b434f38c28cc44d31ad7922994d2f076f72cfd3503",
+    "B-pedestal32-s04-cpu-none.json": "d96632ad4053ef2cc290d19553511a16804566eca514d9b5740de9ec055c355f",
+    "B-pedestal32-s05-cpu-global.json": "3a064f9ded6885a903d3e26bc53265d7a3eba50b6c27c92013bb276c09746949",
+    "B-pedestal32-s05-cpu-none.json": "1b930b67d60d66d466ee63198323e3384554560be6c3532b14f43750d9b9f436",
+    "B-pedestal32-s06-cpu-global.json": "9af1bcd2c8a2cceccb2c3032a0d95309a773a523db93515b85b189cc0dcd1bab",
+    "B-pedestal32-s06-cpu-none.json": "ef6845c7d26aeb8d4709bdda1a365a66a1539456b855abc362a216b90a818e9f",
+    "B-pedestal32-s07-cpu-global.json": "e1cf330c44260e8f5091c22c7446a663df43fc70150e644145256159b3b91b77",
+    "B-pedestal32-s07-cpu-none.json": "3a7ccd85d7ece9e53ebd430af82deed16eeb39100d8e42e92e1895ae603e5006",
+    "B-pedestal32-s08-cpu-global.json": "1d9f9ce9062652dc60783e19eed8ed217d936bb16ffbe9d8580fa32120b9f31c",
+    "B-pedestal32-s08-cpu-none.json": "a31e6cb27125d0aadd677ca9079955fbcebfd5c0614dc14d373bd88aee10ffac",
+    "B-pedestal32-s09-cpu-global.json": "32fb9ecd31f71737f16926d75585c8bfef5005e5b298f69c6a982697a61bec84",
+    "B-pedestal32-s09-cpu-none.json": "4fe45be0371d357713c42eea63ceaf5f03b2bb9e79891be352f3f75df1435616"
+   },
+   "expected": {
+    "B-pedestal32-s00-cpu-global.json": "bd90fd14a0a0d0ae93ca3154c91edcbf53ddeb221863468a49fc9088cf612442",
+    "B-pedestal32-s00-cpu-none.json": "343df6a8f99b648a0884966ff000df33d85c52fc1074c099c29b43986d987830",
+    "B-pedestal32-s01-cpu-global.json": "a2bde9ed9836ccd21f014877f44103a9fd8f6d5226f3641382b932338ea194ce",
+    "B-pedestal32-s01-cpu-none.json": "f4dfb378a2cd5ba303a1218b6849847b57545e111f3e79d7ff3d7468934c21e7",
+    "B-pedestal32-s02-cpu-global.json": "874b37b26ffa832cf6a60ca9dbffb47369c056ab7ce5d4d7c0b3d94a482c4f0e",
+    "B-pedestal32-s02-cpu-none.json": "a6589f76848bad82194422a72e6d9d3797d86703a16c08a75c4029591557c099",
+    "B-pedestal32-s03-cpu-global.json": "4d51f383734a36262fa40a248b4ada13fcbf6fdb8f3df2b2b360c178bc58ff79",
+    "B-pedestal32-s03-cpu-none.json": "3e6fe424190084c91a773273e754ee0dc44efcb78bcb990dc6b744480c3f3121",
+    "B-pedestal32-s04-cpu-global.json": "360ef15454a14e9d2fc6f6b434f38c28cc44d31ad7922994d2f076f72cfd3503",
+    "B-pedestal32-s04-cpu-none.json": "d96632ad4053ef2cc290d19553511a16804566eca514d9b5740de9ec055c355f",
+    "B-pedestal32-s05-cpu-global.json": "3a064f9ded6885a903d3e26bc53265d7a3eba50b6c27c92013bb276c09746949",
+    "B-pedestal32-s05-cpu-none.json": "1b930b67d60d66d466ee63198323e3384554560be6c3532b14f43750d9b9f436",
+    "B-pedestal32-s06-cpu-global.json": "9af1bcd2c8a2cceccb2c3032a0d95309a773a523db93515b85b189cc0dcd1bab",
+    "B-pedestal32-s06-cpu-none.json": "ef6845c7d26aeb8d4709bdda1a365a66a1539456b855abc362a216b90a818e9f",
+    "B-pedestal32-s07-cpu-global.json": "e1cf330c44260e8f5091c22c7446a663df43fc70150e644145256159b3b91b77",
+    "B-pedestal32-s07-cpu-none.json": "3a7ccd85d7ece9e53ebd430af82deed16eeb39100d8e42e92e1895ae603e5006",
+    "B-pedestal32-s08-cpu-global.json": "1d9f9ce9062652dc60783e19eed8ed217d936bb16ffbe9d8580fa32120b9f31c",
+    "B-pedestal32-s08-cpu-none.json": "a31e6cb27125d0aadd677ca9079955fbcebfd5c0614dc14d373bd88aee10ffac",
+    "B-pedestal32-s09-cpu-global.json": "32fb9ecd31f71737f16926d75585c8bfef5005e5b298f69c6a982697a61bec84",
+    "B-pedestal32-s09-cpu-none.json": "4fe45be0371d357713c42eea63ceaf5f03b2bb9e79891be352f3f75df1435616"
+   },
+   "passed": true
+  },
+  {
+   "name": "restore-paired-median/report-loss",
+   "actual": [
+    1,
+    false,
+    false
+   ],
+   "expected": [
+    1,
+    false,
+    false
+   ],
+   "passed": true
+  },
+  {
+   "name": "restore-paired-median/strict-serialization-mechanism",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "restore-paired-median/mutant-rejected",
+   "actual": "REJECT",
+   "expected": "REJECT",
+   "passed": true
+  }
+ ],
+ "commands": [
+  {
+   "name": "finite-large-median",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2_2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/review-r2-retained/boundary-01/finite-large-median/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/finite-large-median/out"
+   ],
+   "exit": 2,
+   "script_sha256": "c2f391822b880fba20b7a9571e4d5150fa3b365bd18afff2e44f90fef939ef45",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "9c320cfae3cf6a719dd3e85c9f045740a13e00bf03f531c54a7ad156886d6496",
+    "B-pedestal32-s01-cpu-global.json": "f3905f000751dfc211c4a1216b2e68626578c9c5a097f1190ef32bf094a80163",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "44753e8495c89e2d5f46d35298205cc6f9d6203794aa4b931d014e1ec9d3b4ab",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "b92dfb5a34dbac5e2b19b890bb440599dc593d2e796461fc69c798f68e28dfee",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "ba09e912051f1e5818add12687f2fde05fbaa9eaba22412b907d541da1f78880",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "bcae12346cd18fa8abc61e619fce98de8810d17fa616e04a456adaab706968a1",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "2e5586e2fd1e29d2c3b427b56ca9ad0100599f28c6f88c19f36b88e34246a620",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "d60f65448887546f5ca1c57d1eb47be94d078372c1efa109fe1847b27731460c",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "6909be091e4bc488907a05962b9eb4b35994c6e51d4dd40e36d6c92acc117fb7",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "9d7efe3178055c503c6f5f7817c5fe1a81d85535954e5a9087c7b06a3ee4a535",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "summary_exists": true,
+   "coverage_exists": true,
+   "contract_verdict": "ACCEPT"
+  },
+  {
+   "name": "finite-large-difference",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2_2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/review-r2-retained/boundary-01/finite-large-difference/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/finite-large-difference/out"
+   ],
+   "exit": 2,
+   "script_sha256": "c2f391822b880fba20b7a9571e4d5150fa3b365bd18afff2e44f90fef939ef45",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+    "B-pedestal32-s01-cpu-global.json": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "summary_exists": true,
+   "coverage_exists": true,
+   "contract_verdict": "ACCEPT"
+  },
+  {
+   "name": "isolated-paired-median",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2_2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/fixtures/isolated-paired-median",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/isolated-paired-median/out"
+   ],
+   "exit": 2,
+   "script_sha256": "c2f391822b880fba20b7a9571e4d5150fa3b365bd18afff2e44f90fef939ef45",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "bd90fd14a0a0d0ae93ca3154c91edcbf53ddeb221863468a49fc9088cf612442",
+    "B-pedestal32-s00-cpu-none.json": "343df6a8f99b648a0884966ff000df33d85c52fc1074c099c29b43986d987830",
+    "B-pedestal32-s01-cpu-global.json": "a2bde9ed9836ccd21f014877f44103a9fd8f6d5226f3641382b932338ea194ce",
+    "B-pedestal32-s01-cpu-none.json": "f4dfb378a2cd5ba303a1218b6849847b57545e111f3e79d7ff3d7468934c21e7",
+    "B-pedestal32-s02-cpu-global.json": "874b37b26ffa832cf6a60ca9dbffb47369c056ab7ce5d4d7c0b3d94a482c4f0e",
+    "B-pedestal32-s02-cpu-none.json": "a6589f76848bad82194422a72e6d9d3797d86703a16c08a75c4029591557c099",
+    "B-pedestal32-s03-cpu-global.json": "4d51f383734a36262fa40a248b4ada13fcbf6fdb8f3df2b2b360c178bc58ff79",
+    "B-pedestal32-s03-cpu-none.json": "3e6fe424190084c91a773273e754ee0dc44efcb78bcb990dc6b744480c3f3121",
+    "B-pedestal32-s04-cpu-global.json": "360ef15454a14e9d2fc6f6b434f38c28cc44d31ad7922994d2f076f72cfd3503",
+    "B-pedestal32-s04-cpu-none.json": "d96632ad4053ef2cc290d19553511a16804566eca514d9b5740de9ec055c355f",
+    "B-pedestal32-s05-cpu-global.json": "3a064f9ded6885a903d3e26bc53265d7a3eba50b6c27c92013bb276c09746949",
+    "B-pedestal32-s05-cpu-none.json": "1b930b67d60d66d466ee63198323e3384554560be6c3532b14f43750d9b9f436",
+    "B-pedestal32-s06-cpu-global.json": "9af1bcd2c8a2cceccb2c3032a0d95309a773a523db93515b85b189cc0dcd1bab",
+    "B-pedestal32-s06-cpu-none.json": "ef6845c7d26aeb8d4709bdda1a365a66a1539456b855abc362a216b90a818e9f",
+    "B-pedestal32-s07-cpu-global.json": "e1cf330c44260e8f5091c22c7446a663df43fc70150e644145256159b3b91b77",
+    "B-pedestal32-s07-cpu-none.json": "3a7ccd85d7ece9e53ebd430af82deed16eeb39100d8e42e92e1895ae603e5006",
+    "B-pedestal32-s08-cpu-global.json": "1d9f9ce9062652dc60783e19eed8ed217d936bb16ffbe9d8580fa32120b9f31c",
+    "B-pedestal32-s08-cpu-none.json": "a31e6cb27125d0aadd677ca9079955fbcebfd5c0614dc14d373bd88aee10ffac",
+    "B-pedestal32-s09-cpu-global.json": "32fb9ecd31f71737f16926d75585c8bfef5005e5b298f69c6a982697a61bec84",
+    "B-pedestal32-s09-cpu-none.json": "4fe45be0371d357713c42eea63ceaf5f03b2bb9e79891be352f3f75df1435616"
+   },
+   "summary_exists": true,
+   "coverage_exists": true,
+   "contract_verdict": "ACCEPT"
+  },
+  {
+   "name": "representable-near-boundary",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2_2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/fixtures/representable-near-boundary",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/representable-near-boundary/out"
+   ],
+   "exit": 0,
+   "script_sha256": "c2f391822b880fba20b7a9571e4d5150fa3b365bd18afff2e44f90fef939ef45",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "7a517b28cfaf0237744c2932609396377d58b83047d058fa2671cf924a9302a5",
+    "B-pedestal32-s00-cpu-none.json": "74eb72d1d0f04047a40617d133bcb85e094689c9126b060747c6f0ad6a3db7e6",
+    "B-pedestal32-s01-cpu-global.json": "ceaba4e1fab954c79244e63b210369f87418f36b7c09ac71b35b233406fc350a",
+    "B-pedestal32-s01-cpu-none.json": "b7bd5d50bfad352cfb5bc9c065f5e841aeeeec01dbdb895dcd2bcfe0a3056abf",
+    "B-pedestal32-s02-cpu-global.json": "55b6d268ea67fc267961c18ce1e94e963dbafe04ce2f83e51f6531836626544f",
+    "B-pedestal32-s02-cpu-none.json": "edd7fa0138288496b162a0ff151d3126ba45f064ca74ac500bbe893f8b0092a2",
+    "B-pedestal32-s03-cpu-global.json": "6b93eeb6c9d64ef4f4c456421bf1ccc0e68937de3a195a8e135576c93c8cf172",
+    "B-pedestal32-s03-cpu-none.json": "72c9f76830bcd1b461cb1ac69c9c6fa7481f5214a84345518a4b0548adef64ed",
+    "B-pedestal32-s04-cpu-global.json": "26113de5cd75ee491959ba9d93907c76e39558a2eed3a4de328477b445d64538",
+    "B-pedestal32-s04-cpu-none.json": "0751e142f3702b2b4782c9162ac3b9c92e16df9cacdc8cded1f672d268b82ffd",
+    "B-pedestal32-s05-cpu-global.json": "8d920aae5cbfcc650249b1176d73dda7258ec3b4ab5843598b91a0d97724aa6b",
+    "B-pedestal32-s05-cpu-none.json": "b0dda657799282b64a69e0d637cdf01bd594dd971e30cab00441b4b08eaf8f52",
+    "B-pedestal32-s06-cpu-global.json": "bb7894daa8c6c7d2278bba09ce91d062a7c08d491d86080455805778862b3103",
+    "B-pedestal32-s06-cpu-none.json": "79a48fe3d314bc57cad3ef14c2ae2c43482c603e2d9b449ebdbbbd1c5bbce8f7",
+    "B-pedestal32-s07-cpu-global.json": "f63e851103bbd81c846c9899bfdf7944a418a834f9c1e49d3c0f567ffafcdd97",
+    "B-pedestal32-s07-cpu-none.json": "0fc5d7ec63392f312b88aeee0a57e4cebcb2e0fe6ea9b5dbe85f1e6d15973e2b",
+    "B-pedestal32-s08-cpu-global.json": "47b118fab24e23c9551cc3905c24e1bc2875044261bbf88ad792c043d6bb60d4",
+    "B-pedestal32-s08-cpu-none.json": "182f09768b3042d843da2fecfad06e650efbb9035fb4079d4b2ae05f810c644f",
+    "B-pedestal32-s09-cpu-global.json": "e8b4b359c242efe14330cf428e94d38cf22db27481fcc4f8e358162109ce06d1",
+    "B-pedestal32-s09-cpu-none.json": "156ae7f2c35da637682db308ff0dae8b1d80bc5414cde24336ef145ff4375b99"
+   },
+   "summary_exists": true,
+   "coverage_exists": true,
+   "contract_verdict": "ACCEPT"
+  },
+  {
+   "name": "all-cell-median-sites",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2_2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/fixtures/all-cell-median-sites",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/all-cell-median-sites/out"
+   ],
+   "exit": 2,
+   "script_sha256": "c2f391822b880fba20b7a9571e4d5150fa3b365bd18afff2e44f90fef939ef45",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "a9799f5596eff8d63f39e4f193ae832951789781092f6b238d850f9c04b90a81",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "04a8240db7e55e089d815bdf0b38679584336f9cb4fe574566651d6e8ea54533",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "02ba864bf7e6cc37c1b93c72daa268b4d96ca45427d25ad552764274079c06df",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "973e4bc9ed2574033e1a1911150772165b90b299fa4cc556dc0bc0011a584e63",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "5ab041a92f41c7a543c21c2d2e433abe26f8a86d0bb00ba4a20379864bf58185",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "6fa51312b15f61f7c1e6b7aee134b391fe890095805cd9ff331ffcca385bf7a4",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "5d041fcbd1ef48ee122b16c100e9659dea5d64c772cff04503cb773d272528ba",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "b0271a9c9bdf8b65f77c15b1b19a3b92427d9872e40abf8f6611b6f3f59aea78",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "d1d94b70057f13903e1c6dde3af2176766fc8922c223bb91c0e1bd98353888cc",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "1dd841b349a0f2360ba3c7192a411b66e4c76504317c723ec47a00fc673deb4e",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   },
+   "summary_exists": true,
+   "coverage_exists": true,
+   "contract_verdict": "ACCEPT"
+  },
+  {
+   "name": "finite-integer-difference",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2_2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/fixtures/finite-integer-difference",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/finite-integer-difference/out"
+   ],
+   "exit": 2,
+   "script_sha256": "c2f391822b880fba20b7a9571e4d5150fa3b365bd18afff2e44f90fef939ef45",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "468ec249b097d7ad127b389abeda44451ddff8688dab707dfea3ab9db43e8e4f",
+    "B-pedestal32-s00-cpu-none.json": "a4e146d7de938c252b4266c3c6939c8dca0238af75c6141027af463fb718746b",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   },
+   "summary_exists": true,
+   "coverage_exists": true,
+   "contract_verdict": "ACCEPT"
+  },
+  {
+   "name": "restore-cell-median",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/mutants/restore-cell-median.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/review-r2-retained/boundary-01/finite-large-median/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/restore-cell-median/out"
+   ],
+   "exit": 1,
+   "script_sha256": "d27bcaa1c5a731837fbf52a08df89581d4625c2499739378eed489737a8cdab9",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "9c320cfae3cf6a719dd3e85c9f045740a13e00bf03f531c54a7ad156886d6496",
+    "B-pedestal32-s01-cpu-global.json": "f3905f000751dfc211c4a1216b2e68626578c9c5a097f1190ef32bf094a80163",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "44753e8495c89e2d5f46d35298205cc6f9d6203794aa4b931d014e1ec9d3b4ab",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "b92dfb5a34dbac5e2b19b890bb440599dc593d2e796461fc69c798f68e28dfee",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "ba09e912051f1e5818add12687f2fde05fbaa9eaba22412b907d541da1f78880",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "bcae12346cd18fa8abc61e619fce98de8810d17fa616e04a456adaab706968a1",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "2e5586e2fd1e29d2c3b427b56ca9ad0100599f28c6f88c19f36b88e34246a620",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "d60f65448887546f5ca1c57d1eb47be94d078372c1efa109fe1847b27731460c",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "6909be091e4bc488907a05962b9eb4b35994c6e51d4dd40e36d6c92acc117fb7",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "9d7efe3178055c503c6f5f7817c5fe1a81d85535954e5a9087c7b06a3ee4a535",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "summary_exists": false,
+   "coverage_exists": false,
+   "contract_verdict": "REJECT"
+  },
+  {
+   "name": "restore-paired-subtraction",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/mutants/restore-paired-subtraction.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/review-r2-retained/boundary-01/finite-large-difference/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/restore-paired-subtraction/out"
+   ],
+   "exit": 1,
+   "script_sha256": "5f56a3088e5eaec74c9b650f15cc7311d7c00f637e58341e13a710940b5986e3",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+    "B-pedestal32-s01-cpu-global.json": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "summary_exists": false,
+   "coverage_exists": false,
+   "contract_verdict": "REJECT"
+  },
+  {
+   "name": "restore-regression-emission",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/mutants/restore-regression-emission.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/review-r2-retained/boundary-01/finite-large-difference/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/restore-regression-emission/out"
+   ],
+   "exit": 1,
+   "script_sha256": "b291c15b49ab4add866d3af1ef5864a1aaa39692697b1a9bcb0201984a91d185",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+    "B-pedestal32-s00-cpu-none.json": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+    "B-pedestal32-s01-cpu-global.json": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+    "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+    "B-pedestal32-s02-cpu-global.json": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+    "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+    "B-pedestal32-s03-cpu-global.json": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+    "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+    "B-pedestal32-s04-cpu-global.json": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+    "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+    "B-pedestal32-s05-cpu-global.json": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+    "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+    "B-pedestal32-s06-cpu-global.json": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+    "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+    "B-pedestal32-s07-cpu-global.json": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+    "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+    "B-pedestal32-s08-cpu-global.json": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+    "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+    "B-pedestal32-s09-cpu-global.json": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+    "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+   },
+   "summary_exists": false,
+   "coverage_exists": false,
+   "contract_verdict": "REJECT"
+  },
+  {
+   "name": "restore-paired-median",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/mutants/restore-paired-median.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/fixtures/isolated-paired-median",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/v2_2_attempt_01/derived/restore-paired-median/out"
+   ],
+   "exit": 1,
+   "script_sha256": "536a7a90d7003bbb0c54e710a049535ed452002ed87da89086d8f06bbb602e89",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "bd90fd14a0a0d0ae93ca3154c91edcbf53ddeb221863468a49fc9088cf612442",
+    "B-pedestal32-s00-cpu-none.json": "343df6a8f99b648a0884966ff000df33d85c52fc1074c099c29b43986d987830",
+    "B-pedestal32-s01-cpu-global.json": "a2bde9ed9836ccd21f014877f44103a9fd8f6d5226f3641382b932338ea194ce",
+    "B-pedestal32-s01-cpu-none.json": "f4dfb378a2cd5ba303a1218b6849847b57545e111f3e79d7ff3d7468934c21e7",
+    "B-pedestal32-s02-cpu-global.json": "874b37b26ffa832cf6a60ca9dbffb47369c056ab7ce5d4d7c0b3d94a482c4f0e",
+    "B-pedestal32-s02-cpu-none.json": "a6589f76848bad82194422a72e6d9d3797d86703a16c08a75c4029591557c099",
+    "B-pedestal32-s03-cpu-global.json": "4d51f383734a36262fa40a248b4ada13fcbf6fdb8f3df2b2b360c178bc58ff79",
+    "B-pedestal32-s03-cpu-none.json": "3e6fe424190084c91a773273e754ee0dc44efcb78bcb990dc6b744480c3f3121",
+    "B-pedestal32-s04-cpu-global.json": "360ef15454a14e9d2fc6f6b434f38c28cc44d31ad7922994d2f076f72cfd3503",
+    "B-pedestal32-s04-cpu-none.json": "d96632ad4053ef2cc290d19553511a16804566eca514d9b5740de9ec055c355f",
+    "B-pedestal32-s05-cpu-global.json": "3a064f9ded6885a903d3e26bc53265d7a3eba50b6c27c92013bb276c09746949",
+    "B-pedestal32-s05-cpu-none.json": "1b930b67d60d66d466ee63198323e3384554560be6c3532b14f43750d9b9f436",
+    "B-pedestal32-s06-cpu-global.json": "9af1bcd2c8a2cceccb2c3032a0d95309a773a523db93515b85b189cc0dcd1bab",
+    "B-pedestal32-s06-cpu-none.json": "ef6845c7d26aeb8d4709bdda1a365a66a1539456b855abc362a216b90a818e9f",
+    "B-pedestal32-s07-cpu-global.json": "e1cf330c44260e8f5091c22c7446a663df43fc70150e644145256159b3b91b77",
+    "B-pedestal32-s07-cpu-none.json": "3a7ccd85d7ece9e53ebd430af82deed16eeb39100d8e42e92e1895ae603e5006",
+    "B-pedestal32-s08-cpu-global.json": "1d9f9ce9062652dc60783e19eed8ed217d936bb16ffbe9d8580fa32120b9f31c",
+    "B-pedestal32-s08-cpu-none.json": "a31e6cb27125d0aadd677ca9079955fbcebfd5c0614dc14d373bd88aee10ffac",
+    "B-pedestal32-s09-cpu-global.json": "32fb9ecd31f71737f16926d75585c8bfef5005e5b298f69c6a982697a61bec84",
+    "B-pedestal32-s09-cpu-none.json": "4fe45be0371d357713c42eea63ceaf5f03b2bb9e79891be352f3f75df1435616"
+   },
+   "summary_exists": false,
+   "coverage_exists": false,
+   "contract_verdict": "REJECT"
+  }
+ ],
+ "result": "PASS"
+}

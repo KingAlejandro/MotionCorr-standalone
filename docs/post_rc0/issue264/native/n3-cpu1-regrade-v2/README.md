@@ -40,3 +40,25 @@ the raw `RESULTS.json`/`CPU_SUBSET.json`, the predictions and all earlier eviden
 - **A deliberate difference from the original:** a missing coefficient index fails the row (`published coefficient index missing`), where the original grader raised. Both fail closed.
 - **Image equality** uses the original payload rule (after the 1024-byte header plus the extended header), now with length validation.
 - **Limits:** printed precision only, with no full-precision trajectory. Images were never read locally. CPU only.
+
+## 23 October 2026 — additive v2.2 R2B author repair
+
+`AMENDMENT-2.md` froze F1–F4 scope in `614e8184` before implementation. New versioned
+`regrade_v2_2.py`, `package_v2_2.py`, `remote_run_v2_2.py`, `test_regrade_v2_2.py` and
+`REMOTE-PLAN-v2.2.md` are prepared for fresh independent review. See
+[RESPONSE-R2B-v2.2.md](RESPONSE-R2B-v2.2.md) and `evidence-v2.2/author01/` for exact
+commands, source/input/runtime hashes, expected refusals and limits.
+
+One local campaign at `dd38b6ad5a67d6aace726d38503b206125752d4e`: **45/45 as intended**,
+exit 0. Private-index controls preserve all original fixture files on both local Git
+implementations; cumulative/identity and ancestor-writer defects have targeted controls
+and separately restored mutants. Measured package: **122,880 bytes**; no full clone.
+Retained tar: STAR **PASS**, FULL **UNRUN**, exit 2. Generated MRC controls are synthetic.
+
+**CPU13 remains HELD. Full remote grade and Linux no-write/process/SSH behavior UNRUN.**
+R2B's two original failed positives remain FAIL, cause unresolved. Original native
+subset FAIL (24 CPU PASS, 3 PASS/5 FAIL pairs, N4 PASS), CUDA16 UNRUN and aggregate
+INCOMPLETE are unchanged. Old 65/65 and contaminated 33-mutant records remain exact;
+R2B's verdict-changing versus diagnostic-only accounting is retained. No production
+source, old contracts/versions/evidence or gates/defaults/policy were changed. Fresh
+independent exact-head review and parent scheduling are the next bounded action.

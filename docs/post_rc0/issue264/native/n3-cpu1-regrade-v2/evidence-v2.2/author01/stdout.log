@@ -1,0 +1,45 @@
+{"name": "numerical_ast_unchanged", "ok": true, "functions": ["coefficients", "global_rows", "rows_equal", "mrc_check", "grade", "snapshot", "consumed"]}
+{"name": "retained_tar", "ok": true, "exit": 2, "consumed": 117, "tar_sha256": "3cc13020d35aaf7113fe16878e8eb63c11652863fd73c0da3974fc7fa09f2760"}
+{"name": "stream-growth-exact", "ok": true, "exit": 1, "expected": 1, "error": "bin grew past 4 bytes", "result": null, "bytes_read": 5, "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849", "detection": "acceptance-changing control"}
+{"name": "stream-growth-bound_removed", "ok": true, "exit": 1, "expected": 1, "error": "bin changed identity during hash", "result": null, "bytes_read": 5, "grader_sha256": "d2252bd75fdb74f618a9bf1f5d5840b910077e40d2799df9aa4fbaa985040c44", "detection": "diagnostic-only; identity still rejects"}
+{"name": "stream-growth-both_removed", "ok": true, "exit": 0, "expected": 0, "error": null, "result": {"size": 5, "sha256": "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"}, "bytes_read": 5, "grader_sha256": "5caac97fde507e35d0e9aa6e1bd9375c996c25ce7a7c10c2ef1ebac09126c98e", "detection": "acceptance-changing control"}
+{"name": "stream-same_size-exact", "ok": true, "exit": 1, "expected": 1, "error": "bin changed identity during hash", "result": null, "bytes_read": 4, "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849", "detection": "acceptance-changing control"}
+{"name": "stream-same_size-identity_removed", "ok": true, "exit": 0, "expected": 0, "error": null, "result": {"size": 4, "sha256": "f8638b979b2f4f793ddb6dbd197e0ee25a7a6ea32b0ae22f5e3c5d119d839e75"}, "bytes_read": 4, "grader_sha256": "719f24b71b5cbd82ec649e58b54163c98c184ee4d9db2170ec46c4d296339073", "detection": "acceptance-changing control"}
+{"name": "stream-replace-exact", "ok": true, "exit": 1, "expected": 1, "error": "bin changed identity during hash", "result": null, "bytes_read": 4, "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849", "detection": "acceptance-changing control"}
+{"name": "stream-replace-identity_removed", "ok": true, "exit": 0, "expected": 0, "error": null, "result": {"size": 4, "sha256": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"}, "bytes_read": 4, "grader_sha256": "719f24b71b5cbd82ec649e58b54163c98c184ee4d9db2170ec46c4d296339073", "detection": "acceptance-changing control"}
+{"name": "stream-restored-exact", "ok": true, "exit": 0, "expected": 0, "error": null, "result": {"size": 4, "sha256": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"}, "bytes_read": 4, "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849", "detection": "acceptance-changing control"}
+{"name": "private-apple-pass", "ok": true, "exit": 0, "changed": [], "actual_git_calls": 15, "private_environment": true, "problems": [], "git": "/usr/bin/git", "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849"}
+{"name": "private-apple-stale_index_stat", "ok": true, "exit": 0, "changed": [], "actual_git_calls": 15, "private_environment": true, "problems": [], "git": "/usr/bin/git", "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849"}
+{"name": "private-homebrew-pass", "ok": true, "exit": 0, "changed": [], "actual_git_calls": 15, "private_environment": true, "problems": [], "git": "/opt/homebrew/bin/git", "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849"}
+{"name": "private-homebrew-stale_index_stat", "ok": true, "exit": 0, "changed": [], "actual_git_calls": 15, "private_environment": true, "problems": [], "git": "/opt/homebrew/bin/git", "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849"}
+{"name": "private-refresh-exact", "ok": true, "exit": 0, "changed": [], "problems": [], "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849", "detection": "procedure/index-isolation detection; mutant intentionally writes isolated original"}
+{"name": "private-refresh-mutant", "ok": true, "exit": 1, "changed": ["src-cand/.git/index"], "problems": ["invalid input: src-cand: .git/index changed during the check"], "grader_sha256": "b76e6a897ac8f8b2f7560b7a33930d88a2b77bc08c27318048881d2974620277", "detection": "procedure/index-isolation detection; mutant intentionally writes isolated original"}
+{"name": "index-guard-injection", "ok": true, "exit": 1, "changed": ["src-cand/.git/index"], "problems": ["invalid input: src-cand: .git/index changed during the check"], "instrumented": true}
+{"name": "binding-head_differs", "ok": true, "exit": 1, "problems": ["src-cand: head 'f9f03cf80498c8ce7fb957a6b233a0361eada4df' != '0000000000000000000000000000000000000000'"]}
+{"name": "binding-untracked_file", "ok": true, "exit": 1, "problems": ["src-ov-cand: status [' M src/motioncorr_runner.cpp', '?? stray.txt'] != [' M src/motioncorr_runner.cpp']"]}
+{"name": "binding-runner_modified", "ok": true, "exit": 1, "problems": ["src-ov-base: diff_sha256 'a87bc2dcc337e6243846848adcecb66b911494df9543696e5477325c4c0e9237' != '74b03ec938f492eb22655201893579e3ad55094c809e5a73c2f9c32e8137b6b0'", "src-ov-base: runner_sha256 '7ae26fcf78ecabd92169426d105f83df32bb30832e9840a0623be147d09857d3' != '099c4677c443d414d5828161141a7ab1ef6f80a80ee571b1df0f9ae2e9bd5350'"]}
+{"name": "binding-binary_differs_from_receipt", "ok": true, "exit": 1, "problems": ["ov-cand-cpu: live/receipt/expect binary hashes differ"]}
+{"name": "binding-binaries_not_distinct", "ok": true, "exit": 1, "problems": ["live binaries are not distinct"]}
+{"name": "binding-symlink_component", "ok": true, "exit": 1, "problems": ["invalid input: symlink or non-directory component in build-ov-base-cpu/motioncorr"]}
+{"name": "proc-self", "ok": true, "hits": [], "fake_proc": true}
+{"name": "proc-parent-writer", "ok": true, "hits": [["32426", "cmdline"]], "fake_proc": true}
+{"name": "ancestor-exemption-mutant", "ok": true, "exact_reject": true, "mutant_reject": false, "grader_sha256": "0c6448dd25b11e7c49d7da70ac1b80704a14a3ea47166f5507760ec8939db00a", "detection": "acceptance-changing process refusal"}
+{"name": "proc-unrelated-writer", "ok": true, "hits": [["999999", "cmdline"]], "fake_proc": true}
+{"name": "proc-sibling", "ok": true, "hits": [], "fake_proc": true}
+{"name": "proc-ssh-bootstrap-driver", "ok": true, "hits": [], "fake_proc": true}
+{"name": "proc-cwd-writer", "ok": true, "hits": [["999997", "cwd"]], "fake_proc": true}
+{"name": "proc-fd-writer", "ok": true, "hits": [["999996", "fd"]], "fake_proc": true}
+{"name": "full-generated", "ok": true, "exit": 0, "expected": 0, "problems": [], "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849", "generated_mrcs": true, "instrumented": false}
+{"name": "reread-exact", "ok": true, "exit": 1, "expected": 1, "problems": ["input changed during grading"], "grader_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849", "generated_mrcs": true, "instrumented": true}
+{"name": "reread-mutant", "ok": true, "exit": 0, "expected": 0, "problems": [], "grader_sha256": "2bda040ea33f70b22c7ba91e1b589949566e65a8ee39abcf7ad9b98f7b5d208e", "generated_mrcs": true, "instrumented": true}
+{"name": "symlink", "ok": true, "exit": 1, "generated_mrcs": true}
+{"name": "header-only", "ok": true, "exit": 1, "generated_mrcs": true}
+{"name": "package-verified", "ok": true, "package_bytes": 122880, "content_bytes": 103273, "package_sha256": "18f53e52c7c46d13a7f0222a466d2dd67b1928a4b75980453a6b1e8ed9f5baa2"}
+{"name": "package-reject-driver", "ok": true, "error": "package member identity mismatch: remote_run_v2_2.py"}
+{"name": "package-reject-manifest", "ok": true, "error": "package manifest hash mismatch"}
+{"name": "package-reject-source", "ok": true, "error": "package source revision mismatch"}
+{"name": "compare-private-paths-ignored", "ok": true}
+{"name": "compare-original-index-change", "ok": true}
+{"name": "original-tar-unchanged", "ok": true}
+{"name": "source-restored", "ok": true, "source_sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849"}
+{"name": "scratch-cap", "ok": true, "logical_bytes": 106724737, "cap_bytes": 536870912}

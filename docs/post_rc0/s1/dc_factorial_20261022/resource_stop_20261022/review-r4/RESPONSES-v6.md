@@ -85,6 +85,10 @@ all retained namespaces plus copied evidence remain well within 256 MiB. The pos
 hash is recorded separately; it was not captured per launch. No MotionCorr binary or movie input
 was built/read/launched; device UUID and native route witness are N/A/UNRUN.
 
+Whitespace verification: the final source and authored reports pass `git diff --check` against the
+exact base. Whole-packet checking flags trailing spaces emitted by unittest in retained raw stdout;
+those bytes are preserved deliberately, not normalized or presented as a passing whole-packet check.
+
 ## Outstanding blockers and next bounded action
 
 The actual ancestry was Python → Codex app-server → T3 → launchd, with no bound Claude owner.

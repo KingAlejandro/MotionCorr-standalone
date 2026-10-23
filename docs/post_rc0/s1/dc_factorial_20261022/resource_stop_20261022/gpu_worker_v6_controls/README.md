@@ -48,3 +48,6 @@ with native binary, movie inputs and device UUID N/A. Raw preflights record load
 ancestry, numeric threads and the scratch lease. No native route witness exists.
 TRANSFER.json and transfer-to-final.patch preserve the original unfinished-worker identity/delta.
 HASHES.txt hashes this packet, excluding itself.
+
+Raw unittest stdout retains its original trailing spaces. Whole-packet `git diff --check` reports
+those spaces; authored source/reports pass the scoped check. Raw evidence is not whitespace-repaired.

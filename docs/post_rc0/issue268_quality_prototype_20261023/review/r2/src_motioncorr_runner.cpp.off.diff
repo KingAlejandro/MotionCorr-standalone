@@ -1,0 +1,43 @@
+--- base
++++ OFF src/motioncorr_runner.cpp
+@@ -26,6 +26,7 @@
+ #include <stdexcept>
+ #include <thread>
+ #include <filesystem>
++#include <map>
+ #include <set>
+ #include <atomic>
+ #include <sstream>
+@@ -1569,6 +1570,7 @@
+ 		}
+ 	}
+ }
++
+ 
+ namespace {
+ void requireAggregatePdf(const FileName &filename) {
+@@ -3441,17 +3443,22 @@
+ 	logfile << std::endl << "Global alignment:" << std::endl;
+ 	MC_STAGE("global alignment");
+ 	RCTIC(TIMING_GLOBAL_ALIGNMENT);
++	// The publication path below does not act on this result (#268).
++	bool global_converged = false;
++	{
+ #ifdef _CUDA_ENABLED
+ 	if (movie_session) {
+ 		// The real-space movie is dead until the inverse FFT below rewrites it,
+ 		// so the alignment's scratch lives there (docs/vram_live_ranges.md).
+ 		size_t arena_bytes = 0;
+ 		void *arena = movie_session->borrowRealFramesForGlobalAlignment(arena_bytes);
+-		alignPatchDevice(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true, arena, arena_bytes);
++		global_converged = alignPatchDevice(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true, arena, arena_bytes);
+ 	} else
+ #endif
+ 	{
+-		alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
++		global_converged = alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
++	}
++	(void)global_converged;
+ 	}
+ 	RCTOC(TIMING_GLOBAL_ALIGNMENT);
+ 	MC_STAGE("allocate reconstruction");

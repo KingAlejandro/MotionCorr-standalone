@@ -1,0 +1,10 @@
+--- base
++++ OFF src/acc/cuda/cuda_alignpatch.cu
+@@ -6,6 +6,7 @@
+ #include "src/error.h"
+ #include "src/acc/cuda/cuda_scoped_resources.h"
+ #include "src/stage_profile.h"
++#include "src/quality_report.h"
+ 
+ #include <cuda_runtime.h>
+ #include <cufft.h>

@@ -59,7 +59,7 @@ OFF (V3) and ON (V4) compiled (`--target motioncorr`), never executed.
 ## Identities
 
 Binaries: V0 `97f44b8a…a1`, V1 `625ac268…4a`, V2 `9a9f1bfa…25`, unit
-`51c77943…19`, V3 `4102738d…19`, V4 `c112a1b9…0d` (`receipts/binaries.txt`).
+`51c77943…19`, V3 `4102738d…b2`, V4 `c112a1b9…0d` (`receipts/binaries.txt`).
 Static witness: V0/V1 contain neither the flag string nor `mcquality::`
 symbols, V2 does; the command is recorded in the receipt. Every sidecar's
 `binary_sha256` equals V2 and its revision equals `2f434253` (`dirty` false).
@@ -83,3 +83,32 @@ on v2 (atomic write path unchanged, not rerun); distortion-guard and fit-RMSD
 fallback reasons; e10216-01; dataset/multi-GPU aggregation; tomography;
 timing. Identifiability and peak validity remain `not_assessed`. Convergence
 is not accuracy; #273 totals are untouched.
+
+## Independent R2 publication review
+
+Fresh Codex 6.1 Sol R2 at `e9c1e9b4` found no blocker for **draft publication
+only**, with two remaining source/data-trace limitations. The full report and
+its whitelisted controls are retained in `review/r2/`; this paragraph changes
+no source or result and does not claim a new native run.
+
+- Resume validation covers the named R5/U3 cases, but is not full schema or
+  solver-invariant validation. A sidecar changed from `iteration_limit` to
+  `converged` can still be accepted while its boolean/RMSD fields contradict
+  that state. Unexamined identity/patch fields are also not comprehensively
+  validated. The review did not execute that C++ reader probe.
+- Collision detection covers equal generated-root strings. Filesystem aliases
+  such as `in/zero.mrcs` and `in//zero.mrcs`, or pre-existing directory symlinks,
+  can evade detection and yield stale summary bindings. The alias scenario is
+  source/path-data evidence; native alias execution is UNRUN.
+
+Thus the F1/F2 responses above mean the specifically tested cases are fixed,
+not that arbitrary collision or resumed-report corruption is excluded. The
+frozen checker also does not exhaustively validate every report field; R2
+independently checked the retained solver fields and found no disagreement.
+
+R2 independently verified 231 retained members (226 ordinary plus five raw-name
+tar members), 16 current sidecars/108 patches/seven summaries and 37 log pairs,
+and reproduced the positive/12 negative data controls. Absent native binaries,
+raw input/MRC products and the launch bundle were reconciled by recorded hashes,
+not rehashed or executed. Full CUDA runtime, wider re-entry qualification,
+scientific accuracy and M4/schema adoption remain outside this review verdict.

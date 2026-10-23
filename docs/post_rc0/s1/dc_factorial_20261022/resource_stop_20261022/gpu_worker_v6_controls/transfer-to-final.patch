@@ -1,0 +1,239 @@
+--- gpu_worker_v6.partial.py
++++ gpu_worker_v6.py
+@@ -56,15 +56,17 @@
+ sample, a foreign process, a timeout, owned survivors or a failed post-job
+ query stops the worker before the next launch.
+ 
+-Cleanup signals only process groups re-verified as owned by
+-tools/multi_gpu/process_ownership.py immediately before each TERM/KILL, never the
+-worker's own group. All waits are bounded. If owned processes cannot be shown to
+-be gone, the job's RUN.json gets status CLEANUP_FAILED, a
+-CLEANUP_FAILED_LEASE_HELD receipt is written, and only then does the worker hold
+-the lease indefinitely; an operator inspects it and stops it with SIGKILL.
+-
+-Every exit path after the lease writes a typed receipt; errors before the lease
+-(runs-dir creation, log or lease open) print a typed JSON receipt to stdout only.
++Cleanup signals verified owned groups, or the original job group while its
++root remains unreaped and its birth, parent, PGID and SID are verified; failed
++group identity checks permit only root-handle signalling. The worker's own group
++is excluded. All cleanup waits are bounded. Unverified cleanup establishes an
++indefinite lease hold before best-effort CLEANUP_FAILED_LEASE_HELD I/O. Job
++records carry CLEANUP_FAILED when writable. An operator must inspect the hold
++before stopping that worker; escaped descendants are never guessed or signalled.
++
++Post-lease receipts are best-effort atomic with guarded stderr fallback. No file
++receipt is promised on unwritable storage. Errors before the lease (runs-dir
++creation, log or lease open) print a typed JSON receipt to stdout only.
+ FINAL carries an exact census of all expected queue ids. "Complete" means every
+ id reached a RUN.json with status EXITED, whatever the native exit code; FINAL
+ also reports how many of those exited nonzero. Exit 0 requires completeness;
+@@ -73,7 +75,7 @@
+ Exit codes: 0 complete census; 3 scratch cap; 4 cancelled; 64 invalid binding;
+ 65 input admission failed; 74 error before the lease; 70 job/worker stage error or directory collision;
+ 75 resource/admission/query/observer stop; 76 final health failed after clean
+-completion; 77 census incomplete; 78 job timeout. CLEANUP_FAILED never exits.
++completion; 77 census incomplete; 78 job timeout; 79 RECORD_WRITE_FAILED after verified cleanup. CLEANUP_FAILED never exits.
+ 
+ Namespace-aware evaluation and matrix generation are NOT implemented: evaluate.py
+ and matrix.py read ROOT/runs only, so a v6 namespace must not be evaluated until
+@@ -127,9 +129,9 @@
+             p = subprocess.Popen(self.cmd + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+         except OSError as e:
+             raise QueryError('QUERY_SPAWN_FAILED', f'{args[0]}: {e!r}')
++        with self.lock: self.unreaped.add(p.pid)
+         birth = self.table.read(p.pid)
+         with self.lock:
+-            self.unreaped.add(p.pid)
+             if birth: self.identities[p.pid] = birth['start']
+         try:
+             try:
+@@ -208,6 +210,13 @@
+         raise
+ 
+ 
++def root_exited(root, table):
++    """Observe exit without reaping: retain the original PID/session until cleanup signals finish."""
++    if root.returncode is not None: return True
++    cur = table.read(root.pid)
++    return cur is None or cur['state'] == 'Z'
++
++
+ def signal_job_group(root, grace, signalled, table):
+     """TERM then KILL the job root's original process group while the root is provably unreaped.
+ 
+@@ -221,9 +230,15 @@
+     for signum in (signal.SIGTERM, signal.SIGKILL):
+         if root.returncode is not None:
+             signalled.append(['skipped-root-reaped', root.pid, campaign.utc()]); break
+-        cur = table.read(root.pid)
++        try:
++            cur = table.read(root.pid)
++            sid = os.getsid(root.pid) if cur else None
++        except Exception as e:
++            cur, sid = None, None
++            signalled.append(['group-identity-unreadable', root.pid, repr(e), campaign.utc()])
+         if (birth is not None and cur and cur['start'] == birth and cur['ppid'] == os.getpid()
+-                and cur['pgid'] == root.pid and root.pid != os.getpgrp()):
++                and cur['pgid'] == root.pid and root.pid != os.getpgrp()
++                and sid == root.pid):
+             try:
+                 os.killpg(root.pid, signum); signalled.append([int(signum), 'root-group', root.pid, campaign.utc()])
+             except ProcessLookupError: pass
+@@ -232,9 +247,13 @@
+             root.send_signal(signum); signalled.append([int(signum), 'root', root.pid, campaign.utc()])
+         deadline = time.monotonic() + grace
+         while time.monotonic() < deadline:
+-            cur = table.read(root.pid)
+-            root_down = cur is None or cur['state'] == 'Z'
+-            group_down = not table.group_live(root.pid)
++            try:
++                cur = table.read(root.pid)
++                root_down = cur is None or cur['state'] == 'Z'
++                group_down = not table.group_live(root.pid)
++            except Exception as e:
++                signalled.append(['group-exit-unverified', root.pid, repr(e), campaign.utc()])
++                break
+             if root_down and group_down: break
+             time.sleep(0.05)
+         if root_down and group_down: break
+@@ -271,9 +290,9 @@
+             signal_job_group(root, grace, signalled, own.table)  # site: in-loop refresh branch
+             return signalled, errors
+         deadline = time.monotonic() + grace
+-        while time.monotonic() < deadline and (root.poll() is None or own.known_live()):
++        while time.monotonic() < deadline and (not root_exited(root, own.table) or own.known_live()):
+             time.sleep(0.05)
+-        if root.poll() is not None and not own.known_live(): break
++        if root_exited(root, own.table) and not own.known_live(): break
+     return signalled, errors
+ 
+ 
+@@ -289,6 +308,7 @@
+         self.log = None
+         self.binding = None
+         self.launched = 0
++        self.job_cleanup_verified = True
+         self.own = None
+         self.holding = False
+         self.write_errors = []
+@@ -306,8 +326,8 @@
+ 
+     def receipt(self, kind, **obj):
+         """Best-effort atomic receipt; never raises. Returns the path, or None if it could not be written."""
+-        obj.update(kind=kind, utc=campaign.utc(), binding=self.binding)
+-        try:
++        try:
++            obj.update(kind=kind, utc=campaign.utc(), binding=self.binding)
+             p = self.runs / f'{kind}-{time.time_ns()}.json'
+             _atomic_write(p, json.dumps(obj, indent=1, default=str) + '\n')
+         except Exception as e:
+@@ -446,12 +466,13 @@
+             try:
+                 p = subprocess.Popen(rec['argv'], cwd=j['cwd'], env=env, stdout=so, stderr=se, start_new_session=True)
+                 self.launched += 1
+-                b = self.table.read(p.pid); p.mc_birth = b['start'] if b else None
+-            except Exception:
++                self.job_cleanup_verified = False
++            except OSError:
+                 rec.update(status='JOB_STAGE_ERROR', stage_error=traceback.format_exc()); self.write(out, rec)
+                 return rec, 'JOB_STAGE'
+             th = None
+             try:
++                b = self.table.read(p.pid); p.mc_birth = b['start'] if b else None
+                 own.watch(p.pid)
+                 def sample():
+                     while not stop.is_set():
+@@ -470,7 +491,7 @@
+                                 if len(sampler['errors']) < 20: sampler['errors'].append(repr(e))
+                         stop.wait(SAMPLE_S)
+                 th = threading.Thread(target=sample, daemon=True); th.start()
+-                while p.poll() is None:
++                while not root_exited(p, self.table):
+                     if self.cancel.is_set(): status = 'CANCELLED'; break
+                     if time.time() - t0 > self.a.job_timeout: status = 'TIMEOUT'; break
+                     time.sleep(0.1)
+@@ -487,8 +508,8 @@
+                 live = own.known_live()
+             except Exception as e:
+                 live, cleanup_errors = None, [f'ownership refresh failed: {e}']
+-            if p.poll() is None or live or live is None:
+-                if status == 'EXITED' and p.poll() is not None: status = 'EXITED_WITH_OWNED_SURVIVORS'
++            if p.returncode is None or live or live is None or own.errors:
++                if status == 'EXITED' and root_exited(p, self.table) and live: status = 'EXITED_WITH_OWNED_SURVIVORS'
+                 s, e = terminate_owned(own, p, self.a.cleanup_grace)
+                 signals += s; cleanup_errors += e
+             try: p.wait(timeout=self.a.cleanup_grace)
+@@ -507,7 +528,9 @@
+                         foreign_on_target_during={str(k): v for k, v in sampler['foreign'].items()},
+                         unjoined=sampler_unjoined, interval_s=SAMPLE_S)
+             rec['gpu_witness_uuids'] = sorted(sampler['witness'])
+-        cleanup_failed = bool(cleanup_errors) or remaining is None or bool(remaining) or p.poll() is None
++        cleanup_failed = (bool(cleanup_errors) or remaining is None or bool(remaining)
++                          or p.returncode is None or bool(own.errors) or sampler_unjoined)
++        self.job_cleanup_verified = not cleanup_failed
+         after, after_error, after_problems = None, None, []
+         try:
+             after = self.smi.query()
+@@ -567,8 +590,8 @@
+         try: fcntl.flock(lease, fcntl.LOCK_EX | fcntl.LOCK_NB)
+         except BlockingIOError:
+             self.receipt('STOP', reason='LEASE_BUSY'); return EXIT['RESOURCE']
+-        for s in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP): signal.signal(s, lambda *_: self.cancel.set())
+-        try:
++        try:
++            for s in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP): signal.signal(s, lambda *_: self.cancel.set())
+             return self.locked_main(q, binaries, lease)
+         except Exception:
+             # Backstop: release only when nothing could be unresolved; otherwise hold (CONTRACT-v6 R4-1).
+@@ -577,6 +600,7 @@
+             owned = len(self.own.identities) if self.own is not None else 0
+             if self.launched == 0 and owned == 0 and not unreaped:
+                 self.receipt('STOP', reason='WORKER_STAGE_ERROR_SAFE_RELEASE', error=err, launched=0, owned_identities=0)
++                self.receipt('FINAL', code=EXIT['JOB_STAGE'], reason='unexpected error before any owned work', error=err)
+                 try: fcntl.flock(lease, fcntl.LOCK_UN)
+                 except Exception: pass
+                 return EXIT['JOB_STAGE']
+@@ -594,7 +618,9 @@
+             self.receipt('STOP', reason='OBSERVER_UNHEALTHY', error=repr(e))
+             self.receipt('FINAL', code=EXIT['RESOURCE'], census=self.census(q), reason='observer activation failed',
+                          final_gpu=None, final_error=None, final_problems=[])
+-            fcntl.flock(lease, fcntl.LOCK_UN); return EXIT['RESOURCE']
++            code = EXIT['RECORD_WRITE'] if self.write_errors else EXIT['RESOURCE']
++            if self.write_errors: self.stderr_record(dict(kind='STOP', reason='RECORD_WRITE_FAILED', code=code, cleanup_verified=True))
++            fcntl.flock(lease, fcntl.LOCK_UN); return code
+         code = None
+         try:
+             for j in q:
+@@ -622,7 +648,7 @@
+                 if outcome == 'CLEANUP_FAILED':
+                     self.hold_lease('job cleanup not verified', job=j['id'], cleanup=rec.get('cleanup'))
+                 if outcome != 'OK':
+-                    self.receipt('STOP', reason=outcome, job=j['id'], status=rec['status'],
++                    self.receipt('STOP', reason='RECORD_WRITE_FAILED' if outcome == 'RECORD_WRITE' else outcome, job=j['id'], status=rec['status'],
+                                  resource=rec.get('resource'), cleanup=rec.get('cleanup'))
+                     code = EXIT[outcome]; break
+         except Exception:
+@@ -631,6 +657,8 @@
+         own.stop(); own.join(5)
+         try:
+             leftover = own.known_live()
++            if not self.job_cleanup_verified:
++                raise RuntimeError('job cleanup was interrupted before verification')
+             if leftover or own.is_alive(): raise RuntimeError(f'owned live={leftover} observer alive={own.is_alive()}')
+             own.restore()
+         except Exception as e:
+@@ -659,7 +687,13 @@
+             # Contract rule 1/4: no release while a worker-owned query could still be running.
+             self.hold_lease('worker-owned query process unreaped', queries_unreaped=unreaped, census=census, code=code)
+         if code == EXIT['OK'] and (final_error or final_problems): code = EXIT['FINAL_HEALTH']
+-        self.receipt('FINAL', code=code, census=census, final_gpu=final, final_error=final_error, final_problems=final_problems)
++        if self.write_errors:
++            code = EXIT['RECORD_WRITE']
++            self.receipt('STOP', reason='RECORD_WRITE_FAILED', write_errors=list(self.write_errors))
++        final_path = self.receipt('FINAL', code=code, census=census, final_gpu=final, final_error=final_error, final_problems=final_problems)
++        if final_path is None:
++            code = EXIT['RECORD_WRITE']
++            self.stderr_record(dict(kind='STOP', reason='RECORD_WRITE_FAILED', code=code, cleanup_verified=True))
+         fcntl.flock(lease, fcntl.LOCK_UN); lease.close()
+         return code
+ 

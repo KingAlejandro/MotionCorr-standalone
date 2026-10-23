@@ -1,0 +1,15 @@
+{
+ "schema": "dc262-v6-data-only/1",
+ "worker_sha256": "fdcf4eb071f3f322dbd5f4f5779189f3c4cfac0422f3fa63ff76d03af59effd9",
+ "test_sha256": "870835d4335c5e93b59b2c35f6cfd645e9eea8cbaf11f2e031a77014737145fd",
+ "tests": 12,
+ "failures": [
+  {
+   "test": "test_run_write_safe_outcome_only_after_cleanup (__main__.Checks.test_run_write_safe_outcome_only_after_cleanup) (uncertain=False)",
+   "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py\", line 182, in test_run_write_safe_outcome_only_after_cleanup\n    self.assertEqual(outcome, 'CLEANUP_FAILED' if uncertain else 'RECORD_WRITE')\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'OK' != 'RECORD_WRITE'\n- OK\n+ RECORD_WRITE\n\n"
+  }
+ ],
+ "errors": [],
+ "result": "FAIL",
+ "limits": "Synthetic Popen/process tables/signals only; process cleanup, real-worker suite, Linux and GPU UNRUN."
+}

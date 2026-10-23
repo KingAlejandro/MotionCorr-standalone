@@ -1,5 +1,16 @@
 # GPU2 resource stop, 2026-10-22 21:40Z, and proposed GPU resume (UNRUN)
 
+## Review R4 and proposed worker v6 (23 October 2026)
+
+[Codex implementation response](review-r4/RESPONSES-v6.md) and
+[v6 data-only evidence](gpu_worker_v6_controls/README.md) retain the provider transfer, R4 repairs,
+exact hashes and a failed embedded-fixture iteration. Final source `f5946de1`: 14/14 synthetic data
+checks, 11/11 admission cases and K28/K30 PASS; nine R4 mutants rejected synthetically. The frozen
+provider owner rule cannot be met by this Codex ancestry, so the real-worker suite remains UNRUN
+and unspent. No Linux/GPU work; native readiness and the namespace consumer remain BLOCKED.
+CONTRACT-v5/v6, v2–v5 and their historical evidence remain unchanged. Parent independent review and
+an explicit provider-binding disposition are required before the bounded process suite.
+
 ## What happened
 
 A foreign `llama-server` (PID 3276184, another user) opened contexts on all

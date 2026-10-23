@@ -1952,6 +1952,22 @@ class CompressedMRCReader
 			             "Command line for the pipe: " + commandline);
 	}
 
+	// Call before processing a complete movie, on the serial error-handling path.
+	// Partial/header reads deliberately retain early-close semantics instead.
+	void finish()
+	{
+		if (pipe == NULL)
+			REPORT_ERROR("CompressedMRCReader::finish() called without an open pipe.");
+		char buffer[65536];
+		while (fread(buffer, 1, sizeof(buffer), pipe) > 0) {}
+		const bool read_error = ferror(pipe) != 0;
+		const int status = pclose(pipe);
+		pipe = NULL; // Never close the stream twice, including on failure.
+		if (read_error || status != 0)
+			REPORT_ERROR("CompressedMRCReader: decompression failed after reading the movie.\n"
+			             "Command line for the pipe: " + commandline);
+	}
+
 	~CompressedMRCReader()
 	{
 		if (pipe != NULL)

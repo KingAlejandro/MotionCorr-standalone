@@ -1,0 +1,110 @@
+{
+  "workers_complete": false,
+  "dataset_ready": false,
+  "verdict": "FAIL",
+  "input_star_sha256": "f6b5f4115bedb4a9a4768b6a5a199164531c5d81a6430652f7250e11893577bf",
+  "binary": "/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault",
+  "binary_sha256": "e531b6d2f651aaa31ad0492465e226360c808183cc41856def554da8ad213414",
+  "endpoint": "successful staged products, canonical joint STAR and full report publication",
+  "dataset_wall_s": 1.1884467266499996,
+  "ownership_mode": "linux-child-subreaper",
+  "worker_phase_wall_s": 1.164669114165008,
+  "failure": "Worker phase exited 3",
+  "cleanup": "Owned PID/birth groups reaped; observed descendants absent or zombies",
+  "process_ownership_errors": [],
+  "tree_rss": {
+    "status": "SAMPLED",
+    "unavailable": null,
+    "errors": [],
+    "interval_s": 0.1,
+    "units": "KiB",
+    "peak_simultaneous_sum_rss_kib": 173948,
+    "note": "Current RSS summed at each observation, not summed VmHWM. Shared pages are counted more than once. Sampled peak may miss brief peaks/children born and exited between polls; PSS is optional. Only exact PID/start roots and their observed descendants are owned.",
+    "samples": [
+      {
+        "monotonic_s": 7871046.151299613,
+        "processes": [
+          {
+            "pid": 1847246,
+            "ppid": 1846872,
+            "pgid": 1847246,
+            "start_ticks": 787104564,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 21980,
+            "pss_kib": 11746
+          },
+          {
+            "pid": 1847260,
+            "ppid": 1847246,
+            "pgid": 1847260,
+            "start_ticks": 787104576,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23004,
+            "pss_kib": 12679
+          }
+        ],
+        "rss_sum_kib": 44984,
+        "pss_sum_kib": 24425,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7871046.638388511,
+        "processes": [
+          {
+            "pid": 1847246,
+            "ppid": 1846872,
+            "pgid": 1847246,
+            "start_ticks": 787104564,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22016,
+            "pss_kib": 11881
+          },
+          {
+            "pid": 1847260,
+            "ppid": 1847246,
+            "pgid": 1847260,
+            "start_ticks": 787104576,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 23032,
+            "pss_kib": 12807
+          },
+          {
+            "pid": 1847281,
+            "ppid": 1847260,
+            "pgid": 1847281,
+            "start_ticks": 787104596,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault",
+            "rss_kib": 128900,
+            "pss_kib": 122357
+          }
+        ],
+        "rss_sum_kib": 173948,
+        "pss_sum_kib": 147045,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7871047.084516601,
+        "processes": [
+          {
+            "pid": 1847246,
+            "ppid": 1846872,
+            "pgid": 1847246,
+            "start_ticks": 787104564,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22180,
+            "pss_kib": 12007
+          }
+        ],
+        "rss_sum_kib": 22180,
+        "pss_sum_kib": 12007,
+        "errors": []
+      }
+    ]
+  }
+}

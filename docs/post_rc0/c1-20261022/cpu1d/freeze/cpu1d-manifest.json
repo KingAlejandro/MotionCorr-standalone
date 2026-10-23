@@ -1,0 +1,273 @@
+{
+  "tested_source_sha": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f",
+  "binaries": {
+    "c1_cpu (build-cpu, no CUDA linkage)": "5692c6dc5eaca953357bf7a1161338b99ca320369f0b6c6ab025d9aaa7f9dc3c",
+    "frozen_F_cpu (read in place, same-host control)": "43cab2b74e97e948172c656d2b3041b562d24e733de1a5727a54624c12749b42"
+  },
+  "expected_identities": {
+    "file": "cpu1c-identities.json",
+    "sha256": "45273edefbf8f83fc529fe06636741904f566b5729a51bb81f9e31beb020cf2c",
+    "all": 100,
+    "control": "dose1-s00..dose1-s09 (10)",
+    "note": "counts and control names are fixed in the helper, not read from the file"
+  },
+  "pins": {
+    "F-cpu-G.RUN.json": "05cf608df6fc57e1c5a6e0618277f550f6b2fa27c18ba60a36f88d531d0abd06",
+    "F-cpu-L.RUN.json": "4b2ffd1fcfee0ccd9d04abedfc3d30560ad5a0ea189a34ed4a7adb626b0d97cb"
+  },
+  "inputs": {
+    "tutorial_movies_star_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041",
+    "t24_baselines": "t24/F-cpu-G and t24/F-cpu-L (iteration 1, rc 0, read in place)",
+    "census_fixtures": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures (100, receipts hash-checked by the runner)",
+    "retained_cpu_sums": "/mnt/clathrin/alex-motioncorr-km-truth/retained-cpu-products/*.tar.zst (+ .json sidecars verified by cpu1_extract_ref.sh)",
+    "published_k267_cpu": "src/docs/post_rc0/s1/synth_combined/evidence/v2-comb-cpu-none.eval.json (information only)",
+    "preflight": "13a18cb8dba5f08f0de1a063e92e522733757f81af0dc1833d42b9ccd1b92ab6",
+    "old_cpu1_freeze_retained": "b1a88839aef331870cb23bbb8581f6b9ca81e250b06019a9a61e5a8a998a31be"
+  },
+  "lane": {
+    "cpus": "8-9 (max 2), whole chain pinned by taskset, --j 2, OMP 2",
+    "gpu": "none: no lease, no nvidia-smi, no --gpu, CUDA_VISIBLE_DEVICES exported empty; the chain is checked for GPU helpers by cpu1_prereq.py",
+    "builds": "none"
+  },
+  "pending_not_in_chain": [
+    "T24 L attribution (needs GPU)",
+    "D12 datasets",
+    "K267 CUDA",
+    "K269/K272 CUDA",
+    "R12/12ds",
+    "R9",
+    "A1 #249 GPU route",
+    "CTest and sticky (not rerun)"
+  ],
+  "decision_rules": {
+    "T24_CPU": "C1 CPU products IDENTICAL to the frozen-F CPU baseline for G and L (any difference stops: unexpected output change)",
+    "K267_CPU": "K267 field metrics and checker statuses only: exactly 8 cases, complete finite metric dictionaries, integer native exit 0, a valid checker contract (exit 2 / ABORT rejected; FAIL and UNIDENTIFIABLE are valid evidence), C1 == same-host F exactly; published values informational",
+    "K269_CPU": "PASS only if exactly the 100 expected identities each have a native exit-0 C1 run bound to its fixture with the expected binary, all decoded sums equal the retained main-CPU sums, and exactly the 10 expected control movies have exit-0 same-host F runs (expected binary, bound) equal to C1; C1 != retained while C1 == same-host F is INCONCLUSIVE (stops); C1 != same-host F is FAIL (stops); any missing/extra/duplicate identity, nonzero or foreign-binary or unbound run is INCOMPLETE (stops). Documented INCONCLUSIVE (exit 3) lets the independent metrics and image rows continue and is preserved as INCONCLUSIVE, never an aggregate PASS; FAIL (4) and INCOMPLETE (5) stop. Non-finite or empty sums, non-object or non-integer-exit RUN files are invalid",
+    "K272_CPU": "image metrics reported; gates, ROI, source unchanged"
+  },
+  "schema": "c1-cpu1d-startup/1",
+  "startup_git_commit": "5576c6b5711b32979359f9b12efde90391ea5ba7",
+  "frozen_cpu1c_tools_commit": "67beb5f59382a74bbc64b10bfa488ab3d549dc0c",
+  "tools_sha256": {
+    "OVERLAY.md": "2a726b3ae9e0a34716f8b34a35e699ffbeb46de27633d85b9c24fb79269a387d",
+    "c1_attr_build.sh": "4a9fdeb84a21499bacd6ae7629e9bfe4d1a0414b3019cd1f376e81448dd2e8fe",
+    "c1_build.sh": "77a52723ce9f8b916c7dac15d9a2722e787d795d815803ee6dc6190f875407f7",
+    "c1_census.py": "9d687e252b5861b0b5261f0a8f09930e956387124cd51e740cac0375fe6551a3",
+    "c1_census_runner.diff": "0c6c5f880597387e8141590e5b829afdc41cb7bf5d4f5ecfafad06af8380ab18",
+    "c1_census_runner.py": "2caa8566e158e05c67805fe6fe0b21acfaf6d1c1479f7d5b59e4ec0082c7d2b2",
+    "c1_ctest.sh": "411c52e9a843530ae95c4e668f032ea82222abc5262797d10f636b0665c80fff",
+    "c1_env.sh": "0cc15694f5f344976077d2f2d1218ea9e358a205fe65735156dc4c87d3f9068d",
+    "c1_expected_union.py": "1ab2e6a38b1517bafb9de566857a1217b777201456e7d4025ffdbc58fa184793",
+    "c1_gpu_run.sh": "9b46109fdee29cd3b26c43b9a57147a0932e252ca9cf9cc70399205cf2c630cb",
+    "c1_grade_ctest.py": "706b79590389f2cce7d2bf5149e359a0d98a052d0f1646f168ed863e34550861",
+    "c1_health.sh": "c5dc88cc00be19907930519bd10d5cd1add8b904ec5e1ac2887b25fd108aef35",
+    "c1_health_check.py": "cb3380116437d18529b82eeeb699594a3de6014d11f18febbd75aa38eabdb81c",
+    "c1_item.sh": "1bd3ec4dc46224b53cd97922a597c32c8d19121ff0ce40a1ac1c933e14c71151",
+    "c1_item12.diff": "f65fb3ab344bdefb221d2191e152d037e97cb837df24120958e29f8c5f121bda",
+    "c1_item12.py": "d6f79a237c9d55e981f96d9d6f06f7b013352f65bcc124d1c4749bfadf606b68",
+    "c1_lane.py": "85bbe465a288817e34a92e50d28ac06e99b1d325fcb44e4cd5044ed26aaefaae",
+    "c1_occupancy.sh": "330bd25af4ec1ab45013fa58d6015af07a125fe7e6e4fbb2e887ec8fa1ef8966",
+    "c1_run_v2_cases.diff": "3cc8010812429b62aa08a906c2618f23d508c0bbcf814749494f4064e3266603",
+    "c1_run_v2_cases.py": "051f25974745979f9f6701a0cd9a8ed45e764044cd98f3e31d0a819a73b081aa",
+    "c1_setup.sh": "523a08e250d320b1176ffb7e0bbb3b21c6146b80681a8242100d678b235d05e1",
+    "c1_stage.sh": "b91a59a2c72b754ca8cb85e2ffebd37c17f3a9587e01212958db11985d91dbad",
+    "c1_sticky.sh": "9a1fbc56565d955e2937bdac74e00a66e65d93925aaa5c34c48e21dcca9b7fae",
+    "c1_tutorial24.py": "55a223babf3714e274ef10a72cb999f7cd480575873597f221247fa7cce3964e",
+    "c1_v2.sh": "4fcdad25abec84e3ad783f2945097d5e3dfbe3cbd42461011427f09aa3f598ae",
+    "cpu1_extract_ref.sh": "8a0d21cda85e34fcec625a9f818a151caa08271a5a94bc4187a59d277ff4aea4",
+    "cpu1d_prereq.py": "dc5d17af45d56faab077a03f1576180e6b732fc0cd518fd490b2952f210d0f12",
+    "cpu1c_sums.py": "2efdca7e26a6e78a327cb5eb21284c2b6d3cf4d02d4d8d472e511bbe9832439c",
+    "make_c1_derived.py": "666f4ea2b84e39ce0c43187f1b4a48d9f3aca8866c0caf4852d27721273170b1",
+    "make_c1_item12.py": "561a7c0785fc078216465a1ad518bce4d19e9550aa29c40934c375bc77c5421a",
+    "test_c1_t24_failclosed.py": "a0168d4db634fdc51e35647e121d2fea23b30d7b0061a1f435eaa9ee31ac9320",
+    "test_c1_wrappers.py": "d66cf7b2a2254de6f29107b551ec4f203262f33e49fdd2726812f50f44beea48"
+  },
+  "tools_count": 32,
+  "unchanged_tool_bytes": 31,
+  "chain": "chain-cpu1d.sh",
+  "chain_sha256": "3c842fb2c505bf5db4dac37b21db6fcbc0aad1ae3ea1b083b10bba57f2958cdc",
+  "wrapper_sha256": "ac71cae5ca0696859fb48731a94c77a235b3266a6f33ee1c6e795635248df404",
+  "stage_count": 17,
+  "stages": [
+    {
+      "stage": "cpu1d-prereq",
+      "allowed_exits": "0",
+      "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/cpu1d_prereq.py /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/chain-cpu1d.sh /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/cpu1c-identities.json /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/cpu1d-tools-expected.sha256 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/cpu1c-pins /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/cpu1d-prereq.json",
+      "expected_receipts": [
+        "logs/cpu1d-prereq.{cmd,pid,started,finished,exit,log}",
+        "cpu1d-prereq.json",
+        "logs/cpu1d-prereq.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-v2-cpu-c1",
+      "allowed_exits": "0",
+      "argv": "bash /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_v2.sh cpu",
+      "expected_receipts": [
+        "logs/cpu1d-v2-cpu-c1.{cmd,pid,started,finished,exit,log}",
+        "v2/cpu-unset/runs.json",
+        "v2/cpu-unset.eval.json",
+        "logs/cpu1d-v2-cpu-c1.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-v2-cpu-F",
+      "allowed_exits": "0",
+      "argv": "/home/alex/.mc-venv/bin/python3 -I /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_run_v2_cases.py /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/v2 cpuF-unset cpu /mnt/clathrin/alex-motioncorr-rc0/W-QF/build-cpu/motioncorr unset 8-9",
+      "expected_receipts": [
+        "logs/cpu1d-v2-cpu-F.{cmd,pid,started,finished,exit,log}",
+        "v2/cpuF-unset/runs.json",
+        "logs/cpu1d-v2-cpu-F.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-v2-eval-F",
+      "allowed_exits": "0",
+      "argv": "/home/alex/.mc-venv/bin/python3 -I /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/docs/post_rc0/s1/synth_combined/eval_v2.py /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/v2/v2fixtures /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/v2/cpuF-unset /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/v2/cpuF-unset.eval.json",
+      "expected_receipts": [
+        "logs/cpu1d-v2-eval-F.{cmd,pid,started,finished,exit,log}",
+        "v2/cpuF-unset.eval.json",
+        "logs/cpu1d-v2-eval-F.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-v2-check",
+      "allowed_exits": "0",
+      "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/cpu1c_sums.py v2check /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/v2/cpu-unset.eval.json /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/v2/cpuF-unset.eval.json /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/docs/post_rc0/s1/synth_combined/evidence/v2-comb-cpu-none.eval.json /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/cpu1d-v2-check.json",
+      "expected_receipts": [
+        "logs/cpu1d-v2-check.{cmd,pid,started,finished,exit,log}",
+        "cpu1d-v2-check.json",
+        "logs/cpu1d-v2-check.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-run-c1-cpu-G",
+      "allowed_exits": "0",
+      "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_tutorial24.py run c1-cpu /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cpu/motioncorr G --cpu",
+      "expected_receipts": [
+        "logs/cpu1d-run-c1-cpu-G.{cmd,pid,started,finished,exit,log}",
+        "t24-cpu1d/c1-cpu-G/RUN.json",
+        "logs/cpu1d-run-c1-cpu-G.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-cmp-cpu-G",
+      "allowed_exits": "0",
+      "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_tutorial24.py compare /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24/F-cpu-G/out /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-cpu1d/c1-cpu-G/out F-cpu_vs_c1-cpu-G",
+      "expected_receipts": [
+        "logs/cpu1d-cmp-cpu-G.{cmd,pid,started,finished,exit,log}",
+        "t24-cpu1d/compare/F-cpu_vs_c1-cpu-G.{json,run.json,class.json}",
+        "logs/cpu1d-cmp-cpu-G.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-run-c1-cpu-L",
+      "allowed_exits": "0",
+      "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_tutorial24.py run c1-cpu /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cpu/motioncorr L --cpu",
+      "expected_receipts": [
+        "logs/cpu1d-run-c1-cpu-L.{cmd,pid,started,finished,exit,log}",
+        "t24-cpu1d/c1-cpu-L/RUN.json",
+        "logs/cpu1d-run-c1-cpu-L.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-cmp-cpu-L",
+      "allowed_exits": "0",
+      "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_tutorial24.py compare /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24/F-cpu-L/out /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-cpu1d/c1-cpu-L/out F-cpu_vs_c1-cpu-L",
+      "expected_receipts": [
+        "logs/cpu1d-cmp-cpu-L.{cmd,pid,started,finished,exit,log}",
+        "t24-cpu1d/compare/F-cpu_vs_c1-cpu-L.{json,run.json,class.json}",
+        "logs/cpu1d-cmp-cpu-L.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-extract-ref",
+      "allowed_exits": "0",
+      "argv": "bash /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/cpu1_extract_ref.sh",
+      "expected_receipts": [
+        "logs/cpu1d-extract-ref.{cmd,pid,started,finished,exit,log}",
+        "census-ref-cpu/<100 movies>/cpu-none/output/movie.mrc (each verified against its sidecar sha256)",
+        "logs/cpu1d-extract-ref.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-census-cpu",
+      "allowed_exits": "0",
+      "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_census.py run cpu /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cpu/motioncorr results-c1-cpu",
+      "expected_receipts": [
+        "logs/cpu1d-census-cpu.{cmd,pid,started,finished,exit,log}",
+        "census/results-c1-cpu/<exactly the 100 identities>/cpu-none/{RUN.json,output/}",
+        "logs/cpu1d-census-cpu.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-census-cmp-retained",
+      "allowed_exits": "0 1",
+      "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/cpu1c_sums.py compare /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census results-c1-cpu /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census-ref-cpu /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census-cpu-vs-retained.json /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/cpu1c-identities.json all 5692c6dc5eaca953357bf7a1161338b99ca320369f0b6c6ab025d9aaa7f9dc3c",
+      "expected_receipts": [
+        "logs/cpu1d-census-cmp-retained.{cmd,pid,started,finished,exit,log}",
+        "census-cpu-vs-retained.json",
+        "logs/cpu1d-census-cmp-retained.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-census-F-control",
+      "allowed_exits": "0",
+      "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_census_runner.py --root /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census --binary /mnt/clathrin/alex-motioncorr-rc0/W-QF/build-cpu/motioncorr --backend cpu --cpus 8-9 --dc-arms none --double-conditions --results results-F-cpu-dose1 --conditions dose1 --max-idle-seconds 600",
+      "expected_receipts": [
+        "logs/cpu1d-census-F-control.{cmd,pid,started,finished,exit,log}",
+        "census/results-F-cpu-dose1/<exactly dose1-s00..09>/cpu-none/",
+        "logs/cpu1d-census-F-control.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-census-decision",
+      "allowed_exits": "0 3",
+      "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/cpu1c_sums.py decide /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census results-c1-cpu results-F-cpu-dose1 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census-ref-cpu /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/cpu1c-identities.json /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census-cpu-decision.json 5692c6dc5eaca953357bf7a1161338b99ca320369f0b6c6ab025d9aaa7f9dc3c 43cab2b74e97e948172c656d2b3041b562d24e733de1a5727a54624c12749b42",
+      "expected_receipts": [
+        "logs/cpu1d-census-decision.{cmd,pid,started,finished,exit,log}",
+        "census-cpu-decision.json",
+        "logs/cpu1d-census-decision.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-census-metrics",
+      "allowed_exits": "0",
+      "argv": "/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_census.py metrics results-c1-cpu cpu /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census-cpu-metrics.json",
+      "expected_receipts": [
+        "logs/cpu1d-census-metrics.{cmd,pid,started,finished,exit,log}",
+        "census-cpu-metrics.json",
+        "logs/cpu1d-census-metrics.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-image-cpu",
+      "allowed_exits": "0",
+      "argv": "env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 /mnt/clathrin/alex-motioncorr-synth-combined/venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/docs/post_rc0/s1/synth_combined/image_batch.py eval /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census results-c1-cpu x 2",
+      "expected_receipts": [
+        "logs/cpu1d-image-cpu.{cmd,pid,started,finished,exit,log}",
+        "census/results-c1-cpu/<100>/cpu-none/image.json",
+        "logs/cpu1d-image-cpu.reserved/owner"
+      ]
+    },
+    {
+      "stage": "cpu1d-image-controls",
+      "allowed_exits": "0",
+      "argv": "env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 /mnt/clathrin/alex-motioncorr-synth-combined/venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/docs/post_rc0/s1/synth_combined/image_batch.py controls /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census dose1-s00 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/cpu1d-image-controls.json",
+      "expected_receipts": [
+        "logs/cpu1d-image-controls.{cmd,pid,started,finished,exit,log}",
+        "cpu1d-image-controls.json",
+        "logs/cpu1d-image-controls.reserved/owner"
+      ]
+    }
+  ],
+  "launch_marker": "logs/launch-cpu1d-attempt1",
+  "launch_gate": "logs/chain-cpu1d.go",
+  "tools_dir": "tools-cpu1d-run",
+  "T24_dir": "t24-cpu1d",
+  "native_status": "UNRUN",
+  "old_cpu1c_status": "prereq RAN/FAIL (24/25); 16 later stages UNRUN; all native UNRUN",
+  "scratch_cap_new_bytes": 16777216,
+  "launch_command": "nohup setsid taskset -c 8-9 bash /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/cpu1d-launch-wrapper.sh > /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/logs/launch-cpu1d-attempt1.outer.out 2>&1 < /dev/null &",
+  "aggregate": "INCONCLUSIVE remains INCONCLUSIVE even if chain reaches .done; only compare allows 0/1 and decision allows 0/3"
+}

@@ -1,0 +1,323 @@
+{
+  "schema": "pr269-parent-integration/1",
+  "label": "LOCAL REPLAY OF RETAINED ESTIMATES; NOT A NATIVE ESTIMATOR RUN",
+  "old_pr269": "677abcfab0b55cf8c64ae511369a863383b21a59",
+  "parent_pr267": "6695241523d7285d4f0480abf1c4a2c6423c3617",
+  "composition_commit": "31a7fecc9a883766084d9b3b7009fa0f18784856",
+  "python": "/Users/alex.konstantinov/.local/bin/python3",
+  "python_version": "3.13.7 (main, Aug 18 2025, 19:02:43) [Clang 20.1.4 ]",
+  "numpy": "2.4.2",
+  "platform": "macOS-26.7.1-arm64-arm-64bit-Mach-O",
+  "threads": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  },
+  "source_contract": {
+    "parent_files_identical": [
+      "docs/motion_diagnostics_v2.md",
+      "tools/check_motion_diagnostics.py",
+      "tools/test_motion_diagnostics.py"
+    ],
+    "pr269_files_identical": [
+      ".github/workflows/ci.yml",
+      "docs/post_rc0/s1/km_truth/4gpus-provenance.txt",
+      "docs/post_rc0/s1/km_truth/ARTIFACTS.sha256",
+      "docs/post_rc0/s1/km_truth/DESIGN.md",
+      "docs/post_rc0/s1/km_truth/FIXTURE_INDEX.json",
+      "docs/post_rc0/s1/km_truth/README.md",
+      "docs/post_rc0/s1/km_truth/SUMMARY.json.gz",
+      "docs/post_rc0/s1/km_truth/VALIDATION.json",
+      "docs/post_rc0/s1/km_truth/accuracy_per_arm.csv",
+      "docs/post_rc0/s1/km_truth/accuracy_per_seed.csv",
+      "docs/post_rc0/s1/km_truth/analysis-environment.json",
+      "docs/post_rc0/s1/km_truth/analyze_live.py",
+      "docs/post_rc0/s1/km_truth/archive-verification.json",
+      "docs/post_rc0/s1/km_truth/backend_agreement.csv",
+      "docs/post_rc0/s1/km_truth/build_report.py",
+      "docs/post_rc0/s1/km_truth/capture_runtime_model.patch",
+      "docs/post_rc0/s1/km_truth/collect_evidence.sh",
+      "docs/post_rc0/s1/km_truth/cpu64-provenance.txt",
+      "docs/post_rc0/s1/km_truth/double_reference_distance.csv",
+      "docs/post_rc0/s1/km_truth/evaluate_final.py",
+      "docs/post_rc0/s1/km_truth/export_tables.py",
+      "docs/post_rc0/s1/km_truth/field_error_time.png",
+      "docs/post_rc0/s1/km_truth/field_error_time.svg",
+      "docs/post_rc0/s1/km_truth/generate_campaign_parallel.py",
+      "docs/post_rc0/s1/km_truth/mapping-bounds.json",
+      "docs/post_rc0/s1/km_truth/native_v2_metrics.json",
+      "docs/post_rc0/s1/km_truth/native_v2_raw.tar.gz",
+      "docs/post_rc0/s1/km_truth/native_v2_raw_index.json",
+      "docs/post_rc0/s1/km_truth/native_v2_table.md",
+      "docs/post_rc0/s1/km_truth/orientation_controls.py",
+      "docs/post_rc0/s1/km_truth/pack_evidence.py",
+      "docs/post_rc0/s1/km_truth/paired_seed_statistics.csv",
+      "docs/post_rc0/s1/km_truth/postrun-cpu-libraries.txt",
+      "docs/post_rc0/s1/km_truth/postrun-cuda-libraries.txt",
+      "docs/post_rc0/s1/km_truth/prefetch_pedestal.py",
+      "docs/post_rc0/s1/km_truth/raw.sha256",
+      "docs/post_rc0/s1/km_truth/raw.tar.gz",
+      "docs/post_rc0/s1/km_truth/rendered-products.sha256",
+      "docs/post_rc0/s1/km_truth/report.html",
+      "docs/post_rc0/s1/km_truth/retain_cpu_products.py",
+      "docs/post_rc0/s1/km_truth/source-provenance.json",
+      "docs/post_rc0/s1/km_truth/stage-control-summary.json",
+      "docs/post_rc0/s1/km_truth/stage_control.py",
+      "docs/post_rc0/s1/km_truth/time_errors.csv",
+      "docs/post_rc0/s1/km_truth/transfer_direct.py",
+      "docs/post_rc0/s1/km_truth/transfer_fixtures.py",
+      "test-data/generate_realistic_motion.py",
+      "tools/check_realistic_motion.py",
+      "tools/run_realistic_motion_census.py",
+      "tools/summarize_realistic_motion.py"
+    ],
+    "test_sha256": "969646ff76dccdb4cf6258dd0429da8c38d857025eb345ec42afc33467d41ed2",
+    "production_diff": [],
+    "shared_helpers_unchanged": [
+      "validate_star_rows",
+      "vector_metrics"
+    ]
+  },
+  "regenerated_fixture_manifest_sha256": "f48c2f16398c356533865d3377a11659bb35bdc845dc7eb0aa670425c4929b39",
+  "valid_reports_identical_except_sampling_status": 32,
+  "old_code_negative_control": "candidate samples outside fixed valid detector region",
+  "retained_archive": {
+    "sha256": "88156bc26356d6fe9a2b3a6a33db60007a800eb4abaaa53417d450e78342ceab",
+    "files_verified": 185
+  },
+  "retained_star_replay": [
+    {
+      "backend": "cpu",
+      "case": "zero",
+      "candidate_sha256": "baa09a10e0583bf703a2f73d83abaf007ec49a660fcb1bb8aefc3b33559af429",
+      "exit": 0,
+      "sampling_status": "VALID",
+      "accuracy_status": "PASS",
+      "field_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      }
+    },
+    {
+      "backend": "cpu",
+      "case": "integer",
+      "candidate_sha256": "259a59360b3cde321195dccc07837d1ed0584b97b818c7d9f8ef5d6ec4f14f35",
+      "exit": 1,
+      "sampling_status": "VALID",
+      "accuracy_status": "FAIL",
+      "field_px": {
+        "rms": 0.29786778665475044,
+        "p95": 0.48769178867805424,
+        "max": 0.48769178867805424
+      }
+    },
+    {
+      "backend": "cpu",
+      "case": "fractional",
+      "candidate_sha256": "4f419457ee91955468b42a1b67c1c24f4141f61a2f1812a8ae84a30913081478",
+      "exit": 1,
+      "sampling_status": "VALID",
+      "accuracy_status": "FAIL",
+      "field_px": {
+        "rms": 0.5921536730251702,
+        "p95": 0.7948194679573471,
+        "max": 0.7948194679573471
+      }
+    },
+    {
+      "backend": "cpu",
+      "case": "affine",
+      "candidate_sha256": "f560b29e3d4521e1b4d5ca97fa3d649181970b49db90714e9a257709d20c97a8",
+      "exit": 1,
+      "sampling_status": "VALID",
+      "accuracy_status": "FAIL",
+      "field_px": {
+        "rms": 0.45474292342088196,
+        "p95": 0.8389729255617365,
+        "max": 1.029511788133801
+      }
+    },
+    {
+      "backend": "cpu",
+      "case": "pedestal",
+      "candidate_sha256": "ad084d840d1f510596507c3efb2dead59b3829ac975d6668869ab3fdfbf7673b",
+      "exit": 1,
+      "sampling_status": "VALID",
+      "accuracy_status": "FAIL",
+      "field_px": {
+        "rms": 2.3945009135517155,
+        "p95": 4.0720413799013375,
+        "max": 4.398997726755499
+      }
+    },
+    {
+      "backend": "cpu",
+      "case": "noisy",
+      "candidate_sha256": "9dc77e8ad53879aa40e7f4ad8ac2523e4b70ceb2e620097302202bee69ca8171",
+      "exit": 1,
+      "sampling_status": "OUTSIDE_FIXED_ROI",
+      "accuracy_status": "FAIL",
+      "field_px": {
+        "rms": 2.6474150479459198,
+        "p95": 4.945276016691183,
+        "max": 11.19089344214544
+      },
+      "old_checker_error": "candidate samples outside fixed valid detector region"
+    },
+    {
+      "backend": "cpu",
+      "case": "flat",
+      "candidate_sha256": "ee62be3ea44afcc1eeb37b1db3b0ecae081d9dfaf4f4ec671613768918ba1e3a",
+      "exit": 0,
+      "sampling_status": "VALID",
+      "accuracy_status": "UNIDENTIFIABLE",
+      "field_px": {
+        "rms": 2.37787654746835,
+        "p95": 3.8830561417522667,
+        "max": 3.8830561417522667
+      }
+    },
+    {
+      "backend": "cpu",
+      "case": "repeated",
+      "candidate_sha256": "57482c3db71e3999c4850d3ba790d434d784fb54bd17dfee4a4b4dd00592ca6d",
+      "exit": 1,
+      "sampling_status": "OUTSIDE_FIXED_ROI",
+      "accuracy_status": "UNIDENTIFIABLE",
+      "field_px": {
+        "rms": 18.68232578869665,
+        "p95": 31.642843286436825,
+        "max": 31.642843286436825
+      },
+      "old_checker_error": "candidate samples outside fixed valid detector region"
+    },
+    {
+      "backend": "cuda",
+      "case": "zero",
+      "candidate_sha256": "baa09a10e0583bf703a2f73d83abaf007ec49a660fcb1bb8aefc3b33559af429",
+      "exit": 0,
+      "sampling_status": "VALID",
+      "accuracy_status": "PASS",
+      "field_px": {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      }
+    },
+    {
+      "backend": "cuda",
+      "case": "integer",
+      "candidate_sha256": "c53268b8f76869c0dabe9727a2b8284887644726ef43ebc252b80f25a4560300",
+      "exit": 1,
+      "sampling_status": "VALID",
+      "accuracy_status": "FAIL",
+      "field_px": {
+        "rms": 0.5147989305458978,
+        "p95": 0.646840698231798,
+        "max": 0.646840698231798
+      }
+    },
+    {
+      "backend": "cuda",
+      "case": "fractional",
+      "candidate_sha256": "0c6a44d984f8fa28a31ee762f0daa4bb10d01605d6e50af604ea767f1c39ec5f",
+      "exit": 1,
+      "sampling_status": "VALID",
+      "accuracy_status": "FAIL",
+      "field_px": {
+        "rms": 0.33907846929582536,
+        "p95": 0.53125,
+        "max": 0.53125
+      }
+    },
+    {
+      "backend": "cuda",
+      "case": "affine",
+      "candidate_sha256": "cfc4d3c130f2855eb43c35df07ddc8e29aa30aa242c836eaac02981e3a7db5c1",
+      "exit": 1,
+      "sampling_status": "VALID",
+      "accuracy_status": "FAIL",
+      "field_px": {
+        "rms": 0.3487973770285684,
+        "p95": 0.6641690089488532,
+        "max": 0.9278876537303117
+      }
+    },
+    {
+      "backend": "cuda",
+      "case": "pedestal",
+      "candidate_sha256": "ad084d840d1f510596507c3efb2dead59b3829ac975d6668869ab3fdfbf7673b",
+      "exit": 1,
+      "sampling_status": "VALID",
+      "accuracy_status": "FAIL",
+      "field_px": {
+        "rms": 2.3945009135517155,
+        "p95": 4.0720413799013375,
+        "max": 4.398997726755499
+      }
+    },
+    {
+      "backend": "cuda",
+      "case": "noisy",
+      "candidate_sha256": "30f653f048b33f06d43b0afadab1debe408c6cef586fc63c83d7a7c883fcb08a",
+      "exit": 0,
+      "sampling_status": "VALID",
+      "accuracy_status": "FAIL",
+      "field_px": {
+        "rms": 1.6920606393235231,
+        "p95": 3.1585020228370793,
+        "max": 7.107200247946224
+      }
+    },
+    {
+      "backend": "cuda",
+      "case": "flat",
+      "candidate_sha256": "ee62be3ea44afcc1eeb37b1db3b0ecae081d9dfaf4f4ec671613768918ba1e3a",
+      "exit": 0,
+      "sampling_status": "VALID",
+      "accuracy_status": "UNIDENTIFIABLE",
+      "field_px": {
+        "rms": 2.37787654746835,
+        "p95": 3.8830561417522667,
+        "max": 3.8830561417522667
+      }
+    },
+    {
+      "backend": "cuda",
+      "case": "repeated",
+      "candidate_sha256": "a5553a6334b7e2db0b22c988a5a26c7fb2ce7a48198b9871c0ebdf5e319a52ef",
+      "exit": 1,
+      "sampling_status": "OUTSIDE_FIXED_ROI",
+      "accuracy_status": "UNIDENTIFIABLE",
+      "field_px": {
+        "rms": 67.56902431495514,
+        "p95": 95.61877532844949,
+        "max": 95.61877532844949
+      },
+      "old_checker_error": "candidate samples outside fixed valid detector region"
+    }
+  ],
+  "focused_collection": {
+    "count": 13,
+    "tests": [
+      "test_analytic_translation_rows",
+      "test_counting_receipt_and_affine_intensity",
+      "test_finite_outside_cli_is_characterization_not_input_error",
+      "test_finite_outside_runtime_and_star_keep_metrics",
+      "test_inverse_and_negation_mutant",
+      "test_native_convergence_beats_rounded_rmsd",
+      "test_oversampled_synthesis_closure",
+      "test_paired_seed_statistics",
+      "test_polynomial_representation",
+      "test_refuse_incomplete_census",
+      "test_runtime_polynomial_nonsquare",
+      "test_summary_counts_finite_outside_characterization",
+      "test_truth_metrics_kill_sign_axis_units_time"
+    ]
+  },
+  "native_execution": "UNRUN; no estimator/build/GPU/remote command launched",
+  "status": "PASS"
+}

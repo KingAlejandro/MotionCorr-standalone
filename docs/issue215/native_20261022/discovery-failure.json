@@ -1,0 +1,21 @@
+{
+  "command": [
+    "ssh",
+    "-J",
+    "ccp4-gateway",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "-o",
+    "ConnectionAttempts=1",
+    "4GPUs",
+    "taskset -c 8-9 bash -s"
+  ],
+  "exit": 1,
+  "phase": "Initial read-only toolchain discovery, before source transfer/build/native launch",
+  "stdout": "4-gpu-vm\n/usr/bin/python3\n/usr/bin/python3\n",
+  "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'numpy'\n",
+  "resolution": "Discovered and verified /home/alex/.mc-venv/bin/python3 with NumPy 2.5.3. No software installation or shared environment modification.",
+  "native_status": "UNRUN at this point"
+}

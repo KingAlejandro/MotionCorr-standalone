@@ -1,0 +1,147 @@
+{
+ "unbounded_child_wait": {
+  "only": [
+   "K25b"
+  ],
+  "replace": [
+   [
+    "try: p.wait(timeout=self.a.cleanup_grace)\n            except subprocess.TimeoutExpired: cleanup_errors.append(f'job root {p.pid} not reaped')",
+    "p.wait()"
+   ]
+  ]
+ },
+ "untyped_query_spawn": {
+  "only": [
+   "K27"
+  ],
+  "replace": [
+   [
+    "        try:\n            p = subprocess.Popen(self.cmd + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)\n        except OSError as e:\n            raise QueryError('QUERY_SPAWN_FAILED', f'{args[0]}: {e!r}')\n",
+    "        p = subprocess.Popen(self.cmd + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)\n"
+   ]
+  ]
+ },
+ "census_raises": {
+  "only": [
+   "K28"
+  ],
+  "replace": [
+   [
+    "                try:\n                    r = json.loads((d / 'RUN.json').read_text())\n                    s = r['status'] if r['status'] != 'EXITED' else ('EXITED' if r['exit'] == 0 else 'EXITED_NONZERO')\n                except Exception:\n                    s = 'UNREADABLE_RUN_JSON'\n",
+    "                r = json.loads((d / 'RUN.json').read_text())\n                s = r['status'] if r['status'] != 'EXITED' else ('EXITED' if r['exit'] == 0 else 'EXITED_NONZERO')\n"
+   ]
+  ]
+ },
+ "release_with_unreaped_query": {
+  "only": [
+   "K29"
+  ],
+  "replace": [
+   [
+    "        if unreaped:\n            # Contract rule 1/4",
+    "        if False:\n            # Contract rule 1/4"
+   ]
+  ]
+ },
+ "initial_branch_root_signal_removed": {
+  "only": [
+   "K25a"
+  ],
+  "replace": [
+   [
+    "        signal_job_group(root, grace, signalled, own.table)  # site: initial-refresh branch\n",
+    ""
+   ]
+  ]
+ },
+ "loop_branch_root_signal_removed": {
+  "only": [
+   "K25c"
+  ],
+  "replace": [
+   [
+    "            signal_job_group(root, grace, signalled, own.table)  # site: in-loop refresh branch\n",
+    ""
+   ]
+  ]
+ },
+ "errors_branch_root_signal_removed": {
+  "only": [
+   "K14R"
+  ],
+  "replace": [
+   [
+    "        signal_job_group(root, grace, signalled, own.table)  # site: observer-errors branch\n",
+    ""
+   ]
+  ]
+ },
+ "root_only_no_group": {
+  "only": [
+   "K25W"
+  ],
+  "replace": [
+   [
+    "os.killpg(root.pid, signum); signalled.append([int(signum), 'root-group', root.pid, campaign.utc()])",
+    "root.send_signal(signum); signalled.append([int(signum), 'root', root.pid, campaign.utc()])"
+   ]
+  ]
+ },
+ "unguarded_hold_receipt": {
+  "only": [
+   "K31a",
+   "K31b"
+  ],
+  "replace": [
+   [
+    "        self.holding = True\n",
+    "        self.holding = True\n        _atomic_write(self.runs / \"unguarded-hold.json\", \"hold\")\n"
+   ]
+  ]
+ },
+ "record_write_unchecked": {
+  "only": [
+   "K31c"
+  ],
+  "replace": [
+   [
+    "        if not written: return rec, 'RECORD_WRITE'",
+    "        if not written: return rec, 'OK'"
+   ]
+  ]
+ },
+ "jobstage_before_cleanup": {
+  "only": [
+   "K32",
+   "K32W"
+  ],
+  "replace": [
+   [
+    "        if cleanup_failed: return rec, 'CLEANUP_FAILED'  # outranks every other outcome (R4-4)",
+    "        if rec.get('outputs_error') or rec.get('dc_witness_error'): return rec, 'JOB_STAGE'\n        if cleanup_failed: return rec, 'CLEANUP_FAILED'  # outranks every other outcome (R4-4)"
+   ]
+  ]
+ },
+ "no_activation_final": {
+  "only": [
+   "K34"
+  ],
+  "replace": [
+   [
+    "            self.receipt('FINAL', code=EXIT['RESOURCE'], census=self.census(q), reason='observer activation failed',\n                         final_gpu=None, final_error=None, final_problems=[])\n",
+    ""
+   ]
+  ]
+ },
+ "no_sighup_handler": {
+  "only": [
+   "K35a"
+  ],
+  "replace": [
+   [
+    "            for s in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP): signal.signal(s, lambda *_: self.cancel.set())",
+    "            for s in (signal.SIGTERM, signal.SIGINT): signal.signal(s, lambda *_: self.cancel.set())"
+   ]
+  ]
+ }
+}

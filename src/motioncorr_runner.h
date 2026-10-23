@@ -31,6 +31,7 @@
 #include <memory>
 #include <src/time.h>
 #include "src/output_writer.h"
+#include "src/quality_report.h"
 #include "src/metadata_table.h"
 #include "src/image.h"
 #include "src/micrograph_model.h"
@@ -366,6 +367,22 @@ private:
 	// not run() keeps the plain serial behaviour.
 	std::unique_ptr<OutputWriter> output_writer;
 	long int output_movie_index = -1;
+
+#ifdef MC_EXPERIMENTAL_QUALITY_REPORT
+	// Experimental #268 quality report: observation only. See
+	// docs/post_rc0/issue268_quality_prototype_20261023/DESIGN.md.
+	bool quality_report = false;
+	mcquality::RunIdentity quality_identity;
+	std::vector<mcquality::MovieQuality> quality_movies;  // indexed like fn_micrographs
+	std::vector<mcquality::SummaryEntry> quality_entries; // filled after the final drain
+	mcquality::MovieQuality *active_quality = nullptr;    // the movie being computed
+	// For each joint-membership occurrence (fn_ori_micrographs), the index of the
+	// fn_micrographs entry processed for it this run, or -1. Set by initialise().
+	std::vector<long> quality_ori_processed;
+	void beginQualityReport();
+	void writeQualitySidecars(const std::vector<char> &movie_failed);
+	void writeQualitySummary(const std::string &joint_state);
+#endif
 
 	// Hand one output product to the writer, or write it here when there is
 	// none. Products of one movie are written in submission order.

@@ -1,0 +1,20 @@
+{
+  "schema": "motioncorr-quality-summary-prototype/1",
+  "status": "experimental_unapproved",
+  "identity": {
+    "run_id": "1792714959720114-3339554-5a3af474",
+    "configured_source_revision": "2f43425340b7525e85288e7b35ee109dd3a4c3cc",
+    "configured_source_dirty": "false",
+    "binary_sha256": "9a9f1bfafaf1139bd115d2b753f05a3381c5d308b9a396967f688c0dc0b45e25",
+    "backend": "cpu",
+    "gpu_id": -1,
+    "options": {"max_iter": "1", "patch_x": "3", "patch_y": "3", "group_frames": "1", "bin_factor": "1", "bfactor": "150", "ccf_downsample": "0", "early_binning": "false", "interpolate_shifts": "false", "first_frame_sum": "1", "last_frame_sum": "5", "dose_weighting": "false", "skip_defect": "true", "threads": "1", "only_do_unfinished": "false"},
+    "argv": ["/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v2/motioncorr", "--i", "in/batch.star", "--o", "out/", "--use_own", "--j", "1", "--bin_factor", "1", "--seed", "1", "--skip_defect", "--save_noDW", "--first_frame_sum", "1", "--last_frame_sum", "5", "--skip_logfile", "--patch_x", "3", "--patch_y", "3", "--max_iter", "1", "--experimental_quality_report"]
+  },
+  "joint_output": {"state": "published", "path": "out/corrected_micrographs.star"},
+  "quality_evidence_complete": true,
+  "counts": {"movies": 1, "unknown_legacy": 0, "sidecar_write_failures": 0, "output_root_collisions": 0, "global_alignment": {"iteration_limit": 1}, "local_model": {"global_only": 1}, "publication": {"published": 1}},
+  "movies": [
+    {"movie": "in/integer.mrcs", "source": "this_run", "reason": null, "output_root_collision": false, "sidecar": {"path": "out/in/integer.quality.json", "sha256": "94c2770e30eb46ae39fbfdba4fad9d45a5d2c1aff987f30d45beccd0e245654e", "write_failed": false, "write_error": null}, "global_alignment": "iteration_limit", "local_model": "global_only", "publication": "published"}
+  ]
+}

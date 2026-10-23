@@ -1,0 +1,28 @@
+in: /mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/src-base/src/image.h, line 463
+ERROR: 
+Image::openFile cannot open: out/in/integer.mrc
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v0/motioncorr(+0x523f7) [0x5779325123f7]
+/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v0/motioncorr(+0x7d9fc) [0x57793253d9fc]
+/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v0/motioncorr(+0xfa959) [0x5779325ba959]
+/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v0/motioncorr(+0x131679) [0x5779325f1679]
+/lib/x86_64-linux-gnu/libstdc++.so.6(+0xecdb4) [0x7b2b830ecdb4]
+/lib/x86_64-linux-gnu/libc.so.6(+0x9cb84) [0x7b2b82c9cb84]
+/lib/x86_64-linux-gnu/libc.so.6(+0x129ecc) [0x7b2b82d29ecc]
+==================
+ERROR: 
+Image::openFile cannot open: out/in/integer.mrc
+Continuing with the remaining movies.
+in: /mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/src-base/src/motioncorr_runner.cpp, line 1094
+ERROR: 
+Motion correction failed for 1 movie(s): in/integer.mrcs. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v0/motioncorr(+0x523f7) [0x5779325123f7]
+/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v0/motioncorr(+0x2911f) [0x5779324e911f]
+/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v0/motioncorr(+0x48366) [0x577932508366]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7b2b82c2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7b2b82c2a28b]
+/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v0/motioncorr(+0x48915) [0x577932508915]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): in/integer.mrcs. Successful per-movie outputs were retained; joint output was not generated.

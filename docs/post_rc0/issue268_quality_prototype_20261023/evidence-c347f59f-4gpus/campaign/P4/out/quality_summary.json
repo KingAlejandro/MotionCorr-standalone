@@ -1,0 +1,25 @@
+{
+  "schema": "motioncorr-quality-summary-prototype/0",
+  "status": "experimental_unapproved",
+  "identity": {
+    "run_id": "1792712230814861-3327546-76e83bd1",
+    "configured_source_revision": "c347f59f25a2148642130136c6462491c8db36d1",
+    "configured_source_dirty": "false",
+    "binary_sha256": "3693e2e9691052dc981b1c8f5ae9f1185ef48616fead31a1b75bac61a1fc065a",
+    "backend": "cpu",
+    "gpu_id": -1,
+    "options": {"max_iter": "5", "tolerance_px": "0.5", "search_range_px": "50", "patch_x": "3", "patch_y": "3", "group_frames": "1", "bin_factor": "1", "bfactor": "150", "ccf_downsample": "0", "early_binning": "false", "interpolate_shifts": "false", "first_frame_sum": "1", "last_frame_sum": "5", "dose_weighting": "false", "skip_defect": "true", "threads": "1", "only_do_unfinished": "false"},
+    "argv": ["/mnt/clathrin/alex-motioncorr-q268-quality-20261023-c347f59f/build-b2/motioncorr", "--i", "in/batch.star", "--o", "out/", "--use_own", "--j", "1", "--bin_factor", "1", "--seed", "1", "--skip_defect", "--save_noDW", "--first_frame_sum", "1", "--last_frame_sum", "5", "--skip_logfile", "--patch_x", "3", "--patch_y", "3", "--experimental_quality_report"]
+  },
+  "joint_output": {"state": "published", "path": "out/corrected_micrographs.star"},
+  "quality_evidence_complete": true,
+  "counts": {"movies": 6, "unknown_legacy": 0, "sidecar_write_failures": 0, "global_alignment": {"converged": 3, "iteration_limit": 3}, "local_model": {"retained": 6}, "publication": {"published": 6}},
+  "movies": [
+    {"movie": "in/zero.mrcs", "source": "this_run", "reason": null, "sidecar": {"path": "out/in/zero.quality.json", "sha256": "9ec12c72772a792bbf82cbe7d634f511202fc89ecae35c604e7cec13346ca8aa", "write_failed": false, "write_error": null}, "global_alignment": "converged", "local_model": "retained", "publication": "published"},
+    {"movie": "in/integer.mrcs", "source": "this_run", "reason": null, "sidecar": {"path": "out/in/integer.quality.json", "sha256": "cc8dd4fe5e6556d367829e4c995915da0204014485a52d9c3ea4c3ef7e9d27ad", "write_failed": false, "write_error": null}, "global_alignment": "iteration_limit", "local_model": "retained", "publication": "published"},
+    {"movie": "in/fractional.mrcs", "source": "this_run", "reason": null, "sidecar": {"path": "out/in/fractional.quality.json", "sha256": "aebe4f4e34d43709f5983aa1d41347de49188db2b4fee2bb04af3effc40398fd", "write_failed": false, "write_error": null}, "global_alignment": "iteration_limit", "local_model": "retained", "publication": "published"},
+    {"movie": "in/affine.mrcs", "source": "this_run", "reason": null, "sidecar": {"path": "out/in/affine.quality.json", "sha256": "7c3c554e02798625f299a8874f889ffa0176d586762931e8ba808651f800b263", "write_failed": false, "write_error": null}, "global_alignment": "converged", "local_model": "retained", "publication": "published"},
+    {"movie": "in/flat.mrcs", "source": "this_run", "reason": null, "sidecar": {"path": "out/in/flat.quality.json", "sha256": "fbf688eb31f34a2277ae869d6cf81c765fc83501f59e48eaa1ce33d6523bbca6", "write_failed": false, "write_error": null}, "global_alignment": "converged", "local_model": "retained", "publication": "published"},
+    {"movie": "in/noisy.mrcs", "source": "this_run", "reason": null, "sidecar": {"path": "out/in/noisy.quality.json", "sha256": "cf71774ee56a4cf67be51b890e31758ea5ed93242f3b0d9a8dc1a5b61a71faa2", "write_failed": false, "write_error": null}, "global_alignment": "iteration_limit", "local_model": "retained", "publication": "published"}
+  ]
+}

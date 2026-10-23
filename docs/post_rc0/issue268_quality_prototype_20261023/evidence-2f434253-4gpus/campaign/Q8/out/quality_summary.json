@@ -1,0 +1,21 @@
+{
+  "schema": "motioncorr-quality-summary-prototype/1",
+  "status": "experimental_unapproved",
+  "identity": {
+    "run_id": "1792714958746622-3339528-50cba8b0",
+    "configured_source_revision": "2f43425340b7525e85288e7b35ee109dd3a4c3cc",
+    "configured_source_dirty": "false",
+    "binary_sha256": "9a9f1bfafaf1139bd115d2b753f05a3381c5d308b9a396967f688c0dc0b45e25",
+    "backend": "cpu",
+    "gpu_id": -1,
+    "options": {"max_iter": "5", "patch_x": "1", "patch_y": "1", "group_frames": "1", "bin_factor": "1", "bfactor": "150", "ccf_downsample": "0", "early_binning": "false", "interpolate_shifts": "false", "first_frame_sum": "1", "last_frame_sum": "5", "dose_weighting": "false", "skip_defect": "true", "threads": "1", "only_do_unfinished": "false"},
+    "argv": ["/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v2/motioncorr", "--i", "in/batch.star", "--o", "out/", "--use_own", "--j", "1", "--bin_factor", "1", "--seed", "1", "--skip_defect", "--save_noDW", "--first_frame_sum", "1", "--last_frame_sum", "5", "--skip_logfile", "--patch_x", "1", "--patch_y", "1", "--experimental_quality_report"]
+  },
+  "joint_output": {"state": "published", "path": "out/corrected_micrographs.star"},
+  "quality_evidence_complete": true,
+  "counts": {"movies": 2, "unknown_legacy": 0, "sidecar_write_failures": 0, "output_root_collisions": 0, "global_alignment": {"converged": 1, "iteration_limit": 1}, "local_model": {"not_requested": 2}, "publication": {"published": 2}},
+  "movies": [
+    {"movie": {"non_utf8_bytes_hex": "696e2f7a65726fe92e6d726373"}, "source": "this_run", "reason": null, "output_root_collision": false, "sidecar": {"path": {"non_utf8_bytes_hex": "6f75742f696e2f7a65726fe92e7175616c6974792e6a736f6e"}, "sha256": "837f7919d9cc87fb27bd8aca3ea0b2494a33558b307522f60d95eb00fca21a42", "write_failed": false, "write_error": null}, "global_alignment": "converged", "local_model": "not_requested", "publication": "published"},
+    {"movie": "in/zéro.mrcs", "source": "this_run", "reason": null, "output_root_collision": false, "sidecar": {"path": "out/in/zéro.quality.json", "sha256": "cac42701dec571997aa4199e4993bb4f7100ba78050d57b49f07002687cc0510", "write_failed": false, "write_error": null}, "global_alignment": "iteration_limit", "local_model": "not_requested", "publication": "published"}
+  ]
+}

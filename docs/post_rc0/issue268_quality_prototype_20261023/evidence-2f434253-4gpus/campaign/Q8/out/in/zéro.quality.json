@@ -1,0 +1,23 @@
+{
+  "schema": "motioncorr-quality-prototype/1",
+  "status": "experimental_unapproved",
+  "identity": {
+    "run_id": "1792714958746622-3339528-50cba8b0",
+    "configured_source_revision": "2f43425340b7525e85288e7b35ee109dd3a4c3cc",
+    "configured_source_dirty": "false",
+    "binary_sha256": "9a9f1bfafaf1139bd115d2b753f05a3381c5d308b9a396967f688c0dc0b45e25",
+    "backend": "cpu",
+    "gpu_id": -1,
+    "options": {"max_iter": "5", "patch_x": "1", "patch_y": "1", "group_frames": "1", "bin_factor": "1", "bfactor": "150", "ccf_downsample": "0", "early_binning": "false", "interpolate_shifts": "false", "first_frame_sum": "1", "last_frame_sum": "5", "dose_weighting": "false", "skip_defect": "true", "threads": "1", "only_do_unfinished": "false"},
+    "argv": ["/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v2/motioncorr", "--i", "in/batch.star", "--o", "out/", "--use_own", "--j", "1", "--bin_factor", "1", "--seed", "1", "--skip_defect", "--save_noDW", "--first_frame_sum", "1", "--last_frame_sum", "5", "--skip_logfile", "--patch_x", "1", "--patch_y", "1", "--experimental_quality_report"]
+  },
+  "movie": {"path": "in/zéro.mrcs", "bytes": 246784, "sha256": "faaa3f9eeb7f1a785f51f6ab62b23e21a02b93a24a81c46b83b41c0590bc0b31"},
+  "products": {"star": {"path": "out/in/zéro.star", "sha256": "82f8465a59349d17d162410d1943d5dc4877d3c215fce30e0e8e64e62ec768cd"}, "micrograph": {"path": "out/in/zéro.mrc", "sha256": "0e27957bfb245894aa886ee05b6d26aa4a274c9737cd6153e2c20840a39a7bbd"}},
+  "global_alignment": {"state": "iteration_limit", "route": "cpu", "iterations": 5, "final_incremental_rmsd_px": 0.92323497106174612, "converged": false, "max_iter": 5, "tolerance_px": 0.5, "solver_returned": false},
+  "local_alignment": {"state": "not_requested", "patches_planned": 0, "patches_recorded": 0, "solver_attempts": 0, "same_input_retries": 0, "device_preparation_declined": 0, "converged_patches": 0, "dropped_patches": 0, "interrupted_patches": 0,
+    "patches": []},
+  "local_model": {"state": "not_requested", "reason": "patch_grid_below_3x3", "observations": null, "min_observations_exclusive": null, "largest_delta_px": null, "distortion_limit_px": null, "fit_rmsd_x_px": null, "fit_rmsd_y_px": null, "fit_rmsd_limit_px": null},
+  "motion_identifiability": "not_assessed",
+  "peak_validity": "not_assessed",
+  "publication": {"state": "published", "reason": null}
+}

@@ -1,0 +1,34 @@
+Working on in/integer.mrcs with 1 thread(s).
+
+Movie size: X = 128 Y = 96 N = 5
+Frames to be used: 1 2 3 4 5
+Frame grouping: n_frames = 5, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 
+interpolate_shifts = 0
+
+
+Global alignment:
+ Iteration 1: RMSD = 5.71299 px
+ Iteration 2: RMSD = 0.867494 px
+ Iteration 3: RMSD = 0.57658 px
+ Iteration 4: RMSD = 0.974519 px
+ Iteration 5: RMSD = 0.923235 px
+
+Local alignments:
+Patches: X = 1 Y = 1
+Too few patches to do local alignments. Local alignment is skipped.
+Summing frames before dose weighting: ..... done
+Written aligned but non-dose weighted sum to out/in/integer.mrc
+Full movie wall time: 0.004 s
+ERROR: === Backtrace  ===
+/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v0/motioncorr(+0x523f7) [0x5779325123f7]
+/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v0/motioncorr(+0x7d9fc) [0x57793253d9fc]
+/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v0/motioncorr(+0xfa959) [0x5779325ba959]
+/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v0/motioncorr(+0x131679) [0x5779325f1679]
+/lib/x86_64-linux-gnu/libstdc++.so.6(+0xecdb4) [0x7b2b830ecdb4]
+/lib/x86_64-linux-gnu/libc.so.6(+0x9cb84) [0x7b2b82c9cb84]
+/lib/x86_64-linux-gnu/libc.so.6(+0x129ecc) [0x7b2b82d29ecc]
+==================
+ERROR: 
+Image::openFile cannot open: out/in/integer.mrc
+

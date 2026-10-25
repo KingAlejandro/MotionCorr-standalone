@@ -1,0 +1,80 @@
+{
+ "invalid": [],
+ "problems": [],
+ "rows": {
+  "zero": {
+   "c1_equals_same_host_F": true,
+   "checker_status": "PASS",
+   "checker_exit": 0,
+   "sampling_status": "VALID",
+   "field_gate": "PASS",
+   "field_equals_published_cross_host": true,
+   "checker_status_published": "PASS"
+  },
+  "integer": {
+   "c1_equals_same_host_F": true,
+   "checker_status": "FAIL",
+   "checker_exit": 1,
+   "sampling_status": "VALID",
+   "field_gate": "FAIL",
+   "field_equals_published_cross_host": true,
+   "checker_status_published": "FAIL"
+  },
+  "fractional": {
+   "c1_equals_same_host_F": true,
+   "checker_status": "FAIL",
+   "checker_exit": 1,
+   "sampling_status": "VALID",
+   "field_gate": "FAIL",
+   "field_equals_published_cross_host": true,
+   "checker_status_published": "FAIL"
+  },
+  "affine": {
+   "c1_equals_same_host_F": true,
+   "checker_status": "FAIL",
+   "checker_exit": 1,
+   "sampling_status": "VALID",
+   "field_gate": "FAIL",
+   "field_equals_published_cross_host": true,
+   "checker_status_published": "FAIL"
+  },
+  "pedestal": {
+   "c1_equals_same_host_F": true,
+   "checker_status": "FAIL",
+   "checker_exit": 1,
+   "sampling_status": "VALID",
+   "field_gate": "FAIL",
+   "field_equals_published_cross_host": true,
+   "checker_status_published": "FAIL"
+  },
+  "noisy": {
+   "c1_equals_same_host_F": true,
+   "checker_status": "FAIL",
+   "checker_exit": 1,
+   "sampling_status": "OUTSIDE_FIXED_ROI",
+   "field_gate": "FAIL",
+   "field_equals_published_cross_host": true,
+   "checker_status_published": "ABORT_NO_RESULT"
+  },
+  "flat": {
+   "c1_equals_same_host_F": true,
+   "checker_status": "UNIDENTIFIABLE",
+   "checker_exit": 0,
+   "sampling_status": "VALID",
+   "field_gate": "FAIL",
+   "field_equals_published_cross_host": true,
+   "checker_status_published": "UNIDENTIFIABLE"
+  },
+  "repeated": {
+   "c1_equals_same_host_F": true,
+   "checker_status": "UNIDENTIFIABLE",
+   "checker_exit": 1,
+   "sampling_status": "OUTSIDE_FIXED_ROI",
+   "field_gate": "FAIL",
+   "field_equals_published_cross_host": true,
+   "checker_status_published": "ABORT_NO_RESULT"
+  }
+ },
+ "scope": "K267 field metrics and checker statuses only (no image block, no signal metrics); FAIL and UNIDENTIFIABLE are valid outcomes recorded as evidence",
+ "note": "published values are cross-host and informational; no gate or tolerance applied"
+}

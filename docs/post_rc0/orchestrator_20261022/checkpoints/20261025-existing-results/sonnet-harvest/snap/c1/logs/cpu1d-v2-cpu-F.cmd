@@ -1,0 +1,1 @@
+/home/alex/.mc-venv/bin/python3 -I /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_run_v2_cases.py /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/v2 cpuF-unset cpu /mnt/clathrin/alex-motioncorr-rc0/W-QF/build-cpu/motioncorr unset 8-9 

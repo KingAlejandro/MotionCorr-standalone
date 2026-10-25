@@ -1,0 +1,26 @@
+{
+ "cmd": [
+  "/home/alex/.mc-venv/bin/python3",
+  "-I",
+  "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/docs/issue85_laneC/compare_output_trees.py",
+  "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24/F-cpu-G/out",
+  "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-cpu1d/c1-cpu-G/out",
+  "--manifest",
+  "/mnt/clathrin/alex-motioncorr-rc0/W-QF/multigpu/G/manifest.json",
+  "--input-star",
+  "/home/alex/motioncorr-validation-20261011-vm/tutorial-data/movies.star",
+  "--products-only",
+  "--json-out",
+  "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-cpu1d/compare/F-cpu_vs_c1-cpu-G.json"
+ ],
+ "rc": 0,
+ "stdout": "Validated 24 movies, 24 MRC images, 25 STAR files, 341735520 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+ "stderr": "",
+ "base": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24/F-cpu-G/out",
+ "candidate": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-cpu1d/c1-cpu-G/out",
+ "manifest": "/mnt/clathrin/alex-motioncorr-rc0/W-QF/multigpu/G/manifest.json",
+ "manifest_sha256": "5e8e566b48199ee30515cf8a82b1d47d415dfe5358d5fd3f295f9e7054c2dde0",
+ "input_star_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041",
+ "comparator_sha256": "67fe718f8861ff2756e6f8d8e9f11b765cb3eacfe6336d8e199dc799662259d9",
+ "report_sha256": "2c0f7c88fef5fc7b2070df1273032220f38a8c1a50c6a72ea5980f0e40e71faf"
+}

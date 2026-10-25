@@ -1,0 +1,784 @@
+--- review-baseline/consume_w4_cpu_observations.py
++++ consume_w4_cpu_observations.py
+@@ -8,6 +8,8 @@
+ import hashlib
+ import json
+ import math
++import os
++import platform
+ import re
+ import sys
+ from pathlib import Path
+@@ -17,12 +19,24 @@
+ ROOT = Path(__file__).resolve().parent
+ INPUTS = ROOT / "inputs"
+ MANIFEST = ROOT / "input-manifest.json"
++OUTPUT = ROOT / "cpu-observations.json"
+ EXPECTED_SELECTORS = {(y, x) for y in range(1, 4) for x in range(1, 4)}
+ CENTRES = {(1, 1): (20, 15), (1, 2): (62, 15), (1, 3): (104, 15),
+            (2, 1): (20, 47), (2, 2): (62, 47), (2, 3): (104, 47),
+            (3, 1): (20, 79), (3, 2): (62, 79), (3, 3): (104, 79)}
+ NX, NY, NF = 128, 96, 5
+ ROI = (12, 84, 12, 116)  # y0:y1, x0:x1
++STRUCTURAL_TEST_MODE = "--structural-test" in sys.argv[1:]
++PINNED_PROVENANCE = {
++    "inputs/provenance/file-index.json": "31255dab8eef81ee05f68271ac665429db9a48498b240fbe85ebe228ea3c65c3",
++    "inputs/provenance/w4-control21-collection.json": "1c00e50547ffa97b0f6a6b3b8b126cfc35929edd2b7d976f8c3d9ba680476e79",
++    "inputs/provenance/RESULT-v2-original-FAIL.json": "87a7d15eccd068ea500f1d492bc628f140c6acbb13ccfd137372e2a0cbf9871e",
++    "inputs/provenance/RESULT-v3-remaining7.json": "897e54dbdeb09fe44fb2fcf5ec1675ad1abf9220cf5340b963b58f0fdb13fdb0",
++    "inputs/provenance/PROTOCOL-v3-remaining7.json": "cd931a88cb194dc24a7ed2cdcaa6827f89f71c70526dbe2e8ce1ebb9e45d4e3d",
++    "inputs/provenance/SELECTOR11-v3-REGRADE.json": "2804699f28210e4d3b68a89c3cb64aa1da0d41481c32c748c1a6f567dc8ba690",
++    "inputs/affine_patch_oracle.py": "fc3f11b6b5d89d4643eb4925cdbcb480e57dea36913656ac9d1569360ed44d31",
++    "inputs/w4_allpatch_decomposition_v2.py": "8ac6a8f9a0ccf9ede6b2507a4a5ccc657263fcd3553e2c7cb53ee57b522c8df6",
++}
+ 
+ 
+ def unique_object(pairs):
+@@ -51,6 +65,145 @@
+     if pin is None or len(raw) != pin["bytes"] or sha256(raw) != pin["sha256"]:
+         fail("input pin mismatch " + str(rel))
+     return raw
++
++
++def source_after_iterations(source_files, source_kind):
++    prefix = "runs/cpu-affine-on/capture/" if source_kind == "original-index" else "capture/"
++    return sorted({
++        int(match.group(1)) for path in source_files
++        if path.startswith(prefix)
++        and (match := re.search(r"(?:^|/)c2-i(\d+)-after\.bin$", path))
++    })
++
++
++def verify_source_pins(manifest, pins):
++    raw_by_path = {rel: checked_bytes(rel, pins) for rel in PINNED_PROVENANCE}
++    for rel, expected_sha in PINNED_PROVENANCE.items():
++        if sha256(raw_by_path[rel]) != expected_sha:
++            fail("authoritative provenance pin mismatch " + rel)
++    identity = manifest.get("identity", {})
++    expected_identity = {
++        "original_index_sha256": PINNED_PROVENANCE["inputs/provenance/file-index.json"],
++        "selector_1_1_v2_result_sha256": PINNED_PROVENANCE["inputs/provenance/RESULT-v2-original-FAIL.json"],
++        "selector_1_1_v3_regrade_sha256": PINNED_PROVENANCE["inputs/provenance/SELECTOR11-v3-REGRADE.json"],
++        "v3_result_sha256": PINNED_PROVENANCE["inputs/provenance/RESULT-v3-remaining7.json"],
++        "v3_protocol_sha256": PINNED_PROVENANCE["inputs/provenance/PROTOCOL-v3-remaining7.json"],
++    }
++    for name, expected in expected_identity.items():
++        if identity.get(name) != expected:
++            fail("input manifest lineage identity mismatch " + name)
++
++    def load_json(rel):
++        return json.loads(raw_by_path[rel], object_pairs_hook=unique_object)
++
++    original_index = load_json("inputs/provenance/file-index.json").get("files")
++    receipt = load_json("inputs/provenance/w4-control21-collection.json")
++    if not isinstance(original_index, dict):
++        fail("original file index lacks files map")
++    if receipt.get("files") != 94 or receipt.get("all_hashes_verified") is not True or receipt.get("native_jobs") != 0:
++        fail("original selector 2,1 collection receipt identity mismatch")
++    receipt_inputs = receipt.get("inputs")
++    if not isinstance(receipt_inputs, dict) or len(receipt_inputs) != 94:
++        fail("original collection receipt must bind exactly 94 files")
++    for rel, record in receipt_inputs.items():
++        if original_index.get(rel) != record:
++            fail("original collection receipt disagrees with source index at " + rel)
++
++    result_v2 = load_json("inputs/provenance/RESULT-v2-original-FAIL.json")
++    result_v3 = load_json("inputs/provenance/RESULT-v3-remaining7.json")
++    protocol_v3 = load_json("inputs/provenance/PROTOCOL-v3-remaining7.json")
++    regrade = load_json("inputs/provenance/SELECTOR11-v3-REGRADE.json")
++    if result_v2.get("status") != "FAIL" or len(result_v2.get("launches", [])) != 1:
++        fail("historical selector 1,1 FAIL record identity mismatch")
++    if result_v2["launches"][0].get("selector") != [1, 1]:
++        fail("historical v2 result does not identify selector 1,1")
++    old_neutrality = result_v2["launches"][0].get("neutrality", {})
++    if old_neutrality.get("affine.log") is not False or any(
++            value is not True for name, value in old_neutrality.items() if name != "affine.log"):
++        fail("historical v2 FAIL is not isolated to the retained affine.log mismatch")
++    expected_v3 = {(1, 2), (1, 3), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)}
++    v3_launches = result_v3.get("launches", [])
++    v3_pairs = {tuple(x.get("selector", [])) for x in v3_launches}
++    if result_v3.get("status") != "PASS" or len(v3_launches) != 7 or v3_pairs != expected_v3:
++        fail("pinned v3 result is not the seven remaining selector collection")
++    if result_v3.get("protocol_sha256") != PINNED_PROVENANCE["inputs/provenance/PROTOCOL-v3-remaining7.json"]:
++        fail("v3 result protocol ancestry mismatch")
++    protocol_pairs = {tuple(x) for x in protocol_v3.get("selectors", [])}
++    if protocol_pairs != expected_v3:
++        fail("pinned v3 protocol selector set mismatch")
++    if regrade.get("schema") != "w4-existing-selector-version3-regrade/1" or regrade.get("selector") != [1, 1]:
++        fail("pinned selector 1,1 regrade identity mismatch")
++    if regrade.get("verdict") != "PASS_VERSION3_REUSE_ONLY" or regrade.get("historical_v2_campaign_status") != "FAIL_UNCHANGED":
++        fail("selector 1,1 regrade does not preserve historical FAIL")
++    if regrade.get("new_native_launches") != 0 or not regrade.get("checks") or any(
++            value is not True for value in regrade["checks"].values()):
++        fail("selector 1,1 regrade is not a complete zero-launch reuse review")
++    if regrade.get("original_result_sha256") != PINNED_PROVENANCE["inputs/provenance/RESULT-v2-original-FAIL.json"]:
++        fail("selector 1,1 regrade does not name the pinned v2 FAIL result")
++    if regrade.get("protocol_sha256") != PINNED_PROVENANCE["inputs/provenance/PROTOCOL-v3-remaining7.json"]:
++        fail("selector 1,1 regrade protocol ancestry mismatch")
++
++    launch_by_selector = {
++        tuple(result_v2["launches"][0]["selector"]): result_v2["launches"][0],
++        **{tuple(x["selector"]): x for x in v3_launches},
++    }
++    for key, selector_record in manifest.get("selectors", {}).items():
++        y, x = map(int, key.split(","))
++        selector = (y, x)
++        source_kind = None
++        source_files = None
++        for entry in selector_record.get("entries", []):
++            source = entry.get("source_pin", {})
++            candidate = source.get("record")
++            if candidate == "original-index" and selector == (2, 1):
++                source_kind, source_files = candidate, original_index
++                break
++            if candidate == "v2-result" and selector == (1, 1):
++                source_kind = candidate
++                source_files = launch_by_selector[selector].get("files", {})
++                break
++            if candidate == "v3-result" and selector in expected_v3:
++                source_kind = candidate
++                source_files = launch_by_selector[selector].get("files", {})
++                break
++        if source_files is None:
++            fail("selector iteration inventory has no authoritative source " + key)
++        authoritative_iterations = source_after_iterations(source_files, source_kind)
++        if selector_record.get("available_iterations") != authoritative_iterations:
++            fail("captured iteration inventory disagrees with authoritative source " + key)
++        for entry in selector_record.get("entries", []):
++            source = entry.get("source_pin", {})
++            source_record = source.get("record")
++            source_path = source.get("path")
++            if source_record == "original-index" and selector == (2, 1):
++                record = original_index.get(source_path)
++            elif source_record == "v2-result" and selector == (1, 1):
++                record = launch_by_selector[selector].get("files", {}).get(source_path)
++            elif source_record == "v3-result" and selector in expected_v3:
++                record = launch_by_selector[selector].get("files", {}).get(source_path)
++            else:
++                fail("selector source-pin ancestry mismatch " + key)
++            if not record or record.get("bytes") != entry.get("bytes") or record.get("sha256") != entry.get("sha256"):
++                fail("capture byte pin disagrees with authoritative source record " + entry["path"])
++
++    # Runtime state/output pins are independently represented in the original #275
++    # index and the exact frozen v3 result identities; require both to agree.
++    final_identities = result_v3.get("final_identities", {})
++    runtime_bindings = {
++        "state/model.txt": "runs/cpu-affine-on/state/model.txt",
++        "state/global.txt": "runs/cpu-affine-on/state/global.txt",
++        "out/affine.star": "runs/cpu-affine-on/out/affine.star",
++        "out/affine.log": "runs/cpu-affine-on/out/affine.log",
++    }
++    for local_rel, source_rel in runtime_bindings.items():
++        local = "inputs/runtime/" + local_rel
++        pin = pins[local]
++        indexed = original_index.get(source_rel)
++        result_pinned = final_identities.get(source_rel)
++        if not indexed or indexed.get("bytes") != pin["bytes"] or indexed.get("sha256") != pin["sha256"]:
++            fail("runtime input disagrees with original file index " + source_rel)
++        if result_pinned != pin["sha256"]:
++            fail("runtime input disagrees with pinned v3 result identity " + source_rel)
+ 
+ 
+ def parse_numeric_rows(path, count, fields):
+@@ -104,6 +257,14 @@
+             fail("malformed STAR local shift value")
+         if not all(math.isfinite(v) for v in row.values()):
+             fail("nonfinite STAR local shift value")
++        fval, xval, yval = (row["_rlnMicrographFrameNumber"], row["_rlnCoordinateX"], row["_rlnCoordinateY"])
++        if not all(v.is_integer() for v in (fval, xval, yval)):
++            fail("STAR frame/coordinates must be integer logged centres")
++        frame, coord = int(fval), (int(xval), int(yval))
++        if coord not in set(CENTRES.values()):
++            fail(f"unknown STAR patch centre {coord}")
++        if frame not in range(1, NF + 1):
++            fail(f"unknown STAR frame {frame} for centre {coord}")
+         records.append(row)
+     if not records:
+         fail("missing STAR data_local_shift observations")
+@@ -118,6 +279,15 @@
+ 
+ 
+ def main():
++    unexpected = [arg for arg in sys.argv[1:] if arg != "--structural-test"]
++    if unexpected:
++        fail("unexpected arguments: " + " ".join(unexpected))
++    if STRUCTURAL_TEST_MODE and os.environ.get("MOTIONCORR_W4_STRUCTURAL_TEST_MODE") != "1":
++        fail("--structural-test requires the dedicated structural-control environment")
++    if not STRUCTURAL_TEST_MODE and len(sys.argv) != 1:
++        fail("invalid execution mode")
++    if OUTPUT.exists():
++        fail("refusing to overwrite existing output " + str(OUTPUT))
+     manifest = json.loads(MANIFEST.read_text(), object_pairs_hook=unique_object)
+     if manifest.get("schema") != "w4-allpatch-cpu-observations-inputs/1":
+         fail("unknown input manifest schema")
+@@ -126,6 +296,8 @@
+         fail("duplicate manifest path")
+     for rel in sorted(pins):
+         checked_bytes(rel, pins)
++    if not STRUCTURAL_TEST_MODE:
++        verify_source_pins(manifest, pins)
+     selectors = manifest.get("selectors", {})
+     parsed = []
+     for key, selector_record in selectors.items():
+@@ -189,12 +361,17 @@
+         frame = int(fval)
+         # STAR frame numbering is 1-based; local coordinates are the logged centres.
+         coord = (int(xval), int(yval))
+-        if coord not in set(CENTRES.values()):
+-            continue
+         k = (coord, frame)
+         if k in retained:
+             fail(f"duplicate STAR selector/frame {k}")
+         retained[k] = (r["_rlnMicrographShiftX"], r["_rlnMicrographShiftY"])
++    expected_star_keys = {(centre, frame) for centre in CENTRES.values() for frame in range(1, NF + 1)}
++    if len(star_rows) != 45 or len(retained) != 45 or set(retained) != expected_star_keys:
++        missing = sorted(expected_star_keys - set(retained))
++        extra = sorted(set(retained) - expected_star_keys)
++        fail(f"STAR coverage must be exactly 45 centre/frame rows; missing={missing}, extra={extra}")
++    if STRUCTURAL_TEST_MODE:
++        raise SystemExit("STRUCTURAL_PREFLIGHT_REACHED")
+     max_star_delta = 0.0
+     for X, Y, z, sx, sy in obs:
+         k = ((int(X), int(Y)), int(round(z + 0.5)))
+@@ -246,13 +423,18 @@
+         "fit_residual_sum_squares_y": float(residual_y[0]) if len(residual_y) else 0.0,
+         "fixed_roi_runtime_field_max_vector_error_px": max_vector_error,
+         "fixed_roi_arithmetic_control_limit_px": 1e-10,
+-        "runtime_truth_limits_angstrom": {"global": 0.20, "local": 0.40, "combined": 0.80},
+-        "runtime_truth_limits_status": "UNCHANGED_NOT_EVALUATED_HERE",
++        "runtime_and_star_field_error_limits_angstrom": {
++            "runtime": {"rms": 0.20, "p95": 0.40, "max": 0.80},
++            "star": {"rms": 0.20, "p95": 0.40, "max": 0.80},
++        },
++        "runtime_and_star_field_error_limits_status": "UNCHANGED_NOT_EVALUATED_HERE",
+         "input_manifest_sha256": sha256(MANIFEST.read_bytes()),
+     }
+     if max_vector_error > 1e-10:
+         fail(f"fixed ROI reconstructed-field arithmetic control exceeded: {max_vector_error:.12g} px")
+-    target = ROOT / "cpu-observations.json"
++    target = OUTPUT
++    if target.exists():
++        fail("refusing to overwrite existing output " + str(target))
+     target.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
+     print(json.dumps(report, indent=2, allow_nan=False))
+ 
+--- review-baseline/input-manifest.json
++++ input-manifest.json
+@@ -9,14 +9,22 @@
+           "source": "/tmp/motioncorr-20261025-parent/w4-control21-original/runs/cpu-affine-on/capture/c2.json",
+           "iteration": null,
+           "bytes": 126,
+-          "sha256": "8084bd76503c0dbf81145f053da658ac8d043a7636c149d35a2d0a912438b286"
++          "sha256": "8084bd76503c0dbf81145f053da658ac8d043a7636c149d35a2d0a912438b286",
++          "source_pin": {
++            "record": "original-index",
++            "path": "runs/cpu-affine-on/capture/c2.json"
++          }
+         },
+         {
+           "path": "inputs/patch-2-1/c2-i2-after.bin",
+           "source": "/tmp/motioncorr-20261025-parent/w4-control21-original/runs/cpu-affine-on/capture/c2-i2-after.bin",
+           "iteration": 2,
+           "bytes": 80,
+-          "sha256": "1a080cb7fd3e0c83656eb5d6c871446f658a5842aeb08b23951642acabff1c46"
++          "sha256": "1a080cb7fd3e0c83656eb5d6c871446f658a5842aeb08b23951642acabff1c46",
++          "source_pin": {
++            "record": "original-index",
++            "path": "runs/cpu-affine-on/capture/c2-i2-after.bin"
++          }
+         }
+       ],
+       "available_iterations": [
+@@ -32,14 +40,22 @@
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-collected/campaign/patch-1-1/capture/c2.json",
+           "iteration": null,
+           "bytes": 126,
+-          "sha256": "a6f6d28dcdbb060810faf1c616e00816e966db491c668540290407f32f86873e"
++          "sha256": "a6f6d28dcdbb060810faf1c616e00816e966db491c668540290407f32f86873e",
++          "source_pin": {
++            "record": "v2-result",
++            "path": "capture/c2.json"
++          }
+         },
+         {
+           "path": "inputs/patch-1-1/c2-i1-after.bin",
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-collected/campaign/patch-1-1/capture/c2-i1-after.bin",
+           "iteration": 1,
+           "bytes": 80,
+-          "sha256": "c5eea5c6120fa90cfa1df27ed7f04fb1422a6b04e9901fa44623b5a74ac8e6c4"
++          "sha256": "c5eea5c6120fa90cfa1df27ed7f04fb1422a6b04e9901fa44623b5a74ac8e6c4",
++          "source_pin": {
++            "record": "v2-result",
++            "path": "capture/c2-i1-after.bin"
++          }
+         }
+       ],
+       "available_iterations": [
+@@ -54,14 +70,22 @@
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-1-2/capture/c2.json",
+           "iteration": null,
+           "bytes": 126,
+-          "sha256": "dbc49d3195ceb28a0e4d2778ab45142a98ff95342ba110dd3eb9d7a72af19ef0"
++          "sha256": "dbc49d3195ceb28a0e4d2778ab45142a98ff95342ba110dd3eb9d7a72af19ef0",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2.json"
++          }
+         },
+         {
+           "path": "inputs/patch-1-2/c2-i1-after.bin",
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-1-2/capture/c2-i1-after.bin",
+           "iteration": 1,
+           "bytes": 80,
+-          "sha256": "2ba7dbc0cf92b9000cb2d2f124d347febdcb71fd67c4918c212ca9c3d84ec636"
++          "sha256": "2ba7dbc0cf92b9000cb2d2f124d347febdcb71fd67c4918c212ca9c3d84ec636",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2-i1-after.bin"
++          }
+         }
+       ],
+       "available_iterations": [
+@@ -76,14 +100,22 @@
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-1-3/capture/c2.json",
+           "iteration": null,
+           "bytes": 126,
+-          "sha256": "c54c943adbc24d108476889ea231a1d1c0bfb879121a4e993a8ecf41d9970cc3"
++          "sha256": "c54c943adbc24d108476889ea231a1d1c0bfb879121a4e993a8ecf41d9970cc3",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2.json"
++          }
+         },
+         {
+           "path": "inputs/patch-1-3/c2-i2-after.bin",
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-1-3/capture/c2-i2-after.bin",
+           "iteration": 2,
+           "bytes": 80,
+-          "sha256": "54554a4c3fda07c8ad54a10e171c0c78407ef353b78c85b96fe52d9e9e390f5b"
++          "sha256": "54554a4c3fda07c8ad54a10e171c0c78407ef353b78c85b96fe52d9e9e390f5b",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2-i2-after.bin"
++          }
+         }
+       ],
+       "available_iterations": [
+@@ -99,14 +131,22 @@
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-2-2/capture/c2.json",
+           "iteration": null,
+           "bytes": 126,
+-          "sha256": "b5e3f272260dcdd7d9042ef24f01625062582d91ad8fd9fcc64b9e68b21c4960"
++          "sha256": "b5e3f272260dcdd7d9042ef24f01625062582d91ad8fd9fcc64b9e68b21c4960",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2.json"
++          }
+         },
+         {
+           "path": "inputs/patch-2-2/c2-i1-after.bin",
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-2-2/capture/c2-i1-after.bin",
+           "iteration": 1,
+           "bytes": 80,
+-          "sha256": "3728d102b4965c5601e632fa6ee281beb478efbe181f37dc48cbea1b41a667aa"
++          "sha256": "3728d102b4965c5601e632fa6ee281beb478efbe181f37dc48cbea1b41a667aa",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2-i1-after.bin"
++          }
+         }
+       ],
+       "available_iterations": [
+@@ -121,14 +161,22 @@
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-2-3/capture/c2.json",
+           "iteration": null,
+           "bytes": 126,
+-          "sha256": "d17bb3208c75429a6a63aa06fdd853ea287bd1c825afe66e531b26892006b326"
++          "sha256": "d17bb3208c75429a6a63aa06fdd853ea287bd1c825afe66e531b26892006b326",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2.json"
++          }
+         },
+         {
+           "path": "inputs/patch-2-3/c2-i2-after.bin",
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-2-3/capture/c2-i2-after.bin",
+           "iteration": 2,
+           "bytes": 80,
+-          "sha256": "991041d7d337339783112aaaa5fc1bffdb3d05d6a65b7cc1af8f978ad3eae478"
++          "sha256": "991041d7d337339783112aaaa5fc1bffdb3d05d6a65b7cc1af8f978ad3eae478",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2-i2-after.bin"
++          }
+         }
+       ],
+       "available_iterations": [
+@@ -144,14 +192,22 @@
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-3-1/capture/c2.json",
+           "iteration": null,
+           "bytes": 126,
+-          "sha256": "d9eab9a0d3bb9b815cdd3f0f291748a2f192a39902238f7a169899e30b92e126"
++          "sha256": "d9eab9a0d3bb9b815cdd3f0f291748a2f192a39902238f7a169899e30b92e126",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2.json"
++          }
+         },
+         {
+           "path": "inputs/patch-3-1/c2-i2-after.bin",
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-3-1/capture/c2-i2-after.bin",
+           "iteration": 2,
+           "bytes": 80,
+-          "sha256": "9ff9dffd82537925bb7557a88fe6520c437787713db940f6c6708d1151067d84"
++          "sha256": "9ff9dffd82537925bb7557a88fe6520c437787713db940f6c6708d1151067d84",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2-i2-after.bin"
++          }
+         }
+       ],
+       "available_iterations": [
+@@ -167,14 +223,22 @@
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-3-2/capture/c2.json",
+           "iteration": null,
+           "bytes": 126,
+-          "sha256": "9077866834771be497f4ad17f524c9d903df619d5fee579d8662ce4dbb0adfdf"
++          "sha256": "9077866834771be497f4ad17f524c9d903df619d5fee579d8662ce4dbb0adfdf",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2.json"
++          }
+         },
+         {
+           "path": "inputs/patch-3-2/c2-i1-after.bin",
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-3-2/capture/c2-i1-after.bin",
+           "iteration": 1,
+           "bytes": 80,
+-          "sha256": "d771a230bb78fa25e86fc1e584bb35abeaa2c901fe59b1e607411447c6600ae0"
++          "sha256": "d771a230bb78fa25e86fc1e584bb35abeaa2c901fe59b1e607411447c6600ae0",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2-i1-after.bin"
++          }
+         }
+       ],
+       "available_iterations": [
+@@ -189,14 +253,22 @@
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-3-3/capture/c2.json",
+           "iteration": null,
+           "bytes": 126,
+-          "sha256": "ed71576705408e1dfd9d87de1087a8a5aed11cb993330185b9daf8f6e2e5979b"
++          "sha256": "ed71576705408e1dfd9d87de1087a8a5aed11cb993330185b9daf8f6e2e5979b",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2.json"
++          }
+         },
+         {
+           "path": "inputs/patch-3-3/c2-i1-after.bin",
+           "source": "/tmp/motioncorr-20261025-parent/w4-cpu-capture-v3-collected/campaign/patch-3-3/capture/c2-i1-after.bin",
+           "iteration": 1,
+           "bytes": 80,
+-          "sha256": "34b7b75b6e303b756661bb446f875d41d61f5f2a3f63ebb6f1435a2c24ba1659"
++          "sha256": "34b7b75b6e303b756661bb446f875d41d61f5f2a3f63ebb6f1435a2c24ba1659",
++          "source_pin": {
++            "record": "v3-result",
++            "path": "capture/c2-i1-after.bin"
++          }
+         }
+       ],
+       "available_iterations": [
+@@ -310,7 +382,17 @@
+       "sha256": "ed71576705408e1dfd9d87de1087a8a5aed11cb993330185b9daf8f6e2e5979b"
+     },
+     {
+-      "path": "inputs/provenance/RESULT.json",
++      "path": "inputs/provenance/PROTOCOL-v3-remaining7.json",
++      "bytes": 3600,
++      "sha256": "cd931a88cb194dc24a7ed2cdcaa6827f89f71c70526dbe2e8ce1ebb9e45d4e3d"
++    },
++    {
++      "path": "inputs/provenance/RESULT-v2-original-FAIL.json",
++      "bytes": 20873,
++      "sha256": "87a7d15eccd068ea500f1d492bc628f140c6acbb13ccfd137372e2a0cbf9871e"
++    },
++    {
++      "path": "inputs/provenance/RESULT-v3-remaining7.json",
+       "bytes": 139146,
+       "sha256": "897e54dbdeb09fe44fb2fcf5ec1675ad1abf9220cf5340b963b58f0fdb13fdb0"
+     },
+@@ -323,11 +405,6 @@
+       "path": "inputs/provenance/file-index.json",
+       "bytes": 207357,
+       "sha256": "31255dab8eef81ee05f68271ac665429db9a48498b240fbe85ebe228ea3c65c3"
+-    },
+-    {
+-      "path": "inputs/provenance/protocol.json",
+-      "bytes": 3600,
+-      "sha256": "cd931a88cb194dc24a7ed2cdcaa6827f89f71c70526dbe2e8ce1ebb9e45d4e3d"
+     },
+     {
+       "path": "inputs/provenance/w4-control21-collection.json",
+@@ -405,6 +482,11 @@
+     ],
+     "runtime_import": "/tmp/motioncorr-20261025-w4attr/r275/runs/cpu-affine-on",
+     "oracle_source": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c3dca0d/docs/post_rc0/s1/first_divergence_20261022/affine_patch_oracle/affine_patch_oracle.py",
+-    "decomposition_basis_source": "/tmp/motioncorr-20261025-w4-objective-protocol/scripts/w4_allpatch_decomposition_v2.py"
++    "decomposition_basis_source": "/tmp/motioncorr-20261025-w4-objective-protocol/scripts/w4_allpatch_decomposition_v2.py",
++    "selector_1_1_v2_result_sha256": "87a7d15eccd068ea500f1d492bc628f140c6acbb13ccfd137372e2a0cbf9871e",
++    "selector_1_1_v3_regrade_sha256": "2804699f28210e4d3b68a89c3cb64aa1da0d41481c32c748c1a6f567dc8ba690",
++    "v3_result_sha256": "897e54dbdeb09fe44fb2fcf5ec1675ad1abf9220cf5340b963b58f0fdb13fdb0",
++    "v3_protocol_sha256": "cd931a88cb194dc24a7ed2cdcaa6827f89f71c70526dbe2e8ce1ebb9e45d4e3d",
++    "original_index_sha256": "31255dab8eef81ee05f68271ac665429db9a48498b240fbe85ebe228ea3c65c3"
+   }
+ }
+--- review-baseline/PROTOCOL.md
++++ PROTOCOL.md
+@@ -5,7 +5,7 @@
+ 
+ ## Inputs and provenance
+ 
+-`input-manifest.json` pins each file in `inputs/` by relative path, byte count, and SHA-256. `inputs.tar` contains exactly those input files. Selector capture inputs are `c2.json` plus the highest captured `c2-iK-after.bin` for that selector. The manifest lists all observed captured iteration indices and asserts the selected index is their maximum. Selector (2,1) uses the original 94-file hash-verified capture collection; selector (1,1) uses the separately reviewed v3 regrade while its historical original FAIL remains immutable; the other seven use their collected v3 capture bytes. Provenance copies include collection-level RESULT/protocol records, original file index and collection receipt, and the selector (1,1) v3 regrade.
++`input-manifest.json` pins each file in `inputs/` by relative path, byte count, and SHA-256. `inputs.tar` contains exactly those input files. Selector capture inputs are `c2.json` plus the highest captured `c2-iK-after.bin` for that selector. The manifest lists all observed captured iteration indices and asserts the selected index is their maximum. Selector (2,1) uses the original 94-file hash-verified capture collection; selector (1,1) uses the separately reviewed v3 regrade while its historical original FAIL remains immutable; the other seven use their collected v3 capture bytes. Provenance copies distinguish the byte-exact `RESULT-v2-original-FAIL.json` from `RESULT-v3-remaining7.json`; the v3 protocol and selector (1,1) regrade have separate filenames. The consumer hard-pins those exact digests, checks the regrade references the v2 FAIL digest and v3 protocol digest, and verifies every capture byte against the original file index or the corresponding frozen RESULT launch file map. Runtime state/model/STAR/log bytes must agree with both the original #275 file index and the pinned v3 `final_identities`.
+ 
+ Input lineage SHA-256:
+ 
+@@ -13,27 +13,29 @@
+ - Original collection receipt: `1c00e50547ffa97b0f6a6b3b8b126cfc35929edd2b7d976f8c3d9ba680476e79`
+ - Original collection tar: `14154ffafcd68493e3e920239b81e07ca7ba6ce42a2198d102037385dfef9dbf`
+ 
+-The per-selector capture folders do not contain their own RESULT/protocol files. The package therefore pins every consumed capture byte directly and retains the available collection-level RESULT/protocol and regrade records as provenance.
++The per-selector capture folders do not contain per-selector RESULT/protocol files. The original 94-file selector (2,1) receipt must agree with all 94 corresponding source-index entries. For selector (1,1) and the seven remaining selectors, the exact frozen collection RESULT files supply each selected capture hash. These source records are digest-pinned; no ambient or latest RESULT is accepted.
+ 
+ ## Consumer contract
+ 
+-`consume_w4_cpu_observations.py` verifies all input hashes before use; requires exactly nine unique selectors, CPU metadata, patch geometry, five frames, final captured iteration, exact `<f8` byte length/shape, finite shifts, and exact frame-zero zero gauge. It derives 45 rows using `obs[g] = after[g] + 0.5*after[1]` at `z=g+0.5`, then compares them with retained STAR shifts to `5e-6` px/component. It fits the same 18-term, no-constant cubic-in-z basis with NumPy `lstsq`; reports coefficient deltas, design condition and residuals; and compares the fitted-plus-retained-global field against the retained full-precision runtime model on `[12:84,12:116]`, integer `z=g`. The `1e-10 px` field bound is an arithmetic-control diagnostic only. Truth limits remain global/local/combined `0.20/0.40/0.80 Å` and are not evaluated here. The report explicitly labels science as UNRUN.
++`consume_w4_cpu_observations.py` verifies all input hashes before use; requires exactly nine unique selectors, CPU metadata, patch geometry, five frames, final captured iteration, exact `<f8` byte length/shape, finite shifts, and exact frame-zero zero gauge. It derives 45 rows using `obs[g] = after[g] + 0.5*after[1]` at `z=g+0.5`, then compares them with retained STAR shifts to `5e-6` px/component. It fits the same 18-term, no-constant cubic-in-z basis with NumPy `lstsq`; reports coefficient deltas, design condition and residuals; and compares the fitted-plus-retained-global field against the retained full-precision runtime model on `[12:84,12:116]`, integer `z=g`. The `1e-10 px` field bound is an arithmetic-control diagnostic only. The unchanged field-error limits are separately applied to runtime and STAR fields: RMS ≤ `0.20 Å`, p95 ≤ `0.40 Å`, and max ≤ `0.80 Å`. These metric labels replace the incorrect global/local/combined labels; the numeric criteria are unchanged and are not evaluated here. The report explicitly labels science as UNRUN.
+ 
+ ## CPU64 admission commands
+ 
+-Stage this directory intact on the parent-approved CPU64 scratch location. Do not run the consumer on macOS. Verify package identity and syntax first:
++Stage this directory intact on the parent-approved CPU64 scratch location. Do not run either script on macOS. Run the deliberate structural negatives once before the actual consumer; any failed assertion stops the sequence without retry. The control harness first runs a metadata-only source-path fixture proving that higher CUDA/off-run iteration names cannot affect selector (2,1), then writes temporary copies under `/tmp`, re-pins deliberate byte mutations, and asserts the consumer exits nonzero for the expected reason. It has a CPU64 admission marker and a test-only consumer mode that skips external source pins only inside those isolated mutated fixtures. Then verify package identity and syntax:
+ 
+ ```sh
+ cd /path/to/motioncorr-20261025-w4-cpu-observations
+-shasum -a 256 consume_w4_cpu_observations.py input-manifest.json inputs.tar
++shasum -a 256 consume_w4_cpu_observations.py run_structural_controls.py input-manifest.json inputs.tar
+ python3 - <<'PY'
+ from pathlib import Path
+-p = Path('consume_w4_cpu_observations.py')
+-compile(p.read_bytes(), str(p), 'exec')
+-print('compile(...) PASS')
++for name in ('consume_w4_cpu_observations.py', 'run_structural_controls.py',
++             'inputs/affine_patch_oracle.py', 'inputs/w4_allpatch_decomposition_v2.py'):
++    p = Path(name)
++    compile(p.read_bytes(), str(p), 'exec')
++    print('compile(...) PASS', name)
+ PY
+-mkdir -p inputs
+- tar -xf inputs.tar
++tar -xf inputs.tar
++MOTIONCORR_W4_CPU64_ADMISSION=cpu64 python3 -I run_structural_controls.py
+ python3 -I consume_w4_cpu_observations.py
+ ```
+ 
+--- /dev/null
++++ run_structural_controls.py
+@@ -0,0 +1,196 @@
++#!/usr/bin/env python3
++# SPDX-License-Identifier: GPL-2.0-or-later
++"""Run deliberate fail-closed input controls on the admitted CPU64 Linux host only.
++
++Every case runs once against an isolated temporary copy. The manifest pin is
++updated for byte-mutated fixtures so the consumer reaches the intended structural
++check instead of failing at the ordinary byte-integrity check.
++"""
++import hashlib
++import importlib.util
++import json
++import os
++import platform
++import shutil
++import struct
++import subprocess
++import sys
++import tempfile
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parent
++
++
++def require_cpu64_admission():
++    if not sys.platform.startswith("linux"):
++        raise SystemExit("REFUSED: structural controls require the CPU64 Linux host")
++    if os.environ.get("MOTIONCORR_W4_CPU64_ADMISSION") != "cpu64":
++        raise SystemExit("REFUSED: set MOTIONCORR_W4_CPU64_ADMISSION=cpu64 only in the admitted CPU64 lane")
++
++
++def load_manifest(case):
++    path = case / "input-manifest.json"
++    return path, json.loads(path.read_text())
++
++
++def write_manifest(path, manifest):
++    path.write_text(json.dumps(manifest, indent=2) + "\n")
++
++
++def repin(manifest, rel, data):
++    target = next((x for x in manifest["files"] if x["path"] == rel), None)
++    if target is None:
++        raise AssertionError("fixture is not pinned: " + rel)
++    target["bytes"] = len(data)
++    target["sha256"] = hashlib.sha256(data).hexdigest()
++
++
++def fresh_case(parent, name):
++    case = parent / name
++    case.mkdir()
++    shutil.copy2(ROOT / "consume_w4_cpu_observations.py", case)
++    shutil.copy2(ROOT / "input-manifest.json", case)
++    shutil.copytree(ROOT / "inputs", case / "inputs")
++    return case
++
++
++def mutate_missing_selector(case):
++    path, m = load_manifest(case)
++    del m["selectors"]["3,3"]
++    write_manifest(path, m)
++
++
++def mutate_duplicate_json_selector(case):
++    path, m = load_manifest(case)
++    raw = path.read_text()
++    marker = '    "1,1": {'
++    if raw.count(marker) != 1:
++        raise AssertionError("could not locate selector 1,1 for duplicate-key fixture")
++    duplicate = '    "1,1": ' + json.dumps(m["selectors"]["1,1"], separators=(",", ":")) + ",\n"
++    path.write_text(raw.replace(marker, duplicate + marker, 1))
++
++
++def mutate_missing_star_frame(case):
++    path, m = load_manifest(case)
++    rel = "inputs/runtime/out/affine.star"
++    star = case / rel
++    lines = star.read_text().splitlines(keepends=True)
++    in_local = False
++    removed = False
++    for i, line in enumerate(lines):
++        stripped = line.strip()
++        if stripped.startswith("data_"):
++            in_local = stripped == "data_local_shift"
++        if in_local and stripped and stripped[0].isdigit():
++            fields = stripped.split()
++            if len(fields) >= 5 and fields[:3] == ["1", "20.000000", "15.000000"]:
++                del lines[i]
++                removed = True
++                break
++    if not removed:
++        raise AssertionError("could not remove one pinned STAR centre/frame row")
++    data = "".join(lines).encode()
++    star.write_bytes(data)
++    repin(m, rel, data)
++    write_manifest(path, m)
++
++
++def mutate_final_iteration(case):
++    path, m = load_manifest(case)
++    rec = m["selectors"]["1,2"]
++    rec["available_iterations"] = [1, 2]
++    rec["selected_iteration"] = 2
++    write_manifest(path, m)
++
++
++def mutate_bad_length(case):
++    path, m = load_manifest(case)
++    rel = "inputs/patch-1-2/c2-i1-after.bin"
++    p = case / rel
++    data = p.read_bytes()[:-1]
++    p.write_bytes(data)
++    repin(m, rel, data)
++    write_manifest(path, m)
++
++
++def mutate_nonfinite(case):
++    path, m = load_manifest(case)
++    rel = "inputs/patch-1-2/c2-i1-after.bin"
++    p = case / rel
++    data = bytearray(p.read_bytes())
++    data[16:24] = struct.pack("<d", float("nan"))  # frame 1, x component
++    data = bytes(data)
++    p.write_bytes(data)
++    repin(m, rel, data)
++    write_manifest(path, m)
++
++
++def mutate_gauge(case):
++    path, m = load_manifest(case)
++    rel = "inputs/patch-1-2/c2-i1-after.bin"
++    p = case / rel
++    data = bytearray(p.read_bytes())
++    data[0:8] = struct.pack("<d", 0.25)  # frame-zero x component
++    data = bytes(data)
++    p.write_bytes(data)
++    repin(m, rel, data)
++    write_manifest(path, m)
++
++
++CASES = [
++    ("missing-selector", mutate_missing_selector, "selector set must contain exactly nine unique patches"),
++    ("duplicate-json-selector-key", mutate_duplicate_json_selector, "duplicate JSON key 1,1"),
++    ("missing-star-frame", mutate_missing_star_frame, "STAR coverage must be exactly 45 centre/frame rows"),
++    ("mismatched-final-iteration", mutate_final_iteration, "selected snapshot is not the final captured iteration"),
++    ("malformed-after-length", mutate_bad_length, "malformed after bytes length"),
++    ("nonfinite-after", mutate_nonfinite, "nonfinite shift"),
++    ("frame-zero-gauge", mutate_gauge, "frame-zero gauge is not exactly zero"),
++]
++
++
++def check_original_index_iteration_scope():
++    spec = importlib.util.spec_from_file_location("w4_consumer_metadata_scope", ROOT / "consume_w4_cpu_observations.py")
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    # Metadata-only fixture: unrelated CUDA and other source paths have larger K.
++    source_files = {
++        "runs/cpu-affine-on/capture/c2-i1-after.bin": {},
++        "runs/cpu-affine-on/capture/c2-i2-after.bin": {},
++        "runs/cuda-affine-on/capture/c2-i5-after.bin": {},
++        "runs/cpu-affine-off/capture/c2-i4-after.bin": {},
++        "runs/cpu-affine-on/capture/c2-i3-input.bin": {},
++    }
++    actual = module.source_after_iterations(source_files, "original-index")
++    if actual != [1, 2]:
++        raise SystemExit(f"FAIL original-index iteration scope expected=[1, 2] actual={actual}")
++    print("PASS metadata fixture original-index scope: cpu-affine-on capture iterations [1, 2]")
++
++
++def main():
++    require_cpu64_admission()
++    check_original_index_iteration_scope()
++    with tempfile.TemporaryDirectory(prefix="motioncorr-w4-structural-") as td:
++        parent = Path(td).resolve()
++        if not parent.is_relative_to(Path("/tmp")):
++            raise SystemExit("REFUSED: temporary control work must remain under /tmp")
++        for name, mutate, expected in CASES:
++            case = fresh_case(parent, name)
++            mutate(case)
++            env = os.environ.copy()
++            env["MOTIONCORR_W4_STRUCTURAL_TEST_MODE"] = "1"
++            proc = subprocess.run(
++                [sys.executable, "-I", "consume_w4_cpu_observations.py", "--structural-test"],
++                cwd=case, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
++                check=False,
++            )
++            output = proc.stdout
++            if proc.returncode == 0 or expected not in output:
++                raise SystemExit(
++                    f"FAIL control={name} rc={proc.returncode} expected={expected!r}\n{output}"
++                )
++            print(f"PASS structural negative {name}: rc={proc.returncode}; reason={expected}")
++    print("PASS all 7 structural negative controls; actual consumer remains UNRUN")
++
++
++if __name__ == "__main__":
++    main()

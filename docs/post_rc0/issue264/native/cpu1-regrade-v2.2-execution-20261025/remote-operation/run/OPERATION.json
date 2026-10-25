@@ -1,0 +1,210 @@
+{
+ "kind": "prospective cpu1 regrade v2.2 operation",
+ "start_utc": "2026-10-25T17:48:40.106578+00:00",
+ "source_commit": "593c9e2cc53663655a1628ab7500fadddee5d261",
+ "package_manifest_sha256": "73b820401d0c67b537c352f9a287243f14e9f89e7d01ecb355d83ec298104abe",
+ "package": {
+  "cap_bytes": 1048576,
+  "content_bytes": 103273,
+  "files": {
+   "AMENDMENT-1.md": {
+    "git_blob": "39ad983a64197fbbb6cd207f18e44cb3eba64a19",
+    "git_path": "docs/post_rc0/issue264/native/n3-cpu1-regrade-v2/AMENDMENT-1.md",
+    "sha256": "e556f54c551b0fb656d55967fccabda89ce7335246204620b9e1e21fe0b11af5",
+    "size": 5688
+   },
+   "AMENDMENT-2.md": {
+    "git_blob": "fcaf81e805cfc6333a6b6a448bf9c48073a70c9f",
+    "git_path": "docs/post_rc0/issue264/native/n3-cpu1-regrade-v2/AMENDMENT-2.md",
+    "sha256": "74d46b46dfb1a74705f58510696c92802a8a321dc5a59baef2b45b0060681a88",
+    "size": 4175
+   },
+   "CONTRACT.md": {
+    "git_blob": "823f12f70b292fe893b734b56be68b6c6e3ea31b",
+    "git_path": "docs/post_rc0/issue264/native/n3-cpu1-regrade-v2/CONTRACT.md",
+    "sha256": "fcc3bf5489c087af7ca7db734fd1ec4a29c5cf7cdd63c59d85d7b7b506a90ca1",
+    "size": 3305
+   },
+   "EVIDENCE_MANIFEST.json": {
+    "git_blob": "f64a9d9172d3b8673b99ed3e2ce42beb79e0a860",
+    "git_path": "docs/post_rc0/issue264/native/n3-cpu1-regrade-v2/EVIDENCE_MANIFEST.json",
+    "sha256": "6bdc14cc25a6361d8ab86f1c0e7edbb05be2099a9c7ed78a337ee8dda5992ed6",
+    "size": 16193
+   },
+   "EXPECT_LIVE.json": {
+    "git_blob": "80eccc5b53ab2b35e8836d8ad069b04af9a27019",
+    "git_path": "docs/post_rc0/issue264/native/n3-cpu1-regrade-v2/EXPECT_LIVE.json",
+    "sha256": "e12a2199011d9a1485b699e7e449dd6b02a63f8772a37da3f955ef68514a4359",
+    "size": 2155
+   },
+   "REMOTE-PLAN-v2.2.md": {
+    "git_blob": "0fea162b4db0453a4fd397ad6c02d6370af64a90",
+    "git_path": "docs/post_rc0/issue264/native/n3-cpu1-regrade-v2/REMOTE-PLAN-v2.2.md",
+    "sha256": "b8959e6cd7293e33eb208c6d939e9f4db487634e938593da050f12f23abef984",
+    "size": 6511
+   },
+   "predictions_iter2.json": {
+    "git_blob": "b21967c6e26277f05539192759863c3e27e4803d",
+    "git_path": "docs/post_rc0/issue264/native/n3-iter2/predictions_iter2.json",
+    "sha256": "6ff11cb5145f3c9f3f0c6380de26b27913eb9da7ccb6652a783c777b205c859e",
+    "size": 16748
+   },
+   "regrade_v2_2.py": {
+    "git_blob": "59ddd35da1fc316d75f73eb80482c5467601d51c",
+    "git_path": "docs/post_rc0/issue264/native/n3-cpu1-regrade-v2/regrade_v2_2.py",
+    "sha256": "036aa9a2f3c9b0cc49055f63b2c9bd32770a5e4f7832a18452b5480ba6820849",
+    "size": 38367
+   },
+   "remote_run_v2_2.py": {
+    "git_blob": "7ed80392a35b600c07ee9b917756d86846873ed2",
+    "git_path": "docs/post_rc0/issue264/native/n3-cpu1-regrade-v2/remote_run_v2_2.py",
+    "sha256": "07263bb9bc57fd9e6ba9ad900818c18153a6f8022a793fe99f408446ae670b32",
+    "size": 10131
+   }
+  },
+  "kind": "cpu1-regrade-v2.2 narrow package",
+  "source_commit": "593c9e2cc53663655a1628ab7500fadddee5d261"
+ },
+ "argv": [
+  "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/package/remote_run_v2_2.py",
+  "--source-commit",
+  "593c9e2cc53663655a1628ab7500fadddee5d261",
+  "--package-manifest-sha256",
+  "73b820401d0c67b537c352f9a287243f14e9f89e7d01ecb355d83ec298104abe",
+  "--out",
+  "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run"
+ ],
+ "pid": 3749891,
+ "uid": 1004,
+ "lease": "/tmp/motioncorr-guard264-cpu13-regrade.lock",
+ "affinity": [
+  13
+ ],
+ "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+ "python_executable": "/usr/bin/python3.12",
+ "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+ "numeric_threads": {
+  "OMP_NUM_THREADS": "1",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "NUMEXPR_NUM_THREADS": "1",
+  "VECLIB_MAXIMUM_THREADS": "1"
+ },
+ "steps": [
+  {
+   "name": "live-pre",
+   "start_utc": "2026-10-25T17:48:43.163083+00:00",
+   "finish_utc": "2026-10-25T17:48:47.686685+00:00",
+   "exit": 0,
+   "arguments": {
+    "scratch_root": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1",
+    "expect": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/package/EXPECT_LIVE.json",
+    "proc_root": "/proc",
+    "out": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/live-pre.json"
+   },
+   "stdout": "precheck-live PASS []\n",
+   "stderr": ""
+  },
+  {
+   "name": "files-pre",
+   "start_utc": "2026-10-25T17:48:47.687764+00:00",
+   "finish_utc": "2026-10-25T17:48:47.951630+00:00",
+   "exit": 0,
+   "arguments": {
+    "scratch_root": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1",
+    "manifest": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/package/EVIDENCE_MANIFEST.json",
+    "out": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/files-pre.json"
+   },
+   "stdout": "precheck-files PASS []\n",
+   "stderr": ""
+  },
+  {
+   "name": "grade",
+   "start_utc": "2026-10-25T17:48:47.952710+00:00",
+   "finish_utc": "2026-10-25T17:48:48.114873+00:00",
+   "exit": 0,
+   "arguments": {
+    "scratch_root": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1",
+    "evidence_tar": null,
+    "evidence_sha256": null,
+    "manifest": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/package/EVIDENCE_MANIFEST.json",
+    "precheck": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/files-pre.json",
+    "predictions": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/package/predictions_iter2.json",
+    "out": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/grade"
+   },
+   "stdout": "star_layer PASS full PASS []\n",
+   "stderr": ""
+  },
+  {
+   "name": "live-post",
+   "start_utc": "2026-10-25T17:48:48.116148+00:00",
+   "finish_utc": "2026-10-25T17:48:48.835219+00:00",
+   "exit": 0,
+   "arguments": {
+    "scratch_root": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1",
+    "expect": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/package/EXPECT_LIVE.json",
+    "proc_root": "/proc",
+    "out": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/live-post.json"
+   },
+   "stdout": "precheck-live PASS []\n",
+   "stderr": ""
+  },
+  {
+   "name": "files-post",
+   "start_utc": "2026-10-25T17:48:48.836390+00:00",
+   "finish_utc": "2026-10-25T17:48:48.876805+00:00",
+   "exit": 0,
+   "arguments": {
+    "scratch_root": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1",
+    "manifest": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/package/EVIDENCE_MANIFEST.json",
+    "out": "/mnt/clathrin/alex-motioncorr-guard264-20261022-3751bd05a954-cpu1-regrade-v2-2-593c9e2cc536-b495f746-6ee5-4c2f-9c76-b70f9e6c8767/run/files-post.json"
+   },
+   "stdout": "precheck-files PASS []\n",
+   "stderr": ""
+  }
+ ],
+ "status": "PASS",
+ "python-version": {
+  "argv": [
+   "/usr/bin/python3",
+   "--version"
+  ],
+  "exit": 0,
+  "stdout": "Python 3.12.3\n",
+  "stderr": ""
+ },
+ "git-version": {
+  "argv": [
+   "/usr/bin/git",
+   "--version"
+  ],
+  "exit": 0,
+  "stdout": "git version 2.43.0\n",
+  "stderr": ""
+ },
+ "taskset-witness": {
+  "argv": [
+   "/usr/bin/taskset",
+   "-pc",
+   "3749891"
+  ],
+  "exit": 0,
+  "stdout": "pid 3749891's current affinity list: 13\n",
+  "stderr": ""
+ },
+ "python_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+ "git_sha256": "eb54b535467e0975c1284d4c4d08eea779aeb248a5d34b02e2ee171382e22201",
+ "cpu13_sample": {
+  "pre": [
+   833924861,
+   786203102
+  ],
+  "post": [
+   833925162,
+   786203402
+  ],
+  "busy_fraction": 0.0033222591362126247
+ },
+ "finish_utc": "2026-10-25T17:48:48.880123+00:00",
+ "operation_bytes": 323942
+}

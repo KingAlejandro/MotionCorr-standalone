@@ -1,0 +1,20 @@
+{
+  "utc": "2026-10-25T20:11:38.314732+00:00",
+  "namespace": "/tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618",
+  "wrapper_sha256": "6663764f570cd2b31a97698111513409f00ae8ef284edb0f08a6d0a3bda5e386",
+  "tools_sha256": "2fc0226b08f6e255bd4903edabee714ca60bb91a311d9b4b31f92c94141cda5b",
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "cpu64",
+    "echo \"6663764f570cd2b31a97698111513409f00ae8ef284edb0f08a6d0a3bda5e386  /tmp/dc-late68-admission-2058c8b3-4591-420d-a5cb-1bb717f99cd7.py\" | sha256sum -c - >&2 && taskset -c 62 /usr/bin/timeout --signal=TERM --kill-after=10s 1200s /usr/bin/python3 -I -B /tmp/dc-late68-admission-2058c8b3-4591-420d-a5cb-1bb717f99cd7.py /tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618"
+  ],
+  "scope": "one68recordexistingoutput evaluator; not native execution/scientific acceptance",
+  "exit": 0,
+  "stdout": "{\"scope\": \"one exact68existingCPU record evaluation\", \"argv\": [\"/usr/bin/python3\", \"-I\", \"-B\", \"/tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618/tools/run_late68_once.py\", \"--root\", \"/tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618/raw\", \"--admission\", \"/tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618/EVAL-ADMISSION.json\"], \"exit\": 0, \"stdout\": \"\", \"stderr\": \"\", \"admission\": {\"scope\": \"dc-late68-evaluator-only\", \"captured_utc\": \"2026-10-25T20:11:41.974304+00:00\", \"cpu_core\": 62, \"cpu_lock_held\": true, \"busy_check_clear\": true, \"cpu_busy_fraction\": 0.0, \"active_evaluator_processes\": 0, \"available_ram_bytes\": 188850352128, \"ram_cap_bytes\": 8589934592, \"scratch_budget_bytes\": 17179869184, \"scratch_free_bytes\": 107032719360, \"python_executable\": \"/usr/bin/python3\", \"versions\": \"3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]\\n1.26.4\\n\", \"host\": \"small-refmac-machine\", \"uid\": 1000, \"claim\": \"existing-output evaluation, not native execution/performance/science qualification\"}, \"finished_utc\": \"2026-10-25T20:14:29.536912+00:00\"}\n",
+  "stderr": "/tmp/dc-late68-admission-2058c8b3-4591-420d-a5cb-1bb717f99cd7.py: OK\n",
+  "finished_utc": "2026-10-25T20:14:29.553437+00:00"
+}

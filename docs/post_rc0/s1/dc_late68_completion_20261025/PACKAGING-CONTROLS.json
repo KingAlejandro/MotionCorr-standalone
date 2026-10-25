@@ -1,0 +1,19 @@
+{
+  "scope": "harmless published-layout controls only; no scientific array reads or native execution",
+  "attempt1": {
+    "python": "/Users/alex.konstantinov/.local/bin/python3",
+    "exit": 1,
+    "tests_run": 2,
+    "passed": 1,
+    "failed": 1,
+    "cause": "ModuleNotFoundError: No module named numpy in child interpreter; no code changed"
+  },
+  "attempt2": {
+    "python": "/tmp/motioncorr-20261025-c1-dataset-grade/venv312/bin/python3",
+    "python_version": "3.12.11",
+    "exit": 0,
+    "tests_run": 2,
+    "passed": 2
+  },
+  "syntax": "all prepared .py files compile with compile(); no bytecode written"
+}

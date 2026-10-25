@@ -1,0 +1,54 @@
+{
+  "scope": "B CPU only; queue member AND frozen RUN exit 0 AND absent from frozen EVALUATIONS sha256 map",
+  "count": 68,
+  "ids_sha256": "b43462cf148c76c7bffd663aba29ee3e42de647804256b0c60637f36063d01a9",
+  "queue_sha256": "7745d453a1033ce61dffe2b9347ea60d7eeb6b7d444e3542c451d0ccfb12a4da",
+  "evaluations_sha256": "4ec94412fb98e6b1e4fda26b8b510e8f23c235a22ad162774e448c2a228d988a",
+  "run_exits_sha256": "8b48deb22688dfda6c842c6238f32f4b01d7aa3e88d156ccfb54dbb882a9b13f",
+  "per_arm_counts": {
+    "both": 17,
+    "global": 16,
+    "local": 17,
+    "none": 16,
+    "plain": 2
+  },
+  "groups": [
+    "dose1-s00",
+    "nonsquare-s00",
+    "nonsquare-s01",
+    "nonsquare-s02",
+    "nonsquare-s03",
+    "nonsquare-s04",
+    "nonsquare-s05",
+    "nonsquare-s06",
+    "nonsquare-s07",
+    "nonsquare-s08",
+    "nonsquare-s09",
+    "outmodel-s03",
+    "outmodel-s04",
+    "outmodel-s05",
+    "outmodel-s06",
+    "outmodel-s07",
+    "outmodel-s08",
+    "outmodel-s09",
+    "pedestal32-s00"
+  ],
+  "derived_from": [
+    "queue.json",
+    "dc_run_exits.txt",
+    "evaluation-snapshots/B-pass3-20261022-2244/EVALUATIONS.json"
+  ],
+  "paths": {
+    "queue": "/tmp/motioncorr-20261025-c1dc-harvest/snap/dc/queue.json",
+    "run_exits": "/tmp/motioncorr-20261025-c1dc-harvest/dc_run_exits.txt",
+    "evaluation_manifest": "/tmp/motioncorr-20261025-c1dc-harvest/snap/dc/evaluation-snapshots/B-pass3-20261022-2244/EVALUATIONS.json"
+  },
+  "source_proven_root": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b",
+  "source_proven_evaluator_sha256": "dcc5ddb3d52d14652f11214fb2a9339fb5fb63637d87dc0c82ee3a4c2d0de14d",
+  "source_proven_evaluator_bytes": 13344,
+  "remote_path_presence_hashes_resources": "UNCONFIRMED; parent must verify VM live before collection",
+  "issues": [
+    "All 68 IDs are existing Tier B CPU queue records with recorded exit 0; this plan launches no native work.",
+    "The two plain arms are control-only in evaluate.py but still require their fixture receipt."
+  ]
+}

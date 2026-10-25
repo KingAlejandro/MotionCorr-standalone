@@ -1,0 +1,20 @@
+{
+  "utc": "2026-10-25T19:56:01.726319+00:00",
+  "kind": "byte staging only, no evaluator/native",
+  "namespace": "/tmp/motioncorr-dc-late68-stage-20261025-e41ac9c7-a948-428a-8e5e-6ef8b92e041c",
+  "receiver_sha256": "dc7e1ef779cb0d677b859bfc2c8fa22fcef8c49d00390d93ec914e7852934e91",
+  "archive_sha256": "921e5546995fc8659cc40bac030bc3f651c8afd638e3fd6cafed8950daa38e4c",
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "cpu64",
+    "echo \"dc7e1ef779cb0d677b859bfc2c8fa22fcef8c49d00390d93ec914e7852934e91  /tmp/motioncorr-dc-late68-receiver-e41ac9c7-a948-428a-8e5e-6ef8b92e041c.py\" | sha256sum -c - >&2 && taskset -c 62 /usr/bin/python3 -I -B /tmp/motioncorr-dc-late68-receiver-e41ac9c7-a948-428a-8e5e-6ef8b92e041c.py /tmp/motioncorr-dc-late68-stage-20261025-e41ac9c7-a948-428a-8e5e-6ef8b92e041c 921e5546995fc8659cc40bac030bc3f651c8afd638e3fd6cafed8950daa38e4c"
+  ],
+  "exit": 255,
+  "stdout": "",
+  "stderr": "/tmp/motioncorr-dc-late68-receiver-e41ac9c7-a948-428a-8e5e-6ef8b92e041c.py: OK\n",
+  "end_utc": "2026-10-25T20:06:02.090230+00:00"
+}

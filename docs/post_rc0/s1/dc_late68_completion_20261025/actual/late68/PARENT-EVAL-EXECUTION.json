@@ -1,0 +1,35 @@
+{
+  "scope": "one exact68existingCPU record evaluation",
+  "argv": [
+    "/usr/bin/python3",
+    "-I",
+    "-B",
+    "/tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618/tools/run_late68_once.py",
+    "--root",
+    "/tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618/raw",
+    "--admission",
+    "/tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618/EVAL-ADMISSION.json"
+  ],
+  "exit": 0,
+  "stdout": "",
+  "stderr": "",
+  "admission": {
+    "scope": "dc-late68-evaluator-only",
+    "captured_utc": "2026-10-25T20:11:41.974304+00:00",
+    "cpu_core": 62,
+    "cpu_lock_held": true,
+    "busy_check_clear": true,
+    "cpu_busy_fraction": 0.0,
+    "active_evaluator_processes": 0,
+    "available_ram_bytes": 188850352128,
+    "ram_cap_bytes": 8589934592,
+    "scratch_budget_bytes": 17179869184,
+    "scratch_free_bytes": 107032719360,
+    "python_executable": "/usr/bin/python3",
+    "versions": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]\n1.26.4\n",
+    "host": "small-refmac-machine",
+    "uid": 1000,
+    "claim": "existing-output evaluation, not native execution/performance/science qualification"
+  },
+  "finished_utc": "2026-10-25T20:14:29.536912+00:00"
+}

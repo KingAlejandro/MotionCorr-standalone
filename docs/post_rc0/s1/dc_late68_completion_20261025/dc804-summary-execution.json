@@ -1,0 +1,15 @@
+{
+  "namespace": "/tmp/motioncorr-dc804-summary-20261025-1cc0555c-f645-4101-9f06-847f521ea749",
+  "late68_namespace": "/tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618",
+  "script_sha256": "dfd9710df8cb74f7d7fa88b094d3619ff1e1aeeb3c15b974726dc4c465105286",
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "cpu64",
+    "echo \"dfd9710df8cb74f7d7fa88b094d3619ff1e1aeeb3c15b974726dc4c465105286  /tmp/dc804-summary-1cc0555c-f645-4101-9f06-847f521ea749.py\" | sha256sum -c - >&2 && taskset -c 62 /usr/bin/timeout --signal=TERM --kill-after=5s 120s /usr/bin/python3 -I -B /tmp/dc804-summary-1cc0555c-f645-4101-9f06-847f521ea749.py /tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618 /tmp/motioncorr-dc804-summary-20261025-1cc0555c-f645-4101-9f06-847f521ea749"
+  ],
+  "exit": 0,
+  "stdout": "{\"scope\": \"new804recordTierBsummary; old371/878snapshots unchanged; no new native job\", \"utc\": \"2026-10-25T20:17:12.964095+00:00\", \"affinity\": [62], \"cpu_busy_fraction\": 0.0, \"mem_available_bytes\": 188709199872, \"late68_terminal_states\": {\"CONTROL_ONLY\": 2, \"EVALUATED\": 66}, \"adapter_sha256\": \"c2f391822b880fba20b7a9571e4d5150fa3b365bd18afff2e44f90fef939ef45\", \"adapter_exit\": 0, \"adapter_stdout\": \"{\\\"format\\\": \\\"motioncorr-dc-tierB-record-errors/2.2\\\", \\\"state\\\": \\\"COMPLETE\\\", \\\"present_record_errors\\\": 0, \\\"global_error_count\\\": 0, \\\"derived_error_count\\\": 0}\\n\", \"adapter_stderr\": \"\", \"summary_state\": \"COMPLETE\", \"counts\": {\"rows\": 80, \"pairs\": 240, \"regressions\": 965, \"record_audit\": 804}, \"summary_sha256\": \"0fbecd72e5396a3abb6feedbaca9a867142716293f177f07cac302873c5a5304\", \"campaign_grade\": \"NOT_ASSIGNED_TIERC_STILL_UNGRADED\"}\n",
+  "stderr": "/tmp/dc804-summary-1cc0555c-f645-4101-9f06-847f521ea749.py: OK\n"
+}

@@ -1,0 +1,2927 @@
+{
+  "schema": "dc-late68-static-collection-v1",
+  "source_root": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b",
+  "source_sha": "3eee0a4b4e367f9b57f950c440c89679a5ec9c93",
+  "scope": "68 selected Tier B CPU exit-0 records only; no other run or evaluation outputs",
+  "ids_path": "late68-ids.txt",
+  "ids_sha256": "b43462cf148c76c7bffd663aba29ee3e42de647804256b0c60637f36063d01a9",
+  "source_vm_metadata_sha256": "da1f3556b4839910d15158584ec76816d7cb957fc03509a119f2c6f7c28d255c",
+  "source_closure_metadata_sha256": "72c17f18d906d3ffa2c5dcd8022facdeaee6bd01375ee4f61309443f7526a361",
+  "current_eval_guard": {
+    "parent_metadata_file": "CURRENT-EVAL-GUARD.json",
+    "sha256": "e535f1de3c681b83af82503080e79dda376cc3a7bcd2d323f65cdb14b022d681",
+    "all_current_B_json_count": 345,
+    "selected_ids_present": 0,
+    "retained_736_snapshot": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/evaluation-snapshots/B-pass3-20261022-2244/eval/B; distinct and excluded"
+  },
+  "counts": {
+    "RUN": 68,
+    "fixture_receipt": 68,
+    "runtime_json": 66,
+    "movie_star": 66,
+    "movie_log": 66,
+    "movie_mrc": 66,
+    "truth_cache": 2,
+    "source_files": 9
+  },
+  "hashes_still_needed": 0,
+  "estimated_staged_bytes": 5682996238,
+  "all_files": [
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/dose1-s00/RECEIPT.json",
+      "stage": "fixture-receipts/B-dose1-s00-cpu-plain/RECEIPT.json",
+      "bytes": 973,
+      "sha256": "495ef90ef4a096071cf446f9956ae4fb0a180875455e8f5eca3bfedde0c96a1c",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s00/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s00-cpu-both/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "eb3a3f7c156260a1d294f4b544f30252b112f88b9d540adb47fe222574b0aca3",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s00/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s00-cpu-global/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "eb3a3f7c156260a1d294f4b544f30252b112f88b9d540adb47fe222574b0aca3",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s00/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s00-cpu-local/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "eb3a3f7c156260a1d294f4b544f30252b112f88b9d540adb47fe222574b0aca3",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s00/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s00-cpu-none/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "eb3a3f7c156260a1d294f4b544f30252b112f88b9d540adb47fe222574b0aca3",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s01/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s01-cpu-both/RECEIPT.json",
+      "bytes": 976,
+      "sha256": "e88a3d820825f983fa0da0e2e118751e32bdcf7ce15adba18737950ad71e500e",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s01/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s01-cpu-global/RECEIPT.json",
+      "bytes": 976,
+      "sha256": "e88a3d820825f983fa0da0e2e118751e32bdcf7ce15adba18737950ad71e500e",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s01/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s01-cpu-local/RECEIPT.json",
+      "bytes": 976,
+      "sha256": "e88a3d820825f983fa0da0e2e118751e32bdcf7ce15adba18737950ad71e500e",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s01/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s01-cpu-none/RECEIPT.json",
+      "bytes": 976,
+      "sha256": "e88a3d820825f983fa0da0e2e118751e32bdcf7ce15adba18737950ad71e500e",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s02/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s02-cpu-both/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "9bc5f9d51fa35d32c3b1cb55629f31db904a8028ca42371e17551d9075c76f4a",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s02/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s02-cpu-global/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "9bc5f9d51fa35d32c3b1cb55629f31db904a8028ca42371e17551d9075c76f4a",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s02/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s02-cpu-local/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "9bc5f9d51fa35d32c3b1cb55629f31db904a8028ca42371e17551d9075c76f4a",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s02/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s02-cpu-none/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "9bc5f9d51fa35d32c3b1cb55629f31db904a8028ca42371e17551d9075c76f4a",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s03/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s03-cpu-both/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "18b4552b5c7211e057a807ef30800ccae903d9a9f3f7a938904a45943902efdf",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s03/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s03-cpu-global/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "18b4552b5c7211e057a807ef30800ccae903d9a9f3f7a938904a45943902efdf",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s03/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s03-cpu-local/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "18b4552b5c7211e057a807ef30800ccae903d9a9f3f7a938904a45943902efdf",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s03/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s03-cpu-none/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "18b4552b5c7211e057a807ef30800ccae903d9a9f3f7a938904a45943902efdf",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s04/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s04-cpu-both/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "e7171625598c0840da65a74c8ddb6abced124ff8781e661b1a62869eadb5baf8",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s04/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s04-cpu-global/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "e7171625598c0840da65a74c8ddb6abced124ff8781e661b1a62869eadb5baf8",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s04/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s04-cpu-local/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "e7171625598c0840da65a74c8ddb6abced124ff8781e661b1a62869eadb5baf8",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s04/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s04-cpu-none/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "e7171625598c0840da65a74c8ddb6abced124ff8781e661b1a62869eadb5baf8",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s05/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s05-cpu-both/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "fa06a56aaa726df52ade4f5ca2162227f3022c010cb0ade6ad60b73485fd9fac",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s05/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s05-cpu-global/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "fa06a56aaa726df52ade4f5ca2162227f3022c010cb0ade6ad60b73485fd9fac",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s05/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s05-cpu-local/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "fa06a56aaa726df52ade4f5ca2162227f3022c010cb0ade6ad60b73485fd9fac",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s05/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s05-cpu-none/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "fa06a56aaa726df52ade4f5ca2162227f3022c010cb0ade6ad60b73485fd9fac",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s06/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s06-cpu-both/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "17cbef482262b049f93fdb6a98c2a176dae2f817b22620e368763bff42ca9482",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s06/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s06-cpu-global/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "17cbef482262b049f93fdb6a98c2a176dae2f817b22620e368763bff42ca9482",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s06/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s06-cpu-local/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "17cbef482262b049f93fdb6a98c2a176dae2f817b22620e368763bff42ca9482",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s06/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s06-cpu-none/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "17cbef482262b049f93fdb6a98c2a176dae2f817b22620e368763bff42ca9482",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s07/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s07-cpu-both/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "22c47b20647f607ef4eefe60a309cf32b23a699bb20908547b85f4b03b7fb8bb",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s07/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s07-cpu-global/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "22c47b20647f607ef4eefe60a309cf32b23a699bb20908547b85f4b03b7fb8bb",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s07/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s07-cpu-local/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "22c47b20647f607ef4eefe60a309cf32b23a699bb20908547b85f4b03b7fb8bb",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s07/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s07-cpu-none/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "22c47b20647f607ef4eefe60a309cf32b23a699bb20908547b85f4b03b7fb8bb",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s08/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s08-cpu-both/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "b205a3b2c3f35a8a89d7d20cbaf28b5cba925eaaec6272b2e1428e51104c3c43",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s08/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s08-cpu-global/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "b205a3b2c3f35a8a89d7d20cbaf28b5cba925eaaec6272b2e1428e51104c3c43",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s08/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s08-cpu-local/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "b205a3b2c3f35a8a89d7d20cbaf28b5cba925eaaec6272b2e1428e51104c3c43",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s08/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s08-cpu-none/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "b205a3b2c3f35a8a89d7d20cbaf28b5cba925eaaec6272b2e1428e51104c3c43",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s09/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s09-cpu-both/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "3b5a27a71f20f9ef605bf3b949cc7b2bc67ad0924e0816a6f34aa375076a3ef7",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s09/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s09-cpu-global/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "3b5a27a71f20f9ef605bf3b949cc7b2bc67ad0924e0816a6f34aa375076a3ef7",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s09/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s09-cpu-local/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "3b5a27a71f20f9ef605bf3b949cc7b2bc67ad0924e0816a6f34aa375076a3ef7",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/nonsquare-s09/RECEIPT.json",
+      "stage": "fixture-receipts/B-nonsquare-s09-cpu-none/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "3b5a27a71f20f9ef605bf3b949cc7b2bc67ad0924e0816a6f34aa375076a3ef7",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s03/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s03-cpu-both/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "60b80a5f261bd35ab5a28994c495e6c3a2f263fdca6d5a6845502fdabdc898a4",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s03/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s03-cpu-local/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "60b80a5f261bd35ab5a28994c495e6c3a2f263fdca6d5a6845502fdabdc898a4",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s04/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s04-cpu-both/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "2d5b0ed4bdc80408f68642a1b09e178d9b3531477be881214579f2a89a5bce06",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s04/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s04-cpu-global/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "2d5b0ed4bdc80408f68642a1b09e178d9b3531477be881214579f2a89a5bce06",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s04/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s04-cpu-local/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "2d5b0ed4bdc80408f68642a1b09e178d9b3531477be881214579f2a89a5bce06",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s04/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s04-cpu-none/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "2d5b0ed4bdc80408f68642a1b09e178d9b3531477be881214579f2a89a5bce06",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s05/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s05-cpu-both/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "6bfd7b8c74128eab23ed320dbb91192258f7f3e2675f33fe7c4a74b2b889b299",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s05/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s05-cpu-global/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "6bfd7b8c74128eab23ed320dbb91192258f7f3e2675f33fe7c4a74b2b889b299",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s05/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s05-cpu-local/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "6bfd7b8c74128eab23ed320dbb91192258f7f3e2675f33fe7c4a74b2b889b299",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s05/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s05-cpu-none/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "6bfd7b8c74128eab23ed320dbb91192258f7f3e2675f33fe7c4a74b2b889b299",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s06/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s06-cpu-both/RECEIPT.json",
+      "bytes": 977,
+      "sha256": "a98963008bf50c56d38aee85115eef5613d6aa9438119bd147d8341e9101ebad",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s06/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s06-cpu-global/RECEIPT.json",
+      "bytes": 977,
+      "sha256": "a98963008bf50c56d38aee85115eef5613d6aa9438119bd147d8341e9101ebad",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s06/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s06-cpu-local/RECEIPT.json",
+      "bytes": 977,
+      "sha256": "a98963008bf50c56d38aee85115eef5613d6aa9438119bd147d8341e9101ebad",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s06/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s06-cpu-none/RECEIPT.json",
+      "bytes": 977,
+      "sha256": "a98963008bf50c56d38aee85115eef5613d6aa9438119bd147d8341e9101ebad",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s07/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s07-cpu-both/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "47648229ddcd037069c30e05a374d544ec6cba8c24ca494b99126a130e01209a",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s07/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s07-cpu-global/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "47648229ddcd037069c30e05a374d544ec6cba8c24ca494b99126a130e01209a",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s07/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s07-cpu-local/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "47648229ddcd037069c30e05a374d544ec6cba8c24ca494b99126a130e01209a",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s07/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s07-cpu-none/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "47648229ddcd037069c30e05a374d544ec6cba8c24ca494b99126a130e01209a",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s08/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s08-cpu-both/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "2dbe6befb43ecb719af564c6b394108c60c6ba59461768eb734663c47053a098",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s08/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s08-cpu-global/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "2dbe6befb43ecb719af564c6b394108c60c6ba59461768eb734663c47053a098",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s08/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s08-cpu-local/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "2dbe6befb43ecb719af564c6b394108c60c6ba59461768eb734663c47053a098",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s08/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s08-cpu-none/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "2dbe6befb43ecb719af564c6b394108c60c6ba59461768eb734663c47053a098",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s09/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s09-cpu-both/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "4c4f1f3e11fd29fd80a855e2d2755973acf2790d2b5f41e8a4001c1d4a9c96fa",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s09/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s09-cpu-global/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "4c4f1f3e11fd29fd80a855e2d2755973acf2790d2b5f41e8a4001c1d4a9c96fa",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s09/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s09-cpu-local/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "4c4f1f3e11fd29fd80a855e2d2755973acf2790d2b5f41e8a4001c1d4a9c96fa",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/outmodel-s09/RECEIPT.json",
+      "stage": "fixture-receipts/B-outmodel-s09-cpu-none/RECEIPT.json",
+      "bytes": 978,
+      "sha256": "4c4f1f3e11fd29fd80a855e2d2755973acf2790d2b5f41e8a4001c1d4a9c96fa",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/pedestal32-s00/RECEIPT.json",
+      "stage": "fixture-receipts/B-pedestal32-s00-cpu-plain/RECEIPT.json",
+      "bytes": 979,
+      "sha256": "d24b1b96ad1c1ca32c29e7c3ef7ba30979438ab5ca5e54ae6b6640b16efe5c9e",
+      "role": "recipe receipt; original cwd preserved as provenance"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s00-cpu-plain/RUN.json",
+      "stage": "runs/B-dose1-s00-cpu-plain/RUN.json",
+      "bytes": 3757,
+      "sha256": "7af6ad057af65c7ce1aa4c62e454e6e99c346e2c2d3ed61e6ff8e1631d904b91",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-both/RUN.json",
+      "stage": "runs/B-nonsquare-s00-cpu-both/RUN.json",
+      "bytes": 4227,
+      "sha256": "5836969c812988acce7d16224057ce6b9c2b981e924bcda6cf43d559d3f8f9fc",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-both/output/movie.log",
+      "stage": "runs/B-nonsquare-s00-cpu-both/output/movie.log",
+      "bytes": 4714,
+      "sha256": "1a707a2aa082ec2f6846d7592be31337a4c6d3ce99392a87947b204198ec9042",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-both/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s00-cpu-both/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "7c0d06eee87a268102e319ed44d4e40e2d52f1892b26747d7fb259e590cd017d",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-both/output/movie.star",
+      "stage": "runs/B-nonsquare-s00-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "65cad8937f6c4d63bd4fc110f6cc7289d0d1a9f84b185fc65a3fae5bde3c8634",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-both/runtime.json",
+      "stage": "runs/B-nonsquare-s00-cpu-both/runtime.json",
+      "bytes": 2453,
+      "sha256": "cf3b7c56810402dd47a17899ab411e8fdb69d698f1412aea661f15712c3acdb6",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-global/RUN.json",
+      "stage": "runs/B-nonsquare-s00-cpu-global/RUN.json",
+      "bytes": 4240,
+      "sha256": "53662e162d38c319ff85faa5e7dda7562be092e6acd8b7fadfe619de428bcd80",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-global/output/movie.log",
+      "stage": "runs/B-nonsquare-s00-cpu-global/output/movie.log",
+      "bytes": 4716,
+      "sha256": "90c351cfcae568ad566b61a01573e198b7b9fc929981409573517308d80656a8",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-global/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s00-cpu-global/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "b7bc46b12f113d4ec33e2ca93b1fe5262a306de0028a7e52bb0cbf0e1ee1f21e",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-global/output/movie.star",
+      "stage": "runs/B-nonsquare-s00-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "a839acbe89439ab0b26efb09146e6d00c4e6f38d9b35b4b0c8e6ded014558e4c",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-global/runtime.json",
+      "stage": "runs/B-nonsquare-s00-cpu-global/runtime.json",
+      "bytes": 2452,
+      "sha256": "c618f3e662900b2c8ffde097f2925db1fb4d0524b508aafd99535477bfe84ca2",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-local/RUN.json",
+      "stage": "runs/B-nonsquare-s00-cpu-local/RUN.json",
+      "bytes": 4234,
+      "sha256": "c9e826b4244afaf7e2e9096e36791d32bd8df0ad70c8487b3118e3171482d176",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-local/output/movie.log",
+      "stage": "runs/B-nonsquare-s00-cpu-local/output/movie.log",
+      "bytes": 4715,
+      "sha256": "3687f1cb6ebdc644289b7d55b9f7d009d0980c1ac36919537ce28d264f66f427",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-local/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s00-cpu-local/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "4b3b69e2c8b23b83cc16c6abb1cef249c7ec064ac9801ff37b67e5725877d578",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-local/output/movie.star",
+      "stage": "runs/B-nonsquare-s00-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "4e897497bfecc0e9b6012129af0220590c84c8b611f78976b6a4b0fdfbb6d138",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-local/runtime.json",
+      "stage": "runs/B-nonsquare-s00-cpu-local/runtime.json",
+      "bytes": 2459,
+      "sha256": "02a6bc3c4bc7865fd0f2b588fd1148a2bc7c508d0d5692d758e344b1843e60b0",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-none/RUN.json",
+      "stage": "runs/B-nonsquare-s00-cpu-none/RUN.json",
+      "bytes": 4223,
+      "sha256": "326c7072ac7ea312ab4897f02c02a8b8f4bae87b32da6dac8afef27384248a81",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-none/output/movie.log",
+      "stage": "runs/B-nonsquare-s00-cpu-none/output/movie.log",
+      "bytes": 4717,
+      "sha256": "3a50e27b00137ae9e1a3c41daccc44fd758a786c93f33a49b04dd8ed3832d129",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-none/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s00-cpu-none/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "7880e0c34e007ee14d9edb33e6ecc1d77e56c8dd1af9a5f3d65b07f7ddfa74da",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-none/output/movie.star",
+      "stage": "runs/B-nonsquare-s00-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "ce37e66d4262d94f2c60a12e5192a4a5bd78e054642b97a8a08c233607cb329c",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s00-cpu-none/runtime.json",
+      "stage": "runs/B-nonsquare-s00-cpu-none/runtime.json",
+      "bytes": 2459,
+      "sha256": "dbd7d7fa71b37e16040271bcb523a0c11be072d2430fa0c71ed06dd0ac395cc3",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-both/RUN.json",
+      "stage": "runs/B-nonsquare-s01-cpu-both/RUN.json",
+      "bytes": 4227,
+      "sha256": "2e5a7317cb37b2b5696fe789671b5db8b16aae67169d494a056c281ec188a663",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-both/output/movie.log",
+      "stage": "runs/B-nonsquare-s01-cpu-both/output/movie.log",
+      "bytes": 4681,
+      "sha256": "8cfcc4233e42a9c46514197de7e4b73681de60cd0f66ef92956741551c041b39",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-both/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s01-cpu-both/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "7af6172e9e2cba67f2f13be93f04acd5d6d7f54daed1a786db89198aacac44b2",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-both/output/movie.star",
+      "stage": "runs/B-nonsquare-s01-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "37ec08ee8b56a7bb0a478099e8e4e1d703bd581dae0ab73ccafeb23d6eefeaae",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-both/runtime.json",
+      "stage": "runs/B-nonsquare-s01-cpu-both/runtime.json",
+      "bytes": 2456,
+      "sha256": "19dd53f6e2135acb48ffce2e799d236d0548c3941be69ccd0603bb28342f83ee",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-global/RUN.json",
+      "stage": "runs/B-nonsquare-s01-cpu-global/RUN.json",
+      "bytes": 4239,
+      "sha256": "0153ac6b289a9c67816d157f9de514c21091ca66a84d60e7cef676d28491c55e",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-global/output/movie.log",
+      "stage": "runs/B-nonsquare-s01-cpu-global/output/movie.log",
+      "bytes": 4687,
+      "sha256": "cc04a3bf3ef916e8c5e514a90596891691c3a3fe04133becee8c9d9ad879aa5b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-global/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s01-cpu-global/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "b9553cafb457113608cc67b4fdeaae27849686a7e9435aaf06b1f6a0a19e3d64",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-global/output/movie.star",
+      "stage": "runs/B-nonsquare-s01-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "76c006acf2d56e7813f93bc19b8a1959341a585eb785518bd722a40cc435dc71",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-global/runtime.json",
+      "stage": "runs/B-nonsquare-s01-cpu-global/runtime.json",
+      "bytes": 2458,
+      "sha256": "afe149a29a74c35b773703634c4c46609b1fe08bd3f206c53e40e157d5c7a4dc",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-local/RUN.json",
+      "stage": "runs/B-nonsquare-s01-cpu-local/RUN.json",
+      "bytes": 4234,
+      "sha256": "2643b121a2d9d6a69ddb1b02a5a4e0df6ebfd336ef12c86038e442ebaa5379b5",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-local/output/movie.log",
+      "stage": "runs/B-nonsquare-s01-cpu-local/output/movie.log",
+      "bytes": 4686,
+      "sha256": "ea7f441333e28362930d54ec09d38b0e1d6e79435f04e5c14951f069c957a6af",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-local/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s01-cpu-local/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "8f5d355fccc15092f2aa90b533e623e7eefa1bdfff671f487d605adf10ca95b6",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-local/output/movie.star",
+      "stage": "runs/B-nonsquare-s01-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "29b07c2990ed9e26d9653e2f9cc3fcfc0deb1384be9acb4c3cd2352f055511b6",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-local/runtime.json",
+      "stage": "runs/B-nonsquare-s01-cpu-local/runtime.json",
+      "bytes": 2457,
+      "sha256": "5deb3fa7b309df28e5e96e74383a5a39d67bd0bc2f62c4b9b1427ef34c824a3e",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-none/RUN.json",
+      "stage": "runs/B-nonsquare-s01-cpu-none/RUN.json",
+      "bytes": 4223,
+      "sha256": "073558bbca175c90e119e0270cf64eaa9b866a07ce3bbfd3b12d0c54faadf926",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-none/output/movie.log",
+      "stage": "runs/B-nonsquare-s01-cpu-none/output/movie.log",
+      "bytes": 4679,
+      "sha256": "1f096b575901f592a913c4ba9f41013d9598e300c617bca8fdab2b7e0e0f5128",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-none/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s01-cpu-none/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "472608e58b9fa2656cd939d39ec145082fcc091decf9805830643936a4800be5",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-none/output/movie.star",
+      "stage": "runs/B-nonsquare-s01-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "b72c809d70207ff0d173508aed248aafb6f3e1c9badbc7e8a027ed4de89e4e94",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s01-cpu-none/runtime.json",
+      "stage": "runs/B-nonsquare-s01-cpu-none/runtime.json",
+      "bytes": 2460,
+      "sha256": "e9a26d41f1e19fb5ceea8bb33c66c905af2802f289cbd3f7f26a10416d8d2bdd",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-both/RUN.json",
+      "stage": "runs/B-nonsquare-s02-cpu-both/RUN.json",
+      "bytes": 4227,
+      "sha256": "b764533be1f5b5fc3b7cfd1861d04af2c21aa0ae6558bd3e4fdd9239f7d96a3d",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-both/output/movie.log",
+      "stage": "runs/B-nonsquare-s02-cpu-both/output/movie.log",
+      "bytes": 4716,
+      "sha256": "d2134ec81af7da804836f6420630ef681cc02a2a69231d69d3fda09430427c8f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-both/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s02-cpu-both/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "e73e57fd148a46442aad497920cbd8aff46f125ff95ebfa08a22d22e20a984ca",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-both/output/movie.star",
+      "stage": "runs/B-nonsquare-s02-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "4e82edab5e6f8e0350ee2da39f1e2ba100df64f5d9fd6c330ac26d015a9153dc",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-both/runtime.json",
+      "stage": "runs/B-nonsquare-s02-cpu-both/runtime.json",
+      "bytes": 2462,
+      "sha256": "7abf44fd1d24ee34500de3390f01267abe9312651b05ab7439ad83b53efaede3",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-global/RUN.json",
+      "stage": "runs/B-nonsquare-s02-cpu-global/RUN.json",
+      "bytes": 4240,
+      "sha256": "40dd76362ae151e6a3596495c179f31666af472e6d5e182b4467492407201ebd",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-global/output/movie.log",
+      "stage": "runs/B-nonsquare-s02-cpu-global/output/movie.log",
+      "bytes": 4719,
+      "sha256": "46e95920206ced4d47781434d9a408c9c54fb42062a14c6e098da9d55e782eed",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-global/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s02-cpu-global/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "b2aa311e9baf3da2bc6a949f15db2cf98fae0a3d57b1395c4b52df3bbd4fe2c1",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-global/output/movie.star",
+      "stage": "runs/B-nonsquare-s02-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "fda9aa70216846f8e3320a1ea55447f8a743ab61788010ccc237e32bf21371ff",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-global/runtime.json",
+      "stage": "runs/B-nonsquare-s02-cpu-global/runtime.json",
+      "bytes": 2457,
+      "sha256": "7ea3c5fe8b0e97213826b80bac700e7fd5b2d7ebda52cc17ad1d0b7d97681066",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-local/RUN.json",
+      "stage": "runs/B-nonsquare-s02-cpu-local/RUN.json",
+      "bytes": 4234,
+      "sha256": "2b4dd08ee81dcac0cca9a646a9445141817ce4ae4c6cd7aa3e503765fa71c905",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-local/output/movie.log",
+      "stage": "runs/B-nonsquare-s02-cpu-local/output/movie.log",
+      "bytes": 4715,
+      "sha256": "c10252348507130070985cbc593fa2f80e95e2839e6351152752d3a83f89641c",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-local/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s02-cpu-local/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "7def701eeefc0858147fe123a24b46ae26cfe2df069eaeb8e29a0df31c329fee",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-local/output/movie.star",
+      "stage": "runs/B-nonsquare-s02-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "27e944c67455909b272acc71d312a885e22ad330eb5369443a637bfef59402c9",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-local/runtime.json",
+      "stage": "runs/B-nonsquare-s02-cpu-local/runtime.json",
+      "bytes": 2460,
+      "sha256": "489f8c7a1747220ac49854a5777ccffc53e6dd71ab2fd73728f4c46b6df055b9",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-none/RUN.json",
+      "stage": "runs/B-nonsquare-s02-cpu-none/RUN.json",
+      "bytes": 4223,
+      "sha256": "626bd4977ad4ce205810ea40cd9f264e599cc28f3dbeb6d57ec6a03bb0104e5f",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-none/output/movie.log",
+      "stage": "runs/B-nonsquare-s02-cpu-none/output/movie.log",
+      "bytes": 4716,
+      "sha256": "e750a6efa40d1ae1d83c430acf9d13d3ae33199aee7b477a76b7d8a468d2d159",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-none/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s02-cpu-none/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "096447721416108b4453f55278bd6c0b044cd8ccb3c9cd67df464bd8f2ac5a7c",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-none/output/movie.star",
+      "stage": "runs/B-nonsquare-s02-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "c695d87319e7255127857f0b0b40e549053826fdab2c7e96f22cbce0c4bc673a",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s02-cpu-none/runtime.json",
+      "stage": "runs/B-nonsquare-s02-cpu-none/runtime.json",
+      "bytes": 2457,
+      "sha256": "b57b0809177826eabe9a7aecff03f1be5f99d2cef3ee851eba0007137206ecfb",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-both/RUN.json",
+      "stage": "runs/B-nonsquare-s03-cpu-both/RUN.json",
+      "bytes": 4227,
+      "sha256": "5a00196185aabf23f106a1d47283e309f7415c75415f759c8a36af4d80ee943c",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-both/output/movie.log",
+      "stage": "runs/B-nonsquare-s03-cpu-both/output/movie.log",
+      "bytes": 4723,
+      "sha256": "0adade4320a38ccaf013345e0bdec0ba7bde0a5a7ac91143fa244b10a938be50",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-both/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s03-cpu-both/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "9e76f14d16f223f09923c92abfc0f7ebb978d09fbfbc3334891ca9b4c91f2a67",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-both/output/movie.star",
+      "stage": "runs/B-nonsquare-s03-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "ba52ad3a5370476fc17c8907f60549c350d0ac9acf091c052a2cb7918b2f15c3",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-both/runtime.json",
+      "stage": "runs/B-nonsquare-s03-cpu-both/runtime.json",
+      "bytes": 2455,
+      "sha256": "e3fd95cb9c022f888a6c71cab97f1f8e6a074cee590c998eacb9ac715db9fb62",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-global/RUN.json",
+      "stage": "runs/B-nonsquare-s03-cpu-global/RUN.json",
+      "bytes": 4240,
+      "sha256": "54c07a5bd0e6d0bef9570e61ab10b7861357261a8e41a1141e43d573fd30a1d7",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-global/output/movie.log",
+      "stage": "runs/B-nonsquare-s03-cpu-global/output/movie.log",
+      "bytes": 4725,
+      "sha256": "d156897545100c12ba346c9c5d2ae59e10e75afe776ebd7ca2ea524b9426ec42",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-global/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s03-cpu-global/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "14263a82e91e836324438aaf3c3cd96716013398a7fe1498ab3ff6c53808ffee",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-global/output/movie.star",
+      "stage": "runs/B-nonsquare-s03-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "c1dec8d4dcc7324f3b99917f5f462f2ff2deb3c7fa2f8832330aaa7a1ec60263",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-global/runtime.json",
+      "stage": "runs/B-nonsquare-s03-cpu-global/runtime.json",
+      "bytes": 2455,
+      "sha256": "a123c170efa9dc6098997c5bc735d2ee66066f4ff2a6b3d22cf461b16d91d58d",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-local/RUN.json",
+      "stage": "runs/B-nonsquare-s03-cpu-local/RUN.json",
+      "bytes": 4234,
+      "sha256": "050e3a10cdf1ef78ae8c03654fc01155fc612d5d566b0d9904d9059de93327f1",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-local/output/movie.log",
+      "stage": "runs/B-nonsquare-s03-cpu-local/output/movie.log",
+      "bytes": 4723,
+      "sha256": "50c57d9012396a446290f43ee50e9b7541bf25a41a211ae6b79ed51bdb70adcb",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-local/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s03-cpu-local/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "98c3649507478cf9a1e9f2bf9a8d2f0c9feb8f7c10c20f2cb0a77fe0e5a7cc7d",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-local/output/movie.star",
+      "stage": "runs/B-nonsquare-s03-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "a2261be28d4c634d9ea7a6b253b1a1087c96210c08a5de574cc949a41db8441a",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-local/runtime.json",
+      "stage": "runs/B-nonsquare-s03-cpu-local/runtime.json",
+      "bytes": 2463,
+      "sha256": "a9029780357c7c366620891edd65070f5f773b7654caf90e0a20abc6205a09fe",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-none/RUN.json",
+      "stage": "runs/B-nonsquare-s03-cpu-none/RUN.json",
+      "bytes": 4223,
+      "sha256": "b79af50c60f6a24ec1330850c8c152b0cfc7d91cf46626ecd23a9e56866ca28d",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-none/output/movie.log",
+      "stage": "runs/B-nonsquare-s03-cpu-none/output/movie.log",
+      "bytes": 4719,
+      "sha256": "84426b75329b29fb94c58a3e6432d2893a45d481433b0fcd9754bb486fa5a0aa",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-none/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s03-cpu-none/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "d53100bc60c1bb3c13fe855b7072817f4dad2c6d55e855b8ae4fe219674a0f12",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-none/output/movie.star",
+      "stage": "runs/B-nonsquare-s03-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "8262a5de538fd2dec7564fa2377c20f56366b394b05f90e2acf8ee48e9b89fc9",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s03-cpu-none/runtime.json",
+      "stage": "runs/B-nonsquare-s03-cpu-none/runtime.json",
+      "bytes": 2461,
+      "sha256": "5feba72f50e48e0a1c680f0c5804265748835fb745ed2088e471c4c5232af9fc",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-both/RUN.json",
+      "stage": "runs/B-nonsquare-s04-cpu-both/RUN.json",
+      "bytes": 4227,
+      "sha256": "864f9c2ef776a95631c9e5972fb503fd25b7594d5ed2a447b3a60db4f68b0669",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-both/output/movie.log",
+      "stage": "runs/B-nonsquare-s04-cpu-both/output/movie.log",
+      "bytes": 4711,
+      "sha256": "475454bb5d8af7a727231599e14c0322ffbef797a26c61f6963e61efb6aeb25e",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-both/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s04-cpu-both/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "f5e8ea526df8062604f06ec6c128e931f9118386075d540d6a6728009125e536",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-both/output/movie.star",
+      "stage": "runs/B-nonsquare-s04-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "954d2fc2ba93158e9aeb48e98767052a27012764cbef10514c088d9d3ca747fa",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-both/runtime.json",
+      "stage": "runs/B-nonsquare-s04-cpu-both/runtime.json",
+      "bytes": 2458,
+      "sha256": "a130f21f16ccae164a6ceb24015453441ab74eb2aa5b0b31a48918bd795309eb",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-global/RUN.json",
+      "stage": "runs/B-nonsquare-s04-cpu-global/RUN.json",
+      "bytes": 4240,
+      "sha256": "282521ae4e7a9293879aecb08fb1115c4731f428742a540a4250f34e4bb5eeac",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-global/output/movie.log",
+      "stage": "runs/B-nonsquare-s04-cpu-global/output/movie.log",
+      "bytes": 4713,
+      "sha256": "a1be99302710ca8483068da6dc2cd7060404ca44f9583b3ab238b218304ffa06",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-global/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s04-cpu-global/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "2e6486d68cd17cde83b64c18bc594faade5962a969461929960512e450c44adc",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-global/output/movie.star",
+      "stage": "runs/B-nonsquare-s04-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "9894efb975260ee020940742c5959fa0f1737fafcb0bed948ccbcdbcdbc15ad1",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-global/runtime.json",
+      "stage": "runs/B-nonsquare-s04-cpu-global/runtime.json",
+      "bytes": 2462,
+      "sha256": "fe7776681a20cb830a69a5d959237d8ba313109d1ea59c958c6746dcc0fb814b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-local/RUN.json",
+      "stage": "runs/B-nonsquare-s04-cpu-local/RUN.json",
+      "bytes": 4234,
+      "sha256": "6078aaef22617e5c4d43f530a2002bb470fd51daa8f256d47fc7faead0663b64",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-local/output/movie.log",
+      "stage": "runs/B-nonsquare-s04-cpu-local/output/movie.log",
+      "bytes": 4716,
+      "sha256": "b238435c3650df3bbb1ffb19190fea11cb73f99f29e534146adc2c6d7f47f0d9",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-local/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s04-cpu-local/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "09f5499d2330554c43d72cce27f9b01a4f07af39d8800682d34b7e3f149bac7f",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-local/output/movie.star",
+      "stage": "runs/B-nonsquare-s04-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "2dd897154519bedc87f2d3c9f12ba37a26ce12583e2b24a59f7dc84146df57e8",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-local/runtime.json",
+      "stage": "runs/B-nonsquare-s04-cpu-local/runtime.json",
+      "bytes": 2456,
+      "sha256": "d402aadc7a23178f46826eb360adf6ef037d07322e4ea31fb26b36fff585f0f3",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-none/RUN.json",
+      "stage": "runs/B-nonsquare-s04-cpu-none/RUN.json",
+      "bytes": 4223,
+      "sha256": "5b841496cfb92d25aafd9bd66bec623e6d5cb12b9c30f821e515adfe809f3c0a",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-none/output/movie.log",
+      "stage": "runs/B-nonsquare-s04-cpu-none/output/movie.log",
+      "bytes": 4721,
+      "sha256": "776aa3a93aa0eda375ecfef65bb10d829cf25638d07167e7b9efecdf37685caf",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-none/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s04-cpu-none/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "2850c3b1057fd4982172b4d915c91937d18aa71de3ffeb1e744840a252b8897a",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-none/output/movie.star",
+      "stage": "runs/B-nonsquare-s04-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "d02f30fe25694ce6c557baec0f0d567560bb00be760c16c62910b34ff5740c5f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s04-cpu-none/runtime.json",
+      "stage": "runs/B-nonsquare-s04-cpu-none/runtime.json",
+      "bytes": 2459,
+      "sha256": "b67434e7a79a2ae60a267e0a98f2d8141e6ded41a9fe8deabb2d382d8f8aa24b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-both/RUN.json",
+      "stage": "runs/B-nonsquare-s05-cpu-both/RUN.json",
+      "bytes": 4227,
+      "sha256": "0c0d4b324eb704fe53a7f9518be35e7d0bc85efffa83676951876bd417bdbed1",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-both/output/movie.log",
+      "stage": "runs/B-nonsquare-s05-cpu-both/output/movie.log",
+      "bytes": 4818,
+      "sha256": "b0f19560e72801d9bc40fbf7b357345108414f6b96c13bed5bfcb38382206743",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-both/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s05-cpu-both/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "29849193b40e714282cb87cebb7c8975100634f771a354cecf1525785a34dc2e",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-both/output/movie.star",
+      "stage": "runs/B-nonsquare-s05-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "deb144d54d4686e1ebb61e3c973906f75cb73d0e9ee0ffa4c5932a072da38454",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-both/runtime.json",
+      "stage": "runs/B-nonsquare-s05-cpu-both/runtime.json",
+      "bytes": 2453,
+      "sha256": "7c367726e7bf48941a963b1bda3ad633d8cf0fad25e9397751eb57a2690eee6d",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-global/RUN.json",
+      "stage": "runs/B-nonsquare-s05-cpu-global/RUN.json",
+      "bytes": 4240,
+      "sha256": "76712e63143d741b636f18df064a50003a491e613d11c672dcd1b7bf4eab3361",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-global/output/movie.log",
+      "stage": "runs/B-nonsquare-s05-cpu-global/output/movie.log",
+      "bytes": 4823,
+      "sha256": "196227975489a88d0f0292cfe273d79c643c0b7d4a487cee10b5a60d8ebb1bde",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-global/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s05-cpu-global/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "438e0e528a1cfcacc86e2f0459316147af1a8c89d99c3fc4380e0cfd4d2b48f1",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-global/output/movie.star",
+      "stage": "runs/B-nonsquare-s05-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "2f152866778edab4d1cf34d978367673270f7208198fd8a3a963ceadf80c7d54",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-global/runtime.json",
+      "stage": "runs/B-nonsquare-s05-cpu-global/runtime.json",
+      "bytes": 2457,
+      "sha256": "bfd212fef034d1ebe1e86d33ddbabb5c0ebeceb8d043be01265c9463f0f081e1",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-local/RUN.json",
+      "stage": "runs/B-nonsquare-s05-cpu-local/RUN.json",
+      "bytes": 4233,
+      "sha256": "1ba7e716db6b4e7f251c3622ef106352e5971a67eb89296b4037594da703bfa5",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-local/output/movie.log",
+      "stage": "runs/B-nonsquare-s05-cpu-local/output/movie.log",
+      "bytes": 4825,
+      "sha256": "d4ff516d4fef9600c374aba7703e834f8462ce770cd07c3d32eed9d0f16ba08f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-local/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s05-cpu-local/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "62ccaee63004a4742d389cabad8ff5ef6a82b9501c364b2ecbc30886f7f7e9e1",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-local/output/movie.star",
+      "stage": "runs/B-nonsquare-s05-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "b1f9ae017cda2af398f6b0065281d19cf37062c0e1178ae984fd07c6a6b399ed",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-local/runtime.json",
+      "stage": "runs/B-nonsquare-s05-cpu-local/runtime.json",
+      "bytes": 2453,
+      "sha256": "94b87047a46375eaa4d4de519ad3dcfc2fd4cf9a7195520814251bb456d3dcc0",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-none/RUN.json",
+      "stage": "runs/B-nonsquare-s05-cpu-none/RUN.json",
+      "bytes": 4223,
+      "sha256": "b778ae4e7177567fd782c4b3059cfa375e9929096fedb4cec992500df05308e9",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-none/output/movie.log",
+      "stage": "runs/B-nonsquare-s05-cpu-none/output/movie.log",
+      "bytes": 4819,
+      "sha256": "5606356d75f8648a6bb01ef14fa8b9a3f2f3c23aba93d3ef609c85453a04bcd2",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-none/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s05-cpu-none/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "d047be572dc9d651fe264a20e83e99f7f7a2059d0a44cfbea90be2d86780146b",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-none/output/movie.star",
+      "stage": "runs/B-nonsquare-s05-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "91638d474dc017180402a66d668b657d31e531aa66fa185660c5612f7103155c",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s05-cpu-none/runtime.json",
+      "stage": "runs/B-nonsquare-s05-cpu-none/runtime.json",
+      "bytes": 2448,
+      "sha256": "2277d6886aad52bea39ea9b83d1b2dc916efa0a030515e2cba6b186cac427a3f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-both/RUN.json",
+      "stage": "runs/B-nonsquare-s06-cpu-both/RUN.json",
+      "bytes": 4227,
+      "sha256": "b6eca53d70db51ffbf01536099afca6616cbc268cd5f21709d48b32b328268b1",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-both/output/movie.log",
+      "stage": "runs/B-nonsquare-s06-cpu-both/output/movie.log",
+      "bytes": 4752,
+      "sha256": "6511cc7f52b4cc0827fb01da876740ac6442b7c60541da2999657fedec8f139f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-both/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s06-cpu-both/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "437a936bd328e5d73c2cc7017fef5db32cefc6e5475d47aa5714b22b33941b76",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-both/output/movie.star",
+      "stage": "runs/B-nonsquare-s06-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "2d2511e68b756e679b3929c3637550d7b41f75b7e973ee13504f50cc0a727827",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-both/runtime.json",
+      "stage": "runs/B-nonsquare-s06-cpu-both/runtime.json",
+      "bytes": 2458,
+      "sha256": "6f26d7f35ec11859951310501fa1e09a9432234dec57ae041e768e49e7f57ed8",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-global/RUN.json",
+      "stage": "runs/B-nonsquare-s06-cpu-global/RUN.json",
+      "bytes": 4240,
+      "sha256": "5fef965350dd60cff757b6098362a40f13ee643229f8b5757e3b347ae312bd63",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-global/output/movie.log",
+      "stage": "runs/B-nonsquare-s06-cpu-global/output/movie.log",
+      "bytes": 4749,
+      "sha256": "4ea950ac4a2a38d827bc77a0152f3d0173eab775a0e1cb2c0d4f6f86df2fc568",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-global/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s06-cpu-global/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "8dae5d508b0ef0a0770ae515692eedd15d32967c73f902d0de918dacaf7ea722",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-global/output/movie.star",
+      "stage": "runs/B-nonsquare-s06-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "c09ec97e7c6a91d9582b03ff84361ae3af6df7fa7f036085f4bb76d2b691cfa0",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-global/runtime.json",
+      "stage": "runs/B-nonsquare-s06-cpu-global/runtime.json",
+      "bytes": 2456,
+      "sha256": "1a2029d60a0de74e64fd8bc88a70866612dd2e14c295de5967fe2dbd3941f116",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-local/RUN.json",
+      "stage": "runs/B-nonsquare-s06-cpu-local/RUN.json",
+      "bytes": 4234,
+      "sha256": "80b10b49e3eb0adc39229100669bfd23e66657927c113b581a35422ac12b5dcd",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-local/output/movie.log",
+      "stage": "runs/B-nonsquare-s06-cpu-local/output/movie.log",
+      "bytes": 4755,
+      "sha256": "d3a48662747126dba48a38f7e6fb518a1961e13aac53e76c6b379c2c8d67a1a9",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-local/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s06-cpu-local/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "a4939ac42b945180236380296dd3c9b61231def7b4af206185c6ea6bbdbcf192",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-local/output/movie.star",
+      "stage": "runs/B-nonsquare-s06-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "53678af80f70a0014d2f3e31ba2e144b8ad6d65eb78a211e2ca3873b32498e47",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-local/runtime.json",
+      "stage": "runs/B-nonsquare-s06-cpu-local/runtime.json",
+      "bytes": 2460,
+      "sha256": "961748b0f7ab9d7aaf12d461a2924c12ac91e5f9e603d6572fa111b9b8df3fa5",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-none/RUN.json",
+      "stage": "runs/B-nonsquare-s06-cpu-none/RUN.json",
+      "bytes": 4223,
+      "sha256": "d2d0f667e3bbe786dd0254bbb759a12801822e952c583bd6a863aba1a99007a0",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-none/output/movie.log",
+      "stage": "runs/B-nonsquare-s06-cpu-none/output/movie.log",
+      "bytes": 4716,
+      "sha256": "600cba8b3194ed0fc178e1e2b79a5cd804501ada947d9a6f57f19400bdceaffc",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-none/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s06-cpu-none/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "2d3693630d6fdc0b26c7f49d70057f0b4de2b424bef5254ad9a9475f97ef355a",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-none/output/movie.star",
+      "stage": "runs/B-nonsquare-s06-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "49d6969b1118a2dfe85f1d9046d4735fecf42712310e48df3b4386c49db1646e",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s06-cpu-none/runtime.json",
+      "stage": "runs/B-nonsquare-s06-cpu-none/runtime.json",
+      "bytes": 2459,
+      "sha256": "0df7c198182acb073d0c08915d53597552364006f22fef4fe3736afe04735867",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-both/RUN.json",
+      "stage": "runs/B-nonsquare-s07-cpu-both/RUN.json",
+      "bytes": 4227,
+      "sha256": "a6b306c64374493876b175ec19ba34169a31243006e71def3e669f61af58111c",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-both/output/movie.log",
+      "stage": "runs/B-nonsquare-s07-cpu-both/output/movie.log",
+      "bytes": 4785,
+      "sha256": "195041eff508c232616493cc015e9326b1b0685a27148bed703896f3f58cb90b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-both/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s07-cpu-both/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "441c525880df7a8e83b92d2d6bd4b7cc9b62bc8e9881a587a719698c1d884a46",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-both/output/movie.star",
+      "stage": "runs/B-nonsquare-s07-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "8d4056e050bd2bdd2ec9ecc83c419c8b11b068da6a98153b19bf057355e5f929",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-both/runtime.json",
+      "stage": "runs/B-nonsquare-s07-cpu-both/runtime.json",
+      "bytes": 2457,
+      "sha256": "70a2bcabddde7c085e546d717e6292f6fea581811673ae7dc5996aaec5215ff3",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-global/RUN.json",
+      "stage": "runs/B-nonsquare-s07-cpu-global/RUN.json",
+      "bytes": 4240,
+      "sha256": "a8fe35fb94407c0a0c4ed74e35b02012ac64e1d8161cf97fcd7fb634acfc1fee",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-global/output/movie.log",
+      "stage": "runs/B-nonsquare-s07-cpu-global/output/movie.log",
+      "bytes": 4788,
+      "sha256": "0df2e03e857ad76df3e339a4243992de32ab74b4ee8fe08a648f4e9f9ba6e91e",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-global/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s07-cpu-global/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "4ba3711d8f52a3902e0e383ef6e81c8b9228c6364a31b18b0522a7b042532f3a",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-global/output/movie.star",
+      "stage": "runs/B-nonsquare-s07-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "7721adc7bb0c204f7b84b1da8c603b6421eea53cf83c4d450a0f38e29f0ca3e8",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-global/runtime.json",
+      "stage": "runs/B-nonsquare-s07-cpu-global/runtime.json",
+      "bytes": 2458,
+      "sha256": "4bbae943eb0c6cbc0721f105223b6cef5d92f089ee873763089c9ac71358164f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-local/RUN.json",
+      "stage": "runs/B-nonsquare-s07-cpu-local/RUN.json",
+      "bytes": 4234,
+      "sha256": "7c1a46df27baf0d6bf981a08a39ff7dc2b3ecbba0d1edc9d114c84be7a4aa20f",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-local/output/movie.log",
+      "stage": "runs/B-nonsquare-s07-cpu-local/output/movie.log",
+      "bytes": 4782,
+      "sha256": "3bfb4d5cc58ac8f291a643c349f097ab32ca4e96b5b3c17cf656462f0dc81dbc",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-local/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s07-cpu-local/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "f2b8d92c965fee6bd45c99036dba2f349a05081812f807590013e7f4ccdc6ed7",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-local/output/movie.star",
+      "stage": "runs/B-nonsquare-s07-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "0fa8e08b640fe93411e47d75ebdd313e29e897489c94f6afa09eb01780ebd41e",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-local/runtime.json",
+      "stage": "runs/B-nonsquare-s07-cpu-local/runtime.json",
+      "bytes": 2468,
+      "sha256": "6a9ef3a0753996198824aa2814473831b92c153d7568abd9f873a14b982e0712",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-none/RUN.json",
+      "stage": "runs/B-nonsquare-s07-cpu-none/RUN.json",
+      "bytes": 4223,
+      "sha256": "c064b438ab04e8a40ac2b5054f4dbb1538a958e0bc15320e86e66f90b3ae1748",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-none/output/movie.log",
+      "stage": "runs/B-nonsquare-s07-cpu-none/output/movie.log",
+      "bytes": 4789,
+      "sha256": "52bd80dbb719023201909add2a4165dd9871c8e7a8f7277b5b2c0f37369d4af4",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-none/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s07-cpu-none/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "04894f325177f0bdb32d328320b98fc168a674be98caaa642c24db89f7656998",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-none/output/movie.star",
+      "stage": "runs/B-nonsquare-s07-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "fd6030e60a4e1e0517599a664245dc83d234d6b3b0945e9c0fc39fa81984898e",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s07-cpu-none/runtime.json",
+      "stage": "runs/B-nonsquare-s07-cpu-none/runtime.json",
+      "bytes": 2468,
+      "sha256": "e92c25996d2a1ff2d2c66d567caf7fc60e305d36359b704546db68b1d90f664d",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-both/RUN.json",
+      "stage": "runs/B-nonsquare-s08-cpu-both/RUN.json",
+      "bytes": 4227,
+      "sha256": "3dbc82a06e1e318f681e97df13d08b98a44f0c507c51992df28f6708df91f302",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-both/output/movie.log",
+      "stage": "runs/B-nonsquare-s08-cpu-both/output/movie.log",
+      "bytes": 4823,
+      "sha256": "0636438504503bdea10f35d626e81e105883c3c42121f3c8d1ca45b763180000",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-both/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s08-cpu-both/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "e4322452fbc31b6e74778748848bfaf0dc02736fc8a4b8793a74e6ff64969bac",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-both/output/movie.star",
+      "stage": "runs/B-nonsquare-s08-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "d36a8559e07573bba10d65f8f24b7338cb095cbfbf114e81d1684b483f6efb9f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-both/runtime.json",
+      "stage": "runs/B-nonsquare-s08-cpu-both/runtime.json",
+      "bytes": 2459,
+      "sha256": "a1109085bb7f711992952373f8429c348992f6ae0221dd8be9ef276eaa0e3d1e",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-global/RUN.json",
+      "stage": "runs/B-nonsquare-s08-cpu-global/RUN.json",
+      "bytes": 4240,
+      "sha256": "f118f45eafa9c9c62dc49e365fc71c044659a66e3d4ce916c87d14f915225a88",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-global/output/movie.log",
+      "stage": "runs/B-nonsquare-s08-cpu-global/output/movie.log",
+      "bytes": 4822,
+      "sha256": "d6613377a4739c46a72d986e250fe840174bb5ac91632b31539d2ae2e3652e09",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-global/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s08-cpu-global/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "c5793e22e5fe35c6930d260d643d90cca20a81f242724500ab20b07028e6770b",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-global/output/movie.star",
+      "stage": "runs/B-nonsquare-s08-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "bd2ad8da1b9cbbce6b9e9548d1dc0503d4b7378272008e225dde2e17ca349254",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-global/runtime.json",
+      "stage": "runs/B-nonsquare-s08-cpu-global/runtime.json",
+      "bytes": 2459,
+      "sha256": "f8eed96ec6a190c2dddccaee6f508907a72624e79656555a30c0d04f09a238ea",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-local/RUN.json",
+      "stage": "runs/B-nonsquare-s08-cpu-local/RUN.json",
+      "bytes": 4234,
+      "sha256": "1054db0ec0770aee58438de09a92c2195af8d860c8fe844d1b83940bd2d6d2f4",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-local/output/movie.log",
+      "stage": "runs/B-nonsquare-s08-cpu-local/output/movie.log",
+      "bytes": 4820,
+      "sha256": "cf3f5928a9c7ba2fbae391a7d18bb0ec39bda0e561e4c9889be9e6463167cd93",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-local/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s08-cpu-local/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "36bbc23f2714a4d33380a868a8386c4dd1ac440793202591089a8c402243d5a1",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-local/output/movie.star",
+      "stage": "runs/B-nonsquare-s08-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "f7a8e2039fd6c26031aba75a69dd9d7bbd38ea9968c2af8d66d97fe2d0287c93",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-local/runtime.json",
+      "stage": "runs/B-nonsquare-s08-cpu-local/runtime.json",
+      "bytes": 2462,
+      "sha256": "655295077e28aa0c490e5a46ddc08668c456467c6ce1fae929ca14eeffecd80b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-none/RUN.json",
+      "stage": "runs/B-nonsquare-s08-cpu-none/RUN.json",
+      "bytes": 4223,
+      "sha256": "da7c2628abeb36178bf2e8b1a3310368590d82b8d3214ddf78d20d62a5db5a0b",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-none/output/movie.log",
+      "stage": "runs/B-nonsquare-s08-cpu-none/output/movie.log",
+      "bytes": 4816,
+      "sha256": "fedbc08b4aa4d6d24a14772fb0af0bc7d738409c706feb74889f01c8f973794f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-none/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s08-cpu-none/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "88c5fe75cf596ff66a06e6d4ca5be5ff6161b8f5fe1228d50c722bdee29d3c21",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-none/output/movie.star",
+      "stage": "runs/B-nonsquare-s08-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "c894f0025aa953ac75ece11d4fd33a09e6aacc3bdbb14529b82a7981737588e6",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s08-cpu-none/runtime.json",
+      "stage": "runs/B-nonsquare-s08-cpu-none/runtime.json",
+      "bytes": 2463,
+      "sha256": "e729b44d0a915961a141a6820bacff290c7aaa7d0937d7ffac803e41e7a238d1",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-both/RUN.json",
+      "stage": "runs/B-nonsquare-s09-cpu-both/RUN.json",
+      "bytes": 4227,
+      "sha256": "a4ef74823c7f636a322083ec8686e316f4348c6b0857bf0c8d9d125507003519",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-both/output/movie.log",
+      "stage": "runs/B-nonsquare-s09-cpu-both/output/movie.log",
+      "bytes": 4754,
+      "sha256": "7f29b3489b0bccf997c1129345138cd16f7a3bcb15f8cd20aedc87a1e7720cae",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-both/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s09-cpu-both/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "abf5bd6ca6b3323a6fb6362752f0833833fba985f2ecb09a0f15cb90147afaf4",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-both/output/movie.star",
+      "stage": "runs/B-nonsquare-s09-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "e98c4c6bb09ee960fa0a87244bb9d8932671545005a8b033cf975ed8abacfbe0",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-both/runtime.json",
+      "stage": "runs/B-nonsquare-s09-cpu-both/runtime.json",
+      "bytes": 2454,
+      "sha256": "898c0d8ffdc8d540b1ed870e83516db576ff1ff874ce56351a28b588ab218b05",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-global/RUN.json",
+      "stage": "runs/B-nonsquare-s09-cpu-global/RUN.json",
+      "bytes": 4240,
+      "sha256": "23ca1e9e063e6bdc3c509d92d3fc8e612d04ab6dd4a5d5861cc9b1f6d795a29f",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-global/output/movie.log",
+      "stage": "runs/B-nonsquare-s09-cpu-global/output/movie.log",
+      "bytes": 4757,
+      "sha256": "38f5718f2eeb6ca5d03341ae4b180113840f6c5a58962e533717c15237fbdd91",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-global/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s09-cpu-global/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "e6c9f4edeaa98c24fbb85a6e9201e3b771990760f185286de89f983d71c5c4d6",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-global/output/movie.star",
+      "stage": "runs/B-nonsquare-s09-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "f8aef3ee3dd329587d9c989657a9f9c17117b700d8db4bd08438ec37e1ce2ee0",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-global/runtime.json",
+      "stage": "runs/B-nonsquare-s09-cpu-global/runtime.json",
+      "bytes": 2450,
+      "sha256": "d611ead86fd34872ae69a14fc25edf900ece18263d51b993bae85e5c73580819",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-local/RUN.json",
+      "stage": "runs/B-nonsquare-s09-cpu-local/RUN.json",
+      "bytes": 4234,
+      "sha256": "fc56966fcbbbb577825486dd5966ee01b8f8b6a57cf7a1314183f96fad8e3b32",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-local/output/movie.log",
+      "stage": "runs/B-nonsquare-s09-cpu-local/output/movie.log",
+      "bytes": 4751,
+      "sha256": "cc37284ed93cdb6859d8542a46e3a73b0184800cf8d1e70588b717e2cbffe61c",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-local/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s09-cpu-local/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "a20afd5d1b56dc5eea1a2e1d10546b5e19e2ec8be874703956059a2911193010",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-local/output/movie.star",
+      "stage": "runs/B-nonsquare-s09-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "658170308f47f777cf4ff2f3334c758cd5bf756e59494c03083e447168af8f54",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-local/runtime.json",
+      "stage": "runs/B-nonsquare-s09-cpu-local/runtime.json",
+      "bytes": 2464,
+      "sha256": "d6ec9942759557911bbf26f7e703cd61bf04d676308a12f0c5bcb25bc5dea0bf",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-none/RUN.json",
+      "stage": "runs/B-nonsquare-s09-cpu-none/RUN.json",
+      "bytes": 4222,
+      "sha256": "4d1cfef40215bcbb717e088c4cd4229c8827060f3e6179a6c531e9ce7e016125",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-none/output/movie.log",
+      "stage": "runs/B-nonsquare-s09-cpu-none/output/movie.log",
+      "bytes": 4750,
+      "sha256": "e2aa47d96aaf743593b378b1e25c62b4b029f879a378721740a474073d33dc41",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-none/output/movie.mrc",
+      "stage": "runs/B-nonsquare-s09-cpu-none/output/movie.mrc",
+      "bytes": 94280704,
+      "sha256": "5a5049fd026cf1f3f1d5055024fd9973ad3a3c2a640494c89c8cd52b19bf183c",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-none/output/movie.star",
+      "stage": "runs/B-nonsquare-s09-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "0c65b7aeb08acfce87c9e31998736bf5db83efc4786e75972416d8a1a65887c5",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-nonsquare-s09-cpu-none/runtime.json",
+      "stage": "runs/B-nonsquare-s09-cpu-none/runtime.json",
+      "bytes": 2464,
+      "sha256": "9b3e0f840855a6e1dd13379bd99cfda3d5df427013b43669455cd895bc0fa068",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s03-cpu-both/RUN.json",
+      "stage": "runs/B-outmodel-s03-cpu-both/RUN.json",
+      "bytes": 4218,
+      "sha256": "c9ac4e1cfc6037c08f6bb881fbcd08e5a811eadc866a68fd0f1358e92be84a62",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s03-cpu-both/output/movie.log",
+      "stage": "runs/B-outmodel-s03-cpu-both/output/movie.log",
+      "bytes": 4834,
+      "sha256": "2153e38cbfcf091711a2bc95f033cf2dd304285dffeac4d647b96b17cba11f15",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s03-cpu-both/output/movie.mrc",
+      "stage": "runs/B-outmodel-s03-cpu-both/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "c9e79578866d5a7f4c97f93f244af6ee6f768f9c7b274a9b36d0b4be0386df37",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s03-cpu-both/output/movie.star",
+      "stage": "runs/B-outmodel-s03-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "2b14ecdb179750409ca787ddcfcfd4fc7e236323eab42407efd917b3a0ff5025",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s03-cpu-both/runtime.json",
+      "stage": "runs/B-outmodel-s03-cpu-both/runtime.json",
+      "bytes": 2464,
+      "sha256": "20ba3c36a3f67cdeef20d375f9970104ef4e8f22fb2fb1964e985584fb9df71c",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s03-cpu-local/RUN.json",
+      "stage": "runs/B-outmodel-s03-cpu-local/RUN.json",
+      "bytes": 4225,
+      "sha256": "cc03d8f7c1a29618ff9872d82d43bdf0e4bf0fba25424d03cf2b306e98a11ceb",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s03-cpu-local/output/movie.log",
+      "stage": "runs/B-outmodel-s03-cpu-local/output/movie.log",
+      "bytes": 4833,
+      "sha256": "2e5945bb0f7547efce56eb6b19e3668fe51ba810f334568d2ad56924dae782ed",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s03-cpu-local/output/movie.mrc",
+      "stage": "runs/B-outmodel-s03-cpu-local/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "98e5b7c2351fc0cc395d44b21c332c383ad47dc09bc0d0de0fecb3e5a1d8f060",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s03-cpu-local/output/movie.star",
+      "stage": "runs/B-outmodel-s03-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "2f508689f3c0fc4026f3b879597699b3c1ba5404c4fd2e6b94f14abe1dabbc27",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s03-cpu-local/runtime.json",
+      "stage": "runs/B-outmodel-s03-cpu-local/runtime.json",
+      "bytes": 2460,
+      "sha256": "4c1699afa09d5ffa3cabf2094a413ff9712ab3d42abb5c1c98208c6dd8df8c2d",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-both/RUN.json",
+      "stage": "runs/B-outmodel-s04-cpu-both/RUN.json",
+      "bytes": 4217,
+      "sha256": "f2393de1406c52f92e63cac1fae3d99e1916ce0c4ef0f6c3d055c03c3fa0a822",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-both/output/movie.log",
+      "stage": "runs/B-outmodel-s04-cpu-both/output/movie.log",
+      "bytes": 4802,
+      "sha256": "78a29c7d472a1419edfe6552bb834ed99c42fb6c6b7b0b67ac9bf3cda9224c5e",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-both/output/movie.mrc",
+      "stage": "runs/B-outmodel-s04-cpu-both/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "f8c29b7e86d5ae38f17f185ba50dc559075bdbeae7ca02107fce546a50d6ec60",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-both/output/movie.star",
+      "stage": "runs/B-outmodel-s04-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "5d50a3a5589ac08bf431f646e43ec95a641166d53dfa167fa01ca9b7a380576f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-both/runtime.json",
+      "stage": "runs/B-outmodel-s04-cpu-both/runtime.json",
+      "bytes": 2460,
+      "sha256": "090025aa1763f1501fca3d03f7cd02a0d1b0101ac142fa3c6d7ad602c7c819e0",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-global/RUN.json",
+      "stage": "runs/B-outmodel-s04-cpu-global/RUN.json",
+      "bytes": 4231,
+      "sha256": "7bc1770f51d42fac847259440501e3ac8bf592ef6313cbb6a59c7cdd5e908916",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-global/output/movie.log",
+      "stage": "runs/B-outmodel-s04-cpu-global/output/movie.log",
+      "bytes": 4800,
+      "sha256": "319c8e90d61ca32ed916eb17b9badaf6e224b85a9cb676fd790f159d6fdad40b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-global/output/movie.mrc",
+      "stage": "runs/B-outmodel-s04-cpu-global/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "42ed2945e4bd52d36a63bbc827ed344ca981cffc252fb8922ae5d2694814b76b",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-global/output/movie.star",
+      "stage": "runs/B-outmodel-s04-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "a5e98a79131373b5a519d64ecc3658c38c2171dff527d2bccbb74e3516760d30",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-global/runtime.json",
+      "stage": "runs/B-outmodel-s04-cpu-global/runtime.json",
+      "bytes": 2458,
+      "sha256": "41c0bdcb871c906868988373cbfa9444de0836c404530f00fa3bcdb4fb1c266b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-local/RUN.json",
+      "stage": "runs/B-outmodel-s04-cpu-local/RUN.json",
+      "bytes": 4225,
+      "sha256": "ba06b447f5e39718e4740f8d13fdd443964011622c2f7758da756148f85ca72f",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-local/output/movie.log",
+      "stage": "runs/B-outmodel-s04-cpu-local/output/movie.log",
+      "bytes": 4800,
+      "sha256": "3eb0786887a288c358f2da9357ec5c98b03380c32bafa343a11f7c797f23b1e5",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-local/output/movie.mrc",
+      "stage": "runs/B-outmodel-s04-cpu-local/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "a63717c72ea488dc0227cc7800a78e4ee4baba85937bf634c8b7ff1931f8c95b",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-local/output/movie.star",
+      "stage": "runs/B-outmodel-s04-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "1fbebeae9c021f76d101e21fa2099365886617b38a9c7ed9cb52fe8c4468b9e8",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-local/runtime.json",
+      "stage": "runs/B-outmodel-s04-cpu-local/runtime.json",
+      "bytes": 2454,
+      "sha256": "b4b4b117b05bbe87dc0c2dc54f695957c6b9b2827f5a40de62b057eb7065bc3d",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-none/RUN.json",
+      "stage": "runs/B-outmodel-s04-cpu-none/RUN.json",
+      "bytes": 4213,
+      "sha256": "2b2a1fa8530419dd761b43515dfa0cf75f8650abcf3ccb2b242b78c9d2a90ba4",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-none/output/movie.log",
+      "stage": "runs/B-outmodel-s04-cpu-none/output/movie.log",
+      "bytes": 4797,
+      "sha256": "f9b991dfc1ed5c7ae7ddd50672f49ee4223064d4de252bb0ef258104e78f11a4",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-none/output/movie.mrc",
+      "stage": "runs/B-outmodel-s04-cpu-none/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "81db4a3acded170b31d7db547858d2a0c2842d0b0e91c9afe94b0eee2f55083c",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-none/output/movie.star",
+      "stage": "runs/B-outmodel-s04-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "2ba21261669779435cff7d413ab78ebe329ab7d306a96913ada1a46ab823d942",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s04-cpu-none/runtime.json",
+      "stage": "runs/B-outmodel-s04-cpu-none/runtime.json",
+      "bytes": 2454,
+      "sha256": "f65a8919be997b1b5cf18298b5dc0397058dd43ff314299ff8e5931efe4affb4",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-both/RUN.json",
+      "stage": "runs/B-outmodel-s05-cpu-both/RUN.json",
+      "bytes": 4217,
+      "sha256": "da264d03b095a5cd2c88314989a01c2313c7a87f507571c66d8300388126ed0c",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-both/output/movie.log",
+      "stage": "runs/B-outmodel-s05-cpu-both/output/movie.log",
+      "bytes": 4797,
+      "sha256": "4c8c2bf345163130ee5263ccd09faada1560ade123710fd167c564ef2220c90b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-both/output/movie.mrc",
+      "stage": "runs/B-outmodel-s05-cpu-both/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "adeb5ac8dba8887808555e55c30c0adda94af0ea7570f6b4de1fa7f0f9c56d95",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-both/output/movie.star",
+      "stage": "runs/B-outmodel-s05-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "bd777c5c75aabe1ddcf628dc83dffc0895867e4736b21c0c39a2183bb63ea8d2",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-both/runtime.json",
+      "stage": "runs/B-outmodel-s05-cpu-both/runtime.json",
+      "bytes": 2448,
+      "sha256": "e2b4dd17c030e08ec53c1bd203db8bcc8a00f32aeb1111e151f67d2af46ec4a0",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-global/RUN.json",
+      "stage": "runs/B-outmodel-s05-cpu-global/RUN.json",
+      "bytes": 4231,
+      "sha256": "6d98a9c2963758fcd2d2b5ad99ee429e42c4c4316e5cf11454443de6cce8f2ea",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-global/output/movie.log",
+      "stage": "runs/B-outmodel-s05-cpu-global/output/movie.log",
+      "bytes": 4802,
+      "sha256": "fc9749eac8c1c359618f85a631e133281a7bab46cd7270b136b6a0f9ab808952",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-global/output/movie.mrc",
+      "stage": "runs/B-outmodel-s05-cpu-global/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "48d273f3acc319a2e2abf177d8c385b7121ce066a02755e8bb7c321c1fe14f32",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-global/output/movie.star",
+      "stage": "runs/B-outmodel-s05-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "7c713e54115391a027fd8c0d67545e3eec573f0636e417029ebc004a2c8e9616",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-global/runtime.json",
+      "stage": "runs/B-outmodel-s05-cpu-global/runtime.json",
+      "bytes": 2445,
+      "sha256": "05c131a1722cdca52c0bdc8a90f4912ed36294b665d79456b385afcf306b6ee9",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-local/RUN.json",
+      "stage": "runs/B-outmodel-s05-cpu-local/RUN.json",
+      "bytes": 4225,
+      "sha256": "29e5582296cd18b5eb39c28050aaad5b671858c9533362202af59fbc8e19a9b6",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-local/output/movie.log",
+      "stage": "runs/B-outmodel-s05-cpu-local/output/movie.log",
+      "bytes": 4808,
+      "sha256": "33c336151f0715c275638d6c9ea9bab164da1bd256f98ecdf04ebcfb4e2012d6",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-local/output/movie.mrc",
+      "stage": "runs/B-outmodel-s05-cpu-local/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "fcf991aaefc38374ca45706da33aafdcd51edaeca99df5162c54f76bf602c8ce",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-local/output/movie.star",
+      "stage": "runs/B-outmodel-s05-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "fa7be69ed25a510093b167a7091e16735dab0ddd823f3c6a5399f5b86cff7ead",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-local/runtime.json",
+      "stage": "runs/B-outmodel-s05-cpu-local/runtime.json",
+      "bytes": 2448,
+      "sha256": "7485b83aab5d8c8c68d959ff204e973109414829bafe0b5bd304ff6aa1bf8b54",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-none/RUN.json",
+      "stage": "runs/B-outmodel-s05-cpu-none/RUN.json",
+      "bytes": 4213,
+      "sha256": "dd56507e9d2e4935016ec527611e092ec5848651ddcc37c2e2abe362024eab67",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-none/output/movie.log",
+      "stage": "runs/B-outmodel-s05-cpu-none/output/movie.log",
+      "bytes": 4802,
+      "sha256": "b014444145c105d14a99ed45b61650a3c24e50ec00b1aa02e94d32b097c8c64f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-none/output/movie.mrc",
+      "stage": "runs/B-outmodel-s05-cpu-none/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "eca3c7f1658cf3963667b503feba992333d2ca0f48bca4bdfdb612159315049f",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-none/output/movie.star",
+      "stage": "runs/B-outmodel-s05-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "fa51f247cf8bb86ff8b2722982aeb0914bbc1f6b15a9752c67a19684a3e263f8",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s05-cpu-none/runtime.json",
+      "stage": "runs/B-outmodel-s05-cpu-none/runtime.json",
+      "bytes": 2451,
+      "sha256": "b5b0cae7987d606686c4684ee933cec97945cb2829e14eca65a0e09dab96e021",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-both/RUN.json",
+      "stage": "runs/B-outmodel-s06-cpu-both/RUN.json",
+      "bytes": 4218,
+      "sha256": "8a2ec577c27c9b4b73d9470fcdfcebc70edac8bdce26541910718f88e480e2d6",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-both/output/movie.log",
+      "stage": "runs/B-outmodel-s06-cpu-both/output/movie.log",
+      "bytes": 4802,
+      "sha256": "7340c3daae7e675ef39b9d6c7670a276418a6862e3cb52fdd069e33fe310ff1a",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-both/output/movie.mrc",
+      "stage": "runs/B-outmodel-s06-cpu-both/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "edd00be7a213cda93eba021d68f5adde367eae2a79ff3a5f906b6ead835327e2",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-both/output/movie.star",
+      "stage": "runs/B-outmodel-s06-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "bf0577c8141777e7ef6d3b0f151fc2bcf0024f5a1e7c99a05259a43ece049c0f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-both/runtime.json",
+      "stage": "runs/B-outmodel-s06-cpu-both/runtime.json",
+      "bytes": 2462,
+      "sha256": "8167c269531b4224e40b425d74733f6a39598fe886ff9138255b430003c864ac",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-global/RUN.json",
+      "stage": "runs/B-outmodel-s06-cpu-global/RUN.json",
+      "bytes": 4231,
+      "sha256": "d004dbb517f70b8998b5dd09d3f795c6ba10858b4ca5e000d8bd72034493eacb",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-global/output/movie.log",
+      "stage": "runs/B-outmodel-s06-cpu-global/output/movie.log",
+      "bytes": 4801,
+      "sha256": "2820d8ef4e1bf3e568f122353eef99e2c4bac803c64bce85ad1a3cab0451ee74",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-global/output/movie.mrc",
+      "stage": "runs/B-outmodel-s06-cpu-global/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "5e7cbda85780536be4ca713aa992e6a72f54672f7c62374f3e9cef24aeb19fd4",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-global/output/movie.star",
+      "stage": "runs/B-outmodel-s06-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "92ce32e072de7e8244304ae284ad395cf60f832591668a2be33d1c3a94e55518",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-global/runtime.json",
+      "stage": "runs/B-outmodel-s06-cpu-global/runtime.json",
+      "bytes": 2459,
+      "sha256": "ea2bd7d340637baeec8f8674bb7ffa07ce8905ad5beb3b0afa76d144f3d530d1",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-local/RUN.json",
+      "stage": "runs/B-outmodel-s06-cpu-local/RUN.json",
+      "bytes": 4224,
+      "sha256": "9142973138e26901529dd369f8329108a005044bad405b8000bed4e36a9eb6dc",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-local/output/movie.log",
+      "stage": "runs/B-outmodel-s06-cpu-local/output/movie.log",
+      "bytes": 4804,
+      "sha256": "62a77eabd05b136ea3b9cdfc9508f30072418846d828c42ea797910cefab94f7",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-local/output/movie.mrc",
+      "stage": "runs/B-outmodel-s06-cpu-local/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "8963054680ea895ee2671fe1e9fdb060178da1d3f18b4faed49f62b9983737ef",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-local/output/movie.star",
+      "stage": "runs/B-outmodel-s06-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "d396c9abd2b0f283a676a557d91a1e862f99744d8bb269e9ab93437e94c9d14b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-local/runtime.json",
+      "stage": "runs/B-outmodel-s06-cpu-local/runtime.json",
+      "bytes": 2457,
+      "sha256": "e8f4bb5d77c35d1c2268cb9872605b175b7a5d9576435935975f232c87a5cb13",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-none/RUN.json",
+      "stage": "runs/B-outmodel-s06-cpu-none/RUN.json",
+      "bytes": 4214,
+      "sha256": "e3d4101af00a68173dec70b9b7ad8c7ab4bdfaf2e26b6779924cbca9cd44568a",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-none/output/movie.log",
+      "stage": "runs/B-outmodel-s06-cpu-none/output/movie.log",
+      "bytes": 4803,
+      "sha256": "17b770888189bd337ce79ba330545b3c7e22ee3f37faa952d24f1aee13f1771b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-none/output/movie.mrc",
+      "stage": "runs/B-outmodel-s06-cpu-none/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "504e2b1f2120fa47e32988b852f62d18bebbf94c527a8d14ec2ee17b4e5a4ab6",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-none/output/movie.star",
+      "stage": "runs/B-outmodel-s06-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "5c7fc1d688883c40af475531ad489626aab78ae10d73854f69821cd2ef446346",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s06-cpu-none/runtime.json",
+      "stage": "runs/B-outmodel-s06-cpu-none/runtime.json",
+      "bytes": 2457,
+      "sha256": "61ec3452344b6e504fa5b9624e78eae77dab52cf44360332e501edd87b41268b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-both/RUN.json",
+      "stage": "runs/B-outmodel-s07-cpu-both/RUN.json",
+      "bytes": 4217,
+      "sha256": "d1e202b7842422f5dfa84a0ca6c05f93da9c1f83bfef866d432a10cfc6762852",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-both/output/movie.log",
+      "stage": "runs/B-outmodel-s07-cpu-both/output/movie.log",
+      "bytes": 4800,
+      "sha256": "6b6da6d6303b530ff22a7b797f4590da9cf7193bc04923fdb19f0628dd5dbdf1",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-both/output/movie.mrc",
+      "stage": "runs/B-outmodel-s07-cpu-both/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "f5b31127eacf418625705ffa52dd31d2cedb5d62262952b0a26f7265b053065c",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-both/output/movie.star",
+      "stage": "runs/B-outmodel-s07-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "dd0f05d3f8406e4ec4f627ce4b54d9b771ef3de3876805d631c3b3dd4bf32ec7",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-both/runtime.json",
+      "stage": "runs/B-outmodel-s07-cpu-both/runtime.json",
+      "bytes": 2458,
+      "sha256": "5490cc0729e828a40849c12e5ab228e89189ea02ca5cb3d95183f118bada2237",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-global/RUN.json",
+      "stage": "runs/B-outmodel-s07-cpu-global/RUN.json",
+      "bytes": 4230,
+      "sha256": "49f4aeb1680105117d26c2b62a014f9131583bc7ceeceab5c74091cd8d71961c",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-global/output/movie.log",
+      "stage": "runs/B-outmodel-s07-cpu-global/output/movie.log",
+      "bytes": 4804,
+      "sha256": "236061fb2d55c802999b70ff0781c2534f9f4945e240ed84d09c8450c9544069",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-global/output/movie.mrc",
+      "stage": "runs/B-outmodel-s07-cpu-global/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "2fc7c296b00ffba82b7fcacb4bb3697990b2df895dd567321b5863979163920d",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-global/output/movie.star",
+      "stage": "runs/B-outmodel-s07-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "f7c72c5fa4e0adc1451cf2878b074a0fa56e16ca47bcdde99cb466a81d93ccb8",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-global/runtime.json",
+      "stage": "runs/B-outmodel-s07-cpu-global/runtime.json",
+      "bytes": 2457,
+      "sha256": "5b27056d8bd3a5772a63b4bdf82b423f60d294e86f312c3bfed4b5c1cf056d35",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-local/RUN.json",
+      "stage": "runs/B-outmodel-s07-cpu-local/RUN.json",
+      "bytes": 4224,
+      "sha256": "aa8f2d538fa7a55049707151971a185f4980f66c54727cecfaed19cf7feef771",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-local/output/movie.log",
+      "stage": "runs/B-outmodel-s07-cpu-local/output/movie.log",
+      "bytes": 4802,
+      "sha256": "9729612b64581e3fce5f779b8aef0524037b96309072e247deb4c8de13f7a3b8",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-local/output/movie.mrc",
+      "stage": "runs/B-outmodel-s07-cpu-local/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "c675ba764c47b5a2e371cec1999d14923ceefeb764decf66cae7eb18bbcbe4a0",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-local/output/movie.star",
+      "stage": "runs/B-outmodel-s07-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "d16c41e9c97213c82306a808da42c5f0a726d2d25b1ab7465a5de6d055e9a65d",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-local/runtime.json",
+      "stage": "runs/B-outmodel-s07-cpu-local/runtime.json",
+      "bytes": 2463,
+      "sha256": "55e8cf1f0a3f5087f61de27800035d18baea0d639ea8dd32aef0ec608448e114",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-none/RUN.json",
+      "stage": "runs/B-outmodel-s07-cpu-none/RUN.json",
+      "bytes": 4214,
+      "sha256": "b8f384fe9e4ff0c787afbe7f077fae958112048505836ecaa021200b1219bb4b",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-none/output/movie.log",
+      "stage": "runs/B-outmodel-s07-cpu-none/output/movie.log",
+      "bytes": 4801,
+      "sha256": "be4db506dc718cfd611250e2f66a1f78a3757d9ada668bd4abbdf17dd9df5f15",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-none/output/movie.mrc",
+      "stage": "runs/B-outmodel-s07-cpu-none/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "b13126bbd3ae53c6ecb6bcce784c6573e913fd9ef1bcb13f0996ebef835a968a",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-none/output/movie.star",
+      "stage": "runs/B-outmodel-s07-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "e5a05a79ddd05075ad938c3ff4e0054565da5f5d928b47a6fe712fcf73524938",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s07-cpu-none/runtime.json",
+      "stage": "runs/B-outmodel-s07-cpu-none/runtime.json",
+      "bytes": 2463,
+      "sha256": "f9ee0d16b56c8866afe2ca457bf65487645654b71afeaf2aa866d4b42f359dfc",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-both/RUN.json",
+      "stage": "runs/B-outmodel-s08-cpu-both/RUN.json",
+      "bytes": 4218,
+      "sha256": "f0d5a8dbda044f0e77abe91083f002109b1ebfa061ffb7ca0ca7942293aaf972",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-both/output/movie.log",
+      "stage": "runs/B-outmodel-s08-cpu-both/output/movie.log",
+      "bytes": 4797,
+      "sha256": "aa8d5c792c2f5a06d577c08839ea01942ed4c71a773f3343536b78e85f766d6e",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-both/output/movie.mrc",
+      "stage": "runs/B-outmodel-s08-cpu-both/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "ba3d355b1189250ed1079b62276c47a27787e53bcc54c1bad2ea4724c3ae1ab7",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-both/output/movie.star",
+      "stage": "runs/B-outmodel-s08-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "12a64cfde4a79168ac59cbb9868c37b6793ed5a26508df63d9e52bd5610e1961",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-both/runtime.json",
+      "stage": "runs/B-outmodel-s08-cpu-both/runtime.json",
+      "bytes": 2454,
+      "sha256": "4d7b6c83a931c396d466a4f4c1747001bed5ef8e2ef63c90886f2919be5ee8a9",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-global/RUN.json",
+      "stage": "runs/B-outmodel-s08-cpu-global/RUN.json",
+      "bytes": 4230,
+      "sha256": "5f6836e9a5ff5331c8018be24089f1b5f072696166d63abfc81683c108e461bb",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-global/output/movie.log",
+      "stage": "runs/B-outmodel-s08-cpu-global/output/movie.log",
+      "bytes": 4802,
+      "sha256": "5c9e7a5c3c39e429d89e88c444b563891c5959b9f91a1131ea539c05425c3f95",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-global/output/movie.mrc",
+      "stage": "runs/B-outmodel-s08-cpu-global/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "a424764ade745047859552ac5f88106076eecc11ebea2d9023d92d49896f3638",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-global/output/movie.star",
+      "stage": "runs/B-outmodel-s08-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "b6dab65ffd3fc64cbce12b5cd309f17721a32ab37ca58063ca67ad6d2650274a",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-global/runtime.json",
+      "stage": "runs/B-outmodel-s08-cpu-global/runtime.json",
+      "bytes": 2454,
+      "sha256": "bd1ffad7df6166c093668bae24c65a789591205077872f965c231c8dc7cc8bf8",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-local/RUN.json",
+      "stage": "runs/B-outmodel-s08-cpu-local/RUN.json",
+      "bytes": 4225,
+      "sha256": "f01d1472ba4bf6c2ba6abc3d8cfb1fc3995b16129df3b9ffc49414168dec0ff4",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-local/output/movie.log",
+      "stage": "runs/B-outmodel-s08-cpu-local/output/movie.log",
+      "bytes": 4802,
+      "sha256": "ae93a5cdf81963a6f1dc7be5cc70b40c6bda16a46d0932fd5191f754984aac17",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-local/output/movie.mrc",
+      "stage": "runs/B-outmodel-s08-cpu-local/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "f767b61df31bd915e7e7aa03d6c8e5afbfa9a10c44be4d461e9e54ad7d05593a",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-local/output/movie.star",
+      "stage": "runs/B-outmodel-s08-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "0d7eeb6acec699de4ebe898c6f297677cce7f6a5207fbf42bd378b6a6a842c37",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-local/runtime.json",
+      "stage": "runs/B-outmodel-s08-cpu-local/runtime.json",
+      "bytes": 2455,
+      "sha256": "035e7c6799c7610f7cde51732f73329524e9d49ef36e0f1c29332d55f9af3961",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-none/RUN.json",
+      "stage": "runs/B-outmodel-s08-cpu-none/RUN.json",
+      "bytes": 4214,
+      "sha256": "6d3a4f6477eec0fbf0963f2e15b2e5176cb3ab0f82d10c3363d55a93abeec58e",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-none/output/movie.log",
+      "stage": "runs/B-outmodel-s08-cpu-none/output/movie.log",
+      "bytes": 4801,
+      "sha256": "3c88dba40dc076d0cf0e5141f5a9da360a656e4a7033e953d2efcd42661eb7a3",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-none/output/movie.mrc",
+      "stage": "runs/B-outmodel-s08-cpu-none/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "95f883978a265c925321cc3d83fab8946dc5454b54395933d507f38bb88bbd7b",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-none/output/movie.star",
+      "stage": "runs/B-outmodel-s08-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "a53f0af4bf4259d115f63c0b800e3038b669f38880d3ac12d5f6cc51bad20fc8",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s08-cpu-none/runtime.json",
+      "stage": "runs/B-outmodel-s08-cpu-none/runtime.json",
+      "bytes": 2455,
+      "sha256": "116cd3ba1a39ed506b3c3815ea5fff99f65cf2ed8a391fb467c0eab25863890b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-both/RUN.json",
+      "stage": "runs/B-outmodel-s09-cpu-both/RUN.json",
+      "bytes": 4217,
+      "sha256": "01b7a8372f83a238ace10db940d7fdc70fbb5bf5013a30af742f825cea9650e8",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-both/output/movie.log",
+      "stage": "runs/B-outmodel-s09-cpu-both/output/movie.log",
+      "bytes": 4801,
+      "sha256": "b85d2ea23182cc9289c8b91ca813ee72fbe367bd7d61dab0bbf814245e889d4e",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-both/output/movie.mrc",
+      "stage": "runs/B-outmodel-s09-cpu-both/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "3cb74c196b320d582ac23c1a4f942966b83566993525b066a91e4fe2d11797fb",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-both/output/movie.star",
+      "stage": "runs/B-outmodel-s09-cpu-both/output/movie.star",
+      "bytes": 69617,
+      "sha256": "a0b4f325102045554ae2a0acb763ed4e357e15325246f0c51ca911035c38af1d",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-both/runtime.json",
+      "stage": "runs/B-outmodel-s09-cpu-both/runtime.json",
+      "bytes": 2452,
+      "sha256": "8ba06b00c012cff2dda423621f7a96599a4c43ff057ee33f4e20680f0cf7a32c",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-global/RUN.json",
+      "stage": "runs/B-outmodel-s09-cpu-global/RUN.json",
+      "bytes": 4231,
+      "sha256": "a585f1cad8134d510037dd6482542ab3f0a8f41acb773f449e7d7aa7eb2a523c",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-global/output/movie.log",
+      "stage": "runs/B-outmodel-s09-cpu-global/output/movie.log",
+      "bytes": 4803,
+      "sha256": "b8dc95fad586e34e6011a880845859cc90c53e4c5d48d99a3fa8684c7970a36b",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-global/output/movie.mrc",
+      "stage": "runs/B-outmodel-s09-cpu-global/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "dbaa9d112b53f0db24f152a34e37afab145beaac864320301dd79861ca151e94",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-global/output/movie.star",
+      "stage": "runs/B-outmodel-s09-cpu-global/output/movie.star",
+      "bytes": 69617,
+      "sha256": "62670133d6d94e19bcce3f77796ee1f0d2b8b672a45d91306060981353995844",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-global/runtime.json",
+      "stage": "runs/B-outmodel-s09-cpu-global/runtime.json",
+      "bytes": 2459,
+      "sha256": "1162816acad62db57a1542d9aedb003ac0110e4339d66b9ba03aa3fdfc5d161f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-local/RUN.json",
+      "stage": "runs/B-outmodel-s09-cpu-local/RUN.json",
+      "bytes": 4225,
+      "sha256": "6f53c6c114178f60cc450dfa1b7330f8fabe0ce9dfc4e7aa510a9c4ce2c1d9da",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-local/output/movie.log",
+      "stage": "runs/B-outmodel-s09-cpu-local/output/movie.log",
+      "bytes": 4797,
+      "sha256": "7f8ba2c123fb09592a86fdab34900d1b5d51766562a4d7cab3bf4284ae784a20",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-local/output/movie.mrc",
+      "stage": "runs/B-outmodel-s09-cpu-local/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "4078126359f79e6c5c219f507deefd4e8058413593df3efddcf93f0c8af62a9f",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-local/output/movie.star",
+      "stage": "runs/B-outmodel-s09-cpu-local/output/movie.star",
+      "bytes": 69617,
+      "sha256": "3e17ec01b4f0dd3caca9aec9e818c595151e96fcd5a57472408bd7133fb72f1f",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-local/runtime.json",
+      "stage": "runs/B-outmodel-s09-cpu-local/runtime.json",
+      "bytes": 2453,
+      "sha256": "eb8136508a08c9d52da471dff7209f70df453af971d00f8dec2f8c38bedd6569",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-none/RUN.json",
+      "stage": "runs/B-outmodel-s09-cpu-none/RUN.json",
+      "bytes": 4213,
+      "sha256": "db6ec6e48e78766944d31341c4209b57cb065f48bd72d57548023165bf19c428",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-none/output/movie.log",
+      "stage": "runs/B-outmodel-s09-cpu-none/output/movie.log",
+      "bytes": 4792,
+      "sha256": "44fd5a2027966a0ea8f382851bbb98f744e24bcdcc9c2548513f9a170fd319eb",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-none/output/movie.mrc",
+      "stage": "runs/B-outmodel-s09-cpu-none/output/movie.mrc",
+      "bytes": 67109888,
+      "sha256": "177a6b170868a7550db6ca92ca04f17e90881603ba612d5691556e37b24e0be8",
+      "role": "existing output pinned to original RUN outputs; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-none/output/movie.star",
+      "stage": "runs/B-outmodel-s09-cpu-none/output/movie.star",
+      "bytes": 69617,
+      "sha256": "cfe362c15f0833cf08875ed21a9ca7e4b70568fafea9bee7b17a1517277fdc62",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-outmodel-s09-cpu-none/runtime.json",
+      "stage": "runs/B-outmodel-s09-cpu-none/runtime.json",
+      "bytes": 2460,
+      "sha256": "2c7aa8c0ea49d953843447d865cd029bbf7494cb46e6a1c50b1b5b21c59e3aab",
+      "role": "existing output pinned to original RUN outputs"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-pedestal32-s00-cpu-plain/RUN.json",
+      "stage": "runs/B-pedestal32-s00-cpu-plain/RUN.json",
+      "bytes": 3797,
+      "sha256": "8e4bb42a0b736713907554453c7a444be541851782a8cbcc43dcfc809e7fa035",
+      "role": "unchanged RUN record"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/SOURCE_SHA",
+      "stage": "source/SOURCE_SHA",
+      "bytes": 41,
+      "sha256": "2f090d92f46599415f11c94d7f088b1b9b528dd3d993da4ef8b416d1f6ced00e",
+      "role": "frozen experiment source identity file"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/tools/evaluate.py",
+      "stage": "source/evaluate-original.py",
+      "bytes": 13344,
+      "sha256": "dcc5ddb3d52d14652f11214fb2a9339fb5fb63637d87dc0c82ee3a4c2d0de14d",
+      "role": "unchanged deployed evaluate.py bytes"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/src/test-data/generate_known_motion_fixture.py",
+      "stage": "src/test-data/generate_known_motion_fixture.py",
+      "bytes": 30686,
+      "sha256": "f28fbf516f8c2f7a3ae1b6133d54d3cc1e0708e2f90644cce30a845f4bbcef4f",
+      "role": "exact deployed checker/generator import closure"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/src/test-data/generate_motion_diagnostics.py",
+      "stage": "src/test-data/generate_motion_diagnostics.py",
+      "bytes": 5444,
+      "sha256": "5e781bb290b3f12b38f6dc7ec18bb955d56331219dc0216321e010ecbcdaf4cc",
+      "role": "exact deployed checker/generator import closure"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/src/test-data/generate_realistic_motion.py",
+      "stage": "src/test-data/generate_realistic_motion.py",
+      "bytes": 9170,
+      "sha256": "a10f694abafc71c146d0e0f2eeb2b1cf2c58131b2dbf6c1b66800405bd126380",
+      "role": "exact deployed checker/generator import closure"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/src/tools/check_motion_diagnostics.py",
+      "stage": "src/tools/check_motion_diagnostics.py",
+      "bytes": 10960,
+      "sha256": "2be34b821ce9c351abaeab5c0280478362cf90ba774df7f529caced9e360eb16",
+      "role": "exact deployed checker/generator import closure"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/src/tools/check_realistic_image.py",
+      "stage": "src/tools/check_realistic_image.py",
+      "bytes": 8281,
+      "sha256": "637f13e22e0857f1ee3ec92837bf66e2354def66f5348e726870408ae6010e62",
+      "role": "exact deployed checker/generator import closure"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/src/tools/check_realistic_motion.py",
+      "stage": "src/tools/check_realistic_motion.py",
+      "bytes": 5539,
+      "sha256": "b0ab099a256e458b1c8aea6c2ff5d9ceacab10dd81945b025e96e5c8a87b7ff9",
+      "role": "exact deployed checker/generator import closure"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/src/tools/motion_field.py",
+      "stage": "src/tools/motion_field.py",
+      "bytes": 13966,
+      "sha256": "d72cfad7175368fa6d0727c2727c49780328951c6f4d3ecc20e9ac662ac2e810",
+      "role": "exact deployed checker/generator import closure"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-synth-combined/truth-4096x4096.npy",
+      "stage": "truth/truth-4096x4096.npy",
+      "bytes": 67108992,
+      "sha256": "6b2733bd516d4c51333fa1981256137d084854cfaca4dd8af90a85be96f18c3b",
+      "role": "existing unchanged truth cache; expected digest must be checked on collected bytes; full staged payload hash verification required before run"
+    },
+    {
+      "source": "/mnt/clathrin/alex-motioncorr-synth-combined/truth-5760x4092.npy",
+      "stage": "truth/truth-5760x4092.npy",
+      "bytes": 94279808,
+      "sha256": "ff084df764348da7b89626d37963546f0fc11e6ed3912347b0e5e6f532963145",
+      "role": "existing unchanged truth cache; expected digest must be checked on collected bytes; full staged payload hash verification required before run"
+    }
+  ],
+  "selection_rule": "queue tier B/backend cpu AND frozen RUN exit 0 AND ID absent from frozen EVALUATIONS.json sha256 map",
+  "join_inputs": [
+    {
+      "name": "queue.json",
+      "path": "/tmp/motioncorr-20261025-c1dc-harvest/snap/dc/queue.json",
+      "sha256": "7745d453a1033ce61dffe2b9347ea60d7eeb6b7d444e3542c451d0ccfb12a4da"
+    },
+    {
+      "name": "dc_run_exits.txt",
+      "path": "/tmp/motioncorr-20261025-c1dc-harvest/dc_run_exits.txt",
+      "sha256": "8b48deb22688dfda6c842c6238f32f4b01d7aa3e88d156ccfb54dbb882a9b13f"
+    },
+    {
+      "name": "EVALUATIONS.json",
+      "path": "/tmp/motioncorr-20261025-c1dc-harvest/snap/dc/evaluation-snapshots/B-pass3-20261022-2244/EVALUATIONS.json",
+      "sha256": "4ec94412fb98e6b1e4fda26b8b510e8f23c235a22ad162774e448c2a228d988a"
+    }
+  ],
+  "input_payload_hashing": "All 66 MRC and 2 truth-cache full expected hashes are pinned below; staged bytes must be chunk-hashed before evaluator invocation. Current VM stat/header evidence alone is not payload verification."
+}

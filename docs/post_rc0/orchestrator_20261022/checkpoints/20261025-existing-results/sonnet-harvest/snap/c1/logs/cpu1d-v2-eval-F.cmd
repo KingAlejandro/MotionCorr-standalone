@@ -1,0 +1,1 @@
+/home/alex/.mc-venv/bin/python3 -I /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/docs/post_rc0/s1/synth_combined/eval_v2.py /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/v2/v2fixtures /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/v2/cpuF-unset /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/v2/cpuF-unset.eval.json 

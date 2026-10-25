@@ -1,0 +1,1 @@
+/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_census.py metrics results-c1-cpu cpu /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census-cpu-metrics.json 

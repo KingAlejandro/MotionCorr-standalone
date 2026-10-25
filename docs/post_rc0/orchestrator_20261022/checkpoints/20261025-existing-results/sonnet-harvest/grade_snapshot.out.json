@@ -1,0 +1,76 @@
+{
+ "c1": {
+  "stages": 17,
+  "stage_exit0": 17,
+  "census_decision": "PASS",
+  "t24_compare": {
+   "G": "IDENTICAL",
+   "L": "IDENTICAL"
+  },
+  "v2check_rows": {
+   "zero": [
+    "PASS",
+    0,
+    "VALID",
+    "PASS"
+   ],
+   "integer": [
+    "FAIL",
+    1,
+    "VALID",
+    "FAIL"
+   ],
+   "fractional": [
+    "FAIL",
+    1,
+    "VALID",
+    "FAIL"
+   ],
+   "affine": [
+    "FAIL",
+    1,
+    "VALID",
+    "FAIL"
+   ],
+   "pedestal": [
+    "FAIL",
+    1,
+    "VALID",
+    "FAIL"
+   ],
+   "noisy": [
+    "FAIL",
+    1,
+    "OUTSIDE_FIXED_ROI",
+    "FAIL"
+   ],
+   "flat": [
+    "UNIDENTIFIABLE",
+    0,
+    "VALID",
+    "FAIL"
+   ],
+   "repeated": [
+    "UNIDENTIFIABLE",
+    1,
+    "OUTSIDE_FIXED_ROI",
+    "FAIL"
+   ]
+  },
+  "v2_exit_state_disagree": [
+   "noisy",
+   "flat",
+   "repeated"
+  ]
+ },
+ "dc": {
+  "A | cpu | RUN | exit0 | tierA_summary": 40,
+  "A | cuda | RUN | exit0 | tierA_summary": 40,
+  "B | cpu | RUN | exit0 | evaluated": 334,
+  "B | cpu | RUN | exit0 | unevaluated": 68,
+  "B | cuda | RUN | exit0 | evaluated": 402,
+  "C | cpu | RUN | exit0 | unevaluated": 408,
+  "C | cuda | NO_RUN | exit- | unevaluated": 297,
+  "C | cuda | RUN | exit0 | unevaluated": 111
+ }
+}

@@ -1,0 +1,345 @@
+{
+  "kind": "M2 Git history/object metadata inventory; local object metadata only; no retention decision/deletion",
+  "recipe": {
+    "script": "inventory_c1_docs.py",
+    "script_sha256": "16ed1f1243a4e4d5fc19cc4c1178ddbbbefcd67a258c052b7975c81c0299be13",
+    "args": {
+      "candidate": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f",
+      "base": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+      "pr": {
+        "273": "805d9de27898b4a10e6212e65098d5995a40fdb1:docs/post_rc0/parallel_20261022/numerics",
+        "274": "a1036901bbc17900a0c515ad047efb50449c14f7:docs/rc0/issue226/integration_20261022"
+      },
+      "focus": [
+        "docs/post_rc0/s1/km_truth"
+      ],
+      "ancestor": {
+        "269": "1b29b7f9eea1976a0b7a9e2ef5f9ca00477324b1"
+      }
+    }
+  },
+  "results": {
+    "inputs": {
+      "candidate": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f",
+      "base": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+      "merge_base": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+      "base_is_ancestor_of_candidate": true,
+      "candidate_parents": [
+        "4fdb008e253175defc80c1b230054ab4c2c77705"
+      ],
+      "commits_base_to_candidate": 102,
+      "merge_commits_base_to_candidate": 24
+    },
+    "layers": {
+      "1_base_tree_docs": {
+        "files": 6642,
+        "logical_bytes": 69865100
+      },
+      "2_candidate_tip_changed_docs": {
+        "files": 756,
+        "logical_bytes": 48385636,
+        "archive_files": 11,
+        "archive_logical_bytes": 38643183
+      },
+      "4_reachable_new_history_base_to_candidate": {
+        "objects": {
+          "commit": {
+            "count": 102,
+            "logical_bytes": 33955
+          },
+          "tree": {
+            "count": 581,
+            "logical_bytes": 705182
+          },
+          "blob": {
+            "count": 947,
+            "logical_bytes": 60411705
+          }
+        },
+        "blobs": 947,
+        "blob_logical_bytes": 60411705,
+        "blob_logical_bytes_docs_name_hint": 53455930,
+        "blob_logical_bytes_other_name_hint": 6955775,
+        "blobs_present_in_candidate_tip_tree": {
+          "blobs": 730,
+          "blob_logical_bytes": 49466987,
+          "blob_logical_bytes_docs_name_hint": 48290435,
+          "blob_logical_bytes_other_name_hint": 1176552
+        },
+        "blobs_history_only_not_in_candidate_tip_tree": {
+          "blobs": 217,
+          "blob_logical_bytes": 10944718,
+          "blob_logical_bytes_docs_name_hint": 5165495,
+          "blob_logical_bytes_other_name_hint": 5779223
+        },
+        "tip_archive_blobs_in_new_history": 11,
+        "largest_new_blobs": [
+          {
+            "oid": "bc962a97707eb3c014a27b77095c148e89a09d41",
+            "name_hint": "docs/post_rc0/s1/km_truth/raw.tar.gz",
+            "bytes": 34973613,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "aae3dbb27d3e6d4d5a9ded89b42a1afc2fb9c5a9",
+            "name_hint": "docs/post_rc0/s1/km_truth/time_errors.csv",
+            "bytes": 1315184,
+            "in_tip_tree": false
+          },
+          {
+            "oid": "64b680ae232b97a249aa05714b2daf55de6cf7c0",
+            "name_hint": "docs/post_rc0/s1/km_truth/time_errors.csv",
+            "bytes": 1311583,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "9420e5f21964a76ea852e0a2e2b2659afbb8755b",
+            "name_hint": "docs/rc0/issue226/d2/raw-logs.tgz",
+            "bytes": 1044455,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "b241a5ab0b023747c5df0581b218063080aba839",
+            "name_hint": "docs/post_rc0/s1/km_truth/raw.sha256",
+            "bytes": 1038553,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "ea91ad955adb26ff2b686b13f352e5cd7d20f469",
+            "name_hint": "docs/post_rc0/s1/km_truth/rendered-products.sha256",
+            "bytes": 635358,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "f058c9371236b9d0cb7476d1cdb1c6593beecf3b",
+            "name_hint": "docs/post_rc0/s1/km_truth/native_v2_raw.tar.gz",
+            "bytes": 536160,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "dd5c038d2e1a1f455e7bc0b4aa6b09c66a763d01",
+            "name_hint": "docs/post_rc0/s1/km_truth/SUMMARY.json.gz",
+            "bytes": 521940,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "9ee8eb75c0ea94401af7eb975b293c9bd68ebe80",
+            "name_hint": "docs/rc0/issue226/d3/raw-logs.tgz",
+            "bytes": 392629,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "e7c4b5a61fb2e24dc718cff7ff3bf4750d87416d",
+            "name_hint": "docs/post_rc0/s1/km_truth/accuracy_per_seed.csv",
+            "bytes": 376417,
+            "in_tip_tree": false
+          }
+        ]
+      }
+    },
+    "focus": {
+      "docs/post_rc0/s1/km_truth": {
+        "files_at_base": 0,
+        "files_at_candidate": 48,
+        "logical_bytes_at_candidate": 40290016,
+        "largest_file_at_candidate": {
+          "path": "docs/post_rc0/s1/km_truth/raw.tar.gz",
+          "oid": "bc962a97707eb3c014a27b77095c148e89a09d41",
+          "bytes": 34973613
+        },
+        "commits_adding_largest_file": [
+          "678b0453e59fef09f8b42fd639423e36da8513ef"
+        ]
+      }
+    },
+    "ancestors": {
+      "269": {
+        "head": "1b29b7f9eea1976a0b7a9e2ef5f9ca00477324b1",
+        "is_ancestor_of_candidate": true,
+        "focus_blobs_at_candidate_also_at_this_head": 48
+      }
+    },
+    "pr_heads": {
+      "273": {
+        "head": "805d9de27898b4a10e6212e65098d5995a40fdb1",
+        "prefixes": [
+          "docs/post_rc0/parallel_20261022/numerics"
+        ],
+        "merge_base_with_base": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+        "merge_base_with_candidate": "1f0a58bf6e0639d8b62f74da52f250cc664c0b30",
+        "is_ancestor_of_candidate": false,
+        "3_unique_tree": {
+          "files": 36,
+          "logical_bytes": 2748458,
+          "unique_blob_bytes": 2748458,
+          "archive_files": 3,
+          "archive_logical_bytes": 1427214,
+          "largest_file": {
+            "path": "docs/post_rc0/parallel_20261022/numerics/native-receipts.tar.gz",
+            "oid": "df005b1e7ce47836f4264bf775f0af3efb8795bc",
+            "bytes": 1390257
+          },
+          "blobs_already_in_candidate_new_history": 1,
+          "blobs_already_at_candidate_tip": 1
+        },
+        "4a_new_history_if_merged_after_candidate": {
+          "range": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f..805d9de27898b4a10e6212e65098d5995a40fdb1",
+          "objects": {
+            "commit": {
+              "count": 4,
+              "logical_bytes": 1400
+            },
+            "tree": {
+              "count": 25,
+              "logical_bytes": 38684
+            },
+            "blob": {
+              "count": 41,
+              "logical_bytes": 3025652
+            }
+          },
+          "blobs": 41,
+          "blob_logical_bytes": 3025652,
+          "blob_logical_bytes_docs_name_hint": 2798471,
+          "blob_logical_bytes_other_name_hint": 227181
+        },
+        "4b_new_history_if_merged_onto_base": {
+          "range": "3691374061f782bc84531fd1c79d017ddcb5a7c2..805d9de27898b4a10e6212e65098d5995a40fdb1",
+          "objects": {
+            "commit": {
+              "count": 43,
+              "logical_bytes": 14174
+            },
+            "tree": {
+              "count": 198,
+              "logical_bytes": 271494
+            },
+            "blob": {
+              "count": 298,
+              "logical_bytes": 48447241
+            }
+          },
+          "blobs": 298,
+          "blob_logical_bytes": 48447241,
+          "blob_logical_bytes_docs_name_hint": 46656028,
+          "blob_logical_bytes_other_name_hint": 1791213
+        }
+      },
+      "274": {
+        "head": "a1036901bbc17900a0c515ad047efb50449c14f7",
+        "prefixes": [
+          "docs/rc0/issue226/integration_20261022"
+        ],
+        "merge_base_with_base": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+        "merge_base_with_candidate": "1dbdd47e875422655ad54bd453be01addb2fef5a",
+        "is_ancestor_of_candidate": false,
+        "3_unique_tree": {
+          "files": 32,
+          "logical_bytes": 1328117,
+          "unique_blob_bytes": 1328117,
+          "archive_files": 1,
+          "archive_logical_bytes": 695240,
+          "largest_file": {
+            "path": "docs/rc0/issue226/integration_20261022/raw-logs.tgz",
+            "oid": "81c3680d0b8445c93285983879349b1941553058",
+            "bytes": 695240
+          },
+          "blobs_already_in_candidate_new_history": 1,
+          "blobs_already_at_candidate_tip": 1
+        },
+        "4a_new_history_if_merged_after_candidate": {
+          "range": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f..a1036901bbc17900a0c515ad047efb50449c14f7",
+          "objects": {
+            "commit": {
+              "count": 3,
+              "logical_bytes": 1742
+            },
+            "tree": {
+              "count": 19,
+              "logical_bytes": 26994
+            },
+            "blob": {
+              "count": 38,
+              "logical_bytes": 1825744
+            }
+          },
+          "blobs": 38,
+          "blob_logical_bytes": 1825744,
+          "blob_logical_bytes_docs_name_hint": 1449051,
+          "blob_logical_bytes_other_name_hint": 376693
+        },
+        "4b_new_history_if_merged_onto_base": {
+          "range": "3691374061f782bc84531fd1c79d017ddcb5a7c2..a1036901bbc17900a0c515ad047efb50449c14f7",
+          "objects": {
+            "commit": {
+              "count": 16,
+              "logical_bytes": 5785
+            },
+            "tree": {
+              "count": 95,
+              "logical_bytes": 128953
+            },
+            "blob": {
+              "count": 132,
+              "logical_bytes": 7026217
+            }
+          },
+          "blobs": 132,
+          "blob_logical_bytes": 7026217,
+          "blob_logical_bytes_docs_name_hint": 4342754,
+          "blob_logical_bytes_other_name_hint": 2683463
+        }
+      }
+    }
+  },
+  "machine_specific": {
+    "layer_5_local_packed_disk_bytes_new_blobs": 40633122,
+    "layer_5_local_packed_disk_bytes_by_type": {
+      "commit": 20670,
+      "tree": 82865,
+      "blob": 40633122
+    },
+    "note": "objectsize:disk of this repository pack/loose state; not a transfer or remote-storage size",
+    "git_version": "git version 2.56.0",
+    "python": "3.14.8",
+    "pr273_4a_new_history_if_merged_after_candidate_local_packed_disk_bytes_blobs": 1695639,
+    "pr273_4b_new_history_if_merged_onto_base_local_packed_disk_bytes_blobs": 39479059,
+    "pr274_4a_new_history_if_merged_after_candidate_local_packed_disk_bytes_blobs": 694615,
+    "pr274_4b_new_history_if_merged_onto_base_local_packed_disk_bytes_blobs": 2583889
+  },
+  "validation": {
+    "recorded_by_hand_after_running; not regenerated by the script": true,
+    "executed_utc": "2026-10-22T20:58:19Z",
+    "command": "python3 -B inventory_c1_docs.py --repo <local clone or worktree> --candidate e77a51a220cb0d91f4ac3c7fac211876d0c6833f --base 3691374061f782bc84531fd1c79d017ddcb5a7c2 --pr 273=805d9de27898b4a10e6212e65098d5995a40fdb1:docs/post_rc0/parallel_20261022/numerics --pr 274=a1036901bbc17900a0c515ad047efb50449c14f7:docs/rc0/issue226/integration_20261022 --focus docs/post_rc0/s1/km_truth --ancestor 269=1b29b7f9eea1976a0b7a9e2ef5f9ca00477324b1 --tree-out <tmp> --history-out <this file>",
+    "exit_code": 0,
+    "wall_seconds": 0.84,
+    "processes": "one sequential python process, git subprocesses one at a time",
+    "script_sha256": "16ed1f1243a4e4d5fc19cc4c1178ddbbbefcd67a258c052b7975c81c0299be13",
+    "results_canonical_sha256": "6a71d06b7ae0b8ce1e78f66368ec36655e660db40bd96e8dc054ae9e0fd053c7",
+    "tree_inventory_regeneration": "byte-identical to M2_c1_docs_inventory_e77a51a2.json (sha256 ba8515abd3e4b1b025e3eb48e9909c67f0ba2ae03623135f1bf96af86088f143); that file is unchanged",
+    "repeat_run": "two further runs gave identical results, recipe and machine_specific blocks",
+    "agreement_with_independent_review_r1_F2": {
+      "new_blobs": 947,
+      "new_blob_logical_bytes": 60411705,
+      "docs_name_hint_bytes": 53455930,
+      "local_packed_disk_bytes_new_blobs": 40633122,
+      "273_unique_tree": "36 files / 2,748,458 B",
+      "274_unique_tree": "32 files / 1,328,117 B"
+    },
+    "assumptions": [
+      "All refs are full SHAs present in the local object store; no fetch was performed, so live PR heads were not refreshed here.",
+      "base is an ancestor of candidate, so the two-dot tree diff and the three-dot diff coincide for the C1 inventory (inputs.base_is_ancestor_of_candidate).",
+      "rev-list --objects base..candidate models an ordinary (non-squash, non-rewrite) merge into a repository that already has base.",
+      "The docs/ split in history uses the first path name rev-list reports per blob and is a hint only; a blob also present outside docs/ may be attributed to either.",
+      "PR \"unique\" trees are files under the given prefixes at the pinned head that are absent by path from base; one blob in each (5,701 B and 2,250 B) is content-identical to a blob already at the candidate tip under another path."
+    ],
+    "limits": [
+      "Logical blob sizes are uncompressed. Packed disk sizes depend on this repository packing and are not transfer, remote storage or clone sizes; they are excluded from reproducibility checks.",
+      "Metadata only: no blob content read, no archive opened, extracted or hashed, no licence/access check, no retrieval test.",
+      "4a/4b ranges count objects an ordinary merge of the pinned PR head would add; a different base, a squash or a history rewrite gives different numbers.",
+      "Does not measure any compact/squash/rewrite alternative; that would create a new commit identity and is not evaluated or recommended.",
+      "No native, scientific or performance claim; no retention policy adopted; no deletion performed."
+    ]
+  },
+  "decision": "UNDECIDED; no file removed and no retention policy adopted"
+}

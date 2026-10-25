@@ -42,7 +42,11 @@ def main():
         assert REFUSAL not in out, out[:300]
         for bad in ("0", "-1", "abc", "nan", "inf"):
             rc, out = run(binary, tmp, "--use_own", "--experimental_align_tolerance", bad)
-            assert rc != 0 and "must be a positive number of pixels" in out, f"tolerance {bad!r}: {out[:300]}"
+            # A non-numeric string is rejected by textToFloat itself; the rest by the positivity check.
+            assert rc != 0 and ("must be a positive number of pixels" in out or "Error in textToFloat" in out), \
+                f"tolerance {bad!r}: {out[:300]}"
+            if bad != "abc":
+                assert "must be a positive number of pixels" in out, f"tolerance {bad!r}: {out[:300]}"
         rc, out = run(binary, tmp, "--use_motioncor2", "--motioncor2_exe", "/bin/false", "--experimental_global_half_gain")
         assert rc != 0 and "valid only with --use_own" in out, out[:300]
     print("PASS")

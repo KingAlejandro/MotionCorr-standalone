@@ -251,6 +251,10 @@ if(BUILD_TESTING)
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
     add_test(NAME PatchRetryState COMMAND patch_retry_state)
+    # Experimental default-off global half-gain damping (research prototype).
+    add_executable(global_half_gain tests/test_global_half_gain.cpp)
+    target_link_libraries(global_half_gain PRIVATE motioncorr_core)
+    add_test(NAME GlobalHalfGain COMMAND global_half_gain)
     # #257: device-free exact-rational controls, shared with the actual CUDA
     # kernel test. Host replays establish arithmetic only, not GPU execution.
     add_executable(peak_fit_arithmetic tests/peak_fit_arithmetic.cpp)
@@ -665,6 +669,11 @@ if(BUILD_TESTING)
         # tests/fake_worker.py, so it needs no GPU and no CUDA build.
         add_test(NAME MultiGpuScheduling
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_multi_gpu_scheduling.py
+                --binary $<TARGET_FILE:motioncorr>)
+        # The experimental research flags are refused with --gpu in every build (the check
+        # precedes the device query), and rejected when malformed or without --use_own.
+        add_test(NAME ExperimentalFlagsCli
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_experimental_flags_cli.py
                 --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME OutputTreeComparator
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compare_output_trees.py)

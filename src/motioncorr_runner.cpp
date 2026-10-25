@@ -211,6 +211,18 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	max_iter = textToInteger(parser.getOption("--max_iter", "Maximum number of iterations for alignment. Only valid with --use_own", "5"));
 	if (max_iter != 5 && !do_own)
 		REPORT_ERROR("--max_iter is valid only with --do_own");
+	experimental_global_half_gain = parser.checkOption("--experimental_global_half_gain", "(EXPERIMENTAL, research, CPU only) Scale each global alignment update by 0.5. Default off. Refused with --gpu.");
+	{
+		const std::string tol = parser.getOption("--experimental_align_tolerance", "(EXPERIMENTAL, research, CPU only) Replace the 0.5 px stopping tolerance of the global alignment, in px. Default off. Refused with --gpu.", "");
+		experimental_align_tolerance = 0;
+		if (!tol.empty()) {
+			experimental_align_tolerance = textToFloat(tol);
+			if (!(experimental_align_tolerance > 0) || !std::isfinite(experimental_align_tolerance))
+				REPORT_ERROR("--experimental_align_tolerance must be a positive number of pixels. Got: " + tol);
+		}
+	}
+	if ((experimental_global_half_gain || experimental_align_tolerance > 0) && !do_own)
+		REPORT_ERROR("--experimental_global_half_gain and --experimental_align_tolerance are valid only with --use_own");
 	interpolate_shifts = parser.checkOption("--interpolate_shifts", "(EXPERIMENTAL) Interpolate shifts");
 	ccf_downsample = textToFloat(parser.getOption("--ccf_downsample", "(EXPERT) Downsampling rate of CC map. default = 0 = automatic based on B factor", "0"));
 	if (parser.checkOption("--early_binning", "Do binning before alignment to reduce memory usage. This might dampen signal near Nyquist. (ON by default)"))
@@ -389,6 +401,12 @@ void MotioncorrRunner::initialise()
 				             integerToString(INT_MAX) + "].");
 			}
 			parsed_gpu_id = parsed_gpu_id * 10 + digit;
+		}
+
+		if (experimental_global_half_gain || experimental_align_tolerance > 0)
+		{
+			REPORT_ERROR("ERROR: --experimental_global_half_gain and --experimental_align_tolerance are CPU-only research "
+			             "options and are refused with --gpu (the CUDA alignment does not implement them). Remove --gpu to run on the CPU.");
 		}
 
 #if defined _CUDA_ENABLED
@@ -4775,7 +4793,8 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 
 	// Parameters TODO: make an option
 	int search_range = 50; // px
-	const RFLOAT tolerance = 0.5; // px
+	const RFLOAT tolerance = (is_global && experimental_align_tolerance > 0) ? experimental_align_tolerance : (RFLOAT)0.5; // px
+	const bool half_gain = is_global && experimental_global_half_gain;
 	const RFLOAT EPS = 1e-15;
 
 	// Shifts within an iteration
@@ -4837,6 +4856,9 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		}
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
+
+	if (is_global && (half_gain || experimental_align_tolerance > 0))
+		logfile << " EXPERIMENTAL global alignment: half_gain = " << (half_gain ? 1 : 0) << ", tolerance = " << tolerance << " px, max_iter = " << max_iter << std::endl;
 
 	for (int iter = 1; iter	<= max_iter; iter++) {
 		RCTIC(TIMING_MAKE_REF);
@@ -4930,6 +4952,15 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			y_sumsq += cur_yshifts[iframe] * cur_yshifts[iframe];
 		}
 		cur_xshifts[0] = 0; cur_yshifts[0] = 0;
+
+		// EXPERIMENTAL: damp the global update. x/y_sumsq above stay unscaled, so the stopping
+		// test sees the full update. Scaling here covers both the accumulation and the re-shift.
+		if (half_gain) {
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				cur_xshifts[iframe] *= 0.5;
+				cur_yshifts[iframe] *= 0.5;
+			}
+		}
 
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			xshifts[iframe] += cur_xshifts[iframe];

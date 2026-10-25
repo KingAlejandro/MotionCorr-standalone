@@ -139,6 +139,14 @@ public:
 	// Maximum number of iterations
 	int max_iter;
 
+	// EXPERIMENTAL research prototype, default off, CPU only (refused with --gpu).
+	// experimental_global_half_gain scales every global alignment update by 0.5 (the
+	// unscaled update still drives the stopping test). experimental_align_tolerance > 0
+	// replaces the hard-coded 0.5 px stop of the global alignment. Local patches are
+	// untouched by both.
+	bool experimental_global_half_gain = false;
+	RFLOAT experimental_align_tolerance = 0;
+
 	// Save aligned but non-dose weighted micrograph.
 	// With MOTIONCOR2, this flag is always assumed to be true
 	bool save_noDW;

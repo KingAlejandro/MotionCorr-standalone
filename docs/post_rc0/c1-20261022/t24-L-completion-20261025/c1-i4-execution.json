@@ -1,0 +1,102 @@
+{
+  "source_sha": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f",
+  "tools": "unchanged tools-v2.3-run",
+  "script_sha256": "8d60f251ae25eb12433b1fbbf2b760fb7756c964f1d4c9d4f26ffa8bc2aa3175",
+  "pins_sha256": "60563c87ed04a660f5c85adc32f913b19b5bcf42002f6c9c69a30698fbd23fd1",
+  "authority": "25 Oct user C1 native authority; parent owns GPU3/CPU8-9 for bounded correctness; no timing claim; existing result inventory complete; Gemini M1-M4 closed",
+  "started_utc": "2026-10-25T18:00:08.663268+00:00",
+  "steps": [
+    {
+      "name": "fresh-resource-admission",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "taskset -c 8-9 python3 -"
+      ],
+      "stdin": "import pathlib,json,os,time,fcntl,subprocess\nfiles=['/tmp/motioncorr-c1-cpu8-9.lock','/tmp/motioncorr-gpu3-correctness.lock'];fds=[]\nfor n in files:\n f=os.open(n,os.O_RDWR|os.O_APPEND|os.O_NOFOLLOW);fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB);fds.append(f)\ndef sample():\n out={}\n for l in pathlib.Path('/proc/stat').read_text().splitlines():\n  if l.startswith(('cpu8 ','cpu9 ')):\n   a=l.split();v=list(map(int,a[1:]))[:8];out[a[0]]=(sum(v),v[3]+v[4])\n return out\na=sample();time.sleep(3);b=sample();busy={k:1-(b[k][1]-v[1])/(b[k][0]-v[0]) for k,v in a.items()};assert all(v<0.5 for v in busy.values()),busy\nq=subprocess.run(['nvidia-smi','--query-compute-apps=gpu_uuid,pid,process_name','--format=csv,noheader'],capture_output=True,text=True,check=True);assert 'GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d' not in q.stdout\nm=dict((l.split(':')[0],l.split(':')[1].strip()) for l in pathlib.Path('/proc/meminfo').read_text().splitlines());assert int(m['MemAvailable'].split()[0])>64*1024*1024\ns=os.statvfs('/mnt/clathrin');assert s.f_bavail*s.f_frsize>16<<30\np=pathlib.Path('/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb');assert not (p/'t24-i4-20261025').exists();assert not (p/'c1-i4-20261025-L.sh').exists();assert not (p/'c1-i4-20261025-pins.json').exists()\nprint(json.dumps({'cpu_mask':'8-9','busy':busy,'free_lease_probes':files,'compute_apps':q.stdout,'mem_available':m['MemAvailable'],'scratch_free_bytes':s.f_bavail*s.f_frsize,'other_lanes_untouched':True}))\n",
+      "exit": 0,
+      "wall_s": 5.431705951690674,
+      "stdout": "{\"cpu_mask\": \"8-9\", \"busy\": {\"cpu8\": 0.0, \"cpu9\": 0.0}, \"free_lease_probes\": [\"/tmp/motioncorr-c1-cpu8-9.lock\", \"/tmp/motioncorr-gpu3-correctness.lock\"], \"compute_apps\": \"\", \"mem_available\": \"442033548 kB\", \"scratch_free_bytes\": 377202716672, \"other_lanes_untouched\": true}\n",
+      "stderr": ""
+    },
+    {
+      "name": "transfer-C1-I4-PINS.json",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "/tmp/motioncorr-20261025-parent/C1-I4-PINS.json",
+        "4GPUs:/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/c1-i4-20261025-pins.json"
+      ],
+      "stdin": null,
+      "exit": 0,
+      "wall_s": 1.0424346923828125,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "transfer-c1-i4-L.sh",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "/tmp/motioncorr-20261025-parent/c1-i4-L.sh",
+        "4GPUs:/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/c1-i4-20261025-L.sh"
+      ],
+      "stdin": null,
+      "exit": 0,
+      "wall_s": 1.4823062419891357,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "verify-transfer",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "python3 -"
+      ],
+      "stdin": "import hashlib,pathlib; p=pathlib.Path('/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb'); assert hashlib.sha256((p/'c1-i4-20261025-L.sh').read_bytes()).hexdigest()=='8d60f251ae25eb12433b1fbbf2b760fb7756c964f1d4c9d4f26ffa8bc2aa3175'; assert hashlib.sha256((p/'c1-i4-20261025-pins.json').read_bytes()).hexdigest()=='60563c87ed04a660f5c85adc32f913b19b5bcf42002f6c9c69a30698fbd23fd1'; print('exact wrapper/pins')",
+      "exit": 0,
+      "wall_s": 0.7591080665588379,
+      "stdout": "exact wrapper/pins\n",
+      "stderr": ""
+    },
+    {
+      "name": "bounded-L-completion-once",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "taskset -c 8-9 bash /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/c1-i4-20261025-L.sh"
+      ],
+      "stdin": null,
+      "exit": 0,
+      "wall_s": 89.69834899902344,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "state": "CHAIN_EXIT0_NEEDS_PARENT_GRADE",
+  "native_count_max": 3,
+  "reuse": "4 prior exact-source L arms, not reruns",
+  "budget": "3 tutorial24 native processes; original native-driver timeout7200s each; parent checks liveness/status, no blind retry; new output expected<8GiB within existing160GiB task scratch cap",
+  "finished_utc": "2026-10-25T18:01:47.500184+00:00"
+}

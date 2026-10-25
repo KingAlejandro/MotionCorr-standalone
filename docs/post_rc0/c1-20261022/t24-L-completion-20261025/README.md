@@ -1,0 +1,15 @@
+# C1 T24 L attribution completed — 25 October 2026
+
+The bounded L attribution row is **COMPLETE with no blockers**. This does not complete C1 qualification or establish scientific validity or performance. Tested production source remains `e77a51a220cb0d91f4ac3c7fac211876d0c6833f`; the deployed attribution tools remain the unchanged `tools-v2.3-run`.
+
+Four valid L arms from 22 October were reused explicitly: F-fresh, C1, N and only254. Their original RUN receipts and 196 product hashes were bound before execution and checked unchanged afterward. Exactly three new native processes ran once on GPU3 / CPU8–9 / OMP2: a fresh F-current control, only260-L and only270-L. Every new arm has 24 nvCOMP route witnesses, a GPU3-only process witness, pre/post health exit 0 and empty cleanup.
+
+F-current reproduced all 49 retained F-fresh products. This strict cross-date control passed before the two missing arms ran. The fresh lane-hash comparison against RC0 was IDENTICAL, and N equals C1 exactly. Of the 49 F-to-C1 changes, only260 reproduces three STAR products: movies 00037 and 00048, and the joint STAR. The remaining 46 products (24 MRC and 22 STAR) are reproduced only by the combined numerical build. Per-fix interactions remain unresolved. only270 changes 24 products relative to F in L; its zero-effect G result must not be generalized to L.
+
+Gemini 4 independently reviewed evidence reuse and required source/binary, witness and baseline pins. Sol implemented those checks and corrected the reviewer's original assertion that reused N-versus-C1 identity would detect all drift in newly run single-fix arms. It would not; the additional fresh F control addresses that specific gap. The amended review, initial reviewed script and final executed script are retained here. The original first handback remains in the app task history.
+
+`C1-I4-PINS.json` binds the four attribution source manifests, build receipts, G RUNs and binaries; 453–470 relevant files per arm were independently matched to exact local Git commits. It also pins the RC0 L manifest/report, tutorial gain and input STAR. `c1-i4-execution.json` records actual argv, exits and resources. Bash syntax and all four embedded Python blocks compiled before launch. The raw bundle contains native RUN records, full comparisons and classifications, stage receipts, and the imported-evidence manifest/unchanged marker.
+
+The old failed only260-L admission record, all old products and all source remain intact. Kernel Xid inspection is UNRUN. Durations are operational observations, not benchmarks. The parent checked reports and bindings; it did not independently reread every new MRC payload. Original products remain on the VM and comparison reports retain their hashes. Dataset, recovery, route, known-motion and other C1 rows retain their separate statuses. No merge, gate/default, publication-policy or support-class adoption follows.
+
+`raw-records.tar.gz` is a lossless compressed record bundle. `SHA256SUMS` covers every other file in this packet.

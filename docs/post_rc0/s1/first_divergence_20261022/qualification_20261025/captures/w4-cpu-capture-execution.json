@@ -1,0 +1,96 @@
+{
+  "namespace": "/mnt/clathrin/alex-motioncorr-w4-cpu13-20261025-d3e1b33e-1082-478e-815a-032ea5f3a83e",
+  "utc": "2026-10-25T18:28:26.165288+00:00",
+  "authority": "25Oct experimental/C1-W4 authority and approved bounded accuracycontract; parent executes exact reviewed8CPUcaptureprotocol once, venue-bound4GPUsCPU13; noCUDAcapture",
+  "pins": {
+    "capture_cpu_v2.py": "884e7424fbb49d1c887301129a20f29ae89467839defcd919810bfa1f17bf1b2",
+    "protocol.json": "c2e7712bb4c16bf4a4e80ce69694177e0961e0a8a608b5e8d62ae217693db15f"
+  },
+  "state": "STOPPED_NO_RETRY",
+  "steps": [
+    {
+      "name": "fresh-admission-and-reserve",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "taskset -c 13 python3 - /mnt/clathrin/alex-motioncorr-w4-cpu13-20261025-d3e1b33e-1082-478e-815a-032ea5f3a83e"
+      ],
+      "stdin": "import pathlib,os,fcntl,time,json,sys\nn=pathlib.Path(sys.argv[1]);assert not n.exists();f=os.open('/tmp/motioncorr-w4-cpu13.lock',os.O_RDWR|os.O_CREAT|os.O_APPEND|os.O_NOFOLLOW,0o666);fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB);assert os.sched_getaffinity(0)=={13}\ndef cpu():\n v=list(map(int,next(x for x in pathlib.Path('/proc/stat').read_text().splitlines() if x.startswith('cpu13 ')).split()[1:]))[:8];return sum(v),v[3]+v[4]\na=cpu();time.sleep(3);b=cpu();busy=1-(b[1]-a[1])/(b[0]-a[0]);assert busy<.5\nm=dict((x.split(':')[0],x.split(':')[1].strip()) for x in pathlib.Path('/proc/meminfo').read_text().splitlines());assert int(m['MemAvailable'].split()[0])>2*1024*1024\ns=os.statvfs('/mnt/clathrin');assert s.f_bavail*s.f_frsize>1<<30\nn.mkdir(mode=0o700);print(json.dumps({'CPU13busy':busy,'memory_available':m['MemAvailable'],'scratch_free_bytes':s.f_bavail*s.f_frsize,'new_namespace':str(n),'noGPU':True}))\n",
+      "exit": 0,
+      "stdout": "{\"CPU13busy\": 0.0033222591362126463, \"memory_available\": \"441924268 kB\", \"scratch_free_bytes\": 371609796608, \"new_namespace\": \"/mnt/clathrin/alex-motioncorr-w4-cpu13-20261025-d3e1b33e-1082-478e-815a-032ea5f3a83e\", \"noGPU\": true}\n",
+      "stderr": ""
+    },
+    {
+      "name": "transfer-capture_cpu_v2.py",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c3dca0d/docs/post_rc0/s1/first_divergence_20261022/affine_patch_oracle/cpu_lattice_capture_20261023/capture_cpu_v2.py",
+        "4GPUs:/mnt/clathrin/alex-motioncorr-w4-cpu13-20261025-d3e1b33e-1082-478e-815a-032ea5f3a83e/capture_cpu_v2.py"
+      ],
+      "stdin": null,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "transfer-protocol.json",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c3dca0d/docs/post_rc0/s1/first_divergence_20261022/affine_patch_oracle/cpu_lattice_capture_20261023/protocol.json",
+        "4GPUs:/mnt/clathrin/alex-motioncorr-w4-cpu13-20261025-d3e1b33e-1082-478e-815a-032ea5f3a83e/protocol.json"
+      ],
+      "stdin": null,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "verify-transfer",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "python3 -"
+      ],
+      "stdin": "import pathlib,hashlib; p=pathlib.Path('/mnt/clathrin/alex-motioncorr-w4-cpu13-20261025-d3e1b33e-1082-478e-815a-032ea5f3a83e'); pins={'capture_cpu_v2.py': '884e7424fbb49d1c887301129a20f29ae89467839defcd919810bfa1f17bf1b2', 'protocol.json': 'c2e7712bb4c16bf4a4e80ce69694177e0961e0a8a608b5e8d62ae217693db15f'}; assert all(hashlib.sha256((p/f).read_bytes()).hexdigest()==h for f,h in pins.items());print(\"exact reviewed driver/protocol\")",
+      "exit": 0,
+      "stdout": "exact reviewed driver/protocol\n",
+      "stderr": ""
+    },
+    {
+      "name": "capture-once",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "taskset -c 13 python3 -B /mnt/clathrin/alex-motioncorr-w4-cpu13-20261025-d3e1b33e-1082-478e-815a-032ea5f3a83e/capture_cpu_v2.py /mnt/clathrin/alex-motioncorr-w4-cpu13-20261025-d3e1b33e-1082-478e-815a-032ea5f3a83e"
+      ],
+      "stdin": null,
+      "exit": 1,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "error": "RuntimeError('capture-once exited1')",
+  "finished_utc": "2026-10-25T18:28:33.567986+00:00"
+}

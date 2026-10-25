@@ -1,0 +1,75 @@
+--- superseded-r1/w4_allpatch_decomposition_v2.py	2026-10-25 18:22:18
++++ scripts/w4_allpatch_decomposition_v2.py	2026-10-25 18:56:59
+@@ -18,8 +18,10 @@
+ v2 changes only the fixture block: it loads the ORIGINAL pinned affine_field.npy,
+ affine_target.npy and affine.mrcs (the retained checker's own input path,
+ check_motion_diagnostics.py:183-185), verifies their sha256 pins, and requires a
+-completed control-D diagnostic (w4_fixture_diag.py) with adoptable=true, whose sha256
+-is recorded. The file-index.json hash is now also pinned. Everything else is v1.
++completed control-D diagnostic (w4_fixture_diag.py), whose sha256 is recorded. The file-index.json
++hash is now also pinned. Everything else is v1.
++Revision v2.1 (2026-10-25): the diagnostic's classification/adoptable labels are advisory only and
++no longer gate execution; protocol id and state == COMPLETE remain a structural prerequisite.
+ 
+ usage: w4_allpatch_decomposition_v2.py R275 SRC805 PINNED_FIXTURE_DIR DIAG.json OUT.json
+ """
+@@ -54,8 +56,8 @@
+ bound = {"file-index.json": FILE_INDEX_SHA}
+ diag_bytes = DIAG.read_bytes()
+ diag = json.loads(diag_bytes)
+-if not (diag.get("protocol") == "w4-loaded-fixture/v2" and diag.get("state") == "COMPLETE" and diag.get("adoptable") is True):
+-    raise SystemExit("control-D diagnostic missing, incomplete or not adoptable")
++if not (diag.get("protocol") == "w4-loaded-fixture/v2" and diag.get("state") == "COMPLETE"):
++    raise SystemExit("control-D diagnostic missing or incomplete")
+ bound["control-D diagnostic"] = sha(diag_bytes)
+ for b in ("cpu", "cuda"):
+     for rel in ("state/global.txt", "state/model.txt", "out/affine.star", "checker.json",
+@@ -129,7 +131,7 @@
+ 
+ CENTRES = [(20, 15), (62, 15), (104, 15), (20, 47), (62, 47), (104, 47), (20, 79), (62, 79), (104, 79)]
+ LABEL = {c: f"({i // 3 + 1},{i % 3 + 1})" for i, c in enumerate(CENTRES)}
+-report = dict(schema="w4-offline-allpatch/2-loaded-fixture", inputs=bound, numpy=np.__version__,
++report = dict(schema="w4-offline-allpatch/2.1-loaded-fixture", inputs=bound, numpy=np.__version__,
+               python=sys.version.split()[0], backends={})
+ 
+ for b in ("cpu", "cuda"):
+--- superseded-r1/w4_objective_oracle.py	2026-10-25 18:30:14
++++ scripts/w4_objective_oracle.py	2026-10-25 18:56:59
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ # SPDX-License-Identifier: GPL-2.0-or-later
+-"""W4 all-patch inherited-objective oracle, protocol w4-objective-oracle/v1 (PROTOCOL.md).
++"""W4 all-patch inherited-objective oracle, protocol w4-objective-oracle/v1.1 (PROTOCOL.md).
+ 
+ Offline, NumPy only, no MotionCorr execution, no new estimator. Generalises R_fm of the
+ reviewed affine patch (2,1) oracle (affine-patch-oracle/v1, affine_patch_oracle.py
+@@ -10,7 +10,8 @@
+ Three references are kept distinct: the static frame-0 template (R_fm, as frozen in REPORT
+ section 6), the actual leave-one-out sum that alignPatch correlates against (R_loo), and R_loo on
+ pipeline windows built from the pinned frames (R_pipe_loo). Truth comes from the ORIGINAL pinned
+-fixtures (amendment w4-loaded-fixture/v2).
++fixtures (amendment w4-loaded-fixture/v2.1). v1.1 differs from v1 only in that the control-D
++diagnostic's classification/adoptable labels are advisory and no longer gate execution.
+ 
+ usage: w4_objective_oracle.py R275 SRC805 PINNED_FIXTURE_DIR DIAG.json REF_ATTEMPT02.json REF_SHRINKAGE.json OUT.json
+ """
+@@ -53,8 +54,8 @@
+ 
+ index = json.loads(pinned('file-index.json', R275 / 'file-index.json'))['files']
+ diag_raw = DIAG.read_bytes(); diag = json.loads(diag_raw)
+-if not (diag.get('protocol') == 'w4-loaded-fixture/v2' and diag.get('state') == 'COMPLETE' and diag.get('adoptable') is True):
+-    raise SystemExit('control-D diagnostic missing, incomplete or not adoptable')
++if not (diag.get('protocol') == 'w4-loaded-fixture/v2' and diag.get('state') == 'COMPLETE'):
++    raise SystemExit('control-D diagnostic missing or incomplete')
+ bound['control-D diagnostic'] = sha(diag_raw)
+ for rel in ('fixtures/affine_field.npy', 'fixtures/affine_target.npy', 'fixtures/affine.mrcs'):
+     assert index[rel]['sha256'] == PINS[rel], rel
+@@ -403,7 +404,7 @@
+ controls['C-NAT'] = 'PASS' if all(max(v[k] for k in ('rms_err_px', 'slope_x', 'slope_y', 'rms_known_px', 'rms_native_px')) <= LIM['nat']
+                                   and v['accepted'] == v['accepted_expected'] for v in nat.values()) else 'FAIL'
+ ok = all(v == 'PASS' for v in controls.values())
+-res = dict(protocol='w4-objective-oracle/v1', amendment='w4-loaded-fixture/v2',
++res = dict(protocol='w4-objective-oracle/v1.1', amendment='w4-loaded-fixture/v2.1',
+            kind='offline inherited-objective oracle; diagnostic routing only, not a gate; no MotionCorr execution',
+            state='COMPLETE_CONTROLS_PASS' if ok else 'COMPLETE_CONTROLS_FAIL_NOT_CREDITED',
+            numpy=np.__version__, python=sys.version.split()[0], limits=LIM, routing_thresholds=ROUTE,

@@ -1,0 +1,40 @@
+{
+  "phase": "A",
+  "affinity": [
+    62
+  ],
+  "cpu_busy_fraction": 0.0,
+  "mem_available": "185155536 kB",
+  "allocated_ram_cap_bytes": 2147483648,
+  "disk_cap_bytes": 67108864,
+  "input_sha256": "0eff72fec561ee064ca0065b9de875c54e9993520631bffd43e5eaff1f9dd59b",
+  "python_exe": "/usr/bin/python3",
+  "jobs": [
+    {
+      "name": "w4_fixture_diag",
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/tmp/motioncorr-w4-phaseA-20261025-7819b384-fa17-4ff0-8bb4-e1e7f4bb120e/out/w4_fixture_diag.time",
+        "/usr/bin/python3",
+        "-I",
+        "-B",
+        "/tmp/motioncorr-w4-phaseA-20261025-7819b384-fa17-4ff0-8bb4-e1e7f4bb120e/scripts/w4_fixture_diag.py",
+        "/tmp/motioncorr-w4-phaseA-20261025-7819b384-fa17-4ff0-8bb4-e1e7f4bb120e/src805",
+        "/tmp/motioncorr-w4-phaseA-20261025-7819b384-fa17-4ff0-8bb4-e1e7f4bb120e/fixtures",
+        "/tmp/motioncorr-w4-phaseA-20261025-7819b384-fa17-4ff0-8bb4-e1e7f4bb120e/out/w4_fixture_diag.json"
+      ],
+      "exit": 0,
+      "wall_s": 0.2494642734527588,
+      "stdout": "{\"state\": \"COMPLETE\", \"classification\": \"PAYLOAD_WITHIN_LIMITS\", \"adoptable\": true, \"numpy\": \"1.26.4\", \"manifest_numpy\": \"2.5.3\"}\n",
+      "stderr": ""
+    }
+  ],
+  "state": "COMPLETE_EXIT0_NEEDS_REVIEW",
+  "output_bytes": 2748436,
+  "outputs_sha256": {
+    "out/w4_fixture_diag.json": "3c9a13b8ef46891b3446f3846153fcec24a4ecbd8c56a518c3132de4cee11c05",
+    "out/w4_fixture_diag.time": "ea0879039a9c37dfb18219713d3b4cbbc01acfc9f0d814a99a0dda4bc932695c"
+  }
+}

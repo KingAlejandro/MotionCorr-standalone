@@ -1,0 +1,164 @@
+{
+ "state": "PASS",
+ "checks": {
+  "all_exit_0": true,
+  "numeric_leaves_7": true,
+  "max_abs_diff_0.5": true,
+  "leaves_over_1e-6_is_2": true,
+  "largest_paths": true,
+  "structural_5": true,
+  "structural_items": true,
+  "top_level_ignore_applied": true,
+  "without_ignore_skip_counted": true,
+  "identical_pair_clean": true
+ },
+ "runs": {
+  "diff": {
+   "exit": 0,
+   "stderr": "",
+   "report": {
+    "numeric_leaves": 7,
+    "max_abs_diff": 0.5,
+    "leaves_over_1e-6": 2,
+    "largest": [
+     {
+      "path": "/n/skip",
+      "abs_diff": 0.5
+     },
+     {
+      "path": "/w[2]",
+      "abs_diff": 0.25
+     },
+     {
+      "path": "/v",
+      "abs_diff": 5.00000000069889e-07
+     },
+     {
+      "path": "/w[1]",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/w[0]",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/list[1]",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/list[0]",
+      "abs_diff": 0.0
+     }
+    ],
+    "structural_or_text_differences": [
+     "/list: length 2 vs 3",
+     "/n/flag: True vs False",
+     "/n/t: 'a' vs 'b'",
+     "/only_a: only in retained",
+     "/only_b: only in reproduced"
+    ],
+    "ignored_top_level_keys": [
+     "skip"
+    ]
+   }
+  },
+  "identical": {
+   "exit": 0,
+   "stderr": "",
+   "report": {
+    "numeric_leaves": 8,
+    "max_abs_diff": 0.0,
+    "leaves_over_1e-6": 0,
+    "largest": [
+     {
+      "path": "/w[2]",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/w[1]",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/w[0]",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/v",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/only_a",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/n/skip",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/list[1]",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/list[0]",
+      "abs_diff": 0.0
+     }
+    ],
+    "structural_or_text_differences": [],
+    "ignored_top_level_keys": [
+     "skip"
+    ]
+   }
+  },
+  "no_ignore": {
+   "exit": 0,
+   "stderr": "",
+   "report": {
+    "numeric_leaves": 8,
+    "max_abs_diff": 998.0,
+    "leaves_over_1e-6": 3,
+    "largest": [
+     {
+      "path": "/skip/x",
+      "abs_diff": 998.0
+     },
+     {
+      "path": "/n/skip",
+      "abs_diff": 0.5
+     },
+     {
+      "path": "/w[2]",
+      "abs_diff": 0.25
+     },
+     {
+      "path": "/v",
+      "abs_diff": 5.00000000069889e-07
+     },
+     {
+      "path": "/w[1]",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/w[0]",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/list[1]",
+      "abs_diff": 0.0
+     },
+     {
+      "path": "/list[0]",
+      "abs_diff": 0.0
+     }
+    ],
+    "structural_or_text_differences": [
+     "/list: length 2 vs 3",
+     "/n/flag: True vs False",
+     "/n/t: 'a' vs 'b'",
+     "/only_a: only in retained",
+     "/only_b: only in reproduced"
+    ],
+    "ignored_top_level_keys": []
+   }
+  }
+ }
+}

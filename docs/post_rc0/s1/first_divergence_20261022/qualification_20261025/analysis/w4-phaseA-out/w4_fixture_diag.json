@@ -1,0 +1,323 @@
+{
+ "protocol": "w4-loaded-fixture/v2",
+ "control": "D fixture identity",
+ "state": "COMPLETE",
+ "python": "3.12.3",
+ "numpy": "1.26.4",
+ "platform": "Linux-6.8.0-86-generic-x86_64-with-glibc2.39",
+ "machine": "x86_64",
+ "limits": {
+  "field_px": 1e-12,
+  "render": 1e-05
+ },
+ "numpy_config": {
+  "Compilers": {
+   "c": {
+    "name": "gcc",
+    "linker": "ld.bfd",
+    "version": "13.2.0",
+    "commands": "cc",
+    "args": "-g, -O2, -fno-omit-frame-pointer, -mno-omit-leaf-frame-pointer, -ffile-prefix-map=/build/numpy-VpSPb5/numpy-1.26.4+ds=., -flto=auto, -ffat-lto-objects, -fstack-protector-strong, -fstack-clash-protection, -Wformat, -Werror=format-security, -fcf-protection, -fdebug-prefix-map=/build/numpy-VpSPb5/numpy-1.26.4+ds=/usr/src/numpy-1:1.26.4+ds-6ubuntu1, -Wdate-time, -D_FORTIFY_SOURCE=3",
+    "linker args": "-Wl,-Bsymbolic-functions, -flto=auto, -ffat-lto-objects, -Wl,-z,relro, -g, -O2, -fno-omit-frame-pointer, -mno-omit-leaf-frame-pointer, -ffile-prefix-map=/build/numpy-VpSPb5/numpy-1.26.4+ds=., -flto=auto, -ffat-lto-objects, -fstack-protector-strong, -fstack-clash-protection, -Wformat, -Werror=format-security, -fcf-protection, -fdebug-prefix-map=/build/numpy-VpSPb5/numpy-1.26.4+ds=/usr/src/numpy-1:1.26.4+ds-6ubuntu1, -Wdate-time, -D_FORTIFY_SOURCE=3"
+   },
+   "cython": {
+    "name": "cython",
+    "linker": "cython",
+    "version": "3.0.8",
+    "commands": "cython"
+   },
+   "c++": {
+    "name": "gcc",
+    "linker": "ld.bfd",
+    "version": "13.2.0",
+    "commands": "c++",
+    "args": "-g, -O2, -fno-omit-frame-pointer, -mno-omit-leaf-frame-pointer, -ffile-prefix-map=/build/numpy-VpSPb5/numpy-1.26.4+ds=., -flto=auto, -ffat-lto-objects, -fstack-protector-strong, -fstack-clash-protection, -Wformat, -Werror=format-security, -fcf-protection, -fdebug-prefix-map=/build/numpy-VpSPb5/numpy-1.26.4+ds=/usr/src/numpy-1:1.26.4+ds-6ubuntu1, -Wdate-time, -D_FORTIFY_SOURCE=3",
+    "linker args": "-Wl,-Bsymbolic-functions, -flto=auto, -ffat-lto-objects, -Wl,-z,relro, -g, -O2, -fno-omit-frame-pointer, -mno-omit-leaf-frame-pointer, -ffile-prefix-map=/build/numpy-VpSPb5/numpy-1.26.4+ds=., -flto=auto, -ffat-lto-objects, -fstack-protector-strong, -fstack-clash-protection, -Wformat, -Werror=format-security, -fcf-protection, -fdebug-prefix-map=/build/numpy-VpSPb5/numpy-1.26.4+ds=/usr/src/numpy-1:1.26.4+ds-6ubuntu1, -Wdate-time, -D_FORTIFY_SOURCE=3"
+   }
+  },
+  "Machine Information": {
+   "host": {
+    "cpu": "x86_64",
+    "family": "x86_64",
+    "endian": "little",
+    "system": "linux"
+   },
+   "build": {
+    "cpu": "x86_64",
+    "family": "x86_64",
+    "endian": "little",
+    "system": "linux"
+   }
+  },
+  "Build Dependencies": {
+   "blas": {
+    "name": "blas",
+    "found": true,
+    "version": "unknown",
+    "detection method": "system",
+    "include directory": "unknown",
+    "lib directory": "unknown",
+    "openblas configuration": "unknown",
+    "pc file directory": "unknown"
+   },
+   "lapack": {
+    "name": "dep140228583157936",
+    "found": true,
+    "version": "1.26.4",
+    "detection method": "internal",
+    "include directory": "unknown",
+    "lib directory": "unknown",
+    "openblas configuration": "unknown",
+    "pc file directory": "unknown"
+   }
+  },
+  "Python Information": {
+   "path": "/usr/bin/python3.12",
+   "version": "3.12"
+  },
+  "SIMD Extensions": {
+   "baseline": [
+    "SSE",
+    "SSE2",
+    "SSE3"
+   ],
+   "found": [
+    "SSSE3",
+    "SSE41",
+    "POPCNT",
+    "SSE42",
+    "AVX",
+    "F16C",
+    "FMA3",
+    "AVX2"
+   ],
+   "not found": [
+    "AVX512F",
+    "AVX512CD",
+    "AVX512_KNL",
+    "AVX512_KNM",
+    "AVX512_SKX",
+    "AVX512_CLX",
+    "AVX512_CNL",
+    "AVX512_ICL",
+    "AVX512_SPR"
+   ]
+  }
+ },
+ "pinned_inputs": {
+  "affine_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+  "affine_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+  "affine.mrcs": "1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a",
+  "MANIFEST.json": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc"
+ },
+ "sources": {
+  "test-data/generate_motion_diagnostics.py": "5e781bb290b3f12b38f6dc7ec18bb955d56331219dc0216321e010ecbcdaf4cc",
+  "test-data/generate_known_motion_fixture.py": "f28fbf516f8c2f7a3ae1b6133d54d3cc1e0708e2f90644cce30a845f4bbcef4f",
+  "tools/motion_field.py": "d72cfad7175368fa6d0727c2727c49780328951c6f4d3ecc20e9ac662ac2e810"
+ },
+ "manifest_numpy": "2.5.3",
+ "arrays": {
+  "affine_field.npy": {
+   "pinned_header": {
+    "version": [
+     1,
+     0
+    ],
+    "header_dict": {
+     "descr": "<f8",
+     "fortran_order": false,
+     "shape": [
+      5,
+      96,
+      128,
+      2
+     ]
+    },
+    "header_len": 128
+   },
+   "pinned_header_bytes_sha256": "75b106abc53c9ca091960decc65860729b2406c6f87fc6e28e8091909cd74470",
+   "pinned_payload_sha256": "7f1827b977f3968e0a726d580d134c2a8c49b67f771dca3b92888b2dbc62242b",
+   "resave_of_pinned_identical": true,
+   "resave_header_identical": true,
+   "resave_payload_identical": true,
+   "regenerated_sha256": "f31372173b6987da565f762d33f219be0eb2bd9276a55912b1075e7495cf9919",
+   "regenerated_header": {
+    "version": [
+     1,
+     0
+    ],
+    "header_dict": {
+     "descr": "<f8",
+     "fortran_order": false,
+     "shape": [
+      5,
+      96,
+      128,
+      2
+     ]
+    },
+    "header_len": 128
+   },
+   "regenerated_header_identical": true,
+   "regenerated_payload_identical": false,
+   "regenerated_dtype": "<f8",
+   "payload_diff": {
+    "comparable": true,
+    "elements": 122880,
+    "differing_elements": 257,
+    "max_abs": 7.105427357601002e-15,
+    "max_ulp": 32,
+    "ulp_histogram": {
+     "1": 105,
+     "2": 51,
+     "3": 0,
+     "4": 41,
+     ">4": 60
+    },
+    "argmax_index": [
+     3,
+     77,
+     31,
+     0
+    ]
+   }
+  },
+  "affine_target.npy": {
+   "pinned_header": {
+    "version": [
+     1,
+     0
+    ],
+    "header_dict": {
+     "descr": "<f4",
+     "fortran_order": false,
+     "shape": [
+      96,
+      128
+     ]
+    },
+    "header_len": 128
+   },
+   "pinned_header_bytes_sha256": "58ab746a4c5fb4521de6077fcbc7619762032125a27f2fa741f216d5fb80b870",
+   "pinned_payload_sha256": "407e9b079baaf4302fc8ab5901ef8aab3708c6b395fe96c81ea29feb69fe7409",
+   "resave_of_pinned_identical": true,
+   "resave_header_identical": true,
+   "resave_payload_identical": true,
+   "regenerated_sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+   "regenerated_header": {
+    "version": [
+     1,
+     0
+    ],
+    "header_dict": {
+     "descr": "<f4",
+     "fortran_order": false,
+     "shape": [
+      96,
+      128
+     ]
+    },
+    "header_len": 128
+   },
+   "regenerated_header_identical": true,
+   "regenerated_payload_identical": true,
+   "regenerated_dtype": "<f4",
+   "payload_diff": {
+    "comparable": true,
+    "elements": 12288,
+    "differing_elements": 0,
+    "max_abs": 0.0,
+    "max_ulp": 0,
+    "ulp_histogram": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4": 0,
+     ">4": 0
+    }
+   }
+  },
+  "affine.mrcs (data only)": {
+   "payload_diff": {
+    "comparable": true,
+    "elements": 61440,
+    "differing_elements": 0,
+    "max_abs": 0.0,
+    "max_ulp": 0,
+    "ulp_histogram": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4": 0,
+     ">4": 0
+    }
+   }
+  }
+ },
+ "localisation_report_only": {
+  "field_elementwise_vs_pinned": {
+   "comparable": true,
+   "elements": 122880,
+   "differing_elements": 257,
+   "max_abs": 7.105427357601002e-15,
+   "max_ulp": 32,
+   "ulp_histogram": {
+    "1": 105,
+    "2": 51,
+    "3": 0,
+    "4": 41,
+    ">4": 60
+   },
+   "argmax_index": [
+    3,
+    77,
+    31,
+    0
+   ]
+  },
+  "field_elementwise_vs_regenerated": {
+   "comparable": true,
+   "elements": 122880,
+   "differing_elements": 0,
+   "max_abs": 0.0,
+   "max_ulp": 0,
+   "ulp_histogram": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    ">4": 0
+   }
+  },
+  "target_scalar_libm_vs_pinned": {
+   "comparable": true,
+   "elements": 12288,
+   "differing_elements": 0,
+   "max_abs": 0.0,
+   "max_ulp": 0,
+   "ulp_histogram": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    ">4": 0
+   }
+  },
+  "target_scalar_libm_vs_regenerated": {
+   "comparable": true,
+   "elements": 12288,
+   "differing_elements": 0,
+   "max_abs": 0.0,
+   "max_ulp": 0,
+   "ulp_histogram": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    ">4": 0
+   }
+  }
+ },
+ "classification": "PAYLOAD_WITHIN_LIMITS",
+ "adoptable": true
+}

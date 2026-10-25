@@ -1,0 +1,23 @@
+--- /tmp/motioncorr-20261025-w4-objective-protocol/superseded-r2/compare_json.py	2026-10-25 18:25:47
++++ /tmp/motioncorr-20261025-w4-objective-protocol/scripts/compare_json.py	2026-10-25 19:06:09
+@@ -4,6 +4,8 @@
+ 
+ usage: compare_json.py RETAINED.json REPRODUCED.json OUT.json [IGNORED_TOP_LEVEL_KEY ...]
+ Report only (exit 0 when both parse); the protocol states how the numbers are read.
++r3 (2026-10-25): r2 (sha256 85ef82f7…5a82) passed `leaves_over_1e-6` as a dict() keyword, a
++SyntaxError; the output dict is now a literal with the same key names. No other change.
+ """
+ import json
+ import sys
+@@ -36,8 +38,8 @@
+ 
+ walk(a, b, "")
+ diffs.sort(reverse=True)
+-out = dict(numeric_leaves=len(diffs), max_abs_diff=diffs[0][0] if diffs else 0.0,
+-           leaves_over_1e-6=sum(d > 1e-6 for d, _ in diffs), largest=[dict(path=p, abs_diff=d) for d, p in diffs[:20]],
+-           structural_or_text_differences=struct, ignored_top_level_keys=sorted(ignore))
++out = {"numeric_leaves": len(diffs), "max_abs_diff": diffs[0][0] if diffs else 0.0,
++       "leaves_over_1e-6": sum(d > 1e-6 for d, _ in diffs), "largest": [dict(path=p, abs_diff=d) for d, p in diffs[:20]],
++       "structural_or_text_differences": struct, "ignored_top_level_keys": sorted(ignore)}
+ Path(sys.argv[3]).write_text(json.dumps(out, indent=1) + "\n")
+ print(json.dumps({k: out[k] for k in ("numeric_leaves", "max_abs_diff", "leaves_over_1e-6")}), len(struct), "structural")

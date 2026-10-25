@@ -1,0 +1,28 @@
+{
+  "schema": "w4-existing-selector-version3-regrade/1",
+  "historical_v2_campaign_status": "FAIL_UNCHANGED",
+  "historical_driver_exit": 1,
+  "native_exit": 0,
+  "new_native_launches": 0,
+  "selector": [
+    1,
+    1
+  ],
+  "verdict": "PASS_VERSION3_REUSE_ONLY",
+  "original_result_sha256": "87a7d15eccd068ea500f1d492bc628f140c6acbb13ccfd137372e2a0cbf9871e",
+  "original_namespace": "/mnt/clathrin/alex-motioncorr-w4-cpu13-20261025-d3e1b33e-1082-478e-815a-032ea5f3a83e",
+  "checks": {
+    "state/global.txt": true,
+    "state/model.txt": true,
+    "affine.log:version3_output_path_and_wall_only": true,
+    "*.star-inventory": true,
+    "affine.star": true,
+    "corrected_micrographs.star": true,
+    "*.mrc-inventory": true,
+    "affine.mrc:header_payload": true,
+    "affine.mrc:labels": true,
+    "*.mrcs-inventory": true
+  },
+  "driver_sha256": "c69d5fdaa98d0b509ad2a13d8fd82020af171b7a4f288b035ddb9f468484dcb6",
+  "protocol_sha256": "cd931a88cb194dc24a7ed2cdcaa6827f89f71c70526dbe2e8ce1ebb9e45d4e3d"
+}

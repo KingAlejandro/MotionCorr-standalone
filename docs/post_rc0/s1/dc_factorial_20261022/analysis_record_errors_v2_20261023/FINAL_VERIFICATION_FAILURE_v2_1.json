@@ -1,0 +1,26 @@
+{
+  "checked_head": "3d5b68e94fcee3c0dd74a8924d3a09cf4bb585f9",
+  "result": "FAIL",
+  "phase": "final packaging assertion, not adapter/harness experiment",
+  "command": "inline final verification: sorted(string paths from git diff) == FILES_v2_1.txt lines (written sorted by pathlib.Path)",
+  "stdout": [
+    "SHA256SUMS PASS 504",
+    "SHA256SUMS_v2_1 PASS 789"
+  ],
+  "stderr": "Traceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError\n",
+  "exit": 1,
+  "read_only_diagnosis": {
+    "actual_count": 790,
+    "listed_count": 790,
+    "missing": [],
+    "extra": [],
+    "first_order_difference": [
+      "v2_1_attempt_01/baseline-EXIT.json",
+      "v2_1_attempt_01/baseline/COMMAND.json"
+    ],
+    "working_tree": "clean"
+  },
+  "reason": "Path component ordering differs from flat string ordering. Membership and hash bindings were correct.",
+  "amendment": "Retain failed check unchanged. New verification iteration checks set equality plus uniqueness, not an unstated sort order. No source, existing artifact, control or baseline rerun.",
+  "preflight": "14:28 local load6.80/5.60/6.42; nonblocking lifetime lease reacquired before receipt writes; cap128MiB"
+}

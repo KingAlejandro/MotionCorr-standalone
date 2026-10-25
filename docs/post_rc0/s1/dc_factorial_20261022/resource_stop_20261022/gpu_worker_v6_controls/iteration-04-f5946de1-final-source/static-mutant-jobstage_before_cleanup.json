@@ -1,0 +1,19 @@
+{
+ "schema": "dc262-v6-data-only/1",
+ "worker_sha256": "fad565f9dc58eafe7e412d83b4e8ac57f51b4f61930498cb88564bd29ae3c8d6",
+ "test_sha256": "848e38d410b3680630b47f6a5fe7d9eade99536d0e31cf7a5d44c197342637a7",
+ "tests": 14,
+ "failures": [
+  {
+   "test": "test_cleanup_uncertainty_outranks_both_stage_faults (__main__.Checks.test_cleanup_uncertainty_outranks_both_stage_faults) (fault='outputs')",
+   "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py\", line 167, in test_cleanup_uncertainty_outranks_both_stage_faults\n    self.assertEqual(outcome, 'CLEANUP_FAILED')\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'JOB_STAGE' != 'CLEANUP_FAILED'\n- JOB_STAGE\n+ CLEANUP_FAILED\n\n"
+  },
+  {
+   "test": "test_cleanup_uncertainty_outranks_both_stage_faults (__main__.Checks.test_cleanup_uncertainty_outranks_both_stage_faults) (fault='witness')",
+   "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py\", line 167, in test_cleanup_uncertainty_outranks_both_stage_faults\n    self.assertEqual(outcome, 'CLEANUP_FAILED')\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'JOB_STAGE' != 'CLEANUP_FAILED'\n- JOB_STAGE\n+ CLEANUP_FAILED\n\n"
+  }
+ ],
+ "errors": [],
+ "result": "FAIL",
+ "limits": "Synthetic Popen/process tables/signals only; process cleanup, real-worker suite, Linux and GPU UNRUN."
+}

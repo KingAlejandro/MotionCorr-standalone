@@ -1,0 +1,78 @@
+[
+  {
+    "name": "finite-large-median",
+    "justification": "Numeric-range fix checks only finite inputs before unchanged median/delta arithmetic. Probe whether accepted finite schema values still lose strict-JSON diagnostics. No source/policy modification.",
+    "argv": [
+      "/Users/alex.konstantinov/.local/bin/python3",
+      "-B",
+      "/private/tmp/motioncorr-dc-analysis-record-errors-review-r2-20261023-81ee3158-d6c7-42fc-9a1b-9bba1fd1c085/exact/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2_1.py",
+      "/private/tmp/motioncorr-dc-analysis-record-errors-review-r2-20261023-81ee3158-d6c7-42fc-9a1b-9bba1fd1c085/boundary-01/finite-large-median/eval",
+      "/private/tmp/motioncorr-dc-analysis-record-errors-review-r2-20261023-81ee3158-d6c7-42fc-9a1b-9bba1fd1c085/boundary-01/finite-large-median/out"
+    ],
+    "exit": 1,
+    "input_values_finite": true,
+    "summary_exists": false,
+    "coverage_exists": false,
+    "inputs": {
+      "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+      "B-pedestal32-s00-cpu-none.json": "9c320cfae3cf6a719dd3e85c9f045740a13e00bf03f531c54a7ad156886d6496",
+      "B-pedestal32-s01-cpu-global.json": "f3905f000751dfc211c4a1216b2e68626578c9c5a097f1190ef32bf094a80163",
+      "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+      "B-pedestal32-s02-cpu-global.json": "44753e8495c89e2d5f46d35298205cc6f9d6203794aa4b931d014e1ec9d3b4ab",
+      "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+      "B-pedestal32-s03-cpu-global.json": "b92dfb5a34dbac5e2b19b890bb440599dc593d2e796461fc69c798f68e28dfee",
+      "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+      "B-pedestal32-s04-cpu-global.json": "ba09e912051f1e5818add12687f2fde05fbaa9eaba22412b907d541da1f78880",
+      "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+      "B-pedestal32-s05-cpu-global.json": "bcae12346cd18fa8abc61e619fce98de8810d17fa616e04a456adaab706968a1",
+      "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+      "B-pedestal32-s06-cpu-global.json": "2e5586e2fd1e29d2c3b427b56ca9ad0100599f28c6f88c19f36b88e34246a620",
+      "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+      "B-pedestal32-s07-cpu-global.json": "d60f65448887546f5ca1c57d1eb47be94d078372c1efa109fe1847b27731460c",
+      "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+      "B-pedestal32-s08-cpu-global.json": "6909be091e4bc488907a05962b9eb4b35994c6e51d4dd40e36d6c92acc117fb7",
+      "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+      "B-pedestal32-s09-cpu-global.json": "9d7efe3178055c503c6f5f7817c5fe1a81d85535954e5a9087c7b06a3ee4a535",
+      "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+    },
+    "stderr": "Traceback (most recent call last):\n  File \"/private/tmp/motioncorr-dc-analysis-record-errors-review-r2-20261023-81ee3158-d6c7-42fc-9a1b-9bba1fd1c085/exact/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2_1.py\", line 304, in <module>\n    sys.exit(main())\n             ~~~~^^\n  File \"/private/tmp/motioncorr-dc-analysis-record-errors-review-r2-20261023-81ee3158-d6c7-42fc-9a1b-9bba1fd1c085/exact/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2_1.py\", line 285, in main\n    (out / 'tierB-v2.json').write_text(json.dumps(result, indent=1, allow_nan=False) + '\\n')\n                                       ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/__init__.py\", line 238, in dumps\n    **kw).encode(obj)\n          ~~~~~~^^^^^\n  File \"/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/encoder.py\", line 200, in encode\n    chunks = self.iterencode(o, _one_shot=True)\n  File \"/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/encoder.py\", line 261, in iterencode\n    return _iterencode(o, 0)\nValueError: Out of range float values are not JSON compliant: inf\n"
+  },
+  {
+    "name": "finite-large-difference",
+    "justification": "Numeric-range fix checks only finite inputs before unchanged median/delta arithmetic. Probe whether accepted finite schema values still lose strict-JSON diagnostics. No source/policy modification.",
+    "argv": [
+      "/Users/alex.konstantinov/.local/bin/python3",
+      "-B",
+      "/private/tmp/motioncorr-dc-analysis-record-errors-review-r2-20261023-81ee3158-d6c7-42fc-9a1b-9bba1fd1c085/exact/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2_1.py",
+      "/private/tmp/motioncorr-dc-analysis-record-errors-review-r2-20261023-81ee3158-d6c7-42fc-9a1b-9bba1fd1c085/boundary-01/finite-large-difference/eval",
+      "/private/tmp/motioncorr-dc-analysis-record-errors-review-r2-20261023-81ee3158-d6c7-42fc-9a1b-9bba1fd1c085/boundary-01/finite-large-difference/out"
+    ],
+    "exit": 1,
+    "input_values_finite": true,
+    "summary_exists": false,
+    "coverage_exists": false,
+    "inputs": {
+      "B-pedestal32-s00-cpu-global.json": "7303df99c88a40044ee12ab04d7f27d5064b27084d9609f833d8aaec16e1f72f",
+      "B-pedestal32-s00-cpu-none.json": "33ae6c723b985208bea8751bfda899498cb2f1dccc36c432e662134a38d4563d",
+      "B-pedestal32-s01-cpu-global.json": "96e18c14f3c8569105df09b11179901690c76db5eaed7679109dc07e2d311acd",
+      "B-pedestal32-s01-cpu-none.json": "0fae099f2ce22c67e6250c575a17cf1dd8ad28e66a96822025e5ad41a58abd74",
+      "B-pedestal32-s02-cpu-global.json": "ea16e99dcf82b9f520042a8da25416ad1f996da53aad4fa94141d0f3594cd334",
+      "B-pedestal32-s02-cpu-none.json": "cd8b0368609e344e8fa5c349ede626d1b42233eaa023e0e7c92414b9f2b03262",
+      "B-pedestal32-s03-cpu-global.json": "4bf1bd24cab747a54f617771efa0518b6b31cb1ddf0c8268fea72498f8a675ab",
+      "B-pedestal32-s03-cpu-none.json": "619bed0bbdffa749ad5eec2dc7afded878458f015da18658d878a1449f670ccf",
+      "B-pedestal32-s04-cpu-global.json": "7fef9648d0e865604db85f35d8872684c0d4f616c279c79d2898e9777a5d6dc7",
+      "B-pedestal32-s04-cpu-none.json": "0da23eccc99d22cdd29b8be32e8d7f913a9c14981802cf9b526352fd1e98bc67",
+      "B-pedestal32-s05-cpu-global.json": "3877ecbb00abfaa7cbd7948cba475e760560851facca3242d36b782846521887",
+      "B-pedestal32-s05-cpu-none.json": "f07366768d14f967b425ffa8692c5ae439ec81e9afcdbd8e09e7f8fe8d225a4e",
+      "B-pedestal32-s06-cpu-global.json": "9453ff44ce62b5079ec1c2de797b267de41fa4dd6a6d58e55a0899997330b6df",
+      "B-pedestal32-s06-cpu-none.json": "63b5298d2af331423833494c44eadb80b50b1ae69f9846d805f32feec37138eb",
+      "B-pedestal32-s07-cpu-global.json": "33d62164b3f8031fc4f9acbe0d6cd9727f75c5b4be3a14abc6ee4a7d5761d002",
+      "B-pedestal32-s07-cpu-none.json": "dbca98aca569ec8a6951b9072436118a366e66f86bbfc5c2cd445d814597cc2f",
+      "B-pedestal32-s08-cpu-global.json": "952d36c58b12d5cfcfb17f62fe3e0ee3e2a7e0bfa33f2c2764527476f44857f9",
+      "B-pedestal32-s08-cpu-none.json": "a50765b915fb08a3b792ab48c9d7b5fe72626f3a4713f4e13b3d1c3c3bd3ba92",
+      "B-pedestal32-s09-cpu-global.json": "cda96ec217a40f82f6ce916cddc8c342f0e66b55e8097b00a280a50f83c0326b",
+      "B-pedestal32-s09-cpu-none.json": "a2258aca2d4e97f0ecfeb9351ff319f4f4bf5e48d8deda0d4b9391b9ff30e778"
+    },
+    "stderr": "Traceback (most recent call last):\n  File \"/private/tmp/motioncorr-dc-analysis-record-errors-review-r2-20261023-81ee3158-d6c7-42fc-9a1b-9bba1fd1c085/exact/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2_1.py\", line 304, in <module>\n    sys.exit(main())\n             ~~~~^^\n  File \"/private/tmp/motioncorr-dc-analysis-record-errors-review-r2-20261023-81ee3158-d6c7-42fc-9a1b-9bba1fd1c085/exact/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2_1.py\", line 285, in main\n    (out / 'tierB-v2.json').write_text(json.dumps(result, indent=1, allow_nan=False) + '\\n')\n                                       ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/__init__.py\", line 238, in dumps\n    **kw).encode(obj)\n          ~~~~~~^^^^^\n  File \"/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/encoder.py\", line 200, in encode\n    chunks = self.iterencode(o, _one_shot=True)\n  File \"/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/encoder.py\", line 261, in iterencode\n    return _iterencode(o, 0)\nValueError: Out of range float values are not JSON compliant: inf\n"
+  }
+]

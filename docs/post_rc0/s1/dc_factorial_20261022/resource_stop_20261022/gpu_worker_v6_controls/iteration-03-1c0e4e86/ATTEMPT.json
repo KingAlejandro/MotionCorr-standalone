@@ -1,0 +1,220 @@
+{
+ "schema": "dc262-v6-static-attempt/1",
+ "namespace": "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6",
+ "uuid": "46f8538e-4012-477e-b2c0-d20621cca7e6",
+ "source_sha": "1c0e4e864925347da20ed9a6a48add927c4d6e88",
+ "utc": "2026-10-23T01:07:42Z",
+ "python": "3.13.7 (main, Aug 18 2025, 19:02:43) [Clang 20.1.4 ]",
+ "load": [
+  6.8203125,
+  7.505859375,
+  11.8076171875
+ ],
+ "logical_cpus": 14,
+ "affinity": "UNAVAILABLE: macOS has no sched_getaffinity; no pinning applied",
+ "numeric_threads": 1,
+ "scratch_cap_bytes": 268435456,
+ "lifetime_lease": "nonblocking flock acquired",
+ "ancestry": [
+  {
+   "pid": 36306,
+   "ppid": 21517,
+   "uid": 502,
+   "cmd": "/Users/alex.konstantinov/.local/bin/python3 -B /tmp/dc262-verify-v6-static-iteration2.py"
+  },
+  {
+   "pid": 21517,
+   "ppid": 16516,
+   "uid": 502,
+   "cmd": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/../CodexCLI.app/Contents/MacOS/codex app-server"
+  },
+  {
+   "pid": 16516,
+   "ppid": 16404,
+   "uid": 502,
+   "cmd": "/Users/alex.konstantinov/Applications/T3 Code (Nightly).app/Contents/MacOS/T3 Code (Nightly) --require /Users/alex.konstantinov/Applications/T3 Code (Nightly).app/Contents/Resources/app.asar/apps/desktop/dist-electron/compileCache.cjs /Users/alex.kon"
+  },
+  {
+   "pid": 16404,
+   "ppid": 1,
+   "uid": 502,
+   "cmd": "/Users/alex.konstantinov/Applications/T3 Code (Nightly).app/Contents/MacOS/T3 Code (Nightly)"
+  },
+  {
+   "pid": 1,
+   "ppid": 0,
+   "uid": 0,
+   "cmd": "/sbin/launchd"
+  }
+ ],
+ "old_author_is_ancestor": false,
+ "real_worker_suite": "UNRUN: frozen --resume owner binding unavailable in Codex ancestry; not invoked, no spoofing",
+ "matching_live_controls": [],
+ "source_hashes": {
+  "v6_mutants.json": "662d040fbe65aae559a2638d5d2ffa0e2bceaf161c6d2652aa97875e22aa7c25",
+  "test_gpu_worker_v6.py": "0fe17877776351843eb1e2c71ce1cb8c349c047c26e2630595f81af0a037ccc0",
+  "gpu_worker_v6.py": "4d247311bab4f31338b4678e5ebb18aa7237e99918b1c03f6d744bfac291a345",
+  "test_v6_static.py": "848e38d410b3680630b47f6a5fe7d9eade99536d0e31cf7a5d44c197342637a7"
+ },
+ "commands": [
+  {
+   "name": "static-units",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py",
+    "--json",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/static-units.json"
+   ],
+   "exit": 0
+  },
+  {
+   "name": "admission-units",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_run_v6_admission.py",
+    "--json",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/admission-units.json"
+   ],
+   "exit": 0
+  },
+  {
+   "name": "K28-K30",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_gpu_worker_v6.py",
+    "--only",
+    "K28,K30",
+    "--json",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/K28-K30.json"
+   ],
+   "exit": 0
+  },
+  {
+   "name": "static-mutant-initial_branch_root_signal_removed",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py",
+    "--worker",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/initial_branch_root_signal_removed.py",
+    "--json",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/static-mutant-initial_branch_root_signal_removed.json"
+   ],
+   "exit": 1
+  },
+  {
+   "name": "static-mutant-loop_branch_root_signal_removed",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py",
+    "--worker",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/loop_branch_root_signal_removed.py",
+    "--json",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/static-mutant-loop_branch_root_signal_removed.json"
+   ],
+   "exit": 1
+  },
+  {
+   "name": "static-mutant-errors_branch_root_signal_removed",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py",
+    "--worker",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/errors_branch_root_signal_removed.py",
+    "--json",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/static-mutant-errors_branch_root_signal_removed.json"
+   ],
+   "exit": 1
+  },
+  {
+   "name": "static-mutant-root_only_no_group",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py",
+    "--worker",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/root_only_no_group.py",
+    "--json",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/static-mutant-root_only_no_group.json"
+   ],
+   "exit": 1
+  },
+  {
+   "name": "static-mutant-unguarded_hold_receipt",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py",
+    "--worker",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/unguarded_hold_receipt.py",
+    "--json",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/static-mutant-unguarded_hold_receipt.json"
+   ],
+   "exit": 1
+  },
+  {
+   "name": "static-mutant-record_write_unchecked",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py",
+    "--worker",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/record_write_unchecked.py",
+    "--json",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/static-mutant-record_write_unchecked.json"
+   ],
+   "exit": 1
+  },
+  {
+   "name": "static-mutant-jobstage_before_cleanup",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py",
+    "--worker",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/jobstage_before_cleanup.py",
+    "--json",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/static-mutant-jobstage_before_cleanup.json"
+   ],
+   "exit": 1
+  },
+  {
+   "name": "static-mutant-no_activation_final",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py",
+    "--worker",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/no_activation_final.py",
+    "--json",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/static-mutant-no_activation_final.json"
+   ],
+   "exit": 1
+  },
+  {
+   "name": "static-mutant-no_sighup_handler",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py",
+    "--worker",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/no_sighup_handler.py",
+    "--json",
+    "/tmp/motioncorr-dc262-v6-sol-static-46f8538e-4012-477e-b2c0-d20621cca7e6/static-mutant-no_sighup_handler.json"
+   ],
+   "exit": 1
+  }
+ ],
+ "end_utc": "2026-10-23T01:07:43Z",
+ "end_load": [
+  6.8203125,
+  7.505859375,
+  11.8076171875
+ ],
+ "scratch_bytes": 448002
+}

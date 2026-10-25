@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/private/tmp/motioncorr-dc-analysis-record-errors-review-r1-20261023-codex/c942e958-52b8-427f-ac1a-5e19fec5052f/exact/analysis_record_errors_v2_20261023/summarize_v2.py", line 292, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/private/tmp/motioncorr-dc-analysis-record-errors-review-r1-20261023-codex/c942e958-52b8-427f-ac1a-5e19fec5052f/exact/analysis_record_errors_v2_20261023/summarize_v2.py", line 271, in main
+    result = tier_b(ev)
+  File "/private/tmp/motioncorr-dc-analysis-record-errors-review-r1-20261023-codex/c942e958-52b8-427f-ac1a-5e19fec5052f/exact/analysis_record_errors_v2_20261023/summarize_v2.py", line 201, in tier_b
+    recs, audits, global_errors = read_records(ev)
+                                  ~~~~~~~~~~~~^^^^
+  File "/private/tmp/motioncorr-dc-analysis-record-errors-review-r1-20261023-codex/c942e958-52b8-427f-ac1a-5e19fec5052f/exact/analysis_record_errors_v2_20261023/summarize_v2.py", line 150, in read_records
+    if not finite_number(g(m, *ks)):
+           ~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/motioncorr-dc-analysis-record-errors-review-r1-20261023-codex/c942e958-52b8-427f-ac1a-5e19fec5052f/exact/analysis_record_errors_v2_20261023/summarize_v2.py", line 65, in finite_number
+    return type(v) in (int, float) and math.isfinite(v)
+                                       ~~~~~~~~~~~~~^^^
+OverflowError: int too large to convert to float

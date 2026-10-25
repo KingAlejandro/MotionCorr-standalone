@@ -1,0 +1,23 @@
+{
+  "utc": "2026-10-25T20:07:25.619471+00:00",
+  "kind": "direct current authenticated CPU64->4GPU data pull; no evaluator/native",
+  "namespace": "/tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618",
+  "receiver_sha256": "dc7e1ef779cb0d677b859bfc2c8fa22fcef8c49d00390d93ec914e7852934e91",
+  "producer_sha256": "5bd170de3c1dfaa768a68b3ab3e03057d83349cdc0f24b29a639e646b4bdff30",
+  "archive_sha256": "921e5546995fc8659cc40bac030bc3f651c8afd638e3fd6cafed8950daa38e4c",
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "cpu64",
+    "bash -c 'set -euo pipefail; echo \"dc7e1ef779cb0d677b859bfc2c8fa22fcef8c49d00390d93ec914e7852934e91  /tmp/dc-late68-direct-receiver-d066432d-6d13-45e4-8c52-77b4e936d618.py\" | sha256sum -c - >&2; ssh -o BatchMode=yes -o ConnectTimeout=10 alex@130.246.80.58 '\"'\"'echo \"5bd170de3c1dfaa768a68b3ab3e03057d83349cdc0f24b29a639e646b4bdff30  /tmp/dc-late68-producer-d066432d-6d13-45e4-8c52-77b4e936d618.py\" | sha256sum -c - >&2 && taskset -c 8-9 /usr/bin/python3 -I -B /tmp/dc-late68-producer-d066432d-6d13-45e4-8c52-77b4e936d618.py'\"'\"' | taskset -c 62 /usr/bin/python3 -I -B /tmp/dc-late68-direct-receiver-d066432d-6d13-45e4-8c52-77b4e936d618.py /tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618 921e5546995fc8659cc40bac030bc3f651c8afd638e3fd6cafed8950daa38e4c'"
+  ],
+  "prior_partial_relay": "retained immutable with explicit owned-receiver stop receipt",
+  "auth": "existing configured forwarded-agent SSH succeeded; no keys/trust/gateway changed",
+  "exit": 0,
+  "stdout": "{\"state\": \"STAGED_ALL_411_PAYLOAD_HASHES_MATCH\", \"root\": \"/tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618/raw\", \"archive_sha256\": \"921e5546995fc8659cc40bac030bc3f651c8afd638e3fd6cafed8950daa38e4c\", \"archive_bytes\": 5683271680, \"content_bytes\": 5682996238, \"files\": 411, \"new_native_jobs\": 0, \"evaluations\": 0, \"admission\": {\"scope\": \"input staging only, no numerical evaluation\", \"captured_utc\": \"2026-10-25T20:07:29.117895+00:00\", \"affinity\": [62], \"cpu_busy_fraction\": 0.0, \"mem_available_bytes\": 189610983424, \"scratch_free_bytes\": 118402441216, \"scratch_budget_bytes\": 17179869184}, \"finished_utc\": \"2026-10-25T20:08:31.960982+00:00\"}\n",
+  "stderr": "/tmp/dc-late68-direct-receiver-d066432d-6d13-45e4-8c52-77b4e936d618.py: OK\n/tmp/dc-late68-producer-d066432d-6d13-45e4-8c52-77b4e936d618.py: OK\n{\"state\": \"COLLECTED_ALL_EXPECTED_HASHES_MATCH\", \"files\": 411, \"content_bytes\": 5682996238, \"busy\": {\"cpu8\": 0.0, \"cpu9\": 0.0033222591362126463}, \"affinity\": [8, 9], \"new_native_jobs\": 0, \"evaluations\": 0}\n",
+  "end_utc": "2026-10-25T20:08:31.979408+00:00"
+}

@@ -1,0 +1,1931 @@
+{
+ "source_sha": "b12a556e57852566008044e4b9729edaa2e00d39",
+ "target_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+ "python": "/Users/alex.konstantinov/.local/bin/python3",
+ "python_sha256": "127b5dc839447e76f0ed6a6c3b3097dc7903547d2f1a1fe21d7fc40c20b7bc65",
+ "numeric_threads": 1,
+ "checks": [
+  {
+   "name": "complete/exit",
+   "actual": 0,
+   "expected": 0,
+   "passed": true
+  },
+  {
+   "name": "complete/paired-arithmetic",
+   "actual": [
+    10,
+    10,
+    0,
+    0,
+    0.001953125,
+    -0.5,
+    "improves",
+    10,
+    0,
+    0.001953125
+   ],
+   "expected": [
+    10,
+    10,
+    0,
+    0,
+    0.001953125,
+    -0.5,
+    "improves",
+    10,
+    0,
+    0.001953125
+   ],
+   "passed": true
+  },
+  {
+   "name": "complete/medians",
+   "actual": [
+    1.95,
+    2.95,
+    4.4,
+    1.95,
+    1.95,
+    0.6,
+    0.4
+   ],
+   "expected": [
+    1.95,
+    2.95,
+    4.4,
+    1.95,
+    1.95,
+    0.6,
+    0.4
+   ],
+   "passed": true
+  },
+  {
+   "name": "complete/coverage",
+   "actual": {
+    "expected": 10,
+    "matched": 10,
+    "error": 0,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 10,
+    "error": 0,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "one-arm-error/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "one-arm-error/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "one-arm-error/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "one-arm-error/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "one-arm-error/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "one-arm-error/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "one-arm-error/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "both-arm-error/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "both-arm-error/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "both-arm-error/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "both-arm-error/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "both-arm-error/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "both-arm-error/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "both-arm-error/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "unknown-status/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "unknown-status/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "unknown-status/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "unknown-status/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "unknown-status/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "unknown-status/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "unknown-status/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "malformed/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "malformed/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "malformed/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "malformed/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "malformed/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "malformed/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "malformed/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "duplicate/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "duplicate/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "duplicate/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "duplicate/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "duplicate/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "duplicate/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "duplicate/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "identity-conflict/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "identity-conflict/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "identity-conflict/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "identity-conflict/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "identity-conflict/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "identity-conflict/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "identity-conflict/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "field-null/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "field-null/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "field-null/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "field-null/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "field-null/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "field-null/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "field-null/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "input-error/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "input-error/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "input-error/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "input-error/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "input-error/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "input-error/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "input-error/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "outside-image-null/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "outside-image-null/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "outside-image-null/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "outside-image-null/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "outside-image-null/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "outside-image-null/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "outside-image-null/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "status-missing/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "status-missing/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "status-missing/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "status-missing/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "status-missing/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "status-missing/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "status-missing/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "nonobject/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "nonobject/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "nonobject/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "nonobject/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "nonobject/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "nonobject/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "nonobject/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "duplicate-key/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "duplicate-key/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "duplicate-key/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "duplicate-key/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "duplicate-key/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "duplicate-key/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "duplicate-key/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "nonfinite/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "nonfinite/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "nonfinite/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "nonfinite/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "nonfinite/pair-counts",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 1,
+    "missing": 0,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "nonfinite/record-denominator",
+   "actual": 10,
+   "expected": 10,
+   "passed": true
+  },
+  {
+   "name": "nonfinite/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "unlocatable/exit",
+   "actual": 2,
+   "expected": 2,
+   "passed": true
+  },
+  {
+   "name": "unlocatable/state",
+   "actual": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "expected": [
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR",
+    "EVALUATION_ERROR"
+   ],
+   "passed": true
+  },
+  {
+   "name": "unlocatable/no-selected-set-inference",
+   "actual": [
+    null,
+    null
+   ],
+   "expected": [
+    null,
+    null
+   ],
+   "passed": true
+  },
+  {
+   "name": "unlocatable/truth-failure-denominator",
+   "actual": [
+    0,
+    0
+   ],
+   "expected": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "unlocatable/error-audit",
+   "actual": true,
+   "expected": true,
+   "passed": true
+  },
+  {
+   "name": "absent/exit",
+   "actual": 0,
+   "expected": 0,
+   "passed": true
+  },
+  {
+   "name": "absent/legacy-partial-label",
+   "actual": "IN_PROGRESS",
+   "expected": "IN_PROGRESS",
+   "passed": true
+  },
+  {
+   "name": "absent/pair-coverage",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 0,
+    "missing": 1,
+    "unrun": 0
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 0,
+    "missing": 1,
+    "unrun": 0
+   },
+   "passed": true
+  },
+  {
+   "name": "absent/cell-coverage",
+   "actual": [
+    1,
+    0,
+    0
+   ],
+   "expected": [
+    1,
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "unrun/exit",
+   "actual": 0,
+   "expected": 0,
+   "passed": true
+  },
+  {
+   "name": "unrun/legacy-partial-label",
+   "actual": "IN_PROGRESS",
+   "expected": "IN_PROGRESS",
+   "passed": true
+  },
+  {
+   "name": "unrun/pair-coverage",
+   "actual": {
+    "expected": 10,
+    "matched": 9,
+    "error": 0,
+    "missing": 0,
+    "unrun": 1
+   },
+   "expected": {
+    "expected": 10,
+    "matched": 9,
+    "error": 0,
+    "missing": 0,
+    "unrun": 1
+   },
+   "passed": true
+  },
+  {
+   "name": "unrun/cell-coverage",
+   "actual": [
+    0,
+    1,
+    0
+   ],
+   "expected": [
+    0,
+    1,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "name": "outside-finite/exit",
+   "actual": 0,
+   "expected": 0,
+   "passed": true
+  },
+  {
+   "name": "outside-finite/retains-field-and-image",
+   "actual": [
+    10,
+    1.95,
+    0.6,
+    1
+   ],
+   "expected": [
+    10,
+    1.95,
+    0.6,
+    1
+   ],
+   "passed": true
+  },
+  {
+   "name": "drop-mutant/discriminator-rejects",
+   "actual": false,
+   "expected": false,
+   "passed": true
+  },
+  {
+   "name": "drop-mutant/restored-bug",
+   "actual": [
+    0,
+    "IN_PROGRESS",
+    9,
+    1
+   ],
+   "expected": [
+    0,
+    "IN_PROGRESS",
+    9,
+    1
+   ],
+   "passed": true
+  },
+  {
+   "name": "frozen-base/discriminator-rejects",
+   "actual": false,
+   "expected": false,
+   "passed": true
+  },
+  {
+   "name": "frozen-base/restored-bug",
+   "actual": [
+    0,
+    "IN_PROGRESS",
+    9
+   ],
+   "expected": [
+    0,
+    "IN_PROGRESS",
+    9
+   ],
+   "passed": true
+  }
+ ],
+ "commands": [
+  {
+   "name": "complete",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/complete/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/complete/out"
+   ],
+   "exit": 0,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "8eaa709ebd307d2b1458a3b3f8ced0d14782605279ebba4c701960fad86c040d",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "one-arm-error",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/one-arm-error/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/one-arm-error/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "65734dd6bd12b56eead40103bc0e2004c796f4196f091e916aea30fe5a555929",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "both-arm-error",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/both-arm-error/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/both-arm-error/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "65734dd6bd12b56eead40103bc0e2004c796f4196f091e916aea30fe5a555929",
+    "B-pedestal32-s00-cpu-none.json": "e76848efb34e6382aac272c62457889a58c6b8e9183655453f3eac87cc077cca",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "unknown-status",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/unknown-status/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/unknown-status/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "7a4801573971be443b17e77bd7c1e2dcf33ee54b442cdce6f373f495388dcac5",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "malformed",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/malformed/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/malformed/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "082027641f4532cec3b8585e1d86e6a9adf1dfb9cd2333de1aca7b1b35cc4ece",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "duplicate",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/duplicate/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/duplicate/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "8eaa709ebd307d2b1458a3b3f8ced0d14782605279ebba4c701960fad86c040d",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df",
+    "duplicate.json": "8eaa709ebd307d2b1458a3b3f8ced0d14782605279ebba4c701960fad86c040d"
+   }
+  },
+  {
+   "name": "identity-conflict",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/identity-conflict/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/identity-conflict/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "148465ef6ee5994e48655b25c59c038d69d7ff29f7ba1c22c8bbdc194e3ea583",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "field-null",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/field-null/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/field-null/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "3076d8232a9ae4125c9b013a489a9de1e35b3c5163ea1cc0e664ea3a178236c3",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "input-error",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/input-error/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/input-error/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "226804141e95f3cf0cffb604200153cb6207f506bedc9fa70f60b2224673c321",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "outside-image-null",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/outside-image-null/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/outside-image-null/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "51076a7424d726fe29f387e5114d5beb8b33728a195a0b6881244f0d319ac177",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "status-missing",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/status-missing/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/status-missing/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "6d0af8d12d2038aa392e3e1b7bdb0e6ec5b454cdc69e29464e468671abb2151e",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "nonobject",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/nonobject/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/nonobject/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "duplicate-key",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/duplicate-key/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/duplicate-key/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "5937298f4348c22b996f6744c53c1064e38e482c0576aa3657417b04a7d52ec5",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "nonfinite",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/nonfinite/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/nonfinite/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "8939feee8a1d2efdcef1b32cf170a2fc94f3b7e52f42afc22f0bdbbce25f5e4a",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "unlocatable",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/unlocatable/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/unlocatable/out"
+   ],
+   "exit": 2,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "8eaa709ebd307d2b1458a3b3f8ced0d14782605279ebba4c701960fad86c040d",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df",
+    "unlocatable.json": "ae91fa0718d17f52f83f727b106cfb9d34bebd334d1618fa4ed3d86c323e4211"
+   }
+  },
+  {
+   "name": "absent",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/absent/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/absent/out"
+   ],
+   "exit": 0,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "unrun",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/unrun/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/unrun/out"
+   ],
+   "exit": 0,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "6527d17ca36be42ef9d2bd854faf4110dd5c168480b5bd8239c0da29cbd0d3d4",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "outside-finite",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/summarize_v2.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/outside-finite/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/outside-finite/out"
+   ],
+   "exit": 0,
+   "source_sha256": "3614afe2c7fab034cbdfada3879f1315398b7ff6ac39709a8b53c1084ce78675",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "2b956d5bc7c414919d307b83f5809a494cd8a05daf825b7eacc734330f242284",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "drop-mutant",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/drop-non-evaluated-mutant.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/drop-mutant/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/drop-mutant/out"
+   ],
+   "exit": 0,
+   "source_sha256": "9f8f73586262231becea5fa578bc022b25f57e97372f2e6141e451d140b805c8",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "65734dd6bd12b56eead40103bc0e2004c796f4196f091e916aea30fe5a555929",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  },
+  {
+   "name": "frozen-base",
+   "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-B",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_B_pass3_20261023/frozen/frozen_summarize.py",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/frozen-base/eval",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9432421/docs/post_rc0/s1/dc_factorial_20261022/analysis_record_errors_v2_20261023/attempt-01/frozen-base/out"
+   ],
+   "exit": 0,
+   "source_sha256": "25fc2a25a8673d5484c38937b74681d09ce96b1bdb3306057ea9a4959f82a897",
+   "inputs": {
+    "B-pedestal32-s00-cpu-global.json": "65734dd6bd12b56eead40103bc0e2004c796f4196f091e916aea30fe5a555929",
+    "B-pedestal32-s00-cpu-none.json": "06f0bfbffd62ee712d8bc330d0386cc10b62c8d23b3196dcbfcd11abd580b514",
+    "B-pedestal32-s01-cpu-global.json": "beaf7de6d3556db137d643761f5e28ef48700242c44dbdd9324c0a9557ba5f3b",
+    "B-pedestal32-s01-cpu-none.json": "95ad6a0b9b8c7c817626f93981df245039bc56ffa1b155969558d17414feec1d",
+    "B-pedestal32-s02-cpu-global.json": "99d6f09476bdd42ae6d41560040ea0f5c92b760adee93ed52268d5c148659562",
+    "B-pedestal32-s02-cpu-none.json": "d31713435b915a64421dbcd8d31d338a27bd76277eea6a50e120f0f8b71bb2b7",
+    "B-pedestal32-s03-cpu-global.json": "518d17f4deae0251c5c725cab1034194584cb62fbc6890923c97cf14e4018626",
+    "B-pedestal32-s03-cpu-none.json": "bf41672ecdd1508e4fc3fe4045a393edd96f486007fce790b818a286d14f0c10",
+    "B-pedestal32-s04-cpu-global.json": "9c39e067efd3c9e6edbbc752e6ce315a6f39cf931b3c97619886a2312c97047d",
+    "B-pedestal32-s04-cpu-none.json": "14d16733c5f8fd478a219ccbe1ee43fd0b5a17e0117f5ebed73c62e22057be5f",
+    "B-pedestal32-s05-cpu-global.json": "bc2e0f9b2909fd2990d7d08f21bb24eccca04f6ae4ca1a42864f7b5bf1185bfe",
+    "B-pedestal32-s05-cpu-none.json": "03e1dac05091f99915e3d0ebcd7056bfb78d283546e854088c4c3506c8fb7ee9",
+    "B-pedestal32-s06-cpu-global.json": "79c1e80aa351944745cdce0f0094bf754c5f283ad4c8788f756ca6bfdbaf3231",
+    "B-pedestal32-s06-cpu-none.json": "bf0f9969b8aadde6eeb3fe40405249fec940de90ca4c11736452250f10818a93",
+    "B-pedestal32-s07-cpu-global.json": "cf8a4406a9e1b881a3daa23943b32681ba4e97d7f27c9df845c086bd1cd3c576",
+    "B-pedestal32-s07-cpu-none.json": "cb07ce0c797a29da26c1a90a3522da35544c0ffd7e26e1f9d4225ea5cbe4c29a",
+    "B-pedestal32-s08-cpu-global.json": "29ced34a88a60b9705aed18ec285265ee4c230448a1a838f1590f4d782d7233b",
+    "B-pedestal32-s08-cpu-none.json": "8423408cc520c8e1a47a73b5965d213c9243ad3c98c672db12180a9483916e60",
+    "B-pedestal32-s09-cpu-global.json": "5bd1601bd4b3ba410ad348654b804df5747d1096420a01fefb861486d5f6729f",
+    "B-pedestal32-s09-cpu-none.json": "1bbb167f1cb4d20020850d227a29d012aba4f5bdb5f942dbae106222a77aa5df"
+   }
+  }
+ ],
+ "result": "PASS"
+}

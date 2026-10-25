@@ -1,0 +1,15 @@
+{
+ "schema": "dc262-v6-data-only/1",
+ "worker_sha256": "9fd645420972c40da3ceb761a47c3fb419b75990a8c1fe9f65c8ed3c9200e542",
+ "test_sha256": "848e38d410b3680630b47f6a5fe7d9eade99536d0e31cf7a5d44c197342637a7",
+ "tests": 14,
+ "failures": [
+  {
+   "test": "test_sighup_handler_installed_inside_lease_backstop (__main__.Checks.test_sighup_handler_installed_inside_lease_backstop)",
+   "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py\", line 219, in test_sighup_handler_installed_inside_lease_backstop\n    self.assertIn(signal.SIGHUP, events)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: <Signals.SIGHUP: 1> not found in [<Signals.SIGTERM: 15>, <Signals.SIGINT: 2>]\n"
+  }
+ ],
+ "errors": [],
+ "result": "FAIL",
+ "limits": "Synthetic Popen/process tables/signals only; process cleanup, real-worker suite, Linux and GPU UNRUN."
+}

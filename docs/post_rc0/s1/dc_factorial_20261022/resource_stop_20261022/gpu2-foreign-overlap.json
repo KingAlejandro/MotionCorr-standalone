@@ -1,0 +1,739 @@
+{
+ "schema": "dc262-gpu2-foreign-overlap/1",
+ "scope": "Read-only scan of gpu_before/gpu_after nvidia-smi snapshots recorded in 553 CUDA RUN.json files under the iteration-2 root. Snapshots exist only immediately before and after each process; occupancy during a run is not observed. This is resource metadata only: it does not change any RUN.json, exit status or scientific category.",
+ "gpu2_uuid": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+ "snapshots": 1106,
+ "gpu2_nonempty_snapshots": 107,
+ "foreign_pids_on_gpu2": [
+  "3276184"
+ ],
+ "foreign_process_example": [
+  "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+ ],
+ "last_clean_snapshot": {
+  "id": "C-e10216-07-p5-cuda-global",
+  "when": "before",
+  "utc": "2026-10-22T21:25:51Z"
+ },
+ "first_foreign_snapshot": {
+  "id": "C-e10216-07-p5-cuda-global",
+  "when": "after",
+  "utc": "2026-10-22T21:26:02Z",
+  "gpu2": [
+   "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+  ],
+  "other": [
+   "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 3276184, 414 MiB",
+   "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 3276184, 414 MiB",
+   "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 3276184, 414 MiB"
+  ]
+ },
+ "clean_snapshots_after_first_foreign": 0,
+ "onset_bound": "foreign GPU2 context began after 2026-10-22T21:25:51Z and by 2026-10-22T21:26:02Z",
+ "other_gpu_foreign_before_onset": "Short-lived foreign contexts on GPU3 (e.g. PID 3137807 at 19:46:51Z, 3183093 at 20:22:20Z) were recorded on other GPUs only; GPU2 was empty in those snapshots.",
+ "ecc_volatile_uncorrected_gpu2": [
+  "0"
+ ],
+ "affected_records": [
+  {
+   "id": "C-e10216-07-p5-cuda-global",
+   "start_utc": "2026-10-22T21:25:51Z",
+   "end_utc": "2026-10-22T21:26:02Z",
+   "exit": 0,
+   "gpu2_before": [],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-07-p5-cuda-local",
+   "start_utc": "2026-10-22T21:26:03Z",
+   "end_utc": "2026-10-22T21:26:15Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-07-p5-cuda-both",
+   "start_utc": "2026-10-22T21:26:15Z",
+   "end_utc": "2026-10-22T21:26:27Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-07-p3-cuda-none",
+   "start_utc": "2026-10-22T21:26:27Z",
+   "end_utc": "2026-10-22T21:26:34Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-07-p3-cuda-global",
+   "start_utc": "2026-10-22T21:26:35Z",
+   "end_utc": "2026-10-22T21:26:43Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-07-p3-cuda-local",
+   "start_utc": "2026-10-22T21:26:43Z",
+   "end_utc": "2026-10-22T21:26:51Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-07-p3-cuda-both",
+   "start_utc": "2026-10-22T21:26:52Z",
+   "end_utc": "2026-10-22T21:26:59Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-08-p5-cuda-none",
+   "start_utc": "2026-10-22T21:27:06Z",
+   "end_utc": "2026-10-22T21:27:17Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-08-p5-cuda-global",
+   "start_utc": "2026-10-22T21:27:17Z",
+   "end_utc": "2026-10-22T21:27:28Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-08-p5-cuda-local",
+   "start_utc": "2026-10-22T21:27:29Z",
+   "end_utc": "2026-10-22T21:27:40Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-08-p5-cuda-both",
+   "start_utc": "2026-10-22T21:27:41Z",
+   "end_utc": "2026-10-22T21:27:52Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-08-p3-cuda-none",
+   "start_utc": "2026-10-22T21:27:52Z",
+   "end_utc": "2026-10-22T21:28:01Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-08-p3-cuda-global",
+   "start_utc": "2026-10-22T21:28:02Z",
+   "end_utc": "2026-10-22T21:28:09Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-08-p3-cuda-local",
+   "start_utc": "2026-10-22T21:28:10Z",
+   "end_utc": "2026-10-22T21:28:17Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-08-p3-cuda-both",
+   "start_utc": "2026-10-22T21:28:18Z",
+   "end_utc": "2026-10-22T21:28:26Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-09-p5-cuda-none",
+   "start_utc": "2026-10-22T21:28:32Z",
+   "end_utc": "2026-10-22T21:28:43Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-09-p5-cuda-global",
+   "start_utc": "2026-10-22T21:28:43Z",
+   "end_utc": "2026-10-22T21:28:55Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-09-p5-cuda-local",
+   "start_utc": "2026-10-22T21:28:55Z",
+   "end_utc": "2026-10-22T21:29:06Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-09-p5-cuda-both",
+   "start_utc": "2026-10-22T21:29:06Z",
+   "end_utc": "2026-10-22T21:29:17Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-09-p3-cuda-none",
+   "start_utc": "2026-10-22T21:29:18Z",
+   "end_utc": "2026-10-22T21:29:28Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-09-p3-cuda-global",
+   "start_utc": "2026-10-22T21:29:28Z",
+   "end_utc": "2026-10-22T21:29:36Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-09-p3-cuda-local",
+   "start_utc": "2026-10-22T21:29:37Z",
+   "end_utc": "2026-10-22T21:29:45Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e10216-09-p3-cuda-both",
+   "start_utc": "2026-10-22T21:29:45Z",
+   "end_utc": "2026-10-22T21:29:53Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-00-p5-cuda-none",
+   "start_utc": "2026-10-22T21:29:55Z",
+   "end_utc": "2026-10-22T21:30:11Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-00-p5-cuda-global",
+   "start_utc": "2026-10-22T21:30:12Z",
+   "end_utc": "2026-10-22T21:30:33Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-00-p5-cuda-local",
+   "start_utc": "2026-10-22T21:30:33Z",
+   "end_utc": "2026-10-22T21:30:52Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-00-p5-cuda-both",
+   "start_utc": "2026-10-22T21:30:53Z",
+   "end_utc": "2026-10-22T21:31:11Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-00-p3-cuda-none",
+   "start_utc": "2026-10-22T21:31:11Z",
+   "end_utc": "2026-10-22T21:31:28Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-00-p3-cuda-global",
+   "start_utc": "2026-10-22T21:31:28Z",
+   "end_utc": "2026-10-22T21:31:43Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-00-p3-cuda-local",
+   "start_utc": "2026-10-22T21:31:44Z",
+   "end_utc": "2026-10-22T21:32:02Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-00-p3-cuda-both",
+   "start_utc": "2026-10-22T21:32:03Z",
+   "end_utc": "2026-10-22T21:32:21Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-01-p5-cuda-none",
+   "start_utc": "2026-10-22T21:32:24Z",
+   "end_utc": "2026-10-22T21:32:44Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-01-p5-cuda-global",
+   "start_utc": "2026-10-22T21:32:44Z",
+   "end_utc": "2026-10-22T21:33:01Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-01-p5-cuda-local",
+   "start_utc": "2026-10-22T21:33:02Z",
+   "end_utc": "2026-10-22T21:33:20Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-01-p5-cuda-both",
+   "start_utc": "2026-10-22T21:33:21Z",
+   "end_utc": "2026-10-22T21:33:42Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-01-p3-cuda-none",
+   "start_utc": "2026-10-22T21:33:42Z",
+   "end_utc": "2026-10-22T21:34:00Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-01-p3-cuda-global",
+   "start_utc": "2026-10-22T21:34:01Z",
+   "end_utc": "2026-10-22T21:34:19Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-01-p3-cuda-local",
+   "start_utc": "2026-10-22T21:34:19Z",
+   "end_utc": "2026-10-22T21:34:35Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-01-p3-cuda-both",
+   "start_utc": "2026-10-22T21:34:36Z",
+   "end_utc": "2026-10-22T21:34:54Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-02-p5-cuda-none",
+   "start_utc": "2026-10-22T21:34:58Z",
+   "end_utc": "2026-10-22T21:35:16Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-02-p5-cuda-global",
+   "start_utc": "2026-10-22T21:35:17Z",
+   "end_utc": "2026-10-22T21:35:37Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-02-p5-cuda-local",
+   "start_utc": "2026-10-22T21:35:37Z",
+   "end_utc": "2026-10-22T21:35:54Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-02-p5-cuda-both",
+   "start_utc": "2026-10-22T21:35:55Z",
+   "end_utc": "2026-10-22T21:36:10Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-02-p3-cuda-none",
+   "start_utc": "2026-10-22T21:36:11Z",
+   "end_utc": "2026-10-22T21:36:28Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-02-p3-cuda-global",
+   "start_utc": "2026-10-22T21:36:28Z",
+   "end_utc": "2026-10-22T21:36:47Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-02-p3-cuda-local",
+   "start_utc": "2026-10-22T21:36:48Z",
+   "end_utc": "2026-10-22T21:37:07Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-02-p3-cuda-both",
+   "start_utc": "2026-10-22T21:37:08Z",
+   "end_utc": "2026-10-22T21:37:26Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-03-p5-cuda-none",
+   "start_utc": "2026-10-22T21:37:29Z",
+   "end_utc": "2026-10-22T21:37:46Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-03-p5-cuda-global",
+   "start_utc": "2026-10-22T21:37:46Z",
+   "end_utc": "2026-10-22T21:38:03Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-03-p5-cuda-local",
+   "start_utc": "2026-10-22T21:38:03Z",
+   "end_utc": "2026-10-22T21:38:23Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-03-p5-cuda-both",
+   "start_utc": "2026-10-22T21:38:23Z",
+   "end_utc": "2026-10-22T21:38:43Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-03-p3-cuda-none",
+   "start_utc": "2026-10-22T21:38:44Z",
+   "end_utc": "2026-10-22T21:39:03Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-03-p3-cuda-global",
+   "start_utc": "2026-10-22T21:39:03Z",
+   "end_utc": "2026-10-22T21:39:21Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  },
+  {
+   "id": "C-e12963-03-p3-cuda-local",
+   "start_utc": "2026-10-22T21:39:22Z",
+   "end_utc": "2026-10-22T21:39:38Z",
+   "exit": 0,
+   "gpu2_before": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "gpu2_after": [
+    "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB"
+   ],
+   "resource_status": "FOREIGN_OBSERVED"
+  }
+ ]
+}

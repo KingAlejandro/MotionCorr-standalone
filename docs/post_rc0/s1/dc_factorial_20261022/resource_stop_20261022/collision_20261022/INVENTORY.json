@@ -1,0 +1,781 @@
+{
+ "schema": "dc262-v4-control-collision/1",
+ "frozen_utc": "2026-10-22T23:50:26Z",
+ "note": "Read-only inventory after the parent stopped orphan copies 75362 and 82476 of this author session at 23:48:09Z. No control file or attempt was modified.",
+ "files": {
+  "tools/gpu_worker_v4.py": "071a1588c9ceda73c2d974309b20f6b51beb5211e393752871496f32e084c853",
+  "tools/test_gpu_worker_v4.py": "29c8ec27a4b7c2abf24189026765dda6668e1e1ca59b2983d666fef3e0bffe51",
+  "tools/run_v4_controls.py": "6e83ab5dcda52bd7e4690c51524a9f183014bc726c0d04a61d07a2f39d7db5b7",
+  "tools/v4_mutants.json": "322c0283dce5371faaba9ab8e8a880e7d27aa5140ed2a64b9359dcac4a3a99b8",
+  "tools/_v4mutant_v3_query_lifecycle.py": "8f04fb78003a3debae5e72a22baef7790b1d70ed4ceff8708333d4b3bf69862e",
+  "tools/gpu_worker_v3.py": "a0510eaae583c4c01ce20829b0656957c6d5c9094f6c1d3ca154438ce8c106c9",
+  "tools/test_gpu_worker_v3.py": "73735e79eafff9608fcfaa27e1e903d54324deaa158e1ddf48b3f0abe13e2c3a",
+  "tools/run_v3_controls.py": "bcd816b9c8fe0c678c6a2be1444faa5db1c24d1430b8335296ebe22fbfe303c7",
+  "tools/v3_mutants.json": "003e542f3ef761da2dd1e65a6b5d62aa11b40ab236ee0b3e373b91c4fb71a13e",
+  "tools/campaign.py": "8701cf248f247d03eb95c36e99bf9d3a9eaf0ad28660460646afc7128cf84eae",
+  "../../../../tools/multi_gpu/process_ownership.py": "8de59b8cd741630f8188ef5e98b4877415df90f3bddd8a4a99013e0e7ff908cb"
+ },
+ "harness_versions": {
+  "1ffacb1d": "author, attempts 01-17",
+  "c2b6e80a": "author (K4 timeout fix), attempts 18-35",
+  "29c8ec27": "written to tools/test_gpu_worker_v4.py at 23:46:58Z by a concurrent orphan copy (mock jobs 0.6->1.5 s, K19b job_timeout 2.5->3.5 s); unreviewed; used only by attempt 36"
+ },
+ "leftover": "tools/_v4mutant_v3_query_lifecycle.py equals the committed mutant replacement of v4 (8f04fb78); left by the stopped attempt 37 runner",
+ "parent_receipts": {
+  "process-snapshot.json": "57ec70f92c7a1031a7c3896a6fd104b2f616971212f9c48d012fb151f3b6020a",
+  "stop-owned-orphans.py": "f4f64d6495ba7adcd9cdb13ecb742baff60d3e014f5a52e5c9228ceb4c8a3563",
+  "pre-signal-tree.json": "10631a0ee275c50aa5c7abd0a269637217f59f9f886677b4aefa99f823f293eb",
+  "stop-receipt.json": "62c0d604dc8cf6eb8603edfad48243188a2eda4987c0d7af284e0f189466703a"
+ },
+ "attempts": [
+  {
+   "attempt": "attempt-01-worker",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 0,
+   "start": "2026-10-22T22:55:29Z",
+   "end": "2026-10-22T22:56:26Z",
+   "test": "1ffacb1dbabe",
+   "worker": "071a1588c9ce",
+   "fails": [],
+   "files": {
+    "ATTEMPT.json": "c9c0678c9a32c505e4a7f14fb060d564cfc841309c0e494739e3a931593105bc",
+    "controls.json": "c2604df1d598c5f18163ecf497eca97546cd299a5ace67ba164faddd58a64ed6",
+    "stdout.log": "8a4cb198c82ccd9550c0edcaa83a7d83031419c2e1b493bfee992f3d23bcbac1",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "071a1588c9ceda73c2d974309b20f6b51beb5211e393752871496f32e084c853"
+   }
+  },
+  {
+   "attempt": "attempt-02-mutant-v3_query_lifecycle",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T22:56:36Z",
+   "end": "2026-10-22T22:57:24Z",
+   "test": "1ffacb1dbabe",
+   "worker": "8f04fb78003a",
+   "fails": [
+    "K19a",
+    "K20"
+   ],
+   "files": {
+    "ATTEMPT.json": "e7d535464814669c861890296d02515daf1172f438835fd9cec447bfc29059b0",
+    "controls.json": "4c07fdc91781e2788650b4bc110ffb048a2b27986e6fd7079c703fc9000be94d",
+    "stdout.log": "3907815a3c96a7aa259bc963b350aa07d0437301f0be0a9054b62993401fa61d",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "8f04fb78003a3debae5e72a22baef7790b1d70ed4ceff8708333d4b3bf69862e"
+   }
+  },
+  {
+   "attempt": "attempt-03-mutant-query_new_session",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T22:57:24Z",
+   "end": "2026-10-22T22:58:19Z",
+   "test": "1ffacb1dbabe",
+   "worker": "3399c75d9fc5",
+   "fails": [
+    "K20"
+   ],
+   "files": {
+    "ATTEMPT.json": "339b2e120aeeb0de754a437a540632c99d2e495e4453f8884429431df429983f",
+    "controls.json": "6c265a09c2cf383e0fff5a5783ff9188251d348538b07841fccdfa84db71ee66",
+    "stdout.log": "32cd007ce28329c7c92d92540c49071a4f70214176ee08e6157e0246c96da786",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "3399c75d9fc5754c7179c3fc96996eabad74db6cf954013752819386a66013e7"
+   }
+  },
+  {
+   "attempt": "attempt-04-mutant-sampler_after_classification",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 0,
+   "start": "2026-10-22T22:58:19Z",
+   "end": "2026-10-22T22:59:17Z",
+   "test": "1ffacb1dbabe",
+   "worker": "e2ee6dedd59b",
+   "fails": [],
+   "files": {
+    "ATTEMPT.json": "d6da9dbab6ba8b1e5e8baf1210115bcc1d592f9acaa437e8735408d10517c4d4",
+    "controls.json": "0d4559c2512c4f8dec4f0f36a24c7576c7331138942465fae0faa28f903f90ce",
+    "stdout.log": "8a4cb198c82ccd9550c0edcaa83a7d83031419c2e1b493bfee992f3d23bcbac1",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "e2ee6dedd59b55fad4d6103befd5475bdd99b558f1c8e1ef940ef047b9ba94b5"
+   }
+  },
+  {
+   "attempt": "attempt-05-mutant-no_zero_job_release",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T22:59:17Z",
+   "end": "2026-10-22T23:01:13Z",
+   "test": "1ffacb1dbabe",
+   "worker": "5a859565aa6d",
+   "fails": [
+    "K15L"
+   ],
+   "files": {
+    "ATTEMPT.json": "1cb1f0f099fb08f5364c993277e3544f8765df7de3cefa72a5cf73931b431b20",
+    "controls.json": "e085e09d78b4449e8463482ddf813dc1badbd5b4de16d56e7fb642566eaf54f1",
+    "stdout.log": "7813f14991a3655f62b4072eb69caa56b9a661ac9123ecd176d61d76d156578a",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "5a859565aa6d538d65da44bb27cc0c323fc21766ad2abe64663b88e6d06658da"
+   }
+  },
+  {
+   "attempt": "attempt-06-mutant-no_own_group_exclusion",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T23:01:13Z",
+   "end": "2026-10-22T23:02:10Z",
+   "test": "1ffacb1dbabe",
+   "worker": "4a4b25f19dcc",
+   "fails": [
+    "K22"
+   ],
+   "files": {
+    "ATTEMPT.json": "7ce81e145080377bd630ddd0da043148e9300680aabb2c8f7c16c010dbf84bb8",
+    "controls.json": "c4e1effd4e7ebc56e351516b9e795a287089f17ec81aeec87bac5439e2dea9bd",
+    "stdout.log": "bbd557a269c960cd53e7b3d79eea09cc791a061977055d1450ba535a6c25a3a3",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "4a4b25f19dccaff3bd0a66da64a4509a220ac122933ccfe8fdbbd23751358bb1"
+   }
+  },
+  {
+   "attempt": "attempt-07-mutant-witness_not_required",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T23:02:11Z",
+   "end": "2026-10-22T23:03:09Z",
+   "test": "1ffacb1dbabe",
+   "worker": "dc970fed430f",
+   "fails": [
+    "K23"
+   ],
+   "files": {
+    "ATTEMPT.json": "6a5cf46271b16ed818f117b3fb58af454bd076314f0edee8d2f6ddc5cba5af31",
+    "controls.json": "4b3e4e47c39711b41576fd9d8b6a4f8ee9b032a1235286939dda38fc22b157c7",
+    "stdout.log": "3dd365ada2892d8f5c39e7137665b93f5657cd8f045370b37715e35fd3a9a2ee",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "dc970fed430fcfa49d74736729e1f7ea1b2e846699887cbb2ad63b09436ec7cb"
+   }
+  },
+  {
+   "attempt": "attempt-08-mutant-no_admission_occupancy",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T23:03:29Z",
+   "end": "2026-10-22T23:04:29Z",
+   "test": "1ffacb1dbabe",
+   "worker": "7ed793481129",
+   "fails": [
+    "K3",
+    "K8"
+   ],
+   "files": {
+    "ATTEMPT.json": "0c738f7d9e4ce3a9d229c417e85ce1f156b984b7de4ceb2eaf31aaae777591c9",
+    "controls.json": "a9688d1ea260375326284e05cc7759b045e285ba886ce2fef67ba6cadd113851",
+    "stdout.log": "b9dc02943c741c8b710a52375d3ae065fd4e3a6f3afe01e1505543755f6b99e5",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "7ed793481129eec192eea51e44811d7e659b6a7c82cce55170db24d046d24e1f"
+   }
+  },
+  {
+   "attempt": "attempt-09-mutant-unbounded_child_wait",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 0,
+   "start": "2026-10-22T23:04:29Z",
+   "end": "2026-10-22T23:05:26Z",
+   "test": "1ffacb1dbabe",
+   "worker": "1e7e1f3bd823",
+   "fails": [],
+   "files": {
+    "ATTEMPT.json": "74220ade23303ff3a37ec3b561e247c163b6f656fb6498d4984ce169ce717439",
+    "controls.json": "0284ce963c1501c76f5d1c225b00f276196c985cec001eeca6ca07ab9e786b40",
+    "stdout.log": "8a4cb198c82ccd9550c0edcaa83a7d83031419c2e1b493bfee992f3d23bcbac1",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "1e7e1f3bd82307e3bc9f3739fc5b0e9cf42f95c12d669085db8ea5d4a79cd473"
+   }
+  },
+  {
+   "attempt": "attempt-10-mutant-no_group_signal",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T23:05:26Z",
+   "end": "2026-10-22T23:10:11Z",
+   "test": "1ffacb1dbabe",
+   "worker": "49a9337b009f",
+   "fails": [
+    "K12",
+    "K13",
+    "K19b",
+    "K19c",
+    "K22"
+   ],
+   "files": {
+    "ATTEMPT.json": "2b0a406cfcc0da6d34f0e3ba540d0f6566f537439304944c5046a080b616ea5f",
+    "controls.json": "43f00fada5caee45e77dc0270ad2680e4269fd97699533e246dddd4daede9ed1",
+    "stdout.log": "38287af926be64fe97072e6fbbb6e8762d3b9b67c62491760e521b24bc912696",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "49a9337b009f80894b24d23cb278425ee5ca04fe4a5b49e8089b4df5f8be19a0"
+   }
+  },
+  {
+   "attempt": "attempt-11-mutant-v2_resume_semantics",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T23:10:11Z",
+   "end": "2026-10-22T23:11:14Z",
+   "test": "1ffacb1dbabe",
+   "worker": "a6563a53213e",
+   "fails": [
+    "K1",
+    "K4c",
+    "K8",
+    "K9"
+   ],
+   "files": {
+    "ATTEMPT.json": "8857b8df928708bd10d76187812c8e476e70cc21de9df32cd235d37cb6388e27",
+    "controls.json": "e06d09ebee98bad90a75929e289a46adc3cb7049c746b2856aa2d01b20bf96dd",
+    "stdout.log": "370c9f6b084fc6a81663063f1489130692e05a916e867ccc9c74bfdc4e051e40",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "a6563a53213ef7b06b98b299948ca5aeec8d7aff0ad6c8396483b67e2de8a1ef"
+   }
+  },
+  {
+   "attempt": "attempt-12-mutant-no_queue_hash_binding",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T23:11:14Z",
+   "end": "2026-10-22T23:12:16Z",
+   "test": "1ffacb1dbabe",
+   "worker": "dcdf0014014f",
+   "fails": [
+    "K1"
+   ],
+   "files": {
+    "ATTEMPT.json": "8ecb8f98472b33c15abc835cc9ad15d77516b6c4f3e25b2c9556e5a57d01ded4",
+    "controls.json": "6a8eb2e83517c59120af8c0629f8ecffd662a93910bd6a23453674fa95f2e353",
+    "stdout.log": "18a19b2f56244ef2eb9185e26b339f6282b9e06cd5fed3ef38a142d3c37cbb96",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "dcdf0014014f8312e2b1b0831ab39ab1a1b7f97af31ee51af0de8be1dace4a4b"
+   }
+  },
+  {
+   "attempt": "attempt-13-mutant-owned_by_identity_keys",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T23:12:48Z",
+   "end": "2026-10-22T23:13:49Z",
+   "test": "1ffacb1dbabe",
+   "worker": "4d440952a1b1",
+   "fails": [
+    "K16"
+   ],
+   "files": {
+    "ATTEMPT.json": "ce8b60d312f16709c3583a4562b4633b7c8d3ff3f42faaa95500d78f1ef5a195",
+    "controls.json": "d1d600128f576d9c2df1983c3be34b975dad8bad25b62a7f69f0409f93b004fa",
+    "stdout.log": "d9bcb75e872c56834184ba0826f5f290de7ec803e5f34dedb6931adaf7d6ca10",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "4d440952a1b1137bdf8f6f5c29b3e8e693b9729f5d86b59c1c2605728918c434"
+   }
+  },
+  {
+   "attempt": "attempt-14-mutant-no_cancel_before_popen",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T23:13:49Z",
+   "end": "2026-10-22T23:14:51Z",
+   "test": "1ffacb1dbabe",
+   "worker": "e378b0b2a703",
+   "fails": [
+    "K11"
+   ],
+   "files": {
+    "ATTEMPT.json": "afaf42c64a7fba28323f191e98fe6cf3726c81c6fc863cd4a0178f9b032e8bb3",
+    "controls.json": "0fb60039eb746971f23c9dfb94d142fcb0fde8fa1d1021c1584c5e352a3a3a1b",
+    "stdout.log": "4e53d5a5f94173914f9f0867e506b3e4dc8db1ccfcc6fdbec5404086684c3bf2",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "e378b0b2a703cd0628d749df6590a0986ece64b27da92e72b16654bf225660ad"
+   }
+  },
+  {
+   "attempt": "attempt-15-mutant-ecc_na_accepted",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T23:14:51Z",
+   "end": "2026-10-22T23:15:50Z",
+   "test": "1ffacb1dbabe",
+   "worker": "5d09572fb6d9",
+   "fails": [
+    "K2a"
+   ],
+   "files": {
+    "ATTEMPT.json": "f12e0a654ddcffaa70017a4dab2bde449f8853b9f6873e9700b7260ca1f2c23b",
+    "controls.json": "ca29c945a522377cc78e4c1bd27ea04739329d0b1cc3476b864104c3a3dbd403",
+    "stdout.log": "f742b9f202ba8520eed3f19abd9011e21923b362f87192fcf22d7da0f72832b4",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "5d09572fb6d99c888b3b5188229025a317e39b2633c0587c3cad3f556e8c244b"
+   }
+  },
+  {
+   "attempt": "attempt-16-mutant-sampler_failures_uncounted",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T23:15:50Z",
+   "end": "2026-10-22T23:16:52Z",
+   "test": "1ffacb1dbabe",
+   "worker": "8a32892802a3",
+   "fails": [
+    "K7"
+   ],
+   "files": {
+    "ATTEMPT.json": "b693036697eeb1dde4b7fc5efa64872e5275c19e65f0cabec8c2601091de54a7",
+    "controls.json": "efd9a83d69f862e817ee1dd076b230906bf5c4b2b4b405b9f6056baaea544d90",
+    "stdout.log": "652a66bb29d9d27d74115dbf584a65d3126dff19cdb8c41163470daf6cc82715",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "8a32892802a380ce7bafbe07cb2d45a85fe6c485f2e5f69d6ef0a674be299cb1"
+   }
+  },
+  {
+   "attempt": "attempt-17-frozen-v3-worker",
+   "launcher": "author (visible commands)",
+   "trust": "retained; serial; harness 1ffacb1d (K4 timeout flake, see attempt 11)",
+   "exit": 1,
+   "start": "2026-10-22T23:17:23Z",
+   "end": "2026-10-22T23:19:21Z",
+   "test": "1ffacb1dbabe",
+   "worker": "a0510eaae583",
+   "fails": [
+    "K15L",
+    "K19a",
+    "K20",
+    "K23",
+    "K24"
+   ],
+   "files": {
+    "ATTEMPT.json": "943339c233600cd85d48731edb38391bada89c7708a580fb78c76e7916ce2698",
+    "controls.json": "0b1f864c62f9e10e93c704f084ccb71541bb7de1354257ce121b5e9858d8143e",
+    "stdout.log": "cd87cd1e6bb2f6282708eb7126d2a2e3316d9e4d19495184339a3e50dc7952c5",
+    "test.py": "1ffacb1dbabeac6be4624839fbc2e483aa9c7be21e06346b616bdbae927f9f02",
+    "worker_under_test.py": "a0510eaae583c4c01ce20829b0656957c6d5c9094f6c1d3ca154438ce8c106c9"
+   }
+  },
+  {
+   "attempt": "attempt-18-worker",
+   "launcher": "author (visible commands; the 23-27 call result was lost in a session interruption)",
+   "trust": "retained; serial; no overlap",
+   "exit": 0,
+   "start": "2026-10-22T23:20:00Z",
+   "end": "2026-10-22T23:21:03Z",
+   "test": "c2b6e80a0370",
+   "worker": "071a1588c9ce",
+   "fails": [],
+   "files": {
+    "ATTEMPT.json": "9d5730f30b5c820f75465cfb58bdadad47fe0ffc9018573c9048afcfbf4f44b2",
+    "controls.json": "5969e144742d6e20aaba8f35bf98ad59702efbab3de6d45f33f42842ad194b88",
+    "stdout.log": "cc9d89bc542b8059c321d18b8fb54be3dcc8e65013b001276488ae5b835e359a",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "071a1588c9ceda73c2d974309b20f6b51beb5211e393752871496f32e084c853"
+   }
+  },
+  {
+   "attempt": "attempt-19-mutant-v3_query_lifecycle",
+   "launcher": "author (visible commands; the 23-27 call result was lost in a session interruption)",
+   "trust": "retained; serial; no overlap",
+   "exit": 1,
+   "start": "2026-10-22T23:21:03Z",
+   "end": "2026-10-22T23:21:52Z",
+   "test": "c2b6e80a0370",
+   "worker": "8f04fb78003a",
+   "fails": [
+    "K19a",
+    "K20"
+   ],
+   "files": {
+    "ATTEMPT.json": "cdceb5c1d193b28b631465e350f20b226a0e068ca29ad5133628f0f47c39cd47",
+    "controls.json": "f2e091fff3c5430c157e6d91da45080a5deaf07a374dc43a9d7ce940f437a1ca",
+    "stdout.log": "0cb644485c82023d87f7ecf0c028dcab8db8ae8c276390f6e214882765e0f210",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "8f04fb78003a3debae5e72a22baef7790b1d70ed4ceff8708333d4b3bf69862e"
+   }
+  },
+  {
+   "attempt": "attempt-20-mutant-query_new_session",
+   "launcher": "author (visible commands; the 23-27 call result was lost in a session interruption)",
+   "trust": "retained; serial; no overlap",
+   "exit": 1,
+   "start": "2026-10-22T23:21:52Z",
+   "end": "2026-10-22T23:22:54Z",
+   "test": "c2b6e80a0370",
+   "worker": "3399c75d9fc5",
+   "fails": [
+    "K20"
+   ],
+   "files": {
+    "ATTEMPT.json": "9ed0e734e3349c07704b2042581cc3cb6b64b4d215fe2262fd2ada5449f1a945",
+    "controls.json": "aba0c96963b0f61031ffdfea3723236523491f565c17ceb154d759e43b0902ce",
+    "stdout.log": "758ce5a816ff4647d7fe6f5401d371bf6d2f3a9b0a124fab0ca31180d6b5c0a1",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "3399c75d9fc5754c7179c3fc96996eabad74db6cf954013752819386a66013e7"
+   }
+  },
+  {
+   "attempt": "attempt-21-mutant-sampler_after_classification",
+   "launcher": "author (visible commands; the 23-27 call result was lost in a session interruption)",
+   "trust": "retained; serial; no overlap",
+   "exit": 0,
+   "start": "2026-10-22T23:22:54Z",
+   "end": "2026-10-22T23:23:53Z",
+   "test": "c2b6e80a0370",
+   "worker": "e2ee6dedd59b",
+   "fails": [],
+   "files": {
+    "ATTEMPT.json": "4a78b7c2d32b1446e5783b9122515c0fc94fb8e65b3ccad8d42c1df34009fc00",
+    "controls.json": "b78b427becfaf1cbf392ce75f02d8b54af6334332dfec523f6f1def92c1bb965",
+    "stdout.log": "cc9d89bc542b8059c321d18b8fb54be3dcc8e65013b001276488ae5b835e359a",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "e2ee6dedd59b55fad4d6103befd5475bdd99b558f1c8e1ef940ef047b9ba94b5"
+   }
+  },
+  {
+   "attempt": "attempt-22-mutant-no_zero_job_release",
+   "launcher": "author (visible commands; the 23-27 call result was lost in a session interruption)",
+   "trust": "retained; serial; no overlap",
+   "exit": 1,
+   "start": "2026-10-22T23:23:53Z",
+   "end": "2026-10-22T23:25:52Z",
+   "test": "c2b6e80a0370",
+   "worker": "5a859565aa6d",
+   "fails": [
+    "K15L"
+   ],
+   "files": {
+    "ATTEMPT.json": "7e928d82a770c732d0ff8944c42d6db236b4fb5757a405a7ae1482628559bb78",
+    "controls.json": "08a34adc26d41ac4c236e794f6788e53ff017826f61adf459b2712f5d3ae35a2",
+    "stdout.log": "6cb399cdd028e88f0f4b47b452487efc16712523b154b4700700697f632af898",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "5a859565aa6d538d65da44bb27cc0c323fc21766ad2abe64663b88e6d06658da"
+   }
+  },
+  {
+   "attempt": "attempt-23-mutant-no_own_group_exclusion",
+   "launcher": "author (visible commands; the 23-27 call result was lost in a session interruption)",
+   "trust": "retained; serial; no overlap",
+   "exit": 1,
+   "start": "2026-10-22T23:26:12Z",
+   "end": "2026-10-22T23:27:11Z",
+   "test": "c2b6e80a0370",
+   "worker": "4a4b25f19dcc",
+   "fails": [
+    "K22"
+   ],
+   "files": {
+    "ATTEMPT.json": "9200c4125a79c53d4619a30ee912b84aa0b5b2ea2ca1abf4f8d761846713f750",
+    "controls.json": "b5ec3cae7118caa75342ed91e207953ec5f7e671aee1c4b4ba90bfc99985740c",
+    "stdout.log": "636e98b336a1af9435f10250b7a5be6c0d9e0b4382601e5a23a66ec92533f7d3",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "4a4b25f19dccaff3bd0a66da64a4509a220ac122933ccfe8fdbbd23751358bb1"
+   }
+  },
+  {
+   "attempt": "attempt-24-mutant-witness_not_required",
+   "launcher": "author (visible commands; the 23-27 call result was lost in a session interruption)",
+   "trust": "retained; serial; no overlap",
+   "exit": 1,
+   "start": "2026-10-22T23:27:11Z",
+   "end": "2026-10-22T23:28:12Z",
+   "test": "c2b6e80a0370",
+   "worker": "dc970fed430f",
+   "fails": [
+    "K23"
+   ],
+   "files": {
+    "ATTEMPT.json": "0ab267b17667d3aabeffbccbee2c98e417d1938322dfa2a040b6679127a98085",
+    "controls.json": "0895ca810ba1df017579639b81cd4ebe122f44a1b2d44f5023384b54ba7a2f87",
+    "stdout.log": "8b820738af25392f95a636f737916cf61ade0d83043161163625a9e669335e3b",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "dc970fed430fcfa49d74736729e1f7ea1b2e846699887cbb2ad63b09436ec7cb"
+   }
+  },
+  {
+   "attempt": "attempt-25-mutant-no_admission_occupancy",
+   "launcher": "author (visible commands; the 23-27 call result was lost in a session interruption)",
+   "trust": "retained; serial; no overlap",
+   "exit": 1,
+   "start": "2026-10-22T23:28:12Z",
+   "end": "2026-10-22T23:29:17Z",
+   "test": "c2b6e80a0370",
+   "worker": "7ed793481129",
+   "fails": [
+    "K3",
+    "K8"
+   ],
+   "files": {
+    "ATTEMPT.json": "c3c2c1b074c277cfa2abda116da8e0b3fdc27e6c12a76248d1d0784a7eee1bbd",
+    "controls.json": "1fcc65cccf3db815afdae8a436a32d7d3056bc030723fcf95e34579afcee05da",
+    "stdout.log": "9818ac13b9405f3284b7222cfe841859b286ede1c68989e2e6e20da5580528f3",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "7ed793481129eec192eea51e44811d7e659b6a7c82cce55170db24d046d24e1f"
+   }
+  },
+  {
+   "attempt": "attempt-26-mutant-unbounded_child_wait",
+   "launcher": "author (visible commands; the 23-27 call result was lost in a session interruption)",
+   "trust": "retained; serial; no overlap",
+   "exit": 0,
+   "start": "2026-10-22T23:29:17Z",
+   "end": "2026-10-22T23:30:19Z",
+   "test": "c2b6e80a0370",
+   "worker": "1e7e1f3bd823",
+   "fails": [],
+   "files": {
+    "ATTEMPT.json": "26f3de4ecced9606daaab26c4ddca36180509ea197f074f5d514e028810ed1ae",
+    "controls.json": "d099d5bdd9a67eecda7ca20f002102494f8d9ccb032661f005396d7150bda6a8",
+    "stdout.log": "cc9d89bc542b8059c321d18b8fb54be3dcc8e65013b001276488ae5b835e359a",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "1e7e1f3bd82307e3bc9f3739fc5b0e9cf42f95c12d669085db8ea5d4a79cd473"
+   }
+  },
+  {
+   "attempt": "attempt-27-mutant-no_group_signal",
+   "launcher": "author (visible commands; the 23-27 call result was lost in a session interruption)",
+   "trust": "retained; serial; no overlap",
+   "exit": 1,
+   "start": "2026-10-22T23:30:19Z",
+   "end": "2026-10-22T23:35:14Z",
+   "test": "c2b6e80a0370",
+   "worker": "49a9337b009f",
+   "fails": [
+    "K12",
+    "K13",
+    "K19a",
+    "K19b",
+    "K19c",
+    "K22"
+   ],
+   "files": {
+    "ATTEMPT.json": "8396f0a52fb0d9a1dc6b3e33ae16185eea6ba407226a41eb2544b5a00507ea43",
+    "controls.json": "4f776d784026bc15dbada1cd7f40545a8b80b982975a275600f94a6913a83705",
+    "stdout.log": "ddf5d700a7dcceea2dabcb94b11e8313837d5ccf8a49b3f608c1c0c78c4b4d19",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "49a9337b009f80894b24d23cb278425ee5ca04fe4a5b49e8089b4df5f8be19a0"
+   }
+  },
+  {
+   "attempt": "attempt-28-mutant-v2_resume_semantics",
+   "launcher": "shell 18534 whose parent was orphan 75362 (not an author-visible command)",
+   "trust": "retained; serial, no overlap; orphan-launched; not primary evidence",
+   "exit": 1,
+   "start": "2026-10-22T23:38:49Z",
+   "end": "2026-10-22T23:40:42Z",
+   "test": "c2b6e80a0370",
+   "worker": "a6563a53213e",
+   "fails": [
+    "K1",
+    "K8",
+    "K9",
+    "K18"
+   ],
+   "files": {
+    "ATTEMPT.json": "a74276ef06c3dacfc81ee4b96a58405b16b45eb8b648161cd9f3fca8e47a9f4f",
+    "controls.json": "ce71a663d93ec361d8125cd308e63d6aec32c1d789d1666f38ed0da931058dd7",
+    "stdout.log": "7c2f0ea6c4986878a779034a861d126362e2ad60d5f3c664c7d499377231f02b",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "a6563a53213ef7b06b98b299948ca5aeec8d7aff0ad6c8396483b67e2de8a1ef"
+   }
+  },
+  {
+   "attempt": "attempt-29-mutant-no_queue_hash_binding",
+   "launcher": "shell 18534 whose parent was orphan 75362 (not an author-visible command)",
+   "trust": "retained; serial, no overlap; orphan-launched; not primary evidence",
+   "exit": 1,
+   "start": "2026-10-22T23:40:42Z",
+   "end": "2026-10-22T23:41:53Z",
+   "test": "c2b6e80a0370",
+   "worker": "dcdf0014014f",
+   "fails": [
+    "K1",
+    "K5"
+   ],
+   "files": {
+    "ATTEMPT.json": "7654170d1b5795e67b28ecfee943ddaf9d02def6fcd65810b1818744cae2d714",
+    "controls.json": "c2014e3bfdbd560de95192174d6885f4a04d123410b5a97b481b11ecd76e8b8c",
+    "stdout.log": "8a2f4529b23106149f3e1be546d10fafa8a9b1bc077419846365597bfa9aeb3e",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "dcdf0014014f8312e2b1b0831ab39ab1a1b7f97af31ee51af0de8be1dace4a4b"
+   }
+  },
+  {
+   "attempt": "attempt-30-mutant-owned_by_identity_keys",
+   "launcher": "shell 18534 whose parent was orphan 75362 (not an author-visible command)",
+   "trust": "retained; serial, no overlap; orphan-launched; not primary evidence",
+   "exit": 1,
+   "start": "2026-10-22T23:41:53Z",
+   "end": "2026-10-22T23:42:56Z",
+   "test": "c2b6e80a0370",
+   "worker": "4d440952a1b1",
+   "fails": [
+    "K16"
+   ],
+   "files": {
+    "ATTEMPT.json": "65bfaaa0e783c77028ccfc87dda216613957e8848dcb3b482d54298f5b4ce971",
+    "controls.json": "2fc54e3f38adc9329d3a5973727f23c4c0eede22872b291e841e3953f3bf388f",
+    "stdout.log": "6c1bddcd8e5bf3b941735be9668f4cae90124d2e2a6e00b4ac37706e3cdbb58a",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "4d440952a1b1137bdf8f6f5c29b3e8e693b9729f5d86b59c1c2605728918c434"
+   }
+  },
+  {
+   "attempt": "attempt-31-mutant-no_cancel_before_popen",
+   "launcher": "shell 18534 whose parent was orphan 75362 (not an author-visible command)",
+   "trust": "retained; serial, no overlap; orphan-launched; not primary evidence",
+   "exit": 1,
+   "start": "2026-10-22T23:42:56Z",
+   "end": "2026-10-22T23:43:56Z",
+   "test": "c2b6e80a0370",
+   "worker": "e378b0b2a703",
+   "fails": [
+    "K11"
+   ],
+   "files": {
+    "ATTEMPT.json": "28c3315bc63acb092bd833e44a2f7f4c5536c4669cac6d5f204682f483e52267",
+    "controls.json": "fa5dde3a689265a4c207eaa18dc71c0d4e4e55df2782fe3d859790a6ed2e910e",
+    "stdout.log": "4a0f678a1b56391b19312eded9ff3810887f946801056232d7e6613a420d4641",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "e378b0b2a703cd0628d749df6590a0986ece64b27da92e72b16654bf225660ad"
+   }
+  },
+  {
+   "attempt": "attempt-32-mutant-ecc_na_accepted",
+   "launcher": "shell 18534 whose parent was orphan 75362 (not an author-visible command)",
+   "trust": "retained; serial, no overlap; orphan-launched; not primary evidence",
+   "exit": 1,
+   "start": "2026-10-22T23:43:56Z",
+   "end": "2026-10-22T23:44:58Z",
+   "test": "c2b6e80a0370",
+   "worker": "5d09572fb6d9",
+   "fails": [
+    "K2a"
+   ],
+   "files": {
+    "ATTEMPT.json": "dac4f2b48345c45866447b76718e3345f0c7c61209a52342e2275b90b32ad137",
+    "controls.json": "78cbbacf988a220ab47bca0b9ba350eaf48b8477b332feb8b0436014970715e6",
+    "stdout.log": "f89baf824ce9aab65738b2892942d0b6f9798a9be1b4d410e08a5d3ffe76b2e1",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "5d09572fb6d99c888b3b5188229025a317e39b2633c0587c3cad3f556e8c244b"
+   }
+  },
+  {
+   "attempt": "attempt-33-mutant-sampler_failures_uncounted",
+   "launcher": "shell 18534 whose parent was orphan 75362 (not an author-visible command)",
+   "trust": "retained; serial, no overlap; orphan-launched; not primary evidence",
+   "exit": 1,
+   "start": "2026-10-22T23:44:58Z",
+   "end": "2026-10-22T23:46:03Z",
+   "test": "c2b6e80a0370",
+   "worker": "8a32892802a3",
+   "fails": [
+    "K7"
+   ],
+   "files": {
+    "ATTEMPT.json": "602ce444f21aa325dbe4e0ae7cc06f3178eef1de807a4bc35438d1beb9134711",
+    "controls.json": "4e0d904be4a0c182129b938e1d6635772479b4ff2791f7c83d34f4230b1c40e0",
+    "stdout.log": "b438e693e33ce772eef561b614cc3157fa986feed5d78f65982117127d363dff",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "8a32892802a380ce7bafbe07cb2d45a85fe6c485f2e5f69d6ef0a674be299cb1"
+   }
+  },
+  {
+   "attempt": "attempt-34-frozen-v3-worker",
+   "launcher": "orphan 82476",
+   "trust": "UNTRUSTED: overlapping attempts 34-37",
+   "exit": null,
+   "start": null,
+   "end": null,
+   "test": null,
+   "worker": null,
+   "fails": null,
+   "files": {
+    "stdout.log": "88a3e03ba22f1737eaade8a44459ca7c348f00ad7f19eec5231bebc255f58c94",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "a0510eaae583c4c01ce20829b0656957c6d5c9094f6c1d3ca154438ce8c106c9"
+   }
+  },
+  {
+   "attempt": "attempt-35-frozen-v3-worker",
+   "launcher": "author",
+   "trust": "UNTRUSTED: overlapping attempts 34-37",
+   "exit": 1,
+   "start": "2026-10-22T23:46:40Z",
+   "end": "2026-10-22T23:48:33Z",
+   "test": "c2b6e80a0370",
+   "worker": "a0510eaae583",
+   "fails": [
+    "K15L",
+    "K19a",
+    "K20",
+    "K23",
+    "K24"
+   ],
+   "files": {
+    "ATTEMPT.json": "713480c0b38fa8929679cb9ae4dbb61983bd7f1bd88bf5103f71aa65deecac7a",
+    "controls.json": "95d15ad56ec54b714685c75c5b2766ea0af8aa430099225d1d84ba726ecb24fc",
+    "stdout.log": "d441b4e2cf6666ce3b6415366bc9cbce4599be8e22a7a60811823992aeb835ab",
+    "test.py": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+    "worker_under_test.py": "a0510eaae583c4c01ce20829b0656957c6d5c9094f6c1d3ca154438ce8c106c9"
+   }
+  },
+  {
+   "attempt": "attempt-36-worker",
+   "launcher": "orphan 75362",
+   "trust": "UNTRUSTED: overlapping attempts 34-37",
+   "exit": -2,
+   "start": "2026-10-22T23:47:04Z",
+   "end": "2026-10-22T23:48:05Z",
+   "test": "29c8ec27a4b7",
+   "worker": "071a1588c9ce",
+   "fails": null,
+   "files": {
+    "ATTEMPT.json": "867f60e460c9be5d511bf64ff155bfb4ef8d25f650aefd334e8c099484bccaf7",
+    "stdout.log": "e697a00f8e48ae3d6c49d6885112070bc820368158d429a749f966c2816ef331",
+    "test.py": "29c8ec27a4b7c2abf24189026765dda6668e1e1ca59b2983d666fef3e0bffe51",
+    "worker_under_test.py": "071a1588c9ceda73c2d974309b20f6b51beb5211e393752871496f32e084c853"
+   }
+  },
+  {
+   "attempt": "attempt-37-mutant-v3_query_lifecycle",
+   "launcher": "orphan 75362",
+   "trust": "UNTRUSTED: overlapping attempts 34-37",
+   "exit": null,
+   "start": null,
+   "end": null,
+   "test": null,
+   "worker": null,
+   "fails": [
+    "K19a",
+    "K20"
+   ],
+   "files": {
+    "controls.json": "01dd728914d80c9842c74e509d2aa62bb001f38904c76251240cff7bc2b3d0d7",
+    "stdout.log": "0cb644485c82023d87f7ecf0c028dcab8db8ae8c276390f6e214882765e0f210",
+    "test.py": "29c8ec27a4b7c2abf24189026765dda6668e1e1ca59b2983d666fef3e0bffe51",
+    "worker_under_test.py": "8f04fb78003a3debae5e72a22baef7790b1d70ed4ceff8708333d4b3bf69862e"
+   }
+  }
+ ]
+}

@@ -1,0 +1,96 @@
+{
+ "schema": "run-v5-admission-units/1",
+ "runner": "../resource_stop_20261022/gpu_worker_v5_controls/static-20261023T001802Z/mutant-admission-r2-owner-rule.py",
+ "runner_sha256": "5a4d0900526eff08df9b86c70cf461baea02e8a9f06ae343155fc6a28dc80296",
+ "test_sha256": "7ba176223babb19a3214b6dd9efa783a3b04c33743bce0aee5703210f7719483",
+ "results": [
+  {
+   "control": "refused r2 tree (watchdog child of the owner) is admitted",
+   "result": "FAIL",
+   "admitted": false,
+   "reason": "owner lacks the exact --resume token",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "orphan duplicate Claude with the same --resume (PPID 1) is refused",
+   "result": "FAIL",
+   "admitted": false,
+   "reason": "owner lacks the exact --resume token",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "space-separated --resume token outside the owner tree is refused",
+   "result": "FAIL",
+   "admitted": false,
+   "reason": "owner lacks the exact --resume token",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "wrong owner birth is refused",
+   "result": "FAIL",
+   "admitted": false,
+   "reason": "owner lacks the exact --resume token",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "owner PID that is not an ancestor is refused",
+   "result": "FAIL",
+   "admitted": false,
+   "reason": "owner lacks the exact --resume token",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "owner without the exact token (different id) is refused",
+   "result": "PASS",
+   "admitted": false,
+   "reason": "owner lacks the exact --resume token",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "unrelated commands mentioning the id are admitted",
+   "result": "FAIL",
+   "admitted": false,
+   "reason": "owner lacks the exact --resume token",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "unrelated launcher.py / smi.py are admitted",
+   "result": "FAIL",
+   "admitted": false,
+   "reason": "owner lacks the exact --resume token",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "a live foreign v5 harness is refused",
+   "result": "FAIL",
+   "admitted": false,
+   "reason": "owner lacks the exact --resume token",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "a live control under the owner but outside the runner chain is refused",
+   "result": "FAIL",
+   "admitted": false,
+   "reason": "owner lacks the exact --resume token",
+   "other_authors": [],
+   "control_processes": []
+  },
+  {
+   "control": "a mock process in another gpu_worker_v5_controls namespace is refused",
+   "result": "FAIL",
+   "admitted": false,
+   "reason": "owner lacks the exact --resume token",
+   "other_authors": [],
+   "control_processes": []
+  }
+ ]
+}

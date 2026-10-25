@@ -1,0 +1,34 @@
+## identity
+records 736 status {'EVALUATED': 734, 'CONTROL_ONLY': 2} cpu 334 cuda 402
+eval sha mismatches 0
+retained==current True 345 reused/new 345 391
+plain in snapshot ['B-pedestal32-s00-cuda-plain', 'B-dose1-s00-cuda-plain'] plain excluded ['B-pedestal32-s00-cpu-plain', 'B-dose1-s00-cpu-plain']
+binaries {('cpu', False, 'd6d76123', 0): 334, ('cuda', False, '35f0c674', 0): 400, ('cuda', True, '3da31378', 0): 2}
+imported-source hashes vs git 3eee0a4b: ok 111 bad 0
+## witness audit (z==e on selected stage, 0 on unselected)
+anomalies 0 []
+## validity/failure fields (734 evaluated)
+[(('fieldgate', 'FAIL'), 560), (('fieldgate', 'PASS'), 174), (('global_converged', False), 40), (('global_converged', True), 694), (('local_enabled', False), 40), (('local_enabled', True), 694), (('sampling', 'VALID'), 734)]
+transfer_inband max 0.9968573383903613 top-band >1 count 2 max 1.0016828179356603
+## pseudoreplication evidence: none-arm CPU field RMS px seeds 0-3
+pedestal0 [0.29948, 0.25969, 0.21036, 0.42953] both [0.29948, 0.25969, 0.21036, 0.42953]
+pedestal32 [1.61603, 1.94181, 2.83462, 1.50434] both [0.29949, 0.25968, 0.21036, 0.42953]
+dose1 [0.29963, 0.2598, 0.2096, 0.42952] both [0.29948, 0.25969, 0.21036, 0.42953]
+contrast025 [0.31198, 0.27055, 0.22497, 0.45131] both [0.29948, 0.25969, 0.21036, 0.42953]
+contrast4 [0.29944, 0.25973, 0.2103, 0.42955] both [0.29948, 0.25969, 0.21036, 0.42953]
+## multiplicity (216 complete comparisons)
+m 216 sig 31 min p 0.001953125 bonf survivors 0 BH q<.05 21 p==0.001953 count 21
+null P(p<.05) at n=10 0.021484375 -> expected nominal false positives if 216 independent nulls: 4.640625
+sig by condition {'contrast025': 4, 'contrast4': 1, 'dose05': 1, 'dose1': 2, 'dose4': 1, 'outmodel': 3, 'pedestal32': 19}
+sig with |median|<1e-2: 9  <2e-4: 8
+ties in complete comparisons 0
+## regression magnitudes (878)
+{'<1e-6': 135, '<1e-4': 461, '<1e-3': 685} >=1e-2 27 in partial CPU outmodel 14
+## partial-cell cohort mismatch: CPU outmodel
+{'none': [0, 1, 2, 3], 'global': [0, 1, 2, 3], 'local': [0, 1, 2], 'both': [0, 1, 2]}
+none own-seeds 1.04299 common [0, 1, 2] 1.05263
+global own-seeds 1.04303 common [0, 1, 2] 1.05272
+local own-seeds 1.05231 common [0, 1, 2] 1.05231
+both own-seeds 1.05225 common [0, 1, 2] 1.05225
+## stability vs earlier 345-record results/tierB.json
+complete in both 96 changed 0

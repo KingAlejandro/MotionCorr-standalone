@@ -1,0 +1,9 @@
+{
+ "result": "FAIL",
+ "exit": 1,
+ "script": "inspect_ancestry.py",
+ "reason": "PermissionError EPERM reading PID 1 birth via frozen ProcessTable; no snapshot written",
+ "phase": "ancestry read; no test/controller/worker launched",
+ "stderr": "PermissionError: [Errno 1] Cannot read PID/birth identity for 1",
+ "disposition": "script retained unchanged; separate v2 stops before PID1, no PID1 retry"
+}

@@ -1,0 +1,23 @@
+--- evaluate.py (deployed)
++++ evaluate-late68-v1.py
+@@ -27,9 +27,9 @@
+ EVAL.mkdir(exist_ok=True)
+ PY = sys.executable
+ ARMS = ['none', 'global', 'local', 'both']
+-TRUTH = {(4096, 4096): ('/mnt/clathrin/alex-motioncorr-synth-combined/truth-4096x4096.npy',
++TRUTH = {(4096, 4096): (str(ROOT / 'truth' / 'truth-4096x4096.npy'),
+                         '6b2733bd516d4c51333fa1981256137d084854cfaca4dd8af90a85be96f18c3b'),
+-         (5760, 4092): ('/mnt/clathrin/alex-motioncorr-synth-combined/truth-5760x4092.npy',
++         (5760, 4092): (str(ROOT / 'truth' / 'truth-5760x4092.npy'),
+                         'ff084df764348da7b89626d37963546f0fc11e6ed3912347b0e5e6f532963145')}
+ 
+ 
+@@ -124,7 +124,7 @@
+         if rec is None or out.exists(): continue
+         out.parent.mkdir(exist_ok=True)
+         run = ROOT / 'runs' / name
+-        receipt = Path(rec['cwd']) / 'RECEIPT.json'
++        receipt = ROOT / 'fixture-receipts' / name / 'RECEIPT.json'
+         r = json.loads(receipt.read_text())['recipe']
+         m = dict(id=name, exit=rec['exit'], arm=rec['arm'], backend=rec['backend'], group=rec['group'],
+                  dc_witness=rec['dc_witness'], wall_s_unqualified=rec['wall_s_unqualified'])

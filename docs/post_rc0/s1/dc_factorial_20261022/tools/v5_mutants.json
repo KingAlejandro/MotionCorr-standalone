@@ -1,0 +1,61 @@
+{
+ "unbounded_child_wait": {
+  "only": [
+   "K25b"
+  ],
+  "replace": [
+   [
+    "try: p.wait(timeout=self.a.cleanup_grace)\n            except subprocess.TimeoutExpired: cleanup_errors.append(f'job root {p.pid} not reaped')",
+    "p.wait()"
+   ]
+  ]
+ },
+ "no_root_signal_on_refresh_exception": {
+  "only": [
+   "K25a"
+  ],
+  "replace": [
+   [
+    "        signal_root(root, grace, signalled)  # R3-m2: descendants unverified, root only\n        return signalled, [f'ownership refresh failed: {e}']",
+    "        return signalled, [f'ownership refresh failed: {e}']"
+   ],
+   [
+    "            signal_root(root, grace, signalled)  # R3-m2: descendants unverified, root only\n            return signalled, errors",
+    "            return signalled, errors"
+   ]
+  ]
+ },
+ "untyped_query_spawn": {
+  "only": [
+   "K27"
+  ],
+  "replace": [
+   [
+    "        try:\n            p = subprocess.Popen(self.cmd + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)\n        except OSError as e:\n            raise QueryError('QUERY_SPAWN_FAILED', f'{args[0]}: {e!r}')\n",
+    "        p = subprocess.Popen(self.cmd + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)\n"
+   ]
+  ]
+ },
+ "census_raises": {
+  "only": [
+   "K28"
+  ],
+  "replace": [
+   [
+    "                try:\n                    r = json.loads((d / 'RUN.json').read_text())\n                    s = r['status'] if r['status'] != 'EXITED' else ('EXITED' if r['exit'] == 0 else 'EXITED_NONZERO')\n                except Exception:\n                    s = 'UNREADABLE_RUN_JSON'\n",
+    "                r = json.loads((d / 'RUN.json').read_text())\n                s = r['status'] if r['status'] != 'EXITED' else ('EXITED' if r['exit'] == 0 else 'EXITED_NONZERO')\n"
+   ]
+  ]
+ },
+ "release_with_unreaped_query": {
+  "only": [
+   "K29"
+  ],
+  "replace": [
+   [
+    "        if unreaped:\n            # Contract rule 1/4",
+    "        if False:\n            # Contract rule 1/4"
+   ]
+  ]
+ }
+}

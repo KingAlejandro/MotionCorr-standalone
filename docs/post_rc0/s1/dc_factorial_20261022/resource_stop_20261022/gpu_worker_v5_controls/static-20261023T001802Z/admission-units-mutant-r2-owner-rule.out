@@ -1,0 +1,11 @@
+FAIL refused r2 tree (watchdog child of the owner) is admitted -> owner lacks the exact --resume token
+FAIL orphan duplicate Claude with the same --resume (PPID 1) is refused -> owner lacks the exact --resume token
+FAIL space-separated --resume token outside the owner tree is refused -> owner lacks the exact --resume token
+FAIL wrong owner birth is refused -> owner lacks the exact --resume token
+FAIL owner PID that is not an ancestor is refused -> owner lacks the exact --resume token
+PASS owner without the exact token (different id) is refused -> owner lacks the exact --resume token
+FAIL unrelated commands mentioning the id are admitted -> owner lacks the exact --resume token
+FAIL unrelated launcher.py / smi.py are admitted -> owner lacks the exact --resume token
+FAIL a live foreign v5 harness is refused -> owner lacks the exact --resume token
+FAIL a live control under the owner but outside the runner chain is refused -> owner lacks the exact --resume token
+FAIL a mock process in another gpu_worker_v5_controls namespace is refused -> owner lacks the exact --resume token

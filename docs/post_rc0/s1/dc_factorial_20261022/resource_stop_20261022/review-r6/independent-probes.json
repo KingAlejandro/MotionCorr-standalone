@@ -1,0 +1,637 @@
+{
+  "known_live": {
+    "result": "PASS",
+    "group_calls": [
+      [
+        910001,
+        15
+      ],
+      [
+        910001,
+        9
+      ]
+    ],
+    "root_events": [
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        15,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        9,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "observer errors during cleanup: late during known_live"
+    ],
+    "fallback_calls": 1
+  },
+  "group_live": {
+    "result": "PASS",
+    "group_calls": [
+      [
+        910001,
+        15
+      ],
+      [
+        910001,
+        9
+      ]
+    ],
+    "root_events": [
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        15,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        9,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "observer errors during cleanup: late during group_live"
+    ],
+    "fallback_calls": 1
+  },
+  "group_live_raises": {
+    "result": "PASS",
+    "group_calls": [
+      [
+        910001,
+        15
+      ],
+      [
+        910001,
+        9
+      ]
+    ],
+    "root_events": [
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        15,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        9,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "ownership check failed during signal 15: synthetic group scan failed"
+    ],
+    "fallback_calls": 1
+  },
+  "verify_raises": {
+    "result": "PASS",
+    "group_calls": [
+      [
+        910001,
+        15
+      ],
+      [
+        910001,
+        9
+      ]
+    ],
+    "root_events": [
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        15,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        9,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "ownership check failed during signal 15: synthetic verification failed"
+    ],
+    "fallback_calls": 1
+  },
+  "late_kill": {
+    "result": "PASS",
+    "group_calls": [
+      [
+        910001,
+        15
+      ],
+      [
+        910001,
+        15
+      ],
+      [
+        910001,
+        9
+      ]
+    ],
+    "root_events": [
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        15,
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        15,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        9,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "observer errors during cleanup: late at KILL verification"
+    ],
+    "fallback_calls": 1
+  },
+  "after_term": {
+    "result": "PASS",
+    "group_calls": [
+      [
+        910001,
+        15
+      ],
+      [
+        910001,
+        15
+      ],
+      [
+        910001,
+        9
+      ]
+    ],
+    "root_events": [
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        15,
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        15,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        9,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "observer errors during cleanup: late after TERM check"
+    ],
+    "fallback_calls": 1
+  },
+  "identity_birth": {
+    "result": "PASS",
+    "group_calls": [
+      [
+        910001,
+        15
+      ]
+    ],
+    "root_events": [
+      [
+        "root",
+        9
+      ],
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        15,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        "group-condition-failed",
+        910001,
+        {
+          "birth": 71,
+          "current": {
+            "pid": 910001,
+            "ppid": 64467,
+            "pgid": 910001,
+            "start": 72,
+            "state": "R"
+          }
+        },
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        9,
+        "root",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "observer errors during cleanup: late at verification"
+    ],
+    "fallback_calls": 1
+  },
+  "identity_parent": {
+    "result": "PASS",
+    "group_calls": [
+      [
+        910001,
+        15
+      ]
+    ],
+    "root_events": [
+      [
+        "root",
+        9
+      ],
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        15,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        "group-condition-failed",
+        910001,
+        {
+          "birth": 71,
+          "current": {
+            "pid": 910001,
+            "ppid": 1,
+            "pgid": 910001,
+            "start": 71,
+            "state": "R"
+          }
+        },
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        9,
+        "root",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "observer errors during cleanup: late at verification"
+    ],
+    "fallback_calls": 1
+  },
+  "identity_pgid": {
+    "result": "PASS",
+    "group_calls": [
+      [
+        910001,
+        15
+      ]
+    ],
+    "root_events": [
+      [
+        "root",
+        9
+      ],
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        15,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        "group-condition-failed",
+        910001,
+        {
+          "birth": 71,
+          "current": {
+            "pid": 910001,
+            "ppid": 64467,
+            "pgid": 910002,
+            "start": 71,
+            "state": "R"
+          }
+        },
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        9,
+        "root",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "observer errors during cleanup: late at verification"
+    ],
+    "fallback_calls": 1
+  },
+  "identity_sid": {
+    "result": "PASS",
+    "group_calls": [
+      [
+        910001,
+        15
+      ]
+    ],
+    "root_events": [
+      [
+        "root",
+        9
+      ],
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        15,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        "group-condition-failed",
+        910001,
+        {
+          "birth": 71,
+          "current": {
+            "pid": 910001,
+            "ppid": 64467,
+            "pgid": 910001,
+            "start": 71,
+            "state": "R"
+          }
+        },
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        9,
+        "root",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "observer errors during cleanup: late at verification"
+    ],
+    "fallback_calls": 1
+  },
+  "identity_own_group": {
+    "result": "PASS",
+    "group_calls": [
+      [
+        910001,
+        15
+      ]
+    ],
+    "root_events": [
+      [
+        "root",
+        9
+      ],
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        15,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        "group-condition-failed",
+        910001,
+        {
+          "birth": 71,
+          "current": {
+            "pid": 910001,
+            "ppid": 64467,
+            "pgid": 910001,
+            "start": 71,
+            "state": "R"
+          }
+        },
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        9,
+        "root",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "observer errors during cleanup: late at verification"
+    ],
+    "fallback_calls": 1
+  },
+  "identity_reaped": {
+    "result": "PASS",
+    "group_calls": [
+      [
+        910001,
+        15
+      ]
+    ],
+    "root_events": [
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        15,
+        "root-group",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        "skipped-root-reaped",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "observer errors during cleanup: late at verification"
+    ],
+    "fallback_calls": 1
+  },
+  "read_raises": {
+    "result": "PASS",
+    "group_calls": [],
+    "root_events": [
+      [
+        "root",
+        15
+      ],
+      [
+        "root",
+        9
+      ],
+      [
+        "wait",
+        0
+      ]
+    ],
+    "signals": [
+      [
+        "group-identity-unreadable",
+        910001,
+        "OSError('synthetic identity unavailable')",
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        "group-condition-failed",
+        910001,
+        {
+          "birth": 71,
+          "current": null
+        },
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        15,
+        "root",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        "group-identity-unreadable",
+        910001,
+        "OSError('synthetic identity unavailable')",
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        "group-condition-failed",
+        910001,
+        {
+          "birth": 71,
+          "current": null
+        },
+        "2026-10-23T13:10:33Z"
+      ],
+      [
+        9,
+        "root",
+        910001,
+        "2026-10-23T13:10:33Z"
+      ]
+    ],
+    "errors": [
+      "observer errors during cleanup: late at verification"
+    ],
+    "fallback_calls": 1
+  },
+  "uncertainty_outcome": {
+    "result": "PASS",
+    "holds": [
+      [
+        [
+          "job cleanup not verified"
+        ],
+        {
+          "job": "J",
+          "cleanup": {
+            "errors": [
+              "late observer"
+            ]
+          }
+        }
+      ]
+    ],
+    "scope": "mocked main transition; no kernel lease claim"
+  },
+  "exception_backstop": {
+    "result": "PASS",
+    "holds": [
+      [
+        [
+          "unexpected worker error with possibly unresolved work"
+        ],
+        {
+          "error": "Traceback (most recent call last):\n  File \"/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/tools/gpu_worker_v6_1.py\", line 603, in main\n    return self.locked_main(q, binaries, lease)\n           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/unittest/mock.py\", line 1169, in __call__\n    return self._mock_call(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/unittest/mock.py\", line 1173, in _mock_call\n    return self._execute_mock_call(*args, **kwargs)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/unittest/mock.py\", line 1228, in _execute_mock_call\n    raise effect\nOSError: synthetic checked fallback error\n",
+          "launched": 1,
+          "owned_identities": 0,
+          "queries_unreaped": []
+        }
+      ]
+    ],
+    "scope": "mocked main transition; no kernel lease claim"
+  },
+  "overall": "PASS"
+}

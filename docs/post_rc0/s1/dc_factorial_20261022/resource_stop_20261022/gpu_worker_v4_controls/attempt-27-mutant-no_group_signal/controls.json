@@ -1,0 +1,1531 @@
+{
+ "schema": "gpu-worker-v4-host-controls/1",
+ "python": "3.13.7 (main, Aug 18 2025, 19:02:43) [Clang 20.1.4 ]",
+ "platform": "darwin",
+ "worker": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/_v4mutant_no_group_signal.py",
+ "worker_sha256": "49a9337b009f80894b24d23cb278425ee5ca04fe4a5b49e8089b4df5f8be19a0",
+ "test_sha256": "c2b6e80a03700d49cda02872102a0bd73f5bb022975f35e593cc7c6c1be1940d",
+ "ownership_sha256": "8de59b8cd741630f8188ef5e98b4877415df90f3bddd8a4a99013e0e7ff908cb",
+ "results": [
+  {
+   "control": "K1 invalid binding refused before lease/output (exit 64)",
+   "result": "PASS",
+   "detail": {
+    "queue_sha": {
+     "exit": 64,
+     "runs_created": false,
+     "result": true,
+     "leftovers": []
+    },
+    "expected_count": {
+     "exit": 64,
+     "runs_created": false,
+     "result": true,
+     "leftovers": []
+    },
+    "backend": {
+     "exit": 64,
+     "runs_created": false,
+     "result": true,
+     "leftovers": []
+    },
+    "duplicate_id": {
+     "exit": 64,
+     "runs_created": false,
+     "result": true,
+     "leftovers": []
+    },
+    "binaries_sha": {
+     "exit": 64,
+     "runs_created": false,
+     "result": true,
+     "leftovers": []
+    },
+    "binary_hash": {
+     "exit": 64,
+     "runs_created": false,
+     "result": true,
+     "leftovers": []
+    },
+    "nonempty_runs": {
+     "exit": 64,
+     "runs_created": false,
+     "result": true,
+     "leftovers": []
+    }
+   }
+  },
+  {
+   "control": "K2a ECC [N/A] fails closed",
+   "result": "PASS",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "ADMISSION_REFUSED"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K2b ECC 1",
+   "result": "PASS",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "ADMISSION_REFUSED"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K2c UUID at wrong index",
+   "result": "PASS",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "ADMISSION_REFUSED"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K3 foreign process before launch",
+   "result": "PASS",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "ADMISSION_REFUSED"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K4a query nonzero exit",
+   "result": "PASS",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "QUERY_FAILED"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K4b query timeout (bounded, query process killed)",
+   "result": "PASS",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "QUERY_TIMEOUT"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K4c malformed compute-app row",
+   "result": "PASS",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "QUERY_MALFORMED"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K5 clean queue via /usr/bin/time prefix (grandchild route), witness, schema, census",
+   "result": "PASS",
+   "detail": {
+    "exit": 0,
+    "stop": [],
+    "final": [
+     {
+      "code": 0,
+      "census": {
+       "expected": 2,
+       "counts": {
+        "EXITED": 2
+       },
+       "complete": true,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": []
+      }
+     }
+    ],
+    "sentinel": "",
+    "records": [
+     {
+      "status": "EXITED",
+      "exit": 0,
+      "witness": [
+       "GPU-00000000-test-test-test-000000000002"
+      ],
+      "sampler": {
+       "ok": 3,
+       "failed": 0,
+       "errors": [],
+       "foreign_on_target_during": {},
+       "unjoined": false,
+       "interval_s": 0.25
+      },
+      "missing_keys": []
+     },
+     {
+      "status": "EXITED",
+      "exit": 0,
+      "witness": [
+       "GPU-00000000-test-test-test-000000000002"
+      ],
+      "sampler": {
+       "ok": 2,
+       "failed": 0,
+       "errors": [],
+       "foreign_on_target_during": {},
+       "unjoined": false,
+       "interval_s": 0.25
+      },
+      "missing_keys": []
+     }
+    ],
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K6 foreign appears mid-job: recorded, stop before next launch, census incomplete",
+   "result": "PASS",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "RESOURCE"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 2,
+       "counts": {
+        "EXITED": 1,
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J1-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K7 mid-job query failure counted, stop before next launch",
+   "result": "PASS",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "RESOURCE"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 2,
+       "counts": {
+        "EXITED": 1,
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J1-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K8 restart after NOT_LAUNCHED cannot pass",
+   "result": "PASS",
+   "detail": {
+    "run1": 75,
+    "run1_status": "NOT_LAUNCHED",
+    "run1_census": {
+     "expected": 1,
+     "counts": {
+      "NOT_LAUNCHED": 1
+     },
+     "complete": false,
+     "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+     "exited_nonzero": 0,
+     "not_complete": [
+      "J0-ok"
+     ]
+    },
+    "run2_same_namespace": 64,
+    "run2_receipts_unchanged": true,
+    "run2_launched": false,
+    "run3_fresh_namespace": 0,
+    "leftovers": [],
+    "sentinel": ""
+   }
+  },
+  {
+   "control": "K9 directory collision: nonzero stop, foreign directory untouched",
+   "result": "PASS",
+   "detail": {
+    "exit": 70,
+    "stop": [
+     "DIRECTORY_COLLISION"
+    ],
+    "final": [
+     {
+      "code": 70,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "NO_RUN_JSON": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K10 cancel during main-loop admission query: no launch",
+   "result": "PASS",
+   "detail": {
+    "call_seen": true,
+    "sigterm": "signalled",
+    "exit": 4,
+    "stop": [
+     "CANCELLED"
+    ],
+    "final": [
+     {
+      "code": 4,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": [
+     [
+      61949,
+      15
+     ]
+    ]
+   }
+  },
+  {
+   "control": "K11 cancel during pre-launch recheck: CANCELLED_BEFORE_LAUNCH, no Popen",
+   "result": "PASS",
+   "detail": {
+    "call_seen": true,
+    "sigterm": "signalled",
+    "exit": 4,
+    "stop": [
+     "CANCELLED"
+    ],
+    "final": [
+     {
+      "code": 4,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "CANCELLED_BEFORE_LAUNCH": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": [
+     [
+      63136,
+      15
+     ]
+    ]
+   }
+  },
+  {
+   "control": "K12 timeout: child, setsid grandchild and detached sleep reaped; sentinel unsignalled (own-group exclusion: K22)",
+   "result": "FAIL",
+   "detail": {
+    "exit": null,
+    "stop": [],
+    "final": [],
+    "sentinel": "",
+    "tree": [
+     {
+      "pid": 63577,
+      "start": [
+       1792711848,
+       74877
+      ],
+      "pgid": 63574,
+      "sid": 63574
+     },
+     {
+      "pid": 63578,
+      "start": [
+       1792711848,
+       78059
+      ],
+      "pgid": 63578,
+      "sid": 63578
+     },
+     {
+      "pid": 63579,
+      "start": [
+       1792711848,
+       115846
+      ],
+      "pgid": 63579,
+      "sid": 63579
+     }
+    ],
+    "tree_alive_after_worker": [
+     {
+      "pid": 63577,
+      "start": [
+       1792711848,
+       74877
+      ],
+      "pgid": 63574,
+      "sid": 63574
+     },
+     {
+      "pid": 63578,
+      "start": [
+       1792711848,
+       78059
+      ],
+      "pgid": 63578,
+      "sid": 63578
+     },
+     {
+      "pid": 63579,
+      "start": [
+       1792711848,
+       115846
+      ],
+      "pgid": 63579,
+      "sid": 63579
+     }
+    ],
+    "status": "CLEANUP_FAILED",
+    "cleanup": {
+     "signals": [
+      [
+       15,
+       63574,
+       "2026-10-22T23:30:51Z"
+      ],
+      [
+       15,
+       63578,
+       "2026-10-22T23:30:51Z"
+      ],
+      [
+       15,
+       63579,
+       "2026-10-22T23:30:51Z"
+      ],
+      [
+       9,
+       63574,
+       "2026-10-22T23:30:54Z"
+      ],
+      [
+       9,
+       63578,
+       "2026-10-22T23:30:54Z"
+      ],
+      [
+       9,
+       63579,
+       "2026-10-22T23:30:54Z"
+      ]
+     ],
+     "errors": [
+      "job root 63574 not reaped"
+     ],
+     "owned_live_after": [
+      {
+       "pid": 63574,
+       "ppid": 63563,
+       "pgid": 63574,
+       "start": [
+        1792711847,
+        870822
+       ],
+       "state": "R"
+      },
+      {
+       "pid": 63577,
+       "ppid": 63574,
+       "pgid": 63574,
+       "start": [
+        1792711848,
+        74877
+       ],
+       "state": "R"
+      },
+      {
+       "pid": 63578,
+       "ppid": 63574,
+       "pgid": 63578,
+       "start": [
+        1792711848,
+        78059
+       ],
+       "state": "R"
+      },
+      {
+       "pid": 63579,
+       "ppid": 63574,
+       "pgid": 63579,
+       "start": [
+        1792711848,
+        115846
+       ],
+       "state": "R"
+      }
+     ],
+     "sampler_settled_before_classification": true
+    },
+    "leftovers": [],
+    "harness_signals": [
+     [
+      63579,
+      9
+     ],
+     [
+      63578,
+      9
+     ],
+     [
+      63577,
+      9
+     ],
+     [
+      63574,
+      9
+     ],
+     [
+      63563,
+      9
+     ],
+     [
+      63562,
+      9
+     ]
+    ]
+   }
+  },
+  {
+   "control": "K13 SIGTERM mid-job: tree reaped, CANCELLED, sentinel unsignalled (own-group exclusion: K22)",
+   "result": "FAIL",
+   "detail": {
+    "tree_ready": true,
+    "sigterm": "signalled",
+    "exit": null,
+    "stop": [],
+    "final": [],
+    "sentinel": "",
+    "tree": [
+     {
+      "pid": 69462,
+      "start": [
+       1792711909,
+       248751
+      ],
+      "pgid": 69333,
+      "sid": 69333
+     },
+     {
+      "pid": 69463,
+      "start": [
+       1792711909,
+       253678
+      ],
+      "pgid": 69463,
+      "sid": 69463
+     },
+     {
+      "pid": 69482,
+      "start": [
+       1792711909,
+       306292
+      ],
+      "pgid": 69482,
+      "sid": 69482
+     }
+    ],
+    "tree_alive_after_worker": [
+     {
+      "pid": 69462,
+      "start": [
+       1792711909,
+       248751
+      ],
+      "pgid": 69333,
+      "sid": 69333
+     },
+     {
+      "pid": 69463,
+      "start": [
+       1792711909,
+       253678
+      ],
+      "pgid": 69463,
+      "sid": 69463
+     },
+     {
+      "pid": 69482,
+      "start": [
+       1792711909,
+       306292
+      ],
+      "pgid": 69482,
+      "sid": 69482
+     }
+    ],
+    "status": "CLEANUP_FAILED",
+    "cleanup": {
+     "signals": [
+      [
+       15,
+       69333,
+       "2026-10-22T23:31:49Z"
+      ],
+      [
+       15,
+       69463,
+       "2026-10-22T23:31:49Z"
+      ],
+      [
+       15,
+       69482,
+       "2026-10-22T23:31:49Z"
+      ],
+      [
+       9,
+       69333,
+       "2026-10-22T23:31:52Z"
+      ],
+      [
+       9,
+       69463,
+       "2026-10-22T23:31:52Z"
+      ],
+      [
+       9,
+       69482,
+       "2026-10-22T23:31:52Z"
+      ]
+     ],
+     "errors": [
+      "job root 69333 not reaped"
+     ],
+     "owned_live_after": [
+      {
+       "pid": 69333,
+       "ppid": 68895,
+       "pgid": 69333,
+       "start": [
+        1792711908,
+        910695
+       ],
+       "state": "R"
+      },
+      {
+       "pid": 69462,
+       "ppid": 69333,
+       "pgid": 69333,
+       "start": [
+        1792711909,
+        248751
+       ],
+       "state": "R"
+      },
+      {
+       "pid": 69463,
+       "ppid": 69333,
+       "pgid": 69463,
+       "start": [
+        1792711909,
+        253678
+       ],
+       "state": "R"
+      },
+      {
+       "pid": 69482,
+       "ppid": 69333,
+       "pgid": 69482,
+       "start": [
+        1792711909,
+        306292
+       ],
+       "state": "R"
+      }
+     ],
+     "sampler_settled_before_classification": true
+    },
+    "leftovers": [],
+    "harness_signals": [
+     [
+      68895,
+      15
+     ],
+     [
+      69482,
+      9
+     ],
+     [
+      69463,
+      9
+     ],
+     [
+      69462,
+      9
+     ],
+     [
+      69333,
+      9
+     ],
+     [
+      68895,
+      9
+     ],
+     [
+      68866,
+      9
+     ]
+    ]
+   }
+  },
+  {
+   "control": "K14 observer error during timeout: CLEANUP_FAILED record and receipt, lease held",
+   "result": "PASS",
+   "detail": {
+    "receipt_seen": true,
+    "lease_held_while_alive": true,
+    "worker_alive": true,
+    "run_status": "CLEANUP_FAILED",
+    "kill_worker": "signalled",
+    "exit": 247,
+    "stop": [],
+    "final": [],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": [
+     [
+      70915,
+      9
+     ],
+     [
+      70946,
+      9
+     ],
+     [
+      70945,
+      9
+     ],
+     [
+      70944,
+      9
+     ]
+    ]
+   }
+  },
+  {
+   "control": "K15 observer refresh failure before launch: no launch",
+   "result": "PASS",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "OBSERVER_UNHEALTHY"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K16 PID reuse: exited owned PID with new birth is foreign",
+   "result": "PASS",
+   "detail": {
+    "reused": {
+     "owned": [],
+     "foreign": [
+      4242
+     ]
+    },
+    "same_birth": {
+     "owned": [
+      4242
+     ],
+     "foreign": []
+    }
+   }
+  },
+  {
+   "control": "K17 input admission failure typed (exit 65)",
+   "result": "PASS",
+   "detail": {
+    "exit": 65,
+    "stop": [
+     "INPUT_ADMISSION"
+    ],
+    "final": [
+     {
+      "code": 65,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "INPUT_ADMISSION_FAILED": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K18 final health query failure after complete census (exit 76)",
+   "result": "PASS",
+   "detail": {
+    "exit": 76,
+    "stop": [],
+    "final": [
+     {
+      "code": 76,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "EXITED": 1
+       },
+       "complete": true,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": []
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K15L observer failure before any launch, Linux restore emulated: exit 75, lease released",
+   "result": "PASS",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "OBSERVER_UNHEALTHY",
+     "OBSERVER_FAILED_ZERO_JOBS"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 1,
+       "counts": {
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J0-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K19a query held in flight across job exit, emulated adoption: clean exit 0",
+   "result": "FAIL",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "RESOURCE"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 2,
+       "counts": {
+        "EXITED": 1,
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J1-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K19b query held in flight across timeout, emulated adoption: TIMEOUT 78, tree reaped",
+   "result": "FAIL",
+   "detail": {
+    "exit": null,
+    "stop": [],
+    "final": [],
+    "sentinel": "",
+    "tree": [
+     {
+      "pid": 72287,
+      "start": [
+       1792711982,
+       344048
+      ],
+      "pgid": 72279,
+      "sid": 72279
+     },
+     {
+      "pid": 72288,
+      "start": [
+       1792711982,
+       353099
+      ],
+      "pgid": 72288,
+      "sid": 72288
+     },
+     {
+      "pid": 72289,
+      "start": [
+       1792711982,
+       398640
+      ],
+      "pgid": 72289,
+      "sid": 72289
+     }
+    ],
+    "tree_alive_after_worker": [
+     {
+      "pid": 72287,
+      "start": [
+       1792711982,
+       344048
+      ],
+      "pgid": 72279,
+      "sid": 72279
+     },
+     {
+      "pid": 72288,
+      "start": [
+       1792711982,
+       353099
+      ],
+      "pgid": 72288,
+      "sid": 72288
+     },
+     {
+      "pid": 72289,
+      "start": [
+       1792711982,
+       398640
+      ],
+      "pgid": 72289,
+      "sid": 72289
+     }
+    ],
+    "status": "CLEANUP_FAILED",
+    "cleanup": {
+     "signals": [
+      [
+       15,
+       72279,
+       "2026-10-22T23:33:06Z"
+      ],
+      [
+       15,
+       72288,
+       "2026-10-22T23:33:06Z"
+      ],
+      [
+       15,
+       72289,
+       "2026-10-22T23:33:06Z"
+      ],
+      [
+       9,
+       72279,
+       "2026-10-22T23:33:09Z"
+      ],
+      [
+       9,
+       72288,
+       "2026-10-22T23:33:09Z"
+      ],
+      [
+       9,
+       72289,
+       "2026-10-22T23:33:09Z"
+      ]
+     ],
+     "errors": [
+      "job root 72279 not reaped"
+     ],
+     "owned_live_after": [
+      {
+       "pid": 72279,
+       "ppid": 72246,
+       "pgid": 72279,
+       "start": [
+        1792711981,
+        470352
+       ],
+       "state": "R"
+      },
+      {
+       "pid": 72288,
+       "ppid": 72279,
+       "pgid": 72288,
+       "start": [
+        1792711982,
+        353099
+       ],
+       "state": "R"
+      },
+      {
+       "pid": 72287,
+       "ppid": 72279,
+       "pgid": 72279,
+       "start": [
+        1792711982,
+        344048
+       ],
+       "state": "R"
+      },
+      {
+       "pid": 72289,
+       "ppid": 72279,
+       "pgid": 72289,
+       "start": [
+        1792711982,
+        398640
+       ],
+       "state": "R"
+      }
+     ],
+     "sampler_settled_before_classification": true
+    },
+    "leftovers": [],
+    "harness_signals": [
+     [
+      72289,
+      9
+     ],
+     [
+      72288,
+      9
+     ],
+     [
+      72287,
+      9
+     ],
+     [
+      72279,
+      9
+     ],
+     [
+      72246,
+      9
+     ],
+     [
+      72245,
+      9
+     ]
+    ]
+   }
+  },
+  {
+   "control": "K19c query held in flight across cancellation, emulated adoption: CANCELLED 4, tree reaped",
+   "result": "FAIL",
+   "detail": {
+    "held": true,
+    "tree_ready": true,
+    "sigterm": "signalled",
+    "exit": null,
+    "stop": [],
+    "final": [],
+    "sentinel": "",
+    "tree": [
+     {
+      "pid": 73527,
+      "start": [
+       1792712042,
+       314427
+      ],
+      "pgid": 73510,
+      "sid": 73510
+     },
+     {
+      "pid": 73528,
+      "start": [
+       1792712042,
+       316412
+      ],
+      "pgid": 73528,
+      "sid": 73528
+     },
+     {
+      "pid": 73529,
+      "start": [
+       1792712042,
+       343038
+      ],
+      "pgid": 73529,
+      "sid": 73529
+     }
+    ],
+    "tree_alive_after_worker": [
+     {
+      "pid": 73527,
+      "start": [
+       1792712042,
+       314427
+      ],
+      "pgid": 73510,
+      "sid": 73510
+     },
+     {
+      "pid": 73528,
+      "start": [
+       1792712042,
+       316412
+      ],
+      "pgid": 73528,
+      "sid": 73528
+     },
+     {
+      "pid": 73529,
+      "start": [
+       1792712042,
+       343038
+      ],
+      "pgid": 73529,
+      "sid": 73529
+     }
+    ],
+    "status": "CLEANUP_FAILED",
+    "cleanup": {
+     "signals": [
+      [
+       15,
+       73510,
+       "2026-10-22T23:34:06Z"
+      ],
+      [
+       15,
+       73528,
+       "2026-10-22T23:34:06Z"
+      ],
+      [
+       15,
+       73529,
+       "2026-10-22T23:34:06Z"
+      ],
+      [
+       9,
+       73510,
+       "2026-10-22T23:34:09Z"
+      ],
+      [
+       9,
+       73528,
+       "2026-10-22T23:34:09Z"
+      ],
+      [
+       9,
+       73529,
+       "2026-10-22T23:34:09Z"
+      ]
+     ],
+     "errors": [
+      "job root 73510 not reaped"
+     ],
+     "owned_live_after": [
+      {
+       "pid": 73510,
+       "ppid": 73494,
+       "pgid": 73510,
+       "start": [
+        1792712041,
+        497638
+       ],
+       "state": "R"
+      },
+      {
+       "pid": 73528,
+       "ppid": 73510,
+       "pgid": 73528,
+       "start": [
+        1792712042,
+        316412
+       ],
+       "state": "R"
+      },
+      {
+       "pid": 73529,
+       "ppid": 73510,
+       "pgid": 73529,
+       "start": [
+        1792712042,
+        343038
+       ],
+       "state": "R"
+      },
+      {
+       "pid": 73527,
+       "ppid": 73510,
+       "pgid": 73510,
+       "start": [
+        1792712042,
+        314427
+       ],
+       "state": "R"
+      }
+     ],
+     "sampler_settled_before_classification": true
+    },
+    "leftovers": [],
+    "harness_signals": [
+     [
+      73494,
+      15
+     ],
+     [
+      73529,
+      9
+     ],
+     [
+      73528,
+      9
+     ],
+     [
+      73527,
+      9
+     ],
+     [
+      73510,
+      9
+     ],
+     [
+      73494,
+      9
+     ],
+     [
+      73489,
+      9
+     ]
+    ]
+   }
+  },
+  {
+   "control": "K20 query process never owned under emulated adoption (unit; positive control adopted)",
+   "result": "PASS",
+   "detail": {
+    "query_pids": [
+     81507
+    ],
+    "owned": [
+     81976
+    ],
+    "positive_pid": 81976,
+    "query_pgids": [
+     58489
+    ],
+    "worker_pgid": 58489,
+    "query": {
+     "utc": "2026-10-22T23:35:08Z",
+     "gpus": "0, GPU-other-0, 1 MiB, 0 %, 0\n2, GPU-00000000-test-test-test-000000000002, 1 MiB, 0 %, 0\n",
+     "apps": "",
+     "gpu_rows": [
+      [
+       "0",
+       "GPU-other-0",
+       "1 MiB",
+       "0 %",
+       "0"
+      ],
+      [
+       "2",
+       "GPU-00000000-test-test-test-000000000002",
+       "1 MiB",
+       "0 %",
+       "0"
+      ]
+     ],
+     "target_pids": []
+    },
+    "leftovers": []
+   }
+  },
+  {
+   "control": "K22 own process group never signalled (unit, injected process view)",
+   "result": "FAIL",
+   "detail": {
+    "own_group": 58489,
+    "groups_signalled": [],
+    "errors": []
+   }
+  },
+  {
+   "control": "K23 OK requires a successful sample and the route witness",
+   "result": "PASS",
+   "detail": {
+    "exit": 75,
+    "stop": [
+     "RESOURCE"
+    ],
+    "final": [
+     {
+      "code": 75,
+      "census": {
+       "expected": 2,
+       "counts": {
+        "EXITED": 1,
+        "ABSENT": 1
+       },
+       "complete": false,
+       "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+       "exited_nonzero": 0,
+       "not_complete": [
+        "J1-ok"
+       ]
+      }
+     }
+    ],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  },
+  {
+   "control": "K24 error before the lease: typed stdout receipt, exit 74",
+   "result": "PASS",
+   "detail": {
+    "exit": 74,
+    "stop": [],
+    "final": [],
+    "sentinel": "",
+    "leftovers": [],
+    "harness_signals": []
+   }
+  }
+ ],
+ "limits": "macOS host mocks; fake nvidia-smi for every query; ProcessOwnership polling mode, with test-only emulation of the Linux adoption rule where stated; Linux subreaper execution UNRUN; /usr/bin/time prefix tested, taskset prefix UNRUN; uninterruptible-sleep query hang not reproducible."
+}

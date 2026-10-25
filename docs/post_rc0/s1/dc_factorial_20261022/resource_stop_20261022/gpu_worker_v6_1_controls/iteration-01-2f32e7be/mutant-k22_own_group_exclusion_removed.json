@@ -1,0 +1,15 @@
+{
+ "schema": "dc262-v6.1-data-only/1",
+ "worker_sha256": "28b2cb3e11070f11f0735086796037c8301ab77b6cb9430216fe424417ea40f6",
+ "test_sha256": "80321093f2a6897edf133ee82f4d408b01738fb11266f08a41822158ef87957d",
+ "tests": 17,
+ "failures": [
+  {
+   "test": "test_k22_exact_fixture_interface_and_own_group_exclusion (__main__.Checks.test_k22_exact_fixture_interface_and_own_group_exclusion)",
+   "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_1_static.py\", line 233, in test_k22_exact_fixture_interface_and_own_group_exclusion\n    self.assertTrue(ok, detail)\n    ~~~~~~~~~~~~~~~^^^^^^^^^^^^\nAssertionError: False is not true : {'own_group': 11583, 'groups_signalled': [11583, 900000, 900002], 'errors': []}\n"
+  }
+ ],
+ "errors": [],
+ "result": "FAIL",
+ "limits": "Synthetic Popen/process tables/signals only; process cleanup, real-worker suite, Linux and GPU UNRUN."
+}

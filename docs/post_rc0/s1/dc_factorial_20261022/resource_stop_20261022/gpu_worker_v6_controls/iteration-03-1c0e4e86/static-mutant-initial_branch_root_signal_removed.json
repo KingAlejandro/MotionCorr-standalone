@@ -1,0 +1,15 @@
+{
+ "schema": "dc262-v6-data-only/1",
+ "worker_sha256": "42332e1465e378f075eabea634e2d2d20898ada74303ff0f2d6e591eca7a68fa",
+ "test_sha256": "848e38d410b3680630b47f6a5fe7d9eade99536d0e31cf7a5d44c197342637a7",
+ "tests": 14,
+ "failures": [
+  {
+   "test": "test_uncertain_branches_are_separate (__main__.Checks.test_uncertain_branches_are_separate) (branch='initial')",
+   "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py\", line 123, in test_uncertain_branches_are_separate\n    self.assertEqual(sig.call_count, 1)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\nAssertionError: 0 != 1\n"
+  }
+ ],
+ "errors": [],
+ "result": "FAIL",
+ "limits": "Synthetic Popen/process tables/signals only; process cleanup, real-worker suite, Linux and GPU UNRUN."
+}

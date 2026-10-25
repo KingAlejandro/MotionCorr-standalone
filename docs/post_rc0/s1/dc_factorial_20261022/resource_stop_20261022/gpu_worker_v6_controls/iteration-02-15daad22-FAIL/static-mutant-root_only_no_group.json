@@ -1,0 +1,20 @@
+{
+ "schema": "dc262-v6-data-only/1",
+ "worker_sha256": "b961ef98d74bcbb55ac7f04770ace4b426fe2734bed75c277e50e08f8f13b7a1",
+ "test_sha256": "848e38d410b3680630b47f6a5fe7d9eade99536d0e31cf7a5d44c197342637a7",
+ "tests": 14,
+ "failures": [
+  {
+   "test": "test_original_group_term_kill_before_wait (__main__.Checks.test_original_group_term_kill_before_wait)",
+   "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py\", line 130, in test_original_group_term_kill_before_wait\n    self.assertEqual(calls, [[root.pid, int(signal.SIGTERM)], [root.pid, int(signal.SIGKILL)]])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: [] != [[900001, 15], [900001, 9]]\n\nSecond list contains 2 additional elements.\nFirst extra element 0:\n[900001, 15]\n\n- []\n+ [[900001, 15], [900001, 9]]\n"
+  }
+ ],
+ "errors": [
+  {
+   "test": "test_embedded_mock_scripts_compile_without_execution (__main__.Checks.test_embedded_mock_scripts_compile_without_execution) (script='FAULT_ENTRY')",
+   "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py\", line 224, in test_embedded_mock_scripts_compile_without_execution\n    with self.subTest(script=name): compile(getattr(harness, name), name, 'exec')\n                                    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"FAULT_ENTRY\", line 99\n    out.write(json.dumps(row) + '\n                                ^\nSyntaxError: unterminated string literal (detected at line 99)\n"
+  }
+ ],
+ "result": "FAIL",
+ "limits": "Synthetic Popen/process tables/signals only; process cleanup, real-worker suite, Linux and GPU UNRUN."
+}

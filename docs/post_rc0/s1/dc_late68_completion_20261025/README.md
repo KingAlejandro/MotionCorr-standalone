@@ -1,0 +1,22 @@
+# DC Tier B completion of existing late CPU records
+
+Exactly 68 completed CPU runs were evaluated once on cpu64: **66 EVALUATED and 2 CONTROL_ONLY**, child exit 0, with all 68 terminal record hashes retained. No MotionCorr job or cohort was created. Original source: `3eee0a4b`. The evaluator and checkers are pinned; the evaluator amendment changes only two truth-cache paths and per-ID recipe lookup for relocation. Original RUN bytes and host/cwd provenance remain intact. Numerical code and criteria are unchanged. Luna 6 authored the packet; Sol independently reviewed the three substitutions and runner, ran both harmless path controls, verified the 411-file manifest and admitted CPU62 execution.
+
+The unchanged reviewed v2.2 adapter consumed a new copy containing all 736 frozen records plus the 68 new records, with hashes checked, no overlap and no re-evaluation of the 736. **Adapter exit 0, state COMPLETE: 80 rows, 240 pairs, 965 regression entries**, with zero present/global/derived errors. The exact regression multiset retains all 878 old entries and adds 87. These are metric entries, not 87 independent cases. The older 345-record/371-regression and 736-record/878-regression snapshots remain separate and unchanged. The live original `eval/B` directory contained 345 records and was not modified.
+
+This completes Tier B evaluation coverage. DC/M3/scientific qualification remains unestablished. **519 completed Tier C records remain ungraded (408 CPU / 111 CUDA)**. The queue still contains 1,700 jobs, 1,403 exit-0 RUN receipts, 296 never-run jobs and one interrupted orphan without a RUN receipt. No variant is adopted. Existing Tier A integer/fractional/affine cases remain FAIL across none/global/local/both; global conditioning can worsen integer recovery and CUDA affine. Signal and convergence regressions remain visible. C1 excludes DC and retains its separate unrun/resource rows. New noisy acceptance cohorts, C2/M6/held-out and performance integration remain held.
+
+## Bytes, resources and retained history
+
+The 411 files comprise 68 unchanged RUNs, 68 recipe receipts, 66 runtime/STAR/log/published-sum sets, two truth caches and nine source/provenance files. All source hashes matched, including the 66 MRCs and both original truth caches. The CPU64 copy was independently rehashed before evaluation. Original movie-input payload hashes are retained RUN provenance; this output-evaluation step did not freshly rehash those inputs.
+
+Durable raw packets remain outside Git:
+
+- `/Users/alex.konstantinov/Documents/MotionCorr-evidence/20261025/DC-late68-inputs-v1.tar`: 5,683,271,680 bytes, SHA-256 `921e5546995fc8659cc40bac030bc3f651c8afd638e3fd6cafed8950daa38e4c`.
+- `DC-late68-evaluations-v1.tar` in the same directory: 4,034,560 bytes, SHA-256 `354613daea400bd7a86a7bd60f80deefc6b351c1d28fb3c9feb7a5e296928bf0`.
+
+Manifests and actual summaries/receipts are retained here. Original VM sums, the archived 736 records and staged CPU64 copies remain retrievable. The first local relay was too slow. Sol verified the owned receiver's PID, UID, birth and namespace, stopped only that staging process, and retained its 1,434,451,968-byte partial archive and stop receipt. No evaluator or native job had run there. A separately versioned CPU64 pull from 4GPUs used the existing SSH setup, matched the same complete archive SHA and all 411 payload hashes, and changed no keys, trust or gateway configuration. No foreign service was terminated. These transport operations provide no benchmark claim.
+
+Actual evaluator resources: `small-refmac-machine`, UID 1000, `/usr/bin/python3` 3.12.3, NumPy 1.26.4, CPU62, BLAS/OpenMP one thread, 8 GiB address-space cap and 16 MiB per new output file. Fresh admission checked nonblocking CPU62/global benchmark locks, occupancy, RAM, scratch and evaluator state. The author protocol's inherited `/home/alex/.mc-venv` interpreter is a documentation error; execution receipts bind the actual interpreter above. No byte-identical cross-host numerical claim is made.
+
+See [terminal states](actual/late68/raw/LATE68-RESULT.json), [the complete new snapshot](actual/summary804/summary/tierB-v2.json) and [the exact regression delta](actual/summary804/REGRESSION-DELTA-vs-736.json). Exit 0 and COMPLETE establish coherent coverage/adapter consumption, not motion-truth acceptance. Parent transport/caller scripts are specific one-shot operations; production has no new scheduler or controller.

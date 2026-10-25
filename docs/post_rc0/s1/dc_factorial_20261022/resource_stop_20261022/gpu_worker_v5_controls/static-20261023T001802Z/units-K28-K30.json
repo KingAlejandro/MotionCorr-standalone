@@ -1,0 +1,41 @@
+{
+ "schema": "gpu-worker-v5-host-controls/1",
+ "python": "3.13.7 (main, Aug 18 2025, 19:02:43) [Clang 20.1.4 ]",
+ "platform": "darwin",
+ "worker": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c79c479/docs/post_rc0/s1/dc_factorial_20261022/tools/gpu_worker_v5.py",
+ "worker_sha256": "1e3d6f0aa140a3a23b8b1510f0f4730f27b510b2fa8603dc8345c3401ddb1b44",
+ "test_sha256": "a2b320be9772707118426ef9d979938828897a051f21e2c5d82765527a9d3a6a",
+ "ownership_sha256": "8de59b8cd741630f8188ef5e98b4877415df90f3bddd8a4a99013e0e7ff908cb",
+ "results": [
+  {
+   "control": "K28 census with malformed RUN.json (unit)",
+   "result": "PASS",
+   "detail": {
+    "census": {
+     "expected": 2,
+     "counts": {
+      "UNREADABLE_RUN_JSON": 1,
+      "EXITED": 1
+     },
+     "complete": false,
+     "complete_means": "every id has RUN.json status EXITED (any native exit code)",
+     "exited_nonzero": 0,
+     "not_complete": [
+      "A"
+     ]
+    },
+    "error": null
+   }
+  },
+  {
+   "control": "K30 time prefix selection and worker default prefix (static unit)",
+   "result": "PASS",
+   "detail": {
+    "darwin": "/usr/bin/time -l -o {out}/time-v.log",
+    "linux": "/usr/bin/time -v -o {out}/time-v.log",
+    "worker_default": "taskset -c {cpu} /usr/bin/time -v -o {out}/time-v.log"
+   }
+  }
+ ],
+ "limits": "macOS host mocks; fake nvidia-smi for every query; ProcessOwnership polling mode, with test-only emulation of the Linux adoption rule where stated; Linux subreaper execution UNRUN; /usr/bin/time prefix tested, taskset prefix UNRUN; uninterruptible-sleep query hang not reproducible."
+}

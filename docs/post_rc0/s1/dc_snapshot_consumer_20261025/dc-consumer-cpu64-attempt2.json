@@ -1,0 +1,19 @@
+{
+  "utc": "2026-10-25T18:49:35.252831+00:00",
+  "namespace": "/tmp/motioncorr-dc-consumer-attempt2-20261025-dcdd56d4-153e-4f2a-9af7-8b60867f922a",
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "cpu64",
+    "taskset -c 62 python3 -I -B /tmp/dc-consumer-bootstrap-v2-f5ba00a5-2e04-4939-9822-5137c410f88e.py /tmp/motioncorr-dc-consumer-attempt2-20261025-dcdd56d4-153e-4f2a-9af7-8b60867f922a 8cac4d8420d082263fb854d64278f63084d898389e6cddca152efe35dc35c92b"
+  ],
+  "input_sha256": "8cac4d8420d082263fb854d64278f63084d898389e6cddca152efe35dc35c92b",
+  "bootstrap_sha256": "fe5d208b6053605e820e23f3ad87a3578fd62d02d018eb6c0b7ff2d9a6ae302d",
+  "prior_attempt": "setupSyntaxError before any adapter run; retained; new namespace and compiled corrected bootstrap",
+  "exit": 0,
+  "stdout": "{\"argv\": [\"/usr/bin/timeout\", \"--signal=TERM\", \"--kill-after=5s\", \"120s\", \"/usr/bin/time\", \"-v\", \"-o\", \"/tmp/motioncorr-dc-consumer-attempt2-20261025-dcdd56d4-153e-4f2a-9af7-8b60867f922a/time-v.log\", \"/usr/bin/python3\", \"-I\", \"-B\", \"/tmp/motioncorr-dc-consumer-attempt2-20261025-dcdd56d4-153e-4f2a-9af7-8b60867f922a/consumer/dc_snapshot_consumer.py\", \"--eval-dir\", \"/tmp/motioncorr-dc-consumer-attempt2-20261025-dcdd56d4-153e-4f2a-9af7-8b60867f922a/consumer/collected-snapshot\", \"--evaluations\", \"/tmp/motioncorr-dc-consumer-attempt2-20261025-dcdd56d4-153e-4f2a-9af7-8b60867f922a/consumer/EVALUATIONS.json\", \"--queue\", \"/tmp/motioncorr-dc-consumer-attempt2-20261025-dcdd56d4-153e-4f2a-9af7-8b60867f922a/consumer/queue.json\", \"--run-exits\", \"/tmp/motioncorr-dc-consumer-attempt2-20261025-dcdd56d4-153e-4f2a-9af7-8b60867f922a/consumer/RUN-EXITS.txt\", \"--tier-a-summary\", \"/tmp/motioncorr-dc-consumer-attempt2-20261025-dcdd56d4-153e-4f2a-9af7-8b60867f922a/consumer/A-summary.json\", \"--out\", \"/tmp/motioncorr-dc-consumer-attempt2-20261025-dcdd56d4-153e-4f2a-9af7-8b60867f922a/consumer/run-once\"], \"exit\": 0, \"stdout\": \"READY_FOR_PARENT_REVIEW\\n\", \"stderr\": \"\", \"wall_s\": 1.368276596069336, \"affinity\": [62], \"busy\": 0.0, \"memory_available\": \"184865780 kB\", \"ram_cap_bytes\": 2147483648, \"input_sha256\": \"8cac4d8420d082263fb854d64278f63084d898389e6cddca152efe35dc35c92b\", \"scientific_acceptance\": \"NOT_EVALUATED\", \"new_native_jobs\": 0}\n",
+  "stderr": ""
+}

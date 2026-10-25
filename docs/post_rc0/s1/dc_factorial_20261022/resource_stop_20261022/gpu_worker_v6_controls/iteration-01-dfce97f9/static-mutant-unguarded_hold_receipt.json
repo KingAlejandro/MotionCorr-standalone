@@ -1,0 +1,15 @@
+{
+ "schema": "dc262-v6-data-only/1",
+ "worker_sha256": "63df24f414400ac73ac3484644c399ccf46fd73397b59544671050b9148f0f0c",
+ "test_sha256": "870835d4335c5e93b59b2c35f6cfd645e9eea8cbaf11f2e031a77014737145fd",
+ "tests": 12,
+ "failures": [],
+ "errors": [
+  {
+   "test": "test_hold_before_io_and_broken_stderr (__main__.Checks.test_hold_before_io_and_broken_stderr)",
+   "trace": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py\", line 95, in test_hold_before_io_and_broken_stderr\n    with self.assertRaises(PauseReached): w.hold_lease('synthetic unresolved work')\n                                          ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/motioncorr-dc262-v6-sol-static-c1bdf59e-7be6-43b8-9d65-7f7978775593/unguarded_hold_receipt.py\", line 344, in hold_lease\n    _atomic_write(self.runs / \"unguarded-hold.json\", \"hold\")\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-334e8a36/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_static.py\", line 89, in fail_write\n    raise OSError(errno.ENOSPC, 'synthetic full storage')\nOSError: [Errno 28] synthetic full storage\n"
+  }
+ ],
+ "result": "FAIL",
+ "limits": "Synthetic Popen/process tables/signals only; process cleanup, real-worker suite, Linux and GPU UNRUN."
+}

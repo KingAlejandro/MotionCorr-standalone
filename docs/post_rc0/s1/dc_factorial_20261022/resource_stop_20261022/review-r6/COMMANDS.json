@@ -1,0 +1,56 @@
+[
+  {
+    "name": "static-units",
+    "mode": "guarded runpy in lease-holder interpreter",
+    "argv": [
+      "/Users/alex.konstantinov/.local/bin/python3",
+      "-B",
+      "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_1_static.py",
+      "--json",
+      "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/static-units.json"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "admission-units",
+    "mode": "guarded runpy in lease-holder interpreter",
+    "argv": [
+      "/Users/alex.konstantinov/.local/bin/python3",
+      "-B",
+      "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/tools/test_run_v6_admission.py",
+      "--runner",
+      "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/tools/run_v6_1_controls.py",
+      "--json",
+      "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/admission-units.json"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "mutant-late_observer_root_signal_removed",
+    "mode": "guarded runpy in lease-holder interpreter",
+    "argv": [
+      "/Users/alex.konstantinov/.local/bin/python3",
+      "-B",
+      "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_1_static.py",
+      "--worker",
+      "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_1_controls/iteration-01-2f32e7be/late_observer_root_signal_removed.py",
+      "--json",
+      "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/mutant-late_observer_root_signal_removed.json"
+    ],
+    "exit": 1
+  },
+  {
+    "name": "mutant-k22_own_group_exclusion_removed",
+    "mode": "guarded runpy in lease-holder interpreter",
+    "argv": [
+      "/Users/alex.konstantinov/.local/bin/python3",
+      "-B",
+      "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/tools/test_v6_1_static.py",
+      "--worker",
+      "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/docs/post_rc0/s1/dc_factorial_20261022/resource_stop_20261022/gpu_worker_v6_1_controls/iteration-01-2f32e7be/k22_own_group_exclusion_removed.py",
+      "--json",
+      "/tmp/motioncorr-dc-worker-v61-review-r6-20261023-codex/inv-f588b5aa-469a-4ae8-b2c8-80184e0dcd26/mutant-k22_own_group_exclusion_removed.json"
+    ],
+    "exit": 1
+  }
+]

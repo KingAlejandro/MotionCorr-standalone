@@ -18,7 +18,12 @@ def rep(a, b, count=1):
     assert s.count(a) == count, (a, s.count(a))
     s = s.replace(a, b)
 
-rep("HERE = Path(__file__).resolve().parent\n", "HERE = Path(__file__).resolve().parents[3] / 'rc0' / 'qf' / 'tools'   # C1: QF helpers are read in place\n")
+rep("HERE = Path(__file__).resolve().parent\n",
+    "# C1: QF helpers are read in place. Deployed under $C1_SCR/tools-*-run, so bind to the scratch checkout; in the repo (C1_SCR unset) use docs/rc0/qf/tools.\n"
+    "HERE = (Path(os.environ['C1_SCR']) / 'src' / 'docs' / 'rc0' / 'qf' / 'tools' if os.environ.get('C1_SCR')\n"
+    "        else Path(__file__).resolve().parents[3] / 'rc0' / 'qf' / 'tools')\n"
+    "if not (HERE / 'qual_lib.py').is_file():\n"
+    "    raise SystemExit(f'c1_item12: QF helpers not found at {HERE}')\n")
 rep("ROOT = W / 'item12-retry'", "ROOT = W / 'c1-item12'")
 rep("'--j', '8', '--gpu', '0']", "'--j', '2', '--gpu', '0']   # C1: 2-CPU lane (QF used 8)")
 rep("gpu=True, extra_env=env, witness=wit)", "gpu=True, extra_env={**env, 'OMP_NUM_THREADS': '2'}, witness=wit)")

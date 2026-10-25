@@ -1,11 +1,15 @@
 --- item12_retry.py
 +++ c1_item12.py
-@@ -43,11 +43,14 @@
+@@ -43,11 +43,18 @@
  import time
  from pathlib import Path
  
 -HERE = Path(__file__).resolve().parent
-+HERE = Path(__file__).resolve().parents[3] / 'rc0' / 'qf' / 'tools'   # C1: QF helpers are read in place
++# C1: QF helpers are read in place. Deployed under $C1_SCR/tools-*-run, so bind to the scratch checkout; in the repo (C1_SCR unset) use docs/rc0/qf/tools.
++HERE = (Path(os.environ['C1_SCR']) / 'src' / 'docs' / 'rc0' / 'qf' / 'tools' if os.environ.get('C1_SCR')
++        else Path(__file__).resolve().parents[3] / 'rc0' / 'qf' / 'tools')
++if not (HERE / 'qual_lib.py').is_file():
++    raise SystemExit(f'c1_item12: QF helpers not found at {HERE}')
  sys.path.insert(0, str(HERE))
  from qual_lib import *  # noqa: F401,F403
 -
@@ -18,7 +22,7 @@
  V = Path.home() / 'motioncorr-validation-20261011-vm'
  RQ = Path('/mnt/clathrin/alex-motioncorr-rc0/W-RETRY-Q/inputs/data')  # #207's verified 10216 re-fetch (read only)
  REF_1DB = Path(os.environ.get('QF_REF_CUDA_BIN', Q1 / 'build-nvcomp' / 'motioncorr'))
-@@ -84,7 +87,7 @@
+@@ -84,7 +91,7 @@
  WARN = 'WARNING: resident retry preparation did not complete'
  REFUSAL = 'Refusing to retry alignment on a poisoned context'
  COMMON = ['--use_own', '--dose_weighting', '--bfactor', '150', '--seed', '1', '--patch_x', '5', '--patch_y', '5',
@@ -27,7 +31,7 @@
  
  
  def star_text(optics_rows, movies):
-@@ -175,7 +178,7 @@
+@@ -175,7 +182,7 @@
                  out = d / f'out-{name}'
                  wit = d / f'{name}.witness'
                  args = [*COMMON, *FAMS[fam]['opts'], '--i', 'movies.star', '--o', f'{out}/', '--ingest_witness', wit, *extra]
@@ -36,7 +40,7 @@
                  text = Path(r['stdout']).read_text(errors='replace')
                  m = re.search(r'resident-retry-preparations=(\d+)', text)
                  owned = re.search(r'remaining-owned=(\d+)', text)
-@@ -196,19 +199,27 @@
+@@ -196,19 +203,27 @@
                  mf = json.loads((idir / 'manifest.json').read_text())
                  mf['expected_shape_xyz'] = list(struct.unpack('<3i', mrcs[0].read_bytes()[:12]))
                  dump(mf, idir / 'manifest.json')
@@ -69,7 +73,7 @@
                          case['problems'].append(f'{a} vs {b}: full rc {full}, products rc {prod}')
              if g == 1:
                  rec = A['rec']
-@@ -386,9 +397,10 @@
+@@ -386,9 +401,10 @@
      cmd = ['taskset', '-c', ','.join(masks[:n]), PY, str(SRC / 'tools/multi_gpu/run_dataset.py'), '--binary', str(binary),
             '--star', str(star), '--out', str(out), f'--launcher-args={la}', '--',
             '--use_own', '--dose_weighting', '--dose_per_frame', '1.0', '--bfactor', '150', '--seed', '1',

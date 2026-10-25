@@ -43,7 +43,11 @@ import sys
 import time
 from pathlib import Path
 
-HERE = Path(__file__).resolve().parents[3] / 'rc0' / 'qf' / 'tools'   # C1: QF helpers are read in place
+# C1: QF helpers are read in place. Deployed under $C1_SCR/tools-*-run, so bind to the scratch checkout; in the repo (C1_SCR unset) use docs/rc0/qf/tools.
+HERE = (Path(os.environ['C1_SCR']) / 'src' / 'docs' / 'rc0' / 'qf' / 'tools' if os.environ.get('C1_SCR')
+        else Path(__file__).resolve().parents[3] / 'rc0' / 'qf' / 'tools')
+if not (HERE / 'qual_lib.py').is_file():
+    raise SystemExit(f'c1_item12: QF helpers not found at {HERE}')
 sys.path.insert(0, str(HERE))
 from qual_lib import *  # noqa: F401,F403
 sys.path.insert(0, str(Path(__file__).resolve().parent))

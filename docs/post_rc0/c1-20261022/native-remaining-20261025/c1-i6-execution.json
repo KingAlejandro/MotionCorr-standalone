@@ -1,0 +1,21 @@
+{
+  "source_sha": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f",
+  "tools_commit": "da2d202bf0caf9ee0859de68e872cbfbc92810fd",
+  "script_sha256": "0d1502ffb64304b569687af2cbba4669744db2dd0009da858437282c9311169a",
+  "utc": "2026-10-25T18:22:00.350371+00:00",
+  "state": "RETURNED_NEEDS_GRADE",
+  "scope": "R9x2;A249x6;T24 one-worker G/L;K267CUDA8cases; no census/performance; existing drivers unchanged",
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "4GPUs",
+    "taskset -c 8-9 bash /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/c1-i6-20261025.sh"
+  ],
+  "exit": 1,
+  "stdout": "",
+  "stderr": "",
+  "finished_utc": "2026-10-25T18:24:00.582197+00:00"
+}

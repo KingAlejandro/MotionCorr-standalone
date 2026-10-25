@@ -71,3 +71,15 @@ Not rerun by C1 and left at their own SHAs: full seven-family product campaign, 
 ## Limits
 
 Current-head CI and final evidence review remain pending; the earlier9035a6e6 CPU/CUDA checks are recorded in the dated supplement. Everything above that says PASS is a bounded engineering statement about the named rows on e77a51a2 and the named binaries; none is a scientific PASS, a support-class change or permission to relax a gate or tolerance. Kernel Xid inspection was not available.
+
+
+## 25 October bounded native completion (additive; engineering incomplete)
+
+See [native packet](native-remaining-20261025/README.md) and [inner grades](native-remaining-20261025/PARENT-GRADE.json). Production source remains `e77a51a2`; the new helper is read-only qualification tooling.
+
+- R9 CUDA/nvCOMP: each16/16 cases PASS,28/28 UUID-witnessed arms.
+- #249 compressed-reader status: six CUDA/nvCOMP × codec rows, each12 cases with no failures.
+- D12 G/L: native one-worker endpoints PASS/ready24; original comparison FAIL/INVALID on archived worker STAR retained. Separately reviewed v1.1 grades: canonical49 products IDENTICAL, archive inventory/bytes/exit hashes verified. No G native rerun. V1 import failure preserved.
+- K267 CUDA:8 native exits0; checker1 PASS/5 FAIL/2 UNIDENTIFIABLE, including invalid noisy/repeated sampling. This does not establish truth accuracy or erase historical ABORT records.
+
+Still held/UNRUN: genuine sticky-context window>=4 CPUs, real-data A13 `--j8`, CUDA K269/K272 census, multi-device dataset/UUID poison/publication, genuine ingest poisoning and Xid inspection. No aggregate C1/M1 PASS, scientific promotion or performance claim. Existing earlier-source rows keep their original identities.

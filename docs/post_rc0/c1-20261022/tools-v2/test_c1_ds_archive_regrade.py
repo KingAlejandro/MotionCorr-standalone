@@ -9,7 +9,7 @@ import hashlib, json, os, shutil, struct, subprocess, sys, tempfile, unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-REPO = Path(os.environ.get('C1_TEST_REPO', '/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-b91ca8c4'))
+REPO = Path(os.environ.get('C1_TEST_REPO', HERE.parents[3]))
 TOOLS = REPO / 'docs/post_rc0/c1-20261022/tools-v2'
 REGRADE = HERE / 'c1_ds_archive_regrade.py'
 CMP = REPO / 'docs/issue85_laneC/compare_output_trees.py'
@@ -203,7 +203,8 @@ class T(unittest.TestCase):
         with self.assertRaises(RuntimeError): m.load_module('dc_bad_ro', bad)
         self.assertIs(sys.modules['dc_bad_ro'], sentinel)               # a previous entry is restored
         del sys.modules['dc_bad_ro']
-        v1 = importlib.util.spec_from_file_location('regrade_v1', HERE / 'c1_ds_archive_regrade.v1.py'); v1m = importlib.util.module_from_spec(v1); v1.loader.exec_module(v1m)
+        retained_v1 = REPO / 'docs/post_rc0/c1-20261022/native-remaining-20261025/grader-review/c1_ds_archive_regrade.v1.py'
+        v1 = importlib.util.spec_from_file_location('regrade_v1', retained_v1); v1m = importlib.util.module_from_spec(v1); v1.loader.exec_module(v1m)
         if sys.version_info < (3, 14):                                    # the control is capable of failing: the retained v1 loader does
             with self.assertRaises(AttributeError): v1m.load_module('dc_good_v1', good)
         self.assertEqual(m.VERSION, 'c1-ds-archive-regrade-v1.1')

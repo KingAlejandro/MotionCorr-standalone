@@ -1,0 +1,1 @@
+Parent Sol: Python3.12.11, `python -I -B -m unittest discover -s docs/post_rc0/c1-20261022/tools-v2 -p test_c1_ds_archive_regrade.py -v`; five controls PASS after relocating the test. This reruns harmless synthetic controls only. No native/data grade rerun.

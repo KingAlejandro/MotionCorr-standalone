@@ -1,0 +1,199 @@
+{
+ "all_controls_ok": true,
+ "results": [
+  {
+   "scenario": "positive",
+   "exit": 0,
+   "expected_exit": 0,
+   "expected_problem": null,
+   "problems": [],
+   "control_ok": true
+  },
+  {
+   "scenario": "missing_row",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "CPU rows not PASS",
+   "problems": [
+    "CPU rows not PASS: ['ov-cand-cpu/E_xy_nonsquare_near_threshold:UNRUN']",
+    "CPU base/candidate pairs not 8 PASS",
+    "original summary {'runs': {'PASS': 23, 'FAIL': 0, 'UNRUN': 17}, 'pairs': {'PASS': 7, 'FAIL': 0}, 'n4': 'PASS'} rc 1; expected 24 PASS / 0 FAIL / 16 UNRUN and rc 1"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "wrong_case",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "CPU rows not PASS",
+   "problems": [
+    "CPU rows not PASS: ['ov-cand-cpu/A_x_legacy_false_accept:FAIL']",
+    "N4 not PASS on exactly ['A_x_legacy_false_accept', 'A_y_legacy_false_accept', 'B_x_legacy_false_reject', 'B_y_legacy_false_reject', 'E_xy_nonsquare_near_threshold']",
+    "original summary {'runs': {'PASS': 23, 'FAIL': 1, 'UNRUN': 16}, 'pairs': {'PASS': 8, 'FAIL': 0}, 'n4': 'PASS'} rc 1; expected 24 PASS / 0 FAIL / 16 UNRUN and rc 1"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "old_3p3_value",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "CPU rows not PASS",
+   "problems": [
+    "CPU rows not PASS: ['ov-cand-cpu/A_x_legacy_false_accept:FAIL', 'ov-cand-cpu/A_y_legacy_false_accept:FAIL']",
+    "original summary {'runs': {'PASS': 22, 'FAIL': 2, 'UNRUN': 16}, 'pairs': {'PASS': 8, 'FAIL': 0}, 'n4': 'PASS'} rc 1; expected 24 PASS / 0 FAIL / 16 UNRUN and rc 1"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "absent_overlay",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "CPU rows not PASS",
+   "problems": [
+    "CPU rows not PASS: ['ov-base-cpu/G_large_both_reject:FAIL']",
+    "original summary {'runs': {'PASS': 23, 'FAIL': 1, 'UNRUN': 16}, 'pairs': {'PASS': 8, 'FAIL': 0}, 'n4': 'PASS'} rc 1; expected 24 PASS / 0 FAIL / 16 UNRUN and rc 1"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "star_model_on_reject",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "CPU rows not PASS",
+   "problems": [
+    "CPU rows not PASS: ['ov-cand-cpu/A_y_legacy_false_accept:FAIL']",
+    "original summary {'runs': {'PASS': 23, 'FAIL': 1, 'UNRUN': 16}, 'pairs': {'PASS': 8, 'FAIL': 0}, 'n4': 'PASS'} rc 1; expected 24 PASS / 0 FAIL / 16 UNRUN and rc 1"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "star_model_missing_on_accept",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "CPU rows not PASS",
+   "problems": [
+    "CPU rows not PASS: ['ov-cand-cpu/B_x_legacy_false_reject:FAIL']",
+    "original summary {'runs': {'PASS': 23, 'FAIL': 1, 'UNRUN': 16}, 'pairs': {'PASS': 8, 'FAIL': 0}, 'n4': 'PASS'} rc 1; expected 24 PASS / 0 FAIL / 16 UNRUN and rc 1"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "mutant_behaves_like_candidate",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "N4 not PASS",
+   "problems": [
+    "CPU rows not PASS: ['ov-mut-cpu/A_x_legacy_false_accept:FAIL', 'ov-mut-cpu/A_y_legacy_false_accept:FAIL', 'ov-mut-cpu/B_x_legacy_false_reject:FAIL', 'ov-mut-cpu/B_y_legacy_false_reject:FAIL', 'ov-mut-cpu/E_xy_nonsquare_near_threshold:FAIL']",
+    "N4 not PASS on exactly ['A_x_legacy_false_accept', 'A_y_legacy_false_accept', 'B_x_legacy_false_reject', 'B_y_legacy_false_reject', 'E_xy_nonsquare_near_threshold']",
+    "original summary {'runs': {'PASS': 19, 'FAIL': 5, 'UNRUN': 16}, 'pairs': {'PASS': 8, 'FAIL': 0}, 'n4': 'FAIL'} rc 1; expected 24 PASS / 0 FAIL / 16 UNRUN and rc 1"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "cuda_marker_in_cpu_arm",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "CPU rows not PASS",
+   "problems": [
+    "CPU rows not PASS: ['ov-base-cpu/F_mild_both_accept:FAIL']",
+    "original summary {'runs': {'PASS': 23, 'FAIL': 1, 'UNRUN': 16}, 'pairs': {'PASS': 8, 'FAIL': 0}, 'n4': 'PASS'} rc 1; expected 24 PASS / 0 FAIL / 16 UNRUN and rc 1"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "nonzero_rc",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "CPU rows not PASS",
+   "problems": [
+    "CPU rows not PASS: ['ov-mut-cpu/B_y_legacy_false_reject:FAIL']",
+    "N4 not PASS on exactly ['A_x_legacy_false_accept', 'A_y_legacy_false_accept', 'B_x_legacy_false_reject', 'B_y_legacy_false_reject', 'E_xy_nonsquare_near_threshold']",
+    "original summary {'runs': {'PASS': 23, 'FAIL': 1, 'UNRUN': 16}, 'pairs': {'PASS': 8, 'FAIL': 0}, 'n4': 'FAIL'} rc 1; expected 24 PASS / 0 FAIL / 16 UNRUN and rc 1"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "missing_mrc",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "original grader raised",
+   "problems": [
+    "original grader raised (fail closed)"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "overlay_on_no_overlay_row",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "CPU rows not PASS",
+   "problems": [
+    "CPU rows not PASS: ['ov-cand-cpu/Z_no_overlay:FAIL']",
+    "original summary {'runs': {'PASS': 23, 'FAIL': 1, 'UNRUN': 16}, 'pairs': {'PASS': 8, 'FAIL': 0}, 'n4': 'PASS'} rc 1; expected 24 PASS / 0 FAIL / 16 UNRUN and rc 1"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "pair_image_mismatch",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "CPU base/candidate pairs not 8 PASS",
+   "problems": [
+    "CPU base/candidate pairs not 8 PASS"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "cuda_arm_present",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "CUDA rows are not exactly 16 UNRUN",
+   "problems": [
+    "CUDA rows are not exactly 16 UNRUN",
+    "a CUDA arm directory exists in a CPU-only campaign",
+    "original summary {'runs': {'PASS': 24, 'FAIL': 1, 'UNRUN': 15}, 'pairs': {'PASS': 8, 'FAIL': 0}, 'n4': 'PASS'} rc 1; expected 24 PASS / 0 FAIL / 16 UNRUN and rc 1"
+   ],
+   "control_ok": true
+  },
+  {
+   "scenario": "wrong_predictions_file",
+   "exit": 1,
+   "expected_exit": 1,
+   "expected_problem": "hash mismatch",
+   "problems": "predictions_iter2.json hash mismatch at /tmp/mc264-cpu1-controls-03/wrong_predictions_file/src-cand/docs/post_rc0/issue264/native/n3-iter2/predictions_iter2.json; refusing",
+   "control_ok": true
+  },
+  {
+   "scenario": "receipts_written_24_rows",
+   "control_ok": true
+  },
+  {
+   "scenario": "receipts_refuse_overwrite",
+   "control_ok": true
+  },
+  {
+   "scenario": "run_gpu_refused",
+   "control_ok": true
+  },
+  {
+   "scenario": "tampered_receipts_refused",
+   "control_ok": true
+  },
+  {
+   "scenario": "no_run_directory_created",
+   "control_ok": true
+  },
+  {
+   "scenario": "sources_bound",
+   "exit": 0,
+   "expected_exit": 0,
+   "control_ok": true
+  },
+  {
+   "scenario": "sources_wrong_helper",
+   "exit": 1,
+   "expected_exit": 1,
+   "control_ok": true
+  }
+ ]
+}

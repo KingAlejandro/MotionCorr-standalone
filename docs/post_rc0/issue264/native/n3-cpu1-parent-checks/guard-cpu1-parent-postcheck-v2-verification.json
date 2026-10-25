@@ -1,0 +1,87 @@
+{
+  "utc": "2026-10-22T23:03:35Z",
+  "source": "3751bd05a95412dff468557141f2e7e01ad21831",
+  "readback_sha256": "5d0697c106a91c5a8364967a1cfc4152183c2a3a08a3c515a8b5984d9b13fc84",
+  "native_CPU_rows_recorded": 24,
+  "stage_exits": {
+    "cpu1-b-ov-base-cpu.exit": "0\n",
+    "cpu1-n3-cpu.exit": "0\n",
+    "cpu1-b-ov-cand-cpu.exit": "0\n",
+    "cpu1-b-ov-mut-cpu.exit": "0\n",
+    "cpu1-occupancy-start.exit": "0\n",
+    "cpu1-grade.exit": "1\n",
+    "cpu1-sources.exit": "0\n",
+    "cpu1-receipts.exit": "0\n"
+  },
+  "stop": "cpu1-grade\n",
+  "status": "BINDINGS_VERIFIED_NATIVE_SUBSET_FAIL",
+  "build_bindings": {
+    "base": "3ee3c739ae54422c65f50671e9240b970c0d08ac788f29297aa3288757a37425",
+    "cand": "789e5e5b8629ecfeae89e0582f9e7e449c33fed787d43cababb03a1b5fdeb405",
+    "mut": "7e0b2cab13d5a7336aab42f5ac74729a1548a32a075b4b9ee0d81cff10a2f110"
+  },
+  "chain_exit": 1,
+  "subset_verdict": "FAIL",
+  "subset_problems": [
+    "CPU base/candidate pairs not 8 PASS"
+  ],
+  "grade_summary": {
+    "runs": {
+      "PASS": 24,
+      "FAIL": 0,
+      "UNRUN": 16
+    },
+    "pairs": {
+      "PASS": 3,
+      "FAIL": 5
+    },
+    "n4": "PASS"
+  },
+  "failed_pairs": [
+    {
+      "backend": "cpu",
+      "case": "A_x_legacy_false_accept",
+      "same_global_shifts": false,
+      "same_decision": false,
+      "image_data_equal": false,
+      "status": "FAIL"
+    },
+    {
+      "backend": "cpu",
+      "case": "B_x_legacy_false_reject",
+      "same_global_shifts": false,
+      "same_decision": false,
+      "image_data_equal": false,
+      "status": "FAIL"
+    },
+    {
+      "backend": "cpu",
+      "case": "A_y_legacy_false_accept",
+      "same_global_shifts": false,
+      "same_decision": false,
+      "image_data_equal": false,
+      "status": "FAIL"
+    },
+    {
+      "backend": "cpu",
+      "case": "B_y_legacy_false_reject",
+      "same_global_shifts": false,
+      "same_decision": false,
+      "image_data_equal": false,
+      "status": "FAIL"
+    },
+    {
+      "backend": "cpu",
+      "case": "E_xy_nonsquare_near_threshold",
+      "same_global_shifts": false,
+      "same_decision": false,
+      "image_data_equal": false,
+      "status": "FAIL"
+    }
+  ],
+  "F1_source_and_build_bindings": "3/3",
+  "F2_exact_injection_bindings": "21/21 plus3no-overlay",
+  "binary_bindings": "24rows/3arms/3distinctverifiedbinaries",
+  "full_N3_N4": "INCOMPLETE:16CUDArowsUNRUN",
+  "limits": "Actual CPU runner with TEST-ONLY injected observations; not motion-estimation accuracy, production ordinary-movie, CUDA, performance, parity adoption or scientific qualification."
+}

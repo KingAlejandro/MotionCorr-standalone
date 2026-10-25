@@ -210,6 +210,9 @@ install(TARGETS motioncorr RUNTIME DESTINATION bin)
 
 include(CTest)
 if(BUILD_TESTING)
+    add_executable(local_motion_distortion_guard tests/test_local_motion_distortion_guard.cpp)
+    target_include_directories(local_motion_distortion_guard PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    add_test(NAME LocalMotionDistortionGuard COMMAND local_motion_distortion_guard)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
     add_executable(cpu_dose_symmetry tests/test_cpu_dose_symmetry.cpp)
@@ -263,6 +266,13 @@ if(BUILD_TESTING)
     # preserving missing-label and non-numeric-label errors for defined labels.
     add_test(NAME ReportPlotUndefinedAxis
         COMMAND $<TARGET_FILE:runner_numerics> plot2d_undefined_axis)
+    # Issue #264: guard helper on the real ThirdOrderPolynomialModel, and a
+    # source pin on its single runner call and strict threshold.
+    add_test(NAME LocalMotionGuardModel
+        COMMAND $<TARGET_FILE:runner_numerics> local_motion_guard_model)
+    add_test(NAME LocalMotionGuardCall
+        COMMAND $<TARGET_FILE:runner_numerics> local_motion_guard_call
+                ${CMAKE_CURRENT_SOURCE_DIR}/src/motioncorr_runner.cpp)
     add_executable(pdf_concat tests/test_pdf_concat.cpp)
     target_link_libraries(pdf_concat PRIVATE motioncorr_core)
     add_test(NAME PdfConcat COMMAND pdf_concat)

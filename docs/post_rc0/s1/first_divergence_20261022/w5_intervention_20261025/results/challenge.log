@@ -1,0 +1,91 @@
+helpers loaded ['cmap', 'cont_eval', 'cont_map', 'cont_max', 'cpu_winner', 'est_S', 'loo', 'native_shift', 'parabola', 'rel_ac', 'rms', 'same_sample', 'soo_S', 'wspec']
+{
+ "kind": "W5 challenge, same stored CPU input; no native execution",
+ "inherited_fit_closure_max_px": 1.9539925233402755e-14,
+ "inherited_fit": {
+  "rank": 18,
+  "condition": 4069.253643780671,
+  "residual_sum_squares": [
+   0.7559680036773846,
+   0.6048675461544831
+  ]
+ },
+ "W4_fixedpoint_reproduction_max_px": 7.771561172376096e-16,
+ "truth_stationarity_anchored_update_rms_px": 0.34321002585951205,
+ "oracle_reference_error_rms_px": 0.34321002585966676,
+ "continuous_fixedpoint_error_rms_px": 0.2749065005837592,
+ "max_truth_restart_fixedpoint_diff_px": 3.207702400920276e-06,
+ "ideal_observation_fit": {
+  "actual_global": {
+   "inherited": {
+    "runtime": {
+     "rms": 0.21431351396260567,
+     "p95": 0.3030350124704897,
+     "max": 0.3030350124704967,
+     "verdict": "FAIL"
+    },
+    "fit": {
+     "rank": 18,
+     "condition": 4069.253643780671,
+     "residual_sum_squares": [
+      0.23092596193197826,
+      0.5233992420759561
+     ]
+    }
+   },
+   "integer": {
+    "runtime": {
+     "rms": 0.08546240575501132,
+     "p95": 0.1380342376945514,
+     "max": 0.13803423769455853,
+     "verdict": "PASS"
+    },
+    "fit": {
+     "rank": 18,
+     "condition": 3608.1861615774396,
+     "residual_sum_squares": [
+      0.03578822833480793,
+      0.3838511165335677
+     ]
+    }
+   }
+  },
+  "true_global": {
+   "inherited": {
+    "runtime": {
+     "rms": 4.13447609806414e-15,
+     "p95": 7.958027218186805e-15,
+     "max": 1.4030831585170798e-14,
+     "verdict": "PASS"
+    },
+    "fit": {
+     "rank": 18,
+     "condition": 4069.253643780671,
+     "residual_sum_squares": [
+      3.078063799303556e-28,
+      1.2748076974839315e-28
+     ]
+    }
+   },
+   "integer": {
+    "runtime": {
+     "rms": 4.672278393038637e-15,
+     "p95": 9.116006573337761e-15,
+     "max": 1.7013680977301005e-14,
+     "verdict": "PASS"
+    },
+    "fit": {
+     "rank": 18,
+     "condition": 3608.1861615774396,
+     "residual_sum_squares": [
+      2.3328625061886593e-28,
+      9.642200731500161e-29
+     ]
+    }
+   }
+  }
+ },
+ "input_manifest_sha256": "757558777b1e89611fa10f0a61dbcd941920207440c419fd1826ece86d07adb5",
+ "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+ "numpy": "2.5.3"
+}

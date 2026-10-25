@@ -1,0 +1,1909 @@
+{
+ "schema": "w5-inputs/1",
+ "source": "805d9de27898b4a10e6212e65098d5995a40fdb1",
+ "parent": "7b76b848650726c018567312b6526269af72496f",
+ "archives": {
+  "W4-phaseD-inputs.tar": {
+   "path": "/Users/alex.konstantinov/Documents/MotionCorr-evidence/20261025/W4-phaseD-inputs.tar",
+   "bytes": 1735680,
+   "sha256": "6cb647945adfd761fbc747b37c3a851ae654556ab021d92baaed01cef6905fbf"
+  },
+  "W4-matched-native-inputs.tar": {
+   "path": "/Users/alex.konstantinov/Documents/MotionCorr-evidence/20261025/W4-matched-native-inputs.tar",
+   "bytes": 2045440,
+   "sha256": "300a406ca0534acbff649fa3f4d7069b70335962041a222c8da024260a7894c2"
+  },
+  "w4-repro-inputs.tar": {
+   "path": "/Users/alex.konstantinov/Documents/MotionCorr-evidence/20261025/w4-repro-inputs.tar",
+   "bytes": 2457600,
+   "sha256": "1333c4b89a435b8925891fedeff0295d500e80f63c430f36b27feca86d07cf96"
+  }
+ },
+ "files": {
+  "fixtures/MANIFEST.json": {
+   "sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+   "bytes": 8332,
+   "origin": "phaseD pinned manifest"
+  },
+  "fixtures/affine.mrcs": {
+   "sha256": "1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a",
+   "bytes": 246784,
+   "origin": "original fixture MANIFEST:1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a"
+  },
+  "fixtures/affine.star": {
+   "sha256": "0a08c285c4ec09aceaef93423033c01830afc6b8f07063697133ceb64b066491",
+   "bytes": 316,
+   "origin": "original fixture MANIFEST:0a08c285c4ec09aceaef93423033c01830afc6b8f07063697133ceb64b066491"
+  },
+  "fixtures/affine_field.npy": {
+   "sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+   "bytes": 983168,
+   "origin": "original fixture MANIFEST:839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799"
+  },
+  "fixtures/affine_target.npy": {
+   "sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+   "bytes": 49280,
+   "origin": "original fixture MANIFEST:287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70"
+  },
+  "fixtures/flat.mrcs": {
+   "sha256": "c2e25c3fcd1df4d92e9124c44dd6d9b5b6f1b8354dc1266af84c9da2ce96eabc",
+   "bytes": 246784,
+   "origin": "original fixture MANIFEST:c2e25c3fcd1df4d92e9124c44dd6d9b5b6f1b8354dc1266af84c9da2ce96eabc"
+  },
+  "fixtures/flat.star": {
+   "sha256": "ecc8c830bf2aa05b7043a0a09bfc6a0d21d8540dccab9e1ad64f7dd608bd40e8",
+   "bytes": 314,
+   "origin": "original fixture MANIFEST:ecc8c830bf2aa05b7043a0a09bfc6a0d21d8540dccab9e1ad64f7dd608bd40e8"
+  },
+  "fixtures/flat_field.npy": {
+   "sha256": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+   "bytes": 983168,
+   "origin": "original fixture MANIFEST:7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9"
+  },
+  "fixtures/flat_target.npy": {
+   "sha256": "5641f26812579bc93caf73d46ada5741416b195a0a9f8ee9f330f0348bf340e4",
+   "bytes": 49280,
+   "origin": "original fixture MANIFEST:5641f26812579bc93caf73d46ada5741416b195a0a9f8ee9f330f0348bf340e4"
+  },
+  "fixtures/fractional.mrcs": {
+   "sha256": "2dc7308553d476fdf51e31ddbbfdc381c9e22032f65a19c3dc87e754988a7c86",
+   "bytes": 246784,
+   "origin": "original fixture MANIFEST:2dc7308553d476fdf51e31ddbbfdc381c9e22032f65a19c3dc87e754988a7c86"
+  },
+  "fixtures/fractional.star": {
+   "sha256": "c051dd18dae87367b0eab06e8ba0d4f75a9841ed46d5b5d327c3e66b960d2dbc",
+   "bytes": 320,
+   "origin": "original fixture MANIFEST:c051dd18dae87367b0eab06e8ba0d4f75a9841ed46d5b5d327c3e66b960d2dbc"
+  },
+  "fixtures/fractional_field.npy": {
+   "sha256": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+   "bytes": 983168,
+   "origin": "original fixture MANIFEST:7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9"
+  },
+  "fixtures/fractional_target.npy": {
+   "sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+   "bytes": 49280,
+   "origin": "original fixture MANIFEST:287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70"
+  },
+  "fixtures/integer.mrcs": {
+   "sha256": "faaa3f9eeb7f1a785f51f6ab62b23e21a02b93a24a81c46b83b41c0590bc0b31",
+   "bytes": 246784,
+   "origin": "original fixture MANIFEST:faaa3f9eeb7f1a785f51f6ab62b23e21a02b93a24a81c46b83b41c0590bc0b31"
+  },
+  "fixtures/integer.star": {
+   "sha256": "8b3e4817dffff9c2deaab7d8f3196f49607818cbf5523c3bc397f6cf1bd09637",
+   "bytes": 317,
+   "origin": "original fixture MANIFEST:8b3e4817dffff9c2deaab7d8f3196f49607818cbf5523c3bc397f6cf1bd09637"
+  },
+  "fixtures/integer_field.npy": {
+   "sha256": "3b1f50a5c9297ba5030de6e305560daa1c25f9154cd527d9b002af15ae91d0ac",
+   "bytes": 983168,
+   "origin": "original fixture MANIFEST:3b1f50a5c9297ba5030de6e305560daa1c25f9154cd527d9b002af15ae91d0ac"
+  },
+  "fixtures/integer_target.npy": {
+   "sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+   "bytes": 49280,
+   "origin": "original fixture MANIFEST:287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70"
+  },
+  "fixtures/noisy.mrcs": {
+   "sha256": "5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3",
+   "bytes": 246784,
+   "origin": "original fixture MANIFEST:5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3"
+  },
+  "fixtures/noisy.star": {
+   "sha256": "c321865e4fc769d9af55bc86af0a0b390abdcdb029137a9aeb5d6743b81a6891",
+   "bytes": 315,
+   "origin": "original fixture MANIFEST:c321865e4fc769d9af55bc86af0a0b390abdcdb029137a9aeb5d6743b81a6891"
+  },
+  "fixtures/noisy_field.npy": {
+   "sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+   "bytes": 983168,
+   "origin": "original fixture MANIFEST:839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799"
+  },
+  "fixtures/noisy_target.npy": {
+   "sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+   "bytes": 49280,
+   "origin": "original fixture MANIFEST:287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70"
+  },
+  "fixtures/pedestal.mrcs": {
+   "sha256": "29016d8818bbd7be3491cca0822734a7e297a84642cf78c0847e61b447e03073",
+   "bytes": 246784,
+   "origin": "original fixture MANIFEST:29016d8818bbd7be3491cca0822734a7e297a84642cf78c0847e61b447e03073"
+  },
+  "fixtures/pedestal.star": {
+   "sha256": "4a0f869b217b75e4315342e64ce8b5adad4fc7c9c57b9033cc23af1aa385fa53",
+   "bytes": 318,
+   "origin": "original fixture MANIFEST:4a0f869b217b75e4315342e64ce8b5adad4fc7c9c57b9033cc23af1aa385fa53"
+  },
+  "fixtures/pedestal_field.npy": {
+   "sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+   "bytes": 983168,
+   "origin": "original fixture MANIFEST:839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799"
+  },
+  "fixtures/pedestal_target.npy": {
+   "sha256": "47b9d9fffbcef586812b8cdfb82b13012ade6a92350431e169d63fd206ea4910",
+   "bytes": 49280,
+   "origin": "original fixture MANIFEST:47b9d9fffbcef586812b8cdfb82b13012ade6a92350431e169d63fd206ea4910"
+  },
+  "fixtures/repeated.mrcs": {
+   "sha256": "887e895add295b1305affb09b8c7f5177103680c45f94dd60c4ab0e4e7deb19c",
+   "bytes": 246784,
+   "origin": "original fixture MANIFEST:887e895add295b1305affb09b8c7f5177103680c45f94dd60c4ab0e4e7deb19c"
+  },
+  "fixtures/repeated.star": {
+   "sha256": "db3580a1bf5774fbc52304db9cf7a452477f3a24ccc2d046986d8c8794904a1d",
+   "bytes": 318,
+   "origin": "original fixture MANIFEST:db3580a1bf5774fbc52304db9cf7a452477f3a24ccc2d046986d8c8794904a1d"
+  },
+  "fixtures/repeated_field.npy": {
+   "sha256": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+   "bytes": 983168,
+   "origin": "original fixture MANIFEST:7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9"
+  },
+  "fixtures/repeated_target.npy": {
+   "sha256": "a655b5dddcbb1473165fe8265e644ad0596de8308a0024e46467170fb8d86378",
+   "bytes": 49280,
+   "origin": "original fixture MANIFEST:a655b5dddcbb1473165fe8265e644ad0596de8308a0024e46467170fb8d86378"
+  },
+  "fixtures/zero.mrcs": {
+   "sha256": "c80e92704c034ccd6e87c0c1ce3e4ceea23aac87aa83d13b0dfe738aa95d3b86",
+   "bytes": 246784,
+   "origin": "original fixture MANIFEST:c80e92704c034ccd6e87c0c1ce3e4ceea23aac87aa83d13b0dfe738aa95d3b86"
+  },
+  "fixtures/zero.star": {
+   "sha256": "3c3084c06c72b2b3d4cc9d94fbf17b623ff4a7c46030e014e0bf7cc67fa2de1f",
+   "bytes": 314,
+   "origin": "original fixture MANIFEST:3c3084c06c72b2b3d4cc9d94fbf17b623ff4a7c46030e014e0bf7cc67fa2de1f"
+  },
+  "fixtures/zero_field.npy": {
+   "sha256": "255348d18b272e6759324d669b9c17aaf7e3f56ee3a48d50185eda96713f2f4d",
+   "bytes": 983168,
+   "origin": "original fixture MANIFEST:255348d18b272e6759324d669b9c17aaf7e3f56ee3a48d50185eda96713f2f4d"
+  },
+  "fixtures/zero_target.npy": {
+   "sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+   "bytes": 49280,
+   "origin": "original fixture MANIFEST:287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70"
+  },
+  "matched/captures/patch-1-1/c2-i0-weight.bin": {
+   "sha256": "ad95f2c22db789568b40c635cd010a0900156f42e7ede20a56a4100c1f42e7d5",
+   "bytes": 2816,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i0-weight.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-after.bin": {
+   "sha256": "c5eea5c6120fa90cfa1df27ed7f04fb1422a6b04e9901fa44623b5a74ac8e6c4",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-after.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-before.bin": {
+   "sha256": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-before.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-candidate.bin": {
+   "sha256": "8268200d25ffc83cacb47d617d689fb2d140d3f5ff8820857b6be439cd87d37d",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-candidate.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-input.bin": {
+   "sha256": "a98fc37fcf5085b3f97e3bcd000c13aa93fb9a8caaf2278fb6ae76860cd6a394",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-input.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-map-f0.bin": {
+   "sha256": "5ea4588d9b856c779637ed4d86aa8f211856bd3d095c3ccd88b01e85ea6f538e",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-map-f0.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-map-f1.bin": {
+   "sha256": "40cc2382130870888139d81ee9c8df53606b50402682cde95cbfa64166a4d461",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-map-f1.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-map-f2.bin": {
+   "sha256": "d9c82ae5c37972753c0141fe17e4d74371a8e3d79d739e6c464f951aa37e7605",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-map-f2.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-map-f3.bin": {
+   "sha256": "7d1860af027201eab37553c16cddb7b91e7b50486348e9fef594d92f64885638",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-map-f3.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-map-f4.bin": {
+   "sha256": "90bcfecdb3320fe7751c5f4ef5ca325943c9c5923ff8437f0d4382135a924634",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-map-f4.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-reference.bin": {
+   "sha256": "100f65502b6a1497f2a2abfba47ca9c14e6214801051803e6422c1fd39af465f",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-reference.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-spectrum-f0.bin": {
+   "sha256": "0b737d2325e261690fe7bc9dead1e368f190b885b1e1c072dd59711fdbaa50c5",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-spectrum-f0.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-spectrum-f1.bin": {
+   "sha256": "884e6f59fcd9b4409fc3d94a00f768d1f0092a30b3853df6e527ea5bc4b2a6a8",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-spectrum-f1.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-spectrum-f2.bin": {
+   "sha256": "d3997ebbf2c2e234b81f6a8a9115d82e3415d33cb658a2318b3332718b24bd70",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-spectrum-f2.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-spectrum-f3.bin": {
+   "sha256": "8f303d6c830bbba1628a9992525740ee9bf7b2882421f74e6027e4d4660c0d86",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-spectrum-f3.bin"
+  },
+  "matched/captures/patch-1-1/c2-i1-spectrum-f4.bin": {
+   "sha256": "7cf51746d7d70e085e5faf38078fce64ccb574e8d129fc71275561c8c582e616",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2-i1-spectrum-f4.bin"
+  },
+  "matched/captures/patch-1-1/c2.json": {
+   "sha256": "a6f6d28dcdbb060810faf1c616e00816e966db491c668540290407f32f86873e",
+   "bytes": 126,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-1/c2.json"
+  },
+  "matched/captures/patch-1-2/c2-i0-weight.bin": {
+   "sha256": "ad95f2c22db789568b40c635cd010a0900156f42e7ede20a56a4100c1f42e7d5",
+   "bytes": 2816,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i0-weight.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-after.bin": {
+   "sha256": "2ba7dbc0cf92b9000cb2d2f124d347febdcb71fd67c4918c212ca9c3d84ec636",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-after.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-before.bin": {
+   "sha256": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-before.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-candidate.bin": {
+   "sha256": "0b5f95c2a3a37753003d9eb9edec602f2b4ef4bfdbe7948ea50d5ec73770938a",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-candidate.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-input.bin": {
+   "sha256": "b1a29a75dda80c9cb91acc36d5dd52645601951d60a15201b92feb4701b0e852",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-input.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-map-f0.bin": {
+   "sha256": "794170e9489052a55950282d2e0513a7ce57cddec7a15822ffad26690315ed36",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-map-f0.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-map-f1.bin": {
+   "sha256": "f3a2228f2176f025a05bcbfb08e6bab99d536c13b59ba9e9821d0ab2e0cd59a4",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-map-f1.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-map-f2.bin": {
+   "sha256": "227ff0b2a7c7222cb12d644ad31e4d8d7ac84b24d91681e958506ac0e8574a61",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-map-f2.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-map-f3.bin": {
+   "sha256": "00ae6a0cec6b118dee3261348198f2ae3a5a178636cc3fb295edbb8a2161ea3f",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-map-f3.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-map-f4.bin": {
+   "sha256": "d74207d137b7c62bf49e767527d11033c07ea522049eb3403b283e5944b82026",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-map-f4.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-reference.bin": {
+   "sha256": "128a13a62d001610f1693e9737ddcab3320c3bb33252471bc1dece177feab890",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-reference.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-spectrum-f0.bin": {
+   "sha256": "3e3eafda24343523d08a248cb57206a270bba89a17bf530ea996011bae0f859c",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-spectrum-f0.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-spectrum-f1.bin": {
+   "sha256": "915823828d1d62949a75515863980e3380718313ca1315ae105b8674a8de0174",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-spectrum-f1.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-spectrum-f2.bin": {
+   "sha256": "871cbbd98744272fa7b35b7d77a5670e791239dbe2cbe3819d2ed4022d4570e7",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-spectrum-f2.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-spectrum-f3.bin": {
+   "sha256": "d9fa6506ec8a5820efb8e33c22e73afbc3e506601a988539017c71b343f7452d",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-spectrum-f3.bin"
+  },
+  "matched/captures/patch-1-2/c2-i1-spectrum-f4.bin": {
+   "sha256": "edddab6f1da295c7ae24ee0dff4e09e7dbbffd8cc66206dbb261263527d9dca4",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2-i1-spectrum-f4.bin"
+  },
+  "matched/captures/patch-1-2/c2.json": {
+   "sha256": "dbc49d3195ceb28a0e4d2778ab45142a98ff95342ba110dd3eb9d7a72af19ef0",
+   "bytes": 126,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-2/c2.json"
+  },
+  "matched/captures/patch-1-3/c2-i0-weight.bin": {
+   "sha256": "ad95f2c22db789568b40c635cd010a0900156f42e7ede20a56a4100c1f42e7d5",
+   "bytes": 2816,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i0-weight.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-after.bin": {
+   "sha256": "6239ee7d300ce1fad25164dc0be94473155e95f820fe7f2181f9db0835afff3e",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-after.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-before.bin": {
+   "sha256": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-before.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-candidate.bin": {
+   "sha256": "1478664cac4c15ac77c83a5068b3531b7000a3c577ace66494b77c78e03f3504",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-candidate.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-input.bin": {
+   "sha256": "fa1e1ac078ad5a61ee106c899eac0c8a4b46b2e5b98769d7ebe16d678bd34153",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-input.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-map-f0.bin": {
+   "sha256": "a0bcc7f82d1f1bfd06507bc0f2abb3bb3e6f7e531835bae66ae17ce672e8be90",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-map-f0.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-map-f1.bin": {
+   "sha256": "6ebccc51866ffaca79e5004c8f3a4813f6a53b7f11e0d58f1cc30d3e0fff751b",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-map-f1.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-map-f2.bin": {
+   "sha256": "4d1798a1f8217f79fdc30399e59741ea5511afd249f6769f4d08a5bc9f7d125e",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-map-f2.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-map-f3.bin": {
+   "sha256": "12ec0fe2b2a1f5e1d24069400c34f6291f345530affe880e1099758977ea71f2",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-map-f3.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-map-f4.bin": {
+   "sha256": "c702aae616de04fb62e676b8e97a4b4152d58ff861383b0066b15308111c44c8",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-map-f4.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-reference.bin": {
+   "sha256": "81a5a08c79c4fda614a4cc02c1e8ed26e39b897b2e0768c702ccadce78a71c4b",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-reference.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-spectrum-f0.bin": {
+   "sha256": "10788a631b425f696e5735bc18d24c3f386fe661dcbbb907eb41d36182c699ab",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-spectrum-f0.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-spectrum-f1.bin": {
+   "sha256": "fd817879b78234982d1a953f6c49bddd8cd36a42a4e0e62e592cbd031396f995",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-spectrum-f1.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-spectrum-f2.bin": {
+   "sha256": "c1ff47ae47bdb4d0cf78d89c2691ae2c9c0e0d7a9b0427c746f54d79c7cdffb5",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-spectrum-f2.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-spectrum-f3.bin": {
+   "sha256": "edfef0a59f7f36c443c0845ead7e93f6d00fa8e8ba42c4ab229274b05bf87c88",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-spectrum-f3.bin"
+  },
+  "matched/captures/patch-1-3/c2-i1-spectrum-f4.bin": {
+   "sha256": "36605c5d401f40b5f8220d42727820115c93d3562894af135331e707d45b73b0",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i1-spectrum-f4.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-after.bin": {
+   "sha256": "54554a4c3fda07c8ad54a10e171c0c78407ef353b78c85b96fe52d9e9e390f5b",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-after.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-before.bin": {
+   "sha256": "6239ee7d300ce1fad25164dc0be94473155e95f820fe7f2181f9db0835afff3e",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-before.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-candidate.bin": {
+   "sha256": "f31405760d8df88d4f453a3cb0c9d07f8af58f298899ab194052fe837268bc9b",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-candidate.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-input.bin": {
+   "sha256": "18b79423e8103f53bc408908d11ade2277b02e584b4d3d722a7d6f833b33c388",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-input.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-map-f0.bin": {
+   "sha256": "8b04cb3e4e1c2dac7c9b114d79c8e2432080f001a215126e95af5bab0e02b83a",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-map-f0.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-map-f1.bin": {
+   "sha256": "67a417ebc10d896d95ac2bf6565312eaee97d1c05b5c2b9590398f8c335a2edc",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-map-f1.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-map-f2.bin": {
+   "sha256": "f07059d277d5ffe74aa9acfa1dd0a8e6f8041285af9e8fe032c076b21c22788d",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-map-f2.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-map-f3.bin": {
+   "sha256": "e0ef849279b36448695f54f7189c5e832f4fee6c676182fd87e0784e8961b8ae",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-map-f3.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-map-f4.bin": {
+   "sha256": "b43f487c74bc52d61544f3fac31773aff38d3af9cedf3be2a3875bdebda7e81f",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-map-f4.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-reference.bin": {
+   "sha256": "26f277f1248697d4848e75f25f49a3cb86ef9a65a547451e7a7c12f7b9146db3",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-reference.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-spectrum-f0.bin": {
+   "sha256": "53a7d461e608516adba2695207fc30696630c7ea27d716d88c5b15d9c183aceb",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-spectrum-f0.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-spectrum-f1.bin": {
+   "sha256": "36ae66ad118cc23b9e5f05c644ea216e7f421e5fb1e7cce9220d4dc6874168d9",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-spectrum-f1.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-spectrum-f2.bin": {
+   "sha256": "b15732cf9cc006fe85d56707dfe5f5f6756ba95a66de659cf52a85d250a53bba",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-spectrum-f2.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-spectrum-f3.bin": {
+   "sha256": "dee8561ce85619b69eb52251b80b4c9d4af780d3e5e02c7468939813f0493c34",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-spectrum-f3.bin"
+  },
+  "matched/captures/patch-1-3/c2-i2-spectrum-f4.bin": {
+   "sha256": "e0052ca974a032d32fa8b65feb0ef798613b6ed161bd26410db6c00ee52de761",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2-i2-spectrum-f4.bin"
+  },
+  "matched/captures/patch-1-3/c2.json": {
+   "sha256": "c54c943adbc24d108476889ea231a1d1c0bfb879121a4e993a8ecf41d9970cc3",
+   "bytes": 126,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-1-3/c2.json"
+  },
+  "matched/captures/patch-2-1/c2-i0-weight.bin": {
+   "sha256": "ad95f2c22db789568b40c635cd010a0900156f42e7ede20a56a4100c1f42e7d5",
+   "bytes": 2816,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i0-weight.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-after.bin": {
+   "sha256": "cfbc65ec1767c1c9ad1928da0c733adcbca7989aba44751a266ab161f3f1ca7a",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-after.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-before.bin": {
+   "sha256": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-before.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-candidate.bin": {
+   "sha256": "249493d0f93282942cb291b19645b255be23d105e94a409c2a18327405c846d8",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-candidate.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-input.bin": {
+   "sha256": "2c2fc00ba38306887fdd537fed5574e532e863ea2d67e53aa32eb70a26908eba",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-input.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-map-f0.bin": {
+   "sha256": "34f7602a5aa4553e0b0471197faad4a8df25e257d86a7654df2d861981d12d71",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-map-f0.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-map-f1.bin": {
+   "sha256": "b0a59fcde6563f1e10372f3b44f96f0eaec6f75755b1c4f9b1b9b3e47e08dac7",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-map-f1.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-map-f2.bin": {
+   "sha256": "155239dafc89cc61b4f6de145d802c73e5d00411dd4289156eda34b18c554251",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-map-f2.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-map-f3.bin": {
+   "sha256": "b1b02a8183742f48b0026e642d277778e51dd8104f21271543d2ae05c1f593f8",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-map-f3.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-map-f4.bin": {
+   "sha256": "63184e325663bd2bd11632eb3879473c0810884243bf9d41ec2f59469449a1e2",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-map-f4.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-reference.bin": {
+   "sha256": "bdf5f0728cd50ceb2e07bf832384e592b6d370de0df136f25a82b4da994bc55c",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-reference.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-spectrum-f0.bin": {
+   "sha256": "109186e0ee624e087db7ed7ae8206d2bb585bf807174fbfd8b5272167b154c53",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-spectrum-f0.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-spectrum-f1.bin": {
+   "sha256": "1dca4ba715ebb7b086da295d74180655ed7a4b9e9c6ebc6228289f143eaa124a",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-spectrum-f1.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-spectrum-f2.bin": {
+   "sha256": "acdbb0176079c24e8ed71220ad87bda41d7564baf82c7975d48e0c012f3822a0",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-spectrum-f2.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-spectrum-f3.bin": {
+   "sha256": "e02ad48342082236358a38f1fb32ab94c31c8233a73c56c00c081e41ab9990e1",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-spectrum-f3.bin"
+  },
+  "matched/captures/patch-2-1/c2-i1-spectrum-f4.bin": {
+   "sha256": "9a26f684d3b4abea52f63f7277cdfc8cce94211d00096627b26241e797de3ca5",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i1-spectrum-f4.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-after.bin": {
+   "sha256": "1a080cb7fd3e0c83656eb5d6c871446f658a5842aeb08b23951642acabff1c46",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-after.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-before.bin": {
+   "sha256": "cfbc65ec1767c1c9ad1928da0c733adcbca7989aba44751a266ab161f3f1ca7a",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-before.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-candidate.bin": {
+   "sha256": "a33f1b790be870d8c2bdd608079f6d866e386b1b697fd17ea35d23fe786defee",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-candidate.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-input.bin": {
+   "sha256": "82e82701af7f6d635aca43e5b5ddd670c0a1925f433e0a795d164e8ed135ce6f",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-input.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-map-f0.bin": {
+   "sha256": "ec4d8d2dda738a1e042c9d5a40c8b6891c308fa6a5d4757e6b22d0509a289419",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-map-f0.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-map-f1.bin": {
+   "sha256": "38cd3354fb43324ad1ee0b8cfd185c014c864eeefeabf144930b7714ad88c0b0",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-map-f1.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-map-f2.bin": {
+   "sha256": "91f1d920df284481244695e8f4090ce226b908d0d50557e4fecc71592e1c5f99",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-map-f2.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-map-f3.bin": {
+   "sha256": "3c8fcb8715de7279995389aea7344a5fdcfaf56c73fa30cb4ccdef245d08a7a5",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-map-f3.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-map-f4.bin": {
+   "sha256": "6e2980ebe6673665259b459932123c90d1d86611796404825d7b9dad687518fd",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-map-f4.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-reference.bin": {
+   "sha256": "febd1db8278fa5afdcbc278bd8a1556ac28ee10edaf72e5f84a9e520a4b92385",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-reference.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-spectrum-f0.bin": {
+   "sha256": "d3281ef9531545fc2b2fe35c980d93fc32dd17c0ff1b7c88a93a8e192d368065",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-spectrum-f0.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-spectrum-f1.bin": {
+   "sha256": "d692df6c106eb04c7baa3d2befcda0bece7b66532f56922ff1562e058d67f3d5",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-spectrum-f1.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-spectrum-f2.bin": {
+   "sha256": "22a830737a9fc534d11a4a590c6e53453cfacd20ab4735fe3a9bcd19e5689a1e",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-spectrum-f2.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-spectrum-f3.bin": {
+   "sha256": "6377a75c16536e77a8c12f30791e2b27b1048d37427ea4ab50c9092d32fdf12d",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-spectrum-f3.bin"
+  },
+  "matched/captures/patch-2-1/c2-i2-spectrum-f4.bin": {
+   "sha256": "0b8409e891143d21333c99ff3c14a1bc8b0c9c30b1e29eec4ecb03aaf44dca24",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2-i2-spectrum-f4.bin"
+  },
+  "matched/captures/patch-2-1/c2.json": {
+   "sha256": "8084bd76503c0dbf81145f053da658ac8d043a7636c149d35a2d0a912438b286",
+   "bytes": 126,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-1/c2.json"
+  },
+  "matched/captures/patch-2-2/c2-i0-weight.bin": {
+   "sha256": "ad95f2c22db789568b40c635cd010a0900156f42e7ede20a56a4100c1f42e7d5",
+   "bytes": 2816,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i0-weight.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-after.bin": {
+   "sha256": "3728d102b4965c5601e632fa6ee281beb478efbe181f37dc48cbea1b41a667aa",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-after.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-before.bin": {
+   "sha256": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-before.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-candidate.bin": {
+   "sha256": "74d4c36a47090200149d0716d4d7188be760d3a161039de5503e9d2a1de8950d",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-candidate.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-input.bin": {
+   "sha256": "623063765d703a74a7b5255c9c91b4d33b548294bf45a5b2a6b26eae0ed66049",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-input.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-map-f0.bin": {
+   "sha256": "06d4b9491206e6b4a286dfb036dbc9f9af3967000dc2b83ca907dc9acf03d5bd",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-map-f0.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-map-f1.bin": {
+   "sha256": "7d76ee6ef9d08a42ea2af5a04a5764e696781ada7e609073b978caf9125810db",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-map-f1.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-map-f2.bin": {
+   "sha256": "4be44d50ef55b485bfcc6716ad17ae24e42d874f51620abf155f8ea26e357c59",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-map-f2.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-map-f3.bin": {
+   "sha256": "b8ae4cca96d2d95e7d80a6867cd20e442354eb342113ff022807d09cd15f0bfc",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-map-f3.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-map-f4.bin": {
+   "sha256": "913d49d7cfecc28d2fd17f9967fde2add923be58ffeaba578ff5d965b8f520dd",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-map-f4.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-reference.bin": {
+   "sha256": "475e603ce76facbb293af17b35aff909bc8f8a323dce4212a84ef0a1caccaf0c",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-reference.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-spectrum-f0.bin": {
+   "sha256": "47b395fe2257ca057eab54d5a0a24be24d92d6c13abaabbde1faa488d56a7b33",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-spectrum-f0.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-spectrum-f1.bin": {
+   "sha256": "81fee291c8560b8615283393f4f737123b9564574ed9499c39c2972548e11212",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-spectrum-f1.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-spectrum-f2.bin": {
+   "sha256": "26573f44e90fe74cb007d3e2ed7655846fbee3472d488e0b1d56d3c8e48eada5",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-spectrum-f2.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-spectrum-f3.bin": {
+   "sha256": "de43d7e03c94773dd9c1be607e962455a9aa0a95e83955e876651723c78d9208",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-spectrum-f3.bin"
+  },
+  "matched/captures/patch-2-2/c2-i1-spectrum-f4.bin": {
+   "sha256": "7fbef1f7af1fe30eb7514b615d1be1f981896ace1265503c0b3690c0cc5584a0",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2-i1-spectrum-f4.bin"
+  },
+  "matched/captures/patch-2-2/c2.json": {
+   "sha256": "b5e3f272260dcdd7d9042ef24f01625062582d91ad8fd9fcc64b9e68b21c4960",
+   "bytes": 126,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-2/c2.json"
+  },
+  "matched/captures/patch-2-3/c2-i0-weight.bin": {
+   "sha256": "ad95f2c22db789568b40c635cd010a0900156f42e7ede20a56a4100c1f42e7d5",
+   "bytes": 2816,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i0-weight.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-after.bin": {
+   "sha256": "181a7ef324e238dd8571ec2d225370ec50ee4529722475d138c8ac8aa09a1816",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-after.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-before.bin": {
+   "sha256": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-before.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-candidate.bin": {
+   "sha256": "fa545d41432f7349efa6063193de435606b025bd0a4bb2872b46068f7b28d0d7",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-candidate.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-input.bin": {
+   "sha256": "0d53b38ab2143fe6cb2bc1bfd5766096b8778be58314939569fbcd4bdac52067",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-input.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-map-f0.bin": {
+   "sha256": "c5d06f1608edae54ac82ff5efe3d7aa108484e0186b5a10c174c7a67a8bbbc4b",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-map-f0.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-map-f1.bin": {
+   "sha256": "f1f3125c612b2b6a7faec0d9a4ebc3e55edf9c4d6a4d96c1169f5d8996d158f0",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-map-f1.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-map-f2.bin": {
+   "sha256": "720e5a969d40dcb6c5487cc7257d15d2b81ce03fa1c0a2a79cd63eaf520645c7",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-map-f2.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-map-f3.bin": {
+   "sha256": "e405e000651a8875e024126f53491f0f0ea83c9fb4c6edea4078ce57d1839061",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-map-f3.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-map-f4.bin": {
+   "sha256": "8135468f5e5808ee213502f55fd3e65e9d6abd19c789ce260f5a63d6f28b1f9a",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-map-f4.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-reference.bin": {
+   "sha256": "fb710d5143f8cd786ea90a949277384957ef6fe7414c2013df1fc2ffa945921d",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-reference.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-spectrum-f0.bin": {
+   "sha256": "a7e7ed6d8b5f03d1b04fbd1ffa9a3c8d148bafd1b783cb0c645410f455a365fd",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-spectrum-f0.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-spectrum-f1.bin": {
+   "sha256": "a0116b60932e0b37b53256f212b2a3a8ddb4948c20001835e5e99f3f71df2747",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-spectrum-f1.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-spectrum-f2.bin": {
+   "sha256": "4d50e982edeb9d049baff451bb99a5ff761df98d7d9016db3ca83b569f8467c9",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-spectrum-f2.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-spectrum-f3.bin": {
+   "sha256": "37a616f5cc279ac2038157b29db151f145f3eb79ef3b23e30751b6ed18e625ec",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-spectrum-f3.bin"
+  },
+  "matched/captures/patch-2-3/c2-i1-spectrum-f4.bin": {
+   "sha256": "082b13909d0bd1fc54527d5c4b86833615b32b7762d516c8d038138c3fcc46ca",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i1-spectrum-f4.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-after.bin": {
+   "sha256": "991041d7d337339783112aaaa5fc1bffdb3d05d6a65b7cc1af8f978ad3eae478",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-after.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-before.bin": {
+   "sha256": "181a7ef324e238dd8571ec2d225370ec50ee4529722475d138c8ac8aa09a1816",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-before.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-candidate.bin": {
+   "sha256": "6a19ccdac8dfb214425a92d16965b94bf4f66c3aa7b26fb92e8beb0f01e31f96",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-candidate.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-input.bin": {
+   "sha256": "07180d2651ed0848c9167b8eed6342af857803ce3175c8f66c215ad655f80c9d",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-input.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-map-f0.bin": {
+   "sha256": "f592fcc032f59e5b967e0bfae8ae1ff03e46f7e0332e59675f690a7b60acf2ac",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-map-f0.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-map-f1.bin": {
+   "sha256": "ef9b2f53172e2cb1df77a6321058262231d52e17eb75c1c63e6589001fba42d3",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-map-f1.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-map-f2.bin": {
+   "sha256": "d38de39f0d8571de8694d5e1520d144ec0da2a4dc2a26ece775b1a68c0cee7a5",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-map-f2.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-map-f3.bin": {
+   "sha256": "7766a96191092863104ce2237f12ddc2b5401781c15c01a3f24e37e02b9762c8",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-map-f3.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-map-f4.bin": {
+   "sha256": "f2b463fcb37420ccd3dfd5f6026335d3a743d59ee16df2c5b884bcbc060b34c6",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-map-f4.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-reference.bin": {
+   "sha256": "c401b783616ecc28506b09dba9f3bd95119f74a167ef5cc9de4f5ce2dd05af80",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-reference.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-spectrum-f0.bin": {
+   "sha256": "d789f945470cf082fd5952f0b24a7f1cb4ab8fc3a1b8ed48d783b2b699ec017a",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-spectrum-f0.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-spectrum-f1.bin": {
+   "sha256": "2e0ff912507f61d24dbf2b2b39df5f023e35093f0ada849db4eb959d4cc006db",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-spectrum-f1.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-spectrum-f2.bin": {
+   "sha256": "a66471749ad9fe2d3097acfcb7319aa4e93ac71b6786cb913e812b6f0caaa926",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-spectrum-f2.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-spectrum-f3.bin": {
+   "sha256": "5344edc1ee9e1702bd29daba6d123bd164a8909a0c2adf934351b772d8aa93ee",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-spectrum-f3.bin"
+  },
+  "matched/captures/patch-2-3/c2-i2-spectrum-f4.bin": {
+   "sha256": "edc2dc421d26206530171ccff19b066d54f6e98764a853b08fac70be4b46dd14",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2-i2-spectrum-f4.bin"
+  },
+  "matched/captures/patch-2-3/c2.json": {
+   "sha256": "d17bb3208c75429a6a63aa06fdd853ea287bd1c825afe66e531b26892006b326",
+   "bytes": 126,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-2-3/c2.json"
+  },
+  "matched/captures/patch-3-1/c2-i0-weight.bin": {
+   "sha256": "ad95f2c22db789568b40c635cd010a0900156f42e7ede20a56a4100c1f42e7d5",
+   "bytes": 2816,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i0-weight.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-after.bin": {
+   "sha256": "46cd07c818579baec5db72c45fb7ea6cffb586c7e82261248464d85d228f0584",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-after.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-before.bin": {
+   "sha256": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-before.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-candidate.bin": {
+   "sha256": "80428dfd36a6e7ebce58144f6416b5ccd6eae1e499203474961342e08552bfaa",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-candidate.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-input.bin": {
+   "sha256": "74f6d3e2df25f300d952fa85ca8a3a321afecc90dffa8f1756cbd0ccbb1eea83",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-input.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-map-f0.bin": {
+   "sha256": "72fb8e11a93ee86c2a71b71937749d2755769ab2e590073ebefeeb903f725878",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-map-f0.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-map-f1.bin": {
+   "sha256": "1a4249e07340de8bb697cb1efe46010e39e9bc353e4bcbf90a881064830a8761",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-map-f1.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-map-f2.bin": {
+   "sha256": "ff4f6bf6f11084454d52b1f60a1e2caddbbc4e42d13f5a51691cbfc50516e7ce",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-map-f2.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-map-f3.bin": {
+   "sha256": "c2329ab0abf995089f7263d40714f9ad3aed235e83a274837aa6416c883143ff",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-map-f3.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-map-f4.bin": {
+   "sha256": "c1eb1fd4a71a108c6e5bca1f3f57cb37936b8f0aa2ca925862fd1e5a5a0f6363",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-map-f4.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-reference.bin": {
+   "sha256": "2182027f1215b31d8d68f3542ec2bae6feb451f2cfd4273eecb2314cb8c19b1e",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-reference.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-spectrum-f0.bin": {
+   "sha256": "be02e769a0f6b32025093f01924d828375f370d89f8c0451d391bd62376e8125",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-spectrum-f0.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-spectrum-f1.bin": {
+   "sha256": "a8eef814f7993c06e47cb52a42dc1b351c5530b3fa1ebc18f626d1e45ba618cb",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-spectrum-f1.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-spectrum-f2.bin": {
+   "sha256": "308c5bce95f0a3ba59152329dcd4fdf625bf4ae6284b858d30fbe076ba63bb44",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-spectrum-f2.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-spectrum-f3.bin": {
+   "sha256": "65c7aa8ae2d99a0c09a2b00418354d184e52e56c055e8e8357cfdbcfc76713d1",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-spectrum-f3.bin"
+  },
+  "matched/captures/patch-3-1/c2-i1-spectrum-f4.bin": {
+   "sha256": "6c5bd6e9c2fb7af2373925a818d5a2e0ba48ac810fda511031bb25f6db0f8fbc",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i1-spectrum-f4.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-after.bin": {
+   "sha256": "9ff9dffd82537925bb7557a88fe6520c437787713db940f6c6708d1151067d84",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-after.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-before.bin": {
+   "sha256": "46cd07c818579baec5db72c45fb7ea6cffb586c7e82261248464d85d228f0584",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-before.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-candidate.bin": {
+   "sha256": "8939afcceb390a34ddf8656ba4b0ade29077ef4af03ed4f46ae337e80b6681bd",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-candidate.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-input.bin": {
+   "sha256": "b3891c17779b7ccad5cffbbd210bb8806edb8672f0eab130fea19d312091ec59",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-input.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-map-f0.bin": {
+   "sha256": "072821c19383e07866959a99bdbd289e80840ddc0eccd431e1c806ef830ae76e",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-map-f0.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-map-f1.bin": {
+   "sha256": "efb1eb1ae6cfd8576639415f8aafb31b0a7f8f98b5260267466a91a752f2e1a0",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-map-f1.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-map-f2.bin": {
+   "sha256": "2d66824fc78a459f56cd5202c342671a31d395950cd0c696ebb77252e721570e",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-map-f2.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-map-f3.bin": {
+   "sha256": "59943f032c83a9b90b3f54e79523685b3d3edd945ebb942a5a51ebf8ca916b3b",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-map-f3.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-map-f4.bin": {
+   "sha256": "7960fa2db34dabd75997aff8e6b4b2cf25c6aba6d87e145ea02302be7349fd56",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-map-f4.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-reference.bin": {
+   "sha256": "599c6d76d45de5fd6d66e03c84e4a73c5bf65340d0a6c41eae460e6a7758b964",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-reference.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-spectrum-f0.bin": {
+   "sha256": "f55bb8a3073521b3582e6f7a23419c37e428c33846b757a6af7813cb0eaefb46",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-spectrum-f0.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-spectrum-f1.bin": {
+   "sha256": "30bb3d1b974af2394271d2a1d68de29efafbf1d3568f06a3f3f74a35ec4ac3fe",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-spectrum-f1.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-spectrum-f2.bin": {
+   "sha256": "373c6b58e22a10bb5154bc37ee51cd32543534a0a410b469691875f068e91fe2",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-spectrum-f2.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-spectrum-f3.bin": {
+   "sha256": "d4b7670e2bdf51301954e4b6a747fddea5584c16e1e171c9639c150045a23d84",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-spectrum-f3.bin"
+  },
+  "matched/captures/patch-3-1/c2-i2-spectrum-f4.bin": {
+   "sha256": "6026b5bce450a7fb04a121f3c7c3a44dfd1237259ab53eb244d28dfb54bf48d7",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2-i2-spectrum-f4.bin"
+  },
+  "matched/captures/patch-3-1/c2.json": {
+   "sha256": "d9eab9a0d3bb9b815cdd3f0f291748a2f192a39902238f7a169899e30b92e126",
+   "bytes": 126,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-1/c2.json"
+  },
+  "matched/captures/patch-3-2/c2-i0-weight.bin": {
+   "sha256": "ad95f2c22db789568b40c635cd010a0900156f42e7ede20a56a4100c1f42e7d5",
+   "bytes": 2816,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i0-weight.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-after.bin": {
+   "sha256": "d771a230bb78fa25e86fc1e584bb35abeaa2c901fe59b1e607411447c6600ae0",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-after.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-before.bin": {
+   "sha256": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-before.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-candidate.bin": {
+   "sha256": "888433e9a3e0621ba2567f0041fe1b81f60180915b1f95cf982c272107cb33be",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-candidate.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-input.bin": {
+   "sha256": "2422d0bcf7a1860fc0dc72725dc7374d4bd3aedd7c71785bc8d8d1a6169ce524",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-input.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-map-f0.bin": {
+   "sha256": "2a939abe5a85306bd7b6b3cf4e8b680e0650afe208da60c4eae2ba5b3e16a6d3",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-map-f0.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-map-f1.bin": {
+   "sha256": "6753c13ca9a121a5914bdc868d774499cf2b9f463069a03b582f8180589a3eed",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-map-f1.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-map-f2.bin": {
+   "sha256": "67cf3fd197862d920ccc7787ea08e7bb505c8ab10ed4c32c7b95f79a17075472",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-map-f2.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-map-f3.bin": {
+   "sha256": "9c78689dbc36cee5a493e10696d3889f46d4d667783b83fbbb0f01df1728b807",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-map-f3.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-map-f4.bin": {
+   "sha256": "e7810af8f337b133259a8efd4f62d09f6c78a45b81126c3ac1b03daeb0ffbd26",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-map-f4.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-reference.bin": {
+   "sha256": "de005114159577502db35e8079b656931e95b3f766be6e0fe15be00ef0987495",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-reference.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-spectrum-f0.bin": {
+   "sha256": "9e740309da14390a2a5d7584592c85259afed19a213a28c125b21ba8c7dcf66e",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-spectrum-f0.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-spectrum-f1.bin": {
+   "sha256": "cdd4d39a3f02ca2a8444e66970ecf76b0933cbe6e3e8a46df654ba90fa9877d1",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-spectrum-f1.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-spectrum-f2.bin": {
+   "sha256": "c47e41c574d2f2ca153101845093b7c739d3b40fb14c0d2fc1dba851ff13389f",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-spectrum-f2.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-spectrum-f3.bin": {
+   "sha256": "51a16ff9905f0b969e6ed0cec0a6828086a0d3acd1866808f49e6ba27610d5a8",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-spectrum-f3.bin"
+  },
+  "matched/captures/patch-3-2/c2-i1-spectrum-f4.bin": {
+   "sha256": "d5d0fc33693af6f0f98afdbd4def04279895495bfc5358b20f3804346f4f861f",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2-i1-spectrum-f4.bin"
+  },
+  "matched/captures/patch-3-2/c2.json": {
+   "sha256": "9077866834771be497f4ad17f524c9d903df619d5fee579d8662ce4dbb0adfdf",
+   "bytes": 126,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-2/c2.json"
+  },
+  "matched/captures/patch-3-3/c2-i0-weight.bin": {
+   "sha256": "ad95f2c22db789568b40c635cd010a0900156f42e7ede20a56a4100c1f42e7d5",
+   "bytes": 2816,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i0-weight.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-after.bin": {
+   "sha256": "34b7b75b6e303b756661bb446f875d41d61f5f2a3f63ebb6f1435a2c24ba1659",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-after.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-before.bin": {
+   "sha256": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-before.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-candidate.bin": {
+   "sha256": "991389fa6401158de264e2622e092c5b385be63a510474d38a8aff48b6a52ea3",
+   "bytes": 80,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-candidate.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-input.bin": {
+   "sha256": "f8e7c03ec59c3664a208c3bfbd0309d6b1499fd7979646efcf2c10694f22a285",
+   "bytes": 28160,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-input.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-map-f0.bin": {
+   "sha256": "d55e2a4df6b0481f46214a4da891f5eb03eef881b05a3e150c51b7416bf67156",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-map-f0.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-map-f1.bin": {
+   "sha256": "feeea3b819fb16ce80b0962d87b5774d9756f85d40ddb1dcc529415ce966b6b6",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-map-f1.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-map-f2.bin": {
+   "sha256": "5a4232223d270224171b1a281c93c36dc086707b3b01dae596aaddc4103484f1",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-map-f2.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-map-f3.bin": {
+   "sha256": "bb8419dbd86e087a105a05e45752d6c90a7f920d808281a206356af9b50298c3",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-map-f3.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-map-f4.bin": {
+   "sha256": "517fb2ab1cb257628b17a18bc793ce1522e544a8d071f02a3d298c1c72e70c89",
+   "bytes": 5376,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-map-f4.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-reference.bin": {
+   "sha256": "34cafb8a6067d8a369b778cfcd442bc5f01ec697894f6ba4d7a5c72a4cfd4a35",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-reference.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-spectrum-f0.bin": {
+   "sha256": "d42191dfe73843718e7b4de6ddd5674960a52c2d9ba21d27a64768e2100eee1b",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-spectrum-f0.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-spectrum-f1.bin": {
+   "sha256": "1c00fdde73eb2277eb7e3069c11fcc5e0d7ec35e6a1ef4a7e5e8a61020b5bfe8",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-spectrum-f1.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-spectrum-f2.bin": {
+   "sha256": "fb8f70be1f69e850cee73459d8dec33abbee973a9b6726908fdb729d86200dce",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-spectrum-f2.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-spectrum-f3.bin": {
+   "sha256": "4be0694179831eedaad81823d7e86b3363095aa9a784a0032fe52c805cedf1c7",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-spectrum-f3.bin"
+  },
+  "matched/captures/patch-3-3/c2-i1-spectrum-f4.bin": {
+   "sha256": "c651aa9ea6b86ddfc9a8dd496e2419ed38abf4941d0b627fc31b79de84303bc6",
+   "bytes": 5632,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2-i1-spectrum-f4.bin"
+  },
+  "matched/captures/patch-3-3/c2.json": {
+   "sha256": "ed71576705408e1dfd9d87de1087a8a5aed11cb993330185b9daf8f6e2e5979b",
+   "bytes": 126,
+   "origin": "W4-matched-native-inputs.tar:captures/patch-3-3/c2.json"
+  },
+  "matched/fixtures/affine.mrcs": {
+   "sha256": "1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a",
+   "bytes": 246784,
+   "origin": "W4-matched-native-inputs.tar:fixtures/affine.mrcs"
+  },
+  "matched/manifest/MANIFEST.json": {
+   "sha256": "b1f044efc54024918b8f27a4dd5a780f2165e8981b7a28bb7334074f02fec381",
+   "bytes": 48738,
+   "origin": "W4-matched-native-inputs.tar:manifest/MANIFEST.json"
+  },
+  "matched/ref/attempt02.json": {
+   "sha256": "0bcf68798d66d86d001d0f22852583c842936141e064216b303c66d2a7e4bb72",
+   "bytes": 69644,
+   "origin": "W4-matched-native-inputs.tar:ref/attempt02.json"
+  },
+  "matched/ref/w4_objective_oracle.json": {
+   "sha256": "67fa892ccd8469f5630d0944243b82f43d18b66fbdbe3beacc146f2b5dca888c",
+   "bytes": 99788,
+   "origin": "W4-matched-native-inputs.tar:ref/w4_objective_oracle.json"
+  },
+  "matched/scripts/w4_matched_native.py": {
+   "sha256": "2aab5d88779d8cbdd868dba6dc310d9e0c853fce73cdda5dfd1d81a022fdef01",
+   "bytes": 17718,
+   "origin": "W4-matched-native-inputs.tar:scripts/w4_matched_native.py"
+  },
+  "matched/state/global.txt": {
+   "sha256": "7ea5a84098e60e01b29bc24d4ed7ca2654c64f279c8a3cdafc4e331e38bfc1e3",
+   "bytes": 174,
+   "origin": "W4-matched-native-inputs.tar:state/global.txt"
+  },
+  "phaseD/diag/w4_fixture_diag.json": {
+   "sha256": "3c9a13b8ef46891b3446f3846153fcec24a4ecbd8c56a518c3132de4cee11c05",
+   "bytes": 8385,
+   "origin": "W4-phaseD-inputs.tar:diag/w4_fixture_diag.json"
+  },
+  "phaseD/fixtures/MANIFEST.json": {
+   "sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+   "bytes": 8332,
+   "origin": "W4-phaseD-inputs.tar:fixtures/MANIFEST.json"
+  },
+  "phaseD/fixtures/affine.mrcs": {
+   "sha256": "1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a",
+   "bytes": 246784,
+   "origin": "W4-phaseD-inputs.tar:fixtures/affine.mrcs"
+  },
+  "phaseD/fixtures/affine_field.npy": {
+   "sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+   "bytes": 983168,
+   "origin": "W4-phaseD-inputs.tar:fixtures/affine_field.npy"
+  },
+  "phaseD/fixtures/affine_target.npy": {
+   "sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+   "bytes": 49280,
+   "origin": "W4-phaseD-inputs.tar:fixtures/affine_target.npy"
+  },
+  "phaseD/r275/file-index.json": {
+   "sha256": "31255dab8eef81ee05f68271ac665429db9a48498b240fbe85ebe228ea3c65c3",
+   "bytes": 207357,
+   "origin": "W4-phaseD-inputs.tar:r275/file-index.json"
+  },
+  "phaseD/r275/runs/cpu-affine-on/checker.json": {
+   "sha256": "9ef7ef64ebada70a5850ab314f3547cd48a8c0c282833d0849931418819cc247",
+   "bytes": 2711,
+   "origin": "W4-phaseD-inputs.tar:r275/runs/cpu-affine-on/checker.json"
+  },
+  "phaseD/r275/runs/cpu-affine-on/out/affine.log": {
+   "sha256": "793124b035353e0c5e45d68ac6bfbf2b97516c5fff7f936c00a6cb1b84955dd4",
+   "bytes": 1810,
+   "origin": "W4-phaseD-inputs.tar:r275/runs/cpu-affine-on/out/affine.log"
+  },
+  "phaseD/r275/runs/cpu-affine-on/out/affine.star": {
+   "sha256": "f560b29e3d4521e1b4d5ca97fa3d649181970b49db90714e9a257709d20c97a8",
+   "bytes": 5188,
+   "origin": "W4-phaseD-inputs.tar:r275/runs/cpu-affine-on/out/affine.star"
+  },
+  "phaseD/r275/runs/cpu-affine-on/state/global.txt": {
+   "sha256": "7ea5a84098e60e01b29bc24d4ed7ca2654c64f279c8a3cdafc4e331e38bfc1e3",
+   "bytes": 174,
+   "origin": "W4-phaseD-inputs.tar:r275/runs/cpu-affine-on/state/global.txt"
+  },
+  "phaseD/r275/runs/cpu-affine-on/state/model.txt": {
+   "sha256": "ca59f476a672094620d13ae5433447774a277ed96bb97e3cf76f288400392523",
+   "bytes": 820,
+   "origin": "W4-phaseD-inputs.tar:r275/runs/cpu-affine-on/state/model.txt"
+  },
+  "phaseD/r275/runs/cuda-affine-on/checker.json": {
+   "sha256": "cc33fb62352efe6b36c54f7ee8a702191379d21edea8a2f5dd48d00898b6e227",
+   "bytes": 2720,
+   "origin": "W4-phaseD-inputs.tar:r275/runs/cuda-affine-on/checker.json"
+  },
+  "phaseD/r275/runs/cuda-affine-on/out/affine.log": {
+   "sha256": "06f62cf40ac05309c45c88425f883fe30fa5a74da6a04e6c966d660ca0e281fb",
+   "bytes": 6275,
+   "origin": "W4-phaseD-inputs.tar:r275/runs/cuda-affine-on/out/affine.log"
+  },
+  "phaseD/r275/runs/cuda-affine-on/out/affine.star": {
+   "sha256": "c9e5ab3668de215f66e911abe0fc299bd5d1e563d623c93869ef4efdfc1a0b7f",
+   "bytes": 4858,
+   "origin": "W4-phaseD-inputs.tar:r275/runs/cuda-affine-on/out/affine.star"
+  },
+  "phaseD/r275/runs/cuda-affine-on/state/global.txt": {
+   "sha256": "16fecf0fb23545b74cd7198db98458ff6098e961ae5376409e26933a1ffb87a1",
+   "bytes": 169,
+   "origin": "W4-phaseD-inputs.tar:r275/runs/cuda-affine-on/state/global.txt"
+  },
+  "phaseD/r275/runs/cuda-affine-on/state/model.txt": {
+   "sha256": "1872f9ba2a78ef14a955cd26fc3d3a6a50ac8457d6444b128711816be80869a5",
+   "bytes": 813,
+   "origin": "W4-phaseD-inputs.tar:r275/runs/cuda-affine-on/state/model.txt"
+  },
+  "phaseD/ref/attempt02.json": {
+   "sha256": "0bcf68798d66d86d001d0f22852583c842936141e064216b303c66d2a7e4bb72",
+   "bytes": 69644,
+   "origin": "W4-phaseD-inputs.tar:ref/attempt02.json"
+  },
+  "phaseD/ref/shrinkage-attempt01.json": {
+   "sha256": "0a2d16d25cbcf3e9a14b43fbd6b331079356bc13e31dc8d80b40f2cc91c54629",
+   "bytes": 8954,
+   "origin": "W4-phaseD-inputs.tar:ref/shrinkage-attempt01.json"
+  },
+  "phaseD/scripts/w4_objective_oracle.py": {
+   "sha256": "47f9db80accd6f6f02ed8c652c3e8e57ee05e47b9cb297f510d7d971ffef1ff1",
+   "bytes": 21608,
+   "origin": "W4-phaseD-inputs.tar:scripts/w4_objective_oracle.py"
+  },
+  "phaseD/src805/BLOBS.txt": {
+   "sha256": "fde4ca0c074f7843b00e54232bae0a66bf96136f6130a9ba71305f8230c0a16b",
+   "bytes": 564,
+   "origin": "W4-phaseD-inputs.tar:src805/BLOBS.txt"
+  },
+  "phaseD/src805/test-data/generate_known_motion_fixture.py": {
+   "sha256": "f28fbf516f8c2f7a3ae1b6133d54d3cc1e0708e2f90644cce30a845f4bbcef4f",
+   "bytes": 30686,
+   "origin": "W4-phaseD-inputs.tar:src805/test-data/generate_known_motion_fixture.py"
+  },
+  "phaseD/src805/test-data/generate_motion_diagnostics.py": {
+   "sha256": "5e781bb290b3f12b38f6dc7ec18bb955d56331219dc0216321e010ecbcdaf4cc",
+   "bytes": 5444,
+   "origin": "W4-phaseD-inputs.tar:src805/test-data/generate_motion_diagnostics.py"
+  },
+  "phaseD/src805/tools/check_motion_diagnostics.py": {
+   "sha256": "2be34b821ce9c351abaeab5c0280478362cf90ba774df7f529caced9e360eb16",
+   "bytes": 10960,
+   "origin": "W4-phaseD-inputs.tar:src805/tools/check_motion_diagnostics.py"
+  },
+  "phaseD/src805/tools/motion_field.py": {
+   "sha256": "d72cfad7175368fa6d0727c2727c49780328951c6f4d3ecc20e9ac662ac2e810",
+   "bytes": 13966,
+   "origin": "W4-phaseD-inputs.tar:src805/tools/motion_field.py"
+  },
+  "repro/r275/file-index.json": {
+   "sha256": "31255dab8eef81ee05f68271ac665429db9a48498b240fbe85ebe228ea3c65c3",
+   "bytes": 207357,
+   "origin": "w4-repro-inputs.tar:r275/file-index.json"
+  },
+  "repro/r275/runs/cpu-affine-off/out/affine.log": {
+   "sha256": "0873562bf99ea631e5c39cf75e4534994ced3d2dbdf710ed7803a22d14f753f8",
+   "bytes": 1811,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-affine-off/out/affine.log"
+  },
+  "repro/r275/runs/cpu-affine-off/out/affine.star": {
+   "sha256": "f560b29e3d4521e1b4d5ca97fa3d649181970b49db90714e9a257709d20c97a8",
+   "bytes": 5188,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-affine-off/out/affine.star"
+  },
+  "repro/r275/runs/cpu-affine-off/out/corrected_micrographs.star": {
+   "sha256": "8136a1de1d8fd1bc4692c15df13a9f91db62a051d013c3bbe1aa23b038989836",
+   "bytes": 745,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-affine-off/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cpu-affine-off/state/global.txt": {
+   "sha256": "7ea5a84098e60e01b29bc24d4ed7ca2654c64f279c8a3cdafc4e331e38bfc1e3",
+   "bytes": 174,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-affine-off/state/global.txt"
+  },
+  "repro/r275/runs/cpu-affine-off/state/model.txt": {
+   "sha256": "ca59f476a672094620d13ae5433447774a277ed96bb97e3cf76f288400392523",
+   "bytes": 820,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-affine-off/state/model.txt"
+  },
+  "repro/r275/runs/cpu-affine-on/out/affine.log": {
+   "sha256": "793124b035353e0c5e45d68ac6bfbf2b97516c5fff7f936c00a6cb1b84955dd4",
+   "bytes": 1810,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-affine-on/out/affine.log"
+  },
+  "repro/r275/runs/cpu-affine-on/out/affine.star": {
+   "sha256": "f560b29e3d4521e1b4d5ca97fa3d649181970b49db90714e9a257709d20c97a8",
+   "bytes": 5188,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-affine-on/out/affine.star"
+  },
+  "repro/r275/runs/cpu-affine-on/out/corrected_micrographs.star": {
+   "sha256": "cb58a901c7c47ac8458c0f40ee727cb718ce405ac44898d0d8075a8a0e23b986",
+   "bytes": 743,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-affine-on/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cpu-affine-on/state/global.txt": {
+   "sha256": "7ea5a84098e60e01b29bc24d4ed7ca2654c64f279c8a3cdafc4e331e38bfc1e3",
+   "bytes": 174,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-affine-on/state/global.txt"
+  },
+  "repro/r275/runs/cpu-affine-on/state/model.txt": {
+   "sha256": "ca59f476a672094620d13ae5433447774a277ed96bb97e3cf76f288400392523",
+   "bytes": 820,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-affine-on/state/model.txt"
+  },
+  "repro/r275/runs/cpu-fractional-off/out/corrected_micrographs.star": {
+   "sha256": "3bf64236deaaef713c67ca2a1f858074fe8f7b7bee5a5b51c9c132b98bbd5941",
+   "bytes": 761,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-fractional-off/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cpu-fractional-off/out/fractional.log": {
+   "sha256": "d580967baaf44424fa820bb94ad2ca749a7e011e8bdf74773e99a01996f86a07",
+   "bytes": 728,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-fractional-off/out/fractional.log"
+  },
+  "repro/r275/runs/cpu-fractional-off/out/fractional.star": {
+   "sha256": "4f419457ee91955468b42a1b67c1c24f4141f61a2f1812a8ae84a30913081478",
+   "bytes": 979,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-fractional-off/out/fractional.star"
+  },
+  "repro/r275/runs/cpu-fractional-off/state/global.txt": {
+   "sha256": "7da1ec3368c40e96b0481aa3b51bf6666b02465ab650c1cfde99be7abac8470a",
+   "bytes": 168,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-fractional-off/state/global.txt"
+  },
+  "repro/r275/runs/cpu-fractional-off/state/model.txt": {
+   "sha256": "b70db49725f8bfe50c326713d28688d7710ffcf9217ed909a0bc0fee506254de",
+   "bytes": 30,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-fractional-off/state/model.txt"
+  },
+  "repro/r275/runs/cpu-fractional-on/out/corrected_micrographs.star": {
+   "sha256": "49f0c20fd92ec517532591058cf90466dc97e078dfaf58f741725a2e6afba0db",
+   "bytes": 759,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-fractional-on/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cpu-fractional-on/out/fractional.log": {
+   "sha256": "1de729b07535bef382feb27055e395c4bbc27280b3c274b361618011486e49f2",
+   "bytes": 727,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-fractional-on/out/fractional.log"
+  },
+  "repro/r275/runs/cpu-fractional-on/out/fractional.star": {
+   "sha256": "4f419457ee91955468b42a1b67c1c24f4141f61a2f1812a8ae84a30913081478",
+   "bytes": 979,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-fractional-on/out/fractional.star"
+  },
+  "repro/r275/runs/cpu-fractional-on/state/global.txt": {
+   "sha256": "7da1ec3368c40e96b0481aa3b51bf6666b02465ab650c1cfde99be7abac8470a",
+   "bytes": 168,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-fractional-on/state/global.txt"
+  },
+  "repro/r275/runs/cpu-fractional-on/state/model.txt": {
+   "sha256": "b70db49725f8bfe50c326713d28688d7710ffcf9217ed909a0bc0fee506254de",
+   "bytes": 30,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-fractional-on/state/model.txt"
+  },
+  "repro/r275/runs/cpu-integer-off/out/corrected_micrographs.star": {
+   "sha256": "cd26bb2ec49179b7cafd9de360d0ad330a76c80efc7da9f6344c42407cc8c5dd",
+   "bytes": 749,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-integer-off/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cpu-integer-off/out/integer.log": {
+   "sha256": "241d8c30c864962c75e36fa65b15ba36f89e266ad74c055007775da7bdf1c5e9",
+   "bytes": 720,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-integer-off/out/integer.log"
+  },
+  "repro/r275/runs/cpu-integer-off/out/integer.star": {
+   "sha256": "259a59360b3cde321195dccc07837d1ed0584b97b818c7d9f8ef5d6ec4f14f35",
+   "bytes": 976,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-integer-off/out/integer.star"
+  },
+  "repro/r275/runs/cpu-integer-off/state/global.txt": {
+   "sha256": "6f94dbf5b90a93207191232f347f19ee8598845c42abf6da38f60c48eb871ff1",
+   "bytes": 171,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-integer-off/state/global.txt"
+  },
+  "repro/r275/runs/cpu-integer-off/state/model.txt": {
+   "sha256": "b70db49725f8bfe50c326713d28688d7710ffcf9217ed909a0bc0fee506254de",
+   "bytes": 30,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-integer-off/state/model.txt"
+  },
+  "repro/r275/runs/cpu-integer-on/out/corrected_micrographs.star": {
+   "sha256": "8821ce5ff9e8b3de5761f5de26d13a8366c3d7ea8d0f45b10c4ae53398107993",
+   "bytes": 747,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-integer-on/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cpu-integer-on/out/integer.log": {
+   "sha256": "b6c45f39360daab32534fddff7b5f727e684066b7276ee876494bd3b916d9cd1",
+   "bytes": 719,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-integer-on/out/integer.log"
+  },
+  "repro/r275/runs/cpu-integer-on/out/integer.star": {
+   "sha256": "259a59360b3cde321195dccc07837d1ed0584b97b818c7d9f8ef5d6ec4f14f35",
+   "bytes": 976,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-integer-on/out/integer.star"
+  },
+  "repro/r275/runs/cpu-integer-on/state/global.txt": {
+   "sha256": "6f94dbf5b90a93207191232f347f19ee8598845c42abf6da38f60c48eb871ff1",
+   "bytes": 171,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-integer-on/state/global.txt"
+  },
+  "repro/r275/runs/cpu-integer-on/state/model.txt": {
+   "sha256": "b70db49725f8bfe50c326713d28688d7710ffcf9217ed909a0bc0fee506254de",
+   "bytes": 30,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-integer-on/state/model.txt"
+  },
+  "repro/r275/runs/cpu-noisy-off/out/corrected_micrographs.star": {
+   "sha256": "3b0b70ee537ef5ea5091226c2592ef113bef6771c68463f5acef0968b7180f29",
+   "bytes": 741,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-noisy-off/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cpu-noisy-off/out/noisy.log": {
+   "sha256": "0f9835a98a0c5abf48983f306596ce3eec70b7d21332f5621db9230cbeae04be",
+   "bytes": 2442,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-noisy-off/out/noisy.log"
+  },
+  "repro/r275/runs/cpu-noisy-off/out/noisy.star": {
+   "sha256": "9dc77e8ad53879aa40e7f4ad8ac2523e4b70ceb2e620097302202bee69ca8171",
+   "bytes": 5187,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-noisy-off/out/noisy.star"
+  },
+  "repro/r275/runs/cpu-noisy-off/state/global.txt": {
+   "sha256": "d9a21a3c149f624e4dc9d4a39023c898e4e40b9481958e862944db729fe0e678",
+   "bytes": 174,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-noisy-off/state/global.txt"
+  },
+  "repro/r275/runs/cpu-noisy-off/state/model.txt": {
+   "sha256": "0641b626a1c41b72cf62aafe06aa92e75c2f8668409bdfb035c3a0c41d63671e",
+   "bytes": 782,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-noisy-off/state/model.txt"
+  },
+  "repro/r275/runs/cpu-noisy-on/out/corrected_micrographs.star": {
+   "sha256": "63eb15b3d4c099beb9220c0ba063177161ca6435c6fabf422c45d909b6ba7d1a",
+   "bytes": 739,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-noisy-on/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cpu-noisy-on/out/noisy.log": {
+   "sha256": "cdf5bc0235d17730cda5d5d6695b666abc71adc2a1bdde3ef92d3e0f384326c2",
+   "bytes": 2441,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-noisy-on/out/noisy.log"
+  },
+  "repro/r275/runs/cpu-noisy-on/out/noisy.star": {
+   "sha256": "9dc77e8ad53879aa40e7f4ad8ac2523e4b70ceb2e620097302202bee69ca8171",
+   "bytes": 5187,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-noisy-on/out/noisy.star"
+  },
+  "repro/r275/runs/cpu-noisy-on/state/global.txt": {
+   "sha256": "d9a21a3c149f624e4dc9d4a39023c898e4e40b9481958e862944db729fe0e678",
+   "bytes": 174,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-noisy-on/state/global.txt"
+  },
+  "repro/r275/runs/cpu-noisy-on/state/model.txt": {
+   "sha256": "0641b626a1c41b72cf62aafe06aa92e75c2f8668409bdfb035c3a0c41d63671e",
+   "bytes": 782,
+   "origin": "w4-repro-inputs.tar:r275/runs/cpu-noisy-on/state/model.txt"
+  },
+  "repro/r275/runs/cuda-affine-off/out/affine.log": {
+   "sha256": "1690eb6b183952906a5affaf076bb2fcf83a39e3858cb60d1a1831cd2cf3c543",
+   "bytes": 6276,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-affine-off/out/affine.log"
+  },
+  "repro/r275/runs/cuda-affine-off/out/affine.star": {
+   "sha256": "c9e5ab3668de215f66e911abe0fc299bd5d1e563d623c93869ef4efdfc1a0b7f",
+   "bytes": 4858,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-affine-off/out/affine.star"
+  },
+  "repro/r275/runs/cuda-affine-off/out/corrected_micrographs.star": {
+   "sha256": "555def5193c321d030221c0afc35f1743f482b1114ffcdf4fd7d570898e72ef8",
+   "bytes": 747,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-affine-off/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cuda-affine-off/state/global.txt": {
+   "sha256": "16fecf0fb23545b74cd7198db98458ff6098e961ae5376409e26933a1ffb87a1",
+   "bytes": 169,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-affine-off/state/global.txt"
+  },
+  "repro/r275/runs/cuda-affine-off/state/model.txt": {
+   "sha256": "1872f9ba2a78ef14a955cd26fc3d3a6a50ac8457d6444b128711816be80869a5",
+   "bytes": 813,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-affine-off/state/model.txt"
+  },
+  "repro/r275/runs/cuda-affine-on/out/affine.log": {
+   "sha256": "06f62cf40ac05309c45c88425f883fe30fa5a74da6a04e6c966d660ca0e281fb",
+   "bytes": 6275,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-affine-on/out/affine.log"
+  },
+  "repro/r275/runs/cuda-affine-on/out/affine.star": {
+   "sha256": "c9e5ab3668de215f66e911abe0fc299bd5d1e563d623c93869ef4efdfc1a0b7f",
+   "bytes": 4858,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-affine-on/out/affine.star"
+  },
+  "repro/r275/runs/cuda-affine-on/out/corrected_micrographs.star": {
+   "sha256": "ac089e8be1c475e377b1d92392cdceba68db7fedc33ecc7c3e8f6421eb97d479",
+   "bytes": 745,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-affine-on/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cuda-affine-on/state/global.txt": {
+   "sha256": "16fecf0fb23545b74cd7198db98458ff6098e961ae5376409e26933a1ffb87a1",
+   "bytes": 169,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-affine-on/state/global.txt"
+  },
+  "repro/r275/runs/cuda-affine-on/state/model.txt": {
+   "sha256": "1872f9ba2a78ef14a955cd26fc3d3a6a50ac8457d6444b128711816be80869a5",
+   "bytes": 813,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-affine-on/state/model.txt"
+  },
+  "repro/r275/runs/cuda-fractional-off/out/corrected_micrographs.star": {
+   "sha256": "5887ee5488d6150d77572f9cddf6ce714ec20d526a4a9cd9c09b55f7877a74d2",
+   "bytes": 763,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-fractional-off/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cuda-fractional-off/out/fractional.log": {
+   "sha256": "b47e18692e8c1987a2ef5aec590d44250e72ca6531e1cbc2a2ea66e7611af054",
+   "bytes": 1330,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-fractional-off/out/fractional.log"
+  },
+  "repro/r275/runs/cuda-fractional-off/out/fractional.star": {
+   "sha256": "719a8d89b4d5321bf66afeb48dbd94c3e89e5b0bf34c96865222c88589c206a5",
+   "bytes": 979,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-fractional-off/out/fractional.star"
+  },
+  "repro/r275/runs/cuda-fractional-off/state/global.txt": {
+   "sha256": "40c0c34c759b77ff63cf133d8d240b1cc9ff7ecef0220f0e8bc74d8bbd78a667",
+   "bytes": 171,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-fractional-off/state/global.txt"
+  },
+  "repro/r275/runs/cuda-fractional-off/state/model.txt": {
+   "sha256": "b70db49725f8bfe50c326713d28688d7710ffcf9217ed909a0bc0fee506254de",
+   "bytes": 30,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-fractional-off/state/model.txt"
+  },
+  "repro/r275/runs/cuda-fractional-on/out/corrected_micrographs.star": {
+   "sha256": "c1af6c45301b2b062b62f49673e93b4ab759b3d31fcecd9a1e097b10ad64ff19",
+   "bytes": 761,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-fractional-on/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cuda-fractional-on/out/fractional.log": {
+   "sha256": "eacb6a0bc8346ebdba4c0c2b51ec3c56e5a1c4496563d75307f26b8f5d9a13e7",
+   "bytes": 1329,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-fractional-on/out/fractional.log"
+  },
+  "repro/r275/runs/cuda-fractional-on/out/fractional.star": {
+   "sha256": "719a8d89b4d5321bf66afeb48dbd94c3e89e5b0bf34c96865222c88589c206a5",
+   "bytes": 979,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-fractional-on/out/fractional.star"
+  },
+  "repro/r275/runs/cuda-fractional-on/state/global.txt": {
+   "sha256": "40c0c34c759b77ff63cf133d8d240b1cc9ff7ecef0220f0e8bc74d8bbd78a667",
+   "bytes": 171,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-fractional-on/state/global.txt"
+  },
+  "repro/r275/runs/cuda-fractional-on/state/model.txt": {
+   "sha256": "b70db49725f8bfe50c326713d28688d7710ffcf9217ed909a0bc0fee506254de",
+   "bytes": 30,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-fractional-on/state/model.txt"
+  },
+  "repro/r275/runs/cuda-integer-off/out/corrected_micrographs.star": {
+   "sha256": "4cb0a6b5fcb3c4ef1ec9a4635ef5b81cc12d94223e907b9b8cd52ff8492f329f",
+   "bytes": 751,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-integer-off/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cuda-integer-off/out/integer.log": {
+   "sha256": "66a448435973c0bb37e158a3302ff9dae8e2a4b327c036de5eff4d3f5ad71f70",
+   "bytes": 1419,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-integer-off/out/integer.log"
+  },
+  "repro/r275/runs/cuda-integer-off/out/integer.star": {
+   "sha256": "f40ab53af1a4273afd53b7a5dd15e2746c7a5d72aa6f7ffff80a0012f5c570c6",
+   "bytes": 976,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-integer-off/out/integer.star"
+  },
+  "repro/r275/runs/cuda-integer-off/state/global.txt": {
+   "sha256": "ea09d9f3e2b629a89cbec26190b22cd2d1ec5d9da4e5072997ca15c411b2dcc1",
+   "bytes": 171,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-integer-off/state/global.txt"
+  },
+  "repro/r275/runs/cuda-integer-off/state/model.txt": {
+   "sha256": "b70db49725f8bfe50c326713d28688d7710ffcf9217ed909a0bc0fee506254de",
+   "bytes": 30,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-integer-off/state/model.txt"
+  },
+  "repro/r275/runs/cuda-integer-on/out/corrected_micrographs.star": {
+   "sha256": "76cb10e02fe99aa03ba11ac2026fd6bcd59b30a68d376c5d451eec8c62097f11",
+   "bytes": 749,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-integer-on/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cuda-integer-on/out/integer.log": {
+   "sha256": "400154561c78ad4c2d14616bc3b65275dfaaa5b2b3ba497611c894a42176132c",
+   "bytes": 1418,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-integer-on/out/integer.log"
+  },
+  "repro/r275/runs/cuda-integer-on/out/integer.star": {
+   "sha256": "f40ab53af1a4273afd53b7a5dd15e2746c7a5d72aa6f7ffff80a0012f5c570c6",
+   "bytes": 976,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-integer-on/out/integer.star"
+  },
+  "repro/r275/runs/cuda-integer-on/state/global.txt": {
+   "sha256": "ea09d9f3e2b629a89cbec26190b22cd2d1ec5d9da4e5072997ca15c411b2dcc1",
+   "bytes": 171,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-integer-on/state/global.txt"
+  },
+  "repro/r275/runs/cuda-integer-on/state/model.txt": {
+   "sha256": "b70db49725f8bfe50c326713d28688d7710ffcf9217ed909a0bc0fee506254de",
+   "bytes": 30,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-integer-on/state/model.txt"
+  },
+  "repro/r275/runs/cuda-noisy-off/out/corrected_micrographs.star": {
+   "sha256": "6efc248708bff95447cf28d55ef2b84d0e8c0c41fe8382d6602841c68cab91ff",
+   "bytes": 743,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-noisy-off/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cuda-noisy-off/out/noisy.log": {
+   "sha256": "b08e505f19eb29f0bba1819e6da95a5287e97e379a7be954a951fdbf5e6de42e",
+   "bytes": 6777,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-noisy-off/out/noisy.log"
+  },
+  "repro/r275/runs/cuda-noisy-off/out/noisy.star": {
+   "sha256": "ae6a9e79a769bcf67b712d69550bb3be566e853983f3873705d68e1e14ad6db7",
+   "bytes": 4857,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-noisy-off/out/noisy.star"
+  },
+  "repro/r275/runs/cuda-noisy-off/state/global.txt": {
+   "sha256": "3ecb8599392a1008c43d3a059d71469e30dfcee3e0a2b8d2ba09bfdf0d0f3bc3",
+   "bytes": 174,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-noisy-off/state/global.txt"
+  },
+  "repro/r275/runs/cuda-noisy-off/state/model.txt": {
+   "sha256": "51faffc74a7cc33d023799091f5372159ea6b54ec521bbdf42e9085750e16aef",
+   "bytes": 784,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-noisy-off/state/model.txt"
+  },
+  "repro/r275/runs/cuda-noisy-on/out/corrected_micrographs.star": {
+   "sha256": "d1f4c0f3a3d9161c41969dc0be6b832cd58423c477eca8c8e432d2fa8cf49dca",
+   "bytes": 741,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-noisy-on/out/corrected_micrographs.star"
+  },
+  "repro/r275/runs/cuda-noisy-on/out/noisy.log": {
+   "sha256": "11f097f9640888a93e7ad6c3fff1e161f8b2b4125d50ebaf2a6dd49025197b34",
+   "bytes": 6777,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-noisy-on/out/noisy.log"
+  },
+  "repro/r275/runs/cuda-noisy-on/out/noisy.star": {
+   "sha256": "ae6a9e79a769bcf67b712d69550bb3be566e853983f3873705d68e1e14ad6db7",
+   "bytes": 4857,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-noisy-on/out/noisy.star"
+  },
+  "repro/r275/runs/cuda-noisy-on/state/global.txt": {
+   "sha256": "3ecb8599392a1008c43d3a059d71469e30dfcee3e0a2b8d2ba09bfdf0d0f3bc3",
+   "bytes": 174,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-noisy-on/state/global.txt"
+  },
+  "repro/r275/runs/cuda-noisy-on/state/model.txt": {
+   "sha256": "51faffc74a7cc33d023799091f5372159ea6b54ec521bbdf42e9085750e16aef",
+   "bytes": 784,
+   "origin": "w4-repro-inputs.tar:r275/runs/cuda-noisy-on/state/model.txt"
+  },
+  "repro/src805/BLOBS.txt": {
+   "sha256": "fde4ca0c074f7843b00e54232bae0a66bf96136f6130a9ba71305f8230c0a16b",
+   "bytes": 564,
+   "origin": "w4-repro-inputs.tar:src805/BLOBS.txt"
+  },
+  "repro/src805/test-data/generate_known_motion_fixture.py": {
+   "sha256": "f28fbf516f8c2f7a3ae1b6133d54d3cc1e0708e2f90644cce30a845f4bbcef4f",
+   "bytes": 30686,
+   "origin": "w4-repro-inputs.tar:src805/test-data/generate_known_motion_fixture.py"
+  },
+  "repro/src805/test-data/generate_motion_diagnostics.py": {
+   "sha256": "5e781bb290b3f12b38f6dc7ec18bb955d56331219dc0216321e010ecbcdaf4cc",
+   "bytes": 5444,
+   "origin": "w4-repro-inputs.tar:src805/test-data/generate_motion_diagnostics.py"
+  },
+  "repro/src805/tools/check_motion_diagnostics.py": {
+   "sha256": "2be34b821ce9c351abaeab5c0280478362cf90ba774df7f529caced9e360eb16",
+   "bytes": 10960,
+   "origin": "w4-repro-inputs.tar:src805/tools/check_motion_diagnostics.py"
+  },
+  "repro/src805/tools/motion_field.py": {
+   "sha256": "d72cfad7175368fa6d0727c2727c49780328951c6f4d3ecc20e9ac662ac2e810",
+   "bytes": 13966,
+   "origin": "w4-repro-inputs.tar:src805/tools/motion_field.py"
+  },
+  "retained/ledger/attempt01.json": {
+   "sha256": "da05b5578828ab6114371a512fd2cffd92faba72445eb8168e67cafc6b344c59",
+   "bytes": 49870,
+   "origin": "7b76b848:docs/post_rc0/s1/first_divergence_20261022/ledger/attempt01.json"
+  },
+  "retained/qualification_20261025/cpu-observation-closure/actual/cpu-observations.json": {
+   "sha256": "26abe70e220d3ca96d76928d369e5af69c51ffc695b8c5aa0479f2649e571ab7",
+   "bytes": 7043,
+   "origin": "7b76b848:docs/post_rc0/s1/first_divergence_20261022/qualification_20261025/cpu-observation-closure/actual/cpu-observations.json"
+  },
+  "retained/qualification_20261025/matched-native/actual/out/w4_matched_native.json": {
+   "sha256": "ac8ab0c1043ef378247ae9cba52ba4dba105fdb42de26b1183a7165c859e9cb1",
+   "bytes": 84171,
+   "origin": "7b76b848:docs/post_rc0/s1/first_divergence_20261022/qualification_20261025/matched-native/actual/out/w4_matched_native.json"
+  },
+  "retained/qualification_20261025/matched-native/scripts/w4_matched_native.py": {
+   "sha256": "2aab5d88779d8cbdd868dba6dc310d9e0c853fce73cdda5dfd1d81a022fdef01",
+   "bytes": 17718,
+   "origin": "7b76b848:docs/post_rc0/s1/first_divergence_20261022/qualification_20261025/matched-native/scripts/w4_matched_native.py"
+  },
+  "retained/qualification_20261025/scripts/w4_objective_oracle.py": {
+   "sha256": "47f9db80accd6f6f02ed8c652c3e8e57ee05e47b9cb297f510d7d971ffef1ff1",
+   "bytes": 21608,
+   "origin": "7b76b848:docs/post_rc0/s1/first_divergence_20261022/qualification_20261025/scripts/w4_objective_oracle.py"
+  },
+  "retained/review/round1/indep.py": {
+   "sha256": "7ab70890240f50feeba1a50d67134541a13ab9fd83929a53e6d1f94c6275e1d5",
+   "bytes": 5663,
+   "origin": "7b76b848:docs/post_rc0/s1/first_divergence_20261022/review/round1/indep.py"
+  },
+  "retained/review/round1/ndep.log": {
+   "sha256": "71b1840be8cbeacae2066eb51c2f58d628dc7a01663b034835636108bfc4b1ee",
+   "bytes": 1381,
+   "origin": "7b76b848:docs/post_rc0/s1/first_divergence_20261022/review/round1/ndep.log"
+  },
+  "retained/review/round1/ndep.py": {
+   "sha256": "ab34971ba14e05c05e50958b25c7b9dae4f59199b54a7a8b1aaae25e478b2471",
+   "bytes": 1186,
+   "origin": "7b76b848:docs/post_rc0/s1/first_divergence_20261022/review/round1/ndep.py"
+  },
+  "source/src/metadata_table.cpp": {
+   "sha256": "6a4955e021b8c54cd1f84363c9a573a95a86d1b51529012b0a3c4ffb0444eceb",
+   "bytes": 57015,
+   "origin": "805d9de27898b4a10e6212e65098d5995a40fdb1:src/metadata_table.cpp"
+  },
+  "source/src/micrograph_model.cpp": {
+   "sha256": "609c401d00bcd2fdee2c484da315ff5d809d2e5a81ef11df7733c65d129d5756",
+   "bytes": 20766,
+   "origin": "805d9de27898b4a10e6212e65098d5995a40fdb1:src/micrograph_model.cpp"
+  },
+  "source/src/motioncorr_runner.cpp": {
+   "sha256": "8a3a1ad80edebc6959abbb80d118a0a358f703ff5041a0ade4995cbc2307d903",
+   "bytes": 230310,
+   "origin": "805d9de27898b4a10e6212e65098d5995a40fdb1:src/motioncorr_runner.cpp"
+  },
+  "source/test-data/generate_known_motion_fixture.py": {
+   "sha256": "f28fbf516f8c2f7a3ae1b6133d54d3cc1e0708e2f90644cce30a845f4bbcef4f",
+   "bytes": 30686,
+   "origin": "805d9de27898b4a10e6212e65098d5995a40fdb1:test-data/generate_known_motion_fixture.py"
+  },
+  "source/test-data/generate_motion_diagnostics.py": {
+   "sha256": "5e781bb290b3f12b38f6dc7ec18bb955d56331219dc0216321e010ecbcdaf4cc",
+   "bytes": 5444,
+   "origin": "805d9de27898b4a10e6212e65098d5995a40fdb1:test-data/generate_motion_diagnostics.py"
+  },
+  "source/tools/check_motion_diagnostics.py": {
+   "sha256": "2be34b821ce9c351abaeab5c0280478362cf90ba774df7f529caced9e360eb16",
+   "bytes": 10960,
+   "origin": "805d9de27898b4a10e6212e65098d5995a40fdb1:tools/check_motion_diagnostics.py"
+  },
+  "source/tools/motion_field.py": {
+   "sha256": "d72cfad7175368fa6d0727c2727c49780328951c6f4d3ecc20e9ac662ac2e810",
+   "bytes": 13966,
+   "origin": "805d9de27898b4a10e6212e65098d5995a40fdb1:tools/motion_field.py"
+  }
+ }
+}

@@ -1,0 +1,35 @@
+{
+ "utc": "2026-10-26T19:07:40.169025+00:00",
+ "status": "PREPARED, HELD; no payload read, no objective values, nothing run",
+ "source_git_object": "927a6890c8864f81ad58e44eac7281b080714af4",
+ "bundle_root": "/Users/alex.konstantinov/Documents/MotionCorr-evidence/20261026/Local-CCF-native-capture-r1/native-map-bundle-r1",
+ "index_sha256": "5b3dde3aefa3ff647927cbf702b3489fc1a470083fbcc23644bb8eb2f191c8d3",
+ "interpreter": "/Users/alex.konstantinov/.local/bin/python3 -B -P (CPython 3.13.7, NumPy 2.4.2, SciPy 1.17.1)",
+ "env": "OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 MKL_NUM_THREADS=1",
+ "command_template": "python3 -B -P physfreq_stage1_v1.py --release <parent release json> --out runs/physfreq-r1",
+ "weight_formula_physical": "float32(exp(-2*150*((kx/42)^2+(signed ky/32)^2))), kx=0..21, y=16 -> +16",
+ "weight_formula_inherited_check": "float32(exp(-2*B*(ly^2/32^2 + x^2/22^2))), B=150, native operation order, float64 evaluation (RFLOAT=double), all 704 bins bitwise vs saved weights or stop",
+ "files": {
+  "jointobj_core_v1.py": "d331a2a439adb7a9ce54812d3098ec48708024fde8d87532f8a0bffef8ac9f36",
+  "physfreq_stage1_v1.py": "43d00916066c169477db35ce29060a2efd4d0ced4b41bdeaff1a5848cb6b7696",
+  "PLAN_PHYSFREQ_STAGE1.md": "a415fb4e1403c7dbe7ee2ebba85fe40725d511efefaf7003c1813fa68e5d626d"
+ },
+ "external_pins": {
+  "/tmp/mc-local-physical-frequency-parent-20261026/PLAN.md": "b8c5752b69d96edb54ea6652ec6218135a4d9dadf6fc43d8d583118486548f3f",
+  "/tmp/mc-local-physical-frequency-parent-20261026/SCORING_PINS.json": "d8ae0606c97ee920239b17e0166d660ca3bb9311f36d3e223e32865dfa152551",
+  "/tmp/mc-local-joint-objective-sonnet-20261026/runs/characterization-r1/stage1_outcomes.json": "5f942ae825219f60029898da94269fd0ab2639fb044d1dfb312d32adceea779d",
+  "/tmp/mc-local-joint-objective-sonnet-20261026/runs/characterization-r1/SEAL.json": "900be85fea068eda1e6794e12f7d4e3053225c5be46de3f7e961adf692bf402e",
+  "/tmp/mc-local-joint-objective-sonnet-20261026/stage1_v2.py (baseline runner, context)": "c457eaa77e88e2f79ea9ef3b56179cf60edb9802e873ca44fd96b29570d325ab"
+ },
+ "release_json_required_keys": [
+  "core_sha256",
+  "script_sha256",
+  "plan_file",
+  "plan_sha256",
+  "pins_sha256",
+  "c9_disposition",
+  "directional_screen_frozen_sha256",
+  "authorizes_offline_weight_arm"
+ ],
+ "retained": "original C9 v1 FAIL; v2 relaxation NOT accepted; no all-controls-PASS; global isotropic harmful control UNRUN"
+}

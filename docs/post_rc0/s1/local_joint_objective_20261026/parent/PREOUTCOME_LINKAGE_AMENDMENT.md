@@ -1,0 +1,5 @@
+# Pre-outcome linkage tightening
+
+Before any captured objective value or optimization outcome is computed, require the existing5e-6 absolute bound on A (observed native real-map half-sum vs direct actual-spectrum J) AND B (ideal initial-spectrum phase J at actual entering shifts vs direct actual entering-spectrum J). Add C with the same bound: ideal-phase J at final native shifts versus direct J from actual final exit spectra; C checks accumulated phase arithmetic, not a native real map that was never captured at that final state. If any A/B/C fails, stop before optimization. No new tolerance is inferred from captured values.
+
+Original C9 sensitivity margin remains FAIL. The author's post-hoc relaxed threshold is not accepted, and no controls-all-PASS claim is permitted. A later independent review must assess actual operator/reference and negative-control correctness. Any limited saved-data characterization must explicitly retain this unresolved auxiliary margin failure and cannot serve as estimator qualification, gate acceptance or production adoption. No captured computation is yet authorized.

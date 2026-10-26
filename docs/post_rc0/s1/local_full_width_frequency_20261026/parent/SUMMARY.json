@@ -1,0 +1,52 @@
+{
+  "max_independent_J_difference": 1.7763568394002505e-15,
+  "patches": [
+    {
+      "patch": [
+        62,
+        79
+      ],
+      "baseline_error_px": {
+        "rms": 6.719771690816579,
+        "p95": 12.210140167581079,
+        "max": 14.847959456363629
+      },
+      "new_error_px": {
+        "rms": 1.2670930953115187,
+        "p95": 1.7405449645604256,
+        "max": 1.7731816276975598
+      },
+      "baseline_selected": "outcome:native_iter1_exit",
+      "new_selected": "outcome:zero",
+      "physical_weight_J_selected": 4.277540919175333,
+      "physical_weight_J_truth_center": 4.199968133889589,
+      "rms_change_px": -5.45267859550506
+    },
+    {
+      "patch": [
+        62,
+        47
+      ],
+      "baseline_error_px": {
+        "rms": 1.282895815939671,
+        "p95": 2.1109992472588566,
+        "max": 2.264967635038458
+      },
+      "new_error_px": {
+        "rms": 0.9973957397258149,
+        "p95": 1.5970273550459864,
+        "max": 1.7262511981711823
+      },
+      "baseline_selected": "outcome:rand2",
+      "new_selected": "outcome:rand4",
+      "physical_weight_J_selected": 4.1446167846355335,
+      "physical_weight_J_truth_center": 4.020744670761499,
+      "rms_change_px": -0.2855000762138562
+    }
+  ],
+  "regressions": [],
+  "bad_rms_drop_at_least_0p5": true,
+  "no_regressions_over_1e_8": true,
+  "prediction_supported": true,
+  "verdict": "NOT_REFUTED_ON_TWO_EXPOSED_PATCHES"
+}

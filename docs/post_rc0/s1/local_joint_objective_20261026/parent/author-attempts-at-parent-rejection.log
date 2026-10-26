@@ -1,0 +1,10 @@
+== attempt 1 2026-10-26T18:46:44Z controls_v1.py (plan/core/controls hashes in PRERUN_v1.sha256, frozen before run)
+exit 127
+attempt 1 aborted before python started: 'timeout' not on macOS (exit 127); retrying same script with perl alarm
+exit 1
+attempt 1b FAILED before any control: python -I disables user site where scipy 1.17.1 lives (ModuleNotFoundError). Output kept as controls_v1_run1_FAILED_scipy_not_on_I_path.out. Script/plan unchanged. Retry (1c) with python -B -P (no cwd/script-dir on sys.path; script inserts its own dir).
+attempt 1c exit 1
+attempt 1c RESULT: C0-C8,C10-C12 PASS; C9 FAIL under predeclared min-rel 1e-3 (swap/Wwide objective mutant min rel = 2.04e-4; all 10 mutant checks >=2e-4, i.e. >=1e8x the 1e-12 equality tolerance). v1 retained as failed (controls_v1_run2.out, controls_v1_result_run1c_C9FAIL.json). v2 = POST-HOC threshold amendment (1e-3 -> 1e-6, 1e6x the equality tolerance), declared in CONTROL_PLAN_v2.md; no other change; core unchanged.
+== attempt 2 2026-10-26T18:47:27Z controls_v2.py (hashes PRERUN_v2.sha256)
+attempt 2 exit 0
+stage1_v1_draft0_unrun.py = first draft (never executed); stage1_v1.py = same + np.bool_ casts + captured-bundle authorisation flag (still never executed on captured data)

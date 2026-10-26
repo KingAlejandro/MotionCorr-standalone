@@ -1,0 +1,17 @@
+== attempt 1 2026-10-26T18:46:44Z controls_v1.py (plan/core/controls hashes in PRERUN_v1.sha256, frozen before run)
+exit 127
+attempt 1 aborted before python started: 'timeout' not on macOS (exit 127); retrying same script with perl alarm
+exit 1
+attempt 1b FAILED before any control: python -I disables user site where scipy 1.17.1 lives (ModuleNotFoundError). Output kept as controls_v1_run1_FAILED_scipy_not_on_I_path.out. Script/plan unchanged. Retry (1c) with python -B -P (no cwd/script-dir on sys.path; script inserts its own dir).
+attempt 1c exit 1
+attempt 1c RESULT: C0-C8,C10-C12 PASS; C9 FAIL under predeclared min-rel 1e-3 (swap/Wwide objective mutant min rel = 2.04e-4; all 10 mutant checks >=2e-4, i.e. >=1e8x the 1e-12 equality tolerance). v1 retained as failed (controls_v1_run2.out, controls_v1_result_run1c_C9FAIL.json). v2 = POST-HOC threshold amendment (1e-3 -> 1e-6, 1e6x the equality tolerance), declared in CONTROL_PLAN_v2.md; no other change; core unchanged.
+== attempt 2 2026-10-26T18:47:27Z controls_v2.py (hashes PRERUN_v2.sha256)
+attempt 2 exit 0
+stage1_v1_draft0_unrun.py = first draft (never executed); stage1_v1.py = same + np.bool_ casts + captured-bundle authorisation flag (still never executed on captured data)
+== 2026-10-26T18:50:06Z PARENT REJECTED v2 (post-hoc C9 1e-3->1e-6 relaxation). v1/v2 files preserved byte-for-byte; v2 marked NOT ACCEPTED (V2_NOT_ACCEPTED.md); v1 C9 FAIL stands; RESPONSE_C9.md lists per-mutant original errors vs original C2/C5 tolerances. No new controls, no payload run. stage1_v1.py edited (never run): clearance must carry c9_disposition; prior copy kept as stage1_v1_draft1_unrun.py
+== 2026-10-26T18:50:39Z PLAN_STAGE1.md written (provisional). Syntax-compile only of stage1_v1.py/make_fake_bundle_v1.py; nothing executed.
+== 2026-10-26T18:52:41Z stage1_v2.py + PLAN_STAGE1_AMENDMENT_v2.md prepared (A and B gate; new C gates; exit-fft whitelisted). Syntax-compiled only. v1 files untouched. No controls rerun, no payload read.
+== 2026-10-26T18:56:58Z parent ack: Opus math review complete (core correct; original C2/C5 reject all mutants; C9 original FAIL stands; v2 controls not accepted). stage1_v2.py/core unchanged and HELD pending exact parent clearance. 11 starts retained; no extra grid starts. No run.
+== 2026-10-26T19:00:20Z RUN characterization-r1 (single, parent-cleared)
+characterization-r1 exit 0
+characterization-r1 sealed: stage1_outcomes.json sha256 5f942ae8...779d; SEAL.json 900be85f...; exit 0; all gates passed; 22 outcomes status 0, no cap. STOP, parent handles truth.

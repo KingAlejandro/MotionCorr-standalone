@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/private/tmp/mc-local-joint-objective-opus-20261026/check_opus_v1.py", line 103, in <module>
+    json.dump(out, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_opus_v1_result.json"), "w"), indent=1)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/__init__.py", line 179, in dump
+    for chunk in iterable:
+                 ^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/encoder.py", line 433, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/encoder.py", line 407, in _iterencode_dict
+    yield from chunks
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/encoder.py", line 407, in _iterencode_dict
+    yield from chunks
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/encoder.py", line 440, in _iterencode
+    o = _default(o)
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type bool is not JSON serializable
+exit 1

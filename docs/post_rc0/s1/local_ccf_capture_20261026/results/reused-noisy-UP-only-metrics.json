@@ -1,0 +1,201 @@
+{
+  "runtime": {
+    "angstrom": {
+      "rms": 1.6453708531561486,
+      "p95": 3.337290305991788,
+      "max": 7.284025716813742
+    },
+    "gate": "FAIL",
+    "px": {
+      "rms": 1.8591761052611848,
+      "p95": 3.770949498295806,
+      "max": 8.230537533122874
+    },
+    "per_frame_angstrom": [
+      {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      {
+        "rms": 1.3017636358124336,
+        "p95": 2.6296818564596984,
+        "max": 3.437374124272614
+      },
+      {
+        "rms": 1.4865584453749092,
+        "p95": 2.95859313261737,
+        "max": 4.94784465583993
+      },
+      {
+        "rms": 1.6352880227562654,
+        "p95": 3.3331989635868546,
+        "max": 6.114704211624123
+      },
+      {
+        "rms": 2.637729085723133,
+        "p95": 4.727851150765453,
+        "max": 7.284025716813742
+      }
+    ]
+  },
+  "STAR": {
+    "angstrom": {
+      "rms": 1.6453973835300504,
+      "p95": 3.3372789185622946,
+      "max": 7.283784224067593
+    },
+    "gate": "FAIL",
+    "px": {
+      "rms": 1.859206083084803,
+      "p95": 3.770936631143836,
+      "max": 8.230264659963382
+    },
+    "per_frame_angstrom": [
+      {
+        "rms": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      {
+        "rms": 1.301760347209436,
+        "p95": 2.629676878744851,
+        "max": 3.437369206132318
+      },
+      {
+        "rms": 1.4865470279638442,
+        "p95": 2.9585661129042573,
+        "max": 4.94781549754011
+      },
+      {
+        "rms": 1.6352908243535789,
+        "p95": 3.333099296536586,
+        "max": 6.1146125347363665
+      },
+      {
+        "rms": 2.6378181515236614,
+        "p95": 4.727792419017685,
+        "max": 7.283784224067593
+      }
+    ]
+  },
+  "roundtrip_vector_max_px": 0.0004910843767115281,
+  "local_enabled": true,
+  "convergence": {
+    "global_iterations": 2,
+    "global_increment_px": [
+      1.8927,
+      0.368717
+    ],
+    "global_converged": true,
+    "patches": [
+      {
+        "final_increment_px": 0.487513,
+        "converged": true
+      },
+      {
+        "final_increment_px": 0.365564,
+        "converged": true
+      },
+      {
+        "final_increment_px": 0.249186,
+        "converged": true
+      },
+      {
+        "final_increment_px": 0.30883,
+        "converged": true
+      },
+      {
+        "final_increment_px": 0.485102,
+        "converged": true
+      },
+      {
+        "final_increment_px": 1.5895,
+        "converged": false
+      },
+      {
+        "final_increment_px": 0.309318,
+        "converged": true
+      },
+      {
+        "final_increment_px": 0.364825,
+        "converged": true
+      },
+      {
+        "final_increment_px": 0.39193,
+        "converged": true
+      }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+  },
+  "manipulation": {
+    "dc": {
+      "arm": "both",
+      "global_zeroed": 10,
+      "global_eligible": 10,
+      "local_zeroed": 115,
+      "local_eligible": 115
+    },
+    "coupled": {
+      "global": {
+        "peaks": 10,
+        "guard_fired": 0,
+        "not_negative_definite": 0,
+        "offset_gt_1px": 0
+      },
+      "patch": {
+        "peaks": 115,
+        "guard_fired": 2,
+        "not_negative_definite": 0,
+        "offset_gt_1px": 2
+      }
+    }
+  },
+  "checker_exit": 1,
+  "checker": {
+    "accuracy_status": "FAIL",
+    "field_distance_status": "FAIL",
+    "identifiable": true,
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "signal_status": "CHARACTERIZATION",
+    "application_consistency_status": "NOT_TESTED"
+  },
+  "patch_coordinates": [
+    [
+      20.0,
+      15.0
+    ],
+    [
+      20.0,
+      47.0
+    ],
+    [
+      20.0,
+      79.0
+    ],
+    [
+      62.0,
+      15.0
+    ],
+    [
+      62.0,
+      47.0
+    ],
+    [
+      62.0,
+      79.0
+    ],
+    [
+      104.0,
+      15.0
+    ],
+    [
+      104.0,
+      79.0
+    ]
+  ],
+  "fit_RMS_logged": [
+    "Polynomial fit RMSD: X = 1.18334 px Y = 1.33899 px"
+  ],
+  "fit_RMS_estimand": "inherited observation residual"
+}

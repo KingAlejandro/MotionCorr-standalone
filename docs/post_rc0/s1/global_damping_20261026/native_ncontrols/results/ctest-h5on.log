@@ -1,0 +1,327 @@
+start 2026-10-26T01:17:36Z cand=20e52f578bf47a9428d2ec62a594444e42a74879 binary=a7db45df3edd6b7882d0f07dfd73feb1b5d022591782d54c8cae03e21571e3ef
+  Test #95: NativeMovieStaging
+
+Total Tests: 95
+=== CTest Collection Validation: PASS === 
+  CUDA-only required tests: not required
+  Collected tests: 95
+    - HermitianProjectionOracle      [ADDITIVE]
+    - CpuDoseSymmetry                [REQUIRED]
+    - CpuDoseSymmetryBase            [REQUIRED]
+    - CpuUnweightedStream            [ADDITIVE]
+    - PatchRetryState                [REQUIRED]
+    - GlobalHalfGain                 [ADDITIVE]
+    - CoupledPeak                    [ADDITIVE]
+    - IsotropicWeight                [ADDITIVE]
+    - CcfDcHook                      [ADDITIVE]
+    - PeakFitArithmetic              [REQUIRED]
+    - PeakFitArithmeticMutant_float-denominator [REQUIRED]
+    - PeakFitArithmeticMutant_early-store [REQUIRED]
+    - PeakFitArithmeticMutant_wrong-scale [REQUIRED]
+    - RealspaceBorderValidation      [ADDITIVE]
+    - PatchRetryAdmission            [REQUIRED]
+    - RunnerInterpolateRecenter      [REQUIRED]
+    - FloatPlanCache                 [ADDITIVE]
+    - MrcHeaderStats                 [REQUIRED]
+    - ReportPlotUndefinedAxis        [REQUIRED]
+    - PdfConcat                      [REQUIRED]
+    - DefectParser                   [REQUIRED]
+    - DeflateLayout                  [REQUIRED]
+    - DeflateLayoutMutant_span_wrap  [REQUIRED]
+    - DeflateLayoutMutant_stage_sum  [REQUIRED]
+    - DeflateLayoutMutant_reserve_round [REQUIRED]
+    - DeflateLayoutMutant_layout_table [REQUIRED]
+    - DeflateLayoutMutant_arena_start [REQUIRED]
+    - DeflateLayoutMutant_drain_step [REQUIRED]
+    - Adler32Arithmetic              [REQUIRED]
+    - Adler32KernelHost              [REQUIRED]
+    - StageProfileThreads            [REQUIRED]
+    - FrameBufferPool                [REQUIRED]
+    - ScratchArena                   [REQUIRED]
+    - ReaderPool                     [ADDITIVE]
+    - ReaderPoolMutant_spin          [ADDITIVE]
+    - ReaderPoolMutant_nowait        [ADDITIVE]
+    - DefectNeighbours               [REQUIRED]
+    - DefectMergeMutant_append_only  [ADDITIVE]
+    - DefectMergeMutant_no_order_check [ADDITIVE]
+    - DefectMergeMutant_swap_xy      [ADDITIVE]
+    - RelionErrorOwnership           [ADDITIVE]
+    - RelionErrorUnprinted           [ADDITIVE]
+    - TiffIdentityLaterChunkHostControls [ADDITIVE]
+    - NvcompAcceptanceDiagnostics    [REQUIRED]
+    - ProfilingKit                   [REQUIRED]
+    - StickyCudaProcessLifecycle     [ADDITIVE]
+    - DatasetFinalization            [ADDITIVE]
+    - TestHygiene235                 [ADDITIVE]
+    - GainCacheOwnership             [REQUIRED]
+    - NvcompGuards                   [REQUIRED]
+    - SyntheticRegression            [REQUIRED]
+    - HotPixelRngDeterminism         [REQUIRED]
+    - RunnerExposure                 [REQUIRED]
+    - Runner_failure                 [REQUIRED]
+    - Runner_invalid                 [REQUIRED]
+    - Runner_resume                  [REQUIRED]
+    - Runner_tomography              [REQUIRED]
+    - RunnerLateBin                  [REQUIRED]
+    - RunnerExportedUnits            [REQUIRED]
+    - GainCache                      [REQUIRED]
+    - TiffRead                       [REQUIRED]
+    - DamagedMovie                   [REQUIRED]
+    - TruncatedMrcMovie              [REQUIRED]
+    - TruncatedGainDefect            [REQUIRED]
+    - CompressedMovieSequence        [REQUIRED]
+    - CompressedMrcStatus_bz2        [REQUIRED]
+    - CompressedMrcStatus_xz         [REQUIRED]
+    - CompressedMrcStatus_zst        [REQUIRED]
+    - InputFormats                   [REQUIRED]
+    - CutDownMovie                   [REQUIRED]
+    - GlobalIfftElision              [REQUIRED]
+    - HostBufferReuse                [REQUIRED]
+    - StageProfile                   [REQUIRED]
+    - RunnerModelParser              [REQUIRED]
+    - EerMemorySafety                [REQUIRED]
+    - MicrographModelBounds          [REQUIRED]
+    - RunnerInterpolateShifts        [REQUIRED]
+    - WriteFaults                    [REQUIRED]
+    - WriteFaultsSync                [REQUIRED]
+    - WriteFaultsMultiProduct        [REQUIRED]
+    - OutputStageFaults              [REQUIRED]
+    - LogfileFromEps                 [REQUIRED]
+    - LogfileFromEpsMutant_always_eps [REQUIRED]
+    - LogfileFromEpsMutant_late_guard [REQUIRED]
+    - LogfileFromEpsMutant_eps_order [REQUIRED]
+    - LogfileFromEpsMutant_placeholder [REQUIRED]
+    - LogfileFromEpsMutant_concat_cleanup [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - CudaValidationParser           [REQUIRED]
+    - MultiGpuScheduling             [REQUIRED]
+    - ExperimentalFlagsCli           [ADDITIVE]
+    - OutputTreeComparator           [REQUIRED]
+    - JointStarPublication           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+    - NativeMovieStaging             [REQUIRED]
+validate_test_collection rc=0
+test_1_absent_truth_script_and_missing_binary (__main__.TestCiFailClosedControls.test_1_absent_truth_script_and_missing_binary)
+Control 1: Missing truth script fails CI preflight; missing binary fails gate runner. ... ok
+test_2_absent_dependency_fails_cmake (__main__.TestCiFailClosedControls.test_2_absent_dependency_fails_cmake)
+Control 2: BUILD_TESTING=ON must fail if python or numpy is missing in MotionCorr CMakeLists.txt. ... ok
+test_3_zero_or_missing_collected_tests_fails (__main__.TestCiFailClosedControls.test_3_zero_or_missing_collected_tests_fails)
+Control 3: Empty test suite or missing required test fails collection validation. ... ok
+test_4_missing_fixture_or_truth_fails (__main__.TestCiFailClosedControls.test_4_missing_fixture_or_truth_fails)
+Control 4: Missing fixture movie, missing truth file, or malformed manifest fails verify_fixtures. ... ok
+test_5_byte_flipped_fixture_fails (__main__.TestCiFailClosedControls.test_5_byte_flipped_fixture_fails)
+Control 5: Baseline fixture must pass first, then fail after corrupting one byte. ... ok
+test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref. ... ok
+test_7_reused_stem_and_canonical_generator_protection (__main__.TestCiFailClosedControls.test_7_reused_stem_and_canonical_generator_protection)
+Control 7: Generator protects canonical truth and refuses conflicting stem overwrite. ... ok
+test_8_canonical_star_input_is_immutable (__main__.TestCiFailClosedControls.test_8_canonical_star_input_is_immutable)
+Control 8: STAR metadata drift that leaves the pixels untouched must fail closed. ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 16.688s
+
+OK
+test_ci_fail_closed rc=0
+Test project /tmp/motioncorr-damping-a1c78adc1d0f/build-h5on
+      Start  1: HermitianProjectionOracle
+      Start  2: CpuDoseSymmetry
+      Start  3: CpuDoseSymmetryBase
+      Start  4: CpuUnweightedStream
+ 1/95 Test  #1: HermitianProjectionOracle ...................   Passed    0.01 sec
+      Start  5: PatchRetryState
+ 2/95 Test  #5: PatchRetryState .............................   Passed    0.04 sec
+      Start  6: GlobalHalfGain
+ 3/95 Test  #6: GlobalHalfGain ..............................   Passed    0.18 sec
+      Start  7: CoupledPeak
+ 4/95 Test  #7: CoupledPeak .................................   Passed    0.12 sec
+      Start  8: IsotropicWeight
+ 5/95 Test  #8: IsotropicWeight .............................   Passed    0.13 sec
+      Start  9: CcfDcHook
+ 6/95 Test  #9: CcfDcHook ...................................   Passed    0.11 sec
+      Start 10: PeakFitArithmetic
+ 7/95 Test #10: PeakFitArithmetic ...........................   Passed    0.01 sec
+      Start 11: PeakFitArithmeticMutant_float-denominator
+ 8/95 Test #11: PeakFitArithmeticMutant_float-denominator ...   Passed    0.01 sec
+      Start 12: PeakFitArithmeticMutant_early-store
+ 9/95 Test #12: PeakFitArithmeticMutant_early-store .........   Passed    0.01 sec
+      Start 13: PeakFitArithmeticMutant_wrong-scale
+10/95 Test #13: PeakFitArithmeticMutant_wrong-scale .........   Passed    0.00 sec
+      Start 14: RealspaceBorderValidation
+11/95 Test #14: RealspaceBorderValidation ...................   Passed    0.01 sec
+      Start 15: PatchRetryAdmission
+12/95 Test #15: PatchRetryAdmission .........................   Passed    0.00 sec
+      Start 16: RunnerInterpolateRecenter
+13/95 Test #16: RunnerInterpolateRecenter ...................   Passed    0.01 sec
+      Start 17: FloatPlanCache
+14/95 Test #17: FloatPlanCache ..............................   Passed    0.02 sec
+      Start 18: MrcHeaderStats
+15/95 Test #18: MrcHeaderStats ..............................   Passed    0.01 sec
+      Start 19: ReportPlotUndefinedAxis
+16/95 Test #19: ReportPlotUndefinedAxis .....................   Passed    0.01 sec
+      Start 20: PdfConcat
+17/95 Test #20: PdfConcat ...................................   Passed    0.08 sec
+      Start 21: DefectParser
+18/95 Test #21: DefectParser ................................   Passed    0.02 sec
+      Start 22: DeflateLayout
+19/95 Test #22: DeflateLayout ...............................   Passed    0.02 sec
+      Start 23: DeflateLayoutMutant_span_wrap
+20/95 Test #23: DeflateLayoutMutant_span_wrap ...............   Passed    0.01 sec
+      Start 24: DeflateLayoutMutant_stage_sum
+21/95 Test #24: DeflateLayoutMutant_stage_sum ...............   Passed    0.01 sec
+      Start 25: DeflateLayoutMutant_reserve_round
+22/95 Test #25: DeflateLayoutMutant_reserve_round ...........   Passed    0.01 sec
+      Start 26: DeflateLayoutMutant_layout_table
+23/95 Test #26: DeflateLayoutMutant_layout_table ............   Passed    0.01 sec
+      Start 27: DeflateLayoutMutant_arena_start
+24/95 Test #27: DeflateLayoutMutant_arena_start .............   Passed    0.01 sec
+      Start 28: DeflateLayoutMutant_drain_step
+25/95 Test #28: DeflateLayoutMutant_drain_step ..............   Passed    0.01 sec
+      Start 29: Adler32Arithmetic
+26/95 Test #29: Adler32Arithmetic ...........................   Passed    0.90 sec
+      Start 30: Adler32KernelHost
+27/95 Test #30: Adler32KernelHost ...........................   Passed    0.00 sec
+      Start 31: StageProfileThreads
+28/95 Test #31: StageProfileThreads .........................   Passed    0.22 sec
+      Start 32: FrameBufferPool
+29/95 Test #32: FrameBufferPool .............................   Passed    0.04 sec
+      Start 33: ScratchArena
+30/95 Test #33: ScratchArena ................................   Passed    0.00 sec
+      Start 34: ReaderPool
+31/95 Test  #4: CpuUnweightedStream .........................   Passed    2.25 sec
+      Start 35: ReaderPoolMutant_spin
+32/95 Test #34: ReaderPool ..................................   Passed    0.55 sec
+      Start 36: ReaderPoolMutant_nowait
+33/95 Test #36: ReaderPoolMutant_nowait .....................   Passed    0.04 sec
+      Start 37: DefectNeighbours
+34/95 Test #37: DefectNeighbours ............................   Passed    0.01 sec
+      Start 38: DefectMergeMutant_append_only
+35/95 Test #38: DefectMergeMutant_append_only ...............   Passed    0.00 sec
+      Start 39: DefectMergeMutant_no_order_check
+36/95 Test #39: DefectMergeMutant_no_order_check ............   Passed    0.01 sec
+      Start 40: DefectMergeMutant_swap_xy
+37/95 Test #40: DefectMergeMutant_swap_xy ...................   Passed    0.01 sec
+      Start 41: RelionErrorOwnership
+38/95 Test #41: RelionErrorOwnership ........................   Passed    0.01 sec
+      Start 42: RelionErrorUnprinted
+39/95 Test #42: RelionErrorUnprinted ........................   Passed    0.00 sec
+      Start 43: TiffIdentityLaterChunkHostControls
+40/95 Test #35: ReaderPoolMutant_spin .......................   Passed    0.70 sec
+      Start 44: NvcompAcceptanceDiagnostics
+41/95 Test #44: NvcompAcceptanceDiagnostics .................   Passed    0.15 sec
+      Start 45: ProfilingKit
+42/95 Test  #2: CpuDoseSymmetry .............................   Passed    4.36 sec
+      Start 46: StickyCudaProcessLifecycle
+43/95 Test  #3: CpuDoseSymmetryBase .........................   Passed    4.39 sec
+      Start 47: DatasetFinalization
+44/95 Test #47: DatasetFinalization .........................   Passed    0.21 sec
+      Start 48: TestHygiene235
+45/95 Test #48: TestHygiene235 ..............................   Passed    0.12 sec
+      Start 49: GainCacheOwnership
+46/95 Test #46: StickyCudaProcessLifecycle ..................   Passed    0.84 sec
+      Start 50: NvcompGuards
+47/95 Test #50: NvcompGuards ................................   Passed    0.03 sec
+      Start 51: SyntheticRegression
+48/95 Test #51: SyntheticRegression .........................   Passed    0.77 sec
+      Start 52: HotPixelRngDeterminism
+49/95 Test #52: HotPixelRngDeterminism ......................   Passed    0.57 sec
+      Start 53: RunnerExposure
+50/95 Test #53: RunnerExposure ..............................   Passed    0.59 sec
+      Start 54: Runner_failure
+51/95 Test #54: Runner_failure ..............................   Passed    0.13 sec
+      Start 55: Runner_invalid
+52/95 Test #55: Runner_invalid ..............................   Passed    0.18 sec
+      Start 56: Runner_resume
+53/95 Test #49: GainCacheOwnership ..........................   Passed    4.51 sec
+      Start 57: Runner_tomography
+54/95 Test #57: Runner_tomography ...........................   Passed    0.41 sec
+      Start 58: RunnerLateBin
+55/95 Test #56: Runner_resume ...............................   Passed    2.33 sec
+      Start 59: RunnerExportedUnits
+56/95 Test #43: TiffIdentityLaterChunkHostControls ..........   Passed    7.19 sec
+      Start 60: GainCache
+57/95 Test #59: RunnerExportedUnits .........................   Passed    0.13 sec
+      Start 61: TiffRead
+58/95 Test #58: RunnerLateBin ...............................   Passed    0.75 sec
+      Start 62: DamagedMovie
+59/95 Test #61: TiffRead ....................................   Passed    0.84 sec
+      Start 63: TruncatedMrcMovie
+60/95 Test #60: GainCache ...................................   Passed    1.14 sec
+      Start 64: TruncatedGainDefect
+61/95 Test #64: TruncatedGainDefect .........................   Passed    1.99 sec
+      Start 65: CompressedMovieSequence
+62/95 Test #62: DamagedMovie ................................   Passed    2.93 sec
+      Start 66: CompressedMrcStatus_bz2
+63/95 Test #66: CompressedMrcStatus_bz2 .....................***Skipped   0.05 sec
+      Start 67: CompressedMrcStatus_xz
+64/95 Test #65: CompressedMovieSequence .....................   Passed    0.70 sec
+      Start 68: CompressedMrcStatus_zst
+65/95 Test #63: TruncatedMrcMovie ...........................   Passed    3.42 sec
+      Start 69: InputFormats
+66/95 Test #67: CompressedMrcStatus_xz ......................   Passed    1.75 sec
+      Start 70: CutDownMovie
+67/95 Test #68: CompressedMrcStatus_zst .....................   Passed    1.67 sec
+      Start 71: GlobalIfftElision
+68/95 Test #71: GlobalIfftElision ...........................   Passed    1.38 sec
+      Start 72: HostBufferReuse
+69/95 Test #70: CutDownMovie ................................   Passed    4.10 sec
+      Start 73: StageProfile
+70/95 Test #72: HostBufferReuse .............................   Passed    2.90 sec
+      Start 74: RunnerModelParser
+71/95 Test #74: RunnerModelParser ...........................   Passed    0.15 sec
+      Start 75: EerMemorySafety
+72/95 Test #73: StageProfile ................................   Passed    1.74 sec
+      Start 76: MicrographModelBounds
+73/95 Test #76: MicrographModelBounds .......................   Passed    1.06 sec
+      Start 77: RunnerInterpolateShifts
+74/95 Test #77: RunnerInterpolateShifts .....................   Passed    0.55 sec
+      Start 78: WriteFaults
+75/95 Test #78: WriteFaults .................................   Passed    0.56 sec
+      Start 79: WriteFaultsSync
+76/95 Test #79: WriteFaultsSync .............................   Passed    0.50 sec
+      Start 80: WriteFaultsMultiProduct
+77/95 Test #80: WriteFaultsMultiProduct .....................   Passed    0.55 sec
+      Start 81: OutputStageFaults
+78/95 Test #81: OutputStageFaults ...........................   Passed    0.50 sec
+      Start 82: LogfileFromEps
+79/95 Test #82: LogfileFromEps ..............................   Passed    3.99 sec
+      Start 83: LogfileFromEpsMutant_always_eps
+80/95 Test #83: LogfileFromEpsMutant_always_eps .............   Passed    0.34 sec
+      Start 84: LogfileFromEpsMutant_late_guard
+81/95 Test #84: LogfileFromEpsMutant_late_guard .............   Passed    0.27 sec
+      Start 85: LogfileFromEpsMutant_eps_order
+82/95 Test #85: LogfileFromEpsMutant_eps_order ..............   Passed    0.20 sec
+      Start 86: LogfileFromEpsMutant_placeholder
+83/95 Test #86: LogfileFromEpsMutant_placeholder ............   Passed    0.54 sec
+      Start 87: LogfileFromEpsMutant_concat_cleanup
+84/95 Test #87: LogfileFromEpsMutant_concat_cleanup .........   Passed    3.49 sec
+      Start 88: CiFailClosedControls
+85/95 Test #75: EerMemorySafety .............................   Passed   20.39 sec
+      Start 89: CudaValidationParser
+86/95 Test #89: CudaValidationParser ........................   Passed    0.05 sec
+      Start 90: MultiGpuScheduling
+87/95 Test #88: CiFailClosedControls ........................   Passed   19.45 sec
+      Start 91: ExperimentalFlagsCli
+88/95 Test #91: ExperimentalFlagsCli ........................   Passed    0.17 sec
+      Start 92: OutputTreeComparator
+89/95 Test #92: OutputTreeComparator ........................   Passed    0.65 sec
+      Start 93: JointStarPublication
+90/95 Test #69: InputFormats ................................   Passed   39.91 sec
+      Start 94: ImageWriteFaults
+91/95 Test #94: ImageWriteFaults ............................   Passed    0.02 sec
+      Start 95: NativeMovieStaging
+92/95 Test #95: NativeMovieStaging ..........................   Passed    0.30 sec
+93/95 Test #93: JointStarPublication ........................   Passed    0.80 sec
+94/95 Test #45: ProfilingKit ................................   Passed   57.05 sec
+95/95 Test #90: MultiGpuScheduling ..........................   Passed   48.37 sec
+
+100% tests passed out of 95
+
+Label Time Summary:
+host    =   0.01 sec*proc (1 test)
+
+Total Test time (real) =  88.57 sec
+
+The following tests did not run:
+	 66 - CompressedMrcStatus_bz2 (Skipped)
+ctest rc=0 end 2026-10-26T01:19:22Z

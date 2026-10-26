@@ -1,0 +1,1 @@
+== stage B exp: CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598 CUDA_DEVICE_ORDER=PCI_BUS_ID OMP_NUM_THREADS=2 taskset -c 80,81 /home/alex/mc-dcnative2-20261026/build-exp/experiment_ccf_dc_stage --json /home/alex/mc-dcnative-ab-20261026/logs/oracle-exp.json

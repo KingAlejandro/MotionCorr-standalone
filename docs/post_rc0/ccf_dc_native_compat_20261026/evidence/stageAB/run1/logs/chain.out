@@ -1,0 +1,214 @@
+leases acquired: dcnative-gpu2-cpu80-87, cuda-boundary-cpu80-87 at 2026-10-26T22:17:48Z
+== staging 2026-10-26T22:17:48Z
+affinity: pid 4009559's current affinity list: 80-87
+8
+extracted files=8497 appledouble=0
+archive sha256: 313f671f4af90e227754ec17c6e8a9cae70a7ea5aaca713de62aa1d297b8ea36  source commit: 96e7e7be0f08469da51c67a1ab251ae4e97cdfc3
+== source-tree proof: attempt-2 src (94e39570) vs staged 96e7e7be, src tests test-data CMakeLists.txt
+diff -rq src rc=0 lines=0
+diff -rq tests rc=1 lines=1
+diff -rq test-data rc=1 lines=1
+diff CMakeLists.txt rc=0
+== tools differing between attempt-2 tree and 96e7e7be:
+Files mc-dcnative2-20261026/src/tools/ccf_dc_native_rows.py and /home/alex/mc-dcnative-ab-20261026/src96e/tools/ccf_dc_native_rows.py differ
+Only in mc-dcnative2-20261026/src/tools: __pycache__
+Files mc-dcnative2-20261026/src/tools/test_ccf_dc_native_rows.py and /home/alex/mc-dcnative-ab-20261026/src96e/tools/test_ccf_dc_native_rows.py differ
+== binaries and oracles (attempt 2) vs recorded hashes
+2db45b2df8241e14bda28e9dbe3d7eae0ce9f5612a7b775bc33990aeb27bed6a  /home/alex/mc-dcnative2-20261026/build-def/motioncorr
+recorded-in-attempt2-def: 1
+b918cadc571eb09d753fd454a20554400ea6443b6b0738e14670f96c7afb2857  /home/alex/mc-dcnative2-20261026/build-exp/motioncorr
+recorded-in-attempt2-exp: 1
+3a7d4f472c0f795f6e3d7fdb7c31ab5c3e6bdef00ccf95d08a5cf5855155d0ff  /home/alex/mc-dcnative2-20261026/build-iso/motioncorr
+recorded-in-attempt2-iso: 1
+3b93be6a06a5a6c41148671bdb654e1a4b33ad500f49e601a451e36e3c95b026  /home/alex/mc-dcnative2-20261026/build-exp/experiment_ccf_dc_stage
+99f1f35228681ea60836094d300237020b89a806ab5a5ebdd872f8b1cc3dfdb5  /home/alex/mc-dcnative2-20261026/build-iso/experiment_ccf_dc_stage
+== python identity
+python 3.12.3 /home/alex/.mc-venv/bin/python3
+numpy 2.5.3 /home/alex/.mc-venv/lib/python3.12/site-packages/numpy/__init__.py
+Linux-6.8.0-136-generic-x86_64-with-glibc2.39
+ccf_dc_native_rows /home/alex/mc-dcnative-ab-20261026/src96e/tools/ccf_dc_native_rows.py 569c33a16c8a18a266904d0430c3be34e0cb3a6aca363397677e2fa760d72248
+ccf_dc_tap_field /home/alex/mc-dcnative-ab-20261026/src96e/tools/ccf_dc_tap_field.py 831ba828f28ed1a7072dc825a18354d405e9557ad19d8464e32cb490a0065f1d
+check_motion_diagnostics /home/alex/mc-dcnative-ab-20261026/src96e/tools/check_motion_diagnostics.py 2be34b821ce9c351abaeab5c0280478362cf90ba774df7f529caced9e360eb16
+check_realistic_motion /home/alex/mc-dcnative-ab-20261026/src96e/tools/check_realistic_motion.py b0ab099a256e458b1c8aea6c2ff5d9ceacab10dd81945b025e96e5c8a87b7ff9
+motion_field /home/alex/mc-dcnative-ab-20261026/src96e/tools/motion_field.py d72cfad7175368fa6d0727c2727c49780328951c6f4d3ecc20e9ac662ac2e810
+generate_ccf_dc_n_controls /home/alex/mc-dcnative-ab-20261026/src96e/test-data/generate_ccf_dc_n_controls.py 8e5a6f58c6e85c869298e424c0fa343ec48fc6009448093271bd927d97fc308d
+generate_motion_diagnostics /home/alex/mc-dcnative-ab-20261026/src96e/test-data/generate_motion_diagnostics.py 5e781bb290b3f12b38f6dc7ec18bb955d56331219dc0216321e010ecbcdaf4cc
+old-attempt paths on sys.path: []
+== fixtures at the venue (hashes only)
+gen-k267 rc=0
+gen-n rc=0
+95514753e8181896a3674826a1ae05e35e6baaa15f71d574fde887406f9f097a
+9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc  fx-k267/MANIFEST.json
+6e7b19bd4d5be963c51813e7941749daeb1ca44f8825e79f4df623676fd7c2a8  fx-n/MANIFEST.json
+== STAGE A 2026-10-26T22:17:50Z
+== guard A-pure 2026-10-26T22:17:50Z
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1551 MiB, 0 %, 39
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 425 MiB, 0 %, 37
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 425 MiB, 0 %, 31
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49769 MiB, 87 %, 66
+3983855, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1540 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49758 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+cpu80-87 busy%: cpu80 0 cpu81 0 cpu82 0 cpu83 0 cpu84 0 cpu85 0 cpu86 0 cpu87 0 
+processes currently running on cpu80-87:
+ 81 R     0.0 alex     4009687 ps -eo psr,stat,pcpu,user,pid,args --no-headers
+/dev/sda1       3.1T  2.5T  592G  81% /
+Mem:             432          15           4           1         419         417
+314M	/home/alex/mc-dcnative-ab-20261026
+guard A-pure passed
+== stage A pure: CUDA_VISIBLE_DEVICES='' /home/alex/.mc-venv/bin/python3 /home/alex/mc-dcnative-ab-20261026/src96e/tools/test_ccf_dc_native_rows.py -v
+A-pure rc=0
+ran=28 final=OK skipped_total=17 ok=10 not_ok=['test_absent_tap_fails_closed', 'test_cuda_declared_row_on_a_cpu_run', 'test_def_build_row_is_star_only_by_declaration', 'test_failed_exit_is_not_rescued_by_a_complete_tap', 'test_global_only_row_cannot_claim_local_coverage', 'test_identity_report', 'test_incomplete_publication', 'test_invalid_tap_rows_are_not_labelled_scored', 'test_local_reached_when_not_requested_is_invalid', 'test_missing_marker_is_reported_not_passed', 'test_n_control_row', 'test_n_tap_with_a_local_model_is_invalid', 'test_placeholder_tap_and_tap_star_disagreement', 'test_positive_affine_both', 'test_skip_logfile_does_not_change_the_products', 'test_two_failed_runs_are_not_an_identity', 'test_witness_incomplete_arm_and_identity']
+required_not_ok=["test_n_score_reproduces_all_16_retained_rows"]
+----------------------------------------------------------------------
+Ran 28 tests in 0.443s
+
+OK (skipped=17)
+== guard A-exp 2026-10-26T22:17:54Z
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1551 MiB, 0 %, 39
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 425 MiB, 0 %, 37
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 425 MiB, 0 %, 31
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49769 MiB, 87 %, 66
+3983855, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1540 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49758 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+cpu80-87 busy%: cpu80 0 cpu81 0 cpu82 0 cpu83 0 cpu84 0 cpu85 0 cpu86 0 cpu87 0 
+processes currently running on cpu80-87:
+ 83 R     0.0 alex     4009735 ps -eo psr,stat,pcpu,user,pid,args --no-headers
+/dev/sda1       3.1T  2.5T  592G  81% /
+Mem:             432          15           4           1         419         417
+314M	/home/alex/mc-dcnative-ab-20261026
+guard A-exp passed
+== stage A exp: CUDA_VISIBLE_DEVICES='' /home/alex/.mc-venv/bin/python3 /home/alex/mc-dcnative-ab-20261026/src96e/tools/test_ccf_dc_native_rows.py --binary /home/alex/mc-dcnative2-20261026/build-exp/motioncorr -v
+A-exp rc=0
+ran=28 final=OK skipped_total=0 ok=27 not_ok=[]
+required_not_ok=["test_n_score_reproduces_all_16_retained_rows"]
+----------------------------------------------------------------------
+Ran 28 tests in 3.760s
+
+OK
+== guard A-iso 2026-10-26T22:18:01Z
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1551 MiB, 0 %, 39
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 425 MiB, 0 %, 37
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 425 MiB, 0 %, 31
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49769 MiB, 87 %, 66
+3983855, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1540 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49758 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+cpu80-87 busy%: cpu80 0 cpu81 0 cpu82 0 cpu83 0 cpu84 0 cpu85 0 cpu86 0 cpu87 0 
+processes currently running on cpu80-87:
+ 83 R     900 alex     4009880 ps -eo psr,stat,pcpu,user,pid,args --no-headers
+/dev/sda1       3.1T  2.5T  592G  81% /
+Mem:             432          15           4           1         419         417
+315M	/home/alex/mc-dcnative-ab-20261026
+guard A-iso passed
+== stage A iso: CUDA_VISIBLE_DEVICES='' /home/alex/.mc-venv/bin/python3 /home/alex/mc-dcnative-ab-20261026/src96e/tools/test_ccf_dc_native_rows.py --iso --binary /home/alex/mc-dcnative2-20261026/build-iso/motioncorr -v
+A-iso rc=0
+ran=28 final=OK skipped_total=0 ok=27 not_ok=[]
+required_not_ok=["test_n_score_reproduces_all_16_retained_rows"]
+----------------------------------------------------------------------
+Ran 28 tests in 3.663s
+
+OK
+== STAGE A done 2026-10-26T22:18:09Z
+== STAGE B 2026-10-26T22:18:09Z
+== guard B-pre 2026-10-26T22:18:09Z
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1551 MiB, 0 %, 39
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 425 MiB, 0 %, 37
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 425 MiB, 0 %, 31
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49769 MiB, 87 %, 66
+3983855, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1540 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49758 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+cpu80-87 busy%: cpu80 0 cpu81 0 cpu82 0 cpu83 0 cpu84 0 cpu85 0 cpu86 0 cpu87 0 
+processes currently running on cpu80-87:
+ 82 R     0.0 alex     4010030 ps -eo psr,stat,pcpu,user,pid,args --no-headers
+/dev/sda1       3.1T  2.5T  592G  81% /
+Mem:             432          15           4           1         419         417
+315M	/home/alex/mc-dcnative-ab-20261026
+guard B-pre passed
+lease acquired: gpu2-correctness at 2026-10-26T22:18:12Z
+== guard B-exp 2026-10-26T22:18:12Z
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1551 MiB, 0 %, 39
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 425 MiB, 0 %, 37
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 425 MiB, 0 %, 31
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49769 MiB, 86 %, 66
+3983855, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1540 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49758 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+cpu80-87 busy%: cpu80 0 cpu81 0 cpu82 0 cpu83 0 cpu84 0 cpu85 0 cpu86 0 cpu87 0 
+processes currently running on cpu80-87:
+ 84 R     900 alex     4010067 ps -eo psr,stat,pcpu,user,pid,args --no-headers
+/dev/sda1       3.1T  2.5T  592G  81% /
+Mem:             432          15           4           1         419         417
+315M	/home/alex/mc-dcnative-ab-20261026
+guard B-exp passed
+3b93be6a06a5a6c41148671bdb654e1a4b33ad500f49e601a451e36e3c95b026  /home/alex/mc-dcnative2-20261026/build-exp/experiment_ccf_dc_stage
+== stage B exp: CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598 CUDA_DEVICE_ORDER=PCI_BUS_ID OMP_NUM_THREADS=2 taskset -c 80,81 /home/alex/mc-dcnative2-20261026/build-exp/experiment_ccf_dc_stage --json /home/alex/mc-dcnative-ab-20261026/logs/oracle-exp.json
+oracle pid 4010143
+oracle-exp rc=0
+cpu_global: rows=220 eligible_frames=1536 zeroed_frames=780
+cpu_local: rows=220 eligible_frames=1536 zeroed_frames=780
+cuda_single_global: rows=220 eligible_frames=1496 zeroed_frames=780
+cuda_single_local: rows=220 eligible_frames=1496 zeroed_frames=780
+cuda_batched_local: rows=220 eligible_frames=2992 zeroed_frames=1560
+gates={"G1": {"pass": 1100, "fail": 0, "inconclusive": 0}, "G2": {"pass": 65, "fail": 0, "inconclusive": 0}, "G3": {"pass": 240, "fail": 0, "inconclusive": 0}, "G4": {"pass": 600, "fail": 0, "inconclusive": 0}, "G5": {"pass": 80, "fail": 0, "inconclusive": 0}} failures=0
+ORACLE_PASSED_LINE=True
+ALL_PATHS_STRICTLY_POSITIVE
+GATES_ALL_PASS_NONEMPTY=True
+samples=26 oracle_pid=4010143 seen_on={'GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598': 19} other_compute_apps_seen=[('3983855', 'GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598'), ('3983855', 'GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d'), ('3983855', 'GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d'), ('3983855', 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54')]
+WITNESSED
+G1 pass=1100 fail=0 inconclusive=0
+G2 pass=65 fail=0 inconclusive=0
+G3 pass=240 fail=0 inconclusive=0
+G4 pass=600 fail=0 inconclusive=0
+G5 pass=80 fail=0 inconclusive=0
+ORACLE PASSED
+== guard B-iso 2026-10-26T22:18:22Z
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1551 MiB, 0 %, 39
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 425 MiB, 0 %, 37
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 425 MiB, 0 %, 31
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49769 MiB, 87 %, 66
+3983855, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1540 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49758 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+cpu80-87 busy%: cpu80 0 cpu81 0 cpu82 0 cpu83 0 cpu84 0 cpu85 0 cpu86 0 cpu87 0 
+processes currently running on cpu80-87:
+ 81 R     0.0 alex     4010434 ps -eo psr,stat,pcpu,user,pid,args --no-headers
+/dev/sda1       3.1T  2.5T  592G  81% /
+Mem:             432          15           4           1         419         417
+315M	/home/alex/mc-dcnative-ab-20261026
+guard B-iso passed
+99f1f35228681ea60836094d300237020b89a806ab5a5ebdd872f8b1cc3dfdb5  /home/alex/mc-dcnative2-20261026/build-iso/experiment_ccf_dc_stage
+== stage B iso: CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598 CUDA_DEVICE_ORDER=PCI_BUS_ID OMP_NUM_THREADS=2 taskset -c 80,81 /home/alex/mc-dcnative2-20261026/build-iso/experiment_ccf_dc_stage --json /home/alex/mc-dcnative-ab-20261026/logs/oracle-iso.json
+oracle pid 4010509
+oracle-iso rc=0
+cpu_global: rows=220 eligible_frames=1616 zeroed_frames=830
+cpu_local: rows=220 eligible_frames=1536 zeroed_frames=780
+cuda_single_global: rows=220 eligible_frames=1596 zeroed_frames=830
+cuda_single_local: rows=220 eligible_frames=1496 zeroed_frames=780
+cuda_batched_local: rows=220 eligible_frames=2992 zeroed_frames=1560
+gates={"G1": {"pass": 1100, "fail": 0, "inconclusive": 0}, "G2": {"pass": 65, "fail": 0, "inconclusive": 0}, "G3": {"pass": 240, "fail": 0, "inconclusive": 0}, "G4": {"pass": 600, "fail": 0, "inconclusive": 0}, "G5": {"pass": 80, "fail": 0, "inconclusive": 0}, "G6": {"pass": 3, "fail": 0, "inconclusive": 0}} failures=0
+ORACLE_PASSED_LINE=True
+ALL_PATHS_STRICTLY_POSITIVE
+GATES_ALL_PASS_NONEMPTY=True
+samples=34 oracle_pid=4010509 seen_on={'GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598': 26} other_compute_apps_seen=[('3983855', 'GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598'), ('3983855', 'GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d'), ('3983855', 'GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d'), ('3983855', 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54')]
+WITNESSED
+G1 pass=1100 fail=0 inconclusive=0
+G2 pass=65 fail=0 inconclusive=0
+G3 pass=240 fail=0 inconclusive=0
+G4 pass=600 fail=0 inconclusive=0
+G5 pass=80 fail=0 inconclusive=0
+G6 pass=3 fail=0 inconclusive=0
+ORACLE PASSED
+== STAGE B done 2026-10-26T22:18:34Z
+== scratch and logs
+316M	/home/alex/mc-dcnative-ab-20261026
+47 /home/alex/mc-dcnative-ab-20261026/logs.sha256
+== done 2026-10-26T22:18:34Z

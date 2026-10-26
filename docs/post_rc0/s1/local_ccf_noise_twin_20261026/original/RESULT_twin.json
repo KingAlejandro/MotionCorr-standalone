@@ -1,0 +1,1589 @@
+{
+ "phase": "twin",
+ "plan_sha256": "c3e25f67429c0384a46034e749ff5b877af4e98caf9b1c43dd6d1905254e7f97",
+ "script_sha256": "c3cc25e6e9e3a4fcdc5fe818553551877c31b8dcd2cffe44ce2b7a34f5292e74",
+ "control_result_sha256": "e277ace109155abc23f35c57b2eca344790800b5ae10c943656899f9097ffbbf",
+ "twin_verification": {
+  "recipe_keys_differing": [
+   "name",
+   "noise",
+   "role"
+  ],
+  "only_noise_and_label_keys_differ": true,
+  "label_keys_name_role_unread_by_pinned_generator": true,
+  "field_hash_equal": true,
+  "target_hash_equal": true,
+  "manifest_numpy": "2.5.3",
+  "numpy_now": "2.4.2",
+  "noise_regen_convention": "Generator(PCG64(seed)).normal(0, noise*contrast, (5,96,128)) from render()",
+  "noisy_minus_affine_mean": 6.19656095902125e-05,
+  "noisy_minus_affine_std": 3.987310045472117,
+  "regen_noise_std": 3.987310059083541,
+  "resid_max_abs": 7.601754859365428e-06,
+  "resid_rounding_bound_max": 7.62939453125e-06,
+  "resid_within_float32_rounding_bound_everywhere": true,
+  "n_elements_exceeding_bound": 0,
+  "movie_shapes": [
+   [
+    5,
+    96,
+    128
+   ],
+   [
+    5,
+    96,
+    128
+   ]
+  ],
+  "movie_min_max_noisy": [
+   82.81829071044922,
+   116.33380126953125
+  ],
+  "movie_min_max_affine": [
+   97.56037902832031,
+   103.42943572998047
+  ]
+ },
+ "arms": {
+  "B32": {
+   "patch_62_79_bad": {
+    "noisy": {
+     "aggregate": {
+      "values": {
+       "x_nat": 0.685995210903544,
+       "x_int": 0.6854100727139878,
+       "x_phys": 0.6471148482925977,
+       "x_truth_unanchored": 0.6552880456861325,
+       "x_loc": 0.6859966910814823
+      },
+      "gap_nat_minus_phys": 0.038880362610946295,
+      "gap_int_minus_phys": 0.038295224421390106,
+      "gap_loc_minus_phys": 0.038881842788884624,
+      "x_loc": [
+       10.065046880828884,
+       -7.7919069089337984
+      ],
+      "native_rule_integer_peak_descriptive": {
+       "integer_xy": [
+        10,
+        -8
+       ],
+       "max_value": 0.6854100727139878,
+       "equal_max_ties_in_search": 1,
+       "coupled_verdict": 0,
+       "coupled_offset_xy": [
+        0.06271089708894544,
+        0.1970429513904323
+       ],
+       "selected_xy": [
+        10.062710897088946,
+        -7.802957048609568
+       ]
+      },
+      "state_energy_rms_Fj_nonDC": 0.11254465941486491
+     },
+     "sum_of_pairwise_aux_map": {
+      "gap_nat_minus_phys": 0.03888035717369964,
+      "numeric_remainder_agg_minus_sum": 5.437246652917338e-09
+     },
+     "components": [
+      {
+       "ref_j": 0,
+       "values": {
+        "x_nat": 0.20413048885457513,
+        "x_int": 0.20579931924829986,
+        "x_phys": 0.1658739289579979,
+        "x_truth_unanchored": 0.16964168167806407,
+        "x_loc": 0.2111552183694868
+       },
+       "gap_nat_minus_phys": 0.038256559896577225,
+       "gap_int_minus_phys": 0.039925390290301954,
+       "gap_loc_minus_phys": 0.0452812894114889,
+       "x_loc": [
+        10.426242459800172,
+        -9.749441780790274
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.16964168167806407,
+       "gap_true_pair_rel_minus_phys": 0.0037677527200661587,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         11,
+         -10
+        ],
+        "max_value": 0.210497278870445,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.5499699527382724,
+         0.2119437214840337
+        ],
+        "selected_xy": [
+         10.450030047261727,
+         -9.788056278515967
+        ]
+       }
+      },
+      {
+       "ref_j": 1,
+       "values": {
+        "x_nat": 0.1661015315613299,
+        "x_int": 0.16430693988867617,
+        "x_phys": 0.1507644090824501,
+        "x_truth_unanchored": 0.14969587694031114,
+        "x_loc": 0.17224584151218347
+       },
+       "gap_nat_minus_phys": 0.015337122478879806,
+       "gap_int_minus_phys": 0.013542530806226083,
+       "gap_loc_minus_phys": 0.021481432429733383,
+       "x_loc": [
+        10.97936407716206,
+        -6.749755883073167
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.15044262145765136,
+       "gap_true_pair_rel_minus_phys": -0.0003217876247987306,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         11,
+         -7
+        ],
+        "max_value": 0.1720864160226076,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.023136089224811612,
+         0.23729474065171308
+        ],
+        "selected_xy": [
+         10.976863910775188,
+         -6.762705259348287
+        ]
+       }
+      },
+      {
+       "ref_j": 2,
+       "values": {
+        "x_nat": 0.14839581927242101,
+        "x_int": 0.14759754023629607,
+        "x_phys": 0.1482355244146121,
+        "x_truth_unanchored": 0.1503802556764323,
+        "x_loc": 0.14927491746970672
+       },
+       "gap_nat_minus_phys": 0.0001602948578089125,
+       "gap_int_minus_phys": -0.0006379841783160367,
+       "gap_loc_minus_phys": 0.0010393930550946229,
+       "x_loc": [
+        9.85485612186914,
+        -7.215731359596177
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.15195375342595246,
+       "gap_true_pair_rel_minus_phys": 0.0037182290113403627,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         0
+        ],
+        "max_value": 0.1543209173144962,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.1797389077439286,
+         0.2601774739081221
+        ],
+        "selected_xy": [
+         -0.1797389077439286,
+         0.2601774739081221
+        ]
+       }
+      },
+      {
+       "ref_j": 3,
+       "values": {
+        "x_nat": 0.16736737139432367,
+        "x_int": 0.16770627403956923,
+        "x_phys": 0.18224099145388992,
+        "x_truth_unanchored": 0.18557023803754413,
+        "x_loc": 0.16778509871527938
+       },
+       "gap_nat_minus_phys": -0.014873620059566245,
+       "gap_int_minus_phys": -0.014534717414320691,
+       "gap_loc_minus_phys": -0.014455892738610532,
+       "x_loc": [
+        10.044636870351631,
+        -8.221296238899091
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.18985233955687597,
+       "gap_true_pair_rel_minus_phys": 0.007611348102986054,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         1
+        ],
+        "max_value": 0.18943955697140988,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.21864660753664,
+         -0.3398391068755695
+        ],
+        "selected_xy": [
+         -0.21864660753664,
+         0.6601608931244305
+        ]
+       }
+      }
+     ],
+     "sum_of_component_gaps": 0.0388803571736997
+    },
+    "affine": {
+     "aggregate": {
+      "values": {
+       "x_nat": 0.485399340610316,
+       "x_int": 0.48207967384039063,
+       "x_phys": 0.852798860938841,
+       "x_truth_unanchored": 0.8635933984992357,
+       "x_loc": 0.49117252880406626
+      },
+      "gap_nat_minus_phys": -0.3673995203285251,
+      "gap_int_minus_phys": -0.3707191870984504,
+      "gap_loc_minus_phys": -0.3616263321347748,
+      "x_loc": [
+       9.90965221137764,
+       -7.304473685811844
+      ],
+      "native_rule_integer_peak_descriptive": {
+       "integer_xy": [
+        0,
+        1
+       ],
+       "max_value": 0.876491637537898,
+       "equal_max_ties_in_search": 1,
+       "coupled_verdict": 0,
+       "coupled_offset_xy": [
+        -0.11510197626616499,
+        -0.20751382587814246
+       ],
+       "selected_xy": [
+        -0.11510197626616499,
+        0.7924861741218575
+       ]
+      },
+      "state_energy_rms_Fj_nonDC": 0.02517348695579135
+     },
+     "sum_of_pairwise_aux_map": {
+      "gap_nat_minus_phys": -0.36739952036742507,
+      "numeric_remainder_agg_minus_sum": 3.8899994336816235e-11
+     },
+     "components": [
+      {
+       "ref_j": 0,
+       "values": {
+        "x_nat": 0.12291940087968149,
+        "x_int": 0.12210479801009728,
+        "x_phys": 0.21596861484329952,
+        "x_truth_unanchored": 0.21831864234277773,
+        "x_loc": 0.12338710330614035
+       },
+       "gap_nat_minus_phys": -0.09304921396361802,
+       "gap_int_minus_phys": -0.09386381683320223,
+       "gap_loc_minus_phys": -0.09258151153715917,
+       "x_loc": [
+        10.056517328100995,
+        -7.650800218027044
+       ],
+       "x_loc_is_concave_stationary": false,
+       "val_at_true_pairwise_rel_after_G": 0.21831864234277773,
+       "gap_true_pair_rel_minus_phys": 0.0023500274994782133,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         1
+        ],
+        "max_value": 0.2203502350939704,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.31755976605203584,
+         -0.004190913180961566
+        ],
+        "selected_xy": [
+         -0.31755976605203584,
+         0.9958090868190385
+        ]
+       }
+      },
+      {
+       "ref_j": 1,
+       "values": {
+        "x_nat": 0.12267086787628731,
+        "x_int": 0.1217507835212152,
+        "x_phys": 0.21521693017958943,
+        "x_truth_unanchored": 0.21758723703938387,
+        "x_loc": 0.12325525658985072
+       },
+       "gap_nat_minus_phys": -0.09254606230330212,
+       "gap_int_minus_phys": -0.09346614665837423,
+       "gap_loc_minus_phys": -0.09196167358973871,
+       "x_loc": [
+        10.071039972950487,
+        -7.633071902278667
+       ],
+       "x_loc_is_concave_stationary": false,
+       "val_at_true_pairwise_rel_after_G": 0.21794337272369607,
+       "gap_true_pair_rel_minus_phys": 0.002726442544106644,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         1
+        ],
+        "max_value": 0.22002455383409397,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.18057990561704262,
+         -0.04977384783717605
+        ],
+        "selected_xy": [
+         -0.18057990561704262,
+         0.9502261521628239
+        ]
+       }
+      },
+      {
+       "ref_j": 2,
+       "values": {
+        "x_nat": 0.12075484929578222,
+        "x_int": 0.1198340747477562,
+        "x_phys": 0.21243179121278014,
+        "x_truth_unanchored": 0.21516525631358374,
+        "x_loc": 0.1213461639623724
+       },
+       "gap_nat_minus_phys": -0.09167694191699792,
+       "gap_int_minus_phys": -0.09259771646502393,
+       "gap_loc_minus_phys": -0.09108562725040774,
+       "x_loc": [
+        10.068792893295107,
+        -7.631975488486351
+       ],
+       "x_loc_is_concave_stationary": false,
+       "val_at_true_pairwise_rel_after_G": 0.21763758291067964,
+       "gap_true_pair_rel_minus_phys": 0.005205791697899503,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         1
+        ],
+        "max_value": 0.21883048244911738,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         0.021686851151216404,
+         -0.2587054323198269
+        ],
+        "selected_xy": [
+         0.021686851151216404,
+         0.7412945676801731
+        ]
+       }
+      },
+      {
+       "ref_j": 3,
+       "values": {
+        "x_nat": 0.11905427708242539,
+        "x_int": 0.11839007142722517,
+        "x_phys": 0.20918157926593256,
+        "x_truth_unanchored": 0.21252231706887825,
+        "x_loc": 0.11940065060655208
+       },
+       "gap_nat_minus_phys": -0.09012730218350717,
+       "gap_int_minus_phys": -0.09079150783870739,
+       "gap_loc_minus_phys": -0.08978092865938048,
+       "x_loc": [
+        10.032944477259825,
+        -7.6751677067174295
+       ],
+       "x_loc_is_concave_stationary": false,
+       "val_at_true_pairwise_rel_after_G": 0.2176241331654267,
+       "gap_true_pair_rel_minus_phys": 0.008442553899494137,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         0
+        ],
+        "max_value": 0.2173719739984307,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         0.020581931690981478,
+         0.48025928483097
+        ],
+        "selected_xy": [
+         0.020581931690981478,
+         0.48025928483097
+        ]
+       }
+      }
+     ],
+     "sum_of_component_gaps": -0.36739952036742524
+    }
+   },
+   "patch_62_47_central": {
+    "noisy": {
+     "aggregate": {
+      "values": {
+       "x_nat": 0.9423325515774137,
+       "x_int": 0.9418816818107346,
+       "x_phys": 0.9222729574839142,
+       "x_truth_unanchored": 0.9064852873049605,
+       "x_loc": 0.9423328186406577
+      },
+      "gap_nat_minus_phys": 0.020059594093499444,
+      "gap_int_minus_phys": 0.01960872432682037,
+      "gap_loc_minus_phys": 0.020059861156743408,
+      "x_loc": [
+       -1.9628795105567,
+       0.8323324544696256
+      ],
+      "native_rule_integer_peak_descriptive": {
+       "integer_xy": [
+        -2,
+        1
+       ],
+       "max_value": 0.9418816818107346,
+       "equal_max_ties_in_search": 1,
+       "coupled_verdict": 0,
+       "coupled_offset_xy": [
+        0.0310395166313341,
+        -0.16401605386469936
+       ],
+       "selected_xy": [
+        -1.9689604833686658,
+        0.8359839461353007
+       ]
+      },
+      "state_energy_rms_Fj_nonDC": 0.11138425010261958
+     },
+     "sum_of_pairwise_aux_map": {
+      "gap_nat_minus_phys": 0.020059595347072467,
+      "numeric_remainder_agg_minus_sum": -1.2535730231633124e-09
+     },
+     "components": [
+      {
+       "ref_j": 0,
+       "values": {
+        "x_nat": 0.23264547069594574,
+        "x_int": 0.23283591562976508,
+        "x_phys": 0.23022035597187204,
+        "x_truth_unanchored": 0.2273701811519363,
+        "x_loc": 0.23290397640780142
+       },
+       "gap_nat_minus_phys": 0.002425114724073696,
+       "gap_int_minus_phys": 0.002615559657893035,
+       "gap_loc_minus_phys": 0.0026836204359293736,
+       "x_loc": [
+        -1.818209618091423,
+        0.9847749464558468
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.2273701811519363,
+       "gap_true_pair_rel_minus_phys": -0.0028501748199357413,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         -2,
+         1
+        ],
+        "max_value": 0.23283591562976505,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         0.1756912541817223,
+         -0.010613235450930658
+        ],
+        "selected_xy": [
+         -1.8243087458182776,
+         0.9893867645490694
+        ]
+       }
+      },
+      {
+       "ref_j": 1,
+       "values": {
+        "x_nat": 0.21173637765107237,
+        "x_int": 0.21191451406502984,
+        "x_phys": 0.20788687037773113,
+        "x_truth_unanchored": 0.20436390622118875,
+        "x_loc": 0.21208675899361712
+       },
+       "gap_nat_minus_phys": 0.0038495072733412405,
+       "gap_int_minus_phys": 0.004027643687298715,
+       "gap_loc_minus_phys": 0.004199888615885994,
+       "x_loc": [
+        -2.286824800540913,
+        1.1591477636928573
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.20228290854018027,
+       "gap_true_pair_rel_minus_phys": -0.005603961837550853,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         -2,
+         1
+        ],
+        "max_value": 0.2119145140650298,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.286266678935207,
+         0.1544620260177953
+        ],
+        "selected_xy": [
+         -2.286266678935207,
+         1.1544620260177954
+        ]
+       }
+      },
+      {
+       "ref_j": 2,
+       "values": {
+        "x_nat": 0.21325486801544347,
+        "x_int": 0.21162403554412573,
+        "x_phys": 0.2001268028561317,
+        "x_truth_unanchored": 0.19384410848323322,
+        "x_loc": 0.21984194687749778
+       },
+       "gap_nat_minus_phys": 0.013128065159311753,
+       "gap_int_minus_phys": 0.011497232687994019,
+       "gap_loc_minus_phys": 0.019715144021366066,
+       "x_loc": [
+        -0.8831078182524408,
+        -0.7925304811060183
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.19314573585302505,
+       "gap_true_pair_rel_minus_phys": -0.006981067003106661,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         -1,
+         -1
+        ],
+        "max_value": 0.21945785851988764,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         0.13588082866188292,
+         0.19393125339850456
+        ],
+        "selected_xy": [
+         -0.8641191713381171,
+         -0.8060687466014954
+        ]
+       }
+      },
+      {
+       "ref_j": 3,
+       "values": {
+        "x_nat": 0.2846957607205721,
+        "x_int": 0.28550714173698827,
+        "x_phys": 0.2840388525302263,
+        "x_truth_unanchored": 0.2809070160846182,
+        "x_loc": 0.28628984205214136
+       },
+       "gap_nat_minus_phys": 0.0006569081903458063,
+       "gap_int_minus_phys": 0.0014682892067619524,
+       "gap_loc_minus_phys": 0.0022509895219150478,
+       "x_loc": [
+        -2.0402143571539177,
+        1.3721180642133461
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.27823763719014816,
+       "gap_true_pair_rel_minus_phys": -0.0058012153400781585,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         -2,
+         1
+        ],
+        "max_value": 0.2855071417369882,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.03870386610843498,
+         0.3715588693316286
+        ],
+        "selected_xy": [
+         -2.038703866108435,
+         1.3715588693316287
+        ]
+       }
+      }
+     ],
+     "sum_of_component_gaps": 0.020059595347072495
+    },
+    "affine": {
+     "aggregate": {
+      "values": {
+       "x_nat": 0.7014525552349632,
+       "x_int": 0.7032951832209905,
+       "x_phys": 0.7178211455049399,
+       "x_truth_unanchored": 0.7180111401353415,
+       "x_loc": 0.7226405907323559
+      },
+      "gap_nat_minus_phys": -0.016368590269976724,
+      "gap_int_minus_phys": -0.014525962283949423,
+      "gap_loc_minus_phys": 0.004819445227415953,
+      "x_loc": [
+       -0.5193352022845197,
+       0.8766653700627103
+      ],
+      "native_rule_integer_peak_descriptive": {
+       "integer_xy": [
+        -1,
+        1
+       ],
+       "max_value": 0.7208886754924108,
+       "equal_max_ties_in_search": 1,
+       "coupled_verdict": 0,
+       "coupled_offset_xy": [
+        0.47794748934985526,
+        -0.11970826217179992
+       ],
+       "selected_xy": [
+        -0.5220525106501448,
+        0.8802917378282
+       ]
+      },
+      "state_energy_rms_Fj_nonDC": 0.0245233863255315
+     },
+     "sum_of_pairwise_aux_map": {
+      "gap_nat_minus_phys": -0.01636858895244253,
+      "numeric_remainder_agg_minus_sum": -1.3175341928572948e-09
+     },
+     "components": [
+      {
+       "ref_j": 0,
+       "values": {
+        "x_nat": 0.174475489253362,
+        "x_int": 0.1749652421409018,
+        "x_phys": 0.1777237874722697,
+        "x_truth_unanchored": 0.17738022408417708,
+        "x_loc": 0.17819572887993473
+       },
+       "gap_nat_minus_phys": -0.0032482982189076803,
+       "gap_int_minus_phys": -0.0027585453313678787,
+       "gap_loc_minus_phys": 0.0004719414076650441,
+       "x_loc": [
+        -0.8621095348262102,
+        1.0304565427100911
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.17738022408417708,
+       "gap_true_pair_rel_minus_phys": -0.0003435633880926048,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         -1,
+         1
+        ],
+        "max_value": 0.1781341330173833,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         0.13729630953966193,
+         0.032760430441716046
+        ],
+        "selected_xy": [
+         -0.862703690460338,
+         1.032760430441716
+        ]
+       }
+      },
+      {
+       "ref_j": 1,
+       "values": {
+        "x_nat": 0.17471183269265664,
+        "x_int": 0.17529380207444092,
+        "x_phys": 0.17911393122707844,
+        "x_truth_unanchored": 0.17919665070771165,
+        "x_loc": 0.1798350310041391
+       },
+       "gap_nat_minus_phys": -0.0044020985344218055,
+       "gap_int_minus_phys": -0.003820129152637519,
+       "gap_loc_minus_phys": 0.0007210997770606686,
+       "x_loc": [
+        -0.6655035135711778,
+        1.0509849625887107
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.17902735585418192,
+       "gap_true_pair_rel_minus_phys": -8.657537289652462e-05,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         -1,
+         1
+        ],
+        "max_value": 0.1795019755474781,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         0.3332122990977942,
+         0.053797545075827506
+        ],
+        "selected_xy": [
+         -0.6667877009022058,
+         1.0537975450758275
+        ]
+       }
+      },
+      {
+       "ref_j": 2,
+       "values": {
+        "x_nat": 0.1756670291680815,
+        "x_int": 0.17616999328331984,
+        "x_phys": 0.18052996620071612,
+        "x_truth_unanchored": 0.18087926014878022,
+        "x_loc": 0.18216926604128258
+       },
+       "gap_nat_minus_phys": -0.004862937032634629,
+       "gap_int_minus_phys": -0.0043599729173962876,
+       "gap_loc_minus_phys": 0.0016392998405664605,
+       "x_loc": [
+        -0.3572611166470132,
+        0.8625964919056806
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.18164998682496725,
+       "gap_true_pair_rel_minus_phys": 0.0011200206242511224,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         1
+        ],
+        "max_value": 0.18164085465378427,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.3580494545311246,
+         -0.13560420102134504
+        ],
+        "selected_xy": [
+         -0.3580494545311246,
+         0.8643957989786549
+        ]
+       }
+      },
+      {
+       "ref_j": 3,
+       "values": {
+        "x_nat": 0.17659820194164827,
+        "x_int": 0.1768661432407923,
+        "x_phys": 0.18045345710812655,
+        "x_truth_unanchored": 0.18055500134818833,
+        "x_loc": 0.1830469040068193
+       },
+       "gap_nat_minus_phys": -0.0038552551664782775,
+       "gap_int_minus_phys": -0.003587313867334241,
+       "gap_loc_minus_phys": 0.0025934468986927584,
+       "x_loc": [
+        -0.21230257650382356,
+        0.5799680683426089
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.18280606768447819,
+       "gap_true_pair_rel_minus_phys": 0.002352610576351638,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         0
+        ],
+        "max_value": 0.18213626234114358,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.209886877379815,
+         0.5794569446322867
+        ],
+        "selected_xy": [
+         -0.209886877379815,
+         0.5794569446322867
+        ]
+       }
+      }
+     ],
+     "sum_of_component_gaps": -0.016368588952442392
+    }
+   }
+  },
+  "B64": {
+   "patch_62_79_bad": {
+    "noisy": {
+     "aggregate": {
+      "values": {
+       "x_nat": 0.6859952292704049,
+       "x_int": 0.6854100651305064,
+       "x_phys": 0.6471144925957532,
+       "x_truth_unanchored": 0.6552877543809426,
+       "x_loc": 0.6859967108680547
+      },
+      "gap_nat_minus_phys": 0.03888073667465175,
+      "gap_int_minus_phys": 0.03829557253475324,
+      "gap_loc_minus_phys": 0.03888221827230154,
+      "x_loc": [
+       10.065042972746262,
+       -7.791898422207057
+      ],
+      "native_rule_integer_peak_descriptive": {
+       "integer_xy": [
+        10,
+        -8
+       ],
+       "max_value": 0.6854100651305064,
+       "equal_max_ties_in_search": 1,
+       "coupled_verdict": 0,
+       "coupled_offset_xy": [
+        0.06270716156975231,
+        0.19705132057208433
+       ],
+       "selected_xy": [
+        10.062707161569753,
+        -7.8029486794279155
+       ]
+      },
+      "state_energy_rms_Fj_nonDC": 0.1125446636787291
+     },
+     "sum_of_pairwise_aux_map": {
+      "gap_nat_minus_phys": 0.03888073667465142,
+      "numeric_remainder_agg_minus_sum": 3.3306690738754696e-16
+     },
+     "components": [
+      {
+       "ref_j": 0,
+       "values": {
+        "x_nat": 0.20413058349419386,
+        "x_int": 0.205799410616819,
+        "x_phys": 0.16587368778717107,
+        "x_truth_unanchored": 0.16964144076513996,
+        "x_loc": 0.21115525310048391
+       },
+       "gap_nat_minus_phys": 0.03825689570702279,
+       "gap_int_minus_phys": 0.03992572282964793,
+       "gap_loc_minus_phys": 0.045281565313312844,
+       "x_loc": [
+        10.42623741473897,
+        -9.749427041107213
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.16964144076513996,
+       "gap_true_pair_rel_minus_phys": 0.0037677529779688856,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         11,
+         -10
+        ],
+        "max_value": 0.21049730760895105,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.5499738706006425,
+         0.2119572945444772
+        ],
+        "selected_xy": [
+         10.450026129399358,
+         -9.788042705455522
+        ]
+       }
+      },
+      {
+       "ref_j": 1,
+       "values": {
+        "x_nat": 0.16610167011835805,
+        "x_int": 0.16430706610838547,
+        "x_phys": 0.15076431719777053,
+        "x_truth_unanchored": 0.14969584205868536,
+        "x_loc": 0.17224605054468567
+       },
+       "gap_nat_minus_phys": 0.015337352920587521,
+       "gap_int_minus_phys": 0.013542748910614938,
+       "gap_loc_minus_phys": 0.02148173334691514,
+       "x_loc": [
+        10.979358316463141,
+        -6.7497421434297245
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.15044259460811246,
+       "gap_true_pair_rel_minus_phys": -0.0003217225896580689,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         11,
+         -7
+        ],
+        "max_value": 0.17208660906035278,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.023141568995279922,
+         0.2373084747393071
+        ],
+        "selected_xy": [
+         10.97685843100472,
+         -6.762691525260693
+        ]
+       }
+      },
+      {
+       "ref_j": 2,
+       "values": {
+        "x_nat": 0.14839596200905222,
+        "x_int": 0.14759767192212844,
+        "x_phys": 0.14823569148068536,
+        "x_truth_unanchored": 0.15038044800445044,
+        "x_loc": 0.14927509283555934
+       },
+       "gap_nat_minus_phys": 0.00016027052836686817,
+       "gap_int_minus_phys": -0.0006380195585569126,
+       "gap_loc_minus_phys": 0.0010394013548739867,
+       "x_loc": [
+        9.85484797100338,
+        -7.215719711496693
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.1519539693734981,
+       "gap_true_pair_rel_minus_phys": 0.0037182778928127325,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         0
+        ],
+        "max_value": 0.1543211905177653,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.17973492162907576,
+         0.2601660684071095
+        ],
+        "selected_xy": [
+         -0.17973492162907576,
+         0.2601660684071095
+        ]
+       }
+      },
+      {
+       "ref_j": 3,
+       "values": {
+        "x_nat": 0.1673670136488006,
+        "x_int": 0.1677059164831732,
+        "x_phys": 0.18224079613012606,
+        "x_truth_unanchored": 0.18557002355266683,
+        "x_loc": 0.16778474349846603
+       },
+       "gap_nat_minus_phys": -0.014873782481325454,
+       "gap_int_minus_phys": -0.014534879646952853,
+       "gap_loc_minus_phys": -0.014456052631660027,
+       "x_loc": [
+        10.04464954148088,
+        -8.221308329496354
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.1898520813769306,
+       "gap_true_pair_rel_minus_phys": 0.0076112852468045444,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         1
+        ],
+        "max_value": 0.18943929975846643,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.2186516660247706,
+         -0.3398326763750917
+        ],
+        "selected_xy": [
+         -0.2186516660247706,
+         0.6601673236249084
+        ]
+       }
+      }
+     ],
+     "sum_of_component_gaps": 0.03888073667465172
+    },
+    "affine": {
+     "aggregate": {
+      "values": {
+       "x_nat": 0.485400322316008,
+       "x_int": 0.4820806323823434,
+       "x_phys": 0.8528001074595964,
+       "x_truth_unanchored": 0.8635946804743061,
+       "x_loc": 0.49117361694550926
+      },
+      "gap_nat_minus_phys": -0.36739978514358845,
+      "gap_int_minus_phys": -0.37071947507725306,
+      "gap_loc_minus_phys": -0.3616264905140872,
+      "x_loc": [
+       9.909649803938958,
+       -7.304469356547759
+      ],
+      "native_rule_integer_peak_descriptive": {
+       "integer_xy": [
+        0,
+        1
+       ],
+       "max_value": 0.8764930061387703,
+       "equal_max_ties_in_search": 1,
+       "coupled_verdict": 0,
+       "coupled_offset_xy": [
+        -0.11509871176436258,
+        -0.20751665018960702
+       ],
+       "selected_xy": [
+        -0.11509871176436258,
+        0.7924833498103929
+       ]
+      },
+      "state_energy_rms_Fj_nonDC": 0.025173488812907565
+     },
+     "sum_of_pairwise_aux_map": {
+      "gap_nat_minus_phys": -0.3673997851435883,
+      "numeric_remainder_agg_minus_sum": -1.6653345369377348e-16
+     },
+     "components": [
+      {
+       "ref_j": 0,
+       "values": {
+        "x_nat": 0.12291972050674459,
+        "x_int": 0.12210511407324777,
+        "x_phys": 0.21596881936501552,
+        "x_truth_unanchored": 0.21831886403364897,
+        "x_loc": 0.12338742796990564
+       },
+       "gap_nat_minus_phys": -0.09304909885827094,
+       "gap_int_minus_phys": -0.09386370529176775,
+       "gap_loc_minus_phys": -0.09258139139510989,
+       "x_loc": [
+        10.056516994872236,
+        -7.650799411085288
+       ],
+       "x_loc_is_concave_stationary": false,
+       "val_at_true_pairwise_rel_after_G": 0.21831886403364897,
+       "gap_true_pair_rel_minus_phys": 0.0023500446686334497,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         1
+        ],
+        "max_value": 0.2203504990740848,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.3175546352238761,
+         -0.004198263380600702
+        ],
+        "selected_xy": [
+         -0.3175546352238761,
+         0.9958017366193993
+        ]
+       }
+      },
+      {
+       "ref_j": 1,
+       "values": {
+        "x_nat": 0.12267122675053625,
+        "x_int": 0.12175113579863986,
+        "x_phys": 0.21521721197888166,
+        "x_truth_unanchored": 0.21758752954664817,
+        "x_loc": 0.12325562483245378
+       },
+       "gap_nat_minus_phys": -0.09254598522834541,
+       "gap_int_minus_phys": -0.0934660761802418,
+       "gap_loc_minus_phys": -0.09196158714642788,
+       "x_loc": [
+        10.071039884918576,
+        -7.633070535020401
+       ],
+       "x_loc_is_concave_stationary": false,
+       "val_at_true_pairwise_rel_after_G": 0.21794366840479507,
+       "gap_true_pair_rel_minus_phys": 0.002726456425913404,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         1
+        ],
+        "max_value": 0.2200248746721017,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.18057541037784625,
+         -0.049778151412536616
+        ],
+        "selected_xy": [
+         -0.18057541037784625,
+         0.9502218485874634
+        ]
+       }
+      },
+      {
+       "ref_j": 2,
+       "values": {
+        "x_nat": 0.12075485278330736,
+        "x_int": 0.1198340728689205,
+        "x_phys": 0.21243216312168633,
+        "x_truth_unanchored": 0.21516562923160892,
+        "x_loc": 0.12134617739579523
+       },
+       "gap_nat_minus_phys": -0.09167731033837898,
+       "gap_int_minus_phys": -0.09259809025276583,
+       "gap_loc_minus_phys": -0.0910859857258911,
+       "x_loc": [
+        10.068792151617053,
+        -7.631974017148622
+       ],
+       "x_loc_is_concave_stationary": false,
+       "val_at_true_pairwise_rel_after_G": 0.21763795782272502,
+       "gap_true_pair_rel_minus_phys": 0.005205794701038685,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         1
+        ],
+        "max_value": 0.21883085640128602,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         0.02168779018080061,
+         -0.25870391901135
+        ],
+        "selected_xy": [
+         0.02168779018080061,
+         0.74129608098865
+        ]
+       }
+      },
+      {
+       "ref_j": 3,
+       "values": {
+        "x_nat": 0.11905452227541974,
+        "x_int": 0.11839030964153525,
+        "x_phys": 0.20918191299401287,
+        "x_truth_unanchored": 0.21252265766240008,
+        "x_loc": 0.11940090393360449
+       },
+       "gap_nat_minus_phys": -0.09012739071859313,
+       "gap_int_minus_phys": -0.09079160335247762,
+       "gap_loc_minus_phys": -0.08978100906040838,
+       "x_loc": [
+        10.032944279577787,
+        -7.675166173879756
+       ],
+       "x_loc_is_concave_stationary": false,
+       "val_at_true_pairwise_rel_after_G": 0.21762448855464886,
+       "gap_true_pair_rel_minus_phys": 0.00844257556063599,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         0
+        ],
+        "max_value": 0.21737233340477974,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         0.020584377598412754,
+         0.4802579486975044
+        ],
+        "selected_xy": [
+         0.020584377598412754,
+         0.4802579486975044
+        ]
+       }
+      }
+     ],
+     "sum_of_component_gaps": -0.36739978514358845
+    }
+   },
+   "patch_62_47_central": {
+    "noisy": {
+     "aggregate": {
+      "values": {
+       "x_nat": 0.9423316654127754,
+       "x_int": 0.9418808006520368,
+       "x_phys": 0.9222720399171999,
+       "x_truth_unanchored": 0.9064843542421609,
+       "x_loc": 0.9423319320084083
+      },
+      "gap_nat_minus_phys": 0.020059625495575495,
+      "gap_int_minus_phys": 0.019608760734836972,
+      "gap_loc_minus_phys": 0.020059892091208398,
+      "x_loc": [
+       -1.962884883816038,
+       0.8323355465026765
+      ],
+      "native_rule_integer_peak_descriptive": {
+       "integer_xy": [
+        -2,
+        1
+       ],
+       "max_value": 0.9418808006520369,
+       "equal_max_ties_in_search": 1,
+       "coupled_verdict": 0,
+       "coupled_offset_xy": [
+        0.03103414753946031,
+        -0.16401294979047995
+       ],
+       "selected_xy": [
+        -1.9689658524605398,
+        0.83598705020952
+       ]
+      },
+      "state_energy_rms_Fj_nonDC": 0.11138425463204302
+     },
+     "sum_of_pairwise_aux_map": {
+      "gap_nat_minus_phys": 0.020059625495575717,
+      "numeric_remainder_agg_minus_sum": -2.220446049250313e-16
+     },
+     "components": [
+      {
+       "ref_j": 0,
+       "values": {
+        "x_nat": 0.2326447962717871,
+        "x_int": 0.2328352526660619,
+        "x_phys": 0.23021971329286398,
+        "x_truth_unanchored": 0.22736954352454636,
+        "x_loc": 0.2329033090459401
+       },
+       "gap_nat_minus_phys": 0.002425082978923132,
+       "gap_int_minus_phys": 0.002615539373197917,
+       "gap_loc_minus_phys": 0.0026835957530761123,
+       "x_loc": [
+        -1.8182297554215054,
+        0.9847923235157303
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.22736954352454636,
+       "gap_true_pair_rel_minus_phys": -0.0028501697683176175,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         -2,
+         1
+        ],
+        "max_value": 0.23283525266606198,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         0.17567124155061323,
+         -0.010595996179073348
+        ],
+        "selected_xy": [
+         -1.8243287584493868,
+         0.9894040038209266
+        ]
+       }
+      },
+      {
+       "ref_j": 1,
+       "values": {
+        "x_nat": 0.2117363583022578,
+        "x_int": 0.2119145002228176,
+        "x_phys": 0.20788683697861762,
+        "x_truth_unanchored": 0.20436386216623434,
+        "x_loc": 0.21208676038784816
+       },
+       "gap_nat_minus_phys": 0.003849521323640165,
+       "gap_int_minus_phys": 0.0040276632441999805,
+       "gap_loc_minus_phys": 0.004199923409230533,
+       "x_loc": [
+        -2.286837121924755,
+        1.1591554351246316
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.20228285737210616,
+       "gap_true_pair_rel_minus_phys": -0.005603979606511461,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         -2,
+         1
+        ],
+        "max_value": 0.21191450022281758,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.28627885829543154,
+         0.15446965771487703
+        ],
+        "selected_xy": [
+         -2.2862788582954314,
+         1.154469657714877
+        ]
+       }
+      },
+      {
+       "ref_j": 2,
+       "values": {
+        "x_nat": 0.2132547679608831,
+        "x_int": 0.21162393173082783,
+        "x_phys": 0.20012668356524968,
+        "x_truth_unanchored": 0.19384398459980562,
+        "x_loc": 0.2198418591352363
+       },
+       "gap_nat_minus_phys": 0.013128084395633427,
+       "gap_int_minus_phys": 0.01149724816557815,
+       "gap_loc_minus_phys": 0.019715175569986615,
+       "x_loc": [
+        -0.8831101563010328,
+        -0.7925289204842301
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.19314561883108572,
+       "gap_true_pair_rel_minus_phys": -0.006981064734163961,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         -1,
+         -1
+        ],
+        "max_value": 0.2194577703890862,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         0.13587853081172394,
+         0.19393279422751425
+        ],
+        "selected_xy": [
+         -0.864121469188276,
+         -0.8060672057724858
+        ]
+       }
+      },
+      {
+       "ref_j": 3,
+       "values": {
+        "x_nat": 0.2846957428778472,
+        "x_int": 0.28550711603232953,
+        "x_phys": 0.28403880608046844,
+        "x_truth_unanchored": 0.2809069639515744,
+        "x_loc": 0.28628979667817195
+       },
+       "gap_nat_minus_phys": 0.000656936797378771,
+       "gap_int_minus_phys": 0.001468309951861091,
+       "gap_loc_minus_phys": 0.002250990597703506,
+       "x_loc": [
+        -2.0402092198561057,
+        1.3721113925966897
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.2782376299615834,
+       "gap_true_pair_rel_minus_phys": -0.005801176118885032,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         -2,
+         1
+        ],
+        "max_value": 0.2855071160323296,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.038698830692817446,
+         0.37155229671475487
+        ],
+        "selected_xy": [
+         -2.0386988306928173,
+         1.3715522967147549
+        ]
+       }
+      }
+     ],
+     "sum_of_component_gaps": 0.020059625495575495
+    },
+    "affine": {
+     "aggregate": {
+      "values": {
+       "x_nat": 0.7014528977955488,
+       "x_int": 0.7032955413388542,
+       "x_phys": 0.7178215205284538,
+       "x_truth_unanchored": 0.7180115164182984,
+       "x_loc": 0.722640907203589
+      },
+      "gap_nat_minus_phys": -0.01636862273290507,
+      "gap_int_minus_phys": -0.014525979189599636,
+      "gap_loc_minus_phys": 0.004819386675135151,
+      "x_loc": [
+       -0.5193390004597411,
+       0.87667022110303
+      ],
+      "native_rule_integer_peak_descriptive": {
+       "integer_xy": [
+        -1,
+        1
+       ],
+       "max_value": 0.7208890108974375,
+       "equal_max_ties_in_search": 1,
+       "coupled_verdict": 0,
+       "coupled_offset_xy": [
+        0.4779437425819536,
+        -0.11970347936520263
+       ],
+       "selected_xy": [
+        -0.5220562574180464,
+        0.8802965206347974
+       ]
+      },
+      "state_energy_rms_Fj_nonDC": 0.024523388851102387
+     },
+     "sum_of_pairwise_aux_map": {
+      "gap_nat_minus_phys": -0.01636862273290507,
+      "numeric_remainder_agg_minus_sum": 0.0
+     },
+     "components": [
+      {
+       "ref_j": 0,
+       "values": {
+        "x_nat": 0.17447553114164932,
+        "x_int": 0.17496528341237566,
+        "x_phys": 0.17772382172412748,
+        "x_truth_unanchored": 0.17738025539211336,
+        "x_loc": 0.17819576433075995
+       },
+       "gap_nat_minus_phys": -0.003248290582478164,
+       "gap_int_minus_phys": -0.0027585383117518236,
+       "gap_loc_minus_phys": 0.00047194260663246945,
+       "x_loc": [
+        -0.8621097782955687,
+        1.0304555377986482
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.17738025539211336,
+       "gap_true_pair_rel_minus_phys": -0.000343566332014128,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         -1,
+         1
+        ],
+        "max_value": 0.17813416927455616,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         0.1372960889274313,
+         0.03275937657234765
+        ],
+        "selected_xy": [
+         -0.8627039110725687,
+         1.0327593765723477
+        ]
+       }
+      },
+      {
+       "ref_j": 1,
+       "values": {
+        "x_nat": 0.17471205020583977,
+        "x_int": 0.1752940244167497,
+        "x_phys": 0.17911416196638633,
+        "x_truth_unanchored": 0.17919688288104663,
+        "x_loc": 0.179835251035417
+       },
+       "gap_nat_minus_phys": -0.0044021117605465565,
+       "gap_int_minus_phys": -0.0038201375496366152,
+       "gap_loc_minus_phys": 0.0007210890690306782,
+       "x_loc": [
+        -0.6655073771623385,
+        1.0509904273831125
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.17902758761705578,
+       "gap_true_pair_rel_minus_phys": -8.657434933054264e-05,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         -1,
+         1
+        ],
+        "max_value": 0.17950219508486698,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         0.33320850781049005,
+         0.05380293023843072
+        ],
+        "selected_xy": [
+         -0.66679149218951,
+         1.0538029302384306
+        ]
+       }
+      },
+      {
+       "ref_j": 2,
+       "values": {
+        "x_nat": 0.17566701331793314,
+        "x_int": 0.17616998729088412,
+        "x_phys": 0.18052998123628283,
+        "x_truth_unanchored": 0.18087928075511936,
+        "x_loc": 0.18216924557125516
+       },
+       "gap_nat_minus_phys": -0.004862967918349698,
+       "gap_int_minus_phys": -0.00435999394539871,
+       "gap_loc_minus_phys": 0.001639264334972329,
+       "x_loc": [
+        -0.3572687744262062,
+        0.8626083975391765
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.1816499901121543,
+       "gap_true_pair_rel_minus_phys": 0.0011200088758714644,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         1
+        ],
+        "max_value": 0.18164084174708678,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.3580570824399166,
+         -0.13559231435413024
+        ],
+        "selected_xy": [
+         -0.3580570824399166,
+         0.8644076856458698
+        ]
+       }
+      },
+      {
+       "ref_j": 3,
+       "values": {
+        "x_nat": 0.1765983031301265,
+        "x_int": 0.17686624621884459,
+        "x_phys": 0.18045355560165707,
+        "x_truth_unanchored": 0.18055509739001893,
+        "x_loc": 0.18304698680412174
+       },
+       "gap_nat_minus_phys": -0.003855252471530568,
+       "gap_int_minus_phys": -0.003587309382812487,
+       "gap_loc_minus_phys": 0.0025934312024646633,
+       "x_loc": [
+        -0.21230586636007232,
+        0.5799712230566527
+       ],
+       "x_loc_is_concave_stationary": true,
+       "val_at_true_pairwise_rel_after_G": 0.1828061537772128,
+       "gap_true_pair_rel_minus_phys": 0.00235259817555572,
+       "native_rule_integer_peak_descriptive": {
+        "integer_xy": [
+         0,
+         0
+        ],
+        "max_value": 0.18213633553461314,
+        "equal_max_ties_in_search": 1,
+        "coupled_verdict": 0,
+        "coupled_offset_xy": [
+         -0.2098902270694307,
+         0.5794601528296439
+        ],
+        "selected_xy": [
+         -0.2098902270694307,
+         0.5794601528296439
+        ]
+       }
+      }
+     ],
+     "sum_of_component_gaps": -0.016368622732904986
+    }
+   }
+  }
+ }
+}

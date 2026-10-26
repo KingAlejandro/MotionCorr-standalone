@@ -1,0 +1,23 @@
+2026-10-26T17:28:00Z
+PLAN frozen c3e25f67429c0384a46034e749ff5b877af4e98caf9b1c43dd6d1905254e7f97  PLAN.md
+$ /Users/alex.konstantinov/.local/bin/python3 -B bridge_v1.py --phase control
+exit 127
+$ /Users/alex.konstantinov/.local/bin/python3 -B bridge_v1.py --phase control (cwd scratch; env OPENBLAS/OMP/VECLIB=1)
+exit 0
+2026-10-26T17:29:58Z C4/C5 clarifications written after Phase A, before Phase B: 31e881cafbf6005707604ac8d8536f2eb3e383d232e9b1ede5ce90d55889274d
+2026-10-26T17:30:07Z $ /Users/alex.konstantinov/.local/bin/python3 -B bridge_v1.py --phase twin (after C4/C5)
+exit 0
+502a503,504
+>     gen = (SCRATCH / "src/test-data/generate_motion_diagnostics.py").read_text()
+>     label_keys_unused_by_render = ('["name"]' not in gen) and ('["role"]' not in gen)  # v2 repair: name/role are labels
+509c511,512
+<             "only_noise_and_role_differ": diff_keys == ["noise", "role"],
+---
+>             "only_noise_and_label_keys_differ": diff_keys == ["name", "noise", "role"] and label_keys_unused_by_render,
+>             "label_keys_name_role_unread_by_pinned_generator": label_keys_unused_by_render,
+571c574
+<     if not (ver["only_noise_and_role_differ"] and ver["field_hash_equal"] and ver["target_hash_equal"]
+---
+>     if not (ver["only_noise_and_label_keys_differ"] and ver["field_hash_equal"] and ver["target_hash_equal"]
+2026-10-26T17:30:24Z $ /Users/alex.konstantinov/.local/bin/python3 -B bridge_v2.py --phase twin
+exit 0

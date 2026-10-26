@@ -1,0 +1,262 @@
+{
+ "total": 51,
+ "failed": 0,
+ "skipped": [],
+ "results": [
+  {
+   "name": "parse /proc status",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "parse /proc stat times (utime/stime)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "parse /proc/locks",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "ancestor chain through a wrapper",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lease control: ours (held by an ancestor)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lease control: unheld is refused",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lease control: peer-held is refused",
+   "ok": true,
+   "detail": "the current inode is flock-held by pid(s) [999], none of them an ancestor of the driver"
+  },
+  {
+   "name": "lease control: lane holds an orphaned inode, a peer holds the recreated path",
+   "ok": true,
+   "detail": "the current inode is flock-held by pid(s) [999], none of them an ancestor of the driver"
+  },
+  {
+   "name": "lease control: a read-mode entry is refused",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lease control: a POSIX lock is refused",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lease control: same inode on another device is refused",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lease control: an intermediate wrapper owner is an ancestor too",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "multi-thread child with a differing mask: OBSERVED, receipts keep what /proc said (not the expected 32-47)",
+   "ok": true,
+   "detail": "{'max_threads': 3, 'max_tasks': 3, 'distinct_cpus_allowed_lists': ['40-41'], 'processes_seen': [1000, 1001], 'first_ms': 0, 'last_ms': 40}"
+  },
+  {
+   "name": "resource keys are non-empty when observable",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a read failure gives PARTIAL with the error kept",
+   "ok": true,
+   "detail": "['stat pid 1000: PermissionError: denied']"
+  },
+  {
+   "name": "child gone before the first read gives UNOBSERVED with a reason (no invented sample)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "no /proc on the host is stated as the reason",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "truncation is flagged and the summary still sees the later 5 threads",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a missing children file is recorded",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "RUN.json carries resource_samples with a stated status",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a fast child that was observed has real reads behind it",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "the extra resource_samples key leaves admit_producer passing",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "slow child: enough samples at the 20 ms schedule and OBSERVED",
+   "ok": true,
+   "detail": "n=28"
+  },
+  {
+   "name": "Threads 3 and mask 40-41 are receipts, not a stop (run exit 0, no gate)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a non-zero exit still carries resource_samples",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a timeout still carries resource_samples and is marked",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "KeyboardInterrupt during the wait propagates",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "own child is reaped after KeyboardInterrupt",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "ledger keeps the real exception and a STOP",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "no next launch after cleanup",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "SIGTERM during the wait is raised inside the campaign",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "own child is reaped after SIGTERM",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "ledger keeps SIGTERM as the real cause, no next launch",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "the previous SIGTERM handler is restored",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "unexpected exception in the wait propagates",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "child reaped, aborted RUN.json, STOP carries RuntimeError, one launch only",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "Popen failure is a LAUNCH stop",
+   "ok": true,
+   "detail": "code=LAUNCH"
+  },
+  {
+   "name": "Popen failure keeps a RUN.json with the real exception and a ledger STOP, no next launch",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "real guard under the real lane: ancestor-owned leases, free disk and the frozen-prior label",
+   "ok": true,
+   "detail": "{'free_bytes': 86457999360, 'prior_scratch_frozen': True}"
+  },
+  {
+   "name": "free disk below the floor is refused",
+   "ok": true,
+   "detail": "code=GUARD"
+  },
+  {
+   "name": "real control: ours (the test process is the ancestor owner)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "real control: an intermediate bash wrapper between owner and checker",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "real control: unheld is refused",
+   "ok": true,
+   "detail": "no FLOCK WRITE entry on the current inode (unheld, or held only on an orphaned inode)"
+  },
+  {
+   "name": "real control: held by a peer (sibling) is refused",
+   "ok": true,
+   "detail": "the current inode is flock-held by pid(s) [3636824], none of them an ancestor of the driver"
+  },
+  {
+   "name": "real control: lane holds an orphaned inode, a peer holds the recreated path: refused",
+   "ok": true,
+   "detail": "the current inode is flock-held by pid(s) [3636826], none of them an ancestor of the driver"
+  },
+  {
+   "name": "real child: OBSERVED with Threads > 1 and the task count",
+   "ok": true,
+   "detail": "{'max_threads': 4, 'max_tasks': 4, 'distinct_cpus_allowed_lists': ['32-33'], 'processes_seen': [3636828, 3636832], 'first_ms': 0, 'last_ms': 1109}"
+  },
+  {
+   "name": "real child: the mask is what the kernel reports for the child (set 2 CPUs), not an expected copy",
+   "ok": true,
+   "detail": "['32-33']"
+  },
+  {
+   "name": "real child: the grandchild is seen through the children files, or the missing files are counted",
+   "ok": true,
+   "detail": "[3636828, 3636832]"
+  },
+  {
+   "name": "real child: immediate sample then 20 ms polls give enough samples",
+   "ok": true,
+   "detail": "n=51"
+  },
+  {
+   "name": "parent-death signal: the child dies when the driver is SIGKILLed",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "control without the signal: the child survives (so the test discriminates)",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

@@ -1,0 +1,59 @@
+Working on noisy.mrcs with 2 thread(s).
+
+Movie size: X = 128 Y = 96 N = 5
+Frames to be used: 1 2 3 4 5
+Frame grouping: n_frames = 5, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 
+interpolate_shifts = 0
+
+
+Global alignment:
+ Iteration 1: RMSD = 1.56329 px
+ Iteration 2: RMSD = 0.565733 px
+ Iteration 3: RMSD = 0.390971 px
+
+Local alignments:
+Patches: X = 3 Y = 3
+Patch (1, 1): 1 / 9, X range = [0, 42), Y range = [0, 32), Center = (20, 15)
+ Iteration 1: RMSD = 2.01555 px
+ Iteration 2: RMSD = 0.461469 px
+Patch (1, 2): 2 / 9, X range = [42, 84), Y range = [0, 32), Center = (62, 15)
+ Iteration 1: RMSD = 1.3951 px
+ Iteration 2: RMSD = 0.402929 px
+Patch (1, 3): 3 / 9, X range = [84, 126), Y range = [0, 32), Center = (104, 15)
+ Iteration 1: RMSD = 4.61048 px
+ Iteration 2: RMSD = 1.4579 px
+ Iteration 3: RMSD = 0.322877 px
+Patch (2, 1): 4 / 9, X range = [0, 42), Y range = [32, 64), Center = (20, 47)
+ Iteration 1: RMSD = 1.38104 px
+ Iteration 2: RMSD = 0.459364 px
+Patch (2, 2): 5 / 9, X range = [42, 84), Y range = [32, 64), Center = (62, 47)
+ Iteration 1: RMSD = 1.46349 px
+ Iteration 2: RMSD = 0.401175 px
+Patch (2, 3): 6 / 9, X range = [84, 126), Y range = [32, 64), Center = (104, 47)
+ Iteration 1: RMSD = 8.90702 px
+ Iteration 2: RMSD = 3.46064 px
+ Iteration 3: RMSD = 2.61871 px
+ Iteration 4: RMSD = 2.72294 px
+ Iteration 5: RMSD = 2.41775 px
+Patch (3, 1): 7 / 9, X range = [0, 42), Y range = [64, 96), Center = (20, 79)
+ Iteration 1: RMSD = 3.32324 px
+ Iteration 2: RMSD = 1.07897 px
+ Iteration 3: RMSD = 0.767163 px
+ Iteration 4: RMSD = 0.660177 px
+ Iteration 5: RMSD = 0.330066 px
+Patch (3, 2): 8 / 9, X range = [42, 84), Y range = [64, 96), Center = (62, 79)
+ Iteration 1: RMSD = 5.96108 px
+ Iteration 2: RMSD = 0.616882 px
+ Iteration 3: RMSD = 0.546664 px
+ Iteration 4: RMSD = 0.541592 px
+ Iteration 5: RMSD = 0.530631 px
+Patch (3, 3): 9 / 9, X range = [84, 126), Y range = [64, 96), Center = (104, 79)
+ Iteration 1: RMSD = 1.74149 px
+ Iteration 2: RMSD = 0.857577 px
+ Iteration 3: RMSD = 0.360332 px
+
+Polynomial fit RMSD: X = 0.545016 px Y = 0.408096 px
+Summing frames before dose weighting: ..... done
+Written aligned but non-dose weighted sum to /tmp/motioncorr-damping-a1c78adc1d0f/v2/dcg-prod-rt/noisy/noisy.mrc
+Full movie wall time: 0.005 s

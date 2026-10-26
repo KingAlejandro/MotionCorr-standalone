@@ -1,0 +1,53 @@
+[
+  {
+    "case": "noisy",
+    "backend": "cpu",
+    "dc": "cap",
+    "patches": 3,
+    "argv": [
+      "taskset",
+      "-c",
+      "48-55",
+      "/tmp/motioncorr-damping-a1c78adc1d0f/build-h4on/motioncorr",
+      "--i",
+      "noisy.star",
+      "--o",
+      "/tmp/motioncorr-damping-a1c78adc1d0f/v2/diag-dcgh2g-g5/noisy",
+      "--use_own",
+      "--j",
+      "2",
+      "--patch_x",
+      "3",
+      "--patch_y",
+      "3",
+      "--bin_factor",
+      "1",
+      "--seed",
+      "1",
+      "--skip_defect",
+      "--save_noDW",
+      "--first_frame_sum",
+      "1",
+      "--last_frame_sum",
+      "5",
+      "--skip_logfile",
+      "--experimental_coupled_peak",
+      "global",
+      "--max_iter",
+      "5",
+      "--experimental_align_tolerance",
+      "1e-9"
+    ],
+    "exit": 0,
+    "seconds": 0.12117505073547363,
+    "gpu_uuid": null,
+    "extra": [
+      "--experimental_coupled_peak",
+      "global",
+      "--max_iter",
+      "5",
+      "--experimental_align_tolerance",
+      "1e-9"
+    ]
+  }
+]

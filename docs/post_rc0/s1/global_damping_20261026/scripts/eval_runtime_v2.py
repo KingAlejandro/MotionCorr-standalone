@@ -6,9 +6,9 @@ come from RUNDIR/CASE.runtime.json (%.17g); geometry, frame indexing and basis a
 taken from the STAR evaluation (identifiability is a property of the data). The gate is eval_v2's field gate (rms<=.2, p95<=.4, max<=.8 A).
 Also reports the max |runtime - STAR| over global shifts and coefficients (serialization rounding).
 """
-import json, pathlib, sys
+import json, os, pathlib, sys
 import numpy as np
-REPO = next((p for p in pathlib.Path(__file__).resolve().parents
+REPO = pathlib.Path(os.environ['MOTIONCORR_SRC']) if os.environ.get('MOTIONCORR_SRC') else next((p for p in pathlib.Path(__file__).resolve().parents
              if (p/'tools/check_motion_diagnostics.py').is_file() and (p/'test-data/generate_motion_diagnostics.py').is_file()), None)
 if REPO is None: sys.exit('cannot locate MotionCorr sources above evaluator path')
 sys.path[:0] = [str(REPO/'tools'), str(REPO/'test-data')]

@@ -20,7 +20,7 @@ run_arm() { # name dcarm extra old_arm
   else lane env MC_EXPERIMENT_CCF_DC_ARM=$dc $DS_PY -I $drv $V $n cpu $BIN cap $DS_CPUS "$extra" > $R/$n.driver.out 2>&1; fi
   echo $? > $R/$n.driver.exit
   lane $DS_PY -I $S/docs/post_rc0/s1/synth_combined/eval_v2.py $V/v2fixtures $V/$n $V/$n.eval.json > $R/$n.eval.out 2>&1; echo $? > $R/$n.eval.exit
-  lane $DS_PY -I $D/eval_runtime_v2.py $V/v2fixtures $V/$n $V/$n.eval.json $V/$n.runtime-eval.json > $R/$n.runtime-eval.out 2>&1; echo $? > $R/$n.runtime-eval.exit
+  lane env MOTIONCORR_SRC=$S $DS_PY -I $D/eval_runtime_v2.py $V/v2fixtures $V/$n $V/$n.eval.json $V/$n.runtime-eval.json > $R/$n.runtime-eval.out 2>&1; echo $? > $R/$n.runtime-eval.exit
   nd=0; for c in zero integer fractional affine pedestal noisy flat repeated; do cmp -s $V/$n/$c/$c.star $V/$old/$c/$c.star || { nd=$((nd+1)); echo "STAR differs: $n/$c vs $old" >> $R/$n.star-identity.txt; }; done
   echo "$nd" > $R/$n.star-differing-cases
   echo "$n dc=$dc driver=$(cat $R/$n.driver.exit) eval=$(cat $R/$n.eval.exit) runtime-eval=$(cat $R/$n.runtime-eval.exit) star-differing-cases=$nd"

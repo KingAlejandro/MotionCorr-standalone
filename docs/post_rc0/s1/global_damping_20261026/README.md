@@ -1,6 +1,6 @@
 # Global peak/update alternatives: default-off research prototypes (not for merge)
 
-Three separate default-off CPU-only prototypes on one branch (H3 adds the ported #262 DC hook, which composes with the other two): (1) global half-gain damping with a tolerance override, scored against the independent challenge that rated it NO-GO; (2) hypothesis H2, a coupled 2x2-Hessian subpixel peak, scored against its frozen predictions. Sections below: summary, half-gain, challenge scorecard, H2, H3, flags-off identity, limitations, provenance.
+Three separate default-off CPU-only prototypes on one branch (H3 adds the ported #262 DC hook, which composes with the other two; the #269 runtime capture, behind the same option, now gives the runtime field for the candidate cells, and the noisy production-stop regression of DCg+H2g is diagnosed in `noisy_diagnosis/`): (1) global half-gain damping with a tolerance override, scored against the independent challenge that rated it NO-GO; (2) hypothesis H2, a coupled 2x2-Hessian subpixel peak, scored against its frozen predictions. Sections below: summary, half-gain, challenge scorecard, H2, H3, flags-off identity, limitations, provenance.
 
 **Half-gain result.** With `--experimental_global_half_gain --max_iter 50 --experimental_align_tolerance 1e-9` (arm c) the
 retained #267 FAIL cases `integer`, `fractional` and `affine` meet the unchanged 0.20/0.40/0.80 Å limits natively on CPU.
@@ -158,7 +158,7 @@ Pedestal, flat and repeated fire on every peak (H not negative definite: float32
 
 Prediction file copied verbatim, SHA256 `ec6e60f8ac25ea341659475ddb62dfe32b6dc2719cc0b6930c5cb08939a10c23` verified before any code was written.
 
-**DC hook port (source `1c1eacf9`).** `src/experiment_ccf_dc.h` is byte-identical to `3eee0a4b` (`cmp`). The CPU call site in `alignPatch` is the same two lines (include, and `if (experimentCcfDcZero(is_global, EXP_DC_CPU, 1)) DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);` after the CCF product, before the inverse FFT). Delta of 3eee0a4b against 805d9de2 is: the header, that call site, the CMake option `MC_EXPERIMENT_CCF_DC` (default OFF; taken here as the option and its compile definition only), the CUDA call sites, the #269 `MC_DIAG_MODEL_OUT` runtime-capture block, and a CUDA-oriented stage oracle with mutants. The CUDA parts, the runtime-capture block and that oracle are not ported (so the runtime field stays UNRUN). The hook keeps its own selection mechanism: with the option built in, `MC_EXPERIMENT_CCF_DC_ARM=none|global|local|both` is required at run time. **Setting used: `global` for DC arms, `none` for the DC-off identity arm.**
+**DC hook port (source `1c1eacf9`).** `src/experiment_ccf_dc.h` is byte-identical to `3eee0a4b` (`cmp`). The CPU call site in `alignPatch` is the same two lines (include, and `if (experimentCcfDcZero(is_global, EXP_DC_CPU, 1)) DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);` after the CCF product, before the inverse FFT). Delta of 3eee0a4b against 805d9de2 is: the header, that call site, the CMake option `MC_EXPERIMENT_CCF_DC` (default OFF; taken here as the option and its compile definition only), the CUDA call sites, the #269 `MC_DIAG_MODEL_OUT` runtime-capture block, and a CUDA-oriented stage oracle with mutants. The CUDA parts and that oracle are not ported; the runtime-capture block was ported in the next round (see the runtime-capture section). The hook keeps its own selection mechanism: with the option built in, `MC_EXPERIMENT_CCF_DC_ARM=none|global|local|both` is required at run time. **Setting used: `global` for DC arms, `none` for the DC-off identity arm.**
 
 **Manipulation control (mirrors #284).** The hook prints, per run, how many CCF frames were eligible and zeroed. Summed over the eight #267 cases per arm: `dcg-prod` global 85/85 zeroed, patch 0/275; `dcg-long` global 1510/1510, patch 0/300; `dcgh2g-prod` global 95/95, patch 0/260; `dcgh2g-long` 1510/1510, 0/345; `dcghalf-prod` 115/115, 0/280; `dcghalf-long` 1510/1510, 0/375; the DC-off arm `h3-dcoff` (ARM=none) 0/130 global, 0/270 patch. So the global arm zeroes every global CCF frame and no patch frame (the K267 counts are in each case's `.stdout`).
 
@@ -253,9 +253,57 @@ Without the DC bin zeroed, H2 fired on every pedestal peak (5/5 global, 45/45 pa
 
 One extra arm, `e-half-iter50-tol05`: `--experimental_global_half_gain --max_iter 50`, default 0.5 px tolerance, no driver change (the `[align]` stdout line gives iterations). Results: integer ran all 50 iterations (never below 0.5 px, last 0.586) and ends at 0.1777 Å, identical to arm c; fractional converged at iteration 8 (0.133 Å); affine stopped at iteration 5 (identical to arm b); noisy converged at iteration 8. The challenge's claim that `--max_iter 50` at the production tolerance stops at iteration 4 or earlier and is bit-identical to `--max_iter 5` is falsified natively for integer, fractional and noisy: those runs use more than five iterations and differ from arm b (integer 0.326 to 0.178, fractional 0.274 to 0.133, noisy RMS 2.799 to 1.926). It holds only for affine, which stops at the cap anyway. A longer budget at the default tolerance is enough for half-gain to pass integer, fractional and affine here; the tolerance override of arm c is not what matters. Arms b, c and d have no iteration log (older binary), so their own iteration counts are not observed.
 
+## Runtime field and the noisy diagnosis (round after H3)
+
+### Runtime capture (source `d41875e1`)
+
+The #269 runtime-capture block (`MC_DIAG_MODEL_OUT`, `%.17g` global shifts and local coefficients before STAR serialization) is ported verbatim from 3eee0a4b into the same compile option `MC_EXPERIMENT_CCF_DC`; the default build compiles none of it. It writes a file and changes no computation: with it built in and `MC_DIAG_MODEL_OUT` set, the synthetic-movie products are IDENTICAL to the run without it (7 gated), and every STAR of the five rerun arms is byte-identical to the earlier STAR-only arm (0 differing cases in all five). `eval_runtime_v2.py` scores the runtime model with eval_v2's truth, ROI, field arithmetic and limits (only the numbers inside the STAR-parsed model are replaced); identifiability status is taken from the STAR checker. Runtime and STAR agree to at most 5.0e-06 px in the global shifts and 4.9e-06 in the coefficients, and the runtime gate equals the STAR gate in all 40 cells of the five arms.
+
+Flags-off / capture-on identity with the new builds (`build-h4off` `9176dfd0...`, default; `build-h4on` `f39e0930...`, hook and capture built in, `MC_EXPERIMENT_CCF_DC_ARM=none`): full CPU CTest 93 tests (92 passed, 1 skipped, 0 failed) and 94 tests (93 passed, 1 skipped, 0 failed); known-motion trees and the synthetic movie IDENTICAL to e77a51a2 for both builds (193 files / 88 gated; 14 / 7); DC arm global and half-gain on still change the products.
+
+Reran only the five arms the capture needs (`a-rt` through `dcgh2g-long-rt`, same lane, driver and evaluator; `a-rt` uses the hook binary with ARM=none). Attempt 1 of the runtime scorer failed in source-root discovery (exit 1, scorer outside the source tree); re-scored with `MOTIONCORR_SRC` set, no native rerun. The earlier STAR-only results are kept unchanged. **Runtime field for the other arms (b, c, d, h2glob-*, dcghalf-*, e) is still UNRUN: the instruction limited reruns to these five arms.**
+
+Runtime vs STAR, candidate arms (cell = RMS / p95 / max Å; limits 0.20 / 0.40 / 0.80; zero, flat and repeated are identical in both representations, see `results/runtime_vs_star.md` for all 40 rows):
+
+| Case | Arm | Runtime RMS / p95 / max Å | Runtime gate | STAR RMS / p95 / max Å | STAR checker | max abs (runtime - STAR) global px / coeff |
+|---|---|---|---|---|---|---|
+| integer | a | 0.2636 / 0.4316 / 0.4316 | FAIL | 0.2636 / 0.4316 / 0.4316 | FAIL | 4.3e-06 / 0.0e+00 |
+| integer | dcg-prod | 0.5191 / 0.8509 / 0.8509 | FAIL | 0.5191 / 0.8509 / 0.8509 | FAIL | 3.2e-06 / 0.0e+00 |
+| integer | dcg-long | 0.2340 / 0.2983 / 0.2983 | FAIL | 0.2340 / 0.2983 / 0.2983 | FAIL | 5.0e-06 / 0.0e+00 |
+| integer | dcgh2g-prod | 0.0742 / 0.1157 / 0.1157 | PASS | 0.0742 / 0.1157 / 0.1157 | PASS | 4.1e-06 / 0.0e+00 |
+| integer | dcgh2g-long | 0.0000 / 0.0000 / 0.0000 | PASS | 0.0000 / 0.0000 / 0.0000 | PASS | 3.2e-06 / 0.0e+00 |
+| fractional | a | 0.5241 / 0.7034 / 0.7034 | FAIL | 0.5241 / 0.7034 / 0.7034 | FAIL | 4.8e-06 / 0.0e+00 |
+| fractional | dcg-prod | 0.3265 / 0.5221 / 0.5221 | FAIL | 0.3265 / 0.5221 / 0.5221 | FAIL | 4.0e-06 / 0.0e+00 |
+| fractional | dcg-long | 0.3137 / 0.5099 / 0.5099 | FAIL | 0.3137 / 0.5099 / 0.5099 | FAIL | 4.2e-06 / 0.0e+00 |
+| fractional | dcgh2g-prod | 0.0297 / 0.0483 / 0.0483 | PASS | 0.0297 / 0.0483 / 0.0483 | PASS | 5.0e-06 / 0.0e+00 |
+| fractional | dcgh2g-long | 0.0000 / 0.0000 / 0.0000 | PASS | 0.0000 / 0.0000 / 0.0000 | PASS | 3.8e-06 / 0.0e+00 |
+| affine | a | 0.4024 / 0.7425 / 0.9111 | FAIL | 0.4024 / 0.7425 / 0.9111 | FAIL | 4.3e-06 / 4.5e-06 |
+| affine | dcg-prod | 0.3039 / 0.5922 / 0.8907 | FAIL | 0.3040 / 0.5922 / 0.8907 | FAIL | 3.8e-06 / 4.8e-06 |
+| affine | dcg-long | 0.3931 / 0.6042 / 0.8577 | FAIL | 0.3931 / 0.6042 / 0.8576 | FAIL | 4.6e-06 / 4.4e-06 |
+| affine | dcgh2g-prod | 0.1589 / 0.3370 / 0.6948 | PASS | 0.1589 / 0.3371 / 0.6948 | PASS | 4.2e-06 / 4.7e-06 |
+| affine | dcgh2g-long | 0.1758 / 0.3748 / 0.8490 | FAIL | 0.1758 / 0.3748 / 0.8491 | FAIL | 4.8e-06 / 3.9e-06 |
+| pedestal | a | 2.1191 / 3.6038 / 3.8931 | FAIL | 2.1191 / 3.6038 / 3.8931 | FAIL | 0.0e+00 / 0.0e+00 |
+| pedestal | dcg-prod | 0.4117 / 0.7466 / 1.1460 | FAIL | 0.4117 / 0.7466 / 1.1460 | FAIL | 2.6e-06 / 0.0e+00 |
+| pedestal | dcg-long | 0.4362 / 0.8173 / 1.4608 | FAIL | 0.4362 / 0.8173 / 1.4608 | FAIL | 3.5e-06 / 0.0e+00 |
+| pedestal | dcgh2g-prod | 0.2623 / 0.5771 / 1.0160 | FAIL | 0.2623 / 0.5771 / 1.0160 | FAIL | 3.2e-06 / 0.0e+00 |
+| pedestal | dcgh2g-long | 0.2628 / 0.5784 / 1.0333 | FAIL | 0.2628 / 0.5784 / 1.0333 | FAIL | 4.9e-06 / 0.0e+00 |
+| noisy | a | 2.3430 / 4.3766 / 9.9039 | FAIL | 2.3430 / 4.3766 / 9.9039 | FAIL | 3.8e-06 / 4.6e-06 |
+| noisy | dcg-prod | 1.7440 / 3.5149 / 7.3831 | FAIL | 1.7440 / 3.5150 / 7.3831 | FAIL | 4.7e-06 / 4.4e-06 |
+| noisy | dcg-long | 1.6609 / 3.3869 / 8.9202 | FAIL | 1.6609 / 3.3870 / 8.9202 | FAIL | 4.7e-06 / 4.7e-06 |
+| noisy | dcgh2g-prod | 3.0491 / 6.3200 / 21.2952 | FAIL | 3.0491 / 6.3200 / 21.2951 | FAIL | 3.0e-06 / 4.9e-06 |
+| noisy | dcgh2g-long | 1.8029 / 3.7120 / 9.8838 | FAIL | 1.8029 / 3.7121 / 9.8839 | FAIL | 3.7e-06 / 4.4e-06 |
+
+Runtime and STAR give the same gate verdict everywhere; the integer and fractional passes of DCg+H2g (production and long) hold in the full-precision runtime field.
+
+### Noisy production-stop regression of DCg+H2g (`noisy_diagnosis/`)
+
+[PREDICTION.md](noisy_diagnosis/PREDICTION.md) was committed (be7bdf14) before the discriminating run; [VERDICT.md](noisy_diagnosis/VERDICT.md) has the full reading. Summary: the 21.3 Å maximum is a top-right-corner extrapolation of the local polynomial (frame 5, y 12, x 115; local part (-16.4, 16.2) Å, frame spatial-mean error 0.90 Å) after patches (1,3) and (2,3) fail to converge and are dropped. Forcing only the global alignment through 5 iterations (the one new run) restores noisy to 1.704 / 3.426 / 7.417 Å, the dcg-prod level, because the 0.07 px of extra global update lets patch (1,3) converge. Global update norms (px): dcg-prod 1.563, 0.566, 0.391; dcgh2g-prod 1.893, 0.369 (stops at 2); h2glob-prod 1.928, 1.117, 0.943, 0.532, 0.474. **Verdict against my prediction (ii): right on where and what (corner patch-fit extrapolation, small global error, bad observations), wrong on persistence (forcing 5 iterations removes it).** (i) passes its outcome test but there is no large transient; (iii) is not the carrier. The mechanism is a stop-rule by patch-acceptance interaction. No guard, stop rule, weight or threshold was changed.
+
+**Correction to the H3 round.** I wrote that arms b, c and d have no iteration log. They do: the K267 driver suppresses only the logfile.pdf tracks, and each case's `noisy.log` (and every other case's `.log`) holds the per-iteration RMSDs of the global and patch alignments. The earlier "no iteration log" statement was wrong; the iteration-log test of the challenge's early-stop claim is unaffected.
+
 ## Not run / limitations (half-gain, H2 and H3)
 
-- **Runtime (unrounded) field: UNRUN.** e77a51a2 has no runtime-model capture (`MC_DIAG_*` is not in `src/`). Only STAR-serialized scores exist. W5 found runtime and STAR scores within about 3e-5 Å RMS on its fixtures (largest: affine double-gain1-5it, 0.320006 vs 0.319982), far inside the limits, but that is not measured here.
+- **Runtime (unrounded) field:** scored in the runtime-capture section for the five candidate arms (a, DCg, DCg+H2g, each at both stops); still UNRUN for the other arms. The statement below applied to the earlier rounds: **UNRUN.** e77a51a2 has no runtime-model capture (`MC_DIAG_*` is not in `src/`). Only STAR-serialized scores exist. W5 found runtime and STAR scores within about 3e-5 Å RMS on its fixtures (largest: affine double-gain1-5it, 0.320006 vs 0.319982), far inside the limits, but that is not measured here.
 - **Native N=9/13/20 and phase-ramp vel0/vel1 controls: UNRUN.** No generator in the repo produces them; W5 used offline replay. The only native N=5 fixtures are the #267 `integer`/`fractional` cases. W5 recorded production-stop regressions at larger N (vel0 isotropic N13/N20 PASS to FAIL) that this run cannot confirm or exclude.
 - Native results do not match W5's offline numbers cell by cell (e.g. arm c integer 0.178 Å here, 0.074 Å in W5 map32); native b integer fails like W5's double-map replay and native b fractional fails like its map32 replay. The offline replay is not a native reproduction.
 - One synthetic fixture family, 5 frames, one run per arm (the CPU build is bit-deterministic, so repeats would not add information). `noisy` worsens at the production stop and `pedestal` is unaffected.

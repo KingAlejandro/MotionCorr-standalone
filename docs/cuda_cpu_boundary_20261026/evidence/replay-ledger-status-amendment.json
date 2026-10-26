@@ -1,0 +1,1085 @@
+{
+  "note": "Additive correction to the broad original collector status label; raw-CPU inverse attempts are unaffected. No RUN receipt or measured result changed.",
+  "rows": [
+    {
+      "receipt": "replays/00021-forward-cpu-cpu/RUN.json",
+      "receipt_sha256": "f66ab8eb4cdd1e8b685deee5b3a0290cfa4eef5074107f9208b2d947fe6f7f9b",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "forward",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-forward-cpu-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:44:49.675156+00:00",
+      "end": "2026-10-26T15:44:51.201734+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00021-forward-cpu-cuda/RUN.json",
+      "receipt_sha256": "d5e12b797e7cc0bf6e585a4015ee5abfdca95686989a0d8564ea53e21f36e97b",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "forward",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-forward-cpu-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:44:53.010432+00:00",
+      "end": "2026-10-26T15:44:53.800320+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00021-forward-cuda-cpu/RUN.json",
+      "receipt_sha256": "a9546ddaa43e516b49999c0cdb01d57da54058a2dfd1885d484ef18706bf6d08",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "forward",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-forward-cuda-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:06.398776+00:00",
+      "end": "2026-10-26T15:45:07.662371+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00021-forward-cuda-cuda/RUN.json",
+      "receipt_sha256": "ca8fec09457db483812a87557c07a2f09257f6aea896479a3c299de0bbd24624",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "forward",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-forward-cuda-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:09.458901+00:00",
+      "end": "2026-10-26T15:45:10.299277+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00021-inverse-cpu-cpu/RUN.json",
+      "receipt_sha256": "14eb738f1cc1a78db15e36dc06e617298175c7e3a4b552b91b602610c3047ef5",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-inverse-cpu-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:00.653085+00:00",
+      "end": "2026-10-26T15:45:00.907496+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00021-inverse-cpu-cuda/RUN.json",
+      "receipt_sha256": "fc43fd9c45b4d061dd3aec26cde1b6262778ca4b1a145b237d1df06d1fe5356b",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-inverse-cpu-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:02.596496+00:00",
+      "end": "2026-10-26T15:45:03.388732+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "INVALID complete-batch provenance; retained original attempt"
+    },
+    {
+      "receipt": "replays/00021-inverse-cuda-cpu/RUN.json",
+      "receipt_sha256": "3bad33860f2fc7a74469dd11c5dfd80a39a4bf7e96e763ccd7c372ad2f8e956f",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-inverse-cuda-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:17.099252+00:00",
+      "end": "2026-10-26T15:45:17.354322+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00021-inverse-cuda-cuda/RUN.json",
+      "receipt_sha256": "46326097cfada6ab03795c57b11efe3ebedcaf0a79191719d02f66481514c987",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-inverse-cuda-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:19.028859+00:00",
+      "end": "2026-10-26T15:45:19.802951+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "INVALID complete-batch provenance; retained original attempt"
+    },
+    {
+      "receipt": "replays/00021-inverse-projected-cpu-cpu/RUN.json",
+      "receipt_sha256": "e64d1403855ba916ae3db085310d19d132e5df666cc2ebd62b606e07ff6b66a1",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-common-projected-cpu",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-inverse-projected-cpu-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:04.775477+00:00",
+      "end": "2026-10-26T15:45:05.035588+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "INVALID complete-batch provenance; retained original attempt"
+    },
+    {
+      "receipt": "replays/00021-inverse-projected-cuda-cpu/RUN.json",
+      "receipt_sha256": "880b5f6e8f11f094beca494697b376e474994e2ab784eabbf1f7a18c1e2f93a4",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-common-projected-cuda",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-inverse-projected-cuda-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:21.166085+00:00",
+      "end": "2026-10-26T15:45:21.426160+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "INVALID complete-batch provenance; retained original attempt"
+    },
+    {
+      "receipt": "replays/00021-window-cpu-cpu/RUN.json",
+      "receipt_sha256": "b7cb6a715d865f2c266916e92db431131fd0cd27037792e3d6a351fd44d142f3",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "window",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-window-cpu-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:44:55.601427+00:00",
+      "end": "2026-10-26T15:44:55.856695+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00021-window-cpu-cuda/RUN.json",
+      "receipt_sha256": "0f8961d66496b9a270608785c947e6e660e2cf7970288918b8b531771b5717b2",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "window",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-window-cpu-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:44:57.559268+00:00",
+      "end": "2026-10-26T15:44:58.843863+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00021-window-cuda-cpu/RUN.json",
+      "receipt_sha256": "36a63405f29339b9a103378ce628aabb06b606f4e3b0052edcaef9f1d15599f8",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "window",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-window-cuda-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:12.087589+00:00",
+      "end": "2026-10-26T15:45:12.348281+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00021-window-cuda-cuda/RUN.json",
+      "receipt_sha256": "3f6e371b7cd04ca080700065a55c6124e2ba31e897bd778a16b726a475dadcc1",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "window",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00021-window-cuda-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:14.041883+00:00",
+      "end": "2026-10-26T15:45:15.321733+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00046-forward-cpu-cpu/RUN.json",
+      "receipt_sha256": "cc648a61021d504717f019d63497e569e5a28e2ca5c6f79e70ff0d501f0f0627",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "forward",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-forward-cpu-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:22.800641+00:00",
+      "end": "2026-10-26T15:45:24.065171+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00046-forward-cpu-cuda/RUN.json",
+      "receipt_sha256": "7f0944fc55578da904efb1870f70de572f6fcb4b8604f081954911324d16ecff",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "forward",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-forward-cpu-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:25.880515+00:00",
+      "end": "2026-10-26T15:45:26.679510+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00046-forward-cuda-cpu/RUN.json",
+      "receipt_sha256": "848d485b1c55371047bbbfb5f05962a19df22569de66dd0c9989e0d6d2a1a81a",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "forward",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-forward-cuda-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:39.327235+00:00",
+      "end": "2026-10-26T15:45:40.596728+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00046-forward-cuda-cuda/RUN.json",
+      "receipt_sha256": "985440c1aaedf3f83cb902e3a5df9a533bfa4e810597c37800c3dfe1089da4d4",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "forward",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-forward-cuda-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:42.468543+00:00",
+      "end": "2026-10-26T15:45:43.528768+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00046-inverse-cpu-cpu/RUN.json",
+      "receipt_sha256": "8b2f0f97711d55c7a39a16eb1863fc72d3ff63ef8dcc822e34f6e48a77ae3884",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-inverse-cpu-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:33.548440+00:00",
+      "end": "2026-10-26T15:45:33.803209+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00046-inverse-cpu-cuda/RUN.json",
+      "receipt_sha256": "79818b181e09cb297ff2603e8ca92178e22a6a8daf597b8249cf1ef1b5eca615",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-inverse-cpu-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:35.509589+00:00",
+      "end": "2026-10-26T15:45:36.295336+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "INVALID complete-batch provenance; retained original attempt"
+    },
+    {
+      "receipt": "replays/00046-inverse-cuda-cpu/RUN.json",
+      "receipt_sha256": "5d432ff6af2b81039594fa86544ad41641c1ca7f1442d8d1dd3b7ac3e7285d1f",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-inverse-cuda-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:50.606853+00:00",
+      "end": "2026-10-26T15:45:50.871341+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00046-inverse-cuda-cuda/RUN.json",
+      "receipt_sha256": "d84af5cb3096f8f4becb2fcf53f28db3730124a917ca3ec2a3dd705b7584c2c6",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-inverse-cuda-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:52.619367+00:00",
+      "end": "2026-10-26T15:45:53.430748+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "INVALID complete-batch provenance; retained original attempt"
+    },
+    {
+      "receipt": "replays/00046-inverse-projected-cpu-cpu/RUN.json",
+      "receipt_sha256": "8886b4db31f0e9b457863893b0d7f107fe1924b5570ddf914dd4c29d3b87cb14",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-common-projected-cpu",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-inverse-projected-cpu-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:37.680953+00:00",
+      "end": "2026-10-26T15:45:37.939216+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "INVALID complete-batch provenance; retained original attempt"
+    },
+    {
+      "receipt": "replays/00046-inverse-projected-cuda-cpu/RUN.json",
+      "receipt_sha256": "51e3d795c3eb09beead8f9c517cab8dd25e8f19e8671f3457393a13542ac314d",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-common-projected-cuda",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-inverse-projected-cuda-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:54.841350+00:00",
+      "end": "2026-10-26T15:45:55.096404+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "INVALID complete-batch provenance; retained original attempt"
+    },
+    {
+      "receipt": "replays/00046-window-cpu-cpu/RUN.json",
+      "receipt_sha256": "44c4773c93ca37133d77f0fdf7ec4379b8ae21a58fbc61dc2603357204575de5",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "window",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-window-cpu-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:28.490244+00:00",
+      "end": "2026-10-26T15:45:28.746182+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00046-window-cpu-cuda/RUN.json",
+      "receipt_sha256": "c1bb040302da0a56e43d523b5b11b8b611eb0c51a57afa84c7a011321d0b1f5a",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "window",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-window-cpu-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:30.463142+00:00",
+      "end": "2026-10-26T15:45:31.750517+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00046-window-cuda-cpu/RUN.json",
+      "receipt_sha256": "4780c2415d2d9fdb5474fa8e041fd36ecf6d80212e32122a8354b3f47d84f5c7",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "window",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-window-cuda-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:45.410710+00:00",
+      "end": "2026-10-26T15:45:45.671325+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "replays/00046-window-cuda-cuda/RUN.json",
+      "receipt_sha256": "78792d2dcc7ec10f890a0c42b124a5f1c49520256257c646fdca00d36613fd04",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-7a1bde5d",
+        "window",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replays/00046-window-cuda-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "ff0443e326163e3fc16c8e6c3d7f65c3a6ac1672d7e924ae519be136128b8157",
+      "phase": "replays",
+      "start": "2026-10-26T15:45:47.438181+00:00",
+      "end": "2026-10-26T15:45:48.749894+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "inverse-repair-v2/00021-inverse-cpu-cuda/RUN.json",
+      "receipt_sha256": "dd7777e477f486c565a921aabe9d9643d7ea5d84af56bc8266d461493cc71d04",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00021-inverse-cpu-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+      "phase": "inverse-repair-v2",
+      "start": "2026-10-26T15:53:29.867106+00:00",
+      "end": "2026-10-26T15:53:30.699915+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "inverse-repair-v2/00021-inverse-cuda-cuda/RUN.json",
+      "receipt_sha256": "81bd0e09c2d1283aaa559ff006498c8b8d05494457eb10b467a3401908245a28",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00021-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00021-inverse-cuda-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+      "phase": "inverse-repair-v2",
+      "start": "2026-10-26T15:53:35.613320+00:00",
+      "end": "2026-10-26T15:53:36.466372+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "inverse-repair-v2/00021-inverse-projected-cpu-cpu/RUN.json",
+      "receipt_sha256": "4a1f1e3103ce08d3a612914bed478b195751c28e94d90f9349a196dcea991e85",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00021-common-projected-cpu",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00021-inverse-projected-cpu-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+      "phase": "inverse-repair-v2",
+      "start": "2026-10-26T15:53:32.069354+00:00",
+      "end": "2026-10-26T15:53:32.323843+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "inverse-repair-v2/00021-inverse-projected-cuda-cpu/RUN.json",
+      "receipt_sha256": "0c5275e1984a06458084189259afac7265268f6d072864b09a69f7124272d44e",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00021-common-projected-cuda",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00021-inverse-projected-cuda-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+      "phase": "inverse-repair-v2",
+      "start": "2026-10-26T15:53:37.837433+00:00",
+      "end": "2026-10-26T15:53:38.091808+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "inverse-repair-v2/00021-inverse-valid-cpu-cuda/RUN.json",
+      "receipt_sha256": "3f8005c8d1324ab05a299eda6a72114a8f2ddd2dc8febcbfdc637d3a33c88ded",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+        "inverse-valid",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00021-common-projected-cpu",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00021-inverse-valid-cpu-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+      "phase": "inverse-repair-v2",
+      "start": "2026-10-26T15:53:33.365328+00:00",
+      "end": "2026-10-26T15:53:34.220411+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "inverse-repair-v2/00021-inverse-valid-cuda-cuda/RUN.json",
+      "receipt_sha256": "308b3b899f759c04c7a932628795709057897b86d5256ecacd687d9fa6b18b40",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+        "inverse-valid",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00021-common-projected-cuda",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00021-inverse-valid-cuda-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+      "phase": "inverse-repair-v2",
+      "start": "2026-10-26T15:53:39.139271+00:00",
+      "end": "2026-10-26T15:53:39.978765+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "inverse-repair-v2/00046-inverse-cpu-cuda/RUN.json",
+      "receipt_sha256": "b3e163306727c2cd28fecbc94f9133f78dde27b3f04b1c4f0e8b6a951730cc8f",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cpu/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00046-inverse-cpu-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+      "phase": "inverse-repair-v2",
+      "start": "2026-10-26T15:53:41.413802+00:00",
+      "end": "2026-10-26T15:53:42.241338+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "inverse-repair-v2/00046-inverse-cuda-cuda/RUN.json",
+      "receipt_sha256": "f3081c741237e31fd2b008831877342e1df8448a2edf55ce28db4e3d38bae513",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/capture/00046-G-cuda/capture",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00046-inverse-cuda-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+      "phase": "inverse-repair-v2",
+      "start": "2026-10-26T15:53:47.190120+00:00",
+      "end": "2026-10-26T15:53:48.028427+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "inverse-repair-v2/00046-inverse-projected-cpu-cpu/RUN.json",
+      "receipt_sha256": "461f8d4b709db0103d9a22f2d0caf5fb0f2094c74c0d7d6f2fc9048b941e7d4f",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00046-common-projected-cpu",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00046-inverse-projected-cpu-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+      "phase": "inverse-repair-v2",
+      "start": "2026-10-26T15:53:43.625738+00:00",
+      "end": "2026-10-26T15:53:43.880493+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "inverse-repair-v2/00046-inverse-projected-cuda-cpu/RUN.json",
+      "receipt_sha256": "44e10deb5319d5b90e2f82d92aa833223adf8ee55987f9b82c816a2a11d87035",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+        "inverse",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00046-common-projected-cuda",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00046-inverse-projected-cuda-cpu/data",
+        "cpu"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+      "phase": "inverse-repair-v2",
+      "start": "2026-10-26T15:53:49.427292+00:00",
+      "end": "2026-10-26T15:53:49.681205+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "inverse-repair-v2/00046-inverse-valid-cpu-cuda/RUN.json",
+      "receipt_sha256": "bfb3ee2f8a0efe140ae4929f15688ab8d90bcac260ea1a52f64e54364e5f5bbf",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+        "inverse-valid",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00046-common-projected-cpu",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00046-inverse-valid-cpu-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+      "phase": "inverse-repair-v2",
+      "start": "2026-10-26T15:53:44.935903+00:00",
+      "end": "2026-10-26T15:53:45.775178+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    },
+    {
+      "receipt": "inverse-repair-v2/00046-inverse-valid-cuda-cuda/RUN.json",
+      "receipt_sha256": "391b465264e289f9f7184da07d8261920a397c19d6c4e19e9bf1ff3ed40c9dd5",
+      "rc": 0,
+      "args": [
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+        "inverse-valid",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00046-common-projected-cuda",
+        "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/inverse-repair-v2/00046-inverse-valid-cuda-cuda/data",
+        "cuda"
+      ],
+      "env": {
+        "OMP_NUM_THREADS": "8",
+        "OPENBLAS_NUM_THREADS": "1",
+        "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+        "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+      "phase": "inverse-repair-v2",
+      "start": "2026-10-26T15:53:50.729755+00:00",
+      "end": "2026-10-26T15:53:51.557340+00:00",
+      "resource_coverage": "fresh-per-producer",
+      "witnessed_uuids_for_run": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "old_inverse_status": "unaffected by inverse-v1 zero-fill defect"
+    }
+  ]
+}

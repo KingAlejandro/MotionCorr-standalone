@@ -24,8 +24,10 @@ Normalization: CPU NewFFT float32 FwdOnly forward divides each complex value
 by float32(nx*ny); inverse is unscaled. No FFTW threads library is linked or
 fftwf_init_threads/plan_with_nthreads called: each plan is single-threaded,
 --j8 provides outer OpenMP frame parallelism. NewFFT uses alignment-specific
-cached FFTW_ESTIMATE plans, rank2 [ny,nx], out-of-place. Replay prints the
-FFTW forward plan. Native resident forward = CudaMovieSession,
+cached FFTW_ESTIMATE plans, rank2 [ny,nx], out-of-place. Replay prints a separately constructed FFTW_ESTIMATE forward plan with the
+same dimensions/alignment; that print is not an executed-plan-instance witness.
+Actual NewFFT execution uses its cached dispatch; exact same-backend array
+reproduction is checked separately. Native resident forward = CudaMovieSession,
 rank2 cuFFT R2C batch1 per frame, shared manually allocated workspace;
 float32 reciprocal scale kernel after all frames. Native CCF inverse =
 rank2 cuFFT C2R batch24 with packed distances, unscaled; the native global

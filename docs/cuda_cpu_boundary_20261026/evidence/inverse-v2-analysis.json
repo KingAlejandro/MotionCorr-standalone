@@ -1,0 +1,877 @@
+{
+  "source_fix": "031f333a2863218c74951117989c84423ad9c92e",
+  "old_v1_inverse_status": "INVALID complete-batch provenance; original4CUDA+4projectedCPU attempts retained, not promoted",
+  "new_inverse_processes": 12,
+  "controls": {
+    "00021-cpu-projection-noop-marker": true,
+    "00021-cpu-0-valid": true,
+    "00021-cpu-0-byteidentical-valid-input": true,
+    "00021-cpu-0-same-consumed-transform": true,
+    "00021-cpu-4-valid": true,
+    "00021-cpu-4-byteidentical-valid-input": true,
+    "00021-cpu-4-same-consumed-transform": true,
+    "00021-cuda-projection-noop-marker": true,
+    "00021-cuda-0-valid": true,
+    "00021-cuda-0-byteidentical-valid-input": true,
+    "00021-cuda-0-same-consumed-transform": true,
+    "00021-cuda-0-native-capture-selfreproduction": true,
+    "00021-cuda-0-native-actual-IFFT-input": true,
+    "00021-cuda-4-valid": true,
+    "00021-cuda-4-byteidentical-valid-input": true,
+    "00021-cuda-4-same-consumed-transform": true,
+    "00021-cuda-4-native-capture-selfreproduction": true,
+    "00021-cuda-4-native-actual-IFFT-input": true,
+    "00046-cpu-projection-noop-marker": true,
+    "00046-cpu-0-valid": true,
+    "00046-cpu-0-byteidentical-valid-input": true,
+    "00046-cpu-0-same-consumed-transform": true,
+    "00046-cpu-4-valid": true,
+    "00046-cpu-4-byteidentical-valid-input": true,
+    "00046-cpu-4-same-consumed-transform": true,
+    "00046-cuda-projection-noop-marker": true,
+    "00046-cuda-0-valid": true,
+    "00046-cuda-0-byteidentical-valid-input": true,
+    "00046-cuda-0-same-consumed-transform": true,
+    "00046-cuda-0-native-capture-selfreproduction": true,
+    "00046-cuda-0-native-actual-IFFT-input": true,
+    "00046-cuda-4-valid": true,
+    "00046-cuda-4-byteidentical-valid-input": true,
+    "00046-cuda-4-same-consumed-transform": true,
+    "00046-cuda-4-native-capture-selfreproduction": true,
+    "00046-cuda-4-native-actual-IFFT-input": true,
+    "12-inverse-only-exits-and-input-unchanged": true,
+    "12-child-affinity": true,
+    "12-fresh-admission": true
+  },
+  "all_controls_pass": true,
+  "cases": {
+    "00021": {
+      "cpu": {
+        "raw_actual_input_is_Hermitian": {
+          "0": {
+            "column_max_conjugacy_error": [
+              3.937506765083754e-09,
+              1.175488395518758e-15
+            ],
+            "valid": false
+          },
+          "4": {
+            "column_max_conjugacy_error": [
+              3.61210084065533e-09,
+              1.2470293276394483e-15
+            ],
+            "valid": false
+          }
+        },
+        "projected_validity": {
+          "0": {
+            "column_max_conjugacy_error": [
+              0.0,
+              0.0
+            ],
+            "valid": true
+          },
+          "4": {
+            "column_max_conjugacy_error": [
+              0.0,
+              0.0
+            ],
+            "valid": true
+          }
+        },
+        "same_valid_input_sha256": {
+          "0": "3c89bab22094344d8806a9247e2467896a065da3203d6e4302e8beec82b93f8a",
+          "4": "aa57f24cc63a3610f3c304b4b29728548e99332bac2b354d227f2519a575a904"
+        },
+        "maps": {
+          "0": {
+            "raw_compatibility": {
+              "count": 944784,
+              "different_bits": 602001,
+              "rmse": 2.3177212075426667e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "same_valid_input_inverse": {
+              "count": 944784,
+              "different_bits": 602001,
+              "rmse": 2.3177212075426667e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "rawCUDA_vs_validCUDA": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            },
+            "original_v1_selected_map_vs_v2": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            }
+          },
+          "4": {
+            "raw_compatibility": {
+              "count": 944784,
+              "different_bits": 597902,
+              "rmse": 2.1927865125115043e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "same_valid_input_inverse": {
+              "count": 944784,
+              "different_bits": 597902,
+              "rmse": 2.1927865125115043e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "rawCUDA_vs_validCUDA": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            },
+            "original_v1_selected_map_vs_v2": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "raw_compatibility_peaks": {
+          "CPU_actual_raw": {
+            "0": {
+              "integer": [
+                -2,
+                2
+              ],
+              "ties": 1,
+              "shift_px": [
+                -6.528860732077106,
+                6.300815013691924
+              ],
+              "max": 20.83086395263672
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.1519421633800717,
+                3.3633853151397006
+              ],
+              "max": 20.980295181274414
+            }
+          },
+          "CUDA_projection_plus_C2R": {
+            "0": {
+              "integer": [
+                -2,
+                2
+              ],
+              "ties": 1,
+              "shift_px": [
+                -6.538161103490322,
+                6.303423570826515
+              ],
+              "max": 20.83086585998535
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.1518113231076192,
+                3.363587867703094
+              ],
+              "max": 20.98029327392578
+            }
+          }
+        },
+        "projected_valid_peaks": {
+          "CPU": {
+            "0": {
+              "integer": [
+                -2,
+                2
+              ],
+              "ties": 1,
+              "shift_px": [
+                -6.528860732077106,
+                6.300815013691924
+              ],
+              "max": 20.83086395263672
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.1519421633800717,
+                3.3633853151397006
+              ],
+              "max": 20.980295181274414
+            }
+          },
+          "CUDA_byte_noop_projection_then_C2R": {
+            "0": {
+              "integer": [
+                -2,
+                2
+              ],
+              "ties": 1,
+              "shift_px": [
+                -6.538161103490322,
+                6.303423570826515
+              ],
+              "max": 20.83086585998535
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.1518113231076192,
+                3.363587867703094
+              ],
+              "max": 20.98029327392578
+            }
+          }
+        }
+      },
+      "cuda": {
+        "raw_actual_input_is_Hermitian": {
+          "0": {
+            "column_max_conjugacy_error": [
+              3.937570713929972e-09,
+              1.1754870190902188e-15
+            ],
+            "valid": false
+          },
+          "4": {
+            "column_max_conjugacy_error": [
+              3.612136811881328e-09,
+              1.2470269982988434e-15
+            ],
+            "valid": false
+          }
+        },
+        "projected_validity": {
+          "0": {
+            "column_max_conjugacy_error": [
+              0.0,
+              0.0
+            ],
+            "valid": true
+          },
+          "4": {
+            "column_max_conjugacy_error": [
+              0.0,
+              0.0
+            ],
+            "valid": true
+          }
+        },
+        "same_valid_input_sha256": {
+          "0": "0ee5ee20ea06eae570b2486892f4568baab8316a0b7966cb99db0808ec4dad37",
+          "4": "0bad79c602787bff8bea72ebd5f1caf7e059c5d1c861ce2caadb4b30241fd4a5"
+        },
+        "maps": {
+          "0": {
+            "raw_compatibility": {
+              "count": 944784,
+              "different_bits": 601994,
+              "rmse": 2.3174919271016167e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "same_valid_input_inverse": {
+              "count": 944784,
+              "different_bits": 601994,
+              "rmse": 2.3174919271016167e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "rawCUDA_vs_validCUDA": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            },
+            "original_v1_selected_map_vs_v2": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            },
+            "native_capture_vs_v2": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            }
+          },
+          "4": {
+            "raw_compatibility": {
+              "count": 944784,
+              "different_bits": 597878,
+              "rmse": 2.19270222157709e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "same_valid_input_inverse": {
+              "count": 944784,
+              "different_bits": 597878,
+              "rmse": 2.19270222157709e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "rawCUDA_vs_validCUDA": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            },
+            "original_v1_selected_map_vs_v2": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            },
+            "native_capture_vs_v2": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "raw_compatibility_peaks": {
+          "CPU_actual_raw": {
+            "0": {
+              "integer": [
+                -2,
+                2
+              ],
+              "ties": 1,
+              "shift_px": [
+                -6.528860732077106,
+                6.300815013691924
+              ],
+              "max": 20.83086585998535
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.1519421633800717,
+                3.3633853151397006
+              ],
+              "max": 20.98029899597168
+            }
+          },
+          "CUDA_projection_plus_C2R": {
+            "0": {
+              "integer": [
+                -2,
+                2
+              ],
+              "ties": 1,
+              "shift_px": [
+                -6.538161103490322,
+                6.303423570826515
+              ],
+              "max": 20.830867767333984
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.1518113231076192,
+                3.363587867703094
+              ],
+              "max": 20.980297088623047
+            }
+          }
+        },
+        "projected_valid_peaks": {
+          "CPU": {
+            "0": {
+              "integer": [
+                -2,
+                2
+              ],
+              "ties": 1,
+              "shift_px": [
+                -6.528860732077106,
+                6.300815013691924
+              ],
+              "max": 20.83086585998535
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.1519421633800717,
+                3.3633853151397006
+              ],
+              "max": 20.98029899597168
+            }
+          },
+          "CUDA_byte_noop_projection_then_C2R": {
+            "0": {
+              "integer": [
+                -2,
+                2
+              ],
+              "ties": 1,
+              "shift_px": [
+                -6.538161103490322,
+                6.303423570826515
+              ],
+              "max": 20.830867767333984
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.1518113231076192,
+                3.363587867703094
+              ],
+              "max": 20.980297088623047
+            }
+          }
+        }
+      }
+    },
+    "00046": {
+      "cpu": {
+        "raw_actual_input_is_Hermitian": {
+          "0": {
+            "column_max_conjugacy_error": [
+              7.96474886044507e-10,
+              1.2873138969735076e-15
+            ],
+            "valid": false
+          },
+          "4": {
+            "column_max_conjugacy_error": [
+              9.733973627135128e-09,
+              1.527278330930651e-15
+            ],
+            "valid": false
+          }
+        },
+        "projected_validity": {
+          "0": {
+            "column_max_conjugacy_error": [
+              0.0,
+              0.0
+            ],
+            "valid": true
+          },
+          "4": {
+            "column_max_conjugacy_error": [
+              0.0,
+              0.0
+            ],
+            "valid": true
+          }
+        },
+        "same_valid_input_sha256": {
+          "0": "b3fe82d54522d26d0674f6dfef32ea740f950da14b93a491b2f8f655eff030f7",
+          "4": "b3ad5325006c2473e9f581c3a07d7e18244657b9e46febbcb1fe0850377b1e2a"
+        },
+        "maps": {
+          "0": {
+            "raw_compatibility": {
+              "count": 944784,
+              "different_bits": 592020,
+              "rmse": 2.1838917538686103e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "same_valid_input_inverse": {
+              "count": 944784,
+              "different_bits": 592620,
+              "rmse": 2.1855661325197486e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "rawCUDA_vs_validCUDA": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            },
+            "original_v1_selected_map_vs_v2": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            }
+          },
+          "4": {
+            "raw_compatibility": {
+              "count": 944784,
+              "different_bits": 637154,
+              "rmse": 2.449982129075659e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "same_valid_input_inverse": {
+              "count": 944784,
+              "different_bits": 637154,
+              "rmse": 2.449982129075659e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "rawCUDA_vs_validCUDA": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            },
+            "original_v1_selected_map_vs_v2": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "raw_compatibility_peaks": {
+          "CPU_actual_raw": {
+            "0": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.439825759565712,
+                3.254612452718291
+              ],
+              "max": 29.77059555053711
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -2.5632628592872453,
+                2.61367728208006
+              ],
+              "max": 30.008840560913086
+            }
+          },
+          "CUDA_projection_plus_C2R": {
+            "0": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.445626477541371,
+                3.256955057681816
+              ],
+              "max": 29.770597457885742
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -2.561244903523623,
+                2.61367728208006
+              ],
+              "max": 30.008840560913086
+            }
+          }
+        },
+        "projected_valid_peaks": {
+          "CPU": {
+            "0": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.439825759565712,
+                3.254612452718291
+              ],
+              "max": 29.77059555053711
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -2.5632628592872453,
+                2.61367728208006
+              ],
+              "max": 30.008840560913086
+            }
+          },
+          "CUDA_byte_noop_projection_then_C2R": {
+            "0": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.445626477541371,
+                3.256955057681816
+              ],
+              "max": 29.770597457885742
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -2.561244903523623,
+                2.61367728208006
+              ],
+              "max": 30.008840560913086
+            }
+          }
+        }
+      },
+      "cuda": {
+        "raw_actual_input_is_Hermitian": {
+          "0": {
+            "column_max_conjugacy_error": [
+              7.963995574122862e-10,
+              1.2873131558196788e-15
+            ],
+            "valid": false
+          },
+          "4": {
+            "column_max_conjugacy_error": [
+              9.73390879011049e-09,
+              1.5272758957109276e-15
+            ],
+            "valid": false
+          }
+        },
+        "projected_validity": {
+          "0": {
+            "column_max_conjugacy_error": [
+              0.0,
+              0.0
+            ],
+            "valid": true
+          },
+          "4": {
+            "column_max_conjugacy_error": [
+              0.0,
+              0.0
+            ],
+            "valid": true
+          }
+        },
+        "same_valid_input_sha256": {
+          "0": "ada5b51b15c579d8f514f14fba731ec53dfc4224ad6e48bb8b30d4df29f80527",
+          "4": "2d59488f07e2bdc342e126864072e24faa508451f41f1db1eeab1552200abac3"
+        },
+        "maps": {
+          "0": {
+            "raw_compatibility": {
+              "count": 944784,
+              "different_bits": 592723,
+              "rmse": 2.1884386683421142e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "same_valid_input_inverse": {
+              "count": 944784,
+              "different_bits": 592723,
+              "rmse": 2.1884386683421142e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "rawCUDA_vs_validCUDA": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            },
+            "original_v1_selected_map_vs_v2": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            },
+            "native_capture_vs_v2": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            }
+          },
+          "4": {
+            "raw_compatibility": {
+              "count": 944784,
+              "different_bits": 637123,
+              "rmse": 2.4499114023584187e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "same_valid_input_inverse": {
+              "count": 944784,
+              "different_bits": 637123,
+              "rmse": 2.4499114023584187e-06,
+              "max_abs": 1.1444091796875e-05
+            },
+            "rawCUDA_vs_validCUDA": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            },
+            "original_v1_selected_map_vs_v2": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            },
+            "native_capture_vs_v2": {
+              "count": 944784,
+              "different_bits": 0,
+              "rmse": 0.0,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "raw_compatibility_peaks": {
+          "CPU_actual_raw": {
+            "0": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.439825759565712,
+                3.254612452718291
+              ],
+              "max": 29.77059555053711
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -2.5632628592872453,
+                2.61367728208006
+              ],
+              "max": 30.00884437561035
+            }
+          },
+          "CUDA_projection_plus_C2R": {
+            "0": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.445626477541371,
+                3.256955057681816
+              ],
+              "max": 29.770597457885742
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -2.561244903523623,
+                2.61367728208006
+              ],
+              "max": 30.00884437561035
+            }
+          }
+        },
+        "projected_valid_peaks": {
+          "CPU": {
+            "0": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.439825759565712,
+                3.254612452718291
+              ],
+              "max": 29.77059555053711
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -2.5632628592872453,
+                2.61367728208006
+              ],
+              "max": 30.00884437561035
+            }
+          },
+          "CUDA_byte_noop_projection_then_C2R": {
+            "0": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -3.445626477541371,
+                3.256955057681816
+              ],
+              "max": 29.770597457885742
+            },
+            "4": {
+              "integer": [
+                -1,
+                1
+              ],
+              "ties": 1,
+              "shift_px": [
+                -2.561244903523623,
+                2.61367728208006
+              ],
+              "max": 30.00884437561035
+            }
+          }
+        }
+      }
+    }
+  }
+}

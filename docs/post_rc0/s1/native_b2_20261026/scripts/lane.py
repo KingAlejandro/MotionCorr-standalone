@@ -1,7 +1,7 @@
 """cpu64 CPUs32-47 lease guard, append-open all known overlapping leases."""
 import fcntl,json,os,re,subprocess,sys,time
 from pathlib import Path
-locks=[]
+locks=[Path('/tmp/motioncorr-cpu64-bench.lock')]
 for p in Path('/tmp').glob('motioncorr*.lock'):
  m=re.search(r'cpu-?(\d+)(?:-(\d+))?',p.name)
  if p.name=='motioncorr-cpu64-bench.lock' or (m and int(m[1])<=47 and int(m[2] or m[1])>=32):locks.append(p)

@@ -14,8 +14,29 @@ sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 def write(p,x):p.write_text(json.dumps(x,indent=2,allow_nan=False)+'\n')
 def check(ok,message):
  if not ok: (EVID/'STOP').write_text(message+'\n');raise RuntimeError(message)
+def admission(d):
+ # Assess current occupancy, not merely the earlier lane snapshot.
+ cp=subprocess.run(['ps','-eo','pid,ppid,psr,pcpu,args','--sort=-pcpu'],capture_output=True,text=True,check=True)
+ (d/'occupancy-before.txt').write_text(cp.stdout)
+ own={os.getpid()};records=[]
+ for line in cp.stdout.splitlines()[1:]:
+  fields=line.split(None,4)
+  if len(fields)==5:records.append((int(fields[0]),int(fields[1]),int(fields[2]),float(fields[3]),fields[4]))
+ changed=True
+ while changed:
+  old=len(own);own.update(pid for pid,ppid,_,_,_ in records if ppid in own);changed=len(own)!=old
+ # Exclude our supervisors too. Reject observed active compute on our cores;
+ # retain all-process snapshot so broad-affinity services remain visible.
+ ancestors={os.getpid(),os.getppid()}
+ for pid,ppid,cpu,pct,args in records:
+  if pid not in own|ancestors and cpu in range(32,48) and pct>50:
+   check(False,'foreign compute on allocated CPU: '+str((pid,cpu,pct,args)))
+ scratch=sum(p.stat().st_size for p in ROOT.rglob('*') if p.is_file())
+ write(d/'admission.json',dict(affinity=sorted(os.sched_getaffinity(0)),scratch_bytes=scratch,limit_bytes=25*1024**3,assessment='no foreign >50% CPU process observed on CPUs32-47 in pre-run snapshot',utc=time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())))
+ check(scratch<=25*1024**3,'scratch cap exceeded');check(set(os.sched_getaffinity(0))==set(range(32,48)),'whole-chain affinity mismatch')
 def run(name,fixture,movie,frames,patches,on,binary=BIN,extra=(),threads=8):
  d=EVID/name;d.mkdir(parents=True,exist_ok=False)
+ admission(d)
  out=d/'output';cmd=[str(binary),'--i',movie+'.star','--o',str(out),'--use_own','--j',str(threads),'--patch_x',str(patches),'--patch_y',str(patches),'--group_frames','1','--bin_factor','1','--seed','1','--skip_defect','--save_noDW','--first_frame_sum','1','--last_frame_sum',str(frames),'--skip_logfile']
  if on:cmd+=['--experimental_local_b2']
  cmd+=list(extra)
@@ -104,11 +125,13 @@ def pilot():
     check(observations(d/'output/movie.star')==observations(first/'output/movie.star'),name+': observations changed')
    delta=0.
    if on:
+    expected={'dose1-s01':'PASS','dose05-s00':'FAIL','dose4-s00':'PASS','pedestal32-s00':'FAIL'}[name]
+    check(m['field_distance_status']==expected,name+': unexpected truth gate')
     w=W8[name];wm=dict(global_=rt['global'])
     if w['status']=='NO_LOCAL_RETAINED':check(rt==first_rt,name+': no-local changed')
     else:
      model=dict(rt,coeff_x=w['coeff_x'],coeff_y=w['coeff_y']);r=wanted['recipe'];x,y=np.meshgrid(np.linspace(32,r['nx']-33,129),np.linspace(32,r['ny']-33,129));a=realistic.runtime_field(rt,r,x.ravel(),y.ravel());b=realistic.runtime_field(model,r,x.ravel(),y.ravel());delta=float(np.linalg.norm(a-b,axis=-1).max());check(delta<=.013131428741,name+': W8 comparison threshold exceeded')
-   summary.append(dict(label=label,on=on,seconds=row['whole_job_seconds'],runtime=m['field']['angstrom'],STAR=m['serialized_field']['angstrom'],runtime_gate=m['field_distance_status'],W8_max_vector_difference_px=delta));write(EVID/(name+'-summary.json'),summary)
+   summary.append(dict(label=label,on=on,seconds=row['whole_job_seconds'],runtime=m['field']['angstrom'],STAR=m['serialized_field']['angstrom'],runtime_gate=m['field_distance_status'],local_enabled=m['local_enabled'],convergence=m['convergence'],W8_max_vector_difference_px=delta));write(EVID/(name+'-summary.json'),summary)
    print(name,label,m['field_distance_status'],m['field']['angstrom'],'W8delta',delta,flush=True)
    # Preserve scientific images durably (14*64MiB total); remove only generated input after all pairs.
   shutil.rmtree(fixture)

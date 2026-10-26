@@ -1,0 +1,38 @@
+{
+  "method": "Absolute coefficient/derivative bounds on convex 32px synthesis halo. Temporal factors in [0,1]; sinusoid derivatives bounded by 4pi per normalized coordinate. ||J_D||inf<1 implies injectivity and positive det(I+J_D); displacement bounds keep inverse iterations inside halo.",
+  "rows": [
+    {
+      "expectation": "inmodel",
+      "nx": 4096,
+      "ny": 4096,
+      "halo": 32,
+      "displacement_jacobian_infinity_bound": 0.00270843505859375,
+      "max_abs_forward_x_bound_px": 16.419637044270836,
+      "max_abs_forward_y_bound_px": 10.820556640625,
+      "inverse_contraction": true,
+      "orientation_preserving": true
+    },
+    {
+      "expectation": "outmodel",
+      "nx": 4096,
+      "ny": 4096,
+      "halo": 32,
+      "displacement_jacobian_infinity_bound": 0.008844358210136315,
+      "max_abs_forward_x_bound_px": 18.419637044270836,
+      "max_abs_forward_y_bound_px": 12.820556640625,
+      "inverse_contraction": true,
+      "orientation_preserving": true
+    },
+    {
+      "expectation": "nonsquare",
+      "nx": 5760,
+      "ny": 4092,
+      "halo": 32,
+      "displacement_jacobian_infinity_bound": 0.0021351734187755695,
+      "max_abs_forward_x_bound_px": 16.401448535534556,
+      "max_abs_forward_y_bound_px": 10.814946687255363,
+      "inverse_contraction": true,
+      "orientation_preserving": true
+    }
+  ]
+}

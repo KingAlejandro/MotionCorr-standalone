@@ -1,0 +1,93 @@
+{
+  "role": "gate",
+  "gauge": "fixed frame-0 material coordinates; no registration",
+  "accuracy_status": "FAIL",
+  "field_distance_status": "FAIL",
+  "identifiable": true,
+  "field_px": {
+    "rms": 0.29690381575351976,
+    "p95": 0.65356328434503,
+    "max": 1.167621985759523
+  },
+  "field_angstrom": {
+    "rms": 0.262759876941865,
+    "p95": 0.5784035066453516,
+    "max": 1.0333454573971779
+  },
+  "border_px": {
+    "rms": 0.4703519063520419,
+    "p95": 0.9918001104680353,
+    "max": 1.4744846793469806
+  },
+  "per_frame_px": [
+    {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+    },
+    {
+      "rms": 0.12069334351708605,
+      "p95": 0.22150490721858718,
+      "max": 0.2807681193369336
+    },
+    {
+      "rms": 0.24153424907729615,
+      "p95": 0.4429700514731796,
+      "max": 0.5669780667221641
+    },
+    {
+      "rms": 0.36308594497171054,
+      "p95": 0.6661053499480526,
+      "max": 0.8630982588535302
+    },
+    {
+      "rms": 0.48582126236130646,
+      "p95": 0.8912562826625503,
+      "max": 1.167621985759523
+    }
+  ],
+  "global_mean_error_px": {
+    "rms": 0.027470453381770062,
+    "p95": 0.0489706294074548,
+    "max": 0.054433129884289375
+  },
+  "local_error_px": {
+    "rms": 0.29563025893842465,
+    "p95": 0.6507311241612526,
+    "max": 1.1200446419674595
+  },
+  "signal": {
+    "uncorrected": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+    },
+    "true_motion_bilinear": {
+      "rmse": 0.005386038484081602,
+      "contrast_normalized_rmse": 0.021630507369244406,
+      "mean_error": -1.3555210040027483e-05
+    },
+    "estimated_motion_bilinear": {
+      "rmse": 0.01798536945082211,
+      "contrast_normalized_rmse": 0.0722298341525732,
+      "mean_error": -0.00018285922546847777
+    },
+    "published_sum_divided_by_frames": {
+      "rmse": 0.017257118597626686,
+      "contrast_normalized_rmse": 0.06930505488184446,
+      "mean_error": 0.00014759943587705493
+    }
+  },
+  "sampling_status": "VALID",
+  "signal_status": "CHARACTERIZATION",
+  "application_consistency_status": "NOT_TESTED",
+  "summed_image_sha256": "63d3dc01940cb906d05f2661705532ed5887795d9fc3a46ebabc8c03e80d1e53",
+  "case": "pedestal",
+  "candidate_sha256": "bc99f4545f642382160a8087af37c9d1b9dd0929f20c3ff6181914a5ef42c06f",
+  "fixture_files": {
+    "pedestal.mrcs": "29016d8818bbd7be3491cca0822734a7e297a84642cf78c0847e61b447e03073",
+    "pedestal_target.npy": "47b9d9fffbcef586812b8cdfb82b13012ade6a92350431e169d63fd206ea4910",
+    "pedestal_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+    "pedestal.star": "4a0f869b217b75e4315342e64ce8b5adad4fc7c9c57b9033cc23af1aa385fa53"
+  }
+}

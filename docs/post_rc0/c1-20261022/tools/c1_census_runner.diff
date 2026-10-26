@@ -1,0 +1,38 @@
+--- tools/run_realistic_motion_census.py
++++ c1_census_runner.py
+@@ -26,14 +26,14 @@
+ 
+ 
+ def lock_gpu():
+-    busy=subprocess.check_output(['nvidia-smi','--query-compute-apps=gpu_uuid','--format=csv,noheader'],text=True).splitlines()
+-    for i in [2,3,1,0]:
+-        if GPU_UUIDS[i] in busy: continue
+-        f=open(f'/tmp/motioncorr-gpu{i}-correctness.lock','a')
+-        try: fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB)
+-        except BlockingIOError: f.close(); continue
+-        return f,i,GPU_UUIDS[i]
+-    return None
++    # C1: GPU3 only, nonblocking canonical lease; the caller verifies lane health afterwards.
++    uuid=os.environ['C1_GPU_UUID']
++    if uuid in subprocess.check_output(['nvidia-smi','--query-compute-apps=gpu_uuid','--format=csv,noheader'],text=True).splitlines(): return None
++    if os.environ.get('C1_LEASE_HELD')=='1': return open(os.devnull),3,uuid   # c1_gpu_run.sh holds the lease across the whole campaign
++    f=open(os.environ['C1_GPU_LOCK'],'a')
++    try: fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB)
++    except BlockingIOError: f.close(); return None
++    return f,3,uuid
+ 
+ 
+ def run_seed(args,fixture,out,device):
+@@ -45,10 +45,10 @@
+     for dc,double in arms:
+         name=args.backend+'-'+('double' if double else dc)
+         arm=out/name; arm.mkdir(exist_ok=False)
+-        env=os.environ.copy(); env['OMP_NUM_THREADS']='8'; env['OPENBLAS_NUM_THREADS']='1'
++        env=os.environ.copy(); env['OMP_NUM_THREADS']='2'   # C1: 2-CPU lane; env['OPENBLAS_NUM_THREADS']='1'
+         env['MC_DIAG_CCF_DC']=dc; env['MC_DIAG_CCF_DOUBLE']='1' if double else '0'
+         env['MC_DIAG_MODEL_OUT']=str(arm/'runtime.json')
+-        cmd=['taskset','-c',args.cpus,str(args.binary),'--i','input.star','--o',str(arm/'output'),'--use_own','--j','8',
++        cmd=['taskset','-c',args.cpus,str(args.binary),'--i','input.star','--o',str(arm/'output'),'--use_own','--j','2',
+              '--patch_x','5','--patch_y','5','--group_frames','1','--bin_factor','1','--seed','1','--skip_defect',
+              '--save_noDW','--first_frame_sum','1','--last_frame_sum',str(r['recipe']['frames']),'--skip_logfile',
+              '--ingest','float','--ingest_witness',str(arm/'ingest.txt')]

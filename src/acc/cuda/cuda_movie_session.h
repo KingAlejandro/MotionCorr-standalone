@@ -65,6 +65,13 @@ public:
 
     // Allocate persistent buffers and single-frame cuFFT plans
     bool initialize();
+    // After preprocessing, admit the local stage including its cuFFT work areas.
+    bool admitLocalAlignment(int patch_w, int patch_h, int n_groups,
+                             RFLOAT scaled_B, RFLOAT ccf_downsample);
+    // Conditional headroom for the full-spectrum retry and its fresh workspace;
+    // the completed resident attempt's workspace remains live during this call.
+    bool admitPatchRetry(int patch_w, int patch_h, int n_groups,
+                         RFLOAT scaled_B, RFLOAT ccf_downsample);
 
     // Release all persistent GPU allocations and plans
     void release();

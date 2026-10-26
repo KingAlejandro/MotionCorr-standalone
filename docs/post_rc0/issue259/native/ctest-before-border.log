@@ -1,0 +1,25 @@
+Internal ctest changing into directory: /mnt/clathrin/alex-motioncorr-259/build-before-cuda
+Test project /mnt/clathrin/alex-motioncorr-259/build-before-cuda
+    Start 96: CudaRealspaceBorderBranch
+1/1 Test #96: CudaRealspaceBorderBranch ........***Failed    1.19 sec
+last column: 63 pixels differ from the CPU-branch oracle (worst 0.5 at x=4095 y=1, got 0 want 0.5)
+last row: 63 pixels differ from the CPU-branch oracle (worst 0.5 at x=1 y=4095, got 0 want 0.5)
+interior output, edge source (x): 63 pixels differ from the CPU-branch oracle (worst 0.5 at x=4092 y=1, got 0 want 0.5)
+interior output, edge source (y): 63 pixels differ from the CPU-branch oracle (worst 0.5 at x=1 y=4092, got 0 want 0.5)
+corner: 4095 pixels differ from the CPU-branch oracle (worst 1 at x=0 y=257, got 257 want 256)
+control: constant image: 0 pixels differ from the CPU-branch oracle
+control: interior shifts: 0 pixels differ from the CPU-branch oracle
+FAIL: 5 case(s) differ from the CPU branch
+
+
+0% tests passed, 1 tests failed out of 1
+
+Label Time Summary:
+cuda        =   1.19 sec*proc (1 test)
+hardware    =   1.19 sec*proc (1 test)
+
+Total Test time (real) =   1.20 sec
+
+The following tests FAILED:
+	 96 - CudaRealspaceBorderBranch (Failed)
+Errors while running CTest

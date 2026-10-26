@@ -1,0 +1,15 @@
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * repeated.mrcs
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.
+000/??? sec ~~(,_,">                                                          [oo]MC_EXPERIMENT_CCF_DC arm=global
+[align] scope=global iterations=3 max_iter=5 converged=1 last_rmsd_px=0.154387 tolerance_px=0.5
+[coupled_peak] scope=global peaks=15 guard_fired=15 (not_negative_definite=15, offset_gt_1px=0)
+   0/   0 sec ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /tmp/motioncorr-damping-a1c78adc1d0f/v2/dcgh2a-prod/repeated/corrected_micrographs.star
+ Now generating logfile.pdf ... 
+ Done! Written: /tmp/motioncorr-damping-a1c78adc1d0f/v2/dcgh2a-prod/repeated/logfile.pdf
+MC_EXPERIMENT_CCF_DC arm=global cpu.global=15/15 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0

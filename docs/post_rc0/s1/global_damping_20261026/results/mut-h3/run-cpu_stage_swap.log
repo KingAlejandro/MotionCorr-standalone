@@ -1,0 +1,7 @@
+  arm none, global call  global zeroed 0/0, patch zeroed 0/5
+  arm global, global call global zeroed 0/0, patch zeroed 0/5
+  arm local, global call global zeroed 0/0, patch zeroed 5/5
+  arm none, patch call   global zeroed 0/5, patch zeroed 0/0
+  arm global, patch call global zeroed 5/5, patch zeroed 0/0
+  arm local, patch call  global zeroed 0/5, patch zeroed 0/0
+FAIL arm none must leave every global CCF DC bin untouched

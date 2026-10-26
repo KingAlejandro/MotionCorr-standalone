@@ -1,0 +1,1854 @@
+{
+  "runs-base": [
+    {
+      "spec": "e10441-G-auto@16",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 33.29,
+      "free_vram_after_balloon_mib": 16381,
+      "max_rss_mib": 36541,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-auto@16/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-auto@16/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 125,
+        "peak_gpu_used_mib": 66283,
+        "peak_motioncorr_above_baseline_mib": 1510,
+        "peak_compute_app_mib": 1504,
+        "min_free_mib": 14872
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": true,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-auto@21",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 42.48,
+      "free_vram_after_balloon_mib": 21501,
+      "max_rss_mib": 36540,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-auto@21/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-auto@21/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 151,
+        "peak_gpu_used_mib": 78067,
+        "peak_motioncorr_above_baseline_mib": 18414,
+        "peak_compute_app_mib": 18408,
+        "min_free_mib": 3088
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-auto@22",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 66.46,
+      "free_vram_after_balloon_mib": 22525,
+      "max_rss_mib": 36903,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=377184192 C2R work=377184192 shared work=377184192 inverse tile=377184192 bytes",
+            "nvCOMP ingestion declined (bits per sample != 16); using the host reader.",
+            "Staging this movie as native unsigned 8-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 4713984000 bytes for 50 x 11520 x 8184 samples, released before any float movie is materialized.",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Dose weighting and summing frames (CUDA in-VRAM)...",
+            "Dose-weighting scratch borrowed from the consumed real-space movie",
+            "Peak VRAM: 0.00 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-auto@none/out/Movies/20May09_3A-3_109-21_0003.mrc"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie buffer allocation failed: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Dose weighting and summing frames (CUDA)...",
+            "Peak VRAM: 1618.57 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-auto@22/out/Movies/20May09_3A-3_109-21_0003.mrc"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-auto@22/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-auto@22/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 246,
+        "peak_gpu_used_mib": 78667,
+        "peak_motioncorr_above_baseline_mib": 20038,
+        "peak_compute_app_mib": 20032,
+        "min_free_mib": 2488
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-auto@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 8.07,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 5164,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-auto@none/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-auto@none/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 29,
+        "peak_gpu_used_mib": 37933,
+        "peak_motioncorr_above_baseline_mib": 37932,
+        "peak_compute_app_mib": 37924,
+        "min_free_mib": 43221
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-float@16",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 39.91,
+      "free_vram_after_balloon_mib": 16381,
+      "max_rss_mib": 36541,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-float@16/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-float@16/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 140,
+        "peak_gpu_used_mib": 66283,
+        "peak_motioncorr_above_baseline_mib": 1510,
+        "peak_compute_app_mib": 1504,
+        "min_free_mib": 14872
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": true,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-float@21",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 39.45,
+      "free_vram_after_balloon_mib": 21501,
+      "max_rss_mib": 36539,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-float@21/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-float@21/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 140,
+        "peak_gpu_used_mib": 78067,
+        "peak_motioncorr_above_baseline_mib": 18414,
+        "peak_compute_app_mib": 18408,
+        "min_free_mib": 3088
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-float@22",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 75.4,
+      "free_vram_after_balloon_mib": 22525,
+      "max_rss_mib": 36901,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=377184192 C2R work=377184192 shared work=377184192 inverse tile=377184192 bytes",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Dose weighting and summing frames (CUDA in-VRAM)...",
+            "Dose-weighting scratch borrowed from the consumed real-space movie",
+            "Peak VRAM: 0.00 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-float@none/out/Movies/20May09_3A-3_109-21_0003.mrc"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie buffer allocation failed: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Dose weighting and summing frames (CUDA)...",
+            "Peak VRAM: 1618.57 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-float@22/out/Movies/20May09_3A-3_109-21_0003.mrc"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-float@22/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-float@22/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 265,
+        "peak_gpu_used_mib": 80691,
+        "peak_motioncorr_above_baseline_mib": 22062,
+        "peak_compute_app_mib": 20032,
+        "min_free_mib": 464
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-float@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 15.14,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 18917,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-float@none/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-G-float@none/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 49,
+        "peak_gpu_used_mib": 37843,
+        "peak_motioncorr_above_baseline_mib": 37842,
+        "peak_compute_app_mib": 37834,
+        "min_free_mib": 43311
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@16",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 35.31,
+      "free_vram_after_balloon_mib": 16381,
+      "max_rss_mib": 36540,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-auto@16/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-auto@16/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 124,
+        "peak_gpu_used_mib": 66283,
+        "peak_motioncorr_above_baseline_mib": 1510,
+        "peak_compute_app_mib": 1504,
+        "min_free_mib": 14872
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": true,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@21",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 41.04,
+      "free_vram_after_balloon_mib": 21501,
+      "max_rss_mib": 36541,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-auto@21/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-auto@21/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 149,
+        "peak_gpu_used_mib": 78067,
+        "peak_motioncorr_above_baseline_mib": 18414,
+        "peak_compute_app_mib": 18408,
+        "min_free_mib": 3088
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@22",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 82.0,
+      "free_vram_after_balloon_mib": 22525,
+      "max_rss_mib": 37266,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=377184192 C2R work=377184192 shared work=377184192 inverse tile=377184192 bytes",
+            "nvCOMP ingestion declined (bits per sample != 16); using the host reader.",
+            "Staging this movie as native unsigned 8-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 4713984000 bytes for 50 x 11520 x 8184 samples, released before any float movie is materialized.",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43670 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2792 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie buffer allocation failed: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-auto@22/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-auto@22/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 292,
+        "peak_gpu_used_mib": 79209,
+        "peak_motioncorr_above_baseline_mib": 20580,
+        "peak_compute_app_mib": 20574,
+        "min_free_mib": 1946
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 8.08,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 5163,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-auto@none/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-auto@none/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 29,
+        "peak_gpu_used_mib": 40275,
+        "peak_motioncorr_above_baseline_mib": 40274,
+        "peak_compute_app_mib": 40266,
+        "min_free_mib": 40879
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        4
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-float@16",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 37.13,
+      "free_vram_after_balloon_mib": 16381,
+      "max_rss_mib": 36541,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-float@16/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-float@16/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 134,
+        "peak_gpu_used_mib": 66283,
+        "peak_motioncorr_above_baseline_mib": 1510,
+        "peak_compute_app_mib": 1504,
+        "min_free_mib": 14872
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": true,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-float@21",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 36.67,
+      "free_vram_after_balloon_mib": 21501,
+      "max_rss_mib": 36540,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-float@21/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-float@21/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 131,
+        "peak_gpu_used_mib": 78067,
+        "peak_motioncorr_above_baseline_mib": 18414,
+        "peak_compute_app_mib": 18408,
+        "min_free_mib": 3088
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-float@22",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 84.52,
+      "free_vram_after_balloon_mib": 22525,
+      "max_rss_mib": 37266,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=377184192 C2R work=377184192 shared work=377184192 inverse tile=377184192 bytes",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43670 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2792 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie buffer allocation failed: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-float@22/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-float@22/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 297,
+        "peak_gpu_used_mib": 80691,
+        "peak_motioncorr_above_baseline_mib": 22062,
+        "peak_compute_app_mib": 22056,
+        "min_free_mib": 464
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-float@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 16.76,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 18921,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-unfixed/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-float@none/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-base/e10441-L-float@none/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 56,
+        "peak_gpu_used_mib": 37843,
+        "peak_motioncorr_above_baseline_mib": 37842,
+        "peak_compute_app_mib": 40266,
+        "min_free_mib": 43311
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        4
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    }
+  ],
+  "runs-d3": [
+    {
+      "spec": "e10441-G-auto@16",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 1.28,
+      "free_vram_after_balloon_mib": 16381,
+      "max_rss_mib": 743,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-auto@16/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-auto@16/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 5,
+        "peak_gpu_used_mib": 64790,
+        "peak_motioncorr_above_baseline_mib": 17,
+        "peak_compute_app_mib": 12,
+        "min_free_mib": 16365
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [
+        "ERROR: Out of GPU memory for Movies/20May09_3A-3_109-21_0003.tif: streaming global alignment requires at least 21414385312 bytes; available 16736518144 bytes after CUDA context setup. Refusing before host preprocessing."
+      ],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-auto@21",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 1.18,
+      "free_vram_after_balloon_mib": 21501,
+      "max_rss_mib": 743,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-auto@21/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-auto@21/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 5,
+        "peak_gpu_used_mib": 59671,
+        "peak_motioncorr_above_baseline_mib": 18,
+        "peak_compute_app_mib": 414,
+        "min_free_mib": 21484
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [
+        "ERROR: Out of GPU memory for Movies/20May09_3A-3_109-21_0003.tif: streaming global alignment requires at least 22673495712 bytes; available 22096838656 bytes after CUDA context setup. Refusing before host preprocessing."
+      ],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-auto@22",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 70.21,
+      "free_vram_after_balloon_mib": 22525,
+      "max_rss_mib": 36902,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=377184192 C2R work=377184192 shared work=377184192 inverse tile=377184192 bytes",
+            "nvCOMP ingestion declined (bits per sample != 16); using the host reader.",
+            "Staging this movie as native unsigned 8-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 4713984000 bytes for 50 x 11520 x 8184 samples, released before any float movie is materialized.",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Dose weighting and summing frames (CUDA in-VRAM)...",
+            "Dose-weighting scratch borrowed from the consumed real-space movie",
+            "Peak VRAM: 0.00 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-auto@none/out/Movies/20May09_3A-3_109-21_0003.mrc"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie buffer allocation failed: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Dose weighting and summing frames (CUDA)...",
+            "Peak VRAM: 1618.57 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-auto@22/out/Movies/20May09_3A-3_109-21_0003.mrc"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-auto@22/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-auto@22/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 242,
+        "peak_gpu_used_mib": 78667,
+        "peak_motioncorr_above_baseline_mib": 20038,
+        "peak_compute_app_mib": 22056,
+        "min_free_mib": 2488
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-auto@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 8.74,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 5164,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-auto@none/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-auto@none/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 29,
+        "peak_gpu_used_mib": 37933,
+        "peak_motioncorr_above_baseline_mib": 37932,
+        "peak_compute_app_mib": 37924,
+        "min_free_mib": 43221
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-float@16",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 1.18,
+      "free_vram_after_balloon_mib": 16381,
+      "max_rss_mib": 743,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-float@16/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-float@16/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 4,
+        "peak_gpu_used_mib": 64773,
+        "peak_motioncorr_above_baseline_mib": 0,
+        "peak_compute_app_mib": 12,
+        "min_free_mib": 16381
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [
+        "ERROR: Out of GPU memory for Movies/20May09_3A-3_109-21_0003.tif: streaming global alignment requires at least 21414385312 bytes; available 16736518144 bytes after CUDA context setup. Refusing before host preprocessing."
+      ],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-float@21",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 1.18,
+      "free_vram_after_balloon_mib": 21501,
+      "max_rss_mib": 743,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-float@21/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-float@21/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 5,
+        "peak_gpu_used_mib": 59733,
+        "peak_motioncorr_above_baseline_mib": 80,
+        "peak_compute_app_mib": 422,
+        "min_free_mib": 21422
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [
+        "ERROR: Out of GPU memory for Movies/20May09_3A-3_109-21_0003.tif: streaming global alignment requires at least 22673495712 bytes; available 22096838656 bytes after CUDA context setup. Refusing before host preprocessing."
+      ],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-float@22",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 65.06,
+      "free_vram_after_balloon_mib": 22525,
+      "max_rss_mib": 36901,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=377184192 C2R work=377184192 shared work=377184192 inverse tile=377184192 bytes",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Dose weighting and summing frames (CUDA in-VRAM)...",
+            "Dose-weighting scratch borrowed from the consumed real-space movie",
+            "Peak VRAM: 0.00 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-float@none/out/Movies/20May09_3A-3_109-21_0003.mrc"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie buffer allocation failed: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Dose weighting and summing frames (CUDA)...",
+            "Peak VRAM: 1618.57 MiB",
+            "Written aligned and dose-weighted sum to /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-float@22/out/Movies/20May09_3A-3_109-21_0003.mrc"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-float@22/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-float@22/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 231,
+        "peak_gpu_used_mib": 78667,
+        "peak_motioncorr_above_baseline_mib": 20038,
+        "peak_compute_app_mib": 20032,
+        "min_free_mib": 2488
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-G-float@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 13.19,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 18917,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-float@none/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-G-float@none/witness.txt",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 38,
+        "peak_gpu_used_mib": 37843,
+        "peak_motioncorr_above_baseline_mib": 37842,
+        "peak_compute_app_mib": 37834,
+        "min_free_mib": 43311
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@16",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 1.39,
+      "free_vram_after_balloon_mib": 16381,
+      "max_rss_mib": 743,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-auto@16/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-auto@16/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 5,
+        "peak_gpu_used_mib": 64791,
+        "peak_motioncorr_above_baseline_mib": 18,
+        "peak_compute_app_mib": 24,
+        "min_free_mib": 16364
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [
+        "ERROR: Out of GPU memory for Movies/20May09_3A-3_109-21_0003.tif: streaming global alignment requires at least 21414385312 bytes; available 16736518144 bytes after CUDA context setup. Refusing before host preprocessing."
+      ],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@21",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 1.58,
+      "free_vram_after_balloon_mib": 21501,
+      "max_rss_mib": 743,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-auto@21/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-auto@21/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 5,
+        "peak_gpu_used_mib": 60073,
+        "peak_motioncorr_above_baseline_mib": 420,
+        "peak_compute_app_mib": 414,
+        "min_free_mib": 21082
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [
+        "ERROR: Out of GPU memory for Movies/20May09_3A-3_109-21_0003.tif: streaming global alignment requires at least 22673495712 bytes; available 22096838656 bytes after CUDA context setup. Refusing before host preprocessing."
+      ],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@22",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 80.87,
+      "free_vram_after_balloon_mib": 22525,
+      "max_rss_mib": 37266,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=377184192 C2R work=377184192 shared work=377184192 inverse tile=377184192 bytes",
+            "nvCOMP ingestion declined (bits per sample != 16); using the host reader.",
+            "Staging this movie as native unsigned 8-bit; the integer to float expansion and the gain are applied on the device; host staging is one mapping of 4713984000 bytes for 50 x 11520 x 8184 samples, released before any float movie is materialized.",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Released native uint8 host staging after device forward FFT.",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43670 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2792 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie buffer allocation failed: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-auto@22/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-auto@22/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 239,
+        "peak_gpu_used_mib": 79209,
+        "peak_motioncorr_above_baseline_mib": 20580,
+        "peak_compute_app_mib": 22056,
+        "min_free_mib": 1946
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-auto@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 10.04,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 5163,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif compact"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-auto@none/out/ --gpu 0 --ingest auto --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-auto@none/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 25,
+        "peak_gpu_used_mib": 37933,
+        "peak_motioncorr_above_baseline_mib": 37932,
+        "peak_compute_app_mib": 40266,
+        "min_free_mib": 43221
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        4
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-float@16",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 1.13,
+      "free_vram_after_balloon_mib": 16381,
+      "max_rss_mib": 743,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-float@16/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-float@16/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 5,
+        "peak_gpu_used_mib": 64791,
+        "peak_motioncorr_above_baseline_mib": 18,
+        "peak_compute_app_mib": 24,
+        "min_free_mib": 16364
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [
+        "ERROR: Out of GPU memory for Movies/20May09_3A-3_109-21_0003.tif: streaming global alignment requires at least 21414385312 bytes; available 16736518144 bytes after CUDA context setup. Refusing before host preprocessing."
+      ],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-float@21",
+      "exit": 1,
+      "timed_out": false,
+      "wall_s": 1.23,
+      "free_vram_after_balloon_mib": 21501,
+      "max_rss_mib": 743,
+      "all_products": false,
+      "joint_star": false,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "candidate tree incomplete; strict whole-tree comparison not applicable"
+      },
+      "witness": [],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-float@21/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-float@21/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 4,
+        "peak_gpu_used_mib": 60073,
+        "peak_motioncorr_above_baseline_mib": 420,
+        "peak_compute_app_mib": 12,
+        "min_free_mib": 21082
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [
+        "ERROR: Out of GPU memory for Movies/20May09_3A-3_109-21_0003.tif: streaming global alignment requires at least 22673495712 bytes; available 22096838656 bytes after CUDA context setup. Refusing before host preprocessing."
+      ],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": false,
+          ".star": false,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-float@22",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 73.61,
+      "free_vram_after_balloon_mib": 22525,
+      "max_rss_mib": 37266,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "strict_rc": 1,
+        "strict_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: complete non-PDF tree; status=FAIL; different files=1\n  DIFF Movies/20May09_3A-3_109-21_0003.log\n",
+        "products_rc": 0,
+        "products_tail": "Validated 1 movies, 1 MRC images, 2 STAR files, 94279680 pixels per arm\nComparison: products; status=PASS; different files=0\n",
+        "log_line_diff": {
+          "only_in_baseline": [
+            "Movie FFT: batch=1 R2C work=377184192 C2R work=377184192 shared work=377184192 inverse tile=377184192 bytes",
+            "Computing full-frame Fourier transforms (CUDA in-VRAM)...",
+            "Buffer placement:             borrowed dead device memory, nothing allocated",
+            "Reconstructing globally aligned frames (CUDA in-VRAM)...",
+            "Batched patch alignment: 25 patches, chunk size 4 (cap 4, 7 chunk(s)); free device memory 43670 of 81153 MiB; workspace 575 MiB + cuFFT work 47 MiB, retained until alignment release.",
+            "Batched patch alignment: device memory in use rose by at most 2792 MiB (sampled after each chunk).",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB",
+            "Peak GPU memory allocated:    622.77 MiB",
+            "Batched alignment:            4 patches together; time and VRAM below are for all of them",
+            "Buffer VRAM:                  575.14 MiB"
+          ],
+          "only_in_candidate": [
+            "ERROR: Movie buffer allocation failed: out of memory",
+            "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline.",
+            "Computing full-frame Fourier transforms (CUDA)...",
+            "Reconstructing globally aligned frames (CUDA)...",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB",
+            "Buffer VRAM:                  816.09 MiB",
+            "Peak GPU memory allocated:    863.71 MiB"
+          ]
+        }
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-float@22/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-float@22/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 269,
+        "peak_gpu_used_mib": 80691,
+        "peak_motioncorr_above_baseline_mib": 22062,
+        "peak_compute_app_mib": 22056,
+        "min_free_mib": 464
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    },
+    {
+      "spec": "e10441-L-float@none",
+      "exit": 0,
+      "timed_out": false,
+      "wall_s": 12.63,
+      "free_vram_after_balloon_mib": 81154,
+      "max_rss_mib": 18923,
+      "all_products": true,
+      "joint_star": true,
+      "balloon_gone": true,
+      "gpu_used_after_mib": 1,
+      "gpu_apps_after": {},
+      "compare": {
+        "note": "this is the unconstrained baseline"
+      },
+      "witness": [
+        "Movies/20May09_3A-3_109-21_0003.tif float"
+      ],
+      "cmd": "taskset -c 104-111 /mnt/clathrin/alex-motioncorr-226/build-d3-nvcomp/motioncorr --use_own --dose_weighting --dose_per_frame 0.999033 --bfactor 150 --seed 1 --expected_frames 50 --i movies.star --j 8 --gainref gain.mrc --o /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-float@none/out/ --gpu 0 --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-226/runs-d3/e10441-L-float@none/witness.txt --patch_x 5 --patch_y 5",
+      "identity": {
+        "e10441": {
+          "movie": "Movies/20May09_3A-3_109-21_0003.tif",
+          "source": "/home/alex/motioncorr-validation-20261011-vm/corpus/data-https/EMPIAR-10441/data/frames/20May09_3A-3_109-21_0003.tif",
+          "bytes": 732798334,
+          "gain": "gain.mrc"
+        }
+      },
+      "sampled": {
+        "n": 43,
+        "peak_gpu_used_mib": 40275,
+        "peak_motioncorr_above_baseline_mib": 40274,
+        "peak_compute_app_mib": 38102,
+        "min_free_mib": 40879
+      },
+      "local_admission": [],
+      "retry_admission": [],
+      "batch_chunks": [
+        4
+      ],
+      "cpu_preprocessing": false,
+      "early_oom": [],
+      "incompatible": false,
+      "stray_products": {
+        "20May09_3A-3_109-21_0003": {
+          ".mrc": true,
+          ".star": true,
+          ".log": true
+        }
+      }
+    }
+  ],
+  "source_heads": {
+    "runs-base": "c8844894c7c6366abf297699b5312e4b775eb5b0",
+    "runs-d3": "4cd851677bfda80e60ef189cb1ff668cef721043"
+  },
+  "gpu_uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+  "cpus": "104-111"
+}

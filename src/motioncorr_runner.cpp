@@ -28,7 +28,6 @@
 #include <filesystem>
 #include <set>
 #include <atomic>
-#include <sstream>
 #include <cstdio>
 #include <memory>
 
@@ -38,6 +37,7 @@
 static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
+#include "src/experiment_ccf_dc.h" // EXPERIMENT ONLY (#262); empty unless MC_EXPERIMENT_CCF_DC
 #include "src/cpu_dose_symmetry_mode.h"
 #include "src/native_movie_staging.h"
 #include "src/defect_neighbours.h"
@@ -48,6 +48,7 @@ static std::atomic<unsigned long long> s_global_gain_generation{1};
 #include "src/acc/cuda/cuda_fft_prep.h"
 #include "src/acc/cuda/cuda_error_class.h"
 #include "src/acc/cuda/cuda_failure_state.h"
+#include "src/acc/cuda/cuda_scoped_resources.h"
 // REPORT_ERROR_STR expands to a std::stringstream, and this file's only use of it is
 // in the CUDA-guarded patch block below. Keeping the include inside the guard too
 // preserves the invariant that a CPU-only build sees no change from this port except
@@ -210,6 +211,30 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	max_iter = textToInteger(parser.getOption("--max_iter", "Maximum number of iterations for alignment. Only valid with --use_own", "5"));
 	if (max_iter != 5 && !do_own)
 		REPORT_ERROR("--max_iter is valid only with --do_own");
+	experimental_global_half_gain = parser.checkOption("--experimental_global_half_gain", "(EXPERIMENTAL, research, CPU only) Scale each global alignment update by 0.5. Default off. Refused with --gpu.");
+	{
+		const std::string tol = parser.getOption("--experimental_align_tolerance", "(EXPERIMENTAL, research, CPU only) Replace the 0.5 px stopping tolerance of the global alignment, in px. Default off. Refused with --gpu.", "");
+		experimental_align_tolerance = 0;
+		if (!tol.empty()) {
+			experimental_align_tolerance = textToFloat(tol);
+			if (!(experimental_align_tolerance > 0) || !std::isfinite(experimental_align_tolerance))
+				REPORT_ERROR("--experimental_align_tolerance must be a positive number of pixels. Got: " + tol);
+		}
+	}
+	if ((experimental_global_half_gain || experimental_align_tolerance > 0) && !do_own)
+		REPORT_ERROR("--experimental_global_half_gain and --experimental_align_tolerance are valid only with --use_own");
+	experimental_isotropic_weight = parser.checkOption("--experimental_isotropic_weight", "(EXPERIMENTAL, research, CPU only) Use W5's isotropic CCF weight (x frequency divided by the full width nx instead of nx/2 + 1) in the global alignment. Default off. Refused with --gpu.");
+	if (experimental_isotropic_weight && !do_own)
+		REPORT_ERROR("--experimental_isotropic_weight is valid only with --use_own");
+	{
+		const std::string mode = parser.getOption("--experimental_coupled_peak", "(EXPERIMENTAL, research, CPU only) Replace the separable 1D parabola of the subpixel peak by the full 2x2-Hessian quadratic on the 3x3 neighbourhood: off (default), global (global alignment only) or all (global and patch peaks). Refused with --gpu.", "off");
+		if      (mode == "off")    experimental_coupled_peak = 0;
+		else if (mode == "global") experimental_coupled_peak = 1;
+		else if (mode == "all")    experimental_coupled_peak = 2;
+		else REPORT_ERROR("--experimental_coupled_peak must be one of: off, global, all. Got: " + mode);
+		if (experimental_coupled_peak != 0 && !do_own)
+			REPORT_ERROR("--experimental_coupled_peak is valid only with --use_own");
+	}
 	interpolate_shifts = parser.checkOption("--interpolate_shifts", "(EXPERIMENTAL) Interpolate shifts");
 	ccf_downsample = textToFloat(parser.getOption("--ccf_downsample", "(EXPERT) Downsampling rate of CC map. default = 0 = automatic based on B factor", "0"));
 	if (parser.checkOption("--early_binning", "Do binning before alignment to reduce memory usage. This might dampen signal near Nyquist. (ON by default)"))
@@ -389,6 +414,37 @@ void MotioncorrRunner::initialise()
 			}
 			parsed_gpu_id = parsed_gpu_id * 10 + digit;
 		}
+
+		if (experimental_global_half_gain || experimental_align_tolerance > 0)
+		{
+			REPORT_ERROR("ERROR: --experimental_global_half_gain and --experimental_align_tolerance are CPU-only research "
+			             "options and are refused with --gpu (the CUDA alignment does not implement them). Remove --gpu to run on the CPU.");
+		}
+
+		if (experimental_isotropic_weight)
+		{
+			REPORT_ERROR("ERROR: --experimental_isotropic_weight is a CPU-only research option and is refused with --gpu "
+			             "(the CUDA alignment does not implement it). Remove --gpu to run on the CPU.");
+		}
+
+		if (experimental_coupled_peak != 0)
+		{
+			REPORT_ERROR("ERROR: --experimental_coupled_peak is a CPU-only research option and is refused with --gpu "
+			             "(the CUDA alignment does not implement it). Remove --gpu to run on the CPU.");
+		}
+
+#ifdef MC_EXPERIMENT_CCF_DC
+		// The #262 CCF DC hook has no CUDA implementation: its arm is read only on the CPU alignPatch path, so on --gpu it
+		// would be silently ignored (no abort, no manipulation count). Refuse unless the arm is explicitly 'none'.
+		{
+			const char *dc_arm = std::getenv("MC_EXPERIMENT_CCF_DC_ARM");
+			if (dc_arm == nullptr || std::strcmp(dc_arm, "none") != 0)
+			{
+				REPORT_ERROR("ERROR: this build contains the #262 CCF DC experiment, which has no CUDA implementation and would be "
+				             "silently ignored with --gpu. Set MC_EXPERIMENT_CCF_DC_ARM=none or remove --gpu.");
+			}
+		}
+#endif
 
 #if defined _CUDA_ENABLED
 		gpu_id = parsed_gpu_id;
@@ -2450,6 +2506,72 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		             "(mode 0, 1 or 6), or an EER whose grouped counts fit uint16. Refusing "
 		             "to continue "
 		             "on a different path under a pinned --ingest.");
+	// #226 D3: account for the streaming global aligner's Fourier stack, CCF
+	// buffers and actual cuFFT workspace before reading/widening the host movie.
+	// No empirical floor or extra margin: those could refuse a completing run.
+	if (use_gpu && !early_binning && !movie_session) {
+		size_t required = sizeof(cufftComplex);
+		for (const size_t dim : {(size_t)n_frames, (size_t)ny, (size_t)(nx / 2 + 1)}) {
+			if (dim == 0 || dim > std::numeric_limits<size_t>::max() / required)
+				REPORT_ERROR("Streaming Fourier stack size overflows address space for " + fn_mic);
+			required *= dim;
+		}
+		size_t available = 0, total = 0;
+		HANDLE_ERROR(cudaSetDevice(gpu_id));
+		HANDLE_ERROR(cudaMemGetInfo(&available, &total));
+		int wx = 0, wy = 0;
+		patchSpectrumWindow(nx, ny, bfactor, ccf_downsample, wx, wy);
+		const size_t window = (size_t)wy * (wx / 2 + 1);
+		auto add_bytes = [&](size_t bytes) {
+			if (bytes > std::numeric_limits<size_t>::max() - required)
+				REPORT_ERROR("Streaming alignment workspace size overflows address space for " + fn_mic);
+			required += bytes;
+		};
+		add_bytes((size_t)n_frames * window * sizeof(cufftComplex));
+		add_bytes(window * sizeof(cufftComplex));
+		add_bytes(window * sizeof(float));
+		add_bytes((size_t)n_frames * wx * wy * sizeof(float));
+		add_bytes((size_t)4 * n_frames * sizeof(float));
+		bool planning_oom = false;
+		if (required <= available) {
+			CudaFailureState failure;
+			mc_cuda::ScopedCufftPlan owner(&failure);
+			cufftHandle plan = 0;
+			cufftResult result = cufftCreate(&plan);
+			if (result == CUFFT_SUCCESS) { owner.take(plan); result = cufftSetAutoAllocation(plan, 0); }
+			size_t work = 0;
+			int n[2] = {wy, wx};
+			if (result == CUFFT_SUCCESS)
+				result = cufftMakePlanMany(plan, 2, n, nullptr, 1, wy * (wx / 2 + 1),
+				                           nullptr, 1, wy * wx, CUFFT_C2R, n_frames, &work);
+			failure.recordCufft(result, "streaming alignment admission", __LINE__);
+			// cuFFT cleanup may consume/replace the pending runtime status. Latch
+			// any fatal planning error before cleanup can obscure it with an OOM.
+			failure.record(cudaPeekAtLastError(), "streaming alignment admission", __LINE__);
+			const cufftResult cleanup = owner.releaseAll();
+			if (result == CUFFT_SUCCESS) result = cleanup;
+			const CudaRetryDecision decision = cudaRetryDecisionFor(failure, cudaPeekAtLastError());
+			if (decision.verdict == CUDA_RETRY_FATAL)
+				REPORT_ERROR("Fatal CUDA error while planning streaming alignment for " + fn_mic);
+			if (result != CUFFT_SUCCESS && result != CUFFT_ALLOC_FAILED)
+				REPORT_ERROR("cuFFT failed while planning streaming alignment for " + fn_mic);
+			(void)cudaGetLastError();
+			planning_oom = result == CUFFT_ALLOC_FAILED;
+			add_bytes(work);
+			HANDLE_ERROR(cudaMemGetInfo(&available, &total));
+		}
+		if (required > available || planning_oom) {
+			std::ostringstream message;
+			message << "ERROR: Out of GPU memory for " << fn_mic
+			        << ": streaming global alignment requires at least " << required
+			        << " bytes; available " << available
+			        << " bytes after CUDA context setup. Refusing before host preprocessing.";
+            if (planning_oom) message << " cuFFT workspace planning ran out of memory.";
+			logfile << message.str() << std::endl;
+			std::cerr << message.str() << std::endl;
+			return false;
+		}
+	}
 #endif
 
 	// Which path this movie actually took. Written only when asked for, to a file
@@ -2530,6 +2652,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
 		}
+		if (isCompressedMRC && n_frames == nn)
+			compressedMRCreader.finish();
 	}
 	RCTOC(TIMING_READ_MOVIE);
 	MC_STAGE("allocate host sum");
@@ -3142,6 +3266,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #ifdef _CUDA_ENABLED
 	if (movie_session && !movie_session->releasePreprocessingBuffers())
 		REPORT_ERROR("CUDA preprocessing cleanup failed for " + fn_mic);
+	// Preserve the pre-existing gain/sum fallback before testing local-stage
+	// headroom: the neighbouring low-memory global routes must not change (#226 D2).
+	if (movie_session && patch_x > 2 && patch_y > 2) {
+		const int pw = (nx / patch_x) / 2 * 2;
+		const int ph = (ny / patch_y) / 2 * 2;
+		if (!movie_session->admitLocalAlignment(pw, ph, n_groups,
+		                                      bfactor / (prescaling * prescaling), ccf_downsample)) {
+			refuse_fallback_if_fatal(movie_session->getFailureState(), "local alignment admission");
+			if (!movie_session->downloadRealFrames(Iframes))
+				REPORT_ERROR("Failed to preserve corrected frames after local alignment admission decline");
+			host_frames_are_raw = false;
+			discard_preprocessing_session("local alignment admission");
+		}
+	}
 #endif
 
 //#define WRITE_FRAMES
@@ -3689,6 +3827,22 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					// failure here (or a failed first preparation) takes the
 					// download path below.
 					bool resident_retry_prep_done = false;
+					if (movie_session && device_prep_ok &&
+					    !movie_session->admitPatchRetry(patch_w, patch_h, n_groups,
+					        bfactor / (prescaling * prescaling), ccf_downsample)) {
+						refuse_fallback_if_fatal(movie_session->getFailureState(), "patch retry admission");
+						// Preserve both globally aligned representations: patch preparation
+						// reads the real frames; dose weighting later reads the spectra.
+						if (!movie_session->downloadRealFrames(Iframes) ||
+						    !movie_session->downloadFourierFrames(Fframes))
+							REPORT_ERROR("Failed to preserve aligned frames after patch retry admission decline");
+						host_frames_are_raw = false;
+						discard_preprocessing_session("patch retry admission");
+						cufftComplex *stale = d_patch_fcomplex_buffer;
+						d_patch_fcomplex_buffer = nullptr;
+						sz_cached_patch_fcomplex = 0;
+						if (stale) HANDLE_ERROR(cudaFree(stale));
+					}
 					if (movie_session && device_prep_ok) {
 						RCTIC(TIMING_PREP_PATCH);
 						resident_retry_prep_done = movie_session->downloadPatchSpectra(
@@ -3989,6 +4143,23 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 
 skip_fitting:
+#ifdef MC_EXPERIMENT_CCF_DC // EXPERIMENT ONLY (#262): verbatim #269 capture_runtime_model.patch body
+	// Observation only: runtime coefficients before lossy STAR serialization.
+	if (const char *path = std::getenv("MC_DIAG_MODEL_OUT")) {
+		FILE *f = std::fopen(path, "w");
+		if (!f) REPORT_ERROR("Cannot open MC_DIAG_MODEL_OUT");
+		std::fprintf(f, "{\"global\":[");
+		for (size_t i = 0; i < xshifts.size(); ++i)
+			std::fprintf(f, "%s[%.17g,%.17g]", i ? "," : "", double(xshifts[i] * prescaling), double(yshifts[i] * prescaling));
+		const auto *observed = dynamic_cast<const ThirdOrderPolynomialModel *>(mic.model);
+		std::fprintf(f, "],\"coeff_x\":[");
+		for (int i = 0; i < 18; ++i) std::fprintf(f, "%s%.17g", i ? "," : "", observed ? double(observed->coeffX(i)) : 0.0);
+		std::fprintf(f, "],\"coeff_y\":[");
+		for (int i = 0; i < 18; ++i) std::fprintf(f, "%s%.17g", i ? "," : "", observed ? double(observed->coeffY(i)) : 0.0);
+		std::fprintf(f, "],\"local_enabled\":%s}\n", observed ? "true" : "false");
+		if (std::fclose(f)) REPORT_ERROR("Cannot close MC_DIAG_MODEL_OUT");
+	}
+#endif
 	MC_STAGE("release alignment");
 #ifdef _CUDA_ENABLED
 	// Local alignment scratch belongs to this movie, but reconstruction no longer
@@ -4676,7 +4847,8 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 
 	// Parameters TODO: make an option
 	int search_range = 50; // px
-	const RFLOAT tolerance = 0.5; // px
+	const RFLOAT tolerance = (is_global && experimental_align_tolerance > 0) ? experimental_align_tolerance : (RFLOAT)0.5; // px
+	const bool half_gain = is_global && experimental_global_half_gain;
 	const RFLOAT EPS = 1e-15;
 
 	// Shifts within an iteration
@@ -4724,20 +4896,28 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	std::cout << "Trajectory size: " << xshifts.size() << std::endl;
 #endif
 
-	// Initialize B factor weight
+	// Initialize B factor weight. x_norm is nfx (inherited) or, with the experimental isotropic weight on the
+	// global alignment, the full width pnx (W5 'iso').
+	const RFLOAT weight_x_norm = ccfWeightXNorm(is_global, experimental_isotropic_weight, pnx, nfx);
 	weight.reshape(Fref);
 	RCTIC(TIMING_PREP_WEIGHT);
 	#pragma omp parallel for num_threads(n_threads)
 	for (int y = 0; y < ccf_nfy; y++) {
 		const int ly = (y > ccf_nfy_half) ? (y - ccf_nfy) : y;
-		RFLOAT ly2 = ly * (RFLOAT)ly / (nfy * (RFLOAT)nfy);
-
 		for (int x = 0; x < ccf_nfx; x++) {
-			RFLOAT dist2 = ly2 + x * (RFLOAT)x / (nfx * (RFLOAT)nfx);
-			DIRECT_A2D_ELEM(weight, y, x) = exp(- 2 * dist2 * scaled_B); // 2 for Fref and Fframe
+			DIRECT_A2D_ELEM(weight, y, x) = ccfWeightAt(ly, x, nfy, weight_x_norm, scaled_B); // 2 for Fref and Fframe
 		}
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
+
+	const bool use_coupled = experimental_coupled_peak == 2 || (experimental_coupled_peak == 1 && is_global);
+	std::atomic<long> coupled_peaks{0}, coupled_not_negdef{0}, coupled_offset_gt_1px{0};
+
+	int iters_done = 0;
+	RFLOAT last_rmsd = 0;
+
+	if (is_global && (half_gain || experimental_align_tolerance > 0))
+		logfile << " EXPERIMENTAL global alignment: half_gain = " << (half_gain ? 1 : 0) << ", tolerance = " << tolerance << " px, max_iter = " << max_iter << std::endl;
 
 	for (int iter = 1; iter	<= max_iter; iter++) {
 		RCTIC(TIMING_MAKE_REF);
@@ -4767,6 +4947,9 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 				}
 			}
 			RCTOC(TIMING_CCF_CALC);
+#ifdef MC_EXPERIMENT_CCF_DC
+			if (experimentCcfDcZero(is_global, EXP_DC_CPU, 1)) DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);
+#endif
 
 			RCTIC(TIMING_CCF_IFFT);
 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
@@ -4814,6 +4997,26 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			} else {
 				cur_yshifts[iframe] = posy;
 			}
+			if (use_coupled) {
+				// EXPERIMENTAL H2: overwrite the separable result above with the coupled 2x2 fit when
+				// the guard accepts it; otherwise the separable result stands.
+				RFLOAT v[3][3];
+				const int iy3[3] = {ipy_n, ipy, ipy_p}, ix3[3] = {ipx_n, ipx, ipx_p};
+				for (int a = 0; a < 3; a++)
+					for (int b = 0; b < 3; b++)
+						v[a][b] = DIRECT_A2D_ELEM(Iccs[tid](), iy3[a], ix3[b]);
+				RFLOAT dx, dy;
+				const int verdict = coupledPeakOffset(v, dx, dy);
+				coupled_peaks++;
+				if (verdict == 0) {
+					cur_xshifts[iframe] = posx + dx;
+					cur_yshifts[iframe] = posy + dy;
+				} else if (verdict == 1) {
+					coupled_not_negdef++;
+				} else {
+					coupled_offset_gt_1px++;
+				}
+			}
 			cur_xshifts[iframe] *= ccf_scale_x;
 			cur_yshifts[iframe] *= ccf_scale_y;
 #ifdef DEBUG_OWN
@@ -4831,6 +5034,15 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			y_sumsq += cur_yshifts[iframe] * cur_yshifts[iframe];
 		}
 		cur_xshifts[0] = 0; cur_yshifts[0] = 0;
+
+		// EXPERIMENTAL: damp the global update. x/y_sumsq above stay unscaled, so the stopping
+		// test sees the full update. Scaling here covers both the accumulation and the re-shift.
+		if (half_gain) {
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				cur_xshifts[iframe] *= 0.5;
+				cur_yshifts[iframe] *= 0.5;
+			}
+		}
 
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			xshifts[iframe] += cur_xshifts[iframe];
@@ -4850,11 +5062,29 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		// Test convergence
 		RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
 		logfile << " Iteration " << iter << ": RMSD = " << rmsd << " px" << std::endl;
+		iters_done = iter; last_rmsd = rmsd;
 
 		if (rmsd < tolerance) {
 			converged = true;
 			break;
 		}
+	}
+
+	// EXPERIMENTAL: iteration accounting of the global alignment, only when an experimental flag is on.
+	if (is_global && (half_gain || experimental_align_tolerance > 0 || use_coupled))
+		std::cout << "[align] scope=global iterations=" << iters_done << " max_iter=" << max_iter << " converged=" << (converged ? 1 : 0)
+		          << " last_rmsd_px=" << last_rmsd << " tolerance_px=" << tolerance << std::endl;
+
+	if (use_coupled) {
+		coupled_peak_last_peaks = coupled_peaks;
+		coupled_peak_last_not_negdef = coupled_not_negdef;
+		coupled_peak_last_offset_gt_1px = coupled_offset_gt_1px;
+		std::ostringstream stats;
+		stats << "[coupled_peak] scope=" << (is_global ? "global" : "patch") << " peaks=" << coupled_peaks
+		      << " guard_fired=" << (coupled_not_negdef + coupled_offset_gt_1px)
+		      << " (not_negative_definite=" << coupled_not_negdef << ", offset_gt_1px=" << coupled_offset_gt_1px << ")";
+		logfile << " " << stats.str() << std::endl;
+		std::cout << stats.str() << std::endl;
 	}
 
 #ifdef DEBUG_OWN
@@ -4864,6 +5094,31 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 #endif
 
 	return converged;
+}
+
+RFLOAT MotioncorrRunner::ccfWeightXNorm(bool is_global, bool isotropic, int pnx, int nfx) {
+	return (is_global && isotropic) ? (RFLOAT)pnx : (RFLOAT)nfx;
+}
+
+RFLOAT MotioncorrRunner::ccfWeightAt(int ly, int x, int nfy, RFLOAT x_norm, RFLOAT scaled_B) {
+	// Same operations, in the same order, as the inline expression this replaces (x_norm = nfx).
+	RFLOAT ly2 = ly * (RFLOAT)ly / (nfy * (RFLOAT)nfy);
+	RFLOAT dist2 = ly2 + x * (RFLOAT)x / (x_norm * x_norm);
+	return exp(- 2 * dist2 * scaled_B);
+}
+
+int MotioncorrRunner::coupledPeakOffset(const RFLOAT v[3][3], RFLOAT &dx, RFLOAT &dy) {
+	// v[dy + 1][dx + 1]. Same second differences and central first differences as the separable fit.
+	const RFLOAT gx = 0.5 * (v[1][2] - v[1][0]), gy = 0.5 * (v[2][1] - v[0][1]);
+	const RFLOAT hxx = v[1][2] + v[1][0] - 2.0 * v[1][1], hyy = v[2][1] + v[0][1] - 2.0 * v[1][1];
+	const RFLOAT hxy = 0.25 * (v[2][2] - v[2][0] - v[0][2] + v[0][0]);
+	const RFLOAT det = hxx * hyy - hxy * hxy;
+	if (!(hxx < 0 && det > 0)) return 1;
+	const RFLOAT ox = -(hyy * gx - hxy * gy) / det;
+	const RFLOAT oy = -(hxx * gy - hxy * gx) / det;
+	if (!(std::abs(ox) <= 1.0 && std::abs(oy) <= 1.0)) return 2;
+	dx = ox; dy = oy;
+	return 0;
 }
 
 int MotioncorrRunner::findGoodSize(int request) {

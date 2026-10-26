@@ -1,0 +1,13 @@
+
+=================================================================
+==1770388==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 6400 byte(s) in 8 object(s) allocated from:
+    #0 0x7d175bcfe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #1 0x56599d01ef88 in RelionError::RelionError(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, long) /mnt/clathrin/alex-motioncorr-hygiene239/unfixed/src/error.cpp:58
+    #2 0x56599d01bd1b in main tests/test_relion_error_ownership.cpp:19
+    #3 0x7d175b42a1c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #4 0x7d175b42a28a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #5 0x56599d01dcf4 in _start (/mnt/clathrin/alex-motioncorr-hygiene239/error-before+0x5cf4) (BuildId: 083b646d7e418ce1e8fa7a0960d62c12ff889902)
+
+SUMMARY: AddressSanitizer: 6400 byte(s) leaked in 8 allocation(s).

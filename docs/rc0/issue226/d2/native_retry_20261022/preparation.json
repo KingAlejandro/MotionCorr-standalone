@@ -1,0 +1,23 @@
+{
+  "events": [
+    {
+      "kind": "transport_failure",
+      "command_prefix": "ssh -J ccp4-gateway 4-gpu-vm",
+      "exit": 255,
+      "stderr": "channel 0: open failed: connect failed: Temporary failure in name resolution\nstdio forwarding failed\nConnection closed by UNKNOWN port 65535\n",
+      "failure_layer": "gateway target-name resolution, before remote execution",
+      "resolution": "Read existing SSH configuration; 4GPUs targets 130.246.80.58 as alex. ssh -J ccp4-gateway 4GPUs succeeded and verified hostname 4-gpu-vm."
+    },
+    {
+      "kind": "premature_extraction",
+      "command": "tar -xzf source.tar.gz -C src",
+      "observed_incomplete_archive_sha256": "28b27ea1f8b8162e978fba7c6f223b9f1e83704f3b2bedd7b05c0d34cb549aee",
+      "diagnostics": "gzip: stdin: unexpected end of file\ntar: Unexpected EOF in archive\ntar: Unexpected EOF in archive\ntar: Error is not recoverable: exiting now\n",
+      "result": "FAIL",
+      "tar_subcommand_exit": "UNRECORDED; the enclosing diagnostic SSH command continued with read-only probes and returned 0",
+      "cause": "The source-transfer exec session was still running when extraction was attempted.",
+      "resolution": "Waited for transfer exit 0, verified the completed archive SHA-256, then re-extracted into this new scratch only. Build script verifies the archive before extraction; configure/build/native all used that complete source.",
+      "qualified_native_jobs_started": 0
+    }
+  ]
+}

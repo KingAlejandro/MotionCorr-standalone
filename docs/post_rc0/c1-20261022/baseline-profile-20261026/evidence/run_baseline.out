@@ -1,0 +1,22 @@
+/tmp/motioncorr-bench.lock inode 8658 acquired 2026-10-26T14:15:33Z
+/tmp/motioncorr-gpu3-correctness.lock inode 1820 acquired 2026-10-26T14:15:33Z
+src HEAD e77a51a220cb0d91f4ac3c7fac211876d0c6833f dirty-files 0
+34e768128b83f7c94eb4a41ee6bb9a795c52c531a5d646ce4116df83d8d3535a  /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cuda/motioncorr
+3b6126efcd601173df79ddc657f7c9f72ac257fddb256e9dc11d7953c6d25def  /mnt/clathrin/alex-motioncorr-km-truth/fixtures/dose1-s01/movie.mrcs
+27d9a55b9318aaa3b89b200d7047670f766670babb0afb8b88956707f60608a6  /mnt/clathrin/alex-motioncorr-km-truth/fixtures/dose1-s01/RECEIPT.json
+ba3a39e59ca796b5dcaae0a41e0ded6f2c020e877d344a4aa182e4afebf8ac55  /mnt/clathrin/alex-motioncorr-km-truth/fixtures/dose1-s01/input.star
+bb7179309ec9ee1b54aa0d89f3e4e5ca0ccc653730c8245eca2ac7ba39e72649  /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/tools/profiling/mcprof.py
+GPU health PASS (identity, ECC, row remap, retired pages, no compute process); kernel Xid log: UNRUN
+gpu3 health exit 0
+=== phase 1: warmup + A1 A2 2026-10-26T14:15:36Z
+phase1 rc=0
+=== P1 built-in --profile (no Nsight) 2026-10-26T14:15:51Z
+P1 rc=0
+=== P2 Nsight Systems trace (kit trace; cuda,nvtx; no CPU sampling; device timing off) 2026-10-26T14:15:54Z
+P2 rc=0
+=== phase 3: A3 A4 2026-10-26T14:16:03Z
+phase3 rc=0
+GPU health PASS (identity, ECC, row remap, retired pages, no compute process); kernel Xid log: UNRUN
+gpu3 health exit 0
+post health rc=0
+=== done 2026-10-26T14:16:14Z

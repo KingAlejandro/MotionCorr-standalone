@@ -1,0 +1,20 @@
+..F........../Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-9c391c37/tools/test_ccf_dc_stagec_driver.py:578: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmpb7cyqess/live.txt' mode='a' encoding='utf-8'>
+  drv.sha256_file(p, _hook=lambda path: open(path, "a").write("b"))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+......
+======================================================================
+FAIL: test_committed_pins_match_the_repository (__main__.PlanAndPins.test_committed_pins_match_the_repository)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-9c391c37/tools/test_ccf_dc_stagec_driver.py", line 279, in test_committed_pins_match_the_repository
+    self.assertEqual(pins["guard"]["sha256"], sha(HERE / "stageC_guard.sh"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '95b82554ab9b353db9c8d00ef951c302402c3eb1505e72c773e1051d74883b15' != 'ad10f27e4a0d17900342cf5fe1ae902eea9c84b6aae7bc1248707dc9ab34dd6d'
+- 95b82554ab9b353db9c8d00ef951c302402c3eb1505e72c773e1051d74883b15
++ ad10f27e4a0d17900342cf5fe1ae902eea9c84b6aae7bc1248707dc9ab34dd6d
+
+
+----------------------------------------------------------------------
+Ran 19 tests in 227.031s
+
+FAILED (failures=1)

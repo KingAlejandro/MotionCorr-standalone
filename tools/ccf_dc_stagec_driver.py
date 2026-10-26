@@ -21,6 +21,7 @@ import json
 import math
 import os
 import re
+import signal
 import subprocess
 import sys
 import time
@@ -40,6 +41,10 @@ N_PHASE2_ORDER = (("production", "none"), ("isotropic", "none"), ("production", 
 
 class Stop(Exception):
     """Campaign stop: everything produced so far is kept, no later row runs."""
+
+
+class Terminated(BaseException):
+    """SIGTERM received by the driver; converted into a recorded stop after the child group is cleaned up."""
 
 
 # ------------------------------------------------------------------------------------------ helpers
@@ -175,13 +180,176 @@ def expected_command(job, pins, run_dir):
     return argv, env, name, fx
 
 
-def default_spawner(argv, cwd, env, out_path, err_path, timeout):
-    with open(out_path, "xb") as so, open(err_path, "xb") as se:
+SAMPLE_PERIOD_S = 0.5
+MAX_SAMPLES = 240
+
+
+def _proc_available():
+    return sys.platform.startswith("linux") and os.path.exists("/proc/self/status")
+
+
+def _pdeath():                                   # runs in the child between fork and exec (Linux only, no new dependency)
+    import ctypes
+    ctypes.CDLL("libc.so.6", use_errno=True).prctl(1, signal.SIGKILL)       # PR_SET_PDEATHSIG
+
+
+def _scan_children(pid):
+    out = []
+    for e in os.listdir("/proc"):
+        if e.isdigit():
+            try:
+                st = open(f"/proc/{e}/stat").read()
+                if int(st[st.rindex(")") + 2:].split()[1]) == pid:
+                    out.append(int(e))
+            except (OSError, ValueError, IndexError):
+                pass
+    return out
+
+
+def _read_proc(pid):
+    d = f"/proc/{pid}"
+    kv = dict(l.split(":", 1) for l in open(d + "/status").read().splitlines() if ":" in l)
+    rest = (lambda t: t[t.rindex(")") + 2:].split())(open(d + "/stat").read())
+    tasks = os.listdir(d + "/task")
+    children, via = [], "children"
+    for tid in tasks:
         try:
-            rc = subprocess.run(argv, cwd=cwd, env=env, stdout=so, stderr=se, stdin=subprocess.DEVNULL, timeout=timeout).returncode
+            children += [int(x) for x in open(f"{d}/task/{tid}/children").read().split()]
+        except OSError:
+            via = "scan"
+    if via == "scan":
+        children = _scan_children(pid)
+    return dict(pid=pid, ppid=int(kv["PPid"]), name=kv["Name"].strip(), state=kv["State"].split()[0], threads=int(kv["Threads"]),
+                tasks=len(tasks), cpus_allowed=kv["Cpus_allowed_list"].strip(), utime=int(rest[11]), stime=int(rest[12]), via=via), children
+
+
+def sample_tree(root):
+    queue, seen, recs, errors = [root], set(), [], []
+    while queue and len(seen) < 256:
+        pid = queue.pop(0)
+        if pid in seen:
+            continue
+        seen.add(pid)
+        try:
+            rec, ch = _read_proc(pid)
+            recs.append(rec)
+            queue += ch
+        except (OSError, ValueError, KeyError, IndexError) as e:
+            errors.append(f"{pid}: {type(e).__name__}: {e}")
+    return recs, errors
+
+
+def gpu_map(pids):
+    r = subprocess.run(["nvidia-smi", "--query-compute-apps=pid,gpu_uuid", "--format=csv,noheader"], capture_output=True, text=True, timeout=10)
+    if r.returncode != 0:
+        raise OSError(f"nvidia-smi rc {r.returncode}")
+    out = {}
+    for line in r.stdout.splitlines():
+        f = [x.strip() for x in line.split(",")]
+        if len(f) >= 2 and f[0].isdigit() and int(f[0]) in pids:
+            out.setdefault(int(f[0]), []).append(f[1])
+    return out
+
+
+def _kill_group(proc):
+    for sig, wait in ((signal.SIGTERM, 3.0), (signal.SIGKILL, 5.0)):
+        try:
+            os.killpg(proc.pid, sig)
+        except ProcessLookupError:
+            break
+        try:
+            proc.wait(timeout=wait)
+            break
         except subprocess.TimeoutExpired:
-            rc = 124
-    return rc, list(argv), dict(env)
+            continue
+
+
+def _reap_group(proc):
+    """Leave no process of the child's group behind; returns whether stragglers had to be killed."""
+    if proc is None:
+        return False
+    stragglers = False
+    if proc.poll() is None:
+        _kill_group(proc)
+    try:
+        os.killpg(proc.pid, 0)                     # the root is gone; is anything left in its group?
+    except ProcessLookupError:
+        return stragglers
+    stragglers = True
+    try:
+        os.killpg(proc.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    return stragglers
+
+
+def summarize(samples, linux, cuda, truncated, stragglers, sample_file):
+    pids_seen = [r for s_ in samples for r in s_["pids"]]
+    summ = dict(samples=len(samples), truncated=truncated, stragglers_killed=stragglers, sample_file=sample_file,
+                read_errors=sum(len(s_["errors"]) for s_ in samples) + sum(1 for s_ in samples if "gpu_error" in s_))
+    if not linux:
+        return dict(summ, status="UNOBSERVED: /proc not available on this platform")
+    if not pids_seen:
+        return dict(summ, status="UNOBSERVED: no readable process sample (the child ended before the first sample or /proc was unreadable)")
+    summ.update(status="OBSERVED",
+                max_tree_pids=max(len(s_["pids"]) for s_ in samples),
+                max_threads_total=max(sum(r["threads"] for r in s_["pids"]) for s_ in samples),
+                max_tasks_total=max(sum(r["tasks"] for r in s_["pids"]) for s_ in samples),
+                cpus_allowed_lists=sorted({r["cpus_allowed"] for r in pids_seen}),
+                names=sorted({r["name"] for r in pids_seen}))
+    if cuda:
+        seen = {}
+        for s_ in samples:
+            for pid, uu in s_.get("gpu", {}).items():
+                seen.setdefault(str(pid), set()).update(uu)
+        summ["gpu_uuids_seen_by_pid"] = {k: sorted(v) for k, v in seen.items()}
+        summ["gpu_status"] = "OBSERVED" if seen else "UNOBSERVED: no tree pid listed by nvidia-smi compute-apps"
+    return summ
+
+
+def default_spawner(argv, cwd, env, out_path, err_path, timeout):
+    """Run the child in its own process group, sample it immediately and periodically, always clean the group up."""
+    sample_path = os.path.join(os.path.dirname(out_path), "procsamples.jsonl")
+    linux, cuda = _proc_available(), bool(env.get("CUDA_VISIBLE_DEVICES"))
+    samples, truncated, proc, rc, stragglers = [], False, None, None, False
+    try:
+        with open(out_path, "xb") as so, open(err_path, "xb") as se:
+            proc = subprocess.Popen(argv, cwd=cwd, env=env, stdout=so, stderr=se, stdin=subprocess.DEVNULL,
+                                    start_new_session=True, preexec_fn=_pdeath if linux else None)
+            t0 = time.monotonic()
+
+            def take():
+                nonlocal truncated
+                if not linux:
+                    return
+                if len(samples) >= MAX_SAMPLES:
+                    truncated = True
+                    return
+                recs, errs = sample_tree(proc.pid)
+                ent = dict(t=time.time(), pids=recs, errors=errs)
+                if cuda:
+                    try:
+                        ent["gpu"] = {str(k): v for k, v in gpu_map({r["pid"] for r in recs}).items()}
+                    except (OSError, subprocess.SubprocessError) as e:
+                        ent["gpu_error"] = repr(e)
+                samples.append(ent)
+
+            take()
+            while rc is None:
+                try:
+                    rc = proc.wait(timeout=SAMPLE_PERIOD_S)
+                except subprocess.TimeoutExpired:
+                    if time.monotonic() - t0 > timeout:
+                        _kill_group(proc)
+                        rc = 124
+                        break
+                    take()
+    finally:
+        stragglers = _reap_group(proc)
+        with open(sample_path, "x") as f:                        # written even when the run was interrupted
+            for ent in samples:
+                f.write(json.dumps(json_safe(ent), sort_keys=True) + "\n")
+    return rc, list(argv), dict(env), summarize(samples, linux, cuda, truncated, stragglers, os.path.basename(sample_path))
 
 
 # ------------------------------------------------------------------------------------------ driver
@@ -196,6 +364,8 @@ class Driver:
         else:
             if self.pins.get("fake") or grader or spawner or guard:
                 raise Stop("a real run refuses fake pins and every hook")
+            if any(k.startswith("STAGEC_TEST_") for k in os.environ):
+                raise Stop("a test hook (STAGEC_TEST_*) is present in the environment of a real run")
             if not release_path:
                 raise Stop("a real run needs a release file")
             self.release = verify_release(release_path, self.pins_path, Path(__file__).resolve(), self.pins, self.outdir)
@@ -287,7 +457,8 @@ class Driver:
         else:
             g = self.pins
             env = {k: v for k, v in os.environ.items() if k in ENV_ALLOW}
-            env.update(STAGEC_GPU2=g["gpu"]["uuid"], STAGEC_FOREIGN_PID=str(g["gpu"]["foreign_pid"]), STAGEC_SCRATCH=str(self.outdir))
+            env.update(STAGEC_GPU2=g["gpu"]["uuid"], STAGEC_FOREIGN_PID=str(g["gpu"]["foreign_pid"]), STAGEC_SCRATCH=str(self.outdir),
+                       STAGEC_REAL="0" if self.dry_run else "1")
             p = subprocess.run(["bash", g["guard"]["path"], label, str(int(need_gpu))], env=env, capture_output=True, text=True)
             rc, text = p.returncode, p.stdout + p.stderr
         (self.outdir / "guards").mkdir(exist_ok=True)
@@ -376,9 +547,16 @@ class Driver:
         pre = inventory(run_dir)
         write_json(run_dir / "inventory.pre.json", pre)
         t0 = time.time()
-        res = self.spawner(argv, str(cwd), env, str(run_dir / "stdout.txt"), str(run_dir / "stderr.txt"), JOB_TIMEOUT_S)
+        try:
+            res = self.spawner(argv, str(cwd), env, str(run_dir / "stdout.txt"), str(run_dir / "stderr.txt"), JOB_TIMEOUT_S)
+        except BaseException as e:                  # the spawner cleans the child group first; record the actual exception
+            write_json(run_dir / "receipt.json", dict(job_id=jid, ledger_row=job, phase=phase, argv=argv, rc=None,
+                                                      interrupted=f"{type(e).__name__}: {e}", run_dir=str(run_dir)))
+            self.event("job_interrupted", job_id=jid, exception=f"{type(e).__name__}: {e}")
+            raise Stop(f"{jid}: {type(e).__name__} during the child run: {e}")
         rc, actual = res[0], res[1]
         env_used = res[2] if len(res) > 2 else env
+        sampling = res[3] if len(res) > 3 else dict(status="UNOBSERVED: the spawner returned no sampling record")
         t1 = time.time()
         with open(run_dir / "rc.txt", "x") as f:
             f.write(f"{rc}\n")
@@ -386,7 +564,7 @@ class Driver:
         post = inventory(run_dir)
         write_json(run_dir / "inventory.post.json", post)
         receipt = dict(job_id=jid, ledger_row=job, phase=phase, argv=actual, expected_argv=argv, env_declared=env_decl,
-                       env_dropped_names=dropped, cwd=str(cwd), binary=bpin, source=self.pins["source"]["commit"],
+                       env_dropped_names=dropped, sampling=sampling, cwd=str(cwd), binary=bpin, source=self.pins["source"]["commit"],
                        pins_sha256=sha256_file(self.pins_path), run_dir=str(run_dir), rc=rc, seconds=t1 - t0,
                        inventory_pre_sha256=hashlib.sha256(json.dumps(pre, sort_keys=True).encode()).hexdigest(),
                        inventory_post_sha256=hashlib.sha256(json.dumps(post, sort_keys=True).encode()).hexdigest())
@@ -532,6 +710,11 @@ class Driver:
 
     def execute(self):
         self.outdir.mkdir(parents=True, exist_ok=False)
+        old_term = None
+        try:
+            old_term = signal.signal(signal.SIGTERM, lambda sig, frm: (_ for _ in ()).throw(Terminated(f"signal {sig}")))
+        except ValueError:                       # not the main thread (dry-run tests): no handler
+            pass
         try:
             self.verify()
             self.acquire(["own", "cpu", "gpu2"])
@@ -548,6 +731,15 @@ class Driver:
         except Stop as e:
             self.status = "STOPPED"
             return self.finish("STOPPED", str(e))
+        except (KeyboardInterrupt, Terminated) as e:
+            self.status = "STOPPED"
+            return self.finish("STOPPED", f"interrupted: {type(e).__name__}: {e}")
+        except Exception as e:                   # an unexpected failure is a recorded stop, never a silent crash
+            self.status = "STOPPED"
+            return self.finish("STOPPED", f"unexpected {type(e).__name__}: {e}")
+        finally:
+            if old_term is not None:
+                signal.signal(signal.SIGTERM, old_term)
 
 
 def main():

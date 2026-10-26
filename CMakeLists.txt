@@ -606,6 +606,13 @@ if(BUILD_TESTING)
         add_test(NAME CcfDcStageCDriver
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_stagec_driver.py)
         set_tests_properties(CcfDcStageCDriver PROPERTIES TIMEOUT 1500)
+        # Stage C guard fail-closed controls (fake command shims, /proc/stat fixtures) and fake-child lifecycle/sampling controls.
+        add_test(NAME CcfDcStageCGuard
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_stagec_guard.py)
+        set_tests_properties(CcfDcStageCGuard PROPERTIES TIMEOUT 300)
+        add_test(NAME CcfDcStageCLifecycle
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_stagec_lifecycle.py)
+        set_tests_properties(CcfDcStageCLifecycle PROPERTIES TIMEOUT 600)
         if(MC_EXPERIMENT_CCF_DC)
             set(_ccf_dc_rows_args "")
             if(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)

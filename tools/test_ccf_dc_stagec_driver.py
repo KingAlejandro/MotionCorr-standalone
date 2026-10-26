@@ -56,6 +56,10 @@ backend = "cuda" if gpu else "cpu"
 if control == "fail":
     os._exit(3)
 os.makedirs(out)
+if control == "sleep":
+    import time
+    open(os.path.join(out, "pid"), "w").write(str(os.getpid()))
+    time.sleep(120)
 json.dump(dict(env={k: v for k, v in env.items()}, cwd=sorted(os.listdir(".")), argv=args), open(os.path.join(out, "observed.json"), "w"))
 seed = int(hashlib.sha256((case + backend).encode()).hexdigest()[:8], 16)
 rng = np.random.default_rng(seed + (7 if control == "pixel" else 0))

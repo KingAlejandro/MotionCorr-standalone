@@ -1,0 +1,212 @@
+{
+  "rows": [
+    {
+      "row": "R1 default-off neutrality (products and logs)",
+      "verdict": "PASS",
+      "detail": {
+        "q2": true,
+        "q3": true,
+        "q2_logs": true,
+        "q3_logs": true,
+        "exits": [
+          0,
+          0,
+          0
+        ],
+        "q3_quality": []
+      }
+    },
+    {
+      "row": "R2 report-on with strengthened checks",
+      "verdict": "PASS",
+      "detail": {
+        "products": true,
+        "logs": true,
+        "exit": 0,
+        "errors": []
+      }
+    },
+    {
+      "row": "R3 duplicate input and shared output root",
+      "verdict": "PASS",
+      "detail": {
+        "products": true,
+        "logs": true,
+        "exits": [
+          0,
+          0
+        ],
+        "joint_equal": true,
+        "errors": []
+      }
+    },
+    {
+      "row": "R4 non-UTF-8 and UTF-8 movie paths",
+      "verdict": "PASS",
+      "detail": {
+        "exits": [
+          0,
+          0
+        ],
+        "products": true,
+        "errors": []
+      }
+    },
+    {
+      "row": "R5 strict resume validation",
+      "verdict": "PASS",
+      "detail": {
+        "exits": [
+          0,
+          0
+        ],
+        "joint_equal": true,
+        "errors": []
+      }
+    },
+    {
+      "row": "R6 product write failure",
+      "verdict": "PASS",
+      "detail": {
+        "exits": [
+          1,
+          1
+        ],
+        "products": true,
+        "logs": true,
+        "errors": []
+      }
+    },
+    {
+      "row": "R7 sidecar write failure",
+      "verdict": "PASS",
+      "detail": {
+        "exit": 0,
+        "products": true,
+        "sidecars": 5,
+        "errors": []
+      }
+    },
+    {
+      "row": "R8 too-few fallback with bound limit",
+      "verdict": "PASS",
+      "detail": {
+        "exits": [
+          0,
+          0
+        ],
+        "products": true,
+        "errors": []
+      }
+    },
+    {
+      "row": "R9 OFF build warns about the flag and is otherwise neutral",
+      "verdict": "PASS",
+      "detail": {
+        "exit": 0,
+        "warns": true,
+        "products": true,
+        "logs": true,
+        "quality": []
+      }
+    },
+    {
+      "row": "R10 no temporary files left (runs present)",
+      "verdict": "PASS",
+      "detail": {}
+    },
+    {
+      "row": "PC untouched Q4 copy accepted",
+      "verdict": "PASS",
+      "detail": "must accept"
+    },
+    {
+      "row": "NC1 identity binary hash rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC2 identity argv rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC5 solver_attempts rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC6 patch final relabel, counts consistent rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC7 observations rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC8 fit_rmsd_x rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC9 movie.bytes rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC3 summary sidecar sha256 rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC4 summary count rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC10 collision entry relabelled published rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC11 encoded path hex altered rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC12 resume entry relabelled resumed_sidecar rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    }
+  ],
+  "facts": {
+    "Q4_states": {
+      "in/zero.mrcs": [
+        "converged",
+        "retained"
+      ],
+      "in/integer.mrcs": [
+        "iteration_limit",
+        "retained"
+      ],
+      "in/fractional.mrcs": [
+        "iteration_limit",
+        "retained"
+      ],
+      "in/affine.mrcs": [
+        "converged",
+        "retained"
+      ],
+      "in/flat.mrcs": [
+        "converged",
+        "retained"
+      ],
+      "in/noisy.mrcs": [
+        "iteration_limit",
+        "retained"
+      ]
+    }
+  }
+}

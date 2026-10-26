@@ -1,0 +1,85 @@
+{
+  "uptime": {
+    "argv": [
+      "uptime"
+    ],
+    "exit": 0,
+    "stdout": " 2:09  up 3 days, 14:39, 1 user, load averages: 3.67 5.95 10.59\n",
+    "stderr": ""
+  },
+  "occupancy": {
+    "argv": [
+      "ps",
+      "-Ao",
+      "pid,pcpu,comm",
+      "-r"
+    ],
+    "exit": 0,
+    "stdout": "  PID  %CPU COMM\n57151  95.7 /Users/alex.konstantinov/Library/Application Support/Steam/steamapps/common/Sid Meier's Civilization VI/Civ6.app/Contents/MacOS/Civ6_Exe_Child\n  421  25.9 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n16193  12.6 /Library/SystemExtensions/9A1519B5-176B-4B62-92C7-793FBA2A44BC/com.jamf.protect.security-extension.systemextension/Contents/MacOS/com.jamf.protect.security-extension\n74326   7.9 /Applications/Ice.app/Contents/MacOS/Ice\n16516   7.6 /Users/alex.konstantinov/Applications/T3 Code (Nightly).app/Contents/MacOS/T3 Code (Nightly)\n21517   7.5 /Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/../CodexCLI.app/Contents/MacOS/codex\n  440   6.7 /usr/sbin/coreaudiod\n  643   5.3 /System/Library/DriverExtensions/com.apple.DriverKit-AppleBCMWLAN.dext/com.apple.DriverKit-AppleBCMWLAN\n75036   4.4 /Applications/Microsoft Defender.app/Contents/MacOS/wdavdaemon_unprivileged.app/Contents/MacOS/wdavdaemon_unprivileged\n  441   4.3 /usr/libexec/airportd\n    1   2.2 /sbin/launchd\n86469   2.0 /Users/alex.konstantinov/.codex/chatgpt-meetings/versions/darwin-arm64-011b18925fb7af186081f5283460e97a679a9a08506aa05d977f2f92ab8faa97/ChatGPT Meetings.app/Contents/MacOS/ChatGPT Meetings\n  641   1.7 /usr/libexec/diagnosticd\n40739   1.6 /Library/Application Support/Fortinet/FortiClient/bin/fctappfw\n  431   1.5 /usr/libexec/trustd",
+    "stderr": ""
+  },
+  "scratch": {
+    "argv": [
+      "du",
+      "-sk",
+      "/tmp/motioncorr-q268-review-r2-20261023-codex/b1565895-bf79-4578-8a29-f09a3e9a30d7"
+    ],
+    "exit": 0,
+    "stdout": "2252\t/tmp/motioncorr-q268-review-r2-20261023-codex/b1565895-bf79-4578-8a29-f09a3e9a30d7\n",
+    "stderr": ""
+  },
+  "disk": {
+    "argv": [
+      "df",
+      "-h",
+      "/tmp"
+    ],
+    "exit": 0,
+    "stdout": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   460Gi   422Gi    14Gi    97%    9.3M  149M    6%   /System/Volumes/Data\n",
+    "stderr": ""
+  },
+  "review_head": {
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit": 0,
+    "stdout": "1f0a58bf6e0639d8b62f74da52f250cc664c0b30\n",
+    "stderr": ""
+  },
+  "review_status": {
+    "argv": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "author_head": {
+    "argv": [
+      "git",
+      "-C",
+      "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-2566d166",
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit": 0,
+    "stdout": "e9c1e9b41a918293928417d57d31adf1e4e50300\n",
+    "stderr": ""
+  },
+  "author_status": {
+    "argv": [
+      "git",
+      "-C",
+      "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-2566d166",
+      "status",
+      "--short"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+}

@@ -1,0 +1,44 @@
+Working on in/affine.mrcs with 1 thread(s).
+
+Movie size: X = 128 Y = 96 N = 5
+Frames to be used: 1 2 3 4 5
+Frame grouping: n_frames = 5, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 
+interpolate_shifts = 0
+
+
+Global alignment:
+ Iteration 1: RMSD = 2.50009 px
+ Iteration 2: RMSD = 0.618338 px
+ Iteration 3: RMSD = 0.614909 px
+ Iteration 4: RMSD = 0.306687 px
+
+Local alignments:
+Patches: X = 3 Y = 3
+Patch (1, 1): 1 / 9, X range = [0, 42), Y range = [0, 32), Center = (20, 15)
+ Iteration 1: RMSD = 0.329762 px
+Patch (1, 2): 2 / 9, X range = [42, 84), Y range = [0, 32), Center = (62, 15)
+ Iteration 1: RMSD = 0.490189 px
+Patch (1, 3): 3 / 9, X range = [84, 126), Y range = [0, 32), Center = (104, 15)
+ Iteration 1: RMSD = 0.950926 px
+ Iteration 2: RMSD = 0.0998224 px
+Patch (2, 1): 4 / 9, X range = [0, 42), Y range = [32, 64), Center = (20, 47)
+ Iteration 1: RMSD = 0.569374 px
+ Iteration 2: RMSD = 0.300762 px
+Patch (2, 2): 5 / 9, X range = [42, 84), Y range = [32, 64), Center = (62, 47)
+ Iteration 1: RMSD = 0.31917 px
+Patch (2, 3): 6 / 9, X range = [84, 126), Y range = [32, 64), Center = (104, 47)
+ Iteration 1: RMSD = 0.579153 px
+ Iteration 2: RMSD = 0.367989 px
+Patch (3, 1): 7 / 9, X range = [0, 42), Y range = [64, 96), Center = (20, 79)
+ Iteration 1: RMSD = 0.757239 px
+ Iteration 2: RMSD = 0.362606 px
+Patch (3, 2): 8 / 9, X range = [42, 84), Y range = [64, 96), Center = (62, 79)
+ Iteration 1: RMSD = 0.447708 px
+Patch (3, 3): 9 / 9, X range = [84, 126), Y range = [64, 96), Center = (104, 79)
+ Iteration 1: RMSD = 0.349928 px
+
+Polynomial fit RMSD: X = 0.129612 px Y = 0.115937 px
+Summing frames before dose weighting: ..... done
+Written aligned but non-dose weighted sum to out/in/affine.mrc
+Full movie wall time: 0.005 s

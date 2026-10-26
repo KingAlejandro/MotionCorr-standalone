@@ -1,0 +1,4 @@
+v0 flag_string=0 mcquality_symbols=0
+v1 flag_string=0 mcquality_symbols=0
+v2 flag_string=2 mcquality_symbols=62
+command: grep -c -a -- '--experimental_quality_report' BIN; nm -C BIN | grep -c 'mcquality::'

@@ -1,0 +1,106 @@
+{
+  "checks": [
+    [
+      "Q4",
+      "PASS"
+    ],
+    [
+      "Q6",
+      "PASS"
+    ],
+    [
+      "Q8",
+      "PASS"
+    ],
+    [
+      "Q9",
+      "PASS"
+    ],
+    [
+      "Q12",
+      "PASS"
+    ],
+    [
+      "Q15",
+      "PASS"
+    ]
+  ],
+  "negative_controls": [
+    {
+      "row": "PC untouched Q4 copy accepted",
+      "verdict": "PASS",
+      "detail": "must accept"
+    },
+    {
+      "row": "NC1 identity binary hash rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC2 identity argv rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC5 solver_attempts rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC6 patch final relabel, counts consistent rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC7 observations rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC8 fit_rmsd_x rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC9 movie.bytes rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC3 summary sidecar sha256 rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC4 summary count rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC10 collision entry relabelled published rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC11 encoded path hex altered rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    },
+    {
+      "row": "NC12 resume entry relabelled resumed_sidecar rejected",
+      "verdict": "PASS",
+      "detail": "must reject"
+    }
+  ],
+  "rebound_probes": {
+    "global_state_only": [
+      "b'in/affine.mrcs': global state iteration_limit != converged",
+      "b'in/affine.mrcs': summary entry differs from sidecar"
+    ],
+    "patch_solver_returned": [],
+    "patch_max_iter": [],
+    "largest_delta": [],
+    "summary_options": []
+  },
+  "scope": "Hash-only input/MRC bindings use receipts; raw named members memory only; no C++ execution"
+}

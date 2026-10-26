@@ -1,0 +1,33 @@
+{
+  "schema": "motioncorr-quality-prototype/0",
+  "status": "experimental_unapproved",
+  "identity": {
+    "run_id": "1792712232468801-3327584-2da15f7d",
+    "configured_source_revision": "c347f59f25a2148642130136c6462491c8db36d1",
+    "configured_source_dirty": "false",
+    "binary_sha256": "3693e2e9691052dc981b1c8f5ae9f1185ef48616fead31a1b75bac61a1fc065a",
+    "backend": "cpu",
+    "gpu_id": -1,
+    "options": {"max_iter": "1", "tolerance_px": "0.5", "search_range_px": "50", "patch_x": "3", "patch_y": "3", "group_frames": "1", "bin_factor": "1", "bfactor": "150", "ccf_downsample": "0", "early_binning": "false", "interpolate_shifts": "false", "first_frame_sum": "1", "last_frame_sum": "5", "dose_weighting": "false", "skip_defect": "true", "threads": "1", "only_do_unfinished": "false"},
+    "argv": ["/mnt/clathrin/alex-motioncorr-q268-quality-20261023-c347f59f/build-b2/motioncorr", "--i", "in/batch.star", "--o", "out/", "--use_own", "--j", "1", "--bin_factor", "1", "--seed", "1", "--skip_defect", "--save_noDW", "--first_frame_sum", "1", "--last_frame_sum", "5", "--skip_logfile", "--patch_x", "3", "--patch_y", "3", "--max_iter", "1", "--experimental_quality_report"]
+  },
+  "movie": {"path": "in/integer.mrcs", "bytes": 246784, "sha256": "faaa3f9eeb7f1a785f51f6ab62b23e21a02b93a24a81c46b83b41c0590bc0b31"},
+  "products": {"star": {"path": "out/in/integer.star", "sha256": "4ffdd1405c4f6244c259ac000ff398ac1a3a7cc943fddeec5b85c852296ff351"}, "micrograph": {"path": "out/in/integer.mrc", "sha256": "9c6af8c85b20a3f33e86b627aa410d3cbe3c120b6913cc8c16152000b83ece50"}},
+  "global_alignment": {"state": "iteration_limit", "route": "cpu", "iterations": 1, "final_incremental_rmsd_px": 5.7129920162536347, "converged": false, "max_iter": 1, "tolerance_px": 0.5, "solver_returned": false},
+  "local_alignment": {"state": "attempted", "patches_planned": 9, "patches_recorded": 9, "solver_attempts": 9, "same_input_retries": 0, "device_preparation_declined": 0, "converged_patches": 0, "dropped_patches": 9,
+    "patches": [
+      {"index": 1, "iy": 1, "ix": 1, "final": "dropped", "device_preparation_declined": false, "attempts": [{"route": "cpu", "kind": "first", "iterations": 1, "final_incremental_rmsd_px": 0.86270400556295679, "converged": false, "solver_returned": false}]},
+      {"index": 2, "iy": 1, "ix": 2, "final": "dropped", "device_preparation_declined": false, "attempts": [{"route": "cpu", "kind": "first", "iterations": 1, "final_incremental_rmsd_px": 0.76196560603616548, "converged": false, "solver_returned": false}]},
+      {"index": 3, "iy": 1, "ix": 3, "final": "dropped", "device_preparation_declined": false, "attempts": [{"route": "cpu", "kind": "first", "iterations": 1, "final_incremental_rmsd_px": 0.839224827991498, "converged": false, "solver_returned": false}]},
+      {"index": 4, "iy": 2, "ix": 1, "final": "dropped", "device_preparation_declined": false, "attempts": [{"route": "cpu", "kind": "first", "iterations": 1, "final_incremental_rmsd_px": 1.1059522528063896, "converged": false, "solver_returned": false}]},
+      {"index": 5, "iy": 2, "ix": 2, "final": "dropped", "device_preparation_declined": false, "attempts": [{"route": "cpu", "kind": "first", "iterations": 1, "final_incremental_rmsd_px": 0.97947749605640622, "converged": false, "solver_returned": false}]},
+      {"index": 6, "iy": 2, "ix": 3, "final": "dropped", "device_preparation_declined": false, "attempts": [{"route": "cpu", "kind": "first", "iterations": 1, "final_incremental_rmsd_px": 1.0921696422714573, "converged": false, "solver_returned": false}]},
+      {"index": 7, "iy": 3, "ix": 1, "final": "dropped", "device_preparation_declined": false, "attempts": [{"route": "cpu", "kind": "first", "iterations": 1, "final_incremental_rmsd_px": 0.9276481639879226, "converged": false, "solver_returned": false}]},
+      {"index": 8, "iy": 3, "ix": 2, "final": "dropped", "device_preparation_declined": false, "attempts": [{"route": "cpu", "kind": "first", "iterations": 1, "final_incremental_rmsd_px": 0.85380168907249099, "converged": false, "solver_returned": false}]},
+      {"index": 9, "iy": 3, "ix": 3, "final": "dropped", "device_preparation_declined": false, "attempts": [{"route": "cpu", "kind": "first", "iterations": 1, "final_incremental_rmsd_px": 1.1038786722067262, "converged": false, "solver_returned": false}]}
+    ]},
+  "local_model": {"state": "global_only", "reason": "too_few_converged_observations", "observations": 0, "min_observations_exclusive": 18, "largest_delta_px": null, "distortion_limit_px": 3, "fit_rmsd_x_px": null, "fit_rmsd_y_px": null, "fit_rmsd_limit_px": 10},
+  "motion_identifiability": "not_assessed",
+  "peak_validity": "not_assessed",
+  "publication": {"state": "published", "reason": null}
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "motioncorr-quality-summary-prototype/1",
+  "status": "experimental_unapproved",
+  "identity": {
+    "run_id": "1792714959303705-3339544-d8433f68",
+    "configured_source_revision": "2f43425340b7525e85288e7b35ee109dd3a4c3cc",
+    "configured_source_dirty": "false",
+    "binary_sha256": "9a9f1bfafaf1139bd115d2b753f05a3381c5d308b9a396967f688c0dc0b45e25",
+    "backend": "cpu",
+    "gpu_id": -1,
+    "options": {"max_iter": "5", "patch_x": "1", "patch_y": "1", "group_frames": "1", "bin_factor": "1", "bfactor": "150", "ccf_downsample": "0", "early_binning": "false", "interpolate_shifts": "false", "first_frame_sum": "1", "last_frame_sum": "5", "dose_weighting": "false", "skip_defect": "true", "threads": "1", "only_do_unfinished": "false"},
+    "argv": ["/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v2/motioncorr", "--i", "in/batch.star", "--o", "out/", "--use_own", "--j", "1", "--bin_factor", "1", "--seed", "1", "--skip_defect", "--save_noDW", "--first_frame_sum", "1", "--last_frame_sum", "5", "--skip_logfile", "--patch_x", "1", "--patch_y", "1", "--experimental_quality_report"]
+  },
+  "joint_output": {"state": "withheld_movie_failures", "path": "out/corrected_micrographs.star"},
+  "quality_evidence_complete": true,
+  "counts": {"movies": 2, "unknown_legacy": 0, "sidecar_write_failures": 0, "output_root_collisions": 0, "global_alignment": {"converged": 1, "iteration_limit": 1}, "local_model": {"not_requested": 2}, "publication": {"failed": 1, "published": 1}},
+  "movies": [
+    {"movie": "in/zero.mrcs", "source": "this_run", "reason": null, "output_root_collision": false, "sidecar": {"path": "out/in/zero.quality.json", "sha256": "ea0d9b0a2a259d25475f0e968ecf8d9940ccce5cf3b70c7ffaf40d36605035ab", "write_failed": false, "write_error": null}, "global_alignment": "converged", "local_model": "not_requested", "publication": "published"},
+    {"movie": "in/integer.mrcs", "source": "this_run", "reason": null, "output_root_collision": false, "sidecar": {"path": "out/in/integer.quality.json", "sha256": "c6cd4bbf936ed0a4b60e0d19a01156e83030a2849b70367deee525b5b4f09014", "write_failed": false, "write_error": null}, "global_alignment": "iteration_limit", "local_model": "not_requested", "publication": "failed"}
+  ]
+}

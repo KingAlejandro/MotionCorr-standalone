@@ -1,0 +1,281 @@
+{
+  "schema": "motioncorr-quality-prototype/1",
+  "status": "experimental_unapproved",
+  "identity": {
+    "run_id": "1792714957984787-3339512-eccc3d17",
+    "configured_source_revision": "2f43425340b7525e85288e7b35ee109dd3a4c3cc",
+    "configured_source_dirty": "false",
+    "binary_sha256": "9a9f1bfafaf1139bd115d2b753f05a3381c5d308b9a396967f688c0dc0b45e25",
+    "backend": "cpu",
+    "gpu_id": -1,
+    "options": {
+      "max_iter": "5",
+      "patch_x": "3",
+      "patch_y": "3",
+      "group_frames": "1",
+      "bin_factor": "1",
+      "bfactor": "150",
+      "ccf_downsample": "0",
+      "early_binning": "false",
+      "interpolate_shifts": "false",
+      "first_frame_sum": "1",
+      "last_frame_sum": "5",
+      "dose_weighting": "false",
+      "skip_defect": "true",
+      "threads": "1",
+      "only_do_unfinished": "false"
+    },
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-q268v2-20261023-2f434253/build-v2/motioncorr",
+      "--i",
+      "in/batch.star",
+      "--o",
+      "out/",
+      "--use_own",
+      "--j",
+      "1",
+      "--bin_factor",
+      "1",
+      "--seed",
+      "1",
+      "--skip_defect",
+      "--save_noDW",
+      "--first_frame_sum",
+      "1",
+      "--last_frame_sum",
+      "5",
+      "--skip_logfile",
+      "--patch_x",
+      "3",
+      "--patch_y",
+      "3",
+      "--experimental_quality_report"
+    ]
+  },
+  "movie": {
+    "path": "in/noisy.mrcs",
+    "bytes": 246784,
+    "sha256": "5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3"
+  },
+  "products": {
+    "star": {
+      "path": "out/in/noisy.star",
+      "sha256": "b30bbbc782bdea37a4ee0deb041b89a8c79d092411d7daa9c44da387922f19dd"
+    },
+    "micrograph": {
+      "path": "out/in/noisy.mrc",
+      "sha256": "4e0939cb33b8247f9ddaf1f44f60038e54152de337cab5e4b6bcf0d9b3100c0b"
+    }
+  },
+  "global_alignment": {
+    "state": "iteration_limit",
+    "route": "cpu",
+    "iterations": 5,
+    "final_incremental_rmsd_px": 1.409976700889825,
+    "converged": false,
+    "max_iter": 5,
+    "tolerance_px": 0.5,
+    "solver_returned": false
+  },
+  "local_alignment": {
+    "state": "attempted",
+    "patches_planned": 9,
+    "patches_recorded": 9,
+    "solver_attempts": 9,
+    "same_input_retries": 0,
+    "device_preparation_declined": 0,
+    "converged_patches": 9,
+    "dropped_patches": 0,
+    "interrupted_patches": 0,
+    "patches": [
+      {
+        "index": 1,
+        "iy": 1,
+        "ix": 1,
+        "final": "converged",
+        "device_preparation_declined": false,
+        "attempts": [
+          {
+            "route": "cpu",
+            "kind": "first",
+            "iterations": 3,
+            "final_incremental_rmsd_px": 0.45254550056667714,
+            "converged": true,
+            "max_iter": 5,
+            "tolerance_px": 0.5,
+            "solver_returned": true
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "iy": 1,
+        "ix": 2,
+        "final": "converged",
+        "device_preparation_declined": false,
+        "attempts": [
+          {
+            "route": "cpu",
+            "kind": "first",
+            "iterations": 3,
+            "final_incremental_rmsd_px": 0.41665929698697957,
+            "converged": true,
+            "max_iter": 5,
+            "tolerance_px": 0.5,
+            "solver_returned": true
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "iy": 1,
+        "ix": 3,
+        "final": "converged",
+        "device_preparation_declined": false,
+        "attempts": [
+          {
+            "route": "cpu",
+            "kind": "first",
+            "iterations": 5,
+            "final_incremental_rmsd_px": 0.24360270452480914,
+            "converged": true,
+            "max_iter": 5,
+            "tolerance_px": 0.5,
+            "solver_returned": true
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "iy": 2,
+        "ix": 1,
+        "final": "converged",
+        "device_preparation_declined": false,
+        "attempts": [
+          {
+            "route": "cpu",
+            "kind": "first",
+            "iterations": 2,
+            "final_incremental_rmsd_px": 0.30792142206542344,
+            "converged": true,
+            "max_iter": 5,
+            "tolerance_px": 0.5,
+            "solver_returned": true
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "iy": 2,
+        "ix": 2,
+        "final": "converged",
+        "device_preparation_declined": false,
+        "attempts": [
+          {
+            "route": "cpu",
+            "kind": "first",
+            "iterations": 5,
+            "final_incremental_rmsd_px": 0.4031172108603121,
+            "converged": true,
+            "max_iter": 5,
+            "tolerance_px": 0.5,
+            "solver_returned": true
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "iy": 2,
+        "ix": 3,
+        "final": "converged",
+        "device_preparation_declined": false,
+        "attempts": [
+          {
+            "route": "cpu",
+            "kind": "first",
+            "iterations": 4,
+            "final_incremental_rmsd_px": 0.24349382470580658,
+            "converged": true,
+            "max_iter": 5,
+            "tolerance_px": 0.5,
+            "solver_returned": true
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "iy": 3,
+        "ix": 1,
+        "final": "converged",
+        "device_preparation_declined": false,
+        "attempts": [
+          {
+            "route": "cpu",
+            "kind": "first",
+            "iterations": 4,
+            "final_incremental_rmsd_px": 0.24199250845772036,
+            "converged": true,
+            "max_iter": 5,
+            "tolerance_px": 0.5,
+            "solver_returned": true
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "iy": 3,
+        "ix": 2,
+        "final": "converged",
+        "device_preparation_declined": false,
+        "attempts": [
+          {
+            "route": "cpu",
+            "kind": "first",
+            "iterations": 3,
+            "final_incremental_rmsd_px": 0.4779797073674539,
+            "converged": true,
+            "max_iter": 5,
+            "tolerance_px": 0.5,
+            "solver_returned": true
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "iy": 3,
+        "ix": 3,
+        "final": "converged",
+        "device_preparation_declined": false,
+        "attempts": [
+          {
+            "route": "cpu",
+            "kind": "first",
+            "iterations": 3,
+            "final_incremental_rmsd_px": 0.4248841692945758,
+            "converged": true,
+            "max_iter": 5,
+            "tolerance_px": 0.5,
+            "solver_returned": true
+          }
+        ]
+      }
+    ]
+  },
+  "local_model": {
+    "state": "retained",
+    "reason": null,
+    "observations": 45,
+    "min_observations_exclusive": 18,
+    "largest_delta_px": 0.7400150339336093,
+    "distortion_limit_px": 3,
+    "fit_rmsd_x_px": 2.219432460921308,
+    "fit_rmsd_y_px": 2.120719018931447,
+    "fit_rmsd_limit_px": 10
+  },
+  "motion_identifiability": "not_assessed",
+  "peak_validity": "valid",
+  "publication": {
+    "state": "published",
+    "reason": null
+  }
+}

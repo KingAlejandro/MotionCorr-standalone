@@ -1,0 +1,30 @@
+baseline (fixed grader) all PASS: True {}
+baseline (first-stage grader): {'d1': 'ok', 'd2': 'ok', 'dshim': 'ok', 'd4': 'ok', 'dpoison': 'ok', 'd4poison': 'StopIteration', 'dpoison_both': 'ok'}
+grader mutants detected: 21 / 21
+  DETECTED d4poison: healthy w1 (10641 A002) STAR deleted -> ["w1: healthy worker incomplete (['HM70-1_10-A-002_0002_Oct28_23_00_41.mrc'])"]
+  DETECTED d4poison: healthy w2 per-worker joint STAR deleted -> ["w2: healthy worker incomplete (['20170629_00031_frameImage.mrc', '20170629_00031_frameImage.star'])"]
+  DETECTED d4poison: refusal line removed from faulting w3 console -> ['w3: fault not attributed (injected/refusal lines missing)']
+  DETECTED d4poison: faulting w3 published its refused movie (STAR+MRC) -> ["w3: refused movie HM70-1_10-A-004_0008_Oct28_23_06_04 published ['HM70-1_10-A-004_0008_Oct28_23_06_04.mrc', 'HM70-1_10-A-004_0008_Oct28_23_06_04.star']"]
+  DETECTED d4poison: fault also fired on healthy w1 (injected line in console) -> ['w1: healthy worker shows a fault or no wrapper attribution']
+  DETECTED d4poison: wrapper did not enable the fault on w3 (fault=on -> fault=off) -> ['w3: wrapper did not enable the fault']
+  DETECTED d4poison: healthy w2 returncode 1 -> ['w2: healthy worker rc 1']
+  DETECTED d4poison: faulting w3 returncode 0 -> ['w3: faulting worker rc 0']
+  DETECTED d4poison: a merged joint STAR was published -> ['a merged tree was published']
+  DETECTED d4poison: dataset_ready true / verdict PASS -> ['rc 0, dataset verdict PASS, ready True']
+  DETECTED d4poison: graded with fault_worker=0 (shard holds no 10641 movie) -> ['w0: no 10641 movie in its shard, so the retry fault cannot fire there', 'w0: faulting worker rc 0']
+  DETECTED d4poison: worker devices out of intended UUID order -> ["worker devices ['GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598', 'GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d', 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54', 'GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d'] != ['GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d', 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54', 'GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d', 'GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598']"]
+  DETECTED d4poison: w3 console log missing -> ['w3: no console log']
+  DETECTED dpoison: healthy tutorial movie before the 10641 movie in faulting w1 lost its STAR -> ["w1: healthy movie 20170629_00031_frameImage lost products (['20170629_00031_frameImage.mrc'])"]
+  DETECTED dpoison: healthy w0 lost its 10641 MRC -> ["w0: healthy worker incomplete (['20170629_00026_frameImage.mrc', '20170629_00026_frameImage.star', 'HM70-1_10-A-002_0002_Oct28_23_00_41.star'])"]
+  DETECTED dpoison_both: refusal removed from w1 -> ['w1: fault not attributed (injected/refusal lines missing)']
+  DETECTED dpoison_both: rc 0 (dataset verdict PASS) -> ['rc 0, dataset verdict PASS, ready False', 'failure reason None']
+  DETECTED d4: merged STAR of one movie deleted -> ["merged products ['20170629_00026_frameImage.mrc', '20170629_00026_frameImage.star', '20170629_00031_frameImage.mrc', 'HM70-1_10-A-002_0002_Oct28_23_00_41.mrc', 'HM70-1_10-A-002_0002_Oct28_23_00_41.star', 'HM70-1_10-A-004_0008_Oct28_23_06_04.mrc', 'HM70-1_10-A-004_0008_Oct28_23_06_04.star'], joint STAR True"]
+  DETECTED d4: gpu witness reports 3 distinct devices -> ['device witness: 3 distinct, all-on-intended True']
+  DETECTED d4: worker 1 returncode 1 -> ['worker rcs [0, 1, 0, 0]']
+  DETECTED dshim: counter does not match retried patches -> ['shim resident-retry-preparations 41 != retried 1000000']
+redigest on retained trees: {'rc': 0, 'stdout': "IDENTICAL {'d2': 0, 'dshim': 0, 'd4': 0}", 'stderr': '', 'files_in_d1_merged': 13, 'verdict': 'IDENTICAL'}
+  DIFFERENT d2 log: one fitted shift digit changed in a non-filtered line {'d2': ['Movies/20170629_00026_frameImage.log']}
+  DIFFERENT d4 log: product path names a different movie in the normalised line {'d4': ['Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.log']}
+  DIFFERENT dshim STAR: one value changed {'dshim': ['Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.star']}
+  DIFFERENT d2 joint STAR: one row dropped {'d2': ['corrected_micrographs.star']}
+  IDENTICAL d2 log: writes into d1's directory (EXPECTED masked: tag is normalised away) {}

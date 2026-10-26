@@ -49,3 +49,7 @@ All per-movie values go to a CSV/JSON; the README shows per-condition medians an
 ## Out of scope
 
 The C arm, CUDA, the evaluator, limits, ROI, generator and gauge are not changed. No new estimator is implemented or run here; the next experiment is named, not executed.
+
+## Amendment 1 (before the full run; only the gate wording changes)
+
+G1 as written failed on a 4-movie debug run: H7a regenerated 82 movies, so the RECEIPT.json copies its `metrics.json` identity hashed differ from the cpu64 originals in timing fields (`seconds`). The identity that matters is the movie bytes. G1 now requires the cpu64 receipt's `movie.mrcs` sha256 to equal the H7a census `movie_sha256` (which H7a checked against its own receipt) and the recipe to equal `gen.recipe(condition, seed)`. The debug run had shown only gate values (G2-G5 passed); no table was computed.

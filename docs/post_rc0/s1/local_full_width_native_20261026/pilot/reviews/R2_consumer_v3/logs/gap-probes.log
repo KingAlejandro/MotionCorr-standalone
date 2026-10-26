@@ -1,0 +1,13 @@
+P1 forged: 3x3 ON products in OFF slot, receipt rewritten  predicted=REJECTED:WITNESS   observed=REJECTED:WITNESS
+P2 forged: 3x3 OFF products in ON slot, receipt rewritten  predicted=REJECTED:WITNESS   observed=REJECTED:WITNESS
+P3 forged: global-only ON products in OFF slot             predicted=ADMITTED           observed=ADMITTED
+P4 OFF log with marker-variant line (no hyphen)            predicted=ADMITTED           observed=ADMITTED
+P5 OFF log with lower-case witness line                    predicted=ADMITTED           observed=ADMITTED
+P6 noisy ON, 0 witnesses, caller expected patch_grid [1,1] predicted=ADMITTED           observed=ADMITTED
+P6b same run with resolved expected                        predicted=REJECTED:WITNESS   observed=REJECTED:WITNESS
+P7 altered COMMANDS (max_iter 9, OMP 8), receipt matches it predicted=ADMITTED           observed=ADMITTED
+P8 pair different binaries: ADMITTED ADMITTED
+P9 extra files in run_dir outside output/ and input/       predicted=ADMITTED           observed=ADMITTED
+P10 output symlink listed in receipt with target hash      predicted=REJECTED:INVENTORY observed=REJECTED:INVENTORY
+P11 canonical slot is a symlink to a tree elsewhere        predicted=REJECTED:RUN_DIR   observed=REJECTED:RUN_DIR
+probes 13 not as predicted: []

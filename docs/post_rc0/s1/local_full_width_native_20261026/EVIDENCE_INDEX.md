@@ -30,3 +30,7 @@ pending parent oracle and pilot packet are outside this index and may be added a
 Repo copy integrity: `EVIDENCE_SHA256SUMS` lists every file under `evidence/` (`cd evidence && shasum -a 256 -c ../EVIDENCE_SHA256SUMS`).
 
 Original compiler/ctest log text, including a few trailing-whitespace lines, is preserved unmodified (`git diff --check` flags them).
+
+## Pilot packet integration
+`pilot/` (snapshot, additive): `PACKET_SHA256SUMS` lists every file; the original `SHA256SUMS_v3` and `SHA256SUMS_v4` verify inside it. Durable originals:
+`~/Documents/MotionCorr-evidence/20261026/Native-local-full-width-final-packet-r1/`. Source `634e4b48` and CMake `5bcfa987` are unchanged.

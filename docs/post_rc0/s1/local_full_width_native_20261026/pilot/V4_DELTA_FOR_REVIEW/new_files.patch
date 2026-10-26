@@ -1,0 +1,2014 @@
+diff --git a/PAIR_V4_PLAN.md b/PAIR_V4_PLAN.md
+new file mode 100644
+index 0000000..7091ac8
+--- /dev/null
++++ b/PAIR_V4_PLAN.md
+@@ -0,0 +1,99 @@
++# Pair and decision layer v4: criteria (frozen before any v4 code or test exists)
++
++Answers Opus R2 M2 (missing pair/decision layer) and its LOWs (W1, P-anchor, expected-dict trust, T1-T3). Pure consumer layer:
++launches no producer, reads no movie or real image intensities, adds no estimator and no new numerical operator. v1-v3, the
++oracle, reviews, logs and tests are untouched. A passing v4 gate is a *condition* for a parent driver, never permission or a
++native job. Native stays HELD: the final binary, source archive, compiler/config, shared libraries, venue and lease fields
++of the admission are null, so the real admission can never satisfy `pre_ON_gate`.
++
++## Trust roots
++`pair_decision_v4.py` loads ADMISSION_DRAFT_v3.json and COMMANDS_DRAFT_v3.json itself and refuses unless their sha256 equals
++module constants (hashes of the unchanged v3 files: no circular self-hash). It also pins `score_fields_v3.py` by hash. No public
++v4 function accepts an `expected` dict, an admission dict or a commands dict; expected rows come only from
++`score_fields_v3.resolve_expected_row`. The v4 file and its tools are bound out of band by the parent's review/release index.
++`verify_tool_pins` runs before use, including the comparator (53449d2d...5f0f47) and `factorial_common.py`.
++
++## Public API
++`admit_single(case, arm, run_dir, ...)`: v3 `admit_producer` unchanged, then a case-insensitive prescan: any line of
++`output/<case>.log` matching `local\W*full\W*width` (re.I) must equal the exact witness line, else WITNESS_VARIANT.
++`pre_ON_gate(case, off_dir, baseline_dir, ...)`, `admit_pair(case, off_dir, on_dir, baseline_dir, ...)`,
++`decide_pilot(evidence_root, baseline_root, fixture_dir, ...)`. Common arguments: evidence_root, roots (consumer_source, repo,
++pilot), binary_path, binary_sha256, decision_dir. decision_dir must lie outside every run, baseline and evidence directory.
++Every failure raises PairError(code) and writes decision_dir/STOP.json with the code and message; failures are retained.
++
++## pre_ON_gate (derives, never accepts a typed PASS)
++1. Anchored admission/commands load; status not HELD_* and every launch field (candidate_binary, source_archive,
++   compiler_and_config, shared_libraries, venue_identity, fresh_venue_resource_admission, independent_source_clearance) non-null,
++   else HELD. A placeholder or unresolved row, or a non-hex binary hash, cannot pass.
++2. Tool pins at roots verify.
++3. OFF admitted by `admit_single` (arm OFF).
++4. Baseline directory holds exactly the 19 pinned retained files (rglob equality; no extras, no symlinks); every byte count and
++   sha256 equals the admission row pin.
++5. OFF runtime.json and output/<case>.star equal the baseline files byte for byte (compare sha256 and length).
++6. The pinned `compare_products.py` is run as a subprocess (`sys.executable -B`, empty-ish env, cwd = decision_dir) on
++   baseline/output vs OFF/output with the JSON written into decision_dir/pre_on/<case>/. Command, return code, stdout, stderr
++   and JSON are retained there. Pass requires rc 0, JSON parse, verdict IDENTICAL, `n_gated_differing` 0, roots equal to the
++   resolved arguments.
++7. The record binds, by sha256: OFF receipt, OFF runtime, canonical OFF output inventory, canonical baseline pin inventory,
++   comparator JSON, comparator command line, comparator file, admission file, commands file, tool pin set, binary path+sha,
++   and the identity fields. `binding_sha256` is the hash of that canonical set.
++`verify_pre_on_record` recomputes every bound item from disk and rejects any drift; it does not rerun the comparator but checks
++the retained JSON hash and verdict.
++
++## admit_pair
++1. The pre-ON record for the case must verify against the current OFF.
++2. Both arms are admitted by `admit_single` with the same resolver, same binary path and sha256, same identity fields; receipts
++   must carry equal binary_sha256 and argv[0] (PAIR_BINARY).
++3. Global trajectory: runtime `global` parsed as float64 and compared as uint64 bit patterns (shape 5x2); the STAR
++   `data_global_shift` block text equal, extracted with the pinned `factorial_common.star_blocks`.
++4. Manipulation counters parsed from each stdout.log with the pinned `factorial_common.manipulation`, extracted by AST (the
++   module has top-level venue path side effects), exactly those two functions, with `check` replaced by one that raises PairError;
++   no numeric logic is copied; the extracted source hash is recorded. Required: DC arm both and `manipulation`'s own coverage
++   checks; global eligible > 0; 3x3: local eligible > 0 on both arms; global-only: local eligible == 0 and coupled patch peaks 0;
++   global DC and global coupled counters equal pairwise; local counters may differ and are recorded.
++5. Global-only pairs also: runtime.json bytes equal, case STAR bytes equal, and the pinned comparator run on OFF/output vs
++   ON/output is IDENTICAL (command, rc, JSON retained in decision_dir/pair/<case>/).
++6. Recorded separately, not as truth surrogates: `local_enabled` per arm, patch convergence/acceptance via the pinned
++   `check_realistic_motion.convergence` on output/<case>.log (a parse failure is an error, never a pass).
++
++## decide_pilot
++Cases must be exactly the admission case order, unique, each with OFF and ON directories and no unlisted case directory
++(CASES). For each case: pre-ON record verification plus `admit_pair`, then v3 `score_admitted` on both arms. Rules, all
++computed here:
++- P1: affine, pedestal, zero, integer, fractional ON gates PASS on both runtime and STAR under the unchanged 0.20/0.40/0.80 A
++  rms/p95/max limits (OFF gates recorded).
++- P2: noisy ON rms, p95 and max are each strictly lower than OFF on both runtime and STAR (a tie fails).
++- `noisy_raw_gate` is PASS only if both noisy ON gates PASS; an improving P2 never changes a FAIL.
++- Every strict increase ON > OFF of rms/p95/max (A), per case and field, including PASS->PASS, is listed with its gate
++  transition.
++- flat and repeated are always UNIDENTIFIABLE with their raw ON/OFF distances retained and no gate verdict.
++- `prediction` is SUPPORTED only if P1 and P2 hold, else NOT_SUPPORTED; `acceptance` is always
++  NOT_ACCEPTED_NO_AUTOMATIC_ACCEPTANCE; no full100, adoption, image or CUDA meaning.
++
++## Tests (fixed before running; tests/test_pair_decision_v4.py)
++Synthetic receipts and tiny fake byte products only (valid minimal MRC: 1024-byte header + 16 payload bytes; STAR/EPS texts
++embedding their own resolved output root so the comparator's normalisation is exercised); real retained noisy runtime/STAR
++for the 3x3 branch; the actual comparator subprocess; a test copy of the v3 admission/commands whose launch fields are filled,
++whose input/baseline pins match the fake bytes, and whose hashes replace the module anchors (a documented test double).
++Positives: baseline/OFF/ON valid 3x3 branch; valid global-only branch; decide_pilot over eight synthetic cases with scoring
++delegated to v3 for noisy/affine and to a crafted-metrics test double only for cases whose truth fixtures are absent.
++Isolated negatives (one change each, intended code required): real HELD admission refused; a launch field null; altered
++anchored admission/commands file; hand-edited commands (max_iter 9, OMP 8) with a matching receipt; hand-built patch grid
++cannot bypass the entry (a 3x3 ON run with 0 witnesses fails); baseline extra/missing/changed byte; baseline runtime or STAR
++differing from OFF; comparator-detected differences in MRC header, MRC payload, STAR, EPS and file inventory; missing OFF
++runtime; pre-ON record absent, tampered, or bound to a different OFF byte; stop before ON (failure writes STOP.json and ON
++is never admitted); same binary path with different sha; changed global runtime bit (1 ulp) and changed global STAR block;
++global-only changed payload (comparator), runtime or STAR; missing DC stage, zero DC counter, global counter drift,
++3x3 local eligible 0, global-only local eligible > 0, coupled/DC coverage mismatch, duplicate or absent counter line;
++convergence log unparsable; P1 pass lost on one case/field; P2 one metric regressed, one tied; PASS->PASS increase listed;
++raw FAIL stays FAIL with improving P2; flat/repeated stay UNIDENTIFIABLE; missing, duplicate, extra, reordered cases;
++forged caller PASS strings and dicts rejected by the public signatures; unresolved placeholder.
++Additional v3-gap tests (R2): lowercase/hyphen-less/underscore witness variants (WITNESS_VARIANT); T1 extra staged file whose
++bytes match its pin and a missing movie with all other pins matching; T2 runtime `1e400` with a matching receipt hash (NONFINITE);
++T3 a real symlink in output listed in a self-consistent receipt (INVENTORY).
++Guard-removal controls (tests/mutation_controls_v4.py): weaken one guard per scratch copy and require the intended tests to fail;
++a guard that the suite shows to be shadowed is reported as shadowed, not claimed as killed. Every run, including failures, is kept.
++
++## Not claimed
++No producer exists or obeys; synthetic receipts test consumer logic only. No native run, estimator accuracy, byte neutrality
++of any real run, or acceptance. The oracle is unchanged and not rerun.
+diff --git a/PAIR_V4_PLAN.sha256 b/PAIR_V4_PLAN.sha256
+new file mode 100644
+index 0000000..49b5d6d
+--- /dev/null
++++ b/PAIR_V4_PLAN.sha256
+@@ -0,0 +1,2 @@
++096795330604265b030aa0c506f72b79a4a9bb801869663628e1feed1e5c3803  PAIR_V4_PLAN.md
++2026-10-26T20:49:49Z
+diff --git a/pair_decision_v4.py b/pair_decision_v4.py
+new file mode 100644
+index 0000000..e4a83e7
+--- /dev/null
++++ b/pair_decision_v4.py
+@@ -0,0 +1,451 @@
++"""Pair and decision layer v4 for the HELD local full-width pilot (criteria: PAIR_V4_PLAN.md).
++
++Pure consumer layer. It launches no producer, reads no movie or real image intensities and adds no estimator or numerical
++operator. The pinned compare_products.py is executed as a subprocess; the pinned factorial_common.star_blocks and
++manipulation are extracted by AST (that module has top-level venue-path side effects) and executed unchanged with only
++`check` replaced by a function that raises PairError. A gate here is a condition for a parent driver, not permission.
++"""
++from pathlib import Path
++import ast, hashlib, json, os, re, subprocess, sys
++sys.dont_write_bytecode = True
++
++HERE = Path(__file__).resolve().parent
++# Hashes of the unchanged v3 files: the trust root of this module (no circular self-hash).
++ADMISSION_V3_SHA256 = '80f796393c1fa40f6e77855576b58439fcecf661057782c0c9a1ad56abb1b42b'
++COMMANDS_V3_SHA256 = '2bd36face2fed6f6a92398eb0402a63e6c6ea3624832e45c823f289a061b8081'
++V3_MODULE_SHA256 = 'bd685429028d6b5d7ce1665355dd120cde163966b5abb11fb51be4d8937bdccc'
++ADMISSION_PATH = HERE / 'ADMISSION_DRAFT_v3.json'
++COMMANDS_PATH = HERE / 'COMMANDS_DRAFT_v3.json'
++LAUNCH_FIELDS = ('candidate_binary', 'source_archive', 'compiler_and_config', 'shared_libraries', 'venue_identity',
++                 'fresh_venue_resource_admission', 'independent_source_clearance')
++P1_CASES = ('affine', 'pedestal', 'zero', 'integer', 'fractional')
++UNIDENTIFIABLE = ('flat', 'repeated')
++METRICS = ('rms', 'p95', 'max')
++PRE_ON_SCHEMA = 'local-full-width-pre-on-v4'
++PAIR_SCHEMA = 'local-full-width-pair-v4'
++
++
++class PairError(ValueError):
++    def __init__(self, code, message=''):
++        super().__init__(code + (': ' + message if message else ''))
++        self.code = code
++
++
++def _sha_bytes(b):
++    return hashlib.sha256(b).hexdigest()
++
++
++def _sha_file(p):
++    return _sha_bytes(Path(p).read_bytes())
++
++
++def _canon(obj):
++    return json.dumps(obj, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()
++
++
++def _h(obj):
++    return _sha_bytes(_canon(obj))
++
++
++def _strict(text, what):
++    def bad(c):
++        raise ValueError('non-finite constant ' + c)
++    try:
++        return json.loads(text, parse_constant=bad)
++    except ValueError as e:
++        raise PairError('NONFINITE' if 'non-finite' in str(e) else 'JSON', what + ': ' + str(e))
++
++
++# ---- trust root ---------------------------------------------------------------------------------------------------------
++if _sha_file(HERE / 'score_fields_v3.py') != V3_MODULE_SHA256:
++    raise PairError('ANCHOR', 'score_fields_v3.py differs from its pin')
++sys.path.insert(0, str(HERE))
++import score_fields_v3 as V3  # noqa: E402
++
++
++def _load_anchored():
++    ab, cb = ADMISSION_PATH.read_bytes(), COMMANDS_PATH.read_bytes()
++    if _sha_bytes(ab) != ADMISSION_V3_SHA256:
++        raise PairError('ANCHOR', 'admission file differs from its anchored hash')
++    if _sha_bytes(cb) != COMMANDS_V3_SHA256:
++        raise PairError('ANCHOR', 'commands file differs from its anchored hash')
++    return _strict(ab.decode(), 'admission'), _strict(cb.decode(), 'commands')
++
++
++class _Ctx:
++    def __init__(self, roots, evidence_root, binary_path, binary_sha256, decision_dir, need_launch):
++        self.adm, self.cmd = _load_anchored()
++        self.roots, self.evidence_root = roots, str(evidence_root)
++        self.binary_path, self.binary_sha256 = binary_path, binary_sha256
++        self.decision_dir = Path(decision_dir) if decision_dir is not None else None
++        if need_launch:
++            if str(self.adm.get('status', '')).startswith('HELD_') or any(self.adm.get(k) is None for k in LAUNCH_FIELDS) \
++                    or not isinstance(self.adm.get('candidate_source_commit'), str):
++                raise PairError('HELD', 'admission is HELD or a launch field (binary/source/venue/lease/clearance) is null')
++        try:
++            V3.verify_tool_pins(self.adm, roots)
++        except V3.AdmissionError as e:
++            raise PairError('TOOL_PIN', str(e))
++        self.identity = {k: self.adm.get(k) for k in LAUNCH_FIELDS + ('candidate_source_commit',)}
++
++    def tool(self, suffix):
++        t = [e for e in self.adm['tools'] if e['path'].endswith(suffix)]
++        if len(t) != 1:
++            raise PairError('TOOL_PIN', 'tool %s not pinned exactly once' % suffix)
++        p = Path(self.roots[t[0]['root']]) / t[0]['path']
++        if _sha_file(p) != t[0]['sha256']:
++            raise PairError('TOOL_PIN', suffix + ' changed')
++        return p
++
++    def expected(self, case, arm):
++        try:
++            return V3.resolve_expected_row(self.cmd, self.adm, case, arm, self.evidence_root, self.binary_path, self.binary_sha256)
++        except V3.AdmissionError as e:
++            raise PairError(e.code, str(e))
++
++
++def _check_decision_dir(decision_dir, *others):
++    d = Path(decision_dir).resolve()
++    for o in others:
++        o = Path(o).resolve()
++        if d == o or d.is_relative_to(o) or o.is_relative_to(d):
++            raise PairError('DECISION_DIR', 'decision_dir overlaps %s' % o)
++    d.mkdir(parents=True, exist_ok=True)
++    return d
++
++
++def _stop(decision_dir, e):
++    try:
++        d = Path(decision_dir)
++        rec = {'code': getattr(e, 'code', type(e).__name__), 'message': str(e)}
++        with (d / 'STOP_LOG.jsonl').open('a') as f:
++            f.write(json.dumps(rec) + '\n')
++        if not (d / 'STOP.json').exists():
++            (d / 'STOP.json').write_text(json.dumps(rec, indent=1) + '\n')
++    except OSError:
++        pass
++
++
++def _guarded(fn):
++    def wrapper(*a, **kw):
++        try:
++            return fn(*a, **kw)
++        except (PairError, V3.AdmissionError) as e:
++            dd = kw.get('decision_dir')
++            if dd is not None and Path(dd).is_dir():
++                _stop(dd, e)
++            raise
++    wrapper.__name__ = fn.__name__
++    wrapper.__doc__ = fn.__doc__
++    return wrapper
++
++
++# ---- single-run admission (v3 unchanged) + R2 W1 prescan ------------------------------------------------------------------
++VARIANT = re.compile(r'local[\W_]*full[\W_]*width', re.I)
++
++
++def _admit(ctx, case, arm, run_dir):
++    exp = ctx.expected(case, arm)
++    adm = V3.admit_producer(run_dir, exp, ctx.adm, ctx.evidence_root)
++    text = (Path(run_dir) / 'output' / (case + '.log')).read_text()
++    for ln in text.split('\n'):
++        if VARIANT.search(ln) and ln != V3.WITNESS_LINE:
++            raise PairError('WITNESS_VARIANT', 'non-exact local full-width line: %r' % ln[:100])
++    return exp, adm
++
++
++@_guarded
++def admit_single(case, arm, run_dir, *, evidence_root, roots, binary_path, binary_sha256, decision_dir=None):
++    ctx = _Ctx(roots, evidence_root, binary_path, binary_sha256, decision_dir, need_launch=False)
++    return _admit(ctx, case, arm, run_dir)[1]
++
++
++# ---- retained pieces -------------------------------------------------------------------------------------------------------
++def _tree_hashes(root, code):
++    root = Path(root)
++    if root.is_symlink() or not root.is_dir():
++        raise PairError(code, '%s is not a real directory' % root)
++    out = {}
++    for dirpath, dirnames, filenames in os.walk(root, followlinks=False):
++        for n in dirnames + filenames:
++            if (Path(dirpath) / n).is_symlink():
++                raise PairError(code, 'symlink under %s: %s' % (root, n))
++        for n in filenames:
++            p = Path(dirpath) / n
++            out[p.relative_to(root).as_posix()] = (p.stat().st_size, _sha_file(p))
++    return out
++
++
++def _baseline_pins(ctx, case):
++    rows = [r for r in ctx.adm['rows'] if r['case'] == case]
++    if len(rows) != 1:
++        raise PairError('CASES', 'case not in admission rows')
++    return {k: (v['bytes'], v['sha256']) for k, v in rows[0]['baseline_files'].items()}
++
++
++def _verify_baseline(ctx, case, baseline_dir):
++    pins = _baseline_pins(ctx, case)
++    disk = _tree_hashes(baseline_dir, 'BASELINE')
++    if set(disk) != set(pins):
++        raise PairError('BASELINE', 'inventory differs: only-disk %s, only-pin %s' % (sorted(set(disk) - set(pins)), sorted(set(pins) - set(disk))))
++    for k in sorted(pins):
++        if disk[k] != pins[k]:
++            raise PairError('BASELINE', 'bytes/sha256 differ from the pin: ' + k)
++    return pins
++
++
++def _compare(ctx, a_root, b_root, out_dir):
++    """Run the pinned comparator as a subprocess; retain command, rc, stdout, stderr and JSON in out_dir."""
++    comparator = ctx.tool('compare_products.py')
++    out_dir = Path(out_dir)
++    if (out_dir / 'compare_products.json').exists():
++        raise PairError('DECISION_DIR', 'retained comparator output already exists: %s' % out_dir)
++    out_dir.mkdir(parents=True, exist_ok=True)
++    jp = out_dir / 'compare_products.json'
++    cmd = [sys.executable, '-B', str(comparator), str(a_root), str(b_root), str(jp)]
++    env = {'PATH': os.environ.get('PATH', ''), 'PYTHONDONTWRITEBYTECODE': '1'}
++    cp = subprocess.run(cmd, cwd=out_dir, env=env, capture_output=True, text=True, timeout=600)
++    (out_dir / 'command.json').write_text(json.dumps({'argv': cmd, 'cwd': str(out_dir), 'env': env, 'returncode': cp.returncode, 'comparator_sha256': _sha_file(comparator)}, indent=1) + '\n')
++    (out_dir / 'stdout.txt').write_text(cp.stdout)
++    (out_dir / 'stderr.txt').write_text(cp.stderr)
++    return _read_comparison(out_dir, a_root, b_root)
++
++
++def _read_comparison(out_dir, a_root, b_root):
++    out_dir = Path(out_dir)
++    cmdj = _strict((out_dir / 'command.json').read_text(), 'command.json')
++    jp = out_dir / 'compare_products.json'
++    if cmdj['returncode'] != 0 or not jp.is_file():
++        raise PairError('COMPARATOR', 'comparator rc=%s, json present=%s' % (cmdj['returncode'], jp.is_file()))
++    j = _strict(jp.read_text(), 'compare_products.json')
++    if j.get('verdict') != 'IDENTICAL' or j.get('n_gated_differing') != 0 or j.get('root_a') != str(Path(a_root).resolve()) or j.get('root_b') != str(Path(b_root).resolve()):
++        raise PairError('COMPARATOR', 'verdict %r, differing %r' % (j.get('verdict'), j.get('n_gated_differing')))
++    return {'command_sha256': _sha_file(out_dir / 'command.json'), 'json_sha256': _sha_file(jp), 'comparator_sha256': cmdj['comparator_sha256'],
++            'n_files': j['n_files'], 'n_gated': j['n_gated']}
++
++
++def _off_bound(ctx, case, off_dir, baseline_dir, cmp_dir, cmp_info):
++    off = Path(off_dir)
++    pins = _baseline_pins(ctx, case)
++    return {
++        'case': case,
++        'off_receipt_sha256': _sha_file(off / 'RUN.json'),
++        'off_runtime_sha256': _sha_file(off / 'runtime.json'),
++        'off_output_inventory_sha256': _h(_tree_hashes(off / 'output', 'INVENTORY')),
++        'baseline_inventory_sha256': _h(pins),
++        'baseline_dir_inventory_sha256': _h(_tree_hashes(baseline_dir, 'BASELINE')),
++        'comparator': cmp_info,
++        'admission_sha256': _sha_bytes(ADMISSION_PATH.read_bytes()), 'commands_sha256': _sha_bytes(COMMANDS_PATH.read_bytes()),
++        'tool_pins_sha256': _h(ctx.adm['tools']),
++        'binary_path': ctx.binary_path, 'binary_sha256': ctx.binary_sha256, 'identity': ctx.identity,
++    }
++
++
++# ---- pre-ON gate -------------------------------------------------------------------------------------------------------------
++@_guarded
++def pre_ON_gate(case, off_dir, baseline_dir, *, evidence_root, roots, binary_path, binary_sha256, decision_dir):
++    """Derive OFF compatibility from the admitted OFF run and the pinned retained baseline; return a hash-bound record."""
++    decision_dir = _check_decision_dir(decision_dir, evidence_root, off_dir, baseline_dir)
++    ctx = _Ctx(roots, evidence_root, binary_path, binary_sha256, decision_dir, need_launch=True)
++    exp, _ = _admit(ctx, case, 'OFF', off_dir)
++    if Path(off_dir).resolve() != Path(exp['cwd']).parent.resolve():
++        raise PairError('RUN_DIR', 'OFF directory is not the resolved slot')
++    _verify_baseline(ctx, case, baseline_dir)
++    pins = _baseline_pins(ctx, case)
++    off = Path(off_dir)
++    for rel in ('runtime.json', 'output/%s.star' % case):
++        if (off / rel).stat().st_size != pins[rel][0] or _sha_file(off / rel) != pins[rel][1]:
++            raise PairError('OFF_RAW', 'OFF %s differs from the retained baseline bytes' % rel)
++    cmp_dir = decision_dir / 'pre_on' / case
++    cmp_info = _compare(ctx, Path(baseline_dir) / 'output', off / 'output', cmp_dir)
++    bound = _off_bound(ctx, case, off_dir, baseline_dir, cmp_dir, cmp_info)
++    rec = {'schema': PRE_ON_SCHEMA, 'status': 'PASS', 'bound': bound, 'binding_sha256': _h(bound),
++           'note': 'condition for a parent driver; not a launch permission'}
++    (cmp_dir / 'pre_on.json').write_text(json.dumps(rec, indent=1, allow_nan=False) + '\n')
++    return rec
++
++
++def _verify_pre_on(ctx, case, off_dir, baseline_dir, decision_dir):
++    cmp_dir = Path(decision_dir) / 'pre_on' / case
++    rp = cmp_dir / 'pre_on.json'
++    if not rp.is_file():
++        raise PairError('PRE_ON', 'pre-ON record absent for ' + case)
++    rec = _strict(rp.read_text(), 'pre_on.json')
++    if rec.get('schema') != PRE_ON_SCHEMA or rec.get('status') != 'PASS':
++        raise PairError('PRE_ON', 'record schema/status')
++    _verify_baseline(ctx, case, baseline_dir)
++    cmp_info = _read_comparison(cmp_dir, Path(baseline_dir) / 'output', Path(off_dir) / 'output')
++    bound = _off_bound(ctx, case, off_dir, baseline_dir, cmp_dir, cmp_info)
++    if rec.get('bound') != bound or rec.get('binding_sha256') != _h(bound) or _h(rec['bound']) != rec['binding_sha256']:
++        diff = sorted(k for k in set(bound) | set(rec.get('bound', {})) if bound.get(k) != rec.get('bound', {}).get(k))
++        raise PairError('PRE_ON', 'record no longer binds the current OFF/baseline/pins: ' + ','.join(diff))
++    return rec
++
++
++# ---- pinned helpers by AST ---------------------------------------------------------------------------------------------------
++def _pinned_functions(ctx):
++    path = ctx.tool('factorial_common.py')
++    src = path.read_text()
++    tree = ast.parse(src)
++    want = ('star_blocks', 'manipulation')
++    nodes = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in want]
++    if sorted(n.name for n in nodes) != sorted(want):
++        raise PairError('TOOL_PIN', 'factorial_common.py does not define exactly the expected functions once')
++
++    def check(ok, message):
++        if not ok:
++            raise PairError('MANIPULATION', message)
++    ns = {'re': re, 'Path': Path, 'check': check}
++    exec(compile(ast.Module(body=nodes, type_ignores=[]), str(path), 'exec'), ns)
++    seg = {n.name: _sha_bytes(ast.get_source_segment(src, n).encode()) for n in nodes}
++    return ns['star_blocks'], ns['manipulation'], seg
++
++
++# ---- pair --------------------------------------------------------------------------------------------------------------------
++def _global_bits(run_dir):
++    import numpy as np
++    model = _strict((Path(run_dir) / 'runtime.json').read_text(), 'runtime.json')
++    g = np.asarray(model['global'], dtype=np.float64)
++    if g.shape != (5, 2):
++        raise PairError('GLOBAL_RUNTIME', 'global shape %r' % (g.shape,))
++    return g.view(np.uint64).tolist(), model['local_enabled']
++
++
++def _arm_facts(ctx, case, arm, run_dir, fns):
++    star_blocks, manipulation, _ = fns
++    d = Path(run_dir)
++    bits, local_enabled = _global_bits(d)
++    blocks = star_blocks(d / 'output' / (case + '.star'))
++    if 'global_shift' not in blocks:
++        raise PairError('GLOBAL_STAR', 'no global_shift block in %s STAR' % arm)
++    man = manipulation(d / 'stdout.log')
++    try:
++        conv = V3.V2.R.convergence(d / 'output' / (case + '.log'))
++    except Exception as e:
++        raise PairError('CONVERGENCE', '%s: %s' % (type(e).__name__, e))
++    return {'global_bits': bits, 'global_star_block': blocks['global_shift'], 'manipulation': man, 'convergence': conv, 'local_enabled': local_enabled}
++
++
++@_guarded
++def admit_pair(case, off_dir, on_dir, baseline_dir, *, evidence_root, roots, binary_path, binary_sha256, decision_dir):
++    decision_dir = _check_decision_dir(decision_dir, evidence_root, off_dir, on_dir, baseline_dir)
++    ctx = _Ctx(roots, evidence_root, binary_path, binary_sha256, decision_dir, need_launch=True)
++    _verify_pre_on(ctx, case, off_dir, baseline_dir, decision_dir)
++    eo, _ = _admit(ctx, case, 'OFF', off_dir)
++    en, _ = _admit(ctx, case, 'ON', on_dir)
++    ro = _strict((Path(off_dir) / 'RUN.json').read_text(), 'OFF receipt'); rn = _strict((Path(on_dir) / 'RUN.json').read_text(), 'ON receipt')
++    if ro['binary_sha256'] != rn['binary_sha256'] or ro['argv'][0] != rn['argv'][0] or ro['binary_sha256'] != binary_sha256:
++        raise PairError('PAIR_BINARY', 'OFF and ON do not share one binary')
++    fns = _pinned_functions(ctx)
++    fo, fn_ = _arm_facts(ctx, case, 'OFF', off_dir, fns), _arm_facts(ctx, case, 'ON', on_dir, fns)
++    if fo['global_bits'] != fn_['global_bits']:
++        raise PairError('GLOBAL_RUNTIME', 'full-precision global trajectory differs between OFF and ON (float64 bit patterns)')
++    if fo['global_star_block'] != fn_['global_star_block']:
++        raise PairError('GLOBAL_STAR', 'serialised global block differs between OFF and ON')
++    grid = eo['patch_grid']
++    local3 = grid == [3, 3]
++    mo, mn = fo['manipulation'], fn_['manipulation']
++    for arm, m in (('OFF', mo), ('ON', mn)):
++        le = m['dc']['local_eligible']
++        if m['dc']['global_eligible'] <= 0:
++            raise PairError('MANIPULATION', '%s global DC eligible is 0' % arm)
++        if local3 and le <= 0:
++            raise PairError('MANIPULATION', '%s 3x3 local DC eligible is 0' % arm)
++        if not local3 and (le != 0 or m['coupled']['patch']['peaks'] != 0):
++            raise PairError('MANIPULATION', '%s global-only case has local DC/coupled work' % arm)
++    for key in ('global_zeroed', 'global_eligible'):
++        if mo['dc'][key] != mn['dc'][key]:
++            raise PairError('COUNTERS', 'global DC %s drifted: %s vs %s' % (key, mo['dc'][key], mn['dc'][key]))
++    if mo['coupled']['global'] != mn['coupled']['global']:
++        raise PairError('COUNTERS', 'global coupled counters drifted')
++    pair_dir = decision_dir / 'pair' / case
++    global_only = None
++    if not local3:
++        for rel in ('runtime.json', 'output/%s.star' % case):
++            if (Path(off_dir) / rel).read_bytes() != (Path(on_dir) / rel).read_bytes():
++                raise PairError('GLOBAL_ONLY', 'global-only OFF/ON %s bytes differ' % rel)
++        try:
++            global_only = _compare(ctx, Path(off_dir) / 'output', Path(on_dir) / 'output', pair_dir)
++        except PairError as e:
++            raise PairError('GLOBAL_ONLY', 'whole-product comparator: ' + str(e))
++    rec = {'schema': PAIR_SCHEMA, 'case': case, 'patch_grid': grid, 'binary_sha256': binary_sha256,
++           'off_receipt_sha256': _sha_file(Path(off_dir) / 'RUN.json'), 'on_receipt_sha256': _sha_file(Path(on_dir) / 'RUN.json'),
++           'global_bits_equal': True, 'global_star_block_equal': True, 'global_only_comparator': global_only,
++           'witness_lines': {'OFF': eo['expected_witness_lines'], 'ON': en['expected_witness_lines']},
++           'counters': {'OFF': mo, 'ON': mn}, 'local_enabled': {'OFF': fo['local_enabled'], 'ON': fn_['local_enabled']},
++           'convergence': {'OFF': fo['convergence'], 'ON': fn_['convergence']},
++           'pinned_function_segments_sha256': fns[2],
++           'note': 'local_enabled/convergence are recorded separately and are not truth surrogates'}
++    pair_dir.mkdir(parents=True, exist_ok=True)
++    (pair_dir / 'pair.json').write_text(json.dumps(rec, indent=1, allow_nan=False) + '\n')
++    return rec
++
++
++# ---- decision ----------------------------------------------------------------------------------------------------------------
++def _score_arm(case, arm, run_dir, expected, adm, evidence_root, fixture_dir):
++    return V3.score_admitted(run_dir, expected, adm, evidence_root, fixture_dir)
++
++
++@_guarded
++def decide_pilot(*, evidence_root, baseline_root, fixture_dir, roots, binary_path, binary_sha256, decision_dir, cases=None):
++    decision_dir = _check_decision_dir(decision_dir, evidence_root, baseline_root)
++    ctx = _Ctx(roots, evidence_root, binary_path, binary_sha256, decision_dir, need_launch=True)
++    order = list(ctx.adm['case_order'])
++    if cases is not None and list(cases) != order:
++        raise PairError('CASES', 'cases must be exactly %s in order, got %s' % (order, list(cases)))
++    ev = Path(evidence_root)
++    present = sorted(p.name for p in ev.iterdir()) if ev.is_dir() else []
++    if present != sorted(order):
++        raise PairError('CASES', 'evidence_root entries %s differ from the 8 admitted cases' % present)
++    for case in order:  # structure first: every case must be a complete OFF/ON pair before anything is admitted
++        cd = ev / case
++        if not cd.is_dir() or sorted(p.name for p in cd.iterdir()) != ['OFF', 'ON'] or not ((cd / 'OFF').is_dir() and (cd / 'ON').is_dir()):
++            raise PairError('CASES', 'case %s lacks a complete OFF/ON pair' % case)
++    scores, pairs = {}, {}
++    for case in order:
++        off, on = ev / case / 'OFF', ev / case / 'ON'
++        base = Path(baseline_root) / case
++        pairs[case] = admit_pair(case, off, on, base, evidence_root=evidence_root, roots=roots, binary_path=binary_path,
++                                 binary_sha256=binary_sha256, decision_dir=decision_dir)
++        scores[case] = {arm: _score_arm(case, arm, d, ctx.expected(case, arm), ctx.adm, ctx.evidence_root, fixture_dir) for arm, d in (('OFF', off), ('ON', on))}
++    result = _decide(scores)
++    result['pair_record_sha256'] = {c: _h(p) for c, p in pairs.items()}
++    (decision_dir / 'DECISION.json').write_text(json.dumps(result, indent=1, allow_nan=False) + '\n')
++    return result
++
++
++def _decide(scores):
++    """Pure rule evaluation over already admitted and scored arms."""
++    lim = {'rms': .20, 'p95': .40, 'max': .80}
++
++    def gate(a):
++        return 'PASS' if all(a[k] <= v for k, v in lim.items()) else 'FAIL'
++    p1 = {}
++    for c in P1_CASES:
++        p1[c] = {'OFF': {f: gate(scores[c]['OFF'][f]['angstrom']) for f in ('runtime', 'STAR')},
++                 'ON': {f: gate(scores[c]['ON'][f]['angstrom']) for f in ('runtime', 'STAR')}}
++    p1_ok = all(v['ON'][f] == 'PASS' for v in p1.values() for f in ('runtime', 'STAR'))
++    n = scores['noisy']
++    p2_detail = {f: {k: {'OFF': n['OFF'][f]['angstrom'][k], 'ON': n['ON'][f]['angstrom'][k], 'strictly_lower': n['ON'][f]['angstrom'][k] < n['OFF'][f]['angstrom'][k]} for k in METRICS} for f in ('runtime', 'STAR')}
++    p2_ok = all(p2_detail[f][k]['strictly_lower'] for f in p2_detail for k in METRICS)
++    noisy_gate = {f: gate(n['ON'][f]['angstrom']) for f in ('runtime', 'STAR')}
++    increases = []
++    for c, arms in scores.items():
++        for f in ('runtime', 'STAR'):
++            for k in METRICS:
++                off, on = arms['OFF'][f]['angstrom'][k], arms['ON'][f]['angstrom'][k]
++                if on > off:
++                    increases.append({'case': c, 'field': f, 'metric': k, 'OFF': off, 'ON': on,
++                                      'gate_transition': '%s->%s' % (gate(arms['OFF'][f]['angstrom']), gate(arms['ON'][f]['angstrom']))})
++    return {
++        'schema': 'local-full-width-decision-v4',
++        'P1': {'ok': p1_ok, 'cases': p1},
++        'P2': {'ok': p2_ok, 'noisy': p2_detail},
++        'noisy_raw_gate': 'PASS' if all(v == 'PASS' for v in noisy_gate.values()) else 'FAIL', 'noisy_raw_gate_by_field': noisy_gate,
++        'increases': increases,
++        'unidentifiable': {c: {'status': 'UNIDENTIFIABLE', 'raw_distances_angstrom': {arm: {f: scores[c][arm][f]['angstrom'] for f in ('runtime', 'STAR')} for arm in ('OFF', 'ON')},
++                               'raw_distances_px': {arm: {f: scores[c][arm][f]['px'] for f in ('runtime', 'STAR')} for arm in ('OFF', 'ON')}} for c in UNIDENTIFIABLE},
++        'prediction': 'SUPPORTED' if (p1_ok and p2_ok) else 'NOT_SUPPORTED',
++        'acceptance': 'NOT_ACCEPTED_NO_AUTOMATIC_ACCEPTANCE',
++        'scope': 'no full100, adoption, image or CUDA meaning; synthetic tests establish consumer logic only',
++    }
+diff --git a/tests/test_pair_decision_v4.py b/tests/test_pair_decision_v4.py
+new file mode 100644
+index 0000000..d0fd0b1
+--- /dev/null
++++ b/tests/test_pair_decision_v4.py
+@@ -0,0 +1,614 @@
++"""Tests for pair_decision_v4 (criteria frozen in PAIR_V4_PLAN.md). Scratch files only; tiny fake byte products; the actual pinned
++comparator runs as a subprocess. Synthetic receipts test consumer logic only, not that any producer obeys it.
++
++usage: python -B tests/test_pair_decision_v4.py RESULT.json   (real NumPy interpreter; threads <= 2)
++"""
++import copy, hashlib, json, os, shutil, sys, tempfile
++from pathlib import Path
++sys.dont_write_bytecode = True
++PILOT = Path(__file__).resolve().parent.parent
++PIN_PILOT = Path(os.environ.get('V4_PIN_PILOT_ROOT', str(PILOT)))  # mutation controls point pins at the real pilot files
++sys.path.insert(0, str(PILOT)); sys.path.insert(0, str(PILOT / 'tests'))
++import pair_decision_v4 as P4
++import score_fields_v3 as V3
++import test_score_fields_v3 as TV3
++
++RAW, FIX, REPO, CONSUMER = TV3.RAW, TV3.FIX, TV3.REPO, TV3.CONSUMER
++BIN, BINSHA = TV3.BIN, TV3.BINSHA
++ADM_REAL = json.loads((PILOT / 'ADMISSION_DRAFT_v3.json').read_text())
++ROWS = {r['case']: r for r in ADM_REAL['rows']}
++sha = lambda b: hashlib.sha256(b).hexdigest()
++RESULTS = []
++ROOTS = {'consumer_source': CONSUMER, 'repo': REPO, 'pilot': PIN_PILOT}
++ALL_CASES = ADM_REAL['case_order']
++
++
++def record(name, ok, detail=''):
++    RESULTS.append({'name': name, 'ok': bool(ok), 'detail': detail})
++    print(('PASS ' if ok else 'FAIL ') + name + ((' :: ' + detail) if detail else ''), flush=True)
++
++
++def expect_code(name, code, fn):
++    try:
++        fn()
++    except (P4.PairError, V3.AdmissionError) as e:
++        record(name, e.code == code, 'code=%s' % e.code if e.code == code else 'wanted %s got %s: %s' % (code, e.code, e))
++        return
++    except Exception as e:
++        record(name, False, 'wrong exception %s: %s' % (type(e).__name__, e))
++        return
++    record(name, False, 'ACCEPTED but wanted %s' % code)
++
++
++def make_log(case, arm, local3):
++    t = 'Working on %s.mrcs with 2 thread(s).\n\nGlobal alignment:\n Iteration 1: RMSD = 0.31 px\n Iteration 2: RMSD = 0.12 px\n\nLocal alignments:\nPatches: X = %d Y = %d\n' % (case, 3 if local3 else 1, 3 if local3 else 1)
++    if local3:
++        for i in range(9):
++            t += 'Patch (%d, %d): %d / 9\n' % (i // 3 + 1, i % 3 + 1, i + 1)
++            if arm == 'ON':
++                t += V3.WITNESS_LINE + '\n'
++            t += ' Iteration 1: RMSD = 0.40 px\n Iteration 2: RMSD = 0.20 px\n'
++    return t
++
++
++def make_stdout(local3, g=(40, 40), l=None, gpeaks=None, patch_peaks=None, dc=True, dup=False, coupled=True):
++    l = l if l is not None else ((360, 360) if local3 else (0, 0))
++    gpeaks = g[1] if gpeaks is None else gpeaks
++    lines = []
++    dcl = 'MC_EXPERIMENT_CCF_DC arm=both cpu.global=%d/%d cpu.local=%d/%d cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0' % (g + l)
++    if dc:
++        lines.append(dcl)
++        if dup:
++            lines.append(dcl)
++    if coupled:
++        lines.append('[coupled_peak] scope=global peaks=%d guard_fired=2 (not_negative_definite=1, offset_gt_1px=1)' % gpeaks)
++        pp = patch_peaks if patch_peaks is not None else (l[1] // 9 if local3 else 0)
++        if local3 or pp:
++            lines += ['[coupled_peak] scope=patch peaks=%d guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)' % pp] * 9
++    return '\n'.join(lines) + '\n'
++
++
++class PW(TV3.World):
++    """Pair world: scratch evidence root, baseline root, test admission with filled launch fields and matching pins."""
++    def __init__(self, scratch):
++        super().__init__(scratch)
++        self.scratch = Path(scratch)
++        self.base_root = self.scratch / 'baseline'
++        self.dec = self.scratch / 'decision'
++        self.n = 0
++        self.adm['status'] = 'ADMITTED_TEST_ONLY'
++        for k in P4.LAUNCH_FIELDS:
++            self.adm[k] = 'test-' + k
++        self.cases = {}
++
++    # --- products --------------------------------------------------------------------------------------------------
++    def star_text(self, case, arm, local3):
++        if case in ('noisy', 'affine'):
++            t = (RAW / case / 'UP_only' / 'output' / (case + '.star')).read_text()
++            if arm == 'ON' and local3:
++                head, tail = t.split('data_local_shift', 1)
++                lines = tail.split('\n')
++                for i, ln in enumerate(lines):
++                    w = ln.split()
++                    if len(w) == 5 and not w[0].startswith(('_', '#', 'data_')):
++                        lines[i] = ln.rstrip() + '1'
++                        break
++                t = head + 'data_local_shift' + '\n'.join(lines)
++            return t
++        return ('data_general\n\n_rlnMicrographMovieName  %s.mrcs\n\ndata_global_shift\n\nloop_\n_rlnMicrographFrameNumber\n_rlnMicrographShiftX\n_rlnMicrographShiftY\n'
++                '1 0.0 0.0\n2 0.1 0.2\n3 0.2 0.3\n4 0.3 0.5\n5 0.4 0.6\n\ndata_local_shift\n\nloop_\n' % case)
++
++    def runtime_bytes(self, case, arm, local3):
++        if case in ('noisy', 'affine'):
++            b = (RAW / case / 'UP_only' / 'runtime.json').read_bytes()
++            if arm == 'ON' and local3:
++                m = json.loads(b); m['coeff_x'][0] += 1e-3
++                return json.dumps(m).encode()
++            return b
++        return json.dumps({'local_enabled': False, 'global': [[0.0, 0.0], [0.1, 0.2], [0.2, 0.3], [0.3, 0.5], [0.4, 0.6]], 'coeff_x': [0.0] * 18, 'coeff_y': [0.0] * 18}).encode()
++
++    def write_output(self, d, case, arm, local3):
++        out = d / 'output'; R = str(out.resolve())
++        mrc = bytes(range(256)) * 4 + (b'ON-PAYLOAD-LOCAL!' if (arm == 'ON' and local3) else b'OFF-PAYLOAD-0000!')[:16]
++        files = {case + '.mrc': mrc, case + '.star': self.star_text(case, arm, local3).replace('@ROOT@', R).encode(),
++                 case + '_shifts.eps': ('%%!PS root %s/%s_shifts.eps %s\n' % (R, case, case)).encode(),
++                 'corrected_micrographs.star': ('data_x\n_rlnMicrographName %s/%s.mrc\n' % (R, case)).encode(),
++                 'logfile.pdf': b'%PDF-1.4 fake ' + case.encode(), 'logfile.pdf.lst': ('lst ' + case + '\n').encode(),
++                 case + '.log': make_log(case, arm, local3).encode()}
++        for k in ('Early', 'Late', 'Total'):
++            files['corrected_micrographs_all_rlnAccumMotion%s.eps' % k] = ('%%!PS %s/all%s.eps\n' % (R, k)).encode()
++        for name, b in files.items():
++            (out / name).write_bytes(b)
++
++    def make(self, case):
++        local3 = ROWS[case]['patch_grid'] == [3, 3]
++        made = {}
++        for arm in ('OFF', 'ON'):
++            d, exp = self.build(case, arm)
++            self.write_output(d, case, arm, local3)
++            (d / 'runtime.json').write_bytes(self.runtime_bytes(case, arm, local3))
++            (d / 'stdout.log').write_text(make_stdout(local3))
++            self.write_receipt(d, exp)
++            made[arm] = (d, exp)
++        base = self.base_root / case
++        if base.exists():
++            shutil.rmtree(base)
++        shutil.copytree(made['OFF'][0] / 'output', base / 'output')
++        Roff, Rb = str((made['OFF'][0] / 'output').resolve()), str((base / 'output').resolve())
++        for p in (base / 'output').iterdir():
++            b = p.read_bytes()
++            if Roff.encode() in b:
++                p.write_bytes(b.replace(Roff.encode(), Rb.encode()))
++        shutil.copy(made['OFF'][0] / 'runtime.json', base / 'runtime.json')
++        shutil.copy(made['OFF'][0] / 'stdout.log', base / 'stdout.log')
++        for n in ('RUN.json', 'admission.json', 'checker.json', 'checker.stdout', 'metrics.json', 'occupancy-before.txt', 'time.txt'):
++            (base / n).write_text('baseline %s %s\n' % (case, n))
++        self.repin(case)
++        self.cases[case] = made
++        return made, base
++
++    def repin(self, case):
++        base = self.base_root / case
++        row = [r for r in self.adm['rows'] if r['case'] == case][0]
++        for name in list(row['baseline_files']):
++            b = (base / name).read_bytes()
++            row['baseline_files'][name] = {'bytes': len(b), 'sha256': sha(b)}
++
++    # --- plumbing ----------------------------------------------------------------------------------------------------
++    def sync(self):
++        p = self.scratch / 'ADMISSION_TEST.json'
++        p.write_text(json.dumps(self.adm, indent=1))
++        P4.ADMISSION_PATH, P4.ADMISSION_V3_SHA256 = p, sha(p.read_bytes())
++
++    def kw(self, **over):
++        self.n += 1
++        kw = dict(evidence_root=self.root, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA, decision_dir=self.dec)
++        kw.update(over)
++        return kw
++
++    def gate(self, case, **over):
++        self.sync()
++        return P4.pre_ON_gate(case, self.root / case / 'OFF', self.base_root / case, **self.kw(**over))
++
++    def pair(self, case, **over):
++        self.sync()
++        return P4.admit_pair(case, self.root / case / 'OFF', self.root / case / 'ON', self.base_root / case, **self.kw(**over))
++
++    def edit(self, case, arm, rel, fn):
++        d, exp = self.cases[case][arm]
++        p = d / rel
++        p.write_bytes(fn(p.read_bytes()))
++        self.write_receipt(d, exp)
++
++
++def fresh(fn, cases=('noisy',)):
++    """Run fn(world) in a fresh scratch with the named cases built."""
++    real = (P4.ADMISSION_PATH, P4.ADMISSION_V3_SHA256, P4.COMMANDS_PATH, P4.COMMANDS_V3_SHA256)
++    with tempfile.TemporaryDirectory(prefix='mc-lfw-v4-') as t:
++        w = PW(Path(t).resolve())
++        for c in cases:
++            w.make(c)
++        try:
++            return fn(w)
++        except Exception as e:  # an infrastructure fault must fail the suite, not abort the remaining checks
++            import traceback
++            record('INFRA fault in %s' % getattr(fn, '__name__', 'case'), False, ''.join(traceback.format_exception_only(type(e), e)).strip())
++        finally:
++            P4.ADMISSION_PATH, P4.ADMISSION_V3_SHA256, P4.COMMANDS_PATH, P4.COMMANDS_V3_SHA256 = real
++
++
++def crafted(rms, p95, mx, scale=1.0):
++    a = {'rms': rms, 'p95': p95, 'max': mx}
++    return {'runtime': {'angstrom': dict(a), 'px': {k: v / .885 for k, v in a.items()}}, 'STAR': {'angstrom': dict(a), 'px': {k: v / .885 for k, v in a.items()}}}
++
++
++def crafted_scores(override=None):
++    s = {}
++    for c in ALL_CASES:
++        if c in P4.P1_CASES:
++            s[c] = {'OFF': crafted(.1, .2, .3), 'ON': crafted(.1, .2, .3)}
++        elif c == 'noisy':
++            s[c] = {'OFF': crafted(1.6, 3.3, 7.2), 'ON': crafted(1.2, 2.9, 6.0)}
++        else:
++            s[c] = {'OFF': crafted(2.0, 4.0, 8.0), 'ON': crafted(2.0, 4.0, 8.0)}
++    for (c, arm), v in (override or {}).items():
++        s[c][arm] = v
++    return s
++
++
++def main(result_path):
++    # ---- trust roots and signatures -------------------------------------------------------------------------------
++    with tempfile.TemporaryDirectory(prefix='mc-lfw-v4-') as t:
++        t = Path(t)
++        expect_code('real HELD admission cannot satisfy pre_ON_gate', 'HELD', lambda: P4.pre_ON_gate('noisy', t / 'o', t / 'b', evidence_root=t / 'ev', roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA, decision_dir=t / 'dec'))
++        expect_code('real HELD admission cannot satisfy admit_pair', 'HELD', lambda: P4.admit_pair('noisy', t / 'o', t / 'n', t / 'b', evidence_root=t / 'ev', roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA, decision_dir=t / 'dec2'))
++        expect_code('real HELD admission cannot satisfy decide_pilot', 'HELD', lambda: P4.decide_pilot(evidence_root=t / 'ev', baseline_root=t / 'b', fixture_dir=FIX, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA, decision_dir=t / 'dec3'))
++        record('HELD failure is retained as STOP.json', json.loads((t / 'dec' / 'STOP.json').read_text())['code'] == 'HELD')
++    for fn_name, extra in [('pre_ON_gate', {'pre_on_status': 'PASS'}), ('admit_pair', {'expected': {}}), ('admit_pair', {'admission': {}}),
++                           ('admit_pair', {'commands': []}), ('decide_pilot', {'pair_records': {}}), ('decide_pilot', {'scores': {}}),
++                           ('admit_single', {'expected': {}})]:
++        f = getattr(P4, fn_name)
++        try:
++            if fn_name == 'pre_ON_gate':
++                f('noisy', 'a', 'b', evidence_root='e', roots={}, binary_path=BIN, binary_sha256=BINSHA, decision_dir='d', **extra)
++            elif fn_name == 'admit_pair':
++                f('noisy', 'a', 'b', 'c', evidence_root='e', roots={}, binary_path=BIN, binary_sha256=BINSHA, decision_dir='d', **extra)
++            elif fn_name == 'admit_single':
++                f('noisy', 'OFF', 'a', evidence_root='e', roots={}, binary_path=BIN, binary_sha256=BINSHA, **extra)
++            else:
++                f(evidence_root='e', baseline_root='b', fixture_dir='f', roots={}, binary_path=BIN, binary_sha256=BINSHA, decision_dir='d', **extra)
++            record('signature rejects caller-typed %s on %s' % (list(extra), fn_name), False, 'accepted')
++        except TypeError:
++            record('signature rejects caller-typed %s on %s' % (list(extra), fn_name), True)
++
++    # ---- positives -------------------------------------------------------------------------------------------------------
++    def pos(w):
++        rec = w.gate('noisy')
++        record('positive pre_ON_gate noisy (comparator subprocess ran)', rec['status'] == 'PASS' and (w.dec / 'pre_on' / 'noisy' / 'command.json').is_file() and (w.dec / 'pre_on' / 'noisy' / 'compare_products.json').is_file() and rec['bound']['comparator']['n_gated'] >= 5, 'binding=%s' % rec['binding_sha256'][:12])
++        cmd = json.loads((w.dec / 'pre_on' / 'noisy' / 'command.json').read_text())
++        record('retained comparator command is the pinned script via python -B', cmd['argv'][1] == '-B' and cmd['argv'][2].endswith('compare_products.py') and cmd['comparator_sha256'] == '53449d2da682305c8c11e3ed3efb91103530196e481ac075b00f90e3d5ea0f47' and cmd['returncode'] == 0)
++        raw_star_differs = (RAW / 'noisy' / 'UP_only' / 'output' / 'noisy.star').read_bytes() == (w.base_root / 'noisy' / 'output' / 'noisy.star').read_bytes()
++        eps_b = (w.base_root / 'noisy' / 'output' / 'noisy_shifts.eps').read_bytes(); eps_o = (w.cases['noisy']['OFF'][0] / 'output' / 'noisy_shifts.eps').read_bytes()
++        record('control: raw EPS text differs between baseline and OFF (comparator normalises the root)', eps_b != eps_o)
++        pr = w.pair('noisy')
++        record('positive admit_pair 3x3', pr['global_bits_equal'] and pr['witness_lines'] == {'OFF': 0, 'ON': 9} and pr['global_only_comparator'] is None and pr['counters']['ON']['dc']['local_eligible'] == 360 and pr['local_enabled']['ON'] is True)
++        record('pair record keeps convergence/local_enabled separately', set(pr['convergence']) == {'OFF', 'ON'} and len(pr['convergence']['ON']['patches']) == 9)
++        record('pre-ON record binds identity and pins', all(k in rec['bound'] for k in ('off_receipt_sha256', 'baseline_inventory_sha256', 'comparator', 'admission_sha256', 'tool_pins_sha256', 'binary_sha256', 'identity')) and rec['bound']['identity']['candidate_binary'] == 'test-candidate_binary')
++    fresh(pos)
++
++    def pos_global(w):
++        w.gate('flat'); pr = w.pair('flat')
++        record('positive admit_pair global-only incl. whole-product comparator', pr['global_only_comparator'] is not None and pr['witness_lines'] == {'OFF': 0, 'ON': 0} and pr['counters']['ON']['dc']['local_eligible'] == 0)
++        record('retained global-only comparator output is outside product dirs', (w.dec / 'pair' / 'flat' / 'compare_products.json').is_file() and not (w.cases['flat']['ON'][0] / 'compare_products.json').exists())
++    fresh(pos_global, ('flat',))
++
++    def pos_inventory_only(w):
++        # logs and PDFs are inventory-only in the pinned comparator: differing bytes there do not fail the OFF gate
++        d, exp = w.cases['noisy']['OFF']
++        (d / 'output' / 'logfile.pdf').write_bytes(b'%PDF-1.4 a different render'); w.write_receipt(d, exp)
++        base_pdf = w.base_root / 'noisy' / 'output' / 'logfile.pdf'
++        record('control: inventory-only PDF differs from baseline yet pre-ON passes', (base_pdf.read_bytes() != (d / 'output' / 'logfile.pdf').read_bytes()) and w.gate('noisy')['status'] == 'PASS')
++    fresh(pos_inventory_only)
++
++    # ---- anchors: altered files and hand-edited commands -------------------------------------------------------------------
++    def anchors(w):
++        w.sync()
++        p = P4.ADMISSION_PATH
++        alt = w.scratch / 'adm_alt.json'; alt.write_text(p.read_text().replace('ADMITTED_TEST_ONLY', 'ADMITTED_TEST_ONLY '))
++        P4.ADMISSION_PATH = alt
++        expect_code('altered anchored admission file refused', 'ANCHOR', lambda: P4.pre_ON_gate('noisy', w.root / 'noisy' / 'OFF', w.base_root / 'noisy', **w.kw()))
++        P4.ADMISSION_PATH = p
++        cmds = json.loads((PILOT / 'COMMANDS_DRAFT_v3.json').read_text())
++        for r in cmds:
++            r['argv'][r['argv'].index('--max_iter') + 1] = '9'; r['environment']['OMP_NUM_THREADS'] = '8'
++        cp = w.scratch / 'commands_hand.json'; cp.write_text(json.dumps(cmds, indent=2) + '\n')
++        P4.COMMANDS_PATH = cp
++        expect_code('hand-edited commands (max_iter 9, OMP 8) refused by the anchor', 'ANCHOR', lambda: P4.pre_ON_gate('noisy', w.root / 'noisy' / 'OFF', w.base_root / 'noisy', **w.kw()))
++        P4.COMMANDS_PATH = PILOT / 'COMMANDS_DRAFT_v3.json'
++        w.adm_backup = copy.deepcopy(w.adm)
++        w.adm['status'] = 'HELD_SOURCE_REVIEW_AND_VENUE_INPUTS_PENDING'
++        expect_code('HELD status in an otherwise filled admission refused', 'HELD', lambda: w.gate('noisy'))
++        w.adm['status'] = 'ADMITTED_TEST_ONLY'
++        for k in P4.LAUNCH_FIELDS:
++            saved = w.adm[k]; w.adm[k] = None
++            expect_code('null launch field %s refused' % k, 'HELD', lambda: w.gate('noisy', decision_dir=w.scratch / ('d_' + k)))
++            w.adm[k] = saved
++        expect_code('unresolved placeholder binary path refused', 'PLACEHOLDER', lambda: w.gate('noisy', binary_path='<PINNED_LINUX_BINARY>', decision_dir=w.scratch / 'd_ph'))
++        expect_code('non-hex binary sha refused', 'BINARY', lambda: w.gate('noisy', binary_sha256='XY' * 32, decision_dir=w.scratch / 'd_hex'))
++        roots = dict(ROOTS, repo=w.scratch)
++        expect_code('tool pins verified before use', 'TOOL_PIN', lambda: w.gate('noisy', roots=roots, decision_dir=w.scratch / 'd_pin'))
++        expect_code('decision_dir inside a run directory refused', 'DECISION_DIR', lambda: w.gate('noisy', decision_dir=w.cases['noisy']['OFF'][0] / 'dec'))
++    fresh(anchors)
++
++    # ---- handbuilt grid cannot bypass: a 3x3 ON run with zero witnesses ----------------------------------------------------
++    def grid(w):
++        d, exp = w.cases['noisy']['ON']
++        lp = d / 'output' / 'noisy.log'; lp.write_text(lp.read_text().replace(V3.WITNESS_LINE + '\n', '')); w.write_receipt(d, exp)
++        w.sync()
++        expect_code('3x3 ON with 0 witnesses cannot be admitted (grid comes from the anchored admission)', 'WITNESS', lambda: P4.admit_single('noisy', 'ON', d, evidence_root=w.root, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA))
++    fresh(grid)
++
++    # ---- baseline / OFF / comparator negatives -----------------------------------------------------------------------------
++    def base_edit(case, rel, fn, repin):
++        def run(w):
++            p = w.base_root / case / rel
++            p.write_bytes(fn(p.read_bytes()))
++            if repin:
++                w.repin(case)
++            return w
++        return run
++
++    def case_neg(name, code, setup, case='noisy', check=None, cases=None):
++        def run(w):
++            setup(w)
++            expect_code(name, code, lambda: w.gate(case))
++            if check:
++                record(name + ' [evidence]', check(w), '')
++        fresh(run, cases or (case,))
++
++    case_neg('baseline byte changed (pin kept)', 'BASELINE', lambda w: base_edit('noisy', 'output/noisy.mrc', lambda b: b[:-1] + b'X', False)(w))
++    def base_extra(w): (w.base_root / 'noisy' / 'output' / 'extra.txt').write_text('x')
++    case_neg('baseline extra file', 'BASELINE', base_extra)
++    def base_missing(w): (w.base_root / 'noisy' / 'time.txt').unlink()
++    case_neg('baseline file missing', 'BASELINE', base_missing)
++    def base_link(w):  # the symlink target holds the pinned bytes, so only the symlink guard can reject it
++        p = w.base_root / 'noisy' / 'time.txt'; keep = w.scratch / 'time_target.txt'; keep.write_bytes(p.read_bytes()); p.unlink(); os.symlink(keep, p)
++    case_neg('baseline file replaced by a symlink', 'BASELINE', base_link)
++    def hdr(w): base_edit('noisy', 'output/noisy.mrc', lambda b: b[:10] + b'\xff' + b[11:], True)(w)
++    case_neg('comparator detects MRC header change', 'COMPARATOR', hdr, check=lambda w: json.loads((w.dec / 'pre_on' / 'noisy' / 'compare_products.json').read_text())['verdict'] == 'DIFFERENT' and any(r.get('header_0_223_equal') is False for r in json.loads((w.dec / 'pre_on' / 'noisy' / 'compare_products.json').read_text())['rows']))
++    def pay(w): base_edit('noisy', 'output/noisy.mrc', lambda b: b[:1030] + b'\x01' + b[1031:], True)(w)
++    case_neg('comparator detects MRC payload change', 'COMPARATOR', pay, check=lambda w: any(r.get('pixels_equal') is False for r in json.loads((w.dec / 'pre_on' / 'noisy' / 'compare_products.json').read_text())['rows']))
++    def eps(w): base_edit('noisy', 'output/noisy_shifts.eps', lambda b: b + b'changed', True)(w)
++    case_neg('comparator detects EPS change', 'COMPARATOR', eps)
++    def cstar(w): base_edit('noisy', 'output/corrected_micrographs.star', lambda b: b + b'changed', True)(w)
++    case_neg('comparator detects corrected_micrographs STAR change', 'COMPARATOR', cstar)
++    def off_runtime(w):
++        d, exp = w.cases['noisy']['OFF']; m = json.loads((d / 'runtime.json').read_text()); m['coeff_x'][1] += 1e-9
++        (d / 'runtime.json').write_text(json.dumps(m)); w.write_receipt(d, exp)
++    case_neg('OFF runtime differs from the retained baseline bytes', 'OFF_RAW', off_runtime)
++    def off_star(w): w.edit('noisy', 'OFF', 'output/noisy.star', lambda b: b + b'\n# edited\n')
++    case_neg('OFF case STAR differs from the retained baseline bytes', 'OFF_RAW', off_star)
++    def off_noruntime(w):
++        d, exp = w.cases['noisy']['OFF']; (d / 'runtime.json').unlink()
++    case_neg('OFF runtime.json missing', 'RUNTIME', off_noruntime)
++    def off_witness(w): w.edit('noisy', 'OFF', 'output/noisy.log', lambda b: b + (V3.WITNESS_LINE + '\n').encode())
++    case_neg('OFF with a witness line is not an OFF run', 'WITNESS', off_witness)
++
++    def inv(w):
++        w.sync(); ctx = P4._Ctx(ROOTS, w.root, BIN, BINSHA, w.dec, True)
++        a = w.scratch / 'tree_a'; b = w.scratch / 'tree_b'
++        shutil.copytree(w.base_root / 'noisy' / 'output', a); shutil.copytree(w.base_root / 'noisy' / 'output', b); (b / 'logfile.pdf.lst').unlink()
++        expect_code('comparator detects a file-inventory difference', 'COMPARATOR', lambda: P4._compare(ctx, a, b, w.scratch / 'cmp_inv'))
++        j = json.loads((w.scratch / 'cmp_inv' / 'compare_products.json').read_text())
++        record('inventory difference recorded by the comparator itself', j['verdict'] == 'DIFFERENT' and any(r['file'] == 'logfile.pdf.lst' and r['in_b'] is False for r in j['rows']))
++        c = json.loads((w.scratch / 'cmp_inv' / 'command.json').read_text())
++        record('failed comparator rc retained', c['returncode'] == 1)
++    fresh(inv)
++
++    def stop_before_on(w):
++        base_edit('noisy', 'output/noisy.mrc', lambda b: b[:1030] + b'\x01' + b[1031:], True)(w)
++        expect_code('failing OFF gate raises before ON', 'COMPARATOR', lambda: w.gate('noisy'))
++        stop = json.loads((w.dec / 'STOP.json').read_text())
++        record('STOP.json retained with the code', stop['code'] == 'COMPARATOR')
++        expect_code('ON cannot be paired without a passing record', 'PRE_ON', lambda: w.pair('noisy', decision_dir=w.dec))
++    fresh(stop_before_on)
++
++    # ---- pre-ON record binding ---------------------------------------------------------------------------------------------
++    def rec_tests(w):
++        expect_code('absent pre-ON record', 'PRE_ON', lambda: w.pair('noisy', decision_dir=w.scratch / 'd_none'))
++        rec = w.gate('noisy')
++        rp = w.dec / 'pre_on' / 'noisy' / 'pre_on.json'
++        good = rp.read_text()
++        j = json.loads(good); j['bound']['binary_sha256'] = 'ef' * 32; rp.write_text(json.dumps(j))
++        expect_code('tampered pre-ON record', 'PRE_ON', lambda: w.pair('noisy'))
++        j = json.loads(good); j['status'] = 'FAIL'; rp.write_text(json.dumps(j))
++        expect_code('pre-ON record status not PASS', 'PRE_ON', lambda: w.pair('noisy'))
++        rp.write_text(good)
++        w.edit('noisy', 'OFF', 'output/logfile.pdf', lambda b: b + b'x')
++        expect_code('record bound to a different OFF byte', 'PRE_ON', lambda: w.pair('noisy'))
++    fresh(rec_tests)
++
++    def comparator_json_tamper(w):
++        w.gate('noisy'); jp = w.dec / 'pre_on' / 'noisy' / 'compare_products.json'
++        j = json.loads(jp.read_text()); j['n_files'] += 1; jp.write_text(json.dumps(j))
++        expect_code('retained comparator JSON altered after the gate', 'PRE_ON', lambda: w.pair('noisy'))
++    fresh(comparator_json_tamper)
++
++    # ---- pair negatives (3x3) ------------------------------------------------------------------------------------------------
++    def pair_neg(name, code, setup, case='noisy', pre=False):
++        def run(w):
++            if pre:
++                setup(w); w.gate(case)  # an OFF-side defect present when the gate ran: the pair layer must still find it
++            else:
++                w.gate(case); setup(w)
++            expect_code(name, code, lambda: w.pair(case))
++        fresh(run, (case,))
++
++    def ulp(w):
++        d, exp = w.cases['noisy']['ON']; import numpy as np
++        m = json.loads((d / 'runtime.json').read_text()); m['global'][1][0] = float(np.nextafter(m['global'][1][0], 1.0))
++        (d / 'runtime.json').write_text(json.dumps(m)); w.write_receipt(d, exp)
++    pair_neg('ON global runtime differs by 1 ulp', 'GLOBAL_RUNTIME', ulp)
++    def gstar(w):
++        def f(b):
++            t = b.decode(); i = t.index('data_global_shift'); j = t.index('data_local_motion_model')
++            blk = t[i:j]; ln = [x for x in blk.split('\n') if len(x.split()) >= 3 and not x.startswith(('_', 'data', 'loop'))][1]
++            return (t[:i] + blk.replace(ln, ln + '0', 1) + t[j:]).encode()
++        w.edit('noisy', 'ON', 'output/noisy.star', f)
++    pair_neg('ON serialised global STAR block differs', 'GLOBAL_STAR', gstar)
++    def ondc_missing(w): w.edit('noisy', 'ON', 'stdout.log', lambda b: make_stdout(True, dc=False).encode())
++    pair_neg('ON missing DC stage line', 'MANIPULATION', ondc_missing)
++    def offdc_zero(w): w.edit('noisy', 'OFF', 'stdout.log', lambda b: make_stdout(True, g=(0, 0), gpeaks=0).encode())
++    pair_neg('OFF zero global DC counters', 'MANIPULATION', offdc_zero, pre=True)
++    pair_neg('OFF zero global DC counters edited after the gate', 'PRE_ON', offdc_zero)
++    def drift(w): w.edit('noisy', 'ON', 'stdout.log', lambda b: make_stdout(True, g=(41, 41)).encode())
++    pair_neg('global DC counters drift between OFF and ON', 'COUNTERS', drift)
++    def zeroed_drift(w): w.edit('noisy', 'ON', 'stdout.log', lambda b: make_stdout(True, g=(39, 40), gpeaks=40).encode())
++    pair_neg('global zeroed count drifts (zeroed != eligible)', 'MANIPULATION', zeroed_drift)
++    def gcoupled_drift(w):
++        w.edit('noisy', 'ON', 'stdout.log', lambda b: b.replace(b'scope=global peaks=40 guard_fired=2 (not_negative_definite=1, offset_gt_1px=1)', b'scope=global peaks=40 guard_fired=3 (not_negative_definite=2, offset_gt_1px=1)'))
++    pair_neg('global coupled counters drift', 'COUNTERS', gcoupled_drift)
++    def l0(w): w.edit('noisy', 'ON', 'stdout.log', lambda b: make_stdout(True, l=(0, 0), patch_peaks=0).encode())
++    pair_neg('3x3 ON local eligible 0', 'MANIPULATION', l0)
++    def off_l0(w): w.edit('noisy', 'OFF', 'stdout.log', lambda b: make_stdout(True, l=(0, 0), patch_peaks=0).encode())
++    pair_neg('3x3 OFF local eligible 0', 'MANIPULATION', off_l0, pre=True)
++    def cov(w): w.edit('noisy', 'ON', 'stdout.log', lambda b: make_stdout(True, gpeaks=39).encode())
++    pair_neg('coupled global peaks disagree with DC eligible', 'MANIPULATION', cov)
++    def lcov(w): w.edit('noisy', 'ON', 'stdout.log', lambda b: make_stdout(True, patch_peaks=39).encode())
++    pair_neg('coupled patch peaks disagree with local DC eligible', 'MANIPULATION', lcov)
++    def dup(w): w.edit('noisy', 'ON', 'stdout.log', lambda b: make_stdout(True, dup=True).encode())
++    pair_neg('duplicate DC counter line', 'MANIPULATION', dup)
++    def nocoup(w): w.edit('noisy', 'ON', 'stdout.log', lambda b: make_stdout(True, coupled=False).encode())
++    pair_neg('coupled counters absent', 'MANIPULATION', nocoup)
++    def noconv(w): w.edit('noisy', 'ON', 'output/noisy.log', lambda b: b.replace(b'Global alignment:', b'Global shifts:'))
++    pair_neg('convergence log unparsable', 'CONVERGENCE', noconv)
++    def sameb(w):
++        d, exp = w.cases['noisy']['ON']
++        w.write_receipt(d, exp, lambda r: r.__setitem__('binary_sha256', 'cd' * 32))
++    pair_neg('same binary path with a different sha256 in ON', 'BINARY', sameb)
++    def on_extra(w): (w.cases['noisy']['ON'][0] / 'output' / 'stray.txt').write_text('x')
++    pair_neg('ON extra output file', 'INVENTORY', on_extra)
++    def on_variant(w): w.edit('noisy', 'ON', 'output/noisy.log', lambda b: b + b' EXPERIMENTAL local fullwidth weight: x_norm = 42, pnx = 42, nfx = 22\n')
++    pair_neg('ON witness variant spelling', 'WITNESS_VARIANT', on_variant)
++
++    # ---- global-only negatives -------------------------------------------------------------------------------------------------
++    def go_neg(name, code, setup):
++        def run(w):
++            w.gate('flat'); setup(w)
++            expect_code(name, code, lambda: w.pair('flat'))
++        fresh(run, ('flat',))
++    def go_payload(w): w.edit('flat', 'ON', 'output/flat.mrc', lambda b: b[:1030] + b'\x07' + b[1031:])
++    go_neg('global-only ON MRC payload differs (comparator)', 'GLOBAL_ONLY', go_payload)
++    def go_hdr(w): w.edit('flat', 'ON', 'output/flat.mrc', lambda b: b[:20] + b'\x07' + b[21:])
++    go_neg('global-only ON MRC header differs (comparator)', 'GLOBAL_ONLY', go_hdr)
++    def go_eps(w): w.edit('flat', 'ON', 'output/flat_shifts.eps', lambda b: b + b'x')
++    go_neg('global-only ON EPS differs (comparator)', 'GLOBAL_ONLY', go_eps)
++    def go_rt(w): w.edit('flat', 'ON', 'runtime.json', lambda b: b + b' ')
++    go_neg('global-only ON runtime bytes differ', 'GLOBAL_ONLY', go_rt)
++    def go_star(w): w.edit('flat', 'ON', 'output/flat.star', lambda b: b + b'# trailing\n')
++    go_neg('global-only ON case STAR bytes differ', 'GLOBAL_ONLY', go_star)
++    def go_local(w): w.edit('flat', 'ON', 'stdout.log', lambda b: make_stdout(True).encode())
++    go_neg('global-only ON has local DC/coupled work', 'MANIPULATION', go_local)
++    def go_witness(w): w.edit('flat', 'ON', 'output/flat.log', lambda b: b + (V3.WITNESS_LINE + '\n').encode())
++    go_neg('global-only ON carries a witness line', 'WITNESS', go_witness)
++
++    # ---- R2 LOW tests ------------------------------------------------------------------------------------------------------------
++    def variants(w):
++        w.sync()
++        for label, line in [('lowercase hyphenless', ' experimental local fullwidth weight: x_norm = 42, pnx = 42, nfx = 22'),
++                            ('underscored', ' EXPERIMENTAL local_full_width weight x_norm = 42'),
++                            ('title case', ' Experimental Local Full-Width Weight: x_norm = 42'),
++                            ('spaced', ' EXPERIMENTAL local full width weight: x_norm = 42, pnx = 42, nfx = 22')]:
++            d, exp = w.cases['flat']['OFF']
++            lp = d / 'output' / 'flat.log'; orig = lp.read_text(); lp.write_text(orig + line + '\n'); w.write_receipt(d, exp)
++            try:
++                V3.admit_producer(d, exp, w.adm, w.root); v3 = 'v3 admits'
++            except V3.AdmissionError as e:
++                v3 = 'v3 rejects %s' % e.code
++            expect_code('witness variant (%s) rejected by the prescan' % label, 'WITNESS_VARIANT', lambda: P4.admit_single('flat', 'OFF', d, evidence_root=w.root, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA))
++            record('control: %s [%s]' % (label, v3), v3 == 'v3 admits' or label == 'title case', v3)
++            lp.write_text(orig); w.write_receipt(d, exp)
++        try:
++            P4.admit_single('flat', 'OFF', w.cases['flat']['OFF'][0], evidence_root=w.root, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA)
++            record('control: clean OFF log passes the prescan', True)
++        except Exception as e:
++            record('control: clean OFF log passes the prescan', False, repr(e))
++    fresh(variants, ('flat',))
++
++    def t_tests(w):
++        w.sync()
++        # T1: an extra staged file whose bytes DO match a fixture pin; only the names guard can reject it
++        d, exp = w.cases['noisy']['OFF']
++        (d / 'input' / 'extra.bin').write_bytes(b'extra staged'); w.adm['fixture_files']['extra.bin'] = {'bytes': 12, 'sha256': sha(b'extra staged')}
++        expect_code('T1 extra staged file with a matching fixture pin', 'INPUT', lambda: V3.admit_producer(d, exp, w.adm, w.root))
++        (d / 'input' / 'extra.bin').unlink()
++        # T1b: staged movie missing while every present file matches its pin
++        (d / 'input' / 'noisy.mrcs').unlink()
++        expect_code('T1 missing staged movie, remaining pins match', 'INPUT', lambda: V3.admit_producer(d, exp, w.adm, w.root))
++    fresh(t_tests)
++
++    def t2(w):
++        d, exp = w.cases['noisy']['OFF']
++        text = (d / 'runtime.json').read_text()
++        tok = '-0.60471920692772696'  # the retained noisy runtime's global[1][0] literal
++        record('control: the retained runtime text carries that literal', tok in text)
++        (d / 'runtime.json').write_text(text.replace(tok, '1e400', 1)); w.write_receipt(d, exp)
++        parsed = json.loads((d / 'runtime.json').read_text())['global'][1][0]
++        record('control: Python parses 1e400 as inf without parse_constant', parsed == float('inf'))
++        expect_code('T2 runtime overflow literal 1e400 with a matching receipt hash', 'NONFINITE', lambda: V3.admit_producer(d, exp, w.adm, w.root))
++    fresh(t2)
++
++    def t3(w):
++        d, exp = w.cases['noisy']['OFF']
++        real = w.scratch / 'target.pdf'; real.write_bytes((d / 'output' / 'logfile.pdf').read_bytes())
++        (d / 'output' / 'logfile.pdf').unlink(); os.symlink(real, d / 'output' / 'logfile.pdf')
++        b = real.read_bytes()
++        def edit(r): r['publication']['logfile.pdf'] = {'bytes': len(b), 'sha256': sha(b)}
++        w.write_receipt(d, exp, edit)
++        rr = json.loads((d / 'RUN.json').read_text())
++        record('control: the receipt lists the symlink with the target hash', rr['publication']['logfile.pdf']['sha256'] == sha(b) and (d / 'output' / 'logfile.pdf').is_symlink())
++        expect_code('T3 real symlink in output with a self-consistent receipt', 'INVENTORY', lambda: V3.admit_producer(d, exp, w.adm, w.root))
++    fresh(t3)
++
++    # ---- decision rules (pure) -----------------------------------------------------------------------------------------------------
++    base = P4._decide(crafted_scores())
++    record('decision: P1 and P2 hold -> SUPPORTED, never accepted', base['prediction'] == 'SUPPORTED' and base['acceptance'] == 'NOT_ACCEPTED_NO_AUTOMATIC_ACCEPTANCE' and base['P1']['ok'] and base['P2']['ok'])
++    record('decision: improving P2 leaves the noisy raw gate FAIL', base['noisy_raw_gate'] == 'FAIL' and base['noisy_raw_gate_by_field'] == {'runtime': 'FAIL', 'STAR': 'FAIL'})
++    record('decision: flat/repeated UNIDENTIFIABLE with raw distances', all(base['unidentifiable'][c]['status'] == 'UNIDENTIFIABLE' and 'rms' in base['unidentifiable'][c]['raw_distances_angstrom']['ON']['runtime'] for c in ('flat', 'repeated')) and 'gate' not in json.dumps(base['unidentifiable']))
++    record('decision: no increase listed when nothing increases', base['increases'] == [])
++    s = crafted_scores({('fractional', 'ON'): dict(crafted(.1, .2, .3), STAR={'angstrom': {'rms': .21, 'p95': .2, 'max': .3}, 'px': {'rms': .2, 'p95': .2, 'max': .3}})})
++    d = P4._decide(s)
++    record('decision: P1 lost on one case/field (fractional STAR rms .21)', d['P1']['ok'] is False and d['prediction'] == 'NOT_SUPPORTED' and d['P1']['cases']['fractional']['ON']['STAR'] == 'FAIL' and d['P1']['cases']['affine']['ON']['STAR'] == 'PASS')
++    record('decision: the P1 loss is listed as a PASS->FAIL increase', any(i['case'] == 'fractional' and i['field'] == 'STAR' and i['metric'] == 'rms' and i['gate_transition'] == 'PASS->FAIL' for i in d['increases']))
++    for metric in ('rms', 'p95', 'max'):
++        on = {'rms': 1.2, 'p95': 2.9, 'max': 6.0}; on[metric] = {'rms': 1.7, 'p95': 3.4, 'max': 7.3}[metric]
++        d = P4._decide(crafted_scores({('noisy', 'ON'): {'runtime': {'angstrom': dict(on), 'px': dict(on)}, 'STAR': {'angstrom': {'rms': 1.2, 'p95': 2.9, 'max': 6.0}, 'px': dict(on)}}}))
++        record('decision: P2 fails on a single regressed %s (runtime only)' % metric, d['P2']['ok'] is False and d['P2']['noisy']['runtime'][metric]['strictly_lower'] is False and d['prediction'] == 'NOT_SUPPORTED')
++        on = {'rms': 1.2, 'p95': 2.9, 'max': 6.0}; on[metric] = {'rms': 1.6, 'p95': 3.3, 'max': 7.2}[metric]
++        d = P4._decide(crafted_scores({('noisy', 'ON'): {'runtime': {'angstrom': dict(on), 'px': dict(on)}, 'STAR': {'angstrom': {'rms': 1.2, 'p95': 2.9, 'max': 6.0}, 'px': dict(on)}}}))
++        record('decision: P2 fails on a tie in %s (strict improvement required)' % metric, d['P2']['ok'] is False)
++    s = crafted_scores({('zero', 'ON'): crafted(.15, .25, .35)})
++    d = P4._decide(s)
++    record('decision: PASS->PASS increase is listed and P1 still holds', d['P1']['ok'] and {(i['metric'], i['gate_transition']) for i in d['increases'] if i['case'] == 'zero' and i['field'] == 'runtime'} == {('rms', 'PASS->PASS'), ('p95', 'PASS->PASS'), ('max', 'PASS->PASS')})
++    d = P4._decide(crafted_scores({('noisy', 'ON'): crafted(.1, .2, .3)}))
++    record('decision: a noisy ON that passes all limits reports raw gate PASS', d['noisy_raw_gate'] == 'PASS' and d['P2']['ok'])
++
++    # ---- decide_pilot end to end: structure -------------------------------------------------------------------------------------------
++    def build_all(w):
++        for c in ALL_CASES:
++            if c not in w.cases:
++                w.make(c)
++        for c in ALL_CASES:
++            w.gate(c)
++
++    def e2e(w):
++        build_all(w); w.sync()
++        orig = P4._score_arm
++        P4._score_arm = lambda case, arm, run_dir, expected, adm, ev, fx: crafted_scores()[case][arm]
++        try:
++            res = P4.decide_pilot(evidence_root=w.root, baseline_root=w.base_root, fixture_dir=FIX, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA, decision_dir=w.dec)
++            record('decide_pilot over 8 synthetic cases (crafted scores)', res['prediction'] == 'SUPPORTED' and set(res['pair_record_sha256']) == set(ALL_CASES) and (w.dec / 'DECISION.json').is_file())
++            record('all 8 pair records retained', all((w.dec / 'pair' / c / 'pair.json').is_file() for c in ALL_CASES))
++            expect_code('cases parameter reordered', 'CASES', lambda: P4.decide_pilot(evidence_root=w.root, baseline_root=w.base_root, fixture_dir=FIX, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA, decision_dir=w.scratch / 'd2', cases=list(reversed(ALL_CASES))))
++            expect_code('cases parameter with a duplicate', 'CASES', lambda: P4.decide_pilot(evidence_root=w.root, baseline_root=w.base_root, fixture_dir=FIX, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA, decision_dir=w.scratch / 'd3', cases=ALL_CASES[:-1] + ['noisy']))
++            expect_code('cases parameter missing a case', 'CASES', lambda: P4.decide_pilot(evidence_root=w.root, baseline_root=w.base_root, fixture_dir=FIX, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA, decision_dir=w.scratch / 'd4', cases=ALL_CASES[:-1]))
++            (w.root / 'extra_case').mkdir()
++            expect_code('unlisted extra case directory', 'CASES', lambda: P4.decide_pilot(evidence_root=w.root, baseline_root=w.base_root, fixture_dir=FIX, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA, decision_dir=w.scratch / 'd5'))
++            (w.root / 'extra_case').rmdir()
++            shutil.move(str(w.root / 'repeated' / 'ON'), str(w.scratch / 'parked_on'))
++            expect_code('case without its ON directory', 'CASES', lambda: P4.decide_pilot(evidence_root=w.root, baseline_root=w.base_root, fixture_dir=FIX, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA, decision_dir=w.scratch / 'd6'))
++            shutil.move(str(w.scratch / 'parked_on'), str(w.root / 'repeated' / 'ON'))
++            shutil.rmtree(w.root / 'zero')
++            expect_code('a case directory missing entirely', 'CASES', lambda: P4.decide_pilot(evidence_root=w.root, baseline_root=w.base_root, fixture_dir=FIX, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA, decision_dir=w.scratch / 'd7'))
++        finally:
++            P4._score_arm = orig
++    fresh(e2e, ())
++
++    def e2e_real(w):
++        build_all(w); w.sync()
++        orig = P4._score_arm
++        crafted_all = crafted_scores()
++        def scorer(case, arm, run_dir, expected, adm, ev, fx):
++            if case in ('noisy', 'affine'):
++                return orig(case, arm, run_dir, expected, adm, ev, fx)
++            return crafted_all[case][arm]
++        P4._score_arm = scorer
++        try:
++            res = P4.decide_pilot(evidence_root=w.root, baseline_root=w.base_root, fixture_dir=FIX, roots=ROOTS, binary_path=BIN, binary_sha256=BINSHA, decision_dir=w.dec)
++            old = json.loads((RAW / 'noisy' / 'UP_only' / 'metrics.json').read_text())
++            got = res['P2']['noisy']['runtime']['rms']['OFF']
++            record('real noisy/affine scoring flows through decide_pilot', abs(got - old['runtime']['angstrom']['rms']) <= 1e-12, 'noisy OFF rms=%.12f' % got)
++            record('real data: the tiny coefficient change does not improve every metric, so P2 fails (no vacuous PASS)', res['P2']['ok'] is False and res['prediction'] == 'NOT_SUPPORTED')
++            record('real affine ON keeps PASS on both fields', res['P1']['cases']['affine']['ON'] == {'runtime': 'PASS', 'STAR': 'PASS'})
++        finally:
++            P4._score_arm = orig
++    fresh(e2e_real, ())
++
++    failed = [r for r in RESULTS if not r['ok']]
++    Path(result_path).write_text(json.dumps({'total': len(RESULTS), 'failed': len(failed), 'results': RESULTS}, indent=1, allow_nan=False) + '\n')
++    print('TOTAL %d FAILED %d' % (len(RESULTS), len(failed)))
++    return 1 if failed else 0
++
++
++if __name__ == '__main__':
++    sys.exit(main(sys.argv[1]))
+diff --git a/tests/mutation_controls_v4.py b/tests/mutation_controls_v4.py
+new file mode 100644
+index 0000000..a80b9aa
+--- /dev/null
++++ b/tests/mutation_controls_v4.py
+@@ -0,0 +1,82 @@
++"""Guard-removal controls for pair_decision_v4 (scratch copies only). A guard that the suite shows to be shadowed by another guard is
++reported as SHADOWED (expected survivors are declared up front), never claimed as killed."""
++import json, os, re, shutil, subprocess, sys, tempfile
++from pathlib import Path
++sys.dont_write_bytecode = True
++PILOT = Path(__file__).resolve().parent.parent
++PY = sys.executable
++# (file, old, new, [test-name fragments that must fail], expected_shadowed)
++M = {
++ 'anchor_admission': ('pair_decision_v4.py', "    if _sha_bytes(ab) != ADMISSION_V3_SHA256:", "    if False:", ['altered anchored admission file'], False),
++ 'anchor_commands': ('pair_decision_v4.py', "    if _sha_bytes(cb) != COMMANDS_V3_SHA256:", "    if False:", ['hand-edited commands'], False),
++ 'held_gate': ('pair_decision_v4.py', "        if need_launch:", "        if False:", ['real HELD admission cannot satisfy pre_ON_gate', 'null launch field', 'HELD status in an otherwise filled'], False),
++ 'tool_pins': ('pair_decision_v4.py', "            V3.verify_tool_pins(self.adm, roots)", "            pass", ['tool pins verified before use'], False),
++ 'decision_dir_overlap': ('pair_decision_v4.py', "        if d == o or d.is_relative_to(o) or o.is_relative_to(d):", "        if False:", ['decision_dir inside a run directory'], False),
++ 'baseline_inventory': ('pair_decision_v4.py', "    if set(disk) != set(pins):", "    if False:", ['baseline extra file', 'baseline file missing'], False),
++ 'baseline_bytes': ('pair_decision_v4.py', "        if disk[k] != pins[k]:", "        if False:", ['baseline byte changed (pin kept)'], False),
++ 'baseline_symlink': ('pair_decision_v4.py', "            if (Path(dirpath) / n).is_symlink():", "            if False:", ['baseline file replaced by a symlink'], False),
++ 'off_raw_runtime': ('pair_decision_v4.py', "        if (off / rel).stat().st_size != pins[rel][0] or _sha_file(off / rel) != pins[rel][1]:", "        if False:", ['OFF runtime differs from the retained baseline bytes'], False),
++ # the real comparator exits 1 whenever it reports DIFFERENT, so the rc guard and the verdict guard shadow each other; each alone is declared shadowed
++ 'comparator_verdict_only': ('pair_decision_v4.py', "    if j.get('verdict') != 'IDENTICAL' or j.get('n_gated_differing') != 0 or j.get('root_a')", "    if False and j.get('root_a')", [], True),
++ 'comparator_rc_only': ('pair_decision_v4.py', "    if cmdj['returncode'] != 0 or not jp.is_file():", "    if not jp.is_file():", [], True),
++ 'comparator_rc_and_verdict': ('pair_decision_v4.py', ["    if cmdj['returncode'] != 0 or not jp.is_file():", "    if j.get('verdict') != 'IDENTICAL' or j.get('n_gated_differing') != 0 or j.get('root_a')"], ["    if not jp.is_file():", "    if False and j.get('root_a')"], ['comparator detects MRC header', 'comparator detects MRC payload', 'comparator detects EPS', 'comparator detects corrected_micrographs STAR', 'comparator detects a file-inventory'], False),
++ 'pre_on_binding': ('pair_decision_v4.py', "    if rec.get('bound') != bound or rec.get('binding_sha256') != _h(bound) or _h(rec['bound']) != rec['binding_sha256']:", "    if False:", ['tampered pre-ON record', 'record bound to a different OFF byte', 'retained comparator JSON altered', 'edited after the gate'], False),
++ 'pre_on_status': ('pair_decision_v4.py', "    if rec.get('schema') != PRE_ON_SCHEMA or rec.get('status') != 'PASS':", "    if False:", ['pre-ON record status not PASS'], False),
++ 'pre_on_present': ('pair_decision_v4.py', "    if not rp.is_file():", "    if False:", ['absent pre-ON record'], False),
++ 'global_bits': ('pair_decision_v4.py', "    if fo['global_bits'] != fn_['global_bits']:", "    if False:", ['1 ulp'], False),
++ 'global_star': ('pair_decision_v4.py', "    if fo['global_star_block'] != fn_['global_star_block']:", "    if False:", ['serialised global STAR block'], False),
++ # manipulation() forces zeroed == eligible == coupled global peaks, so a DC drift always also drifts the coupled counters: shadowed
++ 'dc_drift': ('pair_decision_v4.py', "        if mo['dc'][key] != mn['dc'][key]:", "        if False:", [], True),
++ 'coupled_drift': ('pair_decision_v4.py', "    if mo['coupled']['global'] != mn['coupled']['global']:", "    if False:", ['global coupled counters drift'], False),
++ 'local3_eligible': ('pair_decision_v4.py', "        if local3 and le <= 0:", "        if False:", ['3x3 ON local eligible 0', '3x3 OFF local eligible 0'], False),
++ 'global_only_local_work': ('pair_decision_v4.py', "        if not local3 and (le != 0 or m['coupled']['patch']['peaks'] != 0):", "        if False:", ['global-only ON has local DC/coupled work'], False),
++ 'global_eligible_positive': ('pair_decision_v4.py', "        if m['dc']['global_eligible'] <= 0:", "        if False:", [], True),
++ 'global_only_block': ('pair_decision_v4.py', "    if not local3:\n        for rel in ('runtime.json'", "    if False:\n        for rel in ('runtime.json'", ['global-only ON MRC payload', 'global-only ON MRC header', 'global-only ON EPS', 'global-only ON runtime bytes differ'], False),
++ 'pair_binary': ('pair_decision_v4.py', "    if ro['binary_sha256'] != rn['binary_sha256'] or ro['argv'][0] != rn['argv'][0] or ro['binary_sha256'] != binary_sha256:", "    if False:", [], True),
++ 'witness_variant': ('pair_decision_v4.py', "        if VARIANT.search(ln) and ln != V3.WITNESS_LINE:", "        if False:", ['witness variant (lowercase hyphenless)', 'ON witness variant spelling'], False),
++ 'cases_param': ('pair_decision_v4.py', "    if cases is not None and list(cases) != order:", "    if False:", ['cases parameter reordered', 'cases parameter with a duplicate', 'cases parameter missing a case'], False),
++ 'cases_present': ('pair_decision_v4.py', "    if present != sorted(order):", "    if False:", ['unlisted extra case directory'], False),
++ 'pair_complete': ('pair_decision_v4.py', "        if not cd.is_dir() or sorted(p.name for p in cd.iterdir()) != ['OFF', 'ON'] or not ((cd / 'OFF').is_dir() and (cd / 'ON').is_dir()):", "        if False:", ['case without its ON directory'], False),
++ 'p2_strict': ('pair_decision_v4.py', "n['ON'][f]['angstrom'][k] < n['OFF'][f]['angstrom'][k]}", "n['ON'][f]['angstrom'][k] <= n['OFF'][f]['angstrom'][k]}", ['P2 fails on a tie'], False),
++ 'increases': ('pair_decision_v4.py', "                if on > off:", "                if False:", ['PASS->PASS increase is listed', 'P1 loss is listed'], False),
++ 'p1': ('pair_decision_v4.py', "    p1_ok = all(v['ON'][f] == 'PASS' for v in p1.values() for f in ('runtime', 'STAR'))", "    p1_ok = True", ['P1 lost on one case'], False),
++ 'prediction': ('pair_decision_v4.py', "'prediction': 'SUPPORTED' if (p1_ok and p2_ok) else 'NOT_SUPPORTED',", "'prediction': 'SUPPORTED',", ['P1 lost on one case', 'P2 fails on a single regressed'], False),
++ 'raw_gate': ('pair_decision_v4.py', "'noisy_raw_gate': 'PASS' if all(v == 'PASS' for v in noisy_gate.values()) else 'FAIL'", "'noisy_raw_gate': 'PASS' if p2_ok else 'FAIL'", ['improving P2 leaves the noisy raw gate FAIL'], False),
++ 'v3_names_guard': ('score_fields_v3.py', "    if names != sorted(expected['input_files']):", "    if False:", ['T1 extra staged file', 'T1 missing staged movie'], False),
++ 'v3_symlink_guard': ('score_fields_v3.py', "            if p.is_symlink():\n                _fail('INVENTORY', 'symlink under output: ' + name)", "            if False:\n                _fail('INVENTORY', 'symlink under output: ' + name)", ['T3 real symlink'], False),
++ 'v3_finite_guard': ('score_fields_v3.py', "    if not all(np.isfinite(a).all() for a in (g, cx, cy)):", "    if False:", ['T2 runtime overflow'], False),
++}
++FILES = ['score_fields_v2.py', 'score_fields_v3.py', 'pair_decision_v4.py', 'ADMISSION_DRAFT_v3.json', 'COMMANDS_DRAFT_v3.json', 'COMMANDS_DRAFT.json']
++TESTS = ['tests/test_score_fields_v3.py', 'tests/test_pair_decision_v4.py']
++only = set(sys.argv[2:]) if len(sys.argv) > 2 else None
++out = {}
++for name, (fname, old, new, intended, shadowed) in M.items():
++    if only and name not in only:
++        continue
++    with tempfile.TemporaryDirectory(prefix='mc-lfw-v4-mut-') as t:
++        t = Path(t); (t / 'tests').mkdir()
++        for f in FILES + TESTS:
++            shutil.copy(PILOT / f, t / f)
++        src = (t / fname).read_text()
++        for o, n in (zip(old, new) if isinstance(old, list) else [(old, new)]):
++            assert src.count(o) == 1, (name, src.count(o))
++            src = src.replace(o, n)
++        (t / fname).write_text(src)
++        if fname == 'score_fields_v3.py':  # re-anchor the mutated v3 in the scratch copy so the mutation, not the anchor, is under test
++            import hashlib
++            h = hashlib.sha256((t / fname).read_bytes()).hexdigest()
++            p4 = (t / 'pair_decision_v4.py').read_text()
++            (t / 'pair_decision_v4.py').write_text(re.sub(r"V3_MODULE_SHA256 = '[0-9a-f]{64}'", "V3_MODULE_SHA256 = '%s'" % h, p4))
++        env = dict(os.environ, V4_PIN_PILOT_ROOT=str(PILOT))
++        p = subprocess.run([PY, '-B', str(t / 'tests/test_pair_decision_v4.py'), str(t / 'r.json')], capture_output=True, text=True, env=env)
++        failed = [l[5:].split(' :: ')[0] for l in p.stdout.splitlines() if l.startswith('FAIL ')]
++        covered = [any(frag in f for f in failed) for frag in intended]
++        if shadowed:
++            status = 'SHADOWED_AS_DECLARED' if not failed else 'UNEXPECTEDLY_CAUGHT'
++        else:
++            status = 'KILLED' if all(covered) and intended else 'SURVIVED'
++        out[name] = {'status': status, 'intended': intended, 'covered': covered, 'failed_count': len(failed), 'failed_tests': failed, 'exit': p.returncode}
++        print('%s %s | failed %d' % (status, name, len(failed)), flush=True)
++Path(sys.argv[1]).write_text(json.dumps(out, indent=1))
++bad = [k for k, v in out.items() if v['status'] in ('SURVIVED', 'UNEXPECTEDLY_CAUGHT')]
++sys.exit(1 if bad else 0)
+diff --git a/logs_v4/ATTEMPTS_v4.md b/logs_v4/ATTEMPTS_v4.md
+new file mode 100644
+index 0000000..c9e2bef
+--- /dev/null
++++ b/logs_v4/ATTEMPTS_v4.md
+@@ -0,0 +1,16 @@
++# v4 attempts (append-only)
++Plan frozen: PAIR_V4_PLAN.md sha256 09679533... (PAIR_V4_PLAN.sha256) before pair_decision_v4.py or any v4 test existed.
++1. run1 (logs_v4/test-run1.log): 92 pass, 3 fail, then an infrastructure crash aborted the rest. All test defects, criteria unchanged:
++   (a) the anchor tests called w.gate, which re-synced the test admission and hid the tamper; (b) OFF-side counter edits made after the
++   gate were correctly caught earlier by the pre-ON binding (PRE_ON), so the OFF counter negatives now run both ways (edit before the
++   gate: pair layer must find it; edit after: record must reject); (c) the T2 literal assumed a repr that the retained text lacks, and
++   the helper now records a fault instead of aborting the suite.
++2. run2: TypeError (crafted_scores(**{tuple keys}) is invalid Python) aborted the decision-rule block; test defect, fixed to a dict argument.
++3. run3: 125 pass, 1 fail: 'case without its ON directory' reached the per-case admission (PRE_ON) before the pair-completeness check. Code fix in pair_decision_v4.py: validate all 8 OFF/ON pairs up front. Criteria unchanged.
++4. run4: 126/126 pass. The baseline-symlink test pointed at a file with different bytes, so the byte guard shadowed the symlink guard; test changed so the symlink target holds the pinned bytes (run5).
++5. test run5: 126/126. mutation run1 (logs_v4/mutation-run1.log, MUTATION_V4_run1.json): 29 killed, 3 declared shadowed, 3 reported SURVIVED.
++   The survivors are shadowed guards, not weak tests: (a) comparator verdict check: the real comparator exits 1 whenever it reports DIFFERENT, so the
++   rc check and verdict check shadow each other (each alone survives; both removed together are killed); (b) global DC counter drift guard: manipulation()
++   forces zeroed == eligible == coupled global peaks, so the coupled-counter guard always fires too; (c) cases_present: its missing-case half is also
++   caught by the pair-completeness guard; the guard is credited only with the unlisted-extra-directory test. Harness classification updated accordingly
++   (shadowing declared up front, not claimed as kills); no suite criterion changed.
+diff --git a/logs_v4/mutation-run1.log b/logs_v4/mutation-run1.log
+new file mode 100644
+index 0000000..e21d303
+--- /dev/null
++++ b/logs_v4/mutation-run1.log
+@@ -0,0 +1,35 @@
++KILLED anchor_admission | failed 1
++KILLED anchor_commands | failed 1
++KILLED held_gate | failed 12
++KILLED tool_pins | failed 1
++KILLED decision_dir_overlap | failed 1
++KILLED baseline_inventory | failed 2
++KILLED baseline_bytes | failed 1
++KILLED baseline_symlink | failed 1
++KILLED off_raw_runtime | failed 2
++SURVIVED comparator_verdict | failed 0
++KILLED pre_on_binding | failed 4
++KILLED pre_on_status | failed 1
++KILLED pre_on_present | failed 2
++KILLED global_bits | failed 1
++KILLED global_star | failed 1
++SURVIVED dc_drift | failed 0
++KILLED coupled_drift | failed 1
++KILLED local3_eligible | failed 2
++KILLED global_only_local_work | failed 1
++SHADOWED_AS_DECLARED global_eligible_positive | failed 0
++KILLED global_only_block | failed 7
++SHADOWED_AS_DECLARED pair_binary | failed 0
++KILLED witness_variant | failed 5
++KILLED cases_param | failed 3
++SURVIVED cases_present | failed 1
++KILLED pair_complete | failed 1
++KILLED p2_strict | failed 4
++KILLED increases | failed 2
++KILLED p1 | failed 1
++KILLED prediction | failed 5
++KILLED raw_gate | failed 1
++KILLED v3_names_guard | failed 2
++KILLED v3_symlink_guard | failed 1
++KILLED v3_finite_guard | failed 1
++exit=1
+diff --git a/logs_v4/mutation-run2.log b/logs_v4/mutation-run2.log
+new file mode 100644
+index 0000000..6cd7d50
+--- /dev/null
++++ b/logs_v4/mutation-run2.log
+@@ -0,0 +1,36 @@
++KILLED anchor_admission | failed 1
++KILLED anchor_commands | failed 1
++KILLED held_gate | failed 12
++KILLED tool_pins | failed 1
++KILLED decision_dir_overlap | failed 1
++KILLED baseline_inventory | failed 2
++KILLED baseline_bytes | failed 1
++KILLED baseline_symlink | failed 1
++KILLED off_raw_runtime | failed 2
++SHADOWED_AS_DECLARED comparator_verdict_only | failed 0
++SHADOWED_AS_DECLARED comparator_rc_only | failed 0
++KILLED comparator_rc_and_verdict | failed 10
++KILLED pre_on_binding | failed 4
++KILLED pre_on_status | failed 1
++KILLED pre_on_present | failed 2
++KILLED global_bits | failed 1
++KILLED global_star | failed 1
++SHADOWED_AS_DECLARED dc_drift | failed 0
++KILLED coupled_drift | failed 1
++KILLED local3_eligible | failed 2
++KILLED global_only_local_work | failed 1
++SHADOWED_AS_DECLARED global_eligible_positive | failed 0
++KILLED global_only_block | failed 7
++SHADOWED_AS_DECLARED pair_binary | failed 0
++KILLED witness_variant | failed 5
++KILLED cases_param | failed 3
++KILLED cases_present | failed 1
++KILLED pair_complete | failed 1
++KILLED p2_strict | failed 4
++KILLED increases | failed 2
++KILLED p1 | failed 1
++KILLED prediction | failed 5
++KILLED raw_gate | failed 1
++KILLED v3_names_guard | failed 2
++KILLED v3_symlink_guard | failed 1
++KILLED v3_finite_guard | failed 1
+diff --git a/logs_v4/test-run1.log b/logs_v4/test-run1.log
+new file mode 100644
+index 0000000..dd33d25
+--- /dev/null
++++ b/logs_v4/test-run1.log
+@@ -0,0 +1,108 @@
++PASS real HELD admission cannot satisfy pre_ON_gate :: code=HELD
++PASS real HELD admission cannot satisfy admit_pair :: code=HELD
++PASS real HELD admission cannot satisfy decide_pilot :: code=HELD
++PASS HELD failure is retained as STOP.json
++PASS signature rejects caller-typed ['pre_on_status'] on pre_ON_gate
++PASS signature rejects caller-typed ['expected'] on admit_pair
++PASS signature rejects caller-typed ['admission'] on admit_pair
++PASS signature rejects caller-typed ['commands'] on admit_pair
++PASS signature rejects caller-typed ['pair_records'] on decide_pilot
++PASS signature rejects caller-typed ['scores'] on decide_pilot
++PASS signature rejects caller-typed ['expected'] on admit_single
++PASS positive pre_ON_gate noisy (comparator subprocess ran) :: binding=629daa9f2254
++PASS retained comparator command is the pinned script via python -B
++PASS control: raw EPS text differs between baseline and OFF (comparator normalises the root)
++PASS positive admit_pair 3x3
++PASS pair record keeps convergence/local_enabled separately
++PASS pre-ON record binds identity and pins
++PASS positive admit_pair global-only incl. whole-product comparator
++PASS retained global-only comparator output is outside product dirs
++PASS control: inventory-only PDF differs from baseline yet pre-ON passes
++FAIL altered anchored admission file refused :: ACCEPTED but wanted ANCHOR
++PASS hand-edited commands (max_iter 9, OMP 8) refused by the anchor :: code=ANCHOR
++PASS HELD status in an otherwise filled admission refused :: code=HELD
++PASS null launch field candidate_binary refused :: code=HELD
++PASS null launch field source_archive refused :: code=HELD
++PASS null launch field compiler_and_config refused :: code=HELD
++PASS null launch field shared_libraries refused :: code=HELD
++PASS null launch field venue_identity refused :: code=HELD
++PASS null launch field fresh_venue_resource_admission refused :: code=HELD
++PASS null launch field independent_source_clearance refused :: code=HELD
++PASS unresolved placeholder binary path refused :: code=PLACEHOLDER
++PASS non-hex binary sha refused :: code=BINARY
++PASS tool pins verified before use :: code=TOOL_PIN
++PASS decision_dir inside a run directory refused :: code=DECISION_DIR
++PASS 3x3 ON with 0 witnesses cannot be admitted (grid comes from the anchored admission) :: code=WITNESS
++PASS baseline byte changed (pin kept) :: code=BASELINE
++PASS baseline extra file :: code=BASELINE
++PASS baseline file missing :: code=BASELINE
++PASS baseline file replaced by a symlink :: code=BASELINE
++PASS comparator detects MRC header change :: code=COMPARATOR
++PASS comparator detects MRC header change [evidence]
++PASS comparator detects MRC payload change :: code=COMPARATOR
++PASS comparator detects MRC payload change [evidence]
++PASS comparator detects EPS change :: code=COMPARATOR
++PASS comparator detects corrected_micrographs STAR change :: code=COMPARATOR
++PASS OFF runtime differs from the retained baseline bytes :: code=OFF_RAW
++PASS OFF case STAR differs from the retained baseline bytes :: code=OFF_RAW
++PASS OFF runtime.json missing :: code=RUNTIME
++PASS OFF with a witness line is not an OFF run :: code=WITNESS
++PASS comparator detects a file-inventory difference :: code=COMPARATOR
++PASS inventory difference recorded by the comparator itself
++PASS failed comparator rc retained
++PASS failing OFF gate raises before ON :: code=COMPARATOR
++PASS STOP.json retained with the code
++PASS ON cannot be paired without a passing record :: code=PRE_ON
++PASS absent pre-ON record :: code=PRE_ON
++PASS tampered pre-ON record :: code=PRE_ON
++PASS pre-ON record status not PASS :: code=PRE_ON
++PASS record bound to a different OFF byte :: code=PRE_ON
++PASS retained comparator JSON altered after the gate :: code=PRE_ON
++PASS ON global runtime differs by 1 ulp :: code=GLOBAL_RUNTIME
++PASS ON serialised global STAR block differs :: code=GLOBAL_STAR
++PASS ON missing DC stage line :: code=MANIPULATION
++FAIL OFF zero global DC counters :: wanted MANIPULATION got PRE_ON: PRE_ON: record no longer binds the current OFF/baseline/pins: off_receipt_sha256
++PASS global DC counters drift between OFF and ON :: code=COUNTERS
++PASS global zeroed count drifts (zeroed != eligible) :: code=MANIPULATION
++PASS global coupled counters drift :: code=COUNTERS
++PASS 3x3 ON local eligible 0 :: code=MANIPULATION
++FAIL 3x3 OFF local eligible 0 :: wanted MANIPULATION got PRE_ON: PRE_ON: record no longer binds the current OFF/baseline/pins: off_receipt_sha256
++PASS coupled global peaks disagree with DC eligible :: code=MANIPULATION
++PASS coupled patch peaks disagree with local DC eligible :: code=MANIPULATION
++PASS duplicate DC counter line :: code=MANIPULATION
++PASS coupled counters absent :: code=MANIPULATION
++PASS convergence log unparsable :: code=CONVERGENCE
++PASS same binary path with a different sha256 in ON :: code=BINARY
++PASS ON extra output file :: code=INVENTORY
++PASS ON witness variant spelling :: code=WITNESS_VARIANT
++PASS global-only ON MRC payload differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON MRC header differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON EPS differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON runtime bytes differ :: code=GLOBAL_ONLY
++PASS global-only ON case STAR bytes differ :: code=GLOBAL_ONLY
++PASS global-only ON has local DC/coupled work :: code=MANIPULATION
++PASS global-only ON carries a witness line :: code=WITNESS
++PASS witness variant (lowercase hyphenless) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: lowercase hyphenless [v3 admits] :: v3 admits
++PASS witness variant (underscored) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: underscored [v3 admits] :: v3 admits
++PASS witness variant (title case) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: title case [v3 admits] :: v3 admits
++PASS witness variant (spaced) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: spaced [v3 admits] :: v3 admits
++PASS control: clean OFF log passes the prescan
++PASS T1 extra staged file with a matching fixture pin :: code=INPUT
++PASS T1 missing staged movie, remaining pins match :: code=INPUT
++Traceback (most recent call last):
++  File "/private/tmp/mc-local-full-width-pilot-20261026/tests/test_pair_decision_v4.py", line 607, in <module>
++    sys.exit(main(sys.argv[1]))
++             ~~~~^^^^^^^^^^^^^
++  File "/private/tmp/mc-local-full-width-pilot-20261026/tests/test_pair_decision_v4.py", line 512, in main
++    fresh(t2)
++    ~~~~~^^^^
++  File "/private/tmp/mc-local-full-width-pilot-20261026/tests/test_pair_decision_v4.py", line 192, in fresh
++    return fn(w)
++  File "/private/tmp/mc-local-full-width-pilot-20261026/tests/test_pair_decision_v4.py", line 507, in t2
++    assert repr(tok) in text or str(tok) in text
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++AssertionError
+diff --git a/logs_v4/test-run2.log b/logs_v4/test-run2.log
+new file mode 100644
+index 0000000..daabd78
+--- /dev/null
++++ b/logs_v4/test-run2.log
+@@ -0,0 +1,112 @@
++PASS real HELD admission cannot satisfy pre_ON_gate :: code=HELD
++PASS real HELD admission cannot satisfy admit_pair :: code=HELD
++PASS real HELD admission cannot satisfy decide_pilot :: code=HELD
++PASS HELD failure is retained as STOP.json
++PASS signature rejects caller-typed ['pre_on_status'] on pre_ON_gate
++PASS signature rejects caller-typed ['expected'] on admit_pair
++PASS signature rejects caller-typed ['admission'] on admit_pair
++PASS signature rejects caller-typed ['commands'] on admit_pair
++PASS signature rejects caller-typed ['pair_records'] on decide_pilot
++PASS signature rejects caller-typed ['scores'] on decide_pilot
++PASS signature rejects caller-typed ['expected'] on admit_single
++PASS positive pre_ON_gate noisy (comparator subprocess ran) :: binding=07a8dca42436
++PASS retained comparator command is the pinned script via python -B
++PASS control: raw EPS text differs between baseline and OFF (comparator normalises the root)
++PASS positive admit_pair 3x3
++PASS pair record keeps convergence/local_enabled separately
++PASS pre-ON record binds identity and pins
++PASS positive admit_pair global-only incl. whole-product comparator
++PASS retained global-only comparator output is outside product dirs
++PASS control: inventory-only PDF differs from baseline yet pre-ON passes
++PASS altered anchored admission file refused :: code=ANCHOR
++PASS hand-edited commands (max_iter 9, OMP 8) refused by the anchor :: code=ANCHOR
++PASS HELD status in an otherwise filled admission refused :: code=HELD
++PASS null launch field candidate_binary refused :: code=HELD
++PASS null launch field source_archive refused :: code=HELD
++PASS null launch field compiler_and_config refused :: code=HELD
++PASS null launch field shared_libraries refused :: code=HELD
++PASS null launch field venue_identity refused :: code=HELD
++PASS null launch field fresh_venue_resource_admission refused :: code=HELD
++PASS null launch field independent_source_clearance refused :: code=HELD
++PASS unresolved placeholder binary path refused :: code=PLACEHOLDER
++PASS non-hex binary sha refused :: code=BINARY
++PASS tool pins verified before use :: code=TOOL_PIN
++PASS decision_dir inside a run directory refused :: code=DECISION_DIR
++PASS 3x3 ON with 0 witnesses cannot be admitted (grid comes from the anchored admission) :: code=WITNESS
++PASS baseline byte changed (pin kept) :: code=BASELINE
++PASS baseline extra file :: code=BASELINE
++PASS baseline file missing :: code=BASELINE
++PASS baseline file replaced by a symlink :: code=BASELINE
++PASS comparator detects MRC header change :: code=COMPARATOR
++PASS comparator detects MRC header change [evidence]
++PASS comparator detects MRC payload change :: code=COMPARATOR
++PASS comparator detects MRC payload change [evidence]
++PASS comparator detects EPS change :: code=COMPARATOR
++PASS comparator detects corrected_micrographs STAR change :: code=COMPARATOR
++PASS OFF runtime differs from the retained baseline bytes :: code=OFF_RAW
++PASS OFF case STAR differs from the retained baseline bytes :: code=OFF_RAW
++PASS OFF runtime.json missing :: code=RUNTIME
++PASS OFF with a witness line is not an OFF run :: code=WITNESS
++PASS comparator detects a file-inventory difference :: code=COMPARATOR
++PASS inventory difference recorded by the comparator itself
++PASS failed comparator rc retained
++PASS failing OFF gate raises before ON :: code=COMPARATOR
++PASS STOP.json retained with the code
++PASS ON cannot be paired without a passing record :: code=PRE_ON
++PASS absent pre-ON record :: code=PRE_ON
++PASS tampered pre-ON record :: code=PRE_ON
++PASS pre-ON record status not PASS :: code=PRE_ON
++PASS record bound to a different OFF byte :: code=PRE_ON
++PASS retained comparator JSON altered after the gate :: code=PRE_ON
++PASS ON global runtime differs by 1 ulp :: code=GLOBAL_RUNTIME
++PASS ON serialised global STAR block differs :: code=GLOBAL_STAR
++PASS ON missing DC stage line :: code=MANIPULATION
++PASS OFF zero global DC counters :: code=MANIPULATION
++PASS OFF zero global DC counters edited after the gate :: code=PRE_ON
++PASS global DC counters drift between OFF and ON :: code=COUNTERS
++PASS global zeroed count drifts (zeroed != eligible) :: code=MANIPULATION
++PASS global coupled counters drift :: code=COUNTERS
++PASS 3x3 ON local eligible 0 :: code=MANIPULATION
++PASS 3x3 OFF local eligible 0 :: code=MANIPULATION
++PASS coupled global peaks disagree with DC eligible :: code=MANIPULATION
++PASS coupled patch peaks disagree with local DC eligible :: code=MANIPULATION
++PASS duplicate DC counter line :: code=MANIPULATION
++PASS coupled counters absent :: code=MANIPULATION
++PASS convergence log unparsable :: code=CONVERGENCE
++PASS same binary path with a different sha256 in ON :: code=BINARY
++PASS ON extra output file :: code=INVENTORY
++PASS ON witness variant spelling :: code=WITNESS_VARIANT
++PASS global-only ON MRC payload differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON MRC header differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON EPS differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON runtime bytes differ :: code=GLOBAL_ONLY
++PASS global-only ON case STAR bytes differ :: code=GLOBAL_ONLY
++PASS global-only ON has local DC/coupled work :: code=MANIPULATION
++PASS global-only ON carries a witness line :: code=WITNESS
++PASS witness variant (lowercase hyphenless) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: lowercase hyphenless [v3 admits] :: v3 admits
++PASS witness variant (underscored) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: underscored [v3 admits] :: v3 admits
++PASS witness variant (title case) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: title case [v3 admits] :: v3 admits
++PASS witness variant (spaced) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: spaced [v3 admits] :: v3 admits
++PASS control: clean OFF log passes the prescan
++PASS T1 extra staged file with a matching fixture pin :: code=INPUT
++PASS T1 missing staged movie, remaining pins match :: code=INPUT
++PASS control: the retained runtime text carries that literal
++PASS control: Python parses 1e400 as inf without parse_constant
++PASS T2 runtime overflow literal 1e400 with a matching receipt hash :: code=NONFINITE
++PASS control: the receipt lists the symlink with the target hash
++PASS T3 real symlink in output with a self-consistent receipt :: code=INVENTORY
++PASS decision: P1 and P2 hold -> SUPPORTED, never accepted
++PASS decision: improving P2 leaves the noisy raw gate FAIL
++PASS decision: flat/repeated UNIDENTIFIABLE with raw distances
++PASS decision: no increase listed when nothing increases
++Traceback (most recent call last):
++  File "/private/tmp/mc-local-full-width-pilot-20261026/tests/test_pair_decision_v4.py", line 614, in <module>
++    sys.exit(main(sys.argv[1]))
++             ~~~~^^^^^^^^^^^^^
++  File "/private/tmp/mc-local-full-width-pilot-20261026/tests/test_pair_decision_v4.py", line 539, in main
++    s = crafted_scores(**{('fractional', 'ON'): dict(crafted(.1, .2, .3), STAR={'angstrom': {'rms': .21, 'p95': .2, 'max': .3}, 'px': {'rms': .2, 'p95': .2, 'max': .3}})})
++TypeError: keywords must be strings
+diff --git a/logs_v4/test-run3.log b/logs_v4/test-run3.log
+new file mode 100644
+index 0000000..3b80c8c
+--- /dev/null
++++ b/logs_v4/test-run3.log
+@@ -0,0 +1,127 @@
++PASS real HELD admission cannot satisfy pre_ON_gate :: code=HELD
++PASS real HELD admission cannot satisfy admit_pair :: code=HELD
++PASS real HELD admission cannot satisfy decide_pilot :: code=HELD
++PASS HELD failure is retained as STOP.json
++PASS signature rejects caller-typed ['pre_on_status'] on pre_ON_gate
++PASS signature rejects caller-typed ['expected'] on admit_pair
++PASS signature rejects caller-typed ['admission'] on admit_pair
++PASS signature rejects caller-typed ['commands'] on admit_pair
++PASS signature rejects caller-typed ['pair_records'] on decide_pilot
++PASS signature rejects caller-typed ['scores'] on decide_pilot
++PASS signature rejects caller-typed ['expected'] on admit_single
++PASS positive pre_ON_gate noisy (comparator subprocess ran) :: binding=62cf04b72b8a
++PASS retained comparator command is the pinned script via python -B
++PASS control: raw EPS text differs between baseline and OFF (comparator normalises the root)
++PASS positive admit_pair 3x3
++PASS pair record keeps convergence/local_enabled separately
++PASS pre-ON record binds identity and pins
++PASS positive admit_pair global-only incl. whole-product comparator
++PASS retained global-only comparator output is outside product dirs
++PASS control: inventory-only PDF differs from baseline yet pre-ON passes
++PASS altered anchored admission file refused :: code=ANCHOR
++PASS hand-edited commands (max_iter 9, OMP 8) refused by the anchor :: code=ANCHOR
++PASS HELD status in an otherwise filled admission refused :: code=HELD
++PASS null launch field candidate_binary refused :: code=HELD
++PASS null launch field source_archive refused :: code=HELD
++PASS null launch field compiler_and_config refused :: code=HELD
++PASS null launch field shared_libraries refused :: code=HELD
++PASS null launch field venue_identity refused :: code=HELD
++PASS null launch field fresh_venue_resource_admission refused :: code=HELD
++PASS null launch field independent_source_clearance refused :: code=HELD
++PASS unresolved placeholder binary path refused :: code=PLACEHOLDER
++PASS non-hex binary sha refused :: code=BINARY
++PASS tool pins verified before use :: code=TOOL_PIN
++PASS decision_dir inside a run directory refused :: code=DECISION_DIR
++PASS 3x3 ON with 0 witnesses cannot be admitted (grid comes from the anchored admission) :: code=WITNESS
++PASS baseline byte changed (pin kept) :: code=BASELINE
++PASS baseline extra file :: code=BASELINE
++PASS baseline file missing :: code=BASELINE
++PASS baseline file replaced by a symlink :: code=BASELINE
++PASS comparator detects MRC header change :: code=COMPARATOR
++PASS comparator detects MRC header change [evidence]
++PASS comparator detects MRC payload change :: code=COMPARATOR
++PASS comparator detects MRC payload change [evidence]
++PASS comparator detects EPS change :: code=COMPARATOR
++PASS comparator detects corrected_micrographs STAR change :: code=COMPARATOR
++PASS OFF runtime differs from the retained baseline bytes :: code=OFF_RAW
++PASS OFF case STAR differs from the retained baseline bytes :: code=OFF_RAW
++PASS OFF runtime.json missing :: code=RUNTIME
++PASS OFF with a witness line is not an OFF run :: code=WITNESS
++PASS comparator detects a file-inventory difference :: code=COMPARATOR
++PASS inventory difference recorded by the comparator itself
++PASS failed comparator rc retained
++PASS failing OFF gate raises before ON :: code=COMPARATOR
++PASS STOP.json retained with the code
++PASS ON cannot be paired without a passing record :: code=PRE_ON
++PASS absent pre-ON record :: code=PRE_ON
++PASS tampered pre-ON record :: code=PRE_ON
++PASS pre-ON record status not PASS :: code=PRE_ON
++PASS record bound to a different OFF byte :: code=PRE_ON
++PASS retained comparator JSON altered after the gate :: code=PRE_ON
++PASS ON global runtime differs by 1 ulp :: code=GLOBAL_RUNTIME
++PASS ON serialised global STAR block differs :: code=GLOBAL_STAR
++PASS ON missing DC stage line :: code=MANIPULATION
++PASS OFF zero global DC counters :: code=MANIPULATION
++PASS OFF zero global DC counters edited after the gate :: code=PRE_ON
++PASS global DC counters drift between OFF and ON :: code=COUNTERS
++PASS global zeroed count drifts (zeroed != eligible) :: code=MANIPULATION
++PASS global coupled counters drift :: code=COUNTERS
++PASS 3x3 ON local eligible 0 :: code=MANIPULATION
++PASS 3x3 OFF local eligible 0 :: code=MANIPULATION
++PASS coupled global peaks disagree with DC eligible :: code=MANIPULATION
++PASS coupled patch peaks disagree with local DC eligible :: code=MANIPULATION
++PASS duplicate DC counter line :: code=MANIPULATION
++PASS coupled counters absent :: code=MANIPULATION
++PASS convergence log unparsable :: code=CONVERGENCE
++PASS same binary path with a different sha256 in ON :: code=BINARY
++PASS ON extra output file :: code=INVENTORY
++PASS ON witness variant spelling :: code=WITNESS_VARIANT
++PASS global-only ON MRC payload differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON MRC header differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON EPS differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON runtime bytes differ :: code=GLOBAL_ONLY
++PASS global-only ON case STAR bytes differ :: code=GLOBAL_ONLY
++PASS global-only ON has local DC/coupled work :: code=MANIPULATION
++PASS global-only ON carries a witness line :: code=WITNESS
++PASS witness variant (lowercase hyphenless) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: lowercase hyphenless [v3 admits] :: v3 admits
++PASS witness variant (underscored) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: underscored [v3 admits] :: v3 admits
++PASS witness variant (title case) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: title case [v3 admits] :: v3 admits
++PASS witness variant (spaced) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: spaced [v3 admits] :: v3 admits
++PASS control: clean OFF log passes the prescan
++PASS T1 extra staged file with a matching fixture pin :: code=INPUT
++PASS T1 missing staged movie, remaining pins match :: code=INPUT
++PASS control: the retained runtime text carries that literal
++PASS control: Python parses 1e400 as inf without parse_constant
++PASS T2 runtime overflow literal 1e400 with a matching receipt hash :: code=NONFINITE
++PASS control: the receipt lists the symlink with the target hash
++PASS T3 real symlink in output with a self-consistent receipt :: code=INVENTORY
++PASS decision: P1 and P2 hold -> SUPPORTED, never accepted
++PASS decision: improving P2 leaves the noisy raw gate FAIL
++PASS decision: flat/repeated UNIDENTIFIABLE with raw distances
++PASS decision: no increase listed when nothing increases
++PASS decision: P1 lost on one case/field (fractional STAR rms .21)
++PASS decision: the P1 loss is listed as a PASS->FAIL increase
++PASS decision: P2 fails on a single regressed rms (runtime only)
++PASS decision: P2 fails on a tie in rms (strict improvement required)
++PASS decision: P2 fails on a single regressed p95 (runtime only)
++PASS decision: P2 fails on a tie in p95 (strict improvement required)
++PASS decision: P2 fails on a single regressed max (runtime only)
++PASS decision: P2 fails on a tie in max (strict improvement required)
++PASS decision: PASS->PASS increase is listed and P1 still holds
++PASS decision: a noisy ON that passes all limits reports raw gate PASS
++PASS decide_pilot over 8 synthetic cases (crafted scores)
++PASS all 8 pair records retained
++PASS cases parameter reordered :: code=CASES
++PASS cases parameter with a duplicate :: code=CASES
++PASS cases parameter missing a case :: code=CASES
++PASS unlisted extra case directory :: code=CASES
++FAIL case without its ON directory :: wanted CASES got PRE_ON: PRE_ON: pre-ON record absent for noisy
++PASS a case directory missing entirely :: code=CASES
++PASS real noisy/affine scoring flows through decide_pilot :: noisy OFF rms=1.645370853156
++PASS real data: the tiny coefficient change does not improve every metric, so P2 fails (no vacuous PASS)
++PASS real affine ON keeps PASS on both fields
++TOTAL 126 FAILED 1
+diff --git a/logs_v4/test-run4.log b/logs_v4/test-run4.log
+new file mode 100644
+index 0000000..b279b9b
+--- /dev/null
++++ b/logs_v4/test-run4.log
+@@ -0,0 +1,127 @@
++PASS real HELD admission cannot satisfy pre_ON_gate :: code=HELD
++PASS real HELD admission cannot satisfy admit_pair :: code=HELD
++PASS real HELD admission cannot satisfy decide_pilot :: code=HELD
++PASS HELD failure is retained as STOP.json
++PASS signature rejects caller-typed ['pre_on_status'] on pre_ON_gate
++PASS signature rejects caller-typed ['expected'] on admit_pair
++PASS signature rejects caller-typed ['admission'] on admit_pair
++PASS signature rejects caller-typed ['commands'] on admit_pair
++PASS signature rejects caller-typed ['pair_records'] on decide_pilot
++PASS signature rejects caller-typed ['scores'] on decide_pilot
++PASS signature rejects caller-typed ['expected'] on admit_single
++PASS positive pre_ON_gate noisy (comparator subprocess ran) :: binding=10488954fa8b
++PASS retained comparator command is the pinned script via python -B
++PASS control: raw EPS text differs between baseline and OFF (comparator normalises the root)
++PASS positive admit_pair 3x3
++PASS pair record keeps convergence/local_enabled separately
++PASS pre-ON record binds identity and pins
++PASS positive admit_pair global-only incl. whole-product comparator
++PASS retained global-only comparator output is outside product dirs
++PASS control: inventory-only PDF differs from baseline yet pre-ON passes
++PASS altered anchored admission file refused :: code=ANCHOR
++PASS hand-edited commands (max_iter 9, OMP 8) refused by the anchor :: code=ANCHOR
++PASS HELD status in an otherwise filled admission refused :: code=HELD
++PASS null launch field candidate_binary refused :: code=HELD
++PASS null launch field source_archive refused :: code=HELD
++PASS null launch field compiler_and_config refused :: code=HELD
++PASS null launch field shared_libraries refused :: code=HELD
++PASS null launch field venue_identity refused :: code=HELD
++PASS null launch field fresh_venue_resource_admission refused :: code=HELD
++PASS null launch field independent_source_clearance refused :: code=HELD
++PASS unresolved placeholder binary path refused :: code=PLACEHOLDER
++PASS non-hex binary sha refused :: code=BINARY
++PASS tool pins verified before use :: code=TOOL_PIN
++PASS decision_dir inside a run directory refused :: code=DECISION_DIR
++PASS 3x3 ON with 0 witnesses cannot be admitted (grid comes from the anchored admission) :: code=WITNESS
++PASS baseline byte changed (pin kept) :: code=BASELINE
++PASS baseline extra file :: code=BASELINE
++PASS baseline file missing :: code=BASELINE
++PASS baseline file replaced by a symlink :: code=BASELINE
++PASS comparator detects MRC header change :: code=COMPARATOR
++PASS comparator detects MRC header change [evidence]
++PASS comparator detects MRC payload change :: code=COMPARATOR
++PASS comparator detects MRC payload change [evidence]
++PASS comparator detects EPS change :: code=COMPARATOR
++PASS comparator detects corrected_micrographs STAR change :: code=COMPARATOR
++PASS OFF runtime differs from the retained baseline bytes :: code=OFF_RAW
++PASS OFF case STAR differs from the retained baseline bytes :: code=OFF_RAW
++PASS OFF runtime.json missing :: code=RUNTIME
++PASS OFF with a witness line is not an OFF run :: code=WITNESS
++PASS comparator detects a file-inventory difference :: code=COMPARATOR
++PASS inventory difference recorded by the comparator itself
++PASS failed comparator rc retained
++PASS failing OFF gate raises before ON :: code=COMPARATOR
++PASS STOP.json retained with the code
++PASS ON cannot be paired without a passing record :: code=PRE_ON
++PASS absent pre-ON record :: code=PRE_ON
++PASS tampered pre-ON record :: code=PRE_ON
++PASS pre-ON record status not PASS :: code=PRE_ON
++PASS record bound to a different OFF byte :: code=PRE_ON
++PASS retained comparator JSON altered after the gate :: code=PRE_ON
++PASS ON global runtime differs by 1 ulp :: code=GLOBAL_RUNTIME
++PASS ON serialised global STAR block differs :: code=GLOBAL_STAR
++PASS ON missing DC stage line :: code=MANIPULATION
++PASS OFF zero global DC counters :: code=MANIPULATION
++PASS OFF zero global DC counters edited after the gate :: code=PRE_ON
++PASS global DC counters drift between OFF and ON :: code=COUNTERS
++PASS global zeroed count drifts (zeroed != eligible) :: code=MANIPULATION
++PASS global coupled counters drift :: code=COUNTERS
++PASS 3x3 ON local eligible 0 :: code=MANIPULATION
++PASS 3x3 OFF local eligible 0 :: code=MANIPULATION
++PASS coupled global peaks disagree with DC eligible :: code=MANIPULATION
++PASS coupled patch peaks disagree with local DC eligible :: code=MANIPULATION
++PASS duplicate DC counter line :: code=MANIPULATION
++PASS coupled counters absent :: code=MANIPULATION
++PASS convergence log unparsable :: code=CONVERGENCE
++PASS same binary path with a different sha256 in ON :: code=BINARY
++PASS ON extra output file :: code=INVENTORY
++PASS ON witness variant spelling :: code=WITNESS_VARIANT
++PASS global-only ON MRC payload differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON MRC header differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON EPS differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON runtime bytes differ :: code=GLOBAL_ONLY
++PASS global-only ON case STAR bytes differ :: code=GLOBAL_ONLY
++PASS global-only ON has local DC/coupled work :: code=MANIPULATION
++PASS global-only ON carries a witness line :: code=WITNESS
++PASS witness variant (lowercase hyphenless) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: lowercase hyphenless [v3 admits] :: v3 admits
++PASS witness variant (underscored) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: underscored [v3 admits] :: v3 admits
++PASS witness variant (title case) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: title case [v3 admits] :: v3 admits
++PASS witness variant (spaced) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: spaced [v3 admits] :: v3 admits
++PASS control: clean OFF log passes the prescan
++PASS T1 extra staged file with a matching fixture pin :: code=INPUT
++PASS T1 missing staged movie, remaining pins match :: code=INPUT
++PASS control: the retained runtime text carries that literal
++PASS control: Python parses 1e400 as inf without parse_constant
++PASS T2 runtime overflow literal 1e400 with a matching receipt hash :: code=NONFINITE
++PASS control: the receipt lists the symlink with the target hash
++PASS T3 real symlink in output with a self-consistent receipt :: code=INVENTORY
++PASS decision: P1 and P2 hold -> SUPPORTED, never accepted
++PASS decision: improving P2 leaves the noisy raw gate FAIL
++PASS decision: flat/repeated UNIDENTIFIABLE with raw distances
++PASS decision: no increase listed when nothing increases
++PASS decision: P1 lost on one case/field (fractional STAR rms .21)
++PASS decision: the P1 loss is listed as a PASS->FAIL increase
++PASS decision: P2 fails on a single regressed rms (runtime only)
++PASS decision: P2 fails on a tie in rms (strict improvement required)
++PASS decision: P2 fails on a single regressed p95 (runtime only)
++PASS decision: P2 fails on a tie in p95 (strict improvement required)
++PASS decision: P2 fails on a single regressed max (runtime only)
++PASS decision: P2 fails on a tie in max (strict improvement required)
++PASS decision: PASS->PASS increase is listed and P1 still holds
++PASS decision: a noisy ON that passes all limits reports raw gate PASS
++PASS decide_pilot over 8 synthetic cases (crafted scores)
++PASS all 8 pair records retained
++PASS cases parameter reordered :: code=CASES
++PASS cases parameter with a duplicate :: code=CASES
++PASS cases parameter missing a case :: code=CASES
++PASS unlisted extra case directory :: code=CASES
++PASS case without its ON directory :: code=CASES
++PASS a case directory missing entirely :: code=CASES
++PASS real noisy/affine scoring flows through decide_pilot :: noisy OFF rms=1.645370853156
++PASS real data: the tiny coefficient change does not improve every metric, so P2 fails (no vacuous PASS)
++PASS real affine ON keeps PASS on both fields
++TOTAL 126 FAILED 0
+diff --git a/logs_v4/test-run5.log b/logs_v4/test-run5.log
+new file mode 100644
+index 0000000..5d075a3
+--- /dev/null
++++ b/logs_v4/test-run5.log
+@@ -0,0 +1,127 @@
++PASS real HELD admission cannot satisfy pre_ON_gate :: code=HELD
++PASS real HELD admission cannot satisfy admit_pair :: code=HELD
++PASS real HELD admission cannot satisfy decide_pilot :: code=HELD
++PASS HELD failure is retained as STOP.json
++PASS signature rejects caller-typed ['pre_on_status'] on pre_ON_gate
++PASS signature rejects caller-typed ['expected'] on admit_pair
++PASS signature rejects caller-typed ['admission'] on admit_pair
++PASS signature rejects caller-typed ['commands'] on admit_pair
++PASS signature rejects caller-typed ['pair_records'] on decide_pilot
++PASS signature rejects caller-typed ['scores'] on decide_pilot
++PASS signature rejects caller-typed ['expected'] on admit_single
++PASS positive pre_ON_gate noisy (comparator subprocess ran) :: binding=0a30a4300fd3
++PASS retained comparator command is the pinned script via python -B
++PASS control: raw EPS text differs between baseline and OFF (comparator normalises the root)
++PASS positive admit_pair 3x3
++PASS pair record keeps convergence/local_enabled separately
++PASS pre-ON record binds identity and pins
++PASS positive admit_pair global-only incl. whole-product comparator
++PASS retained global-only comparator output is outside product dirs
++PASS control: inventory-only PDF differs from baseline yet pre-ON passes
++PASS altered anchored admission file refused :: code=ANCHOR
++PASS hand-edited commands (max_iter 9, OMP 8) refused by the anchor :: code=ANCHOR
++PASS HELD status in an otherwise filled admission refused :: code=HELD
++PASS null launch field candidate_binary refused :: code=HELD
++PASS null launch field source_archive refused :: code=HELD
++PASS null launch field compiler_and_config refused :: code=HELD
++PASS null launch field shared_libraries refused :: code=HELD
++PASS null launch field venue_identity refused :: code=HELD
++PASS null launch field fresh_venue_resource_admission refused :: code=HELD
++PASS null launch field independent_source_clearance refused :: code=HELD
++PASS unresolved placeholder binary path refused :: code=PLACEHOLDER
++PASS non-hex binary sha refused :: code=BINARY
++PASS tool pins verified before use :: code=TOOL_PIN
++PASS decision_dir inside a run directory refused :: code=DECISION_DIR
++PASS 3x3 ON with 0 witnesses cannot be admitted (grid comes from the anchored admission) :: code=WITNESS
++PASS baseline byte changed (pin kept) :: code=BASELINE
++PASS baseline extra file :: code=BASELINE
++PASS baseline file missing :: code=BASELINE
++PASS baseline file replaced by a symlink :: code=BASELINE
++PASS comparator detects MRC header change :: code=COMPARATOR
++PASS comparator detects MRC header change [evidence]
++PASS comparator detects MRC payload change :: code=COMPARATOR
++PASS comparator detects MRC payload change [evidence]
++PASS comparator detects EPS change :: code=COMPARATOR
++PASS comparator detects corrected_micrographs STAR change :: code=COMPARATOR
++PASS OFF runtime differs from the retained baseline bytes :: code=OFF_RAW
++PASS OFF case STAR differs from the retained baseline bytes :: code=OFF_RAW
++PASS OFF runtime.json missing :: code=RUNTIME
++PASS OFF with a witness line is not an OFF run :: code=WITNESS
++PASS comparator detects a file-inventory difference :: code=COMPARATOR
++PASS inventory difference recorded by the comparator itself
++PASS failed comparator rc retained
++PASS failing OFF gate raises before ON :: code=COMPARATOR
++PASS STOP.json retained with the code
++PASS ON cannot be paired without a passing record :: code=PRE_ON
++PASS absent pre-ON record :: code=PRE_ON
++PASS tampered pre-ON record :: code=PRE_ON
++PASS pre-ON record status not PASS :: code=PRE_ON
++PASS record bound to a different OFF byte :: code=PRE_ON
++PASS retained comparator JSON altered after the gate :: code=PRE_ON
++PASS ON global runtime differs by 1 ulp :: code=GLOBAL_RUNTIME
++PASS ON serialised global STAR block differs :: code=GLOBAL_STAR
++PASS ON missing DC stage line :: code=MANIPULATION
++PASS OFF zero global DC counters :: code=MANIPULATION
++PASS OFF zero global DC counters edited after the gate :: code=PRE_ON
++PASS global DC counters drift between OFF and ON :: code=COUNTERS
++PASS global zeroed count drifts (zeroed != eligible) :: code=MANIPULATION
++PASS global coupled counters drift :: code=COUNTERS
++PASS 3x3 ON local eligible 0 :: code=MANIPULATION
++PASS 3x3 OFF local eligible 0 :: code=MANIPULATION
++PASS coupled global peaks disagree with DC eligible :: code=MANIPULATION
++PASS coupled patch peaks disagree with local DC eligible :: code=MANIPULATION
++PASS duplicate DC counter line :: code=MANIPULATION
++PASS coupled counters absent :: code=MANIPULATION
++PASS convergence log unparsable :: code=CONVERGENCE
++PASS same binary path with a different sha256 in ON :: code=BINARY
++PASS ON extra output file :: code=INVENTORY
++PASS ON witness variant spelling :: code=WITNESS_VARIANT
++PASS global-only ON MRC payload differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON MRC header differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON EPS differs (comparator) :: code=GLOBAL_ONLY
++PASS global-only ON runtime bytes differ :: code=GLOBAL_ONLY
++PASS global-only ON case STAR bytes differ :: code=GLOBAL_ONLY
++PASS global-only ON has local DC/coupled work :: code=MANIPULATION
++PASS global-only ON carries a witness line :: code=WITNESS
++PASS witness variant (lowercase hyphenless) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: lowercase hyphenless [v3 admits] :: v3 admits
++PASS witness variant (underscored) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: underscored [v3 admits] :: v3 admits
++PASS witness variant (title case) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: title case [v3 admits] :: v3 admits
++PASS witness variant (spaced) rejected by the prescan :: code=WITNESS_VARIANT
++PASS control: spaced [v3 admits] :: v3 admits
++PASS control: clean OFF log passes the prescan
++PASS T1 extra staged file with a matching fixture pin :: code=INPUT
++PASS T1 missing staged movie, remaining pins match :: code=INPUT
++PASS control: the retained runtime text carries that literal
++PASS control: Python parses 1e400 as inf without parse_constant
++PASS T2 runtime overflow literal 1e400 with a matching receipt hash :: code=NONFINITE
++PASS control: the receipt lists the symlink with the target hash
++PASS T3 real symlink in output with a self-consistent receipt :: code=INVENTORY
++PASS decision: P1 and P2 hold -> SUPPORTED, never accepted
++PASS decision: improving P2 leaves the noisy raw gate FAIL
++PASS decision: flat/repeated UNIDENTIFIABLE with raw distances
++PASS decision: no increase listed when nothing increases
++PASS decision: P1 lost on one case/field (fractional STAR rms .21)
++PASS decision: the P1 loss is listed as a PASS->FAIL increase
++PASS decision: P2 fails on a single regressed rms (runtime only)
++PASS decision: P2 fails on a tie in rms (strict improvement required)
++PASS decision: P2 fails on a single regressed p95 (runtime only)
++PASS decision: P2 fails on a tie in p95 (strict improvement required)
++PASS decision: P2 fails on a single regressed max (runtime only)
++PASS decision: P2 fails on a tie in max (strict improvement required)
++PASS decision: PASS->PASS increase is listed and P1 still holds
++PASS decision: a noisy ON that passes all limits reports raw gate PASS
++PASS decide_pilot over 8 synthetic cases (crafted scores)
++PASS all 8 pair records retained
++PASS cases parameter reordered :: code=CASES
++PASS cases parameter with a duplicate :: code=CASES
++PASS cases parameter missing a case :: code=CASES
++PASS unlisted extra case directory :: code=CASES
++PASS case without its ON directory :: code=CASES
++PASS a case directory missing entirely :: code=CASES
++PASS real noisy/affine scoring flows through decide_pilot :: noisy OFF rms=1.645370853156
++PASS real data: the tiny coefficient change does not improve every metric, so P2 fails (no vacuous PASS)
++PASS real affine ON keeps PASS on both fields
++TOTAL 126 FAILED 0

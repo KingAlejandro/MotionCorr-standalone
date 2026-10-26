@@ -1,0 +1,127 @@
+PASS real HELD admission cannot satisfy pre_ON_gate :: code=HELD
+PASS real HELD admission cannot satisfy admit_pair :: code=HELD
+PASS real HELD admission cannot satisfy decide_pilot :: code=HELD
+PASS HELD failure is retained as STOP.json
+PASS signature rejects caller-typed ['pre_on_status'] on pre_ON_gate
+PASS signature rejects caller-typed ['expected'] on admit_pair
+PASS signature rejects caller-typed ['admission'] on admit_pair
+PASS signature rejects caller-typed ['commands'] on admit_pair
+PASS signature rejects caller-typed ['pair_records'] on decide_pilot
+PASS signature rejects caller-typed ['scores'] on decide_pilot
+PASS signature rejects caller-typed ['expected'] on admit_single
+PASS positive pre_ON_gate noisy (comparator subprocess ran) :: binding=10488954fa8b
+PASS retained comparator command is the pinned script via python -B
+PASS control: raw EPS text differs between baseline and OFF (comparator normalises the root)
+PASS positive admit_pair 3x3
+PASS pair record keeps convergence/local_enabled separately
+PASS pre-ON record binds identity and pins
+PASS positive admit_pair global-only incl. whole-product comparator
+PASS retained global-only comparator output is outside product dirs
+PASS control: inventory-only PDF differs from baseline yet pre-ON passes
+PASS altered anchored admission file refused :: code=ANCHOR
+PASS hand-edited commands (max_iter 9, OMP 8) refused by the anchor :: code=ANCHOR
+PASS HELD status in an otherwise filled admission refused :: code=HELD
+PASS null launch field candidate_binary refused :: code=HELD
+PASS null launch field source_archive refused :: code=HELD
+PASS null launch field compiler_and_config refused :: code=HELD
+PASS null launch field shared_libraries refused :: code=HELD
+PASS null launch field venue_identity refused :: code=HELD
+PASS null launch field fresh_venue_resource_admission refused :: code=HELD
+PASS null launch field independent_source_clearance refused :: code=HELD
+PASS unresolved placeholder binary path refused :: code=PLACEHOLDER
+PASS non-hex binary sha refused :: code=BINARY
+PASS tool pins verified before use :: code=TOOL_PIN
+PASS decision_dir inside a run directory refused :: code=DECISION_DIR
+PASS 3x3 ON with 0 witnesses cannot be admitted (grid comes from the anchored admission) :: code=WITNESS
+PASS baseline byte changed (pin kept) :: code=BASELINE
+PASS baseline extra file :: code=BASELINE
+PASS baseline file missing :: code=BASELINE
+PASS baseline file replaced by a symlink :: code=BASELINE
+PASS comparator detects MRC header change :: code=COMPARATOR
+PASS comparator detects MRC header change [evidence]
+PASS comparator detects MRC payload change :: code=COMPARATOR
+PASS comparator detects MRC payload change [evidence]
+PASS comparator detects EPS change :: code=COMPARATOR
+PASS comparator detects corrected_micrographs STAR change :: code=COMPARATOR
+PASS OFF runtime differs from the retained baseline bytes :: code=OFF_RAW
+PASS OFF case STAR differs from the retained baseline bytes :: code=OFF_RAW
+PASS OFF runtime.json missing :: code=RUNTIME
+PASS OFF with a witness line is not an OFF run :: code=WITNESS
+PASS comparator detects a file-inventory difference :: code=COMPARATOR
+PASS inventory difference recorded by the comparator itself
+PASS failed comparator rc retained
+PASS failing OFF gate raises before ON :: code=COMPARATOR
+PASS STOP.json retained with the code
+PASS ON cannot be paired without a passing record :: code=PRE_ON
+PASS absent pre-ON record :: code=PRE_ON
+PASS tampered pre-ON record :: code=PRE_ON
+PASS pre-ON record status not PASS :: code=PRE_ON
+PASS record bound to a different OFF byte :: code=PRE_ON
+PASS retained comparator JSON altered after the gate :: code=PRE_ON
+PASS ON global runtime differs by 1 ulp :: code=GLOBAL_RUNTIME
+PASS ON serialised global STAR block differs :: code=GLOBAL_STAR
+PASS ON missing DC stage line :: code=MANIPULATION
+PASS OFF zero global DC counters :: code=MANIPULATION
+PASS OFF zero global DC counters edited after the gate :: code=PRE_ON
+PASS global DC counters drift between OFF and ON :: code=COUNTERS
+PASS global zeroed count drifts (zeroed != eligible) :: code=MANIPULATION
+PASS global coupled counters drift :: code=COUNTERS
+PASS 3x3 ON local eligible 0 :: code=MANIPULATION
+PASS 3x3 OFF local eligible 0 :: code=MANIPULATION
+PASS coupled global peaks disagree with DC eligible :: code=MANIPULATION
+PASS coupled patch peaks disagree with local DC eligible :: code=MANIPULATION
+PASS duplicate DC counter line :: code=MANIPULATION
+PASS coupled counters absent :: code=MANIPULATION
+PASS convergence log unparsable :: code=CONVERGENCE
+PASS same binary path with a different sha256 in ON :: code=BINARY
+PASS ON extra output file :: code=INVENTORY
+PASS ON witness variant spelling :: code=WITNESS_VARIANT
+PASS global-only ON MRC payload differs (comparator) :: code=GLOBAL_ONLY
+PASS global-only ON MRC header differs (comparator) :: code=GLOBAL_ONLY
+PASS global-only ON EPS differs (comparator) :: code=GLOBAL_ONLY
+PASS global-only ON runtime bytes differ :: code=GLOBAL_ONLY
+PASS global-only ON case STAR bytes differ :: code=GLOBAL_ONLY
+PASS global-only ON has local DC/coupled work :: code=MANIPULATION
+PASS global-only ON carries a witness line :: code=WITNESS
+PASS witness variant (lowercase hyphenless) rejected by the prescan :: code=WITNESS_VARIANT
+PASS control: lowercase hyphenless [v3 admits] :: v3 admits
+PASS witness variant (underscored) rejected by the prescan :: code=WITNESS_VARIANT
+PASS control: underscored [v3 admits] :: v3 admits
+PASS witness variant (title case) rejected by the prescan :: code=WITNESS_VARIANT
+PASS control: title case [v3 admits] :: v3 admits
+PASS witness variant (spaced) rejected by the prescan :: code=WITNESS_VARIANT
+PASS control: spaced [v3 admits] :: v3 admits
+PASS control: clean OFF log passes the prescan
+PASS T1 extra staged file with a matching fixture pin :: code=INPUT
+PASS T1 missing staged movie, remaining pins match :: code=INPUT
+PASS control: the retained runtime text carries that literal
+PASS control: Python parses 1e400 as inf without parse_constant
+PASS T2 runtime overflow literal 1e400 with a matching receipt hash :: code=NONFINITE
+PASS control: the receipt lists the symlink with the target hash
+PASS T3 real symlink in output with a self-consistent receipt :: code=INVENTORY
+PASS decision: P1 and P2 hold -> SUPPORTED, never accepted
+PASS decision: improving P2 leaves the noisy raw gate FAIL
+PASS decision: flat/repeated UNIDENTIFIABLE with raw distances
+PASS decision: no increase listed when nothing increases
+PASS decision: P1 lost on one case/field (fractional STAR rms .21)
+PASS decision: the P1 loss is listed as a PASS->FAIL increase
+PASS decision: P2 fails on a single regressed rms (runtime only)
+PASS decision: P2 fails on a tie in rms (strict improvement required)
+PASS decision: P2 fails on a single regressed p95 (runtime only)
+PASS decision: P2 fails on a tie in p95 (strict improvement required)
+PASS decision: P2 fails on a single regressed max (runtime only)
+PASS decision: P2 fails on a tie in max (strict improvement required)
+PASS decision: PASS->PASS increase is listed and P1 still holds
+PASS decision: a noisy ON that passes all limits reports raw gate PASS
+PASS decide_pilot over 8 synthetic cases (crafted scores)
+PASS all 8 pair records retained
+PASS cases parameter reordered :: code=CASES
+PASS cases parameter with a duplicate :: code=CASES
+PASS cases parameter missing a case :: code=CASES
+PASS unlisted extra case directory :: code=CASES
+PASS case without its ON directory :: code=CASES
+PASS a case directory missing entirely :: code=CASES
+PASS real noisy/affine scoring flows through decide_pilot :: noisy OFF rms=1.645370853156
+PASS real data: the tiny coefficient change does not improve every metric, so P2 fails (no vacuous PASS)
+PASS real affine ON keeps PASS on both fields
+TOTAL 126 FAILED 0

@@ -1,0 +1,10 @@
+Q1   control: OFF runtime != retained bytes, honest pre_ON_gate             predicted=REJECTED:OFF_RAW           observed=REJECTED:OFF_RAW
+Q2   same OFF defect, gate skipped, self-consistent pre_on.json forged      predicted=ACCEPTED                   observed=ACCEPTED
+Q3   OFF DC counters zero: pre_ON_gate result                               predicted=ACCEPTED                   observed=ACCEPTED
+Q4   candidate_binary sha != caller binary_sha256: pre_ON_gate              predicted=ACCEPTED                   observed=ACCEPTED
+Q5   control: gates only, then decide_pilot (same decision_dir)             predicted=ACCEPTED                   observed=ACCEPTED
+Q6   gates + admit_pair x8, then decide_pilot (same decision_dir)           predicted=REJECTED:GLOBAL_ONLY       observed=REJECTED:GLOBAL_ONLY
+Q7   ON DC line missing cpu.local field                                     predicted=REJECTED:MANIPULATION      observed=REJECTED:MANIPULATION
+Q8   ON extra coupled line with unknown scope                               predicted=REJECTED:MANIPULATION      observed=REJECTED:MANIPULATION
+Q9   ON DC arm=global instead of both                                       predicted=REJECTED:MANIPULATION      observed=REJECTED:MANIPULATION
+PROBES 9, not as predicted: none

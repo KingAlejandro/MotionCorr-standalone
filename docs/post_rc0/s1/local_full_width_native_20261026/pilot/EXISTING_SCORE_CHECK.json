@@ -1,0 +1,154 @@
+{
+  "rows": [
+    {
+      "case": "noisy",
+      "arm": "UP_only",
+      "metrics": {
+        "runtime": {
+          "angstrom": {
+            "rms": 1.6453708531561488,
+            "p95": 3.337290305991788,
+            "max": 7.284025716813742
+          },
+          "px": {
+            "rms": 1.8591761052611848,
+            "p95": 3.770949498295806,
+            "max": 8.230537533122872
+          },
+          "gate": "FAIL"
+        },
+        "STAR": {
+          "angstrom": {
+            "rms": 1.6453973835300504,
+            "p95": 3.3372789185622946,
+            "max": 7.2837842240675865
+          },
+          "px": {
+            "rms": 1.859206083084803,
+            "p95": 3.770936631143836,
+            "max": 8.230264659963375
+          },
+          "gate": "FAIL"
+        },
+        "local_enabled": true,
+        "roundtrip_vector_max_px": 0.0004910843767115281,
+        "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks"
+      },
+      "max_abs_difference_A": 6.217248937900877e-15,
+      "metadata_only_fetch_rejected_as_complete_producer": true
+    },
+    {
+      "case": "noisy",
+      "arm": "UP_B2",
+      "metrics": {
+        "runtime": {
+          "angstrom": {
+            "rms": 1.902570068408318,
+            "p95": 4.200286643702108,
+            "max": 9.294777041495406
+          },
+          "px": {
+            "rms": 2.1497966874670262,
+            "p95": 4.74608660305323,
+            "max": 10.502572928243396
+          },
+          "gate": "FAIL"
+        },
+        "STAR": {
+          "angstrom": {
+            "rms": 1.9025867107108656,
+            "p95": 4.200096445958943,
+            "max": 9.294979895568087
+          },
+          "px": {
+            "rms": 2.1498154923286616,
+            "p95": 4.7458716903490865,
+            "max": 10.502802141884843
+          },
+          "gate": "FAIL"
+        },
+        "local_enabled": true,
+        "roundtrip_vector_max_px": 0.0003256919129331806,
+        "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks"
+      },
+      "max_abs_difference_A": 1.7763568394002505e-15,
+      "metadata_only_fetch_rejected_as_complete_producer": true
+    },
+    {
+      "case": "affine",
+      "arm": "UP_only",
+      "metrics": {
+        "runtime": {
+          "angstrom": {
+            "rms": 0.11703506022519784,
+            "p95": 0.260334133944742,
+            "max": 0.5373596162885222
+          },
+          "px": {
+            "rms": 0.13224300590417834,
+            "p95": 0.29416286321439766,
+            "max": 0.6071860071056748
+          },
+          "gate": "PASS"
+        },
+        "STAR": {
+          "angstrom": {
+            "rms": 0.11704036245839815,
+            "p95": 0.26033737282632224,
+            "max": 0.537390780106525
+          },
+          "px": {
+            "rms": 0.13224899712813348,
+            "p95": 0.2941665229675958,
+            "max": 0.6072212204593502
+          },
+          "gate": "PASS"
+        },
+        "local_enabled": true,
+        "roundtrip_vector_max_px": 0.00012927271421428672,
+        "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks"
+      },
+      "max_abs_difference_A": 0.0,
+      "metadata_only_fetch_rejected_as_complete_producer": true
+    },
+    {
+      "case": "affine",
+      "arm": "UP_B2",
+      "metrics": {
+        "runtime": {
+          "angstrom": {
+            "rms": 0.11521936086748896,
+            "p95": 0.2569730321394685,
+            "max": 0.5159533681558085
+          },
+          "px": {
+            "rms": 0.13019136821185193,
+            "p95": 0.29036500806719606,
+            "max": 0.5829981561082582
+          },
+          "gate": "PASS"
+        },
+        "STAR": {
+          "angstrom": {
+            "rms": 0.11522616660000087,
+            "p95": 0.256991911881249,
+            "max": 0.515974571149509
+          },
+          "px": {
+            "rms": 0.13019905830508574,
+            "p95": 0.2903863411087559,
+            "max": 0.5830221142932304
+          },
+          "gate": "PASS"
+        },
+        "local_enabled": true,
+        "roundtrip_vector_max_px": 0.00020340317564599588,
+        "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks"
+      },
+      "max_abs_difference_A": 1.1102230246251565e-16,
+      "metadata_only_fetch_rejected_as_complete_producer": true
+    }
+  ],
+  "status": "PASS for four metadata-only score reproductions; no new native qualification",
+  "tolerance_A": 1e-12
+}

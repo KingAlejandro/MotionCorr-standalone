@@ -1,0 +1,80 @@
+{
+  "utc": {
+    "current_time": "2026-10-26 21:11:01 UTC"
+  },
+  "purpose": "Single bounded direct-route read-only reachability refresh after implementation; no native jobs",
+  "probes": [
+    {
+      "host": "cpu64",
+      "command": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "StrictHostKeyChecking=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "cpu64",
+        "hostname"
+      ],
+      "start": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "caf9b3",
+          "wall_time_seconds": 1.003594667,
+          "session_id": 60092,
+          "original_token_count": 0,
+          "output": ""
+        }
+      },
+      "terminal": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "08bbb2",
+          "wall_time_seconds": 0.065479375,
+          "exit_code": 255,
+          "original_token_count": 17,
+          "output": "ssh: connect to host 130.246.81.24 port 22: Operation timed out\r\n"
+        }
+      }
+    },
+    {
+      "host": "4GPUs",
+      "command": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "StrictHostKeyChecking=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "4GPUs",
+        "hostname"
+      ],
+      "start": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "4ab3f9",
+          "wall_time_seconds": 1.0035955,
+          "session_id": 63996,
+          "original_token_count": 0,
+          "output": ""
+        }
+      },
+      "terminal": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "e18079",
+          "wall_time_seconds": 0.065470875,
+          "exit_code": 255,
+          "original_token_count": 17,
+          "output": "ssh: connect to host 130.246.80.58 port 22: Operation timed out\r\n"
+        }
+      }
+    }
+  ],
+  "no_gateway_attempt": true,
+  "no_key_changes": true,
+  "no_retry_loop": true,
+  "no_native_producer": true
+}

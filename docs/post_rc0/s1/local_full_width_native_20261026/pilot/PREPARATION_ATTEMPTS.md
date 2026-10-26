@@ -1,0 +1,1 @@
+Existing factorial helper EVIDENCE_INDEX.json was absent; correct retained authority is results/RAW_INDEX.json. Inventory first used UP_only as a four_arm_summary label; actual aggregate key is UP. Both read-only inspection errors preceded any new scoring, native execution or admission. No original artifact changed.

@@ -1,0 +1,551 @@
+{
+ "total": 109,
+ "failed": 0,
+ "results": [
+  {
+   "name": "positive admit noisy OFF",
+   "ok": true,
+   "detail": "witness_lines=0"
+  },
+  {
+   "name": "positive admit noisy ON",
+   "ok": true,
+   "detail": "witness_lines=9"
+  },
+  {
+   "name": "positive admit flat OFF",
+   "ok": true,
+   "detail": "witness_lines=0"
+  },
+  {
+   "name": "positive admit flat ON",
+   "ok": true,
+   "detail": "witness_lines=0"
+  },
+  {
+   "name": "positive score noisy OFF equals retained pair",
+   "ok": true,
+   "detail": "maxdiff_A=6.22e-15"
+  },
+  {
+   "name": "positive score noisy ON equals retained pair",
+   "ok": true,
+   "detail": "maxdiff_A=6.22e-15"
+  },
+  {
+   "name": "v3 commands equal v1 argv/cwd/env/inputs/witness",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "witness derivation: 9 on 3x3 ON, else 0",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "placeholder binary path refused",
+   "ok": true,
+   "detail": "code=PLACEHOLDER"
+  },
+  {
+   "name": "bad binary sha refused",
+   "ok": true,
+   "detail": "code=BINARY"
+  },
+  {
+   "name": "unresolved draft row not admissible",
+   "ok": true,
+   "detail": "code=PLACEHOLDER"
+  },
+  {
+   "name": "draft row cannot be re-resolved twice",
+   "ok": true,
+   "detail": "code=PLACEHOLDER"
+  },
+  {
+   "name": "missing arm",
+   "ok": true,
+   "detail": "code=ARM"
+  },
+  {
+   "name": "ON receipt in OFF slot",
+   "ok": true,
+   "detail": "code=ARM"
+  },
+  {
+   "name": "OFF receipt in ON slot",
+   "ok": true,
+   "detail": "code=ARM"
+  },
+  {
+   "name": "swapped dirs: OFF slot holds ON",
+   "ok": true,
+   "detail": "code=ARM"
+  },
+  {
+   "name": "swapped dirs: ON slot holds OFF",
+   "ok": true,
+   "detail": "code=ARM"
+  },
+  {
+   "name": "run dir copied outside evidence_root/case/arm",
+   "ok": true,
+   "detail": "code=RUN_DIR"
+  },
+  {
+   "name": "copied run dir with a self-consistent receipt",
+   "ok": true,
+   "detail": "code=RUN_DIR"
+  },
+  {
+   "name": "receipt run_dir names another directory",
+   "ok": true,
+   "detail": "code=RUN_DIR"
+  },
+  {
+   "name": "missing flag on ON",
+   "ok": true,
+   "detail": "code=FLAG_COUNT"
+  },
+  {
+   "name": "flag on OFF",
+   "ok": true,
+   "detail": "code=FLAG_COUNT"
+  },
+  {
+   "name": "duplicate flag on ON",
+   "ok": true,
+   "detail": "code=FLAG_COUNT"
+  },
+  {
+   "name": "extra unknown argv",
+   "ok": true,
+   "detail": "code=ARGV"
+  },
+  {
+   "name": "changed argv value",
+   "ok": true,
+   "detail": "code=ARGV"
+  },
+  {
+   "name": "argv[0] left as placeholder",
+   "ok": true,
+   "detail": "code=ARGV"
+  },
+  {
+   "name": "wrong binary sha in receipt",
+   "ok": true,
+   "detail": "code=BINARY"
+  },
+  {
+   "name": "uppercase binary sha in receipt",
+   "ok": true,
+   "detail": "code=BINARY"
+  },
+  {
+   "name": "cwd mismatch",
+   "ok": true,
+   "detail": "code=CWD"
+  },
+  {
+   "name": "env value changed",
+   "ok": true,
+   "detail": "code=ENV"
+  },
+  {
+   "name": "env var missing",
+   "ok": true,
+   "detail": "code=ENV"
+  },
+  {
+   "name": "env var extra",
+   "ok": true,
+   "detail": "code=ENV"
+  },
+  {
+   "name": "observed child env has extra OMP_PROC_BIND",
+   "ok": true,
+   "detail": "code=ENV_OBSERVED"
+  },
+  {
+   "name": "observed child env value differs",
+   "ok": true,
+   "detail": "code=ENV_OBSERVED"
+  },
+  {
+   "name": "exit 1 with a complete tap",
+   "ok": true,
+   "detail": "code=EXIT"
+  },
+  {
+   "name": "exit True",
+   "ok": true,
+   "detail": "code=EXIT"
+  },
+  {
+   "name": "exit \"0\"",
+   "ok": true,
+   "detail": "code=EXIT"
+  },
+  {
+   "name": "case swapped in receipt",
+   "ok": true,
+   "detail": "code=CASE"
+  },
+  {
+   "name": "receipt schema wrong",
+   "ok": true,
+   "detail": "code=SCHEMA"
+  },
+  {
+   "name": "publication is a list",
+   "ok": true,
+   "detail": "code=SCHEMA"
+  },
+  {
+   "name": "publication bytes is a string",
+   "ok": true,
+   "detail": "code=SCHEMA"
+  },
+  {
+   "name": "runtime pin is not a dict",
+   "ok": true,
+   "detail": "code=SCHEMA"
+  },
+  {
+   "name": "receipt carries NaN",
+   "ok": true,
+   "detail": "code=NONFINITE"
+  },
+  {
+   "name": "extra file in staged cwd",
+   "ok": true,
+   "detail": "code=INPUT"
+  },
+  {
+   "name": "missing staged movie",
+   "ok": true,
+   "detail": "code=INPUT"
+  },
+  {
+   "name": "staged input byte tamper",
+   "ok": true,
+   "detail": "code=INPUT"
+  },
+  {
+   "name": "witness x_norm 22",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "witness pnx 41",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "witness nfx 21",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "witness x_norm 42.0 text",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "witness spaced variant",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "witness no leading space",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "8 witness lines on 3x3 ON",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "10 witness lines on 3x3 ON",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "0 witness lines on 3x3 ON",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "1 witness line on global-only ON",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "1 witness line on global-only OFF",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "1 witness line on 3x3 OFF",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "log of another case",
+   "ok": true,
+   "detail": "code=LOG_CASE"
+  },
+  {
+   "name": "log is not utf-8",
+   "ok": true,
+   "detail": "code=LOG_CASE"
+  },
+  {
+   "name": "unlisted extra output file (receipt unchanged)",
+   "ok": true,
+   "detail": "code=INVENTORY"
+  },
+  {
+   "name": "extra output file even when listed in the receipt",
+   "ok": true,
+   "detail": "code=INVENTORY"
+  },
+  {
+   "name": "listed output file deleted",
+   "ok": true,
+   "detail": "code=INVENTORY"
+  },
+  {
+   "name": "required output absent from disk and receipt",
+   "ok": true,
+   "detail": "code=INVENTORY"
+  },
+  {
+   "name": "listed output byte changed",
+   "ok": true,
+   "detail": "code=PUBLICATION_HASH"
+  },
+  {
+   "name": "symlink in output",
+   "ok": true,
+   "detail": "code=INVENTORY"
+  },
+  {
+   "name": "publication path escapes output",
+   "ok": true,
+   "detail": "code=INVENTORY"
+  },
+  {
+   "name": "runtime.json replaced by {} (receipt stale)",
+   "ok": true,
+   "detail": "code=RUNTIME"
+  },
+  {
+   "name": "runtime.json tampered to another valid model (receipt stale)",
+   "ok": true,
+   "detail": "code=RUNTIME"
+  },
+  {
+   "name": "runtime.json missing",
+   "ok": true,
+   "detail": "code=RUNTIME"
+  },
+  {
+   "name": "runtime NaN with matching receipt hash",
+   "ok": true,
+   "detail": "code=NONFINITE"
+  },
+  {
+   "name": "runtime 17 coefficients with matching receipt hash",
+   "ok": true,
+   "detail": "code=RUNTIME"
+  },
+  {
+   "name": "runtime local_enabled integer with matching receipt hash",
+   "ok": true,
+   "detail": "code=RUNTIME"
+  },
+  {
+   "name": "runtime 4 frames with matching receipt hash",
+   "ok": true,
+   "detail": "code=RUNTIME"
+  },
+  {
+   "name": "runtime missing key with matching receipt hash",
+   "ok": true,
+   "detail": "code=RUNTIME"
+  },
+  {
+   "name": "stdout.log tampered (receipt stale)",
+   "ok": true,
+   "detail": "code=STDOUT"
+  },
+  {
+   "name": "stdout.log missing",
+   "ok": true,
+   "detail": "code=STDOUT"
+  },
+  {
+   "name": "affine STAR in noisy run is receipt-consistent (admits)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "affine STAR in noisy run refused at scoring",
+   "ok": true,
+   "detail": "code=STAR_CASE"
+  },
+  {
+   "name": "truth file of another case name",
+   "ok": true,
+   "detail": "code=TRUTH"
+  },
+  {
+   "name": "STAR file name of another case",
+   "ok": true,
+   "detail": "code=STAR_CASE"
+  },
+  {
+   "name": "case absent from manifest",
+   "ok": true,
+   "detail": "code=CASE"
+  },
+  {
+   "name": "manifest hash swap",
+   "ok": true,
+   "detail": "code=MANIFEST"
+  },
+  {
+   "name": "in-bounds wrong ROI [0,96,0,128]",
+   "ok": true,
+   "detail": "code=ROI"
+  },
+  {
+   "name": "control: v2 lowlevel accepts that wrong ROI (the gap field_metrics_bound closes)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "control: ON-labelled receipt in OFF slot (v2 admits=True, v3 admits=False)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "control: receipt without arm (v2 admits=True, v3 admits=False)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "control: unlisted extra output (v2 admits=True, v3 admits=False)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "control: runtime.json tamper (v2 admits=True, v3 admits=False)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lowlevel wrong truth sha rejected",
+   "ok": true,
+   "detail": "ValueError"
+  },
+  {
+   "name": "lowlevel 17 coefficients rejected",
+   "ok": true,
+   "detail": "ValueError"
+  },
+  {
+   "name": "lowlevel integer local_enabled rejected",
+   "ok": true,
+   "detail": "ValueError"
+  },
+  {
+   "name": "lowlevel disabled with coefficients rejected",
+   "ok": true,
+   "detail": "ValueError"
+  },
+  {
+   "name": "lowlevel 4-frame global rejected",
+   "ok": true,
+   "detail": "ValueError"
+  },
+  {
+   "name": "lowlevel out-of-bounds ROI rejected",
+   "ok": true,
+   "detail": "ValueError"
+  },
+  {
+   "name": "lowlevel positive control",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "retained pair noisy/UP_only reproduces",
+   "ok": true,
+   "detail": "maxdiff_A=6.22e-15"
+  },
+  {
+   "name": "retained metadata-only fetch noisy/UP_only is not a complete producer",
+   "ok": true,
+   "detail": "code=SCHEMA"
+  },
+  {
+   "name": "retained pair noisy/UP_B2 reproduces",
+   "ok": true,
+   "detail": "maxdiff_A=1.78e-15"
+  },
+  {
+   "name": "retained metadata-only fetch noisy/UP_B2 is not a complete producer",
+   "ok": true,
+   "detail": "code=SCHEMA"
+  },
+  {
+   "name": "retained pair affine/UP_only reproduces",
+   "ok": true,
+   "detail": "maxdiff_A=0"
+  },
+  {
+   "name": "retained metadata-only fetch affine/UP_only is not a complete producer",
+   "ok": true,
+   "detail": "code=SCHEMA"
+  },
+  {
+   "name": "retained pair affine/UP_B2 reproduces",
+   "ok": true,
+   "detail": "maxdiff_A=1.11e-16"
+  },
+  {
+   "name": "retained metadata-only fetch affine/UP_B2 is not a complete producer",
+   "ok": true,
+   "detail": "code=SCHEMA"
+  },
+  {
+   "name": "all admission tool pins verify",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "altered tool pin refused",
+   "ok": true,
+   "detail": "code=TOOL_PIN"
+  },
+  {
+   "name": "admission v3 pins comparator, scorers, tests and all transitive generators",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "admission v3 stays HELD with final fields null",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "launch gate: ON only after OFF compat and source identity PASS",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

@@ -25,7 +25,7 @@ env['PYTHONDONTWRITEBYTECODE'] = '1'
 (root/'results').mkdir(exist_ok=True)
 started = time.time()
 with (root/'results'/'mech.log').open('x') as log:
-    r = subprocess.run([str(Path.home()/'.mc-venv/bin/python'), '-I', '-B', str(root/'scripts'/'w6.py'), '--run-frozen-w6'],
+    r = subprocess.run([str(Path.home()/'.mc-venv/bin/python'), '-I', '-B', str(root/'scripts'/'mech.py'), '--run-frozen-w6-round2'],
         env=env, stdout=log, stderr=subprocess.STDOUT, timeout=3600)
 out = dict(host=os.uname().nodename, affinity=sorted(os.sched_getaffinity(0)), busy_fraction=busy,
     started=started, finished=time.time(), exit=r.returncode, native_runs=0,

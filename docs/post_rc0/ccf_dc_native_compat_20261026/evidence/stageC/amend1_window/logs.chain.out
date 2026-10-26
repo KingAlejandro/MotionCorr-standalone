@@ -1,0 +1,37 @@
+leases acquired (own, cpu80-87, gpu2-correctness) 2026-10-26T23:03:16Z; affinity: pid 4014885's current affinity list: 80-87
+python: 3.12.3 2.5.3
+ad10f27e4a0d17900342cf5fe1ae902eea9c84b6aae7bc1248707dc9ab34dd6d  /home/alex/mc-dcnative-stagec-amend1-20261026/tools/stageC_guard.sh
+daee5f14296e8af0b2b5a6e595fbe48d4b9ce52dd93645b5e864da01fa973e00  /home/alex/mc-dcnative-stagec-amend1-20261026/tools/ccf_dc_stagec_driver.py
+3cbb04d5c37dc1d2acc108a053c28294da1b9c7cbc88f5722a4c00978c481088  /home/alex/mc-dcnative-stagec-amend1-20261026/tools/test_ccf_dc_stagec_guard.py
+3dc75346215d151733a3b895a75f67b52b14afd20a5ebd0ebd26b962445ce109  /home/alex/mc-dcnative-stagec-amend1-20261026/tools/test_ccf_dc_stagec_lifecycle.py
+== 1. standalone guard, real entry (STAGEC_REAL=1), once, read-only 2026-10-26T23:03:16Z
+guard rc=0
+== guard amend1-window 2026-10-26T23:03:16Z
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1551, 0, 38
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 425, 0, 36
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 425, 0, 31
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49769, 88, 67
+3983855, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1540 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+3983855, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49758 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server
+cpu80-87 busy%: cpu80 0 cpu81 0 cpu82 0 cpu83 0 cpu84 0 cpu85 0 cpu86 0 cpu87 0 
+processes currently running on cpu80-87:
+ 85 R     0.0 alex     4014949 ps -eo psr,stat,pcpu,user,pid,args --no-headers
+scratch used 18690219 bytes of cap 21474836480; df available 634833575936; memory total 464899809280 available 447750787072
+guard amend1-window passed
+== 2. guard shim tests on this Linux (awk/grep/df variants) 2026-10-26T23:03:19Z
+guard-tests rc=0
+----------------------------------------------------------------------
+Ran 8 tests in 7.872s
+
+OK
+== 3. fake-child lifecycle and sampling tests, Linux /proc 2026-10-26T23:03:27Z
+lifecycle rc=0
+----------------------------------------------------------------------
+Ran 12 tests in 14.714s
+
+OK
+== scratch
+20M	/home/alex/mc-dcnative-stagec-amend1-20261026
+== done 2026-10-26T23:03:42Z

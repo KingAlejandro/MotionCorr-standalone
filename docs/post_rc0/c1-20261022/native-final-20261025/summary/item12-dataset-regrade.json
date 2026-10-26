@@ -1,0 +1,129 @@
+{
+ "gpus": [
+  "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+  "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+  "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+  "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+ ],
+ "cpu_masks": [
+  "96-97",
+  "98-99",
+  "100-101",
+  "102-103"
+ ],
+ "wrapper_sha256": "260a79b89dbd97c543179cb46e452493d5fa34fa473c7935e1320d7566eba97b",
+ "shim_sha256": "87caff0872730a11e753999a205ddc4f629eb4780af09236296a47543944e427",
+ "runs": {
+  "d1": {
+   "rc": 0,
+   "binary_sha256": "d7c4e2e3baa370defb5d3252cd0ca6e4d7ab57c9a1665037fa54d461a51b2e6d",
+   "expect": "pass",
+   "fault_worker": null,
+   "fault_uuid": null,
+   "verdict": "PASS",
+   "dataset_ready": true,
+   "failure": null,
+   "problems": []
+  },
+  "d2": {
+   "rc": 0,
+   "binary_sha256": "d7c4e2e3baa370defb5d3252cd0ca6e4d7ab57c9a1665037fa54d461a51b2e6d",
+   "expect": "pass",
+   "fault_worker": null,
+   "fault_uuid": null,
+   "verdict": "PASS",
+   "dataset_ready": true,
+   "failure": null,
+   "problems": []
+  },
+  "dshim": {
+   "rc": 0,
+   "binary_sha256": "87caff0872730a11e753999a205ddc4f629eb4780af09236296a47543944e427",
+   "expect": "pass",
+   "fault_worker": null,
+   "fault_uuid": null,
+   "verdict": "PASS",
+   "dataset_ready": true,
+   "failure": null,
+   "problems": []
+  },
+  "d4": {
+   "rc": 0,
+   "binary_sha256": "d7c4e2e3baa370defb5d3252cd0ca6e4d7ab57c9a1665037fa54d461a51b2e6d",
+   "expect": "pass",
+   "fault_worker": null,
+   "fault_uuid": null,
+   "verdict": "PASS",
+   "dataset_ready": true,
+   "failure": null,
+   "problems": []
+  },
+  "dpoison": {
+   "rc": 3,
+   "binary_sha256": "260a79b89dbd97c543179cb46e452493d5fa34fa473c7935e1320d7566eba97b",
+   "expect": "poison_one",
+   "fault_worker": 1,
+   "fault_uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+   "verdict": "FAIL",
+   "dataset_ready": false,
+   "failure": "Worker phase exited 3",
+   "problems": []
+  },
+  "d4poison": {
+   "rc": 3,
+   "binary_sha256": "260a79b89dbd97c543179cb46e452493d5fa34fa473c7935e1320d7566eba97b",
+   "expect": "poison_one",
+   "fault_worker": 3,
+   "fault_uuid": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+   "verdict": "FAIL",
+   "dataset_ready": false,
+   "failure": "Worker phase exited 3",
+   "problems": []
+  }
+ },
+ "problems": [
+  "d1 vs d2: 8 differing files",
+  "d1 vs dshim: 8 differing files",
+  "d1 vs d4: 8 differing files"
+ ],
+ "d1_vs_d2": {
+  "files": 30,
+  "differing": [
+   "Movies/20170629_00026_frameImage.log",
+   "Movies/20170629_00026_frameImage_shifts.eps",
+   "Movies/20170629_00031_frameImage.log",
+   "Movies/20170629_00031_frameImage_shifts.eps",
+   "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.log",
+   "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41_shifts.eps",
+   "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.log",
+   "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04_shifts.eps"
+  ]
+ },
+ "d1_vs_dshim": {
+  "files": 30,
+  "differing": [
+   "Movies/20170629_00026_frameImage.log",
+   "Movies/20170629_00026_frameImage_shifts.eps",
+   "Movies/20170629_00031_frameImage.log",
+   "Movies/20170629_00031_frameImage_shifts.eps",
+   "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.log",
+   "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41_shifts.eps",
+   "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.log",
+   "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04_shifts.eps"
+  ]
+ },
+ "d1_vs_d4": {
+  "files": 30,
+  "differing": [
+   "Movies/20170629_00026_frameImage.log",
+   "Movies/20170629_00026_frameImage_shifts.eps",
+   "Movies/20170629_00031_frameImage.log",
+   "Movies/20170629_00031_frameImage_shifts.eps",
+   "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.log",
+   "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41_shifts.eps",
+   "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.log",
+   "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04_shifts.eps"
+  ]
+ },
+ "verdict": "FAIL"
+}

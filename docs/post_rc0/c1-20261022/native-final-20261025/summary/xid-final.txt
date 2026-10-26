@@ -1,0 +1,612 @@
+2026-10-26T00:38:39Z
+--- pci -> uuid
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 00000000:06:00.0
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 00000000:07:00.0
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 00000000:08:00.0
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 00000000:09:00.0
+--- kern.log* (grep NVRM: Xid, ISO-timestamp lines only)
+2026-10-26T00:34:01.757258+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 31, pid=3831246, name=motioncorr_inge, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-26T00:34:05.385223+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 31, pid=3831269, name=motioncorr_inge, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-26T00:34:08.755262+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 31, pid=3831285, name=motioncorr_inge, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-19T12:49:05.886276+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=1825535, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-19T12:49:06.796293+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=1825581, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-19T12:49:08.051319+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=1825656, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-19T12:52:52.494257+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=1833364, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-19T12:55:18.690370+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=1841225, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-19T12:55:19.512220+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=1841257, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-19T12:55:20.918363+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=1841308, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-19T12:56:37.807518+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=1847137, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-19T12:56:38.730377+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=1847177, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-19T12:56:40.027460+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=1847281, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-19T12:59:27.098488+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=1855087, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-22T19:46:50.081219+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 31, pid=3137795, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-22T19:46:50.930266+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 31, pid=3137807, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-22T19:46:52.269252+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 31, pid=3137843, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-22T19:49:28.452240+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 31, pid=3141331, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-22T19:49:29.127310+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 31, pid=3141343, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-22T19:49:30.193258+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 31, pid=3141370, name=motioncorr_stic, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-11T02:51:41.863314+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:06:00): 13, pid=3904118, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:51:41.863685+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:06:00): 13, pid=3904118, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:51:41.863860+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:06:00): 13, pid=3904118, name=relion_refine, Graphics Exception: ESR 0x514730=0x103000e 0x514734=0x24 0x514728=0xc81eb60 0x51472c=0x1174
+2026-10-11T02:51:41.864266+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:06:00): 43, pid=3904118, name=relion_refine, Ch 0000000a
+2026-10-11T02:58:56.294376+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:56.294543+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.295345+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x504730=0xc0c000e 0x504734=0x24 0x504728=0xc81eb60 0x50472c=0x1174
+2026-10-11T02:58:56.295615+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 0, SM 1): Out Of Range Address
+2026-10-11T02:58:56.295812+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 0, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.296224+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5047b0=0xc05000e 0x5047b4=0x24 0x5047a8=0xc81eb60 0x5047ac=0x1174
+2026-10-11T02:58:56.296471+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 1, SM 0): Out Of Range Address
+2026-10-11T02:58:56.296751+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 1, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.297225+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x504f30=0xc04000e 0x504f34=0x24 0x504f28=0xc81eb60 0x504f2c=0x1174
+2026-10-11T02:58:56.297414+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 1, SM 1): Out Of Range Address
+2026-10-11T02:58:56.298326+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 1, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.298598+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x504fb0=0xc07000e 0x504fb4=0x24 0x504fa8=0xc81eb60 0x504fac=0x1174
+2026-10-11T02:58:56.298864+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 2, SM 0): Out Of Range Address
+2026-10-11T02:58:56.299222+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 2, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.299424+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x505730=0xc01000e 0x505734=0x24 0x505728=0xc81eb60 0x50572c=0x1174
+2026-10-11T02:58:56.299687+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 2, SM 1): Out Of Range Address
+2026-10-11T02:58:56.299929+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 2, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.300302+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5057b0=0xc06000e 0x5057b4=0x24 0x5057a8=0xc81eb60 0x5057ac=0x1174
+2026-10-11T02:58:56.300557+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 3, SM 0): Out Of Range Address
+2026-10-11T02:58:56.300735+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 3, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.300954+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x505f30=0xc05000e 0x505f34=0x24 0x505f28=0xc81eb60 0x505f2c=0x1174
+2026-10-11T02:58:56.301330+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 3, SM 1): Out Of Range Address
+2026-10-11T02:58:56.301512+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 3, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.301722+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x505fb0=0xc04000e 0x505fb4=0x24 0x505fa8=0xc81eb60 0x505fac=0x1174
+2026-10-11T02:58:56.301920+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 4, SM 0): Out Of Range Address
+2026-10-11T02:58:56.302388+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 4, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.302593+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x506730=0xc06000e 0x506734=0x24 0x506728=0xc81eb60 0x50672c=0x1174
+2026-10-11T02:58:56.302844+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 4, SM 1): Out Of Range Address
+2026-10-11T02:58:56.303202+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 4, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.303719+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5067b0=0xc04000e 0x5067b4=0x24 0x5067a8=0xc81eb60 0x5067ac=0x1174
+2026-10-11T02:58:56.303925+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 5, SM 0): Out Of Range Address
+2026-10-11T02:58:56.304379+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 5, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.304561+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x506f30=0xc05000e 0x506f34=0x24 0x506f28=0xc81eb60 0x506f2c=0x1174
+2026-10-11T02:58:56.304782+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 5, SM 1): Out Of Range Address
+2026-10-11T02:58:56.305160+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 5, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.305384+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x506fb0=0xc04000e 0x506fb4=0x24 0x506fa8=0xc81eb60 0x506fac=0x1174
+2026-10-11T02:58:56.305640+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 6, SM 0): Out Of Range Address
+2026-10-11T02:58:56.305910+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 6, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.306274+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x507730=0xc06000e 0x507734=0x24 0x507728=0xc81eb60 0x50772c=0x1174
+2026-10-11T02:58:56.306487+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 0, TPC 6, SM 1): Out Of Range Address
+2026-10-11T02:58:56.306694+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 0, TPC 6, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.306883+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5077b0=0xc03000e 0x5077b4=0x24 0x5077a8=0xc81eb60 0x5077ac=0x1174
+2026-10-11T02:58:56.307532+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:56.307761+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.307938+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50c730=0xc01000e 0x50c734=0x24 0x50c728=0xc81eb60 0x50c72c=0x1174
+2026-10-11T02:58:56.308382+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 0, SM 1): Out Of Range Address
+2026-10-11T02:58:56.308552+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 0, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.308737+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50c7b0=0xc05000e 0x50c7b4=0x24 0x50c7a8=0xc81eb60 0x50c7ac=0x1174
+2026-10-11T02:58:56.309124+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 1, SM 0): Out Of Range Address
+2026-10-11T02:58:56.309398+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 1, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.309597+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50cf30=0xc04000e 0x50cf34=0x24 0x50cf28=0xc81eb60 0x50cf2c=0x1174
+2026-10-11T02:58:56.309841+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 1, SM 1): Out Of Range Address
+2026-10-11T02:58:56.310212+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 1, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.310461+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50cfb0=0xc05000e 0x50cfb4=0x24 0x50cfa8=0xc81eb60 0x50cfac=0x1174
+2026-10-11T02:58:56.310685+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 2, SM 0): Out Of Range Address
+2026-10-11T02:58:56.310897+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 2, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.311296+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50d730=0xc05000e 0x50d734=0x24 0x50d728=0xc81eb60 0x50d72c=0x1174
+2026-10-11T02:58:56.311547+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 2, SM 1): Out Of Range Address
+2026-10-11T02:58:56.311725+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 2, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.311913+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50d7b0=0xc07000e 0x50d7b4=0x24 0x50d7a8=0xc81eb60 0x50d7ac=0x1174
+2026-10-11T02:58:56.312233+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 3, SM 0): Out Of Range Address
+2026-10-11T02:58:56.312415+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 3, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.312623+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50df30=0xc05000e 0x50df34=0x24 0x50df28=0xc81eb60 0x50df2c=0x1174
+2026-10-11T02:58:56.312834+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 3, SM 1): Out Of Range Address
+2026-10-11T02:58:56.313315+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 3, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.313496+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50dfb0=0xc04000e 0x50dfb4=0x24 0x50dfa8=0xc81eb60 0x50dfac=0x1174
+2026-10-11T02:58:56.313759+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 4, SM 0): Out Of Range Address
+2026-10-11T02:58:56.313938+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 4, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.314436+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50e730=0xc06000e 0x50e734=0x24 0x50e728=0xc81eb60 0x50e72c=0x1174
+2026-10-11T02:58:56.314664+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 4, SM 1): Out Of Range Address
+2026-10-11T02:58:56.314864+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 4, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.315248+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50e7b0=0xc04000e 0x50e7b4=0x24 0x50e7a8=0xc81eb60 0x50e7ac=0x1174
+2026-10-11T02:58:56.315467+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 5, SM 0): Out Of Range Address
+2026-10-11T02:58:56.315677+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 5, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.315940+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50ef30=0xc05000e 0x50ef34=0x24 0x50ef28=0xc81eb60 0x50ef2c=0x1174
+2026-10-11T02:58:56.316317+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 5, SM 1): Out Of Range Address
+2026-10-11T02:58:56.316516+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 5, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.316787+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50efb0=0xc04000e 0x50efb4=0x24 0x50efa8=0xc81eb60 0x50efac=0x1174
+2026-10-11T02:58:56.316961+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 6, SM 0): Out Of Range Address
+2026-10-11T02:58:56.317356+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 6, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.317539+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50f730=0xc07000e 0x50f734=0x24 0x50f728=0xc81eb60 0x50f72c=0x1174
+2026-10-11T02:58:56.317711+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 1, TPC 6, SM 1): Out Of Range Address
+2026-10-11T02:58:56.317917+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 1, TPC 6, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.318333+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x50f7b0=0xc04000e 0x50f7b4=0x24 0x50f7a8=0xc81eb60 0x50f7ac=0x1174
+2026-10-11T02:58:56.318574+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:56.318792+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.319236+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x514730=0xc00000e 0x514734=0x24 0x514728=0xc81eb60 0x51472c=0x1174
+2026-10-11T02:58:56.319476+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 0, SM 1): Out Of Range Address
+2026-10-11T02:58:56.319710+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 0, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.319945+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5147b0=0xc06000e 0x5147b4=0x24 0x5147a8=0xc81eb60 0x5147ac=0x1174
+2026-10-11T02:58:56.320322+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 1, SM 0): Out Of Range Address
+2026-10-11T02:58:56.320497+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 1, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.320761+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x514f30=0xc07000e 0x514f34=0x24 0x514f28=0xc81eb60 0x514f2c=0x1174
+2026-10-11T02:58:56.320946+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 1, SM 1): Out Of Range Address
+2026-10-11T02:58:56.321281+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 1, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.321532+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x514fb0=0xc07000e 0x514fb4=0x24 0x514fa8=0xc81eb60 0x514fac=0x1174
+2026-10-11T02:58:56.321753+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 2, SM 0): Out Of Range Address
+2026-10-11T02:58:56.321950+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 2, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.322325+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x515730=0xc06000e 0x515734=0x24 0x515728=0xc81eb60 0x51572c=0x1174
+2026-10-11T02:58:56.322571+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 2, SM 1): Out Of Range Address
+2026-10-11T02:58:56.322751+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 2, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.322922+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5157b0=0xc04000e 0x5157b4=0x24 0x5157a8=0xc81eb60 0x5157ac=0x1174
+2026-10-11T02:58:56.323797+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 3, SM 0): Out Of Range Address
+2026-10-11T02:58:56.324165+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 3, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.324484+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x515f30=0xc02000e 0x515f34=0x24 0x515f28=0xc81eb60 0x515f2c=0x1174
+2026-10-11T02:58:56.324687+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 3, SM 1): Out Of Range Address
+2026-10-11T02:58:56.324903+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 3, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.325263+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x515fb0=0xc06000e 0x515fb4=0x24 0x515fa8=0xc81eb60 0x515fac=0x1174
+2026-10-11T02:58:56.325533+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 4, SM 0): Out Of Range Address
+2026-10-11T02:58:56.325772+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 4, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.325948+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x516730=0xc05000e 0x516734=0x24 0x516728=0xc81eb60 0x51672c=0x1174
+2026-10-11T02:58:56.326327+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 4, SM 1): Out Of Range Address
+2026-10-11T02:58:56.326523+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 4, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.326795+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5167b0=0xc04000e 0x5167b4=0x24 0x5167a8=0xc81eb60 0x5167ac=0x1174
+2026-10-11T02:58:56.327167+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 5, SM 0): Out Of Range Address
+2026-10-11T02:58:56.327350+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 5, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.327605+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x516f30=0xc06000e 0x516f34=0x24 0x516f28=0xc81eb60 0x516f2c=0x1174
+2026-10-11T02:58:56.327783+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 5, SM 1): Out Of Range Address
+2026-10-11T02:58:56.328170+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 5, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.328365+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x516fb0=0xc04000e 0x516fb4=0x24 0x516fa8=0xc81eb60 0x516fac=0x1174
+2026-10-11T02:58:56.328745+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 6, SM 0): Out Of Range Address
+2026-10-11T02:58:56.328950+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 6, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.329395+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x517730=0xc02000e 0x517734=0x24 0x517728=0xc81eb60 0x51772c=0x1174
+2026-10-11T02:58:56.329628+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 6, SM 1): Out Of Range Address
+2026-10-11T02:58:56.329812+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 6, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.330217+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5177b0=0xc07000e 0x5177b4=0x24 0x5177a8=0xc81eb60 0x5177ac=0x1174
+2026-10-11T02:58:56.330781+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 7, SM 0): Out Of Range Address
+2026-10-11T02:58:56.331279+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 7, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.331495+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x517f30=0xc04000e 0x517f34=0x24 0x517f28=0xc81eb60 0x517f2c=0x1174
+2026-10-11T02:58:56.331664+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 2, TPC 7, SM 1): Out Of Range Address
+2026-10-11T02:58:56.331868+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 2, TPC 7, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.332313+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x517fb0=0xc04000e 0x517fb4=0x24 0x517fa8=0xc81eb60 0x517fac=0x1174
+2026-10-11T02:58:56.332528+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:56.332691+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.332943+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51c730=0xc07000e 0x51c734=0x24 0x51c728=0xc81eb60 0x51c72c=0x1174
+2026-10-11T02:58:56.333317+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 0, SM 1): Out Of Range Address
+2026-10-11T02:58:56.333523+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 0, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.333720+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51c7b0=0xc05000e 0x51c7b4=0x24 0x51c7a8=0xc81eb60 0x51c7ac=0x1174
+2026-10-11T02:58:56.333887+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 1, SM 0): Out Of Range Address
+2026-10-11T02:58:56.334533+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 1, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.334759+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51cf30=0xc05000e 0x51cf34=0x24 0x51cf28=0xc81eb60 0x51cf2c=0x1174
+2026-10-11T02:58:56.335163+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 1, SM 1): Out Of Range Address
+2026-10-11T02:58:56.335381+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 1, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.335554+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51cfb0=0xc02000e 0x51cfb4=0x24 0x51cfa8=0xc81eb60 0x51cfac=0x1174
+2026-10-11T02:58:56.335746+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 2, SM 0): Out Of Range Address
+2026-10-11T02:58:56.335935+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 2, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.336325+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51d730=0xc06000e 0x51d734=0x24 0x51d728=0xc81eb60 0x51d72c=0x1174
+2026-10-11T02:58:56.336525+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 2, SM 1): Out Of Range Address
+2026-10-11T02:58:56.336692+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 2, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.336928+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51d7b0=0xc04000e 0x51d7b4=0x24 0x51d7a8=0xc81eb60 0x51d7ac=0x1174
+2026-10-11T02:58:56.337338+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 3, SM 0): Out Of Range Address
+2026-10-11T02:58:56.337534+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 3, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.337786+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51df30=0xc00000e 0x51df34=0x24 0x51df28=0xc81eb60 0x51df2c=0x1174
+2026-10-11T02:58:56.337943+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 3, SM 1): Out Of Range Address
+2026-10-11T02:58:56.338441+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 3, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.338694+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51dfb0=0xc06000e 0x51dfb4=0x24 0x51dfa8=0xc81eb60 0x51dfac=0x1174
+2026-10-11T02:58:56.338873+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 4, SM 0): Out Of Range Address
+2026-10-11T02:58:56.339260+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 4, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.339486+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51e730=0xc05000e 0x51e734=0x24 0x51e728=0xc81eb60 0x51e72c=0x1174
+2026-10-11T02:58:56.339654+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 4, SM 1): Out Of Range Address
+2026-10-11T02:58:56.339846+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 4, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.340259+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51e7b0=0xc04000e 0x51e7b4=0x24 0x51e7a8=0xc81eb60 0x51e7ac=0x1174
+2026-10-11T02:58:56.340489+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 5, SM 0): Out Of Range Address
+2026-10-11T02:58:56.340884+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 5, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.341218+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51ef30=0xc06000e 0x51ef34=0x24 0x51ef28=0xc81eb60 0x51ef2c=0x1174
+2026-10-11T02:58:56.341432+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 5, SM 1): Out Of Range Address
+2026-10-11T02:58:56.341606+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 5, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.341805+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51efb0=0xc04000e 0x51efb4=0x24 0x51efa8=0xc81eb60 0x51efac=0x1174
+2026-10-11T02:58:56.342227+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 6, SM 0): Out Of Range Address
+2026-10-11T02:58:56.342442+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 6, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.342647+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51f730=0xc03000e 0x51f734=0x24 0x51f728=0xc81eb60 0x51f72c=0x1174
+2026-10-11T02:58:56.342840+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 6, SM 1): Out Of Range Address
+2026-10-11T02:58:56.343232+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 6, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.343446+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51f7b0=0xc07000e 0x51f7b4=0x24 0x51f7a8=0xc81eb60 0x51f7ac=0x1174
+2026-10-11T02:58:56.343632+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 7, SM 0): Out Of Range Address
+2026-10-11T02:58:56.343855+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 7, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.344279+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51ff30=0xc04000e 0x51ff34=0x24 0x51ff28=0xc81eb60 0x51ff2c=0x1174
+2026-10-11T02:58:56.344468+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 3, TPC 7, SM 1): Out Of Range Address
+2026-10-11T02:58:56.344674+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 3, TPC 7, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.344850+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x51ffb0=0xc04000e 0x51ffb4=0x24 0x51ffa8=0xc81eb60 0x51ffac=0x1174
+2026-10-11T02:58:56.345181+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:56.345708+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.345931+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x524730=0xc0c000e 0x524734=0x24 0x524728=0xc81eb60 0x52472c=0x1174
+2026-10-11T02:58:56.346316+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 0, SM 1): Out Of Range Address
+2026-10-11T02:58:56.346528+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 0, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.346729+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5247b0=0xc05000e 0x5247b4=0x24 0x5247a8=0xc81eb60 0x5247ac=0x1174
+2026-10-11T02:58:56.346907+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 1, SM 0): Out Of Range Address
+2026-10-11T02:58:56.347349+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 1, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.347553+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x524f30=0xc05000e 0x524f34=0x24 0x524f28=0xc81eb60 0x524f2c=0x1174
+2026-10-11T02:58:56.347724+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 1, SM 1): Out Of Range Address
+2026-10-11T02:58:56.347930+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 1, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.348313+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x524fb0=0xc04000e 0x524fb4=0x24 0x524fa8=0xc81eb60 0x524fac=0x1174
+2026-10-11T02:58:56.348481+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 2, SM 0): Out Of Range Address
+2026-10-11T02:58:56.348681+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 2, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.348902+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x525730=0xc06000e 0x525734=0x24 0x525728=0xc81eb60 0x52572c=0x1174
+2026-10-11T02:58:56.349272+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 2, SM 1): Out Of Range Address
+2026-10-11T02:58:56.349500+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 2, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.349667+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5257b0=0xc04000e 0x5257b4=0x24 0x5257a8=0xc81eb60 0x5257ac=0x1174
+2026-10-11T02:58:56.349901+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 3, SM 0): Out Of Range Address
+2026-10-11T02:58:56.350263+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 3, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.350462+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x525f30=0xc0e000e 0x525f34=0x24 0x525f28=0xc81eb60 0x525f2c=0x1174
+2026-10-11T02:58:56.350657+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 3, SM 1): Out Of Range Address
+2026-10-11T02:58:56.350847+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 3, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.351261+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x525fb0=0xc06000e 0x525fb4=0x24 0x525fa8=0xc81eb60 0x525fac=0x1174
+2026-10-11T02:58:56.351460+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 4, SM 0): Out Of Range Address
+2026-10-11T02:58:56.351610+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 4, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.351833+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x526730=0xc05000e 0x526734=0x24 0x526728=0xc81eb60 0x52672c=0x1174
+2026-10-11T02:58:56.352192+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 4, SM 1): Out Of Range Address
+2026-10-11T02:58:56.352370+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 4, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.352564+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5267b0=0xc04000e 0x5267b4=0x24 0x5267a8=0xc81eb60 0x5267ac=0x1174
+2026-10-11T02:58:56.352789+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 5, SM 0): Out Of Range Address
+2026-10-11T02:58:56.353129+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 5, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.353367+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x526f30=0xc01000e 0x526f34=0x24 0x526f28=0xc81eb60 0x526f2c=0x1174
+2026-10-11T02:58:56.353561+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 5, SM 1): Out Of Range Address
+2026-10-11T02:58:56.353744+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 5, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.353920+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x526fb0=0xc04000e 0x526fb4=0x24 0x526fa8=0xc81eb60 0x526fac=0x1174
+2026-10-11T02:58:56.354318+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 6, SM 0): Out Of Range Address
+2026-10-11T02:58:56.354514+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 6, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.354691+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x527730=0xc02000e 0x527734=0x24 0x527728=0xc81eb60 0x52772c=0x1174
+2026-10-11T02:58:56.354902+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 6, SM 1): Out Of Range Address
+2026-10-11T02:58:56.355264+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 6, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.355449+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5277b0=0xc03000e 0x5277b4=0x24 0x5277a8=0xc81eb60 0x5277ac=0x1174
+2026-10-11T02:58:56.355640+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 7, SM 0): Out Of Range Address
+2026-10-11T02:58:56.355817+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 7, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.356163+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x527f30=0xc04000e 0x527f34=0x24 0x527f28=0xc81eb60 0x527f2c=0x1174
+2026-10-11T02:58:56.356587+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 4, TPC 7, SM 1): Out Of Range Address
+2026-10-11T02:58:56.356781+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 4, TPC 7, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.357130+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x527fb0=0xc05000e 0x527fb4=0x24 0x527fa8=0xc81eb60 0x527fac=0x1174
+2026-10-11T02:58:56.357359+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:56.357560+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.357743+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52c730=0xc00000e 0x52c734=0x24 0x52c728=0xc81eb60 0x52c72c=0x1174
+2026-10-11T02:58:56.358259+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 0, SM 1): Out Of Range Address
+2026-10-11T02:58:56.358481+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 0, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.358687+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52c7b0=0xc07000e 0x52c7b4=0x24 0x52c7a8=0xc81eb60 0x52c7ac=0x1174
+2026-10-11T02:58:56.358861+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 1, SM 0): Out Of Range Address
+2026-10-11T02:58:56.359248+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 1, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.359461+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52cf30=0xc05000e 0x52cf34=0x24 0x52cf28=0xc81eb60 0x52cf2c=0x1174
+2026-10-11T02:58:56.359620+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 1, SM 1): Out Of Range Address
+2026-10-11T02:58:56.359861+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 1, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.360234+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52cfb0=0xc04000e 0x52cfb4=0x24 0x52cfa8=0xc81eb60 0x52cfac=0x1174
+2026-10-11T02:58:56.360401+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 2, SM 0): Out Of Range Address
+2026-10-11T02:58:56.360584+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 2, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.360792+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52d730=0xc06000e 0x52d734=0x24 0x52d728=0xc81eb60 0x52d72c=0x1174
+2026-10-11T02:58:56.360945+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 2, SM 1): Out Of Range Address
+2026-10-11T02:58:56.361829+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 2, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.362291+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52d7b0=0xc03000e 0x52d7b4=0x24 0x52d7a8=0xc81eb60 0x52d7ac=0x1174
+2026-10-11T02:58:56.362507+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 3, SM 0): Out Of Range Address
+2026-10-11T02:58:56.362670+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 3, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.362878+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52df30=0xc00000e 0x52df34=0x24 0x52df28=0xc81eb60 0x52df2c=0x1174
+2026-10-11T02:58:56.363326+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 3, SM 1): Out Of Range Address
+2026-10-11T02:58:56.363479+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 3, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.363674+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52dfb0=0xc05000e 0x52dfb4=0x24 0x52dfa8=0xc81eb60 0x52dfac=0x1174
+2026-10-11T02:58:56.363869+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 4, SM 0): Out Of Range Address
+2026-10-11T02:58:56.364179+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 4, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.364362+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52e730=0xc04000e 0x52e734=0x24 0x52e728=0xc81eb60 0x52e72c=0x1174
+2026-10-11T02:58:56.364559+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 4, SM 1): Out Of Range Address
+2026-10-11T02:58:56.364798+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 4, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.364963+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52e7b0=0xc04000e 0x52e7b4=0x24 0x52e7a8=0xc81eb60 0x52e7ac=0x1174
+2026-10-11T02:58:56.365374+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 5, SM 0): Out Of Range Address
+2026-10-11T02:58:56.365517+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 5, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.365686+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52ef30=0xc06000e 0x52ef34=0x24 0x52ef28=0xc81eb60 0x52ef2c=0x1174
+2026-10-11T02:58:56.365894+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 5, SM 1): Out Of Range Address
+2026-10-11T02:58:56.366223+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 5, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.366445+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52efb0=0xc04000e 0x52efb4=0x24 0x52efa8=0xc81eb60 0x52efac=0x1174
+2026-10-11T02:58:56.366626+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 6, SM 0): Out Of Range Address
+2026-10-11T02:58:56.366798+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 6, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.367237+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52f730=0xc0d000e 0x52f734=0x24 0x52f728=0xc81eb60 0x52f72c=0x1174
+2026-10-11T02:58:56.367421+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 6, SM 1): Out Of Range Address
+2026-10-11T02:58:56.367580+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 6, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.367756+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52f7b0=0xc04000e 0x52f7b4=0x24 0x52f7a8=0xc81eb60 0x52f7ac=0x1174
+2026-10-11T02:58:56.367951+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 7, SM 0): Out Of Range Address
+2026-10-11T02:58:56.368231+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 7, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.368879+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52ff30=0xc04000e 0x52ff34=0x24 0x52ff28=0xc81eb60 0x52ff2c=0x1174
+2026-10-11T02:58:56.369278+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 5, TPC 7, SM 1): Out Of Range Address
+2026-10-11T02:58:56.369460+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 5, TPC 7, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.369678+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x52ffb0=0xc07000e 0x52ffb4=0x24 0x52ffa8=0xc81eb60 0x52ffac=0x1174
+2026-10-11T02:58:56.369872+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:56.370214+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.370664+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x534730=0xc01000e 0x534734=0x24 0x534728=0xc81eb60 0x53472c=0x1174
+2026-10-11T02:58:56.370870+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 0, SM 1): Out Of Range Address
+2026-10-11T02:58:56.371206+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 0, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.371430+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5347b0=0xc05000e 0x5347b4=0x24 0x5347a8=0xc81eb60 0x5347ac=0x1174
+2026-10-11T02:58:56.371587+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 1, SM 0): Out Of Range Address
+2026-10-11T02:58:56.371793+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 1, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.372177+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x534f30=0xc07000e 0x534f34=0x24 0x534f28=0xc81eb60 0x534f2c=0x1174
+2026-10-11T02:58:56.372360+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 1, SM 1): Out Of Range Address
+2026-10-11T02:58:56.372628+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 1, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.372807+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x534fb0=0xc04000e 0x534fb4=0x24 0x534fa8=0xc81eb60 0x534fac=0x1174
+2026-10-11T02:58:56.373189+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 2, SM 0): Out Of Range Address
+2026-10-11T02:58:56.373371+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 2, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.373561+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x535730=0xc04000e 0x535734=0x24 0x535728=0xc81eb60 0x53572c=0x1174
+2026-10-11T02:58:56.373747+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 2, SM 1): Out Of Range Address
+2026-10-11T02:58:56.373917+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 2, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.374237+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5357b0=0xc04000e 0x5357b4=0x24 0x5357a8=0xc81eb60 0x5357ac=0x1174
+2026-10-11T02:58:56.374458+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 3, SM 0): Out Of Range Address
+2026-10-11T02:58:56.374628+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 3, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.374796+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x535f30=0xc0c000e 0x535f34=0x24 0x535f28=0xc81eb60 0x535f2c=0x1174
+2026-10-11T02:58:56.375139+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 3, SM 1): Out Of Range Address
+2026-10-11T02:58:56.375303+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 3, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.375465+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x535fb0=0xc04000e 0x535fb4=0x24 0x535fa8=0xc81eb60 0x535fac=0x1174
+2026-10-11T02:58:56.375678+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 4, SM 0): Out Of Range Address
+2026-10-11T02:58:56.375876+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 4, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.376220+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x536730=0xc04000e 0x536734=0x24 0x536728=0xc81eb60 0x53672c=0x1174
+2026-10-11T02:58:56.376812+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 4, SM 1): Out Of Range Address
+2026-10-11T02:58:56.377180+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 4, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.377391+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5367b0=0xc04000e 0x5367b4=0x24 0x5367a8=0xc81eb60 0x5367ac=0x1174
+2026-10-11T02:58:56.377574+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 5, SM 0): Out Of Range Address
+2026-10-11T02:58:56.377759+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 5, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.377930+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x536f30=0xc07000e 0x536f34=0x24 0x536f28=0xc81eb60 0x536f2c=0x1174
+2026-10-11T02:58:56.378353+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 5, SM 1): Out Of Range Address
+2026-10-11T02:58:56.378533+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 5, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.378715+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x536fb0=0xc04000e 0x536fb4=0x24 0x536fa8=0xc81eb60 0x536fac=0x1174
+2026-10-11T02:58:56.378912+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 6, SM 0): Out Of Range Address
+2026-10-11T02:58:56.379242+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 6, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.379429+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x537730=0xc05000e 0x537734=0x24 0x537728=0xc81eb60 0x53772c=0x1174
+2026-10-11T02:58:56.379643+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 6, SM 1): Out Of Range Address
+2026-10-11T02:58:56.379811+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 6, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.380148+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x5377b0=0xc04000e 0x5377b4=0x24 0x5377a8=0xc81eb60 0x5377ac=0x1174
+2026-10-11T02:58:56.380446+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 7, SM 0): Out Of Range Address
+2026-10-11T02:58:56.380618+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 7, SM 0): Multiple Warp Errors
+2026-10-11T02:58:56.380798+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x537f30=0xc04000e 0x537f34=0x24 0x537f28=0xc81eb60 0x537f2c=0x1174
+2026-10-11T02:58:56.381193+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Warp Exception on (GPC 6, TPC 7, SM 1): Out Of Range Address
+2026-10-11T02:58:56.381434+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics SM Global Exception on (GPC 6, TPC 7, SM 1): Multiple Warp Errors
+2026-10-11T02:58:56.381607+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, pid=3963553, name=relion_refine, Graphics Exception: ESR 0x537fb0=0xc07000e 0x537fb4=0x24 0x537fa8=0xc81eb60 0x537fac=0x1174
+2026-10-11T02:58:56.381835+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 43, pid=3963553, name=relion_refine, Ch 0000000a
+2026-10-11T02:58:59.795410+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Warp Exception on (GPC 0, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:59.796604+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Global Exception on (GPC 0, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:59.797436+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics Exception: ESR 0x504730=0xc06000e 0x504734=0x24 0x504728=0xc81eb60 0x50472c=0x1174
+2026-10-11T02:58:59.797647+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Warp Exception on (GPC 1, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:59.797836+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Global Exception on (GPC 1, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:59.798182+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics Exception: ESR 0x50c730=0xc04000e 0x50c734=0x24 0x50c728=0xc81eb60 0x50c72c=0x1174
+2026-10-11T02:58:59.798346+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Warp Exception on (GPC 2, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:59.798500+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Global Exception on (GPC 2, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:59.798715+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics Exception: ESR 0x514730=0xc06000e 0x514734=0x24 0x514728=0xc81eb60 0x51472c=0x1174
+2026-10-11T02:58:59.798877+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Warp Exception on (GPC 2, TPC 3, SM 0): Out Of Range Address
+2026-10-11T02:58:59.799276+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Global Exception on (GPC 2, TPC 3, SM 0): Multiple Warp Errors
+2026-10-11T02:58:59.799450+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics Exception: ESR 0x515f30=0xc06000e 0x515f34=0x24 0x515f28=0xc81eb60 0x515f2c=0x1174
+2026-10-11T02:58:59.799625+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Warp Exception on (GPC 3, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:59.799792+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Global Exception on (GPC 3, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:59.799950+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics Exception: ESR 0x51c730=0x104000e 0x51c734=0x24 0x51c728=0xc81eb60 0x51c72c=0x1174
+2026-10-11T02:58:59.800340+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Warp Exception on (GPC 3, TPC 3, SM 0): Out Of Range Address
+2026-10-11T02:58:59.800493+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Global Exception on (GPC 3, TPC 3, SM 0): Multiple Warp Errors
+2026-10-11T02:58:59.800665+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics Exception: ESR 0x51df30=0xc04000e 0x51df34=0x24 0x51df28=0xc81eb60 0x51df2c=0x1174
+2026-10-11T02:58:59.800830+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Warp Exception on (GPC 4, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:59.801172+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Global Exception on (GPC 4, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:59.801349+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics Exception: ESR 0x524730=0xc04000e 0x524734=0x24 0x524728=0xc81eb60 0x52472c=0x1174
+2026-10-11T02:58:59.801515+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Warp Exception on (GPC 4, TPC 3, SM 0): Out Of Range Address
+2026-10-11T02:58:59.801685+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Global Exception on (GPC 4, TPC 3, SM 0): Multiple Warp Errors
+2026-10-11T02:58:59.801873+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics Exception: ESR 0x525f30=0xc04000e 0x525f34=0x24 0x525f28=0xc81eb60 0x525f2c=0x1174
+2026-10-11T02:58:59.802217+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Warp Exception on (GPC 5, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:59.802376+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Global Exception on (GPC 5, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:59.802531+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics Exception: ESR 0x52c730=0xc07000e 0x52c734=0x24 0x52c728=0xc81eb60 0x52c72c=0x1174
+2026-10-11T02:58:59.802693+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Warp Exception on (GPC 5, TPC 3, SM 0): Out Of Range Address
+2026-10-11T02:58:59.802878+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Global Exception on (GPC 5, TPC 3, SM 0): Multiple Warp Errors
+2026-10-11T02:58:59.803165+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics Exception: ESR 0x52df30=0x106000e 0x52df34=0x24 0x52df28=0xc81eb60 0x52df2c=0x1174
+2026-10-11T02:58:59.803325+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Warp Exception on (GPC 6, TPC 0, SM 0): Out Of Range Address
+2026-10-11T02:58:59.803475+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Global Exception on (GPC 6, TPC 0, SM 0): Multiple Warp Errors
+2026-10-11T02:58:59.803631+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics Exception: ESR 0x534730=0xc06000e 0x534734=0x24 0x534728=0xc81eb60 0x53472c=0x1174
+2026-10-11T02:58:59.803805+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Warp Exception on (GPC 6, TPC 3, SM 0): Out Of Range Address
+2026-10-11T02:58:59.803955+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics SM Global Exception on (GPC 6, TPC 3, SM 0): Multiple Warp Errors
+2026-10-11T02:58:59.804261+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 13, Graphics Exception: ESR 0x535f30=0xc04000e 0x535f34=0x24 0x535f28=0xc81eb60 0x535f2c=0x1174
+2026-10-11T02:58:59.804429+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:07:00): 43, pid=3963981, name=relion_refine, Ch 0000000a
+2026-10-16T20:39:34.684292+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=4078375, name=rrf-mut-m2, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC3 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_READ
+2026-10-16T20:52:50.088306+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=4106749, name=rrf-mut-m2, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC6 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_READ
+2026-10-16T21:04:07.920279+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=4124391, name=tst1-rrf-mut-m2, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC6 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-16T21:05:58.886263+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=4128227, name=tst1-rrf-mut-m3, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC6 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-16T21:13:36.512157+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=4146540, name=tst1-rrf-mut-m2, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC6 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-16T21:13:41.443201+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=4146615, name=tst1-rrf-mut-m3, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC6 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_
+2026-10-05T14:18:37.208277+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:06:00): 31, pid=3033831, name=cuda_adler32, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_REA
+2026-10-05T14:18:41.132231+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:06:00): 31, pid=3033867, name=cuda_adler32, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_REA
+2026-10-06T10:59:23.186929+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=3293411, name=test, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_READ
+2026-10-06T10:59:30.534210+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:08:00): 31, pid=3293628, name=test, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_READ
+2026-10-07T09:44:46.061219+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 0, TPC 0, SM 0): Out Of Range Address
+2026-10-07T09:44:46.061776+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 0, TPC 0, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.061941+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x504730=0x115000e 0x504734=0x24 0x504728=0xc81eb60 0x50472c=0x1174
+2026-10-07T09:44:46.062218+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 0, TPC 1, SM 0): Out Of Range Address
+2026-10-07T09:44:46.062369+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 0, TPC 1, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.062508+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x504f30=0x112000e 0x504f34=0x24 0x504f28=0xc81eb60 0x504f2c=0x1174
+2026-10-07T09:44:46.062654+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 0, TPC 2, SM 0): Out Of Range Address
+2026-10-07T09:44:46.062809+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 0, TPC 2, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.062965+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x505730=0x116000e 0x505734=0x24 0x505728=0xc81eb60 0x50572c=0x1174
+2026-10-07T09:44:46.063241+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 0, TPC 3, SM 0): Out Of Range Address
+2026-10-07T09:44:46.063394+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x505f30=0x110000e 0x505f34=0x20 0x505f28=0xc81eb60 0x505f2c=0x1174
+2026-10-07T09:44:46.063550+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 0, TPC 4, SM 0): Out Of Range Address
+2026-10-07T09:44:46.063679+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 0, TPC 4, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.063821+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x506730=0x107000e 0x506734=0x24 0x506728=0xc81eb60 0x50672c=0x1174
+2026-10-07T09:44:46.063963+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 0, TPC 5, SM 0): Out Of Range Address
+2026-10-07T09:44:46.064201+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 0, TPC 5, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.064334+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x506f30=0x116000e 0x506f34=0x24 0x506f28=0xc81eb60 0x506f2c=0x1174
+2026-10-07T09:44:46.064492+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 0, TPC 6, SM 0): Out Of Range Address
+2026-10-07T09:44:46.064625+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 0, TPC 6, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.064788+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x507730=0x113000e 0x507734=0x24 0x507728=0xc81eb60 0x50772c=0x1174
+2026-10-07T09:44:46.064932+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 1, TPC 0, SM 0): Out Of Range Address
+2026-10-07T09:44:46.065162+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 1, TPC 0, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.065301+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x50c730=0x109000e 0x50c734=0x24 0x50c728=0xc81eb60 0x50c72c=0x1174
+2026-10-07T09:44:46.065448+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 1, TPC 1, SM 0): Out Of Range Address
+2026-10-07T09:44:46.065600+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 1, TPC 1, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.065754+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x50cf30=0x110000e 0x50cf34=0x24 0x50cf28=0xc81eb60 0x50cf2c=0x1174
+2026-10-07T09:44:46.065888+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 1, TPC 2, SM 0): Out Of Range Address
+2026-10-07T09:44:46.066124+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 1, TPC 2, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.066269+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x50d730=0x110000e 0x50d734=0x24 0x50d728=0xc81eb60 0x50d72c=0x1174
+2026-10-07T09:44:46.066413+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 1, TPC 3, SM 0): Out Of Range Address
+2026-10-07T09:44:46.066545+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 1, TPC 3, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.066692+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x50df30=0x10f000e 0x50df34=0x24 0x50df28=0xc81eb60 0x50df2c=0x1174
+2026-10-07T09:44:46.066838+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 1, TPC 5, SM 0): Out Of Range Address
+2026-10-07T09:44:46.067056+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 1, TPC 5, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.067196+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x50ef30=0x10a000e 0x50ef34=0x24 0x50ef28=0xc81eb60 0x50ef2c=0x1174
+2026-10-07T09:44:46.067336+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 1, TPC 6, SM 0): Out Of Range Address
+2026-10-07T09:44:46.067486+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 1, TPC 6, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.067630+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x50f730=0x109000e 0x50f734=0x24 0x50f728=0xc81eb60 0x50f72c=0x1174
+2026-10-07T09:44:46.067762+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 2, TPC 0, SM 0): Out Of Range Address
+2026-10-07T09:44:46.067906+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 2, TPC 0, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.068129+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x514730=0x10e000e 0x514734=0x24 0x514728=0xc81eb60 0x51472c=0x1174
+2026-10-07T09:44:46.068262+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 2, TPC 1, SM 0): Out Of Range Address
+2026-10-07T09:44:46.068410+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 2, TPC 1, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.068553+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x514f30=0x110000e 0x514f34=0x24 0x514f28=0xc81eb60 0x514f2c=0x1174
+2026-10-07T09:44:46.068694+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 2, TPC 2, SM 0): Out Of Range Address
+2026-10-07T09:44:46.068825+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 2, TPC 2, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.069138+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x515730=0x109000e 0x515734=0x24 0x515728=0xc81eb60 0x51572c=0x1174
+2026-10-07T09:44:46.069265+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 2, TPC 3, SM 0): Out Of Range Address
+2026-10-07T09:44:46.069440+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 2, TPC 3, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.069574+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x515f30=0x117000e 0x515f34=0x24 0x515f28=0xc81eb60 0x515f2c=0x1174
+2026-10-07T09:44:46.069737+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 2, TPC 4, SM 0): Out Of Range Address
+2026-10-07T09:44:46.069873+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 2, TPC 4, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.070067+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x516730=0x10f000e 0x516734=0x24 0x516728=0xc81eb60 0x51672c=0x1174
+2026-10-07T09:44:46.070204+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 2, TPC 6, SM 0): Out Of Range Address
+2026-10-07T09:44:46.070351+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x517730=0x117000e 0x517734=0x20 0x517728=0xc81eb60 0x51772c=0x1174
+2026-10-07T09:44:46.070491+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 2, TPC 7, SM 0): Out Of Range Address
+2026-10-07T09:44:46.070617+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 2, TPC 7, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.070756+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x517f30=0x10e000e 0x517f34=0x24 0x517f28=0xc81eb60 0x517f2c=0x1174
+2026-10-07T09:44:46.070892+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 3, TPC 0, SM 0): Out Of Range Address
+2026-10-07T09:44:46.071119+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 3, TPC 0, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.071263+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x51c730=0x116000e 0x51c734=0x24 0x51c728=0xc81eb60 0x51c72c=0x1174
+2026-10-07T09:44:46.071426+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 3, TPC 1, SM 0): Out Of Range Address
+2026-10-07T09:44:46.071565+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x51cf30=0x108000e 0x51cf34=0x20 0x51cf28=0xc81eb60 0x51cf2c=0x1174
+2026-10-07T09:44:46.071705+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 3, TPC 2, SM 0): Out Of Range Address
+2026-10-07T09:44:46.071844+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 3, TPC 2, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.072063+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x51d730=0x10a000e 0x51d734=0x24 0x51d728=0xc81eb60 0x51d72c=0x1174
+2026-10-07T09:44:46.072198+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 3, TPC 3, SM 0): Out Of Range Address
+2026-10-07T09:44:46.072328+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 3, TPC 3, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.072473+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x51df30=0x10a000e 0x51df34=0x24 0x51df28=0xc81eb60 0x51df2c=0x1174
+2026-10-07T09:44:46.072618+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 3, TPC 4, SM 0): Out Of Range Address
+2026-10-07T09:44:46.072755+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 3, TPC 4, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.072907+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x51e730=0x110000e 0x51e734=0x24 0x51e728=0xc81eb60 0x51e72c=0x1174
+2026-10-07T09:44:46.073119+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 3, TPC 6, SM 0): Out Of Range Address
+2026-10-07T09:44:46.073271+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 3, TPC 6, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.073426+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x51f730=0x115000e 0x51f734=0x24 0x51f728=0xc81eb60 0x51f72c=0x1174
+2026-10-07T09:44:46.073567+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 3, TPC 7, SM 0): Out Of Range Address
+2026-10-07T09:44:46.073714+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 3, TPC 7, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.073866+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x51ff30=0x108000e 0x51ff34=0x24 0x51ff28=0xc81eb60 0x51ff2c=0x1174
+2026-10-07T09:44:46.074088+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 4, TPC 0, SM 0): Out Of Range Address
+2026-10-07T09:44:46.074228+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 4, TPC 0, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.074384+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x524730=0x113000e 0x524734=0x24 0x524728=0xc81eb60 0x52472c=0x1174
+2026-10-07T09:44:46.074525+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 4, TPC 1, SM 0): Out Of Range Address
+2026-10-07T09:44:46.074670+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 4, TPC 1, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.074826+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x524f30=0x111000e 0x524f34=0x24 0x524f28=0xc81eb60 0x524f2c=0x1174
+2026-10-07T09:44:46.075046+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 4, TPC 2, SM 0): Out Of Range Address
+2026-10-07T09:44:46.075213+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 4, TPC 2, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.075357+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x525730=0x111000e 0x525734=0x24 0x525728=0xc81eb60 0x52572c=0x1174
+2026-10-07T09:44:46.075518+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 4, TPC 3, SM 0): Out Of Range Address
+2026-10-07T09:44:46.075676+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x525f30=0x10d000e 0x525f34=0x20 0x525f28=0xc81eb60 0x525f2c=0x1174
+2026-10-07T09:44:46.075827+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 4, TPC 4, SM 0): Out Of Range Address
+2026-10-07T09:44:46.075964+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 4, TPC 4, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.076253+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x526730=0x111000e 0x526734=0x24 0x526728=0xc81eb60 0x52672c=0x1174
+2026-10-07T09:44:46.076401+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 4, TPC 6, SM 0): Out Of Range Address
+2026-10-07T09:44:46.076553+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 4, TPC 6, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.076688+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x527730=0x112000e 0x527734=0x24 0x527728=0xc81eb60 0x52772c=0x1174
+2026-10-07T09:44:46.076824+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 4, TPC 7, SM 0): Out Of Range Address
+2026-10-07T09:44:46.077096+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 4, TPC 7, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.077249+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x527f30=0x112000e 0x527f34=0x24 0x527f28=0xc81eb60 0x527f2c=0x1174
+2026-10-07T09:44:46.077404+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 5, TPC 0, SM 0): Out Of Range Address
+2026-10-07T09:44:46.077536+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x52c730=0x10f000e 0x52c734=0x20 0x52c728=0xc81eb60 0x52c72c=0x1174
+2026-10-07T09:44:46.077673+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 5, TPC 1, SM 0): Out Of Range Address
+2026-10-07T09:44:46.077806+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 5, TPC 1, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.077941+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x52cf30=0x110000e 0x52cf34=0x24 0x52cf28=0xc81eb60 0x52cf2c=0x1174
+2026-10-07T09:44:46.078144+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 5, TPC 2, SM 0): Out Of Range Address
+2026-10-07T09:44:46.078272+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 5, TPC 2, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.078408+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x52d730=0x111000e 0x52d734=0x24 0x52d728=0xc81eb60 0x52d72c=0x1174
+2026-10-07T09:44:46.078540+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 5, TPC 3, SM 0): Out Of Range Address
+2026-10-07T09:44:46.078694+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 5, TPC 3, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.078868+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x52df30=0x117000e 0x52df34=0x24 0x52df28=0xc81eb60 0x52df2c=0x1174
+2026-10-07T09:44:46.079141+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 5, TPC 4, SM 0): Out Of Range Address
+2026-10-07T09:44:46.079283+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x52e730=0x113000e 0x52e734=0x20 0x52e728=0xc81eb60 0x52e72c=0x1174
+2026-10-07T09:44:46.079438+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 5, TPC 6, SM 0): Out Of Range Address
+2026-10-07T09:44:46.079596+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x52f730=0x116000e 0x52f734=0x20 0x52f728=0xc81eb60 0x52f72c=0x1174
+2026-10-07T09:44:46.079748+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 5, TPC 7, SM 0): Out Of Range Address
+2026-10-07T09:44:46.079869+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x52ff30=0x108000e 0x52ff34=0x20 0x52ff28=0xc81eb60 0x52ff2c=0x1174
+2026-10-07T09:44:46.080137+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 6, TPC 0, SM 0): Out Of Range Address
+2026-10-07T09:44:46.080308+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 6, TPC 0, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.080465+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x534730=0x116000e 0x534734=0x24 0x534728=0xc81eb60 0x53472c=0x1174
+2026-10-07T09:44:46.080647+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 6, TPC 1, SM 0): Out Of Range Address
+2026-10-07T09:44:46.080815+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 6, TPC 1, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.080966+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x534f30=0x113000e 0x534f34=0x24 0x534f28=0xc81eb60 0x534f2c=0x1174
+2026-10-07T09:44:46.081290+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 6, TPC 2, SM 0): Out Of Range Address
+2026-10-07T09:44:46.081443+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 6, TPC 2, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.081576+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x535730=0x10d000e 0x535734=0x24 0x535728=0xc81eb60 0x53572c=0x1174
+2026-10-07T09:44:46.081717+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 6, TPC 3, SM 0): Out Of Range Address
+2026-10-07T09:44:46.081861+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 6, TPC 3, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.082076+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x535f30=0x115000e 0x535f34=0x24 0x535f28=0xc81eb60 0x535f2c=0x1174
+2026-10-07T09:44:46.082214+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 6, TPC 4, SM 0): Out Of Range Address
+2026-10-07T09:44:46.082357+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 6, TPC 4, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.082487+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x536730=0x10d000e 0x536734=0x24 0x536728=0xc81eb60 0x53672c=0x1174
+2026-10-07T09:44:46.082617+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 6, TPC 6, SM 0): Out Of Range Address
+2026-10-07T09:44:46.082762+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 6, TPC 6, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.082893+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x537730=0x10e000e 0x537734=0x24 0x537728=0xc81eb60 0x53772c=0x1174
+2026-10-07T09:44:46.083106+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Warp Exception on (GPC 6, TPC 7, SM 0): Out Of Range Address
+2026-10-07T09:44:46.083241+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics SM Global Exception on (GPC 6, TPC 7, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.083385+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544425, name=relion_refine_m, Graphics Exception: ESR 0x537f30=0x112000e 0x537f34=0x24 0x537f28=0xc81eb60 0x537f2c=0x1174
+2026-10-07T09:44:46.083523+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 43, pid=3544425, name=relion_refine_m, Ch 0000000a
+2026-10-07T09:44:46.162107+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Warp Exception on (GPC 0, TPC 2, SM 0): Out Of Range Address
+2026-10-07T09:44:46.162261+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Global Exception on (GPC 0, TPC 2, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.162416+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics Exception: ESR 0x505730=0xc04000e 0x505734=0x24 0x505728=0xc81eb60 0x50572c=0x1174
+2026-10-07T09:44:46.162549+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Warp Exception on (GPC 1, TPC 2, SM 0): Out Of Range Address
+2026-10-07T09:44:46.162687+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Global Exception on (GPC 1, TPC 2, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.162829+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics Exception: ESR 0x50d730=0xc07000e 0x50d734=0x24 0x50d728=0xc81eb60 0x50d72c=0x1174
+2026-10-07T09:44:46.162966+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Warp Exception on (GPC 2, TPC 6, SM 0): Out Of Range Address
+2026-10-07T09:44:46.163242+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Global Exception on (GPC 2, TPC 6, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.163384+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics Exception: ESR 0x517730=0xc05000e 0x517734=0x24 0x517728=0xc81eb60 0x51772c=0x1174
+2026-10-07T09:44:46.163519+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Warp Exception on (GPC 3, TPC 3, SM 0): Out Of Range Address
+2026-10-07T09:44:46.163656+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Global Exception on (GPC 3, TPC 3, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.163830+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics Exception: ESR 0x51df30=0xc04000e 0x51df34=0x24 0x51df28=0xc81eb60 0x51df2c=0x1174
+2026-10-07T09:44:46.163959+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Warp Exception on (GPC 3, TPC 6, SM 0): Out Of Range Address
+2026-10-07T09:44:46.164193+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Global Exception on (GPC 3, TPC 6, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.164337+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics Exception: ESR 0x51f730=0xc04000e 0x51f734=0x24 0x51f728=0xc81eb60 0x51f72c=0x1174
+2026-10-07T09:44:46.164511+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Warp Exception on (GPC 4, TPC 3, SM 0): Out Of Range Address
+2026-10-07T09:44:46.164653+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Global Exception on (GPC 4, TPC 3, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.164791+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics Exception: ESR 0x525f30=0xc06000e 0x525f34=0x24 0x525f28=0xc81eb60 0x525f2c=0x1174
+2026-10-07T09:44:46.164924+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Warp Exception on (GPC 5, TPC 3, SM 0): Out Of Range Address
+2026-10-07T09:44:46.165152+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Global Exception on (GPC 5, TPC 3, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.165288+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics Exception: ESR 0x52df30=0xc04000e 0x52df34=0x24 0x52df28=0xc81eb60 0x52df2c=0x1174
+2026-10-07T09:44:46.165419+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Warp Exception on (GPC 6, TPC 3, SM 0): Out Of Range Address
+2026-10-07T09:44:46.165550+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics SM Global Exception on (GPC 6, TPC 3, SM 0): Multiple Warp Errors
+2026-10-07T09:44:46.165686+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=3544424, name=relion_refine_m, Graphics Exception: ESR 0x535f30=0xc06000e 0x535f34=0x24 0x535f28=0xc81eb60 0x535f2c=0x1174
+2026-10-07T09:44:46.165870+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 43, pid=3544424, name=relion_refine_m, Ch 0000000c
+2026-09-30T13:22:08.907238+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Warp Exception on (GPC 0, TPC 0, SM 0): Out Of Range Address
+2026-09-30T13:22:08.907365+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Global Exception on (GPC 0, TPC 0, SM 0): Multiple Warp Errors
+2026-09-30T13:22:08.907490+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics Exception: ESR 0x504730=0xc04000e 0x504734=0x24 0x504728=0xc81eb60 0x50472c=0x1174
+2026-09-30T13:22:08.907621+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Warp Exception on (GPC 1, TPC 0, SM 0): Out Of Range Address
+2026-09-30T13:22:08.907769+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Global Exception on (GPC 1, TPC 0, SM 0): Multiple Warp Errors
+2026-09-30T13:22:08.907905+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics Exception: ESR 0x50c730=0xc06000e 0x50c734=0x24 0x50c728=0xc81eb60 0x50c72c=0x1174
+2026-09-30T13:22:08.908129+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Warp Exception on (GPC 2, TPC 0, SM 0): Out Of Range Address
+2026-09-30T13:22:08.908273+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Global Exception on (GPC 2, TPC 0, SM 0): Multiple Warp Errors
+2026-09-30T13:22:08.908397+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics Exception: ESR 0x514730=0xc05000e 0x514734=0x24 0x514728=0xc81eb60 0x51472c=0x1174
+2026-09-30T13:22:08.908521+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Warp Exception on (GPC 2, TPC 3, SM 0): Out Of Range Address
+2026-09-30T13:22:08.908655+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Global Exception on (GPC 2, TPC 3, SM 0): Multiple Warp Errors
+2026-09-30T13:22:08.908794+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics Exception: ESR 0x515f30=0xc07000e 0x515f34=0x24 0x515f28=0xc81eb60 0x515f2c=0x1174
+2026-09-30T13:22:08.908935+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Warp Exception on (GPC 3, TPC 0, SM 0): Out Of Range Address
+2026-09-30T13:22:08.910599+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Global Exception on (GPC 3, TPC 0, SM 0): Multiple Warp Errors
+2026-09-30T13:22:08.910737+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics Exception: ESR 0x51c730=0xc04000e 0x51c734=0x24 0x51c728=0xc81eb60 0x51c72c=0x1174
+2026-09-30T13:22:08.910863+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Warp Exception on (GPC 4, TPC 0, SM 0): Out Of Range Address
+2026-09-30T13:22:08.911077+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Global Exception on (GPC 4, TPC 0, SM 0): Multiple Warp Errors
+2026-09-30T13:22:08.911218+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics Exception: ESR 0x524730=0xc07000e 0x524734=0x24 0x524728=0xc81eb60 0x52472c=0x1174
+2026-09-30T13:22:08.911346+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Warp Exception on (GPC 5, TPC 0, SM 0): Out Of Range Address
+2026-09-30T13:22:08.911483+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Global Exception on (GPC 5, TPC 0, SM 0): Multiple Warp Errors
+2026-09-30T13:22:08.911621+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics Exception: ESR 0x52c730=0xc05000e 0x52c734=0x24 0x52c728=0xc81eb60 0x52c72c=0x1174
+2026-09-30T13:22:08.911763+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Warp Exception on (GPC 6, TPC 0, SM 0): Out Of Range Address
+2026-09-30T13:22:08.911894+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics SM Global Exception on (GPC 6, TPC 0, SM 0): Multiple Warp Errors
+2026-09-30T13:22:08.912099+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2121817, name=relion_refine_m, Graphics Exception: ESR 0x534730=0xc04000e 0x534734=0x24 0x534728=0xc81eb60 0x53472c=0x1174
+2026-09-30T13:22:08.912224+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 43, pid=2121817, name=relion_refine_m, Ch 0000000a
+2026-09-30T14:12:57.687157+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2184217, name=relion_refine_m, Graphics SM Warp Exception on (GPC 2, TPC 0, SM 0): Out Of Range Address
+2026-09-30T14:12:57.687680+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2184217, name=relion_refine_m, Graphics SM Global Exception on (GPC 2, TPC 0, SM 0): Multiple Warp Errors
+2026-09-30T14:12:57.687839+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2184217, name=relion_refine_m, Graphics Exception: ESR 0x514730=0xc04000e 0x514734=0x24 0x514728=0xc81eb60 0x51472c=0x1174
+2026-09-30T14:12:57.691100+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 43, pid=2184217, name=relion_refine_m, Ch 0000000a
+2026-09-30T14:12:57.697100+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2184217, name=relion_refine_m, Graphics SM Warp Exception on (GPC 1, TPC 0, SM 0): Out Of Range Address
+2026-09-30T14:12:57.697244+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2184217, name=relion_refine_m, Graphics SM Global Exception on (GPC 1, TPC 0, SM 0): Multiple Warp Errors
+2026-09-30T14:12:57.697409+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2184217, name=relion_refine_m, Graphics Exception: ESR 0x50c730=0x106000e 0x50c734=0x24 0x50c728=0xc81eb60 0x50c72c=0x1174
+2026-09-30T14:12:57.697551+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2184217, name=relion_refine_m, Graphics SM Warp Exception on (GPC 1, TPC 0, SM 1): Out Of Range Address
+2026-09-30T14:12:57.697680+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2184217, name=relion_refine_m, Graphics SM Global Exception on (GPC 1, TPC 0, SM 1): Multiple Warp Errors
+2026-09-30T14:12:57.697810+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 13, pid=2184217, name=relion_refine_m, Graphics Exception: ESR 0x50c7b0=0xc05000e 0x50c7b4=0x24 0x50c7a8=0xc81eb60 0x50c7ac=0x1174
+2026-09-30T14:12:57.742119+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 43, pid=2184215, name=relion_refine_m, Ch 0000000b
+2026-10-02T02:09:24.629877+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:06:00): 31, pid=2524534, name=graph_dw_probe, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0xdea_dbeef000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT
+2026-10-02T02:11:53.828291+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:06:00): 31, pid=2526296, name=graph_dw_probe, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0xdea_dbeef000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT
+2026-10-02T02:18:32.703225+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:06:00): 31, pid=2530513, name=graph_dw_probe, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC3 GPCCLIENT_T1_0 faulted @ 0xdea_dbeef000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT
+2026-10-02T07:14:35.429277+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:06:00): 31, pid=2585626, name=graph_dw_probe, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0xdea_dbeef000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT
+2026-10-02T08:12:40.779289+00:00 4-gpu-vm kernel: NVRM: Xid (PCI:0000:09:00): 31, pid=2701330, name=cuda_worker_poo, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x7924_75200000. Fault is of type FAULT_PDE ACCESS_TYPE_VI
+--- dmesg -T (Xid lines)
+[Mon Oct 26 00:34:02 2026] NVRM: Xid (PCI:0000:09:00): 31, pid=3831246, name=motioncorr_inge, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_WRITE
+[Mon Oct 26 00:34:05 2026] NVRM: Xid (PCI:0000:09:00): 31, pid=3831269, name=motioncorr_inge, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_WRITE
+[Mon Oct 26 00:34:09 2026] NVRM: Xid (PCI:0000:09:00): 31, pid=3831285, name=motioncorr_inge, Ch 0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC2 GPCCLIENT_T1_0 faulted @ 0x0_00000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_WRITE
+--- counts
+kern.log: 6  kern.log.1: 34

@@ -83,3 +83,8 @@ See [native packet](native-remaining-20261025/README.md) and [inner grades](nati
 - K267 CUDA:8 native exits0; checker1 PASS/5 FAIL/2 UNIDENTIFIABLE, including invalid noisy/repeated sampling. This does not establish truth accuracy or erase historical ABORT records.
 
 Still held/UNRUN: genuine sticky-context window>=4 CPUs, real-data A13 `--j8`, CUDA K269/K272 census, multi-device dataset/UUID poison/publication, genuine ingest poisoning and Xid inspection. No aggregate C1/M1 PASS, scientific promotion or performance claim. Existing earlier-source rows keep their original identities.
+
+
+## 26 October native-final window (additive)
+
+The consolidated C1 engineering acceptance packet is [ACCEPTANCE_PACKET.md](ACCEPTANCE_PACKET.md); evidence in [native-final-20261025/](native-final-20261025/README.md). It supersedes the "Still held/UNRUN" lists above: S1 is PASS (receipts of 22 Oct reconciled, kernel Xid 31 confirmed on GPU3), A13 FAIL with ten attributed mismatches, K269-CUDA exact-sum equality FAIL attributed to #270 alone (STAR identical 100/100), K272 CUDA reported, multi-device dataset (2/4 workers, UUID-selective poison) and 24-movie publication PASS, genuine nvCOMP-ingest poisoning PASS, Xid inspection done. Production source remains `e77a51a2`.

@@ -1,20 +1,25 @@
-4c4,7
+4c4,8
 < usage: run_v2_cases.py ROOT OUTNAME BACKEND BINARY DC CPUS [GPU_UUID]
 ---
 > usage: ds_run_v2_cases.py ROOT OUTNAME BACKEND BINARY DC CPUS "EXTRA ARGS" 
 > Derived from docs/post_rc0/c1-20261022/tools/c1_run_v2_cases.py (same command line, env and loop).
 > The only change: EXTRA ARGS (shell-split, may be empty) is appended to every case's command.
+> DS_ONLY_CASES (comma list, env, optional) restricts the loop to those cases (diagnostic single-case runs); unset runs all eight.
 > With EXTRA empty the argv is identical to the original driver's (checked by the retained diff).
-10c13,14
+10c14,15
 < dc=sys.argv[5]; cpus=sys.argv[6]; uuid=sys.argv[7] if len(sys.argv)>7 else None
 ---
 > import shlex
 > dc=sys.argv[5]; cpus=sys.argv[6]; extra=shlex.split(sys.argv[7]); uuid=None
-15c19
+13c18
+< for name in ['zero','integer','fractional','affine','pedestal','noisy','flat','repeated']:
+---
+> for name in [c for c in ['zero','integer','fractional','affine','pedestal','noisy','flat','repeated'] if c in os.environ.get('DS_ONLY_CASES', c).split(',')]:
+15c20
 <  cmd=['taskset','-c',cpus,str(binary),'--i',name+'.star','--o',str(out/name),'--use_own','--j','2','--patch_x',str(p),'--patch_y',str(p),'--bin_factor','1','--seed','1','--skip_defect','--save_noDW','--first_frame_sum','1','--last_frame_sum','5','--skip_logfile']
 ---
 >  cmd=['taskset','-c',cpus,str(binary),'--i',name+'.star','--o',str(out/name),'--use_own','--j','2','--patch_x',str(p),'--patch_y',str(p),'--bin_factor','1','--seed','1','--skip_defect','--save_noDW','--first_frame_sum','1','--last_frame_sum','5','--skip_logfile']+extra
-24c28
+24c29
 <  rows.append(dict(case=name,backend=backend,dc=dc,patches=p,argv=cmd,exit=rc,seconds=time.time()-start,gpu_uuid=uuid))
 ---
 >  rows.append(dict(case=name,backend=backend,dc=dc,patches=p,argv=cmd,exit=rc,seconds=time.time()-start,gpu_uuid=uuid,extra=extra))

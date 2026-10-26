@@ -10,6 +10,7 @@ K267 = ["zero", "integer", "fractional", "affine", "pedestal", "noisy", "flat", 
 NCELLS = [f"vel{v}-N{n}" for v in (0, 1) for n in (5, 9, 13, 20)]
 MOVIES = [f"{m}-{c}" for m in ("00021", "00046") for c in ("G", "L")]  # G/L as defined in PR288 RESULT
 BACKENDS = ("cpu", "cuda")
+LOCAL_CASES = ("affine", "pedestal", "noisy")   # original K267 CLI: 3x3 patches; the other five ID use 1x1 (global only)
 PAIRS = (("C-BASE", "cpu-none", "cuda-none"), ("C-GOAL", "cpu-none", "cuda-both"),
          ("C-COMMON", "cpu-both", "cuda-both"), ("C-CPU", "cpu-none", "cpu-both"))
 
@@ -21,7 +22,8 @@ def rows():
             for binary, arm in (("def", "unset"), ("exp", "unset"), ("exp", "none"), ("exp", "global"),
                                 ("exp", "local"), ("exp", "both")):
                 role = "identity" if arm == "unset" or binary == "def" else ("identity+arm" if arm == "none" else "arm")
-                out.append(dict(tier="K", case=case, config="as-fixture", backend=be, binary=binary, arm=arm,
+                out.append(dict(tier="K", case=case, config="3x3 (original CLI)" if case in LOCAL_CASES else "1x1 global-only (original CLI)",
+                                backend=be, binary=binary, arm=arm,
                                 weight="production", stop="production", role=role, status="HELD"))
     for weight, binary in (("production", "exp"), ("isotropic", "iso")):   # tier N: W5 phase-ramp controls
         for cell in NCELLS:
@@ -39,8 +41,12 @@ def rows():
         g = []
         if r["tier"] == "K" and (r["binary"] == "def" or r["arm"] in ("unset", "none")):
             g.append("B3")
-        if r["tier"] == "K" and r["case"] == "affine" and r["backend"] == "cuda" and r["binary"] == "exp" and r["arm"] != "unset":
-            g.append("B4")
+        k_exp = r["tier"] == "K" and r["binary"] == "exp" and r["arm"] != "unset"
+        if k_exp and r["case"] in LOCAL_CASES and r["backend"] == "cuda":
+            g.append("B4")   # positive: the local stage is requested, so cuda_batched must be reached
+        if k_exp and r["case"] not in LOCAL_CASES and r["arm"] in ("local", "both"):
+            g.append("SEL")  # no local stage requested: a selected local arm must be a no-op, local coverage NOT_APPLICABLE
+            r["role"] = "selectivity" if r["arm"] == "local" else "arm+selectivity"
         r["gates"] = "+".join(g)
         r["cli"] = {"K": "tools/ccf_dc_native_rows.py:k267_argv", "N": "tools/ccf_dc_native_rows.py:n_argv",
                     "M": "PENDING parent pin (PR288 command)"}[r["tier"]]

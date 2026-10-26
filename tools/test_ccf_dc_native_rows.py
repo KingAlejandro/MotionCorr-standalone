@@ -125,8 +125,14 @@ class PureControls(unittest.TestCase):
         self.assertEqual(r["global"], [[0.123457, -0.98765]])
 
     def test_pinned_commands(self):
+        grid = {c: rows.k267_argv("B", c, "O", "cpu")[rows.k267_argv("B", c, "O", "cpu").index("--patch_x") + 1]
+                for c in rows.K267_PATCHES}
+        self.assertEqual(grid, {"zero": "1", "integer": "1", "fractional": "1", "affine": "3", "pedestal": "3",
+                                "noisy": "3", "flat": "1", "repeated": "1"}, "the original per-case patch grid")
+        self.assertEqual(rows.k267_stages("affine"), ("global", "local"))
+        self.assertEqual(rows.k267_stages("flat"), ("global",))
+        self.assertEqual(rows.k267_argv("B", "flat", "O", "cpu", patches=3)[rows.k267_argv("B", "flat", "O", "cpu").index("--patch_x") + 1], "3")
         k = rows.k267_argv("B", "affine", "O", "cuda")
-        self.assertEqual(k[k.index("--patch_x") + 1:k.index("--patch_x") + 2], ["3"])
         self.assertIn("--gpu", k)
         self.assertNotIn("--skip_logfile", k)
         n = rows.n_argv("B", "vel0_N5", 5, "O", "cpu")
@@ -231,6 +237,7 @@ class NativeRows(unittest.TestCase):
             self.assertGreater(c["frames_eligible"], 0)
             self.assertEqual(c["frames_zeroed"], c["frames_eligible"])
         self.assertTrue(row["local_enabled"])
+        self.assertEqual(row["stage_coverage"], {"global": "COVERED", "local": "COVERED"})
         self.assertIn("field_angstrom", row["star"])
         self.assertIn("field_angstrom", row["tap"])
         for i in range(2):
@@ -264,11 +271,44 @@ class NativeRows(unittest.TestCase):
             (run / "witness.json").write_text(json.dumps(dict(w, **change)))
             self.assertEqual(self.grade(run)["row_status"], "INVALID", tag)
 
-    def test_vacuous_local_stage_is_inconclusive(self):
-        run = self.produce("zero_p1_both", "K", "zero", "both", patches=1)   # 1x1: no local stage exists
+    def test_global_only_row_cannot_claim_local_coverage(self):
+        run = self.produce("zero_p1_both", "K", "zero", "both")   # original CLI: 1x1, no local stage requested
         row = rows.grade_k267(run, self.fx, "zero", "cpu", "both", iso_expected=ISO)
+        self.assertEqual(row["row_status"], "SCORED", row)
+        self.assertEqual(row["expected_stages"], ["global"])
+        self.assertEqual(row["stage_coverage"]["global"], "COVERED")
+        self.assertTrue(row["stage_coverage"]["local"].startswith("NOT_APPLICABLE"), row["stage_coverage"])
+        self.assertIn("no-op selectivity", row["stage_coverage"]["local"])   # the arm selects local; nothing to zero
+        loc = row["counters"]["cpu"]["local"]
+        self.assertEqual((loc["frames_eligible"], loc["frames_zeroed"]), (0, 0))
+        # a caller that declares local expected on this global-only run gets INCONCLUSIVE, never a pass
+        row = rows.grade_k267(run, self.fx, "zero", "cpu", "both", iso_expected=ISO, stages=("global", "local"))
         self.assertEqual(row["row_status"], "INCONCLUSIVE", row)
         self.assertTrue(any("local" in r for r in row["witness_reasons"]))
+        self.assertEqual(row["stage_coverage"]["local"], "INCONCLUSIVE")
+
+    def test_local_reached_when_not_requested_is_invalid(self):
+        run = self.produce("affine_both", "K", "affine", "both")   # 3x3: local runs
+        row = rows.grade_k267(run, self.fx, "affine", "cpu", "both", iso_expected=ISO, stages=("global",))
+        self.assertEqual(row["row_status"], "INVALID", row)
+
+    def test_skip_logfile_does_not_change_the_products(self):
+        a = self.produce("skiplog_without", "K", "affine", "none")
+        b = self.root / "skiplog_with"
+        b.mkdir()
+        argv = rows.k267_argv(BINARY, "affine", b / "out", "cpu") + ["--skip_logfile"]
+        import os
+        p = subprocess.run(argv, cwd=self.fx, env={**os.environ, **rows.run_env("none", b / "witness.json", b / "tap.json")},
+                           capture_output=True, text=True, timeout=600)
+        (b / "rc.txt").write_text(f"{p.returncode}\n")
+        (b / "stdout.txt").write_text(p.stdout)
+        (b / "stderr.txt").write_text(p.stderr)
+        self.assertEqual(p.returncode, 0)
+        pa, pb = [read_mrc(x / "out" / "affine.mrc")[0] for x in (a, b)]
+        self.assertTrue(np.array_equal(pa, pb), "--skip_logfile changed the pixels")
+        sa, sb = [(x / "out" / "affine.star").read_text().replace(str(x), "R") for x in (a, b)]
+        self.assertEqual(sa, sb, "--skip_logfile changed the per-movie STAR")
+        self.assertEqual((a / "tap.json").read_bytes(), (b / "tap.json").read_bytes(), "--skip_logfile changed the tap")
 
     def test_cuda_declared_row_on_a_cpu_run(self):
         run = self.produce("affine_both", "K", "affine", "both")

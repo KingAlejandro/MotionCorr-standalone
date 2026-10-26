@@ -45,11 +45,24 @@ LIMITS_A = (0.20, 0.40, 0.80)   # rms, p95, max in Angstrom, unchanged
 
 # ------------------------------------------------------------------------------------ pins --
 
-def k267_argv(binary, case, outdir, backend):
-    """Native K267 command, 3x3 patches for every ID (the retained run used 1x1 for five of them, which never runs
-    the local stage and so cannot exercise the local or both arms). Product log kept (no --skip_logfile)."""
-    argv = [str(binary), "--i", f"{case}.star", "--o", str(outdir), "--use_own", "--j", "8", "--patch_x", "3",
-            "--patch_y", "3", "--bin_factor", "1", "--seed", "1", "--skip_defect", "--save_noDW",
+# Original per-case patch grid of the retained native K267 run (`run_v2.py`): 3x3 for the three cases that exercise
+# the local stage, 1x1 (global alignment only) for the other five.
+K267_PATCHES = {"zero": 1, "integer": 1, "fractional": 1, "affine": 3, "pedestal": 3, "noisy": 3, "flat": 1, "repeated": 1}
+
+
+def k267_stages(case, patches=None):
+    """Stages this row is expected to execute: global always, local only when more than one patch is requested."""
+    return ("global", "local") if (patches or K267_PATCHES[case]) > 1 else ("global",)
+
+
+def k267_argv(binary, case, outdir, backend, patches=None):
+    """Original native K267 command per case (`K267_PATCHES`). The retained command also had --skip_logfile; it is
+    dropped here so the product log (the convergence markers) exists, which must not change numerics (checked by
+    `CcfDcRowsNative.test_skip_logfile_does_not_change_the_products`). `patches` overrides the grid only for the
+    separately labelled, held all-3x3 configurations; it never replaces the original rows."""
+    n = patches or K267_PATCHES[case]
+    argv = [str(binary), "--i", f"{case}.star", "--o", str(outdir), "--use_own", "--j", "8", "--patch_x", str(n),
+            "--patch_y", str(n), "--bin_factor", "1", "--seed", "1", "--skip_defect", "--save_noDW",
             "--first_frame_sum", "1", "--last_frame_sum", "5"]
     return argv + (["--gpu", "0"] if backend == "cuda" else [])
 
@@ -160,6 +173,20 @@ def star_rounded_tap(tap):
                         "coeff_y": [star_format(x) for x in tap["coeff_y"]]})
 
 
+def stage_coverage(w, backend, arm, stages):
+    """Per stage: COVERED (expected and reached), INCONCLUSIVE (expected, never reached), NOT_APPLICABLE (not requested).
+    A selected arm on a stage that is not requested is a no-op selectivity observation, never local coverage."""
+    sel = dict(zip(("global", "local"), ARMS[arm]))
+    out = {}
+    for stage in ("global", "local"):
+        c = w["sites"][DECLARED[backend][stage]][stage]
+        if stage in stages:
+            out[stage] = "COVERED" if c["frames_eligible"] > 0 and c["calls_eligible"] > 0 else "INCONCLUSIVE"
+        else:
+            out[stage] = "NOT_APPLICABLE" + (" (arm selects it: no-op selectivity)" if sel[stage] and c["frames_eligible"] == 0 else "")
+    return out
+
+
 def convergence_of(log_path):
     """Convergence markers from the existing product log (unchanged parser). Never a silent pass."""
     p = Path(log_path)
@@ -200,6 +227,9 @@ def _head(run, movie, backend, arm, stages, iso_expected, has_witness):
             return dict(row, row_status="INVALID", reason=f"witness unreadable: {e}"), False
         row["witness_status"], row["witness_reasons"] = grade_witness(w, backend, arm, stages, iso_expected)
         row["counters"] = w.get("sites")
+        row["expected_stages"] = sorted(stages)
+        if row["witness_status"] != "INVALID":
+            row["stage_coverage"] = stage_coverage(w, backend, arm, stages)
         if row["witness_status"] == "INVALID":
             return dict(row, row_status="INVALID", reason="; ".join(row["witness_reasons"])), False
     row["convergence"] = convergence_of(run / "out" / f"{movie}.log")
@@ -213,8 +243,11 @@ def _finish(row):
     return row
 
 
-def grade_k267(run, fixtures, case, backend, arm, iso_expected=False, has_witness=True, stages=("global", "local")):
+def grade_k267(run, fixtures, case, backend, arm, iso_expected=False, has_witness=True, stages=None):
+    """`stages` defaults to the stages the original CLI of this case executes (`k267_stages`); a caller that asked
+    for more (e.g. a held all-3x3 configuration) passes them explicitly."""
     run, fixtures = Path(run), Path(fixtures)
+    stages = k267_stages(case) if stages is None else tuple(stages)
     row, ok = _head(run, case, backend, arm, set(stages), iso_expected, has_witness)
     row["tier"] = "K"
     if not ok:

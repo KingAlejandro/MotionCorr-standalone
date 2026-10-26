@@ -62,6 +62,15 @@ def main():
             assert rc != 0 and "must be one of: off, global, all" in out, f"coupled_peak {bad!r}: {out[:300]}"
         rc, out = run(binary, tmp, "--use_motioncor2", "--motioncor2_exe", "/bin/false", "--experimental_coupled_peak", "all")
         assert rc != 0 and "valid only with --use_own" in out, out[:300]
+        # --experimental_isotropic_weight (W5 'iso', global only): same CPU-only contract.
+        ISO_REFUSAL = "--experimental_isotropic_weight is a CPU-only research option and is refused with --gpu"
+        rc, out = run(binary, tmp, "--use_own", "--gpu", "0", "--experimental_isotropic_weight")
+        assert rc != 0 and ISO_REFUSAL in out and "built without CUDA" not in out and "Invalid GPU device ID" not in out, \
+            f"isotropic weight with --gpu 0 was not refused first: rc={rc} {out[:300]}"
+        rc, out = run(binary, tmp, "--use_own", "--experimental_isotropic_weight")
+        assert rc != 0 and ISO_REFUSAL not in out and "no_such_input.star" in out, f"isotropic weight without --gpu: {out[:300]}"
+        rc, out = run(binary, tmp, "--use_motioncor2", "--motioncor2_exe", "/bin/false", "--experimental_isotropic_weight")
+        assert rc != 0 and "valid only with --use_own" in out, out[:300]
         rc, out = run(binary, tmp, "--use_motioncor2", "--motioncor2_exe", "/bin/false", "--experimental_global_half_gain")
         assert rc != 0 and "valid only with --use_own" in out, out[:300]
     print("PASS")

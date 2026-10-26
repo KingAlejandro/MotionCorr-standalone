@@ -223,6 +223,9 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	}
 	if ((experimental_global_half_gain || experimental_align_tolerance > 0) && !do_own)
 		REPORT_ERROR("--experimental_global_half_gain and --experimental_align_tolerance are valid only with --use_own");
+	experimental_isotropic_weight = parser.checkOption("--experimental_isotropic_weight", "(EXPERIMENTAL, research, CPU only) Use W5's isotropic CCF weight (x frequency divided by the full width nx instead of nx/2 + 1) in the global alignment. Default off. Refused with --gpu.");
+	if (experimental_isotropic_weight && !do_own)
+		REPORT_ERROR("--experimental_isotropic_weight is valid only with --use_own");
 	{
 		const std::string mode = parser.getOption("--experimental_coupled_peak", "(EXPERIMENTAL, research, CPU only) Replace the separable 1D parabola of the subpixel peak by the full 2x2-Hessian quadratic on the 3x3 neighbourhood: off (default), global (global alignment only) or all (global and patch peaks). Refused with --gpu.", "off");
 		if      (mode == "off")    experimental_coupled_peak = 0;
@@ -416,6 +419,12 @@ void MotioncorrRunner::initialise()
 		{
 			REPORT_ERROR("ERROR: --experimental_global_half_gain and --experimental_align_tolerance are CPU-only research "
 			             "options and are refused with --gpu (the CUDA alignment does not implement them). Remove --gpu to run on the CPU.");
+		}
+
+		if (experimental_isotropic_weight)
+		{
+			REPORT_ERROR("ERROR: --experimental_isotropic_weight is a CPU-only research option and is refused with --gpu "
+			             "(the CUDA alignment does not implement it). Remove --gpu to run on the CPU.");
 		}
 
 		if (experimental_coupled_peak != 0)
@@ -4874,17 +4883,16 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	std::cout << "Trajectory size: " << xshifts.size() << std::endl;
 #endif
 
-	// Initialize B factor weight
+	// Initialize B factor weight. x_norm is nfx (inherited) or, with the experimental isotropic weight on the
+	// global alignment, the full width pnx (W5 'iso').
+	const RFLOAT weight_x_norm = (is_global && experimental_isotropic_weight) ? (RFLOAT)pnx : (RFLOAT)nfx;
 	weight.reshape(Fref);
 	RCTIC(TIMING_PREP_WEIGHT);
 	#pragma omp parallel for num_threads(n_threads)
 	for (int y = 0; y < ccf_nfy; y++) {
 		const int ly = (y > ccf_nfy_half) ? (y - ccf_nfy) : y;
-		RFLOAT ly2 = ly * (RFLOAT)ly / (nfy * (RFLOAT)nfy);
-
 		for (int x = 0; x < ccf_nfx; x++) {
-			RFLOAT dist2 = ly2 + x * (RFLOAT)x / (nfx * (RFLOAT)nfx);
-			DIRECT_A2D_ELEM(weight, y, x) = exp(- 2 * dist2 * scaled_B); // 2 for Fref and Fframe
+			DIRECT_A2D_ELEM(weight, y, x) = ccfWeightAt(ly, x, nfy, weight_x_norm, scaled_B); // 2 for Fref and Fframe
 		}
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
@@ -5073,6 +5081,13 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 #endif
 
 	return converged;
+}
+
+RFLOAT MotioncorrRunner::ccfWeightAt(int ly, int x, int nfy, RFLOAT x_norm, RFLOAT scaled_B) {
+	// Same operations, in the same order, as the inline expression this replaces (x_norm = nfx).
+	RFLOAT ly2 = ly * (RFLOAT)ly / (nfy * (RFLOAT)nfy);
+	RFLOAT dist2 = ly2 + x * (RFLOAT)x / (x_norm * x_norm);
+	return exp(- 2 * dist2 * scaled_B);
 }
 
 int MotioncorrRunner::coupledPeakOffset(const RFLOAT v[3][3], RFLOAT &dx, RFLOAT &dy) {

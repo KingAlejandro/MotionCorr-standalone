@@ -265,6 +265,10 @@ if(BUILD_TESTING)
     add_executable(coupled_peak tests/test_coupled_peak.cpp)
     target_link_libraries(coupled_peak PRIVATE motioncorr_core)
     add_test(NAME CoupledPeak COMMAND coupled_peak)
+    # W6 native follow-up: W5's isotropic CCF weight, global only (harmful-comparator control).
+    add_executable(isotropic_weight tests/test_isotropic_weight.cpp)
+    target_link_libraries(isotropic_weight PRIVATE motioncorr_core)
+    add_test(NAME IsotropicWeight COMMAND isotropic_weight)
     # H3: operator control for the ported #262 DC hook (only exists when built in).
     if(MC_EXPERIMENT_CCF_DC)
         add_executable(ccf_dc_hook tests/test_ccf_dc_hook.cpp)

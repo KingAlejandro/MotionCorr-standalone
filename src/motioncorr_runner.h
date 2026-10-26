@@ -161,6 +161,15 @@ public:
 	// 1 when H is not negative definite, 2 when |delta| > 1 px in either component (dx, dy untouched).
 	static int coupledPeakOffset(const RFLOAT v[3][3], RFLOAT &dx, RFLOAT &dy);
 
+	// EXPERIMENTAL, default off, CPU only (refused with --gpu): W5's isotropic CCF weight for the GLOBAL alignment.
+	// The inherited weight divides the x frequency by nfx = nx/2 + 1; this divides by nx (the full width) instead,
+	// exactly W5 lib.py 'iso'. Exists only to run the W5 harmful comparator natively.
+	bool experimental_isotropic_weight = false;
+
+	// CCF B-factor weight at half-spectrum column x and signed row frequency ly:
+	// exp(-2 * ((ly / nfy)^2 + (x / x_norm)^2) * scaled_B). The inherited weight is x_norm = nfx.
+	static RFLOAT ccfWeightAt(int ly, int x, int nfy, RFLOAT x_norm, RFLOAT scaled_B);
+
 	// Save aligned but non-dose weighted micrograph.
 	// With MOTIONCOR2, this flag is always assumed to be true
 	bool save_noDW;

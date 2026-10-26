@@ -54,3 +54,17 @@ PR288's predetermined issue-36 movies `00021` and `00046`, each in its G and L c
 ## 5. Resources and records
 
 Venue 4GPUs only. GPU2 `GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598` (select by UUID, `--gpu 0`), CPU 80-87 via whole-command `taskset`, one job at a time, build `-j8` max, scratch under a new directory <= 20 GiB with indexed raw outside Git. Before each build/test: fresh occupancy (nvidia-smi compute-apps, process list, `flock -n` on every `/tmp/*.lock`, fd walk for deleted locks), then a dedicated exclusive lease `/tmp/motioncorr-dcnative-gpu2-cpu80-87.lock`. No stopping of others' jobs, no deletion of leases. Correctness only; no performance claim. Record every command, binary and input hash, route, fallback, exit status and failure.
+
+## 6. Job ledger (proposal; generated, nothing run)
+
+`make_ledger.py` writes `ledger.csv` (176 jobs, all `HELD`), `pairs.csv` (112 comparison pairs) and `counts.json`. No new cases beyond sections 3 and 4.
+
+| Tier | Jobs | Composition |
+|---|---:|---|
+| K (eight K267 IDs) | 96 | 8 IDs x 2 backends x 6 rows: `def` unset, `exp` unset, `exp` none/global/local/both |
+| N (W5 controls, production stop) | 64 | 8 cells x 2 backends x 2 arms (none, both) x 2 weight sets (`exp` production: 32, `iso` isotropic: 32) |
+| M (native movies, behind sections 1 and 3 and parent pins) | 16 | 2 movie IDs x 2 configurations (G, L) x 2 backends x 2 arms (none, both), `exp` |
+
+B3 reuses tier K and adds no jobs: per (ID, backend) the triple `def` unset / `exp` unset / `exp` none must be identical (pixels, STAR, logs with output dir normalised, exit, publication). The `exp` none rows are therefore both the identity witness and the none arm of C-BASE/C-GOAL/C-CPU, produced once. The unset-versus-none CPU console/pixel identity is also covered by `CcfDcRequest`; the CUDA unset-versus-none rows exist only in tier K. Tier N has no separate identity rows because B3 already covers `def` versus `exp`; its `iso` rows have no `def` counterpart by construction.
+
+Pairs: for each K, N and M case the four comparisons of section 2, anchored on the cpu none job (K: 8 x 4 = 32, N: 16 x 4 = 64, M: 4 x 4 = 16). They are fixed here, before any result. Retained-record scripts are reused for scoring only; every row is scored with the unchanged checkers and limits, and field-gate outcomes (including `INPUT_ERROR_OUTSIDE_ROI` and `UNIDENTIFIABLE`) are reported as the unchanged checkers emit them.

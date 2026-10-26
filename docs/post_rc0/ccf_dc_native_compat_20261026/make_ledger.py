@@ -21,7 +21,7 @@ def rows():
             for binary, arm in (("def", "unset"), ("exp", "unset"), ("exp", "none"), ("exp", "global"),
                                 ("exp", "local"), ("exp", "both")):
                 role = "identity" if arm == "unset" or binary == "def" else ("identity+arm" if arm == "none" else "arm")
-                out.append(dict(tier="K", case=case, config="5x5-as-fixture", backend=be, binary=binary, arm=arm,
+                out.append(dict(tier="K", case=case, config="as-fixture", backend=be, binary=binary, arm=arm,
                                 weight="production", stop="production", role=role, status="HELD"))
     for weight, binary in (("production", "exp"), ("isotropic", "iso")):   # tier N: W5 phase-ramp controls
         for cell in NCELLS:

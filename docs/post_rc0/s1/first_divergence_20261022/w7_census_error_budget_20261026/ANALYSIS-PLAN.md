@@ -53,3 +53,7 @@ The C arm, CUDA, the evaluator, limits, ROI, generator and gauge are not changed
 ## Amendment 1 (before the full run; only the gate wording changes)
 
 G1 as written failed on a 4-movie debug run: H7a regenerated 82 movies, so the RECEIPT.json copies its `metrics.json` identity hashed differ from the cpu64 originals in timing fields (`seconds`). The identity that matters is the movie bytes. G1 now requires the cpu64 receipt's `movie.mrcs` sha256 to equal the H7a census `movie_sha256` (which H7a checked against its own receipt) and the recipe to equal `gen.recipe(condition, seed)`. The debug run had shown only gate values (G2-G5 passed); no table was computed.
+
+## Amendment 2 (after the first full run; one added diagnostic, nothing removed)
+
+The first full run showed that the per-patch time-constant part of `delta` dominates T6. Added, labelled post hoc: the anchor test. `eloc(p,g) = delta(p,g) - delta(p,0)` for `g >= 1` is the estimate error of frame `g` relative to the pinned frame 0. If per-frame patch errors are independent with equal variance, the RMS of its per-patch mean (which estimates `-eps_0`) equals the RMS of its scatter about that mean (expected ratio 1.026). A ratio near 1 says the offset is one frame's ordinary noise promoted to a constant by the pin; a ratio well above 1 would say frame 0 (or a constant bias) is special. Reported per condition; not used to change any other table.

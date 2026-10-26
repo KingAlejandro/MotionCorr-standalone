@@ -275,6 +275,12 @@ def movie(name):
                                 gain_slope_xy=slope,
                                 delta_rms_px_by_iterations={str(k): rms(delta[its == k]) for k in sorted(set(its.tolist()))},
                                 n_by_iterations={str(k): int((its == k).sum()) for k in sorted(set(its.tolist()))})
+        # Amendment 2 anchor test: eloc(g) = delta(g) - delta(0) is the error of frame g relative to the
+        # pinned frame 0. With i.i.d. per-frame errors its per-patch mean (~ -eps_0) and its scatter
+        # about that mean have the same RMS (ratio sqrt(40/38) = 1.026).
+        eloc = delta[:, 1:] - delta[:, :1]; mloc = eloc.mean(1)
+        out['T6']['anchor'] = dict(mean_rms_px=rms(mloc), scatter_rms_px=rms(eloc - mloc[:, None]),
+                                   ratio=rms(mloc)/rms(eloc - mloc[:, None]))
     return out
 
 

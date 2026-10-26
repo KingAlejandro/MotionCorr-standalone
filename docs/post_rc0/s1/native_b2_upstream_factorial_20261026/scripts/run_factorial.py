@@ -37,7 +37,7 @@ def main():
  for case in ORDER:
   a,ra,ma=run(case,False);b,rb,mb=run(case,True)
   sa=star_blocks(a/'output'/f'{case}.star');sb=star_blocks(b/'output'/f'{case}.star')
-  identity=dict(global_runtime_exact=ra['global']==rb['global'],global_STAR_block_exact=sa['global_shift']==sb['global_shift'],observation_STAR_block_exact=sa['local_shift']==sb['local_shift'],patch_acceptance_exact=ma['convergence']==mb['convergence'],stage_counters_exact=ma['manipulation']==mb['manipulation'])
+  identity=dict(global_runtime_exact=ra['global']==rb['global'],global_STAR_block_exact=sa['global_shift']==sb['global_shift'],observation_STAR_block_exact=sa.get('local_shift','')==sb.get('local_shift',''),patch_acceptance_exact=ma['convergence']==mb['convergence'],stage_counters_exact=ma['manipulation']==mb['manipulation'])
   write(b/'UP-pair-identity.json',identity);check(all(identity.values()),'UP pair upstream/observation/acceptance/counter identity differs: '+case)
   if not ra['local_enabled'] and not rb['local_enabled']:
    cp=subprocess.run([PY,'-B',str(OLD/'scripts/compare_products.py'),str(a/'output'),str(b/'output'),str(b/'global-only-product-identity.json')],capture_output=True,text=True)

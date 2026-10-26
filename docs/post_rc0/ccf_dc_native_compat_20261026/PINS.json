@@ -1,0 +1,149 @@
+{
+ "production_and_build": [
+  {
+   "path": "src/experiment_ccf_dc.h",
+   "git_blob": "5b73c108874f928a7fb39c77e401301dc74290de",
+   "sha256": "0dfc18c2b66fefdd9b3946acdd83df83746f8c1361ac43a477b2df0d7c7de8f7"
+  },
+  {
+   "path": "src/motioncorr_runner.cpp",
+   "git_blob": "5632bdc292f451ae6527bda371ce90ae6292f374",
+   "sha256": "fde5369df5aaed9a8c62a5c74746b550083601a697a60045945c790511cee1e2"
+  },
+  {
+   "path": "src/acc/cuda/cuda_alignpatch.cu",
+   "git_blob": "64fab1b0ff6b8473612660e443aa5e95c7a248d4",
+   "sha256": "139166ad28930ae4ac51ff77a11e33515d823bf1d568fba8ad7a000412f46a2d"
+  },
+  {
+   "path": "CMakeLists.txt",
+   "git_blob": "f9f5961222fc9afd5b55388496a0bc756ea17b15",
+   "sha256": "523d629bb1d9cf68891f23354cdce824d1357bc38856a2fffa2ced921c810120"
+  }
+ ],
+ "tests": [
+  {
+   "path": "tests/experiment_ccf_dc_stage.cpp",
+   "git_blob": "b6c9038de7db7d282580531cd66b4ba4e74477e1",
+   "sha256": "03a472671f0d138e805f29979d7daf7db068a19ddc644ca225cb01d27ad015e0"
+  },
+  {
+   "path": "tests/test_ccf_dc_request.py",
+   "git_blob": "89acab77828a7cb19d2daeb49efc6ad8dbf22d31",
+   "sha256": "71feb232e3abe9996fe1a6fd3ac4777980fbc5ee3c85e5843f1eba30b66b60b0"
+  },
+  {
+   "path": "tools/test_ccf_dc_tap_field.py",
+   "git_blob": "fa48019044cbfac4200e2fa2320a0e83a2df1dc3",
+   "sha256": "e8cf186316da0409b113569ab4d85d2b6a9ff61b19bd516eb8d9f8cd596cb315"
+  },
+  {
+   "path": "tools/test_ccf_dc_native_rows.py",
+   "git_blob": "6e96b7ff90f8d8368d650dbf6275dff703753261",
+   "sha256": "57a0b5cea1fc92a4e33f94953ec430154475caf35804c5f20bc3337a0867d245"
+  }
+ ],
+ "consumers_new": [
+  {
+   "path": "tools/ccf_dc_tap_field.py",
+   "git_blob": "1491e46d0536d557f7ef6c0d2d2dfc2c07785a4f",
+   "sha256": "831ba828f28ed1a7072dc825a18354d405e9557ad19d8464e32cb490a0065f1d"
+  },
+  {
+   "path": "tools/ccf_dc_native_rows.py",
+   "git_blob": "95316243b2b041e2607c67e6810eb6f214b92fe5",
+   "sha256": "36c0a67a753f1e672ddc64c3a92426bf88c04094b4a571bd775a9565b249788f"
+  },
+  {
+   "path": "test-data/generate_ccf_dc_n_controls.py",
+   "git_blob": "e4d5878a19dbd66cc1bdcf787b3979d9e08720fc",
+   "sha256": "8e5a6f58c6e85c869298e424c0fa343ec48fc6009448093271bd927d97fc308d"
+  }
+ ],
+ "scorers_and_math_unchanged": [
+  {
+   "path": "tools/check_motion_diagnostics.py",
+   "git_blob": "0ea903eb96c78e74d135c458c2327b691115e8d0",
+   "sha256": "2be34b821ce9c351abaeab5c0280478362cf90ba774df7f529caced9e360eb16"
+  },
+  {
+   "path": "tools/check_realistic_motion.py",
+   "git_blob": "f4cbeaf449be8b58d438156c9696bec72c371b11",
+   "sha256": "b0ab099a256e458b1c8aea6c2ff5d9ceacab10dd81945b025e96e5c8a87b7ff9"
+  },
+  {
+   "path": "tools/motion_field.py",
+   "git_blob": "a170be767d12ab3f15f9d886a0156e4b1af550ec",
+   "sha256": "d72cfad7175368fa6d0727c2727c49780328951c6f4d3ecc20e9ac662ac2e810"
+  },
+  {
+   "path": "test-data/generate_motion_diagnostics.py",
+   "git_blob": "8e6accca8d0cc26c1559d4411ac06311138a020e",
+   "sha256": "5e781bb290b3f12b38f6dc7ec18bb955d56331219dc0216321e010ecbcdaf4cc"
+  },
+  {
+   "path": "test-data/generate_known_motion_fixture.py",
+   "git_blob": "387bd4fe8ff5456ddea293fee78f3d1d40b4f49d",
+   "sha256": "f28fbf516f8c2f7a3ae1b6133d54d3cc1e0708e2f90644cce30a845f4bbcef4f"
+  }
+ ],
+ "plan_and_ledger": [
+  {
+   "path": "docs/post_rc0/ccf_dc_native_compat_20261026/DESIGN.md",
+   "git_blob": "c4e5280ebe3b6c9360d10128279858baa6feee1b",
+   "sha256": "759d0c161d7e53244d1b03be23686f306fa23116e8ff2dd19a25150d71907a4a"
+  },
+  {
+   "path": "docs/post_rc0/ccf_dc_native_compat_20261026/CONTROL_PLAN.md",
+   "git_blob": "666ae06546194178266c54c912188c0c20023097",
+   "sha256": "85f014ec95edd3e2ea4c40ab22c17478d9025f7000b7e0d2f97bd3af4b64a68b"
+  },
+  {
+   "path": "docs/post_rc0/ccf_dc_native_compat_20261026/make_ledger.py",
+   "git_blob": "c97db39eca64e1542d625372a6a69c627e9174ed",
+   "sha256": "c2266a0eccbae8a946b0a496faddeb81bc88c25e79339bd0d8f9baff2f85f05b"
+  },
+  {
+   "path": "docs/post_rc0/ccf_dc_native_compat_20261026/ledger.csv",
+   "git_blob": "0f069f32e32a6271d8caba95887898906960a896",
+   "sha256": "1bda7e1ea9781f66d79494c2bbd48965259faf3671f23307631f50b0e5b07244"
+  },
+  {
+   "path": "docs/post_rc0/ccf_dc_native_compat_20261026/pairs.csv",
+   "git_blob": "dbfdaa68dce606174a07a4b69c649aedf36416f5",
+   "sha256": "d5817d6af3d4c14da6a937caa79f7260e98658a650a51453e84343e7ed03e1c0"
+  },
+  {
+   "path": "docs/post_rc0/ccf_dc_native_compat_20261026/repro.csv",
+   "git_blob": "16ead7604dab2b7aabb233be036af017ff18cf9f",
+   "sha256": "c417fec59c25b8b9365a592140b85b14d00ec3f5616a76c438520148498f9494"
+  },
+  {
+   "path": "docs/post_rc0/ccf_dc_native_compat_20261026/counts.json",
+   "git_blob": "2f5484d9b5030909d63635952c0b69f7a90532c1",
+   "sha256": "0a449515acec95aed312f1ab9db01aa0ce0a55d6b2af4ba7e794ea7d492bd917"
+  },
+  {
+   "path": "docs/post_rc0/ccf_dc_native_compat_20261026/review/ROUND1_REPORT.md",
+   "git_blob": "d1ff336aac926914a6faa1b08c0828dee189d76e",
+   "sha256": "0affbfc4a111f8ac68f64eb80962c098ce53bec4d374b8f8ae4fec16bffffa6f"
+  },
+  {
+   "path": "docs/post_rc0/ccf_dc_native_compat_20261026/review/ROUND1_RESPONSE.md",
+   "git_blob": "7939da66f66a0bf9246cb48872b575b8bbb7b063",
+   "sha256": "c4a84a481438308f3bf7a464e822b2cc6ce60a5b6dd4b7c1dac8e7fe6a6eed78"
+  }
+ ],
+ "retained_references": [
+  {
+   "path": "docs/post_rc0/ccf_dc_native_compat_20261026/evidence/retained_render_report.json",
+   "git_blob": "52bf72f598e5bcf3bf3df73ab870179076ede766",
+   "sha256": "cae19f3f09aef3c92f1fb271786e7d1e58fd36f69fd70cfc32bb1e9fb510d494"
+  },
+  {
+   "path": "docs/post_rc0/ccf_dc_native_compat_20261026/evidence/retained_cpu_reference.json",
+   "git_blob": "e10b0f779d35f75147d5a0695ef8b153fe19390e",
+   "sha256": "b0d69c640236146e4079446d115eed8689ba563f698958a1f02dbdb61a1aac4c"
+  }
+ ]
+}

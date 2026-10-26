@@ -501,6 +501,7 @@ int main(int argc, char **argv) {
             gate(6, iso_power > 1e-3, "isotropic and production references are not distinguishable: " + num(iso_power));
 #ifdef _CUDA_ENABLED
             {   // One workspace reused global -> local at one geometry must equal fresh workspaces.
+                experimentCcfDcSetArmForTest(0);   // explicit: both the reuse passes and the fresh references use arm none
                 const Case &c = cases[0];
                 const Stack in = buildStack(c, 0, 1);
                 const size_t fr = (size_t)(c.pny) * (c.pnx / 2 + 1);

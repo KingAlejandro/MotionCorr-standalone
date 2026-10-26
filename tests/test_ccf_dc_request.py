@@ -15,6 +15,7 @@ tests/experiment_ccf_dc_stage.cpp covers the CUDA call sites.
 import argparse
 import json
 import os
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -30,6 +31,10 @@ def invoke(binary, work, star, out, env_extra, extra=()):
     return subprocess.run(args, cwd=work, text=True, capture_output=True, timeout=300, env=env)
 
 
+def console_text(clock, text, result, out):
+    return clock.sub('T/T sec', text.replace(str(out), 'OUT'))
+
+
 def refused(result, out, needle):
     assert result.returncode != 0, 'request was accepted: ' + result.stdout + result.stderr
     assert needle in result.stdout + result.stderr, (needle, result.stdout + result.stderr)
@@ -41,7 +46,21 @@ def main():
     ap.add_argument('--binary', required=True)
     ap.add_argument('--experiment', action='store_true', help='binary built with -DMC_EXPERIMENT_CCF_DC=ON')
     ap.add_argument('--iso', action='store_true', help='test-only isotropic build; the witness must say so')
+    ap.add_argument('--expect-mismatch', action='store_true',
+                    help='negative control: the build kind given is wrong; exit 0 only if an assertion fails')
     opts = ap.parse_args()
+    if opts.expect_mismatch:
+        opts.expect_mismatch = False
+        try:
+            run(opts)
+        except AssertionError:
+            print('wrong build kind rejected by an assertion: PASS')
+            return
+        raise SystemExit('wrong build kind was accepted: the test cannot see the build kind')
+    run(opts)
+
+
+def run(opts):
     binary = Path(opts.binary).resolve()
     with tempfile.TemporaryDirectory() as t:
         work = Path(t)
@@ -56,8 +75,25 @@ def main():
         none = invoke(binary, work, one, work / 'none', {'MC_EXPERIMENT_CCF_DC_ARM': 'none'})
         assert none.returncode == 0, none.stdout + none.stderr
         assert read_mrc_pixels(work / 'unset/a.mrc') == read_mrc_pixels(work / 'none/a.mrc'), 'none must equal unset'
-        def console(r, out):  # the output directory is the only intended difference
-            return (r.stdout + r.stderr).replace(str(out), 'OUT')
+        # Console identity. Only the progress bar's known elapsed/remaining line is normalised (anchored on its exact
+        # shape) and the output directory; every other character, including every number, must be identical.
+        clock = re.compile(r'(?m)^ *\d+/ *\d+ sec \.{60}~~\(,_,"> yum!$')
+
+        def console(r, out):
+            return clock.sub('T/T sec', (r.stdout + r.stderr).replace(str(out), 'OUT'))
+
+        # Copy-only controls on the real base console (no new producer run).
+        base_text = console(base, work / 'unset')
+        bar = [l for l in (base.stdout + base.stderr).splitlines() if clock.match(l)]
+        assert bar, 'the progress bar line this normalisation is anchored on was not emitted'
+        shifted = (base.stdout + base.stderr).replace(bar[0], re.sub(r'\d+/ *\d+', '9/  9', bar[0], count=1))
+        assert console_text(clock, shifted, base, work / 'unset') == base_text, 'a clock-only change must still compare equal'
+        other = (base.stdout + base.stderr).replace('THP', 'THP 7', 1)
+        assert console_text(clock, other, base, work / 'unset') != base_text, 'a non-clock numeric change must make the comparison fail'
+        first = [l for l in (base.stdout + base.stderr).splitlines() if l.startswith('000/??? sec')]
+        assert first, 'start-up bar line missing'
+        moved = (base.stdout + base.stderr).replace(first[0], first[0].replace('000/', '001/', 1))
+        assert console_text(clock, moved, base, work / 'unset') != base_text, 'the start-up bar line is not a normalised field'
         assert console(base, work / 'unset') == console(none, work / 'none'), 'none must not change the console'
 
         refused(invoke(binary, work, one, work / 'bad', {'MC_EXPERIMENT_CCF_DC_ARM': 'bogus'}),
@@ -117,6 +153,17 @@ def main():
         refused(invoke(binary, work, one, work / 'tm', {'MC_DIAG_MODEL_OUT': str(work / 'nodir/tap.json')}),
                 work / 'tm', 'cannot be created exclusively')
         refused(invoke(binary, work, one, work / 'te', {'MC_DIAG_MODEL_OUT': ''}), work / 'te', 'is empty')
+
+        # An existing but unreadable tap path is still refused before any pixel (the exclusive create catches it).
+        if os.geteuid() != 0:
+            locked = work / 'locked_tap.json'
+            locked.write_text('retained\n')
+            locked.chmod(0)
+            try:
+                refused(invoke(binary, work, one, work / 'tl', {'MC_DIAG_MODEL_OUT': str(locked)}), work / 'tl', 'cannot be created exclusively')
+            finally:
+                locked.chmod(0o600)
+            assert locked.read_text() == 'retained\n'
 
         # Runtime-model tap: one movie, created exclusively.
         refused(invoke(binary, work, work / 'two.star', work / 't2', {'MC_DIAG_MODEL_OUT': str(work / 'tap2.json')}),

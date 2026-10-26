@@ -570,10 +570,47 @@ if(BUILD_TESTING)
                 --binary $<TARGET_FILE:motioncorr>)
         # Request handling for the default-off CCF DC hooks: every build refuses a
         # request it cannot honour; an experiment build also checks the witness.
+        set(_ccf_dc_request_args "")
+        if(MC_EXPERIMENT_CCF_DC)
+            list(APPEND _ccf_dc_request_args --experiment)
+        endif()
+        if(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+            list(APPEND _ccf_dc_request_args --iso)
+        endif()
         add_test(NAME CcfDcRequest
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_ccf_dc_request.py
-                --binary $<TARGET_FILE:motioncorr> $<$<BOOL:${MC_EXPERIMENT_CCF_DC}>:--experiment>
-                $<$<BOOL:${MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT}>:--iso>)
+                --binary $<TARGET_FILE:motioncorr> ${_ccf_dc_request_args})
+        # Negative controls: tell the test the wrong build kind. Each must be rejected by an
+        # assertion (not a usage error), otherwise CcfDcRequest cannot see the build kind.
+        function(mc_ccf_dc_request_wrong_kind name)
+            add_test(NAME ${name}
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_ccf_dc_request.py
+                    --binary $<TARGET_FILE:motioncorr> --expect-mismatch ${ARGN})
+        endfunction()
+        if(NOT MC_EXPERIMENT_CCF_DC)
+            mc_ccf_dc_request_wrong_kind(CcfDcRequestWrongKind_def_told_experiment --experiment)
+        elseif(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+            mc_ccf_dc_request_wrong_kind(CcfDcRequestWrongKind_iso_told_experiment --experiment)
+            mc_ccf_dc_request_wrong_kind(CcfDcRequestWrongKind_iso_told_default)
+        else()
+            mc_ccf_dc_request_wrong_kind(CcfDcRequestWrongKind_exp_told_default)
+            mc_ccf_dc_request_wrong_kind(CcfDcRequestWrongKind_exp_told_iso --experiment --iso)
+        endif()
+        # Tap -> dense field bridge and the N/K267 row grading: analytic and mutant controls (no producer),
+        # and, in an experiment build, the same grading on real tiny runs of that binary.
+        add_test(NAME CcfDcTapField
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_tap_field.py)
+        add_test(NAME CcfDcRowsPure
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_native_rows.py)
+        if(MC_EXPERIMENT_CCF_DC)
+            set(_ccf_dc_rows_args "")
+            if(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+                list(APPEND _ccf_dc_rows_args --iso)
+            endif()
+            add_test(NAME CcfDcRowsNative
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_native_rows.py
+                    --binary $<TARGET_FILE:motioncorr> ${_ccf_dc_rows_args})
+        endif()
         add_test(NAME RunnerExposure
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --case exposure)

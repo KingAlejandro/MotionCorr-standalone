@@ -34,6 +34,16 @@ def rows():
             for arm in ("none", "both"):
                 out.append(dict(tier="M", case=mv, config="as-PR288", backend=be, binary="exp", arm=arm,
                                 weight="production", stop="production", role="arm", status="HELD"))
+    for r in out:
+        # Gates each row feeds. B3: def/exp identity triple per (ID, backend). B4: stage counts on a real CUDA run.
+        g = []
+        if r["tier"] == "K" and (r["binary"] == "def" or r["arm"] in ("unset", "none")):
+            g.append("B3")
+        if r["tier"] == "K" and r["case"] == "affine" and r["backend"] == "cuda" and r["binary"] == "exp" and r["arm"] != "unset":
+            g.append("B4")
+        r["gates"] = "+".join(g)
+        r["cli"] = {"K": "tools/ccf_dc_native_rows.py:k267_argv", "N": "tools/ccf_dc_native_rows.py:n_argv",
+                    "M": "PENDING parent pin (PR288 command)"}[r["tier"]]
     for i, r in enumerate(out):
         r["job_id"] = "J%03d-%s-%s-%s-%s-%s-%s" % (i + 1, r["tier"], r["case"], r["backend"], r["binary"], r["arm"], r["weight"][:4])
     return out
@@ -44,7 +54,7 @@ def main():
     o = ap.parse_args(); o.outdir.mkdir(parents=True, exist_ok=True)
     R = rows()
     key = {(r["tier"], r["case"], r["weight"], r["backend"], r["binary"], r["arm"]): r["job_id"] for r in R}
-    cols = ["job_id", "tier", "case", "config", "backend", "binary", "arm", "weight", "stop", "role", "status"]
+    cols = ["job_id", "tier", "case", "config", "backend", "binary", "arm", "weight", "stop", "role", "gates", "cli", "status"]
     with open(o.outdir / "ledger.csv", "w", newline="") as f:
         w = csv.DictWriter(f, cols); w.writeheader(); w.writerows(R)
     P = []
@@ -60,8 +70,18 @@ def main():
             P.append(dict(comparison=cid, tier=r["tier"], case=r["case"], weight=r["weight"], job_a=ja, job_b=jc))
     with open(o.outdir / "pairs.csv", "w", newline="") as f:
         w = csv.DictWriter(f, ["comparison", "tier", "case", "weight", "job_a", "job_b"]); w.writeheader(); w.writerows(P)
+    # C-REPRO: every cpu none N-control job must reproduce its retained cpu arm-a row (evidence/retained_cpu_reference.json).
+    retained = json.loads((Path(__file__).with_name("evidence") / "retained_cpu_reference.json").read_text())["rows"]
+    short = {"production": "prod", "isotropic": "iso"}
+    ref = {(x["movie"], x["weight"]) for x in retained}
+    rp = [dict(job_id=r["job_id"], movie=r["case"].replace("-", "_"), weight=r["weight"]) for r in R
+          if r["tier"] == "N" and r["backend"] == "cpu" and r["arm"] == "none"]
+    assert {(x["movie"], short[x["weight"]]) for x in rp} == ref, "C-REPRO rows must match the retained reference rows"
+    with open(o.outdir / "repro.csv", "w", newline="") as f:
+        w = csv.DictWriter(f, ["job_id", "movie", "weight"]); w.writeheader(); w.writerows(rp)
     counts = {t: sum(r["tier"] == t for r in R) for t in "KNM"}
-    counts.update(total=len(R), pairs=len(P),
+    counts.update(total=len(R), pairs=len(P), repro=len(rp), B3_rows=sum("B3" in r["gates"] for r in R),
+                  B4_rows=sum("B4" in r["gates"] for r in R),
                   N_production=sum(r["tier"] == "N" and r["weight"] == "production" for r in R),
                   N_isotropic=sum(r["tier"] == "N" and r["weight"] == "isotropic" for r in R))
     (o.outdir / "counts.json").write_text(json.dumps(counts, indent=1) + "\n")

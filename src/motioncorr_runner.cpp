@@ -17,6 +17,7 @@
  * source code. Additional authorship citations may be added, but existing
  * author citations must be preserved.
  ***************************************************************************/
+#include "src/local_b2_fit.h"
 #include <omp.h>
 #include <cmath>
 #include <exception>
@@ -235,6 +236,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 		if (experimental_coupled_peak != 0 && !do_own)
 			REPORT_ERROR("--experimental_coupled_peak is valid only with --use_own");
 	}
+	experimental_local_b2 = parser.checkOption("--experimental_local_b2", "(EXPERIMENTAL, CPU only) Integer-time local polynomial with per-patch nuisance constants. Default off; requires group_frames=1, bin_factor=1, no interpolation.");
 	interpolate_shifts = parser.checkOption("--interpolate_shifts", "(EXPERIMENTAL) Interpolate shifts");
 	ccf_downsample = textToFloat(parser.getOption("--ccf_downsample", "(EXPERT) Downsampling rate of CC map. default = 0 = automatic based on B factor", "0"));
 	if (parser.checkOption("--early_binning", "Do binning before alignment to reduce memory usage. This might dampen signal near Nyquist. (ON by default)"))
@@ -254,6 +256,8 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	dose_motionstats_cutoff = textToFloat(parser.getOption("--dose_motionstats_cutoff", "Electron dose (in electrons/A2) at which to distinguish early/late global accumulated motion in output statistics", "4."));
 	if (ccf_downsample > 1) REPORT_ERROR("--ccf_downsample cannot exceed 1.");
 	if (skip_defect && !do_own) REPORT_ERROR("--skip_decet is valid only for --use_own");
+	if (experimental_local_b2 && (!do_own || group != 1 || bin_factor != 1 || interpolate_shifts))
+		REPORT_ERROR("--experimental_local_b2 requires --use_own, --group_frames 1, --bin_factor 1 and no --interpolate_shifts");
 	if (group <= 0) REPORT_ERROR("--group_frames must be positive.");
 	if (eer_grouping <= 0) REPORT_ERROR("--eer_grouping must be positive.");
 	if (n_threads <= 0) REPORT_ERROR("--j must be positive.");
@@ -420,6 +424,9 @@ void MotioncorrRunner::initialise()
 			REPORT_ERROR("ERROR: --experimental_global_half_gain and --experimental_align_tolerance are CPU-only research "
 			             "options and are refused with --gpu (the CUDA alignment does not implement them). Remove --gpu to run on the CPU.");
 		}
+
+		if (experimental_local_b2)
+			REPORT_ERROR("--experimental_local_b2 is a CPU-only research option and is refused with --gpu");
 
 		if (experimental_isotropic_weight)
 		{
@@ -4007,6 +4014,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		const int n_params = 18;
 
 		if (n_obs <= n_params) {
+			if (experimental_local_b2 && n_obs > 0) REPORT_ERROR("--experimental_local_b2: too few observations for full rank");
 			std::cerr << fn_mic << ": too few valid local trajectories to fit local motion model." << std::endl;
 			mic.model = NULL;
 			goto skip_fitting; // TODO: Refactor!
@@ -4049,8 +4057,21 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		}
 
 		const RFLOAT EPS = 1e-10;
-		solve(matA, vecX, coeffX, EPS);
-		solve(matA, vecY, coeffY, EPS);
+		std::vector<std::array<double,2>> b2_nuisance;
+		if (experimental_local_b2) {
+			std::vector<LocalB2::Observation> observations;
+			for (int i = 0; i < n_obs; ++i)
+				observations.push_back({double(patch_xs[i] / nx - 0.5), double(patch_ys[i] / ny - 0.5),
+				                        double(patch_frames[i] - 0.5), double(patch_xshifts[i]), double(patch_yshifts[i])});
+			try {
+				const auto fitted = LocalB2::fit(observations);
+				for (int j = 0; j < n_params; ++j) { coeffX(j) = fitted.x[j]; coeffY(j) = fitted.y[j]; }
+				b2_nuisance = fitted.nuisance;
+			} catch (const std::exception &e) { REPORT_ERROR(std::string("--experimental_local_b2: ") + e.what()); }
+		} else {
+			solve(matA, vecX, coeffX, EPS);
+			solve(matA, vecY, coeffY, EPS);
+		}
 
 #ifdef DEBUG_OWN
 		std::cout << "Polynomial fitting coefficients for X and Y:" << std::endl;
@@ -4104,9 +4125,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			const RFLOAT y = patch_ys[i] / ny - 0.5;
 			const RFLOAT z = patch_frames[i];
 
-			model->getShiftAt(z, x, y, x_fitted, y_fitted);
-			rms_x += (patch_xshifts[i] - x_fitted) * (patch_xshifts[i] - x_fitted);
-			rms_y += (patch_yshifts[i] - y_fitted) * (patch_yshifts[i] - y_fitted);
+			model->getShiftAt(experimental_local_b2 ? z - 0.5 : z, x, y, x_fitted, y_fitted);
+			// Nuisance constants enter only the fit residual, never the published/applied field.
+			const RFLOAT residual_x = patch_xshifts[i] - x_fitted - (experimental_local_b2 ? b2_nuisance[i][0] : 0);
+			const RFLOAT residual_y = patch_yshifts[i] - y_fitted - (experimental_local_b2 ? b2_nuisance[i][1] : 0);
+			rms_x += experimental_local_b2 ? residual_x * residual_x : (patch_xshifts[i] - x_fitted) * (patch_xshifts[i] - x_fitted);
+			rms_y += experimental_local_b2 ? residual_y * residual_y : (patch_yshifts[i] - y_fitted) * (patch_yshifts[i] - y_fitted);
 
 			// These shifts and RMSDs are for reporting, so should be in the original pixel size
 			mic.patchX.push_back(patch_xs[i] * prescaling);

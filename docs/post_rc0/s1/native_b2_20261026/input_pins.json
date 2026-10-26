@@ -1,0 +1,148 @@
+{
+  "dose1-s01": {
+    "receipt_sha256": "27d9a55b9318aaa3b89b200d7047670f766670babb0afb8b88956707f60608a6",
+    "receipt": {
+      "schema": "motion-counting/1",
+      "recipe": {
+        "schema": "motion-counting/1",
+        "condition": "dose1",
+        "nx": 4096,
+        "ny": 4096,
+        "frames": 40,
+        "dose": 1.0,
+        "pedestal": 1.0,
+        "scale": 1.0,
+        "texture_rms": 0.04,
+        "oversample": 2,
+        "pixel_size": 0.885,
+        "motion": "inmodel",
+        "scene_seed": 238267,
+        "noise_seed": 1,
+        "control": null
+      },
+      "files": {
+        "movie.mrcs": "3b6126efcd601173df79ddc657f7c9f72ac257fddb256e9dc11d7953c6d25def",
+        "input.star": "ba3a39e59ca796b5dcaae0a41e0ded6f2c020e877d344a4aa182e4afebf8ac55"
+      },
+      "expectation_sha256": "91d8cd86ff646ddf17358a8c7024780f1e239c2ceac382e68f1561fb757ca656",
+      "numpy": "2.5.4",
+      "python": "3.12.3",
+      "seconds": 42.004932165145874,
+      "mean": 0.9999907106161118,
+      "std": 1.0007977521833364,
+      "orientation": "MRC native rows: y increases by stored row, no TIFF conversion",
+      "preprocessing": "identity: no gain, --skip_defect required; injection commutes exactly"
+    }
+  },
+  "dose05-s00": {
+    "receipt_sha256": "5dd468c44555b77a0fa5653b2d6de8398e794a8c1aa985902943045576d77a14",
+    "receipt": {
+      "schema": "motion-counting/1",
+      "recipe": {
+        "schema": "motion-counting/1",
+        "condition": "dose05",
+        "nx": 4096,
+        "ny": 4096,
+        "frames": 40,
+        "dose": 0.5,
+        "pedestal": 0.5,
+        "scale": 1.0,
+        "texture_rms": 0.04,
+        "oversample": 2,
+        "pixel_size": 0.885,
+        "motion": "inmodel",
+        "scene_seed": 238267,
+        "noise_seed": 0,
+        "control": null
+      },
+      "files": {
+        "movie.mrcs": "0eebaff414d2b81b123e00c6e34faaa012df59836046d2ca80e1d862a9b72f5b",
+        "input.star": "ba3a39e59ca796b5dcaae0a41e0ded6f2c020e877d344a4aa182e4afebf8ac55"
+      },
+      "expectation_sha256": "91d8cd86ff646ddf17358a8c7024780f1e239c2ceac382e68f1561fb757ca656",
+      "numpy": "2.5.4",
+      "python": "3.12.3",
+      "seconds": 42.413269996643066,
+      "mean": 0.4999911427497864,
+      "std": 0.7073503142606462,
+      "orientation": "MRC native rows: y increases by stored row, no TIFF conversion",
+      "preprocessing": "identity: no gain, --skip_defect required; injection commutes exactly"
+    }
+  },
+  "dose4-s00": {
+    "receipt_sha256": "813546bfe75e9cb5ddadf23f7356dd3964d9f390aea5b1ba3729c71af25be6a0",
+    "receipt": {
+      "schema": "motion-counting/1",
+      "recipe": {
+        "schema": "motion-counting/1",
+        "condition": "dose4",
+        "nx": 4096,
+        "ny": 4096,
+        "frames": 40,
+        "dose": 4.0,
+        "pedestal": 4.0,
+        "scale": 1.0,
+        "texture_rms": 0.04,
+        "oversample": 2,
+        "pixel_size": 0.885,
+        "motion": "inmodel",
+        "scene_seed": 238267,
+        "noise_seed": 0,
+        "control": null
+      },
+      "files": {
+        "movie.mrcs": "1a37a16a09fb7dc53aab3a4c353ad7ab4853b963bab0bc446b6af65e434b5ab8",
+        "input.star": "ba3a39e59ca796b5dcaae0a41e0ded6f2c020e877d344a4aa182e4afebf8ac55"
+      },
+      "expectation_sha256": "91d8cd86ff646ddf17358a8c7024780f1e239c2ceac382e68f1561fb757ca656",
+      "numpy": "2.5.4",
+      "python": "3.12.3",
+      "seconds": 60.075828552246094,
+      "mean": 3.9998959362506867,
+      "std": 2.0063316208038153,
+      "orientation": "MRC native rows: y increases by stored row, no TIFF conversion",
+      "preprocessing": "identity: no gain, --skip_defect required; injection commutes exactly"
+    }
+  },
+  "pedestal32-s00": {
+    "receipt_sha256": "d24b1b96ad1c1ca32c29e7c3ef7ba30979438ab5ca5e54ae6b6640b16efe5c9e",
+    "receipt": {
+      "schema": "motion-counting/1",
+      "recipe": {
+        "schema": "motion-counting/1",
+        "condition": "pedestal32",
+        "nx": 4096,
+        "ny": 4096,
+        "frames": 40,
+        "dose": 1.0,
+        "pedestal": 32.0,
+        "scale": 1.0,
+        "texture_rms": 0.04,
+        "oversample": 2,
+        "pixel_size": 0.885,
+        "motion": "inmodel",
+        "scene_seed": 238267,
+        "noise_seed": 0,
+        "control": null
+      },
+      "files": {
+        "movie.mrcs": "a71b9dfa5d91e3516e9638fac1cf97574b0c2aecbcf7164d97a89e591e2e8440",
+        "input.star": "ba3a39e59ca796b5dcaae0a41e0ded6f2c020e877d344a4aa182e4afebf8ac55"
+      },
+      "expectation_sha256": "91d8cd86ff646ddf17358a8c7024780f1e239c2ceac382e68f1561fb757ca656",
+      "numpy": "2.5.4",
+      "python": "3.12.3",
+      "seconds": 47.71190667152405,
+      "mean": 32.000013053417206,
+      "std": 1.000798970084015,
+      "orientation": "MRC native rows: y increases by stored row, no TIFF conversion",
+      "preprocessing": "identity: no gain, --skip_defect required; injection commutes exactly"
+    }
+  },
+  "/home/ubuntu/mc-km-truth-20261021/v2/test-data/generate_realistic_motion.py": "a10f694abafc71c146d0e0f2eeb2b1cf2c58131b2dbf6c1b66800405bd126380",
+  "/home/ubuntu/mc-km-truth-20261021/expectations/inmodel.npy": "91d8cd86ff646ddf17358a8c7024780f1e239c2ceac382e68f1561fb757ca656",
+  "/home/ubuntu/mc-km-truth-20261021/expectations/nonsquare.npy": "e1ab88ef4cfd039bdde9b7a425f5694541e83a88a21f80c13a38dd1d1829fde5",
+  "/home/ubuntu/mc-km-truth-20261021/expectations/outmodel.npy": "d48c261f38d8a71b71ae2f17cbd7976c6d938b2a31c2776834eb31fca451f979",
+  "/home/ubuntu/mc-km-truth-20261021/expectations/translation.npy": "2f6ec5608de06ad26c5bfb05a2300a0d0847f22e700a377b4692feeb8cb7c73d",
+  "/home/ubuntu/mc-km-truth-20261021/expectations/zero.npy": "d2b92ba680b5e9fb52943b7f9eecb512aa992ef1410b856b05809aaa503a7612"
+}

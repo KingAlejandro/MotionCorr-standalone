@@ -144,6 +144,7 @@ public:
 	// unscaled update still drives the stopping test). experimental_align_tolerance > 0
 	// replaces the hard-coded 0.5 px stop of the global alignment. Local patches are
 	// untouched by both.
+	bool experimental_local_b2 = false;
 	bool experimental_global_half_gain = false;
 	RFLOAT experimental_align_tolerance = 0;
 

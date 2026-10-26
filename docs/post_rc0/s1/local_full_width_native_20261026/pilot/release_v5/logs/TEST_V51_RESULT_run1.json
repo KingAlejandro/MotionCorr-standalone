@@ -1,0 +1,214 @@
+{
+ "total": 38,
+ "failed": 0,
+ "skipped": [
+  {
+   "name": "real_guard receipt fields and the free-disk floor",
+   "why": "needs Linux /proc and /proc/locks (run on cpu64 under the lane)"
+  },
+  {
+   "name": "real flock lease controls",
+   "why": "needs Linux /proc/locks"
+  },
+  {
+   "name": "real /proc sampling of a multi-thread child",
+   "why": "needs Linux /proc"
+  },
+  {
+   "name": "parent-death signal",
+   "why": "needs Linux prctl"
+  }
+ ],
+ "results": [
+  {
+   "name": "parse /proc status",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "parse /proc stat times (utime/stime)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "parse /proc/locks",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "ancestor chain through a wrapper",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lease control: ours (held by an ancestor)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lease control: unheld is refused",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lease control: peer-held is refused",
+   "ok": true,
+   "detail": "the current inode is flock-held by pid(s) [999], none of them an ancestor of the driver"
+  },
+  {
+   "name": "lease control: lane holds an orphaned inode, a peer holds the recreated path",
+   "ok": true,
+   "detail": "the current inode is flock-held by pid(s) [999], none of them an ancestor of the driver"
+  },
+  {
+   "name": "lease control: a read-mode entry is refused",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lease control: a POSIX lock is refused",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lease control: same inode on another device is refused",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "lease control: an intermediate wrapper owner is an ancestor too",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "multi-thread child with a differing mask: OBSERVED, receipts keep what /proc said (not the expected 32-47)",
+   "ok": true,
+   "detail": "{'max_threads': 3, 'max_tasks': 3, 'distinct_cpus_allowed_lists': ['40-41'], 'processes_seen': [1000, 1001], 'first_ms': 0, 'last_ms': 40}"
+  },
+  {
+   "name": "resource keys are non-empty when observable",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a read failure gives PARTIAL with the error kept",
+   "ok": true,
+   "detail": "['stat pid 1000: PermissionError: denied']"
+  },
+  {
+   "name": "child gone before the first read gives UNOBSERVED with a reason (no invented sample)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "no /proc on the host is stated as the reason",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "truncation is flagged and the summary still sees the later 5 threads",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a missing children file is recorded",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "RUN.json carries resource_samples with a stated status",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a fast/unreadable child is reported UNOBSERVED honestly (reason present, no invented values)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "the extra resource_samples key leaves admit_producer passing",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "slow child: enough samples at the 20 ms schedule and OBSERVED",
+   "ok": true,
+   "detail": "n=23"
+  },
+  {
+   "name": "Threads 3 and mask 40-41 are receipts, not a stop (run exit 0, no gate)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a non-zero exit still carries resource_samples",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a timeout still carries resource_samples and is marked",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "KeyboardInterrupt during the wait propagates",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "own child is reaped after KeyboardInterrupt",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "ledger keeps the real exception and a STOP",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "no next launch after cleanup",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "SIGTERM during the wait is raised inside the campaign",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "own child is reaped after SIGTERM",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "ledger keeps SIGTERM as the real cause, no next launch",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "the previous SIGTERM handler is restored",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "unexpected exception in the wait propagates",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "child reaped, aborted RUN.json, STOP carries RuntimeError, one launch only",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "Popen failure is a LAUNCH stop",
+   "ok": true,
+   "detail": "code=LAUNCH"
+  },
+  {
+   "name": "Popen failure keeps a RUN.json with the real exception and a ledger STOP, no next launch",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

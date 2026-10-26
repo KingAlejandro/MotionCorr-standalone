@@ -1,3 +1,4 @@
+#include "src/boundary_capture.h"
 /***************************************************************************
  *
  * Author: "Sjors H.W. Scheres"
@@ -3247,6 +3248,23 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		logfile << "Image size after binning: X = " << nx << " Y = " << ny << std::endl;
 	}
 
+	// Read only two corrected real frames before either forward transform.
+	if (mc_boundary::enabled()) {
+		if (early_binning) REPORT_ERROR("MC_BOUNDARY_DIR does not support early binning");
+		for (int f : {0, 4}) if (f < n_frames) {
+#ifdef _CUDA_ENABLED
+			if (movie_session) {
+				std::vector<float> tmp((size_t)nx * ny);
+				if (cudaMemcpy(tmp.data(), movie_session->getDeviceRealFrames() + (size_t)f*nx*ny,
+				               tmp.size()*sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess)
+					REPORT_ERROR("MC_BOUNDARY_DIR real frame copy failed");
+				mc_boundary::write("pre-"+std::to_string(f)+".f32", tmp.data(), tmp.size()*sizeof(float));
+			} else
+#endif
+				mc_boundary::write("pre-"+std::to_string(f)+".f32", Iframes[f]().data, (size_t)nx*ny*sizeof(float));
+		}
+		mc_boundary::check();
+	}
 	// FFT
 	MC_STAGE("global fft");
 	RCTIC(TIMING_GLOBAL_FFT);
@@ -4838,6 +4856,21 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
 
+	const bool capture_boundary = is_global && mc_boundary::enabled();
+	if (capture_boundary) {
+		mc_boundary::geometry(pnx,pny,n_frames,ccf_nx,ccf_ny,search_range,scaled_B);
+		mc_boundary::write("weight.f32", weight.data, weight.nzyxdim*sizeof(float));
+		for (int f=0; f<n_frames; ++f) {
+			MultidimArray<fComplex> win(ccf_nfy,ccf_nfx);
+			for (int y=0; y<ccf_nfy; ++y) {
+				const int ly = y>ccf_nfy_half ? y-ccf_nfy+nfy : y;
+				for (int x=0;x<ccf_nfx;++x) DIRECT_A2D_ELEM(win,y,x)=DIRECT_A2D_ELEM(Fframes[f],ly,x);
+			}
+			mc_boundary::write("input-"+std::to_string(f)+".c64",win.data,win.nzyxdim*sizeof(fComplex));
+			if (f==0 || f==4) mc_boundary::write("fft-"+std::to_string(f)+".c64", Fframes[f].data,Fframes[f].nzyxdim*sizeof(fComplex));
+		}
+		mc_boundary::check();
+	}
 	for (int iter = 1; iter	<= max_iter; iter++) {
 		RCTIC(TIMING_MAKE_REF);
 		Fref.initZeros();
@@ -4852,6 +4885,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			}
 		}
 		RCTOC(TIMING_MAKE_REF);
+		if (capture_boundary && iter==1) mc_boundary::write("reference.c64", Fref.data,Fref.nzyxdim*sizeof(fComplex));
 
 		#pragma omp parallel for num_threads(n_threads)
 		for (int iframe = 0; iframe < n_frames; iframe++) {
@@ -4867,9 +4901,13 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			}
 			RCTOC(TIMING_CCF_CALC);
 
+			if (capture_boundary && iter==1 && (iframe==0 || iframe==4))
+				mc_boundary::write("spectrum-"+std::to_string(iframe)+".c64",Fccs[tid].data,Fccs[tid].nzyxdim*sizeof(fComplex));
 			RCTIC(TIMING_CCF_IFFT);
 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
 			RCTOC(TIMING_CCF_IFFT);
+			if (capture_boundary && iter==1 && (iframe==0 || iframe==4))
+				mc_boundary::write("map-"+std::to_string(iframe)+".f32",Iccs[tid]().data,Iccs[tid]().nzyxdim*sizeof(float));
 
 			RCTIC(TIMING_CCF_FIND_MAX);
 			RFLOAT maxval = -1E30;
@@ -4921,6 +4959,11 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			RCTOC(TIMING_CCF_FIND_MAX);
 		}
 
+		if (capture_boundary && iter==1) {
+			mc_boundary::write("peak-x.f64",cur_xshifts.data(),n_frames*sizeof(RFLOAT));
+			mc_boundary::write("peak-y.f64",cur_yshifts.data(),n_frames*sizeof(RFLOAT));
+			mc_boundary::check();
+		}
 		// Set origin
 		RFLOAT x_sumsq = 0, y_sumsq = 0;
 		for (int iframe = n_frames - 1; iframe >= 0; iframe--) { // do frame 0 last!

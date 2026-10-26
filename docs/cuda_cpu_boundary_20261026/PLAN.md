@@ -56,7 +56,9 @@ Scratch fresh /mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026,
    MRC payloads and movie-STAR fields, then capture-on versus flags-off neutrality.
 4. Compare preprocessed input then initial FFT before global iteration. Compare
    reference/weights/weighted spectra/maps/peak on identical stored upstream state,
-   using native CUDA windowed entry point and native FFTW replay. Pure inverse
+   using native CUDA windowed entry point and native FFTW replay. Bind exact backend
+   selector, normalization, layout, Hermitian validity, FFTW threads and planning.
+   Pure inverse
    FFT replay runs both saved spectra on both backends. Do not attribute later
    trajectory differences as first causes. Record first bit mismatch separately
    from materially amplified peak/shift difference (>1e-4px diagnostic routing,
@@ -68,8 +70,7 @@ Scratch fresh /mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026,
 
 Candidate only if a narrow mechanism supports ONE default-off intervention;
 independent source review before candidate native campaigns. No CPU-FFT fallback,
-precision rewrite, prior falsified H7 package, or relaxed tolerances. All eight
-K267 unique/highsignal/fiveframe/harmful-N20iso controls required if estimator
-changes; truth recovery, image preservation and CPU compatibility remain separate.
+precision rewrite, prior falsified H7 package, or relaxed tolerances. All eight K267 cases AND separate retained N5/9/13/20 and global-only
+controls including harmfulvel1N20iso are required if estimator changes; truth recovery, image preservation and CPU compatibility remain separate.
 Original Gate2 relativeRMSE0.001 retained. Runtime cost only paired resources,
 no throughput or scientific acceptance claim. Parent owns interpretation.

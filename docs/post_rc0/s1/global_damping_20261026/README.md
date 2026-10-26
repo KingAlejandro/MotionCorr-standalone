@@ -1,6 +1,6 @@
 # Global peak/update alternatives: default-off research prototypes (not for merge)
 
-Two separate default-off CPU-only options on one branch: (1) global half-gain damping with a tolerance override, scored against the independent challenge that rated it NO-GO; (2) hypothesis H2, a coupled 2x2-Hessian subpixel peak, scored against its frozen predictions. Sections below: summary, half-gain, challenge scorecard, H2, flags-off identity, limitations, provenance.
+Three separate default-off CPU-only prototypes on one branch (H3 adds the ported #262 DC hook, which composes with the other two): (1) global half-gain damping with a tolerance override, scored against the independent challenge that rated it NO-GO; (2) hypothesis H2, a coupled 2x2-Hessian subpixel peak, scored against its frozen predictions. Sections below: summary, half-gain, challenge scorecard, H2, H3, flags-off identity, limitations, provenance.
 
 **Half-gain result.** With `--experimental_global_half_gain --max_iter 50 --experimental_align_tolerance 1e-9` (arm c) the
 retained #267 FAIL cases `integer`, `fractional` and `affine` meet the unchanged 0.20/0.40/0.80 Å limits natively on CPU.
@@ -18,8 +18,12 @@ This is research evidence on one synthetic family. It is not adoption, not a sto
 | Half-gain + 50 iterations / 1e-9 (c) | integer, fractional, affine | diagnostic budget, not the production stop; noisy max 9.9 to 11.0; the matched gain-1 control (d) fixes none |
 | H2 coupled peak, production stop (all / global) | none | integer 0.264 to 0.446 Å RMS (worse); fractional 0.524 to 0.496; affine 0.402 to 0.315 / 0.267 |
 | H2 coupled peak + 50 iterations / 1e-9 (all / global) | none | integer 0.379 (max 0.823); fractional 0.359; affine 0.189 / 0.221 (still FAIL); noisy improves |
+| H3 DCg + H2g (global DC bin zeroed, coupled peak, gain 1), production stop | integer, fractional, affine | noisy RMS 2.12 to 3.05, max 6.8 to 21.3 versus the matched non-DC arm; pedestal improves but still FAILs |
+| H3 DCg + H2g, 50 iterations / 1e-9 | integer, fractional (both 0.000 Å) | affine FAILs (max 0.849); noisy max 9.3 to 9.9 versus the matched non-DC arm |
+| H3 DCg alone (separable, gain 1) | none (long: integer 0.234, fractional 0.314) | integer at the production stop 0.264 to 0.519 |
+| H3 DCg + half-gain | production: integer, fractional, affine; long: integer, fractional | long budget loses the affine pass of arm c (max 0.849) |
 
-Both are research evidence on one 5-frame synthetic family. Limitations are listed below; flags-off products are identical to e77a51a2 for both binaries.
+All are research evidence on one 5-frame synthetic family. Limitations are listed below; flags-off products are identical to e77a51a2 for both binaries.
 
 ## Half-gain change (source `a1c78adc`, tests/evidence `318dc481` and later; runner source unchanged between them)
 
@@ -108,8 +112,8 @@ The review rates fixed 0.5 damping NO-GO. Half-gain is reported here as a candid
 | `noisy` also suffers at the long budget | c vs a: RMS 1.989 (better), max 10.980 (worse); c vs matched control d: RMS 2.061 and max 11.950 (c better on both) | not confirmed against the matched control |
 | Production-stop failures remain (integer double-map, fractional map32) | b: integer FAIL 0.3255 (and worse than a, 0.2636); fractional FAIL 0.2737 | confirmed |
 | `affine` fails at the production stop (map32 0.2004) | b: affine PASS 0.1659 / 0.3234 / 0.7505 | contradicted (natively it passes) |
-| Early 0.5 px stops make `--max_iter 50` alone equal `--max_iter 5` | no arm runs half-gain with `--max_iter 50` and the default tolerance, and the unchanged driver suppresses iteration logs | not tested |
-| The N=5 instability is a peak-definition defect, not an update-gain defect | H2 below does not repair integer/fractional, though it lowers RMS against the matched control d on integer, fractional, affine and noisy | not supported as a sufficient cause on these fixtures |
+| Early 0.5 px stops make `--max_iter 50` alone equal `--max_iter 5` | tested in the H3 round (`e-half-iter50-tol05`, iteration log): integer ran 50 iterations, fractional 8, noisy 8, and all three differ from arm b; only affine (stops at 5) matches | falsified for integer, fractional, noisy |
+| The N=5 instability is a peak-definition defect, not an update-gain defect | H2 alone does not repair integer/fractional (H2 section); with the global DC bin also zeroed (H3), the coupled peak at gain 1 brings integer and fractional to the truth at both stops | supported only together with pedestal removal |
 | NO-GO for a half-gain prototype | at the production stop half-gain is not a repair (integer and noisy worse); only at the diagnostic budget does it newly pass cases, and arm d shows that is the damping | NO-GO stands for production use; the research prototype exists under the bounded contract |
 ## H2: coupled 2x2-Hessian peak (`--experimental_coupled_peak {off,global,all}`, source `700d0c6d`)
 
@@ -150,22 +154,122 @@ The frozen falsification rule (neither integer nor fractional improves at the pr
 
 Pedestal, flat and repeated fire on every peak (H not negative definite: float32 pedestal or degenerate CCF peaks), so H2 is the inherited estimator there by construction. Integer and fractional never fire at the production stop (0 of 25 each) and fire 7/250 and 4/250 at the long budget.
 
-## Not run / limitations (half-gain and H2)
+## H3: pedestal removal x peak/update law (frozen: [H3-dc-interaction-PREDICTION.md](H3-dc-interaction-PREDICTION.md))
+
+Prediction file copied verbatim, SHA256 `ec6e60f8ac25ea341659475ddb62dfe32b6dc2719cc0b6930c5cb08939a10c23` verified before any code was written.
+
+**DC hook port (source `1c1eacf9`).** `src/experiment_ccf_dc.h` is byte-identical to `3eee0a4b` (`cmp`). The CPU call site in `alignPatch` is the same two lines (include, and `if (experimentCcfDcZero(is_global, EXP_DC_CPU, 1)) DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);` after the CCF product, before the inverse FFT). Delta of 3eee0a4b against 805d9de2 is: the header, that call site, the CMake option `MC_EXPERIMENT_CCF_DC` (default OFF; taken here as the option and its compile definition only), the CUDA call sites, the #269 `MC_DIAG_MODEL_OUT` runtime-capture block, and a CUDA-oriented stage oracle with mutants. The CUDA parts, the runtime-capture block and that oracle are not ported (so the runtime field stays UNRUN). The hook keeps its own selection mechanism: with the option built in, `MC_EXPERIMENT_CCF_DC_ARM=none|global|local|both` is required at run time. **Setting used: `global` for DC arms, `none` for the DC-off identity arm.**
+
+**Manipulation control (mirrors #284).** The hook prints, per run, how many CCF frames were eligible and zeroed. Summed over the eight #267 cases per arm: `dcg-prod` global 85/85 zeroed, patch 0/275; `dcg-long` global 1510/1510, patch 0/300; `dcgh2g-prod` global 95/95, patch 0/260; `dcgh2g-long` 1510/1510, 0/345; `dcghalf-prod` 115/115, 0/280; `dcghalf-long` 1510/1510, 0/375; the DC-off arm `h3-dcoff` (ARM=none) 0/130 global, 0/270 patch. So the global arm zeroes every global CCF frame and no patch frame (the K267 counts are in each case's `.stdout`).
+
+**Tests.** `CcfDcHook` (built only with the option): on a 5-frame fixture carrying a 100-grey-level DC pedestal in every spectrum, arm none leaves 0/5 global CCF DC bins zeroed; arm global zeroes 5/5 global and 0/5 patch; arm local the converse; a global call under arm local, and a patch call under arm global, are bitwise the arm-none result; a global call under arm global differs. The #262 CPU mutants (restore the bin, zero the wrong bin, swap the stage) are all killed (`mutants_h3.sh`, `results/mut-h3/`); the restored source passes.
+
+**Flags-off / DC-off identity to e77a51a2** (default build `build-h3off` `032ed3fb...`, hook build `build-h3on` `e65068c1...`, both Release `-O3 -DNDEBUG`):
+
+| Check | Result |
+|---|---|
+| Full CPU CTest, default build | 93 tests, 92 passed, 1 skipped (pbzip2), 0 failed; `validate_test_collection` and `test_ci_fail_closed` rc 0 |
+| Full CPU CTest, hook build with `MC_EXPERIMENT_CCF_DC_ARM=none` | 94 tests (adds `CcfDcHook`), 93 passed, 1 skipped, 0 failed |
+| K267, hook binary ARM=none, flags off (`h3-dcoff`) vs arm a | field metrics and statuses equal bit for bit (1/5/2) |
+| Known-motion fixtures, base vs default build; base vs hook build ARM=none | IDENTICAL, 193 files, 88 gated, 0 differing (both) |
+| Synthetic movie, base vs default build; base vs hook build ARM=none | IDENTICAL, 14 files, 7 gated, 0 differing (both) |
+| Negative controls on the synthetic movie | half gain on: 7/7 differ; DC arm global on: 7/7 differ (the manipulation changes products) |
+
+The iteration-accounting line (`[align] scope=global iterations=N ... converged=..`) added in this commit prints to stdout only when an experimental flag is set; numerics are unchanged.
+
+### H3 arm table
+
+Matched controls reused, not rerun: a, b, c, d, h2glob-prod, h2glob-long. Matched non-DC arm per DC arm: dcg-prod to a, dcg-long to d, dcgh2g-* to h2glob-*, dcghalf-prod to b, dcghalf-long to c. STAR scores, unchanged checker; runtime field UNRUN.
+
+| Arm | checker PASS / FAIL / UNIDENTIFIABLE / other | field-gate PASS (of 8) | native exits |
+|---|---|---|---|
+| a-cand-flagsoff | 1 / 5 / 2 / 0 | 1 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| h3-dcoff | 1 / 5 / 2 / 0 | 1 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| d-gain1-long | 1 / 5 / 2 / 0 | 1 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| dcg-prod | 1 / 5 / 2 / 0 | 1 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| dcg-long | 1 / 5 / 2 / 0 | 1 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| h2glob-prod | 1 / 5 / 2 / 0 | 1 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| h2glob-long | 1 / 5 / 2 / 0 | 1 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| dcgh2g-prod | 4 / 2 / 2 / 0 | 4 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| dcgh2g-long | 3 / 3 / 2 / 0 | 3 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| b-half-prod | 2 / 4 / 2 / 0 | 2 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| c-half-long | 4 / 2 / 2 / 0 | 4 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| dcghalf-prod | 4 / 2 / 2 / 0 | 4 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| dcghalf-long | 3 / 3 / 2 / 0 | 3 | [0, 0, 0, 0, 0, 0, 0, 0] |
+| e-half-iter50-tol05 | 4 / 2 / 2 / 0 | 4 | [0, 0, 0, 0, 0, 0, 0, 0] |
+
+| Case | a-cand-flagsoff | h3-dcoff | d-gain1-long | dcg-prod | dcg-long | h2glob-prod | h2glob-long | dcgh2g-prod | dcgh2g-long | b-half-prod | c-half-long | dcghalf-prod | dcghalf-long | e-half-iter50-tol05 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| zero | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 | PASS/PASS 0.000000 / 0.000000 / 0.000000 |
+| integer | FAIL/FAIL 0.263613 / 0.431607 / 0.431607 | FAIL/FAIL 0.263613 / 0.431607 / 0.431607 | FAIL/FAIL 0.392654 / 0.573054 / 0.573054 | FAIL/FAIL 0.519066 / 0.850897 / 0.850897 | FAIL/FAIL 0.234034 / 0.298257 / 0.298257 | FAIL/FAIL 0.446108 / 0.645090 / 0.645090 | FAIL/FAIL 0.378577 / 0.823228 / 0.823228 | PASS/PASS 0.074187 / 0.115719 / 0.115719 | PASS/PASS 0.000008 / 0.000014 / 0.000014 | FAIL/FAIL 0.325549 / 0.434555 / 0.434555 | PASS/PASS 0.177743 / 0.378286 / 0.378286 | PASS/PASS 0.120929 / 0.208056 / 0.208056 | PASS/PASS 0.000065 / 0.000109 / 0.000109 | PASS/PASS 0.177743 / 0.378286 / 0.378286 |
+| fractional | FAIL/FAIL 0.524056 / 0.703415 / 0.703415 | FAIL/FAIL 0.524056 / 0.703415 / 0.703415 | FAIL/FAIL 0.428876 / 0.682875 / 0.682875 | FAIL/FAIL 0.326484 / 0.522132 / 0.522132 | FAIL/FAIL 0.313731 / 0.509885 / 0.509885 | FAIL/FAIL 0.496160 / 0.681394 / 0.681394 | FAIL/FAIL 0.358772 / 0.505934 / 0.505934 | PASS/PASS 0.029712 / 0.048260 / 0.048260 | PASS/PASS 0.000006 / 0.000012 / 0.000012 | FAIL/FAIL 0.273674 / 0.404167 / 0.404167 | PASS/PASS 0.046840 / 0.062306 / 0.062306 | PASS/PASS 0.177838 / 0.293384 / 0.293384 | PASS/PASS 0.000080 / 0.000132 / 0.000132 | PASS/PASS 0.133007 / 0.274928 / 0.274928 |
+| affine | FAIL/FAIL 0.402447 / 0.742491 / 0.911118 | FAIL/FAIL 0.402447 / 0.742491 / 0.911118 | FAIL/FAIL 0.257860 / 0.504353 / 0.597196 | FAIL/FAIL 0.303951 / 0.592239 / 0.890681 | FAIL/FAIL 0.393109 / 0.604233 / 0.857636 | FAIL/FAIL 0.267061 / 0.504069 / 0.830987 | FAIL/FAIL 0.221027 / 0.412843 / 0.582922 | PASS/PASS 0.158937 / 0.337093 / 0.694812 | FAIL/FAIL 0.175787 / 0.374775 / 0.849069 | PASS/PASS 0.165893 / 0.323365 / 0.750467 | PASS/PASS 0.175520 / 0.337342 / 0.634428 | PASS/PASS 0.199064 / 0.361175 / 0.769927 | FAIL/FAIL 0.175780 / 0.374690 / 0.848981 | PASS/PASS 0.165893 / 0.323365 / 0.750467 |
+| pedestal | FAIL/FAIL 2.119133 / 3.603757 / 3.893113 | FAIL/FAIL 2.119133 / 3.603757 / 3.893113 | FAIL/FAIL 2.119133 / 3.603757 / 3.893113 | FAIL/FAIL 0.411737 / 0.746610 / 1.145954 | FAIL/FAIL 0.436191 / 0.817290 / 1.460827 | FAIL/FAIL 2.119133 / 3.603757 / 3.893113 | FAIL/FAIL 2.119133 / 3.603757 / 3.893113 | FAIL/FAIL 0.262335 / 0.577125 / 1.016022 | FAIL/FAIL 0.262756 / 0.578415 / 1.033332 | FAIL/FAIL 2.119133 / 3.603757 / 3.893113 | FAIL/FAIL 2.119133 / 3.603757 / 3.893113 | FAIL/FAIL 0.318820 / 0.642494 / 1.079337 | FAIL/FAIL 0.262760 / 0.578404 / 1.033345 | FAIL/FAIL 2.119133 / 3.603757 / 3.893113 |
+| noisy | FAIL/FAIL 2.342962 / 4.376569 / 9.903941 | FAIL/FAIL 2.342962 / 4.376569 / 9.903941 | FAIL/FAIL 2.060526 / 4.394210 / 11.950092 | FAIL/FAIL 1.744010 / 3.514956 / 7.383125 | FAIL/FAIL 1.660947 / 3.386998 / 8.920166 | FAIL/FAIL 2.115487 / 4.031991 / 6.757304 | FAIL/FAIL 1.778466 / 3.631657 / 9.302432 | FAIL/FAIL 3.049056 / 6.319967 / 21.295071 | FAIL/FAIL 1.802902 / 3.712072 / 9.883923 | FAIL/FAIL 2.799221 / 5.876730 / 19.018634 | FAIL/FAIL 1.988823 / 4.225033 / 10.980241 | FAIL/FAIL 2.583038 / 5.400150 / 10.567595 | FAIL/FAIL 1.767668 / 3.630567 / 9.548841 | FAIL/FAIL 1.926334 / 3.978985 / 10.649381 |
+| flat | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 | UNIDENTIFIABLE/FAIL 2.104421 / 3.436505 / 3.436505 |
+| repeated | UNIDENTIFIABLE/FAIL 16.533858 / 28.003916 / 28.003916 | UNIDENTIFIABLE/FAIL 16.533858 / 28.003916 / 28.003916 | UNIDENTIFIABLE/FAIL 16.607416 / 28.003916 / 28.003916 | UNIDENTIFIABLE/FAIL 9.012581 / 14.197954 / 14.197954 | UNIDENTIFIABLE/FAIL 9.029315 / 14.230078 / 14.230078 | UNIDENTIFIABLE/FAIL 16.533858 / 28.003916 / 28.003916 | UNIDENTIFIABLE/FAIL 16.607416 / 28.003916 / 28.003916 | UNIDENTIFIABLE/FAIL 9.012581 / 14.197954 / 14.197954 | UNIDENTIFIABLE/FAIL 9.029315 / 14.230078 / 14.230078 | UNIDENTIFIABLE/FAIL 6.740209 / 8.831312 / 8.831312 | UNIDENTIFIABLE/FAIL 4.395413 / 5.842215 / 5.842215 | UNIDENTIFIABLE/FAIL 6.898739 / 8.985500 / 8.985500 | UNIDENTIFIABLE/FAIL 4.339040 / 5.718833 / 5.718833 | UNIDENTIFIABLE/FAIL 4.395413 / 5.842215 / 5.842215 |
+
+### H3 prediction scorecard
+
+| # | Prediction | Native result | Verdict |
+|---|---|---|---|
+| 1 | Flags off and DC off identical to e77a51a2 (rebuilt binary) | table above: CTest 0 failed on both builds, `h3-dcoff` equals a, products IDENTICAL | confirmed |
+| 2 | DCg alone does not make integer or fractional meet the limits at the long budget | `dcg-long` integer 0.2340 / 0.2983 / 0.2983 (RMS > 0.20) FAIL; fractional 0.3137 / 0.5099 / 0.5099 FAIL | confirmed |
+| 3a | DCg+H2g improves integer and fractional RMS versus DCg alone at both stops | integer 0.519 to 0.074 (prod), 0.234 to 0.000 (long); fractional 0.327 to 0.030 (prod), 0.314 to 0.000 (long) | confirmed |
+| 3b | At least one meets 0.20/0.40/0.80 Å in STAR at the long budget | integer and fractional both PASS (RMS / p95 / max 0.000); also PASS at the production stop (integer 0.074 / 0.116, fractional 0.030 / 0.048) | confirmed |
+| 4 | DCg+half at the long budget keeps the integer, fractional and affine passes of arm c | integer 0.0001 PASS, fractional 0.0001 PASS, **affine FAIL** (0.1758 / 0.3747 / 0.8491, max > 0.80; c had 0.1755 / 0.3373 / 0.6344) | **falsified** (affine pass lost) |
+| 5 | Zero PASS; flat and repeated UNIDENTIFIABLE; noisy and pedestal reported in full; RMS or max increases versus the matched non-DC arm listed | zero PASS and flat/repeated UNIDENTIFIABLE in all six DC arms. Pedestal falls from 2.119 to 0.26 to 0.44 Å RMS in every DC arm (still FAIL). Regressions below | confirmed |
+
+Regressions versus the matched non-DC arm (any of RMS, p95, max up; `results/h3_regressions_vs_matched.json`):
+
+| DC arm vs matched | Case | Change (matched to DC arm) | Status |
+|---|---|---|---|
+| dcg-prod vs a | integer | RMS 0.264 to 0.519, max 0.432 to 0.851 | FAIL both |
+| dcg-long vs d | affine | RMS 0.258 to 0.393, max 0.597 to 0.858 | FAIL both |
+| dcgh2g-prod vs h2glob-prod | noisy | RMS 2.116 to 3.049, max 6.76 to 21.30 | FAIL both |
+| dcgh2g-long vs h2glob-long | affine | max 0.583 to 0.849 (RMS 0.221 to 0.176 improves) | FAIL both |
+| dcgh2g-long vs h2glob-long | noisy | RMS 1.779 to 1.803, max 9.30 to 9.88 | FAIL both |
+| dcghalf-prod vs b | affine | RMS 0.166 to 0.199, max 0.751 to 0.770 | PASS both |
+| dcghalf-prod vs b | repeated | RMS 6.74 to 6.90 | UNIDENTIFIABLE |
+| dcghalf-long vs c | affine | max 0.634 to 0.849 | c PASS, DC arm FAIL |
+
+Noisy against the flags-off arm a (RMS 2.343, max 9.904): `dcgh2g-prod` is worse on both (3.049, 21.295); `dcgh2g-long` has lower RMS (1.803) and about equal max (9.884).
+
+**Falsification branch.** Prediction 3 holds, so the second branch applies: on this fixture family the principled candidate is pedestal removal plus the coupled peak at gain 1, and the challenge's peak-definition mechanism is supported natively once the pedestal is gone (H2 without DC did nothing for integer/fractional; with DCg it brings both to the truth). It is research evidence only. Before any adoption discussion it needs N=9/13/20 controls, noisy harm checks (the production-stop noisy regression above), and CUDA parity, none of which exist here.
+
+**Guard fires, DCg+H2g** (peaks falling back to the separable result / peaks fitted, global alignment; no patch peaks use H2 in this arm):
+
+| Case | production stop | long budget |
+|---|---|---|
+| zero | 0/5 | 0/5 |
+| integer, fractional, affine, pedestal | 0/15 each | 0/250 each |
+| noisy | 0/10 | 0/250 |
+| flat | 5/5 (not negative definite) | 5/5 |
+| repeated | 15/15 (not negative definite) | 250/250 |
+
+Without the DC bin zeroed, H2 fired on every pedestal peak (5/5 global, 45/45 patch at the production stop; `results/h2_guard_counts.md`); with DCg it never fires there. Flat and repeated are degenerate inputs and still fire everywhere.
+
+### Iteration log: does half-gain stop early at the production tolerance? (challenge claim, item 3)
+
+One extra arm, `e-half-iter50-tol05`: `--experimental_global_half_gain --max_iter 50`, default 0.5 px tolerance, no driver change (the `[align]` stdout line gives iterations). Results: integer ran all 50 iterations (never below 0.5 px, last 0.586) and ends at 0.1777 Å, identical to arm c; fractional converged at iteration 8 (0.133 Å); affine stopped at iteration 5 (identical to arm b); noisy converged at iteration 8. The challenge's claim that `--max_iter 50` at the production tolerance stops at iteration 4 or earlier and is bit-identical to `--max_iter 5` is falsified natively for integer, fractional and noisy: those runs use more than five iterations and differ from arm b (integer 0.326 to 0.178, fractional 0.274 to 0.133, noisy RMS 2.799 to 1.926). It holds only for affine, which stops at the cap anyway. A longer budget at the default tolerance is enough for half-gain to pass integer, fractional and affine here; the tolerance override of arm c is not what matters. Arms b, c and d have no iteration log (older binary), so their own iteration counts are not observed.
+
+## Not run / limitations (half-gain, H2 and H3)
 
 - **Runtime (unrounded) field: UNRUN.** e77a51a2 has no runtime-model capture (`MC_DIAG_*` is not in `src/`). Only STAR-serialized scores exist. W5 found runtime and STAR scores within about 3e-5 Å RMS on its fixtures (largest: affine double-gain1-5it, 0.320006 vs 0.319982), far inside the limits, but that is not measured here.
 - **Native N=9/13/20 and phase-ramp vel0/vel1 controls: UNRUN.** No generator in the repo produces them; W5 used offline replay. The only native N=5 fixtures are the #267 `integer`/`fractional` cases. W5 recorded production-stop regressions at larger N (vel0 isotropic N13/N20 PASS to FAIL) that this run cannot confirm or exclude.
 - Native results do not match W5's offline numbers cell by cell (e.g. arm c integer 0.178 Å here, 0.074 Å in W5 map32); native b integer fails like W5's double-map replay and native b fractional fails like its map32 replay. The offline replay is not a native reproduction.
 - One synthetic fixture family, 5 frames, one run per arm (the CPU build is bit-deterministic, so repeats would not add information). `noisy` worsens at the production stop and `pedestal` is unaffected.
+- H3: the DC hook is ported for the CPU path only; the CUDA hook, the #269 runtime-capture block and CUDA parity are not ported or run. The H3 arms used the hook binary built from `1c1eacf9`, which also carries the iteration-accounting stdout line; arms a to d and the H2 arms ran on earlier binaries whose flags-off identity was verified separately. DCg+H2g's noisy regression at the production stop is not resolved.
 - H2 arms were run once each; the half-gain arms' native N=9/13/20 controls remain UNRUN for H2 too. The fractional H2 production-stop improvement is small and from one fixture sample.
 - CPU only. No GPU, no 4GPUs, no CUDA build. CPU/CUDA agreement is not addressed. No default, gate, ROI, tolerance or checker changed.
 
 ## Provenance
 
-- Base `e77a51a220cb0d91f4ac3c7fac211876d0c6833f`; half-gain source `a1c78adc1d0ffcf031102bc0dad605c4fb670a1f`; H2 source `700d0c6d0366212de4935da76f6fbc9f10f4ebb5` (H2 binary `95c24099...d24f`, `results/build-h2.binaries.sha256`; tree staged as `src-h2`, same build flags and lane; H2 receipts in `results/v2/receipts-h2/`, `results/chain-h2*`, `results/flagsoff-h2/`, `results/ctest-h2.*`) (C++ sources identical in later commits on the branch; later commits add a CLI-test wording fix and these files).
+- Base `e77a51a220cb0d91f4ac3c7fac211876d0c6833f`; half-gain source `a1c78adc1d0ffcf031102bc0dad605c4fb670a1f`; H3 source `1c1eacf9ac2275b01105492bad84c58d164bd112` (staged `src-h3`; binaries `build-h3off` `032ed3fb...`, `build-h3on` `e65068c1...`, hashes in `results/build-h3o*.binaries.sha256`; receipts `results/v2/receipts-h3/`, `results/chain-h3*`, `results/flagsoff-h3/`, `results/ctest-h3o*`); H2 source `700d0c6d0366212de4935da76f6fbc9f10f4ebb5` (H2 binary `95c24099...d24f`, `results/build-h2.binaries.sha256`; tree staged as `src-h2`, same build flags and lane; H2 receipts in `results/v2/receipts-h2/`, `results/chain-h2*`, `results/flagsoff-h2/`, `results/ctest-h2.*`) (C++ sources identical in later commits on the branch; later commits add a CLI-test wording fix and these files).
 - Binaries (Release, `-O3 -DNDEBUG -std=gnu++17 -fopenmp`, CUDA=OFF): base `7d9fd428...c9c9`, candidate `cee711f8...5d4c` (full hashes in `results/build-*.binaries.sha256`). Fixture hashes: `results/v2/receipts/fixtures.sha256`.
 - Host `small-refmac-machine` (cpu64), `Cpus_allowed_list: 48-55` (receipt `results/v2/receipts/env.txt`), `flock -n /tmp/motioncorr-damping-cpu48-55.lock`, no foreign process above 5% on the lane at start, cmake and Python from `~/.mc-venv`. Scratch `/tmp/motioncorr-damping-a1c78adc1d0f`, 829 MB. Source staged with `git archive`; no copied build tree.
 - Build: `MC_REQUIRE_ALL_DECODERS` left OFF because pbzip2 is absent on cpu64 (explicit repo waiver).
-- Commands: `scripts/build.sh base|cand|h2`, `scripts/run_h2_arms.sh`, `scripts/mutants_h2.sh`, `scripts/flagsoff_h2.sh`, `scripts/chain_h2.sh`, `scripts/run_arms.sh`, `scripts/flagsoff.sh`, `scripts/ctest_cpu.sh`, `scripts/mutants.sh`, `scripts/summarize.py` (driven by `scripts/chain.sh`); exit codes in `results/chain.log`, `results/v2/receipts/*.exit`, `results/flagsoff/receipts/`.
+- Commands: `scripts/build_h3.sh`, `scripts/run_h3_arms.sh`, `scripts/mutants_h3.sh`, `scripts/flagsoff_h3.sh`, `scripts/chain_h3.sh`, `scripts/build.sh base|cand|h2`, `scripts/run_h2_arms.sh`, `scripts/mutants_h2.sh`, `scripts/flagsoff_h2.sh`, `scripts/chain_h2.sh`, `scripts/run_arms.sh`, `scripts/flagsoff.sh`, `scripts/ctest_cpu.sh`, `scripts/mutants.sh`, `scripts/summarize.py` (driven by `scripts/chain.sh`); exit codes in `results/chain.log`, `results/v2/receipts/*.exit`, `results/flagsoff/receipts/`.
 
 ## Retained failures and corrections
 

@@ -1,0 +1,12 @@
+h3off configure rc=0
+h3off build rc=0
+032ed3fba230cc8a6dc1cd164526db930454d5f70592a6315d3adb055968ec4a  /tmp/motioncorr-damping-a1c78adc1d0f/build-h3off/motioncorr
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+CMAKE_BUILD_TYPE:STRING=Release
+MC_EXPERIMENT_CCF_DC:BOOL=OFF
+h3on configure rc=0
+h3on build rc=0
+e65068c1094b8563914ef1bd6f3bef6cc4e6c91a360cc4cc38bc9c3781bab416  /tmp/motioncorr-damping-a1c78adc1d0f/build-h3on/motioncorr
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+CMAKE_BUILD_TYPE:STRING=Release
+MC_EXPERIMENT_CCF_DC:BOOL=ON

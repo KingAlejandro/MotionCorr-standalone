@@ -1,0 +1,4 @@
+mutant cpu_restore: ccf_dc_hook rc=1 (KILLED) FAIL zeroing the global DC bin of a pedestal-carrying CCF changed nothing
+mutant cpu_wrong_bin: ccf_dc_hook rc=1 (KILLED) FAIL zeroing the global DC bin of a pedestal-carrying CCF changed nothing
+mutant cpu_stage_swap: ccf_dc_hook rc=1 (KILLED) FAIL arm none must leave every global CCF DC bin untouched
+restored original: rc=0 (must be 0)

@@ -655,6 +655,10 @@ bool cudaAlignPatchDeviceWithWorkspace(
         // 3. Batched cuFFT C2R
         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_cufft));
         ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
+        if (capture_boundary && iter==1) {
+            for (int f : {0,4}) if (f<n_frames)
+                capture_device("ifft-input-"+std::to_string(f)+".c64",d_Fccs+(size_t)f*ccf_nfy*ccf_nfx,sz_fref);
+        }
         ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
         if (timed) {
             ALIGN_CUDA(cudaEventRecord(ev_stop_cufft));

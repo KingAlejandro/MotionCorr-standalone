@@ -1,5 +1,6 @@
 #ifndef MOTIONCORR_BOUNDARY_CAPTURE_H
 #define MOTIONCORR_BOUNDARY_CAPTURE_H
+// SPDX-License-Identifier: GPL-2.0-or-later
 // Default-off, bounded diagnostic. Callers never replace a production input.
 #include <atomic>
 #include <cstdio>

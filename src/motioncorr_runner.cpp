@@ -3248,23 +3248,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		logfile << "Image size after binning: X = " << nx << " Y = " << ny << std::endl;
 	}
 
-	// Read only two corrected real frames before either forward transform.
-	if (mc_boundary::enabled()) {
-		if (early_binning) REPORT_ERROR("MC_BOUNDARY_DIR does not support early binning");
-		for (int f : {0, 4}) if (f < n_frames) {
-#ifdef _CUDA_ENABLED
-			if (movie_session) {
-				std::vector<float> tmp((size_t)nx * ny);
-				if (cudaMemcpy(tmp.data(), movie_session->getDeviceRealFrames() + (size_t)f*nx*ny,
-				               tmp.size()*sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess)
-					REPORT_ERROR("MC_BOUNDARY_DIR real frame copy failed");
-				mc_boundary::write("pre-"+std::to_string(f)+".f32", tmp.data(), tmp.size()*sizeof(float));
-			} else
-#endif
-				mc_boundary::write("pre-"+std::to_string(f)+".f32", Iframes[f]().data, (size_t)nx*ny*sizeof(float));
-		}
-		mc_boundary::check();
-	}
 	// FFT
 	MC_STAGE("global fft");
 	RCTIC(TIMING_GLOBAL_FFT);
@@ -3285,6 +3268,25 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		             "device ingest and the movie could not be copied back, so no valid "
 		             "representation remains. Failing this movie rather than transforming "
 		             "empty frames.");
+#endif
+	// Read only two corrected real frames before either forward transform.
+	if (mc_boundary::enabled()) {
+		if (early_binning) REPORT_ERROR("MC_BOUNDARY_DIR does not support early binning");
+		for (int f : {0, 4}) if (f < n_frames) {
+#ifdef _CUDA_ENABLED
+			if (movie_session) {
+				std::vector<float> tmp((size_t)nx * ny);
+				if (cudaMemcpy(tmp.data(), movie_session->getDeviceRealFrames() + (size_t)f*nx*ny,
+				               tmp.size()*sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess)
+					REPORT_ERROR("MC_BOUNDARY_DIR real frame copy failed");
+				mc_boundary::write("pre-"+std::to_string(f)+".f32", tmp.data(), tmp.size()*sizeof(float));
+			} else
+#endif
+				mc_boundary::write("pre-"+std::to_string(f)+".f32", Iframes[f]().data, (size_t)nx*ny*sizeof(float));
+		}
+		mc_boundary::check();
+	}
+#ifdef _CUDA_ENABLED
 	// The early-binning path crops a full-size Fourier transform, so keep that
 	// path on the CPU until the CUDA implementation supports the same operation.
 	if (movie_session) {
@@ -4902,7 +4904,10 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			RCTOC(TIMING_CCF_CALC);
 
 			if (capture_boundary && iter==1 && (iframe==0 || iframe==4))
+				{
 				mc_boundary::write("spectrum-"+std::to_string(iframe)+".c64",Fccs[tid].data,Fccs[tid].nzyxdim*sizeof(fComplex));
+				mc_boundary::write("ifft-input-"+std::to_string(iframe)+".c64",Fccs[tid].data,Fccs[tid].nzyxdim*sizeof(fComplex));
+			}
 			RCTIC(TIMING_CCF_IFFT);
 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
 			RCTOC(TIMING_CCF_IFFT);

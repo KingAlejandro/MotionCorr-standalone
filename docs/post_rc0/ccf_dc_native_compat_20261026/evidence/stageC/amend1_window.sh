@@ -1,10 +1,10 @@
 #!/bin/bash
 # Stage C amendment-1 venue window (frozen before launch): the standalone guard once, read-only, and the Linux fake-child /
 # guard-shim tests. No MotionCorr child, no GPU producer, no Stage C row, no retry. Run on 4GPUs as
-#   setsid taskset -c 80-87 bash amend1_window.sh > logs/chain.out 2>&1 < /dev/null &
-# from the staged directory that holds tools/, test-data/ and docs/.
+#   setsid taskset -c 80-87 bash docs/post_rc0/ccf_dc_native_compat_20261026/evidence/stageC/amend1_window.sh <root> > <root>/logs/chain.out 2>&1 < /dev/null &
+# where <root> is the staged subset holding tools/, test-data/ and docs/.
 set -u
-S=$(cd "$(dirname "$0")" && pwd); L=$S/logs; mkdir -p "$L"
+S=$(cd "${1:-.}" && pwd); L=$S/logs; mkdir -p "$L"      # root of the staged subset (holds tools/, test-data/, docs/)
 PY=/home/alex/.mc-venv/bin/python3
 GPU2=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598; FOREIGN=3983855
 ts() { date -u +%FT%TZ; }

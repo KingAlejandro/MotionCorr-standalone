@@ -87,3 +87,16 @@ Tested: weight values, global/local selection, global estimates on the analytic 
 witness, and CLI refusals. UNRUN: full-movie and global-trajectory byte neutrality, the rest of CTest, CUDA, any
 movie, native pilot, scientific accuracy. The combination with `--experimental_local_b2` is UNRUN and untested; the pilot
 keeps B2 off. The stub attempt supports no qualification claim.
+
+## Attempt 3: clean archive of `5bcfa987`, DC registration check
+
+`5bcfa987` adds one CMake property (`LocalFullWidthWeight` sets `MC_EXPERIMENT_CCF_DC_ARM=none` in DC builds) and docs; its
+`src/` and `tests/` are byte-identical to `634e4b48`. A `git archive` of exactly that commit was extracted to a new
+scratch directory; all 11641 extracted files matched their Git blob hashes before and after the build (no `MISMATCH`).
+Real interpreter as in attempt 2 (NumPy 2.4.2), no stub, `PYTHONPATH` unset, `-DMC_EXPERIMENT_CCF_DC=ON`, targets
+`motioncorr local_full_width_weight ccf_dc_hook` only, `-j2`, `OMP_NUM_THREADS=2`, caller `MC_EXPERIMENT_CCF_DC_ARM` unset.
+`ctest -R '^(LocalFullWidthWeight|CcfDcHook|ExperimentalFlagsCli|LocalCcfCaptureCli)$'` exit 0, 4/4 passed. The new test
+runs without the caller exporting the arm; control: the bare binary with the arm unset aborts (exit 134). Binary sha256
+(motioncorr / local_full_width_weight / ccf_dc_hook): `64f00132...`, `801825d9...`, `b6d54782...`. The default-build 6/6
+result remains attempt 2's, at the `634e4b48` tree. Full-movie and global-trajectory byte neutrality, the rest of CTest,
+CUDA and any movie remain UNRUN. Source-level clearance is conditional and is not a merge or scientific claim.

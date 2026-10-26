@@ -96,3 +96,14 @@ CPU F arm only. The C arm is not decomposed, since H7a shows C ≈ F outside `pe
 - `scripts/analyze_w7.py`: gates, the decomposition and `w7.json`.
 - `scripts/summarize_w7.py`: `tables.md` and `per_movie.csv`.
 - `results/`: outputs. SHA-256 of all files is in `SHA256SUMS`.
+
+## Review amendment (2026-10-26, additive; the text above is unchanged)
+
+Early independent review accepted the W7 algebra and gates but corrected four interpretations. They supersede the wording above where they conflict.
+
+- **Shares.** The mean-square shares, with their cross terms, are a descriptive split of one exact sum. They are not causal percentages, and "93–97% of the error" should be read as the standalone share of one additive component.
+- **Anchor.** The per-patch time-constant component `mean(delta)` is not necessarily frame-0 noise. An anchor ratio near 1 shows only that the data are compatible with an i.i.d. single-anchor model. Counterexample (checked in W8 K9): a deterministic `eps` that is 0 on frames 0–19 and `a` on 20–39 has no frame-0 error, yet gives `delta(1) = 3 delta(0)` and ratio sqrt(20/19) = 1.026. The ratio cannot establish cause.
+- **Representability.** R-lat is a least-squares RMS floor. Its p95 and max are those of the RMS-optimal fit, not minima of p95 or max. Counterexample (W8 K10): for `y = [0, 0, 3]` the least-squares constant gives RMS 1.414, p95 1.9 and max 2, while the constant 1.5 gives 1.5 for all three. The `outmodel` impossibility rests on the RMS floor 0.885 > 0.20 (and max ≥ RMS), not on individual p95 or max floors.
+- **Counterfactual.** The −obs_const counterfactual (dose1 0.085 Å) is not a lower bound for any augmented refit, and W8 does not use it as one. As W8's controls show, a naive midpoint intercept refit is also biased even without noise: under `Tr`, a quadratic truth publishes as `b(f² - f)` and a cubic as `c(f³ - 1.5 f² + 0.75 f)`.
+
+These causal claims stay provisional until the independent review completes. The W8 refit tests them directly.

@@ -1,0 +1,259 @@
+{
+  "archive": {
+    "remote_archive": "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/receipts-20261026.tar.gz",
+    "sha256": "e28fffa6f02366eb8899f47cdb8aa1b4539f3bccf22a64909c5eb07a9687c9ab",
+    "bytes": 1754657,
+    "files": 473,
+    "verified_product_files": 882,
+    "source": "7a1bde5db99c94bc4332bae3f3aff6e0bfccaabd",
+    "helper_repair_source": "031f333a2863218c74951117989c84423ad9c92e",
+    "native_movie_producers": 28,
+    "original_replay_processes": 28,
+    "inverse_v2_processes": 12,
+    "local_archive": "/Users/alex.konstantinov/.codex/artifacts/motioncorr-cuda-boundary-20261026/receipts-20261026.tar.gz",
+    "local_sha256_verified": true
+  },
+  "ledger_receipt_hashes_verified": 28,
+  "original_replay_receipts": 28,
+  "v1_invalid_attempts_remain_invalid": 8,
+  "first_sampled_bit_boundary": [
+    {
+      "case": "00021",
+      "frame": 0,
+      "pre_hashes_equal": true,
+      "fft_hashes_differ": true,
+      "basis": "sealed index attestations only; arrays not downloaded"
+    },
+    {
+      "case": "00021",
+      "frame": 4,
+      "pre_hashes_equal": true,
+      "fft_hashes_differ": true,
+      "basis": "sealed index attestations only; arrays not downloaded"
+    },
+    {
+      "case": "00046",
+      "frame": 0,
+      "pre_hashes_equal": true,
+      "fft_hashes_differ": true,
+      "basis": "sealed index attestations only; arrays not downloaded"
+    },
+    {
+      "case": "00046",
+      "frame": 4,
+      "pre_hashes_equal": true,
+      "fft_hashes_differ": true,
+      "basis": "sealed index attestations only; arrays not downloaded"
+    }
+  ],
+  "source_neutrality_index_audit": [
+    {
+      "label": "00021-G-cpu",
+      "extension": ".mrc",
+      "baseline_sha256": "ed45952fdda7aa4842ac59afc07508b60c12fc466de439077529aa22fe1cbab8",
+      "off_sha256": "92ddb52daa282f9eb3e6922debccb2eca989fb958bdb4dcdc0b1386fe99b5ca8",
+      "off_v2_sha256": "015883d7286353fa0405432ea15901018a43947ede5f90c0ca1be85b91626d61",
+      "whole_file_equal": false,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00021-G-cpu",
+      "extension": ".star",
+      "baseline_sha256": "507c50c8d2e8ff0f14123142d5278c6e05fc2fb78738a58d76ee508b22ef9487",
+      "off_sha256": "507c50c8d2e8ff0f14123142d5278c6e05fc2fb78738a58d76ee508b22ef9487",
+      "off_v2_sha256": "507c50c8d2e8ff0f14123142d5278c6e05fc2fb78738a58d76ee508b22ef9487",
+      "whole_file_equal": true,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00021-G-cuda",
+      "extension": ".mrc",
+      "baseline_sha256": "0ae1fa01b98203c15dc21274d2915a04b4090303b2d5abe8797e14cb781d6c8f",
+      "off_sha256": "69f99169c8a596db87585ec51549dd76936624066ee320626ee9e794ffe2686d",
+      "off_v2_sha256": "708bf566eedf7ab66e191dde557dab0ed5188c0fdbaffebd6204cc325e30a9d6",
+      "whole_file_equal": false,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00021-G-cuda",
+      "extension": ".star",
+      "baseline_sha256": "58025c0097e1f015624cf3d8dd4705121ed34e831ac56e1eb1015d1916740977",
+      "off_sha256": "58025c0097e1f015624cf3d8dd4705121ed34e831ac56e1eb1015d1916740977",
+      "off_v2_sha256": "58025c0097e1f015624cf3d8dd4705121ed34e831ac56e1eb1015d1916740977",
+      "whole_file_equal": true,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00021-L-cpu",
+      "extension": ".mrc",
+      "baseline_sha256": "30b5b3a0fe69120bf356ecf1b28ae98399f0441199ab65f0a73fe0adbaea9bd1",
+      "off_sha256": "c4380e8e8f4ac6b5f01873b1aed1e5f5f8ee97f2a95138fc5cd0c26ddff91799",
+      "off_v2_sha256": "cc6ee31dcebd73bebc3f7acdf5b86517c71d78ad1df773a770c4342ad0bba1b0",
+      "whole_file_equal": false,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00021-L-cpu",
+      "extension": ".star",
+      "baseline_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+      "off_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+      "off_v2_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+      "whole_file_equal": true,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00021-L-cuda",
+      "extension": ".mrc",
+      "baseline_sha256": "6e9251328c2253ff55dee3fff88e91206a86d6922e1af499e2e596d19e5affd6",
+      "off_sha256": "6ee6592ecd8bdb634e8751bef42b6cbe923dcf7fa3786594271c0465d2ed9be5",
+      "off_v2_sha256": "27173bef43dd22a88f896a18b55086597910da9247ed81c36cb625a5f01b24f2",
+      "whole_file_equal": false,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00021-L-cuda",
+      "extension": ".star",
+      "baseline_sha256": "38b813aa4e1ee5e0f981130523a0fd5aa4fbbaf7f034c8639cba94f09e350b6e",
+      "off_sha256": "38b813aa4e1ee5e0f981130523a0fd5aa4fbbaf7f034c8639cba94f09e350b6e",
+      "off_v2_sha256": "38b813aa4e1ee5e0f981130523a0fd5aa4fbbaf7f034c8639cba94f09e350b6e",
+      "whole_file_equal": true,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00046-G-cpu",
+      "extension": ".mrc",
+      "baseline_sha256": "f652dc67da19ead5a0ba36c44ef0e8344e82419ae97c1b294af4a1bc59df90a6",
+      "off_sha256": "7c0c86e1e53d3e4a33b86ed036bcab657ce3f37c485523f479ca97a96b94621a",
+      "off_v2_sha256": "46eed68f15f36b7bbf406484bf688dcdf73f55b94125ee27d3a667b06faa7a8d",
+      "whole_file_equal": false,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00046-G-cpu",
+      "extension": ".star",
+      "baseline_sha256": "82caecbfb4ee82b120e92c4c74a95abc78d01cde96fe8b33c8e12a8ba82292ed",
+      "off_sha256": "82caecbfb4ee82b120e92c4c74a95abc78d01cde96fe8b33c8e12a8ba82292ed",
+      "off_v2_sha256": "82caecbfb4ee82b120e92c4c74a95abc78d01cde96fe8b33c8e12a8ba82292ed",
+      "whole_file_equal": true,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00046-G-cuda",
+      "extension": ".mrc",
+      "baseline_sha256": "6f560d90ace1f1038c5882623ae12bb77140ecea9679c73a3560143f7ee2e627",
+      "off_sha256": "f661e7c3550995ac84a52513194eb3e09b9724f0964ca3a2e29d70e72b103f0a",
+      "off_v2_sha256": "cf8baba41b064b4ed5ab790fe65c0e7af9b0e91af9bcd36433a2405f64c57835",
+      "whole_file_equal": false,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00046-G-cuda",
+      "extension": ".star",
+      "baseline_sha256": "dd0afaaa5edde9111a2717f0e08b1df63ec1f3008904dc4a092d6d75296c38d3",
+      "off_sha256": "dd0afaaa5edde9111a2717f0e08b1df63ec1f3008904dc4a092d6d75296c38d3",
+      "off_v2_sha256": "dd0afaaa5edde9111a2717f0e08b1df63ec1f3008904dc4a092d6d75296c38d3",
+      "whole_file_equal": true,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00046-L-cpu",
+      "extension": ".mrc",
+      "baseline_sha256": "3622f7f24feeb631489693baddef12f58d2f16fe6cae4f867284ef7ac0c26b5b",
+      "off_sha256": "97b35d8935ad24966357f683cbfd67e59613e8d7fb0a8591a3ec9c9fd6ff255e",
+      "off_v2_sha256": "e44811ad612ae6c4361a9b5d47893602590285f936374e07b8ef80765bfb3ed2",
+      "whole_file_equal": false,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00046-L-cpu",
+      "extension": ".star",
+      "baseline_sha256": "3059fa3ccf335971b983de422dedd3d5d9cc70f4900b6d328cf9c1a6da7ddb5d",
+      "off_sha256": "3059fa3ccf335971b983de422dedd3d5d9cc70f4900b6d328cf9c1a6da7ddb5d",
+      "off_v2_sha256": "3059fa3ccf335971b983de422dedd3d5d9cc70f4900b6d328cf9c1a6da7ddb5d",
+      "whole_file_equal": true,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00046-L-cuda",
+      "extension": ".mrc",
+      "baseline_sha256": "7f5af686dabe2002dde6478b9289bacffc269f3dcc3eab4eb6abec6bd978a69b",
+      "off_sha256": "880b9895a44c669715ad9fc52faa02993050714c20851792876088ece4b19779",
+      "off_v2_sha256": "a9617bafe7308ed8c1cd3bf84f56283c2ada7e9eb1a85cba5a31f5524bf3c2fe",
+      "whole_file_equal": false,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    },
+    {
+      "label": "00046-L-cuda",
+      "extension": ".star",
+      "baseline_sha256": "eb041789b98b05e3e3459734719864124728f8e3819cbb069fca3ec1d5c5b015",
+      "off_sha256": "eb041789b98b05e3e3459734719864124728f8e3819cbb069fca3ec1d5c5b015",
+      "off_v2_sha256": "eb041789b98b05e3e3459734719864124728f8e3819cbb069fca3ec1d5c5b015",
+      "whole_file_equal": true,
+      "basis": "whole-file hashes only; MRC payload equality is producer-reported and not inferred from these hashes"
+    }
+  ],
+  "endpoint_saved_grade_audit": [
+    {
+      "label": "00021-G",
+      "relative_image_rmse": 0.005892540309116831,
+      "status": "FAIL",
+      "sole_failure": [
+        "Relative image RMSE 5.892540e-03 > 1.000000e-03"
+      ],
+      "coverage": {
+        "motion_and_star": true,
+        "corrected_image": true,
+        "complete": true,
+        "required": true
+      },
+      "basis": "committed saved comparator scalar JSON/RUN audit; no pixel read or rerun"
+    },
+    {
+      "label": "00021-L",
+      "relative_image_rmse": 0.005712646660955957,
+      "status": "FAIL",
+      "sole_failure": [
+        "Relative image RMSE 5.712647e-03 > 1.000000e-03"
+      ],
+      "coverage": {
+        "motion_and_star": true,
+        "corrected_image": true,
+        "complete": true,
+        "required": true
+      },
+      "basis": "committed saved comparator scalar JSON/RUN audit; no pixel read or rerun"
+    },
+    {
+      "label": "00046-G",
+      "relative_image_rmse": 0.011913792144530524,
+      "status": "FAIL",
+      "sole_failure": [
+        "Relative image RMSE 1.191379e-02 > 1.000000e-03"
+      ],
+      "coverage": {
+        "motion_and_star": true,
+        "corrected_image": true,
+        "complete": true,
+        "required": true
+      },
+      "basis": "committed saved comparator scalar JSON/RUN audit; no pixel read or rerun"
+    },
+    {
+      "label": "00046-L",
+      "relative_image_rmse": 0.010737498366415188,
+      "status": "FAIL",
+      "sole_failure": [
+        "Relative image RMSE 1.073750e-02 > 1.000000e-03"
+      ],
+      "coverage": {
+        "motion_and_star": true,
+        "corrected_image": true,
+        "complete": true,
+        "required": true
+      },
+      "basis": "committed saved comparator scalar JSON/RUN audit; no pixel read or rerun"
+    }
+  ],
+  "endpoint_directory_absent_from_original_archive": true,
+  "supplemental_archive_not_fetched_or_verified": true
+}

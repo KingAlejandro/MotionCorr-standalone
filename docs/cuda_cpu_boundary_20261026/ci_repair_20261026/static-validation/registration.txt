@@ -1,0 +1,14 @@
+add_executable cuda_patch_batch_ccf_perpatch_no_projection;tests/cuda_patch_batch.cpp;/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/build/pr288-ci-anchor-20261026/repaired-anchor/out/mutants/cuda_alignpatch_ccf_perpatch_no_projection.cu
+target_link_libraries cuda_patch_batch_ccf_perpatch_no_projection;PRIVATE;motioncorr_core
+target_include_directories cuda_patch_batch_ccf_perpatch_no_projection;PRIVATE;/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/build/pr288-ci-anchor-20261026/repaired-anchor/fixture/src/acc/cuda
+target_link_options cuda_patch_batch_ccf_perpatch_no_projection;PRIVATE;LINKER:--wrap=cudaMalloc;LINKER:--wrap=cudaFree;LINKER:--wrap=cudaEventCreate;LINKER:--wrap=cufftCreate;LINKER:--wrap=cufftMakePlanMany;LINKER:--wrap=cufftExecR2C;LINKER:--wrap=cufftExecC2R
+target_compile_definitions cuda_patch_batch_ccf_perpatch_no_projection;PRIVATE;MC_CHECK_HERMITIAN
+add_test NAME;CudaHermitianCCFMutant_ccf_perpatch_no_projection;COMMAND;cuda_patch_batch_ccf_perpatch_no_projection;--expect-invariant-failure
+set_tests_properties CudaHermitianCCFMutant_ccf_perpatch_no_projection;PROPERTIES;LABELS;cuda;hardware;TIMEOUT;300
+add_executable cuda_patch_batch_ccf_batched_no_projection;tests/cuda_patch_batch.cpp;/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/build/pr288-ci-anchor-20261026/repaired-anchor/out/mutants/cuda_alignpatch_ccf_batched_no_projection.cu
+target_link_libraries cuda_patch_batch_ccf_batched_no_projection;PRIVATE;motioncorr_core
+target_include_directories cuda_patch_batch_ccf_batched_no_projection;PRIVATE;/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/build/pr288-ci-anchor-20261026/repaired-anchor/fixture/src/acc/cuda
+target_link_options cuda_patch_batch_ccf_batched_no_projection;PRIVATE;LINKER:--wrap=cudaMalloc;LINKER:--wrap=cudaFree;LINKER:--wrap=cudaEventCreate;LINKER:--wrap=cufftCreate;LINKER:--wrap=cufftMakePlanMany;LINKER:--wrap=cufftExecR2C;LINKER:--wrap=cufftExecC2R
+target_compile_definitions cuda_patch_batch_ccf_batched_no_projection;PRIVATE;MC_CHECK_HERMITIAN
+add_test NAME;CudaHermitianCCFMutant_ccf_batched_no_projection;COMMAND;cuda_patch_batch_ccf_batched_no_projection;--expect-invariant-failure
+set_tests_properties CudaHermitianCCFMutant_ccf_batched_no_projection;PROPERTIES;LABELS;cuda;hardware;TIMEOUT;300

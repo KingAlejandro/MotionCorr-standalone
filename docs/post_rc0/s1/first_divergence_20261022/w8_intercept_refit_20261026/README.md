@@ -1,4 +1,4 @@
-# W8: offline intercept refit of the H7a F observations — status: controls done, census HELD
+# W8: offline intercept refit of the H7a F observations — status: corrected controls and census code ready, census HELD for review
 
 **Current result.** Arm A, the naive midpoint refit (W7's recommendation read literally), **fails its noiseless controls** and is not eligible for the census. Arms B1/B2 (physical, integer-time) and C (midpoint fit, transformed before publishing) pass every gate K1–K8 and agree to ≤ 5e-12 px. The census fit has **not been run**. Per the reviewer's HOLD it waits for the parent to acknowledge these controls. All numbers are offline reconstructions; no native or scientific claim is made.
 
@@ -27,6 +27,12 @@ The table shows 4096x4096 values; 5760x4092 gives the same verdicts (controls.js
 | in-model 4096² | 0.0016 / 0.0036 / 0.0094 | 0.0016 / 0.0034 / 0.0089 | 0.0000 (≤ 2.4e-12 px) |
 | in-model 5760x4092 | 0.0016 / 0.0036 / 0.0094 | 0.0016 / 0.0034 / 0.0090 | 0.0000 |
 | outmodel | 0.885 / 1.505 / 1.778 | 0.885 / 1.505 / 1.777 | 0.885 / 1.505 / 1.771 |
+
+**Pre-census amendment 1 (review).** The v1 gate let B2 stay eligible on a K8 disagreement; v1 results are kept as they were. `w8_controls_v2.py` gates B1/B2/C as one group and adds two controls (`results/controls_v2.json`, exit 0):
+- K12: a wrong C transform breaks K8 by 4.0e-4 px, empties the eligible set, and makes stage 1 refuse with exit 4.
+- K13: collinear centres (rank 34 of 43) are rejected.
+
+The smoke test (`results/smoke.log`) runs both stages on synthetic perfect inputs. R-rt recovers the truth to 3.9e-7 Å max and R-hyb to 8.7e-7 Å (STAR rounding), and the no-local movie returns `NO_LOCAL_RETAINED`. R-ser is renamed R-hyb (STAR read-back global + full-precision coefficients); a full refit STAR round trip is UNRUN. Census command: `scripts/run_census.sh /tmp/w8src <H7a results/runs>`.
 
 **Next action (held for parent).** Run the frozen census with arm B2 as two separately scored offline reconstructions: R-rt (runtime global) and R-ser (STAR read-back global). Score against the native runtime and serialised fields, and test the predictions in PLAN.md.
 

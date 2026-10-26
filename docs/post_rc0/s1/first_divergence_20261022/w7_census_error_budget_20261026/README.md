@@ -107,3 +107,8 @@ Early independent review accepted the W7 algebra and gates but corrected four in
 - **Counterfactual.** The −obs_const counterfactual (dose1 0.085 Å) is not a lower bound for any augmented refit, and W8 does not use it as one. As W8's controls show, a naive midpoint intercept refit is also biased even without noise: under `Tr`, a quadratic truth publishes as `b(f² - f)` and a cubic as `c(f³ - 1.5 f² + 0.75 f)`.
 
 These causal claims stay provisional until the independent review completes. The W8 refit tests them directly.
+
+## Manifests
+
+- `SHA256SUMS` is frozen and binds the original W7 revision `1342b28f`: README `4106d963...`, before the review amendment. Its README line therefore does not match this file.
+- `SHA256SUMS.v2` binds this amended revision. Every other file is unchanged and has the same hash in both manifests.

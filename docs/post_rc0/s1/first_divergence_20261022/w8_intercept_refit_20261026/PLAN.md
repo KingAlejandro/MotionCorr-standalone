@@ -62,3 +62,15 @@ The STAR observations are the only observation source, and they are serialised. 
 - **T6** outmodel and pedestal32 statuses.
 
 Compute: cpu64 was unreachable at preflight (ssh timeout), so this runs on the local Mac with 2 BLAS threads (`uv run --no-project --with numpy python -I`, NumPy 2.5.4). Scratch ≤ 1 GB.
+
+## Amendment 1 (pre-census, from independent review; predictions and refutation rules unchanged)
+
+- **Arm naming.** The frozen "R-ser" is renamed **R-hyb**: STAR read-back global plus full-precision B2 coefficients. It is a hybrid offline reconstruction, not a serialised field. A full global-plus-coefficient STAR round trip of the refit is **UNRUN**, because no pinned writer is invoked offline. Both arms are offline reconstructions, not native applied fields.
+- **Gate correction.** v1 `w8_controls.py` let B2 stay eligible on a K8 disagreement. Its results are kept unchanged (`results/controls.json`). The versioned `w8_controls_v2.py` (`results/controls_v2.json`) treats B1/B2/C as one equivalence group: a K8 or any member failure makes all three ineligible. It adds:
+  - **K12:** a forced disagreement from a wrong C transform must break K8, empty the eligible set, and make stage 1 refuse (exit 4).
+  - **K13:** a rank-deficient geometry must be rejected.
+
+  The census consumer (`w8_refit.py` via `w8_gate.py`) refuses unless v2 allows it, and requires every census fit to be full rank (rank equal to the number of columns).
+- **Truth isolation.** The census runs as two processes. Stage 1 (`w8_refit.py`) reads only `runtime.json` and the STAR file, and asserts at exit that no generator or evaluator module was imported. Stage 2 (`w8_score.py`) adds truth for scoring only.
+- **Correlation target.** The frozen T4 target `d = mean_g[obs - (Tc - G)]` contains the `+0.5 R(1)` convention term, which is the correct target for the B2 intercept. It stays the gating quantity for the r < 0.5 rule. A secondary r, with `0.5 R(1)` removed from both the intercept and the target, is reported only.
+- **Pipeline smoke test.** `test_w8_pipeline.py` runs both stages on two synthetic movies built from analytic truth, with no census data: perfect in-model inputs and a no-local movie.

@@ -1,0 +1,182 @@
+{
+ "binaries": {
+  "def": {
+   "path": "/home/alex/mc-dcnative2-20261026/build-def/motioncorr",
+   "sha256": "2db45b2df8241e14bda28e9dbe3d7eae0ce9f5612a7b775bc33990aeb27bed6a"
+  },
+  "exp": {
+   "path": "/home/alex/mc-dcnative2-20261026/build-exp/motioncorr",
+   "sha256": "b918cadc571eb09d753fd454a20554400ea6443b6b0738e14670f96c7afb2857"
+  },
+  "iso": {
+   "path": "/home/alex/mc-dcnative2-20261026/build-iso/motioncorr",
+   "sha256": "3a7d4f472c0f795f6e3d7fdb7c31ab5c3e6bdef00ccf95d08a5cf5855155d0ff"
+  }
+ },
+ "compiler_provenance": {
+  "build_type": "Release",
+  "cmake": "3.28.3",
+  "cuda_arch": "80",
+  "gcc": "13.3.0",
+  "note": "recorded from attempt 2 (binaries built there); not re-verified by the driver",
+  "nvcc": "12.8.61"
+ },
+ "counts": {
+  "path": "/home/alex/mc-dcnative-ab-20261026/src96e/docs/post_rc0/ccf_dc_native_compat_20261026/counts.json",
+  "sha256": "657d2d1d4c9e99c1ca1d088f6eae1680ecf18e160d327a3ffd1980c74f41dfde"
+ },
+ "cpus": [
+  80,
+  81,
+  82,
+  83,
+  84,
+  85,
+  86,
+  87
+ ],
+ "expected": {
+  "jobs": 160,
+  "pairs": 96,
+  "repro": 16
+ },
+ "fake": false,
+ "fixtures": {
+  "k267": {
+   "dir": "/home/alex/mc-dcnative-ab-20261026/fx-k267",
+   "file_hashes": {
+    "MANIFEST.json": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+    "affine.mrcs": "1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a",
+    "affine.star": "0a08c285c4ec09aceaef93423033c01830afc6b8f07063697133ceb64b066491",
+    "affine_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+    "affine_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+    "flat.mrcs": "c2e25c3fcd1df4d92e9124c44dd6d9b5b6f1b8354dc1266af84c9da2ce96eabc",
+    "flat.star": "ecc8c830bf2aa05b7043a0a09bfc6a0d21d8540dccab9e1ad64f7dd608bd40e8",
+    "flat_field.npy": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+    "flat_target.npy": "5641f26812579bc93caf73d46ada5741416b195a0a9f8ee9f330f0348bf340e4",
+    "fractional.mrcs": "2dc7308553d476fdf51e31ddbbfdc381c9e22032f65a19c3dc87e754988a7c86",
+    "fractional.star": "c051dd18dae87367b0eab06e8ba0d4f75a9841ed46d5b5d327c3e66b960d2dbc",
+    "fractional_field.npy": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+    "fractional_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+    "integer.mrcs": "faaa3f9eeb7f1a785f51f6ab62b23e21a02b93a24a81c46b83b41c0590bc0b31",
+    "integer.star": "8b3e4817dffff9c2deaab7d8f3196f49607818cbf5523c3bc397f6cf1bd09637",
+    "integer_field.npy": "3b1f50a5c9297ba5030de6e305560daa1c25f9154cd527d9b002af15ae91d0ac",
+    "integer_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+    "noisy.mrcs": "5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3",
+    "noisy.star": "c321865e4fc769d9af55bc86af0a0b390abdcdb029137a9aeb5d6743b81a6891",
+    "noisy_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+    "noisy_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+    "pedestal.mrcs": "29016d8818bbd7be3491cca0822734a7e297a84642cf78c0847e61b447e03073",
+    "pedestal.star": "4a0f869b217b75e4315342e64ce8b5adad4fc7c9c57b9033cc23af1aa385fa53",
+    "pedestal_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+    "pedestal_target.npy": "47b9d9fffbcef586812b8cdfb82b13012ade6a92350431e169d63fd206ea4910",
+    "repeated.mrcs": "887e895add295b1305affb09b8c7f5177103680c45f94dd60c4ab0e4e7deb19c",
+    "repeated.star": "db3580a1bf5774fbc52304db9cf7a452477f3a24ccc2d046986d8c8794904a1d",
+    "repeated_field.npy": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9",
+    "repeated_target.npy": "a655b5dddcbb1473165fe8265e644ad0596de8308a0024e46467170fb8d86378",
+    "zero.mrcs": "c80e92704c034ccd6e87c0c1ce3e4ceea23aac87aa83d13b0dfe738aa95d3b86",
+    "zero.star": "3c3084c06c72b2b3d4cc9d94fbf17b623ff4a7c46030e014e0bf7cc67fa2de1f",
+    "zero_field.npy": "255348d18b272e6759324d669b9c17aaf7e3f56ee3a48d50185eda96713f2f4d",
+    "zero_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70"
+   },
+   "files": 33,
+   "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc"
+  },
+  "n": {
+   "dir": "/home/alex/mc-dcnative-ab-20261026/fx-n",
+   "file_hashes": {
+    "MANIFEST.json": "6e7b19bd4d5be963c51813e7941749daeb1ca44f8825e79f4df623676fd7c2a8",
+    "base_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+    "vel0_N13.mrcs": "72f228d2554b1c83be7425a26df2ad04172186df3887e7a7b1950ba5a682e041",
+    "vel0_N13.star": "2101276f1a88d31c7f1a204ad48d1abdea4e5af93abd708beb516662a4cb749f",
+    "vel0_N13_truth.npy": "7f997174d209f68271eb55bb0d4199024b00ef348972fc58dfc38fdf98c00664",
+    "vel0_N20.mrcs": "32b10141e6f0629da52956b5e86be64d65167a214354e84eb5241d3aed3d4500",
+    "vel0_N20.star": "1e621f33ba693f96a77effd983076996e90e0c6f745bfd8434edeb1fd94714f3",
+    "vel0_N20_truth.npy": "b77ae83276606c3e7fe34365c284ce88bd8e65215eff30c6b5b7de037d6d3007",
+    "vel0_N5.mrcs": "abfac62129dfae999bff263cf58ca556032626b70af570da51e38199768b6b42",
+    "vel0_N5.star": "971016dd95b96a66d6a46af61c11b56d608227922ecbe106ffdca9bbe36f5149",
+    "vel0_N5_truth.npy": "8d132a2be6852afe6f031b586d00bc48503bdac9ad7edc1997b584e901dc472a",
+    "vel0_N9.mrcs": "9bcda1bda7ef398aace8e8e4d4220880abff6b388a5e72f2d0ecc47d73d8ae64",
+    "vel0_N9.star": "1cac647e0a833bfcc849ad0fc731906b6f035295bdb401fe4de1597e686faa7e",
+    "vel0_N9_truth.npy": "82d3c5708ad1e429b92780deadd085f58df1500032abe6d94c4aca9d419b0bc6",
+    "vel1_N13.mrcs": "2db28ea123fd84d67dc1aee7ba84d37fdd8ac01d8d852b84ffb930f8e6dd8216",
+    "vel1_N13.star": "22d27a817b877452db8da2ec82cd1ed3b4bbf866f594299d3b3a7135485be2a0",
+    "vel1_N13_truth.npy": "40ca148dd1cbaf39aa310a776696ee8c41024cee4bf0929ff0fc8540b6cc2cec",
+    "vel1_N20.mrcs": "6451af5e8ad2411ed8632d517af64200b4a8b64262a59a68fc60115b23851d6b",
+    "vel1_N20.star": "1a31eb366b172e87324070151b2909735de65417c3232e014ad25a8b97776fbc",
+    "vel1_N20_truth.npy": "d3c1030113d514a18a0646369603f4c554237370540f4c913210fac38bece9db",
+    "vel1_N5.mrcs": "b3b6e650b6f40390ca73210f74f3a4393b00a956ed822e8f84d78b90f0082bd1",
+    "vel1_N5.star": "cf282d0177c10cc3187134ac12caa40c18ad994c675d59f571513c5e4fac799b",
+    "vel1_N5_truth.npy": "76e020852f559fe107861a86b734775f60427275fea5679d9fcdb45b6e7395a2",
+    "vel1_N9.mrcs": "2dbd11b7688ef0e0ce66975aee10e16016aa767418b52bb8fc57ec376181cfcd",
+    "vel1_N9.star": "49353fe2d4dd40ec1b7dff89a0fed5ea2ea4bf69a38567b90ae34b15fa678cdb",
+    "vel1_N9_truth.npy": "69d87f65bbca2b5242b6a97183f5df11ea87c5be4ad1ccf177e4270dd5fe1106"
+   },
+   "files": 26,
+   "manifest_sha256": "6e7b19bd4d5be963c51813e7941749daeb1ca44f8825e79f4df623676fd7c2a8"
+  }
+ },
+ "gpu": {
+  "allocation": "shared FOREIGN-CONTEXT correctness window; not exclusive, not timing, not science",
+  "foreign_pid": 3983855,
+  "uuid": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+ },
+ "guard": {
+  "path": "/home/alex/mc-dcnative-ab-20261026/src96e/tools/stageC_guard.sh",
+  "sha256": "95b82554ab9b353db9c8d00ef951c302402c3eb1505e72c773e1051d74883b15"
+ },
+ "guard_thresholds": {
+  "core_busy_percent": 50,
+  "gpu2_util_percent": 50
+ },
+ "ledger": {
+  "path": "/home/alex/mc-dcnative-ab-20261026/src96e/docs/post_rc0/ccf_dc_native_compat_20261026/ledger.csv",
+  "sha256": "16b545de70bb4a9f50f2ddd2628f972f85161c5d57b061bf5c5d2e1fce5f276e"
+ },
+ "locks": {
+  "cpu": "/tmp/motioncorr-cuda-boundary-cpu80-87.lock",
+  "gpu2": "/tmp/motioncorr-gpu2-correctness.lock",
+  "own": "/tmp/motioncorr-dcnative-gpu2-cpu80-87.lock"
+ },
+ "modules": {
+  "ccf_dc_native_rows": "569c33a16c8a18a266904d0430c3be34e0cb3a6aca363397677e2fa760d72248",
+  "ccf_dc_tap_field": "831ba828f28ed1a7072dc825a18354d405e9557ad19d8464e32cb490a0065f1d",
+  "check_motion_diagnostics": "2be34b821ce9c351abaeab5c0280478362cf90ba774df7f529caced9e360eb16",
+  "check_realistic_motion": "b0ab099a256e458b1c8aea6c2ff5d9ceacab10dd81945b025e96e5c8a87b7ff9",
+  "motion_field": "d72cfad7175368fa6d0727c2727c49780328951c6f4d3ecc20e9ac662ac2e810"
+ },
+ "omp": {
+  "k267": 8,
+  "n": 2
+ },
+ "order": "B4 rows first, then CPU rows (K, then N: arm none before arm both per weight set), then remaining CUDA rows",
+ "pairs": {
+  "path": "/home/alex/mc-dcnative-ab-20261026/src96e/docs/post_rc0/ccf_dc_native_compat_20261026/pairs.csv",
+  "sha256": "d5817d6af3d4c14da6a937caa79f7260e98658a650a51453e84343e7ed03e1c0"
+ },
+ "python": {
+  "executable": "/home/alex/.mc-venv/bin/python3",
+  "numpy": "2.5.3",
+  "version": "3.12.3"
+ },
+ "repro": {
+  "path": "/home/alex/mc-dcnative-ab-20261026/src96e/docs/post_rc0/ccf_dc_native_compat_20261026/repro.csv",
+  "sha256": "c417fec59c25b8b9365a592140b85b14d00ec3f5616a76c438520148498f9494"
+ },
+ "repro_tolerance": 1e-05,
+ "retained_cpu_reference": {
+  "path": "/home/alex/mc-dcnative-ab-20261026/src96e/docs/post_rc0/ccf_dc_native_compat_20261026/evidence/retained_cpu_reference.json",
+  "sha256": "b0d69c640236146e4079446d115eed8689ba563f698958a1f02dbdb61a1aac4c"
+ },
+ "retained_render_report": {
+  "path": "/home/alex/mc-dcnative-ab-20261026/src96e/docs/post_rc0/ccf_dc_native_compat_20261026/evidence/retained_render_report.json",
+  "sha256": "cae19f3f09aef3c92f1fb271786e7d1e58fd36f69fd70cfc32bb1e9fb510d494"
+ },
+ "schema": "stagec-pins/1",
+ "scratch_cap_gib": 20,
+ "source": {
+  "archive_sha256": "313f671f4af90e227754ec17c6e8a9cae70a7ea5aaca713de62aa1d297b8ea36",
+  "commit": "96e7e7be0f08469da51c67a1ab251ae4e97cdfc3",
+  "staged_tree": "/home/alex/mc-dcnative-ab-20261026/src96e"
+ }
+}

@@ -1,0 +1,86 @@
+-- LibTIFF Deflate subcodec: zlib only
+--   Deflate movie reads use zlib here. A LibTIFF built with libdeflate decodes the same bytes faster; see README, "LibTIFF Deflate backend". Results are unaffected.
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED - Failed
+-- CPU dose weighting: original loop (AUTO: AppleClang on arm64 with these flags is not the qualified x86-64 GCC without FMA). To opt in after CpuDoseSymmetry passes on this toolchain: -DMOTIONCORR_CPU_DOSE_SYMMETRY=ON
+CMake Warning at CMakeLists.txt:570 (message):
+  pbzip2 not found: InputFormats and RealCutdown waive its compressed-MRC
+  cases (UNRUN).  Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the
+  waiver.
+
+
+-- Configuring done (1.0s)
+-- Generating done (0.4s)
+-- Build files have been written to: /tmp/mc-lfw/build
+[  2%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/motioncorr_runner.cpp:41:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/motioncorr_runner.h:35:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/image.h:689:
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/rwSPIDER.h:333:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  333 |     sprintf(header->ctim, "%02d:%02d:%02d", t->tm_hour, t->tm_min, t->tm_sec);
+      |     ^
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/image.h:1797:10: note: in instantiation of member function 'Image<double>::writeSPIDER' requested here
+ 1797 |                         err = writeSPIDER(select_img, isStack, mode, datatype);
+      |                               ^
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/image.h:767:3: note: in instantiation of member function 'Image<double>::_write' requested here
+  767 |                 _write(fname, hFile, select_img, isStack, mode, datatype);
+      |                 ^
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/motioncorr_runner.cpp:758:8: note: in instantiation of member function 'Image<double>::write' requested here
+  758 |                 Iout.write(fn_new_gain);
+      |                      ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/motioncorr_runner.cpp:41:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/motioncorr_runner.h:35:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/image.h:689:
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/rwSPIDER.h:334:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  334 |     sprintf(header->cdat, "%02d-%02d-%02d", t->tm_mday, t->tm_mon, t->tm_year);
+      |     ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/motioncorr_runner.cpp:41:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/motioncorr_runner.h:35:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/image.h:689:
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/rwSPIDER.h:333:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  333 |     sprintf(header->ctim, "%02d:%02d:%02d", t->tm_hour, t->tm_min, t->tm_sec);
+      |     ^
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/image.h:1797:10: note: in instantiation of member function 'Image<float>::writeSPIDER' requested here
+ 1797 |                         err = writeSPIDER(select_img, isStack, mode, datatype);
+      |                               ^
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/image.h:767:3: note: in instantiation of member function 'Image<float>::_write' requested here
+  767 |                 _write(fname, hFile, select_img, isStack, mode, datatype);
+      |                 ^
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/motioncorr_runner.cpp:1629:10: note: in instantiation of member function 'Image<float>::write' requested here
+ 1629 |                 owned->write(path, -1, false, WRITE_OVERWRITE, datatype);
+      |                        ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/motioncorr_runner.cpp:41:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/motioncorr_runner.h:35:
+In file included from /Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/image.h:689:
+/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/src/rwSPIDER.h:334:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+  334 |     sprintf(header->cdat, "%02d-%02d-%02d", t->tm_mday, t->tm_mon, t->tm_year);
+      |     ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+4 warnings generated.
+[  4%] Linking CXX static library libmotioncorr_core.a
+[ 97%] Built target motioncorr_core
+[100%] Linking CXX executable local_full_width_weight
+[100%] Built target local_full_width_weight

@@ -1,0 +1,11 @@
+-- LibTIFF Deflate subcodec: zlib only
+--   Deflate movie reads use zlib here. A LibTIFF built with libdeflate decodes the same bytes faster; see README, "LibTIFF Deflate backend". Results are unaffected.
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED - Failed
+-- CPU dose weighting: original loop (AUTO: AppleClang on arm64 with these flags is not the qualified x86-64 GCC without FMA). To opt in after CpuDoseSymmetry passes on this toolchain: -DMOTIONCORR_CPU_DOSE_SYMMETRY=ON
+CMake Error at CMakeLists.txt:506 (message):
+  BUILD_TESTING=ON requires Python 3 with 'numpy' installed.
+
+
+-- Configuring incomplete, errors occurred!
+make: *** [cmake_check_build_system] Error 1

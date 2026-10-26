@@ -1,0 +1,39 @@
+## default build
+6: Test command: /tmp/mc-lfw2/build/patch_retry_state
+6: PASS alignPatch accumulates into the caller's vectors and does not
+1/6 Test  #6: PatchRetryState ..................   Passed    0.25 sec
+8: Test command: /tmp/mc-lfw2/build/global_half_gain
+8: PASS
+2/6 Test  #8: GlobalHalfGain ...................   Passed    0.18 sec
+9: Test command: /tmp/mc-lfw2/build/coupled_peak
+9: PASS
+3/6 Test  #9: CoupledPeak ......................   Passed    0.32 sec
+10: Test command: /tmp/mc-lfw2/build/isotropic_weight
+10: PASS
+4/6 Test #10: IsotropicWeight ..................   Passed    0.30 sec
+11: Test command: /tmp/mc-lfw2/build/local_full_width_weight
+11: PASS
+5/6 Test #11: LocalFullWidthWeight .............   Passed    0.35 sec
+93: Test command: /Users/alex.konstantinov/.local/bin/python3 "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/tests/test_experimental_flags_cli.py" "--binary" "/tmp/mc-lfw2/build/motioncorr"
+93: PASS
+6/6 Test #93: ExperimentalFlagsCli .............   Passed    0.86 sec
+The following tests passed:
+100% tests passed out of 6
+## DC build (arm none)
+11: Test command: 
+1/4 Test #11: LocalFullWidthWeight .............***Not Run   0.00 sec
+12: Test command: /tmp/mc-lfw2/build-dc/ccf_dc_hook
+12: PASS
+2/4 Test #12: CcfDcHook ........................   Passed    0.29 sec
+94: Test command: /Users/alex.konstantinov/.local/bin/python3 "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/tests/test_experimental_flags_cli.py" "--binary" "/tmp/mc-lfw2/build-dc/motioncorr"
+94: PASS
+3/4 Test #94: ExperimentalFlagsCli .............   Passed    0.80 sec
+96: Test command: /Users/alex.konstantinov/.local/bin/python3 "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/tests/test_local_ccf_capture_cli.py" "--binary" "/tmp/mc-lfw2/build-dc/motioncorr"
+96: PASS diagnostic CPU/scope guards before movie access
+4/4 Test #96: LocalCcfCaptureCli ...............   Passed    0.13 sec
+The following tests passed:
+75% tests passed, 1 tests failed out of 4
+11: PASS
+1/1 Test #11: LocalFullWidthWeight .............   Passed    0.31 sec
+The following tests passed:
+100% tests passed out of 1

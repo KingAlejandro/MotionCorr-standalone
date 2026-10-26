@@ -1,0 +1,63 @@
+UpdateCTestConfiguration  from :/tmp/mc-lfw3/build-dc/DartConfiguration.tcl
+Parse Config file:/tmp/mc-lfw3/build-dc/DartConfiguration.tcl
+Test project /tmp/mc-lfw3/build-dc
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 11
+    Start 11: LocalFullWidthWeight
+
+11: Test command: /tmp/mc-lfw3/build-dc/local_full_width_weight
+11: Working Directory: /tmp/mc-lfw3/build-dc
+11: Environment variables: 
+11:  MC_EXPERIMENT_CCF_DC_ARM=none
+11: Test timeout computed to be: 1500
+11: MC_EXPERIMENT_CCF_DC arm=none
+11: MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/180 cpu.local=0/150 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0
+11:   pnx=192 pny=128: local ON == global iso, local ON != local OFF, global bitwise unchanged
+11:   pnx=96 pny=64: local ON == global iso, local ON != local OFF, global bitwise unchanged
+11: PASS
+1/4 Test #11: LocalFullWidthWeight .............   Passed    0.36 sec
+test 12
+    Start 12: CcfDcHook
+
+12: Test command: /tmp/mc-lfw3/build-dc/ccf_dc_hook
+12: Working Directory: /tmp/mc-lfw3/build-dc
+12: Test timeout computed to be: 1500
+12:   arm none, global call  global zeroed 0/5, patch zeroed 0/0
+12:   arm global, global call global zeroed 5/5, patch zeroed 0/0
+12:   arm local, global call global zeroed 0/5, patch zeroed 0/0
+12:   arm none, patch call   global zeroed 0/0, patch zeroed 0/5
+12:   arm global, patch call global zeroed 0/0, patch zeroed 0/5
+12:   arm local, patch call  global zeroed 0/0, patch zeroed 5/5
+12: PASS
+2/4 Test #12: CcfDcHook ........................   Passed    0.33 sec
+test 94
+    Start 94: ExperimentalFlagsCli
+
+94: Test command: /Users/alex.konstantinov/.local/bin/python3 "/tmp/mc-lfw3/src/tests/test_experimental_flags_cli.py" "--binary" "/tmp/mc-lfw3/build-dc/motioncorr"
+94: Working Directory: /tmp/mc-lfw3/build-dc
+94: Test timeout computed to be: 1500
+94: PASS
+3/4 Test #94: ExperimentalFlagsCli .............   Passed    0.94 sec
+test 96
+    Start 96: LocalCcfCaptureCli
+
+96: Test command: /Users/alex.konstantinov/.local/bin/python3 "/tmp/mc-lfw3/src/tests/test_local_ccf_capture_cli.py" "--binary" "/tmp/mc-lfw3/build-dc/motioncorr"
+96: Working Directory: /tmp/mc-lfw3/build-dc
+96: Test timeout computed to be: 1500
+96: PASS diagnostic CPU/scope guards before movie access
+4/4 Test #96: LocalCcfCaptureCli ...............   Passed    0.11 sec
+
+The following tests passed:
+	LocalFullWidthWeight
+	CcfDcHook
+	ExperimentalFlagsCli
+	LocalCcfCaptureCli
+
+100% tests passed out of 4
+
+Total Test time (real) =   1.78 sec

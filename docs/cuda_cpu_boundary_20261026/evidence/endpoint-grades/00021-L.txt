@@ -1,0 +1,33 @@
+========================================================================
+ MOTIONCORR ACCEPTANCE GATE REPORT
+========================================================================
+Gate Profile:      RELAXED
+Overall Status:    FAIL
+------------------------------------------------------------------------
+1. MOTION TRAJECTORY:
+   Frames evaluated:     24
+   Coordinate RMS error: 0.004125 px (threshold: 0.020000)
+   Max absolute shift:   0.006127 px (threshold: 0.050000)
+   Status:               PASS
+
+2. CORRECTED IMAGE PARITY:
+   Pixel-identical:      False
+   Image RMSE:           4.605048e-03 (threshold: 2.000000e-02)
+   Max absolute diff:    1.523985e+00 (threshold: 5.000000e+00)
+   Relative RMSE:        5.712647e-03 (threshold: 1.000000e-03 in relaxed/custom gate)
+     denominator:        reference pixel population std = 8.061146e-01
+     equivalent to:      absolute RMSE <= 8.061146e-04 for this reference
+   Normalized headers:   Core metadata: 6 diff bytes, Non-timestamp labels: 0 diff bytes
+   Status:               FAIL
+     ! Relative image RMSE 5.712647e-03 > 1.000000e-03
+
+3. STAR FIELDS & METADATA:
+   Normalized diff count: 0
+   Status:                PASS
+
+5. PROCESS METRICS:
+   Wall clock time:      0:01.54
+   User CPU time:        1.81 s
+   Peak RSS memory:      1555.74 MB (1593080 KB)
+   Process exit status:  0
+========================================================================

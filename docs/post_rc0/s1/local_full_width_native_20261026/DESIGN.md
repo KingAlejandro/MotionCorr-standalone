@@ -22,7 +22,14 @@ actual STAR and harm controls are UNRUN. Original C9 margin FAIL stands; no gate
 - Global alignment is bit-identical with the flag either way, including when `--experimental_isotropic_weight`
   (the harmful global arm) is selected. That arm is preserved, not replaced.
 - Refused before any movie access: with `--gpu` (same guard block as the other CPU-only flags), without `--use_own`,
-  and under the fixed-scope `MC_DIAG_LOCAL_CCF_DIR` capture. No CUDA weight is implemented.
+  and under the fixed-scope `MC_DIAG_LOCAL_CCF_DIR` capture, whose unsupported-combination guard now lists the flag
+  (capture with the flag off is unchanged). No CUDA weight is implemented.
+- **Intentional flagged log difference.** With the flag on, each patch `alignPatch` call writes one line to the per-movie
+  log, before the weight loop and outside OpenMP:
+  `" EXPERIMENTAL local full-width weight: x_norm = <weight_x_norm>, pnx = <pnx>, nfx = <nfx>"`. It uses the values
+  actually selected for the weight. Flag off writes no line; a global alignment never writes it, so a global-only run
+  (1x1 patches, no local stage) has zero such lines and a 3x3 run has one per patch alignment call. Products, files and
+  defaults are otherwise unchanged. The line is a reach witness, not evidence of accuracy.
 
 ## Test plan (criteria fixed before results)
 
@@ -35,9 +42,11 @@ actual STAR and harm controls are UNRUN. Original C9 margin FAIL stands; no gate
    c. Flag ON global, with and without the global isotropic flag: x_norm is identical to the flag-off value.
    d. Integration through `alignPatch`: local ON differs from local OFF; local ON equals the global
       isotropic arm bitwise on the same stack (same `x_norm = pnx`, nothing else differs in `alignPatch`), which
-      fails if `nfx`, `pnx/2`, or `pnx/2+1` is used; global results are bitwise equal with the flag on or off, with and
+      fails if `nfx`, `pnx/2`, or `pnx/2+1` is used; the log witness equals the actual `x_norm/pnx/nfx` for local ON and is
+   absent for local OFF and for every global arm; global results are bitwise equal with the flag on or off, with and
       without the isotropic flag; default is off.
-2. `ExperimentalFlagsCli` additions: `--gpu 0` refused first; non-`--use_own` rejected; a valid CPU configuration
+2. `LocalCcfCaptureCli` (DC build): the flag is an unsupported scope under `MC_DIAG_LOCAL_CCF_DIR`; a control with the
+   exact scope reaches the missing input. `ExperimentalFlagsCli` additions: `--gpu 0` refused first; non-`--use_own` rejected; a valid CPU configuration
    reaches the ordinary missing-input failure; the flag together with `--experimental_isotropic_weight` is not refused.
 3. Existing `IsotropicWeight`, `GlobalHalfGain`, `CoupledPeak`, `ExperimentalFlagsCli` and local-capture CLI tests keep
    their original criteria.
@@ -45,3 +54,13 @@ actual STAR and harm controls are UNRUN. Original C9 margin FAIL stands; no gate
 Compilation and these tests do not establish byte neutrality of a movie run or scientific accuracy. Native pilot
 (`.20/.40/.80 A` field gates, runtime vs actual STAR, N5/9/13/20, harmful global-isotropic 20-frame control) needs
 source review, trusted venue access and parent-frozen inputs; none is authorised by this change.
+
+## Local results at the source pin (informational; see the evidence index outside Git)
+
+Host: macOS arm64 (AppleClang), Release, `-j2`, `OMP_NUM_THREADS=2`. numpy is absent, so configure used a stub `numpy`
+package on `PYTHONPATH` outside the repository; only tests that do not need numpy were run. `LocalFullWidthWeight`,
+`IsotropicWeight`, `GlobalHalfGain`, `CoupledPeak`, `PatchRetryState`, `ExperimentalFlagsCli` passed (default build);
+`LocalCcfCaptureCli`, `CcfDcHook`, `ExperimentalFlagsCli` passed (`MC_EXPERIMENT_CCF_DC=ON`, arm `none`). Mutants caught:
+call site passing `false` (integration test), global leak in the selection, `pnx` replaced by the inherited value
+(weight test), capture-guard term removed (`LocalCcfCaptureCli`). UNRUN: the rest of the CTest suite, CUDA, any movie,
+native byte neutrality, scientific accuracy.

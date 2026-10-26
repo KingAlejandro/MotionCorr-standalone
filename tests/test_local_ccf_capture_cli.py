@@ -7,7 +7,10 @@ with tempfile.TemporaryDirectory(prefix='ccf-cli-') as d:
  root=Path(d)/'capture'
  base=[a.binary,'--i',str(Path(d)/'absent.star'),'--o',str(Path(d)/'out'),'--use_own','--j','2','--patch_x','3','--patch_y','3','--group_frames','1','--bin_factor','1','--skip_defect','--first_frame_sum','1','--last_frame_sum','5','--experimental_coupled_peak','all']
  env=dict(os.environ,MC_DIAG_LOCAL_CCF_DIR=str(root),MC_EXPERIMENT_CCF_DC_ARM='both')
- for extra,needle in [(['--gpu','0'],'GPU refused'),(['--experimental_local_b2'],'unsupported scope'),(['--j','3'],'unsupported scope'),(['--group_frames','2'],'unsupported scope'),(['--max_iter','6'],'unsupported scope')]:
+ r=subprocess.run(base,env=env,capture_output=True,text=True)
+ assert r.returncode!=0 and 'unsupported scope' not in r.stdout+r.stderr and 'absent.star' in r.stdout+r.stderr,(r.returncode,r.stdout,r.stderr) # control: the exact scope reaches the missing input
+ assert not root.exists()
+ for extra,needle in [(['--gpu','0'],'GPU refused'),(['--experimental_local_b2'],'unsupported scope'),(['--experimental_local_full_width_weight'],'unsupported scope'),(['--j','3'],'unsupported scope'),(['--group_frames','2'],'unsupported scope'),(['--max_iter','6'],'unsupported scope')]:
   cmd=base.copy()
   if extra[0] in cmd: cmd[cmd.index(extra[0])+1]=extra[1]
   else: cmd+=extra

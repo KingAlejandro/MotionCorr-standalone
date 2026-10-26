@@ -79,6 +79,24 @@ def main():
         assert rc != 0 and ISO_REFUSAL not in out and "no_such_input.star" in out, f"isotropic weight without --gpu: {out[:300]}"
         rc, out = run(binary, tmp, "--use_motioncor2", "--motioncor2_exe", "/bin/false", "--experimental_isotropic_weight")
         assert rc != 0 and "valid only with --use_own" in out, out[:300]
+        # --experimental_local_full_width_weight (patch alignments only): same CPU-only contract.
+        LFW = "--experimental_local_full_width_weight"
+        LFW_REFUSAL = LFW + " is a CPU-only research option and is refused with --gpu"
+        rc, out = run(binary, tmp, "--use_own", "--gpu", "0", LFW)
+        assert rc != 0 and LFW_REFUSAL in out and "built without CUDA" not in out and "Invalid GPU device ID" not in out, \
+            f"local full-width weight with --gpu 0 was not refused first: rc={rc} {out[:300]}"
+        # Combined with the global isotropic flag under --gpu, the earlier isotropic refusal fires; still before any device query.
+        rc, out = run(binary, tmp, "--use_own", "--gpu", "0", LFW, "--experimental_isotropic_weight")
+        assert rc != 0 and "CPU-only research option and is refused with --gpu" in out and "built without CUDA" not in out \
+            and "Invalid GPU device ID" not in out, f"combined flags with --gpu 0 were not refused first: rc={rc} {out[:300]}"
+        for extra in ([], ["--experimental_isotropic_weight"]):
+            rc, out = run(binary, tmp, "--use_own", LFW, *extra)
+            assert rc != 0 and LFW_REFUSAL not in out and "valid only with --use_own" not in out and "no_such_input.star" in out, \
+                f"local full-width weight without --gpu {extra}: {out[:300]}"
+        rc, out = run(binary, tmp, "--use_own", "--gpu", "0")
+        assert LFW_REFUSAL not in out, f"--gpu alone must not trigger the local full-width refusal: {out[:300]}"
+        rc, out = run(binary, tmp, "--use_motioncor2", "--motioncor2_exe", "/bin/false", LFW)
+        assert rc != 0 and LFW + " is valid only with --use_own" in out, out[:300]
         rc, out = run(binary, tmp, "--use_motioncor2", "--motioncor2_exe", "/bin/false", "--experimental_global_half_gain")
         assert rc != 0 and "valid only with --use_own" in out, out[:300]
     print("PASS")

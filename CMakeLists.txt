@@ -275,6 +275,10 @@ if(BUILD_TESTING)
     add_executable(isotropic_weight tests/test_isotropic_weight.cpp)
     target_link_libraries(isotropic_weight PRIVATE motioncorr_core)
     add_test(NAME IsotropicWeight COMMAND isotropic_weight)
+    # Local full-width CCF weight (default-off research prototype; patch alignment only, global unchanged).
+    add_executable(local_full_width_weight tests/test_local_full_width_weight.cpp)
+    target_link_libraries(local_full_width_weight PRIVATE motioncorr_core)
+    add_test(NAME LocalFullWidthWeight COMMAND local_full_width_weight)
     # H3: operator control for the ported #262 DC hook (only exists when built in).
     if(MC_EXPERIMENT_CCF_DC)
         add_executable(ccf_dc_hook tests/test_ccf_dc_hook.cpp)

@@ -1,0 +1,33 @@
+PASS control: the test admission passes identity, pins and resolved commands
+PASS null candidate_binary refused :: code=HELD
+PASS null source_archive refused :: code=HELD
+PASS null build_receipt refused :: code=HELD
+PASS null compiler_and_config refused :: code=HELD
+PASS null shared_libraries refused :: code=HELD
+PASS null venue_identity refused :: code=HELD
+PASS null fresh_venue_resource_admission refused :: code=HELD
+PASS null independent_source_clearance refused :: code=HELD
+PASS HELD status refused :: code=HELD
+PASS altered anchored admission refused :: code=ANCHOR
+PASS hand-edited commands refused by the anchor :: code=ANCHOR
+PASS resolved command row differs from the frozen admission :: code=IDENTITY
+PASS binary on disk differs from candidate_binary.sha256 :: code=IDENTITY
+PASS binary path differs from the build receipt (same bytes) :: code=IDENTITY
+PASS binary given as a symlink :: code=IDENTITY
+PASS source archive changed after the pin :: code=IDENTITY
+PASS candidate_source_commit differs from source_archive.commit :: code=IDENTITY
+PASS build receipt changed after the pin :: code=IDENTITY
+PASS build receipt with the wrong archive sha256 (pin refreshed) :: code=IDENTITY
+PASS build receipt with the wrong commit (pin refreshed) :: code=IDENTITY
+PASS build receipt with the wrong tree (pin refreshed) :: code=IDENTITY
+PASS build receipt with the wrong binary sha256 (pin refreshed) :: code=IDENTITY
+PASS build receipt with the wrong binary path (pin refreshed) :: code=IDENTITY
+PASS control: restored identity passes again
+PASS signature rejects caller argument binary_path
+PASS signature rejects caller argument binary_sha256
+PASS signature rejects caller argument roots
+PASS signature rejects caller argument evidence_root
+PASS signature rejects caller argument expected
+PASS signature rejects caller argument admission
+PASS signature rejects caller argument commands
+TOTAL 32 FAILED 0

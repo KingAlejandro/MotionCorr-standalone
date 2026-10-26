@@ -1,0 +1,116 @@
+UpdateCTestConfiguration  from :/tmp/motioncorr-lfw-v5-20261026/build/DartConfiguration.tcl
+Parse Config file:/tmp/motioncorr-lfw-v5-20261026/build/DartConfiguration.tcl
+Test project /tmp/motioncorr-lfw-v5-20261026/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 6
+    Start  6: PatchRetryState
+
+6: Test command: /tmp/motioncorr-lfw-v5-20261026/build/patch_retry_state
+6: Working Directory: /tmp/motioncorr-lfw-v5-20261026/build
+6: Test timeout computed to be: 1500
+6: MC_EXPERIMENT_CCF_DC arm=none
+6: MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/0 cpu.local=0/28 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0
+6: Issue #69 patch retry shift-state contract (CPU, no device)
+6:   patch 256x256, 4 groups, scaled_B=20.0, truth (frame-0 relative): (+0.00,+0.00) (+2.70,-1.80) (-3.40,+2.20) (+1.90,-3.10)
+6: 
+6:   converged reference          ( +0.000, +0.000) ( -2.637, +1.755) ( +3.394, -2.198) ( -1.846, +3.041)   |v| = 6.2485
+6:   max |recovered + truth| = 0.0630 px  (converged=yes)
+6: 
+6:   attempt 1 (S1)               ( +0.000, +0.000) ( -4.367, +3.041) ( +3.594, -2.307) ( -3.378, +4.726)   |v| = 8.9615
+6:   arm A: reset (S2)            ( +0.000, +0.000) ( -4.367, +3.041) ( +3.594, -2.307) ( -3.378, +4.726)   |v| = 8.9615
+6:   arm B: no reset (S1+S2)      ( +0.000, +0.000) ( -8.734, +6.081) ( +7.189, -4.615) ( -6.756, +9.452)   |v| = 17.9231
+6:   |arm A| = 8.9615   |arm B| = 17.9231   ratio B/A = 2.0000
+6:   max |armA - S1|              = 0.000e+00 px
+6:   max |armB - (S1 + armA)|     = 0.000e+00 px
+6: 
+6: PASS alignPatch accumulates into the caller's vectors and does not
+6:      re-derive them, so re-entering without a reset publishes S1+S2.
+6:      Restoring the vectors publishes the single estimate S2.
+1/4 Test  #6: PatchRetryState ..................   Passed    0.03 sec
+test 8
+    Start  8: GlobalHalfGain
+
+8: Test command: /tmp/motioncorr-lfw-v5-20261026/build/global_half_gain
+8: Working Directory: /tmp/motioncorr-lfw-v5-20261026/build
+8: Test timeout computed to be: 1500
+8: MC_EXPERIMENT_CCF_DC arm=none
+8: Global half-gain operator test (CPU, 5 frames, 256x256, one thread)
+8:   unflagged first update |v| = 8.416588 px, converged=0
+8: [align] scope=global iterations=1 max_iter=1 converged=0 last_rmsd_px=3.76401 tolerance_px=0.5
+8:   flagged update == 0.5 * unflagged, exactly, all 5 frames
+8:   RMSD stop line identical:  Iteration 1: RMSD = 3.76401 px
+8:   re-shifted frames == reference shifted by the half update, bitwise
+8:   local patch (is_global=false): flag has no effect
+8: [align] scope=global iterations=1 max_iter=5 converged=1 last_rmsd_px=3.76401 tolerance_px=1e+09
+8: [align] scope=global iterations=5 max_iter=5 converged=0 last_rmsd_px=0.0162436 tolerance_px=1e-30
+8: MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/60 cpu.local=0/15 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0
+8:   tolerance override: global only (1e9 stops at iter 1; 1e-30 runs all 5; local unaffected)
+8: PASS
+2/4 Test  #8: GlobalHalfGain ...................   Passed    0.07 sec
+test 9
+    Start  9: CoupledPeak
+
+9: Test command: /tmp/motioncorr-lfw-v5-20261026/build/coupled_peak
+9: Working Directory: /tmp/motioncorr-lfw-v5-20261026/build
+9: Test timeout computed to be: 1500
+9: MC_EXPERIMENT_CCF_DC arm=none
+9:   rho=+0.756 offset=(+0.30,-0.20): coupled err (5.55e-17,2.78e-17), separable err (1.51e-01,2.27e-01)
+9:   rho=-0.756 offset=(-0.45,+0.25): coupled err (5.55e-17,5.55e-17), separable err (1.89e-01,3.40e-01)
+9:   rho=+0.761 offset=(+0.10,+0.35): coupled err (6.94e-17,1.67e-16), separable err (1.58e-01,1.29e-01)
+9:   rho=+0.000 offset=(+0.40,-0.30): coupled err (0.00e+00,1.11e-16), separable err (5.55e-17,5.55e-17)
+9:   guard: not-negative-definite and >1 px fall back, 0.98 px accepted
+9: [align] scope=global iterations=1 max_iter=1 converged=0 last_rmsd_px=3.78615 tolerance_px=0.5
+9: [coupled_peak] scope=global peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+9: [align] scope=global iterations=1 max_iter=1 converged=0 last_rmsd_px=3.78615 tolerance_px=0.5
+9: [coupled_peak] scope=global peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+9: [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+9:   alignPatch: off == default; global changes global only (5 peaks); all changes patches (5 peaks)
+9:   fixture tilt rho: isotropic -0.000, tilted +0.894
+9: [align] scope=global iterations=20 max_iter=20 converged=0 last_rmsd_px=2.14396e-06 tolerance_px=1e-09
+9: [align] scope=global iterations=20 max_iter=20 converged=0 last_rmsd_px=1.61137e-06 tolerance_px=1e-09
+9: [coupled_peak] scope=global peaks=100 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+9: [align] scope=global iterations=20 max_iter=20 converged=0 last_rmsd_px=1.61137e-06 tolerance_px=1e-09
+9: [coupled_peak] scope=global peaks=100 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+9: [align] scope=global iterations=20 max_iter=20 converged=0 last_rmsd_px=1.06844 tolerance_px=1e-09
+9: [align] scope=global iterations=20 max_iter=20 converged=0 last_rmsd_px=2.43298e-05 tolerance_px=1e-09
+9: [coupled_peak] scope=global peaks=100 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+9: [align] scope=global iterations=20 max_iter=20 converged=0 last_rmsd_px=2.43298e-05 tolerance_px=1e-09
+9: [coupled_peak] scope=global peaks=100 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+9:   rms(recovered + truth) px after 20 forced iterations: isotropic off 0.0000 global 0.0000 all 0.0000; tilted off 0.6810 global 0.0000 all 0.0000
+9: [coupled_peak] scope=patch peaks=15 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+9: MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/620 cpu.local=0/30 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0
+9: PASS
+3/4 Test  #9: CoupledPeak ......................   Passed    0.22 sec
+test 10
+    Start 10: IsotropicWeight
+
+10: Test command: /tmp/motioncorr-lfw-v5-20261026/build/isotropic_weight
+10: Working Directory: /tmp/motioncorr-lfw-v5-20261026/build
+10: Test timeout computed to be: 1500
+10: MC_EXPERIMENT_CCF_DC arm=none
+10: MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/45 cpu.local=0/30 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0
+10:   ly= +0 x=40: prod 4.571252e-50 (W5 4.571252e-50)  iso 1.890292e-13 (W5 1.890292e-13)
+10:   ly= +3 x= 0: prod 7.460455e-01 (W5 7.460455e-01)  iso 7.460455e-01 (W5 7.460455e-01)
+10:   ly=+10 x=25: prod 2.055215e-21 (W5 2.055215e-21)  iso 4.132140e-07 (W5 4.132140e-07)
+10:   ly=-46 x=64: prod 5.962051e-157 (W5 5.962051e-157)  iso 3.263018e-63 (W5 3.263018e-63)
+10:   ly=+48 x= 3: prod 1.413763e-33 (W5 1.413763e-33)  iso 2.271665e-33 (W5 2.271665e-33)
+10:   ly= +0 x= 0: prod 1.000000e+00 (W5 1.000000e+00)  iso 1.000000e+00 (W5 1.000000e+00)
+10:   ly= +7 x=63: prod 8.190822e-124 (W5 8.190822e-124)  iso 5.560541e-33 (W5 5.560541e-33)
+10:   alignPatch: flag changes the global estimate only
+10: PASS
+4/4 Test #10: IsotropicWeight ..................   Passed    0.05 sec
+
+The following tests passed:
+	PatchRetryState
+	GlobalHalfGain
+	CoupledPeak
+	IsotropicWeight
+
+100% tests passed out of 4
+
+Total Test time (real) =   0.37 sec

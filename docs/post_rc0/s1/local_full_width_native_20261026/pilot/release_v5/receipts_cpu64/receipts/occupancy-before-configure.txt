@@ -1,0 +1,16 @@
+=== OCCUPANCY before-configure 2026-10-26T22:10:59Z
+ 22:10:59 up 328 days, 12:08, 27 users,  load average: 1.20, 0.53, 0.31
+               total        used        free      shared  buff/cache   available
+Mem:          231701       51717       97757       39535      123869      179984
+/dev/vda1       1.3T  1.2T   81G  94% /
+374M	/tmp/motioncorr-lfw-v5-20261026
+pid 3626483's current affinity list: 32-47
+    PID PSR %CPU USER     COMMAND
+3626499  35  400 ubuntu   ps -eo pid,psr,pcpu,user,args --sort=-pcpu
+3626462  44 11.7 ubuntu   python3 /tmp/motioncorr-lfw-v5-20261026/lane.py bash /tmp/motioncorr-lfw-v5-20261026/build_and_check.sh
+3626356  57  1.7 root     sshd: ubuntu [priv]
+2722253  57  1.0 ubuntu   node /usr/local/bin/t3 serve --host 127.0.0.1 --port 3773 --base-dir /home/ubuntu/.t3
+1735907  25  0.7 root     /usr/sbin/rsyslogd -n -iNONE
+1388940  21  0.2 ubuntu   /tmp/doppio-theme-plan-20261022/env/bin/python -m src.main --project /tmp/doppio-theme-plan-20261022/project --yes --no-brow
+1777319  24  0.1 root     /var/ossec/bin/wazuh-syscheckd
+cpu32-47 busy cores over 2s: 0.00

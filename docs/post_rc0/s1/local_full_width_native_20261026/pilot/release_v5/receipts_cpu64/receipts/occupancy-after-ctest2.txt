@@ -1,0 +1,16 @@
+=== OCCUPANCY after-ctest2 2026-10-26T22:13:09Z
+ 22:13:09 up 328 days, 12:10, 27 users,  load average: 0.91, 0.78, 0.44
+               total        used        free      shared  buff/cache   available
+Mem:          231701       51719       97706       39535      123917      179981
+/dev/vda1       1.3T  1.2T   81G  94% /
+418M	/tmp/motioncorr-lfw-v5-20261026
+pid 3628340's current affinity list: 32-47
+    PID PSR %CPU USER     COMMAND
+2722253   4  1.0 ubuntu   node /usr/local/bin/t3 serve --host 127.0.0.1 --port 3773 --base-dir /home/ubuntu/.t3
+1735907  25  0.7 root     /usr/sbin/rsyslogd -n -iNONE
+3628332  14  0.2 ubuntu   python3 /tmp/motioncorr-lfw-v5-20261026/lane.py bash /tmp/motioncorr-lfw-v5-20261026/ctest_attempt2.sh
+1388940  18  0.2 ubuntu   /tmp/doppio-theme-plan-20261022/env/bin/python -m src.main --project /tmp/doppio-theme-plan-20261022/project --yes --no-brow
+1777319  24  0.1 root     /var/ossec/bin/wazuh-syscheckd
+1389370  11  0.1 ubuntu   /tmp/doppio-theme-plan-20261022/linux/doppio-desktop --type=renderer --enable-crash-reporter=db116e94-edda-4c81-a690-03c15d3
+ 292988  53  0.1 root     /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+cpu32-47 busy cores over 2s: 0.00

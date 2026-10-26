@@ -255,6 +255,10 @@ if(BUILD_TESTING)
     add_executable(global_half_gain tests/test_global_half_gain.cpp)
     target_link_libraries(global_half_gain PRIVATE motioncorr_core)
     add_test(NAME GlobalHalfGain COMMAND global_half_gain)
+    # Experimental hypothesis H2: coupled 2x2-Hessian subpixel peak (research prototype).
+    add_executable(coupled_peak tests/test_coupled_peak.cpp)
+    target_link_libraries(coupled_peak PRIVATE motioncorr_core)
+    add_test(NAME CoupledPeak COMMAND coupled_peak)
     # #257: device-free exact-rational controls, shared with the actual CUDA
     # kernel test. Host replays establish arithmetic only, not GPU execution.
     add_executable(peak_fit_arithmetic tests/peak_fit_arithmetic.cpp)

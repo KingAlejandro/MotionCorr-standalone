@@ -147,6 +147,20 @@ public:
 	bool experimental_global_half_gain = false;
 	RFLOAT experimental_align_tolerance = 0;
 
+	// EXPERIMENTAL hypothesis H2, default off (0), CPU only (refused with --gpu): replace the
+	// separable 1D parabola of the subpixel peak by the full 2x2-Hessian quadratic on the same
+	// 3x3 neighbourhood. 0 = off, 1 = global alignment peaks only, 2 = global and patch peaks.
+	int experimental_coupled_peak = 0;
+	// Statistics of the last alignPatch call that used the coupled peak: peaks fitted, peaks that
+	// fell back to the separable result because H was not negative definite, and because the
+	// coupled offset exceeded 1 px in a component.
+	long coupled_peak_last_peaks = 0, coupled_peak_last_not_negdef = 0, coupled_peak_last_offset_gt_1px = 0;
+
+	// Coupled subpixel offset from the 3x3 CCF samples v[dy + 1][dx + 1] around an integer peak:
+	// delta = -H^{-1} g with H_xy the corner stencil / 4. Returns 0 and sets dx, dy when accepted;
+	// 1 when H is not negative definite, 2 when |delta| > 1 px in either component (dx, dy untouched).
+	static int coupledPeakOffset(const RFLOAT v[3][3], RFLOAT &dx, RFLOAT &dy);
+
 	// Save aligned but non-dose weighted micrograph.
 	// With MOTIONCOR2, this flag is always assumed to be true
 	bool save_noDW;

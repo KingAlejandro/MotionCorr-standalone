@@ -47,6 +47,21 @@ def main():
                 f"tolerance {bad!r}: {out[:300]}"
             if bad != "abc":
                 assert "must be a positive number of pixels" in out, f"tolerance {bad!r}: {out[:300]}"
+        # H2: --experimental_coupled_peak {off,global,all}; same CPU-only contract.
+        CP_REFUSAL = "--experimental_coupled_peak is a CPU-only research option and is refused with --gpu"
+        for mode in ("global", "all"):
+            rc, out = run(binary, tmp, "--use_own", "--gpu", "0", "--experimental_coupled_peak", mode)
+            assert rc != 0 and CP_REFUSAL in out and "built without CUDA" not in out and "Invalid GPU device ID" not in out, \
+                f"coupled_peak {mode} with --gpu 0 was not refused first: rc={rc} {out[:300]}"
+            rc, out = run(binary, tmp, "--use_own", "--experimental_coupled_peak", mode)
+            assert rc != 0 and CP_REFUSAL not in out and "no_such_input.star" in out, f"coupled_peak {mode} without --gpu: {out[:300]}"
+        rc, out = run(binary, tmp, "--use_own", "--gpu", "0", "--experimental_coupled_peak", "off")
+        assert CP_REFUSAL not in out, f"coupled_peak off must not be refused: {out[:300]}"
+        for bad in ("on", "1", "ALL", ""):
+            rc, out = run(binary, tmp, "--use_own", "--experimental_coupled_peak", bad)
+            assert rc != 0 and "must be one of: off, global, all" in out, f"coupled_peak {bad!r}: {out[:300]}"
+        rc, out = run(binary, tmp, "--use_motioncor2", "--motioncor2_exe", "/bin/false", "--experimental_coupled_peak", "all")
+        assert rc != 0 and "valid only with --use_own" in out, out[:300]
         rc, out = run(binary, tmp, "--use_motioncor2", "--motioncor2_exe", "/bin/false", "--experimental_global_half_gain")
         assert rc != 0 and "valid only with --use_own" in out, out[:300]
     print("PASS")

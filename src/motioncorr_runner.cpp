@@ -28,7 +28,6 @@
 #include <filesystem>
 #include <set>
 #include <atomic>
-#include <sstream>
 #include <cstdio>
 #include <memory>
 
@@ -223,6 +222,15 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	}
 	if ((experimental_global_half_gain || experimental_align_tolerance > 0) && !do_own)
 		REPORT_ERROR("--experimental_global_half_gain and --experimental_align_tolerance are valid only with --use_own");
+	{
+		const std::string mode = parser.getOption("--experimental_coupled_peak", "(EXPERIMENTAL, research, CPU only) Replace the separable 1D parabola of the subpixel peak by the full 2x2-Hessian quadratic on the 3x3 neighbourhood: off (default), global (global alignment only) or all (global and patch peaks). Refused with --gpu.", "off");
+		if      (mode == "off")    experimental_coupled_peak = 0;
+		else if (mode == "global") experimental_coupled_peak = 1;
+		else if (mode == "all")    experimental_coupled_peak = 2;
+		else REPORT_ERROR("--experimental_coupled_peak must be one of: off, global, all. Got: " + mode);
+		if (experimental_coupled_peak != 0 && !do_own)
+			REPORT_ERROR("--experimental_coupled_peak is valid only with --use_own");
+	}
 	interpolate_shifts = parser.checkOption("--interpolate_shifts", "(EXPERIMENTAL) Interpolate shifts");
 	ccf_downsample = textToFloat(parser.getOption("--ccf_downsample", "(EXPERT) Downsampling rate of CC map. default = 0 = automatic based on B factor", "0"));
 	if (parser.checkOption("--early_binning", "Do binning before alignment to reduce memory usage. This might dampen signal near Nyquist. (ON by default)"))
@@ -407,6 +415,12 @@ void MotioncorrRunner::initialise()
 		{
 			REPORT_ERROR("ERROR: --experimental_global_half_gain and --experimental_align_tolerance are CPU-only research "
 			             "options and are refused with --gpu (the CUDA alignment does not implement them). Remove --gpu to run on the CPU.");
+		}
+
+		if (experimental_coupled_peak != 0)
+		{
+			REPORT_ERROR("ERROR: --experimental_coupled_peak is a CPU-only research option and is refused with --gpu "
+			             "(the CUDA alignment does not implement it). Remove --gpu to run on the CPU.");
 		}
 
 #if defined _CUDA_ENABLED
@@ -4857,6 +4871,9 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
 
+	const bool use_coupled = experimental_coupled_peak == 2 || (experimental_coupled_peak == 1 && is_global);
+	std::atomic<long> coupled_peaks{0}, coupled_not_negdef{0}, coupled_offset_gt_1px{0};
+
 	if (is_global && (half_gain || experimental_align_tolerance > 0))
 		logfile << " EXPERIMENTAL global alignment: half_gain = " << (half_gain ? 1 : 0) << ", tolerance = " << tolerance << " px, max_iter = " << max_iter << std::endl;
 
@@ -4935,6 +4952,26 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			} else {
 				cur_yshifts[iframe] = posy;
 			}
+			if (use_coupled) {
+				// EXPERIMENTAL H2: overwrite the separable result above with the coupled 2x2 fit when
+				// the guard accepts it; otherwise the separable result stands.
+				RFLOAT v[3][3];
+				const int iy3[3] = {ipy_n, ipy, ipy_p}, ix3[3] = {ipx_n, ipx, ipx_p};
+				for (int a = 0; a < 3; a++)
+					for (int b = 0; b < 3; b++)
+						v[a][b] = DIRECT_A2D_ELEM(Iccs[tid](), iy3[a], ix3[b]);
+				RFLOAT dx, dy;
+				const int verdict = coupledPeakOffset(v, dx, dy);
+				coupled_peaks++;
+				if (verdict == 0) {
+					cur_xshifts[iframe] = posx + dx;
+					cur_yshifts[iframe] = posy + dy;
+				} else if (verdict == 1) {
+					coupled_not_negdef++;
+				} else {
+					coupled_offset_gt_1px++;
+				}
+			}
 			cur_xshifts[iframe] *= ccf_scale_x;
 			cur_yshifts[iframe] *= ccf_scale_y;
 #ifdef DEBUG_OWN
@@ -4987,6 +5024,18 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		}
 	}
 
+	if (use_coupled) {
+		coupled_peak_last_peaks = coupled_peaks;
+		coupled_peak_last_not_negdef = coupled_not_negdef;
+		coupled_peak_last_offset_gt_1px = coupled_offset_gt_1px;
+		std::ostringstream stats;
+		stats << "[coupled_peak] scope=" << (is_global ? "global" : "patch") << " peaks=" << coupled_peaks
+		      << " guard_fired=" << (coupled_not_negdef + coupled_offset_gt_1px)
+		      << " (not_negative_definite=" << coupled_not_negdef << ", offset_gt_1px=" << coupled_offset_gt_1px << ")";
+		logfile << " " << stats.str() << std::endl;
+		std::cout << stats.str() << std::endl;
+	}
+
 #ifdef DEBUG_OWN
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		std::cout << iframe << " " << xshifts[iframe] << " " << yshifts[iframe] << std::endl;
@@ -4994,6 +5043,20 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 #endif
 
 	return converged;
+}
+
+int MotioncorrRunner::coupledPeakOffset(const RFLOAT v[3][3], RFLOAT &dx, RFLOAT &dy) {
+	// v[dy + 1][dx + 1]. Same second differences and central first differences as the separable fit.
+	const RFLOAT gx = 0.5 * (v[1][2] - v[1][0]), gy = 0.5 * (v[2][1] - v[0][1]);
+	const RFLOAT hxx = v[1][2] + v[1][0] - 2.0 * v[1][1], hyy = v[2][1] + v[0][1] - 2.0 * v[1][1];
+	const RFLOAT hxy = 0.25 * (v[2][2] - v[2][0] - v[0][2] + v[0][0]);
+	const RFLOAT det = hxx * hyy - hxy * hxy;
+	if (!(hxx < 0 && det > 0)) return 1;
+	const RFLOAT ox = -(hyy * gx - hxy * gy) / det;
+	const RFLOAT oy = -(hxx * gy - hxy * gx) / det;
+	if (!(std::abs(ox) <= 1.0 && std::abs(oy) <= 1.0)) return 2;
+	dx = ox; dy = oy;
+	return 0;
 }
 
 int MotioncorrRunner::findGoodSize(int request) {

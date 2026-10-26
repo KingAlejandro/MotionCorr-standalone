@@ -8,3 +8,5 @@ Tested production source `e77a51a220cb0d91f4ac3c7fac211876d0c6833f` (unchanged);
 - `SHA256SUMS` covers every other file in this directory.
 
 Failed or superseded attempts are retained, not relabelled: `i8-mg-item12` (grader StopIteration at `d4poison`), `i8c-mg-item12-regrade` (digest normalisation), `i8-a13` (grader FAIL), `chain-i8b.sh` (unexecuted draft).
+
+`a13-bz2ctl/` (26 Oct): control for the A13 `c-m1-bz2-native-*` attribution (stage `i8f-a13-bz2ctl`): prediction receipt, harness result, record-by-record comparison with i8-a13, stage/health/Xid receipts. Wrapper: `tools/c1_a13_bz2ctl.sh`.

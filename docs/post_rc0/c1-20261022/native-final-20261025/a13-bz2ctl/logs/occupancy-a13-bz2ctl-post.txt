@@ -1,0 +1,33 @@
+2026-10-26T00:52:26Z
+4-gpu-vm
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 6 %
+--- compute apps (all GPUs)
+--- locks held by anyone (fuser)
+/tmp/motioncorr-gpu0-correctness.lock: 
+/tmp/motioncorr-gpu1-correctness.lock: 
+/tmp/motioncorr-gpu2-correctness.lock: 
+/tmp/motioncorr-gpu3-correctness.lock: 
+/tmp/motioncorr-build.lock: 
+/tmp/motioncorr-bench.lock: 
+--- processes last scheduled on CPUs 96-103
+    PID USER     PSR %CPU ELAPSED COMMAND
+3835762 alex     100  900       0 ps -eo pid,user,psr,pcpu,etimes,args --sort=-pcpu
+3823025 root     100  0.0    3153 [kworker/u349:0-writeback]
+1592208 root      96  0.0 1145763 [kworker/96:2-events]
+3517178 root     102  0.0  884645 [kworker/102:13-events]
+2919748 systemd+  99  0.0  325368 /usr/lib/systemd/systemd-networkd
+3456129 root     101  0.0  946745 [kworker/101:0-events]
+    629 root     102  0.0 8432391 [migration/102]
+    611 root      99  0.0 8432391 [migration/99]
+    605 root      98  0.0 8432391 [migration/98]
+    617 root     100  0.0 8432391 [migration/100]
+    599 root      97  0.0 8432391 [migration/97]
+    593 root      96  0.0 8432391 [migration/96]
+    623 root     101  0.0 8432391 [migration/101]
+ 00:52:26 up 97 days, 14:19, 26 users,  load average: 1.46, 1.24, 1.59
+/dev/sdb        2.0T  1.6T  326G  83% /mnt/clathrin
+GPU health PASS (identity, ECC, row remap, retired pages, no compute process); kernel Xid log: UNRUN
+gpu3 health exit 0

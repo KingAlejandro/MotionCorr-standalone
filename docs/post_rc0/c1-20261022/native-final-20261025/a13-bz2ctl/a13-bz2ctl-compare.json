@@ -1,0 +1,667 @@
+{
+ "question": "c-m1-bz2-native-{auto,float}: pinned pbzip2 or product?",
+ "control_stage": "i8f-a13-bz2ctl",
+ "reference_stage": "i8-a13",
+ "records": 49,
+ "changed": [
+  "c-m1-bz2-native-auto",
+  "c-m1-bz2-native-float"
+ ],
+ "not_passing_i8_a13": 2,
+ "not_passing_control": 0,
+ "native_bz2_records_control": {
+  "/compressed[6]": {
+   "rc": 1,
+   "pass": true,
+   "completion_star": [],
+   "mrc_products": [],
+   "fail_text": "in: /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/src/image.h, line 1923 :: CompressedMRCReader: error in reading header of image movie.mrc.bz2Command line for the pipe: pbzip2 -cdkp1 movie.mrc.bz2 2>/dev/null || in: /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/src/motionc"
+  },
+  "/compressed[7]": {
+   "rc": 1,
+   "pass": true,
+   "completion_star": [],
+   "mrc_products": [],
+   "fail_text": "in: /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/src/image.h, line 1923 :: CompressedMRCReader: error in reading header of image movie.mrc.bz2Command line for the pipe: pbzip2 -cdkp1 movie.mrc.bz2 2>/dev/null || in: /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/src/motionc"
+  }
+ },
+ "rows": [
+  {
+   "path": "/compressed[0]",
+   "label": "c-m1-xz-native-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[1]",
+   "label": "c-m1-xz-native-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[2]",
+   "label": "c-pinned-m1-xz",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[3]",
+   "label": "c-m1-zst-native-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[4]",
+   "label": "c-m1-zst-native-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[5]",
+   "label": "c-pinned-m1-zst",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[6]",
+   "label": "c-m1-bz2-native-auto",
+   "i8_a13": {
+    "pass": false,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": true
+  },
+  {
+   "path": "/compressed[7]",
+   "label": "c-m1-bz2-native-float",
+   "i8_a13": {
+    "pass": false,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": true
+  },
+  {
+   "path": "/compressed[8]",
+   "label": "c-m1-bz2-pbzip2-shim-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[9]",
+   "label": "c-m1-bz2-pbzip2-shim-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[10]",
+   "label": "c-m0-xz-native-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[11]",
+   "label": "c-m0-xz-native-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[12]",
+   "label": "c-m0-zst-native-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[13]",
+   "label": "c-m0-zst-native-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[14]",
+   "label": "c-m6-xz-native-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[15]",
+   "label": "c-m6-xz-native-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[16]",
+   "label": "c-m6-zst-native-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[17]",
+   "label": "c-m6-zst-native-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[18]",
+   "label": "c-m2-xz-native-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[19]",
+   "label": "c-m2-xz-native-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[20]",
+   "label": "c-pinned-m2-xz",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[21]",
+   "label": "c-m2-zst-native-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[22]",
+   "label": "c-m2-zst-native-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[23]",
+   "label": "c-pinned-m2-zst",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/compressed[24]",
+   "label": "pinned-float32-raw",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[0]",
+   "label": "d-xz-truncated-60pct-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[1]",
+   "label": "d-xz-truncated-60pct-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[2]",
+   "label": "d-xz-truncated-tail1-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[3]",
+   "label": "d-xz-truncated-tail1-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[4]",
+   "label": "d-xz-truncated-header-only-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[5]",
+   "label": "d-xz-truncated-header-only-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[6]",
+   "label": "d-xz-trailer-corrupt-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[7]",
+   "label": "d-xz-trailer-corrupt-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[8]",
+   "label": "d-xz-midstream-corrupt-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[9]",
+   "label": "d-xz-midstream-corrupt-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[10]",
+   "label": "d-zst-truncated-60pct-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[11]",
+   "label": "d-zst-truncated-60pct-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[12]",
+   "label": "d-zst-truncated-tail1-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[13]",
+   "label": "d-zst-truncated-tail1-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[14]",
+   "label": "d-zst-truncated-header-only-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[15]",
+   "label": "d-zst-truncated-header-only-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[16]",
+   "label": "d-zst-trailer-corrupt-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[17]",
+   "label": "d-zst-trailer-corrupt-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[18]",
+   "label": "d-zst-midstream-corrupt-auto",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[19]",
+   "label": "d-zst-midstream-corrupt-float",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[20]",
+   "label": "d-shim-exit0-xz",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[21]",
+   "label": "d-shim-exit3-xz",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[22]",
+   "label": "d-shim-exit0-zst",
+   "i8_a13": {
+    "pass": true,
+    "rc": 0
+   },
+   "control": {
+    "pass": true,
+    "rc": 0
+   },
+   "changed": false
+  },
+  {
+   "path": "/damaged[23]",
+   "label": "d-shim-exit3-zst",
+   "i8_a13": {
+    "pass": true,
+    "rc": 1
+   },
+   "control": {
+    "pass": true,
+    "rc": 1
+   },
+   "changed": false
+  }
+ ]
+}

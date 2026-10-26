@@ -1,0 +1,63 @@
+{
+ "status": "PROPOSAL, UNRUN. Nothing is launched by this branch; the parent owns resources, locks, timing and authorisation.",
+ "purpose": "Close the one gap the retained #275 capture leaves for the affine local stage: the #276-validated polynomial fit needs observations from the 3x3 lattice, and only patch (2,1) was captured.",
+ "retained_sufficient_for_patch_2_1": {
+  "evidence": "attempt02: reconstructed patch input equals the captured iteration-1 input with relative L2 (excluding DC) <= 2.1e-5 for all frames of both backends; seven mutants >= 0.24; effect of native-versus-reconstructed input on the fixed-template maximum <= 0.001 px",
+  "conclusion": "no pre-crop or pre-shift capture is needed: the global iteration-1 input plus the backend's own state/global.txt determine the patch input"
+ },
+ "smallest_missing": {
+  "patches": [
+   "1,1",
+   "1,2",
+   "1,3",
+   "2,2",
+   "2,3",
+   "3,1",
+   "3,2",
+   "3,3"
+  ],
+  "backends": [
+   "cpu",
+   "cuda"
+  ],
+  "case": "affine",
+  "processes": 16,
+  "rationale": "MC_CCF_PATCH selects one patch per process in the #275 overlay; no source change is required, so the 16 runs reuse the verified #275 binaries. A one-process-per-backend variant would need an overlay change and a fresh exact-SHA build, which is more work and more new evidence than 16 short runs."
+ },
+ "reuse": {
+  "source_archive_sha256": "1df4099244aca2b09a59df39c732f94640dfcf1fae9c3ca18b390dd669b9d8dc",
+  "overlay_patch_sha256": "061c5c5be6b427cb6643605ac1473e21beeb9e45fea1bd022500eec651a787e4",
+  "cpu_binary_sha256": "778ca7d5fd4ff70bb7162598940ae6a60a12afa0f6cb129a13eca7d46dfb5df1",
+  "cuda_binary_sha256": "09fef94869d1ca4ae9fbd1b17672a8621cc67fbb0cbf672c60602b647d1ef095",
+  "retained_scratch": "/mnt/clathrin/alex-motioncorr-residual-ccf-20261022-805d9de2 (4GPUs; hash-verify before use; if absent, rebuild from the archive and overlay under the build lock, parallelism <= 2, which is a new build and needs its own receipts)",
+  "fixture": "affine.mrcs/.star from the #275 fixtures, MANIFEST sha256 9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc"
+ },
+ "argv_template": "as docs/post_rc0/s1/residual_ccf_20261022/run.py at 6ae48678: BINARY --i affine.star --o OUT --use_own --j 1 --patch_x 3 --patch_y 3 --bin_factor 1 --seed 1 --skip_defect --save_noDW --first_frame_sum 1 --last_frame_sum 5 --skip_logfile [--gpu 0]; env MC_CCF_CAPTURE, MC_CCF_STATE, MC_CCF_PATCH=<iy,ix>; cwd fixtures; numeric threads 1",
+ "capture_per_process": [
+  "c1 (global, redundant), c2 (selected patch): weight, per-iteration input/map/candidate/before/after, reference, spectra",
+  "state/global.txt, state/model.txt, log, STAR"
+ ],
+ "estimated_volume": "about 2 MB per process, about 35 MB total",
+ "resources": "parent-coordinated: CPU runs under the 8-CPU cap, GPU runs on one idle device selected by UUID under its correctness lock held through final health; no timing claim",
+ "acceptance_of_the_capture": [
+  "each process exits 0; log shows the selected patch and its iteration RMSD lines",
+  "final STAR and trajectories of every new run equal the #275 affine capture-on run byte-for-byte after output-prefix normalisation (the patch selector does not enter the numerics); a difference is a stop condition",
+  "for patch (2,1) a repeat is not needed; its existing capture is the control"
+ ],
+ "then_analysis": {
+  "oracle": "generalise attempt02 over the patch window (same frozen controls and mutants per window; geometry gate G-E per patch)",
+  "fit": "build the observation table (accepted patches only, rows = frame, patch centre, state recentred to frame 0) from the captured states and acceptance; feed it to the #276 host fit oracle path only if at least four patches are accepted and cover the lattice; otherwise UNRUN",
+  "field_metric": "the unchanged #267/#273 checker on the fitted field; no new gate"
+ },
+ "stop_conditions": [
+  "any exit code != 0",
+  "GPU not idle or lock busy: stop and report, no blind retry",
+  "STAR/trajectory mismatch against the #275 control",
+  "unexpected output change"
+ ],
+ "not_included_with_reason": {
+  "observation_table_overlay": "would change source; derivable from per-patch states and logs",
+  "precrop_real_space_frames": "reconstruction already reproduces them (2.1e-5)",
+  "other_cases": "noisy and pedestal need their own manifests; not generalised from this affine patch"
+ }
+}

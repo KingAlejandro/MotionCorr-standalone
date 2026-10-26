@@ -1,0 +1,18 @@
+{
+  "kind": "first matched-native stored-input allpatch diagnostic; no new native jobs",
+  "utc": "2026-10-25T19:20:46.234632+00:00",
+  "namespace": "/tmp/motioncorr-w4-matched-v1-20261025-0b0fc625-ebf6-49f1-9b4a-21dd1eeb7faa",
+  "runner_sha256": "33382cc165dc2851c2522d31c8940dbc8263a298c4eddc9a231a9076f83317d0",
+  "input_sha256": "300a406ca0534acbff649fa3f4d7069b70335962041a222c8da024260a7894c2",
+  "parent_review": "source scan/parabola/anchor/state/shift/loop and fourteen controls reviewed; source RFLOAT anchor order checked; local refinement and ordered path-dependent terms only",
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "cpu64",
+    "echo \"33382cc165dc2851c2522d31c8940dbc8263a298c4eddc9a231a9076f83317d0  /tmp/w4-matched-bootstrap-0b0fc625-ebf6-49f1-9b4a-21dd1eeb7faa.py\" | sha256sum -c - >&2 && taskset -c 62 /usr/bin/python3 -I -B /tmp/w4-matched-bootstrap-0b0fc625-ebf6-49f1-9b4a-21dd1eeb7faa.py /tmp/motioncorr-w4-matched-v1-20261025-0b0fc625-ebf6-49f1-9b4a-21dd1eeb7faa 300a406ca0534acbff649fa3f4d7069b70335962041a222c8da024260a7894c2"
+  ],
+  "exit": 0,
+  "stdout": "{\"phase\": \"M\", \"affinity\": [62], \"cpu_busy_fraction\": 0.0033222591362126463, \"mem_available\": \"185163184 kB\", \"allocated_ram_cap_bytes\": 2147483648, \"disk_cap_bytes\": 67108864, \"input_sha256\": \"300a406ca0534acbff649fa3f4d7069b70335962041a222c8da024260a7894c2\", \"python_exe\": \"/usr/bin/python3\", \"jobs\": [{\"name\": \"w4_matched_native\", \"argv\": [\"/usr/bin/time\", \"-v\", \"-o\", \"/tmp/motioncorr-w4-matched-v1-20261025-0b0fc625-ebf6-49f1-9b4a-21dd1eeb7faa/out/w4_matched_native.time\", \"/usr/bin/python3\", \"-I\", \"-B\", \"/tmp/motioncorr-w4-matched-v1-20261025-0b0fc625-ebf6-49f1-9b4a-21dd1eeb7faa/scripts/w4_matched_native.py\", \"/tmp/motioncorr-w4-matched-v1-20261025-0b0fc625-ebf6-49f1-9b4a-21dd1eeb7faa\", \"/tmp/motioncorr-w4-matched-v1-20261025-0b0fc625-ebf6-49f1-9b4a-21dd1eeb7faa/out/w4_matched_native.json\"], \"exit\": 0, \"wall_s\": 0.6491804122924805, \"stdout\": \"{\\n \\\"state\\\": \\\"COMPLETE_CONTROLS_PASS\\\",\\n \\\"controls\\\": {\\n  \\\"C-PIN\\\": \\\"PASS\\\",\\n  \\\"G-W\\\": \\\"PASS\\\",\\n  \\\"G-N\\\": \\\"PASS\\\",\\n  \\\"N-N\\\": \\\"PASS\\\",\\n  \\\"G-M\\\": \\\"PASS\\\",\\n  \\\"C-NEWTON\\\": \\\"PASS\\\",\\n  \\\"C-REF\\\": \\\"PASS\\\",\\n  \\\"C-SPEC\\\": \\\"PASS\\\",\\n  \\\"C-CHAIN\\\": \\\"PASS\\\",\\n  \\\"N-CHAIN\\\": \\\"PASS\\\",\\n  \\\"C-STATE\\\": \\\"PASS\\\",\\n  \\\"C-STOP\\\": \\\"PASS\\\",\\n  \\\"C-IDENT\\\": \\\"PASS\\\",\\n  \\\"C-REG21\\\": \\\"PASS\\\"\\n },\\n \\\"regression_21\\\": {\\n  \\\"native_minus_b\\\": 0.0,\\n  \\\"b_minus_c\\\": 3.3306690738754696e-16,\\n  \\\"pipeline_rel_ac\\\": 3.5990768742014123e-16\\n },\\n \\\"same_sample_rms_px\\\": {\\n  \\\"native_minus_b\\\": 0.318913698311892,\\n  \\\"b_minus_c\\\": 0.31406830591243495\\n },\\n \\\"chain_rms_px\\\": {\\n  \\\"float32_ties\\\": 0.22397691411405302,\\n  \\\"integer_parabola\\\": 0.215697770179929,\\n  \\\"stopping\\\": 0.06489358915119646,\\n  \\\"input_window\\\": 8.518769892996659e-06\\n },\\n \\\"route\\\": \\\"MIXED:float32_ties+integer_parabola\\\",\\n \\\"native_final_minus_R_pipe_loo_rms_px\\\": 0.22817125423209206,\\n \\\"R_fixed_point_stored_minus_known_rms_px\\\": 0.2749065005837591\\n}\\n\", \"stderr\": \"\"}], \"state\": \"COMPLETE_EXIT0_NEEDS_REVIEW\", \"output_bytes\": 3800008, \"outputs_sha256\": {\"out/w4_matched_native.json\": \"ac8ab0c1043ef378247ae9cba52ba4dba105fdb42de26b1183a7165c859e9cb1\", \"out/w4_matched_native.time\": \"68c2d215a79ca5e06f79fe3ce621c9e2d8847e4f6c4d6331c80732e4c67d0207\"}}\n",
+  "stderr": "/tmp/w4-matched-bootstrap-0b0fc625-ebf6-49f1-9b4a-21dd1eeb7faa.py: OK\n"
+}

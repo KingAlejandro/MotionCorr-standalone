@@ -1,0 +1,76 @@
+{
+  "schema": "w4-affine-cpu-lattice-capture/1",
+  "status": "FROZEN_BEFORE_DRIVER_AND_NATIVE",
+  "base": "22675db7e645d745203f8e5fe3507c4999448473",
+  "old_scratch": "/mnt/clathrin/alex-motioncorr-residual-ccf-20261022-805d9de2",
+  "pins": {
+    "source-binding.json": "f952efc5478ab6b99b2c7d06fd3ef4626e31c7b9216f31d1c299ff6bb6453d57",
+    "overlay-binding.json": "3316058aa499fe7d72738c17d2d86bd3908bb5e20b343f2e06524b610ae18e1e",
+    "binaries.json": "51cc4602e9575e1177cb023d0ace854f65479855694edd218a0dc2f672afb4e7",
+    "fixtures/MANIFEST.json": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+    "build-cpu/motioncorr": "778ca7d5fd4ff70bb7162598940ae6a60a12afa0f6cb129a13eca7d46dfb5df1",
+    "runs/cpu-affine-on/state/global.txt": "7ea5a84098e60e01b29bc24d4ed7ca2654c64f279c8a3cdafc4e331e38bfc1e3",
+    "runs/cpu-affine-on/state/model.txt": "ca59f476a672094620d13ae5433447774a277ed96bb97e3cf76f288400392523",
+    "runs/cpu-affine-on/out/affine.star": "f560b29e3d4521e1b4d5ca97fa3d649181970b49db90714e9a257709d20c97a8",
+    "runs/cpu-affine-on/out/affine.mrc": "e801fa5ecb8ecbdeb383e88dd322d81f06065c8b9f87d8d3efd33b6e0622f427",
+    "runs/cpu-affine-on/out/corrected_micrographs.star": "cb58a901c7c47ac8458c0f40ee727cb718ce405ac44898d0d8075a8a0e23b986",
+    "src/src/motioncorr_runner.cpp": "4e20f0e0b5ac03cdd567622eda2b78653704ed141557a29e141cc43f8f32c71a",
+    "src/src/acc/cuda/cuda_alignpatch.cu": "98397777ab88298d390beb241bb87105172104903f4609839dd2cb205d5b5618",
+    "src/src/acc/cuda/cuda_movie_session.cu": "b46ce12b4abf28b962f057ade87df23eae9baa401d4f46e050371bc7f89801dd",
+    "src/src/residual_capture.h": "883da25456f9ff956e2bb00057b237a0242fc80270cd70e3ad9d7a5e6ba972b1",
+    "mc-residual-source-805.tar.gz": "1df4099244aca2b09a59df39c732f94640dfcf1fae9c3ca18b390dd669b9d8dc",
+    "mc-residual-overlay.tar.gz": "655e7fe72adeafb0d5273fe54bc478d818255c30607e3c1875048f03c6ee386c",
+    "fixtures/affine.mrcs": "1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a",
+    "fixtures/affine_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+    "fixtures/affine_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+    "fixtures/affine.star": "0a08c285c4ec09aceaef93423033c01830afc6b8f07063697133ceb64b066491"
+  },
+  "overlay_patch_sha256": "061c5c5be6b427cb6643605ac1473e21beeb9e45fea1bd022500eec651a787e4",
+  "selectors": [
+    [
+      1,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      2,
+      2
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      3,
+      1
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      3,
+      3
+    ]
+  ],
+  "maximum_native_launches": 8,
+  "cpu": [
+    13
+  ],
+  "threads": 1,
+  "timeout_seconds": 120,
+  "scratch_cap_bytes": 67108864,
+  "minimum_free_bytes": 1073741824,
+  "lock": "/tmp/motioncorr-w4-cpu13.lock",
+  "cuda_status": "HELD_UNRUN",
+  "preflight_context_only_sha256": "1584720d7580beb10adde83e799d2307f995e4e062ad0969beffec96ac5f4401",
+  "expected_capture_verdict": "PASS_ONLY_IF_NEUTRAL_AND_BOUND",
+  "truth_fit_science": "UNRUN_THIS_STAGE"
+}

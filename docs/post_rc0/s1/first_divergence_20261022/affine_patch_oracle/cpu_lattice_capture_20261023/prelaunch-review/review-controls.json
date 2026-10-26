@@ -1,0 +1,107 @@
+{
+  "reviewed_sha": "fb5b0b05db8729170ebedb180baef9955812ca42",
+  "utc": "2026-10-23T12:43:53.931429+00:00",
+  "files": {
+    "AMENDMENT-1.md": "514df49c276abcdb7d97090d853999e3830613c7bb5fcbe8c169f583621d2260",
+    "DRIVER_DATA_CONTROLS.json": "224e9240e4668f742b60fd18504447ec3423f1a59d42be8c15620328f747fd7f",
+    "DRIVER_V2_DATA_CONTROLS.json": "e993e9c94c9e45140da90525ae45c0ae71537a4b0f6b3c4c1757d2949e9c5f6a",
+    "ITERATION-2.md": "f97141f887f221c4e1bca373825879c5fa6691b069aebcee3bc37090909d0814",
+    "PROTOCOL.md": "20c5e9c72466c5975bfc0c6a0f723f5c053ebaf044cfb00bde62872e4509a2fb",
+    "attempt1-admission-failure/RESULT.json": "b4dad976c7bae94fe5b8e03db484585171c16e74568ad3360d34768dbc14e34f",
+    "attempt1-admission-failure/w4-cpu-lattice-archive-diagnosis.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "attempt1-admission-failure/w4-cpu-lattice-archive-members.json": "0d481181ba2d4c4b595f6ebc281bbcc1e4a72f957096082a5b9b652c829ad04e",
+    "attempt1-admission-failure/w4-cpu-lattice-attempt1-readback.txt": "e8a6bb6d6e626feb823a11a8855c48a81965444b5d310a47684c393bfb5ef329",
+    "attempt1-admission-failure/w4-cpu-lattice-launch-1.log": "92336c35f552e2d6e27617d6916c6ca839b38d24b0b42724d35164713148e03c",
+    "capture_cpu.py": "75731b61426a91d00a32e3e7163dfd3410c50fc456d5c38aee177339a5f8ae1f",
+    "capture_cpu_v2.py": "884e7424fbb49d1c887301129a20f29ae89467839defcd919810bfa1f17bf1b2",
+    "check_driver_data.py": "430f9b76c489f565cdd284e761ff985a8435ec54d6db8e38bbbcf7b4fe8fdb02",
+    "check_driver_v2_data.py": "b4428d6a014051ae7d3326f87ab1d9473c9606daaba81f355049a4cff7f90b6e",
+    "protocol.json": "c2e7712bb4c16bf4a4e80ce69694177e0961e0a8a608b5e8d62ae217693db15f"
+  },
+  "raw_baseline": {
+    "fixtures/MANIFEST.json": {
+      "sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+      "expected": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+      "matches": true
+    },
+    "runs/cpu-affine-on/state/global.txt": {
+      "sha256": "7ea5a84098e60e01b29bc24d4ed7ca2654c64f279c8a3cdafc4e331e38bfc1e3",
+      "expected": "7ea5a84098e60e01b29bc24d4ed7ca2654c64f279c8a3cdafc4e331e38bfc1e3",
+      "matches": true
+    },
+    "runs/cpu-affine-on/state/model.txt": {
+      "sha256": "ca59f476a672094620d13ae5433447774a277ed96bb97e3cf76f288400392523",
+      "expected": "ca59f476a672094620d13ae5433447774a277ed96bb97e3cf76f288400392523",
+      "matches": true
+    },
+    "runs/cpu-affine-on/out/affine.star": {
+      "sha256": "f560b29e3d4521e1b4d5ca97fa3d649181970b49db90714e9a257709d20c97a8",
+      "expected": "f560b29e3d4521e1b4d5ca97fa3d649181970b49db90714e9a257709d20c97a8",
+      "matches": true
+    },
+    "runs/cpu-affine-on/out/affine.mrc": {
+      "sha256": "e801fa5ecb8ecbdeb383e88dd322d81f06065c8b9f87d8d3efd33b6e0622f427",
+      "expected": "e801fa5ecb8ecbdeb383e88dd322d81f06065c8b9f87d8d3efd33b6e0622f427",
+      "matches": true
+    },
+    "runs/cpu-affine-on/out/corrected_micrographs.star": {
+      "sha256": "cb58a901c7c47ac8458c0f40ee727cb718ce405ac44898d0d8075a8a0e23b986",
+      "expected": "cb58a901c7c47ac8458c0f40ee727cb718ce405ac44898d0d8075a8a0e23b986",
+      "matches": true
+    },
+    "fixtures/affine.mrcs": {
+      "sha256": "1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a",
+      "expected": "1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a",
+      "matches": true
+    },
+    "fixtures/affine_target.npy": {
+      "sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+      "expected": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+      "matches": true
+    },
+    "fixtures/affine_field.npy": {
+      "sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+      "expected": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+      "matches": true
+    },
+    "fixtures/affine.star": {
+      "sha256": "0a08c285c4ec09aceaef93423033c01830afc6b8f07063697133ceb64b066491",
+      "expected": "0a08c285c4ec09aceaef93423033c01830afc6b8f07063697133ceb64b066491",
+      "matches": true
+    },
+    "runs/cpu-affine-on/out/affine.log": {
+      "sha256": "793124b035353e0c5e45d68ac6bfbf2b97516c5fff7f936c00a6cb1b84955dd4",
+      "expected": "793124b035353e0c5e45d68ac6bfbf2b97516c5fff7f936c00a6cb1b84955dd4"
+    }
+  },
+  "checks": {
+    "v1_driver_immutable": true,
+    "v1_suite_immutable": true,
+    "v1_results_immutable": true,
+    "check_driver_v2_data.py": {
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-B",
+        "/tmp/motioncorr-w4-cpu-capture-review-20261023-codex/970ae955-5464-4e8c-836d-db336987aaca/exact/check_driver_v2_data.py",
+        "/tmp/mc-residual-review.h52lh3/raw/runs/cpu-affine-on",
+        "/tmp/motioncorr-w4-cpu-capture-review-20261023-codex/970ae955-5464-4e8c-836d-db336987aaca/v2-controls"
+      ],
+      "exit": 0,
+      "stdout": "{\"controls\": 18, \"all_as_expected\": true}\n",
+      "stderr": ""
+    },
+    "check_driver_data.py": {
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-B",
+        "/tmp/motioncorr-w4-cpu-capture-review-20261023-codex/970ae955-5464-4e8c-836d-db336987aaca/exact/check_driver_data.py",
+        "/tmp/mc-residual-review.h52lh3/raw/runs/cpu-affine-on",
+        "/tmp/motioncorr-w4-cpu-capture-review-20261023-codex/970ae955-5464-4e8c-836d-db336987aaca/v1-controls"
+      ],
+      "exit": 0,
+      "stdout": "{\"controls\": 12, \"all_as_expected\": true}\n",
+      "stderr": ""
+    }
+  },
+  "scratch_bytes": 1719897
+}

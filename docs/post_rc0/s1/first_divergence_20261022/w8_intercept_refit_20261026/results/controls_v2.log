@@ -1,0 +1,78 @@
+{
+ "failed": {
+  "A": [
+   "4096x4096:K4_quadratic",
+   "4096x4096:K5_cubic",
+   "4096x4096:K6_full",
+   "5760x4092:K4_quadratic",
+   "5760x4092:K5_cubic",
+   "5760x4092:K6_full"
+  ],
+  "B1": [],
+  "B2": [],
+  "C": []
+ },
+ "eligible": [
+  "B1",
+  "B2",
+  "C"
+ ],
+ "k8_pass": true,
+ "census_allowed": true,
+ "K12": {
+  "mutant_discrepancy_px": 0.0004017525655943821,
+  "mutant_breaks_k8": true,
+  "mutant_eligible": [],
+  "mutant_census_allowed": false,
+  "stage1_exit_on_mutant": 4,
+  "pass_": true
+ },
+ "K13": {
+  "rejected": true,
+  "message": "rank 34 < 43 columns"
+ },
+ "K9": {
+  "delta_equals_eps": true,
+  "delta1_eq_3delta0": true,
+  "anchor_ratio": 1.0259783520851544,
+  "expected": 1.025978352085154
+ },
+ "K10": {
+  "ls_constant": 1.0,
+  "at_ls": {
+   "rms": 1.4142135623730951,
+   "p95": 1.9,
+   "max": 2.0
+  },
+  "at_1p5": {
+   "rms": 1.5,
+   "p95": 1.5,
+   "max": 1.5
+  }
+ },
+ "K11": {
+  "inmodel_4096": {
+   "native": 0.010571377159453808,
+   "A": 0.010106283261392155,
+   "B1": 1.9392683767362105e-12,
+   "B2": 9.840070950829653e-13,
+   "C": 2.121044451741815e-12
+  },
+  "inmodel_nonsquare": {
+   "native": 0.010619933010331737,
+   "A": 0.01015270286624053,
+   "B1": 2.3479259852154263e-12,
+   "B2": 8.311091299159349e-13,
+   "C": 8.251038889355666e-13
+  },
+  "outmodel": {
+   "native": 2.0086789278634383,
+   "A": 2.008337440687387,
+   "B1": 2.000697450052751,
+   "B2": 2.0006974500532677,
+   "C": 2.0006974500531176
+  }
+ }
+}
+uv run --no-project --with numpy python -I $W/scripts/w8_controls_v2.py  $RUN  3.55s user 0.15s system 82% cpu 4.464 total
+exit=0

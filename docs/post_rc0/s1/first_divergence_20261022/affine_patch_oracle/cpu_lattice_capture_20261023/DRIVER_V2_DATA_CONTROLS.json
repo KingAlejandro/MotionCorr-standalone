@@ -1,0 +1,187 @@
+{
+  "driver_sha256": "884e7424fbb49d1c887301129a20f29ae89467839defcd919810bfa1f17bf1b2",
+  "suite_sha256": "b4428d6a014051ae7d3326f87ab1d9473c9606daaba81f355049a4cff7f90b6e",
+  "argv": [
+    "docs/post_rc0/s1/first_divergence_20261022/affine_patch_oracle/cpu_lattice_capture_20261023/check_driver_v2_data.py",
+    "/tmp/mc-residual-review.h52lh3/raw/runs/cpu-affine-on",
+    "/tmp/motioncorr-w4-cpu-lattice-driver-controls-v2-20261023-1"
+  ],
+  "results": [
+    {
+      "case": "positive",
+      "expected": true,
+      "accepted": true,
+      "checks": {
+        "state/global.txt": true,
+        "state/model.txt": true,
+        "affine.log": true,
+        "*.star-inventory": true,
+        "corrected_micrographs.star": true,
+        "affine.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": true,
+        "affine.mrc:labels": true,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "timestamp_only",
+      "expected": true,
+      "accepted": true,
+      "checks": {
+        "state/global.txt": true,
+        "state/model.txt": true,
+        "affine.log": true,
+        "*.star-inventory": true,
+        "corrected_micrographs.star": true,
+        "affine.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": true,
+        "affine.mrc:labels": true,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "payload",
+      "expected": false,
+      "accepted": false,
+      "checks": {
+        "state/global.txt": true,
+        "state/model.txt": true,
+        "affine.log": true,
+        "*.star-inventory": true,
+        "corrected_micrographs.star": true,
+        "affine.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": false,
+        "affine.mrc:labels": true,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "label",
+      "expected": false,
+      "accepted": false,
+      "checks": {
+        "state/global.txt": true,
+        "state/model.txt": true,
+        "affine.log": true,
+        "*.star-inventory": true,
+        "corrected_micrographs.star": true,
+        "affine.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": true,
+        "affine.mrc:labels": false,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "STAR",
+      "expected": false,
+      "accepted": false,
+      "checks": {
+        "state/global.txt": true,
+        "state/model.txt": true,
+        "affine.log": true,
+        "*.star-inventory": true,
+        "corrected_micrographs.star": true,
+        "affine.star": false,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": true,
+        "affine.mrc:labels": true,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "state",
+      "expected": false,
+      "accepted": false,
+      "checks": {
+        "state/global.txt": false,
+        "state/model.txt": true,
+        "affine.log": true,
+        "*.star-inventory": true,
+        "corrected_micrographs.star": true,
+        "affine.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": true,
+        "affine.mrc:labels": true,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "log",
+      "expected": false,
+      "accepted": false,
+      "checks": {
+        "state/global.txt": true,
+        "state/model.txt": true,
+        "affine.log": false,
+        "*.star-inventory": true,
+        "corrected_micrographs.star": true,
+        "affine.star": true,
+        "*.mrc-inventory": true,
+        "affine.mrc:header_payload": true,
+        "affine.mrc:labels": true,
+        "*.mrcs-inventory": true
+      }
+    },
+    {
+      "case": "capture_positive",
+      "expected": true,
+      "accepted": true
+    },
+    {
+      "case": "wrong_selector",
+      "expected": false,
+      "accepted": false
+    },
+    {
+      "case": "wrong_frames",
+      "expected": false,
+      "accepted": false
+    },
+    {
+      "case": "extra_call",
+      "expected": false,
+      "accepted": false
+    },
+    {
+      "case": "empty_array",
+      "expected": false,
+      "accepted": false
+    },
+    {
+      "case": "archive_positive",
+      "expected": true,
+      "accepted": true
+    },
+    {
+      "case": "archive_missing",
+      "expected": false,
+      "accepted": false
+    },
+    {
+      "case": "archive_extra",
+      "expected": false,
+      "accepted": false
+    },
+    {
+      "case": "archive_duplicate",
+      "expected": false,
+      "accepted": false
+    },
+    {
+      "case": "archive_wrong_content",
+      "expected": false,
+      "accepted": false
+    },
+    {
+      "case": "archive_symlink",
+      "expected": false,
+      "accepted": false
+    }
+  ],
+  "all_as_expected": true,
+  "scope": "Data only. No native child, timeout, signal or cleanup path executed."
+}

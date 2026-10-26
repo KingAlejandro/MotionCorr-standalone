@@ -1,0 +1,96 @@
+{
+  "utc": "2026-10-25T18:38:43.397287+00:00",
+  "namespace": "/mnt/clathrin/alex-motioncorr-w4-cpu13-v3-20261025-308c9b5b-e626-4813-b34d-b82850c1e222",
+  "pins": {
+    "capture_cpu_v3.py": "c69d5fdaa98d0b509ad2a13d8fd82020af171b7a4f288b035ddb9f468484dcb6",
+    "protocol.json": "cd931a88cb194dc24a7ed2cdcaa6827f89f71c70526dbe2e8ce1ebb9e45d4e3d"
+  },
+  "state": "DRIVER_EXIT0_NEEDS_PARENT_GRADE",
+  "original_v2_status": "FAIL_RETAINED",
+  "budget": "1 prior native +7 remaining; no selector repeat",
+  "steps": [
+    {
+      "name": "fresh-admission-reserve",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "taskset -c 13 python3 - /mnt/clathrin/alex-motioncorr-w4-cpu13-v3-20261025-308c9b5b-e626-4813-b34d-b82850c1e222"
+      ],
+      "stdin": "import os,pathlib,fcntl,time,json,sys\np=pathlib.Path(sys.argv[1]);assert not p.exists();f=os.open('/tmp/motioncorr-w4-cpu13.lock',os.O_RDWR|os.O_APPEND);fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB);assert os.sched_getaffinity(0)=={13}\ndef sample():\n v=list(map(int,next(x for x in pathlib.Path('/proc/stat').read_text().splitlines() if x.startswith('cpu13 ')).split()[1:]))[:8];return sum(v),v[3]+v[4]\na=sample();time.sleep(3);b=sample();busy=1-(b[1]-a[1])/(b[0]-a[0]);assert busy<.5\nm=dict((x.split(':')[0],x.split(':')[1].strip()) for x in pathlib.Path('/proc/meminfo').read_text().splitlines());assert int(m['MemAvailable'].split()[0])>2*1024*1024\nv=os.statvfs('/mnt/clathrin');assert v.f_bavail*v.f_frsize>1<<30;p.mkdir(mode=0o700);print(json.dumps({'CPU13busy':busy,'memory_available':m['MemAvailable'],'scratch_free_bytes':v.f_bavail*v.f_frsize,'fresh':str(p)}))\n",
+      "exit": 0,
+      "stdout": "{\"CPU13busy\": 0.0033222591362126463, \"memory_available\": \"441869008 kB\", \"scratch_free_bytes\": 371605831680, \"fresh\": \"/mnt/clathrin/alex-motioncorr-w4-cpu13-v3-20261025-308c9b5b-e626-4813-b34d-b82850c1e222\"}\n",
+      "stderr": ""
+    },
+    {
+      "name": "transfer-capture_cpu_v3.py",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "/tmp/motioncorr-20261025-w4-capture-v3/capture_cpu_v3.py",
+        "4GPUs:/mnt/clathrin/alex-motioncorr-w4-cpu13-v3-20261025-308c9b5b-e626-4813-b34d-b82850c1e222/capture_cpu_v3.py"
+      ],
+      "stdin": null,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "transfer-protocol.json",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "/tmp/motioncorr-20261025-w4-capture-v3/protocol.json",
+        "4GPUs:/mnt/clathrin/alex-motioncorr-w4-cpu13-v3-20261025-308c9b5b-e626-4813-b34d-b82850c1e222/protocol.json"
+      ],
+      "stdin": null,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "versioned-read-only-selector11-regrade",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "taskset -c 13 python3 - /mnt/clathrin/alex-motioncorr-w4-cpu13-v3-20261025-308c9b5b-e626-4813-b34d-b82850c1e222 '{\"capture_cpu_v3.py\": \"c69d5fdaa98d0b509ad2a13d8fd82020af171b7a4f288b035ddb9f468484dcb6\", \"protocol.json\": \"cd931a88cb194dc24a7ed2cdcaa6827f89f71c70526dbe2e8ce1ebb9e45d4e3d\"}'"
+      ],
+      "stdin": "import pathlib,hashlib,json,importlib.util,sys,fcntl\np=pathlib.Path(sys.argv[1]);pins=json.loads(sys.argv[2]);assert all(hashlib.sha256((p/f).read_bytes()).hexdigest()==h for f,h in pins.items());s=importlib.util.spec_from_file_location('v3',p/'capture_cpu_v3.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m);proto=json.loads((p/'protocol.json').read_text());old=pathlib.Path(proto['old_scratch']);a=pathlib.Path('/mnt/clathrin/alex-motioncorr-w4-cpu13-20261025-d3e1b33e-1082-478e-815a-032ea5f3a83e');raw=(a/'RESULT.json').read_bytes();assert hashlib.sha256(raw).hexdigest()=='87a7d15eccd068ea500f1d492bc628f140c6acbb13ccfd137372e2a0cbf9871e';r=json.loads(raw);assert r['status']=='FAIL' and len(r['launches'])==1;row=r['launches'][0];assert row['selector']==[1,1] and row['exit']==0 and row['affinity']==[13];d=a/'campaign/patch-1-1'\nwith open(proto['lock'],'a') as f:\n fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB);m.identities(old,proto)\n for name,pin in row['files'].items():\n  q=d/name;assert q.stat().st_size==pin['bytes'] and m.sha(q)==pin['sha256'],name\n m.captures(d,[1,1]);checks=m.neutrality(old,d);assert all(checks.values()),checks;m.identities(old,proto)\n out={'schema':'w4-existing-selector-version3-regrade/1','historical_v2_campaign_status':'FAIL_UNCHANGED','historical_driver_exit':1,'native_exit':0,'new_native_launches':0,'selector':[1,1],'verdict':'PASS_VERSION3_REUSE_ONLY','original_result_sha256':hashlib.sha256(raw).hexdigest(),'original_namespace':str(a),'checks':checks,'driver_sha256':m.sha(p/'capture_cpu_v3.py'),'protocol_sha256':m.sha(p/'protocol.json')};(p/'SELECTOR11-v3-REGRADE.json').write_text(json.dumps(out,indent=2)+'\\n');print(json.dumps(out))\n",
+      "exit": 0,
+      "stdout": "{\"schema\": \"w4-existing-selector-version3-regrade/1\", \"historical_v2_campaign_status\": \"FAIL_UNCHANGED\", \"historical_driver_exit\": 1, \"native_exit\": 0, \"new_native_launches\": 0, \"selector\": [1, 1], \"verdict\": \"PASS_VERSION3_REUSE_ONLY\", \"original_result_sha256\": \"87a7d15eccd068ea500f1d492bc628f140c6acbb13ccfd137372e2a0cbf9871e\", \"original_namespace\": \"/mnt/clathrin/alex-motioncorr-w4-cpu13-20261025-d3e1b33e-1082-478e-815a-032ea5f3a83e\", \"checks\": {\"state/global.txt\": true, \"state/model.txt\": true, \"affine.log:version3_output_path_and_wall_only\": true, \"*.star-inventory\": true, \"affine.star\": true, \"corrected_micrographs.star\": true, \"*.mrc-inventory\": true, \"affine.mrc:header_payload\": true, \"affine.mrc:labels\": true, \"*.mrcs-inventory\": true}, \"driver_sha256\": \"c69d5fdaa98d0b509ad2a13d8fd82020af171b7a4f288b035ddb9f468484dcb6\", \"protocol_sha256\": \"cd931a88cb194dc24a7ed2cdcaa6827f89f71c70526dbe2e8ce1ebb9e45d4e3d\"}\n",
+      "stderr": ""
+    },
+    {
+      "name": "remaining7-capture-once",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "4GPUs",
+        "taskset -c 13 python3 -B /mnt/clathrin/alex-motioncorr-w4-cpu13-v3-20261025-308c9b5b-e626-4813-b34d-b82850c1e222/capture_cpu_v3.py /mnt/clathrin/alex-motioncorr-w4-cpu13-v3-20261025-308c9b5b-e626-4813-b34d-b82850c1e222"
+      ],
+      "stdin": null,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "finished_utc": "2026-10-25T18:38:57.004062+00:00"
+}

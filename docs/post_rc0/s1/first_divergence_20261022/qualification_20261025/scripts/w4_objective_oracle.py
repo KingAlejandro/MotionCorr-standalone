@@ -1,0 +1,418 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
+"""W4 all-patch inherited-objective oracle, protocol w4-objective-oracle/v1.1 (PROTOCOL.md).
+
+Offline, NumPy only, no MotionCorr execution, no new estimator. Generalises R_fm of the
+reviewed affine patch (2,1) oracle (affine-patch-oracle/v1, affine_patch_oracle.py
+sha256 fc3f11b6…4d31 at 83db13d2) to all nine 42x32 windows, for each backend's own
+retained global state, and splits each native observation error into
+R_fm - known (objective/window/weight) and native - R_fm (estimator arithmetic).
+Three references are kept distinct: the static frame-0 template (R_fm, as frozen in REPORT
+section 6), the actual leave-one-out sum that alignPatch correlates against (R_loo), and R_loo on
+pipeline windows built from the pinned frames (R_pipe_loo). Truth comes from the ORIGINAL pinned
+fixtures (amendment w4-loaded-fixture/v2.1). v1.1 differs from v1 only in that the control-D
+diagnostic's classification/adoptable labels are advisory and no longer gate execution.
+
+usage: w4_objective_oracle.py R275 SRC805 PINNED_FIXTURE_DIR DIAG.json REF_ATTEMPT02.json REF_SHRINKAGE.json OUT.json
+"""
+import hashlib, io, json, sys, time
+from pathlib import Path
+import numpy as np
+
+R275, SRC, FIX, DIAG, REF02, REFSH, OUT = (Path(a) for a in sys.argv[1:8])
+t0 = time.time()
+sys.dont_write_bytecode = True
+sys.path[:0] = [str(SRC / 'tools'), str(SRC / 'test-data')]
+
+NX, NY, NF = 128, 96, 5
+PX, PY = 42, 32
+NFXP = PX // 2 + 1
+B, SEARCH = 150.0, 15
+PINS = {
+    'file-index.json': '31255dab8eef81ee05f68271ac665429db9a48498b240fbe85ebe228ea3c65c3',
+    'fixtures/affine_field.npy': '839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799',
+    'fixtures/affine_target.npy': '287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70',
+    'fixtures/affine.mrcs': '1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a',
+    'ref/attempt02.json': '0bcf68798d66d86d001d0f22852583c842936141e064216b303c66d2a7e4bb72',
+    'ref/shrinkage-attempt01.json': '0a2d16d25cbcf3e9a14b43fbd6b331079356bc13e31dc8d80b40f2cc91c54629',
+}
+# Oracle-control limits (frozen; the reviewed oracle's values where one exists).
+LIM = dict(gen=1e-12, field=1e-12, render=1e-5, cmap=1e-9, pc=1e-6, r0=1e-9, reg21=1e-8, nat=1e-4)
+# Diagnostic routing thresholds frozen in REPORT section 6 (not gates).
+ROUTE = dict(nr_low=0.15, nr_high=0.3, slope_low=0.6, slope_high=0.9)
+sha = lambda b: hashlib.sha256(b).hexdigest()
+bound, controls, checks = {}, {}, {}
+
+
+def pinned(key, path):
+    raw = path.read_bytes()
+    if sha(raw) != PINS[key]:
+        raise SystemExit(f'pin mismatch {key}')
+    bound[key] = PINS[key]
+    return raw
+
+
+index = json.loads(pinned('file-index.json', R275 / 'file-index.json'))['files']
+diag_raw = DIAG.read_bytes(); diag = json.loads(diag_raw)
+if not (diag.get('protocol') == 'w4-loaded-fixture/v2' and diag.get('state') == 'COMPLETE'):
+    raise SystemExit('control-D diagnostic missing or incomplete')
+bound['control-D diagnostic'] = sha(diag_raw)
+for rel in ('fixtures/affine_field.npy', 'fixtures/affine_target.npy', 'fixtures/affine.mrcs'):
+    assert index[rel]['sha256'] == PINS[rel], rel
+field_p = np.load(io.BytesIO(pinned('fixtures/affine_field.npy', FIX / 'affine_field.npy')), allow_pickle=False)
+target_p = np.load(io.BytesIO(pinned('fixtures/affine_target.npy', FIX / 'affine_target.npy')), allow_pickle=False)
+pinned('fixtures/affine.mrcs', FIX / 'affine.mrcs')
+ref02 = json.loads(pinned('ref/attempt02.json', REF02))
+refsh = json.loads(pinned('ref/shrinkage-attempt01.json', REFSH))
+from motion_field import read_mrc, read_motion_star  # noqa: E402
+import generate_motion_diagnostics as gen  # noqa: E402  (cross-check only)
+movie_p, _ = read_mrc(FIX / 'affine.mrcs')
+
+# ------------------------------------------------ independent forward model (copied from the reviewed oracle)
+CEN = np.array([64.0, 48.0])
+G_UNIT = np.array([3.25, -2.125])
+A_UNIT = np.array([[0.012, -0.008], [0.006, -0.010]])
+WAVES = [(3, 2, 1.0, 0.2), (7, -3, 0.7, 1.1), (11, 5, 0.5, -0.4), (19, -13, 0.25, 0.7)]
+LAND = [(31, 23, 3.0, 3.0), (82, 57, -2.0, 5.0), (103, 34, 2.0, 4.0)]
+
+
+def motion(f):
+    t = f / 4.0
+    return G_UNIT * t, A_UNIT * t
+
+
+def fwd(f, q):
+    g, a = motion(f)
+    return q + g + (q - CEN) @ a.T
+
+
+def inv(f, p):
+    g, a = motion(f)
+    rhs = (p - g - CEN).reshape(-1, 2).T
+    return (CEN + np.linalg.solve(np.eye(2) + a, rhs).T).reshape(p.shape)
+
+
+def sig(q):
+    x, y = q[..., 0], q[..., 1]
+    s = np.zeros(x.shape)
+    for kx, ky, amp, ph in WAVES:
+        s += amp * np.cos(2 * np.pi * (kx * x / NX + ky * y / NY) + ph)
+    for cx, cy, amp, w in LAND:
+        s += amp * np.exp(-((x - cx) ** 2 + (y - cy) ** 2) / (2 * w * w))
+    return 100.0 + s
+
+
+def grid(nx, ny, x0=0, y0=0):
+    y, x = np.mgrid[y0:y0 + ny, x0:x0 + nx]
+    return np.stack((x, y), axis=-1).astype(float)
+
+
+# ------------------------------------------------ spectral helpers (copied; native conventions)
+LYP = np.arange(PY); LYP = np.where(LYP > PY // 2, LYP - PY, LYP).astype(float)
+KX = np.arange(NFXP).astype(float)
+MULT = np.full(NFXP, 2.0); MULT[0] = 1.0; MULT[-1] = 1.0
+WEIGHT = np.exp(-2 * B * ((LYP[:, None] / PY) ** 2 + (KX[None, :] / NFXP) ** 2))
+AX = 2j * np.pi * KX / PX
+AY = 2j * np.pi * LYP / PY
+
+
+def native_shift(F, cur, nx, ny):
+    nfx = nx // 2 + 1
+    ly = np.arange(ny); ly = np.where(ly > ny // 2, ly - ny, ly).astype(float)
+    ph = 2 * np.pi * (np.arange(nfx)[None, :] * (-cur[0] / nx) + ly[:, None] * (-cur[1] / ny))
+    return F * np.exp(1j * ph)
+
+
+def wspec(img):
+    return np.fft.rfft2(img) / img.size
+
+
+def cmap(S):
+    return np.fft.irfft2(S, s=(PY, PX)) * (PX * PY)
+
+
+SIDX = np.arange(-SEARCH, SEARCH + 1)
+
+
+def cpu_winner(m):
+    """Row-major strict-maximum winner (alignPatch); argmax returns the first maximum, as `>` keeps it."""
+    blk = m[np.ix_(SIDX % PY, SIDX % PX)]
+    k = int(np.argmax(blk))
+    return (int(SIDX[k % SIDX.size]), int(SIDX[k // SIDX.size])), float(blk.flat[k])
+
+
+def cont_eval(M, d):
+    ex = np.exp(2j * np.pi * KX * d[0] / PX)
+    ey = np.exp(2j * np.pi * LYP * d[1] / PY)
+    f = float(np.real(ey @ M @ ex))
+    gx = float(np.real(ey @ M @ (AX * ex))); gy = float(np.real((AY * ey) @ M @ ex))
+    hxx = float(np.real(ey @ M @ (AX * AX * ex))); hyy = float(np.real((AY * AY * ey) @ M @ ex))
+    hxy = float(np.real((AY * ey) @ M @ (AX * ex)))
+    return f, np.array([gx, gy]), np.array([[hxx, hxy], [hxy, hyy]])
+
+
+def cont_max(S, start):
+    """Newton ascent on the exact band-limited CCF; reviewed protocol v1 settings."""
+    M = S * MULT[None, :]
+    d = np.array(start, float)
+    converged = False; its = 0
+    for its in range(1, 51):
+        f, g, H = cont_eval(M, d)
+        if np.linalg.norm(g) < 1e-12 * abs(f):
+            converged = True; break
+        ev = np.linalg.eigvalsh(H)
+        step = -np.linalg.solve(H, g) if ev.max() < 0 else g / max(abs(H).max(), 1e-300)
+        n = np.linalg.norm(step)
+        if n > 1.0: step = step / n
+        t = 1.0
+        while t > 1e-6 and cont_eval(M, d + t * step)[0] < f - 1e-14 * abs(f):
+            t *= 0.5
+        d = d + t * step
+    f, g, H = cont_eval(M, d)
+    ev = np.linalg.eigvalsh(-H)
+    return dict(xy=d.tolist(), converged=bool(converged), iterations=its,
+                condition_ratio=float(ev.max() / ev.min()) if ev.min() > 0 else None)
+
+
+def cont_map(S):
+    M = S * MULT[None, :]
+    Ey = np.exp(2j * np.pi * LYP[:, None] * np.arange(PY)[None, :] / PY)
+    Ex = np.exp(2j * np.pi * KX[:, None] * np.arange(PX)[None, :] / PX)
+    return np.real(Ey.T @ M @ Ex)
+
+
+gm_worst = [0.0]
+all_converged = [True]
+
+
+def est_S(S):
+    """Integer winner of the weighted CCF, then its continuous maximum (with C-M/C-NEWTON bookkeeping)."""
+    m = cmap(S)
+    gm_worst[0] = max(gm_worst[0], float(np.abs(cont_map(S) - m).max() / np.abs(m).max()))
+    pos, _ = cpu_winner(m)
+    c = cont_max(S, pos)
+    all_converged[0] = all_converged[0] and c['converged']
+    return c
+
+
+def fixed_est(Ft, Ff):
+    """Static-template objective (R_fm of the reviewed oracle)."""
+    return est_S(Ft * np.conj(Ff) * WEIGHT)
+
+
+def loo_iterate(F, max_iter, tol):
+    """Leave-one-out objective as alignPatch iterates it (motioncorr_runner.cpp:4747-4857 at 805d9de2):
+    reference = sum of currently shifted frames minus the frame, weighted CCF, candidates anchored to
+    frame 0, accumulated, frames re-shifted in the window's Fourier space. Continuous maxima replace
+    the integer winner + separable parabola; double precision throughout."""
+    s = np.zeros((NF, 2)); rmsd = []; first = None
+    for _ in range(max_iter):
+        Fs = [native_shift(F[j], s[j], PX, PY) for j in range(NF)]
+        tot = sum(Fs)
+        c = np.array([est_S((tot - Fs[f]) * np.conj(Fs[f]) * WEIGHT)['xy'] for f in range(NF)])
+        if first is None:
+            first = c.copy()             # unanchored iteration-1 candidates (regression vs attempt02)
+        c = c - c[0]
+        s = s + c
+        rmsd.append(float(np.sqrt((c * c).sum() / NF)))
+        if rmsd[-1] < tol:
+            return dict(state=s, rmsd=rmsd, converged=True, first=first)
+    return dict(state=s, rmsd=rmsd, converged=False, first=first)
+
+
+# ------------------------------------------------ patches (patch_bounds, motioncorr_runner.cpp:3474 at 805d9de2)
+PATCHES = []
+for iy in range(3):
+    for ix in range(3):
+        x0, y0 = ix * PX, iy * PY
+        PATCHES.append(dict(label=f'({iy + 1},{ix + 1})', x0=x0, y0=y0,
+                            centre_logged=((2 * x0 + PX - 1) // 2, (2 * y0 + PY - 1) // 2),  # :3519
+                            centre_geometric=(x0 + (PX - 1) / 2, y0 + (PY - 1) / 2)))
+
+# ------------------------------------------------ C-GEN, C-WIN (+N-W1/N-W2), C-K
+rng = np.random.default_rng(12345)
+pts = rng.uniform([-10, -10], [140, 110], size=(1000, 2))
+r = gen.recipe('affine')
+dgen = max(max(float(np.abs(fwd(f, pts) - gen.forward(r, f, pts)).max()),
+               float(np.abs(inv(f, pts) - gen.inverse(r, f, pts)).max())) for f in range(NF))
+dgen = max(dgen, float(np.abs(sig(pts) - gen.signal(r, pts)).max()))
+checks['generator_cross_check_max_abs'] = dgen
+controls['C-GEN'] = 'PASS' if dgen <= LIM['gen'] else 'FAIL'
+
+win = {}
+for p in PATCHES:
+    UW = grid(PX, PY, p['x0'], p['y0'])
+    crop = lambda a: a[..., p['y0']:p['y0'] + PY, p['x0']:p['x0'] + PX].astype(np.float64)
+    base = max([float(np.abs(sig(inv(f, UW)) - crop(movie_p[f])).max()) for f in range(NF)]
+               + [float(np.abs(sig(UW) - crop(target_p)).max())])
+    m1 = max(float(np.abs(sig(inv(f, UW + np.array([1.0, 0.0]))) - crop(movie_p[f])).max()) for f in range(NF))
+    m2 = max(float(np.abs(sig(inv(f, UW + np.array([0.0, 1.0]))) - crop(movie_p[f])).max()) for f in range(NF))
+    win[p['label']] = dict(render_vs_pinned_max_abs=base, mutant_x_plus1=m1, mutant_y_plus1=m2)
+controls['C-WIN'] = 'PASS' if all(v['render_vs_pinned_max_abs'] <= LIM['render'] for v in win.values()) else 'FAIL'
+controls['N-W'] = 'PASS' if all(v['mutant_x_plus1'] > LIM['render'] and v['mutant_y_plus1'] > LIM['render']
+                                for v in win.values()) else 'FAIL'
+dk = 0.0
+for p in PATCHES:
+    X, Y = p['centre_logged']
+    c = np.array([[float(X), float(Y)]])
+    for f in range(NF):
+        dk = max(dk, float(np.abs(field_p[f, Y, X] - (c - fwd(f, c))[0]).max()))
+checks['pinned_field_vs_closed_form_at_centres_max_abs'] = dk
+controls['C-K'] = 'PASS' if dk <= LIM['field'] else 'FAIL'
+
+# ------------------------------------------------ PC per window (+N-C1..N-C4)
+OFFSETS = [(1, 0), (0, -2), (-3, 2), (0.25, 0), (0, -0.5), (0.375, -0.625), (-1.3, 0.7)]
+pc_err = 0.0; nc = {}
+for p in PATCHES:
+    rej = {k: False for k in ('N-C1', 'N-C2', 'N-C3', 'N-C4')}
+    T = wspec(sig(grid(PX, PY, p['x0'], p['y0'])))
+    z = np.array(fixed_est(T, T)['xy'])
+    pc_err = max(pc_err, float(np.abs(z).max()))
+    for mu in OFFSETS:
+        mu = np.array(mu, float)
+        ph = np.exp(2j * np.pi * (KX[None, :] * mu[0] / PX + LYP[:, None] * mu[1] / PY))
+        con = np.array(fixed_est(T, T * ph)['xy'])
+        opp = np.array(fixed_est(T, T * np.conj(ph))['xy'])
+        pc_err = max(pc_err, float(np.abs(con - mu).max()))
+        rej['N-C1'] |= float(np.abs(con + mu).max()) > LIM['pc']
+        rej['N-C2'] |= float(np.abs(con - mu[::-1]).max()) > LIM['pc']
+        rej['N-C3'] |= float(np.abs(con - mu - np.array([1.0, 0.0])).max()) > LIM['pc']
+        rej['N-C4'] |= float(np.abs(opp - mu).max()) > LIM['pc']
+    nc[p['label']] = rej
+checks['periodic_control_max_err_px'] = pc_err
+controls['PC'] = 'PASS' if pc_err <= LIM['pc'] else 'FAIL'
+controls['N-C'] = 'PASS' if all(all(v.values()) for v in nc.values()) else 'FAIL'
+checks['periodic_mutants_rejected'] = nc
+
+
+# ------------------------------------------------ per backend: references, known, native
+def rms(v): return float(np.sqrt(np.mean(np.sum(np.square(v), axis=-1))))
+
+
+def slope(a, b): return [float(np.dot(a[:, k], b[:, k]) / np.dot(b[:, k], b[:, k])) for k in (0, 1)]
+
+
+def corr(a, b): return [float(np.corrcoef(a[:, k], b[:, k])[0, 1]) for k in (0, 1)]
+
+
+def route(nr, slope_y):
+    if nr <= ROUTE['nr_low'] and slope_y <= ROUTE['slope_low']:
+        return 'OBJECTIVE_DOMINATES'
+    if slope_y >= ROUTE['slope_high'] and nr >= ROUTE['nr_high']:
+        return 'ARITHMETIC_DOMINATES'
+    return 'MIXED'
+
+
+# Routing references (frozen): the static template of REPORT section 6, the actual leave-one-out
+# objective at its continuous fixed point, and the same on pipeline windows (global Fourier shift of
+# the pinned frames, with its edge wrap). Report-only arms: LOO iteration 1 and LOO with the native
+# stop rule (RMSD < 0.5 px, at most 5 iterations), both with continuous peaks.
+LOO_TOL, LOO_MAX = 1e-9, 60
+ROUTE_REFS = ('R_fm', 'R_loo', 'R_pipe_loo')
+ARMS = ROUTE_REFS + ('R_loo_iter1', 'R_loo_native_stop')
+stored_Fg = np.stack([np.fft.rfft2(movie_p[f].astype(np.float64)) / (NX * NY) for f in range(NF)])
+EXPECT_ACCEPTED = dict(cpu=9, cuda=8)
+backends = {}
+r0_worst = 0.0; reg21 = {}; nat = {}
+for b in ('cpu', 'cuda'):
+    base = f'runs/{b}-affine-on/'
+    for rel in ('state/global.txt', 'out/affine.star'):
+        h = sha((R275 / (base + rel)).read_bytes())
+        if index[base + rel]['sha256'] != h:
+            raise SystemExit(f'binding mismatch {base + rel}')
+        bound[base + rel] = h
+    g = np.array([[float(t) for t in l.split()[1:]] for l in (R275 / (base + 'state/global.txt')).read_text().splitlines()])
+    assert g.shape == (NF, 2) and not g[0].any()
+    by = {}
+    for s in read_motion_star(R275 / (base + 'out/affine.star')).local_shifts:
+        by.setdefault((int(s['rlnCoordinateX']), int(s['rlnCoordinateY'])), {})[int(s['rlnMicrographFrameNumber']) - 1] = (
+            s['rlnMicrographShiftX'], s['rlnMicrographShiftY'])
+    pipe = [np.fft.irfft2(native_shift(stored_Fg[f], g[f], NX, NY), s=(NY, NX)) * (NX * NY) for f in range(NF)]
+    rows = {}; first21 = None
+    for p in PATCHES:
+        UW = grid(PX, PY, p['x0'], p['y0'])
+        T = wspec(sig(UW))
+        ana = [wspec(sig(inv(f, UW - g[f]))) for f in range(NF)]
+        pw = [wspec(pipe[f][p['y0']:p['y0'] + PY, p['x0']:p['x0'] + PX]) for f in range(NF)]
+        Rfm = np.array([fixed_est(T, ana[f])['xy'] for f in range(NF)])
+        r0_worst = max(r0_worst, float(np.abs(Rfm[0]).max()))
+        loo = loo_iterate(ana, LOO_MAX, LOO_TOL)
+        loo_p = loo_iterate(pw, LOO_MAX, LOO_TOL)
+        loo_s = loo_iterate(ana, 5, 0.5)
+        if p['label'] == '(2,1)':
+            first21 = loo['first']
+        arm = dict(R_fm=Rfm - Rfm[0], R_loo=loo['state'], R_pipe_loo=loo_p['state'],
+                   R_loo_iter1=loo['first'] - loo['first'][0], R_loo_native_stop=loo_s['state'])
+        X, Y = p['centre_logged']
+        K = np.array([field_p[f, Y, X] - g[f] for f in range(NF)])
+        uc = np.array([p['centre_geometric']])
+        Kc = np.array([(inv(f, uc - g[f]) - uc)[0] for f in range(NF)])
+        band = [[float(np.ptp((inv(f, UW - g[f]) - UW)[..., a])) for a in range(2)] for f in range(NF)]
+        N = None
+        if (X, Y) in by:
+            o = np.array([by[(X, Y)][f] for f in range(NF)])
+            N = o - o[0]
+        rows[p['label']] = dict(centre_logged=[X, Y], accepted=N is not None, known=K[1:].tolist(),
+                                known_geometric_centre=Kc[1:].tolist(), native=None if N is None else N[1:].tolist(),
+                                deformation_range_xy=band[1:], **{a: arm[a][1:].tolist() for a in ARMS},
+                                fixed_point=dict(R_loo=dict(converged=loo['converged'], iterations=len(loo['rmsd']), last_rmsd=loo['rmsd'][-1]),
+                                                 R_pipe_loo=dict(converged=loo_p['converged'], iterations=len(loo_p['rmsd']), last_rmsd=loo_p['rmsd'][-1])),
+                                native_stop_rule=dict(converged=loo_s['converged'], rmsd=loo_s['rmsd']),
+                                R_pipe_loo_minus_R_loo_max_px=float(np.linalg.norm(arm['R_pipe_loo'] - arm['R_loo'], axis=1).max()),
+                                R_loo_minus_R_fm_max_px=float(np.linalg.norm(arm['R_loo'] - arm['R_fm'], axis=1).max()))
+    acc = [k for k, v in rows.items() if v['accepted']]
+    stack = lambda key: np.concatenate([np.array(rows[k][key]) for k in acc])
+    N, K, Kc = stack('native'), stack('known'), stack('known_geometric_centre')
+    metrics = {}
+    for a in ARMS:
+        Ra = stack(a)
+        metrics[a] = dict(native_minus_ref_rms_px=rms(N - Ra), ref_minus_known_rms_px=rms(Ra - K),
+                          slope_ref_on_known_xy=slope(Ra, K), corr_ref_known_xy=corr(Ra, K), slope_native_on_ref_xy=slope(N, Ra))
+        for k in acc:
+            rows[k].setdefault('norms', {})[a] = dict(
+                native_minus_ref=np.linalg.norm(np.array(rows[k]['native']) - np.array(rows[k][a]), axis=1).tolist(),
+                ref_minus_known=np.linalg.norm(np.array(rows[k][a]) - np.array(rows[k]['known']), axis=1).tolist())
+    routes = {}
+    for a in ROUTE_REFS:
+        fp_ok = a == 'R_fm' or all(rows[k]['fixed_point'][a]['converged'] for k in acc)
+        routes[a] = route(metrics[a]['native_minus_ref_rms_px'], metrics[a]['slope_ref_on_known_xy'][1]) if fp_ok \
+            else 'UNDETERMINED_NO_FIXED_POINT'
+    eff = routes['R_fm'] if len(set(routes.values())) == 1 else 'MIXED'
+    backends[b] = dict(accepted_patches=acc, native_minus_known_rms_px=rms(N - K), slope_native_on_known_xy=slope(N, K),
+                       metrics=metrics, routes=routes, route_effective=eff, reference_sensitive=len(set(routes.values())) > 1,
+                       secondary_report_only=dict(R_fm_minus_known_geometric_rms_px=rms(stack('R_fm') - Kc),
+                                                  R_loo_minus_known_geometric_rms_px=rms(stack('R_loo') - Kc)),
+                       patches=rows)
+    # C-REG21: the generalised code reproduces the reviewed (2,1) static R_fm and iteration-1 LOO continuous maxima
+    e02 = ref02['estimates'][b]
+    reg21[b] = dict(
+        R_fm_max_abs_vs_attempt02=float(np.abs(np.array(rows['(2,1)']['R_fm']) - np.array([e['analytic_fixed_template_continuous_Rfm'] for e in e02])[1:]).max()),
+        loo_iter1_unanchored_max_abs_vs_attempt02=float(np.abs(first21 - np.array([e['analytic_soo_continuous'] for e in e02])).max()))
+    # C-NAT: native/known extraction reproduces the retained shrinkage-attempt01 summary
+    ref = refsh[b]
+    nat[b] = dict(rms_err_px=abs(rms(N - K) - ref['rms_err_px']),
+                  slope_x=abs(slope(N, K)[0] - ref['slope_native_on_known_xy'][0]),
+                  slope_y=abs(slope(N, K)[1] - ref['slope_native_on_known_xy'][1]),
+                  rms_known_px=abs(rms(K) - ref['rms_known_px']), rms_native_px=abs(rms(N) - ref['rms_native_px']),
+                  accepted=len(acc), accepted_expected=EXPECT_ACCEPTED[b])
+
+checks.update(continuous_map_max_rel=gm_worst[0], frame0_max_abs_px=r0_worst, newton_all_converged=all_converged[0])
+controls['C-M'] = 'PASS' if gm_worst[0] <= LIM['cmap'] else 'FAIL'
+controls['C-NEWTON'] = 'PASS' if all_converged[0] else 'FAIL'
+controls['C-R0'] = 'PASS' if r0_worst <= LIM['r0'] else 'FAIL'
+controls['C-REG21'] = 'PASS' if all(max(v.values()) <= LIM['reg21'] for v in reg21.values()) else 'FAIL'
+controls['C-NAT'] = 'PASS' if all(max(v[k] for k in ('rms_err_px', 'slope_x', 'slope_y', 'rms_known_px', 'rms_native_px')) <= LIM['nat']
+                                  and v['accepted'] == v['accepted_expected'] for v in nat.values()) else 'FAIL'
+ok = all(v == 'PASS' for v in controls.values())
+res = dict(protocol='w4-objective-oracle/v1.1', amendment='w4-loaded-fixture/v2.1',
+           kind='offline inherited-objective oracle; diagnostic routing only, not a gate; no MotionCorr execution',
+           state='COMPLETE_CONTROLS_PASS' if ok else 'COMPLETE_CONTROLS_FAIL_NOT_CREDITED',
+           numpy=np.__version__, python=sys.version.split()[0], limits=LIM, routing_thresholds=ROUTE,
+           loo=dict(tol=LOO_TOL, max_iter=LOO_MAX), bound_inputs=bound, controls=controls, checks=checks,
+           window_controls=win, regression_21=reg21, native_extraction_regression=nat, backends=backends,
+           script_sha256=sha(Path(__file__).read_bytes()), seconds=time.time() - t0)
+OUT.write_text(json.dumps(res, indent=1, allow_nan=False) + '\n')
+print(json.dumps(dict(state=res['state'], controls=controls,
+                      routes={b: dict(v['routes'], effective=v['route_effective']) for b, v in backends.items()},
+                      metrics={b: {a: v['metrics'][a] for a in ROUTE_REFS} for b, v in backends.items()}), indent=1))
+raise SystemExit(0 if ok else 1)

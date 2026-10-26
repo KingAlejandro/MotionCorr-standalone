@@ -1,0 +1,11 @@
+{
+  "namespace": "/tmp/motioncorr-w4-repro-20261025-ed6d18d2-62f5-415c-8e49-a688c601a911",
+  "kind": "once-only reproduction of retained W4 offline calculations; not native accuracy or new estimator",
+  "input_package_sha256": "1333c4b89a435b8925891fedeff0295d500e80f63c430f36b27feca86d07cf96",
+  "started_utc": "2026-10-25T18:09:45.723403+00:00",
+  "steps": [],
+  "exit": 1,
+  "stdout": "{\"affinity\": [62], \"cpu_busy_fraction\": 0.0, \"mem_available\": \"185153904 kB\", \"allocated_ram_cap_bytes\": 2147483648, \"disk_cap_bytes\": 67108864, \"threads\": {\"OMP_NUM_THREADS\": \"1\", \"OPENBLAS_NUM_THREADS\": \"1\", \"MKL_NUM_THREADS\": \"1\", \"NUMEXPR_NUM_THREADS\": \"1\"}, \"input_sha256\": \"1333c4b89a435b8925891fedeff0295d500e80f63c430f36b27feca86d07cf96\", \"jobs\": [{\"argv\": [\"/usr/bin/time\", \"-v\", \"-o\", \"/tmp/motioncorr-w4-repro-20261025-ed6d18d2-62f5-415c-8e49-a688c601a911/out/w4_allpatch_decomposition.json.time\", \"/usr/bin/python3\", \"-I\", \"-B\", \"/tmp/motioncorr-w4-repro-20261025-ed6d18d2-62f5-415c-8e49-a688c601a911/scripts/w4_allpatch_decomposition.py\", \"/tmp/motioncorr-w4-repro-20261025-ed6d18d2-62f5-415c-8e49-a688c601a911/r275\", \"/tmp/motioncorr-w4-repro-20261025-ed6d18d2-62f5-415c-8e49-a688c601a911/src805\", \"/tmp/motioncorr-w4-repro-20261025-ed6d18d2-62f5-415c-8e49-a688c601a911/out/w4_allpatch_decomposition.json\"], \"exit\": 1, \"wall_s\": 0.16972899436950684, \"stdout\": \"\", \"stderr\": \"regenerated fixtures/affine_field.npy differs from pinned fixture\\n\"}], \"state\": \"FAIL_STOP_NO_RETRY\", \"output_bytes\": 3953896}\n",
+  "stderr": "",
+  "finished_utc": "2026-10-25T18:09:51.091402+00:00"
+}

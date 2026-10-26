@@ -1,0 +1,92 @@
+{
+  "phase": "C",
+  "affinity": [
+    62
+  ],
+  "cpu_busy_fraction": 0.0,
+  "mem_available": "185164188 kB",
+  "allocated_ram_cap_bytes": 2147483648,
+  "disk_cap_bytes": 67108864,
+  "input_sha256": "19bdd50fc3a5eb494180b56da7274bf38131287cc3156b1fede047ffb9b8870f",
+  "python_exe": "/usr/bin/python3",
+  "jobs": [
+    {
+      "name": "compare_json_control",
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/out/compare_json_control.time",
+        "/usr/bin/python3",
+        "-I",
+        "-B",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/scripts/compare_json_control.py",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/scripts/compare_json.py",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/out/control"
+      ],
+      "exit": 0,
+      "wall_s": 0.13363194465637207,
+      "stdout": "PASS {\"all_exit_0\": true, \"numeric_leaves_7\": true, \"max_abs_diff_0.5\": true, \"leaves_over_1e-6_is_2\": true, \"largest_paths\": true, \"structural_5\": true, \"structural_items\": true, \"top_level_ignore_applied\": true, \"without_ignore_skip_counted\": true, \"identical_pair_clean\": true}\n",
+      "stderr": ""
+    },
+    {
+      "name": "compare_decomposition",
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/out/compare_decomposition.time",
+        "/usr/bin/python3",
+        "-I",
+        "-B",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/scripts/compare_json.py",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/ref/allpatch-attempt01.json",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/retained/w4_allpatch_decomposition_v2.json",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/out/compare_decomposition.json",
+        "inputs",
+        "numpy",
+        "python",
+        "schema"
+      ],
+      "exit": 0,
+      "wall_s": 0.03393697738647461,
+      "stdout": "{\"numeric_leaves\": 473, \"max_abs_diff\": 5.95719029661268e-11, \"leaves_over_1e-6\": 0} 0 structural\n",
+      "stderr": ""
+    },
+    {
+      "name": "compare_shrinkage",
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/out/compare_shrinkage.time",
+        "/usr/bin/python3",
+        "-I",
+        "-B",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/scripts/compare_json.py",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/ref/shrinkage-attempt01.json",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/retained/w4_shrinkage.json",
+        "/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f/out/compare_shrinkage.json"
+      ],
+      "exit": 0,
+      "wall_s": 0.033911705017089844,
+      "stdout": "{\"numeric_leaves\": 354, \"max_abs_diff\": 0.0, \"leaves_over_1e-6\": 0} 0 structural\n",
+      "stderr": ""
+    }
+  ],
+  "state": "COMPLETE_EXIT0_NEEDS_REVIEW",
+  "output_bytes": 142001,
+  "outputs_sha256": {
+    "out/compare_decomposition.json": "e8fbe1785a91e3aeaa54fd7c70934e7652bf5762997acbcdf2e4914731ebee17",
+    "out/compare_decomposition.time": "f9939119057a23bbe30b2a3c52647b32a3cb81ed176425cd27ab53df351f46ac",
+    "out/compare_json_control.time": "b49b3dc1a49db896a2f07af948e25b78857dad86bc09f486bcfd80cdb9b536fe",
+    "out/compare_shrinkage.json": "61395484a90f8a3bd7572062a0a72de892902db8cf62ea1b5b9af32a127f1a6b",
+    "out/compare_shrinkage.time": "c098acdfc817f9135bed4e5af509637dcdcd3659f0447839484cd4e932a8fe9e",
+    "out/control/CONTROL.json": "511e38437534bb62235834453d036bca20bd260d951c33e0412a37a2907fad72",
+    "out/control/diff.json": "034aa8c764b5b18a9287435f019591ebdfd47a3b1dd8c5a41c528abd8ca5a559",
+    "out/control/identical.json": "a53cd88651b7fe2e7dd1a67ccbab49592e99c89d2f983ba83f9a9e1a2738f700",
+    "out/control/no_ignore.json": "bd784aecfeea49003fdfea95664225acfc5d79972ce1f3587fe86756b5942cb7",
+    "out/control/reproduced.json": "e0d38f4a64f32de31ea58c8985936a75ea66b94a552964e1f4615e6ddada530b",
+    "out/control/retained.json": "45d4637f3d6ec02d0287628beebf1ba6eecf6b0e0894b8d75ad801c1f71ccf26"
+  }
+}

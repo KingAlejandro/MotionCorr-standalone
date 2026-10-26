@@ -1,0 +1,214 @@
+{
+ "protocol": "affine-patch-oracle/v1",
+ "frozen_before_results": true,
+ "base": "b12a28ba4c45529f1002baeb0e9bde37e8ccb1ad",
+ "branch": "diag/affine-patch-oracle-20261022",
+ "inputs": {
+  "file_index_sha256": "31255dab8eef81ee05f68271ac665429db9a48498b240fbe85ebe228ea3c65c3",
+  "committed_receipt_index": "6ae486785334fca635cfc9ad9e86026d656f3943:docs/post_rc0/s1/residual_ccf_20261022/receipt-index.json",
+  "fixture_manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+  "raw_root": "/tmp/mc-residual-review.h52lh3/raw",
+  "file_index": "/tmp/mc-residual-review.h52lh3/receipts/file-index.json",
+  "fixtures": [
+   "fixtures/affine.mrcs",
+   "fixtures/affine_target.npy",
+   "fixtures/affine_field.npy",
+   "fixtures/MANIFEST.json"
+  ],
+  "per_backend": [
+   "runs/{b}-affine-on/capture/c1-i1-input.bin",
+   "runs/{b}-affine-on/capture/c1.json",
+   "runs/{b}-affine-on/capture/c2.json",
+   "runs/{b}-affine-on/state/global.txt"
+  ]
+ },
+ "geometry": {
+  "patch_label_yx": [
+   2,
+   1
+  ],
+  "x_range": [
+   0,
+   42
+  ],
+  "y_range": [
+   32,
+   64
+  ],
+  "size_xy": [
+   42,
+   32
+  ],
+  "geometric_centre_xy": [
+   20.5,
+   47.5
+  ],
+  "logged_centre_xy": [
+   20,
+   47
+  ],
+  "frame": [
+   128,
+   96
+  ],
+  "frames": 5,
+  "B": 150.0,
+  "nfx": 22,
+  "nfy": 32,
+  "search": 15,
+  "tolerance_px": 0.5,
+  "max_iter": 5,
+  "target_centre": [
+   64,
+   48
+  ],
+  "state_convention": "content moves by +s; CCF peak d = +s"
+ },
+ "limits": {
+  "translation_validity_band_px": 0.05,
+  "window_bias_px": 0.05,
+  "material_word_px": 0.05,
+  "material_is_gate": false
+ },
+ "gates": {
+  "G-W": {
+   "max_abs_weight_diff": 1e-06
+  },
+  "G-R": {
+   "render_vs_stored_frames_max_abs": 1e-05,
+   "field_vs_closed_form_max_abs": 1e-12,
+   "generator_cross_check_points": 1000,
+   "generator_cross_check_max_abs": 1e-12
+  },
+  "G-M": {
+   "continuous_vs_irfft2_rel_to_peak": 1e-09
+  },
+  "G-N": {
+   "candidate_replay_max_px": 1e-06
+  },
+  "G-X": {
+   "cuda_c2_c3_byte_identical": true
+  },
+  "G-E": {
+   "rel_ac_max": 0.001
+  },
+  "N-E": {
+   "must_exceed_rel_ac": 0.001,
+   "min_separation_factor_vs_baseline_max": 10.0
+  },
+  "G-CS": {
+   "frames": [
+    2,
+    3,
+    4
+   ],
+   "residual_ratio_max": 0.5,
+   "mutants": [
+    "sign_flipped",
+    "axis_swapped",
+    "zero_shift"
+   ]
+  },
+  "PC": {
+   "continuous_abs_px": 1e-06,
+   "integer_parabola_abs_px": 1e-06
+  },
+  "N-C": {
+   "reject_on_at_least_one_nonzero_offset": true
+  },
+  "WC": {
+   "zero_offset_abs": 1e-09,
+   "other_offsets": "reported, not gated"
+  }
+ },
+ "mutants": {
+  "E": {
+   "N-E1": "global shift sign flipped",
+   "N-E2": "global shift x<->y swapped",
+   "N-E3": "crop X +1",
+   "N-E4": "crop Y +1",
+   "N-E5": "window (1,2): X[42,84) Y[0,32)",
+   "N-E6": "role-swapped crop J[0:42,32:64] transposed",
+   "N-E7": "no global pre-shift"
+  },
+  "C": {
+   "N-C1": "expected -mu",
+   "N-C2": "expected (mu_y,mu_x)",
+   "N-C3": "expected mu+(1,0)",
+   "N-C4": "frame rendered with opposite sign"
+  }
+ },
+ "offsets": {
+  "zero": [
+   [
+    0,
+    0
+   ]
+  ],
+  "integer": [
+   [
+    1,
+    0
+   ],
+   [
+    0,
+    -2
+   ],
+   [
+    -3,
+    2
+   ]
+  ],
+  "fractional": [
+   [
+    0.25,
+    0
+   ],
+   [
+    0,
+    -0.5
+   ],
+   [
+    0.375,
+    -0.625
+   ],
+   [
+    -1.3,
+    0.7
+   ]
+  ]
+ },
+ "continuous_max": {
+  "method": "Newton on exact band-limited CCF, analytic gradient+Hessian, start at integer winner, max_iter=50, grad_norm<1e-12*peak"
+ },
+ "decomposition_order": [
+  "native-b",
+  "b-c",
+  "c-cT",
+  "cT-d",
+  "d-t"
+ ],
+ "expected": {
+  "pure_translation_oracle": "INVALID for frames 1-4 (frame-4 band about 0.74 px x, 0.56 px y)",
+  "fit": "UNRUN (one patch, 5 observations; native needs >18)",
+  "controls": "G-W,G-R,G-M,G-N,G-X,G-E,G-CS,PC,WC-zero PASS; all mutants rejected"
+ },
+ "labels": {
+  "PASS": "criterion met",
+  "FAIL": "criterion not met; retained, never re-gated",
+  "UNRUN": "not executed",
+  "measured": "reported quantity, no label"
+ },
+ "resources": {
+  "host": "mac",
+  "processes": 1,
+  "numeric_threads": 1,
+  "scratch_cap_mib": 512,
+  "python": "python3 -B",
+  "libs": "NumPy only",
+  "ssh": false,
+  "gpu": false,
+  "build": false
+ },
+ "attempts": "attemptNN-* files per attempt; failures retained; a failed control freezes protocol v2"
+}

@@ -1,0 +1,48 @@
+==== cpu
+S1 frame0 term [-0.087  0.443] winners native/double [-1, 0] [0, 0]
+S1 frame terms [[-0.087, 0.443], [0.035, 0.026], [-0.001, -0.025], [0.067, -0.032], [-0.063, -0.047]]
+S2 f 1 window [ 0.111 -0.21 ] deform [-0.009  0.008] total [ 0.102 -0.201]
+S2 f 2 window [ 0.139 -0.254] deform [-0.019  0.017] total [ 0.12  -0.238]
+S2 f 3 window [ 0.289 -0.531] deform [-0.034  0.028] total [ 0.255 -0.503]
+S2 f 4 window [ 0.206 -0.378] deform [-0.041  0.037] total [ 0.166 -0.342]
+S3 iter 1 flips 1 anch diff norms [0.    0.435 0.476 0.5   0.491]
+S3 iter 2 flips 0 anch diff norms [0.    0.097 0.032 0.062 0.008]
+S4 control 0.0
+S4 specified_double_5it_tol0.5                    it 5 conv False to Rfm [0.263 0.184 0.33  0.339] to t [0.3   0.286 0.584 0.441]
+S4 parabola_double_50it_tol1e-9                   it 50 conv False to Rfm [0.022 0.015 0.024 0.028] to t [0.232 0.271 0.568 0.39 ]
+S4 continuous_soo_double_5it_tol0.5               it 1 conv True to Rfm [0.107 0.059 0.124 0.11 ] to t [0.275 0.236 0.469 0.369]
+S4 continuous_soo_double_50it_tol1e-9             it 11 conv True to Rfm [0.    0.001 0.003 0.002] to t [0.226 0.267 0.562 0.381]
+S4 fixed_template_continuous_double_5it_tol0.5    it 1 conv True to Rfm [0.    0.001 0.001 0.001] to t [0.226 0.266 0.564 0.379]
+S4 native_captured_final                          it 2 conv True to Rfm [0.15  0.218 0.335 0.177] to t [0.345 0.445 0.899 0.556]
+==== cuda
+S1 frame0 term [-0.094 -0.028] winners native/double [0, 0] [0, 0]
+S1 frame terms [[-0.094, -0.028], [-0.113, -0.056], [0.024, 0.028], [-0.026, -0.002], [-0.157, -0.034]]
+S2 f 1 window [-0.121  0.199] deform [-0.006  0.007] total [-0.127  0.206]
+S2 f 2 window [-0.006 -0.001] deform [-0.015  0.015] total [-0.021  0.015]
+S2 f 3 window [ 0.124 -0.233] deform [-0.027  0.026] total [ 0.097 -0.207]
+S2 f 4 window [ 0.026 -0.075] deform [-0.031  0.034] total [-0.004 -0.041]
+S3 iter 1 flips 0 anch diff norms [0.    0.034 0.13  0.072 0.064]
+S3 iter 2 flips 0 anch diff norms [0.    0.287 0.195 0.188 0.316]
+S3 iter 3 flips 1 anch diff norms [0.    0.574 0.498 0.617 0.45 ]
+S3 iter 4 flips 0 anch diff norms [0.    0.144 0.262 0.118 0.165]
+S3 iter 5 flips 1 anch diff norms [0.    0.566 0.553 0.519 0.53 ]
+S4 control 0.0
+S4 specified_double_5it_tol0.5                    it 2 conv True to Rfm [0.11  0.183 0.365 0.397] to t [0.345 0.2   0.458 0.418]
+S4 parabola_double_50it_tol1e-9                   it 50 conv False to Rfm [0.046 0.014 0.065 0.11 ] to t [0.25  0.032 0.252 0.143]
+S4 continuous_soo_double_5it_tol0.5               it 2 conv True to Rfm [0.027 0.025 0.03  0.046] to t [0.268 0.05  0.222 0.06 ]
+S4 continuous_soo_double_50it_tol1e-9             it 11 conv True to Rfm [0.003 0.001 0.003 0.001] to t [0.239 0.026 0.226 0.042]
+S4 fixed_template_continuous_double_5it_tol0.5    it 1 conv True to Rfm [0.    0.001 0.001 0.001] to t [0.242 0.026 0.228 0.043]
+S4 native_captured_final                          it 5 conv False to Rfm [0.413 0.423 0.499 0.32 ] to t [0.504 0.433 0.413 0.278]
+{
+ "rows_per_accepted_patch": 5,
+ "native_requirement": "n_obs > 18 (motioncorr_runner.cpp: n_obs <= n_params -> no model)",
+ "patches_captured": 1,
+ "patches_in_grid": 9,
+ "cpu_patch_2_1_accepted": true,
+ "cuda_patch_2_1_accepted": false,
+ "max_rows_available_from_capture": {
+  "cpu": 5,
+  "cuda": 0
+ },
+ "verdict": "UNRUN: one patch gives at most 5 observations; at least 19 (four accepted patches) are required and only a nine-patch lattice constrains the fitted field"
+}

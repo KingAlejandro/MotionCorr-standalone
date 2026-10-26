@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
+"""W4 offline all-patch attribution for the affine case from retained #275 receipts.
+
+No MotionCorr execution. Inputs: extracted #275 receipts (6ae48678), exact-revision
+checker/generator sources exported from 805d9de2. Reuses the unchanged #267/#273
+checker `evaluate` for every field metric.
+
+Stages (production conventions read from src/motioncorr_runner.cpp at 805d9de2):
+  observation  obs[g] = local[g] - interp[0], interp[0] = 1.5*local[0] - 0.5*local[1]
+               at z = g + 0.5 (unit groups, --interpolate_shifts off), x = X/nx-0.5
+  fit          18-term cubic-in-z least squares, no constant term
+  application  model at integer z = frame index, plus global shift
+
+Amendment w4-loaded-fixture/v2 (2026-10-25). v1 (sha256 6e48337430f5…f061, retained
+unchanged) regenerated truth/target with the local NumPy and required byte-identical
+np.save output; that gate failed once on cpu64 (NumPy 1.26.4) and the FAIL is retained.
+v2 changes only the fixture block: it loads the ORIGINAL pinned affine_field.npy,
+affine_target.npy and affine.mrcs (the retained checker's own input path,
+check_motion_diagnostics.py:183-185), verifies their sha256 pins, and requires a
+completed control-D diagnostic (w4_fixture_diag.py) with adoptable=true, whose sha256
+is recorded. The file-index.json hash is now also pinned. Everything else is v1.
+
+usage: w4_allpatch_decomposition_v2.py R275 SRC805 PINNED_FIXTURE_DIR DIAG.json OUT.json
+"""
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+
+R275, SRC, FIX, DIAG, OUT = (Path(a) for a in sys.argv[1:6])
+sys.dont_write_bytecode = True
+sys.path[:0] = [str(SRC / "tools"), str(SRC / "test-data")]
+import generate_motion_diagnostics as gen  # noqa: E402
+import check_motion_diagnostics as chk  # noqa: E402
+from motion_field import read_motion_star  # noqa: E402
+
+PINNED = {  # protocol.json pins (7d203929) and #275 file index
+    "fixtures/affine_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+    "fixtures/affine_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+    "runs/cpu-affine-on/state/global.txt": "7ea5a84098e60e01b29bc24d4ed7ca2654c64f279c8a3cdafc4e331e38bfc1e3",
+    "runs/cpu-affine-on/state/model.txt": "ca59f476a672094620d13ae5433447774a277ed96bb97e3cf76f288400392523",
+    "runs/cpu-affine-on/out/affine.star": "f560b29e3d4521e1b4d5ca97fa3d649181970b49db90714e9a257709d20c97a8",
+}
+sha = lambda b: hashlib.sha256(b).hexdigest()
+FILE_INDEX_SHA = "31255dab8eef81ee05f68271ac665429db9a48498b240fbe85ebe228ea3c65c3"
+MRCS_SHA = "1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a"
+index_bytes = (R275 / "file-index.json").read_bytes()
+if sha(index_bytes) != FILE_INDEX_SHA:
+    raise SystemExit("binding mismatch file-index.json")
+index = json.loads(index_bytes)["files"]
+bound = {"file-index.json": FILE_INDEX_SHA}
+diag_bytes = DIAG.read_bytes()
+diag = json.loads(diag_bytes)
+if not (diag.get("protocol") == "w4-loaded-fixture/v2" and diag.get("state") == "COMPLETE" and diag.get("adoptable") is True):
+    raise SystemExit("control-D diagnostic missing, incomplete or not adoptable")
+bound["control-D diagnostic"] = sha(diag_bytes)
+for b in ("cpu", "cuda"):
+    for rel in ("state/global.txt", "state/model.txt", "out/affine.star", "checker.json",
+                "out/affine.log"):
+        k = f"runs/{b}-affine-on/{rel}"
+        h = sha((R275 / k).read_bytes())
+        if index[k]["sha256"] != h or (k in PINNED and PINNED[k] != h):
+            raise SystemExit(f"binding mismatch {k}")
+        bound[k] = h
+
+r = gen.recipe("affine")
+import io
+from motion_field import read_mrc  # noqa: E402
+loaded = {}
+for name, pin in (("fixtures/affine_field.npy", PINNED["fixtures/affine_field.npy"]),
+                  ("fixtures/affine_target.npy", PINNED["fixtures/affine_target.npy"]),
+                  ("fixtures/affine.mrcs", MRCS_SHA)):
+    raw = (FIX / Path(name).name).read_bytes()
+    if sha(raw) != pin or index[name]["sha256"] != pin:
+        raise SystemExit(f"pinned {name} hash mismatch")
+    loaded[name] = raw
+    bound[name + " (loaded original)"] = pin
+truth = np.load(io.BytesIO(loaded["fixtures/affine_field.npy"]), allow_pickle=False)
+target = np.load(io.BytesIO(loaded["fixtures/affine_target.npy"]), allow_pickle=False)
+movie, _ = read_mrc(FIX / "affine.mrcs")
+NX, NY, NF, PIX = r["nx"], r["ny"], r["frames"], r["pixel_size"]
+ROI = [12, 84, 12, 116]
+q = gen.grid(r)
+
+
+def basis(x, y, z):
+    x2, y2, xy, z2, z3 = x * x, y * y, x * y, z * z, z * z * z
+    return np.stack([z, z2, z3, x*z, x*z2, x*z3, x2*z, x2*z2, x2*z3,
+                     y*z, y*z2, y*z3, y2*z, y2*z2, y2*z3, xy*z, xy*z2, xy*z3], axis=-1)
+
+
+def fit(rows):
+    """rows: (X, Y, z, sx, sy). Least squares as the runner's 18-term model."""
+    a = np.array(rows, dtype=float)
+    A = basis(a[:, 0] / NX - 0.5, a[:, 1] / NY - 0.5, a[:, 2])
+    cx = np.linalg.lstsq(A, a[:, 3], rcond=None)[0]
+    cy = np.linalg.lstsq(A, a[:, 4], rcond=None)[0]
+    return cx, cy, np.linalg.cond(A)
+
+
+def field_of(gx, gy, cx, cy):
+    out = np.zeros((NF, NY, NX, 2))
+    u, v = q[..., 0] / NX - 0.5, q[..., 1] / NY - 0.5
+    for f in range(NF):
+        B = basis(u, v, np.full_like(u, float(f)))
+        out[f, ..., 0] = gx[f] + B @ cx if cx is not None else gx[f]
+        out[f, ..., 1] = gy[f] + B @ cy if cy is not None else gy[f]
+    return out
+
+
+def metrics(field):
+    e = chk.evaluate(r, movie, target, truth, field, ROI)
+    keep = lambda d: {k: round(v, 6) for k, v in d.items()}
+    return dict(field_px=keep(e["field_px"]), field_angstrom=keep(e["field_angstrom"]),
+                accuracy=e["accuracy_status"], sampling=e["sampling_status"],
+                global_mean_error_px=keep(e["global_mean_error_px"]),
+                local_error_px=keep(e["local_error_px"]),
+                per_frame_rms_px=[round(p["rms"], 6) for p in e["per_frame_px"]])
+
+
+def truth_at(f, X, Y):
+    return truth[f, int(Y), int(X)] if float(X).is_integer() and float(Y).is_integer() else \
+        -(np.array([3.25, -2.125]) * f / (NF - 1) + (np.array([X, Y]) - np.array([NX, NY]) / 2)
+          @ (f / (NF - 1) * np.array([[0.012, -0.008], [0.006, -0.010]])).T)
+
+
+CENTRES = [(20, 15), (62, 15), (104, 15), (20, 47), (62, 47), (104, 47), (20, 79), (62, 79), (104, 79)]
+LABEL = {c: f"({i // 3 + 1},{i % 3 + 1})" for i, c in enumerate(CENTRES)}
+report = dict(schema="w4-offline-allpatch/2-loaded-fixture", inputs=bound, numpy=np.__version__,
+              python=sys.version.split()[0], backends={})
+
+for b in ("cpu", "cuda"):
+    base = R275 / f"runs/{b}-affine-on"
+    g = np.array([[float(t) for t in l.split()[1:]] for l in (base / "state/global.txt").read_text().splitlines()])
+    lines = (base / "state/model.txt").read_text().splitlines()
+    mc = np.array([[float(t) for t in l.split()[1:]] for l in lines[1:]])
+    rcx, rcy = mc[:, 0], mc[:, 1]
+    star = read_motion_star(base / "out/affine.star")
+    rep = report["backends"][b] = {}
+    # 1. Retained checker reproduced from the STAR (the #273 verdict's own input).
+    sfield = star.field(star.frames, q[..., 0].ravel(), q[..., 1].ravel()).reshape(NF, NY, NX, 2)
+    rep["star_field"] = metrics(sfield)
+    retained = json.loads((base / "checker.json").read_text())
+    rep["star_field_equals_retained_checker"] = all(
+        abs(rep["star_field"]["field_px"][k] - retained["field_px"][k]) < 1e-6 for k in ("rms", "p95", "max"))
+    # 2. Runtime field: full-precision global state and pre-write coefficients.
+    rfield = field_of(g[:, 0], g[:, 1], rcx, rcy)
+    rep["runtime_field"] = metrics(rfield)
+    d = np.linalg.norm((rfield - sfield)[:, 12:84, 12:116], axis=-1)
+    rep["runtime_minus_star_field_px"] = dict(max=float(d.max()), rms=float(np.sqrt((d * d).mean())))
+    rep["star_coeff_minus_runtime_max_abs"] = float(max(np.abs(star.coeff_x - rcx).max(), np.abs(star.coeff_y - rcy).max()))
+    rep["star_global_minus_runtime_max_abs"] = float(max(np.nanmax(np.abs(star.global_shift_x - g[:, 0])), np.nanmax(np.abs(star.global_shift_y - g[:, 1]))))
+    # 3. Global stage versus truth at the frame centre (gauge: frame 0 fixed).
+    tg = np.array([truth_at(f, NX / 2, NY / 2) for f in range(NF)])
+    rep["global_minus_centre_truth_px"] = [[round(x, 6) for x in row] for row in (g - tg)]
+    # 4. Observation table from the STAR (print precision) with the runtime time convention.
+    obs = [(s["rlnCoordinateX"], s["rlnCoordinateY"], s["rlnMicrographFrameNumber"] - 1 + 0.5,
+            s["rlnMicrographShiftX"], s["rlnMicrographShiftY"]) for s in star.local_shifts]
+    accepted = sorted({(o[0], o[1]) for o in obs})
+    rep["accepted_patches"] = [LABEL[c] for c in CENTRES if c in accepted]
+    rep["observation_rows"] = len(obs)
+    fcx, fcy, cond = fit(obs)
+    rep["refit_from_star_obs"] = dict(
+        design_condition=float(cond),
+        max_abs_coeff_minus_runtime=float(max(np.abs(fcx - rcx).max(), np.abs(fcy - rcy).max())),
+        field_minus_runtime_max_px=float(np.linalg.norm((field_of(g[:, 0], g[:, 1], fcx, fcy) - rfield)[:, 12:84, 12:116], axis=-1).max()))
+    naive = [(o[0], o[1], o[2] - 0.5, o[3], o[4]) for o in obs]
+    ncx, ncy, _ = fit(naive)
+    rep["refit_star_obs_naive_integer_time_field_minus_runtime_max_px"] = float(
+        np.linalg.norm((field_of(g[:, 0], g[:, 1], ncx, ncy) - rfield)[:, 12:84, 12:116], axis=-1).max())
+
+    # 5. Known observations through the production observation convention and fit.
+    def ideal_local(c, f, gs):
+        return truth_at(f, *c) - gs[f]
+
+    def ideal_rows(centres, gs, mode="production", offset=(0.0, 0.0)):
+        rows = []
+        for c in centres:
+            cc = (c[0] + offset[0], c[1] + offset[1])
+            L = np.array([ideal_local(cc, f, gs) for f in range(NF)])
+            for f in range(NF):
+                if mode == "production":   # local - interp[0] at z = f + 0.5
+                    o, z = L[f] - (1.5 * L[0] - 0.5 * L[1]), f + 0.5
+                else:                      # diagnostic counterfactual: same time as application
+                    o, z = L[f], float(f)
+                rows.append((c[0], c[1], z, o[0], o[1]))
+        return rows
+
+    def floor(centres, gs, mode="production", offset=(0.0, 0.0)):
+        cx, cy, _ = fit(ideal_rows(centres, gs, mode, offset))
+        return metrics(field_of(gs[:, 0], gs[:, 1], cx, cy)), (cx, cy)
+
+    rep["known_obs_floor"] = {}
+    acc_centres = [c for c in CENTRES if c in accepted]
+    for name, cen, gs, mode, off in (
+            ("production_convention_backend_global_accepted", acc_centres, g, "production", (0, 0)),
+            ("production_convention_backend_global_all9", CENTRES, g, "production", (0, 0)),
+            ("production_convention_backend_global_window_centroid", acc_centres, g, "production", (0.5, 0.5)),
+            ("production_convention_truth_global_accepted", acc_centres, tg, "production", (0, 0)),
+            ("counterfactual_integer_time_backend_global_accepted", acc_centres, g, "integer", (0, 0)),
+    ):
+        rep["known_obs_floor"][name], coeffs = floor(cen, gs, mode, off)
+        if name == "production_convention_backend_global_accepted":
+            icx, icy = coeffs
+    # 6. Observation error and its share of the native field error (linear fit).
+    ideal = {(row[0], row[1], row[2]): row[3:] for row in ideal_rows(acc_centres, g)}
+    per_patch = {}
+    err_rows = []
+    for o in obs:
+        e = np.array(o[3:]) - np.array(ideal[(o[0], o[1], o[2])])
+        err_rows.append((o[0], o[1], o[2], e[0], e[1]))
+        per_patch.setdefault(LABEL[(o[0], o[1])], []).append([round(e[0], 4), round(e[1], 4)])
+    rep["obs_minus_known_obs_px"] = per_patch
+    rep["obs_error_rms_px_by_patch"] = {k: round(float(np.sqrt(np.mean(np.sum(np.square(v), axis=1)))), 4)
+                                        for k, v in per_patch.items()}
+    ecx, ecy, _ = fit(err_rows)
+    prop = field_of(np.zeros(NF), np.zeros(NF), ecx, ecy)[:, 12:84, 12:116]
+    pv = np.linalg.norm(prop, axis=-1)
+    rep["field_from_obs_error_only_px"] = dict(rms=float(np.sqrt((pv * pv).mean())), max=float(pv.max()))
+    floor_field = field_of(g[:, 0], g[:, 1], icx, icy)[:, 12:84, 12:116] - truth[:, 12:84, 12:116]
+    fv = np.linalg.norm(floor_field, axis=-1)
+    rep["field_from_known_obs_floor_px"] = dict(rms=float(np.sqrt((fv * fv).mean())), max=float(fv.max()))
+    tot = (field_of(g[:, 0], g[:, 1], fcx, fcy)[:, 12:84, 12:116] - truth[:, 12:84, 12:116])
+    resid = tot - floor_field - prop
+    rep["linearity_residual_max_px"] = float(np.abs(resid).max())
+
+OUT.write_text(json.dumps(report, indent=1, allow_nan=False) + "\n")
+print(json.dumps(report, indent=1))

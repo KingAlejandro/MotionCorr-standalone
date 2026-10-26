@@ -1,0 +1,24 @@
+{
+ "stage1_exit": 0,
+ "stage2_exit": 0,
+ "stderr": "",
+ "R_rt_A": {
+  "rms": 1.1810173087655126e-07,
+  "p95": 2.2902424499369738e-07,
+  "max": 3.8762887957150493e-07
+ },
+ "R_hyb_A": {
+  "rms": 3.871083284091235e-07,
+  "p95": 6.031993431745195e-07,
+  "max": 8.722430434365694e-07
+ },
+ "native_rt_A": {
+  "rms": 0.0016299282067549336,
+  "p95": 0.003577974985441564,
+  "max": 0.00935566878611662
+ },
+ "ped32_status": "NO_LOCAL_RETAINED",
+ "pass": true
+}
+uv run --no-project --with numpy python -I $W/scripts/test_w8_pipeline.py    0.94s user 0.09s system 81% cpu 1.272 total
+exit=0

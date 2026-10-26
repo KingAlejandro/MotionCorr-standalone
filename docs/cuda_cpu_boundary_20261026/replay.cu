@@ -66,11 +66,17 @@ int main(int argc,char** argv) try {
   for(int f:{0,4}){MultidimArray<fComplex> spec(cy,cx/2+1);MultidimArray<float> map(cy,cx);
    load(in+"/spectrum-"+std::to_string(f)+".c64",spec.data,bytes);NewFFT::inverseFourierTransform(spec,map);
    mc_boundary::write("map-"+std::to_string(f)+".f32",map.data,(size_t)cx*cy*sizeof(float));}
- } else if(mode=="inverse" && backend=="cuda") {
-  std::vector<fComplex> stack(n*count);for(int f:{0,4})load(in+"/spectrum-"+std::to_string(f)+".c64",stack.data()+f*count,bytes);
+ } else if((mode=="inverse" || mode=="inverse-valid") && backend=="cuda") {
+  std::vector<fComplex> stack(n*count, fComplex(0.0f, 0.0f));for(int f:{0,4})load(in+"/spectrum-"+std::to_string(f)+".c64",stack.data()+f*count,bytes);
   cufftComplex* d=nullptr;float* real=nullptr;ck(cudaMalloc(&d,n*bytes));ck(cudaMalloc(&real,(size_t)n*cx*cy*sizeof(float)));
+  const std::vector<fComplex> before_projection = stack;
   ck(cudaMemcpy(d,stack.data(),n*bytes,cudaMemcpyHostToDevice));ck(mc_cuda::projectHermitianColumns(d,cx,cy,n));
   ck(cudaMemcpy(stack.data(),d,n*bytes,cudaMemcpyDeviceToHost));
+  if(mode=="inverse-valid") {
+   if(std::memcmp(stack.data(),before_projection.data(),n*bytes)!=0)
+    throw std::runtime_error("valid inverse control changed input during projection");
+   mc_boundary::write("projection-noop.txt","PASS\n",5);
+  }
   for(int f:{0,4})mc_boundary::write("projected-spectrum-"+std::to_string(f)+".c64",stack.data()+f*count,bytes);
   int dims[2]={cy,cx};cufftHandle plan;cf(cufftCreate(&plan));size_t work=0;
   cf(cufftMakePlanMany(plan,2,dims,nullptr,1,count,nullptr,1,cx*cy,CUFFT_C2R,n,&work));cf(cufftExecC2R(plan,d,real));

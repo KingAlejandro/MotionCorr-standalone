@@ -18,14 +18,14 @@ and writes the repo's `write_mrc_stack` MRC (mode 2, float32, un-flipped) and `S
 | Check | Result |
 |---|---|
 | Independent re-render (a separate formula, no W5 code) vs the W5-code frames | max abs diff 4.3e-14 |
-| Imaginary part discarded when taking the real part | max 1.2e-06 (vel1), 1.2e-15 (vel0) |
+| Imaginary part discarded when taking the real part | max 1.1e-06 (vel1), 1.2e-15 (vel0) |
 | Stored float32 frames vs the W5 float64 frames | vel0: 0 (integer shifts, exact); vel1: max abs diff 3.8e-06 (float32 rounding of values near 100) |
 | sha256 of the W5 float64 frames and of the written files, per movie | `results/nc/movies/render_report.json` |
 | W5 replay (`indep.py` `replay`, prod and iso weight, 5 / 50 iterations) on the W5 spectra vs W5 `factorial.json` trajectories | max 0.0 px (all 64 probes) |
 | The same replay on the stored frames vs on the W5 spectra | vel0: 0.0 px; vel1: at most 2.0e-03 px (vel1-N5 prod 50 it), otherwise below 5e-07 px |
 | Row order / format null control | frame 0 equals the base image exactly (max diff 0.0); flipud differs by 4.42 and fliplr by 4.00, so a flip would be seen; MRC read-back equals what was written |
 | Movie vs the K267 `integer.mrcs` (same motion: vel0 N=5 is the retained integer case) | 5 of 61,440 pixels differ, by one float32 ulp (7.6e-06) |
-| Native `vel0-N5-prod` vs the K267 `integer` arms | flags-off and H2g bit-identical (0.2636 / 0.3927 and 0.4461 / 0.3786 Å); DCg and DCg+H2g within 2e-5 Å at the production stop; DCg at 50 iterations 0.378 Å here against 0.234 Å there |
+| Native `vel0-N5-prod` vs the K267 `integer` arms | flags-off and H2g bit-identical (0.2636 / 0.3927 and 0.4461 / 0.3786 Å); DCg and DCg+H2g within 3e-5 Å at the production stop; DCg at 50 iterations 0.378 Å here against 0.234 Å there |
 
 The last row says: the movies are the retained fixture to float32 rounding, and the DCg-alone 50-iteration trajectory is sensitive to a one-ulp input change (it is not a stable quantity here).
 
@@ -131,7 +131,7 @@ H2g alone matches map32 better (RMS within 20% in 17 rows against 5; verdict agr
 
 ## 6. Regressions versus arm a (any increase in RMS, p95 or max, runtime or STAR, no threshold; `results/nc-scores.json`, `regressions`)
 
-48 rows (24 cells, runtime and STAR identical): H2g 8 cells, DCg 15 cells, DCg+H2g 1 cell. Verdict losses (PASS to FAIL): DCg at vel0-N9-iso production stop (0.051 to 3.888 Å RMS), and H2g at vel0-N20-prod and vel1-N20-prod at 50 iterations (0.152 to 0.432 and 0.198 to 0.433 Å; W6 had the same two losses for H-P in map32). **DCg+H2g has one increase: vel0-N5-iso at the production stop, RMS 0.070 to 0.082, p95 0.110 to 0.126, max 0.110 to 0.126 Å, PASS to PASS** (W6: 0.035 / 0.051 to 0.082 in double / map32).
+48 rows (24 cells, each listed once for runtime and once for STAR with identical values): H2g 16 cells, DCg 7 cells, DCg+H2g 1 cell. Verdict losses (PASS to FAIL): DCg at vel0-N9-iso production stop (0.051 to 3.888 Å RMS), and H2g at vel0-N20-prod and vel1-N20-prod at 50 iterations (0.152 to 0.432 and 0.198 to 0.433 Å; W6 had the same two losses for H-P in map32). **DCg+H2g has one increase: vel0-N5-iso at the production stop, RMS 0.070 to 0.082, p95 0.110 to 0.126, max 0.110 to 0.126 Å, PASS to PASS** (W6: 0.035 / 0.051 to 0.082 in double / map32).
 Guard (DCg+H2g, global peaks): 8 fires in 10,048 peaks, all offset > 1 px, in vel0-N9 and vel0-N20 production weight (2 each, both stops); H2g alone 95 in 8,768 (15 not negative definite, 80 offset > 1 px).
 
 ## Limits

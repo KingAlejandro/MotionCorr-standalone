@@ -38,6 +38,7 @@
 static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
+#include "src/experiment_ccf_dc.h" // default-off native CCF DC conditioning request check; hooks only with MC_EXPERIMENT_CCF_DC
 #include "src/cpu_dose_symmetry_mode.h"
 #include "src/native_movie_staging.h"
 #include "src/defect_neighbours.h"
@@ -251,6 +252,9 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 		REPORT_ERROR("--ingest nvcomp needs a build configured with USE_NVCOMP=ON; this one is not.");
 #endif
 #endif
+	// Refuse an unsupported conditioning/tap request here, before any device query.
+	experimentCcfDcCheckRequest(do_own);
+
 	// Initialise verb for non-parallel execution
 	verb = 1;
 
@@ -596,6 +600,12 @@ void MotioncorrRunner::initialise()
 			pre_exposure_ori_micrographs.push_back(pre_exposure_given_all[imic]);
 		}
 	}
+
+#ifdef MC_EXPERIMENT_CCF_DC
+	if (std::getenv("MC_DIAG_MODEL_OUT") && fn_micrographs.size() != 1)
+		REPORT_ERROR("MC_DIAG_MODEL_OUT captures exactly one movie per process; this run selected " +
+		             std::to_string(fn_micrographs.size()));
+#endif
 
 	// Make all output directories if necessary
 	FileName prevdir="";
@@ -4088,6 +4098,23 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 
 skip_fitting:
+#ifdef MC_EXPERIMENT_CCF_DC // verbatim #269 capture_runtime_model.patch body; one movie, created exclusively
+	// Observation only: runtime coefficients before lossy STAR serialization.
+	if (const char *path = std::getenv("MC_DIAG_MODEL_OUT")) {
+		FILE *f = std::fopen(path, "wx");
+		if (!f) REPORT_ERROR("Cannot create MC_DIAG_MODEL_OUT exclusively");
+		std::fprintf(f, "{\"global\":[");
+		for (size_t i = 0; i < xshifts.size(); ++i)
+			std::fprintf(f, "%s[%.17g,%.17g]", i ? "," : "", double(xshifts[i] * prescaling), double(yshifts[i] * prescaling));
+		const auto *observed = dynamic_cast<const ThirdOrderPolynomialModel *>(mic.model);
+		std::fprintf(f, "],\"coeff_x\":[");
+		for (int i = 0; i < 18; ++i) std::fprintf(f, "%s%.17g", i ? "," : "", observed ? double(observed->coeffX(i)) : 0.0);
+		std::fprintf(f, "],\"coeff_y\":[");
+		for (int i = 0; i < 18; ++i) std::fprintf(f, "%s%.17g", i ? "," : "", observed ? double(observed->coeffY(i)) : 0.0);
+		std::fprintf(f, "],\"local_enabled\":%s}\n", observed ? "true" : "false");
+		if (std::fclose(f)) REPORT_ERROR("Cannot close MC_DIAG_MODEL_OUT");
+	}
+#endif
 	MC_STAGE("release alignment");
 #ifdef _CUDA_ENABLED
 	// Local alignment scratch belongs to this movie, but reconstruction no longer
@@ -4866,6 +4893,9 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 				}
 			}
 			RCTOC(TIMING_CCF_CALC);
+#ifdef MC_EXPERIMENT_CCF_DC
+			if (experimentCcfDcZero(is_global, EXP_DC_CPU, 1)) DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);
+#endif
 
 			RCTIC(TIMING_CCF_IFFT);
 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());

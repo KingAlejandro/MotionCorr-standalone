@@ -152,6 +152,13 @@ target_link_libraries(motioncorr_core PUBLIC
     PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
     motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)
 
+# EXPERIMENT ONLY: native CCF DC conditioning (CPU and CUDA), selected at run time by
+# MC_EXPERIMENT_CCF_DC_ARM (unset = none). Default OFF compiles none of the hooks, but
+# every build refuses a request for them rather than ignoring it.
+option(MC_EXPERIMENT_CCF_DC "Build the default-off native CCF DC conditioning experiment hooks" OFF)
+if(MC_EXPERIMENT_CCF_DC)
+    target_compile_definitions(motioncorr_core PUBLIC MC_EXPERIMENT_CCF_DC)
+endif()
 option(TIMING "Enable internal timing" OFF)
 if(TIMING)
     add_compile_definitions(TIMING)
@@ -251,6 +258,62 @@ if(BUILD_TESTING)
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
     add_test(NAME PatchRetryState COMMAND patch_retry_state)
+    # EXPERIMENT ONLY CCF DC stage oracle and restoring mutants.
+    # Each mutant replaces one unique line of a production translation unit in a
+    # copy linked ahead of motioncorr_core; the oracle must reject it (exit 1).
+    if(MC_EXPERIMENT_CCF_DC)
+        add_executable(experiment_ccf_dc_stage tests/experiment_ccf_dc_stage.cpp)
+        target_link_libraries(experiment_ccf_dc_stage PRIVATE motioncorr_core)
+        add_test(NAME ExperimentCcfDcStage COMMAND experiment_ccf_dc_stage)
+        set_tests_properties(ExperimentCcfDcStage PROPERTIES TIMEOUT 1800)
+        function(mc_experiment_dc_mutant mutant source from to)
+            set(_src "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
+            set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_src}")
+            file(READ "${_src}" _text)
+            string(FIND "${_text}" "${from}" _first)
+            string(FIND "${_text}" "${from}" _last REVERSE)
+            if(_first EQUAL -1 OR NOT _first EQUAL _last)
+                message(FATAL_ERROR "experiment mutant ${mutant}: target missing or not unique in ${source}")
+            endif()
+            string(REPLACE "${from}" "${to}" _text "${_text}")
+            get_filename_component(_name "${source}" NAME)
+            set(_copy "${CMAKE_CURRENT_BINARY_DIR}/experiment_mutants/${mutant}_${_name}")
+            file(WRITE "${_copy}" "${_text}")
+            add_executable(experiment_ccf_dc_stage_${mutant} tests/experiment_ccf_dc_stage.cpp "${_copy}")
+            get_target_property(_defs motioncorr_core COMPILE_DEFINITIONS)
+            get_target_property(_opts motioncorr_core COMPILE_OPTIONS)
+            target_compile_definitions(experiment_ccf_dc_stage_${mutant} PRIVATE ${_defs})
+            if(_opts)
+                target_compile_options(experiment_ccf_dc_stage_${mutant} PRIVATE ${_opts})
+            endif()
+            target_include_directories(experiment_ccf_dc_stage_${mutant} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda")
+            target_link_libraries(experiment_ccf_dc_stage_${mutant} PRIVATE motioncorr_core motioncorr_openmp)
+            add_test(NAME ExperimentCcfDcStageMutant_${mutant}
+                     COMMAND experiment_ccf_dc_stage_${mutant} --expect-failure)
+            set_tests_properties(ExperimentCcfDcStageMutant_${mutant} PROPERTIES TIMEOUT 1800)
+        endfunction()
+        mc_experiment_dc_mutant(cpu_restore src/motioncorr_runner.cpp
+            "DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);" "(void)0;")
+        mc_experiment_dc_mutant(cpu_wrong_bin src/motioncorr_runner.cpp
+            "DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);"
+            "DIRECT_A2D_ELEM(Fccs[tid], 0, 1) = fComplex(0.f, 0.f);")
+        mc_experiment_dc_mutant(cpu_stage_swap src/motioncorr_runner.cpp
+            "experimentCcfDcZero(is_global, EXP_DC_CPU, 1)" "experimentCcfDcZero(!is_global, EXP_DC_CPU, 1)")
+        if(CUDA)
+            mc_experiment_dc_mutant(cuda_single_restore src/acc/cuda/cuda_alignpatch.cu
+                "experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);\n            ALIGN_LAUNCH(cudaGetLastError());\n        }"
+                "(void)0;\n            ALIGN_LAUNCH(cudaGetLastError());\n        }")
+            mc_experiment_dc_mutant(cuda_batched_restore src/acc/cuda/cuda_alignpatch.cu
+                "experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);\n                ALIGN_LAUNCH"
+                "(void)0;\n                ALIGN_LAUNCH")
+            mc_experiment_dc_mutant(cuda_single_resident src/acc/cuda/cuda_alignpatch.cu
+                "experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);\n            ALIGN_LAUNCH(cudaGetLastError());\n        }"
+                "experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>((float2*)d_Fframes, (size_t)data_nfy * data_nfx, n_frames);\n            ALIGN_LAUNCH(cudaGetLastError());\n        }")
+            mc_experiment_dc_mutant(cuda_single_stage_swap src/acc/cuda/cuda_alignpatch.cu
+                "experimentCcfDcZero(is_global, EXP_DC_CUDA_SINGLE, n_frames)"
+                "experimentCcfDcZero(!is_global, EXP_DC_CUDA_SINGLE, n_frames)")
+        endif()
+    endif()
     # #257: device-free exact-rational controls, shared with the actual CUDA
     # kernel test. Host replays establish arithmetic only, not GPU execution.
     add_executable(peak_fit_arithmetic tests/peak_fit_arithmetic.cpp)
@@ -477,6 +540,11 @@ if(BUILD_TESTING)
         add_test(NAME HotPixelRngDeterminism
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_hotpixel_rng_determinism.py
                 --binary $<TARGET_FILE:motioncorr>)
+        # Request handling for the default-off CCF DC hooks: every build refuses a
+        # request it cannot honour; an experiment build also checks the witness.
+        add_test(NAME CcfDcRequest
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_ccf_dc_request.py
+                --binary $<TARGET_FILE:motioncorr> $<$<BOOL:${MC_EXPERIMENT_CCF_DC}>:--experiment>)
         add_test(NAME RunnerExposure
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --case exposure)

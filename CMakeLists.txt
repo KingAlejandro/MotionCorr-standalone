@@ -602,6 +602,10 @@ if(BUILD_TESTING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_tap_field.py)
         add_test(NAME CcfDcRowsPure
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_native_rows.py)
+        # Stage C driver, dry run only: fake producers, fake pins, hooked grader and guard; no real MotionCorr row.
+        add_test(NAME CcfDcStageCDriver
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_stagec_driver.py)
+        set_tests_properties(CcfDcStageCDriver PROPERTIES TIMEOUT 1500)
         if(MC_EXPERIMENT_CCF_DC)
             set(_ccf_dc_rows_args "")
             if(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)

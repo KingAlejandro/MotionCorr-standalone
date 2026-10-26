@@ -13,6 +13,8 @@ GROUPS = {
     "tests": ["tests/experiment_ccf_dc_stage.cpp", "tests/test_ccf_dc_request.py", "tools/test_ccf_dc_tap_field.py",
               "tools/test_ccf_dc_native_rows.py"],
     "consumers_new": ["tools/ccf_dc_tap_field.py", "tools/ccf_dc_native_rows.py", "test-data/generate_ccf_dc_n_controls.py"],
+    "stage_c_draft": ["tools/ccf_dc_stagec_driver.py", "tools/stageC_guard.sh", "tools/test_ccf_dc_stagec_driver.py",
+                      D + "evidence/stageC/STAGEC_PINS.json", D + "evidence/stageC/make_stagec_pins.py", D + "evidence/stageC/DRIVER_PLAN.md"],
     "scorers_and_math_unchanged": ["tools/check_motion_diagnostics.py", "tools/check_realistic_motion.py", "tools/motion_field.py",
                                    "test-data/generate_motion_diagnostics.py", "test-data/generate_known_motion_fixture.py"],
     "plan_and_ledger": [D + f for f in ("DESIGN.md", "CONTROL_PLAN.md", "make_ledger.py", "ledger.csv", "pairs.csv", "repro.csv", "counts.json",

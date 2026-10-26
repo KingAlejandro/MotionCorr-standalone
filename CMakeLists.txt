@@ -707,9 +707,11 @@ if(BUILD_TESTING)
                 COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_dc_hook_gpu_refusal.py
                     --binary $<TARGET_FILE:motioncorr>)
         endif()
-        add_test(NAME LocalCcfCaptureCli
-            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_local_ccf_capture_cli.py
-                --binary $<TARGET_FILE:motioncorr>)
+        if(MC_EXPERIMENT_CCF_DC)
+            add_test(NAME LocalCcfCaptureCli
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_local_ccf_capture_cli.py
+                    --binary $<TARGET_FILE:motioncorr>)
+        endif()
         add_test(NAME OutputTreeComparator
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compare_output_trees.py)
         set_tests_properties(OutputTreeComparator PROPERTIES TIMEOUT 120)

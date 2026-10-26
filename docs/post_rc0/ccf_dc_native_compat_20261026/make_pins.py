@@ -17,7 +17,8 @@ GROUPS = {
                                    "test-data/generate_motion_diagnostics.py", "test-data/generate_known_motion_fixture.py"],
     "plan_and_ledger": [D + f for f in ("DESIGN.md", "CONTROL_PLAN.md", "make_ledger.py", "ledger.csv", "pairs.csv", "repro.csv", "counts.json",
                                         "review/ROUND1_REPORT.md", "review/ROUND1_RESPONSE.md",
-                                        "review/ROUND2_REPORT.md", "review/ROUND2_RESPONSE.md")],
+                                        "review/ROUND2_REPORT.md", "review/ROUND2_RESPONSE.md",
+                                        "review/ROUND3_REPORT.md", "review/ROUND3_RESPONSE.md")],
     "retained_references": [D + "evidence/retained_render_report.json", D + "evidence/retained_cpu_reference.json",
                             D + "evidence/retained_n_runs/INDEX.json"],
 }

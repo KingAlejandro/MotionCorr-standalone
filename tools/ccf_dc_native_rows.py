@@ -283,7 +283,7 @@ def grade_k267(run, fixtures, case, backend, arm, iso_expected=False, has_witnes
     expect_tap, status, why = _tap_state(run, has_witness, tap_expected)
     if status:
         return dict(row, row_status=status, reason=why)
-    row["runtime_representation"] = "SCORED" if expect_tap else "NOT_REQUESTED"
+    row["runtime_representation"] = "PENDING" if expect_tap else "NOT_REQUESTED"
     if expect_tap:
         try:
             tap = bridge.load_tap(run / "tap.json", r["frames"])
@@ -298,16 +298,19 @@ def grade_k267(run, fixtures, case, backend, arm, iso_expected=False, has_witnes
             row["tap_rounded_vs_star_max_px"] = diff.tolist()
             row["tap_vs_star_max_px"] = np.abs(field - sf).max(axis=(0, 1, 2)).tolist()   # the writer's own rounding loss
             if diff.max() > STAR_FIELD_TOL_PX:
-                return dict(row, row_status="INVALID", reason="tap field (rounded as the STAR writer rounds) and the serialized STAR field disagree")
+                return dict(row, row_status="INVALID", runtime_representation="INVALID",
+                        reason="tap field (rounded as the STAR writer rounds) and the serialized STAR field disagree")
             row["local_enabled"] = tap["local_enabled"]
         except bridge.TapError as e:
-            return dict(row, row_status="INVALID", reason=f"tap: {e}")
+            return dict(row, row_status="INVALID", runtime_representation="INVALID", reason=f"tap: {e}")
         except Exception as e:   # bridge or STAR read-back failed: fail closed, not a checker result
-            return dict(row, row_status="INVALID", reason=f"tap bridge or STAR read-back: {type(e).__name__}: {e}")
+            return dict(row, row_status="INVALID", runtime_representation="INVALID",
+                        reason=f"tap bridge or STAR read-back: {type(e).__name__}: {e}")
         try:
             row["tap"] = cmd.check_case(fixtures, case, cand)
         except Exception as e:   # the unchanged checker's own refusals are results, not harness failures
             row["tap"] = dict(checker_error=f"{type(e).__name__}: {e}")
+        row["runtime_representation"] = "SCORED"
     return _finish(row)
 
 
@@ -340,19 +343,25 @@ def grade_n(run, controls, name, backend, arm, iso_expected=False, has_witness=T
     expect_tap, status, why = _tap_state(run, has_witness, tap_expected)
     if status:
         return dict(row, row_status=status, reason=why)
-    row["runtime_representation"] = "SCORED" if expect_tap else "NOT_REQUESTED"
+    row["runtime_representation"] = "PENDING" if expect_tap else "NOT_REQUESTED"
     if expect_tap:
         try:
             tap = bridge.load_tap(run / "tap.json", man["frames"])
         except bridge.TapError as e:
-            return dict(row, row_status="INVALID", reason=f"tap: {e}")
+            return dict(row, row_status="INVALID", runtime_representation="INVALID", reason=f"tap: {e}")
+        if tap["local_enabled"] or any(v != 0 for v in tap["coeff_x"] + tap["coeff_y"]):
+            # N controls run 1x1 patches (global alignment only): a local model in the tap contradicts the declared run
+            return dict(row, row_status="INVALID", runtime_representation="INVALID",
+                        reason="tap reports a local model but the N control is global-only")
         g = np.array(tap["global"])
         row["runtime"] = n_score(g, truth, roi)
         row["traj_rms_px_runtime"] = float(np.sqrt(np.mean((g - truth) ** 2) * 2))
         row["runtime_minus_STAR_max_px"] = float(np.abs(g - star_g).max())
         row["rounded_runtime_minus_STAR_max_px"] = float(np.abs(np.vectorize(star_format)(g) - star_g).max())
         if row["rounded_runtime_minus_STAR_max_px"] > STAR_FIELD_TOL_PX:
-            return dict(row, row_status="INVALID", reason="tap global shifts (rounded as the STAR writer rounds) and STAR disagree")
+            return dict(row, row_status="INVALID", runtime_representation="INVALID",
+                        reason="tap global shifts (rounded as the STAR writer rounds) and STAR disagree")
+        row["runtime_representation"] = "SCORED"
     return _finish(row)
 
 

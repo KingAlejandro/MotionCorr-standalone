@@ -409,6 +409,40 @@ class NativeRows(unittest.TestCase):
         self.assertEqual(row["row_status"], "INVALID", row)
         self.assertNotIn("runtime", row)
 
+    def test_invalid_tap_rows_are_not_labelled_scored(self):
+        base = self.produce("affine_both", "K", "affine", "both")
+        ok = self.grade(base)
+        self.assertEqual(ok["runtime_representation"], "SCORED")
+        k = self.copy(base, "k_label")
+        (k / "tap.json").write_text('{"status":"incomplete"}\n')
+        row = self.grade(k)
+        self.assertEqual((row["row_status"], row["runtime_representation"]), ("INVALID", "INVALID"))
+        k2 = self.copy(base, "k_label_shift")
+        tap = json.loads((k2 / "tap.json").read_text())
+        tap["global"][2][0] += 1e-3
+        (k2 / "tap.json").write_text(json.dumps(tap))
+        row = self.grade(k2)
+        self.assertEqual((row["row_status"], row["runtime_representation"]), ("INVALID", "INVALID"))
+        n = self.copy(self.produce("n_v0n5_both", "N", "vel0_N5", "both", frames=5), "n_label")
+        (n / "tap.json").write_text('{"status":"incomplete"}\n')
+        row = rows.grade_n(n, self.nc, "vel0_N5", "cpu", "both", iso_expected=ISO)
+        self.assertEqual((row["row_status"], row["runtime_representation"]), ("INVALID", "INVALID"))
+
+    def test_n_tap_with_a_local_model_is_invalid(self):
+        base = self.produce("n_v0n5_both", "N", "vel0_N5", "both", frames=5)
+        ok = rows.grade_n(base, self.nc, "vel0_N5", "cpu", "both", iso_expected=ISO)
+        self.assertEqual((ok["row_status"], ok["runtime_representation"]), ("SCORED", "SCORED"))
+        for tag, edit in (("n_local_flag", lambda t: t.update(local_enabled=True)),
+                          ("n_local_coeff", lambda t: t["coeff_x"].__setitem__(4, 0.25))):
+            run = self.copy(base, tag)
+            tap = json.loads((run / "tap.json").read_text())
+            edit(tap)
+            (run / "tap.json").write_text(json.dumps(tap))
+            row = rows.grade_n(run, self.nc, "vel0_N5", "cpu", "both", iso_expected=ISO)
+            self.assertEqual((row["row_status"], row["runtime_representation"]), ("INVALID", "INVALID"), tag)
+            # the flag case is caught by the N guard; coefficients with the flag off are already refused by the bridge
+            self.assertTrue("global-only" in row["reason"] or "local coefficients are nonzero" in row["reason"], row["reason"])
+
     def test_def_build_row_is_star_only_by_declaration(self):
         k = self.copy(self.produce("affine_both", "K", "affine", "both"), "k_def_style")
         (k / "tap.json").unlink()

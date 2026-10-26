@@ -1,0 +1,50 @@
+lease /tmp/motioncorr-dcnative-gpu2-cpu80-87.lock acquired 2026-10-26T17:39:09Z
+lease /tmp/motioncorr-cuda-boundary-cpu80-87.lock acquired 2026-10-26T17:39:09Z
+lease /tmp/motioncorr-gpu2-correctness.lock acquired 2026-10-26T17:39:09Z
+lease /tmp/motioncorr-build.lock acquired 2026-10-26T17:39:09Z
+== admission inside lease 2026-10-26T17:39:09Z
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+pid, gpu_uuid, used_gpu_memory [MiB]
+affinity: pid 3965752's current affinity list: 80-87
+8
+ 17:39:09 up 98 days,  7:06, 28 users,  load average: 1.33, 1.16, 1.74
+cmake version 3.28.3
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+3.12.3 2.5.3
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+src tar sha: c1a276265e0af07e18d84cc10896c0b98be514a6f0839c95526b024cc7a65a0e  git: 94e3957029221292463565be7c13707f6836dd1c
+== configure def [] 2026-10-26T17:39:09Z
+configure-def rc=0
+== build def 2026-10-26T17:39:15Z
+build-def rc=0
+== ctest def 2026-10-26T17:42:12Z
+ctest-def rc=0
+cuda        =  23.00 sec*proc (16 tests)
+hardware    =  23.00 sec*proc (16 tests)
+
+Total Test time (real) =  32.70 sec
+== configure exp [-DMC_EXPERIMENT_CCF_DC=ON] 2026-10-26T17:42:44Z
+configure-exp rc=0
+== build exp 2026-10-26T17:42:50Z
+build-exp rc=0
+== ctest exp 2026-10-26T17:46:13Z
+ctest-exp rc=0
+cuda        =  22.73 sec*proc (16 tests)
+hardware    =  22.73 sec*proc (16 tests)
+
+Total Test time (real) =  75.61 sec
+== configure iso [-DMC_EXPERIMENT_CCF_DC=ON -DMC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT=ON] 2026-10-26T17:47:28Z
+configure-iso rc=0
+== build iso 2026-10-26T17:47:34Z
+build-iso rc=0
+== ctest iso 2026-10-26T17:51:14Z
+ctest-iso rc=0
+cuda        =  22.26 sec*proc (16 tests)
+hardware    =  22.26 sec*proc (16 tests)
+
+Total Test time (real) = 122.86 sec
+== done 2026-10-26T17:53:17Z

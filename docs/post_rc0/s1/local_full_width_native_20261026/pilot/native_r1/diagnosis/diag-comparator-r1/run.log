@@ -1,0 +1,32 @@
+{"utc": "2026-10-26T23:06:20Z", "locks": ["/tmp/motioncorr-b2-cpu32-47.lock", "/tmp/motioncorr-cpu64-bench.lock", "/tmp/motioncorr-damping-cpu32-47.lock", "/tmp/motioncorr-dc-oracle-cpu-32-39.lock", "/tmp/motioncorr-dc-oracle-cpu-40-47.lock", "/tmp/motioncorr-dc-tierc-cpu32-47.lock", "/tmp/motioncorr-w6-cpu40-47.lock", "/tmp/motioncorr-w7-cpu40-47.lock"], "cpus": "32-47", "command": ["bash", "/tmp/motioncorr-lfw-v5-20261026/diag-comparator-r1/run.sh"]}
+Mon Oct 26 23:06:20 UTC 2026
+ 23:06:20 up 328 days, 13:04, 27 users,  load average: 0.15, 0.13, 0.10
+               total        used        free      shared  buff/cache   available
+Mem:           226Gi        50Gi        95Gi        38Gi       121Gi       176Gi
+Swap:             0B          0B          0B
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda1       1.3T  1.2T   81G  94% /
+    PID PSR %CPU COMMAND
+3642150  54 50.0 python3 /tmp/motioncorr-lfw-v5-20261026/lane.py bash /tmp/motioncorr-lfw-v5-20261026/diag-comparator-r1/run.sh
+3642095  47  1.9 sshd: ubuntu [priv]
+2722253   4  1.0 node /usr/local/bin/t3 serve --host 127.0.0.1 --port 3773 --base-dir /home/ubuntu/.t3
+1735907  32  0.7 /usr/sbin/rsyslogd -n -iNONE
+1388940  15  0.2 /tmp/doppio-theme-plan-20261022/env/bin/python -m src.main --project /tmp/doppio-theme-plan-20261022/project --yes --no-browser
+1777319   4  0.1 /var/ossec/bin/wazuh-syscheckd
+1389370   2  0.1 /tmp/doppio-theme-plan-20261022/linux/doppio-desktop --type=renderer --enable-crash-reporter=db116e94-edda-4c81-a690-03c15d31e0c7,no_channel --user-data-dir=/tmp/doppio-theme-plan-20261022/linux-home/app-data/ccpem/doppio/electron --app-path=/tmp/doppio-theme-plan-20261022/linux/resources/app.asar --enable-sandbox --no-sandbox --remote-debugging-port=0 --disable-gpu-compositing --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=7 --time-ticks-at-unix-epoch=-1764669737454008 --launch-time-ticks=27994606515342 --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,15032944969892776518,6678877359785616269,262144 --disable-features=SpareRendererForSitePerProcess --variations-seed-version --doppio-theme-mode=dark
+ 292988  53  0.1 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+3164981   3  0.1 /home/lzi33989/.t3/runtime/versions/0.1.1-nightly.20261019.3348/t3 serve --host 127.0.0.1 --port 3780
+3300564  12  0.1 /usr/bin/containerd
+3601652  30  0.1 /home/nicholls/.vscode-server/extensions/anthropic.claude-code-2.1.310-linux-x64/resources/native-binary/claude --output-format stream-json --verbose --input-format stream-json --max-thinking-tokens=31999 --permission-prompt-tool=stdio --resume=79a648ca-1077-4899-824d-c183e63f8238 --setting-sources=user,project,local --permission-mode=auto --debug --debug-to-stderr --enable-auth-status --no-chrome --replay-user-messages
+comparator sha: 53449d2da682305c8c11e3ed3efb91103530196e481ac075b00f90e3d5ea0f47
+ 23:06:20 up 328 days, 13:04, 27 users,  load average: 0.15, 0.13, 0.10
+pid 3642158's current affinity list: 32-47
+== A) gate-style invocation (root A = durable copy), reproduces the retained STOP
+DIFFERENT files=10 gated=7 differing=2
+rc=1
+== B) root A = the baseline copy at the ORIGINAL scratch root
+IDENTICAL files=10 gated=7 differing=0
+rc=0
+== before/after hashes of the saved trees
+fd2b295c7044b5ecb48dfae0d6046730eff70b6be12090fb0e8be00804a5e3e5  -
+edec2a64147f28fc0155acf95b5f57aceab39b5e9fe2841d652e32d289779058  -

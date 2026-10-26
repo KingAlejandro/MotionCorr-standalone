@@ -1,0 +1,216 @@
+{
+  "status": "AUDIT_PASS",
+  "scientific_promotion": "BLOCKED",
+  "scope": "noisy and affine only; saved fields and STAR; no fit/native/image analysis",
+  "numerical_audit_tolerance_A": 1e-12,
+  "scientific_limits_A": [
+    0.2,
+    0.4,
+    0.8
+  ],
+  "inputs": {
+    "fixture_manifest": {
+      "path": "/tmp/motioncorr-b2-retained-challenge-20261026/v2fixtures/MANIFEST.json",
+      "sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc"
+    },
+    "source": {
+      "revision": "e28ffb10c9189a5a5054bf7e6e51027f560766a6",
+      "motion_field.py": "d72cfad7175368fa6d0727c2727c49780328951c6f4d3ecc20e9ac662ac2e810"
+    },
+    "truth": {
+      "noisy": {
+        "path": "/tmp/motioncorr-b2-retained-challenge-20261026/v2fixtures/noisy_field.npy",
+        "sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+        "roi": [
+          12,
+          84,
+          12,
+          116
+        ]
+      },
+      "affine": {
+        "path": "/tmp/motioncorr-b2-retained-challenge-20261026/v2fixtures/affine_field.npy",
+        "sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+        "roi": [
+          12,
+          84,
+          12,
+          116
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "case": "noisy",
+      "arm": "OFF",
+      "local_enabled": true,
+      "runtime": {
+        "rms": 2.342955203317165,
+        "p95": 4.37657059107991,
+        "max": 9.903898811468052,
+        "verdict": "FAIL"
+      },
+      "STAR": {
+        "rms": 2.342962317432139,
+        "p95": 4.376569274771697,
+        "max": 9.903940696298713,
+        "verdict": "FAIL"
+      },
+      "model_sha256": "772c65747a9e24b022f494dd1f363b50bed6dd7ffa84663b9e17f229c01fa683",
+      "STAR_sha256": "9dc77e8ad53879aa40e7f4ad8ac2523e4b70ceb2e620097302202bee69ca8171"
+    },
+    {
+      "case": "noisy",
+      "arm": "B2",
+      "local_enabled": true,
+      "runtime": {
+        "rms": 3.587249811986128,
+        "p95": 7.098329835246421,
+        "max": 19.563704821791916,
+        "verdict": "FAIL"
+      },
+      "STAR": {
+        "rms": 3.587232257611049,
+        "p95": 7.098171922826418,
+        "max": 19.563545784803686,
+        "verdict": "FAIL"
+      },
+      "model_sha256": "15ff99e1b49ecb55e18b9ce88c9de0bdb6470f350b45c9094f0e2862050b573c",
+      "STAR_sha256": "dd929a362e7629ecee8d1672927d2e8d8e59ef8e3a85b468cb326a33871c33bd"
+    },
+    {
+      "case": "noisy",
+      "arm": "UP_only",
+      "local_enabled": true,
+      "runtime": {
+        "rms": 1.6453708531561488,
+        "p95": 3.337290305991788,
+        "max": 7.284025716813742,
+        "verdict": "FAIL"
+      },
+      "STAR": {
+        "rms": 1.6453973835300504,
+        "p95": 3.3372789185622946,
+        "max": 7.2837842240675865,
+        "verdict": "FAIL"
+      },
+      "saved_metric_max_abs_diff_A": 6.217248937900877e-15,
+      "model_sha256": "9de5409895486ea04305a91fdf3c1350d5ddcb18559443fb3ca6a6fc99931325",
+      "STAR_sha256": "144b900f9e2283303b2966acb3d6261b906efda84fd1d857214e14efcfe93d3a"
+    },
+    {
+      "case": "noisy",
+      "arm": "UP_B2",
+      "local_enabled": true,
+      "runtime": {
+        "rms": 1.902570068408318,
+        "p95": 4.200286643702108,
+        "max": 9.294777041495406,
+        "verdict": "FAIL"
+      },
+      "STAR": {
+        "rms": 1.9025867107108656,
+        "p95": 4.200096445958943,
+        "max": 9.294979895568087,
+        "verdict": "FAIL"
+      },
+      "saved_metric_max_abs_diff_A": 1.7763568394002505e-15,
+      "model_sha256": "87ee345c9ab9c74e6e69a1c6cd7c5e74386cb1b4311167d97b460df6d46362e9",
+      "STAR_sha256": "ef1355115b44ae2aa75417d874f6606a3cb8a6b9545697cbab0666d13e507c1c"
+    },
+    {
+      "case": "affine",
+      "arm": "OFF",
+      "local_enabled": true,
+      "runtime": {
+        "rms": 0.4024373652304783,
+        "p95": 0.7424886693718217,
+        "max": 0.9110675279088501,
+        "verdict": "FAIL"
+      },
+      "STAR": {
+        "rms": 0.4024474872274806,
+        "p95": 0.7424910391221369,
+        "max": 0.9111179324984139,
+        "verdict": "FAIL"
+      },
+      "model_sha256": "9fdd6ca44c7f718f49c83cc72575196954fd4b817cd2a6ea789052737a92ab7d",
+      "STAR_sha256": "f560b29e3d4521e1b4d5ca97fa3d649181970b49db90714e9a257709d20c97a8"
+    },
+    {
+      "case": "affine",
+      "arm": "B2",
+      "local_enabled": true,
+      "runtime": {
+        "rms": 0.31717376456527235,
+        "p95": 0.6567533901876701,
+        "max": 0.696313074112521,
+        "verdict": "FAIL"
+      },
+      "STAR": {
+        "rms": 0.3171640545839877,
+        "p95": 0.6567361931064725,
+        "max": 0.6963008481218057,
+        "verdict": "FAIL"
+      },
+      "model_sha256": "c5cacc4f68eb43701eace96a12ee6113769e9dba3eb20f161d7c142f865ae1d5",
+      "STAR_sha256": "28ed642b771a574224e108ace01506b0a1768a8afa771a4d834eaf4c00a652b6"
+    },
+    {
+      "case": "affine",
+      "arm": "UP_only",
+      "local_enabled": true,
+      "runtime": {
+        "rms": 0.11703506022519784,
+        "p95": 0.260334133944742,
+        "max": 0.5373596162885222,
+        "verdict": "PASS"
+      },
+      "STAR": {
+        "rms": 0.11704036245839815,
+        "p95": 0.26033737282632224,
+        "max": 0.537390780106525,
+        "verdict": "PASS"
+      },
+      "saved_metric_max_abs_diff_A": 0.0,
+      "model_sha256": "2e6b501c7c2a7dd47ee57fe8fb106c2de31c2f3ce6e9586e09c1fe611564a032",
+      "STAR_sha256": "895a8008276fe29cb68969fd4967105ac6be8693966d008bc96934721d677a56"
+    },
+    {
+      "case": "affine",
+      "arm": "UP_B2",
+      "local_enabled": true,
+      "runtime": {
+        "rms": 0.11521936086748896,
+        "p95": 0.2569730321394685,
+        "max": 0.5159533681558085,
+        "verdict": "PASS"
+      },
+      "STAR": {
+        "rms": 0.11522616660000087,
+        "p95": 0.256991911881249,
+        "max": 0.515974571149509,
+        "verdict": "PASS"
+      },
+      "saved_metric_max_abs_diff_A": 1.1102230246251565e-16,
+      "model_sha256": "17c6a1c10a8eebce057b9d5b6b72817357139d7cc010b631626048d8465ec7cb",
+      "STAR_sha256": "a45bc76983a2eab733549e0444384973fdfd49f5243cfef3c46225fe86fdeb39"
+    }
+  ],
+  "noisy_UP_B2_minus_UP_only_A": {
+    "runtime": {
+      "rms": 0.25719921525216916,
+      "p95": 0.8629963377103196,
+      "max": 2.0107513246816637
+    },
+    "STAR": {
+      "rms": 0.2571893271808152,
+      "p95": 0.8628175273966483,
+      "max": 2.0111956715005004
+    }
+  },
+  "P2_no_worsening": "FALSIFIED",
+  "seconds": 0.3438701629638672,
+  "numpy": "2.4.2"
+}

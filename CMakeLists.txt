@@ -159,6 +159,18 @@ option(MC_EXPERIMENT_CCF_DC "Build the default-off native CCF DC conditioning ex
 if(MC_EXPERIMENT_CCF_DC)
     target_compile_definitions(motioncorr_core PUBLIC MC_EXPERIMENT_CCF_DC)
 endif()
+# TEST ONLY: compile-time isotropic global CCF weight (x frequency over pnx instead of nfx),
+# CPU and CUDA, solely to reproduce the retained W5 N controls. Not a product feature: there is
+# no run-time switch, the local stage is unchanged, and it needs the experiment option so every
+# binary can report its identity in the witness (test_only_isotropic_global_weight).
+option(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT "TEST ONLY: isotropic global CCF weight (retained N controls)" OFF)
+if(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+    if(NOT MC_EXPERIMENT_CCF_DC)
+        message(FATAL_ERROR "MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT requires -DMC_EXPERIMENT_CCF_DC=ON")
+    endif()
+    message(WARNING "TEST-ONLY BINARY: isotropic global CCF weight is compiled in. Not a product build.")
+    target_compile_definitions(motioncorr_core PUBLIC MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+endif()
 option(TIMING "Enable internal timing" OFF)
 if(TIMING)
     add_compile_definitions(TIMING)
@@ -299,6 +311,22 @@ if(BUILD_TESTING)
             "DIRECT_A2D_ELEM(Fccs[tid], 0, 1) = fComplex(0.f, 0.f);")
         mc_experiment_dc_mutant(cpu_stage_swap src/motioncorr_runner.cpp
             "experimentCcfDcZero(is_global, EXP_DC_CPU, 1)" "experimentCcfDcZero(!is_global, EXP_DC_CPU, 1)")
+        if(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+            mc_experiment_dc_mutant(cpu_iso_wrong_norm src/motioncorr_runner.cpp
+                "const RFLOAT weight_x_norm = is_global ? (RFLOAT)pnx : (RFLOAT)nfx;"
+                "const RFLOAT weight_x_norm = (RFLOAT)nfx;")
+            mc_experiment_dc_mutant(cpu_iso_leaks_local src/motioncorr_runner.cpp
+                "const RFLOAT weight_x_norm = is_global ? (RFLOAT)pnx : (RFLOAT)nfx;"
+                "const RFLOAT weight_x_norm = (RFLOAT)pnx;")
+        endif()
+        if(CUDA AND MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+            mc_experiment_dc_mutant(cuda_iso_wrong_norm src/acc/cuda/cuda_alignpatch.cu
+                "const int weight_x_norm = is_global ? pnx : nfx;" "const int weight_x_norm = nfx;")
+            mc_experiment_dc_mutant(cuda_iso_leaks_local src/acc/cuda/cuda_alignpatch.cu
+                "const int weight_x_norm = is_global ? pnx : nfx;" "const int weight_x_norm = pnx;")
+            mc_experiment_dc_mutant(cuda_iso_key_ignores_stage src/acc/cuda/cuda_alignpatch.cu
+                "if (is_global != other.is_global) return false;" "(void)0;")
+        endif()
         if(CUDA)
             mc_experiment_dc_mutant(cuda_single_restore src/acc/cuda/cuda_alignpatch.cu
                 "experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);\n            ALIGN_LAUNCH(cudaGetLastError());\n        }"
@@ -544,7 +572,8 @@ if(BUILD_TESTING)
         # request it cannot honour; an experiment build also checks the witness.
         add_test(NAME CcfDcRequest
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_ccf_dc_request.py
-                --binary $<TARGET_FILE:motioncorr> $<$<BOOL:${MC_EXPERIMENT_CCF_DC}>:--experiment>)
+                --binary $<TARGET_FILE:motioncorr> $<$<BOOL:${MC_EXPERIMENT_CCF_DC}>:--experiment>
+                $<$<BOOL:${MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT}>:--iso>)
         add_test(NAME RunnerExposure
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --case exposure)

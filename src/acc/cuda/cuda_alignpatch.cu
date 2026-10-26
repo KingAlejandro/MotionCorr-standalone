@@ -345,7 +345,13 @@ struct PatchAlignmentWorkspace::Impl {
     struct Key {
         int device, pnx, pny, n_frames, ccf_nx, ccf_ny, search_range;
         RFLOAT scaled_B, downsample;
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+        bool is_global; // the weight differs by stage in this test-only build
+#endif
         bool equals(const Key &other) const {
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+            if (is_global != other.is_global) return false;
+#endif
             return device == other.device && pnx == other.pnx && pny == other.pny &&
                 n_frames == other.n_frames && ccf_nx == other.ccf_nx &&
                 ccf_ny == other.ccf_ny && search_range == other.search_range &&
@@ -497,7 +503,11 @@ bool cudaAlignPatchDeviceWithWorkspace(
     const size_t sz_shifts  = (size_t)n_frames * sizeof(float);
 
     const PatchAlignmentWorkspace::Impl::Key requested = {device_id, pnx, pny, n_frames, ccf_nx,
-        ccf_ny, search_range, scaled_B, ccf_downsample};
+        ccf_ny, search_range, scaled_B, ccf_downsample
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+        , is_global
+#endif
+        };
     const bool setup_required = !w.valid || !w.key.equals(requested);
     if (setup_required) {
         if (!w.release()) REPORT_ERROR("CUDA patch workspace replacement cleanup failed");
@@ -575,8 +585,14 @@ bool cudaAlignPatchDeviceWithWorkspace(
         }
         dim3 blockWeights(16, 16);
         dim3 gridWeights((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+        // TEST ONLY (compile-time): x frequency over the full width pnx for the global stage.
+        const int weight_x_norm = is_global ? pnx : nfx;
+#else
+        const int weight_x_norm = nfx;
+#endif
         computeWeightsKernel<<<gridWeights, blockWeights>>>(w.d_weight,
-            ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, (float)scaled_B);
+            ccf_nfx, ccf_nfy, ccf_nfy_half, weight_x_norm, nfy, (float)scaled_B);
         ALIGN_LAUNCH(cudaGetLastError());
     }
     // Borrow aliases; only the workspace's scoped owners can release them.

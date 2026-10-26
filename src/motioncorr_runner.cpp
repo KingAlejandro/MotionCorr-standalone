@@ -602,9 +602,7 @@ void MotioncorrRunner::initialise()
 	}
 
 #ifdef MC_EXPERIMENT_CCF_DC
-	if (std::getenv("MC_DIAG_MODEL_OUT") && fn_micrographs.size() != 1)
-		REPORT_ERROR("MC_DIAG_MODEL_OUT captures exactly one movie per process; this run selected " +
-		             std::to_string(fn_micrographs.size()));
+	experimentCcfDcPrepareTap(fn_micrographs.size());
 #endif
 
 	// Make all output directories if necessary
@@ -4098,11 +4096,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 
 skip_fitting:
-#ifdef MC_EXPERIMENT_CCF_DC // verbatim #269 capture_runtime_model.patch body; one movie, created exclusively
+#ifdef MC_EXPERIMENT_CCF_DC // verbatim #269 capture_runtime_model.patch body; the file was created by experimentCcfDcPrepareTap()
 	// Observation only: runtime coefficients before lossy STAR serialization.
 	if (const char *path = std::getenv("MC_DIAG_MODEL_OUT")) {
-		FILE *f = std::fopen(path, "wx");
-		if (!f) REPORT_ERROR("Cannot create MC_DIAG_MODEL_OUT exclusively");
+		FILE *f = std::fopen(path, "w");
+		if (!f) REPORT_ERROR("Cannot open MC_DIAG_MODEL_OUT");
 		std::fprintf(f, "{\"global\":[");
 		for (size_t i = 0; i < xshifts.size(); ++i)
 			std::fprintf(f, "%s[%.17g,%.17g]", i ? "," : "", double(xshifts[i] * prescaling), double(yshifts[i] * prescaling));
@@ -4852,6 +4850,10 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 
 	// Initialize B factor weight
 	weight.reshape(Fref);
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+	// TEST ONLY (compile-time): x frequency over the full width pnx for the global stage (W5 'iso').
+	const RFLOAT weight_x_norm = is_global ? (RFLOAT)pnx : (RFLOAT)nfx;
+#endif
 	RCTIC(TIMING_PREP_WEIGHT);
 	#pragma omp parallel for num_threads(n_threads)
 	for (int y = 0; y < ccf_nfy; y++) {
@@ -4859,7 +4861,11 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		RFLOAT ly2 = ly * (RFLOAT)ly / (nfy * (RFLOAT)nfy);
 
 		for (int x = 0; x < ccf_nfx; x++) {
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+			RFLOAT dist2 = ly2 + x * (RFLOAT)x / (weight_x_norm * weight_x_norm);
+#else
 			RFLOAT dist2 = ly2 + x * (RFLOAT)x / (nfx * (RFLOAT)nfx);
+#endif
 			DIRECT_A2D_ELEM(weight, y, x) = exp(- 2 * dist2 * scaled_B); // 2 for Fref and Fframe
 		}
 	}

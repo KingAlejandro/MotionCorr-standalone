@@ -11,12 +11,17 @@
 //
 // Request: MC_EXPERIMENT_CCF_DC_ARM=none|global|local|both (unset means none).
 // MC_EXPERIMENT_CCF_DC_REPORT=<path> asks for a JSON witness of the per-site
-// eligible/zeroed counts; nothing is added to the console or product logs.
+// eligible/zeroed counts; nothing is added to the console or product logs. Its
+// status is "incomplete" from start, and "atexit" once the process ran its
+// normal exit handlers. "atexit" says nothing about whether the producer
+// succeeded: the producer's own exit status must be retained separately.
 // Differences from PR284: unset selects none instead of aborting, and the
 // request is validated once, in MotioncorrRunner::read(), in every build:
 // an unknown value, an arm or report in a build without the hooks, an arm on
 // the --use_motioncor2 route, and an unwritable or existing report path are
-// all refused before any device query or pixel is touched.
+// all refused before any device query or pixel is touched (the one-movie tap
+// rule and the tap file creation need the final movie list and run in
+// initialise(), still before the first movie).
 //
 // The same build option also compiles the #269 observation-only runtime-model
 // tap (MC_DIAG_MODEL_OUT, motioncorr_runner.cpp). It writes one JSON file for
@@ -67,15 +72,22 @@ inline const char *experimentCcfDcArmName(int arm) {
     return (arm >= 0 && arm < 4) ? names[arm] : "invalid";
 }
 
-// Writes the witness; status is "incomplete" until the process exits normally.
+// Writes the witness; status is "incomplete" until the exit handler runs ("atexit").
 inline bool experimentCcfDcWriteReport(const char *path, const char *mode, const char *status) {
     ExperimentCcfDcState &s = experimentCcfDcState();
     FILE *f = std::fopen(path, mode);
     if (!f) return false;
     static const char *site[] = {"cpu", "cuda_single", "cuda_batched"};
     static const char *stage[] = {"global", "local"};
-    std::fprintf(f, "{\"schema\":\"mc-ccf-dc-witness-v1\",\"status\":\"%s\",\"arm\":\"%s\",\"sites\":{", status,
-                 experimentCcfDcArmName(s.arm.load()));
+    std::fprintf(f, "{\"schema\":\"mc-ccf-dc-witness-v1\",\"status\":\"%s\",\"arm\":\"%s\","
+                 "\"test_only_isotropic_global_weight\":%s,\"sites\":{", status,
+                 experimentCcfDcArmName(s.arm.load()),
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+                 "true"
+#else
+                 "false"
+#endif
+                 );
     for (int i = 0; i < EXP_DC_SITES; i++) {
         std::fprintf(f, "%s\"%s\":{", i ? "," : "", site[i]);
         for (int j = 0; j < 2; j++)
@@ -90,7 +102,7 @@ inline bool experimentCcfDcWriteReport(const char *path, const char *mode, const
 
 inline void experimentCcfDcAtExit() {
     const std::string &p = experimentCcfDcState().report_path;
-    if (!p.empty() && !experimentCcfDcWriteReport(p.c_str(), "w", "complete"))
+    if (!p.empty() && !experimentCcfDcWriteReport(p.c_str(), "w", "atexit"))
         std::fprintf(stderr, "MC_EXPERIMENT_CCF_DC: cannot write the witness report %s\n", p.c_str());
 }
 #endif
@@ -114,7 +126,7 @@ inline void experimentCcfDcCheckRequest(bool own_route) {
         REPORT_ERROR("MC_EXPERIMENT_CCF_DC_ARM and MC_DIAG_MODEL_OUT apply only to --use_own; the --use_motioncor2 "
                      "route would ignore them.");
     if (tap_env) {
-        // The tap itself creates the file exclusively; checking here refuses before pixels.
+        if (!*tap_env) REPORT_ERROR("MC_DIAG_MODEL_OUT is empty");
         if (FILE *probe = std::fopen(tap_env, "rb")) {
             std::fclose(probe);
             REPORT_ERROR(std::string("MC_DIAG_MODEL_OUT already exists: ") + tap_env);
@@ -134,6 +146,20 @@ inline void experimentCcfDcCheckRequest(bool own_route) {
 }
 
 #ifdef MC_EXPERIMENT_CCF_DC
+// Called from initialise() once the movie list is final, before the first movie:
+// the tap captures exactly one movie, and its file is created exclusively now so an
+// unwritable path is refused before any pixel work. The tap block rewrites it.
+inline void experimentCcfDcPrepareTap(size_t n_movies) {
+    const char *path = std::getenv("MC_DIAG_MODEL_OUT");
+    if (!path) return;
+    if (n_movies != 1)
+        REPORT_ERROR("MC_DIAG_MODEL_OUT captures exactly one movie per process; this run selected " +
+                     std::to_string(n_movies));
+    FILE *f = std::fopen(path, "wx");
+    if (!f || std::fputs("{\"status\":\"incomplete\"}\n", f) < 0 || std::fclose(f))
+        REPORT_ERROR(std::string("MC_DIAG_MODEL_OUT cannot be created exclusively: ") + path);
+}
+
 inline int experimentCcfDcArm() {
     ExperimentCcfDcState &s = experimentCcfDcState();
     int arm = s.arm.load();

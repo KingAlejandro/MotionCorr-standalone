@@ -40,6 +40,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--binary', required=True)
     ap.add_argument('--experiment', action='store_true', help='binary built with -DMC_EXPERIMENT_CCF_DC=ON')
+    ap.add_argument('--iso', action='store_true', help='test-only isotropic build; the witness must say so')
     opts = ap.parse_args()
     binary = Path(opts.binary).resolve()
     with tempfile.TemporaryDirectory() as t:
@@ -89,7 +90,8 @@ def main():
             assert r.returncode == 0, r.stdout + r.stderr
             assert 'MC_EXPERIMENT_CCF_DC' not in r.stdout + r.stderr, 'the witness must not touch the console'
             w = json.loads(rep.read_text())
-            assert w['status'] == 'complete' and w['arm'] == arm, w
+            assert w['status'] == 'atexit' and w['arm'] == arm, w   # atexit != producer success: rc is checked above
+            assert w['test_only_isotropic_global_weight'] is opts.iso, (w, 'binary identity differs from the build the test was told about')
             cpu = w['sites']['cpu']
             counts[arm] = cpu
             assert cpu['global']['frames_eligible'] > 0 and cpu['local']['frames_eligible'] > 0, cpu
@@ -109,10 +111,17 @@ def main():
                 work / 'k', 'cannot be created exclusively')
         assert keep.read_text() == 'retained\n'
 
+        # An unwritable or empty report/tap path is refused before any pixel.
+        refused(invoke(binary, work, one, work / 'rm', {'MC_EXPERIMENT_CCF_DC_REPORT': str(work / 'nodir/w.json')}),
+                work / 'rm', 'cannot be created exclusively')
+        refused(invoke(binary, work, one, work / 'tm', {'MC_DIAG_MODEL_OUT': str(work / 'nodir/tap.json')}),
+                work / 'tm', 'cannot be created exclusively')
+        refused(invoke(binary, work, one, work / 'te', {'MC_DIAG_MODEL_OUT': ''}), work / 'te', 'is empty')
+
         # Runtime-model tap: one movie, created exclusively.
         refused(invoke(binary, work, work / 'two.star', work / 't2', {'MC_DIAG_MODEL_OUT': str(work / 'tap2.json')}),
                 work / 't2', 'exactly one movie per process')
-        assert not (work / 'tap2.json').exists()
+        assert not (work / 'tap2.json').exists(), 'the tap file must not be created for a multi-movie run'
         tap = work / 'tap.json'
         r = invoke(binary, work, one, work / 't1', {'MC_DIAG_MODEL_OUT': str(tap)}, ['--patch_x', '3', '--patch_y', '3'])
         assert r.returncode == 0, r.stdout + r.stderr

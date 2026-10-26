@@ -24,6 +24,11 @@
 //    0's spectrum is byte-identical after alignment, in every arm.
 // G5 power-of-two amplitude scaling (2^-6, 2^6) leaves shifts bit-identical.
 // Flat, exact tie, boundary and nonfinite cases are characterization only.
+// Test-only isotropic build (-DMC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT=ON): the references use
+// the isotropic x normalisation (pnx instead of nfx) for global paths and the production
+// one for local paths, and G6 adds: the two weights give references that differ by more
+// than 1e-3 px somewhere (detection power), and one CUDA workspace reused across the
+// global and local stages gives the same shifts as fresh workspaces.
 //
 // Exit 0: all gates pass. Exit 1: an oracle gate failed. Exit 2: setup error.
 // --expect-failure (restoring mutants): exit 0 only if an oracle gate failed.
@@ -259,7 +264,7 @@ void fit(const std::vector<LD> &m, int W, int R, int &px, int &py, LD &sx, LD &s
     sy = ey ? vertex(py, at(px, py + 1), at(px, py - 1), best) : py;
 }
 
-Ref reference(const Case &c, const Stack &F) {
+Ref reference(const Case &c, const Stack &F, bool iso) {
     const int nfx = c.pnx / 2 + 1, nfy = c.pny, nx = c.pnx, ny = c.pny, n = c.n;
     const int R = std::min(50, std::min(nx / 2 - 1, ny / 2 - 1)), W = 2 * R + 1;
     Ref out;
@@ -277,7 +282,8 @@ Ref reference(const Case &c, const Stack &F) {
         for (int y = 0; y < nfy; y++)
             for (int x = 0; x < nfx; x++) {
                 const int ly = y > nfy / 2 ? y - nfy : y;
-                const LD dist2 = (LD)ly * ly / ((LD)nfy * nfy) + (LD)x * x / ((LD)nfx * nfx);
+                const LD xn = iso ? (LD)nx : (LD)nfx;
+                const LD dist2 = (LD)ly * ly / ((LD)nfy * nfy) + (LD)x * x / (xn * xn);
                 const LD w = expl(-2 * dist2 * c.B);
                 const size_t i = (size_t)y * nfx + x;
                 const std::complex<LD> fr(F[f].data[i].real, F[f].data[i].imag);
@@ -342,6 +348,12 @@ std::string vec(const std::vector<double> &v) {
 
 struct Tally { int pass = 0, fail = 0, inconclusive = 0; };
 
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+const bool ISO_BUILD = true;
+#else
+const bool ISO_BUILD = false;
+#endif
+
 } // namespace
 
 int main(int argc, char **argv) {
@@ -352,7 +364,7 @@ int main(int argc, char **argv) {
         else if (std::string(argv[i]) == "--json" && i + 1 < argc) json_path = argv[++i];
     }
     std::ostringstream js;
-    Tally t[6];   // G1..G5, index 0 unused
+    Tally t[7];   // G1..G5 (G6 only in the isotropic test build), index 0 unused
     int failures = 0;
     auto gate = [&](int g, bool ok, const std::string &what) {
         (ok ? t[g].pass : t[g].fail)++;
@@ -378,6 +390,7 @@ int main(int argc, char **argv) {
         const int n_paths = CUDA_SINGLE_GLOBAL;
 #endif
         bool power_seen[N_PATHS] = {}, power_case[N_PATHS] = {};
+        double iso_power = 0;
         js << "{\"schema\":\"experiment-ccf-dc-stage/1\",\"rows\":[";
         bool first_row = true;
         for (const Case &c : cases) {
@@ -387,11 +400,19 @@ int main(int argc, char **argv) {
                 if (!hermitianX0(stacks.back())) throw SetupError(c.name + ": input not Hermitian on x=0");
             }
             const bool refable = c.max_iter == 1 && c.down == 1 && c.kind == "texture";
-            std::vector<Ref> refs;
+            std::vector<Ref> refsLocal, refsIso;
             if (refable || c.kind == "flat")
-                for (int ip = 0; ip < N_PED; ip++) refs.push_back(reference(c, stacks[ip]));
+                for (int ip = 0; ip < N_PED; ip++) {
+                    refsLocal.push_back(reference(c, stacks[ip], false));
+                    if (ISO_BUILD) refsIso.push_back(reference(c, stacks[ip], true));
+                }
+            if (ISO_BUILD && refable)
+                for (int f = 0; f < c.n; f++)
+                    iso_power = std::max(iso_power, (double)std::max(std::fabs(refsIso[0].xs[f] - refsLocal[0].xs[f]),
+                                                                     std::fabs(refsIso[0].ys[f] - refsLocal[0].ys[f])));
             for (int path = 0; path < n_paths; path++)
                 for (int arm = 0; arm < 4; arm++) {
+                    const std::vector<Ref> &refs = (ISO_BUILD && pathGlobal(path)) ? refsIso : refsLocal;
                     const bool sel = selected(arm, path);
                     std::vector<Result> res;
                     for (int ip = 0; ip < N_PED; ip++) res.push_back(run(c, path, arm, stacks[ip]));
@@ -476,8 +497,44 @@ int main(int argc, char **argv) {
             if (power_seen[path]) t[2].pass++;
             else { t[2].inconclusive++; std::cout << "INCONCLUSIVE G2 power: " << PATH_NAMES[path] << " never changed with P\n"; }
         }
+        if (ISO_BUILD) {
+            gate(6, iso_power > 1e-3, "isotropic and production references are not distinguishable: " + num(iso_power));
+#ifdef _CUDA_ENABLED
+            {   // One workspace reused global -> local at one geometry must equal fresh workspaces.
+                const Case &c = cases[0];
+                const Stack in = buildStack(c, 0, 1);
+                const size_t fr = (size_t)(c.pny) * (c.pnx / 2 + 1);
+                std::vector<fComplex> h((size_t)c.n * fr);
+                for (int f = 0; f < c.n; f++) std::memcpy(&h[f * fr], in[f].data, fr * sizeof(fComplex));
+                cufftComplex *d = nullptr;
+                ck(cudaMalloc(&d, h.size() * sizeof(fComplex)), "malloc");
+                PatchAlignmentWorkspace ws;
+                std::vector<double> got[2];
+                for (int pass = 0; pass < 2; pass++) {
+                    const bool is_global = pass == 0;   // global first, then local on the same workspace
+                    ck(cudaMemcpy(d, h.data(), h.size() * sizeof(fComplex), cudaMemcpyHostToDevice), "upload");
+                    std::vector<RFLOAT> xs(c.n, 0), ys(c.n, 0);
+                    std::ostringstream log;
+                    cudaAlignPatchDeviceWithWorkspace(ws, d, c.n, c.pnx, c.pny, c.B, xs, ys, c.max_iter, c.down, 0, log, is_global);
+                    got[pass].assign(xs.begin(), xs.end());
+                    got[pass].insert(got[pass].end(), ys.begin(), ys.end());
+                }
+                if (!ws.release()) throw SetupError("workspace release");
+                ck(cudaFree(d), "free");
+                experimentCcfDcSetArmForTest(0);
+                for (int pass = 0; pass < 2; pass++) {
+                    const Result fresh = run(c, pass == 0 ? CUDA_SINGLE_GLOBAL : CUDA_SINGLE_LOCAL, 0, in);
+                    std::vector<double> want(fresh.xs);
+                    want.insert(want.end(), fresh.ys.begin(), fresh.ys.end());
+                    gate(6, got[pass].size() == want.size() &&
+                            !std::memcmp(got[pass].data(), want.data(), want.size() * sizeof(double)),
+                         std::string("reused workspace differs from a fresh one at stage ") + (pass == 0 ? "global" : "local"));
+                }
+            }
+#endif
+        }
         js << "\n],\"gates\":{";
-        for (int g = 1; g <= 5; g++)
+        for (int g = 1; g <= (ISO_BUILD ? 6 : 5); g++)
             js << (g > 1 ? "," : "") << "\"G" << g << "\":{\"pass\":" << t[g].pass << ",\"fail\":" << t[g].fail
                << ",\"inconclusive\":" << t[g].inconclusive << "}";
         js << "},\"failures\":" << failures << "}\n";
@@ -493,7 +550,7 @@ int main(int argc, char **argv) {
         o << js.str();
         if (!o.good()) { std::cout << "SETUP ERROR: cannot write " << json_path << "\n"; return 2; }
     }
-    for (int g = 1; g <= 5; g++)
+    for (int g = 1; g <= (ISO_BUILD ? 6 : 5); g++)
         std::cout << "G" << g << " pass=" << t[g].pass << " fail=" << t[g].fail << " inconclusive=" << t[g].inconclusive << "\n";
     const bool oracle_failed = failures > 0;
     std::cout << (oracle_failed ? "ORACLE FAILED" : "ORACLE PASSED") << "\n";

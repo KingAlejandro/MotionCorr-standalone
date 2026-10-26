@@ -112,6 +112,12 @@ int main() {
         require(MotioncorrRunner::ccfWeightAt(0, 40, 96, 128.0, 150.0) > 1e30 * MotioncorrRunner::ccfWeightAt(0, 40, 96, 65.0, 150.0),
                 "iso must be far more permissive than prod along x");
 
+        // The selection alignPatch uses: full width for the global isotropic weight only, nfx = pnx/2 + 1 otherwise.
+        require(MotioncorrRunner::ccfWeightXNorm(true, true, 128, 65) == 128.0, "global isotropic must normalise by the full width");
+        require(MotioncorrRunner::ccfWeightXNorm(true, false, 128, 65) == 65.0, "global without the flag must keep nfx");
+        require(MotioncorrRunner::ccfWeightXNorm(false, true, 128, 65) == 65.0, "a patch alignment must keep nfx");
+        require(MotioncorrRunner::ccfWeightXNorm(false, false, 128, 65) == 65.0, "inherited weight must keep nfx");
+
         // ---- 2. through alignPatch ----
         MotioncorrRunner runner;
         runner.use_gpu = false; runner.gpu_id = 0; runner.n_threads = 1;

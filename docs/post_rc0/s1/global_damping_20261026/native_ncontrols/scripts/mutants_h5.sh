@@ -12,9 +12,10 @@ p, name = sys.argv[1], sys.argv[2]; s = open(p).read()
 def must(old, new):
     global s
     assert s.count(old) == 1, (name, old[:50]); s = s.replace(old, new)
-if name == 'flag-ignored':      must("(is_global && experimental_isotropic_weight) ? (RFLOAT)pnx : (RFLOAT)nfx", "(RFLOAT)nfx")
-elif name == 'wrong-norm':      must("(is_global && experimental_isotropic_weight) ? (RFLOAT)pnx : (RFLOAT)nfx", "(is_global && experimental_isotropic_weight) ? (RFLOAT)(pnx / 2) : (RFLOAT)nfx")
-elif name == 'leaks-to-patch':  must("(is_global && experimental_isotropic_weight) ? (RFLOAT)pnx : (RFLOAT)nfx", "(experimental_isotropic_weight) ? (RFLOAT)pnx : (RFLOAT)nfx")
+XN = "return (is_global && isotropic) ? (RFLOAT)pnx : (RFLOAT)nfx;"
+if name == 'flag-ignored':      must(XN, "return (RFLOAT)nfx;")
+elif name == 'wrong-norm':      must(XN, "return (is_global && isotropic) ? (RFLOAT)(pnx / 2) : (RFLOAT)nfx;")
+elif name == 'leaks-to-patch':  must(XN, "return (isotropic) ? (RFLOAT)pnx : (RFLOAT)nfx;")
 elif name == 'formula-factor':  must("return exp(- 2 * dist2 * scaled_B);", "return exp(- dist2 * scaled_B);")
 elif name == 'prod-norm-moved': must("RFLOAT dist2 = ly2 + x * (RFLOAT)x / (x_norm * x_norm);", "RFLOAT dist2 = ly2 + x * (RFLOAT)x / (65.0 * 65.0);")
 open(p, 'w').write(s)

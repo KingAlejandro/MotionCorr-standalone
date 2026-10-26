@@ -4885,7 +4885,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 
 	// Initialize B factor weight. x_norm is nfx (inherited) or, with the experimental isotropic weight on the
 	// global alignment, the full width pnx (W5 'iso').
-	const RFLOAT weight_x_norm = (is_global && experimental_isotropic_weight) ? (RFLOAT)pnx : (RFLOAT)nfx;
+	const RFLOAT weight_x_norm = ccfWeightXNorm(is_global, experimental_isotropic_weight, pnx, nfx);
 	weight.reshape(Fref);
 	RCTIC(TIMING_PREP_WEIGHT);
 	#pragma omp parallel for num_threads(n_threads)
@@ -5081,6 +5081,10 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 #endif
 
 	return converged;
+}
+
+RFLOAT MotioncorrRunner::ccfWeightXNorm(bool is_global, bool isotropic, int pnx, int nfx) {
+	return (is_global && isotropic) ? (RFLOAT)pnx : (RFLOAT)nfx;
 }
 
 RFLOAT MotioncorrRunner::ccfWeightAt(int ly, int x, int nfy, RFLOAT x_norm, RFLOAT scaled_B) {

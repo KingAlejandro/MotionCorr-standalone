@@ -1,0 +1,6 @@
+mutant flag-ignored: isotropic_weight rc=1 (KILLED) FAIL the flag did not change the global estimate
+mutant wrong-norm: isotropic_weight rc=0 (SURVIVED) 
+mutant leaks-to-patch: isotropic_weight rc=1 (KILLED) FAIL the flag must not change a patch alignment
+mutant formula-factor: isotropic_weight rc=1 (KILLED) FAIL prod weight differs from W5
+mutant prod-norm-moved: isotropic_weight rc=1 (KILLED) FAIL iso weight differs from W5
+restored original: rc=0 (must be 0)

@@ -14,7 +14,8 @@ BASE_BIN=$DS_SC/build-base/motioncorr; CAND_BIN=$DS_SC/build-cand/motioncorr
 { echo "date $(date -u +%FT%TZ) host $(hostname)"; echo "base $DS_BASE_SHA"; echo "cand $DS_CAND_SHA"
   sha256sum $BASE_BIN $CAND_BIN; lane grep Cpus_allowed_list /proc/self/status; echo "lane rc=$?"
   ps -eo psr,pcpu,pid,comm --no-headers | awk '$1>=48 && $1<=55 && $2>5' | sed 's/^/busy-before: /'; } > $R/env.txt 2>&1
-[ -d $V/v2fixtures ] || lane $DS_PY -I $S/test-data/generate_motion_diagnostics.py --outdir $V/v2fixtures > $V/generate.log 2>&1 || { echo "fixture generation failed"; exit 2; }
+# no -I here: the generator imports its sibling module, exactly as the C1 c1_v2.sh runs it
+[ -d $V/v2fixtures ] || lane $DS_PY $S/test-data/generate_motion_diagnostics.py --outdir $V/v2fixtures > $V/generate.log 2>&1 || { echo "fixture generation failed"; exit 2; }
 ( cd $V/v2fixtures && sha256sum $(find . -type f | sort) ) > $R/fixtures.sha256
 run_arm() { # name binary extra
   local n=$1 bin=$2 extra=$3 drv=$D/ds_run_v2_cases.py

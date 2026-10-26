@@ -1,0 +1,89 @@
+{
+  "role": "characterization",
+  "gauge": "fixed frame-0 material coordinates; no registration",
+  "accuracy_status": "FAIL",
+  "field_distance_status": "FAIL",
+  "identifiable": true,
+  "field_px": {
+    "rms": 3.1629616063903248,
+    "p95": 6.6403731885282,
+    "max": 21.489981445606176
+  },
+  "field_angstrom": {
+    "rms": 2.799221021655437,
+    "p95": 5.876730271847457,
+    "max": 19.018633579361467
+  },
+  "border_px": {
+    "rms": 6.296826529975046,
+    "p95": 12.831304019817317,
+    "max": 31.915619496032036
+  },
+  "per_frame_px": [
+    {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+    },
+    {
+      "rms": 3.060928760052884,
+      "p95": 7.060806554824872,
+      "max": 11.472544027687793
+    },
+    {
+      "rms": 2.4320926386803317,
+      "p95": 5.450541107314975,
+      "max": 9.787151906076886
+    },
+    {
+      "rms": 2.0701331727243497,
+      "p95": 4.1366005376152355,
+      "max": 7.1034850625090264
+    },
+    {
+      "rms": 5.518316753090619,
+      "p95": 12.785160375141494,
+      "max": 21.489981445606176
+    }
+  ],
+  "global_mean_error_px": {
+    "rms": 1.074721036819952,
+    "p95": 1.5579797743505497,
+    "max": 1.6780813425438188
+  },
+  "local_error_px": {
+    "rms": 2.9747774398290567,
+    "p95": 6.095286462930483,
+    "max": 20.65135459076806
+  },
+  "signal": {
+    "uncorrected": {
+      "rmse": 1.8398193560026619,
+      "contrast_normalized_rmse": 1.8471858315940317,
+      "mean_error": 0.008353184023473986
+    },
+    "true_motion_bilinear": {
+      "rmse": 1.3149793556672902,
+      "contrast_normalized_rmse": 1.320244417856724,
+      "mean_error": 0.01125653816658238
+    },
+    "estimated_motion_bilinear": null,
+    "published_sum_divided_by_frames": {
+      "rmse": 1.374455213546753,
+      "contrast_normalized_rmse": 1.3799584436170511,
+      "mean_error": -0.00554975401610136
+    }
+  },
+  "sampling_status": "OUTSIDE_FIXED_ROI",
+  "signal_status": "CHARACTERIZATION",
+  "application_consistency_status": "NOT_TESTED",
+  "summed_image_sha256": "19e98322ce2605c9173bd13755ad2babfca6a91009d5bd73cb290cfa71a39f62",
+  "case": "noisy",
+  "candidate_sha256": "8136532bddb3a9f0fb48a8df7fdc901296a19d1ebf6760154a681f55f59ddad2",
+  "fixture_files": {
+    "noisy.mrcs": "5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3",
+    "noisy_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+    "noisy_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+    "noisy.star": "c321865e4fc769d9af55bc86af0a0b390abdcdb029137a9aeb5d6743b81a6891"
+  }
+}

@@ -4,14 +4,24 @@
 set -u
 D=$(dirname "$(readlink -f "$0")"); source "$D/env.sh" || exit 1
 F=$DS_SC/flagsoff; mkdir -p $F; R=$F/receipts; mkdir -p $R
+# Products mirror the absolute input path (memory: motioncorr-output-path-mirrors-input-path), so both arms must read the
+# synthetic movie from ONE shared path. Attempt 1 read it from src-base/ and src-cand/ and the trees differed only by that path.
+SYN=$F/synth-input; mkdir -p $SYN; cp $DS_SC/src-cand/test-data/synthetic/synthetic_movie.tiff $SYN/
+cmp $DS_SC/src-cand/test-data/synthetic/synthetic_movie.tiff $DS_SC/src-base/test-data/synthetic/synthetic_movie.tiff && echo "synthetic movie identical in both source trees" >> $R/rc.txt
 for arm in base cand; do
   src=$DS_SC/src-$arm
+  [ "${FLAGSOFF_ONLY:-all}" = synth ] || {
   lane $DS_PY -I $src/tools/run_known_motion_gates.py --binary $DS_SC/build-$arm/motioncorr --python $DS_PY --outdir $F/km-$arm --json $F/km-$arm.json > $R/km-$arm.out 2>&1
-  echo "km-$arm rc=$?" | tee -a $R/rc.txt
+  echo "km-$arm rc=$?" | tee -a $R/rc.txt; }
   mkdir -p $F/synth-$arm
-  lane $DS_SC/build-$arm/motioncorr --i $src/test-data/synthetic/synthetic_movie.tiff --o $F/synth-$arm --use_own --j 1 --dose_weighting --dose_per_frame 1.0 --voltage 300 --angpix 1.0 --patch_x 3 --patch_y 3 --bfactor 150 > $R/synth-$arm.out 2>&1
+  lane $DS_SC/build-$arm/motioncorr --i $SYN/synthetic_movie.tiff --o $F/synth-$arm --use_own --j 1 --dose_weighting --dose_per_frame 1.0 --voltage 300 --angpix 1.0 --patch_x 3 --patch_y 3 --bfactor 150 > $R/synth-$arm.out 2>&1
   echo "synth-$arm rc=$?" | tee -a $R/rc.txt
 done
-for p in km synth; do
+for p in $( [ "${FLAGSOFF_ONLY:-all}" = synth ] && echo synth || echo km synth ); do
   lane $DS_PY -I $D/compare_products.py $F/$p-base $F/$p-cand $F/$p-compare.json | tee -a $R/rc.txt
 done
+# Negative control: the candidate with the flag ON on the same movie must be seen as different by the same comparator.
+mkdir -p $F/synth-cand-halfgain
+lane $DS_SC/build-cand/motioncorr --i $SYN/synthetic_movie.tiff --o $F/synth-cand-halfgain --use_own --j 1 --dose_weighting --dose_per_frame 1.0 --voltage 300 --angpix 1.0 --patch_x 3 --patch_y 3 --bfactor 150 --experimental_global_half_gain > $R/synth-cand-halfgain.out 2>&1
+echo "synth-cand-halfgain rc=$?" | tee -a $R/rc.txt
+lane $DS_PY -I $D/compare_products.py $F/synth-cand $F/synth-cand-halfgain $F/synth-negative-control.json --expect-differ | tee -a $R/rc.txt

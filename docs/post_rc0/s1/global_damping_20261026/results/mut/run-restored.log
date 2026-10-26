@@ -1,0 +1,8 @@
+Global half-gain operator test (CPU, 5 frames, 256x256, one thread)
+  unflagged first update |v| = 8.416588 px, converged=0
+  flagged update == 0.5 * unflagged, exactly, all 5 frames
+  RMSD stop line identical:  Iteration 1: RMSD = 3.76401 px
+  re-shifted frames == reference shifted by the half update, bitwise
+  local patch (is_global=false): flag has no effect
+  tolerance override: global only (1e9 stops at iter 1; 1e-30 runs all 5; local unaffected)
+PASS

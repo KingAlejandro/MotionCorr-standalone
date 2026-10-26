@@ -433,6 +433,19 @@ void MotioncorrRunner::initialise()
 			             "(the CUDA alignment does not implement it). Remove --gpu to run on the CPU.");
 		}
 
+#ifdef MC_EXPERIMENT_CCF_DC
+		// The #262 CCF DC hook has no CUDA implementation: its arm is read only on the CPU alignPatch path, so on --gpu it
+		// would be silently ignored (no abort, no manipulation count). Refuse unless the arm is explicitly 'none'.
+		{
+			const char *dc_arm = std::getenv("MC_EXPERIMENT_CCF_DC_ARM");
+			if (dc_arm == nullptr || std::strcmp(dc_arm, "none") != 0)
+			{
+				REPORT_ERROR("ERROR: this build contains the #262 CCF DC experiment, which has no CUDA implementation and would be "
+				             "silently ignored with --gpu. Set MC_EXPERIMENT_CCF_DC_ARM=none or remove --gpu.");
+			}
+		}
+#endif
+
 #if defined _CUDA_ENABLED
 		gpu_id = parsed_gpu_id;
 		HANDLE_ERROR(accGPUGetDeviceCount(&devCount));

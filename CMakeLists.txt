@@ -695,6 +695,12 @@ if(BUILD_TESTING)
         add_test(NAME ExperimentalFlagsCli
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_experimental_flags_cli.py
                 --binary $<TARGET_FILE:motioncorr>)
+        # Review F3: a build with the #262 DC hook must refuse --gpu unless its arm is 'none' (the hook has no CUDA site).
+        if(MC_EXPERIMENT_CCF_DC)
+            add_test(NAME CcfDcHookGpuRefusal
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_dc_hook_gpu_refusal.py
+                    --binary $<TARGET_FILE:motioncorr>)
+        endif()
         add_test(NAME OutputTreeComparator
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compare_output_trees.py)
         set_tests_properties(OutputTreeComparator PROPERTIES TIMEOUT 120)

@@ -10,6 +10,13 @@
 // 3. Through the production alignPatch on a 5-frame periodic fixture: off is bitwise the
 //    default; "global" changes the global estimate and counts every peak, leaves local
 //    patches bitwise unchanged; "all" also changes (and counts) patch peaks.
+// 4. Closeness to truth through alignPatch (review finding F1): with the global alignment forced through 20
+//    iterations (experimental_align_tolerance 1e-9, global only) the recovered shifts are the negative of the
+//    fixture's applied displacements. On the isotropic fixture every mode must be within 0.1 px (rms). On a
+//    TILTED fixture (power along the kx = ky diagonal, |rho| > 0.8 computed from the spectrum and the CCF weight)
+//    the inherited separable fit is unstable (its update has an eigenvalue below -1 for rho > 0.6 at N = 5) while
+//    the coupled fit recovers the truth. A transposed gather, a flipped x or y gather, and a sign error in applying
+//    the result each make one of these assertions fail (mutants in scripts/mutants_h6.sh).
 
 #include "src/motioncorr_runner.h"
 #include "src/jaz/single_particle/new_ft.h"
@@ -54,12 +61,14 @@ void separable(const RFLOAT v[3][3], double &dx, double &dy) {
 
 const int PNX = 256, PNY = 256, NFRAMES = 5;
 const RFLOAT SCALED_B = 20.0;
+const double TRUTH_TOL = 0.1;       // px, recovered vs applied displacement
+const double SEPARABLE_MIN = 0.3;   // px, the separable fit on the tilted fixture must be at least this far off
 const double TRUE_SX[NFRAMES] = {0.0, 2.7, -3.4, 1.9, -1.3};
 const double TRUE_SY[NFRAMES] = {0.0, -1.8, 2.2, -3.1, 0.7};
 
 unsigned int nextRandom(unsigned int &state) { state = state * 1664525u + 1013904223u; return state; }
 
-void buildBaseSpectrum(MultidimArray<fComplex> &F) {
+void buildBaseSpectrum(MultidimArray<fComplex> &F, bool tilted) {
     const int nfx = PNX / 2 + 1, nfy = PNY, radius = 24;
     F.reshape(nfy, nfx);
     F.initZeros();
@@ -69,7 +78,8 @@ void buildBaseSpectrum(MultidimArray<fComplex> &F) {
         if (std::abs(ly) > radius) continue;
         for (int x = 0; x < nfx; x++) {
             if (x > radius || (x == 0 && ly <= 0)) continue;
-            const double amp = 1.0 / (1.0 + std::sqrt((double)(x * x + ly * ly)));
+            double amp = 1.0 / (1.0 + std::sqrt((double)(x * x + ly * ly)));
+            if (tilted) amp *= std::exp(-(double)((x - ly) * (x - ly)) / (2.0 * 3.0 * 3.0));   // power along kx = ky
             const double phase = 2.0 * M_PI * (nextRandom(state) / 4294967296.0);
             DIRECT_A2D_ELEM(F, y, x) = fComplex((float)(amp * std::cos(phase)), (float)(amp * std::sin(phase)));
         }
@@ -80,9 +90,9 @@ void buildBaseSpectrum(MultidimArray<fComplex> &F) {
     }
 }
 
-void buildStack(std::vector<MultidimArray<fComplex> > &F) {
+void buildStack(std::vector<MultidimArray<fComplex> > &F, bool tilted) {
     MultidimArray<fComplex> base;
-    buildBaseSpectrum(base);
+    buildBaseSpectrum(base, tilted);
     F.resize(NFRAMES);
     const int nfx = PNX / 2 + 1, nfy = PNY;
     for (int k = 0; k < NFRAMES; k++) {
@@ -101,12 +111,38 @@ void buildStack(std::vector<MultidimArray<fComplex> > &F) {
 
 struct Run { std::vector<RFLOAT> xs, ys; long peaks, notnd, off1; };
 
-Run runOnce(MotioncorrRunner &r, bool is_global, int mode, int max_iter) {
+// rms of (recovered + applied displacement) in px; alignPatch recovers the negative of the applied displacement.
+double truthRms(const Run &r) {
+    double acc = 0;
+    for (int k = 0; k < NFRAMES; k++) acc += (r.xs[k] + TRUE_SX[k]) * (r.xs[k] + TRUE_SX[k]) + (r.ys[k] + TRUE_SY[k]) * (r.ys[k] + TRUE_SY[k]);
+    return std::sqrt(acc / NFRAMES);
+}
+
+// Analytic CCF-peak tilt rho = Hxy / sqrt(Hxx Hyy) of the fixture spectrum under the production CCF weight.
+double spectrumRho(bool tilted) {
+    MultidimArray<fComplex> base;
+    buildBaseSpectrum(base, tilted);
+    const int nfx = PNX / 2 + 1, nfy = PNY;
+    double hxx = 0, hyy = 0, hxy = 0;
+    for (int y = 0; y < nfy; y++) {
+        const int ly = (y > nfy / 2) ? (y - nfy) : y;
+        for (int x = 0; x < nfx; x++) {
+            const fComplex v = DIRECT_A2D_ELEM(base, y, x);
+            const double p = ((double)v.real * v.real + (double)v.imag * v.imag) * MotioncorrRunner::ccfWeightAt(ly, x, nfy, (RFLOAT)nfx, SCALED_B) * (x == 0 ? 1.0 : 2.0);
+            const double kx = (double)x / PNX, ky = (double)ly / PNY;
+            hxx += p * kx * kx; hyy += p * ky * ky; hxy += p * kx * ky;
+        }
+    }
+    return hxy / std::sqrt(hxx * hyy);
+}
+
+Run runOnce(MotioncorrRunner &r, bool is_global, int mode, int max_iter, bool tilted = false, double tol = 0) {
     r.experimental_coupled_peak = mode;
+    r.experimental_align_tolerance = tol;
     r.coupled_peak_last_peaks = r.coupled_peak_last_not_negdef = r.coupled_peak_last_offset_gt_1px = 0;
     r.max_iter = max_iter;
     std::vector<MultidimArray<fComplex> > F;
-    buildStack(F);
+    buildStack(F, tilted);
     Run out;
     out.xs.assign(NFRAMES, 0.0); out.ys.assign(NFRAMES, 0.0);
     std::ostringstream log;
@@ -181,6 +217,27 @@ int main() {
         require(!same(l_off, l_all) && l_all.peaks == NFRAMES, "all mode must change and count patch peaks");
         require(same(runOnce(runner, true, 0, 1), def), "off is not reproducible");
         std::printf("  alignPatch: off == default; global changes global only (%ld peaks); all changes patches (%ld peaks)\n", g.peaks, l_all.peaks);
+
+        // ---- 4. truth closeness through alignPatch (global forced through 20 iterations) ----
+        {
+            const double rho_iso = spectrumRho(false), rho_tilt = spectrumRho(true);
+            std::printf("  fixture tilt rho: isotropic %+.3f, tilted %+.3f\n", rho_iso, rho_tilt);
+            require(std::fabs(rho_iso) < 0.5, "the isotropic fixture is not isotropic enough");
+            require(std::fabs(rho_tilt) > 0.8, "the tilted fixture does not have |rho| > 0.8");
+            const double iso_off = truthRms(runOnce(runner, true, 0, 20, false, 1e-9));
+            const double iso_glob = truthRms(runOnce(runner, true, 1, 20, false, 1e-9));
+            const double iso_all = truthRms(runOnce(runner, true, 2, 20, false, 1e-9));
+            const double tilt_off = truthRms(runOnce(runner, true, 0, 20, true, 1e-9));
+            const double tilt_glob = truthRms(runOnce(runner, true, 1, 20, true, 1e-9));
+            const double tilt_all = truthRms(runOnce(runner, true, 2, 20, true, 1e-9));
+            std::printf("  rms(recovered + truth) px after 20 forced iterations: isotropic off %.4f global %.4f all %.4f; tilted off %.4f global %.4f all %.4f\n",
+                        iso_off, iso_glob, iso_all, tilt_off, tilt_glob, tilt_all);
+            require(iso_off < TRUTH_TOL && iso_glob < TRUTH_TOL && iso_all < TRUTH_TOL, "isotropic fixture: a mode is not within the truth tolerance");
+            require(tilt_glob < TRUTH_TOL && tilt_all < TRUTH_TOL, "tilted fixture: the coupled peak does not recover the truth");
+            require(tilt_off > SEPARABLE_MIN && tilt_off > 3.0 * tilt_glob, "tilted fixture: the separable fit must be clearly worse than the coupled fit");
+            // Patch path (is_global == false, 'all'): same wiring, patch stop is the default 0.5 px, so only a loose bound.
+            require(truthRms(runOnce(runner, false, 2, 20, true, 0)) < 0.6, "tilted fixture, patch peaks: the coupled peak is far from the truth");
+        }
         std::printf("PASS\n");
         return 0;
     } catch (const std::exception &e) {

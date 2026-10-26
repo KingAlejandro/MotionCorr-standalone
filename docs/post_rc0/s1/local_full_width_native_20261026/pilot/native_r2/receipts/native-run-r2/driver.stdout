@@ -1,0 +1,115 @@
+{
+ "schema": "local-full-width-decision-v5_2",
+ "P1": {
+  "ok": true,
+  "cases": {
+   "affine": {
+    "OFF": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    },
+    "ON": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    }
+   },
+   "pedestal": {
+    "OFF": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    },
+    "ON": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    }
+   },
+   "zero": {
+    "OFF": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    },
+    "ON": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    }
+   },
+   "integer": {
+    "OFF": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    },
+    "ON": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    }
+   },
+   "fractional": {
+    "OFF": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    },
+    "ON": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    }
+   }
+  }
+ },
+ "P2": {
+  "ok": true,
+  "noisy": {
+   "runtime": {
+    "rms": {
+     "OFF": 1.6453708531561486,
+     "ON": 1.095426088140216,
+     "strictly_lower": true
+    },
+    "p95": {
+     "OFF": 3.337290305991788,
+     "ON": 2.240216728988467,
+     "strictly_lower": true
+    },
+    "max": {
+     "OFF": 7.284025716813742,
+     "ON": 4.4692154437241225,
+     "strictly_lower": true
+    }
+   },
+   "STAR": {
+    "rms": {
+     "OFF": 1.6453973835300504,
+     "ON": 1.0954234288068354,
+     "strictly_lower": true
+    },
+    "p95": {
+     "OFF": 3.3372789185622946,
+     "ON": 2.240267414199793,
+     "strictly_lower": true
+    },
+    "max": {
+     "OFF": 7.283784224067593,
+     "ON": 4.469287655604393,
+     "strictly_lower": true
+    }
+   }
+  }
+ },
+ "noisy_raw_gate": "FAIL",
+ "noisy_raw_gate_by_field": {
+  "runtime": "FAIL",
+  "STAR": "FAIL"
+ },
+ "increases": [],
+ "unidentifiable": {
+  "flat": {
+   "status": "UNIDENTIFIABLE",
+   "raw_distances_angstrom": {
+    "OFF": {
+     "runtime": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     },
+     "STAR": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,

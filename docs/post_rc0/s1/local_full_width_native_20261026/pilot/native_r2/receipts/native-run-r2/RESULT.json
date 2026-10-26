@@ -1,0 +1,228 @@
+{
+ "schema": "local-full-width-decision-v5_2",
+ "P1": {
+  "ok": true,
+  "cases": {
+   "affine": {
+    "OFF": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    },
+    "ON": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    }
+   },
+   "pedestal": {
+    "OFF": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    },
+    "ON": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    }
+   },
+   "zero": {
+    "OFF": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    },
+    "ON": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    }
+   },
+   "integer": {
+    "OFF": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    },
+    "ON": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    }
+   },
+   "fractional": {
+    "OFF": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    },
+    "ON": {
+     "runtime": "PASS",
+     "STAR": "PASS"
+    }
+   }
+  }
+ },
+ "P2": {
+  "ok": true,
+  "noisy": {
+   "runtime": {
+    "rms": {
+     "OFF": 1.6453708531561486,
+     "ON": 1.095426088140216,
+     "strictly_lower": true
+    },
+    "p95": {
+     "OFF": 3.337290305991788,
+     "ON": 2.240216728988467,
+     "strictly_lower": true
+    },
+    "max": {
+     "OFF": 7.284025716813742,
+     "ON": 4.4692154437241225,
+     "strictly_lower": true
+    }
+   },
+   "STAR": {
+    "rms": {
+     "OFF": 1.6453973835300504,
+     "ON": 1.0954234288068354,
+     "strictly_lower": true
+    },
+    "p95": {
+     "OFF": 3.3372789185622946,
+     "ON": 2.240267414199793,
+     "strictly_lower": true
+    },
+    "max": {
+     "OFF": 7.283784224067593,
+     "ON": 4.469287655604393,
+     "strictly_lower": true
+    }
+   }
+  }
+ },
+ "noisy_raw_gate": "FAIL",
+ "noisy_raw_gate_by_field": {
+  "runtime": "FAIL",
+  "STAR": "FAIL"
+ },
+ "increases": [],
+ "unidentifiable": {
+  "flat": {
+   "status": "UNIDENTIFIABLE",
+   "raw_distances_angstrom": {
+    "OFF": {
+     "runtime": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     },
+     "STAR": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     }
+    },
+    "ON": {
+     "runtime": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     },
+     "STAR": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     }
+    }
+   },
+   "raw_distances_px": {
+    "OFF": {
+     "runtime": {
+      "rms": 2.37787654746835,
+      "p95": 3.8830561417522667,
+      "max": 3.8830561417522667
+     },
+     "STAR": {
+      "rms": 2.37787654746835,
+      "p95": 3.8830561417522667,
+      "max": 3.8830561417522667
+     }
+    },
+    "ON": {
+     "runtime": {
+      "rms": 2.37787654746835,
+      "p95": 3.8830561417522667,
+      "max": 3.8830561417522667
+     },
+     "STAR": {
+      "rms": 2.37787654746835,
+      "p95": 3.8830561417522667,
+      "max": 3.8830561417522667
+     }
+    }
+   }
+  },
+  "repeated": {
+   "status": "UNIDENTIFIABLE",
+   "raw_distances_angstrom": {
+    "OFF": {
+     "runtime": {
+      "rms": 9.012581072426281,
+      "p95": 14.197954321946206,
+      "max": 14.197954321946206
+     },
+     "STAR": {
+      "rms": 9.012581140129837,
+      "p95": 14.197954391510109,
+      "max": 14.197954391510109
+     }
+    },
+    "ON": {
+     "runtime": {
+      "rms": 9.012581072426281,
+      "p95": 14.197954321946206,
+      "max": 14.197954321946206
+     },
+     "STAR": {
+      "rms": 9.012581140129837,
+      "p95": 14.197954391510109,
+      "max": 14.197954391510109
+     }
+    }
+   },
+   "raw_distances_px": {
+    "OFF": {
+     "runtime": {
+      "rms": 10.183707426470374,
+      "p95": 16.04288623948724,
+      "max": 16.04288623948724
+     },
+     "STAR": {
+      "rms": 10.183707502971567,
+      "p95": 16.04288631809052,
+      "max": 16.04288631809052
+     }
+    },
+    "ON": {
+     "runtime": {
+      "rms": 10.183707426470374,
+      "p95": 16.04288623948724,
+      "max": 16.04288623948724
+     },
+     "STAR": {
+      "rms": 10.183707502971567,
+      "p95": 16.04288631809052,
+      "max": 16.04288631809052
+     }
+    }
+   }
+  }
+ },
+ "prediction": "SUPPORTED",
+ "acceptance": "NOT_ACCEPTED_NO_AUTOMATIC_ACCEPTANCE",
+ "scope": "no full100, adoption, image or CUDA meaning; synthetic tests establish consumer logic only",
+ "pair_record_sha256": {
+  "noisy": "796ad7424d1c60c2fe756f33412f5724d608f33b25356cc9287659d60b39c743",
+  "affine": "ff815601f6cfb6b1244670cf07235c9318360421415969dc3d7d6b1d63ee780e",
+  "pedestal": "239f616e22d53a2f5a32459034d05a1b9a9427c8d04966383b9b990e5b9d0652",
+  "zero": "8b0eed0cfb7f6ab0c002f83317ed876fb31166aa2055f27d5fa65a83b509d2a0",
+  "integer": "7028021b1d0225980e7c37fac4e89ca4b1d6435c4280fc97f811a37874b2e549",
+  "fractional": "b486c121c0355b61522e75928c76bac0eb7bd3f3ea36c907ea4336b3c446e9a5",
+  "flat": "a0bf26405b94b873a1c5520e0137e8e96c8c1c664871cf4c80d86896591566b7",
+  "repeated": "29a9b23e221c4367cac5ecf04a9ba81c1d9bf50750bc3f292524892194ba7494"
+ }
+}

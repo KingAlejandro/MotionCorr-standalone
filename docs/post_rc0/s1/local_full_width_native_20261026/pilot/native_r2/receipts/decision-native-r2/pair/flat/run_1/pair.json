@@ -1,0 +1,101 @@
+{
+ "schema": "local-full-width-pair-v5_2",
+ "case": "flat",
+ "patch_grid": [
+  1,
+  1
+ ],
+ "binary_sha256": "bb92e06116f434219ae3f94c4317ea9b0ea63ee9c5169fd03c28bc00de4d19bd",
+ "off_receipt_sha256": "26d2072b9fd62841b0d995fd33ead464579b6fd2573874868dc90be863d347df",
+ "on_receipt_sha256": "3477c79bd18324718364bcdb4cef2a41f8bed6b3fe0979d413dd7c73ce8397ab",
+ "global_bits_equal": true,
+ "global_star_block_equal": true,
+ "global_only_comparator": {
+  "command_sha256": "9eb129e785ac486fb22f0a36b23ab74f7d3921d0895517e04cbb3cc4301bf7b5",
+  "json_sha256": "6b48adcc43879ff014a5aff78216a183b00c0bf7dc5e38a6c8a86126e7fa98cf",
+  "comparator_sha256": "53449d2da682305c8c11e3ed3efb91103530196e481ac075b00f90e3d5ea0f47",
+  "n_files": 10,
+  "n_gated": 7
+ },
+ "witness_lines": {
+  "OFF": 0,
+  "ON": 0
+ },
+ "counters": {
+  "OFF": {
+   "dc": {
+    "arm": "both",
+    "global_zeroed": 5,
+    "global_eligible": 5,
+    "local_zeroed": 0,
+    "local_eligible": 0
+   },
+   "coupled": {
+    "global": {
+     "peaks": 5,
+     "guard_fired": 5,
+     "not_negative_definite": 5,
+     "offset_gt_1px": 0
+    },
+    "patch": {
+     "peaks": 0,
+     "guard_fired": 0,
+     "not_negative_definite": 0,
+     "offset_gt_1px": 0
+    }
+   }
+  },
+  "ON": {
+   "dc": {
+    "arm": "both",
+    "global_zeroed": 5,
+    "global_eligible": 5,
+    "local_zeroed": 0,
+    "local_eligible": 0
+   },
+   "coupled": {
+    "global": {
+     "peaks": 5,
+     "guard_fired": 5,
+     "not_negative_definite": 5,
+     "offset_gt_1px": 0
+    },
+    "patch": {
+     "peaks": 0,
+     "guard_fired": 0,
+     "not_negative_definite": 0,
+     "offset_gt_1px": 0
+    }
+   }
+  }
+ },
+ "local_enabled": {
+  "OFF": false,
+  "ON": false
+ },
+ "convergence": {
+  "OFF": {
+   "global_iterations": 1,
+   "global_increment_px": [
+    0.0
+   ],
+   "global_converged": true,
+   "patches": [],
+   "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+  },
+  "ON": {
+   "global_iterations": 1,
+   "global_increment_px": [
+    0.0
+   ],
+   "global_converged": true,
+   "patches": [],
+   "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+  }
+ },
+ "pinned_function_segments_sha256": {
+  "star_blocks": "d4f94597a21d618ba1d9764a01c28509d43c88828ac437f5af782e2a9e3270f1",
+  "manipulation": "233f83a8a6399141cd6d32fb33a09b6924400e4b22d90bf4bd5d1495493e17d1"
+ },
+ "note": "local_enabled/convergence are recorded separately and are not truth surrogates"
+}

@@ -47,6 +47,9 @@ def rows():
         if k_exp and r["case"] not in LOCAL_CASES and r["arm"] in ("local", "both"):
             g.append("SEL")  # no local stage requested: a selected local arm must be a no-op, local coverage NOT_APPLICABLE
             r["role"] = "selectivity" if r["arm"] == "local" else "arm+selectivity"
+        if r["tier"] == "N" and r["arm"] == "both":
+            g.append("SEL")  # N controls run global only: the local half of arm both is a no-op selectivity observation
+            r["role"] = "arm+selectivity"
         r["gates"] = "+".join(g)
         r["cli"] = {"K": "tools/ccf_dc_native_rows.py:k267_argv", "N": "tools/ccf_dc_native_rows.py:n_argv",
                     "M": "PENDING parent pin (PR288 command)"}[r["tier"]]
@@ -86,7 +89,7 @@ def main():
     with open(o.outdir / "repro.csv", "w", newline="") as f:
         w = csv.DictWriter(f, ["job_id", "movie", "weight"]); w.writeheader(); w.writerows(rp)
     counts = {t: sum(r["tier"] == t for r in R) for t in "KNM"}
-    counts.update(total=len(R), pairs=len(P), repro=len(rp), B3_rows=sum("B3" in r["gates"] for r in R),
+    counts.update(total=len(R), pairs=len(P), repro=len(rp), B3_rows=sum("B3" in r["gates"] for r in R), SEL_rows=sum("SEL" in r["gates"] for r in R),
                   B4_rows=sum("B4" in r["gates"] for r in R),
                   N_production=sum(r["tier"] == "N" and r["weight"] == "production" for r in R),
                   N_isotropic=sum(r["tier"] == "N" and r["weight"] == "isotropic" for r in R))

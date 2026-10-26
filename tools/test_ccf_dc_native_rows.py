@@ -58,6 +58,68 @@ class PureControls(unittest.TestCase):
         # no scalar floor or offset is subtracted: a constant offset in every frame is an error
         self.assertEqual(rows.n_score(truth + [1.0, 0.0], truth)["verdict"], "FAIL")
 
+    def test_n_score_reproduces_all_16_retained_rows(self):
+        """rms/p95/max/verdict and trajectory RMS of the 16 retained arm-a rows, runtime and STAR, from the retained files."""
+        ev = HERE.parent / "docs/post_rc0/ccf_dc_native_compat_20261026/evidence"
+        ref = json.loads((ev / "retained_cpu_reference.json").read_text())["rows"]
+        self.assertEqual(len(ref), 16)
+        for r in ref:
+            vname, n = r["movie"].split("_N")
+            truth = ngen.truth(ngen.VELOCITY[vname], int(n))
+            d = ev / "retained_n_runs" / ("a-prod-" + r["weight"])
+            star = rows.read_motion_star(d / (r["movie"] + ".star"))
+            g_star = np.stack((star.global_shift_x, star.global_shift_y), axis=-1)
+            g_rt = np.array(json.loads((d / (r["movie"] + ".runtime.json")).read_text())["global"])
+            for label, g in (("runtime", g_rt), ("STAR", g_star)):
+                got, want = rows.n_score(g, truth), r[label]
+                for k in ("rms", "p95", "max"):
+                    self.assertAlmostEqual(got[k], want[k], delta=1e-12, msg=f"{r['movie']} {r['weight']} {label} {k}")
+                self.assertEqual(got["verdict"], want["verdict"], f"{r['movie']} {r['weight']} {label}")
+            self.assertAlmostEqual(float(np.sqrt(np.mean((g_rt - truth) ** 2) * 2)), r["traj_rms_px_runtime"], delta=1e-12)
+
+    def test_n_score_percentile_is_over_the_dense_roi_not_the_frames(self):
+        truth = np.zeros((5, 2))
+        shifts = truth.copy()
+        shifts[4] = [1.0, 0.0]                      # one frame in five is wrong by 1 px
+        e = 1.0 * rows.PIXEL_SIZE
+        per_frame = float(np.percentile(np.array([0, 0, 0, 0, e]), 95))
+        self.assertAlmostEqual(per_frame, 0.8 * e)  # what the frame-vector percentile would report
+        got = rows.n_score(shifts, truth)
+        self.assertAlmostEqual(got["p95"], e, places=12)   # one fifth of the dense ROI carries the error
+        self.assertNotAlmostEqual(got["p95"], per_frame, places=3)
+        small = rows.n_score(shifts, truth, roi=(0, 1, 0, 1))   # a 1x1 ROI is the frame-vector percentile
+        self.assertAlmostEqual(small["p95"], per_frame, places=12)
+
+    def test_witness_selectivity_on_every_reached_site(self):
+        def blank():
+            z = dict(calls_eligible=0, calls_zeroed=0, frames_eligible=0, frames_zeroed=0)
+            return {s: {"global": dict(z), "local": dict(z)} for s in rows.SITES}
+        def cuda(arm, single_local=(0, 0), batched=(8, 8)):
+            sites = blank()
+            sg, sl = rows.ARMS[arm]
+            sites["cuda_single"]["global"] = dict(calls_eligible=10, calls_zeroed=10 * sg, frames_eligible=50, frames_zeroed=50 * sg)
+            sites["cuda_single"]["local"] = dict(calls_eligible=single_local[0], calls_zeroed=single_local[0] * sl,
+                                                 frames_eligible=single_local[0] * 5, frames_zeroed=single_local[1] * 5)
+            sites["cuda_batched"]["local"] = dict(calls_eligible=batched[0], calls_zeroed=batched[0] * sl,
+                                                  frames_eligible=batched[0] * 5, frames_zeroed=batched[1] * 5 if batched[1] != batched[0] else batched[0] * 5 * sl)
+            return dict(schema="mc-ccf-dc-witness-v1", status="atexit", arm=arm, test_only_isotropic_global_weight=False, sites=sites)
+        both = ("global", "local")
+        # retry through cuda_single.local on a selected stage, zeroed: fine
+        self.assertEqual(rows.grade_witness(cuda("both", single_local=(2, 2)), "cuda", "both", both, False)[0], "VALID")
+        # a wrong-arm zero on the retry path: arm global leaves local unselected, yet cuda_single.local zeroed frames
+        bad = cuda("global", single_local=(2, 2))
+        self.assertEqual(rows.grade_witness(bad, "cuda", "global", both, False)[0], "INVALID")
+        # arm both but the retry path did not zero what it reached
+        bad = cuda("both", single_local=(2, 0))
+        self.assertEqual(rows.grade_witness(bad, "cuda", "both", both, False)[0], "INVALID")
+        # a local call reached through cuda_single on a global-only row
+        self.assertEqual(rows.grade_witness(cuda("both", single_local=(2, 2), batched=(0, 0)), "cuda", "both", ("global",), False)[0], "INVALID")
+
+    def test_run_env_thread_pins(self):
+        self.assertEqual((rows.K267_OMP, rows.N_OMP), (8, 2))
+        self.assertEqual(rows.run_env("none", None)["OMP_NUM_THREADS"], "8")
+        self.assertEqual(rows.run_env("none", None, omp=rows.N_OMP)["OMP_NUM_THREADS"], "2")
+
     def test_witness_rules(self):
         def w(arm="both", status="atexit", iso=False, cpu=(10, 80), cuda_single=(0, 0), cuda_batched=(0, 0)):
             def st(ge, le, sel_g, sel_l):
@@ -206,7 +268,7 @@ class NativeRows(unittest.TestCase):
                 else rows.n_argv(BINARY, name, frames, run / "out", "cpu"))
         if patches:
             argv[argv.index("--patch_x") + 1] = argv[argv.index("--patch_y") + 1] = str(patches)
-        env = rows.run_env(arm, run / "witness.json", run / "tap.json")
+        env = rows.run_env(arm, run / "witness.json", run / "tap.json", omp=rows.N_OMP if kind == "N" else rows.K267_OMP)
         import os
         p = subprocess.run(argv, cwd=self.fx if kind == "K" else self.nc, env={**os.environ, **env},
                            capture_output=True, text=True, timeout=600)
@@ -333,6 +395,47 @@ class NativeRows(unittest.TestCase):
         tap["global"][2][0] += 1e-3
         (run / "tap.json").write_text(json.dumps(tap))
         self.assertEqual(self.grade(run)["row_status"], "INVALID")
+
+    def test_absent_tap_fails_closed(self):
+        k = self.copy(self.produce("affine_both", "K", "affine", "both"), "k_notap")
+        (k / "tap.json").unlink()
+        row = self.grade(k)
+        self.assertEqual(row["row_status"], "INVALID", row)
+        self.assertIn("absent", row["reason"])
+        self.assertNotIn("tap", row)   # INVALID, never a SCORED row with only the STAR representation
+        n = self.copy(self.produce("n_v0n5_both", "N", "vel0_N5", "both", frames=5), "n_notap")
+        (n / "tap.json").unlink()
+        row = rows.grade_n(n, self.nc, "vel0_N5", "cpu", "both", iso_expected=ISO)
+        self.assertEqual(row["row_status"], "INVALID", row)
+        self.assertNotIn("runtime", row)
+
+    def test_def_build_row_is_star_only_by_declaration(self):
+        k = self.copy(self.produce("affine_both", "K", "affine", "both"), "k_def_style")
+        (k / "tap.json").unlink()
+        (k / "witness.json").unlink()
+        row = rows.grade_k267(k, self.fx, "affine", "cpu", "none", has_witness=False)
+        self.assertEqual(row["row_status"], "SCORED", row)
+        self.assertEqual(row["runtime_representation"], "NOT_REQUESTED")
+        self.assertIn("field_angstrom", row["star"])
+        self.assertNotIn("tap", row)
+        with self.assertRaises(ValueError):   # a def build cannot be declared to have a tap
+            rows.grade_k267(k, self.fx, "affine", "cpu", "none", has_witness=False, tap_expected=True)
+        n = self.copy(self.produce("n_v0n5_both", "N", "vel0_N5", "both", frames=5), "n_def_style")
+        (n / "tap.json").unlink()
+        (n / "witness.json").unlink()
+        row = rows.grade_n(n, self.nc, "vel0_N5", "cpu", "none", has_witness=False)
+        self.assertEqual((row["row_status"], row["runtime_representation"]), ("SCORED", "NOT_REQUESTED"))
+        self.assertNotIn("runtime", row)
+
+    def test_two_failed_runs_are_not_an_identity(self):
+        a = self.copy(self.produce("n_v0n5_none_a", "N", "vel0_N5", "none", frames=5), "fail_a")
+        b = self.copy(self.produce("n_v0n5_none_b", "N", "vel0_N5", "none", frames=5), "fail_b")
+        self.assertTrue(rows.identity_report(a, b, "vel0_N5")["identical"])
+        (a / "rc.txt").write_text("3\n")
+        (b / "rc.txt").write_text("3\n")
+        rep = rows.identity_report(a, b, "vel0_N5")
+        self.assertTrue(rep["same_exit"])
+        self.assertFalse(rep["identical"], "two failures with the same status must not count as identical")
 
     def test_n_control_row(self):
         run = self.produce("n_v0n5_both", "N", "vel0_N5", "both", frames=5)

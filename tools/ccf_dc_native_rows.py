@@ -68,16 +68,21 @@ def k267_argv(binary, case, outdir, backend, patches=None):
 
 
 def n_argv(binary, name, frames, outdir, backend):
-    """Retained N-control command (`--j 2`, 1x1 patches, `--last_frame_sum N`), with the product log kept."""
+    """Retained N-control command (`--j 2`, 1x1 patches, `--last_frame_sum N`; run with `OMP_NUM_THREADS=N_OMP`), with
+    the product log kept (the retained command had --skip_logfile; same declared deviation as K267)."""
     argv = [str(binary), "--i", f"{name}.star", "--o", str(outdir), "--use_own", "--j", "2", "--patch_x", "1",
             "--patch_y", "1", "--bin_factor", "1", "--seed", "1", "--skip_defect", "--save_noDW",
             "--first_frame_sum", "1", "--last_frame_sum", str(frames)]
     return argv + (["--gpu", "0"] if backend == "cuda" else [])
 
 
-def run_env(arm, report, tap=None, cuda_uuid=None):
-    """Environment for one producer; arm None means unset (identity rows). Report/tap only on experiment builds."""
-    env = {"OMP_NUM_THREADS": "8"}
+K267_OMP, N_OMP = 8, 2   # as the retained runs: K267 `run_v2.py` OMP 8 (--j 8); N controls `run_ncontrols.py` OMP 2 (--j 2)
+
+
+def run_env(arm, report, tap=None, cuda_uuid=None, omp=K267_OMP):
+    """Environment for one producer; arm None means unset (identity rows). Report/tap only on experiment builds.
+    N controls pass omp=N_OMP."""
+    env = {"OMP_NUM_THREADS": str(omp)}
     if arm is not None:
         env["MC_EXPERIMENT_CCF_DC_ARM"] = arm
     if report:
@@ -135,11 +140,16 @@ def grade_witness(w, backend, arm, stages, iso_expected):
             if stage in stages:
                 if c["frames_eligible"] <= 0 or c["calls_eligible"] <= 0:
                     vacuous.append(f"{site}.{stage} never reached (eligible 0)")
-                want_zero = c["frames_eligible"] if sel[stage] else 0
-                if c["frames_zeroed"] != want_zero:
-                    bad.append(f"{site}.{stage} zeroed {c['frames_zeroed']} != {want_zero}")
-            elif c["frames_eligible"] != 0:
-                bad.append(f"{site}.{stage} reached but the run declares only {sorted(stages)}")
+        # Selectivity on EVERY reached (site, stage), including the CUDA retry site cuda_single.local: a reached call
+        # of a selected stage is zeroed, of an unselected stage never; a stage that is not requested is never reached.
+        for site in SITES:
+            for stage in ("global", "local"):
+                c = sites[site][stage]
+                if c["frames_eligible"] > 0 or c["calls_eligible"] > 0:
+                    if c["frames_zeroed"] != (c["frames_eligible"] if sel[stage] else 0):
+                        bad.append(f"{site}.{stage} zeroed {c['frames_zeroed']} of {c['frames_eligible']} with that stage {'selected' if sel[stage] else 'unselected'}")
+                    if stage not in stages:
+                        bad.append(f"{site}.{stage} reached but the run declares only {sorted(stages)}")
         # A run must not leave its backend: a cpu run touches no CUDA site and a cuda run touches no cpu site
         # (a fallback to the host path is a different route and must not be graded as the declared one).
         # cuda_single.local is allowed on CUDA (retry), cuda_batched.global never occurs.
@@ -243,7 +253,19 @@ def _finish(row):
     return row
 
 
-def grade_k267(run, fixtures, case, backend, arm, iso_expected=False, has_witness=True, stages=None):
+def _tap_state(run, has_witness, tap_expected):
+    """Runtime-tap handling. An experiment-build row (has_witness) expects its tap by default; an expected tap that is
+    absent fails closed. A build that cannot write a tap (def) is declared with has_witness=False and is reported as
+    NOT_REQUESTED, never as a scored runtime representation."""
+    expected = has_witness if tap_expected is None else tap_expected
+    if expected and not has_witness:
+        raise ValueError("a tap cannot be expected from a build without the experiment hooks")
+    if expected and not (run / "tap.json").is_file():
+        return None, "INVALID", "runtime tap requested but absent (no runtime fallback to STAR)"
+    return expected, None, None
+
+
+def grade_k267(run, fixtures, case, backend, arm, iso_expected=False, has_witness=True, stages=None, tap_expected=None):
     """`stages` defaults to the stages the original CLI of this case executes (`k267_stages`); a caller that asked
     for more (e.g. a held all-3x3 configuration) passes them explicitly."""
     run, fixtures = Path(run), Path(fixtures)
@@ -258,7 +280,11 @@ def grade_k267(run, fixtures, case, backend, arm, iso_expected=False, has_witnes
         row["star"] = cmd.check_case(fixtures, case, star)
     except Exception as e:   # the unchanged checker's own refusals are results, not harness failures
         row["star"] = dict(checker_error=f"{type(e).__name__}: {e}")
-    if has_witness and (run / "tap.json").exists():
+    expect_tap, status, why = _tap_state(run, has_witness, tap_expected)
+    if status:
+        return dict(row, row_status=status, reason=why)
+    row["runtime_representation"] = "SCORED" if expect_tap else "NOT_REQUESTED"
+    if expect_tap:
         try:
             tap = bridge.load_tap(run / "tap.json", r["frames"])
             field = bridge.dense_field(tap, r["nx"], r["ny"], r["frames"])
@@ -274,23 +300,31 @@ def grade_k267(run, fixtures, case, backend, arm, iso_expected=False, has_witnes
             if diff.max() > STAR_FIELD_TOL_PX:
                 return dict(row, row_status="INVALID", reason="tap field (rounded as the STAR writer rounds) and the serialized STAR field disagree")
             row["local_enabled"] = tap["local_enabled"]
-            row["tap"] = cmd.check_case(fixtures, case, cand)
         except bridge.TapError as e:
             return dict(row, row_status="INVALID", reason=f"tap: {e}")
-        except Exception as e:
+        except Exception as e:   # bridge or STAR read-back failed: fail closed, not a checker result
+            return dict(row, row_status="INVALID", reason=f"tap bridge or STAR read-back: {type(e).__name__}: {e}")
+        try:
+            row["tap"] = cmd.check_case(fixtures, case, cand)
+        except Exception as e:   # the unchanged checker's own refusals are results, not harness failures
             row["tap"] = dict(checker_error=f"{type(e).__name__}: {e}")
     return _finish(row)
 
 
-def n_score(global_shifts, truth_px):
-    """Field metrics for a spatially constant field: ROI is immaterial, gauge is frame 0 (shift 0 by construction)."""
+def n_score(global_shifts, truth_px, roi=(12, 84, 12, 116)):
+    """Field metrics of the retained W5 convention: the per-frame error vector is repeated over the dense ROI
+    (y0:y1, x0:x1) before the unchanged `vector_metrics`, so rms, p95 and max are taken over frames x ROI pixels. The
+    p95 interpolates differently over N frame vectors alone (up to 0.12 A in 12 of 16 retained rows), so the ROI
+    broadcast is part of the metric. Frame-zero gauge, 0.885 A/px, no offset or floor subtracted."""
+    y0, y1, x0, x1 = roi
     err = (np.asarray(global_shifts, dtype=float) - np.asarray(truth_px, dtype=float)) * PIXEL_SIZE
-    m = cmd.vector_metrics(err)
+    dense = np.broadcast_to(err[:, None, None, :], (err.shape[0], y1 - y0, x1 - x0, 2))
+    m = cmd.vector_metrics(dense)
     ok = m["rms"] <= LIMITS_A[0] and m["p95"] <= LIMITS_A[1] and m["max"] <= LIMITS_A[2]
     return dict(rms=m["rms"], p95=m["p95"], max=m["max"], verdict="PASS" if ok else "FAIL")
 
 
-def grade_n(run, controls, name, backend, arm, iso_expected=False, has_witness=True):
+def grade_n(run, controls, name, backend, arm, iso_expected=False, has_witness=True, tap_expected=None):
     run, controls = Path(run), Path(controls)
     man = json.loads((controls / "MANIFEST.json").read_text())["cases"][name]
     row, ok = _head(run, name, backend, arm, {"global"}, iso_expected, has_witness)
@@ -300,15 +334,20 @@ def grade_n(run, controls, name, backend, arm, iso_expected=False, has_witness=T
     truth = np.load(controls / f"{name}_truth.npy", allow_pickle=False)   # scoring stage only
     s = read_motion_star(run / "out" / f"{name}.star")
     star_g = np.stack((s.global_shift_x, s.global_shift_y), axis=-1)
-    row["STAR"] = n_score(star_g, truth)
+    roi = tuple(man["roi"])
+    row["STAR"] = n_score(star_g, truth, roi)
     row["traj_rms_px_STAR"] = float(np.sqrt(np.mean((star_g - truth) ** 2) * 2))
-    if has_witness and (run / "tap.json").exists():
+    expect_tap, status, why = _tap_state(run, has_witness, tap_expected)
+    if status:
+        return dict(row, row_status=status, reason=why)
+    row["runtime_representation"] = "SCORED" if expect_tap else "NOT_REQUESTED"
+    if expect_tap:
         try:
             tap = bridge.load_tap(run / "tap.json", man["frames"])
         except bridge.TapError as e:
             return dict(row, row_status="INVALID", reason=f"tap: {e}")
         g = np.array(tap["global"])
-        row["runtime"] = n_score(g, truth)
+        row["runtime"] = n_score(g, truth, roi)
         row["traj_rms_px_runtime"] = float(np.sqrt(np.mean((g - truth) ** 2) * 2))
         row["runtime_minus_STAR_max_px"] = float(np.abs(g - star_g).max())
         row["rounded_runtime_minus_STAR_max_px"] = float(np.abs(np.vectorize(star_format)(g) - star_g).max())
@@ -332,6 +371,8 @@ def identity_report(run_a, run_b, movie):
     n = lambda x, d: normalise_console((d / x).read_text(), d / "out")
     rep["stdout"] = n("stdout.txt", a) == n("stdout.txt", b)
     rep["stderr"] = sorted(n("stderr.txt", a).splitlines()) == sorted(n("stderr.txt", b).splitlines())
-    rep["identical"] = rep["same_exit"] and all(rep[k] for k in rep if k not in ("exit", "same_exit"))
+    rep["both_succeeded"] = rep["exit"] == ["0", "0"]   # two failures with the same status are not an identity
+    rep["identical"] = rep["same_exit"] and rep["both_succeeded"] and all(
+        rep[k] for k in rep if k not in ("exit", "same_exit", "both_succeeded"))
     return rep
 

@@ -1,0 +1,105 @@
+--- ../release_v5/pair_decision_v5.py	2026-10-26 22:17:51
++++ pair_decision_v5_2.py	2026-10-26 23:11:36
+@@ -1,5 +1,13 @@
+-"""Release module v5 for the local full-width pilot: a re-anchored, extended copy of pair_decision_v4 (criteria: V5_PLAN.md).
++"""Release module v5.2 (continuation): a modified copy of pair_decision_v5.py (criteria: CONTINUATION_PLAN.md). pair_decision_v5.py is unchanged.
+ 
++v5.2 adds only: the anchors of ADMISSION_V5_2/COMMANDS_V5_2, a ROOT_AUDIT of every baseline tree (the pinned baseline RUN.json --o, the path shape and the root embedded in
++corrected_micrographs.star must agree with the baseline root actually passed to the unchanged comparator), and a required `continuation` admission block. Nothing in the
++comparison, comparator invocation, numerical checks, decision rules or science criteria changed.
++
++Original v5 text follows.
++
++Release module v5 for the local full-width pilot: a re-anchored, extended copy of pair_decision_v4 (criteria: V5_PLAN.md).
++
+ Pure consumer layer. It launches no producer, reads no movie or real image intensities and adds no estimator or numerical
+ operator. The pinned compare_products.py is executed as a subprocess; the pinned factorial_common.star_blocks and
+ manipulation are extracted by AST (that module has top-level venue-path side effects) and executed unchanged with only
+@@ -19,18 +27,18 @@
+ PILOT = HERE.parent  # v2/v3 live here (byte-identical to the frozen v3 package)
+ # Trust roots (no circular self-hash): the final admission/commands hashes are written here by build_admission_v5.py; the module itself,
+ # the driver and the tests are bound out of band by the parent release index.
+-ADMISSION_V5_SHA256 = 'dae759f7f12df05af24ca75f2bdbaa7eb9e5453186c86e9df27f81a3dcb53871'
+-COMMANDS_V5_SHA256 = '2bd36face2fed6f6a92398eb0402a63e6c6ea3624832e45c823f289a061b8081'
++ADMISSION_V5_2_SHA256 = '7a431e8db3c2628fc99dc6f38618f8e354653d1c636be5e85ebaec6e2d02c97d'
++COMMANDS_V5_2_SHA256 = '2bd36face2fed6f6a92398eb0402a63e6c6ea3624832e45c823f289a061b8081'
+ V3_MODULE_SHA256 = 'bd685429028d6b5d7ce1665355dd120cde163966b5abb11fb51be4d8937bdccc'
+-ADMISSION_PATH = HERE / 'ADMISSION_V5.json'
+-COMMANDS_PATH = HERE / 'COMMANDS_V5.json'
++ADMISSION_PATH = HERE / 'ADMISSION_V5_2.json'
++COMMANDS_PATH = HERE / 'COMMANDS_V5_2.json'
+ LAUNCH_FIELDS = ('candidate_binary', 'source_archive', 'build_receipt', 'compiler_and_config', 'shared_libraries', 'venue_identity',
+                  'fresh_venue_resource_admission', 'independent_source_clearance')
+ P1_CASES = ('affine', 'pedestal', 'zero', 'integer', 'fractional')
+ UNIDENTIFIABLE = ('flat', 'repeated')
+ METRICS = ('rms', 'p95', 'max')
+-PRE_ON_SCHEMA = 'local-full-width-pre-on-v5'
+-PAIR_SCHEMA = 'local-full-width-pair-v5'
++PRE_ON_SCHEMA = 'local-full-width-pre-on-v5_2'
++PAIR_SCHEMA = 'local-full-width-pair-v5_2'
+ 
+ 
+ class PairError(ValueError):
+@@ -73,9 +81,9 @@
+ 
+ def _load_anchored():
+     ab, cb = ADMISSION_PATH.read_bytes(), COMMANDS_PATH.read_bytes()
+-    if _sha_bytes(ab) != ADMISSION_V5_SHA256:
++    if _sha_bytes(ab) != ADMISSION_V5_2_SHA256:
+         raise PairError('ANCHOR', 'admission file differs from its anchored hash')
+-    if _sha_bytes(cb) != COMMANDS_V5_SHA256:
++    if _sha_bytes(cb) != COMMANDS_V5_2_SHA256:
+         raise PairError('ANCHOR', 'commands file differs from its anchored hash')
+     return _strict(ab.decode(), 'admission'), _strict(cb.decode(), 'commands')
+ 
+@@ -126,9 +134,10 @@
+         if str(adm.get('status', '')).startswith('HELD_') or any(adm.get(k) is None for k in LAUNCH_FIELDS) \
+                 or not isinstance(adm.get('candidate_source_commit'), str):
+             raise PairError('HELD', 'admission is HELD or a launch field (binary/source/build/venue/lease/clearance) is null')
+-        for k in ('evidence_root', 'baseline_root', 'fixture_dir', 'tool_roots'):
++        for k in ('evidence_root', 'baseline_root', 'fixture_dir', 'tool_roots', 'continuation'):
+             if adm.get(k) is None:
+                 raise PairError('HELD', 'admission field %s is null' % k)
++        self.continuation = adm['continuation']
+         self.roots, self.evidence_root = adm['tool_roots'], str(adm['evidence_root'])
+         self.baseline_root, self.fixture_dir = str(adm['baseline_root']), str(adm['fixture_dir'])
+         self.binary_path, self.binary_sha256 = adm['candidate_binary']['path'], adm['candidate_binary']['sha256']
+@@ -272,9 +281,29 @@
+     for k in sorted(pins):
+         if disk[k] != pins[k]:
+             raise PairError('BASELINE', 'bytes/sha256 differ from the pin: ' + k)
++    _root_audit(case, baseline_dir)
+     return pins
+ 
+ 
++def _root_audit(case, baseline_dir):
++    """The comparator normalises the root it is given: that root must be the one the pinned baseline files actually embed (the r1 STOP was a durable path passed over original-root files)."""
++    bd = Path(baseline_dir)
++    root = str(bd.resolve() / 'output')
++    if bd.name != 'UP_only' or bd.parent.name != case:
++        raise PairError('ROOT_AUDIT', 'baseline path must end <case>/UP_only: %s' % bd)
++    try:
++        argv = json.loads((bd / 'RUN.json').read_text())['argv']
++        star = (bd / 'output' / 'corrected_micrographs.star').read_text()
++    except (OSError, ValueError, KeyError, TypeError) as e:
++        raise PairError('ROOT_AUDIT', 'baseline RUN.json/STAR unreadable: %s' % e)
++    idx = [i for i, a in enumerate(argv) if a == '--o']
++    if len(idx) != 1 or idx[0] + 1 >= len(argv) or argv[idx[0] + 1] != root:
++        raise PairError('ROOT_AUDIT', 'baseline RUN.json --o %r does not equal the baseline path %s' % ([argv[i + 1] for i in idx if i + 1 < len(argv)], root))
++    embedded = set(re.findall(r'(/[^\s]*?/output)/', star))
++    if embedded != {root}:
++        raise PairError('ROOT_AUDIT', 'corrected_micrographs.star embeds roots %s, not exactly the baseline root %s' % (sorted(embedded), root))
++
++
+ def _compare(ctx, a_root, b_root, out_dir):
+     """Run the pinned comparator as a subprocess; retain command, rc, stdout, stderr and JSON in out_dir."""
+     comparator = ctx.tool('compare_products.py')
+@@ -546,7 +575,7 @@
+                     increases.append({'case': c, 'field': f, 'metric': k, 'OFF': off, 'ON': on,
+                                       'gate_transition': '%s->%s' % (gate(arms['OFF'][f]['angstrom']), gate(arms['ON'][f]['angstrom']))})
+     return {
+-        'schema': 'local-full-width-decision-v5',
++        'schema': 'local-full-width-decision-v5_2',
+         'P1': {'ok': p1_ok, 'cases': p1},
+         'P2': {'ok': p2_ok, 'noisy': p2_detail},
+         'noisy_raw_gate': 'PASS' if all(v == 'PASS' for v in noisy_gate.values()) else 'FAIL', 'noisy_raw_gate_by_field': noisy_gate,

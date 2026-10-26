@@ -37,6 +37,7 @@
 static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
+#include "src/experiment_ccf_dc.h" // EXPERIMENT ONLY (#262); empty unless MC_EXPERIMENT_CCF_DC
 #include "src/cpu_dose_symmetry_mode.h"
 #include "src/native_movie_staging.h"
 #include "src/defect_neighbours.h"
@@ -4874,6 +4875,9 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	const bool use_coupled = experimental_coupled_peak == 2 || (experimental_coupled_peak == 1 && is_global);
 	std::atomic<long> coupled_peaks{0}, coupled_not_negdef{0}, coupled_offset_gt_1px{0};
 
+	int iters_done = 0;
+	RFLOAT last_rmsd = 0;
+
 	if (is_global && (half_gain || experimental_align_tolerance > 0))
 		logfile << " EXPERIMENTAL global alignment: half_gain = " << (half_gain ? 1 : 0) << ", tolerance = " << tolerance << " px, max_iter = " << max_iter << std::endl;
 
@@ -4905,6 +4909,9 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 				}
 			}
 			RCTOC(TIMING_CCF_CALC);
+#ifdef MC_EXPERIMENT_CCF_DC
+			if (experimentCcfDcZero(is_global, EXP_DC_CPU, 1)) DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);
+#endif
 
 			RCTIC(TIMING_CCF_IFFT);
 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
@@ -5017,12 +5024,18 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		// Test convergence
 		RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
 		logfile << " Iteration " << iter << ": RMSD = " << rmsd << " px" << std::endl;
+		iters_done = iter; last_rmsd = rmsd;
 
 		if (rmsd < tolerance) {
 			converged = true;
 			break;
 		}
 	}
+
+	// EXPERIMENTAL: iteration accounting of the global alignment, only when an experimental flag is on.
+	if (is_global && (half_gain || experimental_align_tolerance > 0 || use_coupled))
+		std::cout << "[align] scope=global iterations=" << iters_done << " max_iter=" << max_iter << " converged=" << (converged ? 1 : 0)
+		          << " last_rmsd_px=" << last_rmsd << " tolerance_px=" << tolerance << std::endl;
 
 	if (use_coupled) {
 		coupled_peak_last_peaks = coupled_peaks;

@@ -152,6 +152,12 @@ target_link_libraries(motioncorr_core PUBLIC
     PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
     motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)
 
+# EXPERIMENT ONLY (#262, ported CPU path only): CCF DC conditioning, selected at run time by
+# MC_EXPERIMENT_CCF_DC_ARM (required when built in). Default OFF compiles none of it.
+option(MC_EXPERIMENT_CCF_DC "Build the #262 CCF DC conditioning experiment (CPU path)" OFF)
+if(MC_EXPERIMENT_CCF_DC)
+    target_compile_definitions(motioncorr_core PUBLIC MC_EXPERIMENT_CCF_DC)
+endif()
 option(TIMING "Enable internal timing" OFF)
 if(TIMING)
     add_compile_definitions(TIMING)
@@ -259,6 +265,12 @@ if(BUILD_TESTING)
     add_executable(coupled_peak tests/test_coupled_peak.cpp)
     target_link_libraries(coupled_peak PRIVATE motioncorr_core)
     add_test(NAME CoupledPeak COMMAND coupled_peak)
+    # H3: operator control for the ported #262 DC hook (only exists when built in).
+    if(MC_EXPERIMENT_CCF_DC)
+        add_executable(ccf_dc_hook tests/test_ccf_dc_hook.cpp)
+        target_link_libraries(ccf_dc_hook PRIVATE motioncorr_core)
+        add_test(NAME CcfDcHook COMMAND ccf_dc_hook)
+    endif()
     # #257: device-free exact-rational controls, shared with the actual CUDA
     # kernel test. Host replays establish arithmetic only, not GPU execution.
     add_executable(peak_fit_arithmetic tests/peak_fit_arithmetic.cpp)

@@ -70,7 +70,7 @@ None identified. Every difference from an earlier expectation in the i8 rows is 
 Not unconditional. The precise remaining items:
 
 1. **Maintainer disposition of two FAIL rows:** A13 (unedited grader FAIL; all ten mismatches attributed, none a regression) and K269-CUDA exact-sum equality (FAIL against the plan's wording; sole cause #270, an intended CUDA product change).
-2. **Current-head CI** for the final head of this branch (compile/CTest on Linux and CUDA compile only; not native evidence).
+2. **Current-head CI** on the final head (green at `5849a947`; the final head is documentation-only on top of it).
 3. If the maintainer wants the two grader fixes and the A13 `bz2` attribution independently confirmed, that is a small follow-up; it does not change a product result.
 
 If 1 and 2 are accepted, the engineering qualification for the C1 composition is complete as bounded above, and C1 is ready for the M1 decision. No merge, tag, gate, tolerance or default was touched.

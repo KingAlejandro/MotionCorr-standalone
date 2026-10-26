@@ -309,6 +309,10 @@ Details: [native_ncontrols/README.md](native_ncontrols/README.md) (prediction fr
 
 Details: [h6_local_dc/README.md](h6_local_dc/README.md). With the DC arm `both` and the coupled peak `all` (DCb+H2a), pedestal passes at both stops (0.262 to 0.117 Å RMS), affine passes at the long budget (max 0.849 to 0.513), noisy at the production stop falls from 3.05 / 21.3 to 1.65 / 7.3 Å (still FAIL) and patch (1,3) is kept; integer and fractional are identical to DCg+H2g; no regression versus DCg+H2g in any case (DCb+H2g has four noisy rows). Prediction 2 holds. Patch DC zeroing carries 74% of the pedestal improvement.
 
+## H7a: production scale (100 #269 movies) and review findings
+
+Details: [h7a_census/README.md](h7a_census/README.md). On the 100 census movies (4096 x 4096 x 40 and 5760 x 4092 x 40, bin 1, global CCF crop 0.25, so one CCF pixel is about 4 movie pixels) flags-off reproduces the C1 K269 CPU census exactly (100/100 STAR and payloads) and DCb+H2a is **not** better in the paired sign test (C lower in 52 of 100, p = 0.76; prediction 1 falsified, the falsification branch applies). Harm: none (no F-pass/C-fail movie); guard fires 0 of 191,960 patch peaks. The only difference is `pedestal32`, where flags-off does not converge and drops all patches and C does; the other 90 movies differ at the noise level. Review findings F1 (CoupledPeak truth closeness and a tilted fixture; the reviewer's 5 mutants now fail), F3 (the DC hook refuses `--gpu`) and F6 (staging records) are closed.
+
 ## Not run / limitations (half-gain, H2 and H3)
 
 - **Runtime (unrounded) field:** scored in the runtime-capture section for the five candidate arms (a, DCg, DCg+H2g, each at both stops); still UNRUN for the other arms. The statement below applied to the earlier rounds: **UNRUN.** e77a51a2 has no runtime-model capture (`MC_DIAG_*` is not in `src/`). Only STAR-serialized scores exist. W5 found runtime and STAR scores within about 3e-5 Å RMS on its fixtures (largest: affine double-gain1-5it, 0.320006 vs 0.319982), far inside the limits, but that is not measured here.

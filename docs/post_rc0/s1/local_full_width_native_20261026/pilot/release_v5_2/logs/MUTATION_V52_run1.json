@@ -1,0 +1,331 @@
+{
+ "audit_argv": {
+  "status": "KILLED",
+  "groups": [
+   "audit"
+  ],
+  "intended": [
+   "names another case (basename)",
+   "differs in the last character",
+   "by one digit",
+   "no --o value pair",
+   "has a second --o"
+  ],
+  "covered": [
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "failed_count": 5,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "baseline RUN.json --o names another case (basename)",
+   "baseline RUN.json --o differs in the last character",
+   "baseline RUN.json --o differs by one digit in a path component (numeric)",
+   "baseline RUN.json has no --o value pair",
+   "baseline RUN.json has a second --o"
+  ],
+  "exit": 1
+ },
+ "audit_embedded": {
+  "status": "KILLED",
+  "groups": [
+   "audit"
+  ],
+  "intended": [
+   "embeds an extra root",
+   "embeds a different root only"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 2,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "corrected_micrographs.star embeds an extra root",
+   "corrected_micrographs.star embeds a different root only"
+  ],
+  "exit": 1
+ },
+ "audit_called": {
+  "status": "KILLED",
+  "groups": [
+   "audit"
+  ],
+  "intended": [
+   "extra root",
+   "different root only",
+   "r1 failure mode"
+  ],
+  "covered": [
+   true,
+   true,
+   true
+  ],
+  "failed_count": 8,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "baseline RUN.json --o names another case (basename)",
+   "baseline RUN.json --o differs in the last character",
+   "baseline RUN.json --o differs by one digit in a path component (numeric)",
+   "baseline RUN.json has no --o value pair",
+   "baseline RUN.json has a second --o",
+   "corrected_micrographs.star embeds an extra root",
+   "corrected_micrographs.star embeds a different root only",
+   "r1 failure mode (durable-style path over original-root files) is now a loud ROOT_AUDIT"
+  ],
+  "exit": 1
+ },
+ "audit_path_shape": {
+  "status": "SHADOWED_AS_DECLARED",
+  "groups": [
+   "audit"
+  ],
+  "intended": [],
+  "covered": [],
+  "failed_count": 0,
+  "crashed_or_hung": false,
+  "failed_tests": [],
+  "exit": 0
+ },
+ "reuse_arm": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "reuse naming another arm is refused"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 4,
+  "crashed_or_hung": true,
+  "failed_tests": [
+   "reuse naming another case is refused",
+   "reuse naming another case is refused [no producer launched]",
+   "reuse naming another arm is refused",
+   "reuse naming another arm is refused [no producer launched]"
+  ],
+  "exit": 1
+ },
+ "reuse_listing": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "another case directory",
+   "an existing ON",
+   "a stray file in evidence_root"
+  ],
+  "covered": [
+   true,
+   true,
+   true
+  ],
+  "failed_count": 5,
+  "crashed_or_hung": true,
+  "failed_tests": [
+   "unexpected existing row: another case directory",
+   "unexpected existing row: another case directory [no producer launched]",
+   "unexpected existing row: an existing ON",
+   "unexpected existing row: a stray file in evidence_root",
+   "unexpected existing row: a stray file in evidence_root [no producer launched]"
+  ],
+  "exit": 1
+ },
+ "reuse_inventory": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "one output byte",
+   "an extra file"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 3,
+  "crashed_or_hung": true,
+  "failed_tests": [
+   "changed first OFF: one output byte",
+   "changed first OFF: an extra file",
+   "changed first OFF: an extra file [no producer launched]"
+  ],
+  "exit": 1
+ },
+ "reuse_run_hash": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "admission reuse hash wrong"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 2,
+  "crashed_or_hung": true,
+  "failed_tests": [
+   "admission reuse hash wrong",
+   "admission reuse hash wrong [no producer launched]"
+  ],
+  "exit": 1
+ },
+ "reuse_r1_records": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "r1 ledger changed",
+   "r1 STOP changed"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 4,
+  "crashed_or_hung": true,
+  "failed_tests": [
+   "r1 ledger changed",
+   "r1 ledger changed [no producer launched]",
+   "r1 STOP changed",
+   "r1 STOP changed [no producer launched]"
+  ],
+  "exit": 1
+ },
+ "budget_arithmetic": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "plan plus the reused OFF is not the budget"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 2,
+  "crashed_or_hung": true,
+  "failed_tests": [
+   "plan plus the reused OFF is not the budget",
+   "plan plus the reused OFF is not the budget [no producer launched]"
+  ],
+  "exit": 1
+ },
+ "release_reused_hash": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "release without the reused-OFF hash"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 2,
+  "crashed_or_hung": true,
+  "failed_tests": [
+   "release without the reused-OFF hash",
+   "release without the reused-OFF hash [no producer launched]"
+  ],
+  "exit": 1
+ },
+ "release_commands": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "release commands hash wrong"
+  ],
+  "covered": [
+   false
+  ],
+  "failed_count": 0,
+  "crashed_or_hung": true,
+  "failed_tests": [],
+  "exit": 1
+ },
+ "ledger_fresh": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "decision directory not fresh"
+  ],
+  "covered": [
+   false
+  ],
+  "failed_count": 0,
+  "crashed_or_hung": true,
+  "failed_tests": [],
+  "exit": 1
+ },
+ "reused_event": {
+  "status": "KILLED",
+  "groups": [
+   "happy"
+  ],
+  "intended": [
+   "explicit REUSED event"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "the new ledger starts with the explicit REUSED event (before 1, remaining 15, ceiling 16)"
+  ],
+  "exit": 1
+ },
+ "pre_on_reused": {
+  "status": "SURVIVED",
+  "groups": [
+   "happy"
+  ],
+  "intended": [
+   "pre-ON record for the reused OFF exists"
+  ],
+  "covered": [
+   false
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "INFRA fault in g_happy"
+  ],
+  "exit": 1
+ },
+ "plan_noisy_on_first": {
+  "status": "SURVIVED",
+  "groups": [
+   "happy"
+  ],
+  "intended": [
+   "continuation ends in the decision",
+   "dry run validates"
+  ],
+  "covered": [
+   false,
+   false
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "INFRA fault in g_happy"
+  ],
+  "exit": 1
+ }
+}

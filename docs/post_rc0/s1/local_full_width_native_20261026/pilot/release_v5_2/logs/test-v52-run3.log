@@ -1,0 +1,60 @@
+PASS positive: the audited baseline root passes the whole gate (OFF admitted, comparator IDENTICAL)
+PASS baseline RUN.json --o names another case (basename) :: code=ROOT_AUDIT
+PASS baseline RUN.json --o differs in the last character :: code=ROOT_AUDIT
+PASS baseline RUN.json --o differs by one digit in a path component (numeric) :: code=ROOT_AUDIT
+PASS baseline RUN.json has no --o value pair :: code=ROOT_AUDIT
+PASS baseline RUN.json has a second --o :: code=ROOT_AUDIT
+PASS control: the restored baseline passes the audit again
+PASS corrected_micrographs.star embeds an extra root :: code=ROOT_AUDIT
+PASS corrected_micrographs.star embeds a different root only :: code=ROOT_AUDIT
+PASS r1 failure mode (durable-style path over original-root files) is now a loud ROOT_AUDIT :: code=ROOT_AUDIT
+PASS control: a changed MRC payload is still detected by the comparator after the audit :: code=COMPARATOR
+PASS dry run validates, plans 15 launches (noisy ON first) and creates nothing
+PASS continuation ends in the decision with 15 new launches
+PASS the new ledger starts with the explicit REUSED event (before 1, remaining 15, ceiling 16)
+PASS noisy/OFF is never launched again and the order is noisy ON then the 7 cases OFF/ON
+PASS the reused OFF RUN.json and the r1 ledger/STOP are unchanged after the run
+PASS pre-ON record for the reused OFF exists in the NEW decision directory (re-evaluated from saved outputs)
+PASS a finished continuation is not restartable in place :: code=REUSE
+PASS a later-case OFF compat failure stops before its ON :: code=COMPARATOR
+PASS stop after exactly noisy ON and affine OFF, no affine ON, no further case
+PASS the old OFF still untouched after a stop
+PASS a failing noisy ON producer stops the continuation :: code=PRODUCER
+PASS no further launch after the noisy ON failure
+PASS unexpected existing row: another case directory :: code=REUSE
+PASS unexpected existing row: another case directory [no producer launched]
+PASS unexpected existing row: an existing ON :: code=REUSE
+PASS unexpected existing row: an existing ON [no producer launched]
+PASS unexpected existing row: a stray file in evidence_root :: code=REUSE
+PASS unexpected existing row: a stray file in evidence_root [no producer launched]
+PASS changed first OFF: one output byte :: code=REUSE
+PASS changed first OFF: one output byte [no producer launched]
+PASS changed first OFF: an extra file :: code=REUSE
+PASS changed first OFF: an extra file [no producer launched]
+PASS changed first OFF: the receipt :: code=REUSE
+PASS changed first OFF: the receipt [no producer launched]
+PASS missing first OFF :: code=REUSE
+PASS missing first OFF [no producer launched]
+PASS r1 ledger changed :: code=REUSE
+PASS r1 ledger changed [no producer launched]
+PASS r1 STOP changed :: code=REUSE
+PASS r1 STOP changed [no producer launched]
+PASS reuse naming another case is refused :: code=REUSE
+PASS reuse naming another case is refused [no producer launched]
+PASS reuse naming another arm is refused :: code=REUSE
+PASS reuse naming another arm is refused [no producer launched]
+PASS admission reuse hash wrong :: code=REUSE
+PASS admission reuse hash wrong [no producer launched]
+PASS plan plus the reused OFF is not the budget :: code=BUDGET
+PASS plan plus the reused OFF is not the budget [no producer launched]
+PASS release without the reused-OFF hash :: code=RELEASE
+PASS release without the reused-OFF hash [no producer launched]
+PASS release naming the old v5.1 driver :: code=RELEASE
+PASS release naming the old v5.1 driver [no producer launched]
+PASS release without any file :: code=RELEASE
+PASS release without any file [no producer launched]
+PASS release commands hash wrong :: code=RELEASE
+PASS release commands hash wrong [no producer launched]
+PASS decision directory not fresh :: code=EXISTS
+PASS decision directory not fresh [no producer launched]
+TOTAL 59 FAILED 0

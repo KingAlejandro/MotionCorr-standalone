@@ -19,7 +19,7 @@ tools, not a portable or executable release.** Nothing here launches a producer.
   (`reviews/`); reports have sha256 `dcb6094c...`, `c3a8cb2a...`, `36bd2d44...`.
 
 ## Not established (UNRUN)
-Any native, GPU or SSH work; a producer driver; a real witness (the 9 log lines) on an actual run; the 33 real fixture bytes and the 8x19
+For this new flag: native movie/GPU execution and remote venue inspection beyond the retained failed SSH reachability probes (`ACCESS_CHECK.json`, `access_r2/ACCESS_CHECK.json`); a producer driver; a real witness (the 9 log lines) on an actual run; the 33 real fixture bytes and the 8x19
 retained baseline bytes at the venue; the final Linux source/build/binary/venue/lease pins and a re-anchored release module; byte neutrality
 of any real run; harm controls; N5/9/13/20; the .20/.40/.80 field gates on native output; STAR/runtime comparison on native output.
 The pilot stays at 8 cases and at most 16 producers with P1/P2 unchanged. No full100, adoption, merge or default change.

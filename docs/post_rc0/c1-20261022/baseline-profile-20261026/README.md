@@ -28,7 +28,7 @@ Characterization only. No optimisation, no speedup claim, no cross-venue ratio. 
 | A3 | 2.738 | 7.59 | 2.86 | none |
 | A4 | 2.700 | 7.59 | 2.82 | none |
 
-AA scatter: |A2-A1| 3.9% of their mean, |A4-A3| 1.4%; A1-A4 range 2.700-2.853 s (5.7% of the minimum), mean 2.759 s. Differences below about 6% on this host and lane are not resolvable with four samples. Peak device memory above idle 6.40 GB in every run. Foreign lane CPU at most 0.008 cores; no foreign GPU process.
+AA scatter: |A2-A1| 3.9% of their mean, |A4-A3| 1.4%; A1-A4 range 2.700-2.853 s (5.7% of the minimum), mean 2.759 s. The observed A1-A4 range is 5.7% of the minimum and the two same-binary pairs differ by 3.9% and 1.4%; these are descriptive observations of four samples, not a calibrated resolution bound (amended 2026-10-26, below). Peak device memory above idle 6.40 GB in every run. Foreign lane CPU at most 0.008 cores; no foreign GPU process.
 
 ## Complete publication and drift
 
@@ -49,7 +49,7 @@ Movie wall 2356.9 ms; run wall 2564.6 ms (the remaining 208 ms: main-thread join
 | global fft / alignment / ifft | 14.9 / 11.5 / 14.6 | 0.6 / 0.5 / 0.6% | |
 | other (setup, release, fit, plot) | ~14 | 0.6% | |
 
-**Result: dominant stage = host read movie** by the predeclared rule (>=35% of the movie wall and >=1.25x the next stage: 55.7% and 2.27x movie teardown). This is one sample, so the shares are single-sample facts, not stable estimates; the first-touch fault count is a recorded fact, not a diagnosed cause.
+**Result: dominant stage = host read movie** by the predeclared rule (>=35% of the movie wall and >=1.25x the next stage: 55.7% and 4.04x movie teardown (raw 1313.183594 / 325.213809 ms); amended 2026-10-26, below). This is one sample, so the shares are single-sample facts, not stable estimates; the first-touch fault count is a recorded fact, not a diagnosed cause.
 
 ## Device view, P2 (Nsight Systems 2024.6.2, `cuda,nvtx`, no CPU sampling, unprivileged; one sample, instrumented)
 
@@ -62,3 +62,11 @@ For this movie, on this host, in this 6-CPU lane, with a warm page cache and the
 ## Retrieval
 
 `retrieval-index.txt`: sha256, size and VM path of all 132 files under `/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb-bp-20261026` (kept outside Git: run trees with the 64 MiB sums, `kit-trace/trace.nsys-rep` sha256 `4af4be60…0cce7a`, full kit reports). `evidence/` holds the compact receipts (runs.jsonl and provenance of each kit invocation, reports, P1 JSONL, trace summary, monitor, occupancy, health, pins). `run_baseline.sh` is the exact driver; `analyze.py` produced `baseline-results.json`.
+
+## Amendment 2026-10-26 (result interpretation; docs only, no new measurement)
+
+Raw data, `evidence/`, `retrieval-index.txt` and the original commit `0247cc2d` are unchanged; the corrected lines above replace their earlier wording in place and the earlier wording stays in git.
+
+1. **Ratio corrected.** The dominant-stage ratio was published as 2.27x. From the raw P1 record (`evidence/p1/p1.profile.jsonl`): host read movie 1313.183594 ms, movie teardown 325.213809 ms, ratio **4.038x** (4.40x against gain and sum, 298.606297 ms). The share 55.7% (1313.183594 / 2356.923755) was right. The predeclared rule (>=35% and >=1.25x the next stage) is satisfied by the corrected numbers, so the conclusion is unchanged. The PR #282 comment of 26 Oct that said "2.3x the next stage" carries the same error and is corrected in the follow-up comment.
+2. **Wording.** "Differences below about 6% ... are not resolvable" treated a four-sample range as an inferential resolution. Replaced by the descriptive statement: observed A1-A4 range 5.7% of the minimum, same-binary pairs 3.9% and 1.4%. No resolution bound is calibrated from four samples.
+3. **What the largest phase is, from source (read-only, `e77a51a2`, no new timing).** The built-in stage `host read movie` is `MC_STAGE("host read movie")` at `src/motioncorr_runner.cpp:2538` to `MC_STAGE("allocate host sum")` at about :2606. It encloses the `read_errors` vector, an `omp parallel for num_threads(n_io_threads)` over frames (`n_io_threads = n_threads`, capped by `--max_io_threads`, :142/:2095-2100), and per frame `read_movie_frame` -> `Image<T>::read(fn_mic, true, frames[i], false, true)` (`image.h:719`) -> `fImageHandler::openFile` (a file open per frame call), `_read` -> `readMRC` (`rwMRC.h:261`, header `fread` and `parseMRCHeader`) -> `readData` (`image.h:1161`: `data.coreAllocateReuse()`, page-buffer allocation, `fseek`, per-page `fread`, `castPage2T`, where the float-to-float case is a `memcpy`), the page free, then the exception rethrow loop. The "per-row Y-flip" in the runner comment belongs to the TIFF reader (`rwTIFF.h:276-311`); the float MRC `readData` path of this input contains no flip. So the 1313 ms phase is the whole enclosed block, **not file I/O alone**. The phase is measured; its cause within the phase (frame-buffer allocation and first touch, page buffer, `fread`/memory copy, file-open, memory or file-system behaviour, thread scheduling) is **unresolved**. The warm page cache and 0 major faults in the record do not diagnose it (233,226 minor faults are recorded, not interpreted).

@@ -242,10 +242,15 @@ def main(argv):
     ap.add_argument('--decision-dir', required=True)
     ap.add_argument('--execute', action='store_true', help='real launch; requires PARENT_RELEASE.json in the decision directory')
     ap.add_argument('--timeout', type=int, default=900)
+    ap.add_argument('--receipt', help='write the full result JSON here (must not exist)')
     a = ap.parse_args(argv)
     cpus = P5.context(None).adm['fresh_venue_resource_admission']['cpus']
     out = run_campaign(a.decision_dir, execute=a.execute, cpus=cpus, timeout=a.timeout)
-    print(json.dumps(out, indent=1, default=str)[:4000])
+    text = json.dumps(out, indent=1, default=str) + '\n'
+    if a.receipt:
+        with open(a.receipt, 'x') as f:
+            f.write(text)
+    print(text[:2000])
     return 0
 
 

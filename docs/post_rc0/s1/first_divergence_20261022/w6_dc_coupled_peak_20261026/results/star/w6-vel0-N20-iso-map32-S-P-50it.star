@@ -1,0 +1,34 @@
+data_general
+_rlnImageSizeX 128
+_rlnImageSizeY 96
+_rlnImageSizeZ 20
+_rlnMicrographStartFrame 1
+_rlnMicrographBinning 1.000000
+_rlnMicrographOriginalPixelSize .885000
+_rlnMotionModelVersion 0
+
+data_global_shift
+loop_
+_rlnMicrographFrameNumber #1
+_rlnMicrographShiftX #2
+_rlnMicrographShiftY #3
+1 0.000000 0.000000
+2 -1.00560 1.994505
+3 -1.99407 3.970696
+4 -2.99407 5.972527
+5 -4.00000 7.978938
+6 -4.99638 9.987179
+7 -5.98130 11.967949
+8 -7.00906 13.970696
+9 -7.99819 15.997253
+10 -9.01186 17.990385
+11 -9.98271 19.960165
+12 -11.01087 21.980769
+13 -11.98090 23.978022
+14 -13.00223 25.980769
+15 -13.99209 27.974359
+16 -14.98814 29.989011
+17 -15.99605 31.969780
+18 -16.99605 33.987179
+19 -17.98814 35.990385
+20 -18.98188 37.961538

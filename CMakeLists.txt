@@ -219,6 +219,9 @@ if(BUILD_TESTING)
     # The same byte-preservation checker used by the native C2R oracle.
     add_executable(hermitian_projection_oracle tests/test_hermitian_projection_oracle.cpp)
     add_test(NAME HermitianProjectionOracle COMMAND hermitian_projection_oracle)
+    add_executable(local_ccf_capture tests/test_local_ccf_capture.cpp)
+    target_link_libraries(local_ccf_capture PRIVATE motioncorr_core)
+    add_test(NAME LocalCcfCapture COMMAND local_ccf_capture)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
     add_executable(cpu_dose_symmetry tests/test_cpu_dose_symmetry.cpp)
@@ -704,6 +707,9 @@ if(BUILD_TESTING)
                 COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_dc_hook_gpu_refusal.py
                     --binary $<TARGET_FILE:motioncorr>)
         endif()
+        add_test(NAME LocalCcfCaptureCli
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_local_ccf_capture_cli.py
+                --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME OutputTreeComparator
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compare_output_trees.py)
         set_tests_properties(OutputTreeComparator PROPERTIES TIMEOUT 120)

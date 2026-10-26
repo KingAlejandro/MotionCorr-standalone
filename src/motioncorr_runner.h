@@ -38,6 +38,7 @@
 #include "src/jaz/tomography/tomogram_set.h"
 
 class EERRenderer;
+class LocalCcfCapture;
 
 #ifdef _CUDA_ENABLED
 #include <cufft.h>
@@ -145,6 +146,7 @@ public:
 	// replaces the hard-coded 0.5 px stop of the global alignment. Local patches are
 	// untouched by both.
 	bool experimental_local_b2 = false;
+	std::string diag_local_ccf_dir; // default-off fixed two-patch observation only
 	bool experimental_global_half_gain = false;
 	RFLOAT experimental_align_tolerance = 0;
 
@@ -419,7 +421,7 @@ private:
 	// shiftx, shifty is relative to the (real space) image size
 	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty);
 
-	bool alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false);
+	bool alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false, LocalCcfCapture *capture = nullptr);
 #ifdef _CUDA_ENABLED
 	bool alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false, void *arena = nullptr, size_t arena_bytes = 0);
 #endif

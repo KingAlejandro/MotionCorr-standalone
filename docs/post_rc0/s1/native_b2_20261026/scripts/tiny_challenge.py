@@ -1,6 +1,7 @@
 """Preregistered retained-only linear-operator challenge; no native producers."""
 import hashlib,json,sys
 from pathlib import Path
+sys.dont_write_bytecode = True
 import numpy as np
 BUNDLE=Path(sys.argv[1]);REPO=Path(sys.argv[2]);W8=Path(sys.argv[3]);OUT=Path(sys.argv[4])
 sys.path[:0]=[str(W8),str(REPO/'tools')]

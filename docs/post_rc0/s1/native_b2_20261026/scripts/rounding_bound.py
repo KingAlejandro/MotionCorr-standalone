@@ -1,6 +1,7 @@
 """Pre-native, truth-blind bound from pinned STAR observations and B2 conditioning."""
 import sys,json,hashlib
 from pathlib import Path
+sys.dont_write_bytecode = True
 import numpy as np
 w8=Path('/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c3dca0d/docs/post_rc0/s1/first_divergence_20261022/w8_intercept_refit_20261026/scripts')
 sys.path.insert(0,str(w8))

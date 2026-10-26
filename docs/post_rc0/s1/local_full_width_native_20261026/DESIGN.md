@@ -55,15 +55,16 @@ Compilation and these tests do not establish byte neutrality of a movie run or s
 (`.20/.40/.80 A` field gates, runtime vs actual STAR, N5/9/13/20, harmful global-isotropic 20-frame control) needs
 source review, trusted venue access and parent-frozen inputs; none is authorised by this change.
 
-## Local results at the source pin (informational; see the evidence index outside Git)
+## Local results, attempt 1 (historical, nonqualifying; evidence outside Git)
 
-Host: macOS arm64 (AppleClang), Release, `-j2`, `OMP_NUM_THREADS=2`. numpy is absent, so configure used a stub `numpy`
-package on `PYTHONPATH` outside the repository; only tests that do not need numpy were run. `LocalFullWidthWeight`,
-`IsotropicWeight`, `GlobalHalfGain`, `CoupledPeak`, `PatchRetryState`, `ExperimentalFlagsCli` passed (default build);
-`LocalCcfCaptureCli`, `CcfDcHook`, `ExperimentalFlagsCli` passed (`MC_EXPERIMENT_CCF_DC=ON`, arm `none`). Mutants caught:
-call site passing `false` (integration test), global leak in the selection, `pnx` replaced by the inherited value
-(weight test), capture-guard term removed (`LocalCcfCaptureCli`). UNRUN: the rest of the CTest suite, CUDA, any movie,
-native byte neutrality, scientific accuracy.
+**Historical, NONQUALIFYING (attempt 1).** Host: macOS arm64 (AppleClang), Release, `-j2`, `OMP_NUM_THREADS=2`. This
+block was produced with a stub `numpy` package on `PYTHONPATH` that bypassed the real-NumPy requirement in
+`CMakeLists.txt`; the sentence "numpy is absent" was true only for the interpreter CMake chose, not for the host. Treat
+every result in this block as superseded by the correction section below. Its mutant checks (call site passing
+`false`, global leak, `pnx` replaced by the inherited value, capture-guard term removed) were run in attempt 1 only; the
+saved `mut_*` logs contain configure/build output and no test verdicts, so the runtime kills are **UNVERIFIED**. Static
+review of the tests supports that each defect would fail them; that is not a runtime result. UNRUN: the rest of the
+CTest suite, CUDA, any movie, native byte neutrality, scientific accuracy.
 
 ## Correction: attempt 1 was limited; attempt 2 uses a real NumPy
 
@@ -71,15 +72,18 @@ Attempt 1 (above) configured with a stub `numpy` package on `PYTHONPATH`. That b
 `CMakeLists.txt` and is **not qualifying evidence**; its logs are retained outside Git. "numpy is absent" was true only
 for the interpreter CMake chose (`/opt/homebrew/bin/python3`), not for the host.
 
-Attempt 2, same source `634e4b48` (no source, test or CMake change since), fresh build directories, `PYTHONPATH` unset,
+Attempt 2, source `634e4b48` (C++/test/CMake unchanged at that time; built from the live worktree with no as-built manifest, so source identity rests on the unchanged tree), fresh build directories, `PYTHONPATH` unset,
 `-DPython3_EXECUTABLE=/Users/alex.konstantinov/.local/bin/python3` (CPython 3.13.7, NumPy 2.4.2,
 `.../python3.13/site-packages/numpy/__init__.py`, sha256 `2e8da3e4385e79c4885b3f7324a8b957e6f01732b239e99e266a12c62a008b8d`), `-j2`, `OMP_NUM_THREADS=2`:
 
 - Default build: `LocalFullWidthWeight`, `IsotropicWeight`, `GlobalHalfGain`, `CoupledPeak`, `PatchRetryState`,
   `ExperimentalFlagsCli` pass (6/6).
-- `MC_EXPERIMENT_CCF_DC=ON`, `MC_EXPERIMENT_CCF_DC_ARM=none`: `LocalFullWidthWeight`, `CcfDcHook`,
-  `ExperimentalFlagsCli`, `LocalCcfCaptureCli` pass.
+- `MC_EXPERIMENT_CCF_DC=ON`, `MC_EXPERIMENT_CCF_DC_ARM=none`, first run (4 selected tests): `CcfDcHook`,
+  `ExperimentalFlagsCli`, `LocalCcfCaptureCli` passed and `LocalFullWidthWeight` was **Not Run** because its target was
+  not yet built in that tree (3 PASS + 1 Not Run, not 4/4). After building that target, a separate run of
+  `LocalFullWidthWeight` passed.
 
 Tested: weight values, global/local selection, global estimates on the analytic fixture with the flag on or off, the log
 witness, and CLI refusals. UNRUN: full-movie and global-trajectory byte neutrality, the rest of CTest, CUDA, any
-movie, native pilot, scientific accuracy. The stub attempt supports no qualification claim.
+movie, native pilot, scientific accuracy. The combination with `--experimental_local_b2` is UNRUN and untested; the pilot
+keeps B2 off. The stub attempt supports no qualification claim.

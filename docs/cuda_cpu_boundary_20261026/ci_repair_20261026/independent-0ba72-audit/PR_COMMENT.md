@@ -1,0 +1,9 @@
+Independent sealed-result audit: **CLEAR for bounded reporting at `0ba72a7197933f5f0c7149491853c04b0d780013`**.
+
+- Recomputed eight same-valid-input CPU/CUDA map comparisons and all 24 recorded native observations per case: **710 scalar comparisons, zero discrepancy**. All 39 v2 controls reproduce; exact 12 RUN ↔ 12 ADMISSION coverage and 72 fetched file hashes verified.
+- Original undefined-batch attempts retain invalid provenance. The review distinguishes raw compatibility behavior from valid Hermitian-input inverse comparisons and does not infer that the inverse boundary alone explains final image differences.
+- No native/FFT/movie rerun, fitting, independent image-pixel comparison, scientific acceptance, or full 882-file rehash was performed. The later DC-bin control at `58cd3a56` is **outside this audit**. An ancillary whole-MRC metadata assertion failed; its original script/traceback and the additive correction are retained.
+
+Exact reviewer artifacts are archived at `/Users/alex.konstantinov/Documents/MotionCorr-evidence/20261026/CUDA-independent-result-review-r1/`: 192 copied files / 426,450,734 bytes, all copy hashes verified. `REPORT.md` SHA-256 `02e0db9aafb6d6741dbc2714f216bb39e68e3d56f0d1d98f1a886e85b808f891`; `COPY_INDEX.json` SHA-256 `540581f62dacd73136daab7d03d04e6fbfdb5e645be9b81a568504742000127a`. Original reviewer manifest verifies all 15 entries. The author can include the compact report/index additively in this PR; large fetched arrays stay outside Git.
+
+Current-head readback at `58cd3a56`: Ubuntu smoke **SUCCESS**; CUDA compile-only **FAIL during configure**, because the `ccf_perpatch_no_projection` mutant's exact source-match anchor is stale after the diagnostic hook. A bounded repair has been assigned; the mutant must remain active. Neither CI state changes the sealed numerical audit, and neither establishes native or scientific qualification. M1 remains held; no adoption/default/gate change.

@@ -1,0 +1,12 @@
+Task ID: node:delegated-task:command%3Amcp%3A77fc7640-1170-4cf3-86b2-53183a94531c%3Adelegate-task%3Acuda-boundary-capture-review-r1-20261026
+
+**Source review clear for the planned bounded captures at `7a1bde5db99c94bc4332bae3f3aff6e0bfccaabd`. Both original findings are resolved; no remaining material blocker found within the reviewed scope.**
+
+- **Inverse-input finding resolved:** CUDA retains raw weighted spectra and now saves `ifft-input-*.c64` after Hermitian projection, immediately before cuFFT ([cuda_alignpatch.cu:657](/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/src/acc/cuda/cuda_alignpatch.cu:657)). CPU saves the values passed to its preserving inverse wrapper ([motioncorr_runner.cpp:4906](/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/src/motioncorr_runner.cpp:4906)).
+- **Preprocessing finding resolved:** capture now follows raw-host materialization and the missing-nvCOMP-frame guard, preceding either forward FFT ([motioncorr_runner.cpp:3255](/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/src/motioncorr_runner.cpp:3255)).
+- **Neutrality/layout:** capture reads production buffers without replacing consumed inputs. Window indexing matches the production reference/CCF indexing; spectra are row-major half-spectra, maps are unshifted real arrays, and shifts precede frame-zero subtraction. No batched-local capture remains.
+- **Failure/compilation:** exclusive creation prevents file overwrite; open/write/close failures latch and reject successful completion ([boundary_capture.h:14](/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/src/boundary_capture.h:14)). Partial files remain, so each producer needs a fresh directory. No compile hazard identified by inspection; `git diff --check` passed.
+
+Producer/replay receipts must still bind backend selection, normalization, layout, Hermitian validity, and FFTW planning/threading. CPU uses float FFTW with `FwdOnly`, an unscaled inverse, and cached alignment-specific `FFTW_ESTIMATE` plans; `--j8` supplies outer OpenMP parallelism. CPU `.f64` shift files require the normal double-`RFLOAT` build. Raw CPU spectra must not be assumed Hermitian-valid for direct cuFFT replay.
+
+Read-only review only: no edits, SSH, builds, native execution, or captures. Uncommitted analysis tools were excluded. Your reported 8/8 flag-off neutrality establishes evidence for `0e055c15`; new-HEAD neutrality and capture-on neutrality remain unverified here.

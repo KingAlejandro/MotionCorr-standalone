@@ -1,0 +1,1044 @@
+CUDA compile only (no GPU execution)	Set up job	﻿2026-10-26T16:32:01.4119473Z Current runner version: '2.338.0'
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4141662Z ##[group]Runner Image Provisioner
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4142518Z Hosted Compute Agent
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4143001Z Version: 20261021.618
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4143539Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4144139Z Build Date: 2026-10-21T00:45:21Z
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4144695Z Worker ID: {54a9be38-6186-4ffd-a266-11347ebb5110}
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4145329Z Region: westus3
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4145791Z Cloud: Azure
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4146293Z ##[endgroup]
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4147420Z ##[group]Operating System
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4147920Z Ubuntu
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4148430Z 24.04.5
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4148851Z LTS
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4149256Z ##[endgroup]
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4149808Z ##[group]Runner Image
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4150485Z Image: ubuntu-24.04
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4151074Z Version: 20261012.334.1
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4151955Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4153411Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4154183Z ##[endgroup]
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4155156Z ##[group]GITHUB_TOKEN Permissions
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4156745Z Contents: read
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4157334Z Metadata: read
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4157785Z ##[endgroup]
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4159576Z Secret source: Actions
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4160672Z Cache mode: write
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4161244Z Prepare workflow directory
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4506956Z Prepare all required actions
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.4545748Z Getting action download info
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.7649736Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+CUDA compile only (no GPU execution)	Set up job	2026-10-26T16:32:01.9834799Z Complete job name: CUDA compile only (no GPU execution)
+CUDA compile only (no GPU execution)	Initialize containers	﻿2026-10-26T16:32:02.0237578Z ##[group]Checking docker version
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.0251597Z ##[command]/usr/bin/docker version --format '{{.Server.APIVersion}}'
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.1807104Z '1.48'
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.1815422Z Docker daemon API version: '1.48'
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.1816058Z ##[command]/usr/bin/docker version --format '{{.Client.APIVersion}}'
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.1949043Z '1.48'
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.1960806Z Docker client API version: '1.48'
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.1965556Z ##[endgroup]
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.1967485Z ##[group]Clean up resources from previous jobs
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.1972071Z ##[command]/usr/bin/docker ps --all --quiet --no-trunc --filter "label=2b8c69"
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.2087728Z ##[command]/usr/bin/docker network prune --force --filter "label=2b8c69"
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.2192644Z ##[endgroup]
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.2193091Z ##[group]Create local container network
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.2201340Z ##[command]/usr/bin/docker network create --label 2b8c69 github_network_d215a136429b4bc484cbdc84ddbe3b20
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.3113067Z 373f98995194b956b1d7a79c5b800576fe3d660e51df39226716b199f96f689e
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.3128833Z ##[endgroup]
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.3149892Z ##[group]Starting job container
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:02.3168201Z ##[command]/usr/bin/docker pull nvidia/cuda:12.8.0-devel-ubuntu24.04@sha256:9a8fffc32a955361aa66d754e7a0cda2513052eaf5aaf8f3ba69b80578d1c6a9
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.3142009Z docker.io/nvidia/cuda@sha256:9a8fffc32a955361aa66d754e7a0cda2513052eaf5aaf8f3ba69b80578d1c6a9: Pulling from nvidia/cuda
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5387773Z de44b265507a: Pulling fs layer
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5388765Z 7c19210cd82d: Pulling fs layer
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5390953Z 5f5407c3a203: Pulling fs layer
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5391979Z 0f8429c62360: Pulling fs layer
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5393968Z 4b650590013c: Pulling fs layer
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5394923Z 14fc1a5fdf5b: Pulling fs layer
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5395801Z 66a4307f086b: Pulling fs layer
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5396668Z ba1786052c2e: Pulling fs layer
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5397672Z b98cda71b10f: Pulling fs layer
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5398616Z 0e7f068147ad: Pulling fs layer
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5399329Z ae59cb84f3cb: Pulling fs layer
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5400596Z 0f8429c62360: Waiting
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5401409Z 4b650590013c: Waiting
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5402359Z 14fc1a5fdf5b: Waiting
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5403304Z 66a4307f086b: Waiting
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5404141Z 0e7f068147ad: Waiting
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5404974Z ba1786052c2e: Waiting
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5405810Z b98cda71b10f: Waiting
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.5406677Z ae59cb84f3cb: Waiting
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.7259188Z 7c19210cd82d: Verifying Checksum
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.7260000Z 7c19210cd82d: Download complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.8271331Z de44b265507a: Verifying Checksum
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.8274540Z de44b265507a: Download complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.8772732Z 5f5407c3a203: Download complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.8917840Z 0f8429c62360: Verifying Checksum
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:03.8918518Z 0f8429c62360: Download complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:04.0018975Z 4b650590013c: Verifying Checksum
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:04.0020957Z 4b650590013c: Download complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:04.0557544Z 66a4307f086b: Verifying Checksum
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:04.0558562Z 66a4307f086b: Download complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:04.1702211Z ba1786052c2e: Verifying Checksum
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:04.1709817Z ba1786052c2e: Download complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:04.2249639Z b98cda71b10f: Download complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:04.3983207Z ae59cb84f3cb: Verifying Checksum
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:04.3983822Z ae59cb84f3cb: Download complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:05.1744958Z de44b265507a: Pull complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:17.2051862Z 14fc1a5fdf5b: Verifying Checksum
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:17.2052260Z 14fc1a5fdf5b: Download complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:22.7407311Z 0e7f068147ad: Verifying Checksum
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:22.7407687Z 0e7f068147ad: Download complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:30.7480020Z 7c19210cd82d: Pull complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:38.5377606Z 5f5407c3a203: Pull complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:38.5487605Z 0f8429c62360: Pull complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:32:38.5594180Z 4b650590013c: Pull complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:00.5767405Z 14fc1a5fdf5b: Pull complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:00.5882365Z 66a4307f086b: Pull complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:00.6203688Z ba1786052c2e: Pull complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:00.6301071Z b98cda71b10f: Pull complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:38.3864204Z 0e7f068147ad: Pull complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:38.5576641Z ae59cb84f3cb: Pull complete
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:38.7685814Z Digest: sha256:9a8fffc32a955361aa66d754e7a0cda2513052eaf5aaf8f3ba69b80578d1c6a9
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:38.7691889Z Status: Downloaded newer image for nvidia/cuda@sha256:9a8fffc32a955361aa66d754e7a0cda2513052eaf5aaf8f3ba69b80578d1c6a9
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:38.7702417Z docker.io/nvidia/cuda:12.8.0-devel-ubuntu24.04@sha256:9a8fffc32a955361aa66d754e7a0cda2513052eaf5aaf8f3ba69b80578d1c6a9
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:38.7768452Z ##[command]/usr/bin/docker create --name a7eedc487a0f4436b67b64a2bfe0cf4d_nvidiacuda1280develubuntu2404sha2569a8fffc32a955361aa66d754e7a0cda2513052eaf5aaf8f3ba69b80578d1c6a9_7c3057 --label 2b8c69 --workdir /__w/MotionCorr-standalone/MotionCorr-standalone --network github_network_d215a136429b4bc484cbdc84ddbe3b20  -e "HOME=/github/home" -e GITHUB_ACTIONS=true -e CI=true -v "/var/run/docker.sock":"/var/run/docker.sock" -v "/home/runner/work":"/__w" -v "/home/runner/actions-runner/cached/2.338.0/externals":"/__e":ro -v "/home/runner/work/_temp":"/__w/_temp" -v "/home/runner/work/_actions":"/__w/_actions" -v "/opt/hostedtoolcache":"/__t" -v "/home/runner/work/_temp/_github_home":"/github/home" -v "/home/runner/work/_temp/_github_workflow":"/github/workflow" --entrypoint "tail" nvidia/cuda:12.8.0-devel-ubuntu24.04@sha256:9a8fffc32a955361aa66d754e7a0cda2513052eaf5aaf8f3ba69b80578d1c6a9 "-f" "/dev/null"
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:38.8017019Z 901683b8bb780036fcab11ae05a626702a82a3e5a35b9c25df9ad681c3425a73
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:38.8037800Z ##[command]/usr/bin/docker start 901683b8bb780036fcab11ae05a626702a82a3e5a35b9c25df9ad681c3425a73
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2456048Z 901683b8bb780036fcab11ae05a626702a82a3e5a35b9c25df9ad681c3425a73
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2472146Z ##[command]/usr/bin/docker ps --all --filter id=901683b8bb780036fcab11ae05a626702a82a3e5a35b9c25df9ad681c3425a73 --filter status=running --no-trunc --format "{{.ID}} {{.Status}}"
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2575780Z 901683b8bb780036fcab11ae05a626702a82a3e5a35b9c25df9ad681c3425a73 Up Less than a second
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2593681Z ##[command]/usr/bin/docker inspect --format "{{range .Config.Env}}{{println .}}{{end}}" 901683b8bb780036fcab11ae05a626702a82a3e5a35b9c25df9ad681c3425a73
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2697611Z GITHUB_ACTIONS=true
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2697989Z CI=true
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2698372Z HOME=/github/home
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2698773Z PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2699170Z NVARCH=x86_64
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2704305Z NVIDIA_REQUIRE_CUDA=cuda>=12.8 brand=unknown,driver>=470,driver<471 brand=grid,driver>=470,driver<471 brand=tesla,driver>=470,driver<471 brand=nvidia,driver>=470,driver<471 brand=quadro,driver>=470,driver<471 brand=quadrortx,driver>=470,driver<471 brand=nvidiartx,driver>=470,driver<471 brand=vapps,driver>=470,driver<471 brand=vpc,driver>=470,driver<471 brand=vcs,driver>=470,driver<471 brand=vws,driver>=470,driver<471 brand=cloudgaming,driver>=470,driver<471 brand=unknown,driver>=535,driver<536 brand=grid,driver>=535,driver<536 brand=tesla,driver>=535,driver<536 brand=nvidia,driver>=535,driver<536 brand=quadro,driver>=535,driver<536 brand=quadrortx,driver>=535,driver<536 brand=nvidiartx,driver>=535,driver<536 brand=vapps,driver>=535,driver<536 brand=vpc,driver>=535,driver<536 brand=vcs,driver>=535,driver<536 brand=vws,driver>=535,driver<536 brand=cloudgaming,driver>=535,driver<536 brand=unknown,driver>=550,driver<551 brand=grid,driver>=550,driver<551 brand=tesla,driver>=550,driver<551 brand=nvidia,driver>=550,driver<551 brand=quadro,driver>=550,driver<551 brand=quadrortx,driver>=550,driver<551 brand=nvidiartx,driver>=550,driver<551 brand=vapps,driver>=550,driver<551 brand=vpc,driver>=550,driver<551 brand=vcs,driver>=550,driver<551 brand=vws,driver>=550,driver<551 brand=cloudgaming,driver>=550,driver<551 brand=unknown,driver>=560,driver<561 brand=grid,driver>=560,driver<561 brand=tesla,driver>=560,driver<561 brand=nvidia,driver>=560,driver<561 brand=quadro,driver>=560,driver<561 brand=quadrortx,driver>=560,driver<561 brand=nvidiartx,driver>=560,driver<561 brand=vapps,driver>=560,driver<561 brand=vpc,driver>=560,driver<561 brand=vcs,driver>=560,driver<561 brand=vws,driver>=560,driver<561 brand=cloudgaming,driver>=560,driver<561 brand=unknown,driver>=565,driver<566 brand=grid,driver>=565,driver<566 brand=tesla,driver>=565,driver<566 brand=nvidia,driver>=565,driver<566 brand=quadro,driver>=565,driver<566 brand=quadrortx,driver>=565,driver<566 brand=nvidiartx,driver>=565,driver<566 brand=vapps,driver>=565,driver<566 brand=vpc,driver>=565,driver<566 brand=vcs,driver>=565,driver<566 brand=vws,driver>=565,driver<566 brand=cloudgaming,driver>=565,driver<566
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2709909Z NV_CUDA_CUDART_VERSION=12.8.57-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2710277Z CUDA_VERSION=12.8.0
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2710608Z LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2711046Z NVIDIA_VISIBLE_DEVICES=all
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2711308Z NVIDIA_DRIVER_CAPABILITIES=compute,utility
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2711544Z NV_CUDA_LIB_VERSION=12.8.0-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2711745Z NV_NVTX_VERSION=12.8.55-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2711946Z NV_LIBNPP_VERSION=12.3.3.65-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2712157Z NV_LIBNPP_PACKAGE=libnpp-12-8=12.3.3.65-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2712389Z NV_LIBCUSPARSE_VERSION=12.5.7.53-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2712610Z NV_LIBCUBLAS_PACKAGE_NAME=libcublas-12-8
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2712833Z NV_LIBCUBLAS_VERSION=12.8.3.14-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2713051Z NV_LIBCUBLAS_PACKAGE=libcublas-12-8=12.8.3.14-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2713287Z NV_LIBNCCL_PACKAGE_NAME=libnccl2
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2713487Z NV_LIBNCCL_PACKAGE_VERSION=2.25.1-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2713688Z NCCL_VERSION=2.25.1-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2713885Z NV_LIBNCCL_PACKAGE=libnccl2=2.25.1-1+cuda12.8
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2714124Z NVIDIA_PRODUCT_NAME=CUDA
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2714314Z NV_CUDA_CUDART_DEV_VERSION=12.8.57-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2714776Z NV_NVML_DEV_VERSION=12.8.55-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2714981Z NV_LIBCUSPARSE_DEV_VERSION=12.5.7.53-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2715207Z NV_LIBNPP_DEV_VERSION=12.3.3.65-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2715451Z NV_LIBNPP_DEV_PACKAGE=libnpp-dev-12-8=12.3.3.65-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2715705Z NV_LIBCUBLAS_DEV_VERSION=12.8.3.14-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2715995Z NV_LIBCUBLAS_DEV_PACKAGE_NAME=libcublas-dev-12-8
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2716264Z NV_LIBCUBLAS_DEV_PACKAGE=libcublas-dev-12-8=12.8.3.14-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2716527Z NV_CUDA_NSIGHT_COMPUTE_VERSION=12.8.0-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2716805Z NV_CUDA_NSIGHT_COMPUTE_DEV_PACKAGE=cuda-nsight-compute-12-8=12.8.0-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2717092Z NV_NVPROF_VERSION=12.8.57-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2717306Z NV_NVPROF_DEV_PACKAGE=cuda-nvprof-12-8=12.8.57-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2717543Z NV_LIBNCCL_DEV_PACKAGE_NAME=libnccl-dev
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2717760Z NV_LIBNCCL_DEV_PACKAGE_VERSION=2.25.1-1
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2717999Z NV_LIBNCCL_DEV_PACKAGE=libnccl-dev=2.25.1-1+cuda12.8
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2718256Z LIBRARY_PATH=/usr/local/cuda/lib64/stubs
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2736219Z ##[endgroup]
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2743967Z ##[group]Waiting for all services to be ready
+CUDA compile only (no GPU execution)	Initialize containers	2026-10-26T16:33:39.2745622Z ##[endgroup]
+CUDA compile only (no GPU execution)	Install build dependencies	﻿2026-10-26T16:33:39.2915963Z ##[group]Run apt-get update
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:39.2916324Z ^[[36;1mapt-get update^[[0m
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:39.2916682Z ^[[36;1mDEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \^[[0m
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:39.2917122Z ^[[36;1m  git cmake build-essential pkg-config libfftw3-dev libtiff-dev \^[[0m
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:39.2917481Z ^[[36;1m  libpng-dev libjpeg-dev zlib1g-dev python3 python3-numpy^[[0m
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:39.2920316Z shell: sh -e {0}
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:39.2920751Z ##[endgroup]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:39.5237088Z Get:1 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64  InRelease [1578 B]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:39.6316992Z Get:2 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:39.6462320Z Get:3 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64  Packages [1989 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:39.9467157Z Get:4 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:39.9992888Z Get:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.0904925Z Get:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.1762207Z Get:7 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.1988521Z Get:8 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.4545596Z Get:9 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.7188816Z Get:10 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1549 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.8459110Z Get:11 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.8501638Z Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1733 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.8753497Z Get:13 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [2231 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.8871683Z Get:14 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2170 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.9629299Z Get:15 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [61.7 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.9630284Z Get:16 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [36.0 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.9631021Z Get:17 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [49.0 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:40.9631779Z Get:18 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [669 B]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:41.8773885Z Get:19 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1411 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:42.1097863Z Get:20 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [2122 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:42.3755088Z Get:21 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [55.6 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:42.4672158Z Fetched 35.6 MB in 3s (12.0 MB/s)
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:43.1560667Z Reading package lists...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:43.1661259Z W: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:43.8820707Z Reading package lists...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.0884200Z Building dependency tree...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.0884593Z Reading state information...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2325252Z build-essential is already the newest version (12.10ubuntu1).
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2325906Z build-essential set to manually installed.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2326330Z The following additional packages will be installed:
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2326826Z   cmake-data gcc-14-base git-man libarchive13t64 libasan8 libatomic1 libblas3
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2327385Z   libbrotli1 libcc1-0 libcurl3t64-gnutls libcurl4t64 libdeflate-dev
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2328020Z   libdeflate0 liberror-perl libexpat1 libfftw3-bin libfftw3-double3
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2333325Z   libfftw3-long3 libfftw3-quad3 libfftw3-single3 libgcc-s1 libgfortran5
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2333977Z   libgomp1 libgssapi-krb5-2 libhwasan0 libicu74 libitm1 libjbig-dev libjbig0
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2336001Z   libjpeg-turbo8 libjpeg-turbo8-dev libjpeg8 libjpeg8-dev libjsoncpp25
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2336626Z   libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 liblapack3 liblerc-dev
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2337198Z   liblerc4 liblsan0 liblzma-dev liblzma5 libnghttp2-14 libpkgconf3
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2337758Z   libpng16-16t64 libpsl5t64 libpython3-stdlib libpython3.12-minimal
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2338337Z   libpython3.12-stdlib libquadmath0 librhash0 librtmp1 libsharpyuv-dev
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2338884Z   libsharpyuv0 libssh-4 libstdc++6 libtiff6 libtiffxx6 libtsan2 libubsan1
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2339474Z   libuv1t64 libwebp-dev libwebp7 libwebpdecoder3 libwebpdemux2 libwebpmux3
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2340263Z   libxml2 libzstd-dev media-types netbase pkgconf pkgconf-bin python3-minimal
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2340895Z   python3-pkg-resources python3.12 python3.12-minimal tzdata xz-utils zlib1g
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2346907Z Suggested packages:
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2347310Z   cmake-doc cmake-format elpa-cmake-mode ninja-build gettext-base
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2347916Z   git-daemon-run | git-daemon-sysvinit git-doc git-email git-gui gitk gitweb
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2348473Z   git-cvs git-mediawiki git-svn lrzip libfftw3-doc krb5-doc krb5-user
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2348979Z   liblzma-doc python3-doc python3-tk python3-venv gfortran python3-dev
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2349516Z   python3-pytest python3-setuptools python3.12-venv python3.12-doc
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2349840Z   binfmt-support
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2350019Z Recommended packages:
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.2350486Z   less ssh-client krb5-locales libpng-tools publicsuffix
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4042873Z The following NEW packages will be installed:
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4043835Z   cmake cmake-data git git-man libarchive13t64 libblas3 libbrotli1
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4044668Z   libcurl3t64-gnutls libcurl4t64 libdeflate-dev libdeflate0 liberror-perl
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4045472Z   libexpat1 libfftw3-bin libfftw3-dev libfftw3-double3 libfftw3-long3
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4046230Z   libfftw3-quad3 libfftw3-single3 libgfortran5 libgssapi-krb5-2 libicu74
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4046939Z   libjbig-dev libjbig0 libjpeg-dev libjpeg-turbo8 libjpeg-turbo8-dev libjpeg8
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4047627Z   libjpeg8-dev libjsoncpp25 libk5crypto3 libkeyutils1 libkrb5-3
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4052071Z   libkrb5support0 liblapack3 liblerc-dev liblerc4 liblzma-dev libnghttp2-14
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4052724Z   libpkgconf3 libpng-dev libpng16-16t64 libpsl5t64 libpython3-stdlib
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4053283Z   libpython3.12-minimal libpython3.12-stdlib librhash0 librtmp1
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4053775Z   libsharpyuv-dev libsharpyuv0 libssh-4 libtiff-dev libtiff6 libtiffxx6
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4054270Z   libuv1t64 libwebp-dev libwebp7 libwebpdecoder3 libwebpdemux2 libwebpmux3
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4055201Z   libxml2 libzstd-dev media-types netbase pkg-config pkgconf pkgconf-bin
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4055741Z   python3 python3-minimal python3-numpy python3-pkg-resources python3.12
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4061296Z   python3.12-minimal tzdata zlib1g-dev
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4062005Z The following packages will be upgraded:
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4066327Z   gcc-14-base libasan8 libatomic1 libcc1-0 libgcc-s1 libgomp1 libhwasan0
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4066943Z   libitm1 liblsan0 liblzma5 libquadmath0 libstdc++6 libtsan2 libubsan1
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.4067255Z   xz-utils zlib1g
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.7235165Z 16 upgraded, 75 newly installed, 0 to remove and 146 not upgraded.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.7235629Z Need to get 68.4 MB of archives.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.7235990Z After this operation, 219 MB of additional disk space will be used.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:44.7236662Z Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libpython3.12-minimal amd64 3.12.3-1ubuntu0.17 [839 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:45.9807209Z Get:2 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libexpat1 amd64 2.6.1-2ubuntu0.6 [98.9 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:45.9991241Z Get:3 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 zlib1g amd64 1:1.3.dfsg-3.1ubuntu2.3 [63.2 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:46.0114248Z Get:4 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 python3.12-minimal amd64 3.12.3-1ubuntu0.17 [2335 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:46.5307287Z Get:5 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 python3-minimal amd64 3.12.3-0ubuntu2.1 [27.4 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:46.5772296Z Get:6 http://archive.ubuntu.com/ubuntu noble/main amd64 media-types all 10.1.0 [27.5 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:46.5790405Z Get:7 http://archive.ubuntu.com/ubuntu noble/main amd64 netbase all 6.4 [13.1 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:46.5794743Z Get:8 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 tzdata all 2026e-0ubuntu0.24.04.1 [282 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:46.5972899Z Get:9 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 liblzma5 amd64 5.6.1+really5.4.5-1ubuntu0.4 [128 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:46.6049332Z Get:10 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libpython3.12-stdlib amd64 3.12.3-1ubuntu0.17 [2071 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:46.7797244Z Get:11 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 python3.12 amd64 3.12.3-1ubuntu0.17 [651 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:46.8194669Z Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libpython3-stdlib amd64 3.12.3-0ubuntu2.1 [10.1 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:46.8195407Z Get:13 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 python3 amd64 3.12.3-0ubuntu2.1 [23.0 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:46.8218213Z Get:14 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libasan8 amd64 14.2.0-4ubuntu2~24.04.1 [3027 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:46.9663292Z Get:15 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libubsan1 amd64 14.2.0-4ubuntu2~24.04.1 [1184 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.0468187Z Get:16 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libtsan2 amd64 14.2.0-4ubuntu2~24.04.1 [2772 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.1764180Z Get:17 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gcc-14-base amd64 14.2.0-4ubuntu2~24.04.1 [51.0 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.1765061Z Get:18 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libstdc++6 amd64 14.2.0-4ubuntu2~24.04.1 [792 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.1885988Z Get:19 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libquadmath0 amd64 14.2.0-4ubuntu2~24.04.1 [153 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.1904129Z Get:20 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 liblsan0 amd64 14.2.0-4ubuntu2~24.04.1 [1322 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.2113878Z Get:21 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libitm1 amd64 14.2.0-4ubuntu2~24.04.1 [29.7 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.2115279Z Get:22 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libhwasan0 amd64 14.2.0-4ubuntu2~24.04.1 [1641 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.2370695Z Get:23 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgomp1 amd64 14.2.0-4ubuntu2~24.04.1 [148 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.2392663Z Get:24 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libcc1-0 amd64 14.2.0-4ubuntu2~24.04.1 [48.0 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.2751571Z Get:25 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libatomic1 amd64 14.2.0-4ubuntu2~24.04.1 [10.5 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.4242397Z Get:26 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgcc-s1 amd64 14.2.0-4ubuntu2~24.04.1 [78.4 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.4247539Z Get:27 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libkrb5support0 amd64 1.20.1-6ubuntu2.10 [34.9 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.4251811Z Get:28 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libk5crypto3 amd64 1.20.1-6ubuntu2.10 [81.9 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.4260281Z Get:29 http://archive.ubuntu.com/ubuntu noble/main amd64 libkeyutils1 amd64 1.6.3-3build1 [9490 B]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.4261221Z Get:30 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libkrb5-3 amd64 1.20.1-6ubuntu2.10 [348 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.4286787Z Get:31 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgssapi-krb5-2 amd64 1.20.1-6ubuntu2.10 [143 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.4302037Z Get:32 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libicu74 amd64 74.2-1ubuntu3.1 [10.9 MB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.6201952Z Get:33 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libxml2 amd64 2.9.14+dfsg-1.3ubuntu3.10 [764 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.6253629Z Get:34 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 python3-pkg-resources all 68.1.2-2ubuntu1.2 [168 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.6270322Z Get:35 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libnghttp2-14 amd64 1.59.0-1ubuntu0.4 [74.6 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.7217609Z Get:36 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libpng16-16t64 amd64 1.6.43-5ubuntu0.7 [189 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.7229090Z Get:37 http://archive.ubuntu.com/ubuntu noble/main amd64 libpsl5t64 amd64 0.21.2-1.1build1 [57.1 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.7233481Z Get:38 http://archive.ubuntu.com/ubuntu noble/main amd64 libuv1t64 amd64 1.48.0-1.1build1 [97.3 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.7241930Z Get:39 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 xz-utils amd64 5.6.1+really5.4.5-1ubuntu0.4 [267 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.7260512Z Get:40 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libarchive13t64 amd64 3.7.2-2ubuntu0.9 [383 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.7288602Z Get:41 http://archive.ubuntu.com/ubuntu noble/main amd64 libbrotli1 amd64 1.1.0-2build2 [331 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.8714118Z Get:42 http://archive.ubuntu.com/ubuntu noble/main amd64 librtmp1 amd64 2.4+20151223.gitfa8646d.1-2build7 [56.3 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.8717708Z Get:43 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libssh-4 amd64 0.10.6-2ubuntu0.5 [191 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.8730991Z Get:44 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libcurl4t64 amd64 8.5.0-2ubuntu10.16 [344 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:47.8750988Z Get:45 http://archive.ubuntu.com/ubuntu noble/main amd64 libjsoncpp25 amd64 1.9.5-6build1 [82.8 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.0202267Z Get:46 http://archive.ubuntu.com/ubuntu noble/main amd64 librhash0 amd64 1.4.3-3build1 [129 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.0209945Z Get:47 http://archive.ubuntu.com/ubuntu noble/main amd64 cmake-data all 3.28.3-1build7 [2155 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.0373525Z Get:48 http://archive.ubuntu.com/ubuntu noble/main amd64 cmake amd64 3.28.3-1build7 [11.2 MB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.1712462Z Get:49 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libcurl3t64-gnutls amd64 8.5.0-2ubuntu10.16 [337 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.1728995Z Get:50 http://archive.ubuntu.com/ubuntu noble/main amd64 liberror-perl all 0.17029-2 [25.6 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.1731394Z Get:51 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 git-man all 1:2.43.0-1ubuntu7.4 [1101 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.1807241Z Get:52 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 git amd64 1:2.43.0-1ubuntu7.4 [3681 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.2097951Z Get:53 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libblas3 amd64 3.12.0-3build1.1 [238 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.2112250Z Get:54 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libdeflate0 amd64 1.19-1build1.1 [43.9 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.2115746Z Get:55 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libdeflate-dev amd64 1.19-1build1.1 [50.9 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.3177324Z Get:56 http://archive.ubuntu.com/ubuntu noble/main amd64 libfftw3-double3 amd64 3.3.10-1ubuntu3 [838 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.3219095Z Get:57 http://archive.ubuntu.com/ubuntu noble/main amd64 libfftw3-long3 amd64 3.3.10-1ubuntu3 [374 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.4666902Z Get:58 http://archive.ubuntu.com/ubuntu noble/main amd64 libfftw3-quad3 amd64 3.3.10-1ubuntu3 [658 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.4701951Z Get:59 http://archive.ubuntu.com/ubuntu noble/main amd64 libfftw3-single3 amd64 3.3.10-1ubuntu3 [868 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.4747021Z Get:60 http://archive.ubuntu.com/ubuntu noble/main amd64 libfftw3-bin amd64 3.3.10-1ubuntu3 [39.2 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.4751308Z Get:61 http://archive.ubuntu.com/ubuntu noble/main amd64 libfftw3-dev amd64 3.3.10-1ubuntu3 [2372 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.4865912Z Get:62 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgfortran5 amd64 14.2.0-4ubuntu2~24.04.1 [916 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.4909565Z Get:63 http://archive.ubuntu.com/ubuntu noble/main amd64 libjpeg-turbo8 amd64 2.1.5-2ubuntu2 [150 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.4918537Z Get:64 http://archive.ubuntu.com/ubuntu noble/main amd64 libjpeg-turbo8-dev amd64 2.1.5-2ubuntu2 [295 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.4934139Z Get:65 http://archive.ubuntu.com/ubuntu noble/main amd64 libjpeg8 amd64 8c-2ubuntu11 [2148 B]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.6155797Z Get:66 http://archive.ubuntu.com/ubuntu noble/main amd64 libjpeg8-dev amd64 8c-2ubuntu11 [1484 B]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.6156509Z Get:67 http://archive.ubuntu.com/ubuntu noble/main amd64 libjpeg-dev amd64 8c-2ubuntu11 [1482 B]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:48.9220521Z Get:68 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 liblapack3 amd64 3.12.0-3build1.1 [2646 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:50.3467331Z Get:69 http://archive.ubuntu.com/ubuntu noble/main amd64 liblerc4 amd64 4.0.0+ds-4ubuntu2 [179 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:50.4797090Z Get:70 http://archive.ubuntu.com/ubuntu noble/main amd64 liblerc-dev amd64 4.0.0+ds-4ubuntu2 [182 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:50.6133701Z Get:71 http://archive.ubuntu.com/ubuntu noble/main amd64 libpkgconf3 amd64 1.8.1-2build1 [30.7 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:50.7388024Z Get:72 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 zlib1g-dev amd64 1:1.3.dfsg-3.1ubuntu2.3 [894 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:50.9096759Z Get:73 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libpng-dev amd64 1.6.43-5ubuntu0.7 [265 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:51.0470939Z Get:74 http://archive.ubuntu.com/ubuntu noble/main amd64 libsharpyuv0 amd64 1.3.2-0.4build3 [15.8 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:51.1725826Z Get:75 http://archive.ubuntu.com/ubuntu noble/main amd64 libsharpyuv-dev amd64 1.3.2-0.4build3 [16.0 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:51.2973651Z Get:76 http://archive.ubuntu.com/ubuntu noble/main amd64 libjbig0 amd64 2.1-6.1ubuntu2 [29.7 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:51.4224973Z Get:77 http://archive.ubuntu.com/ubuntu noble/main amd64 libjbig-dev amd64 2.1-6.1ubuntu2 [27.9 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:51.5476323Z Get:78 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 liblzma-dev amd64 5.6.1+really5.4.5-1ubuntu0.4 [176 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:51.6807445Z Get:79 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libzstd-dev amd64 1.5.5+dfsg2-2build1.1 [364 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:51.8239367Z Get:80 http://archive.ubuntu.com/ubuntu noble/main amd64 libwebp7 amd64 1.3.2-0.4build3 [230 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:51.9604365Z Get:81 http://archive.ubuntu.com/ubuntu noble/main amd64 libwebpdemux2 amd64 1.3.2-0.4build3 [12.4 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:52.0853077Z Get:82 http://archive.ubuntu.com/ubuntu noble/main amd64 libwebpmux3 amd64 1.3.2-0.4build3 [25.7 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:52.2103024Z Get:83 http://archive.ubuntu.com/ubuntu noble/main amd64 libwebpdecoder3 amd64 1.3.2-0.4build3 [114 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:52.3405956Z Get:84 http://archive.ubuntu.com/ubuntu noble/main amd64 libwebp-dev amd64 1.3.2-0.4build3 [367 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:52.4824849Z Get:85 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libtiff6 amd64 4.5.1+git230720-4ubuntu2.5 [200 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:52.6168163Z Get:86 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libtiffxx6 amd64 4.5.1+git230720-4ubuntu2.5 [5642 B]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:52.7417537Z Get:87 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libtiff-dev amd64 4.5.1+git230720-4ubuntu2.5 [338 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:52.8832407Z Get:88 http://archive.ubuntu.com/ubuntu noble/main amd64 pkgconf-bin amd64 1.8.1-2build1 [20.7 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.0083469Z Get:89 http://archive.ubuntu.com/ubuntu noble/main amd64 pkgconf amd64 1.8.1-2build1 [16.8 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.1333544Z Get:90 http://archive.ubuntu.com/ubuntu noble/main amd64 pkg-config amd64 1.8.1-2build1 [7264 B]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.2581426Z Get:91 http://archive.ubuntu.com/ubuntu noble/main amd64 python3-numpy amd64 1:1.26.4+ds-6ubuntu1 [4437 kB]
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.6556261Z debconf: delaying package configuration, since apt-utils is not installed
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.6845134Z Fetched 68.4 MB in 9s (7504 kB/s)
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7258036Z Selecting previously unselected package libpython3.12-minimal:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7294451Z (Reading database ... 
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7294823Z (Reading database ... 5%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7295127Z (Reading database ... 10%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7295421Z (Reading database ... 15%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7295713Z (Reading database ... 20%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7296002Z (Reading database ... 25%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7296295Z (Reading database ... 30%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7296588Z (Reading database ... 35%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7296877Z (Reading database ... 40%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7297165Z (Reading database ... 45%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7297455Z (Reading database ... 50%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7297746Z (Reading database ... 55%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7298050Z (Reading database ... 60%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7302473Z (Reading database ... 65%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7318828Z (Reading database ... 70%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7324114Z (Reading database ... 75%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7335091Z (Reading database ... 80%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7351225Z (Reading database ... 85%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7364256Z (Reading database ... 90%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7382541Z (Reading database ... 95%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7382814Z (Reading database ... 100%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7383173Z (Reading database ... 15164 files and directories currently installed.)
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7394729Z Preparing to unpack .../libpython3.12-minimal_3.12.3-1ubuntu0.17_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7406702Z Unpacking libpython3.12-minimal:amd64 (3.12.3-1ubuntu0.17) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.7993301Z Selecting previously unselected package libexpat1:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8009832Z Preparing to unpack .../libexpat1_2.6.1-2ubuntu0.6_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8021723Z Unpacking libexpat1:amd64 (2.6.1-2ubuntu0.6) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8285786Z Preparing to unpack .../zlib1g_1%3a1.3.dfsg-3.1ubuntu2.3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8300853Z Unpacking zlib1g:amd64 (1:1.3.dfsg-3.1ubuntu2.3) over (1:1.3.dfsg-3.1ubuntu2.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8486337Z Setting up zlib1g:amd64 (1:1.3.dfsg-3.1ubuntu2.3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8857717Z Selecting previously unselected package python3.12-minimal.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8874907Z (Reading database ... 
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8875305Z (Reading database ... 5%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8875593Z (Reading database ... 10%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8875851Z (Reading database ... 15%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8876024Z (Reading database ... 20%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8876204Z (Reading database ... 25%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8876382Z (Reading database ... 30%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8876558Z (Reading database ... 35%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8876743Z (Reading database ... 40%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8876912Z (Reading database ... 45%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8877085Z (Reading database ... 50%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8877256Z (Reading database ... 55%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8877432Z (Reading database ... 60%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8880303Z (Reading database ... 65%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8892288Z (Reading database ... 70%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8898635Z (Reading database ... 75%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8913339Z (Reading database ... 80%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8929241Z (Reading database ... 85%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8936278Z (Reading database ... 90%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8950013Z (Reading database ... 95%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8950409Z (Reading database ... 100%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8950814Z (Reading database ... 15472 files and directories currently installed.)
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.8957800Z Preparing to unpack .../python3.12-minimal_3.12.3-1ubuntu0.17_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.9012702Z Unpacking python3.12-minimal (3.12.3-1ubuntu0.17) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.9527373Z Setting up libpython3.12-minimal:amd64 (3.12.3-1ubuntu0.17) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.9806316Z Setting up libexpat1:amd64 (2.6.1-2ubuntu0.6) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:53.9819956Z Setting up python3.12-minimal (3.12.3-1ubuntu0.17) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6597408Z Selecting previously unselected package python3-minimal.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6627318Z (Reading database ... 
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6628102Z (Reading database ... 5%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6628827Z (Reading database ... 10%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6630725Z (Reading database ... 15%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6632308Z (Reading database ... 20%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6632679Z (Reading database ... 25%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6633927Z (Reading database ... 30%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6634130Z (Reading database ... 35%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6634325Z (Reading database ... 40%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6635081Z (Reading database ... 45%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6635520Z (Reading database ... 50%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6635714Z (Reading database ... 55%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6636073Z (Reading database ... 60%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6663614Z (Reading database ... 65%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6689764Z (Reading database ... 70%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6697629Z (Reading database ... 75%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6716517Z (Reading database ... 80%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6732160Z (Reading database ... 85%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6739329Z (Reading database ... 90%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6754071Z (Reading database ... 95%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6754358Z (Reading database ... 100%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6754640Z (Reading database ... 15483 files and directories currently installed.)
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6762830Z Preparing to unpack .../python3-minimal_3.12.3-0ubuntu2.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6770987Z Unpacking python3-minimal (3.12.3-0ubuntu2.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6900638Z Selecting previously unselected package media-types.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.6916083Z Preparing to unpack .../media-types_10.1.0_all.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.7120586Z Unpacking media-types (10.1.0) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.7658651Z Selecting previously unselected package netbase.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.7675913Z Preparing to unpack .../archives/netbase_6.4_all.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.7682989Z Unpacking netbase (6.4) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.8184981Z Selecting previously unselected package tzdata.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.8201916Z Preparing to unpack .../tzdata_2026e-0ubuntu0.24.04.1_all.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.8208329Z Unpacking tzdata (2026e-0ubuntu0.24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.8969513Z Preparing to unpack .../liblzma5_5.6.1+really5.4.5-1ubuntu0.4_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.8986604Z Unpacking liblzma5:amd64 (5.6.1+really5.4.5-1ubuntu0.4) over (5.6.1+really5.4.5-1build0.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:54.9457323Z Setting up liblzma5:amd64 (5.6.1+really5.4.5-1ubuntu0.4) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0204860Z Selecting previously unselected package libpython3.12-stdlib:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0223463Z (Reading database ... 
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0223869Z (Reading database ... 5%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0224173Z (Reading database ... 10%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0224464Z (Reading database ... 15%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0224759Z (Reading database ... 20%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0225062Z (Reading database ... 25%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0225359Z (Reading database ... 30%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0225650Z (Reading database ... 35%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0226337Z (Reading database ... 40%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0226634Z (Reading database ... 45%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0226920Z (Reading database ... 50%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0227216Z (Reading database ... 55%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0227506Z (Reading database ... 60%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0237763Z (Reading database ... 65%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0249293Z (Reading database ... 70%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0255107Z (Reading database ... 75%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0265583Z (Reading database ... 80%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0282401Z (Reading database ... 85%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0289947Z (Reading database ... 90%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0305950Z (Reading database ... 95%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0306273Z (Reading database ... 100%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0306610Z (Reading database ... 16046 files and directories currently installed.)
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0317029Z Preparing to unpack .../libpython3.12-stdlib_3.12.3-1ubuntu0.17_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.0335101Z Unpacking libpython3.12-stdlib:amd64 (3.12.3-1ubuntu0.17) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.1123934Z Selecting previously unselected package python3.12.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.1141873Z Preparing to unpack .../python3.12_3.12.3-1ubuntu0.17_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.1148754Z Unpacking python3.12 (3.12.3-1ubuntu0.17) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.1441527Z Selecting previously unselected package libpython3-stdlib:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.1458203Z Preparing to unpack .../libpython3-stdlib_3.12.3-0ubuntu2.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.1464917Z Unpacking libpython3-stdlib:amd64 (3.12.3-0ubuntu2.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.1612830Z Setting up python3-minimal (3.12.3-0ubuntu2.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3104179Z Selecting previously unselected package python3.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3121664Z (Reading database ... 
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3122018Z (Reading database ... 5%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3122304Z (Reading database ... 10%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3122609Z (Reading database ... 15%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3122860Z (Reading database ... 20%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3123037Z (Reading database ... 25%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3123216Z (Reading database ... 30%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3123428Z (Reading database ... 35%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3123719Z (Reading database ... 40%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3124003Z (Reading database ... 45%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3124274Z (Reading database ... 50%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3124538Z (Reading database ... 55%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3124829Z (Reading database ... 60%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3125223Z (Reading database ... 65%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3134111Z (Reading database ... 70%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3139469Z (Reading database ... 75%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3149919Z (Reading database ... 80%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3166641Z (Reading database ... 85%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3174265Z (Reading database ... 90%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3190285Z (Reading database ... 95%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3190532Z (Reading database ... 100%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3190804Z (Reading database ... 16452 files and directories currently installed.)
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3198529Z Preparing to unpack .../python3_3.12.3-0ubuntu2.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3228463Z Unpacking python3 (3.12.3-0ubuntu2.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3459565Z Preparing to unpack .../libasan8_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.3478862Z Unpacking libasan8:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.5215919Z Preparing to unpack .../libubsan1_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.5239410Z Unpacking libubsan1:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.6356847Z Preparing to unpack .../libtsan2_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.6444910Z Unpacking libtsan2:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.7700375Z Preparing to unpack .../gcc-14-base_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.7872348Z Unpacking gcc-14-base:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.8069910Z Setting up gcc-14-base:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9443321Z (Reading database ... 
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9443956Z (Reading database ... 5%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9444156Z (Reading database ... 10%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9444339Z (Reading database ... 15%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9444514Z (Reading database ... 20%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9444705Z (Reading database ... 25%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9444882Z (Reading database ... 30%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9445056Z (Reading database ... 35%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9445223Z (Reading database ... 40%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9445397Z (Reading database ... 45%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9445575Z (Reading database ... 50%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9445750Z (Reading database ... 55%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9445936Z (Reading database ... 60%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9452004Z (Reading database ... 65%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9460628Z (Reading database ... 70%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9467898Z (Reading database ... 75%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9474034Z (Reading database ... 80%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9488002Z (Reading database ... 85%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9495273Z (Reading database ... 90%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9508909Z (Reading database ... 95%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9509311Z (Reading database ... 100%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9509587Z (Reading database ... 16473 files and directories currently installed.)
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9517023Z Preparing to unpack .../libstdc++6_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:55.9637996Z Unpacking libstdc++6:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0697209Z Setting up libstdc++6:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0860275Z (Reading database ... 
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0860577Z (Reading database ... 5%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0860786Z (Reading database ... 10%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0860974Z (Reading database ... 15%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0861154Z (Reading database ... 20%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0861342Z (Reading database ... 25%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0861521Z (Reading database ... 30%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0861704Z (Reading database ... 35%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0861882Z (Reading database ... 40%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0862054Z (Reading database ... 45%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0862270Z (Reading database ... 50%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0862547Z (Reading database ... 55%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0862819Z (Reading database ... 60%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0863465Z (Reading database ... 65%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0871524Z (Reading database ... 70%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0879722Z (Reading database ... 75%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0886898Z (Reading database ... 80%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0904128Z (Reading database ... 85%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0913329Z (Reading database ... 90%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0929927Z (Reading database ... 95%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0930427Z (Reading database ... 100%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0930701Z (Reading database ... 16473 files and directories currently installed.)
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0941328Z Preparing to unpack .../0-libquadmath0_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.0959287Z Unpacking libquadmath0:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.1265346Z Preparing to unpack .../1-liblsan0_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.1280289Z Unpacking liblsan0:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.1889378Z Preparing to unpack .../2-libitm1_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.1949903Z Unpacking libitm1:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.2094178Z Preparing to unpack .../3-libhwasan0_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.2139248Z Unpacking libhwasan0:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.2853070Z Preparing to unpack .../4-libgomp1_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.2869981Z Unpacking libgomp1:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.3028809Z Preparing to unpack .../5-libcc1-0_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.3043985Z Unpacking libcc1-0:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.3292480Z Preparing to unpack .../6-libatomic1_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.3307768Z Unpacking libatomic1:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.3599294Z Preparing to unpack .../7-libgcc-s1_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.3615734Z Unpacking libgcc-s1:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.3855610Z Setting up libgcc-s1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4023152Z Selecting previously unselected package libkrb5support0:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4041742Z (Reading database ... 
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4042040Z (Reading database ... 5%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4042330Z (Reading database ... 10%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4042616Z (Reading database ... 15%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4042904Z (Reading database ... 20%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4043081Z (Reading database ... 25%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4043266Z (Reading database ... 30%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4043447Z (Reading database ... 35%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4043759Z (Reading database ... 40%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4043940Z (Reading database ... 45%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4044115Z (Reading database ... 50%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4044297Z (Reading database ... 55%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4044862Z (Reading database ... 60%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4049285Z (Reading database ... 65%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4064390Z (Reading database ... 70%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4071413Z (Reading database ... 75%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4077788Z (Reading database ... 80%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4091168Z (Reading database ... 85%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4098565Z (Reading database ... 90%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4111420Z (Reading database ... 95%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4111816Z (Reading database ... 100%
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4112195Z (Reading database ... 16473 files and directories currently installed.)
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4119797Z Preparing to unpack .../00-libkrb5support0_1.20.1-6ubuntu2.10_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4127254Z Unpacking libkrb5support0:amd64 (1.20.1-6ubuntu2.10) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4301412Z Selecting previously unselected package libk5crypto3:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4317064Z Preparing to unpack .../01-libk5crypto3_1.20.1-6ubuntu2.10_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4333279Z Unpacking libk5crypto3:amd64 (1.20.1-6ubuntu2.10) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4632954Z Selecting previously unselected package libkeyutils1:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4648943Z Preparing to unpack .../02-libkeyutils1_1.6.3-3build1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4656916Z Unpacking libkeyutils1:amd64 (1.6.3-3build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4774560Z Selecting previously unselected package libkrb5-3:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4791736Z Preparing to unpack .../03-libkrb5-3_1.20.1-6ubuntu2.10_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4798824Z Unpacking libkrb5-3:amd64 (1.20.1-6ubuntu2.10) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4973731Z Selecting previously unselected package libgssapi-krb5-2:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.4990725Z Preparing to unpack .../04-libgssapi-krb5-2_1.20.1-6ubuntu2.10_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.5000299Z Unpacking libgssapi-krb5-2:amd64 (1.20.1-6ubuntu2.10) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.5140641Z Selecting previously unselected package libicu74:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.5157494Z Preparing to unpack .../05-libicu74_74.2-1ubuntu3.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.5164777Z Unpacking libicu74:amd64 (74.2-1ubuntu3.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.6382716Z Selecting previously unselected package libxml2:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.6398727Z Preparing to unpack .../06-libxml2_2.9.14+dfsg-1.3ubuntu3.10_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.6405951Z Unpacking libxml2:amd64 (2.9.14+dfsg-1.3ubuntu3.10) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.6586717Z Selecting previously unselected package python3-pkg-resources.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.6603096Z Preparing to unpack .../07-python3-pkg-resources_68.1.2-2ubuntu1.2_all.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.6615268Z Unpacking python3-pkg-resources (68.1.2-2ubuntu1.2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.6912121Z Selecting previously unselected package libnghttp2-14:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.6928459Z Preparing to unpack .../08-libnghttp2-14_1.59.0-1ubuntu0.4_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.6934597Z Unpacking libnghttp2-14:amd64 (1.59.0-1ubuntu0.4) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.7051566Z Selecting previously unselected package libpng16-16t64:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.7067607Z Preparing to unpack .../09-libpng16-16t64_1.6.43-5ubuntu0.7_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.7073936Z Unpacking libpng16-16t64:amd64 (1.6.43-5ubuntu0.7) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.7205321Z Selecting previously unselected package libpsl5t64:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.7222004Z Preparing to unpack .../10-libpsl5t64_0.21.2-1.1build1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.7227727Z Unpacking libpsl5t64:amd64 (0.21.2-1.1build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.7525718Z Selecting previously unselected package libuv1t64:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.7541918Z Preparing to unpack .../11-libuv1t64_1.48.0-1.1build1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.7548359Z Unpacking libuv1t64:amd64 (1.48.0-1.1build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.7762413Z Preparing to unpack .../12-xz-utils_5.6.1+really5.4.5-1ubuntu0.4_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.7815001Z Unpacking xz-utils (5.6.1+really5.4.5-1ubuntu0.4) over (5.6.1+really5.4.5-1build0.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8173530Z Selecting previously unselected package libarchive13t64:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8190760Z Preparing to unpack .../13-libarchive13t64_3.7.2-2ubuntu0.9_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8199008Z Unpacking libarchive13t64:amd64 (3.7.2-2ubuntu0.9) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8359672Z Selecting previously unselected package libbrotli1:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8376636Z Preparing to unpack .../14-libbrotli1_1.1.0-2build2_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8383755Z Unpacking libbrotli1:amd64 (1.1.0-2build2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8567336Z Selecting previously unselected package librtmp1:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8583777Z Preparing to unpack .../15-librtmp1_2.4+20151223.gitfa8646d.1-2build7_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8590632Z Unpacking librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2build7) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8713600Z Selecting previously unselected package libssh-4:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8730444Z Preparing to unpack .../16-libssh-4_0.10.6-2ubuntu0.5_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8736928Z Unpacking libssh-4:amd64 (0.10.6-2ubuntu0.5) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8940686Z Selecting previously unselected package libcurl4t64:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.8957085Z Preparing to unpack .../17-libcurl4t64_8.5.0-2ubuntu10.16_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.9034311Z Unpacking libcurl4t64:amd64 (8.5.0-2ubuntu10.16) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.9180723Z Selecting previously unselected package libjsoncpp25:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.9198371Z Preparing to unpack .../18-libjsoncpp25_1.9.5-6build1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.9205470Z Unpacking libjsoncpp25:amd64 (1.9.5-6build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.9457130Z Selecting previously unselected package librhash0:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.9473962Z Preparing to unpack .../19-librhash0_1.4.3-3build1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.9481715Z Unpacking librhash0:amd64 (1.4.3-3build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.9679884Z Selecting previously unselected package cmake-data.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.9696852Z Preparing to unpack .../20-cmake-data_3.28.3-1build7_all.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:56.9742927Z Unpacking cmake-data (3.28.3-1build7) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.3889558Z Selecting previously unselected package cmake.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.3914677Z Preparing to unpack .../21-cmake_3.28.3-1build7_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.3921432Z Unpacking cmake (3.28.3-1build7) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.5771513Z Selecting previously unselected package libcurl3t64-gnutls:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.5790640Z Preparing to unpack .../22-libcurl3t64-gnutls_8.5.0-2ubuntu10.16_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.5798720Z Unpacking libcurl3t64-gnutls:amd64 (8.5.0-2ubuntu10.16) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.5941755Z Selecting previously unselected package liberror-perl.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.5959902Z Preparing to unpack .../23-liberror-perl_0.17029-2_all.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.5966205Z Unpacking liberror-perl (0.17029-2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.6081321Z Selecting previously unselected package git-man.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.6099640Z Preparing to unpack .../24-git-man_1%3a2.43.0-1ubuntu7.4_all.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.6106431Z Unpacking git-man (1:2.43.0-1ubuntu7.4) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.6344572Z Selecting previously unselected package git.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.6364052Z Preparing to unpack .../25-git_1%3a2.43.0-1ubuntu7.4_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.6408225Z Unpacking git (1:2.43.0-1ubuntu7.4) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.7646353Z Selecting previously unselected package libblas3:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.7667091Z Preparing to unpack .../26-libblas3_3.12.0-3build1.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.7685210Z Unpacking libblas3:amd64 (3.12.0-3build1.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.7843714Z Selecting previously unselected package libdeflate0:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.7862663Z Preparing to unpack .../27-libdeflate0_1.19-1build1.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.7869007Z Unpacking libdeflate0:amd64 (1.19-1build1.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.7976339Z Selecting previously unselected package libdeflate-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.7995317Z Preparing to unpack .../28-libdeflate-dev_1.19-1build1.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.8002421Z Unpacking libdeflate-dev:amd64 (1.19-1build1.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.8131683Z Selecting previously unselected package libfftw3-double3:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.8150532Z Preparing to unpack .../29-libfftw3-double3_3.3.10-1ubuntu3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.8156116Z Unpacking libfftw3-double3:amd64 (3.3.10-1ubuntu3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.8346982Z Selecting previously unselected package libfftw3-long3:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.8367819Z Preparing to unpack .../30-libfftw3-long3_3.3.10-1ubuntu3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.8375254Z Unpacking libfftw3-long3:amd64 (3.3.10-1ubuntu3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.8543349Z Selecting previously unselected package libfftw3-quad3:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.8562912Z Preparing to unpack .../31-libfftw3-quad3_3.3.10-1ubuntu3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.8569426Z Unpacking libfftw3-quad3:amd64 (3.3.10-1ubuntu3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.9079766Z Selecting previously unselected package libfftw3-single3:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.9099308Z Preparing to unpack .../32-libfftw3-single3_3.3.10-1ubuntu3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.9105692Z Unpacking libfftw3-single3:amd64 (3.3.10-1ubuntu3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.9306834Z Selecting previously unselected package libfftw3-bin.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.9326063Z Preparing to unpack .../33-libfftw3-bin_3.3.10-1ubuntu3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.9332531Z Unpacking libfftw3-bin (3.3.10-1ubuntu3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.9457716Z Selecting previously unselected package libfftw3-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.9476145Z Preparing to unpack .../34-libfftw3-dev_3.3.10-1ubuntu3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:57.9483617Z Unpacking libfftw3-dev:amd64 (3.3.10-1ubuntu3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0164658Z Selecting previously unselected package libgfortran5:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0184133Z Preparing to unpack .../35-libgfortran5_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0191404Z Unpacking libgfortran5:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0402511Z Selecting previously unselected package libjpeg-turbo8:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0421867Z Preparing to unpack .../36-libjpeg-turbo8_2.1.5-2ubuntu2_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0428269Z Unpacking libjpeg-turbo8:amd64 (2.1.5-2ubuntu2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0597081Z Selecting previously unselected package libjpeg-turbo8-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0616312Z Preparing to unpack .../37-libjpeg-turbo8-dev_2.1.5-2ubuntu2_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0622644Z Unpacking libjpeg-turbo8-dev:amd64 (2.1.5-2ubuntu2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0777719Z Selecting previously unselected package libjpeg8:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0796985Z Preparing to unpack .../38-libjpeg8_8c-2ubuntu11_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0803438Z Unpacking libjpeg8:amd64 (8c-2ubuntu11) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0903487Z Selecting previously unselected package libjpeg8-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0922745Z Preparing to unpack .../39-libjpeg8-dev_8c-2ubuntu11_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.0928761Z Unpacking libjpeg8-dev:amd64 (8c-2ubuntu11) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.1038157Z Selecting previously unselected package libjpeg-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.1058484Z Preparing to unpack .../40-libjpeg-dev_8c-2ubuntu11_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.1065644Z Unpacking libjpeg-dev:amd64 (8c-2ubuntu11) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.1190631Z Selecting previously unselected package liblapack3:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.1210449Z Preparing to unpack .../41-liblapack3_3.12.0-3build1.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.1230556Z Unpacking liblapack3:amd64 (3.12.0-3build1.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.1716027Z Selecting previously unselected package liblerc4:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.1735044Z Preparing to unpack .../42-liblerc4_4.0.0+ds-4ubuntu2_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.1743775Z Unpacking liblerc4:amd64 (4.0.0+ds-4ubuntu2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.1980048Z Selecting previously unselected package liblerc-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.1999042Z Preparing to unpack .../43-liblerc-dev_4.0.0+ds-4ubuntu2_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.2005791Z Unpacking liblerc-dev:amd64 (4.0.0+ds-4ubuntu2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.2747384Z Selecting previously unselected package libpkgconf3:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.2766987Z Preparing to unpack .../44-libpkgconf3_1.8.1-2build1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.2774447Z Unpacking libpkgconf3:amd64 (1.8.1-2build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3022948Z Selecting previously unselected package zlib1g-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3041862Z Preparing to unpack .../45-zlib1g-dev_1%3a1.3.dfsg-3.1ubuntu2.3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3048747Z Unpacking zlib1g-dev:amd64 (1:1.3.dfsg-3.1ubuntu2.3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3333201Z Selecting previously unselected package libpng-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3351756Z Preparing to unpack .../46-libpng-dev_1.6.43-5ubuntu0.7_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3358397Z Unpacking libpng-dev:amd64 (1.6.43-5ubuntu0.7) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3558404Z Selecting previously unselected package libsharpyuv0:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3577887Z Preparing to unpack .../47-libsharpyuv0_1.3.2-0.4build3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3584559Z Unpacking libsharpyuv0:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3806573Z Selecting previously unselected package libsharpyuv-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3825282Z Preparing to unpack .../48-libsharpyuv-dev_1.3.2-0.4build3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3832396Z Unpacking libsharpyuv-dev:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3960409Z Selecting previously unselected package libjbig0:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3978805Z Preparing to unpack .../49-libjbig0_2.1-6.1ubuntu2_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.3985793Z Unpacking libjbig0:amd64 (2.1-6.1ubuntu2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.4093407Z Selecting previously unselected package libjbig-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.4112134Z Preparing to unpack .../50-libjbig-dev_2.1-6.1ubuntu2_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.4117979Z Unpacking libjbig-dev:amd64 (2.1-6.1ubuntu2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.4229085Z Selecting previously unselected package liblzma-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.4247297Z Preparing to unpack .../51-liblzma-dev_5.6.1+really5.4.5-1ubuntu0.4_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.4253355Z Unpacking liblzma-dev:amd64 (5.6.1+really5.4.5-1ubuntu0.4) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.4501614Z Selecting previously unselected package libzstd-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.4524913Z Preparing to unpack .../52-libzstd-dev_1.5.5+dfsg2-2build1.1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.4531508Z Unpacking libzstd-dev:amd64 (1.5.5+dfsg2-2build1.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.4994122Z Selecting previously unselected package libwebp7:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.5013738Z Preparing to unpack .../53-libwebp7_1.3.2-0.4build3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.5021811Z Unpacking libwebp7:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.5371922Z Selecting previously unselected package libwebpdemux2:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.5391892Z Preparing to unpack .../54-libwebpdemux2_1.3.2-0.4build3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.5399115Z Unpacking libwebpdemux2:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.5514293Z Selecting previously unselected package libwebpmux3:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.5536338Z Preparing to unpack .../55-libwebpmux3_1.3.2-0.4build3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.5542807Z Unpacking libwebpmux3:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.5785342Z Selecting previously unselected package libwebpdecoder3:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.5804574Z Preparing to unpack .../56-libwebpdecoder3_1.3.2-0.4build3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.5973080Z Unpacking libwebpdecoder3:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.6095507Z Selecting previously unselected package libwebp-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.6114638Z Preparing to unpack .../57-libwebp-dev_1.3.2-0.4build3_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.6120555Z Unpacking libwebp-dev:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.6349056Z Selecting previously unselected package libtiff6:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.6368357Z Preparing to unpack .../58-libtiff6_4.5.1+git230720-4ubuntu2.5_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.6375311Z Unpacking libtiff6:amd64 (4.5.1+git230720-4ubuntu2.5) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.6543696Z Selecting previously unselected package libtiffxx6:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.6562728Z Preparing to unpack .../59-libtiffxx6_4.5.1+git230720-4ubuntu2.5_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.6572417Z Unpacking libtiffxx6:amd64 (4.5.1+git230720-4ubuntu2.5) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.6957356Z Selecting previously unselected package libtiff-dev:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.6976444Z Preparing to unpack .../60-libtiff-dev_4.5.1+git230720-4ubuntu2.5_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.6983832Z Unpacking libtiff-dev:amd64 (4.5.1+git230720-4ubuntu2.5) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.7333350Z Selecting previously unselected package pkgconf-bin.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.7356779Z Preparing to unpack .../61-pkgconf-bin_1.8.1-2build1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.7365260Z Unpacking pkgconf-bin (1.8.1-2build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.9061504Z Selecting previously unselected package pkgconf:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.9080028Z Preparing to unpack .../62-pkgconf_1.8.1-2build1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.9096703Z Unpacking pkgconf:amd64 (1.8.1-2build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.9294327Z Selecting previously unselected package pkg-config:amd64.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.9313737Z Preparing to unpack .../63-pkg-config_1.8.1-2build1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.9330843Z Unpacking pkg-config:amd64 (1.8.1-2build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.9446112Z Selecting previously unselected package python3-numpy.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:58.9466069Z Preparing to unpack .../64-python3-numpy_1%3a1.26.4+ds-6ubuntu1_amd64.deb ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.1159239Z Unpacking python3-numpy (1:1.26.4+ds-6ubuntu1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3651300Z Setting up media-types (10.1.0) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3679504Z Setting up libsharpyuv0:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3697174Z Setting up libkeyutils1:amd64 (1.6.3-3build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3711800Z Setting up liblerc4:amd64 (4.0.0+ds-4ubuntu2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3726820Z Setting up libzstd-dev:amd64 (1.5.5+dfsg2-2build1.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3741993Z Setting up libbrotli1:amd64 (1.1.0-2build2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3763348Z Setting up libuv1t64:amd64 (1.48.0-1.1build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3778721Z Setting up libpsl5t64:amd64 (0.21.2-1.1build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3793508Z Setting up libnghttp2-14:amd64 (1.59.0-1ubuntu0.4) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3808024Z Setting up libdeflate0:amd64 (1.19-1build1.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3827685Z Setting up libwebpdecoder3:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3843000Z Setting up libgomp1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3857774Z Setting up libjbig0:amd64 (2.1-6.1ubuntu2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3872437Z Setting up libkrb5support0:amd64 (1.20.1-6ubuntu2.10) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.3888389Z Setting up tzdata (2026e-0ubuntu0.24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4453143Z 
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4453711Z Current default time zone: 'Etc/UTC'
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4465814Z Local time is now:      Mon Oct 26 16:33:59 UTC 2026.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4466576Z Universal Time is now:  Mon Oct 26 16:33:59 UTC 2026.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4467025Z Run 'dpkg-reconfigure tzdata' if you wish to change it.
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4467298Z 
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4537684Z Setting up liberror-perl (0.17029-2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4587870Z Setting up libblas3:amd64 (3.12.0-3build1.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4621635Z update-alternatives: using /usr/lib/x86_64-linux-gnu/blas/libblas.so.3 to provide /usr/lib/x86_64-linux-gnu/libblas.so.3 (libblas.so.3-x86_64-linux-gnu) in auto mode
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4645695Z Setting up libpkgconf3:amd64 (1.8.1-2build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4660505Z Setting up librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2build7) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4875095Z Setting up xz-utils (5.6.1+really5.4.5-1ubuntu0.4) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.4920916Z Setting up libquadmath0:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5060338Z Setting up libpng16-16t64:amd64 (1.6.43-5ubuntu0.7) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5421573Z Setting up libatomic1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5550394Z Setting up libjsoncpp25:amd64 (1.9.5-6build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5571493Z Setting up pkgconf-bin (1.8.1-2build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5586835Z Setting up liblerc-dev:amd64 (4.0.0+ds-4ubuntu2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5601641Z Setting up libk5crypto3:amd64 (1.20.1-6ubuntu2.10) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5619505Z Setting up libjpeg-turbo8:amd64 (2.1.5-2ubuntu2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5665906Z Setting up libfftw3-double3:amd64 (3.3.10-1ubuntu3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5911399Z Setting up libgfortran5:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5928422Z Setting up libwebp7:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5943339Z Setting up liblzma-dev:amd64 (5.6.1+really5.4.5-1ubuntu0.4) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5959626Z Setting up libubsan1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5981361Z Setting up libicu74:amd64 (74.2-1ubuntu3.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.5997547Z Setting up zlib1g-dev:amd64 (1:1.3.dfsg-3.1ubuntu2.3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6315828Z Setting up libhwasan0:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6339139Z Setting up librhash0:amd64 (1.4.3-3build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6384060Z Setting up libasan8:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6403634Z Setting up git-man (1:2.43.0-1ubuntu7.4) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6419673Z Setting up netbase (6.4) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6467646Z Setting up cmake-data (3.28.3-1build7) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6518202Z Setting up libkrb5-3:amd64 (1.20.1-6ubuntu2.10) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6534269Z Setting up libtsan2:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6548990Z Setting up libsharpyuv-dev:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6563994Z Setting up libwebpmux3:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6579433Z Setting up libdeflate-dev:amd64 (1.19-1build1.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6595280Z Setting up libxml2:amd64 (2.9.14+dfsg-1.3ubuntu3.10) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6612894Z Setting up libcc1-0:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6627317Z Setting up liblsan0:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6642744Z Setting up libitm1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6695179Z Setting up libjpeg8:amd64 (8c-2ubuntu11) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6710559Z Setting up libjpeg-turbo8-dev:amd64 (2.1.5-2ubuntu2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6966798Z Setting up liblapack3:amd64 (3.12.0-3build1.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.6994365Z update-alternatives: using /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3 to provide /usr/lib/x86_64-linux-gnu/liblapack.so.3 (liblapack.so.3-x86_64-linux-gnu) in auto mode
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.7006317Z Setting up libfftw3-single3:amd64 (3.3.10-1ubuntu3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.7021210Z Setting up libpython3.12-stdlib:amd64 (3.12.3-1ubuntu0.17) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.7034636Z Setting up libwebpdemux2:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:33:59.7079167Z Setting up python3.12 (3.12.3-1ubuntu0.17) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4001529Z Setting up libpng-dev:amd64 (1.6.43-5ubuntu0.7) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4066084Z Setting up libjbig-dev:amd64 (2.1-6.1ubuntu2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4088339Z Setting up libfftw3-long3:amd64 (3.3.10-1ubuntu3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4325503Z Setting up pkgconf:amd64 (1.8.1-2build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4340647Z Setting up libwebp-dev:amd64 (1.3.2-0.4build3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4555351Z Setting up libfftw3-quad3:amd64 (3.3.10-1ubuntu3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4630001Z Setting up libgssapi-krb5-2:amd64 (1.20.1-6ubuntu2.10) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4655434Z Setting up pkg-config:amd64 (1.8.1-2build1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4669887Z Setting up libssh-4:amd64 (0.10.6-2ubuntu0.5) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4687176Z Setting up libtiff6:amd64 (4.5.1+git230720-4ubuntu2.5) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4705347Z Setting up libjpeg8-dev:amd64 (8c-2ubuntu11) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4779897Z Setting up libtiffxx6:amd64 (4.5.1+git230720-4ubuntu2.5) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4795812Z Setting up libarchive13t64:amd64 (3.7.2-2ubuntu0.9) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4812130Z Setting up libpython3-stdlib:amd64 (3.12.3-0ubuntu2.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4825913Z Setting up libcurl4t64:amd64 (8.5.0-2ubuntu10.16) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4841906Z Setting up libfftw3-bin (3.3.10-1ubuntu3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.4860449Z Setting up libjpeg-dev:amd64 (8c-2ubuntu11) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.5008907Z Setting up libcurl3t64-gnutls:amd64 (8.5.0-2ubuntu10.16) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.5026970Z Setting up python3 (3.12.3-0ubuntu2.1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.5846377Z Setting up libtiff-dev:amd64 (4.5.1+git230720-4ubuntu2.5) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.5860623Z Setting up git (1:2.43.0-1ubuntu7.4) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.5917115Z Setting up cmake (3.28.3-1build7) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.5931314Z Setting up libfftw3-dev:amd64 (3.3.10-1ubuntu3) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.5949205Z Setting up python3-pkg-resources (68.1.2-2ubuntu1.2) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:00.7372232Z Setting up python3-numpy (1:1.26.4+ds-6ubuntu1) ...
+CUDA compile only (no GPU execution)	Install build dependencies	2026-10-26T16:34:01.9637839Z Processing triggers for libc-bin (2.39-0ubuntu8.3) ...
+CUDA compile only (no GPU execution)	Checkout repository	﻿2026-10-26T16:34:02.0341633Z ##[group]Run actions/checkout@v4
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0341890Z with:
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0342099Z   repository: KingAlejandro/MotionCorr-standalone
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0344268Z   token: ***
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0344452Z   ssh-strict: true
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0344625Z   ssh-user: git
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0344802Z   persist-credentials: true
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0344993Z   clean: true
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0345172Z   sparse-checkout-cone-mode: true
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0345381Z   fetch-depth: 1
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0345549Z   fetch-tags: false
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0345725Z   show-progress: true
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0345901Z   lfs: false
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0346061Z   submodules: false
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0346232Z   set-safe-directory: true
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0346438Z   allow-unsafe-pr-checkout: false
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0346640Z ##[endgroup]
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.0386594Z ##[command]/usr/bin/docker exec  901683b8bb780036fcab11ae05a626702a82a3e5a35b9c25df9ad681c3425a73 sh -c "cat /etc/*release | grep ^ID"
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1921577Z Syncing repository: KingAlejandro/MotionCorr-standalone
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1923229Z ##[group]Getting Git version info
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1923727Z Working directory is '/__w/MotionCorr-standalone/MotionCorr-standalone'
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1924469Z [command]/usr/bin/git version
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1924778Z git version 2.43.0
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1925790Z ##[endgroup]
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1935794Z Temporarily overriding HOME='/__w/_temp/bac8fdc4-b484-419a-9211-94f02b55d73b' before making global git config changes
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1936689Z Adding repository directory to the temporary git global config as a safe directory
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1940261Z [command]/usr/bin/git config --global --add safe.directory /__w/MotionCorr-standalone/MotionCorr-standalone
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1966411Z Deleting the contents of '/__w/MotionCorr-standalone/MotionCorr-standalone'
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1969503Z ##[group]Initializing the repository
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1973597Z [command]/usr/bin/git init /__w/MotionCorr-standalone/MotionCorr-standalone
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.1999645Z hint: Using 'master' as the name for the initial branch. This default branch name
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2000433Z hint: is subject to change. To configure the initial branch name to use in all
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2001010Z hint: of your new repositories, which will suppress this warning, call:
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2001350Z hint: 
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2001618Z hint: 	git config --global init.defaultBranch <name>
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2001908Z hint: 
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2002192Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2002790Z hint: 'development'. The just-created branch can be renamed via this command:
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2003256Z hint: 
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2003520Z hint: 	git branch -m <name>
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2008995Z Initialized empty Git repository in /__w/MotionCorr-standalone/MotionCorr-standalone/.git/
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2016229Z [command]/usr/bin/git remote add origin https://github.com/KingAlejandro/MotionCorr-standalone
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2043119Z ##[endgroup]
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2043466Z ##[group]Disabling automatic garbage collection
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2045870Z [command]/usr/bin/git config --local gc.auto 0
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2070334Z ##[endgroup]
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2070808Z ##[group]Setting up auth
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2075488Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2100732Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2286289Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2309123Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2490724Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2514820Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2696392Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2726860Z ##[endgroup]
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2727377Z ##[group]Fetching the repository
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:02.2734834Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +fa07d8fb4db2c13c32971c0afba6554b62da8872:refs/remotes/pull/288/merge
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:06.8779775Z From https://github.com/KingAlejandro/MotionCorr-standalone
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:06.8780723Z  * [new ref]         fa07d8fb4db2c13c32971c0afba6554b62da8872 -> pull/288/merge
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:06.8796922Z ##[endgroup]
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:06.8799453Z ##[group]Determining the checkout info
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:06.8801029Z ##[endgroup]
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:06.8805363Z [command]/usr/bin/git sparse-checkout disable
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:06.8837683Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:06.8859518Z ##[group]Checking out the ref
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:06.8863417Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/288/merge
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5140586Z Note: switching to 'refs/remotes/pull/288/merge'.
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5140960Z 
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5141208Z You are in 'detached HEAD' state. You can look around, make experimental
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5141788Z changes and commit them, and you can discard any commits you make in this
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5142372Z state without impacting any branches by switching back to a branch.
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5142707Z 
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5142921Z If you want to create a new branch to retain commits you create, you may
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5143382Z do so (now or later) by using -c with the switch command. Example:
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5143906Z 
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5143993Z   git switch -c <new-branch-name>
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5144137Z 
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5144222Z Or undo this operation with:
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5144348Z 
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5144424Z   git switch -
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5144520Z 
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5144693Z Turn off this advice by setting config variable advice.detachedHead to false
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5144925Z 
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5145185Z HEAD is now at fa07d8f Merge 58cd3a563ac0b0af6999369b60a3377d656abad4 into b305b23bc7572aaafb0a7fa9fdfdd0c350fb4ce3
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5192043Z ##[endgroup]
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5226427Z [command]/usr/bin/git log -1 --format=%H
+CUDA compile only (no GPU execution)	Checkout repository	2026-10-26T16:34:07.5247196Z fa07d8fb4db2c13c32971c0afba6554b62da8872
+CUDA compile only (no GPU execution)	Configure CUDA	﻿2026-10-26T16:34:07.5396813Z ##[group]Run nvcc --version
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.5397064Z ^[[36;1mnvcc --version^[[0m
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.5397311Z ^[[36;1mcmake -S . -B build-cuda -DCMAKE_BUILD_TYPE=Release \^[[0m
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.5397643Z ^[[36;1m  -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DBUILD_TESTING=ON^[[0m
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.5398027Z shell: sh -e {0}
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.5398201Z ##[endgroup]
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.5863372Z nvcc: NVIDIA (R) Cuda compiler driver
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.5863851Z Copyright (c) 2005-2025 NVIDIA Corporation
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.5864210Z Built on Wed_Jan_15_19:20:09_PST_2025
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.5864441Z Cuda compilation tools, release 12.8, V12.8.61
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.5864695Z Build cuda_12.8.r12.8/compiler.35404655_0
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.6320230Z -- The C compiler identification is GNU 13.3.0
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.6795694Z -- The CXX compiler identification is GNU 13.3.0
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.6926669Z -- Detecting C compiler ABI info
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.7638993Z -- Detecting C compiler ABI info - done
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.7711125Z -- Check for working C compiler: /usr/bin/cc - skipped
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.7713800Z -- Detecting C compile features
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.7717574Z -- Detecting C compile features - done
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.7792428Z -- Detecting CXX compiler ABI info
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.8586991Z -- Detecting CXX compiler ABI info - done
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.8664327Z -- Check for working CXX compiler: /usr/bin/c++ - skipped
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.8666713Z -- Detecting CXX compile features
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.8671229Z -- Detecting CXX compile features - done
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.8711877Z -- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1") 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.8716907Z -- Checking for module 'fftw3'
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.8804911Z --   Found fftw3, version 3.3.10
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.9012696Z -- Checking for module 'fftw3f'
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:07.9095510Z --   Found fftw3f, version 3.3.10
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:08.1811252Z -- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:08.1812479Z -- Found OpenMP: TRUE (found version "4.5") found components: CXX 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:08.1894349Z -- Found TIFF: /usr/lib/x86_64-linux-gnu/libtiff.so (found version "4.5.1")  
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:08.1956521Z -- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.3")  
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:08.2031799Z -- Found PNG: /usr/lib/x86_64-linux-gnu/libpng.so (found version "1.6.43") 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:08.2086805Z -- Found JPEG: /usr/lib/x86_64-linux-gnu/libjpeg.so (found version "80") 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:08.2114850Z -- Performing Test TIFF_HAS_LIBDEFLATE
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:08.3104348Z -- Performing Test TIFF_HAS_LIBDEFLATE - Success
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:08.3104722Z -- LibTIFF Deflate subcodec: libdeflate
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:08.3182786Z -- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:08.3947893Z -- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED - Success
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:08.3948371Z -- CPU dose weighting: symmetric rows (AUTO: qualified x86-64 GCC without FMA)
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:09.0247389Z -- The CUDA compiler identification is NVIDIA 12.8.61
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:09.0315089Z -- Detecting CUDA compiler ABI info
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:09.6544075Z -- Detecting CUDA compiler ABI info - done
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:09.6798075Z -- Check for working CUDA compiler: /usr/local/cuda/bin/nvcc - skipped
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:09.6821938Z -- Detecting CUDA compile features
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:09.6826442Z -- Detecting CUDA compile features - done
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:09.6834074Z -- motioncorr_core CUDA architectures: 80
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:09.6856239Z -- Found CUDAToolkit: /usr/local/cuda/targets/x86_64-linux/include (found version "12.8.61") 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:09.6889939Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:09.8109644Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:09.8118233Z -- Found Threads: TRUE  
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:09.9207904Z -- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0024256Z CMake Warning at CMakeLists.txt:536 (message):
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0024915Z   pbzip2 not found: InputFormats and RealCutdown waive its compressed-MRC
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0025909Z   cases (UNRUN).  Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0026297Z   waiver.
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0026429Z 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0026438Z 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0041724Z CMake Warning at CMakeLists.txt:536 (message):
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0042189Z   zstd not found: InputFormats and RealCutdown waive its compressed-MRC cases
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0042592Z   (UNRUN).  Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the waiver.
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0042815Z 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0042820Z 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0131943Z CMake Error at CMakeLists.txt:794 (message):
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0132547Z   mutant ccf_perpatch_no_projection: target line missing or not unique in
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0133076Z   cuda_alignpatch.cu
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0133411Z Call Stack (most recent call first):
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0133814Z   CMakeLists.txt:852 (mc_cuda_mutant)
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0134079Z 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0134266Z 
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0135661Z -- Configuring incomplete, errors occurred!
+CUDA compile only (no GPU execution)	Configure CUDA	2026-10-26T16:34:10.0233261Z ##[error]Process completed with exit code 1.
+CUDA compile only (no GPU execution)	Post Checkout repository	﻿2026-10-26T16:34:10.0365640Z Post job cleanup.
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.0371958Z ##[command]/usr/bin/docker exec  901683b8bb780036fcab11ae05a626702a82a3e5a35b9c25df9ad681c3425a73 sh -c "cat /etc/*release | grep ^ID"
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.1840430Z [command]/usr/bin/git version
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.1870732Z git version 2.43.0
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.1904358Z Temporarily overriding HOME='/__w/_temp/377699dd-0d58-464b-893c-f6609da8e2f2' before making global git config changes
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.1905281Z Adding repository directory to the temporary git global config as a safe directory
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.1907783Z [command]/usr/bin/git config --global --add safe.directory /__w/MotionCorr-standalone/MotionCorr-standalone
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.1937396Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.1963834Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.2170795Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.2191319Z http.https://github.com/.extraheader
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.2198842Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.2226300Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.2431670Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+CUDA compile only (no GPU execution)	Post Checkout repository	2026-10-26T16:34:10.2457771Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+CUDA compile only (no GPU execution)	Stop containers	﻿2026-10-26T16:34:10.2783958Z Stop and remove container: a7eedc487a0f4436b67b64a2bfe0cf4d_nvidiacuda1280develubuntu2404sha2569a8fffc32a955361aa66d754e7a0cda2513052eaf5aaf8f3ba69b80578d1c6a9_7c3057
+CUDA compile only (no GPU execution)	Stop containers	2026-10-26T16:34:10.2788035Z ##[command]/usr/bin/docker rm --force 901683b8bb780036fcab11ae05a626702a82a3e5a35b9c25df9ad681c3425a73
+CUDA compile only (no GPU execution)	Stop containers	2026-10-26T16:34:13.7313802Z 901683b8bb780036fcab11ae05a626702a82a3e5a35b9c25df9ad681c3425a73
+CUDA compile only (no GPU execution)	Stop containers	2026-10-26T16:34:13.7339653Z Remove container network: github_network_d215a136429b4bc484cbdc84ddbe3b20
+CUDA compile only (no GPU execution)	Stop containers	2026-10-26T16:34:13.7343986Z ##[command]/usr/bin/docker network rm github_network_d215a136429b4bc484cbdc84ddbe3b20
+CUDA compile only (no GPU execution)	Stop containers	2026-10-26T16:34:13.8293053Z github_network_d215a136429b4bc484cbdc84ddbe3b20
+CUDA compile only (no GPU execution)	Complete job	﻿2026-10-26T16:34:13.8359261Z Cleaning up orphan processes
+CUDA compile only (no GPU execution)	Complete job	2026-10-26T16:34:13.8637038Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -848,10 +848,11 @@ if(BUILD_TESTING AND CUDA)
         target_link_options(cuda_hermitian_ccf PRIVATE ${PATCH_BATCH_WRAPS})
         add_test(NAME CudaHermitianCCF COMMAND cuda_hermitian_ccf)
         set_tests_properties(CudaHermitianCCF PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
-        # Include the following inverse in the match to distinguish the two sites.
+        # Match the per-patch statement's exact line indentation: optional capture
+        # can inspect the projected spectrum before the inverse executes.
         mc_cuda_mutant(CudaHermitianCCFMutant tests/cuda_patch_batch.cpp cuda_alignpatch ccf_perpatch_no_projection
-            "ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));\n        ALIGN_CUFFT(cufftExecC2R(plan_c2r"
-            "ALIGN_LAUNCH(cudaSuccess);\n        ALIGN_CUFFT(cufftExecC2R(plan_c2r" ${PATCH_BATCH_WRAPS})
+            "\n        ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));"
+            "\n        ALIGN_LAUNCH(cudaSuccess);" ${PATCH_BATCH_WRAPS})
         mc_cuda_mutant(CudaHermitianCCFMutant tests/cuda_patch_batch.cpp cuda_alignpatch ccf_batched_no_projection
             "ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));\n            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r"
             "ALIGN_LAUNCH(cudaSuccess);\n            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r" ${PATCH_BATCH_WRAPS})

@@ -1,3 +1,4 @@
+#include "src/boundary_capture.h"
 #include "src/acc/cuda/cuda_hermitian.cuh"
 #ifdef _CUDA_ENABLED
 
@@ -606,6 +607,29 @@ bool cudaAlignPatchDeviceWithWorkspace(
     float accumulated_cufft_ms = 0.0f;
     float accumulated_d2h_ms = 0.0f;
 
+    const bool capture_boundary = is_global && mc_boundary::enabled();
+    auto capture_device = [&](const std::string &name, const void *ptr, size_t bytes) {
+        std::vector<unsigned char> tmp(bytes);
+        ALIGN_CUDA(cudaMemcpy(tmp.data(),ptr,bytes,cudaMemcpyDeviceToHost));
+        mc_boundary::write(name,tmp.data(),bytes);
+    };
+    if (capture_boundary) {
+        mc_boundary::geometry(pnx,pny,n_frames,ccf_nx,ccf_ny,search_range,scaled_B);
+        capture_device("weight.f32",d_weight,sz_weight);
+        for (int f=0; f<n_frames; ++f) {
+            std::vector<float2> win((size_t)ccf_nfy*ccf_nfx);
+            for (int y=0;y<ccf_nfy;++y) {
+                const int ly = windowed ? y : (y>ccf_nfy_half ? y-ccf_nfy+data_nfy : y);
+                ALIGN_CUDA(cudaMemcpy(win.data()+(size_t)y*ccf_nfx,
+                    d_Fframes+((size_t)f*data_nfy+ly)*data_nfx,
+                    ccf_nfx*sizeof(float2),cudaMemcpyDeviceToHost));
+            }
+            mc_boundary::write("input-"+std::to_string(f)+".c64",win.data(),win.size()*sizeof(float2));
+            if (!windowed && (f==0 || f==4)) capture_device("fft-"+std::to_string(f)+".c64",
+                d_Fframes+(size_t)f*data_nfy*data_nfx,(size_t)data_nfy*data_nfx*sizeof(float2));
+        }
+        mc_boundary::check();
+    }
     for (int iter = 1; iter <= max_iter; iter++) {
         // 1. Reference computation
         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
@@ -623,9 +647,18 @@ bool cudaAlignPatchDeviceWithWorkspace(
             accumulated_kernel_ms += k1_ms;
         }
 
+        if (capture_boundary && iter==1) {
+            capture_device("reference.c64",d_Fref,sz_fref);
+            for (int f : {0,4}) if (f<n_frames)
+                capture_device("spectrum-"+std::to_string(f)+".c64",d_Fccs+(size_t)f*ccf_nfy*ccf_nfx,sz_fref);
+        }
         // 3. Batched cuFFT C2R
         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_cufft));
         ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
+        if (capture_boundary && iter==1) {
+            for (int f : {0,4}) if (f<n_frames)
+                capture_device("ifft-input-"+std::to_string(f)+".c64",d_Fccs+(size_t)f*ccf_nfy*ccf_nfx,sz_fref);
+        }
         ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
         if (timed) {
             ALIGN_CUDA(cudaEventRecord(ev_stop_cufft));
@@ -635,6 +668,10 @@ bool cudaAlignPatchDeviceWithWorkspace(
             accumulated_cufft_ms += iter_cufft_ms;
         }
 
+        if (capture_boundary && iter==1) {
+            for (int f : {0,4}) if (f<n_frames)
+                capture_device("map-"+std::to_string(f)+".f32",d_Iccs+(size_t)f*ccf_nx*ccf_ny,(size_t)ccf_nx*ccf_ny*sizeof(float));
+        }
         // 4. Peak finding + subpixel quadratic interpolation
         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
         findPeakAndInterpolateKernel<<<n_frames, 256>>>(
@@ -665,6 +702,11 @@ bool cudaAlignPatchDeviceWithWorkspace(
             accumulated_d2h_ms += iter_d2h_ms;
         }
 
+        if (capture_boundary && iter==1) {
+            mc_boundary::write("peak-x.f32",h_cur_xshifts.data(),sz_shifts);
+            mc_boundary::write("peak-y.f32",h_cur_yshifts.data(),sz_shifts);
+            mc_boundary::check();
+        }
         const RFLOAT rmsd = updatePatchShifts(h_cur_xshifts.data(), h_cur_yshifts.data(),
             h_shiftx.data(), h_shifty.data(), xshifts, yshifts, n_frames, pnx, pny);
 

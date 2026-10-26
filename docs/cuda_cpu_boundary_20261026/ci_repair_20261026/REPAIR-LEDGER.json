@@ -1,0 +1,95 @@
+{
+  "failed_head": "58cd3a563ac0b0af6999369b60a3377d656abad4",
+  "run": 40360025226,
+  "CUDA_job": 121702633874,
+  "CUDA_status": "CONFIGURE FAIL",
+  "log_sha256": "2cc6f4820b5c927c8d0b36eb10a49a3fa88fb8091c7126a0cc393a4a2d0635a5",
+  "log_bytes": 155087,
+  "local_static_result": {
+    "tested_base": "58cd3a563ac0b0af6999369b60a3377d656abad4",
+    "cmake_version": "cmake version 4.4.4",
+    "scope": "local actual-CMake helper + registration with mocked targets; not full CUDA configure, compilation, native invariant rejection or science",
+    "helper_function_unchanged": true,
+    "production_source_unchanged_since_58cd": true,
+    "cases": [
+      {
+        "case": "original-stale-anchor",
+        "argv": [
+          "cmake",
+          "-S",
+          "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/build/pr288-ci-anchor-20261026/original-stale-anchor/project",
+          "-B",
+          "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/build/pr288-ci-anchor-20261026/original-stale-anchor/out"
+        ],
+        "rc": 1,
+        "expected_configure_success": false,
+        "cmake_source_sha256": "386cd8ebfd50b07d35294763fa7f49a619c3fe68d2e36b734b2f587da334774e",
+        "CUDA_source_sha256": "fca69526349bddafce83ffa727e672b12b4af34c7b4b46f2d2ff349ab7fff636",
+        "helper_sha256": "f74183100feaa93c1de244d08b416810eb468ac0065b34ce1cecd5157417056e",
+        "log_sha256": "8be666e90662b9a353e32f28c7fb6f1fc441d0401dcef44c23750d7c6c120658"
+      },
+      {
+        "case": "repaired-anchor",
+        "argv": [
+          "cmake",
+          "-S",
+          "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/build/pr288-ci-anchor-20261026/repaired-anchor/project",
+          "-B",
+          "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/build/pr288-ci-anchor-20261026/repaired-anchor/out"
+        ],
+        "rc": 0,
+        "expected_configure_success": true,
+        "cmake_source_sha256": "219857c7c46cd80a97db714be5a6676c6e949e41947a3efc369810ee48d5c475",
+        "CUDA_source_sha256": "fca69526349bddafce83ffa727e672b12b4af34c7b4b46f2d2ff349ab7fff636",
+        "helper_sha256": "f74183100feaa93c1de244d08b416810eb468ac0065b34ce1cecd5157417056e",
+        "log_sha256": "d38e13464e6547431cb2fda3387c220f65c014e356f4d2960f6e99afb05a4bcd",
+        "perpatch_mutant_sha256": "10a87a6a865e7d169af7c322491ca81ab814f55efb49fbc58ba0c7cd88d74b40",
+        "batched_mutant_sha256": "1f60034986ca7592f6c8f35406c792070ad930ecf9864a0df14d037ebc0159dd",
+        "registration_sha256": "d72de12ccc84fe5dc22c3fe96edb982ebc6ac0a1592a43bfa86e51e7d7386a33",
+        "perpatch_exact_single_projection_removal": true,
+        "batched_projection_preserved_in_perpatch": true,
+        "both_inverse_calls_preserved": true,
+        "diagnostic_capture_preserved": true,
+        "MC_CHECK_HERMITIAN_and_expected_failure_registration_preserved": true
+      },
+      {
+        "case": "missing-anchor-control",
+        "argv": [
+          "cmake",
+          "-S",
+          "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/build/pr288-ci-anchor-20261026/missing-anchor-control/project",
+          "-B",
+          "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/build/pr288-ci-anchor-20261026/missing-anchor-control/out"
+        ],
+        "rc": 1,
+        "expected_configure_success": false,
+        "cmake_source_sha256": "219857c7c46cd80a97db714be5a6676c6e949e41947a3efc369810ee48d5c475",
+        "CUDA_source_sha256": "1e94c356dec732f065aa56f9c2a80f2c66b867e295fe9eb7e7e9384a7d35f5ff",
+        "helper_sha256": "f74183100feaa93c1de244d08b416810eb468ac0065b34ce1cecd5157417056e",
+        "log_sha256": "8be666e90662b9a353e32f28c7fb6f1fc441d0401dcef44c23750d7c6c120658"
+      },
+      {
+        "case": "duplicate-anchor-control",
+        "argv": [
+          "cmake",
+          "-S",
+          "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/build/pr288-ci-anchor-20261026/duplicate-anchor-control/project",
+          "-B",
+          "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-5b6913e1/build/pr288-ci-anchor-20261026/duplicate-anchor-control/out"
+        ],
+        "rc": 1,
+        "expected_configure_success": false,
+        "cmake_source_sha256": "219857c7c46cd80a97db714be5a6676c6e949e41947a3efc369810ee48d5c475",
+        "CUDA_source_sha256": "fa7df70496b8f7b77eaa3a7265ae00da46df5fce5689a55d3980863aa475f7b0",
+        "helper_sha256": "f74183100feaa93c1de244d08b416810eb468ac0065b34ce1cecd5157417056e",
+        "log_sha256": "8be666e90662b9a353e32f28c7fb6f1fc441d0401dcef44c23750d7c6c120658"
+      }
+    ],
+    "all4_static_cases_pass": true
+  },
+  "scientific_frozen_files_verified": 73,
+  "all_frozen_files_unchanged": true,
+  "remote_CUDA_configure_build": "UNRUN; not attempted while Sonnet owns native DC resources. Requires coordination and fresh GPU2/CPU80-87 overlap, benchmark and build admission if subsequently requested.",
+  "new_native_or_science_processes": 0,
+  "independent_audit_scope": "CLEAR for0ba72 only; not58cd DC follow-up or native/science acceptance"
+}

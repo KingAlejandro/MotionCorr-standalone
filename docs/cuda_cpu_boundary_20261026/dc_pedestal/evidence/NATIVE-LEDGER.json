@@ -1,0 +1,374 @@
+[
+  {
+    "RUN": "runs/00021-cpu-cpu/RUN.json",
+    "RUN_sha256": "ffaf73bef99baf358b277145874e3fc0c7433946a174d550f1153811efaef515",
+    "START_sha256": "71796a1043e0476401a8916db7de4518e58d4484765fad5cb7e2b06c5d30f0ef",
+    "ADMISSION_sha256": "1094b15fd7e3b10605eecababf9d356ed6a619394f294b7104ff820890402f1c",
+    "case": "00021",
+    "source": "cpu",
+    "backend": "cpu",
+    "rc": 0,
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+      "inverse",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/zero-dc-copies/00021-cpu",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/runs/00021-cpu-cpu/data",
+      "cpu"
+    ],
+    "env": {
+      "OMP_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "1",
+      "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+      "CUDA_VISIBLE_DEVICES": "",
+      "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+    },
+    "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+    "output_hashes": {
+      "map-4.f32": "3a39903dc7cd97ac4cfd2cdc993883a46b87d04c2a0eac37d0b0d1eada866fc8",
+      "map-0.f32": "234acf542b08648ccc22b29670e433febe3f7c97f4d3840035c5861b07a17c66"
+    },
+    "all_frozen_files_unchanged": true,
+    "projection_noop": null,
+    "projected_bytes_identical": null,
+    "own_GPU2_witness": null,
+    "cpu_busy_fraction": {
+      "80": 0.0,
+      "81": 0.019607843137254943,
+      "82": 0.0,
+      "83": 0.0,
+      "84": 0.0,
+      "85": 0.0,
+      "86": 0.0,
+      "87": 0.0
+    },
+    "scratch_bytes": 4864232923,
+    "affinity_verified": true
+  },
+  {
+    "RUN": "runs/00021-cpu-cuda/RUN.json",
+    "RUN_sha256": "42f88b44e35aa5dba376044cc8d05840e2ad27cf2cd32f2b06ea5349a02476d1",
+    "START_sha256": "e64c138e1436753b4cd4c2b4f5c4dc8a746f57644ede7a1e8ffda886de88797f",
+    "ADMISSION_sha256": "4bfd55f0e6434e7fb8ae18c9e1c02a097c63e046980082d34c8fd636b4b07f97",
+    "case": "00021",
+    "source": "cpu",
+    "backend": "cuda",
+    "rc": 0,
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+      "inverse-valid",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/zero-dc-copies/00021-cpu",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/runs/00021-cpu-cuda/data",
+      "cuda"
+    ],
+    "env": {
+      "OMP_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "1",
+      "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+      "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+      "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+    },
+    "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+    "output_hashes": {
+      "projected-spectrum-0.c64": "52df6f091f0b04a7acbfb66448cb163549965a6ea71f8dae6037aab98cdf5374",
+      "projection-noop.txt": "c26de83abdc9496cd1301470918ec39ecca1cf389ef0ae1c6504da1800d1c431",
+      "projected-spectrum-4.c64": "301cd55cfa9baad120c435e9cf4e09cd0eab1468a6f7dddb706d5ad66335a6ae",
+      "map-4.f32": "6030254858478a802fb99df8f8a4f023bf5eced613a601ff0c77c5e142474224",
+      "map-0.f32": "9e8f05292e599a2370063ceeb2e995ae08235ab5b5178a00b5b4663f16ceb4d1"
+    },
+    "all_frozen_files_unchanged": true,
+    "projection_noop": true,
+    "projected_bytes_identical": true,
+    "own_GPU2_witness": true,
+    "cpu_busy_fraction": {
+      "80": 0.0,
+      "81": 0.0,
+      "82": 0.0,
+      "83": 0.0,
+      "84": 0.0,
+      "85": 0.0,
+      "86": 0.0,
+      "87": 0.0
+    },
+    "scratch_bytes": 4871971973,
+    "affinity_verified": true
+  },
+  {
+    "RUN": "runs/00021-cuda-cpu/RUN.json",
+    "RUN_sha256": "5ba6b3e55ea784e2eb6477d52df979dad04c054d4323412cb544d2874ecfcc77",
+    "START_sha256": "a961041a15a264ef22c60c048612284a217c3e49db59f26b88da6706bbd1bd9b",
+    "ADMISSION_sha256": "34937776deb16e001d3f612c0bf21fb4acfbc351143574e43f393afe0b362ef1",
+    "case": "00021",
+    "source": "cuda",
+    "backend": "cpu",
+    "rc": 0,
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+      "inverse",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/zero-dc-copies/00021-cuda",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/runs/00021-cuda-cpu/data",
+      "cpu"
+    ],
+    "env": {
+      "OMP_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "1",
+      "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+      "CUDA_VISIBLE_DEVICES": "",
+      "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+    },
+    "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+    "output_hashes": {
+      "map-4.f32": "02ce7a454e3f431fde9a95309a5694b920d7041100d5b0628825c5ff8a99476f",
+      "map-0.f32": "b280b81d2142c167113bb8b8d46df7a1923e7cb57cd32538a9069feee5f1ba24"
+    },
+    "all_frozen_files_unchanged": true,
+    "projection_noop": null,
+    "projected_bytes_identical": null,
+    "own_GPU2_witness": null,
+    "cpu_busy_fraction": {
+      "80": 0.0,
+      "81": 0.0,
+      "82": 0.0,
+      "83": 0.0,
+      "84": 0.0,
+      "85": 0.0,
+      "86": 0.0,
+      "87": 0.0
+    },
+    "scratch_bytes": 4887286917,
+    "affinity_verified": true
+  },
+  {
+    "RUN": "runs/00021-cuda-cuda/RUN.json",
+    "RUN_sha256": "ddd427441b825ea635790616600818c16e2b55d44e2b2cd01b6f99877fb426ab",
+    "START_sha256": "cae799c715467f5f656cd2f28b545aabef87863706f530cfca6d222056c21903",
+    "ADMISSION_sha256": "e720876fc2d4d5899e83d56d4735fa4e1a6dc4c8cff1f2f8fd39fd906fdf78f6",
+    "case": "00021",
+    "source": "cuda",
+    "backend": "cuda",
+    "rc": 0,
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+      "inverse-valid",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/zero-dc-copies/00021-cuda",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/runs/00021-cuda-cuda/data",
+      "cuda"
+    ],
+    "env": {
+      "OMP_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "1",
+      "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+      "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+      "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+    },
+    "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+    "output_hashes": {
+      "projected-spectrum-0.c64": "9ce954594559f3c0cdf6aba6d838c9ce9f0d12151f991101e360cdbb21a9351a",
+      "projection-noop.txt": "c26de83abdc9496cd1301470918ec39ecca1cf389ef0ae1c6504da1800d1c431",
+      "projected-spectrum-4.c64": "bb0123910145c1b980c1306045fb2c0243567a976caa911d87cdb603e3ad6356",
+      "map-4.f32": "4eda47af1d24c2d7ef56dcdbc5e862d8a0ba5fa703b306d660aaf613a2be19a3",
+      "map-0.f32": "fa908759866b6e1552dd806f30b94e5974d89f4810bb478010bd59e603314e21"
+    },
+    "all_frozen_files_unchanged": true,
+    "projection_noop": true,
+    "projected_bytes_identical": true,
+    "own_GPU2_witness": true,
+    "cpu_busy_fraction": {
+      "80": 0.0,
+      "81": 0.019607843137254943,
+      "82": 0.0,
+      "83": 0.0,
+      "84": 0.0,
+      "85": 0.0,
+      "86": 0.0,
+      "87": 0.0
+    },
+    "scratch_bytes": 4895025993,
+    "affinity_verified": true
+  },
+  {
+    "RUN": "runs/00046-cpu-cpu/RUN.json",
+    "RUN_sha256": "cf7023b58316382eabb8eb10abf0034f6b846a813b1b189398ae905dea57c530",
+    "START_sha256": "5b2d5acc424454c7aa9bfeee53176e2cc3283124412ca6470077699949d069d0",
+    "ADMISSION_sha256": "0fbd4ada0117ef46fb1082c7bec4d32fd86db1b0535829739831761ee154e98d",
+    "case": "00046",
+    "source": "cpu",
+    "backend": "cpu",
+    "rc": 0,
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+      "inverse",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/zero-dc-copies/00046-cpu",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/runs/00046-cpu-cpu/data",
+      "cpu"
+    ],
+    "env": {
+      "OMP_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "1",
+      "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+      "CUDA_VISIBLE_DEVICES": "",
+      "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+    },
+    "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+    "output_hashes": {
+      "map-4.f32": "3cc899e11d789eeb027dc8a8fb9dc10b79c973f63fba2603b42519365715744c",
+      "map-0.f32": "6363cce545f03e6634278f77f3415692185de34bd4553cbc01f4ae76bc9923b4"
+    },
+    "all_frozen_files_unchanged": true,
+    "projection_noop": null,
+    "projected_bytes_identical": null,
+    "own_GPU2_witness": null,
+    "cpu_busy_fraction": {
+      "80": 0.0,
+      "81": 0.0,
+      "82": 0.0,
+      "83": 0.0,
+      "84": 0.0,
+      "85": 0.0,
+      "86": 0.0,
+      "87": 0.0
+    },
+    "scratch_bytes": 4910340986,
+    "affinity_verified": true
+  },
+  {
+    "RUN": "runs/00046-cpu-cuda/RUN.json",
+    "RUN_sha256": "f7e5aa24858cc71f0e9b5943d6d81f91d75186543710e02b04aaa9bcd71a62d8",
+    "START_sha256": "bfc8e1d059d57929d3695c2f071920c8e955687e355d819501fc34372eda30f9",
+    "ADMISSION_sha256": "c19adec1412c85751e03e7748061d4ce15ce483d3ff2aceb639017669b406779",
+    "case": "00046",
+    "source": "cpu",
+    "backend": "cuda",
+    "rc": 0,
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+      "inverse-valid",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/zero-dc-copies/00046-cpu",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/runs/00046-cpu-cuda/data",
+      "cuda"
+    ],
+    "env": {
+      "OMP_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "1",
+      "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+      "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+      "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+    },
+    "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+    "output_hashes": {
+      "projected-spectrum-0.c64": "309607cf840eee7f2065e5ab2b73b16a48abdc64c1c54118d3bc0f4efe1d25d6",
+      "projection-noop.txt": "c26de83abdc9496cd1301470918ec39ecca1cf389ef0ae1c6504da1800d1c431",
+      "projected-spectrum-4.c64": "7264e9b84609b8b901bc9b41c49be7b078d79ea51f7644973e9057d75e53a525",
+      "map-4.f32": "186878cd3117206f9c1a1208fd9b15fe97f4ed818f215651cab5e040335c70ac",
+      "map-0.f32": "45054d1ebbb085844a14250e2cee4a16bcf9949b737379f1191209c42ad4f89a"
+    },
+    "all_frozen_files_unchanged": true,
+    "projection_noop": true,
+    "projected_bytes_identical": true,
+    "own_GPU2_witness": true,
+    "cpu_busy_fraction": {
+      "80": 0.0,
+      "81": 0.0,
+      "82": 0.0,
+      "83": 0.0,
+      "84": 0.0,
+      "85": 0.0,
+      "86": 0.0,
+      "87": 0.0
+    },
+    "scratch_bytes": 4918080021,
+    "affinity_verified": true
+  },
+  {
+    "RUN": "runs/00046-cuda-cpu/RUN.json",
+    "RUN_sha256": "88516c3f19e21c86546d594bae0788a10b9662afd3b2f929a2a7309a1e119130",
+    "START_sha256": "3844281cc593e756647672a1f602e5a8b5675b9a386bb59002a53e00134fc555",
+    "ADMISSION_sha256": "a40ed7dd6b5ea37aacbe5f484a15e425a372132e690e3e95542506c968e3b72a",
+    "case": "00046",
+    "source": "cuda",
+    "backend": "cpu",
+    "rc": 0,
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+      "inverse",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/zero-dc-copies/00046-cuda",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/runs/00046-cuda-cpu/data",
+      "cpu"
+    ],
+    "env": {
+      "OMP_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "1",
+      "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+      "CUDA_VISIBLE_DEVICES": "",
+      "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+    },
+    "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+    "output_hashes": {
+      "map-4.f32": "9a331049badad575a7f51128581eb71137f06cddf8dcb32a038271f473e9143c",
+      "map-0.f32": "5768d63bbab4926f0617c5f1d76c6fe2b6ffb8063a38707945ff196b19a5c8da"
+    },
+    "all_frozen_files_unchanged": true,
+    "projection_noop": null,
+    "projected_bytes_identical": null,
+    "own_GPU2_witness": null,
+    "cpu_busy_fraction": {
+      "80": 0.0,
+      "81": 0.0,
+      "82": 0.0,
+      "83": 0.0,
+      "84": 0.0,
+      "85": 0.0,
+      "86": 0.0,
+      "87": 0.0
+    },
+    "scratch_bytes": 4933394990,
+    "affinity_verified": true
+  },
+  {
+    "RUN": "runs/00046-cuda-cuda/RUN.json",
+    "RUN_sha256": "0eb29e9330e4b235f79681f28fb523d4e0245cd270ba9b297295a4721033cde9",
+    "START_sha256": "214db2b0df65444c6d0ae5d74f608d12edd460fec1b0dd057ed74ae33c6ee435",
+    "ADMISSION_sha256": "789004dfd0f15589646d1199242e4e53e30f041e0005168003d3e197793b00d5",
+    "case": "00046",
+    "source": "cuda",
+    "backend": "cuda",
+    "rc": 0,
+    "argv": [
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/replay-v2-zero-fill",
+      "inverse-valid",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/zero-dc-copies/00046-cuda",
+      "/mnt/clathrin/alex-motioncorr-cuda-cpu-boundary-20261026/dc-pedestal-v1-20261026/runs/00046-cuda-cuda/data",
+      "cuda"
+    ],
+    "env": {
+      "OMP_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "1",
+      "LD_LIBRARY_PATH": "/usr/local/cuda-12.8/lib64",
+      "CUDA_VISIBLE_DEVICES": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+      "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+    },
+    "binary_sha256": "4970be307aad38034c0ae1e36537d00d6fb9cca9c28ae81663e4b79edf0018f1",
+    "output_hashes": {
+      "projected-spectrum-0.c64": "acdb75df10b5a3afa390fe60925d27f85287da4898b0d32564714501f8c36ead",
+      "projection-noop.txt": "c26de83abdc9496cd1301470918ec39ecca1cf389ef0ae1c6504da1800d1c431",
+      "projected-spectrum-4.c64": "016b173f901a4eec92ab14d09794a997e9d89f107bd2d955b44280957d4e6aa0",
+      "map-4.f32": "6b0ba279ba70ff30e38a14d0f33fecc9150af8736d8e8209cf39f16b3f12941f",
+      "map-0.f32": "98e6468d4f99975cf2e94fdbda44edda6d88befe68cb6988443cb6607eaa16ef"
+    },
+    "all_frozen_files_unchanged": true,
+    "projection_noop": true,
+    "projected_bytes_identical": true,
+    "own_GPU2_witness": true,
+    "cpu_busy_fraction": {
+      "80": 0.0,
+      "81": 0.019607843137254943,
+      "82": 0.0,
+      "83": 0.0,
+      "84": 0.0,
+      "85": 0.0,
+      "86": 0.0,
+      "87": 0.0
+    },
+    "scratch_bytes": 4941134009,
+    "affinity_verified": true
+  }
+]

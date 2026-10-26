@@ -64,3 +64,22 @@ package on `PYTHONPATH` outside the repository; only tests that do not need nump
 call site passing `false` (integration test), global leak in the selection, `pnx` replaced by the inherited value
 (weight test), capture-guard term removed (`LocalCcfCaptureCli`). UNRUN: the rest of the CTest suite, CUDA, any movie,
 native byte neutrality, scientific accuracy.
+
+## Correction: attempt 1 was limited; attempt 2 uses a real NumPy
+
+Attempt 1 (above) configured with a stub `numpy` package on `PYTHONPATH`. That bypassed the real-NumPy requirement in
+`CMakeLists.txt` and is **not qualifying evidence**; its logs are retained outside Git. "numpy is absent" was true only
+for the interpreter CMake chose (`/opt/homebrew/bin/python3`), not for the host.
+
+Attempt 2, same source `634e4b48` (no source, test or CMake change since), fresh build directories, `PYTHONPATH` unset,
+`-DPython3_EXECUTABLE=/Users/alex.konstantinov/.local/bin/python3` (CPython 3.13.7, NumPy 2.4.2,
+`.../python3.13/site-packages/numpy/__init__.py`, sha256 `2e8da3e4385e79c4885b3f7324a8b957e6f01732b239e99e266a12c62a008b8d`), `-j2`, `OMP_NUM_THREADS=2`:
+
+- Default build: `LocalFullWidthWeight`, `IsotropicWeight`, `GlobalHalfGain`, `CoupledPeak`, `PatchRetryState`,
+  `ExperimentalFlagsCli` pass (6/6).
+- `MC_EXPERIMENT_CCF_DC=ON`, `MC_EXPERIMENT_CCF_DC_ARM=none`: `LocalFullWidthWeight`, `CcfDcHook`,
+  `ExperimentalFlagsCli`, `LocalCcfCaptureCli` pass.
+
+Tested: weight values, global/local selection, global estimates on the analytic fixture with the flag on or off, the log
+witness, and CLI refusals. UNRUN: full-movie and global-trajectory byte neutrality, the rest of CTest, CUDA, any
+movie, native pilot, scientific accuracy. The stub attempt supports no qualification claim.

@@ -1,0 +1,33 @@
+2026-10-26T14:28:47Z
+4-gpu-vm
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+--- compute apps (all GPUs)
+--- locks held by anyone (fuser)
+/tmp/motioncorr-gpu0-correctness.lock: 
+/tmp/motioncorr-gpu1-correctness.lock: 
+/tmp/motioncorr-gpu2-correctness.lock: 
+/tmp/motioncorr-gpu3-correctness.lock: /tmp/motioncorr-gpu3-correctness.lock: 3913664 3913712 3915102 3915106 3915127 3915129
+/tmp/motioncorr-build.lock: 
+/tmp/motioncorr-bench.lock: /tmp/motioncorr-bench.lock: 3913664 3913712 3915102 3915106 3915133 3915135
+--- processes last scheduled on CPUs 96-103
+    PID USER     PSR %CPU ELAPSED COMMAND
+3913712 alex     102  0.1     114 bash -c while :; do printf "%s\t%s\t%s\t%s\n" "$(date -u +%FT%T.%N)" "$(cut -d" " -f1 /proc/loadavg)" "$(nvidia-smi --query-compute-apps=gpu_uuid,pid --format=csv,noh
+      1 root      99  0.0 8481372 /usr/lib/systemd/systemd --system --deserialize=90
+3913664 alex      96  0.0     116 bash tools-iot/run_iothreads.sh
+2602813 alex      97  0.0 1446107 bash -c while pgrep -f "kit24run" > /dev/null; do sleep 30; done; tail -8 /home/alex/mc-fft/kit24.log
+1592208 root      96  0.0 1194743 [kworker/96:2-events]
+3517178 root     102  0.0  933626 [kworker/102:13-events]
+2919748 systemd+  99  0.0  374349 /usr/lib/systemd/systemd-networkd
+    629 root     102  0.0 8481372 [migration/102]
+    611 root      99  0.0 8481372 [migration/99]
+3456129 root     101  0.0  995726 [kworker/101:0-mm_percpu_wq]
+    605 root      98  0.0 8481372 [migration/98]
+    617 root     100  0.0 8481372 [migration/100]
+    599 root      97  0.0 8481372 [migration/97]
+ 14:28:47 up 98 days,  3:56, 28 users,  load average: 2.79, 1.83, 1.36
+/dev/sdb        2.0T  1.6T  324G  83% /mnt/clathrin
+GPU health PASS (identity, ECC, row remap, retired pages, no compute process); kernel Xid log: UNRUN
+gpu3 health exit 0

@@ -1,0 +1,9 @@
+mutant drop-hxy: coupled_peak rc=1 (KILLED) FAIL coupled estimate does not recover the exact offset to rounding error
+mutant sign-hxy: coupled_peak rc=1 (KILLED) FAIL coupled estimate does not recover the exact offset to rounding error
+mutant half-stencil: coupled_peak rc=1 (KILLED) FAIL guard rejected an exact negative-definite quadratic
+mutant no-negdef-guard: coupled_peak rc=1 (KILLED) FAIL positive-definite H must fall back (1)
+mutant no-offset-guard: coupled_peak rc=1 (KILLED) FAIL offset > 1 px must fall back (2) and leave dx, dy untouched
+mutant swap-axes: coupled_peak rc=1 (KILLED) FAIL coupled estimate does not recover the exact offset to rounding error
+mutant global-leaks: coupled_peak rc=1 (KILLED) FAIL global mode must leave patch alignment bitwise unchanged and uncounted
+mutant not-applied: coupled_peak rc=1 (KILLED) FAIL global mode did not change the global estimate
+restored original: rc=0 (must be 0)

@@ -1,5 +1,5 @@
 #!/bin/bash
-# usage: build.sh base|cand   Release build of the staged tree $DS_SC/src-<arm> into $DS_SC/build-<arm>; -j8 inside CPUs 48-55.
+# usage: build.sh base|cand|h2   Release build of the staged tree $DS_SC/src-<arm> into $DS_SC/build-<arm>; -j8 inside CPUs 48-55.
 # pbzip2 is absent on cpu64, so MC_REQUIRE_ALL_DECODERS stays at its default OFF; the repo then waives the pbzip2 compressed-MRC cases (UNRUN).
 # base builds only the motioncorr binary; cand builds everything (the full CPU CTest needs the test executables).
 set -u

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Arm table from the retained eval JSONs. usage: summarize.py V2DIR FROZEN_F_EVAL.json OUT_PREFIX
+"""Arm table from the retained eval JSONs. usage: summarize.py V2DIR FROZEN_F_EVAL.json OUT_PREFIX [ARM ...]
 Scores are the unchanged eval_v2.py/#267 checker outputs: STAR-serialized field, fixed ROI, limits .20/.40/.80 A.
 """
 import json, pathlib, sys
 v2, frozen, out = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), sys.argv[3]
-ARMS = ['a0-base-flagsoff', 'a-cand-flagsoff', 'b-half-prod', 'c-half-long', 'd-gain1-long']
+ARMS = sys.argv[4:] or ['a0-base-flagsoff', 'a-cand-flagsoff', 'b-half-prod', 'c-half-long', 'd-gain1-long']
 CASES = ['zero', 'integer', 'fractional', 'affine', 'pedestal', 'noisy', 'flat', 'repeated']
 ev = {a: {r['case']: r for r in json.loads((v2/f'{a}.eval.json').read_text())} for a in ARMS if (v2/f'{a}.eval.json').exists()}
 fz = {r['case']: r for r in json.loads(frozen.read_text())}

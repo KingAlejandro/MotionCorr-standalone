@@ -2,7 +2,7 @@
 # usage: ctest_cpu.sh   (on cpu64) Full CPU CTest of the candidate Release build, no exclusions, inside the lane.
 set -u
 D=$(dirname "$(readlink -f "$0")"); source "$D/env.sh" || exit 1
-B=$DS_SC/build-cand; O=$DS_SC/ctest-cand; S=$DS_SC/src-cand
+A=${DS_ARM:-cand}; B=$DS_SC/build-$A; O=$DS_SC/ctest-$A; S=$DS_SC/src-$A
 {
   echo "start $(date -u +%FT%TZ) cand=$DS_CAND_SHA binary=$(sha256sum $B/motioncorr | cut -c1-64)"
   ctest --test-dir $B -N | tail -3

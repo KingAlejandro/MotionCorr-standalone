@@ -14,5 +14,5 @@ for p in sorted(set(locks)):
  handles.append(f)
 print(json.dumps(dict(utc=time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),locks=[str(p) for p in sorted(set(locks))],cpus='32-47',command=sys.argv[1:])),flush=True)
 subprocess.run(['bash','-c','date -u; uptime; free -h; df -h /tmp; ps -eo pid,psr,pcpu,args --sort=-pcpu | head -12'],check=True)
-env=dict(os.environ,OMP_NUM_THREADS='16',OPENBLAS_NUM_THREADS='1',MKL_NUM_THREADS='1',NUMEXPR_NUM_THREADS='1')
+env=dict(os.environ,MOTIONCORR_HELD_LEASES=json.dumps([str(p) for p in sorted(set(locks))]),OMP_NUM_THREADS='16',OPENBLAS_NUM_THREADS='1',MKL_NUM_THREADS='1',NUMEXPR_NUM_THREADS='1')
 raise SystemExit(subprocess.run(['taskset','-c','32-47',*sys.argv[1:]],env=env).returncode)

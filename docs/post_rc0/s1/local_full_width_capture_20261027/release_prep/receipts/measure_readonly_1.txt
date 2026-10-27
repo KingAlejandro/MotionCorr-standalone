@@ -1,0 +1,81 @@
+utc 2026-10-27T00:52:45Z
+host small-refmac-machine
+ 00:52:45 up 328 days, 14:50, 26 users,  load average: 0.18, 0.11, 0.09
+nproc 64
+               total        used        free      shared  buff/cache   available
+Mem:     242956668928 52867149824 103778541568 41455452160 129976102912 190089519104
+Filesystem         1B-blocks          Used   Available Use% Mounted on
+/dev/vda1      1351030112256 1264569409536 86443925504  94% /
+--- top processes
+    PID    PPID PSR %CPU COMMAND
+3665679 3665668  48  400 ps -eo pid,ppid,psr,pcpu,args --sort=-pcpu
+2722253       1   2  1.0 node /usr/local/bin/t3 serve --host 127.0.0.1 --port 3773 --base-dir /home/ubuntu/.t3
+1735907       1  44  0.7 /usr/sbin/rsyslogd -n -iNONE
+1388940 1388890   0  0.2 /tmp/doppio-theme-plan-20261022/env/bin/python -m src.main --project /tmp/doppio-theme-plan-20261022/project --yes --no-browser
+1777319       1  24  0.1 /var/ossec/bin/wazuh-syscheckd
+1389370 1388893  11  0.1 /tmp/doppio-theme-plan-20261022/linux/doppio-desktop --type=renderer --enable-crash-reporter=db116e94-edda-4c81-a690-03c15d31e0c7,no_channel --user-data-dir=/tmp/doppio-theme-
+ 292988       1  53  0.1 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+3164981 3164973  30  0.1 /home/lzi33989/.t3/runtime/versions/0.1.1-nightly.20261019.3348/t3 serve --host 127.0.0.1 --port 3780
+3300564       1  12  0.1 /usr/bin/containerd
+1833454       2  21  0.0 [kworker/u128:2-ext4-rsv-conversion]
+ 375017       1  11  0.0 /home/ubuntu/doppio-relion-venv/bin/python -m src.main --host 0.0.0.0 --port 8000 --no-browser
+ 928240       1  62  0.0 /home/lzi33989/ccpem/doppio_servalcat_test_16170634479/bin/python -m src.main --host 127.0.0.1 --port 43217 --no-browser --project /home/lzi33989/ccpem/doppio-linux-build-veri
+1152644       1  38  0.0 /home/ubuntu/work/dsp-linux-agnel-16256065764/install/bin/python -m src.main --host 127.0.0.1 --port 43363 --no-browser --project /home/ubuntu/work/dsp-linux-agnel-16256065764
+ 362512       1  32  0.0 /home/lzi33989/ccpem/doppio_servalcat_test_16170634479/bin/python -m src.main --host 127.0.0.1 --port 43117 --no-browser --project /home/lzi33989/ccpem/onedep-doppio-servalcat
+--- locks (flock -n probe on the existing file, never created or removed here)
+free  /tmp/motioncorr-b2-cpu32-47.lock
+free  /tmp/motioncorr-cpu64-bench.lock
+free  /tmp/motioncorr-damping-cpu32-47.lock
+free  /tmp/motioncorr-damping-cpu48-55.lock
+free  /tmp/motioncorr-dc-late68-cpu62.lock
+free  /tmp/motioncorr-dc-oracle-cpu-0-7.lock
+free  /tmp/motioncorr-dc-oracle-cpu-16-23.lock
+free  /tmp/motioncorr-dc-oracle-cpu-24-31.lock
+free  /tmp/motioncorr-dc-oracle-cpu-32-39.lock
+free  /tmp/motioncorr-dc-oracle-cpu-40-47.lock
+free  /tmp/motioncorr-dc-oracle-cpu-8-15.lock
+free  /tmp/motioncorr-dc-tierc-cpu32-47.lock
+free  /tmp/motioncorr-maarten-cpu56-61.lock
+free  /tmp/motioncorr-maarten-cpu62.lock
+free  /tmp/motioncorr-w4-analysis-cpu62.lock
+free  /tmp/motioncorr-w5-cpu48-55.lock
+free  /tmp/motioncorr-w6-cpu40-47.lock
+free  /tmp/motioncorr-w7-cpu40-47.lock
+--- earlier scratch (bytes, regular files)
+2682	/tmp/motioncorr-w4-bootstrap-20261025
+6072	/tmp/motioncorr-maarten-000000-20261025-bfe1ca23-d32b-4d08-b53e-3270ea10603c.bootstrap
+75765	/tmp/mc-w8-common-mean-screen-20261026
+143199	/tmp/motioncorr-w4-phaseC-r3-20261025-4f7939b1-12a1-46d6-b24d-1ecfd372517f
+644017	/tmp/motioncorr-maarten-truth-contract-20261025
+1025829	/tmp/motioncorr-w4-cpu-observations-20261025-a104aa0a-dd18-4c2a-87b5-5ef2b72358a0
+2748709	/tmp/motioncorr-w4-phaseA-20261025-7819b384-fa17-4ff0-8bb4-e1e7f4bb120e
+3532636	/tmp/motioncorr-w4-phaseD-v1.1-20261025-6203d932-0b08-40fb-b1d1-6872681fe800
+3555274	/tmp/motioncorr-w4-phaseB-v2.1-20261025-252fcff9-7f16-4d75-a0b6-50e3576745e8
+3800285	/tmp/motioncorr-w4-matched-v1-20261025-0b0fc625-ebf6-49f1-9b4a-21dd1eeb7faa
+3953934	/tmp/motioncorr-w4-repro-20261025-ed6d18d2-62f5-415c-8e49-a688c601a911
+23114133	/tmp/motioncorr-w5-20261025-7b76b848
+36337010	/tmp/motioncorr-w6-20261026
+48338220	/tmp/motioncorr-dc804-summary-20261025-1cc0555c-f645-4101-9f06-847f521ea749
+58121506	/tmp/motioncorr-b2-factorial-20261026
+95598486	/tmp/motioncorr-dc-consumer-attempt2-20261025-dcdd56d4-153e-4f2a-9af7-8b60867f922a
+108128679	/tmp/motioncorr-local-ccf-20261026
+161829431	/tmp/motioncorr-215-cpu64
+399456649	/tmp/motioncorr-239-paired-20261019
+410415973	/tmp/motioncorr-lfw-v5-20261026
+625594661	/tmp/motioncorr-maarten-h7b-e5346a1e
+1086009903	/tmp/motioncorr-b2-native-20261026
+1434453556	/tmp/motioncorr-dc-late68-stage-20261025-e41ac9c7-a948-428a-8e5e-6ef8b92e041c
+2171340896	/tmp/motioncorr-214
+3227758682	/tmp/motioncorr-maarten-000000-20261025-bfe1ca23-d32b-4d08-b53e-3270ea10603c
+3632341624	/tmp/motioncorr-maarten-000000-20261025-bfe1ca23-d32b-4d08-b53e-3270ea10603c-metadata-v2-cbe6d101-b96f-4b75-aa35-e4feb2a0a928
+4789206166	/tmp/motioncorr-damping-a1c78adc1d0f
+11370407814	/tmp/motioncorr-dc-late68-direct-v2-20261025-d066432d-6d13-45e4-8c52-77b4e936d618
+--- toolchain
+-rwxrwxr-x 1 ubuntu ubuntu 223 Sep 24 20:12 /home/ubuntu/.mc-venv/bin/cmake
+-rwxrwxr-x 1 ubuntu ubuntu 223 Sep 24 20:12 /home/ubuntu/.mc-venv/bin/ctest
+lrwxrwxrwx 1 ubuntu ubuntu  16 Sep 24 20:12 /home/ubuntu/.mc-venv/bin/python3 -> /usr/bin/python3
+cmake version 4.4.3
+python 3.12.3 numpy 2.5.3 /home/ubuntu/.mc-venv/lib/python3.12/site-packages/numpy/__init__.py
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+GNU ld (GNU Binutils for Ubuntu) 2.42
+glibc ldd (Ubuntu GLIBC 2.39-0ubuntu8.9) 2.39

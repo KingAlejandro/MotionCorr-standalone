@@ -1,0 +1,59 @@
+{
+ "capture_on_witnesses_all_mandatory": [
+  "W1 session schema local-ccf-capture/2, capture_mode local_full_width_pair, selected centres exactly (104,15),(62,79), patch directories and extents",
+  "W2 recorded actual weight_x_norm 42 (and inherited 22 not used) in both patches",
+  "W3 captured float32 weight map equals the frozen native-order x_norm 42 oracle exactly and differs from the x_norm 22 map",
+  "W4 native log: 9 witness lines \"x_norm = 42, pnx = 42, nfx = 22\", one directly after each of the 9 patch headers, including both selected patches",
+  "coverage: both patches, 5 frames, every actually executed iteration, patch-files.json and COMPLETE.json consistent"
+ ],
+ "driver_requires_in_PARENT_RELEASE.json": [
+  "release_id",
+  "pins_sha256",
+  "driver_sha256",
+  "witness_sha256",
+  "source_commit",
+  "binary_sha256",
+  "independent_review_report_sha256",
+  "jobs_authorized",
+  "fresh_resource_grant"
+ ],
+ "native_budget": "2 producers, unchanged and unreleased",
+ "parent_release_must_bind": {
+  "baseline": {
+   "dir": "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/ON",
+   "run_json_sha256": "ad77c48cce40ee0e8116297e05a7789276dcfc534688f0a88caab0e1ca99e6c4"
+  },
+  "binary_sha256": "e0b4750d8815929035a31db6e028e9ebb508af61d8263cf66418022aa5e44742",
+  "blob_list_sha256": "3d885a21bdaac53ca61e623e7f036f4770f23a7f151ba887b51f059a64147c41",
+  "commands_sha256": "26eeea360d1407d5bb9216a3f79890072cad3f252aa0a06f5877ccbb284fac0c",
+  "comparator": {
+   "path": "/tmp/motioncorr-lfw-capture-20261027/source/docs/post_rc0/s1/global_damping_20261026/scripts/compare_products.py",
+   "sha256": "53449d2da682305c8c11e3ed3efb91103530196e481ac075b00f90e3d5ea0f47"
+  },
+  "driver_sha256": "7467839632b020269b01c6da527d2a35c1868f57b592b83d828b06a26a92e765",
+  "fresh_resource_grant": "required, written by the parent (the driver refuses without it)",
+  "guard_sha256": "3a2c47a1d0632ce6a87f1a7e4178f17415fa5f5f87465a0cbde9f8aeef25ecc4",
+  "independent_source_review": {
+   "durable_copy": "~/Documents/MotionCorr-evidence/20261026/Native-fullwidth-ccf-capture-opus-source-review-r1/original/REPORT.md",
+   "repo_copy": "docs/post_rc0/s1/local_full_width_capture_20261027/review/REPORT.md",
+   "report_sha256": "bdea0d803b50b25ed44d12fea34f856c17390098b46f28a14c24f36b9cc00f00",
+   "verdict": "CLEAR for source f473fbc9 (source scope only)"
+  },
+  "input_files": {
+   "noisy.mrcs": "5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3",
+   "noisy.star": "c321865e4fc769d9af55bc86af0a0b390abdcdb029137a9aeb5d6743b81a6891"
+  },
+  "jobs_authorized": [
+   "OFF",
+   "ON"
+  ],
+  "lane_sha256": "e0143e89fa3b6771d7f3ff873f04a7453d26f1b8c7f7b1e8f4ab4d3202b6fd66",
+  "libs_and_loader": "RUN_PINS.json libs (18) and loader_sha256",
+  "pins_sha256": "2548da9b62ec20029a5709e889fae501cfabf65509fc841cc19418be5ff6a32f",
+  "source_commit": "f473fbc9c380c7bb8cc1533f19461fbf70dde485",
+  "weight_oracle_sha256": "d809bd6273f2d1c296315a1ed7c24a1f08f323059eaecb2bfe6e603cafda7ee8",
+  "witness_sha256": "1206fe46f5eed664893f5ff5509d81469459ea9565a10e75c680cb8290844768"
+ },
+ "schema": "lfw-capture-release-bindings/1",
+ "status": "PREPARED_HELD: no PARENT_RELEASE exists; the parent writes it after its own review and fresh resource grant"
+}

@@ -1,0 +1,121 @@
+PASS control: the test admission passes identity, pins and resolved commands
+PASS null candidate_binary refused :: code=HELD
+PASS null source_archive refused :: code=HELD
+PASS null build_receipt refused :: code=HELD
+PASS null compiler_and_config refused :: code=HELD
+PASS null shared_libraries refused :: code=HELD
+PASS null venue_identity refused :: code=HELD
+PASS null fresh_venue_resource_admission refused :: code=HELD
+PASS null independent_source_clearance refused :: code=HELD
+PASS HELD status refused :: code=HELD
+PASS altered anchored admission refused :: code=ANCHOR
+PASS hand-edited commands refused by the anchor :: code=ANCHOR
+PASS resolved command row differs from the frozen admission :: code=IDENTITY
+PASS binary on disk differs from candidate_binary.sha256 :: code=IDENTITY
+PASS binary path differs from the build receipt (same bytes) :: code=IDENTITY
+PASS binary given as a symlink :: code=IDENTITY
+PASS source archive changed after the pin :: code=IDENTITY
+PASS candidate_source_commit differs from source_archive.commit :: code=IDENTITY
+PASS build receipt changed after the pin :: code=IDENTITY
+PASS build receipt with the wrong archive sha256 (pin refreshed) :: code=IDENTITY
+PASS build receipt with the wrong commit (pin refreshed) :: code=IDENTITY
+PASS build receipt with the wrong tree (pin refreshed) :: code=IDENTITY
+PASS build receipt with the wrong binary sha256 (pin refreshed) :: code=IDENTITY
+PASS build receipt with the wrong binary path (pin refreshed) :: code=IDENTITY
+PASS altered tool pin refused :: code=TOOL_PIN
+PASS control: restored identity passes again
+PASS signature rejects caller argument binary_path
+PASS signature rejects caller argument binary_sha256
+PASS signature rejects caller argument roots
+PASS signature rejects caller argument evidence_root
+PASS signature rejects caller argument expected
+PASS signature rejects caller argument admission
+PASS signature rejects caller argument commands
+PASS L3 gate stops before ON: OFF zero global DC counters :: code=MANIPULATION
+PASS L3 no ON directory exists after the gate stop (noisy)
+PASS L3 gate stops before ON: OFF missing DC line :: code=MANIPULATION
+PASS L3 no ON directory exists after the gate stop (noisy)
+PASS L3 gate stops before ON: global-only OFF with local work :: code=MANIPULATION
+PASS L3 no ON directory exists after the gate stop (flat)
+PASS L3 gate: 3x3 OFF with local eligible 0 :: code=MANIPULATION
+PASS control: a clean OFF passes the gate
+PASS control: a normal pair admits
+PASS gate refuses the changed OFF runtime :: code=OFF_RAW
+PASS L2 self-consistent handwritten record with a changed OFF runtime is rejected by admit_pair :: code=OFF_RAW
+PASS L2 baseline byte changed after the gate :: code=BASELINE
+PASS L2 OFF STAR edited after the gate with a consistent receipt :: code=OFF_RAW
+PASS L1 per-case admit_pair then decide_pilot in the same decision directory succeeds
+PASS L1 both global-only comparator outputs are retained for zero :: ['run_1', 'run_2']
+PASS L1 both global-only comparator outputs are retained for flat :: ['run_1', 'run_2']
+PASS L1 one pair record per admit_pair call (8 + 8) :: 16
+PASS a repeated gate in the same decision directory is refused, not overwritten :: code=DECISION_DIR
+PASS cases parameter reordered :: code=CASES
+PASS unlisted extra case directory :: code=CASES
+PASS ON global runtime 1 ulp different :: code=GLOBAL_RUNTIME
+PASS OFF product differing from the retained baseline (comparator) :: code=COMPARATOR
+PASS witness spelling variant rejected :: code=WITNESS_VARIANT
+PASS control: a global-only pair admits with a whole-product comparator
+PASS dry run plans 16 launches and creates nothing
+PASS real launch refused without PARENT_RELEASE.json :: code=RELEASE
+PASS release file with a wrong release_module_sha256 :: code=RELEASE
+PASS release file with a wrong driver_sha256 :: code=RELEASE
+PASS release file with a wrong admission_sha256 :: code=RELEASE
+PASS release file with a wrong delta_review_report_sha256 :: code=RELEASE
+PASS release file with a wrong approved_by :: code=RELEASE
+PASS refusals launched nothing
+PASS full 8-case campaign with the fake child ends in the decision
+PASS ledger holds exactly 16 launches in the frozen order
+PASS only the case STAR and MRCS are staged (no truth/target)
+PASS guard receipt retained for every launch
+PASS receipt records the actual child (argv[0] is the pinned binary, exit 0, observed env)
+PASS a finished campaign is never restarted in place :: code=EXISTS
+PASS guard failure before the first launch :: code=GUARD
+PASS no run directory after a guard failure at validation
+PASS fake child exits 1 on the first OFF :: code=PRODUCER
+PASS fake child exits 1 on the first OFF [launches stop at 1, STOP recorded] :: launches=1 last={'event': 'STOP', 'code': 'PRODUCER', 'message': 'PRODUCER: exit 1 timed_out False for noisy/OFF', 'launches': 1, 'utc': '2026-10-26T22:23:57Z'}
+PASS fake child exits 1 on the first OFF [no ON run directory for noisy]
+PASS fake child exits 1 on the first OFF [no retry: a second run in place is refused] :: code=EXISTS
+PASS fake child times out :: code=PRODUCER
+PASS fake child times out [launches stop at 1, STOP recorded] :: launches=1 last={'event': 'STOP', 'code': 'PRODUCER', 'message': 'PRODUCER: exit -9 timed_out True for noisy/OFF', 'launches': 1, 'utc': '2026-10-26T22:23:58Z'}
+PASS fake child times out [no ON run directory for noisy]
+PASS fake child times out [no retry: a second run in place is refused] :: code=EXISTS
+PASS child leaves no runtime.json :: code=RUNTIME
+PASS child leaves no runtime.json [launches stop at 1, STOP recorded] :: launches=1 last={'event': 'STOP', 'code': 'RUNTIME', 'message': 'RUNTIME: runtime.json missing', 'launches': 1, 'utc': '2026-10-26T22:23:58Z'}
+PASS child leaves no runtime.json [no ON run directory for noisy]
+PASS child leaves no runtime.json [no retry: a second run in place is refused] :: code=EXISTS
+PASS child writes an unlisted extra output file :: code=INVENTORY
+PASS child writes an unlisted extra output file [launches stop at 1, STOP recorded] :: launches=1 last={'event': 'STOP', 'code': 'INVENTORY', 'message': 'INVENTORY: output names differ from the baseline names of the case', 'launches': 1, 'utc': '2026-10-26T22:23:59Z'}
+PASS child writes an unlisted extra output file [no ON run directory for noisy]
+PASS child writes an unlisted extra output file [no retry: a second run in place is refused] :: code=EXISTS
+PASS ON writes a wrong witness count :: code=WITNESS
+PASS ON writes a wrong witness count [launches stop at 2, STOP recorded] :: launches=2 last={'event': 'STOP', 'code': 'WITNESS', 'message': 'WITNESS: 8 witness lines, expected 9 for ON [3, 3]', 'launches': 2, 'utc': '2026-10-26T22:24:00Z'}
+PASS ON writes a wrong witness count [no retry: a second run in place is refused] :: code=EXISTS
+PASS OFF differs from the retained baseline: STOP before ON :: code=COMPARATOR
+PASS OFF differs from the retained baseline: STOP before ON [launches stop at 1, STOP recorded] :: launches=1 last={'event': 'STOP', 'code': 'COMPARATOR', 'message': 'COMPARATOR: comparator rc=1, json present=True', 'launches': 1, 'utc': '2026-10-26T22:24:00Z'}
+PASS OFF differs from the retained baseline: STOP before ON [no ON run directory for noisy]
+PASS OFF differs from the retained baseline: STOP before ON [no retry: a second run in place is refused] :: code=EXISTS
+PASS OFF with zero DC counters stops before ON (L3) :: code=MANIPULATION
+PASS OFF with zero DC counters stops before ON (L3) [launches stop at 1, STOP recorded] :: launches=1 last={'event': 'STOP', 'code': 'MANIPULATION', 'message': 'MANIPULATION: DC manipulation failed', 'launches': 1, 'utc': '2026-10-26T22:24:01Z'}
+PASS OFF with zero DC counters stops before ON (L3) [no ON run directory for noisy]
+PASS OFF with zero DC counters stops before ON (L3) [no retry: a second run in place is refused] :: code=EXISTS
+PASS guard failure before an ON launch :: code=GUARD
+PASS guard failure before an ON launch [launches stop at 1, STOP recorded] :: launches=1 last={'event': 'STOP', 'code': 'GUARD', 'message': 'GUARD: foreign compute before the ON launch (test)', 'launches': 1, 'utc': '2026-10-26T22:24:01Z'}
+PASS guard failure before an ON launch [no ON run directory for noisy]
+PASS guard failure before an ON launch [no retry: a second run in place is refused] :: code=EXISTS
+PASS evidence_root not empty at the start :: code=EXISTS
+PASS run directory already exists :: code=EXISTS
+PASS a truth file in the staged cwd is refused :: code=STAGING
+PASS fixture differing from its pin refuses the campaign :: code=FIXTURE
+PASS plan above the producer budget :: code=BUDGET
+PASS missing retained baseline refuses the campaign :: code=BASELINE
+PASS binary changed between the OFF and ON launches :: code=IDENTITY
+PASS binary changed between the OFF and ON launches [launches stop at 1, STOP recorded] :: launches=1 last={'event': 'STOP', 'code': 'IDENTITY', 'message': 'IDENTITY: candidate_binary on disk differs from its pin: /private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-lfw-v5-3ir09n2i/bin/motioncorr', 'launches': 1, 'utc': '2026-10-26T22:24:02Z'}
+PASS binary changed between the OFF and ON launches [no ON run directory for noisy]
+PASS binary changed between the OFF and ON launches [no retry: a second run in place is refused] :: code=IDENTITY
+PASS real guard refuses when the held-lease list is missing/different :: GUARD: held leases [] differ from the overlapping set ['/tmp/motioncorr-b2-cpu32-47.lock',
+PASS overlapping lock set always includes the bench and b2 locks
+PASS absent pre-ON record :: code=PRE_ON
+PASS tampered pre-ON record :: code=PRE_ON
+PASS pre-ON record status not PASS :: code=PRE_ON
+PASS control: the restored record admits
+TOTAL 120 FAILED 0

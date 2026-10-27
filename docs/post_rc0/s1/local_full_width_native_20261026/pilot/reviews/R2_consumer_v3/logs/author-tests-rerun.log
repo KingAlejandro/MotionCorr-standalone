@@ -1,0 +1,111 @@
+PASS positive admit noisy OFF :: witness_lines=0
+PASS positive admit noisy ON :: witness_lines=9
+PASS positive admit flat OFF :: witness_lines=0
+PASS positive admit flat ON :: witness_lines=0
+PASS positive score noisy OFF equals retained pair :: maxdiff_A=6.22e-15
+PASS positive score noisy ON equals retained pair :: maxdiff_A=6.22e-15
+PASS v3 commands equal v1 argv/cwd/env/inputs/witness
+PASS witness derivation: 9 on 3x3 ON, else 0
+PASS placeholder binary path refused :: code=PLACEHOLDER
+PASS bad binary sha refused :: code=BINARY
+PASS unresolved draft row not admissible :: code=PLACEHOLDER
+PASS draft row cannot be re-resolved twice :: code=PLACEHOLDER
+PASS missing arm :: code=ARM
+PASS ON receipt in OFF slot :: code=ARM
+PASS OFF receipt in ON slot :: code=ARM
+PASS swapped dirs: OFF slot holds ON :: code=ARM
+PASS swapped dirs: ON slot holds OFF :: code=ARM
+PASS run dir copied outside evidence_root/case/arm :: code=RUN_DIR
+PASS copied run dir with a self-consistent receipt :: code=RUN_DIR
+PASS receipt run_dir names another directory :: code=RUN_DIR
+PASS missing flag on ON :: code=FLAG_COUNT
+PASS flag on OFF :: code=FLAG_COUNT
+PASS duplicate flag on ON :: code=FLAG_COUNT
+PASS extra unknown argv :: code=ARGV
+PASS changed argv value :: code=ARGV
+PASS argv[0] left as placeholder :: code=ARGV
+PASS wrong binary sha in receipt :: code=BINARY
+PASS uppercase binary sha in receipt :: code=BINARY
+PASS cwd mismatch :: code=CWD
+PASS env value changed :: code=ENV
+PASS env var missing :: code=ENV
+PASS env var extra :: code=ENV
+PASS observed child env has extra OMP_PROC_BIND :: code=ENV_OBSERVED
+PASS observed child env value differs :: code=ENV_OBSERVED
+PASS exit 1 with a complete tap :: code=EXIT
+PASS exit True :: code=EXIT
+PASS exit "0" :: code=EXIT
+PASS case swapped in receipt :: code=CASE
+PASS receipt schema wrong :: code=SCHEMA
+PASS publication is a list :: code=SCHEMA
+PASS publication bytes is a string :: code=SCHEMA
+PASS runtime pin is not a dict :: code=SCHEMA
+PASS receipt carries NaN :: code=NONFINITE
+PASS extra file in staged cwd :: code=INPUT
+PASS missing staged movie :: code=INPUT
+PASS staged input byte tamper :: code=INPUT
+PASS witness x_norm 22 :: code=WITNESS
+PASS witness pnx 41 :: code=WITNESS
+PASS witness nfx 21 :: code=WITNESS
+PASS witness x_norm 42.0 text :: code=WITNESS
+PASS witness spaced variant :: code=WITNESS
+PASS witness no leading space :: code=WITNESS
+PASS 8 witness lines on 3x3 ON :: code=WITNESS
+PASS 10 witness lines on 3x3 ON :: code=WITNESS
+PASS 0 witness lines on 3x3 ON :: code=WITNESS
+PASS 1 witness line on global-only ON :: code=WITNESS
+PASS 1 witness line on global-only OFF :: code=WITNESS
+PASS 1 witness line on 3x3 OFF :: code=WITNESS
+PASS log of another case :: code=LOG_CASE
+PASS log is not utf-8 :: code=LOG_CASE
+PASS unlisted extra output file (receipt unchanged) :: code=INVENTORY
+PASS extra output file even when listed in the receipt :: code=INVENTORY
+PASS listed output file deleted :: code=INVENTORY
+PASS required output absent from disk and receipt :: code=INVENTORY
+PASS listed output byte changed :: code=PUBLICATION_HASH
+PASS symlink in output :: code=INVENTORY
+PASS publication path escapes output :: code=INVENTORY
+PASS runtime.json replaced by {} (receipt stale) :: code=RUNTIME
+PASS runtime.json tampered to another valid model (receipt stale) :: code=RUNTIME
+PASS runtime.json missing :: code=RUNTIME
+PASS runtime NaN with matching receipt hash :: code=NONFINITE
+PASS runtime 17 coefficients with matching receipt hash :: code=RUNTIME
+PASS runtime local_enabled integer with matching receipt hash :: code=RUNTIME
+PASS runtime 4 frames with matching receipt hash :: code=RUNTIME
+PASS runtime missing key with matching receipt hash :: code=RUNTIME
+PASS stdout.log tampered (receipt stale) :: code=STDOUT
+PASS stdout.log missing :: code=STDOUT
+PASS affine STAR in noisy run is receipt-consistent (admits)
+PASS affine STAR in noisy run refused at scoring :: code=STAR_CASE
+PASS truth file of another case name :: code=TRUTH
+PASS STAR file name of another case :: code=STAR_CASE
+PASS case absent from manifest :: code=CASE
+PASS manifest hash swap :: code=MANIFEST
+PASS in-bounds wrong ROI [0,96,0,128] :: code=ROI
+PASS control: v2 lowlevel accepts that wrong ROI (the gap field_metrics_bound closes)
+PASS control: ON-labelled receipt in OFF slot (v2 admits=True, v3 admits=False)
+PASS control: receipt without arm (v2 admits=True, v3 admits=False)
+PASS control: unlisted extra output (v2 admits=True, v3 admits=False)
+PASS control: runtime.json tamper (v2 admits=True, v3 admits=False)
+PASS lowlevel wrong truth sha rejected :: ValueError
+PASS lowlevel 17 coefficients rejected :: ValueError
+PASS lowlevel integer local_enabled rejected :: ValueError
+PASS lowlevel disabled with coefficients rejected :: ValueError
+PASS lowlevel 4-frame global rejected :: ValueError
+PASS lowlevel out-of-bounds ROI rejected :: ValueError
+PASS lowlevel positive control
+PASS retained pair noisy/UP_only reproduces :: maxdiff_A=6.22e-15
+PASS retained metadata-only fetch noisy/UP_only is not a complete producer :: code=SCHEMA
+PASS retained pair noisy/UP_B2 reproduces :: maxdiff_A=1.78e-15
+PASS retained metadata-only fetch noisy/UP_B2 is not a complete producer :: code=SCHEMA
+PASS retained pair affine/UP_only reproduces :: maxdiff_A=0
+PASS retained metadata-only fetch affine/UP_only is not a complete producer :: code=SCHEMA
+PASS retained pair affine/UP_B2 reproduces :: maxdiff_A=1.11e-16
+PASS retained metadata-only fetch affine/UP_B2 is not a complete producer :: code=SCHEMA
+PASS all admission tool pins verify
+PASS altered tool pin refused :: code=TOOL_PIN
+PASS admission v3 pins comparator, scorers, tests and all transitive generators
+PASS admission v3 stays HELD with final fields null
+PASS launch gate: ON only after OFF compat and source identity PASS
+TOTAL 109 FAILED 0
+$PY -B -I $P/tests/test_score_fields_v3.py $R/results/AUTHOR_TESTS_rerun.json  0.28s user 0.35s system 44% cpu 1.407 total

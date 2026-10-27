@@ -1,0 +1,543 @@
+{
+ "anchor_admission": {
+  "status": "KILLED",
+  "intended": [
+   "altered anchored admission file"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "altered anchored admission file refused"
+  ],
+  "exit": 1
+ },
+ "anchor_commands": {
+  "status": "KILLED",
+  "intended": [
+   "hand-edited commands"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "hand-edited commands (max_iter 9, OMP 8) refused by the anchor"
+  ],
+  "exit": 1
+ },
+ "held_gate": {
+  "status": "KILLED",
+  "intended": [
+   "real HELD admission cannot satisfy pre_ON_gate",
+   "null launch field",
+   "HELD status in an otherwise filled"
+  ],
+  "covered": [
+   true,
+   true,
+   true
+  ],
+  "failed_count": 12,
+  "failed_tests": [
+   "real HELD admission cannot satisfy pre_ON_gate",
+   "real HELD admission cannot satisfy admit_pair",
+   "real HELD admission cannot satisfy decide_pilot",
+   "HELD failure is retained as STOP.json",
+   "HELD status in an otherwise filled admission refused",
+   "null launch field candidate_binary refused",
+   "null launch field source_archive refused",
+   "null launch field compiler_and_config refused",
+   "null launch field shared_libraries refused",
+   "null launch field venue_identity refused",
+   "null launch field fresh_venue_resource_admission refused",
+   "null launch field independent_source_clearance refused"
+  ],
+  "exit": 1
+ },
+ "tool_pins": {
+  "status": "KILLED",
+  "intended": [
+   "tool pins verified before use"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "tool pins verified before use"
+  ],
+  "exit": 1
+ },
+ "decision_dir_overlap": {
+  "status": "KILLED",
+  "intended": [
+   "decision_dir inside a run directory"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "decision_dir inside a run directory refused"
+  ],
+  "exit": 1
+ },
+ "baseline_inventory": {
+  "status": "KILLED",
+  "intended": [
+   "baseline extra file",
+   "baseline file missing"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 2,
+  "failed_tests": [
+   "baseline extra file",
+   "baseline file missing"
+  ],
+  "exit": 1
+ },
+ "baseline_bytes": {
+  "status": "KILLED",
+  "intended": [
+   "baseline byte changed (pin kept)"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "baseline byte changed (pin kept)"
+  ],
+  "exit": 1
+ },
+ "baseline_symlink": {
+  "status": "KILLED",
+  "intended": [
+   "baseline file replaced by a symlink"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "baseline file replaced by a symlink"
+  ],
+  "exit": 1
+ },
+ "off_raw_runtime": {
+  "status": "KILLED",
+  "intended": [
+   "OFF runtime differs from the retained baseline bytes"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 2,
+  "failed_tests": [
+   "OFF runtime differs from the retained baseline bytes",
+   "OFF case STAR differs from the retained baseline bytes"
+  ],
+  "exit": 1
+ },
+ "comparator_verdict": {
+  "status": "SURVIVED",
+  "intended": [
+   "comparator detects MRC header",
+   "comparator detects MRC payload",
+   "comparator detects EPS",
+   "comparator detects corrected_micrographs STAR",
+   "comparator detects a file-inventory"
+  ],
+  "covered": [
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "failed_count": 0,
+  "failed_tests": [],
+  "exit": 0
+ },
+ "pre_on_binding": {
+  "status": "KILLED",
+  "intended": [
+   "tampered pre-ON record",
+   "record bound to a different OFF byte",
+   "retained comparator JSON altered",
+   "edited after the gate"
+  ],
+  "covered": [
+   true,
+   true,
+   true,
+   true
+  ],
+  "failed_count": 4,
+  "failed_tests": [
+   "tampered pre-ON record",
+   "record bound to a different OFF byte",
+   "retained comparator JSON altered after the gate",
+   "OFF zero global DC counters edited after the gate"
+  ],
+  "exit": 1
+ },
+ "pre_on_status": {
+  "status": "KILLED",
+  "intended": [
+   "pre-ON record status not PASS"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "pre-ON record status not PASS"
+  ],
+  "exit": 1
+ },
+ "pre_on_present": {
+  "status": "KILLED",
+  "intended": [
+   "absent pre-ON record"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 2,
+  "failed_tests": [
+   "ON cannot be paired without a passing record",
+   "absent pre-ON record"
+  ],
+  "exit": 1
+ },
+ "global_bits": {
+  "status": "KILLED",
+  "intended": [
+   "1 ulp"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "ON global runtime differs by 1 ulp"
+  ],
+  "exit": 1
+ },
+ "global_star": {
+  "status": "KILLED",
+  "intended": [
+   "serialised global STAR block"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "ON serialised global STAR block differs"
+  ],
+  "exit": 1
+ },
+ "dc_drift": {
+  "status": "SURVIVED",
+  "intended": [
+   "global DC counters drift between OFF and ON"
+  ],
+  "covered": [
+   false
+  ],
+  "failed_count": 0,
+  "failed_tests": [],
+  "exit": 0
+ },
+ "coupled_drift": {
+  "status": "KILLED",
+  "intended": [
+   "global coupled counters drift"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "global coupled counters drift"
+  ],
+  "exit": 1
+ },
+ "local3_eligible": {
+  "status": "KILLED",
+  "intended": [
+   "3x3 ON local eligible 0",
+   "3x3 OFF local eligible 0"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 2,
+  "failed_tests": [
+   "3x3 ON local eligible 0",
+   "3x3 OFF local eligible 0"
+  ],
+  "exit": 1
+ },
+ "global_only_local_work": {
+  "status": "KILLED",
+  "intended": [
+   "global-only ON has local DC/coupled work"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "global-only ON has local DC/coupled work"
+  ],
+  "exit": 1
+ },
+ "global_eligible_positive": {
+  "status": "SHADOWED_AS_DECLARED",
+  "intended": [],
+  "covered": [],
+  "failed_count": 0,
+  "failed_tests": [],
+  "exit": 0
+ },
+ "global_only_block": {
+  "status": "KILLED",
+  "intended": [
+   "global-only ON MRC payload",
+   "global-only ON MRC header",
+   "global-only ON EPS",
+   "global-only ON runtime bytes differ"
+  ],
+  "covered": [
+   true,
+   true,
+   true,
+   true
+  ],
+  "failed_count": 7,
+  "failed_tests": [
+   "positive admit_pair global-only incl. whole-product comparator",
+   "retained global-only comparator output is outside product dirs",
+   "global-only ON MRC payload differs (comparator)",
+   "global-only ON MRC header differs (comparator)",
+   "global-only ON EPS differs (comparator)",
+   "global-only ON runtime bytes differ",
+   "global-only ON case STAR bytes differ"
+  ],
+  "exit": 1
+ },
+ "pair_binary": {
+  "status": "SHADOWED_AS_DECLARED",
+  "intended": [],
+  "covered": [],
+  "failed_count": 0,
+  "failed_tests": [],
+  "exit": 0
+ },
+ "witness_variant": {
+  "status": "KILLED",
+  "intended": [
+   "witness variant (lowercase hyphenless)",
+   "ON witness variant spelling"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 5,
+  "failed_tests": [
+   "ON witness variant spelling",
+   "witness variant (lowercase hyphenless) rejected by the prescan",
+   "witness variant (underscored) rejected by the prescan",
+   "witness variant (title case) rejected by the prescan",
+   "witness variant (spaced) rejected by the prescan"
+  ],
+  "exit": 1
+ },
+ "cases_param": {
+  "status": "KILLED",
+  "intended": [
+   "cases parameter reordered",
+   "cases parameter with a duplicate",
+   "cases parameter missing a case"
+  ],
+  "covered": [
+   true,
+   true,
+   true
+  ],
+  "failed_count": 3,
+  "failed_tests": [
+   "cases parameter reordered",
+   "cases parameter with a duplicate",
+   "cases parameter missing a case"
+  ],
+  "exit": 1
+ },
+ "cases_present": {
+  "status": "SURVIVED",
+  "intended": [
+   "unlisted extra case directory",
+   "a case directory missing entirely"
+  ],
+  "covered": [
+   true,
+   false
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "unlisted extra case directory"
+  ],
+  "exit": 1
+ },
+ "pair_complete": {
+  "status": "KILLED",
+  "intended": [
+   "case without its ON directory"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "case without its ON directory"
+  ],
+  "exit": 1
+ },
+ "p2_strict": {
+  "status": "KILLED",
+  "intended": [
+   "P2 fails on a tie"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 4,
+  "failed_tests": [
+   "decision: P2 fails on a tie in rms (strict improvement required)",
+   "decision: P2 fails on a tie in p95 (strict improvement required)",
+   "decision: P2 fails on a tie in max (strict improvement required)",
+   "real data: the tiny coefficient change does not improve every metric, so P2 fails (no vacuous PASS)"
+  ],
+  "exit": 1
+ },
+ "increases": {
+  "status": "KILLED",
+  "intended": [
+   "PASS->PASS increase is listed",
+   "P1 loss is listed"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 2,
+  "failed_tests": [
+   "decision: the P1 loss is listed as a PASS->FAIL increase",
+   "decision: PASS->PASS increase is listed and P1 still holds"
+  ],
+  "exit": 1
+ },
+ "p1": {
+  "status": "KILLED",
+  "intended": [
+   "P1 lost on one case"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "decision: P1 lost on one case/field (fractional STAR rms .21)"
+  ],
+  "exit": 1
+ },
+ "prediction": {
+  "status": "KILLED",
+  "intended": [
+   "P1 lost on one case",
+   "P2 fails on a single regressed"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 5,
+  "failed_tests": [
+   "decision: P1 lost on one case/field (fractional STAR rms .21)",
+   "decision: P2 fails on a single regressed rms (runtime only)",
+   "decision: P2 fails on a single regressed p95 (runtime only)",
+   "decision: P2 fails on a single regressed max (runtime only)",
+   "real data: the tiny coefficient change does not improve every metric, so P2 fails (no vacuous PASS)"
+  ],
+  "exit": 1
+ },
+ "raw_gate": {
+  "status": "KILLED",
+  "intended": [
+   "improving P2 leaves the noisy raw gate FAIL"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "decision: improving P2 leaves the noisy raw gate FAIL"
+  ],
+  "exit": 1
+ },
+ "v3_names_guard": {
+  "status": "KILLED",
+  "intended": [
+   "T1 extra staged file",
+   "T1 missing staged movie"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 2,
+  "failed_tests": [
+   "T1 extra staged file with a matching fixture pin",
+   "T1 missing staged movie, remaining pins match"
+  ],
+  "exit": 1
+ },
+ "v3_symlink_guard": {
+  "status": "KILLED",
+  "intended": [
+   "T3 real symlink"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "T3 real symlink in output with a self-consistent receipt"
+  ],
+  "exit": 1
+ },
+ "v3_finite_guard": {
+  "status": "KILLED",
+  "intended": [
+   "T2 runtime overflow"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "T2 runtime overflow literal 1e400 with a matching receipt hash"
+  ],
+  "exit": 1
+ }
+}

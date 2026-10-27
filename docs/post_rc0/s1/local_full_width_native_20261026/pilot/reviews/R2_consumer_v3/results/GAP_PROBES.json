@@ -1,0 +1,91 @@
+[
+ {
+  "probe": "P1 forged: 3x3 ON products in OFF slot, receipt rewritten",
+  "predicted": "REJECTED:WITNESS",
+  "observed": "REJECTED:WITNESS",
+  "as_predicted": true,
+  "note": "product witness is the only check independent of the self-reported receipt"
+ },
+ {
+  "probe": "P2 forged: 3x3 OFF products in ON slot, receipt rewritten",
+  "predicted": "REJECTED:WITNESS",
+  "observed": "REJECTED:WITNESS",
+  "as_predicted": true,
+  "note": ""
+ },
+ {
+  "probe": "P3 forged: global-only ON products in OFF slot",
+  "predicted": "ADMITTED",
+  "observed": "ADMITTED",
+  "as_predicted": true,
+  "note": "honest limit: global-only arms have no product-level arm witness"
+ },
+ {
+  "probe": "P4 OFF log with marker-variant line (no hyphen)",
+  "predicted": "ADMITTED",
+  "observed": "ADMITTED",
+  "as_predicted": true,
+  "note": "WITNESS_MARKER substring match; a variant spelling is neither counted nor rejected"
+ },
+ {
+  "probe": "P5 OFF log with lower-case witness line",
+  "predicted": "ADMITTED",
+  "observed": "ADMITTED",
+  "as_predicted": true,
+  "note": "case-sensitive marker"
+ },
+ {
+  "probe": "P6 noisy ON, 0 witnesses, caller expected patch_grid [1,1]",
+  "predicted": "ADMITTED",
+  "observed": "ADMITTED",
+  "as_predicted": true,
+  "note": "admit_producer does not re-derive patch_grid from admission rows; resolve_expected_row would refuse"
+ },
+ {
+  "probe": "P6b same run with resolved expected",
+  "predicted": "REJECTED:WITNESS",
+  "observed": "REJECTED:WITNESS",
+  "as_predicted": true,
+  "note": "control"
+ },
+ {
+  "probe": "P7 altered COMMANDS (max_iter 9, OMP 8), receipt matches it",
+  "predicted": "ADMITTED",
+  "observed": "ADMITTED",
+  "as_predicted": true,
+  "note": "no COMMANDS_DRAFT_v3 hash or regeneration check in resolve_expected_row/admit_producer"
+ },
+ {
+  "probe": "P8 OFF binary ab.., ON binary cd..: both admit",
+  "predicted": "ADMITTED/ADMITTED",
+  "observed": "ADMITTED/ADMITTED",
+  "as_predicted": true,
+  "note": "no pair-level same-binary check exists"
+ },
+ {
+  "probe": "P9 extra files in run_dir outside output/ and input/",
+  "predicted": "ADMITTED",
+  "observed": "ADMITTED",
+  "as_predicted": true,
+  "note": "stderr is neither required nor bound; run_dir top level is not inventoried"
+ },
+ {
+  "probe": "P10 output symlink listed in receipt with target hash",
+  "predicted": "REJECTED:INVENTORY",
+  "observed": "REJECTED:INVENTORY",
+  "as_predicted": true,
+  "note": ""
+ },
+ {
+  "probe": "P11 canonical slot is a symlink to a tree elsewhere",
+  "predicted": "REJECTED:RUN_DIR",
+  "observed": "REJECTED:RUN_DIR",
+  "as_predicted": true,
+  "note": "receipt run_dir was written for the canonical path; resolve() follows the link"
+ },
+ {
+  "probe": "P12 WITNESS_LINE constant",
+  "observed": " EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22",
+  "as_predicted": true
+ }
+]

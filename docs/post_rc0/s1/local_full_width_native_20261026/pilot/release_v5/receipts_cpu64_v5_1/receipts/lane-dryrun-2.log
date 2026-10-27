@@ -1,0 +1,45 @@
+{"utc": "2026-10-26T22:49:06Z", "locks": ["/tmp/motioncorr-b2-cpu32-47.lock", "/tmp/motioncorr-cpu64-bench.lock", "/tmp/motioncorr-damping-cpu32-47.lock", "/tmp/motioncorr-dc-oracle-cpu-32-39.lock", "/tmp/motioncorr-dc-oracle-cpu-40-47.lock", "/tmp/motioncorr-dc-tierc-cpu32-47.lock", "/tmp/motioncorr-w6-cpu40-47.lock", "/tmp/motioncorr-w7-cpu40-47.lock"], "cpus": "32-47", "command": ["bash", "/tmp/motioncorr-lfw-v5-20261026/dry_run_v5_1.sh"]}
+Mon Oct 26 22:49:06 UTC 2026
+ 22:49:06 up 328 days, 12:46, 27 users,  load average: 0.09, 0.11, 0.14
+               total        used        free      shared  buff/cache   available
+Mem:           226Gi        50Gi        95Gi        38Gi       121Gi       176Gi
+Swap:             0B          0B          0B
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda1       1.3T  1.2T   81G  94% /
+    PID PSR %CPU COMMAND
+3637071  24 50.0 python3 /tmp/motioncorr-lfw-v5-20261026/lane.py bash /tmp/motioncorr-lfw-v5-20261026/dry_run_v5_1.sh
+3637016  13  2.0 sshd: ubuntu [priv]
+2722253  45  1.0 node /usr/local/bin/t3 serve --host 127.0.0.1 --port 3773 --base-dir /home/ubuntu/.t3
+1735907  44  0.7 /usr/sbin/rsyslogd -n -iNONE
+1388940   5  0.2 /tmp/doppio-theme-plan-20261022/env/bin/python -m src.main --project /tmp/doppio-theme-plan-20261022/project --yes --no-browser
+1777319   4  0.1 /var/ossec/bin/wazuh-syscheckd
+1389370  11  0.1 /tmp/doppio-theme-plan-20261022/linux/doppio-desktop --type=renderer --enable-crash-reporter=db116e94-edda-4c81-a690-03c15d31e0c7,no_channel --user-data-dir=/tmp/doppio-theme-plan-20261022/linux-home/app-data/ccpem/doppio/electron --app-path=/tmp/doppio-theme-plan-20261022/linux/resources/app.asar --enable-sandbox --no-sandbox --remote-debugging-port=0 --disable-gpu-compositing --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=7 --time-ticks-at-unix-epoch=-1764669737454008 --launch-time-ticks=27994606515342 --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,15032944969892776518,6678877359785616269,262144 --disable-features=SpareRendererForSitePerProcess --variations-seed-version --doppio-theme-mode=dark
+ 292988  53  0.1 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+3164981   3  0.1 /home/lzi33989/.t3/runtime/versions/0.1.1-nightly.20261019.3348/t3 serve --host 127.0.0.1 --port 3780
+3300564  12  0.1 /usr/bin/containerd
+3601652  31  0.1 /home/nicholls/.vscode-server/extensions/anthropic.claude-code-2.1.310-linux-x64/resources/native-binary/claude --output-format stream-json --verbose --input-format stream-json --max-thinking-tokens=31999 --permission-prompt-tool=stdio --resume=79a648ca-1077-4899-824d-c183e63f8238 --setting-sources=user,project,local --permission-mode=auto --debug --debug-to-stderr --enable-auth-status --no-chrome --replay-user-messages
+=== BEFORE 2026-10-26T22:49:06Z
+ 22:49:06 up 328 days, 12:46, 27 users,  load average: 0.09, 0.11, 0.14
+               total        used        free      shared  buff/cache   available
+Mem:          231701       51257       98156       39535      123929      180443
+/dev/vda1       1.3T  1.2T   81G  94% /
+pid 3637079's current affinity list: 32-47
+held=["/tmp/motioncorr-b2-cpu32-47.lock", "/tmp/motioncorr-cpu64-bench.lock", "/tmp/motioncorr-damping-cpu32-47.lock", "/tmp/motioncorr-dc-oracle-cpu-32-39.lock", "/tmp/motioncorr-dc-oracle-cpu-40-47.lock", "/tmp/motioncorr-dc-tierc-cpu32-47.lock", "/tmp/motioncorr-w6-cpu40-47.lock", "/tmp/motioncorr-w7-cpu40-47.lock"]
+dryrun_rc=0
+=== AFTER 2026-10-26T22:49:09Z
+ 22:49:09 up 328 days, 12:46, 27 users,  load average: 0.16, 0.13, 0.14
+archive
+build
+build_and_check.sh
+ctest_attempt2.sh
+ctest_attempt3.sh
+dry_run_v5.sh
+dry_run_v5_1.sh
+lane.py
+pilot
+pilot_v5_1
+receipts
+source
+v51_linux_tests.sh
+v51_scratch
+ls: cannot access '/tmp/motioncorr-lfw-v5-20261026/evidence': No such file or directory

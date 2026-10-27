@@ -1,0 +1,22 @@
+# B2 cross-feed offline screen: result (status NOT_A_CANDIDATE; never an acceptance)
+
+Offline counterfactual only; native fields are measured controls, offline fields are counterfactual. No native run, source/CMake/binary/gate/ROI/gauge change, no movie or pixel processing, no search. Frozen first: `PLAN.md` df804f52..., `PINS.json` 18841057... (see `FREEZE.txt`); stage 1 sealed 2026-10-27T00:04:11Z (`out/stage1_seal.json`) before truth loaded.
+
+## Headline
+**B2 + full-width does not meet the unchanged field contract for the noisy case**: R-rt 0.8249 / 1.6520 / 3.2167 A (limits .20 / .40 / .80), R-hyb identical to four digits; FAIL on all three limits on both fields. The five retained passes (affine, pedestal, zero, integer, fractional) are retained
+(B2 + full-width affine 0.0654 / 0.1409 / 0.3307, pedestal 0.0654 / 0.1408 / 0.3309; zero, integer, fractional unchanged because no local observation exists). Primary criterion (all six identifiable cases pass both fields): **not met**, so **NOT_A_CANDIDATE**; no automatic native run. flat and repeated stay UNIDENTIFIABLE with unchanged raw distances (rms 2.1044 and 9.0126 A).
+Directional diagnostic: noisy B2 + full-width improves every metric over the measured native legacy full-width field (runtime 1.0954 -> 0.8249, 2.2402 -> 1.6520, 4.4692 -> 3.2167; STAR field likewise), still far above the limits. Increases (all cases, both fields, vs native ON and OFF, PASS->PASS included): 4, all max-metric PASS->PASS: affine R-rt/R-hyb 0.3295 -> 0.3307 A, pedestal 0.3302 -> 0.3309 A (versus native ON; none versus native OFF). No margin-sensitive B2 + full-width comparison.
+
+## Old harm control (mandatory, reproduced, not hidden)
+B2 on the old-weight (OFF) observations, R-rt: noisy 1.9026 / 4.2003 / 9.2948 A, all limits FAIL, vs the retained native UP+B2 1.9026 / 4.2003 / 9.2948 (abs diff <= 5.5e-6 A) and vs UP_only 1.6454 / 3.3373 / 7.2840: the old UP+B2 harm reproduces. Affine control 0.1152 / 0.2570 / 0.5160 A (PASS), difference <= 7.7e-6 A. The B2 field projection vs the retained native UP_B2 runtime coefficients differs by <= 1.3e-5 px (ceiling 0.01313142874082845 px). The historical standalone B2 noise harm (2.342955 -> 3.587250 A) is a different configuration and is untouched.
+
+## Stage-1 controls (sealed, `RESULT_TABLES.md`)
+Staged root held only runtime.json and STAR files (40; no truth, metrics or NPY); the audit hook logged 40 staged opens, 6 pinned-source opens, 104 interpreter/NumPy opens and no other or forbidden path; no truth/generator/evaluator module loaded. Bundle OFF STAR/runtime are byte-equal to the retained UP_only ones (noisy, affine) and the UP_only and UP_B2 observation blocks are identical.
+Six local sets (noisy 8 patches, affine and pedestal 9; old-weight OFF and full-width ON): every patch has frames 1-5, spatial rank 6, 5 distinct times, rank 18 (legacy) and 18 + n_patch (B1, B2, C) in full; raw condition (B2) 5.0e3 (noisy), 4.3e3 (affine, pedestal), scaled 320 / 294; B1 and C vs B2 <= 2.8e-13 px (bound 1e-9); h(0) exactly 0; legacy replay vs native runtime coefficients <= 7.9e-6 px (ceiling 0.01313142874082845 px, not changed). The five local-disabled cases have zero coefficients and no observations; nothing was synthesized.
+
+## Not established
+A genuine refit STAR write/read-back, a native compound run and any applied-image or real-data accuracy are UNRUN. R-hyb is a hybrid (STAR read-back G + full-precision coefficients), not a serialised refit. One exposed noisy realization: no independence, p-value or generalization claim; offsets or truth-origin correlations are not causal proof. No floor subtraction, scalar-capacity substitution or percentile minima.
+Per the plan this compound item stops here; no new fit, tolerance or arm was tried. The parent reviews before any further native decision.
+
+## Runtime, resources, module identity
+CPython 3.13.7, NumPy 2.4.2, one numeric thread (OMP/OPENBLAS/MKL/VECLIB = 1); stage 1 about 0.3 s wall, stage 2 about 1.1 s; scratch about 2 MB under /tmp/mc-lfw-b2-crossfeed-20261026-r1 (preflight: 28 GB free, load 5.6 with other users' work; no ps/lock use). Peak RSS not measured. Pinned: w8_fit `e4000d87...`, w8_refit `d3088ae1...`, w8_gate `601c2806...` (git 0b3478b5, equal to the durable authority copy), score_fields_v3 `bd685429...`; bundle manifest `49698c7c...` (258 listed + 3 addendum files verified); full table in `PINS.json`. Failures: `ATTEMPTS.md`.

@@ -1,0 +1,367 @@
+{
+ "audit_argv": {
+  "status": "KILLED",
+  "groups": [
+   "audit"
+  ],
+  "intended": [
+   "names another case (basename)",
+   "differs in the last character",
+   "by one digit",
+   "no --o value pair",
+   "has a second --o"
+  ],
+  "covered": [
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "failed_count": 5,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "baseline RUN.json --o names another case (basename)",
+   "baseline RUN.json --o differs in the last character",
+   "baseline RUN.json --o differs by one digit in a path component (numeric)",
+   "baseline RUN.json has no --o value pair",
+   "baseline RUN.json has a second --o"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "audit again\nPASS corrected_micrographs.star embeds an extra root :: code=ROOT_AUDIT\nPASS corrected_micrographs.star embeds a different root only :: code=ROOT_AUDIT\nPASS r1 failure mode (durable-style path over original-root files) is now a loud ROOT_AUDIT :: code=ROOT_AUDIT\nPASS control: a changed MRC payload is still detected by the comparator after the audit :: code=COMPARATOR\nTOTAL 11 FAILED 5\n"
+ },
+ "audit_embedded": {
+  "status": "KILLED",
+  "groups": [
+   "audit"
+  ],
+  "intended": [
+   "embeds an extra root",
+   "embeds a different root only"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 2,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "corrected_micrographs.star embeds an extra root",
+   "corrected_micrographs.star embeds a different root only"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "rographs.star embeds an extra root :: ACCEPTED but wanted ROOT_AUDIT\nFAIL corrected_micrographs.star embeds a different root only :: ACCEPTED but wanted ROOT_AUDIT\nPASS r1 failure mode (durable-style path over original-root files) is now a loud ROOT_AUDIT :: code=ROOT_AUDIT\nPASS control: a changed MRC payload is still detected by the comparator after the audit :: code=COMPARATOR\nTOTAL 11 FAILED 2\n"
+ },
+ "audit_called": {
+  "status": "KILLED",
+  "groups": [
+   "audit"
+  ],
+  "intended": [
+   "extra root",
+   "different root only",
+   "r1 failure mode"
+  ],
+  "covered": [
+   true,
+   true,
+   true
+  ],
+  "failed_count": 8,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "baseline RUN.json --o names another case (basename)",
+   "baseline RUN.json --o differs in the last character",
+   "baseline RUN.json --o differs by one digit in a path component (numeric)",
+   "baseline RUN.json has no --o value pair",
+   "baseline RUN.json has a second --o",
+   "corrected_micrographs.star embeds an extra root",
+   "corrected_micrographs.star embeds a different root only",
+   "r1 failure mode (durable-style path over original-root files) is now a loud ROOT_AUDIT"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "ure mode (durable-style path over original-root files) is now a loud ROOT_AUDIT :: wanted ROOT_AUDIT got DECISION_DIR: DECISION_DIR: retained comparator output already exists: /private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-lfw-v52-ieus956i/decision/pre_on/noisy\nPASS control: a changed MRC payload is still detected by the comparator after the audit :: code=COMPARATOR\nTOTAL 11 FAILED 8\n"
+ },
+ "audit_path_shape": {
+  "status": "SHADOWED_AS_DECLARED",
+  "groups": [
+   "audit"
+  ],
+  "intended": [],
+  "covered": [],
+  "failed_count": 0,
+  "crashed_or_hung": false,
+  "failed_tests": [],
+  "exit": 0,
+  "stderr_tail": "",
+  "stdout_tail": "audit again\nPASS corrected_micrographs.star embeds an extra root :: code=ROOT_AUDIT\nPASS corrected_micrographs.star embeds a different root only :: code=ROOT_AUDIT\nPASS r1 failure mode (durable-style path over original-root files) is now a loud ROOT_AUDIT :: code=ROOT_AUDIT\nPASS control: a changed MRC payload is still detected by the comparator after the audit :: code=COMPARATOR\nTOTAL 11 FAILED 0\n"
+ },
+ "reuse_arm": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "reuse naming another arm is refused"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 4,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "reuse naming another case is refused",
+   "reuse naming another case is refused [no producer launched]",
+   "reuse naming another arm is refused",
+   "reuse naming another arm is refused [no producer launched]"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "=RELEASE\nPASS release naming the old v5.1 driver [no producer launched]\nPASS release without any file :: code=RELEASE\nPASS release without any file [no producer launched]\nPASS release commands hash wrong :: code=RELEASE\nPASS release commands hash wrong [no producer launched]\nPASS decision directory not fresh :: code=EXISTS\nPASS decision directory not fresh [no producer launched]\nTOTAL 36 FAILED 4\n"
+ },
+ "reuse_listing": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "another case directory",
+   "an existing ON",
+   "a stray file in evidence_root"
+  ],
+  "covered": [
+   true,
+   true,
+   true
+  ],
+  "failed_count": 5,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "unexpected existing row: another case directory",
+   "unexpected existing row: another case directory [no producer launched]",
+   "unexpected existing row: an existing ON",
+   "unexpected existing row: a stray file in evidence_root",
+   "unexpected existing row: a stray file in evidence_root [no producer launched]"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "=RELEASE\nPASS release naming the old v5.1 driver [no producer launched]\nPASS release without any file :: code=RELEASE\nPASS release without any file [no producer launched]\nPASS release commands hash wrong :: code=RELEASE\nPASS release commands hash wrong [no producer launched]\nPASS decision directory not fresh :: code=EXISTS\nPASS decision directory not fresh [no producer launched]\nTOTAL 36 FAILED 5\n"
+ },
+ "reuse_inventory": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "one output byte",
+   "an extra file"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 3,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "changed first OFF: one output byte",
+   "changed first OFF: an extra file",
+   "changed first OFF: an extra file [no producer launched]"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "=RELEASE\nPASS release naming the old v5.1 driver [no producer launched]\nPASS release without any file :: code=RELEASE\nPASS release without any file [no producer launched]\nPASS release commands hash wrong :: code=RELEASE\nPASS release commands hash wrong [no producer launched]\nPASS decision directory not fresh :: code=EXISTS\nPASS decision directory not fresh [no producer launched]\nTOTAL 36 FAILED 3\n"
+ },
+ "reuse_run_hash": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "admission reuse hash wrong"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 2,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "admission reuse hash wrong",
+   "admission reuse hash wrong [no producer launched]"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "=RELEASE\nPASS release naming the old v5.1 driver [no producer launched]\nPASS release without any file :: code=RELEASE\nPASS release without any file [no producer launched]\nPASS release commands hash wrong :: code=RELEASE\nPASS release commands hash wrong [no producer launched]\nPASS decision directory not fresh :: code=EXISTS\nPASS decision directory not fresh [no producer launched]\nTOTAL 36 FAILED 2\n"
+ },
+ "reuse_r1_records": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "r1 ledger changed",
+   "r1 STOP changed"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 4,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "r1 ledger changed",
+   "r1 ledger changed [no producer launched]",
+   "r1 STOP changed",
+   "r1 STOP changed [no producer launched]"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "=RELEASE\nPASS release naming the old v5.1 driver [no producer launched]\nPASS release without any file :: code=RELEASE\nPASS release without any file [no producer launched]\nPASS release commands hash wrong :: code=RELEASE\nPASS release commands hash wrong [no producer launched]\nPASS decision directory not fresh :: code=EXISTS\nPASS decision directory not fresh [no producer launched]\nTOTAL 36 FAILED 4\n"
+ },
+ "budget_arithmetic": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "plan plus the reused OFF is not the budget"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 2,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "plan plus the reused OFF is not the budget",
+   "plan plus the reused OFF is not the budget [no producer launched]"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "=RELEASE\nPASS release naming the old v5.1 driver [no producer launched]\nPASS release without any file :: code=RELEASE\nPASS release without any file [no producer launched]\nPASS release commands hash wrong :: code=RELEASE\nPASS release commands hash wrong [no producer launched]\nPASS decision directory not fresh :: code=EXISTS\nPASS decision directory not fresh [no producer launched]\nTOTAL 36 FAILED 2\n"
+ },
+ "release_reused_hash": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "release without the reused-OFF hash"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 2,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "release without the reused-OFF hash",
+   "release without the reused-OFF hash [no producer launched]"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "=RELEASE\nPASS release naming the old v5.1 driver [no producer launched]\nPASS release without any file :: code=RELEASE\nPASS release without any file [no producer launched]\nPASS release commands hash wrong :: code=RELEASE\nPASS release commands hash wrong [no producer launched]\nPASS decision directory not fresh :: code=EXISTS\nPASS decision directory not fresh [no producer launched]\nTOTAL 36 FAILED 2\n"
+ },
+ "release_commands": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "release commands hash wrong"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 2,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "release commands hash wrong",
+   "release commands hash wrong [no producer launched]"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "launched]\nFAIL release commands hash wrong :: wrong exception FileNotFoundError: [Errno 2] No such file or directory: '/private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-lfw-v52-tqrsqje4/fixtures/MANIFEST.json'\nFAIL release commands hash wrong [no producer launched]\nPASS decision directory not fresh :: code=EXISTS\nPASS decision directory not fresh [no producer launched]\nTOTAL 36 FAILED 2\n"
+ },
+ "ledger_fresh": {
+  "status": "KILLED",
+  "groups": [
+   "refusals"
+  ],
+  "intended": [
+   "decision directory not fresh"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 2,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "decision directory not fresh",
+   "decision directory not fresh [no producer launched]"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "aunched]\nPASS release commands hash wrong :: code=RELEASE\nPASS release commands hash wrong [no producer launched]\nFAIL decision directory not fresh :: wrong exception FileNotFoundError: [Errno 2] No such file or directory: '/private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-lfw-v52-ykgar3f7/fixtures/MANIFEST.json'\nFAIL decision directory not fresh [no producer launched]\nTOTAL 36 FAILED 2\n"
+ },
+ "reused_event": {
+  "status": "KILLED",
+  "groups": [
+   "happy"
+  ],
+  "intended": [
+   "explicit REUSED event"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "the new ledger starts with the explicit REUSED event (before 1, remaining 15, ceiling 16)"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "fore 1, remaining 15, ceiling 16)\nPASS noisy/OFF is never launched again and the order is noisy ON then the 7 cases OFF/ON\nPASS the reused OFF RUN.json and the r1 ledger/STOP are unchanged after the run\nPASS pre-ON record for the reused OFF exists in the NEW decision directory (re-evaluated from saved outputs)\nPASS a finished continuation is not restartable in place :: code=REUSE\nTOTAL 7 FAILED 1\n"
+ },
+ "pre_on_reused": {
+  "status": "KILLED",
+  "groups": [
+   "happy"
+  ],
+  "intended": [
+   "INFRA fault in g_happy"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "INFRA fault in g_happy"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "PASS dry run validates, plans 15 launches (noisy ON first) and creates nothing\nFAIL INFRA fault in g_happy :: pair_decision_v5_2.PairError: PRE_ON: pre-ON record absent for noisy\nTOTAL 2 FAILED 1\n"
+ },
+ "plan_noisy_on_first": {
+  "status": "KILLED",
+  "groups": [
+   "happy"
+  ],
+  "intended": [
+   "INFRA fault in g_happy"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "INFRA fault in g_happy"
+  ],
+  "exit": 1,
+  "stderr_tail": "",
+  "stdout_tail": "FAIL INFRA fault in g_happy :: driver_v5_2.DriverStop: BUDGET: plan 16 + reused 1 must equal the global budget 16\nTOTAL 1 FAILED 1\n"
+ }
+}

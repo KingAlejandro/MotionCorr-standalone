@@ -1,0 +1,33 @@
+PASS 32 checks
+ - positive: all witnesses and coverage pass
+ - real old-weight capture (schema /1, other coordinates) is refused
+ - W1 schema /1
+ - W1 mode Legacy
+ - W1 weight flag false
+ - W1 coords legacy
+ - W1 coords swapped
+ - W1 truth input true
+ - W1 extra patch directory
+ - W1 patch.json without mode
+ - W1 wrong extents
+ - W2 weight_x_norm 22
+ - W2 weight_x_norm missing
+ - W2 weight_x_norm 41
+ - W2 scaled_B differs
+ - W3 inherited (x_norm 22) map in the weights file
+ - W3 one flipped bit
+ - W3 wrong dtype metadata
+ - W3 truncated weights
+ - W3 oracle that cannot discriminate
+ - W4 old-weight native log (0 witness lines)
+ - W4 one witness line removed
+ - W4 one line with x_norm 22
+ - W4 extra witness line
+ - W4 witness not directly after its header
+ - W4 header of a selected patch renamed
+ - coverage missing real map
+ - coverage extra file
+ - coverage iteration count mismatch
+ - coverage patch-files.json short
+ - coverage COMPLETE.json missing
+ - coverage peak identity

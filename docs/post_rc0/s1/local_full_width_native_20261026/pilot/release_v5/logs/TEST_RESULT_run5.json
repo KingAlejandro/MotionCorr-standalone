@@ -1,0 +1,606 @@
+{
+ "total": 120,
+ "failed": 0,
+ "results": [
+  {
+   "name": "control: the test admission passes identity, pins and resolved commands",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "null candidate_binary refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null source_archive refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null build_receipt refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null compiler_and_config refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null shared_libraries refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null venue_identity refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null fresh_venue_resource_admission refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null independent_source_clearance refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "HELD status refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "altered anchored admission refused",
+   "ok": true,
+   "detail": "code=ANCHOR"
+  },
+  {
+   "name": "hand-edited commands refused by the anchor",
+   "ok": true,
+   "detail": "code=ANCHOR"
+  },
+  {
+   "name": "resolved command row differs from the frozen admission",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "binary on disk differs from candidate_binary.sha256",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "binary path differs from the build receipt (same bytes)",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "binary given as a symlink",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "source archive changed after the pin",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "candidate_source_commit differs from source_archive.commit",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "build receipt changed after the pin",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "build receipt with the wrong archive sha256 (pin refreshed)",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "build receipt with the wrong commit (pin refreshed)",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "build receipt with the wrong tree (pin refreshed)",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "build receipt with the wrong binary sha256 (pin refreshed)",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "build receipt with the wrong binary path (pin refreshed)",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "altered tool pin refused",
+   "ok": true,
+   "detail": "code=TOOL_PIN"
+  },
+  {
+   "name": "control: restored identity passes again",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument binary_path",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument binary_sha256",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument roots",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument evidence_root",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument expected",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument admission",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument commands",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "L3 gate stops before ON: OFF zero global DC counters",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "L3 no ON directory exists after the gate stop (noisy)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "L3 gate stops before ON: OFF missing DC line",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "L3 no ON directory exists after the gate stop (noisy)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "L3 gate stops before ON: global-only OFF with local work",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "L3 no ON directory exists after the gate stop (flat)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "L3 gate: 3x3 OFF with local eligible 0",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "control: a clean OFF passes the gate",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "control: a normal pair admits",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "gate refuses the changed OFF runtime",
+   "ok": true,
+   "detail": "code=OFF_RAW"
+  },
+  {
+   "name": "L2 self-consistent handwritten record with a changed OFF runtime is rejected by admit_pair",
+   "ok": true,
+   "detail": "code=OFF_RAW"
+  },
+  {
+   "name": "L2 baseline byte changed after the gate",
+   "ok": true,
+   "detail": "code=BASELINE"
+  },
+  {
+   "name": "L2 OFF STAR edited after the gate with a consistent receipt",
+   "ok": true,
+   "detail": "code=OFF_RAW"
+  },
+  {
+   "name": "L1 per-case admit_pair then decide_pilot in the same decision directory succeeds",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "L1 both global-only comparator outputs are retained for zero",
+   "ok": true,
+   "detail": "['run_1', 'run_2']"
+  },
+  {
+   "name": "L1 both global-only comparator outputs are retained for flat",
+   "ok": true,
+   "detail": "['run_1', 'run_2']"
+  },
+  {
+   "name": "L1 one pair record per admit_pair call (8 + 8)",
+   "ok": true,
+   "detail": "16"
+  },
+  {
+   "name": "a repeated gate in the same decision directory is refused, not overwritten",
+   "ok": true,
+   "detail": "code=DECISION_DIR"
+  },
+  {
+   "name": "cases parameter reordered",
+   "ok": true,
+   "detail": "code=CASES"
+  },
+  {
+   "name": "unlisted extra case directory",
+   "ok": true,
+   "detail": "code=CASES"
+  },
+  {
+   "name": "ON global runtime 1 ulp different",
+   "ok": true,
+   "detail": "code=GLOBAL_RUNTIME"
+  },
+  {
+   "name": "OFF product differing from the retained baseline (comparator)",
+   "ok": true,
+   "detail": "code=COMPARATOR"
+  },
+  {
+   "name": "witness spelling variant rejected",
+   "ok": true,
+   "detail": "code=WITNESS_VARIANT"
+  },
+  {
+   "name": "control: a global-only pair admits with a whole-product comparator",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "dry run plans 16 launches and creates nothing",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "real launch refused without PARENT_RELEASE.json",
+   "ok": true,
+   "detail": "code=RELEASE"
+  },
+  {
+   "name": "release file with a wrong release_module_sha256",
+   "ok": true,
+   "detail": "code=RELEASE"
+  },
+  {
+   "name": "release file with a wrong driver_sha256",
+   "ok": true,
+   "detail": "code=RELEASE"
+  },
+  {
+   "name": "release file with a wrong admission_sha256",
+   "ok": true,
+   "detail": "code=RELEASE"
+  },
+  {
+   "name": "release file with a wrong delta_review_report_sha256",
+   "ok": true,
+   "detail": "code=RELEASE"
+  },
+  {
+   "name": "release file with a wrong approved_by",
+   "ok": true,
+   "detail": "code=RELEASE"
+  },
+  {
+   "name": "refusals launched nothing",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "full 8-case campaign with the fake child ends in the decision",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "ledger holds exactly 16 launches in the frozen order",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "only the case STAR and MRCS are staged (no truth/target)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "guard receipt retained for every launch",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "receipt records the actual child (argv[0] is the pinned binary, exit 0, observed env)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a finished campaign is never restarted in place",
+   "ok": true,
+   "detail": "code=EXISTS"
+  },
+  {
+   "name": "guard failure before the first launch",
+   "ok": true,
+   "detail": "code=GUARD"
+  },
+  {
+   "name": "no run directory after a guard failure at validation",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "fake child exits 1 on the first OFF",
+   "ok": true,
+   "detail": "code=PRODUCER"
+  },
+  {
+   "name": "fake child exits 1 on the first OFF [launches stop at 1, STOP recorded]",
+   "ok": true,
+   "detail": "launches=1 last={'event': 'STOP', 'code': 'PRODUCER', 'message': 'PRODUCER: exit 1 timed_out False for noisy/OFF', 'launches': 1, 'utc': '2026-10-26T22:23:57Z'}"
+  },
+  {
+   "name": "fake child exits 1 on the first OFF [no ON run directory for noisy]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "fake child exits 1 on the first OFF [no retry: a second run in place is refused]",
+   "ok": true,
+   "detail": "code=EXISTS"
+  },
+  {
+   "name": "fake child times out",
+   "ok": true,
+   "detail": "code=PRODUCER"
+  },
+  {
+   "name": "fake child times out [launches stop at 1, STOP recorded]",
+   "ok": true,
+   "detail": "launches=1 last={'event': 'STOP', 'code': 'PRODUCER', 'message': 'PRODUCER: exit -9 timed_out True for noisy/OFF', 'launches': 1, 'utc': '2026-10-26T22:23:58Z'}"
+  },
+  {
+   "name": "fake child times out [no ON run directory for noisy]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "fake child times out [no retry: a second run in place is refused]",
+   "ok": true,
+   "detail": "code=EXISTS"
+  },
+  {
+   "name": "child leaves no runtime.json",
+   "ok": true,
+   "detail": "code=RUNTIME"
+  },
+  {
+   "name": "child leaves no runtime.json [launches stop at 1, STOP recorded]",
+   "ok": true,
+   "detail": "launches=1 last={'event': 'STOP', 'code': 'RUNTIME', 'message': 'RUNTIME: runtime.json missing', 'launches': 1, 'utc': '2026-10-26T22:23:58Z'}"
+  },
+  {
+   "name": "child leaves no runtime.json [no ON run directory for noisy]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "child leaves no runtime.json [no retry: a second run in place is refused]",
+   "ok": true,
+   "detail": "code=EXISTS"
+  },
+  {
+   "name": "child writes an unlisted extra output file",
+   "ok": true,
+   "detail": "code=INVENTORY"
+  },
+  {
+   "name": "child writes an unlisted extra output file [launches stop at 1, STOP recorded]",
+   "ok": true,
+   "detail": "launches=1 last={'event': 'STOP', 'code': 'INVENTORY', 'message': 'INVENTORY: output names differ from the baseline names of the case', 'launches': 1, 'utc': '2026-10-26T22:23:59Z'}"
+  },
+  {
+   "name": "child writes an unlisted extra output file [no ON run directory for noisy]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "child writes an unlisted extra output file [no retry: a second run in place is refused]",
+   "ok": true,
+   "detail": "code=EXISTS"
+  },
+  {
+   "name": "ON writes a wrong witness count",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "ON writes a wrong witness count [launches stop at 2, STOP recorded]",
+   "ok": true,
+   "detail": "launches=2 last={'event': 'STOP', 'code': 'WITNESS', 'message': 'WITNESS: 8 witness lines, expected 9 for ON [3, 3]', 'launches': 2, 'utc': '2026-10-26T22:24:00Z'}"
+  },
+  {
+   "name": "ON writes a wrong witness count [no retry: a second run in place is refused]",
+   "ok": true,
+   "detail": "code=EXISTS"
+  },
+  {
+   "name": "OFF differs from the retained baseline: STOP before ON",
+   "ok": true,
+   "detail": "code=COMPARATOR"
+  },
+  {
+   "name": "OFF differs from the retained baseline: STOP before ON [launches stop at 1, STOP recorded]",
+   "ok": true,
+   "detail": "launches=1 last={'event': 'STOP', 'code': 'COMPARATOR', 'message': 'COMPARATOR: comparator rc=1, json present=True', 'launches': 1, 'utc': '2026-10-26T22:24:00Z'}"
+  },
+  {
+   "name": "OFF differs from the retained baseline: STOP before ON [no ON run directory for noisy]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "OFF differs from the retained baseline: STOP before ON [no retry: a second run in place is refused]",
+   "ok": true,
+   "detail": "code=EXISTS"
+  },
+  {
+   "name": "OFF with zero DC counters stops before ON (L3)",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "OFF with zero DC counters stops before ON (L3) [launches stop at 1, STOP recorded]",
+   "ok": true,
+   "detail": "launches=1 last={'event': 'STOP', 'code': 'MANIPULATION', 'message': 'MANIPULATION: DC manipulation failed', 'launches': 1, 'utc': '2026-10-26T22:24:01Z'}"
+  },
+  {
+   "name": "OFF with zero DC counters stops before ON (L3) [no ON run directory for noisy]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "OFF with zero DC counters stops before ON (L3) [no retry: a second run in place is refused]",
+   "ok": true,
+   "detail": "code=EXISTS"
+  },
+  {
+   "name": "guard failure before an ON launch",
+   "ok": true,
+   "detail": "code=GUARD"
+  },
+  {
+   "name": "guard failure before an ON launch [launches stop at 1, STOP recorded]",
+   "ok": true,
+   "detail": "launches=1 last={'event': 'STOP', 'code': 'GUARD', 'message': 'GUARD: foreign compute before the ON launch (test)', 'launches': 1, 'utc': '2026-10-26T22:24:01Z'}"
+  },
+  {
+   "name": "guard failure before an ON launch [no ON run directory for noisy]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "guard failure before an ON launch [no retry: a second run in place is refused]",
+   "ok": true,
+   "detail": "code=EXISTS"
+  },
+  {
+   "name": "evidence_root not empty at the start",
+   "ok": true,
+   "detail": "code=EXISTS"
+  },
+  {
+   "name": "run directory already exists",
+   "ok": true,
+   "detail": "code=EXISTS"
+  },
+  {
+   "name": "a truth file in the staged cwd is refused",
+   "ok": true,
+   "detail": "code=STAGING"
+  },
+  {
+   "name": "fixture differing from its pin refuses the campaign",
+   "ok": true,
+   "detail": "code=FIXTURE"
+  },
+  {
+   "name": "plan above the producer budget",
+   "ok": true,
+   "detail": "code=BUDGET"
+  },
+  {
+   "name": "missing retained baseline refuses the campaign",
+   "ok": true,
+   "detail": "code=BASELINE"
+  },
+  {
+   "name": "binary changed between the OFF and ON launches",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "binary changed between the OFF and ON launches [launches stop at 1, STOP recorded]",
+   "ok": true,
+   "detail": "launches=1 last={'event': 'STOP', 'code': 'IDENTITY', 'message': 'IDENTITY: candidate_binary on disk differs from its pin: /private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-lfw-v5-3ir09n2i/bin/motioncorr', 'launches': 1, 'utc': '2026-10-26T22:24:02Z'}"
+  },
+  {
+   "name": "binary changed between the OFF and ON launches [no ON run directory for noisy]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "binary changed between the OFF and ON launches [no retry: a second run in place is refused]",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "real guard refuses when the held-lease list is missing/different",
+   "ok": true,
+   "detail": "GUARD: held leases [] differ from the overlapping set ['/tmp/motioncorr-b2-cpu32-47.lock',"
+  },
+  {
+   "name": "overlapping lock set always includes the bench and b2 locks",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "absent pre-ON record",
+   "ok": true,
+   "detail": "code=PRE_ON"
+  },
+  {
+   "name": "tampered pre-ON record",
+   "ok": true,
+   "detail": "code=PRE_ON"
+  },
+  {
+   "name": "pre-ON record status not PASS",
+   "ok": true,
+   "detail": "code=PRE_ON"
+  },
+  {
+   "name": "control: the restored record admits",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

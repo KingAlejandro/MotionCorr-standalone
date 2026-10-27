@@ -1,0 +1,43 @@
+PASS parse /proc status
+PASS parse /proc stat times (utime/stime)
+PASS parse /proc/locks
+PASS ancestor chain through a wrapper
+PASS lease control: ours (held by an ancestor)
+PASS lease control: unheld is refused
+PASS lease control: peer-held is refused :: the current inode is flock-held by pid(s) [999], none of them an ancestor of the driver
+PASS lease control: lane holds an orphaned inode, a peer holds the recreated path :: the current inode is flock-held by pid(s) [999], none of them an ancestor of the driver
+PASS lease control: a read-mode entry is refused
+PASS lease control: a POSIX lock is refused
+PASS lease control: same inode on another device is refused
+PASS lease control: an intermediate wrapper owner is an ancestor too
+PASS multi-thread child with a differing mask: OBSERVED, receipts keep what /proc said (not the expected 32-47) :: {'max_threads': 3, 'max_tasks': 3, 'distinct_cpus_allowed_lists': ['40-41'], 'processes_seen': [1000, 1001], 'first_ms': 0, 'last_ms': 40}
+PASS resource keys are non-empty when observable
+PASS a read failure gives PARTIAL with the error kept :: ['stat pid 1000: PermissionError: denied']
+PASS child gone before the first read gives UNOBSERVED with a reason (no invented sample)
+PASS no /proc on the host is stated as the reason
+PASS truncation is flagged and the summary still sees the later 5 threads
+PASS a missing children file is recorded
+PASS RUN.json carries resource_samples with a stated status
+PASS a fast/unreadable child is reported UNOBSERVED honestly (reason present, no invented values)
+PASS the extra resource_samples key leaves admit_producer passing
+PASS slow child: enough samples at the 20 ms schedule and OBSERVED :: n=23
+PASS Threads 3 and mask 40-41 are receipts, not a stop (run exit 0, no gate)
+PASS a non-zero exit still carries resource_samples
+PASS a timeout still carries resource_samples and is marked
+PASS KeyboardInterrupt during the wait propagates
+PASS own child is reaped after KeyboardInterrupt
+PASS ledger keeps the real exception and a STOP
+PASS no next launch after cleanup
+PASS SIGTERM during the wait is raised inside the campaign
+PASS own child is reaped after SIGTERM
+PASS ledger keeps SIGTERM as the real cause, no next launch
+PASS the previous SIGTERM handler is restored
+PASS unexpected exception in the wait propagates
+PASS child reaped, aborted RUN.json, STOP carries RuntimeError, one launch only
+PASS Popen failure is a LAUNCH stop :: code=LAUNCH
+PASS Popen failure keeps a RUN.json with the real exception and a ledger STOP, no next launch
+SKIPPED real_guard receipt fields and the free-disk floor :: needs Linux /proc and /proc/locks (run on cpu64 under the lane)
+SKIPPED real flock lease controls :: needs Linux /proc/locks
+SKIPPED real /proc sampling of a multi-thread child :: needs Linux /proc
+SKIPPED parent-death signal :: needs Linux prctl
+TOTAL 38 FAILED 0 SKIPPED 4

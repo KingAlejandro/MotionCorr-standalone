@@ -1,0 +1,10 @@
+case grid | local_enabled OFF/ON | global_converged OFF/ON | global iters OFF/ON | patch accepted(True/False/None) OFF -> ON | witness OFF/ON | global-only comparator
+noisy [3, 3] | True True | True True | 2 2 | (8, 1, 0) -> (8, 1, 0) | 0 9 | None
+affine [3, 3] | True True | True True | 3 3 | (9, 0, 0) -> (9, 0, 0) | 0 9 | None
+pedestal [3, 3] | True True | True True | 3 3 | (9, 0, 0) -> (9, 0, 0) | 0 9 | None
+zero [1, 1] | False False | True True | 1 1 | (0, 0, 0) -> (0, 0, 0) | 0 0 | 7
+integer [1, 1] | False False | True True | 3 3 | (0, 0, 0) -> (0, 0, 0) | 0 0 | 7
+fractional [1, 1] | False False | True True | 3 3 | (0, 0, 0) -> (0, 0, 0) | 0 0 | 7
+flat [1, 1] | False False | True True | 1 1 | (0, 0, 0) -> (0, 0, 0) | 0 0 | 7
+repeated [1, 1] | False False | True True | 3 3 | (0, 0, 0) -> (0, 0, 0) | 0 0 | 7
+global bits equal & STAR global block equal in all: True

@@ -1,0 +1,54 @@
+2c2
+<   "status": "FROZEN_PENDING_OPUS_DELTA_REVIEW",
+---
+>   "status": "FROZEN_PENDING_OPUS_DELTA_REVIEW_CONTINUATION",
+1761,1762c1761,1762
+<   "schema": "local-full-width-admission-v5",
+<   "version": "v5",
+---
+>   "schema": "local-full-width-admission-v5_2",
+>   "version": "v5.2",
+1975c1975
+<   "baseline_root": "/home/ubuntu/motioncorr-evidence/native-b2-upstream-factorial-20261026/task/evidence/runs",
+---
+>   "baseline_root": "/tmp/motioncorr-b2-factorial-20261026/evidence/runs",
+1998a1999,2037
+>   },
+>   "supersedes_v5_admission": {
+>     "file": "release_v5/ADMISSION_V5.json",
+>     "sha256": "dae759f7f12df05af24ca75f2bdbaa7eb9e5453186c86e9df27f81a3dcb53871"
+>   },
+>   "baseline_root_note": "canonical ORIGINAL scratch root: the pinned baseline files embed it; bytes identical to the durable copy and to the 152 pins",
+>   "continuation": {
+>     "kind": "reuse_first_off_after_r1_stop",
+>     "case": "noisy",
+>     "arm": "OFF",
+>     "run_json_sha256": "ab9ae3736b667911fee1e735dc67ea2433067e5442e3536503f8422ab566951a",
+>     "evidence_inventory": {
+>       "RUN.json": "ab9ae3736b667911fee1e735dc67ea2433067e5442e3536503f8422ab566951a",
+>       "input/noisy.mrcs": "5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3",
+>       "input/noisy.star": "c321865e4fc769d9af55bc86af0a0b390abdcdb029137a9aeb5d6743b81a6891",
+>       "output/corrected_micrographs.star": "3fd4c5ddc56e4a30f3690fab6469adb6a6d42da8b707af193816642eace727da",
+>       "output/corrected_micrographs_all_rlnAccumMotionEarly.eps": "8b02360616c7f640d21612bd2be541ee2a995897ac42c7117296a346b5a0f06b",
+>       "output/corrected_micrographs_all_rlnAccumMotionLate.eps": "5a93726796347674df9431d09a972ebd6bf1ea0ac9b1cc0dec1a67666907fcb4",
+>       "output/corrected_micrographs_all_rlnAccumMotionTotal.eps": "7b8cec1d93ab260c41d57ae40f0bd187e992a96f68d1b8ea4c59ae93cafbedfd",
+>       "output/logfile.pdf": "0b6c1afcdd4d0a5d51e9a8f9c76f2a4450f27f322963c12c4149e4b39c454f54",
+>       "output/logfile.pdf.lst": "997ff841c6ed5330cc08c4ddc51b55f5e95ccad96415aa37491dd6bf0df08b7e",
+>       "output/noisy.log": "97fe1967b07e9d5ad90a3dc1dcdc2deddc10dad65fb5b7a0ffb39f04f1af4463",
+>       "output/noisy.mrc": "a977be71578ac1530d3622c7e93c5c195ebfe779c63ec788f45f72f59f97817f",
+>       "output/noisy.star": "144b900f9e2283303b2966acb3d6261b906efda84fd1d857214e14efcfe93d3a",
+>       "output/noisy_shifts.eps": "1f8e56ce5ce809b19f49d598cf8cdee779ecac6d1285b8735b89fd0576069154",
+>       "runtime.json": "9de5409895486ea04305a91fdf3c1350d5ddcb18559443fb3ca6a6fc99931325",
+>       "stdout.log": "7235110f59bbba50b22ef3b4103d2781e64c76c95e5a0b764f30507181d3ee25"
+>     },
+>     "evidence_inventory_sha256": "601f8d51c0b13856eceba09a7a0f8e7135390b1ad72073a55ed4778a04767c6a",
+>     "r1_decision_dir": "/tmp/motioncorr-lfw-v5-20261026/decision-native-r1",
+>     "r1_ledger_sha256": "5da981a5f953b8d21f67a9603b8ad173da519cca71a2bb70438d8faf95663856",
+>     "r1_stop_sha256": "328c9f07d61a7755c3c15ab40763b3b0be411d64dee0b778d60d28020c619f8d",
+>     "r1_release_sha256": "3e356d65b1508945b67dbff6a2e5127377f2c765898fe571c30f07fb438944ac",
+>     "r1_release_index_sha256": "894760af4cdb25fe6a5bf18fac1c0dc8a48f6a31fadb2a484c50f1305505cffc",
+>     "launches_before": 1,
+>     "remaining": 15,
+>     "global_ceiling": 16,
+>     "reused_off_index_sha256": "e85fe53c302fb329811ad5239a52791d3f08ac16428295390214232f2f587b15",
+>     "continuation_plan_sha256": "dfaf3dbc8bdb571ae6c266b286d1ff36e96f7e97aa0a64633b1d3976ed0b32f7"

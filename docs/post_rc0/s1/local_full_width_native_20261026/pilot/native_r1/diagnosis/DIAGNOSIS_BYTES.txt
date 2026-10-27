@@ -1,0 +1,45 @@
+SAVED-ONLY byte inspection of the noisy baseline (task copy == durable copy) against the produced OFF run. No native, fit or image analysis.
+
+1) raw checks the gate performed before the comparator:
+  runtime.json: baseline sha 9de5409895486ea0 OFF sha 9de5409895486ea0 equal=True pin_sha 9de5409895486ea0 baseline==pin True OFF==pin True
+  output/noisy.star: baseline sha 144b900f9e228330 OFF sha 144b900f9e228330 equal=True pin_sha 144b900f9e228330 baseline==pin True OFF==pin True
+
+2) all 10 published products, baseline vs OFF (bytes):
+  corrected_micrographs.star                                 719    689 bytes_equal=False
+  corrected_micrographs_all_rlnAccumMotionEarly.eps        75689  75689 bytes_equal=True
+  corrected_micrographs_all_rlnAccumMotionLate.eps         75686  75686 bytes_equal=True
+  corrected_micrographs_all_rlnAccumMotionTotal.eps        75689  75689 bytes_equal=True
+  logfile.pdf                                              24830  24830 bytes_equal=False
+  logfile.pdf.lst                                            368    323 bytes_equal=False
+  noisy.log                                                 2981   2966 bytes_equal=False
+  noisy.mrc                                                50176  50176 bytes_equal=False
+  noisy.star                                                4857   4857 bytes_equal=True
+  noisy_shifts.eps                                         57398  57383 bytes_equal=False
+
+3) MRC noisy.mrc: header / numeric payload
+  nx,ny,nz,mode,... baseline (128, 96, 1, 2) OFF (128, 96, 1, 2) | header[0:224] equal True | sizes 50176 50176
+  float32 pixels: n 12288 12288 | array_equal True | max|diff| 0.0 | any nan False | bytes equal True
+  label block (224-1023) equal False
+   baseline label: 'Relion    26-Oct-26  15:35:19'
+   OFF label     : 'Relion    26-Oct-26  23:02:41'
+
+4) the two products the comparator flagged:
+  corrected_micrographs.star: differing lines = 2
+      -/tmp/motioncorr-b2-factorial-20261026/evidence/runs/noisy/UP_only/output/noisy.mrc /tmp/motioncorr-b2-factorial-20261026/evidence/runs/noisy/UP_only/output/noisy.star   
+      +/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/OFF/output/noisy.mrc /tmp/motioncorr-lfw-v5-20261026/evidence/noisy/OFF/output/noisy.star            1     2.641788     1.
+   occurrences of ORIGINAL scratch root in baseline: 2 | of durable path: 0 | OFF root in OFF: 2
+   comparator-style (root A = durable path): equal = False
+   comparator-style with root A = ORIGINAL scratch root: equal = True
+   residual diff lines after the original-root normalisation: 0
+  noisy_shifts.eps: differing lines = 2
+      -(/tmp/motioncorr-b2-factorial-20261026/evidence/runs/noisy/UP_only/output/noisy_shifts.eps) dup stringwidth pop 2 div neg 0 rmoveto show
+      +(/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/OFF/output/noisy_shifts.eps) dup stringwidth pop 2 div neg 0 rmoveto show
+   occurrences of ORIGINAL scratch root in baseline: 1 | of durable path: 0 | OFF root in OFF: 1
+   comparator-style (root A = durable path): equal = False
+   comparator-style with root A = ORIGINAL scratch root: equal = True
+   residual diff lines after the original-root normalisation: 0
+
+5) inventory-only products (comparator does not gate them): sizes/equality
+  logfile.pdf: baseline 24830 OFF 24830 equal=False
+  logfile.pdf.lst: baseline 368 OFF 323 equal=False
+  noisy.log: baseline 2981 OFF 2966 equal=False

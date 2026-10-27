@@ -1,0 +1,20 @@
+POSITIVE: pre_checks pass on the real pins
+REFUSED as required: binary hash -> binary changed
+REFUSED as required: one library hash -> shared libraries differ from the pins
+REFUSED as required: extra pinned library -> shared libraries differ from the pins
+REFUSED as required: loader hash -> loader changed
+REFUSED as required: baseline product hash -> baseline product changed: noisy.mrc
+REFUSED as required: baseline run hash -> baseline RUN.json changed
+REFUSED as required: baseline dir is an alias copy of the baseline (the r1 pilot failure mode) -> ROOT_AUDIT: baseline RUN.json --o does not equal the baseline path /tmp/motioncorr-lfw-cap
+REFUSED as required: baseline dir missing -> ROOT_AUDIT: baseline RUN.json/STAR unreadable: [Errno 2] No such file or directory: '/none
+REFUSED as required: input hash -> input fixture changed: noisy.mrcs
+REFUSED as required: review verdict -> independent source review is not CLEAR for the pinned source
+REFUSED as required: review for another source -> independent source review is not CLEAR for the pinned source
+REFUSED as required: source blob list -> source tree differs from the pinned git blob list: files 12282 mismatches 0 []
+
+REFUSED as required: comparator hash -> comparator changed
+REFUSED as required: interpreter version -> interpreter differs from the pins
+REFUSED as required: driver hash -> prep file changed: run_capture_fw.py
+REFUSED as required: witness hash -> prep file changed: capture_witness.py
+REFUSED as required: baseline argv -> baseline RUN.json argv/exit/arm differ from the pins
+all negative controls refused

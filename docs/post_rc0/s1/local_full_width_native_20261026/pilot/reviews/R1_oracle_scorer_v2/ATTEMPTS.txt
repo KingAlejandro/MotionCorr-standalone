@@ -1,0 +1,2 @@
+attempt1 rc=1: star_global parsed '# version 50001' comment as a row (ValueError); parser fixed to skip '#' lines; no result written
+negatives attempt1: symlink_escape fixture created a dangling RELATIVE link (target resolved inside output), so it was rejected by the missing-file check, not the escape check; non-discriminating row; rerun with absolute target in symlink_check.py

@@ -1,0 +1,1 @@
+V1 and its four retained-score checks remain unchanged. Before any native producer, v2 adds the transitive known-motion generator pin, verifies actual imported module origins, and rejects wrong-case, malformed binary pins and noninteger exits in publication receipts. Numerical field operators, dense ROI, limits and recipes remain unchanged. V2 still cannot launch a producer.

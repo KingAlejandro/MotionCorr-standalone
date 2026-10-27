@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/docs/post_rc0/s1/local_full_width_native_20261026/pilot/mac_admission_20261027/run_mac_pilot.py", line 60, in <module>
+    try: main()
+         ~~~~^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/docs/post_rc0/s1/local_full_width_native_20261026/pilot/mac_admission_20261027/run_mac_pilot.py", line 56, in main
+    cmpout=ROOT/case/'compare.json'; c=subprocess.run([sys.executable,str(CMP),str(ROOT/case/'OFF/output'),str(ROOT/case/'ON/output'),str(cmpout)],capture_output=True,text=True); (ROOT/case/'compare.log').write_text(c.stdout+c.stderr); check(c.returncode==0 and json.loads(cmpout.read_text())['verdict']=='IDENTICAL','product comparator '+case)
+                                                                                                                                                                                                                                            ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/docs/post_rc0/s1/local_full_width_native_20261026/pilot/mac_admission_20261027/run_mac_pilot.py", line 23, in check
+    if not ok: raise RuntimeError(msg)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: product comparator zero

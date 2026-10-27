@@ -1,0 +1,195 @@
+{
+ "schema": "local-full-width-pre-on-v5_2",
+ "status": "PASS",
+ "bound": {
+  "case": "affine",
+  "off_receipt_sha256": "3e1330325fa647e14dd0742d977cc598c35e52b06baf560d47ee7ef479084c2a",
+  "off_runtime_sha256": "2e6b501c7c2a7dd47ee57fe8fb106c2de31c2f3ce6e9586e09c1fe611564a032",
+  "off_stdout_sha256": "0f4af00102d0ab9426e0eb0fb43450a83e4f217e27c455f9a16912d8a1f48de8",
+  "off_manipulation_sha256": "503420ef8812ca13aaa7edcaba04f41fffa84ffdef51d89e883293b57d679372",
+  "off_output_inventory_sha256": "e4ef9a782363e45901fbcb14ffeb9fee7abe7f6a36d2e96f3611716fd4e164d6",
+  "baseline_inventory_sha256": "36982e1a5812db7d3d1fdcf182bb59151b06546a0a48ca6d3db7a66675156911",
+  "baseline_dir_inventory_sha256": "36982e1a5812db7d3d1fdcf182bb59151b06546a0a48ca6d3db7a66675156911",
+  "comparator": {
+   "command_sha256": "adc75d9139d56969904a1f53f68f715d8e7b96a244125c21a588ab2610e487de",
+   "json_sha256": "230e034b37002ff7edd184c41735876934bf043ea4a781a897ed82dff847306a",
+   "comparator_sha256": "53449d2da682305c8c11e3ed3efb91103530196e481ac075b00f90e3d5ea0f47",
+   "n_files": 10,
+   "n_gated": 7
+  },
+  "admission_sha256": "7a431e8db3c2628fc99dc6f38618f8e354653d1c636be5e85ebaec6e2d02c97d",
+  "commands_sha256": "2bd36face2fed6f6a92398eb0402a63e6c6ea3624832e45c823f289a061b8081",
+  "tool_pins_sha256": "eaecbb74c5c748d6c5dc17055edaefe6c1bb5c53ae5ef577e845604ebd4cf4a8",
+  "binary_path": "/tmp/motioncorr-lfw-v5-20261026/build/motioncorr",
+  "binary_sha256": "bb92e06116f434219ae3f94c4317ea9b0ea63ee9c5169fd03c28bc00de4d19bd",
+  "identity": {
+   "candidate_binary": {
+    "path": "/tmp/motioncorr-lfw-v5-20261026/build/motioncorr",
+    "sha256": "bb92e06116f434219ae3f94c4317ea9b0ea63ee9c5169fd03c28bc00de4d19bd",
+    "bytes": 2730720
+   },
+   "source_archive": {
+    "path": "/tmp/motioncorr-lfw-v5-20261026/archive/source-d1c498b87123b324c027c2d8957736b9954e6326.tar",
+    "sha256": "87349cb626bad97f304e4e6b6aefdcb6ca84c429a194391bccbbcfed9780e507",
+    "commit": "d1c498b87123b324c027c2d8957736b9954e6326",
+    "tree": "033794b433e928723dbe7e4359b9e02651478fb6",
+    "git_archive_command": "git archive --format=tar d1c498b87123b324c027c2d8957736b9954e6326",
+    "src_tests_cmake_sha256_list": {
+     "path": "/tmp/motioncorr-lfw-v5-20261026/receipts/source_src_tests_cmake.sha256",
+     "sha256": "1f87816a6898fb9c4fc34f0b15a9dee385f8d96e96b2ddd25ac03c71ee2eb30b"
+    },
+    "note": "src = 634e4b48, CMake = 5bcfa987; identical to the reviewed worktree (391 files compared)"
+   },
+   "build_receipt": {
+    "path": "/tmp/motioncorr-lfw-v5-20261026/receipts/build_receipt.json",
+    "sha256": "da0681be64a607e97d8dd0f418a06083371972e73707b2420ec9116182e261d1"
+   },
+   "compiler_and_config": {
+    "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "cmake": "cmake version 4.4.3",
+    "cmake_args": {
+     "CMAKE_BUILD_TYPE": "Release",
+     "CUDA": "OFF",
+     "MC_EXPERIMENT_CCF_DC": "ON",
+     "Python3_EXECUTABLE": "/home/ubuntu/.mc-venv/bin/python3",
+     "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+     "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG"
+    },
+    "jobs": 2,
+    "env": {
+     "OMP_NUM_THREADS": "2",
+     "OPENBLAS_NUM_THREADS": "1",
+     "MKL_NUM_THREADS": "1"
+    }
+   },
+   "shared_libraries": {
+    "/lib/x86_64-linux-gnu/libfftw3.so.3": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10",
+     "sha256": "b5cc02c4d360b5b20111cb0a251f8368af8c9ce3145357f5ba54c51ac4ca9b35"
+    },
+    "/lib/x86_64-linux-gnu/libfftw3f.so.3": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10",
+     "sha256": "d75f423f19dc4b8fc86c5f4bdf9e3202494dea7f0d01060c4b546e7e28d59436"
+    },
+    "/lib/x86_64-linux-gnu/libgomp.so.1": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0",
+     "sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+    },
+    "/lib/x86_64-linux-gnu/libtiff.so.6": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1",
+     "sha256": "aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4"
+    },
+    "/lib/x86_64-linux-gnu/libpng16.so.16": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0",
+     "sha256": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8"
+    },
+    "/lib/x86_64-linux-gnu/libstdc++.so.6": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+     "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+    },
+    "/lib/x86_64-linux-gnu/libm.so.6": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+     "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+    },
+    "/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+     "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+    },
+    "/lib/x86_64-linux-gnu/libc.so.6": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+     "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+    },
+    "/lib/x86_64-linux-gnu/libwebp.so.7": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8",
+     "sha256": "9664db51ec65209078abbb8bc7b699888a43ecc2f3c74ce8dd4e497175aa5bf0"
+    },
+    "/lib/x86_64-linux-gnu/libzstd.so.1": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
+     "sha256": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+    },
+    "/lib/x86_64-linux-gnu/liblzma.so.5": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+     "sha256": "26b37d25f7ca2a2d348de8ecabacda12e921cd933b21fa069a179760db77219d"
+    },
+    "/lib/x86_64-linux-gnu/libLerc.so.4": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libLerc.so.4",
+     "sha256": "a0ee52df526738293bdd232ddaefbb0d1d9c2da775a82fc6730e7cd394da560c"
+    },
+    "/lib/x86_64-linux-gnu/libjbig.so.0": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libjbig.so.0",
+     "sha256": "6fea8a26ef5e0d2a36d296d7d0ec0c1f0894bf796b5824317bea88c090833a62"
+    },
+    "/lib/x86_64-linux-gnu/libjpeg.so.8": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2",
+     "sha256": "ac09f2cd6f8a3b8e3cb123999ce275f9bcbe31c6cf9e20212c8f297772591d15"
+    },
+    "/lib/x86_64-linux-gnu/libdeflate.so.0": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libdeflate.so.0",
+     "sha256": "608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f"
+    },
+    "/lib/x86_64-linux-gnu/libz.so.1": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+     "sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+    },
+    "/lib/x86_64-linux-gnu/libsharpyuv.so.0": {
+     "realpath": "/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1",
+     "sha256": "b2e62799e5dbd783a0671d53be99f7c6489567a5332a1e8f471e6bb250f294dc"
+    }
+   },
+   "venue_identity": {
+    "ssh_alias": "cpu64",
+    "text": "HOST small-refmac-machine\nKERNEL 6.8.0-86-generic\nOS Ubuntu 24.04.3 LTS\nCPU(s):                               64\nModel name:                           AMD EPYC 7763 64-Core Processor\nThread(s) per core:                   1\nSocket(s):                            2\nNUMA node0 CPU(s):                    0-31\nNUMA node1 CPU(s):                    32-63\nSIZE /tmp/motioncorr-b2-native-20261026 1086009903\nSIZE /tmp/motioncorr-b2-factorial-20261026 58121506\nSIZE /tmp/motioncorr-damping-a1c78adc1d0f 4789206166\nSIZE /tmp/motioncorr-local-ccf-20261026 108128679\n"
+   },
+   "fresh_venue_resource_admission": {
+    "cpus": "32-47",
+    "max_foreign_busy_cores": 1.5,
+    "min_available_mem_mb": 8192,
+    "campaign_root": "/tmp/motioncorr-lfw-v5-20261026",
+    "prior_scratch_bytes": 6041466254,
+    "scratch_cap_bytes": 26843545600,
+    "native_threads": 2,
+    "omp_blas_caps": "<=2",
+    "lane_sha256": "e0143e89fa3b6771d7f3ff873f04a7453d26f1b8c7f7b1e8f4ab4d3202b6fd66",
+    "lane_command": "python3 lane.py <driver command>",
+    "receipts_sha256": {
+     "build.log": "0ed82c3c81a6a08bec0d9fbee01d2ed161e313082cec7af91c73e2ec9f8ceae8",
+     "build.rc": "7cf0d9627d797238980dd2af938c370dbd0e36326ddb3dbf9edd0ef8174ba1e3",
+     "build.time": "f9bd15591362289f0bf851f205fac95af1d9c1c6417b04329e6b5bb7095cc44e",
+     "build_receipt.json": "da0681be64a607e97d8dd0f418a06083371972e73707b2420ec9116182e261d1",
+     "configure.log": "e803fa2ac93323a94e0269edaf4b372ec49314b3bbd78130c90ff993ad126482",
+     "configure.rc": "d0316102b1536b671beec6e67311e2311cf2e82fb0ae11151e4de7e90602e4c7",
+     "configure.time": "ef9a14a0e58a9bd3db9add932bd38ef74503cf1c08c496de3256630c14e68086",
+     "ctest.log": "fba341e29218fa811144140b00bad6b78ce2c6edef6e12d24f656b054e3fb22f",
+     "ctest.rc": "8a99bf1d5b187ca4548580ee3544bfd8e02bc5363ef6c20118c92c4956857343",
+     "ctest.time": "ad7b8d7e9c3bc8c2f470c5985c5ea6980e927382c093af93e53e42bc111480eb",
+     "ctest2.log": "fe8ce40ce5d5348612c487b30bb316963607fee7034d3e0b708f01eb04532fe5",
+     "ctest2.rc": "76fa3f955e9c59668be1c616ba9f79629ec877b7eae7556d0600339cdf91dcb9",
+     "ctest2.time": "2237596cc0c7802e015ae710279e23665660744543fe3e821bf16c61be04dc2c",
+     "ctest3.log": "7b7d73304243648c9a2091d9dcb436dfb5d139dac575774c62a63f9aa3cf245a",
+     "ctest3.rc": "ccd844720969405e0c37d702820f28f46bb19f82d6e4ca3f3d57edafdcc52e70",
+     "ctest3.time": "68d0b56b0ad425eae034563225444734940966cd176cbae2d9ad3358b26ca513",
+     "lane-build.log": "f741b8a80584d6aad9f24f71cb1ce3259eaa4602063c04402e36f002e0a8c1c0",
+     "lane-ctest2.log": "6df0b6000c34f422da53eee97dbebac4ad4d809ba2b3e54e9b17e1305165355e",
+     "lane-ctest3.log": "c84aa06fcb497524399a67bc57e879c8f67b3fad4c846d2a83b5a9b88f25ff18",
+     "occupancy-after-ctest2.txt": "6b6a09d258e37c8bbe96e3152bc370039c3a97769c107a089764c8301887ba4b",
+     "occupancy-after-ctest3.txt": "c5319562ea53110b96e24115c2e057c1d970af3bfd630d90a7faa4754d080058",
+     "occupancy-after.txt": "307a006d1ac89c284482f9aedd07ee8ee27b5bb042a8e60355955ec5b8106b91",
+     "occupancy-before-build.txt": "39038560df9634f2205c292d36e7ee25defdc0f109b4d757baeaa19f375a429a",
+     "occupancy-before-configure.txt": "c600439b348c5a10371b8b9fb87000f662a4a8d1df8081987a973f5cf8312365",
+     "occupancy-before-ctest.txt": "1325506c1432c000f790c6559f6c5b3abe881ba767735b4d4b115fce7b7e5631",
+     "occupancy-before-ctest2.txt": "6b2d864dee7325c82907f28bfe989fa921d994b7789e6b850ae8962ded71750f",
+     "occupancy-before-ctest3.txt": "b5eef3fd1365184dcfadefb52c716accc8def61bcd1c90c260959f1fbed346c4"
+    },
+    "note": "a snapshot from the build step; not a lease entitlement: the driver re-runs the guard before every launch"
+   },
+   "independent_source_clearance": {
+    "report": "~/Documents/MotionCorr-evidence/20261026/Native-local-full-width-source-review-r1/REPORT.md",
+    "sha256": "951bf12636c38abb320878f3f959cafe789542c0c173f6754834829179fd591e",
+    "verdict": "no BLOCK, no MATERIAL; conditional, source-only; reviewed commit 634e4b48"
+   },
+   "candidate_source_commit": "d1c498b87123b324c027c2d8957736b9954e6326"
+  }
+ },
+ "binding_sha256": "d991fdae42d171f81a843b944aadc897dd97447d9045d0c7821f3466d23a0d44",
+ "note": "condition for a parent driver; not a launch permission"
+}

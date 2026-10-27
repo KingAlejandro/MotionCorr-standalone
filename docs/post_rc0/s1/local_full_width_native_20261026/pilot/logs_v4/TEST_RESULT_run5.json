@@ -1,0 +1,636 @@
+{
+ "total": 126,
+ "failed": 0,
+ "results": [
+  {
+   "name": "real HELD admission cannot satisfy pre_ON_gate",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "real HELD admission cannot satisfy admit_pair",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "real HELD admission cannot satisfy decide_pilot",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "HELD failure is retained as STOP.json",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller-typed ['pre_on_status'] on pre_ON_gate",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller-typed ['expected'] on admit_pair",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller-typed ['admission'] on admit_pair",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller-typed ['commands'] on admit_pair",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller-typed ['pair_records'] on decide_pilot",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller-typed ['scores'] on decide_pilot",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller-typed ['expected'] on admit_single",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "positive pre_ON_gate noisy (comparator subprocess ran)",
+   "ok": true,
+   "detail": "binding=0a30a4300fd3"
+  },
+  {
+   "name": "retained comparator command is the pinned script via python -B",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "control: raw EPS text differs between baseline and OFF (comparator normalises the root)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "positive admit_pair 3x3",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "pair record keeps convergence/local_enabled separately",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "pre-ON record binds identity and pins",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "positive admit_pair global-only incl. whole-product comparator",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "retained global-only comparator output is outside product dirs",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "control: inventory-only PDF differs from baseline yet pre-ON passes",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "altered anchored admission file refused",
+   "ok": true,
+   "detail": "code=ANCHOR"
+  },
+  {
+   "name": "hand-edited commands (max_iter 9, OMP 8) refused by the anchor",
+   "ok": true,
+   "detail": "code=ANCHOR"
+  },
+  {
+   "name": "HELD status in an otherwise filled admission refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null launch field candidate_binary refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null launch field source_archive refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null launch field compiler_and_config refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null launch field shared_libraries refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null launch field venue_identity refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null launch field fresh_venue_resource_admission refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null launch field independent_source_clearance refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "unresolved placeholder binary path refused",
+   "ok": true,
+   "detail": "code=PLACEHOLDER"
+  },
+  {
+   "name": "non-hex binary sha refused",
+   "ok": true,
+   "detail": "code=BINARY"
+  },
+  {
+   "name": "tool pins verified before use",
+   "ok": true,
+   "detail": "code=TOOL_PIN"
+  },
+  {
+   "name": "decision_dir inside a run directory refused",
+   "ok": true,
+   "detail": "code=DECISION_DIR"
+  },
+  {
+   "name": "3x3 ON with 0 witnesses cannot be admitted (grid comes from the anchored admission)",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "baseline byte changed (pin kept)",
+   "ok": true,
+   "detail": "code=BASELINE"
+  },
+  {
+   "name": "baseline extra file",
+   "ok": true,
+   "detail": "code=BASELINE"
+  },
+  {
+   "name": "baseline file missing",
+   "ok": true,
+   "detail": "code=BASELINE"
+  },
+  {
+   "name": "baseline file replaced by a symlink",
+   "ok": true,
+   "detail": "code=BASELINE"
+  },
+  {
+   "name": "comparator detects MRC header change",
+   "ok": true,
+   "detail": "code=COMPARATOR"
+  },
+  {
+   "name": "comparator detects MRC header change [evidence]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "comparator detects MRC payload change",
+   "ok": true,
+   "detail": "code=COMPARATOR"
+  },
+  {
+   "name": "comparator detects MRC payload change [evidence]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "comparator detects EPS change",
+   "ok": true,
+   "detail": "code=COMPARATOR"
+  },
+  {
+   "name": "comparator detects corrected_micrographs STAR change",
+   "ok": true,
+   "detail": "code=COMPARATOR"
+  },
+  {
+   "name": "OFF runtime differs from the retained baseline bytes",
+   "ok": true,
+   "detail": "code=OFF_RAW"
+  },
+  {
+   "name": "OFF case STAR differs from the retained baseline bytes",
+   "ok": true,
+   "detail": "code=OFF_RAW"
+  },
+  {
+   "name": "OFF runtime.json missing",
+   "ok": true,
+   "detail": "code=RUNTIME"
+  },
+  {
+   "name": "OFF with a witness line is not an OFF run",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "comparator detects a file-inventory difference",
+   "ok": true,
+   "detail": "code=COMPARATOR"
+  },
+  {
+   "name": "inventory difference recorded by the comparator itself",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "failed comparator rc retained",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "failing OFF gate raises before ON",
+   "ok": true,
+   "detail": "code=COMPARATOR"
+  },
+  {
+   "name": "STOP.json retained with the code",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "ON cannot be paired without a passing record",
+   "ok": true,
+   "detail": "code=PRE_ON"
+  },
+  {
+   "name": "absent pre-ON record",
+   "ok": true,
+   "detail": "code=PRE_ON"
+  },
+  {
+   "name": "tampered pre-ON record",
+   "ok": true,
+   "detail": "code=PRE_ON"
+  },
+  {
+   "name": "pre-ON record status not PASS",
+   "ok": true,
+   "detail": "code=PRE_ON"
+  },
+  {
+   "name": "record bound to a different OFF byte",
+   "ok": true,
+   "detail": "code=PRE_ON"
+  },
+  {
+   "name": "retained comparator JSON altered after the gate",
+   "ok": true,
+   "detail": "code=PRE_ON"
+  },
+  {
+   "name": "ON global runtime differs by 1 ulp",
+   "ok": true,
+   "detail": "code=GLOBAL_RUNTIME"
+  },
+  {
+   "name": "ON serialised global STAR block differs",
+   "ok": true,
+   "detail": "code=GLOBAL_STAR"
+  },
+  {
+   "name": "ON missing DC stage line",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "OFF zero global DC counters",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "OFF zero global DC counters edited after the gate",
+   "ok": true,
+   "detail": "code=PRE_ON"
+  },
+  {
+   "name": "global DC counters drift between OFF and ON",
+   "ok": true,
+   "detail": "code=COUNTERS"
+  },
+  {
+   "name": "global zeroed count drifts (zeroed != eligible)",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "global coupled counters drift",
+   "ok": true,
+   "detail": "code=COUNTERS"
+  },
+  {
+   "name": "3x3 ON local eligible 0",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "3x3 OFF local eligible 0",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "coupled global peaks disagree with DC eligible",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "coupled patch peaks disagree with local DC eligible",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "duplicate DC counter line",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "coupled counters absent",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "convergence log unparsable",
+   "ok": true,
+   "detail": "code=CONVERGENCE"
+  },
+  {
+   "name": "same binary path with a different sha256 in ON",
+   "ok": true,
+   "detail": "code=BINARY"
+  },
+  {
+   "name": "ON extra output file",
+   "ok": true,
+   "detail": "code=INVENTORY"
+  },
+  {
+   "name": "ON witness variant spelling",
+   "ok": true,
+   "detail": "code=WITNESS_VARIANT"
+  },
+  {
+   "name": "global-only ON MRC payload differs (comparator)",
+   "ok": true,
+   "detail": "code=GLOBAL_ONLY"
+  },
+  {
+   "name": "global-only ON MRC header differs (comparator)",
+   "ok": true,
+   "detail": "code=GLOBAL_ONLY"
+  },
+  {
+   "name": "global-only ON EPS differs (comparator)",
+   "ok": true,
+   "detail": "code=GLOBAL_ONLY"
+  },
+  {
+   "name": "global-only ON runtime bytes differ",
+   "ok": true,
+   "detail": "code=GLOBAL_ONLY"
+  },
+  {
+   "name": "global-only ON case STAR bytes differ",
+   "ok": true,
+   "detail": "code=GLOBAL_ONLY"
+  },
+  {
+   "name": "global-only ON has local DC/coupled work",
+   "ok": true,
+   "detail": "code=MANIPULATION"
+  },
+  {
+   "name": "global-only ON carries a witness line",
+   "ok": true,
+   "detail": "code=WITNESS"
+  },
+  {
+   "name": "witness variant (lowercase hyphenless) rejected by the prescan",
+   "ok": true,
+   "detail": "code=WITNESS_VARIANT"
+  },
+  {
+   "name": "control: lowercase hyphenless [v3 admits]",
+   "ok": true,
+   "detail": "v3 admits"
+  },
+  {
+   "name": "witness variant (underscored) rejected by the prescan",
+   "ok": true,
+   "detail": "code=WITNESS_VARIANT"
+  },
+  {
+   "name": "control: underscored [v3 admits]",
+   "ok": true,
+   "detail": "v3 admits"
+  },
+  {
+   "name": "witness variant (title case) rejected by the prescan",
+   "ok": true,
+   "detail": "code=WITNESS_VARIANT"
+  },
+  {
+   "name": "control: title case [v3 admits]",
+   "ok": true,
+   "detail": "v3 admits"
+  },
+  {
+   "name": "witness variant (spaced) rejected by the prescan",
+   "ok": true,
+   "detail": "code=WITNESS_VARIANT"
+  },
+  {
+   "name": "control: spaced [v3 admits]",
+   "ok": true,
+   "detail": "v3 admits"
+  },
+  {
+   "name": "control: clean OFF log passes the prescan",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "T1 extra staged file with a matching fixture pin",
+   "ok": true,
+   "detail": "code=INPUT"
+  },
+  {
+   "name": "T1 missing staged movie, remaining pins match",
+   "ok": true,
+   "detail": "code=INPUT"
+  },
+  {
+   "name": "control: the retained runtime text carries that literal",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "control: Python parses 1e400 as inf without parse_constant",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "T2 runtime overflow literal 1e400 with a matching receipt hash",
+   "ok": true,
+   "detail": "code=NONFINITE"
+  },
+  {
+   "name": "control: the receipt lists the symlink with the target hash",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "T3 real symlink in output with a self-consistent receipt",
+   "ok": true,
+   "detail": "code=INVENTORY"
+  },
+  {
+   "name": "decision: P1 and P2 hold -> SUPPORTED, never accepted",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: improving P2 leaves the noisy raw gate FAIL",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: flat/repeated UNIDENTIFIABLE with raw distances",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: no increase listed when nothing increases",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: P1 lost on one case/field (fractional STAR rms .21)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: the P1 loss is listed as a PASS->FAIL increase",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: P2 fails on a single regressed rms (runtime only)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: P2 fails on a tie in rms (strict improvement required)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: P2 fails on a single regressed p95 (runtime only)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: P2 fails on a tie in p95 (strict improvement required)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: P2 fails on a single regressed max (runtime only)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: P2 fails on a tie in max (strict improvement required)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: PASS->PASS increase is listed and P1 still holds",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision: a noisy ON that passes all limits reports raw gate PASS",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decide_pilot over 8 synthetic cases (crafted scores)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "all 8 pair records retained",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "cases parameter reordered",
+   "ok": true,
+   "detail": "code=CASES"
+  },
+  {
+   "name": "cases parameter with a duplicate",
+   "ok": true,
+   "detail": "code=CASES"
+  },
+  {
+   "name": "cases parameter missing a case",
+   "ok": true,
+   "detail": "code=CASES"
+  },
+  {
+   "name": "unlisted extra case directory",
+   "ok": true,
+   "detail": "code=CASES"
+  },
+  {
+   "name": "case without its ON directory",
+   "ok": true,
+   "detail": "code=CASES"
+  },
+  {
+   "name": "a case directory missing entirely",
+   "ok": true,
+   "detail": "code=CASES"
+  },
+  {
+   "name": "real noisy/affine scoring flows through decide_pilot",
+   "ok": true,
+   "detail": "noisy OFF rms=1.645370853156"
+  },
+  {
+   "name": "real data: the tiny coefficient change does not improve every metric, so P2 fails (no vacuous PASS)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "real affine ON keeps PASS on both fields",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

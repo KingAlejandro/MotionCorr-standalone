@@ -1,0 +1,99 @@
+{
+ "schema": "mac-b2fw-k267-run/1",
+ "case": "affine",
+ "arm": "B2",
+ "exit": 0,
+ "run_dir": "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/affine/B2",
+ "argv": [
+  "/private/tmp/mc-mac-pilot-20261027/build-numpy253/motioncorr",
+  "--i",
+  "affine.star",
+  "--o",
+  "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/affine/B2/output",
+  "--use_own",
+  "--j",
+  "2",
+  "--patch_x",
+  "3",
+  "--patch_y",
+  "3",
+  "--group_frames",
+  "1",
+  "--bin_factor",
+  "1",
+  "--seed",
+  "1",
+  "--skip_defect",
+  "--save_noDW",
+  "--first_frame_sum",
+  "1",
+  "--last_frame_sum",
+  "5",
+  "--skip_logfile",
+  "--max_iter",
+  "5",
+  "--experimental_local_b2"
+ ],
+ "cwd": "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/affine/B2/input",
+ "binary_sha256": "d57432b87cdeb034c13e52ed920b19c0f819185f6ee92f04f44314337151f546",
+ "environment": {
+  "PATH": "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+  "PYTHONDONTWRITEBYTECODE": "1",
+  "OMP_NUM_THREADS": "2",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "MC_EXPERIMENT_CCF_DC_ARM": "none",
+  "MC_DIAG_MODEL_OUT": "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/affine/B2/runtime.json"
+ },
+ "publication": {
+  "affine.log": {
+   "bytes": 1691,
+   "sha256": "a0901e1f1714edd379ef1a5a8363d5b4e77fa7b962f7810d3b94cbe0f022aa9e"
+  },
+  "affine.mrc": {
+   "bytes": 50176,
+   "sha256": "f1818bf08df39852e5c36f51a2d592377b04ddf0f2a61cba7136f1b6a8e5491d"
+  },
+  "affine.star": {
+   "bytes": 5188,
+   "sha256": "e382ec29066e2816922d09e319d120db5c6847d49717615bf3221c39663ab31b"
+  },
+  "affine_shifts.eps": {
+   "bytes": 79066,
+   "sha256": "890ebcbdd082be41f5d05d26eb34ce87bb684a18d3cd1abc97c53c43dd316078"
+  },
+  "corrected_micrographs.star": {
+   "bytes": 705,
+   "sha256": "728470f7b06c0967e3276e6155a4f03f1c1d869b401c5fcf5bf69bf0ef9522b6"
+  },
+  "corrected_micrographs_all_rlnAccumMotionEarly.eps": {
+   "bytes": 75689,
+   "sha256": "33f7cd41afa2b8b0ed1f050e3f8cd35fa1336e9ee38a1013e74293af5d8e3a57"
+  },
+  "corrected_micrographs_all_rlnAccumMotionLate.eps": {
+   "bytes": 57534,
+   "sha256": "b6e602371864f986ca59719fa655c94d51fd8614931b46b01fde603100b7116e"
+  },
+  "corrected_micrographs_all_rlnAccumMotionTotal.eps": {
+   "bytes": 75689,
+   "sha256": "dd2877b42faea33ae8249b5f56b04228b5a2a40ebcef5f0b98bf233b67eacbfa"
+  },
+  "logfile.pdf": {
+   "bytes": 23480,
+   "sha256": "c19365eaf1eddd311eff21d2be3268e675936667b804f80d2483334b5e1e5bde"
+  },
+  "logfile.pdf.lst": {
+   "bytes": 344,
+   "sha256": "b7f11c982abb400a0cc81185e18dd6e9684a5e7c0c0ad4f6769d6757b41e7bb7"
+  }
+ },
+ "runtime": {
+  "bytes": 962,
+  "sha256": "bf0eb08edb7c250d4b2ff627c1835dd11d5a6f4933728b06e67878c08716b6b3"
+ },
+ "stdout": {
+  "bytes": 1078,
+  "sha256": "2a300ab17cfcddb26a141ee3995c06aa5630f12bc59155d3634c130382603e2e"
+ },
+ "wall_seconds": 0.4481010437011719
+}

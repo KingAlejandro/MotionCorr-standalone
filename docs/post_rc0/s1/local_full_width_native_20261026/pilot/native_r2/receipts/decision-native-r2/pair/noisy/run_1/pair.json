@@ -1,0 +1,171 @@
+{
+ "schema": "local-full-width-pair-v5_2",
+ "case": "noisy",
+ "patch_grid": [
+  3,
+  3
+ ],
+ "binary_sha256": "bb92e06116f434219ae3f94c4317ea9b0ea63ee9c5169fd03c28bc00de4d19bd",
+ "off_receipt_sha256": "ab9ae3736b667911fee1e735dc67ea2433067e5442e3536503f8422ab566951a",
+ "on_receipt_sha256": "ad77c48cce40ee0e8116297e05a7789276dcfc534688f0a88caab0e1ca99e6c4",
+ "global_bits_equal": true,
+ "global_star_block_equal": true,
+ "global_only_comparator": null,
+ "witness_lines": {
+  "OFF": 0,
+  "ON": 9
+ },
+ "counters": {
+  "OFF": {
+   "dc": {
+    "arm": "both",
+    "global_zeroed": 10,
+    "global_eligible": 10,
+    "local_zeroed": 115,
+    "local_eligible": 115
+   },
+   "coupled": {
+    "global": {
+     "peaks": 10,
+     "guard_fired": 0,
+     "not_negative_definite": 0,
+     "offset_gt_1px": 0
+    },
+    "patch": {
+     "peaks": 115,
+     "guard_fired": 2,
+     "not_negative_definite": 0,
+     "offset_gt_1px": 2
+    }
+   }
+  },
+  "ON": {
+   "dc": {
+    "arm": "both",
+    "global_zeroed": 10,
+    "global_eligible": 10,
+    "local_zeroed": 115,
+    "local_eligible": 115
+   },
+   "coupled": {
+    "global": {
+     "peaks": 10,
+     "guard_fired": 0,
+     "not_negative_definite": 0,
+     "offset_gt_1px": 0
+    },
+    "patch": {
+     "peaks": 115,
+     "guard_fired": 0,
+     "not_negative_definite": 0,
+     "offset_gt_1px": 0
+    }
+   }
+  }
+ },
+ "local_enabled": {
+  "OFF": true,
+  "ON": true
+ },
+ "convergence": {
+  "OFF": {
+   "global_iterations": 2,
+   "global_increment_px": [
+    1.8927,
+    0.368717
+   ],
+   "global_converged": true,
+   "patches": [
+    {
+     "final_increment_px": 0.487513,
+     "converged": true
+    },
+    {
+     "final_increment_px": 0.365564,
+     "converged": true
+    },
+    {
+     "final_increment_px": 0.249186,
+     "converged": true
+    },
+    {
+     "final_increment_px": 0.30883,
+     "converged": true
+    },
+    {
+     "final_increment_px": 0.485102,
+     "converged": true
+    },
+    {
+     "final_increment_px": 1.5895,
+     "converged": false
+    },
+    {
+     "final_increment_px": 0.309318,
+     "converged": true
+    },
+    {
+     "final_increment_px": 0.364825,
+     "converged": true
+    },
+    {
+     "final_increment_px": 0.39193,
+     "converged": true
+    }
+   ],
+   "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+  },
+  "ON": {
+   "global_iterations": 2,
+   "global_increment_px": [
+    1.8927,
+    0.368717
+   ],
+   "global_converged": true,
+   "patches": [
+    {
+     "final_increment_px": 0.274812,
+     "converged": true
+    },
+    {
+     "final_increment_px": 0.446857,
+     "converged": true
+    },
+    {
+     "final_increment_px": 0.157794,
+     "converged": true
+    },
+    {
+     "final_increment_px": 0.258237,
+     "converged": true
+    },
+    {
+     "final_increment_px": 0.243837,
+     "converged": true
+    },
+    {
+     "final_increment_px": 8.36418,
+     "converged": false
+    },
+    {
+     "final_increment_px": 0.182765,
+     "converged": true
+    },
+    {
+     "final_increment_px": 0.232658,
+     "converged": true
+    },
+    {
+     "final_increment_px": 0.359342,
+     "converged": true
+    }
+   ],
+   "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+  }
+ },
+ "pinned_function_segments_sha256": {
+  "star_blocks": "d4f94597a21d618ba1d9764a01c28509d43c88828ac437f5af782e2a9e3270f1",
+  "manipulation": "233f83a8a6399141cd6d32fb33a09b6924400e4b22d90bf4bd5d1495493e17d1"
+ },
+ "note": "local_enabled/convergence are recorded separately and are not truth surrogates"
+}

@@ -1,0 +1,5 @@
+r3 attempts (append-only)
+1. Interpreter: uv CPython 3.13.7 / NumPy 2.4.2 (author runtime); OMP/BLAS/vecLib 1 thread.
+2. Author suite re-run once: 126/126 (9.8 s, 52 MB RSS). Mutation harness not re-run (5.5 min); logic and run2 log reviewed.
+3. probes_r3.py run1: 9/9 as predicted. No failed or repeated runs.
+4. Package 75 files byte-identical before/after; branch clean at 215c37b0.

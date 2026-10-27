@@ -1,0 +1,287 @@
+{
+ "sampler_immediate_sample": {
+  "status": "KILLED",
+  "groups": [
+   "launch"
+  ],
+  "intended": [
+   "slow child: enough samples"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 4,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "slow child: enough samples at the 20 ms schedule and OBSERVED",
+   "Threads 3 and mask 40-41 are receipts, not a stop (run exit 0, no gate)",
+   "a non-zero exit still carries resource_samples",
+   "a timeout still carries resource_samples and is marked"
+  ],
+  "exit": 1
+ },
+ "sampler_poll_schedule": {
+  "status": "KILLED",
+  "groups": [
+   "launch"
+  ],
+  "intended": [
+   "slow child: enough samples"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "slow child: enough samples at the 20 ms schedule and OBSERVED"
+  ],
+  "exit": 1
+ },
+ "summary_threads": {
+  "status": "KILLED",
+  "groups": [
+   "sampler"
+  ],
+  "intended": [
+   "multi-thread child with a differing mask",
+   "truncation is flagged"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 2,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "multi-thread child with a differing mask: OBSERVED, receipts keep what /proc said (not the expected 32-47)",
+   "truncation is flagged and the summary still sees the later 5 threads"
+  ],
+  "exit": 1
+ },
+ "failure_counting": {
+  "status": "KILLED",
+  "groups": [
+   "sampler"
+  ],
+  "intended": [
+   "a read failure gives PARTIAL"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "a read failure gives PARTIAL with the error kept"
+  ],
+  "exit": 1
+ },
+ "unobserved_status": {
+  "status": "KILLED",
+  "groups": [
+   "sampler"
+  ],
+  "intended": [
+   "child gone before the first read gives UNOBSERVED"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 2,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "child gone before the first read gives UNOBSERVED with a reason (no invented sample)",
+   "no /proc on the host is stated as the reason"
+  ],
+  "exit": 1
+ },
+ "truncation_cap": {
+  "status": "KILLED",
+  "groups": [
+   "sampler"
+  ],
+  "intended": [
+   "truncation is flagged"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "truncation is flagged and the summary still sees the later 5 threads"
+  ],
+  "exit": 1
+ },
+ "lease_ancestor": {
+  "status": "SURVIVED",
+  "groups": [
+   "parse"
+  ],
+  "intended": [
+   "lease control: peer-held is refused",
+   "lease control: lane holds an orphaned inode"
+  ],
+  "covered": [
+   false,
+   false
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "INFRA fault in g_parse"
+  ],
+  "exit": 1
+ },
+ "lease_inode": {
+  "status": "SURVIVED",
+  "groups": [
+   "parse"
+  ],
+  "intended": [
+   "lease control: lane holds an orphaned inode",
+   "lease control: unheld is refused"
+  ],
+  "covered": [
+   false,
+   false
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "INFRA fault in g_parse"
+  ],
+  "exit": 1
+ },
+ "lease_mode": {
+  "status": "KILLED",
+  "groups": [
+   "parse"
+  ],
+  "intended": [
+   "lease control: a read-mode entry is refused"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "lease control: a read-mode entry is refused"
+  ],
+  "exit": 1
+ },
+ "lease_kind": {
+  "status": "KILLED",
+  "groups": [
+   "parse"
+  ],
+  "intended": [
+   "lease control: a POSIX lock is refused"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "lease control: a POSIX lock is refused"
+  ],
+  "exit": 1
+ },
+ "cleanup_noop": {
+  "status": "KILLED",
+  "groups": [
+   "kbd"
+  ],
+  "intended": [
+   "own child is reaped after KeyboardInterrupt"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "own child is reaped after KeyboardInterrupt"
+  ],
+  "exit": 1
+ },
+ "ledger_base_exception": {
+  "status": "KILLED",
+  "groups": [
+   "kbd"
+  ],
+  "intended": [
+   "ledger keeps the real exception and a STOP"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "ledger keeps the real exception and a STOP"
+  ],
+  "exit": 1
+ },
+ "sigterm_handler": {
+  "status": "KILLED",
+  "groups": [
+   "sigterm"
+  ],
+  "intended": [
+   "SIGTERM during the wait is raised inside the campaign"
+  ],
+  "covered": [
+   false
+  ],
+  "failed_count": 0,
+  "crashed_or_hung": true,
+  "failed_tests": [],
+  "exit": -15
+ },
+ "aborted_receipt": {
+  "status": "KILLED",
+  "groups": [
+   "kbd",
+   "sigterm",
+   "sampler_error"
+  ],
+  "intended": [
+   "own child is reaped after KeyboardInterrupt",
+   "child reaped, aborted RUN.json"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 3,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "own child is reaped after KeyboardInterrupt",
+   "own child is reaped after SIGTERM",
+   "child reaped, aborted RUN.json, STOP carries RuntimeError, one launch only"
+  ],
+  "exit": 1
+ },
+ "popen_error_kept": {
+  "status": "KILLED",
+  "groups": [
+   "popen"
+  ],
+  "intended": [
+   "Popen failure keeps a RUN.json with the real exception"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "crashed_or_hung": false,
+  "failed_tests": [
+   "Popen failure keeps a RUN.json with the real exception and a ledger STOP, no next launch"
+  ],
+  "exit": 1
+ }
+}

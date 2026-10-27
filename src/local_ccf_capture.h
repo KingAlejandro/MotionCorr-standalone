@@ -33,6 +33,11 @@ inline std::string quote(const std::string& value) {
     }
     s << '"'; return s.str();
 }
+// Legacy: the reviewed old-weight pair (62,47),(62,79). FullWidthPair: (104,15),(62,79) with --experimental_local_full_width_weight.
+enum class Mode { Legacy, FullWidthPair };
+inline bool selectedCentre(Mode m, int cx, int cy) {
+    return m == Mode::Legacy ? (cx == 62 && (cy == 47 || cy == 79)) : ((cx == 104 && cy == 15) || (cx == 62 && cy == 79));
+}
 struct Budget { size_t bytes = 0; static constexpr size_t limit = 64 * 1024 * 1024; };
 inline void exclusiveFile(const std::filesystem::path& p, const void* data, size_t bytes, Budget& budget) {
     require(bytes <= Budget::limit - budget.bytes, "64 MiB payload limit");
@@ -91,6 +96,7 @@ class LocalCcfCapture {
     std::shared_ptr<LocalCcfDiagnostic::Budget> budget;
     std::shared_ptr<LocalCcfDiagnostic::Status> status;
     int width, height, ccf_x=0, ccf_y=0, search=0, iteration=0;
+    LocalCcfDiagnostic::Mode mode;
     std::vector<Frame> frame;
     std::vector<std::string> files;
     void text(const std::string& name, const std::string& value) {
@@ -131,26 +137,33 @@ class LocalCcfCapture {
 public:
     LocalCcfCapture(const std::filesystem::path& p,int xs,int xe,int ys,int ye,int cx,int cy,
                     const std::vector<RFLOAT>& gx,const std::vector<RFLOAT>& gy,
-                    std::shared_ptr<LocalCcfDiagnostic::Budget> b,std::shared_ptr<LocalCcfDiagnostic::Status> st)
-        :dir(p),budget(std::move(b)),status(std::move(st)),width(xe-xs),height(ye-ys),frame(5) {
+                    std::shared_ptr<LocalCcfDiagnostic::Budget> b,std::shared_ptr<LocalCcfDiagnostic::Status> st,LocalCcfDiagnostic::Mode m=LocalCcfDiagnostic::Mode::Legacy)
+        :dir(p),budget(std::move(b)),status(std::move(st)),width(xe-xs),height(ye-ys),mode(m),frame(5) {
         using namespace LocalCcfDiagnostic;
         static_assert(sizeof(float)==4 && sizeof(double)==8 && std::numeric_limits<float>::is_iec559,"capture requires IEEE float32/64");
-        require(width==42&&height==32&&cx==62&&(cy==47||cy==79)&&gx.size()==5&&gy.size()==5,"unsupported patch geometry");
+        require(width==42&&height==32&&selectedCentre(mode,cx,cy)&&gx.size()==5&&gy.size()==5,"unsupported patch geometry");
+        require(mode==Mode::Legacy||((xs+xe-1)/2==cx&&(ys+ye-1)/2==cy),"centre does not match patch extents");
         require(std::filesystem::create_directory(dir),"patch directory exists");
         for(auto& f:frame)f.samples.resize(size_t(width)*height);
         std::ostringstream s;s<<"{\"centre\":["<<cx<<","<<cy<<"],\"extents_xy_halfopen\":["<<xs<<","<<xe<<","<<ys<<","<<ye<<"],\"patch_shape_yx\":[32,42],\"frame_index\":\"zero based group/movie; saved STAR frame=group+1\",\"native_RF_scalars_bytes\":"<<sizeof(RFLOAT)<<",\"native_complex_bytes\":"<<sizeof(fComplex)<<",\"native_complex_component_bytes\":"<<sizeof(frame[0].samples[0])<<",\"native_real_and_weight_dtype\":\"float32\",\"native_real_xy_byte_strides\":[4,168],\"native_half_complex_xy_byte_strides\":[8,176],\"raw_arrays\":\"host endian; dtype in each metadata file; contiguous x then y\"}\n";
-        text("patch.json",s.str());shifts("global-shifts",gx,gy,"existing global trajectory before patch clipping, original movie pixels");
+        std::string patch_json=s.str();
+        if(mode==Mode::FullWidthPair)patch_json.insert(patch_json.size()-2,",\"capture_mode\":\"local_full_width_pair\",\"local_full_width_weight\":true");
+        text("patch.json",patch_json);shifts("global-shifts",gx,gy,"existing global trajectory before patch clipping, original movie pixels");
     }
     void clipped(int f,const MultidimArray<float>& a) noexcept {
         auto& d=frame[f];if(a.xdim!=width||a.ydim!=height||a.zdim!=1||a.ndim!=1){d.bad=true;return;}
         std::copy(a.data,a.data+d.samples.size(),d.samples.begin());d.clipped=true;
     }
-    void configure(const std::vector<MultidimArray<fComplex>>& f,int nx,int ny,int range,RFLOAT sx,RFLOAT sy,RFLOAT scaled_B,const MultidimArray<float>& weight) {
+    void configure(const std::vector<MultidimArray<fComplex>>& f,int nx,int ny,int range,RFLOAT sx,RFLOAT sy,RFLOAT scaled_B,const MultidimArray<float>& weight,RFLOAT weight_x_norm=0) {
         using namespace LocalCcfDiagnostic;require(f.size()==5&&nx==42&&ny==32&&range==15,"unsupported CCF geometry");
+        require(mode==Mode::Legacy||weight_x_norm==RFLOAT(nx),"full-width capture requires the full-width weight normalisation x_norm = pnx");
         ccf_x=nx;ccf_y=ny;search=range;
         for(int i=0;i<5;++i){require(frame[i].clipped&&!frame[i].bad,"clipped sample capture missing");frame[i].allocate(nx,ny);array("initial-frame"+std::to_string(i)+"-samples",frame[i].samples,{32,42},"actual clipped globally aligned samples immediately before patch FFT");complexArray("initial-frame"+std::to_string(i)+"-fft",f[i],"actual patch FFT output entering alignPatch");}
         std::vector<float> w(weight.data,weight.data+size_t(ny)*(nx/2+1));array("weights",w,{size_t(ny),size_t(nx/2+1)},"actual native float B-factor weights");
-        std::ostringstream s;s<<std::setprecision(17)<<"{\"ccf_shape_yx\":["<<ny<<","<<nx<<"],\"half_shape_yx\":["<<ny<<","<<nx/2+1<<"],\"search_range\":"<<range<<",\"scale_xy\":["<<sx<<","<<sy<<"],\"scaled_B\":"<<scaled_B<<",\"forward_norm\":\"NewFFT FwdOnly: divide forward by patch area1344\",\"inverse_norm\":\"FwdOnly: fftwf C2R unnormalized\",\"search_tie\":\"strict greater, y outer then x ascending\",\"hermitian_projection\":\"not applied by diagnostic; no assumption about opaque native FFT handling\",\"primary_oracle_input\":\"actual native real map\",\"shifter\":\"multiply entering spectrum by exp(-2pi i(kx delta_x/42 + signedky delta_y/32)) after frame0 anchor subtraction\",\"native_preserveInput\":true}\n";text("fft-config.json",s.str());
+        std::ostringstream s;s<<std::setprecision(17)<<"{\"ccf_shape_yx\":["<<ny<<","<<nx<<"],\"half_shape_yx\":["<<ny<<","<<nx/2+1<<"],\"search_range\":"<<range<<",\"scale_xy\":["<<sx<<","<<sy<<"],\"scaled_B\":"<<scaled_B<<",\"forward_norm\":\"NewFFT FwdOnly: divide forward by patch area1344\",\"inverse_norm\":\"FwdOnly: fftwf C2R unnormalized\",\"search_tie\":\"strict greater, y outer then x ascending\",\"hermitian_projection\":\"not applied by diagnostic; no assumption about opaque native FFT handling\",\"primary_oracle_input\":\"actual native real map\",\"shifter\":\"multiply entering spectrum by exp(-2pi i(kx delta_x/42 + signedky delta_y/32)) after frame0 anchor subtraction\",\"native_preserveInput\":true}\n";
+        std::string fft_json=s.str();
+        if(mode==Mode::FullWidthPair){std::ostringstream x;x<<",\"capture_mode\":\"local_full_width_pair\",\"weight_x_norm\":"<<weight_x_norm<<",\"weight_nfx_inherited_not_used\":"<<nx/2+1<<",\"weight_x_norm_meaning\":\"patch width pnx (full width); inherited normalisation would be nfx\"";fft_json.insert(fft_json.size()-2,x.str());}
+        text("fft-config.json",fft_json);
     }
     void begin(int iter,const std::vector<MultidimArray<fComplex>>& f,const MultidimArray<fComplex>& ref,const std::vector<RFLOAT>& x,const std::vector<RFLOAT>& y) {
         iteration=iter;for(auto& d:frame)d.reset();
@@ -207,22 +220,26 @@ class LocalCcfCaptureSession {
     std::filesystem::path root;
     std::shared_ptr<LocalCcfDiagnostic::Budget> budget=std::make_shared<LocalCcfDiagnostic::Budget>();
     std::vector<std::shared_ptr<LocalCcfDiagnostic::Status>> states;
-    bool seen47=false,seen79=false;
+    LocalCcfDiagnostic::Mode mode;
+    bool seen[2]={false,false};
 public:
-    LocalCcfCaptureSession(const std::string& path,const std::string& movie,int nx,int ny,int nf) :root(path) {
+    LocalCcfCaptureSession(const std::string& path,const std::string& movie,int nx,int ny,int nf,LocalCcfDiagnostic::Mode m=LocalCcfDiagnostic::Mode::Legacy) :root(path),mode(m) {
         using namespace LocalCcfDiagnostic;
         require(root.is_absolute()&&nx==128&&ny==96&&nf==5,"unsupported movie/path scope");
         require(std::filesystem::create_directory(root),"capture root exists");
-        textFile(root/"session.json","{\"schema\":\"local-ccf-capture/1\",\"movie\":"+quote(movie)+",\"native_truth_input\":false,\"selected_centres\":[[62,47],[62,79]],\"scope\":\"CPU UP-only group1 bin1 max_iter5 tolerance0.5; actual executed iterations\"}\n",*budget);
+        if(mode==Mode::Legacy)
+            textFile(root/"session.json","{\"schema\":\"local-ccf-capture/1\",\"movie\":"+quote(movie)+",\"native_truth_input\":false,\"selected_centres\":[[62,47],[62,79]],\"scope\":\"CPU UP-only group1 bin1 max_iter5 tolerance0.5; actual executed iterations\"}\n",*budget);
+        else
+            textFile(root/"session.json","{\"schema\":\"local-ccf-capture/2\",\"movie\":"+quote(movie)+",\"native_truth_input\":false,\"capture_mode\":\"local_full_width_pair\",\"local_full_width_weight\":true,\"weight_x_normalisation\":\"patch width pnx=42 (full width); inherited pnx/2+1=22 not used\",\"selected_centres\":[[104,15],[62,79]],\"scope\":\"CPU UP-only group1 bin1 max_iter5 tolerance0.5; actual executed iterations\"}\n",*budget);
     }
     std::unique_ptr<LocalCcfCapture> patch(int xs,int xe,int ys,int ye,int cx,int cy,const std::vector<RFLOAT>& gx,const std::vector<RFLOAT>& gy) {
-        if(cx!=62||(cy!=47&&cy!=79))return nullptr;
-        bool& seen=cy==47?seen47:seen79;LocalCcfDiagnostic::require(!seen,"duplicate selected patch");seen=true;
+        if(!LocalCcfDiagnostic::selectedCentre(mode,cx,cy))return nullptr;
+        bool& was_seen=seen[mode==LocalCcfDiagnostic::Mode::Legacy?(cy==47?0:1):(cx==104?0:1)];LocalCcfDiagnostic::require(!was_seen,"duplicate selected patch");was_seen=true;
         auto status=std::make_shared<LocalCcfDiagnostic::Status>();states.push_back(status);
-        return std::make_unique<LocalCcfCapture>(root/("patch-"+std::to_string(cx)+"-"+std::to_string(cy)),xs,xe,ys,ye,cx,cy,gx,gy,budget,status);
+        return std::make_unique<LocalCcfCapture>(root/("patch-"+std::to_string(cx)+"-"+std::to_string(cy)),xs,xe,ys,ye,cx,cy,gx,gy,budget,status,mode);
     }
     void finish() {
-        using namespace LocalCcfDiagnostic;require(seen47&&seen79&&states.size()==2,"selected patch coverage missing");
+        using namespace LocalCcfDiagnostic;require(seen[0]&&seen[1]&&states.size()==2,"selected patch coverage missing");
         for(const auto& s:states)require(s->alignment&&(!s->converged||s->reported),"selected patch completion missing");
         textFile(root/"COMPLETE.json","{\"selected_patches\":2,\"frames_per_patch_iteration\":5,\"bytes_before_complete\":"+std::to_string(budget->bytes)+",\"payload_limit_bytes\":67108864}\n",*budget);
     }

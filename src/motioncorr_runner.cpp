@@ -228,6 +228,9 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	experimental_isotropic_weight = parser.checkOption("--experimental_isotropic_weight", "(EXPERIMENTAL, research, CPU only) Use W5's isotropic CCF weight (x frequency divided by the full width nx instead of nx/2 + 1) in the global alignment. Default off. Refused with --gpu.");
 	if (experimental_isotropic_weight && !do_own)
 		REPORT_ERROR("--experimental_isotropic_weight is valid only with --use_own");
+	experimental_local_full_width_weight = parser.checkOption("--experimental_local_full_width_weight", "(EXPERIMENTAL, research, CPU only) Local patch alignments divide the CCF weight's x frequency by the full patch width instead of pnx/2 + 1. The global alignment is unchanged. Default off. Refused with --gpu.");
+	if (experimental_local_full_width_weight && !do_own)
+		REPORT_ERROR("--experimental_local_full_width_weight is valid only with --use_own");
 	{
 		const std::string mode = parser.getOption("--experimental_coupled_peak", "(EXPERIMENTAL, research, CPU only) Replace the separable 1D parabola of the subpixel peak by the full 2x2-Hessian quadratic on the 3x3 neighbourhood: off (default), global (global alignment only) or all (global and patch peaks). Refused with --gpu.", "off");
 		if      (mode == "off")    experimental_coupled_peak = 0;
@@ -447,6 +450,12 @@ void MotioncorrRunner::initialise()
 		if (experimental_isotropic_weight)
 		{
 			REPORT_ERROR("ERROR: --experimental_isotropic_weight is a CPU-only research option and is refused with --gpu "
+			             "(the CUDA alignment does not implement it). Remove --gpu to run on the CPU.");
+		}
+
+		if (experimental_local_full_width_weight)
+		{
+			REPORT_ERROR("ERROR: --experimental_local_full_width_weight is a CPU-only research option and is refused with --gpu "
 			             "(the CUDA alignment does not implement it). Remove --gpu to run on the CPU.");
 		}
 
@@ -2292,7 +2301,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 
 	std::unique_ptr<LocalCcfCaptureSession> capture_session;
 	if (!diag_local_ccf_dir.empty())
-		capture_session = std::make_unique<LocalCcfCaptureSession>(diag_local_ccf_dir, fn_mic, nx, ny, n_frames);
+		capture_session = std::make_unique<LocalCcfCaptureSession>(diag_local_ccf_dir, fn_mic, nx, ny, n_frames,
+			experimental_local_full_width_weight ? LocalCcfDiagnostic::Mode::FullWidthPair : LocalCcfDiagnostic::Mode::Legacy);
 
 	// Read gain reference
 	MC_STAGE("read gain");
@@ -4945,9 +4955,12 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	std::cout << "Trajectory size: " << xshifts.size() << std::endl;
 #endif
 
-	// Initialize B factor weight. x_norm is nfx (inherited) or, with the experimental isotropic weight on the
-	// global alignment, the full width pnx (W5 'iso').
-	const RFLOAT weight_x_norm = ccfWeightXNorm(is_global, experimental_isotropic_weight, pnx, nfx);
+	// Initialize B factor weight. x_norm is nfx (inherited) or the full width pnx: W5 'iso' on the global alignment,
+	// or the experimental local full-width weight on a patch alignment.
+	const RFLOAT weight_x_norm = ccfWeightXNorm(is_global, experimental_isotropic_weight, pnx, nfx, experimental_local_full_width_weight);
+	// Witness that the flagged x normalisation reached a patch alignment (flag on, patch alignments only; no line otherwise).
+	if (!is_global && experimental_local_full_width_weight)
+		logfile << " EXPERIMENTAL local full-width weight: x_norm = " << weight_x_norm << ", pnx = " << pnx << ", nfx = " << nfx << std::endl;
 	weight.reshape(Fref);
 	RCTIC(TIMING_PREP_WEIGHT);
 	#pragma omp parallel for num_threads(n_threads)
@@ -4958,7 +4971,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		}
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
-	if (capture) capture->configure(Fframes, ccf_nx, ccf_ny, search_range, ccf_scale_x, ccf_scale_y, scaled_B, weight);
+	if (capture) capture->configure(Fframes, ccf_nx, ccf_ny, search_range, ccf_scale_x, ccf_scale_y, scaled_B, weight, weight_x_norm);
 
 	const bool use_coupled = experimental_coupled_peak == 2 || (experimental_coupled_peak == 1 && is_global);
 	std::atomic<long> coupled_peaks{0}, coupled_not_negdef{0}, coupled_offset_gt_1px{0};
@@ -5162,8 +5175,8 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	return converged;
 }
 
-RFLOAT MotioncorrRunner::ccfWeightXNorm(bool is_global, bool isotropic, int pnx, int nfx) {
-	return (is_global && isotropic) ? (RFLOAT)pnx : (RFLOAT)nfx;
+RFLOAT MotioncorrRunner::ccfWeightXNorm(bool is_global, bool isotropic, int pnx, int nfx, bool local_full_width) {
+	return ((is_global && isotropic) || (!is_global && local_full_width)) ? (RFLOAT)pnx : (RFLOAT)nfx;
 }
 
 RFLOAT MotioncorrRunner::ccfWeightAt(int ly, int x, int nfy, RFLOAT x_norm, RFLOAT scaled_B) {

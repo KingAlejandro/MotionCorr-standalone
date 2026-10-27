@@ -1,0 +1,195 @@
+--- ../release_v5/driver_v5_1.py	2026-10-26 22:44:30
++++ driver_v5_2.py	2026-10-26 23:11:47
+@@ -1,15 +1,10 @@
+-"""Minimal producer driver v5.1: driver_v5 plus the resource receipts and operational hardening of AMENDMENT_M1_RESOURCE_RECEIPTS.md.
++"""Continuation driver v5.2 (criteria: CONTINUATION_PLAN.md): a modified copy of driver_v5_1.py; driver_v5_1.py and driver_v5.py are unchanged.
+ 
+-driver_v5.py (frozen with the 668be682 release packet) is unchanged; this is a modified copy with a reviewable diff. It launches exactly the frozen
+-commands of the anchored admission. Real launch is refused without a parent release file (PARENT_RELEASE.json in the decision directory) naming the
+-sha256 of the v5 module, THIS driver and the anchored admission, plus a delta-review report hash and parent approval (the driver cannot see the report;
+-binding the actual report file, the tests and the fresh resource admission is the parent release index's job). No hidden retry: each (case, arm) is
+-launched at most once, every failure stops all further launches and is kept. Truth files are never staged.
+-
+-New here: the child is sampled through /proc while it runs and the samples are stored in RUN.json (a record, never a gate); lease ownership is checked
+-through /proc/locks against the driver's ancestor chain; the guard records free disk and labels the prior-scratch constant as frozen; on any exception,
+-KeyboardInterrupt or SIGTERM the driver's own child process group is terminated and reaped and the real exception is ledgered; on Linux the child gets a
+-parent-death signal. Limits (not engineered around): grandchildren are outside the parent-death signal, SIGKILL of the driver cannot run cleanup, no cgroup.
++Only the campaign part differs: the r1 pilot stopped after the frozen first OFF (noisy/OFF); this driver REUSES that exact produced OFF once (verified byte for byte against the
++frozen continuation block of the admission, the old ledger/STOP hashes checked before and after), re-evaluates its pre-ON gate from the saved outputs against the correct baseline
++root (no producer), launches noisy ON and then the remaining 7 cases OFF/ON (15 launches at most, 16 globally with the reused OFF), and runs decide_pilot once. Launch, sampling,
++lease ownership, cleanup and staging code are unchanged from v5.1. Real launch needs a parent release file naming this driver, the v5.2 module, the v5.2 admission and commands and
++the reused OFF RUN.json hash. No generic resume, no other reuse case, no retry.
+ """
+ from pathlib import Path
+ import glob, hashlib, json, os, re, shutil, signal, subprocess, sys, time
+@@ -17,7 +12,7 @@
+ 
+ HERE = Path(__file__).resolve().parent
+ sys.path.insert(0, str(HERE))
+-import pair_decision_v5 as P5  # noqa: E402
++import pair_decision_v5_2 as P5  # noqa: E402
+ 
+ V3 = P5.V3
+ ARMS = ('OFF', 'ON')
+@@ -415,8 +410,9 @@
+     if not rp.is_file():
+         raise DriverStop('RELEASE', 'PARENT_RELEASE.json absent: the real launch path is closed')
+     r = json.loads(rp.read_text())
+-    want = {'release_module_sha256': _sha(HERE / 'pair_decision_v5.py'), 'driver_sha256': _sha(HERE / 'driver_v5_1.py'),
+-            'admission_sha256': hashlib.sha256(P5.ADMISSION_PATH.read_bytes()).hexdigest()}
++    want = {'release_module_sha256': _sha(HERE / 'pair_decision_v5_2.py'), 'driver_sha256': _sha(HERE / 'driver_v5_2.py'),
++            'admission_sha256': hashlib.sha256(P5.ADMISSION_PATH.read_bytes()).hexdigest(), 'commands_sha256': hashlib.sha256(P5.COMMANDS_PATH.read_bytes()).hexdigest(),
++            'reused_off_run_json_sha256': ctx.continuation['run_json_sha256']}
+     for k, v in want.items():
+         if r.get(k) != v:
+             raise DriverStop('RELEASE', '%s does not equal the file in use' % k)
+@@ -425,62 +421,109 @@
+     return r
+ 
+ 
+-def run_campaign(decision_dir, *, execute=False, guard=None, cpus=None, timeout=900):
+-    """Validate and, only with a parent release, run the pilot: per case OFF, pre-ON gate, ON; then decide_pilot once."""
++def _tree_inventory(root):
++    inv = {}
++    for p in sorted(Path(root).rglob('*')):
++        if p.is_symlink():
++            raise DriverStop('REUSE', 'symlink in the reused OFF: %s' % p)
++        if p.is_file():
++            inv[p.relative_to(root).as_posix()] = _sha(p)
++    return inv
++
++
++def verify_reuse(ctx):
++    """The only reuse case: the frozen first OFF, byte for byte, with nothing else in evidence_root and the r1 records unchanged."""
++    c = ctx.continuation
++    first = (ctx.adm['case_order'][0], 'OFF')
++    if (c.get('case'), c.get('arm')) != first or c.get('kind') != 'reuse_first_off_after_r1_stop':
++        raise DriverStop('REUSE', 'only the frozen first OFF %s may be reused, got %s' % (first, (c.get('case'), c.get('arm'))))
++    ev = Path(ctx.evidence_root)
++    if not ev.is_dir() or sorted(p.name for p in ev.iterdir()) != [first[0]] or sorted(p.name for p in (ev / first[0]).iterdir()) != ['OFF']:
++        raise DriverStop('REUSE', 'evidence_root must hold exactly %s/OFF and nothing else' % first[0])
++    off = ev / first[0] / 'OFF'
++    inv = _tree_inventory(off)
++    if inv != c['evidence_inventory'] or hashlib.sha256(P5._canon(inv)).hexdigest() != c['evidence_inventory_sha256']:
++        raise DriverStop('REUSE', 'the first OFF differs from the frozen inventory (changed, missing or extra file)')
++    if _sha(off / 'RUN.json') != c['run_json_sha256']:
++        raise DriverStop('REUSE', 'the first OFF RUN.json differs from the frozen hash')
++    r1 = Path(c['r1_decision_dir'])
++    for name, key in (('ledger.jsonl', 'r1_ledger_sha256'), ('STOP.json', 'r1_stop_sha256'), ('PARENT_RELEASE.json', 'r1_release_sha256'), ('PARENT_RELEASE_INDEX.json', 'r1_release_index_sha256')):
++        if not (r1 / name).is_file() or _sha(r1 / name) != c[key]:
++            raise DriverStop('REUSE', 'r1 record %s differs from the frozen hash' % name)
++    return inv
++
++
++def run_continuation(decision_dir, *, execute=False, guard=None, cpus=None, timeout=900):
++    """Validate and, only with a parent release, continue the pilot: reuse noisy/OFF, gate it, then 15 launches; decide_pilot once."""
+     ctx = P5.context(decision_dir)
+     guard = guard or (lambda step: real_guard(ctx.adm, step))
+     budget = ctx.adm['native_producer_budget']
+-    plan = [(c, a) for c in ctx.adm['case_order'] for a in ARMS]
+-    if len(plan) > budget:
+-        raise DriverStop('BUDGET', 'plan exceeds the producer budget')
++    order = ctx.adm['case_order']
++    plan = [(order[0], 'ON')] + [(c, a) for c in order[1:] for a in ARMS]
++    c = ctx.continuation
++    if len(plan) + c['launches_before'] != budget or c['remaining'] != len(plan) or c['global_ceiling'] != budget or budget != 16:
++        raise DriverStop('BUDGET', 'plan %d + reused %d must equal the global budget 16' % (len(plan), c['launches_before']))
+     validate_inputs(ctx)
++    verify_reuse(ctx)
+     g0 = guard('validate')
+     if not execute:
+-        return {'mode': 'dry-run', 'launches_planned': len(plan), 'rows': [ctx.expected(c, a) for c, a in plan], 'guard': g0, 'created': []}
++        return {'mode': 'dry-run-continuation', 'reused': [order[0], 'OFF'], 'launches_planned': len(plan), 'rows': [ctx.expected(cs, a) for cs, a in plan], 'guard': g0, 'created': []}
+     dd = Path(decision_dir)
+     check_release(ctx, dd)
+-    ev = Path(ctx.evidence_root)
+-    if ev.exists() and any(ev.iterdir()):
+-        raise DriverStop('EXISTS', 'evidence_root is not empty')
+     ledger = dd / 'ledger.jsonl'
+     if ledger.exists():
+-        raise DriverStop('EXISTS', 'ledger already exists: a campaign is never resumed or restarted in place')
++        raise DriverStop('EXISTS', 'ledger already exists: the continuation decision directory must be fresh')
++    _ledger(ledger, {'event': 'REUSED', 'case': order[0], 'arm': 'OFF', 'run_json_sha256': c['run_json_sha256'], 'r1_ledger_sha256': c['r1_ledger_sha256'], 'r1_stop_sha256': c['r1_stop_sha256'],
++                     'launches_before': c['launches_before'], 'remaining': len(plan), 'global_ceiling': budget})
+     launched = 0
+ 
+     def _on_term(signum, frame):
+         raise Terminated('SIGTERM')
+     old_term = signal.signal(signal.SIGTERM, _on_term)
+     try:
+-        for case in ctx.adm['case_order']:
+-            for arm in ARMS:
+-                if launched >= budget:
+-                    raise DriverStop('BUDGET', 'launch ceiling reached')
+-                g = guard('%s/%s' % (case, arm))
+-                P5._verify_identity(ctx.adm)  # before anything is staged or counted: the binary must still equal its pin
+-                (dd / 'guard').mkdir(exist_ok=True)
+-                _write(dd / 'guard' / ('%s_%s.json' % (case, arm)), g)
+-                run_dir = stage_run(ctx, case, arm)
+-                expected = ctx.expected(case, arm)
+-                _ledger(ledger, {'event': 'launching', 'case': case, 'arm': arm, 'argv_sha256': hashlib.sha256(json.dumps(expected['argv']).encode()).hexdigest(), 'index': launched + 1})
+-                launched += 1
+-                receipt = launch(ctx, case, arm, run_dir, expected, cpus=cpus, timeout=timeout, guard_receipt=g, ledger=ledger)
+-                _ledger(ledger, {'event': 'finished', 'case': case, 'arm': arm, 'exit': receipt['exit'], 'timed_out': receipt['timed_out'], 'receipt_sha256': _sha(run_dir / 'RUN.json')})
+-                if receipt['exit'] != 0 or receipt['timed_out']:
+-                    raise DriverStop('PRODUCER', 'exit %r timed_out %r for %s/%s' % (receipt['exit'], receipt['timed_out'], case, arm))
+-                if arm == 'OFF':
+-                    P5.pre_ON_gate(case, decision_dir=dd)  # admits OFF, checks baseline/raw/manipulation/comparator before any ON exists
+-                else:
+-                    P5.admit_single(case, 'ON', decision_dir=dd)
++        g = guard('reuse-gate/%s' % order[0])
++        (dd / 'guard').mkdir(exist_ok=True)
++        _write(dd / 'guard' / ('%s_OFF_reuse_gate.json' % order[0]), g)
++        P5.pre_ON_gate(order[0], decision_dir=dd)  # re-evaluated from the saved outputs against the audited baseline root; no producer
++        for case, arm in plan:
++            if launched >= budget - c['launches_before']:
++                raise DriverStop('BUDGET', 'launch ceiling reached')
++            g = guard('%s/%s' % (case, arm))
++            P5._verify_identity(ctx.adm)  # before anything is staged or counted: the binary must still equal its pin
++            _write(dd / 'guard' / ('%s_%s.json' % (case, arm)), g)
++            run_dir = stage_run(ctx, case, arm)
++            expected = ctx.expected(case, arm)
++            _ledger(ledger, {'event': 'launching', 'case': case, 'arm': arm, 'argv_sha256': hashlib.sha256(json.dumps(expected['argv']).encode()).hexdigest(), 'index': launched + 1})
++            launched += 1
++            receipt = launch(ctx, case, arm, run_dir, expected, cpus=cpus, timeout=timeout, guard_receipt=g, ledger=ledger)
++            _ledger(ledger, {'event': 'finished', 'case': case, 'arm': arm, 'exit': receipt['exit'], 'timed_out': receipt['timed_out'], 'receipt_sha256': _sha(run_dir / 'RUN.json')})
++            if receipt['exit'] != 0 or receipt['timed_out']:
++                raise DriverStop('PRODUCER', 'exit %r timed_out %r for %s/%s' % (receipt['exit'], receipt['timed_out'], case, arm))
++            if arm == 'OFF':
++                P5.pre_ON_gate(case, decision_dir=dd)
++            else:
++                P5.admit_single(case, 'ON', decision_dir=dd)
+         result = P5.decide_pilot(decision_dir=dd)
++        verify_reuse_records_unchanged(ctx)
+     except BaseException as e:  # first failure (also KeyboardInterrupt/SIGTERM/SystemExit) stops everything and is kept with the real exception; nothing is retried
+         _ledger(ledger, {'event': 'STOP', 'code': getattr(e, 'code', type(e).__name__), 'message': str(e) or repr(e), 'exception': repr(e), 'launches': launched})
+         raise
+     finally:
+         signal.signal(signal.SIGTERM, old_term)
+-    _ledger(ledger, {'event': 'DECIDED', 'prediction': result['prediction'], 'acceptance': result['acceptance']})
++    _ledger(ledger, {'event': 'DECIDED', 'prediction': result['prediction'], 'acceptance': result['acceptance'], 'launches': launched, 'global_launches': launched + c['launches_before']})
+     return result
+ 
+ 
++def verify_reuse_records_unchanged(ctx):
++    c = ctx.continuation
++    r1 = Path(c['r1_decision_dir'])
++    for name, key in (('ledger.jsonl', 'r1_ledger_sha256'), ('STOP.json', 'r1_stop_sha256')):
++        if _sha(r1 / name) != c[key]:
++            raise DriverStop('REUSE', 'r1 record %s changed during the continuation' % name)
++    if _sha(Path(ctx.evidence_root) / c['case'] / 'OFF' / 'RUN.json') != c['run_json_sha256']:
++        raise DriverStop('REUSE', 'the reused OFF RUN.json changed during the continuation')
++
++
+ def main(argv):
+     import argparse
+     ap = argparse.ArgumentParser(description=__doc__)
+@@ -490,7 +533,7 @@
+     ap.add_argument('--receipt', help='write the full result JSON here (must not exist)')
+     a = ap.parse_args(argv)
+     cpus = P5.context(None).adm['fresh_venue_resource_admission']['cpus']
+-    out = run_campaign(a.decision_dir, execute=a.execute, cpus=cpus, timeout=a.timeout)
++    out = run_continuation(a.decision_dir, execute=a.execute, cpus=cpus, timeout=a.timeout)
+     text = json.dumps(out, indent=1, default=str) + '\n'
+     if a.receipt:
+         with open(a.receipt, 'x') as f:

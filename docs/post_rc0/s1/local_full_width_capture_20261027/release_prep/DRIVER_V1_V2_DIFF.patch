@@ -1,0 +1,236 @@
+--- release_prep/driver/run_capture_fw.py	2026-10-27 01:04:45
++++ release_prep/driver/run_capture_fw_v2.py	2026-10-27 01:19:03
+@@ -1,14 +1,21 @@
+-"""Two authorized capture producers only (HELD until the parent writes PARENT_RELEASE.json); never retry or overwrite an existing namespace.
++"""VERSION 2 (response to the driver execution review; v1 `run_capture_fw.py` is kept unchanged). Two authorized capture producers only (HELD until the parent
++writes PARENT_RELEASE.json); never retry or overwrite an existing namespace. v2 adds: C1 per-launch and post-run binary/staged-input checks, C2 sealed capture
++inventory, N1 normalised unexpected errors, N2 structured grant format check, N3 explicit sampling summary, N4 owned process group with timeout and SIGTERM cleanup.
+ 
+ Derived from the reviewed local_ccf_capture_20261026/scripts/run_capture.py (see DRIVER_DIFF.patch). Sequence: OFF = capture off, local full-width ON, compared with the
+ sealed full-width ON noisy baseline of the native pilot; then ON = capture on, compared with the new OFF, and the four capture witnesses plus full coverage.
+-Run under the cpu64 lane with the interpreter pinned in the pins:  python3 -B prep/lane.py /home/ubuntu/.mc-venv/bin/python3 -B prep/run_capture_fw.py [--check-only]
++Run under the cpu64 lane with the interpreter pinned in the pins:  python3 -B prep/lane.py /home/ubuntu/.mc-venv/bin/python3 -B prep/run_capture_fw_v2.py [--check-only]
+ --check-only performs every pre-launch check (pins, source, binary, libraries, tools, baseline, root audit, inputs, admission) and creates no evidence directory.
+ """
+-import hashlib, json, os, re, subprocess, sys, time, threading, shutil
++import hashlib, json, os, re, signal, stat, subprocess, sys, time, threading, shutil
+ from pathlib import Path
+ sys.dont_write_bytecode = True
+ ROOT = Path('/tmp/motioncorr-lfw-capture-20261027'); EVID = ROOT / 'evidence'
++PINS_NAME = 'RUN_PINS_v2.json'; DRIVER_NAME = 'run_capture_fw_v2.py'
++JOB_TIMEOUT = 600          # seconds per producer (the baseline producer took 0.13 s)
++TIME_WRAPPER = lambda d: ['/usr/bin/time', '-v', '-o', str(d / 'time.txt')]   # tests replace it (BSD time has no -o/-v)
++PINS_SHA0 = None           # sha256 of the pins file at driver start; every launch re-checks it
++class Terminated(BaseException): pass
+ HERE = Path(__file__).resolve().parent
+ sys.path.insert(0, str(HERE))
+ import capture_witness as CW                          # noqa: E402  (hash-pinned)
+@@ -17,6 +24,7 @@
+ def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+ def write(p, x): Path(p).write_text(json.dumps(x, indent=2, allow_nan=False) + '\n')
+ class Refuse(Exception): pass
++HEX64 = re.compile(r'^[0-9a-f]{64}$'); UTC = re.compile(r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$')
+ def check(v, s):
+     if not v:
+         if EVID.exists() and not (EVID / 'STOP.json').exists(): write(EVID / 'STOP.json', dict(reason=s, utc=time.strftime('%FT%TZ', time.gmtime())))
+@@ -32,13 +40,20 @@
+     check(len(idx) == 1 and idx[0] + 1 < len(argv) and argv[idx[0] + 1] == root, 'ROOT_AUDIT: baseline RUN.json --o does not equal the baseline path ' + root)
+     check(set(re.findall(r'(/[^\s]*?/output)/', star)) == {root}, 'ROOT_AUDIT: corrected_micrographs.star embeds a different root than ' + root)
+ 
++def grant_format_ok(g, pins):
++    """Format check only: the actual grant and its receipt/index are bound externally by the parent; a well-formed forged grant is not detectable here."""
++    return (isinstance(g, dict) and isinstance(g.get('granted_by'), str) and g['granted_by'].strip() != '' and isinstance(g.get('utc'), str) and bool(UTC.match(g['utc']))
++            and g.get('cpus') == '32-47' and g.get('lane_locks') == sorted(pins['lane_locks']) and g.get('jobs') == ['OFF', 'ON']
++            and isinstance(g.get('receipt_sha256'), str) and bool(HEX64.match(g['receipt_sha256'])))
++
+ def parent_release(pins):
+     p = ROOT / 'PARENT_RELEASE.json'
+     check(p.is_file(), 'HELD: no PARENT_RELEASE.json (only the parent writes it)')
+     r = json.loads(p.read_text())
+-    want = dict(release_id=pins['release_id'], pins_sha256=sha(ROOT / 'RUN_PINS.json'), driver_sha256=sha(HERE / 'run_capture_fw.py'), witness_sha256=sha(HERE / 'capture_witness.py'),
++    want = dict(release_id=pins['release_id'], pins_sha256=sha(ROOT / PINS_NAME), driver_sha256=sha(HERE / DRIVER_NAME), witness_sha256=sha(HERE / 'capture_witness.py'),
+                 source_commit=pins['source_commit'], binary_sha256=pins['binary_sha256'], independent_review_report_sha256=pins['independent_source_review']['report_sha256'], jobs_authorized=['OFF', 'ON'])
+-    check(all(r.get(k) == v for k, v in want.items()) and r.get('fresh_resource_grant'), 'PARENT_RELEASE does not bind the exact pins/driver/witness/source/binary/review/jobs or lacks a fresh resource grant')
++    check(all(r.get(k) == v for k, v in want.items()), 'PARENT_RELEASE does not bind the exact pins/driver/witness/source/binary/review/jobs')
++    check(grant_format_ok(r.get('fresh_resource_grant'), pins), 'PARENT_RELEASE lacks a structured fresh_resource_grant (granted_by, utc, cpus 32-47, the pinned lane locks, jobs OFF/ON, receipt_sha256)')
+ 
+ def pre_checks(pins):
+     """Everything that can be checked before a producer exists. Raises Refuse on the first failure."""
+@@ -47,7 +62,7 @@
+     check(np.__version__ == pins['interpreter']['numpy'] and sha(np.__file__) == pins['interpreter']['numpy_init_sha256'], 'NumPy identity differs from the pins')
+     check(pins['independent_source_review']['verdict'] == 'CLEAR' and pins['independent_source_review']['source_commit'] == pins['source_commit'], 'independent source review is not CLEAR for the pinned source')
+     for f, h in pins['prep_files'].items(): check(sha(ROOT / 'prep' / f) == h, 'prep file changed: ' + f)
+-    check(sha(HERE / 'run_capture_fw.py') == pins['prep_files']['run_capture_fw.py'], 'driver differs from the pins')
++    check(sha(HERE / DRIVER_NAME) == pins['prep_files'][DRIVER_NAME], 'driver differs from the pins')
+     cp = subprocess.run([sys.executable, '-B', str(ROOT / 'prep/verify_source.py'), str(ROOT / 'source'), str(ROOT / 'prep/source.blobs')], capture_output=True, text=True)
+     check(cp.returncode == 0 and sha(ROOT / 'prep/source.blobs') == pins['blob_list_sha256'], 'source tree differs from the pinned git blob list: ' + cp.stdout[-300:])
+     check(sha(pins['binary_path']) == pins['binary_sha256'], 'binary changed')
+@@ -118,55 +133,145 @@
+     write(d / f'{tag}-identity.json', dict(runtime_byte_equal=True, case_STAR_byte_equal=True, product_comparator='IDENTICAL', n_files=j['n_files'], n_gated=j['n_gated'], runtime_sha256=sha(a / 'runtime.json'), case_STAR_sha256=sha(a / 'output/noisy.star'),
+                                            MRC='header0-223+size+pixels exact; labels inventoried', logs_PDF='inventory only'))
+ 
++def sampling_summary(path):
++    """N3: explicit counts of what the monitor actually saw. OBSERVED, PARTIAL and UNOBSERVED are all legal; nothing here asserts a thread count or a mask."""
++    rows = [json.loads(l) for l in Path(path).read_text().splitlines() if l.strip()] if Path(path).exists() else []
++    prod = [[q for q in r['processes'] if q['name'].startswith('motioncorr')] for r in rows]
++    withp = [x for x in prod if x]
++    state = 'UNOBSERVED' if not withp else ('OBSERVED' if len(withp) == len(rows) else 'PARTIAL')
++    return dict(state=state, n_samples=len(rows), n_samples_naming_producer=len(withp), n_empty_samples=sum(1 for r in rows if not r['processes']),
++                distinct_allowed_cpu_lists_of_producer=sorted({q['allowed'] for x in withp for q in x}), max_threads_of_producer=max([q['threads'] for x in withp for q in x], default=None),
++                note='receipt only; no universal thread or mask claim')
++
++def _kill_group(p):
++    """Terminate and reap only our own child's process group (the child is its own session/group leader); never a group we do not own."""
++    if p.poll() is not None: return
++    try:
++        pgid = os.getpgid(p.pid)
++        if pgid != p.pid or pgid == os.getpgrp(): p.kill(); p.wait(); return
++        os.killpg(pgid, signal.SIGTERM)
++        try: p.wait(timeout=5)
++        except subprocess.TimeoutExpired: os.killpg(pgid, signal.SIGKILL); p.wait()
++    except ProcessLookupError: p.wait()
++
++def _pdeathsig():
++    if not sys.platform.startswith('linux'): return None
++    import ctypes
++    libc = ctypes.CDLL(None, use_errno=True)
++    return lambda: libc.prctl(1, int(signal.SIGKILL), 0, 0, 0)   # PR_SET_PDEATHSIG for the direct child only; its children die with the group kill
++
++def launch(cmd, cwd, env, d, timeout):
++    """N4: the producer runs in its own session/process group with a timeout; any exception or SIGTERM in the driver kills and reaps the owned group first."""
++    done = threading.Event(); timed_out = False; start = time.monotonic()
++    with (d / 'stdout.log').open('w') as out:
++        p = subprocess.Popen([*TIME_WRAPPER(d), *cmd], cwd=cwd, env=env, stdout=out, stderr=subprocess.STDOUT, start_new_session=True, preexec_fn=_pdeathsig())
++        t = threading.Thread(target=monitor, args=(p.pid, d / 'actual-resources.jsonl', done)); t.start()
++        try:
++            try: rc = p.wait(timeout=timeout)
++            except subprocess.TimeoutExpired: timed_out = True; _kill_group(p); rc = p.returncode
++        except BaseException: _kill_group(p); raise
++        finally: done.set(); t.join()
++    return rc, timed_out, time.monotonic() - start
++
++def launch_checks(pins):
++    """C1: before EVERY Popen, the pinned binary, the immutable pins and the staged inputs (and their staging sources) are re-verified."""
++    b = Path(pins['binary_path']); check(b.is_file() and not b.is_symlink() and sha(b) == pins['binary_sha256'], 'binary differs from the pins at launch')
++    check(PINS_SHA0 is not None and sha(ROOT / PINS_NAME) == PINS_SHA0, 'the pins file changed since the driver started')
++    ni = ROOT / 'native-input'; names = sorted(q.name for q in ni.iterdir()) if ni.is_dir() else None
++    check(names == sorted(pins['input_files']), f'staged native-input scope differs: {names}')
++    for name, h in pins['input_files'].items():
++        q = ni / name; check(stat.S_ISREG(os.lstat(q).st_mode) and sha(q) == h, 'staged input differs from the pins at launch: ' + name)
++        check(sha(Path(pins['baseline']['dir']) / 'input' / name) == h, 'staging source (baseline input) differs from the pins: ' + name)
++
+ def run(label, pins):
+-    d = EVID / 'runs' / label; d.mkdir(parents=True, exist_ok=False); admission(d, pins, label)
++    d = EVID / 'runs' / label; d.mkdir(parents=True, exist_ok=False); admission(d, pins, label); launch_checks(pins)
+     base = Path(pins['baseline']['dir']); cmd = list(pins['baseline']['argv']); cmd[0] = pins['binary_path']; cmd[cmd.index('--o') + 1] = str(d / 'output')
+     env = dict(pins['baseline']['environment']); env.pop('MC_DIAG_MODEL_OUT', None); env.update(MC_DIAG_MODEL_OUT=str(d / 'runtime.json'), PATH='/usr/bin:/bin')
+     check(not any(k.startswith('MC_DIAG_LOCAL') for k in env), 'capture variable in the base environment')
+     if label == 'ON': env['MC_DIAG_LOCAL_CCF_DIR'] = str(d / 'capture')
+     check(cmd.count('--experimental_local_full_width_weight') == 1, 'full-width flag missing from the pinned argv')
+-    start = time.monotonic(); done = threading.Event()
+-    with (d / 'stdout.log').open('w') as out:
+-        p = subprocess.Popen(['/usr/bin/time', '-v', '-o', str(d / 'time.txt'), *cmd], cwd=ROOT / 'native-input', env=env, stdout=out, stderr=subprocess.STDOUT)
+-        t = threading.Thread(target=monitor, args=(p.pid, d / 'actual-resources.jsonl', done)); t.start(); rc = p.wait(); done.set(); t.join()
+-    receipt = dict(label=label, exit=rc, argv=cmd, cwd=str(ROOT / 'native-input'), binary_sha256=sha(pins['binary_path']), wall_receipt_only=time.monotonic() - start, environment=env, device='CPU; GPU not applicable',
+-                   products={str(q.relative_to(d / 'output')): dict(bytes=q.stat().st_size, sha256=sha(q)) for q in (d / 'output').rglob('*') if q.is_file()})
+-    write(d / 'RUN.json', receipt); check(rc == 0, 'producer exit ' + str((label, rc)))
++    before = sha(pins['binary_path'])
++    rc, timed_out, wall = launch(cmd, ROOT / 'native-input', env, d, JOB_TIMEOUT)
++    after = sha(pins['binary_path'])
++    receipt = dict(label=label, exit=rc, timed_out=timed_out, argv=cmd, cwd=str(ROOT / 'native-input'), binary_sha256=before, binary_sha256_before_launch=before, binary_sha256_after_run=after, binary_sha256_pinned=pins['binary_sha256'],
++                   wall_receipt_only=wall, environment=env, device='CPU; GPU not applicable', sampling=sampling_summary(d / 'actual-resources.jsonl'),
++                   products={str(q.relative_to(d / 'output')): dict(bytes=q.stat().st_size, sha256=sha(q)) for q in (d / 'output').rglob('*') if q.is_file()} if (d / 'output').exists() else {})
++    write(d / 'RUN.json', receipt)
++    if after != pins['binary_sha256'] or before != pins['binary_sha256']:
++        write(d / 'INVALID.json', dict(reason='binary hash differs from the pin around the run', before=before, after=after, pinned=pins['binary_sha256'])); check(False, f'{label}: binary changed around the run; run retained as invalid')
++    check(not timed_out, f'{label}: producer timed out after {JOB_TIMEOUT} s'); check(rc == 0, 'producer exit ' + str((label, rc)))
+     check(sorted(receipt['products']) == sorted(pins['baseline']['products']), 'publication differs from the baseline file set')
+     return d
+ 
++def run_witness_stage(on, oracle42, oracle22):
++    """N1: every failure of the witness stage, expected or not, becomes a STOP; no pass is recorded unless all witnesses returned."""
++    try: return CW.run_all(on / 'capture', (on / 'output/noisy.log').read_text(), oracle42, oracle22)
++    except CW.Stop as e: check(False, f'WITNESS {e.name}: {e.why}')
++    except Refuse: raise
++    except Exception as e: check(False, f'WITNESS_MALFORMED {type(e).__name__}: {e}')
++
++def inventory(cap):
++    """C2: relative path, size, sha256 of every file under the capture tree; any symlink or non-regular entry is a STOP."""
++    inv = {}
++    for q in sorted(Path(cap).rglob('*')):
++        m = os.lstat(q).st_mode
++        check(not stat.S_ISLNK(m) and (stat.S_ISREG(m) or stat.S_ISDIR(m)), f'capture contains a symlink or non-regular entry: {q}')
++        if stat.S_ISREG(m): inv[q.relative_to(cap).as_posix()] = dict(bytes=q.stat().st_size, sha256=sha(q))
++    return inv
++
++def expected_capture_files(coverage):
++    """Independent closed form of the writer's file counts (not the witness's list): 2 root files + per patch 34 + 134 per executed iteration (302 for 2 iterations)."""
++    return 2 + sum(34 + 134 * c['executed_iterations'] for c in coverage.values())
++
++def seal_capture(on, witnesses):
++    cap = on / 'capture'; inv = inventory(cap); n = len(inv)
++    check(n == expected_capture_files(witnesses['coverage']) == 2 + sum(c['files'] for c in witnesses['coverage'].values()), f'capture file count {n} differs from the coverage-derived counts')
++    write(on / 'capture-inventory.json', dict(count=n, bytes_total=sum(v['bytes'] for v in inv.values()), files=inv))     # outside the capture tree: no self-hash
++    check(inventory(cap) == inv, 'capture changed while it was being inventoried')
++    return sha(on / 'capture-inventory.json'), n
++
+ def main():
++    global PINS_SHA0
+     check_only = '--check-only' in sys.argv
+-    pins = json.loads((ROOT / 'RUN_PINS.json').read_text())
++    pins = json.loads((ROOT / PINS_NAME).read_text()); PINS_SHA0 = sha(ROOT / PINS_NAME)
+     pre_checks(pins)
+     if check_only:
+-        d = ROOT / 'receipts'; d.mkdir(exist_ok=True); admission(d, pins, 'checkonly')
++        d = ROOT / 'receipts'; d.mkdir(exist_ok=True); admission(d, pins, 'checkonly_v2')
+         released = (ROOT / 'PARENT_RELEASE.json').is_file()
+         if released: parent_release(pins)
+-        write(d / 'checkonly.json', dict(utc=time.strftime('%FT%TZ', time.gmtime()), status='PRE_CHECKS_PASS', parent_release='PRESENT_AND_BOUND' if released else 'ABSENT: HELD', producers_launched=0, evidence_created=EVID.exists()))
++        write(d / 'checkonly_v2.json', dict(utc=time.strftime('%FT%TZ', time.gmtime()), driver=DRIVER_NAME, status='PRE_CHECKS_PASS', parent_release='PRESENT_AND_BOUND' if released else 'ABSENT: HELD', producers_launched=0, evidence_created=EVID.exists()))
+         print('check-only: pre-launch checks pass; parent release', 'bound' if released else 'ABSENT (held); nothing launched'); return 0
+     parent_release(pins)
++    def on_term(signum, frame): raise Terminated('SIGTERM')
++    old_term = signal.signal(signal.SIGTERM, on_term)
+     EVID.mkdir(exist_ok=False)
+-    check(not (ROOT / 'native-input').exists(), 'native-input already exists')
+-    (ROOT / 'native-input').mkdir()
+-    base = Path(pins['baseline']['dir'])
+-    for name, h in pins['input_files'].items():
+-        shutil.copyfile(base / 'input' / name, ROOT / 'native-input' / name); check(sha(ROOT / 'native-input' / name) == h, 'staged input differs: ' + name)
+-    check(sorted(p.name for p in (ROOT / 'native-input').iterdir()) == ['noisy.mrcs', 'noisy.star'], 'native input directory scope differs')
+-    oracle42, oracle22 = WO.weight_map(42), WO.weight_map(22)
+     try:
++        check(not (ROOT / 'native-input').exists(), 'native-input already exists')
++        (ROOT / 'native-input').mkdir()
++        base = Path(pins['baseline']['dir'])
++        for name, h in pins['input_files'].items():
++            shutil.copyfile(base / 'input' / name, ROOT / 'native-input' / name); check(sha(ROOT / 'native-input' / name) == h, 'staged input differs: ' + name)
++        check(sorted(p.name for p in (ROOT / 'native-input').iterdir()) == ['noisy.mrcs', 'noisy.star'], 'native input directory scope differs')
++        oracle42, oracle22 = WO.weight_map(42), WO.weight_map(22)
+         off = run('OFF', pins); identity(base, off, off, pins, 'OFF_vs_sealed_baseline')
+         write(off / 'log-witness.json', CW.check_log((off / 'output/noisy.log').read_text())); check(not (off / 'capture').exists(), 'capture directory exists in the capture-OFF run')
+         on = run('ON', pins); identity(off, on, on, pins, 'ON_vs_new_OFF')
+         check((on / 'capture/COMPLETE.json').is_file(), 'capture incomplete')
+-        witnesses = CW.run_all(on / 'capture', (on / 'output/noisy.log').read_text(), oracle42, oracle22)
+-    except CW.Stop as e:
+-        check(False, f'WITNESS {e.name}: {e.why}')
+-    write(on / 'capture-witnesses.json', witnesses)
+-    write(EVID / 'NATIVE_COMPLETE.json', dict(producers=2, identity='PASS both comparisons', witnesses='PASS W1-W4 and coverage', source_commit=pins['source_commit'], binary_sha256=pins['binary_sha256'], no_timing_claim=True))
++        witnesses = run_witness_stage(on, oracle42, oracle22)
++        write(on / 'capture-witnesses.json', witnesses)
++        inv_sha, n = seal_capture(on, witnesses)
++        check(sha(on / 'capture-inventory.json') == inv_sha and inventory(on / 'capture') == json.loads((on / 'capture-inventory.json').read_text())['files'], 'capture differs from its sealed inventory at completion')
++        write(EVID / 'NATIVE_COMPLETE.json', dict(producers=2, identity='PASS both comparisons', witnesses='PASS W1-W4 and coverage', source_commit=pins['source_commit'], binary_sha256=pins['binary_sha256'],
++                                                 capture_inventory_sha256=inv_sha, capture_inventory_files=n, no_timing_claim=True, truth_and_analysis='UNRUN until the capture record is sealed'))
++    except (Refuse, Terminated): raise
++    except Exception as e: check(False, f'UNEXPECTED {type(e).__name__}: {e}')
++    finally: signal.signal(signal.SIGTERM, old_term)
+     return 0
+ 
+ if __name__ == '__main__':
+     try: sys.exit(main())
+     except Refuse as e:
+         print('REFUSED/STOP:', e, file=sys.stderr); sys.exit(3)
++    except Terminated:
++        if EVID.exists() and not (EVID / 'STOP.json').exists(): write(EVID / 'STOP.json', dict(reason='terminated by SIGTERM; owned process group cleaned up', utc=time.strftime('%FT%TZ', time.gmtime())))
++        print('TERMINATED', file=sys.stderr); sys.exit(143)

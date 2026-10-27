@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/tmp/motioncorr-lfw-v5-20261026/pilot_v5_1/release_v5/driver_v5_1.py", line 503, in <module>
+    sys.exit(main(sys.argv[1:]))
+             ^^^^^^^^^^^^^^^^^^
+  File "/tmp/motioncorr-lfw-v5-20261026/pilot_v5_1/release_v5/driver_v5_1.py", line 493, in main
+    out = run_campaign(a.decision_dir, execute=a.execute, cpus=cpus, timeout=a.timeout)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/motioncorr-lfw-v5-20261026/pilot_v5_1/release_v5/driver_v5_1.py", line 471, in run_campaign
+    P5.pre_ON_gate(case, decision_dir=dd)  # admits OFF, checks baseline/raw/manipulation/comparator before any ON exists
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/motioncorr-lfw-v5-20261026/pilot_v5_1/release_v5/pair_decision_v5.py", line 209, in wrapper
+    return fn(*a, **kw)
+           ^^^^^^^^^^^^
+  File "/tmp/motioncorr-lfw-v5-20261026/pilot_v5_1/release_v5/pair_decision_v5.py", line 348, in pre_ON_gate
+    cmp_info = _compare(ctx, baseline_dir / 'output', off_dir / 'output', cmp_dir)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/motioncorr-lfw-v5-20261026/pilot_v5_1/release_v5/pair_decision_v5.py", line 292, in _compare
+    return _read_comparison(out_dir, a_root, b_root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/motioncorr-lfw-v5-20261026/pilot_v5_1/release_v5/pair_decision_v5.py", line 300, in _read_comparison
+    raise PairError('COMPARATOR', 'comparator rc=%s, json present=%s' % (cmdj['returncode'], jp.is_file()))
+pair_decision_v5.PairError: COMPARATOR: comparator rc=1, json present=True

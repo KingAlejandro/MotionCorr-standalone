@@ -1,0 +1,301 @@
+{
+ "total": 59,
+ "failed": 2,
+ "results": [
+  {
+   "name": "positive: the audited baseline root passes the whole gate (OFF admitted, comparator IDENTICAL)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "baseline RUN.json --o names another case (basename)",
+   "ok": true,
+   "detail": "code=ROOT_AUDIT"
+  },
+  {
+   "name": "baseline RUN.json --o differs in the last character",
+   "ok": true,
+   "detail": "code=ROOT_AUDIT"
+  },
+  {
+   "name": "baseline RUN.json --o differs in one digit of the path (numeric)",
+   "ok": false,
+   "detail": "ACCEPTED but wanted ROOT_AUDIT"
+  },
+  {
+   "name": "baseline RUN.json has no --o value pair",
+   "ok": true,
+   "detail": "code=ROOT_AUDIT"
+  },
+  {
+   "name": "baseline RUN.json has a second --o",
+   "ok": true,
+   "detail": "code=ROOT_AUDIT"
+  },
+  {
+   "name": "control: the restored baseline passes the audit again",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "corrected_micrographs.star embeds an extra root",
+   "ok": true,
+   "detail": "code=ROOT_AUDIT"
+  },
+  {
+   "name": "corrected_micrographs.star embeds a different root only",
+   "ok": true,
+   "detail": "code=ROOT_AUDIT"
+  },
+  {
+   "name": "r1 failure mode (durable-style path over original-root files) is now a loud ROOT_AUDIT",
+   "ok": true,
+   "detail": "code=ROOT_AUDIT"
+  },
+  {
+   "name": "control: a changed MRC payload is still detected by the comparator after the audit",
+   "ok": true,
+   "detail": "code=COMPARATOR"
+  },
+  {
+   "name": "dry run validates, plans 15 launches (noisy ON first) and creates nothing",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "continuation ends in the decision with 15 new launches",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "the new ledger starts with the explicit REUSED event (before 1, remaining 15, ceiling 16)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "noisy/OFF is never launched again and the order is noisy ON then the 7 cases OFF/ON",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "the reused OFF RUN.json and the r1 ledger/STOP are unchanged after the run",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "pre-ON record for the reused OFF exists in the NEW decision directory (re-evaluated from saved outputs)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a finished continuation is not restartable in place",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "a later-case OFF compat failure stops before its ON",
+   "ok": true,
+   "detail": "code=COMPARATOR"
+  },
+  {
+   "name": "stop after exactly noisy ON and affine OFF, no affine ON, no further case",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "the old OFF still untouched after a stop",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a failing noisy ON producer stops the continuation",
+   "ok": true,
+   "detail": "code=PRODUCER"
+  },
+  {
+   "name": "no further launch after the noisy ON failure",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "unexpected existing row: another case directory",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "unexpected existing row: another case directory [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "unexpected existing row: an existing ON",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "unexpected existing row: an existing ON [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "unexpected existing row: a stray file in evidence_root",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "unexpected existing row: a stray file in evidence_root [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "changed first OFF: one output byte",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "changed first OFF: one output byte [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "changed first OFF: an extra file",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "changed first OFF: an extra file [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "changed first OFF: the receipt",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "changed first OFF: the receipt [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "missing first OFF",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "missing first OFF [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "r1 ledger changed",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "r1 ledger changed [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "r1 STOP changed",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "r1 STOP changed [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "reuse naming another case is refused",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "reuse naming another case is refused [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "reuse naming another arm is refused",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "reuse naming another arm is refused [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "admission reuse hash wrong",
+   "ok": true,
+   "detail": "code=REUSE"
+  },
+  {
+   "name": "admission reuse hash wrong [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "plan plus the reused OFF is not the budget",
+   "ok": true,
+   "detail": "code=BUDGET"
+  },
+  {
+   "name": "plan plus the reused OFF is not the budget [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "release without the reused-OFF hash",
+   "ok": true,
+   "detail": "code=RELEASE"
+  },
+  {
+   "name": "release without the reused-OFF hash [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "release naming the old v5.1 driver",
+   "ok": true,
+   "detail": "code=RELEASE"
+  },
+  {
+   "name": "release naming the old v5.1 driver [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "release without any file",
+   "ok": true,
+   "detail": "code=RELEASE"
+  },
+  {
+   "name": "release without any file [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "release commands hash wrong",
+   "ok": true,
+   "detail": "code=RELEASE"
+  },
+  {
+   "name": "release commands hash wrong [no producer launched]",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "decision directory not fresh",
+   "ok": true,
+   "detail": "code=EXISTS"
+  },
+  {
+   "name": "INFRA fault in run",
+   "ok": false,
+   "detail": "KeyError: 'event'"
+  }
+ ]
+}

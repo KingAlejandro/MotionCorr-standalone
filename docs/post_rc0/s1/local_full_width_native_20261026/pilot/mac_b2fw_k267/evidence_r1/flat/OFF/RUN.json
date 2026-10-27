@@ -1,0 +1,98 @@
+{
+ "schema": "mac-b2fw-k267-run/1",
+ "case": "flat",
+ "arm": "OFF",
+ "exit": 0,
+ "run_dir": "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/flat/OFF",
+ "argv": [
+  "/private/tmp/mc-mac-pilot-20261027/build-numpy253/motioncorr",
+  "--i",
+  "flat.star",
+  "--o",
+  "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/flat/OFF/output",
+  "--use_own",
+  "--j",
+  "2",
+  "--patch_x",
+  "1",
+  "--patch_y",
+  "1",
+  "--group_frames",
+  "1",
+  "--bin_factor",
+  "1",
+  "--seed",
+  "1",
+  "--skip_defect",
+  "--save_noDW",
+  "--first_frame_sum",
+  "1",
+  "--last_frame_sum",
+  "5",
+  "--skip_logfile",
+  "--max_iter",
+  "5"
+ ],
+ "cwd": "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/flat/OFF/input",
+ "binary_sha256": "d57432b87cdeb034c13e52ed920b19c0f819185f6ee92f04f44314337151f546",
+ "environment": {
+  "PATH": "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+  "PYTHONDONTWRITEBYTECODE": "1",
+  "OMP_NUM_THREADS": "2",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "MC_EXPERIMENT_CCF_DC_ARM": "none",
+  "MC_DIAG_MODEL_OUT": "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/flat/OFF/runtime.json"
+ },
+ "publication": {
+  "corrected_micrographs.star": {
+   "bytes": 699,
+   "sha256": "19b2fef847f1f88fc01cc1a156ea70c77d3b13fab5498a8c84420da28fe55386"
+  },
+  "corrected_micrographs_all_rlnAccumMotionEarly.eps": {
+   "bytes": 70575,
+   "sha256": "2bb1a760d00f67b79d523bcc50fb3210e321e83cf102d22a8ed85c3848eddb16"
+  },
+  "corrected_micrographs_all_rlnAccumMotionLate.eps": {
+   "bytes": 70573,
+   "sha256": "b7534c24a8e5602519ae1f7bec131c343ecf449546ecfe73967b1d4dd1c06318"
+  },
+  "corrected_micrographs_all_rlnAccumMotionTotal.eps": {
+   "bytes": 70575,
+   "sha256": "c83e03128806904fb1e1cdcffbd33666d5abdcd3a2eb52628c10e35129858de5"
+  },
+  "flat.log": {
+   "bytes": 555,
+   "sha256": "a5a01376c9a5de8385d234131da9626cb5dbe592f0656269aeac674ecc88fa93"
+  },
+  "flat.mrc": {
+   "bytes": 50176,
+   "sha256": "96ba39f5ea4030faf7edca478d6ac3ffb42f31303ee36fc12f0c42f62c900154"
+  },
+  "flat.star": {
+   "bytes": 973,
+   "sha256": "ee62be3ea44afcc1eeb37b1db3b0ecae081d9dfaf4f4ec671613768918ba1e3a"
+  },
+  "flat_shifts.eps": {
+   "bytes": 76415,
+   "sha256": "f6684eec63855fb9d0bee42b4be98ff58d6a812d604d1f6997e0890380af6c40"
+  },
+  "logfile.pdf": {
+   "bytes": 23119,
+   "sha256": "978d0ece0474189a2e176bfa31a6c8a5f3976b0f97dd8dda3a2a3824e1466a56"
+  },
+  "logfile.pdf.lst": {
+   "bytes": 341,
+   "sha256": "0c82174b01be9a4c10d225f4e39a1cd375bf043060215c44f99f9b94692dd305"
+  }
+ },
+ "runtime": {
+  "bytes": 161,
+  "sha256": "6b17cc53799c300fa065b08d912099b32db1b999d6622fee16ae1d80bba933d9"
+ },
+ "stdout": {
+  "bytes": 1072,
+  "sha256": "c636b2fd67ab9dbbc0783a101e16fe73e87972a034a58d45769b2a4957060e41"
+ },
+ "wall_seconds": 0.44670915603637695
+}

@@ -1,0 +1,282 @@
+{
+  "rows": [
+    {
+      "name": "positive_control_complete",
+      "expected": "ADMIT",
+      "observed": "ADMIT",
+      "error": null,
+      "as_expected": true
+    },
+    {
+      "name": "wrong_case",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: failed/unpinned producer",
+      "as_expected": true
+    },
+    {
+      "name": "exit_1",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: failed/unpinned producer",
+      "as_expected": true
+    },
+    {
+      "name": "exit_str_0",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: failed/unpinned producer",
+      "as_expected": true
+    },
+    {
+      "name": "exit_true",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: failed/unpinned producer",
+      "as_expected": true
+    },
+    {
+      "name": "exit_false_bool",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: failed/unpinned producer",
+      "as_expected": true
+    },
+    {
+      "name": "exit_float_0",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: failed/unpinned producer",
+      "as_expected": true
+    },
+    {
+      "name": "exit_missing",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: failed/unpinned producer",
+      "as_expected": true
+    },
+    {
+      "name": "receipt_binary_differs",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: failed/unpinned producer",
+      "as_expected": true
+    },
+    {
+      "name": "expected_binary_uppercase",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: failed/unpinned producer",
+      "as_expected": true
+    },
+    {
+      "name": "expected_binary_short",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: failed/unpinned producer",
+      "as_expected": true
+    },
+    {
+      "name": "missing_required_in_receipt",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: incomplete publication receipt",
+      "as_expected": true
+    },
+    {
+      "name": "bytes_mismatch",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: missing/changed publication: noisy.star",
+      "as_expected": true
+    },
+    {
+      "name": "sha_mismatch_same_size",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: missing/changed publication: noisy.star",
+      "as_expected": true
+    },
+    {
+      "name": "listed_file_absent",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: missing/changed publication: noisy.mrc",
+      "as_expected": true
+    },
+    {
+      "name": "dotdot_escape",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: publication path escapes run",
+      "as_expected": true
+    },
+    {
+      "name": "absolute_path_escape",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: publication path escapes run",
+      "as_expected": true
+    },
+    {
+      "name": "symlink_escape",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: missing/changed publication: link.txt",
+      "as_expected": true
+    },
+    {
+      "name": "runtime_tap_missing",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: runtime tap missing",
+      "as_expected": true
+    },
+    {
+      "name": "publication_as_list",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "AttributeError: 'list' object has no attribute 'items'",
+      "as_expected": true
+    },
+    {
+      "name": "publication_pin_not_dict",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "TypeError: string indices must be integers, not 'str'",
+      "as_expected": true
+    },
+    {
+      "name": "GAP_unlisted_extra_output_file",
+      "expected": "REJECT",
+      "observed": "ADMIT",
+      "error": null,
+      "as_expected": false
+    },
+    {
+      "name": "GAP_arm_label_ON_passed_as_OFF_slot",
+      "expected": "REJECT",
+      "observed": "ADMIT",
+      "error": null,
+      "as_expected": false
+    },
+    {
+      "name": "GAP_arm_field_absent",
+      "expected": "REJECT",
+      "observed": "ADMIT",
+      "error": null,
+      "as_expected": false
+    },
+    {
+      "name": "GAP_runtime_tap_unparseable_and_unpinned",
+      "expected": "REJECT",
+      "observed": "ADMIT",
+      "error": null,
+      "as_expected": false
+    },
+    {
+      "name": "fm_positive_control",
+      "expected": "ACCEPT",
+      "observed": "ACCEPT",
+      "error": null,
+      "as_expected": true,
+      "runtime_rms_A": 1.6453708531561488,
+      "STAR_rms_A": 1.6453973835300504
+    },
+    {
+      "name": "fm_local_enabled_missing",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: invalid local_enabled",
+      "as_expected": true
+    },
+    {
+      "name": "fm_local_enabled_int",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: invalid local_enabled",
+      "as_expected": true
+    },
+    {
+      "name": "fm_global_4_frames",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: runtime geometry/coefficients",
+      "as_expected": true
+    },
+    {
+      "name": "fm_coeff_17",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: runtime geometry/coefficients",
+      "as_expected": true
+    },
+    {
+      "name": "fm_coeff_nan",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: nonfinite runtime",
+      "as_expected": true
+    },
+    {
+      "name": "fm_disabled_nonzero_coeff",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: disabled model carries nonzero coefficients",
+      "as_expected": true
+    },
+    {
+      "name": "fm_truth_sha_mismatch",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: truth identity mismatch",
+      "as_expected": true
+    },
+    {
+      "name": "fm_wrong_truth_file",
+      "expected": "REJECT",
+      "observed": "ACCEPT",
+      "error": null,
+      "as_expected": false,
+      "runtime_rms_A": 1.6453708531561488,
+      "STAR_rms_A": 1.6453973835300504
+    },
+    {
+      "name": "fm_roi_out_of_bounds",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: invalid fixed ROI",
+      "as_expected": true
+    },
+    {
+      "name": "GAP_fm_roi_in_bounds_but_not_pinned_72x104",
+      "expected": "REJECT",
+      "observed": "ACCEPT",
+      "error": null,
+      "as_expected": false,
+      "runtime_rms_A": 2.3867127314595025,
+      "STAR_rms_A": 2.386708518241494
+    },
+    {
+      "name": "GAP_fm_pixel_size_not_pinned",
+      "expected": "REJECT",
+      "observed": "REJECT",
+      "error": "ValueError: unsupported STAR metadata",
+      "as_expected": true
+    },
+    {
+      "name": "GAP_fm_cross_case_star_affine_with_noisy_runtime",
+      "expected": "REJECT",
+      "observed": "ACCEPT",
+      "error": null,
+      "as_expected": false,
+      "runtime_rms_A": 1.6453708531561488,
+      "STAR_rms_A": 0.11704036245839815
+    }
+  ],
+  "all_as_expected": false,
+  "python": "3.13.7 (main, Aug 18 2025, 19:02:43) [Clang 20.1.4 ]",
+  "numpy": "2.4.2",
+  "adapter_sha256": "e0ef769c665dce1368738a327dc5a15efb0280462750709f0db99d164186a03b"
+}

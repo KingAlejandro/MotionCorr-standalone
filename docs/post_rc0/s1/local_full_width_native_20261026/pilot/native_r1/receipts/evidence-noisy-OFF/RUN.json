@@ -1,0 +1,382 @@
+{
+ "schema": "local-full-width-run-receipt-v3",
+ "case": "noisy",
+ "arm": "OFF",
+ "exit": 0,
+ "binary_sha256": "bb92e06116f434219ae3f94c4317ea9b0ea63ee9c5169fd03c28bc00de4d19bd",
+ "run_dir": "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/OFF",
+ "argv": [
+  "/tmp/motioncorr-lfw-v5-20261026/build/motioncorr",
+  "--i",
+  "noisy.star",
+  "--o",
+  "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/OFF/output",
+  "--use_own",
+  "--j",
+  "2",
+  "--patch_x",
+  "3",
+  "--patch_y",
+  "3",
+  "--group_frames",
+  "1",
+  "--bin_factor",
+  "1",
+  "--seed",
+  "1",
+  "--skip_defect",
+  "--save_noDW",
+  "--first_frame_sum",
+  "1",
+  "--last_frame_sum",
+  "5",
+  "--skip_logfile",
+  "--max_iter",
+  "5",
+  "--experimental_coupled_peak",
+  "all"
+ ],
+ "cwd": "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/OFF/input",
+ "environment": {
+  "OMP_NUM_THREADS": "2",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "MC_EXPERIMENT_CCF_DC_ARM": "both",
+  "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/OFF/runtime.json",
+  "PYTHONDONTWRITEBYTECODE": "1"
+ },
+ "controlled_environment_observed": {
+  "OMP_NUM_THREADS": "2",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "MC_EXPERIMENT_CCF_DC_ARM": "both",
+  "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/OFF/runtime.json"
+ },
+ "publication": {
+  "corrected_micrographs.star": {
+   "bytes": 689,
+   "sha256": "3fd4c5ddc56e4a30f3690fab6469adb6a6d42da8b707af193816642eace727da"
+  },
+  "corrected_micrographs_all_rlnAccumMotionEarly.eps": {
+   "bytes": 75689,
+   "sha256": "8b02360616c7f640d21612bd2be541ee2a995897ac42c7117296a346b5a0f06b"
+  },
+  "corrected_micrographs_all_rlnAccumMotionLate.eps": {
+   "bytes": 75686,
+   "sha256": "5a93726796347674df9431d09a972ebd6bf1ea0ac9b1cc0dec1a67666907fcb4"
+  },
+  "corrected_micrographs_all_rlnAccumMotionTotal.eps": {
+   "bytes": 75689,
+   "sha256": "7b8cec1d93ab260c41d57ae40f0bd187e992a96f68d1b8ea4c59ae93cafbedfd"
+  },
+  "logfile.pdf": {
+   "bytes": 24830,
+   "sha256": "0b6c1afcdd4d0a5d51e9a8f9c76f2a4450f27f322963c12c4149e4b39c454f54"
+  },
+  "logfile.pdf.lst": {
+   "bytes": 323,
+   "sha256": "997ff841c6ed5330cc08c4ddc51b55f5e95ccad96415aa37491dd6bf0df08b7e"
+  },
+  "noisy.log": {
+   "bytes": 2966,
+   "sha256": "97fe1967b07e9d5ad90a3dc1dcdc2deddc10dad65fb5b7a0ffb39f04f1af4463"
+  },
+  "noisy.mrc": {
+   "bytes": 50176,
+   "sha256": "a977be71578ac1530d3622c7e93c5c195ebfe779c63ec788f45f72f59f97817f"
+  },
+  "noisy.star": {
+   "bytes": 4857,
+   "sha256": "144b900f9e2283303b2966acb3d6261b906efda84fd1d857214e14efcfe93d3a"
+  },
+  "noisy_shifts.eps": {
+   "bytes": 57383,
+   "sha256": "1f8e56ce5ce809b19f49d598cf8cdee779ecac6d1285b8735b89fd0576069154"
+  }
+ },
+ "runtime": {
+  "bytes": 947,
+  "sha256": "9de5409895486ea04305a91fdf3c1350d5ddcb18559443fb3ca6a6fc99931325"
+ },
+ "stdout": {
+  "bytes": 2081,
+  "sha256": "7235110f59bbba50b22ef3b4103d2781e64c76c95e5a0b764f30507181d3ee25"
+ },
+ "extra_child_environment": {
+  "PATH": "/usr/bin:/bin"
+ },
+ "timed_out": false,
+ "wall_seconds_receipt_only": 0.1303098015487194,
+ "guard_receipt_sha256": "cc44286655129bfc924236aaab2e687759d15657d676aac20862b69bacc586d7",
+ "child_pid": 3640391,
+ "resource_samples": {
+  "status": "OBSERVED",
+  "reason": null,
+  "schedule": "immediately after Popen, then every 20 ms for 1 s, then every 100 ms until exit or timeout; stored samples capped at 400",
+  "n_samples": 7,
+  "stored_samples": 7,
+  "truncated": false,
+  "read_failures": 0,
+  "first_errors": [],
+  "vanished_reads": 0,
+  "children_file_missing_reads": 0,
+  "summary": {
+   "max_threads": 2,
+   "max_tasks": 2,
+   "distinct_cpus_allowed_lists": [
+    "32-47"
+   ],
+   "processes_seen": [
+    3640391,
+    3640395,
+    3640396
+   ],
+   "first_ms": 0,
+   "last_ms": 123
+  },
+  "samples": [
+   {
+    "t_ms": 0,
+    "procs": [
+     {
+      "name": "motioncorr",
+      "state": "R (running)",
+      "ppid": 3640375,
+      "threads": 1,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 0,
+      "pid": 3640391,
+      "tasks": 1,
+      "utime_ticks": 0,
+      "stime_ticks": 0
+     }
+    ]
+   },
+   {
+    "t_ms": 20,
+    "procs": [
+     {
+      "name": "motioncorr",
+      "state": "S (sleeping)",
+      "ppid": 3640375,
+      "threads": 2,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 10240,
+      "pid": 3640391,
+      "tasks": 2,
+      "utime_ticks": 2,
+      "stime_ticks": 0
+     },
+     {
+      "name": "sh",
+      "state": "S (sleeping)",
+      "ppid": 3640391,
+      "threads": 1,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 1536,
+      "pid": 3640395,
+      "tasks": 1,
+      "utime_ticks": 0,
+      "stime_ticks": 0
+     },
+     {
+      "name": "gs",
+      "state": "R (running)",
+      "ppid": 3640395,
+      "threads": 1,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 512,
+      "pid": 3640396,
+      "tasks": 1,
+      "utime_ticks": 0,
+      "stime_ticks": 0
+     }
+    ]
+   },
+   {
+    "t_ms": 41,
+    "procs": [
+     {
+      "name": "motioncorr",
+      "state": "S (sleeping)",
+      "ppid": 3640375,
+      "threads": 2,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 10240,
+      "pid": 3640391,
+      "tasks": 2,
+      "utime_ticks": 2,
+      "stime_ticks": 0
+     },
+     {
+      "name": "sh",
+      "state": "S (sleeping)",
+      "ppid": 3640391,
+      "threads": 1,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 1536,
+      "pid": 3640395,
+      "tasks": 1,
+      "utime_ticks": 0,
+      "stime_ticks": 0
+     },
+     {
+      "name": "gs",
+      "state": "R (running)",
+      "ppid": 3640395,
+      "threads": 1,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 19456,
+      "pid": 3640396,
+      "tasks": 1,
+      "utime_ticks": 1,
+      "stime_ticks": 0
+     }
+    ]
+   },
+   {
+    "t_ms": 61,
+    "procs": [
+     {
+      "name": "motioncorr",
+      "state": "S (sleeping)",
+      "ppid": 3640375,
+      "threads": 2,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 10240,
+      "pid": 3640391,
+      "tasks": 2,
+      "utime_ticks": 2,
+      "stime_ticks": 0
+     },
+     {
+      "name": "sh",
+      "state": "S (sleeping)",
+      "ppid": 3640391,
+      "threads": 1,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 1536,
+      "pid": 3640395,
+      "tasks": 1,
+      "utime_ticks": 0,
+      "stime_ticks": 0
+     },
+     {
+      "name": "gs",
+      "state": "R (running)",
+      "ppid": 3640395,
+      "threads": 1,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 23040,
+      "pid": 3640396,
+      "tasks": 1,
+      "utime_ticks": 2,
+      "stime_ticks": 1
+     }
+    ]
+   },
+   {
+    "t_ms": 82,
+    "procs": [
+     {
+      "name": "motioncorr",
+      "state": "S (sleeping)",
+      "ppid": 3640375,
+      "threads": 2,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 10240,
+      "pid": 3640391,
+      "tasks": 2,
+      "utime_ticks": 2,
+      "stime_ticks": 0
+     },
+     {
+      "name": "sh",
+      "state": "S (sleeping)",
+      "ppid": 3640391,
+      "threads": 1,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 1536,
+      "pid": 3640395,
+      "tasks": 1,
+      "utime_ticks": 0,
+      "stime_ticks": 0
+     },
+     {
+      "name": "gs",
+      "state": "R (running)",
+      "ppid": 3640395,
+      "threads": 1,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 25088,
+      "pid": 3640396,
+      "tasks": 1,
+      "utime_ticks": 4,
+      "stime_ticks": 1
+     }
+    ]
+   },
+   {
+    "t_ms": 103,
+    "procs": [
+     {
+      "name": "motioncorr",
+      "state": "S (sleeping)",
+      "ppid": 3640375,
+      "threads": 2,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 10240,
+      "pid": 3640391,
+      "tasks": 2,
+      "utime_ticks": 2,
+      "stime_ticks": 0
+     },
+     {
+      "name": "sh",
+      "state": "S (sleeping)",
+      "ppid": 3640391,
+      "threads": 1,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 1536,
+      "pid": 3640395,
+      "tasks": 1,
+      "utime_ticks": 0,
+      "stime_ticks": 0
+     },
+     {
+      "name": "gs",
+      "state": "R (running)",
+      "ppid": 3640395,
+      "threads": 1,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": 26624,
+      "pid": 3640396,
+      "tasks": 1,
+      "utime_ticks": 6,
+      "stime_ticks": 2
+     }
+    ]
+   },
+   {
+    "t_ms": 123,
+    "procs": [
+     {
+      "name": "motioncorr",
+      "state": "Z (zombie)",
+      "ppid": 3640375,
+      "threads": 1,
+      "cpus_allowed_list": "32-47",
+      "vmrss_kb": null,
+      "pid": 3640391,
+      "tasks": 1,
+      "utime_ticks": 2,
+      "stime_ticks": 0
+     }
+    ]
+   }
+  ],
+  "note": "a record only: deviations (for example Threads 3) are not a gate and --j 2 is never proof of Threads == 2"
+ },
+ "aborted": null,
+ "launch_error": null
+}

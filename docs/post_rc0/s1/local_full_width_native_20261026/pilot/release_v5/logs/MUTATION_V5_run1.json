@@ -1,0 +1,649 @@
+{
+ "anchor_admission": {
+  "status": "KILLED",
+  "groups": [
+   "identity"
+  ],
+  "intended": [
+   "altered anchored admission refused"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "altered anchored admission refused"
+  ],
+  "exit": 1
+ },
+ "anchor_commands": {
+  "status": "KILLED",
+  "groups": [
+   "identity"
+  ],
+  "intended": [
+   "hand-edited commands refused"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "hand-edited commands refused by the anchor"
+  ],
+  "exit": 1
+ },
+ "held_and_null_fields": {
+  "status": "KILLED",
+  "groups": [
+   "identity"
+  ],
+  "intended": [
+   "null candidate_binary refused",
+   "null build_receipt refused",
+   "HELD status refused"
+  ],
+  "covered": [
+   true,
+   true,
+   true
+  ],
+  "failed_count": 9,
+  "failed_tests": [
+   "null candidate_binary refused",
+   "null source_archive refused",
+   "null build_receipt refused",
+   "null compiler_and_config refused",
+   "null shared_libraries refused",
+   "null venue_identity refused",
+   "null fresh_venue_resource_admission refused",
+   "null independent_source_clearance refused",
+   "HELD status refused"
+  ],
+  "exit": 1
+ },
+ "identity_file_hash": {
+  "status": "SURVIVED",
+  "groups": [
+   "identity"
+  ],
+  "intended": [
+   "binary on disk differs",
+   "source archive changed after the pin",
+   "build receipt changed after the pin"
+  ],
+  "covered": [
+   true,
+   false,
+   false
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "binary on disk differs from candidate_binary.sha256"
+  ],
+  "exit": 1
+ },
+ "identity_symlink": {
+  "status": "SURVIVED",
+  "groups": [
+   "identity"
+  ],
+  "intended": [
+   "binary given as a symlink"
+  ],
+  "covered": [
+   false
+  ],
+  "failed_count": 0,
+  "failed_tests": [],
+  "exit": 0
+ },
+ "identity_commit": {
+  "status": "SURVIVED",
+  "groups": [
+   "identity"
+  ],
+  "intended": [
+   "candidate_source_commit differs"
+  ],
+  "covered": [
+   false
+  ],
+  "failed_count": 0,
+  "failed_tests": [],
+  "exit": 0
+ },
+ "identity_receipt_binding": {
+  "status": "KILLED",
+  "groups": [
+   "identity"
+  ],
+  "intended": [
+   "build receipt with the wrong archive sha256",
+   "build receipt with the wrong commit",
+   "build receipt with the wrong binary sha256",
+   "binary path differs from the build receipt"
+  ],
+  "covered": [
+   true,
+   true,
+   true,
+   true
+  ],
+  "failed_count": 6,
+  "failed_tests": [
+   "binary path differs from the build receipt (same bytes)",
+   "build receipt with the wrong archive sha256 (pin refreshed)",
+   "build receipt with the wrong commit (pin refreshed)",
+   "build receipt with the wrong tree (pin refreshed)",
+   "build receipt with the wrong binary sha256 (pin refreshed)",
+   "build receipt with the wrong binary path (pin refreshed)"
+  ],
+  "exit": 1
+ },
+ "resolved_commands": {
+  "status": "KILLED",
+  "groups": [
+   "identity"
+  ],
+  "intended": [
+   "resolved command row differs"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "resolved command row differs from the frozen admission"
+  ],
+  "exit": 1
+ },
+ "tool_pins": {
+  "status": "KILLED",
+  "groups": [
+   "identity"
+  ],
+  "intended": [
+   "altered tool pin refused"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "altered tool pin refused"
+  ],
+  "exit": 1
+ },
+ "gate_off_raw": {
+  "status": "KILLED",
+  "groups": [
+   "l2"
+  ],
+  "intended": [
+   "gate refuses the changed OFF runtime"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "gate refuses the changed OFF runtime"
+  ],
+  "exit": 1
+ },
+ "gate_l3_removed": {
+  "status": "KILLED",
+  "groups": [
+   "l3"
+  ],
+  "intended": [
+   "L3 gate stops before ON: OFF zero global DC counters",
+   "L3 gate stops before ON: OFF missing DC line",
+   "global-only OFF with local work",
+   "3x3 OFF with local eligible 0"
+  ],
+  "covered": [
+   true,
+   true,
+   true,
+   true
+  ],
+  "failed_count": 5,
+  "failed_tests": [
+   "L3 gate stops before ON: OFF zero global DC counters",
+   "L3 gate stops before ON: OFF missing DC line",
+   "L3 gate stops before ON: global-only OFF with local work",
+   "L3 gate: 3x3 OFF with local eligible 0",
+   "INFRA fault in g_l3"
+  ],
+  "exit": 1
+ },
+ "gate_l3_coverage_rules": {
+  "status": "KILLED",
+  "groups": [
+   "l3"
+  ],
+  "intended": [
+   "global-only OFF with local work",
+   "3x3 OFF with local eligible 0"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 3,
+  "failed_tests": [
+   "L3 gate stops before ON: global-only OFF with local work",
+   "L3 gate: 3x3 OFF with local eligible 0",
+   "INFRA fault in g_l3"
+  ],
+  "exit": 1
+ },
+ "verify_raw": {
+  "status": "KILLED",
+  "groups": [
+   "l2",
+   "l2b"
+  ],
+  "intended": [
+   "L2 self-consistent handwritten record",
+   "L2 OFF STAR edited after the gate"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 2,
+  "failed_tests": [
+   "L2 self-consistent handwritten record with a changed OFF runtime is rejected by admit_pair",
+   "L2 OFF STAR edited after the gate with a consistent receipt"
+  ],
+  "exit": 1
+ },
+ "verify_baseline": {
+  "status": "KILLED",
+  "groups": [
+   "l2b"
+  ],
+  "intended": [
+   "L2 baseline byte changed after the gate"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "L2 baseline byte changed after the gate"
+  ],
+  "exit": 1
+ },
+ "record_binding": {
+  "status": "KILLED",
+  "groups": [
+   "record"
+  ],
+  "intended": [
+   "tampered pre-ON record"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "tampered pre-ON record"
+  ],
+  "exit": 1
+ },
+ "record_status": {
+  "status": "KILLED",
+  "groups": [
+   "record"
+  ],
+  "intended": [
+   "pre-ON record status not PASS"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "pre-ON record status not PASS"
+  ],
+  "exit": 1
+ },
+ "fresh_pair_dir": {
+  "status": "SURVIVED",
+  "groups": [
+   "l1"
+  ],
+  "intended": [
+   "L1 per-case admit_pair then decide_pilot"
+  ],
+  "covered": [
+   false
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "INFRA fault in g_l1"
+  ],
+  "exit": 1
+ },
+ "witness_variant": {
+  "status": "KILLED",
+  "groups": [
+   "v4"
+  ],
+  "intended": [
+   "witness spelling variant rejected"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "witness spelling variant rejected"
+  ],
+  "exit": 1
+ },
+ "global_bits": {
+  "status": "KILLED",
+  "groups": [
+   "v4"
+  ],
+  "intended": [
+   "ON global runtime 1 ulp different"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "ON global runtime 1 ulp different"
+  ],
+  "exit": 1
+ },
+ "cases_param": {
+  "status": "KILLED",
+  "groups": [
+   "l1"
+  ],
+  "intended": [
+   "cases parameter reordered"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "cases parameter reordered"
+  ],
+  "exit": 1
+ },
+ "cases_present": {
+  "status": "KILLED",
+  "groups": [
+   "l1"
+  ],
+  "intended": [
+   "unlisted extra case directory"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "unlisted extra case directory"
+  ],
+  "exit": 1
+ },
+ "driver_release_present": {
+  "status": "KILLED",
+  "groups": [
+   "driver_ok"
+  ],
+  "intended": [
+   "real launch refused without PARENT_RELEASE.json"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "real launch refused without PARENT_RELEASE.json"
+  ],
+  "exit": 1
+ },
+ "driver_release_hashes": {
+  "status": "KILLED",
+  "groups": [
+   "driver_ok"
+  ],
+  "intended": [
+   "release file with a wrong release_module_sha256",
+   "release file with a wrong driver_sha256",
+   "release file with a wrong admission_sha256"
+  ],
+  "covered": [
+   true,
+   true,
+   true
+  ],
+  "failed_count": 5,
+  "failed_tests": [
+   "release file with a wrong release_module_sha256",
+   "release file with a wrong driver_sha256",
+   "release file with a wrong admission_sha256",
+   "refusals launched nothing",
+   "INFRA fault in g_driver_ok"
+  ],
+  "exit": 1
+ },
+ "driver_release_review": {
+  "status": "SURVIVED",
+  "groups": [
+   "driver_ok"
+  ],
+  "intended": [
+   "wrong approved_by"
+  ],
+  "covered": [
+   false
+  ],
+  "failed_count": 3,
+  "failed_tests": [
+   "release file with a wrong delta_review_report_sha256",
+   "refusals launched nothing",
+   "INFRA fault in g_driver_ok"
+  ],
+  "exit": 1
+ },
+ "driver_guard_call": {
+  "status": "SURVIVED",
+  "groups": [
+   "f8",
+   "driver_ok"
+  ],
+  "intended": [
+   "guard failure before an ON launch",
+   "guard receipt retained for every launch"
+  ],
+  "covered": [
+   true,
+   false
+  ],
+  "failed_count": 3,
+  "failed_tests": [
+   "guard failure before an ON launch",
+   "guard failure before an ON launch [launches stop at 1, STOP recorded]",
+   "guard failure before an ON launch [no ON run directory for noisy]"
+  ],
+  "exit": 1
+ },
+ "driver_exclusive_dir": {
+  "status": "KILLED",
+  "groups": [
+   "f9"
+  ],
+  "intended": [
+   "run directory already exists"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "run directory already exists"
+  ],
+  "exit": 1
+ },
+ "driver_staging_listing": {
+  "status": "KILLED",
+  "groups": [
+   "f9"
+  ],
+  "intended": [
+   "a truth file in the staged cwd is refused"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "a truth file in the staged cwd is refused"
+  ],
+  "exit": 1
+ },
+ "driver_producer_stop": {
+  "status": "KILLED",
+  "groups": [
+   "f1",
+   "f2"
+  ],
+  "intended": [
+   "fake child exits 1 on the first OFF",
+   "fake child times out"
+  ],
+  "covered": [
+   true,
+   true
+  ],
+  "failed_count": 4,
+  "failed_tests": [
+   "fake child exits 1 on the first OFF",
+   "fake child exits 1 on the first OFF [launches stop at 1, STOP recorded]",
+   "fake child times out",
+   "fake child times out [launches stop at 1, STOP recorded]"
+  ],
+  "exit": 1
+ },
+ "driver_evidence_empty": {
+  "status": "KILLED",
+  "groups": [
+   "f9"
+  ],
+  "intended": [
+   "evidence_root not empty at the start"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "evidence_root not empty at the start"
+  ],
+  "exit": 1
+ },
+ "driver_identity_each_launch": {
+  "status": "KILLED",
+  "groups": [
+   "f11"
+  ],
+  "intended": [
+   "binary changed between the OFF and ON launches"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 2,
+  "failed_tests": [
+   "binary changed between the OFF and ON launches [launches stop at 1, STOP recorded]",
+   "binary changed between the OFF and ON launches [no ON run directory for noisy]"
+  ],
+  "exit": 1
+ },
+ "driver_budget": {
+  "status": "KILLED",
+  "groups": [
+   "f10"
+  ],
+  "intended": [
+   "plan above the producer budget"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "plan above the producer budget"
+  ],
+  "exit": 1
+ },
+ "driver_fixture_pins": {
+  "status": "KILLED",
+  "groups": [
+   "f9"
+  ],
+  "intended": [
+   "fixture differing from its pin refuses the campaign"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "fixture differing from its pin refuses the campaign"
+  ],
+  "exit": 1
+ },
+ "driver_baseline_validate": {
+  "status": "KILLED",
+  "groups": [
+   "f10"
+  ],
+  "intended": [
+   "missing retained baseline refuses the campaign"
+  ],
+  "covered": [
+   true
+  ],
+  "failed_count": 1,
+  "failed_tests": [
+   "missing retained baseline refuses the campaign"
+  ],
+  "exit": 1
+ },
+ "driver_ledger_exists": {
+  "status": "SHADOWED_AS_DECLARED",
+  "groups": [
+   "driver_ok"
+  ],
+  "intended": [],
+  "covered": [],
+  "failed_count": 0,
+  "failed_tests": [],
+  "exit": 0
+ },
+ "pair_binary": {
+  "status": "SHADOWED_AS_DECLARED",
+  "groups": [
+   "v4",
+   "l2"
+  ],
+  "intended": [],
+  "covered": [],
+  "failed_count": 0,
+  "failed_tests": [],
+  "exit": 0
+ }
+}

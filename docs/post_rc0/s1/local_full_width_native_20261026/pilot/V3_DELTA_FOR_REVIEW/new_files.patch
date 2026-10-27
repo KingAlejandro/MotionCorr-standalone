@@ -1,0 +1,4120 @@
+diff --git a/SCORER_V3_PLAN.md b/SCORER_V3_PLAN.md
+new file mode 100644
+index 0000000..f7f22f6
+--- /dev/null
++++ b/SCORER_V3_PLAN.md
+@@ -0,0 +1,85 @@
++# Scorer v3 criteria (frozen before any v3 code or test exists)
++
++Scope: a pure consumer/admission layer for the HELD local full-width pilot. It launches nothing, reads no movie or
++image intensities, and adds no numerical operator: the field operators, dense 72x104 ROI, limits and recipes stay those of
++`score_fields_v2.py` (unchanged, imported by pinned hash). v1/v2 files, ADMISSION_DRAFT.json, COMMANDS_DRAFT.json and
++PLAN.md are not edited. Answers: Opus review M1 (arm/argv/env/cwd/witness binding) and L1-L4; L6 by a provenance note.
++
++## Public entry
++`admit_producer(run_dir, expected, admission, evidence_root)` and `score_admitted(...)`, where `expected` comes from
++`resolve_expected_row(commands, admission, case, arm, evidence_root, binary_path, binary_sha256)`. An unresolved draft row
++(argv[0] `<PINNED_LINUX_BINARY>`, no binary hash) is never admissible. `field_metrics_lowlevel` is v2's `field_metrics`
++re-exported unchanged and stays metadata-only: it is not producer admission.
++
++## Receipt schema (RUN.json, schema `local-full-width-run-receipt-v3`)
++`case, arm (OFF|ON), exit (int, not bool), binary_sha256, run_dir, argv, cwd, environment (exact declared dict),
++controlled_environment_observed (every child env var named MC_*, OMP_*, GOMP_*, KMP_*, OPENBLAS_*, MKL_*, BLIS_*,
++VECLIB_*, NUMEXPR_*), publication (output-relative path -> {bytes, sha256}, the complete rglob of output/), runtime
++({bytes, sha256} of runtime.json), stdout ({bytes, sha256} of stdout.log)`. Strict JSON: NaN/Infinity rejected.
++
++## Admission checks (each failure raises AdmissionError with a stable code)
++1. SCHEMA: schema string, field types, strict JSON.
++2. CASE: receipt case is the requested case and in the admitted case order. ARM: receipt arm is the requested arm and
++   not missing/other.
++3. EXIT: int 0.
++4. RUN_DIR: resolved run_dir == resolved evidence_root/case/arm and equals receipt run_dir (a directory copied into the
++   other arm's slot fails).
++5. ARGV: receipt argv == expected argv exactly; FLAG_COUNT: `--experimental_local_full_width_weight` occurs exactly once
++   for ON and never for OFF (duplicate/missing/wrong-arm flag). BINARY: argv[0] == expected binary path, receipt
++   binary_sha256 == expected, 64 lowercase hex. PLACEHOLDER: any `<...>` token in expected argv.
++6. CWD: receipt cwd == expected cwd (run_dir/input); INPUT: that directory holds exactly `<case>.star` and
++   `<case>.mrcs`, regular files, whose bytes equal the admission fixture pins.
++7. ENV: receipt environment == expected environment (exact dict); ENV_OBSERVED: controlled_environment_observed ==
++   the controlled-prefix subset of the expected environment (no extra OMP/BLAS/MC variable, e.g. OMP_PROC_BIND).
++8. INVENTORY: receipt publication keys == the complete set of regular files under output/ (no unlisted extra, no
++   symlink/special file, no escaping path) and == the baseline output names of the case row; PUBLICATION_HASH: every
++   listed bytes/sha256 matches.
++9. RUNTIME: runtime.json exists, bytes/sha256 equal the receipt, strict JSON, finite, `local_enabled` bool, global 5x2,
++   coefficients 18+18. STDOUT: stdout.log exists, bytes/sha256 equal the receipt.
++10. WITNESS: output/<case>.log first line is `Working on <case>.mrcs with 2 thread(s).` (LOG_CASE). Lines containing
++    `EXPERIMENTAL local full-width weight` must each match exactly
++    ` EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22`; any other form fails. Count must equal 9
++    when arm is ON and the row patch grid is 3x3, otherwise 0; the row's declared count must equal that derivation.
++
++## Scoring binding (`score_admitted`, `field_metrics_bound`)
++Manifest sha256 == 9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc; case in manifest; ROI ==
++[12,84,12,116] (any other ROI, even in bounds, fails ROI); truth file name == `<case>_field.npy` and its bytes equal the
++manifest pin (TRUTH); runtime path == run_dir/runtime.json and STAR path == run_dir/output/<case>.star, both
++receipt-hashed (CROSS_CASE); STAR `_rlnMicrographMovieName` stem == case (STAR_CASE). `score_admitted` derives paths only
++from run_dir, so a producer cannot be scored against another case's STAR or runtime.
++
++## Admission v3 draft (L4)
++New `ADMISSION_DRAFT_v3.json` (version v3, supersedes ADMISSION_DRAFT.json by hash): all original pins plus the comparator
++`compare_products.py` 53449d2da682305c8c11e3ed3efb91103530196e481ac075b00f90e3d5ea0f47, the six transitive consumer/
++generator files, `score_fields_v2.py`, `score_fields_v3.py`, the v3 tests and builders, lane.py and factorial_common.py,
++each with an explicit root key. Final Linux binary, source archive, compiler, venue, lease and clearance fields stay
++null; status stays HELD. `COMMANDS_DRAFT_v3.json` is generated from it; its argv/cwd/environment equal
++COMMANDS_DRAFT.json. `verify_tool_pins` rechecks every pin against files at caller-supplied roots.
++Additive `ADMISSION_AMENDMENT_v3.md` states: staged two-file cwd and new output root versus the retained producers (cwd was
++the 33-file fixture directory); retained binary built from production 326f03a0 vs candidate 634e4b48 (src equal at
++215c37b0); OFF byte-compatibility with the retained baseline is an empirical gate, and an OFF identity or compatibility
++failure stops before ON (`on_launch_permitted` returns False unless OFF compatibility and source identity are both PASS).
++
++## Tests (fixed before running; tests/test_score_fields_v3.py)
++Synthetic complete receipts built in scratch (<=100 MB; fake input/output files; real retained noisy runtime.json, STAR,
++truth and manifest where scoring is exercised): noisy 3x3 OFF and ON, flat 1x1 OFF and ON.
++Positive: all four admit; noisy OFF and ON score (runtime/STAR numbers equal the retained pair's); ON counts 9 witnesses,
++the other three 0; real `generate` of the commands equals v1 argv/env.
++Isolated negatives, each starting from a valid receipt and changing one thing, each must fail with its intended code:
++missing arm; ON receipt in OFF slot; OFF receipt in ON slot; swapped run directories; missing flag on ON; flag on OFF;
++duplicate flag; extra unknown argv; wrong binary hash; argv[0] placeholder; env value changed; missing env var; extra
++OMP_PROC_BIND; cwd mismatch; extra/missing input file; input byte tamper; witness x_norm 22; pnx 41; nfx 21; 8 lines
++on 3x3 ON; 10 lines; 1 line on a global-only ON; 1 line on OFF; non-matching spaced variant; log for another case;
++unlisted extra output file; deleted listed file; changed listed byte; symlink in output; runtime.json tamper; runtime
++tamper with matching receipt hash but NaN; runtime shape; stdout.log tamper; stdout.log missing; exit 1 with a complete
++tap; case swap; ROI [0,96,0,128]; manifest hash swap; affine STAR in noisy run; truth of another case name; non-numeric
++types in receipt. Controls: v2 `complete_publication` admits the swapped/omitted-arm, extra-output and
++runtime-tamper receipts (documenting the gaps v3 closes). Original negatives: re-run v2's scorer_negatives table
++against v3 where it applies; the four retained metadata score pairs reproduce within 1e-12 A through
++`field_metrics_bound` and each is still rejected by `admit_producer`.
++Every run, including failed attempts, is logged and kept. No criterion is changed after results; a failing criterion is
++fixed in code or recorded, never relaxed.
++
++## Not claimed
++No producer exists, no native run, no estimator or native acceptance. Oracle numbers remain independently reproduced
++direct-field RMS values of a fixed-G family, never a floor to subtract.
+diff --git a/SCORER_V3_PLAN.sha256 b/SCORER_V3_PLAN.sha256
+new file mode 100644
+index 0000000..5de2692
+--- /dev/null
++++ b/SCORER_V3_PLAN.sha256
+@@ -0,0 +1,2 @@
++5801f877321bbd930b34b9961a99969257c831317f5449704a43361c8eb274a2  SCORER_V3_PLAN.md
++2026-10-26T20:24:00Z
+diff --git a/score_fields_v3.py b/score_fields_v3.py
+new file mode 100644
+index 0000000..623c21f
+--- /dev/null
++++ b/score_fields_v3.py
+@@ -0,0 +1,301 @@
++"""Producer admission and field scoring v3 for the HELD local full-width pilot.
++
++Pure consumer layer: launches nothing and reads no movie or image intensities. The numerical field operators, dense ROI,
++limits and recipes are those of score_fields_v2 (imported by pinned hash, unchanged). Criteria: SCORER_V3_PLAN.md.
++field_metrics_lowlevel is v2's metadata-only calculation and is NOT producer admission; use admit_producer/score_admitted.
++"""
++from pathlib import Path
++import hashlib, json, os, re, sys
++sys.dont_write_bytecode = True
++
++HERE = Path(__file__).resolve().parent
++V2_SHA256 = 'e0ef769c665dce1368738a327dc5a15efb0280462750709f0db99d164186a03b'  # score_fields_v2.py exactly as retained
++_V2_PIN_FILE = HERE / 'score_fields_v2.py'
++
++MANIFEST_SHA256 = '9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc'
++FIXED_ROI = [12, 84, 12, 116]
++FIXED_RECIPE = (5, 96, 128)
++PLACEHOLDER_BINARY = '<PINNED_LINUX_BINARY>'
++DRAFT_ROOT = '/tmp/motioncorr-local-full-width-native-20261026/evidence'
++FLAG = '--experimental_local_full_width_weight'
++RECEIPT_SCHEMA = 'local-full-width-run-receipt-v3'
++CONTROLLED_PREFIXES = ('MC_', 'OMP_', 'GOMP_', 'KMP_', 'OPENBLAS_', 'MKL_', 'BLIS_', 'VECLIB_', 'NUMEXPR_')
++WITNESS_MARKER = 'EXPERIMENTAL local full-width weight'
++WITNESS_LINE = ' EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22'
++HEX64 = re.compile(r'^[0-9a-f]{64}$')
++
++
++class AdmissionError(ValueError):
++    def __init__(self, code, message=''):
++        super().__init__(code + (': ' + message if message else ''))
++        self.code = code
++
++
++def _fail(code, message=''):
++    raise AdmissionError(code, message)
++
++
++def sha(p):
++    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
++
++
++def _strict_json(text, what):
++    def bad(c):
++        raise ValueError('non-finite constant ' + c)
++    try:
++        return json.loads(text, parse_constant=bad)
++    except ValueError as e:
++        _fail('NONFINITE' if 'non-finite' in str(e) else 'SCHEMA', what + ': ' + str(e))
++
++
++def _is_int(v):
++    return type(v) is int
++
++
++def _hex(v):
++    return isinstance(v, str) and HEX64.match(v) is not None
++
++
++# ---- numerical consumers: v2 unchanged, imported by pinned hash --------------------------------------------------------
++def _import_v2(expected_sha256):
++    if sha(_V2_PIN_FILE) != expected_sha256:
++        _fail('TOOL_PIN', 'score_fields_v2.py differs from the pinned hash')
++    sys.path.insert(0, str(HERE))
++    import score_fields_v2 as v2
++    if Path(v2.__file__).resolve() != _V2_PIN_FILE:
++        _fail('TOOL_PIN', 'foreign score_fields_v2 module')
++    return v2
++
++
++V2 = _import_v2(V2_SHA256)
++field_metrics_lowlevel = V2.field_metrics  # metadata-only; never producer admission
++LIMITS = V2.LIMITS
++
++
++# ---- tool pins ----------------------------------------------------------------------------------------------------------
++def verify_tool_pins(admission, roots):
++    """Every admission tool pin must match the bytes at the caller-supplied root."""
++    for entry in admission['tools']:
++        root = roots.get(entry['root'])
++        if root is None:
++            _fail('TOOL_PIN', 'no root supplied for ' + entry['root'])
++        p = Path(root) / entry['path']
++        if not p.is_file() or not _hex(entry['sha256']) or sha(p) != entry['sha256']:
++            _fail('TOOL_PIN', entry['root'] + ':' + entry['path'])
++    return True
++
++
++# ---- expected-row resolution -------------------------------------------------------------------------------------------
++def _reroot(value, evidence_root):
++    if isinstance(value, str) and value.startswith(DRAFT_ROOT):
++        return str(evidence_root) + value[len(DRAFT_ROOT):]
++    return value
++
++
++def witness_expected(arm, patch_grid):
++    return 9 if (arm == 'ON' and list(patch_grid) == [3, 3]) else 0
++
++
++def resolve_expected_row(commands, admission, case, arm, evidence_root, binary_path, binary_sha256):
++    """Resolve one draft command row for an explicitly supplied binary; the draft placeholder is never admissible itself."""
++    if not isinstance(binary_path, str) or not binary_path.startswith('/') or '<' in binary_path:
++        _fail('PLACEHOLDER', 'binary path must be an explicit absolute path')
++    if not _hex(binary_sha256):
++        _fail('BINARY', 'binary sha256 must be 64 lowercase hex')
++    rows = [r for r in commands if r.get('case') == case and r.get('arm') == arm]
++    if len(rows) != 1:
++        _fail('CASE', 'expected exactly one draft row for %r/%r' % (case, arm))
++    row = rows[0]
++    if row['argv'][0] != PLACEHOLDER_BINARY or row.get('status') != 'UNRUN_HELD':
++        _fail('PLACEHOLDER', 'draft row is not an unresolved HELD draft')
++    arows = [r for r in admission['rows'] if r['case'] == case]
++    if len(arows) != 1:
++        _fail('CASE', 'case absent from the admission rows')
++    grid = arows[0]['patch_grid']
++    count = witness_expected(arm, grid)
++    if row['expected_local_weight_witness_lines'] != count:
++        _fail('WITNESS', 'draft witness count disagrees with arm and patch grid')
++    root = str(evidence_root)
++    return {
++        'case': case, 'arm': arm, 'binary_path': binary_path, 'binary_sha256': binary_sha256,
++        'argv': [binary_path] + [_reroot(a, root) for a in row['argv'][1:]],
++        'cwd': _reroot(row['cwd'], root),
++        'environment': {k: _reroot(v, root) for k, v in row['environment'].items()},
++        'input_files': list(row['input_files']),
++        'patch_grid': list(grid), 'expected_witness_lines': count,
++        'expected_output_names': sorted(k[len('output/'):] for k in arows[0]['baseline_files'] if k.startswith('output/')),
++    }
++
++
++# ---- admission ---------------------------------------------------------------------------------------------------------
++def _walk_output(out):
++    if out.is_symlink() or not out.is_dir():
++        _fail('INVENTORY', 'output is not a real directory')
++    found = {}
++    for dirpath, dirnames, filenames in os.walk(out, followlinks=False):
++        for name in list(dirnames) + filenames:
++            p = Path(dirpath) / name
++            if p.is_symlink():
++                _fail('INVENTORY', 'symlink under output: ' + name)
++        for name in filenames:
++            p = Path(dirpath) / name
++            if not p.is_file():
++                _fail('INVENTORY', 'special file under output: ' + name)
++            found[p.relative_to(out).as_posix()] = p
++    return found
++
++
++def _bound_file(run_dir, name, pin, code):
++    p = run_dir / name
++    if p.is_symlink() or not p.is_file():
++        _fail(code, name + ' missing')
++    if not (isinstance(pin, dict) and _is_int(pin.get('bytes')) and _hex(pin.get('sha256'))):
++        _fail('SCHEMA', name + ' receipt pin malformed')
++    data = p.read_bytes()
++    if len(data) != pin['bytes'] or hashlib.sha256(data).hexdigest() != pin['sha256']:
++        _fail(code, name + ' differs from the receipt')
++    return data
++
++
++def admit_producer(run_dir, expected, admission, evidence_root):
++    """Bind receipt, argv, env, cwd, inputs, complete publication, runtime/stdout bytes and the log witness to `expected`."""
++    d = Path(run_dir)
++    case, arm = expected['case'], expected['arm']
++    if any(isinstance(a, str) and a.startswith('<') and a.endswith('>') for a in expected['argv']) or not _hex(expected.get('binary_sha256')):
++        _fail('PLACEHOLDER', 'expected row is not resolved')
++    if case not in admission['case_order']:
++        _fail('CASE', 'case not admitted')
++    if arm not in ('OFF', 'ON'):
++        _fail('ARM', 'expected arm invalid')
++    if d.resolve() != (Path(evidence_root) / case / arm).resolve():
++        _fail('RUN_DIR', 'run directory is not evidence_root/case/arm')
++    rp = d / 'RUN.json'
++    if rp.is_symlink() or not rp.is_file():
++        _fail('SCHEMA', 'RUN.json missing')
++    r = _strict_json(rp.read_text(), 'RUN.json')
++    if not isinstance(r, dict) or r.get('schema') != RECEIPT_SCHEMA:
++        _fail('SCHEMA', 'receipt schema')
++    if r.get('case') != case:
++        _fail('CASE', 'receipt case %r' % (r.get('case'),))
++    if r.get('arm') != arm:  # missing arm is None, which also fails
++        _fail('ARM', 'receipt arm %r, expected %r' % (r.get('arm'), arm))
++    if not _is_int(r.get('exit')) or r['exit'] != 0:
++        _fail('EXIT', 'producer exit %r' % (r.get('exit'),))
++    if r.get('run_dir') != str(d.resolve()):
++        _fail('RUN_DIR', 'receipt run_dir differs')
++    argv = r.get('argv')
++    if not (isinstance(argv, list) and all(isinstance(a, str) for a in argv)):
++        _fail('SCHEMA', 'argv type')
++    if argv.count(FLAG) != (1 if arm == 'ON' else 0):
++        _fail('FLAG_COUNT', '%s occurs %d times for %s' % (FLAG, argv.count(FLAG), arm))
++    if r.get('binary_sha256') != expected['binary_sha256'] or not _hex(r.get('binary_sha256')):
++        _fail('BINARY', 'binary sha256')
++    if argv != expected['argv']:
++        _fail('ARGV', 'argv differs from the resolved row')
++    if r.get('cwd') != expected['cwd'] or Path(expected['cwd']).resolve() != (d / 'input').resolve():
++        _fail('CWD', 'cwd differs from run_dir/input row value')
++    inp = d / 'input'
++    if inp.is_symlink() or not inp.is_dir():
++        _fail('INPUT', 'input directory missing')
++    names = sorted(p.name for p in inp.iterdir())
++    if names != sorted(expected['input_files']):
++        _fail('INPUT', 'input directory must hold exactly %s, found %s' % (sorted(expected['input_files']), names))
++    for n in names:
++        p = inp / n
++        pin = admission['fixture_files'].get(n)
++        if p.is_symlink() or not p.is_file() or pin is None or p.stat().st_size != pin['bytes'] or sha(p) != pin['sha256']:
++            _fail('INPUT', n + ' differs from the fixture pin')
++    env = r.get('environment')
++    if env != expected['environment']:
++        _fail('ENV', 'environment differs from the declared row')
++    observed = r.get('controlled_environment_observed')
++    want = {k: v for k, v in expected['environment'].items() if k.startswith(CONTROLLED_PREFIXES)}
++    if observed != want:
++        _fail('ENV_OBSERVED', 'controlled child environment %r differs from %r' % (observed, want))
++    pub = r.get('publication')
++    if not isinstance(pub, dict) or not all(isinstance(k, str) for k in pub):
++        _fail('SCHEMA', 'publication type')
++    for k in pub:
++        if k.startswith('/') or '..' in Path(k).parts:
++            _fail('INVENTORY', 'publication path escapes output: ' + k)
++    found = _walk_output(d / 'output')
++    if set(pub) != set(found):
++        _fail('INVENTORY', 'receipt differs from the output tree: only-receipt %s, only-disk %s' % (sorted(set(pub) - set(found)), sorted(set(found) - set(pub))))
++    if sorted(pub) != expected['expected_output_names']:
++        _fail('INVENTORY', 'output names differ from the baseline names of the case')
++    for rel in sorted(pub):
++        _bound_file(d / 'output', rel, pub[rel], 'PUBLICATION_HASH')
++    rt = _bound_file(d, 'runtime.json', r.get('runtime'), 'RUNTIME')
++    model = _strict_json(rt.decode('utf-8'), 'runtime.json')
++    import numpy as np
++    try:
++        g = np.asarray(model['global'], dtype=float); cx = np.asarray(model['coeff_x'], dtype=float); cy = np.asarray(model['coeff_y'], dtype=float)
++    except (KeyError, TypeError, ValueError):
++        _fail('RUNTIME', 'runtime model malformed')
++    if type(model.get('local_enabled')) is not bool or g.shape != (FIXED_RECIPE[0], 2) or cx.shape != (18,) or cy.shape != (18,):
++        _fail('RUNTIME', 'runtime geometry')
++    if not all(np.isfinite(a).all() for a in (g, cx, cy)):
++        _fail('NONFINITE', 'runtime model')
++    _bound_file(d, 'stdout.log', r.get('stdout'), 'STDOUT')
++    # log witness (L1): written to output/<case>.log by the per-movie log stream, not to stdout
++    try:
++        text = (d / 'output' / (case + '.log')).read_bytes().decode('utf-8')
++    except UnicodeDecodeError:
++        _fail('LOG_CASE', 'log is not utf-8')
++    lines = text.split('\n')
++    if lines[0] != 'Working on %s.mrcs with 2 thread(s).' % case:
++        _fail('LOG_CASE', 'log does not belong to this case: %r' % lines[0][:80])
++    marked = [ln for ln in lines if WITNESS_MARKER in ln]
++    for ln in marked:
++        if ln != WITNESS_LINE:
++            _fail('WITNESS', 'malformed witness line %r' % ln)
++    if len(marked) != expected['expected_witness_lines'] or expected['expected_witness_lines'] != witness_expected(arm, expected['patch_grid']):
++        _fail('WITNESS', '%d witness lines, expected %d for %s %s' % (len(marked), witness_expected(arm, expected['patch_grid']), arm, expected['patch_grid']))
++    return {'receipt': r, 'case': case, 'arm': arm, 'witness_lines': len(marked)}
++
++
++# ---- scoring -----------------------------------------------------------------------------------------------------------
++def _star_movie_stem(star_path):
++    m = re.search(r'^_rlnMicrographMovieName\s+(\S+)\s*$', Path(star_path).read_text(), re.M)
++    return None if m is None else Path(m.group(1)).stem
++
++
++def field_metrics_bound(case, runtime_path, star_path, truth_path, fixture_dir):
++    """Field metrics bound to the pinned manifest, fixed ROI and one case. Still metadata-only (no producer admission)."""
++    fx = Path(fixture_dir)
++    if sha(fx / 'MANIFEST.json') != MANIFEST_SHA256:
++        _fail('MANIFEST', 'manifest sha256 differs from the pin')
++    manifest = json.loads((fx / 'MANIFEST.json').read_text())
++    if case not in manifest['cases']:
++        _fail('CASE', 'case not in manifest')
++    meta = manifest['cases'][case]
++    r = meta['recipe']
++    if list(meta['roi']) != FIXED_ROI:
++        _fail('ROI', 'ROI %r is not the fixed %r' % (meta['roi'], FIXED_ROI))
++    if (r['frames'], r['ny'], r['nx']) != FIXED_RECIPE:
++        _fail('ROI', 'recipe geometry')
++    tname = case + '_field.npy'
++    if Path(truth_path).name != tname:
++        _fail('TRUTH', 'truth file %r does not belong to case %r' % (Path(truth_path).name, case))
++    if Path(star_path).name != case + '.star':
++        _fail('STAR_CASE', 'STAR file name does not belong to the case')
++    if _star_movie_stem(star_path) != case:
++        _fail('STAR_CASE', 'STAR movie name %r is not %r' % (_star_movie_stem(star_path), case))
++    out = V2.field_metrics(runtime_path, star_path, truth_path, meta, meta['files'][tname])
++    out['binding'] = {'case': case, 'manifest_sha256': MANIFEST_SHA256, 'roi': FIXED_ROI}
++    return out
++
++
++def score_admitted(run_dir, expected, admission, evidence_root, fixture_dir):
++    """Admission first; scoring paths come only from the admitted run directory."""
++    adm = admit_producer(run_dir, expected, admission, evidence_root)
++    d = Path(run_dir)
++    case = expected['case']
++    m = field_metrics_bound(case, d / 'runtime.json', d / 'output' / (case + '.star'), Path(fixture_dir) / (case + '_field.npy'), fixture_dir)
++    m['admission'] = {'arm': adm['arm'], 'witness_lines': adm['witness_lines']}
++    return m
++
++
++def on_launch_permitted(off_compatibility, source_identity):
++    """OFF compatibility and source identity must both be PASS before any ON producer is launched."""
++    return off_compatibility == 'PASS' and source_identity == 'PASS'
+diff --git a/tests/test_score_fields_v3.py b/tests/test_score_fields_v3.py
+new file mode 100644
+index 0000000..ab7ec30
+--- /dev/null
++++ b/tests/test_score_fields_v3.py
+@@ -0,0 +1,395 @@
++"""Focused tests for score_fields_v3 (criteria frozen in SCORER_V3_PLAN.md). Scratch files only; no producer, no movie pixels.
++
++usage: python -B tests/test_score_fields_v3.py RESULT.json   (real NumPy interpreter; run with OMP/OPENBLAS threads <= 2)
++"""
++import copy, hashlib, json, os, shutil, sys, tempfile
++from pathlib import Path
++sys.dont_write_bytecode = True
++PILOT = Path(__file__).resolve().parent.parent
++sys.path.insert(0, str(PILOT))
++import score_fields_v3 as V3
++import score_fields_v2 as V2
++
++RAW = Path('/Users/alex.konstantinov/Documents/MotionCorr-evidence/20261026/B2-factorial-parent-audit-r1/raw')
++FIX = Path('/tmp/motioncorr-b2-retained-challenge-20261026/v2fixtures')
++REPO = Path('/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026')
++CONSUMER = Path('/tmp/mc-w8-common-mean-screen-20261026/src_4fa272f6')
++ADM = json.loads((PILOT / 'ADMISSION_DRAFT_v3.json').read_text())
++CMD = json.loads((PILOT / 'COMMANDS_DRAFT_v3.json').read_text())
++BIN, BINSHA = '/fake/venue/bin/motioncorr', 'ab' * 32
++sha = lambda b: hashlib.sha256(b).hexdigest()
++RESULTS = []
++
++
++def record(name, ok, detail=''):
++    RESULTS.append({'name': name, 'ok': bool(ok), 'detail': detail})
++    print(('PASS ' if ok else 'FAIL ') + name + ((' :: ' + detail) if detail else ''), flush=True)
++
++
++class World:
++    """One scratch evidence root with a test copy of the admission whose fixture pins match the fake inputs."""
++    def __init__(self, scratch):
++        self.root = Path(scratch) / 'ev'
++        self.adm = copy.deepcopy(ADM)
++        self.fixtures = {}
++
++    def fake(self, case, name):
++        return (name + ' ' + case + ' fake').encode()
++
++    def build(self, case, arm, *, log_witness=None, patch=None, runtime_bytes=None, star_bytes=None, root=None):
++        root = Path(root or self.root)
++        exp = V3.resolve_expected_row(CMD, self.adm, case, arm, root, BIN, BINSHA)
++        d = root / case / arm
++        if d.exists():
++            shutil.rmtree(d)
++        (d / 'input').mkdir(parents=True); (d / 'output').mkdir()
++        for n in exp['input_files']:
++            b = self.fake(case, n); (d / 'input' / n).write_bytes(b)
++            self.adm['fixture_files'][n] = {'bytes': len(b), 'sha256': sha(b)}
++        real = case == 'noisy'
++        for rel in exp['expected_output_names']:
++            if rel == case + '.log':
++                n = exp['expected_witness_lines'] if log_witness is None else log_witness
++                text = 'Working on %s.mrcs with 2 thread(s).\n\nGlobal alignment:\n' % case + ' Iteration 1: RMSD = 1 px\n'
++                text += ''.join('Patch (1, %d): %d / 9\n%s\n Iteration 1: RMSD = 1 px\n' % (i, i, V3.WITNESS_LINE) for i in range(1, n + 1))
++                (d / 'output' / rel).write_text(text)
++            elif rel == case + '.star':
++                if star_bytes is not None:
++                    (d / 'output' / rel).write_bytes(star_bytes)
++                elif real:
++                    shutil.copy(RAW / 'noisy' / 'UP_only' / 'output' / 'noisy.star', d / 'output' / rel)
++                else:
++                    (d / 'output' / rel).write_text('data_general\n\n_rlnMicrographMovieName  %s.mrcs\n' % case)
++            else:
++                (d / 'output' / rel).write_bytes(self.fake(case, rel))
++        if runtime_bytes is not None:
++            (d / 'runtime.json').write_bytes(runtime_bytes)
++        elif real:
++            shutil.copy(RAW / 'noisy' / 'UP_only' / 'runtime.json', d / 'runtime.json')
++        else:
++            (d / 'runtime.json').write_text(json.dumps({'local_enabled': False, 'global': [[0.0, 0.0]] * 5, 'coeff_x': [0.0] * 18, 'coeff_y': [0.0] * 18}))
++        (d / 'stdout.log').write_text('stdout of %s %s\n' % (case, arm))
++        self.write_receipt(d, exp)
++        return d, exp
++
++    def write_receipt(self, d, exp, edit=None):
++        pub = {}
++        out = d / 'output'
++        for p in sorted(out.rglob('*')):
++            if p.is_file() and not p.is_symlink():
++                b = p.read_bytes(); pub[p.relative_to(out).as_posix()] = {'bytes': len(b), 'sha256': sha(b)}
++        pin = lambda n: {'bytes': (d / n).stat().st_size, 'sha256': sha((d / n).read_bytes())}
++        r = {'schema': V3.RECEIPT_SCHEMA, 'case': exp['case'], 'arm': exp['arm'], 'exit': 0, 'binary_sha256': BINSHA,
++             'run_dir': str(d.resolve()), 'argv': list(exp['argv']), 'cwd': exp['cwd'], 'environment': dict(exp['environment']),
++             'controlled_environment_observed': {k: v for k, v in exp['environment'].items() if k.startswith(V3.CONTROLLED_PREFIXES)},
++             'publication': pub, 'runtime': pin('runtime.json'), 'stdout': pin('stdout.log')}
++        if edit:
++            edit(r)
++        (d / 'RUN.json').write_text(json.dumps(r))
++        return r
++
++    def admit(self, d, exp, root=None):
++        return V3.admit_producer(d, exp, self.adm, root or self.root)
++
++
++def expect_code(name, code, fn):
++    try:
++        fn()
++    except V3.AdmissionError as e:
++        record(name, e.code == code, 'code=%s' % e.code if e.code == code else 'wanted %s got %s: %s' % (code, e.code, e))
++        return
++    except Exception as e:  # any non-AdmissionError is an infrastructure fault, not the intended rejection
++        record(name, False, 'wrong exception %s: %s' % (type(e).__name__, e))
++        return
++    record(name, False, 'ADMITTED but wanted %s' % code)
++
++
++def main(result_path):
++    with tempfile.TemporaryDirectory(prefix='mc-lfw-v3-') as scratch:
++        w = World(scratch)
++        # ---- positives ----------------------------------------------------------------------------------------
++        built = {}
++        for case, arm in [('noisy', 'OFF'), ('noisy', 'ON'), ('flat', 'OFF'), ('flat', 'ON')]:
++            built[(case, arm)] = w.build(case, arm)
++        for (case, arm), (d, exp) in built.items():
++            try:
++                a = w.admit(d, exp)
++                want = 9 if (case, arm) == ('noisy', 'ON') else 0
++                record('positive admit %s %s' % (case, arm), a['witness_lines'] == want, 'witness_lines=%d' % a['witness_lines'])
++            except Exception as e:
++                record('positive admit %s %s' % (case, arm), False, repr(e))
++        for arm in ('OFF', 'ON'):
++            d, exp = built[('noisy', arm)]
++            try:
++                m = V3.score_admitted(d, exp, w.adm, w.root, FIX)
++                old = json.loads((RAW / 'noisy' / 'UP_only' / 'metrics.json').read_text())
++                diff = max(abs(m[a]['angstrom'][k] - old[a]['angstrom'][k]) for a in ('runtime', 'STAR') for k in V3.LIMITS)
++                record('positive score noisy %s equals retained pair' % arm, diff <= 1e-12 and m['runtime']['gate'] == 'FAIL', 'maxdiff_A=%.3g' % diff)
++            except Exception as e:
++                record('positive score noisy %s' % arm, False, repr(e))
++        v1 = json.loads((PILOT / 'COMMANDS_DRAFT.json').read_text())
++        record('v3 commands equal v1 argv/cwd/env/inputs/witness', len(v1) == len(CMD) == 16 and all(
++            all(a[k] == b[k] for k in ('case', 'arm', 'argv', 'cwd', 'input_files', 'environment', 'status', 'expected_local_weight_witness_lines')) for a, b in zip(v1, CMD)))
++        record('witness derivation: 9 on 3x3 ON, else 0', [V3.witness_expected(a, g) for a, g in [('ON', [3, 3]), ('OFF', [3, 3]), ('ON', [1, 1]), ('OFF', [1, 1])]] == [9, 0, 0, 0])
++
++        # ---- unresolved/placeholder rows ----------------------------------------------------------------------
++        expect_code('placeholder binary path refused', 'PLACEHOLDER', lambda: V3.resolve_expected_row(CMD, w.adm, 'noisy', 'OFF', w.root, '<PINNED_LINUX_BINARY>', BINSHA))
++        expect_code('bad binary sha refused', 'BINARY', lambda: V3.resolve_expected_row(CMD, w.adm, 'noisy', 'OFF', w.root, BIN, 'AB' * 32))
++        raw_row = [r for r in CMD if r['case'] == 'noisy' and r['arm'] == 'OFF'][0]
++        unresolved = {'case': 'noisy', 'arm': 'OFF', 'argv': raw_row['argv'], 'cwd': raw_row['cwd'], 'environment': raw_row['environment'],
++                      'input_files': raw_row['input_files'], 'patch_grid': [3, 3], 'expected_witness_lines': 0, 'expected_output_names': [], 'binary_sha256': BINSHA}
++        d, _ = built[('noisy', 'OFF')]
++        expect_code('unresolved draft row not admissible', 'PLACEHOLDER', lambda: w.admit(d, unresolved))
++        expect_code('draft row cannot be re-resolved twice', 'PLACEHOLDER', lambda: V3.resolve_expected_row([dict(raw_row, argv=[BIN] + raw_row['argv'][1:])], w.adm, 'noisy', 'OFF', w.root, BIN, BINSHA))
++
++        # ---- receipt/argv/env negatives: one change each, receipt otherwise consistent ----------------------------
++        def neg(name, code, case, arm, edit=None, disk=None):
++            d, exp = w.build(case, arm)
++            if disk:
++                disk(d)
++            w.write_receipt(d, exp, edit) if (edit or disk == 'rehash') else None
++            expect_code(name, code, lambda: w.admit(d, exp))
++
++        def setkey(k, v):
++            return lambda r: r.__setitem__(k, v)
++
++        def delkey(k):
++            return lambda r: r.pop(k)
++
++        neg('missing arm', 'ARM', 'noisy', 'ON', delkey('arm'))
++        neg('ON receipt in OFF slot', 'ARM', 'noisy', 'OFF', setkey('arm', 'ON'))
++        neg('OFF receipt in ON slot', 'ARM', 'noisy', 'ON', setkey('arm', 'OFF'))
++        # swapped directories: contents of OFF and ON exchanged
++        w.build('noisy', 'OFF'); w.build('noisy', 'ON')
++        o, n = w.root / 'noisy' / 'OFF', w.root / 'noisy' / 'ON'
++        os.rename(o, w.root / 'noisy' / 'tmp'); os.rename(n, o); os.rename(w.root / 'noisy' / 'tmp', n)
++        eo = V3.resolve_expected_row(CMD, w.adm, 'noisy', 'OFF', w.root, BIN, BINSHA); en = V3.resolve_expected_row(CMD, w.adm, 'noisy', 'ON', w.root, BIN, BINSHA)
++        expect_code('swapped dirs: OFF slot holds ON', 'ARM', lambda: w.admit(o, eo))
++        expect_code('swapped dirs: ON slot holds OFF', 'ARM', lambda: w.admit(n, en))
++        # a tree copied to a non-canonical location with a self-consistent receipt for it
++        d, exp = w.build('noisy', 'OFF')
++        alt = Path(scratch) / 'elsewhere' / 'noisy' / 'OFF'
++        shutil.copytree(d, alt)
++        expect_code('run dir copied outside evidence_root/case/arm', 'RUN_DIR', lambda: V3.admit_producer(alt, exp, w.adm, w.root))
++        rr = json.loads((alt / 'RUN.json').read_text()); rr['run_dir'] = str(alt.resolve()); (alt / 'RUN.json').write_text(json.dumps(rr))
++        expect_code('copied run dir with a self-consistent receipt', 'RUN_DIR', lambda: V3.admit_producer(alt, exp, w.adm, w.root))
++        neg('receipt run_dir names another directory', 'RUN_DIR', 'noisy', 'OFF', setkey('run_dir', str(w.root / 'noisy' / 'ON')))
++        neg('missing flag on ON', 'FLAG_COUNT', 'noisy', 'ON', lambda r: r['argv'].remove(V3.FLAG))
++        neg('flag on OFF', 'FLAG_COUNT', 'noisy', 'OFF', lambda r: r['argv'].append(V3.FLAG))
++        neg('duplicate flag on ON', 'FLAG_COUNT', 'noisy', 'ON', lambda r: r['argv'].append(V3.FLAG))
++        neg('extra unknown argv', 'ARGV', 'noisy', 'ON', lambda r: r['argv'].extend(['--experimental_local_b2']))
++        neg('changed argv value', 'ARGV', 'noisy', 'ON', lambda r: r['argv'].__setitem__(r['argv'].index('--max_iter') + 1, '6'))
++        neg('argv[0] left as placeholder', 'ARGV', 'noisy', 'OFF', lambda r: r['argv'].__setitem__(0, V3.PLACEHOLDER_BINARY))
++        neg('wrong binary sha in receipt', 'BINARY', 'noisy', 'OFF', setkey('binary_sha256', 'cd' * 32))
++        neg('uppercase binary sha in receipt', 'BINARY', 'noisy', 'OFF', setkey('binary_sha256', BINSHA.upper()))
++        neg('cwd mismatch', 'CWD', 'noisy', 'OFF', setkey('cwd', str(w.root / 'noisy' / 'OFF')))
++        neg('env value changed', 'ENV', 'noisy', 'ON', lambda r: r['environment'].__setitem__('OMP_NUM_THREADS', '4'))
++        neg('env var missing', 'ENV', 'noisy', 'ON', lambda r: r['environment'].pop('MC_EXPERIMENT_CCF_DC_ARM'))
++        neg('env var extra', 'ENV', 'noisy', 'ON', lambda r: r['environment'].__setitem__('OMP_PROC_BIND', 'close'))
++        neg('observed child env has extra OMP_PROC_BIND', 'ENV_OBSERVED', 'noisy', 'ON', lambda r: r['controlled_environment_observed'].__setitem__('OMP_PROC_BIND', 'close'))
++        neg('observed child env value differs', 'ENV_OBSERVED', 'noisy', 'OFF', lambda r: r['controlled_environment_observed'].__setitem__('OPENBLAS_NUM_THREADS', '2'))
++        neg('exit 1 with a complete tap', 'EXIT', 'noisy', 'ON', setkey('exit', 1))
++        neg('exit True', 'EXIT', 'noisy', 'ON', setkey('exit', True))
++        neg('exit "0"', 'EXIT', 'noisy', 'ON', setkey('exit', '0'))
++        neg('case swapped in receipt', 'CASE', 'noisy', 'ON', setkey('case', 'affine'))
++        neg('receipt schema wrong', 'SCHEMA', 'noisy', 'ON', setkey('schema', 'v2'))
++        neg('publication is a list', 'SCHEMA', 'noisy', 'ON', setkey('publication', []))
++        neg('publication bytes is a string', 'SCHEMA', 'noisy', 'ON', lambda r: r['publication']['noisy.star'].__setitem__('bytes', '4857'))
++        neg('runtime pin is not a dict', 'SCHEMA', 'noisy', 'ON', setkey('runtime', None))
++        # strict JSON in the receipt itself
++        d, exp = w.build('noisy', 'ON'); (d / 'RUN.json').write_text((d / 'RUN.json').read_text().replace('"exit": 0', '"exit": NaN') if '"exit": 0' in (d / 'RUN.json').read_text() else (d / 'RUN.json').read_text().replace('"exit":0', '"exit":NaN'))
++        expect_code('receipt carries NaN', 'NONFINITE', lambda: w.admit(d, exp))
++
++        # ---- staged input directory ---------------------------------------------------------------------------
++        d, exp = w.build('noisy', 'OFF'); (d / 'input' / 'MANIFEST.json').write_text('{}')
++        expect_code('extra file in staged cwd', 'INPUT', lambda: w.admit(d, exp))
++        d, exp = w.build('noisy', 'OFF'); (d / 'input' / 'noisy.mrcs').unlink()
++        expect_code('missing staged movie', 'INPUT', lambda: w.admit(d, exp))
++        d, exp = w.build('noisy', 'OFF'); (d / 'input' / 'noisy.star').write_text('tampered')
++        expect_code('staged input byte tamper', 'INPUT', lambda: w.admit(d, exp))
++
++        # ---- witness (receipt re-hashed so only the witness differs) -------------------------------------------
++        def witness_case(name, code, case, arm, transform):
++            d, exp = w.build(case, arm)
++            lp = d / 'output' / (case + '.log'); lp.write_text(transform(lp.read_text(), case)); w.write_receipt(d, exp)
++            expect_code(name, code, lambda: w.admit(d, exp))
++        W = V3.WITNESS_LINE
++        witness_case('witness x_norm 22', 'WITNESS', 'noisy', 'ON', lambda t, c: t.replace('x_norm = 42', 'x_norm = 22', 1))
++        witness_case('witness pnx 41', 'WITNESS', 'noisy', 'ON', lambda t, c: t.replace('pnx = 42', 'pnx = 41', 1))
++        witness_case('witness nfx 21', 'WITNESS', 'noisy', 'ON', lambda t, c: t.replace('nfx = 22', 'nfx = 21', 1))
++        witness_case('witness x_norm 42.0 text', 'WITNESS', 'noisy', 'ON', lambda t, c: t.replace('x_norm = 42,', 'x_norm = 42.0,', 1))
++        witness_case('witness spaced variant', 'WITNESS', 'noisy', 'ON', lambda t, c: t.replace('x_norm = 42', 'x_norm  = 42', 1))
++        witness_case('witness no leading space', 'WITNESS', 'noisy', 'ON', lambda t, c: t.replace('\n' + W, '\n' + W[1:], 1))
++        witness_case('8 witness lines on 3x3 ON', 'WITNESS', 'noisy', 'ON', lambda t, c: t.replace(W + '\n', '', 1))
++        witness_case('10 witness lines on 3x3 ON', 'WITNESS', 'noisy', 'ON', lambda t, c: t + W + '\n')
++        witness_case('0 witness lines on 3x3 ON', 'WITNESS', 'noisy', 'ON', lambda t, c: t.replace(W + '\n', ''))
++        witness_case('1 witness line on global-only ON', 'WITNESS', 'flat', 'ON', lambda t, c: t + W + '\n')
++        witness_case('1 witness line on global-only OFF', 'WITNESS', 'flat', 'OFF', lambda t, c: t + W + '\n')
++        witness_case('1 witness line on 3x3 OFF', 'WITNESS', 'noisy', 'OFF', lambda t, c: t + W + '\n')
++        witness_case('log of another case', 'LOG_CASE', 'noisy', 'ON', lambda t, c: t.replace('Working on noisy.mrcs', 'Working on affine.mrcs', 1))
++        d, exp = w.build('noisy', 'ON'); lp = d / 'output' / 'noisy.log'; lp.write_bytes(b'\xff\xfe not utf8'); w.write_receipt(d, exp)
++        expect_code('log is not utf-8', 'LOG_CASE', lambda: w.admit(d, exp))
++
++        # ---- publication inventory ---------------------------------------------------------------------------
++        d, exp = w.build('noisy', 'ON'); (d / 'output' / 'stray.txt').write_text('unlisted')
++        expect_code('unlisted extra output file (receipt unchanged)', 'INVENTORY', lambda: w.admit(d, exp))
++        d, exp = w.build('noisy', 'ON'); (d / 'output' / 'stray.txt').write_text('unlisted'); w.write_receipt(d, exp)
++        expect_code('extra output file even when listed in the receipt', 'INVENTORY', lambda: w.admit(d, exp))
++        d, exp = w.build('noisy', 'ON'); (d / 'output' / 'logfile.pdf.lst').unlink()
++        expect_code('listed output file deleted', 'INVENTORY', lambda: w.admit(d, exp))
++        d, exp = w.build('noisy', 'ON'); (d / 'output' / 'logfile.pdf').unlink(); w.write_receipt(d, exp)
++        expect_code('required output absent from disk and receipt', 'INVENTORY', lambda: w.admit(d, exp))
++        d, exp = w.build('noisy', 'ON'); (d / 'output' / 'noisy.mrc').write_bytes(b'changed')
++        expect_code('listed output byte changed', 'PUBLICATION_HASH', lambda: w.admit(d, exp))
++        d, exp = w.build('noisy', 'ON'); (d / 'output' / 'logfile.pdf').unlink(); os.symlink('/etc/hosts', d / 'output' / 'logfile.pdf'); w.write_receipt(d, exp)
++        expect_code('symlink in output', 'INVENTORY', lambda: w.admit(d, exp))
++        neg('publication path escapes output', 'INVENTORY', 'noisy', 'ON', lambda r: r['publication'].__setitem__('../RUN.json', {'bytes': 1, 'sha256': 'a' * 64}))
++
++        # ---- runtime.json and stdout.log -----------------------------------------------------------------------
++        d, exp = w.build('noisy', 'ON'); (d / 'runtime.json').write_text('{}')
++        expect_code('runtime.json replaced by {} (receipt stale)', 'RUNTIME', lambda: w.admit(d, exp))
++        d, exp = w.build('noisy', 'ON')  # a still-valid, finite, correctly shaped model with one coefficient changed
++        m = json.loads((d / 'runtime.json').read_text()); m['coeff_x'][0] += 1e-3; (d / 'runtime.json').write_text(json.dumps(m))
++        expect_code('runtime.json tampered to another valid model (receipt stale)', 'RUNTIME', lambda: w.admit(d, exp))
++        d, exp = w.build('noisy', 'ON'); (d / 'runtime.json').unlink()
++        expect_code('runtime.json missing', 'RUNTIME', lambda: w.admit(d, exp))
++        good = json.loads((RAW / 'noisy' / 'UP_only' / 'runtime.json').read_text())
++        for name, code, mut in [
++                ('runtime NaN with matching receipt hash', 'NONFINITE', lambda m: None),
++                ('runtime 17 coefficients with matching receipt hash', 'RUNTIME', lambda m: m.__setitem__('coeff_x', m['coeff_x'][:17])),
++                ('runtime local_enabled integer with matching receipt hash', 'RUNTIME', lambda m: m.__setitem__('local_enabled', 1)),
++                ('runtime 4 frames with matching receipt hash', 'RUNTIME', lambda m: m.__setitem__('global', m['global'][:4])),
++                ('runtime missing key with matching receipt hash', 'RUNTIME', lambda m: m.pop('coeff_y'))]:
++            m = copy.deepcopy(good); mut(m)
++            text = json.dumps(m)
++            if code == 'NONFINITE':
++                text = text.replace('-0.60471920692772696', 'NaN', 1) if '-0.60471920692772696' in text else text.replace(str(good['global'][1][0]), 'NaN', 1)
++            d, exp = w.build('noisy', 'ON', runtime_bytes=text.encode()); expect_code(name, code, lambda: w.admit(d, exp))
++        d, exp = w.build('noisy', 'ON'); (d / 'stdout.log').write_text('tampered')
++        expect_code('stdout.log tampered (receipt stale)', 'STDOUT', lambda: w.admit(d, exp))
++        d, exp = w.build('noisy', 'ON'); (d / 'stdout.log').unlink()
++        expect_code('stdout.log missing', 'STDOUT', lambda: w.admit(d, exp))
++
++        # ---- scoring binding ------------------------------------------------------------------------------------
++        # an admitted noisy run whose STAR is the affine movie's (receipt consistent): admission passes, scoring refuses.
++        d, exp = w.build('noisy', 'ON', star_bytes=(RAW / 'affine' / 'UP_only' / 'output' / 'affine.star').read_bytes())
++        try:
++            w.admit(d, exp); record('affine STAR in noisy run is receipt-consistent (admits)', True)
++        except Exception as e:
++            record('affine STAR in noisy run is receipt-consistent (admits)', False, repr(e))
++        expect_code('affine STAR in noisy run refused at scoring', 'STAR_CASE', lambda: V3.score_admitted(d, exp, w.adm, w.root, FIX))
++        rt, st = RAW / 'noisy' / 'UP_only' / 'runtime.json', RAW / 'noisy' / 'UP_only' / 'output' / 'noisy.star'
++        expect_code('truth file of another case name', 'TRUTH', lambda: V3.field_metrics_bound('noisy', rt, st, FIX / 'affine_field.npy', FIX))
++        shutil.copy(st, Path(scratch) / 'other.star')
++        expect_code('STAR file name of another case', 'STAR_CASE', lambda: V3.field_metrics_bound('noisy', rt, Path(scratch) / 'other.star', FIX / 'noisy_field.npy', FIX))
++        expect_code('case absent from manifest', 'CASE', lambda: V3.field_metrics_bound('nonesuch', rt, st, FIX / 'nonesuch_field.npy', FIX))
++        fx2 = Path(scratch) / 'fx_manifest_swap'; fx2.mkdir()
++        for n in ('MANIFEST.json', 'noisy_field.npy'):
++            shutil.copy(FIX / n, fx2 / n)
++        man = json.loads((fx2 / 'MANIFEST.json').read_text()); man['cases']['noisy']['recipe']['pixel_size'] = 0.9; (fx2 / 'MANIFEST.json').write_text(json.dumps(man))
++        expect_code('manifest hash swap', 'MANIFEST', lambda: V3.field_metrics_bound('noisy', rt, st, fx2 / 'noisy_field.npy', fx2))
++        fx3 = Path(scratch) / 'fx_roi'; fx3.mkdir()
++        for n in ('MANIFEST.json', 'noisy_field.npy'):
++            shutil.copy(FIX / n, fx3 / n)
++        man = json.loads((fx3 / 'MANIFEST.json').read_text()); man['cases']['noisy']['roi'] = [0, 96, 0, 128]; (fx3 / 'MANIFEST.json').write_text(json.dumps(man))
++        saved = V3.MANIFEST_SHA256
++        V3.MANIFEST_SHA256 = V3.sha(fx3 / 'MANIFEST.json')  # test double: isolate the ROI check from the manifest pin
++        try:
++            expect_code('in-bounds wrong ROI [0,96,0,128]', 'ROI', lambda: V3.field_metrics_bound('noisy', rt, st, fx3 / 'noisy_field.npy', fx3))
++            ok_lowlevel = True
++            try:
++                meta = man['cases']['noisy']; V2.field_metrics(rt, st, fx3 / 'noisy_field.npy', meta, meta['files']['noisy_field.npy'])
++            except Exception:
++                ok_lowlevel = False
++            record('control: v2 lowlevel accepts that wrong ROI (the gap field_metrics_bound closes)', ok_lowlevel)
++        finally:
++            V3.MANIFEST_SHA256 = saved
++
++        # ---- v2 gaps documented as controls ---------------------------------------------------------------------
++        def v2_admits(name, build_fn):
++            d, exp = build_fn()
++            try:
++                V2.complete_publication(d, exp['case'], BINSHA); got = True
++            except Exception:
++                got = False
++            try:
++                w.admit(d, exp); v3 = True
++            except V3.AdmissionError:
++                v3 = False
++            record('control: %s (v2 admits=%s, v3 admits=%s)' % (name, got, v3), got and not v3)
++        def swapped():
++            d, exp = w.build('noisy', 'OFF'); w.write_receipt(d, exp, setkey('arm', 'ON')); return d, exp
++        def no_arm():
++            d, exp = w.build('noisy', 'OFF'); w.write_receipt(d, exp, delkey('arm')); return d, exp
++        def extra():
++            d, exp = w.build('noisy', 'ON'); (d / 'output' / 'stray.txt').write_text('x'); return d, exp
++        def rtt():
++            d, exp = w.build('noisy', 'ON'); (d / 'runtime.json').write_text('{}'); return d, exp
++        for nm, fn in [('ON-labelled receipt in OFF slot', swapped), ('receipt without arm', no_arm), ('unlisted extra output', extra), ('runtime.json tamper', rtt)]:
++            v2_admits(nm, fn)
++
++        # ---- original numerical negatives (v2 operators, unchanged) via the lowlevel/bound entries -----------------
++        meta = json.loads((FIX / 'MANIFEST.json').read_text())['cases']['noisy']; tp = FIX / 'noisy_field.npy'; tsha = meta['files']['noisy_field.npy']
++        good = json.loads(rt.read_text())
++        def low(mut=None, truth_sha=tsha, case_meta=meta):
++            m = copy.deepcopy(good)
++            if mut: mut(m)
++            p = Path(scratch) / 'rt_low.json'; p.write_text(json.dumps(m))
++            return V2.field_metrics(p, st, tp, case_meta, truth_sha)
++        for name, kw in [('lowlevel wrong truth sha', dict(truth_sha='0' * 64)),
++                         ('lowlevel 17 coefficients', dict(mut=lambda m: m.__setitem__('coeff_x', m['coeff_x'][:17]))),
++                         ('lowlevel integer local_enabled', dict(mut=lambda m: m.__setitem__('local_enabled', 1))),
++                         ('lowlevel disabled with coefficients', dict(mut=lambda m: m.__setitem__('local_enabled', False))),
++                         ('lowlevel 4-frame global', dict(mut=lambda m: m.__setitem__('global', m['global'][:4]))),
++                         ('lowlevel out-of-bounds ROI', dict(case_meta=dict(meta, roi=[0, 200, 0, 128])))]:
++            try:
++                low(**kw); record(name + ' rejected', False, 'accepted')
++            except Exception as e:
++                record(name + ' rejected', True, type(e).__name__)
++        try:
++            base = low(); record('lowlevel positive control', base['runtime']['gate'] == 'FAIL')
++        except Exception as e:
++            record('lowlevel positive control', False, repr(e))
++
++        # ---- four retained metadata score pairs ----------------------------------------------------------------
++        for case in ('noisy', 'affine'):
++            for arm in ('UP_only', 'UP_B2'):
++                rd = RAW / case / arm
++                try:
++                    m = V3.field_metrics_bound(case, rd / 'runtime.json', rd / 'output' / (case + '.star'), FIX / (case + '_field.npy'), FIX)
++                    old = json.loads((rd / 'metrics.json').read_text())
++                    diff = max(abs(m[a]['angstrom'][k] - old[a]['angstrom'][k]) for a in ('runtime', 'STAR') for k in V3.LIMITS)
++                    record('retained pair %s/%s reproduces' % (case, arm), diff <= 1e-12, 'maxdiff_A=%.3g' % diff)
++                except Exception as e:
++                    record('retained pair %s/%s reproduces' % (case, arm), False, repr(e))
++                # copy the retained fetch into a canonical slot so the rejection is about its content, not its path
++                exp = V3.resolve_expected_row(CMD, w.adm, case, 'OFF', w.root, BIN, BINSHA)
++                slot = w.root / case / 'OFF'
++                if slot.exists():
++                    shutil.rmtree(slot)
++                shutil.copytree(rd, slot)
++                expect_code('retained metadata-only fetch %s/%s is not a complete producer' % (case, arm), 'SCHEMA', lambda: V3.admit_producer(slot, exp, w.adm, w.root))
++
++        # ---- tool pins and the launch gate -----------------------------------------------------------------------
++        roots = {'consumer_source': CONSUMER, 'repo': REPO, 'pilot': PILOT}
++        try:
++            record('all admission tool pins verify', V3.verify_tool_pins(ADM, roots) is True)
++        except Exception as e:
++            record('all admission tool pins verify', False, repr(e))
++        bad = copy.deepcopy(ADM); bad['tools'][0]['sha256'] = '0' * 64
++        expect_code('altered tool pin refused', 'TOOL_PIN', lambda: V3.verify_tool_pins(bad, roots))
++        names = {t['path'].split('/')[-1] for t in ADM['tools']}
++        need = {'compare_products.py', 'score_fields_v2.py', 'score_fields_v3.py', 'generate_known_motion_fixture.py', 'generate_realistic_motion.py',
++                'generate_motion_diagnostics.py', 'check_motion_diagnostics.py', 'check_realistic_motion.py', 'motion_field.py', 'test_score_fields_v3.py'}
++        record('admission v3 pins comparator, scorers, tests and all transitive generators', need <= names and any(t['sha256'] == '53449d2da682305c8c11e3ed3efb91103530196e481ac075b00f90e3d5ea0f47' for t in ADM['tools']))
++        record('admission v3 stays HELD with final fields null', ADM['status'].startswith('HELD_') and all(ADM[k] is None for k in ('candidate_binary', 'source_archive', 'compiler_and_config', 'venue_identity', 'fresh_venue_resource_admission', 'independent_source_clearance')) and ADM['native_started'] is False and ADM['manifest_sha256'] == V3.MANIFEST_SHA256)
++        record('launch gate: ON only after OFF compat and source identity PASS', [V3.on_launch_permitted(a, b) for a, b in [('PASS', 'PASS'), ('FAIL', 'PASS'), ('PASS', 'FAIL'), (None, 'PASS'), ('PASS', None)]] == [True, False, False, False, False])
++
++    failed = [r for r in RESULTS if not r['ok']]
++    Path(result_path).write_text(json.dumps({'total': len(RESULTS), 'failed': len(failed), 'results': RESULTS}, indent=1, allow_nan=False) + '\n')
++    print('TOTAL %d FAILED %d' % (len(RESULTS), len(failed)))
++    return 1 if failed else 0
++
++
++if __name__ == '__main__':
++    sys.exit(main(sys.argv[1]))
+diff --git a/tests/mutation_controls_v3.py b/tests/mutation_controls_v3.py
+new file mode 100644
+index 0000000..39e61cc
+--- /dev/null
++++ b/tests/mutation_controls_v3.py
+@@ -0,0 +1,37 @@
++"""Guard-removal controls: weaken one v3 guard in a scratch copy and require the intended tests to fail (scratch only)."""
++import json, shutil, subprocess, sys, tempfile
++from pathlib import Path
++sys.dont_write_bytecode = True
++PILOT = Path(__file__).resolve().parent.parent
++PY = sys.executable
++MUT = {
++ 'arm_check': ("    if r.get('arm') != arm:", "    if False:", ['missing arm', 'ON receipt in OFF slot', 'OFF receipt in ON slot', 'swapped dirs: OFF slot holds ON', 'swapped dirs: ON slot holds OFF']),
++ 'flag_count': ("    if argv.count(FLAG) != (1 if arm == 'ON' else 0):", "    if False:", ['missing flag on ON', 'flag on OFF', 'duplicate flag on ON']),
++ 'env_observed': ("    if observed != want:", "    if False:", ['observed child env has extra OMP_PROC_BIND', 'observed child env value differs']),
++ 'inventory_equality': ("    if set(pub) != set(found):", "    if False:", ['unlisted extra output file (receipt unchanged)', 'listed output file deleted']),
++ 'baseline_names': ("    if sorted(pub) != expected['expected_output_names']:", "    if False:", ['extra output file even when listed in the receipt', 'required output absent from disk and receipt']),
++ 'witness_count': ("    if len(marked) != expected['expected_witness_lines'] or", "    if False and ", ['8 witness lines on 3x3 ON', '10 witness lines on 3x3 ON', '0 witness lines on 3x3 ON', '1 witness line on global-only ON', '1 witness line on global-only OFF', '1 witness line on 3x3 OFF']),
++ 'witness_format': ("        if ln != WITNESS_LINE:", "        if False:", ['witness x_norm 22', 'witness pnx 41', 'witness nfx 21', 'witness x_norm 42.0 text', 'witness spaced variant', 'witness no leading space']),
++ 'runtime_hash': ("    rt = _bound_file(d, 'runtime.json', r.get('runtime'), 'RUNTIME')", "    rt = (d / 'runtime.json').read_bytes()", ['runtime.json tampered to another valid model (receipt stale)']),
++ 'roi_check': ("    if list(meta['roi']) != FIXED_ROI:", "    if False:", ['in-bounds wrong ROI [0,96,0,128]']),
++ 'star_case': ("    if _star_movie_stem(star_path) != case:", "    if False:", ['affine STAR in noisy run refused at scoring']),
++ 'run_dir': ("    if d.resolve() != (Path(evidence_root) / case / arm).resolve():", "    if False:", ['copied run dir with a self-consistent receipt']),
++}
++out = {}
++for name, (old, new, expect_fail) in MUT.items():
++    with tempfile.TemporaryDirectory(prefix='mc-lfw-v3-mut-') as t:
++        t = Path(t)
++        (t / 'tests').mkdir()
++        for f in ['score_fields_v2.py', 'score_fields_v3.py', 'ADMISSION_DRAFT_v3.json', 'COMMANDS_DRAFT_v3.json', 'COMMANDS_DRAFT.json']:
++            shutil.copy(PILOT / f, t / f)
++        shutil.copy(PILOT / 'tests/test_score_fields_v3.py', t / 'tests/test_score_fields_v3.py')
++        src = (t / 'score_fields_v3.py').read_text()
++        assert src.count(old) == 1, name
++        (t / 'score_fields_v3.py').write_text(src.replace(old, new))
++        p = subprocess.run([PY, '-B', str(t / 'tests/test_score_fields_v3.py'), str(t / 'r.json')], capture_output=True, text=True)
++        failed = [l[5:].split(' :: ')[0] for l in p.stdout.splitlines() if l.startswith('FAIL ')]
++        killed = all(e in failed for e in expect_fail)
++        out[name] = {'killed_all_intended': killed, 'intended': expect_fail, 'failed_tests': failed, 'exit': p.returncode}
++        print(('KILLED ' if killed else 'SURVIVED ') + name, '| failed:', len(failed))
++Path(sys.argv[1]).write_text(json.dumps(out, indent=1))
++sys.exit(0 if all(v['killed_all_intended'] for v in out.values()) else 1)
+diff --git a/build_admission_v3.py b/build_admission_v3.py
+new file mode 100644
+index 0000000..e37fae3
+--- /dev/null
++++ b/build_admission_v3.py
+@@ -0,0 +1,47 @@
++"""Write ADMISSION_DRAFT_v3.json from the unchanged ADMISSION_DRAFT.json. Launches nothing; run after the tools are final."""
++from pathlib import Path
++import hashlib, json, sys
++sys.dont_write_bytecode = True
++HERE = Path(__file__).resolve().parent
++REPO = Path('/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026')
++CONSUMER = Path('/tmp/mc-w8-common-mean-screen-20261026/src_4fa272f6')
++def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
++v1 = json.loads((HERE / 'ADMISSION_DRAFT.json').read_text())
++tools = []
++for root, base, names in [
++    ('consumer_source', CONSUMER, ['tools/check_motion_diagnostics.py', 'tools/check_realistic_motion.py', 'tools/motion_field.py',
++                                   'test-data/generate_motion_diagnostics.py', 'test-data/generate_realistic_motion.py',
++                                   'test-data/generate_known_motion_fixture.py']),
++    ('repo', REPO, ['docs/post_rc0/s1/global_damping_20261026/scripts/compare_products.py',
++                    'docs/post_rc0/s1/native_b2_20261026/scripts/lane.py',
++                    'docs/post_rc0/s1/native_b2_upstream_factorial_20261026/scripts/factorial_common.py']),
++    ('pilot', HERE, ['score_fields_v2.py', 'score_fields_v3.py', 'tests/test_score_fields_v3.py', 'build_admission_v3.py',
++                     'command_manifest_v3.py', 'tests/mutation_controls_v3.py'])]:
++    for n in names:
++        tools.append({'root': root, 'path': n, 'sha256': sha(base / n)})
++assert any(t['path'].endswith('compare_products.py') and t['sha256'] == '53449d2da682305c8c11e3ed3efb91103530196e481ac075b00f90e3d5ea0f47' for t in tools)
++v3 = dict(v1)
++v3.update({
++    'schema': 'local-full-width-admission-v3',
++    'version': 'v3',
++    'status': 'HELD_SOURCE_REVIEW_AND_VENUE_INPUTS_PENDING',
++    'supersedes': {'file': 'ADMISSION_DRAFT.json', 'sha256': sha(HERE / 'ADMISSION_DRAFT.json')},
++    'manifest_sha256': '9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc',
++    'fixed_roi_y0y1x0x1': [12, 84, 12, 116],
++    'tools': tools,
++    'scorer': {'entry': 'score_fields_v3.admit_producer / score_admitted', 'plan': 'SCORER_V3_PLAN.md',
++               'numerical_operators': 'score_fields_v2.py unchanged (pinned)'},
++    'retained_baseline': {'production_commit': '326f03a073aec0d26c9cd585ce4f701d1c808245',
++                          'binary_sha256': '531a1b0984dfbb39bd1b43afa23561091365a4d0459967ef5ee24ca69344c2eb'},
++    'candidate_source_commit': v1['candidate_source_commit'],
++    'candidate_branch_head_with_unchanged_src': '215c37b0743dd63a793650e8f0cfda4a2778ace9',
++    'staged_input_deviation': 'cwd holds exactly <case>.star and <case>.mrcs; retained producers used the 33-file fixture directory',
++    'candidate_binary': None, 'source_archive': None, 'compiler_and_config': None, 'shared_libraries': None,
++    'venue_identity': None, 'fresh_venue_resource_admission': None, 'independent_source_clearance': None,
++    'native_started': False,
++})
++for row in v3['rows']:
++    row['expected_output_names'] = sorted(k[len('output/'):] for k in row['baseline_files'] if k.startswith('output/'))
++    row['expected_local_weight_witness_lines'] = {'OFF': 0, 'ON': 9 if row['patch_grid'] == [3, 3] else 0}
++(HERE / 'ADMISSION_DRAFT_v3.json').write_text(json.dumps(v3, indent=2, allow_nan=False) + '\n')
++print('wrote ADMISSION_DRAFT_v3.json; tools pinned:', len(tools))
+diff --git a/command_manifest_v3.py b/command_manifest_v3.py
+new file mode 100644
+index 0000000..86f63e8
+--- /dev/null
++++ b/command_manifest_v3.py
+@@ -0,0 +1,26 @@
++"""Write COMMANDS_DRAFT_v3.json from ADMISSION_DRAFT_v3.json; never launches a process."""
++from pathlib import Path
++import json, sys
++sys.dont_write_bytecode = True
++p = Path(__file__).resolve().parent
++adm = json.loads((p / 'ADMISSION_DRAFT_v3.json').read_text())
++assert adm['status'].startswith('HELD_') and len(adm['rows']) == 8 and adm['version'] == 'v3'
++out = []
++for row in adm['rows']:
++    case = row['case']; px, py = row['patch_grid']
++    for arm in ['OFF', 'ON']:
++        d = Path('/tmp/motioncorr-local-full-width-native-20261026/evidence') / case / arm
++        argv = ['<PINNED_LINUX_BINARY>', '--i', case + '.star', '--o', str(d / 'output'), '--use_own', '--j', '2', '--patch_x', str(px),
++                '--patch_y', str(py), '--group_frames', '1', '--bin_factor', '1', '--seed', '1', '--skip_defect', '--save_noDW',
++                '--first_frame_sum', '1', '--last_frame_sum', '5', '--skip_logfile', '--max_iter', '5', '--experimental_coupled_peak', 'all']
++        if arm == 'ON': argv += ['--experimental_local_full_width_weight']
++        out.append({'case': case, 'arm': arm, 'argv': argv, 'cwd': str(d / 'input'), 'input_files': [case + '.star', case + '.mrcs'],
++                    'environment': {'OMP_NUM_THREADS': '2', 'OPENBLAS_NUM_THREADS': '1', 'MKL_NUM_THREADS': '1',
++                                    'MC_EXPERIMENT_CCF_DC_ARM': 'both', 'MC_DIAG_MODEL_OUT': str(d / 'runtime.json'),
++                                    'PYTHONDONTWRITEBYTECODE': '1'},
++                    'environment_cleanup': ['remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values'],
++                    'status': 'UNRUN_HELD',
++                    'expected_local_weight_witness_lines': row['expected_local_weight_witness_lines'][arm]})
++assert len(out) == 16
++(p / 'COMMANDS_DRAFT_v3.json').write_text(json.dumps(out, indent=2) + '\n')
++print('prepared16commands v3; no execution path exists in this helper')
+diff --git a/ADMISSION_DRAFT_v3.json b/ADMISSION_DRAFT_v3.json
+new file mode 100644
+index 0000000..80aaf5b
+--- /dev/null
++++ b/ADMISSION_DRAFT_v3.json
+@@ -0,0 +1,1817 @@
++{
++  "status": "HELD_SOURCE_REVIEW_AND_VENUE_INPUTS_PENDING",
++  "base_commit": "42af54069e9b33a3f6b7b63c4046457c50daa93c",
++  "candidate_source_commit": "634e4b486240f4c811c3052d573c6d6ebcc5b298",
++  "candidate_binary": null,
++  "independent_source_clearance": null,
++  "fresh_venue_resource_admission": null,
++  "case_order": [
++    "noisy",
++    "affine",
++    "pedestal",
++    "zero",
++    "integer",
++    "fractional",
++    "flat",
++    "repeated"
++  ],
++  "native_producer_budget": 16,
++  "fixture_files": {
++    "noisy.star": {
++      "bytes": 315,
++      "sha256": "c321865e4fc769d9af55bc86af0a0b390abdcdb029137a9aeb5d6743b81a6891"
++    },
++    "affine_field.npy": {
++      "bytes": 983168,
++      "sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799"
++    },
++    "noisy.mrcs": {
++      "bytes": 246784,
++      "sha256": "5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3"
++    },
++    "zero.mrcs": {
++      "bytes": 246784,
++      "sha256": "c80e92704c034ccd6e87c0c1ce3e4ceea23aac87aa83d13b0dfe738aa95d3b86"
++    },
++    "fractional_target.npy": {
++      "bytes": 49280,
++      "sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70"
++    },
++    "noisy_target.npy": {
++      "bytes": 49280,
++      "sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70"
++    },
++    "integer.star": {
++      "bytes": 317,
++      "sha256": "8b3e4817dffff9c2deaab7d8f3196f49607818cbf5523c3bc397f6cf1bd09637"
++    },
++    "flat.mrcs": {
++      "bytes": 246784,
++      "sha256": "c2e25c3fcd1df4d92e9124c44dd6d9b5b6f1b8354dc1266af84c9da2ce96eabc"
++    },
++    "repeated.star": {
++      "bytes": 318,
++      "sha256": "db3580a1bf5774fbc52304db9cf7a452477f3a24ccc2d046986d8c8794904a1d"
++    },
++    "affine.star": {
++      "bytes": 316,
++      "sha256": "0a08c285c4ec09aceaef93423033c01830afc6b8f07063697133ceb64b066491"
++    },
++    "pedestal.mrcs": {
++      "bytes": 246784,
++      "sha256": "29016d8818bbd7be3491cca0822734a7e297a84642cf78c0847e61b447e03073"
++    },
++    "fractional_field.npy": {
++      "bytes": 983168,
++      "sha256": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9"
++    },
++    "integer_field.npy": {
++      "bytes": 983168,
++      "sha256": "3b1f50a5c9297ba5030de6e305560daa1c25f9154cd527d9b002af15ae91d0ac"
++    },
++    "flat_target.npy": {
++      "bytes": 49280,
++      "sha256": "5641f26812579bc93caf73d46ada5741416b195a0a9f8ee9f330f0348bf340e4"
++    },
++    "MANIFEST.json": {
++      "bytes": 8332,
++      "sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc"
++    },
++    "repeated_field.npy": {
++      "bytes": 983168,
++      "sha256": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9"
++    },
++    "zero_target.npy": {
++      "bytes": 49280,
++      "sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70"
++    },
++    "pedestal.star": {
++      "bytes": 318,
++      "sha256": "4a0f869b217b75e4315342e64ce8b5adad4fc7c9c57b9033cc23af1aa385fa53"
++    },
++    "affine_target.npy": {
++      "bytes": 49280,
++      "sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70"
++    },
++    "integer.mrcs": {
++      "bytes": 246784,
++      "sha256": "faaa3f9eeb7f1a785f51f6ab62b23e21a02b93a24a81c46b83b41c0590bc0b31"
++    },
++    "zero.star": {
++      "bytes": 314,
++      "sha256": "3c3084c06c72b2b3d4cc9d94fbf17b623ff4a7c46030e014e0bf7cc67fa2de1f"
++    },
++    "noisy_field.npy": {
++      "bytes": 983168,
++      "sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799"
++    },
++    "integer_target.npy": {
++      "bytes": 49280,
++      "sha256": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70"
++    },
++    "fractional.mrcs": {
++      "bytes": 246784,
++      "sha256": "2dc7308553d476fdf51e31ddbbfdc381c9e22032f65a19c3dc87e754988a7c86"
++    },
++    "fractional.star": {
++      "bytes": 320,
++      "sha256": "c051dd18dae87367b0eab06e8ba0d4f75a9841ed46d5b5d327c3e66b960d2dbc"
++    },
++    "zero_field.npy": {
++      "bytes": 983168,
++      "sha256": "255348d18b272e6759324d669b9c17aaf7e3f56ee3a48d50185eda96713f2f4d"
++    },
++    "pedestal_target.npy": {
++      "bytes": 49280,
++      "sha256": "47b9d9fffbcef586812b8cdfb82b13012ade6a92350431e169d63fd206ea4910"
++    },
++    "flat.star": {
++      "bytes": 314,
++      "sha256": "ecc8c830bf2aa05b7043a0a09bfc6a0d21d8540dccab9e1ad64f7dd608bd40e8"
++    },
++    "repeated_target.npy": {
++      "bytes": 49280,
++      "sha256": "a655b5dddcbb1473165fe8265e644ad0596de8308a0024e46467170fb8d86378"
++    },
++    "pedestal_field.npy": {
++      "bytes": 983168,
++      "sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799"
++    },
++    "flat_field.npy": {
++      "bytes": 983168,
++      "sha256": "7b57149a3a60416b6c5c064b106de5816a676003aa829447a273efed5a2374b9"
++    },
++    "repeated.mrcs": {
++      "bytes": 246784,
++      "sha256": "887e895add295b1305affb09b8c7f5177103680c45f94dd60c4ab0e4e7deb19c"
++    },
++    "affine.mrcs": {
++      "bytes": 246784,
++      "sha256": "1cf918d5da48d4c746020983017222829db9c949e362d07169a823bdc118260a"
++    }
++  },
++  "rows": [
++    {
++      "case": "noisy",
++      "patch_grid": [
++        3,
++        3
++      ],
++      "baseline_remote_root": "/home/ubuntu/motioncorr-evidence/native-b2-upstream-factorial-20261026/task/evidence/runs/noisy/UP_only",
++      "baseline_files": {
++        "RUN.json": {
++          "bytes": 2399,
++          "sha256": "e50780ff6a67de8370ca3116011d1f7ff984944a2cfc19a204072a27e1edd090"
++        },
++        "admission.json": {
++          "bytes": 803,
++          "sha256": "ec6fceb5ca75d66e0955af403fc5cbb7a580343b00ee65a49383cec3a56e5a3f"
++        },
++        "checker.json": {
++          "bytes": 2561,
++          "sha256": "790d5e2be28bb5a24e61c92e295536c190c37d1966d3030e4f75b4a1c0f54c6c"
++        },
++        "checker.stdout": {
++          "bytes": 91,
++          "sha256": "337e0fa53ddacdcad335cdc26939b4bfe6e7bafeab7fed87d4c25a2afb37d803"
++        },
++        "metrics.json": {
++          "bytes": 4011,
++          "sha256": "7263a280d038b5b53f255ff2ca9d2a3b5fa38ec67bbb8cea2b076fcac5e58352"
++        },
++        "occupancy-before.txt": {
++          "bytes": 150030,
++          "sha256": "8ad12a4bf73e62b70002934b105557323e34c3dd091af6c2976fba26c17f1ab0"
++        },
++        "output/corrected_micrographs.star": {
++          "bytes": 719,
++          "sha256": "0d041cae2d5249b57f9aa351ad02779a68eb5a33c5e2adfe0ae924b12847a167"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionEarly.eps": {
++          "bytes": 75689,
++          "sha256": "8b02360616c7f640d21612bd2be541ee2a995897ac42c7117296a346b5a0f06b"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionLate.eps": {
++          "bytes": 75686,
++          "sha256": "5a93726796347674df9431d09a972ebd6bf1ea0ac9b1cc0dec1a67666907fcb4"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionTotal.eps": {
++          "bytes": 75689,
++          "sha256": "7b8cec1d93ab260c41d57ae40f0bd187e992a96f68d1b8ea4c59ae93cafbedfd"
++        },
++        "output/logfile.pdf": {
++          "bytes": 24830,
++          "sha256": "4eaee5a7c1e93696677df755b7e33058143747cb3ee3bbbfe0cef0d8d517fcbd"
++        },
++        "output/logfile.pdf.lst": {
++          "bytes": 368,
++          "sha256": "05e8089f6948eea72694aff06cd3716b386e0b5181fc0b4f443af4f26a6f0f9a"
++        },
++        "output/noisy.log": {
++          "bytes": 2981,
++          "sha256": "7ef142f89ab6cd2e6c6861200820bb390f972f259f0bf0bd6ca6d9ba27be1669"
++        },
++        "output/noisy.mrc": {
++          "bytes": 50176,
++          "sha256": "06a61c47ffc5617723845e223cd0e91811688b5c7799a7dc624de7317f9635c2"
++        },
++        "output/noisy.star": {
++          "bytes": 4857,
++          "sha256": "144b900f9e2283303b2966acb3d6261b906efda84fd1d857214e14efcfe93d3a"
++        },
++        "output/noisy_shifts.eps": {
++          "bytes": 57398,
++          "sha256": "6e13b811ac2b590facd33009212f06d9e30f4ae3df579a333568ae8caa75833c"
++        },
++        "runtime.json": {
++          "bytes": 947,
++          "sha256": "9de5409895486ea04305a91fdf3c1350d5ddcb18559443fb3ca6a6fc99931325"
++        },
++        "stdout.log": {
++          "bytes": 2111,
++          "sha256": "8099a3eeb83098d073aee7e99c7affdb35a0b61af2fbe5de516f957d8bffad8b"
++        },
++        "time.txt": {
++          "bytes": 1069,
++          "sha256": "82a68ec3e130ba8444bfeeaf08af8e6fb220c86d99c7f6c36f913408e3996f0d"
++        }
++      },
++      "baseline_metrics": {
++        "runtime": {
++          "angstrom": {
++            "rms": 1.6453708531561486,
++            "p95": 3.337290305991788,
++            "max": 7.284025716813742
++          },
++          "gate": "FAIL",
++          "px": {
++            "rms": 1.8591761052611848,
++            "p95": 3.770949498295806,
++            "max": 8.230537533122874
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 1.3017636358124336,
++              "p95": 2.6296818564596984,
++              "max": 3.437374124272614
++            },
++            {
++              "rms": 1.4865584453749092,
++              "p95": 2.95859313261737,
++              "max": 4.94784465583993
++            },
++            {
++              "rms": 1.6352880227562654,
++              "p95": 3.3331989635868546,
++              "max": 6.114704211624123
++            },
++            {
++              "rms": 2.637729085723133,
++              "p95": 4.727851150765453,
++              "max": 7.284025716813742
++            }
++          ]
++        },
++        "STAR": {
++          "angstrom": {
++            "rms": 1.6453973835300504,
++            "p95": 3.3372789185622946,
++            "max": 7.283784224067593
++          },
++          "gate": "FAIL",
++          "px": {
++            "rms": 1.859206083084803,
++            "p95": 3.770936631143836,
++            "max": 8.230264659963382
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 1.301760347209436,
++              "p95": 2.629676878744851,
++              "max": 3.437369206132318
++            },
++            {
++              "rms": 1.4865470279638442,
++              "p95": 2.9585661129042573,
++              "max": 4.94781549754011
++            },
++            {
++              "rms": 1.6352908243535789,
++              "p95": 3.333099296536586,
++              "max": 6.1146125347363665
++            },
++            {
++              "rms": 2.6378181515236614,
++              "p95": 4.727792419017685,
++              "max": 7.283784224067593
++            }
++          ]
++        },
++        "local_enabled": true,
++        "checker": {
++          "accuracy_status": "FAIL",
++          "field_distance_status": "FAIL",
++          "identifiable": true,
++          "sampling_status": "OUTSIDE_FIXED_ROI",
++          "signal_status": "CHARACTERIZATION",
++          "application_consistency_status": "NOT_TESTED"
++        }
++      },
++      "expected_output_names": [
++        "corrected_micrographs.star",
++        "corrected_micrographs_all_rlnAccumMotionEarly.eps",
++        "corrected_micrographs_all_rlnAccumMotionLate.eps",
++        "corrected_micrographs_all_rlnAccumMotionTotal.eps",
++        "logfile.pdf",
++        "logfile.pdf.lst",
++        "noisy.log",
++        "noisy.mrc",
++        "noisy.star",
++        "noisy_shifts.eps"
++      ],
++      "expected_local_weight_witness_lines": {
++        "OFF": 0,
++        "ON": 9
++      }
++    },
++    {
++      "case": "affine",
++      "patch_grid": [
++        3,
++        3
++      ],
++      "baseline_remote_root": "/home/ubuntu/motioncorr-evidence/native-b2-upstream-factorial-20261026/task/evidence/runs/affine/UP_only",
++      "baseline_files": {
++        "RUN.json": {
++          "bytes": 2406,
++          "sha256": "445b605491f067a53aa630989428ff3832b26662f5743d311ec4c7f496df25e4"
++        },
++        "admission.json": {
++          "bytes": 804,
++          "sha256": "6394e300e6838823579b60996551c9b6cdd375ab3c03c76d47042b75ab556713"
++        },
++        "checker.json": {
++          "bytes": 2734,
++          "sha256": "484838fb711797dc631463588833ff27203e156f56357bc5810e91395434cbcd"
++        },
++        "checker.stdout": {
++          "bytes": 68,
++          "sha256": "51af03edef6c3049a0e7a986315d95a92ab9b63fe742a2fe328d5da3944d61ad"
++        },
++        "metrics.json": {
++          "bytes": 4100,
++          "sha256": "3d2d700bba215cb628c0bcfa39557a5621ac70a9b23c165cfa67f8b0e03041d2"
++        },
++        "occupancy-before.txt": {
++          "bytes": 149984,
++          "sha256": "44a9c6a7578c6f74c8e94b49926dcf9c12dc812e91ba67d652b3c688e5985ba7"
++        },
++        "output/affine.log": {
++          "bytes": 2638,
++          "sha256": "fcac37260a273e7f5b70d67b43ca7d876fb1bd5a33f8df946d43a64147a01743"
++        },
++        "output/affine.mrc": {
++          "bytes": 50176,
++          "sha256": "29583d19481ce052bf8f2e3d12c874f267423e92fb47350c55a2d32ae820198c"
++        },
++        "output/affine.star": {
++          "bytes": 5188,
++          "sha256": "895a8008276fe29cb68969fd4967105ac6be8693966d008bc96934721d677a56"
++        },
++        "output/affine_shifts.eps": {
++          "bytes": 71599,
++          "sha256": "284dea9ce886187cfb4f484b7dd18ea3bc3edcf819205cc5a8ea2f088dc18071"
++        },
++        "output/corrected_micrographs.star": {
++          "bytes": 723,
++          "sha256": "9ebfdcba0024b0de4e3b3d8a4d93d11281bb2c1e431a5fcac3d91c7fea999936"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionEarly.eps": {
++          "bytes": 75689,
++          "sha256": "c24ebda81174754d7803372d4f4fd1cf785e3ea791957a5a684494639d87f6c9"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionLate.eps": {
++          "bytes": 75687,
++          "sha256": "6143ea4612454ea2831e99d5f1e3d2cfdfecc96d6e41441fc4a0f4e37d439f6e"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionTotal.eps": {
++          "bytes": 75689,
++          "sha256": "a9d8bcb7620087b3613b63e3b2c99d18848b59d96f48cbb86147c4efa715b783"
++        },
++        "output/logfile.pdf": {
++          "bytes": 24829,
++          "sha256": "4fd0e58cf19642ac07f9c692ff12d5bb0be4e20adf72742dd3c4a0db283569ae"
++        },
++        "output/logfile.pdf.lst": {
++          "bytes": 371,
++          "sha256": "5985d90d7dba5e1227b15db553cb42f26507828f493a7b17271ec899afe05f06"
++        },
++        "runtime.json": {
++          "bytes": 1020,
++          "sha256": "2e6b501c7c2a7dd47ee57fe8fb106c2de31c2f3ce6e9586e09c1fe611564a032"
++        },
++        "stdout.log": {
++          "bytes": 2105,
++          "sha256": "447fa024bf9d06d80a81fbf0438d0f30f3152b38c50224914a373838c05b0844"
++        },
++        "time.txt": {
++          "bytes": 1070,
++          "sha256": "fc7cea030f1cda93db816d85ddbd82adf8d37992a823afba490667f17f80ec1a"
++        }
++      },
++      "baseline_metrics": {
++        "runtime": {
++          "angstrom": {
++            "rms": 0.11703506022519784,
++            "p95": 0.260334133944742,
++            "max": 0.5373596162885222
++          },
++          "gate": "PASS",
++          "px": {
++            "rms": 0.13224300590417834,
++            "p95": 0.29416286321439766,
++            "max": 0.6071860071056748
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.046929709740045206,
++              "p95": 0.08848365287172948,
++              "max": 0.13442938348114655
++            },
++            {
++              "rms": 0.0980929877712365,
++              "p95": 0.18864467053453549,
++              "max": 0.2834943893087218
++            },
++            {
++              "rms": 0.14664784502833306,
++              "p95": 0.28260688046951155,
++              "max": 0.4242610615979561
++            },
++            {
++              "rms": 0.18749881133476978,
++              "p95": 0.35736619736484,
++              "max": 0.5373596162885222
++            }
++          ]
++        },
++        "STAR": {
++          "angstrom": {
++            "rms": 0.11704036245839815,
++            "p95": 0.26033737282632224,
++            "max": 0.537390780106525
++          },
++          "gate": "PASS",
++          "px": {
++            "rms": 0.13224899712813348,
++            "p95": 0.29416652296759577,
++            "max": 0.6072212204593502
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.0469299065940281,
++              "p95": 0.08848473260581098,
++              "max": 0.13443091693078496
++            },
++            {
++              "rms": 0.09809400685552569,
++              "p95": 0.18864572196818938,
++              "max": 0.2834981217330733
++            },
++            {
++              "rms": 0.14665263780969823,
++              "p95": 0.2826123822471147,
++              "max": 0.42427717631146267
++            },
++            {
++              "rms": 0.18751102829307775,
++              "p95": 0.3573858278971453,
++              "max": 0.537390780106525
++            }
++          ]
++        },
++        "local_enabled": true,
++        "checker": {
++          "accuracy_status": "PASS",
++          "field_distance_status": "PASS",
++          "identifiable": true,
++          "sampling_status": "VALID",
++          "signal_status": "CHARACTERIZATION",
++          "application_consistency_status": "NOT_TESTED"
++        }
++      },
++      "expected_output_names": [
++        "affine.log",
++        "affine.mrc",
++        "affine.star",
++        "affine_shifts.eps",
++        "corrected_micrographs.star",
++        "corrected_micrographs_all_rlnAccumMotionEarly.eps",
++        "corrected_micrographs_all_rlnAccumMotionLate.eps",
++        "corrected_micrographs_all_rlnAccumMotionTotal.eps",
++        "logfile.pdf",
++        "logfile.pdf.lst"
++      ],
++      "expected_local_weight_witness_lines": {
++        "OFF": 0,
++        "ON": 9
++      }
++    },
++    {
++      "case": "pedestal",
++      "patch_grid": [
++        3,
++        3
++      ],
++      "baseline_remote_root": "/home/ubuntu/motioncorr-evidence/native-b2-upstream-factorial-20261026/task/evidence/runs/pedestal/UP_only",
++      "baseline_files": {
++        "RUN.json": {
++          "bytes": 2420,
++          "sha256": "e4667877fcd4bfe4a2a4afcefa4f04f7be236fc18e07bcd421346a0ccc6dc3b6"
++        },
++        "admission.json": {
++          "bytes": 804,
++          "sha256": "4ed44560980671fe7f9c961d6e53a6cd08aec5efeee1650c38176af946b70e57"
++        },
++        "checker.json": {
++          "bytes": 2741,
++          "sha256": "4e55439f2fb0d76fb03c92ad1043d37ef9b684b800434ea97540982317545084"
++        },
++        "checker.stdout": {
++          "bytes": 70,
++          "sha256": "f390e40543800f8e06ad89f9038cc13d53c9323e92c9147a5cb1cbd8d081c9c9"
++        },
++        "metrics.json": {
++          "bytes": 4102,
++          "sha256": "825c5af2a1b5b8f2deae0192fdae2f5c28e60bfc0813e60232952ff6632f0044"
++        },
++        "occupancy-before.txt": {
++          "bytes": 150058,
++          "sha256": "00315c8a8bead0fd325e0840912205b9d9df3ffc18d73723388df7c0427c050c"
++        },
++        "output/corrected_micrographs.star": {
++          "bytes": 731,
++          "sha256": "3621a8fb61f52121dbeab74a68714a7d4abccd46d1fb039befb78e2a7932a559"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionEarly.eps": {
++          "bytes": 75689,
++          "sha256": "b69212c4bdf768231b195353fdf2bcfe26fdf1af162830f6968565360b6b6f99"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionLate.eps": {
++          "bytes": 75687,
++          "sha256": "fb98092e60c63d8c75fa8f5055d59226e5278c7f7dbc64359a76833c0b1d4ec2"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionTotal.eps": {
++          "bytes": 57536,
++          "sha256": "48fe356b157c5fc27c9e706672150aa345a024201aafef639328a1dd6ee1af68"
++        },
++        "output/logfile.pdf": {
++          "bytes": 23548,
++          "sha256": "13d89aeb429ec02e4b37a02784024554a7294695280f5fc8b8cf0f05ba70326a"
++        },
++        "output/logfile.pdf.lst": {
++          "bytes": 377,
++          "sha256": "c7595d3e96c6bcd653377b81b97250c6059b5a61be741b0d7e2e76524dd1852c"
++        },
++        "output/pedestal.log": {
++          "bytes": 2642,
++          "sha256": "e49376429d300d8d1ba025f5f2325ac089272eb30533afc632f68f1a005ea9fa"
++        },
++        "output/pedestal.mrc": {
++          "bytes": 50176,
++          "sha256": "0017cf06025df93222c6913f6d56f23c3d14df5665128b1962c75c23062248d9"
++        },
++        "output/pedestal.star": {
++          "bytes": 5190,
++          "sha256": "dc8f7e284974e2db390d126687b815a8dece6375121487babc77963a2276fef8"
++        },
++        "output/pedestal_shifts.eps": {
++          "bytes": 71598,
++          "sha256": "55d136b9a4832537b0bb06ccb3d52b127a6b7029d870386a174d8755d4d69e20"
++        },
++        "runtime.json": {
++          "bytes": 1011,
++          "sha256": "93e44cb9e2a525e8331643377c82e961abb33ed3a545fec41f1b47d5278d08eb"
++        },
++        "stdout.log": {
++          "bytes": 2111,
++          "sha256": "be0103a6e506379e8c987b82ff7605af1711330d5a232b5995f424343d96b5b6"
++        },
++        "time.txt": {
++          "bytes": 1074,
++          "sha256": "5301bae9dd8b4e3c40f33fc6431fdf9940d66d4b64b1be78dcbaa87d08306847"
++        }
++      },
++      "baseline_metrics": {
++        "runtime": {
++          "angstrom": {
++            "rms": 0.11694276171708456,
++            "p95": 0.2602693148861097,
++            "max": 0.5374762560756847
++          },
++          "gate": "PASS",
++          "px": {
++            "rms": 0.13213871380461534,
++            "p95": 0.294089621340237,
++            "max": 0.6073178034753499
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.046639839817351404,
++              "p95": 0.08791573254614693,
++              "max": 0.13335680349254983
++            },
++            {
++              "rms": 0.0978005642875271,
++              "p95": 0.18782792653851427,
++              "max": 0.28294921166375486
++            },
++            {
++              "rms": 0.14649298350508191,
++              "p95": 0.28206562348836206,
++              "max": 0.42441251204223507
++            },
++            {
++              "rms": 0.18755700024453095,
++              "p95": 0.3578411441327047,
++              "max": 0.5374762560756847
++            }
++          ]
++        },
++        "STAR": {
++          "angstrom": {
++            "rms": 0.11694972579364636,
++            "p95": 0.26028838448778335,
++            "max": 0.5374941543546113
++          },
++          "gate": "PASS",
++          "px": {
++            "rms": 0.13214658281767952,
++            "p95": 0.2941111689127496,
++            "max": 0.6073380275193347
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.046640737600561075,
++              "p95": 0.08791749645056521,
++              "max": 0.13335934274096323
++            },
++            {
++              "rms": 0.09780277848437838,
++              "p95": 0.187827763331756,
++              "max": 0.2829520971198702
++            },
++            {
++              "rms": 0.14649928505758134,
++              "p95": 0.2820654230739761,
++              "max": 0.4244209559041819
++            },
++            {
++              "rms": 0.18757241111227982,
++              "p95": 0.3578441559267775,
++              "max": 0.5374941543546113
++            }
++          ]
++        },
++        "local_enabled": true,
++        "checker": {
++          "accuracy_status": "PASS",
++          "field_distance_status": "PASS",
++          "identifiable": true,
++          "sampling_status": "VALID",
++          "signal_status": "CHARACTERIZATION",
++          "application_consistency_status": "NOT_TESTED"
++        }
++      },
++      "expected_output_names": [
++        "corrected_micrographs.star",
++        "corrected_micrographs_all_rlnAccumMotionEarly.eps",
++        "corrected_micrographs_all_rlnAccumMotionLate.eps",
++        "corrected_micrographs_all_rlnAccumMotionTotal.eps",
++        "logfile.pdf",
++        "logfile.pdf.lst",
++        "pedestal.log",
++        "pedestal.mrc",
++        "pedestal.star",
++        "pedestal_shifts.eps"
++      ],
++      "expected_local_weight_witness_lines": {
++        "OFF": 0,
++        "ON": 9
++      }
++    },
++    {
++      "case": "zero",
++      "patch_grid": [
++        1,
++        1
++      ],
++      "baseline_remote_root": "/home/ubuntu/motioncorr-evidence/native-b2-upstream-factorial-20261026/task/evidence/runs/zero/UP_only",
++      "baseline_files": {
++        "RUN.json": {
++          "bytes": 2389,
++          "sha256": "c9bfee1c784e19c81d95de3fda4dae43637e568fec1844bfaf678bdde971b85f"
++        },
++        "admission.json": {
++          "bytes": 804,
++          "sha256": "8ef3badfc10fd3d99b18d4595977e80e4e2f77aee15cc22f4abecab04d213f3c"
++        },
++        "checker.json": {
++          "bytes": 2148,
++          "sha256": "1c3739d95b11edf383d4353697614e9288ab7bd7d3b730b79063737232f0d6a2"
++        },
++        "checker.stdout": {
++          "bytes": 66,
++          "sha256": "af63eb77186579344085c08d18c99ded76d30e945725834908236179530c5bd0"
++        },
++        "metrics.json": {
++          "bytes": 2339,
++          "sha256": "c89d1f12dc88bf933260bd17324ae94a169c0e0e3fba4fab4b790d0393fe7cce"
++        },
++        "occupancy-before.txt": {
++          "bytes": 150038,
++          "sha256": "79a9de58654130e6e2772694e8f35a69f6789ada0858b278954251be363f1171"
++        },
++        "output/corrected_micrographs.star": {
++          "bytes": 715,
++          "sha256": "60850b12b85e9e9088a780398f81391f430e55212042e8f709e7db4c436c226b"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionEarly.eps": {
++          "bytes": 70575,
++          "sha256": "2bb1a760d00f67b79d523bcc50fb3210e321e83cf102d22a8ed85c3848eddb16"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionLate.eps": {
++          "bytes": 70573,
++          "sha256": "b7534c24a8e5602519ae1f7bec131c343ecf449546ecfe73967b1d4dd1c06318"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionTotal.eps": {
++          "bytes": 70575,
++          "sha256": "c83e03128806904fb1e1cdcffbd33666d5abdcd3a2eb52628c10e35129858de5"
++        },
++        "output/logfile.pdf": {
++          "bytes": 23198,
++          "sha256": "a4cdb3bcbe8651ab4170ed59eaba99e7a6adf4ba0d07224cc5a61fdd48396ef2"
++        },
++        "output/logfile.pdf.lst": {
++          "bytes": 365,
++          "sha256": "20637cefd9e936d56b18ab87838392210d49531e4403b7e429456eac83d50cc1"
++        },
++        "output/zero.log": {
++          "bytes": 657,
++          "sha256": "52c6cbfdfda9457bfc570c837108fb7553b260e14748853a9dcd05de673de0cf"
++        },
++        "output/zero.mrc": {
++          "bytes": 50176,
++          "sha256": "fb15f63d88955b00825d92b6fc30031e311485133653f876f352d745e6a0a55f"
++        },
++        "output/zero.star": {
++          "bytes": 973,
++          "sha256": "baa09a10e0583bf703a2f73d83abaf007ec49a660fcb1bb8aefc3b33559af429"
++        },
++        "output/zero_shifts.eps": {
++          "bytes": 76423,
++          "sha256": "18cdf199f580eff9ecb795f211032fed9ef4acd68c83085d217bb434fbcc0d6f"
++        },
++        "runtime.json": {
++          "bytes": 161,
++          "sha256": "6b17cc53799c300fa065b08d912099b32db1b999d6622fee16ae1d80bba933d9"
++        },
++        "stdout.log": {
++          "bytes": 1257,
++          "sha256": "a63cd3035433ae4d6ed03c4d7d23f091a56c5e050d15d7d30e49adf1b142df99"
++        },
++        "time.txt": {
++          "bytes": 1066,
++          "sha256": "e449850a1f09c2877cb3cc4c324e9bd871a35fb1fb293a3d8b0298f315426b78"
++        }
++      },
++      "baseline_metrics": {
++        "runtime": {
++          "angstrom": {
++            "rms": 0.0,
++            "p95": 0.0,
++            "max": 0.0
++          },
++          "gate": "PASS",
++          "px": {
++            "rms": 0.0,
++            "p95": 0.0,
++            "max": 0.0
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            }
++          ]
++        },
++        "STAR": {
++          "angstrom": {
++            "rms": 0.0,
++            "p95": 0.0,
++            "max": 0.0
++          },
++          "gate": "PASS",
++          "px": {
++            "rms": 0.0,
++            "p95": 0.0,
++            "max": 0.0
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            }
++          ]
++        },
++        "local_enabled": false,
++        "checker": {
++          "accuracy_status": "PASS",
++          "field_distance_status": "PASS",
++          "identifiable": true,
++          "sampling_status": "VALID",
++          "signal_status": "CHARACTERIZATION",
++          "application_consistency_status": "NOT_TESTED"
++        }
++      },
++      "expected_output_names": [
++        "corrected_micrographs.star",
++        "corrected_micrographs_all_rlnAccumMotionEarly.eps",
++        "corrected_micrographs_all_rlnAccumMotionLate.eps",
++        "corrected_micrographs_all_rlnAccumMotionTotal.eps",
++        "logfile.pdf",
++        "logfile.pdf.lst",
++        "zero.log",
++        "zero.mrc",
++        "zero.star",
++        "zero_shifts.eps"
++      ],
++      "expected_local_weight_witness_lines": {
++        "OFF": 0,
++        "ON": 0
++      }
++    },
++    {
++      "case": "integer",
++      "patch_grid": [
++        1,
++        1
++      ],
++      "baseline_remote_root": "/home/ubuntu/motioncorr-evidence/native-b2-upstream-factorial-20261026/task/evidence/runs/integer/UP_only",
++      "baseline_files": {
++        "RUN.json": {
++          "bytes": 2411,
++          "sha256": "cc0154ae6ae94d90d587f21476b0aa61bb22414f61e9fbbe0844ed3d3e5f606c"
++        },
++        "admission.json": {
++          "bytes": 804,
++          "sha256": "77c8f53eff2ede8f3ca33d513a83ac193c191c5cc3d9cc975f7ac99e428e814e"
++        },
++        "checker.json": {
++          "bytes": 2683,
++          "sha256": "b60ee8fe7c2450073db9d863a8f49adfcbbc6cea31b162047b744b84993566a5"
++        },
++        "checker.stdout": {
++          "bytes": 69,
++          "sha256": "fdd1e3a8ebf52347dffef07f968855f9f1c579cf9484005e224f94ebe4c2283e"
++        },
++        "metrics.json": {
++          "bytes": 2977,
++          "sha256": "528551d9ca189f09d3988c7f172a31c21b0daa6a77e40d31f8af738a7d036050"
++        },
++        "occupancy-before.txt": {
++          "bytes": 150125,
++          "sha256": "74c9d78490721489b100cb19c09e6de2a5d7f241f5e1e5795c97d8df19ad5a8b"
++        },
++        "output/corrected_micrographs.star": {
++          "bytes": 727,
++          "sha256": "4722894df529c901916864c3bd5624b2729489470361788c26722ddca097566e"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionEarly.eps": {
++          "bytes": 75689,
++          "sha256": "df9bad9df5b1168c02bef25b5c11a4a4511dc941ddef63b3933844cc7df809f9"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionLate.eps": {
++          "bytes": 75687,
++          "sha256": "eb9fc6ab108684b1f9155140272a0c9d71e3f0c2d8e93c1a7e760621e0d17a83"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionTotal.eps": {
++          "bytes": 75691,
++          "sha256": "6491904deb22c974bcf19fea52fbb77bf11fd9eab6df168370170ef7decd6e82"
++        },
++        "output/integer.log": {
++          "bytes": 738,
++          "sha256": "dae14020b75ad62ba11a986b779b95e0e1d5456ac1db80ba3b476d1c910e59ac"
++        },
++        "output/integer.mrc": {
++          "bytes": 50176,
++          "sha256": "68c2598c78a0ef05f29f904f78ec41ba560514b49e4f79f168862d64178a5a00"
++        },
++        "output/integer.star": {
++          "bytes": 976,
++          "sha256": "ff66a71074c9bb64b5730b93725881fafbcc8eab45e3a77c6242e5e2bbc4676f"
++        },
++        "output/integer_shifts.eps": {
++          "bytes": 67168,
++          "sha256": "6fa913b071f29d0f09e12b44d6f488f6cf04ec02b6dc40e158f10179f6365beb"
++        },
++        "output/logfile.pdf": {
++          "bytes": 24838,
++          "sha256": "221a606c839fb575a0abe06ace7123ae4c8b3b3394fddba2e81dc12cfc1acbbc"
++        },
++        "output/logfile.pdf.lst": {
++          "bytes": 374,
++          "sha256": "b63e41a87269e13dda6326f3106e39a9d01cdaaea68952014a264fabe5139672"
++        },
++        "runtime.json": {
++          "bytes": 301,
++          "sha256": "c92d86b9e508572d0be282a9d64994c7ad983e578cd950e95c3e4bd34d9c4276"
++        },
++        "stdout.log": {
++          "bytes": 1276,
++          "sha256": "1828dda344914a77adc4d8017feb44f8141090ac5ca9be9488bd82c751eef4fd"
++        },
++        "time.txt": {
++          "bytes": 1072,
++          "sha256": "0fde7de4f945802e238e21ae6c4549d31fae2317f84314d802f244d46215675e"
++        }
++      },
++      "baseline_metrics": {
++        "runtime": {
++          "angstrom": {
++            "rms": 0.07418717972096082,
++            "p95": 0.11571936211482373,
++            "max": 0.11571936211482373
++          },
++          "gate": "PASS",
++          "px": {
++            "rms": 0.0838273217185998,
++            "p95": 0.13075634137268216,
++            "max": 0.13075634137268216
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.013669372891314814,
++              "p95": 0.013669372891314816,
++              "max": 0.013669372891314816
++            },
++            {
++              "rms": 0.05787539110670045,
++              "p95": 0.057875391106700445,
++              "max": 0.057875391106700445
++            },
++            {
++              "rms": 0.10291406490608389,
++              "p95": 0.10291406490608389,
++              "max": 0.10291406490608389
++            },
++            {
++              "rms": 0.11571936211482374,
++              "p95": 0.11571936211482373,
++              "max": 0.11571936211482373
++            }
++          ]
++        },
++        "STAR": {
++          "angstrom": {
++            "rms": 0.07418734422374038,
++            "p95": 0.11571910825819609,
++            "max": 0.11571910825819609
++          },
++          "gate": "PASS",
++          "px": {
++            "rms": 0.08382750759744673,
++            "p95": 0.1307560545290351,
++            "max": 0.1307560545290351
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.013669489980101502,
++              "p95": 0.013669489980101502,
++              "max": 0.013669489980101502
++            },
++            {
++              "rms": 0.05787454877275973,
++              "p95": 0.057874548772759736,
++              "max": 0.057874548772759736
++            },
++            {
++              "rms": 0.10291540140727222,
++              "p95": 0.10291540140727223,
++              "max": 0.10291540140727223
++            },
++            {
++              "rms": 0.1157191082581961,
++              "p95": 0.11571910825819609,
++              "max": 0.11571910825819609
++            }
++          ]
++        },
++        "local_enabled": false,
++        "checker": {
++          "accuracy_status": "PASS",
++          "field_distance_status": "PASS",
++          "identifiable": true,
++          "sampling_status": "VALID",
++          "signal_status": "CHARACTERIZATION",
++          "application_consistency_status": "NOT_TESTED"
++        }
++      },
++      "expected_output_names": [
++        "corrected_micrographs.star",
++        "corrected_micrographs_all_rlnAccumMotionEarly.eps",
++        "corrected_micrographs_all_rlnAccumMotionLate.eps",
++        "corrected_micrographs_all_rlnAccumMotionTotal.eps",
++        "integer.log",
++        "integer.mrc",
++        "integer.star",
++        "integer_shifts.eps",
++        "logfile.pdf",
++        "logfile.pdf.lst"
++      ],
++      "expected_local_weight_witness_lines": {
++        "OFF": 0,
++        "ON": 0
++      }
++    },
++    {
++      "case": "fractional",
++      "patch_grid": [
++        1,
++        1
++      ],
++      "baseline_remote_root": "/home/ubuntu/motioncorr-evidence/native-b2-upstream-factorial-20261026/task/evidence/runs/fractional/UP_only",
++      "baseline_files": {
++        "RUN.json": {
++          "bytes": 2432,
++          "sha256": "795f2e378444a1efd493e899d9cb2ce4ad2f8b485ecced7a80e702b048ab600a"
++        },
++        "admission.json": {
++          "bytes": 804,
++          "sha256": "cd6cece00fdebb423c92de976bfc1c68bc874447445cd162d857e8e5c118b756"
++        },
++        "checker.json": {
++          "bytes": 2773,
++          "sha256": "972feb8a5bccc66ee766943f46c08f0efdb6ab8e3016bea037b5065a927a2975"
++        },
++        "checker.stdout": {
++          "bytes": 72,
++          "sha256": "c05ea36d7f70ad486ee96c5869cc9f7c91b721fa94e0f08338ad9752049cfd42"
++        },
++        "metrics.json": {
++          "bytes": 2990,
++          "sha256": "d7284c029124c28635cf3226ef654d3b5c71699a3cec44c771c8cad18c1fce0c"
++        },
++        "occupancy-before.txt": {
++          "bytes": 150096,
++          "sha256": "6397823031d0577f08f4034e94edaf7954d540766ed773d6014e4a550155d986"
++        },
++        "output/corrected_micrographs.star": {
++          "bytes": 739,
++          "sha256": "c55622fcafe151bbeac1a54b0513fe8fe1da8ea4524179a6ea6cc9ba42bdcaad"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionEarly.eps": {
++          "bytes": 75689,
++          "sha256": "be18fccc04a99841cc7cbd93bd5b75a7cff7ea4a132f4ea8125ea329a3db035a"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionLate.eps": {
++          "bytes": 75687,
++          "sha256": "e2b0ad03034d0ec36ef1078a421adb76613f9c3c1953914c7bd94883a199460c"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionTotal.eps": {
++          "bytes": 75689,
++          "sha256": "b3a52272069e34c4a755c255f2ab8d920d8291428e1359e5e18d28fba18d5cde"
++        },
++        "output/fractional.log": {
++          "bytes": 748,
++          "sha256": "a934f5b9e2625f622b9c9aad66ff8f557a9e47efc73b2f913cf43ab2b5e39deb"
++        },
++        "output/fractional.mrc": {
++          "bytes": 50176,
++          "sha256": "81cbfbbffe22cc6e06ba21350fad0dbb156e567d7a2f3bc8d142068030f7c76d"
++        },
++        "output/fractional.star": {
++          "bytes": 979,
++          "sha256": "e64c520694e8ef07c34aa355574d4fe52cacc4587b78c0853f010dfb9c46ed14"
++        },
++        "output/fractional_shifts.eps": {
++          "bytes": 69569,
++          "sha256": "424cd99239170854d601bcce5ef7f7aa344033ae050de12b5eb440f9b21beaac"
++        },
++        "output/logfile.pdf": {
++          "bytes": 24827,
++          "sha256": "9b7b08d7d876c130a5753e84f741467fe80f28da33b5cb90165a877be0b7d7a3"
++        },
++        "output/logfile.pdf.lst": {
++          "bytes": 383,
++          "sha256": "de0803b5341780a349725c410b51507b390302075bb3e7a36f63e3c6f08534b9"
++        },
++        "runtime.json": {
++          "bytes": 303,
++          "sha256": "657034b10cdd68d7df091154e05ef94f31354f6d5cdee07688e450f63a9f81c7"
++        },
++        "stdout.log": {
++          "bytes": 1285,
++          "sha256": "5ac6eb8e6c3777be402017a10f5da3cd5494bdac095ba0945a79b5b1b42e6035"
++        },
++        "time.txt": {
++          "bytes": 1079,
++          "sha256": "b71c46ea45f348a47e8c335fc0505eaa01504b4bcfe17f91017d72dfb0ae8d5d"
++        }
++      },
++      "baseline_metrics": {
++        "runtime": {
++          "angstrom": {
++            "rms": 0.029714000472880676,
++            "p95": 0.048263746507589834,
++            "max": 0.048263746507589834
++          },
++          "gate": "PASS",
++          "px": {
++            "rms": 0.033575141777266296,
++            "p95": 0.0545353067882371,
++            "max": 0.0545353067882371
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.01115640716173446,
++              "p95": 0.01115640716173446,
++              "max": 0.01115640716173446
++            },
++            {
++              "rms": 0.024145427177644695,
++              "p95": 0.024145427177644688,
++              "max": 0.024145427177644688
++            },
++            {
++              "rms": 0.03711809288222567,
++              "p95": 0.03711809288222567,
++              "max": 0.03711809288222567
++            },
++            {
++              "rms": 0.04826374650758984,
++              "p95": 0.048263746507589834,
++              "max": 0.048263746507589834
++            }
++          ]
++        },
++        "STAR": {
++          "angstrom": {
++            "rms": 0.029712071864872985,
++            "p95": 0.048259968586526404,
++            "max": 0.048259968586526404
++          },
++          "gate": "PASS",
++          "px": {
++            "rms": 0.033572962559178514,
++            "p95": 0.0545310379508773,
++            "max": 0.0545310379508773
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.011159057928473382,
++              "p95": 0.011159057928473383,
++              "max": 0.011159057928473383
++            },
++            {
++              "rms": 0.024144011994596554,
++              "p95": 0.024144011994596554,
++              "max": 0.024144011994596554
++            },
++            {
++              "rms": 0.03711540940765872,
++              "p95": 0.03711540940765873,
++              "max": 0.03711540940765873
++            },
++            {
++              "rms": 0.048259968586526404,
++              "p95": 0.048259968586526404,
++              "max": 0.048259968586526404
++            }
++          ]
++        },
++        "local_enabled": false,
++        "checker": {
++          "accuracy_status": "PASS",
++          "field_distance_status": "PASS",
++          "identifiable": true,
++          "sampling_status": "VALID",
++          "signal_status": "CHARACTERIZATION",
++          "application_consistency_status": "NOT_TESTED"
++        }
++      },
++      "expected_output_names": [
++        "corrected_micrographs.star",
++        "corrected_micrographs_all_rlnAccumMotionEarly.eps",
++        "corrected_micrographs_all_rlnAccumMotionLate.eps",
++        "corrected_micrographs_all_rlnAccumMotionTotal.eps",
++        "fractional.log",
++        "fractional.mrc",
++        "fractional.star",
++        "fractional_shifts.eps",
++        "logfile.pdf",
++        "logfile.pdf.lst"
++      ],
++      "expected_local_weight_witness_lines": {
++        "OFF": 0,
++        "ON": 0
++      }
++    },
++    {
++      "case": "flat",
++      "patch_grid": [
++        1,
++        1
++      ],
++      "baseline_remote_root": "/home/ubuntu/motioncorr-evidence/native-b2-upstream-factorial-20261026/task/evidence/runs/flat/UP_only",
++      "baseline_files": {
++        "RUN.json": {
++          "bytes": 2390,
++          "sha256": "57a8be4e929f277ced1ca94b921840633c1e12c6d14ed243506125777d708498"
++        },
++        "admission.json": {
++          "bytes": 804,
++          "sha256": "4aa500bd738af3c7a78d3d1373fb48e0c3dc6140e50cbb9afb791d17e7a63a8f"
++        },
++        "checker.json": {
++          "bytes": 2462,
++          "sha256": "e95ca4b45ef76de514918d49a2d6ab38de6be52e1734c847aff5c360f1cc7a72"
++        },
++        "checker.stdout": {
++          "bytes": 88,
++          "sha256": "c7e7eff7491e40b5238ecb209deba5ef0ac2cb2c41a93630ca815f7d807261de"
++        },
++        "metrics.json": {
++          "bytes": 2878,
++          "sha256": "b73eb6613d96c30854aaaebe5a163146d8a29b3fdb576ea15cc02ed7fe6f7864"
++        },
++        "occupancy-before.txt": {
++          "bytes": 150062,
++          "sha256": "13624523479c012b2d9003556757209c39e7623fb3f2d322f4f556c7f738ab04"
++        },
++        "output/corrected_micrographs.star": {
++          "bytes": 715,
++          "sha256": "a7dd4c262150c885082325ff38c70c2ead9b7bfdc67fc7fa223f1c2121223982"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionEarly.eps": {
++          "bytes": 70575,
++          "sha256": "2bb1a760d00f67b79d523bcc50fb3210e321e83cf102d22a8ed85c3848eddb16"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionLate.eps": {
++          "bytes": 70573,
++          "sha256": "b7534c24a8e5602519ae1f7bec131c343ecf449546ecfe73967b1d4dd1c06318"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionTotal.eps": {
++          "bytes": 70575,
++          "sha256": "c83e03128806904fb1e1cdcffbd33666d5abdcd3a2eb52628c10e35129858de5"
++        },
++        "output/flat.log": {
++          "bytes": 657,
++          "sha256": "035992275d0d1ef9820cf82b7c1400cec8354e0530abea89222c724611d20b78"
++        },
++        "output/flat.mrc": {
++          "bytes": 50176,
++          "sha256": "4412409d1458d3cb83d4c92a3e96a479de2bc3f18eb3d07c40dfa7a4689b2592"
++        },
++        "output/flat.star": {
++          "bytes": 973,
++          "sha256": "ee62be3ea44afcc1eeb37b1db3b0ecae081d9dfaf4f4ec671613768918ba1e3a"
++        },
++        "output/flat_shifts.eps": {
++          "bytes": 76423,
++          "sha256": "457c5591fe2963a52e77c2c5c5c98267bfc6bd777898aa8d868eb6d9fc2fb88d"
++        },
++        "output/logfile.pdf": {
++          "bytes": 23198,
++          "sha256": "2a3acce5743fc0f241dbc45b518c81705408406b9f5ea7f04201c2c816058704"
++        },
++        "output/logfile.pdf.lst": {
++          "bytes": 365,
++          "sha256": "c7842e6e246d7ad166d976749f5d35786ecd6efd73a311c587b748900be85e7e"
++        },
++        "runtime.json": {
++          "bytes": 161,
++          "sha256": "6b17cc53799c300fa065b08d912099b32db1b999d6622fee16ae1d80bba933d9"
++        },
++        "stdout.log": {
++          "bytes": 1257,
++          "sha256": "c095d4eca3970cf74c8d0a30d94ed10b2ab9c0f32b11d8f13487c967e1c758b3"
++        },
++        "time.txt": {
++          "bytes": 1067,
++          "sha256": "24c4eb3d1a782638773c36d3fb5647fcefc814f28271b65bc96d05d3699b5d25"
++        }
++      },
++      "baseline_metrics": {
++        "runtime": {
++          "angstrom": {
++            "rms": 2.1044207445094902,
++            "p95": 3.4365046854507564,
++            "max": 3.4365046854507564
++          },
++          "gate": "FAIL",
++          "px": {
++            "rms": 2.37787654746835,
++            "p95": 3.8830561417522667,
++            "max": 3.8830561417522667
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.8591261713626892,
++              "p95": 0.8591261713626891,
++              "max": 0.8591261713626891
++            },
++            {
++              "rms": 1.7182523427253784,
++              "p95": 1.7182523427253782,
++              "max": 1.7182523427253782
++            },
++            {
++              "rms": 2.577378514088067,
++              "p95": 2.577378514088067,
++              "max": 2.577378514088067
++            },
++            {
++              "rms": 3.436504685450757,
++              "p95": 3.4365046854507564,
++              "max": 3.4365046854507564
++            }
++          ]
++        },
++        "STAR": {
++          "angstrom": {
++            "rms": 2.1044207445094902,
++            "p95": 3.4365046854507564,
++            "max": 3.4365046854507564
++          },
++          "gate": "FAIL",
++          "px": {
++            "rms": 2.37787654746835,
++            "p95": 3.8830561417522667,
++            "max": 3.8830561417522667
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.8591261713626892,
++              "p95": 0.8591261713626891,
++              "max": 0.8591261713626891
++            },
++            {
++              "rms": 1.7182523427253784,
++              "p95": 1.7182523427253782,
++              "max": 1.7182523427253782
++            },
++            {
++              "rms": 2.577378514088067,
++              "p95": 2.577378514088067,
++              "max": 2.577378514088067
++            },
++            {
++              "rms": 3.436504685450757,
++              "p95": 3.4365046854507564,
++              "max": 3.4365046854507564
++            }
++          ]
++        },
++        "local_enabled": false,
++        "checker": {
++          "accuracy_status": "UNIDENTIFIABLE",
++          "field_distance_status": "FAIL",
++          "identifiable": false,
++          "sampling_status": "VALID",
++          "signal_status": "CHARACTERIZATION",
++          "application_consistency_status": "NOT_TESTED"
++        }
++      },
++      "expected_output_names": [
++        "corrected_micrographs.star",
++        "corrected_micrographs_all_rlnAccumMotionEarly.eps",
++        "corrected_micrographs_all_rlnAccumMotionLate.eps",
++        "corrected_micrographs_all_rlnAccumMotionTotal.eps",
++        "flat.log",
++        "flat.mrc",
++        "flat.star",
++        "flat_shifts.eps",
++        "logfile.pdf",
++        "logfile.pdf.lst"
++      ],
++      "expected_local_weight_witness_lines": {
++        "OFF": 0,
++        "ON": 0
++      }
++    },
++    {
++      "case": "repeated",
++      "patch_grid": [
++        1,
++        1
++      ],
++      "baseline_remote_root": "/home/ubuntu/motioncorr-evidence/native-b2-upstream-factorial-20261026/task/evidence/runs/repeated/UP_only",
++      "baseline_files": {
++        "RUN.json": {
++          "bytes": 2417,
++          "sha256": "7eb15b98dd88cd2d1d9a7d7567ae7934b02217acd30e7763dc6e3a71cf23d86c"
++        },
++        "admission.json": {
++          "bytes": 804,
++          "sha256": "27ed0dc78f4b7597b9d2db99a38432fbe0619c801373411d91a26e1f06edab42"
++        },
++        "checker.json": {
++          "bytes": 2623,
++          "sha256": "f0e00711a894abd4b64132f09339a2d31dae73903cca5f2690e1a72eda9d57e3"
++        },
++        "checker.stdout": {
++          "bytes": 104,
++          "sha256": "ed981a097e28e0f879308c8ea02e81dbb5129e6fe3dd25be27894373c314294b"
++        },
++        "metrics.json": {
++          "bytes": 2957,
++          "sha256": "46788595da2d12ce70cc6dbd664c22dea7e50c70ee17f6665057104d0ce597fd"
++        },
++        "occupancy-before.txt": {
++          "bytes": 150053,
++          "sha256": "f23984f484a6d25eea7fcdc403397dfc4dc5c484f9596c81cc19c14107d560fa"
++        },
++        "output/corrected_micrographs.star": {
++          "bytes": 731,
++          "sha256": "59c7ff502922ebffbd431060feb29ac3a5c0df45aa37e76e78cc8808317f6ebb"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionEarly.eps": {
++          "bytes": 75701,
++          "sha256": "de88ec3562fe16e3333c04c3183d24a0b0e443231c9470d18c8763e19ddf20ef"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionLate.eps": {
++          "bytes": 75699,
++          "sha256": "bfd9b4987fc96f3e9f962466b44219dbb8ae644fd9cf17a743c621067995ab40"
++        },
++        "output/corrected_micrographs_all_rlnAccumMotionTotal.eps": {
++          "bytes": 75701,
++          "sha256": "1fe93ef1a544662aca9929076ec1b04378f83276e4f5bf173b6bf81c48d407be"
++        },
++        "output/logfile.pdf": {
++          "bytes": 24840,
++          "sha256": "00e291e46e64096e58f24b083b38d741e4d0ff5998b657ef8d9c2a6c16d246ab"
++        },
++        "output/logfile.pdf.lst": {
++          "bytes": 377,
++          "sha256": "75e77c94341910fcada66c97537228c1544807f78c77450018b8ce313041f18b"
++        },
++        "output/repeated.log": {
++          "bytes": 742,
++          "sha256": "12a619e991ca4d660e7de6c0a4f429001c7bf6d817d29f4812738fd8ac8c9894"
++        },
++        "output/repeated.mrc": {
++          "bytes": 50176,
++          "sha256": "b34c0ad191cae94c23229197cf1106594aae0e2fd1cf29adb6a245e2f6cd1e09"
++        },
++        "output/repeated.star": {
++          "bytes": 977,
++          "sha256": "bc70c5199f3fd24646c41d754a26a603bf9a4515b63c945bab90cd9511f9a5d5"
++        },
++        "output/repeated_shifts.eps": {
++          "bytes": 69573,
++          "sha256": "de67e6020e153c129ba813146319e8ac553c743b98bf22386bf8a0963e22b4e1"
++        },
++        "runtime.json": {
++          "bytes": 231,
++          "sha256": "ca8b91f716ea61a275d376e3f50ab4b55f38ab348e6973561feaaca10ec4eee3"
++        },
++        "stdout.log": {
++          "bytes": 1281,
++          "sha256": "96a7b0d5fc4e47966f4535fba39a7010bacc7dcf5aac193873a61d94fef178ec"
++        },
++        "time.txt": {
++          "bytes": 1075,
++          "sha256": "fdd273ef3167d7f3af6f9f45bac3588d2ff97dba2f74f8a338de02d2d210581f"
++        }
++      },
++      "baseline_metrics": {
++        "runtime": {
++          "angstrom": {
++            "rms": 9.012581072426281,
++            "p95": 14.197954321946206,
++            "max": 14.197954321946206
++          },
++          "gate": "FAIL",
++          "px": {
++            "rms": 10.183707426470374,
++            "p95": 16.04288623948724,
++            "max": 16.04288623948724
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.47026265548112606,
++              "p95": 0.47026265548112606,
++              "max": 0.47026265548112606
++            },
++            {
++              "rms": 14.170091597365406,
++              "p95": 14.170091597365408,
++              "max": 14.170091597365408
++            },
++            {
++              "rms": 14.197954321946206,
++              "p95": 14.197954321946206,
++              "max": 14.197954321946206
++            },
++            {
++              "rms": 1.8811002536668335,
++              "p95": 1.8811002536668338,
++              "max": 1.8811002536668338
++            }
++          ]
++        },
++        "STAR": {
++          "angstrom": {
++            "rms": 9.012581140129837,
++            "p95": 14.197954391510109,
++            "max": 14.197954391510109
++          },
++          "gate": "FAIL",
++          "px": {
++            "rms": 10.183707502971567,
++            "p95": 16.04288631809052,
++            "max": 16.04288631809052
++          },
++          "per_frame_angstrom": [
++            {
++              "rms": 0.0,
++              "p95": 0.0,
++              "max": 0.0
++            },
++            {
++              "rms": 0.47026259623141675,
++              "p95": 0.47026259623141675,
++              "max": 0.47026259623141675
++            },
++            {
++              "rms": 14.170091735309391,
++              "p95": 14.170091735309391,
++              "max": 14.170091735309391
++            },
++            {
++              "rms": 14.197954391510109,
++              "p95": 14.197954391510109,
++              "max": 14.197954391510109
++            },
++            {
++              "rms": 1.881100326197699,
++              "p95": 1.881100326197699,
++              "max": 1.881100326197699
++            }
++          ]
++        },
++        "local_enabled": false,
++        "checker": {
++          "accuracy_status": "UNIDENTIFIABLE",
++          "field_distance_status": "FAIL",
++          "identifiable": false,
++          "sampling_status": "OUTSIDE_FIXED_ROI",
++          "signal_status": "CHARACTERIZATION",
++          "application_consistency_status": "NOT_TESTED"
++        }
++      },
++      "expected_output_names": [
++        "corrected_micrographs.star",
++        "corrected_micrographs_all_rlnAccumMotionEarly.eps",
++        "corrected_micrographs_all_rlnAccumMotionLate.eps",
++        "corrected_micrographs_all_rlnAccumMotionTotal.eps",
++        "logfile.pdf",
++        "logfile.pdf.lst",
++        "repeated.log",
++        "repeated.mrc",
++        "repeated.star",
++        "repeated_shifts.eps"
++      ],
++      "expected_local_weight_witness_lines": {
++        "OFF": 0,
++        "ON": 0
++      }
++    }
++  ],
++  "tools_sha256": {
++    "tools/check_motion_diagnostics.py": "2be34b821ce9c351abaeab5c0280478362cf90ba774df7f529caced9e360eb16",
++    "tools/check_realistic_motion.py": "b0ab099a256e458b1c8aea6c2ff5d9ceacab10dd81945b025e96e5c8a87b7ff9",
++    "tools/motion_field.py": "d72cfad7175368fa6d0727c2727c49780328951c6f4d3ecc20e9ac662ac2e810",
++    "test-data/generate_motion_diagnostics.py": "5e781bb290b3f12b38f6dc7ec18bb955d56331219dc0216321e010ecbcdaf4cc",
++    "docs/post_rc0/s1/native_b2_20261026/scripts/lane.py": "e0143e89fa3b6771d7f3ff873f04a7453d26f1b8c7f7b1e8f4ab4d3202b6fd66",
++    "docs/post_rc0/s1/native_b2_upstream_factorial_20261026/scripts/factorial_common.py": "ad20dc9f440fd73545b3fcccc6e0beb0540c5069e28886370e0f957960a2a5bf"
++  },
++  "native_started": false,
++  "requested_affinity": "cpu64 CPUs32-47, fresh admission required",
++  "native_threads": 2,
++  "initial_fixture_reference": "docs/post_rc0/s1/native_b2_upstream_factorial_20261026/PINS.json",
++  "initial_raw_index_sha256": "735d143583a37fdfc9073e1935e1e8e5cf5f5a8058ffdea65137466c7ac49871",
++  "schema": "local-full-width-admission-v3",
++  "version": "v3",
++  "supersedes": {
++    "file": "ADMISSION_DRAFT.json",
++    "sha256": "a094387eb6b0d5a44b265a2171bf7a208d52f82f667455a5ee6ebb927d19837b"
++  },
++  "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
++  "fixed_roi_y0y1x0x1": [
++    12,
++    84,
++    12,
++    116
++  ],
++  "tools": [
++    {
++      "root": "consumer_source",
++      "path": "tools/check_motion_diagnostics.py",
++      "sha256": "2be34b821ce9c351abaeab5c0280478362cf90ba774df7f529caced9e360eb16"
++    },
++    {
++      "root": "consumer_source",
++      "path": "tools/check_realistic_motion.py",
++      "sha256": "b0ab099a256e458b1c8aea6c2ff5d9ceacab10dd81945b025e96e5c8a87b7ff9"
++    },
++    {
++      "root": "consumer_source",
++      "path": "tools/motion_field.py",
++      "sha256": "d72cfad7175368fa6d0727c2727c49780328951c6f4d3ecc20e9ac662ac2e810"
++    },
++    {
++      "root": "consumer_source",
++      "path": "test-data/generate_motion_diagnostics.py",
++      "sha256": "5e781bb290b3f12b38f6dc7ec18bb955d56331219dc0216321e010ecbcdaf4cc"
++    },
++    {
++      "root": "consumer_source",
++      "path": "test-data/generate_realistic_motion.py",
++      "sha256": "a10f694abafc71c146d0e0f2eeb2b1cf2c58131b2dbf6c1b66800405bd126380"
++    },
++    {
++      "root": "consumer_source",
++      "path": "test-data/generate_known_motion_fixture.py",
++      "sha256": "f28fbf516f8c2f7a3ae1b6133d54d3cc1e0708e2f90644cce30a845f4bbcef4f"
++    },
++    {
++      "root": "repo",
++      "path": "docs/post_rc0/s1/global_damping_20261026/scripts/compare_products.py",
++      "sha256": "53449d2da682305c8c11e3ed3efb91103530196e481ac075b00f90e3d5ea0f47"
++    },
++    {
++      "root": "repo",
++      "path": "docs/post_rc0/s1/native_b2_20261026/scripts/lane.py",
++      "sha256": "e0143e89fa3b6771d7f3ff873f04a7453d26f1b8c7f7b1e8f4ab4d3202b6fd66"
++    },
++    {
++      "root": "repo",
++      "path": "docs/post_rc0/s1/native_b2_upstream_factorial_20261026/scripts/factorial_common.py",
++      "sha256": "ad20dc9f440fd73545b3fcccc6e0beb0540c5069e28886370e0f957960a2a5bf"
++    },
++    {
++      "root": "pilot",
++      "path": "score_fields_v2.py",
++      "sha256": "e0ef769c665dce1368738a327dc5a15efb0280462750709f0db99d164186a03b"
++    },
++    {
++      "root": "pilot",
++      "path": "score_fields_v3.py",
++      "sha256": "bd685429028d6b5d7ce1665355dd120cde163966b5abb11fb51be4d8937bdccc"
++    },
++    {
++      "root": "pilot",
++      "path": "tests/test_score_fields_v3.py",
++      "sha256": "fb33e7a5627f9f890c3be0c0bae19e7337ab030fb1ecccd6c1a4229d60745869"
++    },
++    {
++      "root": "pilot",
++      "path": "build_admission_v3.py",
++      "sha256": "e9fb10a7f8926e09d2ca1346e6de648b650102672cd782e475100299dc78213f"
++    },
++    {
++      "root": "pilot",
++      "path": "command_manifest_v3.py",
++      "sha256": "578b3ca1c43b7fa5f2ae4553f1835a4bb3619c8ababf94502c7e44fcfe7d9372"
++    },
++    {
++      "root": "pilot",
++      "path": "tests/mutation_controls_v3.py",
++      "sha256": "7d96881f476f1ea3f5126da537d2b039d982a72dfd9cf6133388159a24b392d6"
++    }
++  ],
++  "scorer": {
++    "entry": "score_fields_v3.admit_producer / score_admitted",
++    "plan": "SCORER_V3_PLAN.md",
++    "numerical_operators": "score_fields_v2.py unchanged (pinned)"
++  },
++  "retained_baseline": {
++    "production_commit": "326f03a073aec0d26c9cd585ce4f701d1c808245",
++    "binary_sha256": "531a1b0984dfbb39bd1b43afa23561091365a4d0459967ef5ee24ca69344c2eb"
++  },
++  "candidate_branch_head_with_unchanged_src": "215c37b0743dd63a793650e8f0cfda4a2778ace9",
++  "staged_input_deviation": "cwd holds exactly <case>.star and <case>.mrcs; retained producers used the 33-file fixture directory",
++  "source_archive": null,
++  "compiler_and_config": null,
++  "shared_libraries": null,
++  "venue_identity": null
++}
+diff --git a/COMMANDS_DRAFT_v3.json b/COMMANDS_DRAFT_v3.json
+new file mode 100644
+index 0000000..f9e9724
+--- /dev/null
++++ b/COMMANDS_DRAFT_v3.json
+@@ -0,0 +1,858 @@
++[
++  {
++    "case": "noisy",
++    "arm": "OFF",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "noisy.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/noisy/OFF/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "3",
++      "--patch_y",
++      "3",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/noisy/OFF/input",
++    "input_files": [
++      "noisy.star",
++      "noisy.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/noisy/OFF/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  },
++  {
++    "case": "noisy",
++    "arm": "ON",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "noisy.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/noisy/ON/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "3",
++      "--patch_y",
++      "3",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all",
++      "--experimental_local_full_width_weight"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/noisy/ON/input",
++    "input_files": [
++      "noisy.star",
++      "noisy.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/noisy/ON/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 9
++  },
++  {
++    "case": "affine",
++    "arm": "OFF",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "affine.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/affine/OFF/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "3",
++      "--patch_y",
++      "3",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/affine/OFF/input",
++    "input_files": [
++      "affine.star",
++      "affine.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/affine/OFF/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  },
++  {
++    "case": "affine",
++    "arm": "ON",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "affine.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/affine/ON/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "3",
++      "--patch_y",
++      "3",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all",
++      "--experimental_local_full_width_weight"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/affine/ON/input",
++    "input_files": [
++      "affine.star",
++      "affine.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/affine/ON/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 9
++  },
++  {
++    "case": "pedestal",
++    "arm": "OFF",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "pedestal.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/pedestal/OFF/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "3",
++      "--patch_y",
++      "3",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/pedestal/OFF/input",
++    "input_files": [
++      "pedestal.star",
++      "pedestal.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/pedestal/OFF/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  },
++  {
++    "case": "pedestal",
++    "arm": "ON",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "pedestal.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/pedestal/ON/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "3",
++      "--patch_y",
++      "3",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all",
++      "--experimental_local_full_width_weight"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/pedestal/ON/input",
++    "input_files": [
++      "pedestal.star",
++      "pedestal.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/pedestal/ON/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 9
++  },
++  {
++    "case": "zero",
++    "arm": "OFF",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "zero.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/zero/OFF/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "1",
++      "--patch_y",
++      "1",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/zero/OFF/input",
++    "input_files": [
++      "zero.star",
++      "zero.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/zero/OFF/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  },
++  {
++    "case": "zero",
++    "arm": "ON",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "zero.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/zero/ON/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "1",
++      "--patch_y",
++      "1",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all",
++      "--experimental_local_full_width_weight"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/zero/ON/input",
++    "input_files": [
++      "zero.star",
++      "zero.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/zero/ON/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  },
++  {
++    "case": "integer",
++    "arm": "OFF",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "integer.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/integer/OFF/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "1",
++      "--patch_y",
++      "1",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/integer/OFF/input",
++    "input_files": [
++      "integer.star",
++      "integer.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/integer/OFF/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  },
++  {
++    "case": "integer",
++    "arm": "ON",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "integer.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/integer/ON/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "1",
++      "--patch_y",
++      "1",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all",
++      "--experimental_local_full_width_weight"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/integer/ON/input",
++    "input_files": [
++      "integer.star",
++      "integer.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/integer/ON/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  },
++  {
++    "case": "fractional",
++    "arm": "OFF",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "fractional.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/fractional/OFF/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "1",
++      "--patch_y",
++      "1",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/fractional/OFF/input",
++    "input_files": [
++      "fractional.star",
++      "fractional.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/fractional/OFF/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  },
++  {
++    "case": "fractional",
++    "arm": "ON",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "fractional.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/fractional/ON/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "1",
++      "--patch_y",
++      "1",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all",
++      "--experimental_local_full_width_weight"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/fractional/ON/input",
++    "input_files": [
++      "fractional.star",
++      "fractional.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/fractional/ON/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  },
++  {
++    "case": "flat",
++    "arm": "OFF",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "flat.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/flat/OFF/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "1",
++      "--patch_y",
++      "1",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/flat/OFF/input",
++    "input_files": [
++      "flat.star",
++      "flat.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/flat/OFF/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  },
++  {
++    "case": "flat",
++    "arm": "ON",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "flat.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/flat/ON/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "1",
++      "--patch_y",
++      "1",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all",
++      "--experimental_local_full_width_weight"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/flat/ON/input",
++    "input_files": [
++      "flat.star",
++      "flat.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/flat/ON/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  },
++  {
++    "case": "repeated",
++    "arm": "OFF",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "repeated.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/repeated/OFF/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "1",
++      "--patch_y",
++      "1",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/repeated/OFF/input",
++    "input_files": [
++      "repeated.star",
++      "repeated.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/repeated/OFF/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  },
++  {
++    "case": "repeated",
++    "arm": "ON",
++    "argv": [
++      "<PINNED_LINUX_BINARY>",
++      "--i",
++      "repeated.star",
++      "--o",
++      "/tmp/motioncorr-local-full-width-native-20261026/evidence/repeated/ON/output",
++      "--use_own",
++      "--j",
++      "2",
++      "--patch_x",
++      "1",
++      "--patch_y",
++      "1",
++      "--group_frames",
++      "1",
++      "--bin_factor",
++      "1",
++      "--seed",
++      "1",
++      "--skip_defect",
++      "--save_noDW",
++      "--first_frame_sum",
++      "1",
++      "--last_frame_sum",
++      "5",
++      "--skip_logfile",
++      "--max_iter",
++      "5",
++      "--experimental_coupled_peak",
++      "all",
++      "--experimental_local_full_width_weight"
++    ],
++    "cwd": "/tmp/motioncorr-local-full-width-native-20261026/evidence/repeated/ON/input",
++    "input_files": [
++      "repeated.star",
++      "repeated.mrcs"
++    ],
++    "environment": {
++      "OMP_NUM_THREADS": "2",
++      "OPENBLAS_NUM_THREADS": "1",
++      "MKL_NUM_THREADS": "1",
++      "MC_EXPERIMENT_CCF_DC_ARM": "both",
++      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-local-full-width-native-20261026/evidence/repeated/ON/runtime.json",
++      "PYTHONDONTWRITEBYTECODE": "1"
++    },
++    "environment_cleanup": [
++      "remove inherited MC_DIAG_* and MC_EXPERIMENT_* before installing the listed values"
++    ],
++    "status": "UNRUN_HELD",
++    "expected_local_weight_witness_lines": 0
++  }
++]
+diff --git a/ADMISSION_AMENDMENT_v3.md b/ADMISSION_AMENDMENT_v3.md
+new file mode 100644
+index 0000000..a4f674e
+--- /dev/null
++++ b/ADMISSION_AMENDMENT_v3.md
+@@ -0,0 +1,38 @@
++# Admission amendment v3 (additive; PLAN.md, ADMISSION_DRAFT.json and COMMANDS_DRAFT.json are unchanged)
++
++Status: HELD. No producer exists or has run. `ADMISSION_DRAFT_v3.json` (version v3) supersedes `ADMISSION_DRAFT.json` by
++hash only for admission-consumer purposes; the scientific design in PLAN.md is untouched. The final Linux binary, source
++archive, compiler/config, shared libraries, venue identity and lease fields stay null.
++
++## What v3 adds (Opus review M1, L1-L4)
++- `score_fields_v3.admit_producer`/`score_admitted` bind one run directory to its case and arm, the exact argv (the flag
++  exactly once for ON, never for OFF), the exact declared MC/OMP/BLAS environment plus the observed controlled child
++  environment, the cwd, a staged cwd of exactly `<case>.star` and `<case>.mrcs` at the pinned bytes, a complete
++  `output/` inventory equal to the receipt and to the case's baseline names, receipt-bound `runtime.json` and
++  `stdout.log` bytes, and the log witness in `output/<case>.log` (strict `x_norm = 42, pnx = 42, nfx = 22`; exactly 9 on 3x3
++  ON, 0 otherwise). A draft row whose argv[0] is `<PINNED_LINUX_BINARY>` is not admissible; only a row resolved with an
++  explicit binary path and 64-hex sha256 is.
++- Scoring is bound to manifest `9697c203...02dc`, the fixed ROI `[12,84,12,116]`, the case's own truth file name and STAR
++  (`_rlnMicrographMovieName` stem equals the case). `field_metrics_lowlevel` (= v2 `field_metrics`) stays metadata-only.
++- Admission pins now include the comparator `compare_products.py` (`53449d2d...5f0f47`), the six transitive consumer and
++  generator files, `score_fields_v2.py`, `score_fields_v3.py`, the v3 tests and builders, lane.py and factorial_common.py,
++  each with an explicit root (`consumer_source`, `repo`, `pilot`). `verify_tool_pins` rechecks them at supplied roots.
++
++## Deviations from the retained producers, now named
++1. Staged two-file cwd: the retained producers ran with cwd = the full 33-file fixture directory; the pilot stages only
++   `<case>.star` and `<case>.mrcs`. Gated products should not depend on the extra files (compare_products normalises
++   the output root), but this is unproven locally; the OFF compatibility gate decides it.
++2. New output root (`/tmp/motioncorr-local-full-width-native-20261026/evidence` in the draft, re-rooted at admission).
++3. Source baseline: the retained UP_only binary was built from production `326f03a0` (sha256 `531a1b09...c2eb`); the
++   candidate is `634e4b48` (src unchanged at branch head `215c37b0`). The difference is default-off by design, but OFF
++   byte-compatibility with the retained baseline is an empirical gate, not an assumption.
++
++## Stop rule
++If source identity or OFF compatibility fails for a case, stop before that case's ON producer
++(`score_fields_v3.on_launch_permitted(off_compat, source_identity)` is True only for PASS/PASS). No retry.
++
++## Limits that remain
++`runtime.json` content is not self-identifying: it is bound to the case by the receipt hash, the declared
++`MC_DIAG_MODEL_OUT` path under the canonical run directory and the producer, not by its bytes. The v3 tests use fake
++files plus the retained noisy runtime/STAR/truth; they establish consumer logic only. No native run, estimator
++accuracy, byte neutrality or scientific acceptance follows.
+diff --git a/ORACLE_PROVENANCE_v3.md b/ORACLE_PROVENANCE_v3.md
+new file mode 100644
+index 0000000..fb208de
+--- /dev/null
++++ b/ORACLE_PROVENANCE_v3.md
+@@ -0,0 +1,39 @@
++# Oracle floor provenance (additive; oracle_floor.py, ORACLE_FLOOR_RESULT.json, PLAN and README are unchanged)
++
++Status: independently reproduced; not an estimator, native or scientific acceptance.
++
++An independent Opus review reproduced the parent's direct physical-field oracle without importing the parent's adapter,
++using exact rational temporal projectors, a Householder-QR spatial projector and a Kronecker projection on the dense
++72x104 ROI (report `REPORT.md`, `oracle_reproduce.py`, `ORACLE_REPRODUCTION.json`, hashes in its `SHA256SUMS`):
++
++| case / fixed G | reviewer RMS Å | difference from parent |
++|---|---:|---:|
++| noisy runtime | 0.036792526966214566 | 1.7e-16 |
++| noisy STAR | 0.03679260984730614 | 3.2e-16 |
++| affine runtime | 4.582282970e-05 | 2.1e-19 |
++| affine STAR | 4.496010060e-05 | 2.3e-17 |
++
++Coefficients agree to <=1.9e-14 px. p95 = max at the RMS optimum (0.0594253 Å for noisy). The existence statement stands: a
++passing field exists in the fixed-G native-18 family for these two exposed movies.
++
++Reviewer qualifications to keep with any citation: the floor reduces to `pixel_size * |t_hat^T G| / sqrt(5)` for this affine
++truth, so it carries no information about the estimator, the patch observations, the CCF weight or the 10 px fit
++rejection; it does not carry over to non-polynomial truth or other movies; native noisy (1.645 Å) is ~45x the floor, so
++representability is not the cause of that failure. **No floor is subtracted from any result, there is no percentile or
++maximum floor claim, and the earlier ~0.465 Å perfect-observation figure is an observation-fit outcome, not this oracle.**
++
++## Pinned original import set of `oracle_floor.py` (preserved, not rerun)
++`oracle_floor.py` (sha256 in the table below) imports `score_fields.py` (V1), which pins only five of the
++six consumer files and does not check module origins (Opus L6); the result is unaffected because the reproduction imports
++neither. Original files:
++
++| file | sha256 |
++|---|---|
++| oracle_floor.py | 02751125a66b3a1517f8d0d5c4e021a88fe4c66a52237247dc3d88e70211954a |
++| score_fields.py (V1) | 81bf519a2360c367e5f593b78b14a609348d54b81e8b66485f6c5dacbf347cd7 |
++| ORACLE_FLOOR_RESULT.json | 1d70a3aa34bb19c44edfcd878effce6891398cdbbb58a2a1710a5e8ae2430a4c |
++| ORACLE_FLOOR_PLAN.md | 4b38aeb1f060942f8e380ab504835e2fd052d1ac0480776bb3ab3d24104cb16b |
++| consumers under /tmp/mc-w8-common-mean-screen-20261026/src_4fa272f6 | check_motion_diagnostics 2be34b82..., check_realistic_motion b0ab099a..., motion_field d72cfad7..., generate_motion_diagnostics 5e781bb2..., generate_realistic_motion a10f694a..., generate_known_motion_fixture f28fbf51... (transitive; pinned by v2/v3) |
++| runtime | uv CPython 3.13.7, NumPy 2.4.2 |
++
++No numerical rerun was done for this note. The Opus originals are archived additively outside Git (see V3_INDEX.md).
+diff --git a/logs_v3/ATTEMPTS_v3.md b/logs_v3/ATTEMPTS_v3.md
+new file mode 100644
+index 0000000..c58ff59
+--- /dev/null
++++ b/logs_v3/ATTEMPTS_v3.md
+@@ -0,0 +1,6 @@
++# v3 attempts (append-only)
++1. tests run1: 107/107 PASS (logs_v3/test-run1.log). mutation_controls run1: 9 of 11 guard removals killed; two SURVIVED
++   (logs_v3/mutation-run1.log, MUTATION_CONTROLS_run1.json): `runtime_hash` (the tamper test wrote `{}`, which still failed
++   with the same RUNTIME code from the later parse) and `run_dir` (a copied tree whose receipt still named the old path was
++   caught by the second run_dir check). Both were weak tests, not code defects. Criteria in SCORER_V3_PLAN.md unchanged;
++   tests strengthened (valid-JSON runtime tamper; copied tree with a self-consistent receipt, which must hit RUN_DIR before CWD).
+diff --git a/logs_v3/mutation-run1.log b/logs_v3/mutation-run1.log
+new file mode 100644
+index 0000000..8ac6f36
+--- /dev/null
++++ b/logs_v3/mutation-run1.log
+@@ -0,0 +1,11 @@
++KILLED arm_check | failed: 8
++KILLED flag_count | failed: 4
++KILLED env_observed | failed: 3
++KILLED inventory_equality | failed: 4
++KILLED baseline_names | failed: 3
++KILLED witness_count | failed: 7
++KILLED witness_format | failed: 7
++SURVIVED runtime_hash | failed: 3
++KILLED roi_check | failed: 2
++KILLED star_case | failed: 2
++SURVIVED run_dir | failed: 1
+diff --git a/logs_v3/mutation-run2.log b/logs_v3/mutation-run2.log
+new file mode 100644
+index 0000000..7dbf68f
+--- /dev/null
++++ b/logs_v3/mutation-run2.log
+@@ -0,0 +1,11 @@
++KILLED arm_check | failed: 8
++KILLED flag_count | failed: 4
++KILLED env_observed | failed: 3
++KILLED inventory_equality | failed: 4
++KILLED baseline_names | failed: 3
++KILLED witness_count | failed: 7
++KILLED witness_format | failed: 7
++KILLED runtime_hash | failed: 4
++KILLED roi_check | failed: 2
++KILLED star_case | failed: 2
++KILLED run_dir | failed: 2
+diff --git a/logs_v3/mutation-run3.log b/logs_v3/mutation-run3.log
+new file mode 100644
+index 0000000..7dbf68f
+--- /dev/null
++++ b/logs_v3/mutation-run3.log
+@@ -0,0 +1,11 @@
++KILLED arm_check | failed: 8
++KILLED flag_count | failed: 4
++KILLED env_observed | failed: 3
++KILLED inventory_equality | failed: 4
++KILLED baseline_names | failed: 3
++KILLED witness_count | failed: 7
++KILLED witness_format | failed: 7
++KILLED runtime_hash | failed: 4
++KILLED roi_check | failed: 2
++KILLED star_case | failed: 2
++KILLED run_dir | failed: 2
+diff --git a/logs_v3/test-run1.log b/logs_v3/test-run1.log
+new file mode 100644
+index 0000000..23e45a8
+--- /dev/null
++++ b/logs_v3/test-run1.log
+@@ -0,0 +1,108 @@
++PASS positive admit noisy OFF :: witness_lines=0
++PASS positive admit noisy ON :: witness_lines=9
++PASS positive admit flat OFF :: witness_lines=0
++PASS positive admit flat ON :: witness_lines=0
++PASS positive score noisy OFF equals retained pair :: maxdiff_A=6.22e-15
++PASS positive score noisy ON equals retained pair :: maxdiff_A=6.22e-15
++PASS v3 commands equal v1 argv/cwd/env/inputs/witness
++PASS witness derivation: 9 on 3x3 ON, else 0
++PASS placeholder binary path refused :: code=PLACEHOLDER
++PASS bad binary sha refused :: code=BINARY
++PASS unresolved draft row not admissible :: code=PLACEHOLDER
++PASS draft row cannot be re-resolved twice :: code=PLACEHOLDER
++PASS missing arm :: code=ARM
++PASS ON receipt in OFF slot :: code=ARM
++PASS OFF receipt in ON slot :: code=ARM
++PASS swapped dirs: OFF slot holds ON :: code=ARM
++PASS swapped dirs: ON slot holds OFF :: code=ARM
++PASS run dir copied outside evidence_root/case/arm :: code=RUN_DIR
++PASS receipt run_dir names another directory :: code=RUN_DIR
++PASS missing flag on ON :: code=FLAG_COUNT
++PASS flag on OFF :: code=FLAG_COUNT
++PASS duplicate flag on ON :: code=FLAG_COUNT
++PASS extra unknown argv :: code=ARGV
++PASS changed argv value :: code=ARGV
++PASS argv[0] left as placeholder :: code=ARGV
++PASS wrong binary sha in receipt :: code=BINARY
++PASS uppercase binary sha in receipt :: code=BINARY
++PASS cwd mismatch :: code=CWD
++PASS env value changed :: code=ENV
++PASS env var missing :: code=ENV
++PASS env var extra :: code=ENV
++PASS observed child env has extra OMP_PROC_BIND :: code=ENV_OBSERVED
++PASS observed child env value differs :: code=ENV_OBSERVED
++PASS exit 1 with a complete tap :: code=EXIT
++PASS exit True :: code=EXIT
++PASS exit "0" :: code=EXIT
++PASS case swapped in receipt :: code=CASE
++PASS receipt schema wrong :: code=SCHEMA
++PASS publication is a list :: code=SCHEMA
++PASS publication bytes is a string :: code=SCHEMA
++PASS runtime pin is not a dict :: code=SCHEMA
++PASS receipt carries NaN :: code=NONFINITE
++PASS extra file in staged cwd :: code=INPUT
++PASS missing staged movie :: code=INPUT
++PASS staged input byte tamper :: code=INPUT
++PASS witness x_norm 22 :: code=WITNESS
++PASS witness pnx 41 :: code=WITNESS
++PASS witness nfx 21 :: code=WITNESS
++PASS witness x_norm 42.0 text :: code=WITNESS
++PASS witness spaced variant :: code=WITNESS
++PASS witness no leading space :: code=WITNESS
++PASS 8 witness lines on 3x3 ON :: code=WITNESS
++PASS 10 witness lines on 3x3 ON :: code=WITNESS
++PASS 0 witness lines on 3x3 ON :: code=WITNESS
++PASS 1 witness line on global-only ON :: code=WITNESS
++PASS 1 witness line on global-only OFF :: code=WITNESS
++PASS 1 witness line on 3x3 OFF :: code=WITNESS
++PASS log of another case :: code=LOG_CASE
++PASS log is not utf-8 :: code=LOG_CASE
++PASS unlisted extra output file (receipt unchanged) :: code=INVENTORY
++PASS extra output file even when listed in the receipt :: code=INVENTORY
++PASS listed output file deleted :: code=INVENTORY
++PASS required output absent from disk and receipt :: code=INVENTORY
++PASS listed output byte changed :: code=PUBLICATION_HASH
++PASS symlink in output :: code=INVENTORY
++PASS publication path escapes output :: code=INVENTORY
++PASS runtime.json tampered (receipt stale) :: code=RUNTIME
++PASS runtime.json missing :: code=RUNTIME
++PASS runtime NaN with matching receipt hash :: code=NONFINITE
++PASS runtime 17 coefficients with matching receipt hash :: code=RUNTIME
++PASS runtime local_enabled integer with matching receipt hash :: code=RUNTIME
++PASS runtime 4 frames with matching receipt hash :: code=RUNTIME
++PASS runtime missing key with matching receipt hash :: code=RUNTIME
++PASS stdout.log tampered (receipt stale) :: code=STDOUT
++PASS stdout.log missing :: code=STDOUT
++PASS affine STAR in noisy run is receipt-consistent (admits)
++PASS affine STAR in noisy run refused at scoring :: code=STAR_CASE
++PASS truth file of another case name :: code=TRUTH
++PASS STAR file name of another case :: code=STAR_CASE
++PASS case absent from manifest :: code=CASE
++PASS manifest hash swap :: code=MANIFEST
++PASS in-bounds wrong ROI [0,96,0,128] :: code=ROI
++PASS control: v2 lowlevel accepts that wrong ROI (the gap field_metrics_bound closes)
++PASS control: ON-labelled receipt in OFF slot (v2 admits=True, v3 admits=False)
++PASS control: receipt without arm (v2 admits=True, v3 admits=False)
++PASS control: unlisted extra output (v2 admits=True, v3 admits=False)
++PASS control: runtime.json tamper (v2 admits=True, v3 admits=False)
++PASS lowlevel wrong truth sha rejected :: ValueError
++PASS lowlevel 17 coefficients rejected :: ValueError
++PASS lowlevel integer local_enabled rejected :: ValueError
++PASS lowlevel disabled with coefficients rejected :: ValueError
++PASS lowlevel 4-frame global rejected :: ValueError
++PASS lowlevel out-of-bounds ROI rejected :: ValueError
++PASS lowlevel positive control
++PASS retained pair noisy/UP_only reproduces :: maxdiff_A=6.22e-15
++PASS retained metadata-only fetch noisy/UP_only is not a complete producer :: code=SCHEMA
++PASS retained pair noisy/UP_B2 reproduces :: maxdiff_A=1.78e-15
++PASS retained metadata-only fetch noisy/UP_B2 is not a complete producer :: code=SCHEMA
++PASS retained pair affine/UP_only reproduces :: maxdiff_A=0
++PASS retained metadata-only fetch affine/UP_only is not a complete producer :: code=SCHEMA
++PASS retained pair affine/UP_B2 reproduces :: maxdiff_A=1.11e-16
++PASS retained metadata-only fetch affine/UP_B2 is not a complete producer :: code=SCHEMA
++PASS all admission tool pins verify
++PASS altered tool pin refused :: code=TOOL_PIN
++PASS admission v3 pins comparator, scorers, tests and all transitive generators
++PASS admission v3 stays HELD with final fields null
++PASS launch gate: ON only after OFF compat and source identity PASS
++TOTAL 107 FAILED 0
+diff --git a/logs_v3/test-run2.log b/logs_v3/test-run2.log
+new file mode 100644
+index 0000000..419379f
+--- /dev/null
++++ b/logs_v3/test-run2.log
+@@ -0,0 +1,110 @@
++PASS positive admit noisy OFF :: witness_lines=0
++PASS positive admit noisy ON :: witness_lines=9
++PASS positive admit flat OFF :: witness_lines=0
++PASS positive admit flat ON :: witness_lines=0
++PASS positive score noisy OFF equals retained pair :: maxdiff_A=6.22e-15
++PASS positive score noisy ON equals retained pair :: maxdiff_A=6.22e-15
++PASS v3 commands equal v1 argv/cwd/env/inputs/witness
++PASS witness derivation: 9 on 3x3 ON, else 0
++PASS placeholder binary path refused :: code=PLACEHOLDER
++PASS bad binary sha refused :: code=BINARY
++PASS unresolved draft row not admissible :: code=PLACEHOLDER
++PASS draft row cannot be re-resolved twice :: code=PLACEHOLDER
++PASS missing arm :: code=ARM
++PASS ON receipt in OFF slot :: code=ARM
++PASS OFF receipt in ON slot :: code=ARM
++PASS swapped dirs: OFF slot holds ON :: code=ARM
++PASS swapped dirs: ON slot holds OFF :: code=ARM
++PASS run dir copied outside evidence_root/case/arm :: code=RUN_DIR
++PASS copied run dir with a self-consistent receipt :: code=RUN_DIR
++PASS receipt run_dir names another directory :: code=RUN_DIR
++PASS missing flag on ON :: code=FLAG_COUNT
++PASS flag on OFF :: code=FLAG_COUNT
++PASS duplicate flag on ON :: code=FLAG_COUNT
++PASS extra unknown argv :: code=ARGV
++PASS changed argv value :: code=ARGV
++PASS argv[0] left as placeholder :: code=ARGV
++PASS wrong binary sha in receipt :: code=BINARY
++PASS uppercase binary sha in receipt :: code=BINARY
++PASS cwd mismatch :: code=CWD
++PASS env value changed :: code=ENV
++PASS env var missing :: code=ENV
++PASS env var extra :: code=ENV
++PASS observed child env has extra OMP_PROC_BIND :: code=ENV_OBSERVED
++PASS observed child env value differs :: code=ENV_OBSERVED
++PASS exit 1 with a complete tap :: code=EXIT
++PASS exit True :: code=EXIT
++PASS exit "0" :: code=EXIT
++PASS case swapped in receipt :: code=CASE
++PASS receipt schema wrong :: code=SCHEMA
++PASS publication is a list :: code=SCHEMA
++PASS publication bytes is a string :: code=SCHEMA
++PASS runtime pin is not a dict :: code=SCHEMA
++PASS receipt carries NaN :: code=NONFINITE
++PASS extra file in staged cwd :: code=INPUT
++PASS missing staged movie :: code=INPUT
++PASS staged input byte tamper :: code=INPUT
++PASS witness x_norm 22 :: code=WITNESS
++PASS witness pnx 41 :: code=WITNESS
++PASS witness nfx 21 :: code=WITNESS
++PASS witness x_norm 42.0 text :: code=WITNESS
++PASS witness spaced variant :: code=WITNESS
++PASS witness no leading space :: code=WITNESS
++PASS 8 witness lines on 3x3 ON :: code=WITNESS
++PASS 10 witness lines on 3x3 ON :: code=WITNESS
++PASS 0 witness lines on 3x3 ON :: code=WITNESS
++PASS 1 witness line on global-only ON :: code=WITNESS
++PASS 1 witness line on global-only OFF :: code=WITNESS
++PASS 1 witness line on 3x3 OFF :: code=WITNESS
++PASS log of another case :: code=LOG_CASE
++PASS log is not utf-8 :: code=LOG_CASE
++PASS unlisted extra output file (receipt unchanged) :: code=INVENTORY
++PASS extra output file even when listed in the receipt :: code=INVENTORY
++PASS listed output file deleted :: code=INVENTORY
++PASS required output absent from disk and receipt :: code=INVENTORY
++PASS listed output byte changed :: code=PUBLICATION_HASH
++PASS symlink in output :: code=INVENTORY
++PASS publication path escapes output :: code=INVENTORY
++PASS runtime.json replaced by {} (receipt stale) :: code=RUNTIME
++PASS runtime.json tampered to another valid model (receipt stale) :: code=RUNTIME
++PASS runtime.json missing :: code=RUNTIME
++PASS runtime NaN with matching receipt hash :: code=NONFINITE
++PASS runtime 17 coefficients with matching receipt hash :: code=RUNTIME
++PASS runtime local_enabled integer with matching receipt hash :: code=RUNTIME
++PASS runtime 4 frames with matching receipt hash :: code=RUNTIME
++PASS runtime missing key with matching receipt hash :: code=RUNTIME
++PASS stdout.log tampered (receipt stale) :: code=STDOUT
++PASS stdout.log missing :: code=STDOUT
++PASS affine STAR in noisy run is receipt-consistent (admits)
++PASS affine STAR in noisy run refused at scoring :: code=STAR_CASE
++PASS truth file of another case name :: code=TRUTH
++PASS STAR file name of another case :: code=STAR_CASE
++PASS case absent from manifest :: code=CASE
++PASS manifest hash swap :: code=MANIFEST
++PASS in-bounds wrong ROI [0,96,0,128] :: code=ROI
++PASS control: v2 lowlevel accepts that wrong ROI (the gap field_metrics_bound closes)
++PASS control: ON-labelled receipt in OFF slot (v2 admits=True, v3 admits=False)
++PASS control: receipt without arm (v2 admits=True, v3 admits=False)
++PASS control: unlisted extra output (v2 admits=True, v3 admits=False)
++PASS control: runtime.json tamper (v2 admits=True, v3 admits=False)
++PASS lowlevel wrong truth sha rejected :: ValueError
++PASS lowlevel 17 coefficients rejected :: ValueError
++PASS lowlevel integer local_enabled rejected :: ValueError
++PASS lowlevel disabled with coefficients rejected :: ValueError
++PASS lowlevel 4-frame global rejected :: ValueError
++PASS lowlevel out-of-bounds ROI rejected :: ValueError
++PASS lowlevel positive control
++PASS retained pair noisy/UP_only reproduces :: maxdiff_A=6.22e-15
++PASS retained metadata-only fetch noisy/UP_only is not a complete producer :: code=SCHEMA
++PASS retained pair noisy/UP_B2 reproduces :: maxdiff_A=1.78e-15
++PASS retained metadata-only fetch noisy/UP_B2 is not a complete producer :: code=SCHEMA
++PASS retained pair affine/UP_only reproduces :: maxdiff_A=0
++PASS retained metadata-only fetch affine/UP_only is not a complete producer :: code=SCHEMA
++PASS retained pair affine/UP_B2 reproduces :: maxdiff_A=1.11e-16
++PASS retained metadata-only fetch affine/UP_B2 is not a complete producer :: code=SCHEMA
++PASS all admission tool pins verify
++PASS altered tool pin refused :: code=TOOL_PIN
++PASS admission v3 pins comparator, scorers, tests and all transitive generators
++PASS admission v3 stays HELD with final fields null
++PASS launch gate: ON only after OFF compat and source identity PASS
++TOTAL 109 FAILED 0
+diff --git a/logs_v3/test-run3.log b/logs_v3/test-run3.log
+new file mode 100644
+index 0000000..419379f
+--- /dev/null
++++ b/logs_v3/test-run3.log
+@@ -0,0 +1,110 @@
++PASS positive admit noisy OFF :: witness_lines=0
++PASS positive admit noisy ON :: witness_lines=9
++PASS positive admit flat OFF :: witness_lines=0
++PASS positive admit flat ON :: witness_lines=0
++PASS positive score noisy OFF equals retained pair :: maxdiff_A=6.22e-15
++PASS positive score noisy ON equals retained pair :: maxdiff_A=6.22e-15
++PASS v3 commands equal v1 argv/cwd/env/inputs/witness
++PASS witness derivation: 9 on 3x3 ON, else 0
++PASS placeholder binary path refused :: code=PLACEHOLDER
++PASS bad binary sha refused :: code=BINARY
++PASS unresolved draft row not admissible :: code=PLACEHOLDER
++PASS draft row cannot be re-resolved twice :: code=PLACEHOLDER
++PASS missing arm :: code=ARM
++PASS ON receipt in OFF slot :: code=ARM
++PASS OFF receipt in ON slot :: code=ARM
++PASS swapped dirs: OFF slot holds ON :: code=ARM
++PASS swapped dirs: ON slot holds OFF :: code=ARM
++PASS run dir copied outside evidence_root/case/arm :: code=RUN_DIR
++PASS copied run dir with a self-consistent receipt :: code=RUN_DIR
++PASS receipt run_dir names another directory :: code=RUN_DIR
++PASS missing flag on ON :: code=FLAG_COUNT
++PASS flag on OFF :: code=FLAG_COUNT
++PASS duplicate flag on ON :: code=FLAG_COUNT
++PASS extra unknown argv :: code=ARGV
++PASS changed argv value :: code=ARGV
++PASS argv[0] left as placeholder :: code=ARGV
++PASS wrong binary sha in receipt :: code=BINARY
++PASS uppercase binary sha in receipt :: code=BINARY
++PASS cwd mismatch :: code=CWD
++PASS env value changed :: code=ENV
++PASS env var missing :: code=ENV
++PASS env var extra :: code=ENV
++PASS observed child env has extra OMP_PROC_BIND :: code=ENV_OBSERVED
++PASS observed child env value differs :: code=ENV_OBSERVED
++PASS exit 1 with a complete tap :: code=EXIT
++PASS exit True :: code=EXIT
++PASS exit "0" :: code=EXIT
++PASS case swapped in receipt :: code=CASE
++PASS receipt schema wrong :: code=SCHEMA
++PASS publication is a list :: code=SCHEMA
++PASS publication bytes is a string :: code=SCHEMA
++PASS runtime pin is not a dict :: code=SCHEMA
++PASS receipt carries NaN :: code=NONFINITE
++PASS extra file in staged cwd :: code=INPUT
++PASS missing staged movie :: code=INPUT
++PASS staged input byte tamper :: code=INPUT
++PASS witness x_norm 22 :: code=WITNESS
++PASS witness pnx 41 :: code=WITNESS
++PASS witness nfx 21 :: code=WITNESS
++PASS witness x_norm 42.0 text :: code=WITNESS
++PASS witness spaced variant :: code=WITNESS
++PASS witness no leading space :: code=WITNESS
++PASS 8 witness lines on 3x3 ON :: code=WITNESS
++PASS 10 witness lines on 3x3 ON :: code=WITNESS
++PASS 0 witness lines on 3x3 ON :: code=WITNESS
++PASS 1 witness line on global-only ON :: code=WITNESS
++PASS 1 witness line on global-only OFF :: code=WITNESS
++PASS 1 witness line on 3x3 OFF :: code=WITNESS
++PASS log of another case :: code=LOG_CASE
++PASS log is not utf-8 :: code=LOG_CASE
++PASS unlisted extra output file (receipt unchanged) :: code=INVENTORY
++PASS extra output file even when listed in the receipt :: code=INVENTORY
++PASS listed output file deleted :: code=INVENTORY
++PASS required output absent from disk and receipt :: code=INVENTORY
++PASS listed output byte changed :: code=PUBLICATION_HASH
++PASS symlink in output :: code=INVENTORY
++PASS publication path escapes output :: code=INVENTORY
++PASS runtime.json replaced by {} (receipt stale) :: code=RUNTIME
++PASS runtime.json tampered to another valid model (receipt stale) :: code=RUNTIME
++PASS runtime.json missing :: code=RUNTIME
++PASS runtime NaN with matching receipt hash :: code=NONFINITE
++PASS runtime 17 coefficients with matching receipt hash :: code=RUNTIME
++PASS runtime local_enabled integer with matching receipt hash :: code=RUNTIME
++PASS runtime 4 frames with matching receipt hash :: code=RUNTIME
++PASS runtime missing key with matching receipt hash :: code=RUNTIME
++PASS stdout.log tampered (receipt stale) :: code=STDOUT
++PASS stdout.log missing :: code=STDOUT
++PASS affine STAR in noisy run is receipt-consistent (admits)
++PASS affine STAR in noisy run refused at scoring :: code=STAR_CASE
++PASS truth file of another case name :: code=TRUTH
++PASS STAR file name of another case :: code=STAR_CASE
++PASS case absent from manifest :: code=CASE
++PASS manifest hash swap :: code=MANIFEST
++PASS in-bounds wrong ROI [0,96,0,128] :: code=ROI
++PASS control: v2 lowlevel accepts that wrong ROI (the gap field_metrics_bound closes)
++PASS control: ON-labelled receipt in OFF slot (v2 admits=True, v3 admits=False)
++PASS control: receipt without arm (v2 admits=True, v3 admits=False)
++PASS control: unlisted extra output (v2 admits=True, v3 admits=False)
++PASS control: runtime.json tamper (v2 admits=True, v3 admits=False)
++PASS lowlevel wrong truth sha rejected :: ValueError
++PASS lowlevel 17 coefficients rejected :: ValueError
++PASS lowlevel integer local_enabled rejected :: ValueError
++PASS lowlevel disabled with coefficients rejected :: ValueError
++PASS lowlevel 4-frame global rejected :: ValueError
++PASS lowlevel out-of-bounds ROI rejected :: ValueError
++PASS lowlevel positive control
++PASS retained pair noisy/UP_only reproduces :: maxdiff_A=6.22e-15
++PASS retained metadata-only fetch noisy/UP_only is not a complete producer :: code=SCHEMA
++PASS retained pair noisy/UP_B2 reproduces :: maxdiff_A=1.78e-15
++PASS retained metadata-only fetch noisy/UP_B2 is not a complete producer :: code=SCHEMA
++PASS retained pair affine/UP_only reproduces :: maxdiff_A=0
++PASS retained metadata-only fetch affine/UP_only is not a complete producer :: code=SCHEMA
++PASS retained pair affine/UP_B2 reproduces :: maxdiff_A=1.11e-16
++PASS retained metadata-only fetch affine/UP_B2 is not a complete producer :: code=SCHEMA
++PASS all admission tool pins verify
++PASS altered tool pin refused :: code=TOOL_PIN
++PASS admission v3 pins comparator, scorers, tests and all transitive generators
++PASS admission v3 stays HELD with final fields null
++PASS launch gate: ON only after OFF compat and source identity PASS
++TOTAL 109 FAILED 0

@@ -1,0 +1,41 @@
+-- The C compiler identification is AppleClang 21.0.0.21000334
+-- The CXX compiler identification is AppleClang 21.0.0.21000334
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PkgConfig: /opt/homebrew/bin/pkg-config (found version "3.0.10")
+-- Checking for module 'fftw3'
+--   Found fftw3, version 3.3.11
+-- Checking for module 'fftw3f'
+--   Found fftw3f, version 3.3.11
+-- Found TIFF: /opt/homebrew/lib/libtiff.dylib (found version "4.7.2")
+-- Found ZLIB: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib/libz.tbd (found version "1.2.12")
+-- Found PNG: /opt/homebrew/lib/libpng.dylib (found version "1.6.59")
+-- Found JPEG: /opt/homebrew/lib/libjpeg.dylib (found version "80")
+-- Performing Test TIFF_HAS_LIBDEFLATE
+-- Performing Test TIFF_HAS_LIBDEFLATE - Failed
+-- LibTIFF Deflate subcodec: zlib only
+--   Deflate movie reads use zlib here. A LibTIFF built with libdeflate decodes the same bytes faster; see README, "LibTIFF Deflate backend". Results are unaffected.
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED - Failed
+-- CPU dose weighting: original loop (AUTO: AppleClang on arm64 with these flags is not the qualified x86-64 GCC without FMA). To opt in after CpuDoseSymmetry passes on this toolchain: -DMOTIONCORR_CPU_DOSE_SYMMETRY=ON
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found Python3: /Users/alex.konstantinov/.local/bin/python3 (found version "3.13.7") found components: Interpreter
+CMake Warning at CMakeLists.txt:570 (message):
+  pbzip2 not found: InputFormats and RealCutdown waive its compressed-MRC
+  cases (UNRUN).  Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the
+  waiver.
+
+
+-- Configuring done (4.8s)
+-- Generating done (0.6s)
+-- Build files have been written to: /tmp/mc-lfw2/build

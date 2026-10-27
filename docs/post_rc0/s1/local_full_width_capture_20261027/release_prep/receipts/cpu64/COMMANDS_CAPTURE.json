@@ -1,0 +1,105 @@
+{
+  "jobs": [
+    {
+      "argv": [
+        "/tmp/motioncorr-lfw-capture-20261027/build/motioncorr",
+        "--i",
+        "noisy.star",
+        "--o",
+        "/tmp/motioncorr-lfw-capture-20261027/evidence/runs/OFF/output",
+        "--use_own",
+        "--j",
+        "2",
+        "--patch_x",
+        "3",
+        "--patch_y",
+        "3",
+        "--group_frames",
+        "1",
+        "--bin_factor",
+        "1",
+        "--seed",
+        "1",
+        "--skip_defect",
+        "--save_noDW",
+        "--first_frame_sum",
+        "1",
+        "--last_frame_sum",
+        "5",
+        "--skip_logfile",
+        "--max_iter",
+        "5",
+        "--experimental_coupled_peak",
+        "all",
+        "--experimental_local_full_width_weight"
+      ],
+      "cwd": "/tmp/motioncorr-lfw-capture-20261027/native-input",
+      "environment": {
+        "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-lfw-capture-20261027/evidence/runs/OFF/runtime.json",
+        "MC_EXPERIMENT_CCF_DC_ARM": "both",
+        "MKL_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "2",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "label": "OFF",
+      "wrapped_by": [
+        "/usr/bin/time",
+        "-v"
+      ]
+    },
+    {
+      "argv": [
+        "/tmp/motioncorr-lfw-capture-20261027/build/motioncorr",
+        "--i",
+        "noisy.star",
+        "--o",
+        "/tmp/motioncorr-lfw-capture-20261027/evidence/runs/ON/output",
+        "--use_own",
+        "--j",
+        "2",
+        "--patch_x",
+        "3",
+        "--patch_y",
+        "3",
+        "--group_frames",
+        "1",
+        "--bin_factor",
+        "1",
+        "--seed",
+        "1",
+        "--skip_defect",
+        "--save_noDW",
+        "--first_frame_sum",
+        "1",
+        "--last_frame_sum",
+        "5",
+        "--skip_logfile",
+        "--max_iter",
+        "5",
+        "--experimental_coupled_peak",
+        "all",
+        "--experimental_local_full_width_weight"
+      ],
+      "cwd": "/tmp/motioncorr-lfw-capture-20261027/native-input",
+      "environment": {
+        "MC_DIAG_LOCAL_CCF_DIR": "/tmp/motioncorr-lfw-capture-20261027/evidence/runs/ON/capture",
+        "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-lfw-capture-20261027/evidence/runs/ON/runtime.json",
+        "MC_EXPERIMENT_CCF_DC_ARM": "both",
+        "MKL_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "2",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "label": "ON",
+      "wrapped_by": [
+        "/usr/bin/time",
+        "-v"
+      ]
+    }
+  ],
+  "only_difference_between_jobs": "MC_DIAG_LOCAL_CCF_DIR and the run directory paths",
+  "schema": "lfw-capture-commands/1"
+}

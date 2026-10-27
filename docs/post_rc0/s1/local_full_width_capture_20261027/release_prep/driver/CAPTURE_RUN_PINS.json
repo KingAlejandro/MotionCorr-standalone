@@ -1,0 +1,179 @@
+{
+  "baseline": {
+    "argv": [
+      "/tmp/motioncorr-lfw-v5-20261026/build/motioncorr",
+      "--i",
+      "noisy.star",
+      "--o",
+      "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/ON/output",
+      "--use_own",
+      "--j",
+      "2",
+      "--patch_x",
+      "3",
+      "--patch_y",
+      "3",
+      "--group_frames",
+      "1",
+      "--bin_factor",
+      "1",
+      "--seed",
+      "1",
+      "--skip_defect",
+      "--save_noDW",
+      "--first_frame_sum",
+      "1",
+      "--last_frame_sum",
+      "5",
+      "--skip_logfile",
+      "--max_iter",
+      "5",
+      "--experimental_coupled_peak",
+      "all",
+      "--experimental_local_full_width_weight"
+    ],
+    "binary_sha256_of_baseline_producer": "bb92e06116f434219ae3f94c4317ea9b0ea63ee9c5169fd03c28bc00de4d19bd",
+    "dir": "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/ON",
+    "environment": {
+      "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/ON/runtime.json",
+      "MC_EXPERIMENT_CCF_DC_ARM": "both",
+      "MKL_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "2",
+      "OPENBLAS_NUM_THREADS": "1",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "other_files": {
+      "runtime.json": "4a0b462861da8045e689cef35b83615573be86b7aa0fc48650f3d10f84aab1e0",
+      "stdout.log": "ca362a1db1b7da95b90756318958d09a6fd2e2b2080ae65a3b672944380d5ef2"
+    },
+    "products": {
+      "corrected_micrographs.star": "b8128516c9929a04247b44e56cb36342734b8243690cd56ae78e26a23f93e9f5",
+      "corrected_micrographs_all_rlnAccumMotionEarly.eps": "8b02360616c7f640d21612bd2be541ee2a995897ac42c7117296a346b5a0f06b",
+      "corrected_micrographs_all_rlnAccumMotionLate.eps": "5a93726796347674df9431d09a972ebd6bf1ea0ac9b1cc0dec1a67666907fcb4",
+      "corrected_micrographs_all_rlnAccumMotionTotal.eps": "7b8cec1d93ab260c41d57ae40f0bd187e992a96f68d1b8ea4c59ae93cafbedfd",
+      "logfile.pdf": "e1bc4466f0233c0ca9768f2dc3c914f022ea52328af78374e651fc0c9cef02a2",
+      "logfile.pdf.lst": "e144a3bdc918ed38e9fa1eff60e597150d5bfdb541d3ff50f74975ac9efbb881",
+      "noisy.log": "fb848244ba9c6b70c0d2034e78787397e0d074d9576bf622a2fd710307f90c7f",
+      "noisy.mrc": "ab72dbe2e565790b61bf7b1f31bd8b228cb9345cee52857db2f86d0ba63ca296",
+      "noisy.star": "68c9935783c71190f69f91d89dadfc03ba1e8eae695a19a840974be9fd8cd306",
+      "noisy_shifts.eps": "4eb111c91b8aa80a0fc99dc901686a7fa67b51e91a006557622996b679999609"
+    },
+    "run_json_sha256": "ad77c48cce40ee0e8116297e05a7789276dcfc534688f0a88caab0e1ca99e6c4"
+  },
+  "binary_path": "/tmp/motioncorr-lfw-capture-20261027/build/motioncorr",
+  "binary_sha256": "e0b4750d8815929035a31db6e028e9ebb508af61d8263cf66418022aa5e44742",
+  "blob_list_sha256": "3d885a21bdaac53ca61e623e7f036f4770f23a7f151ba887b51f059a64147c41",
+  "build": {
+    "cmake": "/home/ubuntu/.mc-venv/bin/cmake 4.4.3",
+    "cmake_cache_sha256": "1556228db3c4c41dd78942c523cf1245a74a28e333b304a8b862a068afc9afb6",
+    "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "config": "Release -O3 -DNDEBUG, MC_EXPERIMENT_CCF_DC=ON, CUDA=OFF, BUILD_TESTING=ON, -j2"
+  },
+  "capture_on_expectations": {
+    "capture_mode": "local_full_width_pair",
+    "iterations": "actually executed (1..5), 5 frames per iteration",
+    "log_witness": " EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22",
+    "log_witness_lines": 9,
+    "schema": "local-ccf-capture/2",
+    "selected_centres": [
+      [
+        104,
+        15
+      ],
+      [
+        62,
+        79
+      ]
+    ],
+    "static_note": "CLI tests cannot catch a wrong runner mode wiring; these four witnesses do",
+    "weight_map_oracle": "weight_oracle.weight_map(42), exact float32 equality, also required to differ from the x_norm 22 map",
+    "weight_x_norm": 42
+  },
+  "comparator": {
+    "path": "/tmp/motioncorr-lfw-capture-20261027/source/docs/post_rc0/s1/global_damping_20261026/scripts/compare_products.py",
+    "sha256": "53449d2da682305c8c11e3ed3efb91103530196e481ac075b00f90e3d5ea0f47"
+  },
+  "git_archive_tar_sha256_no_prefix": "6b4c72a44f5ff6539c8d045f6fa0d14547ea03fe66da33c4dd5572f9162f3f85",
+  "independent_source_review": {
+    "durable_copy": "~/Documents/MotionCorr-evidence/20261026/Native-fullwidth-ccf-capture-opus-source-review-r1/original/REPORT.md",
+    "report_path": "/tmp/mc-fullwidth-ccf-capture-opus-review-20261027-r1/REPORT.md",
+    "report_sha256": "bdea0d803b50b25ed44d12fea34f856c17390098b46f28a14c24f36b9cc00f00",
+    "source_commit": "f473fbc9c380c7bb8cc1533f19461fbf70dde485",
+    "verdict": "CLEAR"
+  },
+  "input_files": {
+    "noisy.mrcs": "5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3",
+    "noisy.star": "c321865e4fc769d9af55bc86af0a0b390abdcdb029137a9aeb5d6743b81a6891"
+  },
+  "interpreter": {
+    "numpy": "2.5.3",
+    "numpy_init_sha256": "09295a80660f17925ae23765ce8cbd7ff7ceae968d5f2f89349f1cb74c0b9e11",
+    "path": "/home/ubuntu/.mc-venv/bin/python3",
+    "version": "3.12.3"
+  },
+  "jobs": [
+    "OFF",
+    "ON"
+  ],
+  "lane_locks": [
+    "/tmp/motioncorr-b2-cpu32-47.lock",
+    "/tmp/motioncorr-cpu64-bench.lock",
+    "/tmp/motioncorr-damping-cpu32-47.lock",
+    "/tmp/motioncorr-dc-oracle-cpu-32-39.lock",
+    "/tmp/motioncorr-dc-oracle-cpu-40-47.lock",
+    "/tmp/motioncorr-dc-tierc-cpu32-47.lock",
+    "/tmp/motioncorr-w6-cpu40-47.lock",
+    "/tmp/motioncorr-w7-cpu40-47.lock"
+  ],
+  "libs": {
+    "/usr/lib/x86_64-linux-gnu/libLerc.so.4": "a0ee52df526738293bdd232ddaefbb0d1d9c2da775a82fc6730e7cd394da560c",
+    "/usr/lib/x86_64-linux-gnu/libc.so.6": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf",
+    "/usr/lib/x86_64-linux-gnu/libdeflate.so.0": "608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f",
+    "/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10": "b5cc02c4d360b5b20111cb0a251f8368af8c9ce3145357f5ba54c51ac4ca9b35",
+    "/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10": "d75f423f19dc4b8fc86c5f4bdf9e3202494dea7f0d01060c4b546e7e28d59436",
+    "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb",
+    "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1",
+    "/usr/lib/x86_64-linux-gnu/libjbig.so.0": "6fea8a26ef5e0d2a36d296d7d0ec0c1f0894bf796b5824317bea88c090833a62",
+    "/usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2": "ac09f2cd6f8a3b8e3cb123999ce275f9bcbe31c6cf9e20212c8f297772591d15",
+    "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5": "26b37d25f7ca2a2d348de8ecabacda12e921cd933b21fa069a179760db77219d",
+    "/usr/lib/x86_64-linux-gnu/libm.so.6": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0",
+    "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8",
+    "/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1": "b2e62799e5dbd783a0671d53be99f7c6489567a5332a1e8f471e6bb250f294dc",
+    "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11",
+    "/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1": "aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4",
+    "/usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8": "9664db51ec65209078abbb8bc7b699888a43ecc2f3c74ce8dd4e497175aa5bf0",
+    "/usr/lib/x86_64-linux-gnu/libz.so.1.3": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242",
+    "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+  },
+  "loader_sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da",
+  "prep_files": {
+    "capture_witness.py": "1206fe46f5eed664893f5ff5509d81469459ea9565a10e75c680cb8290844768",
+    "guard.py": "3a2c47a1d0632ce6a87f1a7e4178f17415fa5f5f87465a0cbde9f8aeef25ecc4",
+    "lane.py": "e0143e89fa3b6771d7f3ff873f04a7453d26f1b8c7f7b1e8f4ab4d3202b6fd66",
+    "run_capture_fw.py": "7467839632b020269b01c6da527d2a35c1868f57b592b83d828b06a26a92e765",
+    "verify_source.py": "7963f7b874f1b5b32d6a8843f48cf77c987a82fdbdc6765bd0a7d6a220963d0a",
+    "weight_oracle.py": "d809bd6273f2d1c296315a1ed7c24a1f08f323059eaecb2bfe6e603cafda7ee8"
+  },
+  "release_id": "lfw-capture-v1",
+  "resources": {
+    "BLAS_threads": 1,
+    "OMP_NUM_THREADS": 2,
+    "build_jobs": 2,
+    "cpus": "32-47",
+    "memory_floor_bytes": 4294967296,
+    "native_threads": 2,
+    "scratch_cap_bytes": 26843545600
+  },
+  "schema": "lfw-capture-run-pins/1",
+  "scratch_cap_roots": [
+    "/tmp/motioncorr-b2-native-20261026",
+    "/tmp/motioncorr-b2-factorial-20261026",
+    "/tmp/motioncorr-lfw-v5-20261026",
+    "/tmp/motioncorr-local-ccf-20261026",
+    "/tmp/mc-w8-common-mean-screen-20261026",
+    "/tmp/motioncorr-lfw-capture-20261027"
+  ],
+  "source_commit": "f473fbc9c380c7bb8cc1533f19461fbf70dde485",
+  "source_tree": "f23ed001a7785ad2944f27dcce6bc321b4bcc4f9",
+  "status": "FROZEN_HELD_NOT_RELEASED"
+}

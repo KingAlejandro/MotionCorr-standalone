@@ -1,0 +1,166 @@
+{
+ "total": 32,
+ "failed": 0,
+ "results": [
+  {
+   "name": "control: the test admission passes identity, pins and resolved commands",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "null candidate_binary refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null source_archive refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null build_receipt refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null compiler_and_config refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null shared_libraries refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null venue_identity refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null fresh_venue_resource_admission refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "null independent_source_clearance refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "HELD status refused",
+   "ok": true,
+   "detail": "code=HELD"
+  },
+  {
+   "name": "altered anchored admission refused",
+   "ok": true,
+   "detail": "code=ANCHOR"
+  },
+  {
+   "name": "hand-edited commands refused by the anchor",
+   "ok": true,
+   "detail": "code=ANCHOR"
+  },
+  {
+   "name": "resolved command row differs from the frozen admission",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "binary on disk differs from candidate_binary.sha256",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "binary path differs from the build receipt (same bytes)",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "binary given as a symlink",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "source archive changed after the pin",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "candidate_source_commit differs from source_archive.commit",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "build receipt changed after the pin",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "build receipt with the wrong archive sha256 (pin refreshed)",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "build receipt with the wrong commit (pin refreshed)",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "build receipt with the wrong tree (pin refreshed)",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "build receipt with the wrong binary sha256 (pin refreshed)",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "build receipt with the wrong binary path (pin refreshed)",
+   "ok": true,
+   "detail": "code=IDENTITY"
+  },
+  {
+   "name": "control: restored identity passes again",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument binary_path",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument binary_sha256",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument roots",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument evidence_root",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument expected",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument admission",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "signature rejects caller argument commands",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

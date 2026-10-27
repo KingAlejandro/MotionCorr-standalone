@@ -1,0 +1,56 @@
+# Review r3: local full-width pilot pair/decision layer v4 (Opus, read-only delta)
+
+Reviewer: Claude Opus 5.5. Branch `experiment/local-full-width-weight-20261026` HEAD `215c37b0743dd63a793650e8f0cfda4a2778ace9`: clean before and after, not edited. Package `/tmp/mc-local-full-width-pilot-20261026/`: byte-identical before and after this review (`results/pilot_before.sha256` = `results/pilot_after.sha256`, 75 files, no `__pycache__`). Checks run on the package before review: `SHA256SUMS_v4` 22/22 OK, `SHA256SUMS_v3` 27/27 OK, and R2's 52-file `pilot_before.sha256` all OK. Prior reports matched their stated hashes (R1 `dcb6094c…`, R2 `c3a8cb2a…`). Runtime: uv CPython 3.13.7 / NumPy 2.4.2, OMP/BLAS/vecLib 1 thread, scratch in tempdirs (review dir 60 KB, suite peak RSS 52 MB). No native, GPU, SSH, build, movie, real-pixel or network work. No agents were launched.
+
+**Verdict: M2 is CLOSED at the consumer level. No BLOCK and no new MATERIAL finding. Four new LOWs (L1–L4). One of them (L1) is a fail-closed contradiction between two public functions on an honest flow; resolve or document it before any driver is written.** The draft stays HELD: the real admission cannot pass `pre_ON_gate` (HELD status and null launch fields). Because `ADMISSION_V3_SHA256` anchors that HELD file, any final admission also needs a re-issued module with new anchors, and that module needs review.
+
+## What was performed
+1. Read `PAIR_V4_PLAN.md`, `pair_decision_v4.py` (451 lines), both v4 test files, the attempts log and the mutation logs. Also read the v3 functions it calls, the pinned `compare_products.py` (53449d2d…) and the pinned `factorial_common.star_blocks`/`manipulation` (ad20dc9f…). Checked the module against the plan item by item, and against PLAN.md lines 9, 15, 17 and 25.
+2. Re-ran the author suite once on current bytes: **126/126** in 9.8 s (`results/AUTHOR_TESTS_v4_rerun.json`, `logs/author-tests-v4-rerun.log`). I did not re-run the 5.5-minute mutation harness. Instead I checked its logic. It mutates scratch copies and requires named tests to fail with exact codes. Shadowed guards are declared up front and not counted as kills. Its run2 log agrees with ATTEMPTS_v4: 31 killed, 5 declared shadowed.
+3. Ran 9 reviewer probes with predictions written in advance (`scripts/probes_r3.py`, `results/PROBES_R3_run1.json`, `logs/probes-run1.log`). They reuse the author's `PW` world unchanged. All 9 came out as predicted.
+4. Source and data checks for false rejection of honest runs:
+   - The only log text matching `local\W*full\W*width` at HEAD is the witness line `src/motioncorr_runner.cpp:4962`. The flag's help text and errors go to the parser or stderr, not to `output/<case>.log`. The prescan therefore should not reject an honest ON log. This is a source-derived prediction; no run has confirmed it.
+   - The retained noisy STAR names the movie as the relative `noisy.mrcs` and contains no absolute path, so OFF STAR byte equality can be met. This was checked for noisy only; the other 7 retained STARs are not available locally.
+
+## Prior findings disposition
+| R2 item | status | evidence / residual |
+|---|---|---|
+| **M2(a)** OFF compatibility typed PASS | **CLOSED** | `pre_ON_gate` derives the gate from the admitted OFF run, the 19 pinned baseline files (exact rglob, no symlinks), raw runtime/STAR byte equality, and the pinned comparator. The comparator runs as a subprocess, and its rc, stdout, stderr and JSON are retained under `decision_dir`. Signature tests reject caller-typed `pre_on_status`, `expected`, `admission`, `commands`, `scores` and `pair_records`. Residuals: L2; v3 `on_launch_permitted` still accepts typed strings (v4 does not call it, and a driver must not). |
+| **M2(b)** global trajectory/block | CLOSED | float64→uint64 bit equality, shape 5×2 (:305-311, :341). STAR `global_shift` block text comes from the pinned `star_blocks` (:343). The 1-ulp and block-edit tests are killed by their mutants. |
+| **M2(c)** global-only tree identity | CLOSED | runtime and case STAR bytes plus a whole-tree comparator run on OFF vs ON (:363-370). Header, payload, EPS, runtime and STAR negatives all fail. Note: the comparator by design does not gate logs, PDFs or the MRC label block. |
+| **M2(d)** DC/coupled witnesses, counters | CLOSED | The pinned functions are executed by AST extraction, with only `check` replaced by one that raises (:286-301). Missing fields, an unknown scope and `arm=global` all give MANIPULATION (Q7–Q9). Global eligible > 0, 3×3 local eligible > 0, global-only local work = 0, and pairwise global counters are all enforced. A parse gap never becomes a PASS. Residual: L3. |
+| **M2(e)** same binary across pair | CLOSED | A single `binary_sha256` argument covers both arms through v3 `BINARY`, so the R2 P8 scenario cannot be constructed. PAIR_BINARY is redundant (declared shadowed). Residual: L4. |
+| **M2(f)** P1/P2 computed | CLOSED | `_decide` (:417-451) matches PLAN line 9: P1 on 5 cases × 2 fields under .20/.40/.80 Å `<=` (same rule as v2 :72); P2 strict on 3 metrics × 2 fields, where a tie fails; raw noisy gate separate, so FAIL stays FAIL; every ON>OFF increase is listed with its transition; flat/repeated give raw distances only; acceptance is fixed to NOT_ACCEPTED. Real noisy/affine metadata flows through `decide_pilot`. |
+| W1 witness variants | CLOSED | Case-insensitive prescan (:144-153). 4 variant tests plus an ON variant, with exact code. The mutant is killed. |
+| P-anchor | CLOSED | Admission and commands load from fixed paths and are checked against module constants (:66-72). Altered or hand-edited files give ANCHOR. Trust root: the v4 file hash, bound out of band. |
+| Expected-dict trust | CLOSED | No public `expected` parameter. Expected rows come only from `resolve_expected_row` over the anchored files. Residual: L4 (binary path and sha are still caller-supplied). |
+| T1 names guard | CLOSED | An extra staged file whose bytes match its pin, and a missing movie, both give INPUT. The mutant is killed. |
+| T2 `1e400` | CLOSED | NONFINITE with a matching receipt. A control shows the literal is present and parses to inf. The mutant is killed. |
+| T3 symlink | CLOSED for the symlink guard | Isolated by exact code: without the guard the error becomes PUBLICATION_HASH. The publication-escape (`..`) half of R2 T3 is still not isolated, but defence in depth holds. |
+| R1 M1, L1–L6 | unchanged (closed at R2) | v3 bytes are unchanged. |
+
+## New findings (all LOW; none weakens a criterion or produces a false PASS)
+
+**L1. Per-pair admission followed by `decide_pilot` in the same directory fails, with a misleading code** (`pair_decision_v4.py:201-202`, `:368-370`, `:408`, `:123`). `admit_pair` on a global-only case writes `pair/<case>/compare_products.json`. `decide_pilot` calls `admit_pair` again, and `_compare` refuses because that output already exists. The refusal is re-raised as `GLOBAL_ONLY`, and STOP.json is first-write-wins. Probe Q6: gates, then `admit_pair` on all 8 cases, then `decide_pilot` gives `REJECTED:GLOBAL_ONLY … DECISION_DIR: retained comparator output already exists …/pair/zero`, and STOP.json records `GLOBAL_ONLY`. Control Q5 (gates only, then `decide_pilot`) gives SUPPORTED. A fresh `decision_dir` does not help, because it has no pre-ON records (PRE_ON). Scenario: a driver admits each pair as soon as ON finishes, which is how PLAN line 25 would "stop affected execution". Under the no-retry protocol, a clean run would then leave a STOP that reads as a global-only tree mismatch. Nothing tests this flow. Fix: make `decide_pilot` verify existing pair records or write to its own subdirectory, or document `decide_pilot` as the only pair entry point. Keep the inner code as DECISION_DIR rather than GLOBAL_ONLY.
+
+**L2. `admit_pair` checks the integrity of the pre-ON record but does not re-derive the raw checks** (`:268-282`; OFF_RAW exists only at `:256-258`). Probe Q2: an OFF whose runtime differs from the retained bytes is rejected by the honest gate (Q1, OFF_RAW). If `pre_ON_gate` is skipped and a self-consistent `pre_on.json` is written from current disk (with a real comparator run on `output/`, which excludes runtime.json), `admit_pair` ACCEPTS. This requires deliberately constructing the record, so it is a driver-bypass hazard rather than a typed string. Fix: in `_verify_pre_on`, re-run the two byte comparisons against the anchored pins (a few lines, and cheap).
+
+**L3. OFF manipulation counters are not checked before ON** (`pre_ON_gate` `:246-265`; first checked at `:348-355`). Probe Q3: an OFF with zero global DC counters passes `pre_ON_gate`. It is caught only at `admit_pair`, by which time the ON producer for that case has already run. PLAN line 25 lists manipulation failure as stopping the affected execution. In practice, retained-trajectory equality would probably catch a failed DC arm first (inferred, not measured). Fix: run the pinned `manipulation` on OFF `stdout.log` inside `pre_ON_gate`.
+
+**L4. Binary and source identity are recorded but not compared with the admission** (`:89`, `:82-84`, `:337`). Probe Q4: an admission whose `candidate_binary.sha256` is `cdcd…` passes `pre_ON_gate` with caller `binary_sha256` `abab…`. `candidate_source_commit` is likewise only recorded. The author's own positive test shows the same thing (`identity.candidate_binary == 'test-candidate_binary'`). The real admission's field is null, so its schema is undefined. Treat this as a release condition: the re-anchored module must check `binary_sha256` and path against the frozen `candidate_binary` (and source against `source_archive`/commit).
+
+## Scope, license, tests
+- **Scope**: consumer-only. It adds no estimator or numerical operator; the only new arithmetic is comparisons in `_decide`. ROI, limits and fixtures are unchanged. No branch or source change.
+- **License**: the new files are original stdlib/NumPy code. The pinned repo tools are executed from their pinned paths and not copied. No third-party code was introduced.
+- **Test honesty**: the limits stated in V4_INDEX are accurate.
+  - Anchors are overridden in-process with a filled test admission.
+  - Products are tiny fake bytes, and only noisy/affine scoring uses real retained metadata.
+  - The real comparator runs on fake trees, so this is not fixture or native validation.
+  - All four failed runs are retained and explained, and no criterion was relaxed.
+  - Minor: `raw_star_differs` (test file, positives block) is computed but never asserted. It has no effect on any claim.
+
+## UNRUN / not established
+Any producer or driver; native or Linux binary behaviour; the 9-line witness count and the LOG_CASE line on a real run; byte neutrality of any real OFF against the retained STAR/runtime (only noisy's STAR was inspected for paths); the 33 fixture pins and the 8×19 retained baseline bytes at the venue; final binary, source, venue and lease pins; the final re-anchored module; the mutation harness re-run (author logs reviewed only). This review grants no admission or launch permission.
+
+## Artifacts
+`scripts/probes_r3.py`; `results/` (AUTHOR_TESTS_v4_rerun.json, PROBES_R3_run1.json, pilot_before/after.sha256); `logs/` (author-tests-v4-rerun.log/.time, probes-run1.log); `ATTEMPTS.txt`; `SHA256SUMS`.

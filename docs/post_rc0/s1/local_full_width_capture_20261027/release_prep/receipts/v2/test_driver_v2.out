@@ -1,0 +1,96 @@
+Traceback (most recent call last):
+  File "/private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/drv2-ycph6ez1/n4_runner.py", line 8, in <module>
+    D.launch([sys.executable, '/private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/drv2-ycph6ez1/n4_child.py', str(d / 'child.pid')], str(d), dict(), d, 60)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/docs/post_rc0/s1/local_full_width_capture_20261027/release_prep/driver/run_capture_fw_v2.py", line 170, in launch
+    try: rc = p.wait(timeout=timeout)
+              ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/subprocess.py", line 1280, in wait
+    return self._wait(timeout=timeout)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/subprocess.py", line 2060, in _wait
+    time.sleep(delay)
+    ~~~~~~~~~~^^^^^^^
+  File "/private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/drv2-ycph6ez1/n4_runner.py", line 5, in on_term
+    def on_term(s, f): raise D.Terminated('SIGTERM')
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+run_capture_fw_v2.Terminated: SIGTERM
+Traceback (most recent call last):
+  File "/private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/drv2-ycph6ez1/n4_runner2.py", line 8, in <module>
+    D.launch([sys.executable, '/private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/drv2-ycph6ez1/n4_gc.py', str(d / 'child.pid')], str(d), dict(), d, 60)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/experiment-local-full-width-weight-20261026/docs/post_rc0/s1/local_full_width_capture_20261027/release_prep/driver/run_capture_fw_v2.py", line 170, in launch
+    try: rc = p.wait(timeout=timeout)
+              ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/subprocess.py", line 1280, in wait
+    return self._wait(timeout=timeout)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.local/share/uv/python/cpython-3.13.7-macos-aarch64-none/lib/python3.13/subprocess.py", line 2060, in _wait
+    time.sleep(delay)
+    ~~~~~~~~~~^^^^^^^
+  File "/private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/drv2-ycph6ez1/n4_runner2.py", line 5, in on_term
+    def on_term(s, f): raise D.Terminated('SIGTERM')
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+run_capture_fw_v2.Terminated: SIGTERM
+PASS 61 checks
+ - S0 positive: both jobs, witnesses, 606-file sealed inventory outside the capture tree bound in NATIVE_COMPLETE
+ - S0 RUN receipt records the binary hash before/after and an explicit sampling state (UNOBSERVED)
+ - S0 no STOP, no capture directory in OFF
+ - C1 binary swapped between OFF and ON: STOP before the ON launch
+ - C1 staged input swapped after OFF: STOP before the ON launch
+ - C1 extra staged file: STOP before ON
+ - C1 staged input replaced by a symlink to the right bytes: STOP before ON
+ - C1 pins file changed after start: STOP before ON
+ - C1 staging source (baseline input) changed: STOP before ON
+ - C1 binary changed during OFF: run retained and marked INVALID, ON never launched
+ - C1 retained RUN.json carries the differing post-run hash
+ - C1 launch_checks with no staged input
+ - C2 closed-form file count (2 root files + 34 + 134n per patch) equals the coverage count: 606 (604 in the two patches)
+ - C2 seal writes the inventory outside the capture tree
+ - C2 count crosscheck fails when coverage claims another iteration count
+ - C2 a missing capture file is a count mismatch
+ - C2 a symlink inside the capture tree
+ - C2 a non-regular entry (FIFO) inside the capture tree
+ - C2 a capture file altered while it is being inventoried
+ - C2 capture altered after the seal: no NATIVE_COMPLETE
+ - N1 COMPLETE bytes null
+ - N1 patch-files without files
+ - N1 session as list
+ - N1 weights.json as list
+ - N1 peak.json as list
+ - N1 patch.json as list
+ - N1 alignment-complete as list
+ - N1 fft-config as list
+ - N1 stop file iterations string
+ - N1 missing noisy.log
+ - N1 an unexpected exception in the campaign becomes a STOP record, no completion
+ - N2 well-formed grant accepted
+ - N2 grant truthy string
+ - N2 grant integer 1
+ - N2 grant only cpus 0-63
+ - N2 grant bad utc
+ - N2 grant wrong cpus
+ - N2 grant wrong locks
+ - N2 grant no receipt
+ - N2 grant short receipt
+ - N2 grant jobs ON only
+ - N2 grant empty granted_by
+ - N2 grant null
+ - N2 release with a structured grant accepted by the format check (the actual grant is bound externally by the parent)
+ - N2 release binding driver_sha256
+ - N2 release binding pins_sha256
+ - N2 release binding binary_sha256
+ - N2 release binding independent_review_report_sha256
+ - N2 release binding jobs_authorized
+ - N2 release binding release_id
+ - N2 release binding witness_sha256
+ - N2 release binding source_commit
+ - N2 no PARENT_RELEASE: HELD
+ - N2 main without a release launches nothing and creates no evidence directory
+ - N3 no samples: UNOBSERVED, no assertion
+ - N3 one empty and one producer sample: PARTIAL with explicit counts
+ - N3 all samples name the producer: OBSERVED, values recorded without a universal assertion
+ - N3 only the wrapper observed: UNOBSERVED
+ - N4 a producer over the timeout is killed (owned group), retained as timed_out, and ON is not launched
+ - N4 SIGTERM to the driver kills and reaps the owned producer process group
+ - N4 the grandchild of the producer wrapper dies with the group

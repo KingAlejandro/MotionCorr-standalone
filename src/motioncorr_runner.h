@@ -169,13 +169,19 @@ public:
 	// exactly W5 lib.py 'iso'. Exists only to run the W5 harmful comparator natively.
 	bool experimental_isotropic_weight = false;
 
+	// EXPERIMENTAL, default off, CPU only (refused with --gpu): LOCAL patch alignments divide the CCF weight's x
+	// frequency by the full patch width pnx instead of nfx = pnx/2 + 1. The global alignment is unaffected, also when
+	// experimental_isotropic_weight is set.
+	bool experimental_local_full_width_weight = false;
+
 	// CCF B-factor weight at half-spectrum column x and signed row frequency ly:
 	// exp(-2 * ((ly / nfy)^2 + (x / x_norm)^2) * scaled_B). The inherited weight is x_norm = nfx.
 	static RFLOAT ccfWeightAt(int ly, int x, int nfy, RFLOAT x_norm, RFLOAT scaled_B);
 
 	// x normalisation of the global/patch CCF weight: the full width pnx for the experimental isotropic weight on the
-	// global alignment, otherwise nfx = pnx/2 + 1 (inherited).
-	static RFLOAT ccfWeightXNorm(bool is_global, bool isotropic, int pnx, int nfx);
+	// global alignment or the experimental local full-width weight on a patch alignment, otherwise nfx = pnx/2 + 1
+	// (inherited).
+	static RFLOAT ccfWeightXNorm(bool is_global, bool isotropic, int pnx, int nfx, bool local_full_width = false);
 
 	// Save aligned but non-dose weighted micrograph.
 	// With MOTIONCOR2, this flag is always assumed to be true

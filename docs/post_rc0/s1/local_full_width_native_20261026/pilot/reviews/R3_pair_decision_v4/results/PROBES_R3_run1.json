@@ -1,0 +1,74 @@
+[
+ {
+  "id": "Q1",
+  "desc": "control: OFF runtime != retained bytes, honest pre_ON_gate",
+  "predicted": "REJECTED:OFF_RAW",
+  "observed": "REJECTED:OFF_RAW",
+  "as_predicted": true,
+  "detail": "OFF_RAW: OFF runtime.json differs from the retained baseline bytes"
+ },
+ {
+  "id": "Q2",
+  "desc": "same OFF defect, gate skipped, self-consistent pre_on.json forged",
+  "predicted": "ACCEPTED",
+  "observed": "ACCEPTED",
+  "as_predicted": true,
+  "detail": "{'schema': 'local-full-width-pair-v4', 'case': 'noisy', 'patch_grid': [3, 3], 'binary_sha256': 'abababababababababababababababababababababababababababababababab', 'off_receipt_sha256': '7afbf6f513e51cda1ca21bbde4a9239a845ee02e8f25005189370b62f17dc214', 'on_receipt_sha256': 'bdc956d0d7ec81849effe1e2f"
+ },
+ {
+  "id": "Q3",
+  "desc": "OFF DC counters zero: pre_ON_gate result",
+  "predicted": "ACCEPTED",
+  "observed": "ACCEPTED",
+  "as_predicted": true,
+  "detail": "{'schema': 'local-full-width-pre-on-v4', 'status': 'PASS', 'bound': {'case': 'noisy', 'off_receipt_sha256': '77e5f45908f6f3bd1612ac754e09d4e88289d6004cacb165bb2fa0e62e6d594c', 'off_runtime_sha256': '9de5409895486ea04305a91fdf3c1350d5ddcb18559443fb3ca6a6fc99931325', 'off_output_inventory_sha256': 'b1"
+ },
+ {
+  "id": "Q4",
+  "desc": "candidate_binary sha != caller binary_sha256: pre_ON_gate",
+  "predicted": "ACCEPTED",
+  "observed": "ACCEPTED",
+  "as_predicted": true,
+  "detail": "caller binary_sha256=abababab admission candidate_binary.sha256=cdcdcdcd; gate PASS"
+ },
+ {
+  "id": "Q5",
+  "desc": "control: gates only, then decide_pilot (same decision_dir)",
+  "predicted": "ACCEPTED",
+  "observed": "ACCEPTED",
+  "as_predicted": true,
+  "detail": "SUPPORTED"
+ },
+ {
+  "id": "Q6",
+  "desc": "gates + admit_pair x8, then decide_pilot (same decision_dir)",
+  "predicted": "REJECTED:GLOBAL_ONLY",
+  "observed": "REJECTED:GLOBAL_ONLY",
+  "as_predicted": true,
+  "detail": "GLOBAL_ONLY: whole-product comparator: DECISION_DIR: retained comparator output already exists: /private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-lfw-r3-e_vh29ks/decision/pair/zero | STOP.json={'code': 'GLOBAL_ONLY', 'message': 'GLOBAL_ONLY: whole-product comparator: DECISION_DIR: retained comparator output already exists: /private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-lfw-r3-e_vh29ks/decision/pair/zero'}"
+ },
+ {
+  "id": "Q7",
+  "desc": "ON DC line missing cpu.local field",
+  "predicted": "REJECTED:MANIPULATION",
+  "observed": "REJECTED:MANIPULATION",
+  "as_predicted": true,
+  "detail": "MANIPULATION: missing/duplicate final DC counters"
+ },
+ {
+  "id": "Q8",
+  "desc": "ON extra coupled line with unknown scope",
+  "predicted": "REJECTED:MANIPULATION",
+  "observed": "REJECTED:MANIPULATION",
+  "as_predicted": true,
+  "detail": "MANIPULATION: inconsistent coupled counters"
+ },
+ {
+  "id": "Q9",
+  "desc": "ON DC arm=global instead of both",
+  "predicted": "REJECTED:MANIPULATION",
+  "observed": "REJECTED:MANIPULATION",
+  "as_predicted": true,
+  "detail": "MANIPULATION: DC manipulation failed"
+ }
+]

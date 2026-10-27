@@ -1,0 +1,83 @@
+{
+ "mode": "dry-run-continuation",
+ "reused": [
+  "noisy",
+  "OFF"
+ ],
+ "launches_planned": 15,
+ "rows": [
+  {
+   "case": "noisy",
+   "arm": "ON",
+   "binary_path": "/tmp/motioncorr-lfw-v5-20261026/build/motioncorr",
+   "binary_sha256": "bb92e06116f434219ae3f94c4317ea9b0ea63ee9c5169fd03c28bc00de4d19bd",
+   "argv": [
+    "/tmp/motioncorr-lfw-v5-20261026/build/motioncorr",
+    "--i",
+    "noisy.star",
+    "--o",
+    "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/ON/output",
+    "--use_own",
+    "--j",
+    "2",
+    "--patch_x",
+    "3",
+    "--patch_y",
+    "3",
+    "--group_frames",
+    "1",
+    "--bin_factor",
+    "1",
+    "--seed",
+    "1",
+    "--skip_defect",
+    "--save_noDW",
+    "--first_frame_sum",
+    "1",
+    "--last_frame_sum",
+    "5",
+    "--skip_logfile",
+    "--max_iter",
+    "5",
+    "--experimental_coupled_peak",
+    "all",
+    "--experimental_local_full_width_weight"
+   ],
+   "cwd": "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/ON/input",
+   "environment": {
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "MC_EXPERIMENT_CCF_DC_ARM": "both",
+    "MC_DIAG_MODEL_OUT": "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/ON/runtime.json",
+    "PYTHONDONTWRITEBYTECODE": "1"
+   },
+   "input_files": [
+    "noisy.star",
+    "noisy.mrcs"
+   ],
+   "patch_grid": [
+    3,
+    3
+   ],
+   "expected_witness_lines": 9,
+   "expected_output_names": [
+    "corrected_micrographs.star",
+    "corrected_micrographs_all_rlnAccumMotionEarly.eps",
+    "corrected_micrographs_all_rlnAccumMotionLate.eps",
+    "corrected_micrographs_all_rlnAccumMotionTotal.eps",
+    "logfile.pdf",
+    "logfile.pdf.lst",
+    "noisy.log",
+    "noisy.mrc",
+    "noisy.star",
+    "noisy_shifts.eps"
+   ]
+  },
+  {
+   "case": "affine",
+   "arm": "OFF",
+   "binary_path": "/tmp/motioncorr-lfw-v5-20261026/build/motioncorr",
+   "binary_sha256": "bb92e06116f434219ae3f94c4317ea9b0ea63ee9c5169fd03c28bc00de4d19bd",
+   "argv": [
+    "/tmp/motioncorr-lfw-v5-20261026/build

@@ -1,0 +1,164 @@
+{
+ "arm_check": {
+  "killed_all_intended": true,
+  "intended": [
+   "missing arm",
+   "ON receipt in OFF slot",
+   "OFF receipt in ON slot",
+   "swapped dirs: OFF slot holds ON",
+   "swapped dirs: ON slot holds OFF"
+  ],
+  "failed_tests": [
+   "missing arm",
+   "ON receipt in OFF slot",
+   "OFF receipt in ON slot",
+   "swapped dirs: OFF slot holds ON",
+   "swapped dirs: ON slot holds OFF",
+   "control: ON-labelled receipt in OFF slot (v2 admits=True, v3 admits=True)",
+   "control: receipt without arm (v2 admits=True, v3 admits=True)",
+   "all admission tool pins verify"
+  ],
+  "exit": 1
+ },
+ "flag_count": {
+  "killed_all_intended": true,
+  "intended": [
+   "missing flag on ON",
+   "flag on OFF",
+   "duplicate flag on ON"
+  ],
+  "failed_tests": [
+   "missing flag on ON",
+   "flag on OFF",
+   "duplicate flag on ON",
+   "all admission tool pins verify"
+  ],
+  "exit": 1
+ },
+ "env_observed": {
+  "killed_all_intended": true,
+  "intended": [
+   "observed child env has extra OMP_PROC_BIND",
+   "observed child env value differs"
+  ],
+  "failed_tests": [
+   "observed child env has extra OMP_PROC_BIND",
+   "observed child env value differs",
+   "all admission tool pins verify"
+  ],
+  "exit": 1
+ },
+ "inventory_equality": {
+  "killed_all_intended": true,
+  "intended": [
+   "unlisted extra output file (receipt unchanged)",
+   "listed output file deleted"
+  ],
+  "failed_tests": [
+   "unlisted extra output file (receipt unchanged)",
+   "listed output file deleted",
+   "control: unlisted extra output (v2 admits=True, v3 admits=True)",
+   "all admission tool pins verify"
+  ],
+  "exit": 1
+ },
+ "baseline_names": {
+  "killed_all_intended": true,
+  "intended": [
+   "extra output file even when listed in the receipt",
+   "required output absent from disk and receipt"
+  ],
+  "failed_tests": [
+   "extra output file even when listed in the receipt",
+   "required output absent from disk and receipt",
+   "all admission tool pins verify"
+  ],
+  "exit": 1
+ },
+ "witness_count": {
+  "killed_all_intended": true,
+  "intended": [
+   "8 witness lines on 3x3 ON",
+   "10 witness lines on 3x3 ON",
+   "0 witness lines on 3x3 ON",
+   "1 witness line on global-only ON",
+   "1 witness line on global-only OFF",
+   "1 witness line on 3x3 OFF"
+  ],
+  "failed_tests": [
+   "8 witness lines on 3x3 ON",
+   "10 witness lines on 3x3 ON",
+   "0 witness lines on 3x3 ON",
+   "1 witness line on global-only ON",
+   "1 witness line on global-only OFF",
+   "1 witness line on 3x3 OFF",
+   "all admission tool pins verify"
+  ],
+  "exit": 1
+ },
+ "witness_format": {
+  "killed_all_intended": true,
+  "intended": [
+   "witness x_norm 22",
+   "witness pnx 41",
+   "witness nfx 21",
+   "witness x_norm 42.0 text",
+   "witness spaced variant",
+   "witness no leading space"
+  ],
+  "failed_tests": [
+   "witness x_norm 22",
+   "witness pnx 41",
+   "witness nfx 21",
+   "witness x_norm 42.0 text",
+   "witness spaced variant",
+   "witness no leading space",
+   "all admission tool pins verify"
+  ],
+  "exit": 1
+ },
+ "runtime_hash": {
+  "killed_all_intended": false,
+  "intended": [
+   "runtime.json tampered (receipt stale)"
+  ],
+  "failed_tests": [
+   "runtime pin is not a dict",
+   "runtime.json missing",
+   "all admission tool pins verify"
+  ],
+  "exit": 1
+ },
+ "roi_check": {
+  "killed_all_intended": true,
+  "intended": [
+   "in-bounds wrong ROI [0,96,0,128]"
+  ],
+  "failed_tests": [
+   "in-bounds wrong ROI [0,96,0,128]",
+   "all admission tool pins verify"
+  ],
+  "exit": 1
+ },
+ "star_case": {
+  "killed_all_intended": true,
+  "intended": [
+   "affine STAR in noisy run refused at scoring"
+  ],
+  "failed_tests": [
+   "affine STAR in noisy run refused at scoring",
+   "all admission tool pins verify"
+  ],
+  "exit": 1
+ },
+ "run_dir": {
+  "killed_all_intended": false,
+  "intended": [
+   "run dir copied outside evidence_root/case/arm"
+  ],
+  "failed_tests": [
+   "all admission tool pins verify"
+  ],
+  "exit": 1
+ }
+}

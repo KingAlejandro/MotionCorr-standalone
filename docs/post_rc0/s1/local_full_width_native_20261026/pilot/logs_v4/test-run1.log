@@ -1,0 +1,108 @@
+PASS real HELD admission cannot satisfy pre_ON_gate :: code=HELD
+PASS real HELD admission cannot satisfy admit_pair :: code=HELD
+PASS real HELD admission cannot satisfy decide_pilot :: code=HELD
+PASS HELD failure is retained as STOP.json
+PASS signature rejects caller-typed ['pre_on_status'] on pre_ON_gate
+PASS signature rejects caller-typed ['expected'] on admit_pair
+PASS signature rejects caller-typed ['admission'] on admit_pair
+PASS signature rejects caller-typed ['commands'] on admit_pair
+PASS signature rejects caller-typed ['pair_records'] on decide_pilot
+PASS signature rejects caller-typed ['scores'] on decide_pilot
+PASS signature rejects caller-typed ['expected'] on admit_single
+PASS positive pre_ON_gate noisy (comparator subprocess ran) :: binding=629daa9f2254
+PASS retained comparator command is the pinned script via python -B
+PASS control: raw EPS text differs between baseline and OFF (comparator normalises the root)
+PASS positive admit_pair 3x3
+PASS pair record keeps convergence/local_enabled separately
+PASS pre-ON record binds identity and pins
+PASS positive admit_pair global-only incl. whole-product comparator
+PASS retained global-only comparator output is outside product dirs
+PASS control: inventory-only PDF differs from baseline yet pre-ON passes
+FAIL altered anchored admission file refused :: ACCEPTED but wanted ANCHOR
+PASS hand-edited commands (max_iter 9, OMP 8) refused by the anchor :: code=ANCHOR
+PASS HELD status in an otherwise filled admission refused :: code=HELD
+PASS null launch field candidate_binary refused :: code=HELD
+PASS null launch field source_archive refused :: code=HELD
+PASS null launch field compiler_and_config refused :: code=HELD
+PASS null launch field shared_libraries refused :: code=HELD
+PASS null launch field venue_identity refused :: code=HELD
+PASS null launch field fresh_venue_resource_admission refused :: code=HELD
+PASS null launch field independent_source_clearance refused :: code=HELD
+PASS unresolved placeholder binary path refused :: code=PLACEHOLDER
+PASS non-hex binary sha refused :: code=BINARY
+PASS tool pins verified before use :: code=TOOL_PIN
+PASS decision_dir inside a run directory refused :: code=DECISION_DIR
+PASS 3x3 ON with 0 witnesses cannot be admitted (grid comes from the anchored admission) :: code=WITNESS
+PASS baseline byte changed (pin kept) :: code=BASELINE
+PASS baseline extra file :: code=BASELINE
+PASS baseline file missing :: code=BASELINE
+PASS baseline file replaced by a symlink :: code=BASELINE
+PASS comparator detects MRC header change :: code=COMPARATOR
+PASS comparator detects MRC header change [evidence]
+PASS comparator detects MRC payload change :: code=COMPARATOR
+PASS comparator detects MRC payload change [evidence]
+PASS comparator detects EPS change :: code=COMPARATOR
+PASS comparator detects corrected_micrographs STAR change :: code=COMPARATOR
+PASS OFF runtime differs from the retained baseline bytes :: code=OFF_RAW
+PASS OFF case STAR differs from the retained baseline bytes :: code=OFF_RAW
+PASS OFF runtime.json missing :: code=RUNTIME
+PASS OFF with a witness line is not an OFF run :: code=WITNESS
+PASS comparator detects a file-inventory difference :: code=COMPARATOR
+PASS inventory difference recorded by the comparator itself
+PASS failed comparator rc retained
+PASS failing OFF gate raises before ON :: code=COMPARATOR
+PASS STOP.json retained with the code
+PASS ON cannot be paired without a passing record :: code=PRE_ON
+PASS absent pre-ON record :: code=PRE_ON
+PASS tampered pre-ON record :: code=PRE_ON
+PASS pre-ON record status not PASS :: code=PRE_ON
+PASS record bound to a different OFF byte :: code=PRE_ON
+PASS retained comparator JSON altered after the gate :: code=PRE_ON
+PASS ON global runtime differs by 1 ulp :: code=GLOBAL_RUNTIME
+PASS ON serialised global STAR block differs :: code=GLOBAL_STAR
+PASS ON missing DC stage line :: code=MANIPULATION
+FAIL OFF zero global DC counters :: wanted MANIPULATION got PRE_ON: PRE_ON: record no longer binds the current OFF/baseline/pins: off_receipt_sha256
+PASS global DC counters drift between OFF and ON :: code=COUNTERS
+PASS global zeroed count drifts (zeroed != eligible) :: code=MANIPULATION
+PASS global coupled counters drift :: code=COUNTERS
+PASS 3x3 ON local eligible 0 :: code=MANIPULATION
+FAIL 3x3 OFF local eligible 0 :: wanted MANIPULATION got PRE_ON: PRE_ON: record no longer binds the current OFF/baseline/pins: off_receipt_sha256
+PASS coupled global peaks disagree with DC eligible :: code=MANIPULATION
+PASS coupled patch peaks disagree with local DC eligible :: code=MANIPULATION
+PASS duplicate DC counter line :: code=MANIPULATION
+PASS coupled counters absent :: code=MANIPULATION
+PASS convergence log unparsable :: code=CONVERGENCE
+PASS same binary path with a different sha256 in ON :: code=BINARY
+PASS ON extra output file :: code=INVENTORY
+PASS ON witness variant spelling :: code=WITNESS_VARIANT
+PASS global-only ON MRC payload differs (comparator) :: code=GLOBAL_ONLY
+PASS global-only ON MRC header differs (comparator) :: code=GLOBAL_ONLY
+PASS global-only ON EPS differs (comparator) :: code=GLOBAL_ONLY
+PASS global-only ON runtime bytes differ :: code=GLOBAL_ONLY
+PASS global-only ON case STAR bytes differ :: code=GLOBAL_ONLY
+PASS global-only ON has local DC/coupled work :: code=MANIPULATION
+PASS global-only ON carries a witness line :: code=WITNESS
+PASS witness variant (lowercase hyphenless) rejected by the prescan :: code=WITNESS_VARIANT
+PASS control: lowercase hyphenless [v3 admits] :: v3 admits
+PASS witness variant (underscored) rejected by the prescan :: code=WITNESS_VARIANT
+PASS control: underscored [v3 admits] :: v3 admits
+PASS witness variant (title case) rejected by the prescan :: code=WITNESS_VARIANT
+PASS control: title case [v3 admits] :: v3 admits
+PASS witness variant (spaced) rejected by the prescan :: code=WITNESS_VARIANT
+PASS control: spaced [v3 admits] :: v3 admits
+PASS control: clean OFF log passes the prescan
+PASS T1 extra staged file with a matching fixture pin :: code=INPUT
+PASS T1 missing staged movie, remaining pins match :: code=INPUT
+Traceback (most recent call last):
+  File "/private/tmp/mc-local-full-width-pilot-20261026/tests/test_pair_decision_v4.py", line 607, in <module>
+    sys.exit(main(sys.argv[1]))
+             ~~~~^^^^^^^^^^^^^
+  File "/private/tmp/mc-local-full-width-pilot-20261026/tests/test_pair_decision_v4.py", line 512, in main
+    fresh(t2)
+    ~~~~~^^^^
+  File "/private/tmp/mc-local-full-width-pilot-20261026/tests/test_pair_decision_v4.py", line 192, in fresh
+    return fn(w)
+  File "/private/tmp/mc-local-full-width-pilot-20261026/tests/test_pair_decision_v4.py", line 507, in t2
+    assert repr(tok) in text or str(tok) in text
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

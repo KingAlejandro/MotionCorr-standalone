@@ -1,0 +1,60 @@
+Working on affine.mrcs with 2 thread(s).
+
+Movie size: X = 128 Y = 96 N = 5
+Frames to be used: 1 2 3 4 5
+Frame grouping: n_frames = 5, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 
+interpolate_shifts = 0
+
+
+Global alignment:
+ Iteration 1: RMSD = 2.93928 px
+ Iteration 2: RMSD = 0.724865 px
+ Iteration 3: RMSD = 0.173279 px
+ [coupled_peak] scope=global peaks=15 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+
+Local alignments:
+Patches: X = 3 Y = 3
+Patch (1, 1): 1 / 9, X range = [0, 42), Y range = [0, 32), Center = (20, 15)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.211151 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (1, 2): 2 / 9, X range = [42, 84), Y range = [0, 32), Center = (62, 15)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.250049 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (1, 3): 3 / 9, X range = [84, 126), Y range = [0, 32), Center = (104, 15)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.651687 px
+ Iteration 2: RMSD = 0.160831 px
+ [coupled_peak] scope=patch peaks=10 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (2, 1): 4 / 9, X range = [0, 42), Y range = [32, 64), Center = (20, 47)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.41024 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (2, 2): 5 / 9, X range = [42, 84), Y range = [32, 64), Center = (62, 47)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.0288995 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (2, 3): 6 / 9, X range = [84, 126), Y range = [32, 64), Center = (104, 47)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.372403 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (3, 1): 7 / 9, X range = [0, 42), Y range = [64, 96), Center = (20, 79)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.723066 px
+ Iteration 2: RMSD = 0.17856 px
+ [coupled_peak] scope=patch peaks=10 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (3, 2): 8 / 9, X range = [42, 84), Y range = [64, 96), Center = (62, 79)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.241477 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (3, 3): 9 / 9, X range = [84, 126), Y range = [64, 96), Center = (104, 79)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.195653 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+
+Polynomial fit RMSD: X = 0.0348897 px Y = 0.0187143 px
+Summing frames before dose weighting: ..... done
+Written aligned but non-dose weighted sum to /tmp/mc-mac-pilot-20261027/mac-native-r1/affine/ON/output/affine.mrc
+Full movie wall time: 0.004 s

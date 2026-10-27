@@ -1,0 +1,85 @@
+problems: [('noisy', 'OFF', ['timed_out']), ('noisy', 'ON', ['timed_out']), ('affine', 'OFF', ['timed_out']), ('affine', 'ON', ['timed_out']), ('pedestal', 'OFF', ['timed_out']), ('pedestal', 'ON', ['timed_out']), ('zero', 'OFF', ['timed_out', 'local_enabled']), ('zero', 'ON', ['timed_out', 'local_enabled']), ('integer', 'OFF', ['timed_out', 'local_enabled']), ('integer', 'ON', ['timed_out', 'local_enabled']), ('fractional', 'OFF', ['timed_out', 'local_enabled']), ('fractional', 'ON', ['timed_out', 'local_enabled']), ('flat', 'OFF', ['timed_out', 'local_enabled']), ('flat', 'ON', ['timed_out', 'local_enabled']), ('repeated', 'OFF', ['timed_out', 'local_enabled']), ('repeated', 'ON', ['timed_out', 'local_enabled'])]
+{
+ "r1_events": [
+  "launching",
+  "finished",
+  "STOP"
+ ],
+ "r2_first_event": "REUSED",
+ "r2_last_event": {
+  "event": "DECIDED",
+  "prediction": "SUPPORTED",
+  "acceptance": "NOT_ACCEPTED_NO_AUTOMATIC_ACCEPTANCE",
+  "launches": 15,
+  "global_launches": 16,
+  "utc": "2026-10-26T23:32:19Z"
+ },
+ "r1_launches": 1,
+ "r2_launches": 15,
+ "total_launches": 16,
+ "finished_total": 16,
+ "all_exit_0": true,
+ "unique_receipts": 16,
+ "unique_case_arm": 16,
+ "r2_has_STOP_event": false,
+ "r2_STOP_json_present": false,
+ "r1_ends_STOP": true,
+ "reused_event": {
+  "event": "REUSED",
+  "case": "noisy",
+  "arm": "OFF",
+  "run_json_sha256": "ab9ae3736b667911fee1e735dc67ea2433067e5442e3536503f8422ab566951a",
+  "r1_ledger_sha256": "5da981a5f953b8d21f67a9603b8ad173da519cca71a2bb70438d8faf95663856",
+  "r1_stop_sha256": "328c9f07d61a7755c3c15ab40763b3b0be411d64dee0b778d60d28020c619f8d",
+  "launches_before": 1,
+  "remaining": 15,
+  "global_ceiling": 16,
+  "utc": "2026-10-26T23:31:40Z"
+ },
+ "reused_r1_ledger_sha_matches_bundle": true,
+ "reused_r1_stop_sha_matches_bundle": true,
+ "reused_receipt_equals_r1_finished": true,
+ "reused_off_index_receipt": "ab9ae3736b667911fee1e735dc67ea2433067e5442e3536503f8422ab566951a",
+ "noisy_OFF_not_relaunched_in_r2": true,
+ "r2_indices": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15
+ ],
+ "decided_counts": {
+  "launches": 15,
+  "global_launches": 16,
+  "prediction": "SUPPORTED",
+  "acceptance": "NOT_ACCEPTED_NO_AUTOMATIC_ACCEPTANCE"
+ },
+ "driver_rc": {
+  "native_run_r1/driver.rc": "driver_rc=1 end=2026-10-26T23:02:41Z",
+  "native_run_r1/lane.rc": "lane_rc=0",
+  "native_run_r2/driver.rc": "driver_rc=0 end=2026-10-26T23:32:19Z",
+  "native_run_r2/lane.rc": "lane_rc=0"
+ },
+ "RESULT_equals_DECISION_bytes": true,
+ "RESULT_equals_DECISION_json": true,
+ "decision_pair_record_sha_ok": {
+  "noisy": false,
+  "affine": false,
+  "pedestal": false,
+  "zero": false,
+  "integer": false,
+  "fractional": false,
+  "flat": false,
+  "repeated": false
+ }
+}

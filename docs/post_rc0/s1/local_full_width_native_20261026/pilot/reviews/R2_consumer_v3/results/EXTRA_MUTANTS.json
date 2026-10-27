@@ -1,0 +1,270 @@
+{
+ "exit": {
+  "killed_all_intended": true,
+  "intended": [
+   "exit 1 with a complete tap",
+   "exit True",
+   "exit \"0\""
+  ],
+  "failed_tests": [
+   "exit 1 with a complete tap :: ADMITTED but wanted EXIT",
+   "exit True :: ADMITTED but wanted EXIT",
+   "exit \"0\" :: ADMITTED but wanted EXIT",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "receipt_case": {
+  "killed_all_intended": true,
+  "intended": [
+   "case swapped in receipt"
+  ],
+  "failed_tests": [
+   "case swapped in receipt :: ADMITTED but wanted CASE",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "receipt_run_dir_string": {
+  "killed_all_intended": true,
+  "intended": [
+   "receipt run_dir names another directory"
+  ],
+  "failed_tests": [
+   "receipt run_dir names another directory :: ADMITTED but wanted RUN_DIR",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "binary": {
+  "killed_all_intended": true,
+  "intended": [
+   "wrong binary sha in receipt",
+   "uppercase binary sha in receipt"
+  ],
+  "failed_tests": [
+   "wrong binary sha in receipt :: ADMITTED but wanted BINARY",
+   "uppercase binary sha in receipt :: ADMITTED but wanted BINARY",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "argv_equality": {
+  "killed_all_intended": true,
+  "intended": [
+   "extra unknown argv",
+   "changed argv value",
+   "argv[0] left as placeholder"
+  ],
+  "failed_tests": [
+   "extra unknown argv :: ADMITTED but wanted ARGV",
+   "changed argv value :: ADMITTED but wanted ARGV",
+   "argv[0] left as placeholder :: ADMITTED but wanted ARGV",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "cwd": {
+  "killed_all_intended": true,
+  "intended": [
+   "cwd mismatch"
+  ],
+  "failed_tests": [
+   "cwd mismatch :: ADMITTED but wanted CWD",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "input_names": {
+  "killed_all_intended": false,
+  "intended": [
+   "extra file in staged cwd",
+   "missing staged movie"
+  ],
+  "failed_tests": [
+   "missing staged movie :: ADMITTED but wanted INPUT",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "input_bytes": {
+  "killed_all_intended": true,
+  "intended": [
+   "staged input byte tamper"
+  ],
+  "failed_tests": [
+   "staged input byte tamper :: ADMITTED but wanted INPUT",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "env_declared": {
+  "killed_all_intended": true,
+  "intended": [
+   "env value changed",
+   "env var missing",
+   "env var extra"
+  ],
+  "failed_tests": [
+   "env value changed :: ADMITTED but wanted ENV",
+   "env var missing :: ADMITTED but wanted ENV",
+   "env var extra :: ADMITTED but wanted ENV",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "publication_hash": {
+  "killed_all_intended": true,
+  "intended": [
+   "listed output byte changed"
+  ],
+  "failed_tests": [
+   "publication bytes is a string :: ADMITTED but wanted SCHEMA",
+   "listed output byte changed :: ADMITTED but wanted PUBLICATION_HASH",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "stdout": {
+  "killed_all_intended": true,
+  "intended": [
+   "stdout.log tampered (receipt stale)",
+   "stdout.log missing"
+  ],
+  "failed_tests": [
+   "stdout.log tampered (receipt stale) :: ADMITTED but wanted STDOUT",
+   "stdout.log missing :: ADMITTED but wanted STDOUT",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "log_case": {
+  "killed_all_intended": true,
+  "intended": [
+   "log of another case"
+  ],
+  "failed_tests": [
+   "log of another case :: ADMITTED but wanted LOG_CASE",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "truth_name": {
+  "killed_all_intended": true,
+  "intended": [
+   "truth file of another case name"
+  ],
+  "failed_tests": [
+   "truth file of another case name :: ADMITTED but wanted TRUTH",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "star_file_name": {
+  "killed_all_intended": true,
+  "intended": [
+   "STAR file name of another case"
+  ],
+  "failed_tests": [
+   "STAR file name of another case :: ADMITTED but wanted STAR_CASE",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "manifest_pin": {
+  "killed_all_intended": true,
+  "intended": [
+   "manifest hash swap"
+  ],
+  "failed_tests": [
+   "manifest hash swap :: wrong exception ValueError: unsupported STAR metadata",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "runtime_geometry": {
+  "killed_all_intended": true,
+  "intended": [
+   "runtime 17 coefficients with matching receipt hash",
+   "runtime local_enabled integer with matching receipt hash",
+   "runtime 4 frames with matching receipt hash"
+  ],
+  "failed_tests": [
+   "runtime 17 coefficients with matching receipt hash :: ADMITTED but wanted RUNTIME",
+   "runtime local_enabled integer with matching receipt hash :: ADMITTED but wanted RUNTIME",
+   "runtime 4 frames with matching receipt hash :: ADMITTED but wanted RUNTIME",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "runtime_nonfinite_numpy": {
+  "killed_all_intended": false,
+  "intended": [
+   "runtime NaN with matching receipt hash"
+  ],
+  "failed_tests": [
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "admit_placeholder": {
+  "killed_all_intended": true,
+  "intended": [
+   "unresolved draft row not admissible"
+  ],
+  "failed_tests": [
+   "unresolved draft row not admissible :: wanted PLACEHOLDER got ARGV: ARGV: argv differs from the resolved row",
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "output_symlink": {
+  "killed_all_intended": false,
+  "intended": [
+   "symlink in output"
+  ],
+  "failed_tests": [
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "publication_escape": {
+  "killed_all_intended": false,
+  "intended": [
+   "publication path escapes output"
+  ],
+  "failed_tests": [
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ },
+ "witness_grid_recheck": {
+  "killed_all_intended": false,
+  "intended": [],
+  "failed_tests": [
+   "all admission tool pins verify :: AdmissionError('TOOL_PIN: pilot:score_fields_v3.py')"
+  ],
+  "exit": 1,
+  "stderr_tail": ""
+ }
+}

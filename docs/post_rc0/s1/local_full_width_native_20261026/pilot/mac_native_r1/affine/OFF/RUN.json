@@ -1,0 +1,107 @@
+{
+ "schema": "local-full-width-run-receipt-v3",
+ "case": "affine",
+ "arm": "OFF",
+ "exit": 0,
+ "binary_sha256": "d57432b87cdeb034c13e52ed920b19c0f819185f6ee92f04f44314337151f546",
+ "run_dir": "/private/tmp/mc-mac-pilot-20261027/mac-native-r1/affine/OFF",
+ "argv": [
+  "/tmp/mc-mac-pilot-20261027/build-numpy253/motioncorr",
+  "--i",
+  "affine.star",
+  "--o",
+  "/tmp/mc-mac-pilot-20261027/mac-native-r1/affine/OFF/output",
+  "--use_own",
+  "--j",
+  "2",
+  "--patch_x",
+  "3",
+  "--patch_y",
+  "3",
+  "--group_frames",
+  "1",
+  "--bin_factor",
+  "1",
+  "--seed",
+  "1",
+  "--skip_defect",
+  "--save_noDW",
+  "--first_frame_sum",
+  "1",
+  "--last_frame_sum",
+  "5",
+  "--skip_logfile",
+  "--max_iter",
+  "5",
+  "--experimental_coupled_peak",
+  "all"
+ ],
+ "cwd": "/tmp/mc-mac-pilot-20261027/mac-native-r1/affine/OFF/input",
+ "environment": {
+  "OMP_NUM_THREADS": "2",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "MC_EXPERIMENT_CCF_DC_ARM": "both",
+  "MC_DIAG_MODEL_OUT": "/tmp/mc-mac-pilot-20261027/mac-native-r1/affine/OFF/runtime.json",
+  "PYTHONDONTWRITEBYTECODE": "1"
+ },
+ "controlled_environment_observed": {
+  "OMP_NUM_THREADS": "2",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "MC_EXPERIMENT_CCF_DC_ARM": "both",
+  "MC_DIAG_MODEL_OUT": "/tmp/mc-mac-pilot-20261027/mac-native-r1/affine/OFF/runtime.json"
+ },
+ "publication": {
+  "affine.log": {
+   "bytes": 2623,
+   "sha256": "35d60a170ff9c379b0126555d4b8a9a2b15b4e265eebf9b2d66358dd2d2f452b"
+  },
+  "affine.mrc": {
+   "bytes": 50176,
+   "sha256": "355f1d19548bba2c1b9b204391aa55c8b68bdd6038bfaf14faaf92260c4c6d70"
+  },
+  "affine.star": {
+   "bytes": 5188,
+   "sha256": "ce9c82983c1a46919680bbd2985a1e4524f7288b3752e5c1117f5d80a5444106"
+  },
+  "affine_shifts.eps": {
+   "bytes": 71596,
+   "sha256": "f0f9360185509e8d28f4a1be2e1abf64d83d27021c5f3f1e8efb2b59ca20902f"
+  },
+  "corrected_micrographs.star": {
+   "bytes": 693,
+   "sha256": "57e1a83b86a96010f0d6268ab86c4322319ba4a09354768d54cef46938ddc634"
+  },
+  "corrected_micrographs_all_rlnAccumMotionEarly.eps": {
+   "bytes": 75689,
+   "sha256": "857df0b17ebb169d01736d7f5e5006df3a49f622b2bdf3558a30dc6dd4c0edd3"
+  },
+  "corrected_micrographs_all_rlnAccumMotionLate.eps": {
+   "bytes": 75687,
+   "sha256": "0a3b3ffcc4615bfc43c6826b0d00a4f5b70186869061c58f78a7549fce2e5b5b"
+  },
+  "corrected_micrographs_all_rlnAccumMotionTotal.eps": {
+   "bytes": 57536,
+   "sha256": "5eaabdfc6737b85afe7f7ab5e729ed8e1bb1e090afbd2bff59e5e9134a911f73"
+  },
+  "logfile.pdf": {
+   "bytes": 23474,
+   "sha256": "d1eeb048aa26b11ae468cb4a6d2a4730f69d761a3b164c45ac55a37d4a64e328"
+  },
+  "logfile.pdf.lst": {
+   "bytes": 326,
+   "sha256": "19f298a6e633af837a4774fd75976912adb211d5542b1f29ad25b23c4511eefa"
+  }
+ },
+ "runtime": {
+  "bytes": 1017,
+  "sha256": "12c4c2c01d78bec62e577d689ca4992b788b840d5074d408a5f6aa3a81ffecdc"
+ },
+ "stdout": {
+  "bytes": 2088,
+  "sha256": "f699bb230fe86bef5181ff42ca35e38d0b772fbb393c7bd4ede5a7d4ec12d651"
+ },
+ "producer_path": "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+ "wall_seconds": 0.44001007080078125
+}

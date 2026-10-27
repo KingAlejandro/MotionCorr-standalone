@@ -1,0 +1,73 @@
+{
+ "manipulation": {
+  "dc": {
+   "arm": "both",
+   "global_zeroed": 10,
+   "global_eligible": 10,
+   "local_zeroed": 115,
+   "local_eligible": 115
+  },
+  "coupled": {
+   "global": {
+    "peaks": 10,
+    "guard_fired": 0,
+    "not_negative_definite": 0,
+    "offset_gt_1px": 0
+   },
+   "patch": {
+    "peaks": 115,
+    "guard_fired": 2,
+    "not_negative_definite": 0,
+    "offset_gt_1px": 2
+   }
+  }
+ },
+ "convergence": {
+  "global_iterations": 2,
+  "global_increment_px": [
+   1.89268,
+   0.368699
+  ],
+  "global_converged": true,
+  "patches": [
+   {
+    "final_increment_px": 0.487521,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.365565,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.249193,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.308825,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.485095,
+    "converged": true
+   },
+   {
+    "final_increment_px": 1.5895,
+    "converged": false
+   },
+   {
+    "final_increment_px": 0.309322,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.364821,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.391929,
+    "converged": true
+   }
+  ],
+  "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+ },
+ "local_enabled": true
+}

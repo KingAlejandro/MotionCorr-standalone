@@ -1,0 +1,852 @@
+{
+ "noisy": {
+  "OFF": {
+   "g": [
+    [
+     0,
+     0
+    ],
+    [
+     13826994016408520564,
+     4603084174336034601
+    ],
+    [
+     13830900528055988679,
+     4605167171681532877
+    ],
+    [
+     13833807160983754108,
+     4606208797901465180
+    ],
+    [
+     13835688908690237100,
+     4603269950875404295
+    ]
+   ],
+   "block": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.60471     0.545003 \n           3     -1.07684     0.776263 \n           4     -1.72225     0.891906 \n           5     -2.28016     0.565629 \n \n\n# version 50001\n\n",
+   "man": {
+    "dc": {
+     "arm": "both",
+     "global_zeroed": 10,
+     "global_eligible": 10,
+     "local_zeroed": 115,
+     "local_eligible": 115
+    },
+    "coupled": {
+     "global": {
+      "peaks": 10,
+      "guard_fired": 0,
+      "not_negative_definite": 0,
+      "offset_gt_1px": 0
+     },
+     "patch": {
+      "peaks": 115,
+      "guard_fired": 2,
+      "not_negative_definite": 0,
+      "offset_gt_1px": 2
+     }
+    }
+   },
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 1.6453672652477234,
+      "p95": 3.3372818164804947,
+      "max": 7.284049868464596
+     },
+     "px": {
+      "rms": 1.8591720511273713,
+      "p95": 3.7709399056276776,
+      "max": 8.230564823123837
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 1.645380873951424,
+      "p95": 3.337274217301684,
+      "max": 7.2838865833138255
+     },
+     "px": {
+      "rms": 1.8591874281936993,
+      "p95": 3.7709313189849536,
+      "max": 8.230380320128615
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.0004068405847305433,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "noisy",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    },
+    "admission": {
+     "arm": "OFF",
+     "witness_lines": 0
+    }
+   },
+   "conv": {
+    "global_iterations": 2,
+    "global_increment_px": [
+     1.89268,
+     0.368699
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.487521,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.365565,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.249193,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.308825,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.485095,
+      "converged": true
+     },
+     {
+      "final_increment_px": 1.5895,
+      "converged": false
+     },
+     {
+      "final_increment_px": 0.309322,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.364821,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.391929,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "ON": {
+   "g": [
+    [
+     0,
+     0
+    ],
+    [
+     13826994016408520564,
+     4603084174336034601
+    ],
+    [
+     13830900528055988679,
+     4605167171681532877
+    ],
+    [
+     13833807160983754108,
+     4606208797901465180
+    ],
+    [
+     13835688908690237100,
+     4603269950875404295
+    ]
+   ],
+   "block": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.60471     0.545003 \n           3     -1.07684     0.776263 \n           4     -1.72225     0.891906 \n           5     -2.28016     0.565629 \n \n\n# version 50001\n\n",
+   "man": {
+    "dc": {
+     "arm": "both",
+     "global_zeroed": 10,
+     "global_eligible": 10,
+     "local_zeroed": 115,
+     "local_eligible": 115
+    },
+    "coupled": {
+     "global": {
+      "peaks": 10,
+      "guard_fired": 0,
+      "not_negative_definite": 0,
+      "offset_gt_1px": 0
+     },
+     "patch": {
+      "peaks": 115,
+      "guard_fired": 0,
+      "not_negative_definite": 0,
+      "offset_gt_1px": 0
+     }
+    }
+   },
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 1.0954269101533838,
+      "p95": 2.2402194909931814,
+      "max": 4.469227152464349
+     },
+     "px": {
+      "rms": 1.2377705199473263,
+      "p95": 2.531321458749357,
+      "max": 5.049974183575535
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 1.095413971514903,
+      "p95": 2.24025292104267,
+      "max": 4.4692966514371495
+     },
+     "px": {
+      "rms": 1.2377559000168394,
+      "p95": 2.5313592328165764,
+      "max": 5.050052713488304
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.0005343164586071777,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "noisy",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    },
+    "admission": {
+     "arm": "ON",
+     "witness_lines": 9
+    }
+   },
+   "conv": {
+    "global_iterations": 2,
+    "global_increment_px": [
+     1.89268,
+     0.368699
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.274812,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.446857,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.157797,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.258239,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.243832,
+      "converged": true
+     },
+     {
+      "final_increment_px": 8.3642,
+      "converged": false
+     },
+     {
+      "final_increment_px": 0.182769,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.232658,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.35934,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  }
+ },
+ "affine": {
+  "OFF": {
+   "g": [
+    [
+     0,
+     0
+    ],
+    [
+     13828956190230956949,
+     4602999359856243024
+    ],
+    [
+     13833424995501613297,
+     4607518256292056998
+    ],
+    [
+     13836055348549417695,
+     4609952898133624740
+    ],
+    [
+     13837845798103088898,
+     4612037947541537924
+    ]
+   ],
+   "block": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.82256     0.535587 \n           3     -1.63739     1.074571 \n           4     -2.44289     1.615170 \n           5     -3.23801     2.156288 \n \n\n# version 50001\n\n",
+   "man": {
+    "dc": {
+     "arm": "both",
+     "global_zeroed": 15,
+     "global_eligible": 15,
+     "local_zeroed": 55,
+     "local_eligible": 55
+    },
+    "coupled": {
+     "global": {
+      "peaks": 15,
+      "guard_fired": 0,
+      "not_negative_definite": 0,
+      "offset_gt_1px": 0
+     },
+     "patch": {
+      "peaks": 55,
+      "guard_fired": 0,
+      "not_negative_definite": 0,
+      "offset_gt_1px": 0
+     }
+    }
+   },
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.11703365695529366,
+      "p95": 0.2603314787175705,
+      "max": 0.5373499627460929
+     },
+     "px": {
+      "rms": 0.13224142028846742,
+      "p95": 0.2941598629577068,
+      "max": 0.6071750991481275
+     },
+     "gate": "PASS"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.11704364199946929,
+      "p95": 0.2603844755502817,
+      "max": 0.5374000302471728
+     },
+     "px": {
+      "rms": 0.13225270282425908,
+      "p95": 0.2942197463844991,
+      "max": 0.6072316725956755
+     },
+     "gate": "PASS"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.00020291662406792825,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "affine",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    },
+    "admission": {
+     "arm": "OFF",
+     "witness_lines": 0
+    }
+   },
+   "conv": {
+    "global_iterations": 3,
+    "global_increment_px": [
+     2.93928,
+     0.724865,
+     0.173279
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.199388,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.306385,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.195932,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.450686,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0238849,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.398139,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.198793,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.265488,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.198233,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "ON": {
+   "g": [
+    [
+     0,
+     0
+    ],
+    [
+     13828956190230956949,
+     4602999359856243024
+    ],
+    [
+     13833424995501613297,
+     4607518256292056998
+    ],
+    [
+     13836055348549417695,
+     4609952898133624740
+    ],
+    [
+     13837845798103088898,
+     4612037947541537924
+    ]
+   ],
+   "block": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.82256     0.535587 \n           3     -1.63739     1.074571 \n           4     -2.44289     1.615170 \n           5     -3.23801     2.156288 \n \n\n# version 50001\n\n",
+   "man": {
+    "dc": {
+     "arm": "both",
+     "global_zeroed": 15,
+     "global_eligible": 15,
+     "local_zeroed": 55,
+     "local_eligible": 55
+    },
+    "coupled": {
+     "global": {
+      "peaks": 15,
+      "guard_fired": 0,
+      "not_negative_definite": 0,
+      "offset_gt_1px": 0
+     },
+     "patch": {
+      "peaks": 55,
+      "guard_fired": 0,
+      "not_negative_definite": 0,
+      "offset_gt_1px": 0
+     }
+    }
+   },
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.065968236767502,
+      "p95": 0.14218533232149227,
+      "max": 0.32948540284280453
+     },
+     "px": {
+      "rms": 0.07454038052825085,
+      "p95": 0.1606613924536636,
+      "max": 0.37229989021785825
+     },
+     "gate": "PASS"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.065959676522288,
+      "p95": 0.14217845919173785,
+      "max": 0.32947649758576053
+     },
+     "px": {
+      "rms": 0.07453070793478869,
+      "p95": 0.16065362620535348,
+      "max": 0.37228982778052033
+     },
+     "gate": "PASS"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.00018233876757775124,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "affine",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    },
+    "admission": {
+     "arm": "ON",
+     "witness_lines": 9
+    }
+   },
+   "conv": {
+    "global_iterations": 3,
+    "global_increment_px": [
+     2.93928,
+     0.724865,
+     0.173279
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.211151,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.250049,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.160831,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.41024,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0288995,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.372403,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.17856,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.241477,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.195653,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  }
+ },
+ "pedestal": {
+  "OFF": {
+   "g": [
+    [
+     0,
+     0
+    ],
+    [
+     13828960010938087770,
+     4603003240195268095
+    ],
+    [
+     13833426684949205711,
+     4607520025909709937
+    ],
+    [
+     13836055757694586352,
+     4609953545566356054
+    ],
+    [
+     13837847017027504666,
+     4612039651014341134
+    ]
+   ],
+   "block": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.82298     0.536018 \n           3     -1.63776     1.074964 \n           4     -2.44307     1.615314 \n           5     -3.23855     2.157044 \n \n\n# version 50001\n\n",
+   "man": {
+    "dc": {
+     "arm": "both",
+     "global_zeroed": 15,
+     "global_eligible": 15,
+     "local_zeroed": 55,
+     "local_eligible": 55
+    },
+    "coupled": {
+     "global": {
+      "peaks": 15,
+      "guard_fired": 0,
+      "not_negative_definite": 0,
+      "offset_gt_1px": 0
+     },
+     "patch": {
+      "peaks": 55,
+      "guard_fired": 0,
+      "not_negative_definite": 0,
+      "offset_gt_1px": 0
+     }
+    }
+   },
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.11681943073990324,
+      "p95": 0.25991484542841375,
+      "max": 0.5388540658590883
+     },
+     "px": {
+      "rms": 0.13199935676825225,
+      "p95": 0.2936890908795636,
+      "max": 0.6088746506882354
+     },
+     "gate": "PASS"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.11681727476735335,
+      "p95": 0.2599082373513507,
+      "max": 0.5388555555163063
+     },
+     "px": {
+      "rms": 0.13199692064107724,
+      "p95": 0.29368162412582005,
+      "max": 0.6088763339167302
+     },
+     "gate": "PASS"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 7.649581784473974e-05,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "pedestal",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    },
+    "admission": {
+     "arm": "OFF",
+     "witness_lines": 0
+    }
+   },
+   "conv": {
+    "global_iterations": 3,
+    "global_increment_px": [
+     2.93989,
+     0.725061,
+     0.173339
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.198998,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.30556,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.19573,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.451076,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.023527,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.39761,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.198718,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.265744,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.198448,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "ON": {
+   "g": [
+    [
+     0,
+     0
+    ],
+    [
+     13828960010938087770,
+     4603003240195268095
+    ],
+    [
+     13833426684949205711,
+     4607520025909709937
+    ],
+    [
+     13836055757694586352,
+     4609953545566356054
+    ],
+    [
+     13837847017027504666,
+     4612039651014341134
+    ]
+   ],
+   "block": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.82298     0.536018 \n           3     -1.63776     1.074964 \n           4     -2.44307     1.615314 \n           5     -3.23855     2.157044 \n \n\n# version 50001\n\n",
+   "man": {
+    "dc": {
+     "arm": "both",
+     "global_zeroed": 15,
+     "global_eligible": 15,
+     "local_zeroed": 55,
+     "local_eligible": 55
+    },
+    "coupled": {
+     "global": {
+      "peaks": 15,
+      "guard_fired": 0,
+      "not_negative_definite": 0,
+      "offset_gt_1px": 0
+     },
+     "patch": {
+      "peaks": 55,
+      "guard_fired": 0,
+      "not_negative_definite": 0,
+      "offset_gt_1px": 0
+     }
+    }
+   },
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.06594787182018697,
+      "p95": 0.14200883142753945,
+      "max": 0.3303219408804253
+     },
+     "px": {
+      "rms": 0.07451736928834686,
+      "p95": 0.1604619564152988,
+      "max": 0.3732451309383337
+     },
+     "gate": "PASS"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.06594561325825295,
+      "p95": 0.14199895118126052,
+      "max": 0.33032075879618755
+     },
+     "px": {
+      "rms": 0.07451481724096377,
+      "p95": 0.16045079229520964,
+      "max": 0.3732437952499294
+     },
+     "gate": "PASS"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.00011115306413200366,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "pedestal",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    },
+    "admission": {
+     "arm": "ON",
+     "witness_lines": 9
+    }
+   },
+   "conv": {
+    "global_iterations": 3,
+    "global_increment_px": [
+     2.93989,
+     0.725061,
+     0.173339
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.211261,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.249665,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.160574,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.410684,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0294721,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.372053,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.178549,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.241781,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.195232,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  }
+ }
+}

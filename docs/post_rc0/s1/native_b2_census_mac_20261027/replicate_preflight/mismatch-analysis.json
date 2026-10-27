@@ -1,0 +1,78 @@
+{
+  "label": "Mac replicate census, not hash-identical to the frozen census",
+  "status": "STOP_CHANGED_INTEGER_DETECTOR_COUNTS",
+  "movie": "dose1-s00",
+  "frozen_archive": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9ee0a2b/docs/post_rc0/s1/km_truth/raw.tar.gz",
+  "frozen_archive_sha256": "4b0afb906fa2b5f3118fd9dc31b3bd0afb06554a98cafa8c79edc043131ce8dd",
+  "frozen_receipt_sha256": "495ef90ef4a096071cf446f9956ae4fb0a180875455e8f5eca3bfedde0c96a1c",
+  "receipt_sha256_matches_fixture_index": true,
+  "recipe_identical": true,
+  "shape": [
+    40,
+    4096,
+    4096
+  ],
+  "n_pixels": 671088640,
+  "moments": {
+    "frozen": {
+      "mean": 1.0000130534172058,
+      "std": 1.000798970083948,
+      "derived_sum": 671097400.0,
+      "derived_sum_squared": 1343267588.0,
+      "derived_integer_sum": 671097400,
+      "derived_integer_sum_squared": 1343267588
+    },
+    "mac": {
+      "mean": 1.0000130534172058,
+      "std": 1.0007989641282418,
+      "derived_sum": 671097400.0,
+      "derived_sum_squared": 1343267580.0,
+      "derived_integer_sum": 671097400,
+      "derived_integer_sum_squared": 1343267580
+    }
+  },
+  "sum_difference": 0,
+  "sum_squared_difference": -8,
+  "moment_inference": "Derived from recorded mean and std via sum=N*mean and sum_squared=N*(std^2+mean^2). For this dose1 recipe pixels are integer Poisson counts stored as float32. Difference of 8 in sum_squared is far larger than double rounding in these moments.",
+  "frozen_pixels_available": false,
+  "measured_movie_max_abs_pixel_difference": null,
+  "inferred_movie_max_abs_pixel_difference_lower_bound_counts": 1,
+  "inferred_minimum_differing_pixels": 2,
+  "frozen_expectation_pixels_available": false,
+  "measured_expectation_max_abs_pixel_difference": null,
+  "frozen_source_sha256": "a10f694abafc71c146d0e0f2eeb2b1cf2c58131b2dbf6c1b66800405bd126380",
+  "local_source_sha256": "a10f694abafc71c146d0e0f2eeb2b1cf2c58131b2dbf6c1b66800405bd126380",
+  "truth_comparison": {
+    "scope": "Both frozen-source and local-source analytic displacement functions evaluated on THIS Mac and numerical stack, not a saved-Linux-array comparison",
+    "lattice": [
+      40,
+      129,
+      129,
+      2
+    ],
+    "max_abs_component_difference_px": 0.0,
+    "frozen_source_generated_field_sha256": "cf325ba2190d353c07e0c0f77801f406d40327cd31a5a8e4f19d3de44db8cc97",
+    "local_source_generated_field_sha256": "cf325ba2190d353c07e0c0f77801f406d40327cd31a5a8e4f19d3de44db8cc97",
+    "saved_frozen_truth_arrays_available": false
+  },
+  "frozen_archive_pixel_members": [],
+  "no_new_movies_generated": true,
+  "native_arm_runs": 0,
+  "replicate_amendment_committed": false,
+  "rounding_only_gate": "NOT_MET: integer detector payload differs; exact extent and underlying cause unisolated",
+  "resources": {
+    "python": "3.15.1",
+    "numpy": "2.5.4",
+    "binary_sha256": "e978af21352295bfe2cf756fa2916703d2b7e6c6b34c352d58630e7975155946"
+  },
+  "search": {
+    "roots": [
+      "/tmp",
+      "/Users/alex.konstantinov/.t3/worktrees/MotionCorr",
+      "/Users/alex.konstantinov/Documents/MotionCorr",
+      "/Users/alex.konstantinov/Downloads"
+    ],
+    "method": "rg --files --hidden; filenames filtered for npy, npz, movie.mrcs, inmodel and expectation; raw.tar.gz inventory inspected",
+    "result": "No frozen census pixel array or partial located in these roots; unrelated synthetic and tiny-control arrays excluded. raw.tar.gz has 9198 metadata/source members and no npy/npz/mrc/mrcs members. This is a scoped search, not an exhaustive whole-filesystem attestation."
+  }
+}

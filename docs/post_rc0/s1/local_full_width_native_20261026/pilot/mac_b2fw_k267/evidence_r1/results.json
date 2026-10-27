@@ -1,0 +1,2926 @@
+{
+ "noisy": {
+  "OFF": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13828570727247499069,
+     4600820190755001944
+    ],
+    [
+     13831117405608214528,
+     4604022750490020964
+    ],
+    [
+     13835371698827641301,
+     4608465587265276146
+    ],
+    [
+     13836184848760360972,
+     4602768176308110614
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.77976     0.396825 \n           3     -1.12500     0.649206 \n           4     -2.13929     1.284921 \n           5     -2.50040     0.509921 \n \n\n# version 50001\n\n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 3.0037615249876453,
+      "p95": 6.359308484324744,
+      "max": 19.833257844236954
+     },
+     "px": {
+      "rms": 3.39408081919508,
+      "p95": 7.185659304321744,
+      "max": 22.41046084094571
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 3.0037680539727365,
+      "p95": 6.359312657953972,
+      "max": 19.833324614710726
+     },
+     "px": {
+      "rms": 3.394088196579363,
+      "p95": 7.185664020286975,
+      "max": 22.41053628780873
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.00031335507296616384,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "noisy",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 5,
+    "global_increment_px": [
+     1.89356,
+     0.699883,
+     1.095,
+     1.3302,
+     0.863205
+    ],
+    "global_converged": false,
+    "patches": [
+     {
+      "final_increment_px": 0.37967,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.24482,
+      "converged": true
+     },
+     {
+      "final_increment_px": 1.55191,
+      "converged": false
+     },
+     {
+      "final_increment_px": 0.369993,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.318755,
+      "converged": true
+     },
+     {
+      "final_increment_px": 1.8226,
+      "converged": false
+     },
+     {
+      "final_increment_px": 0.349888,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.40682,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.471706,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13828570727247499069,
+     4600820190755001944
+    ],
+    [
+     13831117405608214528,
+     4604022750490020964
+    ],
+    [
+     13835371698827641301,
+     4608465587265276146
+    ],
+    [
+     13836184848760360972,
+     4602768176308110614
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.77976     0.396825 \n           3     -1.12500     0.649206 \n           4     -2.13929     1.284921 \n           5     -2.50040     0.509921 \n \n\n# version 50001\n\n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 5.035882553316673,
+      "p95": 9.911937405647977,
+      "max": 40.577372947370776
+     },
+     "px": {
+      "rms": 5.690262772109235,
+      "p95": 11.199929271918617,
+      "max": 45.8501389235828
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 5.035881565471953,
+      "p95": 9.912065361016818,
+      "max": 40.577380420024646
+     },
+     "px": {
+      "rms": 5.690261655900511,
+      "p95": 11.200073854256292,
+      "max": 45.85014736725949
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.00030668314940699874,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "noisy",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 5,
+    "global_increment_px": [
+     1.89356,
+     0.699883,
+     1.095,
+     1.3302,
+     0.863205
+    ],
+    "global_converged": false,
+    "patches": [
+     {
+      "final_increment_px": 0.37967,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.24482,
+      "converged": true
+     },
+     {
+      "final_increment_px": 1.55191,
+      "converged": false
+     },
+     {
+      "final_increment_px": 0.369993,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.318755,
+      "converged": true
+     },
+     {
+      "final_increment_px": 1.8226,
+      "converged": false
+     },
+     {
+      "final_increment_px": 0.349888,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.40682,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.471706,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13828570727247499069,
+     4600820190755001944
+    ],
+    [
+     13831117405608214528,
+     4604022750490020964
+    ],
+    [
+     13835371698827641301,
+     4608465587265276146
+    ],
+    [
+     13836184848760360972,
+     4602768176308110614
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.77976     0.396825 \n           3     -1.12500     0.649206 \n           4     -2.13929     1.284921 \n           5     -2.50040     0.509921 \n \n\n# version 50001\n\n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.912635506526953,
+      "p95": 1.7915013805682194,
+      "max": 3.65243172213784
+     },
+     "px": {
+      "rms": 1.0312265610474045,
+      "p95": 2.0242953452748242,
+      "max": 4.1270414939410625
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.9126092832293945,
+      "p95": 1.7914791418932183,
+      "max": 3.652345236598504
+     },
+     "px": {
+      "rms": 1.0311969302027058,
+      "p95": 2.024270216828495,
+      "max": 4.126943770167801
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.0003643105610201956,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "noisy",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 5,
+    "global_increment_px": [
+     1.89356,
+     0.699883,
+     1.095,
+     1.3302,
+     0.863205
+    ],
+    "global_converged": false,
+    "patches": [
+     {
+      "final_increment_px": 0.360254,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.453386,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.222107,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.442602,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.344664,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.425664,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.168352,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.163036,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.396579,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13828570727247499069,
+     4600820190755001944
+    ],
+    [
+     13831117405608214528,
+     4604022750490020964
+    ],
+    [
+     13835371698827641301,
+     4608465587265276146
+    ],
+    [
+     13836184848760360972,
+     4602768176308110614
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.77976     0.396825 \n           3     -1.12500     0.649206 \n           4     -2.13929     1.284921 \n           5     -2.50040     0.509921 \n \n\n# version 50001\n\n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.6838571651338138,
+      "p95": 1.2457514050397576,
+      "max": 2.828688660854328
+     },
+     "px": {
+      "rms": 0.7727199606031794,
+      "p95": 1.4076287062596131,
+      "max": 3.1962583738466983
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.6838462435197039,
+      "p95": 1.245756133533099,
+      "max": 2.8286370316308966
+     },
+     "px": {
+      "rms": 0.7727076197962757,
+      "p95": 1.4076340491899424,
+      "max": 3.1962000357411258
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.0003273779207595971,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "noisy",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 5,
+    "global_increment_px": [
+     1.89356,
+     0.699883,
+     1.095,
+     1.3302,
+     0.863205
+    ],
+    "global_converged": false,
+    "patches": [
+     {
+      "final_increment_px": 0.360254,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.453386,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.222107,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.442602,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.344664,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.425664,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.168352,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.163036,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.396579,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  }
+ },
+ "affine": {
+  "OFF": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13830768912779906097,
+     4600877379321698714
+    ],
+    [
+     13833878541094042868,
+     4608533498688228557
+    ],
+    [
+     13836291183751562777,
+     4609884578576439706
+    ],
+    [
+     13838382140721413364,
+     4612699328343546265
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -1.04762     0.400000 \n           3     -1.73810     1.300000 \n           4     -2.54762     1.600000 \n           5     -3.47619     2.450000 \n \n\n# version 50001\n\n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.2888468607605156,
+      "p95": 0.4875534645111168,
+      "max": 0.8773614323983808
+     },
+     "px": {
+      "rms": 0.32638063362770126,
+      "p95": 0.5509078695040868,
+      "max": 0.991368850167662
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.28885548237860353,
+      "p95": 0.48754993660621965,
+      "max": 0.87743729695426
+     },
+     "px": {
+      "rms": 0.32639037556904354,
+      "p95": 0.5509038831708697,
+      "max": 0.9914545728296723
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.00017002617426457975,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "affine",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 2,
+    "global_increment_px": [
+     2.64748,
+     0.292662
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.314655,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.477296,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.202849,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.355324,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.266854,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.491894,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.457822,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.454865,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.234742,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13830768912779906097,
+     4600877379321698714
+    ],
+    [
+     13833878541094042868,
+     4608533498688228557
+    ],
+    [
+     13836291183751562777,
+     4609884578576439706
+    ],
+    [
+     13838382140721413364,
+     4612699328343546265
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -1.04762     0.400000 \n           3     -1.73810     1.300000 \n           4     -2.54762     1.600000 \n           5     -3.47619     2.450000 \n \n\n# version 50001\n\n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.22597275914302667,
+      "p95": 0.45463081199654704,
+      "max": 0.8660718811179465
+     },
+     "px": {
+      "rms": 0.25533645100906965,
+      "p95": 0.5137071321994882,
+      "max": 0.9786122950485272
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.22596187763294862,
+      "p95": 0.4546249437260816,
+      "max": 0.8660215456584771
+     },
+     "px": {
+      "rms": 0.2553241555174561,
+      "p95": 0.5137005013854029,
+      "max": 0.978555418823138
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.00014243933131633096,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "affine",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 2,
+    "global_increment_px": [
+     2.64748,
+     0.292662
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.314655,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.477296,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.202849,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.355324,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.266854,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.491894,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.457822,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.454865,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.234742,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13830768912779906097,
+     4600877379321698714
+    ],
+    [
+     13833878541094042868,
+     4608533498688228557
+    ],
+    [
+     13836291183751562777,
+     4609884578576439706
+    ],
+    [
+     13838382140721413364,
+     4612699328343546265
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -1.04762     0.400000 \n           3     -1.73810     1.300000 \n           4     -2.54762     1.600000 \n           5     -3.47619     2.450000 \n \n\n# version 50001\n\n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.18413079963413911,
+      "p95": 0.3587983970740192,
+      "max": 0.6037515509429724
+     },
+     "px": {
+      "rms": 0.20805740071654136,
+      "p95": 0.40542191759776186,
+      "max": 0.6822051423084434
+     },
+     "gate": "PASS"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.18413162226026156,
+      "p95": 0.35881349365235327,
+      "max": 0.6038262963237491
+     },
+     "px": {
+      "rms": 0.20805833023758366,
+      "p95": 0.4054389758783652,
+      "max": 0.6822896003658181
+     },
+     "gate": "PASS"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.00028703472523993536,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "affine",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 2,
+    "global_increment_px": [
+     2.64748,
+     0.292662
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.461984,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.290968,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.291642,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.193301,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.301967,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.408467,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.270685,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.399869,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.178993,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13830768912779906097,
+     4600877379321698714
+    ],
+    [
+     13833878541094042868,
+     4608533498688228557
+    ],
+    [
+     13836291183751562777,
+     4609884578576439706
+    ],
+    [
+     13838382140721413364,
+     4612699328343546265
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -1.04762     0.400000 \n           3     -1.73810     1.300000 \n           4     -2.54762     1.600000 \n           5     -3.47619     2.450000 \n \n\n# version 50001\n\n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.14330262801922347,
+      "p95": 0.24782131005678612,
+      "max": 0.5966558923928178
+     },
+     "px": {
+      "rms": 0.16192387346804912,
+      "p95": 0.2800240791602103,
+      "max": 0.6741874490314326
+     },
+     "gate": "PASS"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.143301351228217,
+      "p95": 0.24780740096789458,
+      "max": 0.596593644073418
+     },
+     "px": {
+      "rms": 0.16192243076634688,
+      "p95": 0.2800083626755871,
+      "max": 0.6741171119473648
+     },
+     "gate": "PASS"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.00023212231379692854,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "affine",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 2,
+    "global_increment_px": [
+     2.64748,
+     0.292662
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.461984,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.290968,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.291642,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.193301,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.301967,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.408467,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.270685,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.399869,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.178993,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  }
+ },
+ "pedestal": {
+  "OFF": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     0.000000     0.000000 \n           3     0.000000     0.000000 \n           4     0.000000     0.000000 \n           5     0.000000     0.000000 \n \n\n# version 50001\n\n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 2.119133308493268,
+      "p95": 3.6037566212126833,
+      "max": 3.8931129881786166
+     },
+     "px": {
+      "rms": 2.3945009135517155,
+      "p95": 4.0720413799013375,
+      "max": 4.398997726755499
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 2.119133308493268,
+      "p95": 3.6037566212126833,
+      "max": 3.8931129881786166
+     },
+     "px": {
+      "rms": 2.3945009135517155,
+      "p95": 4.0720413799013375,
+      "max": 4.398997726755499
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "pedestal",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 1,
+    "global_increment_px": [
+     0.0
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     0.000000     0.000000 \n           3     0.000000     0.000000 \n           4     0.000000     0.000000 \n           5     0.000000     0.000000 \n \n\n# version 50001\n\n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 2.119133308493268,
+      "p95": 3.6037566212126833,
+      "max": 3.8931129881786166
+     },
+     "px": {
+      "rms": 2.3945009135517155,
+      "p95": 4.0720413799013375,
+      "max": 4.398997726755499
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 2.119133308493268,
+      "p95": 3.6037566212126833,
+      "max": 3.8931129881786166
+     },
+     "px": {
+      "rms": 2.3945009135517155,
+      "p95": 4.0720413799013375,
+      "max": 4.398997726755499
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "pedestal",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 1,
+    "global_increment_px": [
+     0.0
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     0.000000     0.000000 \n           3     0.000000     0.000000 \n           4     0.000000     0.000000 \n           5     0.000000     0.000000 \n \n\n# version 50001\n\n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 2.119133308493268,
+      "p95": 3.6037566212126833,
+      "max": 3.8931129881786166
+     },
+     "px": {
+      "rms": 2.3945009135517155,
+      "p95": 4.0720413799013375,
+      "max": 4.398997726755499
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 2.119133308493268,
+      "p95": 3.6037566212126833,
+      "max": 3.8931129881786166
+     },
+     "px": {
+      "rms": 2.3945009135517155,
+      "p95": 4.0720413799013375,
+      "max": 4.398997726755499
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "pedestal",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 1,
+    "global_increment_px": [
+     0.0
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     0.000000     0.000000 \n           3     0.000000     0.000000 \n           4     0.000000     0.000000 \n           5     0.000000     0.000000 \n \n\n# version 50001\n\n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 2.119133308493268,
+      "p95": 3.6037566212126833,
+      "max": 3.8931129881786166
+     },
+     "px": {
+      "rms": 2.3945009135517155,
+      "p95": 4.0720413799013375,
+      "max": 4.398997726755499
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 2.119133308493268,
+      "p95": 3.6037566212126833,
+      "max": 3.8931129881786166
+     },
+     "px": {
+      "rms": 2.3945009135517155,
+      "p95": 4.0720413799013375,
+      "max": 4.398997726755499
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": true,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "pedestal",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 1,
+    "global_increment_px": [
+     0.0
+    ],
+    "global_converged": true,
+    "patches": [
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     },
+     {
+      "final_increment_px": 0.0,
+      "converged": true
+     }
+    ],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  }
+ },
+ "zero": {
+  "OFF": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     0.000000     0.000000 \n           3     0.000000     0.000000 \n           4     0.000000     0.000000 \n           5     0.000000     0.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "px": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "gate": "PASS"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "px": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "gate": "PASS"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "zero",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 1,
+    "global_increment_px": [
+     0.0
+    ],
+    "global_converged": true,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     0.000000     0.000000 \n           3     0.000000     0.000000 \n           4     0.000000     0.000000 \n           5     0.000000     0.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "px": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "gate": "PASS"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "px": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "gate": "PASS"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "zero",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 1,
+    "global_increment_px": [
+     0.0
+    ],
+    "global_converged": true,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     0.000000     0.000000 \n           3     0.000000     0.000000 \n           4     0.000000     0.000000 \n           5     0.000000     0.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "px": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "gate": "PASS"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "px": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "gate": "PASS"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "zero",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 1,
+    "global_increment_px": [
+     0.0
+    ],
+    "global_converged": true,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     0.000000     0.000000 \n           3     0.000000     0.000000 \n           4     0.000000     0.000000 \n           5     0.000000     0.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "px": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "gate": "PASS"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "px": {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+     },
+     "gate": "PASS"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "zero",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 1,
+    "global_increment_px": [
+     0.0
+    ],
+    "global_converged": true,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  }
+ },
+ "integer": {
+  "OFF": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13827166033078009696,
+     4612023788399440692
+    ],
+    [
+     13832313004080718838,
+     4616077028064074138
+    ],
+    [
+     13836891663701878842,
+     4618235002885522500
+    ],
+    [
+     13838489369283969805,
+     4620777660175142093
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.62381     2.150000 \n           3     -1.39048     3.950000 \n           4     -2.81429     5.816667 \n           5     -3.52381     8.150000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.36605141129940444,
+      "p95": 0.541240469822305,
+      "max": 0.541240469822305
+     },
+     "px": {
+      "rms": 0.4136174138976322,
+      "p95": 0.6115711523415875,
+      "max": 0.6115711523415875
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.3660498772021907,
+      "p95": 0.5412371096802584,
+      "max": 0.5412371096802584
+     },
+     "px": {
+      "rms": 0.4136156804544528,
+      "p95": 0.6115673555709135,
+      "max": 0.6115673555709135
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 4.298657703681585e-06,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "integer",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 5,
+    "global_increment_px": [
+     7.10423,
+     2.01087,
+     0.587651,
+     0.617426,
+     0.618243
+    ],
+    "global_converged": false,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13827166033078009696,
+     4612023788399440692
+    ],
+    [
+     13832313004080718838,
+     4616077028064074138
+    ],
+    [
+     13836891663701878842,
+     4618235002885522500
+    ],
+    [
+     13838489369283969805,
+     4620777660175142093
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.62381     2.150000 \n           3     -1.39048     3.950000 \n           4     -2.81429     5.816667 \n           5     -3.52381     8.150000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.36605141129940444,
+      "p95": 0.541240469822305,
+      "max": 0.541240469822305
+     },
+     "px": {
+      "rms": 0.4136174138976322,
+      "p95": 0.6115711523415875,
+      "max": 0.6115711523415875
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.3660498772021907,
+      "p95": 0.5412371096802584,
+      "max": 0.5412371096802584
+     },
+     "px": {
+      "rms": 0.4136156804544528,
+      "p95": 0.6115673555709135,
+      "max": 0.6115673555709135
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 4.298657703681585e-06,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "integer",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 5,
+    "global_increment_px": [
+     7.10423,
+     2.01087,
+     0.587651,
+     0.617426,
+     0.618243
+    ],
+    "global_converged": false,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13827166033078009696,
+     4612023788399440692
+    ],
+    [
+     13832313004080718838,
+     4616077028064074138
+    ],
+    [
+     13836891663701878842,
+     4618235002885522500
+    ],
+    [
+     13838489369283969805,
+     4620777660175142093
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.62381     2.150000 \n           3     -1.39048     3.950000 \n           4     -2.81429     5.816667 \n           5     -3.52381     8.150000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.36605141129940444,
+      "p95": 0.541240469822305,
+      "max": 0.541240469822305
+     },
+     "px": {
+      "rms": 0.4136174138976322,
+      "p95": 0.6115711523415875,
+      "max": 0.6115711523415875
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.3660498772021907,
+      "p95": 0.5412371096802584,
+      "max": 0.5412371096802584
+     },
+     "px": {
+      "rms": 0.4136156804544528,
+      "p95": 0.6115673555709135,
+      "max": 0.6115673555709135
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 4.298657703681585e-06,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "integer",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 5,
+    "global_increment_px": [
+     7.10423,
+     2.01087,
+     0.587651,
+     0.617426,
+     0.618243
+    ],
+    "global_converged": false,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13827166033078009696,
+     4612023788399440692
+    ],
+    [
+     13832313004080718838,
+     4616077028064074138
+    ],
+    [
+     13836891663701878842,
+     4618235002885522500
+    ],
+    [
+     13838489369283969805,
+     4620777660175142093
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -0.62381     2.150000 \n           3     -1.39048     3.950000 \n           4     -2.81429     5.816667 \n           5     -3.52381     8.150000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.36605141129940444,
+      "p95": 0.541240469822305,
+      "max": 0.541240469822305
+     },
+     "px": {
+      "rms": 0.4136174138976322,
+      "p95": 0.6115711523415875,
+      "max": 0.6115711523415875
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.3660498772021907,
+      "p95": 0.5412371096802584,
+      "max": 0.5412371096802584
+     },
+     "px": {
+      "rms": 0.4136156804544528,
+      "p95": 0.6115673555709135,
+      "max": 0.6115673555709135
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 4.298657703681585e-06,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "integer",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 5,
+    "global_increment_px": [
+     7.10423,
+     2.01087,
+     0.587651,
+     0.617426,
+     0.618243
+    ],
+    "global_converged": false,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  }
+ },
+ "fractional": {
+  "OFF": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13831669632705380195,
+     4607557718768964949
+    ],
+    [
+     13834757815307005678,
+     4608758678669597082
+    ],
+    [
+     13835862269501337014,
+     4611235658464650855
+    ],
+    [
+     13838596597846526245,
+     4613937818241073152
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -1.24762     1.083333 \n           3     -1.93333     1.350000 \n           4     -2.35714     1.900000 \n           5     -3.57143     3.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.5070112317476838,
+      "p95": 0.8249706482487354,
+      "max": 0.8249706482487354
+     },
+     "px": {
+      "rms": 0.572894047172524,
+      "p95": 0.9321702240098706,
+      "max": 0.9321702240098706
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.5070111981887687,
+      "p95": 0.8249710841973811,
+      "max": 0.8249710841973811
+     },
+     "px": {
+      "rms": 0.572894009252846,
+      "p95": 0.9321707166072103,
+      "max": 0.9321707166072103
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 3.333333333133126e-06,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "fractional",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 5,
+    "global_increment_px": [
+     2.66652,
+     0.699238,
+     0.686347,
+     0.609665,
+     1.09891
+    ],
+    "global_converged": false,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13831669632705380195,
+     4607557718768964949
+    ],
+    [
+     13834757815307005678,
+     4608758678669597082
+    ],
+    [
+     13835862269501337014,
+     4611235658464650855
+    ],
+    [
+     13838596597846526245,
+     4613937818241073152
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -1.24762     1.083333 \n           3     -1.93333     1.350000 \n           4     -2.35714     1.900000 \n           5     -3.57143     3.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.5070112317476838,
+      "p95": 0.8249706482487354,
+      "max": 0.8249706482487354
+     },
+     "px": {
+      "rms": 0.572894047172524,
+      "p95": 0.9321702240098706,
+      "max": 0.9321702240098706
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.5070111981887687,
+      "p95": 0.8249710841973811,
+      "max": 0.8249710841973811
+     },
+     "px": {
+      "rms": 0.572894009252846,
+      "p95": 0.9321707166072103,
+      "max": 0.9321707166072103
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 3.333333333133126e-06,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "fractional",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 5,
+    "global_increment_px": [
+     2.66652,
+     0.699238,
+     0.686347,
+     0.609665,
+     1.09891
+    ],
+    "global_converged": false,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13831669632705380195,
+     4607557718768964949
+    ],
+    [
+     13834757815307005678,
+     4608758678669597082
+    ],
+    [
+     13835862269501337014,
+     4611235658464650855
+    ],
+    [
+     13838596597846526245,
+     4613937818241073152
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -1.24762     1.083333 \n           3     -1.93333     1.350000 \n           4     -2.35714     1.900000 \n           5     -3.57143     3.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.5070112317476838,
+      "p95": 0.8249706482487354,
+      "max": 0.8249706482487354
+     },
+     "px": {
+      "rms": 0.572894047172524,
+      "p95": 0.9321702240098706,
+      "max": 0.9321702240098706
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.5070111981887687,
+      "p95": 0.8249710841973811,
+      "max": 0.8249710841973811
+     },
+     "px": {
+      "rms": 0.572894009252846,
+      "p95": 0.9321707166072103,
+      "max": 0.9321707166072103
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 3.333333333133126e-06,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "fractional",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 5,
+    "global_increment_px": [
+     2.66652,
+     0.699238,
+     0.686347,
+     0.609665,
+     1.09891
+    ],
+    "global_converged": false,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     13831669632705380195,
+     4607557718768964949
+    ],
+    [
+     13834757815307005678,
+     4608758678669597082
+    ],
+    [
+     13835862269501337014,
+     4611235658464650855
+    ],
+    [
+     13838596597846526245,
+     4613937818241073152
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     -1.24762     1.083333 \n           3     -1.93333     1.350000 \n           4     -2.35714     1.900000 \n           5     -3.57143     3.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 0.5070112317476838,
+      "p95": 0.8249706482487354,
+      "max": 0.8249706482487354
+     },
+     "px": {
+      "rms": 0.572894047172524,
+      "p95": 0.9321702240098706,
+      "max": 0.9321702240098706
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 0.5070111981887687,
+      "p95": 0.8249710841973811,
+      "max": 0.8249710841973811
+     },
+     "px": {
+      "rms": 0.572894009252846,
+      "p95": 0.9321707166072103,
+      "max": 0.9321707166072103
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 3.333333333133126e-06,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "fractional",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 5,
+    "global_increment_px": [
+     2.66652,
+     0.699238,
+     0.686347,
+     0.609665,
+     1.09891
+    ],
+    "global_converged": false,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  }
+ },
+ "flat": {
+  "OFF": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     0.000000     0.000000 \n           3     0.000000     0.000000 \n           4     0.000000     0.000000 \n           5     0.000000     0.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     },
+     "px": {
+      "rms": 2.37787654746835,
+      "p95": 3.8830561417522667,
+      "max": 3.8830561417522667
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     },
+     "px": {
+      "rms": 2.37787654746835,
+      "p95": 3.8830561417522667,
+      "max": 3.8830561417522667
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "flat",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 1,
+    "global_increment_px": [
+     0.0
+    ],
+    "global_converged": true,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     0.000000     0.000000 \n           3     0.000000     0.000000 \n           4     0.000000     0.000000 \n           5     0.000000     0.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     },
+     "px": {
+      "rms": 2.37787654746835,
+      "p95": 3.8830561417522667,
+      "max": 3.8830561417522667
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     },
+     "px": {
+      "rms": 2.37787654746835,
+      "p95": 3.8830561417522667,
+      "max": 3.8830561417522667
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "flat",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 1,
+    "global_increment_px": [
+     0.0
+    ],
+    "global_converged": true,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     0.000000     0.000000 \n           3     0.000000     0.000000 \n           4     0.000000     0.000000 \n           5     0.000000     0.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     },
+     "px": {
+      "rms": 2.37787654746835,
+      "p95": 3.8830561417522667,
+      "max": 3.8830561417522667
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     },
+     "px": {
+      "rms": 2.37787654746835,
+      "p95": 3.8830561417522667,
+      "max": 3.8830561417522667
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "flat",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 1,
+    "global_increment_px": [
+     0.0
+    ],
+    "global_converged": true,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2     0.000000     0.000000 \n           3     0.000000     0.000000 \n           4     0.000000     0.000000 \n           5     0.000000     0.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     },
+     "px": {
+      "rms": 2.37787654746835,
+      "p95": 3.8830561417522667,
+      "max": 3.8830561417522667
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 2.1044207445094902,
+      "p95": 3.4365046854507564,
+      "max": 3.4365046854507564
+     },
+     "px": {
+      "rms": 2.37787654746835,
+      "p95": 3.8830561417522667,
+      "max": 3.8830561417522667
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "flat",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 1,
+    "global_increment_px": [
+     0.0
+    ],
+    "global_converged": true,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  }
+ },
+ "repeated": {
+  "OFF": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     4624352392379367424,
+     0
+    ],
+    [
+     4629137466983448576,
+     0
+    ],
+    [
+     4623789442425946112,
+     0
+    ],
+    [
+     4623226492472524800,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2    14.500000     0.000000 \n           3    30.000000     0.000000 \n           4    13.500000     0.000000 \n           5    12.500000     0.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 16.533858322996537,
+      "p95": 28.00391630849659,
+      "max": 28.00391630849659
+     },
+     "px": {
+      "rms": 18.68232578869665,
+      "p95": 31.642843286436825,
+      "max": 31.642843286436825
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 16.533858322996537,
+      "p95": 28.00391630849659,
+      "max": 28.00391630849659
+     },
+     "px": {
+      "rms": 18.68232578869665,
+      "p95": 31.642843286436825,
+      "max": 31.642843286436825
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "repeated",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 4,
+    "global_increment_px": [
+     10.2299,
+     6.26897,
+     6.71193,
+     0.223607
+    ],
+    "global_converged": true,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     4624352392379367424,
+     0
+    ],
+    [
+     4629137466983448576,
+     0
+    ],
+    [
+     4623789442425946112,
+     0
+    ],
+    [
+     4623226492472524800,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2    14.500000     0.000000 \n           3    30.000000     0.000000 \n           4    13.500000     0.000000 \n           5    12.500000     0.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 16.533858322996537,
+      "p95": 28.00391630849659,
+      "max": 28.00391630849659
+     },
+     "px": {
+      "rms": 18.68232578869665,
+      "p95": 31.642843286436825,
+      "max": 31.642843286436825
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 16.533858322996537,
+      "p95": 28.00391630849659,
+      "max": 28.00391630849659
+     },
+     "px": {
+      "rms": 18.68232578869665,
+      "p95": 31.642843286436825,
+      "max": 31.642843286436825
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "repeated",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 4,
+    "global_increment_px": [
+     10.2299,
+     6.26897,
+     6.71193,
+     0.223607
+    ],
+    "global_converged": true,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     4624352392379367424,
+     0
+    ],
+    [
+     4629137466983448576,
+     0
+    ],
+    [
+     4623789442425946112,
+     0
+    ],
+    [
+     4623226492472524800,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2    14.500000     0.000000 \n           3    30.000000     0.000000 \n           4    13.500000     0.000000 \n           5    12.500000     0.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 16.533858322996537,
+      "p95": 28.00391630849659,
+      "max": 28.00391630849659
+     },
+     "px": {
+      "rms": 18.68232578869665,
+      "p95": 31.642843286436825,
+      "max": 31.642843286436825
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 16.533858322996537,
+      "p95": 28.00391630849659,
+      "max": 28.00391630849659
+     },
+     "px": {
+      "rms": 18.68232578869665,
+      "p95": 31.642843286436825,
+      "max": 31.642843286436825
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "repeated",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 4,
+    "global_increment_px": [
+     10.2299,
+     6.26897,
+     6.71193,
+     0.223607
+    ],
+    "global_converged": true,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  },
+  "B2FW": {
+   "global_bits": [
+    [
+     0,
+     0
+    ],
+    [
+     4624352392379367424,
+     0
+    ],
+    [
+     4629137466983448576,
+     0
+    ],
+    [
+     4623789442425946112,
+     0
+    ],
+    [
+     4623226492472524800,
+     0
+    ]
+   ],
+   "global_star": "data_global_shift\n\nloop_ \n_rlnMicrographFrameNumber #1 \n_rlnMicrographShiftX #2 \n_rlnMicrographShiftY #3 \n           1     0.000000     0.000000 \n           2    14.500000     0.000000 \n           3    30.000000     0.000000 \n           4    13.500000     0.000000 \n           5    12.500000     0.000000 \n \n",
+   "score": {
+    "runtime": {
+     "angstrom": {
+      "rms": 16.533858322996537,
+      "p95": 28.00391630849659,
+      "max": 28.00391630849659
+     },
+     "px": {
+      "rms": 18.68232578869665,
+      "p95": 31.642843286436825,
+      "max": 31.642843286436825
+     },
+     "gate": "FAIL"
+    },
+    "STAR": {
+     "angstrom": {
+      "rms": 16.533858322996537,
+      "p95": 28.00391630849659,
+      "max": 28.00391630849659
+     },
+     "px": {
+      "rms": 18.68232578869665,
+      "p95": 31.642843286436825,
+      "max": 31.642843286436825
+     },
+     "gate": "FAIL"
+    },
+    "local_enabled": false,
+    "roundtrip_vector_max_px": 0.0,
+    "scope": "FIELD_ONLY; publication/sampling/application/image/identifiability need separate checks",
+    "binding": {
+     "case": "repeated",
+     "manifest_sha256": "9697c20314d3c0ea4496d4747ad14cbb3088e4e2488b7fccad05ff5f88ad02dc",
+     "roi": [
+      12,
+      84,
+      12,
+      116
+     ]
+    }
+   },
+   "convergence": {
+    "global_iterations": 4,
+    "global_increment_px": [
+     10.2299,
+     6.26897,
+     6.71193,
+     0.223607
+    ],
+    "global_converged": true,
+    "patches": [],
+    "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+   }
+  }
+ }
+}

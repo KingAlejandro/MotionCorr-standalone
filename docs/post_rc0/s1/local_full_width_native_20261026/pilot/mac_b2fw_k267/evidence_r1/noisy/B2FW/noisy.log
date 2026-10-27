@@ -1,0 +1,62 @@
+Working on noisy.mrcs with 2 thread(s).
+
+Movie size: X = 128 Y = 96 N = 5
+Frames to be used: 1 2 3 4 5
+Frame grouping: n_frames = 5, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 
+interpolate_shifts = 0
+
+
+Global alignment:
+ Iteration 1: RMSD = 1.89356 px
+ Iteration 2: RMSD = 0.699883 px
+ Iteration 3: RMSD = 1.095 px
+ Iteration 4: RMSD = 1.3302 px
+ Iteration 5: RMSD = 0.863205 px
+
+Local alignments:
+Patches: X = 3 Y = 3
+Patch (1, 1): 1 / 9, X range = [0, 42), Y range = [0, 32), Center = (20, 15)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 1.53911 px
+ Iteration 2: RMSD = 0.360254 px
+Patch (1, 2): 2 / 9, X range = [42, 84), Y range = [0, 32), Center = (62, 15)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 1.49125 px
+ Iteration 2: RMSD = 0.453386 px
+Patch (1, 3): 3 / 9, X range = [84, 126), Y range = [0, 32), Center = (104, 15)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 3.29919 px
+ Iteration 2: RMSD = 0.726652 px
+ Iteration 3: RMSD = 0.222107 px
+Patch (2, 1): 4 / 9, X range = [0, 42), Y range = [32, 64), Center = (20, 47)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 1.85124 px
+ Iteration 2: RMSD = 0.442602 px
+Patch (2, 2): 5 / 9, X range = [42, 84), Y range = [32, 64), Center = (62, 47)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 1.12585 px
+ Iteration 2: RMSD = 0.344664 px
+Patch (2, 3): 6 / 9, X range = [84, 126), Y range = [32, 64), Center = (104, 47)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 1.60468 px
+ Iteration 2: RMSD = 0.634289 px
+ Iteration 3: RMSD = 0.425664 px
+Patch (3, 1): 7 / 9, X range = [0, 42), Y range = [64, 96), Center = (20, 79)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 2.18307 px
+ Iteration 2: RMSD = 0.595739 px
+ Iteration 3: RMSD = 0.168352 px
+Patch (3, 2): 8 / 9, X range = [42, 84), Y range = [64, 96), Center = (62, 79)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.937543 px
+ Iteration 2: RMSD = 0.163036 px
+Patch (3, 3): 9 / 9, X range = [84, 126), Y range = [64, 96), Center = (104, 79)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 1.26073 px
+ Iteration 2: RMSD = 0.396579 px
+
+Polynomial fit RMSD: X = 0.437366 px Y = 0.454057 px
+Summing frames before dose weighting: ..... done
+Written aligned but non-dose weighted sum to /private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/noisy/B2FW/output/noisy.mrc
+Full movie wall time: 0.004 s

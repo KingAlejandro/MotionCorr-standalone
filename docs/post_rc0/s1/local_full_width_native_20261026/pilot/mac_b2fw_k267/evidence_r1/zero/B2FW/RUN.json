@@ -1,0 +1,100 @@
+{
+ "schema": "mac-b2fw-k267-run/1",
+ "case": "zero",
+ "arm": "B2FW",
+ "exit": 0,
+ "run_dir": "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/zero/B2FW",
+ "argv": [
+  "/private/tmp/mc-mac-pilot-20261027/build-numpy253/motioncorr",
+  "--i",
+  "zero.star",
+  "--o",
+  "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/zero/B2FW/output",
+  "--use_own",
+  "--j",
+  "2",
+  "--patch_x",
+  "1",
+  "--patch_y",
+  "1",
+  "--group_frames",
+  "1",
+  "--bin_factor",
+  "1",
+  "--seed",
+  "1",
+  "--skip_defect",
+  "--save_noDW",
+  "--first_frame_sum",
+  "1",
+  "--last_frame_sum",
+  "5",
+  "--skip_logfile",
+  "--max_iter",
+  "5",
+  "--experimental_local_b2",
+  "--experimental_local_full_width_weight"
+ ],
+ "cwd": "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/zero/B2FW/input",
+ "binary_sha256": "d57432b87cdeb034c13e52ed920b19c0f819185f6ee92f04f44314337151f546",
+ "environment": {
+  "PATH": "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+  "PYTHONDONTWRITEBYTECODE": "1",
+  "OMP_NUM_THREADS": "2",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "MC_EXPERIMENT_CCF_DC_ARM": "none",
+  "MC_DIAG_MODEL_OUT": "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/zero/B2FW/runtime.json"
+ },
+ "publication": {
+  "corrected_micrographs.star": {
+   "bytes": 701,
+   "sha256": "9934d74d4a1e0cb74c0bad3c8be66ecc858712ed29151dd03987748f92c33054"
+  },
+  "corrected_micrographs_all_rlnAccumMotionEarly.eps": {
+   "bytes": 70575,
+   "sha256": "2bb1a760d00f67b79d523bcc50fb3210e321e83cf102d22a8ed85c3848eddb16"
+  },
+  "corrected_micrographs_all_rlnAccumMotionLate.eps": {
+   "bytes": 70573,
+   "sha256": "b7534c24a8e5602519ae1f7bec131c343ecf449546ecfe73967b1d4dd1c06318"
+  },
+  "corrected_micrographs_all_rlnAccumMotionTotal.eps": {
+   "bytes": 70575,
+   "sha256": "c83e03128806904fb1e1cdcffbd33666d5abdcd3a2eb52628c10e35129858de5"
+  },
+  "logfile.pdf": {
+   "bytes": 23120,
+   "sha256": "a1f8ec0c887d5d78a7deec18ef5060b34133c08fc34768c8d2de934e90cdad28"
+  },
+  "logfile.pdf.lst": {
+   "bytes": 344,
+   "sha256": "ff15dd6113ed3a7ca5bef5b12c0166479ac8d983f3c1b37b9c6a5d933cf9103d"
+  },
+  "zero.log": {
+   "bytes": 556,
+   "sha256": "38379a3a650c6d9e2050b02a5da859bceef538ee4cf3c44679bc599b7231f94f"
+  },
+  "zero.mrc": {
+   "bytes": 50176,
+   "sha256": "f3e6536de65fdfe41a872e03fe041b6488912a02960d3ecae11af1de81ec6f49"
+  },
+  "zero.star": {
+   "bytes": 973,
+   "sha256": "baa09a10e0583bf703a2f73d83abaf007ec49a660fcb1bb8aefc3b33559af429"
+  },
+  "zero_shifts.eps": {
+   "bytes": 76416,
+   "sha256": "3f715eb5b54cfbe1036adce2dd55860e1327ee5baf5222d3525e09f587d4030d"
+  }
+ },
+ "runtime": {
+  "bytes": 161,
+  "sha256": "6b17cc53799c300fa065b08d912099b32db1b999d6622fee16ae1d80bba933d9"
+ },
+ "stdout": {
+  "bytes": 1074,
+  "sha256": "251d191ed2f568811c523834d1ade8a953bd394d5661254dbfd3a05d73701fe5"
+ },
+ "wall_seconds": 0.36417317390441895
+}

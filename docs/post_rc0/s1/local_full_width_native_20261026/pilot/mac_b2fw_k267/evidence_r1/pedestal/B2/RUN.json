@@ -1,0 +1,99 @@
+{
+ "schema": "mac-b2fw-k267-run/1",
+ "case": "pedestal",
+ "arm": "B2",
+ "exit": 0,
+ "run_dir": "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/pedestal/B2",
+ "argv": [
+  "/private/tmp/mc-mac-pilot-20261027/build-numpy253/motioncorr",
+  "--i",
+  "pedestal.star",
+  "--o",
+  "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/pedestal/B2/output",
+  "--use_own",
+  "--j",
+  "2",
+  "--patch_x",
+  "3",
+  "--patch_y",
+  "3",
+  "--group_frames",
+  "1",
+  "--bin_factor",
+  "1",
+  "--seed",
+  "1",
+  "--skip_defect",
+  "--save_noDW",
+  "--first_frame_sum",
+  "1",
+  "--last_frame_sum",
+  "5",
+  "--skip_logfile",
+  "--max_iter",
+  "5",
+  "--experimental_local_b2"
+ ],
+ "cwd": "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/pedestal/B2/input",
+ "binary_sha256": "d57432b87cdeb034c13e52ed920b19c0f819185f6ee92f04f44314337151f546",
+ "environment": {
+  "PATH": "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+  "PYTHONDONTWRITEBYTECODE": "1",
+  "OMP_NUM_THREADS": "2",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "MC_EXPERIMENT_CCF_DC_ARM": "none",
+  "MC_DIAG_MODEL_OUT": "/private/tmp/mc-mac-pilot-20261027/b2fw-k267-r1/pedestal/B2/runtime.json"
+ },
+ "publication": {
+  "corrected_micrographs.star": {
+   "bytes": 713,
+   "sha256": "701eee5b0481cbf13b77dac5126b15c001895326b0d4f51c72c5024ee86d6653"
+  },
+  "corrected_micrographs_all_rlnAccumMotionEarly.eps": {
+   "bytes": 70575,
+   "sha256": "2bb1a760d00f67b79d523bcc50fb3210e321e83cf102d22a8ed85c3848eddb16"
+  },
+  "corrected_micrographs_all_rlnAccumMotionLate.eps": {
+   "bytes": 70573,
+   "sha256": "b7534c24a8e5602519ae1f7bec131c343ecf449546ecfe73967b1d4dd1c06318"
+  },
+  "corrected_micrographs_all_rlnAccumMotionTotal.eps": {
+   "bytes": 70575,
+   "sha256": "c83e03128806904fb1e1cdcffbd33666d5abdcd3a2eb52628c10e35129858de5"
+  },
+  "logfile.pdf": {
+   "bytes": 23120,
+   "sha256": "834d3984a9b10388d4c5181e2b1f0bcebd2984db2cb512e6b2e6569b1ac311ba"
+  },
+  "logfile.pdf.lst": {
+   "bytes": 350,
+   "sha256": "9f55f40901308c972d95f4ab80cbca2101006862a1254a8ff78ec9e40647ed2f"
+  },
+  "pedestal.log": {
+   "bytes": 1483,
+   "sha256": "68785f625a235433467ffced0f3ea63c9fb47aca539e514fd58940ee9ee02b80"
+  },
+  "pedestal.mrc": {
+   "bytes": 50176,
+   "sha256": "13dc459e6e47475044862f9eda243c88e171c55b86371b2237ca4cbb6df3aade"
+  },
+  "pedestal.star": {
+   "bytes": 5190,
+   "sha256": "a6590005994c604d0b1fa6ee7965c39b6312344c24e4bf432f6e98162e480f29"
+  },
+  "pedestal_shifts.eps": {
+   "bytes": 68707,
+   "sha256": "bafa146fba4bfcd572539852f55d08e351e214bbfc2770bac5e4b3f7b36497f8"
+  }
+ },
+ "runtime": {
+  "bytes": 184,
+  "sha256": "48b5c8b6d30543f4a9ece970d5d420b028ef45651e8955cf738d38469d66f32f"
+ },
+ "stdout": {
+  "bytes": 1083,
+  "sha256": "dbfa966a0eccc90f4b9bc8626174774d53be66cbdae70bdaa63958ecf856459c"
+ },
+ "wall_seconds": 0.421799898147583
+}

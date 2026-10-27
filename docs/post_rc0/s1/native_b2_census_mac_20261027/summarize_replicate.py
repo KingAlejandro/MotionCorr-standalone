@@ -142,7 +142,8 @@ def main():
         Q3='REPORTED: all OFF-pass/FW-fail and UP-pass/UPFW-fail listed',
         Q4={f: dict(comparison=im['comparisons']['UPFW_vs_UP'][f],
                     pass_count_at_least_UP=im['pass_counts'][f]['UPFW'] >= im['pass_counts'][f]['UP']) for f in FIELDS})
-    result = dict(label=LABEL, native_producers=501, main_arm_producers=500, all_native_and_score_exits=0,
+    result = dict(label=LABEL, native_producers=501, main_arm_producers=500,
+                  native_and_final_score_exits=0, retained_initial_scoring_failures=1,
                   groups=summaries, predictions=verdicts, timing=timing,
                   conditions={c: summarize([r for r in rows if r['condition'] == c]) for c in sorted({r['condition'] for r in rows})},
                   sampling_failures=[dict(movie=r['movie'], arm=a, sampling=r['arms'][a]['sampling']) for r in rows for a in ARMS if r['arms'][a]['sampling'] != 'VALID'],

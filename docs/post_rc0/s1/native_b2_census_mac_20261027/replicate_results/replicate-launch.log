@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9ee0a2b/docs/post_rc0/s1/native_b2_census_mac_20261027/run_replicate.py", line 365, in <module>
+    main()
+    ~~~~^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9ee0a2b/docs/post_rc0/s1/native_b2_census_mac_20261027/run_replicate.py", line 333, in main
+    off_dir, off_result, off_rt = run_arm(name, 'OFF', fixture)
+                                  ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9ee0a2b/docs/post_rc0/s1/native_b2_census_mac_20261027/run_replicate.py", line 211, in run_arm
+    raise RuntimeError(f'{name}/{arm} scoring failure {sr["exit"]}; producer not retried')
+RuntimeError: dose1-s00/OFF scoring failure 1; producer not retried

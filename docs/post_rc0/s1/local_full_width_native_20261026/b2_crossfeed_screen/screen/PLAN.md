@@ -1,0 +1,34 @@
+# B2 cross-feed offline screen: PLAN, pins and criteria (frozen before any fit or score)
+
+Question: with the newly captured local-full-width observations, can the existing, already-correct B2 time/nuisance operator produce a candidate that meets the unchanged field contract
+without losing the retained passes? **Offline counterfactual screen only**: no native run, no source/CMake/binary/default/gate/ROI/gauge/publication change, no new generator, movie, pixel processing, held-out data,
+parameter search or tolerance change. Old harms stay mandatory and are not reinterpreted: B2 alone on the noisy movie (2.342955 -> 3.587250 A, historical, different configuration) and UP+B2 (about 1.64537 -> 1.90257 A RMS, all limits FAIL).
+No causal noise-share, independence, p-value or generalization claims; noisy is one exposed realization. Preflight: scratch <= 200 MB, memory <= 1 GB, one numeric thread; NumPy only.
+
+## Pins (PINS.json, written before any fit)
+- Inputs: immutable bundle `Native-local-full-width-AUDIT-BUNDLE-r1/`, manifest sha256 `49698c7c...` (258 listed + 3 unlisted files incl. `truth/MANIFEST.json` `9697c203...`, verified through repo `final_seal/BUNDLE_ADDENDUM.json`). Only the 8 exposed cases.
+- Operator: `w8_fit.py` from the reviewed W8 package (git `0b3478b5`, sha256 `e4000d87...`, equal to the durable authority copy), used unchanged and imported by the stage-1 fitter, whose only import is NumPy; the existing STAR reader `w8_refit.read_star` (sha256 `d3088ae1...`, needs `w8_gate.py` `601c2806...`) with its module constant `NF` set to 5 (a configuration value, no logic change).
+- Arms: legacy = `fit(..., 'native')` (no nuisance), B1/B2/C = physical arms with one nuisance intercept per patch (unpublished), published h(f) with h(0) = 0. The fixed original runtime global G is kept (no augmented, free-global or common-mean arm). Fields: z = f, spatial `[1,u,u^2,v,v^2,uv]`, temporal `[z,z^2,z^3]` (identical to `check_realistic_motion.runtime_field`).
+- Fixed numbers: compatibility ceiling 0.01313142874082845 px (existing, not a scientific tolerance, never changed); equivalence bound 1e-9 px; .885 A/px; limits .20/.40/.80 A (RMS/p95/max); dense ROI rows 12:84, cols 12:116, 5 frames; the evaluator is the pinned v3/v2 field operator (`field_metrics_bound`).
+
+## Stage 1 (separate process; no truth)
+Input root contains only `runtime.json` and the case STAR for: the 16 native runs (8 cases x OFF/ON) and the retained controls `B2-factorial-parent-audit-r1/raw/{affine,noisy}/{UP_only,UP_B2}` (STAR and runtime only; no `metrics.json`, no NPY, no manifest). The fitter imports NumPy and `w8_fit`/`w8_refit` only; a Python audit hook records every file opened and the run asserts none is outside the staged root, the pinned sources or the interpreter/NumPy tree, and that no truth/generator/evaluator module is loaded.
+Checks, each STOP-before-stage-2 (no candidate scored, specific UNRUN reported; no fetch, regeneration or native retry):
+1. Staged files are byte-equal to their sources; bundle OFF STAR/runtime are byte-equal to the retained UP_only ones (noisy, affine) and the UP_only and UP_B2 observation blocks are identical.
+2. For each local observation set (noisy, affine, pedestal x old-weight OFF, full-width ON): parse all accepted patch centres and frames (every patch has frames 1-5), spatial rank 6, 5 distinct times (>= 4), rank 18 (legacy) and 18 + n_patch (B1, B2, C); report raw and scaled singular values and condition numbers; B1 and C published field vs B2 <= 1e-9 px; h(0) exactly 0.
+3. Legacy replay: the legacy operator on the same rounded observations vs the native runtime coefficients, field difference over the ROI grid <= the fixed ceiling (smaller observed discrepancies are reported, the bound is not tightened).
+4. Control: the B2 operator on the old-weight observations vs the retained native UP_B2 runtime coefficients (noisy, affine), field difference over the ROI grid <= the same ceiling.
+5. Local-disabled cases (zero, integer, fractional, flat, repeated): no local observations, zero coefficients, unchanged native fields; no observation is synthesized.
+Outputs (`stage1_fit.json`, staged-root manifest, audit-hook log, script hashes) are hashed in `stage1_seal.json` before stage 2 starts; stage 2 verifies the seal first.
+
+## Stage 2 (truth enters here)
+Offline fields, each case and arm: R-rt (runtime G + full-precision refit coefficients) and R-hyb (STAR read-back G + the same full-precision coefficients; a hybrid, not a serialised refit). 2 x 2 upstream weights {old-weight OFF, full-width ON} x fitter {legacy, B2} for noisy, affine, pedestal; the five local-disabled cases are unchanged native fields. Native measured baselines (runtime and actual STAR for OFF and ON) are scored with the same evaluator. A genuine refit STAR write/read-back and a native compound run are UNRUN. No floor subtraction, scalar-capacity substitution or percentile minima. flat and repeated stay UNIDENTIFIABLE with raw distances reported.
+Order: (i) control first: offline B2 on the old-weight noisy and affine observations, R-rt metrics vs the retained native UP_B2 metrics within 0.01313142874082845 x .885 A per metric, and the noisy control FAILs all three limits (about 1.64537 -> 1.90257 A RMS): else STOP before any candidate; (ii) only then the full table.
+
+## Frozen criteria
+- **Primary (sufficient) candidate criterion:** B2 + full-width PASSES all three limits (.20/.40/.80) for all SIX identifiable cases (noisy, affine, pedestal, zero, integer, fractional) on both R-rt and R-hyb, with all five original passes (affine, pedestal, zero, integer, fractional) retained. Otherwise status **NOT_A_CANDIDATE**; no automatic native run. If met: **CANDIDATE_SUGGESTED**, never acceptance.
+- **Directional diagnostic:** noisy B2 + full-width improves each of RMS, p95 and max over the measured native legacy full-width field (R-rt vs native runtime, R-hyb vs native STAR). Any tie, regression and EVERY metric increase (all cases, both fields, PASS->PASS included) vs native ON and vs native OFF is listed.
+- **Margin label:** a gate comparison within 0.01313142874082845 x .885 A of its limit is labelled margin-sensitive; the scientific gate is never loosened and no native PASS is claimed. The serialization/replay bound is diagnostic only.
+- Offsets and truth-origin correlations (if shown) are not causal proof. If the screen fails, this compound item stops: no new fit, tolerance or arm is tried.
+## Deliverables
+PLAN/PINS/freeze record, stage-1 isolation proof and seal, all rank/replay/equivalence/control tables, the full score table with harmful regressions, a precise NO-GO / CANDIDATE_SUGGESTED status, runtime/resource/module identity, and every failed attempt. Local, small, durable; no branch commit and no evidence comment until the parent reviews.

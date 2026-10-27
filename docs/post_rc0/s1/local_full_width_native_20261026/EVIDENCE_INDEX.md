@@ -34,3 +34,6 @@ Original compiler/ctest log text, including a few trailing-whitespace lines, is 
 ## Pilot packet integration
 `pilot/` (snapshot, additive): `PACKET_SHA256SUMS` lists every file; the original `SHA256SUMS_v3` and `SHA256SUMS_v4` verify inside it. Durable originals:
 `~/Documents/MotionCorr-evidence/20261026/Native-local-full-width-final-packet-r1/`. Source `634e4b48` and CMake `5bcfa987` are unchanged.
+
+## B2 cross-feed offline screen
+`b2_crossfeed_screen/` (additive, documentation only): `PACKAGE_SHA256SUMS` verifies every file in it (`cd b2_crossfeed_screen && shasum -a 256 -c PACKAGE_SHA256SUMS`). The original 101-file source manifest is kept as `screen/SOURCE_MANIFEST.json` and does not verify inside this compact subset. Durable originals under `~/Documents/MotionCorr-evidence/20261026/`: `B2-crossfeed-screen-archive-r2/` (full working directory, 102-line index), `B2-crossfeed-opus-audit-r1/` (audit originals), `B2-crossfeed-screen-r1/` (earlier copy, unchanged), and `B2-crossfeed-publication-r1/` (copy of this directory). Source, tests and CMake are unchanged.

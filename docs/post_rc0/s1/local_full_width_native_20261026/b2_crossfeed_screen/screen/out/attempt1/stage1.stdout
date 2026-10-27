@@ -1,0 +1,23 @@
+{
+ "checks": {
+  "C1_staged_only_runtime_and_star": true,
+  "C1_OFF_equals_retained_UP_only_bytes": true,
+  "C1_UP_only_UP_B2_observation_blocks_identical": true,
+  "C2_local_sets_present": true,
+  "C2_complete_patches": true,
+  "C2_spatial_rank6_and_ge4_times": true,
+  "C2_full_rank_all_arms": true,
+  "C2_equivalence_le_1e-9px": true,
+  "C2_h0_exactly_zero": true,
+  "C3_legacy_replay_le_ceiling": true,
+  "C4_B2_vs_native_UP_B2_le_ceiling": true,
+  "C5_local_disabled_unchanged": true,
+  "isolation_no_truth_generator_evaluator_modules": true,
+  "isolation_audit_hook_no_forbidden_or_foreign_open": true
+ },
+ "overall_pass": true
+}
+legacy replay (px): {'noisy/OFF': 6.124507225813147e-06, 'noisy/ON': 5.705264912725383e-06, 'affine/OFF': 6.153071490960782e-06, 'affine/ON': 6.149496751761685e-06, 'pedestal/OFF': 3.303499498286122e-06, 'pedestal/ON': 7.886269697554571e-06}
+control B2 vs native UP_B2 (px): {'noisy': 1.1189149681900545e-05, 'affine': 1.3014631609853389e-05}
+equivalence (px): {'noisy/OFF': 2.7949864644938316e-13, 'noisy/ON': 1.8385293287792592e-13, 'affine/OFF': 9.880984919163893e-15, 'affine/ON': 7.66053886991358e-15, 'pedestal/OFF': 1.0880185641326534e-14, 'pedestal/ON': 1.0880185641326534e-14}
+opened {'staged_root': 0, 'pinned_w8_source': 2, 'interpreter_numpy_tree': 104, 'other': 44, 'forbidden_pattern_hits': 0} other: ['/private/tmp/mc-lfw-b2-crossfeed-20261026-r1/src_w8/__pycache__/w8_gate.cpython-313.pyc', '/private/tmp/mc-lfw-b2-crossfeed-20261026-r1/src_w8/w8_gate.py', '/private/tmp/mc-lfw-b2-crossfeed-20261026-r1/src_w8/w8_fit.py', '/private/tmp/mc-lfw-b2-crossfeed-20261026-r1/src_w8/w8_refit.py', '/private/tmp/mc-lfw-b2-crossfeed-20261026-r1/stage1_root/controls/affine/UP_B2/affine.star']

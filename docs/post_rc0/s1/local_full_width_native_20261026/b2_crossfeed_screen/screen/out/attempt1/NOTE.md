@@ -1,0 +1,1 @@
+Attempt 1 (kept): all numerical checks passed. The isolation report classified paths without resolving the /tmp symlink, so the staged-root and pinned-source opens were reported under 'other' (44 entries, all under /private/tmp/mc-lfw-b2-crossfeed-20261026-r1; no pattern hit). Only the classification code changed for attempt 2 (W resolved). Inputs and fit code are unchanged.

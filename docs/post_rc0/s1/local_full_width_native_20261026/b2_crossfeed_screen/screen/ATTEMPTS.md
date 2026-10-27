@@ -1,0 +1,4 @@
+# Attempts and failures (all kept)
+1. Stage 1 attempt 1 (`out/attempt1/`): every numerical check passed; the isolation report classified opened paths without resolving the /tmp symlink, so staged-root and pinned-source opens appeared under "other" (44 entries, all under /private/tmp/mc-lfw-b2-crossfeed-20261026-r1, no forbidden-pattern hit). Only the classification (resolved `W`) changed for attempt 2; inputs, fit code and results are identical (numerical content equal, checked). Attempt 2 is the sealed one.
+2. The shell call that wrote PLAN.md and FREEZE.txt exceeded the tool's 120 s limit (harness delay, no process fault) and finished in the background; PLAN.md (sha256 df804f52...) and PINS.json were frozen at 2026-10-26T23:59:55Z, before stage 1 ran (about 00:03Z) and before the seal (00:04:11Z).
+3. No stage-2 failure: the control passed, so the candidate table was computed once (no rerun, no parameter change).

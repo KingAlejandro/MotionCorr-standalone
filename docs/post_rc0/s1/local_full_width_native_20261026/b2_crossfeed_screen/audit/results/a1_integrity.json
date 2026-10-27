@@ -1,0 +1,95 @@
+{
+ "pins_match": {
+  "PLAN.md": true,
+  "PINS.json": true,
+  "out/stage1_seal.json": true,
+  "out/stage2_result.json": true,
+  "MANIFEST.json": true
+ },
+ "durable_index_sha_ok": true,
+ "packet_manifest_n": 101,
+ "packet_manifest_mismatch": [],
+ "packet_files_unlisted": [
+  "MANIFEST.json"
+ ],
+ "durable_index_n": 102,
+ "durable_mismatch_vs_copy": [],
+ "durable_mismatch_vs_packet": [],
+ "durable_files_unindexed": [],
+ "packet_files_not_in_durable": [],
+ "bundle_manifest_sha_ok": true,
+ "bundle_manifest_count": 258,
+ "bundle_used_files_hash_mismatch": [],
+ "truth_manifest_sha_ok": true,
+ "truth_npy_vs_truth_manifest": {
+  "zero": true,
+  "integer": true,
+  "fractional": true,
+  "affine": true,
+  "pedestal": true,
+  "noisy": true,
+  "flat": true,
+  "repeated": true
+ },
+ "old_harm_control_raw_ok": {
+  "noisy/UP_only/runtime.json": true,
+  "noisy/UP_only/output/noisy.star": true,
+  "noisy/UP_only/metrics.json": true,
+  "noisy/UP_B2/runtime.json": true,
+  "noisy/UP_B2/output/noisy.star": true,
+  "noisy/UP_B2/metrics.json": true,
+  "affine/UP_only/runtime.json": true,
+  "affine/UP_only/output/affine.star": true,
+  "affine/UP_only/metrics.json": true,
+  "affine/UP_B2/runtime.json": true,
+  "affine/UP_B2/output/affine.star": true,
+  "affine/UP_B2/metrics.json": true
+ },
+ "seal_utc": "2026-10-27T00:04:11Z",
+ "seal_files_mismatch": [],
+ "staged_root_n": 40,
+ "staged_names": [
+  "affine.star",
+  "flat.star",
+  "fractional.star",
+  "integer.star",
+  "noisy.star",
+  "pedestal.star",
+  "repeated.star",
+  "runtime.json",
+  "zero.star"
+ ],
+ "staged_equals_seal_list": true,
+ "staged_vs_source_now": [],
+ "seal_covers_stage2_script": false,
+ "stage2_plan_sha": true,
+ "stage2_seal_sha": true,
+ "attempt_code_diff": [
+  "-W = Path('/tmp/mc-lfw-b2-crossfeed-20261026-r1'); ROOT = W / 'stage1_root'; SRC = W / 'src_w8'",
+  "+W = Path('/tmp/mc-lfw-b2-crossfeed-20261026-r1').resolve(); ROOT = W / 'stage1_root'; SRC = W / 'src_w8'  # resolved: /tmp is a symlink on this host"
+ ],
+ "attempt_numeric_content_equal_excl_isolation_env": true,
+ "attempt1_overall_pass": true,
+ "attempt1_isolation_counts": {
+  "staged_root": 0,
+  "pinned_w8_source": 2,
+  "interpreter_numpy_tree": 104,
+  "other": 44,
+  "forbidden_pattern_hits": 0
+ },
+ "attempt2_isolation_counts": {
+  "staged_root": 40,
+  "pinned_w8_source": 6,
+  "interpreter_numpy_tree": 104,
+  "other": 0,
+  "forbidden_pattern_hits": 0
+ },
+ "attempt2_other": [],
+ "attempt1_other_outside_packet": [],
+ "audit_all_opened_foreign": [
+  "/private/tmp/mc-lfw-b2-crossfeed-20261026-r1/out/stage1_fit.json"
+ ],
+ "audit_interp_roots_sample": [
+  "//Users/alex.konstantinov/.local/share"
+ ]
+}

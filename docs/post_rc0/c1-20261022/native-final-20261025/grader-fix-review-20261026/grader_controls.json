@@ -1,0 +1,449 @@
+{
+ "baseline_new": {
+  "d1": [],
+  "d2": [],
+  "dshim": [],
+  "d4": [],
+  "dpoison": [],
+  "d4poison": [],
+  "dpoison_both": []
+ },
+ "baseline_old": {
+  "d1": [],
+  "d2": [],
+  "dshim": [],
+  "d4": [],
+  "dpoison": [],
+  "d4poison": "StopIteration",
+  "dpoison_both": []
+ },
+ "grader_mutants": {
+  "d4poison: healthy w1 (10641 A002) STAR deleted": [
+   "w1: healthy worker incomplete (['HM70-1_10-A-002_0002_Oct28_23_00_41.mrc'])"
+  ],
+  "d4poison: healthy w2 per-worker joint STAR deleted": [
+   "w2: healthy worker incomplete (['20170629_00031_frameImage.mrc', '20170629_00031_frameImage.star'])"
+  ],
+  "d4poison: refusal line removed from faulting w3 console": [
+   "w3: fault not attributed (injected/refusal lines missing)"
+  ],
+  "d4poison: faulting w3 published its refused movie (STAR+MRC)": [
+   "w3: refused movie HM70-1_10-A-004_0008_Oct28_23_06_04 published ['HM70-1_10-A-004_0008_Oct28_23_06_04.mrc', 'HM70-1_10-A-004_0008_Oct28_23_06_04.star']"
+  ],
+  "d4poison: fault also fired on healthy w1 (injected line in console)": [
+   "w1: healthy worker shows a fault or no wrapper attribution"
+  ],
+  "d4poison: wrapper did not enable the fault on w3 (fault=on -> fault=off)": [
+   "w3: wrapper did not enable the fault"
+  ],
+  "d4poison: healthy w2 returncode 1": [
+   "w2: healthy worker rc 1"
+  ],
+  "d4poison: faulting w3 returncode 0": [
+   "w3: faulting worker rc 0"
+  ],
+  "d4poison: a merged joint STAR was published": [
+   "a merged tree was published"
+  ],
+  "d4poison: dataset_ready true / verdict PASS": [
+   "rc 0, dataset verdict PASS, ready True"
+  ],
+  "d4poison: graded with fault_worker=0 (shard holds no 10641 movie)": [
+   "w0: no 10641 movie in its shard, so the retry fault cannot fire there",
+   "w0: faulting worker rc 0",
+   "w0: fault not attributed (injected/refusal lines missing)",
+   "w0: wrapper did not enable the fault",
+   "w3: healthy worker rc 1",
+   "w3: healthy worker shows a fault or no wrapper attribution",
+   "w3: healthy worker incomplete ([])"
+  ],
+  "d4poison: worker devices out of intended UUID order": [
+   "worker devices ['GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598', 'GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d', 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54', 'GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d'] != ['GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d', 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54', 'GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d', 'GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598']"
+  ],
+  "d4poison: w3 console log missing": [
+   "w3: no console log"
+  ],
+  "dpoison: healthy tutorial movie before the 10641 movie in faulting w1 lost its STAR": [
+   "w1: healthy movie 20170629_00031_frameImage lost products (['20170629_00031_frameImage.mrc'])"
+  ],
+  "dpoison: healthy w0 lost its 10641 MRC": [
+   "w0: healthy worker incomplete (['20170629_00026_frameImage.mrc', '20170629_00026_frameImage.star', 'HM70-1_10-A-002_0002_Oct28_23_00_41.star'])"
+  ],
+  "dpoison_both: refusal removed from w1": [
+   "w1: fault not attributed (injected/refusal lines missing)"
+  ],
+  "dpoison_both: rc 0 (dataset verdict PASS)": [
+   "rc 0, dataset verdict PASS, ready False",
+   "failure reason None"
+  ],
+  "d4: merged STAR of one movie deleted": [
+   "merged products ['20170629_00026_frameImage.mrc', '20170629_00026_frameImage.star', '20170629_00031_frameImage.mrc', 'HM70-1_10-A-002_0002_Oct28_23_00_41.mrc', 'HM70-1_10-A-002_0002_Oct28_23_00_41.star', 'HM70-1_10-A-004_0008_Oct28_23_06_04.mrc', 'HM70-1_10-A-004_0008_Oct28_23_06_04.star'], joint STAR True"
+  ],
+  "d4: gpu witness reports 3 distinct devices": [
+   "device witness: 3 distinct, all-on-intended True"
+  ],
+  "d4: worker 1 returncode 1": [
+   "worker rcs [0, 1, 0, 0]"
+  ],
+  "dshim: counter does not match retried patches": [
+   "shim resident-retry-preparations 41 != retried 1000000"
+  ]
+ },
+ "digest": {
+  "line_diff_d1_vs": {
+   "d2/20170629_00026_frameImage.log": {
+    "old_rx": {
+     "n_lines": [
+      241,
+      241
+     ],
+     "differing": [
+      [
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d1/workers/wN/Movies/20170629_00026_frameImage.mrc",
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d2/workers/wN/Movies/20170629_00026_frameImage.mrc"
+      ]
+     ]
+    },
+    "new_rx": {
+     "n_lines": [
+      241,
+      241
+     ],
+     "differing": []
+    },
+    "filtered_only_lines": [
+     "Full movie wall time: 0.677 s",
+     "Full movie wall time: 0.749 s"
+    ]
+   },
+   "d2/20170629_00031_frameImage.log": {
+    "old_rx": {
+     "n_lines": [
+      241,
+      241
+     ],
+     "differing": [
+      [
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d1/workers/wN/Movies/20170629_00031_frameImage.mrc",
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d2/workers/wN/Movies/20170629_00031_frameImage.mrc"
+      ]
+     ]
+    },
+    "new_rx": {
+     "n_lines": [
+      241,
+      241
+     ],
+     "differing": []
+    },
+    "filtered_only_lines": [
+     "Full movie wall time: 0.375 s",
+     "Full movie wall time: 0.790 s",
+     "nvCOMP ingestion: pinned staging pool grown to 100663296 bytes for a 68036480-byte request (worker lifetime)"
+    ]
+   },
+   "d2/HM70-1_10-A-002_0002_Oct28_23_00_41.log": {
+    "old_rx": {
+     "n_lines": [
+      592,
+      592
+     ],
+     "differing": [
+      [
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d1/workers/wN/Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.mrc",
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d2/workers/wN/Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.mrc"
+      ]
+     ]
+    },
+    "new_rx": {
+     "n_lines": [
+      592,
+      592
+     ],
+     "differing": []
+    },
+    "filtered_only_lines": [
+     "Full movie wall time: 7.981 s",
+     "Full movie wall time: 9.319 s"
+    ]
+   },
+   "d2/HM70-1_10-A-004_0008_Oct28_23_06_04.log": {
+    "old_rx": {
+     "n_lines": [
+      490,
+      490
+     ],
+     "differing": [
+      [
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d1/workers/wN/Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.mrc",
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d2/workers/wN/Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.mrc"
+      ]
+     ]
+    },
+    "new_rx": {
+     "n_lines": [
+      490,
+      490
+     ],
+     "differing": []
+    },
+    "filtered_only_lines": [
+     "Full movie wall time: 6.470 s",
+     "Full movie wall time: 7.673 s"
+    ]
+   },
+   "dshim/20170629_00026_frameImage.log": {
+    "old_rx": {
+     "n_lines": [
+      241,
+      241
+     ],
+     "differing": [
+      [
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d1/workers/wN/Movies/20170629_00026_frameImage.mrc",
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/dshim/workers/wN/Movies/20170629_00026_frameImage.mrc"
+      ]
+     ]
+    },
+    "new_rx": {
+     "n_lines": [
+      241,
+      241
+     ],
+     "differing": []
+    },
+    "filtered_only_lines": [
+     "Full movie wall time: 0.677 s",
+     "Full movie wall time: 0.804 s"
+    ]
+   },
+   "dshim/20170629_00031_frameImage.log": {
+    "old_rx": {
+     "n_lines": [
+      241,
+      241
+     ],
+     "differing": [
+      [
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d1/workers/wN/Movies/20170629_00031_frameImage.mrc",
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/dshim/workers/wN/Movies/20170629_00031_frameImage.mrc"
+      ]
+     ]
+    },
+    "new_rx": {
+     "n_lines": [
+      241,
+      241
+     ],
+     "differing": []
+    },
+    "filtered_only_lines": [
+     "Full movie wall time: 0.375 s",
+     "Full movie wall time: 0.724 s",
+     "nvCOMP ingestion: pinned staging pool grown to 100663296 bytes for a 68036480-byte request (worker lifetime)"
+    ]
+   },
+   "dshim/HM70-1_10-A-002_0002_Oct28_23_00_41.log": {
+    "old_rx": {
+     "n_lines": [
+      592,
+      592
+     ],
+     "differing": [
+      [
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d1/workers/wN/Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.mrc",
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/dshim/workers/wN/Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.mrc"
+      ]
+     ]
+    },
+    "new_rx": {
+     "n_lines": [
+      592,
+      592
+     ],
+     "differing": []
+    },
+    "filtered_only_lines": [
+     "Full movie wall time: 8.415 s",
+     "Full movie wall time: 9.319 s"
+    ]
+   },
+   "dshim/HM70-1_10-A-004_0008_Oct28_23_06_04.log": {
+    "old_rx": {
+     "n_lines": [
+      490,
+      490
+     ],
+     "differing": [
+      [
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d1/workers/wN/Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.mrc",
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/dshim/workers/wN/Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.mrc"
+      ]
+     ]
+    },
+    "new_rx": {
+     "n_lines": [
+      490,
+      490
+     ],
+     "differing": []
+    },
+    "filtered_only_lines": [
+     "Full movie wall time: 6.691 s",
+     "Full movie wall time: 7.673 s"
+    ]
+   },
+   "d4/20170629_00026_frameImage.log": {
+    "old_rx": {
+     "n_lines": [
+      241,
+      241
+     ],
+     "differing": [
+      [
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d1/workers/wN/Movies/20170629_00026_frameImage.mrc",
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d4/workers/wN/Movies/20170629_00026_frameImage.mrc"
+      ]
+     ]
+    },
+    "new_rx": {
+     "n_lines": [
+      241,
+      241
+     ],
+     "differing": []
+    },
+    "filtered_only_lines": [
+     "Full movie wall time: 0.677 s",
+     "Full movie wall time: 1.205 s"
+    ]
+   },
+   "d4/20170629_00031_frameImage.log": {
+    "old_rx": {
+     "n_lines": [
+      241,
+      241
+     ],
+     "differing": [
+      [
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d1/workers/wN/Movies/20170629_00031_frameImage.mrc",
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d4/workers/wN/Movies/20170629_00031_frameImage.mrc"
+      ]
+     ]
+    },
+    "new_rx": {
+     "n_lines": [
+      241,
+      241
+     ],
+     "differing": []
+    },
+    "filtered_only_lines": [
+     "Full movie wall time: 0.375 s",
+     "Full movie wall time: 1.121 s",
+     "nvCOMP ingestion: pinned staging pool grown to 100663296 bytes for a 68036480-byte request (worker lifetime)"
+    ]
+   },
+   "d4/HM70-1_10-A-002_0002_Oct28_23_00_41.log": {
+    "old_rx": {
+     "n_lines": [
+      592,
+      592
+     ],
+     "differing": [
+      [
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d1/workers/wN/Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.mrc",
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d4/workers/wN/Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.mrc"
+      ]
+     ]
+    },
+    "new_rx": {
+     "n_lines": [
+      592,
+      592
+     ],
+     "differing": []
+    },
+    "filtered_only_lines": [
+     "Full movie wall time: 7.287 s",
+     "Full movie wall time: 9.319 s"
+    ]
+   },
+   "d4/HM70-1_10-A-004_0008_Oct28_23_06_04.log": {
+    "old_rx": {
+     "n_lines": [
+      490,
+      490
+     ],
+     "differing": [
+      [
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d1/workers/wN/Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.mrc",
+       "Written aligned and dose-weighted sum to /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp4e7jipv4/c1-item12/dataset/d4/workers/wN/Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.mrc"
+      ]
+     ]
+    },
+    "new_rx": {
+     "n_lines": [
+      490,
+      490
+     ],
+     "differing": []
+    },
+    "filtered_only_lines": [
+     "Full movie wall time: 6.937 s",
+     "Full movie wall time: 7.673 s"
+    ]
+   }
+  },
+  "redigest_retained": {
+   "rc": 0,
+   "stdout": "IDENTICAL {'d2': 0, 'dshim': 0, 'd4': 0}",
+   "stderr": "",
+   "files_in_d1_merged": 13,
+   "verdict": "IDENTICAL"
+  },
+  "redigest_mutants": {
+   "d2 log: one fitted shift digit changed in a non-filtered line": {
+    "rc": 0,
+    "verdict": "DIFFERENT",
+    "differing": {
+     "d2": [
+      "Movies/20170629_00026_frameImage.log"
+     ]
+    }
+   },
+   "d4 log: product path names a different movie in the normalised line": {
+    "rc": 0,
+    "verdict": "DIFFERENT",
+    "differing": {
+     "d4": [
+      "Movies/HM70-1_10-A-004_0008_Oct28_23_06_04.log"
+     ]
+    }
+   },
+   "dshim STAR: one value changed": {
+    "rc": 0,
+    "verdict": "DIFFERENT",
+    "differing": {
+     "dshim": [
+      "Movies/HM70-1_10-A-002_0002_Oct28_23_00_41.star"
+     ]
+    }
+   },
+   "d2 joint STAR: one row dropped": {
+    "rc": 0,
+    "verdict": "DIFFERENT",
+    "differing": {
+     "d2": [
+      "corrected_micrographs.star"
+     ]
+    }
+   },
+   "d2 log: writes into d1's directory (EXPECTED masked: tag is normalised away)": {
+    "rc": 0,
+    "verdict": "IDENTICAL",
+    "differing": {}
+   }
+  }
+ }
+}

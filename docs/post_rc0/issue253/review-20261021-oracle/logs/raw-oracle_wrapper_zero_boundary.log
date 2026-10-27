@@ -1,0 +1,22 @@
+device=NVIDIA A100 80GB PCIe cufft=11303
+oracle self-test PASS (rejects unprojected, zeroed-boundary, zero and altered-interior buffers)
+shift=0.3,0.2
+Movie FFT: batch=1 R2C work=12672 C2R work=12672 shared work=12672 inverse tile=12672 bytes
+session nx=64 ny=48 max_relative=1.98989492279e-07 relative_rmse=1.55627393292e-07 row_mean_rms_over_max=4.21565647671e-09 PASS
+session nx=64 ny=48 max_relative=1.98989492279e-07 relative_rmse=1.55627393292e-07 row_mean_rms_over_max=4.21565647671e-09 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+Movie FFT: batch=1 R2C work=12672 C2R work=12672 shared work=12672 inverse tile=12672 bytes
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+session_idempotence projection interior_changed=0 boundary_wrong=0 self_conjugate_not_real=0 hermitian_passthrough_diff=0 PASS
+wrapper nx=64 ny=48 max_relative=0.116631962294 relative_rmse=0.163583531848 row_mean_rms_over_max=0.0424983654887 FAIL
+wrapper nx=64 ny=48 max_relative=0.116631962294 relative_rmse=0.163583531848 row_mean_rms_over_max=0.0424983654887 FAIL
+wrapper projection interior_changed=0 boundary_wrong=95 self_conjugate_not_real=0 hermitian_passthrough_diff=0 FAIL
+wrapper projection interior_changed=0 boundary_wrong=95 self_conjugate_not_real=0 hermitian_passthrough_diff=0 FAIL
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 2, Size: 64x48
+  Peak VRAM: 0.05 MiB
+  Per-stage timing:      not measured (enable with --profile)
+  Total DW Reconstruction Time: 1.03 ms
+dose nx=64 ny=48 max_relative=1.90757628729e-07 relative_rmse=1.60196415534e-07 row_mean_rms_over_max=6.3485395128e-09 PASS
+ORACLE REJECTED MUTANT

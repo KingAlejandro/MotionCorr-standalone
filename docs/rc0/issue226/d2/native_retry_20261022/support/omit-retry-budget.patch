@@ -1,0 +1,5 @@
+--- a/src/acc/cuda/cuda_patch_retry_admission.h
++++ b/src/acc/cuda/cuda_patch_retry_admission.h
+@@ -45 +45 @@
+-    required = total;
++    required = static_cast<size_t>(n_groups) * patch_comp * 2 * sizeof(float);

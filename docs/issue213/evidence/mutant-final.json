@@ -1,0 +1,25 @@
+{
+  "source_commit": "f25c958041cc59e6b6c9d2336c7f85092b0fff81",
+  "mutation": "disable only fatal refusal after downloadPatchSpectra",
+  "line": 3703,
+  "original_runner_sha256": "8a3a1ad80edebc6959abbb80d118a0a358f703ff5041a0ade4995cbc2307d903",
+  "mutant_runner_sha256": "85092671a7b88ea2be4b3de042ea45562f56667b1640ad5aaaf49431b2489dfa",
+  "original_binary_sha256": "0076100f2955b5a3cd60a49071ccd909ebfa4a5628060bf8452f494f24ec120d",
+  "mutant_binary_sha256": "7b1730f84dacfec153e60f9ab866ec7abee848fffc3a63d222bb131d7a259161",
+  "command": [
+    "taskset",
+    "-c",
+    "80-87",
+    "/home/alex/.mc-venv/bin/python3",
+    "/mnt/clathrin/alex-motioncorr-213/src-min/tests/run_sticky_cuda_control.py",
+    "--binary",
+    "/mnt/clathrin/alex-motioncorr-213/build-cuda/motioncorr_sticky_fault",
+    "--workdir",
+    "/mnt/clathrin/alex-motioncorr-213/control-mutant-final"
+  ],
+  "driver_returncode": 1,
+  "verdict": "REJECTED at attributed refusal; native 700/700 witnessed; final health check passed",
+  "restore_build_returncode": 0,
+  "restored_runner_sha256": "8a3a1ad80edebc6959abbb80d118a0a358f703ff5041a0ade4995cbc2307d903",
+  "restored_binary_sha256": "0076100f2955b5a3cd60a49071ccd909ebfa4a5628060bf8452f494f24ec120d"
+}

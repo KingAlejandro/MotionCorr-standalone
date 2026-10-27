@@ -1,0 +1,8 @@
+Written 2026-10-26T00:51:46Z, BEFORE any a13-bz2ctl stage was started.
+Question: are the two i8-a13 mismatches c-m1-bz2-native-auto / c-m1-bz2-native-float caused by the pinned pbzip2 (C1 lane PATH) rather than by the product?
+Run: vendored QF item-13 harness, unedited (docs/rc0/qf/tools/harness_mrc/synth_mrc_matrix.py --section compressed; the harness has no per-record selector, so the whole
+compressed section, 49 records, is the smallest unit), same e77a51a2 nvCOMP binary d7c4e2e3, lane CPUs 96-103 / GPU3, pinned pbzip2 dir removed from PATH.
+Prediction: (1) both c-m1-bz2-native-{auto,float} records have pass=true (native bz2 run fails: rc != 0, no completion STAR, no MRC product, as the harness expects when pbzip2 is absent);
+(2) every one of the other 47 records has the same pass value as in i8-a13 (cuda-compressed.json: all pass=true) and the same rc; (3) the two c-m1-bz2-pbzip2-shim records still pass.
+Anything else = control does not support the attribution.
+wrapper sha256: b2bdeae291376d0d305fab55013fbf2d332cf4ff673459fa53a1f4aa46477c35

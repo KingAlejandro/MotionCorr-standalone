@@ -1,0 +1,14 @@
+{
+  "utc": "2026-10-25T18:58:34.584045+00:00",
+  "script_sha256": "357cabc6ea19cbfa13c889ef147736e498d3b1ed3aa0d7e6ff579e7266b38e15",
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "4GPUs",
+    "echo \"357cabc6ea19cbfa13c889ef147736e498d3b1ed3aa0d7e6ff579e7266b38e15  /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/c1-i7-datasetL-k267.sh\" | sha256sum -c - && taskset -c 8-9 /usr/bin/timeout --signal=TERM --kill-after=10s 1200s bash /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/c1-i7-datasetL-k267.sh"
+  ],
+  "exit": 0,
+  "stdout": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/c1-i7-datasetL-k267.sh: OK\n",
+  "stderr": ""
+}

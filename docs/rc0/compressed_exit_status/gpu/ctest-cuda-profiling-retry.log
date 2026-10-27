@@ -1,0 +1,68 @@
+start 2026-10-19T13:35:02Z HEAD=39aca256c248e6209c6cbf8edc183b7400551b43 mask=88-95 gpu=GPU-eddb42fe-4f9a-adde-76d3-b924e14add54 lock=gpu0
+Internal ctest changing into directory: /mnt/clathrin/alex-motioncorr-214/build-cuda
+Test project /mnt/clathrin/alex-motioncorr-214/build-cuda
+    Start 31: ProfilingKit
+1/1 Test #31: ProfilingKit .....................***Failed  189.90 sec
+...............................................................EE.....................................................................
+======================================================================
+ERROR: test_actual_cli_full_input_does_not_expect_metadata_products (tests.test_import_subset_boundaries.MultipleStarLoops.test_actual_cli_full_input_does_not_expect_metadata_products)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-214/src/tools/profiling/tests/test_import_subset_boundaries.py", line 162, in test_actual_cli_full_input_does_not_expect_metadata_products
+    self.run_cli(False)
+  File "/mnt/clathrin/alex-motioncorr-214/src/tools/profiling/tests/test_import_subset_boundaries.py", line 151, in run_cli
+    result = cli(args)
+             ^^^^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-214/src/tools/profiling/tests/test_import_subset_boundaries.py", line 23, in cli
+    return subprocess.run([sys.executable, *flags, mcprof.__file__, *args],
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '/mnt/clathrin/alex-motioncorr-214/src/tools/profiling/mcprof.py', 'run', 'A=/tmp/tmp4839txug/binary', '--data', '/tmp/tmp4839txug/data', '--work', '/tmp/tmp4839txug/work', '--no-lock', '--warmup', '0', '--rounds', '1', '--lane-wait', '0', '--keep-outputs']' timed out after 30 seconds
+
+======================================================================
+ERROR: test_actual_cli_subset_preserves_all_other_loop_rows (tests.test_import_subset_boundaries.MultipleStarLoops.test_actual_cli_subset_preserves_all_other_loop_rows)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-214/src/tools/profiling/tests/test_import_subset_boundaries.py", line 165, in test_actual_cli_subset_preserves_all_other_loop_rows
+    self.run_cli(True)
+  File "/mnt/clathrin/alex-motioncorr-214/src/tools/profiling/tests/test_import_subset_boundaries.py", line 151, in run_cli
+    result = cli(args)
+             ^^^^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-214/src/tools/profiling/tests/test_import_subset_boundaries.py", line 23, in cli
+    return subprocess.run([sys.executable, *flags, mcprof.__file__, *args],
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '/mnt/clathrin/alex-motioncorr-214/src/tools/profiling/mcprof.py', 'run', 'A=/tmp/tmpqsdp4jmd/binary', '--data', '/tmp/tmpqsdp4jmd/data', '--work', '/tmp/tmpqsdp4jmd/work', '--no-lock', '--warmup', '0', '--rounds', '1', '--lane-wait', '0', '--keep-outputs', '--movies', '2']' timed out after 30 seconds
+
+----------------------------------------------------------------------
+Ran 134 tests in 189.189s
+
+FAILED (errors=2)
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) = 189.91 sec
+
+The following tests FAILED:
+	 31 - ProfilingKit (Failed)
+Errors while running CTest
+ctest rc=8

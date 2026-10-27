@@ -1,0 +1,178 @@
+{
+ "instrument": "Nsight Systems trace",
+ "command": [
+  "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/tools/profiling/mcprof.py",
+  "trace",
+  "A=/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cuda/motioncorr",
+  "--work",
+  "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb-bp-20261026/kit-trace",
+  "--data",
+  "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/dose1-s01",
+  "--star",
+  "input.star",
+  "--cpus",
+  "96-101",
+  "--runner-cpus",
+  "102-103",
+  "--gpu-uuid",
+  "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+  "--no-lock",
+  "--commit",
+  "A=e77a51a220cb0d91f4ac3c7fac211876d0c6833f",
+  "--",
+  "--use_own",
+  "--j",
+  "6",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--group_frames",
+  "1",
+  "--bin_factor",
+  "1",
+  "--seed",
+  "1",
+  "--skip_defect",
+  "--save_noDW",
+  "--first_frame_sum",
+  "1",
+  "--last_frame_sum",
+  "40",
+  "--ingest",
+  "float",
+  "--ingest_witness",
+  "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb-bp-20261026/ingest-witness.txt",
+  "--gpu",
+  "0"
+ ],
+ "kit": {
+  "path": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/tools/profiling",
+  "commit": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f",
+  "dirty": false
+ },
+ "binaries": {
+  "A": {
+   "path": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cuda/motioncorr",
+   "realpath": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cuda/motioncorr",
+   "sha256": "34e768128b83f7c94eb4a41ee6bb9a795c52c531a5d646ce4116df83d8d3535a",
+   "size": 3424440,
+   "source": {
+    "source_dir": null,
+    "commit": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f",
+    "dirty": null,
+    "origin": "given on command line"
+   },
+   "has_profile_option": true,
+   "has_device_timing_option": true,
+   "device_timing_detection": "--use_own --help",
+   "linked": {
+    "libfftw3.so.3": "/lib/x86_64-linux-gnu/libfftw3.so.3",
+    "libfftw3f.so.3": "/lib/x86_64-linux-gnu/libfftw3f.so.3",
+    "libtiff.so.6": "/lib/x86_64-linux-gnu/libtiff.so.6",
+    "libcudart.so.12": "/usr/local/cuda-12.8/lib64/libcudart.so.12",
+    "libcufft.so.11": "/usr/local/cuda-12.8/lib64/libcufft.so.11"
+   }
+  }
+ },
+ "host": {
+  "hostname": "4-gpu-vm",
+  "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "cpu_count": 124,
+  "load1_5_15": [
+   1.439453125,
+   1.177734375,
+   1.08544921875
+  ],
+  "lane_cpus": [
+   96,
+   97,
+   98,
+   99,
+   100,
+   101
+  ],
+  "time_utc": "2026-10-26T14:15:54Z",
+  "cpu_model": "AMD EPYC 7452 32-Core Processor",
+  "clocksource": "acpi_pm",
+  "thp_enabled": "always [madvise] never",
+  "thp_defrag": "always defer defer+madvise [madvise] never",
+  "perf_event_paranoid": "4",
+  "nvcc_release": "12.8",
+  "env": {
+   "OMP_NUM_THREADS": "6"
+  }
+ },
+ "gpu": {
+  "index": "3",
+  "uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+  "name": "NVIDIA A100 80GB PCIe",
+  "driver_version": "570.86.10",
+  "memory.total": "81920",
+  "memory.used": "1",
+  "persistence_mode": "Disabled",
+  "clocks.max.sm": "1410",
+  "pci.bus_id": "00000000:09:00.0",
+  "driver_cuda_version": "12.8"
+ },
+ "arms": [
+  "A"
+ ],
+ "input": {
+  "cwd": "/mnt/clathrin/alex-motioncorr-km-truth/fixtures/dose1-s01",
+  "star": "input.star",
+  "movies": [
+   "movie.mrcs"
+  ],
+  "staged": false,
+  "star_sha256": "ba3a39e59ca796b5dcaae0a41e0ded6f2c020e877d344a4aa182e4afebf8ac55"
+ },
+ "payload_args": [
+  "--use_own",
+  "--j",
+  "6",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--group_frames",
+  "1",
+  "--bin_factor",
+  "1",
+  "--seed",
+  "1",
+  "--skip_defect",
+  "--save_noDW",
+  "--first_frame_sum",
+  "1",
+  "--last_frame_sum",
+  "40",
+  "--ingest",
+  "float",
+  "--ingest_witness",
+  "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb-bp-20261026/ingest-witness.txt",
+  "--gpu",
+  "0"
+ ],
+ "payload_env": {
+  "CUDA_VISIBLE_DEVICES": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+  "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+ },
+ "locks": [],
+ "noise_floor_s": 0.0,
+ "settle": {
+  "settled": true,
+  "waited_s": 0.1
+ },
+ "trace_device_timing": {
+  "A": "off"
+ },
+ "trace_occupancy": {
+  "samples": 707,
+  "foreign_pids": [],
+  "unknown_pids": [],
+  "errors": 0,
+  "error_messages": []
+ }
+}

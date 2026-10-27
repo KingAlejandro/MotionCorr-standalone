@@ -1,0 +1,89 @@
+{
+  "scope": "parent independent read of native R12 result and dataset/worker states; no new raw-MRC rehash",
+  "rows": {
+    "e10641-g1": {
+      "verdict": "PASS",
+      "retry_count": 41,
+      "arm_rc": {
+        "frozen": 0,
+        "ref_1db": 0,
+        "count": 0,
+        "rec": 0,
+        "fatal": 1
+      },
+      "legacy_recorded_207_retried": 41,
+      "legacy_c1_retried": 41
+    },
+    "e10641-g4": {
+      "verdict": "PASS",
+      "retry_count": 9,
+      "arm_rc": {
+        "frozen": 0,
+        "ref_1db": 0,
+        "count": 0
+      },
+      "legacy_recorded_207_retried": 9,
+      "legacy_c1_retried": 9
+    },
+    "e10216-g1": {
+      "verdict": "PASS",
+      "retry_count": 29,
+      "arm_rc": {
+        "frozen": 0,
+        "ref_1db": 0,
+        "count": 0,
+        "rec": 0,
+        "fatal": 1
+      },
+      "legacy_recorded_207_retried": 30,
+      "legacy_c1_retried": 29
+    },
+    "e10216-g4": {
+      "verdict": "PASS",
+      "retry_count": 25,
+      "arm_rc": {
+        "frozen": 0,
+        "ref_1db": 0,
+        "count": 0
+      },
+      "legacy_recorded_207_retried": 25,
+      "legacy_c1_retried": 25
+    }
+  },
+  "dataset": {
+    "gpus": [
+      "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+      null
+    ],
+    "cpu_masks": [
+      "8-9",
+      null
+    ],
+    "wrapper_sha256": "260a79b89dbd97c543179cb46e452493d5fa34fa473c7935e1320d7566eba97b",
+    "shim_sha256": "87caff0872730a11e753999a205ddc4f629eb4780af09236296a47543944e427",
+    "runs": {
+      "d1": {
+        "rc": 0,
+        "binary_sha256": "d7c4e2e3baa370defb5d3252cd0ca6e4d7ab57c9a1665037fa54d461a51b2e6d",
+        "expect": "pass",
+        "verdict": "PASS",
+        "dataset_ready": true,
+        "failure": null,
+        "problems": []
+      },
+      "dpoison_1w": {
+        "rc": 3,
+        "binary_sha256": "87caff0872730a11e753999a205ddc4f629eb4780af09236296a47543944e427",
+        "expect": "poison_both",
+        "verdict": "FAIL",
+        "dataset_ready": false,
+        "failure": "Worker phase exited 3",
+        "problems": []
+      }
+    },
+    "problems": [],
+    "verdict": "PASS"
+  },
+  "source_sha": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f",
+  "tool_source_commit": "da2d202bf0caf9ee0859de68e872cbfbc92810fd"
+}

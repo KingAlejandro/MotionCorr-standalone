@@ -1,0 +1,14 @@
+Observed by `ps -eo pid,ppid,comm,args` at 2026-10-19 13:39:26 UTC,
+after the second ProfilingKit failure. Extracted from the tool output; the
+full compiler flags are omitted here, not inferred.
+
+PID 1974290, PPID 1974289, comm cc1plus
+Executable: /usr/libexec/gcc/x86_64-linux-gnu/13/cc1plus
+Source: /mnt/clathrin/alex-motioncorr-226/build-d2-cuda/mutants/motioncorr_runner_dw_alias.cpp
+Output: /tmp/ccSjHSpX.s
+Compile options observed included -O3 -std=gnu++17 -fopenmp.
+
+The original CUDA full run and targeted retry each report only the two
+`tests.test_import_subset_boundaries.MultipleStarLoops` TimeoutExpired errors.
+Parent attribution: independent test-harness defect #246; do not retry further.
+https://github.com/KingAlejandro/MotionCorr-standalone/issues/246

@@ -48,6 +48,7 @@ static std::atomic<unsigned long long> s_global_gain_generation{1};
 #include "src/acc/cuda/cuda_fft_prep.h"
 #include "src/acc/cuda/cuda_error_class.h"
 #include "src/acc/cuda/cuda_failure_state.h"
+#include "src/acc/cuda/cuda_scoped_resources.h"
 // REPORT_ERROR_STR expands to a std::stringstream, and this file's only use of it is
 // in the CUDA-guarded patch block below. Keeping the include inside the guard too
 // preserves the invariant that a CPU-only build sees no change from this port except
@@ -2450,6 +2451,72 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		             "(mode 0, 1 or 6), or an EER whose grouped counts fit uint16. Refusing "
 		             "to continue "
 		             "on a different path under a pinned --ingest.");
+	// #226 D3: account for the streaming global aligner's Fourier stack, CCF
+	// buffers and actual cuFFT workspace before reading/widening the host movie.
+	// No empirical floor or extra margin: those could refuse a completing run.
+	if (use_gpu && !early_binning && !movie_session) {
+		size_t required = sizeof(cufftComplex);
+		for (const size_t dim : {(size_t)n_frames, (size_t)ny, (size_t)(nx / 2 + 1)}) {
+			if (dim == 0 || dim > std::numeric_limits<size_t>::max() / required)
+				REPORT_ERROR("Streaming Fourier stack size overflows address space for " + fn_mic);
+			required *= dim;
+		}
+		size_t available = 0, total = 0;
+		HANDLE_ERROR(cudaSetDevice(gpu_id));
+		HANDLE_ERROR(cudaMemGetInfo(&available, &total));
+		int wx = 0, wy = 0;
+		patchSpectrumWindow(nx, ny, bfactor, ccf_downsample, wx, wy);
+		const size_t window = (size_t)wy * (wx / 2 + 1);
+		auto add_bytes = [&](size_t bytes) {
+			if (bytes > std::numeric_limits<size_t>::max() - required)
+				REPORT_ERROR("Streaming alignment workspace size overflows address space for " + fn_mic);
+			required += bytes;
+		};
+		add_bytes((size_t)n_frames * window * sizeof(cufftComplex));
+		add_bytes(window * sizeof(cufftComplex));
+		add_bytes(window * sizeof(float));
+		add_bytes((size_t)n_frames * wx * wy * sizeof(float));
+		add_bytes((size_t)4 * n_frames * sizeof(float));
+		bool planning_oom = false;
+		if (required <= available) {
+			CudaFailureState failure;
+			mc_cuda::ScopedCufftPlan owner(&failure);
+			cufftHandle plan = 0;
+			cufftResult result = cufftCreate(&plan);
+			if (result == CUFFT_SUCCESS) { owner.take(plan); result = cufftSetAutoAllocation(plan, 0); }
+			size_t work = 0;
+			int n[2] = {wy, wx};
+			if (result == CUFFT_SUCCESS)
+				result = cufftMakePlanMany(plan, 2, n, nullptr, 1, wy * (wx / 2 + 1),
+				                           nullptr, 1, wy * wx, CUFFT_C2R, n_frames, &work);
+			failure.recordCufft(result, "streaming alignment admission", __LINE__);
+			// cuFFT cleanup may consume/replace the pending runtime status. Latch
+			// any fatal planning error before cleanup can obscure it with an OOM.
+			failure.record(cudaPeekAtLastError(), "streaming alignment admission", __LINE__);
+			const cufftResult cleanup = owner.releaseAll();
+			if (result == CUFFT_SUCCESS) result = cleanup;
+			const CudaRetryDecision decision = cudaRetryDecisionFor(failure, cudaPeekAtLastError());
+			if (decision.verdict == CUDA_RETRY_FATAL)
+				REPORT_ERROR("Fatal CUDA error while planning streaming alignment for " + fn_mic);
+			if (result != CUFFT_SUCCESS && result != CUFFT_ALLOC_FAILED)
+				REPORT_ERROR("cuFFT failed while planning streaming alignment for " + fn_mic);
+			(void)cudaGetLastError();
+			planning_oom = result == CUFFT_ALLOC_FAILED;
+			add_bytes(work);
+			HANDLE_ERROR(cudaMemGetInfo(&available, &total));
+		}
+		if (required > available || planning_oom) {
+			std::ostringstream message;
+			message << "ERROR: Out of GPU memory for " << fn_mic
+			        << ": streaming global alignment requires at least " << required
+			        << " bytes; available " << available
+			        << " bytes after CUDA context setup. Refusing before host preprocessing.";
+            if (planning_oom) message << " cuFFT workspace planning ran out of memory.";
+			logfile << message.str() << std::endl;
+			std::cerr << message.str() << std::endl;
+			return false;
+		}
+	}
 #endif
 
 	// Which path this movie actually took. Written only when asked for, to a file
@@ -2530,6 +2597,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
 		}
+		if (isCompressedMRC && n_frames == nn)
+			compressedMRCreader.finish();
 	}
 	RCTOC(TIMING_READ_MOVIE);
 	MC_STAGE("allocate host sum");
@@ -3142,6 +3211,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #ifdef _CUDA_ENABLED
 	if (movie_session && !movie_session->releasePreprocessingBuffers())
 		REPORT_ERROR("CUDA preprocessing cleanup failed for " + fn_mic);
+	// Preserve the pre-existing gain/sum fallback before testing local-stage
+	// headroom: the neighbouring low-memory global routes must not change (#226 D2).
+	if (movie_session && patch_x > 2 && patch_y > 2) {
+		const int pw = (nx / patch_x) / 2 * 2;
+		const int ph = (ny / patch_y) / 2 * 2;
+		if (!movie_session->admitLocalAlignment(pw, ph, n_groups,
+		                                      bfactor / (prescaling * prescaling), ccf_downsample)) {
+			refuse_fallback_if_fatal(movie_session->getFailureState(), "local alignment admission");
+			if (!movie_session->downloadRealFrames(Iframes))
+				REPORT_ERROR("Failed to preserve corrected frames after local alignment admission decline");
+			host_frames_are_raw = false;
+			discard_preprocessing_session("local alignment admission");
+		}
+	}
 #endif
 
 //#define WRITE_FRAMES
@@ -3689,6 +3772,22 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					// failure here (or a failed first preparation) takes the
 					// download path below.
 					bool resident_retry_prep_done = false;
+					if (movie_session && device_prep_ok &&
+					    !movie_session->admitPatchRetry(patch_w, patch_h, n_groups,
+					        bfactor / (prescaling * prescaling), ccf_downsample)) {
+						refuse_fallback_if_fatal(movie_session->getFailureState(), "patch retry admission");
+						// Preserve both globally aligned representations: patch preparation
+						// reads the real frames; dose weighting later reads the spectra.
+						if (!movie_session->downloadRealFrames(Iframes) ||
+						    !movie_session->downloadFourierFrames(Fframes))
+							REPORT_ERROR("Failed to preserve aligned frames after patch retry admission decline");
+						host_frames_are_raw = false;
+						discard_preprocessing_session("patch retry admission");
+						cufftComplex *stale = d_patch_fcomplex_buffer;
+						d_patch_fcomplex_buffer = nullptr;
+						sz_cached_patch_fcomplex = 0;
+						if (stale) HANDLE_ERROR(cudaFree(stale));
+					}
 					if (movie_session && device_prep_ok) {
 						RCTIC(TIMING_PREP_PATCH);
 						resident_retry_prep_done = movie_session->downloadPatchSpectra(

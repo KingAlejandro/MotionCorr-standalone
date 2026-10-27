@@ -1,0 +1,898 @@
+{
+ "version": "c1-ds-archive-regrade-v1.1",
+ "verdict": "PASS",
+ "state": "IDENTICAL",
+ "cfg": "G",
+ "reasons": [],
+ "different_products": [],
+ "ds_arm_dir": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-i6-20261025/c1-ds-G",
+ "merged": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-i6-20261025/c1-ds-G/out/merged",
+ "base": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-i6-20261025/c1-G/out",
+ "comparison_label": "c1-ds-G_vs_c1-standalone-G",
+ "historical": {
+  "DATASET.json_sha256": "72ec2c6195bb40b71631913c0ef4bfef64d9a11ea72c4e10fa2c0269462f1646",
+  "verdict": "FAIL",
+  "comparator_reason": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-i6-20261025/c1-ds-G/out/merged: STAR inventory differs; missing=[], extra=['_workers/w0/corrected_micrographs.star']",
+  "note": "historical FAIL is retained; this regrade supersedes only its products comparison"
+ },
+ "binding": {
+  "regrader_sha256": "291475e9cac66f3c5b4c41658d3a2448fdf085d152ae88dab9aa4566eb171dd2",
+  "c1_tutorial24_sha256": "55a223babf3714e274ef10a72cb999f7cd480575873597f221247fa7cce3964e",
+  "comparator_sha256": "67fe718f8861ff2756e6f8d8e9f11b765cb3eacfe6336d8e199dc799662259d9",
+  "merge_workers_sha256": "b7b265c03bcdccfd499706aae38a927a7c7fa6642f6fba0b3d75f77d92657c62",
+  "manifest_sha256": "5e8e566b48199ee30515cf8a82b1d47d415dfe5358d5fd3f295f9e7054c2dde0",
+  "input_star_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041",
+  "dataset_status.json": "18b368fd6c7ef03e2d78f0147b644c228220198dfca70080153e40e6716bbf97",
+  "workers/status.json": "1564992aeddaa33453016ba40aa5495d8fc8d6c8f9bd719077780d4d7f228077",
+  "aggregate.json": "13c5ce7cd5df8b3b5e619f1bb949b0ccdbbbe906cfe4df6c34a4b2aa974b0c94",
+  "workers/shards/shard_manifest.json": "4c5e47a51748ae79e3fd29f3a40eac21403f115751e02afd401356e6254878c9"
+ },
+ "archive_allow_list": [
+  "_workers/w0/command.json",
+  "_workers/w0/corrected_micrographs.star",
+  "_workers/w0/launcher.console.log",
+  "_workers/merge.log"
+ ],
+ "archive": {
+  "_workers/w0/command.json": {
+   "worker": 0,
+   "archived_sha256": "0cab8a9ed5c8889bcb8c9ba1b7ed2e10356b0013d20d3d9799d04a944601dd55",
+   "worker_original_sha256": "0cab8a9ed5c8889bcb8c9ba1b7ed2e10356b0013d20d3d9799d04a944601dd55",
+   "exit_sha256": null
+  },
+  "_workers/w0/corrected_micrographs.star": {
+   "worker": 0,
+   "archived_sha256": "527b3d0ec2f8259c053e35a2a836b6a089256def2b0718909ac214785fe6a064",
+   "worker_original_sha256": "527b3d0ec2f8259c053e35a2a836b6a089256def2b0718909ac214785fe6a064",
+   "exit_sha256": "527b3d0ec2f8259c053e35a2a836b6a089256def2b0718909ac214785fe6a064"
+  },
+  "_workers/w0/launcher.console.log": {
+   "worker": 0,
+   "archived_sha256": "2de8efdef572deb56c840570041a97d0fab8751f65de8f604c0e281515fc26a1",
+   "worker_original_sha256": "2de8efdef572deb56c840570041a97d0fab8751f65de8f604c0e281515fc26a1",
+   "exit_sha256": null
+  },
+  "_workers/merge.log": {
+   "archived_sha256": "fd5bc1e51bee96c200af505d4ac8011a5d0b18000a2b00cc7631f80af7d307f2",
+   "note": "aggregate binary stdout/stderr; no worker original"
+  }
+ },
+ "canonical_products": [
+  "Movies/20170629_00021_frameImage.mrc",
+  "Movies/20170629_00021_frameImage.star",
+  "Movies/20170629_00022_frameImage.mrc",
+  "Movies/20170629_00022_frameImage.star",
+  "Movies/20170629_00023_frameImage.mrc",
+  "Movies/20170629_00023_frameImage.star",
+  "Movies/20170629_00024_frameImage.mrc",
+  "Movies/20170629_00024_frameImage.star",
+  "Movies/20170629_00025_frameImage.mrc",
+  "Movies/20170629_00025_frameImage.star",
+  "Movies/20170629_00026_frameImage.mrc",
+  "Movies/20170629_00026_frameImage.star",
+  "Movies/20170629_00027_frameImage.mrc",
+  "Movies/20170629_00027_frameImage.star",
+  "Movies/20170629_00028_frameImage.mrc",
+  "Movies/20170629_00028_frameImage.star",
+  "Movies/20170629_00029_frameImage.mrc",
+  "Movies/20170629_00029_frameImage.star",
+  "Movies/20170629_00030_frameImage.mrc",
+  "Movies/20170629_00030_frameImage.star",
+  "Movies/20170629_00031_frameImage.mrc",
+  "Movies/20170629_00031_frameImage.star",
+  "Movies/20170629_00035_frameImage.mrc",
+  "Movies/20170629_00035_frameImage.star",
+  "Movies/20170629_00036_frameImage.mrc",
+  "Movies/20170629_00036_frameImage.star",
+  "Movies/20170629_00037_frameImage.mrc",
+  "Movies/20170629_00037_frameImage.star",
+  "Movies/20170629_00039_frameImage.mrc",
+  "Movies/20170629_00039_frameImage.star",
+  "Movies/20170629_00040_frameImage.mrc",
+  "Movies/20170629_00040_frameImage.star",
+  "Movies/20170629_00042_frameImage.mrc",
+  "Movies/20170629_00042_frameImage.star",
+  "Movies/20170629_00043_frameImage.mrc",
+  "Movies/20170629_00043_frameImage.star",
+  "Movies/20170629_00044_frameImage.mrc",
+  "Movies/20170629_00044_frameImage.star",
+  "Movies/20170629_00045_frameImage.mrc",
+  "Movies/20170629_00045_frameImage.star",
+  "Movies/20170629_00046_frameImage.mrc",
+  "Movies/20170629_00046_frameImage.star",
+  "Movies/20170629_00047_frameImage.mrc",
+  "Movies/20170629_00047_frameImage.star",
+  "Movies/20170629_00048_frameImage.mrc",
+  "Movies/20170629_00048_frameImage.star",
+  "Movies/20170629_00049_frameImage.mrc",
+  "Movies/20170629_00049_frameImage.star",
+  "corrected_micrographs.star"
+ ],
+ "comparator": {
+  "rc": 0,
+  "scope": "products",
+  "mrc_sha256": {
+   "Movies/20170629_00021_frameImage.mrc": {
+    "base_header": "8ab026e86cedd19965228b0e473b28899ef61a35699b77162ce3ad3d809fe5f6",
+    "candidate_header": "8ab026e86cedd19965228b0e473b28899ef61a35699b77162ce3ad3d809fe5f6",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "1781224047cd5e7b07fd9d204f9c969a2b9855678166a588989ddace083a4b52",
+    "candidate_payload": "1781224047cd5e7b07fd9d204f9c969a2b9855678166a588989ddace083a4b52"
+   },
+   "Movies/20170629_00022_frameImage.mrc": {
+    "base_header": "104a825ff769473bb7ad733921eaf69e75ef4343b3799d8b67872010f5320c3a",
+    "candidate_header": "104a825ff769473bb7ad733921eaf69e75ef4343b3799d8b67872010f5320c3a",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "9984e3f5b6a3af088311a93c1f393b76849c1eb7f91f3bdc3c52e369c1a1e5a1",
+    "candidate_payload": "9984e3f5b6a3af088311a93c1f393b76849c1eb7f91f3bdc3c52e369c1a1e5a1"
+   },
+   "Movies/20170629_00023_frameImage.mrc": {
+    "base_header": "a733991c5897dcca016a37c8f01b2b13ffb39402c6502e85c91eb355f4413d66",
+    "candidate_header": "a733991c5897dcca016a37c8f01b2b13ffb39402c6502e85c91eb355f4413d66",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "90c4eb343fc7ef437a0abb1313d18dec497e80f05ddd18ac90a650287468dc0c",
+    "candidate_payload": "90c4eb343fc7ef437a0abb1313d18dec497e80f05ddd18ac90a650287468dc0c"
+   },
+   "Movies/20170629_00024_frameImage.mrc": {
+    "base_header": "720142f92552b83fc53f5271b7cb722abe44d73f86df5b9e5363584af7bd2235",
+    "candidate_header": "720142f92552b83fc53f5271b7cb722abe44d73f86df5b9e5363584af7bd2235",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "563a8a1293a95c55fdd083186d10b6b45986bddac908ccfda4abba8bc3fdfe15",
+    "candidate_payload": "563a8a1293a95c55fdd083186d10b6b45986bddac908ccfda4abba8bc3fdfe15"
+   },
+   "Movies/20170629_00025_frameImage.mrc": {
+    "base_header": "ad68cb946938768a444201d0f6dcdf99e4fb187614d15f648fb69a5fb8cdd712",
+    "candidate_header": "ad68cb946938768a444201d0f6dcdf99e4fb187614d15f648fb69a5fb8cdd712",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "a4771ae61cc968f9adbad40dd932e25843220e91e724a50b1cc295a551a43315",
+    "candidate_payload": "a4771ae61cc968f9adbad40dd932e25843220e91e724a50b1cc295a551a43315"
+   },
+   "Movies/20170629_00026_frameImage.mrc": {
+    "base_header": "a3e7a737cec2c21daa71707bdc944166ef5b3a2e247582fac2776b35fe5f61a8",
+    "candidate_header": "a3e7a737cec2c21daa71707bdc944166ef5b3a2e247582fac2776b35fe5f61a8",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "91373f931144b751662193b6d02be4124468fb213a81730090638747abc4aa54",
+    "candidate_payload": "91373f931144b751662193b6d02be4124468fb213a81730090638747abc4aa54"
+   },
+   "Movies/20170629_00027_frameImage.mrc": {
+    "base_header": "02f0bf844bdeaa1c49c199bd336b5fbcf6f650d6451f1e1a896009b38cdf78db",
+    "candidate_header": "02f0bf844bdeaa1c49c199bd336b5fbcf6f650d6451f1e1a896009b38cdf78db",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "bc2fb9a041a5ea99afc4a09e804d4cb107be176dface9df918ecbd2613fb2aa0",
+    "candidate_payload": "bc2fb9a041a5ea99afc4a09e804d4cb107be176dface9df918ecbd2613fb2aa0"
+   },
+   "Movies/20170629_00028_frameImage.mrc": {
+    "base_header": "8931f5681607df2af05fc8a80a86ce433d9b1605959f3e9c3a49f6f5fe368c64",
+    "candidate_header": "8931f5681607df2af05fc8a80a86ce433d9b1605959f3e9c3a49f6f5fe368c64",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "5ce0a61679682e9aa2f11c6e03272b44bc88c4c0095d84303d8112bf5685fb0c",
+    "candidate_payload": "5ce0a61679682e9aa2f11c6e03272b44bc88c4c0095d84303d8112bf5685fb0c"
+   },
+   "Movies/20170629_00029_frameImage.mrc": {
+    "base_header": "f69780e9036fb7a7383e8878f66301266ecdf89300b91b95bbc9a1dee6d169e9",
+    "candidate_header": "f69780e9036fb7a7383e8878f66301266ecdf89300b91b95bbc9a1dee6d169e9",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "988fab607869f24057c1b4863a64286e982a5abe97f546cb2b8879792f770b3a",
+    "candidate_payload": "988fab607869f24057c1b4863a64286e982a5abe97f546cb2b8879792f770b3a"
+   },
+   "Movies/20170629_00030_frameImage.mrc": {
+    "base_header": "cb537163ee04900b2f2125e835f89f151d02cc9945b6b18a579787bcbcee65d0",
+    "candidate_header": "cb537163ee04900b2f2125e835f89f151d02cc9945b6b18a579787bcbcee65d0",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "c57bcc8d4841fc19bb1ed990c4ab0a8efbb6db959af8fba98edfcc5b6d65843c",
+    "candidate_payload": "c57bcc8d4841fc19bb1ed990c4ab0a8efbb6db959af8fba98edfcc5b6d65843c"
+   },
+   "Movies/20170629_00031_frameImage.mrc": {
+    "base_header": "6ba5bdd4ace100a5fd89e750c5bd3c9beeb6976491a74c04286783c9a7965a54",
+    "candidate_header": "6ba5bdd4ace100a5fd89e750c5bd3c9beeb6976491a74c04286783c9a7965a54",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "7dcfb4c6bd893983c757f1711d4648d2aba24325c8c09e1f93eedda30a429013",
+    "candidate_payload": "7dcfb4c6bd893983c757f1711d4648d2aba24325c8c09e1f93eedda30a429013"
+   },
+   "Movies/20170629_00035_frameImage.mrc": {
+    "base_header": "fcd2756f27fae3b869d24ac761323fb6b244ecca232e58fe9231a9bc86d4e4ee",
+    "candidate_header": "fcd2756f27fae3b869d24ac761323fb6b244ecca232e58fe9231a9bc86d4e4ee",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "2c5f12a7b930320f6cd100e451c4d99650816c7bff2228e2aff7bfb0fd3716e5",
+    "candidate_payload": "2c5f12a7b930320f6cd100e451c4d99650816c7bff2228e2aff7bfb0fd3716e5"
+   },
+   "Movies/20170629_00036_frameImage.mrc": {
+    "base_header": "f5e4a9fc1a995a79e864b493ded64542407905c4b0a1bc2ac77cd5e6442ce930",
+    "candidate_header": "f5e4a9fc1a995a79e864b493ded64542407905c4b0a1bc2ac77cd5e6442ce930",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "db6d0bffe232f449d30ffdb2a7aac9020f70ef2fcb3182c729ce10b766afff78",
+    "candidate_payload": "db6d0bffe232f449d30ffdb2a7aac9020f70ef2fcb3182c729ce10b766afff78"
+   },
+   "Movies/20170629_00037_frameImage.mrc": {
+    "base_header": "950e222dd3055ab31bf3c48df67d4ef63cc3f3ba1718260202c3995da188b37a",
+    "candidate_header": "950e222dd3055ab31bf3c48df67d4ef63cc3f3ba1718260202c3995da188b37a",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "fa0226cba03ec627521b5372ce2613877be854295a46df39cf1a8ed80b59b47f",
+    "candidate_payload": "fa0226cba03ec627521b5372ce2613877be854295a46df39cf1a8ed80b59b47f"
+   },
+   "Movies/20170629_00039_frameImage.mrc": {
+    "base_header": "1906c945037e09d10a9b1244db9fa9965576f83d84aff36c216b7878d333e077",
+    "candidate_header": "1906c945037e09d10a9b1244db9fa9965576f83d84aff36c216b7878d333e077",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "0616c9dba2c3abd1645d4e66560686260db6cf75ceef3a8526abfac62b853c71",
+    "candidate_payload": "0616c9dba2c3abd1645d4e66560686260db6cf75ceef3a8526abfac62b853c71"
+   },
+   "Movies/20170629_00040_frameImage.mrc": {
+    "base_header": "94ea1d8e63f0e6a0ffca97a36f724d65ca1682dd85e515b79d09d2561e0ae335",
+    "candidate_header": "94ea1d8e63f0e6a0ffca97a36f724d65ca1682dd85e515b79d09d2561e0ae335",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "22bff2a69e17690a44ce49fd73926facf97114e976221892d7e3e3532558294c",
+    "candidate_payload": "22bff2a69e17690a44ce49fd73926facf97114e976221892d7e3e3532558294c"
+   },
+   "Movies/20170629_00042_frameImage.mrc": {
+    "base_header": "b375581b2568721679c771cc5743060f1a4f22d80e005a45d5b3b871083c23a1",
+    "candidate_header": "b375581b2568721679c771cc5743060f1a4f22d80e005a45d5b3b871083c23a1",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "d6225c5a55f6536245483b8cca691b0779aafda4d8e35c116f964527af4be192",
+    "candidate_payload": "d6225c5a55f6536245483b8cca691b0779aafda4d8e35c116f964527af4be192"
+   },
+   "Movies/20170629_00043_frameImage.mrc": {
+    "base_header": "f05d10d62381fe31e1df975857ef1dc897111e5b7f17f7d8451d7d125eaf42c5",
+    "candidate_header": "f05d10d62381fe31e1df975857ef1dc897111e5b7f17f7d8451d7d125eaf42c5",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "378087ebf48e07977b1eacbd1a63308f095a73730200867f25ebfd5c2a747885",
+    "candidate_payload": "378087ebf48e07977b1eacbd1a63308f095a73730200867f25ebfd5c2a747885"
+   },
+   "Movies/20170629_00044_frameImage.mrc": {
+    "base_header": "b44db4df7501e787b9ad2b97b519e31c3301c94b57999006a6c27ae1e2c938b3",
+    "candidate_header": "b44db4df7501e787b9ad2b97b519e31c3301c94b57999006a6c27ae1e2c938b3",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "68630be3f8ec03fbe864204f897f751f96b3210f08b4e080f85b76649831016c",
+    "candidate_payload": "68630be3f8ec03fbe864204f897f751f96b3210f08b4e080f85b76649831016c"
+   },
+   "Movies/20170629_00045_frameImage.mrc": {
+    "base_header": "f968c243016bc1fc97c332053caccf4207803426e2d8b73a2674e690c85ae6df",
+    "candidate_header": "f968c243016bc1fc97c332053caccf4207803426e2d8b73a2674e690c85ae6df",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "195dadeb0b3aeb7ebd8cdc809e209dae0f7e575b3351ca8684a34c1bac0d7c35",
+    "candidate_payload": "195dadeb0b3aeb7ebd8cdc809e209dae0f7e575b3351ca8684a34c1bac0d7c35"
+   },
+   "Movies/20170629_00046_frameImage.mrc": {
+    "base_header": "84c7a809a51c3b44f1165355989c52c0acedb1adab39a693c7b4428484acf798",
+    "candidate_header": "84c7a809a51c3b44f1165355989c52c0acedb1adab39a693c7b4428484acf798",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "d75e81ba956d1827dcf714e47e60fad9519e0499cde81e1eccc0270bcbd74a43",
+    "candidate_payload": "d75e81ba956d1827dcf714e47e60fad9519e0499cde81e1eccc0270bcbd74a43"
+   },
+   "Movies/20170629_00047_frameImage.mrc": {
+    "base_header": "e9b66893a37fb70b7a91215085e766ddd9e998b36632c00baef28895b0bcef1a",
+    "candidate_header": "e9b66893a37fb70b7a91215085e766ddd9e998b36632c00baef28895b0bcef1a",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "69dd2914a04c27a45ffb83541eaa86f20e34294a51eb08cd2135be7b2563848a",
+    "candidate_payload": "69dd2914a04c27a45ffb83541eaa86f20e34294a51eb08cd2135be7b2563848a"
+   },
+   "Movies/20170629_00048_frameImage.mrc": {
+    "base_header": "63c05fd03972fd4781f10dbe1bf268911ed0b716adfd7f565baa2c5a0039751a",
+    "candidate_header": "63c05fd03972fd4781f10dbe1bf268911ed0b716adfd7f565baa2c5a0039751a",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "23232ad993f6a6c4a0858e1fb34694a63c0d3f8fb5ba6cf91284428ac3a38fb1",
+    "candidate_payload": "23232ad993f6a6c4a0858e1fb34694a63c0d3f8fb5ba6cf91284428ac3a38fb1"
+   },
+   "Movies/20170629_00049_frameImage.mrc": {
+    "base_header": "e71a5945672c5df67e2d28a4cebab13085bfd3db0b15c24092eb192e4a6cd345",
+    "candidate_header": "e71a5945672c5df67e2d28a4cebab13085bfd3db0b15c24092eb192e4a6cd345",
+    "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base_payload": "2a1519b800496b02c39893cdff9b3c7bce29e2eab542d1dc7a94bb11298b12fe",
+    "candidate_payload": "2a1519b800496b02c39893cdff9b3c7bce29e2eab542d1dc7a94bb11298b12fe"
+   }
+  },
+  "different_files": [],
+  "archive_hidden_from_comparator": true
+ },
+ "merged_inventory": [
+  {
+   "path": "Movies",
+   "kind": "dir",
+   "size": null
+  },
+  {
+   "path": "Movies/20170629_00021_frameImage.log",
+   "kind": "file",
+   "size": 2307
+  },
+  {
+   "path": "Movies/20170629_00021_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00021_frameImage.star",
+   "kind": "file",
+   "size": 3713
+  },
+  {
+   "path": "Movies/20170629_00021_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 76944
+  },
+  {
+   "path": "Movies/20170629_00022_frameImage.log",
+   "kind": "file",
+   "size": 2231
+  },
+  {
+   "path": "Movies/20170629_00022_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00022_frameImage.star",
+   "kind": "file",
+   "size": 3578
+  },
+  {
+   "path": "Movies/20170629_00022_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 53933
+  },
+  {
+   "path": "Movies/20170629_00023_frameImage.log",
+   "kind": "file",
+   "size": 2231
+  },
+  {
+   "path": "Movies/20170629_00023_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00023_frameImage.star",
+   "kind": "file",
+   "size": 3497
+  },
+  {
+   "path": "Movies/20170629_00023_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 74543
+  },
+  {
+   "path": "Movies/20170629_00024_frameImage.log",
+   "kind": "file",
+   "size": 2231
+  },
+  {
+   "path": "Movies/20170629_00024_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00024_frameImage.star",
+   "kind": "file",
+   "size": 3605
+  },
+  {
+   "path": "Movies/20170629_00024_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 63219
+  },
+  {
+   "path": "Movies/20170629_00025_frameImage.log",
+   "kind": "file",
+   "size": 2229
+  },
+  {
+   "path": "Movies/20170629_00025_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00025_frameImage.star",
+   "kind": "file",
+   "size": 3983
+  },
+  {
+   "path": "Movies/20170629_00025_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 65270
+  },
+  {
+   "path": "Movies/20170629_00026_frameImage.log",
+   "kind": "file",
+   "size": 2233
+  },
+  {
+   "path": "Movies/20170629_00026_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00026_frameImage.star",
+   "kind": "file",
+   "size": 3551
+  },
+  {
+   "path": "Movies/20170629_00026_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 60802
+  },
+  {
+   "path": "Movies/20170629_00027_frameImage.log",
+   "kind": "file",
+   "size": 2230
+  },
+  {
+   "path": "Movies/20170629_00027_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00027_frameImage.star",
+   "kind": "file",
+   "size": 3794
+  },
+  {
+   "path": "Movies/20170629_00027_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 70089
+  },
+  {
+   "path": "Movies/20170629_00028_frameImage.log",
+   "kind": "file",
+   "size": 2232
+  },
+  {
+   "path": "Movies/20170629_00028_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00028_frameImage.star",
+   "kind": "file",
+   "size": 3470
+  },
+  {
+   "path": "Movies/20170629_00028_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 65252
+  },
+  {
+   "path": "Movies/20170629_00029_frameImage.log",
+   "kind": "file",
+   "size": 2228
+  },
+  {
+   "path": "Movies/20170629_00029_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00029_frameImage.star",
+   "kind": "file",
+   "size": 3875
+  },
+  {
+   "path": "Movies/20170629_00029_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 75202
+  },
+  {
+   "path": "Movies/20170629_00030_frameImage.log",
+   "kind": "file",
+   "size": 2229
+  },
+  {
+   "path": "Movies/20170629_00030_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00030_frameImage.star",
+   "kind": "file",
+   "size": 3605
+  },
+  {
+   "path": "Movies/20170629_00030_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 74535
+  },
+  {
+   "path": "Movies/20170629_00031_frameImage.log",
+   "kind": "file",
+   "size": 2230
+  },
+  {
+   "path": "Movies/20170629_00031_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00031_frameImage.star",
+   "kind": "file",
+   "size": 3767
+  },
+  {
+   "path": "Movies/20170629_00031_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 65260
+  },
+  {
+   "path": "Movies/20170629_00035_frameImage.log",
+   "kind": "file",
+   "size": 2230
+  },
+  {
+   "path": "Movies/20170629_00035_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00035_frameImage.star",
+   "kind": "file",
+   "size": 3497
+  },
+  {
+   "path": "Movies/20170629_00035_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 68328
+  },
+  {
+   "path": "Movies/20170629_00036_frameImage.log",
+   "kind": "file",
+   "size": 2230
+  },
+  {
+   "path": "Movies/20170629_00036_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00036_frameImage.star",
+   "kind": "file",
+   "size": 3821
+  },
+  {
+   "path": "Movies/20170629_00036_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 59771
+  },
+  {
+   "path": "Movies/20170629_00037_frameImage.log",
+   "kind": "file",
+   "size": 2231
+  },
+  {
+   "path": "Movies/20170629_00037_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00037_frameImage.star",
+   "kind": "file",
+   "size": 3443
+  },
+  {
+   "path": "Movies/20170629_00037_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 65254
+  },
+  {
+   "path": "Movies/20170629_00039_frameImage.log",
+   "kind": "file",
+   "size": 2232
+  },
+  {
+   "path": "Movies/20170629_00039_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00039_frameImage.star",
+   "kind": "file",
+   "size": 3497
+  },
+  {
+   "path": "Movies/20170629_00039_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 53933
+  },
+  {
+   "path": "Movies/20170629_00040_frameImage.log",
+   "kind": "file",
+   "size": 2233
+  },
+  {
+   "path": "Movies/20170629_00040_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00040_frameImage.star",
+   "kind": "file",
+   "size": 3524
+  },
+  {
+   "path": "Movies/20170629_00040_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 63226
+  },
+  {
+   "path": "Movies/20170629_00042_frameImage.log",
+   "kind": "file",
+   "size": 2230
+  },
+  {
+   "path": "Movies/20170629_00042_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00042_frameImage.star",
+   "kind": "file",
+   "size": 3605
+  },
+  {
+   "path": "Movies/20170629_00042_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 72126
+  },
+  {
+   "path": "Movies/20170629_00043_frameImage.log",
+   "kind": "file",
+   "size": 2231
+  },
+  {
+   "path": "Movies/20170629_00043_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00043_frameImage.star",
+   "kind": "file",
+   "size": 3578
+  },
+  {
+   "path": "Movies/20170629_00043_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 63200
+  },
+  {
+   "path": "Movies/20170629_00044_frameImage.log",
+   "kind": "file",
+   "size": 2230
+  },
+  {
+   "path": "Movies/20170629_00044_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00044_frameImage.star",
+   "kind": "file",
+   "size": 3632
+  },
+  {
+   "path": "Movies/20170629_00044_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 67681
+  },
+  {
+   "path": "Movies/20170629_00045_frameImage.log",
+   "kind": "file",
+   "size": 2197
+  },
+  {
+   "path": "Movies/20170629_00045_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00045_frameImage.star",
+   "kind": "file",
+   "size": 3497
+  },
+  {
+   "path": "Movies/20170629_00045_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 67684
+  },
+  {
+   "path": "Movies/20170629_00046_frameImage.log",
+   "kind": "file",
+   "size": 2198
+  },
+  {
+   "path": "Movies/20170629_00046_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00046_frameImage.star",
+   "kind": "file",
+   "size": 3794
+  },
+  {
+   "path": "Movies/20170629_00046_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 58396
+  },
+  {
+   "path": "Movies/20170629_00047_frameImage.log",
+   "kind": "file",
+   "size": 2230
+  },
+  {
+   "path": "Movies/20170629_00047_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00047_frameImage.star",
+   "kind": "file",
+   "size": 3659
+  },
+  {
+   "path": "Movies/20170629_00047_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 60809
+  },
+  {
+   "path": "Movies/20170629_00048_frameImage.log",
+   "kind": "file",
+   "size": 2231
+  },
+  {
+   "path": "Movies/20170629_00048_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00048_frameImage.star",
+   "kind": "file",
+   "size": 3902
+  },
+  {
+   "path": "Movies/20170629_00048_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 56345
+  },
+  {
+   "path": "Movies/20170629_00049_frameImage.log",
+   "kind": "file",
+   "size": 2230
+  },
+  {
+   "path": "Movies/20170629_00049_frameImage.mrc",
+   "kind": "file",
+   "size": 56956944
+  },
+  {
+   "path": "Movies/20170629_00049_frameImage.star",
+   "kind": "file",
+   "size": 3794
+  },
+  {
+   "path": "Movies/20170629_00049_frameImage_shifts.eps",
+   "kind": "file",
+   "size": 63232
+  },
+  {
+   "path": "_workers",
+   "kind": "dir",
+   "size": null
+  },
+  {
+   "path": "_workers/merge.log",
+   "kind": "file",
+   "size": 556
+  },
+  {
+   "path": "_workers/w0",
+   "kind": "dir",
+   "size": null
+  },
+  {
+   "path": "_workers/w0/command.json",
+   "kind": "file",
+   "size": 1178
+  },
+  {
+   "path": "_workers/w0/corrected_micrographs.star",
+   "kind": "file",
+   "size": 8083
+  },
+  {
+   "path": "_workers/w0/launcher.console.log",
+   "kind": "file",
+   "size": 3756
+  },
+  {
+   "path": "all_batches.pdf",
+   "kind": "file",
+   "size": 149308
+  },
+  {
+   "path": "batch.pdf",
+   "kind": "file",
+   "size": 149308
+  },
+  {
+   "path": "batch.pdf.lst",
+   "kind": "file",
+   "size": 3216
+  },
+  {
+   "path": "corrected_micrographs.star",
+   "kind": "file",
+   "size": 7891
+  },
+  {
+   "path": "corrected_micrographs_all_rlnAccumMotionEarly.eps",
+   "kind": "file",
+   "size": 47069
+  },
+  {
+   "path": "corrected_micrographs_all_rlnAccumMotionLate.eps",
+   "kind": "file",
+   "size": 47056
+  },
+  {
+   "path": "corrected_micrographs_all_rlnAccumMotionTotal.eps",
+   "kind": "file",
+   "size": 49818
+  },
+  {
+   "path": "corrected_micrographs_hist_rlnAccumMotionEarly.eps",
+   "kind": "file",
+   "size": 54336
+  },
+  {
+   "path": "corrected_micrographs_hist_rlnAccumMotionLate.eps",
+   "kind": "file",
+   "size": 56894
+  },
+  {
+   "path": "corrected_micrographs_hist_rlnAccumMotionTotal.eps",
+   "kind": "file",
+   "size": 56208
+  },
+  {
+   "path": "header.pdf",
+   "kind": "file",
+   "size": 34234
+  },
+  {
+   "path": "header.pdf.lst",
+   "kind": "file",
+   "size": 949
+  },
+  {
+   "path": "logfile.pdf",
+   "kind": "file",
+   "size": 177718
+  },
+  {
+   "path": "logfile.pdf.lst",
+   "kind": "file",
+   "size": 4165
+  }
+ ]
+}

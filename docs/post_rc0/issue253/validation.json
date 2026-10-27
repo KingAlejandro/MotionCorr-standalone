@@ -1,0 +1,164 @@
+{
+  "record_integrity_status": "PASS",
+  "base_sha": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+  "implementation_sha": "e539660cc6fc56e32ad29ef25ee28dee3e0dcbbc",
+  "candidate_sha": "adf990fd9801e1124814e3c4fcb30a3a7fd8ff42",
+  "ctest": {
+    "cpu": {
+      "tests": 74,
+      "passed": 74,
+      "failed": 0,
+      "skipped": 0,
+      "source": "e539660cc6fc56e32ad29ef25ee28dee3e0dcbbc",
+      "hostname": "4-gpu-vm",
+      "timestamp": "2026-10-20T01:03:39"
+    },
+    "cuda": {
+      "tests": 110,
+      "passed": 110,
+      "failed": 0,
+      "skipped": 0,
+      "source": "adf990fd9801e1124814e3c4fcb30a3a7fd8ff42",
+      "hostname": "4-gpu-vm",
+      "timestamp": "2026-10-20T01:12:09"
+    },
+    "nvcomp": {
+      "tests": 113,
+      "passed": 113,
+      "failed": 0,
+      "skipped": 0,
+      "source": "adf990fd9801e1124814e3c4fcb30a3a7fd8ff42",
+      "hostname": "4-gpu-vm",
+      "timestamp": "2026-10-20T01:21:05"
+    }
+  },
+  "exit_statuses": {
+    "inverse-main": 1,
+    "inverse-fixed": 0,
+    "inverse-mutant": 1,
+    "inverse-mutant-expected": 0,
+    "matrix-cuda": 0,
+    "matrix-nvcomp": 0,
+    "collection-cpu": 0,
+    "collection-cuda": 0,
+    "collection-nvcomp": 0
+  },
+  "compact_matrices": {
+    "cuda": {
+      "selected": 16,
+      "passed": 16,
+      "failed": 0,
+      "arms": 28,
+      "source": "adf990fd9801e1124814e3c4fcb30a3a7fd8ff42"
+    },
+    "nvcomp": {
+      "selected": 16,
+      "passed": 16,
+      "failed": 0,
+      "arms": 28,
+      "source": "adf990fd9801e1124814e3c4fcb30a3a7fd8ff42"
+    }
+  },
+  "product_runs": 8,
+  "all_product_exits_zero": true,
+  "cpu_products_identical": true,
+  "gpu_uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+  "cpu_affinity": [
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95
+  ],
+  "input": {
+    "path": "/mnt/clathrin/alex-motioncorr-s1ccf/inputs/e10216/Movies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs",
+    "resolved": "/mnt/clathrin/alex-motioncorr-rc0/W-QUAL/data/EMPIAR-10216/data/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrc",
+    "sha256": "f399bd30bfe1a9807bd494c348bfcf7d4aee312ccc18140b05abb1453ac23a56",
+    "star": "# version 30001\n\ndata_optics\n\nloop_\n_rlnOpticsGroupName #1\n_rlnOpticsGroup #2\n_rlnMicrographOriginalPixelSize #3\n_rlnVoltage #4\n_rlnSphericalAberration #5\n_rlnAmplitudeContrast #6\nopticsGroup1 1 0.517 300 2.7 0.1\n\n# version 30001\n\ndata_movies\n\nloop_\n_rlnMicrographMovieName #1\n_rlnOpticsGroup #2\nMovies/FoilHole_14961495_Data_14966722_14966723_20180615_1739_Fractions.mrcs 1\n"
+  },
+  "build_configs": {
+    "cpu": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+      "CUDA": "OFF",
+      "MOTIONCORR_DOSE_SYMMETRY_SELECTED": "1"
+    },
+    "cuda": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CUDA_ARCHITECTURES": "80",
+      "CMAKE_CUDA_COMPILER": "/usr/local/cuda-12.8/bin/nvcc",
+      "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+      "CUDA": "ON",
+      "USE_NVCOMP": "OFF",
+      "MOTIONCORR_DOSE_SYMMETRY_SELECTED": "1"
+    },
+    "nvcomp": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CUDA_ARCHITECTURES": "80",
+      "CMAKE_CUDA_COMPILER": "/usr/local/cuda-12.8/bin/nvcc",
+      "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+      "CUDA": "ON",
+      "USE_NVCOMP": "ON",
+      "MOTIONCORR_DOSE_SYMMETRY_SELECTED": "1"
+    }
+  },
+  "products": [
+    {
+      "source": "main",
+      "config": "G",
+      "nonDW_relative_rmse": 0.01964060800296863,
+      "DW_relative_rmse": 0.016590877895637554,
+      "backend_nonDW": "FAIL",
+      "backend_DW": "FAIL",
+      "model_coeff_relative_rmse": "",
+      "model_field_relative_rmse": "",
+      "model_field_rmse_px": "",
+      "model_field_max_abs_px": ""
+    },
+    {
+      "source": "main",
+      "config": "L",
+      "nonDW_relative_rmse": 0.823504057221391,
+      "DW_relative_rmse": 0.43436215906335873,
+      "backend_nonDW": "FAIL",
+      "backend_DW": "FAIL",
+      "model_coeff_relative_rmse": 0.374524019005197,
+      "model_field_relative_rmse": 0.20682868883224673,
+      "model_field_rmse_px": 1.1809661166556196,
+      "model_field_max_abs_px": 6.2618769401600245
+    },
+    {
+      "source": "fixed",
+      "config": "G",
+      "nonDW_relative_rmse": 0.019390036991359192,
+      "DW_relative_rmse": 0.016463232669444095,
+      "backend_nonDW": "FAIL",
+      "backend_DW": "FAIL",
+      "model_coeff_relative_rmse": "",
+      "model_field_relative_rmse": "",
+      "model_field_rmse_px": "",
+      "model_field_max_abs_px": ""
+    },
+    {
+      "source": "fixed",
+      "config": "L",
+      "nonDW_relative_rmse": 0.03692299321245986,
+      "DW_relative_rmse": 0.017329073824470687,
+      "backend_nonDW": "FAIL",
+      "backend_DW": "FAIL",
+      "model_coeff_relative_rmse": 0.007841363845858835,
+      "model_field_relative_rmse": 0.0047249575758923235,
+      "model_field_rmse_px": 0.02697892072549911,
+      "model_field_max_abs_px": 0.17623777340000402
+    }
+  ],
+  "notes": [
+    "CPU full CTest was on e539660c; adf990fd changes only the CUDA test oracle. CPU production/build sources are identical.",
+    "Backend gate statuses are records only; no thresholds overridden.",
+    "Model metrics use published STAR coefficients; field evaluates z=0..58 on the normalized 21x21 square [-0.5,0.5]^2.",
+    "Raw PlanMany batch-two rows sample its first output frame; production full-frame batch-one execution checks both resident frames."
+  ]
+}

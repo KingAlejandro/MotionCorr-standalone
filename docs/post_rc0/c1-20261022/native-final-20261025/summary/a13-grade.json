@@ -1,0 +1,102 @@
+{
+ "record": "PR #204 @ 5944617b",
+ "runs": {
+  "cuda-matrix": {
+   "recorded": 36,
+   "current": 36,
+   "mismatches": [
+    "matrix: m0_swapped_nx128_inherited: expected PASS, current FAIL"
+   ]
+  },
+  "cuda-refuse": {
+   "recorded": 2,
+   "current": 2,
+   "mismatches": []
+  },
+  "cuda-compressed": {
+   "recorded": 49,
+   "current": 49,
+   "mismatches": [
+    "compressed: c-m1-bz2-native-auto: expected PASS, current FAIL",
+    "compressed: c-m1-bz2-native-float: expected PASS, current FAIL",
+    "damaged: d-shim-exit3-xz: expected FAIL, current PASS",
+    "damaged: d-shim-exit3-zst: expected FAIL, current PASS",
+    "damaged: d-xz-trailer-corrupt-auto: expected FAIL, current PASS",
+    "damaged: d-xz-trailer-corrupt-float: expected FAIL, current PASS",
+    "damaged: d-xz-truncated-tail1-auto: expected FAIL, current PASS",
+    "damaged: d-xz-truncated-tail1-float: expected FAIL, current PASS"
+   ]
+  },
+  "cuda-errors": {
+   "recorded": 26,
+   "current": 26,
+   "mismatches": []
+  },
+  "cuda-options": {
+   "recorded": 10,
+   "current": 10,
+   "mismatches": []
+  },
+  "cpu-matrix": {
+   "recorded": 36,
+   "current": 36,
+   "mismatches": [
+    "matrix: m0_swapped_nx128_inherited: expected FAIL, current PASS"
+   ]
+  },
+  "cpu-errors": {
+   "recorded": 26,
+   "current": 26,
+   "mismatches": []
+  },
+  "real": {
+   "recorded": 6,
+   "current": 6,
+   "mismatches": []
+  },
+  "opts-baseline_rss": {
+   "recorded": 1,
+   "current": 1,
+   "mismatches": []
+  },
+  "opts-early_bin2": {
+   "recorded": 2,
+   "current": 2,
+   "mismatches": []
+  },
+  "opts-early_bin2_explicit": {
+   "recorded": 1,
+   "current": 1,
+   "mismatches": []
+  },
+  "opts-late_bin2": {
+   "recorded": 2,
+   "current": 2,
+   "mismatches": []
+  },
+  "opts-noDW_evenodd": {
+   "recorded": 2,
+   "current": 2,
+   "mismatches": []
+  },
+  "opts-ps_group4": {
+   "recorded": 2,
+   "current": 2,
+   "mismatches": []
+  }
+ },
+ "problems": [
+  "cuda-matrix: matrix: m0_swapped_nx128_inherited: expected PASS, current FAIL",
+  "cuda-compressed: compressed: c-m1-bz2-native-auto: expected PASS, current FAIL",
+  "cuda-compressed: compressed: c-m1-bz2-native-float: expected PASS, current FAIL",
+  "cuda-compressed: damaged: d-shim-exit3-xz: expected FAIL, current PASS",
+  "cuda-compressed: damaged: d-shim-exit3-zst: expected FAIL, current PASS",
+  "cuda-compressed: damaged: d-xz-trailer-corrupt-auto: expected FAIL, current PASS",
+  "cuda-compressed: damaged: d-xz-trailer-corrupt-float: expected FAIL, current PASS",
+  "cuda-compressed: damaged: d-xz-truncated-tail1-auto: expected FAIL, current PASS",
+  "cuda-compressed: damaged: d-xz-truncated-tail1-float: expected FAIL, current PASS",
+  "cpu-matrix: matrix: m0_swapped_nx128_inherited: expected FAIL, current PASS"
+ ],
+ "known_f4": [],
+ "verdict": "FAIL"
+}

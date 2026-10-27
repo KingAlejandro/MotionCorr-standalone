@@ -1,0 +1,36 @@
+{
+  "readback_utc": "2026-10-22T22:07:14.767118+00:00",
+  "raw_sha256": "80791d9ef68f65359ae54f2812f0cb88bb3e57865dd91d284ed9b7a18ae41c9f",
+  "tools_packet": "67beb5f59382a74bbc64b10bfa488ab3d549dc0c",
+  "tested_source": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f",
+  "deployed_and_git_tool_hashes_exact": 32,
+  "stage_count": 17,
+  "preflight_checks": 25,
+  "preflight_affinity": "8-9",
+  "manifest_expanded_argv_allowed_sets_exact": true,
+  "identities": "100 unique;10 dose1 controls",
+  "F_CPU_baselines": "original RUN hashes/binary/source-independent argv/mask/OMP pins verified;25checks include exact argv",
+  "gate_absent_no_receipts": true,
+  "source_test_build_CI_delta": "empty",
+  "decision_rule": "INCONCLUSIVE3 continues only independent metric/image rows, never aggregatePASS;FAIL4/INCOMPLETE5 stop",
+  "remaining_launch_requirements": [
+    "Independent cpu1c R2 review",
+    "Fresh CPU8\u20139 occupancy and nonblocking CPU lease",
+    "Whole chain taskset8\u20139, recorded PID/start/affinity/exit receipt",
+    "No GPU launch; original frozen GPU rows remain pending"
+  ],
+  "limitation": "Prelaunch metadata/source identity only; no CPU qualification row has run.",
+  "R2_manifest_count_reconciled": {
+    "reviewer_files": 31,
+    "deployed_files": 32,
+    "extra": "OVERLAY.md",
+    "extra_sha256": "2a726b3ae9e0a34716f8b34a35e699ffbeb46de27633d85b9c24fb79269a387d",
+    "other31_hashes_equal": true
+  },
+  "independent_review_R2": {
+    "target": "67beb5f59382a74bbc64b10bfa488ab3d549dc0c",
+    "report": "/tmp/motioncorr-c1-cpu1c-review-r2-20261022/REVIEW.md",
+    "sha256": "6dae9e87f327cac45a0b130ec8fe5cb7c62e47dce63d305fe0b92b0fe1f98693",
+    "finding": "no launch-blocking finding; real checker56rows accepted; parent falsePASS rejected"
+  }
+}

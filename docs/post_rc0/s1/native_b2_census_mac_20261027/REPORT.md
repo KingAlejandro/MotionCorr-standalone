@@ -208,6 +208,10 @@ the replacement score is explicitly versioned. There were **no native retries**.
 [Verification](replicate_results/verification.json) checks all 500 compact rows
 against their raw metrics, 2,004 retained publication hashes and 2,004 evaluator
 identity links. This is metadata verification, not an independent native rerun.
+The generated CSV tables retain Python csv.writer's standard CRLF endings.
+The ordinary Git whitespace check reports those carriage returns; the
+CRLF-aware check passes. [Format checks](replicate_results/format-check.json)
+retain that finding and the unchanged CSV hashes; no numerical data was repaired.
 
 [The compact raw metadata archive](replicate_results/raw-metadata.tar.gz)
 contains 6,735 indexed original files / 82,442,315 bytes, plus the index;

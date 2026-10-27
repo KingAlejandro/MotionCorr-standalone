@@ -1,0 +1,35 @@
+{
+  "label": "Mac replicate census, not hash-identical to the frozen census",
+  "ordinary_git_diff_check_exit": 2,
+  "ordinary_check_finding": "Standard CRLF CSV line endings reported as trailing whitespace",
+  "affected_paths": [
+    "docs/post_rc0/s1/native_b2_census_mac_20261027/replicate_results/P6_moments.csv",
+    "docs/post_rc0/s1/native_b2_census_mac_20261027/replicate_results/metric_regressions.csv",
+    "docs/post_rc0/s1/native_b2_census_mac_20261027/replicate_results/per_movie.csv"
+  ],
+  "cr_at_eol_aware_git_diff_check_exit": 0,
+  "CSV_records": [
+    {
+      "file": "P6_moments.csv",
+      "data_rows": 100,
+      "columns": 14,
+      "line_endings": "CRLF, Python csv.writer default; original bytes preserved",
+      "sha256": "e5dc7afceb2d9909d2029fe81ee97562c212bcb80129c843e1f7c051e7d8b1fb"
+    },
+    {
+      "file": "per_movie.csv",
+      "data_rows": 100,
+      "columns": 50,
+      "line_endings": "CRLF, Python csv.writer default; original bytes preserved",
+      "sha256": "95000c226c941927fad402f859c12c3254e137a62f71c3214587048a0c247d54"
+    },
+    {
+      "file": "metric_regressions.csv",
+      "data_rows": 372,
+      "columns": 8,
+      "line_endings": "CRLF, Python csv.writer default; original bytes preserved",
+      "sha256": "36c0eb3a94bda4e1a09aebaa4d9fb7aaa00ea74c85bb7433fc561fac4313dd3c"
+    }
+  ],
+  "scientific_data_or_producers_changed": false
+}

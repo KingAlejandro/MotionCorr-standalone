@@ -1,0 +1,7 @@
+# Integer-grid linkage check, frozen before this computation
+
+On both retained patches, both captured entering iterations and all five frames, compare every native search-box integer lag in [-15,15]^2 against an explicit signed-frequency half-plane Fourier sum of the actual consumed spectrum. Preserve the native maps as primary. The maximum absolute discrepancy must be <=5e-6 (the bound already set before capture computations). At least one map must reject each sign-flip and axis-swap mutant under this same map-equality criterion. Do not alter this bound after seeing the result. Omitted-DC and doubled-x0 multiplicity probes are additionally reported; ky16 sign and Hermitian variants suppressed by B150 are not observable here.
+
+Read only immutable native-map bundle spectra/maps/metadata. No truth, optimization, image samples or native producer. Verify selected binary input hashes against the pinned INDEX. Record the consumed-spectrum L1 magnitudes and epsilon*log2(area)*L1 heuristic before evaluating map discrepancies. The heuristic is not a rigorous error bound, and it will not replace the fixed criterion. A failure stops this proposed characterization before optimization.
+
+This is a separate native-grid linkage check, not a repair to C9. Original C9 FAIL and the unaccepted post-hoc v2 tolerance relaxation remain explicit. Independent Opus value/gradient/Hessian and saved-spectrum shifter checks provide separate evidence for operator conventions. No estimator/scientific acceptance follows from the linkage check.

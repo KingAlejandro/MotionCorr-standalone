@@ -1,0 +1,1201 @@
+{
+  "plan_sha256": "038ec5a2bc907686b19ec37be1f19ade56715dbcdd260d565dcb8efc93462416",
+  "bundle_index_sha256": "5b3dde3aefa3ff647927cbf702b3489fc1a470083fbcc23644bb8eb2f191c8d3",
+  "truth_field_sha256": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+  "capture_source_commit": "927a6890c8864f81ad58e44eac7281b080714af4",
+  "python_executable": "/Users/alex.konstantinov/.local/bin/python3 -B",
+  "numpy_version": "2.4.2",
+  "blas_omp_threads": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "global_certification_status": "UNPROVEN_GLOBAL",
+  "patches": {
+    "patch_62_79_bad": {
+      "patch_center_xy": [
+        62,
+        79
+      ],
+      "fixed_points": {
+        "x_nat_raw_selected_xy": [
+          10.062688110916795,
+          -7.802925722413559
+        ],
+        "x_int_xy": [
+          10.0,
+          -8.0
+        ],
+        "x_loc_stationary_xy": [
+          10.065022329168002,
+          -7.791873097372495
+        ],
+        "x_phys_observed_f0_gauge_xy": [
+          -0.7617316542871614,
+          2.246762288086356
+        ],
+        "x_truth_unanchored_xy": [
+          -0.6978606493870907,
+          1.8813922480092926
+        ],
+        "iter1_frame0_raw_selected_xy": [
+          -0.0638710049000707,
+          0.36537004007706325
+        ]
+      },
+      "saved_vs_regenerated_discrepancies": {
+        "spectrum_f32_sum_vs_saved_consumed_max_abs": 1.5359765015432458e-08,
+        "spectrum_f64_sum_vs_saved_consumed_max_abs": 1.432627974341047e-08,
+        "real_map_aux_sum_f64_vs_saved_native_real_map_max_abs": 1.4987750218686813e-07,
+        "real_map_aux_sum_f64_vs_saved_native_real_map_rms": 3.6541155877399756e-08,
+        "real_map_from_saved_consumed_f64_vs_saved_native_real_map_max_abs": 1.5878527248602836e-07,
+        "pairwise_iter1_hermitian_checks": [
+          {
+            "ref_frame_j": 0,
+            "max_kx0_conj_err": 0.0,
+            "max_kx21_conj_err": 0.0,
+            "max_corner_imag": 0.0
+          },
+          {
+            "ref_frame_j": 1,
+            "max_kx0_conj_err": 0.0,
+            "max_kx21_conj_err": 0.0,
+            "max_corner_imag": 0.0
+          },
+          {
+            "ref_frame_j": 2,
+            "max_kx0_conj_err": 0.0,
+            "max_kx21_conj_err": 0.0,
+            "max_corner_imag": 0.0
+          },
+          {
+            "ref_frame_j": 3,
+            "max_kx0_conj_err": 0.0,
+            "max_kx21_conj_err": 0.0,
+            "max_corner_imag": 0.0
+          }
+        ]
+      },
+      "aggregate_evaluations": {
+        "primary_native_real_map": {
+          "val_at_x_nat": 0.6859927335906875,
+          "val_at_x_int": 0.685407519340515,
+          "val_at_x_loc": 0.6859942180762459,
+          "val_at_x_phys_f0_gauge": 0.6471161996582063,
+          "val_at_x_truth_unanchored": 0.6552894206314863,
+          "gap_nat_minus_phys": 0.03887653393248114,
+          "gap_int_minus_phys": 0.0382913196823087,
+          "gap_loc_minus_phys": 0.03887801841803962,
+          "gap_nat_minus_unanch": 0.030703312959201146
+        },
+        "auxiliary_sum_of_4_pairwise": {
+          "val_at_x_nat": 0.6859927706696877,
+          "val_at_x_int": 0.6854075763032395,
+          "val_at_x_loc": 0.6859942542185488,
+          "val_at_x_phys_f0_gauge": 0.6471161806884201,
+          "val_at_x_truth_unanchored": 0.6552894020783803,
+          "gap_nat_minus_phys": 0.03887658998126753,
+          "gap_int_minus_phys": 0.03829139561481931,
+          "gap_loc_minus_phys": 0.03887807353012862,
+          "gap_nat_minus_unanch": 0.0307033685913074
+        }
+      },
+      "pairwise_components_j0_to_3": [
+        {
+          "ref_frame_j": 0,
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.20412995862964406,
+            "val_at_x_int": 0.20579879854206645,
+            "val_at_x_loc": 0.20403325042239934,
+            "val_at_x_phys_f0_gauge": 0.16587383134458017,
+            "val_at_x_truth_unanchored": 0.16964154620192576,
+            "gap_nat_minus_phys": 0.03825612728506389,
+            "gap_int_minus_phys": 0.03992496719748628,
+            "gap_loc_minus_phys": 0.03815941907781917,
+            "gap_nat_minus_unanch": 0.0344884124277183
+          },
+          "true_pairwise_relative_shift_4_minus_j": {
+            "xy": [
+              -0.6978606493870907,
+              1.8813922480092926
+            ],
+            "val_at_true_pairwise_shift": 0.16964154620192576,
+            "gap_x_nat_minus_true_pairwise_shift": 0.0344884124277183
+          },
+          "component_own_peaks_descriptive": {
+            "native_rule_search_and_3x3": {
+              "integer_xy": [
+                11,
+                -10
+              ],
+              "max_value": 0.21049684844591326,
+              "equal_max_ties_in_search": 1,
+              "coupled_verdict": 0,
+              "coupled_offset_xy": [
+                -0.5499648585605686,
+                0.21193321599704554
+              ],
+              "separable_xy": [
+                10.549516628936138,
+                -10.092969696888185
+              ],
+              "selected_xy": [
+                10.45003514143943,
+                -9.788066784002954
+              ],
+              "within_coupled_verdict0_reach16": true
+            },
+            "local_stationary_from_component_peak": {
+              "xy": [
+                10.426248673665043,
+                -9.749453624605321
+              ],
+              "value": 0.21115477814549033,
+              "grad_norm": 3.860734174794557e-18,
+              "hess_eigvals": [
+                -0.007851191623671644,
+                -0.002211587759824896
+              ],
+              "is_local_concave_stationary": true
+            },
+            "local_stationary_from_x_phys": {
+              "xy": [
+                2.739006943407329,
+                -1.2923314139658988
+              ],
+              "value": 0.19059554552003408,
+              "grad_norm": 6.314488766312914e-18,
+              "hess_eigvals": [
+                -0.0070463668140796475,
+                -0.0009500897106982218
+              ],
+              "is_local_concave_stationary": true
+            }
+          }
+        },
+        {
+          "ref_frame_j": 1,
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.16610084275455989,
+            "val_at_x_int": 0.16430622018159252,
+            "val_at_x_loc": 0.16618858879686335,
+            "val_at_x_phys_f0_gauge": 0.15076513475988187,
+            "val_at_x_truth_unanchored": 0.14969663062160368,
+            "gap_nat_minus_phys": 0.01533570799467801,
+            "gap_int_minus_phys": 0.013541085421710647,
+            "gap_loc_minus_phys": 0.015423454036981477,
+            "gap_nat_minus_unanch": 0.016404212132956203
+          },
+          "true_pairwise_relative_shift_4_minus_j": {
+            "xy": [
+              -0.5580798563148155,
+              1.8146472758758614
+            ],
+            "val_at_true_pairwise_shift": 0.15044337810640557,
+            "gap_x_nat_minus_true_pairwise_shift": 0.015657464648154318
+          },
+          "component_own_peaks_descriptive": {
+            "native_rule_search_and_3x3": {
+              "integer_xy": [
+                11,
+                -7
+              ],
+              "max_value": 0.17208586846335375,
+              "equal_max_ties_in_search": 1,
+              "coupled_verdict": 0,
+              "coupled_offset_xy": [
+                -0.02315927109332571,
+                0.23734177436214227
+              ],
+              "separable_xy": [
+                11.085243238856124,
+                -6.77036114934571
+              ],
+              "selected_xy": [
+                10.976840728906675,
+                -6.762658225637858
+              ],
+              "within_coupled_verdict0_reach16": true
+            },
+            "local_stationary_from_component_peak": {
+              "xy": [
+                10.979340010055061,
+                -6.749709098153639
+              ],
+              "value": 0.17224534543217732,
+              "grad_norm": 2.1171383824766998e-14,
+              "hess_eigvals": [
+                -0.00656358405034727,
+                -0.002609675722177933
+              ],
+              "is_local_concave_stationary": true
+            },
+            "local_stationary_from_x_phys": {
+              "xy": [
+                1.0552053378908433,
+                2.4820263941119762
+              ],
+              "value": 0.15829820762731261,
+              "grad_norm": 1.249610617605471e-17,
+              "hess_eigvals": [
+                -0.005626177174430413,
+                -0.0031487895654741535
+              ],
+              "is_local_concave_stationary": true
+            }
+          }
+        },
+        {
+          "ref_frame_j": 2,
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.14839544867088975,
+            "val_at_x_int": 0.14759712141213052,
+            "val_at_x_loc": 0.14843130859927176,
+            "val_at_x_phys_f0_gauge": 0.14823643699789843,
+            "val_at_x_truth_unanchored": 0.15038120634392182,
+            "gap_nat_minus_phys": 0.00015901167299131602,
+            "gap_int_minus_phys": -0.0006393155857679078,
+            "gap_loc_minus_phys": 0.00019487160137332538,
+            "gap_nat_minus_unanch": -0.001985757673032079
+          },
+          "true_pairwise_relative_shift_4_minus_j": {
+            "xy": [
+              -0.28570232252216865,
+              1.4341476324285187
+            ],
+            "val_at_true_pairwise_shift": 0.1519547377905235,
+            "gap_x_nat_minus_true_pairwise_shift": -0.0035592891196337406
+          },
+          "component_own_peaks_descriptive": {
+            "native_rule_search_and_3x3": {
+              "integer_xy": [
+                0,
+                0
+              ],
+              "max_value": 0.154321982234269,
+              "equal_max_ties_in_search": 1,
+              "coupled_verdict": 0,
+              "coupled_offset_xy": [
+                -0.17973781697345012,
+                0.2601650631532299
+              ],
+              "separable_xy": [
+                -0.03919810546127329,
+                0.15487753967919402
+              ],
+              "selected_xy": [
+                -0.17973781697345012,
+                0.2601650631532299
+              ],
+              "within_coupled_verdict0_reach16": true
+            },
+            "local_stationary_from_component_peak": {
+              "xy": [
+                -0.18367848222924366,
+                0.2635965184270894
+              ],
+              "value": 0.15442093788714228,
+              "grad_norm": 1.7458674496689955e-15,
+              "hess_eigvals": [
+                -0.006264631328078947,
+                -0.0018743172496035652
+              ],
+              "is_local_concave_stationary": true
+            },
+            "local_stationary_from_x_phys": {
+              "xy": [
+                -0.18367848222866456,
+                0.2635965184264606
+              ],
+              "value": 0.1544209378871423,
+              "grad_norm": 1.4306153456407455e-16,
+              "hess_eigvals": [
+                -0.006264631328078991,
+                -0.0018743172496032184
+              ],
+              "is_local_concave_stationary": true
+            }
+          }
+        },
+        {
+          "ref_frame_j": 3,
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.16736652061459395,
+            "val_at_x_int": 0.16770543616744985,
+            "val_at_x_loc": 0.16734110640001423,
+            "val_at_x_phys_f0_gauge": 0.1822407775860596,
+            "val_at_x_truth_unanchored": 0.18557001891092892,
+            "gap_nat_minus_phys": -0.01487425697146566,
+            "gap_int_minus_phys": -0.014535341418609765,
+            "gap_loc_minus_phys": -0.014899671186045377,
+            "gap_nat_minus_unanch": -0.01820349829633497
+          },
+          "true_pairwise_relative_shift_4_minus_j": {
+            "xy": [
+              -0.1866136719722984,
+              0.9380552218859232
+            ],
+            "val_at_true_pairwise_shift": 0.1898520965090109,
+            "gap_x_nat_minus_true_pairwise_shift": -0.022485575894416937
+          },
+          "component_own_peaks_descriptive": {
+            "native_rule_search_and_3x3": {
+              "integer_xy": [
+                0,
+                1
+              ],
+              "max_value": 0.18943931470400888,
+              "equal_max_ties_in_search": 1,
+              "coupled_verdict": 0,
+              "coupled_offset_xy": [
+                -0.21865163046231537,
+                -0.3398322856960819
+              ],
+              "separable_xy": [
+                -0.4060111015324772,
+                0.5837903374334483
+              ],
+              "selected_xy": [
+                -0.21865163046231537,
+                0.6601677143039181
+              ],
+              "within_coupled_verdict0_reach16": true
+            },
+            "local_stationary_from_component_peak": {
+              "xy": [
+                -0.21561804032894827,
+                0.6680151761961817
+              ],
+              "value": 0.19014444956563878,
+              "grad_norm": 1.7116373867916684e-15,
+              "hess_eigvals": [
+                -0.009092628800309959,
+                -0.0029022892923890185
+              ],
+              "is_local_concave_stationary": true
+            },
+            "local_stationary_from_x_phys": {
+              "xy": [
+                -0.21561804032856458,
+                0.6680151761958406
+              ],
+              "value": 0.19014444956563875,
+              "grad_norm": 4.386626251990885e-17,
+              "hess_eigvals": [
+                -0.00909262880030992,
+                -0.0029022892923887228
+              ],
+              "is_local_concave_stationary": true
+            }
+          }
+        }
+      ],
+      "additive_closure_and_cancellation_summary": {
+        "component_val_at_x_nat_per_j": [
+          0.20412995862964406,
+          0.16610084275455989,
+          0.14839544867088975,
+          0.16736652061459395
+        ],
+        "component_val_at_x_phys_per_j": [
+          0.16587383134458017,
+          0.15076513475988187,
+          0.14823643699789843,
+          0.1822407775860596
+        ],
+        "component_gap_nat_minus_phys_per_j": [
+          0.03825612728506389,
+          0.01533570799467801,
+          0.00015901167299131602,
+          -0.01487425697146566
+        ],
+        "component_gap_int_minus_phys_per_j": [
+          0.03992496719748628,
+          0.013541085421710647,
+          -0.0006393155857679078,
+          -0.014535341418609765
+        ],
+        "component_gap_loc_minus_phys_per_j": [
+          0.03815941907781917,
+          0.015423454036981477,
+          0.00019487160137332538,
+          -0.014899671186045377
+        ],
+        "sum_of_4_component_vals_at_x_nat": 0.6859927706696877,
+        "sum_of_4_component_vals_at_x_phys": 0.64711618068842,
+        "sum_of_4_component_gaps_nat_minus_phys": 0.038876589981267556,
+        "aux_sum_map_gap_nat_minus_phys": 0.03887658998126753,
+        "primary_native_map_gap_nat_minus_phys": 0.03887653393248114,
+        "algebraic_closure_error_aux_sum_minus_sum_of_4": -2.7755575615628914e-17,
+        "numeric_remainder_native_minus_sum_of_4": -5.604878641762845e-08,
+        "n_positive_component_gaps": 3,
+        "n_negative_component_gaps": 1,
+        "sum_of_positive_component_gaps": 0.05375084695273322,
+        "sum_of_negative_component_gaps": -0.01487425697146566,
+        "largest_positive_gap_ref_j": 0,
+        "largest_positive_gap_value": 0.03825612728506389,
+        "most_negative_gap_ref_j": 3,
+        "most_negative_gap_value": -0.01487425697146566
+      },
+      "leave_one_reference_out_3of4_diagnostics": [
+        {
+          "dropped_ref_frame": 0,
+          "kept_ref_frames": [
+            1,
+            2,
+            3
+          ],
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.4818628120400435,
+            "val_at_x_int": 0.47960877776117283,
+            "val_at_x_loc": 0.48196100379614926,
+            "val_at_x_phys_f0_gauge": 0.4812423493438399,
+            "val_at_x_truth_unanchored": 0.48564785587645437,
+            "gap_nat_minus_phys": 0.0006204626962035831,
+            "gap_int_minus_phys": -0.0016335715826670816,
+            "gap_loc_minus_phys": 0.0007186544523093419,
+            "gap_nat_minus_unanch": -0.003785043836410873
+          },
+          "sub_aggregate_native_rule_peak": {
+            "integer_xy": [
+              0,
+              1
+            ],
+            "max_value": 0.4914429936888509,
+            "equal_max_ties_in_search": 1,
+            "coupled_verdict": 0,
+            "coupled_offset_xy": [
+              0.18449370917877286,
+              0.010469721458136311
+            ],
+            "separable_xy": [
+              0.18959152543657576,
+              1.0893818168614375
+            ],
+            "selected_xy": [
+              0.18449370917877286,
+              1.0104697214581364
+            ],
+            "within_coupled_verdict0_reach16": true
+          }
+        },
+        {
+          "dropped_ref_frame": 1,
+          "kept_ref_frames": [
+            0,
+            2,
+            3
+          ],
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.5198919279151277,
+            "val_at_x_int": 0.5211013561216468,
+            "val_at_x_loc": 0.5198056654216852,
+            "val_at_x_phys_f0_gauge": 0.4963510459285381,
+            "val_at_x_truth_unanchored": 0.5055927714567763,
+            "gap_nat_minus_phys": 0.0235408819865896,
+            "gap_int_minus_phys": 0.024750310193108638,
+            "gap_loc_minus_phys": 0.023454619493147033,
+            "gap_nat_minus_unanch": 0.014299156458351447
+          },
+          "sub_aggregate_native_rule_peak": {
+            "integer_xy": [
+              1,
+              0
+            ],
+            "max_value": 0.5266260850420219,
+            "equal_max_ties_in_search": 1,
+            "coupled_verdict": 0,
+            "coupled_offset_xy": [
+              -0.32377080695661425,
+              0.04556057441733233
+            ],
+            "separable_xy": [
+              0.7052545034777804,
+              -0.12851354344181254
+            ],
+            "selected_xy": [
+              0.6762291930433857,
+              0.04556057441733233
+            ],
+            "within_coupled_verdict0_reach16": true
+          }
+        },
+        {
+          "dropped_ref_frame": 2,
+          "kept_ref_frames": [
+            0,
+            1,
+            3
+          ],
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.5375973219987978,
+            "val_at_x_int": 0.5378104548911089,
+            "val_at_x_loc": 0.537562945619277,
+            "val_at_x_phys_f0_gauge": 0.4988797436905217,
+            "val_at_x_truth_unanchored": 0.5049081957344584,
+            "gap_nat_minus_phys": 0.03871757830827616,
+            "gap_int_minus_phys": 0.03893071120058722,
+            "gap_loc_minus_phys": 0.038683201928755295,
+            "gap_nat_minus_unanch": 0.032689126264339396
+          },
+          "sub_aggregate_native_rule_peak": {
+            "integer_xy": [
+              10,
+              -8
+            ],
+            "max_value": 0.5378104548911088,
+            "equal_max_ties_in_search": 1,
+            "coupled_verdict": 0,
+            "coupled_offset_xy": [
+              0.2557999410360948,
+              -0.1585076264303692
+            ],
+            "separable_xy": [
+              10.152876802389946,
+              -7.994819016092555
+            ],
+            "selected_xy": [
+              10.255799941036095,
+              -8.158507626430369
+            ],
+            "within_coupled_verdict0_reach16": true
+          }
+        },
+        {
+          "dropped_ref_frame": 3,
+          "kept_ref_frames": [
+            0,
+            1,
+            2
+          ],
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.5186262500550938,
+            "val_at_x_int": 0.5177021401357895,
+            "val_at_x_loc": 0.5186531478185344,
+            "val_at_x_phys_f0_gauge": 0.4648754031023603,
+            "val_at_x_truth_unanchored": 0.4697193831674511,
+            "gap_nat_minus_phys": 0.053750846952733466,
+            "gap_int_minus_phys": 0.052826737033429216,
+            "gap_loc_minus_phys": 0.053777744716174136,
+            "gap_nat_minus_unanch": 0.048906866887642675
+          },
+          "sub_aggregate_native_rule_peak": {
+            "integer_xy": [
+              10,
+              -8
+            ],
+            "max_value": 0.5177021401357895,
+            "equal_max_ties_in_search": 1,
+            "coupled_verdict": 0,
+            "coupled_offset_xy": [
+              0.13643082371118534,
+              0.30212396300068195
+            ],
+            "separable_xy": [
+              10.314070294065882,
+              -7.633714063132252
+            ],
+            "selected_xy": [
+              10.136430823711185,
+              -7.697876036999318
+            ],
+            "within_coupled_verdict0_reach16": true
+          }
+        }
+      ]
+    },
+    "patch_62_47_central": {
+      "patch_center_xy": [
+        62,
+        47
+      ],
+      "fixed_points": {
+        "x_nat_raw_selected_xy": [
+          -1.9689649962290974,
+          0.8359908488943173
+        ],
+        "x_int_xy": [
+          -2.0,
+          1.0
+        ],
+        "x_loc_stationary_xy": [
+          -1.9628889295318537,
+          0.8323420300801878
+        ],
+        "x_phys_observed_f0_gauge_xy": [
+          -1.2864028728259633,
+          1.4351499952431872
+        ],
+        "x_truth_unanchored_xy": [
+          -0.9538606493870909,
+          1.5613922480092923
+        ],
+        "iter1_frame0_raw_selected_xy": [
+          -0.33254222343887235,
+          -0.12624225276610504
+        ]
+      },
+      "saved_vs_regenerated_discrepancies": {
+        "spectrum_f32_sum_vs_saved_consumed_max_abs": 3.0719530030864917e-08,
+        "spectrum_f64_sum_vs_saved_consumed_max_abs": 2.5096721420382283e-08,
+        "real_map_aux_sum_f64_vs_saved_native_real_map_max_abs": 1.902767109429604e-07,
+        "real_map_aux_sum_f64_vs_saved_native_real_map_rms": 4.7243394452706183e-08,
+        "real_map_from_saved_consumed_f64_vs_saved_native_real_map_max_abs": 1.9119277916423982e-07,
+        "pairwise_iter1_hermitian_checks": [
+          {
+            "ref_frame_j": 0,
+            "max_kx0_conj_err": 0.0,
+            "max_kx21_conj_err": 0.0,
+            "max_corner_imag": 0.0
+          },
+          {
+            "ref_frame_j": 1,
+            "max_kx0_conj_err": 0.0,
+            "max_kx21_conj_err": 0.0,
+            "max_corner_imag": 0.0
+          },
+          {
+            "ref_frame_j": 2,
+            "max_kx0_conj_err": 0.0,
+            "max_kx21_conj_err": 0.0,
+            "max_corner_imag": 0.0
+          },
+          {
+            "ref_frame_j": 3,
+            "max_kx0_conj_err": 0.0,
+            "max_kx21_conj_err": 0.0,
+            "max_corner_imag": 0.0
+          }
+        ]
+      },
+      "aggregate_evaluations": {
+        "primary_native_real_map": {
+          "val_at_x_nat": 0.9423304084612477,
+          "val_at_x_int": 0.9418795704841614,
+          "val_at_x_loc": 0.9423306745868588,
+          "val_at_x_phys_f0_gauge": 0.9222709498116727,
+          "val_at_x_truth_unanchored": 0.9064833494079647,
+          "gap_nat_minus_phys": 0.020059458649575035,
+          "gap_int_minus_phys": 0.019608620672488697,
+          "gap_loc_minus_phys": 0.02005972477518614,
+          "gap_nat_minus_unanch": 0.035847059053283004
+        },
+        "auxiliary_sum_of_4_pairwise": {
+          "val_at_x_nat": 0.9423303963460007,
+          "val_at_x_int": 0.9418795546186066,
+          "val_at_x_loc": 0.942330662775758,
+          "val_at_x_phys_f0_gauge": 0.9222709167037191,
+          "val_at_x_truth_unanchored": 0.906483279934057,
+          "gap_nat_minus_phys": 0.020059479642281608,
+          "gap_int_minus_phys": 0.01960863791488754,
+          "gap_loc_minus_phys": 0.020059746072038975,
+          "gap_nat_minus_unanch": 0.035847116411943714
+        }
+      },
+      "pairwise_components_j0_to_3": [
+        {
+          "ref_frame_j": 0,
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.23264409350320428,
+            "val_at_x_int": 0.232834572227037,
+            "val_at_x_loc": 0.23264506642243774,
+            "val_at_x_phys_f0_gauge": 0.23021911664442138,
+            "val_at_x_truth_unanchored": 0.2273689766293025,
+            "gap_nat_minus_phys": 0.0024249768587829013,
+            "gap_int_minus_phys": 0.002615455582615611,
+            "gap_loc_minus_phys": 0.0024259497780163564,
+            "gap_nat_minus_unanch": 0.005275116873901781
+          },
+          "true_pairwise_relative_shift_4_minus_j": {
+            "xy": [
+              -0.9538606493870909,
+              1.5613922480092923
+            ],
+            "val_at_true_pairwise_shift": 0.2273689766293025,
+            "gap_x_nat_minus_true_pairwise_shift": 0.005275116873901781
+          },
+          "component_own_peaks_descriptive": {
+            "native_rule_search_and_3x3": {
+              "integer_xy": [
+                -2,
+                1
+              ],
+              "max_value": 0.23283457222703702,
+              "equal_max_ties_in_search": 1,
+              "coupled_verdict": 0,
+              "coupled_offset_xy": [
+                0.17565327708415113,
+                -0.010571654245973758
+              ],
+              "separable_xy": [
+                -1.8342928814144006,
+                1.0758190860310832
+              ],
+              "selected_xy": [
+                -1.8243467229158488,
+                0.9894283457540263
+              ],
+              "within_coupled_verdict0_reach16": true
+            },
+            "local_stationary_from_component_peak": {
+              "xy": [
+                -1.8182478894331169,
+                0.9848168386612812
+              ],
+              "value": 0.23290263070029016,
+              "grad_norm": 1.0551910960100405e-17,
+              "hess_eigvals": [
+                -0.012043172521491822,
+                -0.001973004986382623
+              ],
+              "is_local_concave_stationary": true
+            },
+            "local_stationary_from_x_phys": {
+              "xy": [
+                -1.8182478894331169,
+                0.9848168386612706
+              ],
+              "value": 0.23290263070029013,
+              "grad_norm": 1.074303758488139e-16,
+              "hess_eigvals": [
+                -0.012043172521491823,
+                -0.0019730049863826223
+              ],
+              "is_local_concave_stationary": true
+            }
+          }
+        },
+        {
+          "ref_frame_j": 1,
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.21173585251037821,
+            "val_at_x_int": 0.21191399542307943,
+            "val_at_x_loc": 0.2117264033197587,
+            "val_at_x_phys_f0_gauge": 0.20788635692417104,
+            "val_at_x_truth_unanchored": 0.20436339378600257,
+            "gap_nat_minus_phys": 0.0038494955862071745,
+            "gap_int_minus_phys": 0.004027638498908387,
+            "gap_loc_minus_phys": 0.0038400463955876596,
+            "gap_nat_minus_unanch": 0.007372458724375641
+          },
+          "true_pairwise_relative_shift_4_minus_j": {
+            "xy": [
+              -0.7500798563148157,
+              1.5746472758758594
+            ],
+            "val_at_true_pairwise_shift": 0.20228239477375962,
+            "gap_x_nat_minus_true_pairwise_shift": 0.009453457736618598
+          },
+          "component_own_peaks_descriptive": {
+            "native_rule_search_and_3x3": {
+              "integer_xy": [
+                -2,
+                1
+              ],
+              "max_value": 0.2119139954230794,
+              "equal_max_ties_in_search": 1,
+              "coupled_verdict": 0,
+              "coupled_offset_xy": [
+                -0.2862748798050471,
+                0.15446965738924776
+              ],
+              "separable_xy": [
+                -2.185702006914287,
+                1.0291415019348156
+              ],
+              "selected_xy": [
+                -2.286274879805047,
+                1.1544696573892477
+              ],
+              "within_coupled_verdict0_reach16": true
+            },
+            "local_stationary_from_component_peak": {
+              "xy": [
+                -2.2868330237304164,
+                1.1591553029259813
+              ],
+              "value": 0.21208625108736093,
+              "grad_norm": 1.1596726990746784e-16,
+              "hess_eigvals": [
+                -0.011157635945455886,
+                -0.0031309001768037017
+              ],
+              "is_local_concave_stationary": true
+            },
+            "local_stationary_from_x_phys": {
+              "xy": [
+                -2.286833023732541,
+                1.159155302931783
+              ],
+              "value": 0.21208625108736096,
+              "grad_norm": 4.324844901007829e-14,
+              "hess_eigvals": [
+                -0.011157635945456107,
+                -0.003130900176804453
+              ],
+              "is_local_concave_stationary": true
+            }
+          }
+        },
+        {
+          "ref_frame_j": 2,
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.213254985390158,
+            "val_at_x_int": 0.21162414134633603,
+            "val_at_x_loc": 0.21327302427733857,
+            "val_at_x_phys_f0_gauge": 0.20012688150476876,
+            "val_at_x_truth_unanchored": 0.19384418113587248,
+            "gap_nat_minus_phys": 0.013128103885389236,
+            "gap_int_minus_phys": 0.01149725984156727,
+            "gap_loc_minus_phys": 0.013146142772569813,
+            "gap_nat_minus_unanch": 0.019410804254285513
+          },
+          "true_pairwise_relative_shift_4_minus_j": {
+            "xy": [
+              -0.41370232252216876,
+              1.2741476324285221
+            ],
+            "val_at_true_pairwise_shift": 0.19314583671748717,
+            "gap_x_nat_minus_true_pairwise_shift": 0.02010914867267083
+          },
+          "component_own_peaks_descriptive": {
+            "native_rule_search_and_3x3": {
+              "integer_xy": [
+                -1,
+                -1
+              ],
+              "max_value": 0.21945803657511043,
+              "equal_max_ties_in_search": 1,
+              "coupled_verdict": 0,
+              "coupled_offset_xy": [
+                0.13588092109729985,
+                0.19393149419147646
+              ],
+              "separable_xy": [
+                -0.6745756861368263,
+                -0.7311678972413498
+              ],
+              "selected_xy": [
+                -0.8641190789027001,
+                -0.8060685058085235
+              ],
+              "within_coupled_verdict0_reach16": true
+            },
+            "local_stationary_from_component_peak": {
+              "xy": [
+                -0.8831075104096051,
+                -0.7925304612245991
+              ],
+              "value": 0.21984212643067808,
+              "grad_norm": 1.630550251482142e-14,
+              "hess_eigvals": [
+                -0.013657999310258056,
+                -0.0018167430550396757
+              ],
+              "is_local_concave_stationary": true
+            },
+            "local_stationary_from_x_phys": {
+              "xy": [
+                -0.8831075104033594,
+                -0.792530461228143
+              ],
+              "value": 0.21984212643067805,
+              "grad_norm": 1.1261348628809622e-15,
+              "hess_eigvals": [
+                -0.013657999310258039,
+                -0.0018167430550388908
+              ],
+              "is_local_concave_stationary": true
+            }
+          }
+        },
+        {
+          "ref_frame_j": 3,
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.28469546494226017,
+            "val_at_x_int": 0.285506845622154,
+            "val_at_x_loc": 0.28468616875622327,
+            "val_at_x_phys_f0_gauge": 0.28403856163035784,
+            "val_at_x_truth_unanchored": 0.28090672838287967,
+            "gap_nat_minus_phys": 0.0006569033119023238,
+            "gap_int_minus_phys": 0.0014682839917961599,
+            "gap_loc_minus_phys": 0.0006476071258654237,
+            "gap_nat_minus_unanch": 0.003788736559380501
+          },
+          "true_pairwise_relative_shift_4_minus_j": {
+            "xy": [
+              -0.25061367197230555,
+              0.8580552218859249
+            ],
+            "val_at_true_pairwise_shift": 0.27823736541270444,
+            "gap_x_nat_minus_true_pairwise_shift": 0.0064580995295557275
+          },
+          "component_own_peaks_descriptive": {
+            "native_rule_search_and_3x3": {
+              "integer_xy": [
+                -2,
+                1
+              ],
+              "max_value": 0.285506845622154,
+              "equal_max_ties_in_search": 1,
+              "coupled_verdict": 0,
+              "coupled_offset_xy": [
+                -0.038700478883734984,
+                0.37155643793776466
+              ],
+              "separable_xy": [
+                -1.7691760272201784,
+                1.355612979484644
+              ],
+              "selected_xy": [
+                -2.038700478883735,
+                1.3715564379377647
+              ],
+              "within_coupled_verdict0_reach16": true
+            },
+            "local_stationary_from_component_peak": {
+              "xy": [
+                -2.0402108397277203,
+                1.3721154626903882
+              ],
+              "value": 0.2862895422905598,
+              "grad_norm": 1.6365348541700844e-17,
+              "hess_eigvals": [
+                -0.015407905686100605,
+                -0.0038856028542613883
+              ],
+              "is_local_concave_stationary": true
+            },
+            "local_stationary_from_x_phys": {
+              "xy": [
+                -2.040210839727724,
+                1.3721154626903882
+              ],
+              "value": 0.28628954229055975,
+              "grad_norm": 1.8440363494407353e-17,
+              "hess_eigvals": [
+                -0.015407905686100606,
+                -0.00388560285426139
+              ],
+              "is_local_concave_stationary": true
+            }
+          }
+        }
+      ],
+      "additive_closure_and_cancellation_summary": {
+        "component_val_at_x_nat_per_j": [
+          0.23264409350320428,
+          0.21173585251037821,
+          0.213254985390158,
+          0.28469546494226017
+        ],
+        "component_val_at_x_phys_per_j": [
+          0.23021911664442138,
+          0.20788635692417104,
+          0.20012688150476876,
+          0.28403856163035784
+        ],
+        "component_gap_nat_minus_phys_per_j": [
+          0.0024249768587829013,
+          0.0038494955862071745,
+          0.013128103885389236,
+          0.0006569033119023238
+        ],
+        "component_gap_int_minus_phys_per_j": [
+          0.002615455582615611,
+          0.004027638498908387,
+          0.01149725984156727,
+          0.0014682839917961599
+        ],
+        "component_gap_loc_minus_phys_per_j": [
+          0.0024259497780163564,
+          0.0038400463955876596,
+          0.013146142772569813,
+          0.0006476071258654237
+        ],
+        "sum_of_4_component_vals_at_x_nat": 0.9423303963460007,
+        "sum_of_4_component_vals_at_x_phys": 0.9222709167037191,
+        "sum_of_4_component_gaps_nat_minus_phys": 0.020059479642281636,
+        "aux_sum_map_gap_nat_minus_phys": 0.020059479642281608,
+        "primary_native_map_gap_nat_minus_phys": 0.020059458649575035,
+        "algebraic_closure_error_aux_sum_minus_sum_of_4": -2.7755575615628914e-17,
+        "numeric_remainder_native_minus_sum_of_4": -2.0992706600830857e-08,
+        "n_positive_component_gaps": 4,
+        "n_negative_component_gaps": 0,
+        "sum_of_positive_component_gaps": 0.020059479642281636,
+        "sum_of_negative_component_gaps": 0.0,
+        "largest_positive_gap_ref_j": 2,
+        "largest_positive_gap_value": 0.013128103885389236,
+        "most_negative_gap_ref_j": 3,
+        "most_negative_gap_value": 0.0006569033119023238
+      },
+      "leave_one_reference_out_3of4_diagnostics": [
+        {
+          "dropped_ref_frame": 0,
+          "kept_ref_frames": [
+            1,
+            2,
+            3
+          ],
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.7096863028427961,
+            "val_at_x_int": 0.7090449823915694,
+            "val_at_x_loc": 0.7096855963533203,
+            "val_at_x_phys_f0_gauge": 0.6920518000592975,
+            "val_at_x_truth_unanchored": 0.6791143033047544,
+            "gap_nat_minus_phys": 0.01763450278349865,
+            "gap_int_minus_phys": 0.016993182332271983,
+            "gap_loc_minus_phys": 0.01763379629402284,
+            "gap_nat_minus_unanch": 0.030571999538041683
+          },
+          "sub_aggregate_native_rule_peak": {
+            "integer_xy": [
+              -2,
+              1
+            ],
+            "max_value": 0.7090449823915694,
+            "equal_max_ties_in_search": 1,
+            "coupled_verdict": 0,
+            "coupled_offset_xy": [
+              -0.004667662592310921,
+              -0.2157476600514851
+            ],
+            "separable_xy": [
+              -2.174489987247278,
+              0.7820292887242565
+            ],
+            "selected_xy": [
+              -2.0046676625923108,
+              0.7842523399485148
+            ],
+            "within_coupled_verdict0_reach16": true
+          }
+        },
+        {
+          "dropped_ref_frame": 1,
+          "kept_ref_frames": [
+            0,
+            2,
+            3
+          ],
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.7305945438356223,
+            "val_at_x_int": 0.7299655591955269,
+            "val_at_x_loc": 0.7306042594559996,
+            "val_at_x_phys_f0_gauge": 0.7143845597795481,
+            "val_at_x_truth_unanchored": 0.7021198861480547,
+            "gap_nat_minus_phys": 0.01620998405607421,
+            "gap_int_minus_phys": 0.015580999415978791,
+            "gap_loc_minus_phys": 0.016219699676451538,
+            "gap_nat_minus_unanch": 0.02847465768756763
+          },
+          "sub_aggregate_native_rule_peak": {
+            "integer_xy": [
+              -2,
+              1
+            ],
+            "max_value": 0.729965559195527,
+            "equal_max_ties_in_search": 1,
+            "coupled_verdict": 0,
+            "coupled_offset_xy": [
+              0.1712376631983404,
+              -0.2826219310882046
+            ],
+            "separable_xy": [
+              -2.076054134808136,
+              0.8015534272681664
+            ],
+            "selected_xy": [
+              -1.8287623368016597,
+              0.7173780689117955
+            ],
+            "within_coupled_verdict0_reach16": true
+          }
+        },
+        {
+          "dropped_ref_frame": 2,
+          "kept_ref_frames": [
+            0,
+            1,
+            3
+          ],
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.7290754109558426,
+            "val_at_x_int": 0.7302554132722705,
+            "val_at_x_loc": 0.7290576384984196,
+            "val_at_x_phys_f0_gauge": 0.7221440351989501,
+            "val_at_x_truth_unanchored": 0.7126390987981845,
+            "gap_nat_minus_phys": 0.0069313757568925105,
+            "gap_int_minus_phys": 0.008111378073320408,
+            "gap_loc_minus_phys": 0.006913603299469551,
+            "gap_nat_minus_unanch": 0.016436312157658062
+          },
+          "sub_aggregate_native_rule_peak": {
+            "integer_xy": [
+              -2,
+              1
+            ],
+            "max_value": 0.7302554132722704,
+            "equal_max_ties_in_search": 1,
+            "coupled_verdict": 0,
+            "coupled_offset_xy": [
+              -0.08738674204605663,
+              0.2158330224771538
+            ],
+            "separable_xy": [
+              -1.9232853872429776,
+              1.1770497614716537
+            ],
+            "selected_xy": [
+              -2.0873867420460566,
+              1.2158330224771539
+            ],
+            "within_coupled_verdict0_reach16": true
+          }
+        },
+        {
+          "dropped_ref_frame": 3,
+          "kept_ref_frames": [
+            0,
+            1,
+            2
+          ],
+          "fixed_point_evaluations": {
+            "val_at_x_nat": 0.6576349314037405,
+            "val_at_x_int": 0.6563727089964524,
+            "val_at_x_loc": 0.657644494019535,
+            "val_at_x_phys_f0_gauge": 0.6382323550733613,
+            "val_at_x_truth_unanchored": 0.6255765515511775,
+            "gap_nat_minus_phys": 0.01940257633037923,
+            "gap_int_minus_phys": 0.0181403539230911,
+            "gap_loc_minus_phys": 0.019412138946173663,
+            "gap_nat_minus_unanch": 0.03205837985256299
+          },
+          "sub_aggregate_native_rule_peak": {
+            "integer_xy": [
+              -2,
+              1
+            ],
+            "max_value": 0.6563727089964524,
+            "equal_max_ties_in_search": 1,
+            "coupled_verdict": 0,
+            "coupled_offset_xy": [
+              0.13726221284240953,
+              -0.44855571664542915
+            ],
+            "separable_xy": [
+              -2.2485296800108925,
+              0.6215555480325152
+            ],
+            "selected_xy": [
+              -1.8627377871575905,
+              0.5514442833545709
+            ],
+            "within_coupled_verdict0_reach16": true
+          }
+        }
+      ]
+    }
+  },
+  "elapsed_seconds": 0.045878666976932436
+}

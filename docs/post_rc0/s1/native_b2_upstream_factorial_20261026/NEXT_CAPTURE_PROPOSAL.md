@@ -1,0 +1,19 @@
+# Next smallest discriminating capture proposal — NOT EXECUTED
+
+Current disposition is NO-GO for compound promotion or expansion: P2 falsified on all3 runtime and realSTAR metrics despite P1. No robust fit, minimum-frame guard, outlier exclusion, new seed/census, or CUDA port is proposed as a response.
+
+The factorial's remaining accepted noisy g4 discrepancy is largest at patch centre(62,79), native log patch(3,2): vector(10.56171665,-10.38535225)px, norm14.81233945px. The predeclared fixed control is central patch(62,47), patch(2,2), endpoint norm0.87623717px. UP dropped(104,47); its removal accounts for the disappearance of the base full-set endpoint maximum23.0061px, while the retained common-set maximum increased14.6283→14.8123px. Do not claim all gross endpoint errors were repaired.
+
+Smallest next data acquisition, only after a separate frozen implementation/capture authorization: one retained noisy UP-only native invocation (same input hash, source, j2, max_iter5, .5px, DCboth/coupledall), with an observation-only diagnostic at the actual local CCF/peak state. The current531a1b binary has only the runtime-model capture; complete local CCF state is not recoverable from these saved STAR/runtime files. This task makes no capture/source change and runs no additional producer.
+
+Capture the two fixed patches, every executed local iteration, all5 prepared frame spectra plus the exact reference spectrum/weights, disposable weighted/DC-conditioned complex CCF spectrum, native inverse-CCF map and actual dimensions/type/normalization/search bounds. Include winning integer peak, local3×3 values, Hessian/coupled offsets and guard/fallback decision, cumulative shifts before/after each update, global trajectory and reference/iteration identity. Capture all5 frames at each state so a mean-reference change is not confused with an estimator difference. Keep IEEE values/types and stage hashes; do not recompute a different-state map or alter peak selection while capturing. Expected payload is small at128×96/42×32 patches; bound it explicitly before implementation.
+
+Offline tests on that SAME stored state can distinguish:
+
+1. **Objective/selection:** verify native integer search against the stored map and compare actual versus truth-compatible peaks with the stored reference/working-frame convention. A stronger wrong objective peak differs from selecting the wrong maximum of the actual map.
+2. **Peak interpolation:** independently maximize/interpolate the same stored complex CCF continuously and compare with the native coupled3×3 offset/guard. Do not substitute another reference, weight, state or map precision.
+3. **Reference/iteration:** compare winner/objective and applied cumulative shifts across captured iterations/reference identities for failure versus central control. An indirect global/reference effect remains possible even though B2 is downstream and fixed-observation cross-feed matches.
+
+Before any future observer-enabled producer: freeze scope/pins/predictions/receipts, verify observer-off byte neutrality, review source changes and enforce current leases/caps. One capture is diagnostic, not general accuracy qualification; all old harm and UNRUN evidence stays unchanged. No current authorization for full100 or additional producers is inferred from this proposal.
+
+Existing retained-log facts (no new capture/fit): failing patch(3,2) stops after2 iterations, last incrementRMS0.364825px,10 coupled peaks/0 guards; central control(2,2) stops after2 iterations,last0.485102px,10/0; dropped patch(2,3) reaches5 iterations,last1.5895px,25 peaks/2 offset guards. The existing convergence criterion does not certify truth closeness. These facts motivate capturing the actual objective/reference state; they do not isolate a causal defect in interpolation or prove a fixed point.

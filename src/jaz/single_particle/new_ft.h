@@ -68,6 +68,14 @@ class NewFFT
         // Number of distinct float plans cached by the ad-hoc transforms (for tests).
         static size_t cachedFloatPlanCount();
 
+        // Observation-only CPU diagnostic. Call-scoped, const and noexcept;
+        // absent observers leave every transform operation unchanged.
+        struct FloatInverseObserver {
+            virtual ~FloatInverseObserver() = default;
+            virtual void beforeC2R(const MultidimArray<fComplex>& input) noexcept = 0;
+            virtual void afterC2R(const MultidimArray<fComplex>& input) noexcept = 0;
+        };
+
         class DoublePlan;
         class FloatPlan;
 
@@ -144,7 +152,8 @@ class NewFFT
                 MultidimArray<fComplex>& src,
                 MultidimArray<float>& dest,
                 Normalization normalization = FwdOnly,
-                bool preserveInput = true);
+                bool preserveInput = true,
+                FloatInverseObserver* observer = nullptr);
 	
 		
 		template<class T>
@@ -205,7 +214,8 @@ class NewFFT
                 MultidimArray<fComplex>& src,
                 MultidimArray<float>& dest,
                 const FloatPlan& plan,
-                Normalization normalization);
+                Normalization normalization,
+                FloatInverseObserver* observer = nullptr);
 		
 	public:
 

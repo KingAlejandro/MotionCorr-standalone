@@ -37,6 +37,14 @@ def main():
             rc, out = run(binary, tmp, "--use_own", *flags)
             assert rc != 0 and REFUSAL not in out and "no_such_input.star" in out, \
                 f"{flags} without --gpu was wrongly refused or failed for another reason: {out[:300]}"
+        flag = "--experimental_local_b2"
+        rc, out = run(binary, tmp, "--use_own", "--gpu", "0", flag)
+        assert rc != 0 and flag + " is a CPU-only research option and is refused with --gpu" in out, out
+        for bad in (["--group_frames", "2"], ["--bin_factor", "2"], ["--interpolate_shifts"]):
+            rc, out = run(binary, tmp, "--use_own", flag, *bad)
+            assert rc != 0 and flag + " requires" in out, out
+        rc, out = run(binary, tmp, "--use_own", flag)
+        assert rc != 0 and "no_such_input.star" in out, out
         # Control: --gpu alone is not refused for the experimental reason.
         rc, out = run(binary, tmp, "--use_own", "--gpu", "0")
         assert REFUSAL not in out, out[:300]

@@ -1,0 +1,188 @@
+{
+  "source": {
+    "src/local_b2_fit.h": "8adfc28f4131dc8794681615c6c8d8ab086c5707dfb8245572aa7d55fb88072f",
+    "src/motioncorr_runner.cpp": "88132e34f235f8a66b65ccdde4dd833d65100520397b4726ceb133ac0a2922c5",
+    "src/motioncorr_runner.h": "c43362d0b1bef3e820d2cb246ce5937ab169892550799bf9fc3a375bf53bdf72",
+    "CMakeLists.txt": "2cfb549d17d7b9fbde659abab0e80a63399048e7d5eb2e7b0e1f59134df9553e",
+    "tools/check_realistic_motion.py": "b0ab099a256e458b1c8aea6c2ff5d9ceacab10dd81945b025e96e5c8a87b7ff9",
+    "tools/check_realistic_image.py": "637f13e22e0857f1ee3ec92837bf66e2354def66f5348e726870408ae6010e62",
+    "test-data/generate_realistic_motion.py": "a10f694abafc71c146d0e0f2eeb2b1cf2c58131b2dbf6c1b66800405bd126380"
+  },
+  "binary_sha256": "531a1b0984dfbb39bd1b43afa23561091365a4d0459967ef5ee24ca69344c2eb",
+  "hardware": {
+    "lscpu": [
+      {
+        "field": "Architecture:",
+        "data": "x86_64"
+      },
+      {
+        "field": "CPU op-mode(s):",
+        "data": "32-bit, 64-bit"
+      },
+      {
+        "field": "Address sizes:",
+        "data": "48 bits physical, 48 bits virtual"
+      },
+      {
+        "field": "Byte Order:",
+        "data": "Little Endian"
+      },
+      {
+        "field": "CPU(s):",
+        "data": "64"
+      },
+      {
+        "field": "On-line CPU(s) list:",
+        "data": "0-63"
+      },
+      {
+        "field": "Vendor ID:",
+        "data": "AuthenticAMD"
+      },
+      {
+        "field": "Model name:",
+        "data": "AMD EPYC 7763 64-Core Processor"
+      },
+      {
+        "field": "CPU family:",
+        "data": "25"
+      },
+      {
+        "field": "Model:",
+        "data": "1"
+      },
+      {
+        "field": "Thread(s) per core:",
+        "data": "1"
+      },
+      {
+        "field": "Core(s) per socket:",
+        "data": "32"
+      },
+      {
+        "field": "Socket(s):",
+        "data": "2"
+      },
+      {
+        "field": "Stepping:",
+        "data": "1"
+      },
+      {
+        "field": "BogoMIPS:",
+        "data": "4890.81"
+      },
+      {
+        "field": "Flags:",
+        "data": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm rep_good nopl cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr wbnoinvd arat npt lbrv nrip_save tsc_scale vmcb_clean flushbyasid pausefilter pfthreshold v_vmsave_vmload vgif umip pku ospke vaes vpclmulqdq rdpid overflow_recov succor fsrm arch_capabilities"
+      },
+      {
+        "field": "Virtualization:",
+        "data": "AMD-V"
+      },
+      {
+        "field": "Hypervisor vendor:",
+        "data": "KVM"
+      },
+      {
+        "field": "Virtualization type:",
+        "data": "full"
+      },
+      {
+        "field": "L1d cache:",
+        "data": "4 MiB (64 instances)"
+      },
+      {
+        "field": "L1i cache:",
+        "data": "4 MiB (64 instances)"
+      },
+      {
+        "field": "L2 cache:",
+        "data": "32 MiB (64 instances)"
+      },
+      {
+        "field": "L3 cache:",
+        "data": "32 MiB (2 instances)"
+      },
+      {
+        "field": "NUMA node(s):",
+        "data": "2"
+      },
+      {
+        "field": "NUMA node0 CPU(s):",
+        "data": "0-31"
+      },
+      {
+        "field": "NUMA node1 CPU(s):",
+        "data": "32-63"
+      },
+      {
+        "field": "Vulnerability Gather data sampling:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Itlb multihit:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability L1tf:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Mds:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Meltdown:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Mmio stale data:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Reg file data sampling:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Retbleed:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Spec rstack overflow:",
+        "data": "Vulnerable: Safe RET, no microcode"
+      },
+      {
+        "field": "Vulnerability Spec store bypass:",
+        "data": "Mitigation; Speculative Store Bypass disabled via prctl"
+      },
+      {
+        "field": "Vulnerability Spectre v1:",
+        "data": "Mitigation; usercopy/swapgs barriers and __user pointer sanitization"
+      },
+      {
+        "field": "Vulnerability Spectre v2:",
+        "data": "Mitigation; Retpolines; IBPB conditional; IBRS_FW; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected"
+      },
+      {
+        "field": "Vulnerability Srbds:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Tsx async abort:",
+        "data": "Not affected"
+      }
+    ]
+  },
+  "cmake_definitions": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 4.4\n\n# compile C with /usr/bin/cc\n# compile CXX with /usr/bin/c++\nC_DEFINES = -DHAVE_JPEG -DHAVE_PNG -DHAVE_TIFF -DMC_EXPERIMENT_CCF_DC -DMOTIONCORR_CPU_DOSE_SYMMETRY_MODE=2\n\nC_INCLUDES = -I/tmp/motioncorr-b2-native-20261026/source\n\nC_FLAGS = -O3 -DNDEBUG -std=gnu99\n\nCXX_DEFINES = -DHAVE_JPEG -DHAVE_PNG -DHAVE_TIFF -DMC_EXPERIMENT_CCF_DC -DMOTIONCORR_CPU_DOSE_SYMMETRY_MODE=2\n\nCXX_INCLUDES = -I/tmp/motioncorr-b2-native-20261026/source\n\nCXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp\n\n",
+  "native_build_targets": [
+    "motioncorr",
+    "local_b2_fit"
+  ],
+  "selected_CTests": {
+    "LocalB2Fit": "PASS",
+    "ExperimentalFlagsCli": "PASS"
+  },
+  "full_CPU_qualification": "UNRUN",
+  "decoder_scope_note": "pbzip2 missing; full TierA/input formats not run",
+  "GPU_native": "UNRUN"
+}

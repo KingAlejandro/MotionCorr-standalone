@@ -1,0 +1,48 @@
+{
+ "phase": "twin",
+ "plan_sha256": "c3e25f67429c0384a46034e749ff5b877af4e98caf9b1c43dd6d1905254e7f97",
+ "script_sha256": "7cc31425f80f9d0e5b032264f323bddebce5e52e772d1bfb7ce310baa3895e14",
+ "control_result_sha256": "e277ace109155abc23f35c57b2eca344790800b5ae10c943656899f9097ffbbf",
+ "twin_verification": {
+  "recipe_keys_differing": [
+   "name",
+   "noise",
+   "role"
+  ],
+  "only_noise_and_role_differ": false,
+  "field_hash_equal": true,
+  "target_hash_equal": true,
+  "manifest_numpy": "2.5.3",
+  "numpy_now": "2.4.2",
+  "noise_regen_convention": "Generator(PCG64(seed)).normal(0, noise*contrast, (5,96,128)) from render()",
+  "noisy_minus_affine_mean": 6.19656095902125e-05,
+  "noisy_minus_affine_std": 3.987310045472117,
+  "regen_noise_std": 3.987310059083541,
+  "resid_max_abs": 7.601754859365428e-06,
+  "resid_rounding_bound_max": 7.62939453125e-06,
+  "resid_within_float32_rounding_bound_everywhere": true,
+  "n_elements_exceeding_bound": 0,
+  "movie_shapes": [
+   [
+    5,
+    96,
+    128
+   ],
+   [
+    5,
+    96,
+    128
+   ]
+  ],
+  "movie_min_max_noisy": [
+   82.81829071044922,
+   116.33380126953125
+  ],
+  "movie_min_max_affine": [
+   97.56037902832031,
+   103.42943572998047
+  ]
+ },
+ "arms": {},
+ "stopped": "twin verification failed; no twin values computed"
+}

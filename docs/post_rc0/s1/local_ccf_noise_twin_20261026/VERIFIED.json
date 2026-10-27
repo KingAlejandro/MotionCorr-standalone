@@ -1,0 +1,69 @@
+{
+  "scope": "B64 auxiliary bridge only; no native counterfactual bound, B32 audit, component peak audit or estimator change.",
+  "max_gap_reproduction_error": 1.942890293094024e-16,
+  "noise_rounding_residual_max": 7.601754859365428e-06,
+  "noise_rounding_bound_max": 7.62939453125e-06,
+  "numpy": "2.4.2",
+  "rows": [
+    {
+      "patch": [
+        62,
+        79
+      ],
+      "input": "noisy",
+      "pairwise_gaps": [
+        0.03825689570702259,
+        0.015337352920587605,
+        0.00016027052836692368,
+        -0.01487378248132537
+      ],
+      "aggregate_pairwise_sum_gap": 0.03888073667465175,
+      "noisy_samples_native_max_abs_error": 4.7508263605777756e-05
+    },
+    {
+      "patch": [
+        62,
+        79
+      ],
+      "input": "affine",
+      "pairwise_gaps": [
+        -0.0930490988582709,
+        -0.0925459852283454,
+        -0.0916773103383789,
+        -0.09012739071859313
+      ],
+      "aggregate_pairwise_sum_gap": -0.36739978514358834,
+      "noisy_samples_native_max_abs_error": null
+    },
+    {
+      "patch": [
+        62,
+        47
+      ],
+      "input": "noisy",
+      "pairwise_gaps": [
+        0.002425082978923049,
+        0.0038495213236400816,
+        0.013128084395633344,
+        0.000656936797378771
+      ],
+      "aggregate_pairwise_sum_gap": 0.020059625495575245,
+      "noisy_samples_native_max_abs_error": 4.76874547814532e-05
+    },
+    {
+      "patch": [
+        62,
+        47
+      ],
+      "input": "affine",
+      "pairwise_gaps": [
+        -0.003248290582478136,
+        -0.0044021117605465565,
+        -0.00486296791834967,
+        -0.003855252471530568
+      ],
+      "aggregate_pairwise_sum_gap": -0.01636862273290493,
+      "noisy_samples_native_max_abs_error": null
+    }
+  ]
+}

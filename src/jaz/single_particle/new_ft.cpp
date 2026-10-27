@@ -286,7 +286,8 @@ void NewFFT::inverseFourierTransform(
 		MultidimArray<fComplex>& src,
 		MultidimArray<float>& dest,
 		Normalization normalization,
-		bool preserveInput)
+		bool preserveInput,
+		FloatInverseObserver* observer)
 {
 	if (!areSizesCompatible(dest, src))
 	{
@@ -297,12 +298,12 @@ void NewFFT::inverseFourierTransform(
 	{
 		MultidimArray<fComplex> src2 = src;
 		FloatPlan p = cachedFloatPlan(dest, src2);
-		_inverseFourierTransform(src2, dest, p, normalization);
+		_inverseFourierTransform(src2, dest, p, normalization, observer);
 	}
 	else
 	{
 		FloatPlan p = cachedFloatPlan(dest, src);
-		_inverseFourierTransform(src, dest, p, normalization);
+		_inverseFourierTransform(src, dest, p, normalization, observer);
 	}
 }
 
@@ -390,11 +391,14 @@ void NewFFT::_inverseFourierTransform(
 		MultidimArray<fComplex>& src,
 		MultidimArray<float>& dest,
 		const NewFFT::FloatPlan& plan,
-		Normalization normalization)
+		Normalization normalization,
+		FloatInverseObserver* observer)
 {	
 	fftwf_complex* in = (fftwf_complex*) MULTIDIM_ARRAY(src);
 	
+	if (observer) observer->beforeC2R(src);
 	fftwf_execute_dft_c2r(plan.getBackward(), in, MULTIDIM_ARRAY(dest));
+	if (observer) observer->afterC2R(src);
 	
 	if (normalization == Both)
 	{

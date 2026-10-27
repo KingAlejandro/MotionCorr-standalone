@@ -1,0 +1,15 @@
+-- LibTIFF Deflate subcodec: zlib only
+--   Deflate movie reads use zlib here. A LibTIFF built with libdeflate decodes the same bytes faster; see README, "LibTIFF Deflate backend". Results are unaffected.
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED - Failed
+-- CPU dose weighting: original loop (AUTO: AppleClang on arm64 with these flags is not the qualified x86-64 GCC without FMA). To opt in after CpuDoseSymmetry passes on this toolchain: -DMOTIONCORR_CPU_DOSE_SYMMETRY=ON
+-- Found Python3: /tmp/motioncorr-b2-census-mac-20261027/venv/bin/python (found version "3.15.1") found components: Interpreter
+CMake Warning at CMakeLists.txt:563 (message):
+  pbzip2 not found: InputFormats and RealCutdown waive its compressed-MRC
+  cases (UNRUN).  Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the
+  waiver.
+
+
+-- Configuring done (1.3s)
+-- Generating done (0.5s)
+-- Build files have been written to: /tmp/motioncorr-b2-census-mac-20261027/build

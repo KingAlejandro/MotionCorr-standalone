@@ -1,0 +1,100 @@
+{
+  "P1": {
+    "rows": [
+      {
+        "case": "affine",
+        "UP": {
+          "runtime": "PASS",
+          "STAR": "PASS"
+        },
+        "compound": {
+          "runtime": "PASS",
+          "STAR": "PASS"
+        },
+        "pass_all": true
+      },
+      {
+        "case": "pedestal",
+        "UP": {
+          "runtime": "PASS",
+          "STAR": "PASS"
+        },
+        "compound": {
+          "runtime": "PASS",
+          "STAR": "PASS"
+        },
+        "pass_all": true
+      },
+      {
+        "case": "zero",
+        "UP": {
+          "runtime": "PASS",
+          "STAR": "PASS"
+        },
+        "compound": {
+          "runtime": "PASS",
+          "STAR": "PASS"
+        },
+        "pass_all": true
+      },
+      {
+        "case": "integer",
+        "UP": {
+          "runtime": "PASS",
+          "STAR": "PASS"
+        },
+        "compound": {
+          "runtime": "PASS",
+          "STAR": "PASS"
+        },
+        "pass_all": true
+      },
+      {
+        "case": "fractional",
+        "UP": {
+          "runtime": "PASS",
+          "STAR": "PASS"
+        },
+        "compound": {
+          "runtime": "PASS",
+          "STAR": "PASS"
+        },
+        "pass_all": true
+      }
+    ],
+    "confirmed": true
+  },
+  "P2": {
+    "rows": [
+      {
+        "representation": "runtime",
+        "better_than_B2_alone": {
+          "rms": true,
+          "p95": true,
+          "max": true
+        },
+        "no_worse_than_UP_only": {
+          "rms": false,
+          "p95": false,
+          "max": false
+        },
+        "pass_all": false
+      },
+      {
+        "representation": "STAR",
+        "better_than_B2_alone": {
+          "rms": true,
+          "p95": true,
+          "max": true
+        },
+        "no_worse_than_UP_only": {
+          "rms": false,
+          "p95": false,
+          "max": false
+        },
+        "pass_all": false
+      }
+    ],
+    "confirmed": false
+  }
+}

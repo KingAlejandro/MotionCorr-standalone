@@ -1,0 +1,3 @@
+# Additive saved-array verification before execution
+
+Complete stage checks already listed in ANALYSIS_PROTOCOL.md step1: scalar float32 tComplex multiplication ordering (NumPy's complex kernel is not assumed bit-identical), scalar-double weight expression cast to float32, exact entering/windowed/previous-exit FFT linkage, and native table-SINCOS/three-multiply complex Fourier shift formula versus captured actual exit spectra. Report raw precision differences; no fitted operator/native producer, scientific gate, estimator or source change. Separate array-verification-v1 namespace; analysis-v1 remains immutable. cpu64 compatible leases32-47 and numeric thread cap2.

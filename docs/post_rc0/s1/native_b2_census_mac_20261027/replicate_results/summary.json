@@ -1,0 +1,3385 @@
+{
+  "label": "Mac replicate census, not hash-identical to the frozen census",
+  "native_producers": 501,
+  "main_arm_producers": 500,
+  "native_and_final_score_exits": 0,
+  "retained_initial_scoring_failures": 1,
+  "groups": {
+    "all_100": {
+      "n": 100,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 22,
+          "B2": 68,
+          "UP": 23,
+          "UPFW": 44,
+          "FW": 41
+        },
+        "STAR": {
+          "OFF": 22,
+          "B2": 68,
+          "UP": 23,
+          "UPFW": 44,
+          "FW": 41
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 90,
+            "higher_RMS": 0,
+            "ties": 10,
+            "two_sided_exact_RMS_sign_p": 1.6155871338926322e-27,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s03",
+              "dose1-s04",
+              "dose1-s05",
+              "dose1-s06",
+              "dose1-s07",
+              "dose1-s08",
+              "dose1-s09",
+              "dose05-s05",
+              "dose05-s07",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s03",
+              "pedestal0-s04",
+              "pedestal0-s05",
+              "pedestal0-s06",
+              "pedestal0-s07",
+              "pedestal0-s08",
+              "pedestal0-s09",
+              "contrast025-s01",
+              "contrast025-s03",
+              "contrast025-s04",
+              "contrast025-s05",
+              "contrast025-s06",
+              "contrast025-s07",
+              "contrast025-s08",
+              "contrast025-s09",
+              "contrast4-s01",
+              "contrast4-s03",
+              "contrast4-s04",
+              "contrast4-s05",
+              "contrast4-s06",
+              "contrast4-s07",
+              "contrast4-s08",
+              "contrast4-s09",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s05",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 2.842170943040401e-14
+          },
+          "STAR": {
+            "lower_RMS": 89,
+            "higher_RMS": 1,
+            "ties": 10,
+            "two_sided_exact_RMS_sign_p": 1.4701842918422953e-25,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s03",
+              "dose1-s04",
+              "dose1-s05",
+              "dose1-s06",
+              "dose1-s07",
+              "dose1-s08",
+              "dose1-s09",
+              "dose05-s05",
+              "dose05-s07",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s03",
+              "pedestal0-s04",
+              "pedestal0-s05",
+              "pedestal0-s06",
+              "pedestal0-s07",
+              "pedestal0-s08",
+              "pedestal0-s09",
+              "contrast025-s01",
+              "contrast025-s03",
+              "contrast025-s04",
+              "contrast025-s05",
+              "contrast025-s06",
+              "contrast025-s07",
+              "contrast025-s08",
+              "contrast025-s09",
+              "contrast4-s01",
+              "contrast4-s03",
+              "contrast4-s04",
+              "contrast4-s05",
+              "contrast4-s06",
+              "contrast4-s07",
+              "contrast4-s08",
+              "contrast4-s09",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s05",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 2.842170943040401e-14
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 92,
+            "higher_RMS": 5,
+            "ties": 3,
+            "two_sided_exact_RMS_sign_p": 8.590765687358437e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 3.814697265625e-06
+          },
+          "STAR": {
+            "lower_RMS": 92,
+            "higher_RMS": 5,
+            "ties": 3,
+            "two_sided_exact_RMS_sign_p": 8.590765687358437e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 3.814697265625e-06
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 98,
+            "higher_RMS": 2,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 7.969072864542661e-27,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "pedestal32-s01",
+              "pedestal32-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 9.5367431640625e-07
+          },
+          "STAR": {
+            "lower_RMS": 98,
+            "higher_RMS": 2,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 7.969072864542661e-27,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "pedestal32-s01",
+              "pedestal32-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 9.5367431640625e-07
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 48,
+            "higher_RMS": 52,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.7643534344026671,
+            "rescues": [
+              "pedestal32-s02"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 52,
+            "higher_RMS": 48,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.7643534344026671,
+            "rescues": [
+              "pedestal32-s02"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "in_model_80": {
+      "n": 80,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 22,
+          "B2": 68,
+          "UP": 22,
+          "UPFW": 41,
+          "FW": 41
+        },
+        "STAR": {
+          "OFF": 22,
+          "B2": 68,
+          "UP": 22,
+          "UPFW": 41,
+          "FW": 41
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 80,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.6543612251060553e-24,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s03",
+              "dose1-s04",
+              "dose1-s05",
+              "dose1-s06",
+              "dose1-s07",
+              "dose1-s08",
+              "dose1-s09",
+              "dose05-s05",
+              "dose05-s07",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s03",
+              "pedestal0-s04",
+              "pedestal0-s05",
+              "pedestal0-s06",
+              "pedestal0-s07",
+              "pedestal0-s08",
+              "pedestal0-s09",
+              "contrast025-s01",
+              "contrast025-s03",
+              "contrast025-s04",
+              "contrast025-s05",
+              "contrast025-s06",
+              "contrast025-s07",
+              "contrast025-s08",
+              "contrast025-s09",
+              "contrast4-s01",
+              "contrast4-s03",
+              "contrast4-s04",
+              "contrast4-s05",
+              "contrast4-s06",
+              "contrast4-s07",
+              "contrast4-s08",
+              "contrast4-s09",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s05",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 2.842170943040401e-14
+          },
+          "STAR": {
+            "lower_RMS": 79,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s03",
+              "dose1-s04",
+              "dose1-s05",
+              "dose1-s06",
+              "dose1-s07",
+              "dose1-s08",
+              "dose1-s09",
+              "dose05-s05",
+              "dose05-s07",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s03",
+              "pedestal0-s04",
+              "pedestal0-s05",
+              "pedestal0-s06",
+              "pedestal0-s07",
+              "pedestal0-s08",
+              "pedestal0-s09",
+              "contrast025-s01",
+              "contrast025-s03",
+              "contrast025-s04",
+              "contrast025-s05",
+              "contrast025-s06",
+              "contrast025-s07",
+              "contrast025-s08",
+              "contrast025-s09",
+              "contrast4-s01",
+              "contrast4-s03",
+              "contrast4-s04",
+              "contrast4-s05",
+              "contrast4-s06",
+              "contrast4-s07",
+              "contrast4-s08",
+              "contrast4-s09",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s05",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 2.842170943040401e-14
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 79,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 3.814697265625e-06
+          },
+          "STAR": {
+            "lower_RMS": 79,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 3.814697265625e-06
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 79,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 3.814697265625e-06
+          },
+          "STAR": {
+            "lower_RMS": 79,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 3.814697265625e-06
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 35,
+            "higher_RMS": 45,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.31430657986393706,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 39,
+            "higher_RMS": 41,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.9110721212260926,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "remaining_20": {
+      "n": 20,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 0
+        },
+        "STAR": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 0
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 10,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 10,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 13,
+            "higher_RMS": 4,
+            "ties": 3,
+            "two_sided_exact_RMS_sign_p": 0.049041748046875,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 13,
+            "higher_RMS": 4,
+            "ties": 3,
+            "two_sided_exact_RMS_sign_p": 0.049041748046875,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 19,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 4.00543212890625e-05,
+            "rescues": [
+              "pedestal32-s01",
+              "pedestal32-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 19,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 4.00543212890625e-05,
+            "rescues": [
+              "pedestal32-s01",
+              "pedestal32-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 13,
+            "higher_RMS": 7,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.26317596435546875,
+            "rescues": [
+              "pedestal32-s02"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 13,
+            "higher_RMS": 7,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.26317596435546875,
+            "rescues": [
+              "pedestal32-s02"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "outmodel_10": {
+      "n": 10,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 0,
+          "UPFW": 0,
+          "FW": 0
+        },
+        "STAR": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 0,
+          "UPFW": 0,
+          "FW": 0
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 3,
+            "higher_RMS": 7,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.34375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 3,
+            "higher_RMS": 7,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.34375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "pedestal32_no_local_10": {
+      "n": 10,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 0
+        },
+        "STAR": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 0
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 10,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 10,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 4,
+            "higher_RMS": 3,
+            "ties": 3,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 4,
+            "higher_RMS": 3,
+            "ties": 3,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal32-s01",
+              "pedestal32-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal32-s01",
+              "pedestal32-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal32-s02"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal32-s02"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "all_100_P6_unflagged": {
+      "n": 100,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 22,
+          "B2": 68,
+          "UP": 23,
+          "UPFW": 44,
+          "FW": 41
+        },
+        "STAR": {
+          "OFF": 22,
+          "B2": 68,
+          "UP": 23,
+          "UPFW": 44,
+          "FW": 41
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 90,
+            "higher_RMS": 0,
+            "ties": 10,
+            "two_sided_exact_RMS_sign_p": 1.6155871338926322e-27,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s03",
+              "dose1-s04",
+              "dose1-s05",
+              "dose1-s06",
+              "dose1-s07",
+              "dose1-s08",
+              "dose1-s09",
+              "dose05-s05",
+              "dose05-s07",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s03",
+              "pedestal0-s04",
+              "pedestal0-s05",
+              "pedestal0-s06",
+              "pedestal0-s07",
+              "pedestal0-s08",
+              "pedestal0-s09",
+              "contrast025-s01",
+              "contrast025-s03",
+              "contrast025-s04",
+              "contrast025-s05",
+              "contrast025-s06",
+              "contrast025-s07",
+              "contrast025-s08",
+              "contrast025-s09",
+              "contrast4-s01",
+              "contrast4-s03",
+              "contrast4-s04",
+              "contrast4-s05",
+              "contrast4-s06",
+              "contrast4-s07",
+              "contrast4-s08",
+              "contrast4-s09",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s05",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 2.842170943040401e-14
+          },
+          "STAR": {
+            "lower_RMS": 89,
+            "higher_RMS": 1,
+            "ties": 10,
+            "two_sided_exact_RMS_sign_p": 1.4701842918422953e-25,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s03",
+              "dose1-s04",
+              "dose1-s05",
+              "dose1-s06",
+              "dose1-s07",
+              "dose1-s08",
+              "dose1-s09",
+              "dose05-s05",
+              "dose05-s07",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s03",
+              "pedestal0-s04",
+              "pedestal0-s05",
+              "pedestal0-s06",
+              "pedestal0-s07",
+              "pedestal0-s08",
+              "pedestal0-s09",
+              "contrast025-s01",
+              "contrast025-s03",
+              "contrast025-s04",
+              "contrast025-s05",
+              "contrast025-s06",
+              "contrast025-s07",
+              "contrast025-s08",
+              "contrast025-s09",
+              "contrast4-s01",
+              "contrast4-s03",
+              "contrast4-s04",
+              "contrast4-s05",
+              "contrast4-s06",
+              "contrast4-s07",
+              "contrast4-s08",
+              "contrast4-s09",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s05",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 2.842170943040401e-14
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 92,
+            "higher_RMS": 5,
+            "ties": 3,
+            "two_sided_exact_RMS_sign_p": 8.590765687358437e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 3.814697265625e-06
+          },
+          "STAR": {
+            "lower_RMS": 92,
+            "higher_RMS": 5,
+            "ties": 3,
+            "two_sided_exact_RMS_sign_p": 8.590765687358437e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 3.814697265625e-06
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 98,
+            "higher_RMS": 2,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 7.969072864542661e-27,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "pedestal32-s01",
+              "pedestal32-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 9.5367431640625e-07
+          },
+          "STAR": {
+            "lower_RMS": 98,
+            "higher_RMS": 2,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 7.969072864542661e-27,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "pedestal32-s01",
+              "pedestal32-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 9.5367431640625e-07
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 48,
+            "higher_RMS": 52,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.7643534344026671,
+            "rescues": [
+              "pedestal32-s02"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 52,
+            "higher_RMS": 48,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.7643534344026671,
+            "rescues": [
+              "pedestal32-s02"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "all_100_P6_flagged": {
+      "n": 0,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 0,
+          "UPFW": 0,
+          "FW": 0
+        },
+        "STAR": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 0,
+          "UPFW": 0,
+          "FW": 0
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "in_model_80_P6_unflagged": {
+      "n": 80,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 22,
+          "B2": 68,
+          "UP": 22,
+          "UPFW": 41,
+          "FW": 41
+        },
+        "STAR": {
+          "OFF": 22,
+          "B2": 68,
+          "UP": 22,
+          "UPFW": 41,
+          "FW": 41
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 80,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.6543612251060553e-24,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s03",
+              "dose1-s04",
+              "dose1-s05",
+              "dose1-s06",
+              "dose1-s07",
+              "dose1-s08",
+              "dose1-s09",
+              "dose05-s05",
+              "dose05-s07",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s03",
+              "pedestal0-s04",
+              "pedestal0-s05",
+              "pedestal0-s06",
+              "pedestal0-s07",
+              "pedestal0-s08",
+              "pedestal0-s09",
+              "contrast025-s01",
+              "contrast025-s03",
+              "contrast025-s04",
+              "contrast025-s05",
+              "contrast025-s06",
+              "contrast025-s07",
+              "contrast025-s08",
+              "contrast025-s09",
+              "contrast4-s01",
+              "contrast4-s03",
+              "contrast4-s04",
+              "contrast4-s05",
+              "contrast4-s06",
+              "contrast4-s07",
+              "contrast4-s08",
+              "contrast4-s09",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s05",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 2.842170943040401e-14
+          },
+          "STAR": {
+            "lower_RMS": 79,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s03",
+              "dose1-s04",
+              "dose1-s05",
+              "dose1-s06",
+              "dose1-s07",
+              "dose1-s08",
+              "dose1-s09",
+              "dose05-s05",
+              "dose05-s07",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s03",
+              "pedestal0-s04",
+              "pedestal0-s05",
+              "pedestal0-s06",
+              "pedestal0-s07",
+              "pedestal0-s08",
+              "pedestal0-s09",
+              "contrast025-s01",
+              "contrast025-s03",
+              "contrast025-s04",
+              "contrast025-s05",
+              "contrast025-s06",
+              "contrast025-s07",
+              "contrast025-s08",
+              "contrast025-s09",
+              "contrast4-s01",
+              "contrast4-s03",
+              "contrast4-s04",
+              "contrast4-s05",
+              "contrast4-s06",
+              "contrast4-s07",
+              "contrast4-s08",
+              "contrast4-s09",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s05",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 2.842170943040401e-14
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 79,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 3.814697265625e-06
+          },
+          "STAR": {
+            "lower_RMS": 79,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 3.814697265625e-06
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 79,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 3.814697265625e-06
+          },
+          "STAR": {
+            "lower_RMS": 79,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08",
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08",
+              "pedestal0-s01",
+              "pedestal0-s08",
+              "contrast025-s01",
+              "contrast025-s08",
+              "contrast4-s01",
+              "contrast4-s08",
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 3.814697265625e-06
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 35,
+            "higher_RMS": 45,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.31430657986393706,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 39,
+            "higher_RMS": 41,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.9110721212260926,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "in_model_80_P6_flagged": {
+      "n": 0,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 0,
+          "UPFW": 0,
+          "FW": 0
+        },
+        "STAR": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 0,
+          "UPFW": 0,
+          "FW": 0
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "remaining_20_P6_unflagged": {
+      "n": 20,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 0
+        },
+        "STAR": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 0
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 10,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 10,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 13,
+            "higher_RMS": 4,
+            "ties": 3,
+            "two_sided_exact_RMS_sign_p": 0.049041748046875,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 13,
+            "higher_RMS": 4,
+            "ties": 3,
+            "two_sided_exact_RMS_sign_p": 0.049041748046875,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 19,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 4.00543212890625e-05,
+            "rescues": [
+              "pedestal32-s01",
+              "pedestal32-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 19,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 4.00543212890625e-05,
+            "rescues": [
+              "pedestal32-s01",
+              "pedestal32-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 13,
+            "higher_RMS": 7,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.26317596435546875,
+            "rescues": [
+              "pedestal32-s02"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 13,
+            "higher_RMS": 7,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.26317596435546875,
+            "rescues": [
+              "pedestal32-s02"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "remaining_20_P6_flagged": {
+      "n": 0,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 0,
+          "UPFW": 0,
+          "FW": 0
+        },
+        "STAR": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 0,
+          "UPFW": 0,
+          "FW": 0
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    }
+  },
+  "predictions": {
+    "P1": "UNTESTABLE on replicate inputs",
+    "P2": {
+      "runtime": true,
+      "STAR": true
+    },
+    "P3": "REPORTED: every pass-to-fail and every metric regression is listed",
+    "P4": "REPORTED: descriptive timings only",
+    "P5": {
+      "runtime": {
+        "agree": 100,
+        "denominator": 100,
+        "flips": [],
+        "threshold": "No acceptance threshold; descriptive agreement count",
+        "by_group": {
+          "all_100": {
+            "agree": 100,
+            "n": 100
+          },
+          "in_model_80": {
+            "agree": 80,
+            "n": 80
+          },
+          "remaining_20": {
+            "agree": 20,
+            "n": 20
+          },
+          "outmodel_10": {
+            "agree": 10,
+            "n": 10
+          },
+          "pedestal32_no_local_10": {
+            "agree": 10,
+            "n": 10
+          },
+          "all_100_P6_unflagged": {
+            "agree": 100,
+            "n": 100
+          },
+          "all_100_P6_flagged": {
+            "agree": 0,
+            "n": 0
+          },
+          "in_model_80_P6_unflagged": {
+            "agree": 80,
+            "n": 80
+          },
+          "in_model_80_P6_flagged": {
+            "agree": 0,
+            "n": 0
+          },
+          "remaining_20_P6_unflagged": {
+            "agree": 20,
+            "n": 20
+          },
+          "remaining_20_P6_flagged": {
+            "agree": 0,
+            "n": 0
+          }
+        }
+      },
+      "STAR": {
+        "agree": 100,
+        "denominator": 100,
+        "flips": [],
+        "threshold": "No acceptance threshold; descriptive agreement count",
+        "by_group": {
+          "all_100": {
+            "agree": 100,
+            "n": 100
+          },
+          "in_model_80": {
+            "agree": 80,
+            "n": 80
+          },
+          "remaining_20": {
+            "agree": 20,
+            "n": 20
+          },
+          "outmodel_10": {
+            "agree": 10,
+            "n": 10
+          },
+          "pedestal32_no_local_10": {
+            "agree": 10,
+            "n": 10
+          },
+          "all_100_P6_unflagged": {
+            "agree": 100,
+            "n": 100
+          },
+          "all_100_P6_flagged": {
+            "agree": 0,
+            "n": 0
+          },
+          "in_model_80_P6_unflagged": {
+            "agree": 80,
+            "n": 80
+          },
+          "in_model_80_P6_flagged": {
+            "agree": 0,
+            "n": 0
+          },
+          "remaining_20_P6_unflagged": {
+            "agree": 20,
+            "n": 20
+          },
+          "remaining_20_P6_flagged": {
+            "agree": 0,
+            "n": 0
+          }
+        }
+      }
+    },
+    "P6": {
+      "status": "REPORTED separately, without changing the frozen rule",
+      "flagged_count": 0,
+      "flagged_movies": [],
+      "total_different": [],
+      "squared_difference_exceeds_1000": [],
+      "maximum_abs_total_difference": 0.0,
+      "maximum_abs_squared_sum_difference": 406.0
+    },
+    "Q1": {
+      "runtime": {
+        "lower_RMS": 79,
+        "higher_RMS": 1,
+        "ties": 0,
+        "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+        "rescues": [
+          "dose1-s01",
+          "dose1-s08",
+          "dose2-s01",
+          "dose2-s06",
+          "dose2-s08",
+          "pedestal0-s01",
+          "pedestal0-s08",
+          "contrast025-s01",
+          "contrast025-s08",
+          "contrast4-s01",
+          "contrast4-s08",
+          "nonsquare-s00",
+          "nonsquare-s01",
+          "nonsquare-s03",
+          "nonsquare-s04",
+          "nonsquare-s06",
+          "nonsquare-s07",
+          "nonsquare-s08",
+          "nonsquare-s09"
+        ],
+        "pass_to_fail": [],
+        "discordant_pass_sign_p": 3.814697265625e-06
+      },
+      "STAR": {
+        "lower_RMS": 79,
+        "higher_RMS": 1,
+        "ties": 0,
+        "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+        "rescues": [
+          "dose1-s01",
+          "dose1-s08",
+          "dose2-s01",
+          "dose2-s06",
+          "dose2-s08",
+          "pedestal0-s01",
+          "pedestal0-s08",
+          "contrast025-s01",
+          "contrast025-s08",
+          "contrast4-s01",
+          "contrast4-s08",
+          "nonsquare-s00",
+          "nonsquare-s01",
+          "nonsquare-s03",
+          "nonsquare-s04",
+          "nonsquare-s06",
+          "nonsquare-s07",
+          "nonsquare-s08",
+          "nonsquare-s09"
+        ],
+        "pass_to_fail": [],
+        "discordant_pass_sign_p": 3.814697265625e-06
+      }
+    },
+    "Q2": {
+      "runtime": true,
+      "STAR": true
+    },
+    "Q3": "REPORTED: all OFF-pass/FW-fail and UP-pass/UPFW-fail listed",
+    "Q4": {
+      "runtime": {
+        "comparison": {
+          "lower_RMS": 79,
+          "higher_RMS": 1,
+          "ties": 0,
+          "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+          "rescues": [
+            "dose1-s01",
+            "dose1-s08",
+            "dose2-s01",
+            "dose2-s06",
+            "dose2-s08",
+            "pedestal0-s01",
+            "pedestal0-s08",
+            "contrast025-s01",
+            "contrast025-s08",
+            "contrast4-s01",
+            "contrast4-s08",
+            "nonsquare-s00",
+            "nonsquare-s01",
+            "nonsquare-s03",
+            "nonsquare-s04",
+            "nonsquare-s06",
+            "nonsquare-s07",
+            "nonsquare-s08",
+            "nonsquare-s09"
+          ],
+          "pass_to_fail": [],
+          "discordant_pass_sign_p": 3.814697265625e-06
+        },
+        "pass_count_at_least_UP": true
+      },
+      "STAR": {
+        "comparison": {
+          "lower_RMS": 79,
+          "higher_RMS": 1,
+          "ties": 0,
+          "two_sided_exact_RMS_sign_p": 1.3400325923359048e-22,
+          "rescues": [
+            "dose1-s01",
+            "dose1-s08",
+            "dose2-s01",
+            "dose2-s06",
+            "dose2-s08",
+            "pedestal0-s01",
+            "pedestal0-s08",
+            "contrast025-s01",
+            "contrast025-s08",
+            "contrast4-s01",
+            "contrast4-s08",
+            "nonsquare-s00",
+            "nonsquare-s01",
+            "nonsquare-s03",
+            "nonsquare-s04",
+            "nonsquare-s06",
+            "nonsquare-s07",
+            "nonsquare-s08",
+            "nonsquare-s09"
+          ],
+          "pass_to_fail": [],
+          "discordant_pass_sign_p": 3.814697265625e-06
+        },
+        "pass_count_at_least_UP": true
+      }
+    }
+  },
+  "timing": {
+    "OFF": {
+      "n": 100,
+      "mean_seconds": 13.41309941793792,
+      "median_seconds": 9.099088187562302,
+      "min_seconds": 7.62761354201939,
+      "max_seconds": 138.73510954191443
+    },
+    "B2": {
+      "n": 100,
+      "mean_seconds": 11.542753747482784,
+      "median_seconds": 8.23212445853278,
+      "min_seconds": 6.336284458055161,
+      "max_seconds": 96.9679978749482
+    },
+    "UP": {
+      "n": 100,
+      "mean_seconds": 11.750270416716813,
+      "median_seconds": 8.310610083513893,
+      "min_seconds": 6.566087167011574,
+      "max_seconds": 99.96492595796008
+    },
+    "UPFW": {
+      "n": 100,
+      "mean_seconds": 12.005666960808448,
+      "median_seconds": 8.155757562955841,
+      "min_seconds": 6.462316083023325,
+      "max_seconds": 122.27359620796051
+    },
+    "FW": {
+      "n": 100,
+      "mean_seconds": 11.515131817092188,
+      "median_seconds": 8.16998483351199,
+      "min_seconds": 6.494089709012769,
+      "max_seconds": 83.65562058310024
+    }
+  },
+  "conditions": {
+    "contrast025": {
+      "n": 10,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 1,
+          "B2": 9,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 3
+        },
+        "STAR": {
+          "OFF": 1,
+          "B2": 9,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 3
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "contrast025-s01",
+              "contrast025-s03",
+              "contrast025-s04",
+              "contrast025-s05",
+              "contrast025-s06",
+              "contrast025-s07",
+              "contrast025-s08",
+              "contrast025-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.0078125
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "contrast025-s01",
+              "contrast025-s03",
+              "contrast025-s04",
+              "contrast025-s05",
+              "contrast025-s06",
+              "contrast025-s07",
+              "contrast025-s08",
+              "contrast025-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.0078125
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "contrast025-s01",
+              "contrast025-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "contrast025-s01",
+              "contrast025-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "contrast025-s01",
+              "contrast025-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "contrast025-s01",
+              "contrast025-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 7,
+            "higher_RMS": 3,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.34375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 7,
+            "higher_RMS": 3,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.34375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "contrast4": {
+      "n": 10,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 1,
+          "B2": 9,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 3
+        },
+        "STAR": {
+          "OFF": 1,
+          "B2": 9,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 3
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "contrast4-s01",
+              "contrast4-s03",
+              "contrast4-s04",
+              "contrast4-s05",
+              "contrast4-s06",
+              "contrast4-s07",
+              "contrast4-s08",
+              "contrast4-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.0078125
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "contrast4-s01",
+              "contrast4-s03",
+              "contrast4-s04",
+              "contrast4-s05",
+              "contrast4-s06",
+              "contrast4-s07",
+              "contrast4-s08",
+              "contrast4-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.0078125
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "contrast4-s01",
+              "contrast4-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "contrast4-s01",
+              "contrast4-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "contrast4-s01",
+              "contrast4-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "contrast4-s01",
+              "contrast4-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 4,
+            "higher_RMS": 6,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.75390625,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 5,
+            "higher_RMS": 5,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "dose05": {
+      "n": 10,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 0,
+          "B2": 2,
+          "UP": 0,
+          "UPFW": 0,
+          "FW": 0
+        },
+        "STAR": {
+          "OFF": 0,
+          "B2": 2,
+          "UP": 0,
+          "UPFW": 0,
+          "FW": 0
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose05-s05",
+              "dose05-s07"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose05-s05",
+              "dose05-s07"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 2,
+            "higher_RMS": 8,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.109375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 2,
+            "higher_RMS": 8,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.109375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "dose1": {
+      "n": 10,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 1,
+          "B2": 9,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 3
+        },
+        "STAR": {
+          "OFF": 1,
+          "B2": 9,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 3
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s03",
+              "dose1-s04",
+              "dose1-s05",
+              "dose1-s06",
+              "dose1-s07",
+              "dose1-s08",
+              "dose1-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.0078125
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s03",
+              "dose1-s04",
+              "dose1-s05",
+              "dose1-s06",
+              "dose1-s07",
+              "dose1-s08",
+              "dose1-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.0078125
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose1-s01",
+              "dose1-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 5,
+            "higher_RMS": 5,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 5,
+            "higher_RMS": 5,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "dose2": {
+      "n": 10,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 7,
+          "B2": 10,
+          "UP": 7,
+          "UPFW": 10,
+          "FW": 10
+        },
+        "STAR": {
+          "OFF": 7,
+          "B2": 10,
+          "UP": 7,
+          "UPFW": 10,
+          "FW": 10
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.25
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.25
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.25
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.25
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.25
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "dose2-s01",
+              "dose2-s06",
+              "dose2-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.25
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 4,
+            "higher_RMS": 6,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.75390625,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 4,
+            "higher_RMS": 6,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.75390625,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "dose4": {
+      "n": 10,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 10,
+          "B2": 10,
+          "UP": 10,
+          "UPFW": 10,
+          "FW": 10
+        },
+        "STAR": {
+          "OFF": 10,
+          "B2": 10,
+          "UP": 10,
+          "UPFW": 10,
+          "FW": 10
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 5,
+            "higher_RMS": 5,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 6,
+            "higher_RMS": 4,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.75390625,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "nonsquare": {
+      "n": 10,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 1,
+          "B2": 10,
+          "UP": 1,
+          "UPFW": 9,
+          "FW": 9
+        },
+        "STAR": {
+          "OFF": 1,
+          "B2": 10,
+          "UP": 1,
+          "UPFW": 9,
+          "FW": 9
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s05",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.00390625
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s05",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.00390625
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.0078125
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.0078125
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.0078125
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "nonsquare-s00",
+              "nonsquare-s01",
+              "nonsquare-s03",
+              "nonsquare-s04",
+              "nonsquare-s06",
+              "nonsquare-s07",
+              "nonsquare-s08",
+              "nonsquare-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.0078125
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 4,
+            "higher_RMS": 6,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.75390625,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 5,
+            "higher_RMS": 5,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "outmodel": {
+      "n": 10,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 0,
+          "UPFW": 0,
+          "FW": 0
+        },
+        "STAR": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 0,
+          "UPFW": 0,
+          "FW": 0
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 9,
+            "higher_RMS": 1,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.021484375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 3,
+            "higher_RMS": 7,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.34375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 3,
+            "higher_RMS": 7,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.34375,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "pedestal0": {
+      "n": 10,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 1,
+          "B2": 9,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 3
+        },
+        "STAR": {
+          "OFF": 1,
+          "B2": 9,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 3
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal0-s01",
+              "pedestal0-s03",
+              "pedestal0-s04",
+              "pedestal0-s05",
+              "pedestal0-s06",
+              "pedestal0-s07",
+              "pedestal0-s08",
+              "pedestal0-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.0078125
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal0-s01",
+              "pedestal0-s03",
+              "pedestal0-s04",
+              "pedestal0-s05",
+              "pedestal0-s06",
+              "pedestal0-s07",
+              "pedestal0-s08",
+              "pedestal0-s09"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.0078125
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal0-s01",
+              "pedestal0-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal0-s01",
+              "pedestal0-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal0-s01",
+              "pedestal0-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal0-s01",
+              "pedestal0-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 4,
+            "higher_RMS": 6,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.75390625,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 5,
+            "higher_RMS": 5,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    },
+    "pedestal32": {
+      "n": 10,
+      "pass_counts": {
+        "runtime": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 0
+        },
+        "STAR": {
+          "OFF": 0,
+          "B2": 0,
+          "UP": 1,
+          "UPFW": 3,
+          "FW": 0
+        }
+      },
+      "comparisons": {
+        "B2_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 10,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 0,
+            "higher_RMS": 0,
+            "ties": 10,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "FW_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 4,
+            "higher_RMS": 3,
+            "ties": 3,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 4,
+            "higher_RMS": 3,
+            "ties": 3,
+            "two_sided_exact_RMS_sign_p": 1.0,
+            "rescues": [],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        },
+        "UPFW_vs_UP": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal32-s01",
+              "pedestal32-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal32-s01",
+              "pedestal32-s08"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 0.5
+          }
+        },
+        "UP_vs_OFF": {
+          "runtime": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal32-s02"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          },
+          "STAR": {
+            "lower_RMS": 10,
+            "higher_RMS": 0,
+            "ties": 0,
+            "two_sided_exact_RMS_sign_p": 0.001953125,
+            "rescues": [
+              "pedestal32-s02"
+            ],
+            "pass_to_fail": [],
+            "discordant_pass_sign_p": 1.0
+          }
+        }
+      }
+    }
+  },
+  "sampling_failures": [],
+  "pair_global_differences": [],
+  "regression_metric_rows": 372
+}

@@ -17,6 +17,8 @@
  * source code. Additional authorship citations may be added, but existing
  * author citations must be preserved.
  ***************************************************************************/
+#include "src/local_b2_fit.h"
+#include "src/local_ccf_capture.h"
 #include <omp.h>
 #include <cmath>
 #include <exception>
@@ -235,6 +237,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 		if (experimental_coupled_peak != 0 && !do_own)
 			REPORT_ERROR("--experimental_coupled_peak is valid only with --use_own");
 	}
+	experimental_local_b2 = parser.checkOption("--experimental_local_b2", "(EXPERIMENTAL, CPU only) Integer-time local polynomial with per-patch nuisance constants. Default off; requires group_frames=1, bin_factor=1, no interpolation.");
 	interpolate_shifts = parser.checkOption("--interpolate_shifts", "(EXPERIMENTAL) Interpolate shifts");
 	ccf_downsample = textToFloat(parser.getOption("--ccf_downsample", "(EXPERT) Downsampling rate of CC map. default = 0 = automatic based on B factor", "0"));
 	if (parser.checkOption("--early_binning", "Do binning before alignment to reduce memory usage. This might dampen signal near Nyquist. (ON by default)"))
@@ -254,6 +257,23 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	dose_motionstats_cutoff = textToFloat(parser.getOption("--dose_motionstats_cutoff", "Electron dose (in electrons/A2) at which to distinguish early/late global accumulated motion in output statistics", "4."));
 	if (ccf_downsample > 1) REPORT_ERROR("--ccf_downsample cannot exceed 1.");
 	if (skip_defect && !do_own) REPORT_ERROR("--skip_decet is valid only for --use_own");
+	if (experimental_local_b2 && (!do_own || group != 1 || bin_factor != 1 || interpolate_shifts))
+		REPORT_ERROR("--experimental_local_b2 requires --use_own, --group_frames 1, --bin_factor 1 and no --interpolate_shifts");
+	if (const char *capture_path = std::getenv("MC_DIAG_LOCAL_CCF_DIR")) {
+		diag_local_ccf_dir = capture_path;
+		const char *dc = std::getenv("MC_EXPERIMENT_CCF_DC_ARM");
+		if (diag_local_ccf_dir.empty() || !gpu_ids.empty())
+			REPORT_ERROR("MC_DIAG_LOCAL_CCF_DIR requires a nonempty path and CPU execution; GPU refused");
+#ifndef MC_EXPERIMENT_CCF_DC
+		REPORT_ERROR("MC_DIAG_LOCAL_CCF_DIR requires the DC diagnostic build");
+#endif
+		if (!do_own || group != 1 || bin_factor != 1 || interpolate_shifts || patch_x != 3 || patch_y != 3
+		    || max_iter != 5 || first_frame_sum != 1 || last_frame_sum != 5 || n_threads < 1 || n_threads > 2
+		    || experimental_coupled_peak != 2 || experimental_local_b2 || experimental_global_half_gain
+		    || experimental_align_tolerance != 0 || experimental_isotropic_weight || ccf_downsample != 0
+		    || bfactor != 150 || !skip_defect || !dc || std::string(dc) != "both")
+			REPORT_ERROR("MC_DIAG_LOCAL_CCF_DIR unsupported scope: requires fixed CPU UP-only K267 configuration");
+	}
 	if (group <= 0) REPORT_ERROR("--group_frames must be positive.");
 	if (eer_grouping <= 0) REPORT_ERROR("--eer_grouping must be positive.");
 	if (n_threads <= 0) REPORT_ERROR("--j must be positive.");
@@ -420,6 +440,9 @@ void MotioncorrRunner::initialise()
 			REPORT_ERROR("ERROR: --experimental_global_half_gain and --experimental_align_tolerance are CPU-only research "
 			             "options and are refused with --gpu (the CUDA alignment does not implement them). Remove --gpu to run on the CPU.");
 		}
+
+		if (experimental_local_b2)
+			REPORT_ERROR("--experimental_local_b2 is a CPU-only research option and is refused with --gpu");
 
 		if (experimental_isotropic_weight)
 		{
@@ -2267,6 +2290,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	logfile << "interpolate_shifts = " << interpolate_shifts << std::endl;
 	logfile << std::endl;
 
+	std::unique_ptr<LocalCcfCaptureSession> capture_session;
+	if (!diag_local_ccf_dir.empty())
+		capture_session = std::make_unique<LocalCcfCaptureSession>(diag_local_ccf_dir, fn_mic, nx, ny, n_frames);
+
 	// Read gain reference
 	MC_STAGE("read gain");
 	RCTIC(TIMING_READ_GAIN);
@@ -3665,6 +3692,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				const int patch_h = y_end - y_start;
 				const int patch_nfx = patch_w / 2 + 1;
 				bool converged = false;
+				std::unique_ptr<LocalCcfCapture> local_capture;
+				if (capture_session) local_capture = capture_session->patch(x_start, x_end, y_start, y_end, x_center, y_center, xshifts, yshifts);
 
 #ifdef _CUDA_ENABLED
 				// Distinguishes the two ways the device attempt can decline to produce
@@ -3951,6 +3980,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 							}
 						}
 						RCTOC(TIMING_CLIP_PATCH);
+						if (local_capture) local_capture->clipped(igroup, Ipatches[tid]);
 
 						RCTIC(TIMING_PATCH_FFT);
 						NewFFT::FourierTransform(Ipatches[tid], Fpatches[igroup]);
@@ -3960,13 +3990,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					RCTOC(TIMING_PREP_PATCH);
 
 					RCTIC(TIMING_PATCH_ALIGN);
-					converged = alignPatch(Fpatches, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
+					converged = alignPatch(Fpatches, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile, false, local_capture.get());
 					RCTOC(TIMING_PATCH_ALIGN);
 				}
 				if (!converged) continue;
 
 				std::vector<RFLOAT> interpolated_xshifts(n_frames), interpolated_yshifts(n_frames);
 				interpolateShifts(group_start, group_size, local_xshifts, local_yshifts, n_frames, interpolated_xshifts, interpolated_yshifts);
+				if (local_capture) local_capture->reported(local_xshifts, local_yshifts, interpolated_xshifts, interpolated_yshifts);
 				if (interpolate_shifts) {
 					// Recenter to the first frame
 					recenterShiftsToFirstFrame(interpolated_xshifts, interpolated_yshifts);
@@ -3991,6 +4022,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			}
 		}
 		Fpatches.clear();
+		if (capture_session) capture_session->finish();
 #ifdef _CUDA_ENABLED
 		if (d_patch_fcomplex_buffer) {
             cufftComplex *owned = d_patch_fcomplex_buffer;
@@ -4007,6 +4039,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		const int n_params = 18;
 
 		if (n_obs <= n_params) {
+			if (experimental_local_b2 && n_obs > 0) REPORT_ERROR("--experimental_local_b2: too few observations for full rank");
 			std::cerr << fn_mic << ": too few valid local trajectories to fit local motion model." << std::endl;
 			mic.model = NULL;
 			goto skip_fitting; // TODO: Refactor!
@@ -4049,8 +4082,21 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		}
 
 		const RFLOAT EPS = 1e-10;
-		solve(matA, vecX, coeffX, EPS);
-		solve(matA, vecY, coeffY, EPS);
+		std::vector<std::array<double,2>> b2_nuisance;
+		if (experimental_local_b2) {
+			std::vector<LocalB2::Observation> observations;
+			for (int i = 0; i < n_obs; ++i)
+				observations.push_back({double(patch_xs[i] / nx - 0.5), double(patch_ys[i] / ny - 0.5),
+				                        double(patch_frames[i] - 0.5), double(patch_xshifts[i]), double(patch_yshifts[i])});
+			try {
+				const auto fitted = LocalB2::fit(observations);
+				for (int j = 0; j < n_params; ++j) { coeffX(j) = fitted.x[j]; coeffY(j) = fitted.y[j]; }
+				b2_nuisance = fitted.nuisance;
+			} catch (const std::exception &e) { REPORT_ERROR(std::string("--experimental_local_b2: ") + e.what()); }
+		} else {
+			solve(matA, vecX, coeffX, EPS);
+			solve(matA, vecY, coeffY, EPS);
+		}
 
 #ifdef DEBUG_OWN
 		std::cout << "Polynomial fitting coefficients for X and Y:" << std::endl;
@@ -4104,9 +4150,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			const RFLOAT y = patch_ys[i] / ny - 0.5;
 			const RFLOAT z = patch_frames[i];
 
-			model->getShiftAt(z, x, y, x_fitted, y_fitted);
-			rms_x += (patch_xshifts[i] - x_fitted) * (patch_xshifts[i] - x_fitted);
-			rms_y += (patch_yshifts[i] - y_fitted) * (patch_yshifts[i] - y_fitted);
+			model->getShiftAt(experimental_local_b2 ? z - 0.5 : z, x, y, x_fitted, y_fitted);
+			// Nuisance constants enter only the fit residual, never the published/applied field.
+			const RFLOAT residual_x = patch_xshifts[i] - x_fitted - (experimental_local_b2 ? b2_nuisance[i][0] : 0);
+			const RFLOAT residual_y = patch_yshifts[i] - y_fitted - (experimental_local_b2 ? b2_nuisance[i][1] : 0);
+			rms_x += experimental_local_b2 ? residual_x * residual_x : (patch_xshifts[i] - x_fitted) * (patch_xshifts[i] - x_fitted);
+			rms_y += experimental_local_b2 ? residual_y * residual_y : (patch_yshifts[i] - y_fitted) * (patch_yshifts[i] - y_fitted);
 
 			// These shifts and RMSDs are for reporting, so should be in the original pixel size
 			mic.patchX.push_back(patch_xs[i] * prescaling);
@@ -4832,7 +4881,7 @@ bool MotioncorrRunner::alignPatchDevice(cufftComplex *d_Fframes, int n_frames, c
 }
 #endif
 
-bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global) {
+bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global, LocalCcfCapture *capture) {
 #ifdef _CUDA_ENABLED
 	if (use_gpu) {
 		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, is_global);
@@ -4909,6 +4958,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		}
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
+	if (capture) capture->configure(Fframes, ccf_nx, ccf_ny, search_range, ccf_scale_x, ccf_scale_y, scaled_B, weight);
 
 	const bool use_coupled = experimental_coupled_peak == 2 || (experimental_coupled_peak == 1 && is_global);
 	std::atomic<long> coupled_peaks{0}, coupled_not_negdef{0}, coupled_offset_gt_1px{0};
@@ -4933,6 +4983,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			}
 		}
 		RCTOC(TIMING_MAKE_REF);
+		if (capture) capture->begin(iter, Fframes, Fref, xshifts, yshifts);
 
 		#pragma omp parallel for num_threads(n_threads)
 		for (int iframe = 0; iframe < n_frames; iframe++) {
@@ -4947,12 +4998,18 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 				}
 			}
 			RCTOC(TIMING_CCF_CALC);
+			if (capture) capture->preDc(iframe, Fccs[tid]);
 #ifdef MC_EXPERIMENT_CCF_DC
 			if (experimentCcfDcZero(is_global, EXP_DC_CPU, 1)) DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);
 #endif
 
 			RCTIC(TIMING_CCF_IFFT);
+			if (capture) {
+				capture->postDc(iframe, Fccs[tid]);
+				NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid](), NewFFT::FwdOnly, true, capture->fftObserver(iframe));
+			} else {
 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
+			}
 			RCTOC(TIMING_CCF_IFFT);
 
 			RCTIC(TIMING_CCF_FIND_MAX);
@@ -4997,6 +5054,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			} else {
 				cur_yshifts[iframe] = posy;
 			}
+			if (capture) { auto &p = capture->peak(iframe); p.posx=posx; p.posy=posy; p.maxval=maxval; p.separable_x=cur_xshifts[iframe]; p.separable_y=cur_yshifts[iframe]; }
 			if (use_coupled) {
 				// EXPERIMENTAL H2: overwrite the separable result above with the coupled 2x2 fit when
 				// the guard accepts it; otherwise the separable result stands.
@@ -5007,6 +5065,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 						v[a][b] = DIRECT_A2D_ELEM(Iccs[tid](), iy3[a], ix3[b]);
 				RFLOAT dx, dy;
 				const int verdict = coupledPeakOffset(v, dx, dy);
+				if (capture) { auto &p = capture->peak(iframe); p.verdict=verdict; if (verdict==0) { p.coupled_dx=dx; p.coupled_dy=dy; } }
 				coupled_peaks++;
 				if (verdict == 0) {
 					cur_xshifts[iframe] = posx + dx;
@@ -5017,13 +5076,17 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 					coupled_offset_gt_1px++;
 				}
 			}
+			if (capture) { auto &p = capture->peak(iframe); p.raw_x=cur_xshifts[iframe]; p.raw_y=cur_yshifts[iframe]; }
 			cur_xshifts[iframe] *= ccf_scale_x;
 			cur_yshifts[iframe] *= ccf_scale_y;
+			if (capture) { auto &p = capture->peak(iframe); p.scaled_x=cur_xshifts[iframe]; p.scaled_y=cur_yshifts[iframe]; capture->result(iframe, Fccs[tid], Iccs[tid]()); }
 #ifdef DEBUG_OWN
 			std::cout << "tid " << tid << " Frame " << 1 + iframe << ": raw shift x = " << posx << " y = " << posy << " cc = " << maxval << " interpolated x = " << cur_xshifts[iframe] << " y = " << cur_yshifts[iframe] << std::endl;
 #endif
 			RCTOC(TIMING_CCF_FIND_MAX);
 		}
+
+		if (capture) capture->rawResults();
 
 		// Set origin
 		RFLOAT x_sumsq = 0, y_sumsq = 0;
@@ -5063,12 +5126,15 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
 		logfile << " Iteration " << iter << ": RMSD = " << rmsd << " px" << std::endl;
 		iters_done = iter; last_rmsd = rmsd;
+		if (capture) capture->end(Fframes, cur_xshifts, cur_yshifts, xshifts, yshifts, rmsd, tolerance);
 
 		if (rmsd < tolerance) {
 			converged = true;
 			break;
 		}
 	}
+
+	if (capture) capture->finish(converged, iters_done, xshifts, yshifts);
 
 	// EXPERIMENTAL: iteration accounting of the global alignment, only when an experimental flag is on.
 	if (is_global && (half_gain || experimental_align_tolerance > 0 || use_coupled))

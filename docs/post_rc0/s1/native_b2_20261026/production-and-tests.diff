@@ -1,0 +1,246 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cb78b08b..88aaa2d9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -257,6 +257,9 @@ if(BUILD_TESTING)
+     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
+     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
+     add_test(NAME PatchRetryState COMMAND patch_retry_state)
++    add_executable(local_b2_fit tests/test_local_b2_fit.cpp)
++    target_include_directories(local_b2_fit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
++    add_test(NAME LocalB2Fit COMMAND local_b2_fit)
+     # Experimental default-off global half-gain damping (research prototype).
+     add_executable(global_half_gain tests/test_global_half_gain.cpp)
+     target_link_libraries(global_half_gain PRIVATE motioncorr_core)
+diff --git a/src/local_b2_fit.h b/src/local_b2_fit.h
+new file mode 100644
+index 00000000..90ef2119
+--- /dev/null
++++ b/src/local_b2_fit.h
+@@ -0,0 +1,65 @@
++// Default-off B2 research fit. GPL-2.0-or-later, like MotionCorr.
++#ifndef MOTIONCORR_LOCAL_B2_FIT_H
++#define MOTIONCORR_LOCAL_B2_FIT_H
++#include <algorithm>
++#include <array>
++#include <cmath>
++#include <limits>
++#include <map>
++#include <set>
++#include <stdexcept>
++#include <vector>
++namespace LocalB2 {
++using Row = std::vector<double>;
++// Column-scaled, column-pivoted Householder QR. No normal equations.
++inline std::vector<Row> qr(std::vector<Row> a, std::vector<Row> b) {
++    const size_t m=a.size(), n=a.at(0).size(), r=b.at(0).size();
++    if(m<n) throw std::runtime_error("B2 rank deficient: fewer rows than columns");
++    Row scale(n); std::vector<size_t> perm(n);
++    for(size_t j=0;j<n;++j) {
++        perm[j]=j;
++        for(size_t i=0;i<m;++i) scale[j]=std::hypot(scale[j],a[i][j]);
++        if(!(scale[j]>0) || !std::isfinite(scale[j])) throw std::runtime_error("B2 rank deficient/nonfinite column");
++        for(size_t i=0;i<m;++i) a[i][j]/=scale[j];
++    }
++    const double tol=64*std::numeric_limits<double>::epsilon()*std::max(m,n);
++    for(size_t k=0;k<n;++k) {
++        size_t pivot=k; double best=-1;
++        for(size_t j=k;j<n;++j) { double norm=0; for(size_t i=k;i<m;++i) norm=std::hypot(norm,a[i][j]); if(norm>best){best=norm;pivot=j;} }
++        if(!(best>tol)) throw std::runtime_error("B2 rank deficient after nuisance projection");
++        for(size_t i=0;i<m;++i) std::swap(a[i][k],a[i][pivot]);
++        std::swap(perm[k],perm[pivot]);
++        Row v(m-k); for(size_t i=k;i<m;++i) v[i-k]=a[i][k];
++        const double alpha=-std::copysign(best,v[0]); v[0]-=alpha;
++        double vn=0; for(double x:v) vn=std::hypot(vn,x); for(double &x:v) x/=vn;
++        for(size_t j=k;j<n;++j) { double dot=0; for(size_t i=k;i<m;++i) dot+=v[i-k]*a[i][j]; for(size_t i=k;i<m;++i) a[i][j]-=2*v[i-k]*dot; }
++        for(size_t j=0;j<r;++j) { double dot=0; for(size_t i=k;i<m;++i) dot+=v[i-k]*b[i][j]; for(size_t i=k;i<m;++i) b[i][j]-=2*v[i-k]*dot; }
++        a[k][k]=alpha;
++    }
++    std::vector<Row> x(n,Row(r)), out(n,Row(r));
++    for(size_t kk=n;kk-->0;) for(size_t j=0;j<r;++j) { double val=b[kk][j]; for(size_t k=kk+1;k<n;++k) val-=a[kk][k]*x[k][j]; x[kk][j]=val/a[kk][kk]; }
++    for(size_t k=0;k<n;++k) for(size_t j=0;j<r;++j) { out[perm[k]][j]=x[k][j]/scale[perm[k]]; if(!std::isfinite(out[perm[k]][j])) throw std::runtime_error("B2 nonfinite solution"); }
++    return out;
++}
++inline Row spatial(double u,double v){return {1,u,u*u,v,v*v,u*v};}
++inline Row design(double u,double v,double g){Row a;for(double s:spatial(u,v)){a.push_back(s*g);a.push_back(s*g*g);a.push_back(s*g*g*g);}return a;}
++struct Observation { double u,v,g,x,y; };
++struct Fit { std::array<double,18> x{},y{}; std::vector<std::array<double,2>> nuisance; };
++inline Fit fit(const std::vector<Observation>& obs) {
++    if(obs.empty()) throw std::runtime_error("B2 has no observations");
++    std::map<std::pair<double,double>,std::vector<size_t>> patches;
++    for(size_t i=0;i<obs.size();++i){const auto&o=obs[i];for(double v:{o.u,o.v,o.g,o.x,o.y})if(!std::isfinite(v))throw std::runtime_error("B2 nonfinite observation");if(o.g<0 || o.g!=std::floor(o.g))throw std::runtime_error("B2 requires integer group times");patches[{o.u,o.v}].push_back(i);}
++    std::vector<Row> s;
++    for(const auto&p:patches){s.push_back(spatial(p.first.first,p.first.second));std::set<double> times;for(size_t i:p.second)times.insert(obs[i].g);if(times.size()<4)throw std::runtime_error("B2 requires >=4 distinct times per patch");}
++    qr(s,std::vector<Row>(s.size(),Row(1))); // spatial rank 6
++    std::vector<Row> a,b; for(const auto&o:obs){a.push_back(design(o.u,o.v,o.g));b.push_back({o.x,o.y});}
++    const auto original_a=a, original_b=b;
++    // Orthogonal projection off the disjoint patch indicator columns. Rank of
++    // [A, indicators] is npatch + rank(projected A), so this checks full rank.
++    for(const auto&p:patches){Row ma(18),mb(2);for(size_t i:p.second){for(size_t j=0;j<18;++j)ma[j]+=a[i][j]/p.second.size();for(size_t j=0;j<2;++j)mb[j]+=b[i][j]/p.second.size();}for(size_t i:p.second){for(size_t j=0;j<18;++j)a[i][j]-=ma[j];for(size_t j=0;j<2;++j)b[i][j]-=mb[j];}}
++    const auto c=qr(a,b);Fit out;out.nuisance.resize(obs.size());for(size_t j=0;j<18;++j){out.x[j]=c[j][0];out.y[j]=c[j][1];}
++    for(const auto&p:patches){std::array<double,2> mean{};for(size_t i:p.second)for(size_t axis=0;axis<2;++axis){double residual=original_b[i][axis];for(size_t j=0;j<18;++j)residual-=original_a[i][j]*c[j][axis];mean[axis]+=residual/p.second.size();}for(size_t i:p.second)out.nuisance[i]=mean;}
++    return out;
++}
++}
++#endif
+diff --git a/src/motioncorr_runner.cpp b/src/motioncorr_runner.cpp
+index a0a96dd2..d9ffe8d2 100644
+--- a/src/motioncorr_runner.cpp
++++ b/src/motioncorr_runner.cpp
+@@ -17,6 +17,7 @@
+  * source code. Additional authorship citations may be added, but existing
+  * author citations must be preserved.
+  ***************************************************************************/
++#include "src/local_b2_fit.h"
+ #include <omp.h>
+ #include <cmath>
+ #include <exception>
+@@ -235,6 +236,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
+ 		if (experimental_coupled_peak != 0 && !do_own)
+ 			REPORT_ERROR("--experimental_coupled_peak is valid only with --use_own");
+ 	}
++	experimental_local_b2 = parser.checkOption("--experimental_local_b2", "(EXPERIMENTAL, CPU only) Integer-time local polynomial with per-patch nuisance constants. Default off; requires group_frames=1, bin_factor=1, no interpolation.");
+ 	interpolate_shifts = parser.checkOption("--interpolate_shifts", "(EXPERIMENTAL) Interpolate shifts");
+ 	ccf_downsample = textToFloat(parser.getOption("--ccf_downsample", "(EXPERT) Downsampling rate of CC map. default = 0 = automatic based on B factor", "0"));
+ 	if (parser.checkOption("--early_binning", "Do binning before alignment to reduce memory usage. This might dampen signal near Nyquist. (ON by default)"))
+@@ -254,6 +256,8 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
+ 	dose_motionstats_cutoff = textToFloat(parser.getOption("--dose_motionstats_cutoff", "Electron dose (in electrons/A2) at which to distinguish early/late global accumulated motion in output statistics", "4."));
+ 	if (ccf_downsample > 1) REPORT_ERROR("--ccf_downsample cannot exceed 1.");
+ 	if (skip_defect && !do_own) REPORT_ERROR("--skip_decet is valid only for --use_own");
++	if (experimental_local_b2 && (!do_own || group != 1 || bin_factor != 1 || interpolate_shifts))
++		REPORT_ERROR("--experimental_local_b2 requires --use_own, --group_frames 1, --bin_factor 1 and no --interpolate_shifts");
+ 	if (group <= 0) REPORT_ERROR("--group_frames must be positive.");
+ 	if (eer_grouping <= 0) REPORT_ERROR("--eer_grouping must be positive.");
+ 	if (n_threads <= 0) REPORT_ERROR("--j must be positive.");
+@@ -421,6 +425,9 @@ void MotioncorrRunner::initialise()
+ 			             "options and are refused with --gpu (the CUDA alignment does not implement them). Remove --gpu to run on the CPU.");
+ 		}
+ 
++		if (experimental_local_b2)
++			REPORT_ERROR("--experimental_local_b2 is a CPU-only research option and is refused with --gpu");
++
+ 		if (experimental_isotropic_weight)
+ 		{
+ 			REPORT_ERROR("ERROR: --experimental_isotropic_weight is a CPU-only research option and is refused with --gpu "
+@@ -4007,6 +4014,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
+ 		const int n_params = 18;
+ 
+ 		if (n_obs <= n_params) {
++			if (experimental_local_b2 && n_obs > 0) REPORT_ERROR("--experimental_local_b2: too few observations for full rank");
+ 			std::cerr << fn_mic << ": too few valid local trajectories to fit local motion model." << std::endl;
+ 			mic.model = NULL;
+ 			goto skip_fitting; // TODO: Refactor!
+@@ -4049,8 +4057,21 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
+ 		}
+ 
+ 		const RFLOAT EPS = 1e-10;
+-		solve(matA, vecX, coeffX, EPS);
+-		solve(matA, vecY, coeffY, EPS);
++		std::vector<std::array<double,2>> b2_nuisance;
++		if (experimental_local_b2) {
++			std::vector<LocalB2::Observation> observations;
++			for (int i = 0; i < n_obs; ++i)
++				observations.push_back({double(patch_xs[i] / nx - 0.5), double(patch_ys[i] / ny - 0.5),
++				                        double(patch_frames[i] - 0.5), double(patch_xshifts[i]), double(patch_yshifts[i])});
++			try {
++				const auto fitted = LocalB2::fit(observations);
++				for (int j = 0; j < n_params; ++j) { coeffX(j) = fitted.x[j]; coeffY(j) = fitted.y[j]; }
++				b2_nuisance = fitted.nuisance;
++			} catch (const std::exception &e) { REPORT_ERROR(std::string("--experimental_local_b2: ") + e.what()); }
++		} else {
++			solve(matA, vecX, coeffX, EPS);
++			solve(matA, vecY, coeffY, EPS);
++		}
+ 
+ #ifdef DEBUG_OWN
+ 		std::cout << "Polynomial fitting coefficients for X and Y:" << std::endl;
+@@ -4104,9 +4125,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
+ 			const RFLOAT y = patch_ys[i] / ny - 0.5;
+ 			const RFLOAT z = patch_frames[i];
+ 
+-			model->getShiftAt(z, x, y, x_fitted, y_fitted);
+-			rms_x += (patch_xshifts[i] - x_fitted) * (patch_xshifts[i] - x_fitted);
+-			rms_y += (patch_yshifts[i] - y_fitted) * (patch_yshifts[i] - y_fitted);
++			model->getShiftAt(experimental_local_b2 ? z - 0.5 : z, x, y, x_fitted, y_fitted);
++			// Nuisance constants enter only the fit residual, never the published/applied field.
++			const RFLOAT residual_x = patch_xshifts[i] - x_fitted - (experimental_local_b2 ? b2_nuisance[i][0] : 0);
++			const RFLOAT residual_y = patch_yshifts[i] - y_fitted - (experimental_local_b2 ? b2_nuisance[i][1] : 0);
++			rms_x += experimental_local_b2 ? residual_x * residual_x : (patch_xshifts[i] - x_fitted) * (patch_xshifts[i] - x_fitted);
++			rms_y += experimental_local_b2 ? residual_y * residual_y : (patch_yshifts[i] - y_fitted) * (patch_yshifts[i] - y_fitted);
+ 
+ 			// These shifts and RMSDs are for reporting, so should be in the original pixel size
+ 			mic.patchX.push_back(patch_xs[i] * prescaling);
+diff --git a/src/motioncorr_runner.h b/src/motioncorr_runner.h
+index f24d7fe9..27f3c146 100644
+--- a/src/motioncorr_runner.h
++++ b/src/motioncorr_runner.h
+@@ -144,6 +144,7 @@ public:
+ 	// unscaled update still drives the stopping test). experimental_align_tolerance > 0
+ 	// replaces the hard-coded 0.5 px stop of the global alignment. Local patches are
+ 	// untouched by both.
++	bool experimental_local_b2 = false;
+ 	bool experimental_global_half_gain = false;
+ 	RFLOAT experimental_align_tolerance = 0;
+ 
+diff --git a/tests/test_experimental_flags_cli.py b/tests/test_experimental_flags_cli.py
+index bd71dcfb..7da1f51b 100644
+--- a/tests/test_experimental_flags_cli.py
++++ b/tests/test_experimental_flags_cli.py
+@@ -37,6 +37,14 @@ def main():
+             rc, out = run(binary, tmp, "--use_own", *flags)
+             assert rc != 0 and REFUSAL not in out and "no_such_input.star" in out, \
+                 f"{flags} without --gpu was wrongly refused or failed for another reason: {out[:300]}"
++        flag = "--experimental_local_b2"
++        rc, out = run(binary, tmp, "--use_own", "--gpu", "0", flag)
++        assert rc != 0 and flag + " is a CPU-only research option and is refused with --gpu" in out, out
++        for bad in (["--group_frames", "2"], ["--bin_factor", "2"], ["--interpolate_shifts"]):
++            rc, out = run(binary, tmp, "--use_own", flag, *bad)
++            assert rc != 0 and flag + " requires" in out, out
++        rc, out = run(binary, tmp, "--use_own", flag)
++        assert rc != 0 and "no_such_input.star" in out, out
+         # Control: --gpu alone is not refused for the experimental reason.
+         rc, out = run(binary, tmp, "--use_own", "--gpu", "0")
+         assert REFUSAL not in out, out[:300]
+diff --git a/tests/test_local_b2_fit.cpp b/tests/test_local_b2_fit.cpp
+new file mode 100644
+index 00000000..c5f1e058
+--- /dev/null
++++ b/tests/test_local_b2_fit.cpp
+@@ -0,0 +1,37 @@
++#include "src/local_b2_fit.h"
++#include <iostream>
++using namespace LocalB2;
++void require(bool ok,const char* msg){if(!ok)throw std::runtime_error(msg);}
++double value(const std::array<double,18>&c,double u,double v,double g){auto a=design(u,v,g);double z=0;for(int j=0;j<18;++j)z+=a[j]*c[j];return z;}
++int main(){try{
++ for(int degree=1;degree<=4;++degree){
++  std::array<double,18> c{};for(int j=0;j<18;++j)if(degree==4 || j%3==degree-1)c[j]=std::sin(j+1)*.003/(1+j%3);
++  std::vector<Observation> obs;int patch=0;
++  for(double u:{-.4,-.2,0.,.2,.4})for(double v:{-.4,-.2,0.,.2,.4}){++patch;for(int g=0;g<40;++g){double z=value(c,u,v,g)+.5*value(c,u,v,1);obs.push_back({u,v,double(g),z,z*-.7});}}
++  auto fit0=fit(obs);double error=0;
++  for(double u:{-.5,-.13,.5})for(double v:{-.5,.23,.5})for(int g=0;g<40;++g)error=std::max(error,std::abs(value(fit0.x,u,v,g)-value(c,u,v,g)));
++  require(error<1e-8,"analytic full-field exactness");require(value(fit0.x,.3,.2,0)==0,"exact zero gauge");
++  // B1 = B2 + .5*S in every temporal column: the extra term is patch-constant.
++  auto shifted=obs;for(auto&o:shifted){double constant=0;auto s=spatial(o.u,o.v);for(int j=0;j<18;++j)constant+=.5*s[j/3]*c[j];o.x+=constant+std::sin(12*o.u+7*o.v)*9;o.y-=constant;}
++  auto fit1=fit(shifted);for(int j=0;j<18;++j){require(std::abs(fit0.x[j]-fit1.x[j])<1e-8,"nuisance/B1 invariance");require(std::abs(fit0.y[j]-fit1.y[j])<1e-8,"axis offset invariance");}
++  // Wrong midpoint arm fits q(g+.5); publishing q(f) must fail degree >=2.
++  auto wrong=obs;for(auto&o:wrong)o.g+=.5;
++  // qr directly since the native fit intentionally refuses noninteger time.
++  std::vector<Row>a,b;for(auto&o:wrong){auto row=design(o.u,o.v,o.g);row.resize(18+25);size_t p=&o-&wrong[0];row[18+p/40]=1;a.push_back(row);b.push_back({o.x});}auto q=qr(a,b);std::array<double,18> qc{};for(int j=0;j<18;++j)qc[j]=q[j][0];
++  if(degree==2 || degree==3)require(std::abs(value(qc,.3,.2,39)-value(c,.3,.2,39))>1e-3,"wrong midpoint mutant escaped");
++ }
++ // Independent augmented designs on noisy data: nuisance elimination vs B1
++ // and transformed midpoint C, including both axes and the full-border field.
++ std::vector<Observation> noisy;
++ for(double u:{-.4,-.2,0.,.2,.4})for(double v:{-.4,-.2,0.,.2,.4})for(int g=0;g<40;++g)
++  noisy.push_back({u,v,double(g),std::sin(g*.19+u*3+v*7)+u*g*.01,std::cos(g*.31+u*2-v*5)});
++ auto b2=fit(noisy);
++ for(int arm=0;arm<2;++arm){std::vector<Row>a,b;size_t i=0;for(const auto&o:noisy){auto row=design(o.u,o.v,o.g+(arm?.5:0));if(!arm){auto s=spatial(o.u,o.v);for(int j=0;j<18;++j)row[j]+=.5*s[j/3];}row.resize(43);row[18+i/40]=1;a.push_back(row);b.push_back({o.x,o.y});++i;}auto q=qr(a,b);
++  for(int axis=0;axis<2;++axis){std::array<double,18> c{};for(int j=0;j<18;++j)c[j]=q[j][axis];if(arm)for(int j=0;j<18;j+=3){c[j]=q[j][axis]+q[j+1][axis]+.75*q[j+2][axis];c[j+1]=q[j+1][axis]+1.5*q[j+2][axis];}
++   for(double u:{-.5,.11,.5})for(double v:{-.5,.23,.5})for(int g=0;g<40;++g)require(std::abs(value(c,u,v,g)-value(axis?b2.y:b2.x,u,v,g))<1e-8,"noisy augmented B1/C vs projected B2");
++  }
++ }
++ for(double bad:{std::numeric_limits<double>::infinity(),std::numeric_limits<double>::quiet_NaN()}){auto invalid=noisy;invalid[5].x=bad;bool rejected=false;try{fit(invalid);}catch(const std::runtime_error&){rejected=true;}require(rejected,"nonfinite accepted");}
++ for(int mode=0;mode<2;++mode){std::vector<Observation> obs;for(double u:{-.4,0.,.4})for(double v:{-.4,0.,.4})for(int g=0;g<(mode?3:5);++g)obs.push_back({u,mode?v:0.,double(g),0,0});bool rejected=false;try{fit(obs);}catch(const std::runtime_error&){rejected=true;}require(rejected,"rank deficient accepted");}
++ std::cout<<"PASS analytic linear/quadratic/cubic/full18, gauge, offset/B1 invariance, midpoint mutants, spatial/three-time/nonfinite rejection, noisy augmented B1/C equivalence\n";
++}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}

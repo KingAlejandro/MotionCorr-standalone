@@ -219,6 +219,9 @@ if(BUILD_TESTING)
     # The same byte-preservation checker used by the native C2R oracle.
     add_executable(hermitian_projection_oracle tests/test_hermitian_projection_oracle.cpp)
     add_test(NAME HermitianProjectionOracle COMMAND hermitian_projection_oracle)
+    add_executable(local_ccf_capture tests/test_local_ccf_capture.cpp)
+    target_link_libraries(local_ccf_capture PRIVATE motioncorr_core)
+    add_test(NAME LocalCcfCapture COMMAND local_ccf_capture)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
     add_executable(cpu_dose_symmetry tests/test_cpu_dose_symmetry.cpp)
@@ -257,6 +260,9 @@ if(BUILD_TESTING)
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
     add_test(NAME PatchRetryState COMMAND patch_retry_state)
+    add_executable(local_b2_fit tests/test_local_b2_fit.cpp)
+    target_include_directories(local_b2_fit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    add_test(NAME LocalB2Fit COMMAND local_b2_fit)
     # Experimental default-off global half-gain damping (research prototype).
     add_executable(global_half_gain tests/test_global_half_gain.cpp)
     target_link_libraries(global_half_gain PRIVATE motioncorr_core)
@@ -699,6 +705,11 @@ if(BUILD_TESTING)
         if(MC_EXPERIMENT_CCF_DC)
             add_test(NAME CcfDcHookGpuRefusal
                 COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_dc_hook_gpu_refusal.py
+                    --binary $<TARGET_FILE:motioncorr>)
+        endif()
+        if(MC_EXPERIMENT_CCF_DC)
+            add_test(NAME LocalCcfCaptureCli
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_local_ccf_capture_cli.py
                     --binary $<TARGET_FILE:motioncorr>)
         endif()
         add_test(NAME OutputTreeComparator

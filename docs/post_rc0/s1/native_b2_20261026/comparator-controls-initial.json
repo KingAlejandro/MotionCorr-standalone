@@ -1,0 +1,45 @@
+[
+  {
+    "control": "root-only",
+    "expected_exit": 0,
+    "exit": 1,
+    "result": {
+      "root_a": "/private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/b2-comparator-rtzytpxb/A",
+      "root_b": "/private/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/b2-comparator-rtzytpxb/root-only",
+      "n_files": 3,
+      "n_gated": 3,
+      "n_gated_differing": 1,
+      "verdict": "DIFFERENT",
+      "rows": [
+        {
+          "file": "case.mrc",
+          "in_a": true,
+          "in_b": true,
+          "gated": true,
+          "equal": true,
+          "header_0_223_equal": true,
+          "pixels_equal": true,
+          "label_block_equal": true,
+          "pixels_sha256": "239f59ed55e737c77147cf55ad0c1b030b6d7ee748a7426952f9b852d5a935e5",
+          "size": 1031
+        },
+        {
+          "file": "case.star",
+          "in_a": true,
+          "in_b": true,
+          "gated": true,
+          "equal": true,
+          "normalised_sha256": "fa7dd7fd2e91a580fa24bd8ccb5fefdf1f5284b4994081343be5392aa300a14e"
+        },
+        {
+          "file": "corrected_micrographs.star",
+          "in_a": true,
+          "in_b": true,
+          "gated": true,
+          "equal": false,
+          "normalised_sha256": "e2d7adb938ec49293ea1b7bf0c8b34c51ce7b2c9c06379560998d88e98c8ed5d"
+        }
+      ]
+    }
+  }
+]

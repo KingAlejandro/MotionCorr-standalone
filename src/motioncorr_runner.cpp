@@ -273,7 +273,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 		if (!do_own || group != 1 || bin_factor != 1 || interpolate_shifts || patch_x != 3 || patch_y != 3
 		    || max_iter != 5 || first_frame_sum != 1 || last_frame_sum != 5 || n_threads < 1 || n_threads > 2
 		    || experimental_coupled_peak != 2 || experimental_local_b2 || experimental_global_half_gain
-		    || experimental_align_tolerance != 0 || experimental_isotropic_weight || experimental_local_full_width_weight || ccf_downsample != 0
+		    || experimental_align_tolerance != 0 || experimental_isotropic_weight || ccf_downsample != 0
 		    || bfactor != 150 || !skip_defect || !dc || std::string(dc) != "both")
 			REPORT_ERROR("MC_DIAG_LOCAL_CCF_DIR unsupported scope: requires fixed CPU UP-only K267 configuration");
 	}
@@ -2301,7 +2301,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 
 	std::unique_ptr<LocalCcfCaptureSession> capture_session;
 	if (!diag_local_ccf_dir.empty())
-		capture_session = std::make_unique<LocalCcfCaptureSession>(diag_local_ccf_dir, fn_mic, nx, ny, n_frames);
+		capture_session = std::make_unique<LocalCcfCaptureSession>(diag_local_ccf_dir, fn_mic, nx, ny, n_frames,
+			experimental_local_full_width_weight ? LocalCcfDiagnostic::Mode::FullWidthPair : LocalCcfDiagnostic::Mode::Legacy);
 
 	// Read gain reference
 	MC_STAGE("read gain");
@@ -4970,7 +4971,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		}
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
-	if (capture) capture->configure(Fframes, ccf_nx, ccf_ny, search_range, ccf_scale_x, ccf_scale_y, scaled_B, weight);
+	if (capture) capture->configure(Fframes, ccf_nx, ccf_ny, search_range, ccf_scale_x, ccf_scale_y, scaled_B, weight, weight_x_norm);
 
 	const bool use_coupled = experimental_coupled_peak == 2 || (experimental_coupled_peak == 1 && is_global);
 	std::atomic<long> coupled_peaks{0}, coupled_not_negdef{0}, coupled_offset_gt_1px{0};

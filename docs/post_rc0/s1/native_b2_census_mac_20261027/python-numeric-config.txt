@@ -1,0 +1,161 @@
+{
+  "Compilers": {
+    "c": {
+      "name": "clang",
+      "linker": "ld64",
+      "version": "15.0.0",
+      "commands": "cc"
+    },
+    "cython": {
+      "name": "cython",
+      "linker": "cython",
+      "version": "3.3.0",
+      "commands": "cython"
+    },
+    "c++": {
+      "name": "clang",
+      "linker": "ld64",
+      "version": "15.0.0",
+      "commands": "c++"
+    }
+  },
+  "Machine Information": {
+    "host": {
+      "cpu": "aarch64",
+      "family": "aarch64",
+      "endian": "little",
+      "system": "darwin"
+    },
+    "build": {
+      "cpu": "aarch64",
+      "family": "aarch64",
+      "endian": "little",
+      "system": "darwin"
+    }
+  },
+  "Build Dependencies": {
+    "blas": {
+      "name": "accelerate",
+      "found": true,
+      "version": "unknown",
+      "detection method": "system",
+      "include directory": "unknown",
+      "lib directory": "unknown",
+      "openblas configuration": "unknown",
+      "pc file directory": "unknown"
+    },
+    "lapack": {
+      "name": "accelerate",
+      "found": true,
+      "version": "unknown",
+      "detection method": "system",
+      "include directory": "unknown",
+      "lib directory": "unknown",
+      "openblas configuration": "unknown",
+      "pc file directory": "unknown"
+    }
+  },
+  "Python Information": {
+    "path": "/private/var/folders/s6/5hzmn6lx4dz5nxs7k_0slzph0000gn/T/build-env-zzknca2z/bin/python",
+    "version": "3.15"
+  },
+  "SIMD Extensions": {
+    "baseline": [
+      "NEON",
+      "NEON_FP16",
+      "NEON_VFPV4",
+      "ASIMD"
+    ],
+    "found": [
+      "ASIMDHP",
+      "ASIMDDP"
+    ],
+    "not found": [
+      "ASIMDFHM"
+    ]
+  }
+}
+None
+{
+  "Compilers": {
+    "c": {
+      "name": "clang",
+      "linker": "ld64",
+      "version": "15.0.0",
+      "commands": "cc"
+    },
+    "cython": {
+      "name": "cython",
+      "linker": "cython",
+      "version": "3.2.9",
+      "commands": "cython"
+    },
+    "c++": {
+      "name": "clang",
+      "linker": "ld64",
+      "version": "15.0.0",
+      "commands": "c++"
+    },
+    "fortran": {
+      "name": "gcc",
+      "linker": "ld64",
+      "version": "13.4.0",
+      "commands": "gfortran"
+    },
+    "pythran": {
+      "version": "0.19.0",
+      "include directory": "../../../../../../../private/var/folders/g3/pffjr_y96bq06blnkf72x_hw0000gn/T/build-env-8xkqy_yh/lib/python3.15/site-packages/pythran"
+    }
+  },
+  "Machine Information": {
+    "host": {
+      "cpu": "aarch64",
+      "family": "aarch64",
+      "endian": "little",
+      "system": "darwin"
+    },
+    "build": {
+      "cpu": "aarch64",
+      "family": "aarch64",
+      "endian": "little",
+      "system": "darwin"
+    },
+    "cross-compiled": false
+  },
+  "Build Dependencies": {
+    "blas": {
+      "name": "Accelerate",
+      "found": true,
+      "version": "unknown",
+      "detection method": "extraframeworks",
+      "include directory": "unknown",
+      "lib directory": "unknown",
+      "openblas configuration": "unknown",
+      "pc file directory": "unknown",
+      "has ilp64": false,
+      "cython blas ilp64": false
+    },
+    "lapack": {
+      "name": "Accelerate",
+      "found": true,
+      "version": "unknown",
+      "detection method": "extraframeworks",
+      "include directory": "unknown",
+      "lib directory": "unknown",
+      "openblas configuration": "unknown",
+      "pc file directory": "unknown",
+      "has ilp64": false
+    },
+    "pybind11": {
+      "name": "pybind11",
+      "version": "3.0.4",
+      "detection method": "config-tool",
+      "include directory": "unknown"
+    }
+  },
+  "Python Information": {
+    "path": "/private/var/folders/g3/pffjr_y96bq06blnkf72x_hw0000gn/T/build-env-8xkqy_yh/bin/python",
+    "version": "3.15"
+  }
+}
+None

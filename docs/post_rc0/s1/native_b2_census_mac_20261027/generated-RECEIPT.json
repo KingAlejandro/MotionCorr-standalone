@@ -1,0 +1,32 @@
+{
+  "schema": "motion-counting/1",
+  "recipe": {
+    "schema": "motion-counting/1",
+    "condition": "dose1",
+    "nx": 4096,
+    "ny": 4096,
+    "frames": 40,
+    "dose": 1.0,
+    "pedestal": 1.0,
+    "scale": 1.0,
+    "texture_rms": 0.04,
+    "oversample": 2,
+    "pixel_size": 0.885,
+    "motion": "inmodel",
+    "scene_seed": 238267,
+    "noise_seed": 0,
+    "control": null
+  },
+  "files": {
+    "movie.mrcs": "44ee7cc3fca81a6a4e3c8892e59d0309d00a4072f8a4f921c36f6d6e797dddc9",
+    "input.star": "ba3a39e59ca796b5dcaae0a41e0ded6f2c020e877d344a4aa182e4afebf8ac55"
+  },
+  "expectation_sha256": "665846b4edc7d42f28cb6287090548b2440db4c4b4048bffd3d11fbd2abf21d0",
+  "numpy": "2.5.4",
+  "python": "3.15.1",
+  "seconds": 27.899980068206787,
+  "mean": 1.0000130534172058,
+  "std": 1.0007989641282418,
+  "orientation": "MRC native rows: y increases by stored row, no TIFF conversion",
+  "preprocessing": "identity: no gain, --skip_defect required; injection commutes exactly"
+}

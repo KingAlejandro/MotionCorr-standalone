@@ -1,0 +1,18 @@
+[
+  {
+    "stage": "initial CMake configure",
+    "exit": 1,
+    "failure": "BUILD_TESTING=ON requires Python 3 with numpy installed; selected system Python did not provide numpy",
+    "resolution": "Retained configure-v1-failed.log. Reconfigured with Python3_EXECUTABLE pointing at the new pinned venv; configure and build then exited 0. No source edits."
+  },
+  {
+    "stage": "W8 metadata inspection",
+    "failure": "AttributeError: 'list' object has no attribute 'items'",
+    "scope": "Exploratory schema display assumed score.json movies was a dict. It is a list; inspected element 0 in the next read. No input/evaluator/result mutation or scientific run."
+  },
+  {
+    "stage": "first input identity",
+    "failure": "dose1-s00 movie and expectation SHA-256 both differ from the frozen census",
+    "resolution": "STOP; no retry, native producers, CTest execution, accuracy metrics or P1-P4 verdicts."
+  }
+]

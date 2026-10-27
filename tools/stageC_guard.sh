@@ -16,8 +16,10 @@ die() { echo "STOP guard: $2 ($(date -u +%FT%TZ))"; exit "$1"; }
 label=${1:-}; need_gpu=${2:-}
 case "$need_gpu" in 0|1) ;; *) die 15 "NEED_GPU must be 0 or 1";; esac
 [ -n "$label" ] || die 15 "empty label"
-if [ "${STAGEC_REAL:-0}" = 1 ] && env | grep -q '^STAGEC_TEST_'; then die 20 "test hook present in a real run"; fi
-if [ "${STAGEC_TEST_MODE:-0}" != 1 ] && env | grep -q '^STAGEC_TEST_'; then die 20 "test hook without STAGEC_TEST_MODE=1"; fi
+# Builtin variable listing, no pipe: `env | grep -q` under pipefail let a large environment hide a hook (SIGPIPE on env).
+hooks=$(compgen -A variable STAGEC_TEST_ || true)
+if [ "${STAGEC_REAL:-0}" = 1 ] && [ -n "$hooks" ]; then die 20 "test hook present in a real run"; fi
+if [ "${STAGEC_TEST_MODE:-0}" != 1 ] && [ -n "$hooks" ]; then die 20 "test hook without STAGEC_TEST_MODE=1"; fi
 GPU2=${STAGEC_GPU2:-}; FOREIGN_PID=${STAGEC_FOREIGN_PID:-}; S=${STAGEC_SCRATCH:-}
 echo "$GPU2" | grep -Eq '^GPU-[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$' || die 15 "STAGEC_GPU2 is not an exact GPU UUID"
 echo "$FOREIGN_PID" | grep -Eq '^[0-9]+$' || die 15 "STAGEC_FOREIGN_PID is not numeric"

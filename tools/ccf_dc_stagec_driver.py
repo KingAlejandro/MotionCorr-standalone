@@ -7,7 +7,9 @@ Real execution needs a parent-written release file (see `verify_release`); this 
 
     python3 ccf_dc_stagec_driver.py run --pins STAGEC_PINS.json --release RELEASE.json --outdir <new dir>
 
-Every grade, scorer, command and identity comparison comes from `ccf_dc_native_rows` unchanged. Hooks (spawner, grader,
+Every grade, scorer, command and identity comparison comes from `ccf_dc_native_rows` unchanged. The "executed command or
+environment differs" check compares what the spawner passed with the ledger-derived command: it is a spawner record, not
+independent proof from the operating system; the child's own `/proc` cmdline, exe and environ are recorded separately. Hooks (spawner, grader,
 guard) exist only for the dry run with fake pins; a real run refuses any hook. The driver compares and records; the only
 threshold it owns is the C-REPRO tolerance below, fixed in source.
 """
@@ -223,6 +225,27 @@ def _read_proc(pid):
                 tasks=len(tasks), cpus_allowed=kv["Cpus_allowed_list"].strip(), utime=int(rest[11]), stime=int(rest[12]), via=via), children
 
 
+def proc_identity(pid, argv, env):
+    """What the OS says the child is (first sample, Linux): recorded next to what the spawner passed. Not a stop rule."""
+    d, out = f"/proc/{pid}", {}
+    try:
+        out["cmdline"] = open(d + "/cmdline", "rb").read().decode(errors="replace").split("\0")[:-1]
+        out["cmdline_matches_argv"] = out["cmdline"] == list(argv)
+    except OSError as e:
+        out["cmdline_error"] = repr(e)
+    try:
+        out["exe"] = os.readlink(d + "/exe")
+    except OSError as e:
+        out["exe_error"] = repr(e)
+    try:
+        raw = open(d + "/environ", "rb").read()
+        kv = dict(x.split("=", 1) for x in raw.decode(errors="replace").split("\0") if "=" in x)
+        out.update(environ_sha256=hashlib.sha256(raw).hexdigest(), environ_keys=sorted(kv), environ_matches_env=kv == dict(env))
+    except OSError as e:
+        out["environ_error"] = repr(e)
+    return out
+
+
 def sample_tree(root):
     queue, seen, recs, errors = [root], set(), [], []
     while queue and len(seen) < 256:
@@ -291,6 +314,8 @@ def summarize(samples, linux, cuda, truncated, stragglers, sample_file):
         return dict(summ, status="UNOBSERVED: /proc not available on this platform")
     if not pids_seen:
         return dict(summ, status="UNOBSERVED: no readable process sample (the child ended before the first sample or /proc was unreadable)")
+    if samples and "identity" in samples[0]:
+        summ["identity_first_sample"] = samples[0]["identity"]
     summ.update(status="OBSERVED",
                 max_tree_pids=max(len(s_["pids"]) for s_ in samples),
                 max_threads_total=max(sum(r["threads"] for r in s_["pids"]) for s_ in samples),
@@ -303,6 +328,7 @@ def summarize(samples, linux, cuda, truncated, stragglers, sample_file):
             for pid, uu in s_.get("gpu", {}).items():
                 seen.setdefault(str(pid), set()).update(uu)
         summ["gpu_uuids_seen_by_pid"] = {k: sorted(v) for k, v in seen.items()}
+        # OBSERVED means a tree pid was listed by nvidia-smi, not that it was on the granted GPU: compare the UUIDs when reporting
         summ["gpu_status"] = "OBSERVED" if seen else "UNOBSERVED: no tree pid listed by nvidia-smi compute-apps"
     return summ
 
@@ -327,6 +353,8 @@ def default_spawner(argv, cwd, env, out_path, err_path, timeout):
                     return
                 recs, errs = sample_tree(proc.pid)
                 ent = dict(t=time.time(), pids=recs, errors=errs)
+                if not samples:
+                    ent["identity"] = proc_identity(proc.pid, argv, env)
                 if cuda:
                     try:
                         ent["gpu"] = {str(k): v for k, v in gpu_map({r["pid"] for r in recs}).items()}
@@ -369,9 +397,11 @@ class Driver:
             if not release_path:
                 raise Stop("a real run needs a release file")
             self.release = verify_release(release_path, self.pins_path, Path(__file__).resolve(), self.pins, self.outdir)
+            self.release_bytes = Path(release_path).read_bytes()
         self.grader = grader or self.real_grade
         self.spawner = spawner or default_spawner
         self.guard_hook = guard
+        self.release_bytes = getattr(self, "release_bytes", None)
         self.ledger, self.plan, self.pairs, self.repro = [], [], [], []
         self.results, self.skipped, self.locks, self.seq, self.b3_done = {}, {}, [], 0, set()
         self.stopped_weights = {}
@@ -412,12 +442,35 @@ class Driver:
                 files["base_target.npy"] = man["base_sha256"]
             if len(files) != f["files"] or files != f["file_hashes"]:
                 raise Stop(f"{tag} input file list differs from the pin")
-            for name, h in files.items():
-                if sha256_file(d / name) != h:
-                    raise Stop(f"{tag} input {name} hash differs")
+            self.verify_fixture_pinned(tag)
         if not self.dry_run:
             self.verify_runtime()
         return self
+
+    def verify_fixture_pinned(self, tag):
+        """Re-hash the manifest and every input and truth file of one fixture against the frozen pins only (never the mutable manifest)."""
+        f = self.pins["fixtures"][tag]
+        d = Path(f["dir"])
+        if len(f["file_hashes"]) != f["files"]:
+            raise Stop(f"{tag} pinned file count differs")
+        if sha256_file(d / "MANIFEST.json") != f["manifest_sha256"]:
+            raise Stop(f"{tag} manifest hash differs from the pin")
+        for name, h in f["file_hashes"].items():
+            if sha256_file(d / name) != h:
+                raise Stop(f"{tag} input {name} hash differs from the pin")
+
+    def verify_tools(self):
+        """Real run, before every job: the guard, the tool modules and this driver still have their pinned bytes."""
+        if self.dry_run:
+            return
+        g = self.pins["guard"]
+        if sha256_file(g["path"]) != g["sha256"]:
+            raise Stop("guard script differs from the pin")
+        for name, h in self.pins["modules"].items():
+            if sha256_file(sys.modules[name].__file__) != h:
+                raise Stop(f"module {name} differs from the pin")
+        if sha256_file(Path(__file__).resolve()) != self.release["driver_sha256"]:
+            raise Stop("the driver file differs from the released driver hash")
 
     def verify_runtime(self):
         p = self.pins
@@ -431,6 +484,21 @@ class Driver:
         cpus = sorted(os.sched_getaffinity(0))
         if cpus != p["cpus"]:
             raise Stop(f"affinity {cpus} != pinned {p['cpus']}")
+
+    def record_release(self):
+        """Copy the parent's exact release bytes into the run directory (under the leases); never creates a release."""
+        if self.release_bytes is None:
+            return
+        with open(self.outdir / "release_copy.json", "xb") as f:
+            f.write(self.release_bytes)
+        self.event("release", sha256=hashlib.sha256(self.release_bytes).hexdigest(), run_id=self.release.get("run_id"),
+                   authorized_by=self.release.get("authorized_by"))
+
+    def release_record(self):
+        if self.release_bytes is None:
+            return None
+        return dict(sha256=hashlib.sha256(self.release_bytes).hexdigest(), run_id=self.release.get("run_id"),
+                    authorized_by=self.release.get("authorized_by"), copy="release_copy.json")
 
     # -- resources -----------------------------------------------------------------------------
     def acquire(self, names):
@@ -456,10 +524,13 @@ class Driver:
             rc, text = self.guard_hook(label, need_gpu)
         else:
             g = self.pins
+            data = Path(g["guard"]["path"]).read_bytes()          # these exact bytes are hashed and then executed
+            if hashlib.sha256(data).hexdigest() != g["guard"]["sha256"]:
+                raise Stop("guard script differs from the pin before the call")
             env = {k: v for k, v in os.environ.items() if k in ENV_ALLOW}
             env.update(STAGEC_GPU2=g["gpu"]["uuid"], STAGEC_FOREIGN_PID=str(g["gpu"]["foreign_pid"]), STAGEC_SCRATCH=str(self.outdir),
                        STAGEC_REAL="0" if self.dry_run else "1")
-            p = subprocess.run(["bash", g["guard"]["path"], label, str(int(need_gpu))], env=env, capture_output=True, text=True)
+            p = subprocess.run(["bash", "-c", data.decode(), "stageC_guard.sh", label, str(int(need_gpu))], env=env, capture_output=True, text=True)
             rc, text = p.returncode, p.stdout + p.stderr
         (self.outdir / "guards").mkdir(exist_ok=True)
         with open(self.outdir / "guards" / f"{self.seq:04d}-{label}.txt", "x") as f:
@@ -528,14 +599,17 @@ class Driver:
         bpin = self.pins["binaries"][job["binary"]]
         if sha256_file(bpin["path"]) != bpin["sha256"]:
             raise Stop(f"binary {job['binary']} changed before {jid}")
+        tag = "k267" if job["tier"] == "K" else "n"
+        self.verify_tools()
+        self.verify_fixture_pinned(tag)                      # manifest, inputs and truth, against the frozen pins, before every producer
         cwd = run_dir / "cwd"
         cwd.mkdir()
-        man = json.loads((Path(fx) / "MANIFEST.json").read_text())["cases"][name]["files"]
+        pinned = self.pins["fixtures"][tag]["file_hashes"]
         for ext in (".star", ".mrcs"):
-            src = Path(fx) / (name + ext)
-            if sha256_file(src) != man[name + ext]:
+            data = (Path(fx) / (name + ext)).read_bytes()       # read once: the hashed bytes are the staged bytes
+            if hashlib.sha256(data).hexdigest() != pinned[name + ext]:
                 raise Stop(f"input {name + ext} changed before {jid}")
-            (cwd / (name + ext)).write_bytes(src.read_bytes())
+            (cwd / (name + ext)).write_bytes(data)
         if sorted(p.name for p in cwd.iterdir()) != sorted([name + ".star", name + ".mrcs"]):
             raise Stop("the child's working directory holds more than the case STAR and MRC")
         base = {k: v for k, v in os.environ.items() if k in ENV_ALLOW}
@@ -564,7 +638,10 @@ class Driver:
         post = inventory(run_dir)
         write_json(run_dir / "inventory.post.json", post)
         receipt = dict(job_id=jid, ledger_row=job, phase=phase, argv=actual, expected_argv=argv, env_declared=env_decl,
-                       env_dropped_names=dropped, sampling=sampling, cwd=str(cwd), binary=bpin, source=self.pins["source"]["commit"],
+                       env_dropped_names=dropped, env_passed=dict(env_used),
+                       env_policy="allowlist " + ",".join(ENV_ALLOW) + " plus declared run_env; all other variables, including "
+                                  "LD_LIBRARY_PATH and LD_PRELOAD, are dropped (Stage B and the retained producer calls passed the full environment)",
+                       sampling=sampling, cwd=str(cwd), binary=bpin, source=self.pins["source"]["commit"],
                        pins_sha256=sha256_file(self.pins_path), run_dir=str(run_dir), rc=rc, seconds=t1 - t0,
                        inventory_pre_sha256=hashlib.sha256(json.dumps(pre, sort_keys=True).encode()).hexdigest(),
                        inventory_post_sha256=hashlib.sha256(json.dumps(post, sort_keys=True).encode()).hexdigest())
@@ -684,7 +761,7 @@ class Driver:
         return len(lines)
 
     def finish(self, status, reason):
-        self.release_locks()
+        # the leases stay held through the records and the manifest; execute() releases them last
         done = set(self.results)
         not_run = [j["job_id"] for _, j in self.plan if j["job_id"] not in done]
         pairs = self.pair_report()
@@ -702,6 +779,7 @@ class Driver:
         write_json(self.outdir / "coverage.json", dict(coverage, not_run=not_run))
         write_json(self.outdir / "final_status.json", dict(
             status=self.status, reason=reason, dry_run=self.dry_run, source=self.pins["source"]["commit"],
+            release=self.release_record(),
             scope="K267 and N controls only; M held; no promotion, no whole-movie parity",
             scientific_note="field FAIL/UNIDENTIFIABLE rows are results, kept; newly harmful results block promotion"))
         self.event("final", status=self.status, reason=reason)
@@ -718,6 +796,7 @@ class Driver:
         try:
             self.verify()
             self.acquire(["own", "cpu", "gpu2"])
+            self.record_release()
             for phase, job in self.plan:
                 if job["tier"] == "N" and job["weight"] in self.stopped_weights:
                     self.skipped[job["job_id"]] = "C-REPRO failed for this weight set"
@@ -740,6 +819,7 @@ class Driver:
         finally:
             if old_term is not None:
                 signal.signal(signal.SIGTERM, old_term)
+            self.release_locks()                 # last: after the child group, the records and the sealed manifest (or the failure)
 
 
 def main():

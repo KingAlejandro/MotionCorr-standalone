@@ -403,7 +403,7 @@ class StopControls(unittest.TestCase):
             holder["w"] = w
             d = drv.Driver(w.write_pins(), Path(t) / "out", dry_run=True, grader=make_fake_grader(), guard=guard)
             res = d.execute()
-            self.stopped(res, "input pedestal.star changed")
+            self.stopped(res, "input pedestal.star hash differs from the pin")
         with tempfile.TemporaryDirectory() as t:
             holder = {}
             def guard2(label, need_gpu):

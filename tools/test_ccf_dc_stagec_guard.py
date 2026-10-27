@@ -9,6 +9,7 @@ realistic fixture passes (0). The real guard on the real host is exercised separ
 import os
 import stat
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -186,6 +187,18 @@ class GuardFailClosed(unittest.TestCase):
         r = subprocess.run(["bash", str(GUARD), "t", "1"], env=env, capture_output=True, text=True, timeout=60)
         self.assertNotEqual(r.returncode, 20, "a real run without hooks proceeds to the real reads")
         self.assertNotEqual(r.returncode, 0 if not os.path.exists("/proc/stat") else 99)
+
+    def test_a_large_environment_cannot_hide_a_hook(self):
+        """Review F5: `env | grep -q` under pipefail got SIGPIPE on a large environment and read the hook as absent."""
+        # One 300 kB variable reproduces the old SIGPIPE bypass here (checked against the 26e74d8a guard on macOS). Linux caps a single
+        # variable at 128 KiB, so there several 120 kB variables stand in (a large environment; the bypass is not asserted on Linux).
+        big = {"STAGEC_BULK": "x" * 300000} if not sys.platform.startswith("linux") else {f"STAGEC_BULK_{i}": "x" * 120000 for i in range(5)}
+        for rep in range(5):
+            r = self.g.run("1", STAGEC_REAL="1", **big)
+            self.assertEqual(r.returncode, 20, f"repeat {rep}: {r.stdout[-200:]}")
+        r = self.g.run("1", STAGEC_REAL="1", STAGEC_TEST_MODE=None, **big)
+        self.assertEqual(r.returncode, 20, "no test mode and a hook: rejected whatever the environment size")
+        self.assertEqual(self.g.run("1", **big).returncode, 0, "a large environment alone does not stop a test-mode run")
 
     def test_missing_proc_stat_is_a_stop_not_zero_percent(self):
         self.g.s1.write_text(stat_text({90}, lambda c: 1, lambda c: 1))   # no cores 80-87 at all

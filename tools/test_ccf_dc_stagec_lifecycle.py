@@ -5,6 +5,7 @@
 Only fake children (small Python scripts); no MotionCorr child, no GPU. Linux-only assertions run where /proc exists; elsewhere the
 record must say UNOBSERVED honestly. Local use: at most two threads, a few MB of scratch.
 """
+import hashlib
 import json
 import os
 import signal
@@ -254,8 +255,10 @@ class RealEntryRejectsTestHooks(unittest.TestCase):
                 d.do_guard("x", True)
             self.assertEqual(seen["env"]["STAGEC_REAL"], "1")
             self.assertFalse([k for k in seen["env"] if k.startswith("STAGEC_TEST_")])
-            self.assertEqual(seen["cmd"][:2], ["bash", pins["guard"]["path"]])
-            self.assertEqual(seen["cmd"][3], "1")
+            # amendment 2 (F3): the pinned bytes are hashed and executed as `bash -c <text>`, not re-read from the path by bash
+            self.assertEqual(seen["cmd"][:2], ["bash", "-c"])
+            self.assertEqual(hashlib.sha256(seen["cmd"][2].encode()).hexdigest(), pins["guard"]["sha256"])
+            self.assertEqual(seen["cmd"][3:], ["stageC_guard.sh", "x", "1"])
 
 
 if __name__ == "__main__":

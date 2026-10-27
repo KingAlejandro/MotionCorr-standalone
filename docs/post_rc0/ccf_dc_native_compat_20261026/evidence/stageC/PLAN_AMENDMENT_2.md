@@ -15,3 +15,28 @@ Review: `review/STAGEC_R1_REPORT.md` (sha256 `577c14ca59665372f88d33b0f76a04c96a
 ## Verification to run (all local; at most 2 threads, 4 GB, 200 MB of scratch)
 
 The new focused tests above (`tools/test_ccf_dc_stagec_seal.py`, additions to the guard tests); the existing guard (8), lifecycle (12) and driver (19) suites once on the final bytes, each observed to its terminal state without orphaned jobs; failed attempts kept. `STAGEC_PINS.json` and `PINS.json` are re-issued (the guard bytes change), the previous pins kept as history. Source, tests, test-data, CMake and the reviewed scoring tools show an empty diff against `96e7e7be` except the new test registration.
+
+## Delivery (added after the work; the plan above is unchanged)
+
+Code bytes are fixed at the commit that adds this section's files; the hashes below are of those bytes. Production `src/`, `tests/`, `test-data/` and the reviewed scoring tools (`ccf_dc_native_rows.py`, `ccf_dc_tap_field.py`, `check_*`, `motion_field.py`) are unchanged since `96e7e7be`; the only edit to an existing build file is the test registration (`CcfDcStageCSeal`). No SSH, native, GPU, movie, benchmark, install, release or watcher step ran; no release file exists; the 160 K267/N rows and 16 M rows remain HELD.
+
+| File | sha256 |
+|---|---|
+| `tools/ccf_dc_stagec_driver.py` | `b45481459d414f56d37872d3c27c2b4b6854d16f8132dfdd52a58019187adf3d` |
+| `tools/stageC_guard.sh` | `3ec008638984513756c3034b7eb981a0a7fcf933c5f5e2800a8104995b7db9d2` |
+| `tools/stageC_ldd_preflight.sh` (prepared, not run) | `f92b8186386bd5ecf7e2de8513a4393f11af42e8d20eb5c26d52b54e8f8c3fd6` |
+| `tools/test_ccf_dc_stagec_seal.py` (new) | `3cd6aa0e1a45b9c571cac65e0161b2e3a820a362cb6e779dce3f79088cfbe04d` |
+| `tools/test_ccf_dc_stagec_guard.py` | `3a2a353bf4a557215415dfce6a4bc295f20029cea402256f5bd8ae6cab73accf` |
+| `tools/test_ccf_dc_stagec_lifecycle.py` | `ae8d8b1e69d176dd0c724e9e54a376d8f9a2cd4ea702b4a7f1c2acd600c08c70` |
+| `tools/test_ccf_dc_stagec_driver.py` | `cc6f6e539eb10015a21932946018d8d1804b124d0ed3cc19cde62a191aab2614` |
+| `evidence/stageC/STAGEC_PINS.json` (re-issued; only the guard pin changed, `ad10f27e...` to `3ec008638984...`) | `c6f6e154161e92fbb6de1b60ffc6a91b2dd3f943c0d6d14a8486f5cd633352f3` |
+| `evidence/stageC/STAGEC_PINS.26e74d8a.json` (previous pins, kept), `STAGEC_PINS.b7935fd5.json` | history |
+
+Results (local, macOS CPU, one thread of work at a time, scratch a few MB; logs in `amend2_logs/`):
+- Guard suite 9 OK (8 earlier plus the large-environment control). Seal suite 19 OK. Lifecycle suite: first run 11 of 12 (`lifecycle-run1.FAILED-old-guard-call-form.out`: the old assertion expected `bash <path>`, which F3 deliberately changed to `bash -c <verified text>`); after updating that assertion 12 OK (`lifecycle-run2.OK.out`). Full driver suite 19 OK, exit 0, 230.7 s, one run observed to its terminal state (`driver-run1.OK-19of19.out`); no background job was left.
+- Test power: the `26e74d8a` driver fails 13 of the 19 seal tests (8 failures, 5 errors), covering F1 (lease order), F2 (input+manifest together, truth, manifest alone, N fixture), F3 (replaced guard, executed bytes, real-mode re-hash), F4 and F6; the `26e74d8a` guard run under `STAGEC_REAL=1` with a 300 kB `STAGEC_BULK` variable returned 0 (hook missed, everything else passed) where the amended guard returns 20 (a single 300 kB variable reproduces the old SIGPIPE bypass on macOS; on Linux the per-variable limit is 128 KiB, so the Linux variant uses several 120 kB variables and does not assert the old bypass).
+- F7 counts, asserted by the seal suite: `amend1_window/SHA256SUMS` 12 OK and 1 FAILED (its own line); `SHA256SUMS.v2` 12 of 12 OK, excluding itself and the amendment; the driver's own manifest excludes itself and verifies completely.
+
+What the fixes do (details in the plan above): F1 leases are released in a final `finally` after the records, release copy and manifest (and on failure); F2 every producer is preceded by a re-hash of the manifest and all 33 (K267) or 26 (N) files against the frozen pins, staged copies are hashed from the bytes read, and a tamper of inputs plus manifest together or of truth stops before the child; F3 the guard file is read, hashed against the pin and the same text executed with `bash -c`, and in a real run the pinned modules, guard and driver hash are re-checked before every job; F4 the exact release bytes are copied into the run directory and its sha256, `run_id` and `authorized_by` are in `final_status.json`; F5 the hook predicate no longer uses a pipe; F6 the full allowlisted environment actually passed, the dropped names and the policy are in each receipt, the first sample records the child's `/proc` cmdline, exe and environ digest (recorded, not a stop), and the argv/env comparison is documented as a spawner record, not independent OS proof.
+
+Still UNRUN or open for the parent: any Stage C producer; the loader preflight `stageC_ldd_preflight.sh` (to be run with the resource grant under the exact scrub environment for the three binaries and two oracles, and compared with the Stage B full-environment resolution, which has no retained record: UNRUN); a fresh 0 % GPU2 baseline (foreign context only) as the grant condition; confirmation that the three lock inodes exist; the driver's behaviour if it is itself killed by SIGKILL/SIGHUP (no manifest; PDEATHSIG covers the direct child only) or SIGTERM during sealing, both documented limits; `do_guard` has no timeout (a hung `nvidia-smi` would hold the leases, no job runs); `gpu_status: OBSERVED` means a tree pid was listed, not that it was on the granted GPU.

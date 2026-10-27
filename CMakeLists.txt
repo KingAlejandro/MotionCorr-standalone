@@ -613,6 +613,10 @@ if(BUILD_TESTING)
         add_test(NAME CcfDcStageCLifecycle
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_stagec_lifecycle.py)
         set_tests_properties(CcfDcStageCLifecycle PROPERTIES TIMEOUT 600)
+        # Opus driver review r1 findings (amendment 2): leases through sealing, frozen-pin fixture checks, guard bytes, release record.
+        add_test(NAME CcfDcStageCSeal
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_stagec_seal.py)
+        set_tests_properties(CcfDcStageCSeal PROPERTIES TIMEOUT 600)
         if(MC_EXPERIMENT_CCF_DC)
             set(_ccf_dc_rows_args "")
             if(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)

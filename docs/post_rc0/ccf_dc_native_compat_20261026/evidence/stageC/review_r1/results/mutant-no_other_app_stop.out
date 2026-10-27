@@ -1,0 +1,32 @@
+F.......
+======================================================================
+FAIL: test_compute_app_failures_and_stop_rules (__main__.GuardFailClosed.test_compute_app_failures_and_stop_rules)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp.quI8JFdqBV/test_ccf_dc_stagec_guard.py", line 125, in test_compute_app_failures_and_stop_rules
+    self.g.set("apps", text=DEFAULTS["apps"] + f"4242, {GPU2}, 100 MiB, other\n"); self.rc(11, "other compute app on GPU2")
+                                                                                   ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp.quI8JFdqBV/test_ccf_dc_stagec_guard.py", line 94, in rc
+    self.assertEqual(r.returncode, expect, f"{why}\n{r.stdout}\n{r.stderr}")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 11 : other compute app on GPU2
+== guard t 2026-10-27T00:16:23Z
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1551, 0, 39
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 425, 0, 37
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 425, 0, 31
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49769, 87, 66
+3983855, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 414 MiB, /home/x/llama-server
+3983855, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49758 MiB, /home/x/llama-server
+4242, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 100 MiB, other
+cpu80-87 busy%: cpu80 20 cpu81 20 cpu82 20 cpu83 20 cpu84 20 cpu85 20 cpu86 20 cpu87 20 
+processes currently running on cpu80-87:
+81 R 0.0 alex 4242 ps -eo psr
+scratch used 1048576 bytes of cap 21474836480; df available 600000000000; memory total 463000000000 available 440000000000
+guard t passed
+
+
+
+----------------------------------------------------------------------
+Ran 8 tests in 20.379s
+
+FAILED (failures=1)

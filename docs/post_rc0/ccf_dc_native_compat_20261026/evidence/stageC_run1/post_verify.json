@@ -1,0 +1,130 @@
+{
+ "fixtures_rehash": {
+  "files": 59,
+  "mismatches": []
+ },
+ "binaries": {
+  "def": true,
+  "exp": true,
+  "iso": true
+ },
+ "guard_pinned_path": true,
+ "release": {
+  "copy_sha256": "83183e0481218f0eab0e3d5fff6d9ccd267f743fb1cabdce68f910ce4373461a",
+  "equals_parent": true,
+  "final_status_release": {
+   "authorized_by": "parent",
+   "copy": "release_copy.json",
+   "run_id": "native-dc-stagec-20261027-r1",
+   "sha256": "83183e0481218f0eab0e3d5fff6d9ccd267f743fb1cabdce68f910ce4373461a"
+  },
+  "final_status_equals_parent": true
+ },
+ "manifest": {
+  "entries": 2712,
+  "ok": 2712,
+  "failed": [],
+  "lists_itself": false,
+  "files_on_disk": 2712
+ },
+ "coverage": {
+  "jobs_executed": 95,
+  "jobs_expected": 160,
+  "jobs_not_run": 65,
+  "pairs_evaluated": 34,
+  "pairs_expected": 96,
+  "repro_expected": 16,
+  "repro_rows_present": 16,
+  "stopped_weight_sets": {}
+ },
+ "not_run_count": 65,
+ "job_events": [
+  [
+   [
+    2,
+    "SCORED",
+    0
+   ],
+   80
+  ],
+  [
+   [
+    1,
+    "SCORED",
+    0
+   ],
+   12
+  ],
+  [
+   [
+    3,
+    "SCORED",
+    0
+   ],
+   3
+  ]
+ ],
+ "cuda_rows": 15,
+ "cuda_gpu2_only_rows": 0,
+ "cuda_not_attributed": [
+  "J045-K-affine-cuda-exp-none-prod",
+  "J046-K-affine-cuda-exp-global-prod",
+  "J047-K-affine-cuda-exp-local-prod",
+  "J048-K-affine-cuda-exp-both-prod",
+  "J057-K-pedestal-cuda-exp-none-prod",
+  "J058-K-pedestal-cuda-exp-global-prod",
+  "J059-K-pedestal-cuda-exp-local-prod",
+  "J060-K-pedestal-cuda-exp-both-prod",
+  "J069-K-noisy-cuda-exp-none-prod",
+  "J070-K-noisy-cuda-exp-global-prod",
+  "J071-K-noisy-cuda-exp-local-prod",
+  "J072-K-noisy-cuda-exp-both-prod",
+  "J007-K-zero-cuda-def-unset-prod",
+  "J008-K-zero-cuda-exp-unset-prod",
+  "J009-K-zero-cuda-exp-none-prod"
+ ],
+ "sampling_summary": [
+  [
+   [
+    "OBSERVED",
+    1,
+    [
+     "80-87"
+    ]
+   ],
+   92
+  ],
+  [
+   [
+    "OBSERVED",
+    2,
+    [
+     "80-87"
+    ]
+   ],
+   3
+  ]
+ ],
+ "post": {
+  "driver_alive": "no",
+  "stray_procs": "",
+  "locks": {
+   "motioncorr-cuda-boundary-cpu80-87": {
+    "inode": 8086,
+    "held_lines": 0
+   },
+   "motioncorr-gpu2-correctness": {
+    "inode": 1918,
+    "held_lines": 0
+   },
+   "motioncorr-dcnative-gpu2-cpu80-87": {
+    "inode": 4531,
+    "held_lines": 0
+   }
+  },
+  "gpu": "0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1551 MiB, 0 %\n1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 425 MiB, 0 %\n2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 425 MiB, 0 %\n3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49769 MiB, 88 %",
+  "gpu_apps": "3983855, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1540 MiB\n3983855, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 414 MiB\n3983855, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 414 MiB\n3983855, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49758 MiB",
+  "outdir_du": "130M",
+  "disk": "/dev/sda1       3.1T  2.5T  592G  81% /"
+ }
+}

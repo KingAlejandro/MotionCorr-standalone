@@ -1,0 +1,2694 @@
+[
+ {
+  "job_id": "J001-K-zero-cpu-def-unset-prod",
+  "tier": "K",
+  "case": "zero",
+  "backend": "cpu",
+  "binary": "def",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": null,
+  "star_verdict": "PASS",
+  "runtime_A": null,
+  "star_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": null,
+  "exit": 0
+ },
+ {
+  "job_id": "J002-K-zero-cpu-exp-unset-prod",
+  "tier": "K",
+  "case": "zero",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "star_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J003-K-zero-cpu-exp-none-prod",
+  "tier": "K",
+  "case": "zero",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "star_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J004-K-zero-cpu-exp-global-prod",
+  "tier": "K",
+  "case": "zero",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "global",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "star_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J005-K-zero-cpu-exp-local-prod",
+  "tier": "K",
+  "case": "zero",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "local",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "star_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J006-K-zero-cpu-exp-both-prod",
+  "tier": "K",
+  "case": "zero",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "star_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J007-K-zero-cuda-def-unset-prod",
+  "tier": "K",
+  "case": "zero",
+  "backend": "cuda",
+  "binary": "def",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": null,
+  "star_verdict": "PASS",
+  "runtime_A": null,
+  "star_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": null,
+  "exit": 0
+ },
+ {
+  "job_id": "J008-K-zero-cuda-exp-unset-prod",
+  "tier": "K",
+  "case": "zero",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "star_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J009-K-zero-cuda-exp-none-prod",
+  "tier": "K",
+  "case": "zero",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "star_A": {
+   "max": 0.0,
+   "p95": 0.0,
+   "rms": 0.0
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J013-K-integer-cpu-def-unset-prod",
+  "tier": "K",
+  "case": "integer",
+  "backend": "cpu",
+  "binary": "def",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": null,
+  "star_verdict": "FAIL",
+  "runtime_A": null,
+  "star_A": {
+   "max": 0.431607232980078,
+   "p95": 0.431607232980078,
+   "rms": 0.2636129911894542
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": null,
+  "exit": 0
+ },
+ {
+  "job_id": "J014-K-integer-cpu-exp-unset-prod",
+  "tier": "K",
+  "case": "integer",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.43160952331041696,
+   "p95": 0.43160952331041696,
+   "rms": 0.2636135932204793
+  },
+  "star_A": {
+   "max": 0.431607232980078,
+   "p95": 0.431607232980078,
+   "rms": 0.2636129911894542
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J015-K-integer-cpu-exp-none-prod",
+  "tier": "K",
+  "case": "integer",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.43160952331041696,
+   "p95": 0.43160952331041696,
+   "rms": 0.2636135932204793
+  },
+  "star_A": {
+   "max": 0.431607232980078,
+   "p95": 0.431607232980078,
+   "rms": 0.2636129911894542
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J016-K-integer-cpu-exp-global-prod",
+  "tier": "K",
+  "case": "integer",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "global",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.8508948266390879,
+   "p95": 0.8508948266390879,
+   "rms": 0.5190658444626374
+  },
+  "star_A": {
+   "max": 0.8508967160601627,
+   "p95": 0.8508967160601627,
+   "rms": 0.519065746918679
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J017-K-integer-cpu-exp-local-prod",
+  "tier": "K",
+  "case": "integer",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "local",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.43160952331041696,
+   "p95": 0.43160952331041696,
+   "rms": 0.2636135932204793
+  },
+  "star_A": {
+   "max": 0.431607232980078,
+   "p95": 0.431607232980078,
+   "rms": 0.2636129911894542
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J018-K-integer-cpu-exp-both-prod",
+  "tier": "K",
+  "case": "integer",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.8508948266390879,
+   "p95": 0.8508948266390879,
+   "rms": 0.5190658444626374
+  },
+  "star_A": {
+   "max": 0.8508967160601627,
+   "p95": 0.8508967160601627,
+   "rms": 0.519065746918679
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J025-K-fractional-cpu-def-unset-prod",
+  "tier": "K",
+  "case": "fractional",
+  "backend": "cpu",
+  "binary": "def",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": null,
+  "star_verdict": "FAIL",
+  "runtime_A": null,
+  "star_A": {
+   "max": 0.7034152291422523,
+   "p95": 0.7034152291422523,
+   "rms": 0.5240560006272756
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": null,
+  "exit": 0
+ },
+ {
+  "job_id": "J026-K-fractional-cpu-exp-unset-prod",
+  "tier": "K",
+  "case": "fractional",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.7034173410401686,
+   "p95": 0.7034173410401686,
+   "rms": 0.5240565056077773
+  },
+  "star_A": {
+   "max": 0.7034152291422523,
+   "p95": 0.7034152291422523,
+   "rms": 0.5240560006272756
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J027-K-fractional-cpu-exp-none-prod",
+  "tier": "K",
+  "case": "fractional",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.7034173410401686,
+   "p95": 0.7034173410401686,
+   "rms": 0.5240565056077773
+  },
+  "star_A": {
+   "max": 0.7034152291422523,
+   "p95": 0.7034152291422523,
+   "rms": 0.5240560006272756
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J028-K-fractional-cpu-exp-global-prod",
+  "tier": "K",
+  "case": "fractional",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "global",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.522130836093494,
+   "p95": 0.522130836093494,
+   "rms": 0.3264842588385313
+  },
+  "star_A": {
+   "max": 0.5221316729063661,
+   "p95": 0.5221316729063661,
+   "rms": 0.32648434050229796
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J029-K-fractional-cpu-exp-local-prod",
+  "tier": "K",
+  "case": "fractional",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "local",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.7034173410401686,
+   "p95": 0.7034173410401686,
+   "rms": 0.5240565056077773
+  },
+  "star_A": {
+   "max": 0.7034152291422523,
+   "p95": 0.7034152291422523,
+   "rms": 0.5240560006272756
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J030-K-fractional-cpu-exp-both-prod",
+  "tier": "K",
+  "case": "fractional",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.522130836093494,
+   "p95": 0.522130836093494,
+   "rms": 0.3264842588385313
+  },
+  "star_A": {
+   "max": 0.5221316729063661,
+   "p95": 0.5221316729063661,
+   "rms": 0.32648434050229796
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J037-K-affine-cpu-def-unset-prod",
+  "tier": "K",
+  "case": "affine",
+  "backend": "cpu",
+  "binary": "def",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": null,
+  "star_verdict": "FAIL",
+  "runtime_A": null,
+  "star_A": {
+   "max": 0.9111179324984138,
+   "p95": 0.742491039122137,
+   "rms": 0.4024474872274806
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": null,
+  "exit": 0
+ },
+ {
+  "job_id": "J038-K-affine-cpu-exp-unset-prod",
+  "tier": "K",
+  "case": "affine",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.9110675279088501,
+   "p95": 0.7424886693718217,
+   "rms": 0.4024373652304783
+  },
+  "star_A": {
+   "max": 0.9111179324984138,
+   "p95": 0.742491039122137,
+   "rms": 0.4024474872274806
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J039-K-affine-cpu-exp-none-prod",
+  "tier": "K",
+  "case": "affine",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.9110675279088501,
+   "p95": 0.7424886693718217,
+   "rms": 0.4024373652304783
+  },
+  "star_A": {
+   "max": 0.9111179324984138,
+   "p95": 0.742491039122137,
+   "rms": 0.4024474872274806
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J040-K-affine-cpu-exp-global-prod",
+  "tier": "K",
+  "case": "affine",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "global",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.8906901260184886,
+   "p95": 0.5922277453441438,
+   "rms": 0.30394378700639096
+  },
+  "star_A": {
+   "max": 0.8906811357412429,
+   "p95": 0.5922388808683116,
+   "rms": 0.30395107358562856
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J041-K-affine-cpu-exp-local-prod",
+  "tier": "K",
+  "case": "affine",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "local",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.9744381684863966,
+   "p95": 0.767717950194196,
+   "rms": 0.4436075132120564
+  },
+  "star_A": {
+   "max": 0.974559118352551,
+   "p95": 0.7677718113753834,
+   "rms": 0.44363781734601426
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J042-K-affine-cpu-exp-both-prod",
+  "tier": "K",
+  "case": "affine",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.8873954447055182,
+   "p95": 0.5881994306213063,
+   "rms": 0.3200002846068196
+  },
+  "star_A": {
+   "max": 0.8874223377398845,
+   "p95": 0.5882350616043779,
+   "rms": 0.32001806715252223
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J045-K-affine-cuda-exp-none-prod",
+  "tier": "K",
+  "case": "affine",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.8169402590551036,
+   "p95": 0.5435639628415303,
+   "rms": 0.2859792436023548
+  },
+  "star_A": {
+   "max": 0.816961780990112,
+   "p95": 0.5435693876984135,
+   "rms": 0.2859841160876424
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J046-K-affine-cuda-exp-global-prod",
+  "tier": "K",
+  "case": "affine",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "global",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 3.0869834433369343,
+   "p95": 1.5604928033360448,
+   "rms": 0.7271522382845119
+  },
+  "star_A": {
+   "max": 3.087004127391611,
+   "p95": 1.5605220131538986,
+   "rms": 0.7271539011641227
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J047-K-affine-cuda-exp-local-prod",
+  "tier": "K",
+  "case": "affine",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "local",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.8389287231886509,
+   "p95": 0.5144827983636207,
+   "rms": 0.27292567999646117
+  },
+  "star_A": {
+   "max": 0.8390611418859086,
+   "p95": 0.5144917439498311,
+   "rms": 0.2729275428759188
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J048-K-affine-cuda-exp-both-prod",
+  "tier": "K",
+  "case": "affine",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.8874053651063061,
+   "p95": 0.5882091170907113,
+   "rms": 0.32000574248731567
+  },
+  "star_A": {
+   "max": 0.8873399226392227,
+   "p95": 0.5881565703461491,
+   "rms": 0.31997826668437057
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J049-K-pedestal-cpu-def-unset-prod",
+  "tier": "K",
+  "case": "pedestal",
+  "backend": "cpu",
+  "binary": "def",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": null,
+  "star_verdict": "FAIL",
+  "runtime_A": null,
+  "star_A": {
+   "max": 3.8931129881786166,
+   "p95": 3.6037566212126833,
+   "rms": 2.119133308493268
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": null,
+  "exit": 0
+ },
+ {
+  "job_id": "J050-K-pedestal-cpu-exp-unset-prod",
+  "tier": "K",
+  "case": "pedestal",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 3.8931129881786166,
+   "p95": 3.6037566212126833,
+   "rms": 2.119133308493268
+  },
+  "star_A": {
+   "max": 3.8931129881786166,
+   "p95": 3.6037566212126833,
+   "rms": 2.119133308493268
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J051-K-pedestal-cpu-exp-none-prod",
+  "tier": "K",
+  "case": "pedestal",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 3.8931129881786166,
+   "p95": 3.6037566212126833,
+   "rms": 2.119133308493268
+  },
+  "star_A": {
+   "max": 3.8931129881786166,
+   "p95": 3.6037566212126833,
+   "rms": 2.119133308493268
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J052-K-pedestal-cpu-exp-global-prod",
+  "tier": "K",
+  "case": "pedestal",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "global",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 1.1459555549881177,
+   "p95": 0.7466087716783345,
+   "rms": 0.4117372078954309
+  },
+  "star_A": {
+   "max": 1.1459538137292093,
+   "p95": 0.7466097481546062,
+   "rms": 0.41173665683406624
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J053-K-pedestal-cpu-exp-local-prod",
+  "tier": "K",
+  "case": "pedestal",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "local",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 2.7193914820940237,
+   "p95": 1.2789793040388426,
+   "rms": 0.6133113624302622
+  },
+  "star_A": {
+   "max": 2.7193927489314924,
+   "p95": 1.2789828804657137,
+   "rms": 0.6133231413763724
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J054-K-pedestal-cpu-exp-both-prod",
+  "tier": "K",
+  "case": "pedestal",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.8881717736550742,
+   "p95": 0.5880544988874526,
+   "rms": 0.3197945429336607
+  },
+  "star_A": {
+   "max": 0.8882090618261861,
+   "p95": 0.5880924708319859,
+   "rms": 0.3198005436218596
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J057-K-pedestal-cuda-exp-none-prod",
+  "tier": "K",
+  "case": "pedestal",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 3.8931129881786166,
+   "p95": 3.6037566212126833,
+   "rms": 2.119133308493268
+  },
+  "star_A": {
+   "max": 3.8931129881786166,
+   "p95": 3.6037566212126833,
+   "rms": 2.119133308493268
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J058-K-pedestal-cuda-exp-global-prod",
+  "tier": "K",
+  "case": "pedestal",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "global",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 1.1459168074716783,
+   "p95": 0.7465975240733808,
+   "rms": 0.4116940595568418
+  },
+  "star_A": {
+   "max": 1.145918558303045,
+   "p95": 0.7465966339184166,
+   "rms": 0.41169424241679914
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J059-K-pedestal-cuda-exp-local-prod",
+  "tier": "K",
+  "case": "pedestal",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "local",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 2.721712940747825,
+   "p95": 1.2796258694961147,
+   "rms": 0.6134088503413909
+  },
+  "star_A": {
+   "max": 2.7217400608387408,
+   "p95": 1.2796454951219722,
+   "rms": 0.6134248709173528
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J060-K-pedestal-cuda-exp-both-prod",
+  "tier": "K",
+  "case": "pedestal",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 0.8879677852849588,
+   "p95": 0.5882931363490664,
+   "rms": 0.32016864515385435
+  },
+  "star_A": {
+   "max": 0.8879510696507109,
+   "p95": 0.5882707457015944,
+   "rms": 0.32016016863479857
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J061-K-noisy-cpu-def-unset-prod",
+  "tier": "K",
+  "case": "noisy",
+  "backend": "cpu",
+  "binary": "def",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": null,
+  "star_verdict": "FAIL",
+  "runtime_A": null,
+  "star_A": {
+   "max": 9.903940696298715,
+   "p95": 4.376569274771697,
+   "rms": 2.342962317432139
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": null,
+  "exit": 0
+ },
+ {
+  "job_id": "J062-K-noisy-cpu-exp-unset-prod",
+  "tier": "K",
+  "case": "noisy",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 9.903898811468054,
+   "p95": 4.37657059107991,
+   "rms": 2.342955203317165
+  },
+  "star_A": {
+   "max": 9.903940696298715,
+   "p95": 4.376569274771697,
+   "rms": 2.342962317432139
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J063-K-noisy-cpu-exp-none-prod",
+  "tier": "K",
+  "case": "noisy",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 9.903898811468054,
+   "p95": 4.37657059107991,
+   "rms": 2.342955203317165
+  },
+  "star_A": {
+   "max": 9.903940696298715,
+   "p95": 4.376569274771697,
+   "rms": 2.342962317432139
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J064-K-noisy-cpu-exp-global-prod",
+  "tier": "K",
+  "case": "noisy",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "global",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 7.38312290322688,
+   "p95": 3.5149193188974985,
+   "rms": 1.744015282999078
+  },
+  "star_A": {
+   "max": 7.383125093880571,
+   "p95": 3.5149564182156032,
+   "rms": 1.7440104993048968
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J065-K-noisy-cpu-exp-local-prod",
+  "tier": "K",
+  "case": "noisy",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "local",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 8.131931360802604,
+   "p95": 4.322749690584963,
+   "rms": 2.324041330686649
+  },
+  "star_A": {
+   "max": 8.132040871050169,
+   "p95": 4.322766228352011,
+   "rms": 2.3240655863800086
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J066-K-noisy-cpu-exp-both-prod",
+  "tier": "K",
+  "case": "noisy",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 7.136690246354176,
+   "p95": 3.3197387664049427,
+   "rms": 1.6684535528098954
+  },
+  "star_A": {
+   "max": 7.136593735468175,
+   "p95": 3.3196277755633385,
+   "rms": 1.6684384078875336
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J069-K-noisy-cuda-exp-none-prod",
+  "tier": "K",
+  "case": "noisy",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 19.116588025354886,
+   "p95": 4.557498555701088,
+   "rms": 2.635923310291373
+  },
+  "star_A": {
+   "max": 19.1164553883484,
+   "p95": 4.557666673063174,
+   "rms": 2.6359237041007133
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J070-K-noisy-cuda-exp-global-prod",
+  "tier": "K",
+  "case": "noisy",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "global",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 7.540622415309934,
+   "p95": 3.4478328034810692,
+   "rms": 1.7557053084959724
+  },
+  "star_A": {
+   "max": 7.540819737810487,
+   "p95": 3.4478401588908225,
+   "rms": 1.7557067298284645
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J071-K-noisy-cuda-exp-local-prod",
+  "tier": "K",
+  "case": "noisy",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "local",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 6.688174704416234,
+   "p95": 3.0818452924101516,
+   "rms": 1.6242607607328365
+  },
+  "star_A": {
+   "max": 6.688101973657283,
+   "p95": 3.0818542216643183,
+   "rms": 1.624250888393093
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J072-K-noisy-cuda-exp-both-prod",
+  "tier": "K",
+  "case": "noisy",
+  "backend": "cuda",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "max": 7.136676317746333,
+   "p95": 3.319734821554523,
+   "rms": 1.6684518335523408
+  },
+  "star_A": {
+   "max": 7.136498765350997,
+   "p95": 3.3195443059930714,
+   "rms": 1.6684227753498653
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": true,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "COVERED"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J073-K-flat-cpu-def-unset-prod",
+  "tier": "K",
+  "case": "flat",
+  "backend": "cpu",
+  "binary": "def",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": null,
+  "star_verdict": "UNIDENTIFIABLE",
+  "runtime_A": null,
+  "star_A": {
+   "max": 3.4365046854507564,
+   "p95": 3.4365046854507564,
+   "rms": 2.1044207445094902
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": null,
+  "exit": 0
+ },
+ {
+  "job_id": "J074-K-flat-cpu-exp-unset-prod",
+  "tier": "K",
+  "case": "flat",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "UNIDENTIFIABLE",
+  "star_verdict": "UNIDENTIFIABLE",
+  "runtime_A": {
+   "max": 3.4365046854507564,
+   "p95": 3.4365046854507564,
+   "rms": 2.1044207445094902
+  },
+  "star_A": {
+   "max": 3.4365046854507564,
+   "p95": 3.4365046854507564,
+   "rms": 2.1044207445094902
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J075-K-flat-cpu-exp-none-prod",
+  "tier": "K",
+  "case": "flat",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "UNIDENTIFIABLE",
+  "star_verdict": "UNIDENTIFIABLE",
+  "runtime_A": {
+   "max": 3.4365046854507564,
+   "p95": 3.4365046854507564,
+   "rms": 2.1044207445094902
+  },
+  "star_A": {
+   "max": 3.4365046854507564,
+   "p95": 3.4365046854507564,
+   "rms": 2.1044207445094902
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J076-K-flat-cpu-exp-global-prod",
+  "tier": "K",
+  "case": "flat",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "global",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "UNIDENTIFIABLE",
+  "star_verdict": "UNIDENTIFIABLE",
+  "runtime_A": {
+   "max": 3.4365046854507564,
+   "p95": 3.4365046854507564,
+   "rms": 2.1044207445094902
+  },
+  "star_A": {
+   "max": 3.4365046854507564,
+   "p95": 3.4365046854507564,
+   "rms": 2.1044207445094902
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J077-K-flat-cpu-exp-local-prod",
+  "tier": "K",
+  "case": "flat",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "local",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "UNIDENTIFIABLE",
+  "star_verdict": "UNIDENTIFIABLE",
+  "runtime_A": {
+   "max": 3.4365046854507564,
+   "p95": 3.4365046854507564,
+   "rms": 2.1044207445094902
+  },
+  "star_A": {
+   "max": 3.4365046854507564,
+   "p95": 3.4365046854507564,
+   "rms": 2.1044207445094902
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J078-K-flat-cpu-exp-both-prod",
+  "tier": "K",
+  "case": "flat",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "UNIDENTIFIABLE",
+  "star_verdict": "UNIDENTIFIABLE",
+  "runtime_A": {
+   "max": 3.4365046854507564,
+   "p95": 3.4365046854507564,
+   "rms": 2.1044207445094902
+  },
+  "star_A": {
+   "max": 3.4365046854507564,
+   "p95": 3.4365046854507564,
+   "rms": 2.1044207445094902
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J085-K-repeated-cpu-def-unset-prod",
+  "tier": "K",
+  "case": "repeated",
+  "backend": "cpu",
+  "binary": "def",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": null,
+  "star_verdict": "UNIDENTIFIABLE",
+  "runtime_A": null,
+  "star_A": {
+   "max": 28.00391630849659,
+   "p95": 28.00391630849659,
+   "rms": 16.533858322996537
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": null,
+  "exit": 0
+ },
+ {
+  "job_id": "J086-K-repeated-cpu-exp-unset-prod",
+  "tier": "K",
+  "case": "repeated",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "unset",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "UNIDENTIFIABLE",
+  "star_verdict": "UNIDENTIFIABLE",
+  "runtime_A": {
+   "max": 28.00391630849659,
+   "p95": 28.00391630849659,
+   "rms": 16.533858322996537
+  },
+  "star_A": {
+   "max": 28.00391630849659,
+   "p95": 28.00391630849659,
+   "rms": 16.533858322996537
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J087-K-repeated-cpu-exp-none-prod",
+  "tier": "K",
+  "case": "repeated",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "UNIDENTIFIABLE",
+  "star_verdict": "UNIDENTIFIABLE",
+  "runtime_A": {
+   "max": 28.00391630849659,
+   "p95": 28.00391630849659,
+   "rms": 16.533858322996537
+  },
+  "star_A": {
+   "max": 28.00391630849659,
+   "p95": 28.00391630849659,
+   "rms": 16.533858322996537
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J088-K-repeated-cpu-exp-global-prod",
+  "tier": "K",
+  "case": "repeated",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "global",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "UNIDENTIFIABLE",
+  "star_verdict": "UNIDENTIFIABLE",
+  "runtime_A": {
+   "max": 14.197954321946206,
+   "p95": 14.197954321946206,
+   "rms": 9.012581072426281
+  },
+  "star_A": {
+   "max": 14.197954391510109,
+   "p95": 14.197954391510109,
+   "rms": 9.012581140129837
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J089-K-repeated-cpu-exp-local-prod",
+  "tier": "K",
+  "case": "repeated",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "local",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "UNIDENTIFIABLE",
+  "star_verdict": "UNIDENTIFIABLE",
+  "runtime_A": {
+   "max": 28.00391630849659,
+   "p95": 28.00391630849659,
+   "rms": 16.533858322996537
+  },
+  "star_A": {
+   "max": 28.00391630849659,
+   "p95": 28.00391630849659,
+   "rms": 16.533858322996537
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J090-K-repeated-cpu-exp-both-prod",
+  "tier": "K",
+  "case": "repeated",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "UNIDENTIFIABLE",
+  "star_verdict": "UNIDENTIFIABLE",
+  "runtime_A": {
+   "max": 14.197954321946206,
+   "p95": 14.197954321946206,
+   "rms": 9.012581072426281
+  },
+  "star_A": {
+   "max": 14.197954391510109,
+   "p95": 14.197954391510109,
+   "rms": 9.012581140129837
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": false,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J097-N-vel0-N5-cpu-exp-none-prod",
+  "tier": "N",
+  "case": "vel0-N5",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.2636135932204793,
+   "p95": 0.43160952331041696,
+   "max": 0.43160952331041696
+  },
+  "star_A": {
+   "rms": 0.2636129911894542,
+   "p95": 0.431607232980078,
+   "max": 0.431607232980078
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J098-N-vel0-N5-cpu-exp-both-prod",
+  "tier": "N",
+  "case": "vel0-N5",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.5190669259283137,
+   "p95": 0.8508998947900727,
+   "max": 0.8508998947900727
+  },
+  "star_A": {
+   "rms": 0.5190665757834876,
+   "p95": 0.8508978058408555,
+   "max": 0.8508978058408555
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J101-N-vel0-N9-cpu-exp-none-prod",
+  "tier": "N",
+  "case": "vel0-N9",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.38429674779109435,
+   "p95": 0.799340692128104,
+   "max": 0.799340692128104
+  },
+  "star_A": {
+   "rms": 0.3842957298636503,
+   "p95": 0.7993381693281436,
+   "max": 0.7993381693281436
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J102-N-vel0-N9-cpu-exp-both-prod",
+  "tier": "N",
+  "case": "vel0-N9",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.5667611166114178,
+   "p95": 0.9061843216358119,
+   "max": 0.9061843216358119
+  },
+  "star_A": {
+   "rms": 0.5667608727374126,
+   "p95": 0.906187352389737,
+   "max": 0.906187352389737
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J105-N-vel0-N13-cpu-exp-none-prod",
+  "tier": "N",
+  "case": "vel0-N13",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.2737548432968447,
+   "p95": 0.42364184437880176,
+   "max": 0.42364184437880176
+  },
+  "star_A": {
+   "rms": 0.2737553138913359,
+   "p95": 0.4236447081249622,
+   "max": 0.4236447081249622
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J106-N-vel0-N13-cpu-exp-both-prod",
+  "tier": "N",
+  "case": "vel0-N13",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.28314904688354564,
+   "p95": 0.4084263300656421,
+   "max": 0.4084263300656421
+  },
+  "star_A": {
+   "rms": 0.28314911475415,
+   "p95": 0.40842796661334624,
+   "max": 0.40842796661334624
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J109-N-vel0-N20-cpu-exp-none-prod",
+  "tier": "N",
+  "case": "vel0-N20",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.3000008336510514,
+   "p95": 0.49994378893214575,
+   "max": 0.49994378893215147
+  },
+  "star_A": {
+   "rms": 0.3000013785699524,
+   "p95": 0.49994319070249227,
+   "max": 0.4999431907024947
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J110-N-vel0-N20-cpu-exp-both-prod",
+  "tier": "N",
+  "case": "vel0-N20",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.3039435422643204,
+   "p95": 0.46130190057332826,
+   "max": 0.4885911546165169
+  },
+  "star_A": {
+   "rms": 0.3039434723971369,
+   "p95": 0.4613021341506883,
+   "max": 0.4885911224402692
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J113-N-vel1-N5-cpu-exp-none-prod",
+  "tier": "N",
+  "case": "vel1-N5",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.5240565056077773,
+   "p95": 0.7034173410401686,
+   "max": 0.7034173410401686
+  },
+  "star_A": {
+   "rms": 0.5240560006272756,
+   "p95": 0.7034152291422523,
+   "max": 0.7034152291422523
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J114-N-vel1-N5-cpu-exp-both-prod",
+  "tier": "N",
+  "case": "vel1-N5",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.3264875647086106,
+   "p95": 0.5221357398172047,
+   "max": 0.5221357398172047
+  },
+  "star_A": {
+   "rms": 0.3264869581958441,
+   "p95": 0.5221362397456876,
+   "max": 0.5221362397456876
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J117-N-vel1-N9-cpu-exp-none-prod",
+  "tier": "N",
+  "case": "vel1-N9",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.5518323069964254,
+   "p95": 0.96953951876541,
+   "max": 0.96953951876541
+  },
+  "star_A": {
+   "rms": 0.5518330711780989,
+   "p95": 0.9695414764680753,
+   "max": 0.9695414764680753
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J118-N-vel1-N9-cpu-exp-both-prod",
+  "tier": "N",
+  "case": "vel1-N9",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.39238894748925585,
+   "p95": 0.6468631205391295,
+   "max": 0.6468631205391295
+  },
+  "star_A": {
+   "rms": 0.3923888652273538,
+   "p95": 0.6468614773007056,
+   "max": 0.6468614773007056
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J121-N-vel1-N13-cpu-exp-none-prod",
+  "tier": "N",
+  "case": "vel1-N13",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.36270323574687696,
+   "p95": 0.7272645382216675,
+   "max": 0.7272645382216675
+  },
+  "star_A": {
+   "rms": 0.3627034731378417,
+   "p95": 0.7272639478382339,
+   "max": 0.7272639478382339
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J122-N-vel1-N13-cpu-exp-both-prod",
+  "tier": "N",
+  "case": "vel1-N13",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.23729995967005396,
+   "p95": 0.3533986675041197,
+   "max": 0.3533986675041197
+  },
+  "star_A": {
+   "rms": 0.2373005271303411,
+   "p95": 0.35340238051651846,
+   "max": 0.35340238051651846
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J125-N-vel1-N20-cpu-exp-none-prod",
+  "tier": "N",
+  "case": "vel1-N20",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "none",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.22240083317307902,
+   "p95": 0.3561556537291266,
+   "max": 0.37878090786614876
+  },
+  "star_A": {
+   "rms": 0.2224004422854377,
+   "p95": 0.3561571921531423,
+   "max": 0.3787812546601477
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J126-N-vel1-N20-cpu-exp-both-prod",
+  "tier": "N",
+  "case": "vel1-N20",
+  "backend": "cpu",
+  "binary": "exp",
+  "arm": "both",
+  "weight": "production",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 0.24695789229137005,
+   "p95": 0.3707898835555964,
+   "max": 0.5220649045646248
+  },
+  "star_A": {
+   "rms": 0.24695785157742747,
+   "p95": 0.37078851686866826,
+   "max": 0.5220657457961144
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J129-N-vel0-N5-cpu-iso-none-isot",
+  "tier": "N",
+  "case": "vel0-N5",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "none",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.07028236220203647,
+   "p95": 0.1095326579191172,
+   "max": 0.1095326579191172
+  },
+  "star_A": {
+   "rms": 0.07028051724198073,
+   "p95": 0.10952986826812527,
+   "max": 0.10952986826812527
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J130-N-vel0-N5-cpu-iso-both-isot",
+  "tier": "N",
+  "case": "vel0-N5",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "both",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.0337477563203386,
+   "p95": 0.05856147053721352,
+   "max": 0.05856147053721352
+  },
+  "star_A": {
+   "rms": 0.03374739270377111,
+   "p95": 0.058561552702025614,
+   "max": 0.058561552702025614
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J133-N-vel0-N9-cpu-iso-none-isot",
+  "tier": "N",
+  "case": "vel0-N9",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "none",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.05127992790606874,
+   "p95": 0.08565121450534008,
+   "max": 0.08565121450534008
+  },
+  "star_A": {
+   "rms": 0.05127968443876798,
+   "p95": 0.08565038456784416,
+   "max": 0.08565038456784416
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J134-N-vel0-N9-cpu-iso-both-isot",
+  "tier": "N",
+  "case": "vel0-N9",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "both",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 3.8884799367803136,
+   "p95": 6.825272434114679,
+   "max": 6.825272434114679
+  },
+  "star_A": {
+   "rms": 3.8884804219647804,
+   "p95": 6.825274493420335,
+   "max": 6.825274493420335
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J137-N-vel0-N13-cpu-iso-none-isot",
+  "tier": "N",
+  "case": "vel0-N13",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "none",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.04099815756054717,
+   "p95": 0.07050544759998571,
+   "max": 0.07050544759998571
+  },
+  "star_A": {
+   "rms": 0.040998511563568395,
+   "p95": 0.070506124818006,
+   "max": 0.070506124818006
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J138-N-vel0-N13-cpu-iso-both-isot",
+  "tier": "N",
+  "case": "vel0-N13",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "both",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.015933731343936042,
+   "p95": 0.0343140525750116,
+   "max": 0.0343140525750116
+  },
+  "star_A": {
+   "rms": 0.015933358567009445,
+   "p95": 0.034313126882224244,
+   "max": 0.034313126882224244
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J141-N-vel0-N20-cpu-iso-none-isot",
+  "tier": "N",
+  "case": "vel0-N20",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "none",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.03769248493255181,
+   "p95": 0.05866118963546839,
+   "max": 0.07868515281061843
+  },
+  "star_A": {
+   "rms": 0.0376924492904765,
+   "p95": 0.05866035026372775,
+   "max": 0.07868336734010899
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J142-N-vel0-N20-cpu-iso-both-isot",
+  "tier": "N",
+  "case": "vel0-N20",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "both",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.03631396765506622,
+   "p95": 0.05371218264961129,
+   "max": 0.06033418757402975
+  },
+  "star_A": {
+   "rms": 0.03631391453656733,
+   "p95": 0.0537095575686538,
+   "max": 0.06033794782868275
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J145-N-vel1-N5-cpu-iso-none-isot",
+  "tier": "N",
+  "case": "vel1-N5",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "none",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.06408242816119854,
+   "p95": 0.1066432965597717,
+   "max": 0.1066432965597717
+  },
+  "star_A": {
+   "rms": 0.06408190471622925,
+   "p95": 0.10664224331296913,
+   "max": 0.10664224331296913
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J146-N-vel1-N5-cpu-iso-both-isot",
+  "tier": "N",
+  "case": "vel1-N5",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "both",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.042963161547155126,
+   "p95": 0.06740871169480274,
+   "max": 0.06740871169480274
+  },
+  "star_A": {
+   "rms": 0.04296419304863469,
+   "p95": 0.06741116487450788,
+   "max": 0.06741116487450788
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J149-N-vel1-N9-cpu-iso-none-isot",
+  "tier": "N",
+  "case": "vel1-N9",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "none",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.03726951572863175,
+   "p95": 0.06588479022569839,
+   "max": 0.06588479022569839
+  },
+  "star_A": {
+   "rms": 0.03726931170654211,
+   "p95": 0.06588499119368826,
+   "max": 0.06588499119368826
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J150-N-vel1-N9-cpu-iso-both-isot",
+  "tier": "N",
+  "case": "vel1-N9",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "both",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.03583679644687622,
+   "p95": 0.061861751257874964,
+   "max": 0.061861751257874964
+  },
+  "star_A": {
+   "rms": 0.03583668656568818,
+   "p95": 0.06186236146996739,
+   "max": 0.06186236146996739
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J153-N-vel1-N13-cpu-iso-none-isot",
+  "tier": "N",
+  "case": "vel1-N13",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "none",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.03742449686167548,
+   "p95": 0.05926483236491662,
+   "max": 0.05926483236491662
+  },
+  "star_A": {
+   "rms": 0.03742475986306621,
+   "p95": 0.0592639029117682,
+   "max": 0.0592639029117682
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J154-N-vel1-N13-cpu-iso-both-isot",
+  "tier": "N",
+  "case": "vel1-N13",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "both",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "PASS",
+  "star_verdict": "PASS",
+  "runtime_A": {
+   "rms": 0.023845675927574236,
+   "p95": 0.03691547561227752,
+   "max": 0.03691547561227752
+  },
+  "star_A": {
+   "rms": 0.023845304795775107,
+   "p95": 0.036914476909674615,
+   "max": 0.036914476909674615
+  },
+  "convergence": "CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J157-N-vel1-N20-cpu-iso-none-isot",
+  "tier": "N",
+  "case": "vel1-N20",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "none",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 10.494839034867491,
+   "p95": 14.853278790016052,
+   "max": 14.859851902178468
+  },
+  "star_A": {
+   "rms": 10.49483871202439,
+   "p95": 14.853281357967008,
+   "max": 14.859849080689683
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE"
+  },
+  "exit": 0
+ },
+ {
+  "job_id": "J158-N-vel1-N20-cpu-iso-both-isot",
+  "tier": "N",
+  "case": "vel1-N20",
+  "backend": "cpu",
+  "binary": "iso",
+  "arm": "both",
+  "weight": "isotropic",
+  "row_status": "SCORED",
+  "runtime_verdict": "FAIL",
+  "star_verdict": "FAIL",
+  "runtime_A": {
+   "rms": 10.472049645623022,
+   "p95": 14.81068160247026,
+   "max": 14.811074063680977
+  },
+  "star_A": {
+   "rms": 10.472049378534843,
+   "p95": 14.810681485482025,
+   "max": 14.811072692129613
+  },
+  "convergence": "NOT_CONVERGED",
+  "local_enabled": null,
+  "stage_coverage": {
+   "global": "COVERED",
+   "local": "NOT_APPLICABLE (arm selects it: no-op selectivity)"
+  },
+  "exit": 0
+ }
+]

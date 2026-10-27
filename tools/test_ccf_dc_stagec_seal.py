@@ -7,6 +7,7 @@ row, no GPU, no SSH. Local use: at most two threads, a few MB of scratch.
 """
 import fcntl
 import hashlib
+import io
 import json
 import os
 import shutil
@@ -328,8 +329,25 @@ class ChildEnvironmentRecord(unittest.TestCase):
             if LINUX:
                 ident = rec["sampling"].get("identity_first_sample")
                 if ident:            # a very short child may end before the first sample; then the status says so
-                    self.assertTrue(ident["cmdline_matches_argv"] or "cmdline_error" in ident)
-                    self.assertIn("environ_sha256", ident)
+                    # A shebang interpreter may prepend itself to argv in /proc.
+                    # Record that mismatch rather than treating it as a failure.
+                    self.assertTrue("cmdline" in ident or "cmdline_error" in ident)
+                    if "cmdline" in ident:
+                        self.assertEqual(ident["cmdline_matches_argv"], ident["cmdline"] == rec["argv"])
+                    self.assertTrue("environ_sha256" in ident or "environ_error" in ident)
+
+    def test_proc_identity_reports_shebang_argument_mismatch(self):
+        argv = ["/tmp/fake-producer", "--i", "noisy.star"]
+        env = {"OMP_NUM_THREADS": "2"}
+        for observed, expected in ((argv, True), (["/usr/bin/python3", *argv], False)):
+            with self.subTest(observed=observed):
+                raw_cmd = ("\0".join(observed) + "\0").encode()
+                with mock.patch("builtins.open", side_effect=[io.BytesIO(raw_cmd), io.BytesIO(b"OMP_NUM_THREADS=2\0")]), \
+                     mock.patch.object(drv.os, "readlink", return_value="/usr/bin/python3"):
+                    identity = drv.proc_identity(123, argv, env)
+                self.assertEqual(identity["cmdline"], observed)
+                self.assertIs(identity["cmdline_matches_argv"], expected)
+                self.assertTrue(identity["environ_matches_env"])
 
     def test_default_spawner_documents_what_it_is(self):
         self.assertIn("not\nindependent proof from the operating system", drv.__doc__)

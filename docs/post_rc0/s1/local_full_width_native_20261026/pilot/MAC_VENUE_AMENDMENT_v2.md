@@ -1,0 +1,5 @@
+# Mac venue amendment v2: canonical continuation root
+
+The r1 zero global-only product comparator reported **FAIL**: producer paths used `/tmp/...` while the unchanged comparator resolved its roots to `/private/tmp/...`, so two embedded-root products differed under its frozen comparison. The original FAIL and all eight r1 producers remain unchanged; none will be rerun.
+
+For the four remaining cases only (integer, fractional, flat, repeated), use a fresh namespace under the realpath-resolved scratch root, `/private/tmp/mc-mac-pilot-20261027/mac-native-r2`. The retained Mac driver and command drafts provide the frozen OFF then ON arms, environment, scorer, pair checks and comparator, with the namespace and four-case selection supplied by `mac_continuation_20261027/run_continuation.py`. Producer output roots and comparator roots will then have the same canonical spelling. The arms, predictions, limits, fixtures, checker, comparator, stop rules and two-thread lane are unchanged. Previous numerical results are reused as recorded; this amendment does not turn the r1 zero comparator FAIL into a PASS.

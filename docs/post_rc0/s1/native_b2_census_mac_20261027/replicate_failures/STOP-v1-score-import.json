@@ -1,0 +1,5 @@
+{
+  "label": "Mac replicate census, not hash-identical to the frozen census",
+  "error": "dose1-s00/OFF scoring failure 1; producer not retried",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9ee0a2b/docs/post_rc0/s1/native_b2_census_mac_20261027/run_replicate.py\", line 365, in <module>\n    main()\n    ~~~~^^\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9ee0a2b/docs/post_rc0/s1/native_b2_census_mac_20261027/run_replicate.py\", line 333, in main\n    off_dir, off_result, off_rt = run_arm(name, 'OFF', fixture)\n                                  ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-f9ee0a2b/docs/post_rc0/s1/native_b2_census_mac_20261027/run_replicate.py\", line 211, in run_arm\n    raise RuntimeError(f'{name}/{arm} scoring failure {sr[\"exit\"]}; producer not retried')\nRuntimeError: dose1-s00/OFF scoring failure 1; producer not retried\n"
+}

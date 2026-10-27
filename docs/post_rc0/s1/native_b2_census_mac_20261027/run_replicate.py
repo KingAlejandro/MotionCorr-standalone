@@ -40,6 +40,7 @@ ARMS = {'OFF': (BIN, 'none', []),
         'IDENTITY_OFF': (FWBIN, 'none', [])}
 MIN_FREE = 10 * 1024**3
 LABEL = 'Mac replicate census, not hash-identical to the frozen census'
+RESUME_FIRST_SCORE = False
 sys.path[:0] = [str(SRC / 'tools'), str(SRC / 'test-data')]
 import numpy as np
 import scipy
@@ -178,9 +179,11 @@ def run_arm(name, arm, fixture):
     binary, dc, extra = ARMS[arm]
     assert digest(binary) == PINS[str(binary)]
     d = WORK / 'runs' / name / arm
-    d.mkdir(parents=True, exist_ok=False)
-    occupancy = subprocess.check_output(['ps', '-axo', 'pid,pcpu,rss,comm', '-r'], text=True)
-    (d / 'occupancy-before.txt').write_text('\n'.join(occupancy.splitlines()[:24]) + '\n')
+    reuse = RESUME_FIRST_SCORE and name == 'dose1-s00' and arm == 'OFF'
+    d.mkdir(parents=True, exist_ok=reuse)
+    if not reuse:
+        occupancy = subprocess.check_output(['ps', '-axo', 'pid,pcpu,rss,comm', '-r'], text=True)
+        (d / 'occupancy-before.txt').write_text('\n'.join(occupancy.splitlines()[:24]) + '\n')
     out = d / 'output'
     argv = [str(binary), '--i', 'movie.star', '--o', str(out), '--use_own', '--j', '8',
             '--patch_x', '5', '--patch_y', '5', '--group_frames', '1', '--bin_factor', '1',
@@ -188,25 +191,37 @@ def run_arm(name, arm, fixture):
             '--last_frame_sum', '40', '--skip_logfile', '--ingest', 'float', *extra]
     env = environment()
     env.update(MC_EXPERIMENT_CCF_DC_ARM=dc, MC_DIAG_MODEL_OUT=str(d / 'runtime.json'))
-    rr = run_guarded(['/usr/bin/time', '-l', *argv], fixture, env,
-                     d / 'stdout.log', d / 'RUN.json')
-    rr.update(label=LABEL, arm=arm, native_argv=argv, binary_sha256=digest(binary),
+    if reuse:
+        rr = json.loads((d / 'RUN.json').read_text())
+        assert rr['exit'] == 0 and rr['native_argv'] == argv
+        assert rr['binary_sha256'] == digest(binary)
+        assert rr['input_receipt_sha256'] == digest(fixture / 'RECEIPT.json')
+        for filename, pin in rr['publication'].items():
+            assert digest(out / filename) == pin['sha256']
+        write(d / 'REUSED_NATIVE.json', dict(reason='score import invocation repair only',
+              original_RUN_sha256=digest(d / 'RUN.json'), native_rerun=False))
+    else:
+        rr = run_guarded(['/usr/bin/time', '-l', *argv], fixture, env,
+                         d / 'stdout.log', d / 'RUN.json')
+        rr.update(label=LABEL, arm=arm, native_argv=argv, binary_sha256=digest(binary),
               environment={k: env[k] for k in ['OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS',
                   'VECLIB_MAXIMUM_THREADS', 'MC_EXPERIMENT_CCF_DC_ARM', 'MC_DIAG_MODEL_OUT']},
               input_receipt_sha256=digest(fixture / 'RECEIPT.json'),
               publication={p.name: dict(bytes=p.stat().st_size, sha256=digest(p))
                            for p in sorted(out.glob('*')) if p.is_file()})
-    write(d / 'RUN.json', rr)
+        write(d / 'RUN.json', rr)
     if rr['exit'] != 0:
         raise RuntimeError(f'{name}/{arm} native failure {rr["exit"]}; retained, not retried')
     for p in [d / 'runtime.json', out / 'movie.star', out / 'movie.log', out / 'movie.mrc']:
         if not p.exists():
             raise RuntimeError(f'{name}/{arm} missing publication: {p.name}')
-    score_argv = [sys.executable, '-I', str(SRC / 'tools/check_realistic_motion.py'),
+    score_argv = [sys.executable, str(SRC / 'tools/check_realistic_motion.py'),
                   '--receipt', str(fixture / 'RECEIPT.json'), '--runtime', str(d / 'runtime.json'),
                   '--star', str(out / 'movie.star'), '--log', str(out / 'movie.log'),
                   '--json', str(d / 'metrics.json')]
-    sr = run_guarded(score_argv, fixture, environment(), d / 'score.stdout', d / 'SCORE.json')
+    sr = run_guarded(score_argv, fixture, environment(),
+                     d / ('score-v2.stdout' if reuse else 'score.stdout'),
+                     d / ('SCORE-v2.json' if reuse else 'SCORE.json'))
     if sr['exit'] != 0:
         raise RuntimeError(f'{name}/{arm} scoring failure {sr["exit"]}; producer not retried')
     m = json.loads((d / 'metrics.json').read_text())
@@ -267,15 +282,29 @@ def worker(mode, recipe_file, destination):
         raise ValueError(mode)
 
 
-def main():
+def main(resume=False):
+    global RESUME_FIRST_SCORE
+    RESUME_FIRST_SCORE = resume
     assert np.__version__ == '2.5.4' and scipy.__version__ == '1.18.1'
     assert digest(SRC / 'test-data/generate_realistic_motion.py') == GEN_SHA
     assert digest(SRC / 'tools/check_realistic_motion.py') == CHECK_SHA
     for path, pin in PINS.items():
         assert digest(path) == pin
     assert subprocess.check_output(['git', 'show', 'HEAD:docs/post_rc0/s1/native_b2_census_mac_20261027/REPLICATE_AMENDMENT_v2.md'], cwd=REPO)
-    WORK.mkdir(exist_ok=False)
-    write(WORK / 'admission.json', dict(label=LABEL,
+    WORK.mkdir(exist_ok=resume)
+    if resume:
+        stop = json.loads((WORK / 'STOP.json').read_text())
+        assert stop['error'] == 'dose1-s00/OFF scoring failure 1; producer not retried'
+        assert not list((WORK / 'rows').glob('*.json'))
+        assert list((WORK / 'runs').glob('*/*')) == [WORK / 'runs/dose1-s00/OFF']
+        assert digest(WORK / 'expectation.npy') == json.loads((WORK / 'expectation.json').read_text())['proof']['expectation_sha256']
+        (WORK / 'STOP.json').rename(WORK / 'STOP-v1-score-import.json')
+        write(WORK / 'continuation.json', dict(label=LABEL,
+              reason='Correct Python import invocation, score saved first OFF without rerunning it',
+              runner_sha256=digest(Path(__file__)), evaluator_sha256=CHECK_SHA,
+              first_native_reused=True, first_movie_reused=True))
+    else:
+        write(WORK / 'admission.json', dict(label=LABEL,
         pre_run_head=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip(),
         amendment_v1_commit='154661ba1bd733ac7993281fa895bfcd3a26b222',
         amendment_v2_commit='8f5e92556dbd338de058666d541d4a901aa276a5',
@@ -285,18 +314,22 @@ def main():
         environment={k: environment()[k] for k in ['OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS',
                        'VECLIB_MAXIMUM_THREADS', 'PYTHONDONTWRITEBYTECODE']},
         free_bytes=shutil.disk_usage(WORK).free,
-        source_note='Unmodified git archive source and two supplied Mac binaries; no Linux byte-identity claim'))
-    refs = reference()
-    rows, expectation_key = [], None
+            source_note='Unmodified git archive source and two supplied Mac binaries; no Linux byte-identity claim'))
+    refs = json.loads((WORK / 'frozen_reference.json').read_text())['movies'] if resume else reference()
+    rows, expectation_key = [], 'inmodel' if resume else None
     for condition in ORDER:
         for seed in range(10):
             name = f'{condition}-s{seed:02d}'
             recipe = gen.recipe(condition, seed)
             assert recipe == refs[name]['receipt']['recipe']
             inp = WORK / 'inputs' / name
-            inp.mkdir(parents=True, exist_ok=False)
+            recover_first = resume and name == 'dose1-s00'
+            inp.mkdir(parents=True, exist_ok=recover_first)
             recipe_file = inp / 'recipe.json'
-            write(recipe_file, recipe)
+            if recover_first:
+                assert json.loads(recipe_file.read_text()) == recipe
+            else:
+                write(recipe_file, recipe)
             key = 'outmodel' if condition == 'outmodel' else ('nonsquare' if condition == 'nonsquare' else 'inmodel')
             if key != expectation_key:
                 for p in [WORK / 'expectation.npy', WORK / 'expectation.json']:
@@ -308,7 +341,10 @@ def main():
                 expectation_key = key
                 shutil.copyfile(WORK / 'expectation.json', WORK / f'expectation-{key}.json')
             fixture = WORK / 'movie'
-            gr = run_guarded([sys.executable, '-I', str(Path(__file__).resolve()), 'movie', str(recipe_file), str(fixture)], WORK, environment(), inp / 'generation.log', inp / 'GENERATION_RUN.json')
+            if recover_first:
+                gr = json.loads((inp / 'GENERATION_RUN.json').read_text())
+            else:
+                gr = run_guarded([sys.executable, '-I', str(Path(__file__).resolve()), 'movie', str(recipe_file), str(fixture)], WORK, environment(), inp / 'generation.log', inp / 'GENERATION_RUN.json')
             if gr['exit'] != 0:
                 raise RuntimeError(f'{name} movie generation failed')
             receipt = json.loads((fixture / 'RECEIPT.json').read_text())
@@ -316,13 +352,19 @@ def main():
             local_hash = digest(fixture / 'movie.mrcs')
             assert local_hash == receipt['files']['movie.mrcs']
             for filename in ['RECEIPT.json', 'input.star']:
-                shutil.copyfile(fixture / filename, inp / filename)
+                if recover_first:
+                    assert digest(fixture / filename) == digest(inp / filename)
+                else:
+                    shutil.copyfile(fixture / filename, inp / filename)
             shutil.copyfile(fixture / 'input.star', fixture / 'movie.star')
             mm, fm = moments(receipt), refs[name]['moments']
             p6 = dict(Mac=mm, frozen=fm, total_difference=mm['total'] - fm['total'],
                       squared_sum_difference=mm['squared_sum'] - fm['squared_sum'])
             p6['flagged'] = p6['total_difference'] != 0 or abs(p6['squared_sum_difference']) > 1000
-            write(inp / 'P6.json', p6)
+            if recover_first:
+                assert json.loads((inp / 'P6.json').read_text()) == p6
+            else:
+                write(inp / 'P6.json', p6)
             row = dict(movie=name, condition=condition, seed=seed,
                        in_model=condition not in ('outmodel', 'pedestal32'),
                        recipe=recipe, movie_sha256=local_hash,
@@ -358,11 +400,11 @@ def main():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 1 and sys.argv[1] != '--resume-first-score':
         worker(*sys.argv[1:])
     else:
         try:
-            main()
+            main(resume=sys.argv[1:] == ['--resume-first-score'])
         except BaseException as error:
             if WORK.exists():
                 write(WORK / 'STOP.json', dict(label=LABEL, error=str(error), traceback=traceback.format_exc()))

@@ -1,0 +1,77 @@
+{
+ "capture_on_witnesses_all_mandatory": [
+  "W1 session schema local-ccf-capture/2, capture_mode local_full_width_pair, selected centres exactly (104,15),(62,79), patch directories and extents",
+  "W2 recorded actual weight_x_norm 42 (and inherited 22 not used) in both patches",
+  "W3 captured float32 weight map equals the frozen native-order x_norm 42 oracle exactly and differs from the x_norm 22 map",
+  "W4 native log: 9 witness lines \"x_norm = 42, pnx = 42, nfx = 22\", one directly after each of the 9 patch headers, including both selected patches",
+  "coverage: both patches, 5 frames, every actually executed iteration, patch-files.json and COMPLETE.json consistent"
+ ],
+ "driver_requires_in_PARENT_RELEASE.json": [
+  "release_id=lfw-capture-v2",
+  "pins_sha256 (RUN_PINS_v2.json)",
+  "driver_sha256 (run_capture_fw_v2.py)",
+  "witness_sha256",
+  "source_commit",
+  "binary_sha256",
+  "independent_review_report_sha256",
+  "jobs_authorized",
+  "fresh_resource_grant (structured)"
+ ],
+ "native_budget": "2 producers, unchanged and unreleased",
+ "parent_release_must_bind": {
+  "baseline": {
+   "dir": "/tmp/motioncorr-lfw-v5-20261026/evidence/noisy/ON",
+   "run_json_sha256": "ad77c48cce40ee0e8116297e05a7789276dcfc534688f0a88caab0e1ca99e6c4"
+  },
+  "binary_sha256": "e0b4750d8815929035a31db6e028e9ebb508af61d8263cf66418022aa5e44742",
+  "blob_list_sha256": "3d885a21bdaac53ca61e623e7f036f4770f23a7f151ba887b51f059a64147c41",
+  "commands_sha256": "26eeea360d1407d5bb9216a3f79890072cad3f252aa0a06f5877ccbb284fac0c",
+  "comparator": {
+   "path": "/tmp/motioncorr-lfw-capture-20261027/source/docs/post_rc0/s1/global_damping_20261026/scripts/compare_products.py",
+   "sha256": "53449d2da682305c8c11e3ed3efb91103530196e481ac075b00f90e3d5ea0f47"
+  },
+  "driver_execution_review": {
+   "durable_copy": "~/Documents/MotionCorr-evidence/20261026/Native-fullwidth-capture-driver-opus-review-r1/original/REPORT.md",
+   "repo_copy": "docs/post_rc0/s1/local_full_width_capture_20261027/review_driver/REPORT.md",
+   "report_sha256": "ba1946e13df7d1042fa9571903ae14342a87ce2347b2a4278330836bb5addb3e",
+   "verdict": "CLEAR conditional on C1 and C2 (now addressed in v2; one delta review requested)"
+  },
+  "driver_sha256": "7b48892e0f1f12c6da9d0ec3f80f60bc37b033ca01f7768c934bb0f877769357",
+  "fresh_resource_grant": "required; the driver checks only its structured format (granted_by, utc, cpus 32-47, the 8 pinned lane locks, jobs OFF/ON, receipt_sha256); the parent binds the actual grant and its receipt/index externally",
+  "guard_sha256": "3a2c47a1d0632ce6a87f1a7e4178f17415fa5f5f87465a0cbde9f8aeef25ecc4",
+  "independent_source_review": {
+   "durable_copy": "~/Documents/MotionCorr-evidence/20261026/Native-fullwidth-ccf-capture-opus-source-review-r1/original/REPORT.md",
+   "repo_copy": "docs/post_rc0/s1/local_full_width_capture_20261027/review/REPORT.md",
+   "report_sha256": "bdea0d803b50b25ed44d12fea34f856c17390098b46f28a14c24f36b9cc00f00",
+   "verdict": "CLEAR for source f473fbc9 (source scope only)"
+  },
+  "input_files": {
+   "noisy.mrcs": "5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3",
+   "noisy.star": "c321865e4fc769d9af55bc86af0a0b390abdcdb029137a9aeb5d6743b81a6891"
+  },
+  "jobs_authorized": [
+   "OFF",
+   "ON"
+  ],
+  "lane_sha256": "e0143e89fa3b6771d7f3ff873f04a7453d26f1b8c7f7b1e8f4ab4d3202b6fd66",
+  "libs_and_loader": "RUN_PINS.json libs (18) and loader_sha256",
+  "pins_file_name_on_cpu64": "RUN_PINS_v2.json",
+  "pins_sha256": "7404fe8b70aaef13ee1f0043b3c8a12cdb6e7167da0ad6b4e7466a736089a7fd",
+  "release_id": "lfw-capture-v2",
+  "source_commit": "f473fbc9c380c7bb8cc1533f19461fbf70dde485",
+  "weight_oracle_sha256": "d809bd6273f2d1c296315a1ed7c24a1f08f323059eaecb2bfe6e603cafda7ee8",
+  "witness_sha256": "1206fe46f5eed664893f5ff5509d81469459ea9565a10e75c680cb8290844768"
+ },
+ "schema": "lfw-capture-release-bindings/1",
+ "status": "PREPARED_HELD v2: no PARENT_RELEASE exists; supersedes RELEASE_BINDINGS.json (v1, kept unchanged)",
+ "tests": {
+  "mutants_driver_v2.sh": "57cd77cd9b558ed570a16ccf5a083514385f2372da50c163bd3ad2ced9c57f3f",
+  "test_capture_witness.py": "a34125e9248e81afe928fa48e43919844b8cce8d9d96b469a1445867d01cc415",
+  "test_driver_v2.py": "ed175bae1edef5b55aa1d94ccef0b0729d8e63cb12176fdbfd4dc05187d73461"
+ },
+ "v2_additions": [
+  "C1 per-launch binary/staged-input/pins/staging-source re-verification and post-run binary check (INVALID.json)",
+  "C2 capture inventory outside the tree, 606-file closed-form crosscheck (2 root + 302 per patch for 2 iterations), re-verification before completion, bound in NATIVE_COMPLETE.json",
+  "N1-N4 as in DRIVER_RESPONSE.md"
+ ]
+}

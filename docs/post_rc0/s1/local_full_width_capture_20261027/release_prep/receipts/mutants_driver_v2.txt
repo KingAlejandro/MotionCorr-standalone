@@ -1,0 +1,16 @@
+control (unmutated copy): rc=0 :: PASS 61 checks
+m1_no_binary_check_at_launch: test rc=1 :: AssertionError
+m2_no_staged_input_hash: test rc=1 :: AssertionError
+m3_no_staging_source_check: test rc=1 :: AssertionError
+m4_no_pins_recheck: test rc=1 :: AssertionError
+m5_no_staged_scope_check: test rc=1 :: AssertionError
+m6_no_postrun_binary_check: test rc=1 :: AssertionError
+m7_no_final_inventory_verify: test rc=1 :: AssertionError
+m8_no_second_inventory: test rc=1 :: AssertionError: NOT REFUSED: C2 a capture file altered while it is being inventoried
+m9_no_count_crosscheck: test rc=1 :: AssertionError: NOT REFUSED: C2 count crosscheck fails when coverage claims another iteration count
+m10_symlinks_allowed: test rc=1 :: AssertionError: NOT REFUSED: C2 a symlink inside the capture tree
+m11_witness_exceptions_not_normalised: test rc=1 :: 
+m12_no_timeout: test rc=1 :: AssertionError
+m13_no_group_kill_on_exception: test rc=1 :: AssertionError
+m14_grant_truthy_only: test rc=1 :: AssertionError: NOT REFUSED: N2 grant no receipt
+m15_no_unexpected_normalisation: test rc=1 :: 

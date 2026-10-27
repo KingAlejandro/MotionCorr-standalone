@@ -106,7 +106,9 @@ int main(){
         {
             auto r=fresh("f3");LocalCcfCaptureSession ses(r.string(),"s",128,96,5,Mode::FullWidthPair);
             check(drive(ses,84,126,0,32,104,15,42),"control: first selected patch rejected");
-            check(throws([&]{ses.patch(84,126,0,32,104,15,zero,zero);}),"duplicate selected patch accepted");std::filesystem::remove_all(r);
+            {std::string what;try{ses.patch(84,126,0,32,104,15,zero,zero);}catch(const std::exception& e){what=e.what();}
+            // the session's own duplicate guard must be the one that fires (the directory-exists check would also throw)
+            check(what.find("duplicate selected patch")!=std::string::npos,"duplicate selected patch not rejected by the session guard");}std::filesystem::remove_all(r);
         }
         {
             auto r=fresh("f4");LocalCcfCaptureSession ses(r.string(),"s",128,96,5,Mode::FullWidthPair);

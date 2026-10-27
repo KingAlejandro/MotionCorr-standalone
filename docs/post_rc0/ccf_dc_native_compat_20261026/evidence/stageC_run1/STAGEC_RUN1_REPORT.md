@@ -1,5 +1,7 @@
 # Stage C run 1 (K267 + N controls, correctness characterization): STOPPED at the first CUDA B3 triple
 
+**Independent audit clarification, 27 October:** the post-run verification covered the three `motioncorr` binaries and the guard; the two oracle binaries were checked in the parent preflight, not after the run. The two `exp` zero-CUDA logs differ only in the unweighted-reconstruction timing line. These corrections do not change the STOP or any recorded result.
+
 Run id `native-dc-stagec-20261027-r1`, one execution, no retry. Released by the parent (`parent/PARENT_RELEASE.json`, sha256 `83183e04...`; index `cde67b57...`; Opus delta review r2 `83c04d6c...`, archived as `review/STAGEC_DELTA_R2_REPORT.md`). 160 K267/N jobs authorized, M 16 held. This is not production acceptance, not a movie-tier or timing result.
 
 ## Pins and staging (4GPUs, strict direct SSH)

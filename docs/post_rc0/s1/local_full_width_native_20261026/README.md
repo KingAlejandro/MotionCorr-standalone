@@ -13,3 +13,6 @@ science/neutrality/harm results are UNRUN; the oracle value is an independent re
 
 ## B2 cross-feed offline screen (added later, documentation only)
 `b2_crossfeed_screen/` holds the offline B2 + full-width counterfactual screen (status NOT_A_CANDIDATE: noisy case fails the unchanged limits), its independent audit and an additive audit disposition; see `b2_crossfeed_screen/README.md`. No native run or acceptance follows from it. `b2_crossfeed_screen/NEXT_OBSERVATION_PROPOSAL.md` is a draft only.
+
+## Observation-residual diagnostic (added later, documentation only)
+`observation_residual/` holds the descriptive saved-metadata diagnostic of accepted full-width patch observations versus the unchanged truth and global (physical and Tr gauges separate), with the parent's independent check; see `observation_residual/README.md`. It attributes no cause and changes no status.

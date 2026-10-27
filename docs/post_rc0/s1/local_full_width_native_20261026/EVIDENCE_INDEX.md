@@ -37,3 +37,6 @@ Original compiler/ctest log text, including a few trailing-whitespace lines, is 
 
 ## B2 cross-feed offline screen
 `b2_crossfeed_screen/` (additive, documentation only): `PACKAGE_SHA256SUMS` verifies every file in it (`cd b2_crossfeed_screen && shasum -a 256 -c PACKAGE_SHA256SUMS`). The original 101-file source manifest is kept as `screen/SOURCE_MANIFEST.json` and does not verify inside this compact subset. Durable originals under `~/Documents/MotionCorr-evidence/20261026/`: `B2-crossfeed-screen-archive-r2/` (full working directory, 102-line index), `B2-crossfeed-opus-audit-r1/` (audit originals), `B2-crossfeed-screen-r1/` (earlier copy, unchanged), and `B2-crossfeed-publication-r1/` (copy of this directory). Source, tests and CMake are unchanged.
+
+## Observation-residual diagnostic
+`observation_residual/` (additive, documentation only): `PACKAGE_SHA256SUMS` verifies every file. Durable originals under `~/Documents/MotionCorr-evidence/20261026/`: `Observation-residual-r1/`, `Observation-residual-parent-check-r1/`.

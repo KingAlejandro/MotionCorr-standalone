@@ -1,0 +1,1373 @@
+{
+  "utc": "2026-10-27T01:05:19Z",
+  "hostname": "4-gpu-vm",
+  "scope": "Read-only current loader and resource snapshot, no native execution or allocation. Historical Stage B resolution is unavailable.",
+  "loader": {
+    "def": {
+      "path": "/home/alex/mc-dcnative2-20261026/build-def/motioncorr",
+      "sha256": "2db45b2df8241e14bda28e9dbe3d7eae0ce9f5612a7b775bc33990aeb27bed6a",
+      "current_resolutions_equal": true,
+      "scrub": {
+        "lines": [
+          "/lib64/ld-linux-x86-64.so.2",
+          "libLerc.so.4 => /lib/x86_64-linux-gnu/libLerc.so.4",
+          "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6",
+          "libcudart.so.12 => /usr/local/cuda/lib64/libcudart.so.12",
+          "libcufft.so.11 => /usr/local/cuda/lib64/libcufft.so.11",
+          "libdeflate.so.0 => /lib/x86_64-linux-gnu/libdeflate.so.0",
+          "libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2",
+          "libfftw3.so.3 => /lib/x86_64-linux-gnu/libfftw3.so.3",
+          "libfftw3f.so.3 => /lib/x86_64-linux-gnu/libfftw3f.so.3",
+          "libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1",
+          "libjbig.so.0 => /lib/x86_64-linux-gnu/libjbig.so.0",
+          "libjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8",
+          "liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5",
+          "libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6",
+          "libpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16",
+          "libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0",
+          "librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1",
+          "libsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0",
+          "libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6",
+          "libtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6",
+          "libwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7",
+          "libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1",
+          "libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1",
+          "linux-vdso.so.1"
+        ],
+        "libraries": {
+          "/lib/x86_64-linux-gnu/libLerc.so.4": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libLerc.so.4",
+            "sha256": "a0ee52df526738293bdd232ddaefbb0d1d9c2da775a82fc6730e7cd394da560c"
+          },
+          "/lib/x86_64-linux-gnu/libc.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+            "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+          },
+          "/lib/x86_64-linux-gnu/libdeflate.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdeflate.so.0",
+            "sha256": "608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f"
+          },
+          "/lib/x86_64-linux-gnu/libdl.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+            "sha256": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10",
+            "sha256": "b5cc02c4d360b5b20111cb0a251f8368af8c9ce3145357f5ba54c51ac4ca9b35"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3f.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10",
+            "sha256": "d75f423f19dc4b8fc86c5f4bdf9e3202494dea7f0d01060c4b546e7e28d59436"
+          },
+          "/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+            "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+          },
+          "/lib/x86_64-linux-gnu/libgomp.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0",
+            "sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+          },
+          "/lib/x86_64-linux-gnu/libjbig.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjbig.so.0",
+            "sha256": "6fea8a26ef5e0d2a36d296d7d0ec0c1f0894bf796b5824317bea88c090833a62"
+          },
+          "/lib/x86_64-linux-gnu/libjpeg.so.8": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2",
+            "sha256": "ac09f2cd6f8a3b8e3cb123999ce275f9bcbe31c6cf9e20212c8f297772591d15"
+          },
+          "/lib/x86_64-linux-gnu/liblzma.so.5": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+            "sha256": "26b37d25f7ca2a2d348de8ecabacda12e921cd933b21fa069a179760db77219d"
+          },
+          "/lib/x86_64-linux-gnu/libm.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+            "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+          },
+          "/lib/x86_64-linux-gnu/libpng16.so.16": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0",
+            "sha256": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8"
+          },
+          "/lib/x86_64-linux-gnu/libpthread.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+            "sha256": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd"
+          },
+          "/lib/x86_64-linux-gnu/librt.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/librt.so.1",
+            "sha256": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82"
+          },
+          "/lib/x86_64-linux-gnu/libsharpyuv.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1",
+            "sha256": "b2e62799e5dbd783a0671d53be99f7c6489567a5332a1e8f471e6bb250f294dc"
+          },
+          "/lib/x86_64-linux-gnu/libstdc++.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+            "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+          },
+          "/lib/x86_64-linux-gnu/libtiff.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1",
+            "sha256": "aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4"
+          },
+          "/lib/x86_64-linux-gnu/libwebp.so.7": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8",
+            "sha256": "9664db51ec65209078abbb8bc7b699888a43ecc2f3c74ce8dd4e497175aa5bf0"
+          },
+          "/lib/x86_64-linux-gnu/libz.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+            "sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+          },
+          "/lib/x86_64-linux-gnu/libzstd.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
+            "sha256": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+          },
+          "/lib64/ld-linux-x86-64.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+            "sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+          },
+          "/usr/local/cuda/lib64/libcudart.so.12": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcudart.so.12.8.57",
+            "sha256": "218eec4c8385a32e258a0235be4d449986844f2d0de3430052f0924e6fe60f71"
+          },
+          "/usr/local/cuda/lib64/libcufft.so.11": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcufft.so.11.3.3.41",
+            "sha256": "27799c3ba85e6ad2f88fdb072c362dfc4a095b567eeea80b5fd89d4a97febefd"
+          }
+        }
+      },
+      "full": {
+        "lines": [
+          "/lib64/ld-linux-x86-64.so.2",
+          "libLerc.so.4 => /lib/x86_64-linux-gnu/libLerc.so.4",
+          "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6",
+          "libcudart.so.12 => /usr/local/cuda/lib64/libcudart.so.12",
+          "libcufft.so.11 => /usr/local/cuda/lib64/libcufft.so.11",
+          "libdeflate.so.0 => /lib/x86_64-linux-gnu/libdeflate.so.0",
+          "libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2",
+          "libfftw3.so.3 => /lib/x86_64-linux-gnu/libfftw3.so.3",
+          "libfftw3f.so.3 => /lib/x86_64-linux-gnu/libfftw3f.so.3",
+          "libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1",
+          "libjbig.so.0 => /lib/x86_64-linux-gnu/libjbig.so.0",
+          "libjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8",
+          "liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5",
+          "libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6",
+          "libpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16",
+          "libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0",
+          "librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1",
+          "libsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0",
+          "libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6",
+          "libtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6",
+          "libwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7",
+          "libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1",
+          "libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1",
+          "linux-vdso.so.1"
+        ],
+        "libraries": {
+          "/lib/x86_64-linux-gnu/libLerc.so.4": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libLerc.so.4",
+            "sha256": "a0ee52df526738293bdd232ddaefbb0d1d9c2da775a82fc6730e7cd394da560c"
+          },
+          "/lib/x86_64-linux-gnu/libc.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+            "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+          },
+          "/lib/x86_64-linux-gnu/libdeflate.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdeflate.so.0",
+            "sha256": "608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f"
+          },
+          "/lib/x86_64-linux-gnu/libdl.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+            "sha256": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10",
+            "sha256": "b5cc02c4d360b5b20111cb0a251f8368af8c9ce3145357f5ba54c51ac4ca9b35"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3f.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10",
+            "sha256": "d75f423f19dc4b8fc86c5f4bdf9e3202494dea7f0d01060c4b546e7e28d59436"
+          },
+          "/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+            "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+          },
+          "/lib/x86_64-linux-gnu/libgomp.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0",
+            "sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+          },
+          "/lib/x86_64-linux-gnu/libjbig.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjbig.so.0",
+            "sha256": "6fea8a26ef5e0d2a36d296d7d0ec0c1f0894bf796b5824317bea88c090833a62"
+          },
+          "/lib/x86_64-linux-gnu/libjpeg.so.8": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2",
+            "sha256": "ac09f2cd6f8a3b8e3cb123999ce275f9bcbe31c6cf9e20212c8f297772591d15"
+          },
+          "/lib/x86_64-linux-gnu/liblzma.so.5": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+            "sha256": "26b37d25f7ca2a2d348de8ecabacda12e921cd933b21fa069a179760db77219d"
+          },
+          "/lib/x86_64-linux-gnu/libm.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+            "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+          },
+          "/lib/x86_64-linux-gnu/libpng16.so.16": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0",
+            "sha256": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8"
+          },
+          "/lib/x86_64-linux-gnu/libpthread.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+            "sha256": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd"
+          },
+          "/lib/x86_64-linux-gnu/librt.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/librt.so.1",
+            "sha256": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82"
+          },
+          "/lib/x86_64-linux-gnu/libsharpyuv.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1",
+            "sha256": "b2e62799e5dbd783a0671d53be99f7c6489567a5332a1e8f471e6bb250f294dc"
+          },
+          "/lib/x86_64-linux-gnu/libstdc++.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+            "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+          },
+          "/lib/x86_64-linux-gnu/libtiff.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1",
+            "sha256": "aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4"
+          },
+          "/lib/x86_64-linux-gnu/libwebp.so.7": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8",
+            "sha256": "9664db51ec65209078abbb8bc7b699888a43ecc2f3c74ce8dd4e497175aa5bf0"
+          },
+          "/lib/x86_64-linux-gnu/libz.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+            "sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+          },
+          "/lib/x86_64-linux-gnu/libzstd.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
+            "sha256": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+          },
+          "/lib64/ld-linux-x86-64.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+            "sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+          },
+          "/usr/local/cuda/lib64/libcudart.so.12": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcudart.so.12.8.57",
+            "sha256": "218eec4c8385a32e258a0235be4d449986844f2d0de3430052f0924e6fe60f71"
+          },
+          "/usr/local/cuda/lib64/libcufft.so.11": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcufft.so.11.3.3.41",
+            "sha256": "27799c3ba85e6ad2f88fdb072c362dfc4a095b567eeea80b5fd89d4a97febefd"
+          }
+        }
+      }
+    },
+    "exp": {
+      "path": "/home/alex/mc-dcnative2-20261026/build-exp/motioncorr",
+      "sha256": "b918cadc571eb09d753fd454a20554400ea6443b6b0738e14670f96c7afb2857",
+      "current_resolutions_equal": true,
+      "scrub": {
+        "lines": [
+          "/lib64/ld-linux-x86-64.so.2",
+          "libLerc.so.4 => /lib/x86_64-linux-gnu/libLerc.so.4",
+          "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6",
+          "libcudart.so.12 => /usr/local/cuda/lib64/libcudart.so.12",
+          "libcufft.so.11 => /usr/local/cuda/lib64/libcufft.so.11",
+          "libdeflate.so.0 => /lib/x86_64-linux-gnu/libdeflate.so.0",
+          "libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2",
+          "libfftw3.so.3 => /lib/x86_64-linux-gnu/libfftw3.so.3",
+          "libfftw3f.so.3 => /lib/x86_64-linux-gnu/libfftw3f.so.3",
+          "libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1",
+          "libjbig.so.0 => /lib/x86_64-linux-gnu/libjbig.so.0",
+          "libjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8",
+          "liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5",
+          "libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6",
+          "libpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16",
+          "libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0",
+          "librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1",
+          "libsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0",
+          "libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6",
+          "libtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6",
+          "libwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7",
+          "libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1",
+          "libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1",
+          "linux-vdso.so.1"
+        ],
+        "libraries": {
+          "/lib/x86_64-linux-gnu/libLerc.so.4": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libLerc.so.4",
+            "sha256": "a0ee52df526738293bdd232ddaefbb0d1d9c2da775a82fc6730e7cd394da560c"
+          },
+          "/lib/x86_64-linux-gnu/libc.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+            "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+          },
+          "/lib/x86_64-linux-gnu/libdeflate.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdeflate.so.0",
+            "sha256": "608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f"
+          },
+          "/lib/x86_64-linux-gnu/libdl.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+            "sha256": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10",
+            "sha256": "b5cc02c4d360b5b20111cb0a251f8368af8c9ce3145357f5ba54c51ac4ca9b35"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3f.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10",
+            "sha256": "d75f423f19dc4b8fc86c5f4bdf9e3202494dea7f0d01060c4b546e7e28d59436"
+          },
+          "/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+            "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+          },
+          "/lib/x86_64-linux-gnu/libgomp.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0",
+            "sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+          },
+          "/lib/x86_64-linux-gnu/libjbig.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjbig.so.0",
+            "sha256": "6fea8a26ef5e0d2a36d296d7d0ec0c1f0894bf796b5824317bea88c090833a62"
+          },
+          "/lib/x86_64-linux-gnu/libjpeg.so.8": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2",
+            "sha256": "ac09f2cd6f8a3b8e3cb123999ce275f9bcbe31c6cf9e20212c8f297772591d15"
+          },
+          "/lib/x86_64-linux-gnu/liblzma.so.5": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+            "sha256": "26b37d25f7ca2a2d348de8ecabacda12e921cd933b21fa069a179760db77219d"
+          },
+          "/lib/x86_64-linux-gnu/libm.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+            "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+          },
+          "/lib/x86_64-linux-gnu/libpng16.so.16": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0",
+            "sha256": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8"
+          },
+          "/lib/x86_64-linux-gnu/libpthread.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+            "sha256": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd"
+          },
+          "/lib/x86_64-linux-gnu/librt.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/librt.so.1",
+            "sha256": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82"
+          },
+          "/lib/x86_64-linux-gnu/libsharpyuv.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1",
+            "sha256": "b2e62799e5dbd783a0671d53be99f7c6489567a5332a1e8f471e6bb250f294dc"
+          },
+          "/lib/x86_64-linux-gnu/libstdc++.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+            "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+          },
+          "/lib/x86_64-linux-gnu/libtiff.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1",
+            "sha256": "aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4"
+          },
+          "/lib/x86_64-linux-gnu/libwebp.so.7": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8",
+            "sha256": "9664db51ec65209078abbb8bc7b699888a43ecc2f3c74ce8dd4e497175aa5bf0"
+          },
+          "/lib/x86_64-linux-gnu/libz.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+            "sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+          },
+          "/lib/x86_64-linux-gnu/libzstd.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
+            "sha256": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+          },
+          "/lib64/ld-linux-x86-64.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+            "sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+          },
+          "/usr/local/cuda/lib64/libcudart.so.12": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcudart.so.12.8.57",
+            "sha256": "218eec4c8385a32e258a0235be4d449986844f2d0de3430052f0924e6fe60f71"
+          },
+          "/usr/local/cuda/lib64/libcufft.so.11": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcufft.so.11.3.3.41",
+            "sha256": "27799c3ba85e6ad2f88fdb072c362dfc4a095b567eeea80b5fd89d4a97febefd"
+          }
+        }
+      },
+      "full": {
+        "lines": [
+          "/lib64/ld-linux-x86-64.so.2",
+          "libLerc.so.4 => /lib/x86_64-linux-gnu/libLerc.so.4",
+          "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6",
+          "libcudart.so.12 => /usr/local/cuda/lib64/libcudart.so.12",
+          "libcufft.so.11 => /usr/local/cuda/lib64/libcufft.so.11",
+          "libdeflate.so.0 => /lib/x86_64-linux-gnu/libdeflate.so.0",
+          "libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2",
+          "libfftw3.so.3 => /lib/x86_64-linux-gnu/libfftw3.so.3",
+          "libfftw3f.so.3 => /lib/x86_64-linux-gnu/libfftw3f.so.3",
+          "libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1",
+          "libjbig.so.0 => /lib/x86_64-linux-gnu/libjbig.so.0",
+          "libjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8",
+          "liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5",
+          "libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6",
+          "libpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16",
+          "libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0",
+          "librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1",
+          "libsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0",
+          "libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6",
+          "libtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6",
+          "libwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7",
+          "libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1",
+          "libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1",
+          "linux-vdso.so.1"
+        ],
+        "libraries": {
+          "/lib/x86_64-linux-gnu/libLerc.so.4": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libLerc.so.4",
+            "sha256": "a0ee52df526738293bdd232ddaefbb0d1d9c2da775a82fc6730e7cd394da560c"
+          },
+          "/lib/x86_64-linux-gnu/libc.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+            "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+          },
+          "/lib/x86_64-linux-gnu/libdeflate.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdeflate.so.0",
+            "sha256": "608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f"
+          },
+          "/lib/x86_64-linux-gnu/libdl.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+            "sha256": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10",
+            "sha256": "b5cc02c4d360b5b20111cb0a251f8368af8c9ce3145357f5ba54c51ac4ca9b35"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3f.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10",
+            "sha256": "d75f423f19dc4b8fc86c5f4bdf9e3202494dea7f0d01060c4b546e7e28d59436"
+          },
+          "/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+            "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+          },
+          "/lib/x86_64-linux-gnu/libgomp.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0",
+            "sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+          },
+          "/lib/x86_64-linux-gnu/libjbig.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjbig.so.0",
+            "sha256": "6fea8a26ef5e0d2a36d296d7d0ec0c1f0894bf796b5824317bea88c090833a62"
+          },
+          "/lib/x86_64-linux-gnu/libjpeg.so.8": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2",
+            "sha256": "ac09f2cd6f8a3b8e3cb123999ce275f9bcbe31c6cf9e20212c8f297772591d15"
+          },
+          "/lib/x86_64-linux-gnu/liblzma.so.5": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+            "sha256": "26b37d25f7ca2a2d348de8ecabacda12e921cd933b21fa069a179760db77219d"
+          },
+          "/lib/x86_64-linux-gnu/libm.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+            "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+          },
+          "/lib/x86_64-linux-gnu/libpng16.so.16": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0",
+            "sha256": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8"
+          },
+          "/lib/x86_64-linux-gnu/libpthread.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+            "sha256": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd"
+          },
+          "/lib/x86_64-linux-gnu/librt.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/librt.so.1",
+            "sha256": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82"
+          },
+          "/lib/x86_64-linux-gnu/libsharpyuv.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1",
+            "sha256": "b2e62799e5dbd783a0671d53be99f7c6489567a5332a1e8f471e6bb250f294dc"
+          },
+          "/lib/x86_64-linux-gnu/libstdc++.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+            "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+          },
+          "/lib/x86_64-linux-gnu/libtiff.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1",
+            "sha256": "aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4"
+          },
+          "/lib/x86_64-linux-gnu/libwebp.so.7": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8",
+            "sha256": "9664db51ec65209078abbb8bc7b699888a43ecc2f3c74ce8dd4e497175aa5bf0"
+          },
+          "/lib/x86_64-linux-gnu/libz.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+            "sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+          },
+          "/lib/x86_64-linux-gnu/libzstd.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
+            "sha256": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+          },
+          "/lib64/ld-linux-x86-64.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+            "sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+          },
+          "/usr/local/cuda/lib64/libcudart.so.12": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcudart.so.12.8.57",
+            "sha256": "218eec4c8385a32e258a0235be4d449986844f2d0de3430052f0924e6fe60f71"
+          },
+          "/usr/local/cuda/lib64/libcufft.so.11": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcufft.so.11.3.3.41",
+            "sha256": "27799c3ba85e6ad2f88fdb072c362dfc4a095b567eeea80b5fd89d4a97febefd"
+          }
+        }
+      }
+    },
+    "iso": {
+      "path": "/home/alex/mc-dcnative2-20261026/build-iso/motioncorr",
+      "sha256": "3a7d4f472c0f795f6e3d7fdb7c31ab5c3e6bdef00ccf95d08a5cf5855155d0ff",
+      "current_resolutions_equal": true,
+      "scrub": {
+        "lines": [
+          "/lib64/ld-linux-x86-64.so.2",
+          "libLerc.so.4 => /lib/x86_64-linux-gnu/libLerc.so.4",
+          "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6",
+          "libcudart.so.12 => /usr/local/cuda/lib64/libcudart.so.12",
+          "libcufft.so.11 => /usr/local/cuda/lib64/libcufft.so.11",
+          "libdeflate.so.0 => /lib/x86_64-linux-gnu/libdeflate.so.0",
+          "libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2",
+          "libfftw3.so.3 => /lib/x86_64-linux-gnu/libfftw3.so.3",
+          "libfftw3f.so.3 => /lib/x86_64-linux-gnu/libfftw3f.so.3",
+          "libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1",
+          "libjbig.so.0 => /lib/x86_64-linux-gnu/libjbig.so.0",
+          "libjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8",
+          "liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5",
+          "libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6",
+          "libpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16",
+          "libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0",
+          "librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1",
+          "libsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0",
+          "libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6",
+          "libtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6",
+          "libwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7",
+          "libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1",
+          "libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1",
+          "linux-vdso.so.1"
+        ],
+        "libraries": {
+          "/lib/x86_64-linux-gnu/libLerc.so.4": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libLerc.so.4",
+            "sha256": "a0ee52df526738293bdd232ddaefbb0d1d9c2da775a82fc6730e7cd394da560c"
+          },
+          "/lib/x86_64-linux-gnu/libc.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+            "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+          },
+          "/lib/x86_64-linux-gnu/libdeflate.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdeflate.so.0",
+            "sha256": "608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f"
+          },
+          "/lib/x86_64-linux-gnu/libdl.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+            "sha256": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10",
+            "sha256": "b5cc02c4d360b5b20111cb0a251f8368af8c9ce3145357f5ba54c51ac4ca9b35"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3f.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10",
+            "sha256": "d75f423f19dc4b8fc86c5f4bdf9e3202494dea7f0d01060c4b546e7e28d59436"
+          },
+          "/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+            "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+          },
+          "/lib/x86_64-linux-gnu/libgomp.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0",
+            "sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+          },
+          "/lib/x86_64-linux-gnu/libjbig.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjbig.so.0",
+            "sha256": "6fea8a26ef5e0d2a36d296d7d0ec0c1f0894bf796b5824317bea88c090833a62"
+          },
+          "/lib/x86_64-linux-gnu/libjpeg.so.8": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2",
+            "sha256": "ac09f2cd6f8a3b8e3cb123999ce275f9bcbe31c6cf9e20212c8f297772591d15"
+          },
+          "/lib/x86_64-linux-gnu/liblzma.so.5": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+            "sha256": "26b37d25f7ca2a2d348de8ecabacda12e921cd933b21fa069a179760db77219d"
+          },
+          "/lib/x86_64-linux-gnu/libm.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+            "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+          },
+          "/lib/x86_64-linux-gnu/libpng16.so.16": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0",
+            "sha256": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8"
+          },
+          "/lib/x86_64-linux-gnu/libpthread.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+            "sha256": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd"
+          },
+          "/lib/x86_64-linux-gnu/librt.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/librt.so.1",
+            "sha256": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82"
+          },
+          "/lib/x86_64-linux-gnu/libsharpyuv.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1",
+            "sha256": "b2e62799e5dbd783a0671d53be99f7c6489567a5332a1e8f471e6bb250f294dc"
+          },
+          "/lib/x86_64-linux-gnu/libstdc++.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+            "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+          },
+          "/lib/x86_64-linux-gnu/libtiff.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1",
+            "sha256": "aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4"
+          },
+          "/lib/x86_64-linux-gnu/libwebp.so.7": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8",
+            "sha256": "9664db51ec65209078abbb8bc7b699888a43ecc2f3c74ce8dd4e497175aa5bf0"
+          },
+          "/lib/x86_64-linux-gnu/libz.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+            "sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+          },
+          "/lib/x86_64-linux-gnu/libzstd.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
+            "sha256": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+          },
+          "/lib64/ld-linux-x86-64.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+            "sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+          },
+          "/usr/local/cuda/lib64/libcudart.so.12": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcudart.so.12.8.57",
+            "sha256": "218eec4c8385a32e258a0235be4d449986844f2d0de3430052f0924e6fe60f71"
+          },
+          "/usr/local/cuda/lib64/libcufft.so.11": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcufft.so.11.3.3.41",
+            "sha256": "27799c3ba85e6ad2f88fdb072c362dfc4a095b567eeea80b5fd89d4a97febefd"
+          }
+        }
+      },
+      "full": {
+        "lines": [
+          "/lib64/ld-linux-x86-64.so.2",
+          "libLerc.so.4 => /lib/x86_64-linux-gnu/libLerc.so.4",
+          "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6",
+          "libcudart.so.12 => /usr/local/cuda/lib64/libcudart.so.12",
+          "libcufft.so.11 => /usr/local/cuda/lib64/libcufft.so.11",
+          "libdeflate.so.0 => /lib/x86_64-linux-gnu/libdeflate.so.0",
+          "libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2",
+          "libfftw3.so.3 => /lib/x86_64-linux-gnu/libfftw3.so.3",
+          "libfftw3f.so.3 => /lib/x86_64-linux-gnu/libfftw3f.so.3",
+          "libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1",
+          "libjbig.so.0 => /lib/x86_64-linux-gnu/libjbig.so.0",
+          "libjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8",
+          "liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5",
+          "libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6",
+          "libpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16",
+          "libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0",
+          "librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1",
+          "libsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0",
+          "libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6",
+          "libtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6",
+          "libwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7",
+          "libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1",
+          "libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1",
+          "linux-vdso.so.1"
+        ],
+        "libraries": {
+          "/lib/x86_64-linux-gnu/libLerc.so.4": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libLerc.so.4",
+            "sha256": "a0ee52df526738293bdd232ddaefbb0d1d9c2da775a82fc6730e7cd394da560c"
+          },
+          "/lib/x86_64-linux-gnu/libc.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+            "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+          },
+          "/lib/x86_64-linux-gnu/libdeflate.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdeflate.so.0",
+            "sha256": "608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f"
+          },
+          "/lib/x86_64-linux-gnu/libdl.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+            "sha256": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10",
+            "sha256": "b5cc02c4d360b5b20111cb0a251f8368af8c9ce3145357f5ba54c51ac4ca9b35"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3f.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10",
+            "sha256": "d75f423f19dc4b8fc86c5f4bdf9e3202494dea7f0d01060c4b546e7e28d59436"
+          },
+          "/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+            "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+          },
+          "/lib/x86_64-linux-gnu/libgomp.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0",
+            "sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+          },
+          "/lib/x86_64-linux-gnu/libjbig.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjbig.so.0",
+            "sha256": "6fea8a26ef5e0d2a36d296d7d0ec0c1f0894bf796b5824317bea88c090833a62"
+          },
+          "/lib/x86_64-linux-gnu/libjpeg.so.8": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2",
+            "sha256": "ac09f2cd6f8a3b8e3cb123999ce275f9bcbe31c6cf9e20212c8f297772591d15"
+          },
+          "/lib/x86_64-linux-gnu/liblzma.so.5": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+            "sha256": "26b37d25f7ca2a2d348de8ecabacda12e921cd933b21fa069a179760db77219d"
+          },
+          "/lib/x86_64-linux-gnu/libm.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+            "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+          },
+          "/lib/x86_64-linux-gnu/libpng16.so.16": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0",
+            "sha256": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8"
+          },
+          "/lib/x86_64-linux-gnu/libpthread.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+            "sha256": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd"
+          },
+          "/lib/x86_64-linux-gnu/librt.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/librt.so.1",
+            "sha256": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82"
+          },
+          "/lib/x86_64-linux-gnu/libsharpyuv.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1",
+            "sha256": "b2e62799e5dbd783a0671d53be99f7c6489567a5332a1e8f471e6bb250f294dc"
+          },
+          "/lib/x86_64-linux-gnu/libstdc++.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+            "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+          },
+          "/lib/x86_64-linux-gnu/libtiff.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1",
+            "sha256": "aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4"
+          },
+          "/lib/x86_64-linux-gnu/libwebp.so.7": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8",
+            "sha256": "9664db51ec65209078abbb8bc7b699888a43ecc2f3c74ce8dd4e497175aa5bf0"
+          },
+          "/lib/x86_64-linux-gnu/libz.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+            "sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+          },
+          "/lib/x86_64-linux-gnu/libzstd.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
+            "sha256": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+          },
+          "/lib64/ld-linux-x86-64.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+            "sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+          },
+          "/usr/local/cuda/lib64/libcudart.so.12": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcudart.so.12.8.57",
+            "sha256": "218eec4c8385a32e258a0235be4d449986844f2d0de3430052f0924e6fe60f71"
+          },
+          "/usr/local/cuda/lib64/libcufft.so.11": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcufft.so.11.3.3.41",
+            "sha256": "27799c3ba85e6ad2f88fdb072c362dfc4a095b567eeea80b5fd89d4a97febefd"
+          }
+        }
+      }
+    },
+    "oracle_exp": {
+      "path": "/home/alex/mc-dcnative2-20261026/build-exp/experiment_ccf_dc_stage",
+      "sha256": "3b93be6a06a5a6c41148671bdb654e1a4b33ad500f49e601a451e36e3c95b026",
+      "current_resolutions_equal": true,
+      "scrub": {
+        "lines": [
+          "/lib64/ld-linux-x86-64.so.2",
+          "libLerc.so.4 => /lib/x86_64-linux-gnu/libLerc.so.4",
+          "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6",
+          "libcudart.so.12 => /usr/local/cuda/lib64/libcudart.so.12",
+          "libcufft.so.11 => /usr/local/cuda/lib64/libcufft.so.11",
+          "libdeflate.so.0 => /lib/x86_64-linux-gnu/libdeflate.so.0",
+          "libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2",
+          "libfftw3.so.3 => /lib/x86_64-linux-gnu/libfftw3.so.3",
+          "libfftw3f.so.3 => /lib/x86_64-linux-gnu/libfftw3f.so.3",
+          "libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1",
+          "libjbig.so.0 => /lib/x86_64-linux-gnu/libjbig.so.0",
+          "libjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8",
+          "liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5",
+          "libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6",
+          "libpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16",
+          "libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0",
+          "librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1",
+          "libsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0",
+          "libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6",
+          "libtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6",
+          "libwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7",
+          "libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1",
+          "libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1",
+          "linux-vdso.so.1"
+        ],
+        "libraries": {
+          "/lib/x86_64-linux-gnu/libLerc.so.4": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libLerc.so.4",
+            "sha256": "a0ee52df526738293bdd232ddaefbb0d1d9c2da775a82fc6730e7cd394da560c"
+          },
+          "/lib/x86_64-linux-gnu/libc.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+            "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+          },
+          "/lib/x86_64-linux-gnu/libdeflate.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdeflate.so.0",
+            "sha256": "608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f"
+          },
+          "/lib/x86_64-linux-gnu/libdl.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+            "sha256": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10",
+            "sha256": "b5cc02c4d360b5b20111cb0a251f8368af8c9ce3145357f5ba54c51ac4ca9b35"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3f.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10",
+            "sha256": "d75f423f19dc4b8fc86c5f4bdf9e3202494dea7f0d01060c4b546e7e28d59436"
+          },
+          "/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+            "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+          },
+          "/lib/x86_64-linux-gnu/libgomp.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0",
+            "sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+          },
+          "/lib/x86_64-linux-gnu/libjbig.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjbig.so.0",
+            "sha256": "6fea8a26ef5e0d2a36d296d7d0ec0c1f0894bf796b5824317bea88c090833a62"
+          },
+          "/lib/x86_64-linux-gnu/libjpeg.so.8": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2",
+            "sha256": "ac09f2cd6f8a3b8e3cb123999ce275f9bcbe31c6cf9e20212c8f297772591d15"
+          },
+          "/lib/x86_64-linux-gnu/liblzma.so.5": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+            "sha256": "26b37d25f7ca2a2d348de8ecabacda12e921cd933b21fa069a179760db77219d"
+          },
+          "/lib/x86_64-linux-gnu/libm.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+            "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+          },
+          "/lib/x86_64-linux-gnu/libpng16.so.16": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0",
+            "sha256": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8"
+          },
+          "/lib/x86_64-linux-gnu/libpthread.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+            "sha256": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd"
+          },
+          "/lib/x86_64-linux-gnu/librt.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/librt.so.1",
+            "sha256": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82"
+          },
+          "/lib/x86_64-linux-gnu/libsharpyuv.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1",
+            "sha256": "b2e62799e5dbd783a0671d53be99f7c6489567a5332a1e8f471e6bb250f294dc"
+          },
+          "/lib/x86_64-linux-gnu/libstdc++.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+            "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+          },
+          "/lib/x86_64-linux-gnu/libtiff.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1",
+            "sha256": "aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4"
+          },
+          "/lib/x86_64-linux-gnu/libwebp.so.7": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8",
+            "sha256": "9664db51ec65209078abbb8bc7b699888a43ecc2f3c74ce8dd4e497175aa5bf0"
+          },
+          "/lib/x86_64-linux-gnu/libz.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+            "sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+          },
+          "/lib/x86_64-linux-gnu/libzstd.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
+            "sha256": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+          },
+          "/lib64/ld-linux-x86-64.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+            "sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+          },
+          "/usr/local/cuda/lib64/libcudart.so.12": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcudart.so.12.8.57",
+            "sha256": "218eec4c8385a32e258a0235be4d449986844f2d0de3430052f0924e6fe60f71"
+          },
+          "/usr/local/cuda/lib64/libcufft.so.11": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcufft.so.11.3.3.41",
+            "sha256": "27799c3ba85e6ad2f88fdb072c362dfc4a095b567eeea80b5fd89d4a97febefd"
+          }
+        }
+      },
+      "full": {
+        "lines": [
+          "/lib64/ld-linux-x86-64.so.2",
+          "libLerc.so.4 => /lib/x86_64-linux-gnu/libLerc.so.4",
+          "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6",
+          "libcudart.so.12 => /usr/local/cuda/lib64/libcudart.so.12",
+          "libcufft.so.11 => /usr/local/cuda/lib64/libcufft.so.11",
+          "libdeflate.so.0 => /lib/x86_64-linux-gnu/libdeflate.so.0",
+          "libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2",
+          "libfftw3.so.3 => /lib/x86_64-linux-gnu/libfftw3.so.3",
+          "libfftw3f.so.3 => /lib/x86_64-linux-gnu/libfftw3f.so.3",
+          "libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1",
+          "libjbig.so.0 => /lib/x86_64-linux-gnu/libjbig.so.0",
+          "libjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8",
+          "liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5",
+          "libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6",
+          "libpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16",
+          "libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0",
+          "librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1",
+          "libsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0",
+          "libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6",
+          "libtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6",
+          "libwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7",
+          "libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1",
+          "libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1",
+          "linux-vdso.so.1"
+        ],
+        "libraries": {
+          "/lib/x86_64-linux-gnu/libLerc.so.4": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libLerc.so.4",
+            "sha256": "a0ee52df526738293bdd232ddaefbb0d1d9c2da775a82fc6730e7cd394da560c"
+          },
+          "/lib/x86_64-linux-gnu/libc.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+            "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+          },
+          "/lib/x86_64-linux-gnu/libdeflate.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdeflate.so.0",
+            "sha256": "608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f"
+          },
+          "/lib/x86_64-linux-gnu/libdl.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+            "sha256": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10",
+            "sha256": "b5cc02c4d360b5b20111cb0a251f8368af8c9ce3145357f5ba54c51ac4ca9b35"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3f.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10",
+            "sha256": "d75f423f19dc4b8fc86c5f4bdf9e3202494dea7f0d01060c4b546e7e28d59436"
+          },
+          "/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+            "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+          },
+          "/lib/x86_64-linux-gnu/libgomp.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0",
+            "sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+          },
+          "/lib/x86_64-linux-gnu/libjbig.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjbig.so.0",
+            "sha256": "6fea8a26ef5e0d2a36d296d7d0ec0c1f0894bf796b5824317bea88c090833a62"
+          },
+          "/lib/x86_64-linux-gnu/libjpeg.so.8": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2",
+            "sha256": "ac09f2cd6f8a3b8e3cb123999ce275f9bcbe31c6cf9e20212c8f297772591d15"
+          },
+          "/lib/x86_64-linux-gnu/liblzma.so.5": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+            "sha256": "26b37d25f7ca2a2d348de8ecabacda12e921cd933b21fa069a179760db77219d"
+          },
+          "/lib/x86_64-linux-gnu/libm.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+            "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+          },
+          "/lib/x86_64-linux-gnu/libpng16.so.16": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0",
+            "sha256": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8"
+          },
+          "/lib/x86_64-linux-gnu/libpthread.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+            "sha256": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd"
+          },
+          "/lib/x86_64-linux-gnu/librt.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/librt.so.1",
+            "sha256": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82"
+          },
+          "/lib/x86_64-linux-gnu/libsharpyuv.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1",
+            "sha256": "b2e62799e5dbd783a0671d53be99f7c6489567a5332a1e8f471e6bb250f294dc"
+          },
+          "/lib/x86_64-linux-gnu/libstdc++.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+            "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+          },
+          "/lib/x86_64-linux-gnu/libtiff.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1",
+            "sha256": "aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4"
+          },
+          "/lib/x86_64-linux-gnu/libwebp.so.7": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8",
+            "sha256": "9664db51ec65209078abbb8bc7b699888a43ecc2f3c74ce8dd4e497175aa5bf0"
+          },
+          "/lib/x86_64-linux-gnu/libz.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+            "sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+          },
+          "/lib/x86_64-linux-gnu/libzstd.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
+            "sha256": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+          },
+          "/lib64/ld-linux-x86-64.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+            "sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+          },
+          "/usr/local/cuda/lib64/libcudart.so.12": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcudart.so.12.8.57",
+            "sha256": "218eec4c8385a32e258a0235be4d449986844f2d0de3430052f0924e6fe60f71"
+          },
+          "/usr/local/cuda/lib64/libcufft.so.11": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcufft.so.11.3.3.41",
+            "sha256": "27799c3ba85e6ad2f88fdb072c362dfc4a095b567eeea80b5fd89d4a97febefd"
+          }
+        }
+      }
+    },
+    "oracle_iso": {
+      "path": "/home/alex/mc-dcnative2-20261026/build-iso/experiment_ccf_dc_stage",
+      "sha256": "99f1f35228681ea60836094d300237020b89a806ab5a5ebdd872f8b1cc3dfdb5",
+      "current_resolutions_equal": true,
+      "scrub": {
+        "lines": [
+          "/lib64/ld-linux-x86-64.so.2",
+          "libLerc.so.4 => /lib/x86_64-linux-gnu/libLerc.so.4",
+          "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6",
+          "libcudart.so.12 => /usr/local/cuda/lib64/libcudart.so.12",
+          "libcufft.so.11 => /usr/local/cuda/lib64/libcufft.so.11",
+          "libdeflate.so.0 => /lib/x86_64-linux-gnu/libdeflate.so.0",
+          "libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2",
+          "libfftw3.so.3 => /lib/x86_64-linux-gnu/libfftw3.so.3",
+          "libfftw3f.so.3 => /lib/x86_64-linux-gnu/libfftw3f.so.3",
+          "libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1",
+          "libjbig.so.0 => /lib/x86_64-linux-gnu/libjbig.so.0",
+          "libjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8",
+          "liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5",
+          "libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6",
+          "libpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16",
+          "libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0",
+          "librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1",
+          "libsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0",
+          "libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6",
+          "libtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6",
+          "libwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7",
+          "libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1",
+          "libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1",
+          "linux-vdso.so.1"
+        ],
+        "libraries": {
+          "/lib/x86_64-linux-gnu/libLerc.so.4": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libLerc.so.4",
+            "sha256": "a0ee52df526738293bdd232ddaefbb0d1d9c2da775a82fc6730e7cd394da560c"
+          },
+          "/lib/x86_64-linux-gnu/libc.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+            "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+          },
+          "/lib/x86_64-linux-gnu/libdeflate.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdeflate.so.0",
+            "sha256": "608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f"
+          },
+          "/lib/x86_64-linux-gnu/libdl.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+            "sha256": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10",
+            "sha256": "b5cc02c4d360b5b20111cb0a251f8368af8c9ce3145357f5ba54c51ac4ca9b35"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3f.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10",
+            "sha256": "d75f423f19dc4b8fc86c5f4bdf9e3202494dea7f0d01060c4b546e7e28d59436"
+          },
+          "/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+            "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+          },
+          "/lib/x86_64-linux-gnu/libgomp.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0",
+            "sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+          },
+          "/lib/x86_64-linux-gnu/libjbig.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjbig.so.0",
+            "sha256": "6fea8a26ef5e0d2a36d296d7d0ec0c1f0894bf796b5824317bea88c090833a62"
+          },
+          "/lib/x86_64-linux-gnu/libjpeg.so.8": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2",
+            "sha256": "ac09f2cd6f8a3b8e3cb123999ce275f9bcbe31c6cf9e20212c8f297772591d15"
+          },
+          "/lib/x86_64-linux-gnu/liblzma.so.5": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+            "sha256": "26b37d25f7ca2a2d348de8ecabacda12e921cd933b21fa069a179760db77219d"
+          },
+          "/lib/x86_64-linux-gnu/libm.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+            "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+          },
+          "/lib/x86_64-linux-gnu/libpng16.so.16": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0",
+            "sha256": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8"
+          },
+          "/lib/x86_64-linux-gnu/libpthread.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+            "sha256": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd"
+          },
+          "/lib/x86_64-linux-gnu/librt.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/librt.so.1",
+            "sha256": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82"
+          },
+          "/lib/x86_64-linux-gnu/libsharpyuv.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1",
+            "sha256": "b2e62799e5dbd783a0671d53be99f7c6489567a5332a1e8f471e6bb250f294dc"
+          },
+          "/lib/x86_64-linux-gnu/libstdc++.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+            "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+          },
+          "/lib/x86_64-linux-gnu/libtiff.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1",
+            "sha256": "aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4"
+          },
+          "/lib/x86_64-linux-gnu/libwebp.so.7": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8",
+            "sha256": "9664db51ec65209078abbb8bc7b699888a43ecc2f3c74ce8dd4e497175aa5bf0"
+          },
+          "/lib/x86_64-linux-gnu/libz.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+            "sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+          },
+          "/lib/x86_64-linux-gnu/libzstd.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
+            "sha256": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+          },
+          "/lib64/ld-linux-x86-64.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+            "sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+          },
+          "/usr/local/cuda/lib64/libcudart.so.12": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcudart.so.12.8.57",
+            "sha256": "218eec4c8385a32e258a0235be4d449986844f2d0de3430052f0924e6fe60f71"
+          },
+          "/usr/local/cuda/lib64/libcufft.so.11": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcufft.so.11.3.3.41",
+            "sha256": "27799c3ba85e6ad2f88fdb072c362dfc4a095b567eeea80b5fd89d4a97febefd"
+          }
+        }
+      },
+      "full": {
+        "lines": [
+          "/lib64/ld-linux-x86-64.so.2",
+          "libLerc.so.4 => /lib/x86_64-linux-gnu/libLerc.so.4",
+          "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6",
+          "libcudart.so.12 => /usr/local/cuda/lib64/libcudart.so.12",
+          "libcufft.so.11 => /usr/local/cuda/lib64/libcufft.so.11",
+          "libdeflate.so.0 => /lib/x86_64-linux-gnu/libdeflate.so.0",
+          "libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2",
+          "libfftw3.so.3 => /lib/x86_64-linux-gnu/libfftw3.so.3",
+          "libfftw3f.so.3 => /lib/x86_64-linux-gnu/libfftw3f.so.3",
+          "libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1",
+          "libjbig.so.0 => /lib/x86_64-linux-gnu/libjbig.so.0",
+          "libjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8",
+          "liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5",
+          "libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6",
+          "libpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16",
+          "libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0",
+          "librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1",
+          "libsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0",
+          "libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6",
+          "libtiff.so.6 => /lib/x86_64-linux-gnu/libtiff.so.6",
+          "libwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7",
+          "libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1",
+          "libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1",
+          "linux-vdso.so.1"
+        ],
+        "libraries": {
+          "/lib/x86_64-linux-gnu/libLerc.so.4": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libLerc.so.4",
+            "sha256": "a0ee52df526738293bdd232ddaefbb0d1d9c2da775a82fc6730e7cd394da560c"
+          },
+          "/lib/x86_64-linux-gnu/libc.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+            "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+          },
+          "/lib/x86_64-linux-gnu/libdeflate.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdeflate.so.0",
+            "sha256": "608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f"
+          },
+          "/lib/x86_64-linux-gnu/libdl.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+            "sha256": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10",
+            "sha256": "b5cc02c4d360b5b20111cb0a251f8368af8c9ce3145357f5ba54c51ac4ca9b35"
+          },
+          "/lib/x86_64-linux-gnu/libfftw3f.so.3": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10",
+            "sha256": "d75f423f19dc4b8fc86c5f4bdf9e3202494dea7f0d01060c4b546e7e28d59436"
+          },
+          "/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+            "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+          },
+          "/lib/x86_64-linux-gnu/libgomp.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0",
+            "sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+          },
+          "/lib/x86_64-linux-gnu/libjbig.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjbig.so.0",
+            "sha256": "6fea8a26ef5e0d2a36d296d7d0ec0c1f0894bf796b5824317bea88c090833a62"
+          },
+          "/lib/x86_64-linux-gnu/libjpeg.so.8": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2",
+            "sha256": "ac09f2cd6f8a3b8e3cb123999ce275f9bcbe31c6cf9e20212c8f297772591d15"
+          },
+          "/lib/x86_64-linux-gnu/liblzma.so.5": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+            "sha256": "26b37d25f7ca2a2d348de8ecabacda12e921cd933b21fa069a179760db77219d"
+          },
+          "/lib/x86_64-linux-gnu/libm.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+            "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+          },
+          "/lib/x86_64-linux-gnu/libpng16.so.16": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0",
+            "sha256": "89c0c6569a8c00480d451401ad4c0a74942e62dc57f229a970592fdc5adb29e8"
+          },
+          "/lib/x86_64-linux-gnu/libpthread.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+            "sha256": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd"
+          },
+          "/lib/x86_64-linux-gnu/librt.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/librt.so.1",
+            "sha256": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82"
+          },
+          "/lib/x86_64-linux-gnu/libsharpyuv.so.0": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1",
+            "sha256": "b2e62799e5dbd783a0671d53be99f7c6489567a5332a1e8f471e6bb250f294dc"
+          },
+          "/lib/x86_64-linux-gnu/libstdc++.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+            "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+          },
+          "/lib/x86_64-linux-gnu/libtiff.so.6": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1",
+            "sha256": "aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4"
+          },
+          "/lib/x86_64-linux-gnu/libwebp.so.7": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8",
+            "sha256": "9664db51ec65209078abbb8bc7b699888a43ecc2f3c74ce8dd4e497175aa5bf0"
+          },
+          "/lib/x86_64-linux-gnu/libz.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+            "sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+          },
+          "/lib/x86_64-linux-gnu/libzstd.so.1": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
+            "sha256": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+          },
+          "/lib64/ld-linux-x86-64.so.2": {
+            "realpath": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+            "sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+          },
+          "/usr/local/cuda/lib64/libcudart.so.12": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcudart.so.12.8.57",
+            "sha256": "218eec4c8385a32e258a0235be4d449986844f2d0de3430052f0924e6fe60f71"
+          },
+          "/usr/local/cuda/lib64/libcufft.so.11": {
+            "realpath": "/usr/local/cuda-12.8/targets/x86_64-linux/lib/libcufft.so.11.3.3.41",
+            "sha256": "27799c3ba85e6ad2f88fdb072c362dfc4a095b567eeea80b5fd89d4a97febefd"
+          }
+        }
+      }
+    }
+  },
+  "scrub_environment": {
+    "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+    "HOME": "/home/alex",
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "LC_CTYPE": "C.UTF-8",
+    "USER": "alex",
+    "LOGNAME": "alex"
+  },
+  "inherited_loader_names_present": [],
+  "gpus": {
+    "argv": [
+      "nvidia-smi",
+      "--query-gpu=index,uuid,memory.used,utilization.gpu",
+      "--format=csv,noheader,nounits"
+    ],
+    "rc": 0,
+    "stdout": "0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1551, 0\n1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 425, 0\n2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 425, 0\n3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49769, 86\n",
+    "stderr": ""
+  },
+  "gpu_processes": {
+    "argv": [
+      "nvidia-smi",
+      "--query-compute-apps=pid,gpu_uuid,used_memory",
+      "--format=csv,noheader,nounits"
+    ],
+    "rc": 0,
+    "stdout": "3983855, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1540\n3983855, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 414\n3983855, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 414\n3983855, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49758\n",
+    "stderr": ""
+  },
+  "process_metadata": {
+    "argv": [
+      "ps",
+      "-eo",
+      "pid,ppid,user,psr,pcpu,comm",
+      "--sort=-pcpu"
+    ],
+    "rc": 0,
+    "stdout": "    PID    PPID USER     PSR %CPU COMMAND\n4028134 4028053 alex     121  800 ps\n3983855 3983165 dvi41342   2  177 llama-server\n4028053 4028052 alex      11 90.7 python3\n3387634       1 root      96  3.4 rsyslogd\n3983165 3891049 dvi41342  93  1.5 llama-server\n4027890 3387583 root       9  0.4 sshd\n     17       2 root     118  0.3 rcu_preempt\n    893       2 root      41  0.2 kcompactd0\n    894       2 root     109  0.2 kcompactd1\n3474165       1 root      37  0.1 wazuh-syscheckd\n3890783 3890633 dvi41342  64  0.1 MainThread\n2919673       1 root      29  0.1 systemd-journal\n3900687 3890633 dvi41342  63  0.1 MainThread\n3474152       1 wazuh     97  0.1 wazuh-agentd\n3890633 3890629 dvi41342  64  0.1 MainThread\n3983638 3900687 dvi41342  64  0.0 MainThread\n3474196       1 root      86  0.0 wazuh-modulesd\n    918       2 root      62  0.0 kswapd1\n3474179       1 root      81  0.0 wazuh-logcollec\n     16       2 root       0  0.0 ksoftirqd/0\n3900702 3890633 dvi41342  62  0.0 MainThread\n2919671       1 root      22  0.0 multipathd\n3295825       2 root     119  0.0 kworker/119:1-ceph-msgr\n    917       2 root      36  0.0 kswapd0\n   1737       2 root      32  0.0 jbd2/sda1-8\n3493584 2314308 alex      81  0.0 Runner.Listener\n3140705       2 root     109  0.0 kworker/109:2-ceph-msgr\n      1       0 root      29  0.0 systemd\n2327607 2327604 alex      42  0.0 nsys\n4117014       1 alex      75  0.0 bash\n   2523       1 message+ 117  0.0 dbus-daemon\n3975781       2 root       0  0.0 kworker/0:2-rcu_par_gp\n3474141       1 root      43  0.0 wazuh-execd\n4019082       2 root       1  0.0 kworker/1:2-events\n2561930       2 root      21  0.0 kworker/21:0-rcu_gp\n3823791       2 root      61  0.0 kworker/u248:0-ipv6_addrconf\n3608156       1 alex      64  0.0 bash\n3608358       1 alex      64  0.0 bash\n4023182       2 root       0  0.0 kworker/0:3-events\n1694881       1 ryz18496   1  0.0 code-110a328ea5\n3983349 3900687 dvi41342   4  0.0 pet\n4018661       2 root       3  0.0 kworker/3:1-mm_percpu_wq\n3979142       2 root       2  0.0 kworker/2:3-events\n3341315       1 xmn04182 108  0.0 code-07f806f999\n 249400       1 dxp41838 117  0.0 code-a44adf7f53\n     24       2 root       1  0.0 ksoftirqd/1\n2519530       1 alex     121  0.0 bash\n3858897       2 root      22  0.0 kworker/22:2-events\n2816188       1 alex      69  0.0 code-7debcd0e2a\n2720161       2 root     110  0.0 kworker/110:2-events\n3919335       2 root      21  0.0 kworker/21:3-ceph-msgr\n2288309       1 alex      33  0.0 bash\n2291708       1 alex     115  0.0 bash\n 142307       1 mdemir    71  0.0 code-8a7abeba6e\n4003924       2 root      63  0.0 kworker/63:1-events\n    896       2 root       1  0.0 khugepaged\n3387600       1 polkitd   56  0.0 polkitd\n3934839       2 root       1  0.0 kworker/1:0-rcu_par_gp\n3847731       2 root       7  0.0 kworker/7:1-events\n3818869       2 root      91  0.0 kworker/u340:0-events_unbound\n3387587       1 root      49  0.0 udisksd\n2572276       1 alex      86  0.0 bash\n3931739       2 root      81  0.0 kworker/u248:1-ext4-rsv-conversion\n2703489       2 root      43  0.0 kworker/43:1-rcu_par_gp\n3986873       2 root     119  0.0 kworker/119:0-ceph-msgr\n3885138       2 root       3  0.0 kworker/3:2-cgroup_release\n3903213       2 root       4  0.0 kworker/4:0-mm_percpu_wq\n 992183       1 dvi41342  16  0.0 code-a5b5009513\n2602813       1 alex      98  0.0 bash\n3879359       2 root       9  0.0 kworker/9:1-rcu_par_gp\n  96639       1 dvi41342  63  0.0 code-8a7abeba6e\n   2558       1 root      65  0.0 systemd-logind\n3818418       2 root      12  0.0 kworker/12:1-mm_percpu_wq\n3476451       2 root     122  0.0 kworker/122:0-events\n3979122       2 root      62  0.0 kworker/62:2-mm_percpu_wq\n3921827       2 root      99  0.0 kworker/99:0-mm_percpu_wq\n3830243       2 root      30  0.0 kworker/30:2-rcu_gp\n 746506       2 root      84  0.0 kworker/84:1-events\n3898065       2 root      63  0.0 kworker/u312:0-events_unbound\n2668632       2 root     107  0.0 kworker/u356:4-writeback\n3504156       2 root     112  0.0 kworker/112:0-mm_percpu_wq\n2994638       2 root     116  0.0 kworker/116:1-events\n2894589       2 root      86  0.0 kworker/86:0-events\n3039324       2 root      65  0.0 kworker/65:3-mm_percpu_wq\n     30       2 root       2  0.0 ksoftirqd/2\n3399089       2 root      91  0.0 kworker/u340:2-writeback\n1592208       2 root      96  0.0 kworker/96:2-mm_percpu_wq\n3053748       2 root      83  0.0 kworker/83:1-events\n3825272       2 root      26  0.0 kworker/26:0-mm_percpu_wq\n3750758       2 root     111  0.0 kworker/111:0-mm_percpu_wq\n3517178       2 root     102  0.0 kworker/102:13-mm_percpu_wq\n2919686       2 root      64  0.0 kworker/64:2-mm_percpu_wq\n3884257       2 root      63  0.0 kworker/u312:2-flush-8:0\n    533       2 root      86  0.0 migration/86\n    437       2 root      70  0.0 migration/70\n3920342       2 root       8  0.0 kworker/8:2-events\n3929274       2 root       2  0.0 kworker/u251:2-writeback\n    251       2 root      39  0.0 migration/39\n    143       2 root      21  0.0 migration/21\n2919748       1 systemd+  99  0.0 systemd-network\n    263       2 root      41  0.0 migration/41\n    275       2 root      43  0.0 migration/43\n    191       2 root      29  0.0 migration/29\n    317       2 root      50  0.0 migration/50\n    233       2 root      36  0.0 migration/36\n    677       2 root     110  0.0 migration/110\n    305       2 root      48  0.0 migration/48\n3243474       2 root      66  0.0 kworker/66:1-events\n    179       2 root      27  0.0 migration/27\n    245       2 root      38  0.0 migration/38\n    539       2 root      87  0.0 migration/87\n    197       2 root      30  0.0 migration/30\n    659       2 root     107  0.0 migration/107\n    329       2 root      52  0.0 migration/52\n    215       2 root      33  0.0 migration/33\n    461       2 root      74  0.0 migration/74\n    311       2 root      49  0.0 migration/49\n    581       2 root      94  0.0 migration/94\n    185       2 root      28  0.0 migration/28\n    629       2 root     102  0.0 migration/102\n    323       2 root      51  0.0 migration/51\n    749       2 root     122  0.0 migration/122\n    173       2 root      26  0.0 migration/26\n    221       2 root      34  0.0 migration/34\n    443       2 root      71  0.0 migration/71\n    545       2 root      88  0.0 migration/88\n    713       2 root     116  0.0 migration/116\n    569       2 root      92  0.0 migration/92\n    161       2 root      24  0.0 migration/24\n    389       2 root      62  0.0 migration/62\n    335       2 root      53  0.0 migration/53\n    683       2 root     111  0.0 migration/111\n    473       2 root      76  0.0 migration/76\n    113       2 root      16  0.0 migration/16\n    587       2 root      95  0.0 migration/95\n     65       2 root       8  0.0 migration/8\n    611       2 root      99  0.0 migration/99\n    425       2 root      68  0.0 migration/68\n    257       2 root      40  0.0 migration/40\n     77       2 root      10  0.0 migration/10\n    377       2 root      60  0.0 migration/60\n    371       2 root      59  0.0 migration/59\n    671       2 root     109  0.0 migration/109\n    605       2 root      98  0.0 migration/98\n     89       2 root      12  0.0 migration/12\n    383       2 root      61  0.0 migration/61\n    665       2 root     108  0.0 migration/108\n    617       2 root     100  0.0 migration/100\n    341       2 root      54  0.0 migration/54\n    449       2 root      72  0.0 migration/72\n    125       2 root      18  0.0 migration/18\n    101       2 root      14  0.0 migration/14\n    269       2 root      42  0.0 migration/42\n    167       2 root      25  0.0 migration/25\n    737       2 root     120  0.0 migration/120\n    227       2 root      35  0.0 migration/35\n    455       2 root      73  0.0 migration/73\n    599       2 root      97  0.0 migration/97\n     95       2 root      13  0.0 migration/13\n    593       2 root      96  0.0 migration/96\n    137       2 root      20  0.0 migration/20\n    131       2 root      19  0.0 migration/19\n     41       2 root       4  0.0 migration/4\n    467       2 root      75  0.0 migration/75\n    299       2 root      47  0.0 migration/47\n    149       2 root      22  0.0 migration/22\n    485       2 root      78  0.0 migration/78\n    419       2 root      67  0.0 migration/67\n     71       2 root       9  0.0 migration/9\n    281       2 root      44  0.0 migration/44\n    743       2 root     121  0.0 migration/121\n    209       2 root      32  0.0 migration/32\n    731       2 root     119  0.0 migration/119\n    707       2 root     115  0.0 migration/115\n    755       2 root     123  0.0 migration/123\n     59       2 root       7  0.0 migration/7\n    353       2 root      56  0.0 migration/56\n    293       2 root      46  0.0 migration/46\n    521       2 root      84  0.0 migration/84\n    725       2 root     118  0.0 migration/118\n    431       2 root      69  0.0 migration/69\n    563       2 root      91  0.0 migration/91\n    623       2 root     101  0.0 migration/101\n    689       2 root     112  0.0 migration/112\n    635       2 root     103  0.0 migration/103\n    413       2 root      66  0.0 migration/66\n    401       2 root      64  0.0 migration/64\n    491       2 root      79  0.0 migration/79\n    365       2 root      58  0.0 migration/58\n    509       2 root      82  0.0 migration/82\n    239       2 root      37  0.0 migration/37\n    701       2 root     114  0.0 migration/114\n3186913       2 root       3  0.0 jbd2/sdb-8\n    719       2 root     117  0.0 migration/117\n    503       2 root      81  0.0 migration/81\n     53       2 root       6  0.0 migration/6\n    653       2 root     106  0.0 migration/106\n    359       2 root      57  0.0 migration/57\n    515       2 root      83  0.0 migration/83\n    119       2 root      17  0.0 migration/17\n    107       2 root      15  0.0 migration/15\n    479       2 root      77  0.0 migration/77\n    347       2 root      55  0.0 migration/55\n    497       2 root      80  0.0 migration/80\n    557       2 root      90  0.0 migration/90\n     83       2 root      11  0.0 migration/11\n    155       2 root      23  0.0 migration/23\n     35       2 root       3  0.0 migration/3\n    695       2 root     113  0.0 migration/113\n    641       2 root     104  0.0 migration/104\n    551       2 root      89  0.0 migration/89\n    575       2 root      93  0.0 migration/93\n3921760       2 root      96  0.0 kworker/u345:0-events_unbound\n    527       2 root      85  0.0 migration/85\n3456129       2 root     101  0.0 kworker/101:0-mm_percpu_wq\n     47       2 root       5  0.0 migration/5\n     29       2 root       2  0.0 migration/2\n    203       2 root      31  0.0 migration/31\n    287       2 root      45  0.0 migration/45\n    407       2 root      65  0.0 migration/65\n    395       2 root      63  0.0 migration/63\n    647       2 root     105  0.0 migration/105\n3284737       2 root      90  0.0 kworker/90:1-mm_percpu_wq\n1077735       2 root      68  0.0 kworker/68:1-events\n     23       2 root       1  0.0 migration/1\n     18       2 root       0  0.0 migration/0\n   2259       2 root     121  0.0 jbd2/sdc-8\n1118935       2 root      69  0.0 kworker/69:2-events\n3993574       2 root       3  0.0 kworker/u252:1-writeback\n1342232       2 root      81  0.0 kworker/81:2-mm_percpu_wq\n4168441       2 root      57  0.0 kworker/57:1-mm_percpu_wq\n2381976       2 root      41  0.0 kworker/41:3-mm_percpu_wq\n3848493       2 root      86  0.0 kworker/u335:1-events_unbound\n3856666       2 root      89  0.0 kworker/u338:1-flush-8:0\n3504210       2 root      85  0.0 kworker/85:2-mm_percpu_wq\n 997122       1 dvi41342  24  0.0 code-c2d1b13fdc\n 396567       2 root      80  0.0 kworker/80:1-events\n3742491       2 root       5  0.0 kworker/u254:3-events_unbound\n 611807       2 root      67  0.0 kworker/67:1-mm_percpu_wq\n3474466       2 root     104  0.0 kworker/104:2-mm_percpu_wq\n1110503       2 root      92  0.0 kworker/92:0-mm_percpu_wq\n 997554       1 dvi41342   5  0.0 code-c2d1b13fdc\n3156063       2 root     100  0.0 kworker/100:0-mm_percpu_wq\n3993161       2 root      53  0.0 kworker/53:2-mm_percpu_wq\n3811017       2 root     121  0.0 kworker/121:0-mm_percpu_wq\n1393653       2 root      87  0.0 kworker/87:2-mm_percpu_wq\n2919698       1 systemd+  14  0.0 systemd-resolve\n3719192       2 root      93  0.0 kworker/93:0-mm_percpu_wq\n2827756       2 root      70  0.0 kworker/70:2-mm_percpu_wq\n     36       2 root       3  0.0 ksoftirqd/3\n3504547       2 root      76  0.0 kworker/76:11-events\n3177487       2 root     108  0.0 kworker/108:0-mm_percpu_wq\n3890714       2 root       0  0.0 kworker/u311:2-events_unbound\n1081261       2 root     103  0.0 kworker/103:2-mm_percpu_wq\n3053746       2 root      83  0.0 kworker/u332:1-events_power_efficient\n2727528       2 root      38  0.0 kworker/38:0-mm_percpu_wq\n 423620       2 root      88  0.0 kworker/88:2-mm_percpu_wq\n3986764       2 root      58  0.0 kworker/u307:1-events_unbound\n3778028       2 root      97  0.0 kworker/97:0-mm_percpu_wq\n3813077       2 root      36  0.0 kworker/36:2-mm_percpu_wq\n    887       2 root      88  0.0 kauditd\n3509189       2 root      73  0.0 kworker/73:1-mm_percpu_wq\n3522147       2 root     106  0.0 kworker/106:1-mm_percpu_wq\n3995700       2 root     117  0.0 kworker/117:1-events\n1343750       2 root     118  0.0 kworker/118:0-events\n2759789       2 root     105  0.0 kworker/105:2-mm_percpu_wq\n2762418       2 root     100  0.0 kworker/u349:6-events_unbound\n3209771       2 root     115  0.0 kworker/115:0-mm_percpu_wq\n1605493       2 root      82  0.0 kworker/82:0-events\n3748720       2 root      45  0.0 kworker/u294:1-events_unbound\n3283187       2 root      91  0.0 kworker/91:0-mm_percpu_wq\n3647588       2 root     114  0.0 kworker/114:2-mm_percpu_wq\n1382040       2 root      94  0.0 kworker/94:2-mm_percpu_wq\n2743606       2 root     108  0.0 kworker/u357:3-events_unbound\n3841668       2 root       7  0.0 kworker/u256:1-events_unbound\n3917143       2 root      38  0.0 kworker/u287:0-events_unbound\n3986540       2 root      20  0.0 kworker/u269:0-events_unbound\n2944587       2 root     107  0.0 kworker/107:1-mm_percpu_wq\n3899182       2 root      65  0.0 kworker/u314:2-events_unbound\n3118885       2 root      81  0.0 kworker/u330:2-writeback\n3572303       2 root      63  0.0 kworker/63:2H-kblockd\n3471621       2 root      16  0.0 kworker/16:2-mm_percpu_wq\n3054278       2 root       5  0.0 kworker/5:0-mm_percpu_wq\n    888       2 root      32  0.0 khungtaskd\n 176836       2 root      52  0.0 kworker/52:1-mm_percpu_wq\n3585904       2 root      58  0.0 kworker/58:2-rcu_par_gp\n     42       2 root       4  0.0 ksoftirqd/4\n1117193       2 root      95  0.0 kworker/95:0-mm_percpu_wq\n3082000       2 root     113  0.0 kworker/113:0-mm_percpu_wq\n3934585       2 root      18  0.0 kworker/18:2-rcu_par_gp\n4032542       2 root     123  0.0 kworker/123:1-mm_percpu_wq\n3982041       2 root      33  0.0 kworker/33:1-mm_percpu_wq\n3949314       2 root       2  0.0 kworker/2:0-events\n2760214       2 root      55  0.0 kworker/55:0-mm_percpu_wq\n4019076       2 root      49  0.0 kworker/49:0-mm_percpu_wq\n3050047       2 root      89  0.0 kworker/89:0-mm_percpu_wq\n4000883       2 root      30  0.0 kworker/u279:3-events_unbound\n3429944       2 root      42  0.0 kworker/42:0-mm_percpu_wq\n3841165       2 root      11  0.0 kworker/11:2-mm_percpu_wq\n4018660       2 root       9  0.0 kworker/9:0-mm_percpu_wq\n3571178       2 root      10  0.0 kworker/10:1-mm_percpu_wq\n3928832       2 root      17  0.0 kworker/17:2-mm_percpu_wq\n3787174       2 root       0  0.0 kworker/u249:3-writeback\n3547291       2 root      98  0.0 kworker/98:1-mm_percpu_wq\n1910915       2 root      72  0.0 kworker/72:2-mm_percpu_wq\n   1278       2 root      62  0.0 kworker/62:1H-kblockd\n3276496       2 root      81  0.0 kworker/u330:1-writeback\n3476155       2 root      71  0.0 kworker/71:0-events\n3748939       2 root      45  0.0 kworker/45:0-mm_percpu_wq\n3438266       2 root      59  0.0 kworker/59:2-mm_percpu_wq\n3211308       2 root     109  0.0 kworker/u358:2-events_unbound\n3895455       2 root      53  0.0 kworker/u302:0-flush-8:32\n3894407       2 root      53  0.0 kworker/53:1-events\n2685548       2 root     114  0.0 kworker/u363:7-loop0\n2672326       2 root     113  0.0 kworker/u362:4-events_unbound\n3782096       1 xmn04182  63  0.0 screen\n3993961       2 root     115  0.0 kworker/u364:0-writeback\n      2       0 root      11  0.0 kthreadd\n3888889       2 root       1  0.0 kworker/u250:1-writeback\n2919702       1 systemd+  67  0.0 systemd-timesyn\n3045931       2 root      79  0.0 kworker/u328:0-writeback\n     48       2 root       5  0.0 ksoftirqd/5\n3730134       2 root       6  0.0 kworker/6:1-events\n3828927       2 root      49  0.0 kworker/u298:2-flush-8:0\n2611327       2 root      27  0.0 kworker/27:2-rcu_par_gp\n4021050       2 root      62  0.0 kworker/u311:0-events_power_efficient\n2650917       2 root      60  0.0 kworker/60:0-events\n   1390       2 root       1  0.0 kworker/1:1H-kblockd\n  29452       2 root      64  0.0 UVM global queue\n3917575       2 root      15  0.0 kworker/u264:1-events_unbound\n3679064       2 root      44  0.0 kworker/44:1-mm_percpu_wq\n2791756       2 root     120  0.0 kworker/120:2-mm_percpu_wq\n3773719       2 root      40  0.0 kworker/40:1-mm_percpu_wq\n4003501       2 root      49  0.0 kworker/49:2-rcu_par_gp\n3390519       2 root      96  0.0 kworker/u345:2-iou_exit\n2559976       2 root      75  0.0 kworker/75:1-mm_percpu_wq\n1156999       2 root      71  0.0 kworker/71:1-events\n3444984       2 root      54  0.0 kworker/54:2-events\n  29454       2 root      26  0.0 UVM Tools Event Queue\n3604860       2 root      39  0.0 kworker/39:2-rcu_par_gp\n3929359       2 root     110  0.0 kworker/u359:3-events_unbound\n3932754       2 root      13  0.0 kworker/13:1-mm_percpu_wq\n3050918       2 root      47  0.0 kworker/47:2-mm_percpu_wq\n3823025       2 root     100  0.0 kworker/u349:0-writeback\n1349523       2 root      61  0.0 kworker/u310:1-events_unbound\n3432067       2 root      94  0.0 kworker/u343:0-events_unbound\n2919714       1 root      29  0.0 systemd-udevd\n3928341       2 root     110  0.0 kworker/u359:0-events_unbound\n3354956       2 root      78  0.0 kworker/78:1-mm_percpu_wq\n3611074       2 root      84  0.0 kworker/u333:1-flush-8:16\n     54       2 root       6  0.0 ksoftirqd/6\n2558911       2 root      63  0.0 kworker/u372:0-writeback\n   1440       2 root       2  0.0 kworker/2:1H-kblockd\n3390133       2 root      97  0.0 kworker/u346:0-writeback\n3387588       2 root      77  0.0 kworker/77:1-mm_percpu_wq\n2646837       1 root      17  0.0 cron\n3966901       2 root       1  0.0 kworker/u250:2-writeback\n3922517       2 root      86  0.0 kworker/u335:2-events_unbound\n3352404       2 root      75  0.0 kworker/u324:1-writeback\n3417947       2 root       9  0.0 kworker/u258:0-events_unbound\n2753248       2 root      26  0.0 kworker/u275:1-events_unbound\n3832670       2 root      72  0.0 kworker/u321:0-events_unbound\n    390       2 root      62  0.0 ksoftirqd/62\n   1320       2 root     114  0.0 hwrng\n    912       2 root       0  0.0 kworker/0:1H-kblockd\n3787249       2 root      85  0.0 kworker/u334:0-events_unbound\n     60       2 root       7  0.0 ksoftirqd/7\n2868830       2 root     120  0.0 kworker/u369:1-events_unbound\n1685840       1 ryz18496  93  0.0 systemd\n3780453       2 root      39  0.0 kworker/u288:2-events_unbound\n3054668       2 root      24  0.0 kworker/24:0-mm_percpu_wq\n3340340       1 xmn04182  51  0.0 systemd\n2926969       2 root      26  0.0 kworker/u275:0-events_power_efficient\n3387619       1 root      31  0.0 ModemManager\n 248921       1 dxp41838  63  0.0 systemd\n   1527       2 root      64  0.0 kworker/64:1H-kblockd\n3767128       2 root       9  0.0 kworker/u258:3-events_unbound\n3891049 3890783 dvi41342 102  0.0 bash\n 362101       1 alex      58  0.0 systemd\n3794474       2 root      29  0.0 kworker/29:0-mm_percpu_wq\n1899131       2 root      52  0.0 kworker/u301:3-events_power_efficient\n 141918       1 mdemir    38  0.0 systemd\n     66       2 root       8  0.0 ksoftirqd/8\n3925314       2 root      84  0.0 kworker/u333:0-events_unbound\n  48518       1 dvi41342 113  0.0 systemd\n3796093       2 root      20  0.0 kworker/20:0-rcu_par_gp\n3972838       2 root      79  0.0 kworker/79:1-events\n3756357       2 root      66  0.0 kworker/u315:0-events_unbound\n   1367       2 root       3  0.0 kworker/3:1H-kblockd\n2614446       2 root      49  0.0 kworker/u298:3-writeback\n    396       2 root      63  0.0 ksoftirqd/63\n3752795       2 root      19  0.0 kworker/19:2-mm_percpu_wq\n   1433       2 root       5  0.0 kworker/5:1H-kblockd\n4018423       2 root       4  0.0 kworker/u253:0-events_unbound\n2877905       2 root      33  0.0 kworker/u282:0-events_unbound\n3841159       2 root      43  0.0 kworker/43:2-mm_percpu_wq\n3930709       2 root      32  0.0 kworker/32:0-mm_percpu_wq\n3986378       2 root     115  0.0 kworker/u364:2-writeback\n3845972       2 root      45  0.0 kworker/u294:0-events_unbound\n3863400       2 root       0  0.0 kworker/u249:0-events_unbound\n3919703       2 root      61  0.0 kworker/61:2-rcu_par_gp\n     72       2 root       9  0.0 ksoftirqd/9\n3848335       2 root       4  0.0 kworker/u253:3-writeback\n3387583       1 root       8  0.0 sshd\n3518576       2 root      31  0.0 kworker/31:2-mm_percpu_wq\n1175750       2 root      42  0.0 kworker/u291:0-events_freezable_power_\n2836556       2 root      74  0.0 kworker/74:0-events\n    672       2 root     109  0.0 ksoftirqd/109\n3854540       2 root      94  0.0 kworker/u368:0-events_unbound\n     78       2 root      10  0.0 ksoftirqd/10\n    402       2 root      64  0.0 ksoftirqd/64\n3023687       2 root      76  0.0 kworker/u325:3-writeback\n3784619       2 root      12  0.0 kworker/u261:3-loop0\n3400545       2 root      51  0.0 kworker/51:1-events\n   1462       2 root       4  0.0 kworker/4:1H-kblockd\n   1282       2 root      65  0.0 kworker/65:1H-kblockd\n2762579       2 root      97  0.0 kworker/u346:5-events_unbound\n   1403       2 root      10  0.0 kworker/10:1H-kblockd\n3570843       2 root      72  0.0 kworker/72:2H-kblockd\n2804261       2 root      73  0.0 kworker/u322:0-writeback\n3885476       2 root      16  0.0 kworker/u265:0-writeback\n3043159       2 root      56  0.0 kworker/56:0-mm_percpu_wq\n3727258       2 root      48  0.0 kworker/48:0-mm_percpu_wq\n    408       2 root      65  0.0 ksoftirqd/65\n3509772       2 root     109  0.0 kworker/u357:0-events_unbound\n2295339       2 root      32  0.0 kworker/u281:2-flush-8:0\n    732       2 root     119  0.0 ksoftirqd/119\n3033292       2 root      39  0.0 kworker/u288:1-events_unbound\n3642191       2 root      50  0.0 kworker/u299:3-flush-8:0\n   1522       2 root      43  0.0 kworker/43:1H-kblockd\n3545379       2 root     102  0.0 kworker/u351:2-flush-8:0\n4010412       2 root      62  0.0 kworker/u311:4-flush-8:0\n    624       2 root     101  0.0 ksoftirqd/101\n     84       2 root      11  0.0 ksoftirqd/11\n   1470       2 root      41  0.0 kworker/41:1H-kblockd\n3318396       2 root      49  0.0 kworker/u298:0-events_unbound\n    618       2 root     100  0.0 ksoftirqd/100\n3669325       2 root      12  0.0 kworker/u261:2-writeback\n    144       2 root      21  0.0 ksoftirqd/21\n    642       2 root     104  0.0 ksoftirqd/104\n3794480       2 root      34  0.0 kworker/34:2-mm_percpu_wq\n    678       2 root     110  0.0 ksoftirqd/110\n3634257       2 root      40  0.0 kworker/u260:0-writeback\n4003507       2 root      58  0.0 kworker/58:0-events\n    414       2 root      66  0.0 ksoftirqd/66\n     90       2 root      12  0.0 ksoftirqd/12\n    522       2 root      84  0.0 ksoftirqd/84\n    636       2 root     103  0.0 ksoftirqd/103\n    594       2 root      96  0.0 ksoftirqd/96\n     96       2 root      13  0.0 ksoftirqd/13\n    570       2 root      92  0.0 ksoftirqd/92\n    612       2 root      99  0.0 ksoftirqd/99\n    600       2 root      97  0.0 ksoftirqd/97\n3043313       2 root      23  0.0 kworker/23:2-events\n3831774       2 root      99  0.0 kworker/u348:1-writeback\n    630       2 root     102  0.0 ksoftirqd/102\n    534       2 root      86  0.0 ksoftirqd/86\n    540       2 root      87  0.0 ksoftirqd/87\n   1310       2 root      36  0.0 kworker/36:1H-kblockd\n3387602       2 root      46  0.0 kworker/46:1-mm_percpu_wq\n   1409       2 root      12  0.0 kworker/12:1H-kblockd\n    504       2 root      81  0.0 ksoftirqd/81\n3845345       2 root     104  0.0 kworker/u353:1-writeback\n3664169       2 root       5  0.0 kworker/u254:0-writeback\n    420       2 root      67  0.0 ksoftirqd/67\n    510       2 root      82  0.0 ksoftirqd/82\n    582       2 root      94  0.0 ksoftirqd/94\n    528       2 root      85  0.0 ksoftirqd/85\n    648       2 root     105  0.0 ksoftirqd/105\n    444       2 root      71  0.0 ksoftirqd/71\n    438       2 root      70  0.0 ksoftirqd/70\n    588       2 root      95  0.0 ksoftirqd/95\n    606       2 root      98  0.0 ksoftirqd/98\n    468       2 root      75  0.0 ksoftirqd/75\n    426       2 root      68  0.0 ksoftirqd/68\n1190113       2 root     116  0.0 kworker/116:2H-kblockd\n    102       2 root      14  0.0 ksoftirqd/14\n    714       2 root     116  0.0 ksoftirqd/116\n    516       2 root      83  0.0 ksoftirqd/83\n    492       2 root      79  0.0 ksoftirqd/79\n3387621       2 root      51  0.0 kworker/51:2-rcu_gp\n3769269       2 root      35  0.0 kworker/35:0-mm_percpu_wq\n    480       2 root      77  0.0 ksoftirqd/77\n3715091       2 root      29  0.0 kworker/u278:2-events_freezable_power_\n3811539       2 root      45  0.0 kworker/u294:2-events_power_efficient\n    552       2 root      89  0.0 ksoftirqd/89\n    576       2 root      93  0.0 ksoftirqd/93\n    558       2 root      90  0.0 ksoftirqd/90\n    474       2 root      76  0.0 ksoftirqd/76\n    486       2 root      78  0.0 ksoftirqd/78\n2726545       2 root     118  0.0 kworker/u367:2-flush-8:0\n    498       2 root      80  0.0 ksoftirqd/80\n    564       2 root      91  0.0 ksoftirqd/91\n    684       2 root     111  0.0 ksoftirqd/111\n3672660       2 root      40  0.0 kworker/u289:1-events_unbound\n3611081       2 root      83  0.0 kworker/u332:0-events_power_efficient\n    108       2 root      15  0.0 ksoftirqd/15\n    432       2 root      69  0.0 ksoftirqd/69\n    546       2 root      88  0.0 ksoftirqd/88\n    666       2 root     108  0.0 ksoftirqd/108\n    450       2 root      72  0.0 ksoftirqd/72\n3410845       2 root     120  0.0 kworker/u369:0-writeback\n   1270       2 root     123  0.0 kworker/123:1H-kblockd\n   2191       2 root      90  0.0 kworker/90:1H-kblockd\n    654       2 root     106  0.0 ksoftirqd/106\n    456       2 root      73  0.0 ksoftirqd/73\n    660       2 root     107  0.0 ksoftirqd/107\n    696       2 root     113  0.0 ksoftirqd/113\n    756       2 root     123  0.0 ksoftirqd/123\n3762749       2 root      94  0.0 kworker/u343:1-flush-8:0\n   1256       2 root      14  0.0 kworker/14:1H-kblockd\n3388936       2 root      77  0.0 kworker/u325:1-events_unbound\n3047155       2 root      28  0.0 kworker/u277:0-events_unbound\n2772030       2 root      77  0.0 kworker/u326:2-writeback\n   1350       2 root      52  0.0 kworker/52:1H-kblockd\n    690       2 root     112  0.0 ksoftirqd/112\n    708       2 root     115  0.0 ksoftirqd/115\n    720       2 root     117  0.0 ksoftirqd/117\n    114       2 root      16  0.0 ksoftirqd/16\n    462       2 root      74  0.0 ksoftirqd/74\n    132       2 root      19  0.0 ksoftirqd/19\n    120       2 root      17  0.0 ksoftirqd/17\n3585726       2 root     105  0.0 kworker/u354:2-writeback\n    750       2 root     122  0.0 ksoftirqd/122\n    726       2 root     118  0.0 ksoftirqd/118\n    702       2 root     114  0.0 ksoftirqd/114\n    744       2 root     121  0.0 ksoftirqd/121\n   1538       2 root      80  0.0 kworker/80:1H-kblockd\n3983739       2 root      93  0.0 kworker/u342:2-flush-8:0\n   1393       2 root       6  0.0 kworker/6:1H-kblockd\n    138       2 root      20  0.0 ksoftirqd/20\n   1316       2 root      66  0.0 kworker/66:1H-kblockd\n    150       2 root      22  0.0 ksoftirqd/22\n2949152       2 root      72  0.0 kworker/u321:2-writeback\n    126       2 root      18  0.0 ksoftirqd/18\n   1888       2 root     113  0.0 kworker/113:1H-kblockd\n3333969       2 root      14  0.0 kworker/u263:1-events_unbound\n3669117       2 root      34  0.0 kworker/u283:0-events_unbound\n    276       2 root      43  0.0 ksoftirqd/43\n   5499       2 root     100  0.0 kworker/100:1H-kblockd\n   1768       2 root      71  0.0 kworker/71:1H-kblockd\n   1417       2 root      18  0.0 kworker/18:1H-kblockd\n    168       2 root      25  0.0 ksoftirqd/25\n    180       2 root      27  0.0 ksoftirqd/27\n3794468       2 root      14  0.0 kworker/u263:0-events_unbound\n   1406       2 root      11  0.0 kworker/11:1H-kblockd\n3241553       2 root      93  0.0 kworker/u342:1-flush-8:0\n   5501       2 root      98  0.0 kworker/98:1H-kblockd\n    738       2 root     120  0.0 ksoftirqd/120\n   2001       2 root      94  0.0 kworker/94:1H-kblockd\n3766663       2 root      37  0.0 kworker/37:2-events\n    740       2 root     120  0.0 kworker/120:0H-kblockd\n3622424       2 root      67  0.0 kworker/u316:2-flush-8:0\n3639243       2 root      70  0.0 kworker/u319:2-writeback\n    156       2 root      23  0.0 ksoftirqd/23\n   2693       2 root      99  0.0 kworker/99:1H-kblockd\n   1375       2 root      82  0.0 kworker/82:1H-kblockd\n2981553       2 root      77  0.0 kworker/u326:0-writeback\n   1765       2 root      68  0.0 kworker/68:1H-kblockd\n   1525       2 root      70  0.0 kworker/70:1H-kblockd\n3732295       2 root       0  0.0 kworker/u287:1-events_unbound\n    186       2 root      28  0.0 ksoftirqd/28\n    422       2 root      67  0.0 kworker/67:0H-kblockd\n2886159       2 root      50  0.0 kworker/u299:2-events_unbound\n    174       2 root      26  0.0 ksoftirqd/26\n    162       2 root      24  0.0 ksoftirqd/24\n4020507       2 root       3  0.0 kworker/u252:2-events_unbound\n   1351       2 root      53  0.0 kworker/53:1H-kblockd\n2974808       2 root      60  0.0 kworker/u309:1-writeback\n   2637       2 root     102  0.0 kworker/102:1H-kblockd\n   2379       2 root     110  0.0 kworker/110:1H-kblockd\n   1260       2 root      26  0.0 kworker/26:1H-kblockd\n    372       2 root      59  0.0 ksoftirqd/59\n   1402       2 root       9  0.0 kworker/9:1H-kblockd\n3164123       2 root      74  0.0 kworker/u323:3-flush-8:0\n   1399       2 root       8  0.0 kworker/8:1H-kblockd\n    198       2 root      30  0.0 ksoftirqd/30\n3811144       2 root      50  0.0 kworker/50:0-mm_percpu_wq\n   1261       2 root      15  0.0 kworker/15:1H-kblockd\n    366       2 root      58  0.0 ksoftirqd/58\n   1483       2 root      45  0.0 kworker/45:1H-kblockd\n    192       2 root      29  0.0 ksoftirqd/29\n3983564 3890783 dvi41342  15  0.0 bash\n    354       2 root      56  0.0 ksoftirqd/56\n3722300       2 root      17  0.0 kworker/u266:2-flush-8:0\n    246       2 root      38  0.0 ksoftirqd/38\n   1999       2 root      92  0.0 kworker/92:1H-kblockd\n   1518       2 root      69  0.0 kworker/69:1H-kblockd\n3847705       2 root      64  0.0 kworker/u313:0-flush-8:0\n3814041       2 root      33  0.0 kworker/33:2-rcu_par_gp\n   1280       2 root      31  0.0 kworker/31:1H-kblockd\n   2042       2 root     109  0.0 kworker/109:1H-kblockd\n    282       2 root      44  0.0 ksoftirqd/44\n3882927       2 root      46  0.0 kworker/u295:1-events_unbound\n  11009       2 root      97  0.0 kworker/97:1H-kblockd\n   1607       2 root     119  0.0 kworker/119:1H-kblockd\n   1395       2 root       7  0.0 kworker/7:1H-kblockd\n    228       2 root      35  0.0 ksoftirqd/35\n    378       2 root      60  0.0 ksoftirqd/60\n   3514       2 root     101  0.0 kworker/101:1H-kblockd\n    360       2 root      57  0.0 ksoftirqd/57\n   1294       2 root      76  0.0 kworker/76:1H-kblockd\n3543547       2 root      25  0.0 kworker/25:1-mm_percpu_wq\n    216       2 root      33  0.0 ksoftirqd/33\n    342       2 root      54  0.0 ksoftirqd/54\n    210       2 root      32  0.0 ksoftirqd/32\n   1421       2 root      19  0.0 kworker/19:1H-kblockd\n   1313       2 root      75  0.0 kworker/75:1H-kblockd\n   2689       2 root     104  0.0 kworker/104:1H-kblockd\n    318       2 root      50  0.0 ksoftirqd/50\n2954328       2 root     119  0.0 kworker/u368:1-flush-8:0\n    240       2 root      37  0.0 ksoftirqd/37\n    234       2 root      36  0.0 ksoftirqd/36\n   2041       2 root     108  0.0 kworker/108:1H-kblockd\n3988986       2 root       0  0.0 kworker/u249:1-writeback\n3811153       2 root      39  0.0 kworker/u288:3-events_unbound\n   2156       2 root      96  0.0 kworker/96:1H-kblockd\n3720351       2 root      25  0.0 kworker/u274:1-loop0\n    270       2 root      42  0.0 ksoftirqd/42\n   1771       2 root      83  0.0 kworker/83:1H-kblockd\n    482       2 root      77  0.0 kworker/77:0H-kblockd\n   1446       2 root      21  0.0 kworker/21:1H-kblockd\n   1426       2 root      24  0.0 kworker/24:1H-kblockd\n    204       2 root      31  0.0 ksoftirqd/31\n3717159       2 root      99  0.0 kworker/u348:2-events_unbound\n    222       2 root      34  0.0 ksoftirqd/34\n   1491       2 root      50  0.0 kworker/50:1H-kblockd\n   1283       2 root      32  0.0 kworker/32:1H-kblockd\n    252       2 root      39  0.0 ksoftirqd/39\n   1778       2 root      88  0.0 kworker/88:1H-kblockd\n    294       2 root      46  0.0 ksoftirqd/46\n    312       2 root      49  0.0 ksoftirqd/49\n  10771       2 root     114  0.0 kworker/114:1H-kblockd\n    300       2 root      47  0.0 ksoftirqd/47\n3623793       2 root      58  0.0 kworker/u307:0-events_unbound\n   1271       2 root      27  0.0 kworker/27:1H-kblockd\n    324       2 root      51  0.0 ksoftirqd/51\n3895547       2 root      22  0.0 kworker/u271:1-writeback\n   2075       2 root      95  0.0 kworker/95:1H-kblockd\n3045921       2 root      89  0.0 kworker/u338:2-writeback\n   1443       2 root      20  0.0 kworker/20:1H-kblockd\n    330       2 root      52  0.0 ksoftirqd/52\n3519698       2 root      29  0.0 kworker/u278:1-flush-8:0\n   1300       2 root      39  0.0 kworker/39:1H-kblockd\n3668815       2 root      12  0.0 kworker/12:0-rcu_par_gp\n3370836       2 root      36  0.0 kworker/u285:3-flush-8:0\n3563139       2 root      35  0.0 kworker/u284:1-events_unbound\n   1777       2 root      89  0.0 kworker/89:1H-kblockd\n   1437       2 root      23  0.0 kworker/23:1H-kblockd\n    288       2 root      45  0.0 ksoftirqd/45\n3986809       2 root      66  0.0 kworker/u315:2-writeback\n3986699       2 root      64  0.0 kworker/u313:2-flush-8:0\n    336       2 root      53  0.0 ksoftirqd/53\n    264       2 root      41  0.0 ksoftirqd/41\n3953307       2 root      28  0.0 kworker/28:1-mm_percpu_wq\n3986517       2 root      20  0.0 kworker/20:2-mm_percpu_wq\n   1767       2 root      81  0.0 kworker/81:1H-kblockd\n    258       2 root      40  0.0 ksoftirqd/40\n   1449       2 root      13  0.0 kworker/13:1H-kblockd\n   1907       2 root      91  0.0 kworker/91:1H-kblockd\n3902890       2 root      65  0.0 kworker/u314:1-writeback\n   1359       2 root      60  0.0 kworker/60:1H-kblockd\n    722       2 root     117  0.0 kworker/117:0H-kblockd\n   2926       2 root     106  0.0 kworker/106:1H-kblockd\n    306       2 root      48  0.0 ksoftirqd/48\n   1299       2 root     121  0.0 kworker/121:1H-kblockd\n    384       2 root      61  0.0 ksoftirqd/61\n    348       2 root      55  0.0 ksoftirqd/55\n   1523       2 root      79  0.0 kworker/79:1H-kblockd\n   1281       2 root      29  0.0 kworker/29:1H-kblockd\n   2147       2 root      34  0.0 kworker/34:1H-kblockd\n   1374       2 root     107  0.0 kworker/107:1H-kblockd\n2327608 2327604 alex      42  0.0 grep\n   1772       2 root      84  0.0 kworker/84:1H-kblockd\n  28077       2 root     115  0.0 kworker/115:1H-kblockd\n   1415       2 root      17  0.0 kworker/17:1H-kblockd\n3690463       2 root      18  0.0 kworker/u267:1-events_unbound\n   3643       2 root     103  0.0 kworker/103:1H-kblockd\n   5430       2 root     112  0.0 kworker/112:1H-kblockd\n  11256       2 root     118  0.0 kworker/118:1H-kblockd\n3146350       2 root      78  0.0 kworker/u327:1-writeback\n 199150       2 root      74  0.0 kworker/74:2H-kblockd\n   1479       2 root      46  0.0 kworker/46:1H-kblockd\n3841174       2 root      30  0.0 kworker/30:1-events_freezable\n   1353       2 root      57  0.0 kworker/57:1H-kblockd\n   1529       2 root      55  0.0 kworker/55:1H-kblockd\n3572788       2 root      58  0.0 kworker/u307:2-loop0\n3678914       2 root      80  0.0 kworker/u329:0-events_power_efficient\n    374       2 root      59  0.0 kworker/59:0H-kblockd\n   1386       2 root      51  0.0 kworker/51:1H-kblockd\n3000854       2 root      98  0.0 kworker/u347:3-flush-8:0\n   1418       2 root      73  0.0 kworker/73:1H-kblockd\n3903200       2 root      56  0.0 kworker/u305:3-events_unbound\n   6223       2 root     111  0.0 kworker/111:1H-kblockd\n   1773       2 root      78  0.0 kworker/78:1H-kblockd\n3993854       2 root      18  0.0 kworker/18:0-mm_percpu_wq\n   1076       2 root      35  0.0 kworker/35:1H-kblockd\n3548075       2 root      31  0.0 kworker/u280:0-flush-8:0\n   2140       2 root     122  0.0 kworker/122:1H-kblockd\n3714645       2 root      20  0.0 kworker/u269:1-events_freezable_power_\n   1826       2 root      49  0.0 kworker/49:1H-kblockd\n   2040       2 root     105  0.0 kworker/105:1H-kblockd\n3739069       2 root      36  0.0 kworker/u285:0-events_unbound\n3380641       2 root     107  0.0 kworker/u356:0-flush-8:0\n3883682       2 root      12  0.0 kworker/u261:1-events_unbound\n3655617       2 root      90  0.0 kworker/u339:1-writeback\n   1284       2 root      33  0.0 kworker/33:1H-kblockd\n3896908       2 root      15  0.0 kworker/15:2-events\n3331325       2 root     122  0.0 kworker/u371:1-writeback\n   1269       2 root      28  0.0 kworker/28:1H-kblockd\n   1488       2 root      38  0.0 kworker/38:1H-kblockd\n   1413       2 root      16  0.0 kworker/16:1H-kblockd\n3388894       2 root      92  0.0 kworker/u341:2-flush-8:0\n   1991       2 root      93  0.0 kworker/93:1H-kblockd\n3911716       2 root      70  0.0 kworker/u319:0-flush-8:0\n   1514       2 root      47  0.0 kworker/47:1H-kblockd\n   1769       2 root      87  0.0 kworker/87:1H-kblockd\n   1347       2 root      54  0.0 kworker/54:1H-kblockd\n3522333       2 root      24  0.0 kworker/u273:0-writeback\n   1292       2 root      37  0.0 kworker/37:1H-kblockd\n   1422       2 root      22  0.0 kworker/22:1H-kblockd\n3889542       2 root      30  0.0 kworker/u290:1-events_power_efficient\n3805066       2 root      39  0.0 kworker/39:0-mm_percpu_wq\n3873853       2 root      60  0.0 kworker/u309:2-writeback\n1130157       2 root      55  0.0 kworker/u304:1-writeback\n   1372       2 root      58  0.0 kworker/58:1H-kblockd\n3543597       2 root      13  0.0 kworker/u262:0-writeback\n   1487       2 root      48  0.0 kworker/48:1H-kblockd\n3885113       2 root      10  0.0 kworker/u259:0-events_unbound\n   1427       2 root      25  0.0 kworker/25:1H-kblockd\n3986105       2 root      68  0.0 kworker/u317:2-writeback\n   1346       2 root      56  0.0 kworker/56:1H-kblockd\n3984122       2 root      95  0.0 kworker/u344:2-events_unbound\n   1776       2 root      85  0.0 kworker/85:1H-kblockd\n3841249       2 root      44  0.0 kworker/u293:2-writeback\n2784245       2 root      61  0.0 kworker/u286:0-flush-8:0\n3178135       2 root      64  0.0 jbd2/sdd-8\n3830546       2 root      16  0.0 kworker/u265:1-events_unbound\n   1472       2 root      44  0.0 kworker/44:1H-kblockd\n3851181       2 root      13  0.0 kworker/u262:2-events_unbound\n3979547       2 root     104  0.0 kworker/u353:0-events_unbound\n3979141       2 root       2  0.0 kworker/u251:1-writeback\n3322697       2 root      59  0.0 kworker/u308:1-events_unbound\n   1475       2 root      42  0.0 kworker/42:1H-kblockd\n3639188       2 root      72  0.0 kworker/u321:3-events_unbound\n   1279       2 root      30  0.0 kworker/30:1H-kblockd\n   1362       2 root      61  0.0 kworker/61:1H-kblockd\n3402934       2 root      71  0.0 kworker/u320:2-writeback\n   1302       2 root      40  0.0 kworker/40:1H-kblockd\n    200       2 root      30  0.0 kworker/30:0H-kblockd\n    536       2 root      86  0.0 kworker/86:0H-kblockd\n3934528       2 root       1  0.0 kworker/u290:2-events_unbound\n3931726       2 root     106  0.0 kworker/u355:2-writeback\n3497071       2 root      56  0.0 kworker/u305:2-writeback\n2839018       2 root      35  0.0 kworker/u284:2-events_unbound\n3660936       2 root      90  0.0 kworker/u339:2-events_unbound\n3733400       2 root      44  0.0 kworker/u293:0-events_unbound\n3406268       2 root     115  0.0 kworker/u364:1-events_unbound\n3722443       2 root      43  0.0 kworker/u292:0-events_unbound\n3705352       2 root      28  0.0 kworker/u277:2-events_unbound\n2950812       2 root      46  0.0 kworker/u295:0-flush-8:0\n3633219       2 root      19  0.0 kworker/u268:3-events_unbound\n   1334       2 root      77  0.0 kworker/77:1H-kblockd\n3597362       2 root      59  0.0 kworker/u308:0-writeback\n3627238       2 root      27  0.0 kworker/u276:1-events_unbound\n2645248       2 root      79  0.0 kworker/u328:2-events_unbound\n3581266       2 root      51  0.0 kworker/u300:0-events_power_efficient\n3053470       2 root      31  0.0 kworker/u280:4-flush-8:0\n2562888       2 root      75  0.0 kworker/u324:3-flush-8:0\n 362180  362101 alex       5  0.0 dbus-daemon\n3781565       2 root      84  0.0 kworker/u333:2-writeback\n 362177       1 alex      15  0.0 tmux: server\n3775137       2 root      61  0.0 kworker/u310:2-events_unbound\n3845935       2 root     107  0.0 kworker/u370:1-writeback\n2914850       2 root      46  0.0 kworker/u295:2-writeback\n3954807       2 root       8  0.0 kworker/u257:0-flush-8:0\n3948200       2 root      19  0.0 kworker/u268:1-flush-8:0\n3738478       2 root      87  0.0 kworker/u336:0-events_unbound\n3936679       2 root      41  0.0 kworker/u285:1-events_power_efficient\n3935237       2 root      76  0.0 kworker/u325:0-writeback\n3679084       2 root      27  0.0 kworker/27:3-mm_percpu_wq\n3724602       2 root      43  0.0 kworker/u292:3-events_unbound\n    170       2 root      25  0.0 kworker/25:0H-kblockd\n3929257       2 root      64  0.0 kworker/u322:1-writeback\n3923286       2 root      99  0.0 kworker/u348:0-writeback\n3503345       2 root     102  0.0 kworker/u351:1-writeback\n3920268       2 root      44  0.0 kworker/u293:1-events_unbound\n3919675       2 root       7  0.0 kworker/u256:0-writeback\n3768472       2 root      47  0.0 kworker/u296:1-events_unbound\n3466895       2 root      96  0.0 kworker/u323:1-writeback\n3696859       2 root      57  0.0 kworker/u306:2-events_unbound\n3437105       2 root      57  0.0 kworker/u306:0-events_unbound\n3851682       2 root      10  0.0 kworker/u259:2-events_power_efficient\n3362260       2 root      51  0.0 kworker/u300:2-events_power_efficient\n2840391       2 root       0  0.0 kworker/u282:1-events_unbound\n3850096       2 root      57  0.0 kworker/u306:1-events_unbound\n3418578       2 root      47  0.0 kworker/u296:0-events_unbound\n3910009       2 root     103  0.0 kworker/u352:0-flush-8:0\n3347638       2 root      82  0.0 kworker/u331:2-events_unbound\n3597428       2 root      88  0.0 kworker/u337:1-events_unbound\n3222169       2 root     106  0.0 kworker/u355:1-flush-8:0\n3715841       2 root     101  0.0 kworker/u350:0-events_unbound\n3714656       2 root      32  0.0 kworker/u281:3-flush-8:0\n3812679       2 root      96  0.0 kworker/u345:1-writeback\n3800622       2 root       6  0.0 kworker/u255:0-writeback\n3047366       2 root      53  0.0 kworker/u302:1-flush-8:32\n3796070       2 root      34  0.0 kworker/u283:2-events_unbound\n3538706       2 root     103  0.0 kworker/u352:1-events_unbound\n3054268       2 root      27  0.0 kworker/u276:3-events_unbound\n3053957       2 root      62  0.0 kworker/u367:3-writeback\n3680250       2 root      26  0.0 kworker/u275:2-events_unbound\n3755745       2 root      95  0.0 kworker/u344:1-writeback\n3480399       2 root      60  0.0 kworker/u309:0-events_unbound\n3460799       2 root      78  0.0 kworker/u327:0-writeback\n1806434       1 ryz18496  92  0.0 tmux: server\n3012664       2 root      51  0.0 kworker/u300:1-loop0\n3866357       2 root      24  0.0 kworker/u273:2-writeback\n3699656       2 root     116  0.0 kworker/u365:0-flush-8:0\n3457280       2 root      25  0.0 kworker/u274:2-events_unbound\n3853715       2 root     122  0.0 kworker/u371:0-loop0\n3674071       2 root      71  0.0 kworker/u320:1-writeback\n3387578       1 root       6  0.0 switcheroo-cont\n3841246       2 root      37  0.0 kworker/u286:1-events_unbound\n3838038       2 root       4  0.0 kworker/u253:1-events_unbound\n3347537       2 root      68  0.0 kworker/u317:1-flush-8:0\n3526145       2 root     101  0.0 kworker/u350:3-flush-8:0\n3473630       2 root      88  0.0 kworker/u337:2-events_unbound\n3779797       2 root     117  0.0 kworker/u366:0-flush-8:0\n3782097 3782096 xmn04182  62  0.0 bash\n3766638       2 root      48  0.0 kworker/u297:1-writeback\n3590341       2 root      85  0.0 kworker/u334:2-flush-8:0\n1806438 1685840 ryz18496  25  0.0 dbus-daemon\n2314308 2314302 alex       8  0.0 node\n3572078       2 root      15  0.0 kworker/u264:2-flush-8:0\n3739839       2 root      32  0.0 kworker/u281:1-events_power_efficient\n3734149       2 root     111  0.0 kworker/u360:1-events_unbound\n3691517       2 root       5  0.0 kworker/u254:1-events_unbound\n    356       2 root      56  0.0 kworker/56:0H-kblockd\n 252139  248921 dxp41838  80  0.0 dbus-daemon\n2927433       2 root      56  0.0 kworker/u305:0-writeback\n2919626       2 root     106  0.0 psimon\n3593202       2 root      38  0.0 kworker/u287:3-events_unbound\n   1291       2 root      67  0.0 kworker/67:1H-kblockd\n      5       2 root      24  0.0 kworker/R-rcu_p\n   2091       2 root      77  0.0 jbd2/sda16-8\n3526144       2 root     101  0.0 kworker/u350:2-flush-8:0\n    892       2 root       3  0.0 kworker/R-write\n   2659       1 root      46  0.0 unattended-upgr\n3507458 1806434 ryz18496   5  0.0 bash\n     86       2 root      11  0.0 kworker/11:0H-kblockd\n 778820 1685840 ryz18496  78  0.0 at-spi-bus-laun\n3696837 3340340 xmn04182   9  0.0 dbus-daemon\n3473972       1 root      74  0.0 qemu-ga\n3798336       2 root       1  0.0 kworker/R-ceph-\n   1326       2 root      28  0.0 scsi_eh_2\n  51198   48518 dvi41342   5  0.0 dbus-daemon\n 146390  141918 mdemir     4  0.0 dbus-daemon\n   1332       2 root      49  0.0 scsi_eh_5\n2168527 2168524 alex      37  0.0 tail\n2157640 2157637 alex      79  0.0 tail\n1806435 1806434 ryz18496  13  0.0 bash\n   1366       2 root      72  0.0 scsi_eh_6\n     12       2 root      76  0.0 kworker/R-mm_pe\n 362178  362177 alex      16  0.0 bash\n   2273       2 root      60  0.0 irq/449-nvidia\n   2260       2 root      81  0.0 kworker/R-ext4-\n   1328       2 root      45  0.0 scsi_eh_3\n   1330       2 root      47  0.0 scsi_eh_4\n   1324       2 root      72  0.0 scsi_eh_1\n   2707       1 root      48  0.0 agetty\n   2679       1 root      88  0.0 agetty\n    885       2 root       4  0.0 kdevtmpfs\n    452       2 root      72  0.0 kworker/72:0H-events_highpri\n     15       2 root       0  0.0 rcu_tasks_trace_kthread\n      3       2 root       2  0.0 pool_workqueue_release\n      4       2 root       0  0.0 kworker/R-rcu_g\n      6       2 root       0  0.0 kworker/R-slub_\n      7       2 root       0  0.0 kworker/R-netns\n      9       2 root       0  0.0 kworker/0:0H-events_highpri\n     13       2 root       0  0.0 rcu_tasks_kthread\n     14       2 root       0  0.0 rcu_tasks_rude_kthread\n     19       2 root       0  0.0 idle_inject/0\n     20       2 root       0  0.0 cpuhp/0\n     21       2 root       1  0.0 cpuhp/1\n     22       2 root       1  0.0 idle_inject/1\n     26       2 root       1  0.0 kworker/1:0H-events_highpri\n     27       2 root       2  0.0 cpuhp/2\n     28       2 root       2  0.0 idle_inject/2\n     32       2 root       2  0.0 kworker/2:0H-events_highpri\n     33       2 root       3  0.0 cpuhp/3\n     34       2 root       3  0.0 idle_inject/3\n     38       2 root       3  0.0 kworker/3:0H-events_highpri\n     39       2 root       4  0.0 cpuhp/4\n     40       2 root       4  0.0 idle_inject/4\n     44       2 root       4  0.0 kworker/4:0H-events_highpri\n     45       2 root       5  0.0 cpuhp/5\n     46       2 root       5  0.0 idle_inject/5\n     50       2 root       5  0.0 kworker/5:0H-events_highpri\n     51       2 root       6  0.0 cpuhp/6\n     52       2 root       6  0.0 idle_inject/6\n     56       2 root       6  0.0 kworker/6:0H-events_highpri\n     57       2 root       7  0.0 cpuhp/7\n     58       2 root       7  0.0 idle_inject/7\n     62       2 root       7  0.0 kworker/7:0H-events_highpri\n     63       2 root       8  0.0 cpuhp/8\n     64       2 root       8  0.0 idle_inject/8\n     68       2 root       8  0.0 kworker/8:0H-events_highpri\n     69       2 root       9  0.0 cpuhp/9\n     70       2 root       9  0.0 idle_inject/9\n     74       2 root       9  0.0 kworker/9:0H-events_highpri\n     75       2 root      10  0.0 cpuhp/10\n     76       2 root      10  0.0 idle_inject/10\n     80       2 root      10  0.0 kworker/10:0H-events_highpri\n     81       2 root      11  0.0 cpuhp/11\n     82       2 root      11  0.0 idle_inject/11\n     87       2 root      12  0.0 cpuhp/12\n     88       2 root      12  0.0 idle_inject/12\n     92       2 root      12  0.0 kworker/12:0H-events_highpri\n     93       2 root      13  0.0 cpuhp/13\n     94       2 root      13  0.0 idle_inject/13\n     98       2 root      13  0.0 kworker/13:0H-events_highpri\n     99       2 root      14  0.0 cpuhp/14\n    100       2 root      14  0.0 idle_inject/14\n    104       2 root      14  0.0 kworker/14:0H-events_highpri\n    105       2 root      15  0.0 cpuhp/15\n    106       2 root      15  0.0 idle_inject/15\n    110       2 root      15  0.0 kworker/15:0H-events_highpri\n    111       2 root      16  0.0 cpuhp/16\n    112       2 root      16  0.0 idle_inject/16\n    116       2 root      16  0.0 kworker/16:0H-events_highpri\n    117       2 root      17  0.0 cpuhp/17\n    118       2 root      17  0.0 idle_inject/17\n    122       2 root      17  0.0 kworker/17:0H-events_highpri\n    123       2 root      18  0.0 cpuhp/18\n    124       2 root      18  0.0 idle_inject/18\n    128       2 root      18  0.0 kworker/18:0H-events_highpri\n    129       2 root      19  0.0 cpuhp/19\n    130       2 root      19  0.0 idle_inject/19\n    134       2 root      19  0.0 kworker/19:0H-events_highpri\n    135       2 root      20  0.0 cpuhp/20\n    136       2 root      20  0.0 idle_inject/20\n    140       2 root      20  0.0 kworker/20:0H-events_highpri\n    141       2 root      21  0.0 cpuhp/21\n    142       2 root      21  0.0 idle_inject/21\n    146       2 root      21  0.0 kworker/21:0H-events_highpri\n    147       2 root      22  0.0 cpuhp/22\n    148       2 root      22  0.0 idle_inject/22\n    152       2 root      22  0.0 kworker/22:0H-events_highpri\n    153       2 root      23  0.0 cpuhp/23\n    154       2 root      23  0.0 idle_inject/23\n    158       2 root      23  0.0 kworker/23:0H-events_highpri\n    159       2 root      24  0.0 cpuhp/24\n    160       2 root      24  0.0 idle_inject/24\n    164       2 root      24  0.0 kworker/24:0H-events_highpri\n    165       2 root      25  0.0 cpuhp/25\n    166       2 root      25  0.0 idle_inject/25\n    171       2 root      26  0.0 cpuhp/26\n    172       2 root      26  0.0 idle_inject/26\n    176       2 root      26  0.0 kworker/26:0H-events_highpri\n    177       2 root      27  0.0 cpuhp/27\n    178       2 root      27  0.0 idle_inject/27\n    182       2 root      27  0.0 kworker/27:0H-events_highpri\n    183       2 root      28  0.0 cpuhp/28\n    184       2 root      28  0.0 idle_inject/28\n    188       2 root      28  0.0 kworker/28:0H-events_highpri\n    189       2 root      29  0.0 cpuhp/29\n    190       2 root      29  0.0 idle_inject/29\n    194       2 root      29  0.0 kworker/29:0H-events_highpri\n    195       2 root      30  0.0 cpuhp/30\n    196       2 root      30  0.0 idle_inject/30\n    201       2 root      31  0.0 cpuhp/31\n    202       2 root      31  0.0 idle_inject/31\n    206       2 root      31  0.0 kworker/31:0H-events_highpri\n    207       2 root      32  0.0 cpuhp/32\n    208       2 root      32  0.0 idle_inject/32\n    212       2 root      32  0.0 kworker/32:0H-events_highpri\n    213       2 root      33  0.0 cpuhp/33\n    214       2 root      33  0.0 idle_inject/33\n    218       2 root      33  0.0 kworker/33:0H-events_highpri\n    219       2 root      34  0.0 cpuhp/34\n    220       2 root      34  0.0 idle_inject/34\n    224       2 root      34  0.0 kworker/34:0H-events_highpri\n    225       2 root      35  0.0 cpuhp/35\n    226       2 root      35  0.0 idle_inject/35\n    230       2 root      35  0.0 kworker/35:0H-events_highpri\n    231       2 root      36  0.0 cpuhp/36\n    232       2 root      36  0.0 idle_inject/36\n    236       2 root      36  0.0 kworker/36:0H-events_highpri\n    237       2 root      37  0.0 cpuhp/37\n    238       2 root      37  0.0 idle_inject/37\n    242       2 root      37  0.0 kworker/37:0H-events_highpri\n    243       2 root      38  0.0 cpuhp/38\n    244       2 root      38  0.0 idle_inject/38\n    248       2 root      38  0.0 kworker/38:0H-events_highpri\n    249       2 root      39  0.0 cpuhp/39\n    250       2 root      39  0.0 idle_inject/39\n    254       2 root      39  0.0 kworker/39:0H-events_highpri\n    255       2 root      40  0.0 cpuhp/40\n    256       2 root      40  0.0 idle_inject/40\n    260       2 root      40  0.0 kworker/40:0H-events_highpri\n    261       2 root      41  0.0 cpuhp/41\n    262       2 root      41  0.0 idle_inject/41\n    266       2 root      41  0.0 kworker/41:0H-events_highpri\n    267       2 root      42  0.0 cpuhp/42\n    268       2 root      42  0.0 idle_inject/42\n    272       2 root      42  0.0 kworker/42:0H-events_highpri\n    273       2 root      43  0.0 cpuhp/43\n    274       2 root      43  0.0 idle_inject/43\n    278       2 root      43  0.0 kworker/43:0H-events_highpri\n    279       2 root      44  0.0 cpuhp/44\n    280       2 root      44  0.0 idle_inject/44\n    284       2 root      44  0.0 kworker/44:0H-events_highpri\n    285       2 root      45  0.0 cpuhp/45\n    286       2 root      45  0.0 idle_inject/45\n    290       2 root      45  0.0 kworker/45:0H-events_highpri\n    291       2 root      46  0.0 cpuhp/46\n    292       2 root      46  0.0 idle_inject/46\n    296       2 root      46  0.0 kworker/46:0H-events_highpri\n    297       2 root      47  0.0 cpuhp/47\n    298       2 root      47  0.0 idle_inject/47\n    302       2 root      47  0.0 kworker/47:0H-events_highpri\n    303       2 root      48  0.0 cpuhp/48\n    304       2 root      48  0.0 idle_inject/48\n    308       2 root      48  0.0 kworker/48:0H-events_highpri\n    309       2 root      49  0.0 cpuhp/49\n    310       2 root      49  0.0 idle_inject/49\n    314       2 root      49  0.0 kworker/49:0H-events_highpri\n    315       2 root      50  0.0 cpuhp/50\n    316       2 root      50  0.0 idle_inject/50\n    320       2 root      50  0.0 kworker/50:0H-events_highpri\n    321       2 root      51  0.0 cpuhp/51\n    322       2 root      51  0.0 idle_inject/51\n    326       2 root      51  0.0 kworker/51:0H-events_highpri\n    327       2 root      52  0.0 cpuhp/52\n    328       2 root      52  0.0 idle_inject/52\n    332       2 root      52  0.0 kworker/52:0H-events_highpri\n    333       2 root      53  0.0 cpuhp/53\n    334       2 root      53  0.0 idle_inject/53\n    338       2 root      53  0.0 kworker/53:0H-events_highpri\n    339       2 root      54  0.0 cpuhp/54\n    340       2 root      54  0.0 idle_inject/54\n    344       2 root      54  0.0 kworker/54:0H-events_highpri\n    345       2 root      55  0.0 cpuhp/55\n    346       2 root      55  0.0 idle_inject/55\n    350       2 root      55  0.0 kworker/55:0H-events_highpri\n    351       2 root      56  0.0 cpuhp/56\n    352       2 root      56  0.0 idle_inject/56\n    357       2 root      57  0.0 cpuhp/57\n    358       2 root      57  0.0 idle_inject/57\n    362       2 root      57  0.0 kworker/57:0H-events_highpri\n    363       2 root      58  0.0 cpuhp/58\n    364       2 root      58  0.0 idle_inject/58\n    368       2 root      58  0.0 kworker/58:0H-events_highpri\n    369       2 root      59  0.0 cpuhp/59\n    370       2 root      59  0.0 idle_inject/59\n    375       2 root      60  0.0 cpuhp/60\n    376       2 root      60  0.0 idle_inject/60\n    380       2 root      60  0.0 kworker/60:0H-events_highpri\n    381       2 root      61  0.0 cpuhp/61\n    382       2 root      61  0.0 idle_inject/61\n    386       2 root      61  0.0 kworker/61:0H-events_highpri\n    387       2 root      62  0.0 cpuhp/62\n    388       2 root      62  0.0 idle_inject/62\n    392       2 root      62  0.0 kworker/62:0H-events_highpri\n    393       2 root      63  0.0 cpuhp/63\n    394       2 root      63  0.0 idle_inject/63\n    398       2 root      63  0.0 kworker/63:0H-events_highpri\n    399       2 root      64  0.0 cpuhp/64\n    400       2 root      64  0.0 idle_inject/64\n    404       2 root      64  0.0 kworker/64:0H-events_highpri\n    405       2 root      65  0.0 cpuhp/65\n    406       2 root      65  0.0 idle_inject/65\n    410       2 root      65  0.0 kworker/65:0H-events_highpri\n    411       2 root      66  0.0 cpuhp/66\n    412       2 root      66  0.0 idle_inject/66\n    416       2 root      66  0.0 kworker/66:0H-events_highpri\n    417       2 root      67  0.0 cpuhp/67\n    418       2 root      67  0.0 idle_inject/67\n    423       2 root      68  0.0 cpuhp/68\n    424       2 root      68  0.0 idle_inject/68\n    428       2 root      68  0.0 kworker/68:0H-events_highpri\n    429       2 root      69  0.0 cpuhp/69\n    430       2 root      69  0.0 idle_inject/69\n    434       2 root      69  0.0 kworker/69:0H-events_highpri\n    435       2 root      70  0.0 cpuhp/70\n    436       2 root      70  0.0 idle_inject/70\n    440       2 root      70  0.0 kworker/70:0H-events_highpri\n    441       2 root      71  0.0 cpuhp/71\n    442       2 root      71  0.0 idle_inject/71\n    446       2 root      71  0.0 kworker/71:0H-events_highpri\n    447       2 root      72  0.0 cpuhp/72\n    448       2 root      72  0.0 idle_inject/72\n    453       2 root      73  0.0 cpuhp/73\n    454       2 root      73  0.0 idle_inject/73\n    458       2 root      73  0.0 kworker/73:0H-events_highpri\n    459       2 root      74  0.0 cpuhp/74\n    460       2 root      74  0.0 idle_inject/74\n    464       2 root      74  0.0 kworker/74:0H-events_highpri\n    465       2 root      75  0.0 cpuhp/75\n    466       2 root      75  0.0 idle_inject/75\n    470       2 root      75  0.0 kworker/75:0H-events_highpri\n    471       2 root      76  0.0 cpuhp/76\n    472       2 root      76  0.0 idle_inject/76\n    476       2 root      76  0.0 kworker/76:0H-events_highpri\n    477       2 root      77  0.0 cpuhp/77\n    478       2 root      77  0.0 idle_inject/77\n    483       2 root      78  0.0 cpuhp/78\n    484       2 root      78  0.0 idle_inject/78\n    488       2 root      78  0.0 kworker/78:0H-events_highpri\n    489       2 root      79  0.0 cpuhp/79\n    490       2 root      79  0.0 idle_inject/79\n    494       2 root      79  0.0 kworker/79:0H-events_highpri\n    495       2 root      80  0.0 cpuhp/80\n    496       2 root      80  0.0 idle_inject/80\n    500       2 root      80  0.0 kworker/80:0H-events_highpri\n    501       2 root      81  0.0 cpuhp/81\n    502       2 root      81  0.0 idle_inject/81\n    506       2 root      81  0.0 kworker/81:0H-events_highpri\n    507       2 root      82  0.0 cpuhp/82\n    508       2 root      82  0.0 idle_inject/82\n    512       2 root      82  0.0 kworker/82:0H-events_highpri\n    513       2 root      83  0.0 cpuhp/83\n    514       2 root      83  0.0 idle_inject/83\n    518       2 root      83  0.0 kworker/83:0H-events_highpri\n    519       2 root      84  0.0 cpuhp/84\n    520       2 root      84  0.0 idle_inject/84\n    524       2 root      84  0.0 kworker/84:0H-events_highpri\n    525       2 root      85  0.0 cpuhp/85\n    526       2 root      85  0.0 idle_inject/85\n    530       2 root      85  0.0 kworker/85:0H-events_highpri\n    531       2 root      86  0.0 cpuhp/86\n    532       2 root      86  0.0 idle_inject/86\n    537       2 root      87  0.0 cpuhp/87\n    538       2 root      87  0.0 idle_inject/87\n    542       2 root      87  0.0 kworker/87:0H-events_highpri\n    543       2 root      88  0.0 cpuhp/88\n    544       2 root      88  0.0 idle_inject/88\n    548       2 root      88  0.0 kworker/88:0H-events_highpri\n    549       2 root      89  0.0 cpuhp/89\n    550       2 root      89  0.0 idle_inject/89\n    554       2 root      89  0.0 kworker/89:0H-events_highpri\n    555       2 root      90  0.0 cpuhp/90\n    556       2 root      90  0.0 idle_inject/90\n    560       2 root      90  0.0 kworker/90:0H-events_highpri\n    561       2 root      91  0.0 cpuhp/91\n    562       2 root      91  0.0 idle_inject/91\n    566       2 root      91  0.0 kworker/91:0H-events_highpri\n    567       2 root      92  0.0 cpuhp/92\n    568       2 root      92  0.0 idle_inject/92\n    572       2 root      92  0.0 kworker/92:0H-events_highpri\n    573       2 root      93  0.0 cpuhp/93\n    574       2 root      93  0.0 idle_inject/93\n    578       2 root      93  0.0 kworker/93:0H-events_highpri\n    579       2 root      94  0.0 cpuhp/94\n    580       2 root      94  0.0 idle_inject/94\n    584       2 root      94  0.0 kworker/94:0H-events_highpri\n    585       2 root      95  0.0 cpuhp/95\n    586       2 root      95  0.0 idle_inject/95\n    590       2 root      95  0.0 kworker/95:0H-events_highpri\n    591       2 root      96  0.0 cpuhp/96\n    592       2 root      96  0.0 idle_inject/96\n    596       2 root      96  0.0 kworker/96:0H-events_highpri\n    597       2 root      97  0.0 cpuhp/97\n    598       2 root      97  0.0 idle_inject/97\n    602       2 root      97  0.0 kworker/97:0H-kblockd\n    603       2 root      98  0.0 cpuhp/98\n    604       2 root      98  0.0 idle_inject/98\n    608       2 root      98  0.0 kworker/98:0H-events_highpri\n    609       2 root      99  0.0 cpuhp/99\n    610       2 root      99  0.0 idle_inject/99\n    614       2 root      99  0.0 kworker/99:0H-events_highpri\n    615       2 root     100  0.0 cpuhp/100\n    616       2 root     100  0.0 idle_inject/100\n    620       2 root     100  0.0 kworker/100:0H-events_highpri\n    621       2 root     101  0.0 cpuhp/101\n    622       2 root     101  0.0 idle_inject/101\n    626       2 root     101  0.0 kworker/101:0H-events_highpri\n    627       2 root     102  0.0 cpuhp/102\n    628       2 root     102  0.0 idle_inject/102\n    632       2 root     102  0.0 kworker/102:0H-events_highpri\n    633       2 root     103  0.0 cpuhp/103\n    634       2 root     103  0.0 idle_inject/103\n    638       2 root     103  0.0 kworker/103:0H-kblockd\n    639       2 root     104  0.0 cpuhp/104\n    640       2 root     104  0.0 idle_inject/104\n    644       2 root     104  0.0 kworker/104:0H-events_highpri\n    645       2 root     105  0.0 cpuhp/105\n    646       2 root     105  0.0 idle_inject/105\n    650       2 root     105  0.0 kworker/105:0H-events_highpri\n    651       2 root     106  0.0 cpuhp/106\n    652       2 root     106  0.0 idle_inject/106\n    656       2 root     106  0.0 kworker/106:0H-kblockd\n    657       2 root     107  0.0 cpuhp/107\n    658       2 root     107  0.0 idle_inject/107\n    662       2 root     107  0.0 kworker/107:0H-events_highpri\n    663       2 root     108  0.0 cpuhp/108\n    664       2 root     108  0.0 idle_inject/108\n    668       2 root     108  0.0 kworker/108:0H-events_highpri\n    669       2 root     109  0.0 cpuhp/109\n    670       2 root     109  0.0 idle_inject/109\n    674       2 root     109  0.0 kworker/109:0H-events_highpri\n    675       2 root     110  0.0 cpuhp/110\n    676       2 root     110  0.0 idle_inject/110\n    680       2 root     110  0.0 kworker/110:0H-events_highpri\n    681       2 root     111  0.0 cpuhp/111\n    682       2 root     111  0.0 idle_inject/111\n    686       2 root     111  0.0 kworker/111:0H-events_highpri\n    687       2 root     112  0.0 cpuhp/112\n    688       2 root     112  0.0 idle_inject/112\n    692       2 root     112  0.0 kworker/112:0H-events_highpri\n    693       2 root     113  0.0 cpuhp/113\n    694       2 root     113  0.0 idle_inject/113\n    698       2 root     113  0.0 kworker/113:0H-events_highpri\n    699       2 root     114  0.0 cpuhp/114\n    700       2 root     114  0.0 idle_inject/114\n    704       2 root     114  0.0 kworker/114:0H-kblockd\n    705       2 root     115  0.0 cpuhp/115\n    706       2 root     115  0.0 idle_inject/115\n    710       2 root     115  0.0 kworker/115:0H-events_highpri\n    711       2 root     116  0.0 cpuhp/116\n    712       2 root     116  0.0 idle_inject/116\n    716       2 root     116  0.0 kworker/116:0H-kblockd\n    717       2 root     117  0.0 cpuhp/117\n    718       2 root     117  0.0 idle_inject/117\n    723       2 root     118  0.0 cpuhp/118\n    724       2 root     118  0.0 idle_inject/118\n    728       2 root     118  0.0 kworker/118:0H-kblockd\n    729       2 root     119  0.0 cpuhp/119\n    730       2 root     119  0.0 idle_inject/119\n    734       2 root     119  0.0 kworker/119:0H-kblockd\n    735       2 root     120  0.0 cpuhp/120\n    736       2 root     120  0.0 idle_inject/120\n    741       2 root     121  0.0 cpuhp/121\n    742       2 root     121  0.0 idle_inject/121\n    746       2 root     121  0.0 kworker/121:0H-events_highpri\n    747       2 root     122  0.0 cpuhp/122\n    748       2 root     122  0.0 idle_inject/122\n    752       2 root     122  0.0 kworker/122:0H-events_highpri\n    753       2 root     123  0.0 cpuhp/123\n    754       2 root     123  0.0 idle_inject/123\n    758       2 root     123  0.0 kworker/123:0H-events_highpri\n    886       2 root      53  0.0 kworker/R-inet_\n    889       2 root      48  0.0 oom_reaper\n    895       2 root       1  0.0 ksmd\n    897       2 root      39  0.0 kworker/R-kinte\n    898       2 root      72  0.0 kworker/R-kbloc\n    899       2 root      42  0.0 kworker/R-blkcg\n    900       2 root       0  0.0 irq/9-acpi\n    903       2 root      35  0.0 kworker/R-tpm_d\n    904       2 root      36  0.0 kworker/R-ata_s\n    905       2 root      38  0.0 kworker/R-md\n    906       2 root      39  0.0 kworker/R-md_bi\n    907       2 root      40  0.0 kworker/R-edac-\n    908       2 root      41  0.0 kworker/R-devfr\n    909       2 root      37  0.0 watchdogd\n    910       2 root      37  0.0 kworker/R-quota\n    919       2 root      36  0.0 ecryptfs-kthread\n    920       2 root      38  0.0 kworker/R-kthro\n    921       2 root       1  0.0 irq/24-aerdrv\n    922       2 root       2  0.0 irq/25-aerdrv\n    923       2 root       3  0.0 irq/26-aerdrv\n    924       2 root       4  0.0 irq/27-aerdrv\n    925       2 root       5  0.0 irq/28-aerdrv\n    926       2 root       6  0.0 irq/29-aerdrv\n    927       2 root       7  0.0 irq/30-aerdrv\n    928       2 root       8  0.0 irq/31-aerdrv\n    929       2 root       9  0.0 irq/32-aerdrv\n    930       2 root      10  0.0 irq/33-aerdrv\n    931       2 root      11  0.0 irq/34-aerdrv\n    932       2 root      12  0.0 irq/35-aerdrv\n    933       2 root      13  0.0 irq/36-aerdrv\n    934       2 root      14  0.0 irq/37-aerdrv\n    935       2 root      15  0.0 irq/38-aerdrv\n    936       2 root      16  0.0 irq/39-aerdrv\n    937       2 root      17  0.0 irq/40-aerdrv\n    938       2 root      18  0.0 irq/41-aerdrv\n    939       2 root      19  0.0 irq/42-aerdrv\n    940       2 root      20  0.0 irq/43-aerdrv\n    941       2 root      21  0.0 irq/44-aerdrv\n    942       2 root      22  0.0 irq/45-aerdrv\n    943       2 root      23  0.0 irq/46-aerdrv\n    944       2 root      24  0.0 irq/47-aerdrv\n    945       2 root      25  0.0 irq/48-aerdrv\n    946       2 root      26  0.0 irq/49-aerdrv\n    947       2 root      27  0.0 irq/50-aerdrv\n    948       2 root      28  0.0 irq/51-aerdrv\n    949       2 root      29  0.0 irq/52-aerdrv\n    950       2 root      36  0.0 kworker/R-acpi_\n    952       2 root      41  0.0 scsi_eh_0\n    953       2 root      43  0.0 kworker/R-scsi_\n   1074       2 root      10  0.0 kworker/R-mld\n   1077       2 root      32  0.0 kworker/R-ipv6_\n   1084       2 root      46  0.0 kworker/R-kstrp\n   1088       2 root      36  0.0 kworker/u373:0\n   1089       2 root      39  0.0 kworker/u374:0\n   1090       2 root      39  0.0 kworker/u375:0\n   1091       2 root     116  0.0 kworker/u376:0\n   1092       2 root     116  0.0 kworker/u377:0\n   1093       2 root     116  0.0 kworker/u378:0\n   1094       2 root     123  0.0 kworker/u379:0\n   1095       2 root     123  0.0 kworker/u380:0\n   1096       2 root     116  0.0 kworker/u381:0\n   1097       2 root     116  0.0 kworker/u382:0\n   1098       2 root     116  0.0 kworker/u383:0\n   1099       2 root     116  0.0 kworker/u384:0\n   1100       2 root     116  0.0 kworker/u385:0\n   1101       2 root     116  0.0 kworker/u386:0\n   1102       2 root     116  0.0 kworker/u387:0\n   1103       2 root     117  0.0 kworker/u388:0\n   1104       2 root     117  0.0 kworker/u389:0\n   1105       2 root     117  0.0 kworker/u390:0\n   1106       2 root      38  0.0 kworker/u391:0\n   1107       2 root     117  0.0 kworker/u392:0\n   1108       2 root      40  0.0 kworker/u393:0\n   1109       2 root     117  0.0 kworker/u394:0\n   1110       2 root     117  0.0 kworker/u395:0\n   1111       2 root      42  0.0 kworker/u396:0\n   1112       2 root      43  0.0 kworker/u397:0\n   1113       2 root     117  0.0 kworker/u398:0\n   1114       2 root     116  0.0 kworker/u399:0\n   1115       2 root      44  0.0 kworker/u400:0\n   1116       2 root      62  0.0 kworker/u401:0\n   1117       2 root      62  0.0 kworker/u402:0\n   1118       2 root      62  0.0 kworker/u403:0\n   1119       2 root      62  0.0 kworker/u404:0\n   1120       2 root      62  0.0 kworker/u405:0\n   1121       2 root      45  0.0 kworker/u406:0\n   1122       2 root      47  0.0 kworker/u407:0\n   1123       2 root      62  0.0 kworker/u408:0\n   1124       2 root      48  0.0 kworker/u409:0\n   1125       2 root      49  0.0 kworker/u410:0\n   1126       2 root      62  0.0 kworker/u411:0\n   1127       2 root      50  0.0 kworker/u412:0\n   1128       2 root     118  0.0 kworker/u413:0\n   1129       2 root     118  0.0 kworker/u414:0\n   1130       2 root      51  0.0 kworker/u415:0\n   1131       2 root     118  0.0 kworker/u416:0\n   1132       2 root      52  0.0 kworker/u417:0\n   1133       2 root      53  0.0 kworker/u418:0\n   1134       2 root      54  0.0 kworker/u419:0\n   1135       2 root     118  0.0 kworker/u420:0\n   1136       2 root     118  0.0 kworker/u421:0\n   1137       2 root      55  0.0 kworker/u422:0\n   1138       2 root     118  0.0 kworker/u423:0\n   1139       2 root      56  0.0 kworker/u424:0\n   1140       2 root      57  0.0 kworker/u425:0\n   1141       2 root      58  0.0 kworker/u426:0\n   1142       2 root      59  0.0 kworker/u427:0\n   1143       2 root      60  0.0 kworker/u428:0\n   1144       2 root     118  0.0 kworker/u429:0\n   1145       2 root      61  0.0 kworker/u430:0\n   1146       2 root     118  0.0 kworker/u431:0\n   1147       2 root       0  0.0 kworker/u432:0\n   1148       2 root       1  0.0 kworker/u433:0\n   1149       2 root       5  0.0 kworker/u434:0\n   1150       2 root       6  0.0 kworker/u435:0\n   1151       2 root     118  0.0 kworker/u436:0\n   1152       2 root      35  0.0 kworker/u437:0\n   1153       2 root       7  0.0 kworker/u438:0\n   1154       2 root       8  0.0 kworker/u439:0\n   1155       2 root       9  0.0 kworker/u440:0\n   1156       2 root      10  0.0 kworker/u441:0\n   1157       2 root      11  0.0 kworker/u442:0\n   1158       2 root     118  0.0 kworker/u443:0\n   1159       2 root      13  0.0 kworker/u444:0\n   1160       2 root      14  0.0 kworker/u445:0\n   1161       2 root     118  0.0 kworker/u446:0\n   1162       2 root      15  0.0 kworker/u447:0\n   1163       2 root      16  0.0 kworker/u448:0\n   1164       2 root      17  0.0 kworker/u449:0\n   1165       2 root      18  0.0 kworker/u450:0\n   1166       2 root      20  0.0 kworker/u451:0\n   1167       2 root      21  0.0 kworker/u452:0\n   1168       2 root      22  0.0 kworker/u453:0\n   1169       2 root      24  0.0 kworker/u454:0\n   1170       2 root      25  0.0 kworker/u455:0\n   1171       2 root      26  0.0 kworker/u456:0\n   1172       2 root      27  0.0 kworker/u457:0\n   1173       2 root      28  0.0 kworker/u458:0\n   1174       2 root      29  0.0 kworker/u459:0\n   1175       2 root      30  0.0 kworker/u460:0\n   1176       2 root     118  0.0 kworker/u461:0\n   1177       2 root     118  0.0 kworker/u462:0\n   1178       2 root      31  0.0 kworker/u463:0\n   1179       2 root      32  0.0 kworker/u464:0\n   1180       2 root      33  0.0 kworker/u465:0\n   1181       2 root      46  0.0 kworker/u466:0\n   1182       2 root     119  0.0 kworker/u467:0\n   1183       2 root      19  0.0 kworker/u468:0\n   1184       2 root      37  0.0 kworker/u469:0\n   1185       2 root       4  0.0 kworker/u470:0\n   1186       2 root      36  0.0 kworker/u471:0\n   1187       2 root      23  0.0 kworker/u472:0\n   1188       2 root      39  0.0 kworker/u473:0\n   1189       2 root      38  0.0 kworker/u474:0\n   1190       2 root      40  0.0 kworker/u475:0\n   1191       2 root      42  0.0 kworker/u476:0\n   1192       2 root      43  0.0 kworker/u477:0\n   1193       2 root      12  0.0 kworker/u478:0\n   1194       2 root      44  0.0 kworker/u479:0\n   1195       2 root      45  0.0 kworker/u480:0\n   1196       2 root      47  0.0 kworker/u481:0\n   1197       2 root      48  0.0 kworker/u482:0\n   1198       2 root      49  0.0 kworker/u483:0\n   1199       2 root      51  0.0 kworker/u484:0\n   1200       2 root      50  0.0 kworker/u485:0\n   1201       2 root      52  0.0 kworker/u486:0\n   1202       2 root      53  0.0 kworker/u487:0\n   1203       2 root      54  0.0 kworker/u488:0\n   1204       2 root     119  0.0 kworker/u489:0\n   1205       2 root      55  0.0 kworker/u490:0\n   1206       2 root      56  0.0 kworker/u491:0\n   1207       2 root      57  0.0 kworker/u492:0\n   1208       2 root      58  0.0 kworker/u493:0\n   1209       2 root      59  0.0 kworker/u494:0\n   1210       2 root      60  0.0 kworker/u495:0\n   1211       2 root      61  0.0 kworker/u496:0\n   1212       2 root       0  0.0 kworker/u497:0\n   1219       2 root      35  0.0 kworker/R-crypt\n   1231       2 root      41  0.0 kworker/R-charg\n   1303       2 root     120  0.0 kworker/120:1H\n   1325       2 root      41  0.0 kworker/R-scsi_\n   1327       2 root      44  0.0 kworker/R-scsi_\n   1329       2 root      46  0.0 kworker/R-scsi_\n   1331       2 root      48  0.0 kworker/R-scsi_\n   1333       2 root      50  0.0 kworker/R-scsi_\n   1360       2 root      59  0.0 kworker/59:1H\n   1369       2 root      62  0.0 kworker/R-scsi_\n   1565       2 root      35  0.0 kworker/R-raid5\n   1605       2 root     117  0.0 kworker/117:1H\n   1738       2 root      36  0.0 kworker/R-ext4-\n   1775       2 root      86  0.0 kworker/86:1H\n   1877       2 root      35  0.0 kworker/R-kmpat\n   1878       2 root      38  0.0 kworker/R-kmpat\n   2092       2 root      91  0.0 kworker/R-ext4-\n   2238       2 root      75  0.0 nv_queue\n   2239       2 root      75  0.0 nv_queue\n   2240       2 root      98  0.0 nv_open_q\n   2242       2 root     114  0.0 nv_open_q\n   2244       2 root      75  0.0 nv_open_q\n   2245       2 root      75  0.0 nv_open_q\n   2249       2 root     122  0.0 nvidia-modeset/kthread_q\n   2250       2 root      35  0.0 nvidia-modeset/deferred_close_kthread_q\n   2251       2 root      46  0.0 irq/435-nvidia\n   2252       2 root      47  0.0 irq/436-nvidia\n   2253       2 root      48  0.0 irq/437-nvidia\n   2254       2 root      49  0.0 irq/438-nvidia\n   2255       2 root      50  0.0 irq/439-nvidia\n   2256       2 root      51  0.0 irq/440-nvidia\n   2257       2 root     119  0.0 nvidia\n   2258       2 root     119  0.0 nv_queue\n   2263       2 root      52  0.0 irq/441-nvidia\n   2264       2 root      53  0.0 irq/442-nvidia\n   2265       2 root      54  0.0 irq/443-nvidia\n   2266       2 root      55  0.0 irq/444-nvidia\n   2267       2 root      56  0.0 irq/445-nvidia\n   2268       2 root      57  0.0 irq/446-nvidia\n   2269       2 root      37  0.0 nvidia\n   2270       2 root      39  0.0 nv_queue\n   2271       2 root      58  0.0 irq/447-nvidia\n   2272       2 root      59  0.0 irq/448-nvidia\n   2274       2 root      61  0.0 irq/450-nvidia\n   2275       2 root      62  0.0 irq/451-nvidia\n   2276       2 root      63  0.0 irq/452-nvidia\n   2277       2 root      35  0.0 nvidia\n   2278       2 root      36  0.0 nv_queue\n   2279       2 root      64  0.0 irq/453-nvidia\n   2280       2 root      65  0.0 irq/454-nvidia\n   2281       2 root      66  0.0 irq/455-nvidia\n   2282       2 root      67  0.0 irq/456-nvidia\n   2283       2 root      68  0.0 irq/457-nvidia\n   2284       2 root      69  0.0 irq/458-nvidia\n   2285       2 root      36  0.0 nvidia\n   2286       2 root      37  0.0 nv_queue\n   5712       2 root     115  0.0 kworker/R-tls-s\n  29453       2 root     116  0.0 UVM deferred release queue\n  48519   48518 dvi41342   3  0.0 (sd-pam)\n 141919  141918 mdemir     2  0.0 (sd-pam)\n 248922  248921 dxp41838  94  0.0 (sd-pam)\n 362102  362101 alex      10  0.0 (sd-pam)\n1189285       2 root      92  0.0 kworker/R-ceph-\n1189286       2 root      92  0.0 kworker/R-ceph-\n1685842 1685840 ryz18496 111  0.0 (sd-pam)\n2146156       1 alex       8  0.0 bash\n2146159 2146156 alex      10  0.0 tail\n2146160 2146156 alex      10  0.0 grep\n2152500       1 alex       8  0.0 bash\n2152503 2152500 alex      10  0.0 tail\n2152504 2152500 alex      10  0.0 grep\n2157637       1 alex      10  0.0 bash\n2157641 2157637 alex      79  0.0 grep\n2168524       1 alex      19  0.0 bash\n2168528 2168524 alex      37  0.0 grep\n2314302       1 alex       0  0.0 runsvc.sh\n2327604       1 alex      10  0.0 bash\n2327609 2327604 alex      62  0.0 head\n2869996       2 root      33  0.0 kworker/u282:2-events_unbound\n2919747       2 root      77  0.0 psimon\n3061436       2 root      52  0.0 kworker/u301:1-events_unbound\n3078453       2 root      96  0.0 kworker/96:0-cgroup_free\n3129215       2 root      97  0.0 kworker/97:2\n3138964       2 root      95  0.0 kworker/95:1\n3139397       2 root      98  0.0 kworker/98:0\n3147646       2 root     101  0.0 kworker/101:1\n3147832       2 root     103  0.0 kworker/103:0\n3150467       2 root     110  0.0 kworker/110:0-cgroup_free\n3153932       2 root     116  0.0 kworker/116:2\n3155777       2 root     105  0.0 kworker/105:1\n3157198       2 root     102  0.0 kworker/102:1\n3159630       2 root     107  0.0 kworker/107:3-cgroup_free\n3178136       2 root     120  0.0 kworker/R-ext4-\n3186914       2 root     121  0.0 kworker/R-ext4-\n3209503       2 root     112  0.0 kworker/112:1\n3209892       2 root     118  0.0 kworker/118:1\n3233884       2 root      93  0.0 kworker/93:1-cgroup_free\n3237297       2 root      92  0.0 kworker/92:2-rcu_par_gp\n3284524       2 root     123  0.0 kworker/123:2-cgroup_free\n3287918       2 root      88  0.0 kworker/88:1\n3295351       2 root     117  0.0 kworker/117:0\n3305986       2 root      77  0.0 kworker/77:0-cgroup_free\n3312347       2 root      86  0.0 kworker/86:2\n3320155       2 root     108  0.0 kworker/108:1\n3323426       2 root      81  0.0 kworker/81:1\n3328673       2 root      76  0.0 kworker/76:0-cgroup_free\n3329679       2 root      72  0.0 kworker/72:1\n3330707       2 root     115  0.0 kworker/115:1-cgroup_free\n3336949       2 root      66  0.0 kworker/66:2-cgroup_free\n3338410       2 root      68  0.0 kworker/68:2\n3339266       2 root      74  0.0 kworker/74:2\n3340341 3340340 xmn04182   1  0.0 (sd-pam)\n3340600       2 root      85  0.0 kworker/85:1\n3356522       2 root     106  0.0 kworker/106:2\n3356825       2 root     109  0.0 kworker/109:0\n3370258       2 root      75  0.0 kworker/75:0-cgroup_free\n3371916       2 root      90  0.0 kworker/90:2-events\n3400619       2 root      87  0.0 kworker/87:0-cgroup_free\n3408898       2 root     105  0.0 kworker/u354:0-writeback\n3410848       2 root     120  0.0 kworker/120:0\n3419711       2 root      82  0.0 kworker/u331:1-flush-8:0\n3419868       2 root      82  0.0 kworker/82:2-cgroup_free\n3429734       2 root     111  0.0 kworker/111:1\n3447190       2 root      70  0.0 kworker/70:1-cgroup_free\n3477194       2 root      80  0.0 kworker/80:2-cgroup_free\n3478178       2 root     122  0.0 kworker/122:2-cgroup_free\n3582255       2 root      54  0.0 kworker/u303:3-flush-8:0\n3584925       2 root     121  0.0 kworker/121:1\n3585919       2 root      57  0.0 kworker/57:2\n3591195       2 root      35  0.0 kworker/u284:0\n3611031       2 root      31  0.0 kworker/u280:2-events_unbound\n3615193       2 root      83  0.0 kworker/83:3\n3616067       2 root      31  0.0 kworker/31:0-cgroup_free\n3621616       2 root      13  0.0 kworker/u310:0-events_power_efficient\n3621619       2 root      52  0.0 kworker/52:2\n3649176       2 root      42  0.0 kworker/u291:1-flush-8:0\n3660066       2 root      63  0.0 kworker/u361:1-writeback\n3701843       2 root      41  0.0 kworker/41:1-rcu_par_gp\n3706451       2 root      50  0.0 kworker/50:2\n3723639       2 root      63  0.0 kworker/63:0-cgroup_free\n3727234       2 root      44  0.0 kworker/u299:1\n3732261       2 root      38  0.0 kworker/38:1-rcu_par_gp\n3733502       2 root     112  0.0 kworker/u361:0-flush-8:0\n3735845       2 root      94  0.0 kworker/94:0-cgroup_free\n3740284       2 root     114  0.0 kworker/114:1\n3745066       2 root     117  0.0 kworker/u366:2-writeback\n3749480       2 root      20  0.0 kworker/u269:2-events_unbound\n3769285       2 root      40  0.0 kworker/40:2-cgroup_free\n3769499       2 root      47  0.0 kworker/u296:2-flush-8:0\n3770432       2 root      47  0.0 kworker/47:3-cgroup_free\n3780066       2 root      55  0.0 kworker/u304:0-events_unbound\n3780827       2 root      55  0.0 kworker/55:2-rcu_par_gp\n3780836       2 root      89  0.0 kworker/89:1-cgroup_free\n3782713       2 root     114  0.0 kworker/u363:1-events_unbound\n3786286       2 root      87  0.0 kworker/u336:2-iou_exit\n3786439       2 root      54  0.0 kworker/u303:1-writeback\n3790014       2 root      92  0.0 kworker/u341:0-flush-8:0\n3794893       2 root      34  0.0 kworker/u283:1\n3798337       2 root      94  0.0 kworker/R-ceph-\n3798338       2 root      96  0.0 kworker/R-ceph-\n3811567       2 root     111  0.0 kworker/u360:2-flush-8:0\n3821536       2 root      98  0.0 kworker/u347:0-events_unbound\n3829149       2 root      23  0.0 kworker/23:1-rcu_par_gp\n3846750       2 root      16  0.0 kworker/u265:2-events_unbound\n3848832       2 root      34  0.0 kworker/34:1\n3854937       2 root     121  0.0 kworker/u370:2-flush-8:0\n3856130       2 root      32  0.0 kworker/32:1-cgwb_release\n3856624       2 root      43  0.0 kworker/u292:2-events_unbound\n3856647       2 root      35  0.0 kworker/35:2-rcu_par_gp\n3856698       2 root      69  0.0 kworker/69:0-cgroup_free\n3863279       2 root      11  0.0 kworker/u260:2-writeback\n3867383       2 root      36  0.0 kworker/36:0\n3867408       2 root      37  0.0 kworker/37:1-events\n3867793       2 root      90  0.0 kworker/u339:0-flush-8:0\n3869210       2 root     113  0.0 kworker/113:2-cgroup_free\n3869698       2 root     113  0.0 kworker/u362:1-events_unbound\n3872850       2 root      42  0.0 kworker/42:3\n3879337       2 root      60  0.0 kworker/60:1\n3885192       2 root      73  0.0 kworker/73:0\n3886765       2 root      78  0.0 kworker/78:2-cgroup_free\n3888625       2 root      63  0.0 kworker/u312:1-flush-8:0\n3890135       2 root      48  0.0 kworker/u297:2-writeback\n3890136       2 root      48  0.0 kworker/48:3-events\n3890629       1 dvi41342 119  0.0 sh\n3892875       2 root       8  0.0 kworker/u257:1-writeback\n3894401       2 root      46  0.0 kworker/46:2-rcu_par_gp\n3894415       2 root      45  0.0 kworker/45:2\n3894549       2 root      24  0.0 kworker/24:2\n3894909       2 root      25  0.0 kworker/25:0\n3896932       2 root       6  0.0 kworker/6:2-rcu_par_gp\n3902133       2 root      23  0.0 kworker/u272:1-events_unbound\n3902134       2 root      23  0.0 kworker/u272:2-events_power_efficient\n3903473       2 root       9  0.0 kworker/u258:1-writeback\n3903514       2 root      95  0.0 kworker/u344:0-flush-8:0\n3903654       2 root      67  0.0 kworker/u316:0-writeback\n3907306       2 root      40  0.0 kworker/u289:2-writeback\n3914721       2 root      10  0.0 kworker/10:0-rcu_par_gp\n3919130       2 root      23  0.0 kworker/u301:0-events_power_efficient\n3921998       2 root      83  0.0 kworker/u332:2\n3923182       2 root      53  0.0 kworker/u270:0-flush-8:0\n3923446       2 root       7  0.0 kworker/7:2\n3925047       2 root      22  0.0 kworker/u271:0-flush-8:16\n3926416       2 root      87  0.0 kworker/u336:1\n3927773       2 root     116  0.0 kworker/u365:2-flush-8:0\n3928009       2 root       6  0.0 kworker/u255:2-events_power_efficient\n3928033       2 root      86  0.0 kworker/u335:3-flush-8:32\n3928242       2 root      11  0.0 kworker/11:1\n3928858       2 root      97  0.0 kworker/u346:1-writeback\n3930629       2 root     110  0.0 kworker/u359:1-flush-8:0\n3932049       2 root     109  0.0 kworker/u358:0\n3933595       2 root      17  0.0 kworker/u266:1-events_power_efficient\n3933838       2 root      13  0.0 kworker/13:0-cgroup_free\n3934583       2 root      18  0.0 kworker/u267:2-flush-8:0\n3948873       2 root     100  0.0 kworker/u318:0-flush-8:0\n3948927       2 root      17  0.0 kworker/u266:0-events_unbound\n3953240       2 root      10  0.0 kworker/u259:1-events_unbound\n3953279       2 root      22  0.0 kworker/22:1\n3953280       2 root      23  0.0 kworker/u272:3-events_unbound\n3959172       2 root      19  0.0 kworker/u268:0\n3959274       2 root      19  0.0 kworker/19:0\n3965459       2 root      79  0.0 kworker/79:0-cgroup_free\n3965616       2 root      79  0.0 kworker/u328:1-events_unbound\n3967105       2 root      82  0.0 kworker/u331:0\n3968148       2 root      21  0.0 kworker/u270:2-flush-8:0\n3972839       2 root      91  0.0 kworker/91:1\n3978469       2 root      15  0.0 kworker/u264:0\n3980286       2 root      16  0.0 kworker/16:0-rcu_par_gp\n3981226       2 root      56  0.0 kworker/56:3-events\n3981351       2 root      61  0.0 kworker/u286:3-flush-8:0\n3983171       2 root      12  0.0 vidmem lazy free\n3983172       2 root      15  0.0 UVM GPU1 BH\n3983173       2 root      16  0.0 UVM GPU1 KC\n3983174       2 root      13  0.0 vidmem lazy free\n3983175       2 root      17  0.0 UVM GPU2 BH\n3983176       2 root      18  0.0 UVM GPU2 KC\n3983177       2 root      19  0.0 vidmem lazy free\n3983178       2 root      20  0.0 UVM GPU3 BH\n3983179       2 root      21  0.0 UVM GPU3 KC\n3983180       2 root      14  0.0 vidmem lazy free\n3983181       2 root      22  0.0 UVM GPU4 BH\n3983182       2 root      23  0.0 UVM GPU4 KC\n3985603       2 root      40  0.0 kworker/u289:0-events_unbound\n3986493       2 root       7  0.0 kworker/u256:2-loop0\n3986526       2 root      14  0.0 kworker/u263:2-events_unbound\n3986771       2 root     113  0.0 kworker/u362:0-events_unbound\n3986791       2 root      44  0.0 kworker/44:0-rcu_par_gp\n3992330       2 root      69  0.0 kworker/u318:1-writeback\n3993174       2 root      54  0.0 kworker/54:1\n3993828       2 root      15  0.0 kworker/u276:2-events_unbound\n3993831       2 root      28  0.0 kworker/28:2\n3998711       2 root      25  0.0 kworker/u274:0-events_unbound\n3998713       2 root     114  0.0 kworker/u363:0\n3998715       2 root      26  0.0 kworker/26:2\n3998940       2 root      15  0.0 kworker/15:1\n4001829       2 root      30  0.0 kworker/u279:2-events_power_efficient\n4008512       2 root       5  0.0 kworker/5:1\n4008535       2 root      59  0.0 kworker/59:0-rcu_par_gp\n4010254       2 root      85  0.0 kworker/u334:3-flush-8:0\n4011878       2 root       3  0.0 kworker/u252:0-writeback\n4012007       2 root     104  0.0 kworker/u353:2-events_unbound\n4012010       2 root     104  0.0 kworker/104:3\n4014456       2 root      14  0.0 kworker/14:1-events\n4017872       2 root      84  0.0 kworker/84:0\n4018635       2 root      59  0.0 kworker/u308:2\n4018638       2 root       8  0.0 kworker/8:1\n4019091       2 root     100  0.0 kworker/100:3-events\n4019092       2 root     100  0.0 kworker/u349:1-events_unbound\n4019497       2 root      99  0.0 kworker/99:3-events\n4019505       2 root      71  0.0 kworker/u320:0-events_unbound\n4019567       2 root       6  0.0 kworker/u255:1-events_unbound\n4022527       2 root      18  0.0 kworker/u267:0\n4022627       2 root      53  0.0 kworker/u302:3-flush-8:32\n4022641       2 root      29  0.0 kworker/29:2-rcu_par_gp\n4022645       2 root      62  0.0 kworker/62:0-cgroup_free\n4023310       2 root      17  0.0 kworker/17:1\n4023320       2 root      64  0.0 kworker/u313:1-events_unbound\n4023589       2 root      29  0.0 kworker/u278:0-events_unbound\n4023590       2 root     123  0.0 kworker/u372:1-events_unbound\n4023593       2 root      14  0.0 kworker/14:0\n4023615       2 root      61  0.0 kworker/61:0-mm_percpu_wq\n4023676       2 root       4  0.0 kworker/4:1-rcu_par_gp\n4024073       2 root      30  0.0 kworker/u279:0-events_unbound\n4024078       2 root      64  0.0 kworker/64:1-cgroup_free\n4024801       2 root      80  0.0 kworker/u329:1-events_unbound\n4025918       2 root      67  0.0 kworker/u316:1-events_unbound\n4025920       2 root      67  0.0 kworker/67:0-cgroup_free\n4026090       2 root      80  0.0 kworker/u329:3-events_power_efficient\n4026719       2 root      65  0.0 kworker/65:1-cgroup_free\n4027510       2 root      67  0.0 kworker/67:2\n4027511       2 root      67  0.0 kworker/67:3-cgroup_free\n4027873 2602813 alex     100  0.0 sleep\n4027882 2572276 alex      88  0.0 sleep\n4027886 2288309 alex      35  0.0 sleep\n4027887 3608156 alex      65  0.0 sleep\n4027892 2519530 alex     122  0.0 sleep\n4028052 4027890 alex      10  0.0 sshd\n4028091 4117014 alex      76  0.0 sleep\n4028099 3608358 alex      65  0.0 sleep\n4028122 2291708 alex     117  0.0 sleep\n",
+    "stderr": ""
+  },
+  "memory": "MemTotal:       454003720 kB\nMemFree:         4610016 kB\nMemAvailable:   437270048 kB\nBuffers:         2486480 kB\nCached:         416171380 kB\nSwapCached:            0 kB\nActive:         78051524 kB\nInactive:       343984612 kB\nActive(anon):    4514152 kB\nInactive(anon):   140824 kB\nActive(file):   73537372 kB\nInactive(file): 343843788 kB\nUnevictable:       30656 kB\nMlocked:           27584 kB\nSwapTotal:             0 kB\nSwapFree:              0 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:               344 kB\nWriteback:             0 kB\nAnonPages:       3409344 kB\nMapped:          3945860 kB\nShmem:           1268180 kB\nKReclaimable:   21240296 kB\nSlab:           24374600 kB\nSReclaimable:   21240296 kB\nSUnreclaim:      3134304 kB\nKernelStack:       59536 kB\nPageTables:        50256 kB\nSecPageTables:         0 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    227001860 kB\nCommitted_AS:   12859184 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:      526956 kB\nVmallocChunk:          0 kB\nPercpu:          1166848 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:         0 kB\nFilePmdMapped:         0 kB\nUnaccepted:            0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:    101613408 kB\nDirectMap2M:    347176960 kB\nDirectMap1G:    14680064 kB\n",
+  "disk_free_bytes": 634834894848,
+  "locks": {
+    "/tmp/motioncorr-cuda-boundary-cpu80-87.lock": {
+      "inode": 8086,
+      "device": 2049,
+      "matching_proc_lock_lines": []
+    },
+    "/tmp/motioncorr-gpu2-correctness.lock": {
+      "inode": 1918,
+      "device": 2049,
+      "matching_proc_lock_lines": []
+    },
+    "/tmp/motioncorr-dcnative-gpu2-cpu80-87.lock": {
+      "inode": 4531,
+      "device": 2049,
+      "matching_proc_lock_lines": []
+    }
+  },
+  "cpu_busy_fraction": {
+    "cpu80": 0.0,
+    "cpu81": 0.0,
+    "cpu82": 0.0,
+    "cpu83": 0.0,
+    "cpu84": 0.0,
+    "cpu85": 0.0,
+    "cpu86": 0.0,
+    "cpu87": 0.0
+  },
+  "terminal_utc": "2026-10-27T01:05:25Z"
+}

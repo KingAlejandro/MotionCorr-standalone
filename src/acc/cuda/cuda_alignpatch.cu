@@ -2,6 +2,7 @@
 #ifdef _CUDA_ENABLED
 
 #include "src/acc/cuda/cuda_alignpatch.h"
+#include "src/experiment_ccf_dc.h" // EXPERIMENT ONLY; hooks compiled only with MC_EXPERIMENT_CCF_DC
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/error.h"
 #include "src/acc/cuda/cuda_scoped_resources.h"
@@ -40,6 +41,14 @@ namespace {
 const int ALIGN_MAX_BUFFERS = 8;
 const int ALIGN_MAX_EVENTS  = 8;
 } // namespace
+
+#ifdef MC_EXPERIMENT_CCF_DC
+// EXPERIMENT ONLY: zero each frame's CCF scratch DC bin; never resident spectra.
+__global__ void experimentZeroCcfDcKernel(float2 *d_Fccs, size_t stride, int n_frames) {
+    const int f = blockIdx.x * blockDim.x + threadIdx.x;
+    if (f < n_frames) d_Fccs[(size_t)f * stride] = make_float2(0.f, 0.f);
+}
+#endif
 
 static int findGoodSizeCuda(int request) {
     const int good_numbers[] = {192, 216, 256, 288, 324,
@@ -336,7 +345,13 @@ struct PatchAlignmentWorkspace::Impl {
     struct Key {
         int device, pnx, pny, n_frames, ccf_nx, ccf_ny, search_range;
         RFLOAT scaled_B, downsample;
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+        bool is_global; // the weight differs by stage in this test-only build
+#endif
         bool equals(const Key &other) const {
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+            if (is_global != other.is_global) return false;
+#endif
             return device == other.device && pnx == other.pnx && pny == other.pny &&
                 n_frames == other.n_frames && ccf_nx == other.ccf_nx &&
                 ccf_ny == other.ccf_ny && search_range == other.search_range &&
@@ -488,7 +503,11 @@ bool cudaAlignPatchDeviceWithWorkspace(
     const size_t sz_shifts  = (size_t)n_frames * sizeof(float);
 
     const PatchAlignmentWorkspace::Impl::Key requested = {device_id, pnx, pny, n_frames, ccf_nx,
-        ccf_ny, search_range, scaled_B, ccf_downsample};
+        ccf_ny, search_range, scaled_B, ccf_downsample
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+        , is_global
+#endif
+        };
     const bool setup_required = !w.valid || !w.key.equals(requested);
     if (setup_required) {
         if (!w.release()) REPORT_ERROR("CUDA patch workspace replacement cleanup failed");
@@ -566,8 +585,14 @@ bool cudaAlignPatchDeviceWithWorkspace(
         }
         dim3 blockWeights(16, 16);
         dim3 gridWeights((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+        // TEST ONLY (compile-time): x frequency over the full width pnx for the global stage.
+        const int weight_x_norm = is_global ? pnx : nfx;
+#else
+        const int weight_x_norm = nfx;
+#endif
         computeWeightsKernel<<<gridWeights, blockWeights>>>(w.d_weight,
-            ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, (float)scaled_B);
+            ccf_nfx, ccf_nfy, ccf_nfy_half, weight_x_norm, nfy, (float)scaled_B);
         ALIGN_LAUNCH(cudaGetLastError());
     }
     // Borrow aliases; only the workspace's scoped owners can release them.
@@ -625,6 +650,12 @@ bool cudaAlignPatchDeviceWithWorkspace(
 
         // 3. Batched cuFFT C2R
         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_cufft));
+#ifdef MC_EXPERIMENT_CCF_DC
+        if (experimentCcfDcZero(is_global, EXP_DC_CUDA_SINGLE, n_frames)) {
+            experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);
+            ALIGN_LAUNCH(cudaGetLastError());
+        }
+#endif
         ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
         ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
         if (timed) {
@@ -989,6 +1020,12 @@ void cudaAlignPatchBatchDevice(
             ALIGN_LAUNCH(cudaGetLastError());
             computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, w.d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, ccf_nfx, ccf_nfy, n_frames);
             ALIGN_LAUNCH(cudaGetLastError());
+#ifdef MC_EXPERIMENT_CCF_DC
+            if (experimentCcfDcZero(false, EXP_DC_CUDA_BATCHED, n_frames)) {
+                experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);
+                ALIGN_LAUNCH(cudaGetLastError());
+            }
+#endif
             ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
             ALIGN_CUFFT(cufftExecC2R(w.plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
             findPeakAndInterpolateKernel<<<n_frames, 256>>>(

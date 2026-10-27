@@ -1,0 +1,51 @@
+{
+  "schema": "stagec-release/1",
+  "driver_sha256": "b45481459d414f56d37872d3c27c2b4b6854d16f8132dfdd52a58019187adf3d",
+  "pins_sha256": "c6f6e154161e92fbb6de1b60ffc6a91b2dd3f943c0d6d14a8486f5cd633352f3",
+  "ledger_sha256": "16b545de70bb4a9f50f2ddd2628f972f85161c5d57b061bf5c5d2e1fce5f276e",
+  "source_commit": "96e7e7be0f08469da51c67a1ab251ae4e97cdfc3",
+  "outdir": "/home/alex/mc-dcnative-stagec-20261027-r1/runs",
+  "test_fixture": false,
+  "authorized_by": "parent",
+  "run_id": "native-dc-stagec-20261027-r1",
+  "review_report_sha256": "83c04d6c611bff82c8b47659f82401d6e2ea5edbce7012a2e24ed44016312dc0",
+  "release_index_sha256": "cde67b571bcb5c244913085f48a69016b5e20157aeb2c8b079265f035e95889d",
+  "fresh_resource_grant": {
+    "host": "4GPUs / 4-gpu-vm",
+    "cpu_affinity": [
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87
+    ],
+    "gpu_uuid": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+    "foreign_context_pid": 3983855,
+    "mode": "shared correctness only; GPU3 untouched; no timing/exclusivity claim",
+    "scratch_cap_bytes": 21474836480,
+    "initial_locks": {
+      "/tmp/motioncorr-cuda-boundary-cpu80-87.lock": {
+        "inode": 8086,
+        "device": 2049,
+        "matching_proc_lock_lines": []
+      },
+      "/tmp/motioncorr-gpu2-correctness.lock": {
+        "inode": 1918,
+        "device": 2049,
+        "matching_proc_lock_lines": []
+      },
+      "/tmp/motioncorr-dcnative-gpu2-cpu80-87.lock": {
+        "inode": 4531,
+        "device": 2049,
+        "matching_proc_lock_lines": []
+      }
+    },
+    "initial_gpu_utilization_percent": 0,
+    "per_job_guard_required": true
+  },
+  "native_producers_max": 160,
+  "M_jobs_authorized": 0
+}

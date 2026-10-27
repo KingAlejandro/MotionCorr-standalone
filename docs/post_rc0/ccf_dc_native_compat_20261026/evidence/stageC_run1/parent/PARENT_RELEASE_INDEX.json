@@ -1,0 +1,90 @@
+{
+  "schema": "stagec-parent-release-index/1",
+  "created_utc": "2026-10-27T01:14:38.661028+00:00",
+  "tooling_head": "047aa7a51381ca074dcf4c468581108ce551c3ed",
+  "compiled_source": {
+    "archive_sha256": "313f671f4af90e227754ec17c6e8a9cae70a7ea5aaca713de62aa1d297b8ea36",
+    "commit": "96e7e7be0f08469da51c67a1ab251ae4e97cdfc3",
+    "staged_tree": "/home/alex/mc-dcnative-ab-20261026/src96e"
+  },
+  "files": {
+    "driver": {
+      "path": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-9c391c37/tools/ccf_dc_stagec_driver.py",
+      "sha256": "b45481459d414f56d37872d3c27c2b4b6854d16f8132dfdd52a58019187adf3d"
+    },
+    "pins": {
+      "path": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-9c391c37/docs/post_rc0/ccf_dc_native_compat_20261026/evidence/stageC/STAGEC_PINS.json",
+      "sha256": "c6f6e154161e92fbb6de1b60ffc6a91b2dd3f943c0d6d14a8486f5cd633352f3"
+    },
+    "delta_review": {
+      "path": "/tmp/mc-native-dc-stagec-opus-delta-review-20261027-r2/REPORT.md",
+      "sha256": "83c04d6c611bff82c8b47659f82401d6e2ea5edbce7012a2e24ed44016312dc0"
+    },
+    "initial_review": {
+      "path": "/tmp/mc-native-dc-stagec-opus-review-20261027-r1/REPORT.md",
+      "sha256": "577c14ca59665372f88d33b0f76a04c96a9659c986097b4717b85ccd77a7fcbf"
+    },
+    "parent_readonly_preflight": {
+      "path": "/tmp/mc-native-dc-parent-preflight-20261027-r2/stdout.json",
+      "sha256": "c42face406b551b3fd6ea06f16c7ae7061bfef4576d5629a21471981c33360bb",
+      "utc": "2026-10-27T01:13:54Z"
+    }
+  },
+  "fresh_resource_grant": {
+    "host": "4GPUs / 4-gpu-vm",
+    "cpu_affinity": [
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87
+    ],
+    "gpu_uuid": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+    "foreign_context_pid": 3983855,
+    "mode": "shared correctness only; GPU3 untouched; no timing/exclusivity claim",
+    "scratch_cap_bytes": 21474836480,
+    "initial_locks": {
+      "/tmp/motioncorr-cuda-boundary-cpu80-87.lock": {
+        "inode": 8086,
+        "device": 2049,
+        "matching_proc_lock_lines": []
+      },
+      "/tmp/motioncorr-gpu2-correctness.lock": {
+        "inode": 1918,
+        "device": 2049,
+        "matching_proc_lock_lines": []
+      },
+      "/tmp/motioncorr-dcnative-gpu2-cpu80-87.lock": {
+        "inode": 4531,
+        "device": 2049,
+        "matching_proc_lock_lines": []
+      }
+    },
+    "initial_gpu_utilization_percent": 0,
+    "per_job_guard_required": true
+  },
+  "counts": {
+    "producers_max": 160,
+    "pairs": 96,
+    "repro": 16,
+    "M_jobs_held": 16
+  },
+  "conditions": [
+    "Single run/output directory only. STOP is terminal; no retry, rerun, overwrite or continuation without a new parent disposition.",
+    "Recheck GPU2 at 0% with only declared foreign context immediately before driver; acquire all three pinned lock inodes nonblocking and retain through seal.",
+    "Stage only reviewed driver/guard/pins at exact hashes. Preserve replaced task-owned preparation bytes additively; never edit compiled or scorer files.",
+    "Verify source/archive/binaries/modules/fixtures/loader pins before execution; driver checks per job.",
+    "Verify final release_copy.json and final_status release hash equal this parent release; final ledger/status authoritative.",
+    "Re-hash all 59 input/truth files after final grading and preserve mismatch as invalid evidence, never a score pass."
+  ],
+  "limitations": [
+    "Historical Stage B dynamic loader resolution was not retained; current full/scrub resolutions match and every resolved library plus ELF interpreter was independently hashed.",
+    "ldd does not resolve runtime dlopen libcuda.so.1; no claim that ldd identifies runtime CUDA driver loading.",
+    "Truth is rehashed before each producer, not during or between exit and grade; final rehash cannot exclude transient edits.",
+    "Known SIGHUP/SIGKILL/SIGTERM-sealing and guard-timeout limits remain. Launch non-tty/setsid; do not change semantics mid-run.",
+    "GPU OBSERVED requires actual UUID readback before device attribution. Process samples do not prove all short-lived threads."
+  ]
+}

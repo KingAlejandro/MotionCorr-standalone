@@ -38,6 +38,7 @@
 static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
+#include "src/experiment_ccf_dc.h" // default-off native CCF DC conditioning request check; hooks only with MC_EXPERIMENT_CCF_DC
 #include "src/cpu_dose_symmetry_mode.h"
 #include "src/native_movie_staging.h"
 #include "src/defect_neighbours.h"
@@ -251,6 +252,9 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 		REPORT_ERROR("--ingest nvcomp needs a build configured with USE_NVCOMP=ON; this one is not.");
 #endif
 #endif
+	// Refuse an unsupported conditioning/tap request here, before any device query.
+	experimentCcfDcCheckRequest(do_own);
+
 	// Initialise verb for non-parallel execution
 	verb = 1;
 
@@ -596,6 +600,10 @@ void MotioncorrRunner::initialise()
 			pre_exposure_ori_micrographs.push_back(pre_exposure_given_all[imic]);
 		}
 	}
+
+#ifdef MC_EXPERIMENT_CCF_DC
+	experimentCcfDcPrepareTap(fn_micrographs.size());
+#endif
 
 	// Make all output directories if necessary
 	FileName prevdir="";
@@ -4088,6 +4096,23 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 
 skip_fitting:
+#ifdef MC_EXPERIMENT_CCF_DC // verbatim #269 capture_runtime_model.patch body; the file was created by experimentCcfDcPrepareTap()
+	// Observation only: runtime coefficients before lossy STAR serialization.
+	if (const char *path = std::getenv("MC_DIAG_MODEL_OUT")) {
+		FILE *f = std::fopen(path, "w");
+		if (!f) REPORT_ERROR("Cannot open MC_DIAG_MODEL_OUT");
+		std::fprintf(f, "{\"global\":[");
+		for (size_t i = 0; i < xshifts.size(); ++i)
+			std::fprintf(f, "%s[%.17g,%.17g]", i ? "," : "", double(xshifts[i] * prescaling), double(yshifts[i] * prescaling));
+		const auto *observed = dynamic_cast<const ThirdOrderPolynomialModel *>(mic.model);
+		std::fprintf(f, "],\"coeff_x\":[");
+		for (int i = 0; i < 18; ++i) std::fprintf(f, "%s%.17g", i ? "," : "", observed ? double(observed->coeffX(i)) : 0.0);
+		std::fprintf(f, "],\"coeff_y\":[");
+		for (int i = 0; i < 18; ++i) std::fprintf(f, "%s%.17g", i ? "," : "", observed ? double(observed->coeffY(i)) : 0.0);
+		std::fprintf(f, "],\"local_enabled\":%s}\n", observed ? "true" : "false");
+		if (std::fclose(f)) REPORT_ERROR("Cannot close MC_DIAG_MODEL_OUT");
+	}
+#endif
 	MC_STAGE("release alignment");
 #ifdef _CUDA_ENABLED
 	// Local alignment scratch belongs to this movie, but reconstruction no longer
@@ -4825,6 +4850,10 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 
 	// Initialize B factor weight
 	weight.reshape(Fref);
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+	// TEST ONLY (compile-time): x frequency over the full width pnx for the global stage (W5 'iso').
+	const RFLOAT weight_x_norm = is_global ? (RFLOAT)pnx : (RFLOAT)nfx;
+#endif
 	RCTIC(TIMING_PREP_WEIGHT);
 	#pragma omp parallel for num_threads(n_threads)
 	for (int y = 0; y < ccf_nfy; y++) {
@@ -4832,7 +4861,11 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		RFLOAT ly2 = ly * (RFLOAT)ly / (nfy * (RFLOAT)nfy);
 
 		for (int x = 0; x < ccf_nfx; x++) {
+#ifdef MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT
+			RFLOAT dist2 = ly2 + x * (RFLOAT)x / (weight_x_norm * weight_x_norm);
+#else
 			RFLOAT dist2 = ly2 + x * (RFLOAT)x / (nfx * (RFLOAT)nfx);
+#endif
 			DIRECT_A2D_ELEM(weight, y, x) = exp(- 2 * dist2 * scaled_B); // 2 for Fref and Fframe
 		}
 	}
@@ -4866,6 +4899,9 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 				}
 			}
 			RCTOC(TIMING_CCF_CALC);
+#ifdef MC_EXPERIMENT_CCF_DC
+			if (experimentCcfDcZero(is_global, EXP_DC_CPU, 1)) DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);
+#endif
 
 			RCTIC(TIMING_CCF_IFFT);
 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());

@@ -152,6 +152,25 @@ target_link_libraries(motioncorr_core PUBLIC
     PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
     motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)
 
+# EXPERIMENT ONLY: native CCF DC conditioning (CPU and CUDA), selected at run time by
+# MC_EXPERIMENT_CCF_DC_ARM (unset = none). Default OFF compiles none of the hooks, but
+# every build refuses a request for them rather than ignoring it.
+option(MC_EXPERIMENT_CCF_DC "Build the default-off native CCF DC conditioning experiment hooks" OFF)
+if(MC_EXPERIMENT_CCF_DC)
+    target_compile_definitions(motioncorr_core PUBLIC MC_EXPERIMENT_CCF_DC)
+endif()
+# TEST ONLY: compile-time isotropic global CCF weight (x frequency over pnx instead of nfx),
+# CPU and CUDA, solely to reproduce the retained W5 N controls. Not a product feature: there is
+# no run-time switch, the local stage is unchanged, and it needs the experiment option so every
+# binary can report its identity in the witness (test_only_isotropic_global_weight).
+option(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT "TEST ONLY: isotropic global CCF weight (retained N controls)" OFF)
+if(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+    if(NOT MC_EXPERIMENT_CCF_DC)
+        message(FATAL_ERROR "MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT requires -DMC_EXPERIMENT_CCF_DC=ON")
+    endif()
+    message(WARNING "TEST-ONLY BINARY: isotropic global CCF weight is compiled in. Not a product build.")
+    target_compile_definitions(motioncorr_core PUBLIC MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+endif()
 option(TIMING "Enable internal timing" OFF)
 if(TIMING)
     add_compile_definitions(TIMING)
@@ -251,6 +270,78 @@ if(BUILD_TESTING)
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
     add_test(NAME PatchRetryState COMMAND patch_retry_state)
+    # EXPERIMENT ONLY CCF DC stage oracle and restoring mutants.
+    # Each mutant replaces one unique line of a production translation unit in a
+    # copy linked ahead of motioncorr_core; the oracle must reject it (exit 1).
+    if(MC_EXPERIMENT_CCF_DC)
+        add_executable(experiment_ccf_dc_stage tests/experiment_ccf_dc_stage.cpp)
+        target_link_libraries(experiment_ccf_dc_stage PRIVATE motioncorr_core)
+        add_test(NAME ExperimentCcfDcStage COMMAND experiment_ccf_dc_stage)
+        set_tests_properties(ExperimentCcfDcStage PROPERTIES TIMEOUT 1800)
+        function(mc_experiment_dc_mutant mutant source from to)
+            set(_src "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
+            set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_src}")
+            file(READ "${_src}" _text)
+            string(FIND "${_text}" "${from}" _first)
+            string(FIND "${_text}" "${from}" _last REVERSE)
+            if(_first EQUAL -1 OR NOT _first EQUAL _last)
+                message(FATAL_ERROR "experiment mutant ${mutant}: target missing or not unique in ${source}")
+            endif()
+            string(REPLACE "${from}" "${to}" _text "${_text}")
+            get_filename_component(_name "${source}" NAME)
+            set(_copy "${CMAKE_CURRENT_BINARY_DIR}/experiment_mutants/${mutant}_${_name}")
+            file(WRITE "${_copy}" "${_text}")
+            add_executable(experiment_ccf_dc_stage_${mutant} tests/experiment_ccf_dc_stage.cpp "${_copy}")
+            get_target_property(_defs motioncorr_core COMPILE_DEFINITIONS)
+            get_target_property(_opts motioncorr_core COMPILE_OPTIONS)
+            target_compile_definitions(experiment_ccf_dc_stage_${mutant} PRIVATE ${_defs})
+            if(_opts)
+                target_compile_options(experiment_ccf_dc_stage_${mutant} PRIVATE ${_opts})
+            endif()
+            target_include_directories(experiment_ccf_dc_stage_${mutant} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda")
+            target_link_libraries(experiment_ccf_dc_stage_${mutant} PRIVATE motioncorr_core motioncorr_openmp)
+            add_test(NAME ExperimentCcfDcStageMutant_${mutant}
+                     COMMAND experiment_ccf_dc_stage_${mutant} --expect-failure)
+            set_tests_properties(ExperimentCcfDcStageMutant_${mutant} PROPERTIES TIMEOUT 1800)
+        endfunction()
+        mc_experiment_dc_mutant(cpu_restore src/motioncorr_runner.cpp
+            "DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);" "(void)0;")
+        mc_experiment_dc_mutant(cpu_wrong_bin src/motioncorr_runner.cpp
+            "DIRECT_A2D_ELEM(Fccs[tid], 0, 0) = fComplex(0.f, 0.f);"
+            "DIRECT_A2D_ELEM(Fccs[tid], 0, 1) = fComplex(0.f, 0.f);")
+        mc_experiment_dc_mutant(cpu_stage_swap src/motioncorr_runner.cpp
+            "experimentCcfDcZero(is_global, EXP_DC_CPU, 1)" "experimentCcfDcZero(!is_global, EXP_DC_CPU, 1)")
+        if(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+            mc_experiment_dc_mutant(cpu_iso_wrong_norm src/motioncorr_runner.cpp
+                "const RFLOAT weight_x_norm = is_global ? (RFLOAT)pnx : (RFLOAT)nfx;"
+                "const RFLOAT weight_x_norm = (RFLOAT)nfx;")
+            mc_experiment_dc_mutant(cpu_iso_leaks_local src/motioncorr_runner.cpp
+                "const RFLOAT weight_x_norm = is_global ? (RFLOAT)pnx : (RFLOAT)nfx;"
+                "const RFLOAT weight_x_norm = (RFLOAT)pnx;")
+        endif()
+        if(CUDA AND MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+            mc_experiment_dc_mutant(cuda_iso_wrong_norm src/acc/cuda/cuda_alignpatch.cu
+                "const int weight_x_norm = is_global ? pnx : nfx;" "const int weight_x_norm = nfx;")
+            mc_experiment_dc_mutant(cuda_iso_leaks_local src/acc/cuda/cuda_alignpatch.cu
+                "const int weight_x_norm = is_global ? pnx : nfx;" "const int weight_x_norm = pnx;")
+            mc_experiment_dc_mutant(cuda_iso_key_ignores_stage src/acc/cuda/cuda_alignpatch.cu
+                "if (is_global != other.is_global) return false;" "(void)0;")
+        endif()
+        if(CUDA)
+            mc_experiment_dc_mutant(cuda_single_restore src/acc/cuda/cuda_alignpatch.cu
+                "experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);\n            ALIGN_LAUNCH(cudaGetLastError());\n        }"
+                "(void)0;\n            ALIGN_LAUNCH(cudaGetLastError());\n        }")
+            mc_experiment_dc_mutant(cuda_batched_restore src/acc/cuda/cuda_alignpatch.cu
+                "experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);\n                ALIGN_LAUNCH"
+                "(void)0;\n                ALIGN_LAUNCH")
+            mc_experiment_dc_mutant(cuda_single_resident src/acc/cuda/cuda_alignpatch.cu
+                "experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>(d_Fccs, (size_t)ccf_nfy * ccf_nfx, n_frames);\n            ALIGN_LAUNCH(cudaGetLastError());\n        }"
+                "experimentZeroCcfDcKernel<<<(n_frames + 127) / 128, 128>>>((float2*)d_Fframes, (size_t)data_nfy * data_nfx, n_frames);\n            ALIGN_LAUNCH(cudaGetLastError());\n        }")
+            mc_experiment_dc_mutant(cuda_single_stage_swap src/acc/cuda/cuda_alignpatch.cu
+                "experimentCcfDcZero(is_global, EXP_DC_CUDA_SINGLE, n_frames)"
+                "experimentCcfDcZero(!is_global, EXP_DC_CUDA_SINGLE, n_frames)")
+        endif()
+    endif()
     # #257: device-free exact-rational controls, shared with the actual CUDA
     # kernel test. Host replays establish arithmetic only, not GPU execution.
     add_executable(peak_fit_arithmetic tests/peak_fit_arithmetic.cpp)
@@ -477,6 +568,64 @@ if(BUILD_TESTING)
         add_test(NAME HotPixelRngDeterminism
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_hotpixel_rng_determinism.py
                 --binary $<TARGET_FILE:motioncorr>)
+        # Request handling for the default-off CCF DC hooks: every build refuses a
+        # request it cannot honour; an experiment build also checks the witness.
+        set(_ccf_dc_request_args "")
+        if(MC_EXPERIMENT_CCF_DC)
+            list(APPEND _ccf_dc_request_args --experiment)
+        endif()
+        if(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+            list(APPEND _ccf_dc_request_args --iso)
+        endif()
+        add_test(NAME CcfDcRequest
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_ccf_dc_request.py
+                --binary $<TARGET_FILE:motioncorr> ${_ccf_dc_request_args})
+        # Negative controls: tell the test the wrong build kind. Each must be rejected by an
+        # assertion (not a usage error), otherwise CcfDcRequest cannot see the build kind.
+        function(mc_ccf_dc_request_wrong_kind name)
+            add_test(NAME ${name}
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_ccf_dc_request.py
+                    --binary $<TARGET_FILE:motioncorr> --expect-mismatch ${ARGN})
+        endfunction()
+        if(NOT MC_EXPERIMENT_CCF_DC)
+            mc_ccf_dc_request_wrong_kind(CcfDcRequestWrongKind_def_told_experiment --experiment)
+        elseif(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+            mc_ccf_dc_request_wrong_kind(CcfDcRequestWrongKind_iso_told_experiment --experiment)
+            mc_ccf_dc_request_wrong_kind(CcfDcRequestWrongKind_iso_told_default)
+        else()
+            mc_ccf_dc_request_wrong_kind(CcfDcRequestWrongKind_exp_told_default)
+            mc_ccf_dc_request_wrong_kind(CcfDcRequestWrongKind_exp_told_iso --experiment --iso)
+        endif()
+        # Tap -> dense field bridge and the N/K267 row grading: analytic and mutant controls (no producer),
+        # and, in an experiment build, the same grading on real tiny runs of that binary.
+        add_test(NAME CcfDcTapField
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_tap_field.py)
+        add_test(NAME CcfDcRowsPure
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_native_rows.py)
+        # Stage C driver, dry run only: fake producers, fake pins, hooked grader and guard; no real MotionCorr row.
+        add_test(NAME CcfDcStageCDriver
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_stagec_driver.py)
+        set_tests_properties(CcfDcStageCDriver PROPERTIES TIMEOUT 1500)
+        # Stage C guard fail-closed controls (fake command shims, /proc/stat fixtures) and fake-child lifecycle/sampling controls.
+        add_test(NAME CcfDcStageCGuard
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_stagec_guard.py)
+        set_tests_properties(CcfDcStageCGuard PROPERTIES TIMEOUT 300)
+        add_test(NAME CcfDcStageCLifecycle
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_stagec_lifecycle.py)
+        set_tests_properties(CcfDcStageCLifecycle PROPERTIES TIMEOUT 600)
+        # Opus driver review r1 findings (amendment 2): leases through sealing, frozen-pin fixture checks, guard bytes, release record.
+        add_test(NAME CcfDcStageCSeal
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_stagec_seal.py)
+        set_tests_properties(CcfDcStageCSeal PROPERTIES TIMEOUT 600)
+        if(MC_EXPERIMENT_CCF_DC)
+            set(_ccf_dc_rows_args "")
+            if(MC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT)
+                list(APPEND _ccf_dc_rows_args --iso)
+            endif()
+            add_test(NAME CcfDcRowsNative
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ccf_dc_native_rows.py
+                    --binary $<TARGET_FILE:motioncorr> ${_ccf_dc_rows_args})
+        endif()
         add_test(NAME RunnerExposure
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --case exposure)

@@ -1,0 +1,50 @@
+lease /tmp/motioncorr-dcnative-gpu2-cpu80-87.lock acquired 2026-10-26T17:02:28Z
+lease /tmp/motioncorr-cuda-boundary-cpu80-87.lock acquired 2026-10-26T17:02:28Z
+lease /tmp/motioncorr-gpu2-correctness.lock acquired 2026-10-26T17:02:28Z
+lease /tmp/motioncorr-build.lock acquired 2026-10-26T17:02:28Z
+== admission inside lease 2026-10-26T17:02:28Z
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+pid, gpu_uuid, used_gpu_memory [MiB]
+affinity: pid 3949447's current affinity list: 80-87
+8
+ 17:02:28 up 98 days,  6:29, 28 users,  load average: 1.51, 1.18, 1.12
+cmake version 3.28.3
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+3.12.3 2.5.3
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+src tar sha: 6ce0601bc39a8ad1a4c1da91ca59709134c4c0cde676be54c099853d6fa55a07  git: b75039a04f8d3937660066fcb391c79f6083e1f0
+== configure def [] 2026-10-26T17:02:29Z
+configure-def rc=0
+== build def 2026-10-26T17:02:34Z
+build-def rc=0
+== ctest def 2026-10-26T17:05:33Z
+ctest-def rc=8
+
+The following tests FAILED:
+	 49 - CcfDcRequest (Failed)
+Errors while running CTest
+== configure exp [-DMC_EXPERIMENT_CCF_DC=ON] 2026-10-26T17:06:04Z
+configure-exp rc=0
+== build exp 2026-10-26T17:06:09Z
+build-exp rc=0
+== ctest exp 2026-10-26T17:09:34Z
+ctest-exp rc=8
+
+The following tests FAILED:
+	 57 - CcfDcRequest (Failed)
+Errors while running CTest
+== configure iso [-DMC_EXPERIMENT_CCF_DC=ON -DMC_TEST_ONLY_ISOTROPIC_GLOBAL_WEIGHT=ON] 2026-10-26T17:10:42Z
+configure-iso rc=0
+== build iso 2026-10-26T17:10:48Z
+build-iso rc=0
+== ctest iso 2026-10-26T17:14:28Z
+ctest-iso rc=8
+
+The following tests FAILED:
+	 60 - SyntheticRegression (Failed)
+Errors while running CTest
+== done 2026-10-26T17:16:27Z

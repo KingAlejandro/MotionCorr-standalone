@@ -1,0 +1,23 @@
+.....F......
+======================================================================
+FAIL: test_real_driver_refuses_a_test_hook_environment_and_guard_gets_the_real_flag (__main__.RealEntryRejectsTestHooks.test_real_driver_refuses_a_test_hook_environment_and_guard_gets_the_real_flag)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-9c391c37/tools/test_ccf_dc_stagec_lifecycle.py", line 257, in test_real_driver_refuses_a_test_hook_environment_and_guard_gets_the_real_flag
+    self.assertEqual(seen["cmd"][:2], ["bash", pins["guard"]["path"]])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['bash', '-c'] != ['bash', '/Users/alex.konstantinov/.t3/worktrees/Mo[39 chars].sh']
+
+First differing element 1:
+'-c'
+'/Users/alex.konstantinov/.t3/worktrees/Mo[38 chars]d.sh'
+
+- ['bash', '-c']
++ ['bash',
++  '/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-9c391c37/tools/stageC_guard.sh']
+
+----------------------------------------------------------------------
+Ran 12 tests in 15.372s
+
+FAILED (failures=1)
+exit=1

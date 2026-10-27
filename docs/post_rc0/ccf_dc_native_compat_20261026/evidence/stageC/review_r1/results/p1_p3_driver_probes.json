@@ -1,0 +1,38 @@
+{
+ "P1": {
+  "status": "STOPPED",
+  "reason": "guard 1-J046-K-affine-cuda-exp-global-prod stopped the campaign (rc 1)",
+  "leases_free_while_manifest_written": {
+   "own": true,
+   "cpu": true,
+   "gpu2": true
+  }
+ },
+ "P2a_input_only": {
+  "status": "STOPPED",
+  "reason": "input affine.star changed before J045-K-affine-cuda-exp-none-prod",
+  "jobs_executed": 0,
+  "staged_inputs": []
+ },
+ "P2b_input_and_manifest": {
+  "status": "STOPPED",
+  "reason": "guard 1-J047-K-affine-cuda-exp-local-prod stopped the campaign (rc 1)",
+  "jobs_executed": 2,
+  "staged_inputs": [
+   "TAMPERED",
+   "TAMPERED"
+  ]
+ },
+ "P3": {
+  "status": "STOPPED",
+  "reason": "guard 1-J046-K-affine-cuda-exp-global-prod stopped the campaign (rc 7)",
+  "guard_logs": {
+   "0001-1-J045-K-affine-cuda-exp-none-prod.txt": "pinned-guard-ok",
+   "0002-1-J046-K-affine-cuda-exp-global-prod.txt": "UNPINNED-GUARD-RAN"
+  }
+ },
+ "P5_release_refs_in_driver": [
+  "self.release = verify_release(release_path, self.pins_path, Path(__file__).resolve(), self.pins, self.outdir)",
+  "self.release_locks()"
+ ]
+}

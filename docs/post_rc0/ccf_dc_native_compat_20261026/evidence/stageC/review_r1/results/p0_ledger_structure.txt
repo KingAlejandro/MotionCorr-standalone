@@ -1,0 +1,11 @@
+phases {1: 12, 2: 80, 3: 68} total 160
+phase1 [('affine', 'cuda', 'exp', 'none'), ('affine', 'cuda', 'exp', 'global'), ('affine', 'cuda', 'exp', 'local'), ('affine', 'cuda', 'exp', 'both'), ('pedestal', 'cuda', 'exp', 'none'), ('pedestal', 'cuda', 'exp', 'global'), ('pedestal', 'cuda', 'exp', 'local'), ('pedestal', 'cuda', 'exp', 'both'), ('noisy', 'cuda', 'exp', 'none'), ('noisy', 'cuda', 'exp', 'global'), ('noisy', 'cuda', 'exp', 'local'), ('noisy', 'cuda', 'exp', 'both')]
+phase2 backends Counter({'cpu': 80})
+phase3 backends Counter({'cuda': 68})
+pairs 96 case/tier mismatches 0 Counter({'C-BASE': 24, 'C-GOAL': 24, 'C-COMMON': 24, 'C-CPU': 24})
+repro 16 Counter({('N', 'cpu', 'none', 'exp', 'production'): 8, ('N', 'cpu', 'none', 'iso', 'isotropic'): 8})
+cpu N arm-none rows 16 == repro set: True
+K duplicate (case,backend,binary,arm) keys: []
+B3 triples complete: 16 of 16
+gates Counter({'SEL': 52, '': 51, 'B3': 45, 'B4': 9, 'B3+B4': 3})
+columns ['job_id', 'tier', 'case', 'config', 'backend', 'binary', 'arm', 'weight', 'stop', 'role', 'gates', 'cli', 'status']

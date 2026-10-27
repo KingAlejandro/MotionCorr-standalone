@@ -1,0 +1,85 @@
+Internal ctest changing into directory: /home/alex/mc-dcnative-20261026/build-def
+Test project /home/alex/mc-dcnative-20261026/build-def
+      Start   1: HermitianProjectionOracle
+ 1/34 Test   #1: HermitianProjectionOracle ................................   Passed    0.00 sec
+      Start   5: PatchRetryState
+ 2/34 Test   #5: PatchRetryState ..........................................   Passed    0.04 sec
+      Start   6: PeakFitArithmetic
+ 3/34 Test   #6: PeakFitArithmetic ........................................   Passed    0.00 sec
+      Start   7: PeakFitArithmeticMutant_float-denominator
+ 4/34 Test   #7: PeakFitArithmeticMutant_float-denominator ................   Passed    0.00 sec
+      Start   8: PeakFitArithmeticMutant_early-store
+ 5/34 Test   #8: PeakFitArithmeticMutant_early-store ......................   Passed    0.00 sec
+      Start   9: PeakFitArithmeticMutant_wrong-scale
+ 6/34 Test   #9: PeakFitArithmeticMutant_wrong-scale ......................   Passed    0.00 sec
+      Start  11: PatchRetryAdmission
+ 7/34 Test  #11: PatchRetryAdmission ......................................   Passed    0.00 sec
+      Start  12: RunnerInterpolateRecenter
+ 8/34 Test  #12: RunnerInterpolateRecenter ................................   Passed    0.01 sec
+      Start  47: SyntheticRegression
+ 9/34 Test  #47: SyntheticRegression ......................................   Passed    0.72 sec
+      Start  48: HotPixelRngDeterminism
+10/34 Test  #48: HotPixelRngDeterminism ...................................   Passed    0.57 sec
+      Start  49: CcfDcRequest
+11/34 Test  #49: CcfDcRequest .............................................***Failed    0.07 sec
+usage: test_ccf_dc_request.py [-h] --binary BINARY [--experiment] [--iso]
+test_ccf_dc_request.py: error: unrecognized arguments:  
+
+      Start  51: Runner_failure
+12/34 Test  #51: Runner_failure ...........................................   Passed    0.16 sec
+      Start  52: Runner_invalid
+13/34 Test  #52: Runner_invalid ...........................................   Passed    0.18 sec
+      Start  53: Runner_resume
+14/34 Test  #53: Runner_resume ............................................   Passed    2.73 sec
+      Start  54: Runner_tomography
+15/34 Test  #54: Runner_tomography ........................................   Passed    0.50 sec
+      Start  68: GlobalIfftElision
+16/34 Test  #68: GlobalIfftElision ........................................   Passed    1.76 sec
+      Start  71: RunnerModelParser
+17/34 Test  #71: RunnerModelParser ........................................   Passed    0.25 sec
+      Start  74: RunnerInterpolateShifts
+18/34 Test  #74: RunnerInterpolateShifts ..................................   Passed    0.53 sec
+      Start  92: RunnerInterpolateShiftsCuda
+19/34 Test  #92: RunnerInterpolateShiftsCuda ..............................   Passed    1.45 sec
+      Start 103: CudaHermitianInverse
+20/34 Test #103: CudaHermitianInverse .....................................   Passed    4.19 sec
+      Start 104: CudaHermitianInverseMutant_no_projection
+21/34 Test #104: CudaHermitianInverseMutant_no_projection .................   Passed    2.38 sec
+      Start 105: CudaHermitianInverseMutant_wrapper_no_projection
+22/34 Test #105: CudaHermitianInverseMutant_wrapper_no_projection .........   Passed    3.29 sec
+      Start 106: CudaHermitianInverseMutant_dose_no_projection
+23/34 Test #106: CudaHermitianInverseMutant_dose_no_projection ............   Passed    3.84 sec
+      Start 107: CudaHermitianOracleMutant_oracle_session_no_projection
+24/34 Test #107: CudaHermitianOracleMutant_oracle_session_no_projection ...   Passed    0.43 sec
+      Start 108: CudaHermitianOracleMutant_oracle_session_zero_boundary
+25/34 Test #108: CudaHermitianOracleMutant_oracle_session_zero_boundary ...   Passed    0.44 sec
+      Start 109: CudaHermitianOracleMutant_oracle_wrapper_zero_boundary
+26/34 Test #109: CudaHermitianOracleMutant_oracle_wrapper_zero_boundary ...   Passed    0.41 sec
+      Start 110: CudaHermitianOracleMutant_oracle_dose_zero_boundary
+27/34 Test #110: CudaHermitianOracleMutant_oracle_dose_zero_boundary ......   Passed    0.42 sec
+      Start 111: CudaHermitianCCF
+28/34 Test #111: CudaHermitianCCF .........................................   Passed    2.65 sec
+      Start 112: CudaHermitianCCFMutant_ccf_perpatch_no_projection
+29/34 Test #112: CudaHermitianCCFMutant_ccf_perpatch_no_projection ........   Passed    0.43 sec
+      Start 113: CudaHermitianCCFMutant_ccf_batched_no_projection
+30/34 Test #113: CudaHermitianCCFMutant_ccf_batched_no_projection .........   Passed    0.42 sec
+      Start 114: CudaPeakFit
+31/34 Test #114: CudaPeakFit ..............................................   Passed    0.42 sec
+      Start 115: CudaPeakFitMutant_float_denominator
+32/34 Test #115: CudaPeakFitMutant_float_denominator ......................   Passed    0.43 sec
+      Start 129: CudaLocalAdmission
+33/34 Test #129: CudaLocalAdmission .......................................   Passed    0.44 sec
+      Start 140: CudaStaleErrorAfterOom
+34/34 Test #140: CudaStaleErrorAfterOom ...................................   Passed    1.30 sec
+
+97% tests passed, 1 tests failed out of 34
+
+Label Time Summary:
+cuda        =  22.93 sec*proc (16 tests)
+hardware    =  22.93 sec*proc (16 tests)
+
+Total Test time (real) =  30.52 sec
+
+The following tests FAILED:
+	 49 - CcfDcRequest (Failed)
+Errors while running CTest

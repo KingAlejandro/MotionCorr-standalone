@@ -16,3 +16,6 @@ science/neutrality/harm results are UNRUN; the oracle value is an independent re
 
 ## Observation-residual diagnostic (added later, documentation only)
 `observation_residual/` holds the descriptive saved-metadata diagnostic of accepted full-width patch observations versus the unchanged truth and global (physical and Tr gauges separate), with the parent's independent check; see `observation_residual/README.md`. It attributes no cause and changes no status.
+
+## Full-width capture extension (source work, default off)
+`../local_full_width_capture_20261027/` holds the design note with frozen test criteria, amendments, local build/test evidence and a plan-only future analysis for a diagnostic full-width two-patch CCF capture. No native producer is released by it.

@@ -1,0 +1,54 @@
+== unit
+unit_rc=0
+PASS actual-temp/API distinction, bit neutrality, two-thread coverage, scope/exclusive writes, fallback/no rejected offsets, budget, legacy bytes, full-width pair selection/metadata/failures
+== cli
+cli_rc=0
+PASS diagnostic CPU/scope guards before movie access (legacy and full-width pair)
+== extra targets
+build2_rc=0
+== ctest without DC arm env (preserved)
+rc=8
+ 1/10 Test  #6: PatchRetryState ..................Subprocess aborted***Exception:   0.28 sec
+ 2/10 Test  #2: LocalCcfCapture ..................   Passed    0.47 sec
+ 3/10 Test  #7: LocalB2Fit .......................   Passed    0.21 sec
+ 4/10 Test  #8: GlobalHalfGain ...................Subprocess aborted***Exception:   0.29 sec
+ 5/10 Test  #9: CoupledPeak ......................Subprocess aborted***Exception:   0.48 sec
+ 6/10 Test #10: IsotropicWeight ..................Subprocess aborted***Exception:   0.45 sec
+ 7/10 Test #11: LocalFullWidthWeight .............   Passed    0.48 sec
+ 8/10 Test #12: CcfDcHook ........................   Passed    0.41 sec
+ 9/10 Test #94: ExperimentalFlagsCli .............   Passed    0.35 sec
+10/10 Test #96: LocalCcfCaptureCli ...............   Passed    0.18 sec
+60% tests passed, 4 tests failed out of 10
+== ctest arm none for the tests that need it
+rc=0
+1/4 Test  #6: PatchRetryState ..................   Passed    0.02 sec
+2/4 Test  #8: GlobalHalfGain ...................   Passed    0.05 sec
+3/4 Test  #9: CoupledPeak ......................   Passed    0.16 sec
+4/4 Test #10: IsotropicWeight ..................   Passed    0.04 sec
+100% tests passed out of 4
+== legacy differential dump
+old_build_rc=0
+new_build_rc=0
+run_old_rc=0
+run_new_rc=0
+files_old= 606 files_new= 606
+LEGACY_BYTES_IDENTICAL
+== sanitizers
+san_build_rc=0
+san_run_rc=0
+PASS actual-temp/API distinction, bit neutrality, two-thread coverage, scope/exclusive writes, fallback/no rejected offsets, budget, legacy bytes, full-width pair selection/metadata/failures
+== unit mutants
+control (unmutated header through the same path):
+PASS actual-temp/API distinction, bit neutrality, two-thread
+ctl rc=0
+m2_select_wrong_coordinate: unit rc=1 :: unselected patch captured in full-width mode; retained "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-ccf-unit-65828"
+m3_no_duplicate_check: unit rc=1 :: duplicate selected patch not rejected by the session guard; retained "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-ccf-unit-65920"
+m4_no_weight_norm_check: unit rc=1 :: inherited weight normalisation accepted in full-width capture; retained "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-ccf-unit-67558"
+m5_legacy_schema_changed: unit rc=1 :: legacy session.json bytes changed; retained "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-ccf-unit-67572"
+m6_no_missing_patch_check: unit rc=1 :: missing selected patch accepted at finish; retained "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-ccf-unit-67582"
+m7_no_centre_extent_check: unit rc=1 :: centre/extent mismatch accepted; retained "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-ccf-unit-67604"
+== cli mutant
+cfg_rc=0
+build_rc=0
+m1_guard_still_refuses_flag: cli rc=1 :: AssertionError: (1, '', 'in: /tmp/mc-capext-20261027-r2/mut_cli/src/src/motioncorr_runner.cpp, line 278\nERROR: \nMC_DIAG_LOCAL_CCF_DIR unsupported scope: requires fixed CPU UP-only K267 configuration
+ALL_DONE

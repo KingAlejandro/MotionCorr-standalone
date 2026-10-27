@@ -1,0 +1,9 @@
+control (unmutated header through the same path):
+PASS actual-temp/API distinction, bit neutrality, two-thread
+ctl rc=0
+m2_select_wrong_coordinate: unit rc=1 :: unselected patch captured in full-width mode; retained "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-ccf-unit-65828"
+m3_no_duplicate_check: unit rc=1 :: duplicate selected patch not rejected by the session guard; retained "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-ccf-unit-65920"
+m4_no_weight_norm_check: unit rc=1 :: inherited weight normalisation accepted in full-width capture; retained "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-ccf-unit-67558"
+m5_legacy_schema_changed: unit rc=1 :: legacy session.json bytes changed; retained "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-ccf-unit-67572"
+m6_no_missing_patch_check: unit rc=1 :: missing selected patch accepted at finish; retained "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-ccf-unit-67582"
+m7_no_centre_extent_check: unit rc=1 :: centre/extent mismatch accepted; retained "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc-ccf-unit-67604"

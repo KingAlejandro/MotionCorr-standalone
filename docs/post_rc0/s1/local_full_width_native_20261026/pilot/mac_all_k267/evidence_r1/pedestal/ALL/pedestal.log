@@ -1,0 +1,60 @@
+Working on pedestal.mrcs with 2 thread(s).
+
+Movie size: X = 128 Y = 96 N = 5
+Frames to be used: 1 2 3 4 5
+Frame grouping: n_frames = 5, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 
+interpolate_shifts = 0
+
+
+Global alignment:
+ Iteration 1: RMSD = 2.93989 px
+ Iteration 2: RMSD = 0.725061 px
+ Iteration 3: RMSD = 0.173339 px
+ [coupled_peak] scope=global peaks=15 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+
+Local alignments:
+Patches: X = 3 Y = 3
+Patch (1, 1): 1 / 9, X range = [0, 42), Y range = [0, 32), Center = (20, 15)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.211261 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (1, 2): 2 / 9, X range = [42, 84), Y range = [0, 32), Center = (62, 15)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.249665 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (1, 3): 3 / 9, X range = [84, 126), Y range = [0, 32), Center = (104, 15)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.650722 px
+ Iteration 2: RMSD = 0.160574 px
+ [coupled_peak] scope=patch peaks=10 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (2, 1): 4 / 9, X range = [0, 42), Y range = [32, 64), Center = (20, 47)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.410684 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (2, 2): 5 / 9, X range = [42, 84), Y range = [32, 64), Center = (62, 47)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.0294721 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (2, 3): 6 / 9, X range = [84, 126), Y range = [32, 64), Center = (104, 47)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.372053 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (3, 1): 7 / 9, X range = [0, 42), Y range = [64, 96), Center = (20, 79)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.723057 px
+ Iteration 2: RMSD = 0.178549 px
+ [coupled_peak] scope=patch peaks=10 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (3, 2): 8 / 9, X range = [42, 84), Y range = [64, 96), Center = (62, 79)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.241781 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (3, 3): 9 / 9, X range = [84, 126), Y range = [64, 96), Center = (104, 79)
+ EXPERIMENTAL local full-width weight: x_norm = 42, pnx = 42, nfx = 22
+ Iteration 1: RMSD = 0.195232 px
+ [coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+
+Polynomial fit RMSD: X = 0.0168066 px Y = 0.0107066 px
+Summing frames before dose weighting: ..... done
+Written aligned but non-dose weighted sum to /private/tmp/mc-mac-pilot-20261027/all-k267-r1/pedestal/ALL/output/pedestal.mrc
+Full movie wall time: 0.004 s

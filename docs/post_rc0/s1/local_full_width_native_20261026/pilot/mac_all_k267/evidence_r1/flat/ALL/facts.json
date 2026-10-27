@@ -1,0 +1,35 @@
+{
+ "convergence": {
+  "global_iterations": 1,
+  "global_increment_px": [
+   0.0
+  ],
+  "global_converged": true,
+  "patches": [],
+  "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+ },
+ "manipulation": {
+  "dc": {
+   "arm": "both",
+   "global_zeroed": 5,
+   "global_eligible": 5,
+   "local_zeroed": 0,
+   "local_eligible": 0
+  },
+  "coupled": {
+   "global": {
+    "peaks": 5,
+    "guard_fired": 5,
+    "not_negative_definite": 5,
+    "offset_gt_1px": 0
+   },
+   "patch": {
+    "peaks": 0,
+    "guard_fired": 0,
+    "not_negative_definite": 0,
+    "offset_gt_1px": 0
+   }
+  }
+ },
+ "witness_lines": 0
+}

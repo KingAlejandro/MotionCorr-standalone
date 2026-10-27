@@ -1,0 +1,74 @@
+{
+ "convergence": {
+  "global_iterations": 3,
+  "global_increment_px": [
+   2.93928,
+   0.724865,
+   0.173279
+  ],
+  "global_converged": true,
+  "patches": [
+   {
+    "final_increment_px": 0.211151,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.250049,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.160831,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.41024,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.0288995,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.372403,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.17856,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.241477,
+    "converged": true
+   },
+   {
+    "final_increment_px": 0.195653,
+    "converged": true
+   }
+  ],
+  "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+ },
+ "manipulation": {
+  "dc": {
+   "arm": "both",
+   "global_zeroed": 15,
+   "global_eligible": 15,
+   "local_zeroed": 55,
+   "local_eligible": 55
+  },
+  "coupled": {
+   "global": {
+    "peaks": 15,
+    "guard_fired": 0,
+    "not_negative_definite": 0,
+    "offset_gt_1px": 0
+   },
+   "patch": {
+    "peaks": 55,
+    "guard_fired": 0,
+    "not_negative_definite": 0,
+    "offset_gt_1px": 0
+   }
+  }
+ },
+ "witness_lines": 9
+}

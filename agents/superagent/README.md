@@ -36,11 +36,13 @@ Worker rules are in `prompts/worker.md`. They add the agent-specific parts to `A
 
 ## Running it
 
-1. Start a T3 thread on this checkout for the coordinator.
-2. In that thread, create an interval `schedule_task` bound to it (for example every 5 minutes) with the prompt: `Read agents/superagent/prompts/coordinator.md and run one pass.` An idle pass costs one short turn.
-3. The first `sa.py poll` records the current position and starts from there.
+1. Start a T3 thread on this checkout for the coordinator. Its scheduled tasks use the prompt `Read agents/superagent/prompts/coordinator.md and run one pass.`
+2. A webhook `schedule_task` bound to that thread. Filters: `headers.x-github-event` in `issue_comment`, `pull_request_review_comment`, `issues`, `pull_request`, and `body.action` in `created`, `labeled`, `unlabeled`, `closed`. Dedupe with replay key `{{headers.x-github-delivery}}`, coalesce key `{{headers.x-github-hook-id}}` and a 60 s window, so a burst of events is one pass.
+3. A repository webhook (JSON, the same four events) pointing at the task's `webhookUrl`. Needs T3 Connect remote access.
+4. A 30-minute interval task on the same thread as a fallback for missed deliveries, stale workers and merged PRs.
+5. The first `sa.py poll` records the current position and starts from there.
 
-A GitHub webhook to a T3 webhook schedule (filtered on `issue_comment`, `pull_request_review_comment` and `issues`/`pull_request` `labeled`) can replace the interval later. The coordinator pass does not change.
+The webhook only starts a pass: `sa.py poll` reads GitHub itself and applies the gate, so the payload is never trusted. A forged or duplicate delivery costs at most one idle pass.
 
 `python3 agents/superagent/sa.py status --all` lists every ticket. `python3 -m unittest agents/superagent/test_sa.py` runs the tests.
 

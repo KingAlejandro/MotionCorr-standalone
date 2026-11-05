@@ -60,6 +60,6 @@ Record your state with `sa.py report <ticket> --state <state> --summary "<text>"
 - `waiting`: your turn ends with nothing for a person to do yet, for example while CI runs.
 - `blocked`: a person must act. Put the one concrete question in `--question`. Do not leave it only in the summary, on GitHub, or in this thread.
 - `failed`: you cannot complete the ticket. Say why.
-- `dropped`: nothing for a person to act on. The ticket ends silently.
+- `dropped`: nothing for a person to act on. The ticket ends silently, unless you acknowledged the request; then the coordinator posts one closing sentence, so put the reason first in the summary.
 
 The summary is internal: changes, checks actually run, risks, PR number, and automated-review round counts. The coordinator writes the short GitHub message from it. Do not post the result yourself.

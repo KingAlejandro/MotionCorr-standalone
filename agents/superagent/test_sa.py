@@ -170,6 +170,18 @@ class Ledger(unittest.TestCase):
         self.assertIn(CFG["marker"], msg)
         self.assertIn("issues/7/comments", msg)
 
+    def test_dropped_is_silent_unless_acknowledged(self):
+        cfg = sa.load_config()
+        with sa.store(cfg) as state:
+            sa.process(label(number=8), state, cfg)  # T2, never acknowledged
+            state["tickets"]["T1"]["acked"].append(state["tickets"]["T1"]["source"]["id"])
+        self.cli("report", "T1", "--state", "dropped", "--summary", "already fixed by #242")
+        self.cli("report", "T2", "--state", "dropped", "--summary", "not reproduced")
+        with sa.store(cfg, write=False) as state:
+            relay = [r["ticket"] for r in sa.work_list(state, cfg)["relay"]]
+        self.assertEqual(relay, ["T1"])
+        self.assertEqual(self.cli("reply", "T1", "--purpose", "result", "--text", "Fixed by #242.", "--dry-run")[0], 0)
+
     def test_handed_back_unlisted_message_cannot_be_accepted(self):
         cfg = sa.load_config()
         with sa.store(cfg, write=False) as state:

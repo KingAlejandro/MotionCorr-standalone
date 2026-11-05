@@ -287,6 +287,10 @@ def work_list(state: dict, cfg: dict) -> dict:
     for t in tickets:
         if t.get("needs_cancel"):
             out["cancel"].append({"ticket": t["id"], "task_id": t["task_id"]})
+        unrelayed = t["reports"][t["relayed"]:]
+        if t["status"] != "stopped" and any(
+                r["state"] in PERSON_REPORTS or r["state"] == "dropped" or r.get("question") for r in unrelayed):
+            out["relay"].append({"ticket": t["id"], "report": t["reports"][-1]})
         if t["status"] != "open":
             continue
         if t["worker_thread"] is None and not running(t):
@@ -297,9 +301,6 @@ def work_list(state: dict, cfg: dict) -> dict:
             out["deliver"].append({"ticket": t["id"], "thread": t["worker_thread"], "count": len(t["inbox"])})
         if t.get("pr") and not t.get("watched") and t["worker_thread"]:
             out["watch"].append({"ticket": t["id"], "pr": t["pr"], "thread": t["worker_thread"]})
-        unrelayed = t["reports"][t["relayed"]:]
-        if any(r["state"] in PERSON_REPORTS or r.get("question") for r in unrelayed):
-            out["relay"].append({"ticket": t["id"], "report": t["reports"][-1]})
         a = t.get("assignment")
         if running(t):
             age = dt.datetime.now(dt.timezone.utc) - parse_iso(a["started"])
@@ -452,7 +453,8 @@ def cmd_report(a, cfg):
             t["assignment"]["state"] = "ended"
         if a.state == "dropped":
             t["status"], t["ended_reason"] = "ended", "dropped: " + a.summary[:200]
-            t["relayed"] = len(t["reports"])
+            if not t["acked"]:  # silent end; after an acknowledgement the person gets one closing line
+                t["relayed"] = len(t["reports"])
     print("ok")
 
 
@@ -494,6 +496,8 @@ def cmd_reply(a, cfg):
         die(f"{word_count(a.text)} words; the limit is {cfg['reply_word_limit']}")
     with store(cfg, write=not a.dry_run) as state:
         t = get_ticket(state, a.ticket)
+        if t["status"] == "stopped":
+            die(f"{t['id']} was stopped by a person")
         trig = find_trigger(t, a.trigger) if a.trigger else None
         if a.trigger and trig is None:
             die(f"{a.trigger} never reached {t['id']}")
@@ -503,8 +507,8 @@ def cmd_reply(a, cfg):
         if a.purpose == "ack" and a.trigger in t["acked"]:
             print("already acknowledged")
             return
-        if a.purpose == "result" and not (last and last["state"] in PERSON_REPORTS):
-            die("result needs a ready, blocked or failed report")
+        if a.purpose == "result" and not (last and (last["state"] in PERSON_REPORTS or last["state"] == "dropped")):
+            die("result needs a ready, blocked, failed or dropped report")
         if a.purpose == "attention":
             if not (last and last.get("question")):
                 die("attention needs a report with --question")

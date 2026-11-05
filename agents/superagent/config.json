@@ -1,0 +1,22 @@
+{
+  "repository": "KingAlejandro/MotionCorr-standalone",
+  "allowed_logins": ["KingAlejandro"],
+  "trigger_prefix": "/agent",
+  "labels": {
+    "agent:fix": "fix",
+    "agent:triage": "triage",
+    "agent:review": "review"
+  },
+  "marker": "<!-- motioncorr-superagent -->",
+  "banner": "_Automated agent message._",
+  "reply_word_limit": 100,
+  "max_running": 3,
+  "stale_assignment_hours": 6,
+  "branch_prefix": "agent/",
+  "state_dir": "~/.motioncorr-superagent",
+  "worker": {
+    "providerInstanceId": "codex",
+    "model": "gpt-6.1-sol",
+    "options": {"reasoningEffort": "high"}
+  }
+}

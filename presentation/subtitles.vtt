@@ -1,0 +1,119 @@
+WEBVTT
+
+00:00:00.600 --> 00:00:04.800
+We came to STFC to make scientific software faster.
+
+00:00:05.000 --> 00:00:09.700
+Then we asked the agents to make the presentation. Naturally.
+
+00:00:10.500 --> 00:00:15.600
+In cryo-electron microscopy, tiny movements can blur the picture.
+
+00:00:15.800 --> 00:00:21.700
+RELION's motion correction aligns movie frames so the useful signal
+adds up.
+
+00:00:22.500 --> 00:00:27.800
+Estimate the motion, shift the frames, then combine them with dose
+weighting.
+
+00:00:28.000 --> 00:00:33.700
+Simple to say. Rather less simple when there are millions of pixels.
+
+00:00:34.500 --> 00:00:39.700
+We took a standalone RELION-derived engine and explored three
+acceleration routes:
+
+00:00:39.900 --> 00:00:45.700
+CUDA, JAX and Metal. Different hardware. One very demanding scientific
+reference.
+
+00:00:46.500 --> 00:00:51.800
+At this STFC, Google and PA hackathon, Antigravity became our workshop.
+
+00:00:52.000 --> 00:00:56.400
+We used it heavily to investigate code, develop changes and iterate.
+
+00:00:56.600 --> 00:00:59.700
+There was still plenty of debugging. Gravity, apparently, still works.
+
+00:01:00.500 --> 00:01:05.400
+We created specialist agents for our Gemini Enterprise workflow.
+
+00:01:05.600 --> 00:01:10.000
+An architect proposes. A critic challenges. Review and testing agents
+check.
+
+00:01:10.200 --> 00:01:14.700
+Basically, a very productive meeting where everyone has actually read
+the code.
+
+00:01:15.500 --> 00:01:20.800
+On Google Cloud, Gemini-powered workers triage issues, propose fixes
+and review pull requests.
+
+00:01:21.000 --> 00:01:27.700
+Small scopes, explicit checks, and humans making the final call. No
+automatic victory lap.
+
+00:01:28.500 --> 00:01:33.800
+We tackled thread-dependent randomness and built reproducible
+comparisons.
+
+00:01:34.000 --> 00:01:39.700
+The fixed CPU matched across one and four threads on all twenty-four
+tutorial movies.
+
+00:01:40.500 --> 00:01:45.800
+CUDA passed the small synthetic global-alignment tests. Real movies
+revealed image differences.
+
+00:01:46.000 --> 00:01:52.700
+So we kept the numerical gates, recorded the failures and traced the
+pipeline. Science, not vibes.
+
+00:01:53.500 --> 00:01:58.400
+Then came the classic twist: faster GPU kernels, but no whole-movie
+speedup yet.
+
+00:01:58.600 --> 00:02:03.700
+The CPU was still doing the expensive reconstruction. We had
+accelerated the wrong queue.
+
+00:02:04.500 --> 00:02:10.800
+The newest CUDA pull request moves that reconstruction work onto the
+GPU, with streaming buffers.
+
+00:02:11.000 --> 00:02:16.700
+Its early report is promising. Stage timings are not whole-pipeline
+speedups. The asterisk stays.
+
+00:02:17.500 --> 00:02:22.800
+Metal now has a global-alignment implementation proposed for Apple
+silicon. JAX is an exploration track.
+
+00:02:23.000 --> 00:02:28.700
+Different stages of progress, shared reference tests. We are building
+evidence, not just backends.
+
+00:02:29.500 --> 00:02:34.400
+Our biggest lesson: agents help most when the task and the test are
+both clear.
+
+00:02:34.600 --> 00:02:38.600
+Antigravity helped us iterate. Independent checks challenged our
+assumptions.
+
+00:02:38.800 --> 00:02:42.700
+The humans supplied the scientific judgment. And the snacks.
+
+00:02:43.500 --> 00:02:49.000
+We leave with GPU prototypes, reusable agents, tougher tests and a much
+clearer next step.
+
+00:02:49.200 --> 00:02:54.600
+Then we gave the agents one final issue: make this look good in three
+minutes.
+
+00:02:55.100 --> 00:02:59.600
+Motion, corrected. Hype, tested.

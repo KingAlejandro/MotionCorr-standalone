@@ -1,0 +1,33 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fe86d6bd..ead61f1e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -748,6 +748,7 @@ if(BUILD_TESTING AND CUDA)
+             get_filename_component(_exe "${test_source}" NAME_WE)
+             add_executable(${_exe}_${mutant} ${test_source} "${_mutant_cu}")
+             target_link_libraries(${_exe}_${mutant} PRIVATE motioncorr_core)
++            target_include_directories(${_exe}_${mutant} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda")
+             target_link_options(${_exe}_${mutant} PRIVATE ${ARGN})
+             if(test_prefix MATCHES "Hermitian")
+                 target_compile_definitions(${_exe}_${mutant} PRIVATE MC_CHECK_HERMITIAN)
+diff --git a/tests/cuda_hermitian_inverse.cpp b/tests/cuda_hermitian_inverse.cpp
+index a81b4f22..7789bc2d 100644
+--- a/tests/cuda_hermitian_inverse.cpp
++++ b/tests/cuda_hermitian_inverse.cpp
+@@ -128,12 +128,15 @@ static bool run(int nx, int ny, double sx, double sy, bool plans, bool session_o
+                                      CUFFT_C2R, batch, &work) == CUFFT_SUCCESS, "cuFFT plan many");
+             for (int b = 0; b < batch; ++b)
+                 check(cudaMemcpy(din + b * nf, f, nf * sizeof(cufftComplex), cudaMemcpyHostToDevice));
++            std::cout << "CHARACTERIZATION ONLY: invalid raw C2R input; numerical leakage is platform-specific\n";
+             raw_characterization = true;
+             require(cufftExecC2R(plan, din, dout) == CUFFT_SUCCESS, "cuFFT exec");
+             raw_characterization = false;
+             check(cudaDeviceSynchronize());
+             check(cudaMemcpy(image.data(), dout, nr * sizeof(float), cudaMemcpyDeviceToHost));
+-            compare(batch == 1 ? "raw_planmany_batch1" : "raw_planmany_batch2", image.data(), reference, nx, ny);
++            const bool discarded = compare(batch == 1 ? "raw_planmany_batch1" : "raw_planmany_batch2", image.data(), reference, nx, ny);
++            std::cout << (discarded ? "No numerical leak observed (invariant remains the negative control)\n"
++                                   : "Numerical leak observed (characterization, not a test failure)\n");
+             require(cufftDestroy(plan) == CUFFT_SUCCESS, "cuFFT destroy");
+             check(cudaFree(din)); check(cudaFree(dout));
+         }

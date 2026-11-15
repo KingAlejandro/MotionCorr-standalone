@@ -1,0 +1,93 @@
+{
+  "source_commit": "f25c958041cc59e6b6c9d2336c7f85092b0fff81",
+  "archived_source_files_verified": 451,
+  "mismatches": [],
+  "configurations": {
+    "cuda": {
+      "collection_count": 109,
+      "test": {
+        "backtrace": 231,
+        "command": [
+          "/home/alex/.mc-venv/bin/python3",
+          "/mnt/clathrin/alex-motioncorr-213/src-min/tests/run_sticky_cuda_control.py",
+          "--binary",
+          "/mnt/clathrin/alex-motioncorr-213/build-cuda/motioncorr_sticky_fault"
+        ],
+        "name": "CudaStickyContext",
+        "properties": [
+          {
+            "name": "LABELS",
+            "value": [
+              "cuda",
+              "destructive",
+              "hardware",
+              "opt-in"
+            ]
+          },
+          {
+            "name": "RUN_SERIAL",
+            "value": true
+          },
+          {
+            "name": "TIMEOUT",
+            "value": 1200.0
+          },
+          {
+            "name": "WORKING_DIRECTORY",
+            "value": "/mnt/clathrin/alex-motioncorr-213/build-cuda"
+          }
+        ]
+      },
+      "configure_returncode": 0,
+      "test_variant_build_returncode": 0,
+      "production_build_returncode": 0,
+      "driver_returncode": 0,
+      "native_result": "PASS healthy: real resident retry and products\nPASS single: native sticky error, attributed refusal, exit 1, no products/kernels\nPASS multi: native sticky error, attributed refusal, exit 1, no products/kernels\nPASS dataset: worker exit 1, dataset FAIL, descendants reaped, no aggregation\nSTICKY_CONTEXT_PASS: GPU healthy after process contexts exited\n"
+    },
+    "nvcomp": {
+      "collection_count": 112,
+      "test": {
+        "backtrace": 231,
+        "command": [
+          "/home/alex/.mc-venv/bin/python3",
+          "/mnt/clathrin/alex-motioncorr-213/src-min/tests/run_sticky_cuda_control.py",
+          "--binary",
+          "/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault"
+        ],
+        "name": "CudaStickyContext",
+        "properties": [
+          {
+            "name": "LABELS",
+            "value": [
+              "cuda",
+              "destructive",
+              "hardware",
+              "opt-in"
+            ]
+          },
+          {
+            "name": "RUN_SERIAL",
+            "value": true
+          },
+          {
+            "name": "TIMEOUT",
+            "value": 1200.0
+          },
+          {
+            "name": "WORKING_DIRECTORY",
+            "value": "/mnt/clathrin/alex-motioncorr-213/build-nvcomp"
+          }
+        ]
+      },
+      "configure_returncode": 0,
+      "test_variant_build_returncode": 0,
+      "production_build_returncode": 0,
+      "driver_returncode": 0,
+      "native_result": "PASS healthy: real resident retry and products\nPASS single: native sticky error, attributed refusal, exit 1, no products/kernels\nPASS multi: native sticky error, attributed refusal, exit 1, no products/kernels\nPASS dataset: worker exit 1, dataset FAIL, descendants reaped, no aggregation\nSTICKY_CONTEXT_PASS: GPU healthy after process contexts exited\n"
+    }
+  },
+  "production_hooks": {
+    "cuda": "absent: illegalWrite, __wrap_cudaMalloc, __wrap_cudaLaunchKernel, MC_STICKY_FAULT",
+    "nvcomp": "absent: illegalWrite, __wrap_cudaMalloc, __wrap_cudaLaunchKernel, MC_STICKY_FAULT"
+  }
+}

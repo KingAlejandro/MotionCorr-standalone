@@ -1,0 +1,7 @@
+mutant accumulate-only: global_half_gain rc=1 (KILLED) FAIL flagged frames are not the reference frames shifted by the half update
+mutant reshift-only: global_half_gain rc=1 (KILLED) FAIL flagged x update at frame 1 is not exactly half
+mutant scaled-sumsq: global_half_gain rc=1 (KILLED) FAIL iteration-1 RMSD line differs, so the stop is not using the unscaled update:
+mutant damp-local: global_half_gain rc=1 (KILLED) FAIL local patch update changed by the flag
+mutant tolerance-local: global_half_gain rc=1 (KILLED) FAIL the tolerance override must not apply to local patches
+mutant gain-0.6: global_half_gain rc=1 (KILLED) FAIL flagged x update at frame 1 is not exactly half
+restored original: rc=0 (must be 0)

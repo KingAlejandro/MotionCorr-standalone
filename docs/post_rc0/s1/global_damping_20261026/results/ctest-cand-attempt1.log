@@ -1,0 +1,422 @@
+start 2026-10-25T23:58:04Z cand=a1c78adc1d0ffcf031102bc0dad605c4fb670a1f binary=cee711f8969773dded7835e45bdab470950aa48cfed32d27d1e67b324c0f5d4c
+  Test #92: NativeMovieStaging
+
+Total Tests: 92
+=== CTest Collection Validation: PASS === 
+  CUDA-only required tests: not required
+  Collected tests: 92
+    - HermitianProjectionOracle      [ADDITIVE]
+    - CpuDoseSymmetry                [REQUIRED]
+    - CpuDoseSymmetryBase            [REQUIRED]
+    - CpuUnweightedStream            [ADDITIVE]
+    - PatchRetryState                [REQUIRED]
+    - GlobalHalfGain                 [ADDITIVE]
+    - PeakFitArithmetic              [REQUIRED]
+    - PeakFitArithmeticMutant_float-denominator [REQUIRED]
+    - PeakFitArithmeticMutant_early-store [REQUIRED]
+    - PeakFitArithmeticMutant_wrong-scale [REQUIRED]
+    - RealspaceBorderValidation      [ADDITIVE]
+    - PatchRetryAdmission            [REQUIRED]
+    - RunnerInterpolateRecenter      [REQUIRED]
+    - FloatPlanCache                 [ADDITIVE]
+    - MrcHeaderStats                 [REQUIRED]
+    - ReportPlotUndefinedAxis        [REQUIRED]
+    - PdfConcat                      [REQUIRED]
+    - DefectParser                   [REQUIRED]
+    - DeflateLayout                  [REQUIRED]
+    - DeflateLayoutMutant_span_wrap  [REQUIRED]
+    - DeflateLayoutMutant_stage_sum  [REQUIRED]
+    - DeflateLayoutMutant_reserve_round [REQUIRED]
+    - DeflateLayoutMutant_layout_table [REQUIRED]
+    - DeflateLayoutMutant_arena_start [REQUIRED]
+    - DeflateLayoutMutant_drain_step [REQUIRED]
+    - Adler32Arithmetic              [REQUIRED]
+    - Adler32KernelHost              [REQUIRED]
+    - StageProfileThreads            [REQUIRED]
+    - FrameBufferPool                [REQUIRED]
+    - ScratchArena                   [REQUIRED]
+    - ReaderPool                     [ADDITIVE]
+    - ReaderPoolMutant_spin          [ADDITIVE]
+    - ReaderPoolMutant_nowait        [ADDITIVE]
+    - DefectNeighbours               [REQUIRED]
+    - DefectMergeMutant_append_only  [ADDITIVE]
+    - DefectMergeMutant_no_order_check [ADDITIVE]
+    - DefectMergeMutant_swap_xy      [ADDITIVE]
+    - RelionErrorOwnership           [ADDITIVE]
+    - RelionErrorUnprinted           [ADDITIVE]
+    - TiffIdentityLaterChunkHostControls [ADDITIVE]
+    - NvcompAcceptanceDiagnostics    [REQUIRED]
+    - ProfilingKit                   [REQUIRED]
+    - StickyCudaProcessLifecycle     [ADDITIVE]
+    - DatasetFinalization            [ADDITIVE]
+    - TestHygiene235                 [ADDITIVE]
+    - GainCacheOwnership             [REQUIRED]
+    - NvcompGuards                   [REQUIRED]
+    - SyntheticRegression            [REQUIRED]
+    - HotPixelRngDeterminism         [REQUIRED]
+    - RunnerExposure                 [REQUIRED]
+    - Runner_failure                 [REQUIRED]
+    - Runner_invalid                 [REQUIRED]
+    - Runner_resume                  [REQUIRED]
+    - Runner_tomography              [REQUIRED]
+    - RunnerLateBin                  [REQUIRED]
+    - RunnerExportedUnits            [REQUIRED]
+    - GainCache                      [REQUIRED]
+    - TiffRead                       [REQUIRED]
+    - DamagedMovie                   [REQUIRED]
+    - TruncatedMrcMovie              [REQUIRED]
+    - TruncatedGainDefect            [REQUIRED]
+    - CompressedMovieSequence        [REQUIRED]
+    - CompressedMrcStatus_bz2        [REQUIRED]
+    - CompressedMrcStatus_xz         [REQUIRED]
+    - CompressedMrcStatus_zst        [REQUIRED]
+    - InputFormats                   [REQUIRED]
+    - CutDownMovie                   [REQUIRED]
+    - GlobalIfftElision              [REQUIRED]
+    - HostBufferReuse                [REQUIRED]
+    - StageProfile                   [REQUIRED]
+    - RunnerModelParser              [REQUIRED]
+    - EerMemorySafety                [REQUIRED]
+    - MicrographModelBounds          [REQUIRED]
+    - RunnerInterpolateShifts        [REQUIRED]
+    - WriteFaults                    [REQUIRED]
+    - WriteFaultsSync                [REQUIRED]
+    - WriteFaultsMultiProduct        [REQUIRED]
+    - OutputStageFaults              [REQUIRED]
+    - LogfileFromEps                 [REQUIRED]
+    - LogfileFromEpsMutant_always_eps [REQUIRED]
+    - LogfileFromEpsMutant_late_guard [REQUIRED]
+    - LogfileFromEpsMutant_eps_order [REQUIRED]
+    - LogfileFromEpsMutant_placeholder [REQUIRED]
+    - LogfileFromEpsMutant_concat_cleanup [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - CudaValidationParser           [REQUIRED]
+    - MultiGpuScheduling             [REQUIRED]
+    - ExperimentalFlagsCli           [ADDITIVE]
+    - OutputTreeComparator           [REQUIRED]
+    - JointStarPublication           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+    - NativeMovieStaging             [REQUIRED]
+validate_test_collection rc=0
+test_1_absent_truth_script_and_missing_binary (__main__.TestCiFailClosedControls.test_1_absent_truth_script_and_missing_binary)
+Control 1: Missing truth script fails CI preflight; missing binary fails gate runner. ... ok
+test_2_absent_dependency_fails_cmake (__main__.TestCiFailClosedControls.test_2_absent_dependency_fails_cmake)
+Control 2: BUILD_TESTING=ON must fail if python or numpy is missing in MotionCorr CMakeLists.txt. ... ok
+test_3_zero_or_missing_collected_tests_fails (__main__.TestCiFailClosedControls.test_3_zero_or_missing_collected_tests_fails)
+Control 3: Empty test suite or missing required test fails collection validation. ... ok
+test_4_missing_fixture_or_truth_fails (__main__.TestCiFailClosedControls.test_4_missing_fixture_or_truth_fails)
+Control 4: Missing fixture movie, missing truth file, or malformed manifest fails verify_fixtures. ... ok
+test_5_byte_flipped_fixture_fails (__main__.TestCiFailClosedControls.test_5_byte_flipped_fixture_fails)
+Control 5: Baseline fixture must pass first, then fail after corrupting one byte. ... FAIL
+test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref. ... FAIL
+test_7_reused_stem_and_canonical_generator_protection (__main__.TestCiFailClosedControls.test_7_reused_stem_and_canonical_generator_protection)
+Control 7: Generator protects canonical truth and refuses conflicting stem overwrite. ... ok
+test_8_canonical_star_input_is_immutable (__main__.TestCiFailClosedControls.test_8_canonical_star_input_is_immutable)
+Control 8: STAR metadata drift that leaves the pixels untouched must fail closed. ... FAIL
+
+======================================================================
+FAIL: test_5_byte_flipped_fixture_fails (__main__.TestCiFailClosedControls.test_5_byte_flipped_fixture_fails)
+Control 5: Baseline fixture must pass first, then fail after corrupting one byte.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/motioncorr-damping-a1c78adc1d0f/src-cand/tools/test_ci_fail_closed.py", line 453, in test_5_byte_flipped_fixture_fails
+    self.assertEqual(res_baseline.returncode, 0,
+AssertionError: 1 != 0 : Baseline verification must pass before corruption: === Canonical Fixture Verification (file:/tmp/motioncorr-damping-a1c78adc1d0f/src-cand/test-data/known_motion/MANIFEST.json) ===
+         MISMATCH  km_global_hisnr
+      expected SHA256: 343c1cbab443917195047c8a7a720db191f127cd9c2a2685091b113f51a9f4ee
+      observed SHA256: 343c1cbab443917195047c8a7a720db191f127cd9c2a2685091b113f51a9f4ee
+      expected bytes:  12583936
+      observed bytes:  12583936
+      ground-truth JSON hash MISMATCH:
+        expected: 9e4269f9808d2908ae6f5923cec601f7b79e380efa1e23cddd263cba99b0439c
+        observed: 1299833454431f655ac5da77f175a29c7b5e97f3e5ab51da6f79fcf6362a257e
+  NOTE: Zero fixtures were successfully verified
+
+
+======================================================================
+FAIL: test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/motioncorr-damping-a1c78adc1d0f/src-cand/tools/test_ci_fail_closed.py", line 536, in test_6_trusted_git_lookup_and_tampered_disk_manifest
+    self.assertIn("Failed to load trusted manifest from git ref", res_invalid_ref.stderr)
+AssertionError: 'Failed to load trusted manifest from git ref' not found in "ERROR: Cannot load trusted manifest: Cannot resolve git ref 'nonexistent_ref_12345' in source archive without git metadata\n"
+
+======================================================================
+FAIL: test_8_canonical_star_input_is_immutable (__main__.TestCiFailClosedControls.test_8_canonical_star_input_is_immutable)
+Control 8: STAR metadata drift that leaves the pixels untouched must fail closed.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/motioncorr-damping-a1c78adc1d0f/src-cand/tools/test_ci_fail_closed.py", line 768, in test_8_canonical_star_input_is_immutable
+    self.assertEqual(res_clean.returncode, 0,
+AssertionError: 1 != 0 : Baseline must verify before tampering: === Canonical Fixture Verification (file:/tmp/motioncorr-damping-a1c78adc1d0f/src-cand/test-data/known_motion/MANIFEST.json) ===
+         MISMATCH  km_global_hisnr
+      expected SHA256: 343c1cbab443917195047c8a7a720db191f127cd9c2a2685091b113f51a9f4ee
+      observed SHA256: 343c1cbab443917195047c8a7a720db191f127cd9c2a2685091b113f51a9f4ee
+      expected bytes:  12583936
+      observed bytes:  12583936
+      ground-truth JSON hash MISMATCH:
+        expected: 9e4269f9808d2908ae6f5923cec601f7b79e380efa1e23cddd263cba99b0439c
+        observed: 1299833454431f655ac5da77f175a29c7b5e97f3e5ab51da6f79fcf6362a257e
+  NOTE: Zero fixtures were successfully verified
+
+
+----------------------------------------------------------------------
+Ran 8 tests in 15.466s
+
+FAILED (failures=3)
+test_ci_fail_closed rc=1
+Test project /tmp/motioncorr-damping-a1c78adc1d0f/build-cand
+      Start 88: ExperimentalFlagsCli
+      Start  6: GlobalHalfGain
+      Start  1: HermitianProjectionOracle
+      Start  2: CpuDoseSymmetry
+ 1/92 Test  #1: HermitianProjectionOracle ...................   Passed    0.00 sec
+      Start  3: CpuDoseSymmetryBase
+ 2/92 Test  #6: GlobalHalfGain ..............................   Passed    0.10 sec
+      Start  4: CpuUnweightedStream
+ 3/92 Test #88: ExperimentalFlagsCli ........................   Passed    0.16 sec
+      Start  5: PatchRetryState
+ 4/92 Test  #5: PatchRetryState .............................   Passed    0.04 sec
+      Start  7: PeakFitArithmetic
+ 5/92 Test  #7: PeakFitArithmetic ...........................   Passed    0.00 sec
+      Start  8: PeakFitArithmeticMutant_float-denominator
+ 6/92 Test  #8: PeakFitArithmeticMutant_float-denominator ...   Passed    0.01 sec
+      Start  9: PeakFitArithmeticMutant_early-store
+ 7/92 Test  #9: PeakFitArithmeticMutant_early-store .........   Passed    0.00 sec
+      Start 10: PeakFitArithmeticMutant_wrong-scale
+ 8/92 Test #10: PeakFitArithmeticMutant_wrong-scale .........   Passed    0.00 sec
+      Start 11: RealspaceBorderValidation
+ 9/92 Test #11: RealspaceBorderValidation ...................   Passed    0.01 sec
+      Start 12: PatchRetryAdmission
+10/92 Test #12: PatchRetryAdmission .........................   Passed    0.00 sec
+      Start 13: RunnerInterpolateRecenter
+11/92 Test #13: RunnerInterpolateRecenter ...................   Passed    0.01 sec
+      Start 14: FloatPlanCache
+12/92 Test #14: FloatPlanCache ..............................   Passed    0.02 sec
+      Start 15: MrcHeaderStats
+13/92 Test #15: MrcHeaderStats ..............................   Passed    0.02 sec
+      Start 16: ReportPlotUndefinedAxis
+14/92 Test #16: ReportPlotUndefinedAxis .....................   Passed    0.01 sec
+      Start 17: PdfConcat
+15/92 Test #17: PdfConcat ...................................   Passed    0.18 sec
+      Start 18: DefectParser
+16/92 Test #18: DefectParser ................................   Passed    0.02 sec
+      Start 19: DeflateLayout
+17/92 Test #19: DeflateLayout ...............................   Passed    0.02 sec
+      Start 20: DeflateLayoutMutant_span_wrap
+18/92 Test  #4: CpuUnweightedStream .........................   Passed    0.41 sec
+      Start 21: DeflateLayoutMutant_stage_sum
+19/92 Test #20: DeflateLayoutMutant_span_wrap ...............   Passed    0.01 sec
+      Start 22: DeflateLayoutMutant_reserve_round
+20/92 Test #21: DeflateLayoutMutant_stage_sum ...............   Passed    0.01 sec
+      Start 23: DeflateLayoutMutant_layout_table
+21/92 Test #22: DeflateLayoutMutant_reserve_round ...........   Passed    0.01 sec
+      Start 24: DeflateLayoutMutant_arena_start
+22/92 Test #23: DeflateLayoutMutant_layout_table ............   Passed    0.01 sec
+      Start 25: DeflateLayoutMutant_drain_step
+23/92 Test #24: DeflateLayoutMutant_arena_start .............   Passed    0.01 sec
+      Start 26: Adler32Arithmetic
+24/92 Test #25: DeflateLayoutMutant_drain_step ..............   Passed    0.02 sec
+      Start 27: Adler32KernelHost
+25/92 Test #27: Adler32KernelHost ...........................   Passed    0.00 sec
+      Start 28: StageProfileThreads
+26/92 Test #28: StageProfileThreads .........................   Passed    0.16 sec
+      Start 29: FrameBufferPool
+27/92 Test #29: FrameBufferPool .............................   Passed    0.04 sec
+      Start 30: ScratchArena
+28/92 Test #30: ScratchArena ................................   Passed    0.00 sec
+      Start 31: ReaderPool
+29/92 Test #31: ReaderPool ..................................   Passed    0.53 sec
+      Start 32: ReaderPoolMutant_spin
+30/92 Test #26: Adler32Arithmetic ...........................   Passed    0.98 sec
+      Start 33: ReaderPoolMutant_nowait
+31/92 Test #33: ReaderPoolMutant_nowait .....................   Passed    0.04 sec
+      Start 34: DefectNeighbours
+32/92 Test #34: DefectNeighbours ............................   Passed    0.01 sec
+      Start 35: DefectMergeMutant_append_only
+33/92 Test #35: DefectMergeMutant_append_only ...............   Passed    0.01 sec
+      Start 36: DefectMergeMutant_no_order_check
+34/92 Test #36: DefectMergeMutant_no_order_check ............   Passed    0.01 sec
+      Start 37: DefectMergeMutant_swap_xy
+35/92 Test #37: DefectMergeMutant_swap_xy ...................   Passed    0.00 sec
+      Start 38: RelionErrorOwnership
+36/92 Test #38: RelionErrorOwnership ........................   Passed    0.01 sec
+      Start 39: RelionErrorUnprinted
+37/92 Test #39: RelionErrorUnprinted ........................   Passed    0.01 sec
+      Start 40: TiffIdentityLaterChunkHostControls
+38/92 Test #32: ReaderPoolMutant_spin .......................   Passed    0.76 sec
+      Start 41: NvcompAcceptanceDiagnostics
+39/92 Test #41: NvcompAcceptanceDiagnostics .................   Passed    0.13 sec
+      Start 42: ProfilingKit
+40/92 Test  #2: CpuDoseSymmetry .............................   Passed    3.10 sec
+      Start 43: StickyCudaProcessLifecycle
+41/92 Test  #3: CpuDoseSymmetryBase .........................   Passed    3.70 sec
+      Start 44: DatasetFinalization
+42/92 Test #44: DatasetFinalization .........................   Passed    0.20 sec
+      Start 45: TestHygiene235
+43/92 Test #43: StickyCudaProcessLifecycle ..................   Passed    0.84 sec
+      Start 46: GainCacheOwnership
+44/92 Test #45: TestHygiene235 ..............................   Passed    0.13 sec
+      Start 47: NvcompGuards
+45/92 Test #47: NvcompGuards ................................   Passed    0.03 sec
+      Start 48: SyntheticRegression
+46/92 Test #48: SyntheticRegression .........................   Passed    0.68 sec
+      Start 49: HotPixelRngDeterminism
+47/92 Test #49: HotPixelRngDeterminism ......................   Passed    0.54 sec
+      Start 50: RunnerExposure
+48/92 Test #50: RunnerExposure ..............................   Passed    0.64 sec
+      Start 51: Runner_failure
+49/92 Test #51: Runner_failure ..............................   Passed    0.13 sec
+      Start 52: Runner_invalid
+50/92 Test #52: Runner_invalid ..............................   Passed    0.12 sec
+      Start 53: Runner_resume
+51/92 Test #46: GainCacheOwnership ..........................   Passed    4.46 sec
+      Start 54: Runner_tomography
+52/92 Test #53: Runner_resume ...............................   Passed    2.24 sec
+      Start 55: RunnerLateBin
+53/92 Test #54: Runner_tomography ...........................   Passed    0.42 sec
+      Start 56: RunnerExportedUnits
+54/92 Test #40: TiffIdentityLaterChunkHostControls ..........   Passed    7.28 sec
+      Start 57: GainCache
+55/92 Test #56: RunnerExportedUnits .........................   Passed    0.12 sec
+      Start 58: TiffRead
+56/92 Test #55: RunnerLateBin ...............................   Passed    0.71 sec
+      Start 59: DamagedMovie
+57/92 Test #58: TiffRead ....................................   Passed    0.95 sec
+      Start 60: TruncatedMrcMovie
+58/92 Test #57: GainCache ...................................   Passed    1.25 sec
+      Start 61: TruncatedGainDefect
+59/92 Test #59: DamagedMovie ................................   Passed    2.87 sec
+      Start 62: CompressedMovieSequence
+60/92 Test #61: TruncatedGainDefect .........................   Passed    1.97 sec
+      Start 63: CompressedMrcStatus_bz2
+61/92 Test #63: CompressedMrcStatus_bz2 .....................***Skipped   0.05 sec
+      Start 64: CompressedMrcStatus_xz
+62/92 Test #62: CompressedMovieSequence .....................   Passed    0.72 sec
+      Start 65: CompressedMrcStatus_zst
+63/92 Test #60: TruncatedMrcMovie ...........................   Passed    3.54 sec
+      Start 66: InputFormats
+64/92 Test #64: CompressedMrcStatus_xz ......................   Passed    1.94 sec
+      Start 67: CutDownMovie
+65/92 Test #65: CompressedMrcStatus_zst .....................   Passed    1.64 sec
+      Start 68: GlobalIfftElision
+66/92 Test #68: GlobalIfftElision ...........................   Passed    1.63 sec
+      Start 69: HostBufferReuse
+67/92 Test #67: CutDownMovie ................................   Passed    3.46 sec
+      Start 70: StageProfile
+68/92 Test #69: HostBufferReuse .............................   Passed    3.07 sec
+      Start 71: RunnerModelParser
+69/92 Test #71: RunnerModelParser ...........................   Passed    0.19 sec
+      Start 72: EerMemorySafety
+70/92 Test #70: StageProfile ................................   Passed    1.73 sec
+      Start 73: MicrographModelBounds
+71/92 Test #73: MicrographModelBounds .......................   Passed    1.15 sec
+      Start 74: RunnerInterpolateShifts
+72/92 Test #74: RunnerInterpolateShifts .....................   Passed    0.42 sec
+      Start 75: WriteFaults
+73/92 Test #75: WriteFaults .................................   Passed    0.48 sec
+      Start 76: WriteFaultsSync
+74/92 Test #76: WriteFaultsSync .............................   Passed    0.58 sec
+      Start 77: WriteFaultsMultiProduct
+75/92 Test #77: WriteFaultsMultiProduct .....................   Passed    0.58 sec
+      Start 78: OutputStageFaults
+76/92 Test #78: OutputStageFaults ...........................   Passed    0.53 sec
+      Start 79: LogfileFromEps
+77/92 Test #79: LogfileFromEps ..............................   Passed    3.90 sec
+      Start 80: LogfileFromEpsMutant_always_eps
+78/92 Test #80: LogfileFromEpsMutant_always_eps .............   Passed    0.32 sec
+      Start 81: LogfileFromEpsMutant_late_guard
+79/92 Test #81: LogfileFromEpsMutant_late_guard .............   Passed    0.23 sec
+      Start 82: LogfileFromEpsMutant_eps_order
+80/92 Test #82: LogfileFromEpsMutant_eps_order ..............   Passed    0.24 sec
+      Start 83: LogfileFromEpsMutant_placeholder
+81/92 Test #83: LogfileFromEpsMutant_placeholder ............   Passed    0.67 sec
+      Start 84: LogfileFromEpsMutant_concat_cleanup
+82/92 Test #84: LogfileFromEpsMutant_concat_cleanup .........   Passed    3.39 sec
+      Start 85: CiFailClosedControls
+83/92 Test #72: EerMemorySafety .............................   Passed   20.59 sec
+      Start 86: CudaValidationParser
+84/92 Test #86: CudaValidationParser ........................   Passed    0.05 sec
+      Start 87: MultiGpuScheduling
+85/92 Test #85: CiFailClosedControls ........................***Failed   18.34 sec
+....FF.F
+======================================================================
+FAIL: test_5_byte_flipped_fixture_fails (__main__.TestCiFailClosedControls.test_5_byte_flipped_fixture_fails)
+Control 5: Baseline fixture must pass first, then fail after corrupting one byte.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/motioncorr-damping-a1c78adc1d0f/src-cand/tools/test_ci_fail_closed.py", line 453, in test_5_byte_flipped_fixture_fails
+    self.assertEqual(res_baseline.returncode, 0,
+AssertionError: 1 != 0 : Baseline verification must pass before corruption: === Canonical Fixture Verification (file:/tmp/motioncorr-damping-a1c78adc1d0f/src-cand/test-data/known_motion/MANIFEST.json) ===
+         MISMATCH  km_global_hisnr
+      expected SHA256: 343c1cbab443917195047c8a7a720db191f127cd9c2a2685091b113f51a9f4ee
+      observed SHA256: 343c1cbab443917195047c8a7a720db191f127cd9c2a2685091b113f51a9f4ee
+      expected bytes:  12583936
+      observed bytes:  12583936
+      ground-truth JSON hash MISMATCH:
+        expected: 9e4269f9808d2908ae6f5923cec601f7b79e380efa1e23cddd263cba99b0439c
+        observed: 1299833454431f655ac5da77f175a29c7b5e97f3e5ab51da6f79fcf6362a257e
+  NOTE: Zero fixtures were successfully verified
+
+
+======================================================================
+FAIL: test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/motioncorr-damping-a1c78adc1d0f/src-cand/tools/test_ci_fail_closed.py", line 536, in test_6_trusted_git_lookup_and_tampered_disk_manifest
+    self.assertIn("Failed to load trusted manifest from git ref", res_invalid_ref.stderr)
+AssertionError: 'Failed to load trusted manifest from git ref' not found in "ERROR: Cannot load trusted manifest: Cannot resolve git ref 'nonexistent_ref_12345' in source archive without git metadata\n"
+
+======================================================================
+FAIL: test_8_canonical_star_input_is_immutable (__main__.TestCiFailClosedControls.test_8_canonical_star_input_is_immutable)
+Control 8: STAR metadata drift that leaves the pixels untouched must fail closed.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/motioncorr-damping-a1c78adc1d0f/src-cand/tools/test_ci_fail_closed.py", line 768, in test_8_canonical_star_input_is_immutable
+    self.assertEqual(res_clean.returncode, 0,
+AssertionError: 1 != 0 : Baseline must verify before tampering: === Canonical Fixture Verification (file:/tmp/motioncorr-damping-a1c78adc1d0f/src-cand/test-data/known_motion/MANIFEST.json) ===
+         MISMATCH  km_global_hisnr
+      expected SHA256: 343c1cbab443917195047c8a7a720db191f127cd9c2a2685091b113f51a9f4ee
+      observed SHA256: 343c1cbab443917195047c8a7a720db191f127cd9c2a2685091b113f51a9f4ee
+      expected bytes:  12583936
+      observed bytes:  12583936
+      ground-truth JSON hash MISMATCH:
+        expected: 9e4269f9808d2908ae6f5923cec601f7b79e380efa1e23cddd263cba99b0439c
+        observed: 1299833454431f655ac5da77f175a29c7b5e97f3e5ab51da6f79fcf6362a257e
+  NOTE: Zero fixtures were successfully verified
+
+
+----------------------------------------------------------------------
+Ran 8 tests in 18.267s
+
+FAILED (failures=3)
+
+      Start 89: OutputTreeComparator
+86/92 Test #89: OutputTreeComparator ........................   Passed    0.65 sec
+      Start 90: JointStarPublication
+87/92 Test #90: JointStarPublication ........................   Passed    0.85 sec
+      Start 91: ImageWriteFaults
+88/92 Test #91: ImageWriteFaults ............................   Passed    0.04 sec
+      Start 92: NativeMovieStaging
+89/92 Test #92: NativeMovieStaging ..........................   Passed    0.33 sec
+90/92 Test #66: InputFormats ................................   Passed   41.87 sec
+91/92 Test #42: ProfilingKit ................................   Passed   56.47 sec
+92/92 Test #87: MultiGpuScheduling ..........................   Passed   48.94 sec
+
+99% tests passed, 1 tests failed out of 92
+
+Label Time Summary:
+host    =   0.01 sec*proc (1 test)
+
+Total Test time (real) =  88.86 sec
+
+The following tests did not run:
+	 63 - CompressedMrcStatus_bz2 (Skipped)
+
+The following tests FAILED:
+	 85 - CiFailClosedControls (Failed)
+Errors while running CTest
+ctest rc=8 end 2026-10-25T23:59:49Z

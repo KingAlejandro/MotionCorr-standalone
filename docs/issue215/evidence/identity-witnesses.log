@@ -1,0 +1,61 @@
+
+control-fixed-initial
+host-original: route=compact swapped=False passed=True
+host-replacement: route=compact swapped=False passed=True
+healthy: route=nvcomp swapped=False passed=True
+tag-close-grow: route=compact swapped=True passed=True
+  [tiffidentity] changed mode=grow point=tag-close
+  nvCOMP ingestion declined (TIFF file identity changed or unavailable); using the host reader.
+tag-close-replace: route=compact swapped=True passed=True
+  [tiffidentity] changed mode=replace point=tag-close
+  nvCOMP ingestion declined (TIFF file identity changed or unavailable); using the host reader.
+reader-open-grow: route=compact swapped=True passed=True
+  [tiffidentity] changed mode=grow point=reader-open
+  nvCOMP ingestion declined (TIFF file identity changed or unavailable); using the host reader.
+reader-open-replace: route=compact swapped=True passed=True
+  [tiffidentity] changed mode=replace point=reader-open
+  nvCOMP ingestion declined (TIFF file identity changed or unavailable); using the host reader.
+strip-read-grow: route=nvcomp swapped=False passed=False
+strip-read-replace: route=nvcomp swapped=False passed=False
+
+control-fixed
+host-original: route=compact swapped=False passed=True
+host-replacement: route=compact swapped=False passed=True
+healthy: route=nvcomp swapped=False passed=True
+tag-close-grow: route=compact swapped=True passed=True
+  [tiffidentity] changed mode=grow point=tag-close
+  nvCOMP ingestion declined (TIFF file identity changed or unavailable); using the host reader.
+tag-close-replace: route=compact swapped=True passed=True
+  [tiffidentity] changed mode=replace point=tag-close
+  nvCOMP ingestion declined (TIFF file identity changed or unavailable); using the host reader.
+reader-open-grow: route=compact swapped=True passed=True
+  [tiffidentity] changed mode=grow point=reader-open
+  nvCOMP ingestion declined (TIFF file identity changed or unavailable); using the host reader.
+reader-open-replace: route=compact swapped=True passed=True
+  [tiffidentity] changed mode=replace point=reader-open
+  nvCOMP ingestion declined (TIFF file identity changed or unavailable); using the host reader.
+strip-read-grow: route=compact swapped=True passed=True
+  [tiffidentity] changed mode=grow point=strip-read
+  nvCOMP ingestion declined (TIFF file identity changed or unavailable); using the host reader.
+strip-read-replace: route=compact swapped=True passed=True
+  [tiffidentity] changed mode=replace point=strip-read
+  nvCOMP ingestion declined (TIFF file identity changed or unavailable); using the host reader.
+
+control-unfixed
+host-original: route=compact swapped=False passed=True
+host-replacement: route=compact swapped=False passed=True
+healthy: route=nvcomp swapped=False passed=True
+tag-close-grow: route=nvcomp swapped=True passed=False
+  [tiffidentity] changed mode=grow point=tag-close
+tag-close-replace: route=compact swapped=True passed=False
+  [tiffidentity] changed mode=replace point=tag-close
+  WARNING: strip 20 of frame 0 has an unusable zlib wrapper; falling back to the host reader.
+  WARNING: strip 0 of frame 1 has an unusable zlib wrapper; falling back to the host reader.
+reader-open-grow: route=nvcomp swapped=True passed=False
+  [tiffidentity] changed mode=grow point=reader-open
+reader-open-replace: route=nvcomp swapped=True passed=False
+  [tiffidentity] changed mode=replace point=reader-open
+strip-read-grow: route=nvcomp swapped=True passed=False
+  [tiffidentity] changed mode=grow point=strip-read
+strip-read-replace: route=nvcomp swapped=True passed=False
+  [tiffidentity] changed mode=replace point=strip-read

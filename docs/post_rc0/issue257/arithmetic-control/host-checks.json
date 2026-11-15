@@ -1,0 +1,353 @@
+{
+  "base": "d888ab111b1965aeda484a928e76f421112737e0",
+  "cwd": "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493",
+  "thread_limit": 2,
+  "environment": {
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "MKL_NUM_THREADS": "2",
+    "VECLIB_MAXIMUM_THREADS": "2",
+    "CMAKE_BUILD_PARALLEL_LEVEL": "2",
+    "CTEST_PARALLEL_LEVEL": "2"
+  },
+  "checks": [
+    {
+      "utc": "2026-10-22T10:41:16.887664+00:00",
+      "command": [
+        "uname",
+        "-a"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "Darwin SCMAC-7L9P2F 25.6.0 Darwin Kernel Version 25.6.0: Tue Aug 18 17:48:46 PDT 2026; root:xnu-12377.161.15.700.19~2/RELEASE_ARM64_T6041 arm64\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:41:16.928797+00:00",
+      "command": [
+        "ps",
+        "-axo",
+        "pid,pcpu,comm",
+        "-r"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "  PID  %CPU COMM\n86395 1076.0 /Users/alex.konstantinov/.t3/tools/chrome-headless-shell/mac-arm64/154.0.8037.92/chrome-headless-shell\n69175  96.9 /tmp/gv/parent-small-20261022/baseline-matched\n40029  11.6 /Applications/Microsoft Defender.app/Contents/MacOS/wdavdaemon_unprivileged.app/Contents/MacOS/wdavdaemon_unprivileged\n  421  10.2 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n49797   8.5 /Library/SystemExtensions/9C03D4E6-1453-4593-B131-CCBC8F7D18AC/com.jamf.protect.security-extension.systemextension/Contents/MacOS/com.jamf.protect.security-extension\n34320   7.5 /Applications/Zen.app/Contents/MacOS/plugin-container.app/Contents/MacOS/plugin-container\n16321   5.4 /Applications/Zen.app/Contents/MacOS/gpu-helper.app/Contents/MacOS/Zen GPU Helper\n35214   3.6 /Applications/Zen.app/Contents/MacOS/zen\n  565   2.5 /Applications/Microsoft Defender.app/Contents/MacOS/wdavdaemon\n77051   2.5 /Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/../CodexCLI.app/Contents/MacOS/codex\n  675   2.0 /Applications/Microsoft Defender.app/Contents/MacOS/wdavdaemon_enterprise.app/Contents/MacOS/wdavdaemon_enterprise\n69281   1.9 /Library/Application Support/Fortinet/FortiClient/bin/fctappfw\n34917   1.8 /Users/alex.konstantinov/Applications/T3 Code (Nightly).app/Contents/MacOS/T3 Code (Nightly)\n  643   1.7 /System/Library/DriverExtensions/com.apple.DriverKit-AppleBCMWLAN.dext/com.apple.DriverKit-AppleBCMWLAN\n  440   1.4 /usr/sbin/coreaudiod\n88388   1.3 /Applications/ChatGPT.app/Contents/MacOS/ChatGPT\n  566   1.1 /Library/Application Support/JAMF/Jamf.app/Contents/MacOS/JamfDaemon.app/Contents/MacOS/JamfDaemon\n16355   1.0 /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/155.0.8059.80/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)\n77619   1.0 /Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex-code-mode-host\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:41:16.939750+00:00",
+      "command": [
+        "df",
+        "-h",
+        "."
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   460Gi   391Gi    36Gi    92%    7.6M  377M    2%   /System/Volumes/Data\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:41:17.028697+00:00",
+      "command": [
+        "clang++",
+        "--version"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:41:24.085318+00:00",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build/peak-fit-control",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCUDA=OFF",
+        "-DBUILD_TESTING=ON",
+        "-DPython3_EXECUTABLE=/Users/alex.konstantinov/.local/bin/python3"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "-- The C compiler identification is AppleClang 21.0.0.21000334\n-- The CXX compiler identification is AppleClang 21.0.0.21000334\n-- Detecting C compiler ABI info\n-- Detecting C compiler ABI info - done\n-- Check for working C compiler: /usr/bin/cc - skipped\n-- Detecting C compile features\n-- Detecting C compile features - done\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Found PkgConfig: /opt/homebrew/bin/pkg-config (found version \"3.0.7\")\n-- Checking for module 'fftw3'\n--   Found fftw3, version 3.3.11\n-- Checking for module 'fftw3f'\n--   Found fftw3f, version 3.3.11\n-- Found TIFF: /opt/homebrew/lib/libtiff.dylib (found version \"4.7.2\")\n-- Found ZLIB: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib/libz.tbd (found version \"1.2.12\")\n-- Found PNG: /opt/homebrew/lib/libpng.dylib (found version \"1.6.59\")\n-- Found JPEG: /opt/homebrew/lib/libjpeg.dylib (found version \"80\")\n-- Performing Test TIFF_HAS_LIBDEFLATE\n-- Performing Test TIFF_HAS_LIBDEFLATE - Failed\n-- LibTIFF Deflate subcodec: zlib only\n--   Deflate movie reads use zlib here. A LibTIFF built with libdeflate decodes the same bytes faster; see README, \"LibTIFF Deflate backend\". Results are unaffected.\n-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED\n-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED - Failed\n-- CPU dose weighting: original loop (AUTO: AppleClang on arm64 with these flags is not the qualified x86-64 GCC without FMA). To opt in after CpuDoseSymmetry passes on this toolchain: -DMOTIONCORR_CPU_DOSE_SYMMETRY=ON\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n-- Found Threads: TRUE\n-- Found Python3: /Users/alex.konstantinov/.local/bin/python3 (found version \"3.13.7\") found components: Interpreter\n-- Configuring done (5.9s)\n-- Generating done (1.0s)\n-- Build files have been written to: /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493/build/peak-fit-control\n",
+      "stderr": "CMake Warning at CMakeLists.txt:493 (message):\n  pbzip2 not found: InputFormats and RealCutdown waive its compressed-MRC\n  cases (UNRUN).  Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the\n  waiver.\n\n\n"
+    },
+    {
+      "utc": "2026-10-22T10:41:25.266637+00:00",
+      "command": [
+        "cmake",
+        "--build",
+        "build/peak-fit-control",
+        "--target",
+        "peak_fit_arithmetic",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "[100%] Building CXX object CMakeFiles/peak_fit_arithmetic.dir/tests/peak_fit_arithmetic.cpp.o\n[100%] Linking CXX executable peak_fit_arithmetic\n[100%] Built target peak_fit_arithmetic\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:41:25.607978+00:00",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build/peak-fit-control",
+        "-R",
+        "^PeakFitArithmetic",
+        "-j",
+        "2",
+        "--output-on-failure"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "Test project /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493/build/peak-fit-control\n    Start 5: PeakFitArithmetic\n    Start 6: PeakFitArithmeticMutant_float-denominator\n1/4 Test #5: PeakFitArithmetic ...........................   Passed    0.23 sec\n    Start 7: PeakFitArithmeticMutant_early-store\n2/4 Test #6: PeakFitArithmeticMutant_float-denominator ...   Passed    0.23 sec\n    Start 8: PeakFitArithmeticMutant_wrong-scale\n3/4 Test #7: PeakFitArithmeticMutant_early-store .........   Passed    0.00 sec\n4/4 Test #8: PeakFitArithmeticMutant_wrong-scale .........   Passed    0.01 sec\n\n100% tests passed out of 4\n\nTotal Test time (real) =   0.25 sec\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:41:25.613807+00:00",
+      "command": [
+        "build/peak-fit-control/peak_fit_arithmetic",
+        "none"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "exact-pedestal got=-1.6521738767623901,1.2391303777694702 exact-rounded=-1.6521738767623901,1.2391303777694702 match=1\nknown-dyadic-vertex got=1,-0.75 exact-rounded=1,-0.75 match=1\nknown-sixth-final-store got=0.2083333283662796,-0.2083333283662796 exact-rounded=0.2083333283662796,-0.2083333283662796 match=1\nknown-float-scale got=1.6296297311782837,-1.6296297311782837 exact-rounded=1.6296297311782837,-1.6296297311782837 match=1\nexact-rounded-zero got=2,-1.5 exact-rounded=2,-1.5 match=1\nexact-unique-ulp got=0,0 exact-rounded=0,0 match=1\nsub-ulp-output got=3,-2 exact-rounded=3,-2 match=1\nexact-below-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-at-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-above-guard got=2.0000004768371582,-1.5000003576278687 exact-rounded=2.0000004768371582,-1.5000003576278687 match=1\nexact-unbracketed-edge got=6.25,0.625 exact-rounded=6.25,0.625 match=1\nexact-positive-curvature got=-0.66666668653488159,0.5 exact-rounded=-0.66666668653488159,0.5 match=1\nquantized-flat got=0,0 exact-rounded=0,0 match=1\nquantization: analytic_vertex=0.25 stored_fit_fallback=0 map_error=0.25 fit_error_on_stored_samples=0\nreplay=none mismatches=0\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:41:25.629291+00:00",
+      "command": [
+        "build/peak-fit-control/peak_fit_arithmetic",
+        "float-denominator"
+      ],
+      "exit": 1,
+      "expected_exit": 1,
+      "stdout": "exact-pedestal got=-1.6442307233810425,1.233173131942749 exact-rounded=-1.6521738767623901,1.2391303777694702 match=0\nknown-dyadic-vertex got=1,-0.75 exact-rounded=1,-0.75 match=1\nknown-sixth-final-store got=0.2083333283662796,-0.2083333283662796 exact-rounded=0.2083333283662796,-0.2083333283662796 match=1\nknown-float-scale got=1.6296297311782837,-1.6296297311782837 exact-rounded=1.6296297311782837,-1.6296297311782837 match=1\nexact-rounded-zero got=0,0 exact-rounded=2,-1.5 match=0\nexact-unique-ulp got=0,0 exact-rounded=0,0 match=1\nsub-ulp-output got=3,-2 exact-rounded=3,-2 match=1\nexact-below-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-at-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-above-guard got=2.0000004768371582,-1.5000003576278687 exact-rounded=2.0000004768371582,-1.5000003576278687 match=1\nexact-unbracketed-edge got=6.25,0.625 exact-rounded=6.25,0.625 match=1\nexact-positive-curvature got=-0.66666668653488159,0.5 exact-rounded=-0.66666668653488159,0.5 match=1\nquantized-flat got=0,0 exact-rounded=0,0 match=1\nquantization: analytic_vertex=0.25 stored_fit_fallback=0 map_error=0.25 fit_error_on_stored_samples=0\nreplay=float-denominator mismatches=2\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:41:25.644348+00:00",
+      "command": [
+        "build/peak-fit-control/peak_fit_arithmetic",
+        "early-store"
+      ],
+      "exit": 1,
+      "expected_exit": 1,
+      "stdout": "exact-pedestal got=-1.6521738767623901,1.2391303777694702 exact-rounded=-1.6521738767623901,1.2391303777694702 match=1\nknown-dyadic-vertex got=1,-0.75 exact-rounded=1,-0.75 match=1\nknown-sixth-final-store got=0.2083333432674408,-0.2083333432674408 exact-rounded=0.2083333283662796,-0.2083333283662796 match=0\nknown-float-scale got=1.6296296119689941,-1.6296296119689941 exact-rounded=1.6296297311782837,-1.6296297311782837 match=0\nexact-rounded-zero got=2,-1.5 exact-rounded=2,-1.5 match=1\nexact-unique-ulp got=0,0 exact-rounded=0,0 match=1\nsub-ulp-output got=3,-2 exact-rounded=3,-2 match=1\nexact-below-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-at-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-above-guard got=2.0000004768371582,-1.5000003576278687 exact-rounded=2.0000004768371582,-1.5000003576278687 match=1\nexact-unbracketed-edge got=6.25,0.625 exact-rounded=6.25,0.625 match=1\nexact-positive-curvature got=-0.66666668653488159,0.5 exact-rounded=-0.66666668653488159,0.5 match=1\nquantized-flat got=0,0 exact-rounded=0,0 match=1\nquantization: analytic_vertex=0.25 stored_fit_fallback=0 map_error=0.25 fit_error_on_stored_samples=0\nreplay=early-store mismatches=2\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:41:25.654535+00:00",
+      "command": [
+        "build/peak-fit-control/peak_fit_arithmetic",
+        "wrong-scale"
+      ],
+      "exit": 1,
+      "expected_exit": 1,
+      "stdout": "exact-pedestal got=-1.6521738767623901,1.2391303777694702 exact-rounded=-1.6521738767623901,1.2391303777694702 match=1\nknown-dyadic-vertex got=1,-0.75 exact-rounded=1,-0.75 match=1\nknown-sixth-final-store got=0.2083333283662796,-0.2083333283662796 exact-rounded=0.2083333283662796,-0.2083333283662796 match=1\nknown-float-scale got=1.6296296119689941,-1.6296296119689941 exact-rounded=1.6296297311782837,-1.6296297311782837 match=0\nexact-rounded-zero got=2,-1.5 exact-rounded=2,-1.5 match=1\nexact-unique-ulp got=0,0 exact-rounded=0,0 match=1\nsub-ulp-output got=3,-2 exact-rounded=3,-2 match=1\nexact-below-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-at-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-above-guard got=2.0000004768371582,-1.5000003576278687 exact-rounded=2.0000004768371582,-1.5000003576278687 match=1\nexact-unbracketed-edge got=6.25,0.625 exact-rounded=6.25,0.625 match=1\nexact-positive-curvature got=-0.66666668653488159,0.5 exact-rounded=-0.66666668653488159,0.5 match=1\nquantized-flat got=0,0 exact-rounded=0,0 match=1\nquantization: analytic_vertex=0.25 stored_fit_fallback=0 map_error=0.25 fit_error_on_stored_samples=0\nreplay=wrong-scale mismatches=1\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:41:27.335717+00:00",
+      "command": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "tools/test_ci_fail_closed.py",
+        "TestCiFailClosedControls.test_3_zero_or_missing_collected_tests_fails"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "",
+      "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 1.592s\n\nOK\n"
+    },
+    {
+      "utc": "2026-10-22T10:41:27.399025+00:00",
+      "command": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "tools/validate_test_collection.py",
+        "--test-dir",
+        "build/peak-fit-control",
+        "--min-count",
+        "40"
+      ],
+      "exit": 1,
+      "expected_exit": 0,
+      "stdout": "=== CTest Collection Validation: FAIL === \n  CUDA-only required tests: not required\n  Collected tests: 78\n    - CpuDoseSymmetry                [REQUIRED]\n    - CpuDoseSymmetryBase            [REQUIRED]\n    - CpuUnweightedStream            [ADDITIVE]\n    - PatchRetryState                [REQUIRED]\n    - PeakFitArithmetic              [REQUIRED]\n    - PeakFitArithmeticMutant_float-denominator [REQUIRED]\n    - PeakFitArithmeticMutant_early-store [REQUIRED]\n    - PeakFitArithmeticMutant_wrong-scale [REQUIRED]\n    - RunnerInterpolateRecenter      [REQUIRED]\n    - FloatPlanCache                 [ADDITIVE]\n    - MrcHeaderStats                 [REQUIRED]\n    - ReportPlotUndefinedAxis        [REQUIRED]\n    - PdfConcat                      [REQUIRED]\n    - DefectParser                   [REQUIRED]\n    - DeflateLayout                  [REQUIRED]\n    - DeflateLayoutMutant_span_wrap  [REQUIRED]\n    - DeflateLayoutMutant_stage_sum  [REQUIRED]\n    - DeflateLayoutMutant_reserve_round [REQUIRED]\n    - DeflateLayoutMutant_layout_table [REQUIRED]\n    - DeflateLayoutMutant_arena_start [REQUIRED]\n    - DeflateLayoutMutant_drain_step [REQUIRED]\n    - Adler32Arithmetic              [REQUIRED]\n    - Adler32KernelHost              [REQUIRED]\n    - StageProfileThreads            [REQUIRED]\n    - FrameBufferPool                [REQUIRED]\n    - ScratchArena                   [REQUIRED]\n    - ReaderPool                     [ADDITIVE]\n    - ReaderPoolMutant_spin          [ADDITIVE]\n    - ReaderPoolMutant_nowait        [ADDITIVE]\n    - DefectNeighbours               [REQUIRED]\n    - DefectMergeMutant_append_only  [ADDITIVE]\n    - DefectMergeMutant_no_order_check [ADDITIVE]\n    - DefectMergeMutant_swap_xy      [ADDITIVE]\n    - NvcompAcceptanceDiagnostics    [REQUIRED]\n    - ProfilingKit                   [REQUIRED]\n    - GainCacheOwnership             [REQUIRED]\n    - NvcompGuards                   [REQUIRED]\n    - SyntheticRegression            [REQUIRED]\n    - HotPixelRngDeterminism         [REQUIRED]\n    - RunnerExposure                 [REQUIRED]\n    - Runner_failure                 [REQUIRED]\n    - Runner_invalid                 [REQUIRED]\n    - Runner_resume                  [REQUIRED]\n    - Runner_tomography              [REQUIRED]\n    - RunnerLateBin                  [REQUIRED]\n    - RunnerExportedUnits            [REQUIRED]\n    - GainCache                      [REQUIRED]\n    - TiffRead                       [REQUIRED]\n    - DamagedMovie                   [REQUIRED]\n    - TruncatedMrcMovie              [REQUIRED]\n    - TruncatedGainDefect            [REQUIRED]\n    - CompressedMovieSequence        [REQUIRED]\n    - InputFormats                   [REQUIRED]\n    - CutDownMovie                   [REQUIRED]\n    - GlobalIfftElision              [REQUIRED]\n    - HostBufferReuse                [REQUIRED]\n    - StageProfile                   [REQUIRED]\n    - RunnerModelParser              [REQUIRED]\n    - EerMemorySafety                [REQUIRED]\n    - MicrographModelBounds          [REQUIRED]\n    - RunnerInterpolateShifts        [REQUIRED]\n    - WriteFaults                    [REQUIRED]\n    - WriteFaultsSync                [REQUIRED]\n    - WriteFaultsMultiProduct        [REQUIRED]\n    - OutputStageFaults              [REQUIRED]\n    - LogfileFromEps                 [REQUIRED]\n    - LogfileFromEpsMutant_always_eps [REQUIRED]\n    - LogfileFromEpsMutant_late_guard [REQUIRED]\n    - LogfileFromEpsMutant_eps_order [REQUIRED]\n    - LogfileFromEpsMutant_placeholder [REQUIRED]\n    - LogfileFromEpsMutant_concat_cleanup [REQUIRED]\n    - CiFailClosedControls           [REQUIRED]\n    - CudaValidationParser           [REQUIRED]\n    - MultiGpuScheduling             [REQUIRED]\n    - OutputTreeComparator           [REQUIRED]\n    - JointStarPublication           [REQUIRED]\n    - ImageWriteFaults               [REQUIRED]\n    - NativeMovieStaging             [REQUIRED]\n  FAILURE REASON: Test(s) registered with an empty command program, so CTest would report BAD_COMMAND: CpuDoseSymmetry, CpuDoseSymmetryBase, CpuUnweightedStream, PatchRetryState, RunnerInterpolateRecenter, FloatPlanCache, MrcHeaderStats, ReportPlotUndefinedAxis, PdfConcat, DefectParser, DeflateLayout, DeflateLayoutMutant_span_wrap, DeflateLayoutMutant_stage_sum, DeflateLayoutMutant_reserve_round, DeflateLayoutMutant_layout_table, DeflateLayoutMutant_arena_start, DeflateLayoutMutant_drain_step, Adler32Arithmetic, Adler32KernelHost, StageProfileThreads, FrameBufferPool, ScratchArena, ReaderPool, ReaderPoolMutant_spin, ReaderPoolMutant_nowait, DefectNeighbours, DefectMergeMutant_append_only, DefectMergeMutant_no_order_check, DefectMergeMutant_swap_xy, ImageWriteFaults, NativeMovieStaging\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:42:08.258267+00:00",
+      "command": [
+        "cmake",
+        "--build",
+        "build/peak-fit-control",
+        "--target",
+        "peak_fit_arithmetic",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "[100%] Building CXX object CMakeFiles/peak_fit_arithmetic.dir/tests/peak_fit_arithmetic.cpp.o\n[100%] Linking CXX executable peak_fit_arithmetic\n[100%] Built target peak_fit_arithmetic\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:42:08.577426+00:00",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build/peak-fit-control",
+        "-R",
+        "^PeakFitArithmetic",
+        "-j",
+        "2",
+        "--output-on-failure"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "Test project /Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493/build/peak-fit-control\n    Start 6: PeakFitArithmeticMutant_float-denominator\n    Start 5: PeakFitArithmetic\n1/4 Test #5: PeakFitArithmetic ...........................   Passed    0.26 sec\n    Start 8: PeakFitArithmeticMutant_wrong-scale\n2/4 Test #6: PeakFitArithmeticMutant_float-denominator ...   Passed    0.26 sec\n    Start 7: PeakFitArithmeticMutant_early-store\n3/4 Test #8: PeakFitArithmeticMutant_wrong-scale .........   Passed    0.00 sec\n4/4 Test #7: PeakFitArithmeticMutant_early-store .........   Passed    0.01 sec\n\n100% tests passed out of 4\n\nTotal Test time (real) =   0.29 sec\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:42:08.584955+00:00",
+      "command": [
+        "build/peak-fit-control/peak_fit_arithmetic",
+        "none"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "exact-pedestal got=-1.6521738767623901,1.2391303777694702 exact-rounded=-1.6521738767623901,1.2391303777694702 match=1\nknown-dyadic-vertex got=1,-0.75 exact-rounded=1,-0.75 match=1\nknown-sixth-final-store got=0.2083333283662796,-0.2083333283662796 exact-rounded=0.2083333283662796,-0.2083333283662796 match=1\nknown-float-scale got=1.6296297311782837,-1.6296297311782837 exact-rounded=1.6296297311782837,-1.6296297311782837 match=1\nexact-rounded-zero got=2,-1.5 exact-rounded=2,-1.5 match=1\nexact-unique-ulp got=0,0 exact-rounded=0,0 match=1\nsub-ulp-output got=3,-2 exact-rounded=3,-2 match=1\nexact-below-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-at-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-above-guard got=2.0000004768371582,-1.5000003576278687 exact-rounded=2.0000004768371582,-1.5000003576278687 match=1\nexact-unbracketed-edge got=6.25,0.625 exact-rounded=6.25,0.625 match=1\nexact-positive-curvature got=-0.66666668653488159,0.5 exact-rounded=-0.66666668653488159,0.5 match=1\nquantized-flat got=0,0 exact-rounded=0,0 match=1\nquantization: analytic_vertex=0.25 stored_fit_fallback=0 map_error=0.25 fit_error_on_stored_samples=0\nreplay=none mismatches=0\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:42:08.604542+00:00",
+      "command": [
+        "build/peak-fit-control/peak_fit_arithmetic",
+        "float-denominator"
+      ],
+      "exit": 1,
+      "expected_exit": 1,
+      "stdout": "exact-pedestal got=-1.6442307233810425,1.233173131942749 exact-rounded=-1.6521738767623901,1.2391303777694702 match=0\nknown-dyadic-vertex got=1,-0.75 exact-rounded=1,-0.75 match=1\nknown-sixth-final-store got=0.2083333283662796,-0.2083333283662796 exact-rounded=0.2083333283662796,-0.2083333283662796 match=1\nknown-float-scale got=1.6296297311782837,-1.6296297311782837 exact-rounded=1.6296297311782837,-1.6296297311782837 match=1\nexact-rounded-zero got=0,0 exact-rounded=2,-1.5 match=0\nexact-unique-ulp got=0,0 exact-rounded=0,0 match=1\nsub-ulp-output got=3,-2 exact-rounded=3,-2 match=1\nexact-below-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-at-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-above-guard got=2.0000004768371582,-1.5000003576278687 exact-rounded=2.0000004768371582,-1.5000003576278687 match=1\nexact-unbracketed-edge got=6.25,0.625 exact-rounded=6.25,0.625 match=1\nexact-positive-curvature got=-0.66666668653488159,0.5 exact-rounded=-0.66666668653488159,0.5 match=1\nquantized-flat got=0,0 exact-rounded=0,0 match=1\nquantization: analytic_vertex=0.25 stored_fit_fallback=0 map_error=0.25 fit_error_on_stored_samples=0\nreplay=float-denominator mismatches=2\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:42:08.616901+00:00",
+      "command": [
+        "build/peak-fit-control/peak_fit_arithmetic",
+        "early-store"
+      ],
+      "exit": 1,
+      "expected_exit": 1,
+      "stdout": "exact-pedestal got=-1.6521738767623901,1.2391303777694702 exact-rounded=-1.6521738767623901,1.2391303777694702 match=1\nknown-dyadic-vertex got=1,-0.75 exact-rounded=1,-0.75 match=1\nknown-sixth-final-store got=0.2083333432674408,-0.2083333432674408 exact-rounded=0.2083333283662796,-0.2083333283662796 match=0\nknown-float-scale got=1.6296296119689941,-1.6296296119689941 exact-rounded=1.6296297311782837,-1.6296297311782837 match=0\nexact-rounded-zero got=2,-1.5 exact-rounded=2,-1.5 match=1\nexact-unique-ulp got=0,0 exact-rounded=0,0 match=1\nsub-ulp-output got=3,-2 exact-rounded=3,-2 match=1\nexact-below-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-at-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-above-guard got=2.0000004768371582,-1.5000003576278687 exact-rounded=2.0000004768371582,-1.5000003576278687 match=1\nexact-unbracketed-edge got=6.25,0.625 exact-rounded=6.25,0.625 match=1\nexact-positive-curvature got=-0.66666668653488159,0.5 exact-rounded=-0.66666668653488159,0.5 match=1\nquantized-flat got=0,0 exact-rounded=0,0 match=1\nquantization: analytic_vertex=0.25 stored_fit_fallback=0 map_error=0.25 fit_error_on_stored_samples=0\nreplay=early-store mismatches=2\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:42:08.626763+00:00",
+      "command": [
+        "build/peak-fit-control/peak_fit_arithmetic",
+        "wrong-scale"
+      ],
+      "exit": 1,
+      "expected_exit": 1,
+      "stdout": "exact-pedestal got=-1.6521738767623901,1.2391303777694702 exact-rounded=-1.6521738767623901,1.2391303777694702 match=1\nknown-dyadic-vertex got=1,-0.75 exact-rounded=1,-0.75 match=1\nknown-sixth-final-store got=0.2083333283662796,-0.2083333283662796 exact-rounded=0.2083333283662796,-0.2083333283662796 match=1\nknown-float-scale got=1.6296296119689941,-1.6296296119689941 exact-rounded=1.6296297311782837,-1.6296297311782837 match=0\nexact-rounded-zero got=2,-1.5 exact-rounded=2,-1.5 match=1\nexact-unique-ulp got=0,0 exact-rounded=0,0 match=1\nsub-ulp-output got=3,-2 exact-rounded=3,-2 match=1\nexact-below-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-at-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-above-guard got=2.0000004768371582,-1.5000003576278687 exact-rounded=2.0000004768371582,-1.5000003576278687 match=1\nexact-unbracketed-edge got=6.25,0.625 exact-rounded=6.25,0.625 match=1\nexact-positive-curvature got=-0.66666668653488159,0.5 exact-rounded=-0.66666668653488159,0.5 match=1\nquantized-flat got=0,0 exact-rounded=0,0 match=1\nquantization: analytic_vertex=0.25 stored_fit_fallback=0 map_error=0.25 fit_error_on_stored_samples=0\nreplay=wrong-scale mismatches=1\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:42:08.664125+00:00",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build/peak-fit-control",
+        "-R",
+        "^PeakFitArithmetic",
+        "--show-only=json-v1"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "{\n  \"backtraceGraph\" : \n  {\n    \"commands\" : \n    [\n      \"add_test\"\n    ],\n    \"files\" : \n    [\n      \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493/CMakeLists.txt\"\n    ],\n    \"nodes\" : \n    [\n      {\n        \"file\" : 0\n      },\n      {\n        \"command\" : 0,\n        \"file\" : 0,\n        \"line\" : 254,\n        \"parent\" : 0\n      },\n      {\n        \"file\" : 0\n      },\n      {\n        \"command\" : 0,\n        \"file\" : 0,\n        \"line\" : 256,\n        \"parent\" : 2\n      },\n      {\n        \"file\" : 0\n      },\n      {\n        \"command\" : 0,\n        \"file\" : 0,\n        \"line\" : 256,\n        \"parent\" : 4\n      },\n      {\n        \"file\" : 0\n      },\n      {\n        \"command\" : 0,\n        \"file\" : 0,\n        \"line\" : 256,\n        \"parent\" : 6\n      }\n    ]\n  },\n  \"kind\" : \"ctestInfo\",\n  \"tests\" : \n  [\n    {\n      \"backtrace\" : 1,\n      \"command\" : \n      [\n        \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493/build/peak-fit-control/peak_fit_arithmetic\"\n      ],\n      \"name\" : \"PeakFitArithmetic\",\n      \"properties\" : \n      [\n        {\n          \"name\" : \"WORKING_DIRECTORY\",\n          \"value\" : \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493/build/peak-fit-control\"\n        }\n      ]\n    },\n    {\n      \"backtrace\" : 3,\n      \"command\" : \n      [\n        \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493/build/peak-fit-control/peak_fit_arithmetic\",\n        \"--expect-mismatch\",\n        \"float-denominator\"\n      ],\n      \"name\" : \"PeakFitArithmeticMutant_float-denominator\",\n      \"properties\" : \n      [\n        {\n          \"name\" : \"WORKING_DIRECTORY\",\n          \"value\" : \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493/build/peak-fit-control\"\n        }\n      ]\n    },\n    {\n      \"backtrace\" : 5,\n      \"command\" : \n      [\n        \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493/build/peak-fit-control/peak_fit_arithmetic\",\n        \"--expect-mismatch\",\n        \"early-store\"\n      ],\n      \"name\" : \"PeakFitArithmeticMutant_early-store\",\n      \"properties\" : \n      [\n        {\n          \"name\" : \"WORKING_DIRECTORY\",\n          \"value\" : \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493/build/peak-fit-control\"\n        }\n      ]\n    },\n    {\n      \"backtrace\" : 7,\n      \"command\" : \n      [\n        \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493/build/peak-fit-control/peak_fit_arithmetic\",\n        \"--expect-mismatch\",\n        \"wrong-scale\"\n      ],\n      \"name\" : \"PeakFitArithmeticMutant_wrong-scale\",\n      \"properties\" : \n      [\n        {\n          \"name\" : \"WORKING_DIRECTORY\",\n          \"value\" : \"/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-000e7493/build/peak-fit-control\"\n        }\n      ]\n    }\n  ],\n  \"version\" : \n  {\n    \"major\" : 1,\n    \"minor\" : 0\n  }\n}",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:42:08.708143+00:00",
+      "command": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "tools/validate_test_collection.py",
+        "--json",
+        "build/peak-fit-control/focused-collection.json",
+        "--min-count",
+        "4",
+        "--required-tests",
+        "PeakFitArithmetic",
+        "PeakFitArithmeticMutant_float-denominator",
+        "PeakFitArithmeticMutant_early-store",
+        "PeakFitArithmeticMutant_wrong-scale"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "=== CTest Collection Validation: PASS === \n  CUDA-only required tests: not required\n  Collected tests: 4\n    - PeakFitArithmetic              [REQUIRED]\n    - PeakFitArithmeticMutant_float-denominator [REQUIRED]\n    - PeakFitArithmeticMutant_early-store [REQUIRED]\n    - PeakFitArithmeticMutant_wrong-scale [REQUIRED]\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:42:09.405108+00:00",
+      "command": [
+        "clang++",
+        "-std=c++17",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=undefined",
+        "tests/peak_fit_arithmetic.cpp",
+        "-o",
+        "build/peak-fit-control/peak_fit_arithmetic_ubsan"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:42:09.629341+00:00",
+      "command": [
+        "build/peak-fit-control/peak_fit_arithmetic_ubsan"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "exact-pedestal got=-1.6521738767623901,1.2391303777694702 exact-rounded=-1.6521738767623901,1.2391303777694702 match=1\nknown-dyadic-vertex got=1,-0.75 exact-rounded=1,-0.75 match=1\nknown-sixth-final-store got=0.2083333283662796,-0.2083333283662796 exact-rounded=0.2083333283662796,-0.2083333283662796 match=1\nknown-float-scale got=1.6296297311782837,-1.6296297311782837 exact-rounded=1.6296297311782837,-1.6296297311782837 match=1\nexact-rounded-zero got=2,-1.5 exact-rounded=2,-1.5 match=1\nexact-unique-ulp got=0,0 exact-rounded=0,0 match=1\nsub-ulp-output got=3,-2 exact-rounded=3,-2 match=1\nexact-below-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-at-guard got=4,-3 exact-rounded=4,-3 match=1\nexact-above-guard got=2.0000004768371582,-1.5000003576278687 exact-rounded=2.0000004768371582,-1.5000003576278687 match=1\nexact-unbracketed-edge got=6.25,0.625 exact-rounded=6.25,0.625 match=1\nexact-positive-curvature got=-0.66666668653488159,0.5 exact-rounded=-0.66666668653488159,0.5 match=1\nquantized-flat got=0,0 exact-rounded=0,0 match=1\nquantization: analytic_vertex=0.25 stored_fit_fallback=0 map_error=0.25 fit_error_on_stored_samples=0\nreplay=none mismatches=0\n",
+      "stderr": ""
+    },
+    {
+      "utc": "2026-10-22T10:42:09.656490+00:00",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "full_collection_limit": "Full validator exit 1 retained: only the focused executable was built; unrelated C++ test commands are absent. This is not a full-suite result.",
+  "source_sha256": {
+    "tests/peak_fit_reference.h": "95377556ad2ead143ee90ba685a0ea633b76a7262a22d186199b28380e4d900b",
+    "tests/peak_fit_arithmetic.cpp": "90a27cefd5b2c28129e29268765c73d8e313c27456b834dfd93f4087c0713a02",
+    "tests/cuda_peak_fit.cu": "02b4e9d1904a5934dc7694fa94ab1d6e4c60cf5c719da586ff28c3819cf05224",
+    "CMakeLists.txt": "d518d69a91206ded9dddd7a475bf0af9ec70b31493eb993a47c073b198fd22ed",
+    "tools/validate_test_collection.py": "2279567e491ccb3d46658744ca727cbe3edcec815bdbcce89a29ea3e6ace54c7",
+    "tools/test_ci_fail_closed.py": "0a17367a8cb56b2049363496c812844fc781b0664aada920dd5deff73684d33b"
+  },
+  "cuda_compile": "UNRUN: nvcc unavailable on arm64 macOS; no remote/GPU work authorized",
+  "cuda_native": "UNRUN",
+  "retained_raw_sha256": "c61a338faf9204eb1a19e83bd7322ad3b27ae28a4a2793a6501555be572f8e50",
+  "nvcc_path": null,
+  "release_flags": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 4.4\n\n# compile CXX with /usr/bin/c++\nCXX_DEFINES = \n\nCXX_INCLUDES = \n\nCXX_FLAGSarm64 = -O3 -DNDEBUG -std=gnu++17 -arch arm64\n\nCXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -arch arm64\n\n"
+}

@@ -1,0 +1,93 @@
+{
+  "role": "gate",
+  "gauge": "fixed frame-0 material coordinates; no registration",
+  "accuracy_status": "FAIL",
+  "field_distance_status": "FAIL",
+  "identifiable": true,
+  "field_px": {
+    "rms": 2.3945009135517155,
+    "p95": 4.0720413799013375,
+    "max": 4.398997726755499
+  },
+  "field_angstrom": {
+    "rms": 2.119133308493268,
+    "p95": 3.6037566212126833,
+    "max": 3.8931129881786166
+  },
+  "border_px": {
+    "rms": 2.422129985157692,
+    "p95": 4.242251218096885,
+    "max": 4.569178153672702
+  },
+  "per_frame_px": [
+    {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+    },
+    {
+      "rms": 0.977550904471646,
+      "p95": 1.061999970412794,
+      "max": 1.0997494316888683
+    },
+    {
+      "rms": 1.955101808943292,
+      "p95": 2.1239999408255805,
+      "max": 2.1994988633777495
+    },
+    {
+      "rms": 2.9326527134149383,
+      "p95": 3.1859999112383792,
+      "max": 3.2992482950666178
+    },
+    {
+      "rms": 3.910203617886584,
+      "p95": 4.247999881651165,
+      "max": 4.398997726755499
+    }
+  ],
+  "global_mean_error_px": {
+    "rms": 2.3761812588689417,
+    "p95": 3.68627335970896,
+    "max": 3.8802877470620643
+  },
+  "local_error_px": {
+    "rms": 0.29563025893842465,
+    "p95": 0.6507311241612524,
+    "max": 1.1200446419674592
+  },
+  "signal": {
+    "uncorrected": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+    },
+    "true_motion_bilinear": {
+      "rmse": 0.005386038484081602,
+      "contrast_normalized_rmse": 0.021630507369244406,
+      "mean_error": -1.3555210040027483e-05
+    },
+    "estimated_motion_bilinear": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+    },
+    "published_sum_divided_by_frames": {
+      "rmse": 0.11352824419736862,
+      "contrast_normalized_rmse": 0.45593249824568877,
+      "mean_error": -0.00011486477160360664
+    }
+  },
+  "sampling_status": "VALID",
+  "signal_status": "CHARACTERIZATION",
+  "application_consistency_status": "NOT_TESTED",
+  "summed_image_sha256": "0f20215dd9366868072b29dd54615634c01fbafaa8679227c4912a0996ba5bd4",
+  "case": "pedestal",
+  "candidate_sha256": "ad084d840d1f510596507c3efb2dead59b3829ac975d6668869ab3fdfbf7673b",
+  "fixture_files": {
+    "pedestal.mrcs": "29016d8818bbd7be3491cca0822734a7e297a84642cf78c0847e61b447e03073",
+    "pedestal_target.npy": "47b9d9fffbcef586812b8cdfb82b13012ade6a92350431e169d63fd206ea4910",
+    "pedestal_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+    "pedestal.star": "4a0f869b217b75e4315342e64ce8b5adad4fc7c9c57b9033cc23af1aa385fa53"
+  }
+}

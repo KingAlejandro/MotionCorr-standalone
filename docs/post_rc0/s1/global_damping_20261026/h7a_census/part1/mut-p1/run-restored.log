@@ -1,0 +1,27 @@
+MC_EXPERIMENT_CCF_DC arm=none
+  rho=+0.756 offset=(+0.30,-0.20): coupled err (5.55e-17,2.78e-17), separable err (1.51e-01,2.27e-01)
+  rho=-0.756 offset=(-0.45,+0.25): coupled err (5.55e-17,5.55e-17), separable err (1.89e-01,3.40e-01)
+  rho=+0.761 offset=(+0.10,+0.35): coupled err (6.94e-17,1.67e-16), separable err (1.58e-01,1.29e-01)
+  rho=+0.000 offset=(+0.40,-0.30): coupled err (0.00e+00,1.11e-16), separable err (5.55e-17,5.55e-17)
+  guard: not-negative-definite and >1 px fall back, 0.98 px accepted
+[align] scope=global iterations=1 max_iter=1 converged=0 last_rmsd_px=3.78615 tolerance_px=0.5
+[coupled_peak] scope=global peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+[align] scope=global iterations=1 max_iter=1 converged=0 last_rmsd_px=3.78615 tolerance_px=0.5
+[coupled_peak] scope=global peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+[coupled_peak] scope=patch peaks=5 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+  alignPatch: off == default; global changes global only (5 peaks); all changes patches (5 peaks)
+  fixture tilt rho: isotropic -0.000, tilted +0.894
+[align] scope=global iterations=20 max_iter=20 converged=0 last_rmsd_px=2.14396e-06 tolerance_px=1e-09
+[align] scope=global iterations=20 max_iter=20 converged=0 last_rmsd_px=1.61137e-06 tolerance_px=1e-09
+[coupled_peak] scope=global peaks=100 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+[align] scope=global iterations=20 max_iter=20 converged=0 last_rmsd_px=1.61137e-06 tolerance_px=1e-09
+[coupled_peak] scope=global peaks=100 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+[align] scope=global iterations=20 max_iter=20 converged=0 last_rmsd_px=1.06844 tolerance_px=1e-09
+[align] scope=global iterations=20 max_iter=20 converged=0 last_rmsd_px=2.43298e-05 tolerance_px=1e-09
+[coupled_peak] scope=global peaks=100 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+[align] scope=global iterations=20 max_iter=20 converged=0 last_rmsd_px=2.43298e-05 tolerance_px=1e-09
+[coupled_peak] scope=global peaks=100 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+  rms(recovered + truth) px after 20 forced iterations: isotropic off 0.0000 global 0.0000 all 0.0000; tilted off 0.6810 global 0.0000 all 0.0000
+[coupled_peak] scope=patch peaks=15 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/620 cpu.local=0/30 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0
+PASS

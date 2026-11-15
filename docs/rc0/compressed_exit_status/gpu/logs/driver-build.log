@@ -1,0 +1,29 @@
+bench lock held, waiting 12:44:44
+bench lock held, waiting 12:45:44
+bench lock held, waiting 12:46:44
+bench lock held, waiting 12:47:44
+=== configure cpu 2026-10-19T12:48:44Z
+configure cpu rc=0
+CMAKE_HOME_DIRECTORY:INTERNAL=/mnt/clathrin/alex-motioncorr-214/src
+=== build cpu 2026-10-19T12:48:46Z
+build cpu rc=0 2026-10-19T12:50:05Z
+473c3e39564955d6dd2bf4adf85be835834503dce0a322c60e2f1754855ddf10  /mnt/clathrin/alex-motioncorr-214/build-cpu/motioncorr
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+=== configure cuda 2026-10-19T12:50:05Z
+configure cuda rc=0
+CMAKE_HOME_DIRECTORY:INTERNAL=/mnt/clathrin/alex-motioncorr-214/src
+=== build cuda 2026-10-19T12:50:11Z
+build cuda rc=0 2026-10-19T12:52:42Z
+cbf44ff50cd57509c7b902100a5f488dcaa2f2b8958e4a4c7df0ff45b6a530c7  /mnt/clathrin/alex-motioncorr-214/build-cuda/motioncorr
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+=== configure nvcomp 2026-10-19T12:52:42Z
+configure nvcomp rc=0
+CMAKE_HOME_DIRECTORY:INTERNAL=/mnt/clathrin/alex-motioncorr-214/src
+=== build nvcomp 2026-10-19T12:52:49Z
+build nvcomp rc=0 2026-10-19T12:55:44Z
+8fb324bf19c1c7040eca24047556e9f0c80aecee24d8896c242dce6b3b278d9f  /mnt/clathrin/alex-motioncorr-214/build-nvcomp/motioncorr
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+ctest -N cpu: Total Tests: 77
+ctest -N cuda: Total Tests: 111
+ctest -N nvcomp: Total Tests: 114
+ALL_BUILDS_DONE

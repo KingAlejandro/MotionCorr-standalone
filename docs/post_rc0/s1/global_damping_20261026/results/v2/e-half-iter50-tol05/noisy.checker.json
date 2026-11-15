@@ -1,0 +1,89 @@
+{
+  "role": "characterization",
+  "gauge": "fixed frame-0 material coordinates; no registration",
+  "accuracy_status": "FAIL",
+  "field_distance_status": "FAIL",
+  "identifiable": true,
+  "field_px": {
+    "rms": 2.176648087718904,
+    "p95": 4.496028661796331,
+    "max": 12.033199433631584
+  },
+  "field_angstrom": {
+    "rms": 1.92633355763123,
+    "p95": 3.9789853656897534,
+    "max": 10.649381498763953
+  },
+  "border_px": {
+    "rms": 4.53419869213403,
+    "p95": 9.649646084058848,
+    "max": 17.738418115050372
+  },
+  "per_frame_px": [
+    {
+      "rms": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+    },
+    {
+      "rms": 1.2912192358270576,
+      "p95": 2.5722844749453087,
+      "max": 3.2560746624935137
+    },
+    {
+      "rms": 1.618691240377125,
+      "p95": 2.694103483100152,
+      "max": 4.927150503417559
+    },
+    {
+      "rms": 1.8759704916966764,
+      "p95": 2.993535302440686,
+      "max": 6.58594938476404
+    },
+    {
+      "rms": 3.9852616923474034,
+      "p95": 8.425194535177436,
+      "max": 12.033199433631584
+    }
+  ],
+  "global_mean_error_px": {
+    "rms": 0.5286181404682557,
+    "p95": 0.6259333251493746,
+    "max": 0.6296083413579384
+  },
+  "local_error_px": {
+    "rms": 2.111482834251381,
+    "p95": 4.602739345641278,
+    "max": 11.597731628213504
+  },
+  "signal": {
+    "uncorrected": {
+      "rmse": 1.8398193560026619,
+      "contrast_normalized_rmse": 1.8471858315940317,
+      "mean_error": 0.008353184023473986
+    },
+    "true_motion_bilinear": {
+      "rmse": 1.3149793556672902,
+      "contrast_normalized_rmse": 1.320244417856724,
+      "mean_error": 0.01125653816658238
+    },
+    "estimated_motion_bilinear": null,
+    "published_sum_divided_by_frames": {
+      "rmse": 1.392903208732605,
+      "contrast_normalized_rmse": 1.3984803033863706,
+      "mean_error": 0.005542412865906954
+    }
+  },
+  "sampling_status": "OUTSIDE_FIXED_ROI",
+  "signal_status": "CHARACTERIZATION",
+  "application_consistency_status": "NOT_TESTED",
+  "summed_image_sha256": "2c7ea8264b6a10a3940bd2806e130100be54072ec8ade5df08b16ca4a45b4d53",
+  "case": "noisy",
+  "candidate_sha256": "ec1e6ee6317766ea1a6a1cada67eaa44c877be9ecd6ce97d4cb38b0c9c6fae46",
+  "fixture_files": {
+    "noisy.mrcs": "5000fbfc0d87cb4be7a8197685297176a2200f9c0d1866f94a7202aa5e85dab3",
+    "noisy_target.npy": "287e0a82ebb47a9230a6f3e2468ce417baebb1e23b8b94243f232a2cdb43da70",
+    "noisy_field.npy": "839c484f08ced435120a3f7c60267b95959bc5c06993f7c3015d61ffa3b95799",
+    "noisy.star": "c321865e4fc769d9af55bc86af0a0b390abdcdb029137a9aeb5d6743b81a6891"
+  }
+}

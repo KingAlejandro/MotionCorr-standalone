@@ -1,0 +1,66 @@
+Working on noisy.mrcs with 2 thread(s).
+
+Movie size: X = 128 Y = 96 N = 5
+Frames to be used: 1 2 3 4 5
+Frame grouping: n_frames = 5, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 
+interpolate_shifts = 0
+
+
+Global alignment:
+ Iteration 1: RMSD = 1.8927 px
+ Iteration 2: RMSD = 0.368717 px
+ [coupled_peak] scope=global peaks=10 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+
+Local alignments:
+Patches: X = 3 Y = 3
+Patch (1, 1): 1 / 9, X range = [0, 42), Y range = [0, 32), Center = (20, 15)
+ Iteration 1: RMSD = 1.92203 px
+ Iteration 2: RMSD = 0.507458 px
+ Iteration 3: RMSD = 0.168709 px
+ [coupled_peak] scope=patch peaks=15 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (1, 2): 2 / 9, X range = [42, 84), Y range = [0, 32), Center = (62, 15)
+ Iteration 1: RMSD = 1.14941 px
+ Iteration 2: RMSD = 0.304432 px
+ [coupled_peak] scope=patch peaks=10 guard_fired=1 (not_negative_definite=1, offset_gt_1px=0)
+Patch (1, 3): 3 / 9, X range = [84, 126), Y range = [0, 32), Center = (104, 15)
+ Iteration 1: RMSD = 4.4262 px
+ Iteration 2: RMSD = 0.995214 px
+ Iteration 3: RMSD = 0.499336 px
+ [coupled_peak] scope=patch peaks=15 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (2, 1): 4 / 9, X range = [0, 42), Y range = [32, 64), Center = (20, 47)
+ Iteration 1: RMSD = 2.01815 px
+ Iteration 2: RMSD = 0.483587 px
+ [coupled_peak] scope=patch peaks=10 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (2, 2): 5 / 9, X range = [42, 84), Y range = [32, 64), Center = (62, 47)
+ Iteration 1: RMSD = 1.38053 px
+ Iteration 2: RMSD = 0.897184 px
+ Iteration 3: RMSD = 0.915971 px
+ Iteration 4: RMSD = 0.312659 px
+ [coupled_peak] scope=patch peaks=20 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (2, 3): 6 / 9, X range = [84, 126), Y range = [32, 64), Center = (104, 47)
+ Iteration 1: RMSD = 9.08232 px
+ Iteration 2: RMSD = 4.17636 px
+ Iteration 3: RMSD = 3.08938 px
+ Iteration 4: RMSD = 2.48067 px
+ Iteration 5: RMSD = 2.25331 px
+ [coupled_peak] scope=patch peaks=25 guard_fired=4 (not_negative_definite=1, offset_gt_1px=3)
+Patch (3, 1): 7 / 9, X range = [0, 42), Y range = [64, 96), Center = (20, 79)
+ Iteration 1: RMSD = 3.1452 px
+ Iteration 2: RMSD = 0.906828 px
+ Iteration 3: RMSD = 0.395632 px
+ [coupled_peak] scope=patch peaks=15 guard_fired=1 (not_negative_definite=0, offset_gt_1px=1)
+Patch (3, 2): 8 / 9, X range = [42, 84), Y range = [64, 96), Center = (62, 79)
+ Iteration 1: RMSD = 5.66171 px
+ Iteration 2: RMSD = 0.650882 px
+ Iteration 3: RMSD = 0.417923 px
+ [coupled_peak] scope=patch peaks=15 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+Patch (3, 3): 9 / 9, X range = [84, 126), Y range = [64, 96), Center = (104, 79)
+ Iteration 1: RMSD = 1.16297 px
+ Iteration 2: RMSD = 0.403935 px
+ [coupled_peak] scope=patch peaks=10 guard_fired=0 (not_negative_definite=0, offset_gt_1px=0)
+
+Polynomial fit RMSD: X = 1.22592 px Y = 1.41376 px
+Summing frames before dose weighting: ..... done
+Written aligned but non-dose weighted sum to /tmp/motioncorr-damping-a1c78adc1d0f/v2/dcgh2a-prod/noisy/noisy.mrc
+Full movie wall time: 0.005 s

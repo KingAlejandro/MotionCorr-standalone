@@ -1,0 +1,13 @@
+--- docs/post_rc0/s1/synth_combined/run_v2_cases.py
++++ c1_run_v2_cases.py
+@@ -12,8 +12,8 @@
+ rows=[]
+ for name in ['zero','integer','fractional','affine','pedestal','noisy','flat','repeated']:
+  p=3 if name in ['affine','pedestal','noisy'] else 1
+- cmd=['taskset','-c',cpus,str(binary),'--i',name+'.star','--o',str(out/name),'--use_own','--j','8','--patch_x',str(p),'--patch_y',str(p),'--bin_factor','1','--seed','1','--skip_defect','--save_noDW','--first_frame_sum','1','--last_frame_sum','5','--skip_logfile']
+- env=os.environ.copy(); env['OMP_NUM_THREADS']='8'
++ cmd=['taskset','-c',cpus,str(binary),'--i',name+'.star','--o',str(out/name),'--use_own','--j','2','--patch_x',str(p),'--patch_y',str(p),'--bin_factor','1','--seed','1','--skip_defect','--save_noDW','--first_frame_sum','1','--last_frame_sum','5','--skip_logfile']
++ env=os.environ.copy(); env['OMP_NUM_THREADS']='2'   # C1: 2-CPU lane
+  for k in list(env):
+   if k.startswith('MC_DIAG_'): del env[k]
+  if dc!='unset':

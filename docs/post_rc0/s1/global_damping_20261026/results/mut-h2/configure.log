@@ -1,0 +1,42 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1")
+-- Checking for module 'fftw3'
+--   Found fftw3, version 3.3.10
+-- Checking for module 'fftw3f'
+--   Found fftw3f, version 3.3.10
+-- Found OpenMP_CXX: -fopenmp (found version "4.5")
+-- Found OpenMP: TRUE (found version "4.5") found components: CXX
+-- Found TIFF: /usr/lib/x86_64-linux-gnu/libtiff.so (found version "4.5.1")
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.3")
+-- Found PNG: /usr/lib/x86_64-linux-gnu/libpng.so (found version "1.6.43")
+-- Found JPEG: /usr/lib/x86_64-linux-gnu/libjpeg.so (found version "80")
+-- Performing Test TIFF_HAS_LIBDEFLATE
+-- Performing Test TIFF_HAS_LIBDEFLATE - Success
+-- LibTIFF Deflate subcodec: libdeflate
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED - Success
+-- CPU dose weighting: symmetric rows (AUTO: qualified x86-64 GCC without FMA)
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found Python3: /home/ubuntu/.mc-venv/bin/python3 (found version "3.12.3") found components: Interpreter
+CMake Warning at CMakeLists.txt:544 (message):
+  pbzip2 not found: InputFormats and RealCutdown waive its compressed-MRC
+  cases (UNRUN).  Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the
+  waiver.
+
+
+-- Configuring done (1.3s)
+-- Generating done (0.1s)
+-- Build files have been written to: /tmp/motioncorr-damping-a1c78adc1d0f/mut-h2/build

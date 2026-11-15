@@ -1,0 +1,17 @@
+mutant gather-transpose: coupled_peak rc=1 (KILLED) FAIL isotropic fixture: a mode is not within the truth tolerance
+mutant gather-yflip: coupled_peak rc=1 (KILLED) FAIL isotropic fixture: a mode is not within the truth tolerance
+mutant gather-xflip: coupled_peak rc=1 (KILLED) FAIL isotropic fixture: a mode is not within the truth tolerance
+mutant apply-sign: coupled_peak rc=1 (KILLED) FAIL isotropic fixture: a mode is not within the truth tolerance
+mutant apply-y-only-sign: coupled_peak rc=1 (KILLED) FAIL isotropic fixture: a mode is not within the truth tolerance
+mutant drop-hxy: coupled_peak rc=1 (KILLED) FAIL coupled estimate does not recover the exact offset to rounding error
+mutant sign-hxy: coupled_peak rc=1 (KILLED) FAIL coupled estimate does not recover the exact offset to rounding error
+mutant half-stencil: coupled_peak rc=1 (KILLED) FAIL guard rejected an exact negative-definite quadratic
+mutant no-negdef-guard: coupled_peak rc=1 (KILLED) FAIL positive-definite H must fall back (1)
+mutant no-offset-guard: coupled_peak rc=1 (KILLED) FAIL offset > 1 px must fall back (2) and leave dx, dy untouched
+mutant swap-axes: coupled_peak rc=1 (KILLED) FAIL coupled estimate does not recover the exact offset to rounding error
+mutant global-leaks: coupled_peak rc=1 (KILLED) FAIL global mode must leave patch alignment bitwise unchanged and uncounted
+mutant not-applied: coupled_peak rc=1 (KILLED) FAIL global mode did not change the global estimate
+mutant dc-gpu-refusal-removed: CcfDcHookGpuRefusal rc=1 (KILLED) FAIL arm 'global' with --gpu 0 was not refused: rc=1 in: /tmp/motioncorr-damping-a1c78adc1d0f/mut-p1/src/src/motioncorr_runner.cpp, line 459
+mutant dc-gpu-refusal-unset-allowed: CcfDcHookGpuRefusal rc=1 (KILLED) FAIL arm None with --gpu 0 was not refused: rc=1 in: /tmp/motioncorr-damping-a1c78adc1d0f/mut-p1/src/src/motioncorr_runner.cpp, line 459
+restored original: coupled_peak rc=0 (must be 0)
+restored original: gpu refusal test rc=0 (must be 0)

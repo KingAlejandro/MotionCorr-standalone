@@ -155,6 +155,20 @@ bool is_u16_fault(const char *name) {
 }
 } // namespace
 
+// #226 D3: report constrained free memory without occupying a whole GPU.
+// Pair with MC_FAULT_ORDINAL=1 to decline the first resident session.
+extern "C" cudaError_t __real_cudaMemGetInfo(size_t*, size_t*);
+extern "C" cudaError_t __wrap_cudaMemGetInfo(size_t *free, size_t *total) {
+    const cudaError_t result = __real_cudaMemGetInfo(free, total);
+    const char *limit = std::getenv("MC_AVAILABLE_BYTES");
+    if (result == cudaSuccess && limit) {
+        const size_t bytes = std::strtoull(limit, nullptr, 10);
+        if (*free > bytes) *free = bytes;
+        std::fprintf(stderr, "[memlimit] available=%zu bytes\n", *free);
+    }
+    return result;
+}
+
 extern "C" cudaError_t __real_cudaStreamSynchronize(cudaStream_t);
 extern "C" cudaError_t __wrap_cudaStreamSynchronize(cudaStream_t s) {
     init_once();

@@ -1,0 +1,42 @@
+== cuda_realspace_border_branch
+last column: 0 pixels differ from the CPU-branch oracle
+last row: 0 pixels differ from the CPU-branch oracle
+interior output, edge source (x): 0 pixels differ from the CPU-branch oracle
+interior output, edge source (y): 0 pixels differ from the CPU-branch oracle
+corner: 0 pixels differ from the CPU-branch oracle
+control: constant image: 0 pixels differ from the CPU-branch oracle
+control: interior shifts: 0 pixels differ from the CPU-branch oracle
+PASS: 7 cases match the CPU branch decision
+rc=0
+== cuda_realspace_border_branch_x_float
+last column: 63 pixels differ from the CPU-branch oracle (worst 0.5 at x=4095 y=1, got 0 want 0.5)
+last row: 0 pixels differ from the CPU-branch oracle
+interior output, edge source (x): 63 pixels differ from the CPU-branch oracle (worst 0.5 at x=4092 y=1, got 0 want 0.5)
+interior output, edge source (y): 0 pixels differ from the CPU-branch oracle
+corner: 4095 pixels differ from the CPU-branch oracle (worst 0.99999 at x=4095 y=1, got 0 want 0.99999)
+control: constant image: 0 pixels differ from the CPU-branch oracle
+control: interior shifts: 0 pixels differ from the CPU-branch oracle
+FAIL: 3 case(s) differ from the CPU branch
+rc=1
+== cuda_realspace_border_branch_y_float
+last column: 0 pixels differ from the CPU-branch oracle
+last row: 63 pixels differ from the CPU-branch oracle (worst 0.5 at x=1 y=4095, got 0 want 0.5)
+interior output, edge source (x): 0 pixels differ from the CPU-branch oracle
+interior output, edge source (y): 63 pixels differ from the CPU-branch oracle (worst 0.5 at x=1 y=4092, got 0 want 0.5)
+corner: 3839 pixels differ from the CPU-branch oracle (worst 1 at x=0 y=257, got 257 want 256)
+control: constant image: 0 pixels differ from the CPU-branch oracle
+control: interior shifts: 0 pixels differ from the CPU-branch oracle
+FAIL: 3 case(s) differ from the CPU branch
+rc=1
+== x_float --expect-mismatch
+last column: 63 pixels differ from the CPU-branch oracle (worst 0.5 at x=4095 y=1, got 0 want 0.5)
+last row: 0 pixels differ from the CPU-branch oracle
+interior output, edge source (x): 63 pixels differ from the CPU-branch oracle (worst 0.5 at x=4092 y=1, got 0 want 0.5)
+interior output, edge source (y): 0 pixels differ from the CPU-branch oracle
+corner: 4095 pixels differ from the CPU-branch oracle (worst 0.99999 at x=4095 y=1, got 0 want 0.99999)
+control: constant image: 0 pixels differ from the CPU-branch oracle
+control: interior shifts: 0 pixels differ from the CPU-branch oracle
+RAN: 3 case(s) differ from the oracle
+rc=0
+
+[exited with code 0]

@@ -1,0 +1,145 @@
+{
+  "head": "35d2f950fcb4339e97b9919cdc5b36a4315460ed",
+  "fixture": {
+    "kind": "ctestInfo",
+    "version": {
+      "major": 1,
+      "minor": 0
+    },
+    "cpu_names": [
+      "SyntheticRegression",
+      "HotPixelRngDeterminism",
+      "RunnerExposure",
+      "Runner_failure",
+      "Runner_invalid",
+      "Runner_resume",
+      "Runner_tomography",
+      "RunnerLateBin",
+      "RunnerExportedUnits",
+      "GainCache",
+      "TiffRead",
+      "DamagedMovie",
+      "TruncatedMrcMovie",
+      "TruncatedGainDefect",
+      "CompressedMovieSequence",
+      "InputFormats",
+      "CutDownMovie",
+      "RunnerModelParser",
+      "MicrographModelBounds",
+      "CiFailClosedControls",
+      "WriteFaults",
+      "ImageWriteFaults",
+      "DefectParser",
+      "GlobalIfftElision",
+      "PatchRetryState",
+      "CpuDoseSymmetry",
+      "CpuDoseSymmetryBase",
+      "OutputTreeComparator",
+      "RunnerInterpolateRecenter",
+      "RunnerInterpolateShifts",
+      "DeflateLayout",
+      "Adler32Arithmetic",
+      "Adler32KernelHost",
+      "ScratchArena",
+      "DefectNeighbours",
+      "MrcHeaderStats",
+      "ReportPlotUndefinedAxis",
+      "PdfConcat",
+      "WriteFaultsSync",
+      "WriteFaultsMultiProduct",
+      "NvcompGuards",
+      "NvcompAcceptanceDiagnostics",
+      "OutputStageFaults",
+      "LogfileFromEps",
+      "LogfileFromEpsMutant_always_eps",
+      "LogfileFromEpsMutant_late_guard",
+      "LogfileFromEpsMutant_eps_order",
+      "LogfileFromEpsMutant_placeholder",
+      "LogfileFromEpsMutant_concat_cleanup",
+      "DeflateLayoutMutant_span_wrap",
+      "DeflateLayoutMutant_stage_sum",
+      "DeflateLayoutMutant_reserve_round",
+      "DeflateLayoutMutant_layout_table",
+      "DeflateLayoutMutant_arena_start",
+      "DeflateLayoutMutant_drain_step",
+      "MultiGpuScheduling",
+      "NativeMovieStaging",
+      "GainCacheOwnership",
+      "JointStarPublication",
+      "EerMemorySafety",
+      "StageProfile",
+      "CudaValidationParser",
+      "HostBufferReuse",
+      "StageProfileThreads",
+      "FrameBufferPool",
+      "ProfilingKit"
+    ],
+    "cuda_names": [
+      "CudaStaleErrorAfterOom",
+      "CudaEarlyStreamingOom",
+      "CudaStreamingPlanClassificationCleanup"
+    ],
+    "command_program": "/Users/alex.konstantinov/.local/bin/python3",
+    "command_argument": "<test-name>.py"
+  },
+  "validator_sha256": "d0a99b744d990d80e8cd33a0a96b037be7f3141ca1a6aba2dc68ceb0eb17029b",
+  "cases": {
+    "cpu_complete": {
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-B",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c095f27/tools/validate_test_collection.py",
+        "--min-count",
+        "40"
+      ],
+      "stdin": {
+        "fixture": "cpu",
+        "omit": null,
+        "additive_filler": null,
+        "sha256": "01269ab8914704e0a5720a994d73eeec4012828dd2bc66c8c5b3cabcea6c0226"
+      },
+      "exit": 0,
+      "stdout": "=== CTest Collection Validation: PASS === \n  CUDA-only required tests: not required\n  Collected tests: 66\n    - SyntheticRegression            [REQUIRED]\n    - HotPixelRngDeterminism         [REQUIRED]\n    - RunnerExposure                 [REQUIRED]\n    - Runner_failure                 [REQUIRED]\n    - Runner_invalid                 [REQUIRED]\n    - Runner_resume                  [REQUIRED]\n    - Runner_tomography              [REQUIRED]\n    - RunnerLateBin                  [REQUIRED]\n    - RunnerExportedUnits            [REQUIRED]\n    - GainCache                      [REQUIRED]\n    - TiffRead                       [REQUIRED]\n    - DamagedMovie                   [REQUIRED]\n    - TruncatedMrcMovie              [REQUIRED]\n    - TruncatedGainDefect            [REQUIRED]\n    - CompressedMovieSequence        [REQUIRED]\n    - InputFormats                   [REQUIRED]\n    - CutDownMovie                   [REQUIRED]\n    - RunnerModelParser              [REQUIRED]\n    - MicrographModelBounds          [REQUIRED]\n    - CiFailClosedControls           [REQUIRED]\n    - WriteFaults                    [REQUIRED]\n    - ImageWriteFaults               [REQUIRED]\n    - DefectParser                   [REQUIRED]\n    - GlobalIfftElision              [REQUIRED]\n    - PatchRetryState                [REQUIRED]\n    - CpuDoseSymmetry                [REQUIRED]\n    - CpuDoseSymmetryBase            [REQUIRED]\n    - OutputTreeComparator           [REQUIRED]\n    - RunnerInterpolateRecenter      [REQUIRED]\n    - RunnerInterpolateShifts        [REQUIRED]\n    - DeflateLayout                  [REQUIRED]\n    - Adler32Arithmetic              [REQUIRED]\n    - Adler32KernelHost              [REQUIRED]\n    - ScratchArena                   [REQUIRED]\n    - DefectNeighbours               [REQUIRED]\n    - MrcHeaderStats                 [REQUIRED]\n    - ReportPlotUndefinedAxis        [REQUIRED]\n    - PdfConcat                      [REQUIRED]\n    - WriteFaultsSync                [REQUIRED]\n    - WriteFaultsMultiProduct        [REQUIRED]\n    - NvcompGuards                   [REQUIRED]\n    - NvcompAcceptanceDiagnostics    [REQUIRED]\n    - OutputStageFaults              [REQUIRED]\n    - LogfileFromEps                 [REQUIRED]\n    - LogfileFromEpsMutant_always_eps [REQUIRED]\n    - LogfileFromEpsMutant_late_guard [REQUIRED]\n    - LogfileFromEpsMutant_eps_order [REQUIRED]\n    - LogfileFromEpsMutant_placeholder [REQUIRED]\n    - LogfileFromEpsMutant_concat_cleanup [REQUIRED]\n    - DeflateLayoutMutant_span_wrap  [REQUIRED]\n    - DeflateLayoutMutant_stage_sum  [REQUIRED]\n    - DeflateLayoutMutant_reserve_round [REQUIRED]\n    - DeflateLayoutMutant_layout_table [REQUIRED]\n    - DeflateLayoutMutant_arena_start [REQUIRED]\n    - DeflateLayoutMutant_drain_step [REQUIRED]\n    - MultiGpuScheduling             [REQUIRED]\n    - NativeMovieStaging             [REQUIRED]\n    - GainCacheOwnership             [REQUIRED]\n    - JointStarPublication           [REQUIRED]\n    - EerMemorySafety                [REQUIRED]\n    - StageProfile                   [REQUIRED]\n    - CudaValidationParser           [REQUIRED]\n    - HostBufferReuse                [REQUIRED]\n    - StageProfileThreads            [REQUIRED]\n    - FrameBufferPool                [REQUIRED]\n    - ProfilingKit                   [REQUIRED]\n",
+      "stderr": ""
+    },
+    "cuda_complete": {
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-B",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c095f27/tools/validate_test_collection.py",
+        "--min-count",
+        "40",
+        "--cuda"
+      ],
+      "stdin": {
+        "fixture": "cuda",
+        "omit": null,
+        "additive_filler": null,
+        "sha256": "8e411dd4dda0aa198fb832771c9e6514f8b602caec3e82258d47844c8a01469b"
+      },
+      "exit": 0,
+      "stdout": "=== CTest Collection Validation: PASS === \n  CUDA-only required tests: required\n  Collected tests: 69\n    - SyntheticRegression            [REQUIRED]\n    - HotPixelRngDeterminism         [REQUIRED]\n    - RunnerExposure                 [REQUIRED]\n    - Runner_failure                 [REQUIRED]\n    - Runner_invalid                 [REQUIRED]\n    - Runner_resume                  [REQUIRED]\n    - Runner_tomography              [REQUIRED]\n    - RunnerLateBin                  [REQUIRED]\n    - RunnerExportedUnits            [REQUIRED]\n    - GainCache                      [REQUIRED]\n    - TiffRead                       [REQUIRED]\n    - DamagedMovie                   [REQUIRED]\n    - TruncatedMrcMovie              [REQUIRED]\n    - TruncatedGainDefect            [REQUIRED]\n    - CompressedMovieSequence        [REQUIRED]\n    - InputFormats                   [REQUIRED]\n    - CutDownMovie                   [REQUIRED]\n    - RunnerModelParser              [REQUIRED]\n    - MicrographModelBounds          [REQUIRED]\n    - CiFailClosedControls           [REQUIRED]\n    - WriteFaults                    [REQUIRED]\n    - ImageWriteFaults               [REQUIRED]\n    - DefectParser                   [REQUIRED]\n    - GlobalIfftElision              [REQUIRED]\n    - PatchRetryState                [REQUIRED]\n    - CpuDoseSymmetry                [REQUIRED]\n    - CpuDoseSymmetryBase            [REQUIRED]\n    - OutputTreeComparator           [REQUIRED]\n    - RunnerInterpolateRecenter      [REQUIRED]\n    - RunnerInterpolateShifts        [REQUIRED]\n    - DeflateLayout                  [REQUIRED]\n    - Adler32Arithmetic              [REQUIRED]\n    - Adler32KernelHost              [REQUIRED]\n    - ScratchArena                   [REQUIRED]\n    - DefectNeighbours               [REQUIRED]\n    - MrcHeaderStats                 [REQUIRED]\n    - ReportPlotUndefinedAxis        [REQUIRED]\n    - PdfConcat                      [REQUIRED]\n    - WriteFaultsSync                [REQUIRED]\n    - WriteFaultsMultiProduct        [REQUIRED]\n    - NvcompGuards                   [REQUIRED]\n    - NvcompAcceptanceDiagnostics    [REQUIRED]\n    - OutputStageFaults              [REQUIRED]\n    - LogfileFromEps                 [REQUIRED]\n    - LogfileFromEpsMutant_always_eps [REQUIRED]\n    - LogfileFromEpsMutant_late_guard [REQUIRED]\n    - LogfileFromEpsMutant_eps_order [REQUIRED]\n    - LogfileFromEpsMutant_placeholder [REQUIRED]\n    - LogfileFromEpsMutant_concat_cleanup [REQUIRED]\n    - DeflateLayoutMutant_span_wrap  [REQUIRED]\n    - DeflateLayoutMutant_stage_sum  [REQUIRED]\n    - DeflateLayoutMutant_reserve_round [REQUIRED]\n    - DeflateLayoutMutant_layout_table [REQUIRED]\n    - DeflateLayoutMutant_arena_start [REQUIRED]\n    - DeflateLayoutMutant_drain_step [REQUIRED]\n    - MultiGpuScheduling             [REQUIRED]\n    - NativeMovieStaging             [REQUIRED]\n    - GainCacheOwnership             [REQUIRED]\n    - JointStarPublication           [REQUIRED]\n    - EerMemorySafety                [REQUIRED]\n    - StageProfile                   [REQUIRED]\n    - CudaValidationParser           [REQUIRED]\n    - HostBufferReuse                [REQUIRED]\n    - StageProfileThreads            [REQUIRED]\n    - FrameBufferPool                [REQUIRED]\n    - ProfilingKit                   [REQUIRED]\n    - CudaStaleErrorAfterOom         [REQUIRED]\n    - CudaEarlyStreamingOom          [REQUIRED]\n    - CudaStreamingPlanClassificationCleanup [ADDITIVE]\n",
+      "stderr": ""
+    },
+    "cuda_missing_new_control": {
+      "argv": [
+        "/Users/alex.konstantinov/.local/bin/python3",
+        "-B",
+        "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-6c095f27/tools/validate_test_collection.py",
+        "--min-count",
+        "40",
+        "--cuda"
+      ],
+      "stdin": {
+        "fixture": "cuda",
+        "omit": "CudaStreamingPlanClassificationCleanup",
+        "additive_filler": "AdditiveFillerTest",
+        "sha256": "9d69f95be29796a736df51884d8f2dfaea8621dc33ce9f33de78037107a6590a"
+      },
+      "exit": 0,
+      "stdout": "=== CTest Collection Validation: PASS === \n  CUDA-only required tests: required\n  Collected tests: 69\n    - SyntheticRegression            [REQUIRED]\n    - HotPixelRngDeterminism         [REQUIRED]\n    - RunnerExposure                 [REQUIRED]\n    - Runner_failure                 [REQUIRED]\n    - Runner_invalid                 [REQUIRED]\n    - Runner_resume                  [REQUIRED]\n    - Runner_tomography              [REQUIRED]\n    - RunnerLateBin                  [REQUIRED]\n    - RunnerExportedUnits            [REQUIRED]\n    - GainCache                      [REQUIRED]\n    - TiffRead                       [REQUIRED]\n    - DamagedMovie                   [REQUIRED]\n    - TruncatedMrcMovie              [REQUIRED]\n    - TruncatedGainDefect            [REQUIRED]\n    - CompressedMovieSequence        [REQUIRED]\n    - InputFormats                   [REQUIRED]\n    - CutDownMovie                   [REQUIRED]\n    - RunnerModelParser              [REQUIRED]\n    - MicrographModelBounds          [REQUIRED]\n    - CiFailClosedControls           [REQUIRED]\n    - WriteFaults                    [REQUIRED]\n    - ImageWriteFaults               [REQUIRED]\n    - DefectParser                   [REQUIRED]\n    - GlobalIfftElision              [REQUIRED]\n    - PatchRetryState                [REQUIRED]\n    - CpuDoseSymmetry                [REQUIRED]\n    - CpuDoseSymmetryBase            [REQUIRED]\n    - OutputTreeComparator           [REQUIRED]\n    - RunnerInterpolateRecenter      [REQUIRED]\n    - RunnerInterpolateShifts        [REQUIRED]\n    - DeflateLayout                  [REQUIRED]\n    - Adler32Arithmetic              [REQUIRED]\n    - Adler32KernelHost              [REQUIRED]\n    - ScratchArena                   [REQUIRED]\n    - DefectNeighbours               [REQUIRED]\n    - MrcHeaderStats                 [REQUIRED]\n    - ReportPlotUndefinedAxis        [REQUIRED]\n    - PdfConcat                      [REQUIRED]\n    - WriteFaultsSync                [REQUIRED]\n    - WriteFaultsMultiProduct        [REQUIRED]\n    - NvcompGuards                   [REQUIRED]\n    - NvcompAcceptanceDiagnostics    [REQUIRED]\n    - OutputStageFaults              [REQUIRED]\n    - LogfileFromEps                 [REQUIRED]\n    - LogfileFromEpsMutant_always_eps [REQUIRED]\n    - LogfileFromEpsMutant_late_guard [REQUIRED]\n    - LogfileFromEpsMutant_eps_order [REQUIRED]\n    - LogfileFromEpsMutant_placeholder [REQUIRED]\n    - LogfileFromEpsMutant_concat_cleanup [REQUIRED]\n    - DeflateLayoutMutant_span_wrap  [REQUIRED]\n    - DeflateLayoutMutant_stage_sum  [REQUIRED]\n    - DeflateLayoutMutant_reserve_round [REQUIRED]\n    - DeflateLayoutMutant_layout_table [REQUIRED]\n    - DeflateLayoutMutant_arena_start [REQUIRED]\n    - DeflateLayoutMutant_drain_step [REQUIRED]\n    - MultiGpuScheduling             [REQUIRED]\n    - NativeMovieStaging             [REQUIRED]\n    - GainCacheOwnership             [REQUIRED]\n    - JointStarPublication           [REQUIRED]\n    - EerMemorySafety                [REQUIRED]\n    - StageProfile                   [REQUIRED]\n    - CudaValidationParser           [REQUIRED]\n    - HostBufferReuse                [REQUIRED]\n    - StageProfileThreads            [REQUIRED]\n    - FrameBufferPool                [REQUIRED]\n    - ProfilingKit                   [REQUIRED]\n    - CudaStaleErrorAfterOom         [REQUIRED]\n    - CudaEarlyStreamingOom          [REQUIRED]\n    - AdditiveFillerTest             [ADDITIVE]\n",
+      "stderr": ""
+    }
+  },
+  "serialization": "stdin stores a lossless common-fixture recipe; sha256 binds the exact json.dumps payload sent to each CLI."
+}

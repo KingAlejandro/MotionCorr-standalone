@@ -152,6 +152,12 @@ target_link_libraries(motioncorr_core PUBLIC
     PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
     motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)
 
+# EXPERIMENT ONLY (#262, ported CPU path only): CCF DC conditioning, selected at run time by
+# MC_EXPERIMENT_CCF_DC_ARM (required when built in). Default OFF compiles none of it.
+option(MC_EXPERIMENT_CCF_DC "Build the #262 CCF DC conditioning experiment (CPU path)" OFF)
+if(MC_EXPERIMENT_CCF_DC)
+    target_compile_definitions(motioncorr_core PUBLIC MC_EXPERIMENT_CCF_DC)
+endif()
 option(TIMING "Enable internal timing" OFF)
 if(TIMING)
     add_compile_definitions(TIMING)
@@ -210,6 +216,9 @@ install(TARGETS motioncorr RUNTIME DESTINATION bin)
 
 include(CTest)
 if(BUILD_TESTING)
+    # The same byte-preservation checker used by the native C2R oracle.
+    add_executable(hermitian_projection_oracle tests/test_hermitian_projection_oracle.cpp)
+    add_test(NAME HermitianProjectionOracle COMMAND hermitian_projection_oracle)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
     add_executable(cpu_dose_symmetry tests/test_cpu_dose_symmetry.cpp)
@@ -248,6 +257,40 @@ if(BUILD_TESTING)
     add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
     target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
     add_test(NAME PatchRetryState COMMAND patch_retry_state)
+    # Experimental default-off global half-gain damping (research prototype).
+    add_executable(global_half_gain tests/test_global_half_gain.cpp)
+    target_link_libraries(global_half_gain PRIVATE motioncorr_core)
+    add_test(NAME GlobalHalfGain COMMAND global_half_gain)
+    # Experimental hypothesis H2: coupled 2x2-Hessian subpixel peak (research prototype).
+    add_executable(coupled_peak tests/test_coupled_peak.cpp)
+    target_link_libraries(coupled_peak PRIVATE motioncorr_core)
+    add_test(NAME CoupledPeak COMMAND coupled_peak)
+    # W6 native follow-up: W5's isotropic CCF weight, global only (harmful-comparator control).
+    add_executable(isotropic_weight tests/test_isotropic_weight.cpp)
+    target_link_libraries(isotropic_weight PRIVATE motioncorr_core)
+    add_test(NAME IsotropicWeight COMMAND isotropic_weight)
+    # H3: operator control for the ported #262 DC hook (only exists when built in).
+    if(MC_EXPERIMENT_CCF_DC)
+        add_executable(ccf_dc_hook tests/test_ccf_dc_hook.cpp)
+        target_link_libraries(ccf_dc_hook PRIVATE motioncorr_core)
+        add_test(NAME CcfDcHook COMMAND ccf_dc_hook)
+    endif()
+    # #257: device-free exact-rational controls, shared with the actual CUDA
+    # kernel test. Host replays establish arithmetic only, not GPU execution.
+    add_executable(peak_fit_arithmetic tests/peak_fit_arithmetic.cpp)
+    add_test(NAME PeakFitArithmetic COMMAND peak_fit_arithmetic)
+    foreach(_mutation float-denominator early-store wrong-scale)
+        add_test(NAME PeakFitArithmeticMutant_${_mutation}
+            COMMAND peak_fit_arithmetic --expect-mismatch ${_mutation})
+    endforeach()
+    # Device-free controls for the exact predicate used by the CUDA border test.
+    add_executable(realspace_border_validation tests/test_realspace_border_validation.cpp)
+    add_test(NAME RealspaceBorderValidation COMMAND realspace_border_validation)
+    set_tests_properties(RealspaceBorderValidation PROPERTIES LABELS "host" TIMEOUT 30)
+    # #226 D2: retry lifetime arithmetic, checked without CUDA or a GPU.
+    add_executable(patch_retry_admission tests/test_patch_retry_admission.cpp)
+    target_include_directories(patch_retry_admission PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME PatchRetryAdmission COMMAND patch_retry_admission)
     add_executable(defect_parser tests/test_defect_parser.cpp)
     target_link_libraries(defect_parser PRIVATE motioncorr_core)
     # Pure C++ arithmetic regression (issue #97). Registered above the
@@ -399,7 +442,23 @@ if(BUILD_TESTING)
     # The malformed-input cases hang the pre-#98 parser; bound them so a
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
+    add_executable(relion_error_ownership tests/test_relion_error_ownership.cpp src/error.cpp)
+    target_include_directories(relion_error_ownership PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    add_test(NAME RelionErrorOwnership COMMAND relion_error_ownership)
+    add_test(NAME RelionErrorUnprinted COMMAND relion_error_ownership --unprinted)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    # Device-free validation of the later-chunk shim, using a deliberately fake
+    # CUDA API. This validates interposition/failure controls, never GPU decoding.
+    add_executable(tiff_identity_host_control
+        tests/tiff_identity_host/control.cpp tests/cuda_tiff_identity_shim.cpp)
+    target_include_directories(tiff_identity_host_control PRIVATE tests/tiff_identity_host)
+    target_compile_definitions(tiff_identity_host_control PRIVATE MC_TIFF_IDENTITY_CONVERSION_PROBE)
+    target_link_libraries(tiff_identity_host_control PRIVATE TIFF::TIFF ${CMAKE_DL_LIBS})
+    set_target_properties(tiff_identity_host_control PROPERTIES ENABLE_EXPORTS ON)
+    add_test(NAME TiffIdentityLaterChunkHostControls
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_tiff_identity_later_chunk.py
+            --host-binary $<TARGET_FILE:tiff_identity_host_control>)
+    set_tests_properties(TiffIdentityLaterChunkHostControls PROPERTIES TIMEOUT 60)
     add_test(NAME NvcompAcceptanceDiagnostics
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_nvcomp_acceptance_diagnostics.py)
     # Profiling kit (docs/profiling.md): Nsight SQLite queries and derived
@@ -409,6 +468,16 @@ if(BUILD_TESTING)
     add_test(NAME ProfilingKit
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/profiling/mcprof.py selftest)
     set_tests_properties(ProfilingKit PROPERTIES TIMEOUT 300)
+    if(UNIX)
+        # Real detached CPU children and temporary flocks; never invokes CUDA.
+        add_test(NAME StickyCudaProcessLifecycle
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_sticky_cuda_process_lifecycle.py)
+        set_tests_properties(StickyCudaProcessLifecycle PROPERTIES TIMEOUT 60)
+    endif()
+    add_test(NAME DatasetFinalization
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_dataset_finalization.py)
+    add_test(NAME TestHygiene235
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_hygiene_235.py)
     add_test(NAME GainCacheOwnership
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_gain_cache_host.py
             --cxx ${CMAKE_CXX_COMPILER})
@@ -469,6 +538,12 @@ if(BUILD_TESTING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compressed_movie_sequence.py
                 --binary $<TARGET_FILE:motioncorr>)
         set_tests_properties(CompressedMovieSequence PROPERTIES TIMEOUT 120)
+        foreach(codec bz2 xz zst)
+            add_test(NAME CompressedMrcStatus_${codec}
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compressed_mrc_status.py
+                    --binary $<TARGET_FILE:motioncorr> --codec ${codec})
+            set_tests_properties(CompressedMrcStatus_${codec} PROPERTIES TIMEOUT 300 SKIP_RETURN_CODE 77)
+        endforeach()
         # Every container, sample type and codec the readers accept (issue #186 follow-up).
         # The compressed-MRC cases need the decoders the reader pipes through; a missing
         # one is reported UNRUN and only tolerated when it is absent at configure time.
@@ -615,6 +690,17 @@ if(BUILD_TESTING)
         add_test(NAME MultiGpuScheduling
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_multi_gpu_scheduling.py
                 --binary $<TARGET_FILE:motioncorr>)
+        # The experimental research flags are refused with --gpu in every build (the check
+        # precedes the device query), and rejected when malformed or without --use_own.
+        add_test(NAME ExperimentalFlagsCli
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_experimental_flags_cli.py
+                --binary $<TARGET_FILE:motioncorr>)
+        # Review F3: a build with the #262 DC hook must refuse --gpu unless its arm is 'none' (the hook has no CUDA site).
+        if(MC_EXPERIMENT_CCF_DC)
+            add_test(NAME CcfDcHookGpuRefusal
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_dc_hook_gpu_refusal.py
+                    --binary $<TARGET_FILE:motioncorr>)
+        endif()
         add_test(NAME OutputTreeComparator
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compare_output_trees.py)
         set_tests_properties(OutputTreeComparator PROPERTIES TIMEOUT 120)
@@ -748,10 +834,69 @@ if(BUILD_TESTING AND CUDA)
             get_filename_component(_exe "${test_source}" NAME_WE)
             add_executable(${_exe}_${mutant} ${test_source} "${_mutant_cu}")
             target_link_libraries(${_exe}_${mutant} PRIVATE motioncorr_core)
+            target_include_directories(${_exe}_${mutant} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda")
             target_link_options(${_exe}_${mutant} PRIVATE ${ARGN})
-            add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-mismatch)
+            if(test_prefix MATCHES "Oracle")
+                add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-oracle-failure)
+            elseif(test_prefix MATCHES "Hermitian")
+                target_compile_definitions(${_exe}_${mutant} PRIVATE MC_CHECK_HERMITIAN)
+                add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-invariant-failure)
+            else()
+                add_test(NAME ${test_prefix}_${mutant} COMMAND ${_exe}_${mutant} --expect-mismatch)
+            endif()
             set_tests_properties(${test_prefix}_${mutant} PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
         endfunction()
+        add_executable(cuda_hermitian_inverse tests/cuda_hermitian_inverse.cpp)
+        target_link_libraries(cuda_hermitian_inverse PRIVATE motioncorr_core)
+        add_test(NAME CudaHermitianInverse COMMAND cuda_hermitian_inverse)
+        set_tests_properties(CudaHermitianInverse PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        set(HERMITIAN_WRAPS "LINKER:--wrap=cufftMakePlanMany" "LINKER:--wrap=cufftExecC2R")
+        target_link_options(cuda_hermitian_inverse PRIVATE ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianInverseMutant tests/cuda_hermitian_inverse.cpp cuda_movie_session no_projection
+            "mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianInverseMutant tests/cuda_hermitian_inverse.cpp cuda_fft_prep wrapper_no_projection
+            "mc_cuda::projectHermitianColumns(d_comp, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianInverseMutant tests/cuda_hermitian_inverse.cpp cuda_realspace_dw dose_no_projection
+            "mc_cuda::projectHermitianColumns((cufftComplex*)d_Fframe, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        # Output-oracle mutants (invariant check off): removing the projection, or
+        # zeroing the whole boundary columns (a Hermitian but wrong operator), must
+        # be rejected by the host-projected reference.
+        set(ZERO_BOUNDARY "([&]{ const size_t pitch_ = (size_t)(nx / 2 + 1) * sizeof(cufftComplex); cudaMemset2D(PTR, pitch_, 0, sizeof(cufftComplex), ny); if (nx % 2 == 0) cudaMemset2D((PTR) + nx / 2, pitch_, 0, sizeof(cufftComplex), ny); return cudaGetLastError(); }())")
+        function(mc_zero_boundary_expr out ptr)
+            string(REPLACE "PTR" "${ptr}" _expr "${ZERO_BOUNDARY}")
+            set(${out} "${_expr}" PARENT_SCOPE)
+        endfunction()
+        mc_zero_boundary_expr(_zero_session d_inverse_tile)
+        mc_zero_boundary_expr(_zero_wrapper d_comp)
+        mc_zero_boundary_expr(_zero_dose "(cufftComplex*)d_Fframe")
+        mc_cuda_mutant(CudaHermitianOracleMutant tests/cuda_hermitian_inverse.cpp cuda_movie_session oracle_session_no_projection
+            "mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny)" "cudaSuccess" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianOracleMutant tests/cuda_hermitian_inverse.cpp cuda_movie_session oracle_session_zero_boundary
+            "mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny)" "${_zero_session}" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianOracleMutant tests/cuda_hermitian_inverse.cpp cuda_fft_prep oracle_wrapper_zero_boundary
+            "mc_cuda::projectHermitianColumns(d_comp, nx, ny)" "${_zero_wrapper}" ${HERMITIAN_WRAPS})
+        mc_cuda_mutant(CudaHermitianOracleMutant tests/cuda_hermitian_inverse.cpp cuda_realspace_dw oracle_dose_zero_boundary
+            "mc_cuda::projectHermitianColumns((cufftComplex*)d_Fframe, nx, ny)" "${_zero_dose}" ${HERMITIAN_WRAPS})
+        add_executable(cuda_hermitian_ccf tests/cuda_patch_batch.cpp)
+        target_compile_definitions(cuda_hermitian_ccf PRIVATE MC_CHECK_HERMITIAN)
+        target_link_libraries(cuda_hermitian_ccf PRIVATE motioncorr_core)
+        target_link_options(cuda_hermitian_ccf PRIVATE ${PATCH_BATCH_WRAPS})
+        add_test(NAME CudaHermitianCCF COMMAND cuda_hermitian_ccf)
+        set_tests_properties(CudaHermitianCCF PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Include the following inverse in the match to distinguish the two sites.
+        mc_cuda_mutant(CudaHermitianCCFMutant tests/cuda_patch_batch.cpp cuda_alignpatch ccf_perpatch_no_projection
+            "ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));\n        ALIGN_CUFFT(cufftExecC2R(plan_c2r"
+            "ALIGN_LAUNCH(cudaSuccess);\n        ALIGN_CUFFT(cufftExecC2R(plan_c2r" ${PATCH_BATCH_WRAPS})
+        mc_cuda_mutant(CudaHermitianCCFMutant tests/cuda_patch_batch.cpp cuda_alignpatch ccf_batched_no_projection
+            "ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));\n            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r"
+            "ALIGN_LAUNCH(cudaSuccess);\n            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r" ${PATCH_BATCH_WRAPS})
+        add_executable(cuda_peak_fit tests/cuda_peak_fit.cu)
+        target_link_libraries(cuda_peak_fit PRIVATE motioncorr_core)
+        add_test(NAME CudaPeakFit COMMAND cuda_peak_fit)
+        set_tests_properties(CudaPeakFit PROPERTIES LABELS "cuda;hardware" TIMEOUT 60)
+        mc_cuda_mutant(CudaPeakFitMutant tests/cuda_peak_fit.cu cuda_alignpatch float_denominator
+            "double denom_x = vp_x + vn_x - 2.0 * maxval;"
+            "double denom_x = float(vp_x) + float(vn_x) - 2.0f * float(maxval);")
         # shift_retired: retired patches keep receiving phase shifts.
         mc_cuda_mutant(CudaPatchBatchMutant tests/cuda_patch_batch.cpp cuda_alignpatch shift_retired
             "for (int j = 0; j < (int)active.size(); ++j) { const int p = active[j];"
@@ -794,8 +939,26 @@ if(BUILD_TESTING AND CUDA)
         mc_cuda_mutant(CudaVramAliasMutant tests/cuda_vram_alias.cpp cuda_movie_session dw_scratch_over_fourier
             "scratch.block = reinterpret_cast<char*>(d_Iframes);"
             "scratch.block = reinterpret_cast<char*>(d_Fframes);" "LINKER:--wrap=cudaMalloc")
+        # #259: the local warp's border branch must match the CPU's double decision.
+        add_executable(cuda_realspace_border_branch tests/cuda_realspace_border_branch.cpp)
+        target_link_libraries(cuda_realspace_border_branch PRIVATE motioncorr_core)
+        add_test(NAME CudaRealspaceBorderBranch COMMAND cuda_realspace_border_branch)
+        set_tests_properties(CudaRealspaceBorderBranch PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Mutants restore the float floor in one axis; the other axis and the
+        # control cases must still match.
+        mc_cuda_mutant(CudaRealspaceBorderBranchMutant tests/cuda_realspace_border_branch.cpp cuda_realspace_dw x_float
+            "int x0 = (int)floor((double)ix - (double)x_fitted);"
+            "int x0 = (int)floorf(x_target);")
+        mc_cuda_mutant(CudaRealspaceBorderBranchMutant tests/cuda_realspace_border_branch.cpp cuda_realspace_dw y_float
+            "int y0 = (int)floor((double)iy - (double)y_fitted);"
+            "int y0 = (int)floorf(y_target);")
         # Worker-lifetime device gain retention: the produced sum is the oracle,
         # so a wrongly reused or wrongly retired buffer changes pixels.
+        add_executable(cuda_local_admission tests/cuda_local_admission.cpp)
+        target_link_libraries(cuda_local_admission PRIVATE motioncorr_core)
+        target_link_options(cuda_local_admission PRIVATE "LINKER:--wrap=cudaMemGetInfo")
+        add_test(NAME CudaLocalAdmission COMMAND cuda_local_admission)
+        set_tests_properties(CudaLocalAdmission PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
         add_executable(cuda_device_gain_pool tests/cuda_device_gain_pool.cpp)
         target_link_libraries(cuda_device_gain_pool PRIVATE motioncorr_core)
         target_link_options(cuda_device_gain_pool PRIVATE
@@ -867,6 +1030,7 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaMemcpy"
             "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetLastError"
             "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cudaGetDeviceCount"
+            "LINKER:--wrap=cudaMemGetInfo"
             # cudaStreamSynchronize reaches the ingest scratch teardown, which runs
             # after the worker has already chosen its return value; TIFFOpen reaches
             # the multi-threaded strip reader, where some threads holding a handle
@@ -887,6 +1051,7 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaMemcpy"
             "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetLastError"
             "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cudaGetDeviceCount"
+            "LINKER:--wrap=cudaMemGetInfo"
             "LINKER:--wrap=cudaStreamSynchronize" "LINKER:--wrap=TIFFOpen")
         add_test(NAME CudaResidentRetryFailures
             COMMAND ${Python3_EXECUTABLE}
@@ -894,6 +1059,27 @@ if(BUILD_TESTING AND CUDA)
                 --binary $<TARGET_FILE:motioncorr_resident_retry_fault>)
         set_tests_properties(CudaResidentRetryFailures PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 600)
+        # A real illegal device write can trigger an Xid. Never collect it in the
+        # ordinary hardware suite; the driver also requires a UUID, an idle GPU,
+        # the canonical per-device lock and an allocation of at most eight CPUs.
+        option(MC_ENABLE_STICKY_CUDA_TEST "Enable destructive, isolated CUDA context test (#213)" OFF)
+        if(MC_ENABLE_STICKY_CUDA_TEST)
+            add_executable(motioncorr_sticky_fault
+                src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp
+                tests/cuda_sticky_fault.cu)
+            target_link_libraries(motioncorr_sticky_fault PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+            target_link_options(motioncorr_sticky_fault PRIVATE "-rdynamic"
+                "LINKER:--wrap=_Z20cudaAlignPatchDeviceP6float2iiidRSt6vectorIdSaIdEES4_idiRSob"
+                "LINKER:--wrap=_Z33cudaAlignPatchDeviceWithWorkspaceR23PatchAlignmentWorkspaceP6float2iiidRSt6vectorIdSaIdEES6_idiRSob"
+                "LINKER:--wrap=_Z25cudaAlignPatchBatchDeviceR30BatchedPatchAlignmentWorkspaceiiiidPSt6vectorIdSaIdEES4_idiP13PatchBatchLog"
+                "LINKER:--wrap=_Z14cudaAlignPatchRSt6vectorI13MultidimArrayI8tComplexIfEESaIS3_EEiidRS_IdSaIdEES9_idiRSob"
+                "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaLaunchKernel")
+            add_test(NAME CudaStickyContext
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_sticky_cuda_control.py
+                    --binary $<TARGET_FILE:motioncorr_sticky_fault>)
+            set_tests_properties(CudaStickyContext PROPERTIES
+                LABELS "cuda;hardware;destructive;opt-in" TIMEOUT 1200 RUN_SERIAL TRUE)
+        endif()
         add_test(NAME CudaPreprocessingFailurePaths
             COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py
@@ -915,6 +1101,30 @@ if(BUILD_TESTING AND CUDA)
                 --binary $<TARGET_FILE:motioncorr_faultinject> ${_stale_cuda_args})
         set_tests_properties(CudaStaleErrorAfterOom PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 600)
+        add_test(NAME CudaEarlyStreamingOom
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_early_streaming_oom.py
+                --binary $<TARGET_FILE:motioncorr_faultinject>)
+        set_tests_properties(CudaEarlyStreamingOom PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        # #226 D3: real runner/planner ownership, simulated status returns only.
+        add_executable(motioncorr_streaming_plan_fault
+            src/apps/run_motioncorr.cpp tests/cuda_fault_inject_shim.cpp
+            tests/cuda_streaming_plan_fault_shim.cpp)
+        target_link_libraries(motioncorr_streaming_plan_fault PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+        target_link_options(motioncorr_streaming_plan_fault PRIVATE
+            "-rdynamic" "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaMemcpy"
+            "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetLastError"
+            "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cudaGetDeviceCount"
+            "LINKER:--wrap=cudaMemGetInfo" "LINKER:--wrap=cudaStreamSynchronize"
+            "LINKER:--wrap=TIFFOpen" "LINKER:--wrap=cudaPeekAtLastError"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftSetAutoAllocation"
+            "LINKER:--wrap=cufftMakePlanMany" "LINKER:--wrap=cufftDestroy")
+        add_test(NAME CudaStreamingPlanClassificationCleanup
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_streaming_plan_classification_cleanup.py
+                --binary $<TARGET_FILE:motioncorr_streaming_plan_fault>)
+        set_tests_properties(CudaStreamingPlanClassificationCleanup PROPERTIES
+            LABELS "cuda;hardware" TIMEOUT 300)
         # The same two reconstruction-cleanup controls on the nvCOMP ingest arm.
         # run_preprocessing_failure_controls.py builds its fixture with
         # TIFFTAG_COMPRESSION = 1, so the fast path declines it and
@@ -941,6 +1151,53 @@ if(BUILD_TESTING AND CUDA)
             target_link_libraries(motioncorr_nvcomp_acceptance PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
             target_link_options(motioncorr_nvcomp_acceptance PRIVATE
                 "-rdynamic" "LINKER:--wrap=cudaMemcpyAsync" "LINKER:--wrap=cudaLaunchKernel")
+            add_executable(motioncorr_tiff_identity
+                src/apps/run_motioncorr.cpp tests/cuda_tiff_identity_shim.cpp)
+            target_link_libraries(motioncorr_tiff_identity PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+            target_link_options(motioncorr_tiff_identity PRIVATE
+                "-rdynamic" "LINKER:--wrap=TIFFOpen" "LINKER:--wrap=TIFFClose" "LINKER:--wrap=pread" "LINKER:--wrap=__pread_chk")
+            add_test(NAME CudaNvcompTiffIdentity
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_tiff_identity_controls.py
+                    --binary $<TARGET_FILE:motioncorr_tiff_identity>)
+            set_tests_properties(CudaNvcompTiffIdentity PROPERTIES
+                LABELS "cuda;hardware" TIMEOUT 900)
+            # Test-only copies export the exact conversion kernel stub. The
+            # first-chunk-only mutant retains fresh-handle checks and omits ONLY
+            # the later per-chunk identity checks; normal core source is untouched.
+            set(_identity_cu "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_movie_session.cu")
+            set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_identity_cu}")
+            file(READ "${_identity_cu}" _identity_source)
+            set(_identity_check "            if (!path_unchanged()) return decline_identity();\n            for (TIFF *t : tiffs.h) if (!handle_unchanged(t)) return decline_identity();")
+            string(FIND "${_identity_source}" "${_identity_check}" _first)
+            string(FIND "${_identity_source}" "${_identity_check}" _last REVERSE)
+            if(_first EQUAL -1 OR NOT _first EQUAL _last)
+                message(FATAL_ERROR "TIFF first-chunk mutant: per-chunk checks missing or not unique")
+            endif()
+            string(REPLACE "${_identity_check}" "            if (k == 0) {\n${_identity_check}\n            }"
+                _identity_mutant "${_identity_source}")
+            set(_identity_mutant_cu "${CMAKE_CURRENT_BINARY_DIR}/mutants/cuda_movie_session_identity_first_chunk.cu")
+            file(WRITE "${_identity_mutant_cu}" "${_identity_mutant}")
+            foreach(_variant later first_chunk)
+                set(_target motioncorr_tiff_identity_${_variant})
+                add_executable(${_target} src/apps/run_motioncorr.cpp
+                    tests/cuda_tiff_identity_shim.cpp tests/cuda_tiff_identity_probe.cu)
+                target_link_libraries(${_target} PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+                target_compile_definitions(${_target} PRIVATE MC_TIFF_IDENTITY_CONVERSION_PROBE)
+                target_compile_options(${_target} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler -fopenmp>)
+                target_link_options(${_target} PRIVATE "-rdynamic"
+                    "LINKER:--wrap=TIFFOpen" "LINKER:--wrap=TIFFClose"
+                    "LINKER:--wrap=pread" "LINKER:--wrap=__pread_chk" "LINKER:--wrap=cudaLaunchKernel")
+            endforeach()
+            target_compile_definitions(motioncorr_tiff_identity_first_chunk PRIVATE
+                MC_TIFF_IDENTITY_SESSION_SOURCE="${_identity_mutant_cu}")
+            add_test(NAME CudaNvcompTiffIdentityLaterChunk
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_tiff_identity_later_chunk_controls.py
+                    --binary $<TARGET_FILE:motioncorr_tiff_identity_later>
+                    --mutant-binary $<TARGET_FILE:motioncorr_tiff_identity_first_chunk>)
+            set_tests_properties(CudaNvcompTiffIdentityLaterChunk PROPERTIES
+                LABELS "cuda;hardware" TIMEOUT 1500)
             add_test(NAME CudaNvcompAcceptanceFailures
                 COMMAND ${Python3_EXECUTABLE}
                     ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_nvcomp_acceptance_controls.py

@@ -139,6 +139,41 @@ public:
 	// Maximum number of iterations
 	int max_iter;
 
+	// EXPERIMENTAL research prototype, default off, CPU only (refused with --gpu).
+	// experimental_global_half_gain scales every global alignment update by 0.5 (the
+	// unscaled update still drives the stopping test). experimental_align_tolerance > 0
+	// replaces the hard-coded 0.5 px stop of the global alignment. Local patches are
+	// untouched by both.
+	bool experimental_global_half_gain = false;
+	RFLOAT experimental_align_tolerance = 0;
+
+	// EXPERIMENTAL hypothesis H2, default off (0), CPU only (refused with --gpu): replace the
+	// separable 1D parabola of the subpixel peak by the full 2x2-Hessian quadratic on the same
+	// 3x3 neighbourhood. 0 = off, 1 = global alignment peaks only, 2 = global and patch peaks.
+	int experimental_coupled_peak = 0;
+	// Statistics of the last alignPatch call that used the coupled peak: peaks fitted, peaks that
+	// fell back to the separable result because H was not negative definite, and because the
+	// coupled offset exceeded 1 px in a component.
+	long coupled_peak_last_peaks = 0, coupled_peak_last_not_negdef = 0, coupled_peak_last_offset_gt_1px = 0;
+
+	// Coupled subpixel offset from the 3x3 CCF samples v[dy + 1][dx + 1] around an integer peak:
+	// delta = -H^{-1} g with H_xy the corner stencil / 4. Returns 0 and sets dx, dy when accepted;
+	// 1 when H is not negative definite, 2 when |delta| > 1 px in either component (dx, dy untouched).
+	static int coupledPeakOffset(const RFLOAT v[3][3], RFLOAT &dx, RFLOAT &dy);
+
+	// EXPERIMENTAL, default off, CPU only (refused with --gpu): W5's isotropic CCF weight for the GLOBAL alignment.
+	// The inherited weight divides the x frequency by nfx = nx/2 + 1; this divides by nx (the full width) instead,
+	// exactly W5 lib.py 'iso'. Exists only to run the W5 harmful comparator natively.
+	bool experimental_isotropic_weight = false;
+
+	// CCF B-factor weight at half-spectrum column x and signed row frequency ly:
+	// exp(-2 * ((ly / nfy)^2 + (x / x_norm)^2) * scaled_B). The inherited weight is x_norm = nfx.
+	static RFLOAT ccfWeightAt(int ly, int x, int nfy, RFLOAT x_norm, RFLOAT scaled_B);
+
+	// x normalisation of the global/patch CCF weight: the full width pnx for the experimental isotropic weight on the
+	// global alignment, otherwise nfx = pnx/2 + 1 (inherited).
+	static RFLOAT ccfWeightXNorm(bool is_global, bool isotropic, int pnx, int nfx);
+
 	// Save aligned but non-dose weighted micrograph.
 	// With MOTIONCOR2, this flag is always assumed to be true
 	bool save_noDW;

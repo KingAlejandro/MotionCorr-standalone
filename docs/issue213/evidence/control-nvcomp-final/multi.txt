@@ -1,0 +1,76 @@
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/control.tiff
+  * Movies/after1.tiff
+  * Movies/after2.tiff
+ Correcting beam-induced motions using our own implementation ...
+ Host allocator: glibc defaults; full-frame buffers pooled; THP madvise.
+000/??? sec ~~(,_,">                                                          [oo]Movies/control.tiff: Cannot get "Predictor" tag as plugin is not configured.
+[retry-caller] injected nonconvergence with nonzero shifts (batched)
+[sticky] launch illegal write in downloadPatchSpectra
+[sticky] fault completion=700 (an illegal memory access was encountered)
+[sticky] product cudaMalloc=700 (an illegal memory access was encountered), unchanged
+in: /mnt/clathrin/alex-motioncorr-213/src-min/src/motioncorr_runner.cpp, line 3704
+ERROR: 
+CUDA device context is unusable for Movies/control.tiff (patch 1, 1): an illegal memory access was encountered. Refusing to retry alignment on a poisoned context.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x586ee3a84717]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(+0x53871) [0x586ee3a53871]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_ZN16MotioncorrRunner3runEv+0x22b1) [0x586ee3b46db1]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(main+0x296) [0x586ee3a797a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x70d1b442a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x70d1b442a28b]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_start+0x25) [0x586ee3a7a385]
+==================
+ERROR: 
+CUDA device context is unusable for Movies/control.tiff (patch 1, 1): an illegal memory access was encountered. Refusing to retry alignment on a poisoned context.
+Continuing with the remaining movies.
+   0/   0 sec ...................~~(,_,">                                     [oo]in: /mnt/clathrin/alex-motioncorr-213/src-min/src/motioncorr_runner.cpp, line 2266
+ERROR: 
+CUDA device became unusable during session initialization for Movies/after1.tiff: an illegal memory access was encountered (recorded at initialize retired gain cache:461). First failure at initialize retired gain cache:461. Refusing CPU fallback after a fatal device error.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x586ee3a84717]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(+0x4a385) [0x586ee3a4a385]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(+0x1164ee) [0x586ee3b164ee]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_ZN16MotioncorrRunner26executeOwnMotionCorrectionER10Micrographi+0x62fd) [0x586ee3b3dd6d]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_ZN16MotioncorrRunner3runEv+0x22b1) [0x586ee3b46db1]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(main+0x296) [0x586ee3a797a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x70d1b442a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x70d1b442a28b]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_start+0x25) [0x586ee3a7a385]
+==================
+ERROR: 
+CUDA device became unusable during session initialization for Movies/after1.tiff: an illegal memory access was encountered (recorded at initialize retired gain cache:461). First failure at initialize retired gain cache:461. Refusing CPU fallback after a fatal device error.
+Continuing with the remaining movies.
+   0/   0 sec .......................................~~(,_,">                 [oo]in: /mnt/clathrin/alex-motioncorr-213/src-min/src/motioncorr_runner.cpp, line 2266
+ERROR: 
+CUDA device became unusable during session initialization for Movies/after2.tiff: an illegal memory access was encountered (recorded at initialize retired gain cache:461). First failure at initialize retired gain cache:461. Refusing CPU fallback after a fatal device error.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x586ee3a84717]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(+0x4a385) [0x586ee3a4a385]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(+0x1164ee) [0x586ee3b164ee]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_ZN16MotioncorrRunner26executeOwnMotionCorrectionER10Micrographi+0x62fd) [0x586ee3b3dd6d]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_ZN16MotioncorrRunner3runEv+0x22b1) [0x586ee3b46db1]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(main+0x296) [0x586ee3a797a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x70d1b442a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x70d1b442a28b]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_start+0x25) [0x586ee3a7a385]
+==================
+ERROR: 
+CUDA device became unusable during session initialization for Movies/after2.tiff: an illegal memory access was encountered (recorded at initialize retired gain cache:461). First failure at initialize retired gain cache:461. Refusing CPU fallback after a fatal device error.
+Continuing with the remaining movies.
+   0/   0 sec ............................................................~~(,_,"> yum!
+in: /mnt/clathrin/alex-motioncorr-213/src-min/src/motioncorr_runner.cpp, line 1093
+ERROR: 
+Motion correction failed for 3 movie(s): Movies/control.tiff Movies/after1.tiff Movies/after2.tiff. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x586ee3a84717]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(+0x56c05) [0x586ee3a56c05]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(main+0x296) [0x586ee3a797a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x70d1b442a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x70d1b442a28b]
+/mnt/clathrin/alex-motioncorr-213/build-nvcomp/motioncorr_sticky_fault(_start+0x25) [0x586ee3a7a385]
+==================
+ERROR: 
+Motion correction failed for 3 movie(s): Movies/control.tiff Movies/after1.tiff Movies/after2.tiff. Successful per-movie outputs were retained; joint output was not generated.

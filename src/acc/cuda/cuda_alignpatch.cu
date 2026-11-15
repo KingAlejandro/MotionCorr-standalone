@@ -1,3 +1,4 @@
+#include "src/acc/cuda/cuda_hermitian.cuh"
 #ifdef _CUDA_ENABLED
 
 #include "src/acc/cuda/cuda_alignpatch.h"
@@ -234,7 +235,7 @@ __global__ void findPeakAndInterpolateKernel(
     }
 
     if (threadIdx.x == 0) {
-        float maxval = s_max[0];
+        const double maxval = s_max[0];
         int posx = s_posx[0];
         int posy = s_posy[0];
 
@@ -245,16 +246,18 @@ __global__ void findPeakAndInterpolateKernel(
         int ipy   = posy;     if (ipy < 0)   ipy   = ccf_ny + ipy;
         int ipy_p = posy + 1; if (ipy_p < 0) ipy_p = ccf_ny + ipy_p;
 
+        // Promote before arithmetic: the float CCF can carry a large DC pedestal.
+        // Keep the existing guard threshold; only its curvature evaluation changes.
         const float EPS = 1e-15f;
-        float vp_x = d_Iccs[frame_offset + ipy * ccf_nx + ipx_p];
-        float vn_x = d_Iccs[frame_offset + ipy * ccf_nx + ipx_n];
-        float denom_x = vp_x + vn_x - 2.0f * maxval;
-        float cur_x = (fabsf(denom_x) > EPS) ? (posx - 0.5f * (vp_x - vn_x) / denom_x) : posx;
+        double vp_x = d_Iccs[frame_offset + ipy * ccf_nx + ipx_p];
+        double vn_x = d_Iccs[frame_offset + ipy * ccf_nx + ipx_n];
+        double denom_x = vp_x + vn_x - 2.0 * maxval;
+        double cur_x = (fabs(denom_x) > EPS) ? (posx - 0.5 * (vp_x - vn_x) / denom_x) : posx;
 
-        float vp_y = d_Iccs[frame_offset + ipy_p * ccf_nx + ipx];
-        float vn_y = d_Iccs[frame_offset + ipy_n * ccf_nx + ipx];
-        float denom_y = vp_y + vn_y - 2.0f * maxval;
-        float cur_y = (fabsf(denom_y) > EPS) ? (posy - 0.5f * (vp_y - vn_y) / denom_y) : posy;
+        double vp_y = d_Iccs[frame_offset + ipy_p * ccf_nx + ipx];
+        double vn_y = d_Iccs[frame_offset + ipy_n * ccf_nx + ipx];
+        double denom_y = vp_y + vn_y - 2.0 * maxval;
+        double cur_y = (fabs(denom_y) > EPS) ? (posy - 0.5 * (vp_y - vn_y) / denom_y) : posy;
 
         d_cur_xshifts[iframe] = cur_x * ccf_scale_x;
         d_cur_yshifts[iframe] = cur_y * ccf_scale_y;
@@ -622,6 +625,7 @@ bool cudaAlignPatchDeviceWithWorkspace(
 
         // 3. Batched cuFFT C2R
         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_cufft));
+        ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
         ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
         if (timed) {
             ALIGN_CUDA(cudaEventRecord(ev_stop_cufft));
@@ -985,6 +989,7 @@ void cudaAlignPatchBatchDevice(
             ALIGN_LAUNCH(cudaGetLastError());
             computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, w.d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, ccf_nfx, ccf_nfy, n_frames);
             ALIGN_LAUNCH(cudaGetLastError());
+            ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
             ALIGN_CUFFT(cufftExecC2R(w.plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
             findPeakAndInterpolateKernel<<<n_frames, 256>>>(
                 d_Iccs, d_cur_x + p * n, d_cur_y + p * n,

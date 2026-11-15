@@ -1,0 +1,6 @@
+mutant flag-ignored: isotropic_weight rc=1 (KILLED) FAIL global isotropic must normalise by the full width
+mutant wrong-norm: isotropic_weight rc=1 (KILLED) FAIL global isotropic must normalise by the full width
+mutant leaks-to-patch: isotropic_weight rc=1 (KILLED) FAIL a patch alignment must keep nfx
+mutant formula-factor: isotropic_weight rc=1 (KILLED) FAIL prod weight differs from W5
+mutant prod-norm-moved: isotropic_weight rc=1 (KILLED) FAIL iso weight differs from W5
+restored original: rc=0 (must be 0)

@@ -1,0 +1,292 @@
+[
+  {
+    "config": "G",
+    "arm": "unfixed",
+    "command": [
+      "/mnt/clathrin/alex-motioncorr-215/unfixed/motioncorr",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--bfactor",
+      "150",
+      "--seed",
+      "1",
+      "--expected_frames",
+      "24",
+      "--i",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/input/movies.star",
+      "--o",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/G-unfixed/",
+      "--j",
+      "8",
+      "--max_io_threads",
+      "4",
+      "--gainref",
+      "gain.mrc",
+      "--gpu",
+      "0",
+      "--ingest",
+      "auto",
+      "--ingest_witness",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/G-unfixed.witness"
+    ],
+    "returncode": 0,
+    "routes": [
+      "nvcomp",
+      "nvcomp"
+    ],
+    "route_logs": {
+      "20170629_00026_frameImage.log": [
+        "nvCOMP ingestion: chunk=6/24 frames x 4 chunks, slots=2, scratch=410073744/1367678976 bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0), pinned staging=100663296/268435456 reserved, 68338816 used (2 x 33063768 payload), nvCOMP temp=0, input alignment=4, span-read frames=24/24",
+        "nvCOMP ingestion: pinned staging pool grown to 100663296 bytes for a 68338816-byte request (worker lifetime)"
+      ],
+      "20170629_00031_frameImage.log": [
+        "nvCOMP ingestion: chunk=6/24 frames x 4 chunks, slots=2, scratch=409771392/1367678976 bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0), pinned staging=100663296/268435456 reserved, 68036480 used (2 x 32912592 payload), nvCOMP temp=0, input alignment=4, span-read frames=24/24"
+      ]
+    },
+    "binary_sha256": "7bfb4860fd79f93aefe4d70bdaadd75aac8b51239a1e4df5a35c65e037f4a9ef"
+  },
+  {
+    "config": "G",
+    "arm": "fixed",
+    "command": [
+      "/mnt/clathrin/alex-motioncorr-215/build-nvcomp/motioncorr",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--bfactor",
+      "150",
+      "--seed",
+      "1",
+      "--expected_frames",
+      "24",
+      "--i",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/input/movies.star",
+      "--o",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/G-fixed/",
+      "--j",
+      "8",
+      "--max_io_threads",
+      "4",
+      "--gainref",
+      "gain.mrc",
+      "--gpu",
+      "0",
+      "--ingest",
+      "auto",
+      "--ingest_witness",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/G-fixed.witness"
+    ],
+    "returncode": 0,
+    "routes": [
+      "nvcomp",
+      "nvcomp"
+    ],
+    "route_logs": {
+      "20170629_00026_frameImage.log": [
+        "nvCOMP ingestion: chunk=6/24 frames x 4 chunks, slots=2, scratch=410073744/1367678976 bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0), pinned staging=100663296/268435456 reserved, 68338816 used (2 x 33063768 payload), nvCOMP temp=0, input alignment=4, span-read frames=24/24",
+        "nvCOMP ingestion: pinned staging pool grown to 100663296 bytes for a 68338816-byte request (worker lifetime)"
+      ],
+      "20170629_00031_frameImage.log": [
+        "nvCOMP ingestion: chunk=6/24 frames x 4 chunks, slots=2, scratch=409771392/1367678976 bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0), pinned staging=100663296/268435456 reserved, 68036480 used (2 x 32912592 payload), nvCOMP temp=0, input alignment=4, span-read frames=24/24"
+      ]
+    },
+    "binary_sha256": "720c25dd7716e377406a9667c100db74c575f845981dd4d53037460caec2141c"
+  },
+  {
+    "config": "G",
+    "arm": "compact",
+    "command": [
+      "/mnt/clathrin/alex-motioncorr-215/build-nvcomp/motioncorr",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--bfactor",
+      "150",
+      "--seed",
+      "1",
+      "--expected_frames",
+      "24",
+      "--i",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/input/movies.star",
+      "--o",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/G-compact/",
+      "--j",
+      "8",
+      "--max_io_threads",
+      "4",
+      "--gainref",
+      "gain.mrc",
+      "--gpu",
+      "0",
+      "--ingest",
+      "compact",
+      "--ingest_witness",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/G-compact.witness"
+    ],
+    "returncode": 0,
+    "routes": [
+      "compact",
+      "compact"
+    ],
+    "route_logs": {
+      "20170629_00026_frameImage.log": [],
+      "20170629_00031_frameImage.log": []
+    },
+    "binary_sha256": "720c25dd7716e377406a9667c100db74c575f845981dd4d53037460caec2141c"
+  },
+  {
+    "config": "L",
+    "arm": "unfixed",
+    "command": [
+      "/mnt/clathrin/alex-motioncorr-215/unfixed/motioncorr",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--bfactor",
+      "150",
+      "--seed",
+      "1",
+      "--expected_frames",
+      "24",
+      "--i",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/input/movies.star",
+      "--o",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/L-unfixed/",
+      "--j",
+      "8",
+      "--max_io_threads",
+      "4",
+      "--gainref",
+      "gain.mrc",
+      "--gpu",
+      "0",
+      "--ingest",
+      "auto",
+      "--ingest_witness",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/L-unfixed.witness",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5"
+    ],
+    "returncode": 0,
+    "routes": [
+      "nvcomp",
+      "nvcomp"
+    ],
+    "route_logs": {
+      "20170629_00026_frameImage.log": [
+        "nvCOMP ingestion: chunk=6/24 frames x 4 chunks, slots=2, scratch=410073744/1367678976 bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0), pinned staging=100663296/268435456 reserved, 68338816 used (2 x 33063768 payload), nvCOMP temp=0, input alignment=4, span-read frames=24/24",
+        "nvCOMP ingestion: pinned staging pool grown to 100663296 bytes for a 68338816-byte request (worker lifetime)"
+      ],
+      "20170629_00031_frameImage.log": [
+        "nvCOMP ingestion: chunk=6/24 frames x 4 chunks, slots=2, scratch=409771392/1367678976 bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0), pinned staging=100663296/268435456 reserved, 68036480 used (2 x 32912592 payload), nvCOMP temp=0, input alignment=4, span-read frames=24/24"
+      ]
+    },
+    "binary_sha256": "7bfb4860fd79f93aefe4d70bdaadd75aac8b51239a1e4df5a35c65e037f4a9ef"
+  },
+  {
+    "config": "L",
+    "arm": "fixed",
+    "command": [
+      "/mnt/clathrin/alex-motioncorr-215/build-nvcomp/motioncorr",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--bfactor",
+      "150",
+      "--seed",
+      "1",
+      "--expected_frames",
+      "24",
+      "--i",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/input/movies.star",
+      "--o",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/L-fixed/",
+      "--j",
+      "8",
+      "--max_io_threads",
+      "4",
+      "--gainref",
+      "gain.mrc",
+      "--gpu",
+      "0",
+      "--ingest",
+      "auto",
+      "--ingest_witness",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/L-fixed.witness",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5"
+    ],
+    "returncode": 0,
+    "routes": [
+      "nvcomp",
+      "nvcomp"
+    ],
+    "route_logs": {
+      "20170629_00026_frameImage.log": [
+        "nvCOMP ingestion: chunk=6/24 frames x 4 chunks, slots=2, scratch=410073744/1367678976 bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0), pinned staging=100663296/268435456 reserved, 68338816 used (2 x 33063768 payload), nvCOMP temp=0, input alignment=4, span-read frames=24/24",
+        "nvCOMP ingestion: pinned staging pool grown to 100663296 bytes for a 68338816-byte request (worker lifetime)"
+      ],
+      "20170629_00031_frameImage.log": [
+        "nvCOMP ingestion: chunk=6/24 frames x 4 chunks, slots=2, scratch=409771392/1367678976 bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0), pinned staging=100663296/268435456 reserved, 68036480 used (2 x 32912592 payload), nvCOMP temp=0, input alignment=4, span-read frames=24/24"
+      ]
+    },
+    "binary_sha256": "720c25dd7716e377406a9667c100db74c575f845981dd4d53037460caec2141c"
+  },
+  {
+    "config": "L",
+    "arm": "compact",
+    "command": [
+      "/mnt/clathrin/alex-motioncorr-215/build-nvcomp/motioncorr",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--bfactor",
+      "150",
+      "--seed",
+      "1",
+      "--expected_frames",
+      "24",
+      "--i",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/input/movies.star",
+      "--o",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/L-compact/",
+      "--j",
+      "8",
+      "--max_io_threads",
+      "4",
+      "--gainref",
+      "gain.mrc",
+      "--gpu",
+      "0",
+      "--ingest",
+      "compact",
+      "--ingest_witness",
+      "/mnt/clathrin/alex-motioncorr-215/tutorial/L-compact.witness",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5"
+    ],
+    "returncode": 0,
+    "routes": [
+      "compact",
+      "compact"
+    ],
+    "route_logs": {
+      "20170629_00026_frameImage.log": [],
+      "20170629_00031_frameImage.log": []
+    },
+    "binary_sha256": "720c25dd7716e377406a9667c100db74c575f845981dd4d53037460caec2141c"
+  }
+]

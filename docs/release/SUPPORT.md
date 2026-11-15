@@ -59,7 +59,7 @@ Where this program behaves differently from RELION 5.1's built-in CPU motion cor
 | Worker reports; failed movie | per-movie files may remain | `--skip_report_pdf` for multi-GPU workers; no rollback: partial or earlier per-movie files and an early `_PS.mrc` can remain, joint outputs withheld, §6 | Verified |
 | Corrupt EER fractions | skipped with a warning (inherited) | preserved: wrong-pixel-count fractions are skipped and the movie publishes; supply `--expected_frames`, §2 | Decided (D6) |
 | EER decoder bounds and damaged container | out-of-bounds host access and a process abort on malformed or truncated EER, verified on the inherited code ([#221](https://github.com/KingAlejandro/MotionCorr-standalone/issues/221)) | each decoder loop is bounded by its own fraction's bytes and by electron-vector capacity; a fraction that would overrun takes the D6 skip-and-warn path; a damaged TIFF/EER container fails that **movie**, not the process. Valid input is byte-identical to before. A **bounded** result: see §2 for what is and is not claimed | Decided (D10); **merged** (#231, `55e30154`); deliberate divergence from RELION 5.1 |
-| Compressed MRC integrity | decompressor exit status not checked (inherited) | unchanged; validate inputs with `xz -t`/`zstd -t`/`bzip2 -t`, §6 item 6 | Decided (D5/F4, fix #214) |
+| Compressed MRC integrity | decompressor exit status not checked (inherited) | RC0 unchanged; post-RC0 #214 checks full reads; subsets still need independent validation, §6 item 6 | D5/F4; post-RC0 #214 evidence (see §8) |
 | MRC mode 0, early binning, dose-weighting voltages | mode 0 read as signed int8; early binning on by default when `--bin_factor` is not 1; dose weighting only at 100/200/300 kV | unchanged. **GPU users:** with `--bin_factor` other than 1, default early binning bypasses the resident CUDA session and compact host staging (the movie takes the `float` route and the global FFT runs on the CPU); late binning needs `--no_early_binning` (`src/motioncorr_runner.cpp:2300, 2405`; §2, §3). RELION users who pass `--bin_factor 2` expecting lower GPU memory use will not get the resident path by default | Verified |
 | Options | all RELION 5.1 `relion_run_motioncorr` options | all still parsed; new, additive: `--seed`, `--expected_frames`, `--ingest`, `--ingest_witness`, `--profile`, `--profile_device_timing`, `--sync_output`, `--skip_report_pdf`, `--aggregate_only`. The only change in meaning is `--gpu` under `--use_own` | Verified |
 
@@ -353,8 +353,9 @@ healthy movies for a published dataset.
      "no report was produced", not a successful run; the numerical products are the MRC and STAR files.
 3. A pinned `--ingest` that cannot be honoured fails the movie before any host decode (§2).
 4. A fatal CUDA error refuses any CPU fallback and fails the movie (`src/motioncorr_runner.cpp:2260-2272`). A
-   recoverable device-ingest failure re-reads the movie on the host and continues (`:2341-2346`). The fatal-path CUDA tests inject error
-   codes; **genuine device poisoning is not tested** and is post-RC0 work (TST2, [#213](https://github.com/KingAlejandro/MotionCorr-standalone/issues/213)).
+   recoverable device-ingest failure re-reads the movie on the host and continues (`:2341-2346`). The ordinary fatal-path CUDA tests inject error
+   codes. The opt-in genuine sticky-context control covers one resident-retry boundary
+   on an A100 (TST2, [#213](https://github.com/KingAlejandro/MotionCorr-standalone/issues/213)); see §8 for limits.
 5. **Truncated or short raw MRC movies, gain references and defect maps fail closed (F3/F3b, D5; merged, #205 `f67a5866`).** The negative return of `Image::read` (short
    `fread` or seek failure) is now checked at every read, so a truncated movie no longer runs on unread memory. This is movie-level rejection (the criterion of
    `POST_FREEZE_TEST_PLAN.md` §4.1): exit 1, no completion STAR for the movie, no joint output for the batch. The named messages are:
@@ -364,11 +365,8 @@ healthy movies for a published dataset.
    A truncated gain or defect map fails **every** movie and the job (exit 1, no products); with `--gain_rot` the gain is read before any movie. Valid input is byte-identical to
    `1db86902` and the truncated cases fail on `1db86902` (PR #205; tests `TruncatedMrcMovie`, `TruncatedGainDefect` and their `Cuda` variants). This does **not** cover compressed
    MRC (item 6, F4); EER has its own rules (D6 and D10, §2). Frozen-SHA rerun of the two required tests: **PASS** on F (QF item 4, with the `Cuda` variants).
-6. **Compressed MRC (`.bz2`/`.xz`/`.zst`) integrity is not fully checked (F4, documented RC0 limitation, D5).** The decoder's exit status is not
-   checked after a complete read (`src/image.h:1958-1963`, `pclose` result ignored, "exit status is not a complete-file integrity check
-   here"), so some corruption that is reported only at the end of the stream (for example a missing final byte or a bad index CRC) is
-   **accepted**. Short reads are still caught. **You must validate compressed inputs independently before processing**: `xz -t FILE`,
-   `zstd -t FILE`, `bzip2 -t FILE` (or `pbzip2 -t FILE`). Scheduled fix: [#214](https://github.com/KingAlejandro/MotionCorr-standalone/issues/214).
+6. **Compressed MRC (`.bz2`/`.xz`/`.zst`), D5/F4, post-RC0 #214.** RC0 ignores decoder exit status and can publish a complete-looking stream despite a missing final byte, corrupt index CRC or nonzero decoder exit (#204). The post-RC0 fix explicitly drains full-movie reads to EOF and checks `pclose` before alignment and publication. A read error or nonzero status fails that movie (Class A: exit 1, no completion STAR, no joint output; healthy movies continue). This intentional rejection changes inherited failure behavior under #214; healthy products are required to remain identical.
+   Header-only and frame-subset reads retain early close: status is ignored because SIGPIPE is legitimate. A subset is any selection omitting a frame, **even if it reaches the last frame**; an explicit selection covering all frames is a full read. Short reads needed for the selected frames still fail. For subsets, and for RC0, validate independently before processing: `xz -t FILE`, `zstd -t FILE`, `bzip2 -t FILE` (or `pbzip2 -t FILE`). Qualification status and retained evidence: [#214 record](../rc0/compressed_exit_status/README.md); native and timing results, including the independent #246 test-harness exception, are recorded there.
 7. **Big-endian mode-0 MRC with nx = 128 (F5): processed on F, but not pinned by a test.** Up to `483e881d` the swap heuristic was `abs(header->mode) > SWAPTRIG || abs(header->nx) > SWAPTRIG`; a byte-swapped
    nx of 128 is `INT_MIN`, for which `abs` is undefined behaviour, and the movie failed identically on every tested route of the GCC build (W-MRC-Q, PR #204; R-QA1). #231 replaced the test with ordered comparisons
    (`src/rwMRC.h:149-151`), so `abs(INT_MIN)` no longer occurs and the undefined-behaviour rationale no longer applies. A byte-swapped `INT_MIN` field now takes the swap branch. **Observed on F at QF** (`docs/rc0/qf/run_6d68e2d6/README.md`, item 13 disposition): the F5 input
@@ -384,7 +382,7 @@ results. `logfile.pdf`, `header.pdf`, `batch.pdf`, the shift EPS plots, `.log` a
   5.3.0.16 and CUDA 12.8 (PR #209). See "Optional proprietary dependencies" below.
 - **Ghostscript** (`gs`): needed for `logfile.pdf`, `header.pdf` and `batch.pdf`. A single-process run without it still
   writes the MRC, STAR and EPS products, but the PDF reports are absent or empty (§6); `run_dataset.py` fails (§4).
-- **pbzip2 / xz / zstd**: only for compressed MRC input (§2). The same tools (`xz -t`, `zstd -t`, `bzip2 -t`/`pbzip2 -t`) are needed to validate compressed inputs first (§6 item 6).
+- **pbzip2 / xz / zstd**: only for compressed MRC input (§2). Use `xz -t`, `zstd -t`, `bzip2 -t`/`pbzip2 -t` before subset reads (and before all RC0 reads; §6 item 6).
 - **Python 3 with NumPy**: required at configure time when `BUILD_TESTING=ON` (`CMakeLists.txt:422-428`); the CMake
   configure fails with "BUILD_TESTING=ON requires Python 3 with 'numpy' installed." (reproduced locally). `README.md` now
   says so beside the build prerequisites. The tools under `tools/` also need NumPy.
@@ -401,7 +399,7 @@ results. `logfile.pdf`, `header.pdf`, `batch.pdf`, the shift EPS plots, `.log` a
 Basis: maintainer decision D2 on #198 and the decision record [`docs/rc0/decoder_trust_and_dependencies.md`](../rc0/decoder_trust_and_dependencies.md) §3 (merged, #199 `a1ab83f2`).
 This page makes no legal claim beyond these statements.
 
-### Decoder trust boundary (D1, option 1: trusted-input precondition; no code change)
+### Decoder trust boundary (D1, option 1: trusted-input precondition)
 
 On builds configured with `-DUSE_NVCOMP=ON` (default OFF), `--ingest auto` sends **eligible TIFFs** (16-bit, Deflate or Adobe-Deflate, one row per
 strip, no predictor, native byte order; full list in §2) to NVIDIA nvCOMP's GPU Deflate decoder. nvCOMP 5.3 documents **undefined behaviour for
@@ -410,11 +408,34 @@ sizes and offsets, the decoder status, the decoded length and an Adler-32 checks
 behaviour on a corrupt Deflate body**. This route therefore **assumes complete, unmodified acquisition files**. **Use `--ingest compact` for
 files of unknown integrity or files that are still being written.**
 
-Two further statements: a file that changes **between the tag scan and the strip read is not detected** (follow-up
-[#215](https://github.com/KingAlejandro/MotionCorr-standalone/issues/215), post-RC0), and **checked arithmetic on the pre-decode offset/size path is in force
+Post-RC0 [#215](https://github.com/KingAlejandro/MotionCorr-standalone/issues/215) pins the tag-scan descriptor's
+`st_dev`, `st_ino`, `st_size` and nanosecond `st_mtim`. A failed identity check on a fresh reader handle or the path,
+or before each chunk's decoder submission, declines into the existing host reader (`auto`; pinned `nvcomp` still refuses).
+This detects ordinary growth and replacement; it does not lock the file or validate its Deflate body. The complete,
+unmodified-input precondition remains unchanged. **Checked arithmetic on the pre-decode offset/size path is in force
 (T3, #217 merged `483e881d`)**: an overflow or an unreadable strip offset becomes a named decline (§2). The trusted-input precondition for the Deflate body is unchanged.
 
 ## 8. Known limitations
+
+- **Genuine CUDA context poisoning (#213): bounded native coverage.** An opt-in,
+  test-only `CudaStickyContext` control now launches an illegal device write in
+  the runner's context and checks sticky-error observation, attributed refusal,
+  no publication, later-movie containment and worker/dataset failure. It is
+  excluded from ordinary CTest collection (`MC_ENABLE_STICKY_CUDA_TEST=OFF`).
+  A reserved idle GPU and the driver's canonical per-GPU lock are required;
+  see [`docs/issue213/README.md`](../issue213/README.md) for the runbook and actual
+  evidence at `f25c9580`: CUDA and CUDA+nvCOMP controls passed on one A100 with
+  CUDA 12.8; a compiled CUDA mutant disabling the boundary refusal was rejected.
+  Before/after GPU health checks passed. Coverage is one resident-retry boundary
+  and one dataset worker with a synthetic fixture; other fault sites, genuine
+  nvCOMP-ingest poisoning, late-product rollback and other devices/toolkits are
+  untested. Existing injected controls and frozen RC0 results keep their scope/SHA.
+- **nvCOMP input identity (#215, post-RC0):** identity checks detect growth/replacement between the tag scan and decoder submission,
+  but cannot exclude a concurrent writer after the check or same-size edits with restored timestamps. Continue to supply complete,
+  immutable, trusted files (§7); this is not a corrupt-Deflate safety guarantee. The RC0 binary itself has no identity check.
+  Post-RC0 controls and native route/product evidence: [#215 record](../issue215/README.md).
+
+- **Compressed MRC (D5/F4, #214):** full-movie decoder-status rejection is fixed in post-RC0 source; header-only and subset reads intentionally do not certify the stream. Native CUDA execution, CTest re-entry (with the independent #246 test-harness exception) and real-movie drain timing are recorded in the [evidence](../rc0/compressed_exit_status/README.md). RC0 retains the original limitation (§6 item 6).
 
 - **The `0.001` relative-RMSE diagnostic fails for CUDA versus CPU.** On the 24 tutorial movies CUDA versus fixed CPU
   `--j 1` gives relative RMSE 0.002899-0.010082 against 0.001 (0/24 pass the relaxed profile; every other relaxed check
@@ -430,7 +451,7 @@ Two further statements: a file that changes **between the tag scan and the strip
   families tested (PR #209). Limits are unchanged.
 - **EER damaged input (D10, merged #231): bounded, not a general safety claim.** A damaged EER container or MRC header fails the movie (exit 1, no completion STAR for it, no joint output); a fraction that would overrun
   takes the D6 skip-and-warn path; whole-IFD truncation is still a shorter movie without `--expected_frames` (E-1). The claim is limited to the tested cases and to 65000, 65001 and 65002 host decoding; see §2 for the three separate behaviours and the bound.
-- **Known post-RC0 item, not a user-facing limitation:** LeakSanitizer reports a leak from the `RelionError` constructor's backtrace buffer (`src/error.cpp:58`; the matching `delete[]` is only in the error-print function, `:82`), so a caught-and-not-printed error leaves it allocated (inherited and pre-existing; R-D10b P3-2 on #231). It is a follow-up after RC0 and does not affect products.
+- **RelionError backtrace leak, post-RC0 #239:** RC0 leaks a caught-and-unprinted error's backtrace buffer (inherited, R-D10b P3-2 on #231). The candidate uses value ownership, preserving error/backtrace format and products. LeakSanitizer's 6,400-byte negative control now passes with no leaks; throw/copy/assignment/repeated-print paths pass AddressSanitizer. Full native CTest: CPU 75/76 (ProfilingKit harness defect #246: compiler settling exceeds the CLI deadline), CUDA 110/110 and CUDA+nvCOMP 113/113. The failed rerun has the same #246 cause, with live compilers recorded in its occupancy snapshot; it is unrelated to backtrace ownership. The CPU re-entry question is resolved without a maintainer waiver; the historical failures remain recorded. See `docs/post_rc0/issue239/README.md`.
 - **There is no Tier D scientific gate.** No CTF/FSC/B-factor non-inferiority result exists for CPU, CUDA or hybrid output
   (`docs/gate_contract.md` §1; #61, #73 open). RC0 is an evaluation release.
 - Tier A (byte-exact CPU regression) and Tier C (known-motion truth) exist and are enforced
@@ -440,8 +461,9 @@ Two further statements: a file that changes **between the tag scan and the strip
 - `--max_iter 5` non-convergence: 41 of 50 patches in EMPIAR-10641 and 30 of 50 in EMPIAR-10216 did not converge in the
   #186 pass; those movies spend most of their time in the retry (`docs/workload_corpus/gpu/README.md`). Data dependent.
 - Resume (§5). Multi-GPU is process-per-device only (§4).
-- **GPU memory: free-VRAM floors per geometry, the streaming fallback and a non-monotone gap: see "GPU memory (QM)" at the end of this section.** Binning is not a memory workaround on the strength of this page: early binning skips the resident session (`:2300`) and does the global FFT on the CPU, changes the output sampling, and the later CUDA stages' memory behaviour is unqualified.
+- **GPU memory: free-VRAM floors per geometry, the streaming fallback and post-RC0 admission updates: see "GPU memory (QM)" at the end of this section.** Binning is not a memory workaround on the strength of this page: early binning skips the resident session (`:2300`) and does the global FFT on the CPU, changes the output sampling, and the later CUDA stages' memory behaviour is unqualified.
 - **Host RAM with `--grouping_for_ps` on CUDA:** one extra Fourier movie on the host (§3).
+- **Post-RC0 #235:** ProfilingKit selftests now use local `/tmp` scratch, including child processes, to avoid PanFS/network `TMPDIR` cleanup `ENOTEMPTY`. A supplied EER gain section now fails explicitly if Pillow is missing; optional EER inputs remain optional. Local semantic negative controls and affected CTests passed; PanFS itself was not retested. See `docs/post_rc0/issue235/`.
 - **ProfilingKit compiler settling, post-RC0 #246:** the two fake import/subset CLI tests now pass `--settle-timeout 0`. Previously any live host compiler could trigger the default 300 s settle wait inside their 30 s subprocess deadline; this explains #245's two timeout errors (its occupancy records `cc1`/`cc1plus`). A live-`cc1` control fails before and passes after the fix (134/134 internal tests). Production defaults and test deadlines are unchanged; see `docs/post_rc0/issue246/README.md`. Historical timeout failures, including PR #209's reported load-sensitive event, are not relabelled as passes.
 - Resident retry (#197), 10641: host RSS 2.07 GiB with the resident retry versus 7.0 GiB before #197; one resident retry allocates 504 MiB of
   VRAM (301 MiB on 10216) (PR #207, single runs).
@@ -454,14 +476,24 @@ Two further statements: a file that changes **between the tag scan and the strip
     fixed the test and is **merged** (`ecb7d7f7`); it passes on macOS at `cb3699ac`. This does not qualify macOS.
   - `NativeMovieStaging` is Linux-only and is skipped.
   No unqualified "macOS supported" statement is made anywhere in these documents. Section 3 of `docs/release/RELEASE_CHECKLIST.md`.
-- `python3 tools/multi_gpu/run_dataset.py` emits a `SyntaxWarning: 'return' in a 'finally' block` on Python 3.14
-  (`run_dataset.py:172`). Cosmetic as of this draft.
+- **Post-RC0 #240:** the Python 3.14 `return`-in-`finally` warning in `run_dataset.py` is fixed. Exit codes and status-write/restoration precedence are preserved, including exceptions in the try body. Strict compilation, 16 semantic subcases, 71 scheduling cases and 8 native dataset endpoints passed; see `docs/post_rc0/issue240/README.md`. Frozen C++ binaries were reused; this is a tooling re-entry result.
 
 ### GPU memory (QM)
 
 Evidence: [PR #225](https://github.com/KingAlejandro/MotionCorr-standalone/pull/225) (`docs/rc0/qual_qm_vram/`, main `483e881d`): 162 runs on one A100 80 GB with a VRAM balloon, 0 crashes, 0 hangs, 0 wrong outputs;
 every completed constrained run was identical to its unconstrained run and every failure was clean (no products written). Audited by R-QM
-([audit](https://github.com/KingAlejandro/MotionCorr-standalone/pull/225#issuecomment-6234250216)). Of the three defects it found ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)), **D1 (stale CUDA error after a handled out-of-memory) is fixed by D11 ([PR #228](https://github.com/KingAlejandro/MotionCorr-standalone/pull/228), merged `e3871ca2`)**; the quoted table and text below predate that fix, and its D1 sentence is revised in place (marked). D2 (config-L admission gap) and D3 (late OOM failure) are **deferred until after RC0** (#226 stays open); none changes output. The wording below is R-QM's, not the worker's first draft.
+([audit](https://github.com/KingAlejandro/MotionCorr-standalone/pull/225#issuecomment-6234250216)). Of the three defects it found ([#226](https://github.com/KingAlejandro/MotionCorr-standalone/issues/226)), **D1 (stale CUDA error after a handled out-of-memory) is fixed by D11 ([PR #228](https://github.com/KingAlejandro/MotionCorr-standalone/pull/228), merged `e3871ca2`)**; the quoted table and text below predate that fix, and its D1 sentence is revised in place (marked). D2 (config-L admission gap) and D3 (late OOM failure) were **deferred until after RC0** (#226 stays open until both are resolved). The quotation below records the historical QM measurements; the separate post-RC0 candidate updates supersede only their stated defect rows.
+
+**Post-RC0 D2 candidate (`bb348554`, #226):** exact patch-workspace and conditional
+retry-stack admission closes the measured config-L/auto gaps: 10441 at
+37.5/38/38.5 GiB, Falcon 4 at 19/19.5 GiB, and 10216 at 8.5 GiB now complete with
+identical products. The nine neighbouring passing points (including 10216 at
+16 GiB) retain their routes and products. Resident-L floors remain 39/20/8.75 GiB;
+this closes the listed gaps, without establishing a universal memory floor.
+New fallback peak RSS samples were about 40.8/25.8/7.8 GiB respectively; allow
+host headroom, as host-RAM exhaustion was not tested. This is the same A100 and
+balloon harness, not qualification on physical smaller cards. D3 is separate.
+[Commands, before/after controls and limits](../rc0/issue226/d2/README.md).
 
 > **GPU memory.** The resident CUDA route keeps the movie on the device twice (real space and Fourier space, about 8 bytes × pixels × frames) plus 0.7–4.2 GiB of workspace. The table gives the minimum **free GPU memory at launch** (`nvidia-smi` free memory before `motioncorr` creates its ~0.4 GiB CUDA context, not nominal card size) for the full-speed route, measured with `--use_own --gpu 0 --j 8` on one A100 80 GB card using a VRAM balloon (one movie per family; leave 1–2 GiB of margin):
 >
@@ -472,12 +504,23 @@ every completed constrained run was identical to its unconstrained run and every
 > | 4096²×144 (Falcon 4 EER, compact) | 19 / 20 GiB | 12–18.5 GiB | ≤ 11 GiB |
 > | 11520×8184×50 (K3-class u8 TIFF, compact) | 37.5 / 39 GiB | 22–36.5 GiB | ≤ 21 GiB |
 >
-> Below the resident session threshold, the movie falls back to the streaming route (identical output, 3–9× slower, and several times the host RAM: about 36 GiB RSS for 11520×8184×50, 21 GiB for 4096²×144, and 7.7 GiB for 4096²×59; hosts with insufficient RAM are untested). Below the streaming floor, the movie fails cleanly after host preprocessing with an out-of-memory error and writes no products. **Completion is not monotone in free VRAM:** in the ~0.5–1.5 GiB band **between the streaming range and the full-speed floor** (8.0–8.5, 19–19.5, and 37.0–38.5 GiB above), the resident session is admitted before gain/sum or patch-stage buffers are allocated, so global alignment falls back to CPU preprocessing (8.0 and 37.0 GiB) and local (patch) alignment **fails** with a patch-stage out-of-memory error (8.5, 19–19.5, and 37.5–38.5 GiB) even though lower free VRAM completes via streaming (#226 D2). Do not size runs in that gap or right at the floor. [Revised after D11, #228 `e3871ca2`; R-QM measured the old behaviour on `483e881d`:] After a movie fails with a handled device out-of-memory error in a multi-movie run, the next movie in the same process keeps its own route and produces the same products as a standalone run, under `--ingest auto` and under a pinned `--ingest nvcomp` (on main before D11 it fell back one route step, or was refused under a pinned nvcomp; #226 D1). This was shown on one A100 with a VRAM balloon, on a strict-product test (`CudaStaleErrorAfterOom`) and in three-movie jobs; fatal-error handling is unchanged (the fix is a scope guard at `src/motioncorr_runner.cpp:2279-2299`, registered as `CudaStaleErrorAfterOom`, `CMakeLists.txt:913-917`), and no genuine sticky-error (poisoned-device) control exists (TST2). `--ingest compact` refuses immediately (~1 s, no products) when the resident session cannot be created. Not covered here: `--eer_upsampling 2` (see §2), `--grouping_for_ps` (+1 Fourier movie in host RAM, §3), `--bin_factor`, float32 MRC, and real smaller GPUs (whose driver reservation may differ from the 80 GB A100).
+> Below the resident session threshold, the movie falls back to the streaming route (identical output, 3–9× slower, and several times the host RAM: about 36 GiB RSS for 11520×8184×50, 21 GiB for 4096²×144, and 7.7 GiB for 4096²×59; hosts with insufficient RAM are untested). Below the streaming floor, the movie fails cleanly after host preprocessing with an out-of-memory error and writes no products. **Completion is not monotone in free VRAM:** in the ~0.5–1.5 GiB band **between the streaming range and the full-speed floor** (8.0–8.5, 19–19.5, and 37.0–38.5 GiB above), the resident session is admitted before gain/sum or patch-stage buffers are allocated, so global alignment falls back to CPU preprocessing (8.0 and 37.0 GiB) and local (patch) alignment **fails** with a patch-stage out-of-memory error (8.5, 19–19.5, and 37.5–38.5 GiB) even though lower free VRAM completes via streaming (#226 D2). Do not size runs in that gap or right at the floor. [Revised after D11, #228 `e3871ca2`; R-QM measured the old behaviour on `483e881d`:] After a movie fails with a handled device out-of-memory error in a multi-movie run, the next movie in the same process keeps its own route and produces the same products as a standalone run, under `--ingest auto` and under a pinned `--ingest nvcomp` (on main before D11 it fell back one route step, or was refused under a pinned nvcomp; #226 D1). This was shown on one A100 with a VRAM balloon, on a strict-product test (`CudaStaleErrorAfterOom`) and in three-movie jobs; fatal-error handling is unchanged (the fix is a scope guard at `src/motioncorr_runner.cpp:2279-2299`, registered as `CudaStaleErrorAfterOom`, `CMakeLists.txt:913-917`), and the genuine sticky-error control is limited to one resident-retry boundary on one A100 (TST2, #213; §8). `--ingest compact` refuses immediately (~1 s, no products) when the resident session cannot be created. Not covered here: `--eer_upsampling 2` (see §2), `--grouping_for_ps` (+1 Fourier movie in host RAM, §3), `--bin_factor`, float32 MRC, and real smaller GPUs (whose driver reservation may differ from the 80 GB A100).
 
 Caveats that stay with the table: the floors are **free GiB at launch measured with a VRAM balloon on one A100 80 GB, not nominal card sizes**; card-size conclusions are estimates and were not
 measured (the 80 GB card's driver reserve was 766 MiB; a small card's may differ); one movie per family, bracketed at 1 GiB / 0.5 GiB steps (NVML sampling is a lower bound), and the e10361 floor was
 not bisected; host-RAM exhaustion (hosts below about 36 GiB for 11520×8184×50) is untested; multi-GPU, `e10028`, `e10164` and `e10641` were not run (PR #225 README limitations, R-QM section 4). The QM
 status in the qualification lists is **completed (pre-freeze, on `483e881d`), with these documented limits**.
+
+
+**Post-RC0 #226 D3 — source candidate `4cd85167`.** [Evidence and re-entry record](../rc0/issue226/d3/README.md).
+For the 11520×8184×50 movie, G/L × auto/float at 16 and 21 GiB free now refuse before host movie preprocessing,
+with a named out-of-GPU-memory message giving required and available bytes. The eight probes take 1.13–1.58 s
+and 743 MiB host RSS (before: 33.29–42.48 s and about 35.7 GiB RSS), with no movie MRC/STAR or joint STAR.
+All four 22 GiB controls still complete with identical products: the measured streaming floor stays **22 GiB**.
+The necessary-memory check includes the Fourier/CCF buffers and queries the actual cuFFT work size when the
+buffers alone fit. It is not a host-RAM fit guarantee or a guarantee against later allocation failures.
+These are single observations on one balloon-constrained A100; the historical table's real-card and option caveats remain.
+D2's local-admission gap is a separate fix; no other geometry's floor is requalified by these D3 probes.
 
 ## 9. CPU dose-weighting symmetry (#220): qualified-toolchain contract (MERGED)
 

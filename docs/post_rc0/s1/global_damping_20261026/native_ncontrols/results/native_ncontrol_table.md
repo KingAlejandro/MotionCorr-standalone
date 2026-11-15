@@ -1,0 +1,34 @@
+| Control | Stop | a | DCg | H2g | DCg+H2g |
+|---|---|---|---|---|---|
+| vel0-N5-prod | prod | 0.264 F | 0.519 F | 0.446 F | 0.074 P |
+| vel0-N5-prod | long | 0.393 F | 0.378 F | 0.379 F | 0.000 P |
+| vel0-N9-prod | prod | 0.384 F | 0.567 F | 0.505 F | 0.027 P |
+| vel0-N9-prod | long | 0.304 F | 0.052 P | 0.954 F | 0.000 P |
+| vel0-N13-prod | prod | 0.274 F | 0.283 F | 0.204 F | 0.003 P |
+| vel0-N13-prod | long | 0.382 F | 0.001 P | 0.288 F | 0.000 P |
+| vel0-N20-prod | prod | 0.300 F | 0.304 F | 0.234 F | 0.003 P |
+| vel0-N20-prod | long | 0.152 P | 0.000 P | 0.432 F | 0.000 P |
+| vel1-N5-prod | prod | 0.524 F | 0.326 F | 0.496 F | 0.030 P |
+| vel1-N5-prod | long | 0.429 F | 0.314 F | 0.359 F | 0.000 P |
+| vel1-N9-prod | prod | 0.552 F | 0.392 F | 0.163 P | 0.007 P |
+| vel1-N9-prod | long | 0.338 F | 0.059 P | 0.582 F | 0.000 P |
+| vel1-N13-prod | prod | 0.363 F | 0.237 F | 0.209 F | 0.003 P |
+| vel1-N13-prod | long | 0.321 F | 0.001 P | 0.236 F | 0.000 P |
+| vel1-N20-prod | prod | 0.222 F | 0.247 F | 0.286 F | 0.002 P |
+| vel1-N20-prod | long | 0.198 P | 0.000 P | 0.433 F | 0.000 P |
+| vel0-N5-iso | prod | 0.070 P | 0.034 P | 0.068 P | 0.082 P |
+| vel0-N5-iso | long | 0.017 P | 0.000 P | 0.032 P | 0.000 P |
+| vel0-N9-iso | prod | 0.051 P | 3.888 F | 0.052 P | 0.011 P |
+| vel0-N9-iso | long | 0.030 P | 0.000 P | 0.022 P | 0.000 P |
+| vel0-N13-iso | prod | 0.041 P | 0.016 P | 0.034 P | 0.001 P |
+| vel0-N13-iso | long | 0.011 P | 0.000 P | 0.008 P | 0.000 P |
+| vel0-N20-iso | prod | 0.038 P | 0.036 P | 0.031 P | 0.003 P |
+| vel0-N20-iso | long | 0.021 P | 0.000 P | 0.024 P | 0.000 P |
+| vel1-N5-iso | prod | 0.064 P | 0.043 P | 0.052 P | 0.034 P |
+| vel1-N5-iso | long | 0.014 P | 0.000 P | 0.025 P | 0.000 P |
+| vel1-N9-iso | prod | 0.037 P | 0.036 P | 0.039 P | 0.009 P |
+| vel1-N9-iso | long | 0.018 P | 0.000 P | 0.019 P | 0.000 P |
+| vel1-N13-iso | prod | 0.037 P | 0.024 P | 0.027 P | 0.004 P |
+| vel1-N13-iso | long | 0.008 P | 0.000 P | 0.013 P | 0.000 P |
+| vel1-N20-iso | prod | 10.495 F | 10.472 F | 10.471 F | 10.402 F |
+| vel1-N20-iso | long | 10.515 F | 10.467 F | 10.453 F | 10.403 F |

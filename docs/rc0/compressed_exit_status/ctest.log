@@ -1,0 +1,183 @@
+Test project /tmp/motioncorr-214-build
+      Start  1: CpuDoseSymmetry
+      Start  2: CpuDoseSymmetryBase
+ 1/77 Test  #1: CpuDoseSymmetry .......................   Passed    1.31 sec
+      Start  3: CpuUnweightedStream
+ 2/77 Test  #2: CpuDoseSymmetryBase ...................   Passed    1.66 sec
+      Start  4: PatchRetryState
+ 3/77 Test  #3: CpuUnweightedStream ...................   Passed    0.46 sec
+      Start  5: RunnerInterpolateRecenter
+ 4/77 Test  #4: PatchRetryState .......................   Passed    0.37 sec
+      Start  6: FloatPlanCache
+ 5/77 Test  #5: RunnerInterpolateRecenter .............   Passed    0.52 sec
+      Start  7: MrcHeaderStats
+ 6/77 Test  #6: FloatPlanCache ........................   Passed    0.27 sec
+      Start  8: ReportPlotUndefinedAxis
+ 7/77 Test  #7: MrcHeaderStats ........................   Passed    0.02 sec
+      Start  9: PdfConcat
+ 8/77 Test  #8: ReportPlotUndefinedAxis ...............   Passed    0.02 sec
+      Start 10: DefectParser
+ 9/77 Test  #9: PdfConcat .............................   Passed    0.34 sec
+      Start 11: DeflateLayout
+10/77 Test #10: DefectParser ..........................   Passed    0.83 sec
+      Start 12: DeflateLayoutMutant_span_wrap
+11/77 Test #11: DeflateLayout .........................   Passed    0.65 sec
+      Start 13: DeflateLayoutMutant_stage_sum
+12/77 Test #12: DeflateLayoutMutant_span_wrap .........   Passed    0.41 sec
+      Start 14: DeflateLayoutMutant_reserve_round
+13/77 Test #13: DeflateLayoutMutant_stage_sum .........   Passed    0.66 sec
+      Start 15: DeflateLayoutMutant_layout_table
+14/77 Test #14: DeflateLayoutMutant_reserve_round .....   Passed    0.65 sec
+      Start 16: DeflateLayoutMutant_arena_start
+15/77 Test #15: DeflateLayoutMutant_layout_table ......   Passed    0.50 sec
+      Start 17: DeflateLayoutMutant_drain_step
+16/77 Test #16: DeflateLayoutMutant_arena_start .......   Passed    0.63 sec
+      Start 18: Adler32Arithmetic
+17/77 Test #17: DeflateLayoutMutant_drain_step ........   Passed    0.68 sec
+      Start 19: Adler32KernelHost
+18/77 Test #19: Adler32KernelHost .....................   Passed    0.84 sec
+      Start 20: StageProfileThreads
+19/77 Test #18: Adler32Arithmetic .....................   Passed    1.51 sec
+      Start 21: FrameBufferPool
+20/77 Test #20: StageProfileThreads ...................   Passed    0.42 sec
+      Start 22: ScratchArena
+21/77 Test #21: FrameBufferPool .......................   Passed    0.47 sec
+      Start 23: ReaderPool
+22/77 Test #22: ScratchArena ..........................   Passed    0.95 sec
+      Start 24: ReaderPoolMutant_spin
+23/77 Test #23: ReaderPool ............................   Passed    1.43 sec
+      Start 25: ReaderPoolMutant_nowait
+24/77 Test #24: ReaderPoolMutant_spin .................   Passed    1.22 sec
+      Start 26: DefectNeighbours
+25/77 Test #25: ReaderPoolMutant_nowait ...............   Passed    0.43 sec
+      Start 27: DefectMergeMutant_append_only
+26/77 Test #26: DefectNeighbours ......................   Passed    0.60 sec
+      Start 28: DefectMergeMutant_no_order_check
+27/77 Test #27: DefectMergeMutant_append_only .........   Passed    1.06 sec
+      Start 29: DefectMergeMutant_swap_xy
+28/77 Test #28: DefectMergeMutant_no_order_check ......   Passed    0.98 sec
+      Start 30: NvcompAcceptanceDiagnostics
+29/77 Test #29: DefectMergeMutant_swap_xy .............   Passed    0.79 sec
+      Start 31: ProfilingKit
+30/77 Test #30: NvcompAcceptanceDiagnostics ...........   Passed    1.44 sec
+      Start 32: GainCacheOwnership
+31/77 Test #32: GainCacheOwnership ....................   Passed   32.83 sec
+      Start 33: NvcompGuards
+32/77 Test #33: NvcompGuards ..........................   Passed    0.11 sec
+      Start 34: SyntheticRegression
+33/77 Test #34: SyntheticRegression ...................***Failed    0.69 sec
+Results for --j 1 vs Expected Old Baseline:
+  Image Max Pixel Difference: 2.364986e+01
+  Image RMSE:                 3.119288e-01
+  Shift Max Difference (px):  4.670000e-03
+  Shift RMSD (px):            3.305323e-03
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-9af4bd72/tests/test_synthetic_regression.py", line 194, in <module>
+    main()
+    ~~~~^^
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-9af4bd72/tests/test_synthetic_regression.py", line 189, in main
+    success = test_synthetic_regression(binary=args.binary, threads_to_test=threads)
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-9af4bd72/tests/test_synthetic_regression.py", line 173, in test_synthetic_regression
+    assert m_diff == 0.0, f"Image pixel diff ({m_diff}) must be exactly 0.0"
+           ^^^^^^^^^^^^^
+AssertionError: Image pixel diff (23.649856567382812) must be exactly 0.0
+
+      Start 35: HotPixelRngDeterminism
+34/77 Test #35: HotPixelRngDeterminism ................   Passed    0.64 sec
+      Start 36: RunnerExposure
+35/77 Test #36: RunnerExposure ........................   Passed    1.10 sec
+      Start 37: Runner_failure
+36/77 Test #37: Runner_failure ........................   Passed    0.37 sec
+      Start 38: Runner_invalid
+37/77 Test #38: Runner_invalid ........................   Passed    0.30 sec
+      Start 39: Runner_resume
+38/77 Test #39: Runner_resume .........................   Passed    3.88 sec
+      Start 40: Runner_tomography
+39/77 Test #40: Runner_tomography .....................   Passed    0.93 sec
+      Start 41: RunnerLateBin
+40/77 Test #41: RunnerLateBin .........................   Passed    1.21 sec
+      Start 42: RunnerExportedUnits
+41/77 Test #42: RunnerExportedUnits ...................   Passed    0.27 sec
+      Start 43: GainCache
+42/77 Test #43: GainCache .............................   Passed    1.46 sec
+      Start 44: TiffRead
+43/77 Test #44: TiffRead ..............................   Passed    0.97 sec
+      Start 45: DamagedMovie
+44/77 Test #45: DamagedMovie ..........................   Passed    8.34 sec
+      Start 46: TruncatedMrcMovie
+45/77 Test #46: TruncatedMrcMovie .....................   Passed    9.16 sec
+      Start 47: TruncatedGainDefect
+46/77 Test #47: TruncatedGainDefect ...................   Passed    4.95 sec
+      Start 48: CompressedMovieSequence
+47/77 Test #48: CompressedMovieSequence ...............   Passed    1.35 sec
+      Start 49: CompressedMrcStatus_bz2
+48/77 Test #49: CompressedMrcStatus_bz2 ...............***Skipped   0.12 sec
+      Start 50: CompressedMrcStatus_xz
+49/77 Test #50: CompressedMrcStatus_xz ................   Passed    7.22 sec
+      Start 51: CompressedMrcStatus_zst
+50/77 Test #51: CompressedMrcStatus_zst ...............   Passed    5.15 sec
+      Start 52: InputFormats
+51/77 Test #31: ProfilingKit ..........................   Passed  105.36 sec
+      Start 53: CutDownMovie
+52/77 Test #53: CutDownMovie ..........................   Passed    4.42 sec
+      Start 54: GlobalIfftElision
+53/77 Test #54: GlobalIfftElision .....................   Passed    1.62 sec
+      Start 55: HostBufferReuse
+54/77 Test #55: HostBufferReuse .......................   Passed    2.91 sec
+      Start 56: StageProfile
+55/77 Test #52: InputFormats ..........................   Passed   32.45 sec
+      Start 57: RunnerModelParser
+56/77 Test #57: RunnerModelParser .....................   Passed    0.36 sec
+      Start 58: EerMemorySafety
+57/77 Test #56: StageProfile ..........................   Passed    1.11 sec
+      Start 59: MicrographModelBounds
+58/77 Test #59: MicrographModelBounds .................   Passed    3.01 sec
+      Start 60: RunnerInterpolateShifts
+59/77 Test #60: RunnerInterpolateShifts ...............   Passed    0.27 sec
+      Start 61: WriteFaults
+60/77 Test #61: WriteFaults ...........................   Passed    0.41 sec
+      Start 62: WriteFaultsSync
+61/77 Test #62: WriteFaultsSync .......................   Passed    0.38 sec
+      Start 63: WriteFaultsMultiProduct
+62/77 Test #63: WriteFaultsMultiProduct ...............   Passed    0.40 sec
+      Start 64: OutputStageFaults
+63/77 Test #64: OutputStageFaults .....................   Passed    0.31 sec
+      Start 65: LogfileFromEps
+64/77 Test #58: EerMemorySafety .......................   Passed   13.35 sec
+      Start 66: LogfileFromEpsMutant_always_eps
+65/77 Test #66: LogfileFromEpsMutant_always_eps .......   Passed    2.16 sec
+      Start 67: LogfileFromEpsMutant_late_guard
+66/77 Test #65: LogfileFromEps ........................   Passed   10.56 sec
+      Start 68: LogfileFromEpsMutant_eps_order
+67/77 Test #67: LogfileFromEpsMutant_late_guard .......   Passed    2.02 sec
+      Start 69: LogfileFromEpsMutant_placeholder
+68/77 Test #68: LogfileFromEpsMutant_eps_order ........   Passed    1.97 sec
+      Start 70: LogfileFromEpsMutant_concat_cleanup
+69/77 Test #69: LogfileFromEpsMutant_placeholder ......   Passed    3.29 sec
+      Start 71: CiFailClosedControls
+70/77 Test #70: LogfileFromEpsMutant_concat_cleanup ...   Passed   10.83 sec
+      Start 72: CudaValidationParser
+71/77 Test #72: CudaValidationParser ..................   Passed    0.16 sec
+      Start 73: MultiGpuScheduling
+72/77 Test #71: CiFailClosedControls ..................   Passed   71.46 sec
+      Start 74: OutputTreeComparator
+73/77 Test #74: OutputTreeComparator ..................   Passed    1.78 sec
+      Start 75: JointStarPublication
+74/77 Test #75: JointStarPublication ..................   Passed    0.71 sec
+      Start 76: ImageWriteFaults
+75/77 Test #76: ImageWriteFaults ......................   Passed    0.42 sec
+      Start 77: NativeMovieStaging
+76/77 Test #77: NativeMovieStaging ....................***Skipped   0.46 sec
+77/77 Test #73: MultiGpuScheduling ....................   Passed   97.17 sec
+
+99% tests passed, 1 tests failed out of 77
+
+Total Test time (real) = 251.54 sec
+
+The following tests did not run:
+	 49 - CompressedMrcStatus_bz2 (Skipped)
+	 77 - NativeMovieStaging (Skipped)
+
+The following tests FAILED:
+	 34 - SyntheticRegression (Failed)
+Errors while running CTest

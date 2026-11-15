@@ -1,0 +1,144 @@
+{
+  "workers_complete": false,
+  "dataset_ready": false,
+  "verdict": "FAIL",
+  "input_star_sha256": "f6b5f4115bedb4a9a4768b6a5a199164531c5d81a6430652f7250e11893577bf",
+  "binary": "/mnt/clathrin/alex-motioncorr-213/build-cuda/motioncorr_sticky_fault",
+  "binary_sha256": "0076100f2955b5a3cd60a49071ccd909ebfa4a5628060bf8452f494f24ec120d",
+  "endpoint": "successful staged products, canonical joint STAR and full report publication",
+  "dataset_wall_s": 1.4680094746872783,
+  "ownership_mode": "linux-child-subreaper",
+  "worker_phase_wall_s": 1.4427042938768864,
+  "failure": "Worker phase exited 3",
+  "cleanup": "Owned PID/birth groups reaped; observed descendants absent or zombies",
+  "process_ownership_errors": [],
+  "tree_rss": {
+    "status": "INCOMPLETE",
+    "unavailable": null,
+    "errors": [
+      "Owned PID 1841308 RSS unavailable: [Errno 2] No such file or directory: '/proc/1841308/exe'",
+      "Owned PID 1841334 RSS unavailable: [Errno 2] No such file or directory: '/proc/1841334/exe'"
+    ],
+    "interval_s": 0.1,
+    "units": "KiB",
+    "peak_simultaneous_sum_rss_kib": 172188,
+    "note": "Current RSS summed at each observation, not summed VmHWM. Shared pages are counted more than once. Sampled peak may miss brief peaks/children born and exited between polls; PSS is optional. Only exact PID/start roots and their observed descendants are owned.",
+    "samples": [
+      {
+        "monotonic_s": 7870966.862877077,
+        "processes": [
+          {
+            "pid": 1841292,
+            "ppid": 1840907,
+            "pgid": 1841292,
+            "start_ticks": 787096640,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22024,
+            "pss_kib": 12041
+          },
+          {
+            "pid": 1841297,
+            "ppid": 1841292,
+            "pgid": 1841297,
+            "start_ticks": 787096652,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22880,
+            "pss_kib": 12949
+          }
+        ],
+        "rss_sum_kib": 44904,
+        "pss_sum_kib": 24990,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870967.342822055,
+        "processes": [
+          {
+            "pid": 1841292,
+            "ppid": 1840907,
+            "pgid": 1841292,
+            "start_ticks": 787096640,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22072,
+            "pss_kib": 12087
+          },
+          {
+            "pid": 1841297,
+            "ppid": 1841292,
+            "pgid": 1841297,
+            "start_ticks": 787096652,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22912,
+            "pss_kib": 12978
+          },
+          {
+            "pid": 1841308,
+            "ppid": 1841297,
+            "pgid": 1841308,
+            "start_ticks": 787096671,
+            "state": "R",
+            "executable": "/mnt/clathrin/alex-motioncorr-213/build-cuda/motioncorr_sticky_fault",
+            "rss_kib": 127204,
+            "pss_kib": 118889
+          }
+        ],
+        "rss_sum_kib": 172188,
+        "pss_sum_kib": 143954,
+        "errors": []
+      },
+      {
+        "monotonic_s": 7870967.824395173,
+        "processes": [
+          {
+            "pid": 1841292,
+            "ppid": 1840907,
+            "pgid": 1841292,
+            "start_ticks": 787096640,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22092,
+            "pss_kib": 12107
+          },
+          {
+            "pid": 1841297,
+            "ppid": 1841292,
+            "pgid": 1841297,
+            "start_ticks": 787096652,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22932,
+            "pss_kib": 12999
+          }
+        ],
+        "rss_sum_kib": null,
+        "pss_sum_kib": 25106,
+        "errors": [
+          "Owned PID 1841308 RSS unavailable: [Errno 2] No such file or directory: '/proc/1841308/exe'",
+          "Owned PID 1841334 RSS unavailable: [Errno 2] No such file or directory: '/proc/1841334/exe'"
+        ]
+      },
+      {
+        "monotonic_s": 7870968.256476508,
+        "processes": [
+          {
+            "pid": 1841292,
+            "ppid": 1840907,
+            "pgid": 1841292,
+            "start_ticks": 787096640,
+            "state": "S",
+            "executable": "/usr/bin/python3.12",
+            "rss_kib": 22216,
+            "pss_kib": 12103
+          }
+        ],
+        "rss_sum_kib": 22216,
+        "pss_sum_kib": 12103,
+        "errors": []
+      }
+    ]
+  }
+}

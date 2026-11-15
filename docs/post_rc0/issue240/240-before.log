@@ -1,0 +1,23 @@
+/private/tmp/mc-hygiene/w240/tools/multi_gpu/run_dataset.py:172: SyntaxWarning: 'return' in a 'finally' block
+  if restoration_failed:return 3
+.E/private/tmp/mc-hygiene/w240/tools/multi_gpu/run_dataset.py:172: SyntaxWarning: 'return' in a 'finally' block
+  if restoration_failed:return 3
+/private/tmp/mc-hygiene/w240/tools/multi_gpu/run_dataset.py:172: SyntaxWarning: 'return' in a 'finally' block
+  if restoration_failed:return 3
+.
+======================================================================
+ERROR: test_no_finally_return (__main__.Finalization.test_no_finally_return)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/mc-hygiene/w240/tests/test_dataset_finalization.py", line 23, in test_no_finally_return
+    compile(source, dataset.__file__, 'exec')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/mc-hygiene/w240/tools/multi_gpu/run_dataset.py", line 172
+    if restoration_failed:return 3
+                          ^^^^^^^^
+SyntaxError: 'return' in a 'finally' block
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.246s
+
+FAILED (errors=1)

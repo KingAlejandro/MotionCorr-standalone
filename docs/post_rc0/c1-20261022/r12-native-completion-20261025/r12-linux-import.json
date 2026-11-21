@@ -1,0 +1,16 @@
+{
+  "utc": "2026-10-25T18:05:46.363317+00:00",
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "4GPUs",
+    "taskset -c 8-9 python3 -"
+  ],
+  "stdin": "import pathlib,tarfile,hashlib,subprocess,os,fcntl,json,shutil\np=pathlib.Path('/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb');pack=p/'r12-fixed-files-da2d202b.tar';assert hashlib.sha256(pack.read_bytes()).hexdigest()=='260062ce133d228c7844f942a293546ac36efa2be0e346a81ba5d54c9c3c067c'\nf=os.open('/tmp/motioncorr-c1-cpu8-9.lock',os.O_RDWR|os.O_APPEND);fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB)\nassert os.sched_getaffinity(0)=={8,9}\nn=p/'r12-import-da2d202b';n.mkdir();d=n/'docs/post_rc0/c1-20261022/tools-v2';d.mkdir(parents=True)\n(n/'docs/rc0/qf').mkdir(parents=True);os.symlink(p/'src/docs/rc0/qf/tools',n/'docs/rc0/qf/tools')\nwith tarfile.open(pack) as t:\n assert all(x.isfile() and pathlib.PurePosixPath(x.name).name==x.name for x in t.getmembers());t.extractall(d,filter='data')\nshutil.copy2(p/'tools-v2.3-run/c1_lane.py',d/'c1_lane.py')\ne=os.environ.copy();e.update(OMP_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1',MKL_NUM_THREADS='1',PYTHONDONTWRITEBYTECODE='1')\nr=subprocess.run(['/usr/bin/python3','-I','-B',str(d/'test_c1_item12_binding.py')],capture_output=True,text=True,env=e,timeout=60)\nrec={'source_commit':'da2d202bf0caf9ee0859de68e872cbfbc92810fd','kind':'Linux import-only; no native/GPU/build','affinity':sorted(os.sched_getaffinity(0)),'exit':r.returncode,'stdout':r.stdout,'stderr':r.stderr,'package_sha256':hashlib.sha256(pack.read_bytes()).hexdigest()};(n/'RESULT.json').write_text(json.dumps(rec,indent=2)+'\\n');print(json.dumps(rec));raise SystemExit(r.returncode)\n",
+  "exit": 0,
+  "stdout": "{\"source_commit\": \"da2d202bf0caf9ee0859de68e872cbfbc92810fd\", \"kind\": \"Linux import-only; no native/GPU/build\", \"affinity\": [8, 9], \"exit\": 0, \"stdout\": \"\", \"stderr\": \".....\\n----------------------------------------------------------------------\\nRan 5 tests in 0.509s\\n\\nOK\\n\", \"package_sha256\": \"260062ce133d228c7844f942a293546ac36efa2be0e346a81ba5d54c9c3c067c\"}\n",
+  "stderr": ""
+}

@@ -1,0 +1,34 @@
+--- a/tests/cuda_local_admission.cpp
++++ b/tests/cuda_local_admission.cpp
+@@ -64,15 +64,28 @@
+         struct Geometry { int pw, ph, groups; RFLOAT b, downsample; };
+         for (const Geometry geo : {Geometry{102, 102, 24, 150, 0},
+                                   Geometry{408, 324, 7, 150, 0.5},
+-                                  Geometry{408, 324, 7, 40, 0}}) {
++                                  Geometry{408, 324, 7, 40, 0},
++                                  Geometry{818, 818, 59, 150, 0}}) {
+             const size_t spectrum = (size_t)geo.groups * geo.ph * (geo.pw / 2 + 1) * sizeof(cufftComplex);
+             const size_t retry = retryBytes(geo.pw, geo.ph, geo.groups, geo.b, geo.downsample);
++            std::cout << "RETRY geometry=" << geo.pw << 'x' << geo.ph
++                      << " groups=" << geo.groups << " b=" << geo.b
++                      << " downsample=" << geo.downsample << " spectrum=" << spectrum
++                      << " complete_required=" << retry << std::endl;
++            if (geo.pw == 818) {
++                available = 175000000;
++                const bool admitted = session.admitPatchRetry(geo.pw, geo.ph, geo.groups, geo.b, geo.downsample);
++                std::cout << "REVIEW free=" << available << " admitted=" << admitted << std::endl;
++                if (admitted) throw std::runtime_error("175000000-byte review interval admitted");
++            }
+             for (const size_t free : {spectrum - 1, spectrum, spectrum + 1,
+                                       spectrum + (retry - spectrum) / 2,
+                                       retry - 1, retry, retry + 1}) {
+                 available = free;
+-                if (session.admitPatchRetry(geo.pw, geo.ph, geo.groups, geo.b, geo.downsample)
+-                    != (free >= retry))
++                const bool admitted = session.admitPatchRetry(geo.pw, geo.ph, geo.groups, geo.b, geo.downsample);
++                std::cout << "BOUNDARY free=" << free << " expected=" << (free >= retry)
++                          << " admitted=" << admitted << std::endl;
++                if (admitted != (free >= retry))
+                     throw std::runtime_error("incorrect complete retry admission boundary");
+             }
+         }

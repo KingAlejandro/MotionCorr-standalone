@@ -1,0 +1,25 @@
+# Predeclared plan: single-GPU baseline profile (frozen before launch)
+
+Question: what is the current complete-publication latency of the unchanged C1 CUDA binary on one K269 census movie, and which stage dominates? Characterization only: no optimisation proposed here, no speedup claim, no cross-venue ratio. M1 stays held; A13 and K269-CUDA FAIL dispositions unchanged.
+
+Pins (verified by the script before the first run, run aborts on mismatch): source `e77a51a220cb0d91f4ac3c7fac211876d0c6833f` (clean checkout); binary `/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cuda/motioncorr` sha256 `34e768128b83f7c94eb4a41ee6bb9a795c52c531a5d646ce4116df83d8d3535a` (plain CUDA, Release -O3, no nvCOMP, the K269/CTest binary; not rebuilt);
+input `km-truth/fixtures/dose1-s01` = K269 census movie `dose1-s01` (4096x4096x40, float MRC): movie.mrcs `3b6126ef…d25def`, RECEIPT.json `27d9a55b…0608a6`, input.star sha256 recorded in the receipt `ba3a39e5…ac55`. These equal the movie/receipt hashes in the retained census RUN.json of both the original and the C1 CUDA census.
+Profiling kit: `tools/profiling/mcprof.py` of the same checkout (kit commit = e77a51a2).
+
+Venue and resources: 4GPUs, whole chain `taskset -c 96-103`. Payload lane CPUs 96-101 with `--j 6` (OMP_NUM_THREADS=6), the kit/monitor on 102-103 (the kit flags a run when the lane shows foreign CPU; its sampler must not sit in the payload lane), so 8 CPUs in total. This is a 6-CPU payload lane, not the `--j 8` of earlier census runs: do not compare with those. GPU3 `GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d` by UUID, `CUDA_VISIBLE_DEVICES` set, `--gpu 0`. GPU3 correctness lock (append-open) and `/tmp/motioncorr-bench.lock` taken with `flock -n` and held for the whole series; contention = stop. The kit is run with `--no-lock` only because the script already holds both continuously. `GLIBC_TUNABLES` unset, THP `madvise` (host setting, recorded). No sudo. No Xid scan (not requested; GPU health via the C1 health check before and after).
+
+Workload (the K269 census command, `--j 6`, one deliberate change: **`--skip_logfile` is dropped** so the aggregate `logfile.pdf` and histogram EPS are published, i.e. complete publication): `--use_own --j 6 --patch_x 5 --patch_y 5 --group_frames 1 --bin_factor 1 --seed 1 --skip_defect --save_noDW --first_frame_sum 1 --last_frame_sum 40 --ingest float --ingest_witness <file> --gpu 0`, `--i input.star`, cwd = fixture directory, output to a fresh directory per run. Route: pinned `--ingest float` (host float reader, no nvCOMP, no compact route); fallback route none expected, the witness file and logs are checked.
+
+Run order (all in one locked window, same source/binary/input/threads/GPU/options):
+1. W: one kit warmup (page cache, cold binary); recorded but not a sample.
+2. A1, A2: unprofiled (kit `run`, `--rounds 2`).
+3. P1: built-in `--profile <jsonl> --profile_device_timing 0` run (stage wall/CPU/faults per movie; no Nsight).
+4. P2: Nsight Systems 2024.6.2 trace (kit `trace`): `--trace=cuda,nvtx --cuda-memory-usage=true --sample=none --cpuctxsw=none`, built-in stage ranges as NVTX, device timing off, unprivileged. Trace file kept only if <=500 MB, else dropped and reported.
+5. A3, A4: unprofiled (kit `run`, `--rounds 2`, `--warmup 0`).
+Profiled runs (P1, P2) are never mixed into the wall samples; no number is computed across instruments.
+
+Occupancy: the kit samples the GPU per run and flags foreign GPU processes, lane CPU use, affinity or image mismatch; a 1 Hz monitor on 102-103 records load, GPU compute apps on all GPUs and payload-lane busy jiffies for the whole window. A flagged run or foreign activity during a run removes timing claims for that run (data kept, no rerun to improve numbers). Nothing is killed.
+
+Reporting rules fixed now: all wall samples (A1-A4, P1, P2 separately); AA scatter = |A2-A1|/mean(A1,A2) and |A4-A3|/mean(A3,A4), plus min/max across A1-A4; peak RSS and CPU time from the kit; the complete publication inventory per run (per-movie MRC sum, noDW MRC, STAR, shifts EPS, movie log; aggregate corrected_micrographs.star, logfile.pdf with page count via Ghostscript, histogram/accumulated-motion EPS); drift check across A1-A4 with the kit's identity comparison (MRC header-label-independent payload, STAR, logs normalised) plus whole-file hashes for the deterministic files; P1 output compared with A1 the same way. Bottleneck rule: from P1's built-in stages (no CUPTI), a stage is called dominant only if it is >=35% of the movie wall and >=1.25x the next stage; P2 adds device busy fraction and kernel/copy totals (instrumented, CUPTI-inflated host walls are not used for stage shares). Otherwise INCONCLUSIVE. One sample per profile means shares are single-sample facts, not stable estimates. Wall samples are four numbers on one host under a 6-CPU lane: no stable-speedup claim and no cross-host comparison.
+
+Not done: no code change or rebuild, no other test, no multi-GPU run, no fault injection, no Maarten/held-out input. If dose1-s01 had been absent a fixed-index retained tutorial movie would have been chosen without looking at performance; it is present, so this is moot.

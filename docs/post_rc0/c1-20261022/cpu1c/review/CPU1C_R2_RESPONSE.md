@@ -1,0 +1,13 @@
+# Response to cpu1c review R2 (author side; the review text is unchanged)
+
+Review report retained verbatim as `CPU1C_R2_REVIEW.md` (sha256 `6dae9e87f327cac45a0b130ec8fe5cb7c62e47dce63d305fe0b92b0fe1f98693`): no launch-blocking findings. Parent readback of the frozen inputs: `../parent-control/c1-cpu1c-parent-freeze-verification.json`.
+
+| R2 item | Response |
+|---|---|
+| 1 retained K267 evals show ABORT rows; a real e77 row may still abort | Expected and fail-closed: `cpu1c-v2-check` exit 2 stops the chain after only the two small K267 native stages and is recorded as invalid evidence (a candidate-sampling abort or an invalid summed image), never as a C1-vs-F regression. With the e77 checker `noisy`/`repeated` outside the ROI should become `OUTSIDE_FIXED_ROI` with exit 1, which is accepted |
+| 2 manifest count 31 vs 32 | Reconciled by the parent: the sole extra file in the 32-file deployed set is **`OVERLAY.md`** (sha256 `2a726b3ae9e0a34716f8b34a35e699ffbeb46de27633d85b9c24fb79269a387d`); all 31 common hashes are equal and all 32 deployed files match git `67beb5f5`. (An earlier parent message named a different file by mistake; the observed set difference is OVERLAY.md.) The prerequisite enforces exact set equality, so launch safety did not depend on the naming |
+| 3 test gaps (empty sums on the decide path; `main()` catch-all; control files lack `sampling_status`) | Recorded; the code behaviour was verified by the reviewer's probes. The decide path and `main()` are covered in the cpu1c tests only indirectly (empty-sum guard via compare; catch-all via the missing-identity-file calls). No frozen input is changed |
+| 4 "equal" means decoded sum payload equal | Adopted in the labels: census, decide and T24 parity statements say "decoded sum payload equal", never "byte-identical"; K267 covers field metrics and checker statuses only |
+| 5 receipts | The chain's `.pid`/`.started`/`.cpus` receipts are copied once into the launch directory by the operator; `chain-cpu1c.done` means the chain reached its end, not that every stage passed (`cpu1c-census-decision` may be 3). The aggregate verdict is built from the stage `.exit` receipts and `census-cpu-decision.json` with INCONCLUSIVE carried through; `census-cpu-*.json` lack the `cpu1c` prefix but are written only by stages that reserved a fresh name |
+
+Readbacks and limits carried forward: K267 `runs.json` has no binary hash (binding rests on the prerequisite binary hashes); `decide` and `v2check` do not compare C1 and F argv/env/mask (same-host parity rests on the identical frozen runner invocation); the T24 F-cpu baselines are the iteration-1 runs, bound by the pins.

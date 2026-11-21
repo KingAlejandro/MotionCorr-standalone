@@ -55,8 +55,8 @@ RelionError::RelionError(const std::string &what, const std::string &fileArg, co
 {
 #ifdef __GNUC__
     const int SZ_BUF = 100;
-    backtrace_buffer = new void*[SZ_BUF];
-    size = backtrace(backtrace_buffer, SZ_BUF);
+    backtrace_buffer.resize(SZ_BUF);
+    size = backtrace(backtrace_buffer.data(), SZ_BUF);
 #endif
 
     msg = "ERROR: \n" + what;
@@ -74,12 +74,11 @@ std::ostream& operator << (std::ostream& o, RelionError& XE)
 
 #ifdef __GNUC__
     o << "=== Backtrace  ===" << std::endl;
-    char **bt_symbols = backtrace_symbols(XE.backtrace_buffer, XE.size);
+    char **bt_symbols = backtrace_symbols(XE.backtrace_buffer.data(), XE.size);
     for (int i = 0; i < XE.size; i++) {
         o << bt_symbols[i] << std::endl;
     }
     o << "==================" << std::endl;
-    delete[] XE.backtrace_buffer;
     free(bt_symbols);
 #endif
 

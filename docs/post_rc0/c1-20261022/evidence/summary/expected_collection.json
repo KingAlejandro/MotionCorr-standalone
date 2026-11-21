@@ -1,0 +1,769 @@
+{
+ "refs": {
+  "main": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+  "pr267": "6695241523d7285d4f0480abf1c4a2c6423c3617",
+  "pr269": "1b29b7f9eea1976a0b7a9e2ef5f9ca00477324b1",
+  "pr272": "1f0a58bf6e0639d8b62f74da52f250cc664c0b30",
+  "pr254": "b7f4517669b3eae2f7d83f767b1ef6c7bf3681ad",
+  "pr260": "2b23fd3cebcab116240ece1566fb7f3510423a25",
+  "pr270": "09ee7cb0a48a3f9bc0301239af475134cb78cd6d",
+  "pr252": "ad0c61a369499b9d1444b804cd9850a167fea646",
+  "pr251": "1dbdd47e875422655ad54bd453be01addb2fef5a",
+  "pr244": "1b8239b1518e882a26fc77f061d48c0e4afb3632",
+  "pr248": "855b134e6503096c84f3ac11308f5fdb4a70e1b0",
+  "pr249": "5791f69e775f8151b953e159f45ba8b20a33bf12",
+  "pr245": "b8b8adbf12978ef580b227eac512da938a0f8225",
+  "pr242": "430699df47b76568555ce043b4d5d3279ee6fd56",
+  "pr241": "6c72a87b464486175bd91175b2b5c304da54fabe",
+  "c1": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f"
+ },
+ "cfg": {
+  "cpu": {
+   "main_count": 74,
+   "expected_count": 90,
+   "c1_configured_count": 90,
+   "expected": [
+    "Adler32Arithmetic",
+    "Adler32KernelHost",
+    "CiFailClosedControls",
+    "CompressedMovieSequence",
+    "CompressedMrcStatus_bz2",
+    "CompressedMrcStatus_xz",
+    "CompressedMrcStatus_zst",
+    "CpuDoseSymmetry",
+    "CpuDoseSymmetryBase",
+    "CpuUnweightedStream",
+    "CudaValidationParser",
+    "CutDownMovie",
+    "DamagedMovie",
+    "DatasetFinalization",
+    "DefectMergeMutant_append_only",
+    "DefectMergeMutant_no_order_check",
+    "DefectMergeMutant_swap_xy",
+    "DefectNeighbours",
+    "DefectParser",
+    "DeflateLayout",
+    "DeflateLayoutMutant_arena_start",
+    "DeflateLayoutMutant_drain_step",
+    "DeflateLayoutMutant_layout_table",
+    "DeflateLayoutMutant_reserve_round",
+    "DeflateLayoutMutant_span_wrap",
+    "DeflateLayoutMutant_stage_sum",
+    "EerMemorySafety",
+    "FloatPlanCache",
+    "FrameBufferPool",
+    "GainCache",
+    "GainCacheOwnership",
+    "GlobalIfftElision",
+    "HermitianProjectionOracle",
+    "HostBufferReuse",
+    "HotPixelRngDeterminism",
+    "ImageWriteFaults",
+    "InputFormats",
+    "JointStarPublication",
+    "LogfileFromEps",
+    "LogfileFromEpsMutant_always_eps",
+    "LogfileFromEpsMutant_concat_cleanup",
+    "LogfileFromEpsMutant_eps_order",
+    "LogfileFromEpsMutant_late_guard",
+    "LogfileFromEpsMutant_placeholder",
+    "MicrographModelBounds",
+    "MrcHeaderStats",
+    "MultiGpuScheduling",
+    "NativeMovieStaging",
+    "NvcompAcceptanceDiagnostics",
+    "NvcompGuards",
+    "OutputStageFaults",
+    "OutputTreeComparator",
+    "PatchRetryAdmission",
+    "PatchRetryState",
+    "PdfConcat",
+    "PeakFitArithmetic",
+    "PeakFitArithmeticMutant_early-store",
+    "PeakFitArithmeticMutant_float-denominator",
+    "PeakFitArithmeticMutant_wrong-scale",
+    "ProfilingKit",
+    "ReaderPool",
+    "ReaderPoolMutant_nowait",
+    "ReaderPoolMutant_spin",
+    "RealspaceBorderValidation",
+    "RelionErrorOwnership",
+    "RelionErrorUnprinted",
+    "ReportPlotUndefinedAxis",
+    "RunnerExportedUnits",
+    "RunnerExposure",
+    "RunnerInterpolateRecenter",
+    "RunnerInterpolateShifts",
+    "RunnerLateBin",
+    "RunnerModelParser",
+    "Runner_failure",
+    "Runner_invalid",
+    "Runner_resume",
+    "Runner_tomography",
+    "ScratchArena",
+    "StageProfile",
+    "StageProfileThreads",
+    "StickyCudaProcessLifecycle",
+    "SyntheticRegression",
+    "TestHygiene235",
+    "TiffIdentityLaterChunkHostControls",
+    "TiffRead",
+    "TruncatedGainDefect",
+    "TruncatedMrcMovie",
+    "WriteFaults",
+    "WriteFaultsMultiProduct",
+    "WriteFaultsSync"
+   ],
+   "added_by_pr": {
+    "CompressedMrcStatus_bz2": [
+     249
+    ],
+    "CompressedMrcStatus_xz": [
+     249
+    ],
+    "CompressedMrcStatus_zst": [
+     249
+    ],
+    "DatasetFinalization": [
+     242
+    ],
+    "HermitianProjectionOracle": [
+     254
+    ],
+    "PatchRetryAdmission": [
+     252
+    ],
+    "PeakFitArithmetic": [
+     260
+    ],
+    "PeakFitArithmeticMutant_early-store": [
+     260
+    ],
+    "PeakFitArithmeticMutant_float-denominator": [
+     260
+    ],
+    "PeakFitArithmeticMutant_wrong-scale": [
+     260
+    ],
+    "RealspaceBorderValidation": [
+     270
+    ],
+    "RelionErrorOwnership": [
+     245
+    ],
+    "RelionErrorUnprinted": [
+     245
+    ],
+    "StickyCudaProcessLifecycle": [
+     244
+    ],
+    "TestHygiene235": [
+     241
+    ],
+    "TiffIdentityLaterChunkHostControls": [
+     248
+    ]
+   },
+   "missing_from_c1": [],
+   "extra_in_c1": [],
+   "removed_by_any_pr": [],
+   "required_lists_not_in_c1": [],
+   "added_but_not_in_required_lists": [
+    "DatasetFinalization",
+    "HermitianProjectionOracle",
+    "RealspaceBorderValidation",
+    "RelionErrorOwnership",
+    "RelionErrorUnprinted",
+    "StickyCudaProcessLifecycle",
+    "TestHygiene235",
+    "TiffIdentityLaterChunkHostControls"
+   ],
+   "required_list_names_checked": 74
+  },
+  "cuda": {
+   "main_count": 108,
+   "expected_count": 143,
+   "c1_configured_count": 143,
+   "expected": [
+    "Adler32Arithmetic",
+    "Adler32KernelHost",
+    "CiFailClosedControls",
+    "CompressedMovieSequence",
+    "CompressedMrcStatus_bz2",
+    "CompressedMrcStatus_xz",
+    "CompressedMrcStatus_zst",
+    "CpuDoseSymmetry",
+    "CpuDoseSymmetryBase",
+    "CpuUnweightedStream",
+    "CudaDeviceGainCleanupFatal",
+    "CudaDeviceGainPool",
+    "CudaDoseNormalization",
+    "CudaDoseSessionPlan",
+    "CudaDoseWeightAlias",
+    "CudaEarlyStreamingOom",
+    "CudaErrorClass",
+    "CudaFaultMatrix",
+    "CudaGeometryRetention",
+    "CudaGeometryRetentionMutant_keep_taken_alias",
+    "CudaGeometryRetentionMutant_no_take",
+    "CudaGeometryRetentionMutant_return_failed",
+    "CudaHermitianCCF",
+    "CudaHermitianCCFMutant_ccf_batched_no_projection",
+    "CudaHermitianCCFMutant_ccf_perpatch_no_projection",
+    "CudaHermitianInverse",
+    "CudaHermitianInverseMutant_dose_no_projection",
+    "CudaHermitianInverseMutant_no_projection",
+    "CudaHermitianInverseMutant_wrapper_no_projection",
+    "CudaHermitianOracleMutant_oracle_dose_zero_boundary",
+    "CudaHermitianOracleMutant_oracle_session_no_projection",
+    "CudaHermitianOracleMutant_oracle_session_zero_boundary",
+    "CudaHermitianOracleMutant_oracle_wrapper_zero_boundary",
+    "CudaLocalAdmission",
+    "CudaPatchBatch",
+    "CudaPatchBatchMutant_extract_no_remap",
+    "CudaPatchBatchMutant_never_retire",
+    "CudaPatchBatchMutant_perpatch_wrong_half",
+    "CudaPatchBatchMutant_scale_divide",
+    "CudaPatchBatchMutant_shift_retired",
+    "CudaPatchBatchMutant_shift_wrong_half",
+    "CudaPatchWorkspace",
+    "CudaPeakFit",
+    "CudaPeakFitMutant_float_denominator",
+    "CudaPreprocessingFailurePaths",
+    "CudaRealspaceBorderBranch",
+    "CudaRealspaceBorderBranchMutant_x_float",
+    "CudaRealspaceBorderBranchMutant_y_float",
+    "CudaResidentRetryFailures",
+    "CudaStaleErrorAfterOom",
+    "CudaStreamingPlanClassificationCleanup",
+    "CudaU16StagingEquivalence",
+    "CudaValidationParser",
+    "CudaVramAlias",
+    "CudaVramAliasMutant_arena_overlap",
+    "CudaVramAliasMutant_arena_work_over_buffers",
+    "CudaVramAliasMutant_dw_scratch_over_fourier",
+    "CudaVramAliasMutant_refusal_off",
+    "CudaWrapperUploadFailure",
+    "CutDownMovie",
+    "DamagedMovie",
+    "DatasetFinalization",
+    "DefectMergeMutant_append_only",
+    "DefectMergeMutant_no_order_check",
+    "DefectMergeMutant_swap_xy",
+    "DefectNeighbours",
+    "DefectParser",
+    "DeflateLayout",
+    "DeflateLayoutMutant_arena_start",
+    "DeflateLayoutMutant_drain_step",
+    "DeflateLayoutMutant_layout_table",
+    "DeflateLayoutMutant_reserve_round",
+    "DeflateLayoutMutant_span_wrap",
+    "DeflateLayoutMutant_stage_sum",
+    "EerMemorySafety",
+    "FloatPlanCache",
+    "FrameBufferPool",
+    "GainCache",
+    "GainCacheOwnership",
+    "GlobalIfftElision",
+    "HermitianProjectionOracle",
+    "HostBufferReuse",
+    "HotPixelRngDeterminism",
+    "ImageWriteFaults",
+    "InputFormats",
+    "JointStarPublication",
+    "LogfileFromEps",
+    "LogfileFromEpsMutant_always_eps",
+    "LogfileFromEpsMutant_concat_cleanup",
+    "LogfileFromEpsMutant_eps_order",
+    "LogfileFromEpsMutant_late_guard",
+    "LogfileFromEpsMutant_placeholder",
+    "MicrographModelBounds",
+    "MrcHeaderStats",
+    "MultiGpuScheduling",
+    "NativeMovieStaging",
+    "NvcompAcceptanceDiagnostics",
+    "NvcompGuards",
+    "OutputStageFaults",
+    "OutputTreeComparator",
+    "PatchRetryAdmission",
+    "PatchRetryState",
+    "PdfConcat",
+    "PeakFitArithmetic",
+    "PeakFitArithmeticMutant_early-store",
+    "PeakFitArithmeticMutant_float-denominator",
+    "PeakFitArithmeticMutant_wrong-scale",
+    "ProfilingKit",
+    "ReaderPool",
+    "ReaderPoolMutant_nowait",
+    "ReaderPoolMutant_spin",
+    "RealspaceBorderValidation",
+    "RelionErrorOwnership",
+    "RelionErrorUnprinted",
+    "ReportPlotUndefinedAxis",
+    "RunnerExportedUnits",
+    "RunnerExposure",
+    "RunnerInterpolateRecenter",
+    "RunnerInterpolateShifts",
+    "RunnerInterpolateShiftsCuda",
+    "RunnerLateBin",
+    "RunnerModelParser",
+    "Runner_failure",
+    "Runner_invalid",
+    "Runner_resume",
+    "Runner_tomography",
+    "ScratchArena",
+    "SignedMrcStaging",
+    "StageProfile",
+    "StageProfileDeviceTiming",
+    "StageProfileThreads",
+    "StickyCudaProcessLifecycle",
+    "SyntheticRegression",
+    "TestHygiene235",
+    "TiffIdentityLaterChunkHostControls",
+    "TiffRead",
+    "TruncatedGainDefect",
+    "TruncatedGainDefectCuda",
+    "TruncatedMrcMovie",
+    "TruncatedMrcMovieCuda",
+    "WriteFaults",
+    "WriteFaultsMultiProduct",
+    "WriteFaultsSync"
+   ],
+   "added_by_pr": {
+    "CompressedMrcStatus_bz2": [
+     249
+    ],
+    "CompressedMrcStatus_xz": [
+     249
+    ],
+    "CompressedMrcStatus_zst": [
+     249
+    ],
+    "CudaEarlyStreamingOom": [
+     251
+    ],
+    "CudaHermitianCCF": [
+     254
+    ],
+    "CudaHermitianCCFMutant_ccf_batched_no_projection": [
+     254
+    ],
+    "CudaHermitianCCFMutant_ccf_perpatch_no_projection": [
+     254
+    ],
+    "CudaHermitianInverse": [
+     254
+    ],
+    "CudaHermitianInverseMutant_dose_no_projection": [
+     254
+    ],
+    "CudaHermitianInverseMutant_no_projection": [
+     254
+    ],
+    "CudaHermitianInverseMutant_wrapper_no_projection": [
+     254
+    ],
+    "CudaHermitianOracleMutant_oracle_dose_zero_boundary": [
+     254
+    ],
+    "CudaHermitianOracleMutant_oracle_session_no_projection": [
+     254
+    ],
+    "CudaHermitianOracleMutant_oracle_session_zero_boundary": [
+     254
+    ],
+    "CudaHermitianOracleMutant_oracle_wrapper_zero_boundary": [
+     254
+    ],
+    "CudaLocalAdmission": [
+     252
+    ],
+    "CudaPeakFit": [
+     260
+    ],
+    "CudaPeakFitMutant_float_denominator": [
+     260
+    ],
+    "CudaRealspaceBorderBranch": [
+     270
+    ],
+    "CudaRealspaceBorderBranchMutant_x_float": [
+     270
+    ],
+    "CudaRealspaceBorderBranchMutant_y_float": [
+     270
+    ],
+    "CudaStreamingPlanClassificationCleanup": [
+     251
+    ],
+    "DatasetFinalization": [
+     242
+    ],
+    "HermitianProjectionOracle": [
+     254
+    ],
+    "PatchRetryAdmission": [
+     252
+    ],
+    "PeakFitArithmetic": [
+     260
+    ],
+    "PeakFitArithmeticMutant_early-store": [
+     260
+    ],
+    "PeakFitArithmeticMutant_float-denominator": [
+     260
+    ],
+    "PeakFitArithmeticMutant_wrong-scale": [
+     260
+    ],
+    "RealspaceBorderValidation": [
+     270
+    ],
+    "RelionErrorOwnership": [
+     245
+    ],
+    "RelionErrorUnprinted": [
+     245
+    ],
+    "StickyCudaProcessLifecycle": [
+     244
+    ],
+    "TestHygiene235": [
+     241
+    ],
+    "TiffIdentityLaterChunkHostControls": [
+     248
+    ]
+   },
+   "missing_from_c1": [],
+   "extra_in_c1": [],
+   "removed_by_any_pr": [],
+   "required_lists_not_in_c1": [],
+   "added_but_not_in_required_lists": [
+    "CudaHermitianCCF",
+    "CudaHermitianCCFMutant_ccf_batched_no_projection",
+    "CudaHermitianCCFMutant_ccf_perpatch_no_projection",
+    "CudaHermitianInverse",
+    "CudaHermitianInverseMutant_dose_no_projection",
+    "CudaHermitianInverseMutant_no_projection",
+    "CudaHermitianInverseMutant_wrapper_no_projection",
+    "CudaHermitianOracleMutant_oracle_dose_zero_boundary",
+    "CudaHermitianOracleMutant_oracle_session_no_projection",
+    "CudaHermitianOracleMutant_oracle_session_zero_boundary",
+    "CudaHermitianOracleMutant_oracle_wrapper_zero_boundary",
+    "CudaRealspaceBorderBranch",
+    "CudaRealspaceBorderBranchMutant_x_float",
+    "CudaRealspaceBorderBranchMutant_y_float",
+    "DatasetFinalization",
+    "HermitianProjectionOracle",
+    "RealspaceBorderValidation",
+    "RelionErrorOwnership",
+    "RelionErrorUnprinted",
+    "StickyCudaProcessLifecycle",
+    "TestHygiene235",
+    "TiffIdentityLaterChunkHostControls"
+   ],
+   "required_list_names_checked": 80
+  },
+  "nvcomp": {
+   "main_count": 111,
+   "expected_count": 148,
+   "c1_configured_count": 148,
+   "expected": [
+    "Adler32Arithmetic",
+    "Adler32KernelHost",
+    "CiFailClosedControls",
+    "CompressedMovieSequence",
+    "CompressedMrcStatus_bz2",
+    "CompressedMrcStatus_xz",
+    "CompressedMrcStatus_zst",
+    "CpuDoseSymmetry",
+    "CpuDoseSymmetryBase",
+    "CpuUnweightedStream",
+    "CudaAdler32",
+    "CudaDeviceGainCleanupFatal",
+    "CudaDeviceGainPool",
+    "CudaDoseNormalization",
+    "CudaDoseSessionPlan",
+    "CudaDoseWeightAlias",
+    "CudaEarlyStreamingOom",
+    "CudaErrorClass",
+    "CudaFaultMatrix",
+    "CudaGeometryRetention",
+    "CudaGeometryRetentionMutant_keep_taken_alias",
+    "CudaGeometryRetentionMutant_no_take",
+    "CudaGeometryRetentionMutant_return_failed",
+    "CudaHermitianCCF",
+    "CudaHermitianCCFMutant_ccf_batched_no_projection",
+    "CudaHermitianCCFMutant_ccf_perpatch_no_projection",
+    "CudaHermitianInverse",
+    "CudaHermitianInverseMutant_dose_no_projection",
+    "CudaHermitianInverseMutant_no_projection",
+    "CudaHermitianInverseMutant_wrapper_no_projection",
+    "CudaHermitianOracleMutant_oracle_dose_zero_boundary",
+    "CudaHermitianOracleMutant_oracle_session_no_projection",
+    "CudaHermitianOracleMutant_oracle_session_zero_boundary",
+    "CudaHermitianOracleMutant_oracle_wrapper_zero_boundary",
+    "CudaLocalAdmission",
+    "CudaNvcompAcceptanceFailures",
+    "CudaNvcompReconstructionFailures",
+    "CudaNvcompTiffIdentity",
+    "CudaNvcompTiffIdentityLaterChunk",
+    "CudaPatchBatch",
+    "CudaPatchBatchMutant_extract_no_remap",
+    "CudaPatchBatchMutant_never_retire",
+    "CudaPatchBatchMutant_perpatch_wrong_half",
+    "CudaPatchBatchMutant_scale_divide",
+    "CudaPatchBatchMutant_shift_retired",
+    "CudaPatchBatchMutant_shift_wrong_half",
+    "CudaPatchWorkspace",
+    "CudaPeakFit",
+    "CudaPeakFitMutant_float_denominator",
+    "CudaPreprocessingFailurePaths",
+    "CudaRealspaceBorderBranch",
+    "CudaRealspaceBorderBranchMutant_x_float",
+    "CudaRealspaceBorderBranchMutant_y_float",
+    "CudaResidentRetryFailures",
+    "CudaStaleErrorAfterOom",
+    "CudaStreamingPlanClassificationCleanup",
+    "CudaU16StagingEquivalence",
+    "CudaValidationParser",
+    "CudaVramAlias",
+    "CudaVramAliasMutant_arena_overlap",
+    "CudaVramAliasMutant_arena_work_over_buffers",
+    "CudaVramAliasMutant_dw_scratch_over_fourier",
+    "CudaVramAliasMutant_refusal_off",
+    "CudaWrapperUploadFailure",
+    "CutDownMovie",
+    "DamagedMovie",
+    "DatasetFinalization",
+    "DefectMergeMutant_append_only",
+    "DefectMergeMutant_no_order_check",
+    "DefectMergeMutant_swap_xy",
+    "DefectNeighbours",
+    "DefectParser",
+    "DeflateLayout",
+    "DeflateLayoutMutant_arena_start",
+    "DeflateLayoutMutant_drain_step",
+    "DeflateLayoutMutant_layout_table",
+    "DeflateLayoutMutant_reserve_round",
+    "DeflateLayoutMutant_span_wrap",
+    "DeflateLayoutMutant_stage_sum",
+    "EerMemorySafety",
+    "FloatPlanCache",
+    "FrameBufferPool",
+    "GainCache",
+    "GainCacheOwnership",
+    "GlobalIfftElision",
+    "HermitianProjectionOracle",
+    "HostBufferReuse",
+    "HotPixelRngDeterminism",
+    "ImageWriteFaults",
+    "InputFormats",
+    "JointStarPublication",
+    "LogfileFromEps",
+    "LogfileFromEpsMutant_always_eps",
+    "LogfileFromEpsMutant_concat_cleanup",
+    "LogfileFromEpsMutant_eps_order",
+    "LogfileFromEpsMutant_late_guard",
+    "LogfileFromEpsMutant_placeholder",
+    "MicrographModelBounds",
+    "MrcHeaderStats",
+    "MultiGpuScheduling",
+    "NativeMovieStaging",
+    "NvcompAcceptanceDiagnostics",
+    "NvcompGuards",
+    "OutputStageFaults",
+    "OutputTreeComparator",
+    "PatchRetryAdmission",
+    "PatchRetryState",
+    "PdfConcat",
+    "PeakFitArithmetic",
+    "PeakFitArithmeticMutant_early-store",
+    "PeakFitArithmeticMutant_float-denominator",
+    "PeakFitArithmeticMutant_wrong-scale",
+    "ProfilingKit",
+    "ReaderPool",
+    "ReaderPoolMutant_nowait",
+    "ReaderPoolMutant_spin",
+    "RealspaceBorderValidation",
+    "RelionErrorOwnership",
+    "RelionErrorUnprinted",
+    "ReportPlotUndefinedAxis",
+    "RunnerExportedUnits",
+    "RunnerExposure",
+    "RunnerInterpolateRecenter",
+    "RunnerInterpolateShifts",
+    "RunnerInterpolateShiftsCuda",
+    "RunnerLateBin",
+    "RunnerModelParser",
+    "Runner_failure",
+    "Runner_invalid",
+    "Runner_resume",
+    "Runner_tomography",
+    "ScratchArena",
+    "SignedMrcStaging",
+    "StageProfile",
+    "StageProfileDeviceTiming",
+    "StageProfileThreads",
+    "StickyCudaProcessLifecycle",
+    "SyntheticRegression",
+    "TestHygiene235",
+    "TiffIdentityLaterChunkHostControls",
+    "TiffRead",
+    "TruncatedGainDefect",
+    "TruncatedGainDefectCuda",
+    "TruncatedMrcMovie",
+    "TruncatedMrcMovieCuda",
+    "WriteFaults",
+    "WriteFaultsMultiProduct",
+    "WriteFaultsSync"
+   ],
+   "added_by_pr": {
+    "CompressedMrcStatus_bz2": [
+     249
+    ],
+    "CompressedMrcStatus_xz": [
+     249
+    ],
+    "CompressedMrcStatus_zst": [
+     249
+    ],
+    "CudaEarlyStreamingOom": [
+     251
+    ],
+    "CudaHermitianCCF": [
+     254
+    ],
+    "CudaHermitianCCFMutant_ccf_batched_no_projection": [
+     254
+    ],
+    "CudaHermitianCCFMutant_ccf_perpatch_no_projection": [
+     254
+    ],
+    "CudaHermitianInverse": [
+     254
+    ],
+    "CudaHermitianInverseMutant_dose_no_projection": [
+     254
+    ],
+    "CudaHermitianInverseMutant_no_projection": [
+     254
+    ],
+    "CudaHermitianInverseMutant_wrapper_no_projection": [
+     254
+    ],
+    "CudaHermitianOracleMutant_oracle_dose_zero_boundary": [
+     254
+    ],
+    "CudaHermitianOracleMutant_oracle_session_no_projection": [
+     254
+    ],
+    "CudaHermitianOracleMutant_oracle_session_zero_boundary": [
+     254
+    ],
+    "CudaHermitianOracleMutant_oracle_wrapper_zero_boundary": [
+     254
+    ],
+    "CudaLocalAdmission": [
+     252
+    ],
+    "CudaNvcompTiffIdentity": [
+     248
+    ],
+    "CudaNvcompTiffIdentityLaterChunk": [
+     248
+    ],
+    "CudaPeakFit": [
+     260
+    ],
+    "CudaPeakFitMutant_float_denominator": [
+     260
+    ],
+    "CudaRealspaceBorderBranch": [
+     270
+    ],
+    "CudaRealspaceBorderBranchMutant_x_float": [
+     270
+    ],
+    "CudaRealspaceBorderBranchMutant_y_float": [
+     270
+    ],
+    "CudaStreamingPlanClassificationCleanup": [
+     251
+    ],
+    "DatasetFinalization": [
+     242
+    ],
+    "HermitianProjectionOracle": [
+     254
+    ],
+    "PatchRetryAdmission": [
+     252
+    ],
+    "PeakFitArithmetic": [
+     260
+    ],
+    "PeakFitArithmeticMutant_early-store": [
+     260
+    ],
+    "PeakFitArithmeticMutant_float-denominator": [
+     260
+    ],
+    "PeakFitArithmeticMutant_wrong-scale": [
+     260
+    ],
+    "RealspaceBorderValidation": [
+     270
+    ],
+    "RelionErrorOwnership": [
+     245
+    ],
+    "RelionErrorUnprinted": [
+     245
+    ],
+    "StickyCudaProcessLifecycle": [
+     244
+    ],
+    "TestHygiene235": [
+     241
+    ],
+    "TiffIdentityLaterChunkHostControls": [
+     248
+    ]
+   },
+   "missing_from_c1": [],
+   "extra_in_c1": [],
+   "removed_by_any_pr": [],
+   "required_lists_not_in_c1": [],
+   "added_but_not_in_required_lists": [
+    "CudaHermitianCCF",
+    "CudaHermitianCCFMutant_ccf_batched_no_projection",
+    "CudaHermitianCCFMutant_ccf_perpatch_no_projection",
+    "CudaHermitianInverse",
+    "CudaHermitianInverseMutant_dose_no_projection",
+    "CudaHermitianInverseMutant_no_projection",
+    "CudaHermitianInverseMutant_wrapper_no_projection",
+    "CudaHermitianOracleMutant_oracle_dose_zero_boundary",
+    "CudaHermitianOracleMutant_oracle_session_no_projection",
+    "CudaHermitianOracleMutant_oracle_session_zero_boundary",
+    "CudaHermitianOracleMutant_oracle_wrapper_zero_boundary",
+    "CudaNvcompTiffIdentity",
+    "CudaNvcompTiffIdentityLaterChunk",
+    "CudaRealspaceBorderBranch",
+    "CudaRealspaceBorderBranchMutant_x_float",
+    "CudaRealspaceBorderBranchMutant_y_float",
+    "DatasetFinalization",
+    "HermitianProjectionOracle",
+    "RealspaceBorderValidation",
+    "RelionErrorOwnership",
+    "RelionErrorUnprinted",
+    "StickyCudaProcessLifecycle",
+    "TestHygiene235",
+    "TiffIdentityLaterChunkHostControls"
+   ],
+   "required_list_names_checked": 80
+  }
+ }
+}

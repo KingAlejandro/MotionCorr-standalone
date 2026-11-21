@@ -249,9 +249,129 @@ Reference rows (earlier SHAs; context only, not RC0 results):
 
 Per-family GPU and CPU timing tables are in `docs/workload_corpus/{cpu,gpu}/`; do not copy them here without their provenance.
 
+## Post-RC0 #226 D2: patch workspace admission
+
+PR implementation head `bb34855434e0293ad559781697610d742765ebcd` (subsequent
+merge/evidence commits leave production sources/CMake unchanged; #247 changes
+only tests/docs). Re-entry class: CUDA/shared source (§9.4). Release full CTest
+passes CPU 74/74, CUDA 109/109 and CUDA+nvCOMP 112/112. Native same-GPU QM replay
+reproduces six failures without the fix and passes all 15 constrained points
+with it; nine passing neighbours retain routes, and all completed products match
+unconstrained references (including three cross-revision references).
+The resident floors remain unchanged; the measured D2 gaps now complete through
+existing streaming paths, with updated host-RSS caveats in SUPPORT §8.
+Evidence: `docs/rc0/issue226/d2/README.md`. Full QF, S1, performance, macOS,
+multi-GPU, physical smaller cards, host OOM and poisoned-device controls were not
+rerun; their rows retain earlier SHAs. No gate/tolerance or numerical change.
+D3 has separate evidence; no new tag or release acceptance is asserted.
+
 ## 7. Sign-off
 
 Maintainer review of this report, the scope decision and the tag are separate steps (`RELEASE_CHECKLIST.md` §10). Frozen source SHA F: `6d68e2d6`. Tag target T (named by the maintainer; F or a later docs-only evidence commit): pending. `git diff F T -- . ':!docs/rc0' ':!docs/release'` empty: pending. Maintainer sign-off: pending (QF on F is recorded in `docs/rc0/qf/run_6d68e2d6/`).
+
+## 8. Post-RC0 changes
+
+- **#213, tests only**, tested PR source head `f25c958041cc59e6b6c9d2336c7f85092b0fff81`
+  (subsequent publication changes are documentation only): opt-in genuine CUDA
+  sticky-context control; production sources and existing injected tests
+  unchanged. Local Python syntax/grader predicate checks and Release CPU CMake
+  configuration/collection passed (74 CPU tests collected; destructive test
+  absent). CPU executables/CTest were not run. Native CUDA and CUDA+nvCOMP
+  controls **passed** (healthy, genuine single/three-movie fault, single-worker
+  dataset failure/cleanup); before/after GPU health passed. The compiled CUDA
+  detection mutant failed the intended refusal assertion, with real error 700
+  still witnessed; original source/binary restored exactly. Both Release builds
+  succeeded. No QF, full CTest suite, known-motion/corpus, performance or
+  scientific rerun; those results retain their earlier SHA. Tests-only re-entry
+  under `POST_FREEZE_TEST_PLAN.md` §9.4 reruns the affected controls, not QF.
+  Evidence and remaining scope: [`docs/issue213/README.md`](../issue213/README.md);
+  limitation: `SUPPORT.md` §8.
+
+## 8. Post-RC0 defect-fix re-entry
+
+**#215 — TIFF identity before nvCOMP submission.** PR code/test head at validation:
+`76fa8112b829d4e3e9d95f7f869513da5e64b39d` (base `c8844894`; the following
+commit only records documentation/evidence). CUDA-source re-entry:
+CPU full CTest **74/74** on cpu64; CUDA full CTest **108/108** on 4GPUs;
+CUDA+nvCOMP full CTest **111/112** on 4GPUs. Its sole failure is `ProfilingKit`'s
+two import-subset `TimeoutExpired` errors, attributed by the parent to independent
+[#246](https://github.com/KingAlejandro/MotionCorr-standalone/issues/246) with
+compiler occupancy retained; every other test, including `CudaNvcompTiffIdentity`,
+passed. Earlier CPU full runs at both venues were 73/74 with the same #246 failure;
+they remain in the record. No test deadline, gate or tolerance changed.
+
+Six append/atomic-rename controls observed their mutations: all pass with the
+fix and all fail the identity/fallback predicate with only the production CUDA
+file restored from `c8844894`. Native nvCOMP re-entry on one UUID-selected A100
+(GPU3, eight-CPU cap, per-GPU lock): two distinct real tutorial TIFFs, G and L,
+keep their auto `nvcomp` route and have MRC/STAR products identical to both the
+unfixed auto and fixed compact arms. D1's complete, immutable, trusted-input
+precondition is unchanged; §8 of `SUPPORT.md` records the residual race boundary.
+[Commands, revisions, hashes, route logs, failed controls and results](../issue215/README.md).
+
+Not rerun on this candidate: the full QF campaign, the other corpus families,
+multi-GPU publication/scaling, performance gates, SCARF or Tier D science.
+Those rows retain their earlier SHA and are **not retested** here. No new tag or
+maintainer sign-off is implied by this re-entry record.
+
+## 8. Post-RC0 fixes
+
+**#214 — compressed MRC decoder status.** Source/test PR head
+`39aca256c248e6209c6cbf8edc183b7400551b43`; later commits record docs/evidence only.
+Full reads now drain to EOF and reject decoder failure before processing;
+header-only/subsets retain early close and need independent integrity validation.
+No numerical gate or supported-configuration changes.
+
+Rerun: Release builds for CPU/CUDA/CUDA+nvCOMP; full CTest **77/77**, **110/111**
+(only the two independent #246 import-subset timeouts, reproduced on one unchanged
+test retry with compiler occupancy recorded), **114/114**; native pbzip2/xz/zstd
+checks and 12 strict healthy GPU baseline comparisons; #204 compressed replay
+**49/49**. Local macOS: 74 pass, 2 skips, documented `SyntheticRegression` failure.
+Real compressed EMPIAR-10028 movie on cpu64: seven interleaved timing pairs after
+warm-up, with identical MRC/STAR products; median paired change -0.110 s, IQR
+0.480 s (whole-process measurement; no stable speedup/no-regression claim).
+
+[Evidence, commands and limits](../rc0/compressed_exit_status/README.md).
+Not rerun: full QF beyond affected compressed-format rows, real EER campaigns,
+multi-GPU endpoints, soak, other real-movie performance rows or Tier D science.
+Frozen-F results keep their original SHA. Independent review and current-head CI
+remain required before merge; #246 is being fixed separately.
+
+## Post-RC0 #239: RelionError backtrace ownership
+
+PR implementation head `1c14e8882b4754903da4499f1ceca5fd8037f630` (base `c8844894`; subsequent commits are evidence/docs only).
+Re-entry class: shared source, §9.4. All three Release builds and collection checks passed on 4GPUs.
+Full CTest: CPU **75/76 (FAIL: ProfilingKit harness defect #246)**; CUDA **110/110 PASS**;
+CUDA+nvCOMP **113/113 PASS**, zero skips in every configuration. F counts 74/108/111 increase by two ownership tests.
+Native GPU suites ran on GPU3 UUID under its lock and an eight-CPU taskset cap.
+LeakSanitizer reports 6,400 leaked bytes before the fix and none after; old copy/print fails ASan, fixed throw/copy/assignment/repeated-print paths pass with exact format checks.
+The single permitted CPU ProfilingKit rerun also **FAILED** (two 30-second CLI timeouts), recorded separately in `docs/post_rc0/issue239/README.md`;
+the occupancy snapshot records live `cc1`/`cc1plus` processes. #246 identifies the cause: the fake CLI tests allow
+300 seconds of compiler settling inside a 30-second subprocess deadline. The separate #246 control and test-only fix (PR #247; full ProfilingKit before fails with the same two timeouts,
+after passes 134/134 while verified `cc1` children remain alive) resolve the CPU re-entry question for #245; no maintainer waiver or RelionError change is needed. Original failures remain FAIL.
+The superseded cpu64 full-suite attempt was interrupted and is not used as re-entry evidence.
+UNRUN on this source head: full QF route/product campaigns, independent scientific acceptance and performance qualification.
+Their earlier rows retain their earlier SHAs. No product, metadata, gate or tolerance change.
+
+## Post-RC0 #240: dataset finalization warning
+
+PR implementation head `ed24e44b614ec158ffa919a356efaa2806b9c309` (base `c8844894`; following commit is evidence/docs only).
+Re-entry class: multi-GPU tooling, §9.4. Strict Python 3.14 compile fails on the old source and passes here;
+16 exit/status subcases preserve failure and restoration precedence. Existing scheduling tests passed 71/71 on macOS and Linux, including failure injections.
+Native 4GPUs re-entry: G/L × 1/2/4 workers plus mixed × 1/2, **8/8 endpoints PASS**; product identity and byte-flip controls discriminate.
+The eight-CPU cap was retained (8/4/2 threads per worker); all four GPU locks plus the bench lock were held.
+Production binaries are unchanged F `6d68e2d6` Release builds, identified by hash in the evidence.
+UNRUN on this tooling head: full QF, fresh scientific/performance acceptance and unrelated route/format campaigns.
+Historical F results retain F. Evidence: `docs/post_rc0/issue240/README.md`.
+
+## Post-RC0 #235: test hygiene
+
+PR implementation head `d7e797f9bc01f155733f2dee3cdec3a473c3c288` (base `c8844894`; subsequent changes are evidence/docs only).
+Re-entry class: tests only, §9.4. Local macOS arm64 Release build rc 0; affected CTests
+`ProfilingKit`, `TestHygiene235`, `TruncatedGainDefect` passed 3/3. Both new controls fail on unfixed source and pass on this head.
+ProfilingKit's direct run: 134 internal tests, one existing platform skip. No numerical gate changed.
+UNRUN: PanFS, native CUDA, QF and full CTest; no qualification result at F is relabelled.
+Evidence and commands: `docs/post_rc0/issue235/README.md`.
 
 ## Post-RC0 #246: fake CLI compiler-settle timeout
 
@@ -263,3 +383,76 @@ the fixed CLI's provenance records that same witness. The production settle defa
 The bench lock protected other agents from this compiler-presence control. No C++ build or GPU execution was performed.
 UNRUN: full CTest, QF, performance and scientific campaigns. Evidence: `docs/post_rc0/issue246/README.md`.
 This identifies the independent harness cause of #245's retained 75/76 CPU record and failed rerun; those historical results remain FAIL.
+
+## Post-RC0 #253: CUDA C2R boundary contract
+
+[PR #254](https://github.com/KingAlejandro/MotionCorr-standalone/pull/254), class **CUDA/shared** under
+POST_FREEZE_TEST_PLAN §9. Base main `36913740`; implementation `e539660cc6fc56e32ad29ef25ee28dee3e0dcbbc`;
+final CUDA-test oracle `adf990fd9801e1124814e3c4fcb30a3a7fd8ff42`. The five CUDA C2R consumers project
+non-Hermitian self-conjugate columns in consumption scratch. CPU code and resident spectra are unchanged.
+Intentional CUDA product differences reproduce FFTW's real inverse to rounding; maintainer sign-off is pending.
+No dependency, numerical tolerance, convergence or publication-policy change.
+
+On 4GPUs, A100 80 GB PCIe GPU3 `GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d`, CPUs 88–95, GPU correctness lock,
+benchmark-lock checks, Release, CUDA 12.8.61/cuFFT 11.3.3: full CTest **74/74 CPU** (`e539660c`),
+**110/110 CUDA** and **113/113 CUDA+nvCOMP** (`adf990fd`), zero skips. The intervening change is only the
+CUDA dose-test oracle, excluded from the CPU build; CPU sources/configuration are identical. Both CUDA builds
+also pass the adapted #123 matrix, **16/16 cases and 28 native arms each**, with UUID and gain-effect controls.
+The full CTest includes the relevant truncation, patch/reconstruction, failure/publication and D11 controls.
+
+The 4096² production inverse test fails on main and the session launch-removal mutant (exit 1), and passes on
+the fix (exit 0): maximum relative error **0.0121215 → 5.22079e-7**. The native five-size PlanMany matrix reproduces
+the leak at 4096²; the other requested geometries stay at rounding in this fixture. All five C2R sites and their
+input provenance are audited in the evidence. Initial harness/oracle failures remain retained; the final full
+nvCOMP suite was rerun after correcting its inverse oracle, without relaxing its exact-byte checks.
+
+For the requested EMPIAR-10216 `FoilHole_14961495…1739` movie, all eight G/L × CPU/CUDA × main/fixed runs exit 0.
+CPU pixels/core headers and movie STARs are identical before/after. CUDA-vs-CPU relative micrograph RMSE (non-DW / DW):
+G **0.0196406 / 0.0165909 → 0.0193900 / 0.0164632**; 5×5 L **0.823504 / 0.434362 → 0.0369230 / 0.0173291**.
+The serialized local model's coefficient relative RMSE is **0.374524 → 0.00784136**; its evaluated field relative
+RMSE is **0.206829 → 0.00472496** (definition and STAR-formatting limitation in the evidence). Every
+`compare_motioncorr.py --gate backend` record remains **FAIL**, retained for the record only. **S1 is not closed.**
+
+Re-entry is scoped: the full seven-family QF route campaign, full EER/#204/retry dataset replays, multi-GPU
+publication, optional external-fixture `CudaU16FailurePaths`, sanitizer, other platforms/devices/cuFFT versions,
+D14 timing and downstream CTF/FSC/B-factor are **not rerun** on this candidate. Their earlier rows keep their
+original SHAs; this does not turn them into candidate passes. Supported configurations and the frozen RC0/tag
+record are unchanged. No merge or new tag is recommended by this evidence alone; independent review,
+current-head CI and maintainer sign-off remain required.
+
+Evidence, full audit, commands, hashes, counts, failures and limits: [issue253/README.md](../post_rc0/issue253/README.md).
+Implementation CI on `adf990fd`, run [39351741856](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/39351741856),
+passes Ubuntu build/smoke and CUDA compile-only; native evidence is the separate record above.
+
+## Post-freeze candidate #257: CUDA peak-fit arithmetic
+
+PR #260, production `531e9db4`, final tests `6c23ba1d` (base main `36913740`):
+CUDA-only fit promotion; CPU source, integer peak selection, thresholds, gates
+and output interfaces unchanged. Native Release CTest on 4GPUs passes CPU
+74/74, CUDA 110/110 and CUDA+nvCOMP 113/113, with no skips. The actual production
+kernel passes the captured pedestal/edge controls; the float-denominator mutant
+fails the named witness. CPU and CUDA known-motion launchers pass their existing
+aggregate policy, retaining the noisy characterization accuracy failure.
+
+The legacy Tier A exact fixture fails on this branch. A retained frozen-F CPU
+control and this branch's CPU output match exactly on that fixture; the mismatch
+is already present in the control. No tolerance was changed. Raw records and
+limits: [#257 evidence](../post_rc0/issue257/README.md). Combined S1 attribution
+is separate PR #261. A new full QF, performance cost, downstream S1.4 and other
+hardware/toolchains are unrun; earlier qualification rows keep their original
+SHA. Candidate only, no merge/tag/sign-off by this agent.
+
+## Post-RC0 re-entry: #226 D3
+
+Validated PR implementation head: `4cd851677bfda80e60ef189cb1ff668cef721043` (CUDA source; later updates are test/documentation only).
+Release builds and full CTest pass: CPU **74/74** on cpu64, CUDA **109/109** and CUDA+nvCOMP **112/112** on an A100.
+`CudaEarlyStreamingOom` passes. The original QM balloon harness on the original GPU1 UUID reproduces the late
+16/21 GiB failures on `c8844894`; G/L × auto/float now refuse early with required/available memory, no failed-movie
+products and 743 MiB RSS. All four 22 GiB controls complete identically; unconstrained products also match
+`c8844894`. [Commands, hashes, raw receipts and powered before/after control](../rc0/issue226/d3/README.md).
+No numerical gate, tolerance or completed-product difference is introduced. Not rerun: complete frozen QF,
+scientific S1, performance qualification, macOS, native multi-GPU publication, real smaller GPUs, host-RAM
+exhaustion, genuine device poisoning or optional upsampling/binning/PS matrices. Those rows retain their earlier
+SHA and verdict; a new tag remains a maintainer decision.
+
+The branch incorporates main `36913740` (#247, ProfilingKit tests/docs only). Runtime sources and CMake configuration are identical to native-tested `4cd85167`; native rows keep that tested SHA.

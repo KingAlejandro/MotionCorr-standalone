@@ -1,0 +1,39 @@
+diff --git a/c1_ds_archive_regrade.v1.py b/c1_ds_archive_regrade.py
+index b3150ae..8d6dd21 100644
+--- a/c1_ds_archive_regrade.v1.py
++++ b/c1_ds_archive_regrade.py
+@@ -13,6 +13,7 @@ product is compared. This helper separates the two populations instead of ignori
+      with the already-verified _workers/ subtree hidden from that one root's rglob; its report goes through the unmodified c1_tutorial24.classify.
+      Any other extra/missing STAR or MRC, wrong path, mode/header/extension/payload difference is still found by the comparator itself.
+ 
++v1.1: load_module registers the comparator in sys.modules before executing it (v1 failed on Python 3.12 inside @dataclass; v1 is retained as c1_ds_archive_regrade.v1.py).
+ Nothing under the dataset arm is written. The report goes to a NEW --out-dir. The historical DATASET.json (FAIL) is bound by hash and left in place.
+ Needs the c1_env.sh variables (C1_SCR, C1_TUTORIAL, C1_FROZEN_RC0, QF_*) like c1_tutorial24.py, and numpy (the comparator's).
+ 
+@@ -23,7 +24,7 @@ STAR text, and a symlinked prefix must keep its lexical spelling (run_dataset.py
+ import argparse, contextlib, hashlib, importlib.util, json, os, pathlib, sys
+ from pathlib import Path
+ 
+-VERSION = 'c1-ds-archive-regrade-v1'
++VERSION = 'c1-ds-archive-regrade-v1.1'
+ ARCHIVE_STAR = 'corrected_micrographs.star'
+ MERGE_LOG = '_workers/merge.log'
+ HERE = Path(__file__).resolve().parent
+@@ -116,7 +117,16 @@ def hide_verified_archive(root):
+ 
+ 
+ def load_module(name, path):
+-    spec = importlib.util.spec_from_file_location(name, path); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m); return m
++    """Import a file as `name`. The module must be in sys.modules while its body runs: @dataclass (Python < 3.14, string annotations) looks up
++    sys.modules[cls.__module__]. A failed import leaves no half-initialised entry behind and restores any previous one."""
++    spec = importlib.util.spec_from_file_location(name, path); m = importlib.util.module_from_spec(spec)
++    prior = sys.modules.get(name); sys.modules[name] = m
++    try: spec.loader.exec_module(m)
++    except BaseException:
++        if prior is None: sys.modules.pop(name, None)
++        else: sys.modules[name] = prior
++        raise
++    return m
+ 
+ 
+ def main(argv=None):

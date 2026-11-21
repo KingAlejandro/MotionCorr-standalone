@@ -1,0 +1,197 @@
+{
+  "utc": "2026-10-22T22:43:16.962756+00:00",
+  "aggregate": "ONGOING",
+  "wrapper_exit": null,
+  "chain_exit": null,
+  "stages": [
+    {
+      "stage": "cpu1d-prereq",
+      "allowed_exits": "0",
+      "reserved": true,
+      "exit": "0",
+      "status": "RAN"
+    },
+    {
+      "stage": "cpu1d-v2-cpu-c1",
+      "allowed_exits": "0",
+      "reserved": true,
+      "exit": "0",
+      "status": "RAN"
+    },
+    {
+      "stage": "cpu1d-v2-cpu-F",
+      "allowed_exits": "0",
+      "reserved": true,
+      "exit": "0",
+      "status": "RAN"
+    },
+    {
+      "stage": "cpu1d-v2-eval-F",
+      "allowed_exits": "0",
+      "reserved": true,
+      "exit": "0",
+      "status": "RAN"
+    },
+    {
+      "stage": "cpu1d-v2-check",
+      "allowed_exits": "0",
+      "reserved": true,
+      "exit": "0",
+      "status": "RAN"
+    },
+    {
+      "stage": "cpu1d-run-c1-cpu-G",
+      "allowed_exits": "0",
+      "reserved": true,
+      "exit": null,
+      "status": "RUNNING_OR_PARTIAL"
+    }
+  ],
+  "processes": {
+    "3311648": {
+      "pid": 3311648,
+      "ppid": 1,
+      "session": 3311648,
+      "kernel_start_ticks": "816540337",
+      "proc_stat": "3311648 (bash) S 1 3311648 3311648 0 -1 4194304 924 2702 0 0 0 1 0 2 20 0 1 0 816540337 7929856 744 18446744073709551615 110015925833728 110015926809389 140730790521472 0 0 0 65536 7 1132560120 1 0 0 17 8 0 0 0 0 0 110015927032240 110015927080880 110016522121216 140730790526272 140730790526356 140730790526356 140730790526954 0\n",
+      "uid": "1004",
+      "cpus": "8-9",
+      "actual_argv": [
+        "bash",
+        "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/cpu1d-launch-wrapper.sh"
+      ],
+      "exe": "/usr/bin/bash",
+      "CPU1D_overrides": []
+    },
+    "3311661": {
+      "pid": 3311661,
+      "ppid": 3311648,
+      "session": 3311648,
+      "kernel_start_ticks": "816540340",
+      "proc_stat": "3311661 (bash) S 3311648 3311648 3311648 0 -1 4194304 672 250027 0 17 0 0 528 261 20 0 1 0 816540340 7929856 744 18446744073709551615 107164407365632 107164408341293 140726759748848 0 0 0 65536 7 65536 1 0 0 17 9 0 0 0 0 0 107164408564144 107164408612784 107164411146240 140726759755098 140726759755173 140726759755173 140726759755754 0\n",
+      "uid": "1004",
+      "cpus": "8-9",
+      "actual_argv": [
+        "bash",
+        "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/chain-cpu1d.sh"
+      ],
+      "exe": "/usr/bin/bash",
+      "CPU1D_overrides": []
+    },
+    "3311877": {
+      "pid": 3311877,
+      "ppid": 3311661,
+      "session": 3311648,
+      "kernel_start_ticks": "816541117",
+      "proc_stat": "3311877 (bash) S 3311661 3311648 3311648 0 -1 4194304 382 1178 0 0 0 0 0 1 20 0 1 0 816541117 7929856 744 18446744073709551615 109553588338688 109553589314349 140737231522480 0 0 0 65536 7 65536 1 0 0 17 8 0 0 0 0 0 109553589537200 109553589585840 109554054852608 140737231530850 140737231531172 140737231531172 140737231532010 0\n",
+      "uid": "1004",
+      "cpus": "8-9",
+      "actual_argv": [
+        "bash",
+        "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_stage.sh",
+        "cpu1d-run-c1-cpu-G",
+        "/home/alex/.mc-venv/bin/python3",
+        "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_tutorial24.py",
+        "run",
+        "c1-cpu",
+        "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cpu/motioncorr",
+        "G",
+        "--cpu"
+      ],
+      "exe": "/usr/bin/bash",
+      "CPU1D_overrides": []
+    },
+    "3311886": {
+      "pid": 3311886,
+      "ppid": 3311877,
+      "session": 3311648,
+      "kernel_start_ticks": "816541119",
+      "proc_stat": "3311886 (python3) S 3311877 3311648 3311648 0 -1 4194304 3064 0 0 0 9 8 0 0 20 0 1 0 816541119 29110272 4636 18446744073709551615 4325376 7352253 140725359073536 0 0 0 0 16781319 0 1 0 0 17 9 0 0 0 0 0 10653128 12216448 82403328 140725359081298 140725359081513 140725359081513 140725359083480 0\n",
+      "uid": "1004",
+      "cpus": "8-9",
+      "actual_argv": [
+        "/home/alex/.mc-venv/bin/python3",
+        "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_tutorial24.py",
+        "run",
+        "c1-cpu",
+        "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cpu/motioncorr",
+        "G",
+        "--cpu"
+      ],
+      "exe": "/usr/bin/python3.12",
+      "CPU1D_overrides": []
+    },
+    "3311887": {
+      "pid": 3311887,
+      "ppid": 3311886,
+      "session": 3311887,
+      "kernel_start_ticks": "816541125",
+      "proc_stat": "3311887 (time) S 3311886 3311887 3311887 0 -1 4194304 62 0 0 0 0 0 0 0 20 0 1 0 816541125 2760704 248 18446744073709551615 96749287256064 96749287262329 140727256150320 0 0 0 0 7 0 1 0 0 17 8 0 0 0 0 0 96749287275504 96749287276864 96749683064832 140727256155790 140727256156219 140727256156219 140727256158186 0\n",
+      "uid": "1004",
+      "cpus": "8-9",
+      "actual_argv": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-cpu1d/c1-cpu-G/logs/c1-cpu-G.time",
+        "taskset",
+        "-c",
+        "8-9",
+        "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cpu/motioncorr",
+        "--i",
+        "movies.star",
+        "--o",
+        "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-cpu1d/c1-cpu-G/out/",
+        "--j",
+        "2",
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--expected_frames",
+        "24",
+        "--gainref",
+        "Movies/gain.mrc"
+      ],
+      "exe": "/usr/bin/time",
+      "CPU1D_overrides": []
+    },
+    "3311888": {
+      "pid": 3311888,
+      "ppid": 3311887,
+      "session": 3311887,
+      "kernel_start_ticks": "816541126",
+      "proc_stat": "3311888 (motioncorr) R 3311887 3311887 3311887 0 -1 4194304 2543301 0 0 0 5707 732 0 0 20 0 3 0 816541126 1804496896 403212 18446744073709551615 103290483818496 103290485808853 140727050905488 0 0 0 0 7 0 0 0 0 17 8 0 0 0 0 0 103290486166544 103290486173928 103291083517952 140727050913488 140727050913789 140727050913789 140727050915756 0\n",
+      "uid": "1004",
+      "cpus": "8-9",
+      "actual_argv": [
+        "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cpu/motioncorr",
+        "--i",
+        "movies.star",
+        "--o",
+        "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-cpu1d/c1-cpu-G/out/",
+        "--j",
+        "2",
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--bfactor",
+        "150",
+        "--seed",
+        "1",
+        "--expected_frames",
+        "24",
+        "--gainref",
+        "Movies/gain.mrc"
+      ],
+      "exe": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cpu/motioncorr",
+      "CPU1D_overrides": [],
+      "binary_sha256": "5692c6dc5eaca953357bf7a1161338b99ca320369f0b6c6ab025d9aaa7f9dc3c"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "tested_source": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f",
+  "archive_sha256": "29eb9cfaab14eccbc27cb94a850e6c57c4282c9c3d5ff9717578dcc668b334c0",
+  "raw_detail_sha256": "87d90cf4ad6922d5a8cb501c9f9aef9e33cade4a15ff1f7228d8040105b2e333",
+  "configs": {
+    "cuda": {
+      "binary_sha256": "3b6dec998707e1e56fbf7435ae4d3e655a495968bfafb28c441fc4c2b48f6665",
+      "gpu_uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+      "cpu_mask": [
+        8,
+        9,
+        14,
+        15
+      ],
+      "started": "2026-10-22T19:46:54Z",
+      "finished": "2026-10-22T19:49:32Z",
+      "healthy_native_retry": true,
+      "fault_launch_exactly_once_per_process": true,
+      "native_cuda_error_700_and_fatal_status_1": true,
+      "all_failed_movies_attributed": true,
+      "no_post_fault_product_kernel_marker": true,
+      "dataset_failure_and_cleanup_verified": true,
+      "driver_and_wrapper_exit": 0
+    },
+    "nvcomp": {
+      "binary_sha256": "ccb15a15cde313045e7d6af770ffc1bc6d5610617d8379824f0d6f38e81ebcca",
+      "gpu_uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+      "cpu_mask": [
+        8,
+        9,
+        14,
+        15
+      ],
+      "started": "2026-10-22T19:44:14Z",
+      "finished": "2026-10-22T19:46:54Z",
+      "healthy_native_retry": true,
+      "fault_launch_exactly_once_per_process": true,
+      "native_cuda_error_700_and_fatal_status_1": true,
+      "all_failed_movies_attributed": true,
+      "no_post_fault_product_kernel_marker": true,
+      "dataset_failure_and_cleanup_verified": true,
+      "driver_and_wrapper_exit": 0
+    }
+  },
+  "limitations": [
+    "Direct native logs and dataset statuses inspected; driver recorded product-inventory checks at execution, not newly re-executed.",
+    "No genuine nvCOMP-ingest poisoning, multi-device poisoning, performance or science claim.",
+    "Original wrapper log includes a harmless missing build-sticky-*/motioncorr hash lookup; actual motioncorr_sticky_fault hashes separately retained and matched."
+  ]
+}

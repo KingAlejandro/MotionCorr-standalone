@@ -1,0 +1,33 @@
+2026-10-26T14:26:53Z
+4-gpu-vm
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+--- compute apps (all GPUs)
+--- locks held by anyone (fuser)
+/tmp/motioncorr-gpu0-correctness.lock: 
+/tmp/motioncorr-gpu1-correctness.lock: 
+/tmp/motioncorr-gpu2-correctness.lock: 
+/tmp/motioncorr-gpu3-correctness.lock: /tmp/motioncorr-gpu3-correctness.lock: 3913664 3913712 3913713 3913730 3913742 3913744
+/tmp/motioncorr-build.lock: 
+/tmp/motioncorr-bench.lock: /tmp/motioncorr-bench.lock: 3913664 3913712 3913713 3913730 3913748 3913750
+--- processes last scheduled on CPUs 96-103
+    PID USER     PSR %CPU ELAPSED COMMAND
+3913751 alex     102  900       0 ps -eo pid,user,psr,pcpu,etimes,args --sort=-pcpu
+3913664 alex      96  0.3       2 bash tools-iot/run_iothreads.sh
+2602813 alex      96  0.0 1445993 bash -c while pgrep -f "kit24run" > /dev/null; do sleep 30; done; tail -8 /home/alex/mc-fft/kit24.log
+1592208 root      96  0.0 1194629 [kworker/96:2-mm_percpu_wq]
+3517178 root     102  0.0  933512 [kworker/102:13-mm_percpu_wq]
+2919748 systemd+  99  0.0  374235 /usr/lib/systemd/systemd-networkd
+    629 root     102  0.0 8481258 [migration/102]
+    611 root      99  0.0 8481258 [migration/99]
+3456129 root     101  0.0  995612 [kworker/101:0-mm_percpu_wq]
+    605 root      98  0.0 8481258 [migration/98]
+    617 root     100  0.0 8481258 [migration/100]
+    599 root      97  0.0 8481258 [migration/97]
+    593 root      96  0.0 8481258 [migration/96]
+ 14:26:53 up 98 days,  3:54, 28 users,  load average: 1.36, 1.15, 1.10
+/dev/sdb        2.0T  1.6T  325G  83% /mnt/clathrin
+GPU health PASS (identity, ECC, row remap, retired pages, no compute process); kernel Xid log: UNRUN
+gpu3 health exit 0

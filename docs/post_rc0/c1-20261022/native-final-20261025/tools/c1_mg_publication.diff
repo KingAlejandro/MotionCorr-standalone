@@ -1,0 +1,60 @@
+--- rc0/qf/tools/multigpu_publication.py
++++ c1_mg_publication.py
+@@ -19,9 +19,12 @@
+ import time
+ from pathlib import Path
+ 
+-sys.path.insert(0, str(Path(__file__).resolve().parent))
++# i8: QF helpers are read in place from the scratch checkout of the tested source; this derivative lives in the i8 tools packet.
++sys.path.insert(0, str(Path(os.environ['QF_W']) / 'src/docs/rc0/qf/tools'))
+ sys.path.insert(0, str(Path(os.environ['QF_W']) / 'src/tools/profiling'))
+ from qual_lib import *  # noqa: F401,F403
++sys.path.insert(0, str(Path(__file__).resolve().parent))
++import c1_lane; c1_lane.install()   # bench lock probed, not waited on (#198 policy)
+ from lib import identity  # noqa: E402
+ 
+ UUID = {0: 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54', 1: 'GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d',
+@@ -34,20 +37,14 @@
+ # QF change: the fixed 16-CPU budget comes from QF_MG_CPU_A / QF_MG_CPU_B (two 8-CPU ranges
+ # 'lo-hi', required); the 1-worker arm and the s0 reference use QF_MG_W1_GPU
+ # (default 0). Q1 used 104-111 + 64-71 and GPU1.
+-def _split(r):
+-    lo, hi = map(int, r.split('-'))
+-    return f'{lo}-{lo + 3}', f'{lo + 4}-{hi}'
+-
+-
+-MG_A = os.environ['QF_MG_CPU_A']
+-MG_B = os.environ['QF_MG_CPU_B']
+-MG_ALL = f'{MG_A},{MG_B}'
++MG_ALL = os.environ['QF_MG_CPU_ALL']   # i8: one 8-CPU range 'lo-hi' (QF used two 8-CPU ranges, 16 CPUs)
+ W1_GPU = int(os.environ.get('QF_MG_W1_GPU', '0'))
+ W2_GPUS = [W1_GPU, (W1_GPU + 1) % 4]
++_lo = int(MG_ALL.split('-')[0])
+ ARMS = [
+-    ('w1', [W1_GPU], [MG_ALL], 16),
+-    ('w2', W2_GPUS, [MG_A, MG_B], 8),
+-    ('w4', [0, 1, 2, 3], [*_split(MG_A), *_split(MG_B)], 4),
++    ('w1', [W1_GPU], [MG_ALL], 8),
++    ('w2', W2_GPUS, [f'{_lo}-{_lo + 3}', f'{_lo + 4}-{_lo + 7}'], 4),
++    ('w4', [0, 1, 2, 3], [f'{_lo}-{_lo + 1}', f'{_lo + 2}-{_lo + 3}', f'{_lo + 4}-{_lo + 5}', f'{_lo + 6}-{_lo + 7}'], 2),
+ ]
+ 
+ 
+@@ -223,7 +220,7 @@
+             res['arms']['s0'] = {'run': r}
+         for name, devs, masks, j in ARMS:
+             run = base / name
+-            la = f"--devices {','.join(UUID[d] for d in devs)} --cpus '{';'.join(masks)}' --cpu-budget 16"
++            la = f"--devices {','.join(UUID[d] for d in devs)} --cpus '{';'.join(masks)}' --cpu-budget 8"
+             cmd = ['taskset', '-c', MG_ALL, PY, str(TOOLS / 'run_dataset.py'), '--binary', str(BIN['nvcomp']),
+                    '--star', str(star), '--out', str(run), f'--launcher-args={la}',
+                    '--required-products=.mrc,.star,_shifts.eps', '--',
+@@ -370,7 +367,7 @@
+ 
+ 
+ def mixed_arm_cmd(name, devs, masks, j, star, run, wit):
+-    la = f"--devices {','.join(UUID[x] for x in devs)} --cpus '{';'.join(masks)}' --cpu-budget 16"
++    la = f"--devices {','.join(UUID[x] for x in devs)} --cpus '{';'.join(masks)}' --cpu-budget 8"
+     return ['taskset', '-c', MG_ALL, PY, str(TOOLS / 'run_dataset.py'), '--binary', str(BIN['nvcomp']),
+             '--star', str(star), '--out', str(run), f'--launcher-args={la}',
+             '--required-products=.mrc,.star,_shifts.eps', '--',

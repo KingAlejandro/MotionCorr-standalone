@@ -1,0 +1,13 @@
+# C1 R12 and one-worker recovery completed — 25 October 2026
+
+The named engineering rows **PASS**; aggregate C1, science and performance qualification remain incomplete. Production source is `e77a51a220cb0d91f4ac3c7fac211876d0c6833f`, native CUDA+nvCOMP binary `d7c4e2e3…`, fault shim `87caff08…`. Tooling commit `da2d202b` fixes only the relocated QF-helper lookup. The old `tools-v2.3-run` remains untouched. The new `tools-v2.4-run` manifest SHA256 is `f275c0869d84c463a9ad12ddf26181e0e4993002a2088965dc85ea0d92122241`.
+
+Sonnet implemented the bounded path repair; Sol independently reviewed it and reran five import controls on macOS. The same five controls passed on Linux, followed by `--help` in the actual deployed layout before native execution. Numerical source, gates, expectations, lease handling, health checks and recovery body were unchanged.
+
+Fresh admission found CPU8–9 idle, its lifetime lease free, GPU3 unoccupied and sufficient memory/scratch. Stages `i5-20261025-r12` and `i5-20261025-r12ds` ran exactly once and exited 0. All four family/grouping cases passed: e10641 with grouping 1/4 and e10216 with grouping 1/4. The current C1 retry counts were 41/9 and 29/25. The older #207 counts 41/9 and 30/25 remain legacy diagnostics; they were not substituted for the current candidate's criteria.
+
+Frozen/count/recoverable comparisons passed the unchanged internal rules. Injected fatal contexts were refused as expected, with ownership/cleanup checks retained. The one-worker healthy dataset `d1` exited 0, reported PASS/ready/complete and merged four movies. The poisoned `dpoison_1w` exited 3 and reported FAIL/not ready with `Worker phase exited 3`, as expected; its refusal, publication withholding and cleanup satisfied the frozen negative control. The parent independently read result, dataset and worker states rather than inferring qualification from outer exit 0.
+
+GPU3-only process witnesses and pre/post identity, ECC, remap, retired-page and empty-app health checks are retained. Xid inspection, genuine nvCOMP-ingest poisoning and new multi-device evidence remain UNRUN. No timing claim is made. The native driver performed its existing exact product comparisons; the parent did not independently rehash raw MRC payloads. The retained record bundle includes those comparisons, provenance, logs and hashes; original VM products remain untouched.
+
+Tutorial dataset G/L, compact-ingest matrix, #249 GPU-route checks, CUDA known-motion/census/image and other frozen-plan rows remain separate. No main merge, gate/default, publication-policy or support-class change follows. `SHA256SUMS` covers this packet and its lossless compressed record bundle.

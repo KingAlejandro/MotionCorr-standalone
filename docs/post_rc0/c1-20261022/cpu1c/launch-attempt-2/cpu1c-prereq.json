@@ -1,0 +1,151 @@
+{
+ "checks": {
+  "source_exact_clean": {
+   "ok": true,
+   "detail": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f"
+  },
+  "c1_cpu_binary": {
+   "ok": true,
+   "detail": "5692c6dc5eaca953357bf7a1161338b99ca320369f0b6c6ab025d9aaa7f9dc3c"
+  },
+  "f_cpu_binary": {
+   "ok": true,
+   "detail": "43cab2b74e97e948172c656d2b3041b562d24e733de1a5727a54624c12749b42"
+  },
+  "no_cuda_linkage_alex-motioncorr-c1-20261022-e77a51a220cb": {
+   "ok": true,
+   "detail": null
+  },
+  "no_cuda_linkage_W-QF": {
+   "ok": true,
+   "detail": null
+  },
+  "f_cpu_baseline_G": {
+   "ok": true,
+   "detail": {
+    "rc": 0,
+    "wall_s": 692.117
+   }
+  },
+  "f_cpu_baseline_L": {
+   "ok": true,
+   "detail": {
+    "rc": 0,
+    "wall_s": 1220.789
+   }
+  },
+  "census_fixtures_100": {
+   "ok": true,
+   "detail": 100
+  },
+  "retained_cpu_products_100": {
+   "ok": true,
+   "detail": [
+    100,
+    100
+   ]
+  },
+  "scipy_venv": {
+   "ok": true,
+   "detail": "1.18.1 2.5.4"
+  },
+  "zstd_tar": {
+   "ok": true,
+   "detail": null
+  },
+  "fresh_t24-cpu1c": {
+   "ok": true,
+   "detail": "t24-cpu1c"
+  },
+  "fresh_census": {
+   "ok": true,
+   "detail": "census"
+  },
+  "fresh_census-ref-cpu": {
+   "ok": true,
+   "detail": "census-ref-cpu"
+  },
+  "fresh_v2/cpu-unset": {
+   "ok": true,
+   "detail": "v2/cpu-unset"
+  },
+  "fresh_v2/cpuF-unset": {
+   "ok": true,
+   "detail": "v2/cpuF-unset"
+  },
+  "fresh_stage_names": {
+   "ok": false,
+   "detail": null
+  },
+  "chain_has_no_gpu_helper": {
+   "ok": true,
+   "detail": null
+  },
+  "chain_sets_empty_cuda_visible_devices": {
+   "ok": true,
+   "detail": null
+  },
+  "identities_frozen_100_and_10": {
+   "ok": true,
+   "detail": {
+    "all": 100,
+    "control": [
+     "dose1-s00",
+     "dose1-s01",
+     "..."
+    ],
+    "sha256": "45273edefbf8f83fc529fe06636741904f566b5729a51bb81f9e31beb020cf2c"
+   }
+  },
+  "cpus_allowed_list_is_8-9": {
+   "ok": true,
+   "detail": "8-9"
+  },
+  "deployed_tools_equal_frozen_manifest": {
+   "ok": true,
+   "detail": {
+    "files": 32,
+    "differing": [],
+    "manifest_sha256": "d0e4ffb6edfdc003077cfb896f531149374e6e80ef1acf1917959aa2335a4c0a"
+   }
+  },
+  "chain_scripts_present_in_deployed_set": {
+   "ok": true,
+   "detail": {
+    "used": [
+     "c1_census.py",
+     "c1_census_runner.py",
+     "c1_run_v2_cases.py",
+     "c1_stage.sh",
+     "c1_tutorial24.py",
+     "c1_v2.sh",
+     "cpu1_extract_ref.sh",
+     "cpu1c_prereq.py",
+     "cpu1c_sums.py"
+    ],
+    "missing": []
+   }
+  },
+  "f_cpu_run_pinned_G": {
+   "ok": true,
+   "detail": {
+    "rc": 0,
+    "binary": "43cab2b74e97",
+    "args_equal": true,
+    "live_sha256": "05cf608df6fc57e1c5a6e0618277f550f6b2fa27c18ba60a36f88d531d0abd06"
+   }
+  },
+  "f_cpu_run_pinned_L": {
+   "ok": true,
+   "detail": {
+    "rc": 0,
+    "binary": "43cab2b74e97",
+    "args_equal": true,
+    "live_sha256": "4b2ffd1fcfee0ccd9d04abedfc3d30560ad5a0ea189a34ed4a7adb626b0d97cb"
+   }
+  }
+ },
+ "failed": [
+  "fresh_stage_names"
+ ]
+}

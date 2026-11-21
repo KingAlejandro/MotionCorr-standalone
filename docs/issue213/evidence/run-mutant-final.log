@@ -1,0 +1,15 @@
+PASS healthy: real resident retry and products
+FAILED: evidence retained at /mnt/clathrin/alex-motioncorr-213/control-mutant-final
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-213/src-min/tests/run_sticky_cuda_control.py", line 227, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-213/src-min/tests/run_sticky_cuda_control.py", line 213, in main
+    run_controls(binary, work, uuid)
+  File "/mnt/clathrin/alex-motioncorr-213/src-min/tests/run_sticky_cuda_control.py", line 146, in run_controls
+    fault_verdict(rc, text, out, count)
+  File "/mnt/clathrin/alex-motioncorr-213/src-min/tests/run_sticky_cuda_control.py", line 95, in fault_verdict
+    require(re.search(r"CUDA device context is unusable for [^\n]*Movies/control\.tiff \(patch 1, 1\)", text)
+  File "/mnt/clathrin/alex-motioncorr-213/src-min/tests/run_resident_retry_controls.py", line 36, in require
+    raise RuntimeError(message)
+RuntimeError: fatal refusal missing or attributed to the wrong movie/patch

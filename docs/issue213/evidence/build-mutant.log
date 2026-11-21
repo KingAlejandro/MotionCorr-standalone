@@ -1,0 +1,23 @@
+-- LibTIFF Deflate subcodec: libdeflate
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED
+-- Performing Test MOTIONCORR_DOSE_SYMMETRY_SELECTED - Success
+-- CPU dose weighting: symmetric rows (AUTO: qualified x86-64 GCC without FMA)
+-- motioncorr_core CUDA architectures: 80
+CMake Warning at CMakeLists.txt:485 (message):
+  pbzip2 not found: InputFormats and RealCutdown waive its compressed-MRC
+  cases (UNRUN).  Configure with -DMC_REQUIRE_ALL_DECODERS=ON to refuse the
+  waiver.
+
+
+-- Configuring done (0.9s)
+-- Generating done (0.3s)
+-- Build files have been written to: /mnt/clathrin/alex-motioncorr-213/build-cuda
+[  0%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+/mnt/clathrin/alex-motioncorr-213/src-min/src/motioncorr_runner.cpp: In function ‘std::string readDefectTextSnapshot(const FileName&)’:
+/mnt/clathrin/alex-motioncorr-213/src-min/src/motioncorr_runner.cpp:1907:53: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+ 1907 |         std::unique_ptr<FILE, decltype(&std::fclose)> input(
+      |                                                     ^
+[  0%] Linking CXX static library libmotioncorr_core.a
+[ 97%] Built target motioncorr_core
+[ 97%] Linking CXX executable motioncorr_sticky_fault
+[100%] Built target motioncorr_sticky_fault

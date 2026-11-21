@@ -1,0 +1,16 @@
+test_completion_timestamp_does_not_cross_deadline_between_reads (__main__.Controls.test_completion_timestamp_does_not_cross_deadline_between_reads) ...
+  test_completion_timestamp_does_not_cross_deadline_between_reads (__main__.Controls.test_completion_timestamp_does_not_cross_deadline_between_reads) (completion=9.999) ... FAIL
+
+======================================================================
+FAIL: test_completion_timestamp_does_not_cross_deadline_between_reads (__main__.Controls.test_completion_timestamp_does_not_cross_deadline_between_reads) (completion=9.999)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-7a8fa0b5/docs/issue215/native_20261022/test_postrun_idle.py", line 108, in test_completion_timestamp_does_not_cross_deadline_between_reads
+    self.assertEqual(result["elapsed_seconds"], completion)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 10.001 != 9.999
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)

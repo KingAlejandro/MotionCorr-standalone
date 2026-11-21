@@ -1,0 +1,54 @@
+combined-candidate-cpu-build.exit 0
+combined-plain-control-cpu-build.exit 0
+e694a52be882ec92c6ec638eb3dec745cb19638051b726672842887e3b675911  combined-candidate-cpu/motioncorr
+6104f092238c5a0d0a6a34c149e19a3f5fd53a3a4488b1afa8f53ced856dfb10  combined-plain-control-cpu/motioncorr
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+//ADVANCED property for variable: CMAKE_CXX_FLAGS_RELEASE
+CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+e69409306ec022edb832092f146c5d9e2b6671c12a228b89416e125e4da9bf5f  ../combined-candidate.tar.gz
+5a3cea390fa5359f717e4ec23033cd1dcc088e0f13cf338a8eabb603a4888c59  ../combined-plain-control.tar.gz
+e694a52be882ec92c6ec638eb3dec745cb19638051b726672842887e3b675911  combined-candidate-cpu/motioncorr
+exit 0
+zero 0
+integer 0
+fractional 0
+affine 0
+pedestal 0
+noisy 0
+flat 0
+repeated 0
+6104f092238c5a0d0a6a34c149e19a3f5fd53a3a4488b1afa8f53ced856dfb10  combined-plain-control-cpu/motioncorr
+exit 0
+zero 0
+integer 0
+fractional 0
+affine 0
+pedestal 0
+noisy 0
+flat 0
+repeated 0
+---compare movie
+movie.mrc IDENTICAL 14057780da5d1c9a
+movie.star IDENTICAL 7cbe5b42af81a6a6
+---compare v2
+zero.mrc MISSING False False
+zero.star MISSING False False
+integer.mrc MISSING False False
+integer.star MISSING False False
+fractional.mrc MISSING False False
+fractional.star MISSING False False
+affine.mrc MISSING False False
+affine.star MISSING False False
+pedestal.mrc MISSING False False
+pedestal.star MISSING False False
+noisy.mrc MISSING False False
+noisy.star MISSING False False
+flat.mrc MISSING False False
+flat.star MISSING False False
+repeated.mrc MISSING False False
+repeated.star MISSING False False
+done
+cpu RUN exits/binary: {(0, 'e694a52be882ec92'): 210}
+sha256sum: '$f': No such file or directory
+sha256sum: '$f': No such file or directory

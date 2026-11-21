@@ -1,0 +1,105 @@
+{
+  "captured_utc": "2026-10-22T21:30:16.530921+00:00",
+  "c1": {
+    "root": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb",
+    "receipts": {
+      "logs/chain-i3.go": "",
+      "logs/chain-i3.launch": "launcher_pid=3273979\ncommand=nohup setsid bash /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/chain-i3.sh\nlaunched_utc=2026-10-22T21:23:53Z\nchain_sha256=397275b10892ffae30f71bc57a23cbc6937913df21d9dede50b2a90658e56104\nmanifest_sha256=07e3dec2d2ff1cd6617e6e9d4d044c6339ea5ee94001c5f2f50f47a54e5208e5\ngate_created_utc=2026-10-22T21:23:53Z\n",
+      "logs/chain-i3.out": "",
+      "logs/chain-i3.pid": "3273979\n",
+      "logs/chain-i3.started": "2026-10-22T21:24:03Z\n",
+      "logs/chain-i3.stop": "stage i3-run-only260-L exited 1 (allowed: 0)\n2026-10-22T21:25:57Z\n",
+      "logs/i3-attribute-G.exit": "0\n",
+      "logs/i3-cmp-F-N-G.exit": "1\n",
+      "logs/i3-cmp-F-N-L.exit": "1\n",
+      "logs/i3-cmp-F-c1-G.exit": "1\n",
+      "logs/i3-cmp-F-c1-L.exit": "1\n",
+      "logs/i3-cmp-F-only254-G.exit": "1\n",
+      "logs/i3-cmp-F-only254-L.exit": "1\n",
+      "logs/i3-cmp-F-only260-G.exit": "1\n",
+      "logs/i3-cmp-F-only270-G.exit": "0\n",
+      "logs/i3-cmp-N-c1-G.exit": "0\n",
+      "logs/i3-cmp-only254-c1-G.exit": "1\n",
+      "logs/i3-cmp-only260-c1-G.exit": "1\n",
+      "logs/i3-cmp-only270-c1-G.exit": "1\n",
+      "logs/i3-lane-hash-G.exit": "0\n",
+      "logs/i3-lane-hash-L.exit": "0\n",
+      "logs/i3-run-F-fresh-G.exit": "0\n",
+      "logs/i3-run-F-fresh-L.exit": "0\n",
+      "logs/i3-run-N-G.exit": "0\n",
+      "logs/i3-run-N-L.exit": "0\n",
+      "logs/i3-run-c1-G.exit": "0\n",
+      "logs/i3-run-c1-L.exit": "0\n",
+      "logs/i3-run-only254-G.exit": "0\n",
+      "logs/i3-run-only254-L.exit": "0\n",
+      "logs/i3-run-only260-G.exit": "0\n",
+      "logs/i3-run-only260-L.exit": "1\n",
+      "logs/i3-run-only270-G.exit": "0\n"
+    }
+  },
+  "guard264": {
+    "root": "/mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19",
+    "receipts": {
+      "logs/b-base-cpu.exit": "0\n",
+      "logs/b-base-cuda.exit": "0\n",
+      "logs/b-cand-cpu.exit": "0\n",
+      "logs/b-cand-cuda.exit": "0\n",
+      "logs/b-cand-nvcomp.exit": "0\n",
+      "logs/ctest-cand-cpu.exit": "0\n",
+      "logs/ctest-cand-cuda.exit": "0\n",
+      "logs/ctest-cand-nvcomp.exit": "0\n",
+      "logs/health-start.exit": "0\n",
+      "logs/n2-inputs.exit": "0\n",
+      "logs/setup.exit": "setup_rc=0\n",
+      "logs/CHAIN.txt": "chain 3187170 start 2026-10-22T20:24:29Z sha=0a1f64ab3e192c3ebad57b35149d872b21331730\nhealth-start rc=0 2026-10-22T20:24:30Z\nb-cand-cpu rc=0 2026-10-22T20:28:24Z\nctest-cand-cpu rc=0 2026-10-22T20:35:01Z\nb-cand-cuda rc=0 2026-10-22T20:42:16Z\nctest-cand-cuda rc=0 2026-10-22T20:50:54Z\nb-cand-nvcomp rc=0 2026-10-22T20:58:23Z\nctest-cand-nvcomp rc=0 2026-10-22T21:07:26Z\nb-base-cpu rc=0 2026-10-22T21:09:24Z\nb-base-cuda rc=0 2026-10-22T21:11:50Z\nn2-inputs rc=0 2026-10-22T21:11:55Z\n",
+      "logs/chain.cmd": "G_SCR=/mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19 G_SHA=0a1f64ab3e192c3ebad57b35149d872b21331730 taskset -c 14-15 bash /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/src-cand/docs/post_rc0/issue264/native/tools/chain.sh\n",
+      "logs/chain.out": "",
+      "logs/chain.pid": "3187170\n",
+      "logs/chain.pid.reconciled": "launch receipt reconciled 2026-10-22T20:27:01Z: chain.pid not written (launch line backgrounded the cd, so the echo ran outside SCR).\nwrapper(setsid, writes chain.exit)=3187169 chain.sh=3187170 ssh-attached launcher subshell=3187166 (outside the setsid session; may exit on ssh hangup without affecting the chain)\n"
+    }
+  },
+  "dc": {
+    "root": "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b",
+    "receipts": {
+      "worker-cpu-10.pid": "3119417\n",
+      "worker-cpu-11.pid": "3119491\n",
+      "worker-cpu-12.pid": "3119582\n",
+      "worker-cuda-13.pid": "3119381\n"
+    },
+    "run_exit_counts": {
+      "0": 757
+    },
+    "directories_without_valid_RUN": [
+      "C-e12963-00-p5-cuda-global",
+      "B-dose1-s09-cpu-none",
+      "B-dose1-s08-cpu-local",
+      "B-dose1-s08-cpu-global"
+    ],
+    "disk": "44G\t/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs\n"
+  },
+  "gpu": {
+    "exit": 0,
+    "stdout": "0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1551 MiB, 0\n1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 425 MiB, 0\n2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 6045 MiB, 0\n3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 49737 MiB, 0\n",
+    "stderr": ""
+  },
+  "gpu_processes": {
+    "exit": 0,
+    "stdout": "3276184, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, /home/dvi41342/Software/llama.cpp/build/bin/llama-server\n3276184, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, /home/dvi41342/Software/llama.cpp/build/bin/llama-server\n3276184, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, /home/dvi41342/Software/llama.cpp/build/bin/llama-server\n3278587, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/b/cuda-exp/motioncorr\n3276184, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, /home/dvi41342/Software/llama.cpp/build/bin/llama-server\n",
+    "stderr": ""
+  },
+  "locks": {
+    "exit": 0,
+    "stdout": "3119383 python3         /tmp/motioncorr-gpu2-correctness.lock",
+    "stderr": ""
+  },
+  "processes": {
+    "exit": 0,
+    "stdout": "2291708       1 106 21-21:16:41 bash -c until grep -qE \"MPS_CAMPAIGN_DONE|FATAL\" /home/alex/mpscamp.log 2>/dev/null; do sleep 15; done echo \"MPS campaign done: $(grep -c \"^MPSARM \" /home/alex/mpscamp.log) runs\" flock -w 1800 /tmp/motioncorr-bench.lock -c \"bash /tmp/lifecycle_run.sh\" > /home/alex/life.log 2>&1 echo \"lifecycle done: $(grep -c \"^LIFE \" /home/alex/life.log) samples\"\n3119381       1  13    01:57:24 bash -c echo $$ > worker-cuda-13.pid; /home/alex/.mc-venv/bin/python3 -B tools/campaign.py worker /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b cuda 13 > worker-cuda-13.out 2>&1; echo $? > worker-cuda-13.exit\n3119383 3119381  13    01:57:24 /home/alex/.mc-venv/bin/python3 -B tools/campaign.py worker /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b cuda 13\n3119417       1  10    01:57:23 bash -c echo $$ > worker-cpu-10.pid; /home/alex/.mc-venv/bin/python3 -B tools/campaign.py worker /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b cpu 10 > worker-cpu-10.out 2>&1; echo $? > worker-cpu-10.exit\n3119420 3119417  10    01:57:23 /home/alex/.mc-venv/bin/python3 -B tools/campaign.py worker /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b cpu 10\n3119491       1  11    01:57:22 bash -c echo $$ > worker-cpu-11.pid; /home/alex/.mc-venv/bin/python3 -B tools/campaign.py worker /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b cpu 11 > worker-cpu-11.out 2>&1; echo $? > worker-cpu-11.exit\n3119494 3119491  11    01:57:22 /home/alex/.mc-venv/bin/python3 -B tools/campaign.py worker /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b cpu 11\n3119582       1  12    01:57:21 bash -c echo $$ > worker-cpu-12.pid; /home/alex/.mc-venv/bin/python3 -B tools/campaign.py worker /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b cpu 12 > worker-cpu-12.out 2>&1; echo $? > worker-cpu-12.exit\n3119584 3119582  12    01:57:21 /home/alex/.mc-venv/bin/python3 -B tools/campaign.py worker /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b cpu 12\n3187166       1  78    01:05:47 bash -c cd /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19 && test ! -e logs/chain.pid && echo 'G_SCR=/mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19 G_SHA=0a1f64ab3e192c3ebad57b35149d872b21331730 taskset -c 14-15 bash /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/src-cand/docs/post_rc0/issue264/native/tools/chain.sh' > logs/chain.cmd && setsid nohup bash -c 'G_SCR=/mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19 G_SHA=0a1f64ab3e192c3ebad57b35149d872b21331730 taskset -c 14-15 bash /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/src-cand/docs/post_rc0/issue264/native/tools/chain.sh > /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/logs/chain.out 2>&1; echo $? > /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/logs/chain.exit' < /dev/null > /dev/null 2>&1 & echo $! > logs/chain.pid; sleep 3; cat logs/chain.pid; cat logs/CHAIN.txt; cat logs/chain.out; ls logs\n3187169 3187166  80    01:05:47 bash -c G_SCR=/mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19 G_SHA=0a1f64ab3e192c3ebad57b35149d872b21331730 taskset -c 14-15 bash /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/src-cand/docs/post_rc0/issue264/native/tools/chain.sh > /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/logs/chain.out 2>&1; echo $? > /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/logs/chain.exit\n3187170 3187169  15    01:05:47 bash /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/src-cand/docs/post_rc0/issue264/native/tools/chain.sh\n3265740 3187170  14       18:21 /bin/bash /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/src-cand/docs/post_rc0/issue264/native/tools/stage.sh n2-base-cpu /home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/src-cand/docs/post_rc0/issue264/native/tools/n2.py run base-cpu /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/build-base-cpu/motioncorr cpu\n3265749 3265740  15       18:21 /home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/src-cand/docs/post_rc0/issue264/native/tools/n2.py run base-cpu /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/build-base-cpu/motioncorr cpu\n3265750 3265749  14       18:21 /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/build-base-cpu/motioncorr --i movies.star --o /mnt/clathrin/alex-motioncorr-guard264-20261022-0a1f64ab3e19/n2/base-cpu/out/ --j 1 --use_own --dose_weighting --dose_per_frame 1.277 --bfactor 150 --seed 1 --expected_frames 24 --gainref Movies/gain.mrc --patch_x 5 --patch_y 5\n3277655 3119420  10       01:56 /usr/bin/time -v -o /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s08-cpu-global/time-v.log /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/b/cpu-exp/motioncorr --i input.star --o /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s08-cpu-global/output --use_own --j 1 --patch_x 5 --patch_y 5 --group_frames 1 --bin_factor 1 --seed 1 --skip_defect --save_noDW --first_frame_sum 1 --last_frame_sum 40 --skip_logfile --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s08-cpu-global/ingest.txt\n3277656 3277655  10       01:56 /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/b/cpu-exp/motioncorr --i input.star --o /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s08-cpu-global/output --use_own --j 1 --patch_x 5 --patch_y 5 --group_frames 1 --bin_factor 1 --seed 1 --skip_defect --save_noDW --first_frame_sum 1 --last_frame_sum 40 --skip_logfile --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s08-cpu-global/ingest.txt\n3277664 3119494  11       01:55 /usr/bin/time -v -o /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s08-cpu-local/time-v.log /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/b/cpu-exp/motioncorr --i input.star --o /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s08-cpu-local/output --use_own --j 1 --patch_x 5 --patch_y 5 --group_frames 1 --bin_factor 1 --seed 1 --skip_defect --save_noDW --first_frame_sum 1 --last_frame_sum 40 --skip_logfile --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s08-cpu-local/ingest.txt\n3277665 3277664  11       01:55 /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/b/cpu-exp/motioncorr --i input.star --o /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s08-cpu-local/output --use_own --j 1 --patch_x 5 --patch_y 5 --group_frames 1 --bin_factor 1 --seed 1 --skip_defect --save_noDW --first_frame_sum 1 --last_frame_sum 40 --skip_logfile --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s08-cpu-local/ingest.txt\n3278510 3119584  12       00:12 /usr/bin/time -v -o /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s09-cpu-none/time-v.log /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/b/cpu-exp/motioncorr --i input.star --o /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s09-cpu-none/output --use_own --j 1 --patch_x 5 --patch_y 5 --group_frames 1 --bin_factor 1 --seed 1 --skip_defect --save_noDW --first_frame_sum 1 --last_frame_sum 40 --skip_logfile --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s09-cpu-none/ingest.txt\n3278511 3278510  12       00:12 /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/b/cpu-exp/motioncorr --i input.star --o /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s09-cpu-none/output --use_own --j 1 --patch_x 5 --patch_y 5 --group_frames 1 --bin_factor 1 --seed 1 --skip_defect --save_noDW --first_frame_sum 1 --last_frame_sum 40 --skip_logfile --ingest float --ingest_witness /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/B-dose1-s09-cpu-none/ingest.txt\n3278584 3119383  13       00:04 /usr/bin/time -v -o /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/C-e12963-00-p5-cuda-global/time-v.log /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/b/cuda-exp/motioncorr --use_own --dose_weighting --dose_per_frame 1.282051282051282 --bfactor 150 --seed 1 --i movies.star --o /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/C-e12963-00-p5-cuda-global/ --j 1 --patch_x 5 --patch_y 5 --expected_frames 39 --ingest_witness /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/C-e12963-00-p5-cuda-global/witness.txt --gainref gain.gain --eer_grouping 49 --eer_upsampling 1 --gpu 0 --ingest auto\n3278587 3278584  13       00:04 /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/b/cuda-exp/motioncorr --use_own --dose_weighting --dose_per_frame 1.282051282051282 --bfactor 150 --seed 1 --i movies.star --o /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/C-e12963-00-p5-cuda-global/ --j 1 --patch_x 5 --patch_y 5 --expected_frames 39 --ingest_witness /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/C-e12963-00-p5-cuda-global/witness.txt --gainref gain.gain --eer_grouping 49 --eer_upsampling 1 --gpu 0 --ingest auto",
+    "stderr": ""
+  },
+  "space": {
+    "exit": 0,
+    "stdout": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sdb        2.0T  1.5T  422G  78% /mnt/clathrin\n",
+    "stderr": ""
+  }
+}

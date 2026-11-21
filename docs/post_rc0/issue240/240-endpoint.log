@@ -1,0 +1,7 @@
+PASS worker completion followed by canonical dataset readiness/full report endpoint
+PASS failed worker withholds dataset completion
+PASS report failure after healthy worker exits cannot publish readiness
+PASS same-byte rewrite rejected by timestamp plus content identity
+PASS top-level run.tif keeps its run.log; launcher console log is a separate staged file
+PASS missing per-movie wall times are reported as missing, not as zero
+PASS coordinator argument ownership refuses alternate binary before launch

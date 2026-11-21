@@ -1,0 +1,125 @@
+{
+ "schema": "iothreads-analysis/2",
+ "supersedes_interpretation_of": "iothreads-results.json (v1, retained; its H_supported and read_phase_monotone_1_2_4_6 fields used the flagged P-c6 sample and are not valid)",
+ "flagged_runs": {
+  "P-c6": [
+   "foreign CPU on lane 0.35 cores"
+  ]
+ },
+ "unflagged_runs": [
+  "P-c1",
+  "P-c2",
+  "P-c4",
+  "T01-c6",
+  "T02-c1",
+  "T03-c1",
+  "T04-c6",
+  "T05-c6",
+  "T06-c2",
+  "T07-c2",
+  "T08-c6",
+  "T09-c6",
+  "T10-c4",
+  "T11-c4",
+  "T12-c6",
+  "W"
+ ],
+ "unprofiled_whole_job_effects": {
+  "status": "REPORTED (criteria (a) repeat side and (b) deviation > observed AA satisfied for caps 1, 2, 4; no run flagged)",
+  "observed_AA_max_pct": 2.5,
+  "observed_AA_pct": {
+   "B(T04,T05)": 1.05,
+   "B(T08,T09)": 2.5,
+   "c1": 2.09,
+   "c2": 0.85,
+   "c4": 0.37
+  },
+  "variants": {
+   "c1": {
+    "runs_flagged": [],
+    "mean_wall_s": 6.10543888900429,
+    "block_baseline_mean_s": 2.727535964921117,
+    "pair_ratio": 2.2384448702148885,
+    "deviation_pct": 123.8,
+    "repeat_side_both_runs_vs_both_adjacent_baselines": true,
+    "exceeds_max_observed_AA": true
+   },
+   "c2": {
+    "runs_flagged": [],
+    "mean_wall_s": 4.196620491333306,
+    "block_baseline_mean_s": 2.6776611525565386,
+    "pair_ratio": 1.5672709324428586,
+    "deviation_pct": 56.7,
+    "repeat_side_both_runs_vs_both_adjacent_baselines": true,
+    "exceeds_max_observed_AA": true
+   },
+   "c4": {
+    "runs_flagged": [],
+    "mean_wall_s": 2.941153734922409,
+    "block_baseline_mean_s": 2.7217280492186546,
+    "pair_ratio": 1.0806199891156454,
+    "deviation_pct": 8.1,
+    "repeat_side_both_runs_vs_both_adjacent_baselines": true,
+    "exceeds_max_observed_AA": true
+   }
+  }
+ },
+ "profile_samples": {
+  "1": {
+   "flagged": [],
+   "read_wall_ms": 4392.251087,
+   "read_share": 0.799
+  },
+  "2": {
+   "flagged": [],
+   "read_wall_ms": 2805.072382,
+   "read_share": 0.741
+  },
+  "4": {
+   "flagged": [],
+   "read_wall_ms": 1567.625429,
+   "read_share": 0.618
+  },
+  "6": {
+   "flagged": [
+    "foreign CPU on lane 0.35 cores"
+   ],
+   "read_wall_ms": 1288.065074,
+   "read_share": 0.564
+  }
+ },
+ "phase_descriptive_unflagged_caps_1_2_4": {
+  "read_wall_ms": {
+   "1": 4392.251087,
+   "2": 2805.072382,
+   "4": 1567.625429
+  },
+  "monotone_among_themselves": true,
+  "note": "descriptive single samples; not a contrast against a baseline"
+ },
+ "phase_comparison_with_cap6_baseline": "UNASSESSED: the in-series baseline profile sample (P-c6) is flagged and lost its timing claim; full 1/2/4/6 monotonicity is unassessed",
+ "posthoc_context_only": {
+  "earlier_window_baseline_P1_read_ms": 1313.183594,
+  "label": "post hoc context from another measurement window (same configuration, unflagged); NOT a replacement primary measurement and not part of the frozen rule",
+  "ratios_of_caps_1_2_4_read_phase_to_it": {
+   "1": 3.34,
+   "2": 2.14,
+   "4": 1.19
+  }
+ },
+ "combined_hypothesis_H": {
+  "verdict": "INCONCLUSIVE",
+  "reason": "criterion (c), the read-phase contrast against the baseline profile sample, has a flagged reference (P-c6); (a) and (b) alone are met by the unprofiled runs",
+  "v1_H_supported_withdrawn": true
+ },
+ "checks": {
+  "failures_in_17_processes": 0
+ },
+ "unrun": [
+  "cold cache",
+  "other formats and routes",
+  "worker layouts",
+  "caps above 6",
+  "a clean baseline profile sample (not rerun: the plan forbids reruns to obtain a pass)"
+ ]
+}

@@ -1,0 +1,20 @@
+{
+  "utc": "2026-10-25T18:50:54.990489+00:00",
+  "kind": "read-only versioned dataset archive grade; old native FAIL retained",
+  "namespace": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/dataset-G-archive-regrade-v1-20261025",
+  "helper_sha256": "0aa15842ce1aef0ae5765b8efa94220d70ee05e8b5853b84253023660350cad8",
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "4GPUs",
+    "export C1_SCR=/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb C1_SHA=e77a51a220cb0d91f4ac3c7fac211876d0c6833f C1_T24_DIR=t24-i6-20261025 C1_TOOLS=/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-v2.4-run PYTHONDONTWRITEBYTECODE=1; source /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-v2.4-run/c1_env.sh && flock -n /tmp/motioncorr-c1-cpu8-9.lock taskset -c 8-9 /usr/bin/timeout --signal=TERM --kill-after=5s 120s \"$C1_PY\" -I -B /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/dataset-G-archive-regrade-v1-20261025/c1_ds_archive_regrade.py /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-i6-20261025/c1-ds-G --out-dir /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/dataset-G-archive-regrade-v1-20261025/grade"
+  ],
+  "parent_review": "source/archive contract and scoped comparator filter reviewed; four local synthetic control groups independently PASS; Linux negative harness not rerun",
+  "new_native_jobs": 0,
+  "exit": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/dataset-G-archive-regrade-v1-20261025/c1_ds_archive_regrade.py\", line 196, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/dataset-G-archive-regrade-v1-20261025/c1_ds_archive_regrade.py\", line 132, in main\n    cot = load_module('compare_output_trees_ro', t24.CMP)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/dataset-G-archive-regrade-v1-20261025/c1_ds_archive_regrade.py\", line 119, in load_module\n    spec = importlib.util.spec_from_file_location(name, path); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m); return m\n                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap_external>\", line 995, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/docs/issue85_laneC/compare_output_trees.py\", line 63, in <module>\n    @dataclass(frozen=True)\n     ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/dataclasses.py\", line 1258, in wrap\n    return _process_class(cls, init, repr, eq, order, unsafe_hash,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/dataclasses.py\", line 983, in _process_class\n    and _is_type(type, cls, dataclasses, dataclasses.KW_ONLY,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/dataclasses.py\", line 749, in _is_type\n    ns = sys.modules.get(cls.__module__).__dict__\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'NoneType' object has no attribute '__dict__'. Did you mean: '__dir__'?\n"
+}

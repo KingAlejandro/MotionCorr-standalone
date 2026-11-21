@@ -1,0 +1,4196 @@
+{
+ "window_ns": [
+  576406929,
+  3466314917
+ ],
+ "span_ns": 2889907988,
+ "totals": {
+  "busy_ns": 516069927,
+  "idle_ns": 2373838061,
+  "kernel_sum_ns": 83505623,
+  "kernel_union_ns": 83505623,
+  "copy_sum_ns": 432502192,
+  "copy_union_ns": 432502192,
+  "overlap_ns": 0,
+  "kernels": 749,
+  "copies": 143,
+  "memsets": 13,
+  "copy_bytes": 5448052832,
+  "movies": 1,
+  "streams_with_kernels": 1
+ },
+ "stages": {
+  "before first movie": {
+   "kind": "outside",
+   "segments": 1,
+   "wall_ns": {
+    "sum": 3941833
+   },
+   "busy_ns": {
+    "sum": 0
+   },
+   "idle_ns": {
+    "sum": 3941833
+   },
+   "kernel_busy_ns": {
+    "sum": 0
+   },
+   "copy_busy_ns": {
+    "sum": 0
+   },
+   "idle_intervals": {
+    "sum": 1
+   },
+   "kernels": {
+    "sum": 0
+   },
+   "malloc": {
+    "sum": 0
+   },
+   "free": {
+    "sum": 0
+   },
+   "pinned_malloc": {
+    "sum": 0
+   },
+   "sync_calls": {
+    "sum": 0
+   },
+   "sync_blocked_idle_ns": {
+    "sum": 0
+   },
+   "copy_bytes": {
+    "sum": 0
+   },
+   "pageable_copies": {
+    "sum": 0
+   },
+   "mem_peak_bytes": 0
+  },
+  "movie: unattributed": {
+   "kind": "unattributed",
+   "segments": 19,
+   "wall_ns": {
+    "per_movie": [
+     276015
+    ],
+    "sum": 276015,
+    "first": 276015,
+    "steady_median": 276015,
+    "steady_sum": 276015
+   },
+   "busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_ns": {
+    "per_movie": [
+     276015
+    ],
+    "sum": 276015,
+    "first": 276015,
+    "steady_median": 276015,
+    "steady_sum": 276015
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_intervals": {
+    "per_movie": [
+     19
+    ],
+    "sum": 19,
+    "first": 19,
+    "steady_median": 19,
+    "steady_sum": 19
+   },
+   "kernels": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_bytes": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 5935470512
+  },
+  "setup": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     457599
+    ],
+    "sum": 457599,
+    "first": 457599,
+    "steady_median": 457599,
+    "steady_sum": 457599
+   },
+   "busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_ns": {
+    "per_movie": [
+     457599
+    ],
+    "sum": 457599,
+    "first": 457599,
+    "steady_median": 457599,
+    "steady_sum": 457599
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_intervals": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "kernels": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_bytes": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 0
+  },
+  "read gain": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     68165
+    ],
+    "sum": 68165,
+    "first": 68165,
+    "steady_median": 68165,
+    "steady_sum": 68165
+   },
+   "busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_ns": {
+    "per_movie": [
+     68165
+    ],
+    "sum": 68165,
+    "first": 68165,
+    "steady_median": 68165,
+    "steady_sum": 68165
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_intervals": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "kernels": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_bytes": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 0
+  },
+  "session and device ingest": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     176481547
+    ],
+    "sum": 176481547,
+    "first": 176481547,
+    "steady_median": 176481547,
+    "steady_sum": 176481547
+   },
+   "busy_ns": {
+    "per_movie": [
+     1664936
+    ],
+    "sum": 1664936,
+    "first": 1664936,
+    "steady_median": 1664936,
+    "steady_sum": 1664936
+   },
+   "idle_ns": {
+    "per_movie": [
+     174816611
+    ],
+    "sum": 174816611,
+    "first": 174816611,
+    "steady_median": 174816611,
+    "steady_sum": 174816611
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     1664936
+    ],
+    "sum": 1664936,
+    "first": 1664936,
+    "steady_median": 1664936,
+    "steady_sum": 1664936
+   },
+   "idle_intervals": {
+    "per_movie": [
+     6
+    ],
+    "sum": 6,
+    "first": 6,
+    "steady_median": 6,
+    "steady_sum": 6
+   },
+   "kernels": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "malloc": {
+    "per_movie": [
+     6
+    ],
+    "sum": 6,
+    "first": 6,
+    "steady_median": 6,
+    "steady_sum": 6
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     5
+    ],
+    "sum": 5,
+    "first": 5,
+    "steady_median": 5,
+    "steady_sum": 5
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     541431
+    ],
+    "sum": 541431,
+    "first": 541431,
+    "steady_median": 541431,
+    "steady_sum": 541431
+   },
+   "copy_bytes": {
+    "per_movie": [
+     6811536
+    ],
+    "sum": 6811536,
+    "first": 6811536,
+    "steady_median": 6811536,
+    "steady_sum": 6811536
+   },
+   "pageable_copies": {
+    "per_movie": [
+     5
+    ],
+    "sum": 5,
+    "first": 5,
+    "steady_median": 5,
+    "steady_sum": 5
+   },
+   "mem_peak_bytes": 5578223536
+  },
+  "host read movie": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     1277926699
+    ],
+    "sum": 1277926699,
+    "first": 1277926699,
+    "steady_median": 1277926699,
+    "steady_sum": 1277926699
+   },
+   "busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_ns": {
+    "per_movie": [
+     1277926699
+    ],
+    "sum": 1277926699,
+    "first": 1277926699,
+    "steady_median": 1277926699,
+    "steady_sum": 1277926699
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_intervals": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "kernels": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_bytes": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 5578223536
+  },
+  "allocate host sum": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     29612
+    ],
+    "sum": 29612,
+    "first": 29612,
+    "steady_median": 29612,
+    "steady_sum": 29612
+   },
+   "busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_ns": {
+    "per_movie": [
+     29612
+    ],
+    "sum": 29612,
+    "first": 29612,
+    "steady_median": 29612,
+    "steady_sum": 29612
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_intervals": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "kernels": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_bytes": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 5578223536
+  },
+  "gain and sum": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     434139994
+    ],
+    "sum": 434139994,
+    "first": 434139994,
+    "steady_median": 434139994,
+    "steady_sum": 434139994
+   },
+   "busy_ns": {
+    "per_movie": [
+     421581914
+    ],
+    "sum": 421581914,
+    "first": 421581914,
+    "steady_median": 421581914,
+    "steady_sum": 421581914
+   },
+   "idle_ns": {
+    "per_movie": [
+     12558080
+    ],
+    "sum": 12558080,
+    "first": 12558080,
+    "steady_median": 12558080,
+    "steady_sum": 12558080
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     1758920
+    ],
+    "sum": 1758920,
+    "first": 1758920,
+    "steady_median": 1758920,
+    "steady_sum": 1758920
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     419822994
+    ],
+    "sum": 419822994,
+    "first": 419822994,
+    "steady_median": 419822994,
+    "steady_sum": 419822994
+   },
+   "idle_intervals": {
+    "per_movie": [
+     42
+    ],
+    "sum": 42,
+    "first": 42,
+    "steady_median": 42,
+    "steady_sum": 42
+   },
+   "kernels": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     41
+    ],
+    "sum": 41,
+    "first": 41,
+    "steady_median": 41,
+    "steady_sum": 41
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     10698727
+    ],
+    "sum": 10698727,
+    "first": 10698727,
+    "steady_median": 10698727,
+    "steady_sum": 10698727
+   },
+   "copy_bytes": {
+    "per_movie": [
+     2684354560
+    ],
+    "sum": 2684354560,
+    "first": 2684354560,
+    "steady_median": 2684354560,
+    "steady_sum": 2684354560
+   },
+   "pageable_copies": {
+    "per_movie": [
+     40
+    ],
+    "sum": 40,
+    "first": 40,
+    "steady_median": 40,
+    "steady_sum": 40
+   },
+   "mem_peak_bytes": 5578223536
+  },
+  "release preprocessing": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     20022892
+    ],
+    "sum": 20022892,
+    "first": 20022892,
+    "steady_median": 20022892,
+    "steady_sum": 20022892
+   },
+   "busy_ns": {
+    "per_movie": [
+     691363
+    ],
+    "sum": 691363,
+    "first": 691363,
+    "steady_median": 691363,
+    "steady_sum": 691363
+   },
+   "idle_ns": {
+    "per_movie": [
+     19331529
+    ],
+    "sum": 19331529,
+    "first": 19331529,
+    "steady_median": 19331529,
+    "steady_sum": 19331529
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     122720
+    ],
+    "sum": 122720,
+    "first": 122720,
+    "steady_median": 122720,
+    "steady_sum": 122720
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     556227
+    ],
+    "sum": 556227,
+    "first": 556227,
+    "steady_median": 556227,
+    "steady_sum": 556227
+   },
+   "idle_intervals": {
+    "per_movie": [
+     31
+    ],
+    "sum": 31,
+    "first": 31,
+    "steady_median": 31,
+    "steady_sum": 31
+   },
+   "kernels": {
+    "per_movie": [
+     15
+    ],
+    "sum": 15,
+    "first": 15,
+    "steady_median": 15,
+    "steady_sum": 15
+   },
+   "malloc": {
+    "per_movie": [
+     16
+    ],
+    "sum": 16,
+    "first": 16,
+    "steady_median": 16,
+    "steady_sum": 16
+   },
+   "free": {
+    "per_movie": [
+     16
+    ],
+    "sum": 16,
+    "first": 16,
+    "steady_median": 16,
+    "steady_sum": 16
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     35
+    ],
+    "sum": 35,
+    "first": 35,
+    "steady_median": 35,
+    "steady_sum": 35
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     2217863
+    ],
+    "sum": 2217863,
+    "first": 2217863,
+    "steady_median": 2217863,
+    "steady_sum": 2217863
+   },
+   "copy_bytes": {
+    "per_movie": [
+     4075072
+    ],
+    "sum": 4075072,
+    "first": 4075072,
+    "steady_median": 4075072,
+    "steady_sum": 4075072
+   },
+   "pageable_copies": {
+    "per_movie": [
+     9
+    ],
+    "sum": 9,
+    "first": 9,
+    "steady_median": 9,
+    "steady_sum": 9
+   },
+   "mem_peak_bytes": 5578223536
+  },
+  "global fft": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     14979804
+    ],
+    "sum": 14979804,
+    "first": 14979804,
+    "steady_median": 14979804,
+    "steady_sum": 14979804
+   },
+   "busy_ns": {
+    "per_movie": [
+     14674307
+    ],
+    "sum": 14674307,
+    "first": 14674307,
+    "steady_median": 14674307,
+    "steady_sum": 14674307
+   },
+   "idle_ns": {
+    "per_movie": [
+     305497
+    ],
+    "sum": 305497,
+    "first": 305497,
+    "steady_median": 305497,
+    "steady_sum": 305497
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     14674307
+    ],
+    "sum": 14674307,
+    "first": 14674307,
+    "steady_median": 14674307,
+    "steady_sum": 14674307
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_intervals": {
+    "per_movie": [
+     82
+    ],
+    "sum": 82,
+    "first": 82,
+    "steady_median": 82,
+    "steady_sum": 82
+   },
+   "kernels": {
+    "per_movie": [
+     81
+    ],
+    "sum": 81,
+    "first": 81,
+    "steady_median": 81,
+    "steady_sum": 81
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     94313
+    ],
+    "sum": 94313,
+    "first": 94313,
+    "steady_median": 94313,
+    "steady_sum": 94313
+   },
+   "copy_bytes": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 5515189744
+  },
+  "power spectrum": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     79898
+    ],
+    "sum": 79898,
+    "first": 79898,
+    "steady_median": 79898,
+    "steady_sum": 79898
+   },
+   "busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_ns": {
+    "per_movie": [
+     79898
+    ],
+    "sum": 79898,
+    "first": 79898,
+    "steady_median": 79898,
+    "steady_sum": 79898
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_intervals": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "kernels": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_bytes": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 5515189744
+  },
+  "global alignment": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     14183057
+    ],
+    "sum": 14183057,
+    "first": 14183057,
+    "steady_median": 14183057,
+    "steady_sum": 14183057
+   },
+   "busy_ns": {
+    "per_movie": [
+     10461198
+    ],
+    "sum": 10461198,
+    "first": 10461198,
+    "steady_median": 10461198,
+    "steady_sum": 10461198
+   },
+   "idle_ns": {
+    "per_movie": [
+     3721859
+    ],
+    "sum": 3721859,
+    "first": 3721859,
+    "steady_median": 3721859,
+    "steady_sum": 3721859
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     10446702
+    ],
+    "sum": 10446702,
+    "first": 10446702,
+    "steady_median": 10446702,
+    "steady_sum": 10446702
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     14496
+    ],
+    "sum": 14496,
+    "first": 14496,
+    "steady_median": 14496,
+    "steady_sum": 14496
+   },
+   "idle_intervals": {
+    "per_movie": [
+     26
+    ],
+    "sum": 26,
+    "first": 26,
+    "steady_median": 26,
+    "steady_sum": 26
+   },
+   "kernels": {
+    "per_movie": [
+     15
+    ],
+    "sum": 15,
+    "first": 15,
+    "steady_median": 15,
+    "steady_sum": 15
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     11
+    ],
+    "sum": 11,
+    "first": 11,
+    "steady_median": 11,
+    "steady_sum": 11
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     406698
+    ],
+    "sum": 406698,
+    "first": 406698,
+    "steady_median": 406698,
+    "steady_sum": 406698
+   },
+   "copy_bytes": {
+    "per_movie": [
+     1296
+    ],
+    "sum": 1296,
+    "first": 1296,
+    "steady_median": 1296,
+    "steady_sum": 1296
+   },
+   "pageable_copies": {
+    "per_movie": [
+     10
+    ],
+    "sum": 10,
+    "first": 10,
+    "steady_median": 10,
+    "steady_sum": 10
+   },
+   "mem_peak_bytes": 5515189744
+  },
+  "allocate reconstruction": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     22908
+    ],
+    "sum": 22908,
+    "first": 22908,
+    "steady_median": 22908,
+    "steady_sum": 22908
+   },
+   "busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_ns": {
+    "per_movie": [
+     22908
+    ],
+    "sum": 22908,
+    "first": 22908,
+    "steady_median": 22908,
+    "steady_sum": 22908
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_intervals": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "kernels": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_bytes": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 5515189744
+  },
+  "global ifft": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     14950751
+    ],
+    "sum": 14950751,
+    "first": 14950751,
+    "steady_median": 14950751,
+    "steady_sum": 14950751
+   },
+   "busy_ns": {
+    "per_movie": [
+     14453987
+    ],
+    "sum": 14453987,
+    "first": 14453987,
+    "steady_median": 14453987,
+    "steady_sum": 14453987
+   },
+   "idle_ns": {
+    "per_movie": [
+     496764
+    ],
+    "sum": 496764,
+    "first": 496764,
+    "steady_median": 496764,
+    "steady_sum": 496764
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     11034128
+    ],
+    "sum": 11034128,
+    "first": 11034128,
+    "steady_median": 11034128,
+    "steady_sum": 11034128
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     3419859
+    ],
+    "sum": 3419859,
+    "first": 3419859,
+    "steady_median": 3419859,
+    "steady_sum": 3419859
+   },
+   "idle_intervals": {
+    "per_movie": [
+     161
+    ],
+    "sum": 161,
+    "first": 161,
+    "steady_median": 161,
+    "steady_sum": 161
+   },
+   "kernels": {
+    "per_movie": [
+     120
+    ],
+    "sum": 120,
+    "first": 120,
+    "steady_median": 120,
+    "steady_sum": 120
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     41
+    ],
+    "sum": 41,
+    "first": 41,
+    "steady_median": 41,
+    "steady_sum": 41
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     172940
+    ],
+    "sum": 172940,
+    "first": 172940,
+    "steady_median": 172940,
+    "steady_sum": 172940
+   },
+   "copy_bytes": {
+    "per_movie": [
+     2685665280
+    ],
+    "sum": 2685665280,
+    "first": 2685665280,
+    "steady_median": 2685665280,
+    "steady_sum": 2685665280
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 5515189744
+  },
+  "patch alignment": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     67140790
+    ],
+    "sum": 67140790,
+    "first": 67140790,
+    "steady_median": 67140790,
+    "steady_sum": 67140790
+   },
+   "busy_ns": {
+    "per_movie": [
+     36112003
+    ],
+    "sum": 36112003,
+    "first": 36112003,
+    "steady_median": 36112003,
+    "steady_sum": 36112003
+   },
+   "idle_ns": {
+    "per_movie": [
+     31028787
+    ],
+    "sum": 31028787,
+    "first": 31028787,
+    "steady_median": 31028787,
+    "steady_sum": 31028787
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     36045635
+    ],
+    "sum": 36045635,
+    "first": 36045635,
+    "steady_median": 36045635,
+    "steady_sum": 36045635
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     54272
+    ],
+    "sum": 54272,
+    "first": 54272,
+    "steady_median": 54272,
+    "steady_sum": 54272
+   },
+   "idle_intervals": {
+    "per_movie": [
+     522
+    ],
+    "sum": 522,
+    "first": 522,
+    "steady_median": 522,
+    "steady_sum": 522
+   },
+   "kernels": {
+    "per_movie": [
+     477
+    ],
+    "sum": 477,
+    "first": 477,
+    "steady_median": 477,
+    "steady_sum": 477
+   },
+   "malloc": {
+    "per_movie": [
+     28
+    ],
+    "sum": 28,
+    "first": 28,
+    "steady_median": 28,
+    "steady_sum": 28
+   },
+   "free": {
+    "per_movie": [
+     9
+    ],
+    "sum": 9,
+    "first": 9,
+    "steady_median": 9,
+    "steady_sum": 9
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     63
+    ],
+    "sum": 63,
+    "first": 63,
+    "steady_median": 63,
+    "steady_sum": 63
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     2623464
+    ],
+    "sum": 2623464,
+    "first": 2623464,
+    "steady_median": 2623464,
+    "steady_sum": 2623464
+   },
+   "copy_bytes": {
+    "per_movie": [
+     36224
+    ],
+    "sum": 36224,
+    "first": 36224,
+    "steady_median": 36224,
+    "steady_sum": 36224
+   },
+   "pageable_copies": {
+    "per_movie": [
+     38
+    ],
+    "sum": 38,
+    "first": 38,
+    "steady_median": 38,
+    "steady_sum": 38
+   },
+   "mem_peak_bytes": 5935470512
+  },
+  "fit polynomial": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     2727436
+    ],
+    "sum": 2727436,
+    "first": 2727436,
+    "steady_median": 2727436,
+    "steady_sum": 2727436
+   },
+   "busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_ns": {
+    "per_movie": [
+     2727436
+    ],
+    "sum": 2727436,
+    "first": 2727436,
+    "steady_median": 2727436,
+    "steady_sum": 2727436
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_intervals": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "kernels": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_bytes": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 5935470512
+  },
+  "release alignment": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     3662748
+    ],
+    "sum": 3662748,
+    "first": 3662748,
+    "steady_median": 3662748,
+    "steady_sum": 3662748
+   },
+   "busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_ns": {
+    "per_movie": [
+     3662748
+    ],
+    "sum": 3662748,
+    "first": 3662748,
+    "steady_median": 3662748,
+    "steady_sum": 3662748
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_intervals": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "kernels": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     19
+    ],
+    "sum": 19,
+    "first": 19,
+    "steady_median": 19,
+    "steady_sum": 19
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     20
+    ],
+    "sum": 20,
+    "first": 20,
+    "steady_median": 20,
+    "steady_sum": 20
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     2554229
+    ],
+    "sum": 2554229,
+    "first": 2554229,
+    "steady_median": 2554229,
+    "steady_sum": 2554229
+   },
+   "copy_bytes": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 5935470512
+  },
+  "unweighted sums": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     159147817
+    ],
+    "sum": 159147817,
+    "first": 159147817,
+    "steady_median": 159147817,
+    "steady_sum": 159147817
+   },
+   "busy_ns": {
+    "per_movie": [
+     16430219
+    ],
+    "sum": 16430219,
+    "first": 16430219,
+    "steady_median": 16430219,
+    "steady_sum": 16430219
+   },
+   "idle_ns": {
+    "per_movie": [
+     142717598
+    ],
+    "sum": 142717598,
+    "first": 142717598,
+    "steady_median": 142717598,
+    "steady_sum": 142717598
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     9423211
+    ],
+    "sum": 9423211,
+    "first": 9423211,
+    "steady_median": 9423211,
+    "steady_sum": 9423211
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     6969408
+    ],
+    "sum": 6969408,
+    "first": 6969408,
+    "steady_median": 6969408,
+    "steady_sum": 6969408
+   },
+   "idle_intervals": {
+    "per_movie": [
+     43
+    ],
+    "sum": 43,
+    "first": 43,
+    "steady_median": 43,
+    "steady_sum": 43
+   },
+   "kernels": {
+    "per_movie": [
+     40
+    ],
+    "sum": 40,
+    "first": 40,
+    "steady_median": 40,
+    "steady_sum": 40
+   },
+   "malloc": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "free": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     3
+    ],
+    "sum": 3,
+    "first": 3,
+    "steady_median": 3,
+    "steady_sum": 3
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     674183
+    ],
+    "sum": 674183,
+    "first": 674183,
+    "steady_median": 674183,
+    "steady_sum": 674183
+   },
+   "copy_bytes": {
+    "per_movie": [
+     67108864
+    ],
+    "sum": 67108864,
+    "first": 67108864,
+    "steady_median": 67108864,
+    "steady_sum": 67108864
+   },
+   "pageable_copies": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "mem_peak_bytes": 5582298640
+  },
+  "movie teardown": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     359071957
+    ],
+    "sum": 359071957,
+    "first": 359071957,
+    "steady_median": 359071957,
+    "steady_sum": 359071957
+   },
+   "busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_ns": {
+    "per_movie": [
+     359071957
+    ],
+    "sum": 359071957,
+    "first": 359071957,
+    "steady_median": 359071957,
+    "steady_sum": 359071957
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_intervals": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "kernels": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     42463
+    ],
+    "sum": 42463,
+    "first": 42463,
+    "steady_median": 42463,
+    "steady_sum": 42463
+   },
+   "copy_bytes": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 5515189776
+  },
+  "submit model and plot": {
+   "kind": "stage",
+   "segments": 1,
+   "wall_ns": {
+    "per_movie": [
+     219860
+    ],
+    "sum": 219860,
+    "first": 219860,
+    "steady_median": 219860,
+    "steady_sum": 219860
+   },
+   "busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_ns": {
+    "per_movie": [
+     219860
+    ],
+    "sum": 219860,
+    "first": 219860,
+    "steady_median": 219860,
+    "steady_sum": 219860
+   },
+   "kernel_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_busy_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "idle_intervals": {
+    "per_movie": [
+     1
+    ],
+    "sum": 1,
+    "first": 1,
+    "steady_median": 1,
+    "steady_sum": 1
+   },
+   "kernels": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "free": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pinned_malloc": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_calls": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "sync_blocked_idle_ns": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "copy_bytes": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "pageable_copies": {
+    "per_movie": [
+     0
+    ],
+    "sum": 0,
+    "first": 0,
+    "steady_median": 0,
+    "steady_sum": 0
+   },
+   "mem_peak_bytes": 5515189776
+  },
+  "after last movie": {
+   "kind": "outside",
+   "segments": 1,
+   "wall_ns": {
+    "sum": 340376606
+   },
+   "busy_ns": {
+    "sum": 0
+   },
+   "idle_ns": {
+    "sum": 340376606
+   },
+   "kernel_busy_ns": {
+    "sum": 0
+   },
+   "copy_busy_ns": {
+    "sum": 0
+   },
+   "idle_intervals": {
+    "sum": 1
+   },
+   "kernels": {
+    "sum": 0
+   },
+   "malloc": {
+    "sum": 0
+   },
+   "free": {
+    "sum": 6
+   },
+   "pinned_malloc": {
+    "sum": 0
+   },
+   "sync_calls": {
+    "sum": 6
+   },
+   "sync_blocked_idle_ns": {
+    "sum": 5635621
+   },
+   "copy_bytes": {
+    "sum": 0
+   },
+   "pageable_copies": {
+    "sum": 0
+   },
+   "mem_peak_bytes": 5515189776
+  }
+ },
+ "copies_by_stage": {
+  "session and device ingest": {
+   "Host-to-Device Pageable->Device": {
+    "n": 5,
+    "bytes": 6811536,
+    "device_ns": 1664936
+   }
+  },
+  "gain and sum": {
+   "Host-to-Device Pageable->Device": {
+    "n": 40,
+    "bytes": 2684354560,
+    "device_ns": 419822994
+   }
+  },
+  "release preprocessing": {
+   "Host-to-Device Pageable->Device": {
+    "n": 9,
+    "bytes": 4075072,
+    "device_ns": 556227
+   }
+  },
+  "global alignment": {
+   "Device-to-Host Device->Pageable": {
+    "n": 4,
+    "bytes": 640,
+    "device_ns": 8384
+   },
+   "Host-to-Device Pageable->Device": {
+    "n": 6,
+    "bytes": 656,
+    "device_ns": 6112
+   }
+  },
+  "global ifft": {
+   "Device-to-Device Device->Device": {
+    "n": 40,
+    "bytes": 2685665280,
+    "device_ns": 3419859
+   }
+  },
+  "patch alignment": {
+   "Device-to-Host Device->Pageable": {
+    "n": 14,
+    "bytes": 17920,
+    "device_ns": 28160
+   },
+   "Host-to-Device Pageable->Device": {
+    "n": 24,
+    "bytes": 18304,
+    "device_ns": 26112
+   }
+  },
+  "unweighted sums": {
+   "Device-to-Host Device->Pageable": {
+    "n": 1,
+    "bytes": 67108864,
+    "device_ns": 6969408
+   }
+  }
+ },
+ "syncs_by_stage": {
+  "session and device ingest": {
+   "synchronous memcpy": {
+    "n": 5,
+    "host_ns": 2188262,
+    "device_busy_ns": 1646831,
+    "blocked_idle_ns": 541431
+   }
+  },
+  "gain and sum": {
+   "device sync": {
+    "n": 1,
+    "host_ns": 1735412,
+    "device_busy_ns": 1703885,
+    "blocked_idle_ns": 31527
+   },
+   "synchronous memcpy": {
+    "n": 40,
+    "host_ns": 430332815,
+    "device_busy_ns": 419665615,
+    "blocked_idle_ns": 10667200
+   }
+  },
+  "release preprocessing": {
+   "device sync": {
+    "n": 10,
+    "host_ns": 440277,
+    "device_busy_ns": 0,
+    "blocked_idle_ns": 440277
+   },
+   "free (implicit sync)": {
+    "n": 16,
+    "host_ns": 1291502,
+    "device_busy_ns": 0,
+    "blocked_idle_ns": 1291502
+   },
+   "synchronous memcpy": {
+    "n": 9,
+    "host_ns": 1016330,
+    "device_busy_ns": 530246,
+    "blocked_idle_ns": 486084
+   }
+  },
+  "global fft": {
+   "device sync": {
+    "n": 1,
+    "host_ns": 11540828,
+    "device_busy_ns": 11446515,
+    "blocked_idle_ns": 94313
+   }
+  },
+  "global alignment": {
+   "event sync": {
+    "n": 1,
+    "host_ns": 4325959,
+    "device_busy_ns": 4302245,
+    "blocked_idle_ns": 23714
+   },
+   "synchronous memcpy": {
+    "n": 10,
+    "host_ns": 5734794,
+    "device_busy_ns": 5351810,
+    "blocked_idle_ns": 382984
+   }
+  },
+  "global ifft": {
+   "device sync": {
+    "n": 1,
+    "host_ns": 6948354,
+    "device_busy_ns": 6840219,
+    "blocked_idle_ns": 108135
+   },
+   "synchronous memcpy": {
+    "n": 40,
+    "host_ns": 1752734,
+    "device_busy_ns": 1687929,
+    "blocked_idle_ns": 64805
+   }
+  },
+  "patch alignment": {
+   "device sync": {
+    "n": 9,
+    "host_ns": 349206,
+    "device_busy_ns": 0,
+    "blocked_idle_ns": 349206
+   },
+   "event sync": {
+    "n": 7,
+    "host_ns": 268189,
+    "device_busy_ns": 0,
+    "blocked_idle_ns": 268189
+   },
+   "free (implicit sync)": {
+    "n": 9,
+    "host_ns": 351719,
+    "device_busy_ns": 0,
+    "blocked_idle_ns": 351719
+   },
+   "synchronous memcpy": {
+    "n": 38,
+    "host_ns": 21369433,
+    "device_busy_ns": 19715083,
+    "blocked_idle_ns": 1654350
+   }
+  },
+  "release alignment": {
+   "device sync": {
+    "n": 1,
+    "host_ns": 36596,
+    "device_busy_ns": 0,
+    "blocked_idle_ns": 36596
+   },
+   "free (implicit sync)": {
+    "n": 19,
+    "host_ns": 2517633,
+    "device_busy_ns": 0,
+    "blocked_idle_ns": 2517633
+   }
+  },
+  "unweighted sums": {
+   "event sync": {
+    "n": 1,
+    "host_ns": 43022,
+    "device_busy_ns": 0,
+    "blocked_idle_ns": 43022
+   },
+   "free (implicit sync)": {
+    "n": 1,
+    "host_ns": 419884,
+    "device_busy_ns": 0,
+    "blocked_idle_ns": 419884
+   },
+   "synchronous memcpy": {
+    "n": 1,
+    "host_ns": 14415767,
+    "device_busy_ns": 14204490,
+    "blocked_idle_ns": 211277
+   }
+  },
+  "movie teardown": {
+   "device sync": {
+    "n": 1,
+    "host_ns": 42463,
+    "device_busy_ns": 0,
+    "blocked_idle_ns": 42463
+   }
+  },
+  "after last movie": {
+   "free (implicit sync)": {
+    "n": 6,
+    "host_ns": 5635621,
+    "device_busy_ns": 0,
+    "blocked_idle_ns": 5635621
+   }
+  }
+ },
+ "apis": {
+  "cudaMemcpy": {
+   "n": 119,
+   "host_ns": 473241530,
+   "device_busy_ns": 460614719,
+   "class": "synchronous memcpy"
+  },
+  "cudaDeviceSynchronize": {
+   "n": 6,
+   "host_ns": 20343881,
+   "device_busy_ns": 19990619,
+   "class": "device sync"
+  },
+  "cuModuleLoadData": {
+   "n": 54,
+   "host_ns": 18395599,
+   "device_busy_ns": null,
+   "class": null
+  },
+  "cudaLaunchKernel": {
+   "n": 384,
+   "host_ns": 11862650,
+   "device_busy_ns": null,
+   "class": "launch"
+  },
+  "cuLaunchKernel": {
+   "n": 365,
+   "host_ns": 9429105,
+   "device_busy_ns": null,
+   "class": "launch"
+  },
+  "cudaFree": {
+   "n": 17,
+   "host_ns": 7653468,
+   "device_busy_ns": 0,
+   "class": "free (implicit sync)"
+  },
+  "cudaMalloc": {
+   "n": 17,
+   "host_ns": 5296750,
+   "device_busy_ns": null,
+   "class": "device malloc"
+  },
+  "cudaEventSynchronize": {
+   "n": 9,
+   "host_ns": 4637170,
+   "device_busy_ns": 4302245,
+   "class": "event sync"
+  },
+  "cuMemcpyHtoD": {
+   "n": 24,
+   "host_ns": 3568605,
+   "device_busy_ns": 2187285,
+   "class": "synchronous memcpy"
+  },
+  "cuMemFree": {
+   "n": 34,
+   "host_ns": 2562891,
+   "device_busy_ns": 0,
+   "class": "free (implicit sync)"
+  },
+  "cuMemAlloc": {
+   "n": 34,
+   "host_ns": 2149149,
+   "device_busy_ns": null,
+   "class": "device malloc"
+  },
+  "cuModuleUnload": {
+   "n": 54,
+   "host_ns": 1889621,
+   "device_busy_ns": null,
+   "class": null
+  },
+  "cudaMemGetInfo": {
+   "n": 9,
+   "host_ns": 757076,
+   "device_busy_ns": null,
+   "class": null
+  },
+  "cuCtxSynchronize": {
+   "n": 18,
+   "host_ns": 749255,
+   "device_busy_ns": 0,
+   "class": "device sync"
+  },
+  "cudaEventRecord": {
+   "n": 18,
+   "host_ns": 504530,
+   "device_busy_ns": null,
+   "class": null
+  },
+  "cuMemsetD8": {
+   "n": 12,
+   "host_ns": 501461,
+   "device_busy_ns": null,
+   "class": null
+  },
+  "cuMemGetInfo": {
+   "n": 13,
+   "host_ns": 493359,
+   "device_busy_ns": null,
+   "class": null
+  },
+  "cuStreamIsCapturing": {
+   "n": 31,
+   "host_ns": 372953,
+   "device_busy_ns": null,
+   "class": null
+  },
+  "cudaEventCreate": {
+   "n": 12,
+   "host_ns": 258969,
+   "device_busy_ns": null,
+   "class": null
+  },
+  "cuCtxSetCurrent": {
+   "n": 13,
+   "host_ns": 170133,
+   "device_busy_ns": null,
+   "class": null
+  },
+  "cudaEventDestroy": {
+   "n": 12,
+   "host_ns": 151696,
+   "device_busy_ns": null,
+   "class": null
+  },
+  "cudaMemset": {
+   "n": 1,
+   "host_ns": 75987,
+   "device_busy_ns": null,
+   "class": null
+  },
+  "cuInit": {
+   "n": 1,
+   "host_ns": 14807,
+   "device_busy_ns": null,
+   "class": null
+  },
+  "cuModuleGetLoadingMode": {
+   "n": 1,
+   "host_ns": 11174,
+   "device_busy_ns": null,
+   "class": null
+  }
+ },
+ "sync_records": {
+  "Unknown": 24,
+  "Event sync": 9
+ },
+ "memory": {
+  "scope": "traced CUDA allocations (cudaMalloc/cuMemAlloc and static symbols); excludes CUDA context, cuFFT/driver internal and untraced memory",
+  "devices": {
+   "0": {
+    "peak_bytes": 5935470512,
+    "peak_time_ns": 2553754252,
+    "peak_segment": "patch alignment",
+    "peak_movie": 0,
+    "residual_bytes": 160
+   }
+  },
+  "allocations_by_kind": {
+   "Device": 51,
+   "Device Static": 20
+  },
+  "frees": 51,
+  "duplicate_device_static_counted_once": 24,
+  "segment_peak_bytes": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   5578223536,
+   5578223536,
+   5578223536,
+   5578223536,
+   5578223536,
+   5578223536,
+   5578223536,
+   5578223536,
+   5578223536,
+   5515189744,
+   5515189744,
+   5515189744,
+   5515189744,
+   5515189744,
+   5515189744,
+   5515189744,
+   5515189744,
+   5515189744,
+   5515189744,
+   5515189744,
+   5935470512,
+   5935470512,
+   5935470512,
+   5935470512,
+   5935470512,
+   5515189776,
+   5582298640,
+   5515189776,
+   5515189776,
+   5515189776,
+   5515189776,
+   5515189776,
+   5515189776
+  ]
+ },
+ "top_kernels": [
+  {
+   "name": "regular_bluestein_fft",
+   "launches": 50,
+   "device_ns": 24309840,
+   "mean_ns": 486196.8,
+   "max_ns": 569635,
+   "share": 0.291116204234534
+  },
+  {
+   "name": "regular_fft_factor",
+   "launches": 80,
+   "device_ns": 15059425,
+   "mean_ns": 188242.8125,
+   "max_ns": 192865,
+   "share": 0.18034025085951397
+  },
+  {
+   "name": "interpolateAndAccumulatePolynomialKernel",
+   "launches": 40,
+   "device_ns": 9423211,
+   "mean_ns": 235580.275,
+   "max_ns": 243681,
+   "share": 0.11284522720104728
+  },
+  {
+   "name": "fourierShiftKernel",
+   "launches": 50,
+   "device_ns": 9420104,
+   "mean_ns": 188402.08,
+   "max_ns": 4380435,
+   "share": 0.11280802012578242
+  },
+  {
+   "name": "cropAndGroupPatchResidentKernel",
+   "launches": 25,
+   "device_ns": 4978902,
+   "mean_ns": 199156.08,
+   "max_ns": 209857,
+   "share": 0.05962355373362103
+  },
+  {
+   "name": "vector_fft_symm_c2r",
+   "launches": 42,
+   "device_ns": 3816756,
+   "mean_ns": 90875.14285714286,
+   "max_ns": 213121,
+   "share": 0.04570657475365461
+  },
+  {
+   "name": "vector_fft_symm_r2c",
+   "launches": 40,
+   "device_ns": 3807474,
+   "mean_ns": 95186.85,
+   "max_ns": 98625,
+   "share": 0.04559542056227758
+  },
+  {
+   "name": "scaleComplexKernel",
+   "launches": 1,
+   "device_ns": 3282446,
+   "mean_ns": 3282446.0,
+   "max_ns": 3282446,
+   "share": 0.03930808348079746
+  },
+  {
+   "name": "postprocess_kernel",
+   "launches": 25,
+   "device_ns": 3158444,
+   "mean_ns": 126337.76,
+   "max_ns": 127841,
+   "share": 0.0378231295873333
+  },
+  {
+   "name": "fusedGainAndSumKernel",
+   "launches": 1,
+   "device_ns": 1758920,
+   "mean_ns": 1758920.0,
+   "max_ns": 1758920,
+   "share": 0.02106349173635888
+  },
+  {
+   "name": "regular_fft",
+   "launches": 52,
+   "device_ns": 1155686,
+   "mean_ns": 22224.73076923077,
+   "max_ns": 259041,
+   "share": 0.013839618920033684
+  },
+  {
+   "name": "computeCCFKernel",
+   "launches": 50,
+   "device_ns": 938854,
+   "mean_ns": 18777.08,
+   "max_ns": 241601,
+   "share": 0.011243003360384486
+  },
+  {
+   "name": "computeReferenceKernel",
+   "launches": 50,
+   "device_ns": 717378,
+   "mean_ns": 14347.56,
+   "max_ns": 140128,
+   "share": 0.008590774779322345
+  },
+  {
+   "name": "vector_fft_c2r",
+   "launches": 48,
+   "device_ns": 588130,
+   "mean_ns": 12252.708333333334,
+   "max_ns": 12480,
+   "share": 0.007042998769076904
+  },
+  {
+   "name": "projectHermitianColumnsKernel",
+   "launches": 90,
+   "device_ns": 320129,
+   "mean_ns": 3556.988888888889,
+   "max_ns": 9248,
+   "share": 0.0038336220783599206
+  }
+ ],
+ "kernel_kinds": 22,
+ "segments": [
+  {
+   "start": 576406929,
+   "end": 580348762,
+   "label": "before first movie",
+   "movie": null,
+   "kind": "outside"
+  },
+  {
+   "start": 580348762,
+   "end": 580360495,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 580360495,
+   "end": 580818094,
+   "label": "setup",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 580818094,
+   "end": 580830666,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 580830666,
+   "end": 580898831,
+   "label": "read gain",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 580898831,
+   "end": 580909446,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 580909446,
+   "end": 757390993,
+   "label": "session and device ingest",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 757390993,
+   "end": 757403285,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 757403285,
+   "end": 2035329984,
+   "label": "host read movie",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2035329984,
+   "end": 2035347584,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2035347584,
+   "end": 2035377196,
+   "label": "allocate host sum",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2035377196,
+   "end": 2035390327,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2035390327,
+   "end": 2469530321,
+   "label": "gain and sum",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2469530321,
+   "end": 2469542614,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2469542614,
+   "end": 2489565506,
+   "label": "release preprocessing",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2489565506,
+   "end": 2489580592,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2489580592,
+   "end": 2504560396,
+   "label": "global fft",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2504560396,
+   "end": 2504571292,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2504571292,
+   "end": 2504651190,
+   "label": "power spectrum",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2504651190,
+   "end": 2504664879,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2504664879,
+   "end": 2518847936,
+   "label": "global alignment",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2518847936,
+   "end": 2518859110,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2518859110,
+   "end": 2518882018,
+   "label": "allocate reconstruction",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2518882018,
+   "end": 2518892634,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2518892634,
+   "end": 2533843385,
+   "label": "global ifft",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2533843385,
+   "end": 2533854001,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2533854001,
+   "end": 2600994791,
+   "label": "patch alignment",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2600994791,
+   "end": 2601007363,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2601007363,
+   "end": 2603734799,
+   "label": "fit polynomial",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2603734799,
+   "end": 2603747370,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2603747370,
+   "end": 2607410118,
+   "label": "release alignment",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2607410118,
+   "end": 2607422690,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2607422690,
+   "end": 2766570507,
+   "label": "unweighted sums",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 2766570507,
+   "end": 2766581961,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 2766581961,
+   "end": 3125653918,
+   "label": "movie teardown",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 3125653918,
+   "end": 3125707556,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 3125707556,
+   "end": 3125927416,
+   "label": "submit model and plot",
+   "movie": 0,
+   "kind": "stage"
+  },
+  {
+   "start": 3125927416,
+   "end": 3125938311,
+   "label": "movie: unattributed",
+   "movie": 0,
+   "kind": "unattributed"
+  },
+  {
+   "start": 3125938311,
+   "end": 3466314917,
+   "label": "after last movie",
+   "movie": null,
+   "kind": "outside"
+  }
+ ],
+ "per_segment": [
+  {
+   "wall_ns": 3941833,
+   "busy_ns": 0,
+   "idle_ns": 3941833,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 0
+  },
+  {
+   "wall_ns": 11733,
+   "busy_ns": 0,
+   "idle_ns": 11733,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 0
+  },
+  {
+   "wall_ns": 457599,
+   "busy_ns": 0,
+   "idle_ns": 457599,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 0
+  },
+  {
+   "wall_ns": 12572,
+   "busy_ns": 0,
+   "idle_ns": 12572,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 0
+  },
+  {
+   "wall_ns": 68165,
+   "busy_ns": 0,
+   "idle_ns": 68165,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 0
+  },
+  {
+   "wall_ns": 10615,
+   "busy_ns": 0,
+   "idle_ns": 10615,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 0
+  },
+  {
+   "wall_ns": 176481547,
+   "busy_ns": 1664936,
+   "idle_ns": 174816611,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 1664936,
+   "idle_intervals": 6,
+   "kernels": 0,
+   "malloc": 6,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 5,
+   "sync_blocked_idle_ns": 541431,
+   "copy_bytes": 6811536,
+   "pageable_copies": 5,
+   "mem_peak_bytes": 5578223536
+  },
+  {
+   "wall_ns": 12292,
+   "busy_ns": 0,
+   "idle_ns": 12292,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5578223536
+  },
+  {
+   "wall_ns": 1277926699,
+   "busy_ns": 0,
+   "idle_ns": 1277926699,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5578223536
+  },
+  {
+   "wall_ns": 17600,
+   "busy_ns": 0,
+   "idle_ns": 17600,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5578223536
+  },
+  {
+   "wall_ns": 29612,
+   "busy_ns": 0,
+   "idle_ns": 29612,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5578223536
+  },
+  {
+   "wall_ns": 13131,
+   "busy_ns": 0,
+   "idle_ns": 13131,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5578223536
+  },
+  {
+   "wall_ns": 434139994,
+   "busy_ns": 421581914,
+   "idle_ns": 12558080,
+   "kernel_busy_ns": 1758920,
+   "copy_busy_ns": 419822994,
+   "idle_intervals": 42,
+   "kernels": 1,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 41,
+   "sync_blocked_idle_ns": 10698727,
+   "copy_bytes": 2684354560,
+   "pageable_copies": 40,
+   "mem_peak_bytes": 5578223536
+  },
+  {
+   "wall_ns": 12293,
+   "busy_ns": 0,
+   "idle_ns": 12293,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5578223536
+  },
+  {
+   "wall_ns": 20022892,
+   "busy_ns": 691363,
+   "idle_ns": 19331529,
+   "kernel_busy_ns": 122720,
+   "copy_busy_ns": 556227,
+   "idle_intervals": 31,
+   "kernels": 15,
+   "malloc": 16,
+   "free": 16,
+   "pinned_malloc": 0,
+   "sync_calls": 35,
+   "sync_blocked_idle_ns": 2217863,
+   "copy_bytes": 4075072,
+   "pageable_copies": 9,
+   "mem_peak_bytes": 5578223536
+  },
+  {
+   "wall_ns": 15086,
+   "busy_ns": 0,
+   "idle_ns": 15086,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189744
+  },
+  {
+   "wall_ns": 14979804,
+   "busy_ns": 14674307,
+   "idle_ns": 305497,
+   "kernel_busy_ns": 14674307,
+   "copy_busy_ns": 0,
+   "idle_intervals": 82,
+   "kernels": 81,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 1,
+   "sync_blocked_idle_ns": 94313,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189744
+  },
+  {
+   "wall_ns": 10896,
+   "busy_ns": 0,
+   "idle_ns": 10896,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189744
+  },
+  {
+   "wall_ns": 79898,
+   "busy_ns": 0,
+   "idle_ns": 79898,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189744
+  },
+  {
+   "wall_ns": 13689,
+   "busy_ns": 0,
+   "idle_ns": 13689,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189744
+  },
+  {
+   "wall_ns": 14183057,
+   "busy_ns": 10461198,
+   "idle_ns": 3721859,
+   "kernel_busy_ns": 10446702,
+   "copy_busy_ns": 14496,
+   "idle_intervals": 26,
+   "kernels": 15,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 11,
+   "sync_blocked_idle_ns": 406698,
+   "copy_bytes": 1296,
+   "pageable_copies": 10,
+   "mem_peak_bytes": 5515189744
+  },
+  {
+   "wall_ns": 11174,
+   "busy_ns": 0,
+   "idle_ns": 11174,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189744
+  },
+  {
+   "wall_ns": 22908,
+   "busy_ns": 0,
+   "idle_ns": 22908,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189744
+  },
+  {
+   "wall_ns": 10616,
+   "busy_ns": 0,
+   "idle_ns": 10616,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189744
+  },
+  {
+   "wall_ns": 14950751,
+   "busy_ns": 14453987,
+   "idle_ns": 496764,
+   "kernel_busy_ns": 11034128,
+   "copy_busy_ns": 3419859,
+   "idle_intervals": 161,
+   "kernels": 120,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 41,
+   "sync_blocked_idle_ns": 172940,
+   "copy_bytes": 2685665280,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189744
+  },
+  {
+   "wall_ns": 10616,
+   "busy_ns": 0,
+   "idle_ns": 10616,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189744
+  },
+  {
+   "wall_ns": 67140790,
+   "busy_ns": 36112003,
+   "idle_ns": 31028787,
+   "kernel_busy_ns": 36045635,
+   "copy_busy_ns": 54272,
+   "idle_intervals": 522,
+   "kernels": 477,
+   "malloc": 28,
+   "free": 9,
+   "pinned_malloc": 0,
+   "sync_calls": 63,
+   "sync_blocked_idle_ns": 2623464,
+   "copy_bytes": 36224,
+   "pageable_copies": 38,
+   "mem_peak_bytes": 5935470512
+  },
+  {
+   "wall_ns": 12572,
+   "busy_ns": 0,
+   "idle_ns": 12572,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5935470512
+  },
+  {
+   "wall_ns": 2727436,
+   "busy_ns": 0,
+   "idle_ns": 2727436,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5935470512
+  },
+  {
+   "wall_ns": 12571,
+   "busy_ns": 0,
+   "idle_ns": 12571,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5935470512
+  },
+  {
+   "wall_ns": 3662748,
+   "busy_ns": 0,
+   "idle_ns": 3662748,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 19,
+   "pinned_malloc": 0,
+   "sync_calls": 20,
+   "sync_blocked_idle_ns": 2554229,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5935470512
+  },
+  {
+   "wall_ns": 12572,
+   "busy_ns": 0,
+   "idle_ns": 12572,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189776
+  },
+  {
+   "wall_ns": 159147817,
+   "busy_ns": 16430219,
+   "idle_ns": 142717598,
+   "kernel_busy_ns": 9423211,
+   "copy_busy_ns": 6969408,
+   "idle_intervals": 43,
+   "kernels": 40,
+   "malloc": 1,
+   "free": 1,
+   "pinned_malloc": 0,
+   "sync_calls": 3,
+   "sync_blocked_idle_ns": 674183,
+   "copy_bytes": 67108864,
+   "pageable_copies": 1,
+   "mem_peak_bytes": 5582298640
+  },
+  {
+   "wall_ns": 11454,
+   "busy_ns": 0,
+   "idle_ns": 11454,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189776
+  },
+  {
+   "wall_ns": 359071957,
+   "busy_ns": 0,
+   "idle_ns": 359071957,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 1,
+   "sync_blocked_idle_ns": 42463,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189776
+  },
+  {
+   "wall_ns": 53638,
+   "busy_ns": 0,
+   "idle_ns": 53638,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189776
+  },
+  {
+   "wall_ns": 219860,
+   "busy_ns": 0,
+   "idle_ns": 219860,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189776
+  },
+  {
+   "wall_ns": 10895,
+   "busy_ns": 0,
+   "idle_ns": 10895,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 0,
+   "pinned_malloc": 0,
+   "sync_calls": 0,
+   "sync_blocked_idle_ns": 0,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189776
+  },
+  {
+   "wall_ns": 340376606,
+   "busy_ns": 0,
+   "idle_ns": 340376606,
+   "kernel_busy_ns": 0,
+   "copy_busy_ns": 0,
+   "idle_intervals": 1,
+   "kernels": 0,
+   "malloc": 0,
+   "free": 6,
+   "pinned_malloc": 0,
+   "sync_calls": 6,
+   "sync_blocked_idle_ns": 5635621,
+   "copy_bytes": 0,
+   "pageable_copies": 0,
+   "mem_peak_bytes": 5515189776
+  }
+ ],
+ "gpus": [
+  {
+   "id": 3,
+   "name": "NVIDIA A100 80GB PCIe",
+   "uuid": "b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+   "busLocation": "0000:09:00.0",
+   "smCount": 108,
+   "totalMemory": 85095874560,
+   "clockRate": 1410000000
+  },
+  {
+   "id": 2,
+   "name": "NVIDIA A100 80GB PCIe",
+   "uuid": "063e5232-7fc5-f1e6-7a0d-260577c4e598",
+   "busLocation": "0000:08:00.0",
+   "smCount": 108,
+   "totalMemory": 85095874560,
+   "clockRate": 1410000000
+  },
+  {
+   "id": 1,
+   "name": "NVIDIA A100 80GB PCIe",
+   "uuid": "cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+   "busLocation": "0000:07:00.0",
+   "smCount": 108,
+   "totalMemory": 85095874560,
+   "clockRate": 1410000000
+  },
+  {
+   "id": 0,
+   "name": "NVIDIA A100 80GB PCIe",
+   "uuid": "eddb42fe-4f9a-adde-76d3-b924e14add54",
+   "busLocation": "0000:06:00.0",
+   "smCount": 108,
+   "totalMemory": 85095874560,
+   "clockRate": 1410000000
+  }
+ ],
+ "nsys": {
+  "EXPORT_PRODUCT_VERSION": "2024.6.2.225",
+  "EXPORT_SCHEMA_VERSION": "3.16.1"
+ },
+ "capture": {
+  "command": [
+   "taskset",
+   "-c",
+   "96,97,98,99,100,101",
+   "/usr/local/cuda-12.8/bin/nsys",
+   "profile",
+   "--trace=cuda,nvtx",
+   "--cuda-memory-usage=true",
+   "--stats=false",
+   "--force-overwrite=true",
+   "-o",
+   "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb-bp-20261026/kit-trace/trace",
+   "--sample=none",
+   "--cpuctxsw=none",
+   "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cuda/motioncorr",
+   "--use_own",
+   "--j",
+   "6",
+   "--patch_x",
+   "5",
+   "--patch_y",
+   "5",
+   "--group_frames",
+   "1",
+   "--bin_factor",
+   "1",
+   "--seed",
+   "1",
+   "--skip_defect",
+   "--save_noDW",
+   "--first_frame_sum",
+   "1",
+   "--last_frame_sum",
+   "40",
+   "--ingest",
+   "float",
+   "--ingest_witness",
+   "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb-bp-20261026/ingest-witness.txt",
+   "--gpu",
+   "0",
+   "--i",
+   "input.star",
+   "--o",
+   "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb-bp-20261026/kit-trace/out/",
+   "--profile",
+   "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb-bp-20261026/kit-trace/trace.profile.jsonl",
+   "--profile_device_timing",
+   "0"
+  ],
+  "nsys_wall_s": 7.354784537106752,
+  "binary_sha256": "34e768128b83f7c94eb4a41ee6bb9a795c52c531a5d646ce4116df83d8d3535a",
+  "profile_jsonl": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb-bp-20261026/kit-trace/trace.profile.jsonl",
+  "trace": "cuda,nvtx",
+  "sampled": false,
+  "nvtx_stages": true,
+  "device_timing": "off"
+ }
+}

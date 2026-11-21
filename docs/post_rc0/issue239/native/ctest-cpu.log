@@ -1,0 +1,216 @@
+Internal ctest changing into directory: /mnt/clathrin/alex-motioncorr-hygiene239/build-cpu
+Test project /mnt/clathrin/alex-motioncorr-hygiene239/build-cpu
+      Start  1: CpuDoseSymmetry
+ 1/76 Test  #1: CpuDoseSymmetry .......................   Passed    1.83 sec
+      Start  2: CpuDoseSymmetryBase
+ 2/76 Test  #2: CpuDoseSymmetryBase ...................   Passed    2.22 sec
+      Start  3: CpuUnweightedStream
+ 3/76 Test  #3: CpuUnweightedStream ...................   Passed    0.08 sec
+      Start  4: PatchRetryState
+ 4/76 Test  #4: PatchRetryState .......................   Passed    0.04 sec
+      Start  5: RunnerInterpolateRecenter
+ 5/76 Test  #5: RunnerInterpolateRecenter .............   Passed    0.01 sec
+      Start  6: FloatPlanCache
+ 6/76 Test  #6: FloatPlanCache ........................   Passed    0.01 sec
+      Start  7: MrcHeaderStats
+ 7/76 Test  #7: MrcHeaderStats ........................   Passed    0.01 sec
+      Start  8: ReportPlotUndefinedAxis
+ 8/76 Test  #8: ReportPlotUndefinedAxis ...............   Passed    0.01 sec
+      Start  9: PdfConcat
+ 9/76 Test  #9: PdfConcat .............................   Passed    0.07 sec
+      Start 10: DefectParser
+10/76 Test #10: DefectParser ..........................   Passed    0.02 sec
+      Start 11: DeflateLayout
+11/76 Test #11: DeflateLayout .........................   Passed    0.01 sec
+      Start 12: DeflateLayoutMutant_span_wrap
+12/76 Test #12: DeflateLayoutMutant_span_wrap .........   Passed    0.01 sec
+      Start 13: DeflateLayoutMutant_stage_sum
+13/76 Test #13: DeflateLayoutMutant_stage_sum .........   Passed    0.01 sec
+      Start 14: DeflateLayoutMutant_reserve_round
+14/76 Test #14: DeflateLayoutMutant_reserve_round .....   Passed    0.01 sec
+      Start 15: DeflateLayoutMutant_layout_table
+15/76 Test #15: DeflateLayoutMutant_layout_table ......   Passed    0.01 sec
+      Start 16: DeflateLayoutMutant_arena_start
+16/76 Test #16: DeflateLayoutMutant_arena_start .......   Passed    0.01 sec
+      Start 17: DeflateLayoutMutant_drain_step
+17/76 Test #17: DeflateLayoutMutant_drain_step ........   Passed    0.01 sec
+      Start 18: Adler32Arithmetic
+18/76 Test #18: Adler32Arithmetic .....................   Passed    0.76 sec
+      Start 19: Adler32KernelHost
+19/76 Test #19: Adler32KernelHost .....................   Passed    0.00 sec
+      Start 20: StageProfileThreads
+20/76 Test #20: StageProfileThreads ...................   Passed    0.58 sec
+      Start 21: FrameBufferPool
+21/76 Test #21: FrameBufferPool .......................   Passed    0.04 sec
+      Start 22: ScratchArena
+22/76 Test #22: ScratchArena ..........................   Passed    0.00 sec
+      Start 23: ReaderPool
+23/76 Test #23: ReaderPool ............................   Passed    0.56 sec
+      Start 24: ReaderPoolMutant_spin
+24/76 Test #24: ReaderPoolMutant_spin .................   Passed    0.54 sec
+      Start 25: ReaderPoolMutant_nowait
+25/76 Test #25: ReaderPoolMutant_nowait ...............   Passed    0.04 sec
+      Start 26: DefectNeighbours
+26/76 Test #26: DefectNeighbours ......................   Passed    0.00 sec
+      Start 27: DefectMergeMutant_append_only
+27/76 Test #27: DefectMergeMutant_append_only .........   Passed    0.00 sec
+      Start 28: DefectMergeMutant_no_order_check
+28/76 Test #28: DefectMergeMutant_no_order_check ......   Passed    0.01 sec
+      Start 29: DefectMergeMutant_swap_xy
+29/76 Test #29: DefectMergeMutant_swap_xy .............   Passed    0.00 sec
+      Start 30: RelionErrorOwnership
+30/76 Test #30: RelionErrorOwnership ..................   Passed    0.00 sec
+      Start 31: RelionErrorUnprinted
+31/76 Test #31: RelionErrorUnprinted ..................   Passed    0.00 sec
+      Start 32: NvcompAcceptanceDiagnostics
+32/76 Test #32: NvcompAcceptanceDiagnostics ...........   Passed    0.14 sec
+      Start 33: ProfilingKit
+33/76 Test #33: ProfilingKit ..........................***Failed  178.62 sec
+...............................................................EE.....................................................................
+======================================================================
+ERROR: test_actual_cli_full_input_does_not_expect_metadata_products (tests.test_import_subset_boundaries.MultipleStarLoops.test_actual_cli_full_input_does_not_expect_metadata_products)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-hygiene239/src/tools/profiling/tests/test_import_subset_boundaries.py", line 162, in test_actual_cli_full_input_does_not_expect_metadata_products
+    self.run_cli(False)
+  File "/mnt/clathrin/alex-motioncorr-hygiene239/src/tools/profiling/tests/test_import_subset_boundaries.py", line 151, in run_cli
+    result = cli(args)
+             ^^^^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-hygiene239/src/tools/profiling/tests/test_import_subset_boundaries.py", line 23, in cli
+    return subprocess.run([sys.executable, *flags, mcprof.__file__, *args],
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '/mnt/clathrin/alex-motioncorr-hygiene239/src/tools/profiling/mcprof.py', 'run', 'A=/tmp/tmpiof7m2s6/binary', '--data', '/tmp/tmpiof7m2s6/data', '--work', '/tmp/tmpiof7m2s6/work', '--no-lock', '--warmup', '0', '--rounds', '1', '--lane-wait', '0', '--keep-outputs']' timed out after 30 seconds
+
+======================================================================
+ERROR: test_actual_cli_subset_preserves_all_other_loop_rows (tests.test_import_subset_boundaries.MultipleStarLoops.test_actual_cli_subset_preserves_all_other_loop_rows)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/clathrin/alex-motioncorr-hygiene239/src/tools/profiling/tests/test_import_subset_boundaries.py", line 165, in test_actual_cli_subset_preserves_all_other_loop_rows
+    self.run_cli(True)
+  File "/mnt/clathrin/alex-motioncorr-hygiene239/src/tools/profiling/tests/test_import_subset_boundaries.py", line 151, in run_cli
+    result = cli(args)
+             ^^^^^^^^^
+  File "/mnt/clathrin/alex-motioncorr-hygiene239/src/tools/profiling/tests/test_import_subset_boundaries.py", line 23, in cli
+    return subprocess.run([sys.executable, *flags, mcprof.__file__, *args],
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/home/alex/.mc-venv/bin/python3', '/mnt/clathrin/alex-motioncorr-hygiene239/src/tools/profiling/mcprof.py', 'run', 'A=/tmp/tmphludw7tx/binary', '--data', '/tmp/tmphludw7tx/data', '--work', '/tmp/tmphludw7tx/work', '--no-lock', '--warmup', '0', '--rounds', '1', '--lane-wait', '0', '--keep-outputs', '--movies', '2']' timed out after 30 seconds
+
+----------------------------------------------------------------------
+Ran 134 tests in 177.890s
+
+FAILED (errors=2)
+
+      Start 34: GainCacheOwnership
+34/76 Test #34: GainCacheOwnership ....................   Passed    6.44 sec
+      Start 35: NvcompGuards
+35/76 Test #35: NvcompGuards ..........................   Passed    0.05 sec
+      Start 36: SyntheticRegression
+36/76 Test #36: SyntheticRegression ...................   Passed    0.88 sec
+      Start 37: HotPixelRngDeterminism
+37/76 Test #37: HotPixelRngDeterminism ................   Passed    0.70 sec
+      Start 38: RunnerExposure
+38/76 Test #38: RunnerExposure ........................   Passed    0.81 sec
+      Start 39: Runner_failure
+39/76 Test #39: Runner_failure ........................   Passed    0.20 sec
+      Start 40: Runner_invalid
+40/76 Test #40: Runner_invalid ........................   Passed    0.26 sec
+      Start 41: Runner_resume
+41/76 Test #41: Runner_resume .........................   Passed    4.03 sec
+      Start 42: Runner_tomography
+42/76 Test #42: Runner_tomography .....................   Passed    0.57 sec
+      Start 43: RunnerLateBin
+43/76 Test #43: RunnerLateBin .........................   Passed    1.14 sec
+      Start 44: RunnerExportedUnits
+44/76 Test #44: RunnerExportedUnits ...................   Passed    0.15 sec
+      Start 45: GainCache
+45/76 Test #45: GainCache .............................   Passed    1.70 sec
+      Start 46: TiffRead
+46/76 Test #46: TiffRead ..............................   Passed    1.25 sec
+      Start 47: DamagedMovie
+47/76 Test #47: DamagedMovie ..........................   Passed    5.72 sec
+      Start 48: TruncatedMrcMovie
+48/76 Test #48: TruncatedMrcMovie .....................   Passed    4.61 sec
+      Start 49: TruncatedGainDefect
+49/76 Test #49: TruncatedGainDefect ...................   Passed    2.43 sec
+      Start 50: CompressedMovieSequence
+50/76 Test #50: CompressedMovieSequence ...............   Passed    1.13 sec
+      Start 51: InputFormats
+51/76 Test #51: InputFormats ..........................   Passed   72.78 sec
+      Start 52: CutDownMovie
+52/76 Test #52: CutDownMovie ..........................   Passed    9.40 sec
+      Start 53: GlobalIfftElision
+53/76 Test #53: GlobalIfftElision .....................   Passed    1.97 sec
+      Start 54: HostBufferReuse
+54/76 Test #54: HostBufferReuse .......................   Passed    3.92 sec
+      Start 55: StageProfile
+55/76 Test #55: StageProfile ..........................   Passed    2.90 sec
+      Start 56: RunnerModelParser
+56/76 Test #56: RunnerModelParser .....................   Passed    0.33 sec
+      Start 57: EerMemorySafety
+57/76 Test #57: EerMemorySafety .......................   Passed   25.18 sec
+      Start 58: MicrographModelBounds
+58/76 Test #58: MicrographModelBounds .................   Passed    1.65 sec
+      Start 59: RunnerInterpolateShifts
+59/76 Test #59: RunnerInterpolateShifts ...............   Passed    0.57 sec
+      Start 60: WriteFaults
+60/76 Test #60: WriteFaults ...........................   Passed    0.65 sec
+      Start 61: WriteFaultsSync
+61/76 Test #61: WriteFaultsSync .......................   Passed    0.65 sec
+      Start 62: WriteFaultsMultiProduct
+62/76 Test #62: WriteFaultsMultiProduct ...............   Passed    0.66 sec
+      Start 63: OutputStageFaults
+63/76 Test #63: OutputStageFaults .....................   Passed    0.63 sec
+      Start 64: LogfileFromEps
+64/76 Test #64: LogfileFromEps ........................   Passed    4.87 sec
+      Start 65: LogfileFromEpsMutant_always_eps
+65/76 Test #65: LogfileFromEpsMutant_always_eps .......   Passed    0.49 sec
+      Start 66: LogfileFromEpsMutant_late_guard
+66/76 Test #66: LogfileFromEpsMutant_late_guard .......   Passed    0.35 sec
+      Start 67: LogfileFromEpsMutant_eps_order
+67/76 Test #67: LogfileFromEpsMutant_eps_order ........   Passed    0.31 sec
+      Start 68: LogfileFromEpsMutant_placeholder
+68/76 Test #68: LogfileFromEpsMutant_placeholder ......   Passed    0.82 sec
+      Start 69: LogfileFromEpsMutant_concat_cleanup
+69/76 Test #69: LogfileFromEpsMutant_concat_cleanup ...   Passed    4.06 sec
+      Start 70: CiFailClosedControls
+70/76 Test #70: CiFailClosedControls ..................   Passed   25.79 sec
+      Start 71: CudaValidationParser
+71/76 Test #71: CudaValidationParser ..................   Passed    0.08 sec
+      Start 72: MultiGpuScheduling
+72/76 Test #72: MultiGpuScheduling ....................   Passed   97.25 sec
+      Start 73: OutputTreeComparator
+73/76 Test #73: OutputTreeComparator ..................   Passed    0.97 sec
+      Start 74: JointStarPublication
+74/76 Test #74: JointStarPublication ..................   Passed    1.08 sec
+      Start 75: ImageWriteFaults
+75/76 Test #75: ImageWriteFaults ......................   Passed    0.04 sec
+      Start 76: NativeMovieStaging
+76/76 Test #76: NativeMovieStaging ....................   Passed    0.43 sec
+
+99% tests passed, 1 tests failed out of 76
+
+Total Test time (real) = 475.61 sec
+
+The following tests FAILED:
+	 33 - ProfilingKit (Failed)
+Errors while running CTest

@@ -28,6 +28,10 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#ifdef MC_CHECK_HERMITIAN
+#include "cuda_hermitian_check.h"
+static bool expect_invariant_failure = false;
+#endif
 
 namespace {
 // ---- interposition -------------------------------------------------------
@@ -93,8 +97,12 @@ cufftResult __wrap_cufftMakePlanMany(cufftHandle plan, int rank, int *n,
     if (active && fault == PLAN_MAKE && ++plan_calls == fault_at) {
         fired = true; return CUFFT_ALLOC_FAILED;
     }
-    return __real_cufftMakePlanMany(plan, rank, n, inembed, istride, idist,
+    auto result = __real_cufftMakePlanMany(plan, rank, n, inembed, istride, idist,
                                   onembed, ostride, odist, type, batch, work);
+#ifdef MC_CHECK_HERMITIAN
+    hermitian_test::remember(plan, rank, n, istride, idist, type, batch, result);
+#endif
+    return result;
 }
 cufftResult __wrap_cufftExecR2C(cufftHandle plan, cufftReal *in, cufftComplex *out) {
     if (active && ++r2c_calls == fault_at && fault == EXEC_R2C) {
@@ -106,6 +114,9 @@ cufftResult __wrap_cufftExecC2R(cufftHandle plan, cufftComplex *in, cufftReal *o
     if (active && ++c2r_calls == fault_at && fault == EXEC_C2R) {
         fired = true; return CUFFT_EXEC_FAILED;
     }
+    #ifdef MC_CHECK_HERMITIAN
+    hermitian_test::check(plan, in);
+#endif
     return __real_cufftExecC2R(plan, in, out);
 }
 }
@@ -672,6 +683,9 @@ void sessionFaults() {
 }
 
 int main(int argc, char **argv) {
+#ifdef MC_CHECK_HERMITIAN
+    expect_invariant_failure = argc > 1 && std::string(argv[1]) == "--expect-invariant-failure";
+#endif
     expect_mismatch = argc > 1 && std::string(argv[1]) == "--expect-mismatch";
     if (cudaSetDevice(0) != cudaSuccess || cudaFree(nullptr) != cudaSuccess) {
         std::cerr << "Native CUDA device 0 is required\n"; return 1;
@@ -691,9 +705,18 @@ int main(int argc, char **argv) {
             std::cout << (mismatches ? "PASS" : "FAIL") << ": mutant produced " << mismatches << " detected mismatches\n";
             return mismatches ? 0 : 1;
         }
+#ifdef MC_CHECK_HERMITIAN
+        require(!expect_invariant_failure, "mutant did not violate invariant");
+        std::cout << "INVARIANT PASS CCF inverses=" << hermitian_test::checked << '\n';
+        return 0;
+#endif
         chunkArithmetic();
         reserveFaults();
         sessionFaults();
+#ifdef MC_CHECK_HERMITIAN
+    } catch (const hermitian_test::Violation &e) {
+        std::cerr << e.what() << '\n'; return expect_invariant_failure ? 0 : 1;
+#endif
     } catch (const std::exception &e) {
         std::cerr << "FAIL: " << e.what() << '\n'; return 1;
     } catch (RelionError &e) {

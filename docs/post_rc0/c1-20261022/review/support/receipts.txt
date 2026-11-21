@@ -1,0 +1,47 @@
+# c1 review r1 command receipts (read-only git/local; 2026-10-22T21:03:16Z)
+HEAD=e77a51a220cb0d91f4ac3c7fac211876d0c6833f (detached)
+tree e77=f68981169cc24bd487275220516e7e6fd84bc2d7
+--- src numerics byte-identical to #273 native source d751ff28:
+identical src/acc/cuda/cuda_alignpatch.cu
+identical src/acc/cuda/cuda_fft_prep.cu
+identical src/acc/cuda/cuda_hermitian.cuh
+identical src/acc/cuda/cuda_realspace_dw.cu
+--- src vs #274 a1036901: files differing
+ src/acc/cuda/cuda_alignpatch.cu    | 23 ++++++++++++---------
+ src/acc/cuda/cuda_fft_prep.cu      |  2 ++
+ src/acc/cuda/cuda_hermitian.cuh    | 37 ++++++++++++++++++++++++++++++++++
+ src/acc/cuda/cuda_movie_session.cu | 41 ++++++++++++++++++++++++++++++++++++++
+ src/acc/cuda/cuda_realspace_dw.cu  |  9 +++++++--
+ src/error.cpp                      |  7 +++----
+ src/error.h                        |  3 ++-
+ src/image.h                        | 16 +++++++++++++++
+ src/motioncorr_runner.cpp          |  2 ++
+ 9 files changed, 124 insertions(+), 16 deletions(-)
+--- runner vs #274:
++		if (isCompressedMRC && n_frames == nn)
++			compressedMRCreader.finish();
+--- e77 vs last merge 1ff59b74 outside docs/post_rc0/c1-20261022:
+identical
+--- overlay 1aac4159 vs e77 outside docs/post_rc0/c1-20261022:
+identical
+A	docs/post_rc0/c1-20261022/tools-v2/OVERLAY.md
+A	docs/post_rc0/c1-20261022/tools-v2/c1_item.sh
+A	docs/post_rc0/c1-20261022/tools-v2/c1_item12.diff
+A	docs/post_rc0/c1-20261022/tools-v2/c1_item12.py
+A	docs/post_rc0/c1-20261022/tools-v2/c1_lane.py
+A	docs/post_rc0/c1-20261022/tools-v2/c1_tutorial24.py
+A	docs/post_rc0/c1-20261022/tools-v2/make_c1_item12.py
+A	docs/post_rc0/c1-20261022/tools-v2/test_c1_t24_failclosed.py
+--- 1ee9cbfe tree == #272 head:
+yes
+--- C2R sites
+src/acc/cuda/cuda_alignpatch.cu:628:        ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
+src/acc/cuda/cuda_alignpatch.cu:629:        ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
+src/acc/cuda/cuda_alignpatch.cu:992:            ALIGN_LAUNCH(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fccs, ccf_nx, ccf_ny, n_frames));
+src/acc/cuda/cuda_alignpatch.cu:993:            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
+src/acc/cuda/cuda_movie_session.cu:2155:        const cudaError_t projection = mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny);
+src/acc/cuda/cuda_movie_session.cu:2162:        const cufftResult res = cufftExecC2R(plan_c2r, d_inverse_tile,
+src/acc/cuda/cuda_fft_prep.cu:255:        HANDLE_ERROR(mc_cuda::projectHermitianColumns(d_comp, nx, ny));
+src/acc/cuda/cuda_fft_prep.cu:256:        CUFFT_CHECK(cufftExecC2R(plan_c2r, d_comp, (cufftReal*)target_d_real));
+src/acc/cuda/cuda_realspace_dw.cu:392:        LAUNCH_HANDLE_ERROR(mc_cuda::projectHermitianColumns((cufftComplex*)d_Fframe, nx, ny));
+src/acc/cuda/cuda_realspace_dw.cu:393:        CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));

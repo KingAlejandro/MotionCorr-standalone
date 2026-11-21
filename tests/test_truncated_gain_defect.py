@@ -154,7 +154,7 @@ def eer_section(args, work):
     try:
         from PIL import Image
     except ImportError:
-        print("SKIP EER gain section: PIL not available to convert the gain")
+        base.check(False, "EER gain section NOT RUN: Pillow is required for the supplied EER inputs", failures)
         return failures
     import numpy as np
 

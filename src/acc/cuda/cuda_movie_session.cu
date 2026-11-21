@@ -1,6 +1,8 @@
+#include "src/acc/cuda/cuda_hermitian.cuh"
 #include "src/acc/cuda/cuda_movie_session.h"
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
+#include "src/acc/cuda/cuda_patch_retry_admission.h"
 #include "src/stage_profile.h"
 
 #ifdef _CUDA_ENABLED
@@ -16,6 +18,7 @@
 #if defined(_NVCOMP_ENABLED)
 #include <tiffio.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include <cerrno>
 #include <cstring>
 #include <cstdint>
@@ -1343,6 +1346,14 @@ struct PinnedStagePool {
 };
 thread_local PinnedStagePool t_pinned_stage;
 
+// Pin the descriptor used for the tag scan, not a separate path lookup.
+// This detects ordinary replacement/growth; it is not a lock against writers.
+bool sameTiffIdentity(const struct stat &a, const struct stat &b) {
+    return a.st_dev == b.st_dev && a.st_ino == b.st_ino &&
+           a.st_size == b.st_size &&
+           a.st_mtim.tv_sec == b.st_mtim.tv_sec &&
+           a.st_mtim.tv_nsec == b.st_mtim.tv_nsec;
+}
 // pread until n bytes have arrived. A short file, an error or EOF is a refusal,
 // as a short TIFFReadRawStrip was. pread leaves the descriptor's offset alone,
 // so it does not disturb the LibTIFF handle that owns fd.
@@ -1411,10 +1422,28 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // read with one pread of its whole span instead of one LibTIFF call per
     // strip; anything else keeps the per-strip TIFFReadRawStrip reader.
     std::vector<char> frame_contiguous(num_req_frames, 0);
+    struct stat tag_identity{};
+    auto decline_identity = [&]() -> bool {
+        logfile << "nvCOMP ingestion declined (TIFF file identity changed or unavailable)"
+                   "; using the host reader." << std::endl;
+        return false;
+    };
+    auto path_unchanged = [&]() -> bool {
+        struct stat current{};
+        return stat(fn_mic.c_str(), &current) == 0 && sameTiffIdentity(tag_identity, current);
+    };
+    auto handle_unchanged = [&](TIFF *t) -> bool {
+        struct stat current{};
+        return fstat(TIFFFileno(t), &current) == 0 && sameTiffIdentity(tag_identity, current);
+    };
     {
         StageScope tag_scope("ingest tag scan");
         TIFF *tif = TIFFOpen(fn_mic.c_str(), "r");
         if (!tif) return false;
+        if (fstat(TIFFFileno(tif), &tag_identity) != 0) {
+            TIFFClose(tif);
+            return decline_identity();
+        }
         bool ok = true;
         const char *reject = nullptr;
         // Raw Deflate decompression reproduces only what LibTIFF would do for one
@@ -1806,6 +1835,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // region and competed with the thread submitting GPU work
     // (docs/nvcomp_ingest_pipeline.md). Handles are opened here, on the calling
     // thread, so a refused open declines the whole ingest before any chunk is staged.
+    if (!path_unchanged()) return decline_identity();
     const int io_threads = n_threads > 0 ? n_threads : 4;
     struct TiffHandles {
         std::vector<TIFF *> h;
@@ -1816,6 +1846,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     for (int t = 0; t < io_threads; t++) {
         tiffs.h[t] = TIFFOpen(fn_mic.c_str(), "r");
         if (!tiffs.h[t]) all_open = false;
+        else if (!handle_unchanged(tiffs.h[t]) || !path_unchanged()) return decline_identity();
     }
     if (!all_open) {
         logfile << "WARNING: nvCOMP ingestion could not open a TIFF handle for every reader"
@@ -1994,6 +2025,10 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             }
             HANDLE_ERROR(cudaEventRecord(ev_h2d_done[j], copy_stream));
 
+            // Payload is staged. Recheck before handing any of it to nvCOMP,
+            // including replacement of the path while an old inode stayed open.
+            if (!path_unchanged()) return decline_identity();
+            for (TIFF *t : tiffs.h) if (!handle_unchanged(t)) return decline_identity();
             phase.next("ingest decompress submit");
             HANDLE_ERROR(cudaStreamWaitEvent(stream, ev_h2d_done[j], 0));
             if (nvcompBatchedDeflateDecompressAsync(
@@ -2117,6 +2152,13 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
             drain_after_failure();
             return false;
         }
+        const cudaError_t projection = mc_cuda::projectHermitianColumns(d_inverse_tile, nx, ny);
+        if (projection != cudaSuccess) {
+            logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " << cudaGetErrorString(projection) << std::endl;
+            recordFailure(projection, __func__, __LINE__);
+            drain_after_failure();
+            return false;
+        }
         const cufftResult res = cufftExecC2R(plan_c2r, d_inverse_tile,
                                              (cufftReal*)(d_Iframes + (size_t)iframe * real_stride));
         if (res != CUFFT_SUCCESS) {
@@ -2178,6 +2220,100 @@ bool CudaMovieSession::releasePatchAlignmentWorkspace() {
     if (releaseBuffer(start) != cudaSuccess) ok = false;
     if (releaseBuffer(size) != cudaSuccess) ok = false;
     return ok;
+}
+
+bool CudaMovieSession::admitLocalAlignment(int patch_w, int patch_h, int n_groups,
+                                         RFLOAT scaled_B, RFLOAT ccf_downsample) {
+    if (!is_initialized || failure_state.isPoisoned()) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    // Ask cuFFT for the work sizes of the actual plans, with automatic device
+    // allocation disabled. A fixed margin or cufftEstimateMany is insufficient
+    // for geometries whose factorisation needs a large R2C work area (#226 D2).
+    auto plan_bytes = [&](int w, int h, cufftType type, size_t &bytes) -> bool {
+        cufftHandle plan = 0;
+        mc_cuda::ScopedCufftPlan owner(&failure_state);
+        CUFFT_CHECK(cufftCreate(&plan));
+        owner.take(plan);
+        CUFFT_CHECK(cufftSetAutoAllocation(plan, 0));
+        int n[2] = {h, w};
+        const int real = w * h, comp = (w / 2 + 1) * h;
+        CUFFT_CHECK(cufftMakePlanMany(plan, 2, n, nullptr, 1,
+            type == CUFFT_R2C ? real : comp, nullptr, 1,
+            type == CUFFT_R2C ? comp : real, type, n_groups, &bytes));
+        CUFFT_CHECK(owner.releaseAll());
+        return true;
+    };
+    int wx = 0, wy = 0;
+    patchSpectrumWindow(patch_w, patch_h, scaled_B, ccf_downsample, wx, wy);
+    size_t prep_work = 0, align_work = 0;
+    if (!plan_bytes(patch_w, patch_h, CUFFT_R2C, prep_work) ||
+        !plan_bytes(wx, wy, CUFFT_C2R, align_work)) return false;
+    const size_t patch_real = (size_t)n_groups * patch_w * patch_h * sizeof(float);
+    const size_t patch_comp = (size_t)n_groups * (patch_w / 2 + 1) * patch_h * sizeof(cufftComplex);
+    const size_t tile = (size_t)ny * nfx * sizeof(cufftComplex);
+    const size_t patch_preparation_bytes = patch_real + prep_work + 2 * n_groups * sizeof(int) +
+                              (patch_comp > tile ? patch_comp : 0);
+    const size_t window = (size_t)wy * (wx / 2 + 1);
+    const size_t alignment = (2 * n_groups + 1) * window * sizeof(cufftComplex) +
+        window * sizeof(float) + (size_t)n_groups * wx * wy * sizeof(float) +
+        4 * n_groups * sizeof(float) + align_work;
+    size_t free_bytes = 0, total_bytes = 0;
+    HANDLE_ERROR(cudaMemGetInfo(&free_bytes, &total_bytes));
+    const size_t required = patch_preparation_bytes + alignment;
+    if (required <= free_bytes) return true;
+    logfile << "Local alignment admission declined: requires " << required
+            << " bytes of workspace, available " << free_bytes
+            << " bytes; falling back to streaming pipeline." << std::endl;
+    recordFailure(cudaErrorMemoryAllocation, "local alignment admission", __LINE__);
+    return false;
+}
+
+bool CudaMovieSession::admitPatchRetry(int patch_w, int patch_h, int n_groups,
+                                     RFLOAT scaled_B, RFLOAT ccf_downsample) {
+    if (!is_initialized || failure_state.isPoisoned()) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    // Only a non-converged patch needs this peak. downloadPatchSpectra frees S
+    // before returning, but cudaAlignPatch then allocates S and a fresh workspace
+    // while the session's old workspace is still alive (#226 D2, review #252).
+    static_assert(sizeof(cufftComplex) == 2 * sizeof(float), "retry spectrum byte layout");
+    size_t required = 0;
+    auto refuse_size = [&]() {
+        logfile << "Resident patch retry admission declined: invalid or overflowing workspace size; "
+                << "falling back to streaming pipeline." << std::endl;
+        recordFailure(cudaErrorMemoryAllocation, "patch retry admission", __LINE__);
+        return false;
+    };
+    // Validate before deriving the CCF geometry or forming int plan distances.
+    if (patch_w <= 0 || patch_h <= 0 || n_groups <= 0 ||
+        patch_w % 2 || patch_h % 2 || patch_w > INT_MAX / patch_h)
+        return refuse_size();
+    int wx = 0, wy = 0;
+    patchSpectrumWindow(patch_w, patch_h, scaled_B, ccf_downsample, wx, wy);
+    if (!mc_cuda::patchRetryRequiredBytes(patch_w, patch_h, n_groups, wx, wy, 0, required))
+        return refuse_size();
+    // Match the retry's batch-n_groups, out-of-place C2R plan. Do not allocate
+    // device work during the query; destroy the probe before sampling free bytes.
+    cufftHandle plan = 0;
+    mc_cuda::ScopedCufftPlan owner(&failure_state);
+    CUFFT_CHECK(cufftCreate(&plan));
+    owner.take(plan);
+    CUFFT_CHECK(cufftSetAutoAllocation(plan, 0));
+    int n[2] = {wy, wx};
+    size_t work = 0;
+    CUFFT_CHECK(cufftMakePlanMany(plan, 2, n, nullptr, 1, wy * (wx / 2 + 1),
+        nullptr, 1, wy * wx, CUFFT_C2R, n_groups, &work));
+    CUFFT_CHECK(cufftGetSize(plan, &work));
+    CUFFT_CHECK(owner.releaseAll());
+    if (!mc_cuda::patchRetryRequiredBytes(patch_w, patch_h, n_groups, wx, wy, work, required))
+        return refuse_size();
+    size_t free_bytes = 0, total_bytes = 0;
+    HANDLE_ERROR(cudaMemGetInfo(&free_bytes, &total_bytes));
+    if (required <= free_bytes) return true;
+    logfile << "Resident patch retry admission declined: requires " << required
+            << " bytes, available " << free_bytes
+            << " bytes; falling back to streaming pipeline." << std::endl;
+    recordFailure(cudaErrorMemoryAllocation, "patch retry admission", __LINE__);
+    return false;
 }
 
 bool CudaMovieSession::preparePatchInVram(

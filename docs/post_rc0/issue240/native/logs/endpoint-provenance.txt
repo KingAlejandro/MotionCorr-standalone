@@ -1,0 +1,38 @@
+Mon Oct 19 12:44:03 UTC 2026
+4-gpu-vm
+Mon Oct 19 12:44:03 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.86.10              Driver Version: 570.86.10      CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100 80GB PCIe          Off |   00000000:06:00.0 Off |                    0 |
+| N/A   37C    P0             45W /  300W |       1MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA A100 80GB PCIe          Off |   00000000:07:00.0 Off |                    0 |
+| N/A   37C    P0             44W /  300W |       1MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   2  NVIDIA A100 80GB PCIe          Off |   00000000:08:00.0 Off |                    0 |
+| N/A   32C    P0             43W /  300W |       1MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   3  NVIDIA A100 80GB PCIe          Off |   00000000:09:00.0 Off |                    0 |
+| N/A   31C    P0             42W /  300W |       1MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+ed24e44b614ec158ffa919a356efaa2806b9c309
+2e00e0e8fb75aafaf23f15a3c2a142c7d35b6e30477d594244ecba495a5bb6b3  /mnt/clathrin/alex-motioncorr-hygiene240/build-nvcomp/motioncorr
+52e52d3a3af2a296c5b9859973931dc2422971b01955ed6c627807f5e96291d9  /mnt/clathrin/alex-motioncorr-hygiene240/tools/multigpu_publication.py
+f42dc6a2b4862c77f0a677ce6000c410d2ca4cf54810bb39604decf72de5b8cf  /mnt/clathrin/alex-motioncorr-hygiene240/tools/qual_lib.py

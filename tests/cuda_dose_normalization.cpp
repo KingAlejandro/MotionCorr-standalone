@@ -1,5 +1,6 @@
 // Native exact-byte oracle against the frozen pre-prototype CUDA kernels.
 // Original formulas below are deliberately independent of the new plane helper.
+// The inverse oracle applies #253's required boundary policy independently on the host.
 // Returned-code faults are test-only, not physically poisoned GPU contexts.
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_movie_session.h"
@@ -327,6 +328,25 @@ void coefficients(const ThirdOrderPolynomialModel &model, int iframe, float *x, 
         y[i] = (float)(model.coeffY(c)*z + model.coeffY(c+1)*z2 + model.coeffY(c+2)*z3);
     }
 }
+// Independent host projection for inverse-oracle scratch. cuFFT R2C can also
+// leave boundary-pair roundoff; preserve its original resident bytes separately.
+void projectInverseBoundaryOnHost(cufftComplex *frame, int nx, int ny) {
+    const int nfx = nx/2+1;
+    const size_t tile = (size_t)nfx*ny;
+    std::vector<cufftComplex> boundary(tile);
+    gpu(cudaMemcpy(boundary.data(), frame, tile*sizeof(cufftComplex), cudaMemcpyDeviceToHost), "oracle boundary download");
+    for (int x : {0, nx % 2 == 0 ? nx/2 : 0}) {
+        for (int y = 0; y <= ny/2; ++y) {
+            const size_t a = (size_t)y*nfx+x, b = (size_t)((ny-y)%ny)*nfx+x;
+            if (a == b) { boundary[a].y = 0; continue; }
+            const cufftComplex u = boundary[a], v = boundary[b];
+            if (u.x == v.x && u.y == -v.y) continue;
+            const float re = (u.x+v.x)*0.5f, im = (u.y-v.y)*0.5f;
+            boundary[a] = make_cuFloatComplex(re, im); boundary[b] = make_cuFloatComplex(re, -im);
+        }
+    }
+    gpu(cudaMemcpy(frame, boundary.data(), tile*sizeof(cufftComplex), cudaMemcpyHostToDevice), "oracle boundary upload");
+}
 std::vector<float> oracle(const Input &in, const ThirdOrderPolynomialModel *model) {
     const int nfx = in.nx/2+1;
     const size_t tile = (size_t)nfx*in.ny, pixels = (size_t)in.nx*in.ny;
@@ -349,6 +369,9 @@ std::vector<float> oracle(const Input &in, const ThirdOrderPolynomialModel *mode
         gpu(cudaMemcpy(frame, in.values.data()+j*tile, tile*sizeof(float2), cudaMemcpyHostToDevice), "oracle frame upload");
         originalDoseWeightKernel<<<grid,block>>>(frame,nfx,in.ny,in.ny/2,nx2,ny2,(float)in.apix,doses,in.count,j);
         gpu(cudaGetLastError(), "oracle dose launch"); gpu(cudaDeviceSynchronize(), "oracle dose completion");
+        // Arbitrary complex fixtures use the same defined real-image policy
+        // as FFTW, without changing the predecessor dose/interpolation formulas.
+        projectInverseBoundaryOnHost((cufftComplex*)frame, in.nx, in.ny);
         fft(cufftExecC2R(plan,(cufftComplex*)frame,real), "oracle inverse FFT");
         gpu(cudaDeviceSynchronize(), "oracle inverse completion");
         if (model) {
@@ -439,9 +462,10 @@ void exactCases() {
             require(allocations == 5 && plane_bytes == (size_t)(in.nx/2+1)*in.ny*sizeof(float) && plane_freed,
                     "reconstruction denominator plane allocation/ownership wrong");
             require(violation.empty(), violation.c_str());
-            // The weight kernel writes the C2R input directly: no per-frame D2D copy.
+            // Weight, Hermitian projection and accumulation each check their launch;
+            // the weight kernel still writes C2R scratch directly, without a D2D copy.
             // (Before this change frame_copies was `count`; that shape now fails here.)
-            require(launch_checks == 1+2*count && execs == count && frame_copies == 0,
+            require(launch_checks == 1+3*count && execs == count && frame_copies == 0,
                     "dose precompute/per-frame launch count changed or a per-frame D2D copy came back");
             // One checked normalization completion and one total-timer wait in
             // both modes; three telemetry waits per frame only when timed.
@@ -593,6 +617,7 @@ void fftSyncCases() {
         gpu(cudaMemcpy(want_f.data(),df,ctile*frames*sizeof(cufftComplex),cudaMemcpyDeviceToHost),"oracle f download");
         for (int j = 0; j < frames; ++j) {
             gpu(cudaMemcpy(tile,df+j*ctile,ctile*sizeof(cufftComplex),cudaMemcpyDeviceToDevice),"oracle preserve copy");
+            projectInverseBoundaryOnHost(tile, nx, ny);
             fft(cufftExecC2R(inv,tile,dr2+j*rpix),"oracle C2R"); gpu(cudaDeviceSynchronize(),"oracle C2R wait");
         }
         gpu(cudaMemcpy(want_r.data(),dr2,rpix*frames*sizeof(float),cudaMemcpyDeviceToHost),"oracle r download");

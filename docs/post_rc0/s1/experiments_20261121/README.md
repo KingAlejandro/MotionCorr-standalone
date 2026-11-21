@@ -7,4 +7,6 @@ This checkpoint records two lines of investigation under [issue #238](https://gi
 
 Numerical gates and release decisions remain as recorded in the earlier issue and PRs. These runs are diagnostics on selected development inputs. Performance, independent scientific accuracy and release qualification remain open.
 
+The [run recipes](run_recipes.md) record the producer commands, diagnostic switches and replay prerequisites.
+
 The linked JSON files retain the measured values, input and binary hashes, exit codes and GPU-context witnesses where available. [Source SHA-256 index](data/source_sha256.json) identifies the local evidence used to assemble these records. GPU UUIDs, process IDs, timing and host paths were omitted from the public receipts. Raw arrays and binaries remain in the experiment archives.

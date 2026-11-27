@@ -1,0 +1,43 @@
+{
+  "number": 256,
+  "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/256",
+  "title": "docs(audit): stage-by-stage CPU/CUDA numerical correctness review",
+  "head": "docs/numerical-correctness-audit-20261020",
+  "head_sha": "f62572947572259abd197c1deaa024c3a1020e13",
+  "base": "main",
+  "base_sha": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+  "state": "open",
+  "draft": false,
+  "body": "## Purpose\nPublish an independent, self-contained review of MotionCorr Standalone's CPU/CUDA numerical divergence and correctness risks, with pinned code links and clear evidence boundaries.\n\n## Included\n- **[Full illustrated report](https://github.com/KingAlejandro/MotionCorr-standalone/blob/4731f46fbb73f1a7decb871267f37e35632c5a4f/docs/post_rc0/numerical_correctness_audit/README.md)**: motion-correction pipeline, precise error stage, mechanism, provenance, proposed fix and remaining test for each finding.\n- **Three committed SVG charts**: five production S1 image-relative-RMSE cases; fit-field changes with common accepted patch sets; same-input peak curvature replay.\n- **Two Mermaid diagrams**: pipeline stage ownership and causal paths from upstream numerical differences through near-tied peaks, acceptance and corrected images.\n- Pinned source links for each finding; references to #250, #238, #232 and #70. No Notion links.\n\n## Review highlights\n1. Non-Hermitian spectra can reach global and dose-weighted C2R; reduced CCF geometry is a separate unproven S1 risk. Contract violation is distinct from routine FFTW/cuFFT roundoff.\n2. CUDA subpixel curvature loses avoidable precision even for identical captured CCF samples. Stable-denominator results are **host replays**, not validated patched GPU output.\n3. Patch-set/trajectory decisions amplify differences; fit-only controls do not establish a broken solver or improved reconstructed images.\n4. Independent correctness concerns: unbracketed boundary peak fit, centred-coordinate guard, float border interpolation branch, transformed EER gain semantics, and STAR coefficient serialization.\n\n## Evidence boundaries\nDocumentation and SVG assets **only**. No production code, CMake, numerical tolerances, benchmark gates, release designation or algorithms changed. No new native GPU experiment or downstream CTF/FSC result is claimed. CPU parity is not equated with scientific ground truth. Do not merge as an implicit closure of S1.3/S1.4.\n\nRelated: #238, #232, #70, #250.",
+  "comments": [
+    {
+      "id": 6304595022,
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/256#issuecomment-6304595022",
+      "created_at": "2026-10-21T00:04:10Z",
+      "review": null,
+      "body": "**Section C updated** (`f6257294`) with the #253 size dependence and the #255 census (S1 27 \u2192 17 of 60 with #254, McNemar p = 0.021). Follow-ups from this review: \u00a7B peak-fit precision is being fixed and measured in a separate PR; \u00a7F is filed as #259 and \u00a7G as #258. \u00a7D, \u00a7E and \u00a7H are inherited behaviours and wait for a maintainer decision.",
+      "path": null,
+      "line": null
+    },
+    {
+      "id": 6304705259,
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/256#issuecomment-6304705259",
+      "created_at": "2026-10-21T00:11:56Z",
+      "review": null,
+      "body": "The `f6257294` census update is useful. Two small publication follow-ups while consolidating the current review:\n\n1. The PR body's prominent **Full illustrated report** link still pins `4731f46f`, so readers following it do not see the new section C. Point the current-report link at the reviewed new head (and retain the old commit only if labelled as the original snapshot).\n2. Carry the census's endpoint and uncertainty qualifications into the summary: 60 configurations are 30 movies at two grids; 27\u219217 is the configuration screen, not 27\u219217 independent movies or scientific failures. The raw counts reproduce, and my [#255 review](https://github.com/KingAlejandro/MotionCorr-standalone/pull/255#pullrequestreview-5593341658) adds a movie-cluster sensitivity analysis, explicit regressions and the limits of the two RMS-matched null seeds. The earlier 'not yet measured' statement can be superseded without claiming complete causal closure.\n\nThe coordinated implementation/validation plan is now on [#238](https://github.com/KingAlejandro/MotionCorr-standalone/issues/238#issuecomment-6304699348). It points to the active #254/#257 work rather than starting duplicate fixes. No production changes, gate changes or merge are implied by this documentation follow-up.",
+      "path": null,
+      "line": null
+    },
+    {
+      "id": 6311294385,
+      "url": "https://github.com/KingAlejandro/MotionCorr-standalone/pull/256#issuecomment-6311294385",
+      "created_at": "2026-10-21T08:12:58Z",
+      "review": null,
+      "body": "## Conclusions update after the native #260/#261 work\n\nThe [revised coordination/validation plan on #238](https://github.com/KingAlejandro/MotionCorr-standalone/issues/238#issuecomment-6311285235) now prioritises mathematical validity, injected-motion truth and held-out scientific outcomes over matching legacy CPU output. This is a supplementary conclusions update; the original pinned review remains a historical assessment, not an account of new runs performed by its author.\n\nChanges to carry into the next report revision:\n\n- **\u00a7B:** #260 now provides a native actual-kernel demonstration of the scalar peak-fit repair and its float-denominator mutant. Its localized correctness argument is stronger than the original host replay. However, #261 does not support the hypothesis that this fixes the principal remaining global trajectory gap: the #254-only vs combined fixed-reference census is 17\u219219/60 positives, with median maximum global discrepancy essentially unchanged. Do not equate that change in CPU agreement with a change in scientific accuracy.\n- **\u00a7B/\u00a7C:** bilateral CCF DC conditioning is now experimentally supported as a strong numerical-stability intervention, not just a proposed diagnostic. Both-conditioned agreement has 0/60 screen positives, while the CPU implementation itself changes substantially when conditioned. Absolute motion accuracy and downstream science remain unmeasured.\n- **Important counterexample:** the very close agreement includes the e10216-01 shared global nonconvergence. Both paths exhaust their global iterations with roughly 58.57 px last-increment RMSD and still publish/exit 0. The 0/60 screen therefore must not be promoted to 60 successful motion estimates.\n- **\u00a7C:** #254's latest tests now inspect the actual inputs at all five C2R sites and use deterministic invariant-removal mutants. The positive numerical reference still uses an unprojected malformed FFTW input and needs the independently valid oracle requested in the [updated review](https://github.com/KingAlejandro/MotionCorr-standalone/pull/254#pullrequestreview-5596691051). New boundary-injection evidence also characterizes alternating-x as well as row-constant leakage on the tested 4096\u00b2 transform.\n- The next validation should build on the existing analytic-Gaussian known-motion fixtures, expand realistic low-SNR/background/geometry coverage and separate global/local conditioning, not only repeat CPU-relative census statistics. [Detailed #262 test brief](https://github.com/KingAlejandro/MotionCorr-standalone/issues/262#issuecomment-6311268237).\n\nNew source-bound evidence: [#260 at d888ab11](https://github.com/KingAlejandro/MotionCorr-standalone/blob/d888ab111b1965aeda484a928e76f421112737e0/docs/post_rc0/issue257/README.md), [#261 at c89e74c2](https://github.com/KingAlejandro/MotionCorr-standalone/blob/c89e74c212a3196d2ad14a58626e9da539d37893/docs/post_rc0/s1/peakfit_attribution/README.md), [#254 review response at af2a5900](https://github.com/KingAlejandro/MotionCorr-standalone/blob/af2a5900357e8e4dcdd83fb833ccb7e4fdaa5817/docs/post_rc0/issue253/review-20261021/README.md).\n\nNo new native experiments, production changes, gate relaxations or merges were performed in this review/update.",
+      "path": null,
+      "line": null
+    }
+  ],
+  "capture_method": "GitHub connector fetch_pr metadata subset (diff omitted), fetch_pr_comments merged normalized timeline; not native revalidation",
+  "snapshot_recorded_utc": "2026-10-22T20:25:03.394370+00:00"
+}

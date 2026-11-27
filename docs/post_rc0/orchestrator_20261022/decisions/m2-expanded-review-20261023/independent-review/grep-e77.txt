@@ -1,0 +1,85 @@
+e77a51a2:CMakeLists.txt:440:    # Profiling kit (docs/profiling.md): Nsight SQLite queries and derived
+e77a51a2:CMakeLists.txt:762:        # fault controls (docs/batched_patch_alignment.md).
+e77a51a2:CMakeLists.txt:772:        # Measurement only (low-VRAM Tier 2 decision, docs/perf_vram_tier1/report.md):
+e77a51a2:CMakeLists.txt:1179:        # Dose-weighting scratch alias (docs/vram_live_ranges.md). The mutant runner
+e77a51a2:CMakeLists.txt:1224:                    ${CMAKE_CURRENT_SOURCE_DIR}/docs/issue85_laneC/compare_output_trees.py)
+e77a51a2:src/acc/cuda/cuda_alignpatch.cu:739:// Batched local patch alignment (docs/batched_patch_alignment.md).
+e77a51a2:src/acc/cuda/cuda_alignpatch.h:80: * next patch's RMSD lines). See docs/batched_patch_alignment.md.
+e77a51a2:src/acc/cuda/cuda_movie_session.cu:1634:    // Pipelined chunks (docs/nvcomp_ingest_pipeline.md).
+e77a51a2:src/acc/cuda/cuda_movie_session.cu:1836:    // (docs/nvcomp_ingest_pipeline.md). Handles are opened here, on the calling
+e77a51a2:src/acc/cuda/cuda_movie_session.cu:2136:    // tried, docs/fft_dw_device_overheads.md), so each Fourier tile is copied
+e77a51a2:src/acc/cuda/cuda_movie_session.cu:2426:        // (docs/vram_live_ranges.md), so it holds them when large enough.
+e77a51a2:src/acc/cuda/cuda_movie_session.h:280:    // Global alignment scratch (docs/vram_live_ranges.md): d_Iframes is dead from
+e77a51a2:src/acc/cuda/cuda_movie_session.h:292:    /** Batched local alignment (docs/batched_patch_alignment.md). Aligns the
+e77a51a2:src/acc/cuda/cuda_reader_pool.h:22: * OMP_WAIT_POLICY=passive recovered it (docs/nvcomp_ingest_pipeline.md).
+e77a51a2:src/acc/cuda/cuda_realspace_dw.cu:429:    // buffer was measured and rejected (docs/host_device_overheads.md): the
+e77a51a2:src/apps/run_motioncorr.cpp:29:// mode changes CPU-path timings substantially (docs/issue10_allocator_control/).
+e77a51a2:src/apps/run_motioncorr.cpp:48:/* Host allocator policy (docs/host_buffer_reuse.md).
+e77a51a2:src/float16.h:53:// http://gcc.gnu.org/onlinedocs/gcc-4.7.1/gcc/Structures-unions-enumerations-and-bit_002dfields-implementation.html#Structures-unions-enumerations-and-bit_002dfields-implementation
+e77a51a2:src/motioncorr_runner.cpp:127:	// (docs/stage_profile.md). Each costs one branch when profiling is off.
+e77a51a2:src/motioncorr_runner.cpp:143:	fn_profile = parser.getOption("--profile", "Write a per-movie, per-stage wall/CPU/page-fault profile to this JSON-lines file (docs/stage_profile.md). Diagnostic; products are unchanged.", "");
+e77a51a2:src/motioncorr_runner.cpp:2065:// (docs/batched_patch_alignment.md).
+e77a51a2:src/motioncorr_runner.cpp:3447:		// so the alignment's scratch lives there (docs/vram_live_ranges.md).
+e77a51a2:src/motioncorr_runner.cpp:3574:		// Batched resident alignment (docs/batched_patch_alignment.md). It only
+e77a51a2:src/multidim_array.h:2712:     * docs/output_timing_20260930/mutants.txt.) computeStats' callers depend
+e77a51a2:src/stage_profile.cpp:2: * Built-in per-stage profile for MotionCorr. See docs/stage_profile.md.
+e77a51a2:src/stage_profile.h:2: * Built-in per-stage profile for MotionCorr. See docs/stage_profile.md.
+e77a51a2:tests/cuda_fault_matrix.cpp:23://     end-to-end witness is item 4 of docs/issue69/gpu_plan.md.
+e77a51a2:tests/cuda_fault_matrix.cpp:379:    // requirement, and it belongs to the end-to-end runs in docs/issue69/gpu_plan.md
+e77a51a2:tests/cuda_nvcomp_acceptance_shim.cpp:7:// The ingest is pipelined in chunks (docs/nvcomp_ingest_pipeline.md). Each
+e77a51a2:tests/cuda_patch_batch.cpp:1:// Native controls for batched local patch alignment (docs/batched_patch_alignment.md).
+e77a51a2:tests/cuda_patch_batch.cpp:9:// Window mode (docs/vram_live_ranges.md): both paths hold only each frame's CCF
+e77a51a2:tests/cuda_patch_fft_batch_probe.cpp:3:// (docs/perf_vram_tier1/report.md): without a resident real-space movie, the
+e77a51a2:tests/cuda_vram_alias.cpp:1:// Native controls for the dead-buffer aliases of docs/vram_live_ranges.md.
+e77a51a2:tests/run_dw_alias_controls.py:2:"""Runner control for the dose-weighting scratch alias (docs/vram_live_ranges.md).
+e77a51a2:tests/run_enumeration_boundary_control.py:27:                        "docs/issue69/evidence/ownership-20260929/compare-native.py")
+e77a51a2:tests/run_nvcomp_acceptance_controls.py:8:The ingest is pipelined in chunks (docs/nvcomp_ingest_pipeline.md). The fixture
+e77a51a2:tests/run_nvcomp_reconstruction_controls.py:167:    # (docs/vram_live_ranges.md) and there is no reconstruction cudaFree to fault.
+e77a51a2:tests/run_preprocessing_failure_controls.py:69:    comparator_path = source / ("docs/issue69/evidence/ownership-20260929/compare-native.py"
+e77a51a2:tests/run_preprocessing_failure_controls.py:70:                                if args.float_host else "docs/issue85_laneC/compare_output_trees.py")
+e77a51a2:tests/run_preprocessing_failure_controls.py:173:    # (docs/vram_live_ranges.md) and there is no reconstruction cudaFree to fault.
+e77a51a2:tests/run_resident_retry_controls.py:15:the label is masked, as in docs/issue85_laneC/compare_output_trees.py), every pixel, and
+e77a51a2:tests/run_stale_cuda_error_controls.py:25:through docs/issue85_laneC/compare_output_trees.validate_mrc, so the whole header
+e77a51a2:tests/run_stale_cuda_error_controls.py:54:    Path(__file__).resolve().parents[1] / "docs/issue85_laneC/compare_output_trees.py")
+e77a51a2:tests/run_tiff_identity_later_chunk_controls.py:19:sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "docs/rc0/qf/tools"))
+e77a51a2:tests/test_host_buffer_reuse.py:2:"""Host buffer reuse must not change products (docs/host_buffer_reuse.md).
+e77a51a2:tests/test_multi_gpu_scheduling.py:12:docs/multi_gpu/negative_controls.py, which removes each one in a scratch copy
+e77a51a2:tests/test_multi_gpu_scheduling.py:16:message for the same input (docs/multi_gpu/gpu_evidence/a0_device_list_witness.log).
+e77a51a2:tests/test_multi_gpu_scheduling.py:22:docs/issue85_laneC/compare_output_trees.py, which compares MRC header,
+e77a51a2:tests/test_native_movie_staging.cpp:222:			            "       discriminating evidence is the 24-movie A/B in docs/issue95_staging\n");
+e77a51a2:tests/test_runner_numerics.cpp:223:                // docs/output_timing_20260930/mutants.txt.
+e77a51a2:tests/test_stage_profile.py:2:"""Contract for --profile (docs/stage_profile.md).
+e77a51a2:tests/test_sticky_cuda_process_lifecycle.py:245:    evidence = Path(__file__).resolve().parents[1] / "docs/issue213/evidence"
+e77a51a2:tools/check_known_motion.py:56:# docs/known_motion_validation.md.
+e77a51a2:tools/compare_motioncorr.py:283:        # and not the MRC header "rms" word. See docs/gate_contract.md.
+e77a51a2:tools/compare_motioncorr.py:601:    # gate, so it must not report PASS. See docs/gate_contract.md, "Failure behaviour".
+e77a51a2:tools/gate_representations.py:4:Regenerates every table in docs/gate_contract.md section 4A. Read-only: it runs no movie,
+e77a51a2:tools/multi_gpu/merge_workers.py:359:                         "always copies. See docs/multi_gpu/AGGREGATE_STAGING.md")
+e77a51a2:tools/multi_gpu/run_multi_gpu.py:702:    # benchmark: see docs/multi_gpu/scaling/README.md for what an
+e77a51a2:tools/nsys_analysis/README.md:3:**Superseded by `tools/profiling/` (`docs/profiling.md`).** The queries of
+e77a51a2:tools/nsys_analysis/selftest.py:150:data = ROOT / "docs/profiling_20261001/data24/arms24.json"
+e77a51a2:tools/nsys_analysis/selftest.py:207:            clone_data = clone / 'docs/profiling_20261001/data24/arms24.json'
+e77a51a2:tools/profiling/lib/__init__.py:1:"""MotionCorr profiling kit library. See docs/profiling.md."""
+e77a51a2:tools/profiling/lib/identity.py:1:"""Product identity between two MotionCorr output trees (docs/profiling.md).
+e77a51a2:tools/profiling/lib/metrics.py:1:"""Derived device metrics from an Nsight Systems trace (docs/profiling.md, "trace").
+e77a51a2:tools/profiling/lib/provenance.py:1:"""Provenance, host state and shared-host locks (docs/profiling.md, "Trust rules").
+e77a51a2:tools/profiling/lib/report.py:22:INSTR_PROFILE = "--profile (docs/stage_profile.md): profiled process, per-stage main-thread wall/CPU/faults"
+e77a51a2:tools/profiling/lib/stats.py:1:"""Paired statistics for A/B wall-time claims (docs/profiling.md, "Verdicts").
+e77a51a2:tools/profiling/mcprof.py:2:"""MotionCorr profiling kit (docs/profiling.md).
+e77a51a2:tools/profiling/tests/test_discards.py:1:"""The discard rule cannot bias a verdict silently (docs/profiling.md, rule 3).
+e77a51a2:tools/run_cuda_reconstruction_validation.py:77:    parser.add_argument("--out-json", default="docs/cuda_reconstruction_validation_summary.json", help="Summary JSON output")
+e77a51a2:tools/single_gpu/refresh_profile.sh:23:python3 "$D/baseline-src/docs/issue85_laneC/compare_output_trees.py" "$D/baseline-r3" "$D/profile2-output" --manifest "$D/baseline-src/docs/issue85_laneC/tutorial_24_movie_manifest.json" --input-star "$R/movies.star" --products-only --json-out "$D/profile2-exact.json" > "$D/profile2-exact.log" 2>&1
+e77a51a2:tools/single_gpu/run_dose_options.py:6:spec=importlib.util.spec_from_file_location('cmp',a.source/'docs/issue85_laneC/compare_output_trees.py');cmp=importlib.util.module_from_spec(spec);sys.modules[spec.name]=cmp;spec.loader.exec_module(cmp)
+e77a51a2:tools/single_gpu/run_dose_options.py:7:manifest=json.loads((a.source/'docs/issue85_laneC/tutorial_24_movie_manifest.json').read_text());movie=manifest['movies'][0];stem=Path(movie).stem
+e77a51a2:tools/single_gpu/run_dose_pairs.py:50:manifest=json.loads((a.manifest or a.source/'docs/issue85_laneC/tutorial_24_movie_manifest.json').read_text())
+e77a51a2:tools/single_gpu/run_dose_pairs.py:135: compare=[os.environ.get('MC_PYTHON','python3'),str(a.source/'docs/issue85_laneC/compare_output_trees.py'),str(b),str(c),'--manifest',str(manifest_path),'--input-star',str(a.input_dir/'movies.star'),'--json-out',str(root/f'exact-{pair}.json')]
+e77a51a2:tools/single_gpu/run_option_matrix.py:6:spec=importlib.util.spec_from_file_location('cmp',a.source/'docs/issue85_laneC/compare_output_trees.py');cmp=importlib.util.module_from_spec(spec);sys.modules[spec.name]=cmp;spec.loader.exec_module(cmp)
+e77a51a2:tools/single_gpu/run_option_matrix.py:7:manifest=json.loads((a.source/'docs/issue85_laneC/tutorial_24_movie_manifest.json').read_text());movie=manifest['movies'][0];stem=Path(movie).stem
+e77a51a2:tools/single_gpu/run_pairs.py:25:manifest=json.loads((a.source/'docs/issue85_laneC/tutorial_24_movie_manifest.json').read_text())
+e77a51a2:tools/single_gpu/run_pairs.py:97: compare=[os.environ.get('MC_PYTHON','python3'),str(a.source/'docs/issue85_laneC/compare_output_trees.py'),str(b),str(c),'--manifest',str(manifest_path),'--input-star',str(a.input_dir/'movies.star'),'--json-out',str(root/f'exact-{pair}.json')]
+e77a51a2:tools/stage_profile.py:2:"""Summarise MotionCorr --profile output (docs/stage_profile.md).
+e77a51a2:tools/test_ci_fail_closed.py:249:            # --profile contract (docs/stage_profile.md).
+e77a51a2:tools/test_ci_fail_closed.py:255:            # Profiling kit (docs/profiling.md).
+e77a51a2:tools/test_combined_eval.py:16:WRAPPER = REPO/'docs/post_rc0/s1/synth_combined/eval_v2.py'
+e77a51a2:tools/validate_test_collection.py:61:    # --profile: products unchanged, stages exhaustive (docs/stage_profile.md).
+e77a51a2:tools/validate_test_collection.py:71:    # product identity (docs/profiling.md). Device-free.

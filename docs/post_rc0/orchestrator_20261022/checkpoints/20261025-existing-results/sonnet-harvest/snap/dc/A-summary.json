@@ -1,0 +1,5493 @@
+[
+ {
+  "backend": "cpu",
+  "arm": "none",
+  "eval_exit": 0,
+  "stderr": "",
+  "results": [
+   {
+    "case": "zero",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 0,
+    "checker_message": "zero: gate accuracy=PASS; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_gate": "PASS",
+    "checker_status": "PASS",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 1.1129693120892625e-05,
+      "contrast_normalized_rmse": 1.1174255694669063e-05,
+      "mean_error": -1.099374571822409e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/5 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "integer",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 1,
+    "checker_message": "integer: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.29786778665475044,
+     "p95": 0.48769178867805424,
+     "max": 0.48769178867805424
+    },
+    "field_angstrom": {
+     "rms": 0.2636129911894542,
+     "p95": 0.431607232980078,
+     "max": 0.431607232980078
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.6294498329247489,
+      "contrast_normalized_rmse": 0.6319700949358554,
+      "mean_error": -0.0023172690318180797
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.03560936860368568,
+      "contrast_normalized_rmse": 0.03575194539731887,
+      "mean_error": -0.00013916638168669142
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.02630162611603737,
+      "contrast_normalized_rmse": 0.02640693613146232,
+      "mean_error": -8.513071952620521e-05
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      5.71299,
+      0.867494,
+      0.57658,
+      0.974519,
+      0.923235
+     ],
+     "global_converged": false,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/25 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "fractional",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 1,
+    "checker_message": "fractional: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.5921536730251702,
+     "p95": 0.7948194679573471,
+     "max": 0.7948194679573471
+    },
+    "field_angstrom": {
+     "rms": 0.5240560006272756,
+     "p95": 0.7034152291422523,
+     "max": 0.7034152291422523
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.4550866865088168,
+      "contrast_normalized_rmse": 0.4569088137503783,
+      "mean_error": -0.0011611553338857672
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.02357382905470023,
+      "contrast_normalized_rmse": 0.023668216601912408,
+      "mean_error": -6.632381835237176e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.1347650142302321,
+      "contrast_normalized_rmse": 0.13530460154605126,
+      "mean_error": 0.00041666447825953464
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.13761205971240997,
+      "contrast_normalized_rmse": 0.1381630495282882,
+      "mean_error": 0.00047152978368103504
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      2.67662,
+      0.735208,
+      0.760209,
+      0.716634,
+      1.2464
+     ],
+     "global_converged": false,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/25 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "affine",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 1,
+    "checker_message": "affine: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.45474292342088196,
+     "p95": 0.8389729255617366,
+     "max": 1.029511788133801
+    },
+    "field_angstrom": {
+     "rms": 0.4024474872274806,
+     "p95": 0.742491039122137,
+     "max": 0.9111179324984138
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.45412299930470584,
+      "contrast_normalized_rmse": 0.4559412680270907,
+      "mean_error": -0.0018126993097810349
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.021541174428325656,
+      "contrast_normalized_rmse": 0.021627423404410172,
+      "mean_error": -6.0467113914507874e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.1088487382642568,
+      "contrast_normalized_rmse": 0.1092845590805554,
+      "mean_error": -0.0009351736685037025
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.10865087062120438,
+      "contrast_normalized_rmse": 0.10908590170295475,
+      "mean_error": -0.0009081424796022475
+     }
+    },
+    "convergence": {
+     "global_iterations": 4,
+     "global_increment_px": [
+      2.50009,
+      0.618338,
+      0.614909,
+      0.306687
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.329762,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.490189,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0998224,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.300762,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.31917,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.367989,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.362606,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.447708,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.349928,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/20 cpu.local=0/65 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "pedestal",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 1,
+    "checker_message": "pedestal: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.3945009135517155,
+     "p95": 4.0720413799013375,
+     "max": 4.398997726755499
+    },
+    "field_angstrom": {
+     "rms": 2.119133308493268,
+     "p95": 3.6037566212126833,
+     "max": 3.8931129881786166
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.005386038484081602,
+      "contrast_normalized_rmse": 0.021630507369244406,
+      "mean_error": -1.3555210040027483e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.11352824419736862,
+      "contrast_normalized_rmse": 0.45593249824568877,
+      "mean_error": -0.00011486477160360664
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/5 cpu.local=0/45 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "noisy",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 1,
+    "checker_message": "noisy: characterization accuracy=FAIL; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 2.6474150479459193,
+     "p95": 4.945276016691183,
+     "max": 11.19089344214544
+    },
+    "field_angstrom": {
+     "rms": 2.342962317432139,
+     "p95": 4.376569274771697,
+     "max": 9.903940696298715
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 1.8398193560026619,
+      "contrast_normalized_rmse": 1.8471858315940317,
+      "mean_error": 0.008353184023473986
+     },
+     "true_motion_bilinear": {
+      "rmse": 1.3149793556672902,
+      "contrast_normalized_rmse": 1.320244417856724,
+      "mean_error": 0.01125653816658238
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 1.393311619758606,
+      "contrast_normalized_rmse": 1.3988903496637914,
+      "mean_error": 0.008808448910713196
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      1.85486,
+      1.19205,
+      1.35101,
+      1.26005,
+      1.40998
+     ],
+     "global_converged": false,
+     "patches": [
+      {
+       "final_increment_px": 0.452546,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.416659,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.243603,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.307921,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.403117,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.243494,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.241993,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.47798,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.424884,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/25 cpu.local=0/160 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "flat",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 0,
+    "checker_message": "flat: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.37787654746835,
+     "p95": 3.8830561417522667,
+     "max": 3.8830561417522667
+    },
+    "field_angstrom": {
+     "rms": 2.1044207445094902,
+     "p95": 3.4365046854507564,
+     "max": 3.4365046854507564
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/5 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "repeated",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 1,
+    "checker_message": "repeated: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 18.68232578869665,
+     "p95": 31.642843286436825,
+     "max": 31.642843286436825
+    },
+    "field_angstrom": {
+     "rms": 16.533858322996537,
+     "p95": 28.00391630849659,
+     "max": 28.00391630849659
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.42687223210138525,
+      "contrast_normalized_rmse": 0.6051034756702337,
+      "mean_error": -0.018514501131497704
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.008904370800019313,
+      "contrast_normalized_rmse": 0.012622197731682208,
+      "mean_error": -0.0006081599455613357
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 0.07616128027439117,
+      "contrast_normalized_rmse": 0.10796077188522503,
+      "mean_error": 0.00052642822265625
+     }
+    },
+    "convergence": {
+     "global_iterations": 4,
+     "global_increment_px": [
+      10.2299,
+      6.26897,
+      6.71193,
+      0.223607
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/20 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   }
+  ]
+ },
+ {
+  "backend": "cpu",
+  "arm": "global",
+  "eval_exit": 0,
+  "stderr": "",
+  "results": [
+   {
+    "case": "zero",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 0,
+    "checker_message": "zero: gate accuracy=PASS; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_gate": "PASS",
+    "checker_status": "PASS",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 1.1129693120892625e-05,
+      "contrast_normalized_rmse": 1.1174255694669063e-05,
+      "mean_error": -1.099374571822409e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=5/5 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "integer",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 1,
+    "checker_message": "integer: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.5865149682696938,
+     "p95": 0.9614652158871895,
+     "max": 0.9614652158871895
+    },
+    "field_angstrom": {
+     "rms": 0.519065746918679,
+     "p95": 0.8508967160601627,
+     "max": 0.8508967160601627
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.6294498329247489,
+      "contrast_normalized_rmse": 0.6319700949358554,
+      "mean_error": -0.0023172690318180797
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.11873829218993598,
+      "contrast_normalized_rmse": 0.11921370991414044,
+      "mean_error": -0.0004137312522756707
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.11921501904726028,
+      "contrast_normalized_rmse": 0.11969234829828701,
+      "mean_error": -0.00035006573307327926
+     }
+    },
+    "convergence": {
+     "global_iterations": 3,
+     "global_increment_px": [
+      6.33612,
+      1.59657,
+      0.432098
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=15/15 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "fractional",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 1,
+    "checker_message": "fractional: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.3689088593246305,
+     "p95": 0.5899792914196227,
+     "max": 0.5899792914196227
+    },
+    "field_angstrom": {
+     "rms": 0.32648434050229796,
+     "p95": 0.5221316729063661,
+     "max": 0.5221316729063661
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.4550866865088168,
+      "contrast_normalized_rmse": 0.4569088137503783,
+      "mean_error": -0.0011611553338857672
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.02357382905470023,
+      "contrast_normalized_rmse": 0.023668216601912408,
+      "mean_error": -6.632381835237176e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.06546965418863215,
+      "contrast_normalized_rmse": 0.0657317889509296,
+      "mean_error": 0.00011393344932832816
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.06345731765031815,
+      "contrast_normalized_rmse": 0.06371139665939152,
+      "mean_error": 0.00017433187167625874
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.7802,
+      0.371037
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=10/10 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "affine",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 1,
+    "checker_message": "affine: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.34344754077472156,
+     "p95": 0.6691964755574142,
+     "max": 1.0064193624194835
+    },
+    "field_angstrom": {
+     "rms": 0.30395107358562856,
+     "p95": 0.5922388808683116,
+     "max": 0.8906811357412429
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.45412299930470584,
+      "contrast_normalized_rmse": 0.4559412680270907,
+      "mean_error": -0.0018126993097810349
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.021541174428325656,
+      "contrast_normalized_rmse": 0.021627423404410172,
+      "mean_error": -6.0467113914507874e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.06449576692600721,
+      "contrast_normalized_rmse": 0.06475400232898687,
+      "mean_error": -0.00041854660675096067
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.06342723220586777,
+      "contrast_normalized_rmse": 0.06368119075476103,
+      "mean_error": -0.0003866242477670312
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.76812,
+      0.370284
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.354853,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.353345,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.253819,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.280019,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.267556,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.230188,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.274229,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.335436,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.307535,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=10/10 cpu.local=0/85 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "pedestal",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 1,
+    "checker_message": "pedestal: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.46523916026448164,
+     "p95": 0.8436268340730013,
+     "max": 1.2948630663606884
+    },
+    "field_angstrom": {
+     "rms": 0.41173665683406624,
+     "p95": 0.7466097481546062,
+     "max": 1.1459538137292093
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.005386038484081602,
+      "contrast_normalized_rmse": 0.021630507369244406,
+      "mean_error": -1.3555210040027483e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.023320715752351066,
+      "contrast_normalized_rmse": 0.09365676005252271,
+      "mean_error": -0.0001337445714654967
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.023161867633461952,
+      "contrast_normalized_rmse": 0.09301868666092727,
+      "mean_error": 0.0002513135550543666
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.76825,
+      0.370284
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=10/10 cpu.local=0/45 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "noisy",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 0,
+    "checker_message": "noisy: characterization accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 1.9706333325479057,
+     "p95": 3.971702167475258,
+     "max": 8.342514230373526
+    },
+    "field_angstrom": {
+     "rms": 1.7440104993048968,
+     "p95": 3.5149564182156032,
+     "max": 7.383125093880571
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 1.8398193560026619,
+      "contrast_normalized_rmse": 1.8471858315940317,
+      "mean_error": 0.008353184023473986
+     },
+     "true_motion_bilinear": {
+      "rmse": 1.3149793556672902,
+      "contrast_normalized_rmse": 1.320244417856724,
+      "mean_error": 0.01125653816658238
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 1.3846053821043198,
+      "contrast_normalized_rmse": 1.3901492208065669,
+      "mean_error": 0.004949501039210908
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 1.3943980932235718,
+      "contrast_normalized_rmse": 1.399981173298471,
+      "mean_error": 0.004630240611732006
+     }
+    },
+    "convergence": {
+     "global_iterations": 3,
+     "global_increment_px": [
+      1.56329,
+      0.565733,
+      0.390971
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.461469,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.402929,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.322877,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.459364,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.401175,
+       "converged": true
+      },
+      {
+       "final_increment_px": 2.41775,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.330066,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.530631,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.360332,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=15/15 cpu.local=0/145 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "flat",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 0,
+    "checker_message": "flat: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.37787654746835,
+     "p95": 3.8830561417522667,
+     "max": 3.8830561417522667
+    },
+    "field_angstrom": {
+     "rms": 2.1044207445094902,
+     "p95": 3.4365046854507564,
+     "max": 3.4365046854507564
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=5/5 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "repeated",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 1,
+    "checker_message": "repeated: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 10.183707502971567,
+     "p95": 16.04288631809052,
+     "max": 16.04288631809052
+    },
+    "field_angstrom": {
+     "rms": 9.012581140129837,
+     "p95": 14.197954391510109,
+     "max": 14.197954391510109
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.42687223210138525,
+      "contrast_normalized_rmse": 0.6051034756702337,
+      "mean_error": -0.018514501131497704
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.008904370800019313,
+      "contrast_normalized_rmse": 0.012622197731682208,
+      "mean_error": -0.0006081599455613357
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 0.006634203717112541,
+      "contrast_normalized_rmse": 0.009404171667845884,
+      "mean_error": 8.671100658830255e-05
+     }
+    },
+    "convergence": {
+     "global_iterations": 3,
+     "global_increment_px": [
+      10.059,
+      6.71528,
+      0.154387
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=15/15 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   }
+  ]
+ },
+ {
+  "backend": "cpu",
+  "arm": "local",
+  "eval_exit": 0,
+  "stderr": "",
+  "results": [
+   {
+    "case": "zero",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 0,
+    "checker_message": "zero: gate accuracy=PASS; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_gate": "PASS",
+    "checker_status": "PASS",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 1.1129693120892625e-05,
+      "contrast_normalized_rmse": 1.1174255694669063e-05,
+      "mean_error": -1.099374571822409e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/5 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "integer",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 1,
+    "checker_message": "integer: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.29786778665475044,
+     "p95": 0.48769178867805424,
+     "max": 0.48769178867805424
+    },
+    "field_angstrom": {
+     "rms": 0.2636129911894542,
+     "p95": 0.431607232980078,
+     "max": 0.431607232980078
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.6294498329247489,
+      "contrast_normalized_rmse": 0.6319700949358554,
+      "mean_error": -0.0023172690318180797
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.03560936860368568,
+      "contrast_normalized_rmse": 0.03575194539731887,
+      "mean_error": -0.00013916638168669142
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.02630162611603737,
+      "contrast_normalized_rmse": 0.02640693613146232,
+      "mean_error": -8.513071952620521e-05
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      5.71299,
+      0.867494,
+      0.57658,
+      0.974519,
+      0.923235
+     ],
+     "global_converged": false,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/25 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "fractional",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 1,
+    "checker_message": "fractional: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.5921536730251702,
+     "p95": 0.7948194679573471,
+     "max": 0.7948194679573471
+    },
+    "field_angstrom": {
+     "rms": 0.5240560006272756,
+     "p95": 0.7034152291422523,
+     "max": 0.7034152291422523
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.4550866865088168,
+      "contrast_normalized_rmse": 0.4569088137503783,
+      "mean_error": -0.0011611553338857672
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.02357382905470023,
+      "contrast_normalized_rmse": 0.023668216601912408,
+      "mean_error": -6.632381835237176e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.1347650142302321,
+      "contrast_normalized_rmse": 0.13530460154605126,
+      "mean_error": 0.00041666447825953464
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.13761205971240997,
+      "contrast_normalized_rmse": 0.1381630495282882,
+      "mean_error": 0.00047152978368103504
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      2.67662,
+      0.735208,
+      0.760209,
+      0.716634,
+      1.2464
+     ],
+     "global_converged": false,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/25 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "affine",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 1,
+    "checker_message": "affine: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.5012856693175303,
+     "p95": 0.8675387699156875,
+     "max": 1.1011967439011876
+    },
+    "field_angstrom": {
+     "rms": 0.44363781734601426,
+     "p95": 0.7677718113753834,
+     "max": 0.974559118352551
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.45412299930470584,
+      "contrast_normalized_rmse": 0.4559412680270907,
+      "mean_error": -0.0018126993097810349
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.021541174428325656,
+      "contrast_normalized_rmse": 0.021627423404410172,
+      "mean_error": -6.0467113914507874e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.12577260553041913,
+      "contrast_normalized_rmse": 0.12627618802925522,
+      "mean_error": -0.0006317229422313811
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.12552520632743835,
+      "contrast_normalized_rmse": 0.12602780116154644,
+      "mean_error": -0.0006369546172209084
+     }
+    },
+    "convergence": {
+     "global_iterations": 4,
+     "global_increment_px": [
+      2.50009,
+      0.618338,
+      0.614909,
+      0.306687
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.359231,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.40066,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.192546,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.524715,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.32061,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.324461,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.358975,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.476165,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.315454,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/20 cpu.local=85/85 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "pedestal",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 1,
+    "checker_message": "pedestal: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.6930204987303643,
+     "p95": 1.4451783960064561,
+     "max": 3.072760168284172
+    },
+    "field_angstrom": {
+     "rms": 0.6133231413763724,
+     "p95": 1.2789828804657137,
+     "max": 2.7193927489314924
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.005386038484081602,
+      "contrast_normalized_rmse": 0.021630507369244406,
+      "mean_error": -1.3555210040027483e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0372184726644058,
+      "contrast_normalized_rmse": 0.1494706080579973,
+      "mean_error": -0.0001734955338366304
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.03722388297319412,
+      "contrast_normalized_rmse": 0.14949212047064253,
+      "mean_error": 0.00016452104318886995
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.465906,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.15851,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.528461,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.249947,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.497395,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.38454,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.471956,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.466717,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.489903,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/5 cpu.local=120/120 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "noisy",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 1,
+    "checker_message": "noisy: characterization accuracy=FAIL; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 2.6260628094689364,
+     "p95": 4.884481613957073,
+     "max": 9.188746746949345
+    },
+    "field_angstrom": {
+     "rms": 2.3240655863800086,
+     "p95": 4.322766228352011,
+     "max": 8.132040871050169
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 1.8398193560026619,
+      "contrast_normalized_rmse": 1.8471858315940317,
+      "mean_error": 0.008353184023473986
+     },
+     "true_motion_bilinear": {
+      "rmse": 1.3149793556672902,
+      "contrast_normalized_rmse": 1.320244417856724,
+      "mean_error": 0.01125653816658238
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 1.4164960384368896,
+      "contrast_normalized_rmse": 1.422167597259871,
+      "mean_error": 0.007100225426256657
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      1.85486,
+      1.19205,
+      1.35101,
+      1.26005,
+      1.40998
+     ],
+     "global_converged": false,
+     "patches": [
+      {
+       "final_increment_px": 0.307732,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.455571,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.300078,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.397695,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.696589,
+       "converged": false
+      },
+      {
+       "final_increment_px": 1.64531,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.319369,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.461845,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.305205,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/25 cpu.local=150/150 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "flat",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 0,
+    "checker_message": "flat: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.37787654746835,
+     "p95": 3.8830561417522667,
+     "max": 3.8830561417522667
+    },
+    "field_angstrom": {
+     "rms": 2.1044207445094902,
+     "p95": 3.4365046854507564,
+     "max": 3.4365046854507564
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/5 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "repeated",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 1,
+    "checker_message": "repeated: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 18.68232578869665,
+     "p95": 31.642843286436825,
+     "max": 31.642843286436825
+    },
+    "field_angstrom": {
+     "rms": 16.533858322996537,
+     "p95": 28.00391630849659,
+     "max": 28.00391630849659
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.42687223210138525,
+      "contrast_normalized_rmse": 0.6051034756702337,
+      "mean_error": -0.018514501131497704
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.008904370800019313,
+      "contrast_normalized_rmse": 0.012622197731682208,
+      "mean_error": -0.0006081599455613357
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 0.07616128027439117,
+      "contrast_normalized_rmse": 0.10796077188522503,
+      "mean_error": 0.00052642822265625
+     }
+    },
+    "convergence": {
+     "global_iterations": 4,
+     "global_increment_px": [
+      10.2299,
+      6.26897,
+      6.71193,
+      0.223607
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/20 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   }
+  ]
+ },
+ {
+  "backend": "cpu",
+  "arm": "both",
+  "eval_exit": 0,
+  "stderr": "",
+  "results": [
+   {
+    "case": "zero",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 0,
+    "checker_message": "zero: gate accuracy=PASS; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_gate": "PASS",
+    "checker_status": "PASS",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 1.1129693120892625e-05,
+      "contrast_normalized_rmse": 1.1174255694669063e-05,
+      "mean_error": -1.099374571822409e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=5/5 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "integer",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 1,
+    "checker_message": "integer: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.5865149682696938,
+     "p95": 0.9614652158871895,
+     "max": 0.9614652158871895
+    },
+    "field_angstrom": {
+     "rms": 0.519065746918679,
+     "p95": 0.8508967160601627,
+     "max": 0.8508967160601627
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.6294498329247489,
+      "contrast_normalized_rmse": 0.6319700949358554,
+      "mean_error": -0.0023172690318180797
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.11873829218993598,
+      "contrast_normalized_rmse": 0.11921370991414044,
+      "mean_error": -0.0004137312522756707
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.11921501904726028,
+      "contrast_normalized_rmse": 0.11969234829828701,
+      "mean_error": -0.00035006573307327926
+     }
+    },
+    "convergence": {
+     "global_iterations": 3,
+     "global_increment_px": [
+      6.33612,
+      1.59657,
+      0.432098
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=15/15 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "fractional",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 1,
+    "checker_message": "fractional: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.3689088593246305,
+     "p95": 0.5899792914196227,
+     "max": 0.5899792914196227
+    },
+    "field_angstrom": {
+     "rms": 0.32648434050229796,
+     "p95": 0.5221316729063661,
+     "max": 0.5221316729063661
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.4550866865088168,
+      "contrast_normalized_rmse": 0.4569088137503783,
+      "mean_error": -0.0011611553338857672
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.02357382905470023,
+      "contrast_normalized_rmse": 0.023668216601912408,
+      "mean_error": -6.632381835237176e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.06546965418863215,
+      "contrast_normalized_rmse": 0.0657317889509296,
+      "mean_error": 0.00011393344932832816
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.06345731765031815,
+      "contrast_normalized_rmse": 0.06371139665939152,
+      "mean_error": 0.00017433187167625874
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.7802,
+      0.371037
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=10/10 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "affine",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 1,
+    "checker_message": "affine: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.36160233576556183,
+     "p95": 0.6646723859936473,
+     "max": 1.00273710479083
+    },
+    "field_angstrom": {
+     "rms": 0.32001806715252223,
+     "p95": 0.5882350616043779,
+     "max": 0.8874223377398845
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.45412299930470584,
+      "contrast_normalized_rmse": 0.4559412680270907,
+      "mean_error": -0.0018126993097810349
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.021541174428325656,
+      "contrast_normalized_rmse": 0.021627423404410172,
+      "mean_error": -6.0467113914507874e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0680497669373456,
+      "contrast_normalized_rmse": 0.0683222322451525,
+      "mean_error": -0.00013663301334114011
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0672587901353836,
+      "contrast_normalized_rmse": 0.0675280899952239,
+      "mean_error": -0.0001276812981814146
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.76812,
+      0.370284
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.409917,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.424485,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.25599,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.525477,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.315682,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.390966,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.3044,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.496941,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.324741,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=10/10 cpu.local=80/80 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "pedestal",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 1,
+    "checker_message": "pedestal: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.3613565464653781,
+     "p95": 0.6645112664768201,
+     "max": 1.0036260585606622
+    },
+    "field_angstrom": {
+     "rms": 0.3198005436218596,
+     "p95": 0.5880924708319859,
+     "max": 0.8882090618261861
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.005386038484081602,
+      "contrast_normalized_rmse": 0.021630507369244406,
+      "mean_error": -1.3555210040027483e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0169943533125753,
+      "contrast_normalized_rmse": 0.06824988080750478,
+      "mean_error": -3.356168945564319e-05
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.01680457964539528,
+      "contrast_normalized_rmse": 0.067487646214045,
+      "mean_error": 0.0003376822278369218
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.76825,
+      0.370284
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.409701,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.424544,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.255626,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.525599,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.31516,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.391376,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.304447,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.497236,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.324518,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=10/10 cpu.local=80/80 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "noisy",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 1,
+    "checker_message": "noisy: characterization accuracy=FAIL; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 1.88524113885597,
+     "p95": 3.7509918367947326,
+     "max": 8.063947723692854
+    },
+    "field_angstrom": {
+     "rms": 1.6684384078875336,
+     "p95": 3.3196277755633385,
+     "max": 7.136593735468175
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 1.8398193560026619,
+      "contrast_normalized_rmse": 1.8471858315940317,
+      "mean_error": 0.008353184023473986
+     },
+     "true_motion_bilinear": {
+      "rmse": 1.3149793556672902,
+      "contrast_normalized_rmse": 1.320244417856724,
+      "mean_error": 0.01125653816658238
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 1.3898361921310425,
+      "contrast_normalized_rmse": 1.3954010066480518,
+      "mean_error": 0.004750900901854038
+     }
+    },
+    "convergence": {
+     "global_iterations": 3,
+     "global_increment_px": [
+      1.56329,
+      0.565733,
+      0.390971
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.426186,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.434774,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.12201,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.366947,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.372412,
+       "converged": true
+      },
+      {
+       "final_increment_px": 1.93556,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.392335,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.441308,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.477962,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=15/15 cpu.local=130/130 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "flat",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 0,
+    "checker_message": "flat: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.37787654746835,
+     "p95": 3.8830561417522667,
+     "max": 3.8830561417522667
+    },
+    "field_angstrom": {
+     "rms": 2.1044207445094902,
+     "p95": 3.4365046854507564,
+     "max": 3.4365046854507564
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=5/5 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "repeated",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 1,
+    "checker_message": "repeated: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 10.183707502971567,
+     "p95": 16.04288631809052,
+     "max": 16.04288631809052
+    },
+    "field_angstrom": {
+     "rms": 9.012581140129837,
+     "p95": 14.197954391510109,
+     "max": 14.197954391510109
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.42687223210138525,
+      "contrast_normalized_rmse": 0.6051034756702337,
+      "mean_error": -0.018514501131497704
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.008904370800019313,
+      "contrast_normalized_rmse": 0.012622197731682208,
+      "mean_error": -0.0006081599455613357
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 0.006634203717112541,
+      "contrast_normalized_rmse": 0.009404171667845884,
+      "mean_error": 8.671100658830255e-05
+     }
+    },
+    "convergence": {
+     "global_iterations": 3,
+     "global_increment_px": [
+      10.059,
+      6.71528,
+      0.154387
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=15/15 cpu.local=0/0 cuda_single.global=0/0 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   }
+  ]
+ },
+ {
+  "backend": "cpu",
+  "arm": "plain",
+  "eval_exit": 0,
+  "stderr": "",
+  "results": [
+   {
+    "case": "zero",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 0,
+    "checker_message": "zero: gate accuracy=PASS; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_gate": "PASS",
+    "checker_status": "PASS",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 1.1129693120892625e-05,
+      "contrast_normalized_rmse": 1.1174255694669063e-05,
+      "mean_error": -1.099374571822409e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "integer",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 1,
+    "checker_message": "integer: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.29786778665475044,
+     "p95": 0.48769178867805424,
+     "max": 0.48769178867805424
+    },
+    "field_angstrom": {
+     "rms": 0.2636129911894542,
+     "p95": 0.431607232980078,
+     "max": 0.431607232980078
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.6294498329247489,
+      "contrast_normalized_rmse": 0.6319700949358554,
+      "mean_error": -0.0023172690318180797
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.03560936860368568,
+      "contrast_normalized_rmse": 0.03575194539731887,
+      "mean_error": -0.00013916638168669142
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.02630162611603737,
+      "contrast_normalized_rmse": 0.02640693613146232,
+      "mean_error": -8.513071952620521e-05
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      5.71299,
+      0.867494,
+      0.57658,
+      0.974519,
+      0.923235
+     ],
+     "global_converged": false,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "fractional",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 1,
+    "checker_message": "fractional: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.5921536730251702,
+     "p95": 0.7948194679573471,
+     "max": 0.7948194679573471
+    },
+    "field_angstrom": {
+     "rms": 0.5240560006272756,
+     "p95": 0.7034152291422523,
+     "max": 0.7034152291422523
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.4550866865088168,
+      "contrast_normalized_rmse": 0.4569088137503783,
+      "mean_error": -0.0011611553338857672
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.02357382905470023,
+      "contrast_normalized_rmse": 0.023668216601912408,
+      "mean_error": -6.632381835237176e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.1347650142302321,
+      "contrast_normalized_rmse": 0.13530460154605126,
+      "mean_error": 0.00041666447825953464
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.13761205971240997,
+      "contrast_normalized_rmse": 0.1381630495282882,
+      "mean_error": 0.00047152978368103504
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      2.67662,
+      0.735208,
+      0.760209,
+      0.716634,
+      1.2464
+     ],
+     "global_converged": false,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "affine",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 1,
+    "checker_message": "affine: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.45474292342088196,
+     "p95": 0.8389729255617366,
+     "max": 1.029511788133801
+    },
+    "field_angstrom": {
+     "rms": 0.4024474872274806,
+     "p95": 0.742491039122137,
+     "max": 0.9111179324984138
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.45412299930470584,
+      "contrast_normalized_rmse": 0.4559412680270907,
+      "mean_error": -0.0018126993097810349
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.021541174428325656,
+      "contrast_normalized_rmse": 0.021627423404410172,
+      "mean_error": -6.0467113914507874e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.1088487382642568,
+      "contrast_normalized_rmse": 0.1092845590805554,
+      "mean_error": -0.0009351736685037025
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.10865087062120438,
+      "contrast_normalized_rmse": 0.10908590170295475,
+      "mean_error": -0.0009081424796022475
+     }
+    },
+    "convergence": {
+     "global_iterations": 4,
+     "global_increment_px": [
+      2.50009,
+      0.618338,
+      0.614909,
+      0.306687
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.329762,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.490189,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0998224,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.300762,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.31917,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.367989,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.362606,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.447708,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.349928,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "pedestal",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 1,
+    "checker_message": "pedestal: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.3945009135517155,
+     "p95": 4.0720413799013375,
+     "max": 4.398997726755499
+    },
+    "field_angstrom": {
+     "rms": 2.119133308493268,
+     "p95": 3.6037566212126833,
+     "max": 3.8931129881786166
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.005386038484081602,
+      "contrast_normalized_rmse": 0.021630507369244406,
+      "mean_error": -1.3555210040027483e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.11352824419736862,
+      "contrast_normalized_rmse": 0.45593249824568877,
+      "mean_error": -0.00011486477160360664
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "noisy",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 1,
+    "checker_message": "noisy: characterization accuracy=FAIL; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 2.6474150479459193,
+     "p95": 4.945276016691183,
+     "max": 11.19089344214544
+    },
+    "field_angstrom": {
+     "rms": 2.342962317432139,
+     "p95": 4.376569274771697,
+     "max": 9.903940696298715
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 1.8398193560026619,
+      "contrast_normalized_rmse": 1.8471858315940317,
+      "mean_error": 0.008353184023473986
+     },
+     "true_motion_bilinear": {
+      "rmse": 1.3149793556672902,
+      "contrast_normalized_rmse": 1.320244417856724,
+      "mean_error": 0.01125653816658238
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 1.393311619758606,
+      "contrast_normalized_rmse": 1.3988903496637914,
+      "mean_error": 0.008808448910713196
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      1.85486,
+      1.19205,
+      1.35101,
+      1.26005,
+      1.40998
+     ],
+     "global_converged": false,
+     "patches": [
+      {
+       "final_increment_px": 0.452546,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.416659,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.243603,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.307921,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.403117,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.243494,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.241993,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.47798,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.424884,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "flat",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 0,
+    "checker_message": "flat: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.37787654746835,
+     "p95": 3.8830561417522667,
+     "max": 3.8830561417522667
+    },
+    "field_angstrom": {
+     "rms": 2.1044207445094902,
+     "p95": 3.4365046854507564,
+     "max": 3.4365046854507564
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "repeated",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 1,
+    "checker_message": "repeated: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 18.68232578869665,
+     "p95": 31.642843286436825,
+     "max": 31.642843286436825
+    },
+    "field_angstrom": {
+     "rms": 16.533858322996537,
+     "p95": 28.00391630849659,
+     "max": 28.00391630849659
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.42687223210138525,
+      "contrast_normalized_rmse": 0.6051034756702337,
+      "mean_error": -0.018514501131497704
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.008904370800019313,
+      "contrast_normalized_rmse": 0.012622197731682208,
+      "mean_error": -0.0006081599455613357
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 0.07616128027439117,
+      "contrast_normalized_rmse": 0.10796077188522503,
+      "mean_error": 0.00052642822265625
+     }
+    },
+    "convergence": {
+     "global_iterations": 4,
+     "global_increment_px": [
+      10.2299,
+      6.26897,
+      6.71193,
+      0.223607
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   }
+  ]
+ },
+ {
+  "backend": "cuda",
+  "arm": "none",
+  "eval_exit": 0,
+  "stderr": "",
+  "results": [
+   {
+    "case": "zero",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 0,
+    "checker_message": "zero: gate accuracy=PASS; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_gate": "PASS",
+    "checker_status": "PASS",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 1.1474617167550605e-05,
+      "contrast_normalized_rmse": 1.152056079497421e-05,
+      "mean_error": -1.112619997911679e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/5 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "integer",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 1,
+    "checker_message": "integer: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.2850258109094684,
+     "p95": 0.467056334884776,
+     "max": 0.467056334884776
+    },
+    "field_angstrom": {
+     "rms": 0.2522478426548795,
+     "p95": 0.41334485637302676,
+     "max": 0.41334485637302676
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.6294498329247489,
+      "contrast_normalized_rmse": 0.6319700949358554,
+      "mean_error": -0.0023172690318180797
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.04940696507372307,
+      "contrast_normalized_rmse": 0.049604786235388644,
+      "mean_error": -5.425486560389627e-05
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.04550886154174805,
+      "contrast_normalized_rmse": 0.0456910760896163,
+      "mean_error": -6.430169378290884e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      7.22021,
+      2.23051,
+      0.988703,
+      0.523113,
+      0.345044
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/25 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "fractional",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 1,
+    "checker_message": "fractional: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.3794256954134761,
+     "p95": 0.608179917869704,
+     "max": 0.608179917869704
+    },
+    "field_angstrom": {
+     "rms": 0.3357917404409264,
+     "p95": 0.5382392273146881,
+     "max": 0.5382392273146881
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.4550866865088168,
+      "contrast_normalized_rmse": 0.4569088137503783,
+      "mean_error": -0.0011611553338857672
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.02357382905470023,
+      "contrast_normalized_rmse": 0.023668216601912408,
+      "mean_error": -6.632381835237176e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.08167103869171918,
+      "contrast_normalized_rmse": 0.08199804237883743,
+      "mean_error": 0.00016486568166171832
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.07883860915899277,
+      "contrast_normalized_rmse": 0.07915427386770646,
+      "mean_error": 0.00022619198716711253
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.80135,
+      0.477261
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/10 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "affine",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 1,
+    "checker_message": "affine: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.3231458938843417,
+     "p95": 0.6142026979643092,
+     "max": 0.9231206564860022
+    },
+    "field_angstrom": {
+     "rms": 0.2859841160876424,
+     "p95": 0.5435693876984135,
+     "max": 0.816961780990112
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.45412299930470584,
+      "contrast_normalized_rmse": 0.4559412680270907,
+      "mean_error": -0.0018126993097810349
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.021541174428325656,
+      "contrast_normalized_rmse": 0.021627423404410172,
+      "mean_error": -6.0467113914507874e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.06604430242927115,
+      "contrast_normalized_rmse": 0.06630873803280307,
+      "mean_error": -0.00021937199829935488
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.06559593230485916,
+      "contrast_normalized_rmse": 0.06585857418914276,
+      "mean_error": -0.00025278175598941743
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.78324,
+      0.472634
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.34,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.43,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.48,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.78,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.18,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.41,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.32,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.4,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.15,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/10 cuda_single.local=0/25 cuda_batched.global=0/0 cuda_batched.local=0/80"
+   },
+   {
+    "case": "pedestal",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 1,
+    "checker_message": "pedestal: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.3945009135517155,
+     "p95": 4.0720413799013375,
+     "max": 4.398997726755499
+    },
+    "field_angstrom": {
+     "rms": 2.119133308493268,
+     "p95": 3.6037566212126833,
+     "max": 3.8931129881786166
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.005386038484081602,
+      "contrast_normalized_rmse": 0.021630507369244406,
+      "mean_error": -1.3555210040027483e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.11352244019508362,
+      "contrast_normalized_rmse": 0.455909189215585,
+      "mean_error": -0.00011241945321671665
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/5 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/45"
+   },
+   {
+    "case": "noisy",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 1,
+    "checker_message": "noisy: characterization accuracy=FAIL; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 2.9784448633906364,
+     "p95": 5.1499058452691235,
+     "max": 21.600514563105534
+    },
+    "field_angstrom": {
+     "rms": 2.6359237041007133,
+     "p95": 4.557666673063174,
+     "max": 19.1164553883484
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 1.8398193560026619,
+      "contrast_normalized_rmse": 1.8471858315940317,
+      "mean_error": 0.008353184023473986
+     },
+     "true_motion_bilinear": {
+      "rmse": 1.3149793556672902,
+      "contrast_normalized_rmse": 1.320244417856724,
+      "mean_error": 0.01125653816658238
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 1.3700993061065674,
+      "contrast_normalized_rmse": 1.37558509540428,
+      "mean_error": -0.0031152607407420874
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      1.89356,
+      0.662723,
+      0.592997,
+      0.701403,
+      0.529881
+     ],
+     "global_converged": false,
+     "patches": [
+      {
+       "final_increment_px": 0.27,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.47,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.79,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.31,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.48,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.43,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.42,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.37,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.33,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/25 cuda_single.local=0/25 cuda_batched.global=0/0 cuda_batched.local=0/150"
+   },
+   {
+    "case": "flat",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 0,
+    "checker_message": "flat: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.37787654746835,
+     "p95": 3.8830561417522667,
+     "max": 3.8830561417522667
+    },
+    "field_angstrom": {
+     "rms": 2.1044207445094902,
+     "p95": 3.4365046854507564,
+     "max": 3.4365046854507564
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/5 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "repeated",
+    "native_exit": 0,
+    "dc": "none",
+    "checker_exit": 1,
+    "checker_message": "repeated: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 68.67462629585252,
+     "p95": 127.90873516398322,
+     "max": 127.90873516398322
+    },
+    "field_angstrom": {
+     "rms": 60.77704427182949,
+     "p95": 113.19923062012515,
+     "max": 113.19923062012515
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.42687223210138525,
+      "contrast_normalized_rmse": 0.6051034756702337,
+      "mean_error": -0.018514501131497704
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.008904370800019313,
+      "contrast_normalized_rmse": 0.012622197731682208,
+      "mean_error": -0.0006081599455613357
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 0.07616213709115982,
+      "contrast_normalized_rmse": 0.10796198644726199,
+      "mean_error": 0.000526501564309001
+     }
+    },
+    "convergence": {
+     "global_iterations": 4,
+     "global_increment_px": [
+      36.7764,
+      21.3787,
+      35.5225,
+      0.223607
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=none cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/20 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   }
+  ]
+ },
+ {
+  "backend": "cuda",
+  "arm": "global",
+  "eval_exit": 0,
+  "stderr": "",
+  "results": [
+   {
+    "case": "zero",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 0,
+    "checker_message": "zero: gate accuracy=PASS; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_gate": "PASS",
+    "checker_status": "PASS",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 1.1474617167550605e-05,
+      "contrast_normalized_rmse": 1.152056079497421e-05,
+      "mean_error": -1.112619997911679e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=0/0 cpu.local=0/0 cuda_single.global=5/5 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "integer",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 1,
+    "checker_message": "integer: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.45252601246270907,
+     "p95": 0.6557190691264058,
+     "max": 0.6557190691264058
+    },
+    "field_angstrom": {
+     "rms": 0.4004855210294975,
+     "p95": 0.5803113761768691,
+     "max": 0.5803113761768691
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.6294498329247489,
+      "contrast_normalized_rmse": 0.6319700949358554,
+      "mean_error": -0.0023172690318180797
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.08450576985592345,
+      "contrast_normalized_rmse": 0.08484412355839026,
+      "mean_error": 0.00019403851596291188
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.08493713289499283,
+      "contrast_normalized_rmse": 0.08527721569960196,
+      "mean_error": 0.000255411519901827
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      7.00193,
+      2.42641,
+      1.33479,
+      0.622267,
+      0.62083
+     ],
+     "global_converged": false,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=0/0 cpu.local=0/0 cuda_single.global=25/25 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "fractional",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 1,
+    "checker_message": "fractional: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.36891284014655823,
+     "p95": 0.5899844516900423,
+     "max": 0.5899844516900423
+    },
+    "field_angstrom": {
+     "rms": 0.32648786352970405,
+     "p95": 0.5221362397456876,
+     "max": 0.5221362397456876
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.4550866865088168,
+      "contrast_normalized_rmse": 0.4569088137503783,
+      "mean_error": -0.0011611553338857672
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.02357382905470023,
+      "contrast_normalized_rmse": 0.023668216601912408,
+      "mean_error": -6.632381835237176e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.06547028242631676,
+      "contrast_normalized_rmse": 0.06573241970402288,
+      "mean_error": 0.0001139349084058062
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.06345749646425247,
+      "contrast_normalized_rmse": 0.06371157618928532,
+      "mean_error": 0.00017424831457901746
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.78021,
+      0.371043
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=0/0 cpu.local=0/0 cuda_single.global=10/10 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "affine",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 1,
+    "checker_message": "affine: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.82164282617415,
+     "p95": 1.7633017097784165,
+     "max": 3.4881402569396736
+    },
+    "field_angstrom": {
+     "rms": 0.7271539011641227,
+     "p95": 1.5605220131538986,
+     "max": 3.087004127391611
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.45412299930470584,
+      "contrast_normalized_rmse": 0.4559412680270907,
+      "mean_error": -0.0018126993097810349
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.021541174428325656,
+      "contrast_normalized_rmse": 0.021627423404410172,
+      "mean_error": -6.0467113914507874e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.1614590271529569,
+      "contrast_normalized_rmse": 0.16210549495896626,
+      "mean_error": -0.0015649630558372024
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.1613311618566513,
+      "contrast_normalized_rmse": 0.16197712142845475,
+      "mean_error": -0.0015472836093977094
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.76812,
+      0.370284
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.38,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.47,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.65,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.21,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.38,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.76,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.32,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.65,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.35,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=0/0 cpu.local=0/0 cuda_single.global=10/10 cuda_single.local=0/75 cuda_batched.global=0/0 cuda_batched.local=0/125"
+   },
+   {
+    "case": "pedestal",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 1,
+    "checker_message": "pedestal: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.4651912343692646,
+     "p95": 0.8436120157270245,
+     "max": 1.2948232297209548
+    },
+    "field_angstrom": {
+     "rms": 0.41169424241679914,
+     "p95": 0.7465966339184166,
+     "max": 1.145918558303045
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.005386038484081602,
+      "contrast_normalized_rmse": 0.021630507369244406,
+      "mean_error": -1.3555210040027483e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.023318852585323048,
+      "contrast_normalized_rmse": 0.09364927751257267,
+      "mean_error": -0.00013375320597942486
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.023163579404354095,
+      "contrast_normalized_rmse": 0.09302556117911258,
+      "mean_error": 0.0002330877905478701
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.76822,
+      0.370325
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=0/0 cpu.local=0/0 cuda_single.global=10/10 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/45"
+   },
+   {
+    "case": "noisy",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 1,
+    "checker_message": "noisy: characterization accuracy=FAIL; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 1.9838494122355532,
+     "p95": 3.8958645863173142,
+     "max": 8.520700268712414
+    },
+    "field_angstrom": {
+     "rms": 1.7557067298284645,
+     "p95": 3.4478401588908225,
+     "max": 7.540819737810487
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 1.8398193560026619,
+      "contrast_normalized_rmse": 1.8471858315940317,
+      "mean_error": 0.008353184023473986
+     },
+     "true_motion_bilinear": {
+      "rmse": 1.3149793556672902,
+      "contrast_normalized_rmse": 1.320244417856724,
+      "mean_error": 0.01125653816658238
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 1.3899728059768677,
+      "contrast_normalized_rmse": 1.3955381674869087,
+      "mean_error": 0.0075879707001149654
+     }
+    },
+    "convergence": {
+     "global_iterations": 3,
+     "global_increment_px": [
+      1.56329,
+      0.565742,
+      0.390976
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.44,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.37,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.23,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.78,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.35,
+       "converged": true
+      },
+      {
+       "final_increment_px": 3.17,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.48,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.45,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.49,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=0/0 cpu.local=0/0 cuda_single.global=15/15 cuda_single.local=0/50 cuda_batched.global=0/0 cuda_batched.local=0/140"
+   },
+   {
+    "case": "flat",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 0,
+    "checker_message": "flat: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.37787654746835,
+     "p95": 3.8830561417522667,
+     "max": 3.8830561417522667
+    },
+    "field_angstrom": {
+     "rms": 2.1044207445094902,
+     "p95": 3.4365046854507564,
+     "max": 3.4365046854507564
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=0/0 cpu.local=0/0 cuda_single.global=5/5 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "repeated",
+    "native_exit": 0,
+    "dc": "global",
+    "checker_exit": 1,
+    "checker_message": "repeated: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 43.36848346262987,
+     "p95": 68.12501675543574,
+     "max": 68.12501675543574
+    },
+    "field_angstrom": {
+     "rms": 38.381107864427435,
+     "p95": 60.29063982856063,
+     "max": 60.29063982856063
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.42687223210138525,
+      "contrast_normalized_rmse": 0.6051034756702337,
+      "mean_error": -0.018514501131497704
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.008904370800019313,
+      "contrast_normalized_rmse": 0.012622197731682208,
+      "mean_error": -0.0006081599455613357
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 0.006634203717112541,
+      "contrast_normalized_rmse": 0.009404171667845884,
+      "mean_error": 8.671100658830255e-05
+     }
+    },
+    "convergence": {
+     "global_iterations": 3,
+     "global_increment_px": [
+      44.9663,
+      42.8777,
+      0.154388
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=global cpu.global=0/0 cpu.local=0/0 cuda_single.global=15/15 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   }
+  ]
+ },
+ {
+  "backend": "cuda",
+  "arm": "local",
+  "eval_exit": 0,
+  "stderr": "",
+  "results": [
+   {
+    "case": "zero",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 0,
+    "checker_message": "zero: gate accuracy=PASS; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_gate": "PASS",
+    "checker_status": "PASS",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 1.1474617167550605e-05,
+      "contrast_normalized_rmse": 1.152056079497421e-05,
+      "mean_error": -1.112619997911679e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/5 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "integer",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 1,
+    "checker_message": "integer: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.2850258109094684,
+     "p95": 0.467056334884776,
+     "max": 0.467056334884776
+    },
+    "field_angstrom": {
+     "rms": 0.2522478426548795,
+     "p95": 0.41334485637302676,
+     "max": 0.41334485637302676
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.6294498329247489,
+      "contrast_normalized_rmse": 0.6319700949358554,
+      "mean_error": -0.0023172690318180797
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.04940696507372307,
+      "contrast_normalized_rmse": 0.049604786235388644,
+      "mean_error": -5.425486560389627e-05
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.04550886154174805,
+      "contrast_normalized_rmse": 0.0456910760896163,
+      "mean_error": -6.430169378290884e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      7.22021,
+      2.23051,
+      0.988703,
+      0.523113,
+      0.345044
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/25 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "fractional",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 1,
+    "checker_message": "fractional: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.3794256954134761,
+     "p95": 0.608179917869704,
+     "max": 0.608179917869704
+    },
+    "field_angstrom": {
+     "rms": 0.3357917404409264,
+     "p95": 0.5382392273146881,
+     "max": 0.5382392273146881
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.4550866865088168,
+      "contrast_normalized_rmse": 0.4569088137503783,
+      "mean_error": -0.0011611553338857672
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.02357382905470023,
+      "contrast_normalized_rmse": 0.023668216601912408,
+      "mean_error": -6.632381835237176e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.08167103869171918,
+      "contrast_normalized_rmse": 0.08199804237883743,
+      "mean_error": 0.00016486568166171832
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.07883860915899277,
+      "contrast_normalized_rmse": 0.07915427386770646,
+      "mean_error": 0.00022619198716711253
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.80135,
+      0.477261
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/10 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "affine",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 1,
+    "checker_message": "affine: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.3083927038145975,
+     "p95": 0.5813466033331425,
+     "max": 0.9480916857467895
+    },
+    "field_angstrom": {
+     "rms": 0.2729275428759188,
+     "p95": 0.5144917439498311,
+     "max": 0.8390611418859086
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.45412299930470584,
+      "contrast_normalized_rmse": 0.4559412680270907,
+      "mean_error": -0.0018126993097810349
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.021541174428325656,
+      "contrast_normalized_rmse": 0.021627423404410172,
+      "mean_error": -6.0467113914507874e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.059778229352520015,
+      "contrast_normalized_rmse": 0.060017576148162714,
+      "mean_error": -0.00011790654326913292
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0611596517264843,
+      "contrast_normalized_rmse": 0.06140453102931849,
+      "mean_error": -0.00012994423741474748
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.78324,
+      0.472634
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.3,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.39,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.27,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.48,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.16,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.49,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.34,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.39,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.2,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/10 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=70/70"
+   },
+   {
+    "case": "pedestal",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 1,
+    "checker_message": "pedestal: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.6931354473642403,
+     "p95": 1.4459271131321716,
+     "max": 3.0754124981228705
+    },
+    "field_angstrom": {
+     "rms": 0.6134248709173528,
+     "p95": 1.2796454951219722,
+     "max": 2.7217400608387408
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.005386038484081602,
+      "contrast_normalized_rmse": 0.021630507369244406,
+      "mean_error": -1.3555210040027483e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.03721158955956875,
+      "contrast_normalized_rmse": 0.14944296528300766,
+      "mean_error": -0.0001737542714386862
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.03721323981881142,
+      "contrast_normalized_rmse": 0.14944937727487456,
+      "mean_error": 0.0001701289729680866
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.47,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.16,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.53,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.25,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.5,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.38,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.47,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.47,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.49,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/5 cuda_single.local=25/25 cuda_batched.global=0/0 cuda_batched.local=120/120"
+   },
+   {
+    "case": "noisy",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 0,
+    "checker_message": "noisy: characterization accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 1.8353117382972801,
+     "p95": 3.482321154422958,
+     "max": 7.557177371364162
+    },
+    "field_angstrom": {
+     "rms": 1.624250888393093,
+     "p95": 3.0818542216643183,
+     "max": 6.688101973657283
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 1.8398193560026619,
+      "contrast_normalized_rmse": 1.8471858315940317,
+      "mean_error": 0.008353184023473986
+     },
+     "true_motion_bilinear": {
+      "rmse": 1.3149793556672902,
+      "contrast_normalized_rmse": 1.320244417856724,
+      "mean_error": 0.01125653816658238
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 1.3944305505150905,
+      "contrast_normalized_rmse": 1.40001372833128,
+      "mean_error": 0.006274312309001973
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 1.3848224878311157,
+      "contrast_normalized_rmse": 1.3903672277993184,
+      "mean_error": 0.005936603061854839
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      1.89356,
+      0.662723,
+      0.592997,
+      0.701403,
+      0.529881
+     ],
+     "global_converged": false,
+     "patches": [
+      {
+       "final_increment_px": 0.47,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.38,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.27,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.45,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.27,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.51,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.42,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.31,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.33,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/25 cuda_single.local=25/25 cuda_batched.global=0/0 cuda_batched.local=140/140"
+   },
+   {
+    "case": "flat",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 0,
+    "checker_message": "flat: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.37787654746835,
+     "p95": 3.8830561417522667,
+     "max": 3.8830561417522667
+    },
+    "field_angstrom": {
+     "rms": 2.1044207445094902,
+     "p95": 3.4365046854507564,
+     "max": 3.4365046854507564
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/5 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "repeated",
+    "native_exit": 0,
+    "dc": "local",
+    "checker_exit": 1,
+    "checker_message": "repeated: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 68.67462629585252,
+     "p95": 127.90873516398322,
+     "max": 127.90873516398322
+    },
+    "field_angstrom": {
+     "rms": 60.77704427182949,
+     "p95": 113.19923062012515,
+     "max": 113.19923062012515
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.42687223210138525,
+      "contrast_normalized_rmse": 0.6051034756702337,
+      "mean_error": -0.018514501131497704
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.008904370800019313,
+      "contrast_normalized_rmse": 0.012622197731682208,
+      "mean_error": -0.0006081599455613357
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 0.07616213709115982,
+      "contrast_normalized_rmse": 0.10796198644726199,
+      "mean_error": 0.000526501564309001
+     }
+    },
+    "convergence": {
+     "global_iterations": 4,
+     "global_increment_px": [
+      36.7764,
+      21.3787,
+      35.5225,
+      0.223607
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=local cpu.global=0/0 cpu.local=0/0 cuda_single.global=0/20 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   }
+  ]
+ },
+ {
+  "backend": "cuda",
+  "arm": "both",
+  "eval_exit": 0,
+  "stderr": "",
+  "results": [
+   {
+    "case": "zero",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 0,
+    "checker_message": "zero: gate accuracy=PASS; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_gate": "PASS",
+    "checker_status": "PASS",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 1.1474617167550605e-05,
+      "contrast_normalized_rmse": 1.152056079497421e-05,
+      "mean_error": -1.112619997911679e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=0/0 cpu.local=0/0 cuda_single.global=5/5 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "integer",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 1,
+    "checker_message": "integer: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.45252601246270907,
+     "p95": 0.6557190691264058,
+     "max": 0.6557190691264058
+    },
+    "field_angstrom": {
+     "rms": 0.4004855210294975,
+     "p95": 0.5803113761768691,
+     "max": 0.5803113761768691
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.6294498329247489,
+      "contrast_normalized_rmse": 0.6319700949358554,
+      "mean_error": -0.0023172690318180797
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.08450576985592345,
+      "contrast_normalized_rmse": 0.08484412355839026,
+      "mean_error": 0.00019403851596291188
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.08493713289499283,
+      "contrast_normalized_rmse": 0.08527721569960196,
+      "mean_error": 0.000255411519901827
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      7.00193,
+      2.42641,
+      1.33479,
+      0.622267,
+      0.62083
+     ],
+     "global_converged": false,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=0/0 cpu.local=0/0 cuda_single.global=25/25 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "fractional",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 1,
+    "checker_message": "fractional: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.36891284014655823,
+     "p95": 0.5899844516900423,
+     "max": 0.5899844516900423
+    },
+    "field_angstrom": {
+     "rms": 0.32648786352970405,
+     "p95": 0.5221362397456876,
+     "max": 0.5221362397456876
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.4550866865088168,
+      "contrast_normalized_rmse": 0.4569088137503783,
+      "mean_error": -0.0011611553338857672
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.02357382905470023,
+      "contrast_normalized_rmse": 0.023668216601912408,
+      "mean_error": -6.632381835237176e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.06547028242631676,
+      "contrast_normalized_rmse": 0.06573241970402288,
+      "mean_error": 0.0001139349084058062
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.06345749646425247,
+      "contrast_normalized_rmse": 0.06371157618928532,
+      "mean_error": 0.00017424831457901746
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.78021,
+      0.371043
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=0/0 cpu.local=0/0 cuda_single.global=10/10 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "affine",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 1,
+    "checker_message": "affine: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.36155736348516443,
+     "p95": 0.6645836953063831,
+     "max": 1.0026439803833025
+    },
+    "field_angstrom": {
+     "rms": 0.31997826668437057,
+     "p95": 0.5881565703461491,
+     "max": 0.8873399226392227
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.45412299930470584,
+      "contrast_normalized_rmse": 0.4559412680270907,
+      "mean_error": -0.0018126993097810349
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.021541174428325656,
+      "contrast_normalized_rmse": 0.021627423404410172,
+      "mean_error": -6.0467113914507874e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.06804123574629281,
+      "contrast_normalized_rmse": 0.0683136668959578,
+      "mean_error": -0.00013668612110121387
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0672607421875,
+      "contrast_normalized_rmse": 0.06753004986323113,
+      "mean_error": -0.00012779541430063546
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.76812,
+      0.370284
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.41,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.42,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.26,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.53,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.32,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.39,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.3,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.5,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.32,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=0/0 cpu.local=0/0 cuda_single.global=10/10 cuda_single.local=25/25 cuda_batched.global=0/0 cuda_batched.local=80/80"
+   },
+   {
+    "case": "pedestal",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 1,
+    "checker_message": "pedestal: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.3617629024122017,
+     "p95": 0.6647127070074512,
+     "max": 1.0033345419782043
+    },
+    "field_angstrom": {
+     "rms": 0.32016016863479857,
+     "p95": 0.5882707457015944,
+     "max": 0.8879510696507109
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.005386038484081602,
+      "contrast_normalized_rmse": 0.021630507369244406,
+      "mean_error": -1.3555210040027483e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.01702273704673409,
+      "contrast_normalized_rmse": 0.06836387081569037,
+      "mean_error": -3.298764494129267e-05
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.016834106296300888,
+      "contrast_normalized_rmse": 0.06760622604241633,
+      "mean_error": 0.00032085843849927187
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.76822,
+      0.370325
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.41,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.42,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.26,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.53,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.32,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.39,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.3,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.5,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.32,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=0/0 cpu.local=0/0 cuda_single.global=10/10 cuda_single.local=25/25 cuda_batched.global=0/0 cuda_batched.local=80/80"
+   },
+   {
+    "case": "noisy",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 1,
+    "checker_message": "noisy: characterization accuracy=FAIL; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 1.885223474971599,
+     "p95": 3.750897520896126,
+     "max": 8.063840412825986
+    },
+    "field_angstrom": {
+     "rms": 1.6684227753498653,
+     "p95": 3.3195443059930714,
+     "max": 7.136498765350997
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 1.8398193560026619,
+      "contrast_normalized_rmse": 1.8471858315940317,
+      "mean_error": 0.008353184023473986
+     },
+     "true_motion_bilinear": {
+      "rmse": 1.3149793556672902,
+      "contrast_normalized_rmse": 1.320244417856724,
+      "mean_error": 0.01125653816658238
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 1.3898355960845947,
+      "contrast_normalized_rmse": 1.3954004082150726,
+      "mean_error": 0.0047497982159256935
+     }
+    },
+    "convergence": {
+     "global_iterations": 3,
+     "global_increment_px": [
+      1.56329,
+      0.565742,
+      0.390976
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.43,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.43,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.12,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.37,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.37,
+       "converged": true
+      },
+      {
+       "final_increment_px": 1.94,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.39,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.44,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.48,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": true,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=0/0 cpu.local=0/0 cuda_single.global=15/15 cuda_single.local=25/25 cuda_batched.global=0/0 cuda_batched.local=130/130"
+   },
+   {
+    "case": "flat",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 0,
+    "checker_message": "flat: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.37787654746835,
+     "p95": 3.8830561417522667,
+     "max": 3.8830561417522667
+    },
+    "field_angstrom": {
+     "rms": 2.1044207445094902,
+     "p95": 3.4365046854507564,
+     "max": 3.4365046854507564
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=0/0 cpu.local=0/0 cuda_single.global=5/5 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   },
+   {
+    "case": "repeated",
+    "native_exit": 0,
+    "dc": "both",
+    "checker_exit": 1,
+    "checker_message": "repeated: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 43.36848346262987,
+     "p95": 68.12501675543574,
+     "max": 68.12501675543574
+    },
+    "field_angstrom": {
+     "rms": 38.381107864427435,
+     "p95": 60.29063982856063,
+     "max": 60.29063982856063
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.42687223210138525,
+      "contrast_normalized_rmse": 0.6051034756702337,
+      "mean_error": -0.018514501131497704
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.008904370800019313,
+      "contrast_normalized_rmse": 0.012622197731682208,
+      "mean_error": -0.0006081599455613357
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 0.006634203717112541,
+      "contrast_normalized_rmse": 0.009404171667845884,
+      "mean_error": 8.671100658830255e-05
+     }
+    },
+    "convergence": {
+     "global_iterations": 3,
+     "global_increment_px": [
+      44.9663,
+      42.8777,
+      0.154388
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": false,
+    "dc_witness": "MC_EXPERIMENT_CCF_DC arm=both cpu.global=0/0 cpu.local=0/0 cuda_single.global=15/15 cuda_single.local=0/0 cuda_batched.global=0/0 cuda_batched.local=0/0"
+   }
+  ]
+ },
+ {
+  "backend": "cuda",
+  "arm": "plain",
+  "eval_exit": 0,
+  "stderr": "",
+  "results": [
+   {
+    "case": "zero",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 0,
+    "checker_message": "zero: gate accuracy=PASS; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_angstrom": {
+     "rms": 0.0,
+     "p95": 0.0,
+     "max": 0.0
+    },
+    "field_gate": "PASS",
+    "checker_status": "PASS",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 1.1474617167550605e-05,
+      "contrast_normalized_rmse": 1.152056079497421e-05,
+      "mean_error": -1.112619997911679e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "integer",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 1,
+    "checker_message": "integer: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.2850258109094684,
+     "p95": 0.467056334884776,
+     "max": 0.467056334884776
+    },
+    "field_angstrom": {
+     "rms": 0.2522478426548795,
+     "p95": 0.41334485637302676,
+     "max": 0.41334485637302676
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.6294498329247489,
+      "contrast_normalized_rmse": 0.6319700949358554,
+      "mean_error": -0.0023172690318180797
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": 0.0,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.04940696507372307,
+      "contrast_normalized_rmse": 0.049604786235388644,
+      "mean_error": -5.425486560389627e-05
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.04550886154174805,
+      "contrast_normalized_rmse": 0.0456910760896163,
+      "mean_error": -6.430169378290884e-06
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      7.22021,
+      2.23051,
+      0.988703,
+      0.523113,
+      0.345044
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "fractional",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 1,
+    "checker_message": "fractional: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.3794256954134761,
+     "p95": 0.608179917869704,
+     "max": 0.608179917869704
+    },
+    "field_angstrom": {
+     "rms": 0.3357917404409264,
+     "p95": 0.5382392273146881,
+     "max": 0.5382392273146881
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.4550866865088168,
+      "contrast_normalized_rmse": 0.4569088137503783,
+      "mean_error": -0.0011611553338857672
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.02357382905470023,
+      "contrast_normalized_rmse": 0.023668216601912408,
+      "mean_error": -6.632381835237176e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.08167103869171918,
+      "contrast_normalized_rmse": 0.08199804237883743,
+      "mean_error": 0.00016486568166171832
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.07883860915899277,
+      "contrast_normalized_rmse": 0.07915427386770646,
+      "mean_error": 0.00022619198716711253
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.80135,
+      0.477261
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "affine",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 1,
+    "checker_message": "affine: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 0.3231458938843417,
+     "p95": 0.6142026979643092,
+     "max": 0.9231206564860022
+    },
+    "field_angstrom": {
+     "rms": 0.2859841160876424,
+     "p95": 0.5435693876984135,
+     "max": 0.816961780990112
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.45412299930470584,
+      "contrast_normalized_rmse": 0.4559412680270907,
+      "mean_error": -0.0018126993097810349
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.021541174428325656,
+      "contrast_normalized_rmse": 0.021627423404410172,
+      "mean_error": -6.0467113914507874e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.06604430242927115,
+      "contrast_normalized_rmse": 0.06630873803280307,
+      "mean_error": -0.00021937199829935488
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.06559593230485916,
+      "contrast_normalized_rmse": 0.06585857418914276,
+      "mean_error": -0.00025278175598941743
+     }
+    },
+    "convergence": {
+     "global_iterations": 2,
+     "global_increment_px": [
+      2.78324,
+      0.472634
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.34,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.43,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.48,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.78,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.18,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.41,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.32,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.4,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.15,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "pedestal",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 1,
+    "checker_message": "pedestal: gate accuracy=FAIL; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.3945009135517155,
+     "p95": 4.0720413799013375,
+     "max": 4.398997726755499
+    },
+    "field_angstrom": {
+     "rms": 2.119133308493268,
+     "p95": 3.6037566212126833,
+     "max": 3.8931129881786166
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.005386038484081602,
+      "contrast_normalized_rmse": 0.021630507369244406,
+      "mean_error": -1.3555210040027483e-05
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.11353016387802327,
+      "contrast_normalized_rmse": 0.4559408651930274,
+      "mean_error": -0.0004515362600973062
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.11352244019508362,
+      "contrast_normalized_rmse": 0.455909189215585,
+      "mean_error": -0.00011241945321671665
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.0,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "noisy",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 1,
+    "checker_message": "noisy: characterization accuracy=FAIL; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 2.9784448633906364,
+     "p95": 5.1499058452691235,
+     "max": 21.600514563105534
+    },
+    "field_angstrom": {
+     "rms": 2.6359237041007133,
+     "p95": 4.557666673063174,
+     "max": 19.1164553883484
+    },
+    "field_gate": "FAIL",
+    "checker_status": "FAIL",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 1.8398193560026619,
+      "contrast_normalized_rmse": 1.8471858315940317,
+      "mean_error": 0.008353184023473986
+     },
+     "true_motion_bilinear": {
+      "rmse": 1.3149793556672902,
+      "contrast_normalized_rmse": 1.320244417856724,
+      "mean_error": 0.01125653816658238
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 1.3700993061065674,
+      "contrast_normalized_rmse": 1.37558509540428,
+      "mean_error": -0.0031152607407420874
+     }
+    },
+    "convergence": {
+     "global_iterations": 5,
+     "global_increment_px": [
+      1.89356,
+      0.662723,
+      0.592997,
+      0.701403,
+      0.529881
+     ],
+     "global_converged": false,
+     "patches": [
+      {
+       "final_increment_px": 0.27,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.47,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.79,
+       "converged": false
+      },
+      {
+       "final_increment_px": 0.31,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.48,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.43,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.42,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.37,
+       "converged": true
+      },
+      {
+       "final_increment_px": 0.33,
+       "converged": true
+      }
+     ],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "flat",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 0,
+    "checker_message": "flat: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=VALID",
+    "field_px": {
+     "rms": 2.37787654746835,
+     "p95": 3.8830561417522667,
+     "max": 3.8830561417522667
+    },
+    "field_angstrom": {
+     "rms": 2.1044207445094902,
+     "p95": 3.4365046854507564,
+     "max": 3.4365046854507564
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "VALID",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "estimated_motion_bilinear": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     },
+     "published_sum_divided_by_frames": {
+      "rmse": 0.0,
+      "contrast_normalized_rmse": null,
+      "mean_error": 0.0
+     }
+    },
+    "convergence": {
+     "global_iterations": 1,
+     "global_increment_px": [
+      0.0
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   },
+   {
+    "case": "repeated",
+    "native_exit": 0,
+    "dc": "plain",
+    "checker_exit": 1,
+    "checker_message": "repeated: characterization accuracy=UNIDENTIFIABLE; signal=CHARACTERIZATION; sampling=OUTSIDE_FIXED_ROI",
+    "field_px": {
+     "rms": 68.67462629585252,
+     "p95": 127.90873516398322,
+     "max": 127.90873516398322
+    },
+    "field_angstrom": {
+     "rms": 60.77704427182949,
+     "p95": 113.19923062012515,
+     "max": 113.19923062012515
+    },
+    "field_gate": "FAIL",
+    "checker_status": "UNIDENTIFIABLE",
+    "sampling_status": "OUTSIDE_FIXED_ROI",
+    "image": {
+     "uncorrected": {
+      "rmse": 0.42687223210138525,
+      "contrast_normalized_rmse": 0.6051034756702337,
+      "mean_error": -0.018514501131497704
+     },
+     "true_motion_bilinear": {
+      "rmse": 0.008904370800019313,
+      "contrast_normalized_rmse": 0.012622197731682208,
+      "mean_error": -0.0006081599455613357
+     },
+     "estimated_motion_bilinear": null,
+     "published_sum_divided_by_frames": {
+      "rmse": 0.07616213709115982,
+      "contrast_normalized_rmse": 0.10796198644726199,
+      "mean_error": 0.000526501564309001
+     }
+    },
+    "convergence": {
+     "global_iterations": 4,
+     "global_increment_px": [
+      36.7764,
+      21.3787,
+      35.5225,
+      0.223607
+     ],
+     "global_converged": true,
+     "patches": [],
+     "source": "explicit CUDA verdict; CPU final logged RMSD, with exact .5 treated as ambiguous"
+    },
+    "runtime_local_enabled": null,
+    "dc_witness": null
+   }
+  ]
+ }
+]

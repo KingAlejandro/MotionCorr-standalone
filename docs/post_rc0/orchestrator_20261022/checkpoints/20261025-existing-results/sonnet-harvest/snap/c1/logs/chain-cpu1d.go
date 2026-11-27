@@ -1,0 +1,1 @@
+{"authorized_by": "parent", "utc": "2026-10-22T22:41:18.509362+00:00", "startup_commit": "5576c6b5711b32979359f9b12efde90391ea5ba7", "tested_source": "e77a51a220cb0d91f4ac3c7fac211876d0c6833f", "preflight_sha256": "272823c82ad17e2bbbcdbaa63cf27c9ebb819a54c0bb47675bc872309cebd229", "scope": "ONE cpu1d launch,CPU8-9 only,no build/GPU,retry forbidden"}

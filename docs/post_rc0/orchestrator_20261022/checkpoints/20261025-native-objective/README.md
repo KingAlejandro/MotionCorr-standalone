@@ -1,0 +1,24 @@
+# 25 October execution checkpoint: C1 / W4 / DC
+
+Main remains `3691374061f782bc84531fd1c79d017ddcb5a7c2`. M1/engineering qualification is not complete and no merge is recommended. Alex approved the initial bounded research accuracy contract and explicitly disallowed max effort on Claude; active Claude work uses HIGH. Earlier heads and historical FAIL/UNRUN/INCONCLUSIVE/UNIDENTIFIABLE/invalid-sampling records remain intact.
+
+| Work | New evidence | Exact next step / hold |
+|---|---|---|
+| C1 [#28215b5e7ed](https://github.com/KingAlejandro/MotionCorr-standalone/pull/282#issuecomment-6401898245), production sourcee77a51a2 | R9each16/16,28/28witnessed;72 #249cases; tutorialG/Loneworker endpoints complete and canonical49products IDENTICAL under reviewed separate archive grade; K267CUDA1PASS/5FAIL/2UNIDENTIFIABLE | Sticky>=4CPU, A13j8, multi-device2/4worker/UUIDpoison require a different admitted allocation; CUDAK269/K272 census not restarted; genuine ingest poison/Xid UNRUN. No aggregate C1 qualification or scope waiver. |
+| W4 [#27863143882](https://github.com/KingAlejandro/MotionCorr-standalone/pull/278#issuecomment-6402013556), diagnostic source805d9de2 | Eight CPU selectors acquired exactly once, independent v3 neutrality amendment; loaded-original analysis reproduced; first allpatch objective11controlsPASS and MIXED on both backends | Close45fullprecisionCPUfit observations and SAME-native-input allpatch peak/window attribution from existing captures. CUDA capture protocol/review/admission still absent. |
+| DC [#28424a40916](https://github.com/KingAlejandro/MotionCorr-standalone/pull/284#issuecomment-6401898511) | Unchanged v2.2 adapter actually ran once on cpu64: exit0/stateIN_PROGRESS;80rows/240pairs/878regressions exact;9callercontrolsPASS |587completed outputs stillungraded. If next selected:68existing lateTierB CPU evaluations before new native work. M3/science not established. |
+| Guard [#27736d18b0c](https://github.com/KingAlejandro/MotionCorr-standalone/pull/277#issuecomment-6401066900) | Read-only exact-reviewed v2.2 CPU subset PASS; original subsetFAIL preserved | Full N3/N4 INCOMPLETE,16CUDA UNRUN; separate scope. |
+
+## Scientific interpretation and current authority
+
+The0.20/0.40/0.80Å limits mean RMS/p95/max FIELD errors, evaluated separately on runtime and STAR over the fixed ROI. Keep current identifiable five-frame fixtures, N5/9/13/20 and11.833px harmful isotropic-weight counterexample visible. Signal retention is report-only, with true/zero/wrong-sign controls; no science qualification. New noisy acceptance cohorts, M6/C2 and held-out outcomes remain held.
+
+W4's time finding is the coupled fit-time/zero-anchor convention acting on erroneous nonlinear global trajectories, not a half-frame shift alone. Exact ideal affine local motion with true global motion is reproduced. Counterfactual0.242/0.333px residuals are not unconditional floors: observation error can cancel convention distortion. Actual observations are a separate gate-failing co-cause. The objective's three reference definitions all yield MIXED under frozen diagnostic routing; no “arithmetic alone” or “objective alone” conclusion. Continuous Newton refinement is local, not a certified global optimum. No repair/adoption or throughput improvement is claimed.
+
+Separate-branch weighting/peak/stopping/coupled-time-anchor/window experiments are authorized. Main remains bug-fix-only; C1 excludes DC, guard, STAR precision, quality policy, CPU Hermitian and performance routes. M2 expanded review only, M4 report-only/preserve publication prototype, and M8 parked OPEN#64/#138/#46/#52 remain selected. Performance integration needs reopened scope and a current source-pinned bottleneck; no closed experiment was reopened and no new scheduler/controller was built.
+
+## Resources, evidence and validation
+
+C1 native work serialized on4GPUs GPU3/CPU8–9 with source/binary/tools pins, fresh health/occupancy and locks; no foreign service was disturbed. W4 CPU13 capture reused the reviewed venue, and numerical analysis ran on cpu64 CPU62/one thread/2GiB with fresh checks. Agent concurrency was separate from machine concurrency. No timing ratio/benchmark is inferred. The short read-only G grade's explicit process snapshot was after its operation, a disclosed admission-record limitation; subsequent native admission was fresh.
+
+Bulky raw records/captures retain VM originals and additional hash-pinned copies under `/Users/alex.konstantinov/Documents/MotionCorr-evidence/20261025`; Git packets bind archive/individual hashes, source, commands, inner evaluator states and failures. No destructive retention. Consumer/grader test dependencies are retained and harmless packaging controls pass. Current moved-head CI was pending when packets were posted and is distinct from native/scientific evidence. No main merge, release, tag, default, gate or publication-policy change.

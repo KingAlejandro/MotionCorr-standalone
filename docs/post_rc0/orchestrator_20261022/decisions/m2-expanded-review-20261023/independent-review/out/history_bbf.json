@@ -1,0 +1,311 @@
+{
+  "kind": "M2 Git history/object metadata inventory; local object metadata only; no retention decision/deletion",
+  "recipe": {
+    "script": "inventory_c1_docs.py",
+    "script_sha256": "16ed1f1243a4e4d5fc19cc4c1178ddbbbefcd67a258c052b7975c81c0299be13",
+    "args": {
+      "candidate": "bbf24607dec537bd13351f061047ea38bd38237b",
+      "base": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+      "pr": {
+        "273": "805d9de27898b4a10e6212e65098d5995a40fdb1:docs/post_rc0/parallel_20261022/numerics",
+        "274": "a1036901bbc17900a0c515ad047efb50449c14f7:docs/rc0/issue226/integration_20261022"
+      },
+      "focus": [
+        "docs/post_rc0/s1/km_truth"
+      ],
+      "ancestor": {
+        "269": "1b29b7f9eea1976a0b7a9e2ef5f9ca00477324b1"
+      }
+    }
+  },
+  "results": {
+    "inputs": {
+      "candidate": "bbf24607dec537bd13351f061047ea38bd38237b",
+      "base": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+      "merge_base": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+      "base_is_ancestor_of_candidate": true,
+      "candidate_parents": [
+        "520bd182ed8305fe42e22bf9238814d7056c9eb3"
+      ],
+      "commits_base_to_candidate": 118,
+      "merge_commits_base_to_candidate": 24
+    },
+    "layers": {
+      "1_base_tree_docs": {
+        "files": 6642,
+        "logical_bytes": 69865100
+      },
+      "2_candidate_tip_changed_docs": {
+        "files": 913,
+        "logical_bytes": 49630021,
+        "archive_files": 16,
+        "archive_logical_bytes": 39240108
+      },
+      "4_reachable_new_history_base_to_candidate": {
+        "objects": {
+          "commit": {
+            "count": 118,
+            "logical_bytes": 41078
+          },
+          "tree": {
+            "count": 679,
+            "logical_bytes": 791141
+          },
+          "blob": {
+            "count": 1099,
+            "logical_bytes": 61752600
+          }
+        },
+        "blobs": 1099,
+        "blob_logical_bytes": 61752600,
+        "blob_logical_bytes_docs_name_hint": 54796825,
+        "blob_logical_bytes_other_name_hint": 6955775,
+        "blobs_present_in_candidate_tip_tree": {
+          "blobs": 869,
+          "blob_logical_bytes": 50703396,
+          "blob_logical_bytes_docs_name_hint": 49526844,
+          "blob_logical_bytes_other_name_hint": 1176552
+        },
+        "blobs_history_only_not_in_candidate_tip_tree": {
+          "blobs": 230,
+          "blob_logical_bytes": 11049204,
+          "blob_logical_bytes_docs_name_hint": 5269981,
+          "blob_logical_bytes_other_name_hint": 5779223
+        },
+        "tip_archive_blobs_in_new_history": 16,
+        "largest_new_blobs": [
+          {
+            "oid": "bc962a97707eb3c014a27b77095c148e89a09d41",
+            "name_hint": "docs/post_rc0/s1/km_truth/raw.tar.gz",
+            "bytes": 34973613,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "aae3dbb27d3e6d4d5a9ded89b42a1afc2fb9c5a9",
+            "name_hint": "docs/post_rc0/s1/km_truth/time_errors.csv",
+            "bytes": 1315184,
+            "in_tip_tree": false
+          },
+          {
+            "oid": "64b680ae232b97a249aa05714b2daf55de6cf7c0",
+            "name_hint": "docs/post_rc0/s1/km_truth/time_errors.csv",
+            "bytes": 1311583,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "9420e5f21964a76ea852e0a2e2b2659afbb8755b",
+            "name_hint": "docs/rc0/issue226/d2/raw-logs.tgz",
+            "bytes": 1044455,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "b241a5ab0b023747c5df0581b218063080aba839",
+            "name_hint": "docs/post_rc0/s1/km_truth/raw.sha256",
+            "bytes": 1038553,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "ea91ad955adb26ff2b686b13f352e5cd7d20f469",
+            "name_hint": "docs/post_rc0/s1/km_truth/rendered-products.sha256",
+            "bytes": 635358,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "f058c9371236b9d0cb7476d1cdb1c6593beecf3b",
+            "name_hint": "docs/post_rc0/s1/km_truth/native_v2_raw.tar.gz",
+            "bytes": 536160,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "dd5c038d2e1a1f455e7bc0b4aa6b09c66a763d01",
+            "name_hint": "docs/post_rc0/s1/km_truth/SUMMARY.json.gz",
+            "bytes": 521940,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "9ee8eb75c0ea94401af7eb975b293c9bd68ebe80",
+            "name_hint": "docs/rc0/issue226/d3/raw-logs.tgz",
+            "bytes": 392629,
+            "in_tip_tree": true
+          },
+          {
+            "oid": "e7c4b5a61fb2e24dc718cff7ff3bf4750d87416d",
+            "name_hint": "docs/post_rc0/s1/km_truth/accuracy_per_seed.csv",
+            "bytes": 376417,
+            "in_tip_tree": false
+          }
+        ]
+      }
+    },
+    "focus": {
+      "docs/post_rc0/s1/km_truth": {
+        "files_at_base": 0,
+        "files_at_candidate": 48,
+        "logical_bytes_at_candidate": 40290016,
+        "largest_file_at_candidate": {
+          "path": "docs/post_rc0/s1/km_truth/raw.tar.gz",
+          "oid": "bc962a97707eb3c014a27b77095c148e89a09d41",
+          "bytes": 34973613
+        },
+        "commits_adding_largest_file": [
+          "678b0453e59fef09f8b42fd639423e36da8513ef"
+        ]
+      }
+    },
+    "ancestors": {
+      "269": {
+        "head": "1b29b7f9eea1976a0b7a9e2ef5f9ca00477324b1",
+        "is_ancestor_of_candidate": true,
+        "focus_blobs_at_candidate_also_at_this_head": 48
+      }
+    },
+    "pr_heads": {
+      "273": {
+        "head": "805d9de27898b4a10e6212e65098d5995a40fdb1",
+        "prefixes": [
+          "docs/post_rc0/parallel_20261022/numerics"
+        ],
+        "merge_base_with_base": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+        "merge_base_with_candidate": "1f0a58bf6e0639d8b62f74da52f250cc664c0b30",
+        "is_ancestor_of_candidate": false,
+        "3_unique_tree": {
+          "files": 36,
+          "logical_bytes": 2748458,
+          "unique_blob_bytes": 2748458,
+          "archive_files": 3,
+          "archive_logical_bytes": 1427214,
+          "largest_file": {
+            "path": "docs/post_rc0/parallel_20261022/numerics/native-receipts.tar.gz",
+            "oid": "df005b1e7ce47836f4264bf775f0af3efb8795bc",
+            "bytes": 1390257
+          },
+          "blobs_already_in_candidate_new_history": 1,
+          "blobs_already_at_candidate_tip": 1
+        },
+        "4a_new_history_if_merged_after_candidate": {
+          "range": "bbf24607dec537bd13351f061047ea38bd38237b..805d9de27898b4a10e6212e65098d5995a40fdb1",
+          "objects": {
+            "commit": {
+              "count": 4,
+              "logical_bytes": 1400
+            },
+            "tree": {
+              "count": 25,
+              "logical_bytes": 38684
+            },
+            "blob": {
+              "count": 41,
+              "logical_bytes": 3025652
+            }
+          },
+          "blobs": 41,
+          "blob_logical_bytes": 3025652,
+          "blob_logical_bytes_docs_name_hint": 2798471,
+          "blob_logical_bytes_other_name_hint": 227181
+        },
+        "4b_new_history_if_merged_onto_base": {
+          "range": "3691374061f782bc84531fd1c79d017ddcb5a7c2..805d9de27898b4a10e6212e65098d5995a40fdb1",
+          "objects": {
+            "commit": {
+              "count": 43,
+              "logical_bytes": 14174
+            },
+            "tree": {
+              "count": 198,
+              "logical_bytes": 271494
+            },
+            "blob": {
+              "count": 298,
+              "logical_bytes": 48447241
+            }
+          },
+          "blobs": 298,
+          "blob_logical_bytes": 48447241,
+          "blob_logical_bytes_docs_name_hint": 46656028,
+          "blob_logical_bytes_other_name_hint": 1791213
+        }
+      },
+      "274": {
+        "head": "a1036901bbc17900a0c515ad047efb50449c14f7",
+        "prefixes": [
+          "docs/rc0/issue226/integration_20261022"
+        ],
+        "merge_base_with_base": "3691374061f782bc84531fd1c79d017ddcb5a7c2",
+        "merge_base_with_candidate": "1dbdd47e875422655ad54bd453be01addb2fef5a",
+        "is_ancestor_of_candidate": false,
+        "3_unique_tree": {
+          "files": 32,
+          "logical_bytes": 1328117,
+          "unique_blob_bytes": 1328117,
+          "archive_files": 1,
+          "archive_logical_bytes": 695240,
+          "largest_file": {
+            "path": "docs/rc0/issue226/integration_20261022/raw-logs.tgz",
+            "oid": "81c3680d0b8445c93285983879349b1941553058",
+            "bytes": 695240
+          },
+          "blobs_already_in_candidate_new_history": 1,
+          "blobs_already_at_candidate_tip": 1
+        },
+        "4a_new_history_if_merged_after_candidate": {
+          "range": "bbf24607dec537bd13351f061047ea38bd38237b..a1036901bbc17900a0c515ad047efb50449c14f7",
+          "objects": {
+            "commit": {
+              "count": 3,
+              "logical_bytes": 1742
+            },
+            "tree": {
+              "count": 19,
+              "logical_bytes": 26994
+            },
+            "blob": {
+              "count": 38,
+              "logical_bytes": 1825744
+            }
+          },
+          "blobs": 38,
+          "blob_logical_bytes": 1825744,
+          "blob_logical_bytes_docs_name_hint": 1449051,
+          "blob_logical_bytes_other_name_hint": 376693
+        },
+        "4b_new_history_if_merged_onto_base": {
+          "range": "3691374061f782bc84531fd1c79d017ddcb5a7c2..a1036901bbc17900a0c515ad047efb50449c14f7",
+          "objects": {
+            "commit": {
+              "count": 16,
+              "logical_bytes": 5785
+            },
+            "tree": {
+              "count": 95,
+              "logical_bytes": 128953
+            },
+            "blob": {
+              "count": 132,
+              "logical_bytes": 7026217
+            }
+          },
+          "blobs": 132,
+          "blob_logical_bytes": 7026217,
+          "blob_logical_bytes_docs_name_hint": 4342754,
+          "blob_logical_bytes_other_name_hint": 2683463
+        }
+      }
+    }
+  },
+  "machine_specific": {
+    "layer_5_local_packed_disk_bytes_new_blobs": 41510257,
+    "layer_5_local_packed_disk_bytes_by_type": {
+      "commit": 25406,
+      "tree": 150598,
+      "blob": 41510257
+    },
+    "note": "objectsize:disk of this repository pack/loose state; not a transfer or remote-storage size",
+    "git_version": "git version 2.56.0",
+    "python": "3.13.7",
+    "pr273_4a_new_history_if_merged_after_candidate_local_packed_disk_bytes_blobs": 1695639,
+    "pr273_4b_new_history_if_merged_onto_base_local_packed_disk_bytes_blobs": 39479059,
+    "pr274_4a_new_history_if_merged_after_candidate_local_packed_disk_bytes_blobs": 694615,
+    "pr274_4b_new_history_if_merged_onto_base_local_packed_disk_bytes_blobs": 2583889
+  },
+  "decision": "UNDECIDED; no file removed and no retention policy adopted"
+}

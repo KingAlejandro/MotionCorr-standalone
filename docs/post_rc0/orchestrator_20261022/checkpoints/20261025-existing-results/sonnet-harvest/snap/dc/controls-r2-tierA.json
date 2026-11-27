@@ -1,0 +1,454 @@
+{
+ "rule": "r2",
+ "evaluator_sha256": "dcc5ddb3d52d14652f11214fb2a9339fb5fb63637d87dc0c82ee3a4c2d0de14d",
+ "rows": [
+  {
+   "control": "A-affine-cpu-plain",
+   "against": "A-affine-cpu-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "affine/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-affine-cpu-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-affine-cpu-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "affine/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-affine-cpu-plain/affine/affine.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-affine-cpu-plain/affine/affine.star            1     3.515954     2.130732     1.385222 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-affine-cpu-none/affine/affine.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-affine-cpu-none/affine/affine.star            1     3.515954     2.130732     1.385222 "
+    ]
+   }
+  },
+  {
+   "control": "A-affine-cuda-plain",
+   "against": "A-affine-cuda-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "affine/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-affine-cuda-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-affine-cuda-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "affine/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-affine-cuda-plain/affine/affine.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-affine-cuda-plain/affine/affine.star            1     4.321484     2.881189     1.440294 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-affine-cuda-none/affine/affine.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-affine-cuda-none/affine/affine.star            1     4.321484     2.881189     1.440294 "
+    ]
+   }
+  },
+  {
+   "control": "A-flat-cpu-plain",
+   "against": "A-flat-cpu-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "flat/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-flat-cpu-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-flat-cpu-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "flat/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-flat-cpu-plain/flat/flat.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-flat-cpu-plain/flat/flat.star            1     0.000000     0.000000     0.000000 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-flat-cpu-none/flat/flat.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-flat-cpu-none/flat/flat.star            1     0.000000     0.000000     0.000000 "
+    ]
+   }
+  },
+  {
+   "control": "A-flat-cuda-plain",
+   "against": "A-flat-cuda-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "flat/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-flat-cuda-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-flat-cuda-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "flat/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-flat-cuda-plain/flat/flat.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-flat-cuda-plain/flat/flat.star            1     0.000000     0.000000     0.000000 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-flat-cuda-none/flat/flat.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-flat-cuda-none/flat/flat.star            1     0.000000     0.000000     0.000000 "
+    ]
+   }
+  },
+  {
+   "control": "A-fractional-cpu-plain",
+   "against": "A-fractional-cpu-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "fractional/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-fractional-cpu-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-fractional-cpu-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "fractional/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-fractional-cpu-plain/fractional/fractional.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-fractional-cpu-plain/fractional/fractional.star            1     4.654327     3.301774     1.352552 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-fractional-cpu-none/fractional/fractional.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-fractional-cpu-none/fractional/fractional.star            1     4.654327     3.301774     1.352552 "
+    ]
+   }
+  },
+  {
+   "control": "A-fractional-cuda-plain",
+   "against": "A-fractional-cuda-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "fractional/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-fractional-cuda-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-fractional-cuda-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "fractional/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-fractional-cuda-plain/fractional/fractional.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-fractional-cuda-plain/fractional/fractional.star            1     4.452427     2.890377     1.562050 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-fractional-cuda-none/fractional/fractional.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-fractional-cuda-none/fractional/fractional.star            1     4.452427     2.890377     1.562050 "
+    ]
+   }
+  },
+  {
+   "control": "A-integer-cpu-plain",
+   "against": "A-integer-cpu-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "integer/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-integer-cpu-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-integer-cpu-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "integer/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-integer-cpu-plain/integer/integer.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-integer-cpu-plain/integer/integer.star            1     9.240441     6.745378     2.495062 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-integer-cpu-none/integer/integer.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-integer-cpu-none/integer/integer.star            1     9.240441     6.745378     2.495062 "
+    ]
+   }
+  },
+  {
+   "control": "A-integer-cuda-plain",
+   "against": "A-integer-cuda-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "integer/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-integer-cuda-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-integer-cuda-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "integer/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-integer-cuda-plain/integer/integer.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-integer-cuda-plain/integer/integer.star            1     8.857106     7.036228     1.820878 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-integer-cuda-none/integer/integer.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-integer-cuda-none/integer/integer.star            1     8.857106     7.036228     1.820878 "
+    ]
+   }
+  },
+  {
+   "control": "A-noisy-cpu-plain",
+   "against": "A-noisy-cpu-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "noisy/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-noisy-cpu-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-noisy-cpu-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "noisy/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-noisy-cpu-plain/noisy/noisy.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-noisy-cpu-plain/noisy/noisy.star            1     4.786436     4.186378     0.600057 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-noisy-cpu-none/noisy/noisy.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-noisy-cpu-none/noisy/noisy.star            1     4.786436     4.186378     0.600057 "
+    ]
+   }
+  },
+  {
+   "control": "A-noisy-cuda-plain",
+   "against": "A-noisy-cuda-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "noisy/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-noisy-cuda-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-noisy-cuda-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "noisy/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-noisy-cuda-plain/noisy/noisy.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-noisy-cuda-plain/noisy/noisy.star            1     3.106092     2.087202     1.018889 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-noisy-cuda-none/noisy/noisy.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-noisy-cuda-none/noisy/noisy.star            1     3.106092     2.087202     1.018889 "
+    ]
+   }
+  },
+  {
+   "control": "A-pedestal-cpu-plain",
+   "against": "A-pedestal-cpu-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "pedestal/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-pedestal-cpu-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-pedestal-cpu-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "pedestal/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-pedestal-cpu-plain/pedestal/pedestal.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-pedestal-cpu-plain/pedestal/pedestal.star            1     0.000000     0.000000     0.000000 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-pedestal-cpu-none/pedestal/pedestal.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-pedestal-cpu-none/pedestal/pedestal.star            1     0.000000     0.000000     0.000000 "
+    ]
+   }
+  },
+  {
+   "control": "A-pedestal-cuda-plain",
+   "against": "A-pedestal-cuda-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "pedestal/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-pedestal-cuda-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-pedestal-cuda-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "pedestal/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-pedestal-cuda-plain/pedestal/pedestal.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-pedestal-cuda-plain/pedestal/pedestal.star            1     0.000000     0.000000     0.000000 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-pedestal-cuda-none/pedestal/pedestal.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-pedestal-cuda-none/pedestal/pedestal.star            1     0.000000     0.000000     0.000000 "
+    ]
+   }
+  },
+  {
+   "control": "A-repeated-cpu-plain",
+   "against": "A-repeated-cpu-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "repeated/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-repeated-cpu-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-repeated-cpu-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "repeated/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-repeated-cpu-plain/repeated/repeated.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-repeated-cpu-plain/repeated/repeated.star            1    47.500000    46.500000     1.000000 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-repeated-cpu-none/repeated/repeated.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-repeated-cpu-none/repeated/repeated.star            1    47.500000    46.500000     1.000000 "
+    ]
+   }
+  },
+  {
+   "control": "A-repeated-cuda-plain",
+   "against": "A-repeated-cuda-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "repeated/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-repeated-cuda-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-repeated-cuda-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "repeated/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-repeated-cuda-plain/repeated/repeated.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-repeated-cuda-plain/repeated/repeated.star            1   275.559355   274.559355     1.000000 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-repeated-cuda-none/repeated/repeated.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-repeated-cuda-none/repeated/repeated.star            1   275.559355   274.559355     1.000000 "
+    ]
+   }
+  },
+  {
+   "control": "A-zero-cpu-plain",
+   "against": "A-zero-cpu-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "zero/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-zero-cpu-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-zero-cpu-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "zero/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-zero-cpu-plain/zero/zero.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-zero-cpu-plain/zero/zero.star            1     0.000000     0.000000     0.000000 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-zero-cpu-none/zero/zero.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-zero-cpu-none/zero/zero.star            1     0.000000     0.000000     0.000000 "
+    ]
+   }
+  },
+  {
+   "control": "A-zero-cuda-plain",
+   "against": "A-zero-cuda-none",
+   "mrc": 1,
+   "star": 2,
+   "status": "DIFFERENT_PATH_ONLY",
+   "differing": [],
+   "differing_only_by_run_directory_path": [
+    "zero/corrected_micrographs.star"
+   ],
+   "normalization": {
+    "scope": "STAR bytes only",
+    "replaced": [
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-zero-cuda-plain",
+     "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-zero-cuda-none"
+    ],
+    "token": "RUN"
+   },
+   "raw_star_diffs": {
+    "zero/corrected_micrographs.star": [
+     "--- ",
+     "+++ ",
+     "@@ -28 +28 @@",
+     "-/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-zero-cuda-plain/zero/zero.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-zero-cuda-plain/zero/zero.star            1     0.000000     0.000000     0.000000 ",
+     "+/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-zero-cuda-none/zero/zero.mrc /mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b/runs/A-zero-cuda-none/zero/zero.star            1     0.000000     0.000000     0.000000 "
+    ]
+   }
+  }
+ ]
+}

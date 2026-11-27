@@ -1,0 +1,16 @@
+{
+  "utc": "2026-10-25T17:41:46.277075+00:00",
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "4GPUs",
+    "date -u; hostname; id; nvidia-smi --query-gpu=index,uuid,utilization.gpu,memory.used,memory.total --format=csv,noheader; nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader; free -b; df -B1 /mnt/clathrin /home /dev/shm; lslocks -o PID,COMMAND,MODE,PATH; taskset -pc $$; cd /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb; sha256sum -c build-cpu.binaries.sha256 build-cuda.binaries.sha256 build-nvcomp.binaries.sha256; cd tools-v2.3-run; sha256sum -c ../tools-v2.3-run.sha256"
+  ],
+  "exit": 0,
+  "wall_s": 0.8911712169647217,
+  "stdout": "Sun Oct 25 17:41:46 UTC 2026\n4-gpu-vm\nuid=1004(alex) gid=1004(alex) groups=1004(alex),100(users)\n0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 0 %, 1 MiB, 81920 MiB\n1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 0 %, 1 MiB, 81920 MiB\n2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 0 %, 1 MiB, 81920 MiB\n3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 0 %, 1 MiB, 81920 MiB\n               total        used        free      shared  buff/cache   available\nMem:     464899809280 12238622720 61372182528   168083456 397570433024 452661186560\nSwap:              0           0           0\nFilesystem         1B-blocks          Used    Available Use% Mounted on\n/dev/sdb       2112619954176 1628025892864 377203101696  82% /mnt/clathrin\n/dev/sda1      3327258812416 2640093413376 687148621824  80% /\ntmpfs           232449904640     138166272 232311738368   1% /dev/shm\n    PID COMMAND         MODE  PATH\n3493584 Runner.Listener READ  /home/alex/actions-runner/_diag/Runner_20261023-171944-utc.log\n3474196 wazuh-modulesd  READ  /...\n3474196 wazuh-modulesd  WRITE /...\n2646837 cron            WRITE /run...\n3474165 wazuh-syscheckd READ  /...\n3474165 wazuh-syscheckd WRITE /...\n2919671 multipathd      WRITE /run...\npid 3748223's current affinity list: 0-123\n/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cpu/motioncorr: OK\n/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cuda/motioncorr: OK\n/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-nvcomp/motioncorr: OK\nc1_attr_build.sh: OK\nc1_build.sh: OK\nc1_census.py: OK\nc1_census_runner.diff: OK\nc1_census_runner.py: OK\nc1_ctest.sh: OK\nc1_env.sh: OK\nc1_expected_union.py: OK\nc1_gpu_run.sh: OK\nc1_grade_ctest.py: OK\nc1_health_check.py: OK\nc1_health.sh: OK\nc1_item12.diff: OK\nc1_item12.py: OK\nc1_item.sh: OK\nc1_lane.py: OK\nc1_occupancy.sh: OK\nc1_run_v2_cases.diff: OK\nc1_run_v2_cases.py: OK\nc1_setup.sh: OK\nc1_stage.sh: OK\nc1_sticky.sh: OK\nc1_tutorial24.py: OK\nc1_v2.sh: OK\nmake_c1_derived.py: OK\nmake_c1_item12.py: OK\nOVERLAY.md: OK\ntest_c1_t24_failclosed.py: OK\ntest_c1_wrappers.py: OK\n",
+  "stderr": ""
+}

@@ -1,0 +1,1 @@
+/home/alex/.mc-venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/tools-cpu1d-run/c1_tutorial24.py compare /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24/F-cpu-G/out /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/t24-cpu1d/c1-cpu-G/out F-cpu_vs_c1-cpu-G 

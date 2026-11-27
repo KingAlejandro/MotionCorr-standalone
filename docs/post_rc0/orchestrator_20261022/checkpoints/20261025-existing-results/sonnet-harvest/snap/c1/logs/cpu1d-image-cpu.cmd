@@ -1,0 +1,1 @@
+env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 /mnt/clathrin/alex-motioncorr-synth-combined/venv/bin/python3 /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/src/docs/post_rc0/s1/synth_combined/image_batch.py eval /mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census results-c1-cpu x 2 

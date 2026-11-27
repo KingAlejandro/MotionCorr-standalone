@@ -1,0 +1,86 @@
+{
+  "utc": "2026-10-22T21:39:58.272193+00:00",
+  "actions": [
+    {
+      "utc": "2026-10-22T21:39:57.271858+00:00",
+      "signal": "SIGKILL",
+      "identity": {
+        "pid": 3119383,
+        "ppid": 3119381,
+        "state": "T",
+        "start_ticks": 815401887,
+        "uid": 1004,
+        "argv": [
+          "/home/alex/.mc-venv/bin/python3",
+          "-B",
+          "tools/campaign.py",
+          "worker",
+          "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b",
+          "cuda",
+          "13"
+        ],
+        "exe": "/usr/bin/python3.12"
+      },
+      "reason": "exact stopped coordinator; no resume/new launch"
+    }
+  ],
+  "root_after": null,
+  "original_family_after": [],
+  "gpu_apps": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 3276184, 1540 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server\nGPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 3276184, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server\nGPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3276184, 414 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server\nGPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 3276184, 49726 MiB, /home/dvi41342/Software/llama.cpp/build/bin/llama-server\n",
+  "worker_exit_receipt": "137\n",
+  "cpu_workers": [
+    {
+      "pid": 3119420,
+      "ppid": 3119417,
+      "state": "S",
+      "start_ticks": 815401987,
+      "uid": 1004,
+      "argv": [
+        "/home/alex/.mc-venv/bin/python3",
+        "-B",
+        "tools/campaign.py",
+        "worker",
+        "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b",
+        "cpu",
+        "10"
+      ],
+      "exe": "/usr/bin/python3.12"
+    },
+    {
+      "pid": 3119494,
+      "ppid": 3119491,
+      "state": "S",
+      "start_ticks": 815402088,
+      "uid": 1004,
+      "argv": [
+        "/home/alex/.mc-venv/bin/python3",
+        "-B",
+        "tools/campaign.py",
+        "worker",
+        "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b",
+        "cpu",
+        "11"
+      ],
+      "exe": "/usr/bin/python3.12"
+    },
+    {
+      "pid": 3119584,
+      "ppid": 3119582,
+      "state": "S",
+      "start_ticks": 815402188,
+      "uid": 1004,
+      "argv": [
+        "/home/alex/.mc-venv/bin/python3",
+        "-B",
+        "tools/campaign.py",
+        "worker",
+        "/mnt/clathrin/alex-motioncorr-dc-fourarm-20261022-3eee0a4b",
+        "cpu",
+        "12"
+      ],
+      "exe": "/usr/bin/python3.12"
+    }
+  ],
+  "state": "GPU WORKER STOPPED FOR RESOURCE CONFLICT; any directory without RUN.json remains incomplete, never PASS or rerun in place",
+  "foreign_process_not_signalled": true
+}

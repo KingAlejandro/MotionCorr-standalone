@@ -1,0 +1,50 @@
+# Maintainer decision preparation, 22 October 2026
+
+**DRAFT / UNAPPROVED.** This packet changes no source, threshold, quality-state
+interface, publication behavior, PR state, support class or default. Independent
+review round 1 is retained in [review-round1](review-round1/REVIEW.md);
+its F1–F5 corrections are recorded in [the response](review-round1/RESPONSE.md).
+Round 2 independently closed F1–F5 and found no DRAFT publication blocker.
+Its single M2 wording finding is corrected with a parent Git merge preview;
+[round-2 report and response](review-round2/RESPONSE.md) retain that boundary.
+No third independent review or policy approval is claimed. It is preparation for M2, M4/M5, M6 and M8 in the updated
+[Notion plan](https://app.notion.com/p/644bae9e6ac648889b0fdcf0a3aa3fc9), not a
+request to adopt decisions before the missing evidence is supplied.
+
+| Item | Draft | What remains |
+| --- | --- | --- |
+| M2 evidence retention | [Tip-tree/history inventories and choices](M2_EVIDENCE_RETENTION_DRAFT.md) | Maintainer retention decision; source/fixture/evidence retrieval checks for any later extraction. No deletion performed. |
+| M4 nonconvergence / M5 peak-edge policy | [Source-bound options and prospective controls](M4_M5_OPTIONS_DRAFT.md) | Independent review, only useful minimal prototypes, selected-contract native qualification and maintainer disposition. No four-policy implementation. |
+| M6 / S1.4 | [Protocol refresh](W5_S14_PROTOCOL_DRAFT.md) | Metadata-only collection eligibility/input/downstream manifest, independently justified harm/operating-characteristic design, reviewed concrete preregistration, C2 freeze/required truth gates and M6 approval. No new held-out outcomes inspected. |
+| M8 legacy PRs | [Preserve/park/close proposal](M8_LEGACY_DISPOSITION_DRAFT.md) | Maintainer choice. #64/#138/#46/#52 remain open; no branch deletion proposed. |
+| W7 documentation queue | [Six evidence-PR disposition choices](W7_DOCS_DISPOSITION_DRAFT.md) | Independent review and retention/retrieval decisions before any closure or landing. #243/#250/#255/#256/#261/#271 remain open; dated body clarifications on #255/#256 preserve their original evidence. |
+
+A [provisional data-eligibility inventory](s14_eligibility/README.md) records 114
+movie files present with expected sizes but unverified content hashes, 26 missing
+conventional STAR paths, and unresolved dose/downstream/provenance fields. It
+admits no scientific cohort and starts no computation.
+
+The [six source reviews and original ledger](../W1_REVIEW_AND_LEDGER.md) remain
+pinned to their stated heads; that earlier snapshot is not silently refreshed
+by this draft. C1 qualification is still active at e77a51a2 and is **not complete**.
+M1 cannot yet be requested from this packet. M3 awaits the separate full DC
+experiment evidence; M7/release promotion awaits the required scientific evidence.
+
+Current development outputs: separate guard fix [PR #277](https://github.com/KingAlejandro/MotionCorr-standalone/pull/277)
+and reviewed diagnostic [PR #278](https://github.com/KingAlejandro/MotionCorr-standalone/pull/278).
+The latter retains historical 2 PASS / 10 FAIL / 4 UNIDENTIFIABLE, the native
+NOT MET prediction, scope corrections and counter-evidence. Its newly filed
+[#279 weight](https://github.com/KingAlejandro/MotionCorr-standalone/issues/279)
+and [#280 estimator/iteration](https://github.com/KingAlejandro/MotionCorr-standalone/issues/280)
+questions are held/file-only. None is silently folded into C1 or a scientific PASS.
+
+`MANIFEST.json` binds the drafts and raw REST snapshots copied at preparation.
+Snapshot existence/hash binding is not scientific provenance, source review or
+future freshness. `inventory_c1_docs.py` is a standard-library Git-metadata
+recipe with explicit `--repo/--candidate/--base/--pr` inputs. Its earlier version
+read an uncommitted sibling predecessor JSON; the current recipe has no such
+dependency. `M2_history_object_inventory_e77a51a2.json` records history/object
+accounting and validation; local packed sizes are not transfer predictions.
+No script in this packet launches numerical or native experiments.
+All numerical/native experiments proposed by these briefs are UNRUN. Their
+worked planning arithmetic and historical measurements are labelled separately.

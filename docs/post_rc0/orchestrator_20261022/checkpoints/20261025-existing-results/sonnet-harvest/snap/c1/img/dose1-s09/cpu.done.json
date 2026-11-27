@@ -1,0 +1,52 @@
+[
+  {
+    "arm": "cpu-none",
+    "argv": [
+      "taskset",
+      "-c",
+      "8-9",
+      "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/build-cpu/motioncorr",
+      "--i",
+      "input.star",
+      "--o",
+      "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census/results-c1-cpu/dose1-s09/cpu-none/output",
+      "--use_own",
+      "--j",
+      "2",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5",
+      "--group_frames",
+      "1",
+      "--bin_factor",
+      "1",
+      "--seed",
+      "1",
+      "--skip_defect",
+      "--save_noDW",
+      "--first_frame_sum",
+      "1",
+      "--last_frame_sum",
+      "40",
+      "--skip_logfile",
+      "--ingest",
+      "float",
+      "--ingest_witness",
+      "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census/results-c1-cpu/dose1-s09/cpu-none/ingest.txt"
+    ],
+    "exit": 0,
+    "seconds": 63.132888078689575,
+    "env": {
+      "CUDA_VISIBLE_DEVICES": "",
+      "OMP_NUM_THREADS": "2",
+      "MC_DIAG_CCF_DC": "none",
+      "MC_DIAG_CCF_DOUBLE": "0",
+      "MC_DIAG_MODEL_OUT": "/mnt/clathrin/alex-motioncorr-c1-20261022-e77a51a220cb/census/results-c1-cpu/dose1-s09/cpu-none/runtime.json"
+    },
+    "gpu_uuid": null,
+    "binary_sha256": "5692c6dc5eaca953357bf7a1161338b99ca320369f0b6c6ab025d9aaa7f9dc3c",
+    "input_receipt_sha256": "4998435420db1ab5d213a5471b410baa28ed8d428214ed8c78e1988b44eb3158",
+    "movie_sha256": "1f9d6ef2cb864bc9bbf02b11be3a6d169dc7a7a92ce95d48ba20fe1cb99668d7"
+  }
+]

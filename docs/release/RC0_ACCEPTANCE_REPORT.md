@@ -263,3 +263,19 @@ the fixed CLI's provenance records that same witness. The production settle defa
 The bench lock protected other agents from this compiler-presence control. No C++ build or GPU execution was performed.
 UNRUN: full CTest, QF, performance and scientific campaigns. Evidence: `docs/post_rc0/issue246/README.md`.
 This identifies the independent harness cause of #245's retained 75/76 CPU record and failed rerun; those historical results remain FAIL.
+
+
+## Post-RC0 re-entry: #226 D3
+
+Validated PR implementation head: `4cd851677bfda80e60ef189cb1ff668cef721043` (CUDA source; later updates are test/documentation only).
+Release builds and full CTest pass: CPU **74/74** on cpu64, CUDA **109/109** and CUDA+nvCOMP **112/112** on an A100.
+`CudaEarlyStreamingOom` passes. The original QM balloon harness on the original GPU1 UUID reproduces the late
+16/21 GiB failures on `c8844894`; G/L × auto/float now refuse early with required/available memory, no failed-movie
+products and 743 MiB RSS. All four 22 GiB controls complete identically; unconstrained products also match
+`c8844894`. [Commands, hashes, raw receipts and powered before/after control](../rc0/issue226/d3/README.md).
+No numerical gate, tolerance or completed-product difference is introduced. Not rerun: complete frozen QF,
+scientific S1, performance qualification, macOS, native multi-GPU publication, real smaller GPUs, host-RAM
+exhaustion, genuine device poisoning or optional upsampling/binning/PS matrices. Those rows retain their earlier
+SHA and verdict; a new tag remains a maintainer decision.
+
+The branch incorporates main `36913740` (#247, ProfilingKit tests/docs only). Runtime sources and CMake configuration are identical to native-tested `4cd85167`; native rows keep that tested SHA.

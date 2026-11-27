@@ -1,0 +1,2806 @@
+{
+ "e10216-p5-injcpu-herm": {
+  "emulation_mismatches": 0,
+  "cuda_frame_iterations": 6785,
+  "patches": {
+   "global": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     2,
+     2
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.037
+   },
+   "1,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.025
+   },
+   "1,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.038
+   },
+   "1,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.043
+   },
+   "1,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.067
+   },
+   "1,5": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.229,
+    "iter": 1,
+    "frames": {
+     "36": {
+      "cpu_sel": [
+       0,
+       1
+      ],
+      "cuda_sel": [
+       1,
+       1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 1.48,
+      "cpu_curv_ulps": [
+       -187.0,
+       -143.0
+      ],
+      "cuda_curv_ulps": [
+       -186.0,
+       -195.0
+      ],
+      "cpu_max": 35664.8711,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 1,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -3.0,
+      "D_at_cuda_sel_ulps": -2.0,
+      "D_frame_rms_ulps": 2.453,
+      "D_frame_offset_ulps": -1.988,
+      "D_frame_local_max_ulps": 6.012,
+      "D_frame_max_ulps": 8.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": -1.141,
+      "f64_cuda_in_margin_ulps": 1.141,
+      "near_tie": true
+     }
+    }
+   },
+   "2,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.062
+   },
+   "2,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.059
+   },
+   "2,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.048
+   },
+   "2,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.057
+   },
+   "2,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.035
+   },
+   "3,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.042
+   },
+   "3,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.075
+   },
+   "3,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.212
+   },
+   "3,4": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.09,
+    "iter": 1,
+    "frames": {
+     "39": {
+      "cpu_sel": [
+       -1,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       0
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 0.648,
+      "cpu_curv_ulps": [
+       -355.0,
+       -605.0
+      ],
+      "cuda_curv_ulps": [
+       -355.0,
+       -562.0
+      ],
+      "cpu_max": 36349.7812,
+      "cpu_map_margin_ulps": 2,
+      "cuda_map_margin_ulps": 0,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -2.0,
+      "D_at_cuda_sel_ulps": 0.0,
+      "D_frame_rms_ulps": 2.712,
+      "D_frame_offset_ulps": -2.351,
+      "D_frame_local_max_ulps": 5.351,
+      "D_frame_max_ulps": 7.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": -0.72,
+      "f64_cuda_in_margin_ulps": 0.72,
+      "near_tie": true
+     }
+    }
+   },
+   "3,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.09
+   },
+   "4,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.046
+   },
+   "4,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.075
+   },
+   "4,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.062
+   },
+   "4,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.087
+   },
+   "4,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.042
+   },
+   "5,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.081
+   },
+   "5,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.076
+   },
+   "5,3": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.044,
+    "iter": 1,
+    "frames": {
+     "52": {
+      "cpu_sel": [
+       0,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       -1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 0.843,
+      "cpu_curv_ulps": [
+       -233.0,
+       -201.0
+      ],
+      "cuda_curv_ulps": [
+       -228.0,
+       -427.0
+      ],
+      "cpu_max": 36483.7383,
+      "cpu_map_margin_ulps": 1,
+      "cuda_map_margin_ulps": 2,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -6.0,
+      "D_at_cuda_sel_ulps": -3.0,
+      "D_frame_rms_ulps": 3.962,
+      "D_frame_offset_ulps": -3.707,
+      "D_frame_local_max_ulps": 5.707,
+      "D_frame_max_ulps": 9.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 1.052,
+      "f64_cuda_in_margin_ulps": -1.052,
+      "near_tie": true
+     }
+    }
+   },
+   "5,4": {
+    "kind": "no frame event; RMSD either side of 0.5 px",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.471,
+    "rmsd": [
+     [
+      11.02751,
+      13.571015,
+      0.506732,
+      0.18796
+     ],
+     [
+      11.003193,
+      13.543149,
+      0.498413
+     ]
+    ]
+   },
+   "5,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.17
+   }
+  },
+  "maps": {
+   "patches": {
+    "n_iter_rows": 93,
+    "comp_cpu_f32_vs_f64_rel_max": 3.962297950052859e-07,
+    "comp_cuda_f32_vs_f64_rel_max": 3.9437207490711957e-07,
+    "comp_cpu_max_ulps_at_peak": 8.625549605116248,
+    "comp_cuda_max_ulps_at_peak": 8.120359430089593,
+    "map_cpu_vs_cuda_rel_median": 2.0532945334368698e-07,
+    "map_cpu_vs_cuda_rel_max": 7.593115575801382e-06,
+    "f64_maps_from_the_two_inputs_rel_max": 7.588943748817097e-06,
+    "input_rel_diff_median": 0.0023087230325823196,
+    "D_offset_ulps_max": 5.11059670781893,
+    "D_local_max_ulps_median": 7.009816529492455,
+    "D_local_max_ulps_max": 276.2241083676269,
+    "it1_D_local_max_ulps_max": 8.029128086419753,
+    "it1_input_rel_diff_max": 5.935139098614991e-07,
+    "it1_map_rel_diff_max": 5.495449952832024e-07,
+    "it1_ramp_test": {
+     "frame1_input_rel_diff_max": 2.801356936777914e-07,
+     "corr_input_diff_vs_global_shift_diff_median": -0.14951945622700086,
+     "before_median": 5.041627095818814e-07,
+     "after_median": 0.0021602333428799646
+    }
+   },
+   "global": {
+    "n_iter_rows": 0,
+    "comp_cpu_f32_vs_f64_rel_max": null,
+    "comp_cuda_f32_vs_f64_rel_max": null,
+    "comp_cpu_max_ulps_at_peak": null,
+    "comp_cuda_max_ulps_at_peak": null,
+    "map_cpu_vs_cuda_rel_median": null,
+    "map_cpu_vs_cuda_rel_max": null,
+    "f64_maps_from_the_two_inputs_rel_max": null,
+    "input_rel_diff_median": null,
+    "D_offset_ulps_max": null,
+    "D_local_max_ulps_median": null,
+    "D_local_max_ulps_max": null,
+    "it1_D_local_max_ulps_max": 0.0
+   }
+  },
+  "shift_test": {
+   "patches": {
+    "cpu": {
+     "n": 69,
+     "resid_rel_max": 7.926369360584188e-09,
+     "max_phase_rad": 27.515963102452204
+    },
+    "cuda": {
+     "n": 68,
+     "resid_rel_max": 2.4437067576096643e-07,
+     "max_phase_rad": 27.605408832517668
+    }
+   },
+   "global": {
+    "cpu": {
+     "n": 0,
+     "resid_rel_max": null,
+     "max_phase_rad": null
+    },
+    "cuda": {
+     "n": 0,
+     "resid_rel_max": null,
+     "max_phase_rad": null
+    }
+   }
+  }
+ },
+ "e10216-p5-own-herm": {
+  "emulation_mismatches": 0,
+  "cuda_frame_iterations": 6844,
+  "patches": {
+   "global": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     2,
+     2
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.037
+   },
+   "1,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.048
+   },
+   "1,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.074
+   },
+   "1,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.08
+   },
+   "1,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.062
+   },
+   "1,5": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.99,
+    "iter": 1,
+    "frames": {
+     "24": {
+      "cpu_sel": [
+       1,
+       1
+      ],
+      "cuda_sel": [
+       0,
+       0
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 2.502,
+      "cpu_curv_ulps": [
+       -143.0,
+       -227.0
+      ],
+      "cuda_curv_ulps": [
+       -207.0,
+       -541.0
+      ],
+      "cpu_max": 35914.8828,
+      "cpu_map_margin_ulps": 1,
+      "cuda_map_margin_ulps": 2,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -23.0,
+      "D_at_cuda_sel_ulps": -20.0,
+      "D_frame_rms_ulps": 22.969,
+      "D_frame_offset_ulps": -22.919,
+      "D_frame_local_max_ulps": 7.081,
+      "D_frame_max_ulps": 30.0,
+      "input_rel_diff": 0.002,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 0.258,
+      "f64_cuda_in_margin_ulps": -0.028,
+      "near_tie": true
+     },
+     "36": {
+      "cpu_sel": [
+       0,
+       1
+      ],
+      "cuda_sel": [
+       1,
+       1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 1.519,
+      "cpu_curv_ulps": [
+       -187.0,
+       -143.0
+      ],
+      "cuda_curv_ulps": [
+       -183.0,
+       -193.0
+      ],
+      "cpu_max": 35664.8711,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 0,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -7.0,
+      "D_at_cuda_sel_ulps": -7.0,
+      "D_frame_rms_ulps": 5.212,
+      "D_frame_offset_ulps": -4.99,
+      "D_frame_local_max_ulps": 5.01,
+      "D_frame_max_ulps": 10.0,
+      "input_rel_diff": 0.002,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": -1.141,
+      "f64_cuda_in_margin_ulps": 1.058,
+      "near_tie": true
+     }
+    }
+   },
+   "2,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.088
+   },
+   "2,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.058
+   },
+   "2,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.049
+   },
+   "2,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.083
+   },
+   "2,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.038
+   },
+   "3,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.072
+   },
+   "3,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.044
+   },
+   "3,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.05
+   },
+   "3,4": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.09,
+    "iter": 1,
+    "frames": {
+     "39": {
+      "cpu_sel": [
+       -1,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       0
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 0.658,
+      "cpu_curv_ulps": [
+       -355.0,
+       -605.0
+      ],
+      "cuda_curv_ulps": [
+       -353.0,
+       -559.0
+      ],
+      "cpu_max": 36349.7812,
+      "cpu_map_margin_ulps": 2,
+      "cuda_map_margin_ulps": 0,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -15.0,
+      "D_at_cuda_sel_ulps": -13.0,
+      "D_frame_rms_ulps": 14.415,
+      "D_frame_offset_ulps": -14.347,
+      "D_frame_local_max_ulps": 5.347,
+      "D_frame_max_ulps": 19.0,
+      "input_rel_diff": 0.002,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": -0.72,
+      "f64_cuda_in_margin_ulps": 0.934,
+      "near_tie": true
+     }
+    }
+   },
+   "3,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.106
+   },
+   "4,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.061
+   },
+   "4,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.115
+   },
+   "4,3": {
+    "kind": "same integer peak, subpixel",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.109,
+    "iter": 2,
+    "frames": {
+     "1": {
+      "cpu_sel": [
+       0,
+       -1
+      ],
+      "cuda_sel": [
+       0,
+       -1
+      ],
+      "same_peak": true,
+      "adjacent": false,
+      "cand_diff_px": 0.568,
+      "cpu_curv_ulps": [
+       -229.0,
+       -15.0
+      ],
+      "cuda_curv_ulps": [
+       -226.0,
+       -13.0
+      ],
+      "cpu_max": 36095.1133,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 0,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -2.0,
+      "D_at_cuda_sel_ulps": -2.0,
+      "D_frame_rms_ulps": 1.738,
+      "D_frame_offset_ulps": -0.817,
+      "D_frame_local_max_ulps": 7.183,
+      "D_frame_max_ulps": 8.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 0.0,
+      "f64_cuda_in_margin_ulps": 0.0
+     }
+    }
+   },
+   "4,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.044
+   },
+   "4,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.074
+   },
+   "5,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.059
+   },
+   "5,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.085
+   },
+   "5,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.035
+   },
+   "5,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.046
+   },
+   "5,5": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.094,
+    "iter": 1,
+    "frames": {
+     "51": {
+      "cpu_sel": [
+       0,
+       0
+      ],
+      "cuda_sel": [
+       -1,
+       0
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 0.506,
+      "cpu_curv_ulps": [
+       -121.0,
+       -603.0
+      ],
+      "cuda_curv_ulps": [
+       -118.0,
+       -670.0
+      ],
+      "cpu_max": 36331.3984,
+      "cpu_map_margin_ulps": 1,
+      "cuda_map_margin_ulps": 1,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": 5.0,
+      "D_at_cuda_sel_ulps": 7.0,
+      "D_frame_rms_ulps": 6.519,
+      "D_frame_offset_ulps": 6.254,
+      "D_frame_local_max_ulps": 7.254,
+      "D_frame_max_ulps": 12.0,
+      "input_rel_diff": 0.004,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 1.123,
+      "f64_cuda_in_margin_ulps": -0.292,
+      "near_tie": true
+     }
+    }
+   }
+  },
+  "maps": {
+   "patches": {
+    "n_iter_rows": 94,
+    "comp_cpu_f32_vs_f64_rel_max": 3.962297950052859e-07,
+    "comp_cuda_f32_vs_f64_rel_max": 3.749372553190706e-07,
+    "comp_cpu_max_ulps_at_peak": 8.625549605116248,
+    "comp_cuda_max_ulps_at_peak": 7.644512765109539,
+    "map_cpu_vs_cuda_rel_median": 7.989362599648322e-07,
+    "map_cpu_vs_cuda_rel_max": 9.375750462480964e-06,
+    "f64_maps_from_the_two_inputs_rel_max": 9.347519455625358e-06,
+    "input_rel_diff_median": 0.0029633894934273748,
+    "D_offset_ulps_max": 59.178197873799725,
+    "D_local_max_ulps_median": 7.057506001371741,
+    "D_local_max_ulps_max": 373.9067644032922,
+    "it1_D_local_max_ulps_max": 9.096472050754457,
+    "it1_input_rel_diff_max": 0.005403560755873087,
+    "it1_map_rel_diff_max": 6.280833737779162e-06,
+    "it1_ramp_test": {
+     "frame1_input_rel_diff_max": 2.801356936777914e-07,
+     "corr_input_diff_vs_global_shift_diff_median": 0.9995831571575066,
+     "before_median": 0.002166737429496282,
+     "after_median": 0.00018481883729014507
+    }
+   },
+   "global": {
+    "n_iter_rows": 0,
+    "comp_cpu_f32_vs_f64_rel_max": null,
+    "comp_cuda_f32_vs_f64_rel_max": null,
+    "comp_cpu_max_ulps_at_peak": null,
+    "comp_cuda_max_ulps_at_peak": null,
+    "map_cpu_vs_cuda_rel_median": null,
+    "map_cpu_vs_cuda_rel_max": null,
+    "f64_maps_from_the_two_inputs_rel_max": null,
+    "input_rel_diff_median": null,
+    "D_offset_ulps_max": null,
+    "D_local_max_ulps_median": null,
+    "D_local_max_ulps_max": null,
+    "it1_D_local_max_ulps_max": 0.0
+   }
+  },
+  "shift_test": {
+   "patches": {
+    "cpu": {
+     "n": 69,
+     "resid_rel_max": 7.926369360584188e-09,
+     "max_phase_rad": 27.515963102452204
+    },
+    "cuda": {
+     "n": 69,
+     "resid_rel_max": 2.418943101608009e-07,
+     "max_phase_rad": 27.56031686383332
+    }
+   },
+   "global": {
+    "cpu": {
+     "n": 0,
+     "resid_rel_max": null,
+     "max_phase_rad": null
+    },
+    "cuda": {
+     "n": 0,
+     "resid_rel_max": null,
+     "max_phase_rad": null
+    }
+   }
+  }
+ },
+ "e12963-p5-injcpu-herm": {
+  "emulation_mismatches": 0,
+  "cuda_frame_iterations": 3978,
+  "patches": {
+   "global": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     2,
+     2
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.032
+   },
+   "1,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.028
+   },
+   "1,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.045
+   },
+   "1,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     2,
+     2
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.072
+   },
+   "1,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     2,
+     2
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.055
+   },
+   "1,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     2,
+     2
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.042
+   },
+   "2,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.055
+   },
+   "2,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.206
+   },
+   "2,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.053
+   },
+   "2,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.049
+   },
+   "2,5": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     5
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.281,
+    "rmsd": [
+     [
+      8.282391,
+      9.072438,
+      0.54346,
+      0.26115
+     ],
+     [
+      3.68684,
+      7.162786,
+      9.431604,
+      0.532556,
+      0.167603
+     ]
+    ],
+    "iter": 1,
+    "frames": {
+     "32": {
+      "cpu_sel": [
+       -8,
+       8
+      ],
+      "cuda_sel": [
+       0,
+       -1
+      ],
+      "same_peak": false,
+      "adjacent": false,
+      "cand_diff_px": 45.512,
+      "cpu_curv_ulps": [
+       -63.0,
+       -93.0
+      ],
+      "cuda_curv_ulps": [
+       -103.1,
+       -158.0
+      ],
+      "cpu_max": 30.5530777,
+      "cpu_map_margin_ulps": 3,
+      "cuda_map_margin_ulps": 1,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -7.0,
+      "D_at_cuda_sel_ulps": -3.0,
+      "D_frame_rms_ulps": 4.097,
+      "D_frame_offset_ulps": -3.897,
+      "D_frame_local_max_ulps": 5.897,
+      "D_frame_max_ulps": 9.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 2.329,
+      "f64_cuda_in_margin_ulps": -2.329,
+      "near_tie": true
+     }
+    }
+   },
+   "3,1": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.139,
+    "iter": 1,
+    "frames": {
+     "35": {
+      "cpu_sel": [
+       0,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 1.066,
+      "cpu_curv_ulps": [
+       -56.0,
+       -100.0
+      ],
+      "cuda_curv_ulps": [
+       -63.0,
+       -54.0
+      ],
+      "cpu_max": 32.1267929,
+      "cpu_map_margin_ulps": 1,
+      "cuda_map_margin_ulps": 1,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -4.0,
+      "D_at_cuda_sel_ulps": -2.0,
+      "D_frame_rms_ulps": 3.414,
+      "D_frame_offset_ulps": -3.096,
+      "D_frame_local_max_ulps": 6.096,
+      "D_frame_max_ulps": 9.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": -1.465,
+      "f64_cuda_in_margin_ulps": 1.465,
+      "near_tie": true
+     }
+    }
+   },
+   "3,2": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.17,
+    "iter": 1,
+    "frames": {
+     "2": {
+      "cpu_sel": [
+       0,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 0.555,
+      "cpu_curv_ulps": [
+       -98.0,
+       -94.0
+      ],
+      "cuda_curv_ulps": [
+       -106.0,
+       -128.0
+      ],
+      "cpu_max": 32.2316437,
+      "cpu_map_margin_ulps": 2,
+      "cuda_map_margin_ulps": 1,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -4.0,
+      "D_at_cuda_sel_ulps": -1.0,
+      "D_frame_rms_ulps": 2.505,
+      "D_frame_offset_ulps": -2.05,
+      "D_frame_local_max_ulps": 6.05,
+      "D_frame_max_ulps": 8.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": -0.107,
+      "f64_cuda_in_margin_ulps": 0.107,
+      "near_tie": true
+     }
+    }
+   },
+   "3,3": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.191,
+    "iter": 1,
+    "frames": {
+     "27": {
+      "cpu_sel": [
+       -1,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       0
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 0.838,
+      "cpu_curv_ulps": [
+       -85.0,
+       -210.0
+      ],
+      "cuda_curv_ulps": [
+       -88.0,
+       -198.0
+      ],
+      "cpu_max": 32.1787987,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 0,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -1.0,
+      "D_at_cuda_sel_ulps": -1.0,
+      "D_frame_rms_ulps": 1.669,
+      "D_frame_offset_ulps": -0.951,
+      "D_frame_local_max_ulps": 5.951,
+      "D_frame_max_ulps": 6.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 0.306,
+      "f64_cuda_in_margin_ulps": -0.306,
+      "near_tie": true
+     }
+    }
+   },
+   "3,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.1
+   },
+   "3,5": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.109,
+    "iter": 1,
+    "frames": {
+     "5": {
+      "cpu_sel": [
+       1,
+       0
+      ],
+      "cuda_sel": [
+       1,
+       -1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 1.864,
+      "cpu_curv_ulps": [
+       -105.0,
+       -142.1
+      ],
+      "cuda_curv_ulps": [
+       -79.0,
+       -178.0
+      ],
+      "cpu_max": 31.056572,
+      "cpu_map_margin_ulps": 2,
+      "cuda_map_margin_ulps": 0,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -1.0,
+      "D_at_cuda_sel_ulps": 1.0,
+      "D_frame_rms_ulps": 1.417,
+      "D_frame_offset_ulps": -0.138,
+      "D_frame_local_max_ulps": 5.862,
+      "D_frame_max_ulps": 6.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 0.343,
+      "f64_cuda_in_margin_ulps": -0.343,
+      "near_tie": true
+     }
+    }
+   },
+   "4,1": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.6,
+    "iter": 3,
+    "frames": {
+     "31": {
+      "cpu_sel": [
+       0,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 1.599,
+      "cpu_curv_ulps": [
+       -77.0,
+       -38.0
+      ],
+      "cuda_curv_ulps": [
+       -76.0,
+       -73.0
+      ],
+      "cpu_max": 32.5522995,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 6,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -3.0,
+      "D_at_cuda_sel_ulps": 3.0,
+      "D_frame_rms_ulps": 3.301,
+      "D_frame_offset_ulps": -2.118,
+      "D_frame_local_max_ulps": 10.882,
+      "D_frame_max_ulps": 13.0,
+      "input_rel_diff": 0.011,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": -0.86,
+      "f64_cuda_in_margin_ulps": 2.758,
+      "near_tie": true
+     }
+    }
+   },
+   "4,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.127
+   },
+   "4,3": {
+    "kind": "mixed",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.136,
+    "iter": 1,
+    "frames": {
+     "4": {
+      "cpu_sel": [
+       -1,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       0
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 0.512,
+      "cpu_curv_ulps": [
+       -92.0,
+       -74.0
+      ],
+      "cuda_curv_ulps": [
+       -95.0,
+       -74.0
+      ],
+      "cpu_max": 32.647583,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 1,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -4.0,
+      "D_at_cuda_sel_ulps": -3.0,
+      "D_frame_rms_ulps": 3.365,
+      "D_frame_offset_ulps": -3.095,
+      "D_frame_local_max_ulps": 5.095,
+      "D_frame_max_ulps": 8.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": -0.351,
+      "f64_cuda_in_margin_ulps": 0.351,
+      "near_tie": true
+     },
+     "22": {
+      "cpu_sel": [
+       -7,
+       -13
+      ],
+      "cuda_sel": [
+       -7,
+       -13
+      ],
+      "same_peak": true,
+      "adjacent": false,
+      "cand_diff_px": 0.506,
+      "cpu_curv_ulps": [
+       -21.0,
+       -86.0
+      ],
+      "cuda_curv_ulps": [
+       -19.0,
+       -76.0
+      ],
+      "cpu_max": 32.7564049,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 0,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -4.0,
+      "D_at_cuda_sel_ulps": -4.0,
+      "D_frame_rms_ulps": 2.08,
+      "D_frame_offset_ulps": -1.428,
+      "D_frame_local_max_ulps": 6.428,
+      "D_frame_max_ulps": 7.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 0.0,
+      "f64_cuda_in_margin_ulps": 0.0
+     }
+    }
+   },
+   "4,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.166
+   },
+   "4,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.05
+   },
+   "5,1": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.286,
+    "iter": 1,
+    "frames": {
+     "27": {
+      "cpu_sel": [
+       0,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       -1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 1.556,
+      "cpu_curv_ulps": [
+       -56.0,
+       -8.0
+      ],
+      "cuda_curv_ulps": [
+       -67.0,
+       -60.0
+      ],
+      "cpu_max": 32.6700478,
+      "cpu_map_margin_ulps": 3,
+      "cuda_map_margin_ulps": 1,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -5.0,
+      "D_at_cuda_sel_ulps": -1.0,
+      "D_frame_rms_ulps": 3.344,
+      "D_frame_offset_ulps": -3.009,
+      "D_frame_local_max_ulps": 5.991,
+      "D_frame_max_ulps": 9.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 2.235,
+      "f64_cuda_in_margin_ulps": -2.236,
+      "near_tie": true
+     }
+    }
+   },
+   "5,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.214
+   },
+   "5,3": {
+    "kind": "same integer peak, subpixel",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.159,
+    "iter": 2,
+    "frames": {
+     "28": {
+      "cpu_sel": [
+       0,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       0
+      ],
+      "same_peak": true,
+      "adjacent": false,
+      "cand_diff_px": 0.561,
+      "cpu_curv_ulps": [
+       -45.0,
+       -40.0
+      ],
+      "cuda_curv_ulps": [
+       -46.0,
+       -46.0
+      ],
+      "cpu_max": 33.2134399,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 0,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": 0.0,
+      "D_at_cuda_sel_ulps": 0.0,
+      "D_frame_rms_ulps": 4.637,
+      "D_frame_offset_ulps": -1.963,
+      "D_frame_local_max_ulps": 16.963,
+      "D_frame_max_ulps": 18.0,
+      "input_rel_diff": 0.024,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 0.0,
+      "f64_cuda_in_margin_ulps": 0.0
+     }
+    }
+   },
+   "5,4": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.73,
+    "rmsd": [
+     [
+      2.657935,
+      1.090777,
+      0.455534
+     ],
+     [
+      2.62114,
+      1.055786,
+      0.530383,
+      0.251067
+     ]
+    ],
+    "iter": 1,
+    "frames": {
+     "13": {
+      "cpu_sel": [
+       0,
+       0
+      ],
+      "cuda_sel": [
+       -1,
+       1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 1.291,
+      "cpu_curv_ulps": [
+       -98.0,
+       -190.0
+      ],
+      "cuda_curv_ulps": [
+       -86.0,
+       -137.0
+      ],
+      "cpu_max": 32.4406013,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 2,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -4.0,
+      "D_at_cuda_sel_ulps": -2.0,
+      "D_frame_rms_ulps": 1.55,
+      "D_frame_offset_ulps": -0.819,
+      "D_frame_local_max_ulps": 5.181,
+      "D_frame_max_ulps": 6.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 1.043,
+      "f64_cuda_in_margin_ulps": -1.043,
+      "near_tie": true
+     },
+     "26": {
+      "cpu_sel": [
+       -1,
+       -1
+      ],
+      "cuda_sel": [
+       0,
+       0
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 1.766,
+      "cpu_curv_ulps": [
+       -98.0,
+       -86.0
+      ],
+      "cuda_curv_ulps": [
+       -82.0,
+       -195.0
+      ],
+      "cpu_max": 32.4844246,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 1,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -3.0,
+      "D_at_cuda_sel_ulps": -2.0,
+      "D_frame_rms_ulps": 2.213,
+      "D_frame_offset_ulps": -1.664,
+      "D_frame_local_max_ulps": 6.336,
+      "D_frame_max_ulps": 8.0,
+      "input_rel_diff": 0.0,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": -0.263,
+      "f64_cuda_in_margin_ulps": 0.263,
+      "near_tie": true
+     }
+    }
+   },
+   "5,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.048
+   }
+  },
+  "maps": {
+   "patches": {
+    "n_iter_rows": 83,
+    "comp_cpu_f32_vs_f64_rel_max": 2.8459176685377923e-07,
+    "comp_cuda_f32_vs_f64_rel_max": 3.6411811854995627e-07,
+    "comp_cpu_max_ulps_at_peak": 9.158146429806948,
+    "comp_cuda_max_ulps_at_peak": 8.21668710373342,
+    "map_cpu_vs_cuda_rel_median": 2.0934517480229274e-07,
+    "map_cpu_vs_cuda_rel_max": 1.649902465605911e-05,
+    "f64_maps_from_the_two_inputs_rel_max": 1.6495726145988703e-05,
+    "input_rel_diff_median": 0.002219876058001909,
+    "D_offset_ulps_max": 7.435485253772291,
+    "D_local_max_ulps_median": 6.8344907407407405,
+    "D_local_max_ulps_max": 1368.9841820987654,
+    "it1_D_local_max_ulps_max": 7.906121399176954,
+    "it1_input_rel_diff_max": 3.480338305677798e-07,
+    "it1_map_rel_diff_max": 6.363766859297843e-07,
+    "it1_ramp_test": {
+     "frame1_input_rel_diff_max": 2.9553142869992555e-07,
+     "corr_input_diff_vs_global_shift_diff_median": 0.007927767611854668,
+     "before_median": 2.3543571757746593e-07,
+     "after_median": 0.0012794886986544798
+    }
+   },
+   "global": {
+    "n_iter_rows": 0,
+    "comp_cpu_f32_vs_f64_rel_max": null,
+    "comp_cuda_f32_vs_f64_rel_max": null,
+    "comp_cpu_max_ulps_at_peak": null,
+    "comp_cuda_max_ulps_at_peak": null,
+    "map_cpu_vs_cuda_rel_median": null,
+    "map_cpu_vs_cuda_rel_max": null,
+    "f64_maps_from_the_two_inputs_rel_max": null,
+    "input_rel_diff_median": null,
+    "D_offset_ulps_max": null,
+    "D_local_max_ulps_median": null,
+    "D_local_max_ulps_max": null,
+    "it1_D_local_max_ulps_max": 0.0
+   }
+  },
+  "shift_test": {
+   "patches": {
+    "cpu": {
+     "n": 58,
+     "resid_rel_max": 4.543434416579558e-09,
+     "max_phase_rad": 72.2873901494065
+    },
+    "cuda": {
+     "n": 60,
+     "resid_rel_max": 4.098058987359819e-07,
+     "max_phase_rad": 72.2690783120044
+    }
+   },
+   "global": {
+    "cpu": {
+     "n": 0,
+     "resid_rel_max": null,
+     "max_phase_rad": null
+    },
+    "cuda": {
+     "n": 0,
+     "resid_rel_max": null,
+     "max_phase_rad": null
+    }
+   }
+  }
+ },
+ "e12963-p5-own-herm": {
+  "emulation_mismatches": 0,
+  "cuda_frame_iterations": 3666,
+  "patches": {
+   "global": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     2,
+     2
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.032
+   },
+   "1,1": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 1.916,
+    "iter": 1,
+    "frames": {
+     "31": {
+      "cpu_sel": [
+       0,
+       0
+      ],
+      "cuda_sel": [
+       -1,
+       1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 5.263,
+      "cpu_curv_ulps": [
+       -285.0,
+       -635.0
+      ],
+      "cuda_curv_ulps": [
+       -247.0,
+       -746.0
+      ],
+      "cpu_max": 30.6354618,
+      "cpu_map_margin_ulps": 2,
+      "cuda_map_margin_ulps": 1,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": 27.0,
+      "D_at_cuda_sel_ulps": 30.0,
+      "D_frame_rms_ulps": 29.162,
+      "D_frame_offset_ulps": 29.115,
+      "D_frame_local_max_ulps": 6.885,
+      "D_frame_max_ulps": 36.0,
+      "input_rel_diff": 0.002,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 1.513,
+      "f64_cuda_in_margin_ulps": -0.386,
+      "near_tie": true
+     }
+    }
+   },
+   "1,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.05
+   },
+   "1,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     2,
+     2
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.062
+   },
+   "1,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     2,
+     2
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.086
+   },
+   "1,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     2,
+     2
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.033
+   },
+   "2,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.122
+   },
+   "2,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.466
+   },
+   "2,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.063
+   },
+   "2,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.066
+   },
+   "2,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.084
+   },
+   "3,1": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.147
+   },
+   "3,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.15
+   },
+   "3,3": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.226,
+    "iter": 1,
+    "frames": {
+     "27": {
+      "cpu_sel": [
+       -1,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       0
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 0.838,
+      "cpu_curv_ulps": [
+       -85.0,
+       -210.0
+      ],
+      "cuda_curv_ulps": [
+       -87.0,
+       -198.0
+      ],
+      "cpu_max": 32.1787987,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 0,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -24.0,
+      "D_at_cuda_sel_ulps": -24.0,
+      "D_frame_rms_ulps": 24.0,
+      "D_frame_offset_ulps": -23.959,
+      "D_frame_local_max_ulps": 5.959,
+      "D_frame_max_ulps": 29.0,
+      "input_rel_diff": 0.002,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 0.306,
+      "f64_cuda_in_margin_ulps": -0.013,
+      "near_tie": true
+     }
+    }
+   },
+   "3,4": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.175,
+    "iter": 1,
+    "frames": {
+     "3": {
+      "cpu_sel": [
+       -1,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       0
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 0.992,
+      "cpu_curv_ulps": [
+       -127.0,
+       -242.0
+      ],
+      "cuda_curv_ulps": [
+       -167.0,
+       -213.0
+      ],
+      "cpu_max": 31.7298031,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 0,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -14.0,
+      "D_at_cuda_sel_ulps": -14.0,
+      "D_frame_rms_ulps": 13.104,
+      "D_frame_offset_ulps": -13.032,
+      "D_frame_local_max_ulps": 5.032,
+      "D_frame_max_ulps": 18.0,
+      "input_rel_diff": 0.001,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 0.266,
+      "f64_cuda_in_margin_ulps": -0.631,
+      "near_tie": true
+     }
+    }
+   },
+   "3,5": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.1,
+    "iter": 1,
+    "frames": {
+     "5": {
+      "cpu_sel": [
+       1,
+       0
+      ],
+      "cuda_sel": [
+       1,
+       -1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 1.793,
+      "cpu_curv_ulps": [
+       -105.0,
+       -142.1
+      ],
+      "cuda_curv_ulps": [
+       -80.0,
+       -178.0
+      ],
+      "cpu_max": 31.056572,
+      "cpu_map_margin_ulps": 2,
+      "cuda_map_margin_ulps": 0,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": 8.0,
+      "D_at_cuda_sel_ulps": 10.0,
+      "D_frame_rms_ulps": 8.991,
+      "D_frame_offset_ulps": 8.865,
+      "D_frame_local_max_ulps": 6.865,
+      "D_frame_max_ulps": 15.0,
+      "input_rel_diff": 0.001,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 0.343,
+      "f64_cuda_in_margin_ulps": -0.294,
+      "near_tie": true
+     }
+    }
+   },
+   "4,1": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     5,
+     5
+    ],
+    "converged": [
+     false,
+     false
+    ],
+    "final_traj_diff_max_px": 0.422,
+    "iter": 3,
+    "frames": {
+     "31": {
+      "cpu_sel": [
+       0,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 1.6,
+      "cpu_curv_ulps": [
+       -77.0,
+       -38.0
+      ],
+      "cuda_curv_ulps": [
+       -75.0,
+       -71.0
+      ],
+      "cpu_max": 32.5522995,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 3,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": 53.0,
+      "D_at_cuda_sel_ulps": 56.0,
+      "D_frame_rms_ulps": 51.834,
+      "D_frame_offset_ulps": 51.792,
+      "D_frame_local_max_ulps": 9.208,
+      "D_frame_max_ulps": 61.0,
+      "input_rel_diff": 0.005,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": -0.86,
+      "f64_cuda_in_margin_ulps": 1.569,
+      "near_tie": true
+     }
+    }
+   },
+   "4,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     4,
+     4
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.114
+   },
+   "4,3": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.144,
+    "iter": 1,
+    "frames": {
+     "4": {
+      "cpu_sel": [
+       -1,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       0
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 0.515,
+      "cpu_curv_ulps": [
+       -92.0,
+       -74.0
+      ],
+      "cuda_curv_ulps": [
+       -95.0,
+       -74.0
+      ],
+      "cpu_max": 32.647583,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 1,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -1.0,
+      "D_at_cuda_sel_ulps": 0.0,
+      "D_frame_rms_ulps": 1.344,
+      "D_frame_offset_ulps": -0.113,
+      "D_frame_local_max_ulps": 5.113,
+      "D_frame_max_ulps": 5.0,
+      "input_rel_diff": 0.001,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": -0.351,
+      "f64_cuda_in_margin_ulps": 0.01,
+      "near_tie": true
+     }
+    }
+   },
+   "4,4": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.175
+   },
+   "4,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.042
+   },
+   "5,1": {
+    "kind": "different integer peak",
+    "acceptance_flip": true,
+    "iters": [
+     5,
+     4
+    ],
+    "converged": [
+     false,
+     true
+    ],
+    "final_traj_diff_max_px": 30.558,
+    "rmsd": [
+     [
+      3.723807,
+      1.579293,
+      1.030636,
+      0.539158,
+      4.940031
+     ],
+     [
+      3.736544,
+      1.529195,
+      0.97473,
+      0.447718
+     ]
+    ],
+    "iter": 1,
+    "frames": {
+     "27": {
+      "cpu_sel": [
+       0,
+       0
+      ],
+      "cuda_sel": [
+       0,
+       -1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 1.553,
+      "cpu_curv_ulps": [
+       -56.0,
+       -8.0
+      ],
+      "cuda_curv_ulps": [
+       -69.0,
+       -62.0
+      ],
+      "cpu_max": 32.6700478,
+      "cpu_map_margin_ulps": 3,
+      "cuda_map_margin_ulps": 1,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": 16.0,
+      "D_at_cuda_sel_ulps": 20.0,
+      "D_frame_rms_ulps": 17.056,
+      "D_frame_offset_ulps": 16.99,
+      "D_frame_local_max_ulps": 6.01,
+      "D_frame_max_ulps": 23.0,
+      "input_rel_diff": 0.001,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 2.235,
+      "f64_cuda_in_margin_ulps": -2.296,
+      "near_tie": true
+     }
+    }
+   },
+   "5,2": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.105
+   },
+   "5,3": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.136
+   },
+   "5,4": {
+    "kind": "different integer peak",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.307,
+    "iter": 1,
+    "frames": {
+     "13": {
+      "cpu_sel": [
+       0,
+       0
+      ],
+      "cuda_sel": [
+       -1,
+       1
+      ],
+      "same_peak": false,
+      "adjacent": true,
+      "cand_diff_px": 1.328,
+      "cpu_curv_ulps": [
+       -98.0,
+       -190.0
+      ],
+      "cuda_curv_ulps": [
+       -88.0,
+       -137.0
+      ],
+      "cpu_max": 32.4406013,
+      "cpu_map_margin_ulps": 0,
+      "cuda_map_margin_ulps": 3,
+      "cpu_map_margin_rel": 0.0,
+      "cuda_map_margin_rel": 0.0,
+      "D_at_cpu_sel_ulps": -11.0,
+      "D_at_cuda_sel_ulps": -8.0,
+      "D_frame_rms_ulps": 7.954,
+      "D_frame_offset_ulps": -7.84,
+      "D_frame_local_max_ulps": 5.84,
+      "D_frame_max_ulps": 13.0,
+      "input_rel_diff": 0.001,
+      "f64_maps_rel_diff": 0.0,
+      "f64_cpu_in_margin_ulps": 1.043,
+      "f64_cuda_in_margin_ulps": -0.956,
+      "near_tie": true
+     }
+    }
+   },
+   "5,5": {
+    "kind": "none (no frame event, same iteration count)",
+    "acceptance_flip": false,
+    "iters": [
+     3,
+     3
+    ],
+    "converged": [
+     true,
+     true
+    ],
+    "final_traj_diff_max_px": 0.06
+   }
+  },
+  "maps": {
+   "patches": {
+    "n_iter_rows": 82,
+    "comp_cpu_f32_vs_f64_rel_max": 2.8459176685377923e-07,
+    "comp_cuda_f32_vs_f64_rel_max": 3.3414988254604737e-07,
+    "comp_cpu_max_ulps_at_peak": 9.158146429806948,
+    "comp_cuda_max_ulps_at_peak": 9.655479095876217,
+    "map_cpu_vs_cuda_rel_median": 7.703581817667638e-07,
+    "map_cpu_vs_cuda_rel_max": 7.619738169025509e-06,
+    "f64_maps_from_the_two_inputs_rel_max": 7.447173054974637e-06,
+    "input_rel_diff_median": 0.0023672308785934945,
+    "D_offset_ulps_max": 83.13473079561042,
+    "D_local_max_ulps_median": 6.965942215363511,
+    "D_local_max_ulps_max": 446.0119598765432,
+    "it1_D_local_max_ulps_max": 8.453875171467764,
+    "it1_input_rel_diff_max": 0.0028152103106536984,
+    "it1_map_rel_diff_max": 7.591119932325276e-06,
+    "it1_ramp_test": {
+     "frame1_input_rel_diff_max": 2.9553142869992555e-07,
+     "corr_input_diff_vs_global_shift_diff_median": 0.9999082906497897,
+     "before_median": 0.0012926571788248035,
+     "after_median": 0.00017251462753419252
+    }
+   },
+   "global": {
+    "n_iter_rows": 0,
+    "comp_cpu_f32_vs_f64_rel_max": null,
+    "comp_cuda_f32_vs_f64_rel_max": null,
+    "comp_cpu_max_ulps_at_peak": null,
+    "comp_cuda_max_ulps_at_peak": null,
+    "map_cpu_vs_cuda_rel_median": null,
+    "map_cpu_vs_cuda_rel_max": null,
+    "f64_maps_from_the_two_inputs_rel_max": null,
+    "input_rel_diff_median": null,
+    "D_offset_ulps_max": null,
+    "D_local_max_ulps_median": null,
+    "D_local_max_ulps_max": null,
+    "it1_D_local_max_ulps_max": 0.0
+   }
+  },
+  "shift_test": {
+   "patches": {
+    "cpu": {
+     "n": 58,
+     "resid_rel_max": 4.543434416579558e-09,
+     "max_phase_rad": 72.2873901494065
+    },
+    "cuda": {
+     "n": 57,
+     "resid_rel_max": 4.1549274319440303e-07,
+     "max_phase_rad": 72.20911037409907
+    }
+   },
+   "global": {
+    "cpu": {
+     "n": 0,
+     "resid_rel_max": null,
+     "max_phase_rad": null
+    },
+    "cuda": {
+     "n": 0,
+     "resid_rel_max": null,
+     "max_phase_rad": null
+    }
+   }
+  }
+ }
+}

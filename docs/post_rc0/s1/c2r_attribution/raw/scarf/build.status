@@ -1,0 +1,5 @@
+configure rc=0
+build rc=0 cn072.scarf.rl.ac.uk 2026-10-20T00:51:19Z
+CUDA_FLAGS = -O3 -DNDEBUG -std=c++17 "--generate-code=arch=compute_80,code=[compute_80,sm_80]" -Xcompiler -fopenmp
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+43f61daf8be434efa4a3389fee166f8457326fff153478fa29234d6f582bfe8a  /home/vol05/scarf1415/mc-s13c/build-diag4-cuda/motioncorr

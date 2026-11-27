@@ -1,0 +1,18 @@
+# S1.3c census builds on 4GPUs
+diag5 = diag/s1-ccf-ties 8c8277e8 (null toggle), pr254 = PR #254 head 8b55d5da
+97ebcbdc619fa2df515e2d21928c022c1f9f832e754c38c4ce4bec4d825a2ee2  tools/s13c-diag5.tar.gz
+26472e69de4b7c889b98d04d6c6fbc42738af77e0a411e0fde822422577aac22  tools/s13c-pr254.tar.gz
+build diag5-nvcomp rc=0 2026-10-20T01:25:53Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+fa3fddcc3c6e369fcc4b18d274c8a38929d64d89b49d1e6b7dcdba44d1601f1f  /mnt/clathrin/alex-motioncorr-s1ccf/build-diag5-nvcomp/motioncorr
+BUILDS-DONE st=0
+build pr254-nvcomp rc=0 2026-10-20T01:59:11Z CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+71e226f174dd58e91d6cde200e339ccc4be31ce99cc3c57dd273871633b4cb3e  /mnt/clathrin/alex-motioncorr-s1ccf/build-pr254-nvcomp/motioncorr
+BUILDS-DONE st=0
+build-diag5-nvcomp: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+  CMAKE_BUILD_TYPE:STRING=Release
+  CUDA:BOOL=ON
+  USE_NVCOMP:BOOL=ON
+build-pr254-nvcomp: CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+  CMAKE_BUILD_TYPE:STRING=Release
+  CUDA:BOOL=ON
+  USE_NVCOMP:BOOL=ON

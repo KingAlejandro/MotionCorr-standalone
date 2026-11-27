@@ -1,0 +1,47 @@
+{
+  "CUDA_VISIBLE_DEVICES": "",
+  "affinity": [
+    14,
+    15
+  ],
+  "cpu_lock": "/tmp/motioncorr-i61-cpu-14-15.lock",
+  "gpu_inventory_readonly": {
+    "argv": [
+      "nvidia-smi",
+      "--query-gpu=index,uuid,name",
+      "--format=csv,noheader"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout": "0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, NVIDIA A100 80GB PCIe\n1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, NVIDIA A100 80GB PCIe\n2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, NVIDIA A100 80GB PCIe\n3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, NVIDIA A100 80GB PCIe\n"
+  },
+  "gpu_processes_readonly": {
+    "argv": [
+      "nvidia-smi",
+      "--query-compute-apps=pid,gpu_uuid,process_name",
+      "--format=csv,noheader"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout": ""
+  },
+  "occupancy": {
+    "argv": [
+      "ps",
+      "-eo",
+      "pid,psr,pcpu,args",
+      "--sort=-pcpu"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout": "    PID PSR %CPU COMMAND\n3000156  14 1000 ps -eo pid,psr,pcpu,args --sort=-pcpu\n3000155  76  109 pgrep -f build/eer_device_exp compare\n3000016  15 99.5 /home/alex/.mc-venv/bin/python3 /mnt/clathrin/mc-i61-pilot-c0ee115c-q21hhr8l/run_pilot.py execute /mnt/clathrin/mc-i61-pilot-c0ee115c-q21hhr8l\n2919721 107 29.5 /usr/sbin/rsyslogd -n -iNONE\n2966712  22 14.8 /home/dxp41838/.vscode-server/cli/servers/Stable-6d62b1d5dace93a33b3a6d3eca1317bd5e15bcb1/server/node /home/dxp41838/.vscode-server/extensions/ms-python.vscode-pylance-2026.4.1/dist/server.bundle.js --cancellationReceive=file:8faedeeecf149ba1dd7df10d3ac6f8fd06c96ba9d0 --node-ipc --clientProcessId=2965030\n2965030   3 11.4 /home/dxp41838/.vscode-server/cli/servers/Stable-6d62b1d5dace93a33b3a6d3eca1317bd5e15bcb1/server/node --dns-result-order=ipv4first /home/dxp41838/.vscode-server/cli/servers/Stable-6d62b1d5dace93a33b3a6d3eca1317bd5e15bcb1/server/out/bootstrap-fork --type=extensionHost --transformURIs --useHostProxy=false\n2964156  63  4.7 /home/dxp41838/.vscode-server/code-6d62b1d5dace93a33b3a6d3eca1317bd5e15bcb1 command-shell --cli-data-dir /home/dxp41838/.vscode-server/cli --parent-process-id 2963992 --on-host=127.0.0.1 --on-port\n2999264 110  4.1 sshd: alex@notty\n2992016  59  3.1 /home/dxp41838/.vscode-server/extensions/anthropic.claude-code-2.1.292-linux-x64/resources/native-binary/claude --output-format stream-json --verbose --input-format stream-json --max-thinking-tokens 31999 --permission-prompt-tool stdio --setting-sources=user,project,local --debug --debug-to-stderr --enable-auth-status --no-chrome --replay-user-messages\n2963990  63  2.8 sshd: dxp41838@notty\n2998988 116  2.2 sshd: alex@notty\n2999204  62  1.4 sshd: alex@notty\n2964353   2  1.3 /home/dxp41838/.vscode-server/cli/servers/Stable-6d62b1d5dace93a33b3a6d3eca1317bd5e15bcb1/server/node /home/dxp41838/.vscode-server/cli/servers/Stable-6d62b1d5dace93a33b3a6d3eca1317bd5e15bcb1/server/out/bootstrap-fork --type=fileWatcher\n2919673   0  0.9 /usr/lib/systemd/systemd-journald\n2999265 100  0.9 /usr/lib/openssh/sftp-server\n2992155  33  0.8 /home/dxp41838/.vscode-server/extensions/anthropic.claude-code-2.1.292-linux-x64/resources/native-binary/claude --claude-in-chrome-mcp\n2998994 116  0.5 /usr/lib/openssh/sftp-server\n2964317   2  0.5 /home/dxp41838/.vscode-server/cli/servers/Stable-6d62b1d5dace93a33b3a6d3eca1317bd5e15bcb1/server/node /home/dxp41838/.vscode-server/cli/servers/Stable-6d62b1d5dace93a33b3a6d3eca1317bd5e15bcb1/server/out/server-main.js --connection-token=remotessh --accept-server-license-terms --agent-host-bridge-port=38621 --agent-host-bridge-host=127.0.0.1 --start-server --enable-remote-auto-shutdown --socket-path=/tmp/code-912d5d3c-15c2-452e-a566-d8846f6c14ba\n3000015  14  0.5 /home/alex/.mc-venv/bin/python3 /mnt/clathrin/mc-i61-pilot-c0ee115c-q21hhr8l/supervise.py\n2946309  43  0.4 /home/dvi41342/.vscode-server/code-c2d1b13fdc4a77628e5f3bb70173351c8f2fbad1 command-shell --cli-data-dir /home/dvi41342/.vscode-server/cli --parent-process-id 2946291 --on-host=127.0.0.1 --on-port\n2999206  62  0.3 /usr/lib/openssh/sftp-server\n[remaining lines retained remotely]\n"
+  },
+  "pid": 3000016,
+  "utc": "2026-10-22T15:09:28.015781+00:00",
+  "full_remote_receipt": {
+    "remote_root": "/mnt/clathrin/mc-i61-pilot-c0ee115c-q21hhr8l",
+    "remote_file": "launch_resources.json",
+    "sha256": "bfabeadf6084eb769e9c45aea6960f13f0aae6487843b892c201ebeaadf616d7",
+    "occupancy_lines": 1773
+  }
+}

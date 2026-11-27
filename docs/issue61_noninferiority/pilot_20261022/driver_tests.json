@@ -1,0 +1,26 @@
+{
+  "utc": "2026-10-22T15:10:36.688947+00:00",
+  "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "docs/issue61_noninferiority/pilot_20261022",
+    "-p",
+    "test_run_pilot.py",
+    "-v"
+  ],
+  "environment": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "BLIS_NUM_THREADS": "1"
+  },
+  "exit": 0,
+  "stdout": "",
+  "stderr": "test_environment_is_cpu_only_and_private (test_run_pilot.Staging.test_environment_is_cpu_only_and_private) ... ok\ntest_only_output_changes_and_jackknife_is_excluded (test_run_pilot.Staging.test_only_output_changes_and_jackknife_is_excluded) ... ok\ntest_refuses_settings_cwd_duplicate_and_missing_half (test_run_pilot.Staging.test_refuses_settings_cwd_duplicate_and_missing_half) ... ok\ntest_runtime_resolution_accepts_non_system_prefix_and_refuses_missing (test_run_pilot.Staging.test_runtime_resolution_accepts_non_system_prefix_and_refuses_missing) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.003s\n\nOK\n",
+  "driver_sha256": "909f9f205e2e8a582b84f0e6b69457d95719a149d9b775852872e7ceb6db71f8"
+}

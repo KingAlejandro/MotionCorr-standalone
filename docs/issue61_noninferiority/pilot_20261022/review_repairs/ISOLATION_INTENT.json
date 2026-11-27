@@ -1,0 +1,21 @@
+{
+  "utc": "2026-10-22T15:40:47.740598+00:00",
+  "status": "FROZEN_BEFORE_LAUNCH",
+  "driver_sha256": "d086c4337cd5c27a1ac6eb2082d4045f25425d4d2379ac8a8499f10e34370fa4",
+  "probe_sha256": "9bd83f6a6de6870e76915d041724fa10ef03ce481c1bb9d07cabb4c687ec9941",
+  "transport": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=15",
+    "-J",
+    "ccp4-gateway",
+    "4GPUs"
+  ],
+  "remote_command": "taskset -c 14,15 env PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 NUMEXPR_NUM_THREADS=1 BLIS_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/alex/.mc-venv/bin/python3 -c <exact isolation_probe.py bytes>",
+  "scratch_prefix": "/mnt/clathrin/mc-i61-review-isolation-",
+  "container_invocations": 1,
+  "timeout_seconds": 45,
+  "intent": "Read runtime/version/help/config/wrapper; nonblocking CPU14-15 lock; one direct pinned-container /bin/sh probe. Check actual mountinfo for RO historical/project/frozen-plan/source mounts and RW private scratch/home/tmp/var_tmp. Attempt write only to disposable RO fixture; write disposable output/home/tmp. Hash existing internal binaries without executing them. No writes to historical mounts, RELION calls, GPU, --nv, maps, analyser or numerical rerun. Retain failure and do not retry."
+}

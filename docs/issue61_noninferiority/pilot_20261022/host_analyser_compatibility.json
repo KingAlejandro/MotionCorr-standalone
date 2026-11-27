@@ -1,0 +1,25 @@
+{
+  "utc": "2026-10-22T15:15:05.802813+00:00",
+  "argv": [
+    "/Users/alex.konstantinov/.local/bin/python3",
+    "/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3-d0ac321b/docs/issue61_noninferiority/scripts/i61_analyse_B.py"
+  ],
+  "environment": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "BLIS_NUM_THREADS": "1",
+    "I61_ROOT": "/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/i61-pilot-host-compatibility-5b2f4ce6",
+    "I61_OUT": "pilot_point_only_attempt.json",
+    "I61_REAL": "cpu thinned",
+    "I61_CTRL": "",
+    "I61_SENSITIVITY_CERT": ""
+  },
+  "analyser_sha256": "75d6e779dc5abf9b3de09c9d6b63b93a4d7706b90615320d1741bc498cfc1838",
+  "exit": 1,
+  "stdout": "",
+  "stderr": "ABORT: the jackknife replicate set on disk does not match the preregistered 22 held-out movies.\n  missing: ['00022', '00023', '00024', '00025', '00026', '00027', '00028', '00029', '00030', '00031', '00035', '00036', '00037', '00039', '00040', '00042', '00043', '00044', '00045', '00047', '00048', '00049']\n  unexpected: []\nRefusing to compute confidence bounds from a different sample than the protocol fixes.\n",
+  "generated_result_files": []
+}

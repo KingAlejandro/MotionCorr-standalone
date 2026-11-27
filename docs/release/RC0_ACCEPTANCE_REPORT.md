@@ -263,3 +263,21 @@ the fixed CLI's provenance records that same witness. The production settle defa
 The bench lock protected other agents from this compiler-presence control. No C++ build or GPU execution was performed.
 UNRUN: full CTest, QF, performance and scientific campaigns. Evidence: `docs/post_rc0/issue246/README.md`.
 This identifies the independent harness cause of #245's retained 75/76 CPU record and failed rerun; those historical results remain FAIL.
+
+## Post-freeze candidate #257: CUDA peak-fit arithmetic
+
+PR #260, production `531e9db4`, final tests `6c23ba1d` (base main `36913740`):
+CUDA-only fit promotion; CPU source, integer peak selection, thresholds, gates
+and output interfaces unchanged. Native Release CTest on 4GPUs passes CPU
+74/74, CUDA 110/110 and CUDA+nvCOMP 113/113, with no skips. The actual production
+kernel passes the captured pedestal/edge controls; the float-denominator mutant
+fails the named witness. CPU and CUDA known-motion launchers pass their existing
+aggregate policy, retaining the noisy characterization accuracy failure.
+
+The legacy Tier A exact fixture fails on this branch. A retained frozen-F CPU
+control and this branch's CPU output match exactly on that fixture; the mismatch
+is already present in the control. No tolerance was changed. Raw records and
+limits: [#257 evidence](../post_rc0/issue257/README.md). Combined S1 attribution
+is separate PR #261. A new full QF, performance cost, downstream S1.4 and other
+hardware/toolchains are unrun; earlier qualification rows keep their original
+SHA. Candidate only, no merge/tag/sign-off by this agent.

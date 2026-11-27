@@ -73,6 +73,10 @@ DEFAULT_REQUIRED_TESTS = [
     # collected; the CUDA-only CudaErrorClass is not listed here, matching
     # the existing exclusion of CudaWrapperUploadFailure.
     "PatchRetryState",
+    "PeakFitArithmetic",
+    "PeakFitArithmeticMutant_float-denominator",
+    "PeakFitArithmeticMutant_early-store",
+    "PeakFitArithmeticMutant_wrong-scale",
     # CPU dose weighting (#179, #220): exact bits against the frozen base
     # doseWeighting, including the FMA-contraction signed-zero case, for the
     # selected path and for the forced original path.
@@ -168,6 +172,8 @@ DEFAULT_REQUIRED_TESTS = [
 # cannot register. Collection needs no GPU. Every entry must be registered in every
 # CUDA configuration, with and without nvCOMP.
 CUDA_REQUIRED_TESTS = [
+    "CudaPeakFit",
+    "CudaPeakFitMutant_float_denominator",
     # #226 D1: a handled allocation failure must not leave a stale last error that
     # degrades or refuses the next movie. The only test that sets the runtime's real
     # last-error slot before a healthy movie.
